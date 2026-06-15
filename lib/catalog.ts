@@ -15,6 +15,7 @@ export interface CatalogItem {
   portalRole: PortalRole;
   category: PackageCategory;
   tier?: ImplementationTier;
+  portalLoginUrl: string;
 }
 
 export const CATALOG: CatalogItem[] = [
@@ -30,6 +31,7 @@ export const CATALOG: CatalogItem[] = [
     airtablePackageName: 'Capacity Assessment',
     portalRole: 'client',
     category: 'assessment',
+    portalLoginUrl: 'https://ea-portal.vercel.app/login',
   },
   {
     id: 'ea-capacity-blueprint',
@@ -43,6 +45,7 @@ export const CATALOG: CatalogItem[] = [
     airtablePackageName: 'Capacity Blueprint',
     portalRole: 'client',
     category: 'blueprint',
+    portalLoginUrl: 'https://ea-portal.vercel.app/login',
   },
   {
     id: 'ea-implementation-starter',
@@ -57,6 +60,7 @@ export const CATALOG: CatalogItem[] = [
     portalRole: 'client',
     category: 'implementation',
     tier: 'starter',
+    portalLoginUrl: 'https://ea-portal.vercel.app/login',
   },
   {
     id: 'ea-implementation-standard',
@@ -71,6 +75,7 @@ export const CATALOG: CatalogItem[] = [
     portalRole: 'client',
     category: 'implementation',
     tier: 'standard',
+    portalLoginUrl: 'https://ea-portal.vercel.app/login',
   },
   {
     id: 'ea-implementation-premier',
@@ -85,6 +90,7 @@ export const CATALOG: CatalogItem[] = [
     portalRole: 'client',
     category: 'implementation',
     tier: 'premier',
+    portalLoginUrl: 'https://ea-portal.vercel.app/login',
   },
 ];
 

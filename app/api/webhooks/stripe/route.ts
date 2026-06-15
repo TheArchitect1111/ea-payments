@@ -3,6 +3,8 @@ import Stripe from 'stripe';
 import { getStripe } from '@/lib/stripe';
 import { createOrUpdateClientRecord } from '@/lib/airtable';
 import type { AirtablePackage } from '@/lib/airtable';
+import { getCatalogItem } from '@/lib/catalog';
+import { sendWelcomeEmail, sendAdminNotification } from '@/lib/email';
 
 export const dynamic = 'force-dynamic';
 
@@ -76,7 +78,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
       ? session.payment_intent
       : (session.payment_intent as Stripe.PaymentIntent | null)?.id ?? session.id;
 
-  const result = await createOrUpdateClientRecord({
+  const airtableResult = await createOrUpdateClientRecord({
     clientName,
     organization: meta.organization || undefined,
     email,
@@ -89,7 +91,47 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
     onboardingStatus: 'Not Started',
   });
 
-  if (!result.ok) {
-    console.error('Airtable write failed for session', session.id, ':', result.error);
+  if (!airtableResult.ok) {
+    console.error('Airtable write failed for session', session.id, ':', airtableResult.error);
+  }
+
+  const catalogItem = meta.packageId ? getCatalogItem(meta.packageId) : undefined;
+  const portalLoginUrl = catalogItem?.portalLoginUrl ?? 'https://ea-portal.vercel.app/login';
+
+  const paymentMethodTypes = Array.isArray(session.payment_method_types)
+    ? session.payment_method_types
+    : [];
+
+  try {
+    const welcomeResult = await sendWelcomeEmail({
+      clientName,
+      email,
+      packageName,
+      portalLoginUrl,
+    });
+    if (!welcomeResult.ok) {
+      console.error('Welcome email failed for session', session.id, ':', welcomeResult.error);
+    }
+  } catch (err) {
+    console.error('Welcome email threw for session', session.id, ':', err);
+  }
+
+  try {
+    const adminResult = await sendAdminNotification({
+      clientName,
+      organization: meta.organization || undefined,
+      email,
+      packageName,
+      amountPaid,
+      paymentDate,
+      paymentMethodTypes,
+      stripeTransactionId,
+      airtableRecordId: airtableResult.recordId,
+    });
+    if (!adminResult.ok) {
+      console.error('Admin notification failed for session', session.id, ':', adminResult.error);
+    }
+  } catch (err) {
+    console.error('Admin notification threw for session', session.id, ':', err);
   }
 }

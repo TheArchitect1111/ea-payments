@@ -48,7 +48,7 @@ async function findRecordByEmail(email: string): Promise<string | null> {
 
 export async function createOrUpdateClientRecord(
   record: ClientRecord
-): Promise<{ ok: boolean; error?: string }> {
+): Promise<{ ok: boolean; error?: string; recordId?: string }> {
   if (!process.env.AIRTABLE_API_KEY) {
     return { ok: false, error: 'AIRTABLE_API_KEY not configured.' };
   }
@@ -69,6 +69,7 @@ export async function createOrUpdateClientRecord(
 
   try {
     const existingId = await findRecordByEmail(record.email);
+    let recordId: string | undefined;
 
     if (existingId) {
       const res = await fetch(
@@ -84,6 +85,7 @@ export async function createOrUpdateClientRecord(
         console.error('Airtable PATCH failed:', detail);
         return { ok: false, error: 'Failed to update client record.' };
       }
+      recordId = existingId;
     } else {
       const res = await fetch(
         `https://api.airtable.com/v0/${BASE_ID}/${encodeURIComponent(TABLE)}`,
@@ -98,9 +100,11 @@ export async function createOrUpdateClientRecord(
         console.error('Airtable POST failed:', detail);
         return { ok: false, error: 'Failed to create client record.' };
       }
+      const data = (await res.json()) as { records?: { id: string }[] };
+      recordId = data.records?.[0]?.id;
     }
 
-    return { ok: true };
+    return { ok: true, recordId };
   } catch (err) {
     console.error('Airtable error:', err);
     return { ok: false, error: 'Unexpected error writing to Airtable.' };
