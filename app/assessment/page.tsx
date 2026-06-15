@@ -196,6 +196,7 @@ export default function AssessmentPage() {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading]     = useState(false);
   const [error, setError]         = useState('');
+  const [attempted, setAttempted] = useState(false);
 
   function setField(field: keyof FormState) {
     return (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
@@ -216,6 +217,7 @@ export default function AssessmentPage() {
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
+    setAttempted(true);
     setError('');
 
     if (
@@ -346,18 +348,8 @@ export default function AssessmentPage() {
             aria-label="Efficiency Architects"
             style={{ textDecoration: 'none' }}
           >
-            <span
-              style={{
-                fontFamily: CONDENSED,
-                color: GOLD,
-                fontSize: '42px',
-                fontWeight: 800,
-                lineHeight: 1,
-                letterSpacing: '0.04em',
-              }}
-            >
-              EA
-            </span>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/images/ea-logo.png" alt="Efficiency Architects" style={{ height: '80px', width: 'auto' }} />
           </a>
         </div>
 
@@ -538,7 +530,7 @@ export default function AssessmentPage() {
             </div>
           </div>
 
-          {error && (
+          {attempted && error && (
             <div className="rounded border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
               {error}
             </div>
