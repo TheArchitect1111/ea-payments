@@ -5,6 +5,7 @@ import { createOrUpdateClientRecord } from '@/lib/airtable';
 import type { AirtablePackage } from '@/lib/airtable';
 import { getCatalogItem } from '@/lib/catalog';
 import { sendWelcomeEmail, sendAdminNotification } from '@/lib/email';
+import { createPortalAccess } from '@/lib/portal-access';
 
 export const dynamic = 'force-dynamic';
 
@@ -96,7 +97,40 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
   }
 
   const catalogItem = meta.packageId ? getCatalogItem(meta.packageId) : undefined;
-  const portalLoginUrl = catalogItem?.portalLoginUrl ?? 'https://ea-portal.vercel.app/login';
+
+  let tempCredentials: string | undefined;
+  let portalLoginUrl: string =
+    catalogItem?.portalLoginUrl ??
+    `${process.env.NEXT_PUBLIC_BASE_URL ?? 'https://ea-payments.vercel.app'}/portal/login`;
+
+  if (catalogItem?.portalConfig && airtableResult.ok) {
+    try {
+      const portalResult = await createPortalAccess(
+        {
+          clientName,
+          email,
+          organization: meta.organization || undefined,
+          airtableRecordId: airtableResult.recordId,
+        },
+        catalogItem.portalConfig
+      );
+
+      if (portalResult.ok) {
+        if (portalResult.portalLoginUrl) {
+          portalLoginUrl = portalResult.portalLoginUrl;
+        }
+        if (portalResult.username && portalResult.tempPassword) {
+          tempCredentials =
+            `Your portal login credentials: Email: ${portalResult.username} | Temporary Password: ${portalResult.tempPassword}` +
+            ' — Log in using the button above. Contact us to update your password at any time.';
+        }
+      } else {
+        console.error('Portal access creation failed for session', session.id, ':', portalResult.error);
+      }
+    } catch (err) {
+      console.error('Portal access creation threw for session', session.id, ':', err);
+    }
+  }
 
   const paymentMethodTypes = Array.isArray(session.payment_method_types)
     ? session.payment_method_types
@@ -108,6 +142,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
       email,
       packageName,
       portalLoginUrl,
+      tempCredentials,
     });
     if (!welcomeResult.ok) {
       console.error('Welcome email failed for session', session.id, ':', welcomeResult.error);

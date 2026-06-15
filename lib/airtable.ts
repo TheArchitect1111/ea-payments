@@ -22,6 +22,18 @@ export interface ClientRecord {
   onboardingStatus?: OnboardingStatus;
 }
 
+export interface PortalClientRecord {
+  id: string;
+  clientName: string;
+  email: string;
+  organization?: string;
+  packagePurchased: AirtablePackage;
+  amountPaid: number;
+  paymentDate: string;
+  portalAccessStatus: PortalAccessStatus;
+  portalSlug: string;
+}
+
 function authHeaders(): Record<string, string> {
   return {
     Authorization: `Bearer ${process.env.AIRTABLE_API_KEY}`,
@@ -108,5 +120,122 @@ export async function createOrUpdateClientRecord(
   } catch (err) {
     console.error('Airtable error:', err);
     return { ok: false, error: 'Unexpected error writing to Airtable.' };
+  }
+}
+
+export async function setPortalCredentials(
+  recordId: string,
+  portalSlug: string,
+  tempPassword: string,
+  portalUsername: string
+): Promise<{ ok: boolean; error?: string }> {
+  if (!process.env.AIRTABLE_API_KEY) {
+    return { ok: false, error: 'AIRTABLE_API_KEY not configured.' };
+  }
+
+  const fields: Record<string, string> = {
+    'Portal Username': portalUsername,
+    'Temp Password': tempPassword,
+    'Portal Slug': portalSlug,
+    'Portal Access Status': 'Active',
+  };
+
+  try {
+    const res = await fetch(
+      `https://api.airtable.com/v0/${BASE_ID}/${encodeURIComponent(TABLE)}/${recordId}`,
+      {
+        method: 'PATCH',
+        headers: authHeaders(),
+        body: JSON.stringify({ fields, typecast: true }),
+      }
+    );
+
+    if (!res.ok) {
+      const detail = await res.text();
+      console.error('setPortalCredentials PATCH failed:', detail);
+      return { ok: false, error: 'Failed to set portal credentials.' };
+    }
+
+    return { ok: true };
+  } catch (err) {
+    console.error('setPortalCredentials error:', err);
+    return { ok: false, error: 'Unexpected error setting portal credentials.' };
+  }
+}
+
+export async function getClientByPortalSlug(slug: string): Promise<PortalClientRecord | null> {
+  if (!process.env.AIRTABLE_API_KEY) return null;
+
+  const safe = slug.replace(/'/g, "\\'");
+  const formula = encodeURIComponent(`{Portal Slug}='${safe}'`);
+  const url = `https://api.airtable.com/v0/${BASE_ID}/${encodeURIComponent(TABLE)}?filterByFormula=${formula}&maxRecords=1`;
+
+  try {
+    const res = await fetch(url, { headers: authHeaders() });
+    if (!res.ok) return null;
+
+    const data = (await res.json()) as {
+      records?: { id: string; fields: Record<string, unknown> }[];
+    };
+    const rec = data.records?.[0];
+    if (!rec) return null;
+
+    const f = rec.fields;
+    return {
+      id: rec.id,
+      clientName: (f['Client Name'] as string) ?? '',
+      email: (f['Email'] as string) ?? '',
+      organization: (f['Organization'] as string) || undefined,
+      packagePurchased: (f['Package Purchased'] as AirtablePackage) ?? 'Capacity Assessment',
+      amountPaid: (f['Amount Paid'] as number) ?? 0,
+      paymentDate: (f['Payment Date'] as string) ?? '',
+      portalAccessStatus: (f['Portal Access Status'] as PortalAccessStatus) ?? 'Pending',
+      portalSlug: slug,
+    };
+  } catch {
+    return null;
+  }
+}
+
+export async function validatePortalLogin(
+  email: string,
+  password: string
+): Promise<{ ok: boolean; slug?: string; error?: string }> {
+  if (!process.env.AIRTABLE_API_KEY) {
+    return { ok: false, error: 'Not configured.' };
+  }
+
+  const safe = email.toLowerCase().replace(/'/g, "\\'");
+  const formula = encodeURIComponent(`LOWER({Email})='${safe}'`);
+  const url = `https://api.airtable.com/v0/${BASE_ID}/${encodeURIComponent(TABLE)}?filterByFormula=${formula}&maxRecords=1`;
+
+  try {
+    const res = await fetch(url, { headers: authHeaders() });
+    if (!res.ok) return { ok: false, error: 'Database error.' };
+
+    const data = (await res.json()) as {
+      records?: { fields: Record<string, unknown> }[];
+    };
+    const rec = data.records?.[0];
+    if (!rec) return { ok: false, error: 'Invalid credentials.' };
+
+    const f = rec.fields;
+    const storedPassword = (f['Temp Password'] as string) ?? '';
+    const portalSlug = (f['Portal Slug'] as string) ?? '';
+    const accessStatus = (f['Portal Access Status'] as PortalAccessStatus) ?? 'Pending';
+
+    if (!storedPassword || storedPassword !== password) {
+      return { ok: false, error: 'Invalid credentials.' };
+    }
+    if (accessStatus === 'Suspended') {
+      return { ok: false, error: 'Portal access suspended. Please contact support.' };
+    }
+    if (!portalSlug) {
+      return { ok: false, error: 'Portal not yet provisioned. Please contact support.' };
+    }
+
+    return { ok: true, slug: portalSlug };
+  } catch {
+    return { ok: false, error: 'Unexpected error. Please try again.' };
   }
 }

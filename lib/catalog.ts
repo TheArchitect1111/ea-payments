@@ -2,6 +2,12 @@ export type ProductLine = 'EA' | 'NSP' | 'BrotherHub' | 'SisterHub' | 'CPR' | 'E
 export type PortalRole = 'client' | 'partner' | 'athlete' | 'parent' | 'attendee';
 export type PackageCategory = 'assessment' | 'blueprint' | 'implementation';
 export type ImplementationTier = 'starter' | 'standard' | 'premier';
+export type PortalPlatform = 'efficiency-architects' | 'nsp' | 'brotherhub' | 'sisterhub' | 'partner';
+
+export interface PortalConfig {
+  platform: PortalPlatform;
+  loginPath: string;
+}
 
 export interface CatalogItem {
   id: string;
@@ -16,7 +22,16 @@ export interface CatalogItem {
   category: PackageCategory;
   tier?: ImplementationTier;
   portalLoginUrl: string;
+  portalConfig: PortalConfig;
 }
+
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://ea-payments.vercel.app';
+const PORTAL_LOGIN = `${BASE_URL}/portal/login`;
+
+const EA_PORTAL_CONFIG: PortalConfig = {
+  platform: 'efficiency-architects',
+  loginPath: '/portal/login',
+};
 
 export const CATALOG: CatalogItem[] = [
   {
@@ -31,7 +46,8 @@ export const CATALOG: CatalogItem[] = [
     airtablePackageName: 'Capacity Assessment',
     portalRole: 'client',
     category: 'assessment',
-    portalLoginUrl: 'https://ea-portal.vercel.app/login',
+    portalLoginUrl: PORTAL_LOGIN,
+    portalConfig: EA_PORTAL_CONFIG,
   },
   {
     id: 'ea-capacity-blueprint',
@@ -45,7 +61,8 @@ export const CATALOG: CatalogItem[] = [
     airtablePackageName: 'Capacity Blueprint',
     portalRole: 'client',
     category: 'blueprint',
-    portalLoginUrl: 'https://ea-portal.vercel.app/login',
+    portalLoginUrl: PORTAL_LOGIN,
+    portalConfig: EA_PORTAL_CONFIG,
   },
   {
     id: 'ea-implementation-starter',
@@ -60,7 +77,8 @@ export const CATALOG: CatalogItem[] = [
     portalRole: 'client',
     category: 'implementation',
     tier: 'starter',
-    portalLoginUrl: 'https://ea-portal.vercel.app/login',
+    portalLoginUrl: PORTAL_LOGIN,
+    portalConfig: EA_PORTAL_CONFIG,
   },
   {
     id: 'ea-implementation-standard',
@@ -75,7 +93,8 @@ export const CATALOG: CatalogItem[] = [
     portalRole: 'client',
     category: 'implementation',
     tier: 'standard',
-    portalLoginUrl: 'https://ea-portal.vercel.app/login',
+    portalLoginUrl: PORTAL_LOGIN,
+    portalConfig: EA_PORTAL_CONFIG,
   },
   {
     id: 'ea-implementation-premier',
@@ -90,7 +109,8 @@ export const CATALOG: CatalogItem[] = [
     portalRole: 'client',
     category: 'implementation',
     tier: 'premier',
-    portalLoginUrl: 'https://ea-portal.vercel.app/login',
+    portalLoginUrl: PORTAL_LOGIN,
+    portalConfig: EA_PORTAL_CONFIG,
   },
 ];
 

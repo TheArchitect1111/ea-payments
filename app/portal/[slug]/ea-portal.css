@@ -1,0 +1,187 @@
+.ep-page {
+  min-height: 100vh;
+  background: #F0F2F5;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* HEADER */
+.ep-header {
+  background: #1B2B4D;
+  padding: 20px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.ep-header-brand {
+  display: flex;
+  flex-direction: column;
+}
+
+.ep-header-label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: #C9A844;
+  margin-bottom: 3px;
+}
+
+.ep-header-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: #FFFFFF;
+  letter-spacing: 0.5px;
+}
+
+.ep-logout {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #8896AF;
+  text-decoration: none;
+  padding: 8px 0;
+  transition: color 0.15s;
+}
+
+.ep-logout:hover {
+  color: #C9A844;
+}
+
+/* MAIN */
+.ep-main {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 40px 24px 80px;
+}
+
+/* WELCOME */
+.ep-welcome {
+  margin-bottom: 32px;
+}
+
+.ep-welcome-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: #C9A844;
+  margin-bottom: 6px;
+}
+
+.ep-welcome-heading {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+  color: #1B2B4D;
+  letter-spacing: 0.5px;
+}
+
+/* CARDS */
+.ep-card {
+  background: #FFFFFF;
+  border-top: 3px solid #C9A844;
+  padding: 28px 32px;
+  margin-bottom: 20px;
+}
+
+.ep-card-title {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #1B2B4D;
+  margin: 0 0 20px;
+}
+
+/* ACCOUNT INFO TABLE */
+.ep-info-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.ep-info-table tr {
+  border-bottom: 1px solid #F0F2F5;
+}
+
+.ep-info-table tr:last-child {
+  border-bottom: none;
+}
+
+.ep-info-label {
+  padding: 10px 0;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #6B7280;
+  width: 160px;
+  vertical-align: top;
+}
+
+.ep-info-value {
+  padding: 10px 0;
+  font-size: 14px;
+  color: #1A1A2E;
+  line-height: 1.5;
+}
+
+/* STATUS BADGE */
+.ep-status {
+  display: inline-block;
+  padding: 3px 10px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.ep-status-active {
+  background: #D1FAE5;
+  color: #065F46;
+}
+
+.ep-status-pending {
+  background: #FEF3C7;
+  color: #92400E;
+}
+
+/* PLACEHOLDER SECTION */
+.ep-placeholder {
+  padding: 32px;
+  text-align: center;
+  background: #F9FAFB;
+}
+
+.ep-placeholder-text {
+  font-size: 13px;
+  color: #6B7280;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* RESPONSIVE */
+@media (max-width: 600px) {
+  .ep-header {
+    padding: 16px 20px;
+  }
+
+  .ep-main {
+    padding: 24px 16px 60px;
+  }
+
+  .ep-card {
+    padding: 20px;
+  }
+
+  .ep-welcome-heading {
+    font-size: 22px;
+  }
+
+  .ep-info-label {
+    width: 120px;
+    font-size: 10px;
+  }
+}

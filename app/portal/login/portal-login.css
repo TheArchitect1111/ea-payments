@@ -1,0 +1,143 @@
+.pl-page {
+  min-height: 100vh;
+  background-color: #1B2B4D;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+}
+
+.pl-brand {
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+.pl-brand-line {
+  display: block;
+  color: #C9A844;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.pl-brand-name {
+  display: block;
+  color: #FFFFFF;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.pl-card {
+  background: #FFFFFF;
+  width: 100%;
+  max-width: 420px;
+  padding: 40px;
+  border-top: 3px solid #C9A844;
+}
+
+.pl-heading {
+  margin: 0 0 6px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #1B2B4D;
+  letter-spacing: 0.5px;
+}
+
+.pl-sub {
+  margin: 0 0 32px;
+  font-size: 13px;
+  color: #6B7280;
+  line-height: 1.5;
+}
+
+.pl-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #1B2B4D;
+  margin-bottom: 8px;
+}
+
+.pl-input {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 14px;
+  border: 1px solid #D1D5DB;
+  font-size: 14px;
+  color: #1A1A2E;
+  background: #F9FAFB;
+  outline: none;
+  margin-bottom: 20px;
+  transition: border-color 0.15s;
+}
+
+.pl-input:focus {
+  border-color: #1B2B4D;
+  background: #FFFFFF;
+}
+
+.pl-input::placeholder {
+  color: #9CA3AF;
+}
+
+.pl-btn {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  background: #C9A844;
+  color: #1B2B4D;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s;
+  margin-top: 4px;
+}
+
+.pl-btn:hover:not(:disabled) {
+  background: #B8952E;
+}
+
+.pl-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.pl-error {
+  margin: 16px 0 0;
+  padding: 12px 14px;
+  background: #FEF2F2;
+  border-left: 3px solid #DC2626;
+  font-size: 13px;
+  color: #991B1B;
+  line-height: 1.5;
+}
+
+.pl-footer {
+  margin-top: 28px;
+  text-align: center;
+}
+
+.pl-footer-text {
+  font-size: 12px;
+  color: #8896AF;
+  line-height: 1.6;
+}
+
+.pl-footer-link {
+  color: #C9A844;
+  text-decoration: none;
+}
+
+.pl-footer-link:hover {
+  text-decoration: underline;
+}
