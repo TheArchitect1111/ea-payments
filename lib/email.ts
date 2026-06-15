@@ -6,6 +6,7 @@ export interface WelcomeEmailData {
   packageName: string;
   portalLoginUrl: string;
   tempCredentials?: string;
+  platformName?: string;
 }
 
 export interface AdminNotificationData {
@@ -49,8 +50,9 @@ function buildWelcomeHtml(params: {
   tempCredentials: string;
   nextSteps: string;
   year: number;
+  platformName: string;
 }): string {
-  const { clientName, packageName, portalLoginUrl, supportEmail, tempCredentials, nextSteps, year } =
+  const { clientName, packageName, portalLoginUrl, supportEmail, tempCredentials, nextSteps, year, platformName } =
     params;
 
   return `<!DOCTYPE html>
@@ -58,7 +60,7 @@ function buildWelcomeHtml(params: {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Welcome to Efficiency Architects</title>
+<title>Welcome to ${escHtml(platformName)}</title>
 </head>
 <body style="margin:0;padding:0;background-color:#F0F2F5;font-family:Arial,Helvetica,sans-serif;">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#F0F2F5;padding:40px 20px;">
@@ -68,8 +70,8 @@ function buildWelcomeHtml(params: {
   <!-- HEADER -->
   <tr>
     <td style="background-color:#1B2B4D;padding:32px 40px;text-align:center;">
-      <p style="margin:0;color:#C9A844;font-size:10px;font-weight:700;letter-spacing:4px;text-transform:uppercase;">Efficiency Architects</p>
-      <h1 style="margin:10px 0 0;color:#FFFFFF;font-size:22px;font-weight:700;letter-spacing:1px;">Welcome to EA</h1>
+      <p style="margin:0;color:#C9A844;font-size:10px;font-weight:700;letter-spacing:4px;text-transform:uppercase;">${escHtml(platformName)}</p>
+      <h1 style="margin:10px 0 0;color:#FFFFFF;font-size:22px;font-weight:700;letter-spacing:1px;">Welcome</h1>
     </td>
   </tr>
 
@@ -119,7 +121,7 @@ function buildWelcomeHtml(params: {
   <tr>
     <td style="background-color:#1B2B4D;padding:20px 40px;text-align:center;">
       <p style="margin:0;font-size:10px;color:#8896AF;letter-spacing:2px;text-transform:uppercase;">
-        Efficiency Architects &copy; ${year}
+        ${escHtml(platformName)} &copy; ${year}
       </p>
     </td>
   </tr>
@@ -276,6 +278,8 @@ export async function sendWelcomeEmail(
   const supportEmail =
     process.env.SUPPORT_EMAIL ?? 'freedom@efficiencyarchitects.online';
 
+  const platformName = data.platformName ?? 'Efficiency Architects';
+
   const tempCredentials =
     data.tempCredentials ??
     'Our team will send your portal access details in a separate email once your account is provisioned.';
@@ -291,9 +295,10 @@ export async function sendWelcomeEmail(
     tempCredentials,
     nextSteps,
     year,
+    platformName,
   });
 
-  return resendEmail(data.email, 'Welcome to Efficiency Architects', html);
+  return resendEmail(data.email, `Welcome to ${platformName}`, html);
 }
 
 export async function sendAdminNotification(

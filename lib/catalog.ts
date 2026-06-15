@@ -1,116 +1,102 @@
-export type ProductLine = 'EA' | 'NSP' | 'BrotherHub' | 'SisterHub' | 'CPR' | 'EventHub';
-export type PortalRole = 'client' | 'partner' | 'athlete' | 'parent' | 'attendee';
-export type PackageCategory = 'assessment' | 'blueprint' | 'implementation';
-export type ImplementationTier = 'starter' | 'standard' | 'premier';
-export type PortalPlatform = 'efficiency-architects' | 'nsp' | 'brotherhub' | 'sisterhub' | 'partner';
+// lib/catalog.ts
+//
+// Product/package catalog for EA Payments.
+// Stripe Price IDs are stored in env vars (stripePriceEnvKey). Once Stripe
+// Products/Prices are created, set the corresponding env vars and redeploy.
+
+export type PortalPlatform =
+  | 'efficiency-architects'
+  | 'nsp'
+  | 'cpr'
+  | 'brotherhub'
+  | 'sisterhub'
+  | 'partner';
 
 export interface PortalConfig {
   platform: PortalPlatform;
   loginPath: string;
 }
 
+export type PackageId =
+  | 'capacity_assessment'
+  | 'capacity_blueprint'
+  | 'implementation_starter'
+  | 'implementation_professional'
+  | 'implementation_premium'
+  | 'implementation_enterprise';
+
 export interface CatalogItem {
-  id: string;
-  productLine: ProductLine;
+  id: PackageId;
   name: string;
   displayName: string;
   description: string;
-  priceCents: number;
   stripePriceEnvKey: string;
   airtablePackageName: 'Capacity Assessment' | 'Capacity Blueprint' | 'Implementation Package';
-  portalRole: PortalRole;
-  category: PackageCategory;
-  tier?: ImplementationTier;
-  portalLoginUrl: string;
-  portalConfig: PortalConfig;
+  priceCents: number;
+  portalConfig?: PortalConfig;
+  portalLoginUrl?: string;
 }
-
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://ea-payments.vercel.app';
-const PORTAL_LOGIN = `${BASE_URL}/portal/login`;
-
-const EA_PORTAL_CONFIG: PortalConfig = {
-  platform: 'efficiency-architects',
-  loginPath: '/portal/login',
-};
 
 export const CATALOG: CatalogItem[] = [
   {
-    id: 'ea-capacity-assessment',
-    productLine: 'EA',
+    id: 'capacity_assessment',
     name: 'Capacity Assessment',
     displayName: 'Capacity Assessment',
-    description:
-      'A diagnostic evaluation of your organization\'s operational capacity, constraints, and growth readiness. Delivered as a structured report with key findings and prioritized recommendations.',
-    priceCents: 0,
+    description: 'Initial diagnostic to identify automation opportunities and bottlenecks.',
     stripePriceEnvKey: 'STRIPE_PRICE_CAPACITY_ASSESSMENT',
     airtablePackageName: 'Capacity Assessment',
-    portalRole: 'client',
-    category: 'assessment',
-    portalLoginUrl: PORTAL_LOGIN,
-    portalConfig: EA_PORTAL_CONFIG,
+    priceCents: 0,
+    portalConfig: { platform: 'efficiency-architects', loginPath: '/portal/login' },
   },
   {
-    id: 'ea-capacity-blueprint',
-    productLine: 'EA',
+    id: 'capacity_blueprint',
     name: 'Capacity Blueprint',
     displayName: 'Capacity Blueprint',
-    description:
-      'A tailored operational roadmap built from your assessment findings. Includes prioritized implementation milestones, resource allocation guidance, and measurable outcome targets.',
-    priceCents: 0,
+    description: 'Detailed roadmap and implementation plan based on the assessment.',
     stripePriceEnvKey: 'STRIPE_PRICE_CAPACITY_BLUEPRINT',
     airtablePackageName: 'Capacity Blueprint',
-    portalRole: 'client',
-    category: 'blueprint',
-    portalLoginUrl: PORTAL_LOGIN,
-    portalConfig: EA_PORTAL_CONFIG,
+    priceCents: 0,
+    portalConfig: { platform: 'efficiency-architects', loginPath: '/portal/login' },
   },
   {
-    id: 'ea-implementation-starter',
-    productLine: 'EA',
-    name: 'Implementation Package (Starter)',
+    id: 'implementation_starter',
+    name: 'Implementation Package - Starter',
     displayName: 'Implementation Package - Starter',
-    description:
-      'Hands-on implementation support for organizations beginning their operational transformation. Includes structured onboarding, milestone tracking, and monthly check-ins.',
-    priceCents: 0,
-    stripePriceEnvKey: 'STRIPE_PRICE_IMPLEMENTATION_STARTER',
+    description: 'Entry-level build and automation setup.',
+    stripePriceEnvKey: 'STRIPE_PRICE_IMPL_STARTER',
     airtablePackageName: 'Implementation Package',
-    portalRole: 'client',
-    category: 'implementation',
-    tier: 'starter',
-    portalLoginUrl: PORTAL_LOGIN,
-    portalConfig: EA_PORTAL_CONFIG,
+    priceCents: 0,
+    portalConfig: { platform: 'efficiency-architects', loginPath: '/portal/login' },
   },
   {
-    id: 'ea-implementation-standard',
-    productLine: 'EA',
-    name: 'Implementation Package (Standard)',
-    displayName: 'Implementation Package - Standard',
-    description:
-      'Full-scope implementation support with dedicated advisor access, bi-weekly strategy sessions, and hands-on process redesign throughout.',
-    priceCents: 0,
-    stripePriceEnvKey: 'STRIPE_PRICE_IMPLEMENTATION_STANDARD',
+    id: 'implementation_professional',
+    name: 'Implementation Package - Professional',
+    displayName: 'Implementation Package - Professional',
+    description: 'Full platform build with standard integrations.',
+    stripePriceEnvKey: 'STRIPE_PRICE_IMPL_PROFESSIONAL',
     airtablePackageName: 'Implementation Package',
-    portalRole: 'client',
-    category: 'implementation',
-    tier: 'standard',
-    portalLoginUrl: PORTAL_LOGIN,
-    portalConfig: EA_PORTAL_CONFIG,
+    priceCents: 0,
+    portalConfig: { platform: 'efficiency-architects', loginPath: '/portal/login' },
   },
   {
-    id: 'ea-implementation-premier',
-    productLine: 'EA',
-    name: 'Implementation Package (Premier)',
-    displayName: 'Implementation Package - Premier',
-    description:
-      'High-touch implementation with priority advisor access, weekly sessions, custom toolkits, and ongoing operational review for 12 months.',
-    priceCents: 0,
-    stripePriceEnvKey: 'STRIPE_PRICE_IMPLEMENTATION_PREMIER',
+    id: 'implementation_premium',
+    name: 'Implementation Package - Premium',
+    displayName: 'Implementation Package - Premium',
+    description: 'Full platform build plus extended automation and reporting.',
+    stripePriceEnvKey: 'STRIPE_PRICE_IMPL_PREMIUM',
     airtablePackageName: 'Implementation Package',
-    portalRole: 'client',
-    category: 'implementation',
-    tier: 'premier',
-    portalLoginUrl: PORTAL_LOGIN,
-    portalConfig: EA_PORTAL_CONFIG,
+    priceCents: 0,
+    portalConfig: { platform: 'efficiency-architects', loginPath: '/portal/login' },
+  },
+  {
+    id: 'implementation_enterprise',
+    name: 'Implementation Package - Enterprise',
+    displayName: 'Implementation Package - Enterprise',
+    description: 'Custom multi-platform build with full instance factory rollout.',
+    stripePriceEnvKey: 'STRIPE_PRICE_IMPL_ENTERPRISE',
+    airtablePackageName: 'Implementation Package',
+    priceCents: 0,
+    portalConfig: { platform: 'efficiency-architects', loginPath: '/portal/login' },
   },
 ];
 
@@ -118,8 +104,14 @@ export function getCatalogItem(id: string): CatalogItem | undefined {
   return CATALOG.find((item) => item.id === id);
 }
 
+export function getCatalogItemByPriceId(priceId: string): CatalogItem | undefined {
+  return CATALOG.find((item) => process.env[item.stripePriceEnvKey] === priceId);
+}
+
 export function getEACatalog(): CatalogItem[] {
-  return CATALOG.filter((item) => item.productLine === 'EA');
+  return CATALOG.filter(
+    (item) => item.portalConfig?.platform === 'efficiency-architects'
+  );
 }
 
 export function formatPrice(priceCents: number): string {

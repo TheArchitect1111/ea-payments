@@ -55,12 +55,15 @@ export default async function PortalPage({
 
   const isActive = client.portalAccessStatus === 'Active';
 
+  const brandName = process.env.BRAND_NAME ?? 'Efficiency Architects';
+  const supportEmail = process.env.SUPPORT_EMAIL ?? 'freedom@efficiencyarchitects.online';
+
   return (
     <div className="ep-page">
       <header className="ep-header">
         <div className="ep-header-brand">
           <span className="ep-header-label">Client Portal</span>
-          <span className="ep-header-name">Efficiency Architects</span>
+          <span className="ep-header-name">{brandName}</span>
         </div>
         <a href="/api/portal/logout" className="ep-logout">
           Sign Out
@@ -129,10 +132,10 @@ export default async function PortalPage({
             <p className="ep-placeholder-text">
               Questions? Reach your advisor at{' '}
               <a
-                href="mailto:freedom@efficiencyarchitects.online"
+                href={`mailto:${supportEmail}`}
                 style={{ color: '#1B2B4D', fontWeight: 700 }}
               >
-                freedom@efficiencyarchitects.online
+                {supportEmail}
               </a>
             </p>
           </div>

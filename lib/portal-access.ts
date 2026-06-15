@@ -41,19 +41,72 @@ function generatePortalSlug(clientName: string, organization?: string): string {
   return `${base}-${suffix}`;
 }
 
-export async function createPortalAccess(
+async function writeToExternalPlatform(
+  baseEnvKey: string,
+  tableName: string,
   clientData: PortalAccessInput,
-  config: PortalConfig
-): Promise<PortalAccessResult> {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://ea-payments.vercel.app';
-  const portalLoginUrl = `${baseUrl}${config.loginPath}`;
-
-  if (config.platform !== 'efficiency-architects') {
-    return { ok: true, portalLoginUrl };
+  slug: string,
+  tempPassword: string
+): Promise<{ ok: boolean; error?: string }> {
+  if (!process.env.AIRTABLE_API_KEY) {
+    // Sample-data fallback: when AIRTABLE_API_KEY is unset (dev/test), skip the
+    // write so the credential email can still flow through without Airtable configured.
+    console.warn(`AIRTABLE_API_KEY not set; skipping Airtable write for ${baseEnvKey}.`);
+    return { ok: true };
   }
 
+  const baseId = process.env[baseEnvKey];
+  if (!baseId) {
+    return { ok: false, error: `${baseEnvKey} not configured.` };
+  }
+
+  const fields: Record<string, string> = {
+    'Client Name': clientData.clientName,
+    'Email': clientData.email,
+    'Portal Username': clientData.email,
+    'Temp Password': tempPassword,
+    'Portal Slug': slug,
+    'Portal Access Status': 'Active',
+  };
+  if (clientData.organization) {
+    fields['Organization'] = clientData.organization;
+  }
+
+  try {
+    const res = await fetch(
+      `https://api.airtable.com/v0/${baseId}/${encodeURIComponent(tableName)}`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${process.env.AIRTABLE_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ records: [{ fields }], typecast: true }),
+      }
+    );
+
+    if (!res.ok) {
+      const detail = await res.text();
+      console.error(`writeToExternalPlatform (${baseEnvKey}) failed:`, detail);
+      return { ok: false, error: 'Failed to write credentials to external platform.' };
+    }
+
+    return { ok: true };
+  } catch (err) {
+    console.error(`writeToExternalPlatform (${baseEnvKey}) error:`, err);
+    return { ok: false, error: 'Unexpected error writing to external platform.' };
+  }
+}
+
+async function createEAPortalAccess(
+  clientData: PortalAccessInput,
+  baseUrl: string,
+  loginPath: string
+): Promise<PortalAccessResult> {
+  const portalLoginUrl = `${baseUrl}${loginPath}`;
+
   if (!clientData.airtableRecordId) {
-    return { ok: false, error: 'Airtable record ID required for portal access creation.' };
+    return { ok: false, error: 'Airtable record ID required for EA portal access creation.' };
   }
 
   const slug = generatePortalSlug(clientData.clientName, clientData.organization);
@@ -72,4 +125,91 @@ export async function createPortalAccess(
   }
 
   return { ok: true, slug, username, tempPassword, portalLoginUrl };
+}
+
+async function createExternalPortalAccess(
+  clientData: PortalAccessInput,
+  portalUrlEnvKey: string,
+  baseEnvKey: string,
+  tableName: string
+): Promise<PortalAccessResult> {
+  const portalLoginUrl = process.env[portalUrlEnvKey] ?? '';
+
+  const slug = generatePortalSlug(clientData.clientName, clientData.organization);
+  const tempPassword = generateTempPassword();
+  const username = clientData.email;
+
+  const writeResult = await writeToExternalPlatform(
+    baseEnvKey,
+    tableName,
+    clientData,
+    slug,
+    tempPassword
+  );
+
+  if (!writeResult.ok) {
+    return {
+      ok: false,
+      error: writeResult.error ?? 'Failed to provision external platform access.',
+    };
+  }
+
+  return { ok: true, slug, username, tempPassword, portalLoginUrl };
+}
+
+export async function createPortalAccess(
+  clientData: PortalAccessInput,
+  config: PortalConfig
+): Promise<PortalAccessResult> {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://ea-payments.vercel.app';
+
+  switch (config.platform) {
+    case 'efficiency-architects':
+      return createEAPortalAccess(clientData, baseUrl, config.loginPath);
+
+    case 'nsp':
+      return createExternalPortalAccess(
+        clientData,
+        'NSP_PORTAL_URL',
+        'NSP_AIRTABLE_BASE_ID',
+        'Client Records'
+      );
+
+    case 'cpr':
+      return createExternalPortalAccess(
+        clientData,
+        'CPR_PORTAL_URL',
+        'CPR_AIRTABLE_BASE_ID',
+        'Client Records'
+      );
+
+    case 'brotherhub':
+      return createExternalPortalAccess(
+        clientData,
+        'BROTHERHUB_PORTAL_URL',
+        'BROTHERHUB_AIRTABLE_BASE_ID',
+        'Members'
+      );
+
+    case 'sisterhub':
+      return createExternalPortalAccess(
+        clientData,
+        'SISTERHUB_PORTAL_URL',
+        'SISTERHUB_AIRTABLE_BASE_ID',
+        'Members'
+      );
+
+    case 'partner':
+      return createExternalPortalAccess(
+        clientData,
+        'PARTNER_PORTAL_URL',
+        'PARTNER_PORTAL_AIRTABLE_BASE_ID',
+        'Partner Records'
+      );
+
+    default: {
+      const _exhaustive: never = config.platform;
+      return { ok: false, error: `Unknown portal platform: ${String(_exhaustive)}` };
+    }
+  }
 }
