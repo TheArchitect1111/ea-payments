@@ -310,3 +310,434 @@ export async function sendAdminNotification(
   const html = buildAdminHtml(data);
   return resendEmail(to, 'New Client Payment Received', html);
 }
+
+export interface AssessmentNotificationData {
+  businessName: string;
+  contactName: string;
+  email: string;
+  teamSize: number;
+  revenueRange: string;
+  operationalChallenges: string[];
+  workflowCount: number;
+  automationCount: number;
+  integrationCount: number;
+  dashboardRequired: boolean;
+  portalRequired: boolean;
+  userCount: number;
+  businessComplexity: string;
+  capacityScore: number;
+  scoreBand: string;
+  primaryConstraint: string;
+  weeklyTimeRecovery: number;
+  opportunityLow: number;
+  opportunityHigh: number;
+  recommendedProjectType: string;
+  projectTypeLabel: string;
+  rawFee: number;
+  recommendedFee: number;
+  assessmentRecordId?: string;
+  proposalRecordId?: string;
+}
+
+function buildAssessmentAdminHtml(data: AssessmentNotificationData): string {
+  const assessmentsTableId = process.env.AIRTABLE_ASSESSMENTS_TABLE_ID ?? 'tblbDbNP5PCMojNe1';
+  const proposalsTableId = process.env.AIRTABLE_PROPOSALS_TABLE_ID ?? 'tbl3P26zyteiPNLQY';
+
+  const assessmentUrl = data.assessmentRecordId
+    ? `https://airtable.com/${AIRTABLE_BASE_ID}/${assessmentsTableId}/${data.assessmentRecordId}`
+    : `https://airtable.com/${AIRTABLE_BASE_ID}/${assessmentsTableId}`;
+
+  const proposalUrl = data.proposalRecordId
+    ? `https://airtable.com/${AIRTABLE_BASE_ID}/${proposalsTableId}/${data.proposalRecordId}`
+    : `https://airtable.com/${AIRTABLE_BASE_ID}/${proposalsTableId}`;
+
+  const fmt = (n: number) =>
+    new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0 }).format(n);
+
+  const contactRows: [string, string][] = [
+    ['Business Name', data.businessName],
+    ['Contact Name', data.contactName],
+    ['Email', data.email],
+    ['Team Size', String(data.teamSize)],
+    ['Revenue Range', data.revenueRange],
+    ['Business Complexity', data.businessComplexity],
+  ];
+
+  const scopeRows: [string, string][] = [
+    ['Workflows', String(data.workflowCount)],
+    ['Automations', String(data.automationCount)],
+    ['Integrations', String(data.integrationCount)],
+    ['Dashboard Required', data.dashboardRequired ? 'Yes' : 'No'],
+    ['Portal Required', data.portalRequired ? 'Yes' : 'No'],
+    ['User Count', String(data.userCount)],
+  ];
+
+  const analysisRows: [string, string][] = [
+    ['Capacity Score', String(data.capacityScore)],
+    ['Score Band', data.scoreBand],
+    ['Primary Constraint', data.primaryConstraint],
+    ['Weekly Time Recovery', `${data.weeklyTimeRecovery} hrs/week`],
+    ['Opportunity Range', `${fmt(data.opportunityLow)} - ${fmt(data.opportunityHigh)} / year`],
+  ];
+
+  const pricingRows: [string, string][] = [
+    ['Project Type', data.projectTypeLabel],
+    ['Raw Fee', fmt(data.rawFee)],
+    ['Recommended Fee', fmt(data.recommendedFee)],
+  ];
+
+  function renderRows(rows: [string, string][], startIndex = 0): string {
+    return rows
+      .map(
+        ([label, value], i) =>
+          `<tr style="background-color:${(i + startIndex) % 2 === 0 ? '#FFFFFF' : '#F8F9FB'};">
+            <td style="padding:10px 16px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#555555;border-bottom:1px solid #E4E4E4;width:40%;vertical-align:top;">${escHtml(label)}</td>
+            <td style="padding:10px 16px;font-size:13px;color:#1A1A2E;border-bottom:1px solid #E4E4E4;vertical-align:top;word-break:break-all;">${escHtml(String(value))}</td>
+          </tr>`
+      )
+      .join('');
+  }
+
+  const challengesList = data.operationalChallenges.length > 0
+    ? data.operationalChallenges
+        .map((c) => `<li style="margin-bottom:4px;">${escHtml(c)}</li>`)
+        .join('')
+    : '<li style="color:#888;">None selected</li>';
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>New Assessment Submission</title>
+</head>
+<body style="margin:0;padding:0;background-color:#F0F2F5;font-family:Arial,Helvetica,sans-serif;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#F0F2F5;padding:40px 20px;">
+<tr><td>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:640px;margin:0 auto;background-color:#FFFFFF;">
+
+  <tr>
+    <td style="background-color:#1B2B4D;padding:24px 40px;">
+      <p style="margin:0;color:#C9A844;font-size:10px;font-weight:700;letter-spacing:4px;text-transform:uppercase;">Efficiency Architects Admin</p>
+      <h1 style="margin:8px 0 0;color:#FFFFFF;font-size:18px;font-weight:700;">New Assessment Submission</h1>
+    </td>
+  </tr>
+
+  <tr>
+    <td style="padding:32px 40px 0;">
+
+      <p style="margin:0 0 12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:#1B2B4D;">Contact Information</p>
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #E4E4E4;margin-bottom:28px;">
+        ${renderRows(contactRows)}
+      </table>
+
+      <p style="margin:0 0 12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:#1B2B4D;">Operational Challenges</p>
+      <ul style="margin:0 0 28px;padding:0 0 0 20px;font-size:13px;color:#1A1A2E;line-height:1.8;">
+        ${challengesList}
+      </ul>
+
+      <p style="margin:0 0 12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:#1B2B4D;">Scope</p>
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #E4E4E4;margin-bottom:28px;">
+        ${renderRows(scopeRows)}
+      </table>
+
+      <p style="margin:0 0 12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:#1B2B4D;">Analysis Results</p>
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #E4E4E4;margin-bottom:28px;">
+        ${renderRows(analysisRows)}
+      </table>
+
+      <p style="margin:0 0 12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:#1B2B4D;">Pricing Recommendation</p>
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #E4E4E4;margin-bottom:28px;">
+        ${renderRows(pricingRows)}
+      </table>
+
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:32px;">
+        <tr>
+          <td style="padding-right:12px;">
+            <table role="presentation" cellpadding="0" cellspacing="0">
+              <tr>
+                <td style="background-color:#1B2B4D;border-radius:2px;">
+                  <a href="${escHtml(assessmentUrl)}" target="_blank" style="display:inline-block;padding:10px 20px;color:#FFFFFF;text-decoration:none;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;">View Assessment</a>
+                </td>
+              </tr>
+            </table>
+          </td>
+          <td>
+            <table role="presentation" cellpadding="0" cellspacing="0">
+              <tr>
+                <td style="background-color:#C9A844;border-radius:2px;">
+                  <a href="${escHtml(proposalUrl)}" target="_blank" style="display:inline-block;padding:10px 20px;color:#1B2B4D;text-decoration:none;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;">View Proposal</a>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+
+    </td>
+  </tr>
+
+  <tr>
+    <td style="background-color:#1B2B4D;padding:16px 40px;text-align:center;">
+      <p style="margin:0;font-size:10px;color:#8896AF;letter-spacing:2px;text-transform:uppercase;">Efficiency Architects - Internal Notification</p>
+    </td>
+  </tr>
+
+</table>
+</td></tr>
+</table>
+</body>
+</html>`;
+}
+
+export async function sendAssessmentAdminNotification(
+  data: AssessmentNotificationData
+): Promise<{ ok: boolean; error?: string }> {
+  const to =
+    process.env.ADMIN_NOTIFICATION_EMAIL ?? 'freedom@efficiencyarchitects.online';
+
+  const html = buildAssessmentAdminHtml(data);
+  return resendEmail(to, `New Assessment: ${data.businessName}`, html);
+}
+
+// ---------------------------------------------------------------------------
+// E6 - Proposal email sent to the prospect after admin approves
+// ---------------------------------------------------------------------------
+
+import type { ProposalWithAssessment } from '@/lib/airtable';
+
+type ChallengeCategory =
+  | 'manual_process'
+  | 'disconnected_systems'
+  | 'visibility_gaps'
+  | 'workflow_inconsistency'
+  | 'scaling_bottleneck';
+
+const LABEL_TO_CATEGORY: Record<string, ChallengeCategory> = {
+  'Manual scheduling and booking':                       'manual_process',
+  'No centralized client or customer database':          'manual_process',
+  'Inconsistent follow-up with leads or clients':        'workflow_inconsistency',
+  'Manual invoicing or billing processes':               'manual_process',
+  'Disconnected systems requiring duplicate data entry': 'disconnected_systems',
+  'No centralized reporting or performance dashboards':  'visibility_gaps',
+  'Leadership lacks real-time operational data':         'visibility_gaps',
+  'Manual data entry between multiple tools':            'disconnected_systems',
+  'Inconsistent client or customer communication':       'workflow_inconsistency',
+  'Manual onboarding or offboarding processes':          'manual_process',
+  'Compliance or regulatory reporting done manually':    'visibility_gaps',
+  'Vendor or supplier management in spreadsheets':       'workflow_inconsistency',
+  'Difficulty scaling operations with team growth':      'scaling_bottleneck',
+  'No documented standard operating procedures':         'workflow_inconsistency',
+  'Project or task tracking gaps':                       'visibility_gaps',
+};
+
+const CATEGORY_FINDINGS: Record<ChallengeCategory, string> = {
+  manual_process:
+    'A meaningful portion of your team is spending time on repetitive tasks that add no strategic value to the business.',
+  disconnected_systems:
+    'Your tools are not connected to each other, which means data is being re-entered and reconciled manually across multiple places.',
+  visibility_gaps:
+    'You do not have a clear, real-time picture of what is happening across your operations, which makes planning and decision-making harder than it needs to be.',
+  workflow_inconsistency:
+    'Key processes are being handled differently by different people or at different times, which creates unpredictable results for clients and your internal team.',
+  scaling_bottleneck:
+    'Your operations are struggling to keep up with your team\'s growth, and the challenges you have today will compound as the business scales.',
+};
+
+function deriveFindings(challenges: string[]): string[] {
+  const counts = new Map<ChallengeCategory, number>();
+  for (const label of challenges) {
+    const cat = LABEL_TO_CATEGORY[label];
+    if (cat) counts.set(cat, (counts.get(cat) ?? 0) + 1);
+  }
+
+  const sorted = [...counts.entries()].sort((a, b) => b[1] - a[1]);
+  const findings = sorted.slice(0, 3).map(([cat]) => CATEGORY_FINDINGS[cat]);
+
+  if (findings.length === 0) {
+    return [
+      'Your team is spending time on tasks that could be handled more efficiently.',
+      'There are meaningful opportunities to improve visibility and consistency across your operations.',
+    ];
+  }
+  if (findings.length === 1) {
+    findings.push(
+      'There are additional opportunities to improve consistency and visibility across your operations.'
+    );
+  }
+  return findings;
+}
+
+function buildProposalHtml(proposal: ProposalWithAssessment): string {
+  const baseUrl =
+    process.env.NEXT_PUBLIC_BASE_URL ?? 'https://ea-payments.vercel.app';
+  const proposalUrl = `${baseUrl}/proposal/${escHtml(proposal.proposalId)}`;
+  const supportEmail =
+    process.env.SUPPORT_EMAIL ?? 'freedom@efficiencyarchitects.online';
+  const year = new Date().getFullYear();
+
+  const fmtCurrency = (n: number) =>
+    new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+    }).format(n);
+
+  const firstName =
+    proposal.contactName.split(' ')[0] || proposal.contactName || 'there';
+  const findings = deriveFindings(proposal.operationalChallenges ?? []);
+
+  const findingsHtml = findings
+    .map(
+      (f) =>
+        `<li style="margin-bottom:10px;font-size:14px;color:#1A1A2E;line-height:1.7;">${escHtml(f)}</li>`
+    )
+    .join('');
+
+  const solutionLabel =
+    proposal.projectTypeLabel || proposal.recommendedProjectType || 'Custom Solution';
+
+  const analysisRows: [string, string][] = [
+    ['Capacity Score', String(proposal.capacityScore)],
+    ['Primary Focus Area', proposal.primaryConstraint],
+    ['Solution Category', solutionLabel],
+  ];
+
+  const analysisRowsHtml = analysisRows
+    .map(
+      ([label, value], i) =>
+        `<tr style="background-color:${i % 2 === 0 ? '#FFFFFF' : '#F8F9FB'};">
+          <td style="padding:10px 16px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#555555;border-bottom:1px solid #E4E4E4;width:45%;vertical-align:top;">${escHtml(label)}</td>
+          <td style="padding:10px 16px;font-size:13px;color:#1A1A2E;border-bottom:1px solid #E4E4E4;vertical-align:top;">${escHtml(value)}</td>
+        </tr>`
+    )
+    .join('');
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Your Capacity Analysis - Efficiency Architects</title>
+</head>
+<body style="margin:0;padding:0;background-color:#F0F2F5;font-family:Arial,Helvetica,sans-serif;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#F0F2F5;padding:40px 20px;">
+<tr><td>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;margin:0 auto;background-color:#FFFFFF;">
+
+  <tr>
+    <td style="background-color:#1B2B4D;padding:32px 40px;text-align:center;">
+      <p style="margin:0;color:#C9A844;font-size:10px;font-weight:700;letter-spacing:4px;text-transform:uppercase;">Efficiency Architects</p>
+      <h1 style="margin:10px 0 0;color:#FFFFFF;font-size:22px;font-weight:700;letter-spacing:1px;">Your Capacity Analysis</h1>
+    </td>
+  </tr>
+
+  <tr>
+    <td style="padding:40px 40px 0;">
+      <p style="margin:0 0 12px;font-size:15px;color:#1A1A2E;line-height:1.7;">Hi ${escHtml(firstName)},</p>
+      <p style="margin:0 0 24px;font-size:15px;color:#1A1A2E;line-height:1.7;">
+        We reviewed the assessment submitted for <strong>${escHtml(proposal.businessName)}</strong>. Here is what we found.
+      </p>
+
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
+        <tr>
+          <td style="background-color:#F0F2F5;border-left:4px solid #C9A844;padding:20px 24px;">
+            <p style="margin:0 0 6px;font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#C9A844;">Your Opportunity</p>
+            <p style="margin:0 0 4px;font-size:24px;font-weight:700;color:#1B2B4D;line-height:1.2;">${escHtml(fmtCurrency(proposal.opportunityLow))} to ${escHtml(fmtCurrency(proposal.opportunityHigh))}</p>
+            <p style="margin:0 0 12px;font-size:13px;color:#555555;">in recoverable capacity and growth opportunity per year</p>
+            <p style="margin:0;font-size:14px;color:#1A1A2E;font-weight:600;">${proposal.weeklyTimeRecovery} hours per week your team can get back</p>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+
+  <tr>
+    <td style="padding:0 40px 28px;">
+      <p style="margin:0 0 14px;font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#1B2B4D;">Key Findings</p>
+      <ul style="margin:0;padding:0 0 0 20px;">
+        ${findingsHtml}
+      </ul>
+    </td>
+  </tr>
+
+  <tr>
+    <td style="padding:0 40px 28px;">
+      <p style="margin:0 0 12px;font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#1B2B4D;">Analysis Summary</p>
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #E4E4E4;">
+        ${analysisRowsHtml}
+      </table>
+    </td>
+  </tr>
+
+  <tr>
+    <td style="padding:0 40px 32px;text-align:center;">
+      <p style="margin:0 0 8px;font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#555555;">Recommended Investment</p>
+      <p style="margin:0 0 4px;font-size:36px;font-weight:700;color:#1B2B4D;">${escHtml(fmtCurrency(proposal.recommendedFee))}</p>
+      <p style="margin:0;font-size:13px;color:#777777;">one-time project investment</p>
+    </td>
+  </tr>
+
+  <tr>
+    <td style="padding:0 40px 40px;text-align:center;">
+      <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto;">
+        <tr>
+          <td style="background-color:#C9A844;border-radius:2px;">
+            <a href="${proposalUrl}" target="_blank" style="display:inline-block;padding:16px 32px;color:#1B2B4D;text-decoration:none;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;">Help Me Save Time and Money</a>
+          </td>
+        </tr>
+      </table>
+      <p style="margin:16px 0 0;font-size:12px;color:#888888;">
+        Or paste this link into your browser: ${proposalUrl}
+      </p>
+    </td>
+  </tr>
+
+  <tr>
+    <td style="padding:0 40px 24px;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+        <tr><td style="border-top:1px solid #E4E4E4;font-size:0;">&nbsp;</td></tr>
+      </table>
+    </td>
+  </tr>
+
+  <tr>
+    <td style="padding:0 40px 32px;">
+      <p style="margin:0;font-size:13px;color:#555555;line-height:1.7;">
+        Questions? Reply to this email or reach us at <a href="mailto:${escHtml(supportEmail)}" style="color:#1B2B4D;text-decoration:underline;">${escHtml(supportEmail)}</a>.
+      </p>
+    </td>
+  </tr>
+
+  <tr>
+    <td style="background-color:#1B2B4D;padding:20px 40px;text-align:center;">
+      <p style="margin:0;font-size:10px;color:#8896AF;letter-spacing:2px;text-transform:uppercase;">
+        Efficiency Architects &copy; ${year}
+      </p>
+    </td>
+  </tr>
+
+</table>
+</td></tr>
+</table>
+</body>
+</html>`;
+}
+
+export async function sendProposalEmail(
+  proposal: ProposalWithAssessment
+): Promise<{ ok: boolean; error?: string }> {
+  if (!proposal.email) {
+    return { ok: false, error: 'Proposal has no email address.' };
+  }
+
+  try {
+    const html = buildProposalHtml(proposal);
+    const subject = `${proposal.businessName}, your capacity analysis is ready`;
+    return resendEmail(proposal.email, subject, html);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Unknown error building proposal email.';
+    console.error('sendProposalEmail error:', err);
+    return { ok: false, error: msg };
+  }
+}

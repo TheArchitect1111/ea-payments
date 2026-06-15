@@ -197,6 +197,158 @@ export async function getClientByPortalSlug(slug: string): Promise<PortalClientR
   }
 }
 
+const ASSESSMENTS_TABLE =
+  process.env.AIRTABLE_ASSESSMENTS_TABLE_ID ?? 'tblbDbNP5PCMojNe1';
+const PROPOSALS_TABLE =
+  process.env.AIRTABLE_PROPOSALS_TABLE_ID ?? 'tbl3P26zyteiPNLQY';
+
+export interface AssessmentRecord {
+  assessmentId: string;
+  businessName: string;
+  contactName: string;
+  email: string;
+  teamSize: number;
+  revenueRange: string;
+  currentSystems: string;
+  systemsCount: number;
+  operationalChallenges: string[];
+  growthGoals: string;
+  capacityConstraints: string;
+  workflowCount: number;
+  automationCount: number;
+  integrationCount: number;
+  dashboardRequired: boolean;
+  portalRequired: boolean;
+  userCount: number;
+  businessComplexity: string;
+  linkedProposalId?: string;
+}
+
+export interface ProposalRecord {
+  proposalId: string;
+  businessName: string;
+  contactName: string;
+  email: string;
+  status: string;
+  recommendedProjectType: string;
+  projectTypeLabel: string;
+  capacityScore: number;
+  scoreBand: string;
+  primaryConstraint: string;
+  weeklyTimeRecovery: number;
+  opportunityLow: number;
+  opportunityHigh: number;
+  rawFee: number;
+  recommendedFee: number;
+}
+
+export async function createProposalRecord(
+  record: ProposalRecord
+): Promise<{ ok: boolean; error?: string; recordId?: string }> {
+  if (!process.env.AIRTABLE_API_KEY) {
+    console.warn('createProposalRecord: AIRTABLE_API_KEY not set.');
+    return { ok: false, error: 'AIRTABLE_API_KEY not configured.' };
+  }
+
+  const fields: Record<string, unknown> = {
+    'Proposal ID': record.proposalId,
+    'Business Name': record.businessName,
+    'Contact Name': record.contactName,
+    'Email': record.email,
+    'Status': record.status,
+    'Recommended Project Type': record.recommendedProjectType,
+    'Project Type Label': record.projectTypeLabel,
+    'Capacity Score': record.capacityScore,
+    'Score Band': record.scoreBand,
+    'Primary Constraint': record.primaryConstraint,
+    'Weekly Time Recovery': record.weeklyTimeRecovery,
+    'Opportunity Low': record.opportunityLow,
+    'Opportunity High': record.opportunityHigh,
+    'Raw Fee': record.rawFee,
+    'Recommended Fee': record.recommendedFee,
+  };
+
+  try {
+    const res = await fetch(
+      `https://api.airtable.com/v0/${BASE_ID}/${PROPOSALS_TABLE}`,
+      {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({ records: [{ fields }], typecast: true }),
+      }
+    );
+
+    if (!res.ok) {
+      const detail = await res.text();
+      console.error('createProposalRecord POST failed:', detail);
+      return { ok: false, error: 'Failed to create proposal record.' };
+    }
+
+    const data = (await res.json()) as { records?: { id: string }[] };
+    return { ok: true, recordId: data.records?.[0]?.id };
+  } catch (err) {
+    console.error('createProposalRecord error:', err);
+    return { ok: false, error: 'Unexpected error creating proposal.' };
+  }
+}
+
+export async function createAssessmentRecord(
+  record: AssessmentRecord
+): Promise<{ ok: boolean; error?: string; recordId?: string }> {
+  if (!process.env.AIRTABLE_API_KEY) {
+    console.warn('createAssessmentRecord: AIRTABLE_API_KEY not set.');
+    return { ok: false, error: 'AIRTABLE_API_KEY not configured.' };
+  }
+
+  const fields: Record<string, unknown> = {
+    'Assessment ID': record.assessmentId,
+    'Business Name': record.businessName,
+    'Contact Name': record.contactName,
+    'Email': record.email,
+    'Team Size': record.teamSize,
+    'Revenue Range': record.revenueRange,
+    'Current Systems': record.currentSystems,
+    'Systems Count': record.systemsCount,
+    'Operational Challenges': record.operationalChallenges,
+    'Growth Goals': record.growthGoals,
+    'Capacity Constraints': record.capacityConstraints,
+    'Workflow Count': record.workflowCount,
+    'Automation Count': record.automationCount,
+    'Integration Count': record.integrationCount,
+    'Dashboard Required': record.dashboardRequired,
+    'Portal Required': record.portalRequired,
+    'User Count': record.userCount,
+    'Business Complexity': record.businessComplexity,
+  };
+
+  if (record.linkedProposalId) {
+    fields['Linked Proposal'] = [record.linkedProposalId];
+  }
+
+  try {
+    const res = await fetch(
+      `https://api.airtable.com/v0/${BASE_ID}/${ASSESSMENTS_TABLE}`,
+      {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({ records: [{ fields }], typecast: true }),
+      }
+    );
+
+    if (!res.ok) {
+      const detail = await res.text();
+      console.error('createAssessmentRecord POST failed:', detail);
+      return { ok: false, error: 'Failed to create assessment record.' };
+    }
+
+    const data = (await res.json()) as { records?: { id: string }[] };
+    return { ok: true, recordId: data.records?.[0]?.id };
+  } catch (err) {
+    console.error('createAssessmentRecord error:', err);
+    return { ok: false, error: 'Unexpected error creating assessment.' };
+  }
+}
+
 export async function validatePortalLogin(
   email: string,
   password: string
@@ -237,5 +389,332 @@ export async function validatePortalLogin(
     return { ok: true, slug: portalSlug };
   } catch {
     return { ok: false, error: 'Unexpected error. Please try again.' };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Proposals dashboard (E5)
+// ---------------------------------------------------------------------------
+
+export interface ProposalWithAssessment {
+  id: string; // Airtable record ID
+  proposalId: string;
+  businessName: string;
+  contactName: string;
+  email: string;
+  status: string;
+  recommendedProjectType: string;
+  projectTypeLabel: string;
+  capacityScore: number;
+  scoreBand: string;
+  primaryConstraint: string;
+  weeklyTimeRecovery: number;
+  opportunityLow: number;
+  opportunityHigh: number;
+  rawFee: number;
+  recommendedFee: number;
+  scopeSummary: string;
+  dateApproved?: string;
+  // Populated from linked Assessment record (absent if no link)
+  teamSize?: number;
+  revenueRange?: string;
+  operationalChallenges?: string[];
+  growthGoals?: string;
+  capacityConstraints?: string;
+  businessComplexity?: string;
+}
+
+export async function getProposalsWithAssessments(): Promise<ProposalWithAssessment[]> {
+  if (!process.env.AIRTABLE_API_KEY) {
+    console.warn('getProposalsWithAssessments: AIRTABLE_API_KEY not set.');
+    return [];
+  }
+
+  try {
+    // Paginate through all proposals
+    const proposalRecords: { id: string; fields: Record<string, unknown> }[] = [];
+    let offset: string | undefined;
+
+    do {
+      const params = new URLSearchParams({ pageSize: '100' });
+      if (offset) params.set('offset', offset);
+
+      const res = await fetch(
+        `https://api.airtable.com/v0/${BASE_ID}/${PROPOSALS_TABLE}?${params}`,
+        { headers: authHeaders() }
+      );
+
+      if (!res.ok) {
+        const detail = await res.text();
+        console.error('getProposalsWithAssessments fetch failed:', detail);
+        return [];
+      }
+
+      const data = (await res.json()) as {
+        records: { id: string; fields: Record<string, unknown> }[];
+        offset?: string;
+      };
+      proposalRecords.push(...data.records);
+      offset = data.offset;
+    } while (offset);
+
+    // Collect unique linked assessment record IDs
+    const assessmentCache = new Map<string, Record<string, unknown>>();
+    const assessmentIds = new Set<string>();
+
+    for (const record of proposalRecords) {
+      const linked = record.fields['Linked Assessment'];
+      if (Array.isArray(linked) && linked.length > 0) {
+        assessmentIds.add(linked[0] as string);
+      }
+    }
+
+    // Fetch each linked assessment by record ID
+    for (const assessmentId of assessmentIds) {
+      try {
+        const res = await fetch(
+          `https://api.airtable.com/v0/${BASE_ID}/${ASSESSMENTS_TABLE}/${assessmentId}`,
+          { headers: authHeaders() }
+        );
+        if (res.ok) {
+          const data = (await res.json()) as { fields: Record<string, unknown> };
+          assessmentCache.set(assessmentId, data.fields);
+        }
+      } catch (err) {
+        console.error(`Failed to fetch assessment ${assessmentId}:`, err);
+      }
+    }
+
+    // Merge proposal + assessment data into typed records
+    return proposalRecords.map((record) => {
+      const f = record.fields;
+      const linked = record.fields['Linked Assessment'];
+      const assessmentId =
+        Array.isArray(linked) && linked.length > 0 ? (linked[0] as string) : undefined;
+      const af = assessmentId ? assessmentCache.get(assessmentId) : undefined;
+
+      // Operational Challenges may be multipleSelects (array) or multilineText (string)
+      const rawChallenges = af?.['Operational Challenges'];
+      const operationalChallenges = Array.isArray(rawChallenges)
+        ? (rawChallenges as string[])
+        : typeof rawChallenges === 'string' && rawChallenges
+        ? rawChallenges
+            .split('\n')
+            .map((s) => s.trim())
+            .filter(Boolean)
+        : [];
+
+      return {
+        id: record.id,
+        proposalId: (f['Proposal ID'] as string) ?? '',
+        businessName: (f['Business Name'] as string) ?? '',
+        contactName: (f['Contact Name'] as string) ?? '',
+        email: (f['Email'] as string) ?? '',
+        status: (f['Status'] as string) ?? 'Pending Review',
+        recommendedProjectType: (f['Recommended Project Type'] as string) ?? '',
+        projectTypeLabel: (f['Project Type Label'] as string) ?? '',
+        capacityScore: (f['Capacity Score'] as number) ?? 0,
+        scoreBand: (f['Score Band'] as string) ?? '',
+        primaryConstraint: (f['Primary Constraint'] as string) ?? '',
+        weeklyTimeRecovery: (f['Weekly Time Recovery'] as number) ?? 0,
+        opportunityLow: (f['Opportunity Low'] as number) ?? 0,
+        opportunityHigh: (f['Opportunity High'] as number) ?? 0,
+        rawFee: (f['Raw Fee'] as number) ?? 0,
+        recommendedFee: (f['Recommended Fee'] as number) ?? 0,
+        scopeSummary: (f['Scope Summary'] as string) ?? '',
+        dateApproved: (f['Date Approved'] as string) || undefined,
+        teamSize: af ? ((af['Team Size'] as number) ?? undefined) : undefined,
+        revenueRange: af ? ((af['Revenue Range'] as string) || undefined) : undefined,
+        operationalChallenges: af ? operationalChallenges : undefined,
+        growthGoals: af ? ((af['Growth Goals'] as string) || undefined) : undefined,
+        capacityConstraints: af
+          ? ((af['Capacity Constraints'] as string) || undefined)
+          : undefined,
+        businessComplexity: af
+          ? ((af['Business Complexity'] as string) || undefined)
+          : undefined,
+      };
+    });
+  } catch (err) {
+    console.error('getProposalsWithAssessments error:', err);
+    return [];
+  }
+}
+
+export async function updateProposal(
+  recordId: string,
+  patch: {
+    status?: string;
+    recommendedFee?: number;
+    scopeSummary?: string;
+    dateApproved?: string;
+  }
+): Promise<{ ok: boolean; error?: string }> {
+  if (!process.env.AIRTABLE_API_KEY) {
+    return { ok: false, error: 'AIRTABLE_API_KEY not configured.' };
+  }
+
+  const fields: Record<string, unknown> = {};
+  if (patch.status !== undefined) fields['Status'] = patch.status;
+  if (patch.recommendedFee !== undefined) fields['Recommended Fee'] = patch.recommendedFee;
+  if (patch.scopeSummary !== undefined) fields['Scope Summary'] = patch.scopeSummary;
+  if (patch.dateApproved !== undefined) fields['Date Approved'] = patch.dateApproved;
+
+  if (Object.keys(fields).length === 0) {
+    return { ok: false, error: 'No fields to update.' };
+  }
+
+  try {
+    const res = await fetch(
+      `https://api.airtable.com/v0/${BASE_ID}/${PROPOSALS_TABLE}/${recordId}`,
+      {
+        method: 'PATCH',
+        headers: authHeaders(),
+        body: JSON.stringify({ fields, typecast: true }),
+      }
+    );
+
+    if (!res.ok) {
+      const detail = await res.text();
+      console.error('updateProposal PATCH failed:', detail);
+      return { ok: false, error: 'Failed to update proposal.' };
+    }
+
+    return { ok: true };
+  } catch (err) {
+    console.error('updateProposal error:', err);
+    return { ok: false, error: 'Unexpected error updating proposal.' };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Single-proposal lookups (E6/E7)
+// ---------------------------------------------------------------------------
+
+// Private helper: convert a raw Proposals record + its linked Assessment into
+// a ProposalWithAssessment. Used by both getProposalByRecordId and
+// getProposalByProposalId.
+async function buildProposalRecord(
+  record: { id: string; fields: Record<string, unknown> }
+): Promise<ProposalWithAssessment> {
+  const f = record.fields;
+  const linked = f['Linked Assessment'];
+  const assessmentId =
+    Array.isArray(linked) && linked.length > 0 ? (linked[0] as string) : undefined;
+
+  let af: Record<string, unknown> | undefined;
+  if (assessmentId && process.env.AIRTABLE_API_KEY) {
+    try {
+      const res = await fetch(
+        `https://api.airtable.com/v0/${BASE_ID}/${ASSESSMENTS_TABLE}/${assessmentId}`,
+        { headers: authHeaders() }
+      );
+      if (res.ok) {
+        const data = (await res.json()) as { fields: Record<string, unknown> };
+        af = data.fields;
+      }
+    } catch (err) {
+      console.error(`buildProposalRecord: failed to fetch assessment ${assessmentId}:`, err);
+    }
+  }
+
+  const rawChallenges = af?.['Operational Challenges'];
+  const operationalChallenges = Array.isArray(rawChallenges)
+    ? (rawChallenges as string[])
+    : typeof rawChallenges === 'string' && rawChallenges
+    ? rawChallenges.split('\n').map((s) => s.trim()).filter(Boolean)
+    : [];
+
+  return {
+    id: record.id,
+    proposalId: (f['Proposal ID'] as string) ?? '',
+    businessName: (f['Business Name'] as string) ?? '',
+    contactName: (f['Contact Name'] as string) ?? '',
+    email: (f['Email'] as string) ?? '',
+    status: (f['Status'] as string) ?? 'Pending Review',
+    recommendedProjectType: (f['Recommended Project Type'] as string) ?? '',
+    projectTypeLabel: (f['Project Type Label'] as string) ?? '',
+    capacityScore: (f['Capacity Score'] as number) ?? 0,
+    scoreBand: (f['Score Band'] as string) ?? '',
+    primaryConstraint: (f['Primary Constraint'] as string) ?? '',
+    weeklyTimeRecovery: (f['Weekly Time Recovery'] as number) ?? 0,
+    opportunityLow: (f['Opportunity Low'] as number) ?? 0,
+    opportunityHigh: (f['Opportunity High'] as number) ?? 0,
+    rawFee: (f['Raw Fee'] as number) ?? 0,
+    recommendedFee: (f['Recommended Fee'] as number) ?? 0,
+    scopeSummary: (f['Scope Summary'] as string) ?? '',
+    dateApproved: (f['Date Approved'] as string) || undefined,
+    teamSize: af ? ((af['Team Size'] as number) ?? undefined) : undefined,
+    revenueRange: af ? ((af['Revenue Range'] as string) || undefined) : undefined,
+    operationalChallenges: af ? operationalChallenges : undefined,
+    growthGoals: af ? ((af['Growth Goals'] as string) || undefined) : undefined,
+    capacityConstraints: af
+      ? ((af['Capacity Constraints'] as string) || undefined)
+      : undefined,
+    businessComplexity: af
+      ? ((af['Business Complexity'] as string) || undefined)
+      : undefined,
+  };
+}
+
+export async function getProposalByRecordId(
+  recordId: string
+): Promise<ProposalWithAssessment | null> {
+  if (!process.env.AIRTABLE_API_KEY) {
+    console.warn('getProposalByRecordId: AIRTABLE_API_KEY not set.');
+    return null;
+  }
+
+  try {
+    const res = await fetch(
+      `https://api.airtable.com/v0/${BASE_ID}/${PROPOSALS_TABLE}/${recordId}`,
+      { headers: authHeaders() }
+    );
+
+    if (!res.ok) {
+      const detail = await res.text();
+      console.error('getProposalByRecordId fetch failed:', detail);
+      return null;
+    }
+
+    const data = (await res.json()) as { id: string; fields: Record<string, unknown> };
+    return buildProposalRecord({ id: data.id, fields: data.fields });
+  } catch (err) {
+    console.error('getProposalByRecordId error:', err);
+    return null;
+  }
+}
+
+export async function getProposalByProposalId(
+  proposalId: string
+): Promise<ProposalWithAssessment | null> {
+  if (!process.env.AIRTABLE_API_KEY) {
+    console.warn('getProposalByProposalId: AIRTABLE_API_KEY not set.');
+    return null;
+  }
+
+  try {
+    const safe = proposalId.replace(/'/g, "\\'");
+    const formula = encodeURIComponent(`{Proposal ID}='${safe}'`);
+    const url = `https://api.airtable.com/v0/${BASE_ID}/${PROPOSALS_TABLE}?filterByFormula=${formula}&maxRecords=1`;
+
+    const res = await fetch(url, { headers: authHeaders() });
+    if (!res.ok) {
+      const detail = await res.text();
+      console.error('getProposalByProposalId fetch failed:', detail);
+      return null;
+    }
+
+    const data = (await res.json()) as {
+      records?: { id: string; fields: Record<string, unknown> }[];
+    };
+
+    const record = data.records?.[0];
+    if (!record) return null;
+
+    return buildProposalRecord(record);
+  } catch (err) {
+    console.error('getProposalByProposalId error:', err);
+    return null;
   }
 }
