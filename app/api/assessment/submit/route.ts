@@ -6,13 +6,24 @@ import { calculateFee } from '@/lib/pricing-engine';
 import { createAssessmentRecord, createProposalRecord } from '@/lib/airtable';
 import { sendAssessmentAdminNotification } from '@/lib/email';
 
+function mapTeamSize(label: string): number {
+  const map: Record<string, number> = {
+    'Just me':            1,
+    '2-5 people':         3,
+    '6-15 people':        10,
+    '16-50 people':       33,
+    'More than 50 people': 65,
+  };
+  return map[label] ?? 1;
+}
+
 function mapRevenueRange(label: string): RevenueRange {
   const map: Record<string, RevenueRange> = {
-    'Under $100k': 'under_100k',
-    '$100k-$500k': '100k_500k',
-    '$500k-$1M': '500k_1m',
-    '$1M-$5M': '1m_5m',
-    '$5M+': '5m_plus',
+    'Under $100k':    'under_100k',
+    '$100k to $500k': '100k_500k',
+    '$500k to $1M':   '500k_1m',
+    '$1M to $5M':     '1m_5m',
+    'More than $5M':  '5m_plus',
   };
   return map[label] ?? 'under_100k';
 }
@@ -26,11 +37,58 @@ function mapComplexity(label: string): Complexity {
   return map[label] ?? 'medium';
 }
 
+// Accepts either challenge labels (legacy) or IDs. Falls back to the input
+// value so new IDs submitted by the redesigned form pass through unchanged.
 function mapChallengeLabelsToIds(labels: string[]): string[] {
   return labels.map((label) => {
     const found = OPERATIONAL_CHALLENGES.find((c) => c.label === label);
     return found?.id ?? label;
   });
+}
+
+// Scope derivation helpers (replaces the prospect-facing Scope section).
+
+function deriveWorkflowCount(teamSizeLabel: string): number {
+  const map: Record<string, number> = {
+    'Just me':            1,
+    '2-5 people':         2,
+    '6-15 people':        4,
+    '16-50 people':       6,
+    'More than 50 people': 9,
+  };
+  return map[teamSizeLabel] ?? 1;
+}
+
+function deriveUserCount(teamSizeLabel: string): number {
+  const map: Record<string, number> = {
+    'Just me':            1,
+    '2-5 people':         3,
+    '6-15 people':        10,
+    '16-50 people':       33,
+    'More than 50 people': 65,
+  };
+  return map[teamSizeLabel] ?? 1;
+}
+
+function deriveDashboardRequired(teamSizeLabel: string): boolean {
+  return ['6-15 people', '16-50 people', 'More than 50 people'].includes(teamSizeLabel);
+}
+
+function derivePortalRequired(teamSizeLabel: string): boolean {
+  return ['16-50 people', 'More than 50 people'].includes(teamSizeLabel);
+}
+
+function deriveComplexity(revenueRange: string): string {
+  if (revenueRange === 'Under $100k' || revenueRange === '$100k to $500k') return 'Low';
+  if (revenueRange === '$500k to $1M') return 'Medium';
+  return 'High';
+}
+
+// Count comma-separated tools mentioned in currentSystems, capped at 8.
+function deriveSystemsCount(currentSystems: string): number {
+  if (!currentSystems.trim()) return 0;
+  const count = currentSystems.split(',').filter((s) => s.trim().length > 0).length;
+  return Math.min(count, 8);
 }
 
 export async function POST(req: NextRequest) {
@@ -41,29 +99,32 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid request body.' }, { status: 400 });
   }
 
-  const businessName = String(body.businessName ?? '').trim();
-  const contactName = String(body.contactName ?? '').trim();
-  const email = String(body.email ?? '').trim();
-  const teamSize = Math.max(1, Number(body.teamSize ?? 1));
-  const revenueRange = String(body.revenueRange ?? '');
+  const businessName   = String(body.businessName ?? '').trim();
+  const contactName    = String(body.contactName ?? '').trim();
+  const email          = String(body.email ?? '').trim();
+  const teamSizeLabel  = String(body.teamSizeLabel ?? '');
+  const revenueRange   = String(body.revenueRange ?? '');
   const currentSystems = String(body.currentSystems ?? '').trim();
-  const systemsCount = Math.max(0, Number(body.systemsCount ?? 0));
   const operationalChallenges = Array.isArray(body.operationalChallenges)
     ? (body.operationalChallenges as string[])
     : [];
-  const growthGoals = String(body.growthGoals ?? '').trim();
+  const growthGoals         = String(body.growthGoals ?? '').trim();
   const capacityConstraints = String(body.capacityConstraints ?? '').trim();
-  const workflowCount = Math.max(0, Number(body.workflowCount ?? 0));
-  const automationCount = Math.max(0, Number(body.automationCount ?? 0));
-  const integrationCount = Math.max(0, Number(body.integrationCount ?? 0));
-  const dashboardRequired = Boolean(body.dashboardRequired);
-  const portalRequired = Boolean(body.portalRequired);
-  const userCount = Math.max(0, Number(body.userCount ?? 0));
-  const businessComplexity = String(body.businessComplexity ?? '');
 
-  if (!businessName || !contactName || !email || !revenueRange || !businessComplexity) {
+  if (!businessName || !contactName || !email || !teamSizeLabel || !revenueRange) {
     return NextResponse.json({ error: 'Required fields are missing.' }, { status: 400 });
   }
+
+  // Derive all scope values from prospect answers.
+  const teamSize          = mapTeamSize(teamSizeLabel);
+  const workflowCount     = deriveWorkflowCount(teamSizeLabel);
+  const userCount         = deriveUserCount(teamSizeLabel);
+  const dashboardRequired = deriveDashboardRequired(teamSizeLabel);
+  const portalRequired    = derivePortalRequired(teamSizeLabel);
+  const businessComplexity = deriveComplexity(revenueRange);
+  const systemsCount      = deriveSystemsCount(currentSystems);
+  const integrationCount  = systemsCount;
+  const automationCount   = 0;
 
   const challengeIds = mapChallengeLabelsToIds(operationalChallenges);
 
@@ -86,7 +147,7 @@ export async function POST(req: NextRequest) {
   });
 
   const assessmentId = `ASSESS-${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
-  const proposalId = `PROP-${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
+  const proposalId   = `PROP-${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
 
   const proposalResult = await createProposalRecord({
     proposalId,
