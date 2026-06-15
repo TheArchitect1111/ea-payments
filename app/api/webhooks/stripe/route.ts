@@ -6,6 +6,7 @@ import type { AirtablePackage } from '@/lib/airtable';
 import { getCatalogItem } from '@/lib/catalog';
 import { sendWelcomeEmail, sendAdminNotification } from '@/lib/email';
 import { createPortalAccess } from '@/lib/portal-access';
+import { createOpportunityRecord } from '@/lib/partner-network';
 
 export const dynamic = 'force-dynamic';
 
@@ -129,6 +130,24 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
       }
     } catch (err) {
       console.error('Portal access creation threw for session', session.id, ':', err);
+    }
+  }
+
+  const referralSource = (meta.referralSource ?? '').trim();
+  if (referralSource && airtableResult.ok) {
+    try {
+      const oppResult = await createOpportunityRecord({
+        clientName,
+        packageName: packageName as string,
+        referralSource,
+        organization: meta.organization || undefined,
+        projectValue: amountPaid,
+      });
+      if (!oppResult.ok) {
+        console.error('Opportunity record creation failed for session', session.id, ':', oppResult.error);
+      }
+    } catch (err) {
+      console.error('Opportunity record creation threw for session', session.id, ':', err);
     }
   }
 

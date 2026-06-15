@@ -11,12 +11,13 @@ interface CheckoutBody {
   email?: string;
   phone?: string;
   packageId?: string;
+  referralSource?: string;
 }
 
 export async function POST(req: NextRequest) {
   try {
     const body = (await req.json()) as CheckoutBody;
-    const { name, organization, email, phone, packageId } = body;
+    const { name, organization, email, phone, packageId, referralSource } = body;
 
     if (!name?.trim() || !email?.trim() || !packageId?.trim()) {
       return NextResponse.json(
@@ -69,6 +70,7 @@ export async function POST(req: NextRequest) {
         phone: phone?.trim() ?? '',
         packageId: item.id,
         packageName: item.airtablePackageName,
+        referralSource: referralSource?.trim() ?? '',
       },
       success_url: `${baseUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${baseUrl}/checkout/cancel`,

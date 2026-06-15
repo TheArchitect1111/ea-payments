@@ -11,6 +11,7 @@ export default function CheckoutPage() {
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [packageId, setPackageId] = useState('');
+  const [referralSource, setReferralSource] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -30,7 +31,7 @@ export default function CheckoutPage() {
       const res = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, organization, email, phone, packageId }),
+        body: JSON.stringify({ name, organization, email, phone, packageId, referralSource }),
       });
       const data = (await res.json()) as { url?: string; error?: string };
       if (!res.ok || data.error) {
@@ -135,6 +136,19 @@ export default function CheckoutPage() {
                 {selectedItem.description}
               </p>
             )}
+          </div>
+
+          <div>
+            <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-neutral-700">
+              Referral Source
+            </label>
+            <input
+              type="text"
+              className="w-full border border-neutral-300 bg-white px-4 py-3 text-sm outline-none focus:border-neutral-800 focus:ring-1 focus:ring-neutral-800"
+              value={referralSource}
+              onChange={(e) => setReferralSource(e.target.value)}
+              placeholder="Were you referred by a partner? Enter their name or leave blank"
+            />
           </div>
 
           {showAchNote && (
