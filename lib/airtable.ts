@@ -416,6 +416,7 @@ export interface ProposalWithAssessment {
   scopeSummary: string;
   dateApproved?: string;
   stripeSessionId?: string;
+  createdTime?: string;
   // Populated from linked Assessment record (absent if no link)
   teamSize?: number;
   revenueRange?: string;
@@ -433,7 +434,7 @@ export async function getProposalsWithAssessments(): Promise<ProposalWithAssessm
 
   try {
     // Paginate through all proposals
-    const proposalRecords: { id: string; fields: Record<string, unknown> }[] = [];
+    const proposalRecords: { id: string; createdTime: string; fields: Record<string, unknown> }[] = [];
     let offset: string | undefined;
 
     do {
@@ -452,7 +453,7 @@ export async function getProposalsWithAssessments(): Promise<ProposalWithAssessm
       }
 
       const data = (await res.json()) as {
-        records: { id: string; fields: Record<string, unknown> }[];
+        records: { id: string; createdTime: string; fields: Record<string, unknown> }[];
         offset?: string;
       };
       proposalRecords.push(...data.records);
@@ -524,6 +525,7 @@ export async function getProposalsWithAssessments(): Promise<ProposalWithAssessm
         recommendedFee: (f['Recommended Fee'] as number) ?? 0,
         scopeSummary: (f['Scope Summary'] as string) ?? '',
         dateApproved: (f['Date Approved'] as string) || undefined,
+        createdTime: record.createdTime || undefined,
         teamSize: af ? ((af['Team Size'] as number) ?? undefined) : undefined,
         revenueRange: af ? ((af['Revenue Range'] as string) || undefined) : undefined,
         operationalChallenges: af ? operationalChallenges : undefined,
@@ -600,7 +602,7 @@ export async function updateProposal(
 // a ProposalWithAssessment. Used by both getProposalByRecordId and
 // getProposalByProposalId.
 async function buildProposalRecord(
-  record: { id: string; fields: Record<string, unknown> }
+  record: { id: string; createdTime?: string; fields: Record<string, unknown> }
 ): Promise<ProposalWithAssessment> {
   const f = record.fields;
   const linked = f['Linked Assessment'];
@@ -650,6 +652,7 @@ async function buildProposalRecord(
     scopeSummary: (f['Scope Summary'] as string) ?? '',
     dateApproved: (f['Date Approved'] as string) || undefined,
     stripeSessionId: (f['Stripe Session ID'] as string) || undefined,
+    createdTime: record.createdTime || undefined,
     teamSize: af ? ((af['Team Size'] as number) ?? undefined) : undefined,
     revenueRange: af ? ((af['Revenue Range'] as string) || undefined) : undefined,
     operationalChallenges: af ? operationalChallenges : undefined,
@@ -683,8 +686,8 @@ export async function getProposalByRecordId(
       return null;
     }
 
-    const data = (await res.json()) as { id: string; fields: Record<string, unknown> };
-    return buildProposalRecord({ id: data.id, fields: data.fields });
+    const data = (await res.json()) as { id: string; createdTime?: string; fields: Record<string, unknown> };
+    return buildProposalRecord({ id: data.id, createdTime: data.createdTime, fields: data.fields });
   } catch (err) {
     console.error('getProposalByRecordId error:', err);
     return null;
@@ -712,7 +715,7 @@ export async function getProposalByProposalId(
     }
 
     const data = (await res.json()) as {
-      records?: { id: string; fields: Record<string, unknown> }[];
+      records?: { id: string; createdTime?: string; fields: Record<string, unknown> }[];
     };
 
     const record = data.records?.[0];
@@ -722,5 +725,123 @@ export async function getProposalByProposalId(
   } catch (err) {
     console.error('getProposalByProposalId error:', err);
     return null;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Dashboard helpers (E11)
+// ---------------------------------------------------------------------------
+
+export interface AssessmentSummary {
+  id: string;
+  createdTime: string;
+  businessName: string;
+}
+
+export async function getAllAssessments(): Promise<AssessmentSummary[]> {
+  if (!process.env.AIRTABLE_API_KEY) {
+    console.warn('getAllAssessments: AIRTABLE_API_KEY not set.');
+    return [];
+  }
+
+  try {
+    const records: AssessmentSummary[] = [];
+    let offset: string | undefined;
+
+    do {
+      const params = new URLSearchParams({ pageSize: '100' });
+      if (offset) params.set('offset', offset);
+
+      const res = await fetch(
+        `https://api.airtable.com/v0/${BASE_ID}/${ASSESSMENTS_TABLE}?${params}`,
+        { headers: authHeaders() }
+      );
+
+      if (!res.ok) {
+        const detail = await res.text();
+        console.error('getAllAssessments fetch failed:', detail);
+        return records;
+      }
+
+      const data = (await res.json()) as {
+        records: { id: string; createdTime: string; fields: Record<string, unknown> }[];
+        offset?: string;
+      };
+
+      for (const r of data.records) {
+        records.push({
+          id: r.id,
+          createdTime: r.createdTime,
+          businessName: (r.fields['Business Name'] as string) ?? '',
+        });
+      }
+
+      offset = data.offset;
+    } while (offset);
+
+    return records;
+  } catch (err) {
+    console.error('getAllAssessments error:', err);
+    return [];
+  }
+}
+
+export interface ClientRecordSummary {
+  id: string;
+  clientName: string;
+  onboardingStatus: string;
+  portalAccessStatus: string;
+  amountPaid: number;
+  packagePurchased: string;
+}
+
+export async function getAllClientRecords(): Promise<ClientRecordSummary[]> {
+  if (!process.env.AIRTABLE_API_KEY) {
+    console.warn('getAllClientRecords: AIRTABLE_API_KEY not set.');
+    return [];
+  }
+
+  try {
+    const records: ClientRecordSummary[] = [];
+    let offset: string | undefined;
+
+    do {
+      const params = new URLSearchParams({ pageSize: '100' });
+      if (offset) params.set('offset', offset);
+
+      const res = await fetch(
+        `https://api.airtable.com/v0/${BASE_ID}/${encodeURIComponent(TABLE)}?${params}`,
+        { headers: authHeaders() }
+      );
+
+      if (!res.ok) {
+        const detail = await res.text();
+        console.error('getAllClientRecords fetch failed:', detail);
+        return records;
+      }
+
+      const data = (await res.json()) as {
+        records: { id: string; fields: Record<string, unknown> }[];
+        offset?: string;
+      };
+
+      for (const r of data.records) {
+        records.push({
+          id: r.id,
+          clientName: (r.fields['Client Name'] as string) ?? '',
+          onboardingStatus: (r.fields['Onboarding Status'] as string) ?? 'Not Started',
+          portalAccessStatus: (r.fields['Portal Access Status'] as string) ?? 'Pending',
+          amountPaid: (r.fields['Amount Paid'] as number) ?? 0,
+          packagePurchased: (r.fields['Package Purchased'] as string) ?? '',
+        });
+      }
+
+      offset = data.offset;
+    } while (offset);
+
+    return records;
+  } catch (err) {
+    console.error('getAllClientRecords error:', err);
+    return [];
   }
 }
