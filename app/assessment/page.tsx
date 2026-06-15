@@ -3,10 +3,14 @@
 import { useState, FormEvent, ChangeEvent } from 'react';
 import { OPERATIONAL_CHALLENGES } from '@/lib/analysis-engine';
 
-const GOLD = '#F5A623';
-const BLACK = '#111111';
+const GOLD    = '#F5A623';
+const BLACK   = '#111111';
 const CONDENSED = "'Barlow Condensed', sans-serif";
-const BARLOW = "'Barlow', sans-serif";
+const BARLOW    = "'Barlow', sans-serif";
+
+// ---------------------------------------------------------------------------
+// Static option lists
+// ---------------------------------------------------------------------------
 
 const TEAM_SIZE_OPTIONS = [
   'Just me',
@@ -22,6 +26,43 @@ const REVENUE_OPTIONS = [
   '$500k to $1M',
   '$1M to $5M',
   'More than $5M',
+];
+
+const TOOLS_OPTIONS = [
+  'QuickBooks or accounting software',
+  'Google Sheets or Excel spreadsheets',
+  'A separate CRM or contact management tool',
+  'Email only (Gmail, Outlook, etc.)',
+  'Project management software (Asana, Monday, Trello, etc.)',
+  'Scheduling or booking software',
+  'Point of sale or inventory system',
+  'HR or payroll software',
+  'Social media management tools',
+  'None, everything is done manually',
+  'Other',
+];
+
+const GROWTH_OPTIONS = [
+  'Grow revenue without adding more staff',
+  'Open a new location or expand to new markets',
+  'Get my time back and stop doing everything myself',
+  'Build systems so the business can run without me',
+  'Improve the customer experience and retention',
+  'Raise funding or prepare for acquisition',
+  'Stabilize and create more predictable revenue',
+  'Other',
+];
+
+const BLOCKER_OPTIONS = [
+  'Not enough time in the day',
+  'Too much manual work and repetitive tasks',
+  'My team is not aligned or operating efficiently',
+  'I do not have clear visibility into what is happening in my business',
+  'My systems and tools do not talk to each other',
+  'I cannot find or afford the right people',
+  'I do not have a clear plan or strategy',
+  'Cash flow or budget constraints',
+  'Other',
 ];
 
 // Plain-English display labels for each challenge ID.
@@ -43,16 +84,20 @@ const CHALLENGE_DISPLAY: Record<string, string> = {
   project_tracking_gaps:       'Projects or tasks slip through without proper tracking',
 };
 
+// ---------------------------------------------------------------------------
+// Form state
+// ---------------------------------------------------------------------------
+
 interface FormState {
   businessName: string;
   contactName: string;
   email: string;
   teamSizeLabel: string;
   revenueRange: string;
-  currentSystems: string;
-  operationalChallenges: string[];
-  growthGoals: string;
-  capacityConstraints: string;
+  currentSystems: string[];        // multi-select
+  operationalChallenges: string[]; // multi-select (IDs)
+  growthGoals: string;             // single-select
+  capacityConstraints: string[];   // multi-select
 }
 
 const EMPTY: FormState = {
@@ -61,17 +106,18 @@ const EMPTY: FormState = {
   email: '',
   teamSizeLabel: '',
   revenueRange: '',
-  currentSystems: '',
+  currentSystems: [],
   operationalChallenges: [],
   growthGoals: '',
-  capacityConstraints: '',
+  capacityConstraints: [],
 };
 
-// Shared input/select/textarea styling
+// ---------------------------------------------------------------------------
+// Shared styles
+// ---------------------------------------------------------------------------
+
 const baseInput =
   'ea-input w-full border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 transition-colors';
-const textareaBase =
-  'ea-input w-full border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 resize-y transition-colors';
 
 function SectionLabel({ children }: { children: string }) {
   return (
@@ -84,13 +130,7 @@ function SectionLabel({ children }: { children: string }) {
   );
 }
 
-function FieldLabel({
-  children,
-  required,
-}: {
-  children: string;
-  required?: boolean;
-}) {
+function FieldLabel({ children, required }: { children: string; required?: boolean }) {
   return (
     <label
       className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-neutral-700"
@@ -102,28 +142,76 @@ function FieldLabel({
   );
 }
 
-export default function AssessmentPage() {
-  const [form, setForm]         = useState<FormState>(EMPTY);
-  const [submitted, setSubmitted] = useState(false);
-  const [loading, setLoading]   = useState(false);
-  const [error, setError]       = useState('');
+// Reusable multi-select checklist rendered as a grid of toggle tiles.
+function Checklist({
+  options,
+  selected,
+  onToggle,
+  cols = 2,
+}: {
+  options: string[];
+  selected: string[];
+  onToggle: (val: string) => void;
+  cols?: 1 | 2;
+}) {
+  const gridClass =
+    cols === 1
+      ? 'grid grid-cols-1 gap-2'
+      : 'grid grid-cols-1 gap-2 sm:grid-cols-2';
 
-  function setText(field: keyof FormState) {
-    return (
-      e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-    ) => setForm((prev) => ({ ...prev, [field]: e.target.value }));
+  return (
+    <div className={gridClass}>
+      {options.map((opt) => {
+        const checked = selected.includes(opt);
+        return (
+          <label
+            key={opt}
+            className={`flex cursor-pointer items-start gap-3 border p-3.5 text-sm leading-snug transition-colors ${
+              checked
+                ? 'border-[#F5A623] bg-amber-50'
+                : 'border-neutral-200 bg-white hover:border-neutral-400'
+            }`}
+          >
+            <input
+              type="checkbox"
+              className="mt-0.5 shrink-0"
+              style={{ accentColor: GOLD }}
+              checked={checked}
+              onChange={() => onToggle(opt)}
+            />
+            <span className="text-neutral-700">{opt}</span>
+          </label>
+        );
+      })}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Page component
+// ---------------------------------------------------------------------------
+
+export default function AssessmentPage() {
+  const [form, setForm]           = useState<FormState>(EMPTY);
+  const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading]     = useState(false);
+  const [error, setError]         = useState('');
+
+  function setField(field: keyof FormState) {
+    return (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
+      setForm((prev) => ({ ...prev, [field]: e.target.value }));
   }
 
-  function toggleChallenge(id: string) {
-    setForm((prev) => {
-      const has = prev.operationalChallenges.includes(id);
-      return {
-        ...prev,
-        operationalChallenges: has
-          ? prev.operationalChallenges.filter((c) => c !== id)
-          : [...prev.operationalChallenges, id],
-      };
-    });
+  function toggleArray(field: 'currentSystems' | 'operationalChallenges' | 'capacityConstraints') {
+    return (val: string) =>
+      setForm((prev) => {
+        const arr = prev[field] as string[];
+        const has = arr.includes(val);
+        return {
+          ...prev,
+          [field]: has ? arr.filter((v) => v !== val) : [...arr, val],
+        };
+      });
   }
 
   async function handleSubmit(e: FormEvent) {
@@ -148,22 +236,34 @@ export default function AssessmentPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          businessName: form.businessName.trim(),
-          contactName: form.contactName.trim(),
-          email: form.email.trim(),
-          teamSizeLabel: form.teamSizeLabel,
-          revenueRange: form.revenueRange,
-          currentSystems: form.currentSystems.trim(),
+          businessName:          form.businessName.trim(),
+          contactName:           form.contactName.trim(),
+          email:                 form.email.trim(),
+          teamSizeLabel:         form.teamSizeLabel,
+          revenueRange:          form.revenueRange,
+          currentSystems:        form.currentSystems.join(', '),
           operationalChallenges: form.operationalChallenges,
-          growthGoals: form.growthGoals.trim(),
-          capacityConstraints: form.capacityConstraints.trim(),
+          growthGoals:           form.growthGoals,
+          capacityConstraints:   form.capacityConstraints.join('; '),
         }),
       });
 
-      const data = (await res.json()) as { ok?: boolean; error?: string };
+      if (!res.ok) {
+        let msg = 'Something went wrong. Please try again.';
+        try {
+          const data = (await res.json()) as { error?: string };
+          if (data.error) msg = data.error;
+        } catch {
+          // response was not JSON
+        }
+        setError(msg);
+        setLoading(false);
+        return;
+      }
 
-      if (!res.ok || data.error) {
-        setError(data.error ?? 'Something went wrong. Please try again.');
+      const data = (await res.json()) as { ok?: boolean; error?: string };
+      if (data.error) {
+        setError(data.error);
         setLoading(false);
         return;
       }
@@ -175,7 +275,10 @@ export default function AssessmentPage() {
     }
   }
 
+  // ---------------------------------------------------------------------------
   // Thank-you view
+  // ---------------------------------------------------------------------------
+
   if (submitted) {
     return (
       <main className="min-h-screen" style={{ backgroundColor: '#F8F6F2', fontFamily: BARLOW }}>
@@ -227,26 +330,49 @@ export default function AssessmentPage() {
     );
   }
 
+  // ---------------------------------------------------------------------------
+  // Form view
+  // ---------------------------------------------------------------------------
+
   return (
     <main className="min-h-screen" style={{ backgroundColor: '#F8F6F2', fontFamily: BARLOW }}>
 
       {/* Hero */}
-      <div className="px-6 py-20 text-center" style={{ backgroundColor: BLACK }}>
-        <p
-          className="text-xs font-bold uppercase tracking-[0.25em]"
-          style={{ fontFamily: CONDENSED, color: GOLD }}
-        >
-          Efficiency Architects
-        </p>
-        <h1
-          className="mt-4 text-4xl font-bold uppercase leading-tight sm:text-5xl"
-          style={{ fontFamily: CONDENSED, color: GOLD }}
-        >
-          Let&apos;s See What&apos;s Possible
-        </h1>
-        <p className="mx-auto mt-5 max-w-xl text-base leading-relaxed text-white">
-          Answer a few questions. We&apos;ll show you what&apos;s slowing you down and what it&apos;s costing you.
-        </p>
+      <div style={{ backgroundColor: BLACK }}>
+        {/* EA wordmark row */}
+        <div className="mx-auto max-w-5xl px-6 pt-6">
+          <a
+            href="https://efficiency-architects.vercel.app"
+            aria-label="Efficiency Architects"
+            style={{ textDecoration: 'none' }}
+          >
+            <span
+              style={{
+                fontFamily: CONDENSED,
+                color: GOLD,
+                fontSize: '42px',
+                fontWeight: 800,
+                lineHeight: 1,
+                letterSpacing: '0.04em',
+              }}
+            >
+              EA
+            </span>
+          </a>
+        </div>
+
+        {/* Headline */}
+        <div className="px-6 pb-20 pt-10 text-center">
+          <h1
+            className="text-4xl font-bold uppercase leading-tight sm:text-5xl"
+            style={{ fontFamily: CONDENSED, color: GOLD }}
+          >
+            Let&apos;s See What&apos;s Possible
+          </h1>
+          <p className="mx-auto mt-5 max-w-xl text-base leading-relaxed text-white">
+            Answer a few questions. We&apos;ll show you what&apos;s slowing you down and what it&apos;s costing you.
+          </p>
+        </div>
       </div>
 
       {/* Form */}
@@ -264,7 +390,7 @@ export default function AssessmentPage() {
                   type="text"
                   className={baseInput}
                   value={form.businessName}
-                  onChange={setText('businessName')}
+                  onChange={setField('businessName')}
                   placeholder="Your business name"
                   autoComplete="organization"
                 />
@@ -276,7 +402,7 @@ export default function AssessmentPage() {
                   type="text"
                   className={baseInput}
                   value={form.contactName}
-                  onChange={setText('contactName')}
+                  onChange={setField('contactName')}
                   placeholder="First and last name"
                   autoComplete="name"
                 />
@@ -288,7 +414,7 @@ export default function AssessmentPage() {
                   type="email"
                   className={baseInput}
                   value={form.email}
-                  onChange={setText('email')}
+                  onChange={setField('email')}
                   placeholder="you@yourbusiness.com"
                   autoComplete="email"
                 />
@@ -299,7 +425,7 @@ export default function AssessmentPage() {
                 <select
                   className={baseInput}
                   value={form.teamSizeLabel}
-                  onChange={setText('teamSizeLabel')}
+                  onChange={setField('teamSizeLabel')}
                 >
                   <option value="">Select one</option>
                   {TEAM_SIZE_OPTIONS.map((opt) => (
@@ -313,7 +439,7 @@ export default function AssessmentPage() {
                 <select
                   className={baseInput}
                   value={form.revenueRange}
-                  onChange={setText('revenueRange')}
+                  onChange={setField('revenueRange')}
                 >
                   <option value="">Select a range</option>
                   {REVENUE_OPTIONS.map((opt) => (
@@ -332,12 +458,13 @@ export default function AssessmentPage() {
 
               <div>
                 <FieldLabel>What tools or software does your business currently use?</FieldLabel>
-                <textarea
-                  className={textareaBase}
-                  rows={3}
-                  value={form.currentSystems}
-                  onChange={setText('currentSystems')}
-                  placeholder="e.g. QuickBooks, Google Sheets, email, spreadsheets..."
+                <p className="mb-3 text-xs leading-relaxed text-neutral-500">
+                  Select everything that applies.
+                </p>
+                <Checklist
+                  options={TOOLS_OPTIONS}
+                  selected={form.currentSystems}
+                  onToggle={toggleArray('currentSystems')}
                 />
               </div>
 
@@ -364,7 +491,7 @@ export default function AssessmentPage() {
                           className="mt-0.5 shrink-0"
                           style={{ accentColor: GOLD }}
                           checked={checked}
-                          onChange={() => toggleChallenge(challenge.id)}
+                          onChange={() => toggleArray('operationalChallenges')(challenge.id)}
                         />
                         <span className="text-neutral-700">{display}</span>
                       </label>
@@ -379,27 +506,32 @@ export default function AssessmentPage() {
           {/* Section 3: Your Goals */}
           <div className="rounded bg-white p-8 shadow-sm">
             <SectionLabel>Your Goals</SectionLabel>
-            <div className="space-y-5">
+            <div className="space-y-6">
 
               <div>
                 <FieldLabel>Where do you want your business to be in the next 12-24 months?</FieldLabel>
-                <textarea
-                  className={textareaBase}
-                  rows={4}
+                <select
+                  className={baseInput}
                   value={form.growthGoals}
-                  onChange={setText('growthGoals')}
-                  placeholder="Describe your growth goals and where you want to take the business..."
-                />
+                  onChange={setField('growthGoals')}
+                >
+                  <option value="">Select one</option>
+                  {GROWTH_OPTIONS.map((opt) => (
+                    <option key={opt} value={opt}>{opt}</option>
+                  ))}
+                </select>
               </div>
 
               <div>
                 <FieldLabel>What is stopping you from getting there?</FieldLabel>
-                <textarea
-                  className={textareaBase}
-                  rows={4}
-                  value={form.capacityConstraints}
-                  onChange={setText('capacityConstraints')}
-                  placeholder="What bottlenecks, resource gaps, or operational issues are holding you back right now?"
+                <p className="mb-3 text-xs leading-relaxed text-neutral-500">
+                  Select everything that applies.
+                </p>
+                <Checklist
+                  options={BLOCKER_OPTIONS}
+                  selected={form.capacityConstraints}
+                  onToggle={toggleArray('capacityConstraints')}
+                  cols={1}
                 />
               </div>
 
@@ -416,11 +548,7 @@ export default function AssessmentPage() {
             type="submit"
             disabled={loading}
             className="w-full py-4 text-sm font-bold uppercase tracking-[0.18em] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
-            style={{
-              fontFamily: CONDENSED,
-              backgroundColor: BLACK,
-              color: GOLD,
-            }}
+            style={{ fontFamily: CONDENSED, backgroundColor: BLACK, color: GOLD }}
           >
             {loading ? 'Submitting...' : 'Submit My Assessment'}
           </button>

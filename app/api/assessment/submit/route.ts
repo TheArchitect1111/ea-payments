@@ -8,10 +8,10 @@ import { sendAssessmentAdminNotification } from '@/lib/email';
 
 function mapTeamSize(label: string): number {
   const map: Record<string, number> = {
-    'Just me':            1,
-    '2-5 people':         3,
-    '6-15 people':        10,
-    '16-50 people':       33,
+    'Just me':             1,
+    '2-5 people':          3,
+    '6-15 people':         10,
+    '16-50 people':        33,
     'More than 50 people': 65,
   };
   return map[label] ?? 1;
@@ -30,15 +30,15 @@ function mapRevenueRange(label: string): RevenueRange {
 
 function mapComplexity(label: string): Complexity {
   const map: Record<string, Complexity> = {
-    Low: 'low',
+    Low:    'low',
     Medium: 'medium',
-    High: 'high',
+    High:   'high',
   };
   return map[label] ?? 'medium';
 }
 
-// Accepts either challenge labels (legacy) or IDs. Falls back to the input
-// value so new IDs submitted by the redesigned form pass through unchanged.
+// Accepts challenge IDs (from the redesigned form) or legacy labels.
+// Falls back to the input value so IDs pass through unchanged.
 function mapChallengeLabelsToIds(labels: string[]): string[] {
   return labels.map((label) => {
     const found = OPERATIONAL_CHALLENGES.find((c) => c.label === label);
@@ -46,14 +46,16 @@ function mapChallengeLabelsToIds(labels: string[]): string[] {
   });
 }
 
-// Scope derivation helpers (replaces the prospect-facing Scope section).
+// ---------------------------------------------------------------------------
+// Scope derivation (replaces the removed prospect-facing Scope section)
+// ---------------------------------------------------------------------------
 
 function deriveWorkflowCount(teamSizeLabel: string): number {
   const map: Record<string, number> = {
-    'Just me':            1,
-    '2-5 people':         2,
-    '6-15 people':        4,
-    '16-50 people':       6,
+    'Just me':             1,
+    '2-5 people':          2,
+    '6-15 people':         4,
+    '16-50 people':        6,
     'More than 50 people': 9,
   };
   return map[teamSizeLabel] ?? 1;
@@ -61,10 +63,10 @@ function deriveWorkflowCount(teamSizeLabel: string): number {
 
 function deriveUserCount(teamSizeLabel: string): number {
   const map: Record<string, number> = {
-    'Just me':            1,
-    '2-5 people':         3,
-    '6-15 people':        10,
-    '16-50 people':       33,
+    'Just me':             1,
+    '2-5 people':          3,
+    '6-15 people':         10,
+    '16-50 people':        33,
     'More than 50 people': 65,
   };
   return map[teamSizeLabel] ?? 1;
@@ -84,126 +86,110 @@ function deriveComplexity(revenueRange: string): string {
   return 'High';
 }
 
-// Count comma-separated tools mentioned in currentSystems, capped at 8.
+// Count comma-separated tools in the currentSystems string (capped at 8).
+// The form joins the multi-select array with ', ' before sending.
 function deriveSystemsCount(currentSystems: string): number {
   if (!currentSystems.trim()) return 0;
   const count = currentSystems.split(',').filter((s) => s.trim().length > 0).length;
   return Math.min(count, 8);
 }
 
+// ---------------------------------------------------------------------------
+// Route handler
+// ---------------------------------------------------------------------------
+
 export async function POST(req: NextRequest) {
-  let body: Record<string, unknown>;
+  // Outer catch ensures the client always receives JSON, never an HTML error page.
   try {
-    body = (await req.json()) as Record<string, unknown>;
-  } catch {
-    return NextResponse.json({ error: 'Invalid request body.' }, { status: 400 });
-  }
+    let body: Record<string, unknown>;
+    try {
+      body = (await req.json()) as Record<string, unknown>;
+    } catch {
+      return NextResponse.json({ error: 'Invalid request body.' }, { status: 400 });
+    }
 
-  const businessName   = String(body.businessName ?? '').trim();
-  const contactName    = String(body.contactName ?? '').trim();
-  const email          = String(body.email ?? '').trim();
-  const teamSizeLabel  = String(body.teamSizeLabel ?? '');
-  const revenueRange   = String(body.revenueRange ?? '');
-  const currentSystems = String(body.currentSystems ?? '').trim();
-  const operationalChallenges = Array.isArray(body.operationalChallenges)
-    ? (body.operationalChallenges as string[])
-    : [];
-  const growthGoals         = String(body.growthGoals ?? '').trim();
-  const capacityConstraints = String(body.capacityConstraints ?? '').trim();
+    console.log('[assessment/submit] body:', JSON.stringify(body));
 
-  if (!businessName || !contactName || !email || !teamSizeLabel || !revenueRange) {
-    return NextResponse.json({ error: 'Required fields are missing.' }, { status: 400 });
-  }
+    const businessName   = String(body.businessName ?? '').trim();
+    const contactName    = String(body.contactName ?? '').trim();
+    const email          = String(body.email ?? '').trim();
+    const teamSizeLabel  = String(body.teamSizeLabel ?? '');
+    const revenueRange   = String(body.revenueRange ?? '');
+    const currentSystems = String(body.currentSystems ?? '').trim();
+    const operationalChallenges = Array.isArray(body.operationalChallenges)
+      ? (body.operationalChallenges as string[])
+      : [];
+    const growthGoals         = String(body.growthGoals ?? '').trim();
+    const capacityConstraints = String(body.capacityConstraints ?? '').trim();
 
-  // Derive all scope values from prospect answers.
-  const teamSize          = mapTeamSize(teamSizeLabel);
-  const workflowCount     = deriveWorkflowCount(teamSizeLabel);
-  const userCount         = deriveUserCount(teamSizeLabel);
-  const dashboardRequired = deriveDashboardRequired(teamSizeLabel);
-  const portalRequired    = derivePortalRequired(teamSizeLabel);
-  const businessComplexity = deriveComplexity(revenueRange);
-  const systemsCount      = deriveSystemsCount(currentSystems);
-  const integrationCount  = systemsCount;
-  const automationCount   = 0;
+    if (!businessName || !contactName || !email || !teamSizeLabel || !revenueRange) {
+      return NextResponse.json({ error: 'Required fields are missing.' }, { status: 400 });
+    }
 
-  const challengeIds = mapChallengeLabelsToIds(operationalChallenges);
+    // Derive all scope values from the prospect's answers.
+    const teamSize           = mapTeamSize(teamSizeLabel);
+    const workflowCount      = deriveWorkflowCount(teamSizeLabel);
+    const userCount          = deriveUserCount(teamSizeLabel);
+    const dashboardRequired  = deriveDashboardRequired(teamSizeLabel);
+    const portalRequired     = derivePortalRequired(teamSizeLabel);
+    const businessComplexity = deriveComplexity(revenueRange);
+    const systemsCount       = deriveSystemsCount(currentSystems);
+    const integrationCount   = systemsCount;
+    const automationCount    = 0;
 
-  const analysis = analyzeAssessment({
-    teamSize,
-    revenueRange: mapRevenueRange(revenueRange),
-    systemsCount,
-    operationalChallenges: challengeIds,
-    complexity: mapComplexity(businessComplexity),
-  });
+    const challengeIds = mapChallengeLabelsToIds(operationalChallenges);
 
-  const pricing = calculateFee({
-    projectType: analysis.recommendedProjectType,
-    workflowCount,
-    automationCount,
-    integrationCount,
-    dashboardRequired,
-    portalRequired,
-    userCount,
-  });
+    const analysis = analyzeAssessment({
+      teamSize,
+      revenueRange: mapRevenueRange(revenueRange),
+      systemsCount,
+      operationalChallenges: challengeIds,
+      complexity: mapComplexity(businessComplexity),
+    });
 
-  const assessmentId = `ASSESS-${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
-  const proposalId   = `PROP-${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
+    const pricing = calculateFee({
+      projectType: analysis.recommendedProjectType,
+      workflowCount,
+      automationCount,
+      integrationCount,
+      dashboardRequired,
+      portalRequired,
+      userCount,
+    });
 
-  const proposalResult = await createProposalRecord({
-    proposalId,
-    businessName,
-    contactName,
-    email,
-    status: 'Pending Review',
-    recommendedProjectType: analysis.recommendedProjectType,
-    projectTypeLabel: pricing.projectTypeLabel,
-    capacityScore: analysis.capacityScore,
-    scoreBand: analysis.scoreBand,
-    primaryConstraint: analysis.primaryConstraint,
-    weeklyTimeRecovery: analysis.weeklyTimeRecovery,
-    opportunityLow: analysis.opportunityLow,
-    opportunityHigh: analysis.opportunityHigh,
-    rawFee: pricing.rawFee,
-    recommendedFee: pricing.recommendedFee,
-  });
+    const assessmentId = `ASSESS-${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
+    const proposalId   = `PROP-${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
 
-  const assessmentResult = await createAssessmentRecord({
-    assessmentId,
-    businessName,
-    contactName,
-    email,
-    teamSize,
-    revenueRange,
-    currentSystems,
-    systemsCount,
-    operationalChallenges,
-    growthGoals,
-    capacityConstraints,
-    workflowCount,
-    automationCount,
-    integrationCount,
-    dashboardRequired,
-    portalRequired,
-    userCount,
-    businessComplexity,
-    linkedProposalId: proposalResult.recordId,
-  });
+    const proposalResult = await createProposalRecord({
+      proposalId,
+      businessName,
+      contactName,
+      email,
+      status: 'Pending Review',
+      recommendedProjectType: analysis.recommendedProjectType,
+      projectTypeLabel:       pricing.projectTypeLabel,
+      capacityScore:          analysis.capacityScore,
+      scoreBand:              analysis.scoreBand,
+      primaryConstraint:      analysis.primaryConstraint,
+      weeklyTimeRecovery:     analysis.weeklyTimeRecovery,
+      opportunityLow:         analysis.opportunityLow,
+      opportunityHigh:        analysis.opportunityHigh,
+      rawFee:                 pricing.rawFee,
+      recommendedFee:         pricing.recommendedFee,
+    });
 
-  if (!assessmentResult.ok) {
-    console.error('Assessment write failed:', assessmentResult.error);
-  }
-  if (!proposalResult.ok) {
-    console.error('Proposal write failed:', proposalResult.error);
-  }
-
-  try {
-    await sendAssessmentAdminNotification({
+    const assessmentResult = await createAssessmentRecord({
+      assessmentId,
       businessName,
       contactName,
       email,
       teamSize,
       revenueRange,
+      currentSystems,
+      systemsCount,
       operationalChallenges,
+      growthGoals,
+      capacityConstraints,
       workflowCount,
       automationCount,
       integrationCount,
@@ -211,22 +197,54 @@ export async function POST(req: NextRequest) {
       portalRequired,
       userCount,
       businessComplexity,
-      capacityScore: analysis.capacityScore,
-      scoreBand: analysis.scoreBand,
-      primaryConstraint: analysis.primaryConstraint,
-      weeklyTimeRecovery: analysis.weeklyTimeRecovery,
-      opportunityLow: analysis.opportunityLow,
-      opportunityHigh: analysis.opportunityHigh,
-      recommendedProjectType: analysis.recommendedProjectType,
-      projectTypeLabel: pricing.projectTypeLabel,
-      rawFee: pricing.rawFee,
-      recommendedFee: pricing.recommendedFee,
-      assessmentRecordId: assessmentResult.recordId,
-      proposalRecordId: proposalResult.recordId,
+      linkedProposalId: proposalResult.recordId,
     });
-  } catch (err) {
-    console.error('Assessment admin notification error:', err);
-  }
 
-  return NextResponse.json({ ok: true });
+    if (!assessmentResult.ok) {
+      console.error('Assessment write failed:', assessmentResult.error);
+    }
+    if (!proposalResult.ok) {
+      console.error('Proposal write failed:', proposalResult.error);
+    }
+
+    try {
+      await sendAssessmentAdminNotification({
+        businessName,
+        contactName,
+        email,
+        teamSize,
+        revenueRange,
+        operationalChallenges,
+        workflowCount,
+        automationCount,
+        integrationCount,
+        dashboardRequired,
+        portalRequired,
+        userCount,
+        businessComplexity,
+        capacityScore:          analysis.capacityScore,
+        scoreBand:              analysis.scoreBand,
+        primaryConstraint:      analysis.primaryConstraint,
+        weeklyTimeRecovery:     analysis.weeklyTimeRecovery,
+        opportunityLow:         analysis.opportunityLow,
+        opportunityHigh:        analysis.opportunityHigh,
+        recommendedProjectType: analysis.recommendedProjectType,
+        projectTypeLabel:       pricing.projectTypeLabel,
+        rawFee:                 pricing.rawFee,
+        recommendedFee:         pricing.recommendedFee,
+        assessmentRecordId:     assessmentResult.recordId,
+        proposalRecordId:       proposalResult.recordId,
+      });
+    } catch (err) {
+      console.error('Assessment admin notification error:', err);
+    }
+
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    console.error('Assessment submit unhandled error:', err);
+    return NextResponse.json(
+      { error: 'An unexpected error occurred. Please try again.' },
+      { status: 500 }
+    );
+  }
 }
