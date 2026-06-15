@@ -415,6 +415,7 @@ export interface ProposalWithAssessment {
   recommendedFee: number;
   scopeSummary: string;
   dateApproved?: string;
+  stripeSessionId?: string;
   // Populated from linked Assessment record (absent if no link)
   teamSize?: number;
   revenueRange?: string;
@@ -545,9 +546,11 @@ export async function updateProposal(
   recordId: string,
   patch: {
     status?: string;
+    paymentStatus?: string;
     recommendedFee?: number;
     scopeSummary?: string;
     dateApproved?: string;
+    stripeSessionId?: string;
   }
 ): Promise<{ ok: boolean; error?: string }> {
   if (!process.env.AIRTABLE_API_KEY) {
@@ -556,9 +559,11 @@ export async function updateProposal(
 
   const fields: Record<string, unknown> = {};
   if (patch.status !== undefined) fields['Status'] = patch.status;
+  if (patch.paymentStatus !== undefined) fields['Payment Status'] = patch.paymentStatus;
   if (patch.recommendedFee !== undefined) fields['Recommended Fee'] = patch.recommendedFee;
   if (patch.scopeSummary !== undefined) fields['Scope Summary'] = patch.scopeSummary;
   if (patch.dateApproved !== undefined) fields['Date Approved'] = patch.dateApproved;
+  if (patch.stripeSessionId !== undefined) fields['Stripe Session ID'] = patch.stripeSessionId;
 
   if (Object.keys(fields).length === 0) {
     return { ok: false, error: 'No fields to update.' };
@@ -644,6 +649,7 @@ async function buildProposalRecord(
     recommendedFee: (f['Recommended Fee'] as number) ?? 0,
     scopeSummary: (f['Scope Summary'] as string) ?? '',
     dateApproved: (f['Date Approved'] as string) || undefined,
+    stripeSessionId: (f['Stripe Session ID'] as string) || undefined,
     teamSize: af ? ((af['Team Size'] as number) ?? undefined) : undefined,
     revenueRange: af ? ((af['Revenue Range'] as string) || undefined) : undefined,
     operationalChallenges: af ? operationalChallenges : undefined,

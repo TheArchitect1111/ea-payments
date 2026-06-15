@@ -1,8 +1,12 @@
 import { NextRequest } from 'next/server';
 import Stripe from 'stripe';
 import { getStripe } from '@/lib/stripe';
-import { createOrUpdateClientRecord } from '@/lib/airtable';
-import type { AirtablePackage } from '@/lib/airtable';
+import {
+  createOrUpdateClientRecord,
+  getProposalByRecordId,
+  updateProposal,
+} from '@/lib/airtable';
+import type { AirtablePackage, ProposalWithAssessment } from '@/lib/airtable';
 import { getCatalogItem } from '@/lib/catalog';
 import { sendWelcomeEmail, sendAdminNotification } from '@/lib/email';
 import { createPortalAccess } from '@/lib/portal-access';
@@ -53,6 +57,14 @@ export async function POST(req: NextRequest) {
 
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promise<void> {
   const meta = session.metadata ?? {};
+
+  // Phase E: proposal-based payment. Branch early; Phase A logic is not run.
+  if (meta.proposalId && meta.airtableRecordId) {
+    await handleProposalPayment(session, meta.proposalId, meta.airtableRecordId);
+    return;
+  }
+
+  // Phase A: fixed-package payment (existing logic unchanged below).
   const customerDetails = session.customer_details;
 
   const clientName = meta.clientName || customerDetails?.name || 'Unknown Client';
@@ -187,5 +199,165 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
     }
   } catch (err) {
     console.error('Admin notification threw for session', session.id, ':', err);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Phase E: proposal-based payment handling (E9 + E10)
+// ---------------------------------------------------------------------------
+
+async function handleProposalPayment(
+  session: Stripe.Checkout.Session,
+  proposalId: string,
+  proposalRecordId: string
+): Promise<void> {
+  // 1. Fetch the full Proposal record (with linked Assessment data).
+  let proposal: ProposalWithAssessment | null = null;
+  try {
+    proposal = await getProposalByRecordId(proposalRecordId);
+    if (!proposal) {
+      console.error(
+        `handleProposalPayment [${proposalId}]: proposal record ${proposalRecordId} not found in Airtable.`
+      );
+    }
+  } catch (err) {
+    console.error(`handleProposalPayment [${proposalId}]: getProposalByRecordId threw:`, err);
+  }
+
+  // 2. Verify the stored Stripe Session ID matches this event.
+  // E8 writes the session ID before redirecting; log a warning if they diverge.
+  if (proposal?.stripeSessionId && proposal.stripeSessionId !== session.id) {
+    console.warn(
+      `handleProposalPayment [${proposalId}]: session ID mismatch.` +
+        ` Stored: ${proposal.stripeSessionId}, received: ${session.id}. Proceeding.`
+    );
+  }
+
+  // 3. Update Proposal status (critical, own try/catch).
+  try {
+    const statusResult = await updateProposal(proposalRecordId, {
+      status: 'Approved & Paid',
+    });
+    if (!statusResult.ok) {
+      console.error(
+        `handleProposalPayment [${proposalId}]: status update failed:`,
+        statusResult.error
+      );
+    }
+  } catch (err) {
+    console.error(`handleProposalPayment [${proposalId}]: status update threw:`, err);
+  }
+
+  // 4. Update Payment Status (best-effort; field may not exist yet in Airtable).
+  try {
+    const paymentStatusResult = await updateProposal(proposalRecordId, {
+      paymentStatus: 'Paid',
+    });
+    if (!paymentStatusResult.ok) {
+      console.error(
+        `handleProposalPayment [${proposalId}]: payment status update failed:`,
+        paymentStatusResult.error
+      );
+    }
+  } catch (err) {
+    console.error(`handleProposalPayment [${proposalId}]: payment status update threw:`, err);
+  }
+
+  // Derive values for the Client Record and email from the proposal (fallback to
+  // session data if the proposal fetch failed).
+  const clientName =
+    proposal?.contactName || session.customer_details?.name || 'Unknown Client';
+  const email =
+    proposal?.email ||
+    session.customer_details?.email ||
+    session.customer_email ||
+    '';
+  const businessName = proposal?.businessName ?? '';
+  const packageLabel =
+    proposal?.projectTypeLabel || proposal?.recommendedProjectType || 'Implementation Package';
+  const amountPaid = proposal?.recommendedFee ?? (session.amount_total ?? 0) / 100;
+  const paymentDate = session.created
+    ? new Date(session.created * 1000).toISOString().slice(0, 10)
+    : new Date().toISOString().slice(0, 10);
+  const stripeTransactionId =
+    typeof session.payment_intent === 'string'
+      ? session.payment_intent
+      : (session.payment_intent as Stripe.PaymentIntent | null)?.id ?? session.id;
+
+  // 5. Create a Client Record so the client can access the portal.
+  const airtableResult = await createOrUpdateClientRecord({
+    clientName,
+    organization: businessName || undefined,
+    email,
+    packagePurchased: 'Implementation Package',
+    amountPaid,
+    paymentDate,
+    stripeTransactionId,
+    portalAccessStatus: 'Pending',
+    onboardingStatus: 'Not Started',
+  });
+
+  if (!airtableResult.ok) {
+    console.error(
+      `handleProposalPayment [${proposalId}]: createOrUpdateClientRecord failed:`,
+      airtableResult.error
+    );
+  }
+
+  // 6. Provision EA portal access and write credentials to the Client Record.
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://ea-payments.vercel.app';
+  let portalLoginUrl = `${baseUrl}/portal/login`;
+  let tempCredentials: string | undefined;
+
+  if (airtableResult.ok && airtableResult.recordId) {
+    try {
+      const portalResult = await createPortalAccess(
+        {
+          clientName,
+          email,
+          organization: businessName || undefined,
+          airtableRecordId: airtableResult.recordId,
+        },
+        { platform: 'efficiency-architects', loginPath: '/portal/login' }
+      );
+
+      if (portalResult.ok) {
+        if (portalResult.portalLoginUrl) {
+          portalLoginUrl = portalResult.portalLoginUrl;
+        }
+        if (portalResult.username && portalResult.tempPassword) {
+          tempCredentials =
+            `Your portal login credentials. Email: ${portalResult.username}. ` +
+            `Temporary Password: ${portalResult.tempPassword}. ` +
+            `Log in using the button above. Contact us to update your password at any time.`;
+        }
+      } else {
+        console.error(
+          `handleProposalPayment [${proposalId}]: createPortalAccess failed:`,
+          portalResult.error
+        );
+      }
+    } catch (err) {
+      console.error(`handleProposalPayment [${proposalId}]: createPortalAccess threw:`, err);
+    }
+  }
+
+  // 7. Send welcome email to the new client (E10).
+  try {
+    const welcomeResult = await sendWelcomeEmail({
+      clientName,
+      email,
+      packageName: packageLabel,
+      portalLoginUrl,
+      tempCredentials,
+    });
+    if (!welcomeResult.ok) {
+      console.error(
+        `handleProposalPayment [${proposalId}]: sendWelcomeEmail failed:`,
+        welcomeResult.error
+      );
+    }
+  } catch (err) {
+    console.error(`handleProposalPayment [${proposalId}]: sendWelcomeEmail threw:`, err);
   }
 }
