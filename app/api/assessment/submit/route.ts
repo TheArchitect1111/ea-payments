@@ -99,16 +99,20 @@ function deriveSystemsCount(currentSystems: string): number {
 // ---------------------------------------------------------------------------
 
 export async function POST(req: NextRequest) {
+  const rawText = await req.text();
+  console.log('[assessment/submit] raw body:', rawText);
+
   // Outer catch ensures the client always receives JSON, never an HTML error page.
   try {
     let body: Record<string, unknown>;
     try {
-      body = (await req.json()) as Record<string, unknown>;
-    } catch {
-      return NextResponse.json({ error: 'Invalid request body.' }, { status: 400 });
+      body = rawText ? (JSON.parse(rawText) as Record<string, unknown>) : {};
+    } catch (err) {
+      console.error('[assessment/submit] failed to parse body:', err);
+      return NextResponse.json({ ok: false, error: 'Invalid request body.' }, { status: 400 });
     }
 
-    console.log('[assessment/submit] body:', JSON.stringify(body));
+    console.log('[assessment/submit] parsed body:', JSON.stringify(body));
 
     const businessName   = String(body.businessName ?? '').trim();
     const contactName    = String(body.contactName ?? '').trim();
@@ -123,7 +127,10 @@ export async function POST(req: NextRequest) {
     const capacityConstraints = String(body.capacityConstraints ?? '').trim();
 
     if (!businessName || !contactName || !email || !teamSizeLabel || !revenueRange) {
-      return NextResponse.json({ error: 'Required fields are missing.' }, { status: 400 });
+      return NextResponse.json(
+        { ok: false, error: 'Required fields are missing.' },
+        { status: 400 }
+      );
     }
 
     // Derive all scope values from the prospect's answers.
@@ -135,7 +142,6 @@ export async function POST(req: NextRequest) {
     const businessComplexity = deriveComplexity(revenueRange);
     const systemsCount       = deriveSystemsCount(currentSystems);
     const integrationCount   = systemsCount;
-    const automationCount    = 0;
 
     const challengeIds = mapChallengeLabelsToIds(operationalChallenges);
 
@@ -150,7 +156,7 @@ export async function POST(req: NextRequest) {
     const pricing = calculateFee({
       projectType: analysis.recommendedProjectType,
       workflowCount,
-      automationCount,
+      automationCount: 0,
       integrationCount,
       dashboardRequired,
       portalRequired,
@@ -191,7 +197,7 @@ export async function POST(req: NextRequest) {
       growthGoals,
       capacityConstraints,
       workflowCount,
-      automationCount,
+      automationCount: 0,
       integrationCount,
       dashboardRequired,
       portalRequired,
@@ -216,7 +222,7 @@ export async function POST(req: NextRequest) {
         revenueRange,
         operationalChallenges,
         workflowCount,
-        automationCount,
+        automationCount: 0,
         integrationCount,
         dashboardRequired,
         portalRequired,
@@ -241,9 +247,12 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ ok: true });
   } catch (err) {
-    console.error('Assessment submit unhandled error:', err);
+    console.error(
+      'Assessment submit unhandled error:',
+      err instanceof Error ? err.stack ?? err.message : err
+    );
     return NextResponse.json(
-      { error: 'An unexpected error occurred. Please try again.' },
+      { ok: false, error: 'An unexpected error occurred. Please try again.' },
       { status: 500 }
     );
   }
