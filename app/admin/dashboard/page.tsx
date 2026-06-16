@@ -157,6 +157,12 @@ export default async function DashboardPage() {
           </div>
           <div className="flex items-center gap-4">
             <a
+              href="/admin/master"
+              className="text-xs font-semibold text-blue-200 hover:text-white transition"
+            >
+              Master
+            </a>
+            <a
               href="/admin/proposals"
               className="text-xs font-semibold text-blue-200 hover:text-white transition"
             >

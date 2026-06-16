@@ -94,12 +94,20 @@ export default function CommissionsDashboard({ initialData }: Props) {
               Commission Dashboard
             </h1>
           </div>
-          <a
-            href="/api/admin/logout"
-            className="text-xs font-semibold text-blue-200 hover:text-white transition"
-          >
-            Sign Out
-          </a>
+          <div className="flex items-center gap-4">
+            <a
+              href="/admin/master"
+              className="text-xs font-semibold text-blue-200 hover:text-white transition"
+            >
+              Master
+            </a>
+            <a
+              href="/api/admin/logout"
+              className="text-xs font-semibold text-blue-200 hover:text-white transition"
+            >
+              Sign Out
+            </a>
+          </div>
         </div>
       </header>
 

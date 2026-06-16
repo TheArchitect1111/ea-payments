@@ -414,6 +414,7 @@ export interface ProposalWithAssessment {
   rawFee: number;
   recommendedFee: number;
   scopeSummary: string;
+  paymentStatus?: string;
   dateApproved?: string;
   stripeSessionId?: string;
   createdTime?: string;
@@ -524,6 +525,7 @@ export async function getProposalsWithAssessments(): Promise<ProposalWithAssessm
         rawFee: (f['Raw Fee'] as number) ?? 0,
         recommendedFee: (f['Recommended Fee'] as number) ?? 0,
         scopeSummary: (f['Scope Summary'] as string) ?? '',
+        paymentStatus: (f['Payment Status'] as string) || undefined,
         dateApproved: (f['Date Approved'] as string) || undefined,
         createdTime: record.createdTime || undefined,
         teamSize: af ? ((af['Team Size'] as number) ?? undefined) : undefined,
@@ -650,6 +652,7 @@ async function buildProposalRecord(
     rawFee: (f['Raw Fee'] as number) ?? 0,
     recommendedFee: (f['Recommended Fee'] as number) ?? 0,
     scopeSummary: (f['Scope Summary'] as string) ?? '',
+    paymentStatus: (f['Payment Status'] as string) || undefined,
     dateApproved: (f['Date Approved'] as string) || undefined,
     stripeSessionId: (f['Stripe Session ID'] as string) || undefined,
     createdTime: record.createdTime || undefined,
@@ -789,10 +792,12 @@ export async function getAllAssessments(): Promise<AssessmentSummary[]> {
 export interface ClientRecordSummary {
   id: string;
   clientName: string;
+  organization?: string;
   onboardingStatus: string;
   portalAccessStatus: string;
   amountPaid: number;
   packagePurchased: string;
+  createdTime?: string;
 }
 
 export async function getAllClientRecords(): Promise<ClientRecordSummary[]> {
@@ -821,7 +826,7 @@ export async function getAllClientRecords(): Promise<ClientRecordSummary[]> {
       }
 
       const data = (await res.json()) as {
-        records: { id: string; fields: Record<string, unknown> }[];
+        records: { id: string; createdTime: string; fields: Record<string, unknown> }[];
         offset?: string;
       };
 
@@ -829,10 +834,12 @@ export async function getAllClientRecords(): Promise<ClientRecordSummary[]> {
         records.push({
           id: r.id,
           clientName: (r.fields['Client Name'] as string) ?? '',
+          organization: (r.fields['Organization'] as string) || undefined,
           onboardingStatus: (r.fields['Onboarding Status'] as string) ?? 'Not Started',
           portalAccessStatus: (r.fields['Portal Access Status'] as string) ?? 'Pending',
           amountPaid: (r.fields['Amount Paid'] as number) ?? 0,
           packagePurchased: (r.fields['Package Purchased'] as string) ?? '',
+          createdTime: r.createdTime || undefined,
         });
       }
 
@@ -843,5 +850,191 @@ export async function getAllClientRecords(): Promise<ClientRecordSummary[]> {
   } catch (err) {
     console.error('getAllClientRecords error:', err);
     return [];
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Master portal helpers (cross-platform read-only summaries)
+// ---------------------------------------------------------------------------
+
+const PARTNER_NETWORK_BASE_ID =
+  process.env.AIRTABLE_PARTNER_NETWORK_BASE_ID ?? 'appnyHBarTuXIG9Ke';
+const PARTNERS_TABLE = 'Partners';
+
+export interface PartnerRecord {
+  partnerName: string;
+  referralCount: number;
+  commissionOwed: number;
+  commissionPaid: number;
+  status: string;
+}
+
+const SAMPLE_PARTNER_RECORDS: PartnerRecord[] = [
+  { partnerName: 'Sample Partner A', referralCount: 4, commissionOwed: 1200, commissionPaid: 800, status: 'Active' },
+  { partnerName: 'Sample Partner B', referralCount: 2, commissionOwed: 600, commissionPaid: 0, status: 'Active' },
+];
+
+export async function getPartnerRecords(): Promise<PartnerRecord[]> {
+  if (!process.env.AIRTABLE_API_KEY) return SAMPLE_PARTNER_RECORDS;
+
+  try {
+    const records: PartnerRecord[] = [];
+    let offset: string | undefined;
+
+    do {
+      const params = new URLSearchParams({ pageSize: '100' });
+      if (offset) params.set('offset', offset);
+
+      const res = await fetch(
+        `https://api.airtable.com/v0/${PARTNER_NETWORK_BASE_ID}/${encodeURIComponent(PARTNERS_TABLE)}?${params}`,
+        { headers: authHeaders(), cache: 'no-store' }
+      );
+
+      if (!res.ok) {
+        const detail = await res.text();
+        console.error('getPartnerRecords fetch failed:', detail);
+        return SAMPLE_PARTNER_RECORDS;
+      }
+
+      const data = (await res.json()) as {
+        records: { fields: Record<string, unknown> }[];
+        offset?: string;
+      };
+
+      for (const r of data.records) {
+        records.push({
+          partnerName: (r.fields['Name'] as string) ?? '',
+          referralCount: (r.fields['Referral Count'] as number) ?? 0,
+          commissionOwed: (r.fields['Commission Owed'] as number) ?? 0,
+          commissionPaid: (r.fields['Commission Paid'] as number) ?? 0,
+          status: (r.fields['Status'] as string) ?? '',
+        });
+      }
+
+      offset = data.offset;
+    } while (offset);
+
+    return records;
+  } catch (err) {
+    console.error('getPartnerRecords error:', err);
+    return SAMPLE_PARTNER_RECORDS;
+  }
+}
+
+const CPR_BASE_ID = process.env.AIRTABLE_CPR_BASE_ID;
+const CPR_ATHLETES_TABLE = 'Athletes';
+
+export interface CPRAthleteRecord {
+  athleteName: string;
+  status: string;
+  dateSubmitted: string;
+}
+
+const SAMPLE_CPR_ATHLETES: CPRAthleteRecord[] = [
+  { athleteName: 'Sample Athlete 1', status: 'Active', dateSubmitted: '2026-05-01' },
+  { athleteName: 'Sample Athlete 2', status: 'Pending', dateSubmitted: '2026-05-20' },
+];
+
+export async function getCPRAthletes(): Promise<CPRAthleteRecord[]> {
+  if (!process.env.AIRTABLE_API_KEY || !CPR_BASE_ID) return SAMPLE_CPR_ATHLETES;
+
+  try {
+    const records: CPRAthleteRecord[] = [];
+    let offset: string | undefined;
+
+    do {
+      const params = new URLSearchParams({ pageSize: '100' });
+      if (offset) params.set('offset', offset);
+
+      const res = await fetch(
+        `https://api.airtable.com/v0/${CPR_BASE_ID}/${encodeURIComponent(CPR_ATHLETES_TABLE)}?${params}`,
+        { headers: authHeaders(), cache: 'no-store' }
+      );
+
+      if (!res.ok) {
+        const detail = await res.text();
+        console.error('getCPRAthletes fetch failed:', detail);
+        return SAMPLE_CPR_ATHLETES;
+      }
+
+      const data = (await res.json()) as {
+        records: { fields: Record<string, unknown> }[];
+        offset?: string;
+      };
+
+      for (const r of data.records) {
+        records.push({
+          athleteName: (r.fields['Athlete Name'] as string) ?? '',
+          status: (r.fields['Status'] as string) ?? '',
+          dateSubmitted: (r.fields['Date Submitted'] as string) ?? '',
+        });
+      }
+
+      offset = data.offset;
+    } while (offset);
+
+    return records;
+  } catch (err) {
+    console.error('getCPRAthletes error:', err);
+    return SAMPLE_CPR_ATHLETES;
+  }
+}
+
+const BROTHERHUB_BASE_ID = process.env.AIRTABLE_BROTHERHUB_BASE_ID;
+const BROTHERHUB_CHAPTERS_TABLE = 'Chapters';
+
+export interface BrotherHubChapterRecord {
+  chapterName: string;
+  memberCount: number;
+  status: string;
+}
+
+const SAMPLE_BROTHERHUB_CHAPTERS: BrotherHubChapterRecord[] = [
+  { chapterName: 'Sample Chapter Alpha', memberCount: 18, status: 'Active' },
+  { chapterName: 'Sample Chapter Beta', memberCount: 9, status: 'Active' },
+];
+
+export async function getBrotherHubChapters(): Promise<BrotherHubChapterRecord[]> {
+  if (!process.env.AIRTABLE_API_KEY || !BROTHERHUB_BASE_ID) return SAMPLE_BROTHERHUB_CHAPTERS;
+
+  try {
+    const records: BrotherHubChapterRecord[] = [];
+    let offset: string | undefined;
+
+    do {
+      const params = new URLSearchParams({ pageSize: '100' });
+      if (offset) params.set('offset', offset);
+
+      const res = await fetch(
+        `https://api.airtable.com/v0/${BROTHERHUB_BASE_ID}/${encodeURIComponent(BROTHERHUB_CHAPTERS_TABLE)}?${params}`,
+        { headers: authHeaders(), cache: 'no-store' }
+      );
+
+      if (!res.ok) {
+        const detail = await res.text();
+        console.error('getBrotherHubChapters fetch failed:', detail);
+        return SAMPLE_BROTHERHUB_CHAPTERS;
+      }
+
+      const data = (await res.json()) as {
+        records: { fields: Record<string, unknown> }[];
+        offset?: string;
+      };
+
+      for (const r of data.records) {
+        records.push({
+          chapterName: (r.fields['Chapter Name'] as string) ?? '',
+          memberCount: (r.fields['Member Count'] as number) ?? 0,
+          status: (r.fields['Status'] as string) ?? '',
+        });
+      }
+
+      offset = data.offset;
+    } while (offset);
+
+    return records;
+  } catch (err) {
+    console.error('getBrotherHubChapters error:', err);
+    return SAMPLE_BROTHERHUB_CHAPTERS;
   }
 }
