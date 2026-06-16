@@ -114,19 +114,29 @@ export async function POST(req: NextRequest) {
 
     console.log('[assessment/submit] parsed body:', JSON.stringify(body));
 
-    const businessName   = String(body.businessName ?? '').trim();
-    const contactName    = String(body.contactName ?? '').trim();
-    const email          = String(body.email ?? '').trim();
-    const teamSizeLabel  = String(body.teamSizeLabel ?? '');
-    const revenueRange   = String(body.revenueRange ?? '');
-    const currentSystems = String(body.currentSystems ?? '').trim();
-    const operationalChallenges = Array.isArray(body.operationalChallenges)
-      ? (body.operationalChallenges as string[])
-      : [];
-    const growthGoals         = String(body.growthGoals ?? '').trim();
-    const capacityConstraints = String(body.capacityConstraints ?? '').trim();
+    // Bundled into one object (see note below on the `scope` object) rather
+    // than bare sequential consts, for the same Turbopack-safety reason.
+    const input = {
+      businessName: String(body.businessName ?? '').trim(),
+      contactName: String(body.contactName ?? '').trim(),
+      email: String(body.email ?? '').trim(),
+      teamSizeLabel: String(body.teamSizeLabel ?? ''),
+      revenueRange: String(body.revenueRange ?? ''),
+      currentSystems: String(body.currentSystems ?? '').trim(),
+      operationalChallenges: Array.isArray(body.operationalChallenges)
+        ? (body.operationalChallenges as string[])
+        : [],
+      growthGoals: String(body.growthGoals ?? '').trim(),
+      capacityConstraints: String(body.capacityConstraints ?? '').trim(),
+    };
 
-    if (!businessName || !contactName || !email || !teamSizeLabel || !revenueRange) {
+    if (
+      !input.businessName ||
+      !input.contactName ||
+      !input.email ||
+      !input.teamSizeLabel ||
+      !input.revenueRange
+    ) {
       return NextResponse.json(
         { ok: false, error: 'Required fields are missing.' },
         { status: 400 }
@@ -134,33 +144,39 @@ export async function POST(req: NextRequest) {
     }
 
     // Derive all scope values from the prospect's answers.
-    const teamSize           = mapTeamSize(teamSizeLabel);
-    const workflowCount      = deriveWorkflowCount(teamSizeLabel);
-    const userCount          = deriveUserCount(teamSizeLabel);
-    const dashboardRequired  = deriveDashboardRequired(teamSizeLabel);
-    const portalRequired     = derivePortalRequired(teamSizeLabel);
-    const businessComplexity = deriveComplexity(revenueRange);
-    const systemsCount       = deriveSystemsCount(currentSystems);
-    const integrationCount   = systemsCount;
+    // Bundled into one object and accessed via dot-notation everywhere below
+    // (never destructured into bare identifiers) to avoid a Turbopack
+    // production-build bug where bare local consts referenced only through
+    // object-literal shorthand across multiple call sites get dropped,
+    // producing "X is not defined" at runtime despite valid source.
+    const scope = {
+      teamSize: mapTeamSize(input.teamSizeLabel),
+      workflowCount: deriveWorkflowCount(input.teamSizeLabel),
+      userCount: deriveUserCount(input.teamSizeLabel),
+      dashboardRequired: deriveDashboardRequired(input.teamSizeLabel),
+      portalRequired: derivePortalRequired(input.teamSizeLabel),
+      businessComplexity: deriveComplexity(input.revenueRange),
+      systemsCount: deriveSystemsCount(input.currentSystems),
+    };
 
-    const challengeIds = mapChallengeLabelsToIds(operationalChallenges);
+    const challengeIds = mapChallengeLabelsToIds(input.operationalChallenges);
 
     const analysis = analyzeAssessment({
-      teamSize,
-      revenueRange: mapRevenueRange(revenueRange),
-      systemsCount,
+      teamSize: scope.teamSize,
+      revenueRange: mapRevenueRange(input.revenueRange),
+      systemsCount: scope.systemsCount,
       operationalChallenges: challengeIds,
-      complexity: mapComplexity(businessComplexity),
+      complexity: mapComplexity(scope.businessComplexity),
     });
 
     const pricing = calculateFee({
       projectType: analysis.recommendedProjectType,
-      workflowCount,
+      workflowCount: scope.workflowCount,
       automationCount: 0,
-      integrationCount,
-      dashboardRequired,
-      portalRequired,
-      userCount,
+      integrationCount: scope.systemsCount,
+      dashboardRequired: scope.dashboardRequired,
+      portalRequired: scope.portalRequired,
+      userCount: scope.userCount,
     });
 
     const assessmentId = `ASSESS-${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
@@ -168,9 +184,9 @@ export async function POST(req: NextRequest) {
 
     const proposalResult = await createProposalRecord({
       proposalId,
-      businessName,
-      contactName,
-      email,
+      businessName: input.businessName,
+      contactName: input.contactName,
+      email: input.email,
       status: 'Pending Review',
       recommendedProjectType: analysis.recommendedProjectType,
       projectTypeLabel:       pricing.projectTypeLabel,
@@ -186,23 +202,23 @@ export async function POST(req: NextRequest) {
 
     const assessmentResult = await createAssessmentRecord({
       assessmentId,
-      businessName,
-      contactName,
-      email,
-      teamSize,
-      revenueRange,
-      currentSystems,
-      systemsCount,
-      operationalChallenges,
-      growthGoals,
-      capacityConstraints,
-      workflowCount,
+      businessName: input.businessName,
+      contactName: input.contactName,
+      email: input.email,
+      teamSize: scope.teamSize,
+      revenueRange: input.revenueRange,
+      currentSystems: input.currentSystems,
+      systemsCount: scope.systemsCount,
+      operationalChallenges: input.operationalChallenges,
+      growthGoals: input.growthGoals,
+      capacityConstraints: input.capacityConstraints,
+      workflowCount: scope.workflowCount,
       automationCount: 0,
-      integrationCount,
-      dashboardRequired,
-      portalRequired,
-      userCount,
-      businessComplexity,
+      integrationCount: scope.systemsCount,
+      dashboardRequired: scope.dashboardRequired,
+      portalRequired: scope.portalRequired,
+      userCount: scope.userCount,
+      businessComplexity: scope.businessComplexity,
       linkedProposalId: proposalResult.recordId,
     });
 
@@ -215,19 +231,19 @@ export async function POST(req: NextRequest) {
 
     try {
       await sendAssessmentAdminNotification({
-        businessName,
-        contactName,
-        email,
-        teamSize,
-        revenueRange,
-        operationalChallenges,
-        workflowCount,
+        businessName: input.businessName,
+        contactName: input.contactName,
+        email: input.email,
+        teamSize: scope.teamSize,
+        revenueRange: input.revenueRange,
+        operationalChallenges: input.operationalChallenges,
+        workflowCount: scope.workflowCount,
         automationCount: 0,
-        integrationCount,
-        dashboardRequired,
-        portalRequired,
-        userCount,
-        businessComplexity,
+        integrationCount: scope.systemsCount,
+        dashboardRequired: scope.dashboardRequired,
+        portalRequired: scope.portalRequired,
+        userCount: scope.userCount,
+        businessComplexity: scope.businessComplexity,
         capacityScore:          analysis.capacityScore,
         scoreBand:              analysis.scoreBand,
         primaryConstraint:      analysis.primaryConstraint,
