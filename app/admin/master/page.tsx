@@ -250,7 +250,7 @@ export default async function MasterPortalPage() {
       <div className="bg-white border-b border-neutral-200 px-6 py-8">
         <div className="max-w-6xl mx-auto flex items-center justify-between flex-wrap gap-4">
           <div className="flex items-center gap-4">
-            <img src="/images/ea-logo.png" alt="Efficiency Architects" style={{ height: '48px', width: 'auto' }} />
+            <img src="/images/ea-logo-hd.png" alt="Efficiency Architects" style={{ height: '60px', width: 'auto' }} />
             <div>
               <h2 className="text-2xl font-extrabold" style={{ color: NAVY }}>
                 EA Master Control
