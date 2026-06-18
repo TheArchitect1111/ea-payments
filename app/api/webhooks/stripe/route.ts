@@ -135,7 +135,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
         if (portalResult.username && portalResult.tempPassword) {
           tempCredentials =
             `Your portal login credentials: Email: ${portalResult.username} | Temporary Password: ${portalResult.tempPassword}` +
-            ' — Log in using the button above. Contact us to update your password at any time.';
+            ' Log in using the button above. Contact us to update your password at any time.';
         }
       } else {
         console.error('Portal access creation failed for session', session.id, ':', portalResult.error);

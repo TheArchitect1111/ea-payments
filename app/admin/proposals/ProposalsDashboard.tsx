@@ -12,7 +12,8 @@ type ProposalStatus =
   | 'Sent'
   | 'Rejected'
   | 'Discovery Call Requested'
-  | 'Approved & Paid';
+  | 'Approved & Paid'
+  | 'Complete';
 
 const ALL_STATUSES: ProposalStatus[] = [
   'Pending Review',
@@ -21,6 +22,7 @@ const ALL_STATUSES: ProposalStatus[] = [
   'Rejected',
   'Discovery Call Requested',
   'Approved & Paid',
+  'Complete',
 ];
 
 const STATUS_STYLES: Record<string, { bg: string; color: string }> = {
@@ -30,6 +32,7 @@ const STATUS_STYLES: Record<string, { bg: string; color: string }> = {
   'Rejected':                 { bg: '#FEF2F2', color: '#991B1B' },
   'Discovery Call Requested': { bg: '#F5F3FF', color: '#5B21B6' },
   'Approved & Paid':          { bg: '#F0FDF4', color: '#166534' },
+  'Complete':                 { bg: '#F8F6F2', color: '#1B2B4D' },
 };
 
 function fmt(n: number): string {
@@ -174,6 +177,19 @@ export default function ProposalsDashboard({ initialData }: Props) {
         prev.map((p) => (p.id === proposal.id ? { ...p, scopeSummary: scope } : p))
       );
     }
+  }
+
+  async function handleMarkComplete(proposal: ProposalWithAssessment) {
+    const ok = await callPatch(proposal, { action: 'mark_complete' });
+    if (ok) {
+      setProposals((prev) =>
+        prev.map((p) => (p.id === proposal.id ? { ...p, status: 'Complete' } : p))
+      );
+    }
+  }
+
+  async function handleSendReveal(proposal: ProposalWithAssessment) {
+    await callPatch(proposal, { action: 'send_reveal' });
   }
 
   function updateEdit(id: string, field: keyof EditState, value: string) {
@@ -359,6 +375,26 @@ export default function ProposalsDashboard({ initialData }: Props) {
                           style={{ backgroundColor: '#991B1B', color: '#FFFFFF' }}
                         >
                           Reject
+                        </button>
+                      )}
+                      {proposal.status === 'Approved & Paid' && (
+                        <button
+                          disabled={isUpdating}
+                          onClick={() => handleMarkComplete(proposal)}
+                          className="px-3 py-1.5 text-xs font-bold uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed"
+                          style={{ backgroundColor: '#1B2B4D', color: '#FFFFFF' }}
+                        >
+                          Mark Complete
+                        </button>
+                      )}
+                      {proposal.status === 'Complete' && (
+                        <button
+                          disabled={isUpdating}
+                          onClick={() => handleSendReveal(proposal)}
+                          className="px-3 py-1.5 text-xs font-bold uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed"
+                          style={{ backgroundColor: '#C9A844', color: '#1B2B4D' }}
+                        >
+                          Approve &amp; Send Reveal
                         </button>
                       )}
                     </div>

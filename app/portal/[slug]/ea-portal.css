@@ -19,6 +19,25 @@
   flex-direction: column;
 }
 
+.ep-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.ep-update-link {
+  background: #C9A844;
+  color: #1B2B4D;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  text-decoration: none;
+  padding: 10px 14px;
+}
+
 .ep-header-label {
   font-size: 9px;
   font-weight: 700;
@@ -48,6 +67,90 @@
 
 .ep-logout:hover {
   color: #C9A844;
+}
+
+.ep-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(27, 43, 77, 0.82);
+}
+
+.ep-modal {
+  width: min(100%, 440px);
+  background: #FFFFFF;
+  border-top: 4px solid #C9A844;
+  padding: 30px;
+}
+
+.ep-modal-label {
+  margin: 0 0 8px;
+  color: #C9A844;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+.ep-modal-title {
+  margin: 0;
+  color: #1B2B4D;
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.ep-modal-copy {
+  margin: 12px 0 22px;
+  color: #4B5563;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.ep-form-label {
+  display: block;
+  margin: 14px 0 6px;
+  color: #4B5563;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.ep-form-input {
+  width: 100%;
+  border: 1px solid #D1D5DB;
+  padding: 12px;
+  color: #111827;
+  font-size: 14px;
+}
+
+.ep-form-error {
+  margin: 14px 0 0;
+  color: #991B1B;
+  font-size: 13px;
+}
+
+.ep-primary-button {
+  width: 100%;
+  margin-top: 18px;
+  border: 0;
+  background: #C9A844;
+  color: #1B2B4D;
+  padding: 14px 18px;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.ep-primary-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 /* MAIN */
@@ -166,6 +269,7 @@
 @media (max-width: 600px) {
   .ep-header {
     padding: 16px 20px;
+    align-items: flex-start;
   }
 
   .ep-main {

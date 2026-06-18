@@ -2,6 +2,7 @@ import { cookies } from 'next/headers';
 import { redirect, notFound } from 'next/navigation';
 import { verifySession, EA_PORTAL_COOKIE } from '@/lib/ea-portal-auth';
 import { getClientByPortalSlug } from '@/lib/airtable';
+import PasswordChangeModal from './PasswordChangeModal';
 import './ea-portal.css';
 
 export const dynamic = 'force-dynamic';
@@ -65,9 +66,12 @@ export default async function PortalPage({
           <span className="ep-header-label">Client Portal</span>
           <span className="ep-header-name">{brandName}</span>
         </div>
-        <a href="/api/portal/logout" className="ep-logout">
-          Sign Out
-        </a>
+        <div className="ep-header-actions">
+          <a href={`/portal/${slug}/updates`} className="ep-update-link">Update Requests</a>
+          <a href="/api/portal/logout" className="ep-logout">
+            Sign Out
+          </a>
+        </div>
       </header>
 
       <main className="ep-main">
@@ -141,6 +145,7 @@ export default async function PortalPage({
           </div>
         </div>
       </main>
+      {!client.passwordChanged && <PasswordChangeModal />}
     </div>
   );
 }

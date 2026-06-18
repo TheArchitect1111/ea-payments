@@ -32,6 +32,9 @@ export interface PortalClientRecord {
   paymentDate: string;
   portalAccessStatus: PortalAccessStatus;
   portalSlug: string;
+  passwordChanged: boolean;
+  passwordHash?: string;
+  tempPassword?: string;
 }
 
 function authHeaders(): Record<string, string> {
@@ -191,9 +194,87 @@ export async function getClientByPortalSlug(slug: string): Promise<PortalClientR
       paymentDate: (f['Payment Date'] as string) ?? '',
       portalAccessStatus: (f['Portal Access Status'] as PortalAccessStatus) ?? 'Pending',
       portalSlug: slug,
+      passwordChanged: Boolean(f['Password Changed']),
+      passwordHash: (f['Password Hash'] as string) || undefined,
+      tempPassword: (f['Temp Password'] as string) || undefined,
     };
   } catch {
     return null;
+  }
+}
+
+export async function getClientByEmail(email: string): Promise<PortalClientRecord | null> {
+  if (!process.env.AIRTABLE_API_KEY) return null;
+
+  const safe = email.toLowerCase().replace(/'/g, "\\'");
+  const formula = encodeURIComponent(`LOWER({Email})='${safe}'`);
+  const url = `https://api.airtable.com/v0/${BASE_ID}/${encodeURIComponent(TABLE)}?filterByFormula=${formula}&maxRecords=1`;
+
+  try {
+    const res = await fetch(url, { headers: authHeaders(), cache: 'no-store' });
+    if (!res.ok) return null;
+
+    const data = (await res.json()) as {
+      records?: { id: string; fields: Record<string, unknown> }[];
+    };
+    const rec = data.records?.[0];
+    if (!rec) return null;
+
+    const f = rec.fields;
+    return {
+      id: rec.id,
+      clientName: (f['Client Name'] as string) ?? '',
+      email: (f['Email'] as string) ?? '',
+      organization: (f['Organization'] as string) || undefined,
+      packagePurchased: (f['Package Purchased'] as AirtablePackage) ?? 'Capacity Assessment',
+      amountPaid: (f['Amount Paid'] as number) ?? 0,
+      paymentDate: (f['Payment Date'] as string) ?? '',
+      portalAccessStatus: (f['Portal Access Status'] as PortalAccessStatus) ?? 'Pending',
+      portalSlug: (f['Portal Slug'] as string) ?? '',
+      passwordChanged: Boolean(f['Password Changed']),
+      passwordHash: (f['Password Hash'] as string) || undefined,
+      tempPassword: (f['Temp Password'] as string) || undefined,
+    };
+  } catch {
+    return null;
+  }
+}
+
+export async function updateClientPassword(
+  recordId: string,
+  passwordHash: string
+): Promise<{ ok: boolean; error?: string }> {
+  if (!process.env.AIRTABLE_API_KEY) {
+    return { ok: false, error: 'AIRTABLE_API_KEY not configured.' };
+  }
+
+  try {
+    const res = await fetch(
+      `https://api.airtable.com/v0/${BASE_ID}/${encodeURIComponent(TABLE)}/${recordId}`,
+      {
+        method: 'PATCH',
+        headers: authHeaders(),
+        body: JSON.stringify({
+          fields: {
+            'Password Hash': passwordHash,
+            'Password Changed': true,
+            'Temp Password': '',
+          },
+          typecast: true,
+        }),
+      }
+    );
+
+    if (!res.ok) {
+      const detail = await res.text();
+      console.error('updateClientPassword PATCH failed:', detail);
+      return { ok: false, error: 'Failed to update password.' };
+    }
+
+    return { ok: true };
+  } catch (err) {
+    console.error('updateClientPassword error:', err);
+    return { ok: false, error: 'Unexpected error updating password.' };
   }
 }
 
@@ -352,7 +433,7 @@ export async function createAssessmentRecord(
 export async function validatePortalLogin(
   email: string,
   password: string
-): Promise<{ ok: boolean; slug?: string; error?: string }> {
+): Promise<{ ok: boolean; slug?: string; error?: string; passwordChanged?: boolean }> {
   if (!process.env.AIRTABLE_API_KEY) {
     return { ok: false, error: 'Not configured.' };
   }
@@ -373,10 +454,28 @@ export async function validatePortalLogin(
 
     const f = rec.fields;
     const storedPassword = (f['Temp Password'] as string) ?? '';
+    const storedHash = (f['Password Hash'] as string) ?? '';
+    const passwordChanged = Boolean(f['Password Changed']);
     const portalSlug = (f['Portal Slug'] as string) ?? '';
     const accessStatus = (f['Portal Access Status'] as PortalAccessStatus) ?? 'Pending';
 
-    if (!storedPassword || storedPassword !== password) {
+    if (passwordChanged) {
+      const crypto = await import('node:crypto');
+      let matches = false;
+      if (storedHash.startsWith('scrypt$')) {
+        const [, salt, expected] = storedHash.split('$');
+        if (salt && expected) {
+          const attempted = crypto.scryptSync(password, salt, 64).toString('hex');
+          matches = expected === attempted;
+        }
+      } else {
+        const attemptedHash = crypto.createHash('sha256').update(password).digest('hex');
+        matches = storedHash === attemptedHash;
+      }
+      if (!storedHash || !matches) {
+        return { ok: false, error: 'Invalid credentials.' };
+      }
+    } else if (!storedPassword || storedPassword !== password) {
       return { ok: false, error: 'Invalid credentials.' };
     }
     if (accessStatus === 'Suspended') {
@@ -386,7 +485,7 @@ export async function validatePortalLogin(
       return { ok: false, error: 'Portal not yet provisioned. Please contact support.' };
     }
 
-    return { ok: true, slug: portalSlug };
+    return { ok: true, slug: portalSlug, passwordChanged };
   } catch {
     return { ok: false, error: 'Unexpected error. Please try again.' };
   }
@@ -593,6 +692,368 @@ export async function updateProposal(
   } catch (err) {
     console.error('updateProposal error:', err);
     return { ok: false, error: 'Unexpected error updating proposal.' };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Content Command Center
+// ---------------------------------------------------------------------------
+
+const CONTENT_REQUESTS_TABLE =
+  process.env.AIRTABLE_CONTENT_REQUESTS_TABLE_ID ?? 'Content Requests';
+const ENHANCEMENT_REQUESTS_TABLE =
+  process.env.AIRTABLE_ENHANCEMENT_REQUESTS_TABLE_ID ?? 'Enhancement Requests';
+
+export interface ContentRequestRecord {
+  id: string;
+  requestId: string;
+  clientRecordId?: string;
+  organizationName: string;
+  requestType: string;
+  pageLocation?: string;
+  title: string;
+  description?: string;
+  content?: string;
+  imageUrl?: string;
+  videoLink?: string;
+  documentUrl?: string;
+  priority: string;
+  requestedPublishDate?: string;
+  additionalNotes?: string;
+  status: string;
+  aiAnalysis?: string;
+  aiRoutingSuggestion?: string;
+  versionNumber?: number;
+  dateSubmitted?: string;
+  datePublished?: string;
+  submittedBy?: string;
+}
+
+export interface EnhancementRequestRecord {
+  id: string;
+  enhancementId: string;
+  clientRecordId?: string;
+  organizationName: string;
+  enhancementType: string;
+  description: string;
+  businessGoal: string;
+  aiLevelAssessment?: string;
+  aiEstimatedFeeRange?: string;
+  status: string;
+  dateSubmitted?: string;
+  notes?: string;
+}
+
+function firstLinkedId(value: unknown): string | undefined {
+  return Array.isArray(value) && typeof value[0] === 'string' ? value[0] : undefined;
+}
+
+function mapContentRequest(record: {
+  id: string;
+  createdTime?: string;
+  fields: Record<string, unknown>;
+}): ContentRequestRecord {
+  const f = record.fields;
+  return {
+    id: record.id,
+    requestId: String(f['Request ID'] ?? record.id),
+    clientRecordId: firstLinkedId(f['Client Record']),
+    organizationName: (f['Organization Name'] as string) ?? '',
+    requestType: (f['Request Type'] as string) ?? '',
+    pageLocation: (f['Page Location'] as string) || undefined,
+    title: (f['Title'] as string) ?? '',
+    description: (f['Description'] as string) || undefined,
+    content: (f['Content'] as string) || undefined,
+    imageUrl: (f['Image URL'] as string) || undefined,
+    videoLink: (f['Video Link'] as string) || undefined,
+    documentUrl: (f['Document URL'] as string) || undefined,
+    priority: (f['Priority'] as string) ?? 'Normal',
+    requestedPublishDate: (f['Requested Publish Date'] as string) || undefined,
+    additionalNotes: (f['Additional Notes'] as string) || undefined,
+    status: (f['Status'] as string) ?? 'Pending Review',
+    aiAnalysis: (f['AI Analysis'] as string) || undefined,
+    aiRoutingSuggestion: (f['AI Routing Suggestion'] as string) || undefined,
+    versionNumber: (f['Version Number'] as number) || undefined,
+    dateSubmitted: (f['Date Submitted'] as string) || record.createdTime,
+    datePublished: (f['Date Published'] as string) || undefined,
+    submittedBy: (f['Submitted By'] as string) || undefined,
+  };
+}
+
+function mapEnhancementRequest(record: {
+  id: string;
+  createdTime?: string;
+  fields: Record<string, unknown>;
+}): EnhancementRequestRecord {
+  const f = record.fields;
+  return {
+    id: record.id,
+    enhancementId: String(f['Enhancement ID'] ?? record.id),
+    clientRecordId: firstLinkedId(f['Client Record']),
+    organizationName: (f['Organization Name'] as string) ?? '',
+    enhancementType: (f['Enhancement Type'] as string) ?? '',
+    description: (f['Description'] as string) ?? '',
+    businessGoal: (f['Business Goal'] as string) ?? '',
+    aiLevelAssessment: (f['AI Level Assessment'] as string) || undefined,
+    aiEstimatedFeeRange: (f['AI Estimated Fee Range'] as string) || undefined,
+    status: (f['Status'] as string) ?? 'Submitted',
+    dateSubmitted: (f['Date Submitted'] as string) || record.createdTime,
+    notes: (f['Notes'] as string) || undefined,
+  };
+}
+
+async function listTableRecords<T>(
+  table: string,
+  mapper: (record: { id: string; createdTime?: string; fields: Record<string, unknown> }) => T,
+  filterByFormula?: string
+): Promise<T[]> {
+  if (!process.env.AIRTABLE_API_KEY) return [];
+
+  const records: T[] = [];
+  let offset: string | undefined;
+
+  do {
+    const params = new URLSearchParams({ pageSize: '100' });
+    if (offset) params.set('offset', offset);
+    if (filterByFormula) params.set('filterByFormula', filterByFormula);
+
+    const res = await fetch(
+      `https://api.airtable.com/v0/${BASE_ID}/${encodeURIComponent(table)}?${params}`,
+      { headers: authHeaders(), cache: 'no-store' }
+    );
+
+    if (!res.ok) {
+      const detail = await res.text();
+      console.error(`listTableRecords ${table} failed:`, detail);
+      return records;
+    }
+
+    const data = (await res.json()) as {
+      records: { id: string; createdTime?: string; fields: Record<string, unknown> }[];
+      offset?: string;
+    };
+
+    records.push(...data.records.map(mapper));
+    offset = data.offset;
+  } while (offset);
+
+  return records;
+}
+
+export async function getContentRequestsForClient(
+  clientRecordId: string
+): Promise<ContentRequestRecord[]> {
+  const requests = await listTableRecords(CONTENT_REQUESTS_TABLE, mapContentRequest);
+  return requests.filter((request) => request.clientRecordId === clientRecordId);
+}
+
+export async function getAllContentRequests(): Promise<ContentRequestRecord[]> {
+  return listTableRecords(CONTENT_REQUESTS_TABLE, mapContentRequest);
+}
+
+export async function createContentRequest(record: {
+  clientRecordId: string;
+  organizationName: string;
+  requestType: string;
+  pageLocation?: string;
+  title: string;
+  description?: string;
+  content?: string;
+  imageUrl?: string;
+  videoLink?: string;
+  documentUrl?: string;
+  priority?: string;
+  requestedPublishDate?: string;
+  additionalNotes?: string;
+  status?: string;
+  aiAnalysis?: string;
+  submittedBy?: string;
+}): Promise<{ ok: boolean; error?: string; recordId?: string; requestId?: string }> {
+  if (!process.env.AIRTABLE_API_KEY) {
+    return { ok: false, error: 'AIRTABLE_API_KEY not configured.' };
+  }
+
+  const fields: Record<string, unknown> = {
+    'Client Record': [record.clientRecordId],
+    'Organization Name': record.organizationName,
+    'Request Type': record.requestType,
+    'Title': record.title,
+    'Priority': record.priority ?? 'Normal',
+    'Status': record.status ?? 'Pending Review',
+    'Version Number': 1,
+  };
+
+  if (record.pageLocation) fields['Page Location'] = record.pageLocation;
+  if (record.description) fields['Description'] = record.description;
+  if (record.content) fields['Content'] = record.content;
+  if (record.imageUrl) fields['Image URL'] = record.imageUrl;
+  if (record.videoLink) fields['Video Link'] = record.videoLink;
+  if (record.documentUrl) fields['Document URL'] = record.documentUrl;
+  if (record.requestedPublishDate) fields['Requested Publish Date'] = record.requestedPublishDate;
+  if (record.additionalNotes) fields['Additional Notes'] = record.additionalNotes;
+  if (record.aiAnalysis) fields['AI Analysis'] = record.aiAnalysis;
+  if (record.submittedBy) fields['Submitted By'] = record.submittedBy;
+
+  try {
+    const res = await fetch(
+      `https://api.airtable.com/v0/${BASE_ID}/${encodeURIComponent(CONTENT_REQUESTS_TABLE)}`,
+      {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({ records: [{ fields }], typecast: true }),
+      }
+    );
+
+    if (!res.ok) {
+      const detail = await res.text();
+      console.error('createContentRequest POST failed:', detail);
+      return { ok: false, error: 'Failed to create content request.' };
+    }
+
+    const data = (await res.json()) as {
+      records?: { id: string; fields: Record<string, unknown> }[];
+    };
+    const created = data.records?.[0];
+    return {
+      ok: true,
+      recordId: created?.id,
+      requestId: created ? String(created.fields['Request ID'] ?? created.id) : undefined,
+    };
+  } catch (err) {
+    console.error('createContentRequest error:', err);
+    return { ok: false, error: 'Unexpected error creating content request.' };
+  }
+}
+
+export async function updateContentRequest(
+  recordId: string,
+  patch: { status?: string; datePublished?: string }
+): Promise<{ ok: boolean; error?: string }> {
+  if (!process.env.AIRTABLE_API_KEY) {
+    return { ok: false, error: 'AIRTABLE_API_KEY not configured.' };
+  }
+
+  const fields: Record<string, unknown> = {};
+  if (patch.status) fields['Status'] = patch.status;
+  if (patch.datePublished) fields['Date Published'] = patch.datePublished;
+
+  try {
+    const res = await fetch(
+      `https://api.airtable.com/v0/${BASE_ID}/${encodeURIComponent(CONTENT_REQUESTS_TABLE)}/${recordId}`,
+      {
+        method: 'PATCH',
+        headers: authHeaders(),
+        body: JSON.stringify({ fields, typecast: true }),
+      }
+    );
+
+    if (!res.ok) {
+      const detail = await res.text();
+      console.error('updateContentRequest PATCH failed:', detail);
+      return { ok: false, error: 'Failed to update content request.' };
+    }
+
+    return { ok: true };
+  } catch (err) {
+    console.error('updateContentRequest error:', err);
+    return { ok: false, error: 'Unexpected error updating content request.' };
+  }
+}
+
+export async function getAllEnhancementRequests(): Promise<EnhancementRequestRecord[]> {
+  return listTableRecords(ENHANCEMENT_REQUESTS_TABLE, mapEnhancementRequest);
+}
+
+export async function createEnhancementRequest(record: {
+  clientRecordId: string;
+  organizationName: string;
+  enhancementType: string;
+  description: string;
+  businessGoal: string;
+  aiLevelAssessment?: string;
+  aiEstimatedFeeRange?: string;
+  notes?: string;
+}): Promise<{ ok: boolean; error?: string; recordId?: string; enhancementId?: string }> {
+  if (!process.env.AIRTABLE_API_KEY) {
+    return { ok: false, error: 'AIRTABLE_API_KEY not configured.' };
+  }
+
+  const fields: Record<string, unknown> = {
+    'Client Record': [record.clientRecordId],
+    'Organization Name': record.organizationName,
+    'Enhancement Type': record.enhancementType,
+    'Description': record.description,
+    'Business Goal': record.businessGoal,
+    'Status': 'Submitted',
+  };
+
+  if (record.aiLevelAssessment) fields['AI Level Assessment'] = record.aiLevelAssessment;
+  if (record.aiEstimatedFeeRange) fields['AI Estimated Fee Range'] = record.aiEstimatedFeeRange;
+  if (record.notes) fields['Notes'] = record.notes;
+
+  try {
+    const res = await fetch(
+      `https://api.airtable.com/v0/${BASE_ID}/${encodeURIComponent(ENHANCEMENT_REQUESTS_TABLE)}`,
+      {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({ records: [{ fields }], typecast: true }),
+      }
+    );
+
+    if (!res.ok) {
+      const detail = await res.text();
+      console.error('createEnhancementRequest POST failed:', detail);
+      return { ok: false, error: 'Failed to create enhancement request.' };
+    }
+
+    const data = (await res.json()) as {
+      records?: { id: string; fields: Record<string, unknown> }[];
+    };
+    const created = data.records?.[0];
+    return {
+      ok: true,
+      recordId: created?.id,
+      enhancementId: created ? String(created.fields['Enhancement ID'] ?? created.id) : undefined,
+    };
+  } catch (err) {
+    console.error('createEnhancementRequest error:', err);
+    return { ok: false, error: 'Unexpected error creating enhancement request.' };
+  }
+}
+
+export async function updateEnhancementRequest(
+  recordId: string,
+  patch: { status?: string; notes?: string }
+): Promise<{ ok: boolean; error?: string }> {
+  if (!process.env.AIRTABLE_API_KEY) {
+    return { ok: false, error: 'AIRTABLE_API_KEY not configured.' };
+  }
+
+  const fields: Record<string, unknown> = {};
+  if (patch.status) fields['Status'] = patch.status;
+  if (patch.notes !== undefined) fields['Notes'] = patch.notes;
+
+  try {
+    const res = await fetch(
+      `https://api.airtable.com/v0/${BASE_ID}/${encodeURIComponent(ENHANCEMENT_REQUESTS_TABLE)}/${recordId}`,
+      {
+        method: 'PATCH',
+        headers: authHeaders(),
+        body: JSON.stringify({ fields, typecast: true }),
+      }
+    );
+
+    if (!res.ok) {
+      const detail = await res.text();
+      console.error('updateEnhancementRequest PATCH failed:', detail);
+      return { ok: false, error: 'Failed to update enhancement request.' };
+    }
+
+    return { ok: true };
+  } catch (err) {
+    console.error('updateEnhancementRequest error:', err);
+    return { ok: false, error: 'Unexpected error updating enhancement request.' };
   }
 }
 

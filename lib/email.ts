@@ -282,23 +282,42 @@ export async function sendWelcomeEmail(
 
   const tempCredentials =
     data.tempCredentials ??
-    'Our team will send your portal access details in a separate email once your account is provisioned.';
+    'Your portal is being prepared. You will receive access details as soon as they are ready.';
 
-  const nextSteps = nextStepsForPackage(data.packageName);
-  const year = new Date().getFullYear();
+  const firstName = data.clientName.split(' ')[0] || data.clientName;
+  const bodyHtml = `
+    <p style="margin:0 0 16px;font-size:15px;color:#1A1A2E;line-height:1.7;">You are in, ${escHtml(firstName)}. We are excited to begin this work with you.</p>
+    <p style="margin:0 0 22px;font-size:15px;color:#1A1A2E;line-height:1.7;">A reminder of what you are getting: <strong>${escHtml(data.packageName)}</strong>, full project guidance, launch support, and access to your client portal.</p>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #E4E4E4;margin-bottom:22px;">
+      <tr><td style="padding:12px 16px;font-size:12px;font-weight:700;color:#555;">Within 24 hours</td><td style="padding:12px 16px;font-size:14px;color:#1A1A2E;">You receive your project timeline and milestone plan.</td></tr>
+      <tr><td style="padding:12px 16px;font-size:12px;font-weight:700;color:#555;">Week 1</td><td style="padding:12px 16px;font-size:14px;color:#1A1A2E;">Architecture and design begin.</td></tr>
+      <tr><td style="padding:12px 16px;font-size:12px;font-weight:700;color:#555;">Week 2+</td><td style="padding:12px 16px;font-size:14px;color:#1A1A2E;">Build and integration move forward.</td></tr>
+      <tr><td style="padding:12px 16px;font-size:12px;font-weight:700;color:#555;">Final</td><td style="padding:12px 16px;font-size:14px;color:#1A1A2E;">Review, approval, training, and launch.</td></tr>
+    </table>
+    <p style="margin:0 0 14px;font-size:14px;font-weight:700;color:#1B2B4D;">What to expect from us.</p>
+    <ul style="margin:0 0 22px;padding-left:20px;font-size:14px;color:#1A1A2E;line-height:1.7;">
+      <li>Responsive communication.</li>
+      <li>Clear visibility into each milestone.</li>
+      <li>No surprises before anything launches.</li>
+    </ul>
+    <div style="background-color:#F8F6F2;border-left:4px solid #C9A844;padding:18px 20px;">
+      <p style="margin:0 0 8px;font-size:12px;font-weight:700;color:#1B2B4D;">Portal Access</p>
+      <p style="margin:0;font-size:13px;color:#555;line-height:1.7;">${escHtml(tempCredentials)}</p>
+      <p style="margin:10px 0 0;font-size:12px;color:#777;">This is a temporary password. You will be prompted to create a new one on your first login.</p>
+    </div>
+    <p style="margin:22px 0 0;font-size:13px;color:#555;line-height:1.7;">Questions? Reply to this email or reach us at <a href="mailto:${escHtml(supportEmail)}" style="color:#1B2B4D;text-decoration:underline;">${escHtml(supportEmail)}</a>.</p>`;
 
-  const html = buildWelcomeHtml({
-    clientName: data.clientName,
-    packageName: data.packageName,
-    portalLoginUrl: data.portalLoginUrl,
-    supportEmail,
-    tempCredentials,
-    nextSteps,
-    year,
-    platformName,
-  });
-
-  return resendEmail(data.email, `Welcome to ${platformName}`, html);
+  return resendEmail(
+    data.email,
+    `You are in, ${firstName}. Here is what happens next.`,
+    baseEmailShell({
+      title: 'You Are In',
+      eyebrow: platformName,
+      bodyHtml,
+      ctaLabel: 'Access My Portal',
+      ctaUrl: data.portalLoginUrl,
+    })
+  );
 }
 
 export async function sendAdminNotification(
@@ -711,9 +730,10 @@ function buildProposalHtml(proposal: ProposalWithAssessment): string {
 
   <tr>
     <td style="background-color:#1B2B4D;padding:20px 40px;text-align:center;">
-      <p style="margin:0;font-size:10px;color:#8896AF;letter-spacing:2px;text-transform:uppercase;">
+      <p style="margin:0 0 8px;font-size:10px;color:#8896AF;letter-spacing:2px;text-transform:uppercase;">
         Efficiency Architects &copy; ${year}
       </p>
+      <p style="margin:0;font-size:11px;color:#8896AF;"><a href="${escHtml(process.env.UNSUBSCRIBE_URL ?? '#')}" style="color:#8896AF;text-decoration:underline;">Unsubscribe</a></p>
     </td>
   </tr>
 
@@ -733,11 +753,236 @@ export async function sendProposalEmail(
 
   try {
     const html = buildProposalHtml(proposal);
-    const subject = `${proposal.businessName}, your capacity analysis is ready`;
+    const firstName = proposal.contactName.split(' ')[0] || proposal.contactName || 'there';
+    const subject = `${firstName}, here is what we found in your business.`;
     return resendEmail(proposal.email, subject, html);
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Unknown error building proposal email.';
     console.error('sendProposalEmail error:', err);
     return { ok: false, error: msg };
   }
+}
+
+function baseEmailShell(params: {
+  title: string;
+  eyebrow: string;
+  bodyHtml: string;
+  ctaLabel?: string;
+  ctaUrl?: string;
+}): string {
+  const year = new Date().getFullYear();
+  const cta = params.ctaLabel && params.ctaUrl
+    ? `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:28px 0 0;">
+        <tr><td style="background-color:#C9A844;border-radius:2px;">
+          <a href="${escHtml(params.ctaUrl)}" target="_blank" style="display:inline-block;padding:14px 28px;color:#1B2B4D;text-decoration:none;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;">${escHtml(params.ctaLabel)}</a>
+        </td></tr>
+      </table>`
+    : '';
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>${escHtml(params.title)}</title></head>
+<body style="margin:0;padding:0;background-color:#F8F6F2;font-family:Arial,Helvetica,sans-serif;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#F8F6F2;padding:36px 18px;">
+<tr><td>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:620px;margin:0 auto;background-color:#FFFFFF;">
+<tr><td style="background-color:#1B2B4D;padding:30px 36px;text-align:center;">
+  <p style="margin:0;color:#C9A844;font-size:10px;font-weight:700;letter-spacing:4px;text-transform:uppercase;">Efficiency Architects</p>
+  <h1 style="margin:10px 0 0;color:#FFFFFF;font-size:22px;font-weight:700;">${escHtml(params.title)}</h1>
+</td></tr>
+<tr><td style="padding:36px;">
+  <p style="margin:0 0 18px;color:#C9A844;font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;">${escHtml(params.eyebrow)}</p>
+  ${params.bodyHtml}
+  ${cta}
+</td></tr>
+<tr><td style="background-color:#1B2B4D;padding:20px 36px;text-align:center;">
+  <p style="margin:0 0 8px;font-size:10px;color:#8896AF;letter-spacing:2px;text-transform:uppercase;">Efficiency Architects &copy; ${year}</p>
+  <p style="margin:0;font-size:11px;color:#8896AF;"><a href="${escHtml(process.env.UNSUBSCRIBE_URL ?? '#')}" style="color:#8896AF;text-decoration:underline;">Unsubscribe</a></p>
+</td></tr>
+</table>
+</td></tr>
+</table>
+</body>
+</html>`;
+}
+
+export async function sendContentRequestConfirmation(data: {
+  email: string;
+  clientName: string;
+  requestId: string;
+  requestType: string;
+  title: string;
+  portalUrl: string;
+}): Promise<{ ok: boolean; error?: string }> {
+  const bodyHtml = `
+    <p style="margin:0 0 16px;font-size:15px;color:#1A1A2E;line-height:1.7;">Hi ${escHtml(data.clientName.split(' ')[0] || data.clientName)},</p>
+    <p style="margin:0 0 18px;font-size:15px;color:#1A1A2E;line-height:1.7;">We received your update request and it is now pending review.</p>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #E4E4E4;margin:22px 0;">
+      <tr><td style="padding:12px 16px;font-size:12px;font-weight:700;color:#555;">Request</td><td style="padding:12px 16px;font-size:14px;color:#1A1A2E;">${escHtml(data.requestId)}</td></tr>
+      <tr><td style="padding:12px 16px;font-size:12px;font-weight:700;color:#555;">Type</td><td style="padding:12px 16px;font-size:14px;color:#1A1A2E;">${escHtml(data.requestType)}</td></tr>
+      <tr><td style="padding:12px 16px;font-size:12px;font-weight:700;color:#555;">Title</td><td style="padding:12px 16px;font-size:14px;color:#1A1A2E;">${escHtml(data.title)}</td></tr>
+    </table>
+    <p style="margin:0;font-size:14px;color:#555;line-height:1.7;">We will review it and keep the status updated inside your portal.</p>`;
+
+  return resendEmail(
+    data.email,
+    `Your update request was received`,
+    baseEmailShell({
+      title: 'Update Request Received',
+      eyebrow: 'Content Command Center',
+      bodyHtml,
+      ctaLabel: 'Log In And Explore',
+      ctaUrl: data.portalUrl,
+    })
+  );
+}
+
+export async function sendEnhancementRequestConfirmation(data: {
+  email: string;
+  clientName: string;
+  portalUrl: string;
+}): Promise<{ ok: boolean; error?: string }> {
+  const bodyHtml = `
+    <p style="margin:0 0 16px;font-size:15px;color:#1A1A2E;line-height:1.7;">Hi ${escHtml(data.clientName.split(' ')[0] || data.clientName)},</p>
+    <p style="margin:0 0 18px;font-size:15px;color:#1A1A2E;line-height:1.7;">Your enhancement request has been received. We will review it and send you an estimate within 24 hours.</p>`;
+
+  return resendEmail(
+    data.email,
+    'Your enhancement request was received',
+    baseEmailShell({
+      title: 'Enhancement Request Received',
+      eyebrow: 'Next Step',
+      bodyHtml,
+      ctaLabel: 'Access My Portal',
+      ctaUrl: data.portalUrl,
+    })
+  );
+}
+
+export async function sendAssessmentConfirmationEmail(data: {
+  email: string;
+  contactName: string;
+  capacityScore: number;
+  scoreBand: string;
+  weeklyTimeRecovery: number;
+  opportunityLow: number;
+  opportunityHigh: number;
+  projectTypeLabel: string;
+  recommendedFee: number;
+  proposalId: string;
+}): Promise<{ ok: boolean; error?: string }> {
+  const baseUrl =
+    process.env.NEXT_PUBLIC_BASE_URL ?? 'https://ea-payments.vercel.app';
+  const proposalUrl = `${baseUrl}/proposal/${encodeURIComponent(data.proposalId)}`;
+  const supportEmail =
+    process.env.SUPPORT_EMAIL ?? 'freedom@efficiencyarchitects.online';
+  const firstName = data.contactName.split(' ')[0] || data.contactName;
+  const fmt = (n: number) =>
+    new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+    }).format(n);
+
+  const bandLabels: Record<string, string> = {
+    healthy: 'Your foundation is solid. There is meaningful room to grow and reclaim time.',
+    strained: 'Your business is carrying friction that is quietly costing you time, money, and energy every week.',
+    critical: 'Your operations have significant gaps that are actively limiting your growth and personal bandwidth.',
+    severe: 'Your business is at a point where the systems underneath it need to change for growth to be sustainable.',
+  };
+  const scoreInterpretation = bandLabels[data.scoreBand] ?? bandLabels.strained;
+
+  const bodyHtml = `
+    <p style="margin:0 0 18px;font-size:15px;color:#1A1A2E;line-height:1.7;">Hi ${escHtml(firstName)},</p>
+    <p style="margin:0 0 22px;font-size:15px;color:#1A1A2E;line-height:1.7;">What you are carrying right now is real. The hours, the manual work, the feeling that the business should be running more smoothly by now. We see it. And we can show you exactly where it is coming from.</p>
+
+    <p style="margin:0 0 10px;font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#1B2B4D;">Your Capacity Score</p>
+    <div style="background-color:#F8F6F2;border-left:4px solid #C9A844;padding:16px 18px;margin-bottom:22px;">
+      <p style="margin:0 0 6px;font-size:28px;font-weight:700;color:#1B2B4D;">${data.capacityScore} / 100</p>
+      <p style="margin:0;font-size:14px;color:#555;line-height:1.7;">${escHtml(scoreInterpretation)}</p>
+    </div>
+
+    <p style="margin:0 0 10px;font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#1B2B4D;">What Friction Is Costing You</p>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #E4E4E4;margin-bottom:22px;">
+      <tr><td style="padding:12px 16px;font-size:12px;font-weight:700;color:#555;">Annual Opportunity</td><td style="padding:12px 16px;font-size:14px;font-weight:700;color:#1B2B4D;">${fmt(data.opportunityLow)} to ${fmt(data.opportunityHigh)} per year</td></tr>
+      <tr><td style="padding:12px 16px;font-size:12px;font-weight:700;color:#555;">Time Recovery</td><td style="padding:12px 16px;font-size:14px;font-weight:700;color:#1B2B4D;">${data.weeklyTimeRecovery} hours per week</td></tr>
+    </table>
+
+    <p style="margin:0 0 10px;font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#1B2B4D;">Here Is What Becomes Possible</p>
+    <ul style="margin:0 0 22px;padding-left:20px;font-size:14px;color:#1A1A2E;line-height:1.9;">
+      <li>More time back in your week, consistently.</li>
+      <li>Lower operating costs through smarter systems.</li>
+      <li>Clearer visibility into what is actually happening in your business.</li>
+      <li>Growth that does not require you to work more hours to sustain it.</li>
+    </ul>
+
+    <p style="margin:0 0 10px;font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#1B2B4D;">Recommended Solution</p>
+    <div style="background-color:#F8F6F2;border:1px solid #E4E4E4;padding:16px 18px;margin-bottom:8px;">
+      <p style="margin:0 0 6px;font-size:15px;font-weight:700;color:#1B2B4D;">${escHtml(data.projectTypeLabel)}</p>
+      <p style="margin:0;font-size:24px;font-weight:700;color:#1B2B4D;">${fmt(data.recommendedFee)}</p>
+    </div>
+
+    <p style="margin:0 0 22px;font-size:13px;color:#777;line-height:1.7;">Your full analysis, including the specific areas we identified and exactly what we recommend, is ready for you now.</p>
+    <p style="margin:0;font-size:13px;color:#555;line-height:1.7;">Questions? Reply to this email or reach us at <a href="mailto:${escHtml(supportEmail)}" style="color:#1B2B4D;text-decoration:underline;">${escHtml(supportEmail)}</a>.</p>`;
+
+  return resendEmail(
+    data.email,
+    `${firstName}, here is what we found in your business.`,
+    baseEmailShell({
+      title: 'Your Capacity Analysis',
+      eyebrow: 'Here Is What We Found',
+      bodyHtml,
+      ctaLabel: 'See My Full Analysis',
+      ctaUrl: proposalUrl,
+    })
+  );
+}
+
+export async function sendInternalNotification(data: {
+  subject: string;
+  title: string;
+  body: string;
+}): Promise<{ ok: boolean; error?: string }> {
+  const to = process.env.ADMIN_NOTIFICATION_EMAIL ?? 'freedom@efficiencyarchitects.online';
+  const bodyHtml = `<p style="margin:0;font-size:15px;color:#1A1A2E;line-height:1.7;white-space:pre-wrap;">${escHtml(data.body)}</p>`;
+  return resendEmail(to, data.subject, baseEmailShell({ title: data.title, eyebrow: 'Internal Notice', bodyHtml }));
+}
+
+export async function sendRevealEmail(data: {
+  email: string;
+  firstName: string;
+  projectType: string;
+  deliverables: string[];
+  weeklyTimeRecovery: number;
+  annualCapacityUnlocked: number;
+  systemsAutomated: number;
+  revealUrl: string;
+}): Promise<{ ok: boolean; error?: string }> {
+  const fmt = (n: number) =>
+    new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0 }).format(n);
+  const deliverables = data.deliverables
+    .map((item) => `<li style="margin-bottom:8px;">${escHtml(item)}</li>`)
+    .join('');
+  const bodyHtml = `
+    <p style="margin:0 0 16px;font-size:15px;color:#1A1A2E;line-height:1.7;">${escHtml(data.firstName)}, your system is live. This is the moment all the planning has been leading to.</p>
+    <p style="margin:0 0 14px;font-size:14px;font-weight:700;color:#1B2B4D;">Here is what we built for you.</p>
+    <ul style="margin:0 0 22px;padding-left:20px;font-size:14px;color:#1A1A2E;line-height:1.7;">${deliverables}</ul>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #E4E4E4;">
+      <tr><td style="padding:12px 16px;font-size:12px;font-weight:700;color:#555;">Project Type</td><td style="padding:12px 16px;font-size:14px;color:#1A1A2E;">${escHtml(data.projectType)}</td></tr>
+      <tr><td style="padding:12px 16px;font-size:12px;font-weight:700;color:#555;">Weekly Time Recovered</td><td style="padding:12px 16px;font-size:14px;color:#1A1A2E;">${data.weeklyTimeRecovery} hours</td></tr>
+      <tr><td style="padding:12px 16px;font-size:12px;font-weight:700;color:#555;">Annual Capacity Unlocked</td><td style="padding:12px 16px;font-size:14px;color:#1A1A2E;">${fmt(data.annualCapacityUnlocked)}</td></tr>
+      <tr><td style="padding:12px 16px;font-size:12px;font-weight:700;color:#555;">Systems Automated</td><td style="padding:12px 16px;font-size:14px;color:#1A1A2E;">${data.systemsAutomated}</td></tr>
+    </table>`;
+
+  return resendEmail(
+    data.email,
+    `${data.firstName}, your system is live. Welcome to the other side.`,
+    baseEmailShell({
+      title: 'Your System Is Live',
+      eyebrow: 'Welcome To The Other Side',
+      bodyHtml,
+      ctaLabel: 'See Your New System',
+      ctaUrl: data.revealUrl,
+    })
+  );
 }

@@ -219,15 +219,12 @@ function ProposalContent({
               Click below to start your engagement. You will be taken to a secure
               checkout to confirm your investment and kick off the work.
             </p>
-            <form method="POST" action="/api/checkout/proposal">
-              <input type="hidden" name="proposalId" value={proposal.proposalId} />
-              <button
-                type="submit"
-                className="w-full bg-neutral-950 px-6 py-4 text-xs font-bold uppercase tracking-widest text-white hover:bg-neutral-800"
-              >
+            <a
+              href={`/commitment/${encodeURIComponent(proposal.proposalId)}`}
+              className="block w-full bg-neutral-950 px-6 py-4 text-xs font-bold uppercase tracking-widest text-white hover:bg-neutral-800"
+            >
                 Start My Transformation
-              </button>
-            </form>
+            </a>
             <p className="mt-4 text-xs text-neutral-400">
               Questions before you commit? Email us at{' '}
               <a

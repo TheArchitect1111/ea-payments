@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { verifyAdminSession, EA_ADMIN_COOKIE } from '@/lib/ea-admin-auth';
-import { updateProposal, getProposalByRecordId } from '@/lib/airtable';
-import { sendProposalEmail } from '@/lib/email';
+import { updateProposal, getProposalByRecordId, getClientByEmail } from '@/lib/airtable';
+import { sendInternalNotification, sendProposalEmail, sendRevealEmail } from '@/lib/email';
 
 export const dynamic = 'force-dynamic';
 
-type ProposalAction = 'approve' | 'reject' | 'discovery' | 'update_fee' | 'update_scope';
+type ProposalAction = 'approve' | 'reject' | 'discovery' | 'update_fee' | 'update_scope' | 'mark_complete' | 'send_reveal';
 
 interface PatchBody {
   action: ProposalAction;
@@ -20,6 +20,8 @@ const VALID_ACTIONS: ProposalAction[] = [
   'discovery',
   'update_fee',
   'update_scope',
+  'mark_complete',
+  'send_reveal',
 ];
 
 export async function PATCH(
@@ -85,6 +87,14 @@ export async function PATCH(
       }
       patch = { scopeSummary: body.scopeSummary };
       break;
+
+    case 'mark_complete':
+      patch = { status: 'Complete' };
+      break;
+
+    case 'send_reveal':
+      patch = { status: 'Complete' };
+      break;
   }
 
   const result = await updateProposal(id, patch);
@@ -113,6 +123,41 @@ export async function PATCH(
       console.error('sendProposalEmail error:', err);
     }
     return NextResponse.json({ ok: true, emailWarning });
+  }
+
+  if (body.action === 'mark_complete') {
+    const proposal = await getProposalByRecordId(id);
+    await sendInternalNotification({
+      subject: `Project complete for ${proposal?.businessName ?? id}`,
+      title: 'Project Complete',
+      body: `Project complete for ${proposal?.contactName ?? 'client'}. Review and approve the reveal email before it sends.`,
+    });
+    return NextResponse.json({ ok: true });
+  }
+
+  if (body.action === 'send_reveal') {
+    const proposal = await getProposalByRecordId(id);
+    if (!proposal) {
+      return NextResponse.json({ error: 'Proposal not found.' }, { status: 404 });
+    }
+    const baseUrl = process.env.REVEAL_BASE_URL ?? process.env.NEXT_PUBLIC_BASE_URL ?? 'https://ea-payments.vercel.app';
+    const client = await getClientByEmail(proposal.email);
+    const slug = client?.portalSlug || proposal.businessName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    await sendRevealEmail({
+      email: proposal.email,
+      firstName: proposal.contactName.split(' ')[0] || proposal.contactName,
+      projectType: proposal.projectTypeLabel || proposal.recommendedProjectType || 'Custom Solution',
+      deliverables: [
+        proposal.projectTypeLabel || proposal.recommendedProjectType || 'Custom Solution',
+        'Client portal access',
+        'Training and launch support',
+      ],
+      weeklyTimeRecovery: proposal.weeklyTimeRecovery,
+      annualCapacityUnlocked: proposal.opportunityHigh,
+      systemsAutomated: 1,
+      revealUrl: `${baseUrl}/reveal/${slug}`,
+    });
+    return NextResponse.json({ ok: true });
   }
 
   return NextResponse.json({ ok: true });

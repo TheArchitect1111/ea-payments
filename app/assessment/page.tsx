@@ -193,7 +193,7 @@ function Checklist({
 
 export default function AssessmentPage() {
   const [form, setForm]           = useState<FormState>(EMPTY);
-  const [submitted, setSubmitted] = useState(false);
+  const [submitted] = useState(false);
   const [loading, setLoading]     = useState(false);
   const [error, setError]         = useState('');
   const [attempted, setAttempted] = useState(false);
@@ -270,7 +270,7 @@ export default function AssessmentPage() {
         return;
       }
 
-      setSubmitted(true);
+      window.location.href = '/assessment/thank-you';
     } catch {
       setError('Network error. Please check your connection and try again.');
       setLoading(false);

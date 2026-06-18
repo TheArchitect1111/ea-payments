@@ -4,7 +4,7 @@ import { analyzeAssessment, OPERATIONAL_CHALLENGES } from '@/lib/analysis-engine
 import type { RevenueRange, Complexity } from '@/lib/analysis-engine';
 import { calculateFee } from '@/lib/pricing-engine';
 import { createAssessmentRecord, createProposalRecord } from '@/lib/airtable';
-import { sendAssessmentAdminNotification } from '@/lib/email';
+import { sendAssessmentAdminNotification, sendAssessmentConfirmationEmail } from '@/lib/email';
 
 function mapTeamSize(label: string): number {
   const map: Record<string, number> = {
@@ -259,6 +259,27 @@ export async function POST(req: NextRequest) {
       });
     } catch (err) {
       console.error('Assessment admin notification error:', err);
+    }
+
+    // Client confirmation email (Email 1 / F2)
+    // Sent after admin notification; failure never blocks the success response.
+    if (proposalResult.recordId) {
+      try {
+        await sendAssessmentConfirmationEmail({
+          email: input.email,
+          contactName: input.contactName,
+          capacityScore: analysis.capacityScore,
+          scoreBand: analysis.scoreBand,
+          weeklyTimeRecovery: analysis.weeklyTimeRecovery,
+          opportunityLow: analysis.opportunityLow,
+          opportunityHigh: analysis.opportunityHigh,
+          projectTypeLabel: pricing.projectTypeLabel,
+          recommendedFee: pricing.recommendedFee,
+          proposalId,
+        });
+      } catch (err) {
+        console.error('Assessment confirmation email error:', err);
+      }
     }
 
     return NextResponse.json({ ok: true });
