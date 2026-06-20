@@ -9,6 +9,7 @@ import {
   getBrotherHubChapters,
 } from '@/lib/airtable';
 import { getOpportunities } from '@/lib/partner-network';
+import { getCaptures } from '@/lib/capture-records';
 import AdminLogin from './AdminLogin';
 
 export const dynamic = 'force-dynamic';
@@ -126,7 +127,7 @@ export default async function MasterPortalPage() {
     return <AdminLogin />;
   }
 
-  const [assessments, proposals, clientRecords, partnerRecords, opportunities, cprAthletes, brotherHubChapters] =
+  const [assessments, proposals, clientRecords, partnerRecords, opportunities, cprAthletes, brotherHubChapters, captures] =
     await Promise.all([
       getAllAssessments(),
       getProposalsWithAssessments(),
@@ -135,6 +136,7 @@ export default async function MasterPortalPage() {
       getOpportunities(),
       getCPRAthletes(),
       getBrotherHubChapters(),
+      getCaptures(8),
     ]);
 
   // Revenue Overview
@@ -219,34 +221,7 @@ export default async function MasterPortalPage() {
   });
 
   return (
-    <div className="min-h-screen bg-neutral-50">
-      <header style={{ backgroundColor: NAVY }} className="px-6 py-4">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-widest text-blue-200">
-              Efficiency Architects
-            </p>
-            <h1 className="text-xl font-extrabold uppercase tracking-widest text-white">
-              Master Control
-            </h1>
-          </div>
-          <div className="flex items-center gap-4">
-            <a href="/admin/dashboard" className="text-xs font-semibold text-blue-200 hover:text-white transition">
-              Pipeline
-            </a>
-            <a href="/admin/proposals" className="text-xs font-semibold text-blue-200 hover:text-white transition">
-              Proposals
-            </a>
-            <a href="/admin/commissions" className="text-xs font-semibold text-blue-200 hover:text-white transition">
-              Commissions
-            </a>
-            <a href="/api/admin/logout" className="text-xs font-semibold text-blue-200 hover:text-white transition">
-              Sign Out
-            </a>
-          </div>
-        </div>
-      </header>
-
+    <>
       <div className="bg-white border-b border-neutral-200 px-6 py-8">
         <div className="max-w-6xl mx-auto flex items-center justify-between flex-wrap gap-4">
           <div className="flex items-center gap-4">
@@ -427,7 +402,45 @@ export default async function MasterPortalPage() {
           )}
         </section>
 
+        {/* EA Capture Engine — recent captures */}
+        <section>
+          <SectionHead title="EA Capture Engine — Recent Captures" />
+          {captures.length === 0 ? (
+            <div className="bg-white border border-neutral-200 p-8 text-center">
+              <p className="text-sm text-neutral-500 mb-2">No captures yet.</p>
+              <p className="text-xs text-neutral-400">
+                Press ⌘K in Mission Control → Quick Capture. Requires a &quot;Capture Records&quot; table in the Payments Airtable base.
+              </p>
+            </div>
+          ) : (
+            <div className="bg-white border border-neutral-200 overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-neutral-200 bg-neutral-50">
+                    <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-neutral-500">Title</th>
+                    <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-neutral-500">Type</th>
+                    <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-neutral-500">Source</th>
+                    <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-neutral-500">Status</th>
+                    <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-neutral-500">Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {captures.map((c) => (
+                    <tr key={c.id} className="border-b border-neutral-100">
+                      <td className="px-4 py-3 font-medium" style={{ color: NAVY }}>{c.title}</td>
+                      <td className="px-4 py-3 text-neutral-600">{c.captureType}</td>
+                      <td className="px-4 py-3 text-neutral-600">{c.source}</td>
+                      <td className="px-4 py-3 text-neutral-600">{c.status}</td>
+                      <td className="px-4 py-3 text-neutral-400">{fmtDate(c.dateCaptured)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+
       </main>
-    </div>
+    </>
   );
 }
