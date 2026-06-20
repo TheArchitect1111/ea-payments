@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import UniversalCommandBar from './UniversalCommandBar';
+import { startGuidedTour } from './GuidedTour';
 
 const NAVY = '#1B2B4D';
 const GOLD = '#C9A844';
@@ -9,7 +10,9 @@ const GOLD = '#C9A844';
 const NAV_LINKS = [
   { href: '/admin/master', label: 'Master Control' },
   { href: '/admin/resource-radar', label: 'Resource Radar' },
+  { href: '/admin/simplifi-audit', label: 'Simplifi Audit' },
   { href: '/admin/blueprints', label: 'Blueprints' },
+  { href: '/admin/academy', label: 'Academy' },
   { href: '/admin/dashboard', label: 'Pipeline' },
   { href: '/admin/proposals', label: 'Proposals' },
   { href: '/admin/commissions', label: 'Commissions' },
@@ -22,6 +25,8 @@ const NAVIGATOR_GOALS = [
   { label: 'Manage proposals', href: '/admin/proposals' },
   { label: 'Track partner commissions', href: '/admin/commissions' },
   { label: 'Run Operational MRI funnel', href: '/assessment' },
+  { label: 'Run Simplifi website audit', href: '/admin/simplifi-audit' },
+  { label: 'Learn EA Academy', href: '/admin/academy' },
   { label: 'Analyze a URL (Resource Radar)', action: 'analyze' as const },
   { label: 'View Auto Blueprints', href: '/admin/blueprints' },
   { label: 'Capture an opportunity', action: 'capture' as const },
@@ -55,11 +60,19 @@ export default function EANavigatorShell({ children }: { children: React.ReactNo
             <UniversalCommandBar onOpenNavigator={() => setNavigatorOpen(true)} />
             <button
               type="button"
+              id="ea-navigator-btn"
               onClick={() => setNavigatorOpen(true)}
               className="text-xs font-semibold px-3 py-1.5 rounded text-white transition"
               style={{ backgroundColor: GOLD, color: NAVY }}
             >
               EA Navigator
+            </button>
+            <button
+              type="button"
+              onClick={startGuidedTour}
+              className="text-xs font-semibold text-blue-200 hover:text-white transition"
+            >
+              Tour
             </button>
             <a
               href="/api/admin/logout"

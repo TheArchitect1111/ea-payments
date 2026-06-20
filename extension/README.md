@@ -26,6 +26,7 @@ Chrome MV3 extension for one-click capture to Mission Control.
 **Context menu (right-click)**
 - **Capture with Magnifi™** — quick capture + analysis
 - **Generate Auto Blueprint** — BAS / Selena / JCSU pattern + blueprint stub
+- **Run Simplifi Website Audit** — opens Simplifi audit with URL pre-filled
 - **Run Simplifi Assessment** — opens assessment funnel
 
 Captures run Firecrawl (if configured) → Resource Radar → Opportunity Engine → Recommendation Engine → Auto Blueprint → Airtable.

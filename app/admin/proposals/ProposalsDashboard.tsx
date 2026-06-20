@@ -2,6 +2,10 @@
 
 import { useState } from 'react';
 import type { ProposalWithAssessment } from '@/lib/airtable';
+import { computeAdoptionHealth } from '@/lib/adoption-engine';
+import { matchProofStories } from '@/lib/proof-library';
+import AdoptionHealthPanel from '../_components/AdoptionHealthPanel';
+import ProofLibraryPanel from '../_components/ProofLibraryPanel';
 
 const NAVY = '#1B2B4D';
 const GOLD = '#C9A844';
@@ -308,6 +312,8 @@ export default function ProposalsDashboard({ initialData }: Props) {
               const isUpdating = !!updating[proposal.id];
               const err = errors[proposal.id];
               const edit = edits[proposal.id] ?? { fee: String(proposal.recommendedFee), scope: proposal.scopeSummary };
+              const adoption = computeAdoptionHealth(proposal);
+              const proofStories = matchProofStories(proposal);
 
               return (
                 <div
@@ -544,6 +550,11 @@ export default function ProposalsDashboard({ initialData }: Props) {
                         </div>
                       </div>
                     </div>
+                  </div>
+
+                  <div className="px-6 pb-6 grid grid-cols-1 lg:grid-cols-2 gap-4 border-t border-neutral-100 pt-4 mx-6">
+                    <AdoptionHealthPanel adoption={adoption} compact />
+                    <ProofLibraryPanel stories={proofStories} title="Matched Proof Stories" />
                   </div>
 
                   {/* Proposal ID footer */}

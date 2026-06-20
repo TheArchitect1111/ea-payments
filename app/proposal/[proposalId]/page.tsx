@@ -1,5 +1,9 @@
 import { getProposalByProposalId } from '@/lib/airtable';
 import type { ProposalWithAssessment } from '@/lib/airtable';
+import { computeAdoptionHealth } from '@/lib/adoption-engine';
+import { matchProofStories, defaultProofStories } from '@/lib/proof-library';
+import AdoptionHealthPanel from '@/app/admin/_components/AdoptionHealthPanel';
+import ProofLibraryPanel from '@/app/admin/_components/ProofLibraryPanel';
 
 export const dynamic = 'force-dynamic';
 
@@ -83,9 +87,13 @@ function PaymentBanner({ status }: { status: string | undefined }) {
 function ProposalContent({
   proposal,
   paymentStatus,
+  adoption,
+  proofStories,
 }: {
   proposal: ProposalWithAssessment;
   paymentStatus?: string;
+  adoption: ReturnType<typeof computeAdoptionHealth>;
+  proofStories: ReturnType<typeof matchProofStories>;
 }) {
   const firstName =
     proposal.contactName.split(' ')[0] || proposal.contactName || 'there';
@@ -195,6 +203,10 @@ function ProposalContent({
           </div>
         </div>
 
+        {/* Adoption + Proof (Wave 4) */}
+        <AdoptionHealthPanel adoption={adoption} />
+        <ProofLibraryPanel stories={proofStories} />
+
         {/* Recommended investment */}
         <div className="border border-neutral-200 bg-white p-8 text-center">
           <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mb-3">
@@ -278,5 +290,16 @@ export default async function ProposalPage({
     return <Unavailable />;
   }
 
-  return <ProposalContent proposal={proposal} paymentStatus={payment} />;
+  const adoption = computeAdoptionHealth(proposal);
+  const proofStories = matchProofStories(proposal);
+  const stories = proofStories.length > 0 ? proofStories : defaultProofStories();
+
+  return (
+    <ProposalContent
+      proposal={proposal}
+      paymentStatus={payment}
+      adoption={adoption}
+      proofStories={stories}
+    />
+  );
 }

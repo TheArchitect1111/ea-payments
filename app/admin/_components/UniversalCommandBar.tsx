@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { ADMIN_COMMANDS, type CommandItem } from '@/lib/admin-command-registry';
+import { startGuidedTour } from './GuidedTour';
 
 const NAVY = '#1B2B4D';
 const GOLD = '#C9A844';
@@ -46,6 +47,10 @@ export default function UniversalCommandBar({ onOpenNavigator }: Props) {
       }
       if (cmd.action === 'capture:analyze') {
         setAnalyzeOpen(true);
+        return;
+      }
+      if (cmd.action === 'tour:start') {
+        startGuidedTour();
         return;
       }
       if (cmd.href) {
@@ -159,6 +164,7 @@ export default function UniversalCommandBar({ onOpenNavigator }: Props) {
     <>
       <button
         type="button"
+        id="ea-command-bar"
         onClick={() => setOpen(true)}
         className="text-xs font-semibold px-3 py-1.5 rounded border border-blue-300/40 text-blue-100 hover:bg-white/10 transition"
         title="Command bar (Ctrl+K)"

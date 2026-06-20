@@ -10,6 +10,11 @@ chrome.runtime.onInstalled.addListener(() => {
     contexts: ['page', 'link'],
   });
   chrome.contextMenus.create({
+    id: 'ea-simplifi-audit',
+    title: 'Run Simplifi Website Audit',
+    contexts: ['page', 'link'],
+  });
+  chrome.contextMenus.create({
     id: 'ea-simplifi',
     title: 'Run Simplifi Assessment',
     contexts: ['page'],
@@ -24,6 +29,14 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
     const { apiUrl } = await chrome.storage.sync.get(['apiUrl']);
     const base = apiUrl || 'https://ea-payments.vercel.app';
     chrome.tabs.create({ url: `${base}/assessment` });
+    return;
+  }
+
+  if (info.menuItemId === 'ea-simplifi-audit') {
+    const { apiUrl } = await chrome.storage.sync.get(['apiUrl']);
+    const base = apiUrl || 'https://ea-payments.vercel.app';
+    const auditUrl = encodeURIComponent(url);
+    chrome.tabs.create({ url: `${base}/admin/simplifi-audit?url=${auditUrl}` });
     return;
   }
 
