@@ -37,3 +37,9 @@ Every capture includes:
 - **Trust Layer** — confidence score, sources, reasoning
 - **Recommendation Engine** — Magnifi template + top 3 priorities + first step
 - **Auto Blueprint stub** — view in `/admin/blueprints`
+
+## Wave 5 — EA Voice
+
+- Header **Voice** button or **Ctrl+Shift+V** (Cmd+Shift+V on Mac)
+- ⌘K → **EA Voice Assistant**
+- Example commands: "Open Knowledge Graph", "Run Simplifi audit on https://…", "Search graph for Magnifi"

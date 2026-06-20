@@ -125,4 +125,33 @@ export const ACADEMY_MODULES: AcademyModule[] = [
     ],
     cta: { label: 'Blueprint Library', href: '/admin/blueprints' },
   },
+  {
+    id: 'wave5-intelligence',
+    title: 'Wave 5 — Intelligence Layer',
+    duration: '8 min',
+    summary: 'Knowledge Graph, Digital Twin, EA Voice, and Partner Marketplace complete the OS.',
+    lessons: [
+      {
+        title: 'Knowledge Graph',
+        content:
+          'Organizational memory — captures, products, partners, proposals, and proof stories as connected nodes.',
+      },
+      {
+        title: 'Digital Twin',
+        content:
+          'Operational mirror with health dimensions — intelligence capture, pipeline, visibility, adoption, partners.',
+      },
+      {
+        title: 'EA Voice',
+        content:
+          'Natural-language navigation — press Voice or ⌘⇧V. Optional Claude enhancement when ANTHROPIC_API_KEY is set.',
+      },
+      {
+        title: 'Partner Marketplace',
+        content:
+          'Referral programs, satellite hubs, implementation packages, and live partner listings.',
+      },
+    ],
+    cta: { label: 'Knowledge Graph', href: '/admin/knowledge-graph' },
+  },
 ];

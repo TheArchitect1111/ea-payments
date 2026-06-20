@@ -51,6 +51,18 @@ export const MISSION_CONTROL_TOUR: GuidedTour = {
       body: 'Role-based learning modules for Magnifi, Simplifi, Capture Engine, and adoption.',
       href: '/admin/academy',
     },
+    {
+      id: 'intelligence',
+      title: 'Wave 5 Intelligence',
+      body: 'Knowledge Graph connects organizational memory. Digital Twin mirrors platform health. EA Voice navigates by speech or text.',
+      href: '/admin/knowledge-graph',
+    },
+    {
+      id: 'marketplace',
+      title: 'Partner Marketplace',
+      body: 'Referral programs, satellite hubs (CPR, BrotherHub), and co-sell packages.',
+      href: '/admin/partner-marketplace',
+    },
   ],
 };
 

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import UniversalCommandBar from './UniversalCommandBar';
+import VoiceAssistant from './VoiceAssistant';
 import { startGuidedTour } from './GuidedTour';
 
 const NAVY = '#1B2B4D';
@@ -13,6 +14,9 @@ const NAV_LINKS = [
   { href: '/admin/simplifi-audit', label: 'Simplifi Audit' },
   { href: '/admin/blueprints', label: 'Blueprints' },
   { href: '/admin/academy', label: 'Academy' },
+  { href: '/admin/knowledge-graph', label: 'Knowledge Graph' },
+  { href: '/admin/digital-twin', label: 'Digital Twin' },
+  { href: '/admin/partner-marketplace', label: 'Marketplace' },
   { href: '/admin/dashboard', label: 'Pipeline' },
   { href: '/admin/proposals', label: 'Proposals' },
   { href: '/admin/commissions', label: 'Commissions' },
@@ -26,6 +30,9 @@ const NAVIGATOR_GOALS = [
   { label: 'Track partner commissions', href: '/admin/commissions' },
   { label: 'Run Operational MRI funnel', href: '/assessment' },
   { label: 'Run Simplifi website audit', href: '/admin/simplifi-audit' },
+  { label: 'Search Knowledge Graph', href: '/admin/knowledge-graph' },
+  { label: 'View Digital Twin', href: '/admin/digital-twin' },
+  { label: 'Browse Partner Marketplace', href: '/admin/partner-marketplace' },
   { label: 'Learn EA Academy', href: '/admin/academy' },
   { label: 'Analyze a URL (Resource Radar)', action: 'analyze' as const },
   { label: 'View Auto Blueprints', href: '/admin/blueprints' },
@@ -58,6 +65,7 @@ export default function EANavigatorShell({ children }: { children: React.ReactNo
               </a>
             ))}
             <UniversalCommandBar onOpenNavigator={() => setNavigatorOpen(true)} />
+            <VoiceAssistant />
             <button
               type="button"
               id="ea-navigator-btn"

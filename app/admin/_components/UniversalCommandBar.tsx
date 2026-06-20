@@ -53,6 +53,10 @@ export default function UniversalCommandBar({ onOpenNavigator }: Props) {
         startGuidedTour();
         return;
       }
+      if (cmd.action === 'voice:open') {
+        window.dispatchEvent(new CustomEvent('ea:open-voice'));
+        return;
+      }
       if (cmd.href) {
         window.location.href = cmd.href;
       }
