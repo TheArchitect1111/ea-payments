@@ -11,6 +11,7 @@ import { getCatalogItem } from '@/lib/catalog';
 import { sendWelcomeEmail, sendAdminNotification } from '@/lib/email';
 import { createPortalAccess } from '@/lib/portal-access';
 import { createOpportunityRecord } from '@/lib/partner-network';
+import { fireOnboardingWebhook } from '@/lib/make-webhooks';
 
 export const dynamic = 'force-dynamic';
 
@@ -88,6 +89,10 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
     ? new Date(session.created * 1000).toISOString().slice(0, 10)
     : new Date().toISOString().slice(0, 10);
 
+  const paymentReceivedAt = session.created
+    ? new Date(session.created * 1000).toISOString()
+    : new Date().toISOString();
+
   const stripeTransactionId =
     typeof session.payment_intent === 'string'
       ? session.payment_intent
@@ -104,6 +109,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
     stripeTransactionId,
     portalAccessStatus: 'Pending',
     onboardingStatus: 'Not Started',
+    paymentReceivedAt,
   });
 
   if (!airtableResult.ok) {
@@ -201,6 +207,19 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
   } catch (err) {
     console.error('Admin notification threw for session', session.id, ':', err);
   }
+
+  await fireOnboardingWebhook({
+    event: 'payment.received',
+    clientName,
+    email,
+    organization: meta.organization || undefined,
+    packageName,
+    amountPaid,
+    paymentDate,
+    stripeTransactionId,
+    airtableRecordId: airtableResult.recordId,
+    portalLoginUrl,
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -280,6 +299,9 @@ async function handleProposalPayment(
   const paymentDate = session.created
     ? new Date(session.created * 1000).toISOString().slice(0, 10)
     : new Date().toISOString().slice(0, 10);
+  const paymentReceivedAt = session.created
+    ? new Date(session.created * 1000).toISOString()
+    : new Date().toISOString();
   const stripeTransactionId =
     typeof session.payment_intent === 'string'
       ? session.payment_intent
@@ -296,6 +318,7 @@ async function handleProposalPayment(
     stripeTransactionId,
     portalAccessStatus: 'Pending',
     onboardingStatus: 'Not Started',
+    paymentReceivedAt,
   });
 
   if (!airtableResult.ok) {
@@ -361,4 +384,17 @@ async function handleProposalPayment(
   } catch (err) {
     console.error(`handleProposalPayment [${proposalId}]: sendWelcomeEmail threw:`, err);
   }
+
+  await fireOnboardingWebhook({
+    event: 'payment.received',
+    clientName,
+    email,
+    organization: businessName || undefined,
+    packageName: packageLabel,
+    amountPaid,
+    paymentDate,
+    stripeTransactionId,
+    airtableRecordId: airtableResult.recordId,
+    portalLoginUrl,
+  });
 }

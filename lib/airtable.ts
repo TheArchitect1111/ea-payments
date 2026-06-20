@@ -8,7 +8,12 @@ export type AirtablePackage =
   | 'Simplifi';
 
 export type PortalAccessStatus = 'Pending' | 'Active' | 'Suspended';
-export type OnboardingStatus = 'Not Started' | 'In Progress' | 'Complete';
+export type OnboardingStatus =
+  | 'Not Started'
+  | 'In Progress'
+  | 'Docs Sent'
+  | 'Docs Signed'
+  | 'Complete';
 
 export interface ClientRecord {
   clientName: string;
@@ -21,6 +26,9 @@ export interface ClientRecord {
   stripeTransactionId: string;
   portalAccessStatus?: PortalAccessStatus;
   onboardingStatus?: OnboardingStatus;
+  paymentReceivedAt?: string;
+  docsSentAt?: string;
+  docsSignedAt?: string;
 }
 
 export interface PortalClientRecord {
@@ -82,6 +90,9 @@ export async function createOrUpdateClientRecord(
 
   if (record.organization) raw['Organization'] = record.organization;
   if (record.phone) raw['Phone'] = record.phone;
+  if (record.paymentReceivedAt) raw['Payment Received At'] = record.paymentReceivedAt;
+  if (record.docsSentAt) raw['Docs Sent At'] = record.docsSentAt;
+  if (record.docsSignedAt) raw['Docs Signed At'] = record.docsSignedAt;
 
   try {
     const existingId = await findRecordByEmail(record.email);
