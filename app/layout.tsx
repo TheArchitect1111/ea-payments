@@ -2,9 +2,9 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Efficiency Architects - Operational Architecture For Growing Businesses',
+  title: 'Efficiency Architects — What Becomes Possible',
   description:
-    'Efficiency Architects helps organizations reclaim time, reduce costs, unlock capacity, and fuel growth through systems design.',
+    'Help people create more of what matters and less of what doesn\'t. More life for individuals. More capacity for organizations.',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

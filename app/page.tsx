@@ -1,393 +1,276 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import './landing.css';
 
-const CREAM = '#F8F6F2';
-const INK = '#111827';
-
-const impactMetrics = [
-  { value: '10-20+', label: 'hours recovered each week', note: 'Time returned to owners and teams through better operating visibility.' },
-  { value: '$25K-$150K+', label: 'capacity unlocked annually', note: 'Estimated opportunity value from reducing friction and leakage.' },
-  { value: '3-7', label: 'systems clarified', note: 'Core workflows mapped, improved, and connected around the way the business runs.' },
+const possibilities = [
+  {
+    title: 'More Time',
+    copy: 'Imagine what becomes possible when the hours you lose to chaos return to you.',
+    image:
+      'https://images.unsplash.com/photo-1511895426328-ac872781f227?auto=format&fit=crop&w=900&q=80',
+    alt: 'Family spending meaningful time together outdoors',
+  },
+  {
+    title: 'A Team That Just Gets It',
+    copy: 'Everyone aligned. Everyone informed. Less repeating yourself.',
+    image:
+      'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=900&q=80',
+    alt: 'Diverse team collaborating with calm confidence',
+  },
+  {
+    title: 'More Growth',
+    copy: 'More capacity means more room for the opportunities you have been waiting to pursue.',
+    image:
+      'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=900&q=80',
+    alt: 'Leader envisioning growth with their team',
+  },
+  {
+    title: 'Greater Peace Of Mind',
+    copy: 'Less stress. More confidence that what matters is actually happening.',
+    image:
+      'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=900&q=80',
+    alt: 'Professional feeling calm and present at work',
+  },
+  {
+    title: 'More Capacity',
+    copy: 'Your organization gains room to grow without burning out the people who make it run.',
+    image:
+      'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&w=900&q=80',
+    alt: 'Multicultural team moving forward together',
+  },
+  {
+    title: 'Better Experiences',
+    copy: 'For your team, your customers, and the life you are building beyond the business.',
+    image:
+      'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=900&q=80',
+    alt: 'Friends sharing a joyful experience together',
+  },
+  {
+    title: 'More Life',
+    copy: 'Because every hour saved is a possibility waiting to be lived.',
+    image:
+      'https://images.unsplash.com/photo-1464226184743-18fd08086df7?auto=format&fit=crop&w=900&q=80',
+    alt: 'Parent present with family at a meaningful moment',
+  },
 ];
-
-const solveSteps = [
-  {
-    title: 'Find the friction',
-    copy: 'We look at how work actually moves through your business so the hidden bottlenecks become visible.',
-  },
-  {
-    title: 'Design the operating system',
-    copy: 'We translate scattered tasks, handoffs, and communication into clear workflows your team can follow.',
-  },
-  {
-    title: 'Build with accountability',
-    copy: 'You get practical systems, dashboards, portals, and communication paths that support day-to-day execution.',
-  },
-];
-
-const solutions = [
-  {
-    eyebrow: 'Operational MRI',
-    title: 'See what is really slowing the business down.',
-    copy: 'A focused diagnostic that identifies inefficiencies, process friction, communication gaps, and growth constraints before they become expensive.',
-    bullets: ['Capacity analysis', 'Workflow visibility', 'Friction findings', 'Prioritized action plan'],
-  },
-  {
-    eyebrow: 'Client Portal',
-    title: 'Give clients one organized place to move forward.',
-    copy: 'A premium portal experience for project milestones, updates, requests, documents, and next steps.',
-    bullets: ['Secure client access', 'Milestone clarity', 'Update requests', 'Project visibility'],
-  },
-  {
-    eyebrow: 'Event Management Portal',
-    title: 'Coordinate complex events without scattered communication.',
-    copy: 'Centralized event planning, registration, content updates, sponsor visibility, and operational tracking.',
-    bullets: ['Event workflows', 'Content updates', 'Sponsor assets', 'Team coordination'],
-  },
-  {
-    eyebrow: 'Communication Hub',
-    title: 'Turn scattered messages into one clean command center.',
-    copy: 'A structured communication layer that helps teams, clients, and leadership know what matters next.',
-    bullets: ['Status updates', 'Request routing', 'Leadership visibility', 'Less follow-up'],
-  },
-];
-
-const results = [
-  'Owners regain visibility into what is happening across the business.',
-  'Teams stop relying on memory, screenshots, and scattered follow-up.',
-  'Clients get a more premium and predictable experience.',
-  'Growth becomes easier because the operating foundation is clearer.',
-];
-
-function Header() {
-  return (
-    <header className="sticky top-0 z-50 border-b border-white/10 bg-[#1B2B4D]/95 backdrop-blur">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4 sm:px-8">
-        <Link href="/" className="flex items-center gap-3" aria-label="Efficiency Architects home">
-          <Image src="/images/ea-logo.png" alt="Efficiency Architects" width={56} height={56} className="h-12 w-auto" priority />
-          <div className="leading-none">
-            <div className="text-xs font-black uppercase tracking-[0.25em] text-[#C9A844]">Efficiency</div>
-            <div className="text-sm font-black uppercase tracking-[0.2em] text-white">Architects</div>
-          </div>
-        </Link>
-        <nav className="hidden items-center gap-7 text-xs font-bold uppercase tracking-[0.2em] text-white/75 lg:flex">
-          <a href="#process" className="hover:text-white">Process</a>
-          <a href="#solutions" className="hover:text-white">Solutions</a>
-          <a href="#results" className="hover:text-white">Results</a>
-          <a href="#portal" className="hover:text-white">Portal</a>
-        </nav>
-        <Link
-          href="/assessment"
-          className="shrink-0 rounded-sm bg-[#C9A844] px-4 py-3 text-center text-[11px] font-black uppercase tracking-[0.18em] text-[#1B2B4D] transition hover:bg-[#D8B95A]"
-        >
-          Free MRI
-        </Link>
-      </div>
-    </header>
-  );
-}
-
-function HeroSection() {
-  return (
-    <section className="relative overflow-hidden bg-[#1B2B4D] text-white">
-      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#C9A844] to-transparent" />
-      <div className="mx-auto grid max-w-7xl items-center gap-12 px-5 py-16 sm:px-8 sm:py-20 lg:grid-cols-[1.05fr_0.95fr] lg:py-24">
-        <div>
-          <p className="mb-5 text-xs font-black uppercase tracking-[0.32em] text-[#C9A844]">Operational Architecture For Growing Businesses</p>
-          <h1 className="max-w-4xl text-4xl font-black leading-[0.95] tracking-tight sm:text-6xl lg:text-7xl">
-            Build the operating system your business has outgrown.
-          </h1>
-          <p className="mt-7 max-w-2xl text-base leading-8 text-white/78 sm:text-lg">
-            Efficiency Architects helps organizations reclaim time, reduce costs, unlock capacity, and fuel growth through systems design.
-          </p>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <Link href="/assessment" className="rounded-sm bg-[#C9A844] px-6 py-4 text-center text-xs font-black uppercase tracking-[0.2em] text-[#1B2B4D] transition hover:bg-[#D8B95A]">
-              Take The Free Operational MRI™
-            </Link>
-            <a href="#results" className="rounded-sm border border-white/25 px-6 py-4 text-center text-xs font-black uppercase tracking-[0.2em] text-white transition hover:border-white">
-              View Sample Findings
-            </a>
-          </div>
-        </div>
-        <div className="rounded-sm border border-white/12 bg-white/[0.06] p-4 shadow-2xl shadow-black/20">
-          <div className="rounded-sm bg-white p-5 text-[#111827] sm:p-7">
-            <div className="flex items-start justify-between gap-4 border-b border-slate-200 pb-5">
-              <div>
-                <p className="text-xs font-black uppercase tracking-[0.22em] text-slate-400">Operational MRI</p>
-                <h2 className="mt-2 text-2xl font-black text-[#1B2B4D]">Visibility Snapshot</h2>
-              </div>
-              <span className="rounded-sm bg-[#F8F6F2] px-3 py-2 text-xs font-black text-[#1B2B4D]">Live</span>
-            </div>
-            <div className="mt-6 grid gap-4">
-              {[
-                ['Workflow friction', 'High', '78%'],
-                ['Communication leakage', 'Medium', '52%'],
-                ['Capacity opportunity', 'High', '84%'],
-              ].map(([label, level, value]) => (
-                <div key={label}>
-                  <div className="mb-2 flex items-center justify-between text-sm">
-                    <span className="font-bold">{label}</span>
-                    <span className="text-slate-500">{level}</span>
-                  </div>
-                  <div className="h-2 overflow-hidden rounded-full bg-slate-100">
-                    <div className="h-full rounded-full bg-[#C9A844]" style={{ width: value }} />
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="mt-7 grid grid-cols-2 gap-3">
-              <div className="rounded-sm bg-[#1B2B4D] p-4 text-white">
-                <div className="text-2xl font-black">14h</div>
-                <div className="mt-1 text-xs text-white/70">weekly recovery</div>
-              </div>
-              <div className="rounded-sm bg-[#F8F6F2] p-4">
-                <div className="text-2xl font-black text-[#1B2B4D]">$84K</div>
-                <div className="mt-1 text-xs text-slate-500">capacity signal</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function HowWeSolveIt() {
-  return (
-    <section id="process" className="bg-white px-5 py-16 sm:px-8 sm:py-20">
-      <div className="mx-auto max-w-7xl">
-        <SectionIntro
-          eyebrow="How We Solve It"
-          title="We do not start with tools. We start with how your business actually works."
-          copy="Most operational problems are not people problems. They are visibility, process, and communication problems hiding inside daily work."
-        />
-        <div className="mt-10 grid gap-4 md:grid-cols-3">
-          {solveSteps.map((step, index) => (
-            <article key={step.title} className="border border-slate-200 bg-white p-6 shadow-sm">
-              <div className="mb-7 flex h-11 w-11 items-center justify-center bg-[#1B2B4D] text-sm font-black text-[#C9A844]">
-                0{index + 1}
-              </div>
-              <h3 className="text-xl font-black text-[#1B2B4D]">{step.title}</h3>
-              <p className="mt-3 text-sm leading-7 text-slate-600">{step.copy}</p>
-            </article>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function ImpactMetrics() {
-  return (
-    <section className="bg-[#F8F6F2] px-5 py-16 sm:px-8 sm:py-20">
-      <div className="mx-auto max-w-7xl">
-        <SectionIntro
-          eyebrow="Impact Metrics"
-          title="The goal is not more software. The goal is more usable capacity."
-          copy="EA focuses on measurable operational outcomes: time recovered, cost reduced, friction removed, and growth capacity unlocked."
-        />
-        <div className="mt-10 grid gap-4 md:grid-cols-3">
-          {impactMetrics.map((metric) => (
-            <article key={metric.label} className="bg-white p-6 shadow-sm">
-              <div className="text-4xl font-black tracking-tight text-[#1B2B4D] sm:text-5xl">{metric.value}</div>
-              <h3 className="mt-3 text-base font-black uppercase tracking-[0.14em] text-[#C9A844]">{metric.label}</h3>
-              <p className="mt-4 text-sm leading-7 text-slate-600">{metric.note}</p>
-            </article>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function ClientResults() {
-  return (
-    <section id="results" className="bg-white px-5 py-16 sm:px-8 sm:py-20">
-      <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.9fr_1.1fr]">
-        <div>
-          <p className="text-xs font-black uppercase tracking-[0.28em] text-[#C9A844]">Client Results</p>
-          <h2 className="mt-4 text-3xl font-black leading-tight text-[#1B2B4D] sm:text-5xl">
-            A clearer business creates a calmer business.
-          </h2>
-        </div>
-        <div className="grid gap-3">
-          {results.map((result) => (
-            <div key={result} className="flex gap-4 border border-slate-200 bg-white p-5">
-              <span className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center bg-[#C9A844] text-xs font-black text-[#1B2B4D]">✓</span>
-              <p className="text-base leading-7 text-slate-700">{result}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function OperationalMriCta() {
-  return (
-    <section className="bg-[#F8F6F2] px-5 py-16 sm:px-8 sm:py-20">
-      <div className="mx-auto max-w-6xl border-l-4 border-[#C9A844] bg-white p-7 shadow-sm sm:p-10 lg:p-12">
-        <p className="text-xs font-black uppercase tracking-[0.28em] text-[#C9A844]">Operational MRI™</p>
-        <h2 className="mt-4 max-w-4xl text-3xl font-black leading-tight text-[#1B2B4D] sm:text-5xl">
-          Ready To See What&apos;s Slowing Your Business Down?
-        </h2>
-        <p className="mt-5 text-xl font-semibold text-[#111827]">
-          Most businesses don&apos;t have a people problem. They have a visibility problem.
-        </p>
-        <p className="mt-5 max-w-4xl text-base leading-8 text-slate-600">
-          Our Operational MRI™ identifies hidden inefficiencies, process friction, communication breakdowns, and growth constraints that may be costing your business time, money, and capacity.
-        </p>
-        <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-          <Link href="/assessment" className="rounded-sm bg-[#1B2B4D] px-6 py-4 text-center text-xs font-black uppercase tracking-[0.2em] text-white transition hover:bg-[#22375F]">
-            Take The Free Operational MRI™
-          </Link>
-          <a href="#results" className="rounded-sm border border-[#1B2B4D]/20 px-6 py-4 text-center text-xs font-black uppercase tracking-[0.2em] text-[#1B2B4D] transition hover:border-[#1B2B4D]">
-            View Sample Findings
-          </a>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function SolutionsSection() {
-  return (
-    <section id="solutions" className="bg-white px-5 py-16 sm:px-8 sm:py-20">
-      <div className="mx-auto max-w-7xl">
-        <SectionIntro
-          eyebrow="Solutions"
-          title="Business transformation needs structure your team can actually use."
-          copy="EA builds operating layers that make the business easier to see, manage, and grow."
-        />
-        <div className="mt-10 grid gap-4 lg:grid-cols-2">
-          {solutions.map((solution) => (
-            <article key={solution.title} className="border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-              <p className="text-xs font-black uppercase tracking-[0.24em] text-[#C9A844]">{solution.eyebrow}</p>
-              <h3 className="mt-4 text-2xl font-black leading-tight text-[#1B2B4D]">{solution.title}</h3>
-              <p className="mt-4 text-sm leading-7 text-slate-600">{solution.copy}</p>
-              <div className="mt-6 grid gap-2 sm:grid-cols-2">
-                {solution.bullets.map((bullet) => (
-                  <div key={bullet} className="bg-[#F8F6F2] px-4 py-3 text-sm font-bold text-[#1B2B4D]">
-                    {bullet}
-                  </div>
-                ))}
-              </div>
-            </article>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function StorySection() {
-  return (
-    <section className="bg-[#1B2B4D] px-5 py-16 text-white sm:px-8 sm:py-20">
-      <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-2">
-        <div>
-          <p className="text-xs font-black uppercase tracking-[0.28em] text-[#C9A844]">The Problem</p>
-          <h2 className="mt-4 text-3xl font-black leading-tight sm:text-5xl">Growth creates pressure when the operating system is unclear.</h2>
-          <p className="mt-5 text-base leading-8 text-white/75">
-            The business starts relying on the owner, the strongest team members, and constant communication just to keep things moving. That works until it does not.
-          </p>
-        </div>
-        <div className="bg-white p-7 text-[#111827] sm:p-8">
-          <p className="text-xs font-black uppercase tracking-[0.28em] text-[#C9A844]">The Solution</p>
-          <h3 className="mt-4 text-2xl font-black text-[#1B2B4D]">Architect the way the business should run.</h3>
-          <p className="mt-4 text-sm leading-7 text-slate-600">
-            EA turns invisible friction into a visible operating model, then builds the workflows, portals, dashboards, and communication paths that help the organization move with less drag.
-          </p>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function PortalSection() {
-  return (
-    <section id="portal" className="bg-[#F8F6F2] px-5 py-16 sm:px-8 sm:py-20">
-      <div className="mx-auto grid max-w-7xl items-center gap-10 lg:grid-cols-[1fr_1.05fr]">
-        <div>
-          <p className="text-xs font-black uppercase tracking-[0.28em] text-[#C9A844]">Client Portal</p>
-          <h2 className="mt-4 text-3xl font-black leading-tight text-[#1B2B4D] sm:text-5xl">
-            A premium client experience after the decision is made.
-          </h2>
-          <p className="mt-5 text-base leading-8 text-slate-600">
-            The EA portal keeps clients connected to milestones, requests, updates, documents, and the Content Command Center without making them chase information.
-          </p>
-        </div>
-        <div className="bg-white p-5 shadow-sm sm:p-7">
-          <div className="border-b border-slate-200 pb-4">
-            <p className="text-xs font-black uppercase tracking-[0.24em] text-slate-400">Client Operating Hub</p>
-            <h3 className="mt-2 text-2xl font-black text-[#1B2B4D]">Current Project Status</h3>
-          </div>
-          <div className="mt-5 grid gap-3">
-            {['Assessment reviewed', 'Architecture mapped', 'Build in progress', 'Review and approval'].map((item, index) => (
-              <div key={item} className="flex items-center justify-between bg-[#F8F6F2] px-4 py-3">
-                <span className="text-sm font-bold text-[#1B2B4D]">{item}</span>
-                <span className={`text-xs font-black ${index < 2 ? 'text-emerald-700' : 'text-slate-400'}`}>
-                  {index < 2 ? 'Complete' : 'Next'}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function FinalCta() {
-  return (
-    <section className="bg-white px-5 py-16 sm:px-8 sm:py-20">
-      <div className="mx-auto max-w-5xl text-center">
-        <p className="text-xs font-black uppercase tracking-[0.28em] text-[#C9A844]">Start With Visibility</p>
-        <h2 className="mt-4 text-3xl font-black leading-tight text-[#1B2B4D] sm:text-5xl">
-          Know what is costing you capacity before you invest in another fix.
-        </h2>
-        <p className="mx-auto mt-5 max-w-3xl text-base leading-8 text-slate-600">
-          Take the free Operational MRI™ and get a clearer view of where time, money, and momentum may be leaking from the business.
-        </p>
-        <div className="mt-8">
-          <Link href="/assessment" className="inline-flex rounded-sm bg-[#C9A844] px-7 py-4 text-center text-xs font-black uppercase tracking-[0.2em] text-[#1B2B4D] transition hover:bg-[#D8B95A]">
-            Take The Free Operational MRI™
-          </Link>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function SectionIntro({ eyebrow, title, copy }: { eyebrow: string; title: string; copy: string }) {
-  return (
-    <div className="max-w-3xl">
-      <p className="text-xs font-black uppercase tracking-[0.28em] text-[#C9A844]">{eyebrow}</p>
-      <h2 className="mt-4 text-3xl font-black leading-tight text-[#1B2B4D] sm:text-5xl">{title}</h2>
-      <p className="mt-5 text-base leading-8 text-slate-600">{copy}</p>
-    </div>
-  );
-}
 
 export default function HomePage() {
   return (
-    <main style={{ backgroundColor: CREAM, color: INK }}>
-      <Header />
-      <HeroSection />
-      <HowWeSolveIt />
-      <ImpactMetrics />
-      <ClientResults />
-      <OperationalMriCta />
-      <SolutionsSection />
-      <StorySection />
-      <PortalSection />
-      <FinalCta />
-      <footer className="bg-[#1B2B4D] px-5 py-8 text-center text-xs font-bold uppercase tracking-[0.2em] text-white/60 sm:px-8">
-        <div className="mb-3 flex flex-wrap items-center justify-center gap-6 text-[10px]">
-          <a href="/scorecard" className="hover:text-white">Visibility Scorecard</a>
-          <a href="/portal/login" className="hover:text-white">Client Portal</a>
-          <a href="/assessment" className="hover:text-white">Operational MRI</a>
+    <main className="ea-landing">
+      <header className="ea-nav">
+        <div className="ea-nav-inner">
+          <Link href="/" className="ea-brand" aria-label="Efficiency Architects home">
+            <Image src="/images/ea-logo.png" alt="" width={44} height={44} priority />
+            <div className="ea-brand-text">
+              <span>Efficiency</span>
+              <strong>Architects</strong>
+            </div>
+          </Link>
+          <Link href="/assessment" className="ea-nav-cta">
+            Take The Assessment
+          </Link>
         </div>
-        Efficiency Architects · Operational Architecture For Growing Businesses
+      </header>
+
+      {/* HERO */}
+      <section className="ea-section ea-hero">
+        <div className="ea-container ea-hero-grid ea-fade-in">
+          <div>
+            <h1 className="ea-display">
+              What would become possible if more got done and more of your time belonged to you?
+            </h1>
+            <div className="ea-pill-list" aria-label="Outcomes">
+              {['More family.', 'More growth.', 'More opportunities.', 'More experiences.', 'More freedom.', 'More life.'].map(
+                (item) => (
+                  <span key={item} className="ea-pill">
+                    {item}
+                  </span>
+                ),
+              )}
+            </div>
+            <div className="ea-actions">
+              <a href="#possibilities" className="ea-btn ea-btn-primary">
+                Discover What&apos;s Possible
+              </a>
+              <Link href="/assessment" className="ea-btn ea-btn-secondary">
+                Take The Assessment
+              </Link>
+            </div>
+          </div>
+          <div className="ea-hero-visual">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&w=1200&q=80"
+              alt="Diverse business owner leaving work to be present with family at a meaningful experience"
+            />
+            <p className="ea-hero-caption">Presence. Freedom. Possibility — not luxury, but a life you can actually live.</p>
+          </div>
+        </div>
+      </section>
+
+      {/* SECTION 2 */}
+      <section className="ea-section soft" id="possibilities">
+        <div className="ea-container">
+          <h2 className="ea-display-md">Imagine The Possibilities</h2>
+          <p className="ea-lead">Every improvement creates capacity for the organization — and possibilities for the people inside it.</p>
+          <div className="ea-cards">
+            {possibilities.map((card) => (
+              <article key={card.title} className="ea-card" tabIndex={0}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={card.image} alt={card.alt} loading="lazy" />
+                <div className="ea-card-overlay">
+                  <h3>{card.title}</h3>
+                  <p>{card.copy}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* SECTION 3 */}
+      <section className="ea-section" id="team">
+        <div className="ea-container ea-split">
+          <div className="ea-copy-stack">
+            <h2 className="ea-display-md">A Team That Just Gets It</h2>
+            <p>Clear communication.</p>
+            <p>Less confusion.</p>
+            <p>Less repeating yourself.</p>
+            <p>More confidence.</p>
+            <p>More alignment.</p>
+          </div>
+          <div className="ea-visual">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="https://images.unsplash.com/photo-1600880292089-90a7e086ee0c?auto=format&fit=crop&w=1200&q=80"
+              alt="Diverse team working together with calm energy — everyone informed, no visible confusion"
+              loading="lazy"
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* SECTION 4 — TEAM READINESS */}
+      <section className="ea-section soft" id="team-readiness">
+        <div className="ea-container ea-split">
+          <div className="ea-visual">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80"
+              alt="Experienced team member mentoring a newer colleague while knowledge is shared and multiplied"
+              loading="lazy"
+            />
+          </div>
+          <div>
+            <span className="ea-product-label">Team Readiness™</span>
+            <h2 className="ea-display-md">Build Once. Teach Forever.</h2>
+            <div className="ea-copy-stack">
+              <p>The best organizations don&apos;t rely on memory.</p>
+              <p>They capture knowledge, share experience, and help people grow.</p>
+              <p>Current staff continue improving. New team members gain confidence faster.</p>
+              <p>The lessons learned today continue creating value tomorrow.</p>
+            </div>
+            <div className="ea-actions">
+              <a href="#whats-possible" className="ea-btn ea-btn-primary">
+                Learn More
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* SECTION 5 — WHAT'S POSSIBLE */}
+      <section className="ea-section" id="whats-possible">
+        <div className="ea-container ea-split">
+          <div>
+            <span className="ea-product-label">What&apos;s Possible?™</span>
+            <h2 className="ea-display-md">What if you could see what&apos;s possible before investing time, money, and energy?</h2>
+            <div className="ea-copy-stack">
+              <p>Explore opportunities.</p>
+              <p>Visualize the future.</p>
+              <p>Create a roadmap.</p>
+              <p>Move forward with confidence.</p>
+            </div>
+            <div className="ea-actions">
+              <Link href="/assessment" className="ea-btn ea-btn-primary">
+                Explore What&apos;s Possible
+              </Link>
+            </div>
+          </div>
+          <div className="ea-visual">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1200&q=80"
+              alt="Diverse leader envisioning a hopeful future of growth, impact, and opportunity"
+              loading="lazy"
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* SECTION 6 — PULSE */}
+      <section className="ea-section soft" id="pulse">
+        <div className="ea-container ea-split">
+          <div className="ea-visual">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1200&q=80"
+              alt="Clean, elegant view of organizational health — calm confidence, not complexity"
+              loading="lazy"
+            />
+          </div>
+          <div>
+            <span className="ea-product-label">Pulse™</span>
+            <h2 className="ea-display-md">One Place To See What Matters.</h2>
+            <div className="ea-copy-stack">
+              <p>Communication. Training. Participation. Growth. Capacity. Opportunities. Progress.</p>
+              <p>Everything comes together here — so leaders can see what matters without the stress.</p>
+            </div>
+            <div className="ea-actions">
+              <a href="#assessment" className="ea-btn ea-btn-primary">
+                Explore Pulse
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* SECTION 7 — ASSESSMENT */}
+      <section className="ea-section" id="assessment">
+        <div className="ea-container ea-split">
+          <div>
+            <h2 className="ea-display-md">Start With What You Can See.</h2>
+            <div className="ea-copy-stack">
+              <p>Most people don&apos;t need another opinion. They need a clearer picture.</p>
+              <p>
+                The Capacity Assessment helps uncover opportunities, hidden costs, and areas for growth — so you can see what
+                becomes possible before you invest time, money, and energy.
+              </p>
+            </div>
+            <div className="ea-actions">
+              <Link href="/assessment" className="ea-btn ea-btn-primary">
+                Take The Assessment
+              </Link>
+            </div>
+          </div>
+          <div className="ea-visual">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=1200&q=80"
+              alt="Leader reviewing insights with clarity and confidence — discovery, not audit"
+              loading="lazy"
+            />
+          </div>
+        </div>
+      </section>
+
+      <footer className="ea-footer">
+        <nav className="ea-footer-links" aria-label="Footer">
+          <Link href="/assessment">Capacity Assessment</Link>
+          <Link href="/portal/login">Client Portal</Link>
+          <Link href="/scorecard">Visibility Scorecard</Link>
+        </nav>
+        <small>Efficiency Architects · Turn wasted time into possibilities.</small>
       </footer>
     </main>
   );
