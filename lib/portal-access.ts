@@ -167,14 +167,6 @@ export async function createPortalAccess(
     case 'efficiency-architects':
       return createEAPortalAccess(clientData, baseUrl, config.loginPath);
 
-    case 'nsp':
-      return createExternalPortalAccess(
-        clientData,
-        'NSP_PORTAL_URL',
-        'NSP_AIRTABLE_BASE_ID',
-        'Client Records'
-      );
-
     case 'cpr':
       return createExternalPortalAccess(
         clientData,

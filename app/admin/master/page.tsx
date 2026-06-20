@@ -382,7 +382,7 @@ export default async function MasterPortalPage() {
               metric={String(cprAthletes.length)}
               metricLabel="Total athletes"
               sub={`${cprActiveAthletes} active`}
-              href="https://canadian-prospects-recruitment.vercel.app"
+              href="https://cpr-site.vercel.app"
             />
             <PlatformTile
               title="BrotherHub"

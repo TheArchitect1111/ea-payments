@@ -382,6 +382,11 @@ export default function HomePage() {
       <PortalSection />
       <FinalCta />
       <footer className="bg-[#1B2B4D] px-5 py-8 text-center text-xs font-bold uppercase tracking-[0.2em] text-white/60 sm:px-8">
+        <div className="mb-3 flex flex-wrap items-center justify-center gap-6 text-[10px]">
+          <a href="/scorecard" className="hover:text-white">Visibility Scorecard</a>
+          <a href="/portal/login" className="hover:text-white">Client Portal</a>
+          <a href="/assessment" className="hover:text-white">Operational MRI</a>
+        </div>
         Efficiency Architects · Operational Architecture For Growing Businesses
       </footer>
     </main>

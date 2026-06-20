@@ -6,7 +6,6 @@
 
 export type PortalPlatform =
   | 'efficiency-architects'
-  | 'nsp'
   | 'cpr'
   | 'brotherhub'
   | 'sisterhub'

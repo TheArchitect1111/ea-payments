@@ -344,7 +344,7 @@ export default function AssessmentPage() {
         {/* EA wordmark row */}
         <div className="mx-auto max-w-5xl px-6 pt-6">
           <a
-            href="https://efficiency-architects.vercel.app"
+            href="https://www.efficiencyarchitects.online"
             aria-label="Efficiency Architects"
             style={{ textDecoration: 'none' }}
           >
