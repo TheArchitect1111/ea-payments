@@ -1,6 +1,7 @@
 const NAVY = '#1B2B4D';
 const GOLD = '#C9A844';
 const CREAM = '#F8F6F2';
+const SUPPORT_EMAIL = 'freedom@efficiencyarchitects.online';
 
 const steps = [
   {
@@ -39,7 +40,14 @@ function StepIcon({ type }: { type: string }) {
   );
 }
 
-export default function ThankYouPage() {
+export default async function ThankYouPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ proposal?: string }>;
+}) {
+  const { proposal } = await searchParams;
+  const proposalUrl = proposal ? `/proposal/${encodeURIComponent(proposal)}` : null;
+
   return (
     <main className="min-h-screen" style={{ backgroundColor: CREAM }}>
       <section className="px-6 py-8 text-white" style={{ backgroundColor: NAVY }}>
@@ -76,13 +84,22 @@ export default function ThankYouPage() {
           ))}
         </div>
 
-        <div className="mt-10 text-center">
+        <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
+          {proposalUrl && (
+            <a
+              href={proposalUrl}
+              className="inline-flex items-center justify-center px-8 py-4 text-xs font-black uppercase tracking-[0.22em]"
+              style={{ backgroundColor: NAVY, color: GOLD }}
+            >
+              View My Analysis
+            </a>
+          )}
           <a
-            href="mailto:"
+            href={`mailto:${SUPPORT_EMAIL}`}
             className="inline-flex items-center justify-center px-8 py-4 text-xs font-black uppercase tracking-[0.22em]"
             style={{ backgroundColor: GOLD, color: NAVY }}
           >
-            Check Your Email
+            Contact Our Team
           </a>
         </div>
       </section>

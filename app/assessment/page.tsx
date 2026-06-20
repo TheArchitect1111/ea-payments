@@ -264,10 +264,15 @@ export default function AssessmentPage() {
         return;
       }
 
-      const data = (await res.json()) as { ok?: boolean; error?: string };
+      const data = (await res.json()) as { ok?: boolean; error?: string; proposalId?: string };
       if (data.error) {
         setError(data.error);
         setLoading(false);
+        return;
+      }
+
+      if (data.proposalId) {
+        window.location.href = `/proposal/${encodeURIComponent(data.proposalId)}`;
         return;
       }
 

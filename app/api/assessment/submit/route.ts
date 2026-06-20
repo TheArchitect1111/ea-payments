@@ -282,7 +282,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({ ok: true, proposalId });
   } catch (err) {
     console.error(
       'Assessment submit unhandled error:',

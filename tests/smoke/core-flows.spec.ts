@@ -38,3 +38,16 @@ test('simplifi landing page is reachable', async ({ page }) => {
   await expect(page.getByRole('heading', { name: /never lose an opportunity again/i })).toBeVisible();
   await expect(page.getByRole('link', { name: /^simplifi$/i })).toBeVisible();
 });
+
+test('pulse route requires portal login', async ({ page }) => {
+  await page.goto('/portal/demo-client/pulse');
+  await expect(page).toHaveURL(/\/portal\/login/);
+});
+
+test('assessment thank-you contact link works', async ({ page }) => {
+  await page.goto('/assessment/thank-you');
+  await expect(page.getByRole('link', { name: /contact our team/i })).toHaveAttribute(
+    'href',
+    'mailto:freedom@efficiencyarchitects.online',
+  );
+});

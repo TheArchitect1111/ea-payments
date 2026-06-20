@@ -3,6 +3,7 @@ import { redirect, notFound } from 'next/navigation';
 import { verifySession, EA_PORTAL_COOKIE } from '@/lib/ea-portal-auth';
 import { getClientByPortalSlug } from '@/lib/airtable';
 import PasswordChangeModal from './PasswordChangeModal';
+import { PortalNav } from './PortalNav';
 import './ea-portal.css';
 
 export const dynamic = 'force-dynamic';
@@ -56,23 +57,11 @@ export default async function PortalPage({
 
   const isActive = client.portalAccessStatus === 'Active';
 
-  const brandName = process.env.BRAND_NAME ?? 'Efficiency Architects';
   const supportEmail = process.env.SUPPORT_EMAIL ?? 'freedom@efficiencyarchitects.online';
 
   return (
     <div className="ep-page">
-      <header className="ep-header">
-        <div className="ep-header-brand">
-          <span className="ep-header-label">Client Portal</span>
-          <span className="ep-header-name">{brandName}</span>
-        </div>
-        <div className="ep-header-actions">
-          <a href={`/portal/${slug}/updates`} className="ep-update-link">Update Requests</a>
-          <a href="/api/portal/logout" className="ep-logout">
-            Sign Out
-          </a>
-        </div>
-      </header>
+      <PortalNav slug={slug} active="home" />
 
       <main className="ep-main">
         <div className="ep-welcome">
@@ -121,12 +110,15 @@ export default async function PortalPage({
         </div>
 
         <div className="ep-card">
-          <p className="ep-card-title">Resources</p>
+          <p className="ep-card-title">Pulse — Your Progress</p>
           <div className="ep-placeholder">
             <p className="ep-placeholder-text">
-              Your advisor will populate this section with documents, deliverables, and next steps
-              as your engagement progresses.
+              See your Capacity Score, Engagement Score, Training Completion, and
+              Operational Health in one place.
             </p>
+            <a href={`/portal/${slug}/pulse`} className="ep-pulse-cta">
+              Open Pulse
+            </a>
           </div>
         </div>
 

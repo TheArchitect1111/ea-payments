@@ -44,6 +44,7 @@ export interface PortalClientRecord {
   passwordChanged: boolean;
   passwordHash?: string;
   tempPassword?: string;
+  onboardingStatus?: OnboardingStatus;
 }
 
 function authHeaders(): Record<string, string> {
@@ -209,6 +210,7 @@ export async function getClientByPortalSlug(slug: string): Promise<PortalClientR
       passwordChanged: Boolean(f['Password Changed']),
       passwordHash: (f['Password Hash'] as string) || undefined,
       tempPassword: (f['Temp Password'] as string) || undefined,
+      onboardingStatus: (f['Onboarding Status'] as OnboardingStatus) || undefined,
     };
   } catch {
     return null;
@@ -246,6 +248,7 @@ export async function getClientByEmail(email: string): Promise<PortalClientRecor
       passwordChanged: Boolean(f['Password Changed']),
       passwordHash: (f['Password Hash'] as string) || undefined,
       tempPassword: (f['Temp Password'] as string) || undefined,
+      onboardingStatus: (f['Onboarding Status'] as OnboardingStatus) || undefined,
     };
   } catch {
     return null;
@@ -1200,6 +1203,48 @@ export async function getProposalByProposalId(
     return buildProposalRecord(record);
   } catch (err) {
     console.error('getProposalByProposalId error:', err);
+    return null;
+  }
+}
+
+export async function getLatestProposalByEmail(
+  email: string,
+): Promise<ProposalWithAssessment | null> {
+  if (!process.env.AIRTABLE_API_KEY) {
+    console.warn('getLatestProposalByEmail: AIRTABLE_API_KEY not set.');
+    return null;
+  }
+
+  const safe = email.toLowerCase().replace(/'/g, "\\'");
+  const formula = encodeURIComponent(`LOWER({Email})='${safe}'`);
+  const url =
+    `https://api.airtable.com/v0/${BASE_ID}/${PROPOSALS_TABLE}` +
+    `?filterByFormula=${formula}&pageSize=10`;
+
+  try {
+    const res = await fetch(url, { headers: authHeaders(), cache: 'no-store' });
+    if (!res.ok) {
+      const detail = await res.text();
+      console.error('getLatestProposalByEmail fetch failed:', detail);
+      return null;
+    }
+
+    const data = (await res.json()) as {
+      records?: { id: string; createdTime?: string; fields: Record<string, unknown> }[];
+    };
+
+    const records = data.records ?? [];
+    if (records.length === 0) return null;
+
+    records.sort((a, b) => {
+      const ta = a.createdTime ? Date.parse(a.createdTime) : 0;
+      const tb = b.createdTime ? Date.parse(b.createdTime) : 0;
+      return tb - ta;
+    });
+
+    return buildProposalRecord(records[0]);
+  } catch (err) {
+    console.error('getLatestProposalByEmail error:', err);
     return null;
   }
 }

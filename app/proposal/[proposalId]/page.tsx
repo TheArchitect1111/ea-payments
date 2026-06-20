@@ -7,7 +7,14 @@ import ProofLibraryPanel from '@/app/admin/_components/ProofLibraryPanel';
 
 export const dynamic = 'force-dynamic';
 
-const VISIBLE_STATUSES = new Set(['Approved', 'Sent', 'Approved & Paid']);
+const RESULTS_STATUSES = new Set([
+  'Pending Review',
+  'Approved',
+  'Sent',
+  'Approved & Paid',
+  'Discovery Call Requested',
+]);
+const PAYMENT_READY_STATUSES = new Set(['Approved', 'Sent', 'Approved & Paid']);
 
 function fmt(n: number): string {
   return new Intl.NumberFormat('en-US', {
@@ -89,11 +96,13 @@ function ProposalContent({
   paymentStatus,
   adoption,
   proofStories,
+  paymentReady,
 }: {
   proposal: ProposalWithAssessment;
   paymentStatus?: string;
   adoption: ReturnType<typeof computeAdoptionHealth>;
   proofStories: ReturnType<typeof matchProofStories>;
+  paymentReady: boolean;
 }) {
   const firstName =
     proposal.contactName.split(' ')[0] || proposal.contactName || 'there';
@@ -110,13 +119,20 @@ function ProposalContent({
           Efficiency Architects
         </p>
         <h1 className="mt-2 text-2xl font-extrabold uppercase tracking-widest text-white">
-          Your Proposal
+          {paymentReady ? 'Your Proposal' : 'Your Capacity Analysis'}
         </h1>
       </div>
 
       <div className="mx-auto max-w-2xl px-6 py-12 space-y-6">
         {/* Payment status banner */}
         <PaymentBanner status={paymentStatus} />
+
+        {!paymentReady && (
+          <div className="border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+            <strong>Your analysis is ready.</strong> Our team may reach out to walk through
+            findings before checkout opens. Save this link — you can return anytime.
+          </div>
+        )}
 
         {/* Greeting */}
         <div className="border border-neutral-200 bg-white p-8">
@@ -130,10 +146,20 @@ function ProposalContent({
             Hi {firstName}
           </h2>
           <p className="mt-3 text-sm leading-relaxed text-neutral-600">
-            Here is the capacity analysis and proposal we prepared for{' '}
-            <strong className="text-neutral-900">{proposal.businessName}</strong>. It
-            is based on what you shared in your assessment. Take a look at what we
-            found.
+            {paymentReady ? (
+              <>
+                Here is the capacity analysis and proposal we prepared for{' '}
+                <strong className="text-neutral-900">{proposal.businessName}</strong>. It
+                is based on what you shared in your assessment. Take a look at what we
+                found.
+              </>
+            ) : (
+              <>
+                Here is what we found for{' '}
+                <strong className="text-neutral-900">{proposal.businessName}</strong> based
+                on your assessment. Review your capacity score and opportunity range below.
+              </>
+            )}
           </p>
         </div>
 
@@ -207,45 +233,66 @@ function ProposalContent({
         <AdoptionHealthPanel adoption={adoption} />
         <ProofLibraryPanel stories={proofStories} />
 
-        {/* Recommended investment */}
-        <div className="border border-neutral-200 bg-white p-8 text-center">
-          <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mb-3">
-            Recommended Investment
-          </p>
-          <p
-            className="text-4xl font-extrabold"
-            style={{ color: '#1B2B4D' }}
-          >
-            {fmt(proposal.recommendedFee)}
-          </p>
-          <p className="mt-2 text-xs text-neutral-500">one-time project investment</p>
-        </div>
+        {paymentReady && (
+          <>
+            {/* Recommended investment */}
+            <div className="border border-neutral-200 bg-white p-8 text-center">
+              <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mb-3">
+                Recommended Investment
+              </p>
+              <p
+                className="text-4xl font-extrabold"
+                style={{ color: '#1B2B4D' }}
+              >
+                {fmt(proposal.recommendedFee)}
+              </p>
+              <p className="mt-2 text-xs text-neutral-500">one-time project investment</p>
+            </div>
 
-        {/* CTA — hidden once payment is confirmed */}
-        {!paid && (
+            {/* CTA — hidden once payment is confirmed */}
+            {!paid && (
+              <div className="border border-neutral-200 bg-white p-8 text-center">
+                <p className="mb-2 text-sm font-semibold text-neutral-700">
+                  Ready to move forward?
+                </p>
+                <p className="mb-6 text-sm leading-relaxed text-neutral-500">
+                  Click below to start your engagement. You will be taken to a secure
+                  checkout to confirm your investment and kick off the work.
+                </p>
+                <a
+                  href={`/commitment/${encodeURIComponent(proposal.proposalId)}`}
+                  className="block w-full bg-neutral-950 px-6 py-4 text-xs font-bold uppercase tracking-widest text-white hover:bg-neutral-800"
+                >
+                  Start My Transformation
+                </a>
+                <p className="mt-4 text-xs text-neutral-400">
+                  Questions before you commit? Email us at{' '}
+                  <a
+                    href="mailto:freedom@efficiencyarchitects.online"
+                    className="font-semibold text-neutral-700 underline"
+                  >
+                    freedom@efficiencyarchitects.online
+                  </a>
+                </p>
+              </div>
+            )}
+          </>
+        )}
+
+        {!paymentReady && (
           <div className="border border-neutral-200 bg-white p-8 text-center">
             <p className="mb-2 text-sm font-semibold text-neutral-700">
-              Ready to move forward?
+              Questions about your results?
             </p>
             <p className="mb-6 text-sm leading-relaxed text-neutral-500">
-              Click below to start your engagement. You will be taken to a secure
-              checkout to confirm your investment and kick off the work.
+              Email us and we will schedule a walkthrough of your analysis and next steps.
             </p>
             <a
-              href={`/commitment/${encodeURIComponent(proposal.proposalId)}`}
-              className="block w-full bg-neutral-950 px-6 py-4 text-xs font-bold uppercase tracking-widest text-white hover:bg-neutral-800"
+              href="mailto:freedom@efficiencyarchitects.online"
+              className="inline-block bg-neutral-950 px-6 py-4 text-xs font-bold uppercase tracking-widest text-white hover:bg-neutral-800"
             >
-                Start My Transformation
+              Talk With Our Team
             </a>
-            <p className="mt-4 text-xs text-neutral-400">
-              Questions before you commit? Email us at{' '}
-              <a
-                href="mailto:freedom@efficiencyarchitects.online"
-                className="font-semibold text-neutral-700 underline"
-              >
-                freedom@efficiencyarchitects.online
-              </a>
-            </p>
           </div>
         )}
 
@@ -286,10 +333,11 @@ export default async function ProposalPage({
 
   const proposal = await getProposalByProposalId(proposalId);
 
-  if (!proposal || !VISIBLE_STATUSES.has(proposal.status)) {
+  if (!proposal || !RESULTS_STATUSES.has(proposal.status)) {
     return <Unavailable />;
   }
 
+  const paymentReady = PAYMENT_READY_STATUSES.has(proposal.status);
   const adoption = computeAdoptionHealth(proposal);
   const proofStories = matchProofStories(proposal);
   const stories = proofStories.length > 0 ? proofStories : defaultProofStories();
@@ -300,6 +348,7 @@ export default async function ProposalPage({
       paymentStatus={payment}
       adoption={adoption}
       proofStories={stories}
+      paymentReady={paymentReady}
     />
   );
 }
