@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
     }
 
     const stripePriceId = process.env[item.stripePriceEnvKey];
-    if (!stripePriceId) {
+    if (!stripePriceId && !item.allowInlineStripePrice) {
       return NextResponse.json(
         {
           error:
@@ -62,7 +62,21 @@ export async function POST(req: NextRequest) {
     const sessionParams: Stripe.Checkout.SessionCreateParams = {
       mode: 'payment',
       payment_method_types: ['card', 'us_bank_account'],
-      line_items: [{ price: stripePriceId, quantity: 1 }],
+      line_items: [
+        stripePriceId
+          ? { price: stripePriceId, quantity: 1 }
+          : {
+              price_data: {
+                currency: 'usd',
+                unit_amount: item.priceCents,
+                product_data: {
+                  name: item.displayName,
+                  description: item.description,
+                },
+              },
+              quantity: 1,
+            },
+      ],
       customer_email: email.trim(),
       metadata: {
         clientName: name.trim(),

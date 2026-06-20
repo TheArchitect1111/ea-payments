@@ -129,6 +129,7 @@ export default function PremiumLanding() {
           </Link>
           <nav className="ea-nav-links" aria-label="Primary">
             <a href="#possibilities">Discover</a>
+            <Link href="/simplifi">Simplifi</Link>
             <Link href="/assessment" className="ea-nav-cta">
               Take The Assessment
             </Link>
@@ -289,6 +290,7 @@ export default function PremiumLanding() {
 
       <footer className="ea-footer">
         <nav className="ea-footer-links" aria-label="Footer">
+          <Link href="/simplifi">Simplifi</Link>
           <Link href="/assessment">Capacity Assessment</Link>
           <Link href="/portal/login">Client Portal</Link>
           <Link href="/scorecard">Visibility Scorecard</Link>

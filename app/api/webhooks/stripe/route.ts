@@ -18,6 +18,7 @@ const VALID_PACKAGES: AirtablePackage[] = [
   'Capacity Assessment',
   'Capacity Blueprint',
   'Implementation Package',
+  'Simplifi',
 ];
 
 export async function POST(req: NextRequest) {

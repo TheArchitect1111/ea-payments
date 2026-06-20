@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
+import { useEffect, useState, FormEvent } from 'react';
 import { getEACatalog, formatPrice } from '@/lib/catalog';
 
 const EA_PRODUCTS = getEACatalog();
@@ -17,6 +17,15 @@ export default function CheckoutPage() {
 
   const selectedItem = EA_PRODUCTS.find((p) => p.id === packageId);
   const showAchNote = selectedItem && selectedItem.priceCents > 50000;
+
+  useEffect(() => {
+    const requestedPackage = new URLSearchParams(window.location.search).get('package');
+    if (requestedPackage && EA_PRODUCTS.some((product) => product.id === requestedPackage)) {
+      const timer = window.setTimeout(() => setPackageId(requestedPackage), 0);
+      return () => window.clearTimeout(timer);
+    }
+    return undefined;
+  }, []);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();

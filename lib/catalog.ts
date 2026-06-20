@@ -22,7 +22,8 @@ export type PackageId =
   | 'implementation_starter'
   | 'implementation_professional'
   | 'implementation_premium'
-  | 'implementation_enterprise';
+  | 'implementation_enterprise'
+  | 'simplifi_early_access';
 
 export interface CatalogItem {
   id: PackageId;
@@ -30,13 +31,26 @@ export interface CatalogItem {
   displayName: string;
   description: string;
   stripePriceEnvKey: string;
-  airtablePackageName: 'Capacity Assessment' | 'Capacity Blueprint' | 'Implementation Package';
+  airtablePackageName: 'Capacity Assessment' | 'Capacity Blueprint' | 'Implementation Package' | 'Simplifi';
   priceCents: number;
+  allowInlineStripePrice?: boolean;
   portalConfig?: PortalConfig;
   portalLoginUrl?: string;
 }
 
 export const CATALOG: CatalogItem[] = [
+  {
+    id: 'simplifi_early_access',
+    name: 'Simplifi Early Access',
+    displayName: 'Simplifi Early Access',
+    description:
+      'Personal Opportunity Intelligence for capturing, analyzing, and acting on opportunities before they disappear.',
+    stripePriceEnvKey: 'STRIPE_PRICE_SIMPLIFI_EARLY_ACCESS',
+    airtablePackageName: 'Simplifi',
+    priceCents: 14900,
+    allowInlineStripePrice: true,
+    portalConfig: { platform: 'efficiency-architects', loginPath: '/portal/login' },
+  },
   {
     id: 'capacity_assessment',
     name: 'Capacity Assessment',

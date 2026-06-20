@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useState, FormEvent, ChangeEvent } from 'react';
 import { OPERATIONAL_CHALLENGES } from '@/lib/analysis-engine';
 
@@ -343,14 +344,10 @@ export default function AssessmentPage() {
       <div style={{ backgroundColor: BLACK }}>
         {/* EA wordmark row */}
         <div className="mx-auto max-w-5xl px-6 pt-6">
-          <a
-            href="https://www.efficiencyarchitects.online"
-            aria-label="Efficiency Architects"
-            style={{ textDecoration: 'none' }}
-          >
+          <Link href="/" aria-label="Efficiency Architects home" style={{ textDecoration: 'none' }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/images/ea-logo.png" alt="Efficiency Architects" style={{ height: '80px', width: 'auto' }} />
-          </a>
+          </Link>
         </div>
 
         {/* Headline */}

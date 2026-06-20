@@ -32,3 +32,9 @@ test('scorecard download asset is available', async ({ page }) => {
   expect(res.status()).toBe(200);
   expect(res.headers()['content-type']).toContain('wordprocessingml');
 });
+
+test('simplifi landing page is reachable', async ({ page }) => {
+  await page.goto('/simplifi');
+  await expect(page.getByRole('heading', { name: /never lose an opportunity again/i })).toBeVisible();
+  await expect(page.getByRole('link', { name: /^simplifi$/i })).toBeVisible();
+});
