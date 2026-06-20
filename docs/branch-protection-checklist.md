@@ -28,3 +28,4 @@ Apply these settings in GitHub repository settings:
 - Sentry DSN configured for production ([Sentry React](https://docs.sentry.io/platforms/javascript/guides/react/))
 - Uptime monitors on canonical URLs ([Uptime Kuma](https://github.com/louislam/uptime-kuma))
 - Backup destination documented for env/registry exports
+- DNS cutover for `www.efficiencyarchitects.online` — see [dns-cutover-plan.md](./dns-cutover-plan.md)
