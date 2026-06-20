@@ -14,6 +14,8 @@ export default function UniversalCommandBar({ onOpenNavigator }: Props) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [captureOpen, setCaptureOpen] = useState(false);
+  const [analyzeOpen, setAnalyzeOpen] = useState(false);
+  const [analyzeUrl, setAnalyzeUrl] = useState('');
   const [captureTitle, setCaptureTitle] = useState('');
   const [captureDesc, setCaptureDesc] = useState('');
   const [captureUrl, setCaptureUrl] = useState('');
@@ -42,6 +44,10 @@ export default function UniversalCommandBar({ onOpenNavigator }: Props) {
         setCaptureOpen(true);
         return;
       }
+      if (cmd.action === 'capture:analyze') {
+        setAnalyzeOpen(true);
+        return;
+      }
       if (cmd.href) {
         window.location.href = cmd.href;
       }
@@ -58,17 +64,24 @@ export default function UniversalCommandBar({ onOpenNavigator }: Props) {
       if (e.key === 'Escape') {
         setOpen(false);
         setCaptureOpen(false);
+        setAnalyzeOpen(false);
       }
     };
     const onCapture = () => {
       setCaptureOpen(true);
       setOpen(false);
     };
+    const onAnalyze = () => {
+      setAnalyzeOpen(true);
+      setOpen(false);
+    };
     window.addEventListener('keydown', onKey);
     window.addEventListener('ea:open-capture', onCapture);
+    window.addEventListener('ea:open-analyze', onAnalyze);
     return () => {
       window.removeEventListener('keydown', onKey);
       window.removeEventListener('ea:open-capture', onCapture);
+      window.removeEventListener('ea:open-analyze', onAnalyze);
     };
   }, []);
 
@@ -102,6 +115,41 @@ export default function UniversalCommandBar({ onOpenNavigator }: Props) {
       }, 1200);
     } catch {
       setMessage('Capture failed.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const submitAnalyze = async () => {
+    if (!analyzeUrl.trim()) return;
+    setSaving(true);
+    setMessage('');
+    try {
+      const res = await fetch('/api/admin/captures/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: analyzeUrl.trim(), source: 'Command Bar' }),
+      });
+      const data = (await res.json()) as {
+        ok?: boolean;
+        error?: string;
+        scores?: { eaFitScore: number; opportunityScore: number };
+      };
+      if (!res.ok || !data.ok) {
+        setMessage(data.error ?? 'Analysis failed.');
+        return;
+      }
+      setMessage(
+        `Analyzed · EA Fit ${data.scores?.eaFitScore}/100 · Opportunity ${data.scores?.opportunityScore}/100`
+      );
+      setAnalyzeUrl('');
+      setTimeout(() => {
+        setAnalyzeOpen(false);
+        setMessage('');
+        window.location.href = '/admin/resource-radar';
+      }, 1200);
+    } catch {
+      setMessage('Analysis failed.');
     } finally {
       setSaving(false);
     }
@@ -210,6 +258,47 @@ export default function UniversalCommandBar({ onOpenNavigator }: Props) {
                 style={{ backgroundColor: NAVY }}
               >
                 {saving ? 'Saving…' : 'Save Capture'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {analyzeOpen && (
+        <div
+          className="fixed inset-0 z-[101] flex items-center justify-center px-4"
+          style={{ backgroundColor: 'rgba(15,31,61,0.55)' }}
+          onClick={() => setAnalyzeOpen(false)}
+        >
+          <div
+            className="w-full max-w-md bg-white rounded-lg shadow-2xl p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: GOLD }}>
+              Resource Radar + Firecrawl
+            </p>
+            <h3 className="text-lg font-bold mb-4" style={{ color: NAVY }}>
+              Analyze URL
+            </h3>
+            <input
+              value={analyzeUrl}
+              onChange={(e) => setAnalyzeUrl(e.target.value)}
+              className="w-full border border-neutral-200 rounded px-3 py-2 text-sm mb-4"
+              placeholder="https://"
+            />
+            {message && <p className="text-xs mb-3 text-neutral-600">{message}</p>}
+            <div className="flex gap-2 justify-end">
+              <button type="button" onClick={() => setAnalyzeOpen(false)} className="px-4 py-2 text-sm text-neutral-600">
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={saving || !analyzeUrl.trim()}
+                onClick={submitAnalyze}
+                className="px-4 py-2 text-sm font-bold text-white rounded disabled:opacity-50"
+                style={{ backgroundColor: NAVY }}
+              >
+                {saving ? 'Analyzing…' : 'Capture & Analyze'}
               </button>
             </div>
           </div>

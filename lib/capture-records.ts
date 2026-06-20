@@ -24,6 +24,10 @@ export interface CaptureRecord {
   status: CaptureStatus;
   tags?: string[];
   dateCaptured: string;
+  eaFitScore?: number;
+  opportunityScore?: number;
+  analysisSummary?: string;
+  productAlignment?: string[];
 }
 
 export interface CreateCaptureInput {
@@ -35,6 +39,11 @@ export interface CreateCaptureInput {
   category?: string;
   priority?: 'Low' | 'Normal' | 'High';
   tags?: string[];
+  status?: CaptureStatus;
+  eaFitScore?: number;
+  opportunityScore?: number;
+  analysisSummary?: string;
+  productAlignment?: string[];
 }
 
 function authHeaders(): Record<string, string> {
@@ -47,6 +56,7 @@ function authHeaders(): Record<string, string> {
 function mapRecord(rec: { id: string; fields: Record<string, unknown> }): CaptureRecord {
   const f = rec.fields;
   const tagsRaw = f['Tags'];
+  const alignmentRaw = f['Product Alignment'];
   return {
     id: rec.id,
     captureId: (f['Capture ID'] as string) ?? rec.id,
@@ -55,11 +65,19 @@ function mapRecord(rec: { id: string; fields: Record<string, unknown> }): Captur
     captureType: ((f['Capture Type'] as string) ?? 'Signal') as CaptureType,
     sourceUrl: (f['Source URL'] as string) ?? undefined,
     source: (f['Source'] as string) ?? 'Mission Control',
-    category: (f['Category'] as string) ?? undefined,
+    category: (f['Category'] as string) ?? (f['Resource Category'] as string) ?? undefined,
     priority: ((f['Priority'] as string) ?? 'Normal') as CaptureRecord['priority'],
     status: ((f['Status'] as string) ?? 'Captured') as CaptureStatus,
     tags: Array.isArray(tagsRaw) ? (tagsRaw as string[]) : undefined,
     dateCaptured: (f['Date Captured'] as string) ?? '',
+    eaFitScore: typeof f['EA Fit Score'] === 'number' ? f['EA Fit Score'] : undefined,
+    opportunityScore:
+      typeof f['Opportunity Score'] === 'number' ? f['Opportunity Score'] : undefined,
+    analysisSummary: (f['Analysis Summary'] as string) ?? undefined,
+    productAlignment:
+      typeof alignmentRaw === 'string'
+        ? alignmentRaw.split(',').map((s) => s.trim()).filter(Boolean)
+        : undefined,
   };
 }
 
@@ -85,6 +103,17 @@ export async function getCaptures(limit = 20): Promise<CaptureRecord[]> {
   }
 }
 
+export async function getResourceCaptures(limit = 50): Promise<CaptureRecord[]> {
+  const all = await getCaptures(limit);
+  return all.filter(
+    (c) =>
+      c.captureType === 'Resource' ||
+      c.captureType === 'Organization' ||
+      c.eaFitScore != null ||
+      c.category != null
+  );
+}
+
 export async function createCaptureRecord(
   input: CreateCaptureInput
 ): Promise<{ ok: boolean; record?: CaptureRecord; error?: string }> {
@@ -95,20 +124,28 @@ export async function createCaptureRecord(
   const today = new Date().toISOString().slice(0, 10);
   const captureId = `CAP-${Date.now().toString(36).toUpperCase()}`;
 
-  const fields: Record<string, string | string[]> = {
+  const fields: Record<string, string | number | string[]> = {
     'Capture ID': captureId,
     Title: input.title.trim(),
     'Capture Type': input.captureType ?? 'Signal',
     Source: input.source ?? 'Command Bar',
     Priority: input.priority ?? 'Normal',
-    Status: 'Captured',
+    Status: input.status ?? 'Captured',
     'Date Captured': today,
   };
 
   if (input.description) fields['Description'] = input.description.trim();
   if (input.sourceUrl) fields['Source URL'] = input.sourceUrl.trim();
-  if (input.category) fields['Category'] = input.category;
+  if (input.category) {
+    fields['Category'] = input.category;
+    fields['Resource Category'] = input.category;
+  }
   if (input.tags?.length) fields['Tags'] = input.tags;
+  if (input.eaFitScore != null) fields['EA Fit Score'] = input.eaFitScore;
+  if (input.opportunityScore != null) fields['Opportunity Score'] = input.opportunityScore;
+  if (input.analysisSummary) fields['Analysis Summary'] = input.analysisSummary;
+  if (input.productAlignment?.length)
+    fields['Product Alignment'] = input.productAlignment.join(', ');
 
   try {
     const res = await fetch(
@@ -142,13 +179,27 @@ export async function createCaptureRecord(
   }
 }
 
-export async function updateCaptureStatus(
+export async function updateCaptureAnalysis(
   recordId: string,
-  status: CaptureStatus
+  input: {
+    status?: CaptureStatus;
+    analysisSummary?: string;
+    eaFitScore?: number;
+    opportunityScore?: number;
+    productAlignment?: string[];
+  }
 ): Promise<{ ok: boolean; error?: string }> {
   if (!process.env.AIRTABLE_API_KEY) {
     return { ok: false, error: 'AIRTABLE_API_KEY not configured.' };
   }
+
+  const fields: Record<string, string | number> = {};
+  if (input.status) fields['Status'] = input.status;
+  if (input.analysisSummary) fields['Analysis Summary'] = input.analysisSummary;
+  if (input.eaFitScore != null) fields['EA Fit Score'] = input.eaFitScore;
+  if (input.opportunityScore != null) fields['Opportunity Score'] = input.opportunityScore;
+  if (input.productAlignment?.length)
+    fields['Product Alignment'] = input.productAlignment.join(', ');
 
   try {
     const res = await fetch(
@@ -156,15 +207,22 @@ export async function updateCaptureStatus(
       {
         method: 'PATCH',
         headers: authHeaders(),
-        body: JSON.stringify({ fields: { Status: status }, typecast: true }),
+        body: JSON.stringify({ fields, typecast: true }),
       }
     );
 
     if (!res.ok) {
-      return { ok: false, error: 'Failed to update capture.' };
+      return { ok: false, error: 'Failed to update capture analysis.' };
     }
     return { ok: true };
   } catch {
     return { ok: false, error: 'Unexpected error.' };
   }
+}
+
+export async function updateCaptureStatus(
+  recordId: string,
+  status: CaptureStatus
+): Promise<{ ok: boolean; error?: string }> {
+  return updateCaptureAnalysis(recordId, { status });
 }

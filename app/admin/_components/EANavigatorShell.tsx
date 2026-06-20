@@ -8,6 +8,7 @@ const GOLD = '#C9A844';
 
 const NAV_LINKS = [
   { href: '/admin/master', label: 'Master Control' },
+  { href: '/admin/resource-radar', label: 'Resource Radar' },
   { href: '/admin/dashboard', label: 'Pipeline' },
   { href: '/admin/proposals', label: 'Proposals' },
   { href: '/admin/commissions', label: 'Commissions' },
@@ -20,6 +21,7 @@ const NAVIGATOR_GOALS = [
   { label: 'Manage proposals', href: '/admin/proposals' },
   { label: 'Track partner commissions', href: '/admin/commissions' },
   { label: 'Run Operational MRI funnel', href: '/assessment' },
+  { label: 'Analyze a URL (Resource Radar)', action: 'analyze' as const },
   { label: 'Capture an opportunity', action: 'capture' as const },
 ];
 
@@ -96,6 +98,17 @@ export default function EANavigatorShell({ children }: { children: React.ReactNo
                       onClick={() => {
                         setNavigatorOpen(false);
                         window.dispatchEvent(new CustomEvent('ea:open-capture'));
+                      }}
+                    >
+                      {goal.label} →
+                    </button>
+                  ) : goal.action === 'analyze' ? (
+                    <button
+                      type="button"
+                      className="w-full text-left text-sm px-3 py-2 rounded border border-neutral-200 hover:border-neutral-400"
+                      onClick={() => {
+                        setNavigatorOpen(false);
+                        window.dispatchEvent(new CustomEvent('ea:open-analyze'));
                       }}
                     >
                       {goal.label} →

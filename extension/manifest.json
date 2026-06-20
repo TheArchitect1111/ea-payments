@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "EA Capture Engine",
+  "version": "2.0.0",
+  "description": "One-click capture to Mission Control with Resource Radar analysis",
+  "permissions": ["activeTab", "contextMenus", "storage"],
+  "host_permissions": [
+    "https://ea-payments.vercel.app/*",
+    "http://localhost:3000/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Capture with Magnifi"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "options_page": "options.html"
+}

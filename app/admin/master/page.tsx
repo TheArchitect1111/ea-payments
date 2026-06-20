@@ -409,7 +409,8 @@ export default async function MasterPortalPage() {
             <div className="bg-white border border-neutral-200 p-8 text-center">
               <p className="text-sm text-neutral-500 mb-2">No captures yet.</p>
               <p className="text-xs text-neutral-400">
-                Press ⌘K in Mission Control → Quick Capture. Requires a &quot;Capture Records&quot; table in the Payments Airtable base.
+                Press ⌘K → Analyze URL or Quick Capture. View all scores in{' '}
+                <a href="/admin/resource-radar" className="underline" style={{ color: GOLD }}>Resource Radar</a>.
               </p>
             </div>
           ) : (
@@ -420,6 +421,8 @@ export default async function MasterPortalPage() {
                     <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-neutral-500">Title</th>
                     <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-neutral-500">Type</th>
                     <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-neutral-500">Source</th>
+                    <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-neutral-500">EA Fit</th>
+                    <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-neutral-500">Opportunity</th>
                     <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-neutral-500">Status</th>
                     <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-neutral-500">Date</th>
                   </tr>
@@ -430,6 +433,8 @@ export default async function MasterPortalPage() {
                       <td className="px-4 py-3 font-medium" style={{ color: NAVY }}>{c.title}</td>
                       <td className="px-4 py-3 text-neutral-600">{c.captureType}</td>
                       <td className="px-4 py-3 text-neutral-600">{c.source}</td>
+                      <td className="px-4 py-3 font-semibold" style={{ color: GOLD }}>{c.eaFitScore ?? '—'}</td>
+                      <td className="px-4 py-3 font-semibold" style={{ color: NAVY }}>{c.opportunityScore ?? '—'}</td>
                       <td className="px-4 py-3 text-neutral-600">{c.status}</td>
                       <td className="px-4 py-3 text-neutral-400">{fmtDate(c.dateCaptured)}</td>
                     </tr>
