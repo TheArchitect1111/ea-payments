@@ -132,6 +132,46 @@ export async function getBlueprintCaptures(limit = 30): Promise<CaptureRecord[]>
   return all.filter((c) => c.blueprintSummary || c.blueprintTemplate);
 }
 
+export async function getCaptureByIdentifier(identifier: string): Promise<CaptureRecord | null> {
+  if (!process.env.AIRTABLE_API_KEY) return null;
+
+  const trimmed = identifier.trim();
+  if (!trimmed) return null;
+
+  const fetchRecord = async (url: string) => {
+    const res = await fetch(url, { headers: authHeaders(), cache: 'no-store' });
+    if (!res.ok) return null;
+    return (await res.json()) as {
+      id?: string;
+      fields?: Record<string, unknown>;
+      records?: { id: string; fields: Record<string, unknown> }[];
+    };
+  };
+
+  try {
+    if (trimmed.startsWith('rec')) {
+      const data = await fetchRecord(
+        `https://api.airtable.com/v0/${BASE_ID}/${encodeURIComponent(CAPTURES_TABLE)}/${trimmed}`
+      );
+      if (data?.id && data.fields) return mapRecord({ id: data.id, fields: data.fields });
+    }
+
+    const safeIdentifier = trimmed.replace(/'/g, "\\'");
+    const formula = `OR({Capture ID}='${safeIdentifier}',RECORD_ID()='${safeIdentifier}')`;
+    const params = new URLSearchParams({
+      filterByFormula: formula,
+      maxRecords: '1',
+    });
+    const data = await fetchRecord(
+      `https://api.airtable.com/v0/${BASE_ID}/${encodeURIComponent(CAPTURES_TABLE)}?${params.toString()}`
+    );
+    const rec = data?.records?.[0];
+    return rec ? mapRecord(rec) : null;
+  } catch {
+    return null;
+  }
+}
+
 export async function createCaptureRecord(
   input: CreateCaptureInput
 ): Promise<{ ok: boolean; record?: CaptureRecord; error?: string }> {

@@ -4,7 +4,8 @@ const TABLE = 'Client Records';
 export type AirtablePackage =
   | 'Capacity Assessment'
   | 'Capacity Blueprint'
-  | 'Implementation Package';
+  | 'Implementation Package'
+  | 'Simplifi';
 
 export type PortalAccessStatus = 'Pending' | 'Active' | 'Suspended';
 export type OnboardingStatus = 'Not Started' | 'In Progress' | 'Complete';

@@ -10,9 +10,11 @@ const GOLD = '#C9A844';
 
 const NAV_LINKS = [
   { href: '/admin/master', label: 'Master Control' },
+  { href: '/admin/simplifi', label: 'Simplifi' },
   { href: '/admin/resource-radar', label: 'Resource Radar' },
   { href: '/admin/simplifi-audit', label: 'Simplifi Audit' },
   { href: '/admin/blueprints', label: 'Blueprints' },
+  { href: '/admin/foundation-library', label: 'Foundation Library' },
   { href: '/admin/academy', label: 'Academy' },
   { href: '/admin/knowledge-graph', label: 'Knowledge Graph' },
   { href: '/admin/digital-twin', label: 'Digital Twin' },
@@ -29,6 +31,7 @@ const NAVIGATOR_GOALS = [
   { label: 'Manage proposals', href: '/admin/proposals' },
   { label: 'Track partner commissions', href: '/admin/commissions' },
   { label: 'Run Operational MRI funnel', href: '/assessment' },
+  { label: 'Open Simplifi workspace', href: '/admin/simplifi' },
   { label: 'Run Simplifi website audit', href: '/admin/simplifi-audit' },
   { label: 'Search Knowledge Graph', href: '/admin/knowledge-graph' },
   { label: 'View Digital Twin', href: '/admin/digital-twin' },
@@ -36,6 +39,7 @@ const NAVIGATOR_GOALS = [
   { label: 'Learn EA Academy', href: '/admin/academy' },
   { label: 'Analyze a URL (Resource Radar)', action: 'analyze' as const },
   { label: 'View Auto Blueprints', href: '/admin/blueprints' },
+  { label: 'Open Foundation Library', href: '/admin/foundation-library' },
   { label: 'Capture an opportunity', action: 'capture' as const },
 ];
 

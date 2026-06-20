@@ -9,7 +9,7 @@ const GOLD = '#C9A844';
 
 export default function AcademyClient() {
   const [activeId, setActiveId] = useState(ACADEMY_MODULES[0]?.id ?? '');
-  const module = ACADEMY_MODULES.find((m) => m.id === activeId) ?? ACADEMY_MODULES[0];
+  const activeModule = ACADEMY_MODULES.find((m) => m.id === activeId) ?? ACADEMY_MODULES[0];
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-8">
@@ -57,16 +57,16 @@ export default function AcademyClient() {
           ))}
         </div>
 
-        {module && (
+        {activeModule && (
           <div className="lg:col-span-2 space-y-4">
             <div className="bg-white border border-neutral-200 p-6">
               <h3 className="text-xl font-extrabold mb-2" style={{ color: NAVY }}>
-                {module.title}
+                {activeModule.title}
               </h3>
-              <p className="text-sm text-neutral-600">{module.summary}</p>
+              <p className="text-sm text-neutral-600">{activeModule.summary}</p>
             </div>
 
-            {module.lessons.map((lesson) => (
+            {activeModule.lessons.map((lesson) => (
               <div key={lesson.title} className="bg-white border border-neutral-200 p-5">
                 <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: GOLD }}>
                   {lesson.title}
@@ -75,13 +75,13 @@ export default function AcademyClient() {
               </div>
             ))}
 
-            {module.cta && (
+            {activeModule.cta && (
               <a
-                href={module.cta.href}
+                href={activeModule.cta.href}
                 className="inline-block text-xs font-bold px-4 py-2 rounded text-white"
                 style={{ backgroundColor: NAVY }}
               >
-                {module.cta.label} →
+                {activeModule.cta.label} →
               </a>
             )}
           </div>
