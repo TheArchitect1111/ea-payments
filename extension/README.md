@@ -1,4 +1,4 @@
-# EA Capture Engine — Browser Extension (Wave 2)
+# EA Capture Engine — Browser Extension (Wave 3)
 
 Chrome MV3 extension for one-click capture to Mission Control.
 
@@ -17,10 +17,22 @@ Chrome MV3 extension for one-click capture to Mission Control.
 
 ## Usage
 
-- Click extension icon → **Capture This Page**
-- Right-click any page → **Capture with Magnifi™**
-- Captures run Firecrawl (if configured) → Resource Radar → Opportunity scoring → Airtable
+**Popup**
+- **Capture This Page** — scrape, classify, score, recommend, blueprint stub
+- **Generate Auto Blueprint** — full Wave 3 pipeline with Magnifi template selection
+- **Run Simplifi Assessment** — opens Operational MRI funnel
+- **Open Resource Radar** — Mission Control intelligence view
 
-## Context menu actions (future Wave 3)
+**Context menu (right-click)**
+- **Capture with Magnifi™** — quick capture + analysis
+- **Generate Auto Blueprint** — BAS / Selena / JCSU pattern + blueprint stub
+- **Run Simplifi Assessment** — opens assessment funnel
 
-Save to Resource Radar, Generate Blueprint, Run Simplifi — planned for next wave.
+Captures run Firecrawl (if configured) → Resource Radar → Opportunity Engine → Recommendation Engine → Auto Blueprint → Airtable.
+
+## Wave 3 outputs
+
+Every capture includes:
+- **Trust Layer** — confidence score, sources, reasoning
+- **Recommendation Engine** — Magnifi template + top 3 priorities + first step
+- **Auto Blueprint stub** — view in `/admin/blueprints`

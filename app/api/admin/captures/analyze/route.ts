@@ -26,5 +26,8 @@ export async function POST(req: Request) {
     record: result.record,
     scores: result.scores,
     classification: result.classification,
+    recommendations: result.recommendations,
+    blueprint: result.blueprint,
+    trust: result.trust,
   });
 }

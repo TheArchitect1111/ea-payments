@@ -28,6 +28,10 @@ export interface CaptureRecord {
   opportunityScore?: number;
   analysisSummary?: string;
   productAlignment?: string[];
+  blueprintTemplate?: string;
+  trustConfidence?: number;
+  recommendationSummary?: string;
+  blueprintSummary?: string;
 }
 
 export interface CreateCaptureInput {
@@ -44,6 +48,10 @@ export interface CreateCaptureInput {
   opportunityScore?: number;
   analysisSummary?: string;
   productAlignment?: string[];
+  blueprintTemplate?: string;
+  trustConfidence?: number;
+  recommendationSummary?: string;
+  blueprintSummary?: string;
 }
 
 function authHeaders(): Record<string, string> {
@@ -78,6 +86,11 @@ function mapRecord(rec: { id: string; fields: Record<string, unknown> }): Captur
       typeof alignmentRaw === 'string'
         ? alignmentRaw.split(',').map((s) => s.trim()).filter(Boolean)
         : undefined,
+    blueprintTemplate: (f['Blueprint Template'] as string) ?? undefined,
+    trustConfidence:
+      typeof f['Trust Confidence'] === 'number' ? f['Trust Confidence'] : undefined,
+    recommendationSummary: (f['Recommendation Summary'] as string) ?? undefined,
+    blueprintSummary: (f['Blueprint Summary'] as string) ?? undefined,
   };
 }
 
@@ -114,6 +127,11 @@ export async function getResourceCaptures(limit = 50): Promise<CaptureRecord[]> 
   );
 }
 
+export async function getBlueprintCaptures(limit = 30): Promise<CaptureRecord[]> {
+  const all = await getCaptures(limit);
+  return all.filter((c) => c.blueprintSummary || c.blueprintTemplate);
+}
+
 export async function createCaptureRecord(
   input: CreateCaptureInput
 ): Promise<{ ok: boolean; record?: CaptureRecord; error?: string }> {
@@ -146,6 +164,10 @@ export async function createCaptureRecord(
   if (input.analysisSummary) fields['Analysis Summary'] = input.analysisSummary;
   if (input.productAlignment?.length)
     fields['Product Alignment'] = input.productAlignment.join(', ');
+  if (input.blueprintTemplate) fields['Blueprint Template'] = input.blueprintTemplate;
+  if (input.trustConfidence != null) fields['Trust Confidence'] = input.trustConfidence;
+  if (input.recommendationSummary) fields['Recommendation Summary'] = input.recommendationSummary;
+  if (input.blueprintSummary) fields['Blueprint Summary'] = input.blueprintSummary;
 
   try {
     const res = await fetch(
@@ -187,6 +209,10 @@ export async function updateCaptureAnalysis(
     eaFitScore?: number;
     opportunityScore?: number;
     productAlignment?: string[];
+    blueprintTemplate?: string;
+    trustConfidence?: number;
+    recommendationSummary?: string;
+    blueprintSummary?: string;
   }
 ): Promise<{ ok: boolean; error?: string }> {
   if (!process.env.AIRTABLE_API_KEY) {
@@ -200,6 +226,10 @@ export async function updateCaptureAnalysis(
   if (input.opportunityScore != null) fields['Opportunity Score'] = input.opportunityScore;
   if (input.productAlignment?.length)
     fields['Product Alignment'] = input.productAlignment.join(', ');
+  if (input.blueprintTemplate) fields['Blueprint Template'] = input.blueprintTemplate;
+  if (input.trustConfidence != null) fields['Trust Confidence'] = input.trustConfidence;
+  if (input.recommendationSummary) fields['Recommendation Summary'] = input.recommendationSummary;
+  if (input.blueprintSummary) fields['Blueprint Summary'] = input.blueprintSummary;
 
   try {
     const res = await fetch(

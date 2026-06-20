@@ -9,6 +9,7 @@ const GOLD = '#C9A844';
 const NAV_LINKS = [
   { href: '/admin/master', label: 'Master Control' },
   { href: '/admin/resource-radar', label: 'Resource Radar' },
+  { href: '/admin/blueprints', label: 'Blueprints' },
   { href: '/admin/dashboard', label: 'Pipeline' },
   { href: '/admin/proposals', label: 'Proposals' },
   { href: '/admin/commissions', label: 'Commissions' },
@@ -22,6 +23,7 @@ const NAVIGATOR_GOALS = [
   { label: 'Track partner commissions', href: '/admin/commissions' },
   { label: 'Run Operational MRI funnel', href: '/assessment' },
   { label: 'Analyze a URL (Resource Radar)', action: 'analyze' as const },
+  { label: 'View Auto Blueprints', href: '/admin/blueprints' },
   { label: 'Capture an opportunity', action: 'capture' as const },
 ];
 

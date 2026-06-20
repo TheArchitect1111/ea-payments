@@ -16,6 +16,7 @@ export const ADMIN_COMMANDS: CommandItem[] = [
   { id: 'nav-enhance', label: 'Enhancements', group: 'Navigate', href: '/admin/enhancements' },
   { id: 'nav-assessment', label: 'Operational MRI (public)', group: 'Navigate', href: '/assessment', keywords: ['mri', 'funnel'] },
   { id: 'nav-radar', label: 'Resource Radar', group: 'Navigate', href: '/admin/resource-radar', keywords: ['resources', 'tools'] },
+  { id: 'nav-blueprints', label: 'Blueprint Library', group: 'Navigate', href: '/admin/blueprints', keywords: ['magnifi', 'auto blueprint'] },
   { id: 'nav-portal', label: 'Client Portal Login', group: 'Navigate', href: '/portal/login' },
   { id: 'create-capture', label: 'Quick Capture', group: 'Capture', action: 'capture:quick', keywords: ['save', 'signal'] },
   { id: 'analyze-url', label: 'Analyze URL (Firecrawl + Radar)', group: 'Capture', action: 'capture:analyze', keywords: ['scrape', 'website'] },
