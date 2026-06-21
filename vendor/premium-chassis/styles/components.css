@@ -1,0 +1,133 @@
+/**
+ * EA Premium Chassis™ — reusable UI primitives
+ */
+
+.pc-page {
+  min-height: 100vh;
+  background: var(--pc-cream-alt);
+  color: var(--pc-ink);
+  font-family: var(--pc-font-body);
+}
+
+.pc-page-dark {
+  background: var(--pc-black);
+  color: #fff;
+}
+
+.pc-container {
+  max-width: var(--pc-container);
+  margin: 0 auto;
+  padding: 0 var(--pc-space-6);
+}
+
+.pc-container-narrow {
+  max-width: var(--pc-container-narrow);
+  margin: 0 auto;
+  padding: 0 var(--pc-space-6);
+}
+
+.pc-section {
+  padding: var(--pc-space-16) 0;
+}
+
+.pc-card {
+  background: var(--pc-surface);
+  border: 1px solid var(--pc-border);
+  border-radius: var(--pc-radius-md);
+  padding: var(--pc-space-8);
+  box-shadow: var(--pc-shadow-card);
+}
+
+.pc-card-accent {
+  border-top: 3px solid var(--pc-gold);
+}
+
+.pc-callout {
+  border: 2px solid var(--pc-gold-bright);
+  background: #fffbeb;
+  border-radius: var(--pc-radius-md);
+  padding: var(--pc-space-4) var(--pc-space-6);
+}
+
+.pc-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--pc-space-2);
+  padding: 1rem 1.5rem;
+  font-family: var(--pc-font-display);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border: none;
+  border-radius: var(--pc-radius-sm);
+  cursor: pointer;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.pc-btn:hover {
+  opacity: 0.92;
+}
+
+.pc-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pc-btn-primary {
+  background: var(--pc-black);
+  color: var(--pc-gold-bright);
+}
+
+.pc-btn-secondary {
+  background: var(--pc-navy);
+  color: var(--pc-gold);
+}
+
+.pc-btn-outline {
+  background: transparent;
+  border: 1px solid var(--pc-border);
+  color: var(--pc-navy);
+}
+
+.pc-input,
+.ea-input {
+  width: 100%;
+  border: 1px solid #d1d5db;
+  background: var(--pc-surface);
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  color: var(--pc-ink);
+  border-radius: var(--pc-radius-sm);
+  font-family: var(--pc-font-body);
+}
+
+.pc-input:focus,
+.ea-input:focus {
+  outline: none;
+  border-color: var(--pc-gold-bright);
+  box-shadow: var(--pc-shadow-gold-ring);
+}
+
+.pc-hero-band {
+  background: var(--pc-black);
+  color: #fff;
+  padding: var(--pc-space-12) var(--pc-space-6) var(--pc-space-16);
+  text-align: center;
+}
+
+.pc-badge {
+  display: inline-block;
+  font-family: var(--pc-font-display);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--pc-navy);
+  background: #f3f0e8;
+  border: 1px solid var(--pc-gold);
+  padding: 4px 8px;
+  border-radius: var(--pc-radius-sm);
+}

@@ -1,6 +1,8 @@
-const NAVY = '#1B2B4D';
-const GOLD = '#C9A844';
-const CREAM = '#F8F6F2';
+import { eaPulseTheme } from '@ea/premium-chassis/theme';
+
+const NAVY = eaPulseTheme.colors.navy;
+const GOLD = eaPulseTheme.colors.gold;
+const CREAM = eaPulseTheme.colors.creamAlt;
 const SUPPORT_EMAIL = 'freedom@efficiencyarchitects.online';
 
 const steps = [

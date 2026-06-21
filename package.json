@@ -8,10 +8,13 @@
     "start": "next start",
     "lint": "eslint",
     "test:smoke": "playwright test --config=playwright.smoke.config.ts",
-    "sync-chassis": "node scripts/sync-portal-chassis.mjs"
+    "sync-chassis": "node scripts/sync-portal-chassis.mjs",
+    "sync-premium": "node scripts/sync-premium-chassis.mjs",
+    "sync-all-chassis": "npm run sync-chassis && npm run sync-premium"
   },
   "dependencies": {
     "@ea/portal-chassis": "file:./vendor/portal-chassis",
+    "@ea/premium-chassis": "file:./vendor/premium-chassis",
     "@sentry/nextjs": "^10.59.0",
     "framer-motion": "^12.40.0",
     "next": "16.2.9",

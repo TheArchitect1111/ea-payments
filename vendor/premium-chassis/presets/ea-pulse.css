@@ -1,0 +1,17 @@
+/**
+ * EA Pulse default theme — import once in app globals.css
+ * @import '@ea/premium-chassis/presets/ea-pulse.css';
+ */
+@import '../styles/premium-chassis.css';
+
+:root {
+  /* Pulse marketing uses bright gold on dark heroes; portals use classic gold */
+  --pc-hero-accent: var(--pc-gold-bright);
+}
+
+body.pc-body-default,
+body {
+  background: var(--pc-cream-alt);
+  color: var(--pc-ink);
+  font-family: var(--pc-font-body);
+}

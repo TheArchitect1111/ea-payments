@@ -1,33 +1,14 @@
-@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=Barlow:wght@400;600&display=swap');
+@import '@ea/premium-chassis/presets/ea-pulse.css';
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-background: var(--pc-cream-alt);
+  --color-foreground: var(--pc-ink);
+  --font-sans: var(--pc-font-body);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-}
-
-.ea-input:focus {
-  outline: none;
-  border-color: #F5A623;
-  box-shadow: 0 0 0 2px rgba(245, 166, 35, 0.2);
+  background: var(--pc-cream-alt);
+  color: var(--pc-ink);
+  font-family: var(--pc-font-body);
 }

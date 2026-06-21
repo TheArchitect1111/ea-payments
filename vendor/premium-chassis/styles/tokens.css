@@ -1,0 +1,56 @@
+/**
+ * EA Premium Chassis™ — brand tokens (Pulse default)
+ * Import via presets/ea-pulse.css or styles/premium-chassis.css
+ */
+
+:root {
+  /* Brand */
+  --pc-navy: #1b2b4d;
+  --pc-gold: #c9a844;
+  --pc-gold-bright: #f5a623;
+  --pc-cream: #faf8f3;
+  --pc-cream-alt: #f8f6f2;
+  --pc-black: #111111;
+  --pc-ink: #171717;
+  --pc-muted: #6b7280;
+  --pc-border: #e5e7eb;
+  --pc-surface: #ffffff;
+  --pc-success: #065f46;
+  --pc-warning: #92400e;
+  --pc-danger: #991b1b;
+
+  /* Typography */
+  --pc-font-display: 'Barlow Condensed', Arial, sans-serif;
+  --pc-font-body: 'Barlow', system-ui, sans-serif;
+
+  /* Layout */
+  --pc-radius-sm: 4px;
+  --pc-radius-md: 8px;
+  --pc-radius-lg: 12px;
+  --pc-container: 1180px;
+  --pc-container-narrow: 768px;
+
+  --pc-space-1: 4px;
+  --pc-space-2: 8px;
+  --pc-space-3: 12px;
+  --pc-space-4: 16px;
+  --pc-space-6: 24px;
+  --pc-space-8: 32px;
+  --pc-space-12: 48px;
+  --pc-space-16: 64px;
+
+  --pc-shadow-card: 0 1px 3px rgba(27, 43, 77, 0.08);
+  --pc-shadow-elevated: 0 12px 40px rgba(27, 43, 77, 0.12);
+  --pc-shadow-gold-ring: 0 0 0 2px rgba(245, 166, 35, 0.25);
+
+  /* portal-chassis compatibility aliases */
+  --color-brand: var(--pc-navy);
+  --color-brand-light: #2a3f6b;
+  --color-accent: var(--pc-gold);
+  --color-bg: var(--pc-cream-alt);
+  --color-surface: var(--pc-surface);
+  --color-text: var(--pc-ink);
+  --color-text-muted: var(--pc-muted);
+  --font-display: var(--pc-font-display);
+  --font-body: var(--pc-font-body);
+}

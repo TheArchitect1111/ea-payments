@@ -1,0 +1,50 @@
+{
+  "name": "@ea/premium-chassis",
+  "version": "0.1.0",
+  "description": "EA Premium Chassis — shared brand tokens, typography, and UI components for Pulse ecosystem sites",
+  "license": "UNLICENSED",
+  "private": false,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./index.js",
+      "default": "./index.js"
+    },
+    "./theme": {
+      "types": "./theme.d.ts",
+      "import": "./theme.js",
+      "default": "./theme.js"
+    },
+    "./styles/tokens.css": "./styles/tokens.css",
+    "./styles/typography.css": "./styles/typography.css",
+    "./styles/components.css": "./styles/components.css",
+    "./styles/premium-chassis.css": "./styles/premium-chassis.css",
+    "./presets/ea-pulse.css": "./presets/ea-pulse.css"
+  },
+  "files": [
+    "styles",
+    "presets",
+    "index.js",
+    "index.d.ts",
+    "theme.js",
+    "theme.d.ts",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "restricted",
+    "registry": "https://npm.pkg.github.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TheArchitect1111/ea-operating-system.git",
+    "directory": "premium-chassis"
+  },
+  "keywords": [
+    "ea",
+    "pulse",
+    "design-system",
+    "premium",
+    "chassis"
+  ]
+}

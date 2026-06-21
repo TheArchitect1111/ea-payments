@@ -1,0 +1,54 @@
+/**
+ * EA Premium Chassis™ — typography
+ */
+
+.pc-font-body {
+  font-family: var(--pc-font-body);
+}
+
+.pc-font-display {
+  font-family: var(--pc-font-display);
+}
+
+.pc-eyebrow {
+  font-family: var(--pc-font-display);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--pc-gold);
+}
+
+.pc-display-lg {
+  font-family: var(--pc-font-display);
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--pc-gold-bright);
+}
+
+.pc-display-md {
+  font-family: var(--pc-font-display);
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--pc-navy);
+}
+
+.pc-lead {
+  font-family: var(--pc-font-body);
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--pc-muted);
+}
+
+.pc-body {
+  font-family: var(--pc-font-body);
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--pc-muted);
+}

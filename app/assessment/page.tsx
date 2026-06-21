@@ -4,10 +4,12 @@ import Link from 'next/link';
 import { useState, FormEvent, ChangeEvent } from 'react';
 import { OPERATIONAL_CHALLENGES } from '@/lib/analysis-engine';
 
-const GOLD    = '#F5A623';
-const BLACK   = '#111111';
-const CONDENSED = "'Barlow Condensed', sans-serif";
-const BARLOW    = "'Barlow', sans-serif";
+import { eaPulseTheme } from '@ea/premium-chassis/theme';
+
+const GOLD = eaPulseTheme.colors.goldBright;
+const BLACK = eaPulseTheme.colors.black;
+const CONDENSED = eaPulseTheme.fonts.display;
+const BARLOW = eaPulseTheme.fonts.body;
 
 // ---------------------------------------------------------------------------
 // Static option lists
