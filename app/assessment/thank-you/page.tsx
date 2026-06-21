@@ -43,10 +43,11 @@ function StepIcon({ type }: { type: string }) {
 export default async function ThankYouPage({
   searchParams,
 }: {
-  searchParams: Promise<{ proposal?: string }>;
+  searchParams: Promise<{ proposal?: string; received?: string }>;
 }) {
-  const { proposal } = await searchParams;
+  const { proposal, received } = await searchParams;
   const proposalUrl = proposal ? `/proposal/${encodeURIComponent(proposal)}` : null;
+  const receivedOnly = received === '1';
 
   return (
     <main className="min-h-screen" style={{ backgroundColor: CREAM }}>
@@ -61,7 +62,9 @@ export default async function ThankYouPage({
               Your Assessment Is In.
             </h1>
             <p className="mt-4 max-w-xl text-lg leading-8 text-blue-50">
-              Here is what happens next.
+              {receivedOnly
+                ? 'We received your responses. Our team will email you within 1–2 business days with next steps.'
+                : 'Here is what happens next.'}
             </p>
           </div>
         </div>

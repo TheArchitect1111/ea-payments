@@ -264,7 +264,13 @@ export default function AssessmentPage() {
         return;
       }
 
-      const data = (await res.json()) as { ok?: boolean; error?: string; proposalId?: string };
+      const data = (await res.json()) as {
+        ok?: boolean;
+        error?: string;
+        proposalId?: string;
+        saved?: boolean;
+        message?: string;
+      };
       if (data.error) {
         setError(data.error);
         setLoading(false);
@@ -272,7 +278,12 @@ export default function AssessmentPage() {
       }
 
       if (data.proposalId) {
-        window.location.href = `/proposal/${encodeURIComponent(data.proposalId)}`;
+        window.location.href = `/assessment/thank-you?proposal=${encodeURIComponent(data.proposalId)}`;
+        return;
+      }
+
+      if (data.ok && data.saved === false) {
+        window.location.href = '/assessment/thank-you?received=1';
         return;
       }
 
@@ -371,11 +382,24 @@ export default function AssessmentPage() {
 
       {/* Form */}
       <div className="mx-auto max-w-2xl px-4 py-12 sm:px-6">
+        <div
+          className="mb-8 rounded border-2 border-[#F5A623] bg-amber-50 px-5 py-4 text-sm leading-relaxed text-neutral-800"
+          style={{ fontFamily: BARLOW }}
+        >
+          <p className="font-bold uppercase tracking-wide text-neutral-950" style={{ fontFamily: CONDENSED }}>
+            Start here — contact info required
+          </p>
+          <p className="mt-1">
+            Enter your <strong>business name</strong>, <strong>your name</strong>, and <strong>email</strong> in the
+            first section before you submit. We use this to send your capacity analysis and next steps.
+          </p>
+        </div>
+
         <form onSubmit={handleSubmit} noValidate className="space-y-6">
 
           {/* Section 1: About Your Business */}
-          <div className="rounded bg-white p-8 shadow-sm">
-            <SectionLabel>About Your Business</SectionLabel>
+          <div className="rounded bg-white p-8 shadow-sm ring-2 ring-[#F5A623]/40">
+            <SectionLabel>Step 1 — Your Contact Info (Required)</SectionLabel>
             <div className="space-y-5">
 
               <div>

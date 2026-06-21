@@ -222,11 +222,18 @@ export async function POST(req: NextRequest) {
       linkedProposalId: proposalResult.recordId,
     });
 
-    if (!assessmentResult.ok) {
-      console.error('Assessment write failed:', assessmentResult.error);
-    }
     if (!proposalResult.ok) {
       console.error('Proposal write failed:', proposalResult.error);
+      return NextResponse.json({
+        ok: true,
+        saved: false,
+        message:
+          'We received your assessment. Our team will follow up by email within 1–2 business days.',
+      });
+    }
+
+    if (!assessmentResult.ok) {
+      console.error('Assessment write failed:', assessmentResult.error);
     }
 
     try {
