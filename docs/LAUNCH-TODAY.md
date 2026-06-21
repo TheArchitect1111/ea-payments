@@ -4,6 +4,10 @@ Use this guide to get **real-world phone testing** working today. Every step exp
 
 **Canonical testing URL (new platform):** https://ea-payments.vercel.app
 
+**One link for all testers:** https://ea-payments.vercel.app/start (or `/go`)
+
+**Health check (is the server ready?):** https://ea-payments.vercel.app/api/health/launch
+
 **Do not use for testing yet:** https://www.efficiencyarchitects.online — that domain still points at the **old** Create React App site (different Vercel project). If your phone bookmark or autocomplete opens `.online`, you will see the legacy site even though `ea-payments.vercel.app` is correct.
 
 ---
@@ -12,7 +16,7 @@ Use this guide to get **real-world phone testing** working today. Every step exp
 
 | Product | Link to send | Why this link |
 |---------|--------------|---------------|
-| **Simplifi capture (phone FAB)** | https://ea-payments.vercel.app/simplifi/capture | Mobile page with gold **Capture** floating button |
+| **Simplifi capture (phone FAB)** | https://ea-payments.vercel.app/capture | Mobile page — **Capture now** button |
 | **Simplifi marketing** | https://ea-payments.vercel.app/simplifi | Product landing page |
 | **Magnifi demo (no login)** | https://ea-payments.vercel.app/consider/selena | Full shareable opportunity experience |
 | **Magnifi short path** | https://ea-payments.vercel.app/magnifi | Redirects to Selena demo |

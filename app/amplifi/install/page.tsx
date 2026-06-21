@@ -45,6 +45,7 @@ export default function AmplifiInstallPage() {
             Gold toolbar icon on every site, plus optional floating Amplify button bottom-right.
           </p>
           <ol className="text-sm text-neutral-300 list-decimal pl-5 space-y-2">
+            <li>On your PC run <code className="text-[#C9A844]">scripts\package-extension.bat</code> (optional zip for sharing)</li>
             <li>Open <code className="text-[#C9A844]">chrome://extensions</code></li>
             <li>Enable Developer mode → Load unpacked</li>
             <li>Select the <code className="text-[#C9A844]">extension/</code> folder in the ea-payments repo</li>

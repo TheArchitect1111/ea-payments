@@ -25,6 +25,7 @@ export const PUBLIC_LINKS = {
   signIn: `${BASE}/sign-in`,
   /** Install Amplifi browser button */
   installAmplifi: `${BASE}/amplifi/install`,
+  start: `${BASE}/start`,
 } as const;
 
 /** Future custom domains → same routes (add in Vercel Domains when ready). */

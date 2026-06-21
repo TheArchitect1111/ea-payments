@@ -1,6 +1,11 @@
 {
   "redirects": [
     {
+      "source": "/go",
+      "destination": "/start",
+      "permanent": false
+    },
+    {
       "source": "/partner-portal",
       "destination": "/partners/login",
       "permanent": true

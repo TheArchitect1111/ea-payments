@@ -1,0 +1,67 @@
+import Link from 'next/link';
+import { PUBLIC_LINKS } from '@/lib/marketing-urls';
+
+const DEMO_EMAIL = 'demo@efficiencyarchitects.online';
+const DEMO_PASSWORD = 'DemoPulse2026!';
+
+const testerMessage = `Efficiency Architects preview — try these:
+
+Capture (Simplifi): ${PUBLIC_LINKS.capture}
+Amplify & share: ${PUBLIC_LINKS.amplify}
+Magnifi story (no login): ${PUBLIC_LINKS.storyDemo}
+
+Login: ${DEMO_EMAIL} / ${DEMO_PASSWORD}
+
+Use ea-payments.vercel.app — NOT efficiencyarchitects.online (old site).`;
+
+export default function StartPage() {
+  return (
+    <main className="min-h-screen bg-[#1B2B4D] text-white px-6 py-12">
+      <div className="mx-auto max-w-2xl">
+        <p className="text-xs font-bold uppercase tracking-[0.3em] text-[#C9A844]">Friend test kit</p>
+        <h1 className="mt-4 text-3xl font-black">Start here</h1>
+        <p className="mt-3 text-neutral-300 leading-relaxed">
+          Send this page to testers. Everything below works on phones and laptops today.
+        </p>
+
+        <section className="mt-10 grid gap-4">
+          {[
+            { label: 'Capture — Simplifi', href: PUBLIC_LINKS.capture, note: 'Login → Capture now → paste URL' },
+            { label: 'Amplify — share a story', href: PUBLIC_LINKS.amplify, note: 'Login → Amplify → Share link' },
+            { label: 'Magnifi story (no login)', href: PUBLIC_LINKS.storyDemo, note: 'Full demo experience' },
+            { label: 'Sign in', href: PUBLIC_LINKS.signIn, note: `${DEMO_EMAIL}` },
+            { label: 'Install Chrome button', href: PUBLIC_LINKS.installAmplifi, note: 'Floating Amplify on any site' },
+          ].map((item) => (
+            <a
+              key={item.href}
+              href={item.href}
+              className="block border border-white/15 p-5 hover:border-[#C9A844]/50 transition-colors"
+            >
+              <p className="font-bold text-[#C9A844]">{item.label}</p>
+              <p className="text-sm text-neutral-400 mt-1">{item.note}</p>
+              <p className="text-xs text-neutral-500 mt-2 break-all">{item.href}</p>
+            </a>
+          ))}
+        </section>
+
+        <section className="mt-10 border border-white/15 p-5">
+          <p className="text-sm font-bold text-[#C9A844]">Copy message for friends</p>
+          <pre className="mt-3 text-xs text-neutral-300 whitespace-pre-wrap leading-relaxed">{testerMessage}</pre>
+        </section>
+
+        <section className="mt-8 text-sm text-neutral-400 space-y-2">
+          <p>
+            <strong className="text-white">Health check:</strong>{' '}
+            <Link href="/api/health/launch" className="underline text-[#C9A844]">
+              /api/health/launch
+            </Link>
+          </p>
+          <p>
+            <strong className="text-white">DNS cutover guide:</strong> see{' '}
+            <code className="text-[#C9A844]">docs/DNS-THREE-CLICKS.md</code> in the repo
+          </p>
+        </section>
+      </div>
+    </main>
+  );
+}
