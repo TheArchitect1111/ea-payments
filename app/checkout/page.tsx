@@ -1,9 +1,10 @@
 'use client';
 
 import { useEffect, useState, FormEvent } from 'react';
-import { getEACatalog, formatPrice } from '@/lib/catalog';
+import { getPurchasableEACatalog, getEACatalog, formatPrice } from '@/lib/catalog';
 
-const EA_PRODUCTS = getEACatalog();
+const PURCHASABLE_PRODUCTS = getPurchasableEACatalog();
+const ALL_EA_PRODUCTS = getEACatalog();
 
 export default function CheckoutPage() {
   const [name, setName] = useState('');
@@ -15,12 +16,13 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const selectedItem = EA_PRODUCTS.find((p) => p.id === packageId);
+  const selectedItem = PURCHASABLE_PRODUCTS.find((p) => p.id === packageId);
+  const contactOnlyCount = ALL_EA_PRODUCTS.length - PURCHASABLE_PRODUCTS.length;
   const showAchNote = selectedItem && selectedItem.priceCents > 50000;
 
   useEffect(() => {
     const requestedPackage = new URLSearchParams(window.location.search).get('package');
-    if (requestedPackage && EA_PRODUCTS.some((product) => product.id === requestedPackage)) {
+    if (requestedPackage && PURCHASABLE_PRODUCTS.some((product) => product.id === requestedPackage)) {
       const timer = window.setTimeout(() => setPackageId(requestedPackage), 0);
       return () => window.clearTimeout(timer);
     }
@@ -134,12 +136,21 @@ export default function CheckoutPage() {
               onChange={(e) => setPackageId(e.target.value)}
             >
               <option value="">Select a package</option>
-              {EA_PRODUCTS.map((product) => (
+              {PURCHASABLE_PRODUCTS.map((product) => (
                 <option key={product.id} value={product.id}>
                   {product.displayName} - {formatPrice(product.priceCents)}
                 </option>
               ))}
             </select>
+            {contactOnlyCount > 0 && (
+              <p className="mt-2 text-xs leading-relaxed text-neutral-500">
+                Capacity and implementation packages are scoped after your assessment. Email{' '}
+                <a href="mailto:freedom@efficiencyarchitects.online" className="font-semibold underline">
+                  freedom@efficiencyarchitects.online
+                </a>{' '}
+                for pricing on those tiers.
+              </p>
+            )}
             {selectedItem && (
               <p className="mt-2 text-xs leading-relaxed text-neutral-500">
                 {selectedItem.description}

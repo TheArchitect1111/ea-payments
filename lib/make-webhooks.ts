@@ -16,7 +16,12 @@ export async function fireMakeWebhook(
   payload: Record<string, unknown>,
   label: string,
 ): Promise<void> {
-  if (!url) return;
+  if (!url) {
+    console.warn(
+      `[make-webhooks] ${label} is not set — automation skipped. Add this env var in Vercel Production.`,
+    );
+    return;
+  }
 
   try {
     const res = await fetch(url, {

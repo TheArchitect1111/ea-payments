@@ -127,6 +127,17 @@ export function getEACatalog(): CatalogItem[] {
   );
 }
 
+/** True when checkout can create a Stripe session (inline price or configured Stripe Price ID). */
+export function isCatalogItemPurchasable(item: CatalogItem): boolean {
+  if (item.allowInlineStripePrice && item.priceCents > 0) return true;
+  const priceId = process.env[item.stripePriceEnvKey];
+  return item.priceCents > 0 && Boolean(priceId);
+}
+
+export function getPurchasableEACatalog(): CatalogItem[] {
+  return getEACatalog().filter(isCatalogItemPurchasable);
+}
+
 export function formatPrice(priceCents: number): string {
   if (priceCents === 0) return 'Contact for pricing';
   return new Intl.NumberFormat('en-US', {

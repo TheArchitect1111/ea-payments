@@ -1,7 +1,9 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { EA_PORTAL_COOKIE, verifySession } from '@/lib/ea-portal-auth';
+import { PortalNav } from '../../PortalNav';
 import NewContentRequestForm from './NewContentRequestForm';
+import '../../ea-portal.css';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,19 +16,17 @@ export default async function NewContentRequestPage({ params }: { params: Promis
   if (session.slug !== slug) redirect(`/portal/${session.slug}/updates/new`);
 
   return (
-    <main className="min-h-screen bg-[#F8F6F2]">
-      <header className="px-6 py-5 bg-[#1B2B4D]">
-        <div className="mx-auto flex max-w-5xl items-center justify-between">
-          <img src="/images/ea-logo.png" alt="Efficiency Architects" className="h-10 w-auto" />
-          <a href={`/portal/${slug}/updates`} className="text-xs font-bold uppercase tracking-[0.2em] text-blue-100 hover:text-white">Back To Dashboard</a>
+    <div className="ep-page">
+      <PortalNav slug={slug} active="updates" />
+      <main className="ep-main">
+        <div className="ep-welcome">
+          <p className="ep-welcome-label">Update Hub™</p>
+          <h1 className="ep-welcome-heading">Submit Update Request</h1>
         </div>
-      </header>
-      <div className="mx-auto max-w-5xl px-6 py-8">
-        <h1 className="text-3xl font-black uppercase tracking-wide text-[#1B2B4D]">Submit Update Request</h1>
-        <div className="mt-6">
+        <div className="ep-card">
           <NewContentRequestForm slug={slug} />
         </div>
-      </div>
-    </main>
+      </main>
+    </div>
   );
 }

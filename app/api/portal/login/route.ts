@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { validatePortalLogin } from '@/lib/airtable';
+import { validatePortalLogin, updateClientEngagementScore, getClientByPortalSlug } from '@/lib/airtable';
 import { signSession, EA_PORTAL_COOKIE } from '@/lib/ea-portal-auth';
+import { getClientSuccessProfile } from '@/lib/client-success';
 
 export const dynamic = 'force-dynamic';
 
@@ -33,6 +34,21 @@ export async function POST(req: NextRequest) {
     token = signSession(result.slug);
   } catch {
     return NextResponse.json({ error: 'Session signing failed.' }, { status: 500 });
+  }
+
+  if (result.recordId) {
+    try {
+      const client = await getClientByPortalSlug(result.slug);
+      if (client) {
+        const profile = await getClientSuccessProfile(client);
+        const engagement = profile.scores.find((s) => s.id === 'engagement');
+        if (engagement) {
+          await updateClientEngagementScore(result.recordId, engagement.value);
+        }
+      }
+    } catch (err) {
+      console.error('Engagement score sync on login:', err);
+    }
   }
 
   const res = NextResponse.json({ slug: result.slug });

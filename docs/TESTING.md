@@ -12,10 +12,12 @@ Do **not** send people to `www.efficiencyarchitects.online` yet — that domain 
 |---|------|-----|----------------------|
 | 1 | **Homepage** | `/` | Hero: “What would become possible…” · sections for Unifi™, Fortifi™, Amplifi™, Pulse™ · CTAs scroll or link to assessment |
 | 2 | **Simplifi landing** | `/simplifi` | “Never Lose An Opportunity Again” · Start Simplifi buttons |
-| 3 | **Capacity Assessment** | `/assessment` | Form loads · logo returns to homepage · submit reaches thank-you (if backend env is set) |
-| 4 | **Scorecard** | `/scorecard` | Download `.docx` works |
-| 5 | **Client portal** | `/portal/login` | Login form loads (test credentials provided separately) |
-| 6 | **Unsubscribe** | `/unsubscribe` | Page loads · mailto link works |
+| 3 | **Capacity Assessment** | `/assessment` | Submit redirects to **live analysis** at `/proposal/{id}` |
+| 4 | **Pulse** | `/portal/login` → Pulse tab | Four client success scores after login |
+| 5 | **Update Hub** | `/portal/{slug}/updates` | Submit update + enhancement requests |
+| 6 | **Simplifi workspace** | `/portal/{slug}/simplifi` | Workspace status + links (Simplifi buyers) |
+| 7 | **Scorecard** | `/scorecard` | Download `.docx` works |
+| 8 | **Unsubscribe** | `/unsubscribe` | Page loads · mailto link works |
 
 ### Optional (admin / payments)
 

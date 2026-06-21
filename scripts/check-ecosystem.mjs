@@ -20,7 +20,13 @@ async function checkAirtable() {
   const key = env.AIRTABLE_API_KEY;
   const baseId = env.AIRTABLE_PAYMENTS_BASE_ID || 'appv0YoLIMY45fmDA';
   const tableId = env.AIRTABLE_CLIENT_RECORDS_TABLE_ID || 'tblEtkE88ADyIitnm';
-  const required = ['Onboarding Status', 'Payment Received At', 'Docs Sent At', 'Docs Signed At'];
+  const required = [
+    'Onboarding Status',
+    'Payment Received At',
+    'Docs Sent At',
+    'Docs Signed At',
+  ];
+  const optional = ['Engagement Score'];
 
   const res = await fetch(`https://api.airtable.com/v0/meta/bases/${baseId}/tables`, {
     headers: { Authorization: `Bearer ${key}` },
@@ -42,6 +48,9 @@ async function checkAirtable() {
   console.log('TABLE', table.name, table.id);
   for (const field of required) {
     console.log(names.has(field) ? 'OK' : 'MISSING', field);
+  }
+  for (const field of optional) {
+    console.log(names.has(field) ? 'OK' : 'OPTIONAL_MISSING', field);
   }
 
   const onboarding = table.fields?.find((f) => f.name === 'Onboarding Status');

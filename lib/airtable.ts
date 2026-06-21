@@ -448,7 +448,7 @@ export async function createAssessmentRecord(
 export async function validatePortalLogin(
   email: string,
   password: string
-): Promise<{ ok: boolean; slug?: string; error?: string; passwordChanged?: boolean }> {
+): Promise<{ ok: boolean; slug?: string; recordId?: string; error?: string; passwordChanged?: boolean }> {
   if (!process.env.AIRTABLE_API_KEY) {
     return { ok: false, error: 'Not configured.' };
   }
@@ -462,7 +462,7 @@ export async function validatePortalLogin(
     if (!res.ok) return { ok: false, error: 'Database error.' };
 
     const data = (await res.json()) as {
-      records?: { fields: Record<string, unknown> }[];
+      records?: { id: string; fields: Record<string, unknown> }[];
     };
     const rec = data.records?.[0];
     if (!rec) return { ok: false, error: 'Invalid credentials.' };
@@ -500,9 +500,36 @@ export async function validatePortalLogin(
       return { ok: false, error: 'Portal not yet provisioned. Please contact support.' };
     }
 
-    return { ok: true, slug: portalSlug, passwordChanged };
+    return { ok: true, slug: portalSlug, recordId: rec.id, passwordChanged };
   } catch {
     return { ok: false, error: 'Unexpected error. Please try again.' };
+  }
+}
+
+export async function updateClientEngagementScore(
+  recordId: string,
+  score: number,
+): Promise<void> {
+  if (!process.env.AIRTABLE_API_KEY) return;
+
+  const clamped = Math.max(0, Math.min(100, Math.round(score)));
+
+  try {
+    const res = await fetch(
+      `https://api.airtable.com/v0/${BASE_ID}/${encodeURIComponent(TABLE)}/${recordId}`,
+      {
+        method: 'PATCH',
+        headers: authHeaders(),
+        body: JSON.stringify({ fields: { 'Engagement Score': clamped }, typecast: true }),
+      },
+    );
+    if (!res.ok) {
+      const detail = await res.text();
+      if (detail.includes('UNKNOWN_FIELD_NAME')) return;
+      console.error('updateClientEngagementScore failed:', detail);
+    }
+  } catch (err) {
+    console.error('updateClientEngagementScore error:', err);
   }
 }
 

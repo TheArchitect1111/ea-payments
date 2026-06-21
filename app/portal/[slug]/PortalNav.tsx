@@ -8,7 +8,7 @@ export function PortalNav({
   active,
 }: {
   slug: string;
-  active: 'home' | 'pulse' | 'updates';
+  active: 'home' | 'pulse' | 'simplifi' | 'updates';
 }) {
   const brandName = process.env.BRAND_NAME ?? 'Efficiency Architects';
 
@@ -19,6 +19,13 @@ export function PortalNav({
         <span className="ep-header-name">{brandName}</span>
       </div>
       <div className="ep-header-actions">
+        <Link
+          href={`/portal/${slug}/simplifi`}
+          className="ep-update-link"
+          style={active === 'simplifi' ? { outline: '2px solid #fff' } : undefined}
+        >
+          Simplifi
+        </Link>
         <Link
           href={`/portal/${slug}/pulse`}
           className="ep-update-link"

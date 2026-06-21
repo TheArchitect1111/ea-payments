@@ -44,6 +44,17 @@ test('pulse route requires portal login', async ({ page }) => {
   await expect(page).toHaveURL(/\/portal\/login/);
 });
 
+test('simplifi portal route requires portal login', async ({ page }) => {
+  await page.goto('/portal/demo-client/simplifi');
+  await expect(page).toHaveURL(/\/portal\/login/);
+});
+
+test('checkout lists purchasable packages only', async ({ page }) => {
+  await page.goto('/checkout');
+  await expect(page.getByRole('option', { name: /Simplifi Early Access/i })).toBeVisible();
+  await expect(page.getByRole('option', { name: /Capacity Assessment/i })).toHaveCount(0);
+});
+
 test('assessment thank-you contact link works', async ({ page }) => {
   await page.goto('/assessment/thank-you');
   await expect(page.getByRole('link', { name: /contact our team/i })).toHaveAttribute(
