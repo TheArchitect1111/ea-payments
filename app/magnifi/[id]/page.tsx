@@ -1,20 +1,13 @@
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getCaptureByIdentifier } from '@/lib/capture-records';
+import { parseBlueprintSummary } from '@/lib/blueprint-summary';
 
 export const dynamic = 'force-dynamic';
 
 const NAVY = '#1B2B4D';
 const GOLD = '#C9A844';
 const CREAM = '#FAF8F3';
-
-function splitSummary(summary?: string) {
-  if (!summary) return [];
-  return summary
-    .split(/\n{2,}|---/)
-    .map((part) => part.trim())
-    .filter(Boolean)
-    .slice(0, 8);
-}
 
 export default async function MagnifiOpportunityPage({
   params,
@@ -28,7 +21,9 @@ export default async function MagnifiOpportunityPage({
     notFound();
   }
 
-  const sections = splitSummary(capture.blueprintSummary || capture.analysisSummary);
+  const summaryText = capture.blueprintSummary || capture.analysisSummary;
+  const parsed = parseBlueprintSummary(summaryText);
+  const hasStructured = parsed.sections.length > 0;
 
   return (
     <main style={{ backgroundColor: CREAM }} className="min-h-screen">
@@ -40,9 +35,16 @@ export default async function MagnifiOpportunityPage({
           <h1 className="text-4xl sm:text-5xl font-extrabold leading-tight" style={{ color: NAVY }}>
             {capture.title}
           </h1>
+          {parsed.meta[0] && (
+            <p className="text-sm font-semibold mt-3" style={{ color: NAVY }}>
+              {parsed.meta[0]}
+            </p>
+          )}
+          {parsed.meta[1] && <p className="text-lg text-neutral-700 mt-1">{parsed.meta[1]}</p>}
+          {parsed.meta[2] && <p className="text-sm text-neutral-500 mt-1">{parsed.meta[2]}</p>}
           <p className="text-sm text-neutral-500 mt-4 max-w-3xl">
             Generated from a Simplifi capture and routed through the EA opportunity intelligence
-            stack for review.
+            stack.
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-8">
             <Metric label="Opportunity" value={capture.opportunityScore ?? 'Pending'} />
@@ -55,28 +57,48 @@ export default async function MagnifiOpportunityPage({
 
       <section className="max-w-5xl mx-auto px-6 py-10 grid lg:grid-cols-[1fr_280px] gap-6">
         <div className="space-y-4">
-          {sections.length === 0 ? (
+          {!hasStructured ? (
             <article className="bg-white border border-neutral-200 p-6">
               <h2 className="text-xl font-extrabold" style={{ color: NAVY }}>
                 Opportunity summary is being prepared
               </h2>
               <p className="text-sm text-neutral-500 mt-2">
-                This record exists, but the Magnifi summary has not been generated yet.
+                This record exists, but the Magnifi summary has not been generated yet. Return after
+                Simplifi finishes analysis, or contact your advisor.
               </p>
             </article>
           ) : (
-            sections.map((section, index) => (
-              <article key={index} className="bg-white border border-neutral-200 p-6">
+            parsed.sections.map((section) => (
+              <article key={section.title} className="bg-white border border-neutral-200 p-6">
                 <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: GOLD }}>
-                  Section {index + 1}
+                  {section.title}
                 </p>
-                <p className="text-sm text-neutral-700 whitespace-pre-wrap leading-relaxed">{section}</p>
+                <p className="text-sm text-neutral-700 whitespace-pre-wrap leading-relaxed">
+                  {section.content}
+                </p>
               </article>
             ))
           )}
         </div>
 
-        <aside className="bg-white border border-neutral-200 p-5 h-fit space-y-4">
+        <aside className="bg-white border border-neutral-200 p-5 h-fit space-y-5">
+          {parsed.roadmap.length > 0 && (
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: GOLD }}>
+                Roadmap
+              </p>
+              <ul className="space-y-3">
+                {parsed.roadmap.map((item) => (
+                  <li key={item.phase} className="text-sm">
+                    <p className="font-bold" style={{ color: NAVY }}>
+                      {item.phase}
+                    </p>
+                    <p className="text-neutral-600 mt-0.5">{item.focus}</p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
           <div>
             <p className="text-xs font-bold uppercase tracking-widest" style={{ color: GOLD }}>
               Source
@@ -109,6 +131,13 @@ export default async function MagnifiOpportunityPage({
               {(capture.productAlignment ?? ['Simplifi', 'Clarifi', 'Magnifi', 'Pulse']).join(', ')}
             </p>
           </div>
+          <Link
+            href="/simplifi"
+            className="inline-block text-xs font-bold underline"
+            style={{ color: GOLD }}
+          >
+            Learn about Simplifi →
+          </Link>
         </aside>
       </section>
     </main>

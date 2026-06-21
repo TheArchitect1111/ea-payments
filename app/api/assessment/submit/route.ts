@@ -182,12 +182,14 @@ export async function POST(req: NextRequest) {
     const assessmentId = `ASSESS-${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
     const proposalId   = `PROP-${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
 
+    const autoApprove = process.env.LAUNCH_AUTO_APPROVE_PROPOSALS === 'true';
+
     const proposalResult = await createProposalRecord({
       proposalId,
       businessName: input.businessName,
       contactName: input.contactName,
       email: input.email,
-      status: 'Pending Review',
+      status: autoApprove ? 'Approved' : 'Pending Review',
       recommendedProjectType: analysis.recommendedProjectType,
       projectTypeLabel:       pricing.projectTypeLabel,
       capacityScore:          analysis.capacityScore,

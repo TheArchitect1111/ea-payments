@@ -76,7 +76,12 @@ function mapRecord(rec: { id: string; fields: Record<string, unknown> }): Captur
     category: (f['Category'] as string) ?? (f['Resource Category'] as string) ?? undefined,
     priority: ((f['Priority'] as string) ?? 'Normal') as CaptureRecord['priority'],
     status: ((f['Status'] as string) ?? 'Captured') as CaptureStatus,
-    tags: Array.isArray(tagsRaw) ? (tagsRaw as string[]) : undefined,
+    tags:
+      typeof tagsRaw === 'string'
+        ? tagsRaw.split(',').map((s) => s.trim()).filter(Boolean)
+        : Array.isArray(tagsRaw)
+          ? (tagsRaw as string[])
+          : undefined,
     dateCaptured: (f['Date Captured'] as string) ?? '',
     eaFitScore: typeof f['EA Fit Score'] === 'number' ? f['EA Fit Score'] : undefined,
     opportunityScore:
@@ -130,6 +135,18 @@ export async function getResourceCaptures(limit = 50): Promise<CaptureRecord[]> 
 export async function getBlueprintCaptures(limit = 30): Promise<CaptureRecord[]> {
   const all = await getCaptures(limit);
   return all.filter((c) => c.blueprintSummary || c.blueprintTemplate);
+}
+
+const PORTAL_SOURCE_PREFIX = 'Simplifi Portal · ';
+
+export function portalCaptureSource(slug: string): string {
+  return `${PORTAL_SOURCE_PREFIX}${slug}`;
+}
+
+export async function getPortalCaptures(slug: string, limit = 20): Promise<CaptureRecord[]> {
+  const prefix = portalCaptureSource(slug);
+  const all = await getCaptures(Math.max(limit, 50));
+  return all.filter((c) => c.source === prefix || c.source.startsWith(`${prefix} `)).slice(0, limit);
 }
 
 export async function getCaptureByIdentifier(identifier: string): Promise<CaptureRecord | null> {
@@ -198,7 +215,7 @@ export async function createCaptureRecord(
     fields['Category'] = input.category;
     fields['Resource Category'] = input.category;
   }
-  if (input.tags?.length) fields['Tags'] = input.tags;
+  if (input.tags?.length) fields['Tags'] = input.tags.join(', ');
   if (input.eaFitScore != null) fields['EA Fit Score'] = input.eaFitScore;
   if (input.opportunityScore != null) fields['Opportunity Score'] = input.opportunityScore;
   if (input.analysisSummary) fields['Analysis Summary'] = input.analysisSummary;

@@ -28,7 +28,7 @@ echo Checking token length...
 echo %AIRTABLE_API_KEY:~0,8%...
 
 echo.
-echo [1/2] Adding Client Records fields...
+echo [1/3] Adding Client Records fields...
 node "%~dp0..\..\..\ea-operating-system\scripts\setup-airtable-onboarding-fields.mjs"
 if errorlevel 1 (
   echo.
@@ -41,12 +41,21 @@ if errorlevel 1 (
 )
 
 echo.
-echo [2/2] Creating demo client for Pulse demos...
+echo [2/3] Ensuring Capture Records table (Simplifi + Magnifi)...
+node "%~dp0setup-capture-records-table.mjs"
+if errorlevel 1 (
+  echo.
+  echo STEP 2 FAILED. Simplifi capture needs Capture Records table.
+  pause
+  exit /b 1
+)
+
+echo.
+echo [3/3] Creating demo client + Magnifi sample...
 node "%~dp0seed-demo-client.mjs"
 if errorlevel 1 (
   echo.
-  echo STEP 2 FAILED. Step 1 may still have worked.
-  echo You can skip demo client for now - not required for launch.
+  echo STEP 3 FAILED. Steps 1-2 may still have worked.
   pause
   exit /b 1
 )
@@ -58,6 +67,9 @@ echo ============================================
 echo Demo login: https://ea-payments.vercel.app/portal/login
 echo Email: demo@efficiencyarchitects.online
 echo Password: DemoPulse2026!
+echo Simplifi: https://ea-payments.vercel.app/portal/demo-client/simplifi
+echo.
+echo Magnifi demo URL was printed above by the seed script.
 echo.
 echo Also add the same token to Vercel as AIRTABLE_API_KEY and redeploy.
 echo.

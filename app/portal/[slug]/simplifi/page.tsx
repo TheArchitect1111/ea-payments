@@ -3,7 +3,9 @@ import { cookies } from 'next/headers';
 import { redirect, notFound } from 'next/navigation';
 import { verifySession, EA_PORTAL_COOKIE } from '@/lib/ea-portal-auth';
 import { getClientByPortalSlug, getContentRequestsForClient } from '@/lib/airtable';
+import { getPortalCaptures } from '@/lib/capture-records';
 import { PortalShell, NAVY, GOLD } from '@/lib/chassis/PortalShell';
+import SimplifiPortalWorkspace from './SimplifiPortalWorkspace';
 import '../ea-portal.css';
 
 export const dynamic = 'force-dynamic';
@@ -31,6 +33,7 @@ export default async function SimplifiClientPage({
   const activeRequests = requests.filter((r) =>
     ['Pending Review', 'In Progress', 'Awaiting Approval', 'Scheduled'].includes(r.status),
   ).length;
+  const captures = isSimplifi ? await getPortalCaptures(slug) : [];
 
   return (
     <div className="ep-page">
@@ -72,26 +75,24 @@ export default async function SimplifiClientPage({
         </div>
 
         {isSimplifi ? (
-          <div className="ep-card">
-            <p className="ep-card-title">What You Can Do Now</p>
-            <ul className="ep-pulse-list">
-              <li>Track progress and capacity gains in Pulse</li>
-              <li>Submit content and opportunity updates through Update Hub</li>
-              <li>Work with your advisor to activate full capture + audit workflows</li>
-            </ul>
-            <div className="mt-6 flex flex-wrap gap-3">
-              <Link href={`/portal/${slug}/pulse`} className="ep-pulse-cta">
-                Open Pulse
-              </Link>
-              <Link
-                href={`/portal/${slug}/updates/new`}
-                className="ep-pulse-cta"
-                style={{ backgroundColor: NAVY, color: GOLD }}
-              >
-                Submit Update
-              </Link>
+          <>
+            <SimplifiPortalWorkspace slug={slug} initialCaptures={captures} />
+            <div className="ep-card">
+              <p className="ep-card-title">Quick Links</p>
+              <div className="mt-4 flex flex-wrap gap-3">
+                <Link href={`/portal/${slug}/pulse`} className="ep-pulse-cta">
+                  Open Pulse
+                </Link>
+                <Link
+                  href={`/portal/${slug}/updates/new`}
+                  className="ep-pulse-cta"
+                  style={{ backgroundColor: NAVY, color: GOLD }}
+                >
+                  Submit Update
+                </Link>
+              </div>
             </div>
-          </div>
+          </>
         ) : (
           <div className="ep-card">
             <p className="ep-card-title">Get Simplifi</p>
@@ -112,8 +113,8 @@ export default async function SimplifiClientPage({
         <div className="ep-card">
           <p className="ep-card-title">Advisor Note</p>
           <p className="ep-placeholder-text">
-            Full in-portal capture and website audit tools are being enabled for early access
-            clients. Your advisor can configure these from Mission Control during onboarding.
+            Captures are analyzed automatically and linked to your Magnifi opportunity experience.
+            Share Magnifi links with stakeholders when you are ready to discuss next steps.
           </p>
         </div>
       </main>

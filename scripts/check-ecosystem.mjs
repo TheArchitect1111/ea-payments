@@ -57,6 +57,25 @@ async function checkAirtable() {
   if (onboarding?.options?.choices) {
     console.log('ONBOARDING_OPTIONS', onboarding.options.choices.map((c) => c.name).join('|'));
   }
+
+  const capturesTable = data.tables?.find((t) => t.name === (env.AIRTABLE_CAPTURES_TABLE || 'Capture Records'));
+  if (!capturesTable) {
+    console.log('MISSING TABLE Capture Records');
+    return;
+  }
+  const captureFields = [
+    'Capture ID',
+    'Title',
+    'Blueprint Summary',
+    'EA Fit Score',
+    'Opportunity Score',
+    'Status',
+  ];
+  const captureNames = new Set((capturesTable.fields || []).map((f) => f.name));
+  console.log('CAPTURE_TABLE', capturesTable.name, capturesTable.id);
+  for (const field of captureFields) {
+    console.log(captureNames.has(field) ? 'OK' : 'MISSING', field);
+  }
 }
 
 async function checkResend() {

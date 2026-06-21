@@ -42,7 +42,29 @@ const DEMO = {
   clientName: 'Demo Client',
   organization: 'Efficiency Architects Demo',
   proposalId: 'PROP-DEMO-PULSE',
+  captureId: 'CAP-DEMO-MAGNIFI',
 };
+
+const DEMO_BLUEPRINT_SUMMARY = [
+  'CAP-DEMO-MAGNIFI · Executive Transformation',
+  'Efficiency Architects Demo — Executive Transformation',
+  'Auto Blueprint stub · EA Fit 78 · Opportunity 72',
+  'Sections: Opening Reveal, Hidden Opportunity, Future State, First Move',
+  '',
+  'Roadmap:',
+  '30 Days: Clarify the highest-leverage constraint and assign an owner',
+  '60 Days: Launch one visible win that proves the new operating rhythm',
+  '90 Days: Mission Control launch and adoption tracking',
+  '',
+  '---',
+  '## Opening Reveal\nYour team is executing well in pockets, but capacity leaks through invisible handoffs. The biggest unlock is not more hours — it is fewer decisions repeated without a system.',
+  '',
+  '## Hidden Opportunity\nA structured capture + review loop would recover 6–10 hours per week across leadership and client-facing roles, while making progress visible to stakeholders.',
+  '',
+  '## Future State\nPulse tracks client success scores. Simplifi captures every opportunity once. Magnifi turns the best ones into a shareable experience that builds buy-in before you invest.',
+  '',
+  '## First Move\nRun one Simplifi capture on your highest-value prospect or partner site, review the Magnifi draft with your advisor, and agree the single next action.',
+].join('\n');
 
 if (!key?.trim()) {
   console.error('Missing AIRTABLE_API_KEY.');
@@ -155,8 +177,53 @@ async function upsertProposal() {
   console.log('CREATED proposal');
 }
 
+async function upsertDemoCapture() {
+  const table = env.AIRTABLE_CAPTURES_TABLE || 'Capture Records';
+  const existing = await findByFormula(table, `{Capture ID}='${DEMO.captureId}'`);
+  const fields = {
+    'Capture ID': DEMO.captureId,
+    Title: 'Demo Partner — Growth-Stage Professional Services',
+    'Capture Type': 'Opportunity',
+    Source: `Simplifi Portal · ${DEMO.slug}`,
+    Priority: 'High',
+    Status: 'Routed',
+    'Date Captured': new Date().toISOString().slice(0, 10),
+    'Source URL': 'https://ea-payments.vercel.app/simplifi',
+    'EA Fit Score': 78,
+    'Opportunity Score': 72,
+    'Trust Confidence': 85,
+    'Blueprint Template': 'Executive Transformation',
+    'Product Alignment': 'Simplifi, Magnifi, Pulse',
+    'Blueprint Summary': DEMO_BLUEPRINT_SUMMARY,
+    'Analysis Summary':
+      'Demo capture for external testing. Shows structured Magnifi sections and roadmap.',
+  };
+
+  if (existing) {
+    const res = await fetch(
+      `https://api.airtable.com/v0/${baseId}/${encodeURIComponent(table)}/${existing.id}`,
+      { method: 'PATCH', headers, body: JSON.stringify({ fields, typecast: true }) },
+    );
+    if (!res.ok) throw new Error(`Capture PATCH ${await res.text()}`);
+    console.log('UPDATED demo capture', existing.id);
+    return existing.id;
+  }
+
+  const res = await fetch(`https://api.airtable.com/v0/${baseId}/${encodeURIComponent(table)}`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ records: [{ fields }], typecast: true }),
+  });
+  if (!res.ok) throw new Error(`Capture POST ${await res.text()}`);
+  const data = await res.json();
+  const id = data.records?.[0]?.id;
+  console.log('CREATED demo capture', id);
+  return id;
+}
+
 await upsertClient();
 await upsertProposal();
+const demoCaptureId = await upsertDemoCapture();
 
 const baseUrl = env.NEXT_PUBLIC_BASE_URL || 'https://ea-payments.vercel.app';
 console.log('\n--- Pulse demo credentials ---');
@@ -164,4 +231,8 @@ console.log('Login:', `${baseUrl}/portal/login`);
 console.log('Email:', DEMO.email);
 console.log('Password:', DEMO.password);
 console.log('Pulse:', `${baseUrl}/portal/${DEMO.slug}/pulse`);
+console.log('Simplifi:', `${baseUrl}/portal/${DEMO.slug}/simplifi`);
 console.log('Proposal:', `${baseUrl}/proposal/${DEMO.proposalId}`);
+if (demoCaptureId) {
+  console.log('Magnifi (demo):', `${baseUrl}/magnifi/${demoCaptureId}`);
+}

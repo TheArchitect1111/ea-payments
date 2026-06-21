@@ -7,6 +7,9 @@ import ProofLibraryPanel from '@/app/admin/_components/ProofLibraryPanel';
 
 export const dynamic = 'force-dynamic';
 
+const CALENDLY_URL =
+  process.env.CALENDLY_URL ?? 'https://calendly.com/freedom-efficiencyarchitects/30min';
+
 const RESULTS_STATUSES = new Set([
   'Pending Review',
   'Approved',
@@ -292,6 +295,14 @@ function ProposalContent({
               className="inline-block bg-neutral-950 px-6 py-4 text-xs font-bold uppercase tracking-widest text-white hover:bg-neutral-800"
             >
               Talk With Our Team
+            </a>
+            <a
+              href={CALENDLY_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-4 inline-block border border-neutral-300 px-6 py-4 text-xs font-bold uppercase tracking-widest text-neutral-700 hover:bg-neutral-50"
+            >
+              Schedule a Call
             </a>
           </div>
         )}

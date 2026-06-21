@@ -62,3 +62,8 @@ test('assessment thank-you contact link works', async ({ page }) => {
     'mailto:freedom@efficiencyarchitects.online',
   );
 });
+
+test('magnifi page returns 404 for unknown id', async ({ page }) => {
+  const res = await page.request.get('/magnifi/recINVALID00000000');
+  expect(res.status()).toBe(404);
+});
