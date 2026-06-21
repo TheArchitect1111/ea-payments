@@ -165,6 +165,16 @@ export default function SimplifiCaptureApp({
           <li>Choose URL or photo</li>
           <li>Share the Consider or Magnifi link</li>
         </ul>
+        <button
+          type="button"
+          className="sc-btn sc-btn-capture-main"
+          onClick={() => {
+            resetSheet();
+            setOpen(true);
+          }}
+        >
+          Capture now
+        </button>
       </main>
 
       {open && (
@@ -272,7 +282,14 @@ export default function SimplifiCaptureApp({
           resetSheet();
           setOpen(true);
         }}
-        style={{ backgroundColor: GOLD, color: NAVY }}
+        style={{
+          position: 'fixed',
+          right: 20,
+          bottom: 20,
+          zIndex: 9999,
+          backgroundColor: GOLD,
+          color: NAVY,
+        }}
       >
         <span className="sc-fab-icon">+</span>
         <span className="sc-fab-label">Capture</span>

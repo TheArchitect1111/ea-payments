@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import './simplifi-capture.css';
 
 export const metadata: Metadata = {
   title: 'Simplifi Capture — One Tap',

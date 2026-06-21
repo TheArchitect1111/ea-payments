@@ -96,6 +96,19 @@
   color: #fff;
 }
 
+.sc-btn-capture-main {
+  margin-top: 24px;
+  width: 100%;
+  max-width: 320px;
+  padding: 18px 28px;
+  background: #c9a844;
+  color: #1b2b4d;
+  font-size: 15px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  box-shadow: 0 8px 24px rgba(201, 168, 68, 0.45);
+}
+
 .sc-btn-block {
   width: 100%;
   margin-top: 8px;
