@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic';
 export async function POST(req: NextRequest) {
   const cookieStore = await cookies();
   const token = cookieStore.get(EA_PORTAL_COOKIE)?.value;
-  const session = token ? verifySession(token) : null;
+  const session = token ? await verifySession(token) : null;
 
   if (!session) {
     return NextResponse.json({ error: 'Please log in again.' }, { status: 401 });

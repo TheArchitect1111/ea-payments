@@ -19,7 +19,7 @@ export default async function SimplifiClientPage({
   const token = cookieStore.get(EA_PORTAL_COOKIE)?.value;
   if (!token) redirect('/portal/login');
 
-  const session = verifySession(token);
+  const session = await verifySession(token);
   if (!session) redirect('/portal/login');
   if (session.slug !== slug) redirect(`/portal/${session.slug}/simplifi`);
 

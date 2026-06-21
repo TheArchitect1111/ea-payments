@@ -16,7 +16,7 @@ export default async function UpdatesPage({ params }: { params: Promise<{ slug: 
   const { slug } = await params;
   const cookieStore = await cookies();
   const token = cookieStore.get(EA_PORTAL_COOKIE)?.value;
-  const session = token ? verifySession(token) : null;
+  const session = token ? await verifySession(token) : null;
 
   if (!session) redirect('/portal/login');
   if (session.slug !== slug) redirect(`/portal/${session.slug}/updates`);

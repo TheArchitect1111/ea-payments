@@ -1,0 +1,37 @@
+/* ─────────────────────────────────────────────
+   SECTION 1 · Identity tokens — overridden per portal
+   Copy this block into the portal's globals.css and set each value.
+   ───────────────────────────────────────────── */
+:root {
+  --color-brand:       #000000;
+  --color-brand-light: #000000;
+  --color-accent:      #000000;
+  --color-bg:          #000000;
+  --color-surface:     #000000;
+  --color-text:        #000000;
+  --color-text-muted:  #000000;
+  --font-display:      'Inter', sans-serif;
+  --font-body:         'Inter', sans-serif;
+}
+
+/* ─────────────────────────────────────────────
+   SECTION 2 · Shared tokens — do not override
+   Layout, spacing, radius, and shadow are identical across all portals.
+   ───────────────────────────────────────────── */
+:root {
+  --radius-sm:    4px;
+  --radius-md:    8px;
+  --radius-lg:    16px;
+
+  --space-1:      4px;
+  --space-2:      8px;
+  --space-3:      12px;
+  --space-4:      16px;
+  --space-6:      24px;
+  --space-8:      32px;
+  --space-12:     48px;
+  --space-16:     64px;
+
+  --shadow-card:  0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-modal: 0 8px 32px rgba(0, 0, 0, 0.5);
+}

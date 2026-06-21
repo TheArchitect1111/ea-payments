@@ -32,7 +32,7 @@ export default async function PulsePage({
     redirect(`/portal/login`);
   }
 
-  const session = verifySession(token);
+  const session = await verifySession(token);
   if (!session) {
     redirect(`/portal/login`);
   }

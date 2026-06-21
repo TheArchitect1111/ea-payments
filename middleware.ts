@@ -1,36 +1,13 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { EA_PORTAL_COOKIE, verifyEAPortalSessionEdge } from '@/lib/ea-portal-auth-edge';
+import { createSlugPortalMiddleware } from '@ea/portal-chassis/middleware';
+import { EA_PORTAL_COOKIE, EA_PORTAL_SESSION } from '@/lib/chassis/ea-portal';
 
-export async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+const { middleware } = createSlugPortalMiddleware({
+  cookieName: EA_PORTAL_COOKIE,
+  loginPath: '/portal/login',
+  session: EA_PORTAL_SESSION,
+});
 
-  if (pathname === '/portal/login' || pathname.startsWith('/api/portal/login')) {
-    return NextResponse.next();
-  }
-
-  const slugMatch = pathname.match(/^\/portal\/([^/]+)/);
-  if (!slugMatch) return NextResponse.next();
-
-  const slug = slugMatch[1];
-  if (slug === 'login') return NextResponse.next();
-  const token = request.cookies.get(EA_PORTAL_COOKIE)?.value;
-  const secret = process.env.SESSION_SECRET ?? '';
-
-  if (!token) {
-    return NextResponse.redirect(new URL('/portal/login', request.url));
-  }
-
-  const session = await verifyEAPortalSessionEdge(token, secret);
-  if (!session) {
-    return NextResponse.redirect(new URL('/portal/login', request.url));
-  }
-
-  if (session.slug !== slug) {
-    return NextResponse.redirect(new URL(`/portal/${session.slug}`, request.url));
-  }
-
-  return NextResponse.next();
-}
+export default middleware;
 
 export const config = {
   matcher: ['/portal/:slug', '/portal/:slug/:path*'],

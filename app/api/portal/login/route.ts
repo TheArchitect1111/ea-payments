@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { validatePortalLogin, updateClientEngagementScore, getClientByPortalSlug } from '@/lib/airtable';
-import { signSession, EA_PORTAL_COOKIE } from '@/lib/ea-portal-auth';
+import { signSession, makeSessionCookie } from '@/lib/ea-portal-auth';
 import { getClientSuccessProfile } from '@/lib/client-success';
 
 export const dynamic = 'force-dynamic';
@@ -29,10 +29,8 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  let token: string;
-  try {
-    token = signSession(result.slug);
-  } catch {
+  const token = await signSession(result.slug);
+  if (!token) {
     return NextResponse.json({ error: 'Session signing failed.' }, { status: 500 });
   }
 
@@ -52,15 +50,7 @@ export async function POST(req: NextRequest) {
   }
 
   const res = NextResponse.json({ slug: result.slug });
-  res.cookies.set({
-    name: EA_PORTAL_COOKIE,
-    value: token,
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    path: '/',
-    maxAge: 24 * 60 * 60,
-  });
+  res.cookies.set(makeSessionCookie(token));
 
   return res;
 }

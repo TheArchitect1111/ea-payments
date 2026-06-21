@@ -7,9 +7,11 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test:smoke": "playwright test --config=playwright.smoke.config.ts"
+    "test:smoke": "playwright test --config=playwright.smoke.config.ts",
+    "sync-chassis": "node scripts/sync-portal-chassis.mjs"
   },
   "dependencies": {
+    "@ea/portal-chassis": "file:./vendor/portal-chassis",
     "@sentry/nextjs": "^10.59.0",
     "framer-motion": "^12.40.0",
     "next": "16.2.9",

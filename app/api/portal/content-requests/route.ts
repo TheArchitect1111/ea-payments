@@ -10,7 +10,7 @@ export const dynamic = 'force-dynamic';
 async function authenticatedClient() {
   const cookieStore = await cookies();
   const token = cookieStore.get(EA_PORTAL_COOKIE)?.value;
-  const session = token ? verifySession(token) : null;
+  const session = token ? await verifySession(token) : null;
   if (!session) return null;
   return getClientByPortalSlug(session.slug);
 }
