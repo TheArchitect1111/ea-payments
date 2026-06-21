@@ -241,7 +241,7 @@ export default function PremiumLanding() {
         image="https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=1400&q=80"
         imageAlt="Diverse community connected through shared purpose and momentum"
         cta="Explore Amplifi"
-        ctaHref="#pulse"
+        ctaHref="/portal/login"
       />
 
       <SplitSection

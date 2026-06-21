@@ -14,7 +14,31 @@ Do **not** send people to `www.efficiencyarchitects.online` yet — that domain 
 
 
 
-## Demo login (Pulse + Simplifi + Magnifi)
+## Share with friends (Simplifi + Magnifi + Amplifi)
+
+Send **one link:** https://ea-payments.vercel.app
+
+**No login required** for the cinematic experiences — share these after a capture (or use the seed script URL):
+
+| Experience | URL pattern | Notes |
+|------------|-------------|--------|
+| Magnifi | `/magnifi/{captureId}` | Full-screen cinematic · add `?classic=1` for report view |
+| Simplifi guidance | `/simplifi/guidance/{captureId}` | Guided journey + floating AI Guide |
+| Template library | `/experience/templates` | Browse all 10 paired templates |
+
+**Portal login** (Pulse, Simplifi workspace, Amplifi hub):
+
+| Field | Value |
+|-------|-------|
+| Login | https://ea-payments.vercel.app/portal/login |
+| Email | `demo@efficiencyarchitects.online` |
+| Password | `DemoPulse2026!` |
+
+Friends can paste any public URL on **Simplifi** → get Magnifi + Guidance links to share back.
+
+---
+
+## Demo login (Pulse + Simplifi + Magnifi + Amplifi)
 
 
 
@@ -36,6 +60,7 @@ After setup, testers get:
 
 - **Pulse:** `/portal/demo-client/pulse`
 - **Simplifi workspace:** `/portal/demo-client/simplifi` — paste a URL to capture
+- **Amplifi hub:** `/portal/demo-client/amplifi` — cinematic growth narrative + links to Magnifi/Guidance
 - **Magnifi demo:** link printed by seed script (`/magnifi/{id}`)
 
 
@@ -64,9 +89,10 @@ After setup, testers get:
 
 | 6 | **Magnifi experience** | `/magnifi/{id}` | Full-screen cinematic V2 · `?classic=1` for report view |
 | 7 | **Simplifi guidance** | `/simplifi/guidance/{id}` | 9-section guided journey + AI Guide panel |
-| 8 | **Update Hub** | `/portal/{slug}/updates` | Submit update requests |
-| 9 | **Scorecard** | `/scorecard` | Download `.docx` works |
-| 10 | **Unsubscribe** | `/unsubscribe` | Page loads |
+| 8 | **Amplifi hub** | `/portal/demo-client/amplifi` | Cinematic portal tab · stats from Pulse + latest capture |
+| 9 | **Update Hub** | `/portal/{slug}/updates` | Submit update requests |
+| 10 | **Scorecard** | `/scorecard` | Download `.docx` works |
+| 11 | **Unsubscribe** | `/unsubscribe` | Page loads |
 | — | **Template library** | `/experience/templates` | All 10 Simplifi + Magnifi pairs listed |
 
 
@@ -126,6 +152,8 @@ Portal (demo login)
 [ ] Simplifi tab → paste URL → capture completes
 
 [ ] Magnifi link opens with sections + roadmap
+
+[ ] Amplifi tab loads cinematic hub with Magnifi/Guidance links
 
 
 

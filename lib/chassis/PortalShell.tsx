@@ -1,7 +1,7 @@
 import type { CSSProperties } from 'react';
 import { HeaderPortalShell } from '@ea/portal-chassis/layout';
 
-export type EAPortalTab = 'home' | 'pulse' | 'simplifi' | 'updates';
+export type EAPortalTab = 'home' | 'pulse' | 'simplifi' | 'amplifi' | 'updates';
 
 const NAVY = '#1B2B4D';
 const GOLD = '#C9A844';
@@ -36,6 +36,7 @@ export function PortalShell({ slug, active }: Props) {
         tabs={[
           { id: 'home', label: 'Dashboard', href: base },
           { id: 'simplifi', label: 'Simplifi', href: `${base}/simplifi` },
+          { id: 'amplifi', label: 'Amplifi', href: `${base}/amplifi` },
           { id: 'pulse', label: 'Pulse', href: `${base}/pulse` },
           { id: 'updates', label: 'Update Requests', href: `${base}/updates` },
         ]}

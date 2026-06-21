@@ -110,6 +110,19 @@ export default async function PortalPage({
         </div>
 
         <div className="ep-card">
+          <p className="ep-card-title">Amplifi — Your Story</p>
+          <div className="ep-placeholder">
+            <p className="ep-placeholder-text">
+              Share more. Reach more. See your amplification journey, latest Magnifi experience, and
+              visibility roadmap.
+            </p>
+            <a href={`/portal/${slug}/amplifi`} className="ep-pulse-cta">
+              Open Amplifi
+            </a>
+          </div>
+        </div>
+
+        <div className="ep-card">
           <p className="ep-card-title">Pulse — Your Progress</p>
           <div className="ep-placeholder">
             <p className="ep-placeholder-text">
