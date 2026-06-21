@@ -1,3 +1,5 @@
+import { triggerMakeWebhook } from '@ea/portal-chassis/webhooks';
+
 export interface OnboardingWebhookPayload {
   event: 'payment.received';
   clientName: string;
@@ -24,14 +26,9 @@ export async function fireMakeWebhook(
   }
 
   try {
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-    if (!res.ok) {
-      const detail = await res.text();
-      console.error(`${label} failed (${res.status}):`, detail);
+    const { success } = await triggerMakeWebhook(url, payload);
+    if (!success) {
+      console.error(`${label} failed — Make returned non-OK response.`);
     }
   } catch (err) {
     console.error(`${label} threw:`, err);

@@ -287,7 +287,11 @@ function PortalLayout({
   const role = user?.publicMetadata?.role;
   const isAdmin = role ? ADMIN_ROLES.includes(role) : false;
   const visibleNav = [...navItems, ...isAdmin ? adminNavItems : []];
-  const isActive = (href) => href === "/" ? pathname === "/" : pathname.startsWith(href);
+  const isActive = (href) => {
+    if (href === "/") return pathname === "/";
+    if (pathname === href) return true;
+    return pathname.startsWith(`${href}/`);
+  };
   return /* @__PURE__ */ jsxs(Fragment, { children: [
     /* @__PURE__ */ jsx("style", { children: `
         .pl-root {

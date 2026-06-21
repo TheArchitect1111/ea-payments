@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { EA_PORTAL_COOKIE, verifySession } from '@/lib/ea-portal-auth';
-import { PortalNav } from '../../PortalNav';
+import { PortalShell } from '@/lib/chassis/PortalShell';
 import NewContentRequestForm from './NewContentRequestForm';
 import '../../ea-portal.css';
 
@@ -17,7 +17,7 @@ export default async function NewContentRequestPage({ params }: { params: Promis
 
   return (
     <div className="ep-page">
-      <PortalNav slug={slug} active="updates" />
+      <PortalShell slug={slug} active="updates" />
       <main className="ep-main">
         <div className="ep-welcome">
           <p className="ep-welcome-label">Update Hub™</p>

@@ -3,7 +3,7 @@ import { cookies } from 'next/headers';
 import { redirect, notFound } from 'next/navigation';
 import { verifySession, EA_PORTAL_COOKIE } from '@/lib/ea-portal-auth';
 import { getClientByPortalSlug, getContentRequestsForClient } from '@/lib/airtable';
-import { PortalNav, NAVY, GOLD } from '../PortalNav';
+import { PortalShell, NAVY, GOLD } from '@/lib/chassis/PortalShell';
 import '../ea-portal.css';
 
 export const dynamic = 'force-dynamic';
@@ -34,7 +34,7 @@ export default async function SimplifiClientPage({
 
   return (
     <div className="ep-page">
-      <PortalNav slug={slug} active="simplifi" />
+      <PortalShell slug={slug} active="simplifi" />
 
       <main className="ep-main">
         <div className="ep-welcome">

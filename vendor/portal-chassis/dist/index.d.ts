@@ -1,29 +1,17 @@
 export { TenantAirtable, TenantBrand, TenantConfig, TenantLayout, TenantNavItem } from './tenant.js';
-import * as react from 'react';
-import { ReactNode, ComponentType } from 'react';
+export { ClerkShell, ClerkShellProps } from './clerk.js';
 import * as next_server from 'next/server';
+import * as react from 'react';
+import { ReactNode } from 'react';
 export { HmacSessionConfig, SessionCookieOptions, makeSessionCookie, newSessionExpiry, signHmacSession, verifyHmacSession } from './hmac.js';
 export { HmacPortalMiddlewareConfig, SlugRoleRoute, createHmacPortalMiddleware } from './middleware.js';
+export { NavItem, PortalLayout, PortalLayoutProps } from './portal-layout.js';
 export { HeaderPortalShell, HeaderPortalShellProps, HeaderPortalTab } from './layout.js';
 export { AirtableQueryParams, AirtableRecord, airtableCreate, airtableDelete, airtableGet, airtableGetOne, airtableUpdate } from './airtable.js';
 export { triggerMakeWebhook } from './webhooks.js';
 export { EmailPayload, sendEmail } from './email.js';
 export { adminEmail, allowSampleData, isDemoMode, isProductionDeploy, requireEnv } from './env.js';
 export { AdminNotifyInput, notifyAdmin } from './notify.js';
-
-interface ClerkShellProps {
-    brandColor: string;
-    logoSrc: string;
-    portalName: string;
-    tagline: string;
-    mode: "sign-in" | "sign-up";
-}
-/**
- * Universal login/signup shell used across all EA portals.
- * Left panel: brand color, logo, tagline. Right panel: Clerk component.
- * Left panel collapses below 768px so only the Clerk form is visible on mobile.
- */
-declare function ClerkShell({ brandColor, logoSrc, portalName, tagline, mode }: ClerkShellProps): react.JSX.Element;
 
 interface MiddlewareConfig {
     protectedPrefixes: string[];
@@ -67,24 +55,4 @@ declare function RoleGuard({ requiredRole, fallback, children }: RoleGuardProps)
  */
 declare function withRoleProtection(_request: Request, requiredRole: string): Promise<Response | null>;
 
-interface NavItem {
-    label: string;
-    href: string;
-    icon: ComponentType<{
-        className?: string;
-        style?: React.CSSProperties;
-    }>;
-}
-interface PortalLayoutProps {
-    portalName: string;
-    logoSrc: string;
-    brandColor: string;
-    accentColor: string;
-    navItems: NavItem[];
-    adminNavItems?: NavItem[];
-    mobileNavStyle?: "bottom" | "sheet";
-    children: ReactNode;
-}
-declare function PortalLayout({ portalName, logoSrc, brandColor, accentColor, navItems, adminNavItems, mobileNavStyle, children, }: PortalLayoutProps): react.JSX.Element;
-
-export { ClerkShell, type ClerkShellProps, type MiddlewareConfig, type NavItem, PortalLayout, type PortalLayoutProps, RoleGuard, type RoleGuardProps, createPortalMiddleware, withRoleProtection };
+export { type MiddlewareConfig, RoleGuard, type RoleGuardProps, createPortalMiddleware, withRoleProtection };

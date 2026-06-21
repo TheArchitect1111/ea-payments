@@ -1,6 +1,6 @@
 {
   "name": "@ea/portal-chassis",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "EA Portal Chassis — shared auth, layout, email, webhooks, and Airtable adapters for multi-tenant portals",
   "license": "UNLICENSED",
   "private": false,
@@ -33,6 +33,16 @@
       "types": "./dist/layout.d.ts",
       "import": "./dist/layout.js",
       "require": "./dist/layout.cjs"
+    },
+    "./portal-layout": {
+      "types": "./dist/portal-layout.d.ts",
+      "import": "./dist/portal-layout.js",
+      "require": "./dist/portal-layout.cjs"
+    },
+    "./clerk": {
+      "types": "./dist/clerk.d.ts",
+      "import": "./dist/clerk.js",
+      "require": "./dist/clerk.cjs"
     },
     "./airtable": {
       "types": "./dist/airtable.d.ts",

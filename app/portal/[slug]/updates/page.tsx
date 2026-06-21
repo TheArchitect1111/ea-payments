@@ -2,7 +2,7 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { EA_PORTAL_COOKIE, verifySession } from '@/lib/ea-portal-auth';
 import { getClientByPortalSlug, getContentRequestsForClient } from '@/lib/airtable';
-import { PortalNav, NAVY, GOLD } from '../PortalNav';
+import { PortalShell, NAVY, GOLD } from '@/lib/chassis/PortalShell';
 import '../ea-portal.css';
 
 export const dynamic = 'force-dynamic';
@@ -31,7 +31,7 @@ export default async function UpdatesPage({ params }: { params: Promise<{ slug: 
 
   return (
     <div className="ep-page">
-      <PortalNav slug={slug} active="updates" />
+      <PortalShell slug={slug} active="updates" />
 
       <main className="ep-main">
         <div className="ep-welcome">

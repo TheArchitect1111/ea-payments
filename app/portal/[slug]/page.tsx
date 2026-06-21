@@ -3,7 +3,7 @@ import { redirect, notFound } from 'next/navigation';
 import { verifySession, EA_PORTAL_COOKIE } from '@/lib/ea-portal-auth';
 import { getClientByPortalSlug } from '@/lib/airtable';
 import PasswordChangeModal from './PasswordChangeModal';
-import { PortalNav } from './PortalNav';
+import { PortalShell } from '@/lib/chassis/PortalShell';
 import './ea-portal.css';
 
 export const dynamic = 'force-dynamic';
@@ -61,7 +61,7 @@ export default async function PortalPage({
 
   return (
     <div className="ep-page">
-      <PortalNav slug={slug} active="home" />
+      <PortalShell slug={slug} active="home" />
 
       <main className="ep-main">
         <div className="ep-welcome">

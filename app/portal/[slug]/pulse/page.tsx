@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { verifySession, EA_PORTAL_COOKIE } from '@/lib/ea-portal-auth';
 import { getClientByPortalSlug } from '@/lib/airtable';
 import { getClientSuccessProfile } from '@/lib/client-success';
-import { PortalNav, NAVY, GOLD } from '../PortalNav';
+import { PortalShell, NAVY, GOLD } from '@/lib/chassis/PortalShell';
 import '../ea-portal.css';
 
 export const dynamic = 'force-dynamic';
@@ -51,7 +51,7 @@ export default async function PulsePage({
 
   return (
     <div className="ep-page">
-      <PortalNav slug={slug} active="pulse" />
+      <PortalShell slug={slug} active="pulse" />
 
       <main className="ep-main">
         <div className="ep-welcome">
