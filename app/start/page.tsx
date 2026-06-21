@@ -12,7 +12,7 @@ Magnifi story (no login): ${PUBLIC_LINKS.storyDemo}
 
 Login: ${DEMO_EMAIL} / ${DEMO_PASSWORD}
 
-Use ea-payments.vercel.app — NOT efficiencyarchitects.online (old site).`;
+Use ea-payments.vercel.app or www.efficiencyarchitects.online (same platform).`;
 
 export default function StartPage() {
   return (

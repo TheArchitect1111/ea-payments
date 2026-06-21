@@ -2,13 +2,15 @@
 
 Use this guide to get **real-world phone testing** working today. Every step explains **what**, **why**, and **where to click**.
 
-**Canonical testing URL (new platform):** https://ea-payments.vercel.app
+**Canonical URLs (both work):** https://ea-payments.vercel.app · https://www.efficiencyarchitects.online (redirects to ea-payments)
 
 **One link for all testers:** https://ea-payments.vercel.app/start (or `/go`)
 
 **Health check (is the server ready?):** https://ea-payments.vercel.app/api/health/launch
 
-**Do not use for testing yet:** https://www.efficiencyarchitects.online — that domain still points at the **old** Create React App site (different Vercel project). If your phone bookmark or autocomplete opens `.online`, you will see the legacy site even though `ea-payments.vercel.app` is correct.
+**Do not use for CPR recruitment:** https://mississaugamagic.com — that is the WordPress basketball org site, not CPR.
+
+If your phone bookmark or autocomplete opens an old URL, hard refresh or re-bookmark the links above.
 
 ---
 
@@ -185,7 +187,7 @@ https://ea-payments.vercel.app/consider/selena
 Amplifi hub:
 https://ea-payments.vercel.app/amplifi
 
-Use ea-payments.vercel.app only — NOT efficiencyarchitects.online
+Use ea-payments.vercel.app or www.efficiencyarchitects.online (same site)
 ```
 
 ---

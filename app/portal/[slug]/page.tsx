@@ -7,6 +7,7 @@ import { getPortalCaptures } from '@/lib/capture-records';
 import { getClientSuccessProfile } from '@/lib/client-success';
 import PasswordChangeModal from './PasswordChangeModal';
 import { PortalShell, NAVY, GOLD } from '@/lib/chassis/PortalShell';
+import EAPortalHubCards from '@/app/portal/components/EAPortalHubCards';
 import './ea-portal.css';
 
 export const dynamic = 'force-dynamic';
@@ -61,6 +62,8 @@ export default async function PortalPage({
             Pulse, Simplifi, Magnifi, and Amplifi — your operating rhythm in one place.
           </p>
         </section>
+
+        <EAPortalHubCards slug={slug} />
 
         <div className="ep-stats-row">
           <div className="ep-stat-pill">

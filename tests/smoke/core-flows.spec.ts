@@ -4,10 +4,16 @@ test('homepage hero and primary CTA render', async ({ page }) => {
   await page.goto('/');
   await expect(
     page.getByRole('heading', {
-      name: /what would become possible if more got done and more of your time belonged to you/i,
+      name: /imagine what becomes possible when everything isn't on your shoulders/i,
     }),
   ).toBeVisible();
-  await expect(page.getByRole('link', { name: /take the assessment/i }).first()).toBeVisible();
+  await expect(page.getByRole('link', { name: /take the operational mri/i }).first()).toBeVisible();
+});
+
+test('consider selena demo story is reachable', async ({ page }) => {
+  await page.goto('/story/selena');
+  await expect(page).toHaveURL(/\/consider\/selena|\/story\/selena/);
+  await expect(page.locator('body')).not.toBeEmpty();
 });
 
 test('assessment page is reachable', async ({ page }) => {

@@ -590,3 +590,136 @@
     border-radius: var(--ea-radius-sm);
   }
 }
+
+/* ── Portal hub cards (CPR template parity) ── */
+.ep-hub-section {
+  margin-bottom: 28px;
+}
+
+.ep-hub-eyebrow {
+  margin: 0 0 8px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ea-gold);
+}
+
+.ep-hub-title {
+  margin: 0;
+  font-size: clamp(1.35rem, 2.5vw, 1.75rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--ea-navy);
+}
+
+.ep-hub-intro {
+  margin: 12px 0 0;
+  max-width: 640px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ea-muted);
+}
+
+.ep-hub-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 24px;
+}
+
+.ep-hub-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 18px;
+  border-radius: var(--ea-radius-sm);
+  border: 1px solid rgba(27, 43, 77, 0.08);
+  background: rgba(255, 255, 255, 0.92);
+  text-decoration: none;
+  color: inherit;
+  box-shadow: var(--ea-shadow);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.ep-hub-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--ea-shadow-lg);
+}
+
+.ep-hub-card strong {
+  font-size: 15px;
+  letter-spacing: -0.01em;
+}
+
+.ep-hub-card p {
+  margin: 0;
+  flex: 1;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ea-muted);
+}
+
+.ep-hub-tag {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ea-gold);
+}
+
+.ep-hub-cta {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--ea-navy);
+}
+
+.ep-hub-card-pulse {
+  background: linear-gradient(145deg, var(--ea-navy) 0%, #0f1829 100%);
+  border-color: rgba(201, 168, 68, 0.25);
+  color: #fff;
+}
+
+.ep-hub-card-pulse p,
+.ep-hub-card-pulse .ep-hub-tag {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.ep-hub-card-pulse .ep-hub-tag {
+  color: var(--ea-gold);
+}
+
+.ep-hub-card-pulse .ep-hub-cta {
+  color: #fff;
+}
+
+.ep-hub-card-amplifi {
+  background: linear-gradient(145deg, #0c0c0a 0%, #1a0505 100%);
+  border-color: rgba(201, 168, 68, 0.2);
+  color: #fff;
+}
+
+.ep-hub-card-amplifi p,
+.ep-hub-card-amplifi .ep-hub-tag {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.ep-hub-card-amplifi .ep-hub-cta {
+  color: #fff;
+}
+
+.ep-hub-card-simplifi {
+  background: linear-gradient(145deg, #fff 0%, #f0f4ff 100%);
+}
+
+@media (max-width: 1100px) {
+  .ep-hub-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .ep-hub-grid {
+    grid-template-columns: 1fr;
+  }
+}

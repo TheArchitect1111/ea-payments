@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Efficiency Architects — What Becomes Possible',
+  title: 'Efficiency Architects — Imagine What Becomes Possible',
   description:
     'Help people create more of what matters and less of what doesn\'t. More life for individuals. More capacity for organizations.',
 };

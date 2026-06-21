@@ -102,8 +102,6 @@ export default function AmplifiShareApp({
     );
   }
 
-  const primaryShare = result?.considerUrl ?? result?.magnifiUrl;
-
   return (
     <div className="as-app">
       <header className="as-header">

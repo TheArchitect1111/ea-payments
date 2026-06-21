@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getClientByPortalSlug } from '@/lib/airtable';
-import { getCaptureByConsiderSlug } from '@/lib/capture-records';
+import { resolveConsiderExperience } from '@/lib/consider-resolve';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,8 +28,8 @@ export async function GET() {
   }
 
   try {
-    const capture = await getCaptureByConsiderSlug('selena');
-    selenaCapture = Boolean(capture);
+    const resolved = await resolveConsiderExperience('selena');
+    selenaCapture = Boolean(resolved);
   } catch {
     selenaCapture = false;
   }
