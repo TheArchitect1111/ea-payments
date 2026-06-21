@@ -1,20 +1,32 @@
 (function () {
-  if (document.getElementById('ea-amplifi-fab')) return;
+  if (document.getElementById('ea-product-fabs')) return;
 
-  const fab = document.createElement('button');
-  fab.id = 'ea-amplifi-fab';
-  fab.type = 'button';
-  fab.title = 'Amplifi™ — Amplify this page';
-  fab.setAttribute('aria-label', 'Amplifi this page');
-  fab.textContent = 'Amplify';
+  const wrap = document.createElement('div');
+  wrap.id = 'ea-product-fabs';
 
-  fab.addEventListener('click', () => {
+  function openPath(path, label) {
     chrome.storage.sync.get(['apiUrl'], (stored) => {
       const base = stored.apiUrl || 'https://ea-payments.vercel.app';
       const url = encodeURIComponent(window.location.href);
-      window.open(`${base}/amplifi/share?url=${url}`, '_blank', 'noopener');
+      window.open(`${base}${path}?url=${url}`, '_blank', 'noopener');
     });
-  });
+  }
 
-  document.documentElement.appendChild(fab);
+  const capture = document.createElement('button');
+  capture.type = 'button';
+  capture.className = 'ea-fab ea-fab-simplifi';
+  capture.title = 'Simplifi™ — Capture this page';
+  capture.textContent = 'Capture';
+  capture.addEventListener('click', () => openPath('/capture', 'capture'));
+
+  const amplify = document.createElement('button');
+  amplify.type = 'button';
+  amplify.className = 'ea-fab ea-fab-amplifi';
+  amplify.title = 'Amplifi™ — Amplify & share';
+  amplify.textContent = 'Amplify';
+  amplify.addEventListener('click', () => openPath('/amplify', 'amplify'));
+
+  wrap.appendChild(capture);
+  wrap.appendChild(amplify);
+  document.documentElement.appendChild(wrap);
 })();

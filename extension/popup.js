@@ -1,60 +1,24 @@
-document.getElementById('amplify').addEventListener('click', async () => {
-
-  const status = document.getElementById('status');
-
-  status.textContent = 'Opening Amplifi…';
-
-  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-
-  if (!tab?.url) {
-
-    status.textContent = 'No active tab.';
-
-    return;
-
-  }
-
-  chrome.runtime.sendMessage({ type: 'AMPLIFY_URL', url: tab.url }, (res) => {
-
-    status.textContent = res?.ok ? 'Amplifi opened.' : 'Failed.';
-
-  });
-
-});
-
-
-
-document.getElementById('capture').addEventListener('click', async () => {
-
-  const status = document.getElementById('status');
-
-  status.textContent = 'Capturing…';
-
-  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-
-  if (!tab?.url) {
-
-    status.textContent = 'No active tab.';
-
-    return;
-
-  }
-
-  chrome.runtime.sendMessage({ type: 'CAPTURE_URL', url: tab.url, mode: 'capture' }, (res) => {
-
-    status.textContent = res?.ok ? 'Sent to Simplifi.' : 'Failed — check Settings for API key.';
-
-  });
-
-});
-
-
-
-document.getElementById('options').addEventListener('click', (e) => {
-
-  e.preventDefault();
-
-  chrome.runtime.openOptionsPage();
-
-});
-
+function openProduct(path) {
+  const status = document.getElementById('status');
+  status.textContent = 'Opening…';
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    const tab = tabs[0];
+    if (!tab?.url) {
+      status.textContent = 'No active tab.';
+      return;
+    }
+    chrome.storage.sync.get(['apiUrl'], (stored) => {
+      const base = stored.apiUrl || 'https://ea-payments.vercel.app';
+      chrome.tabs.create({ url: `${base}${path}?url=${encodeURIComponent(tab.url)}` });
+      status.textContent = 'Opened — sign in if needed. Magnifi opens after capture.';
+    });
+  });
+}
+
+document.getElementById('capture').addEventListener('click', () => openProduct('/capture'));
+document.getElementById('amplify').addEventListener('click', () => openProduct('/amplify'));
+
+document.getElementById('options').addEventListener('click', (e) => {
+  e.preventDefault();
+  chrome.runtime.openOptionsPage();
+});

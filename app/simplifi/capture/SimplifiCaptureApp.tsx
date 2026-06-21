@@ -1,8 +1,9 @@
 'use client';
 
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useRef, useState, useEffect } from 'react';
 import Link from 'next/link';
 import type { CaptureRecord } from '@/lib/capture-records';
+import CaptureSuccessPanel from '@/app/components/CaptureSuccessPanel';
 
 const NAVY = '#1B2B4D';
 const GOLD = '#C9A844';
@@ -39,6 +40,14 @@ export default function SimplifiCaptureApp({
   const [result, setResult] = useState<AnalyzeResponse | null>(null);
 
   const loginNext = encodeURIComponent('/simplifi/capture');
+
+  useEffect(() => {
+    if (loggedIn && initialUrl?.trim()) {
+      setUrl(initialUrl);
+      setOpen(true);
+      setView('url');
+    }
+  }, [loggedIn, initialUrl]);
 
   const resetSheet = () => {
     setView('menu');
@@ -77,6 +86,7 @@ export default function SimplifiCaptureApp({
       }
       setResult(data);
       setView('result');
+      setOpen(true);
     } catch {
       setMessage('Network error. Try again.');
     } finally {
@@ -98,6 +108,7 @@ export default function SimplifiCaptureApp({
       }
       setResult(data);
       setView('result');
+      setOpen(true);
     } catch {
       setMessage('Network error. Try again.');
     } finally {
@@ -237,28 +248,18 @@ export default function SimplifiCaptureApp({
 
         {view === 'result' && result?.record && (
           <>
-            <p className="sc-sheet-title">Captured</p>
-            <p className="sc-result-name">{result.record.title}</p>
-            <div className="sc-result-links">
-              {result.considerUrl && (
-                <a href={result.considerUrl} target="_blank" rel="noopener noreferrer">
-                  Consider share link
-                </a>
-              )}
-              {result.magnifiUrl && (
-                <a href={result.magnifiUrl} target="_blank" rel="noopener noreferrer">
-                  Magnifi cinematic
-                </a>
-              )}
-              {result.guidanceUrl && (
-                <a href={result.guidanceUrl} target="_blank" rel="noopener noreferrer">
-                  Simplifi guidance
-                </a>
-              )}
-            </div>
-            <button type="button" className="sc-btn sc-btn-primary sc-btn-block" onClick={closeSheet}>
-              Done
-            </button>
+            <p className="sc-sheet-title">Pipeline complete</p>
+            <CaptureSuccessPanel
+              title={result.record.title ?? 'Opportunity'}
+              links={{
+                magnifiUrl: result.magnifiUrl,
+                considerUrl: result.considerUrl,
+                guidanceUrl: result.guidanceUrl,
+                clientMessage: result.clientMessage,
+              }}
+              onClose={closeSheet}
+              autoOpenMagnifi
+            />
           </>
         )}
 

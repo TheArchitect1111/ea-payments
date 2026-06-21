@@ -1,18 +1,13 @@
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({
-    id: 'ea-amplifi-page',
-    title: 'Amplifi™ this page',
+    id: 'ea-simplifi-capture',
+    title: 'Simplifi™ — Capture this page',
     contexts: ['page'],
   });
   chrome.contextMenus.create({
-    id: 'ea-capture',
-    title: 'Capture with Simplifi™',
-    contexts: ['page', 'link'],
-  });
-  chrome.contextMenus.create({
-    id: 'ea-blueprint',
-    title: 'Generate Auto Blueprint',
-    contexts: ['page', 'link'],
+    id: 'ea-amplifi-page',
+    title: 'Amplifi™ — Amplify & share',
+    contexts: ['page'],
   });
 });
 
@@ -23,18 +18,14 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   const { apiUrl } = await chrome.storage.sync.get(['apiUrl']);
   const base = apiUrl || 'https://ea-payments.vercel.app';
 
+  if (info.menuItemId === 'ea-simplifi-capture') {
+    chrome.tabs.create({ url: `${base}/capture?url=${encodeURIComponent(url)}` });
+    return;
+  }
+
   if (info.menuItemId === 'ea-amplifi-page') {
-    chrome.tabs.create({ url: `${base}/amplifi/share?url=${encodeURIComponent(url)}` });
+    chrome.tabs.create({ url: `${base}/amplify?url=${encodeURIComponent(url)}` });
     return;
-  }
-
-  if (info.menuItemId === 'ea-blueprint') {
-    await captureUrl(url, 'blueprint');
-    return;
-  }
-
-  if (info.menuItemId === 'ea-capture') {
-    await captureUrl(url, 'capture');
   }
 });
 

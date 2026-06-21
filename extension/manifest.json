@@ -1,13 +1,13 @@
 {
   "manifest_version": 3,
-  "name": "Amplifi™ — Share More",
-  "version": "2.1.0",
-  "description": "Amplify any page into a shareable Magnifi story. Floating button + toolbar icon.",
+  "name": "EA Simplifi + Amplifi",
+  "version": "2.2.0",
+  "description": "Capture with Simplifi (→ Magnifi auto). Amplify & share with Amplifi. Toolbar + floating buttons.",
   "permissions": ["activeTab", "contextMenus", "storage"],
   "host_permissions": ["https://*/*", "http://*/*"],
   "action": {
     "default_popup": "popup.html",
-    "default_title": "Amplifi™ — Amplify this page"
+    "default_title": "Simplifi + Amplifi"
   },
   "background": {
     "service_worker": "background.js"

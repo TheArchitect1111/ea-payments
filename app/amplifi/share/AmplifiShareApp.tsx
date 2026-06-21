@@ -1,7 +1,8 @@
 'use client';
 
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useRef, useState, useEffect } from 'react';
 import Link from 'next/link';
+import CaptureSuccessPanel from '@/app/components/CaptureSuccessPanel';
 
 const NAVY = '#1B2B4D';
 const GOLD = '#C9A844';
@@ -32,23 +33,14 @@ export default function AmplifiShareApp({
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [result, setResult] = useState<AnalyzeResponse | null>(null);
-  const [copied, setCopied] = useState(false);
 
   const loginNext = encodeURIComponent('/amplifi/share');
 
-  const shareLink = async (link: string, title: string) => {
-    if (typeof navigator !== 'undefined' && navigator.share) {
-      try {
-        await navigator.share({ title: 'Amplifi™', text: title, url: link });
-        return;
-      } catch {
-        /* user cancelled */
-      }
+  useEffect(() => {
+    if (loggedIn && initialUrl?.trim()) {
+      setUrl(initialUrl);
     }
-    await navigator.clipboard.writeText(link);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
+  }, [loggedIn, initialUrl]);
 
   const runCapture = useCallback(async (body: Record<string, string>) => {
     setLoading(true);
@@ -148,34 +140,19 @@ export default function AmplifiShareApp({
         {message && <p className="as-error">{message}</p>}
       </main>
 
-      {open && result && (
-        <div className="as-sheet" role="dialog">
-          <p className="as-sheet-title">Ready to share</p>
-          <p className="as-sheet-name">{result.record?.title ?? 'Your Amplifi story'}</p>
-          {primaryShare && (
-            <button
-              type="button"
-              className="as-btn as-btn-gold as-btn-block"
-              onClick={() => shareLink(primaryShare, result.record?.title ?? 'Amplifi story')}
-            >
-              {copied ? 'Link copied!' : 'Share link'}
-            </button>
-          )}
-          <div className="as-sheet-links">
-            {result.considerUrl && (
-              <a href={result.considerUrl} target="_blank" rel="noopener noreferrer">
-                Open Consider page
-              </a>
-            )}
-            {result.magnifiUrl && (
-              <a href={result.magnifiUrl} target="_blank" rel="noopener noreferrer">
-                Open Magnifi cinematic
-              </a>
-            )}
-          </div>
-          <button type="button" className="as-sheet-close" onClick={() => setOpen(false)}>
-            Close
-          </button>
+      {open && result?.record && (
+        <div className="as-sheet as-sheet-open" role="dialog">
+          <CaptureSuccessPanel
+            title={result.record.title ?? 'Your Amplifi story'}
+            links={{
+              magnifiUrl: result.magnifiUrl,
+              considerUrl: result.considerUrl,
+              guidanceUrl: result.guidanceUrl,
+              clientMessage: result.clientMessage,
+            }}
+            onClose={() => setOpen(false)}
+            autoOpenMagnifi
+          />
         </div>
       )}
 

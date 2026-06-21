@@ -1,46 +1,25 @@
-<!DOCTYPE html>
-
-<html>
-
-<head>
-
-  <meta charset="utf-8" />
-
-  <style>
-
-    body { font-family: system-ui, sans-serif; width: 320px; margin: 0; padding: 16px; background: #1B2B4D; color: #fff; }
-
-    h1 { font-size: 14px; margin: 0 0 4px; letter-spacing: 0.08em; text-transform: uppercase; color: #C9A844; }
-
-    p { font-size: 12px; color: #cbd5e1; margin: 0 0 16px; line-height: 1.5; }
-
-    button { width: 100%; padding: 12px; border: none; border-radius: 4px; font-weight: 700; cursor: pointer; background: #C9A844; color: #1B2B4D; margin-bottom: 8px; }
-
-    a { color: #C9A844; font-size: 11px; }
-
-    #status { font-size: 11px; min-height: 16px; margin-top: 8px; color: #e2e8f0; }
-
-  </style>
-
-</head>
-
-<body>
-
-  <h1>Amplifi™</h1>
-
-  <p>Amplify this page into a shareable Magnifi story — or capture with Simplifi.</p>
-
-  <button id="amplify">Amplify This Page</button>
-
-  <button id="capture" style="background:#334155;color:#fff;">Capture with Simplifi</button>
-
-  <a href="#" id="options">Settings</a>
-
-  <div id="status"></div>
-
-  <script src="popup.js"></script>
-
-</body>
-
-</html>
-
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <style>
+    body { font-family: system-ui, sans-serif; width: 340px; margin: 0; padding: 16px; background: #1B2B4D; color: #fff; }
+    h1 { font-size: 13px; margin: 0 0 8px; color: #C9A844; }
+    p { font-size: 11px; color: #cbd5e1; margin: 0 0 12px; line-height: 1.5; }
+    button { width: 100%; padding: 12px; border: none; border-radius: 4px; font-weight: 700; cursor: pointer; margin-bottom: 8px; }
+    .simplifi { background: #0A66FF; color: #fff; }
+    .amplifi { background: #C9A844; color: #1B2B4D; }
+    a { color: #C9A844; font-size: 11px; }
+    #status { font-size: 11px; min-height: 16px; margin-top: 8px; color: #e2e8f0; }
+  </style>
+</head>
+<body>
+  <h1>Simplifi → Magnifi → Amplifi</h1>
+  <p>Capture runs Simplifi. Magnifi story builds automatically. Amplifi shares the link.</p>
+  <button id="capture" class="simplifi">Capture This Page (Simplifi)</button>
+  <button id="amplify" class="amplifi">Amplify & Share (Amplifi)</button>
+  <a href="#" id="options">Settings</a>
+  <div id="status"></div>
+  <script src="popup.js"></script>
+</body>
+</html>

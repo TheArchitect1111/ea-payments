@@ -21,8 +21,14 @@ export default function StartPage() {
         <p className="text-xs font-bold uppercase tracking-[0.3em] text-[#C9A844]">Friend test kit</p>
         <h1 className="mt-4 text-3xl font-black">Start here</h1>
         <p className="mt-3 text-neutral-300 leading-relaxed">
-          Send this page to testers. Everything below works on phones and laptops today.
+          Send this page to testers. Pipeline: <strong className="text-white">Simplifi captures → Magnifi opens automatically → Amplifi shares the link.</strong>
         </p>
+
+        <section className="mt-6 border border-white/15 p-4 text-sm text-neutral-300">
+          <p className="font-bold text-[#C9A844] mb-2">Browser buttons</p>
+          <p>Chrome: load <code className="text-white">extension/</code> folder → toolbar icon + floating Capture & Amplify on every site.</p>
+          <p className="mt-2">Guide: <Link href="/amplifi/install" className="underline text-[#C9A844]">/amplifi/install</Link></p>
+        </section>
 
         <section className="mt-10 grid gap-4">
           {[

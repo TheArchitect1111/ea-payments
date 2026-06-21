@@ -1,22 +1,39 @@
-#ea-amplifi-fab {
+#ea-product-fabs {
   position: fixed;
   right: 16px;
   bottom: 16px;
   z-index: 2147483646;
-  padding: 12px 20px;
-  border: 2px solid #c9a844;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.ea-fab {
+  padding: 12px 18px;
   border-radius: 999px;
-  background: #1b2b4d;
-  color: #c9a844;
   font-family: system-ui, sans-serif;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 800;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   cursor: pointer;
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+  border: 2px solid transparent;
 }
 
-#ea-amplifi-fab:hover {
-  background: #243a66;
+.ea-fab-simplifi {
+  background: #0a66ff;
+  color: #fff;
+  border-color: #0a66ff;
+}
+
+.ea-fab-amplifi {
+  background: #1b2b4d;
+  color: #c9a844;
+  border-color: #c9a844;
+}
+
+.ea-fab:hover {
+  filter: brightness(1.08);
 }

@@ -1,7 +1,8 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import type { CaptureRecord } from '@/lib/capture-records';
+import CaptureSuccessPanel from '@/app/components/CaptureSuccessPanel';
 
 const NAVY = '#1B2B4D';
 const GOLD = '#C9A844';
@@ -234,68 +235,17 @@ export default function SimplifiPortalWorkspace({
         </div>
 
         {lastResult?.record && (
-          <div className="mt-4 border border-neutral-200 bg-neutral-50 p-4 space-y-3">
-            <p className="text-sm font-bold" style={{ color: NAVY }}>
-              {lastResult.record.title}
-            </p>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs text-neutral-600">
-              <span>Visibility: {scoreLabel(lastResult.businessScores?.visibility)}</span>
-              <span>Conversion: {scoreLabel(lastResult.businessScores?.conversion)}</span>
-              <span>Trust: {scoreLabel(lastResult.businessScores?.trust)}</span>
-              <span>EA Fit: {scoreLabel(lastResult.scores?.eaFitScore)}</span>
-              <span>Opportunity: {scoreLabel(lastResult.scores?.opportunityScore)}</span>
-              <span>Template: {lastResult.recommendations?.template.name ?? 'None'}</span>
-            </div>
-            <div className="flex flex-wrap gap-4">
-              {lastResult.considerUrl && (
-                <a
-                  href={lastResult.considerUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-xs font-bold underline"
-                  style={{ color: GOLD }}
-                >
-                  Consider share link →
-                </a>
-              )}
-              {lastResult.magnifiUrl && (
-                <a
-                  href={lastResult.magnifiUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-xs font-bold underline"
-                  style={{ color: GOLD }}
-                >
-                  Magnifi cinematic →
-                </a>
-              )}
-              {lastResult.guidanceUrl && (
-                <a
-                  href={lastResult.guidanceUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-xs font-bold underline"
-                  style={{ color: GOLD }}
-                >
-                  Simplifi guidance →
-                </a>
-              )}
-            </div>
-            {lastResult.clientMessage && (
-              <div>
-                <pre className="text-xs bg-white border border-neutral-200 p-3 whitespace-pre-wrap">
-                  {lastResult.clientMessage}
-                </pre>
-                <button
-                  type="button"
-                  onClick={copyMessage}
-                  className="mt-2 text-xs font-bold underline"
-                  style={{ color: GOLD }}
-                >
-                  {copied ? 'Copied!' : 'Copy client message'}
-                </button>
-              </div>
-            )}
+          <div className="mt-4 border border-neutral-200 bg-neutral-50 p-4">
+            <CaptureSuccessPanel
+              title={lastResult.record.title}
+              links={{
+                magnifiUrl: lastResult.magnifiUrl,
+                considerUrl: lastResult.considerUrl,
+                guidanceUrl: lastResult.guidanceUrl,
+                clientMessage: lastResult.clientMessage,
+              }}
+              autoOpenMagnifi
+            />
           </div>
         )}
         {message && <p className="text-sm text-neutral-600 mt-3">{message}</p>}
