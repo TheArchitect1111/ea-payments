@@ -1,5 +1,15 @@
 import type { CaptureRecord } from './capture-records';
 import { parseBlueprintSummary } from './blueprint-summary';
+import {
+  type MagnifiTemplateId,
+  type SimplifiAssessmentId,
+  type ExperienceTheme,
+  getMagnifiTemplate,
+  resolveMagnifiTemplateId,
+  resolveSimplifiAssessmentId,
+} from './ea-template-registry';
+
+export type { MagnifiTemplateId, SimplifiAssessmentId, ExperienceTheme };
 
 export interface ParsedPriority {
   rank: number;
@@ -10,6 +20,9 @@ export interface ParsedPriority {
 
 export interface RebuiltCaptureContext {
   orgName: string;
+  templateId: MagnifiTemplateId;
+  simplifiAssessmentId: SimplifiAssessmentId;
+  theme: ExperienceTheme;
   templateName: string;
   templateReason?: string;
   journey: string[];
@@ -86,16 +99,25 @@ export function rebuildCaptureContext(capture: CaptureRecord): RebuiltCaptureCon
   const parsed = parseBlueprintSummary(capture.blueprintSummary || capture.analysisSummary);
   const orgName = titleFromCapture(capture);
   const recSummary = capture.recommendationSummary;
+  const blob = `${capture.title} ${capture.category ?? ''} ${capture.analysisSummary ?? ''} ${capture.blueprintTemplate ?? ''} ${recSummary ?? ''}`;
 
-  const blueprintSections = parsed.sections.map((s, i) => ({
+  const blueprintSections = parsed.sections.map((s) => ({
     id: s.title.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
     title: s.title,
     content: s.content,
   }));
 
+  const templateName = capture.blueprintTemplate || parseTemplateName(recSummary);
+  const templateId = resolveMagnifiTemplateId(blob, templateName);
+  const simplifiAssessmentId = resolveSimplifiAssessmentId(templateId, blob);
+  const magnifiDef = getMagnifiTemplate(templateId);
+
   return {
     orgName,
-    templateName: capture.blueprintTemplate || parseTemplateName(recSummary),
+    templateId,
+    simplifiAssessmentId,
+    theme: magnifiDef.theme,
+    templateName: magnifiDef.name,
     templateReason: recSummary?.split('\n').find((l) => l.startsWith('Match:'))?.replace('Match:', '').trim(),
     journey: parseJourney(recSummary).length
       ? parseJourney(recSummary)

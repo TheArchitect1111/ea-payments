@@ -67,6 +67,7 @@ After setup, testers get:
 | 8 | **Update Hub** | `/portal/{slug}/updates` | Submit update requests |
 | 9 | **Scorecard** | `/scorecard` | Download `.docx` works |
 | 10 | **Unsubscribe** | `/unsubscribe` | Page loads |
+| — | **Template library** | `/experience/templates` | All 10 Simplifi + Magnifi pairs listed |
 
 
 

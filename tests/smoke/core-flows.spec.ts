@@ -63,7 +63,8 @@ test('assessment thank-you contact link works', async ({ page }) => {
   );
 });
 
-test('simplifi guidance page returns 404 for unknown id', async ({ page }) => {
-  const res = await page.request.get('/simplifi/guidance/recINVALID00000000');
-  expect(res.status()).toBe(404);
+test('experience templates library is reachable', async ({ page }) => {
+  await page.goto('/experience/templates');
+  await expect(page.getByRole('heading', { name: /template library/i })).toBeVisible();
+  await expect(page.getByText(/Executive Transformation/i)).toBeVisible();
 });

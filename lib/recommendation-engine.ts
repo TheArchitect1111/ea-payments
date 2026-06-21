@@ -1,13 +1,13 @@
 import type { ScrapedPage } from './firecrawl';
 import type { ResourceClassification } from './resource-radar';
 import type { OpportunityScores } from './opportunity-engine';
+import {
+  type MagnifiTemplateId,
+  magnifiTemplateForEngine,
+  resolveMagnifiTemplateId,
+} from './ea-template-registry';
 
-export type MagnifiTemplateId =
-  | 'executive-transformation'
-  | 'community-blueprint'
-  | 'university-ecosystem'
-  | 'entrepreneur-launch'
-  | 'athlete-development';
+export type { MagnifiTemplateId };
 
 export interface MagnifiTemplate {
   id: MagnifiTemplateId;
@@ -38,130 +38,34 @@ export interface RecommendationResult {
   recommendedProducts: string[];
 }
 
-const TEMPLATES: Record<MagnifiTemplateId, MagnifiTemplate> = {
-  'executive-transformation': {
-    id: 'executive-transformation',
-    name: 'Executive Transformation™',
-    example: 'Selena',
-    audience: 'Executives, managers, corporate leaders',
-    journey: ['Experience', 'Expertise', 'Asset', 'Platform', 'Ownership'],
-    magnifiProduct: 'Magnifi',
-    simplifiAssessment: 'Operational Friction Assessment™',
-  },
-  'community-blueprint': {
-    id: 'community-blueprint',
-    name: 'Community Blueprint™',
-    example: 'BAS',
-    audience: 'Associations, fraternities, sororities, nonprofits',
-    journey: ['Legacy', 'Engagement', 'Connection', 'Community', 'Impact'],
-    magnifiProduct: 'Magnifi',
-    simplifiAssessment: 'Community Health Assessment™',
-  },
-  'university-ecosystem': {
-    id: 'university-ecosystem',
-    name: 'University Ecosystem™',
-    example: 'JCSU',
-    audience: 'Universities, alumni associations, advancement offices',
-    journey: ['Students', 'Graduates', 'Alumni', 'Mentors', 'Donors', 'Legacy'],
-    magnifiProduct: 'Magnifi',
-    simplifiAssessment: 'Membership Growth Assessment™',
-  },
-  'entrepreneur-launch': {
-    id: 'entrepreneur-launch',
-    name: 'Entrepreneur Launch™',
-    audience: 'Small business owners, solopreneurs, consultants',
-    journey: ['Current Business', 'Missed Opportunities', 'Systems', 'Scale', 'Freedom'],
-    magnifiProduct: 'Magnifi',
-    simplifiAssessment: 'Business Visibility Assessment™',
-  },
-  'athlete-development': {
-    id: 'athlete-development',
-    name: 'Athlete Development™',
-    example: 'CPR',
-    audience: 'Athletes, coaches, recruiting services',
-    journey: ['Potential', 'Development', 'Exposure', 'Opportunity', 'Success'],
-    magnifiProduct: 'Amplifi',
-    simplifiAssessment: 'Website Clarity Assessment™',
-  },
-};
-
 export function selectTemplate(
   classification: ResourceClassification,
-  page: ScrapedPage
+  page: ScrapedPage,
 ): { template: MagnifiTemplate; reason: string } {
-  const blob = `${page.title} ${page.description ?? ''} ${page.markdown}`.toLowerCase();
-  const { category, industry, productAlignment } = classification;
+  const blob = `${page.title} ${page.description ?? ''} ${page.markdown} ${classification.category} ${classification.industry} ${classification.productAlignment.join(' ')}`.toLowerCase();
+  const id = resolveMagnifiTemplateId(blob);
+  const def = magnifiTemplateForEngine(id);
 
-  if (
-    category === 'University' ||
-    industry === 'Education' ||
-    /alumni|university|college|campus|student/.test(blob)
-  ) {
-    return {
-      template: TEMPLATES['university-ecosystem'],
-      reason: 'University or alumni signals detected — JCSU-style ecosystem journey.',
-    };
+  let reason = `${def.name} pattern selected from capture signals.`;
+  if (id === 'university-ecosystem') reason = 'University or alumni signals detected — JCSU-style ecosystem journey.';
+  if (id === 'community-blueprint') reason = 'Community or membership signals detected — BAS-style blueprint journey.';
+  if (id === 'athlete-development') reason = 'Athletics or recruiting signals detected — CPR-style development journey.';
+  if (id === 'executive-transformation' && /executive|corporate|leadership/.test(blob)) {
+    reason = 'Executive or corporate leadership signals — Selena-style transformation journey.';
   }
+  if (id === 'faith-community-impact') reason = 'Faith or ministry signals detected — mission-driven engagement journey.';
+  if (id === 'media-empire') reason = 'Media or creator signals detected — audience-to-platform journey.';
+  if (id === 'financial-transformation') reason = 'Financial services signals detected — clarity and control journey.';
+  if (id === 'legacy-and-scale') reason = 'Multi-location or franchise signals — knowledge capture journey.';
+  if (id === 'hidden-asset-discovery') reason = 'Professional career signals — hidden asset discovery journey.';
 
-  if (
-    category === 'Community' ||
-    category === 'Nonprofit' ||
-    productAlignment.includes('BrotherHub') ||
-    productAlignment.includes('SisterHub') ||
-    productAlignment.includes('Community Hub') ||
-    /fraternity|sorority|chapter|association|nonprofit|legacy/.test(blob)
-  ) {
-    return {
-      template: TEMPLATES['community-blueprint'],
-      reason: 'Community or membership signals detected — BAS-style blueprint journey.',
-    };
-  }
-
-  if (
-    productAlignment.includes('CPR') ||
-    productAlignment.includes('Amplifi') ||
-    industry === 'Athletics' ||
-    /athlete|recruit|basketball|camp|showcase/.test(blob)
-  ) {
-    return {
-      template: TEMPLATES['athlete-development'],
-      reason: 'Athletics or recruiting signals detected — CPR-style development journey.',
-    };
-  }
-
-  if (
-    category === 'Business' ||
-    /consult|coach|solopreneur|founder|executive|leader/.test(blob)
-  ) {
-    if (/executive|corporate|manager|director|vp|leadership/.test(blob)) {
-      return {
-        template: TEMPLATES['executive-transformation'],
-        reason: 'Executive or corporate leadership signals — Selena-style transformation journey.',
-      };
-    }
-    return {
-      template: TEMPLATES['entrepreneur-launch'],
-      reason: 'Business owner signals detected — entrepreneur launch journey.',
-    };
-  }
-
-  if (category === 'Person / Profile' && /executive|founder|ceo|president/.test(blob)) {
-    return {
-      template: TEMPLATES['executive-transformation'],
-      reason: 'Professional profile with leadership signals — executive transformation journey.',
-    };
-  }
-
-  return {
-    template: TEMPLATES['executive-transformation'],
-    reason: 'Default Magnifi executive transformation pattern applied.',
-  };
+  return { template: def, reason };
 }
 
 export function generateRecommendations(
   classification: ResourceClassification,
   page: ScrapedPage,
-  scores: OpportunityScores
+  scores: OpportunityScores,
 ): RecommendationResult {
   const { template, reason } = selectTemplate(classification, page);
   const blob = `${page.title} ${page.markdown}`.toLowerCase();
@@ -194,19 +98,19 @@ function inferStageOpportunity(
   stage: string,
   classification: ResourceClassification,
   scores: OpportunityScores,
-  index: number
+  index: number,
 ): string {
   const useCase = classification.useCases[index % classification.useCases.length] ?? 'EA platform opportunity';
-  if (/legacy|experience|potential|current/i.test(stage)) {
+  if (/legacy|experience|potential|current|career|chaos|audience|mission/i.test(stage)) {
     return `Surface hidden value in ${classification.primaryFunction.toLowerCase()}.`;
   }
-  if (/engagement|connection|development|expertise/i.test(stage)) {
+  if (/engagement|connection|development|expertise|visibility|content/i.test(stage)) {
     return `Improve ${useCase.toLowerCase()} with structured touchpoints.`;
   }
-  if (/community|platform|exposure|scale/i.test(stage)) {
+  if (/community|platform|exposure|scale|structure|systems/i.test(stage)) {
     return `Deploy ${classification.productAlignment[0] ?? 'Mission Control'} for visibility and coordination.`;
   }
-  if (/impact|ownership|success|freedom|donors/i.test(stage)) {
+  if (/impact|ownership|success|freedom|donors|control|network/i.test(stage)) {
     return `Measure outcomes — opportunity score ${scores.opportunityScore}/100.`;
   }
   return useCase;
@@ -216,7 +120,7 @@ function buildPriorities(
   template: MagnifiTemplate,
   classification: ResourceClassification,
   scores: OpportunityScores,
-  blob: string
+  blob: string,
 ): PriorityRecommendation[] {
   const candidates: Omit<PriorityRecommendation, 'rank'>[] = [];
 
@@ -253,38 +157,91 @@ function buildPriorities(
     });
   }
 
-  if (template.id === 'university-ecosystem') {
-    candidates.push({
+  const templatePriority: Partial<Record<MagnifiTemplateId, Omit<PriorityRecommendation, 'rank'>>> = {
+    'university-ecosystem': {
       title: 'Build alumni-to-donor journey',
       rationale: 'University ecosystem pattern — connect graduates, mentors, and advancement.',
       impact: 'High',
       ease: 'Medium',
       urgency: 'Medium',
       eaProduct: 'Community Hub',
-    });
-  }
-
-  if (template.id === 'community-blueprint') {
-    candidates.push({
+    },
+    'community-blueprint': {
       title: 'Revitalize chapter engagement',
       rationale: 'Community blueprint pattern — legacy → connection → measurable impact.',
       impact: 'High',
       ease: 'Medium',
       urgency: 'High',
       eaProduct: 'Community Hub',
-    });
-  }
-
-  if (template.id === 'executive-transformation') {
-    candidates.push({
+    },
+    'executive-transformation': {
       title: 'Package expertise into a platform',
       rationale: 'Executive transformation pattern — experience → asset → ownership.',
       impact: 'High',
       ease: 'Medium',
       urgency: 'Medium',
       eaProduct: 'Magnifi',
-    });
-  }
+    },
+    'media-empire': {
+      title: 'Turn audience into a platform',
+      rationale: 'Media empire pattern — content → community → network.',
+      impact: 'High',
+      ease: 'Medium',
+      urgency: 'High',
+      eaProduct: 'Amplifi',
+    },
+    'athlete-development': {
+      title: 'Showcase development and exposure',
+      rationale: 'Athlete development pattern — CPR-style recruiting visibility.',
+      impact: 'High',
+      ease: 'Medium',
+      urgency: 'High',
+      eaProduct: 'Amplifi',
+    },
+    'faith-community-impact': {
+      title: 'Strengthen mission-driven engagement',
+      rationale: 'Faith pattern — mission → connection → measurable growth.',
+      impact: 'High',
+      ease: 'High',
+      urgency: 'Medium',
+      eaProduct: 'Update Hub',
+    },
+    'financial-transformation': {
+      title: 'Structure client clarity journey',
+      rationale: 'Financial transformation pattern — chaos → visibility → control.',
+      impact: 'High',
+      ease: 'Medium',
+      urgency: 'High',
+      eaProduct: 'Fortifi',
+    },
+    'legacy-and-scale': {
+      title: 'Capture founder knowledge in systems',
+      rationale: 'Legacy & scale pattern — playbook → platform → multi-location consistency.',
+      impact: 'High',
+      ease: 'Medium',
+      urgency: 'Medium',
+      eaProduct: 'Training Transformation',
+    },
+    'hidden-asset-discovery': {
+      title: 'Package hidden career assets',
+      rationale: 'Hidden asset pattern — career expertise → marketable offer.',
+      impact: 'High',
+      ease: 'High',
+      urgency: 'Medium',
+      eaProduct: 'Magnifi',
+    },
+    'entrepreneur-launch': {
+      title: 'Build visibility and lead capture',
+      rationale: 'Entrepreneur launch pattern — missed opportunities → systems → freedom.',
+      impact: 'High',
+      ease: 'High',
+      urgency: 'High',
+      eaProduct: 'Simplifi',
+    },
+  };
+
+  const specific = templatePriority[template.id];
+  if (specific) candidates.push(specific);
 
   if (scores.trainingOpportunityScore >= 45) {
     candidates.push({
@@ -298,7 +255,7 @@ function buildPriorities(
   }
 
   candidates.push({
-    title: `Run ${template.simplifiAssessment ?? 'Operational MRI'}`,
+    title: `Run ${template.simplifiAssessment ?? 'Operational Friction Assessment™'}`,
     rationale: 'Simplifi guidance engine — top three priorities, not twenty recommendations.',
     impact: 'High',
     ease: 'High',
@@ -322,7 +279,7 @@ function scorePriority(p: Omit<PriorityRecommendation, 'rank'>): number {
 function buildFirstStep(
   template: MagnifiTemplate,
   classification: ResourceClassification,
-  scores: OpportunityScores
+  scores: OpportunityScores,
 ): RecommendationResult['firstStep'] {
   if (scores.opportunityScore >= 70) {
     return {
@@ -349,7 +306,7 @@ export function formatRecommendationSummary(rec: RecommendationResult): string {
   const priorityLines = rec.priorities
     .map(
       (p) =>
-        `#${p.rank} ${p.title} (${p.eaProduct}) — Impact ${p.impact}, Ease ${p.ease}, Urgency ${p.urgency}. ${p.rationale}`
+        `#${p.rank} ${p.title} (${p.eaProduct}) — Impact ${p.impact}, Ease ${p.ease}, Urgency ${p.urgency}. ${p.rationale}`,
     )
     .join('\n');
 

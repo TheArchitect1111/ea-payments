@@ -1,5 +1,9 @@
 import type { CaptureRecord } from './capture-records';
-import { rebuildCaptureContext, inferIndustryTone } from './capture-experience';
+import { rebuildCaptureContext } from './capture-experience';
+import { getMagnifiTemplate, getSimplifiAssessment } from './ea-template-registry';
+import type { ExperienceTheme } from './ea-template-registry';
+
+export type { ExperienceTheme };
 
 export interface MagnifiAct {
   id: string;
@@ -12,7 +16,9 @@ export interface MagnifiAct {
 export interface MagnifiCinematicExperience {
   captureId: string;
   title: string;
+  templateId: string;
   templateName: string;
+  theme: ExperienceTheme;
   hook: string;
   acts: MagnifiAct[];
   journey: { stage: string; line: string }[];
@@ -21,18 +27,10 @@ export interface MagnifiCinematicExperience {
   scores: { opportunity?: number; eaFit?: number; trust?: number };
 }
 
-const OPENING_HOOKS: Record<string, string> = {
-  campus: 'A future your alumni can see — before they ever write a check.',
-  faith: 'A mission that moves people — not just meetings that fill calendars.',
-  athletics: 'Potential is visible. The path to opportunity should be too.',
-  community: 'Legacy is not history. It is momentum waiting for a system.',
-  business: 'You have built something real. The next chapter should feel inevitable.',
-};
-
 export function buildMagnifiExperience(capture: CaptureRecord): MagnifiCinematicExperience {
   const ctx = rebuildCaptureContext(capture);
-  const tone = inferIndustryTone(capture);
-  const hook = OPENING_HOOKS[tone] ?? OPENING_HOOKS.business;
+  const def = getMagnifiTemplate(ctx.templateId);
+  const hook = def.cinematicHook(ctx.orgName);
 
   const hidden =
     ctx.sections.find((s) => /hidden/i.test(s.title))?.content ||
@@ -41,11 +39,11 @@ export function buildMagnifiExperience(capture: CaptureRecord): MagnifiCinematic
 
   const future =
     ctx.sections.find((s) => /future/i.test(s.title))?.content ||
-    ctx.journey.map((stage, i) => `${stage}: ${ctx.roadmap[i]?.focus ?? 'Build visible momentum'}`).join('\n');
+    def.journey.map((stage, i) => `${stage}: ${ctx.roadmap[i]?.focus ?? 'Build visible momentum'}`).join('\n');
 
   const possibility =
     ctx.sections.find((s) => /possibilit/i.test(s.title))?.content ||
-    `Opportunity score ${ctx.scores.opportunity ?? 'pending'}/100 · EA Fit ${ctx.scores.eaFit ?? 'pending'}/100`;
+    `Opportunity ${ctx.scores.opportunity ?? 'pending'}/100 · EA Fit ${ctx.scores.eaFit ?? 'pending'}/100 · Template: ${def.name}`;
 
   const priorities =
     ctx.sections.find((s) => /priorit/i.test(s.title))?.content ||
@@ -62,7 +60,7 @@ export function buildMagnifiExperience(capture: CaptureRecord): MagnifiCinematic
       label: 'Opening Reveal™',
       headline: ctx.orgName,
       body: hook,
-      accent: ctx.templateName,
+      accent: def.name,
     },
     {
       id: 'hidden-opportunity',
@@ -73,7 +71,7 @@ export function buildMagnifiExperience(capture: CaptureRecord): MagnifiCinematic
     {
       id: 'future-state',
       label: 'Future-State Reveal™',
-      headline: 'The future you can build',
+      headline: def.journey.join(' → '),
       body: future,
     },
     {
@@ -86,8 +84,7 @@ export function buildMagnifiExperience(capture: CaptureRecord): MagnifiCinematic
       id: 'mission-control',
       label: 'Mission Control Reveal™',
       headline: 'One place to see progress',
-      body:
-        'Mission Control tracks captures, priorities, and adoption — so stakeholders see momentum, not mystery.',
+      body: def.missionControlLine,
     },
     {
       id: 'priorities',
@@ -103,26 +100,28 @@ export function buildMagnifiExperience(capture: CaptureRecord): MagnifiCinematic
     },
   ];
 
-  const journey = ctx.journey.map((stage, i) => ({
+  const journey = def.journey.map((stage, i) => ({
     stage,
     line: ctx.roadmap[i]?.focus ?? `Advance ${stage.toLowerCase()} with one visible win.`,
   }));
 
-  const twelveMonths = `Twelve months from now, ${ctx.orgName} could be operating with clearer priorities, visible progress in Pulse, and a shareable story that builds buy-in before the next investment.`;
-
   return {
     captureId: capture.id,
     title: capture.title,
-    templateName: ctx.templateName,
+    templateId: ctx.templateId,
+    templateName: def.name,
+    theme: ctx.theme,
     hook,
     acts,
     journey,
-    twelveMonths,
+    twelveMonths: def.twelveMonths(ctx.orgName),
     cta: {
       headline: 'You can see it. You can begin.',
-      body: ctx.firstStep || 'Start with one Simplifi capture and review your Magnifi experience with your advisor.',
-      href: '/assessment',
-      label: 'Take The Assessment',
+      body:
+        ctx.firstStep ||
+        `Start with ${getSimplifiAssessment(def.pairedSimplifiAssessment).name} and review your Magnifi experience.`,
+      href: def.ctaHref,
+      label: def.ctaLabel,
     },
     scores: ctx.scores,
   };

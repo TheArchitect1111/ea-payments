@@ -6,10 +6,6 @@ import { motion } from 'framer-motion';
 import type { GuidanceExperience } from '@/lib/simplifi-guidance-engine';
 import SimplifiGuidePanel from './SimplifiGuidePanel';
 
-const NAVY = '#1B2B4D';
-const GOLD = '#C9A844';
-const CREAM = '#FAF8F3';
-
 function fadeUp(delay = 0) {
   return {
     initial: { opacity: 0, y: 32 },
@@ -20,14 +16,23 @@ function fadeUp(delay = 0) {
 }
 
 export default function SimplifiGuidanceV2({ experience }: { experience: GuidanceExperience }) {
+  const { theme } = experience;
   const [activeSection, setActiveSection] = useState(0);
 
   return (
-    <main className="min-h-screen" style={{ backgroundColor: CREAM }}>
-      <section className="px-6 py-16" style={{ backgroundColor: NAVY }}>
+    <main className="min-h-screen" style={{ backgroundColor: theme.cream }}>
+      <section
+        className="px-6 py-16"
+        style={{
+          background: `linear-gradient(135deg, ${theme.heroFrom}, ${theme.heroVia}, ${theme.heroTo})`,
+        }}
+      >
         <div className="max-w-4xl mx-auto">
-          <motion.p {...fadeUp()} className="text-xs font-bold uppercase tracking-[0.35em]" style={{ color: GOLD }}>
-            Simplifi&trade; Guidance Engine V2
+          <motion.p {...fadeUp()} className="text-xs font-bold uppercase tracking-[0.35em]" style={{ color: theme.gold }}>
+            Simplifi&trade; Guidance · Phase 2
+          </motion.p>
+          <motion.p {...fadeUp(0.05)} className="mt-2 text-sm text-white/60">
+            Paired with {experience.magnifiTemplateName}
           </motion.p>
           <motion.h1 {...fadeUp(0.08)} className="mt-4 text-4xl sm:text-6xl font-black text-white leading-tight">
             {experience.assessmentName}
@@ -40,12 +45,15 @@ export default function SimplifiGuidanceV2({ experience }: { experience: Guidanc
               <button
                 key={section.id}
                 type="button"
-                onClick={() => setActiveSection(index)}
+                onClick={() => {
+                  setActiveSection(index);
+                  document.getElementById(section.id)?.scrollIntoView({ behavior: 'smooth' });
+                }}
                 className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider border"
                 style={{
-                  borderColor: activeSection === index ? GOLD : 'rgba(255,255,255,0.2)',
-                  color: activeSection === index ? NAVY : 'white',
-                  backgroundColor: activeSection === index ? GOLD : 'transparent',
+                  borderColor: activeSection === index ? theme.gold : 'rgba(255,255,255,0.2)',
+                  color: activeSection === index ? theme.navy : 'white',
+                  backgroundColor: activeSection === index ? theme.gold : 'transparent',
                 }}
               >
                 {index + 1}
@@ -60,13 +68,13 @@ export default function SimplifiGuidanceV2({ experience }: { experience: Guidanc
           key={section.id}
           id={section.id}
           className="px-6 py-20 border-b border-neutral-200/80"
-          style={{ backgroundColor: index % 2 === 0 ? '#fff' : CREAM }}
+          style={{ backgroundColor: index % 2 === 0 ? '#fff' : theme.cream }}
         >
           <motion.div {...fadeUp()} className="max-w-3xl mx-auto">
-            <p className="text-xs font-bold uppercase tracking-[0.28em]" style={{ color: GOLD }}>
+            <p className="text-xs font-bold uppercase tracking-[0.28em]" style={{ color: theme.accent }}>
               {section.label}
             </p>
-            <h2 className="mt-3 text-3xl sm:text-4xl font-extrabold" style={{ color: NAVY }}>
+            <h2 className="mt-3 text-3xl sm:text-4xl font-extrabold" style={{ color: theme.navy }}>
               {section.headline}
             </h2>
             <p className="mt-6 text-base leading-8 text-neutral-600 whitespace-pre-wrap">{section.body}</p>
@@ -74,7 +82,7 @@ export default function SimplifiGuidanceV2({ experience }: { experience: Guidanc
               <ul className="mt-8 space-y-3">
                 {section.items.map((item) => (
                   <li key={item} className="flex gap-3 text-sm leading-relaxed text-neutral-700">
-                    <span style={{ color: GOLD }}>→</span>
+                    <span style={{ color: theme.accent }}>→</span>
                     <span>{item}</span>
                   </li>
                 ))}
@@ -87,9 +95,13 @@ export default function SimplifiGuidanceV2({ experience }: { experience: Guidanc
                   { label: 'Revenue', value: experience.opportunity.revenue },
                   { label: 'Engagement', value: experience.opportunity.engagement },
                 ].map((metric) => (
-                  <div key={metric.label} className="p-5 border-t-4" style={{ borderColor: GOLD, backgroundColor: CREAM }}>
+                  <div
+                    key={metric.label}
+                    className="p-5 border-t-4"
+                    style={{ borderColor: theme.accent, backgroundColor: theme.cream }}
+                  >
                     <p className="text-xs font-bold uppercase tracking-wider text-neutral-500">{metric.label}</p>
-                    <p className="mt-2 text-sm font-semibold" style={{ color: NAVY }}>
+                    <p className="mt-2 text-sm font-semibold" style={{ color: theme.navy }}>
                       {metric.value}
                     </p>
                   </div>
@@ -100,10 +112,10 @@ export default function SimplifiGuidanceV2({ experience }: { experience: Guidanc
               <div className="mt-8 space-y-4">
                 {experience.priorities.map((p) => (
                   <div key={p.rank} className="p-5 border border-neutral-200">
-                    <p className="text-xs font-bold uppercase tracking-widest" style={{ color: GOLD }}>
+                    <p className="text-xs font-bold uppercase tracking-widest" style={{ color: theme.accent }}>
                       Priority #{p.rank}{p.product ? ` · ${p.product}` : ''}
                     </p>
-                    <p className="mt-2 text-lg font-bold" style={{ color: NAVY }}>
+                    <p className="mt-2 text-lg font-bold" style={{ color: theme.navy }}>
                       {p.title}
                     </p>
                     <p className="mt-2 text-sm text-neutral-600">{p.detail}</p>
@@ -114,11 +126,11 @@ export default function SimplifiGuidanceV2({ experience }: { experience: Guidanc
             {section.id === 'progress-path' && (
               <div className="mt-8 flex flex-col sm:flex-row gap-4">
                 {experience.progressPath.map((step, i) => (
-                  <div key={step.stage} className="flex-1 p-5" style={{ backgroundColor: CREAM }}>
-                    <p className="text-xs font-bold uppercase tracking-widest" style={{ color: GOLD }}>
+                  <div key={step.stage} className="flex-1 p-5" style={{ backgroundColor: theme.cream }}>
+                    <p className="text-xs font-bold uppercase tracking-widest" style={{ color: theme.accent }}>
                       {i + 1}
                     </p>
-                    <p className="mt-2 font-bold" style={{ color: NAVY }}>
+                    <p className="mt-2 font-bold" style={{ color: theme.navy }}>
                       {step.stage}
                     </p>
                     <p className="mt-2 text-sm text-neutral-600">{step.description}</p>
@@ -130,16 +142,16 @@ export default function SimplifiGuidanceV2({ experience }: { experience: Guidanc
         </section>
       ))}
 
-      <section className="px-6 py-20 text-center" style={{ backgroundColor: NAVY }}>
+      <section className="px-6 py-20 text-center" style={{ backgroundColor: theme.navy }}>
         <div className="max-w-2xl mx-auto">
-          <p className="text-xs font-bold uppercase tracking-[0.3em]" style={{ color: GOLD }}>
+          <p className="text-xs font-bold uppercase tracking-[0.3em]" style={{ color: theme.gold }}>
             Your First Step™
           </p>
           <p className="mt-4 text-xl text-white/90">{experience.firstStep.action}</p>
           <a
             href={experience.firstStep.href}
             className="mt-8 inline-flex px-10 py-4 text-xs font-black uppercase tracking-[0.25em]"
-            style={{ backgroundColor: GOLD, color: NAVY }}
+            style={{ backgroundColor: theme.gold, color: theme.navy }}
           >
             {experience.firstStep.cta}
           </a>
@@ -147,11 +159,15 @@ export default function SimplifiGuidanceV2({ experience }: { experience: Guidanc
             <Link href={`/magnifi/${experience.captureId}`} className="underline text-white/70">
               View Magnifi cinematic experience →
             </Link>
+            {' · '}
+            <Link href="/experience/templates" className="underline text-white/70">
+              All templates
+            </Link>
           </p>
         </div>
       </section>
 
-      <SimplifiGuidePanel prompts={experience.guidePrompts} />
+      <SimplifiGuidePanel prompts={experience.guidePrompts} theme={theme} />
     </main>
   );
 }
