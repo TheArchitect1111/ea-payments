@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, FormEvent } from 'react';
+import Image from 'next/image';
 import './portal-login.css';
 
 export default function PortalLoginPage() {
@@ -38,59 +39,76 @@ export default function PortalLoginPage() {
 
   return (
     <div className="pl-page">
-      <div className="pl-brand">
-        <span className="pl-brand-line">Client Portal</span>
-        <span className="pl-brand-name">Efficiency Architects</span>
-      </div>
+      <div className="pl-bg-glow pl-bg-glow-a" aria-hidden />
+      <div className="pl-bg-glow pl-bg-glow-b" aria-hidden />
 
-      <div className="pl-card">
-        <h1 className="pl-heading">Sign In</h1>
-        <p className="pl-sub">Enter the credentials from your welcome email.</p>
-
-        <form onSubmit={handleSubmit} noValidate>
-          <label className="pl-label" htmlFor="email">Email</label>
-          <input
-            id="email"
-            type="email"
-            className="pl-input"
-            placeholder="your@email.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            autoComplete="email"
-            autoFocus
+      <div className="pl-shell">
+        <header className="pl-header">
+          <Image
+            src="/ea-logo.png"
+            alt="Efficiency Architects"
+            width={280}
+            height={280}
+            className="pl-logo"
+            priority
           />
+          <p className="pl-eyebrow">Client Portal</p>
+          <h1 className="pl-title">Welcome back</h1>
+          <p className="pl-lede">Sign in to Pulse™, Simplifi™, Magnifi™, and Amplifi™.</p>
+        </header>
 
-          <label className="pl-label" htmlFor="password">Temporary Password</label>
-          <input
-            id="password"
-            type="password"
-            className="pl-input"
-            placeholder="From your welcome email"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            autoComplete="current-password"
-          />
+        <div className="pl-card">
+          <form onSubmit={handleSubmit} noValidate className="pl-form">
+            <label className="pl-label" htmlFor="email">
+              Email
+            </label>
+            <input
+              id="email"
+              type="email"
+              className="pl-input"
+              placeholder="you@company.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              autoComplete="email"
+              autoFocus
+            />
 
-          <button type="submit" className="pl-btn" disabled={loading}>
-            {loading ? 'Signing In...' : 'Sign In'}
-          </button>
+            <label className="pl-label" htmlFor="password">
+              Password
+            </label>
+            <input
+              id="password"
+              type="password"
+              className="pl-input"
+              placeholder="From your welcome email"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              autoComplete="current-password"
+            />
 
-          {error && <p className="pl-error">{error}</p>}
-        </form>
-      </div>
+            <button type="submit" className="pl-btn" disabled={loading}>
+              {loading ? 'Signing in…' : 'Sign in'}
+            </button>
 
-      <div className="pl-footer">
-        <p className="pl-footer-text">
-          Need access?{' '}
-          <a
-            href="mailto:freedom@efficiencyarchitects.online"
-            className="pl-footer-link"
-          >
-            Contact us
-          </a>
-        </p>
+            {error && (
+              <p className="pl-error" role="alert">
+                {error}
+              </p>
+            )}
+          </form>
+        </div>
+
+        <footer className="pl-footer">
+          <p className="pl-footer-text">
+            Need access?{' '}
+            <a href="mailto:freedom@efficiencyarchitects.online" className="pl-footer-link">
+              Contact us
+            </a>
+          </p>
+          <p className="pl-tagline">Systems that transform businesses.</p>
+        </footer>
       </div>
     </div>
   );

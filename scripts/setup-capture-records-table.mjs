@@ -129,6 +129,32 @@ const FIELD_DEFS = [
   { name: 'Trust Confidence', type: 'number', options: { precision: 0 } },
   { name: 'Recommendation Summary', type: 'multilineText' },
   { name: 'Blueprint Summary', type: 'multilineText' },
+  { name: 'Consider Slug', type: 'singleLineText' },
+  { name: 'Prospect Name', type: 'singleLineText' },
+  { name: 'Business Name', type: 'singleLineText' },
+  { name: 'Share URL', type: 'url' },
+  { name: 'Client Message', type: 'multilineText' },
+  { name: 'Visibility Score', type: 'number', options: { precision: 0 } },
+  { name: 'Exposure Score', type: 'number', options: { precision: 0 } },
+  { name: 'Conversion Score', type: 'number', options: { precision: 0 } },
+  { name: 'Differentiation Score', type: 'number', options: { precision: 0 } },
+  { name: 'Modernity Score', type: 'number', options: { precision: 0 } },
+  {
+    name: 'Prospect Status',
+    type: 'singleSelect',
+    options: {
+      choices: [
+        { name: 'New' },
+        { name: 'Shared' },
+        { name: 'Viewed' },
+        { name: 'Assessment Started' },
+        { name: 'Assessment Completed' },
+        { name: 'Discovery Booked' },
+        { name: 'Archived' },
+      ],
+    },
+  },
+  { name: 'Portal Slug', type: 'singleLineText' },
 ];
 
 let tables = await listTables();

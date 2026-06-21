@@ -32,6 +32,18 @@ export interface CaptureRecord {
   trustConfidence?: number;
   recommendationSummary?: string;
   blueprintSummary?: string;
+  considerSlug?: string;
+  prospectName?: string;
+  businessName?: string;
+  shareUrl?: string;
+  clientMessage?: string;
+  visibilityScore?: number;
+  exposureScore?: number;
+  conversionScore?: number;
+  differentiationScore?: number;
+  modernityScore?: number;
+  prospectStatus?: string;
+  portalSlug?: string;
 }
 
 export interface CreateCaptureInput {
@@ -52,6 +64,18 @@ export interface CreateCaptureInput {
   trustConfidence?: number;
   recommendationSummary?: string;
   blueprintSummary?: string;
+  considerSlug?: string;
+  prospectName?: string;
+  businessName?: string;
+  shareUrl?: string;
+  clientMessage?: string;
+  visibilityScore?: number;
+  exposureScore?: number;
+  conversionScore?: number;
+  differentiationScore?: number;
+  modernityScore?: number;
+  prospectStatus?: string;
+  portalSlug?: string;
 }
 
 function authHeaders(): Record<string, string> {
@@ -96,6 +120,19 @@ function mapRecord(rec: { id: string; fields: Record<string, unknown> }): Captur
       typeof f['Trust Confidence'] === 'number' ? f['Trust Confidence'] : undefined,
     recommendationSummary: (f['Recommendation Summary'] as string) ?? undefined,
     blueprintSummary: (f['Blueprint Summary'] as string) ?? undefined,
+    considerSlug: (f['Consider Slug'] as string) ?? undefined,
+    prospectName: (f['Prospect Name'] as string) ?? undefined,
+    businessName: (f['Business Name'] as string) ?? undefined,
+    shareUrl: (f['Share URL'] as string) ?? undefined,
+    clientMessage: (f['Client Message'] as string) ?? undefined,
+    visibilityScore: typeof f['Visibility Score'] === 'number' ? f['Visibility Score'] : undefined,
+    exposureScore: typeof f['Exposure Score'] === 'number' ? f['Exposure Score'] : undefined,
+    conversionScore: typeof f['Conversion Score'] === 'number' ? f['Conversion Score'] : undefined,
+    differentiationScore:
+      typeof f['Differentiation Score'] === 'number' ? f['Differentiation Score'] : undefined,
+    modernityScore: typeof f['Modernity Score'] === 'number' ? f['Modernity Score'] : undefined,
+    prospectStatus: (f['Prospect Status'] as string) ?? undefined,
+    portalSlug: (f['Portal Slug'] as string) ?? undefined,
   };
 }
 
@@ -225,6 +262,18 @@ export async function createCaptureRecord(
   if (input.trustConfidence != null) fields['Trust Confidence'] = input.trustConfidence;
   if (input.recommendationSummary) fields['Recommendation Summary'] = input.recommendationSummary;
   if (input.blueprintSummary) fields['Blueprint Summary'] = input.blueprintSummary;
+  if (input.considerSlug) fields['Consider Slug'] = input.considerSlug;
+  if (input.prospectName) fields['Prospect Name'] = input.prospectName;
+  if (input.businessName) fields['Business Name'] = input.businessName;
+  if (input.shareUrl) fields['Share URL'] = input.shareUrl;
+  if (input.clientMessage) fields['Client Message'] = input.clientMessage;
+  if (input.visibilityScore != null) fields['Visibility Score'] = input.visibilityScore;
+  if (input.exposureScore != null) fields['Exposure Score'] = input.exposureScore;
+  if (input.conversionScore != null) fields['Conversion Score'] = input.conversionScore;
+  if (input.differentiationScore != null) fields['Differentiation Score'] = input.differentiationScore;
+  if (input.modernityScore != null) fields['Modernity Score'] = input.modernityScore;
+  if (input.prospectStatus) fields['Prospect Status'] = input.prospectStatus;
+  if (input.portalSlug) fields['Portal Slug'] = input.portalSlug;
 
   try {
     const res = await fetch(
@@ -307,9 +356,112 @@ export async function updateCaptureAnalysis(
   }
 }
 
+export async function getCaptureByConsiderSlug(slug: string): Promise<CaptureRecord | null> {
+  if (!process.env.AIRTABLE_API_KEY) return null;
+
+  const safe = slug.trim().replace(/'/g, "\\'");
+  const formula = `{Consider Slug}='${safe}'`;
+  const params = new URLSearchParams({ filterByFormula: formula, maxRecords: '1' });
+
+  try {
+    const res = await fetch(
+      `https://api.airtable.com/v0/${BASE_ID}/${encodeURIComponent(CAPTURES_TABLE)}?${params.toString()}`,
+      { headers: authHeaders(), cache: 'no-store' },
+    );
+    if (!res.ok) return null;
+    const data = (await res.json()) as {
+      records?: { id: string; fields: Record<string, unknown> }[];
+    };
+    const rec = data.records?.[0];
+    return rec ? mapRecord(rec) : null;
+  } catch {
+    return null;
+  }
+}
+
+export async function updateOpportunityExperience(
+  recordId: string,
+  input: {
+    status?: CaptureStatus;
+    description?: string;
+    analysisSummary?: string;
+    eaFitScore?: number;
+    opportunityScore?: number;
+    productAlignment?: string[];
+    blueprintTemplate?: string;
+    trustConfidence?: number;
+    recommendationSummary?: string;
+    blueprintSummary?: string;
+    considerSlug?: string;
+    prospectName?: string;
+    businessName?: string;
+    shareUrl?: string;
+    clientMessage?: string;
+    visibilityScore?: number;
+    exposureScore?: number;
+    conversionScore?: number;
+    differentiationScore?: number;
+    modernityScore?: number;
+    prospectStatus?: string;
+    portalSlug?: string;
+  },
+): Promise<{ ok: boolean; error?: string }> {
+  if (!process.env.AIRTABLE_API_KEY) {
+    return { ok: false, error: 'AIRTABLE_API_KEY not configured.' };
+  }
+
+  const fields: Record<string, string | number> = {};
+  if (input.status) fields['Status'] = input.status;
+  if (input.description) fields['Description'] = input.description;
+  if (input.analysisSummary) fields['Analysis Summary'] = input.analysisSummary;
+  if (input.eaFitScore != null) fields['EA Fit Score'] = input.eaFitScore;
+  if (input.opportunityScore != null) fields['Opportunity Score'] = input.opportunityScore;
+  if (input.productAlignment?.length)
+    fields['Product Alignment'] = input.productAlignment.join(', ');
+  if (input.blueprintTemplate) fields['Blueprint Template'] = input.blueprintTemplate;
+  if (input.trustConfidence != null) fields['Trust Confidence'] = input.trustConfidence;
+  if (input.recommendationSummary) fields['Recommendation Summary'] = input.recommendationSummary;
+  if (input.blueprintSummary) fields['Blueprint Summary'] = input.blueprintSummary;
+  if (input.considerSlug) fields['Consider Slug'] = input.considerSlug;
+  if (input.prospectName) fields['Prospect Name'] = input.prospectName;
+  if (input.businessName) fields['Business Name'] = input.businessName;
+  if (input.shareUrl) fields['Share URL'] = input.shareUrl;
+  if (input.clientMessage) fields['Client Message'] = input.clientMessage;
+  if (input.visibilityScore != null) fields['Visibility Score'] = input.visibilityScore;
+  if (input.exposureScore != null) fields['Exposure Score'] = input.exposureScore;
+  if (input.conversionScore != null) fields['Conversion Score'] = input.conversionScore;
+  if (input.differentiationScore != null) fields['Differentiation Score'] = input.differentiationScore;
+  if (input.modernityScore != null) fields['Modernity Score'] = input.modernityScore;
+  if (input.prospectStatus) fields['Prospect Status'] = input.prospectStatus;
+  if (input.portalSlug) fields['Portal Slug'] = input.portalSlug;
+
+  try {
+    const res = await fetch(
+      `https://api.airtable.com/v0/${BASE_ID}/${encodeURIComponent(CAPTURES_TABLE)}/${recordId}`,
+      {
+        method: 'PATCH',
+        headers: authHeaders(),
+        body: JSON.stringify({ fields, typecast: true }),
+      },
+    );
+    if (!res.ok) return { ok: false, error: 'Failed to update opportunity experience.' };
+    return { ok: true };
+  } catch {
+    return { ok: false, error: 'Unexpected error.' };
+  }
+}
+
 export async function updateCaptureStatus(
   recordId: string,
   status: CaptureStatus
 ): Promise<{ ok: boolean; error?: string }> {
   return updateCaptureAnalysis(recordId, { status });
+}
+
+export async function saveOpportunityPayload(
+  recordId: string,
+  description: string,
+  prospectStatus?: string,
+): Promise<{ ok: boolean; error?: string }> {
+  return updateOpportunityExperience(recordId, { description, prospectStatus });
 }

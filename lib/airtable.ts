@@ -454,7 +454,9 @@ export async function validatePortalLogin(
   }
 
   const safe = email.toLowerCase().replace(/'/g, "\\'");
-  const formula = encodeURIComponent(`LOWER({Email})='${safe}'`);
+  const formula = encodeURIComponent(
+    `OR(LOWER({Email})='${safe}', LOWER({Portal Username})='${safe}')`,
+  );
   const url = `https://api.airtable.com/v0/${BASE_ID}/${encodeURIComponent(TABLE)}?filterByFormula=${formula}&maxRecords=1`;
 
   try {
