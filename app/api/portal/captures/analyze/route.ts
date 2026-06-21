@@ -49,5 +49,6 @@ export async function POST(req: Request) {
     recommendations: result.recommendations,
     trust: result.trust,
     magnifiUrl: result.record ? `/magnifi/${result.record.id}` : undefined,
+    guidanceUrl: result.record ? `/simplifi/guidance/${result.record.id}` : undefined,
   });
 }

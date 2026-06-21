@@ -17,6 +17,7 @@ interface AnalyzeResponse {
     firstStep: { action: string };
   };
   magnifiUrl?: string;
+  guidanceUrl?: string;
 }
 
 function scoreLabel(value?: number) {
@@ -100,15 +101,28 @@ export default function SimplifiPortalWorkspace({
               <span>Template: {lastResult.recommendations?.template.name ?? 'None'}</span>
             </div>
             {lastResult.magnifiUrl && (
-              <a
-                href={lastResult.magnifiUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block text-xs font-bold underline mt-2"
-                style={{ color: GOLD }}
-              >
-                Open Magnifi experience →
-              </a>
+              <div className="flex flex-wrap gap-4 mt-2">
+                <a
+                  href={lastResult.magnifiUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs font-bold underline"
+                  style={{ color: GOLD }}
+                >
+                  Magnifi cinematic experience →
+                </a>
+                {lastResult.guidanceUrl && (
+                  <a
+                    href={lastResult.guidanceUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs font-bold underline"
+                    style={{ color: GOLD }}
+                  >
+                    Simplifi guidance journey →
+                  </a>
+                )}
+              </div>
             )}
           </div>
         )}
@@ -157,15 +171,26 @@ export default function SimplifiPortalWorkspace({
                   <td className="px-2 py-3 text-neutral-600">{capture.status}</td>
                   <td className="px-2 py-3">
                     {capture.blueprintSummary || capture.analysisSummary ? (
-                      <a
-                        href={`/magnifi/${capture.id}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-xs font-bold underline"
-                        style={{ color: GOLD }}
-                      >
-                        Open
-                      </a>
+                      <div className="flex flex-col gap-1">
+                        <a
+                          href={`/magnifi/${capture.id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs font-bold underline"
+                          style={{ color: GOLD }}
+                        >
+                          Magnifi
+                        </a>
+                        <a
+                          href={`/simplifi/guidance/${capture.id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs font-bold underline"
+                          style={{ color: GOLD }}
+                        >
+                          Guidance
+                        </a>
+                      </div>
                     ) : (
                       <span className="text-xs text-neutral-400">Preparing</span>
                     )}

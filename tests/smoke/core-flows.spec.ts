@@ -63,7 +63,7 @@ test('assessment thank-you contact link works', async ({ page }) => {
   );
 });
 
-test('magnifi page returns 404 for unknown id', async ({ page }) => {
-  const res = await page.request.get('/magnifi/recINVALID00000000');
+test('simplifi guidance page returns 404 for unknown id', async ({ page }) => {
+  const res = await page.request.get('/simplifi/guidance/recINVALID00000000');
   expect(res.status()).toBe(404);
 });

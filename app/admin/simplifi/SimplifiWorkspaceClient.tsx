@@ -171,7 +171,16 @@ export default function SimplifiWorkspaceClient({
                   className="text-xs font-bold underline"
                   style={{ color: GOLD }}
                 >
-                  Open Magnifi page
+                  Magnifi cinematic
+                </a>
+                <a
+                  href={`/simplifi/guidance/${lastResult.record.id}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs font-bold underline"
+                  style={{ color: GOLD }}
+                >
+                  Simplifi guidance
                 </a>
                 <a href="/admin/blueprints" className="text-xs font-bold underline" style={{ color: GOLD }}>
                   View Blueprint Library
@@ -263,15 +272,26 @@ export default function SimplifiWorkspaceClient({
                   <td className="px-4 py-3 text-neutral-600">{capture.status}</td>
                   <td className="px-4 py-3">
                     {capture.blueprintSummary ? (
-                      <a
-                        href={`/magnifi/${capture.id}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-xs font-bold underline"
-                        style={{ color: GOLD }}
-                      >
-                        Open page
-                      </a>
+                      <div className="flex flex-col gap-1">
+                        <a
+                          href={`/magnifi/${capture.id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs font-bold underline"
+                          style={{ color: GOLD }}
+                        >
+                          Magnifi
+                        </a>
+                        <a
+                          href={`/simplifi/guidance/${capture.id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs font-bold underline"
+                          style={{ color: GOLD }}
+                        >
+                          Guidance
+                        </a>
+                      </div>
                     ) : (
                       <span className="text-xs text-neutral-400">Not generated</span>
                     )}

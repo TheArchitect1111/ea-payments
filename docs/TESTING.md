@@ -62,13 +62,11 @@ After setup, testers get:
 
 | 5 | **Simplifi workspace** | `/portal/demo-client/simplifi` | Paste URL → scores → **Open Magnifi** link |
 
-| 6 | **Magnifi experience** | `/magnifi/{id}` | Titled sections + roadmap sidebar |
-
-| 7 | **Update Hub** | `/portal/{slug}/updates` | Submit update requests |
-
-| 8 | **Scorecard** | `/scorecard` | Download `.docx` works |
-
-| 9 | **Unsubscribe** | `/unsubscribe` | Page loads |
+| 6 | **Magnifi experience** | `/magnifi/{id}` | Full-screen cinematic V2 · `?classic=1` for report view |
+| 7 | **Simplifi guidance** | `/simplifi/guidance/{id}` | 9-section guided journey + AI Guide panel |
+| 8 | **Update Hub** | `/portal/{slug}/updates` | Submit update requests |
+| 9 | **Scorecard** | `/scorecard` | Download `.docx` works |
+| 10 | **Unsubscribe** | `/unsubscribe` | Page loads |
 
 
 

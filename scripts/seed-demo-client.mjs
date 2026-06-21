@@ -66,6 +66,19 @@ const DEMO_BLUEPRINT_SUMMARY = [
   '## First Move\nRun one Simplifi capture on your highest-value prospect or partner site, review the Magnifi draft with your advisor, and agree the single next action.',
 ].join('\n');
 
+const DEMO_RECOMMENDATION_SUMMARY = [
+  'Template: Executive Transformation™ (Selena)',
+  'Match: Executive or corporate leadership signals — Selena-style transformation journey.',
+  'Journey: Experience → Expertise → Asset → Platform → Ownership',
+  'Recommended products: Magnifi, Simplifi, Pulse',
+  'First step: Run Operational Friction Assessment™ to clarify top priorities before building.',
+  '',
+  'Top 3 priorities:',
+  '#1 Automate operational friction (Simplifi) — Impact High, Ease Medium, Urgency High. Manual workflows detected.',
+  '#2 Launch a member or client portal (Magnifi) — Impact High, Ease Medium, Urgency Medium. Portal signals present.',
+  '#3 Run Operational Friction Assessment™ (Simplifi) — Impact High, Ease High, Urgency High.',
+].join('\n');
+
 if (!key?.trim()) {
   console.error('Missing AIRTABLE_API_KEY.');
   console.error('');
@@ -195,6 +208,7 @@ async function upsertDemoCapture() {
     'Blueprint Template': 'Executive Transformation',
     'Product Alignment': 'Simplifi, Magnifi, Pulse',
     'Blueprint Summary': DEMO_BLUEPRINT_SUMMARY,
+    'Recommendation Summary': DEMO_RECOMMENDATION_SUMMARY,
     'Analysis Summary':
       'Demo capture for external testing. Shows structured Magnifi sections and roadmap.',
   };
@@ -234,5 +248,6 @@ console.log('Pulse:', `${baseUrl}/portal/${DEMO.slug}/pulse`);
 console.log('Simplifi:', `${baseUrl}/portal/${DEMO.slug}/simplifi`);
 console.log('Proposal:', `${baseUrl}/proposal/${DEMO.proposalId}`);
 if (demoCaptureId) {
-  console.log('Magnifi (demo):', `${baseUrl}/magnifi/${demoCaptureId}`);
+  console.log('Magnifi V2:', `${baseUrl}/magnifi/${demoCaptureId}`);
+  console.log('Simplifi Guidance V2:', `${baseUrl}/simplifi/guidance/${demoCaptureId}`);
 }
