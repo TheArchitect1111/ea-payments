@@ -1,13 +1,5 @@
 import { NextResponse } from 'next/server';
-import {
-  getCaptureByConsiderSlug,
-  saveOpportunityPayload,
-} from '@/lib/capture-records';
-import {
-  embedOpportunityPayload,
-  incrementViewTracking,
-  parseOpportunityPayload,
-} from '@/lib/opportunity-experience';
+import { trackConsiderEvent } from '@/lib/opportunity-tracking';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,32 +8,23 @@ export async function POST(
   { params }: { params: Promise<{ slug: string }> },
 ) {
   const { slug } = await params;
-  const capture = await getCaptureByConsiderSlug(slug);
-  if (!capture) {
-    return NextResponse.json({ ok: false }, { status: 404 });
-  }
 
-  const payload = parseOpportunityPayload(capture);
-  if (!payload) {
-    return NextResponse.json({ ok: false }, { status: 404 });
-  }
-
+  let event: 'view' | 'assessment_started' | 'assessment_completed' | 'discovery_booked' = 'view';
   let timeOnPageSeconds: number | undefined;
+
   try {
-    const body = (await req.json()) as { timeOnPageSeconds?: number };
+    const body = (await req.json()) as {
+      event?: string;
+      timeOnPageSeconds?: number;
+    };
+    if (body.event === 'assessment_started') event = 'assessment_started';
+    if (body.event === 'assessment_completed') event = 'assessment_completed';
+    if (body.event === 'discovery_booked') event = 'discovery_booked';
     timeOnPageSeconds = body.timeOnPageSeconds;
   } catch {
-    // initial view ping has no body
+    // view ping without body
   }
 
-  const updated = incrementViewTracking(payload, timeOnPageSeconds);
-  const description = embedOpportunityPayload(capture.description ?? '', updated);
-
-  await saveOpportunityPayload(
-    capture.id,
-    description,
-    updated.tracking.views > 0 ? 'Viewed' : capture.prospectStatus,
-  );
-
-  return NextResponse.json({ ok: true, views: updated.tracking.views });
+  await trackConsiderEvent(slug, event, { timeOnPageSeconds });
+  return NextResponse.json({ ok: true });
 }

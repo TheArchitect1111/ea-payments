@@ -10,14 +10,25 @@ interface Props {
   payload: OpportunityExperiencePayload;
   captureId: string;
   slug: string;
+  isDemo?: boolean;
 }
 
-export default function ConsiderExperience({ payload, captureId, slug }: Props) {
+function trackEvent(slug: string, event: string, isDemo?: boolean) {
+  if (isDemo) return;
+  fetch(`/api/consider/${slug}/view`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ event }),
+  }).catch(() => {});
+}
+
+export default function ConsiderExperience({ payload, captureId, slug, isDemo }: Props) {
   const [copied, setCopied] = useState(false);
   const { analysis, magnifi, extraction } = payload;
   const scores = analysis.scores;
 
   useEffect(() => {
+    if (isDemo) return;
     const start = Date.now();
     fetch(`/api/consider/${slug}/view`, { method: 'POST' }).catch(() => {});
 
@@ -31,7 +42,9 @@ export default function ConsiderExperience({ payload, captureId, slug }: Props) 
         }).catch(() => {});
       }
     };
-  }, [slug]);
+  }, [slug, isDemo]);
+
+  const assessmentHref = `/assessment?consider=${encodeURIComponent(slug)}`;
 
   const copyMessage = async () => {
     await navigator.clipboard.writeText(payload.clientMessage);
@@ -171,7 +184,11 @@ export default function ConsiderExperience({ payload, captureId, slug }: Props) 
         <h2 className="cx-h2">Recommended Next Steps</h2>
         <p className="cx-body">No purchase required to begin. Start with clarity.</p>
         <div className="cx-cta-row">
-          <a href="/assessment" className="cx-cta cx-cta-primary">
+          <a
+            href={assessmentHref}
+            className="cx-cta cx-cta-primary"
+            onClick={() => trackEvent(slug, 'assessment_started', isDemo)}
+          >
             Take the Capacity Impact Assessment™
           </a>
           <a
@@ -179,20 +196,29 @@ export default function ConsiderExperience({ payload, captureId, slug }: Props) 
             target="_blank"
             rel="noopener noreferrer"
             className="cx-cta cx-cta-secondary"
+            onClick={() => trackEvent(slug, 'discovery_booked', isDemo)}
           >
             Schedule Discovery Conversation
           </a>
-          <a href="/assessment" className="cx-cta cx-cta-tertiary">
+          <a
+            href={assessmentHref}
+            className="cx-cta cx-cta-tertiary"
+            onClick={() => trackEvent(slug, 'assessment_started', isDemo)}
+          >
             Request Blueprint
           </a>
         </div>
         <div className="cx-links-row">
-          <a href={`/magnifi/${captureId}`} className="cx-link">
-            Full Magnifi™ cinematic experience →
-          </a>
-          <a href={`/simplifi/guidance/${captureId}`} className="cx-link">
-            Simplifi™ guided journey →
-          </a>
+          {!isDemo && captureId.startsWith('rec') && (
+            <>
+              <a href={`/magnifi/${captureId}`} className="cx-link">
+                Full Magnifi™ cinematic experience →
+              </a>
+              <a href={`/simplifi/guidance/${captureId}`} className="cx-link">
+                Simplifi™ guided journey →
+              </a>
+            </>
+          )}
         </div>
       </section>
 

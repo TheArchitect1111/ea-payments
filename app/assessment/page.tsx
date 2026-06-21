@@ -1,7 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, FormEvent, ChangeEvent } from 'react';
+import { useState, FormEvent, ChangeEvent, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { OPERATIONAL_CHALLENGES } from '@/lib/analysis-engine';
 
 import { eaPulseTheme } from '@ea/premium-chassis/theme';
@@ -195,11 +196,32 @@ function Checklist({
 // ---------------------------------------------------------------------------
 
 export default function AssessmentPage() {
+  return (
+    <Suspense fallback={null}>
+      <AssessmentPageInner />
+    </Suspense>
+  );
+}
+
+function AssessmentPageInner() {
+  const searchParams = useSearchParams();
+  const considerSlug = searchParams.get('consider')?.trim() || undefined;
+  const partnerSlug = searchParams.get('partner')?.trim() || undefined;
+
   const [form, setForm]           = useState<FormState>(EMPTY);
   const [submitted] = useState(false);
   const [loading, setLoading]     = useState(false);
   const [error, setError]         = useState('');
   const [attempted, setAttempted] = useState(false);
+
+  useEffect(() => {
+    if (!considerSlug) return;
+    fetch(`/api/consider/${considerSlug}/view`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ event: 'assessment_started' }),
+    }).catch(() => {});
+  }, [considerSlug]);
 
   function setField(field: keyof FormState) {
     return (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
@@ -250,6 +272,8 @@ export default function AssessmentPage() {
           operationalChallenges: form.operationalChallenges,
           growthGoals:           form.growthGoals,
           capacityConstraints:   form.capacityConstraints.join('; '),
+          considerSlug,
+          partnerSlug,
         }),
       });
 

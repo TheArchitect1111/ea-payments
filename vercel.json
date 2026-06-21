@@ -1,0 +1,25 @@
+{
+  "redirects": [
+    {
+      "source": "/partner-portal",
+      "destination": "/partners/login",
+      "permanent": true
+    },
+    {
+      "source": "/partner-portal/:path*",
+      "destination": "/partners/login",
+      "permanent": true
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-EA-Platform",
+          "value": "ea-payments"
+        }
+      ]
+    }
+  ]
+}

@@ -183,6 +183,16 @@ export default async function PortalPage({
         </div>
 
         <div className="ep-card" style={{ marginTop: 16 }}>
+          <p className="ep-card-title">Partner Portal</p>
+          <p className="ep-placeholder-text">
+            Part-time sales partners track referrals and commissions here — linked to Command Center.
+          </p>
+          <Link href="/partners/login" className="ep-pulse-cta ep-pulse-cta-outline">
+            Partner sign in
+          </Link>
+        </div>
+
+        <div className="ep-card">
           <p className="ep-card-title">Support</p>
           <p className="ep-placeholder-text">
             Questions? Reach your advisor at{' '}

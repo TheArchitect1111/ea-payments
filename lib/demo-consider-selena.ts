@@ -178,7 +178,25 @@ export async function ensureDemoConsiderSelena(): Promise<boolean> {
       headers: authHeaders(),
       body: JSON.stringify({ records: [{ fields }], typecast: true }),
     });
-    return res.ok;
+    if (res.ok) return true;
+
+    const minimal = {
+      'Capture ID': 'CAP-DEMO-SELENA',
+      Title: 'Selena Executive Coaching',
+      Description: description,
+      'Analysis Summary': analysisSummary,
+      'Capture Type': 'Opportunity',
+      Source: 'Simplifi Portal · demo-client',
+      Priority: 'High',
+      Status: 'Routed',
+      'Date Captured': new Date().toISOString().slice(0, 10),
+    };
+    const retry = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${encodeURIComponent(CAPTURES_TABLE)}`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ records: [{ fields: minimal }], typecast: true }),
+    });
+    return retry.ok;
   } catch {
     return false;
   }

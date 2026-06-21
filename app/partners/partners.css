@@ -1,0 +1,146 @@
+.pp-page {
+  min-height: 100vh;
+  background: linear-gradient(145deg, #faf7f0 0%, #f3efe4 40%, #ebe4d4 100%);
+}
+
+.pp-nav {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.pp-nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pp-nav-logo {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+}
+
+.pp-main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px 80px;
+}
+
+.pp-hero-title {
+  font-size: clamp(1.75rem, 4vw, 2.25rem);
+  font-weight: 700;
+  color: #1b2b4d;
+  margin: 0 0 8px;
+  letter-spacing: -0.02em;
+}
+
+.pp-tier {
+  display: inline-block;
+  background: linear-gradient(135deg, #d4b04a, #c9a844);
+  color: #1b2b4d;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 6px 14px;
+  border-radius: 999px;
+  margin-left: 12px;
+}
+
+.pp-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  margin: 24px 0;
+}
+
+.pp-stat {
+  background: #fff;
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 8px 32px rgba(27, 43, 77, 0.08);
+}
+
+.pp-stat-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #6b7280;
+  margin: 0 0 8px;
+}
+
+.pp-stat-value {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #1b2b4d;
+  margin: 0;
+}
+
+.pp-stat-value-gold {
+  color: #c9a844;
+}
+
+.pp-card {
+  background: #fff;
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: 0 8px 32px rgba(27, 43, 77, 0.08);
+  margin-bottom: 16px;
+}
+
+.pp-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.pp-table th {
+  text-align: left;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #6b7280;
+  padding: 10px 8px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.pp-table td {
+  padding: 12px 8px;
+  border-bottom: 1px solid #f5f5f5;
+  color: #1a1a2e;
+}
+
+.pp-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: #f3f4f6;
+  color: #4b5563;
+}
+
+.pp-badge-won {
+  background: #dcfce7;
+  color: #065f46;
+}
+
+.pp-logout {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  text-decoration: none;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(27, 43, 77, 0.12);
+  background: #fff;
+}

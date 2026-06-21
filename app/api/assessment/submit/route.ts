@@ -5,6 +5,7 @@ import type { RevenueRange, Complexity } from '@/lib/analysis-engine';
 import { calculateFee } from '@/lib/pricing-engine';
 import { createAssessmentRecord, createProposalRecord } from '@/lib/airtable';
 import { sendAssessmentAdminNotification, sendAssessmentConfirmationEmail } from '@/lib/email';
+import { trackConsiderEvent } from '@/lib/opportunity-tracking';
 
 function mapTeamSize(label: string): number {
   const map: Record<string, number> = {
@@ -128,6 +129,8 @@ export async function POST(req: NextRequest) {
         : [],
       growthGoals: String(body.growthGoals ?? '').trim(),
       capacityConstraints: String(body.capacityConstraints ?? '').trim(),
+      considerSlug: String(body.considerSlug ?? '').trim() || undefined,
+      partnerSlug: String(body.partnerSlug ?? '').trim() || undefined,
     };
 
     if (
@@ -270,8 +273,6 @@ export async function POST(req: NextRequest) {
       console.error('Assessment admin notification error:', err);
     }
 
-    // Client confirmation email (Email 1 / F2)
-    // Sent after admin notification; failure never blocks the success response.
     if (proposalResult.recordId) {
       try {
         await sendAssessmentConfirmationEmail({
@@ -288,6 +289,14 @@ export async function POST(req: NextRequest) {
         });
       } catch (err) {
         console.error('Assessment confirmation email error:', err);
+      }
+    }
+
+    if (input.considerSlug) {
+      try {
+        await trackConsiderEvent(input.considerSlug, 'assessment_completed');
+      } catch (err) {
+        console.error('Consider tracking error:', err);
       }
     }
 
