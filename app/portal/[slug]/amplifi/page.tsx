@@ -28,11 +28,12 @@ export default async function AmplifiPortalPage({ params }: { params: Promise<{ 
 
   const captures = await getPortalCaptures(slug, 5);
   const profile = await getClientSuccessProfile(client);
+  const firstName = client.clientName.split(' ')[0] ?? client.clientName;
   const experience = buildAmplifiPortalExperience(client, captures, profile);
 
   return (
     <div className="ep-page">
-      <PortalShell slug={slug} active="amplifi" />
+      <PortalShell slug={slug} active="amplifi" firstName={firstName} />
       <main className="ep-main ep-main-amplifi">
         <AmplifiPortalExperience experience={experience} slug={slug} />
       </main>

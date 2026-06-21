@@ -35,9 +35,11 @@ export default async function SimplifiClientPage({
   ).length;
   const captures = isSimplifi ? await getPortalCaptures(slug) : [];
 
+  const firstName = client.clientName.split(' ')[0] ?? client.clientName;
+
   return (
     <div className="ep-page">
-      <PortalShell slug={slug} active="simplifi" />
+      <PortalShell slug={slug} active="simplifi" firstName={firstName} />
 
       <main className="ep-main">
         <div className="ep-welcome">

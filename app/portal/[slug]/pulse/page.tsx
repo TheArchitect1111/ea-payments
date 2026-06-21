@@ -52,7 +52,7 @@ export default async function PulsePage({
 
   return (
     <div className="ep-page">
-      <PortalShell slug={slug} active="pulse" />
+      <PortalShell slug={slug} active="pulse" firstName={firstName} />
 
       <main className="ep-main">
         <div className="ep-welcome">

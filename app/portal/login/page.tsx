@@ -39,21 +39,18 @@ export default function PortalLoginPage() {
 
   return (
     <div className="pl-page">
-      <div className="pl-bg-glow pl-bg-glow-a" aria-hidden />
-      <div className="pl-bg-glow pl-bg-glow-b" aria-hidden />
-
       <div className="pl-shell">
         <header className="pl-header">
           <Image
             src="/ea-logo.png"
             alt="Efficiency Architects"
-            width={280}
-            height={280}
+            width={240}
+            height={240}
             className="pl-logo"
             priority
           />
           <p className="pl-eyebrow">Client Portal</p>
-          <h1 className="pl-title">Welcome back</h1>
+          <h1 className="pl-title">Welcome in</h1>
           <p className="pl-lede">Sign in to Pulse™, Simplifi™, Magnifi™, and Amplifi™.</p>
         </header>
 

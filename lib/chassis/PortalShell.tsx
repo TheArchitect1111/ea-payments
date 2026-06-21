@@ -1,5 +1,5 @@
-import type { CSSProperties } from 'react';
-import { HeaderPortalShell } from '@ea/portal-chassis/layout';
+import type { CSSProperties, ReactNode } from 'react';
+import { EAPortalNav } from './EAPortalNav';
 
 export type EAPortalTab = 'home' | 'pulse' | 'simplifi' | 'amplifi' | 'updates';
 
@@ -9,38 +9,24 @@ const GOLD = '#C9A844';
 type Props = {
   slug: string;
   active: EAPortalTab;
+  firstName?: string;
+  children?: ReactNode;
 };
 
-/** EA client portal header — chassis HeaderPortalShell with EA nav tabs. */
-export function PortalShell({ slug, active }: Props) {
-  const brandName = process.env.BRAND_NAME ?? 'Efficiency Architects';
-  const base = `/portal/${slug}`;
-
+/** EA client portal — modern soft-UI shell with pill navigation. */
+export function PortalShell({ slug, active, firstName, children }: Props) {
   return (
     <div
+      className="ea-shell"
       style={
         {
-          '--portal-header-bg': NAVY,
-          '--portal-accent': GOLD,
-          '--portal-header-text': '#fff',
+          '--ea-navy': NAVY,
+          '--ea-gold': GOLD,
         } as CSSProperties
       }
     >
-      <HeaderPortalShell
-        logoSrc="/ea-logo.png"
-        nameLine1="CLIENT PORTAL"
-        nameLine2={brandName.toUpperCase()}
-        activeTabId={active}
-        logoutApiPath="/api/portal/logout"
-        loginPath="/portal/login"
-        tabs={[
-          { id: 'home', label: 'Dashboard', href: base },
-          { id: 'simplifi', label: 'Simplifi', href: `${base}/simplifi` },
-          { id: 'amplifi', label: 'Amplifi', href: `${base}/amplifi` },
-          { id: 'pulse', label: 'Pulse', href: `${base}/pulse` },
-          { id: 'updates', label: 'Update Requests', href: `${base}/updates` },
-        ]}
-      />
+      <EAPortalNav slug={slug} active={active} firstName={firstName} />
+      {children}
     </div>
   );
 }
