@@ -51,6 +51,32 @@ export default function SimplifiPortalWorkspace({
   const [message, setMessage] = useState('');
   const [lastResult, setLastResult] = useState<AnalyzeResponse | null>(null);
   const [copied, setCopied] = useState(false);
+  const [actionMessage, setActionMessage] = useState('');
+
+  const manageCapture = async (body: { action: string; recordId?: string; slug?: string }) => {
+    setActionMessage('');
+    const res = await fetch('/api/portal/opportunities/manage', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    const data = (await res.json()) as { ok?: boolean; error?: string; newSlug?: string };
+    if (!data.ok) {
+      setActionMessage(data.error ?? 'Action failed.');
+      return;
+    }
+    if (body.action === 'archive' && body.recordId) {
+      setCaptures((prev) =>
+        prev.map((c) =>
+          c.id === body.recordId ? { ...c, status: 'Archived', prospectStatus: 'Archived' } : c,
+        ),
+      );
+      setActionMessage('Archived.');
+    }
+    if (body.action === 'duplicate' && data.newSlug) {
+      setActionMessage(`Duplicate created: /consider/${data.newSlug}`);
+    }
+  };
 
   const analyzeJson = async (body: Record<string, string>) => {
     const res = await fetch('/api/portal/captures/analyze', {
@@ -283,7 +309,7 @@ export default function SimplifiPortalWorkspace({
           <table className="w-full text-sm mt-4">
             <thead>
               <tr className="border-b border-neutral-200">
-                {['Opportunity', 'Scores', 'Status', 'Share'].map((head) => (
+                {['Opportunity', 'Scores', 'Status', 'Share', 'Actions'].map((head) => (
                   <th
                     key={head}
                     className="px-2 py-2 text-left text-xs font-bold uppercase tracking-wider text-neutral-500"
@@ -332,11 +358,37 @@ export default function SimplifiPortalWorkspace({
                       </a>
                     </div>
                   </td>
+                  <td className="px-2 py-3">
+                    <div className="flex flex-col gap-1">
+                      {capture.considerSlug && capture.status !== 'Archived' && (
+                        <button
+                          type="button"
+                          className="text-xs font-bold underline text-left"
+                          style={{ color: NAVY }}
+                          onClick={() =>
+                            manageCapture({ action: 'duplicate', slug: capture.considerSlug! })
+                          }
+                        >
+                          Duplicate
+                        </button>
+                      )}
+                      {capture.status !== 'Archived' && (
+                        <button
+                          type="button"
+                          className="text-xs font-bold underline text-left text-neutral-500"
+                          onClick={() => manageCapture({ action: 'archive', recordId: capture.id })}
+                        >
+                          Archive
+                        </button>
+                      )}
+                    </div>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         )}
+        {actionMessage && <p className="text-sm text-neutral-600 mt-3">{actionMessage}</p>}
       </div>
     </div>
   );

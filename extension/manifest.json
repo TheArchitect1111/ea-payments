@@ -1,19 +1,28 @@
 {
   "manifest_version": 3,
-  "name": "EA Capture Engine",
-  "version": "2.0.0",
-  "description": "One-click capture to Mission Control with Resource Radar analysis",
+  "name": "Amplifi™ — Share More",
+  "version": "2.1.0",
+  "description": "Amplify any page into a shareable Magnifi story. Floating button + toolbar icon.",
   "permissions": ["activeTab", "contextMenus", "storage"],
-  "host_permissions": [
-    "https://ea-payments.vercel.app/*",
-    "http://localhost:3000/*"
-  ],
+  "host_permissions": ["https://*/*", "http://*/*"],
   "action": {
     "default_popup": "popup.html",
-    "default_title": "Capture with Magnifi"
+    "default_title": "Amplifi™ — Amplify this page"
   },
   "background": {
     "service_worker": "background.js"
   },
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "exclude_matches": [
+        "https://ea-payments.vercel.app/*",
+        "http://localhost:3000/*"
+      ],
+      "js": ["content.js"],
+      "css": ["content.css"],
+      "run_at": "document_idle"
+    }
+  ],
   "options_page": "options.html"
 }

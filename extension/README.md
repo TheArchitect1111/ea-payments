@@ -1,45 +1,30 @@
-# EA Capture Engine — Browser Extension (Wave 3)
+# Amplifi™ — Browser Companion
 
-Chrome MV3 extension for one-click capture to Mission Control.
+Chrome extension: **toolbar icon + floating Amplify button** on every page.
 
-## Install (developer mode)
+## Install (developer mode — for real-world testing today)
 
 1. Open `chrome://extensions`
 2. Enable **Developer mode**
-3. Click **Load unpacked**
-4. Select this `extension/` folder
+3. **Load unpacked** → select this `extension/` folder
+4. Open extension **Settings** → set **API Base URL**: `https://ea-payments.vercel.app`
 
-## Configure
+## What testers see
 
-1. Open extension **Settings**
-2. Set **API Base URL**: `https://ea-payments.vercel.app`
-3. Set **Capture API Key**: value of `EA_CAPTURE_API_KEY` in Vercel (generate a long random string)
+| Surface | What happens |
+|---------|----------------|
+| **Gold toolbar icon** | Click → Amplify This Page |
+| **Floating button** | Bottom-right **Amplify** on any site (except EA platform pages) |
+| **Right-click** | Amplifi™ this page |
+| **Phone** | Open https://ea-payments.vercel.app/amplify → Add to Home Screen |
 
-## Usage
+Amplify opens `/amplifi/share?url=…` → sign in → build Magnifi share link → native Share sheet on phone.
 
-**Popup**
-- **Capture This Page** — scrape, classify, score, recommend, blueprint stub
-- **Generate Auto Blueprint** — full Wave 3 pipeline with Magnifi template selection
-- **Run Simplifi Assessment** — opens Operational MRI funnel
-- **Open Resource Radar** — Mission Control intelligence view
+## Market links (send to friends)
 
-**Context menu (right-click)**
-- **Capture with Magnifi™** — quick capture + analysis
-- **Generate Auto Blueprint** — BAS / Selena / JCSU pattern + blueprint stub
-- **Run Simplifi Website Audit** — opens Simplifi audit with URL pre-filled
-- **Run Simplifi Assessment** — opens assessment funnel
+- **Amplify:** https://ea-payments.vercel.app/amplify  
+- **Capture (Simplifi):** https://ea-payments.vercel.app/capture  
+- **Story demo (Magnifi):** https://ea-payments.vercel.app/story/selena  
+- **Install guide:** https://ea-payments.vercel.app/amplifi/install  
 
-Captures run Firecrawl (if configured) → Resource Radar → Opportunity Engine → Recommendation Engine → Auto Blueprint → Airtable.
-
-## Wave 3 outputs
-
-Every capture includes:
-- **Trust Layer** — confidence score, sources, reasoning
-- **Recommendation Engine** — Magnifi template + top 3 priorities + first step
-- **Auto Blueprint stub** — view in `/admin/blueprints`
-
-## Wave 5 — EA Voice
-
-- Header **Voice** button or **Ctrl+Shift+V** (Cmd+Shift+V on Mac)
-- ⌘K → **EA Voice Assistant**
-- Example commands: "Open Knowledge Graph", "Run Simplifi audit on https://…", "Search graph for Magnifi"
+Future custom domains: `amplify.efficiencyarchitects.online`, `capture.…`, `story.…` (add in Vercel Domains).

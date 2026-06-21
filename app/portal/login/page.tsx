@@ -1,10 +1,18 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
+import { Suspense, useState, FormEvent } from 'react';
 import Image from 'next/image';
+import { useSearchParams } from 'next/navigation';
 import './portal-login.css';
 
-export default function PortalLoginPage() {
+function safeNextPath(raw: string | null): string | null {
+  if (!raw || !raw.startsWith('/') || raw.startsWith('//')) return null;
+  return raw;
+}
+
+function PortalLoginForm() {
+  const searchParams = useSearchParams();
+  const nextPath = safeNextPath(searchParams.get('next'));
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -30,13 +38,60 @@ export default function PortalLoginPage() {
         return;
       }
 
-      window.location.href = `/portal/${data.slug}`;
+      window.location.href = nextPath ?? `/portal/${data.slug}`;
     } catch {
       setError('An unexpected error occurred. Please try again.');
       setLoading(false);
     }
   }
 
+  return (
+    <div className="pl-card">
+      <form onSubmit={handleSubmit} noValidate className="pl-form">
+        <label className="pl-label" htmlFor="email">
+          Email
+        </label>
+        <input
+          id="email"
+          type="email"
+          className="pl-input"
+          placeholder="you@company.com"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+          autoComplete="email"
+          autoFocus
+        />
+
+        <label className="pl-label" htmlFor="password">
+          Password
+        </label>
+        <input
+          id="password"
+          type="password"
+          className="pl-input"
+          placeholder="From your welcome email"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+          autoComplete="current-password"
+        />
+
+        <button type="submit" className="pl-btn" disabled={loading}>
+          {loading ? 'Signing in…' : 'Sign in'}
+        </button>
+
+        {error && (
+          <p className="pl-error" role="alert">
+            {error}
+          </p>
+        )}
+      </form>
+    </div>
+  );
+}
+
+export default function PortalLoginPage() {
   return (
     <div className="pl-page">
       <div className="pl-shell">
@@ -54,48 +109,9 @@ export default function PortalLoginPage() {
           <p className="pl-lede">Sign in to Pulse™, Simplifi™, Magnifi™, and Amplifi™.</p>
         </header>
 
-        <div className="pl-card">
-          <form onSubmit={handleSubmit} noValidate className="pl-form">
-            <label className="pl-label" htmlFor="email">
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              className="pl-input"
-              placeholder="you@company.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              autoComplete="email"
-              autoFocus
-            />
-
-            <label className="pl-label" htmlFor="password">
-              Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              className="pl-input"
-              placeholder="From your welcome email"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              autoComplete="current-password"
-            />
-
-            <button type="submit" className="pl-btn" disabled={loading}>
-              {loading ? 'Signing in…' : 'Sign in'}
-            </button>
-
-            {error && (
-              <p className="pl-error" role="alert">
-                {error}
-              </p>
-            )}
-          </form>
-        </div>
+        <Suspense fallback={<div className="pl-card">Loading…</div>}>
+          <PortalLoginForm />
+        </Suspense>
 
         <footer className="pl-footer">
           <p className="pl-footer-text">

@@ -1,0 +1,10 @@
+{
+  "name": "Amplifi — Share More",
+  "short_name": "Amplifi",
+  "description": "Amplify any page into a shareable story",
+  "start_url": "/amplifi/share",
+  "display": "standalone",
+  "background_color": "#1B2B4D",
+  "theme_color": "#C9A844",
+  "icons": [{ "src": "/ea-logo.png", "sizes": "512x512", "type": "image/png" }]
+}

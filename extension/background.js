@@ -1,7 +1,12 @@
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({
+    id: 'ea-amplifi-page',
+    title: 'Amplifi™ this page',
+    contexts: ['page'],
+  });
+  chrome.contextMenus.create({
     id: 'ea-capture',
-    title: 'Capture with Magnifi™',
+    title: 'Capture with Simplifi™',
     contexts: ['page', 'link'],
   });
   chrome.contextMenus.create({
@@ -9,39 +14,28 @@ chrome.runtime.onInstalled.addListener(() => {
     title: 'Generate Auto Blueprint',
     contexts: ['page', 'link'],
   });
-  chrome.contextMenus.create({
-    id: 'ea-simplifi-audit',
-    title: 'Run Simplifi Website Audit',
-    contexts: ['page', 'link'],
-  });
-  chrome.contextMenus.create({
-    id: 'ea-simplifi',
-    title: 'Run Simplifi Assessment',
-    contexts: ['page'],
-  });
 });
 
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   const url = info.linkUrl || info.pageUrl || tab?.url;
   if (!url) return;
 
-  if (info.menuItemId === 'ea-simplifi') {
-    const { apiUrl } = await chrome.storage.sync.get(['apiUrl']);
-    const base = apiUrl || 'https://ea-payments.vercel.app';
-    chrome.tabs.create({ url: `${base}/assessment` });
+  const { apiUrl } = await chrome.storage.sync.get(['apiUrl']);
+  const base = apiUrl || 'https://ea-payments.vercel.app';
+
+  if (info.menuItemId === 'ea-amplifi-page') {
+    chrome.tabs.create({ url: `${base}/amplifi/share?url=${encodeURIComponent(url)}` });
     return;
   }
 
-  if (info.menuItemId === 'ea-simplifi-audit') {
-    const { apiUrl } = await chrome.storage.sync.get(['apiUrl']);
-    const base = apiUrl || 'https://ea-payments.vercel.app';
-    const auditUrl = encodeURIComponent(url);
-    chrome.tabs.create({ url: `${base}/admin/simplifi-audit?url=${auditUrl}` });
+  if (info.menuItemId === 'ea-blueprint') {
+    await captureUrl(url, 'blueprint');
     return;
   }
 
-  const mode = info.menuItemId === 'ea-blueprint' ? 'blueprint' : 'capture';
-  await captureUrl(url, mode);
+  if (info.menuItemId === 'ea-capture') {
+    await captureUrl(url, 'capture');
+  }
 });
 
 async function captureUrl(url, mode = 'capture') {
@@ -65,9 +59,6 @@ async function captureUrl(url, mode = 'capture') {
     if (data.ok) {
       chrome.action.setBadgeText({ text: mode === 'blueprint' ? 'BP' : '✓' });
       setTimeout(() => chrome.action.setBadgeText({ text: '' }), 3000);
-      if (mode === 'blueprint' && data.blueprint) {
-        chrome.storage.local.set({ lastBlueprint: data.blueprint });
-      }
     }
   } catch (err) {
     console.error('EA capture failed', err);
@@ -75,6 +66,16 @@ async function captureUrl(url, mode = 'capture') {
 }
 
 chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
+  if (msg.type === 'AMPLIFY_URL') {
+    chrome.storage.sync.get(['apiUrl'], (stored) => {
+      const base = stored.apiUrl || 'https://ea-payments.vercel.app';
+      chrome.tabs.create({
+        url: `${base}/amplifi/share?url=${encodeURIComponent(msg.url)}`,
+      });
+      sendResponse({ ok: true });
+    });
+    return true;
+  }
   if (msg.type === 'CAPTURE_URL') {
     captureUrl(msg.url, msg.mode || 'capture').then(() => sendResponse({ ok: true }));
     return true;

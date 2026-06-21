@@ -208,8 +208,8 @@ export default function PremiumLanding() {
         ]}
         image="https://images.unsplash.com/photo-1600880292089-90a7e086ee0c?auto=format&fit=crop&w=1400&q=80"
         imageAlt="Diverse team working together with calm energy — everyone informed, no visible confusion"
-        cta="Learn More"
-        ctaHref="#fortifi"
+        cta="Explore Unifi"
+        ctaHref="/assessment"
       />
 
       <SplitSection
@@ -224,8 +224,8 @@ export default function PremiumLanding() {
         ]}
         image="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1400&q=80"
         imageAlt="Experienced team member mentoring a newer colleague while knowledge is shared and multiplied"
-        cta="Learn More"
-        ctaHref="#amplifi"
+        cta="Explore Fortifi"
+        ctaHref="/portal/login?next=/portal/demo-client/updates"
         reverse
       />
 
@@ -241,7 +241,7 @@ export default function PremiumLanding() {
         image="https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=1400&q=80"
         imageAlt="Diverse community connected through shared purpose and momentum"
         cta="Explore Amplifi"
-        ctaHref="/portal/login"
+        ctaHref="/portal/login?next=/portal/demo-client/amplifi"
       />
 
       <SplitSection
@@ -255,7 +255,7 @@ export default function PremiumLanding() {
         image="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1400&q=80"
         imageAlt="Clean, elegant view of organizational health — calm confidence, not complexity"
         cta="Explore Pulse"
-        ctaHref="#assessment"
+        ctaHref="/portal/login?next=/portal/demo-client/pulse"
         reverse
         dark
       />

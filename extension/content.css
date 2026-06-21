@@ -1,0 +1,22 @@
+#ea-amplifi-fab {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 2147483646;
+  padding: 12px 20px;
+  border: 2px solid #c9a844;
+  border-radius: 999px;
+  background: #1b2b4d;
+  color: #c9a844;
+  font-family: system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+}
+
+#ea-amplifi-fab:hover {
+  background: #243a66;
+}

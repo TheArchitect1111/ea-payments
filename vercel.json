@@ -9,6 +9,56 @@
       "source": "/partner-portal/:path*",
       "destination": "/partners/login",
       "permanent": true
+    },
+    {
+      "source": "/capture",
+      "destination": "/simplifi/capture",
+      "permanent": false
+    },
+    {
+      "source": "/amplify",
+      "destination": "/amplifi/share",
+      "permanent": false
+    },
+    {
+      "source": "/story/:slug",
+      "destination": "/consider/:slug",
+      "permanent": false
+    },
+    {
+      "source": "/sign-in",
+      "destination": "/portal/login",
+      "permanent": false
+    },
+    {
+      "source": "/products/simplifi",
+      "destination": "/simplifi/capture",
+      "permanent": false
+    },
+    {
+      "source": "/products/magnifi",
+      "destination": "/story/selena",
+      "permanent": false
+    },
+    {
+      "source": "/products/amplifi",
+      "destination": "/amplify",
+      "permanent": false
+    },
+    {
+      "source": "/products/pulse",
+      "destination": "/sign-in?next=/portal/demo-client/pulse",
+      "permanent": false
+    },
+    {
+      "source": "/magnifi",
+      "destination": "/story/selena",
+      "permanent": false
+    },
+    {
+      "source": "/amplifi",
+      "destination": "/amplify",
+      "permanent": false
     }
   ],
   "headers": [
@@ -17,7 +67,7 @@
       "headers": [
         {
           "key": "X-EA-Platform",
-          "value": "ea-payments"
+          "value": "ea-platform"
         }
       ]
     }

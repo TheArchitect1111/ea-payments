@@ -54,9 +54,15 @@ export default function SimplifiLaunchPage() {
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <a
-                href="/checkout?package=simplifi_early_access"
+                href="/simplifi/capture"
                 className="rounded-full px-7 py-4 text-sm font-bold text-white"
                 style={{ backgroundColor: BLUE }}
+              >
+                Open Capture (mobile)
+              </a>
+              <a
+                href="/checkout?package=simplifi_early_access"
+                className="rounded-full border border-neutral-200 px-7 py-4 text-sm font-bold"
               >
                 Start Simplifi
               </a>
