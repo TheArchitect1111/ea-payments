@@ -2,6 +2,7 @@ import { getAirtableApiKey, productionSecretIssues } from '@/lib/integration-env
 import { checkAirtableLaunchSchema } from '@/lib/airtable-schema-check';
 import { getTier2EnvChecks, isTier2AutomationReady } from '@/lib/launch-tier2';
 import { EA_PLATFORM_URL } from '@/lib/platform-urls';
+import { parseResendFromEmail, RESEND_FROM_EMAIL_EXAMPLE } from '@/lib/resend-env';
 
 export const CANONICAL_PRODUCTION_URL = 'https://www.efficiencyarchitects.online';
 
@@ -9,8 +10,28 @@ export type LaunchAutomation = 'fully_automated' | 'partially_automated' | 'manu
 
 export type LaunchStatus = 'complete' | 'missing' | 'needs_credentials' | 'needs_human_action';
 
+export type LaunchSectionId =
+  | 'infrastructure'
+  | 'payments'
+  | 'communications'
+  | 'onboarding'
+  | 'domains'
+  | 'security'
+  | 'friend_testing';
+
+export const LAUNCH_SECTION_LABELS: Record<LaunchSectionId, string> = {
+  infrastructure: 'Infrastructure',
+  payments: 'Payments',
+  communications: 'Communications',
+  onboarding: 'Onboarding',
+  domains: 'Domains',
+  security: 'Security',
+  friend_testing: 'Friend Testing',
+};
+
 export type LaunchCheckItem = {
   id: string;
+  section: LaunchSectionId;
   category: string;
   name: string;
   automation: LaunchAutomation;
@@ -22,10 +43,24 @@ export type LaunchCheckItem = {
   verify?: string;
 };
 
+export type LaunchSectionSummary = {
+  id: LaunchSectionId;
+  name: string;
+  score: number;
+  maxScore: number;
+  complete: number;
+  blockers: number;
+  warnings: number;
+  items: LaunchCheckItem[];
+};
+
 export type LaunchCommandCenterReport = {
   generatedAt: string;
   readinessScore: number;
   status: 'full_launch_ready' | 'friend_testing_ready' | 'needs_setup';
+  launchBlockers: number;
+  warnings: number;
+  recommendedNextAction: string;
   summary: {
     complete: number;
     missing: number;
@@ -33,6 +68,7 @@ export type LaunchCommandCenterReport = {
     needsHumanAction: number;
     total: number;
   };
+  sections: LaunchSectionSummary[];
   items: LaunchCheckItem[];
   links: {
     healthLaunch: string;
@@ -42,6 +78,10 @@ export type LaunchCommandCenterReport = {
     tier2Guide: string;
     makeOnboardingGuide: string;
     dnsGuide: string;
+    esignGuide: string;
+    contractSignedGuide: string;
+    friendTestingGuide: string;
+    finalReport: string;
   };
 };
 
@@ -103,17 +143,31 @@ async function checkResendDomain(): Promise<{
   ok: boolean;
   status: LaunchStatus;
   message: string;
+  domain?: string;
 }> {
   const key = process.env.RESEND_API_KEY?.trim();
-  const from = process.env.RESEND_FROM_EMAIL?.trim();
-  if (!key || !from) {
+  const fromRaw = process.env.RESEND_FROM_EMAIL;
+  if (!key || !fromRaw?.trim()) {
     return { ok: false, status: 'missing', message: 'RESEND_API_KEY or RESEND_FROM_EMAIL not set.' };
   }
 
-  const domain = from.split('@')[1]?.toLowerCase();
-  if (!domain) {
-    return { ok: false, status: 'missing', message: 'RESEND_FROM_EMAIL is not a valid address.' };
+  const parsed = parseResendFromEmail(fromRaw);
+  if (!parsed || parsed.parseError) {
+    if (parsed?.parseError === 'missing_at') {
+      return {
+        ok: false,
+        status: 'missing',
+        message: `RESEND_FROM_EMAIL must include @ (e.g. ${RESEND_FROM_EMAIL_EXAMPLE}). Current value has no @ symbol.`,
+      };
+    }
+    return {
+      ok: false,
+      status: 'missing',
+      message: `RESEND_FROM_EMAIL format invalid. Use ${RESEND_FROM_EMAIL_EXAMPLE} or Name <${RESEND_FROM_EMAIL_EXAMPLE}>.`,
+    };
   }
+
+  const { domain, address } = parsed;
 
   try {
     const res = await fetch('https://api.resend.com/domains', {
@@ -126,25 +180,147 @@ async function checkResendDomain(): Promise<{
       return { ok: false, status: 'needs_human_action', message: `Resend domains API returned ${res.status}.` };
     }
     const data = (await res.json()) as { data?: { name: string; status: string }[] };
-    const match = data.data?.find((d) => d.name === domain || from.endsWith(`@${d.name}`));
+    const domains = data.data ?? [];
+    const match =
+      domains.find((d) => d.name === domain) ??
+      domains.find((d) => address.endsWith(`@${d.name}`));
     if (match?.status === 'verified') {
-      return { ok: true, status: 'complete', message: `Domain ${match.name} verified in Resend.` };
+      return {
+        ok: true,
+        status: 'complete',
+        message: `Domain ${match.name} verified. Sending from ${address}.`,
+        domain: match.name,
+      };
     }
     if (match) {
       return {
         ok: false,
         status: 'needs_human_action',
         message: `Domain ${match.name} status: ${match.status} — verify at resend.com/domains`,
+        domain: match.name,
       };
     }
     return {
       ok: false,
       status: 'needs_human_action',
-      message: `Domain ${domain} not found in Resend — add and verify at resend.com/domains`,
+      message: `Domain ${domain} not found in Resend — add DNS records at resend.com/domains for ${domain}`,
+      domain,
     };
   } catch {
     return { ok: false, status: 'needs_human_action', message: 'Could not reach Resend API.' };
   }
+}
+
+async function checkEsignaturesCallback(): Promise<{
+  ok: boolean;
+  status: LaunchStatus;
+  message: string;
+}> {
+  const url = `${EA_PLATFORM_URL}/api/webhooks/esignatures`;
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ event: 'launch.command_center.ping', test: true }),
+      signal: AbortSignal.timeout(12000),
+    });
+    if (res.status === 404) {
+      return { ok: false, status: 'missing', message: `Callback route not found: ${url}` };
+    }
+    if (res.ok || res.status === 400) {
+      return { ok: true, status: 'complete', message: `eSignatures callback route live at ${url}` };
+    }
+    return {
+      ok: false,
+      status: 'needs_human_action',
+      message: `Callback ${url} returned HTTP ${res.status}.`,
+    };
+  } catch (err) {
+    return {
+      ok: false,
+      status: 'needs_human_action',
+      message: `Could not reach callback: ${err instanceof Error ? err.message : 'network error'}`,
+    };
+  }
+}
+
+function checkEsignTemplateEnv(): { ok: boolean; status: LaunchStatus; message: string } {
+  const msa = process.env.ESIGNATURES_MSA_TEMPLATE_ID?.trim();
+  const sow = process.env.ESIGNATURES_SOW_TEMPLATE_ID?.trim();
+  if (msa && sow) {
+    return {
+      ok: true,
+      status: 'complete',
+      message: 'MSA and SOW template IDs configured on Vercel.',
+    };
+  }
+  if (msa || sow) {
+    return {
+      ok: false,
+      status: 'needs_human_action',
+      message: `Set both ESIGNATURES_MSA_TEMPLATE_ID and ESIGNATURES_SOW_TEMPLATE_ID (have ${msa ? 'MSA' : 'SOW'} only).`,
+    };
+  }
+  return {
+    ok: false,
+    status: 'needs_human_action',
+    message: 'Upload MSA/SOW at esignatures.io → set ESIGNATURES_MSA_TEMPLATE_ID + ESIGNATURES_SOW_TEMPLATE_ID on Vercel.',
+  };
+}
+
+function buildSections(items: LaunchCheckItem[]): LaunchSectionSummary[] {
+  const order: LaunchSectionId[] = [
+    'infrastructure',
+    'payments',
+    'communications',
+    'onboarding',
+    'domains',
+    'security',
+    'friend_testing',
+  ];
+
+  return order.map((id) => {
+    const sectionItems = items.filter((i) => i.section === id);
+    const scored = sectionItems.filter((i) => i.maxScore > 0);
+    const score = scored.reduce((s, i) => s + i.score, 0);
+    const maxScore = scored.reduce((s, i) => s + i.maxScore, 0);
+    return {
+      id,
+      name: LAUNCH_SECTION_LABELS[id],
+      score,
+      maxScore,
+      complete: sectionItems.filter((i) => i.status === 'complete').length,
+      blockers: sectionItems.filter((i) => i.maxScore > 0 && i.status !== 'complete').length,
+      warnings: sectionItems.filter(
+        (i) => i.status === 'needs_human_action' || i.status === 'needs_credentials',
+      ).length,
+      items: sectionItems,
+    };
+  });
+}
+
+function recommendNextAction(items: LaunchCheckItem[], tier2Ready: boolean): string {
+  const byId = Object.fromEntries(items.map((i) => [i.id, i]));
+
+  if (byId.resend_domain && byId.resend_domain.status !== 'complete') {
+    return byId.resend_domain.message;
+  }
+  if (byId.make_esign_webhook && byId.make_esign_webhook.status !== 'complete') {
+    return 'Create Make scenario EA Contract Signed → set ESIGN_WEBHOOK_URL on Vercel → docs/MAKE-EA-CONTRACT-SIGNED-SCENARIO.md';
+  }
+  if (byId.esignatures_templates && byId.esignatures_templates.status !== 'complete') {
+    return byId.esignatures_templates.message;
+  }
+  if (byId.resend_domain?.status === 'complete' && byId.make_esign_webhook?.status === 'complete' && !tier2Ready) {
+    return 'Complete remaining Tier 2 env vars (Resend + Stripe webhook secret).';
+  }
+  if (byId.stripe_live_checkout && byId.stripe_live_checkout.status !== 'complete') {
+    return 'Run friend test checkout at /checkout — docs/FRIEND-TESTING-CHECKLIST.md';
+  }
+  if (byId.launch_setup_key_cleanup?.status === 'needs_human_action') {
+    return 'Remove LAUNCH_SETUP_KEY from Vercel Production after setup is complete.';
+  }
+  return 'All automated blockers cleared — run live checkout friend test.';
 }
 
 async function checkStripeApi(): Promise<{ ok: boolean; status: LaunchStatus; message: string }> {
@@ -256,6 +432,8 @@ export async function runLaunchCommandCenter(options?: {
   const resendDomain = await checkResendDomain();
   const stripeApi = await checkStripeApi();
   const dns = await checkDnsCanonical();
+  const esignCallback = await checkEsignaturesCallback();
+  const esignTemplates = checkEsignTemplateEnv();
   const onboardingProbe = await probeMakeWebhook(process.env.ONBOARDING_WEBHOOK_URL, 'ONBOARDING_WEBHOOK_URL');
   const esignProbe = await probeMakeWebhook(process.env.ESIGN_WEBHOOK_URL, 'ESIGN_WEBHOOK_URL');
 
@@ -266,6 +444,7 @@ export async function runLaunchCommandCenter(options?: {
   const items: LaunchCheckItem[] = [
     item({
       id: 'airtable_api',
+      section: 'infrastructure',
       category: 'Airtable',
       name: 'Airtable API key configured',
       automation: 'fully_automated',
@@ -277,6 +456,7 @@ export async function runLaunchCommandCenter(options?: {
     }),
     item({
       id: 'airtable_capture_schema',
+      section: 'infrastructure',
       category: 'Airtable',
       name: 'Capture Records schema',
       automation: 'fully_automated',
@@ -292,6 +472,7 @@ export async function runLaunchCommandCenter(options?: {
     }),
     item({
       id: 'airtable_pulse_schema',
+      section: 'infrastructure',
       category: 'Airtable',
       name: 'Pulse Events schema',
       automation: 'fully_automated',
@@ -304,6 +485,7 @@ export async function runLaunchCommandCenter(options?: {
     }),
     item({
       id: 'airtable_client_onboarding_fields',
+      section: 'infrastructure',
       category: 'Airtable',
       name: 'Client Records onboarding fields',
       automation: 'partially_automated',
@@ -320,6 +502,7 @@ export async function runLaunchCommandCenter(options?: {
     }),
     item({
       id: 'airtable_demo_client',
+      section: 'friend_testing',
       category: 'Airtable',
       name: 'Demo client (friend testing)',
       automation: 'fully_automated',
@@ -330,6 +513,7 @@ export async function runLaunchCommandCenter(options?: {
     }),
     item({
       id: 'stripe_keys',
+      section: 'payments',
       category: 'Stripe',
       name: 'Stripe API keys',
       automation: 'partially_automated',
@@ -340,6 +524,7 @@ export async function runLaunchCommandCenter(options?: {
     }),
     item({
       id: 'stripe_webhook_secret',
+      section: 'payments',
       category: 'Stripe',
       name: 'Stripe webhook secret',
       automation: 'partially_automated',
@@ -352,6 +537,7 @@ export async function runLaunchCommandCenter(options?: {
     }),
     item({
       id: 'stripe_live_checkout',
+      section: 'friend_testing',
       category: 'Stripe',
       name: 'Live checkout end-to-end test',
       automation: 'manual_only',
@@ -364,6 +550,7 @@ export async function runLaunchCommandCenter(options?: {
     }),
     item({
       id: 'resend_env',
+      section: 'communications',
       category: 'Resend',
       name: 'Resend env vars',
       automation: 'fully_automated',
@@ -376,6 +563,7 @@ export async function runLaunchCommandCenter(options?: {
     }),
     item({
       id: 'resend_domain',
+      section: 'communications',
       category: 'Resend',
       name: 'Resend sending domain verified',
       automation: 'partially_automated',
@@ -386,6 +574,7 @@ export async function runLaunchCommandCenter(options?: {
     }),
     item({
       id: 'make_onboarding_webhook',
+      section: 'onboarding',
       category: 'Make',
       name: 'ONBOARDING_WEBHOOK_URL',
       automation: 'partially_automated',
@@ -397,6 +586,7 @@ export async function runLaunchCommandCenter(options?: {
     }),
     item({
       id: 'make_esign_webhook',
+      section: 'onboarding',
       category: 'Make',
       name: 'ESIGN_WEBHOOK_URL',
       automation: 'partially_automated',
@@ -408,6 +598,7 @@ export async function runLaunchCommandCenter(options?: {
     }),
     item({
       id: 'make_content_webhook',
+      section: 'onboarding',
       category: 'Make',
       name: 'CONTENT_REQUEST_WEBHOOK_URL',
       automation: 'fully_automated',
@@ -419,6 +610,7 @@ export async function runLaunchCommandCenter(options?: {
     }),
     item({
       id: 'make_onboarding_scenario',
+      section: 'onboarding',
       category: 'Make',
       name: 'EA Onboarding Webhook scenario (Make UI)',
       automation: 'manual_only',
@@ -429,18 +621,43 @@ export async function runLaunchCommandCenter(options?: {
       fix: 'docs/MAKE-EA-ONBOARDING-SCENARIO.md',
     }),
     item({
-      id: 'esignatures_setup',
+      id: 'esignatures_callback',
+      section: 'onboarding',
+      category: 'eSignatures',
+      name: 'eSignatures callback route',
+      automation: 'fully_automated',
+      status: esignCallback.status,
+      maxScore: 4,
+      message: esignCallback.message,
+      fix: `${EA_PLATFORM_URL}/api/webhooks/esignatures`,
+      verify: 'docs/ESIGNATURES-SETUP.md',
+    }),
+    item({
+      id: 'esignatures_templates',
+      section: 'onboarding',
+      category: 'eSignatures',
+      name: 'MSA + SOW template IDs',
+      automation: 'partially_automated',
+      status: esignTemplates.status,
+      maxScore: 4,
+      message: esignTemplates.message,
+      fix: 'docs/ESIGNATURES-SETUP.md',
+    }),
+    item({
+      id: 'make_esign_scenario',
+      section: 'onboarding',
       category: 'Make',
-      name: 'eSignatures.io MSA/SOW templates',
+      name: 'EA Contract Signed scenario (Make UI)',
       automation: 'manual_only',
-      status: 'needs_human_action',
+      status: esignProbe.ok ? 'complete' : 'needs_human_action',
       maxScore: 0,
       score: 0,
-      message: 'Upload templates + set callback to /api/webhooks/esignatures',
-      fix: 'https://esignatures.io',
+      message: 'Build scenario EA Contract Signed in Make — docs/MAKE-EA-CONTRACT-SIGNED-SCENARIO.md',
+      fix: 'docs/MAKE-EA-CONTRACT-SIGNED-SCENARIO.md',
     }),
     item({
       id: 'dns_canonical',
+      section: 'domains',
       category: 'DNS',
       name: 'Canonical domain www.efficiencyarchitects.online',
       automation: 'partially_automated',
@@ -451,6 +668,7 @@ export async function runLaunchCommandCenter(options?: {
     }),
     item({
       id: 'dns_simplifi_app',
+      section: 'domains',
       category: 'DNS',
       name: 'app.simplifi.ai workspace alias',
       automation: 'manual_only',
@@ -462,6 +680,7 @@ export async function runLaunchCommandCenter(options?: {
     }),
     item({
       id: 'session_secrets',
+      section: 'security',
       category: 'Security',
       name: 'Production session secrets',
       automation: 'fully_automated',
@@ -474,6 +693,7 @@ export async function runLaunchCommandCenter(options?: {
     }),
     item({
       id: 'sentry',
+      section: 'security',
       category: 'Sentry',
       name: 'Error monitoring (Sentry DSN)',
       automation: 'partially_automated',
@@ -486,6 +706,7 @@ export async function runLaunchCommandCenter(options?: {
     }),
     item({
       id: 'clerk',
+      section: 'security',
       category: 'Clerk',
       name: 'Clerk authentication',
       automation: 'fully_automated',
@@ -496,6 +717,7 @@ export async function runLaunchCommandCenter(options?: {
     }),
     item({
       id: 'capture_pipeline',
+      section: 'infrastructure',
       category: 'Product',
       name: 'Simplifi capture pipeline',
       automation: 'fully_automated',
@@ -506,6 +728,7 @@ export async function runLaunchCommandCenter(options?: {
     }),
     item({
       id: 'magnifi_selena',
+      section: 'infrastructure',
       category: 'Product',
       name: 'Magnifi Selena demo',
       automation: 'fully_automated',
@@ -515,6 +738,7 @@ export async function runLaunchCommandCenter(options?: {
     }),
     item({
       id: 'chrome_extension_key',
+      section: 'infrastructure',
       category: 'Product',
       name: 'Chrome extension API key',
       automation: 'partially_automated',
@@ -528,6 +752,7 @@ export async function runLaunchCommandCenter(options?: {
     }),
     item({
       id: 'launch_setup_key_cleanup',
+      section: 'security',
       category: 'Security',
       name: 'Remove LAUNCH_SETUP_KEY after setup',
       automation: 'partially_automated',
@@ -556,11 +781,22 @@ export async function runLaunchCommandCenter(options?: {
     total: items.length,
   };
 
+  const sections = buildSections(items);
+  const launchBlockers = items.filter((i) => i.maxScore > 0 && i.status !== 'complete').length;
+  const warnings = items.filter(
+    (i) => i.status === 'needs_human_action' || i.status === 'needs_credentials',
+  ).length;
+  const tier2Ready = isTier2AutomationReady(tier2);
+
   return {
     generatedAt: new Date().toISOString(),
     readinessScore,
     status: fullLaunchReady ? 'full_launch_ready' : friendTestingReady ? 'friend_testing_ready' : 'needs_setup',
+    launchBlockers,
+    warnings,
+    recommendedNextAction: recommendNextAction(items, tier2Ready),
     summary,
+    sections,
     items,
     links: {
       healthLaunch: `${base}/api/health/launch`,
@@ -570,6 +806,10 @@ export async function runLaunchCommandCenter(options?: {
       tier2Guide: 'docs/MAKE-TIER2.md',
       makeOnboardingGuide: 'docs/MAKE-EA-ONBOARDING-SCENARIO.md',
       dnsGuide: 'docs/DNS-THREE-CLICKS.md',
+      esignGuide: 'docs/ESIGNATURES-SETUP.md',
+      contractSignedGuide: 'docs/MAKE-EA-CONTRACT-SIGNED-SCENARIO.md',
+      friendTestingGuide: 'docs/FRIEND-TESTING-CHECKLIST.md',
+      finalReport: 'docs/FINAL-LAUNCH-REPORT.md',
     },
   };
 }
