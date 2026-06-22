@@ -2,16 +2,26 @@ import { cookies } from 'next/headers';
 import Link from 'next/link';
 import { verifySession, EA_PORTAL_COOKIE } from '@/lib/ea-portal-auth';
 import { getClientByPortalSlug } from '@/lib/airtable';
-import { getPortalCaptures } from '@/lib/capture-records';
-import { captureToObject, sortInbox, buildDailyBrief } from '@/lib/simplifi-objects';
-import type { SimplifiObject } from '@/lib/simplifi-objects';
-import { isTerminalOutcome } from '@/lib/outcome-tracking';
-import { objectsToMemoryLibrary } from '@/lib/memory-assets';
+import { loadSimplifiWorkspace, type SimplifiWorkspaceData } from '@/lib/simplifi-store';
 import { EA_PLATFORM_URL } from '@/lib/platform-urls';
 import SimplifiWorkspace from './SimplifiWorkspace';
 import './simplifi-workspace.css';
 
 export const dynamic = 'force-dynamic';
+
+const EMPTY_WORKSPACE: SimplifiWorkspaceData = {
+  objects: [],
+  activeObjects: [],
+  brief: {
+    greeting: 'Good morning.',
+    items: [],
+    recommendedNext: { label: 'Capture something worth exploring', href: '/simplifi/capture' },
+    completed: [],
+  },
+  memoryLibrary: [],
+  actionCenter: { needsAttention: [], recommended: [], watchlist: [] },
+  relationships: [],
+};
 
 export default async function SimplifiWorkspacePage() {
   const cookieStore = await cookies();
@@ -19,25 +29,13 @@ export default async function SimplifiWorkspacePage() {
   const session = token ? await verifySession(token) : null;
   const slug = session?.slug ?? null;
 
-  let firstName = '';
-  let objects: SimplifiObject[] = [];
+  let workspace: SimplifiWorkspaceData = EMPTY_WORKSPACE;
 
   if (slug) {
-    const [client, captures] = await Promise.all([
-      getClientByPortalSlug(slug),
-      getPortalCaptures(slug, 30),
-    ]);
-    firstName = client?.clientName?.split(' ')[0] ?? '';
-    objects = sortInbox(
-      captures
-        .filter((c) => c.status !== 'Archived')
-        .map((c) => captureToObject(c, EA_PLATFORM_URL)),
-    );
+    const client = await getClientByPortalSlug(slug);
+    const firstName = client?.clientName?.split(' ')[0] ?? '';
+    workspace = await loadSimplifiWorkspace(slug, EA_PLATFORM_URL, firstName);
   }
-
-  const brief = buildDailyBrief(objects, firstName, slug ?? undefined);
-  const memoryLibrary = objectsToMemoryLibrary(objects.filter((o) => !isTerminalOutcome(o.outcomeStatus)));
-  const activeObjects = objects.filter((o) => !isTerminalOutcome(o.outcomeStatus));
 
   return (
     <div className="sw-app">
@@ -58,9 +56,11 @@ export default async function SimplifiWorkspacePage() {
       <SimplifiWorkspace
         slug={slug}
         loggedIn={Boolean(session)}
-        objects={activeObjects}
-        brief={brief}
-        memoryLibrary={memoryLibrary}
+        objects={workspace.activeObjects}
+        brief={workspace.brief}
+        memoryLibrary={workspace.memoryLibrary}
+        actionCenter={workspace.actionCenter}
+        relationships={workspace.relationships}
       />
     </div>
   );

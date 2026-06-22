@@ -4,7 +4,12 @@ import { useState } from 'react';
 import Link from 'next/link';
 import type { SimplifiObject } from '@/lib/simplifi-objects';
 import type { MemoryAsset } from '@/lib/memory-assets';
+import type { ActionCenterPayload } from '@/lib/action-center';
+import type { RelationshipCluster } from '@/lib/relationship-hints';
+import { priorityLevelLabel } from '@/lib/priority-engine';
 import EmptyStateGuide from '@/app/components/guided-first-success/EmptyStateGuide';
+import ActionCenterPanel from './ActionCenterPanel';
+import './action-center-panel.css';
 
 interface BriefPayload {
   greeting: string;
@@ -25,12 +30,16 @@ export default function SimplifiWorkspace({
   objects,
   brief,
   memoryLibrary,
+  actionCenter,
+  relationships,
 }: {
   slug: string | null;
   loggedIn: boolean;
   objects: SimplifiObject[];
   brief: BriefPayload;
   memoryLibrary: MemoryAsset[];
+  actionCenter: ActionCenterPayload;
+  relationships: RelationshipCluster[];
 }) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [selected, setSelected] = useState<SimplifiObject | null>(objects[0] ?? null);
@@ -116,6 +125,8 @@ export default function SimplifiWorkspace({
         </div>
       </section>
 
+      <ActionCenterPanel center={actionCenter} />
+
       <section className="sw-brief">
         <div className="sw-brief-header">
           <h2>Daily Brief</h2>
@@ -161,6 +172,21 @@ export default function SimplifiWorkspace({
               <li key={o.id}>
                 <strong>{o.title}</strong>
                 <span>{o.outcomeStatus}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {relationships.length > 0 && (
+        <section className="sw-relationships">
+          <h2>Connected patterns</h2>
+          <ul className="sw-rel-list">
+            {relationships.map((cluster) => (
+              <li key={cluster.id} className="sw-rel-item">
+                <strong>{cluster.label}</strong>
+                <p>{cluster.hint}</p>
+                <span className="sw-rel-count">{cluster.objectIds.length} linked</span>
               </li>
             ))}
           </ul>
@@ -224,6 +250,11 @@ export default function SimplifiWorkspace({
                       <span className={`sw-priority sw-priority-${obj.priority.toLowerCase()}`}>
                         {obj.priority}
                       </span>
+                      {obj.priorityLevel && obj.priorityLevel !== 'low' && (
+                        <span className={`sw-dyn-priority sw-dyn-${obj.priorityLevel}`}>
+                          {priorityLevelLabel(obj.priorityLevel)}
+                        </span>
+                      )}
                       <h3>{obj.title}</h3>
                       <p className="sw-card-meta">
                         {obj.type}

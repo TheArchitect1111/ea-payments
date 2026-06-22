@@ -83,3 +83,10 @@ Redeploy after changes.
 - `POST /api/portal/captures/outcome` — record outcomes + snooze
 - `GET /api/portal/captures/[id]/story` — on-demand story drafts
 - `capture.completed` + `capture.outcome_recorded` Pulse events
+
+## Phase 2 — Action Center + Priority Engine (latest)
+
+- **Action Center** on workspace — Needs Attention, Recommended, Watchlist
+- **Priority Engine** — dynamic scores on inbox items (Critical / High / Medium / Low)
+- **Relationship hints** — clusters captures from same domain or save purpose
+- **`lib/simplifi-store.ts`** — single load path (Airtable now, Supabase-ready)

@@ -3,6 +3,7 @@ import { buildGuidanceTriple } from './guidance-triple';
 import { buildExpirationAlerts } from './smart-expiration';
 import { pulseEventsForBrief } from './pulse-daily-brief';
 import { isTerminalOutcome } from './outcome-tracking';
+import type { PriorityLevel } from './priority-engine';
 
 export type SimplifiObjectStatus = 'active' | 'triaged' | 'archived' | 'analyzing';
 
@@ -28,6 +29,8 @@ export interface SimplifiObject {
   considerUrl?: string;
   magnifiUrl?: string;
   shareUrl?: string;
+  priorityScore?: number;
+  priorityLevel?: PriorityLevel;
 }
 
 function mapStatus(status: CaptureRecord['status']): SimplifiObjectStatus {
@@ -84,6 +87,9 @@ export function sortInbox(objects: SimplifiObject[]): SimplifiObject[] {
   return [...objects].sort((a, b) => {
     if (a.status === 'analyzing' && b.status !== 'analyzing') return -1;
     if (b.status === 'analyzing' && a.status !== 'analyzing') return 1;
+    const dynA = a.priorityScore ?? 0;
+    const dynB = b.priorityScore ?? 0;
+    if (dynA !== dynB) return dynB - dynA;
     const pa = priorityOrder[a.priority] ?? 1;
     const pb = priorityOrder[b.priority] ?? 1;
     if (pa !== pb) return pa - pb;
