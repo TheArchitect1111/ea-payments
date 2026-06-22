@@ -9,6 +9,7 @@ import {
 import { scheduleCaptureJob, type ScheduleCaptureJobOptions } from './capture-async';
 import type { CaptureRecord } from './capture-records';
 import { buildCaptureApiResponse, type CaptureApiResponse } from './capture-response';
+import { emitCaptureCompleted } from './capture-pulse';
 
 export interface CaptureSubmissionOptions extends AnalyzeOptions, ScheduleCaptureJobOptions {
   asyncMode?: boolean;
@@ -51,6 +52,10 @@ export async function submitCapture(
 
   if (!pipeline.ok) {
     return { ok: false, error: pipeline.error ?? 'Capture failed.' };
+  }
+
+  if (pipeline.record) {
+    await emitCaptureCompleted(pipeline.record, options.portalSlug);
   }
 
   return {

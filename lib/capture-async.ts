@@ -6,6 +6,7 @@ import {
 } from './capture-pipeline';
 import { sendCaptureReadyEmail } from './email';
 import { EA_PLATFORM_URL } from './platform-urls';
+import { emitCaptureCompleted } from './capture-pulse';
 
 export interface ScheduleCaptureJobOptions extends AnalyzeOptions {
   notifyEmail?: string;
@@ -20,7 +21,11 @@ export function scheduleCaptureJob(
   after(async () => {
     try {
       const result = await processCaptureAsset(recordId, input, source, options);
-      if (!result.ok || !result.record || !options.notifyEmail) return;
+      if (!result.ok || !result.record) return;
+
+      await emitCaptureCompleted(result.record, options.portalSlug);
+
+      if (!options.notifyEmail) return;
 
       const base =
         options.baseUrl ??

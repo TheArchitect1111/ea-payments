@@ -245,6 +245,54 @@
   color: #0a66ff;
 }
 
+.sw-brief-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.sw-link-btn {
+  border: none;
+  background: none;
+  font-size: 12px;
+  font-weight: 800;
+  color: #0a66ff;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.sw-completed {
+  background: #fff;
+  border: 1px solid #e8edf5;
+  border-radius: 16px;
+  padding: 20px 24px;
+}
+
+.sw-completed h2 {
+  font-size: 16px;
+  font-weight: 900;
+  margin: 0 0 12px;
+}
+
+.sw-completed-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.sw-completed-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13px;
+  padding: 10px 12px;
+  background: #f7f9fc;
+  border-radius: 10px;
+}
+
 .sw-action-note {
   font-size: 13px;
   color: #0a66ff;

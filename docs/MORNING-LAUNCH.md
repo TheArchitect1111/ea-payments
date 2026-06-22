@@ -73,5 +73,13 @@ Redeploy after changes.
 
 - **Story Engine v1** — LinkedIn, email, SMS, caption drafts (`lib/story-engine.ts`)
 - **Memory Library** — reusable assets on workspace
-- **Smart Expiration** — overdue / stale / due-soon in Daily Brief
+- **Smart Expiration** — overdue / stale / due-soon in Daily Brief + Snooze 30d
+- **Outcome Tracking v1** — Won / In progress / Pass from workspace
+- **Pulse in Daily Brief** — recent capture events for your portal
 - **Archive from workspace** — clears inbox without portal hop
+
+## Phase 2 continued (latest)
+
+- `POST /api/portal/captures/outcome` — record outcomes + snooze
+- `GET /api/portal/captures/[id]/story` — on-demand story drafts
+- `capture.completed` + `capture.outcome_recorded` Pulse events

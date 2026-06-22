@@ -18,6 +18,7 @@ export type PulseEventType =
   | 'capture.completed'
   | 'capture.queued'
   | 'capture.active_saved'
+  | 'capture.outcome_recorded'
   | 'update.submitted'
   | 'update.published'
   | 'assessment.submitted'

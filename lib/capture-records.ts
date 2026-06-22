@@ -53,6 +53,7 @@ export interface CaptureRecord {
   whatWeRecommend?: string;
   savePurpose?: string;
   saveReason?: string;
+  outcomeStatus?: string;
 }
 
 export interface CreateCaptureInput {
@@ -150,6 +151,7 @@ function mapRecord(rec: { id: string; fields: Record<string, unknown> }): Captur
     whatWeRecommend: (f['What We Recommend'] as string) ?? undefined,
     savePurpose: (f['Save Purpose'] as string) ?? undefined,
     saveReason: (f['Save Reason'] as string) ?? undefined,
+    outcomeStatus: (f['Outcome Status'] as string) ?? undefined,
   };
 }
 
@@ -539,6 +541,64 @@ export async function updateActiveSave(
       },
     );
     if (!res.ok) return { ok: false, error: 'Failed to save Active Save.' };
+    return { ok: true };
+  } catch {
+    return { ok: false, error: 'Unexpected error.' };
+  }
+}
+
+export async function updateOutcomeStatus(
+  recordId: string,
+  input: {
+    outcomeStatus: string;
+    nextAction?: string;
+    status?: CaptureStatus;
+  },
+): Promise<{ ok: boolean; error?: string }> {
+  if (!process.env.AIRTABLE_API_KEY) {
+    return { ok: false, error: 'AIRTABLE_API_KEY not configured.' };
+  }
+
+  const fields: Record<string, string> = {
+    'Outcome Status': input.outcomeStatus,
+  };
+  if (input.nextAction) fields['Next Action'] = input.nextAction;
+  if (input.status) fields['Status'] = input.status;
+
+  try {
+    const res = await fetch(
+      `https://api.airtable.com/v0/${BASE_ID}/${encodeURIComponent(CAPTURES_TABLE)}/${recordId}`,
+      {
+        method: 'PATCH',
+        headers: authHeaders(),
+        body: JSON.stringify({ fields, typecast: true }),
+      },
+    );
+    if (!res.ok) return { ok: false, error: 'Failed to update outcome.' };
+    return { ok: true };
+  } catch {
+    return { ok: false, error: 'Unexpected error.' };
+  }
+}
+
+export async function snoozeActiveSave(
+  recordId: string,
+  dueDate: string,
+): Promise<{ ok: boolean; error?: string }> {
+  if (!process.env.AIRTABLE_API_KEY) {
+    return { ok: false, error: 'AIRTABLE_API_KEY not configured.' };
+  }
+
+  try {
+    const res = await fetch(
+      `https://api.airtable.com/v0/${BASE_ID}/${encodeURIComponent(CAPTURES_TABLE)}/${recordId}`,
+      {
+        method: 'PATCH',
+        headers: authHeaders(),
+        body: JSON.stringify({ fields: { 'Due Date': dueDate }, typecast: true }),
+      },
+    );
+    if (!res.ok) return { ok: false, error: 'Failed to snooze.' };
     return { ok: true };
   } catch {
     return { ok: false, error: 'Unexpected error.' };

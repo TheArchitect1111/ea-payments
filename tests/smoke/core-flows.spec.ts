@@ -79,6 +79,17 @@ test('assessment thank-you contact link works', async ({ page }) => {
   );
 });
 
+test('simplifi workspace is reachable', async ({ page }) => {
+  await page.goto('/simplifi/workspace');
+  await expect(page.getByRole('heading', { name: /what's worth exploring today/i })).toBeVisible();
+  await expect(page.getByRole('link', { name: /capture now/i })).toBeVisible();
+});
+
+test('app alias redirects to workspace', async ({ page }) => {
+  await page.goto('/app');
+  await expect(page).toHaveURL(/\/simplifi\/workspace/);
+});
+
 test('experience templates library is reachable', async ({ page }) => {
   await page.goto('/experience/templates');
   await expect(page.getByRole('heading', { name: /template library/i })).toBeVisible();

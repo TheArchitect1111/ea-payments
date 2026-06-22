@@ -1,6 +1,8 @@
 import type { CaptureRecord } from './capture-records';
 import { buildGuidanceTriple } from './guidance-triple';
 import { buildExpirationAlerts } from './smart-expiration';
+import { pulseEventsForBrief } from './pulse-daily-brief';
+import { isTerminalOutcome } from './outcome-tracking';
 
 export type SimplifiObjectStatus = 'active' | 'triaged' | 'archived' | 'analyzing';
 
@@ -19,6 +21,7 @@ export interface SimplifiObject {
   owner?: string;
   savePurpose?: string;
   saveReason?: string;
+  outcomeStatus?: string;
   whyThisMatters: string;
   whatMostPeopleDo: string;
   whatWeRecommend: string;
@@ -66,6 +69,7 @@ export function captureToObject(capture: CaptureRecord, baseUrl?: string): Simpl
     owner: capture.owner,
     savePurpose: capture.savePurpose,
     saveReason: capture.saveReason,
+    outcomeStatus: capture.outcomeStatus,
     whyThisMatters: triple.whyThisMatters,
     whatMostPeopleDo: triple.whatMostPeopleDo,
     whatWeRecommend: triple.whatWeRecommend,
@@ -98,13 +102,20 @@ export interface DailyBriefItem {
   kind: 'momentum' | 'deadline' | 'explore' | 'overdue' | 'stale' | 'due-soon';
 }
 
-export function buildDailyBrief(objects: SimplifiObject[], firstName: string): {
+export function buildDailyBrief(
+  objects: SimplifiObject[],
+  firstName: string,
+  tenantSlug?: string,
+): {
   greeting: string;
   items: DailyBriefItem[];
   recommendedNext: { label: string; href: string } | null;
+  completed: SimplifiObject[];
 } {
-  const sorted = sortInbox(objects);
-  const top = sorted.filter((o) => o.status !== 'archived').slice(0, 6);
+  const active = objects.filter((o) => !isTerminalOutcome(o.outcomeStatus) && o.status !== 'archived');
+  const completed = objects.filter((o) => isTerminalOutcome(o.outcomeStatus)).slice(0, 5);
+  const sorted = sortInbox(active);
+  const top = sorted.slice(0, 6);
 
   const items: DailyBriefItem[] = [];
 
@@ -151,6 +162,12 @@ export function buildDailyBrief(objects: SimplifiObject[], firstName: string): {
     });
   }
 
+  for (const pulseItem of pulseEventsForBrief(tenantSlug, 2)) {
+    if (!items.some((i) => i.title === pulseItem.title)) {
+      items.push(pulseItem);
+    }
+  }
+
   const first = sorted[0];
   const recommendedNext = first
     ? {
@@ -161,7 +178,8 @@ export function buildDailyBrief(objects: SimplifiObject[], firstName: string): {
 
   return {
     greeting: `Good morning${firstName ? `, ${firstName}` : ''}.`,
-    items: items.slice(0, 5),
+    items: items.slice(0, 6),
     recommendedNext,
+    completed,
   };
 }

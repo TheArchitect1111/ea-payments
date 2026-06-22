@@ -33,8 +33,8 @@ Locked: table names + column headers listed in that prompt.
 - Why This Matters (long text)
 - What Most People Do (long text)
 - What We Recommend (long text)
-- Save Purpose (single line)
-- Save Reason (long text)
+- Save Purpose, Save Reason
+- Outcome Status (single line)
 
 Guidance triple is written automatically when capture analysis completes.
 

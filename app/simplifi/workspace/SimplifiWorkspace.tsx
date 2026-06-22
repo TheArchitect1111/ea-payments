@@ -16,6 +16,7 @@ interface BriefPayload {
     kind: 'momentum' | 'deadline' | 'explore' | 'overdue' | 'stale' | 'due-soon';
   }[];
   recommendedNext: { label: string; href: string } | null;
+  completed?: SimplifiObject[];
 }
 
 export default function SimplifiWorkspace({
@@ -55,7 +56,43 @@ export default function SimplifiWorkspace({
     }
     setLocalObjects((prev) => prev.filter((o) => o.id !== recordId));
     setExpandedId(null);
-    setActionNote('Archived — Smart Expiration cleared.');
+    setActionNote('Archived.');
+  };
+
+  const recordOutcome = async (recordId: string, outcome: 'won' | 'lost' | 'passed' | 'in_progress') => {
+    setActionNote('');
+    const res = await fetch('/api/portal/captures/outcome', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ recordId, outcome }),
+    });
+    const data = (await res.json()) as { ok?: boolean; error?: string; outcomeStatus?: string };
+    if (!data.ok) {
+      setActionNote(data.error ?? 'Could not record outcome.');
+      return;
+    }
+    if (outcome === 'won' || outcome === 'lost' || outcome === 'passed') {
+      setLocalObjects((prev) => prev.filter((o) => o.id !== recordId));
+      setExpandedId(null);
+    }
+    setActionNote(`Outcome: ${data.outcomeStatus ?? outcome}`);
+  };
+
+  const snoozeItem = async (briefItemId: string) => {
+    const recordId = briefItemId.replace(/^x-/, '');
+    if (!recordId) return;
+    setActionNote('');
+    const res = await fetch('/api/portal/captures/outcome', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ recordId, action: 'snooze', days: 30 }),
+    });
+    const data = (await res.json()) as { ok?: boolean; error?: string; dueDate?: string };
+    if (!data.ok) {
+      setActionNote(data.error ?? 'Could not snooze.');
+      return;
+    }
+    setActionNote(`Snoozed until ${data.dueDate ?? 'later'}.`);
   };
 
   return (
@@ -98,16 +135,37 @@ export default function SimplifiWorkspace({
                   <strong>{item.title}</strong>
                   <p>{item.detail}</p>
                 </div>
-                {item.href && (
-                  <Link href={item.href} className="sw-link">
-                    Open
-                  </Link>
-                )}
+                <div className="sw-brief-actions">
+                  {item.href && (
+                    <Link href={item.href} className="sw-link">
+                      Open
+                    </Link>
+                  )}
+                  {loggedIn && item.id.startsWith('x-') && (item.kind === 'stale' || item.kind === 'overdue') && (
+                    <button type="button" className="sw-link-btn" onClick={() => snoozeItem(item.id)}>
+                      Snooze 30d
+                    </button>
+                  )}
+                </div>
               </li>
             ))}
           </ul>
         )}
       </section>
+
+      {brief.completed && brief.completed.length > 0 && (
+        <section className="sw-completed">
+          <h2>Recently Completed</h2>
+          <ul className="sw-completed-list">
+            {brief.completed.map((o) => (
+              <li key={o.id}>
+                <strong>{o.title}</strong>
+                <span>{o.outcomeStatus}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       {memoryLibrary.length > 0 && (
         <section className="sw-memory">
@@ -208,13 +266,36 @@ export default function SimplifiWorkspace({
                           </a>
                         )}
                         {loggedIn && (
-                          <button
-                            type="button"
-                            className="sw-btn sw-btn-small sw-btn-ghost"
-                            onClick={() => archiveObject(obj.id)}
-                          >
-                            Archive
-                          </button>
+                          <>
+                            <button
+                              type="button"
+                              className="sw-btn sw-btn-small"
+                              onClick={() => recordOutcome(obj.id, 'won')}
+                            >
+                              Won
+                            </button>
+                            <button
+                              type="button"
+                              className="sw-btn sw-btn-small sw-btn-ghost"
+                              onClick={() => recordOutcome(obj.id, 'in_progress')}
+                            >
+                              In progress
+                            </button>
+                            <button
+                              type="button"
+                              className="sw-btn sw-btn-small sw-btn-ghost"
+                              onClick={() => recordOutcome(obj.id, 'passed')}
+                            >
+                              Pass
+                            </button>
+                            <button
+                              type="button"
+                              className="sw-btn sw-btn-small sw-btn-ghost"
+                              onClick={() => archiveObject(obj.id)}
+                            >
+                              Archive
+                            </button>
+                          </>
                         )}
                         {slug && (
                           <Link
