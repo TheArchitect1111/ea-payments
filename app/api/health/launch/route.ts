@@ -5,20 +5,24 @@ import { EA_PLATFORM_URL } from '@/lib/platform-urls';
 import { SIMPLIFI_APP_URL } from '@/lib/simplifi-app-host';
 import { productionSecretIssues } from '@/lib/integration-env';
 import { checkAirtableLaunchSchema } from '@/lib/airtable-schema-check';
+import { ESIGNATURES_CALLBACK_URL, getTier2EnvChecks, isTier2AutomationReady } from '@/lib/launch-tier2';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   const base = process.env.NEXT_PUBLIC_BASE_URL ?? EA_PLATFORM_URL;
 
+  const tier2 = getTier2EnvChecks();
+
   const env = {
     airtable: Boolean(process.env.AIRTABLE_API_KEY),
-    onboardingWebhook: Boolean(process.env.ONBOARDING_WEBHOOK_URL),
-    esignWebhook: Boolean(process.env.ESIGN_WEBHOOK_URL),
+    onboardingWebhook: tier2.onboardingWebhook,
+    esignWebhook: tier2.esignWebhook,
     contentWebhook: Boolean(process.env.CONTENT_REQUEST_WEBHOOK_URL),
-    resend: Boolean(process.env.RESEND_API_KEY),
-    resendFrom: Boolean(process.env.RESEND_FROM_EMAIL),
-    stripe: Boolean(process.env.STRIPE_SECRET_KEY),
+    resend: tier2.resend,
+    resendFrom: tier2.resendFrom,
+    stripe: tier2.stripe,
+    stripeWebhookSecret: tier2.stripeWebhookSecret,
   };
 
   let demoClient = false;
@@ -39,8 +43,6 @@ export async function GET() {
   }
 
   const friendTestingReady = env.airtable && demoClient;
-  const paymentsAutomationReady = env.onboardingWebhook && env.resend && env.resendFrom;
-  const fullLaunchReady = friendTestingReady && paymentsAutomationReady;
 
   const captureExtensionKey = Boolean(process.env.EA_CAPTURE_API_KEY);
   const magnifiOperational = selenaCapture;
@@ -64,6 +66,8 @@ export async function GET() {
   }
 
   const captureReady = airtableSchema.capture.ok;
+  const tier2Ready = isTier2AutomationReady(tier2);
+  const fullLaunchReady = friendTestingReady && captureReady && tier2Ready;
 
   return NextResponse.json({
     ok: friendTestingReady && captureReady,
@@ -71,6 +75,7 @@ export async function GET() {
     baseUrl: base,
     checks: {
       env,
+      tier2: { ...tier2, ready: tier2Ready },
       demoClient,
       selenaCapture,
       productionSecrets: secretIssues.length === 0,
@@ -91,12 +96,25 @@ export async function GET() {
       signIn: `${base}/sign-in`,
       simplifiWorkspace: `${base}/simplifi/workspace`,
       simplifiApp: SIMPLIFI_APP_URL,
+      checkout: `${base}/checkout`,
+      tier2Guide: 'ea-payments/docs/MAKE-TIER2.md',
     },
     manual: {
+      tier2: tier2Ready
+        ? null
+        : 'Set ONBOARDING_WEBHOOK_URL + ESIGN_WEBHOOK_URL on Vercel → docs/MAKE-TIER2.md',
+      onboardingWebhook: env.onboardingWebhook
+        ? null
+        : 'Create Make onboarding scenario → copy Custom webhook URL → ONBOARDING_WEBHOOK_URL',
+      esignWebhook: env.esignWebhook
+        ? null
+        : `Create Make eSign scenario → ESIGN_WEBHOOK_URL. eSignatures callback: ${ESIGNATURES_CALLBACK_URL}`,
+      stripeLiveTest: tier2Ready
+        ? 'Run one live checkout at /checkout and confirm Make + welcome email'
+        : null,
       dns: 'Point www.efficiencyarchitects.online to ea-payments in Vercel → docs/DNS-THREE-CLICKS.md',
       simplifiAppDns:
         'Add app.simplifi.ai in Vercel Domains (same project) → CNAME to cname.vercel-dns.com — middleware routes / to workspace',
-      makeWebhooks: env.onboardingWebhook ? null : 'Set ONBOARDING_WEBHOOK_URL on Vercel',
       resend: env.resend && env.resendFrom ? null : 'Set RESEND_API_KEY + RESEND_FROM_EMAIL + verify domain',
       chromeExtension: captureExtensionKey
         ? null
