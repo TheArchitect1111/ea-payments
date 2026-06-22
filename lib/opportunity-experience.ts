@@ -1,6 +1,7 @@
 import type { CaptureRecord } from './capture-records';
 import type { BusinessExtraction, OpportunityAnalysis } from './simplifi-business-analysis';
 import type { RecommendationResult } from './recommendation-engine';
+import type { SimplifiIntelligenceBundle } from './intelligence-bundle';
 
 export const OPP_JSON_MARKER = '---OPP_JSON---';
 
@@ -39,6 +40,7 @@ export interface OpportunityExperiencePayload {
   captureRecordId?: string;
   createdAt: string;
   tracking: OpportunityTracking;
+  intelligence?: SimplifiIntelligenceBundle;
 }
 
 export function slugifyProspect(name: string): string {
@@ -150,6 +152,7 @@ export function buildOpportunityPayload(input: {
   portalSlug?: string;
   captureRecordId?: string;
   uniqueSuffix?: string;
+  intelligence?: SimplifiIntelligenceBundle;
 }): OpportunityExperiencePayload {
   const prospectSlug = buildProspectSlug(input.businessName, input.uniqueSuffix);
   const shareUrl = `${input.baseUrl.replace(/\/$/, '')}/consider/${prospectSlug}`;
@@ -179,6 +182,7 @@ export function buildOpportunityPayload(input: {
       assessmentCompleted: false,
       discoveryBooked: false,
     },
+    intelligence: input.intelligence,
   };
 }
 

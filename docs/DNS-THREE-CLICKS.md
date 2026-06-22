@@ -1,6 +1,8 @@
 # DNS in 3 steps — stop the old website on phones
 
-**Goal:** When someone types `efficiencyarchitects.online`, they see the **new** site (same as ea-payments.vercel.app).
+**Goal:** `www.efficiencyarchitects.online` serves **ea-payments** (new site) — not the legacy `efficiency-architects` Vercel project.
+
+**Critical:** Two Vercel projects currently claim the domain. Remove domains from **efficiency-architects** first, then add to **ea-payments** and set `www` as **Primary**.
 
 **Time:** ~15 minutes + wait for DNS (up to 24 hours, often faster)
 
@@ -37,7 +39,7 @@
 2. Set **`NEXT_PUBLIC_BASE_URL`** = `https://www.efficiencyarchitects.online` (Production)  
 3. Redeploy: Deployments → latest → **Redeploy**
 
-**Test:** Open https://www.efficiencyarchitects.online — you should see “What would become possible…”
+**Test:** Open https://www.efficiencyarchitects.online — headline **DISCOVER THE POSSIBILITIES.**
 
 **Rollback:** Change DNS back at Namecheap to old targets if something breaks.
 

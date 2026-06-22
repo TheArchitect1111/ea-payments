@@ -35,10 +35,8 @@ const MONTAGE = [
 
 export default function HeroMontage() {
   const [index, setIndex] = useState(0);
-  const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    setReady(true);
     const id = window.setInterval(() => {
       setIndex((i) => (i + 1) % MONTAGE.length);
     }, 6000);
@@ -51,15 +49,13 @@ export default function HeroMontage() {
     <div className="pl-hero-montage" aria-hidden="true">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={MONTAGE[0].src} alt="" className="pl-hero-montage-img pl-hero-montage-base" />
-      {ready ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          key={current.src}
-          src={current.src}
-          alt=""
-          className="pl-hero-montage-img pl-hero-montage-fade"
-        />
-      ) : null}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        key={current.src}
+        src={current.src}
+        alt=""
+        className="pl-hero-montage-img pl-hero-montage-fade"
+      />
       <div className="pl-hero-montage-veil" />
     </div>
   );

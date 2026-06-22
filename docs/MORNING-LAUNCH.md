@@ -84,7 +84,13 @@ Redeploy after changes.
 - `GET /api/portal/captures/[id]/story` — on-demand story drafts
 - `capture.completed` + `capture.outcome_recorded` Pulse events
 
-## Phase 2 — Action Center + Priority Engine (latest)
+## Phase 2 — Decision + Build Intelligence (latest)
+
+- **Decision Intelligence™** + **Build Intelligence™** on every capture (`lib/intelligence-bundle.ts`)
+- `GET /api/portal/captures/[id]/intelligence` — blueprint + Cursor prompt
+- Workspace **Build Intelligence** button on inbox items
+- Supabase draft: `supabase/migrations/001_simplifi_objects.sql`
+- Docs: `docs/SIMPLIFI-INTELLIGENCE.md`
 
 - **Action Center** on workspace — Needs Attention, Recommended, Watchlist
 - **Priority Engine** — dynamic scores on inbox items (Critical / High / Medium / Low)

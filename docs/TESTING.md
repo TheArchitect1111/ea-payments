@@ -2,11 +2,9 @@
 
 
 
-**Share this URL with testers:** https://ea-payments.vercel.app
+**Share this URL with testers:** https://ea-payments.vercel.app (or https://www.efficiencyarchitects.online after Vercel domain cleanup — see `docs/DNS-THREE-CLICKS.md`).
 
-
-
-Do **not** send people to `www.efficiencyarchitects.online` yet — that domain still shows a legacy site.
+If `.online` flashes then errors, use `ea-payments.vercel.app` until domains are moved off the `efficiency-architects` Vercel project.
 
 
 
@@ -187,7 +185,7 @@ General
 
 
 
-- **Marketing domain** — use `ea-payments.vercel.app` only until DNS cutover.
+- **Marketing domain** — prefer `ea-payments.vercel.app` until Vercel primary domain is `www.efficiencyarchitects.online` on **ea-payments** only.
 
 - **Email** — welcome/onboarding emails need Resend DNS (not required for UI testing).
 

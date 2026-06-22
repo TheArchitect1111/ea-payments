@@ -40,7 +40,8 @@ Zip for sharing: run `scripts\package-extension.bat`
 - [x] Chrome dual FAB (Capture + Amplify)
 - [x] `/start` tester hub + health API
 - [x] Client portal (demo)
-- [x] Landing pages on Vercel
+- [x] Possibility-first marketing homepage (DISCOVER THE POSSIBILITIES)
+- [x] Decision + Build Intelligence v0 on every capture (`docs/SIMPLIFI-INTELLIGENCE.md`)
 
 ---
 
@@ -48,8 +49,8 @@ Zip for sharing: run `scripts\package-extension.bat`
 
 | # | Task | Why | Link |
 |---|------|-----|------|
-| 1 | **DNS cutover** | `.online` still shows old site | `docs/DNS-THREE-CLICKS.md` |
-| 2 | **`NEXT_PUBLIC_BASE_URL`** | Links use correct domain after DNS | Vercel env → `https://www.efficiencyarchitects.online` |
+| 1 | **Vercel domain cleanup** | Remove `www` from `efficiency-architects` project; set primary on `ea-payments` | `docs/DNS-THREE-CLICKS.md` |
+| 2 | **`NEXT_PUBLIC_BASE_URL`** | Canonical links | `https://www.efficiencyarchitects.online` |
 | 3 | **`ONBOARDING_WEBHOOK_URL`** | Payment → Make automation | Vercel env + Make scenario |
 | 4 | **`ESIGN_WEBHOOK_URL`** | Signed docs → Airtable | Vercel env + Make |
 | 5 | **Resend domain verified** | Welcome emails send | https://resend.com/domains |

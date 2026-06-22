@@ -45,6 +45,10 @@ import {
 } from './capture-records';
 import { buildGuidanceTriple } from './guidance-triple';
 import { EA_PLATFORM_URL } from './platform-urls';
+import {
+  buildSimplifiIntelligence,
+  formatIntelligenceSummary,
+} from './intelligence-bundle';
 
 export interface CapturePipelineResult {
   ok: boolean;
@@ -55,6 +59,7 @@ export interface CapturePipelineResult {
   blueprint?: BlueprintStub;
   trust?: TrustMetadata;
   opportunity?: OpportunityExperiencePayload;
+  intelligence?: ReturnType<typeof buildSimplifiIntelligence>;
   error?: string;
 }
 
@@ -110,6 +115,16 @@ async function runCapturePipeline(
       ? generateBlueprintStub(sourceUrl, page, classification, scores, recommendations)
       : undefined;
 
+  const businessName = extraction.businessName || page.title || sourceUrl;
+  const intelligence = buildSimplifiIntelligence({
+    page,
+    classification,
+    scores,
+    recommendations,
+    businessName,
+    sourceUrl,
+  });
+
   const baseUrl =
     options.baseUrl ??
     process.env.NEXT_PUBLIC_BASE_URL ??
@@ -125,6 +140,7 @@ async function runCapturePipeline(
     `Missed: ${businessAnalysis.missedOpportunities.join('; ')}`,
     '',
     formatRecommendationSummary(recommendations),
+    `\n${formatIntelligenceSummary(intelligence)}`,
     blueprint ? `\n--- Auto Blueprint ---\n${formatBlueprintSummary(blueprint).slice(0, 1200)}…` : '',
   ]
     .filter(Boolean)
@@ -190,6 +206,7 @@ async function runCapturePipeline(
     portalSlug,
     captureRecordId: recordId,
     uniqueSuffix: recordId.replace('rec', '').slice(-6),
+    intelligence,
   });
 
   const descriptionWithPayload = embedOpportunityPayload(analysisSummary, opportunity);
@@ -252,6 +269,7 @@ async function runCapturePipeline(
     blueprint,
     trust,
     opportunity,
+    intelligence,
   };
 }
 

@@ -45,6 +45,8 @@ export default function SimplifiWorkspace({
   const [selected, setSelected] = useState<SimplifiObject | null>(objects[0] ?? null);
   const [localObjects, setLocalObjects] = useState(objects);
   const [actionNote, setActionNote] = useState('');
+  const [intelligenceNote, setIntelligenceNote] = useState('');
+  const [intelligenceLoading, setIntelligenceLoading] = useState(false);
 
   const toggleExpand = (obj: SimplifiObject) => {
     setExpandedId((prev) => (prev === obj.id ? null : obj.id));
@@ -102,6 +104,34 @@ export default function SimplifiWorkspace({
       return;
     }
     setActionNote(`Snoozed until ${data.dueDate ?? 'later'}.`);
+  };
+
+  const loadIntelligence = async (recordId: string) => {
+    setIntelligenceLoading(true);
+    setIntelligenceNote('');
+    try {
+      const res = await fetch(`/api/portal/captures/${recordId}/intelligence`);
+      const data = (await res.json()) as {
+        ok?: boolean;
+        error?: string;
+        intelligence?: {
+          decision: { recommendedPath: string; confidenceScore: number };
+          build: { buildPath: string; overlayConfidence: { overall: string } };
+        };
+      };
+      if (!data.ok || !data.intelligence) {
+        setIntelligenceNote(data.error ?? 'Blueprint not ready — capture again for intelligence.');
+        return;
+      }
+      const { decision, build } = data.intelligence;
+      setIntelligenceNote(
+        `Path: ${decision.recommendedPath} (${decision.confidenceScore}/100) · ${build.buildPath} · Overlay ${build.overlayConfidence.overall}`,
+      );
+    } catch {
+      setIntelligenceNote('Could not load Build Intelligence.');
+    } finally {
+      setIntelligenceLoading(false);
+    }
   };
 
   return (
@@ -285,6 +315,9 @@ export default function SimplifiWorkspace({
                           </p>
                         </div>
                       </div>
+                      {intelligenceNote && open && (
+                        <p className="sw-intelligence-note">{intelligenceNote}</p>
+                      )}
                       <div className="sw-card-actions">
                         {obj.considerUrl && (
                           <Link href={obj.considerUrl} className="sw-btn sw-btn-small">
@@ -298,6 +331,14 @@ export default function SimplifiWorkspace({
                         )}
                         {loggedIn && (
                           <>
+                            <button
+                              type="button"
+                              className="sw-btn sw-btn-small sw-btn-ghost"
+                              disabled={intelligenceLoading}
+                              onClick={() => loadIntelligence(obj.id)}
+                            >
+                              {intelligenceLoading ? 'Loading…' : 'Build Intelligence'}
+                            </button>
                             <button
                               type="button"
                               className="sw-btn sw-btn-small"
