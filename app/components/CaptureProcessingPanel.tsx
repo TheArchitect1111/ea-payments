@@ -13,6 +13,7 @@ export default function CaptureProcessingPanel({
   onError,
   autoOpenMagnifi = true,
   showActiveSave = false,
+  variant = 'default',
 }: {
   captureId: string;
   title?: string;
@@ -20,6 +21,7 @@ export default function CaptureProcessingPanel({
   onError?: (message: string) => void;
   autoOpenMagnifi?: boolean;
   showActiveSave?: boolean;
+  variant?: 'default' | 'capture';
 }) {
   const [message, setMessage] = useState('Analyzing in the background…');
   const [result, setResult] = useState<CaptureApiResponse | null>(null);
@@ -62,7 +64,7 @@ export default function CaptureProcessingPanel({
 
   if (result?.record) {
     return (
-      <div className="space-y-3">
+      <div className={variant === 'capture' ? 'sc-processing-result' : 'space-y-3'}>
         {showActiveSave && (
           <ActiveSavePanel
             recordId={result.record.id}
@@ -81,6 +83,16 @@ export default function CaptureProcessingPanel({
           amplifiDraft={result.amplifiDraft}
           autoOpenMagnifi={autoOpenMagnifi}
         />
+      </div>
+    );
+  }
+
+  if (variant === 'capture') {
+    return (
+      <div className="sc-processing-status">
+        <p className="sc-processing-kicker">{failed ? 'Capture issue' : 'Processing'}</p>
+        <p className={failed ? 'sc-error' : 'sc-processing-message'}>{message}</p>
+        {!failed && <p className="sc-processing-hint">Magnifi builds automatically when scoring finishes.</p>}
       </div>
     );
   }

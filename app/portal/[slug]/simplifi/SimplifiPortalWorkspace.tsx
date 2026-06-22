@@ -4,8 +4,10 @@ import { useRef, useState, useEffect } from 'react';
 import type { CaptureRecord } from '@/lib/capture-records';
 import CaptureSuccessPanel from '@/app/components/CaptureSuccessPanel';
 import ActiveSavePanel from '@/app/components/ActiveSavePanel';
+import CaptureProcessingPanel from '@/app/components/CaptureProcessingPanel';
 import EmptyStateGuide from '@/app/components/guided-first-success/EmptyStateGuide';
 import type { AmplifiSocialDraft } from '@/lib/amplifi-draft';
+import { prepareCaptureUpload } from '@/lib/client-image-upload';
 
 const NAVY = '#1B2B4D';
 const GOLD = '#C9A844';
@@ -13,6 +15,8 @@ const GOLD = '#C9A844';
 interface AnalyzeResponse {
   ok?: boolean;
   error?: string;
+  processing?: boolean;
+  captureId?: string;
   record?: CaptureRecord;
   scores?: { eaFitScore: number; opportunityScore: number };
   businessScores?: {
@@ -54,8 +58,10 @@ export default function SimplifiPortalWorkspace({
   const [prospectName, setProspectName] = useState('');
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
+  const [uploadLabel, setUploadLabel] = useState('');
   const [message, setMessage] = useState('');
   const [lastResult, setLastResult] = useState<AnalyzeResponse | null>(null);
+  const [processingId, setProcessingId] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [actionMessage, setActionMessage] = useState('');
 
@@ -84,13 +90,28 @@ export default function SimplifiPortalWorkspace({
     }
   };
 
+  const parseAnalyzeResponse = async (res: Response): Promise<AnalyzeResponse & { error?: string }> => {
+    const contentType = res.headers.get('content-type') ?? '';
+    if (!contentType.includes('application/json')) {
+      if (res.status === 413) {
+        return { ok: false, error: 'File is too large. Try a smaller photo or screenshot.' };
+      }
+      return { ok: false, error: `Upload failed (${res.status}). Try again.` };
+    }
+    const data = (await res.json()) as AnalyzeResponse & { error?: string };
+    if (!res.ok && !data.error) {
+      return { ok: false, error: 'Could not capture. Try again.' };
+    }
+    return data;
+  };
+
   const analyzeJson = async (body: Record<string, string>) => {
     const res = await fetch('/api/portal/captures/analyze', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
     });
-    return (await res.json()) as AnalyzeResponse & { error?: string };
+    return parseAnalyzeResponse(res);
   };
 
   const analyzeForm = async (form: FormData) => {
@@ -98,18 +119,34 @@ export default function SimplifiPortalWorkspace({
       method: 'POST',
       body: form,
     });
-    return (await res.json()) as AnalyzeResponse & { error?: string };
+    return parseAnalyzeResponse(res);
   };
 
   const handleSuccess = (data: AnalyzeResponse) => {
-    if (!data.ok || !data.record) {
+    if (!data.ok) {
       setMessage(data.error ?? 'Simplifi could not process this opportunity.');
       return;
     }
+    if (data.processing && data.captureId) {
+      if (data.record) {
+        setCaptures((prev) => [data.record!, ...prev]);
+      }
+      setProcessingId(data.captureId);
+      setLastResult(data);
+      setUploadLabel('');
+      setMessage('Upload received — Simplifi is analyzing your asset…');
+      return;
+    }
+    if (!data.record) {
+      setMessage(data.error ?? 'Simplifi could not process this opportunity.');
+      return;
+    }
+    setProcessingId(null);
     setCaptures((prev) => [data.record!, ...prev]);
     setLastResult(data);
     setUrl('');
     setNotes('');
+    setUploadLabel('');
     setMessage('Opportunity captured. Share the Consider link with your prospect.');
   };
 
@@ -140,19 +177,19 @@ export default function SimplifiPortalWorkspace({
     setLoading(true);
     setMessage('');
     setLastResult(null);
+    setProcessingId(null);
+    setUploadLabel(file.name);
     try {
+      const prepared = await prepareCaptureUpload(file);
       const form = new FormData();
-      form.append('file', file);
+      form.append('file', prepared);
       if (notes) form.append('notes', notes);
       if (prospectName) form.append('prospectName', prospectName);
       const data = await analyzeForm(form);
-      if (!data.ok) {
-        setMessage(data.error ?? 'Simplifi could not process this asset.');
-        return;
-      }
       handleSuccess(data);
-    } catch {
-      setMessage('Simplifi could not process this asset.');
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Simplifi could not process this asset.';
+      setMessage(msg);
     } finally {
       setLoading(false);
       if (fileRef.current) fileRef.current.value = '';
@@ -218,28 +255,53 @@ export default function SimplifiPortalWorkspace({
           <p className="text-sm text-neutral-600 mb-3">
             Or upload image, screenshot, flyer, ad, brochure, or PDF
           </p>
-          <input
-            ref={fileRef}
-            type="file"
-            accept="image/*,.pdf,application/pdf"
-            className="hidden"
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) analyzeFile(file);
-            }}
-          />
-          <button
-            type="button"
-            disabled={loading}
-            onClick={() => fileRef.current?.click()}
-            className="ep-pulse-cta disabled:opacity-50"
+          {loading && uploadLabel ? (
+            <p className="text-sm font-semibold mb-3" style={{ color: NAVY }}>
+              Uploading {uploadLabel}…
+            </p>
+          ) : null}
+          <label
+            className={`ep-pulse-cta inline-block cursor-pointer relative${loading ? ' opacity-50 pointer-events-none' : ''}`}
             style={{ backgroundColor: NAVY, color: GOLD }}
           >
-            Upload asset
-          </button>
+            {loading && uploadLabel ? 'Uploading…' : 'Upload asset'}
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/*,.pdf,application/pdf"
+              className="absolute w-px h-px p-0 -m-px overflow-hidden whitespace-nowrap border-0"
+              style={{ clip: 'rect(0,0,0,0)' }}
+              disabled={loading}
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) void analyzeFile(file);
+              }}
+            />
+          </label>
         </div>
 
-        {lastResult?.record && (
+        {processingId && (
+          <div className="mt-4 border border-neutral-200 bg-neutral-50 p-4">
+            <CaptureProcessingPanel
+              captureId={processingId}
+              title={lastResult?.record?.title}
+              showActiveSave
+              onComplete={(response) => {
+                setProcessingId(null);
+                setLastResult(response);
+                if (response.record) {
+                  setCaptures((prev) =>
+                    prev.map((c) => (c.id === response.record!.id ? response.record! : c)),
+                  );
+                }
+                setMessage('Opportunity captured. Share the Consider link with your prospect.');
+              }}
+              onError={(msg) => setMessage(msg)}
+            />
+          </div>
+        )}
+
+        {lastResult?.record && !processingId && (
           <div className="mt-4 border border-neutral-200 bg-neutral-50 p-4">
             <ActiveSavePanel
               recordId={lastResult.record.id}
@@ -259,7 +321,11 @@ export default function SimplifiPortalWorkspace({
             />
           </div>
         )}
-        {message && <p className="text-sm text-neutral-600 mt-3">{message}</p>}
+        {message && (
+          <p className={`text-sm mt-3${message.includes('could not') || message.includes('failed') || message.includes('too large') ? ' text-red-600 font-semibold' : ' text-neutral-600'}`}>
+            {message}
+          </p>
+        )}
       </div>
 
       <div className="ep-card overflow-x-auto">

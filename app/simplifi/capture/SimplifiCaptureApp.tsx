@@ -9,6 +9,7 @@ import CaptureProcessingPanel from '@/app/components/CaptureProcessingPanel';
 import type { AmplifiSocialDraft } from '@/lib/amplifi-draft';
 import GuidedFirstSuccessFlow from '@/app/components/guided-first-success/GuidedFirstSuccessFlow';
 import UniversalCoachPanel from '@/app/components/guided-first-success/UniversalCoachPanel';
+import { prepareCaptureUpload } from '@/lib/client-image-upload';
 
 const NAVY = '#1B2B4D';
 const GOLD = '#C9A844';
@@ -27,7 +28,7 @@ interface AnalyzeResponse {
   amplifiDraft?: AmplifiSocialDraft;
 }
 
-type SheetView = 'menu' | 'url' | 'upload' | 'result';
+type SheetView = 'menu' | 'url' | 'upload' | 'processing' | 'result';
 
 export default function SimplifiCaptureApp({
   slug,
@@ -44,6 +45,7 @@ export default function SimplifiCaptureApp({
   const [url, setUrl] = useState(initialUrl ?? '');
   const [prospectName, setProspectName] = useState('');
   const [loading, setLoading] = useState(false);
+  const [uploadLabel, setUploadLabel] = useState('');
   const [message, setMessage] = useState('');
   const [result, setResult] = useState<AnalyzeResponse | null>(null);
   const [processingId, setProcessingId] = useState<string | null>(null);
@@ -69,13 +71,44 @@ export default function SimplifiCaptureApp({
   const resetSheet = () => {
     setView('menu');
     setMessage('');
+    setUploadLabel('');
     setResult(null);
-    setProcessingId(null);
+  };
+
+  const openSheet = () => {
+    setMessage('');
+    setUploadLabel('');
+    if (!processingId) {
+      setResult(null);
+    }
+    setView(processingId ? 'processing' : 'menu');
+    setOpen(true);
   };
 
   const closeSheet = () => {
     setOpen(false);
+    if (processingId) {
+      setMessage('');
+      setUploadLabel('');
+      setView('menu');
+      return;
+    }
     resetSheet();
+  };
+
+  const parseAnalyzeResponse = async (res: Response): Promise<AnalyzeResponse> => {
+    const contentType = res.headers.get('content-type') ?? '';
+    if (!contentType.includes('application/json')) {
+      if (res.status === 413) {
+        return { ok: false, error: 'Image is too large. Try a smaller photo or screenshot.' };
+      }
+      return { ok: false, error: `Upload failed (${res.status}). Try again.` };
+    }
+    const data = (await res.json()) as AnalyzeResponse;
+    if (!res.ok && !data.error) {
+      return { ok: false, error: 'Could not capture. Try again.' };
+    }
+    return data;
   };
 
   const analyzeJson = async (body: Record<string, string>) => {
@@ -84,24 +117,25 @@ export default function SimplifiCaptureApp({
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
     });
-    return (await res.json()) as AnalyzeResponse;
+    return parseAnalyzeResponse(res);
   };
 
   const analyzeForm = async (form: FormData) => {
     const res = await fetch('/api/portal/captures/analyze', { method: 'POST', body: form });
-    return (await res.json()) as AnalyzeResponse;
+    return parseAnalyzeResponse(res);
   };
 
-  const handleAnalyzeResponse = (data: AnalyzeResponse) => {
+  const handleAnalyzeResponse = (data: AnalyzeResponse, source: 'url' | 'file' = 'url') => {
     if (!data.ok) {
       setMessage(data.error ?? 'Could not capture.');
+      setView(source === 'file' ? 'upload' : 'url');
       return;
     }
     if (data.processing && data.captureId) {
       setProcessingId(data.captureId);
       setResult(data);
-      setOpen(false);
-      setView('menu');
+      setView('processing');
+      setOpen(true);
       return;
     }
     setResult(data);
@@ -115,7 +149,7 @@ export default function SimplifiCaptureApp({
     setMessage('');
     try {
       const data = await analyzeJson({ url: url.trim(), prospectName });
-      handleAnalyzeResponse(data);
+      handleAnalyzeResponse(data, 'url');
     } catch {
       setMessage('Network error. Try again.');
     } finally {
@@ -126,14 +160,20 @@ export default function SimplifiCaptureApp({
   const handleCaptureFile = async (file: File) => {
     setLoading(true);
     setMessage('');
+    setUploadLabel(file.name);
+    setView('upload');
+    setOpen(true);
     try {
+      const prepared = await prepareCaptureUpload(file);
       const form = new FormData();
-      form.append('file', file);
+      form.append('file', prepared);
       if (prospectName) form.append('prospectName', prospectName);
       const data = await analyzeForm(form);
-      handleAnalyzeResponse(data);
-    } catch {
-      setMessage('Network error. Try again.');
+      handleAnalyzeResponse(data, 'file');
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Network error. Try again.';
+      setMessage(msg);
+      setView('upload');
     } finally {
       setLoading(false);
       if (fileRef.current) fileRef.current.value = '';
@@ -202,22 +242,20 @@ export default function SimplifiCaptureApp({
         <button
           type="button"
           className="sc-btn sc-btn-capture-main"
-          onClick={() => {
-            resetSheet();
-            setOpen(true);
-          }}
+          onClick={openSheet}
         >
           Capture now
         </button>
 
-        {processingId && (
+        {processingId && !open && (
           <div className="sc-processing-banner">
             <CaptureProcessingPanel
               captureId={processingId}
               title={result?.record?.title}
               showActiveSave={loggedIn}
+              variant="capture"
               onComplete={() => setProcessingId(null)}
-              onError={() => setProcessingId(null)}
+              onError={() => {}}
             />
           </div>
         )}
@@ -231,21 +269,93 @@ export default function SimplifiCaptureApp({
         {view === 'menu' && (
           <>
             <p className="sc-sheet-title">Capture opportunity</p>
+            {message && <p className="sc-error">{message}</p>}
             <button type="button" className="sc-sheet-action" onClick={() => setView('url')}>
               Paste a URL
             </button>
-            <button
-              type="button"
-              className="sc-sheet-action"
-              onClick={() => fileRef.current?.click()}
-            >
+            <label className="sc-sheet-action sc-file-label">
               Photo or screenshot
-            </button>
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/*,.pdf,application/pdf"
+                className="sc-file-input"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) void handleCaptureFile(file);
+                }}
+              />
+            </label>
             <button type="button" className="sc-sheet-action" onClick={captureCurrentPage}>
               Use this page&apos;s link
             </button>
             <button type="button" className="sc-sheet-cancel" onClick={closeSheet}>
               Cancel
+            </button>
+          </>
+        )}
+
+        {view === 'upload' && (
+          <>
+            <p className="sc-sheet-title">{loading ? 'Uploading capture' : 'Photo upload'}</p>
+            <div className="sc-uploading">
+              {loading && <div className="sc-spinner" aria-hidden="true" />}
+              <p className="sc-processing-message">
+                {loading
+                  ? `Sending ${uploadLabel || 'your image'} to Simplifi…`
+                  : uploadLabel
+                    ? `Ready to retry: ${uploadLabel}`
+                    : 'Choose a photo or screenshot to capture.'}
+              </p>
+            </div>
+            {message && <p className="sc-error">{message}</p>}
+            {!loading && (
+              <>
+                <label className="sc-btn sc-btn-primary sc-btn-block sc-file-label">
+                  Choose another image
+                  <input
+                    type="file"
+                    accept="image/*,.pdf,application/pdf"
+                    className="sc-file-input"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) void handleCaptureFile(file);
+                      e.target.value = '';
+                    }}
+                  />
+                </label>
+                <button type="button" className="sc-sheet-cancel" onClick={() => setView('menu')}>
+                  Back
+                </button>
+              </>
+            )}
+          </>
+        )}
+
+        {view === 'processing' && processingId && (
+          <>
+            <p className="sc-sheet-title">Building your capture</p>
+            <CaptureProcessingPanel
+              captureId={processingId}
+              title={result?.record?.title}
+              showActiveSave={loggedIn}
+              variant="capture"
+              onComplete={(response) => {
+                setProcessingId(null);
+                setResult(response);
+                setView('result');
+              }}
+              onError={(msg) => setMessage(msg)}
+            />
+            <button
+              type="button"
+              className="sc-sheet-cancel"
+              onClick={() => {
+                setOpen(false);
+                setView('menu');
+              }}
+            >
+              Minimize — keep processing in background
             </button>
           </>
         )}
@@ -281,7 +391,7 @@ export default function SimplifiCaptureApp({
           </>
         )}
 
-        {view === 'result' && result?.record && !result.processing && (
+        {view === 'result' && result?.record && (
           <>
             <p className="sc-sheet-title">Pipeline complete</p>
             {loggedIn && result.record.id && (
@@ -306,26 +416,13 @@ export default function SimplifiCaptureApp({
           </>
         )}
 
-        <input
-          ref={fileRef}
-          type="file"
-          accept="image/*,.pdf,application/pdf"
-          className="hidden"
-          onChange={(e) => {
-            const file = e.target.files?.[0];
-            if (file) handleCaptureFile(file);
-          }}
-        />
       </div>
 
       <button
         type="button"
         className="sc-fab"
         aria-label="Capture opportunity"
-        onClick={() => {
-          resetSheet();
-          setOpen(true);
-        }}
+        onClick={openSheet}
         style={{
           position: 'fixed',
           right: 20,
