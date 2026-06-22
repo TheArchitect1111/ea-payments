@@ -3,6 +3,7 @@
 import { useCallback, useRef, useState, useEffect } from 'react';
 import Link from 'next/link';
 import CaptureSuccessPanel from '@/app/components/CaptureSuccessPanel';
+import CaptureProcessingPanel from '@/app/components/CaptureProcessingPanel';
 
 const NAVY = '#1B2B4D';
 const GOLD = '#C9A844';
@@ -10,6 +11,8 @@ const GOLD = '#C9A844';
 interface AnalyzeResponse {
   ok?: boolean;
   error?: string;
+  processing?: boolean;
+  captureId?: string;
   record?: { title?: string };
   considerUrl?: string;
   magnifiUrl?: string;
@@ -33,6 +36,7 @@ export default function AmplifiShareApp({
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [result, setResult] = useState<AnalyzeResponse | null>(null);
+  const [processingId, setProcessingId] = useState<string | null>(null);
 
   const loginNext = encodeURIComponent('/amplifi/share');
 
@@ -41,6 +45,29 @@ export default function AmplifiShareApp({
       setUrl(initialUrl);
     }
   }, [loggedIn, initialUrl]);
+
+  useEffect(() => {
+    if (loggedIn && typeof window !== 'undefined' && 'Notification' in window) {
+      if (Notification.permission === 'default') {
+        Notification.requestPermission().catch(() => {});
+      }
+    }
+  }, [loggedIn]);
+
+  const handleResponse = (data: AnalyzeResponse) => {
+    if (!data.ok) {
+      setMessage(data.error ?? 'Amplifi could not build a share story.');
+      return;
+    }
+    if (data.processing && data.captureId) {
+      setProcessingId(data.captureId);
+      setResult(data);
+      setOpen(false);
+      return;
+    }
+    setResult(data);
+    setOpen(true);
+  };
 
   const runCapture = useCallback(async (body: Record<string, string>) => {
     setLoading(true);
@@ -51,13 +78,7 @@ export default function AmplifiShareApp({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       });
-      const data = (await res.json()) as AnalyzeResponse;
-      if (!data.ok) {
-        setMessage(data.error ?? 'Amplifi could not build a share story.');
-        return;
-      }
-      setResult(data);
-      setOpen(true);
+      handleResponse((await res.json()) as AnalyzeResponse);
     } catch {
       setMessage('Network error. Try again.');
     } finally {
@@ -72,8 +93,9 @@ export default function AmplifiShareApp({
 
   const amplifyCurrent = () => {
     if (typeof window !== 'undefined') {
-      setUrl(window.location.href);
-      runCapture({ url: window.location.href, prospectName });
+      const current = window.location.href;
+      setUrl(current);
+      runCapture({ url: current, prospectName });
     }
   };
 
@@ -115,8 +137,8 @@ export default function AmplifiShareApp({
         <p className="as-kicker">Amplify mode</p>
         <h1 className="as-title">Make it visible.</h1>
         <p className="as-lede">
-          Tap Amplify on anything worth sharing. Simplifi analyzes it; Magnifi builds the story; you
-          send the link.
+          Tap Amplify on anything worth sharing. Simplifi analyzes it in the background; Magnifi builds
+          the story; you send the link.
         </p>
         {initialUrl && (
           <p className="as-prefill">
@@ -136,9 +158,20 @@ export default function AmplifiShareApp({
           className="as-input"
         />
         {message && <p className="as-error">{message}</p>}
+
+        {processingId && (
+          <div className="as-processing-banner">
+            <CaptureProcessingPanel
+              captureId={processingId}
+              title={result?.record?.title}
+              onComplete={() => setProcessingId(null)}
+              onError={() => setProcessingId(null)}
+            />
+          </div>
+        )}
       </main>
 
-      {open && result?.record && (
+      {open && result?.record && !result.processing && (
         <div className="as-sheet as-sheet-open" role="dialog">
           <CaptureSuccessPanel
             title={result.record.title ?? 'Your Amplifi story'}
@@ -183,13 +216,7 @@ export default function AmplifiShareApp({
           if (prospectName) form.append('prospectName', prospectName);
           try {
             const res = await fetch('/api/portal/captures/analyze', { method: 'POST', body: form });
-            const data = (await res.json()) as AnalyzeResponse;
-            if (data.ok) {
-              setResult(data);
-              setOpen(true);
-            } else {
-              setMessage(data.error ?? 'Could not amplify this file.');
-            }
+            handleResponse((await res.json()) as AnalyzeResponse);
           } finally {
             setLoading(false);
             if (fileRef.current) fileRef.current.value = '';

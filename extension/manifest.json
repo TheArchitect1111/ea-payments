@@ -1,13 +1,19 @@
 {
   "manifest_version": 3,
   "name": "EA Simplifi + Amplifi",
-  "version": "2.2.0",
-  "description": "Capture with Simplifi (→ Magnifi auto). Amplify & share with Amplifi. Toolbar + floating buttons.",
-  "permissions": ["activeTab", "contextMenus", "storage"],
+  "version": "3.0.0",
+  "description": "Screenshot capture with Simplifi. Magnifi builds automatically. Amplifi shares the link. Background processing + notifications.",
+  "permissions": ["activeTab", "contextMenus", "storage", "tabs", "notifications"],
   "host_permissions": ["https://*/*", "http://*/*"],
   "action": {
     "default_popup": "popup.html",
-    "default_title": "Simplifi + Amplifi"
+    "default_title": "Simplifi + Amplifi",
+    "default_icon": {
+      "128": "icon128.png"
+    }
+  },
+  "icons": {
+    "128": "icon128.png"
   },
   "background": {
     "service_worker": "background.js"
@@ -17,6 +23,7 @@
       "matches": ["http://*/*", "https://*/*"],
       "exclude_matches": [
         "https://ea-payments.vercel.app/*",
+        "https://www.efficiencyarchitects.online/*",
         "http://localhost:3000/*"
       ],
       "js": ["content.js"],

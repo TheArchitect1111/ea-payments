@@ -40,19 +40,20 @@ export default function AmplifiInstallPage() {
         </section>
 
         <section className="mt-6 border border-white/15 p-6 space-y-4">
-          <h2 className="text-lg font-bold text-[#C9A844]">2. Chrome — Extension + floating button</h2>
+          <h2 className="text-lg font-bold text-[#C9A844]">2. Chrome — Extension + screenshot capture</h2>
           <p className="text-sm text-neutral-300">
-            Gold toolbar icon on every site, plus optional floating Amplify button bottom-right.
+            Floating <strong>Capture</strong> and <strong>Amplify</strong> buttons screenshot the visible tab,
+            analyze in the background, and notify you when Magnifi is ready — no new tab required.
           </p>
           <ol className="text-sm text-neutral-300 list-decimal pl-5 space-y-2">
             <li>On your PC run <code className="text-[#C9A844]">scripts\package-extension.bat</code> (optional zip for sharing)</li>
             <li>Open <code className="text-[#C9A844]">chrome://extensions</code></li>
-            <li>Enable Developer mode → Load unpacked</li>
-            <li>Select the <code className="text-[#C9A844]">extension/</code> folder in the ea-payments repo</li>
-            <li>Extension options → API Base URL: {base}</li>
+            <li>Enable Developer mode → Load unpacked → select the <code className="text-[#C9A844]">extension/</code> folder</li>
+            <li>Extension options → API Base URL + <strong>EA_CAPTURE_API_KEY</strong> from Vercel</li>
+            <li>Optional: notify email + portal slug (<code className="text-[#C9A844]">demo-client</code>)</li>
           </ol>
           <p className="text-xs text-neutral-400">
-            Right-click any page → Amplifi this page. Or click the gold toolbar icon.
+            Tap Capture or Amplify on any page. Keep scrolling — Chrome notifies you when the story is ready.
           </p>
         </section>
 

@@ -4,14 +4,16 @@ import { useCallback, useRef, useState, useEffect } from 'react';
 import Link from 'next/link';
 import type { CaptureRecord } from '@/lib/capture-records';
 import CaptureSuccessPanel from '@/app/components/CaptureSuccessPanel';
+import CaptureProcessingPanel from '@/app/components/CaptureProcessingPanel';
 
 const NAVY = '#1B2B4D';
 const GOLD = '#C9A844';
-const BLUE = '#0A66FF';
 
 interface AnalyzeResponse {
   ok?: boolean;
   error?: string;
+  processing?: boolean;
+  captureId?: string;
   record?: CaptureRecord;
   magnifiUrl?: string;
   guidanceUrl?: string;
@@ -38,8 +40,17 @@ export default function SimplifiCaptureApp({
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [result, setResult] = useState<AnalyzeResponse | null>(null);
+  const [processingId, setProcessingId] = useState<string | null>(null);
 
   const loginNext = encodeURIComponent('/simplifi/capture');
+
+  useEffect(() => {
+    if (loggedIn && typeof window !== 'undefined' && 'Notification' in window) {
+      if (Notification.permission === 'default') {
+        Notification.requestPermission().catch(() => {});
+      }
+    }
+  }, [loggedIn]);
 
   useEffect(() => {
     if (loggedIn && initialUrl?.trim()) {
@@ -53,6 +64,7 @@ export default function SimplifiCaptureApp({
     setView('menu');
     setMessage('');
     setResult(null);
+    setProcessingId(null);
   };
 
   const closeSheet = () => {
@@ -74,19 +86,30 @@ export default function SimplifiCaptureApp({
     return (await res.json()) as AnalyzeResponse;
   };
 
+  const handleAnalyzeResponse = (data: AnalyzeResponse) => {
+    if (!data.ok) {
+      setMessage(data.error ?? 'Could not capture.');
+      return;
+    }
+    if (data.processing && data.captureId) {
+      setProcessingId(data.captureId);
+      setResult(data);
+      setOpen(false);
+      setView('menu');
+      return;
+    }
+    setResult(data);
+    setView('result');
+    setOpen(true);
+  };
+
   const handleCaptureUrl = useCallback(async () => {
     if (!url.trim()) return;
     setLoading(true);
     setMessage('');
     try {
       const data = await analyzeJson({ url: url.trim(), prospectName });
-      if (!data.ok) {
-        setMessage(data.error ?? 'Could not capture this URL.');
-        return;
-      }
-      setResult(data);
-      setView('result');
-      setOpen(true);
+      handleAnalyzeResponse(data);
     } catch {
       setMessage('Network error. Try again.');
     } finally {
@@ -102,13 +125,7 @@ export default function SimplifiCaptureApp({
       form.append('file', file);
       if (prospectName) form.append('prospectName', prospectName);
       const data = await analyzeForm(form);
-      if (!data.ok) {
-        setMessage(data.error ?? 'Could not capture this file.');
-        return;
-      }
-      setResult(data);
-      setView('result');
-      setOpen(true);
+      handleAnalyzeResponse(data);
     } catch {
       setMessage('Network error. Try again.');
     } finally {
@@ -186,6 +203,17 @@ export default function SimplifiCaptureApp({
         >
           Capture now
         </button>
+
+        {processingId && (
+          <div className="sc-processing-banner">
+            <CaptureProcessingPanel
+              captureId={processingId}
+              title={result?.record?.title}
+              onComplete={() => setProcessingId(null)}
+              onError={() => setProcessingId(null)}
+            />
+          </div>
+        )}
       </main>
 
       {open && (
@@ -238,7 +266,7 @@ export default function SimplifiCaptureApp({
               disabled={loading || !url.trim()}
               onClick={handleCaptureUrl}
             >
-              {loading ? 'Analyzing…' : 'Capture'}
+              {loading ? 'Capturing…' : 'Capture'}
             </button>
             <button type="button" className="sc-sheet-cancel" onClick={() => setView('menu')}>
               Back
@@ -246,7 +274,7 @@ export default function SimplifiCaptureApp({
           </>
         )}
 
-        {view === 'result' && result?.record && (
+        {view === 'result' && result?.record && !result.processing && (
           <>
             <p className="sc-sheet-title">Pipeline complete</p>
             <CaptureSuccessPanel

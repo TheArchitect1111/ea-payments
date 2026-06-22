@@ -241,3 +241,11 @@
 .hidden {
   display: none;
 }
+
+.sc-processing-banner {
+  margin-top: 24px;
+  padding: 16px;
+  border: 1px solid rgba(201, 168, 68, 0.35);
+  border-radius: 12px;
+  background: #faf8f2;
+}

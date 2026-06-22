@@ -37,3 +37,28 @@
 .ea-fab:hover {
   filter: brightness(1.08);
 }
+
+#ea-capture-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 96px;
+  transform: translateX(-50%) translateY(12px);
+  z-index: 2147483647;
+  max-width: min(92vw, 420px);
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: rgba(27, 43, 77, 0.96);
+  color: #fff;
+  font-family: system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.ea-capture-toast-show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}

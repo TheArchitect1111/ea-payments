@@ -986,3 +986,28 @@ export async function sendRevealEmail(data: {
     })
   );
 }
+
+export async function sendCaptureReadyEmail(data: {
+  email: string;
+  title: string;
+  magnifiUrl: string;
+  considerUrl?: string;
+  guidanceUrl?: string;
+}): Promise<{ ok: boolean; error?: string }> {
+  const bodyHtml = `
+    <p style="margin:0 0 16px;font-size:15px;color:#1A1A2E;line-height:1.7;">Your capture is ready. Simplifi analyzed it, Magnifi built the story, and Amplifi can share the link.</p>
+    <p style="margin:0 0 8px;font-size:14px;font-weight:700;color:#1B2B4D;">${escHtml(data.title)}</p>
+    <p style="margin:0;font-size:13px;color:#555;line-height:1.7;">Open Magnifi for the cinematic experience, or share the Consider link with anyone.</p>`;
+
+  return resendEmail(
+    data.email,
+    `Your Magnifi story is ready — ${data.title}`,
+    baseEmailShell({
+      title: 'Capture Complete',
+      eyebrow: 'Simplifi → Magnifi → Amplifi',
+      bodyHtml,
+      ctaLabel: 'Open Magnifi',
+      ctaUrl: data.magnifiUrl,
+    })
+  );
+}
