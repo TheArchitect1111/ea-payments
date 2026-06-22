@@ -1,12 +1,6 @@
 import { CAPTURE_CORS_HEADERS, verifyCaptureApiKey } from '@/lib/capture-auth';
-import {
-  analyzeAndCapture,
-  analyzeAndCaptureAsset,
-  enqueueCaptureAsset,
-  type CaptureInput,
-} from '@/lib/capture-pipeline';
-import { scheduleCaptureJob } from '@/lib/capture-async';
-import { buildCaptureApiResponse } from '@/lib/capture-response';
+import { type CaptureInput } from '@/lib/capture-pipeline';
+import { submitCapture, toCaptureApiResponse } from '@/lib/capture-submit';
 
 export async function OPTIONS() {
   return new Response(null, { headers: CAPTURE_CORS_HEADERS });
@@ -56,39 +50,17 @@ export async function POST(req: Request) {
     notes: body.title ? `Page title: ${body.title}` : undefined,
   };
 
-  const options = {
+  const result = await submitCapture(input, source, {
     generateBlueprint: body.mode !== 'capture' ? true : true,
     portalSlug: body.portalSlug,
     prospectName: body.prospectName,
     notifyEmail: body.notifyEmail,
-  };
-
-  const asyncMode = body.async !== false;
-
-  if (asyncMode) {
-    const queued = await enqueueCaptureAsset(input, source, options);
-    if (!queued.ok || !queued.record) {
-      return corsJson({ ok: false, error: queued.error ?? 'Could not queue capture.' }, 500);
-    }
-
-    scheduleCaptureJob(queued.record.id, input, source, options);
-
-    return corsJson({
-      ok: true,
-      processing: true,
-      captureId: queued.record.id,
-      status: 'Analyzing',
-      record: queued.record,
-    });
-  }
-
-  const result = url
-    ? await analyzeAndCapture(url, source, options)
-    : await analyzeAndCaptureAsset(input, source, options);
+    asyncMode: body.async !== false,
+  });
 
   if (!result.ok) {
     return corsJson({ ok: false, error: result.error }, 500);
   }
 
-  return corsJson(buildCaptureApiResponse(result));
+  return corsJson(toCaptureApiResponse(result));
 }

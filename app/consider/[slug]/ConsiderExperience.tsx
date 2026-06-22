@@ -13,6 +13,7 @@ interface Props {
   captureId: string;
   slug: string;
   isDemo?: boolean;
+  architectMode?: boolean;
 }
 
 function trackEvent(slug: string, event: string, isDemo?: boolean) {
@@ -24,7 +25,13 @@ function trackEvent(slug: string, event: string, isDemo?: boolean) {
   }).catch(() => {});
 }
 
-export default function ConsiderExperience({ payload, captureId, slug, isDemo }: Props) {
+export default function ConsiderExperience({
+  payload,
+  captureId,
+  slug,
+  isDemo,
+  architectMode = false,
+}: Props) {
   const [copied, setCopied] = useState(false);
   const { analysis, magnifi, extraction } = payload;
   const scores = analysis.scores;
@@ -66,22 +73,43 @@ export default function ConsiderExperience({ payload, captureId, slug, isDemo }:
   return (
     <div className="cx-page">
       <header className="cx-hero">
-        <p className="cx-eyebrow">Consider The Possibilities™</p>
+        <p className="cx-eyebrow">
+          {architectMode ? 'Consider The Possibilities™' : 'Magnifi™ Opportunity Experience'}
+        </p>
         <h1 className="cx-title">{payload.businessName}</h1>
-        <p className="cx-subtitle">Complimentary Opportunity Experience · Business analysis, not design critique</p>
+        <p className="cx-subtitle">
+          {architectMode
+            ? 'Complimentary Opportunity Experience · Business analysis, not design critique'
+            : 'Guided opportunity story · Full architect analysis available to licensed Architects'}
+        </p>
       </header>
 
-      <section className="cx-section">
-        <h2 className="cx-h2">Opportunity Scores</h2>
-        <div className="cx-score-grid">
-          {scoreItems.map(([label, value]) => (
-            <div key={label} className="cx-score-card">
-              <span className="cx-score-label">{label}</span>
-              <span className="cx-score-value">{value}</span>
-            </div>
-          ))}
-        </div>
-      </section>
+      {architectMode ? (
+        <section className="cx-section">
+          <h2 className="cx-h2">Opportunity Scores</h2>
+          <div className="cx-score-grid">
+            {scoreItems.map(([label, value]) => (
+              <div key={label} className="cx-score-card">
+                <span className="cx-score-label">{label}</span>
+                <span className="cx-score-value">{value}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : (
+        <section className="cx-section cx-architect-gate">
+          <h2 className="cx-h2">Your guided path</h2>
+          <p className="cx-body">
+            Opportunity scores, revenue estimates, and Consider The Possibilities™ analysis are
+            reserved for Architect Mode™. You still get the story, quick wins, and Simplifi guidance.
+          </p>
+          {!isDemo && captureId.startsWith('rec') && (
+            <a href={`/simplifi/guidance/${captureId}`} className="cx-cta cx-cta-primary">
+              Open Simplifi™ guidance →
+            </a>
+          )}
+        </section>
+      )}
 
       <section className="cx-section cx-two-col">
         <div>
@@ -125,33 +153,35 @@ export default function ConsiderExperience({ payload, captureId, slug, isDemo }:
         </div>
       </section>
 
-      <section className="cx-section">
-        <h2 className="cx-h2">Estimated Impact</h2>
-        <div className="cx-estimate-grid">
-          <div className="cx-estimate">
-            <p className="cx-estimate-label">Revenue left on table</p>
-            <p className="cx-estimate-value">
-              ${analysis.estimates.revenueLeftOnTable.low.toLocaleString()}–$
-              {analysis.estimates.revenueLeftOnTable.high.toLocaleString()}
-            </p>
-            <p className="cx-assumption">{analysis.estimates.revenueLeftOnTable.assumption}</p>
+      {architectMode && (
+        <section className="cx-section">
+          <h2 className="cx-h2">Estimated Impact</h2>
+          <div className="cx-estimate-grid">
+            <div className="cx-estimate">
+              <p className="cx-estimate-label">Revenue left on table</p>
+              <p className="cx-estimate-value">
+                ${analysis.estimates.revenueLeftOnTable.low.toLocaleString()}–$
+                {analysis.estimates.revenueLeftOnTable.high.toLocaleString()}
+              </p>
+              <p className="cx-assumption">{analysis.estimates.revenueLeftOnTable.assumption}</p>
+            </div>
+            <div className="cx-estimate">
+              <p className="cx-estimate-label">Leads potentially missed / month</p>
+              <p className="cx-estimate-value">
+                {analysis.estimates.leadsMissed.low}–{analysis.estimates.leadsMissed.high}
+              </p>
+              <p className="cx-assumption">{analysis.estimates.leadsMissed.assumption}</p>
+            </div>
+            <div className="cx-estimate">
+              <p className="cx-estimate-label">Engagement loss</p>
+              <p className="cx-estimate-value">
+                {analysis.estimates.engagementLoss.low}–{analysis.estimates.engagementLoss.high}%
+              </p>
+              <p className="cx-assumption">{analysis.estimates.engagementLoss.assumption}</p>
+            </div>
           </div>
-          <div className="cx-estimate">
-            <p className="cx-estimate-label">Leads potentially missed / month</p>
-            <p className="cx-estimate-value">
-              {analysis.estimates.leadsMissed.low}–{analysis.estimates.leadsMissed.high}
-            </p>
-            <p className="cx-assumption">{analysis.estimates.leadsMissed.assumption}</p>
-          </div>
-          <div className="cx-estimate">
-            <p className="cx-estimate-label">Engagement loss</p>
-            <p className="cx-estimate-value">
-              {analysis.estimates.engagementLoss.low}–{analysis.estimates.engagementLoss.high}%
-            </p>
-            <p className="cx-assumption">{analysis.estimates.engagementLoss.assumption}</p>
-          </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       <section className="cx-section">
         <h2 className="cx-h2">Future State</h2>
@@ -173,14 +203,16 @@ export default function ConsiderExperience({ payload, captureId, slug, isDemo }:
         </div>
       </section>
 
-      <section className="cx-section cx-possibilities">
-        <h2 className="cx-h2">Consider The Possibilities™</h2>
-        {magnifi.considerThePossibilities.split('\n\n').map((para) => (
-          <p key={para.slice(0, 40)} className="cx-body">
-            {para}
-          </p>
-        ))}
-      </section>
+      {architectMode && (
+        <section className="cx-section cx-possibilities">
+          <h2 className="cx-h2">Consider The Possibilities™</h2>
+          {magnifi.considerThePossibilities.split('\n\n').map((para) => (
+            <p key={para.slice(0, 40)} className="cx-body">
+              {para}
+            </p>
+          ))}
+        </section>
+      )}
 
       <section className="cx-section cx-cta-block">
         <h2 className="cx-h2">Recommended Next Steps</h2>

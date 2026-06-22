@@ -2,14 +2,9 @@ import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { EA_PORTAL_COOKIE, verifySession } from '@/lib/ea-portal-auth';
 import { getClientByPortalSlug } from '@/lib/airtable';
-import {
-  analyzeAndCaptureAsset,
-  enqueueCaptureAsset,
-  type CaptureInput,
-} from '@/lib/capture-pipeline';
-import { scheduleCaptureJob } from '@/lib/capture-async';
+import { type CaptureInput } from '@/lib/capture-pipeline';
 import { portalCaptureSource } from '@/lib/capture-records';
-import { buildCaptureApiResponse } from '@/lib/capture-response';
+import { submitCapture, toCaptureApiResponse } from '@/lib/capture-submit';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -110,33 +105,13 @@ export async function POST(req: Request) {
   }
 
   const source = portalCaptureSource(session.slug);
-  const options = {
+  const result = await submitCapture(parsed.input, source, {
     portalSlug: session.slug,
     prospectName: parsed.prospectName,
     notifyEmail: client.email,
-  };
+    asyncMode: parsed.asyncMode,
+  });
 
-  if (parsed.asyncMode) {
-    const queued = await enqueueCaptureAsset(parsed.input, source, options);
-    if (!queued.ok || !queued.record) {
-      return NextResponse.json(
-        { ok: false, error: queued.error ?? 'Could not queue capture.' },
-        { status: 500 },
-      );
-    }
-
-    scheduleCaptureJob(queued.record.id, parsed.input, source, options);
-
-    return NextResponse.json({
-      ok: true,
-      processing: true,
-      captureId: queued.record.id,
-      status: 'Analyzing',
-      record: queued.record,
-    });
-  }
-
-  const result = await analyzeAndCaptureAsset(parsed.input, source, options);
   if (!result.ok) {
     return NextResponse.json(
       { ok: false, error: result.error ?? 'Simplifi could not process this opportunity.' },
@@ -144,5 +119,5 @@ export async function POST(req: Request) {
     );
   }
 
-  return NextResponse.json(buildCaptureApiResponse(result));
+  return NextResponse.json(toCaptureApiResponse(result));
 }

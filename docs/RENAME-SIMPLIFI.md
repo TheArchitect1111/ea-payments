@@ -27,6 +27,22 @@ The codebase is **Simplifi** (EA Intelligence OS). Vercel project name may still
 
 Guidance triple is written automatically when capture analysis completes.
 
+## Architect Mode (CTP gate)
+
+Consider The Possibilities™ sections (scores, revenue estimates, CTP narrative) require **Architect Mode**:
+
+- EA admin session cookie, OR
+- Portal slug in `ARCHITECT_PORTAL_SLUGS` with email in `ARCHITECT_EMAILS`
+
+Public demo `/consider/selena` remains fully visible for marketing.
+
+Env vars (optional):
+
+```
+ARCHITECT_PORTAL_SLUGS=demo-client,robert-portal
+ARCHITECT_EMAILS=freedom@efficiencyarchitects.online
+```
+
 ## Vercel (optional)
 
 - Rename project to `simplifi` in Vercel dashboard

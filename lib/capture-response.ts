@@ -18,6 +18,7 @@ export interface CaptureApiResponse {
   considerUrl?: string;
   considerSlug?: string;
   clientMessage?: string;
+  workspaceUrl?: string;
   error?: string;
 }
 
@@ -58,5 +59,6 @@ export function buildCaptureStatusResponse(record: CaptureRecord): CaptureApiRes
     considerUrl: record.shareUrl,
     considerSlug: record.considerSlug,
     clientMessage: record.clientMessage,
+    workspaceUrl: '/simplifi/workspace',
   };
 }

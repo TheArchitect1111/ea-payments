@@ -266,3 +266,15 @@
     display: none;
   }
 }
+
+.cx-architect-gate {
+  background: #eaf2ff;
+  border: 1px solid #c5d9ff;
+  border-radius: 16px;
+  padding: 24px;
+}
+
+.cx-architect-gate .cx-cta {
+  margin-top: 16px;
+  display: inline-block;
+}
