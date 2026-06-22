@@ -1,7 +1,7 @@
 'use client';
 
-import { motion, useReducedMotion, useScroll, useTransform } from 'framer-motion';
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import Reveal from './Reveal';
 
 const MOMENTS = [
   {
@@ -42,107 +42,59 @@ const MOMENTS = [
 ];
 
 export default function ConsiderScroll() {
-  const ref = useRef<HTMLDivElement>(null);
-  const reduce = useReducedMotion();
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ['start start', 'end end'],
-  });
+  const [active, setActive] = useState(0);
+  const blockRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  useEffect(() => {
+    const blocks = blockRefs.current.filter(Boolean) as HTMLDivElement[];
+    if (!blocks.length) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+        if (!visible) return;
+        const index = blocks.indexOf(visible.target as HTMLDivElement);
+        if (index >= 0) setActive(index);
+      },
+      { rootMargin: '-35% 0px -35% 0px', threshold: [0.15, 0.35, 0.55] },
+    );
+
+    blocks.forEach((block) => observer.observe(block));
+    return () => observer.disconnect();
+  }, []);
 
   return (
-    <div className="pl-consider-track" ref={ref}>
-      <div className="pl-consider-sticky">
-        <div className="pl-consider-visual">
-          {MOMENTS.map((moment, i) => (
-            <ConsiderFrame
-              key={moment.question}
-              index={i}
-              total={MOMENTS.length}
-              progress={scrollYProgress}
-              src={moment.src}
-              alt={moment.alt}
-              reduce={Boolean(reduce)}
-            />
-          ))}
-        </div>
-        <div className="pl-consider-questions">
-          {MOMENTS.map((moment, i) => (
-            <ConsiderQuestion
-              key={moment.question}
-              index={i}
-              total={MOMENTS.length}
-              progress={scrollYProgress}
-              text={moment.question}
-              reduce={Boolean(reduce)}
-            />
-          ))}
-        </div>
+    <div className="pl-consider-layout">
+      <div className="pl-consider-visual pl-consider-visual-sticky" aria-hidden="true">
+        {MOMENTS.map((moment, i) => (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            key={moment.question}
+            src={moment.src}
+            alt=""
+            className={`pl-consider-img${i === active ? ' is-active' : ''}`}
+          />
+        ))}
+      </div>
+      <div className="pl-consider-steps">
+        {MOMENTS.map((moment, i) => (
+          <div
+            key={moment.question}
+            ref={(el) => {
+              blockRefs.current[i] = el;
+            }}
+            className="pl-consider-step"
+          >
+            <Reveal>
+              <p className={`pl-consider-q pl-consider-q-static${i === active ? ' is-active' : ''}`}>
+                {moment.question}
+              </p>
+            </Reveal>
+          </div>
+        ))}
       </div>
     </div>
-  );
-}
-
-function ConsiderFrame({
-  index,
-  total,
-  progress,
-  src,
-  alt,
-  reduce,
-}: {
-  index: number;
-  total: number;
-  progress: ReturnType<typeof useScroll>['scrollYProgress'];
-  src: string;
-  alt: string;
-  reduce: boolean;
-}) {
-  const start = index / total;
-  const end = (index + 1) / total;
-  const opacity = useTransform(progress, [start, start + 0.08, end - 0.08, end], [0, 1, 1, 0]);
-
-  if (reduce) {
-    return index === 0 ? (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img src={src} alt={alt} className="pl-consider-img" />
-    ) : null;
-  }
-
-  return (
-    <motion.img
-      style={{ opacity }}
-      src={src}
-      alt={alt}
-      className="pl-consider-img"
-    />
-  );
-}
-
-function ConsiderQuestion({
-  index,
-  total,
-  progress,
-  text,
-  reduce,
-}: {
-  index: number;
-  total: number;
-  progress: ReturnType<typeof useScroll>['scrollYProgress'];
-  text: string;
-  reduce: boolean;
-}) {
-  const start = index / total;
-  const end = (index + 1) / total;
-  const opacity = useTransform(progress, [start, start + 0.06, end - 0.06, end], [0.15, 1, 1, 0.15]);
-  const y = useTransform(progress, [start, end], [24, -24]);
-
-  if (reduce) {
-    return <p className="pl-consider-q pl-consider-q-static">{text}</p>;
-  }
-
-  return (
-    <motion.p className="pl-consider-q" style={{ opacity, y }}>
-      {text}
-    </motion.p>
   );
 }

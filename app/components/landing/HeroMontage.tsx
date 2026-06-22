@@ -1,6 +1,5 @@
 'use client';
 
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 
 const MONTAGE = [
@@ -35,38 +34,32 @@ const MONTAGE = [
 ];
 
 export default function HeroMontage() {
-  const reduce = useReducedMotion();
   const [index, setIndex] = useState(0);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    if (reduce) return;
+    setReady(true);
     const id = window.setInterval(() => {
       setIndex((i) => (i + 1) % MONTAGE.length);
     }, 6000);
     return () => window.clearInterval(id);
-  }, [reduce]);
+  }, []);
 
   const current = MONTAGE[index];
 
   return (
     <div className="pl-hero-montage" aria-hidden="true">
-      {reduce ? (
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={MONTAGE[0].src} alt="" className="pl-hero-montage-img pl-hero-montage-base" />
+      {ready ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={MONTAGE[0].src} alt="" className="pl-hero-montage-img" />
-      ) : (
-        <AnimatePresence mode="sync">
-          <motion.img
-            key={current.src}
-            src={current.src}
-            alt=""
-            className="pl-hero-montage-img"
-            initial={{ opacity: 0, scale: 1.04 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 2.2, ease: [0.22, 1, 0.36, 1] }}
-          />
-        </AnimatePresence>
-      )}
+        <img
+          key={current.src}
+          src={current.src}
+          alt=""
+          className="pl-hero-montage-img pl-hero-montage-fade"
+        />
+      ) : null}
       <div className="pl-hero-montage-veil" />
     </div>
   );

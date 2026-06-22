@@ -102,6 +102,21 @@ html {
   object-position: center 35%;
 }
 
+.pl-hero-montage-fade {
+  animation: pl-hero-fade-in 2.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes pl-hero-fade-in {
+  from {
+    opacity: 0;
+    transform: scale(1.04);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 .pl-hero-montage-veil {
   position: absolute;
   inset: 0;
@@ -359,6 +374,75 @@ html {
 .pl-consider-track {
   height: 480vh;
   position: relative;
+}
+
+.pl-consider-layout {
+  display: grid;
+  gap: 0;
+}
+
+@media (min-width: 900px) {
+  .pl-consider-layout {
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: clamp(32px, 5vw, 64px);
+    padding: 0 clamp(24px, 5vw, 48px) clamp(80px, 10vw, 120px);
+    align-items: start;
+  }
+}
+
+.pl-consider-visual-sticky {
+  position: relative;
+  height: min(72vh, 640px);
+  overflow: hidden;
+}
+
+@media (min-width: 900px) {
+  .pl-consider-visual-sticky {
+    position: sticky;
+    top: 12vh;
+  }
+}
+
+.pl-consider-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 35%;
+  opacity: 0;
+  transition: opacity 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.pl-consider-img.is-active {
+  opacity: 1;
+}
+
+.pl-consider-steps {
+  padding: 0 clamp(24px, 5vw, 48px) clamp(80px, 10vw, 120px);
+}
+
+@media (min-width: 900px) {
+  .pl-consider-steps {
+    padding: 0 0 clamp(80px, 10vw, 120px);
+  }
+}
+
+.pl-consider-step {
+  min-height: 55vh;
+  display: flex;
+  align-items: center;
+}
+
+.pl-consider-q-static {
+  opacity: 0.28;
+  transition: opacity 0.6s ease, transform 0.6s ease;
+  transform: translateY(12px);
+}
+
+.pl-consider-q-static.is-active {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .pl-consider-sticky {
