@@ -4,6 +4,7 @@ import { EA_PORTAL_COOKIE, verifySession } from '@/lib/ea-portal-auth';
 import { createContentRequest, getClientByPortalSlug } from '@/lib/airtable';
 import { enhanceContentRequest } from '@/lib/ai';
 import { sendContentRequestConfirmation, sendInternalNotification } from '@/lib/email';
+import { emitPulseEvent } from '@/lib/pulse-bus';
 
 export const dynamic = 'force-dynamic';
 
@@ -66,6 +67,17 @@ export async function POST(req: NextRequest) {
   if (!result.ok) {
     return NextResponse.json({ error: result.error ?? 'Request could not be saved.' }, { status: 500 });
   }
+
+  await emitPulseEvent({
+    product: 'update-hub',
+    type: 'update.submitted',
+    title: `Update submitted: ${title}`,
+    detail: `${client.clientName} — ${requestType}`,
+    priority: body.priority === 'Urgent' ? 'high' : 'medium',
+    href: `/admin/content-requests`,
+    tenantId: client.portalSlug,
+    objectId: result.recordId,
+  });
 
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://ea-payments.vercel.app';
   const portalUrl = `${baseUrl}/portal/${client.portalSlug}/updates`;

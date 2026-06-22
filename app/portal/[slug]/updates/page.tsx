@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { EA_PORTAL_COOKIE, verifySession } from '@/lib/ea-portal-auth';
 import { getClientByPortalSlug, getContentRequestsForClient } from '@/lib/airtable';
 import { PortalShell, NAVY, GOLD } from '@/lib/chassis/PortalShell';
+import UpdateHubExperience from '@/app/portal/components/UpdateHubExperience';
 import '../ea-portal.css';
 
 export const dynamic = 'force-dynamic';
@@ -55,6 +56,8 @@ export default async function UpdatesPage({ params }: { params: Promise<{ slug: 
           ))}
         </div>
 
+        <UpdateHubExperience slug={slug} requestCount={requests.length} />
+
         <div className="mt-2 flex flex-wrap gap-3">
           <a
             href={`/portal/${slug}/updates/new`}
@@ -72,11 +75,9 @@ export default async function UpdatesPage({ params }: { params: Promise<{ slug: 
           </a>
         </div>
 
+        {requests.length > 0 && (
         <div className="ep-card mt-6">
           <p className="ep-card-title">Recent Requests</p>
-          {requests.length === 0 ? (
-            <p className="ep-placeholder-text">No requests have been submitted yet.</p>
-          ) : (
             <div className="overflow-x-auto">
               <table className="ep-info-table w-full min-w-[720px] text-left text-sm">
                 <thead>
@@ -105,8 +106,8 @@ export default async function UpdatesPage({ params }: { params: Promise<{ slug: 
                 </tbody>
               </table>
             </div>
-          )}
         </div>
+        )}
       </main>
     </div>
   );

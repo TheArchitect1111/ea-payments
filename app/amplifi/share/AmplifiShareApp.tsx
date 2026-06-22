@@ -39,8 +39,11 @@ export default function AmplifiShareApp({
   const [message, setMessage] = useState('');
   const [result, setResult] = useState<AnalyzeResponse | null>(null);
   const [processingId, setProcessingId] = useState<string | null>(null);
+  const [autoStarted, setAutoStarted] = useState(false);
 
-  const loginNext = encodeURIComponent('/amplifi/share');
+  const loginNext = encodeURIComponent(
+    initialUrl ? `/amplify?url=${encodeURIComponent(initialUrl)}` : '/amplifi/share',
+  );
 
   useEffect(() => {
     if (loggedIn && initialUrl?.trim()) {
@@ -87,6 +90,13 @@ export default function AmplifiShareApp({
       setLoading(false);
     }
   }, []);
+
+  useEffect(() => {
+    if (!loggedIn || !initialUrl?.trim() || autoStarted) return;
+    setAutoStarted(true);
+    setUrl(initialUrl);
+    runCapture({ url: initialUrl.trim(), prospectName });
+  }, [loggedIn, initialUrl, autoStarted, prospectName, runCapture]);
 
   const amplifyUrl = () => {
     if (!url.trim()) return;
@@ -190,6 +200,17 @@ export default function AmplifiShareApp({
       )}
 
       {open && <div className="as-backdrop" onClick={() => setOpen(false)} aria-hidden="true" />}
+
+      <button
+        type="button"
+        className="as-fab as-fab-secondary"
+        disabled={loading}
+        onClick={() => fileRef.current?.click()}
+        style={{ backgroundColor: GOLD, color: NAVY, borderColor: NAVY, right: '92px' }}
+        aria-label="Upload screenshot"
+      >
+        📷
+      </button>
 
       <button
         type="button"

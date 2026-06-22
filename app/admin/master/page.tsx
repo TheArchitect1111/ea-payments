@@ -7,9 +7,14 @@ import {
   getPartnerRecords,
   getCPRAthletes,
   getBrotherHubChapters,
+  getSisterHubChapters,
+  getAllContentRequests,
 } from '@/lib/airtable';
 import { getOpportunities } from '@/lib/partner-network';
 import { getCaptures } from '@/lib/capture-records';
+import { buildAttentionItems } from '@/lib/pulse-attention';
+import { EA_SATELLITE_URLS } from '@/lib/platform-urls';
+import AttentionCenterPanel from './AttentionCenterPanel';
 import AdminLogin from './AdminLogin';
 
 export const dynamic = 'force-dynamic';
@@ -127,7 +132,7 @@ export default async function MasterPortalPage() {
     return <AdminLogin />;
   }
 
-  const [assessments, proposals, clientRecords, partnerRecords, opportunities, cprAthletes, brotherHubChapters, captures] =
+  const [assessments, proposals, clientRecords, partnerRecords, opportunities, cprAthletes, brotherHubChapters, sisterHubChapters, captures, contentRequests] =
     await Promise.all([
       getAllAssessments(),
       getProposalsWithAssessments(),
@@ -136,7 +141,9 @@ export default async function MasterPortalPage() {
       getOpportunities(),
       getCPRAthletes(),
       getBrotherHubChapters(),
+      getSisterHubChapters(),
       getCaptures(8),
+      getAllContentRequests(),
     ]);
 
   // Revenue Overview
@@ -173,7 +180,21 @@ export default async function MasterPortalPage() {
   const cprActiveAthletes = cprAthletes.filter((a) => a.status === 'Active').length;
   const brotherHubMembers = brotherHubChapters.reduce((sum, c) => sum + c.memberCount, 0);
   const brotherHubActiveChapters = brotherHubChapters.filter((c) => c.status === 'Active').length;
+  const sisterHubMembers = sisterHubChapters.reduce((sum, c) => sum + c.memberCount, 0);
+  const sisterHubActiveChapters = sisterHubChapters.filter((c) => c.status === 'Active').length;
   const proposalsPendingReview = proposals.filter((p) => p.status === 'Pending Review').length;
+
+  const attentionItems = buildAttentionItems({
+    captures,
+    contentRequests,
+    proposalsPendingReview,
+    onboardingWebhooksMissing: !process.env.ONBOARDING_WEBHOOK_URL || !process.env.ESIGN_WEBHOOK_URL,
+    captureApiKeyMissing: !process.env.EA_CAPTURE_API_KEY,
+    cprAthleteCount: cprAthletes.length,
+    cprActiveCount: cprActiveAthletes,
+    brotherHubMembers,
+    sisterHubMembers,
+  });
 
   // Recent Activity Feed
   interface ActivityItem {
@@ -240,6 +261,8 @@ export default async function MasterPortalPage() {
       </div>
 
       <main className="max-w-6xl mx-auto px-6 py-8 space-y-10">
+
+        <AttentionCenterPanel items={attentionItems} />
 
         {/* Section 1: Revenue Overview */}
         <section>
@@ -351,20 +374,27 @@ export default async function MasterPortalPage() {
         {/* Section 5: Platform Snapshot */}
         <section>
           <SectionHead title="Platform Snapshot" />
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <PlatformTile
               title="Canadian Prospects Recruitment"
               metric={String(cprAthletes.length)}
               metricLabel="Total athletes"
               sub={`${cprActiveAthletes} active`}
-              href="https://cpr-site.vercel.app"
+              href={EA_SATELLITE_URLS.cpr}
             />
             <PlatformTile
               title="BrotherHub"
               metric={String(brotherHubMembers)}
-              metricLabel="Total chapter members"
+              metricLabel="Chapter members"
               sub={`${brotherHubActiveChapters} active chapters`}
-              href="https://brother-hub.vercel.app"
+              href={EA_SATELLITE_URLS.brotherHub}
+            />
+            <PlatformTile
+              title="SisterHub"
+              metric={String(sisterHubMembers)}
+              metricLabel="Chapter members"
+              sub={`${sisterHubActiveChapters} active chapters`}
+              href={EA_SATELLITE_URLS.sisterHub}
             />
             <PlatformTile
               title="EA Payments Engine"

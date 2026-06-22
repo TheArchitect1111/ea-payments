@@ -1585,3 +1585,56 @@ export async function getBrotherHubChapters(): Promise<BrotherHubChapterRecord[]
     return SAMPLE_BROTHERHUB_CHAPTERS;
   }
 }
+
+const SISTERHUB_BASE_ID = process.env.AIRTABLE_SISTERHUB_BASE_ID;
+const SISTERHUB_CHAPTERS_TABLE = 'Chapters';
+
+export type SisterHubChapterRecord = BrotherHubChapterRecord;
+
+const SAMPLE_SISTERHUB_CHAPTERS: SisterHubChapterRecord[] = [
+  { chapterName: 'Sample Sister Chapter', memberCount: 24, status: 'Active' },
+];
+
+export async function getSisterHubChapters(): Promise<SisterHubChapterRecord[]> {
+  if (!process.env.AIRTABLE_API_KEY || !SISTERHUB_BASE_ID) return SAMPLE_SISTERHUB_CHAPTERS;
+
+  try {
+    const records: SisterHubChapterRecord[] = [];
+    let offset: string | undefined;
+
+    do {
+      const params = new URLSearchParams({ pageSize: '100' });
+      if (offset) params.set('offset', offset);
+
+      const res = await fetch(
+        `https://api.airtable.com/v0/${SISTERHUB_BASE_ID}/${encodeURIComponent(SISTERHUB_CHAPTERS_TABLE)}?${params}`,
+        { headers: authHeaders(), cache: 'no-store' }
+      );
+
+      if (!res.ok) {
+        console.error('getSisterHubChapters fetch failed:', await res.text());
+        return SAMPLE_SISTERHUB_CHAPTERS;
+      }
+
+      const data = (await res.json()) as {
+        records: { fields: Record<string, unknown> }[];
+        offset?: string;
+      };
+
+      for (const r of data.records) {
+        records.push({
+          chapterName: (r.fields['Chapter Name'] as string) ?? '',
+          memberCount: (r.fields['Member Count'] as number) ?? 0,
+          status: (r.fields['Status'] as string) ?? '',
+        });
+      }
+
+      offset = data.offset;
+    } while (offset);
+
+    return records;
+  } catch (err) {
+    console.error('getSisterHubChapters error:', err);
+    return SAMPLE_SISTERHUB_CHAPTERS;
+  }
+}
