@@ -5,6 +5,7 @@ import { createContentRequest, getClientByPortalSlug } from '@/lib/airtable';
 import { enhanceContentRequest } from '@/lib/ai';
 import { sendContentRequestConfirmation, sendInternalNotification } from '@/lib/email';
 import { emitPulseEvent } from '@/lib/pulse-bus';
+import { EA_PLATFORM_URL } from '@/lib/platform-urls';
 
 export const dynamic = 'force-dynamic';
 
@@ -79,7 +80,7 @@ export async function POST(req: NextRequest) {
     objectId: result.recordId,
   });
 
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://ea-payments.vercel.app';
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? EA_PLATFORM_URL;
   const portalUrl = `${baseUrl}/portal/${client.portalSlug}/updates`;
 
   try {

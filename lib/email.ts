@@ -1,3 +1,5 @@
+import { EA_PLATFORM_URL } from './platform-urls';
+
 const AIRTABLE_BASE_ID = process.env.AIRTABLE_PAYMENTS_BASE_ID ?? 'appv0YoLIMY45fmDA';
 
 export interface WelcomeEmailData {
@@ -589,7 +591,7 @@ function deriveFindings(challenges: string[]): string[] {
 
 function buildProposalHtml(proposal: ProposalWithAssessment): string {
   const baseUrl =
-    process.env.NEXT_PUBLIC_BASE_URL ?? 'https://ea-payments.vercel.app';
+    process.env.NEXT_PUBLIC_BASE_URL ?? EA_PLATFORM_URL;
   const proposalUrl = `${baseUrl}/proposal/${escHtml(proposal.proposalId)}`;
   const supportEmail =
     process.env.SUPPORT_EMAIL ?? 'freedom@efficiencyarchitects.online';
@@ -896,7 +898,7 @@ export async function sendAssessmentConfirmationEmail(data: {
   proposalId: string;
 }): Promise<{ ok: boolean; error?: string }> {
   const baseUrl =
-    process.env.NEXT_PUBLIC_BASE_URL ?? 'https://ea-payments.vercel.app';
+    process.env.NEXT_PUBLIC_BASE_URL ?? EA_PLATFORM_URL;
   const proposalUrl = `${baseUrl}/proposal/${encodeURIComponent(data.proposalId)}`;
   const supportEmail =
     process.env.SUPPORT_EMAIL ?? 'freedom@efficiencyarchitects.online';

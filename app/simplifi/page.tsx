@@ -67,6 +67,12 @@ export default function SimplifiLaunchPage() {
                 Start Simplifi
               </a>
               <a
+                href="/simplifi/workspace"
+                className="rounded-full border border-neutral-200 px-7 py-4 text-sm font-bold"
+              >
+                Open Workspace
+              </a>
+              <a
                 href="#how-it-works"
                 className="rounded-full border border-neutral-200 px-7 py-4 text-sm font-bold"
               >

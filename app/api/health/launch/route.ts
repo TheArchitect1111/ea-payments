@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server';
 import { getClientByPortalSlug } from '@/lib/airtable';
 import { resolveConsiderExperience } from '@/lib/consider-resolve';
+import { EA_PLATFORM_URL } from '@/lib/platform-urls';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
-  const base = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://ea-payments.vercel.app';
+  const base = process.env.NEXT_PUBLIC_BASE_URL ?? EA_PLATFORM_URL;
 
   const env = {
     airtable: Boolean(process.env.AIRTABLE_API_KEY),

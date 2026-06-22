@@ -64,6 +64,11 @@
       "source": "/amplifi",
       "destination": "/amplify",
       "permanent": false
+    },
+    {
+      "source": "/app",
+      "destination": "/simplifi/workspace",
+      "permanent": false
     }
   ],
   "headers": [

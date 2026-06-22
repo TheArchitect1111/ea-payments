@@ -5,6 +5,7 @@ import {
   type CaptureInput,
 } from './capture-pipeline';
 import { sendCaptureReadyEmail } from './email';
+import { EA_PLATFORM_URL } from './platform-urls';
 
 export interface ScheduleCaptureJobOptions extends AnalyzeOptions {
   notifyEmail?: string;
@@ -24,7 +25,7 @@ export function scheduleCaptureJob(
       const base =
         options.baseUrl ??
         process.env.NEXT_PUBLIC_BASE_URL ??
-        'https://ea-payments.vercel.app';
+        EA_PLATFORM_URL;
 
       await sendCaptureReadyEmail({
         email: options.notifyEmail,

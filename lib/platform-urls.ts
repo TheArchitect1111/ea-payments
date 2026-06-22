@@ -9,3 +9,5 @@ export const EA_SATELLITE_URLS = {
 export const EA_PLATFORM_URL =
   process.env.NEXT_PUBLIC_BASE_URL?.replace(/\/$/, '') ??
   'https://www.efficiencyarchitects.online';
+
+export const SIMPLIFI_PRODUCT_NAME = 'Simplifi';

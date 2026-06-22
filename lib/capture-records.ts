@@ -44,6 +44,13 @@ export interface CaptureRecord {
   modernityScore?: number;
   prospectStatus?: string;
   portalSlug?: string;
+  /** Simplifi object lifecycle */
+  nextAction?: string;
+  dueDate?: string;
+  owner?: string;
+  whyThisMatters?: string;
+  whatMostPeopleDo?: string;
+  whatWeRecommend?: string;
 }
 
 export interface CreateCaptureInput {
@@ -133,6 +140,12 @@ function mapRecord(rec: { id: string; fields: Record<string, unknown> }): Captur
     modernityScore: typeof f['Modernity Score'] === 'number' ? f['Modernity Score'] : undefined,
     prospectStatus: (f['Prospect Status'] as string) ?? undefined,
     portalSlug: (f['Portal Slug'] as string) ?? undefined,
+    nextAction: (f['Next Action'] as string) ?? undefined,
+    dueDate: (f['Due Date'] as string) ?? undefined,
+    owner: (f['Owner'] as string) ?? undefined,
+    whyThisMatters: (f['Why This Matters'] as string) ?? undefined,
+    whatMostPeopleDo: (f['What Most People Do'] as string) ?? undefined,
+    whatWeRecommend: (f['What We Recommend'] as string) ?? undefined,
   };
 }
 
@@ -445,6 +458,47 @@ export async function updateOpportunityExperience(
       },
     );
     if (!res.ok) return { ok: false, error: 'Failed to update opportunity experience.' };
+    return { ok: true };
+  } catch {
+    return { ok: false, error: 'Unexpected error.' };
+  }
+}
+
+export async function updateObjectGuidance(
+  recordId: string,
+  input: {
+    nextAction?: string;
+    dueDate?: string;
+    owner?: string;
+    whyThisMatters?: string;
+    whatMostPeopleDo?: string;
+    whatWeRecommend?: string;
+  },
+): Promise<{ ok: boolean; error?: string }> {
+  if (!process.env.AIRTABLE_API_KEY) {
+    return { ok: false, error: 'AIRTABLE_API_KEY not configured.' };
+  }
+
+  const fields: Record<string, string> = {};
+  if (input.nextAction) fields['Next Action'] = input.nextAction;
+  if (input.dueDate) fields['Due Date'] = input.dueDate;
+  if (input.owner) fields['Owner'] = input.owner;
+  if (input.whyThisMatters) fields['Why This Matters'] = input.whyThisMatters;
+  if (input.whatMostPeopleDo) fields['What Most People Do'] = input.whatMostPeopleDo;
+  if (input.whatWeRecommend) fields['What We Recommend'] = input.whatWeRecommend;
+
+  if (Object.keys(fields).length === 0) return { ok: true };
+
+  try {
+    const res = await fetch(
+      `https://api.airtable.com/v0/${BASE_ID}/${encodeURIComponent(CAPTURES_TABLE)}/${recordId}`,
+      {
+        method: 'PATCH',
+        headers: authHeaders(),
+        body: JSON.stringify({ fields, typecast: true }),
+      },
+    );
+    if (!res.ok) return { ok: false, error: 'Failed to update object guidance.' };
     return { ok: true };
   } catch {
     return { ok: false, error: 'Unexpected error.' };

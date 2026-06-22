@@ -40,8 +40,11 @@ import {
   getCaptureByIdentifier,
   updateCaptureStatus,
   updateOpportunityExperience,
+  updateObjectGuidance,
   type CaptureRecord,
 } from './capture-records';
+import { buildGuidanceTriple } from './guidance-triple';
+import { EA_PLATFORM_URL } from './platform-urls';
 
 export interface CapturePipelineResult {
   ok: boolean;
@@ -110,7 +113,7 @@ async function runCapturePipeline(
   const baseUrl =
     options.baseUrl ??
     process.env.NEXT_PUBLIC_BASE_URL ??
-    'https://ea-payments.vercel.app';
+    EA_PLATFORM_URL;
 
   const portalSlug = options.portalSlug ?? portalSlugFromSource(source);
 
@@ -218,6 +221,19 @@ async function runCapturePipeline(
 
   const updated = await getCaptureByIdentifier(recordId);
   record = updated ?? record;
+
+  if (record) {
+    const triple = buildGuidanceTriple(record);
+    await updateObjectGuidance(recordId, {
+      nextAction: triple.nextAction,
+      dueDate: triple.suggestedDueDate,
+      whyThisMatters: triple.whyThisMatters,
+      whatMostPeopleDo: triple.whatMostPeopleDo,
+      whatWeRecommend: triple.whatWeRecommend,
+    });
+    const withGuidance = await getCaptureByIdentifier(recordId);
+    record = withGuidance ?? record;
+  }
 
   return {
     ok: true,
