@@ -4,6 +4,8 @@ import { useCallback, useRef, useState, useEffect } from 'react';
 import Link from 'next/link';
 import CaptureSuccessPanel from '@/app/components/CaptureSuccessPanel';
 import CaptureProcessingPanel from '@/app/components/CaptureProcessingPanel';
+import GuidedFirstSuccessFlow from '@/app/components/guided-first-success/GuidedFirstSuccessFlow';
+import UniversalCoachPanel from '@/app/components/guided-first-success/UniversalCoachPanel';
 
 const NAVY = '#1B2B4D';
 const GOLD = '#C9A844';
@@ -223,6 +225,13 @@ export default function AmplifiShareApp({
           }
         }}
       />
+
+      {loggedIn && slug && (
+        <>
+          <GuidedFirstSuccessFlow platformId="amplifi" scope={slug} firstActionHref="/amplify" />
+          <UniversalCoachPanel platformId="amplifi" />
+        </>
+      )}
     </div>
   );
 }

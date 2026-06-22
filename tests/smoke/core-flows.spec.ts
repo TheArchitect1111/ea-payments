@@ -55,6 +55,16 @@ test('simplifi portal route requires portal login', async ({ page }) => {
   await expect(page).toHaveURL(/\/portal\/login/);
 });
 
+test('amplifi share page is reachable', async ({ page }) => {
+  await page.goto('/amplify');
+  await expect(page.getByText(/amplify what you see|make it visible/i).first()).toBeVisible();
+});
+
+test('magnifi consider demo has opportunity content', async ({ page }) => {
+  await page.goto('/story/selena');
+  await expect(page.getByText(/consider the possibilities|opportunity scores/i).first()).toBeVisible();
+});
+
 test('checkout lists purchasable packages only', async ({ page }) => {
   await page.goto('/checkout');
   await expect(page.getByRole('option', { name: /Simplifi Early Access/i })).toBeVisible();

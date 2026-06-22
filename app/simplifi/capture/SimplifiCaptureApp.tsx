@@ -5,6 +5,8 @@ import Link from 'next/link';
 import type { CaptureRecord } from '@/lib/capture-records';
 import CaptureSuccessPanel from '@/app/components/CaptureSuccessPanel';
 import CaptureProcessingPanel from '@/app/components/CaptureProcessingPanel';
+import GuidedFirstSuccessFlow from '@/app/components/guided-first-success/GuidedFirstSuccessFlow';
+import UniversalCoachPanel from '@/app/components/guided-first-success/UniversalCoachPanel';
 
 const NAVY = '#1B2B4D';
 const GOLD = '#C9A844';
@@ -323,6 +325,13 @@ export default function SimplifiCaptureApp({
         <span className="sc-fab-icon">+</span>
         <span className="sc-fab-label">Capture</span>
       </button>
+
+      {loggedIn && slug && (
+        <>
+          <GuidedFirstSuccessFlow platformId="simplifi" scope={slug} />
+          <UniversalCoachPanel platformId="simplifi" />
+        </>
+      )}
     </div>
   );
 }

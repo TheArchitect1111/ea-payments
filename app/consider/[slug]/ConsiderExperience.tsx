@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import type { OpportunityExperiencePayload } from '@/lib/opportunity-experience';
+import GuidedFirstSuccessFlow from '@/app/components/guided-first-success/GuidedFirstSuccessFlow';
+import UniversalCoachPanel from '@/app/components/guided-first-success/UniversalCoachPanel';
 import './consider.css';
 
 const GOLD = '#C9A844';
@@ -239,6 +241,9 @@ export default function ConsiderExperience({ payload, captureId, slug, isDemo }:
         <p style={{ color: GOLD }}>Efficiency Architects</p>
         <p>Opportunity Experience · Stored in Pulse™</p>
       </footer>
+
+      <GuidedFirstSuccessFlow platformId="magnifi" scope={slug} />
+      <UniversalCoachPanel platformId="magnifi" />
     </div>
   );
 }

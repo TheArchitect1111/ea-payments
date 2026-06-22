@@ -3,6 +3,7 @@
 import { useRef, useState, useEffect } from 'react';
 import type { CaptureRecord } from '@/lib/capture-records';
 import CaptureSuccessPanel from '@/app/components/CaptureSuccessPanel';
+import EmptyStateGuide from '@/app/components/guided-first-success/EmptyStateGuide';
 
 const NAVY = '#1B2B4D';
 const GOLD = '#C9A844';
@@ -254,7 +255,12 @@ export default function SimplifiPortalWorkspace({
       <div className="ep-card overflow-x-auto">
         <p className="ep-card-title">Your Opportunities (Pulse™)</p>
         {captures.length === 0 ? (
-          <p className="ep-placeholder-text">No captures yet. Upload or paste above to get started.</p>
+          <EmptyStateGuide
+            title="No captures yet"
+            explanation="Capture your first opportunity — Simplifi analyzes it and Magnifi builds a shareable story automatically."
+            actionLabel="Capture now"
+            actionHref="/capture"
+          />
         ) : (
           <table className="w-full text-sm mt-4">
             <thead>

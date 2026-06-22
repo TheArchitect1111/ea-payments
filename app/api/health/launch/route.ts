@@ -38,6 +38,10 @@ export async function GET() {
   const paymentsAutomationReady = env.onboardingWebhook && env.resend && env.resendFrom;
   const fullLaunchReady = friendTestingReady && paymentsAutomationReady;
 
+  const captureExtensionKey = Boolean(process.env.EA_CAPTURE_API_KEY);
+  const magnifiOperational = selenaCapture;
+  const amplifiOperational = friendTestingReady && env.resend && env.resendFrom;
+
   return NextResponse.json({
     ok: friendTestingReady,
     status: fullLaunchReady ? 'full_launch_ready' : friendTestingReady ? 'friend_testing_ready' : 'needs_setup',
@@ -46,6 +50,12 @@ export async function GET() {
       env,
       demoClient,
       selenaCapture,
+      products: {
+        magnifi: magnifiOperational,
+        amplifi: amplifiOperational,
+        captureExtensionKey,
+        asyncCapture: true,
+      },
     },
     links: {
       start: `${base}/start`,
@@ -58,7 +68,9 @@ export async function GET() {
       dns: 'Point www.efficiencyarchitects.online to ea-payments in Vercel → docs/DNS-THREE-CLICKS.md',
       makeWebhooks: env.onboardingWebhook ? null : 'Set ONBOARDING_WEBHOOK_URL on Vercel',
       resend: env.resend && env.resendFrom ? null : 'Set RESEND_API_KEY + RESEND_FROM_EMAIL + verify domain',
-      chromeExtension: 'Load extension/ folder in chrome://extensions (see /amplifi/install)',
+      chromeExtension: captureExtensionKey
+        ? null
+        : 'Set EA_CAPTURE_API_KEY on Vercel + extension settings (see /amplifi/install)',
       appStore: 'Not planned — use /capture and Add to Home Screen',
     },
   });

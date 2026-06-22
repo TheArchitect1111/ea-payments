@@ -8,6 +8,7 @@ import { getClientSuccessProfile } from '@/lib/client-success';
 import PasswordChangeModal from './PasswordChangeModal';
 import { PortalShell, NAVY, GOLD } from '@/lib/chassis/PortalShell';
 import EAPortalHubCards from '@/app/portal/components/EAPortalHubCards';
+import PortalHomeExperience from '@/app/portal/components/PortalHomeExperience';
 import './ea-portal.css';
 
 export const dynamic = 'force-dynamic';
@@ -62,6 +63,12 @@ export default async function PortalPage({
             Pulse, Simplifi, Magnifi, and Amplifi — your operating rhythm in one place.
           </p>
         </section>
+
+        <PortalHomeExperience
+          slug={slug}
+          captureCount={captures.length}
+          opportunityCount={opportunities.length}
+        />
 
         <EAPortalHubCards slug={slug} />
 
