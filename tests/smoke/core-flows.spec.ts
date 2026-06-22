@@ -56,19 +56,20 @@ test('simplifi portal route requires portal login', async ({ page }) => {
 });
 
 test('amplifi share page is reachable', async ({ page }) => {
-  await page.goto('/amplify');
-  await expect(page.getByText(/amplify what you see|make it visible/i).first()).toBeVisible();
+  await page.goto('/amplifi/share');
+  await expect(page.getByRole('heading', { name: /amplify what you see/i })).toBeVisible();
 });
 
 test('magnifi consider demo has opportunity content', async ({ page }) => {
-  await page.goto('/story/selena');
-  await expect(page.getByText(/consider the possibilities|opportunity scores/i).first()).toBeVisible();
+  await page.goto('/consider/selena');
+  await expect(page.getByRole('heading', { name: /opportunity scores/i })).toBeVisible();
 });
 
 test('checkout lists purchasable packages only', async ({ page }) => {
   await page.goto('/checkout');
-  await expect(page.getByRole('option', { name: /Simplifi Early Access/i })).toBeVisible();
-  await expect(page.getByRole('option', { name: /Capacity Assessment/i })).toHaveCount(0);
+  const options = page.locator('select option');
+  await expect(options.filter({ hasText: /Simplifi Early Access/i })).toHaveCount(1);
+  await expect(options.filter({ hasText: /Capacity Assessment/i })).toHaveCount(0);
 });
 
 test('assessment thank-you contact link works', async ({ page }) => {
@@ -92,6 +93,6 @@ test('app alias redirects to workspace', async ({ page }) => {
 
 test('experience templates library is reachable', async ({ page }) => {
   await page.goto('/experience/templates');
-  await expect(page.getByRole('heading', { name: /template library/i })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1 })).toContainText(/template library/i);
   await expect(page.getByText(/Executive Transformation/i)).toBeVisible();
 });
