@@ -1,4 +1,5 @@
 import type { OnboardingWebhookPayload } from '@/lib/make-webhooks';
+import { buildOnboardingWebhookBody } from '@/lib/make-webhooks';
 
 export type Tier2EnvChecks = {
   onboardingWebhook: boolean;
@@ -43,8 +44,13 @@ export function sampleOnboardingWebhookPayload(): OnboardingWebhookPayload {
     paymentDate: new Date().toISOString().slice(0, 10),
     stripeTransactionId: `pi_test_tier2_${Date.now()}`,
     airtableRecordId: 'recREPLACE_WITH_REAL_ID',
+    portalSlug: 'demo-client',
     portalLoginUrl: `${base}/portal/login`,
   };
+}
+
+export function sampleOnboardingWebhookBody(): Record<string, unknown> {
+  return buildOnboardingWebhookBody(sampleOnboardingWebhookPayload());
 }
 
 export function sampleEsignWebhookPayload(): Record<string, unknown> {

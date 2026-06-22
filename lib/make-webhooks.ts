@@ -3,14 +3,38 @@ import { triggerMakeWebhook } from '@ea/portal-chassis/webhooks';
 export interface OnboardingWebhookPayload {
   event: 'payment.received';
   clientName: string;
+  /** @deprecated Use clientEmail in Make mappings — kept for backward compatibility */
   email: string;
   organization?: string;
+  /** @deprecated Use packagePurchased in Make mappings */
   packageName: string;
   amountPaid: number;
   paymentDate: string;
   stripeTransactionId: string;
   airtableRecordId?: string;
+  portalSlug?: string;
   portalLoginUrl?: string;
+}
+
+/** Canonical fields for Make.com EA Onboarding Webhook scenario */
+export function buildOnboardingWebhookBody(
+  payload: OnboardingWebhookPayload,
+): Record<string, unknown> {
+  return {
+    event: payload.event,
+    airtableRecordId: payload.airtableRecordId,
+    clientName: payload.clientName,
+    clientEmail: payload.email,
+    email: payload.email,
+    packagePurchased: payload.packageName,
+    packageName: payload.packageName,
+    portalSlug: payload.portalSlug,
+    organization: payload.organization,
+    amountPaid: payload.amountPaid,
+    paymentDate: payload.paymentDate,
+    stripeTransactionId: payload.stripeTransactionId,
+    portalLoginUrl: payload.portalLoginUrl,
+  };
 }
 
 export async function fireMakeWebhook(
@@ -38,7 +62,7 @@ export async function fireMakeWebhook(
 export async function fireOnboardingWebhook(payload: OnboardingWebhookPayload): Promise<void> {
   await fireMakeWebhook(
     process.env.ONBOARDING_WEBHOOK_URL,
-    payload as unknown as Record<string, unknown>,
+    buildOnboardingWebhookBody(payload),
     'ONBOARDING_WEBHOOK_URL',
   );
 }

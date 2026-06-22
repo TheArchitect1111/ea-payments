@@ -130,6 +130,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
   const catalogItem = meta.packageId ? getCatalogItem(meta.packageId) : undefined;
 
   let tempCredentials: string | undefined;
+  let portalSlug: string | undefined;
   let portalLoginUrl: string =
     catalogItem?.portalLoginUrl ??
     `${process.env.NEXT_PUBLIC_BASE_URL ?? 'https://ea-payments.vercel.app'}/portal/login`;
@@ -147,6 +148,9 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
       );
 
       if (portalResult.ok) {
+        if (portalResult.slug) {
+          portalSlug = portalResult.slug;
+        }
         if (portalResult.portalLoginUrl) {
           portalLoginUrl = portalResult.portalLoginUrl;
         }
@@ -229,6 +233,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
     paymentDate,
     stripeTransactionId,
     airtableRecordId: airtableResult.recordId,
+    portalSlug,
     portalLoginUrl,
   });
 }
@@ -352,6 +357,7 @@ async function handleProposalPayment(
   // 6. Provision EA portal access and write credentials to the Client Record.
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://ea-payments.vercel.app';
   let portalLoginUrl = `${baseUrl}/portal/login`;
+  let portalSlug: string | undefined;
   let tempCredentials: string | undefined;
 
   if (airtableResult.ok && airtableResult.recordId) {
@@ -367,6 +373,9 @@ async function handleProposalPayment(
       );
 
       if (portalResult.ok) {
+        if (portalResult.slug) {
+          portalSlug = portalResult.slug;
+        }
         if (portalResult.portalLoginUrl) {
           portalLoginUrl = portalResult.portalLoginUrl;
         }
@@ -416,6 +425,7 @@ async function handleProposalPayment(
     paymentDate,
     stripeTransactionId,
     airtableRecordId: airtableResult.recordId,
+    portalSlug,
     portalLoginUrl,
   });
 }

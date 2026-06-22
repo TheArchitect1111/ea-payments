@@ -57,6 +57,16 @@ export default function StartPage() {
 
         <section className="mt-8 text-sm text-neutral-400 space-y-2">
           <p>
+            <strong className="text-white">Launch Command Center:</strong>{' '}
+            <Link href="/launch" className="underline text-[#C9A844]">
+              /launch
+            </Link>
+            {' · '}
+            <Link href="/api/health/command-center" className="underline text-[#C9A844]">
+              JSON
+            </Link>
+          </p>
+          <p>
             <strong className="text-white">Health check:</strong>{' '}
             <Link href="/api/health/launch" className="underline text-[#C9A844]">
               /api/health/launch

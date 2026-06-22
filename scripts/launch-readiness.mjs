@@ -40,6 +40,8 @@ try {
     }
   }
   console.log('\nSend testers:', `${BASE}/start`);
+  console.log('\nLaunch Command Center:', `${BASE}/launch`);
+  console.log('Full report CLI: npm run launch:report');
 } catch (err) {
   console.log('Health check failed:', err.message);
 }

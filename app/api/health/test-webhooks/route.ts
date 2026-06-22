@@ -7,6 +7,7 @@ import {
 import {
   getTier2EnvChecks,
   sampleEsignWebhookPayload,
+  sampleOnboardingWebhookBody,
   sampleOnboardingWebhookPayload,
 } from '@/lib/launch-tier2';
 
@@ -85,7 +86,8 @@ export async function GET(req: NextRequest) {
     ok: env.onboardingWebhook && env.esignWebhook,
     env,
     samples: {
-      onboarding: sampleOnboardingWebhookPayload(),
+      onboarding: sampleOnboardingWebhookBody(),
+      onboardingInternal: sampleOnboardingWebhookPayload(),
       esign: sampleEsignWebhookPayload(),
     },
   });

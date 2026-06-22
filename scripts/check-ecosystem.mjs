@@ -1,20 +1,31 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-const envPath = path.join(process.cwd(), '.env.production.check');
-const env = Object.fromEntries(
-  fs
-    .readFileSync(envPath, 'utf8')
-    .split(/\r?\n/)
-    .filter((line) => line && !line.startsWith('#'))
-    .map((line) => {
-      const i = line.indexOf('=');
-      const key = line.slice(0, i);
-      let value = line.slice(i + 1);
-      if (value.startsWith('"') && value.endsWith('"')) value = value.slice(1, -1);
-      return [key, value];
-    }),
-);
+const envPath =
+  process.argv[2] && !process.argv[2].startsWith('--')
+    ? process.argv[2]
+    : path.join(process.cwd(), '.env.local');
+
+const envFromFile = (() => {
+  try {
+    return Object.fromEntries(
+      fs
+        .readFileSync(envPath, 'utf8')
+        .split(/\r?\n/)
+        .filter((line) => line && !line.startsWith('#'))
+        .map((line) => {
+          const i = line.indexOf('=');
+          let value = line.slice(i + 1);
+          if (value.startsWith('"') && value.endsWith('"')) value = value.slice(1, -1);
+          return [line.slice(0, i), value];
+        }),
+    );
+  } catch {
+    return {};
+  }
+})();
+
+const env = { ...envFromFile, ...process.env };
 
 async function checkAirtable() {
   const key = env.AIRTABLE_API_KEY;
