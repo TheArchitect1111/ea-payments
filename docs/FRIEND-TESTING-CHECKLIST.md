@@ -3,6 +3,7 @@
 Run one complete payment as a trusted tester before public launch.
 
 **Checkout URL:** https://www.efficiencyarchitects.online/checkout  
+**Launch Verification ($1 smoke test):** https://www.efficiencyarchitects.online/launch-verification  
 **Health:** https://www.efficiencyarchitects.online/api/health/launch  
 **Command Center:** https://www.efficiencyarchitects.online/launch
 

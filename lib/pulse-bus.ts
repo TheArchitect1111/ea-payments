@@ -25,6 +25,7 @@ export type PulseEventType =
   | 'portal.login'
   | 'proposal.pending'
   | 'onboarding.blocked'
+  | 'launch.verification.completed'
   | 'attention.critical';
 
 export interface PulseEvent {
