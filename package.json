@@ -19,7 +19,8 @@
     "test:tier2": "node scripts/test-tier2-launch.mjs",
     "launch:report": "node scripts/launch-command-center.mjs",
     "launch:check": "node scripts/launch-check.mjs",
-    "launch:readiness": "node scripts/launch-readiness.mjs"
+    "launch:readiness": "node scripts/launch-readiness.mjs",
+    "setup:launch-verification": "node scripts/create-stripe-launch-verification.mjs"
   },
   "dependencies": {
     "@ea/portal-chassis": "file:./vendor/portal-chassis",

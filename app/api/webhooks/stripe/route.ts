@@ -13,6 +13,8 @@ import { createPortalAccess } from '@/lib/portal-access';
 import { createOpportunityRecord } from '@/lib/partner-network';
 import { fireOnboardingWebhook } from '@/lib/make-webhooks';
 import { emitPulseEvent } from '@/lib/pulse-bus';
+import { isLaunchVerificationSession } from '@/lib/launch-verification';
+import { handleLaunchVerificationPayment } from '@/lib/launch-verification-flow';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,6 +23,7 @@ const VALID_PACKAGES: AirtablePackage[] = [
   'Capacity Blueprint',
   'Implementation Package',
   'Simplifi',
+  'Launch Verification',
 ];
 
 export async function POST(req: NextRequest) {
@@ -60,6 +63,11 @@ export async function POST(req: NextRequest) {
 
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promise<void> {
   const meta = session.metadata ?? {};
+
+  if (isLaunchVerificationSession(meta as Record<string, string | undefined>)) {
+    await handleLaunchVerificationPayment(session);
+    return;
+  }
 
   // Phase E: proposal-based payment. Branch early; Phase A logic is not run.
   if (meta.proposalId && meta.airtableRecordId) {

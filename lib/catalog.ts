@@ -23,7 +23,8 @@ export type PackageId =
   | 'implementation_professional'
   | 'implementation_premium'
   | 'implementation_enterprise'
-  | 'simplifi_early_access';
+  | 'simplifi_early_access'
+  | 'launch_verification';
 
 export interface CatalogItem {
   id: PackageId;
@@ -31,7 +32,7 @@ export interface CatalogItem {
   displayName: string;
   description: string;
   stripePriceEnvKey: string;
-  airtablePackageName: 'Capacity Assessment' | 'Capacity Blueprint' | 'Implementation Package' | 'Simplifi';
+  airtablePackageName: 'Capacity Assessment' | 'Capacity Blueprint' | 'Implementation Package' | 'Simplifi' | 'Launch Verification';
   priceCents: number;
   allowInlineStripePrice?: boolean;
   portalConfig?: PortalConfig;
@@ -39,6 +40,17 @@ export interface CatalogItem {
 }
 
 export const CATALOG: CatalogItem[] = [
+  {
+    id: 'launch_verification',
+    name: 'EA Launch Verification',
+    displayName: 'EA Launch Verification',
+    description:
+      'One-time $1 payment to verify the complete production checkout, Airtable, email, and webhook workflow before live customers.',
+    stripePriceEnvKey: 'STRIPE_PRICE_LAUNCH_VERIFICATION',
+    airtablePackageName: 'Launch Verification',
+    priceCents: 100,
+    allowInlineStripePrice: true,
+  },
   {
     id: 'simplifi_early_access',
     name: 'Simplifi Early Access',

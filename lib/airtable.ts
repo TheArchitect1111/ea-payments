@@ -5,7 +5,8 @@ export type AirtablePackage =
   | 'Capacity Assessment'
   | 'Capacity Blueprint'
   | 'Implementation Package'
-  | 'Simplifi';
+  | 'Simplifi'
+  | 'Launch Verification';
 
 export type PortalAccessStatus = 'Pending' | 'Active' | 'Suspended';
 export type OnboardingStatus =
@@ -13,7 +14,8 @@ export type OnboardingStatus =
   | 'In Progress'
   | 'Docs Sent'
   | 'Docs Signed'
-  | 'Complete';
+  | 'Complete'
+  | 'Launch Verification';
 
 export interface ClientRecord {
   clientName: string;
