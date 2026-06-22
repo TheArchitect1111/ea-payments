@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import type { CaptureApiResponse } from '@/lib/capture-response';
 import { pollCaptureUntilReady } from '@/lib/capture-polling';
 import CaptureSuccessPanel from '@/app/components/CaptureSuccessPanel';
+import ActiveSavePanel from '@/app/components/ActiveSavePanel';
 
 export default function CaptureProcessingPanel({
   captureId,
@@ -11,12 +12,14 @@ export default function CaptureProcessingPanel({
   onComplete,
   onError,
   autoOpenMagnifi = true,
+  showActiveSave = false,
 }: {
   captureId: string;
   title?: string;
   onComplete?: (response: CaptureApiResponse) => void;
   onError?: (message: string) => void;
   autoOpenMagnifi?: boolean;
+  showActiveSave?: boolean;
 }) {
   const [message, setMessage] = useState('Analyzing in the background…');
   const [result, setResult] = useState<CaptureApiResponse | null>(null);
@@ -59,16 +62,26 @@ export default function CaptureProcessingPanel({
 
   if (result?.record) {
     return (
-      <CaptureSuccessPanel
-        title={result.record.title ?? title ?? 'Opportunity'}
-        links={{
-          magnifiUrl: result.magnifiUrl,
-          considerUrl: result.considerUrl,
-          guidanceUrl: result.guidanceUrl,
-          clientMessage: result.clientMessage,
-        }}
-        autoOpenMagnifi={autoOpenMagnifi}
-      />
+      <div className="space-y-3">
+        {showActiveSave && (
+          <ActiveSavePanel
+            recordId={result.record.id}
+            title={result.record.title ?? title ?? 'Opportunity'}
+          />
+        )}
+        <CaptureSuccessPanel
+          title={result.record.title ?? title ?? 'Opportunity'}
+          links={{
+            magnifiUrl: result.magnifiUrl,
+            considerUrl: result.considerUrl,
+            guidanceUrl: result.guidanceUrl,
+            workspaceUrl: result.workspaceUrl,
+            clientMessage: result.clientMessage,
+          }}
+          amplifiDraft={result.amplifiDraft}
+          autoOpenMagnifi={autoOpenMagnifi}
+        />
+      </div>
     );
   }
 

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getClientByPortalSlug } from '@/lib/airtable';
 import { resolveConsiderExperience } from '@/lib/consider-resolve';
 import { EA_PLATFORM_URL } from '@/lib/platform-urls';
+import { SIMPLIFI_APP_URL } from '@/lib/simplifi-app-host';
 
 export const dynamic = 'force-dynamic';
 
@@ -64,9 +65,13 @@ export async function GET() {
       amplify: `${base}/amplify`,
       storyDemo: `${base}/story/selena`,
       signIn: `${base}/sign-in`,
+      simplifiWorkspace: `${base}/simplifi/workspace`,
+      simplifiApp: SIMPLIFI_APP_URL,
     },
     manual: {
       dns: 'Point www.efficiencyarchitects.online to ea-payments in Vercel → docs/DNS-THREE-CLICKS.md',
+      simplifiAppDns:
+        'Add app.simplifi.ai in Vercel Domains (same project) → CNAME to cname.vercel-dns.com — middleware routes / to workspace',
       makeWebhooks: env.onboardingWebhook ? null : 'Set ONBOARDING_WEBHOOK_URL on Vercel',
       resend: env.resend && env.resendFrom ? null : 'Set RESEND_API_KEY + RESEND_FROM_EMAIL + verify domain',
       chromeExtension: captureExtensionKey

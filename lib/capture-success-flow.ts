@@ -3,6 +3,7 @@ export interface CaptureSuccessLinks {
   magnifiUrl?: string;
   considerUrl?: string;
   guidanceUrl?: string;
+  workspaceUrl?: string;
   clientMessage?: string;
 }
 

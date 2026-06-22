@@ -120,6 +120,7 @@ export default function SimplifiWorkspace({
                       <h3>{obj.title}</h3>
                       <p className="sw-card-meta">
                         {obj.type}
+                        {obj.savePurpose ? ` · ${obj.savePurpose}` : ''}
                         {obj.opportunityScore != null ? ` · ${obj.opportunityScore}/100` : ''}
                         {obj.dueDate ? ` · due ${obj.dueDate}` : ''}
                       </p>

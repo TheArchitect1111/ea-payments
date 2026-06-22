@@ -51,6 +51,8 @@ export interface CaptureRecord {
   whyThisMatters?: string;
   whatMostPeopleDo?: string;
   whatWeRecommend?: string;
+  savePurpose?: string;
+  saveReason?: string;
 }
 
 export interface CreateCaptureInput {
@@ -146,6 +148,8 @@ function mapRecord(rec: { id: string; fields: Record<string, unknown> }): Captur
     whyThisMatters: (f['Why This Matters'] as string) ?? undefined,
     whatMostPeopleDo: (f['What Most People Do'] as string) ?? undefined,
     whatWeRecommend: (f['What We Recommend'] as string) ?? undefined,
+    savePurpose: (f['Save Purpose'] as string) ?? undefined,
+    saveReason: (f['Save Reason'] as string) ?? undefined,
   };
 }
 
@@ -499,6 +503,42 @@ export async function updateObjectGuidance(
       },
     );
     if (!res.ok) return { ok: false, error: 'Failed to update object guidance.' };
+    return { ok: true };
+  } catch {
+    return { ok: false, error: 'Unexpected error.' };
+  }
+}
+
+export async function updateActiveSave(
+  recordId: string,
+  input: {
+    savePurpose: string;
+    saveReason?: string;
+    dueDate: string;
+    nextAction: string;
+  },
+): Promise<{ ok: boolean; error?: string }> {
+  if (!process.env.AIRTABLE_API_KEY) {
+    return { ok: false, error: 'AIRTABLE_API_KEY not configured.' };
+  }
+
+  const fields: Record<string, string> = {
+    'Save Purpose': input.savePurpose,
+    'Due Date': input.dueDate,
+    'Next Action': input.nextAction,
+  };
+  if (input.saveReason) fields['Save Reason'] = input.saveReason;
+
+  try {
+    const res = await fetch(
+      `https://api.airtable.com/v0/${BASE_ID}/${encodeURIComponent(CAPTURES_TABLE)}/${recordId}`,
+      {
+        method: 'PATCH',
+        headers: authHeaders(),
+        body: JSON.stringify({ fields, typecast: true }),
+      },
+    );
+    if (!res.ok) return { ok: false, error: 'Failed to save Active Save.' };
     return { ok: true };
   } catch {
     return { ok: false, error: 'Unexpected error.' };

@@ -1,6 +1,7 @@
 import type { CapturePipelineResult } from './capture-pipeline';
 import type { CaptureRecord, CaptureStatus } from './capture-records';
 import type { SimplifiBusinessScores } from './simplifi-business-analysis';
+import { buildAmplifiSocialDraft, type AmplifiSocialDraft } from './amplifi-draft';
 
 export interface CaptureApiResponse {
   ok: boolean;
@@ -19,7 +20,22 @@ export interface CaptureApiResponse {
   considerSlug?: string;
   clientMessage?: string;
   workspaceUrl?: string;
+  amplifiDraft?: AmplifiSocialDraft;
   error?: string;
+}
+
+function amplifiDraftFromResult(result: CapturePipelineResult): AmplifiSocialDraft | undefined {
+  const considerUrl = result.opportunity?.shareUrl ?? result.record?.shareUrl;
+  if (!considerUrl) return undefined;
+  const businessName =
+    result.opportunity?.businessName ?? result.record?.businessName ?? result.record?.title ?? '';
+  const quickWin = result.opportunity?.magnifi.quickWins?.[0];
+  return buildAmplifiSocialDraft({
+    businessName,
+    considerUrl,
+    quickWin,
+    headline: result.record?.analysisSummary?.split('\n')[0],
+  });
 }
 
 export function buildCaptureApiResponse(result: CapturePipelineResult): CaptureApiResponse {
@@ -42,7 +58,18 @@ export function buildCaptureApiResponse(result: CapturePipelineResult): CaptureA
     considerUrl: result.opportunity?.shareUrl ?? result.record?.shareUrl,
     considerSlug: result.opportunity?.prospectSlug ?? result.record?.considerSlug,
     clientMessage: result.opportunity?.clientMessage ?? result.record?.clientMessage,
+    workspaceUrl: '/simplifi/workspace',
+    amplifiDraft: amplifiDraftFromResult(result),
   };
+}
+
+function amplifiDraftFromRecord(record: CaptureRecord): AmplifiSocialDraft | undefined {
+  if (!record.shareUrl) return undefined;
+  return buildAmplifiSocialDraft({
+    businessName: record.businessName ?? record.title,
+    considerUrl: record.shareUrl,
+    headline: record.analysisSummary?.split('\n')[0],
+  });
 }
 
 export function buildCaptureStatusResponse(record: CaptureRecord): CaptureApiResponse {
@@ -60,5 +87,6 @@ export function buildCaptureStatusResponse(record: CaptureRecord): CaptureApiRes
     considerSlug: record.considerSlug,
     clientMessage: record.clientMessage,
     workspaceUrl: '/simplifi/workspace',
+    amplifiDraft: ready ? amplifiDraftFromRecord(record) : undefined,
   };
 }

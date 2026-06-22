@@ -13,6 +13,7 @@ The codebase is **Simplifi** (EA Intelligence OS). Vercel project name may still
 |---------|-----|
 | Production | https://www.efficiencyarchitects.online |
 | Workspace | https://www.efficiencyarchitects.online/simplifi/workspace |
+| Simplifi app | https://app.simplifi.ai (add domain in Vercel) |
 | App alias | `/app` → `/simplifi/workspace` |
 | Capture | `/simplifi/capture` |
 
@@ -24,8 +25,21 @@ The codebase is **Simplifi** (EA Intelligence OS). Vercel project name may still
 - Why This Matters (long text)
 - What Most People Do (long text)
 - What We Recommend (long text)
+- Save Purpose (single line)
+- Save Reason (long text)
 
 Guidance triple is written automatically when capture analysis completes.
+
+## Active Save™
+
+After capture, users set **purpose + target date** (Review Later, Visit Later, etc.). Stored in Save Purpose, Due Date, Next Action.
+
+## app.simplifi.ai (Vercel DNS)
+
+1. Vercel → ea-payments project → **Settings → Domains** → Add `app.simplifi.ai`
+2. At your DNS host, **CNAME** `app` → `cname.vercel-dns.com`
+3. Middleware routes: `/` → workspace, `/capture` → `/simplifi/capture`
+4. Optional staging host: `app-simplifi.vercel.app` (add in Vercel if desired)
 
 ## Architect Mode (CTP gate)
 

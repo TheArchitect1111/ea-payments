@@ -16,6 +16,8 @@ export interface SimplifiObject {
   nextAction: string;
   dueDate?: string;
   owner?: string;
+  savePurpose?: string;
+  saveReason?: string;
   whyThisMatters: string;
   whatMostPeopleDo: string;
   whatWeRecommend: string;
@@ -61,6 +63,8 @@ export function captureToObject(capture: CaptureRecord, baseUrl?: string): Simpl
     nextAction: capture.nextAction ?? triple.nextAction,
     dueDate: capture.dueDate ?? triple.suggestedDueDate,
     owner: capture.owner,
+    savePurpose: capture.savePurpose,
+    saveReason: capture.saveReason,
     whyThisMatters: triple.whyThisMatters,
     whatMostPeopleDo: triple.whatMostPeopleDo,
     whatWeRecommend: triple.whatWeRecommend,

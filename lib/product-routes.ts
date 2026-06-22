@@ -22,6 +22,8 @@ export const PRODUCT_HOST_ENTRY: Record<string, string> = {
   'ea-magnifi.vercel.app': '/consider/selena',
   'ea-amplifi.vercel.app': '/portal/login?next=/portal/demo-client/amplifi',
   'ea-pulse.vercel.app': '/portal/login?next=/portal/demo-client/pulse',
+  'app.simplifi.ai': '/simplifi/workspace',
+  'app-simplifi.vercel.app': '/simplifi/workspace',
 };
 
 export function resolveProductHostRedirect(host: string | null, pathname: string): string | null {

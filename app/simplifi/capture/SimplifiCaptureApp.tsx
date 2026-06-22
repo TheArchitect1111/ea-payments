@@ -4,7 +4,9 @@ import { useCallback, useRef, useState, useEffect } from 'react';
 import Link from 'next/link';
 import type { CaptureRecord } from '@/lib/capture-records';
 import CaptureSuccessPanel from '@/app/components/CaptureSuccessPanel';
+import ActiveSavePanel from '@/app/components/ActiveSavePanel';
 import CaptureProcessingPanel from '@/app/components/CaptureProcessingPanel';
+import type { AmplifiSocialDraft } from '@/lib/amplifi-draft';
 import GuidedFirstSuccessFlow from '@/app/components/guided-first-success/GuidedFirstSuccessFlow';
 import UniversalCoachPanel from '@/app/components/guided-first-success/UniversalCoachPanel';
 
@@ -21,6 +23,8 @@ interface AnalyzeResponse {
   guidanceUrl?: string;
   considerUrl?: string;
   clientMessage?: string;
+  workspaceUrl?: string;
+  amplifiDraft?: AmplifiSocialDraft;
 }
 
 type SheetView = 'menu' | 'url' | 'upload' | 'result';
@@ -211,6 +215,7 @@ export default function SimplifiCaptureApp({
             <CaptureProcessingPanel
               captureId={processingId}
               title={result?.record?.title}
+              showActiveSave={loggedIn}
               onComplete={() => setProcessingId(null)}
               onError={() => setProcessingId(null)}
             />
@@ -279,14 +284,22 @@ export default function SimplifiCaptureApp({
         {view === 'result' && result?.record && !result.processing && (
           <>
             <p className="sc-sheet-title">Pipeline complete</p>
+            {loggedIn && result.record.id && (
+              <ActiveSavePanel
+                recordId={result.record.id}
+                title={result.record.title ?? 'Opportunity'}
+              />
+            )}
             <CaptureSuccessPanel
               title={result.record.title ?? 'Opportunity'}
               links={{
                 magnifiUrl: result.magnifiUrl,
                 considerUrl: result.considerUrl,
                 guidanceUrl: result.guidanceUrl,
+                workspaceUrl: result.workspaceUrl,
                 clientMessage: result.clientMessage,
               }}
+              amplifiDraft={result.amplifiDraft}
               onClose={closeSheet}
               autoOpenMagnifi
             />

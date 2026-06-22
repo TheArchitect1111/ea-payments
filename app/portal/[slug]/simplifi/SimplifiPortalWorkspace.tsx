@@ -3,7 +3,9 @@
 import { useRef, useState, useEffect } from 'react';
 import type { CaptureRecord } from '@/lib/capture-records';
 import CaptureSuccessPanel from '@/app/components/CaptureSuccessPanel';
+import ActiveSavePanel from '@/app/components/ActiveSavePanel';
 import EmptyStateGuide from '@/app/components/guided-first-success/EmptyStateGuide';
+import type { AmplifiSocialDraft } from '@/lib/amplifi-draft';
 
 const NAVY = '#1B2B4D';
 const GOLD = '#C9A844';
@@ -31,6 +33,8 @@ interface AnalyzeResponse {
   considerUrl?: string;
   considerSlug?: string;
   clientMessage?: string;
+  workspaceUrl?: string;
+  amplifiDraft?: AmplifiSocialDraft;
 }
 
 function scoreLabel(value?: number) {
@@ -237,14 +241,20 @@ export default function SimplifiPortalWorkspace({
 
         {lastResult?.record && (
           <div className="mt-4 border border-neutral-200 bg-neutral-50 p-4">
+            <ActiveSavePanel
+              recordId={lastResult.record.id}
+              title={lastResult.record.title}
+            />
             <CaptureSuccessPanel
               title={lastResult.record.title}
               links={{
                 magnifiUrl: lastResult.magnifiUrl,
                 considerUrl: lastResult.considerUrl,
                 guidanceUrl: lastResult.guidanceUrl,
+                workspaceUrl: lastResult.workspaceUrl,
                 clientMessage: lastResult.clientMessage,
               }}
+              amplifiDraft={lastResult.amplifiDraft}
               autoOpenMagnifi
             />
           </div>

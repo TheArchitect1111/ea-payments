@@ -3,7 +3,9 @@
 import { useCallback, useRef, useState, useEffect } from 'react';
 import Link from 'next/link';
 import CaptureSuccessPanel from '@/app/components/CaptureSuccessPanel';
+import ActiveSavePanel from '@/app/components/ActiveSavePanel';
 import CaptureProcessingPanel from '@/app/components/CaptureProcessingPanel';
+import type { AmplifiSocialDraft } from '@/lib/amplifi-draft';
 import GuidedFirstSuccessFlow from '@/app/components/guided-first-success/GuidedFirstSuccessFlow';
 import UniversalCoachPanel from '@/app/components/guided-first-success/UniversalCoachPanel';
 
@@ -15,11 +17,13 @@ interface AnalyzeResponse {
   error?: string;
   processing?: boolean;
   captureId?: string;
-  record?: { title?: string };
+  record?: { id?: string; title?: string };
   considerUrl?: string;
   magnifiUrl?: string;
   guidanceUrl?: string;
+  workspaceUrl?: string;
   clientMessage?: string;
+  amplifiDraft?: AmplifiSocialDraft;
 }
 
 export default function AmplifiShareApp({
@@ -176,6 +180,7 @@ export default function AmplifiShareApp({
             <CaptureProcessingPanel
               captureId={processingId}
               title={result?.record?.title}
+              showActiveSave={Boolean(loggedIn && slug)}
               onComplete={() => setProcessingId(null)}
               onError={() => setProcessingId(null)}
             />
@@ -185,14 +190,22 @@ export default function AmplifiShareApp({
 
       {open && result?.record && !result.processing && (
         <div className="as-sheet as-sheet-open" role="dialog">
+          {loggedIn && result.record.id && (
+            <ActiveSavePanel
+              recordId={result.record.id}
+              title={result.record.title ?? 'Your Amplifi story'}
+            />
+          )}
           <CaptureSuccessPanel
             title={result.record.title ?? 'Your Amplifi story'}
             links={{
               magnifiUrl: result.magnifiUrl,
               considerUrl: result.considerUrl,
               guidanceUrl: result.guidanceUrl,
+              workspaceUrl: result.workspaceUrl,
               clientMessage: result.clientMessage,
             }}
+            amplifiDraft={result.amplifiDraft}
             onClose={() => setOpen(false)}
             autoOpenMagnifi
           />
