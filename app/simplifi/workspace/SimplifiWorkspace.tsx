@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import type { SimplifiObject } from '@/lib/simplifi-objects';
+import type { MemoryAsset } from '@/lib/memory-assets';
 import EmptyStateGuide from '@/app/components/guided-first-success/EmptyStateGuide';
 
 interface BriefPayload {
@@ -12,7 +13,7 @@ interface BriefPayload {
     title: string;
     detail: string;
     href?: string;
-    kind: 'momentum' | 'deadline' | 'explore';
+    kind: 'momentum' | 'deadline' | 'explore' | 'overdue' | 'stale' | 'due-soon';
   }[];
   recommendedNext: { label: string; href: string } | null;
 }
@@ -22,20 +23,39 @@ export default function SimplifiWorkspace({
   loggedIn,
   objects,
   brief,
+  memoryLibrary,
 }: {
   slug: string | null;
   loggedIn: boolean;
   objects: SimplifiObject[];
   brief: BriefPayload;
+  memoryLibrary: MemoryAsset[];
 }) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
-  const [selected, setSelected] = useState<SimplifiObject | null>(
-    objects[0] ?? null,
-  );
+  const [selected, setSelected] = useState<SimplifiObject | null>(objects[0] ?? null);
+  const [localObjects, setLocalObjects] = useState(objects);
+  const [actionNote, setActionNote] = useState('');
 
   const toggleExpand = (obj: SimplifiObject) => {
     setExpandedId((prev) => (prev === obj.id ? null : obj.id));
     setSelected(obj);
+  };
+
+  const archiveObject = async (recordId: string) => {
+    setActionNote('');
+    const res = await fetch('/api/portal/opportunities/manage', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'archive', recordId }),
+    });
+    const data = (await res.json()) as { ok?: boolean; error?: string };
+    if (!data.ok) {
+      setActionNote(data.error ?? 'Could not archive.');
+      return;
+    }
+    setLocalObjects((prev) => prev.filter((o) => o.id !== recordId));
+    setExpandedId(null);
+    setActionNote('Archived — Smart Expiration cleared.');
   };
 
   return (
@@ -89,13 +109,42 @@ export default function SimplifiWorkspace({
         )}
       </section>
 
+      {memoryLibrary.length > 0 && (
+        <section className="sw-memory">
+          <div className="sw-inbox-header">
+            <h2>Memory Library</h2>
+            <span className="sw-count">{memoryLibrary.length} assets</span>
+          </div>
+          <p className="sw-muted">Reusable captures — adapt, don&apos;t re-capture from scratch.</p>
+          <ul className="sw-memory-list">
+            {memoryLibrary.slice(0, 6).map((asset) => (
+              <li key={asset.id} className="sw-memory-item">
+                <div>
+                  <strong>{asset.title}</strong>
+                  <p>{asset.reuseHint.slice(0, 100)}</p>
+                  {asset.savePurpose && (
+                    <span className="sw-memory-tag">{asset.savePurpose}</span>
+                  )}
+                </div>
+                {asset.href && (
+                  <Link href={asset.href} className="sw-link">
+                    Reuse
+                  </Link>
+                )}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
       <section className="sw-inbox">
         <div className="sw-inbox-header">
           <h2>Inbox</h2>
-          <span className="sw-count">{objects.length} active</span>
+          <span className="sw-count">{localObjects.length} active</span>
         </div>
+        {actionNote && <p className="sw-action-note">{actionNote}</p>}
 
-        {objects.length === 0 ? (
+        {localObjects.length === 0 ? (
           <EmptyStateGuide
             title="Nothing in your inbox yet"
             explanation="Paste a URL, upload a file, or jot a note — Simplifi will score the opportunity and surface your next move."
@@ -104,7 +153,7 @@ export default function SimplifiWorkspace({
           />
         ) : (
           <ul className="sw-inbox-list">
-            {objects.map((obj) => {
+            {localObjects.map((obj) => {
               const open = expandedId === obj.id;
               return (
                 <li key={obj.id} className={`sw-card ${open ? 'sw-card-open' : ''}`}>
@@ -157,6 +206,15 @@ export default function SimplifiWorkspace({
                           <a href={obj.shareUrl} className="sw-btn sw-btn-small sw-btn-ghost">
                             Share
                           </a>
+                        )}
+                        {loggedIn && (
+                          <button
+                            type="button"
+                            className="sw-btn sw-btn-small sw-btn-ghost"
+                            onClick={() => archiveObject(obj.id)}
+                          >
+                            Archive
+                          </button>
                         )}
                         {slug && (
                           <Link

@@ -35,6 +35,7 @@ function amplifiDraftFromResult(result: CapturePipelineResult): AmplifiSocialDra
     considerUrl,
     quickWin,
     headline: result.record?.analysisSummary?.split('\n')[0],
+    prospectName: result.record?.prospectName,
   });
 }
 
@@ -69,6 +70,7 @@ function amplifiDraftFromRecord(record: CaptureRecord): AmplifiSocialDraft | und
     businessName: record.businessName ?? record.title,
     considerUrl: record.shareUrl,
     headline: record.analysisSummary?.split('\n')[0],
+    prospectName: record.prospectName,
   });
 }
 

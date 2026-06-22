@@ -1,5 +1,6 @@
 import type { CaptureRecord } from './capture-records';
 import { buildGuidanceTriple } from './guidance-triple';
+import { buildExpirationAlerts } from './smart-expiration';
 
 export type SimplifiObjectStatus = 'active' | 'triaged' | 'archived' | 'analyzing';
 
@@ -94,7 +95,7 @@ export interface DailyBriefItem {
   title: string;
   detail: string;
   href?: string;
-  kind: 'momentum' | 'deadline' | 'explore';
+  kind: 'momentum' | 'deadline' | 'explore' | 'overdue' | 'stale' | 'due-soon';
 }
 
 export function buildDailyBrief(objects: SimplifiObject[], firstName: string): {
@@ -106,6 +107,16 @@ export function buildDailyBrief(objects: SimplifiObject[], firstName: string): {
   const top = sorted.filter((o) => o.status !== 'archived').slice(0, 6);
 
   const items: DailyBriefItem[] = [];
+
+  for (const alert of buildExpirationAlerts(top)) {
+    items.push({
+      id: `x-${alert.objectId}`,
+      title: alert.title,
+      detail: alert.detail,
+      href: alert.href,
+      kind: alert.kind,
+    });
+  }
 
   const highMomentum = top.filter((o) => (o.opportunityScore ?? 0) >= 55).slice(0, 3);
   for (const o of highMomentum) {

@@ -5,6 +5,7 @@ import { getClientByPortalSlug } from '@/lib/airtable';
 import { getPortalCaptures } from '@/lib/capture-records';
 import { captureToObject, sortInbox, buildDailyBrief } from '@/lib/simplifi-objects';
 import type { SimplifiObject } from '@/lib/simplifi-objects';
+import { objectsToMemoryLibrary } from '@/lib/memory-assets';
 import { EA_PLATFORM_URL } from '@/lib/platform-urls';
 import SimplifiWorkspace from './SimplifiWorkspace';
 import './simplifi-workspace.css';
@@ -34,6 +35,7 @@ export default async function SimplifiWorkspacePage() {
   }
 
   const brief = buildDailyBrief(objects, firstName);
+  const memoryLibrary = objectsToMemoryLibrary(objects);
 
   return (
     <div className="sw-app">
@@ -56,6 +58,7 @@ export default async function SimplifiWorkspacePage() {
         loggedIn={Boolean(session)}
         objects={objects}
         brief={brief}
+        memoryLibrary={memoryLibrary}
       />
     </div>
   );

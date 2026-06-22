@@ -186,6 +186,71 @@
   border-left: 3px solid #1b2b4d;
 }
 
+.sw-brief-overdue {
+  border-left: 3px solid #b42318;
+  background: #fff5f5;
+}
+
+.sw-brief-stale {
+  border-left: 3px solid #c9a844;
+}
+
+.sw-brief-due-soon {
+  border-left: 3px solid #0a66ff;
+}
+
+.sw-memory {
+  background: #fff;
+  border: 1px solid #e8edf5;
+  border-radius: 16px;
+  padding: 24px;
+}
+
+.sw-memory-list {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.sw-memory-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #f7f9fc;
+}
+
+.sw-memory-item strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.sw-memory-item p {
+  margin: 0;
+  font-size: 12px;
+  color: #5f6b7a;
+}
+
+.sw-memory-tag {
+  display: inline-block;
+  margin-top: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #eaf2ff;
+  color: #0a66ff;
+}
+
+.sw-action-note {
+  font-size: 13px;
+  color: #0a66ff;
+  margin: 0 0 12px;
+}
+
 .sw-link {
   font-size: 12px;
   font-weight: 800;

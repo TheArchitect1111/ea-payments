@@ -17,7 +17,15 @@ The codebase is **Simplifi** (EA Intelligence OS). Vercel project name may still
 | App alias | `/app` → `/simplifi/workspace` |
 | Capture | `/simplifi/capture` |
 
-## Airtable — Capture Records fields (add if missing)
+## Airtable — marketing views + new fields
+
+**Paste prompt:** `ea-operating-system/Prompt Library/Airtable Rename - MARKETING NAMES PROMPT.md`  
+**Open base:** https://airtable.com/appv0YoLIMY45fmDA
+
+Safe: view names, descriptions, demo labels.  
+Locked: table names + column headers listed in that prompt.
+
+### Capture Records fields (add if missing — do not rename)
 
 - Next Action (single line)
 - Due Date (date)

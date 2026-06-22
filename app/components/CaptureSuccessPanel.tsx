@@ -7,6 +7,8 @@ import {
   type CaptureSuccessLinks,
 } from '@/lib/capture-success-flow';
 import type { AmplifiSocialDraft } from '@/lib/amplifi-draft';
+import StoryDraftPanel from '@/app/components/StoryDraftPanel';
+import '@/app/components/story-draft-panel.css';
 import { useEffect, useState } from 'react';
 
 export default function CaptureSuccessPanel({
@@ -24,7 +26,6 @@ export default function CaptureSuccessPanel({
 }) {
   const [shareNote, setShareNote] = useState('');
   const [magnifiOpened, setMagnifiOpened] = useState(false);
-  const [draftCopied, setDraftCopied] = useState(false);
 
   useEffect(() => {
     if (!autoOpenMagnifi || !links.magnifiUrl || magnifiOpened) return;
@@ -43,13 +44,6 @@ export default function CaptureSuccessPanel({
     if (!links.considerUrl) return;
     const result = await shareAmplifiLink(links.considerUrl, title);
     setShareNote(result === 'shared' ? 'Shared via Amplifi.' : 'Consider link copied.');
-  };
-
-  const copyDraft = async () => {
-    if (!amplifiDraft?.linkedIn) return;
-    await navigator.clipboard.writeText(amplifiDraft.linkedIn);
-    setDraftCopied(true);
-    setTimeout(() => setDraftCopied(false), 2000);
   };
 
   return (
@@ -98,21 +92,7 @@ export default function CaptureSuccessPanel({
           </a>
         )}
       </div>
-      {amplifiDraft && (
-        <div className="space-y-2">
-          <p className="text-xs font-bold uppercase tracking-wider text-[#1B2B4D]">Amplifi post draft</p>
-          <pre className="text-xs bg-neutral-50 border p-3 whitespace-pre-wrap max-h-40 overflow-auto">
-            {amplifiDraft.linkedIn}
-          </pre>
-          <button
-            type="button"
-            className="w-full py-2 rounded-full font-bold text-sm bg-[#0A66FF] text-white"
-            onClick={copyDraft}
-          >
-            {draftCopied ? 'Copied!' : 'Copy LinkedIn draft'}
-          </button>
-        </div>
-      )}
+      {amplifiDraft && <StoryDraftPanel draft={amplifiDraft} />}
       {shareNote && <p className="text-xs text-neutral-600">{shareNote}</p>}
       {links.clientMessage && (
         <pre className="text-xs bg-neutral-50 border p-3 whitespace-pre-wrap">{links.clientMessage}</pre>

@@ -1,0 +1,77 @@
+# Morning Launch Checklist
+
+**Canonical URL:** https://www.efficiencyarchitects.online  
+**Demo login:** demo@efficiencyarchitects.online / DemoPulse2026!
+
+Code is deployed. These steps need your hands in Airtable, Vercel, and DNS.
+
+---
+
+## 1. Airtable (15 min)
+
+1. Open https://airtable.com/appv0YoLIMY45fmDA
+2. Paste prompt from `ea-operating-system/Prompt Library/Airtable Rename - MARKETING NAMES PROMPT.md`
+3. Confirm **8 new columns** exist on Capture Records (Guidance + Active Save fields)
+4. Test capture → Active Save → fields populate
+
+---
+
+## 2. app.simplifi.ai DNS (10 min)
+
+1. Vercel → **ea-payments** → Settings → Domains → Add `app.simplifi.ai`
+2. DNS host → CNAME `app` → `cname.vercel-dns.com`
+3. Wait for SSL → https://app.simplifi.ai should open workspace
+
+Until DNS propagates, use:
+- https://www.efficiencyarchitects.online/simplifi/workspace
+- https://www.efficiencyarchitects.online/app
+
+---
+
+## 3. Vercel env (if not set)
+
+| Variable | Purpose |
+|----------|---------|
+| `EA_CAPTURE_API_KEY` | Extension + bookmarklet capture |
+| `ONBOARDING_WEBHOOK_URL` | Full launch automation |
+| `ESIGN_WEBHOOK_URL` | E-sign flow |
+| `ARCHITECT_PORTAL_SLUGS` | CTP gate (optional) |
+| `ARCHITECT_EMAILS` | CTP gate (optional) |
+
+Redeploy after changes.
+
+---
+
+## 4. 12-point smoke test
+
+| # | System | URL / action |
+|---|--------|--------------|
+| 1 | Health | `/api/health/launch` |
+| 2 | Tester hub | `/start` |
+| 3 | Workspace | `/simplifi/workspace` |
+| 4 | Capture | `/simplifi/capture` → URL |
+| 5 | Active Save | Purpose + due date after capture |
+| 6 | Story drafts | LinkedIn / Email / SMS tabs on success |
+| 7 | Magnifi | Auto-opens after capture |
+| 8 | Amplifi | `/amplifi/share` |
+| 9 | Extension | Screenshot → notification |
+| 10 | Update Hub | Submit → admin publish → client feed |
+| 11 | Command Center | `/admin/master` Attention Center |
+| 12 | GFS modal | First login on portal/capture |
+
+---
+
+## 5. Optional polish
+
+- GitHub rename: `ea-payments` → `simplifi`
+- Stripe live E2E test
+- `PULSE_EVENTS_TABLE` in Airtable for persistent Pulse bus
+
+---
+
+## What shipped overnight (Phase 2 start)
+
+- **Story Engine v1** — LinkedIn, email, SMS, caption drafts (`lib/story-engine.ts`)
+- **Memory Library** — reusable assets on workspace
+- **Smart Expiration** — overdue / stale / due-soon in Daily Brief
+- **Archive from workspace** — clears inbox without portal hop
