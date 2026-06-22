@@ -14,7 +14,8 @@
     "sync-all-chassis": "npm run sync-chassis && npm run sync-premium && npm run sync-landing",
     "setup-capture-records": "node scripts/setup-capture-records-table.mjs",
     "setup-pulse-events": "node scripts/setup-pulse-events-table.mjs",
-    "verify-airtable": "node scripts/verify-airtable-schema.mjs"
+    "verify-airtable": "node scripts/verify-airtable-schema.mjs",
+    "test:capture-e2e": "node scripts/test-capture-e2e.mjs"
   },
   "dependencies": {
     "@ea/portal-chassis": "file:./vendor/portal-chassis",
