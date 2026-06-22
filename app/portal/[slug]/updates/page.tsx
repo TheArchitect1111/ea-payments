@@ -4,6 +4,8 @@ import { EA_PORTAL_COOKIE, verifySession } from '@/lib/ea-portal-auth';
 import { getClientByPortalSlug, getContentRequestsForClient } from '@/lib/airtable';
 import { PortalShell, NAVY, GOLD } from '@/lib/chassis/PortalShell';
 import UpdateHubExperience from '@/app/portal/components/UpdateHubExperience';
+import UpdateHubFeed from '@/app/portal/components/UpdateHubFeed';
+import { getPublishedFeedItems, getPendingRequests } from '@/lib/update-hub-feed';
 import '../ea-portal.css';
 
 export const dynamic = 'force-dynamic';
@@ -26,8 +28,10 @@ export default async function UpdatesPage({ params }: { params: Promise<{ slug: 
   if (!client) redirect('/portal/login');
 
   const requests = await getContentRequestsForClient(client.id);
-  const pending = requests.filter((r) => ['Pending Review', 'In Progress', 'Awaiting Approval'].includes(r.status)).length;
-  const published = requests.filter((r) => ['Published', 'Completed'].includes(r.status)).length;
+  const publishedFeed = getPublishedFeedItems(requests);
+  const pendingRequests = getPendingRequests(requests);
+  const pending = pendingRequests.length;
+  const published = publishedFeed.length;
   const scheduled = requests.filter((r) => r.status === 'Scheduled').length;
 
   return (
@@ -56,6 +60,8 @@ export default async function UpdatesPage({ params }: { params: Promise<{ slug: 
           ))}
         </div>
 
+        <UpdateHubFeed items={publishedFeed} organizationName={client.organization ?? client.clientName} />
+
         <UpdateHubExperience slug={slug} requestCount={requests.length} />
 
         <div className="mt-2 flex flex-wrap gap-3">
@@ -75,9 +81,9 @@ export default async function UpdatesPage({ params }: { params: Promise<{ slug: 
           </a>
         </div>
 
-        {requests.length > 0 && (
+        {pendingRequests.length > 0 && (
         <div className="ep-card mt-6">
-          <p className="ep-card-title">Recent Requests</p>
+          <p className="ep-card-title">Your requests in progress</p>
             <div className="overflow-x-auto">
               <table className="ep-info-table w-full min-w-[720px] text-left text-sm">
                 <thead>
@@ -90,7 +96,7 @@ export default async function UpdatesPage({ params }: { params: Promise<{ slug: 
                   </tr>
                 </thead>
                 <tbody>
-                  {requests.slice(0, 20).map((request) => (
+                  {pendingRequests.slice(0, 20).map((request) => (
                     <tr key={request.id}>
                       <td className="ep-info-value py-3">{request.requestType}</td>
                       <td className="ep-info-value py-3">{request.title}</td>

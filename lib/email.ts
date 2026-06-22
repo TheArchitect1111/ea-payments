@@ -837,6 +837,30 @@ export async function sendContentRequestConfirmation(data: {
   );
 }
 
+export async function sendUpdatePublishedEmail(data: {
+  email: string;
+  clientName: string;
+  title: string;
+  portalUrl: string;
+}): Promise<{ ok: boolean; error?: string }> {
+  const bodyHtml = `
+    <p style="margin:0 0 16px;font-size:15px;color:#1A1A2E;line-height:1.7;">Hi ${escHtml(data.clientName.split(' ')[0] || data.clientName)},</p>
+    <p style="margin:0 0 18px;font-size:15px;color:#1A1A2E;line-height:1.7;">Your update <strong>${escHtml(data.title)}</strong> is now published in Update Hub™.</p>
+    <p style="margin:0;font-size:14px;color:#555;line-height:1.7;">Open your portal to view the live feed.</p>`;
+
+  return resendEmail(
+    data.email,
+    `Update published: ${data.title}`,
+    baseEmailShell({
+      title: 'Update Published',
+      eyebrow: 'Update Hub™',
+      bodyHtml,
+      ctaLabel: 'View published updates',
+      ctaUrl: data.portalUrl,
+    }),
+  );
+}
+
 export async function sendEnhancementRequestConfirmation(data: {
   email: string;
   clientName: string;

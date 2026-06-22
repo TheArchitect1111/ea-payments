@@ -217,6 +217,40 @@ export async function getClientByPortalSlug(slug: string): Promise<PortalClientR
   }
 }
 
+export async function getClientByRecordId(recordId: string): Promise<PortalClientRecord | null> {
+  if (!process.env.AIRTABLE_API_KEY) return null;
+
+  try {
+    const res = await fetch(
+      `https://api.airtable.com/v0/${BASE_ID}/${encodeURIComponent(TABLE)}/${recordId}`,
+      { headers: authHeaders(), cache: 'no-store' },
+    );
+    if (!res.ok) return null;
+
+    const rec = (await res.json()) as { id: string; fields: Record<string, unknown> };
+    const f = rec.fields;
+    const slug = (f['Portal Slug'] as string) ?? '';
+
+    return {
+      id: rec.id,
+      clientName: (f['Client Name'] as string) ?? '',
+      email: (f['Email'] as string) ?? '',
+      organization: (f['Organization'] as string) || undefined,
+      packagePurchased: (f['Package Purchased'] as AirtablePackage) ?? 'Capacity Assessment',
+      amountPaid: (f['Amount Paid'] as number) ?? 0,
+      paymentDate: (f['Payment Date'] as string) ?? '',
+      portalAccessStatus: (f['Portal Access Status'] as PortalAccessStatus) ?? 'Pending',
+      portalSlug: slug,
+      passwordChanged: Boolean(f['Password Changed']),
+      passwordHash: (f['Password Hash'] as string) || undefined,
+      tempPassword: (f['Temp Password'] as string) || undefined,
+      onboardingStatus: (f['Onboarding Status'] as OnboardingStatus) || undefined,
+    };
+  } catch {
+    return null;
+  }
+}
+
 export async function getClientByEmail(email: string): Promise<PortalClientRecord | null> {
   if (!process.env.AIRTABLE_API_KEY) return null;
 
@@ -770,6 +804,7 @@ export interface ContentRequestRecord {
   versionNumber?: number;
   dateSubmitted?: string;
   datePublished?: string;
+  publishedContent?: string;
   submittedBy?: string;
 }
 
@@ -820,6 +855,7 @@ function mapContentRequest(record: {
     versionNumber: (f['Version Number'] as number) || undefined,
     dateSubmitted: (f['Date Submitted'] as string) || record.createdTime,
     datePublished: (f['Date Published'] as string) || undefined,
+    publishedContent: (f['Published Content'] as string) || (f['Content'] as string) || undefined,
     submittedBy: (f['Submitted By'] as string) || undefined,
   };
 }
@@ -971,7 +1007,7 @@ export async function createContentRequest(record: {
 
 export async function updateContentRequest(
   recordId: string,
-  patch: { status?: string; datePublished?: string }
+  patch: { status?: string; datePublished?: string; publishedContent?: string }
 ): Promise<{ ok: boolean; error?: string }> {
   if (!process.env.AIRTABLE_API_KEY) {
     return { ok: false, error: 'AIRTABLE_API_KEY not configured.' };
@@ -980,6 +1016,7 @@ export async function updateContentRequest(
   const fields: Record<string, unknown> = {};
   if (patch.status) fields['Status'] = patch.status;
   if (patch.datePublished) fields['Date Published'] = patch.datePublished;
+  if (patch.publishedContent) fields['Published Content'] = patch.publishedContent;
 
   try {
     const res = await fetch(
