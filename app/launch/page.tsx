@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { buildLaunchCommandCenterReport } from '@/lib/launch-command-center';
-import type { LaunchCheckItem, LaunchStatus } from '@/lib/launch-command-center';
+import type { LaunchCheckItem, LaunchSectionSummary, LaunchStatus } from '@/lib/launch-command-center';
 
 export const dynamic = 'force-dynamic';
 
@@ -57,12 +57,32 @@ function ItemRow({ item }: { item: LaunchCheckItem }) {
   );
 }
 
+function SectionBlock({ section }: { section: LaunchSectionSummary }) {
+  const pct = section.maxScore > 0 ? Math.round((section.score / section.maxScore) * 100) : null;
+  return (
+    <section className="mt-10">
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <h2 className="text-lg font-bold text-[#C9A844]">{section.name}</h2>
+        {pct !== null && (
+          <span className="text-xs text-neutral-400">
+            {section.score}/{section.maxScore} pts ({pct}%)
+          </span>
+        )}
+      </div>
+      <p className="mt-1 text-xs text-neutral-500">
+        Complete: {section.complete} · Blockers: {section.blockers} · Warnings: {section.warnings}
+      </p>
+      <ul className="mt-3 grid gap-3">
+        {section.items.map((item) => (
+          <ItemRow key={item.id} item={item} />
+        ))}
+      </ul>
+    </section>
+  );
+}
+
 export default async function LaunchCommandCenterPage() {
   const report = await buildLaunchCommandCenterReport();
-  const byCategory = report.items.reduce<Record<string, LaunchCheckItem[]>>((acc, item) => {
-    (acc[item.category] ??= []).push(item);
-    return acc;
-  }, {});
 
   return (
     <main className="min-h-screen bg-[#0f1729] text-white px-6 py-12">
@@ -70,7 +90,7 @@ export default async function LaunchCommandCenterPage() {
         <p className="text-xs font-bold uppercase tracking-[0.3em] text-[#C9A844]">Launch Command Center</p>
         <h1 className="mt-3 text-3xl font-black">Readiness report</h1>
         <p className="mt-2 text-neutral-400 text-sm">
-          Automated checks for Airtable, Stripe, Resend, Make, DNS, Sentry, and product flows.
+          Automated checks for infrastructure, payments, communications, onboarding, domains, and security.
           Updated {new Date(report.generatedAt).toLocaleString()}.
         </p>
 
@@ -82,23 +102,18 @@ export default async function LaunchCommandCenterPage() {
             Platform status:{' '}
             <strong className="text-white">{report.status.replace(/_/g, ' ')}</strong>
           </p>
-          <div className="mt-4 grid grid-cols-2 gap-2 text-xs text-neutral-400 sm:grid-cols-4">
+          <div className="mt-4 grid grid-cols-2 gap-2 text-xs text-neutral-400 sm:grid-cols-3">
+            <span>Launch blockers: {report.launchBlockers}</span>
+            <span>Warnings: {report.warnings}</span>
             <span>Complete: {report.summary.complete}</span>
-            <span>Missing: {report.summary.missing}</span>
-            <span>Needs creds: {report.summary.needsCredentials}</span>
-            <span>Human action: {report.summary.needsHumanAction}</span>
           </div>
+          <p className="mt-4 text-sm text-sky-300 border-t border-white/10 pt-4">
+            <strong className="text-white">Next:</strong> {report.recommendedNextAction}
+          </p>
         </section>
 
-        {Object.entries(byCategory).map(([category, items]) => (
-          <section key={category} className="mt-10">
-            <h2 className="text-lg font-bold text-[#C9A844]">{category}</h2>
-            <ul className="mt-3 grid gap-3">
-              {items.map((item) => (
-                <ItemRow key={item.id} item={item} />
-              ))}
-            </ul>
-          </section>
+        {report.sections.map((section) => (
+          <SectionBlock key={section.id} section={section} />
         ))}
 
         <section className="mt-10 text-sm text-neutral-400 space-y-2 border-t border-white/10 pt-8">
@@ -115,8 +130,14 @@ export default async function LaunchCommandCenterPage() {
               Tester hub
             </Link>
           </p>
-          <p>CLI: <code className="text-neutral-300">npm run launch:report</code></p>
-          <p>Full check: <code className="text-neutral-300">npm run launch:check</code></p>
+          <p>
+            Guides:{' '}
+            <span className="text-neutral-300">{report.links.friendTestingGuide}</span> ·{' '}
+            <span className="text-neutral-300">{report.links.finalReport}</span>
+          </p>
+          <p>
+            CLI: <code className="text-neutral-300">npm run launch:report</code>
+          </p>
         </section>
       </div>
     </main>

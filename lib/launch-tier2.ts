@@ -1,5 +1,6 @@
 import type { OnboardingWebhookPayload } from '@/lib/make-webhooks';
 import { buildOnboardingWebhookBody } from '@/lib/make-webhooks';
+import { EA_PLATFORM_URL } from '@/lib/platform-urls';
 
 export type Tier2EnvChecks = {
   onboardingWebhook: boolean;
@@ -65,4 +66,4 @@ export function sampleEsignWebhookPayload(): Record<string, unknown> {
   };
 }
 
-export const ESIGNATURES_CALLBACK_URL = 'https://ea-payments.vercel.app/api/webhooks/esignatures';
+export const ESIGNATURES_CALLBACK_URL = `${EA_PLATFORM_URL}/api/webhooks/esignatures`;

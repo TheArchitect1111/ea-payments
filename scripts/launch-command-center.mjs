@@ -47,6 +47,9 @@ async function main() {
   console.log(`  LAUNCH READINESS SCORE: ${score}/100`);
   console.log(`  [${bar}]`);
   console.log(`  Platform status: ${report.status}`);
+  console.log(`  Launch blockers: ${report.launchBlockers ?? '—'}`);
+  console.log(`  Warnings:        ${report.warnings ?? '—'}`);
+  console.log(`  Next action:     ${report.recommendedNextAction ?? '—'}`);
   console.log(`  Generated: ${report.generatedAt}`);
   console.log('');
   console.log('  Summary:');
@@ -59,16 +62,17 @@ async function main() {
   console.log('  CHECKLIST');
   console.log('───────────────────────────────────────────────────────────');
 
-  const byCategory = new Map();
+  const bySection = new Map();
   for (const item of report.items ?? []) {
-    const list = byCategory.get(item.category) ?? [];
+    const key = item.section ?? item.category;
+    const list = bySection.get(key) ?? [];
     list.push(item);
-    byCategory.set(item.category, list);
+    bySection.set(key, list);
   }
 
-  for (const [category, items] of byCategory) {
+  for (const [section, items] of bySection) {
     console.log('');
-    console.log(`  ## ${category}`);
+    console.log(`  ## ${section}`);
     for (const item of items) {
       const icon = STATUS_ICON[item.status] ?? '?';
       const pts =
