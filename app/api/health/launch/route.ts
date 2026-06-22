@@ -4,6 +4,7 @@ import { resolveConsiderExperience } from '@/lib/consider-resolve';
 import { EA_PLATFORM_URL } from '@/lib/platform-urls';
 import { SIMPLIFI_APP_URL } from '@/lib/simplifi-app-host';
 import { productionSecretIssues } from '@/lib/integration-env';
+import { checkAirtableLaunchSchema } from '@/lib/airtable-schema-check';
 
 export const dynamic = 'force-dynamic';
 
@@ -47,8 +48,25 @@ export async function GET() {
 
   const secretIssues = productionSecretIssues();
 
+  let airtableSchema = {
+    capture: { ok: false, exists: false, missingFields: [] as string[] },
+    pulse: { ok: false, exists: false, configured: false, missingFields: [] as string[] },
+    captureAnalysisMissing: [] as string[],
+  };
+
+  if (env.airtable) {
+    try {
+      const schema = await checkAirtableLaunchSchema();
+      airtableSchema = schema;
+    } catch {
+      // schema check is best-effort
+    }
+  }
+
+  const captureReady = airtableSchema.capture.ok;
+
   return NextResponse.json({
-    ok: friendTestingReady,
+    ok: friendTestingReady && captureReady,
     status: fullLaunchReady ? 'full_launch_ready' : friendTestingReady ? 'friend_testing_ready' : 'needs_setup',
     baseUrl: base,
     checks: {
@@ -61,8 +79,9 @@ export async function GET() {
         magnifi: magnifiOperational,
         amplifi: amplifiOperational,
         captureExtensionKey,
-        asyncCapture: true,
+        asyncCapture: captureReady,
       },
+      airtableSchema,
     },
     links: {
       start: `${base}/start`,
@@ -83,6 +102,16 @@ export async function GET() {
         ? null
         : 'Set EA_CAPTURE_API_KEY on Vercel + extension settings (see /amplifi/install)',
       appStore: 'Not planned — use /capture and Add to Home Screen',
+      captureRecords: captureReady
+        ? null
+        : airtableSchema.capture.exists
+          ? `Capture Records missing columns: ${airtableSchema.capture.missingFields.join(', ')}. Run scripts/run-capture-pulse-setup.bat`
+          : 'Create Capture Records table — run scripts/run-capture-pulse-setup.bat',
+      pulseEvents: airtableSchema.pulse.ok
+        ? null
+        : airtableSchema.pulse.configured
+          ? `Pulse Events missing columns: ${airtableSchema.pulse.missingFields.join(', ')}`
+          : 'Set PULSE_EVENTS_TABLE=Pulse Events on Vercel and run setup-pulse-events script',
     },
   });
 }

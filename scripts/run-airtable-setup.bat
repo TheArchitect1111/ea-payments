@@ -46,12 +46,21 @@ node "%~dp0setup-capture-records-table.mjs"
 if errorlevel 1 (
   echo.
   echo STEP 2 FAILED. Simplifi capture needs Capture Records table.
+  echo Try scripts\run-capture-pulse-setup.bat instead (skips step 1).
   pause
   exit /b 1
 )
 
 echo.
-echo [3/3] Creating demo client + Magnifi sample...
+echo [2b/4] Ensuring Pulse Events table...
+node "%~dp0setup-pulse-events-table.mjs"
+if errorlevel 1 (
+  echo.
+  echo Pulse Events setup failed (optional but recommended).
+)
+
+echo.
+echo [3/4] Creating demo client + Magnifi sample...
 node "%~dp0seed-demo-client.mjs"
 if errorlevel 1 (
   echo.
