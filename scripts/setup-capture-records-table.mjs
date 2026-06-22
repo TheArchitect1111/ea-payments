@@ -155,6 +155,15 @@ const FIELD_DEFS = [
     },
   },
   { name: 'Portal Slug', type: 'singleLineText' },
+  { name: 'Next Action', type: 'singleLineText' },
+  { name: 'Due Date', type: 'date', options: { dateFormat: { name: 'iso' } } },
+  { name: 'Owner', type: 'singleLineText' },
+  { name: 'Why This Matters', type: 'multilineText' },
+  { name: 'What Most People Do', type: 'multilineText' },
+  { name: 'What We Recommend', type: 'multilineText' },
+  { name: 'Save Purpose', type: 'singleLineText' },
+  { name: 'Save Reason', type: 'multilineText' },
+  { name: 'Outcome Status', type: 'singleLineText' },
 ];
 
 let tables = await listTables();

@@ -88,6 +88,31 @@ export interface CreateCaptureInput {
   portalSlug?: string;
 }
 
+function airtableErrorMessage(status: number, detail: string): string {
+  try {
+    const parsed = JSON.parse(detail) as { error?: { type?: string; message?: string } };
+    const msg = parsed.error?.message;
+    if (msg) {
+      if (status === 404 || msg.toLowerCase().includes('could not find table')) {
+        return `Airtable table "${CAPTURES_TABLE}" not found in base ${BASE_ID}. Create it in the same base as Client Records, or fix AIRTABLE_CAPTURES_TABLE.`;
+      }
+      if (msg.includes('UNKNOWN_FIELD_NAME')) {
+        const field = msg.match(/"([^"]+)"/)?.[1];
+        return field
+          ? `Capture Records is missing column "${field}". Add it in Airtable and retry.`
+          : `Capture Records is missing a required column. Airtable: ${msg}`;
+      }
+      return `Airtable error: ${msg}`;
+    }
+  } catch {
+    // fall through
+  }
+  if (status === 404) {
+    return `Airtable table "${CAPTURES_TABLE}" not found in base ${BASE_ID}.`;
+  }
+  return 'Could not save capture. Check Capture Records table name and columns in Airtable.';
+}
+
 function authHeaders(): Record<string, string> {
   return {
     Authorization: `Bearer ${process.env.AIRTABLE_API_KEY}`,
@@ -309,8 +334,7 @@ export async function createCaptureRecord(
       console.error('createCaptureRecord failed:', detail);
       return {
         ok: false,
-        error:
-          'Could not save capture. Create a "Capture Records" table in the Payments Airtable base.',
+        error: airtableErrorMessage(res.status, detail),
       };
     }
 
