@@ -12,6 +12,7 @@ import { sendWelcomeEmail, sendAdminNotification } from '@/lib/email';
 import { createPortalAccess } from '@/lib/portal-access';
 import { createOpportunityRecord } from '@/lib/partner-network';
 import { fireOnboardingWebhook } from '@/lib/make-webhooks';
+import { emitPulseEvent } from '@/lib/pulse-bus';
 
 export const dynamic = 'force-dynamic';
 
@@ -114,6 +115,16 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
 
   if (!airtableResult.ok) {
     console.error('Airtable write failed for session', session.id, ':', airtableResult.error);
+    await emitPulseEvent({
+      product: 'ea-platform',
+      type: 'onboarding.blocked',
+      title: `Payment received — Airtable failed for ${clientName}`,
+      detail: airtableResult.error ?? 'Client record not created',
+      priority: 'critical',
+      href: '/admin/dashboard',
+      metadata: { stripeSessionId: session.id, email },
+    });
+    return;
   }
 
   const catalogItem = meta.packageId ? getCatalogItem(meta.packageId) : undefined;
@@ -123,7 +134,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
     catalogItem?.portalLoginUrl ??
     `${process.env.NEXT_PUBLIC_BASE_URL ?? 'https://ea-payments.vercel.app'}/portal/login`;
 
-  if (catalogItem?.portalConfig && airtableResult.ok) {
+  if (catalogItem?.portalConfig && airtableResult.recordId) {
     try {
       const portalResult = await createPortalAccess(
         {
@@ -153,7 +164,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
   }
 
   const referralSource = (meta.referralSource ?? '').trim();
-  if (referralSource && airtableResult.ok) {
+  if (referralSource && airtableResult.recordId) {
     try {
       const oppResult = await createOpportunityRecord({
         clientName,
@@ -326,6 +337,16 @@ async function handleProposalPayment(
       `handleProposalPayment [${proposalId}]: createOrUpdateClientRecord failed:`,
       airtableResult.error
     );
+    await emitPulseEvent({
+      product: 'ea-platform',
+      type: 'onboarding.blocked',
+      title: `Proposal paid — Airtable failed for ${clientName}`,
+      detail: airtableResult.error ?? 'Client record not created',
+      priority: 'critical',
+      href: '/admin/proposals',
+      metadata: { proposalId, stripeSessionId: session.id, email },
+    });
+    return;
   }
 
   // 6. Provision EA portal access and write credentials to the Client Record.

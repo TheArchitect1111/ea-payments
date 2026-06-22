@@ -791,3 +791,64 @@
   white-space: pre-wrap;
   margin: 0;
 }
+
+.ep-lede {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--ea-muted);
+  margin: 8px 0 0;
+  max-width: 52ch;
+}
+
+.ep-muted-link {
+  margin-top: 28px;
+  font-size: 0.9rem;
+}
+
+.ep-muted-link a {
+  color: var(--ea-navy);
+  font-weight: 700;
+}
+
+.ep-module-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ep-module-card {
+  background: var(--ea-surface);
+  border-radius: var(--ea-radius-sm);
+  padding: 18px 20px;
+  box-shadow: var(--ea-shadow);
+}
+
+.ep-module-card-title {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--ea-navy);
+  text-decoration: none;
+}
+
+.ep-module-card-title:hover {
+  text-decoration: underline;
+}
+
+.ep-module-card-meta {
+  margin: 6px 0 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--ea-gold);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.ep-module-card-note {
+  margin: 8px 0 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--ea-muted);
+}

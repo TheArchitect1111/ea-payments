@@ -1,4 +1,6 @@
 import { EA_PLATFORM_URL } from './platform-urls';
+import { sendEmail } from '@ea/portal-chassis/email';
+import { getAdminNotificationEmail } from './integration-env';
 
 const AIRTABLE_BASE_ID = process.env.AIRTABLE_PAYMENTS_BASE_ID ?? 'appv0YoLIMY45fmDA';
 
@@ -254,20 +256,7 @@ async function resendEmail(
   }
 
   try {
-    const res = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ from, to: [to], subject, html }),
-    });
-
-    if (!res.ok) {
-      const detail = await res.text();
-      return { ok: false, error: `Resend API error (${res.status}): ${detail}` };
-    }
-
+    await sendEmail({ to, subject, html, from });
     return { ok: true };
   } catch (err) {
     return { ok: false, error: err instanceof Error ? err.message : 'Unknown network error.' };

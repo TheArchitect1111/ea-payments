@@ -6,6 +6,7 @@ import { enhanceContentRequest } from '@/lib/ai';
 import { sendContentRequestConfirmation, sendInternalNotification } from '@/lib/email';
 import { emitPulseEvent } from '@/lib/pulse-bus';
 import { EA_PLATFORM_URL } from '@/lib/platform-urls';
+import { fireContentRequestWebhook } from '@/lib/make-webhooks';
 
 export const dynamic = 'force-dynamic';
 
@@ -108,22 +109,14 @@ export async function POST(req: NextRequest) {
 
   const webhookUrl = process.env.CONTENT_REQUEST_WEBHOOK_URL;
   if (webhookUrl) {
-    try {
-      await fetch(webhookUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          requestId: result.requestId,
-          clientName: client.clientName,
-          organizationName: client.organization || client.clientName,
-          requestType,
-          title,
-          status: 'Pending Review',
-        }),
-      });
-    } catch (err) {
-      console.error('CONTENT_REQUEST_WEBHOOK_URL failed:', err);
-    }
+    await fireContentRequestWebhook({
+      requestId: result.requestId,
+      clientName: client.clientName,
+      organizationName: client.organization || client.clientName,
+      requestType,
+      title,
+      status: 'Pending Review',
+    });
   }
 
   return NextResponse.json({

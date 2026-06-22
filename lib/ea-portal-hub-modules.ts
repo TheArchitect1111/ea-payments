@@ -45,12 +45,30 @@ export function getEAPortalHubModules(slug: string): EAPortalHubModule[] {
     },
     {
       href: `${base}/updates`,
-      tag: 'Update Portal',
+      tag: 'Update Hub',
       title: 'Activity feed',
       description: 'Captures, outreach, enhancements, and advisor updates in one timeline.',
     },
     {
-      href: '/capture',
+      href: `${base}/documents`,
+      tag: 'Documents',
+      title: 'Document hub',
+      description: 'Assessments, scorecards, and onboarding materials.',
+    },
+    {
+      href: `${base}/events`,
+      tag: 'Events',
+      title: 'Upcoming events',
+      description: 'Office hours, review calls, and scheduled touchpoints.',
+    },
+    {
+      href: `${base}/resources`,
+      tag: 'Resource library',
+      title: 'Tools & templates',
+      description: 'Magnifi templates, workspace links, and tester resources.',
+    },
+    {
+      href: '/simplifi/capture',
       tag: 'Mobile capture',
       title: 'Simplifi capture',
       description: 'Phone-friendly capture flow with floating Capture now button.',

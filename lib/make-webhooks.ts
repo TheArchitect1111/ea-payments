@@ -46,3 +46,11 @@ export async function fireOnboardingWebhook(payload: OnboardingWebhookPayload): 
 export async function fireEsignWebhook(payload: Record<string, unknown>): Promise<void> {
   await fireMakeWebhook(process.env.ESIGN_WEBHOOK_URL, payload, 'ESIGN_WEBHOOK_URL');
 }
+
+export async function fireContentRequestWebhook(payload: Record<string, unknown>): Promise<void> {
+  await fireMakeWebhook(
+    process.env.CONTENT_REQUEST_WEBHOOK_URL,
+    payload,
+    'CONTENT_REQUEST_WEBHOOK_URL',
+  );
+}

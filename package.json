@@ -10,7 +10,9 @@
     "test:smoke": "playwright test --config=playwright.smoke.config.ts",
     "sync-chassis": "node scripts/sync-portal-chassis.mjs",
     "sync-premium": "node scripts/sync-premium-chassis.mjs",
-    "sync-all-chassis": "npm run sync-chassis && npm run sync-premium"
+    "sync-landing": "node scripts/sync-landing-chassis.mjs",
+    "sync-all-chassis": "npm run sync-chassis && npm run sync-premium && npm run sync-landing",
+    "setup-pulse-events": "node scripts/setup-pulse-events-table.mjs"
   },
   "dependencies": {
     "@ea/portal-chassis": "file:./vendor/portal-chassis",

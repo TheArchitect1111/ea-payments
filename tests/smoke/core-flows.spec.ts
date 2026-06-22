@@ -96,3 +96,16 @@ test('experience templates library is reachable', async ({ page }) => {
   await expect(page.getByRole('heading', { level: 1 })).toContainText(/template library/i);
   await expect(page.getByText(/Executive Transformation/i)).toBeVisible();
 });
+
+test('health launch endpoint returns JSON', async ({ page }) => {
+  const res = await page.request.get('/api/health/launch');
+  expect(res.status()).toBe(200);
+  const data = (await res.json()) as { ok?: boolean; checks?: { demoClient?: boolean } };
+  expect(typeof data.ok).toBe('boolean');
+  expect(data.checks).toBeTruthy();
+});
+
+test('portal documents requires login', async ({ page }) => {
+  await page.goto('/portal/demo-client/documents');
+  await expect(page).toHaveURL(/\/portal\/login/);
+});

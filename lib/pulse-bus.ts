@@ -53,7 +53,7 @@ export async function emitPulseEvent(event: PulseEvent): Promise<{ ok: boolean }
 
   const baseId = process.env.AIRTABLE_PAYMENTS_BASE_ID;
   const table = process.env.PULSE_EVENTS_TABLE;
-  const key = process.env.AIRTABLE_API_KEY;
+  const key = process.env.AIRTABLE_API_KEY ?? process.env.AIRTABLE_PAT;
 
   if (!baseId || !table || !key) {
     return { ok: true };

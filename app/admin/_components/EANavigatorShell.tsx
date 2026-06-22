@@ -8,23 +8,33 @@ import { startGuidedTour } from './GuidedTour';
 const NAVY = '#1B2B4D';
 const GOLD = '#C9A844';
 
-const NAV_LINKS = [
+const EXPERIMENTAL_ADMIN =
+  process.env.EXPERIMENTAL_ADMIN === 'true' || process.env.EXPERIMENTAL_ADMIN === '1';
+
+const CORE_NAV_LINKS = [
   { href: '/admin/master', label: 'Master Control' },
   { href: '/admin/simplifi', label: 'Simplifi' },
-  { href: '/admin/resource-radar', label: 'Resource Radar' },
   { href: '/admin/simplifi-audit', label: 'Simplifi Audit' },
   { href: '/admin/blueprints', label: 'Blueprints' },
   { href: '/admin/foundation-library', label: 'Foundation Library' },
   { href: '/admin/academy', label: 'Academy' },
-  { href: '/admin/knowledge-graph', label: 'Knowledge Graph' },
-  { href: '/admin/digital-twin', label: 'Digital Twin' },
-  { href: '/admin/partner-marketplace', label: 'Marketplace' },
   { href: '/admin/dashboard', label: 'Pipeline' },
   { href: '/admin/proposals', label: 'Proposals' },
   { href: '/admin/commissions', label: 'Commissions' },
   { href: '/admin/content-requests', label: 'Content' },
   { href: '/admin/enhancements', label: 'Enhancements' },
 ];
+
+const EXPERIMENTAL_NAV_LINKS = [
+  { href: '/admin/resource-radar', label: 'Resource Radar' },
+  { href: '/admin/knowledge-graph', label: 'Knowledge Graph' },
+  { href: '/admin/digital-twin', label: 'Digital Twin' },
+  { href: '/admin/partner-marketplace', label: 'Marketplace' },
+];
+
+const NAV_LINKS = EXPERIMENTAL_ADMIN
+  ? [...CORE_NAV_LINKS.slice(0, 2), ...EXPERIMENTAL_NAV_LINKS, ...CORE_NAV_LINKS.slice(2)]
+  : CORE_NAV_LINKS;
 
 const NAVIGATOR_GOALS = [
   { label: 'Review revenue & pipeline', href: '/admin/master' },
@@ -33,11 +43,15 @@ const NAVIGATOR_GOALS = [
   { label: 'Run Operational MRI funnel', href: '/assessment' },
   { label: 'Open Simplifi workspace', href: '/admin/simplifi' },
   { label: 'Run Simplifi website audit', href: '/admin/simplifi-audit' },
-  { label: 'Search Knowledge Graph', href: '/admin/knowledge-graph' },
-  { label: 'View Digital Twin', href: '/admin/digital-twin' },
-  { label: 'Browse Partner Marketplace', href: '/admin/partner-marketplace' },
+  ...(EXPERIMENTAL_ADMIN
+    ? [
+        { label: 'Search Knowledge Graph', href: '/admin/knowledge-graph' },
+        { label: 'View Digital Twin', href: '/admin/digital-twin' },
+        { label: 'Browse Partner Marketplace', href: '/admin/partner-marketplace' },
+        { label: 'Analyze a URL (Resource Radar)', action: 'analyze' as const },
+      ]
+    : []),
   { label: 'Learn EA Academy', href: '/admin/academy' },
-  { label: 'Analyze a URL (Resource Radar)', action: 'analyze' as const },
   { label: 'View Auto Blueprints', href: '/admin/blueprints' },
   { label: 'Open Foundation Library', href: '/admin/foundation-library' },
   { label: 'Capture an opportunity', action: 'capture' as const },

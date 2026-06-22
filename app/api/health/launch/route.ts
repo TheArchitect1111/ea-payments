@@ -3,6 +3,7 @@ import { getClientByPortalSlug } from '@/lib/airtable';
 import { resolveConsiderExperience } from '@/lib/consider-resolve';
 import { EA_PLATFORM_URL } from '@/lib/platform-urls';
 import { SIMPLIFI_APP_URL } from '@/lib/simplifi-app-host';
+import { productionSecretIssues } from '@/lib/integration-env';
 
 export const dynamic = 'force-dynamic';
 
@@ -44,6 +45,8 @@ export async function GET() {
   const magnifiOperational = selenaCapture;
   const amplifiOperational = friendTestingReady && env.resend && env.resendFrom;
 
+  const secretIssues = productionSecretIssues();
+
   return NextResponse.json({
     ok: friendTestingReady,
     status: fullLaunchReady ? 'full_launch_ready' : friendTestingReady ? 'friend_testing_ready' : 'needs_setup',
@@ -52,6 +55,8 @@ export async function GET() {
       env,
       demoClient,
       selenaCapture,
+      productionSecrets: secretIssues.length === 0,
+      productionSecretIssues: secretIssues,
       products: {
         magnifi: magnifiOperational,
         amplifi: amplifiOperational,
