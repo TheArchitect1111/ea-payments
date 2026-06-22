@@ -94,7 +94,7 @@ test('app alias redirects to workspace', async ({ page }) => {
 test('experience templates library is reachable', async ({ page }) => {
   await page.goto('/experience/templates');
   await expect(page.getByRole('heading', { level: 1 })).toContainText(/template library/i);
-  await expect(page.getByText(/Executive Transformation/i)).toBeVisible();
+  await expect(page.getByRole('heading', { name: /Executive Transformation/i })).toBeVisible();
 });
 
 test('health launch endpoint returns JSON', async ({ page }) => {
