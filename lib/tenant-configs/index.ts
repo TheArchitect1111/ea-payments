@@ -7,7 +7,8 @@ export type HubModuleId =
   | 'video-learning'
   | 'documents'
   | 'messaging'
-  | 'events';
+  | 'events'
+  | 'opportunities-resources';
 
 export type TenantPresetRef = {
   id: string;
@@ -17,8 +18,26 @@ export type TenantPresetRef = {
 
 export const FAMILY_HUB_TENANT: TenantPresetRef = {
   id: 'family-hub',
-  modules: ['training', 'video-learning', 'documents', 'assessments', 'updates', 'messaging', 'events'],
-  hubModuleIds: ['dashboard', 'updates', 'training', 'video-learning', 'documents', 'messaging', 'events'],
+  modules: [
+    'training',
+    'video-learning',
+    'documents',
+    'assessments',
+    'updates',
+    'messaging',
+    'events',
+    'opportunities-resources',
+  ],
+  hubModuleIds: [
+    'dashboard',
+    'updates',
+    'training',
+    'video-learning',
+    'documents',
+    'messaging',
+    'events',
+    'opportunities-resources',
+  ],
 };
 
 export const EA_CLIENT_TENANT: TenantPresetRef = {

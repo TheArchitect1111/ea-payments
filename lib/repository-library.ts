@@ -21,8 +21,8 @@ export const EA_REPOSITORY_LIBRARY: RepositoryCandidate[] = [
     href: 'https://github.com/TheArchitect1111/ea-payments',
     category: 'platform',
     industries: ['consulting', 'saas', 'professional services', 'nonprofit', 'church'],
-    useCases: ['capture', 'magnifi', 'amplifi', 'pulse', 'portal', 'payments'],
-    strengths: ['Full intelligence OS', 'Capture pipeline', 'Consider experiences', 'Stripe'],
+    useCases: ['capture', 'magnifi', 'amplifi', 'pulse', 'portal', 'payments', 'partner marketplace', 'opportunities resources'],
+    strengths: ['Full intelligence OS', 'Capture pipeline', 'Consider experiences', 'Stripe', 'Partner Marketplace'],
     strategy: 'extend',
   },
   {
@@ -31,8 +31,8 @@ export const EA_REPOSITORY_LIBRARY: RepositoryCandidate[] = [
     href: 'https://cpr-site.vercel.app',
     category: 'vertical',
     industries: ['athletics', 'recruiting', 'sports'],
-    useCases: ['recruiting portal', 'athlete pipeline', 'parent communication'],
-    strengths: ['Sports recruitment UX', 'Portal chassis', 'Magnifi athlete template'],
+    useCases: ['recruiting portal', 'athlete pipeline', 'parent communication', 'resource library', 'events'],
+    strengths: ['Sports recruitment UX', 'Portal chassis', 'Magnifi athlete template', 'Resource and event patterns'],
     strategy: 'overlay',
   },
   {
@@ -41,8 +41,8 @@ export const EA_REPOSITORY_LIBRARY: RepositoryCandidate[] = [
     href: 'https://brother-hub.vercel.app',
     category: 'community',
     industries: ['faith', 'men', 'community'],
-    useCases: ['membership', 'events', 'community hub'],
-    strengths: ['Community patterns', 'Chassis reuse'],
+    useCases: ['membership', 'events', 'community hub', 'opportunities'],
+    strengths: ['Community patterns', 'Chassis reuse', 'Opportunities page'],
     strategy: 'overlay',
   },
   {
@@ -51,8 +51,8 @@ export const EA_REPOSITORY_LIBRARY: RepositoryCandidate[] = [
     href: 'https://sister-hub.vercel.app',
     category: 'community',
     industries: ['faith', 'women', 'community'],
-    useCases: ['membership', 'events', 'community hub'],
-    strengths: ['Community patterns', 'Chassis reuse'],
+    useCases: ['membership', 'events', 'community hub', 'member benefits'],
+    strengths: ['Community patterns', 'Chassis reuse', 'Member portal and events'],
     strategy: 'overlay',
   },
   {
