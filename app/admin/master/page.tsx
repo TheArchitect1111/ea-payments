@@ -13,6 +13,7 @@ import {
 import { getOpportunities } from '@/lib/partner-network';
 import { getCaptures } from '@/lib/capture-records';
 import { buildAttentionItems } from '@/lib/pulse-attention';
+import { isCaptureApiKeyConfigured } from '@/lib/capture-api-key';
 import { EA_SATELLITE_URLS } from '@/lib/platform-urls';
 import AttentionCenterPanel from './AttentionCenterPanel';
 import AdminLogin from './AdminLogin';
@@ -220,7 +221,7 @@ export default async function MasterPortalPage() {
     contentRequests,
     proposalsPendingReview,
     onboardingWebhooksMissing: !process.env.ONBOARDING_WEBHOOK_URL || !process.env.ESIGN_WEBHOOK_URL,
-    captureApiKeyMissing: !process.env.EA_CAPTURE_API_KEY,
+    captureApiKeyMissing: !isCaptureApiKeyConfigured(),
     cprAthleteCount: cprAthletes.length,
     cprActiveCount: cprActiveAthletes,
     brotherHubMembers,

@@ -1,28 +1,56 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8" />
-  <style>
-    body { font-family: system-ui, sans-serif; max-width: 480px; margin: 40px auto; padding: 0 24px; }
-    label { display: block; font-size: 12px; font-weight: 600; margin: 16px 0 6px; }
-    input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-    button { margin-top: 20px; padding: 12px 24px; background: #1B2B4D; color: #fff; border: none; border-radius: 4px; font-weight: 700; cursor: pointer; }
-    p { font-size: 13px; color: #555; line-height: 1.6; }
-  </style>
-</head>
-<body>
-  <h1>EA Simplifi + Amplifi Settings</h1>
-  <p>Screenshot capture runs in the background. Chrome notifies you when Magnifi is ready.</p>
-  <label>API Base URL</label>
-  <input id="apiUrl" placeholder="https://ea-payments.vercel.app" />
-  <label>Capture API Key</label>
-  <input id="apiKey" type="password" placeholder="EA_CAPTURE_API_KEY from Vercel" />
-  <label>Notify email (optional)</label>
-  <input id="notifyEmail" type="email" placeholder="you@company.com" />
-  <label>Portal slug (optional)</label>
-  <input id="portalSlug" placeholder="demo-client" />
-  <button id="save">Save</button>
-  <p id="msg"></p>
-  <script src="options.js"></script>
-</body>
-</html>
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+  <meta charset="utf-8" />
+
+  <style>
+
+    body { font-family: system-ui, sans-serif; max-width: 480px; margin: 40px auto; padding: 0 24px; }
+
+    label { display: block; font-size: 12px; font-weight: 600; margin: 16px 0 6px; }
+
+    input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+
+    button { margin-top: 20px; padding: 12px 24px; background: #1B2B4D; color: #fff; border: none; border-radius: 4px; font-weight: 700; cursor: pointer; }
+
+    p { font-size: 13px; color: #555; line-height: 1.6; }
+
+  </style>
+
+</head>
+
+<body>
+
+  <h1>EA Simplifi + Amplifi Settings</h1>
+
+  <p>Screenshot capture runs in the background. Chrome notifies you when Magnifi is ready.</p>
+
+  <label>API Base URL</label>
+
+  <input id="apiUrl" placeholder="https://ea-payments.vercel.app" />
+
+  <label>Capture API Key</label>
+
+  <input id="apiKey" type="password" placeholder="EA_CAPTURE_API_KEY from Vercel" />
+
+  <label>Notify email (optional)</label>
+
+  <input id="notifyEmail" type="email" placeholder="you@company.com" />
+
+  <label>Portal slug (optional)</label>
+
+  <input id="portalSlug" placeholder="demo-client" />
+
+  <button id="save">Save</button>
+
+  <p id="msg"></p>
+
+  <script src="options.js"></script>
+
+</body>
+
+</html>
+

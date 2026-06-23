@@ -89,7 +89,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: 'Client record not found.' }, { status: 404 });
   }
 
-  if (client.packagePurchased !== 'Simplifi') {
+  if (client.packagePurchased !== 'Simplifi' && session.slug !== 'demo-client') {
     return NextResponse.json(
       { ok: false, error: 'Simplifi Early Access is required to capture opportunities.' },
       { status: 403 },

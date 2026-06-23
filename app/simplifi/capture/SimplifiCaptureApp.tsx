@@ -10,6 +10,7 @@ import type { AmplifiSocialDraft } from '@/lib/amplifi-draft';
 import GuidedFirstSuccessFlow from '@/app/components/guided-first-success/GuidedFirstSuccessFlow';
 import UniversalCoachPanel from '@/app/components/guided-first-success/UniversalCoachPanel';
 import { prepareCaptureUpload } from '@/lib/client-image-upload';
+import { useProductGuestSession } from '@/components/auth/useProductGuestSession';
 
 const NAVY = '#1B2B4D';
 const GOLD = '#C9A844';
@@ -51,6 +52,12 @@ export default function SimplifiCaptureApp({
   const [processingId, setProcessingId] = useState<string | null>(null);
 
   const loginNext = encodeURIComponent('/simplifi/capture');
+
+  const { starting: guestStarting, error: guestError, startGuest } = useProductGuestSession({
+    loggedIn,
+    autoStart: true,
+    initialUrl,
+  });
 
   useEffect(() => {
     if (loggedIn && typeof window !== 'undefined' && 'Notification' in window) {
@@ -197,17 +204,24 @@ export default function SimplifiCaptureApp({
         </header>
         <main className="sc-main sc-main-center">
           <p className="sc-kicker">One-tap capture</p>
-          <h1 className="sc-title">Sign in to capture opportunities</h1>
+          <h1 className="sc-title">
+            {guestStarting ? 'Starting capture…' : 'Capture opportunities instantly'}
+          </h1>
           <p className="sc-lede">
             Simplifi saves URLs, photos, and flyers from your phone — then builds Magnifi experiences
             you can share.
           </p>
-          <Link href={`/portal/login?next=${loginNext}`} className="sc-btn sc-btn-primary">
-            Sign in to Simplifi
-          </Link>
-          <p className="sc-demo-hint">
-            Demo: demo@efficiencyarchitects.online / DemoPulse2026!
-          </p>
+          {guestError ? <p className="sc-error">{guestError}</p> : null}
+          {!guestStarting && (
+            <>
+              <button type="button" className="sc-btn sc-btn-primary" onClick={() => void startGuest()}>
+                Start capturing now
+              </button>
+              <Link href={`/portal/login?next=${loginNext}`} className="sc-header-link">
+                Sign in with your account →
+              </Link>
+            </>
+          )}
         </main>
         <div className="sc-fab-placeholder" aria-hidden="true" />
       </div>

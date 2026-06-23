@@ -69,7 +69,7 @@ export function buildAttentionItems(input: {
       id: 'env-capture-key',
       product: 'Amplifi',
       title: 'Desktop screenshot capture needs API key',
-      detail: 'Set EA_CAPTURE_API_KEY on Vercel and in the Chrome/Firefox extension.',
+      detail: 'Use /extension/connect to pair the Chrome/Firefox extension (or set EA_CAPTURE_API_KEY).',
       priority: 'high',
       href: `${EA_PLATFORM_URL}/amplifi/install`,
       cta: 'Install guide',

@@ -1,6 +1,10 @@
 const pendingMagnifiUrls = {};
 
-chrome.runtime.onInstalled.addListener(() => {
+chrome.runtime.onInstalled.addListener((details) => {
+  if (details.reason === 'install') {
+    chrome.tabs.create({ url: 'https://www.efficiencyarchitects.online/extension/connect' });
+  }
+
   chrome.contextMenus.create({
     id: 'ea-simplifi-capture',
     title: 'Simplifi™ — Screenshot & capture this page',
@@ -146,6 +150,19 @@ chrome.notifications.onClicked.addListener((notificationId) => {
 });
 
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+  if (msg.type === 'EA_EXTENSION_CONFIG' && msg.config) {
+    const { apiUrl, apiKey, portalSlug, notifyEmail } = msg.config;
+    chrome.storage.sync.set(
+      {
+        apiUrl: apiUrl || 'https://www.efficiencyarchitects.online',
+        apiKey: apiKey || '',
+        portalSlug: portalSlug || '',
+        notifyEmail: notifyEmail || '',
+      },
+      () => sendResponse({ ok: true }),
+    );
+    return true;
+  }
   if (msg.type === 'CAPTURE_PAGE') {
     captureActiveTab(msg.mode || 'capture').then((data) => sendResponse(data));
     return true;

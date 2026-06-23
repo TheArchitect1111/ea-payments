@@ -1,16 +1,13 @@
 import Link from 'next/link';
 import { PUBLIC_LINKS } from '@/lib/marketing-urls';
 
-const DEMO_EMAIL = 'demo@efficiencyarchitects.online';
-const DEMO_PASSWORD = 'DemoPulse2026!';
-
 const testerMessage = `Efficiency Architects preview — try these:
 
 Capture (Simplifi): ${PUBLIC_LINKS.capture}
 Amplify & share: ${PUBLIC_LINKS.amplify}
 Magnifi story (no login): ${PUBLIC_LINKS.storyDemo}
 
-Login: ${DEMO_EMAIL} / ${DEMO_PASSWORD}
+No password needed — tap Start on /capture or /amplify. Optional account: ${PUBLIC_LINKS.signIn}
 
 Use ea-payments.vercel.app or www.efficiencyarchitects.online (same platform).`;
 
@@ -32,11 +29,11 @@ export default function StartPage() {
 
         <section className="mt-10 grid gap-4">
           {[
-            { label: 'Capture — Simplifi', href: PUBLIC_LINKS.capture, note: 'Login → Capture now → paste URL' },
-            { label: 'Amplify — share a story', href: PUBLIC_LINKS.amplify, note: 'Login → Amplify → Share link' },
+            { label: 'Capture — Simplifi', href: PUBLIC_LINKS.capture, note: 'Guest session — tap Capture now' },
+            { label: 'Amplify — share a story', href: PUBLIC_LINKS.amplify, note: 'Guest session — tap Amplify' },
             { label: 'Magnifi story (no login)', href: PUBLIC_LINKS.storyDemo, note: 'Full demo experience' },
-            { label: 'Sign in', href: PUBLIC_LINKS.signIn, note: `${DEMO_EMAIL}` },
-            { label: 'Install Chrome button', href: PUBLIC_LINKS.installAmplifi, note: 'Floating Amplify on any site' },
+            { label: 'Connect browser extension', href: '/extension/connect', note: 'One-click Chrome/Firefox pairing' },
+            { label: 'Install guide', href: PUBLIC_LINKS.installAmplifi, note: 'Bookmarklet, extension, home screen' },
           ].map((item) => (
             <a
               key={item.href}

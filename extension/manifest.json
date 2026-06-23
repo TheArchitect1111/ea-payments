@@ -20,6 +20,15 @@
   },
   "content_scripts": [
     {
+      "matches": [
+        "https://ea-payments.vercel.app/extension/connect*",
+        "https://www.efficiencyarchitects.online/extension/connect*",
+        "http://localhost:3000/extension/connect*"
+      ],
+      "js": ["connect-bridge.js"],
+      "run_at": "document_idle"
+    },
+    {
       "matches": ["http://*/*", "https://*/*"],
       "exclude_matches": [
         "https://ea-payments.vercel.app/*",

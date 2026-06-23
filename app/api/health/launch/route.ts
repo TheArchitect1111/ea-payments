@@ -5,6 +5,7 @@ import { EA_PLATFORM_URL } from '@/lib/platform-urls';
 import { SIMPLIFI_APP_URL } from '@/lib/simplifi-app-host';
 import { productionSecretIssues } from '@/lib/integration-env';
 import { checkAirtableLaunchSchema } from '@/lib/airtable-schema-check';
+import { isCaptureApiKeyConfigured } from '@/lib/capture-api-key';
 import { ESIGNATURES_CALLBACK_URL, getTier2EnvChecks, isTier2AutomationReady } from '@/lib/launch-tier2';
 
 export const dynamic = 'force-dynamic';
@@ -44,9 +45,11 @@ export async function GET() {
 
   const friendTestingReady = env.airtable && demoClient;
 
-  const captureExtensionKey = Boolean(process.env.EA_CAPTURE_API_KEY);
+  const captureExtensionKey = isCaptureApiKeyConfigured();
   const magnifiOperational = selenaCapture;
   const amplifiOperational = friendTestingReady && env.resend && env.resendFrom;
+  const simplifiGuestCapture = demoClient;
+  const amplifiGuestShare = demoClient;
 
   const secretIssues = productionSecretIssues();
 
@@ -83,7 +86,10 @@ export async function GET() {
       products: {
         magnifi: magnifiOperational,
         amplifi: amplifiOperational,
+        simplifi: captureReady && simplifiGuestCapture,
         captureExtensionKey,
+        extensionConnect: captureExtensionKey,
+        guestSessions: demoClient,
         asyncCapture: captureReady,
       },
       airtableSchema,
@@ -118,7 +124,7 @@ export async function GET() {
       resend: env.resend && env.resendFrom ? null : 'Set RESEND_API_KEY + RESEND_FROM_EMAIL + verify domain',
       chromeExtension: captureExtensionKey
         ? null
-        : 'Set EA_CAPTURE_API_KEY on Vercel + extension settings (see /amplifi/install)',
+        : 'Set EA_CAPTURE_API_KEY or ADMIN_SESSION_SECRET on Vercel — then use /extension/connect',
       appStore: 'Not planned — use /capture and Add to Home Screen',
       captureRecords: captureReady
         ? null

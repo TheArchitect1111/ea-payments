@@ -1,5 +1,6 @@
 import { getAirtableApiKey, productionSecretIssues } from '@/lib/integration-env';
 import { checkAirtableLaunchSchema } from '@/lib/airtable-schema-check';
+import { isCaptureApiKeyConfigured } from '@/lib/capture-api-key';
 import { getTier2EnvChecks, isTier2AutomationReady } from '@/lib/launch-tier2';
 import { EA_PLATFORM_URL } from '@/lib/platform-urls';
 import { parseResendFromEmail, RESEND_FROM_EMAIL_EXAMPLE } from '@/lib/resend-env';
@@ -742,13 +743,13 @@ export async function runLaunchCommandCenter(options?: {
       category: 'Product',
       name: 'Chrome extension API key',
       automation: 'partially_automated',
-      status: process.env.EA_CAPTURE_API_KEY?.trim() ? 'complete' : 'needs_human_action',
+      status: isCaptureApiKeyConfigured() ? 'complete' : 'needs_human_action',
       maxScore: 0,
       score: 0,
-      message: process.env.EA_CAPTURE_API_KEY
-        ? 'EA_CAPTURE_API_KEY set.'
-        : 'Optional — mobile /simplifi/capture works without extension.',
-      fix: '/amplifi/install',
+      message: isCaptureApiKeyConfigured()
+        ? 'Capture API key ready (explicit or derived from ADMIN_SESSION_SECRET).'
+        : 'Set EA_CAPTURE_API_KEY or ADMIN_SESSION_SECRET — then /extension/connect',
+      fix: '/extension/connect',
     }),
     item({
       id: 'launch_setup_key_cleanup',

@@ -3,7 +3,9 @@ import { emitPulseEvent, type PulseEvent } from '@/lib/pulse-bus';
 
 export const dynamic = 'force-dynamic';
 
-const INGEST_KEY = process.env.PULSE_INGEST_KEY ?? process.env.EA_CAPTURE_API_KEY;
+import { getCaptureApiKey } from '@/lib/capture-api-key';
+
+const INGEST_KEY = process.env.PULSE_INGEST_KEY ?? getCaptureApiKey();
 
 export async function POST(req: NextRequest) {
   const key = req.headers.get('x-ea-pulse-key') ?? req.headers.get('x-ea-capture-key');

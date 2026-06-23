@@ -29,6 +29,7 @@ export interface PartnerDashboardData {
 export interface AuthenticatedPartner {
   partnerId: string;
   profile: PartnerProfile;
+  email?: string;
 }
 
 function authHeaders(): Record<string, string> {
@@ -83,10 +84,12 @@ export async function authenticatePartner(
       commissionRate: pf['Commission Rate'] != null ? Number(pf['Commission Rate']) : null,
       overrideRate: pf['Override Rate'] != null ? Number(pf['Override Rate']) : null,
     };
+    const email =
+      String(pf['Email'] ?? pf['Partner Email'] ?? '').trim().toLowerCase() || undefined;
 
     return {
       ok: true,
-      auth: { partnerId, profile },
+      auth: { partnerId, profile, email },
     };
   } catch {
     return { ok: false, error: 'Service unavailable.' };

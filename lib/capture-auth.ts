@@ -1,7 +1,14 @@
+import crypto from 'node:crypto';
+import { getCaptureApiKey } from '@/lib/capture-api-key';
+
 export function verifyCaptureApiKey(provided: string | null | undefined): boolean {
-  const expected = process.env.EA_CAPTURE_API_KEY;
+  const expected = getCaptureApiKey();
   if (!expected || !provided) return false;
-  return provided === expected;
+
+  const a = Buffer.from(provided);
+  const b = Buffer.from(expected);
+  if (a.length !== b.length) return false;
+  return crypto.timingSafeEqual(a, b);
 }
 
 export const CAPTURE_CORS_HEADERS = {

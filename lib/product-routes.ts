@@ -10,7 +10,7 @@ export const PRODUCT_LINKS = {
   simplifi: `${PLATFORM_BASE}/simplifi`,
   simplifiCapture: `${PLATFORM_BASE}/simplifi/capture`,
   magnifiDemo: `${PLATFORM_BASE}/consider/selena`,
-  amplifi: `${PLATFORM_BASE}/portal/login?next=${encodeURIComponent('/portal/demo-client/amplifi')}`,
+  amplifi: `${PLATFORM_BASE}/amplify`,
   pulse: `${PLATFORM_BASE}/portal/login?next=${encodeURIComponent('/portal/demo-client/pulse')}`,
   portalLogin: `${PLATFORM_BASE}/portal/login`,
   assessment: `${PLATFORM_BASE}/assessment`,
@@ -20,7 +20,7 @@ export const PRODUCT_LINKS = {
 export const PRODUCT_HOST_ENTRY: Record<string, string> = {
   'ea-simplifi.vercel.app': '/simplifi/capture',
   'ea-magnifi.vercel.app': '/consider/selena',
-  'ea-amplifi.vercel.app': '/portal/login?next=/portal/demo-client/amplifi',
+  'ea-amplifi.vercel.app': '/amplify',
   'ea-pulse.vercel.app': '/portal/login?next=/portal/demo-client/pulse',
   'app.simplifi.ai': '/simplifi/workspace',
   'app-simplifi.vercel.app': '/simplifi/workspace',

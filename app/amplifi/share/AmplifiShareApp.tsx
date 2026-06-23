@@ -8,6 +8,7 @@ import CaptureProcessingPanel from '@/app/components/CaptureProcessingPanel';
 import type { AmplifiSocialDraft } from '@/lib/amplifi-draft';
 import GuidedFirstSuccessFlow from '@/app/components/guided-first-success/GuidedFirstSuccessFlow';
 import UniversalCoachPanel from '@/app/components/guided-first-success/UniversalCoachPanel';
+import { useProductGuestSession } from '@/components/auth/useProductGuestSession';
 
 const NAVY = '#1B2B4D';
 const GOLD = '#C9A844';
@@ -44,6 +45,12 @@ export default function AmplifiShareApp({
   const [result, setResult] = useState<AnalyzeResponse | null>(null);
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [autoStarted, setAutoStarted] = useState(false);
+
+  const { starting: guestStarting, error: guestError, startGuest } = useProductGuestSession({
+    loggedIn,
+    autoStart: true,
+    initialUrl,
+  });
 
   const loginNext = encodeURIComponent(
     initialUrl ? `/amplify?url=${encodeURIComponent(initialUrl)}` : '/amplifi/share',
@@ -125,13 +132,21 @@ export default function AmplifiShareApp({
           <p className="as-kicker">Share more · Reach more</p>
           <h1 className="as-title">Amplify what you see</h1>
           <p className="as-lede">
-            Turn any page, flyer, or idea into a shareable Magnifi story — one tap from your browser or
-            phone.
+            {guestStarting
+              ? 'Starting your session…'
+              : 'Turn any page, flyer, or idea into a shareable Magnifi story — one tap from your browser or phone.'}
           </p>
-          <Link href={`/portal/login?next=${loginNext}`} className="as-btn as-btn-gold">
-            Sign in to Amplifi
-          </Link>
-          <p className="as-demo">Demo: demo@efficiencyarchitects.online / DemoPulse2026!</p>
+          {guestError ? <p className="as-error">{guestError}</p> : null}
+          {!guestStarting && (
+            <>
+              <button type="button" className="as-btn as-btn-gold" onClick={() => void startGuest()}>
+                Start amplifying now
+              </button>
+              <Link href={`/portal/login?next=${loginNext}`} className="as-link">
+                Sign in with your account →
+              </Link>
+            </>
+          )}
           <Link href="/amplifi/install" className="as-link">
             Install browser button →
           </Link>

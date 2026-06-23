@@ -2,7 +2,10 @@
 
 import { Suspense, useState, FormEvent } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import AuthNav from '@/components/auth/AuthNav';
+import TwoFactorForm from '@/components/auth/TwoFactorForm';
 import './portal-login.css';
 
 function safeNextPath(raw: string | null): string | null {
@@ -17,6 +20,8 @@ function PortalLoginForm() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [pendingToken, setPendingToken] = useState('');
+  const [maskedEmail, setMaskedEmail] = useState('');
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -27,13 +32,37 @@ function PortalLoginForm() {
       const res = await fetch('/api/portal/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim(), password }),
+        body: JSON.stringify({
+          email: email.trim(),
+          password,
+          next: nextPath ?? undefined,
+        }),
       });
 
-      const data = (await res.json()) as { slug?: string; error?: string };
+      const data = (await res.json()) as {
+        slug?: string;
+        requires2fa?: boolean;
+        pendingToken?: string;
+        maskedEmail?: string;
+        next?: string;
+        error?: string;
+      };
 
-      if (!res.ok || !data.slug) {
+      if (!res.ok) {
         setError(data.error ?? 'Login failed. Please try again.');
+        setLoading(false);
+        return;
+      }
+
+      if (data.requires2fa && data.pendingToken) {
+        setPendingToken(data.pendingToken);
+        setMaskedEmail(data.maskedEmail ?? 'your email');
+        setLoading(false);
+        return;
+      }
+
+      if (!data.slug) {
+        setError('Login failed. Please try again.');
         setLoading(false);
         return;
       }
@@ -45,8 +74,27 @@ function PortalLoginForm() {
     }
   }
 
+  if (pendingToken) {
+    return (
+      <div className="pl-card">
+        <AuthNav realm="portal" active="sign-in" />
+        <TwoFactorForm
+          pendingToken={pendingToken}
+          maskedEmail={maskedEmail}
+          verifyUrl="/api/auth/verify-2fa"
+          onSuccess={(data) => {
+            const slug = data.slug as string | undefined;
+            const next = data.next as string | undefined;
+            window.location.href = next ?? (slug ? `/portal/${slug}` : '/portal/login');
+          }}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="pl-card">
+      <AuthNav realm="portal" active="sign-in" />
       <form onSubmit={handleSubmit} noValidate className="pl-form">
         <label className="pl-label" htmlFor="email">
           Email
@@ -106,7 +154,7 @@ export default function PortalLoginPage() {
           />
           <p className="pl-eyebrow">Client Portal</p>
           <h1 className="pl-title">Welcome in</h1>
-          <p className="pl-lede">Sign in to Pulse™, Simplifi™, Magnifi™, and Amplifi™.</p>
+          <p className="pl-lede">Sign in, register, or reset your password. Two-factor verification protects your account.</p>
         </header>
 
         <Suspense fallback={<div className="pl-card">Loading…</div>}>
@@ -115,10 +163,10 @@ export default function PortalLoginPage() {
 
         <footer className="pl-footer">
           <p className="pl-footer-text">
-            Need access?{' '}
-            <a href="mailto:freedom@efficiencyarchitects.online" className="pl-footer-link">
-              Contact us
-            </a>
+            Partner portal?{' '}
+            <Link href="/partners/login" className="pl-footer-link">
+              Sign in here
+            </Link>
           </p>
           <p className="pl-tagline">Systems that transform businesses.</p>
         </footer>
