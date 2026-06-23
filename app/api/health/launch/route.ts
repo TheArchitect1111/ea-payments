@@ -49,9 +49,20 @@ export async function GET() {
   const magnifiOperational = selenaCapture;
   const amplifiOperational = friendTestingReady && env.resend && env.resendFrom;
   const simplifiGuestCapture = demoClient;
-  const amplifiGuestShare = demoClient;
 
   const secretIssues = productionSecretIssues();
+  const controls = {
+    sentryDsn: Boolean(process.env.NEXT_PUBLIC_SENTRY_DSN?.trim()),
+    uptimeDashboard: Boolean(
+      process.env.UPTIME_KUMA_DASHBOARD_URL?.trim() || process.env.UPTIME_MONITORING_URL?.trim(),
+    ),
+    backupDestination: Boolean(process.env.BACKUP_DESTINATION_URI?.trim()),
+  };
+  const controlIssues: string[] = [];
+  if (!controls.sentryDsn) controlIssues.push('NEXT_PUBLIC_SENTRY_DSN');
+  if (!controls.uptimeDashboard) controlIssues.push('UPTIME_KUMA_DASHBOARD_URL');
+  if (!controls.backupDestination) controlIssues.push('BACKUP_DESTINATION_URI');
+  const criticalIssues = [...secretIssues, ...controlIssues];
 
   let airtableSchema = {
     capture: { ok: false, exists: false, missingFields: [] as string[] },
@@ -70,7 +81,8 @@ export async function GET() {
 
   const captureReady = airtableSchema.capture.ok;
   const tier2Ready = isTier2AutomationReady(tier2);
-  const fullLaunchReady = friendTestingReady && captureReady && tier2Ready;
+  const criticalReady = criticalIssues.length === 0;
+  const fullLaunchReady = friendTestingReady && captureReady && tier2Ready && criticalReady;
 
   return NextResponse.json({
     ok: friendTestingReady && captureReady,
@@ -83,6 +95,9 @@ export async function GET() {
       selenaCapture,
       productionSecrets: secretIssues.length === 0,
       productionSecretIssues: secretIssues,
+      controls,
+      controlIssues,
+      criticalReady,
       products: {
         magnifi: magnifiOperational,
         amplifi: amplifiOperational,
@@ -122,6 +137,15 @@ export async function GET() {
       simplifiAppDns:
         'Add app.simplifi.ai in Vercel Domains (same project) → CNAME to cname.vercel-dns.com — middleware routes / to workspace',
       resend: env.resend && env.resendFrom ? null : 'Set RESEND_API_KEY + RESEND_FROM_EMAIL + verify domain',
+      sentryDsn: controls.sentryDsn
+        ? null
+        : 'Set NEXT_PUBLIC_SENTRY_DSN in Vercel Production (required for full launch readiness)',
+      uptimeDashboard: controls.uptimeDashboard
+        ? null
+        : 'Set UPTIME_KUMA_DASHBOARD_URL (or UPTIME_MONITORING_URL) to your monitoring dashboard URL',
+      backupDestination: controls.backupDestination
+        ? null
+        : 'Set BACKUP_DESTINATION_URI to your encrypted backup destination location',
       chromeExtension: captureExtensionKey
         ? null
         : 'Set EA_CAPTURE_API_KEY or ADMIN_SESSION_SECRET on Vercel — then use /extension/connect',

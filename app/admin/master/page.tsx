@@ -182,12 +182,11 @@ export default async function MasterPortalPage() {
     (c) => c.discoveryStatus === 'Follow-Up Needed',
   ).length;
 
-  const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
   const clientsStuckOnboarding = clientRecords.filter((c) => {
-    if (c.onboardingStatus === 'Complete' || c.amountPaid <= 0) return false;
-    const anchor = c.paymentReceivedAt ?? c.createdTime;
-    if (!anchor) return false;
-    return Date.now() - new Date(anchor.includes('T') ? anchor : `${anchor}T12:00:00`).getTime() > sevenDaysMs;
+    if (c.amountPaid <= 0) return false;
+    if (c.onboardingStatus === 'Complete') return false;
+    // Deterministic approximation: paid clients still in early onboarding states.
+    return c.onboardingStatus === 'Not Started' || c.onboardingStatus === 'In Progress';
   }).length;
 
   // Pipeline Summary
