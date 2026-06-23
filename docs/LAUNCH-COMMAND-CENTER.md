@@ -19,6 +19,7 @@ npm run launch:check           # Orchestrates report + smoke + tier2 + airtable
 npm run repo:readiness         # Inventory EA repo reuse/readiness signals
 npm run verify-airtable        # Local Airtable schema (needs .env.local)
 npm run test:capture-e2e       # Capture pipeline E2E
+npm run test:assessment-pathway # Assessment to proposal pathway E2E
 npm run test:tier2             # Tier 2 env flags
 ```
 
@@ -60,6 +61,13 @@ Weighted sum of scored items (max 100). `controlled_paid_launch_ready` requires 
 ## Related
 
 - `docs/LAUNCH-READINESS-MODEL.md`
+- `docs/PRODUCT-QUICKSTARTS.md`
+- `docs/PRODUCT-SUPPORT-AND-TRIAGE-SOP.md`
+- `docs/SHARE-ACCESS-ANALYTICS-POLICY.md`
+- `docs/MAGNIFI-TEMPLATE-QA.md`
+- `docs/DEMO-LIBRARY.md`
+- `docs/FULL-LAUNCH-MANUAL-SETUP.md`
+- `docs/LAUNCH-CHANGELOG-KNOWN-LIMITATIONS.md`
 - `docs/MAKE-TIER2.md`
 - `docs/MAKE-EA-ONBOARDING-SCENARIO.md`
 - `docs/LAUNCH-100.md`
