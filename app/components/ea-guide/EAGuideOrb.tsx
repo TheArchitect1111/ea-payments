@@ -7,7 +7,6 @@ import { useEffect, useMemo, useState } from 'react';
 import {
   EA_GUIDE_DAILY_BRIEF_KEY,
   EA_GUIDE_FIRST_USE_KEY,
-  EA_GUIDE_LAUNCH_SIGNAL_KEY,
   EA_GUIDE_MEMORY_KEY,
   type EAGuideAction,
   type EAGuideMemoryItem,
@@ -23,18 +22,29 @@ type LaunchSignal = {
   launchId: string;
   client: string;
   message: string;
-  createdAt: string;
+  status: string;
+  statusLabel: string;
+  updatedAt: string;
   links: {
     reviewPackage: string;
     projectBrief: string;
     skinBrief: string;
     approval: string;
+    codexBuilder: string;
+    deployment: string;
   };
 };
 
 type PageContext = {
   lead: string;
   actions: string[];
+};
+
+type StorySectionSignal = {
+  id: string;
+  title: string;
+  message: string;
+  example: string;
 };
 
 function todayKey() {
@@ -97,6 +107,7 @@ export default function EAGuideOrb() {
     }
   });
   const [launchSignal, setLaunchSignal] = useState<LaunchSignal | null>(null);
+  const [storySection, setStorySection] = useState<StorySectionSignal | null>(null);
   const [firstName] = useState(() => inferFirstName());
   const [firstUseComplete, setFirstUseComplete] = useState(() => {
     if (typeof window === 'undefined') return true;
@@ -111,10 +122,11 @@ export default function EAGuideOrb() {
   }, [context.id]);
 
   useEffect(() => {
-    function loadLaunchSignal() {
+    async function loadLaunchSignal() {
       try {
-        const stored = window.localStorage.getItem(EA_GUIDE_LAUNCH_SIGNAL_KEY);
-        setLaunchSignal(stored ? (JSON.parse(stored) as LaunchSignal) : null);
+        const response = await fetch('/api/ea-factory/launch-status', { cache: 'no-store' });
+        const payload = await response.json();
+        setLaunchSignal(payload.active ?? null);
       } catch {
         setLaunchSignal(null);
       }
@@ -127,6 +139,16 @@ export default function EAGuideOrb() {
       window.removeEventListener('storage', loadLaunchSignal);
       window.removeEventListener('ea-guide:launch-ready', loadLaunchSignal);
     };
+  }, []);
+
+  useEffect(() => {
+    function updateStorySection(event: Event) {
+      const signal = (event as CustomEvent<StorySectionSignal>).detail;
+      if (signal?.id && signal.message) setStorySection(signal);
+    }
+
+    window.addEventListener('ea-guide:story-section', updateStorySection);
+    return () => window.removeEventListener('ea-guide:story-section', updateStorySection);
   }, []);
 
   function showToast(message: string) {
@@ -161,8 +183,9 @@ export default function EAGuideOrb() {
   }
 
   const launchReady = Boolean(launchSignal && pathname.includes('/admin'));
+  const isStoryHome = pathname === '/' && Boolean(storySection);
   const stacked = pathname.includes('/simplifi/capture') || pathname.includes('/amplifi/share');
-  const state = voiceOpen ? 'listening' : open ? 'speaking' : launchReady ? 'success' : 'idle';
+  const state = voiceOpen ? 'listening' : open ? 'speaking' : launchReady ? 'success' : isStoryHome ? 'watching' : 'idle';
   const captureCount = isSimplifi ? getCaptureCount(scope) : 0;
   const simplifiRecommendation = isSimplifi && shouldShowGuideRecommendations(scope) && captureCount >= 3
     ? {
@@ -175,24 +198,40 @@ export default function EAGuideOrb() {
       }
     : null;
 
-  const recommendedAction = launchReady ? 'Project package ready.' : simplifiRecommendation?.title ?? context.recommendedAction;
+  const recommendedAction = isStoryHome && storySection
+    ? storySection.title
+    : launchReady && launchSignal ? launchSignal.message : simplifiRecommendation?.title ?? context.recommendedAction;
   const recommendationDetail = launchReady && launchSignal
-    ? `${launchSignal.client} has a build package ready for review.`
-    : simplifiRecommendation?.detail ?? context.recommendationDetail;
+    ? `${launchSignal.client} is ${launchSignal.statusLabel.toLowerCase()}.`
+    : isStoryHome && storySection
+      ? storySection.message
+      : simplifiRecommendation?.detail ?? context.recommendationDetail;
   const recommendationWhy = launchReady
     ? ['Launch workflow completed.', 'Project and skin briefs were generated.', 'Approval is the next dependency.']
+    : isStoryHome && storySection
+      ? [storySection.example, 'The site is moving from current reality toward what becomes possible.', 'Use the final section to generate a future-state narrative.']
     : context.recommendationWhy ?? context.sinceLastVisit;
-  const dailyBrief = context.dailyBrief?.length ? context.dailyBrief : context.sinceLastVisit;
+  const dailyBrief = isStoryHome && storySection
+    ? ['I am following the active scene.', 'Click Continue the story to move through the experience.', 'Use Show me an example for a concrete version.']
+    : context.dailyBrief?.length ? context.dailyBrief : context.sinceLastVisit;
   const opportunityHealth = context.opportunityHealth ?? ['Active: Current workspace', 'Watching: New signals', 'Follow-Up Needed: Open commitments'];
   const winWall = context.winWall ?? ['Progress is being tracked'];
-  const badgeLabel = launchReady ? 'Opportunity Ready' : context.badgeLabel;
+  const badgeLabel = isStoryHome && storySection ? storySection.title : launchReady && launchSignal ? launchSignal.message : context.badgeLabel;
   const guideActions: EAGuideAction[] = launchReady && launchSignal
     ? [
         { id: 'review-package', label: 'Review Package', kind: 'href', href: launchSignal.links.reviewPackage },
         { id: 'open-skin-brief', label: 'Open Skin Brief', kind: 'href', href: launchSignal.links.skinBrief },
         { id: 'open-project-brief', label: 'Open Project Brief', kind: 'href', href: launchSignal.links.projectBrief },
         { id: 'approval', label: 'Continue To Approval', kind: 'href', href: launchSignal.links.approval },
+        { id: 'codex', label: 'Codex Handoff', kind: 'href', href: launchSignal.links.codexBuilder },
+        { id: 'deployment', label: 'Deployment Package', kind: 'href', href: launchSignal.links.deployment },
       ]
+    : isStoryHome
+      ? [
+          { id: 'story-example', label: 'Show me an example', kind: 'memory' },
+          { id: 'continue-story', label: 'Continue the story', kind: 'href', href: '#possibilities' },
+          { id: 'how-it-works', label: 'How does this work?', kind: 'href', href: '/assessment' },
+        ]
     : simplifiRecommendation
       ? (simplifiRecommendation.actions as EAGuideAction[])
       : context.actions;

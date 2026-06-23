@@ -4,10 +4,10 @@ test('homepage hero and primary CTA render', async ({ page }) => {
   await page.goto('/');
   await expect(
     page.getByRole('heading', {
-      name: /discover the possibilities/i,
+      name: /imagine the possibilities/i,
     }),
   ).toBeVisible();
-  await expect(page.getByRole('link', { name: /discover what's possible/i }).first()).toBeVisible();
+  await expect(page.getByRole('link', { name: /begin the story/i }).first()).toBeVisible();
 });
 
 test('consider selena demo story is reachable', async ({ page }) => {
@@ -82,7 +82,7 @@ test('assessment thank-you contact link works', async ({ page }) => {
 
 test('simplifi workspace is reachable', async ({ page }) => {
   await page.goto('/simplifi/workspace');
-  await expect(page.getByRole('heading', { name: /what's worth exploring today/i })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /your opportunities, organized/i })).toBeVisible();
   await expect(page.getByRole('link', { name: /capture now/i })).toBeVisible();
 });
 
