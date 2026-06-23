@@ -47,6 +47,10 @@ async function main() {
   console.log(`  LAUNCH READINESS SCORE: ${score}/100`);
   console.log(`  [${bar}]`);
   console.log(`  Platform status: ${report.status}`);
+  console.log(`  Revenue ready:   ${report.readiness?.revenueReady ? 'yes' : 'NO'}`);
+  console.log(`  Delivery ready:  ${report.readiness?.deliveryReady ? 'yes' : 'NO'}`);
+  console.log(`  Monitoring:      ${report.readiness?.monitoringReady ? 'yes' : 'NO'}`);
+  console.log(`  Resilience:      ${report.readiness?.resilienceReady ? 'yes' : 'NO'}`);
   console.log(`  Launch blockers: ${report.launchBlockers ?? '—'}`);
   console.log(`  Warnings:        ${report.warnings ?? '—'}`);
   console.log(`  Next action:     ${report.recommendedNextAction ?? '—'}`);
@@ -58,6 +62,15 @@ async function main() {
   console.log(`    Needs credentials:  ${report.summary?.needsCredentials ?? 0}`);
   console.log(`    Needs human action: ${report.summary?.needsHumanAction ?? 0}`);
   console.log('');
+  if (report.readiness?.missing) {
+    console.log('  Missing by category:');
+    for (const [category, info] of Object.entries(report.readiness.missing)) {
+      if (Array.isArray(info?.missing) && info.missing.length > 0) {
+        console.log(`    ${pad(category + ':', 13)} ${info.missing.join(', ')}`);
+      }
+    }
+    console.log('');
+  }
   console.log('───────────────────────────────────────────────────────────');
   console.log('  CHECKLIST');
   console.log('───────────────────────────────────────────────────────────');
@@ -107,6 +120,10 @@ async function main() {
 
   if (report.status === 'full_launch_ready') {
     console.log('  PASS — full_launch_ready. Run one live checkout to confirm.');
+    process.exit(0);
+  }
+  if (report.status === 'controlled_paid_launch_ready') {
+    console.log('  PASS - controlled_paid_launch_ready. Monitoring/backups remain before public launch.');
     process.exit(0);
   }
 

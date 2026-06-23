@@ -13,14 +13,15 @@ export interface ResolvedConsiderExperience {
 }
 
 export async function resolveConsiderExperience(slug: string): Promise<ResolvedConsiderExperience | null> {
-  const trimmed = slug.trim().toLowerCase();
+  const trimmed = slug.trim();
+  const normalized = trimmed.toLowerCase();
   if (!trimmed) return null;
 
   let capture = await getCaptureByConsiderSlug(trimmed);
 
-  if (!capture && trimmed === DEMO_CONSIDER_SLUG) {
+  if (!capture && normalized === DEMO_CONSIDER_SLUG) {
     await ensureDemoConsiderSelena();
-    capture = await getCaptureByConsiderSlug(trimmed);
+    capture = await getCaptureByConsiderSlug(normalized);
     if (!capture) {
       capture = await getCaptureByIdentifier('CAP-DEMO-SELENA');
     }
@@ -33,7 +34,7 @@ export async function resolveConsiderExperience(slug: string): Promise<ResolvedC
     }
   }
 
-  if (trimmed === DEMO_CONSIDER_SLUG) {
+  if (normalized === DEMO_CONSIDER_SLUG) {
     return {
       payload: buildDemoSelenaPayload(),
       captureId: 'demo-selena',

@@ -18,6 +18,7 @@ const CORE_NAV_LINKS = [
   { href: '/admin/blueprints', label: 'Blueprints' },
   { href: '/admin/foundation-library', label: 'Foundation Library' },
   { href: '/admin/academy', label: 'Academy' },
+  { href: '/admin/delivery', label: 'Delivery' },
   { href: '/admin/dashboard', label: 'Pipeline' },
   { href: '/admin/proposals', label: 'Proposals' },
   { href: '/admin/commissions', label: 'Commissions' },
@@ -38,6 +39,7 @@ const NAV_LINKS = EXPERIMENTAL_ADMIN
 
 const NAVIGATOR_GOALS = [
   { label: 'Review revenue & pipeline', href: '/admin/master' },
+  { label: 'Run client delivery board', href: '/admin/delivery' },
   { label: 'Manage proposals', href: '/admin/proposals' },
   { label: 'Track partner commissions', href: '/admin/commissions' },
   { label: 'Run Operational MRI funnel', href: '/assessment' },

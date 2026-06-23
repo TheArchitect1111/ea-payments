@@ -29,13 +29,23 @@ try {
   const health = await fetch(`${BASE}/api/health/launch`);
   const data = await health.json();
   console.log('\nHealth status:', data.status);
-  console.log('Critical controls ready:', data.checks?.criticalReady ? 'yes' : 'NO');
+  console.log('Revenue ready:', data.checks?.revenueReady ? 'yes' : 'NO');
+  console.log('Delivery ready:', data.checks?.deliveryReady ? 'yes' : 'NO');
+  console.log('Monitoring ready:', data.checks?.monitoringReady ? 'yes' : 'NO');
+  console.log('Resilience ready:', data.checks?.resilienceReady ? 'yes' : 'NO');
+  console.log('Critical ready:', data.checks?.criticalReady ? 'yes' : 'NO');
+  console.log('Full launch ready:', data.checks?.fullLaunchReady ? 'yes' : 'NO');
   console.log('Airtable key on server:', data.checks?.env?.airtable ? 'yes' : 'NO');
   console.log('Demo client:', data.checks?.demoClient ? 'yes' : 'NO');
   console.log('Onboarding webhook:', data.checks?.env?.onboardingWebhook ? 'yes' : 'NO');
   console.log('Resend email:', data.checks?.env?.resend ? 'yes' : 'NO');
-  if (Array.isArray(data.checks?.controlIssues) && data.checks.controlIssues.length > 0) {
-    console.log('Control issues:', data.checks.controlIssues.join(', '));
+  if (data.checks?.missingByCategory) {
+    console.log('\nMissing by category:');
+    for (const [category, info] of Object.entries(data.checks.missingByCategory)) {
+      if (Array.isArray(info?.missing) && info.missing.length > 0) {
+        console.log(` - ${category}: ${info.missing.join(', ')}`);
+      }
+    }
   }
   if (data.manual) {
     console.log('\nManual still needed:');
@@ -47,7 +57,7 @@ try {
   console.log('\nLaunch Command Center:', `${BASE}/launch`);
   console.log('Full report CLI: npm run launch:report');
 
-  if (data.status !== 'full_launch_ready' || data.checks?.criticalReady !== true) {
+  if (data.checks?.criticalReady !== true) {
     process.exitCode = 1;
   }
 } catch (err) {

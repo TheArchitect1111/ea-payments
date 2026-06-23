@@ -55,7 +55,7 @@ export function slugifyProspect(name: string): string {
 export function buildProspectSlug(businessName: string, uniqueSuffix?: string): string {
   const base = slugifyProspect(businessName);
   if (!uniqueSuffix) return base;
-  return `${base}-${uniqueSuffix.slice(0, 6)}`;
+  return `${base}-${uniqueSuffix.toLowerCase().replace(/[^a-z0-9]+/g, '').slice(0, 6)}`;
 }
 
 export function buildClientMessage(businessName: string, shareUrl: string): string {

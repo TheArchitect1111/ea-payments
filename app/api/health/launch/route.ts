@@ -7,6 +7,7 @@ import { productionSecretIssues } from '@/lib/integration-env';
 import { checkAirtableLaunchSchema } from '@/lib/airtable-schema-check';
 import { isCaptureApiKeyConfigured } from '@/lib/capture-api-key';
 import { ESIGNATURES_CALLBACK_URL, getTier2EnvChecks, isTier2AutomationReady } from '@/lib/launch-tier2';
+import { buildLaunchReadinessModel } from '@/lib/launch-readiness';
 
 export const dynamic = 'force-dynamic';
 
@@ -62,11 +63,12 @@ export async function GET() {
   if (!controls.sentryDsn) controlIssues.push('NEXT_PUBLIC_SENTRY_DSN');
   if (!controls.uptimeDashboard) controlIssues.push('UPTIME_KUMA_DASHBOARD_URL');
   if (!controls.backupDestination) controlIssues.push('BACKUP_DESTINATION_URI');
-  const criticalIssues = [...secretIssues, ...controlIssues];
 
   let airtableSchema = {
     capture: { ok: false, exists: false, missingFields: [] as string[] },
     pulse: { ok: false, exists: false, configured: false, missingFields: [] as string[] },
+    assessment: { ok: false, exists: false, missingFields: [] as string[] },
+    proposal: { ok: false, exists: false, missingFields: [] as string[] },
     captureAnalysisMissing: [] as string[],
   };
 
@@ -80,13 +82,36 @@ export async function GET() {
   }
 
   const captureReady = airtableSchema.capture.ok;
+  const assessmentPathReady = airtableSchema.assessment.ok && airtableSchema.proposal.ok;
   const tier2Ready = isTier2AutomationReady(tier2);
-  const criticalReady = criticalIssues.length === 0;
-  const fullLaunchReady = friendTestingReady && captureReady && tier2Ready && criticalReady;
+  const readiness = buildLaunchReadinessModel({
+    revenue: {
+      stripe: env.stripe,
+      stripeWebhookSecret: env.stripeWebhookSecret,
+      airtable: env.airtable,
+      resend: env.resend,
+      resendFrom: env.resendFrom,
+    },
+    delivery: {
+      onboardingWebhook: env.onboardingWebhook,
+      esignWebhook: env.esignWebhook,
+      captureSchema: airtableSchema.capture.ok,
+      pulseSchema: airtableSchema.pulse.ok,
+      assessmentSchema: airtableSchema.assessment.ok,
+      proposalSchema: airtableSchema.proposal.ok,
+    },
+    monitoring: {
+      sentryDsn: controls.sentryDsn,
+      uptimeDashboard: controls.uptimeDashboard,
+    },
+    resilience: {
+      backupDestination: controls.backupDestination,
+    },
+  });
 
   return NextResponse.json({
-    ok: friendTestingReady && captureReady,
-    status: fullLaunchReady ? 'full_launch_ready' : friendTestingReady ? 'friend_testing_ready' : 'needs_setup',
+    ok: friendTestingReady && captureReady && assessmentPathReady,
+    status: readiness.status,
     baseUrl: base,
     checks: {
       env,
@@ -97,7 +122,15 @@ export async function GET() {
       productionSecretIssues: secretIssues,
       controls,
       controlIssues,
-      criticalReady,
+      readiness,
+      missingByCategory: readiness.missing,
+      revenueReady: readiness.revenueReady,
+      deliveryReady: readiness.deliveryReady,
+      monitoringReady: readiness.monitoringReady,
+      resilienceReady: readiness.resilienceReady,
+      criticalReady: readiness.criticalReady,
+      fullLaunchReady: readiness.fullLaunchReady,
+      scaleReady: readiness.scaleReady,
       products: {
         magnifi: magnifiOperational,
         amplifi: amplifiOperational,
@@ -133,7 +166,7 @@ export async function GET() {
       stripeLiveTest: tier2Ready
         ? 'Run one live checkout at /checkout and confirm Make + welcome email'
         : null,
-      dns: 'Point www.efficiencyarchitects.online to ea-payments in Vercel → docs/DNS-THREE-CLICKS.md',
+      dns: null,
       simplifiAppDns:
         'Add app.simplifi.ai in Vercel Domains (same project) → CNAME to cname.vercel-dns.com — middleware routes / to workspace',
       resend: env.resend && env.resendFrom ? null : 'Set RESEND_API_KEY + RESEND_FROM_EMAIL + verify domain',
@@ -149,7 +182,7 @@ export async function GET() {
       chromeExtension: captureExtensionKey
         ? null
         : 'Set EA_CAPTURE_API_KEY or ADMIN_SESSION_SECRET on Vercel — then use /extension/connect',
-      appStore: 'Not planned — use /capture and Add to Home Screen',
+      appStore: null,
       captureRecords: captureReady
         ? null
         : airtableSchema.capture.exists
@@ -160,6 +193,16 @@ export async function GET() {
         : airtableSchema.pulse.configured
           ? `Pulse Events missing columns: ${airtableSchema.pulse.missingFields.join(', ')}`
           : 'Set PULSE_EVENTS_TABLE=Pulse Events on Vercel and run setup-pulse-events script',
+      assessments: airtableSchema.assessment.ok
+        ? null
+        : airtableSchema.assessment.exists
+          ? `Assessments missing columns: ${airtableSchema.assessment.missingFields.join(', ')}. Run /api/health/setup-schema with LAUNCH_SETUP_KEY.`
+          : 'Create or configure Assessments table and run /api/health/setup-schema with LAUNCH_SETUP_KEY.',
+      proposals: airtableSchema.proposal.ok
+        ? null
+        : airtableSchema.proposal.exists
+          ? `Proposals missing columns: ${airtableSchema.proposal.missingFields.join(', ')}. Run /api/health/setup-schema with LAUNCH_SETUP_KEY.`
+          : 'Create or configure Proposals table and run /api/health/setup-schema with LAUNCH_SETUP_KEY.',
     },
   });
 }

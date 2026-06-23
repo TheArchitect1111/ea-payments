@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { buildLaunchCommandCenterReport } from '@/lib/launch-command-center';
 import type { LaunchCheckItem, LaunchSectionSummary, LaunchStatus } from '@/lib/launch-command-center';
+import type { LaunchReadinessCategory, LaunchReadinessStatus } from '@/lib/launch-readiness';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,6 +19,16 @@ const STATUS_CLASS: Record<LaunchStatus, string> = {
   needs_human_action: 'text-sky-400 border-sky-400/40 bg-sky-400/10',
 };
 
+const PLATFORM_STATUS_LABEL: Record<LaunchReadinessStatus, string> = {
+  build_ready: 'Build Ready',
+  revenue_ready: 'Revenue Ready',
+  delivery_ready: 'Delivery Ready',
+  controlled_paid_launch_ready: 'Controlled Paid Launch Ready',
+  full_launch_ready: 'Full Launch Ready',
+  scale_ready: 'Scale Ready',
+  needs_setup: 'Needs Setup',
+};
+
 function ScoreBar({ score }: { score: number }) {
   const filled = Math.round(score / 5);
   return (
@@ -28,6 +39,41 @@ function ScoreBar({ score }: { score: number }) {
           className={`h-2 flex-1 rounded-sm ${i < filled ? 'bg-[#C9A844]' : 'bg-white/10'}`}
         />
       ))}
+    </div>
+  );
+}
+
+function ReadinessCard({
+  title,
+  category,
+}: {
+  title: string;
+  category: LaunchReadinessCategory;
+}) {
+  return (
+    <div className="border border-white/10 bg-white/[0.03] p-4">
+      <div className="flex flex-wrap items-start justify-between gap-2">
+        <h2 className="text-sm font-bold text-white">{title}</h2>
+        <span
+          className={`text-xs px-2 py-0.5 border rounded-full ${
+            category.ready
+              ? 'text-emerald-400 border-emerald-400/40 bg-emerald-400/10'
+              : 'text-amber-400 border-amber-400/40 bg-amber-400/10'
+          }`}
+        >
+          {category.ready ? 'Ready' : 'Needs attention'}
+        </span>
+      </div>
+      <p className="mt-2 text-xs text-neutral-400">{category.purpose}</p>
+      {category.missing.length > 0 ? (
+        <ul className="mt-3 space-y-1 text-xs text-neutral-300">
+          {category.missing.map((missing) => (
+            <li key={missing}>{missing}</li>
+          ))}
+        </ul>
+      ) : (
+        <p className="mt-3 text-xs text-emerald-300">No missing items.</p>
+      )}
     </div>
   );
 }
@@ -100,7 +146,7 @@ export default async function LaunchCommandCenterPage() {
           <ScoreBar score={report.readinessScore} />
           <p className="mt-4 text-sm">
             Platform status:{' '}
-            <strong className="text-white">{report.status.replace(/_/g, ' ')}</strong>
+            <strong className="text-white">{PLATFORM_STATUS_LABEL[report.status]}</strong>
           </p>
           <div className="mt-4 grid grid-cols-2 gap-2 text-xs text-neutral-400 sm:grid-cols-3">
             <span>Launch blockers: {report.launchBlockers}</span>
@@ -110,6 +156,22 @@ export default async function LaunchCommandCenterPage() {
           <p className="mt-4 text-sm text-sky-300 border-t border-white/10 pt-4">
             <strong className="text-white">Next:</strong> {report.recommendedNextAction}
           </p>
+        </section>
+
+        <section className="mt-8">
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <h2 className="text-lg font-bold text-[#C9A844]">Readiness Breakdown</h2>
+            <span className="text-xs text-neutral-400">
+              Critical: {report.readiness.criticalReady ? 'ready' : 'not ready'} {' / '} Full launch:{' '}
+              {report.readiness.fullLaunchReady ? 'ready' : 'not ready'}
+            </span>
+          </div>
+          <div className="mt-3 grid gap-3 sm:grid-cols-2">
+            <ReadinessCard title="Revenue Readiness" category={report.readiness.missing.revenue} />
+            <ReadinessCard title="Delivery Readiness" category={report.readiness.missing.delivery} />
+            <ReadinessCard title="Monitoring Readiness" category={report.readiness.missing.monitoring} />
+            <ReadinessCard title="Resilience Readiness" category={report.readiness.missing.resilience} />
+          </div>
         </section>
 
         {report.sections.map((section) => (

@@ -9,6 +9,7 @@ export type CommandItem = {
 
 export const ADMIN_COMMANDS: CommandItem[] = [
   { id: 'nav-master', label: 'Master Control', group: 'Navigate', href: '/admin/master', keywords: ['home', 'dashboard'] },
+  { id: 'nav-delivery', label: 'Client Delivery Board', group: 'Navigate', href: '/admin/delivery', keywords: ['clients', 'onboarding', 'delivery', 'scale', 'sop'] },
   { id: 'nav-pipeline', label: 'Pipeline Dashboard', group: 'Navigate', href: '/admin/dashboard', keywords: ['assessments'] },
   { id: 'nav-proposals', label: 'Proposals', group: 'Navigate', href: '/admin/proposals' },
   { id: 'nav-commissions', label: 'Commissions', group: 'Navigate', href: '/admin/commissions', keywords: ['partners'] },
