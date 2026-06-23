@@ -1,13 +1,14 @@
 import Link from 'next/link';
 import { listEACPApprovals } from '@/lib/eacp-launch';
+import ApprovalActions from './ApprovalActions';
 
 export const dynamic = 'force-dynamic';
 
 const NAVY = '#1B2B4D';
 const GOLD = '#C9A844';
 
-export default function ApprovalsPlaceholderPage() {
-  const approvals = listEACPApprovals();
+export default async function ApprovalsPlaceholderPage() {
+  const approvals = await listEACPApprovals();
 
   return (
     <main className="min-h-screen bg-[#FAF8F3] text-neutral-900">
@@ -22,7 +23,7 @@ export default function ApprovalsPlaceholderPage() {
                 Approval Queue
               </h1>
               <p className="mt-2 max-w-3xl text-sm leading-6 text-neutral-500">
-                Placeholder approval center for story, visual, module, brand, and functionality review gates. Full approval workflows are not implemented yet.
+                Review launch packages, approve build handoffs, reject packages, or request revisions with audit trail comments.
               </p>
             </div>
             <Link href="/admin/ea-factory/launches" className="bg-[#1B2B4D] px-5 py-3 text-xs font-black uppercase tracking-wider text-white">
@@ -44,7 +45,7 @@ export default function ApprovalsPlaceholderPage() {
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
                     <p className="text-xs font-bold uppercase tracking-[0.24em]" style={{ color: GOLD }}>
-                      Placeholder Approval
+                      EACP Approval
                     </p>
                     <h2 className="mt-2 text-xl font-black" style={{ color: NAVY }}>
                       {approval.client}
@@ -65,6 +66,12 @@ export default function ApprovalsPlaceholderPage() {
                 <Link href={`/admin/ea-factory/launches/${approval.launchId}`} className="mt-5 inline-block text-sm font-bold" style={{ color: NAVY }}>
                   Review Package
                 </Link>
+                {approval.status === 'queued' ? <ApprovalActions launchId={approval.launchId} /> : null}
+                {approval.comments ? (
+                  <p className="mt-4 text-sm leading-6 text-neutral-600">
+                    <strong>{approval.reviewerName}</strong>: {approval.comments}
+                  </p>
+                ) : null}
               </article>
             ))}
           </div>

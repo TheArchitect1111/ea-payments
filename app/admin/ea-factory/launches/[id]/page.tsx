@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { getEACPLaunch } from '@/lib/eacp-launch';
+import { getEACPLaunch, statusLabel } from '@/lib/eacp-launch';
+import { CopyCodexPrompt, RepoReviewForm } from './LaunchDetailActions';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,7 +14,7 @@ type PageProps = {
 
 export default async function EACPLaunchDetailPage({ params }: PageProps) {
   const { id } = await params;
-  const launch = getEACPLaunch(id);
+  const launch = await getEACPLaunch(id);
 
   if (!launch) notFound();
 
@@ -45,7 +46,7 @@ export default async function EACPLaunchDetailPage({ params }: PageProps) {
 
       <div className="mx-auto max-w-7xl space-y-8 px-6 py-10">
         <section className="grid gap-4 md:grid-cols-4">
-          <Metric label="Status" value={launch.status.replace('-', ' ')} />
+          <Metric label="Status" value={statusLabel(launch.status)} />
           <Metric label="Protocols" value={String(launch.protocolNames.length)} />
           <Metric label="Repos" value={String(launch.recommendedRepos.length)} />
           <Metric label="Skin Brief" value={launch.skinBriefId} />
@@ -60,6 +61,18 @@ export default async function EACPLaunchDetailPage({ params }: PageProps) {
           </h2>
           <p className="mt-3 text-sm leading-6 text-neutral-600">{launch.buildPackage.executiveSummary}</p>
           <p className="mt-3 text-sm leading-6 text-neutral-600">{launch.buildPackage.transformationStory}</p>
+          <div className="mt-5 flex flex-wrap gap-2">
+            <a href={`/api/ea-factory/launch/${launch.id}/export?type=json`} className="bg-[#1B2B4D] px-4 py-2 text-xs font-black uppercase tracking-wider text-white">
+              Export JSON
+            </a>
+            <a href={`/api/ea-factory/launch/${launch.id}/export?type=markdown`} className="bg-[#1B2B4D] px-4 py-2 text-xs font-black uppercase tracking-wider text-white">
+              Export Markdown
+            </a>
+            <a href={`/api/ea-factory/launch/${launch.id}/export?type=codex`} className="bg-[#1B2B4D] px-4 py-2 text-xs font-black uppercase tracking-wider text-white">
+              Download Build Package
+            </a>
+            <CopyCodexPrompt prompt={launch.buildPackage.codexBuildPrompt} />
+          </div>
         </section>
 
         <section id="project-brief" className="scroll-mt-8 border border-neutral-200 bg-white p-6 shadow-sm">
@@ -105,10 +118,21 @@ export default async function EACPLaunchDetailPage({ params }: PageProps) {
                   <h3 className="font-black" style={{ color: NAVY }}>{repo.name}</h3>
                   <span className="text-xs font-black" style={{ color: GOLD }}>{repo.compatibilityScore}</span>
                 </div>
+                <p className="mt-1 text-xs font-bold uppercase tracking-wider text-neutral-500">
+                  {repo.reviewStatus} / {repo.requirement}
+                </p>
                 <p className="mt-2 text-sm leading-6 text-neutral-600">{repo.implementationRationale}</p>
+                {repo.reviewerNotes ? <p className="mt-2 text-xs text-neutral-500">Notes: {repo.reviewerNotes}</p> : null}
               </article>
             ))}
           </div>
+          <RepoReviewForm launchId={launch.id} repos={launch.recommendedRepos.map((repo) => ({
+            id: repo.id,
+            name: repo.name,
+            reviewStatus: repo.reviewStatus,
+            requirement: repo.requirement,
+            reviewerNotes: repo.reviewerNotes,
+          }))} />
         </section>
 
         <section className="border border-neutral-200 bg-white p-6 shadow-sm">
@@ -116,6 +140,24 @@ export default async function EACPLaunchDetailPage({ params }: PageProps) {
             Codex Build Prompt
           </p>
           <textarea readOnly value={launch.buildPackage.codexBuildPrompt} className="mt-4 h-96 w-full border border-neutral-200 bg-[#FAF8F3] p-4 text-sm leading-6" />
+        </section>
+
+        <section className="border border-neutral-200 bg-white p-6 shadow-sm">
+          <p className="text-xs font-bold uppercase tracking-[0.24em]" style={{ color: GOLD }}>
+            Audit Trail
+          </p>
+          <div className="mt-5 space-y-3">
+            {launch.auditTrail.map((event) => (
+              <article key={event.id} className="border-l-4 border-[#C9A844] bg-[#FAF8F3] p-4">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <h3 className="font-black" style={{ color: NAVY }}>{event.label}</h3>
+                  <span className="text-xs font-bold text-neutral-500">{new Date(event.createdAt).toLocaleString()}</span>
+                </div>
+                <p className="mt-1 text-sm leading-6 text-neutral-600">{event.detail}</p>
+                <p className="mt-1 text-xs font-bold uppercase tracking-wider text-neutral-400">{event.actor}</p>
+              </article>
+            ))}
+          </div>
         </section>
       </div>
     </main>

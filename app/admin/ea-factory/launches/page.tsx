@@ -7,8 +7,8 @@ export const dynamic = 'force-dynamic';
 const NAVY = '#1B2B4D';
 const GOLD = '#C9A844';
 
-export default function EACPLaunchesPage() {
-  const launches = listEACPLaunches();
+export default async function EACPLaunchesPage() {
+  const launches = await listEACPLaunches();
 
   return (
     <main className="min-h-screen bg-[#FAF8F3] text-neutral-900">

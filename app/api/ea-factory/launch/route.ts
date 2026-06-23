@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import {
   createEACPLaunch,
+  friendlyLaunchCorrection,
   listEACPLaunches,
   parseEACPCommand,
   validateEACPLaunchInput,
@@ -8,13 +9,14 @@ import {
 } from '@/lib/eacp-launch';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 type LaunchRequest = Partial<EACPLaunchInput> & {
   command?: string;
 };
 
 export async function GET() {
-  return NextResponse.json({ launches: listEACPLaunches() });
+  return NextResponse.json({ launches: await listEACPLaunches() });
 }
 
 export async function POST(request: NextRequest) {
@@ -42,6 +44,7 @@ export async function POST(request: NextRequest) {
       {
         error: 'Missing required EACP launch fields.',
         missing,
+        correction: friendlyLaunchCorrection(missing),
         expected: { client: '', goal: '', deliverable: '', industry: '', notes: '' },
       },
       { status: 400 },

@@ -2,17 +2,12 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { EA_GUIDE_LAUNCH_SIGNAL_KEY } from '@/lib/ea-guide';
 import type { EACPLaunchRecord } from '@/lib/eacp-launch';
 
 const NAVY = '#1B2B4D';
 const GOLD = '#C9A844';
 
-const DEFAULT_COMMAND = `EACP
-Client: Bob Rumball Centre
-Goal: Training Transformation
-Deliverable: Website + Portal
-Industry: Nonprofit`;
+const DEFAULT_COMMAND = 'EACP Client: Bob Rumball Centre Goal: Training Transformation Deliverable: Website + Portal + Learning Hub Notes: Convert videos, SOPs, policies, and PowerPoints into modular learning.';
 
 export default function LaunchesClient({ initialLaunches }: { initialLaunches: EACPLaunchRecord[] }) {
   const [launches, setLaunches] = useState(initialLaunches);
@@ -33,22 +28,12 @@ export default function LaunchesClient({ initialLaunches }: { initialLaunches: E
       const payload = await response.json();
 
       if (!response.ok) {
-        setError(payload.error ?? 'Launch failed.');
+        setError(payload.correction ?? payload.error ?? 'Launch failed.');
         return;
       }
 
       const launch = payload.launch as EACPLaunchRecord;
       setLaunches((current) => [launch, ...current.filter((item) => item.id !== launch.id)]);
-      window.localStorage.setItem(
-        EA_GUIDE_LAUNCH_SIGNAL_KEY,
-        JSON.stringify({
-          launchId: launch.id,
-          client: launch.client,
-          message: 'Project package ready.',
-          createdAt: launch.timestamp,
-          links: launch.links,
-        }),
-      );
       window.dispatchEvent(new CustomEvent('ea-guide:launch-ready'));
     } catch {
       setError('Launch failed. Check the EACP command and try again.');
@@ -129,7 +114,7 @@ export default function LaunchesClient({ initialLaunches }: { initialLaunches: E
                     </td>
                     <td className="px-4 py-4 align-top">
                       <span className="rounded-full bg-[#FAF8F3] px-3 py-1 text-xs font-bold uppercase tracking-wider text-neutral-600">
-                        {launch.status.replace('-', ' ')}
+                        {launch.status.replaceAll('-', ' ')}
                       </span>
                     </td>
                     <td className="px-4 py-4 align-top text-neutral-600">{new Date(launch.timestamp).toLocaleString()}</td>

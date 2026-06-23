@@ -7,7 +7,6 @@ import { useEffect, useMemo, useState } from 'react';
 import {
   EA_GUIDE_DAILY_BRIEF_KEY,
   EA_GUIDE_FIRST_USE_KEY,
-  EA_GUIDE_LAUNCH_SIGNAL_KEY,
   EA_GUIDE_MEMORY_KEY,
   type EAGuideAction,
   type EAGuideMemoryItem,
@@ -23,12 +22,16 @@ type LaunchSignal = {
   launchId: string;
   client: string;
   message: string;
-  createdAt: string;
+  status: string;
+  statusLabel: string;
+  updatedAt: string;
   links: {
     reviewPackage: string;
     projectBrief: string;
     skinBrief: string;
     approval: string;
+    codexBuilder: string;
+    deployment: string;
   };
 };
 
@@ -111,10 +114,11 @@ export default function EAGuideOrb() {
   }, [context.id]);
 
   useEffect(() => {
-    function loadLaunchSignal() {
+    async function loadLaunchSignal() {
       try {
-        const stored = window.localStorage.getItem(EA_GUIDE_LAUNCH_SIGNAL_KEY);
-        setLaunchSignal(stored ? (JSON.parse(stored) as LaunchSignal) : null);
+        const response = await fetch('/api/ea-factory/launch-status', { cache: 'no-store' });
+        const payload = await response.json();
+        setLaunchSignal(payload.active ?? null);
       } catch {
         setLaunchSignal(null);
       }
@@ -175,9 +179,9 @@ export default function EAGuideOrb() {
       }
     : null;
 
-  const recommendedAction = launchReady ? 'Project package ready.' : simplifiRecommendation?.title ?? context.recommendedAction;
+  const recommendedAction = launchReady && launchSignal ? launchSignal.message : simplifiRecommendation?.title ?? context.recommendedAction;
   const recommendationDetail = launchReady && launchSignal
-    ? `${launchSignal.client} has a build package ready for review.`
+    ? `${launchSignal.client} is ${launchSignal.statusLabel.toLowerCase()}.`
     : simplifiRecommendation?.detail ?? context.recommendationDetail;
   const recommendationWhy = launchReady
     ? ['Launch workflow completed.', 'Project and skin briefs were generated.', 'Approval is the next dependency.']
@@ -185,13 +189,15 @@ export default function EAGuideOrb() {
   const dailyBrief = context.dailyBrief?.length ? context.dailyBrief : context.sinceLastVisit;
   const opportunityHealth = context.opportunityHealth ?? ['Active: Current workspace', 'Watching: New signals', 'Follow-Up Needed: Open commitments'];
   const winWall = context.winWall ?? ['Progress is being tracked'];
-  const badgeLabel = launchReady ? 'Opportunity Ready' : context.badgeLabel;
+  const badgeLabel = launchReady && launchSignal ? launchSignal.message : context.badgeLabel;
   const guideActions: EAGuideAction[] = launchReady && launchSignal
     ? [
         { id: 'review-package', label: 'Review Package', kind: 'href', href: launchSignal.links.reviewPackage },
         { id: 'open-skin-brief', label: 'Open Skin Brief', kind: 'href', href: launchSignal.links.skinBrief },
         { id: 'open-project-brief', label: 'Open Project Brief', kind: 'href', href: launchSignal.links.projectBrief },
         { id: 'approval', label: 'Continue To Approval', kind: 'href', href: launchSignal.links.approval },
+        { id: 'codex', label: 'Codex Handoff', kind: 'href', href: launchSignal.links.codexBuilder },
+        { id: 'deployment', label: 'Deployment Package', kind: 'href', href: launchSignal.links.deployment },
       ]
     : simplifiRecommendation
       ? (simplifiRecommendation.actions as EAGuideAction[])
