@@ -31,12 +31,8 @@ export default function ExtensionConnectClient({ loggedIn }: { loggedIn: boolean
     return () => window.removeEventListener('message', onMessage);
   }, []);
 
-  useEffect(() => {
-    if (error) {
-      setStatus('needs-session');
-      setMessage(error);
-    }
-  }, [error]);
+  const displayStatus = error ? 'needs-session' : status;
+  const displayMessage = error ?? message;
 
   return (
     <div className="pl-page">
@@ -50,13 +46,13 @@ export default function ExtensionConnectClient({ loggedIn }: { loggedIn: boolean
         </header>
 
         <div className="pl-card">
-          {status === 'connected' ? (
-            <p className="pl-success">{message}</p>
-          ) : status === 'loading' || starting ? (
-            <p className="pl-footer-text">{starting ? 'Starting guest session…' : message}</p>
+          {displayStatus === 'connected' ? (
+            <p className="pl-success">{displayMessage}</p>
+          ) : displayStatus === 'loading' || starting ? (
+            <p className="pl-footer-text">{starting ? 'Starting guest session…' : displayMessage}</p>
           ) : (
             <>
-              <p className="pl-error">{message}</p>
+              <p className="pl-error">{displayMessage}</p>
               <button type="button" className="pl-btn" onClick={() => void startGuest()}>
                 Start guest session & connect
               </button>

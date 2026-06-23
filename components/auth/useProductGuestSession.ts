@@ -38,9 +38,13 @@ export function useProductGuestSession({
 
   useEffect(() => {
     if (loggedIn || starting) return;
-    if (autoStart || initialUrl?.trim()) {
+    if (!autoStart && !initialUrl?.trim()) return;
+
+    const timer = window.setTimeout(() => {
       void startGuest();
-    }
+    }, 0);
+
+    return () => window.clearTimeout(timer);
   }, [loggedIn, autoStart, initialUrl, starting, startGuest]);
 
   return { starting: starting && !loggedIn, error, startGuest };
