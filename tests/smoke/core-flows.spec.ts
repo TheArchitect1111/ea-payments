@@ -100,9 +100,30 @@ test('experience templates library is reachable', async ({ page }) => {
 test('health launch endpoint returns JSON', async ({ page }) => {
   const res = await page.request.get('/api/health/launch');
   expect(res.status()).toBe(200);
-  const data = (await res.json()) as { ok?: boolean; checks?: { demoClient?: boolean } };
+  const data = (await res.json()) as {
+    ok?: boolean;
+    status?: string;
+    checks?: {
+      demoClient?: boolean;
+      revenueReady?: boolean;
+      deliveryReady?: boolean;
+      monitoringReady?: boolean;
+      resilienceReady?: boolean;
+      criticalReady?: boolean;
+      fullLaunchReady?: boolean;
+      missingByCategory?: unknown;
+    };
+  };
   expect(typeof data.ok).toBe('boolean');
+  expect(typeof data.status).toBe('string');
   expect(data.checks).toBeTruthy();
+  expect(typeof data.checks?.revenueReady).toBe('boolean');
+  expect(typeof data.checks?.deliveryReady).toBe('boolean');
+  expect(typeof data.checks?.monitoringReady).toBe('boolean');
+  expect(typeof data.checks?.resilienceReady).toBe('boolean');
+  expect(typeof data.checks?.criticalReady).toBe('boolean');
+  expect(typeof data.checks?.fullLaunchReady).toBe('boolean');
+  expect(data.checks?.missingByCategory).toBeTruthy();
 });
 
 test('portal documents requires login', async ({ page }) => {

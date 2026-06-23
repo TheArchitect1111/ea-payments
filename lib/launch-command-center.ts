@@ -2,6 +2,8 @@ import { getAirtableApiKey, productionSecretIssues } from '@/lib/integration-env
 import { checkAirtableLaunchSchema } from '@/lib/airtable-schema-check';
 import { isCaptureApiKeyConfigured } from '@/lib/capture-api-key';
 import { getTier2EnvChecks, isTier2AutomationReady } from '@/lib/launch-tier2';
+import { buildLaunchReadinessModel } from '@/lib/launch-readiness';
+import type { LaunchReadinessModel, LaunchReadinessStatus } from '@/lib/launch-readiness';
 import { EA_PLATFORM_URL } from '@/lib/platform-urls';
 import { parseResendFromEmail, RESEND_FROM_EMAIL_EXAMPLE } from '@/lib/resend-env';
 
@@ -58,7 +60,8 @@ export type LaunchSectionSummary = {
 export type LaunchCommandCenterReport = {
   generatedAt: string;
   readinessScore: number;
-  status: 'full_launch_ready' | 'friend_testing_ready' | 'needs_setup';
+  status: LaunchReadinessStatus;
+  readiness: LaunchReadinessModel;
   launchBlockers: number;
   warnings: number;
   recommendedNextAction: string;
@@ -771,8 +774,37 @@ export async function runLaunchCommandCenter(options?: {
   const max = scored.reduce((s, i) => s + i.maxScore, 0);
   const readinessScore = max > 0 ? Math.round((earned / max) * 100) : 0;
 
-  const friendTestingReady = Boolean(getAirtableApiKey()) && demoClient && captureReady;
-  const fullLaunchReady = friendTestingReady && isTier2AutomationReady(tier2) && onboardingProbe.ok && esignProbe.ok;
+  const controls = {
+    sentryDsn: Boolean(process.env.NEXT_PUBLIC_SENTRY_DSN?.trim()),
+    uptimeDashboard: Boolean(
+      process.env.UPTIME_KUMA_DASHBOARD_URL?.trim() || process.env.UPTIME_MONITORING_URL?.trim(),
+    ),
+    backupDestination: Boolean(process.env.BACKUP_DESTINATION_URI?.trim()),
+  };
+  const readiness = buildLaunchReadinessModel({
+    revenue: {
+      stripe: tier2.stripe,
+      stripeWebhookSecret: tier2.stripeWebhookSecret,
+      airtable: Boolean(getAirtableApiKey()),
+      resend: tier2.resend,
+      resendFrom: tier2.resendFrom,
+    },
+    delivery: {
+      onboardingWebhook: tier2.onboardingWebhook,
+      esignWebhook: tier2.esignWebhook,
+      captureSchema: schema.capture.ok,
+      pulseSchema: schema.pulse.ok,
+      assessmentSchema: schema.assessment.ok,
+      proposalSchema: schema.proposal.ok,
+    },
+    monitoring: {
+      sentryDsn: controls.sentryDsn,
+      uptimeDashboard: controls.uptimeDashboard,
+    },
+    resilience: {
+      backupDestination: controls.backupDestination,
+    },
+  });
 
   const summary = {
     complete: items.filter((i) => i.status === 'complete').length,
@@ -783,7 +815,7 @@ export async function runLaunchCommandCenter(options?: {
   };
 
   const sections = buildSections(items);
-  const launchBlockers = items.filter((i) => i.maxScore > 0 && i.status !== 'complete').length;
+  const launchBlockers = readiness.missing.revenue.missing.length + readiness.missing.delivery.missing.length;
   const warnings = items.filter(
     (i) => i.status === 'needs_human_action' || i.status === 'needs_credentials',
   ).length;
@@ -792,7 +824,8 @@ export async function runLaunchCommandCenter(options?: {
   return {
     generatedAt: new Date().toISOString(),
     readinessScore,
-    status: fullLaunchReady ? 'full_launch_ready' : friendTestingReady ? 'friend_testing_ready' : 'needs_setup',
+    status: readiness.status,
+    readiness,
     launchBlockers,
     warnings,
     recommendedNextAction: recommendNextAction(items, tier2Ready),

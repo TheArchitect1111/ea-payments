@@ -1,33 +1,62 @@
-# EA Simplifi + Amplifi — Chrome / Firefox extension
+# Simplifi Extension
 
-## Quick install (no manual API key)
+Personal Opportunity Intelligence across the internet.
 
-1. `chrome://extensions` → **Developer mode** → **Load unpacked** → select this `extension/` folder.
-2. On first install, a tab opens to **`/extension/connect`** on production.
-3. Guest session starts automatically; the extension receives API config — done.
+## What It Does
 
-Manual fallback: open **Options** and paste API Base URL + key only if connect fails.
+- Adds a floating Simplifi orb to normal websites.
+- Captures the current page, title, metadata, selected text, and screenshot.
+- Sends captures to existing Simplifi capture APIs.
+- Creates local watch list items and follow-up reminders.
+- Shows browser notifications when capture analysis is ready.
+- Provides a popup command center with Capture, Watch, Analyze, Follow Up, Daily Brief, and Dashboard.
 
-## Options (advanced)
+## Install For Testing
 
-- **API Base URL:** `https://www.efficiencyarchitects.online` (or preview URL)
-- **Capture API Key:** auto-filled via `/extension/connect`, or `EA_CAPTURE_API_KEY` from Vercel (optional — derived from `ADMIN_SESSION_SECRET` if unset)
-- **Portal slug:** optional tenant slug for captures
-- **Notify email:** optional completion email
+1. Open `chrome://extensions`.
+2. Enable Developer mode.
+3. Click Load unpacked.
+4. Select this `extension/` folder.
+5. Open `https://ea-payments.vercel.app/extension/connect` while signed in.
 
-## Package for testers
+The extension stores its API URL, capture key, portal slug, and notify email in `chrome.storage.sync`.
+
+## Current Phase
+
+Implemented:
+
+- Manifest V3
+- Floating Simplifi Orb
+- Capture current page
+- Capture selected text from right-click menu
+- Visible screenshot capture
+- Watch List storage
+- Follow-up reminders via browser alarms
+- Daily Brief generation from local extension activity
+- Browser notifications
+- Popup dashboard
+- Existing Simplifi API sync
+
+Not yet implemented:
+
+- Remote continuous web monitoring
+- Region/full-page screenshot stitching
+- Voice transcription
+- Backend watch list database
+- AI autonomous opportunity detection
+
+Those belong to Phase 2/3 once watch lists, reminders, and notifications have server-side tables.
+
+## Package
+
+Run:
 
 ```bat
 scripts\package-extension.bat
 ```
 
-Produces `dist\ea-amplifi-extension.zip`.
+Output:
 
-## Env on Vercel
-
-- `EA_CAPTURE_API_KEY` — optional explicit key
-- `ADMIN_SESSION_SECRET` — used to derive capture key when `EA_CAPTURE_API_KEY` is unset
-
-## Chrome Web Store
-
-Not required for launch. Use load-unpacked + `/extension/connect` for friend testing. Web Store listing is a post-launch polish step.
+```txt
+dist\simplifi-extension.zip
+```

@@ -29,6 +29,7 @@ console.log('Launch check orchestrator —', BASE);
 
 const steps = [
   ['node', ['scripts/launch-command-center.mjs', BASE], 'Command center report'],
+  ['node', ['scripts/repo-readiness.mjs'], 'Repository readiness'],
   ['node', ['scripts/launch-readiness.mjs'], 'Route smoke + health'],
   ['node', ['scripts/test-tier2-launch.mjs', BASE], 'Tier 2 env'],
 ];

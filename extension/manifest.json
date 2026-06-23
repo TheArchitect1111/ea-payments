@@ -1,13 +1,13 @@
 {
   "manifest_version": 3,
-  "name": "EA Simplifi + Amplifi",
-  "version": "3.0.0",
-  "description": "Screenshot capture with Simplifi. Magnifi builds automatically. Amplifi shares the link. Background processing + notifications.",
-  "permissions": ["activeTab", "contextMenus", "storage", "tabs", "notifications"],
+  "name": "Simplifi Extension",
+  "version": "4.0.0",
+  "description": "Personal Opportunity Intelligence across the internet: capture, watch, analyze, follow up, and receive Simplifi alerts.",
+  "permissions": ["activeTab", "alarms", "contextMenus", "storage", "tabs", "notifications"],
   "host_permissions": ["https://*/*", "http://*/*"],
   "action": {
     "default_popup": "popup.html",
-    "default_title": "Simplifi + Amplifi",
+    "default_title": "Simplifi Opportunity Intelligence",
     "default_icon": {
       "128": "icon128.png"
     }
@@ -43,7 +43,7 @@
   "options_page": "options.html",
   "browser_specific_settings": {
     "gecko": {
-      "id": "ea-simplifi-amplifi@efficiencyarchitects.online",
+      "id": "simplifi-extension@efficiencyarchitects.online",
       "strict_min_version": "109.0"
     }
   }

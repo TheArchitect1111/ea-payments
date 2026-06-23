@@ -1,14 +1,19 @@
 'use client';
 
 import { useCallback, useRef, useState, useEffect } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import type { CaptureRecord } from '@/lib/capture-records';
 import CaptureSuccessPanel from '@/app/components/CaptureSuccessPanel';
-import ActiveSavePanel from '@/app/components/ActiveSavePanel';
 import CaptureProcessingPanel from '@/app/components/CaptureProcessingPanel';
+import SimplifiOnboardingFlow from '@/app/components/simplifi-onboarding/SimplifiOnboardingFlow';
 import type { AmplifiSocialDraft } from '@/lib/amplifi-draft';
-import GuidedFirstSuccessFlow from '@/app/components/guided-first-success/GuidedFirstSuccessFlow';
-import UniversalCoachPanel from '@/app/components/guided-first-success/UniversalCoachPanel';
+import {
+  incrementCaptureCount,
+  isOnboardingComplete,
+  setOnboardingStep as persistOnboardingStep,
+  type SimplifiOnboardingStep,
+} from '@/lib/simplifi-onboarding';
 import { prepareCaptureUpload } from '@/lib/client-image-upload';
 import { useProductGuestSession } from '@/components/auth/useProductGuestSession';
 
@@ -50,8 +55,10 @@ export default function SimplifiCaptureApp({
   const [message, setMessage] = useState('');
   const [result, setResult] = useState<AnalyzeResponse | null>(null);
   const [processingId, setProcessingId] = useState<string | null>(null);
+  const [externalOnboardingStep, setExternalOnboardingStep] = useState<SimplifiOnboardingStep | null>(null);
 
   const loginNext = encodeURIComponent('/simplifi/capture');
+  const onboardingScope = slug ?? 'simplifi-user';
 
   const { starting: guestStarting, error: guestError, startGuest } = useProductGuestSession({
     loggedIn,
@@ -148,6 +155,13 @@ export default function SimplifiCaptureApp({
     setResult(data);
     setView('result');
     setOpen(true);
+    if (loggedIn) {
+      incrementCaptureCount(onboardingScope);
+      if (!isOnboardingComplete(onboardingScope)) {
+        persistOnboardingStep(onboardingScope, 'capture-success');
+        setExternalOnboardingStep('capture-success');
+      }
+    }
   };
 
   const handleCaptureUrl = useCallback(async () => {
@@ -198,18 +212,17 @@ export default function SimplifiCaptureApp({
     return (
       <div className="sc-app">
         <header className="sc-header">
-          <Link href="/simplifi" className="sc-brand">
-            SIMPLIFI
-          </Link>
+          <div className="sc-brand-lockup">
+            <Image src="/simplifi-logo.png" alt="Simplifi" width={170} height={96} priority />
+          </div>
         </header>
         <main className="sc-main sc-main-center">
-          <p className="sc-kicker">One-tap capture</p>
+          <p className="sc-kicker">Never Lose An Opportunity Again™</p>
           <h1 className="sc-title">
-            {guestStarting ? 'Starting capture…' : 'Capture opportunities instantly'}
+            {guestStarting ? 'Getting ready…' : 'Save what matters before it slips away'}
           </h1>
           <p className="sc-lede">
-            Simplifi saves URLs, photos, and flyers from your phone — then builds Magnifi experiences
-            you can share.
+            Simplifi helps you save opportunities, remember them, and act when the time is right.
           </p>
           {guestError ? <p className="sc-error">{guestError}</p> : null}
           {!guestStarting && (
@@ -217,7 +230,7 @@ export default function SimplifiCaptureApp({
               <button type="button" className="sc-btn sc-btn-primary" onClick={() => void startGuest()}>
                 Start capturing now
               </button>
-              <Link href={`/portal/login?next=${loginNext}`} className="sc-header-link">
+              <Link href={`/simplifi/login?next=${loginNext}`} className="sc-header-link">
                 Sign in with your account →
               </Link>
             </>
@@ -231,34 +244,78 @@ export default function SimplifiCaptureApp({
   return (
     <div className="sc-app">
       <header className="sc-header">
-        <Link href="/simplifi" className="sc-brand">
-          SIMPLIFI
-        </Link>
-        {slug && (
-          <Link href={`/portal/${slug}/simplifi`} className="sc-header-link">
-            Workspace
+        <div className="sc-brand-lockup">
+          <Image src="/simplifi-logo.png" alt="Simplifi" width={170} height={96} priority />
+        </div>
+        {slug ? (
+          <Link href="/simplifi/workspace" className="sc-header-link">
+            My opportunities
+          </Link>
+        ) : (
+          <Link href="/simplifi/workspace" className="sc-header-link">
+            My dashboard
           </Link>
         )}
       </header>
 
       <main className="sc-main">
-        <p className="sc-kicker">Capture mode</p>
-        <h1 className="sc-title">Tap the button. Never lose an opportunity.</h1>
+        <p className="sc-kicker">Never Lose An Opportunity Again™</p>
+        <h1 className="sc-title">Let&apos;s capture your first opportunity.</h1>
         <p className="sc-lede">
-          Paste a link, snap a flyer, or upload a screenshot. Simplifi scores it and Magnifi builds
-          the shareable story.
+          Paste a link, upload a screenshot, save a flyer, or capture something worth remembering.
         </p>
-        <ul className="sc-steps">
-          <li>Tap the gold Capture button</li>
-          <li>Choose URL or photo</li>
-          <li>Share the Consider or Magnifi link</li>
-        </ul>
+
+        <section className="sc-first-capture" aria-label="Capture your first item">
+          <label className="sc-field-label" htmlFor="first-capture-url">
+            Paste a link
+          </label>
+          <div className="sc-inline-capture">
+            <input
+              id="first-capture-url"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              placeholder="https://example.com"
+              className="sc-input"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && url.trim() && !loading) void handleCaptureUrl();
+              }}
+            />
+            <button
+              type="button"
+              className="sc-btn sc-btn-primary"
+              disabled={loading || !url.trim()}
+              onClick={handleCaptureUrl}
+            >
+              {loading ? 'Capturing...' : 'Capture link'}
+            </button>
+          </div>
+          <p className="sc-divider">or</p>
+          <label className="sc-btn sc-btn-capture-main sc-file-label">
+            Upload screenshot or flyer
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/*,.pdf,application/pdf"
+              className="sc-file-input"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) void handleCaptureFile(file);
+              }}
+            />
+          </label>
+        </section>
+
+        <ol className="sc-steps sc-steps-numbered">
+          <li><strong>Save it:</strong> capture what caught your attention.</li>
+          <li><strong>Understand it:</strong> Simplifi creates a clear summary.</li>
+          <li><strong>Act on it:</strong> follow up when the time is right.</li>
+        </ol>
         <button
           type="button"
-          className="sc-btn sc-btn-capture-main"
+          className="sc-secondary-link"
           onClick={openSheet}
         >
-          Capture now
+          More capture options
         </button>
 
         {processingId && !open && (
@@ -285,10 +342,10 @@ export default function SimplifiCaptureApp({
             <p className="sc-sheet-title">Capture opportunity</p>
             {message && <p className="sc-error">{message}</p>}
             <button type="button" className="sc-sheet-action" onClick={() => setView('url')}>
-              Paste a URL
+              Paste URL
             </button>
             <label className="sc-sheet-action sc-file-label">
-              Photo or screenshot
+              Upload Screenshot
               <input
                 ref={fileRef}
                 type="file"
@@ -300,8 +357,30 @@ export default function SimplifiCaptureApp({
                 }}
               />
             </label>
+            <label className="sc-sheet-action sc-file-label">
+              Upload Flyer
+              <input
+                type="file"
+                accept="image/*,.pdf,application/pdf"
+                className="sc-file-input"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) void handleCaptureFile(file);
+                }}
+              />
+            </label>
             <button type="button" className="sc-sheet-action" onClick={captureCurrentPage}>
-              Use this page&apos;s link
+              Use Current Page
+            </button>
+            <button
+              type="button"
+              className="sc-sheet-action"
+              onClick={() => {
+                setProspectName('');
+                setView('url');
+              }}
+            >
+              Add Quick Note
             </button>
             <button type="button" className="sc-sheet-cancel" onClick={closeSheet}>
               Cancel
@@ -358,6 +437,13 @@ export default function SimplifiCaptureApp({
                 setProcessingId(null);
                 setResult(response);
                 setView('result');
+                if (loggedIn) {
+                  incrementCaptureCount(onboardingScope);
+                  if (!isOnboardingComplete(onboardingScope)) {
+                    persistOnboardingStep(onboardingScope, 'capture-success');
+                    setExternalOnboardingStep('capture-success');
+                  }
+                }
               }}
               onError={(msg) => setMessage(msg)}
             />
@@ -407,25 +493,23 @@ export default function SimplifiCaptureApp({
 
         {view === 'result' && result?.record && (
           <>
-            <p className="sc-sheet-title">Pipeline complete</p>
-            {loggedIn && result.record.id && (
-              <ActiveSavePanel
-                recordId={result.record.id}
-                title={result.record.title ?? 'Opportunity'}
-              />
-            )}
+            <p className="sc-sheet-title">Nice capture</p>
             <CaptureSuccessPanel
               title={result.record.title ?? 'Opportunity'}
               links={{
                 magnifiUrl: result.magnifiUrl,
                 considerUrl: result.considerUrl,
                 guidanceUrl: result.guidanceUrl,
-                workspaceUrl: result.workspaceUrl,
+                workspaceUrl: '/simplifi/workspace',
                 clientMessage: result.clientMessage,
               }}
-              amplifiDraft={result.amplifiDraft}
               onClose={closeSheet}
-              autoOpenMagnifi
+              onContinue={() => {
+                if (!isOnboardingComplete(onboardingScope)) {
+                  persistOnboardingStep(onboardingScope, 'capture-success');
+                  setExternalOnboardingStep('capture-success');
+                }
+              }}
             />
           </>
         )}
@@ -450,11 +534,16 @@ export default function SimplifiCaptureApp({
         <span className="sc-fab-label">Capture</span>
       </button>
 
-      {loggedIn && slug && (
-        <>
-          <GuidedFirstSuccessFlow platformId="simplifi" scope={slug} />
-          <UniversalCoachPanel platformId="simplifi" />
-        </>
+      {loggedIn && (
+        <SimplifiOnboardingFlow
+          scope={onboardingScope}
+          onStartCapture={() => {
+            setOpen(true);
+            setView('menu');
+          }}
+          externalStep={externalOnboardingStep}
+          onExternalStepHandled={() => setExternalOnboardingStep(null)}
+        />
       )}
     </div>
   );

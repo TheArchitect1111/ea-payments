@@ -9,7 +9,10 @@ const PASSWORD = 'DemoPulse2026!';
 function parseCookies(res) {
   const jar = new Map();
   const raw = typeof res.headers.getSetCookie === 'function' ? res.headers.getSetCookie() : [];
-  const lines = raw.length ? raw : (res.headers.get('set-cookie') ? [res.headers.get('set-cookie')] : []);
+  const fallback = res.headers.get('set-cookie')
+    ? res.headers.get('set-cookie').split(/,(?=\s*[^;=]+=[^;]+)/g)
+    : [];
+  const lines = raw.length ? raw : fallback;
   for (const header of lines) {
     if (!header) continue;
     const part = header.split(';')[0];
@@ -38,8 +41,20 @@ if (!loginRes.ok) {
 }
 console.log('LOGIN OK slug:', loginBody.slug ?? 'demo-client');
 
-const cookies = parseCookies(loginRes);
-const session = cookies.get('ea_portal_session');
+let cookies = parseCookies(loginRes);
+let session = cookies.get('ea_portal_session');
+if (!session && loginBody.requires2fa) {
+  console.log('LOGIN requires 2FA; using demo session endpoint for capture E2E.');
+  const demoRes = await fetch(`${BASE}/api/demo/session`, { method: 'POST' });
+  const demoBody = await demoRes.json().catch(() => ({}));
+  if (!demoRes.ok || !demoBody.ok) {
+    console.error('DEMO SESSION FAIL', demoRes.status, demoBody);
+    process.exit(1);
+  }
+  cookies = parseCookies(demoRes);
+  session = cookies.get('ea_portal_session');
+  console.log('DEMO SESSION OK slug:', demoBody.slug ?? 'demo-client');
+}
 if (!session) {
   console.error('LOGIN FAIL — no session cookie');
   process.exit(1);

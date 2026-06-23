@@ -4,7 +4,7 @@ import { FormEvent, useState } from 'react';
 import Link from 'next/link';
 import AuthNav from '@/components/auth/AuthNav';
 
-type Realm = 'admin' | 'portal' | 'partner';
+type Realm = 'admin' | 'portal' | 'partner' | 'simplifi';
 
 const CONFIG: Record<
   Realm,
@@ -25,6 +25,12 @@ const CONFIG: Record<
     title: 'Request partner access',
     lede: 'Join the EA partner network to track referrals, commissions, and pipeline.',
     endpoint: '/api/partners/register',
+  },
+  simplifi: {
+    title: 'Request Simplifi access',
+    lede: 'Request Simplifi access or start with the Operational MRI assessment if you are still choosing the right EA path.',
+    endpoint: '/api/portal/register',
+    assessmentLink: '/assessment',
   },
 };
 

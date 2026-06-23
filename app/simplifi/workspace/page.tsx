@@ -48,7 +48,7 @@ export default async function SimplifiWorkspacePage() {
           {slug ? (
             <Link href={`/portal/${slug}`}>Portal</Link>
           ) : (
-            <Link href="/portal/login">Sign in</Link>
+            <Link href="/simplifi/login?next=/simplifi/workspace">Sign in</Link>
           )}
         </nav>
       </header>

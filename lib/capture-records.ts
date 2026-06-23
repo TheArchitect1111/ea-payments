@@ -402,8 +402,10 @@ export async function updateCaptureAnalysis(
 export async function getCaptureByConsiderSlug(slug: string): Promise<CaptureRecord | null> {
   if (!process.env.AIRTABLE_API_KEY) return null;
 
-  const safe = slug.trim().replace(/'/g, "\\'");
-  const formula = `{Consider Slug}='${safe}'`;
+  const trimmed = slug.trim();
+  const safe = trimmed.replace(/'/g, "\\'");
+  const safeLower = trimmed.toLowerCase().replace(/'/g, "\\'");
+  const formula = `OR({Consider Slug}='${safe}',LOWER({Consider Slug})='${safeLower}')`;
   const params = new URLSearchParams({ filterByFormula: formula, maxRecords: '1' });
 
   try {

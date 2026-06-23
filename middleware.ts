@@ -24,6 +24,13 @@ const { middleware: portalMiddleware } = createSlugPortalMiddleware({
 
 });
 
+const PUBLIC_PORTAL_AUTH_PATHS = new Set([
+  '/portal/login',
+  '/portal/register',
+  '/portal/forgot-password',
+  '/portal/reset-password',
+]);
+
 
 
 export function middleware(request: NextRequest) {
@@ -38,7 +45,9 @@ export function middleware(request: NextRequest) {
 
   if (simplifiAppEntry) {
 
-    return NextResponse.redirect(new URL(simplifiAppEntry, request.url));
+    const target = new URL(simplifiAppEntry, request.url);
+    target.search = request.nextUrl.search;
+    return NextResponse.redirect(target);
 
   }
 
@@ -61,6 +70,9 @@ export function middleware(request: NextRequest) {
 
 
   if (pathname.startsWith('/portal')) {
+    if (PUBLIC_PORTAL_AUTH_PATHS.has(pathname)) {
+      return NextResponse.next();
+    }
 
     return (portalMiddleware as unknown as (req: NextRequest) => ReturnType<typeof portalMiddleware>)(request);
 
@@ -76,7 +88,18 @@ export function middleware(request: NextRequest) {
 
 export const config = {
 
-  matcher: ['/', '/capture', '/app', '/workspace', '/login', '/portal/:slug', '/portal/:slug/:path*'],
+  matcher: [
+    '/',
+    '/capture',
+    '/app',
+    '/workspace',
+    '/login',
+    '/register',
+    '/forgot-password',
+    '/reset-password',
+    '/portal/:slug',
+    '/portal/:slug/:path*',
+  ],
 
 };
 

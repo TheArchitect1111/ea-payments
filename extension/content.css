@@ -1,47 +1,186 @@
-#ea-product-fabs {
+#simplifi-orb-root {
+  all: initial;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+#simplifi-orb-root * {
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+.simplifi-orb {
   position: fixed;
-  right: 16px;
-  bottom: 16px;
+  right: 18px;
+  bottom: 18px;
   z-index: 2147483646;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  align-items: flex-end;
-}
-
-.ea-fab {
-  padding: 12px 18px;
-  border-radius: 999px;
-  font-family: system-ui, sans-serif;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  cursor: pointer;
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
-  border: 2px solid transparent;
-}
-
-.ea-fab-simplifi {
-  background: #0a66ff;
+  width: 74px;
+  height: 74px;
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  border-radius: 50%;
+  background: radial-gradient(circle at 34% 26%, #2d7dff 0%, #0a66ff 36%, #082765 100%);
   color: #fff;
+  box-shadow: 0 18px 52px rgba(8, 39, 101, 0.35);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  padding: 0;
+}
+
+.simplifi-orb-ring {
+  position: absolute;
+  inset: -7px;
+  border-radius: 50%;
+  border: 2px solid rgba(201, 168, 68, 0.75);
+  animation: simplifi-pulse 2.4s ease-in-out infinite;
+}
+
+.simplifi-orb-core {
+  font-size: 26px;
+  font-weight: 950;
+  letter-spacing: -0.04em;
+}
+
+.simplifi-orb-state {
+  position: absolute;
+  right: 2px;
+  bottom: -8px;
+  min-width: 66px;
+  border-radius: 999px;
+  background: #fff;
+  color: #1b2b4d;
+  border: 1px solid rgba(27, 43, 77, 0.12);
+  padding: 4px 7px;
+  font-size: 10px;
+  font-weight: 850;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.simplifi-orb-watching .simplifi-orb-ring { border-color: #25c76f; }
+.simplifi-orb-found .simplifi-orb-ring { border-color: #f5c542; animation-duration: 1.2s; }
+.simplifi-orb-followup .simplifi-orb-ring { border-color: #2d7dff; }
+.simplifi-orb-action .simplifi-orb-ring { border-color: #8a5cf6; animation-duration: 1.4s; }
+.simplifi-orb-idle { filter: grayscale(0.25); opacity: 0.92; }
+
+.simplifi-panel {
+  position: fixed;
+  right: 18px;
+  bottom: 108px;
+  z-index: 2147483646;
+  width: min(380px, calc(100vw - 28px));
+  max-height: min(680px, calc(100vh - 130px));
+  overflow: auto;
+  padding: 18px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.98);
+  color: #15213b;
+  box-shadow: 0 24px 80px rgba(8, 39, 101, 0.28);
+  border: 1px solid rgba(27, 43, 77, 0.1);
+  transform: translateY(12px) scale(0.98);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+.simplifi-panel-open {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0) scale(1);
+}
+
+.simplifi-panel-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.simplifi-panel-head p {
+  margin: 0 0 3px;
+  color: #0a66ff;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.simplifi-panel-head h2 {
+  margin: 0;
+  color: #1b2b4d;
+  font-size: 18px;
+  line-height: 1.2;
+  font-weight: 900;
+}
+
+#simplifi-close {
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 50%;
+  background: #eef4ff;
+  color: #1b2b4d;
+  cursor: pointer;
+  font-weight: 900;
+}
+
+.simplifi-context {
+  margin: 0 0 14px;
+  color: #5d6a7d;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.simplifi-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.simplifi-actions button {
+  min-height: 42px;
+  border: 1px solid rgba(27, 43, 77, 0.12);
+  border-radius: 12px;
+  background: #f7faff;
+  color: #1b2b4d;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.simplifi-actions button:first-child,
+.simplifi-actions button:nth-child(2) {
+  background: #0a66ff;
   border-color: #0a66ff;
+  color: #fff;
 }
 
-.ea-fab-amplifi {
-  background: #1b2b4d;
-  color: #c9a844;
-  border-color: #c9a844;
+.simplifi-output {
+  margin-top: 14px;
+  padding: 13px;
+  border-radius: 14px;
+  background: #fbf8ed;
+  border: 1px solid rgba(201, 168, 68, 0.32);
 }
 
-.ea-fab:hover {
-  filter: brightness(1.08);
+.simplifi-output strong {
+  display: block;
+  color: #1b2b4d;
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+.simplifi-output span {
+  display: block;
+  color: #5d6a7d;
+  font-size: 12px;
+  line-height: 1.45;
 }
 
 #ea-capture-toast {
   position: fixed;
   left: 50%;
-  bottom: 96px;
+  bottom: 108px;
   transform: translateX(-50%) translateY(12px);
   z-index: 2147483647;
   max-width: min(92vw, 420px);
@@ -49,9 +188,9 @@
   border-radius: 12px;
   background: rgba(27, 43, 77, 0.96);
   color: #fff;
-  font-family: system-ui, sans-serif;
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
   line-height: 1.4;
   opacity: 0;
   pointer-events: none;
@@ -59,6 +198,23 @@
 }
 
 .ea-capture-toast-show {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
+  opacity: 1 !important;
+  transform: translateX(-50%) translateY(0) !important;
+}
+
+@keyframes simplifi-pulse {
+  0%, 100% { transform: scale(1); opacity: 0.58; }
+  50% { transform: scale(1.14); opacity: 1; }
+}
+
+@media (max-width: 520px) {
+  .simplifi-orb {
+    right: 14px;
+    bottom: 14px;
+  }
+
+  .simplifi-panel {
+    right: 12px;
+    bottom: 100px;
+  }
 }

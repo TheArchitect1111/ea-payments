@@ -1,12 +1,20 @@
 import { getAirtableApiKey } from '@/lib/integration-env';
 import {
+  ASSESSMENT_REQUIRED_FIELDS,
   CAPTURE_REQUIRED_FIELDS,
+  PROPOSAL_REQUIRED_FIELDS,
   PULSE_REQUIRED_FIELDS,
 } from '@/lib/airtable-schema-check';
 
 const BASE_ID = process.env.AIRTABLE_PAYMENTS_BASE_ID ?? 'appv0YoLIMY45fmDA';
 const CAPTURES_TABLE = process.env.AIRTABLE_CAPTURES_TABLE ?? 'Capture Records';
 const PULSE_TABLE = process.env.PULSE_EVENTS_TABLE ?? 'Pulse Events';
+const ASSESSMENTS_TABLE_ID =
+  process.env.AIRTABLE_ASSESSMENTS_TABLE_ID ?? 'tblbDbNP5PCMojNe1';
+const PROPOSALS_TABLE_ID =
+  process.env.AIRTABLE_PROPOSALS_TABLE_ID ?? 'tbl3P26zyteiPNLQY';
+const ASSESSMENTS_TABLE_NAME = process.env.AIRTABLE_ASSESSMENTS_TABLE ?? 'Assessments';
+const PROPOSALS_TABLE_NAME = process.env.AIRTABLE_PROPOSALS_TABLE ?? 'Proposals';
 
 type AirtableFieldDef = {
   name: string;
@@ -121,6 +129,86 @@ const PULSE_FIELD_DEFS: AirtableFieldDef[] = [
   },
 ];
 
+const PROPOSAL_FIELD_DEFS: AirtableFieldDef[] = [
+  { name: 'Proposal ID', type: 'singleLineText' },
+  { name: 'Business Name', type: 'singleLineText' },
+  { name: 'Contact Name', type: 'singleLineText' },
+  { name: 'Email', type: 'email' },
+  {
+    name: 'Status',
+    type: 'singleSelect',
+    options: {
+      choices: [
+        { name: 'Pending Review' },
+        { name: 'Approved' },
+        { name: 'Client Accepted' },
+        { name: 'Paid' },
+        { name: 'Archived' },
+      ],
+    },
+  },
+  { name: 'Recommended Project Type', type: 'singleLineText' },
+  { name: 'Project Type Label', type: 'singleLineText' },
+  { name: 'Capacity Score', type: 'number', options: { precision: 0 } },
+  { name: 'Score Band', type: 'singleLineText' },
+  { name: 'Primary Constraint', type: 'singleLineText' },
+  { name: 'Weekly Time Recovery', type: 'number', options: { precision: 0 } },
+  { name: 'Opportunity Low', type: 'currency', options: { precision: 2, symbol: '$' } },
+  { name: 'Opportunity High', type: 'currency', options: { precision: 2, symbol: '$' } },
+  { name: 'Raw Fee', type: 'currency', options: { precision: 2, symbol: '$' } },
+  { name: 'Recommended Fee', type: 'currency', options: { precision: 2, symbol: '$' } },
+  { name: 'Scope Summary', type: 'multilineText' },
+  {
+    name: 'Payment Status',
+    type: 'singleSelect',
+    options: {
+      choices: [
+        { name: 'Not Started' },
+        { name: 'Checkout Created' },
+        { name: 'Paid' },
+        { name: 'Payment Failed' },
+        { name: 'Refunded' },
+      ],
+    },
+  },
+  { name: 'Date Approved', type: 'date', options: { dateFormat: { name: 'iso' } } },
+  { name: 'Stripe Session ID', type: 'singleLineText' },
+];
+
+const ASSESSMENT_FIELD_DEFS: AirtableFieldDef[] = [
+  { name: 'Assessment ID', type: 'singleLineText' },
+  { name: 'Business Name', type: 'singleLineText' },
+  { name: 'Contact Name', type: 'singleLineText' },
+  { name: 'Email', type: 'email' },
+  { name: 'Team Size', type: 'number', options: { precision: 0 } },
+  { name: 'Revenue Range', type: 'singleLineText' },
+  { name: 'Current Systems', type: 'singleLineText' },
+  { name: 'Systems Count', type: 'number', options: { precision: 0 } },
+  { name: 'Operational Challenges', type: 'multipleSelects', options: { choices: [] } },
+  { name: 'Growth Goals', type: 'multilineText' },
+  { name: 'Capacity Constraints', type: 'multilineText' },
+  { name: 'Workflow Count', type: 'number', options: { precision: 0 } },
+  { name: 'Automation Count', type: 'number', options: { precision: 0 } },
+  { name: 'Integration Count', type: 'number', options: { precision: 0 } },
+  {
+    name: 'Dashboard Required',
+    type: 'checkbox',
+    options: { icon: 'check', color: 'greenBright' },
+  },
+  {
+    name: 'Portal Required',
+    type: 'checkbox',
+    options: { icon: 'check', color: 'greenBright' },
+  },
+  { name: 'User Count', type: 'number', options: { precision: 0 } },
+  { name: 'Business Complexity', type: 'singleLineText' },
+  {
+    name: 'Linked Proposal',
+    type: 'multipleRecordLinks',
+    options: { linkedTableId: PROPOSALS_TABLE_ID },
+  },
+];
+
 type TableMeta = { id: string; name: string; fields?: { name: string }[] };
 
 function authHeaders(key: string): Record<string, string> {
@@ -144,8 +232,9 @@ async function ensureTable(
   tableName: string,
   description: string,
   seedFields: AirtableFieldDef[],
+  tableId?: string,
 ): Promise<{ table: TableMeta; created: string[]; skipped: string[] }> {
-  let table = tables.find((t) => t.name === tableName);
+  let table = tables.find((t) => (tableId ? t.id === tableId : false) || t.name === tableName);
   const created: string[] = [];
   const skipped: string[] = [];
 
@@ -201,6 +290,8 @@ export type AirtableLaunchSetupResult = {
   paymentsBaseConfigured: boolean;
   capture: { tableName: string; tableId: string; created: string[]; skipped: string[] };
   pulse: { tableName: string; tableId: string; created: string[]; skipped: string[] };
+  assessment: { tableName: string; tableId: string; created: string[]; skipped: string[] };
+  proposal: { tableName: string; tableId: string; created: string[]; skipped: string[] };
   errors: string[];
 };
 
@@ -215,6 +306,8 @@ export async function ensureAirtableLaunchTables(): Promise<AirtableLaunchSetupR
       paymentsBaseConfigured: Boolean(process.env.AIRTABLE_PAYMENTS_BASE_ID),
       capture: { tableName: CAPTURES_TABLE, tableId: '', created: [], skipped: [] },
       pulse: { tableName: PULSE_TABLE, tableId: '', created: [], skipped: [] },
+      assessment: { tableName: ASSESSMENTS_TABLE_NAME, tableId: '', created: [], skipped: [] },
+      proposal: { tableName: PROPOSALS_TABLE_NAME, tableId: '', created: [], skipped: [] },
       errors: ['AIRTABLE_API_KEY missing on server'],
     };
   }
@@ -238,6 +331,26 @@ export async function ensureAirtableLaunchTables(): Promise<AirtableLaunchSetupR
       PULSE_FIELD_DEFS,
     );
 
+    const proposalTables = await listTables(key);
+    const proposalResult = await ensureTable(
+      key,
+      proposalTables,
+      PROPOSALS_TABLE_NAME,
+      'Assessment-generated client proposals',
+      PROPOSAL_FIELD_DEFS,
+      PROPOSALS_TABLE_ID,
+    );
+
+    const assessmentTables = await listTables(key);
+    const assessmentResult = await ensureTable(
+      key,
+      assessmentTables,
+      ASSESSMENTS_TABLE_NAME,
+      'Client capacity assessment submissions',
+      ASSESSMENT_FIELD_DEFS,
+      ASSESSMENTS_TABLE_ID,
+    );
+
     const captureNames = new Set([
       ...(captureResult.table.fields ?? []).map((f) => f.name),
       ...captureResult.created,
@@ -246,12 +359,26 @@ export async function ensureAirtableLaunchTables(): Promise<AirtableLaunchSetupR
       ...(pulseResult.table.fields ?? []).map((f) => f.name),
       ...pulseResult.created,
     ]);
+    const proposalNames = new Set([
+      ...(proposalResult.table.fields ?? []).map((f) => f.name),
+      ...proposalResult.created,
+    ]);
+    const assessmentNames = new Set([
+      ...(assessmentResult.table.fields ?? []).map((f) => f.name),
+      ...assessmentResult.created,
+    ]);
 
     for (const field of CAPTURE_REQUIRED_FIELDS) {
       if (!captureNames.has(field)) errors.push(`Capture missing required field: ${field}`);
     }
     for (const field of PULSE_REQUIRED_FIELDS) {
       if (!pulseNames.has(field)) errors.push(`Pulse missing required field: ${field}`);
+    }
+    for (const field of PROPOSAL_REQUIRED_FIELDS) {
+      if (!proposalNames.has(field)) errors.push(`Proposal missing required field: ${field}`);
+    }
+    for (const field of ASSESSMENT_REQUIRED_FIELDS) {
+      if (!assessmentNames.has(field)) errors.push(`Assessment missing required field: ${field}`);
     }
 
     return {
@@ -265,10 +392,22 @@ export async function ensureAirtableLaunchTables(): Promise<AirtableLaunchSetupR
         skipped: captureResult.skipped,
       },
       pulse: {
-        tableName: PULSE_TABLE,
+        tableName: pulseResult.table.name,
         tableId: pulseResult.table.id,
         created: pulseResult.created,
         skipped: pulseResult.skipped,
+      },
+      assessment: {
+        tableName: assessmentResult.table.name,
+        tableId: assessmentResult.table.id,
+        created: assessmentResult.created,
+        skipped: assessmentResult.skipped,
+      },
+      proposal: {
+        tableName: proposalResult.table.name,
+        tableId: proposalResult.table.id,
+        created: proposalResult.created,
+        skipped: proposalResult.skipped,
       },
       errors,
     };
@@ -280,6 +419,8 @@ export async function ensureAirtableLaunchTables(): Promise<AirtableLaunchSetupR
       paymentsBaseConfigured: Boolean(process.env.AIRTABLE_PAYMENTS_BASE_ID),
       capture: { tableName: CAPTURES_TABLE, tableId: '', created: [], skipped: [] },
       pulse: { tableName: PULSE_TABLE, tableId: '', created: [], skipped: [] },
+      assessment: { tableName: ASSESSMENTS_TABLE_NAME, tableId: '', created: [], skipped: [] },
+      proposal: { tableName: PROPOSALS_TABLE_NAME, tableId: '', created: [], skipped: [] },
       errors: [message],
     };
   }

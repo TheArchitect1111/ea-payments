@@ -16,11 +16,13 @@
     "setup-pulse-events": "node scripts/setup-pulse-events-table.mjs",
     "verify-airtable": "node scripts/verify-airtable-schema.mjs",
     "test:capture-e2e": "node scripts/test-capture-e2e.mjs",
+    "test:assessment-pathway": "node scripts/test-assessment-pathway.mjs",
     "test:tier2": "node scripts/test-tier2-launch.mjs",
     "launch:report": "node scripts/launch-command-center.mjs",
     "launch:check": "node scripts/launch-check.mjs",
     "launch:webhooks": "node scripts/verify-webhook-readiness.mjs",
     "launch:readiness": "node scripts/launch-readiness.mjs",
+    "repo:readiness": "node scripts/repo-readiness.mjs",
     "setup:launch-verification": "node scripts/create-stripe-launch-verification.mjs"
   },
   "dependencies": {

@@ -1,107 +1,124 @@
 'use client';
 
+import { useState } from 'react';
 import {
-  capturePipelineSteps,
   openMagnifiExperience,
   shareAmplifiLink,
   type CaptureSuccessLinks,
 } from '@/lib/capture-success-flow';
 import type { AmplifiSocialDraft } from '@/lib/amplifi-draft';
-import StoryDraftPanel from '@/app/components/StoryDraftPanel';
-import '@/app/components/story-draft-panel.css';
-import { useEffect, useState } from 'react';
 
 export default function CaptureSuccessPanel({
   title,
   links,
-  amplifiDraft,
+  amplifiDraft: _amplifiDraft,
   onClose,
-  autoOpenMagnifi = true,
+  onContinue,
 }: {
   title: string;
   links: CaptureSuccessLinks;
   amplifiDraft?: AmplifiSocialDraft;
   onClose?: () => void;
+  onContinue?: () => void;
   autoOpenMagnifi?: boolean;
 }) {
   const [shareNote, setShareNote] = useState('');
-  const [magnifiOpened, setMagnifiOpened] = useState(false);
+  const [selectedActions, setSelectedActions] = useState<string[]>([]);
 
-  useEffect(() => {
-    if (!autoOpenMagnifi || !links.magnifiUrl || magnifiOpened) return;
-    const ok = openMagnifiExperience(links.magnifiUrl);
-    setMagnifiOpened(ok);
-    if (!ok) setShareNote('Pop-up blocked — tap Open Magnifi below.');
-  }, [autoOpenMagnifi, links.magnifiUrl, magnifiOpened]);
+  const actions = [
+    'Add to Watch List',
+    'Set Reminder',
+    'Follow Up Later',
+    'Share With Someone',
+    'Create Amplifi Story',
+    'Continue Browsing',
+  ];
+
+  function toggleAction(label: string) {
+    setSelectedActions((current) =>
+      current.includes(label) ? current.filter((item) => item !== label) : [...current, label],
+    );
+  }
 
   const openMagnifi = () => {
     if (!links.magnifiUrl) return;
-    const ok = openMagnifiExperience(links.magnifiUrl);
-    setMagnifiOpened(ok);
+    openMagnifiExperience(links.magnifiUrl);
   };
 
-  const amplify = async () => {
-    if (!links.considerUrl) return;
-    const result = await shareAmplifiLink(links.considerUrl, title);
-    setShareNote(result === 'shared' ? 'Shared via Amplifi.' : 'Consider link copied.');
+  const shareStory = async () => {
+    const shareUrl = links.considerUrl ?? links.magnifiUrl;
+    if (!shareUrl) return;
+    const result = await shareAmplifiLink(shareUrl, title);
+    setShareNote(result === 'shared' ? 'Shared.' : 'Link copied.');
   };
 
   return (
     <div className="space-y-4">
-      <p className="text-xs font-bold uppercase tracking-wider text-[#C9A844]">Simplifi → Magnifi → Amplifi</p>
-      <p className="font-bold text-[#1B2B4D]">{title}</p>
-      <ol className="text-xs text-neutral-600 space-y-1 list-decimal pl-4">
-        {capturePipelineSteps().map((s) => (
-          <li key={s.step}>
-            <strong>{s.step}</strong> — {s.detail}
-          </li>
+      <p className="text-xs font-bold uppercase tracking-wider text-[#C9A844]">Nice capture</p>
+      <div>
+        <p className="text-lg font-extrabold text-[#1B2B4D]">{title}</p>
+        <p className="mt-2 text-sm leading-6 text-neutral-600">
+          Your opportunity has been saved. Simplifi reviewed it and created a summary. Now you can decide what happens
+          next.
+        </p>
+      </div>
+
+      <div className="space-y-2">
+        {actions.map((label) => (
+          <label
+            key={label}
+            className="flex cursor-pointer items-center gap-3 rounded-xl border border-neutral-200 bg-[#FAF8F3] px-3 py-3 text-sm font-semibold text-neutral-800"
+          >
+            <input
+              type="checkbox"
+              checked={selectedActions.includes(label)}
+              onChange={() => toggleAction(label)}
+              className="h-4 w-4"
+            />
+            {label}
+          </label>
         ))}
-      </ol>
-      <div className="flex flex-col gap-2">
-        {links.magnifiUrl && (
+      </div>
+
+      {selectedActions.includes('Create Amplifi Story') && links.magnifiUrl ? (
+        <div className="flex flex-col gap-2 border-t border-neutral-100 pt-3">
           <button
             type="button"
-            className="w-full py-3 rounded-full font-extrabold text-sm bg-[#C9A844] text-[#1B2B4D]"
+            className="w-full rounded-full bg-[#1B2B4D] py-3 text-sm font-extrabold text-[#C9A844]"
             onClick={openMagnifi}
           >
-            {magnifiOpened ? 'Re-open Magnifi' : 'Open Magnifi cinematic'}
+            Preview your story
           </button>
-        )}
-        {links.considerUrl && (
-          <button
-            type="button"
-            className="w-full py-3 rounded-full font-extrabold text-sm bg-[#1B2B4D] text-[#C9A844]"
-            onClick={amplify}
-          >
-            Amplifi — share story link
-          </button>
-        )}
-        {links.guidanceUrl && (
-          <a href={links.guidanceUrl} target="_blank" rel="noopener noreferrer" className="text-xs font-bold text-[#C9A844] underline">
-            Simplifi guidance →
-          </a>
-        )}
-        {links.considerUrl && (
-          <a href={links.considerUrl} target="_blank" rel="noopener noreferrer" className="text-xs font-bold text-[#C9A844] underline">
-            Open Consider page →
-          </a>
-        )}
-        {links.workspaceUrl && (
-          <a href={links.workspaceUrl} className="text-xs font-bold text-[#0A66FF] underline">
-            Simplifi workspace →
-          </a>
-        )}
-      </div>
-      {amplifiDraft && <StoryDraftPanel draft={amplifiDraft} />}
-      {shareNote && <p className="text-xs text-neutral-600">{shareNote}</p>}
-      {links.clientMessage && (
-        <pre className="text-xs bg-neutral-50 border p-3 whitespace-pre-wrap">{links.clientMessage}</pre>
+          {(links.considerUrl || links.magnifiUrl) && (
+            <button
+              type="button"
+              className="w-full rounded-full border border-neutral-200 py-3 text-sm font-bold text-[#1B2B4D]"
+              onClick={shareStory}
+            >
+              Share with someone
+            </button>
+          )}
+        </div>
+      ) : null}
+
+      {links.workspaceUrl && (
+        <a href={links.workspaceUrl} className="block text-center text-xs font-bold text-[#1B2B4D] underline">
+          View all saved opportunities
+        </a>
       )}
-      {onClose && (
-        <button type="button" className="w-full py-2 text-sm font-semibold text-neutral-600" onClick={onClose}>
-          Done
-        </button>
-      )}
+
+      {shareNote ? <p className="text-xs text-neutral-600">{shareNote}</p> : null}
+
+      <button
+        type="button"
+        className="w-full rounded-full bg-[#C9A844] py-3 text-sm font-extrabold text-[#1B2B4D]"
+        onClick={() => {
+          onContinue?.();
+          onClose?.();
+        }}
+      >
+        Continue
+      </button>
     </div>
   );
 }

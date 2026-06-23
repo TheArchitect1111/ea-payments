@@ -44,16 +44,16 @@ export default async function SimplifiClientPage({
       <main className="ep-main">
         <div className="ep-welcome">
           <p className="ep-welcome-label">Simplifi™</p>
-          <h1 className="ep-welcome-heading">Your Opportunity Workspace</h1>
+          <h1 className="ep-welcome-heading">Your saved opportunities</h1>
           <p className="ep-pulse-summary">
             {isSimplifi
-              ? 'Capture opportunities, track follow-through, and keep momentum visible in Pulse.'
-              : 'Simplifi early access is available as a standalone purchase. Your portal includes Pulse and Update Hub today.'}
+              ? 'Capture what matters, follow up when the time is right, and keep momentum visible.'
+              : 'Simplifi is available as a standalone purchase. Your portal includes updates and activity tracking today.'}
           </p>
         </div>
 
         <div className="ep-card">
-          <p className="ep-card-title">Workspace Status</p>
+          <p className="ep-card-title">Your account</p>
           <table className="ep-info-table">
             <tbody>
               <tr>

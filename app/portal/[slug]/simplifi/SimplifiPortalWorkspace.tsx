@@ -208,9 +208,8 @@ export default function SimplifiPortalWorkspace({
       <div className="ep-card">
         <p className="ep-card-title">Capture an Opportunity</p>
         <p className="ep-placeholder-text mb-4">
-          Upload an image, screenshot, flyer, PDF, or paste a website URL. Simplifi™ analyzes
-          business opportunity — not design critique — and Magnifi™ builds a shareable experience
-          stored in Pulse™.
+          Upload a screenshot, flyer, PDF, or paste a link. Simplifi saves it, creates a summary, and helps you
+          decide what to do next.
         </p>
 
         <label className="block text-xs font-bold uppercase tracking-wider mb-2" style={{ color: NAVY }}>
@@ -313,11 +312,11 @@ export default function SimplifiPortalWorkspace({
                 magnifiUrl: lastResult.magnifiUrl,
                 considerUrl: lastResult.considerUrl,
                 guidanceUrl: lastResult.guidanceUrl,
-                workspaceUrl: lastResult.workspaceUrl,
+                workspaceUrl: `/portal/${slug}/simplifi`,
                 clientMessage: lastResult.clientMessage,
               }}
               amplifiDraft={lastResult.amplifiDraft}
-              autoOpenMagnifi
+              autoOpenMagnifi={false}
             />
           </div>
         )}
@@ -329,13 +328,13 @@ export default function SimplifiPortalWorkspace({
       </div>
 
       <div className="ep-card overflow-x-auto">
-        <p className="ep-card-title">Your Opportunities (Pulse™)</p>
+        <p className="ep-card-title">Your saved opportunities</p>
         {captures.length === 0 ? (
           <EmptyStateGuide
-            title="No captures yet"
-            explanation="Capture your first opportunity — Simplifi analyzes it and Magnifi builds a shareable story automatically."
+            title="No opportunities saved yet"
+            explanation="Capture something worth remembering — Simplifi will summarize it and help you follow up."
             actionLabel="Capture now"
-            actionHref="/capture"
+            actionHref="/simplifi/capture"
           />
         ) : (
           <table className="w-full text-sm mt-4">

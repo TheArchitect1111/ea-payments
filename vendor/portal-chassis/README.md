@@ -6,6 +6,8 @@ Shared portal infrastructure for Efficiency Architects client portals.
 ## Quick links
 
 - Master spec: [`docs/ea-portal-chassis-spec.md`](../docs/ea-portal-chassis-spec.md)
+- Skin/chassis constitution: [`docs/EA-SKIN-AND-CHASSIS-CONSTITUTION.md`](../../docs/EA-SKIN-AND-CHASSIS-CONSTITUTION.md)
+- Portal options prompt: [`docs/PORTAL-OPTIONS-CODEX-PROMPT.md`](../../docs/PORTAL-OPTIONS-CODEX-PROMPT.md)
 - Extraction guide: [`docs/claude-code/portal-core-extraction.md`](../docs/claude-code/portal-core-extraction.md)
 - CPR reference: https://cpr-site.vercel.app
 
@@ -110,3 +112,16 @@ From `cpr-site` (HMAC auth, not Clerk):
 | CPR | HMAC (custom) | Production reference |
 | SisterHub | Clerk (planned) | Live site, portal-core partial |
 | ea-payments client portal | Session (custom) | Launch sprint in progress |
+
+## Selectable portal modules
+
+Current portal builder prompt modules:
+
+- Update Hub™
+- Learning Hub™
+- Event Hub™
+- Community Directory™
+- Opportunities & Resources™ (`opportunities-resources`)
+- Job Board™
+- Sponsor Center™
+- Marketplace™
