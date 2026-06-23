@@ -22,6 +22,9 @@ export async function POST(req: Request) {
     notifyEmail?: string;
     portalSlug?: string;
     prospectName?: string;
+    notes?: string;
+    selectedText?: string;
+    source?: string;
   };
   const key = headerKey ?? body.apiKey;
 
@@ -34,12 +37,18 @@ export async function POST(req: Request) {
     return corsJson({ ok: false, error: 'URL or screenshot is required.' }, 400);
   }
 
-  const source =
+  const source = body.source?.trim() || (
     body.mode === 'blueprint'
       ? 'Browser Extension (Blueprint)'
       : body.mode === 'amplify'
         ? 'Browser Extension (Amplifi)'
-        : 'Browser Extension';
+        : 'Browser Extension'
+  );
+  const notes = [
+    body.title ? `Page title: ${body.title}` : '',
+    body.selectedText ? `Selected text: ${body.selectedText}` : '',
+    body.notes,
+  ].filter(Boolean).join('\n\n');
 
   const input: CaptureInput = {
     url,
@@ -47,7 +56,7 @@ export async function POST(req: Request) {
     screenshotBase64: body.screenshotBase64,
     fileName: body.screenshotBase64 ? 'screenshot.png' : undefined,
     mimeType: body.screenshotBase64 ? 'image/png' : undefined,
-    notes: body.title ? `Page title: ${body.title}` : undefined,
+    notes: notes || undefined,
   };
 
   const result = await submitCapture(input, source, {

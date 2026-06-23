@@ -1,5 +1,5 @@
 @echo off
-title Package Amplifi Chrome Extension
+title Package Simplifi Chrome Extension
 cd /d "%~dp0.."
 
 if not exist extension (
@@ -10,7 +10,7 @@ if not exist extension (
 
 if not exist dist mkdir dist
 
-set ZIP=dist\ea-amplifi-extension.zip
+set ZIP=dist\simplifi-extension.zip
 if exist "%ZIP%" del "%ZIP%"
 
 powershell -NoProfile -Command "Compress-Archive -Path 'extension\*' -DestinationPath '%ZIP%' -Force"
