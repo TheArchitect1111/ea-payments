@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { verifyAdminSession, EA_ADMIN_COOKIE } from '@/lib/ea-admin-auth';
-import { updateProposal, getProposalByRecordId, getClientByEmail } from '@/lib/airtable';
+import { updateProposal, getProposalByRecordId, getClientByEmail, updateClientLifecycleByEmail } from '@/lib/airtable';
 import { sendInternalNotification, sendProposalEmail, sendRevealEmail } from '@/lib/email';
+import { lifecycleForDiscoveryScheduled } from '@/lib/client-lifecycle';
 
 export const dynamic = 'force-dynamic';
 
@@ -100,6 +101,17 @@ export async function PATCH(
   const result = await updateProposal(id, patch);
   if (!result.ok) {
     return NextResponse.json({ error: result.error ?? 'Update failed.' }, { status: 500 });
+  }
+
+  if (body.action === 'discovery') {
+    try {
+      const proposal = await getProposalByRecordId(id);
+      if (proposal?.email) {
+        await updateClientLifecycleByEmail(proposal.email, lifecycleForDiscoveryScheduled());
+      }
+    } catch (err) {
+      console.error('Discovery lifecycle update failed:', err);
+    }
   }
 
   // After approving: fetch the full proposal and send the prospect email.

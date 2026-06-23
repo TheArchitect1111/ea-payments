@@ -7,6 +7,7 @@ import {
   LAUNCH_VERIFICATION_ONBOARDING_STATUS,
   LAUNCH_VERIFICATION_PRODUCT_NAME,
 } from '@/lib/launch-verification';
+import { lifecycleForPaidClient } from '@/lib/client-lifecycle';
 import { emitPulseEvent } from '@/lib/pulse-bus';
 
 function logLaunchVerificationTransaction(payload: Record<string, unknown>): void {
@@ -60,6 +61,7 @@ export async function handleLaunchVerificationPayment(
     portalAccessStatus: 'Pending',
     onboardingStatus: LAUNCH_VERIFICATION_ONBOARDING_STATUS,
     paymentReceivedAt,
+    lifecycle: lifecycleForPaidClient(LAUNCH_VERIFICATION_AIRTABLE_PACKAGE),
   });
 
   if (!airtableResult.ok) {

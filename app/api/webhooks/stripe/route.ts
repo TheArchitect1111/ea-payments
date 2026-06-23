@@ -15,6 +15,7 @@ import { fireOnboardingWebhook } from '@/lib/make-webhooks';
 import { emitPulseEvent } from '@/lib/pulse-bus';
 import { isLaunchVerificationSession } from '@/lib/launch-verification';
 import { handleLaunchVerificationPayment } from '@/lib/launch-verification-flow';
+import { lifecycleForPaidClient } from '@/lib/client-lifecycle';
 
 export const dynamic = 'force-dynamic';
 
@@ -119,6 +120,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
     portalAccessStatus: 'Pending',
     onboardingStatus: 'Not Started',
     paymentReceivedAt,
+    lifecycle: lifecycleForPaidClient(packageName),
   });
 
   if (!airtableResult.ok) {
@@ -244,6 +246,17 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
     portalSlug,
     portalLoginUrl,
   });
+
+  await emitPulseEvent({
+    product: 'ea-platform',
+    type: 'payment.received',
+    title: `Payment received — ${clientName}`,
+    detail: `$${amountPaid.toFixed(2)} · ${packageName}`,
+    priority: 'high',
+    href: '/admin/master',
+    objectId: airtableResult.recordId,
+    metadata: { stripeSessionId: session.id, email, packageName },
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -343,6 +356,7 @@ async function handleProposalPayment(
     portalAccessStatus: 'Pending',
     onboardingStatus: 'Not Started',
     paymentReceivedAt,
+    lifecycle: lifecycleForPaidClient('Implementation Package'),
   });
 
   if (!airtableResult.ok) {
@@ -435,5 +449,16 @@ async function handleProposalPayment(
     airtableRecordId: airtableResult.recordId,
     portalSlug,
     portalLoginUrl,
+  });
+
+  await emitPulseEvent({
+    product: 'ea-platform',
+    type: 'payment.received',
+    title: `Proposal paid — ${clientName}`,
+    detail: `$${amountPaid.toFixed(2)} · ${packageLabel}`,
+    priority: 'high',
+    href: '/admin/proposals',
+    objectId: airtableResult.recordId,
+    metadata: { proposalId, stripeSessionId: session.id, email },
   });
 }

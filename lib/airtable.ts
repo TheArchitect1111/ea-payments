@@ -1,3 +1,12 @@
+import {
+  lifecycleFieldsFromAirtable,
+  lifecycleFieldsToAirtable,
+  lifecycleForDiscoveryScheduled,
+  lifecycleForPaidClient,
+  lifecycleForProspect,
+  type ClientLifecycleFields,
+} from '@/lib/client-lifecycle';
+
 const BASE_ID = process.env.AIRTABLE_PAYMENTS_BASE_ID ?? 'appv0YoLIMY45fmDA';
 const TABLE = 'Client Records';
 
@@ -31,6 +40,7 @@ export interface ClientRecord {
   paymentReceivedAt?: string;
   docsSentAt?: string;
   docsSignedAt?: string;
+  lifecycle?: ClientLifecycleFields;
 }
 
 export interface PortalClientRecord {
@@ -96,6 +106,7 @@ export async function createOrUpdateClientRecord(
   if (record.paymentReceivedAt) raw['Payment Received At'] = record.paymentReceivedAt;
   if (record.docsSentAt) raw['Docs Sent At'] = record.docsSentAt;
   if (record.docsSignedAt) raw['Docs Signed At'] = record.docsSignedAt;
+  Object.assign(raw, lifecycleFieldsToAirtable(record.lifecycle ?? {}));
 
   try {
     const existingId = await findRecordByEmail(record.email);
@@ -139,6 +150,84 @@ export async function createOrUpdateClientRecord(
     console.error('Airtable error:', err);
     return { ok: false, error: 'Unexpected error writing to Airtable.' };
   }
+}
+
+export async function updateClientLifecycleByEmail(
+  email: string,
+  lifecycle: ClientLifecycleFields,
+): Promise<{ ok: boolean; recordId?: string; error?: string }> {
+  if (!process.env.AIRTABLE_API_KEY) {
+    return { ok: false, error: 'AIRTABLE_API_KEY not configured.' };
+  }
+
+  const existingId = await findRecordByEmail(email);
+  if (!existingId) {
+    return { ok: false, error: 'No client record for email.' };
+  }
+
+  const fields = lifecycleFieldsToAirtable(lifecycle);
+  if (Object.keys(fields).length === 0) {
+    return { ok: true, recordId: existingId };
+  }
+
+  try {
+    const res = await fetch(
+      `https://api.airtable.com/v0/${BASE_ID}/${encodeURIComponent(TABLE)}/${existingId}`,
+      {
+        method: 'PATCH',
+        headers: authHeaders(),
+        body: JSON.stringify({ fields, typecast: true }),
+      },
+    );
+    if (!res.ok) {
+      const detail = await res.text();
+      console.error('updateClientLifecycleByEmail PATCH failed:', detail);
+      return { ok: false, error: 'Failed to update lifecycle fields.' };
+    }
+    return { ok: true, recordId: existingId };
+  } catch (err) {
+    console.error('updateClientLifecycleByEmail error:', err);
+    return { ok: false, error: 'Unexpected error updating lifecycle.' };
+  }
+}
+
+export async function updateClientLifecycleByPortalSlug(
+  portalSlug: string,
+  lifecycle: ClientLifecycleFields,
+): Promise<{ ok: boolean; error?: string }> {
+  const client = await getClientByPortalSlug(portalSlug);
+  if (!client?.email) {
+    return { ok: false, error: 'No client for portal slug.' };
+  }
+  const result = await updateClientLifecycleByEmail(client.email, lifecycle);
+  return { ok: result.ok, error: result.error };
+}
+
+/** Link assessment lead to Client Records without overwriting paying clients. */
+export async function upsertProspectFromAssessment(input: {
+  contactName: string;
+  businessName: string;
+  email: string;
+  assessmentId: string;
+}): Promise<{ ok: boolean; recordId?: string }> {
+  const existing = await getClientByEmail(input.email);
+  if (existing && existing.amountPaid > 0) {
+    return { ok: true, recordId: existing.id };
+  }
+
+  const today = new Date().toISOString().slice(0, 10);
+  return createOrUpdateClientRecord({
+    clientName: input.contactName,
+    organization: input.businessName,
+    email: input.email,
+    packagePurchased: 'Capacity Assessment',
+    amountPaid: 0,
+    paymentDate: today,
+    stripeTransactionId: `prospect-${input.assessmentId}`,
+    portalAccessStatus: 'Pending',
+    onboardingStatus: 'Not Started',
+    lifecycle: lifecycleForProspect(),
+  });
 }
 
 export async function setPortalCredentials(
@@ -1379,11 +1468,17 @@ export interface ClientRecordSummary {
   id: string;
   clientName: string;
   organization?: string;
+  email?: string;
   onboardingStatus: string;
   portalAccessStatus: string;
   amountPaid: number;
   packagePurchased: string;
   createdTime?: string;
+  paymentReceivedAt?: string;
+  lifecycleStage?: string;
+  discoveryStatus?: string;
+  buildStatus?: string;
+  launchStatus?: string;
 }
 
 export async function getAllClientRecords(): Promise<ClientRecordSummary[]> {
@@ -1417,15 +1512,22 @@ export async function getAllClientRecords(): Promise<ClientRecordSummary[]> {
       };
 
       for (const r of data.records) {
+        const lifecycle = lifecycleFieldsFromAirtable(r.fields);
         records.push({
           id: r.id,
           clientName: (r.fields['Client Name'] as string) ?? '',
           organization: (r.fields['Organization'] as string) || undefined,
+          email: (r.fields['Email'] as string) || undefined,
           onboardingStatus: (r.fields['Onboarding Status'] as string) ?? 'Not Started',
           portalAccessStatus: (r.fields['Portal Access Status'] as string) ?? 'Pending',
           amountPaid: (r.fields['Amount Paid'] as number) ?? 0,
           packagePurchased: (r.fields['Package Purchased'] as string) ?? '',
           createdTime: r.createdTime || undefined,
+          paymentReceivedAt: (r.fields['Payment Received At'] as string) || undefined,
+          lifecycleStage: lifecycle.lifecycleStage,
+          discoveryStatus: lifecycle.discoveryStatus,
+          buildStatus: lifecycle.buildStatus,
+          launchStatus: lifecycle.launchStatus,
         });
       }
 

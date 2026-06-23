@@ -3,6 +3,7 @@ import { validatePortalLogin, updateClientEngagementScore, getClientByPortalSlug
 import { signSession, makeSessionCookie } from '@/lib/ea-portal-auth';
 import { getClientSuccessProfile } from '@/lib/client-success';
 import { ensureDemoClient, isDemoCredentialAttempt } from '@/lib/demo-client';
+import { emitPulseEvent } from '@/lib/pulse-bus';
 
 export const dynamic = 'force-dynamic';
 
@@ -43,8 +44,9 @@ export async function POST(req: NextRequest) {
   }
 
   if (result.recordId) {
+    let client = null;
     try {
-      const client = await getClientByPortalSlug(result.slug);
+      client = await getClientByPortalSlug(result.slug);
       if (client) {
         const profile = await getClientSuccessProfile(client);
         const engagement = profile.scores.find((s) => s.id === 'engagement');
@@ -54,6 +56,21 @@ export async function POST(req: NextRequest) {
       }
     } catch (err) {
       console.error('Engagement score sync on login:', err);
+    }
+
+    try {
+      await emitPulseEvent({
+        product: 'ea-platform',
+        type: 'portal.login',
+        title: `Portal login — ${client?.clientName ?? result.slug}`,
+        detail: client?.email ?? result.slug,
+        priority: 'low',
+        href: `/portal/${result.slug}`,
+        tenantId: result.slug,
+        objectId: result.recordId,
+      });
+    } catch (err) {
+      console.error('Pulse portal.login failed:', err);
     }
   }
 

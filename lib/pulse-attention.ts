@@ -23,6 +23,8 @@ export function buildAttentionItems(input: {
   cprActiveCount: number;
   brotherHubMembers: number;
   sisterHubMembers: number;
+  clientsStuckOnboarding?: number;
+  discoveryFollowUpCount?: number;
 }): AttentionItem[] {
   const items: AttentionItem[] = [];
 
@@ -35,6 +37,30 @@ export function buildAttentionItems(input: {
       priority: 'critical',
       href: `${EA_PLATFORM_URL}/api/health/launch`,
       cta: 'Health check',
+    });
+  }
+
+  if ((input.clientsStuckOnboarding ?? 0) > 0) {
+    items.push({
+      id: 'onboarding-stuck',
+      product: 'EA Platform',
+      title: `${input.clientsStuckOnboarding} client(s) in onboarding > 7 days`,
+      detail: 'Review Client Records — welcome email, Make webhook, and portal access.',
+      priority: 'high',
+      href: '/admin/master',
+      cta: 'View clients',
+    });
+  }
+
+  if ((input.discoveryFollowUpCount ?? 0) > 0) {
+    items.push({
+      id: 'discovery-follow-up',
+      product: 'Lead Hub',
+      title: `${input.discoveryFollowUpCount} discovery follow-up(s) needed`,
+      detail: 'Prospects need scheduling or no-show follow-up.',
+      priority: 'high',
+      href: '/admin/proposals',
+      cta: 'Pipeline',
     });
   }
 

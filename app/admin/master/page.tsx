@@ -146,9 +146,23 @@ export default async function MasterPortalPage() {
       getAllContentRequests(),
     ]);
 
-  // Revenue Overview
+  // Revenue Overview — Stripe client records are source of truth for collected payments
+  const stripeRevenueCollected = clientRecords.reduce((sum, c) => sum + (c.amountPaid || 0), 0);
   const paidProposals = proposals.filter((p) => p.status === 'Approved & Paid');
-  const totalRevenueCollected = paidProposals.reduce((sum, p) => sum + (p.recommendedFee || 0), 0);
+  const proposalOnlyRevenue = paidProposals.reduce((sum, p) => sum + (p.recommendedFee || 0), 0);
+  const paidClientEmails = new Set(
+    clientRecords.filter((c) => c.amountPaid > 0).map((c) => (c.email ?? '').toLowerCase()),
+  );
+  const orphanProposalRevenue = paidProposals
+    .filter((p) => p.email && !paidClientEmails.has(p.email.toLowerCase()))
+    .reduce((sum, p) => sum + (p.recommendedFee || 0), 0);
+  const totalRevenueCollected = stripeRevenueCollected + orphanProposalRevenue;
+  const lastStripePayment = clientRecords
+    .filter((c) => c.paymentReceivedAt)
+    .sort(
+      (a, b) =>
+        new Date(b.paymentReceivedAt!).getTime() - new Date(a.paymentReceivedAt!).getTime(),
+    )[0];
   const revenueForecast = proposals
     .filter((p) => p.status === 'Approved' || p.status === 'Sent')
     .reduce((sum, p) => sum + (p.recommendedFee || 0), 0);
@@ -156,7 +170,24 @@ export default async function MasterPortalPage() {
     (p) => p.paymentStatus === 'Unpaid' && p.status !== 'Rejected'
   ).length;
   const averageProjectValue =
-    paidProposals.length > 0 ? totalRevenueCollected / paidProposals.length : 0;
+    clientRecords.filter((c) => c.amountPaid > 0).length > 0
+      ? stripeRevenueCollected / clientRecords.filter((c) => c.amountPaid > 0).length
+      : paidProposals.length > 0
+        ? proposalOnlyRevenue / paidProposals.length
+        : 0;
+
+  const discoveryScheduled = clientRecords.filter((c) => c.discoveryStatus === 'Scheduled').length;
+  const discoveryFollowUp = clientRecords.filter(
+    (c) => c.discoveryStatus === 'Follow-Up Needed',
+  ).length;
+
+  const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
+  const clientsStuckOnboarding = clientRecords.filter((c) => {
+    if (c.onboardingStatus === 'Complete' || c.amountPaid <= 0) return false;
+    const anchor = c.paymentReceivedAt ?? c.createdTime;
+    if (!anchor) return false;
+    return Date.now() - new Date(anchor.includes('T') ? anchor : `${anchor}T12:00:00`).getTime() > sevenDaysMs;
+  }).length;
 
   // Pipeline Summary
   const sentStatuses = new Set(['Approved', 'Sent', 'Approved & Paid']);
@@ -194,6 +225,8 @@ export default async function MasterPortalPage() {
     cprActiveCount: cprActiveAthletes,
     brotherHubMembers,
     sisterHubMembers,
+    clientsStuckOnboarding,
+    discoveryFollowUpCount: discoveryFollowUp,
   });
 
   // Recent Activity Feed
@@ -268,7 +301,15 @@ export default async function MasterPortalPage() {
         <section>
           <SectionHead title="Revenue Overview" />
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <Tile label="Total Revenue Collected" value={fmt(totalRevenueCollected)} sub="Approved & Paid proposals" />
+            <Tile
+              label="Total Revenue Collected"
+              value={fmt(totalRevenueCollected)}
+              sub={
+                lastStripePayment?.paymentReceivedAt
+                  ? `Last payment ${fmtDate(lastStripePayment.paymentReceivedAt)}`
+                  : 'Stripe client records + orphan proposals'
+              }
+            />
             <Tile label="Revenue Forecast" value={fmt(revenueForecast)} sub="Approved or Sent, not yet paid" />
             <Tile label="Outstanding Invoices" value={String(outstandingInvoices)} sub="Unpaid, not rejected" />
             <Tile label="Average Project Value" value={fmt(averageProjectValue)} sub={`Across ${paidProposals.length} paid deals`} />
@@ -277,13 +318,23 @@ export default async function MasterPortalPage() {
 
         {/* Section 2: Pipeline Summary */}
         <section>
-          <SectionHead title="Pipeline Summary" />
+          <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+            <SectionHead title="Pipeline Summary" />
+            <a href="/admin/proposals" className="text-xs font-semibold" style={{ color: GOLD }}>
+              View pipeline detail &rarr;
+            </a>
+          </div>
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
             <Tile label="Assessments Submitted" value={String(assessmentsSubmitted)} />
             <Tile label="Proposals Sent" value={String(proposalsSent)} />
             <Tile label="Proposals Approved" value={String(proposalsApproved)} />
             <Tile label="Deals Closed" value={String(dealsClosed)} />
             <Tile label="Conversion Rate" value={conversionRate} sub="Assessments to closed" />
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-4">
+            <Tile label="Discovery Scheduled" value={String(discoveryScheduled)} sub="Client Records" accent="#1D4ED8" />
+            <Tile label="Discovery Follow-Up" value={String(discoveryFollowUp)} sub="Needs outreach" accent="#92400E" />
+            <Tile label="Onboarding > 7 days" value={String(clientsStuckOnboarding)} sub="Paid, not complete" accent="#991B1B" />
           </div>
         </section>
 
@@ -305,6 +356,8 @@ export default async function MasterPortalPage() {
                     <th className="px-4 py-3 text-right text-xs font-bold uppercase tracking-wider text-neutral-500">Amount Paid</th>
                     <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-neutral-500">Portal Access</th>
                     <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-neutral-500">Onboarding</th>
+                    <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-neutral-500">Lifecycle</th>
+                    <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-neutral-500">Discovery</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-neutral-100">
@@ -316,6 +369,8 @@ export default async function MasterPortalPage() {
                       <td className="px-4 py-3 text-right font-semibold text-neutral-900 whitespace-nowrap">{fmt(c.amountPaid)}</td>
                       <td className="px-4 py-3 text-xs text-neutral-500">{c.portalAccessStatus}</td>
                       <td className="px-4 py-3 text-xs text-neutral-500">{c.onboardingStatus}</td>
+                      <td className="px-4 py-3 text-xs text-neutral-500">{c.lifecycleStage || '—'}</td>
+                      <td className="px-4 py-3 text-xs text-neutral-500">{c.discoveryStatus || '—'}</td>
                     </tr>
                   ))}
                 </tbody>
