@@ -22,10 +22,12 @@ export type PulseEventType =
   | 'update.submitted'
   | 'update.published'
   | 'assessment.submitted'
+  | 'apply.submitted'
   | 'portal.login'
   | 'proposal.pending'
   | 'onboarding.blocked'
   | 'launch.verification.completed'
+  | 'payment.received'
   | 'attention.critical';
 
 export interface PulseEvent {
@@ -61,7 +63,7 @@ export async function emitPulseEvent(event: PulseEvent): Promise<{ ok: boolean }
   }
 
   try {
-    await fetch(`https://api.airtable.com/v0/${baseId}/${encodeURIComponent(table)}`, {
+    const res = await fetch(`https://api.airtable.com/v0/${baseId}/${encodeURIComponent(table)}`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${key}`,
@@ -85,8 +87,12 @@ export async function emitPulseEvent(event: PulseEvent): Promise<{ ok: boolean }
         ],
       }),
     });
-  } catch {
-    /* memory bus still holds event */
+    if (!res.ok) {
+      const detail = await res.text();
+      console.error('[pulse-bus] Airtable persist failed:', res.status, detail.slice(0, 200));
+    }
+  } catch (err) {
+    console.error('[pulse-bus] Airtable persist threw:', err);
   }
 
   return { ok: true };

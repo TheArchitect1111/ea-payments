@@ -3,9 +3,10 @@ import crypto from 'crypto';
 import { analyzeAssessment, OPERATIONAL_CHALLENGES } from '@/lib/analysis-engine';
 import type { RevenueRange, Complexity } from '@/lib/analysis-engine';
 import { calculateFee } from '@/lib/pricing-engine';
-import { createAssessmentRecord, createProposalRecord } from '@/lib/airtable';
+import { createAssessmentRecord, createProposalRecord, upsertProspectFromAssessment } from '@/lib/airtable';
 import { sendAssessmentAdminNotification, sendAssessmentConfirmationEmail } from '@/lib/email';
 import { trackConsiderEvent } from '@/lib/opportunity-tracking';
+import { emitPulseEvent } from '@/lib/pulse-bus';
 
 function mapTeamSize(label: string): number {
   const map: Record<string, number> = {
@@ -239,6 +240,32 @@ export async function POST(req: NextRequest) {
 
     if (!assessmentResult.ok) {
       console.error('Assessment write failed:', assessmentResult.error);
+    }
+
+    try {
+      await upsertProspectFromAssessment({
+        contactName: input.contactName,
+        businessName: input.businessName,
+        email: input.email,
+        assessmentId,
+      });
+    } catch (err) {
+      console.error('Prospect client record upsert failed:', err);
+    }
+
+    try {
+      await emitPulseEvent({
+        product: 'ea-platform',
+        type: 'assessment.submitted',
+        title: `Assessment submitted — ${input.businessName}`,
+        detail: `${input.contactName} · score band pending review`,
+        priority: 'medium',
+        href: '/admin/proposals',
+        objectId: assessmentResult.recordId,
+        metadata: { email: input.email, proposalId },
+      });
+    } catch (err) {
+      console.error('Pulse assessment.submitted failed:', err);
     }
 
     try {

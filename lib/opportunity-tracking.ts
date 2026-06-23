@@ -10,6 +10,8 @@ import {
   saveOpportunityPayload,
   updateOpportunityExperience,
 } from './capture-records';
+import { lifecycleForDiscoveryBooked } from './client-lifecycle';
+import { updateClientLifecycleByPortalSlug } from './airtable';
 
 export type ConsiderTrackEvent =
   | 'view'
@@ -55,6 +57,14 @@ export async function trackConsiderEvent(
             : capture.prospectStatus;
 
   await saveOpportunityPayload(capture.id, description, prospectStatus);
+
+  if (event === 'discovery_booked' && capture.portalSlug) {
+    try {
+      await updateClientLifecycleByPortalSlug(capture.portalSlug, lifecycleForDiscoveryBooked());
+    } catch (err) {
+      console.error('Discovery booked lifecycle sync failed:', err);
+    }
+  }
 }
 
 export async function archiveConsiderCapture(recordId: string): Promise<{ ok: boolean }> {
