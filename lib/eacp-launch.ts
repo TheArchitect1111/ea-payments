@@ -31,6 +31,7 @@ export type EACPLaunchStatus =
 export type EACPApprovalDecision = 'approved' | 'rejected' | 'revision-requested';
 export type EACPRepoReviewStatus = 'pending' | 'approved' | 'removed';
 export type EACPRepoRequirement = 'required' | 'optional';
+export type EACPLifecycleAction = 'start-build' | 'fail-build' | 'complete-build' | 'deploy' | 'archive';
 
 export interface EACPLaunchInput {
   client: string;
@@ -57,15 +58,19 @@ export interface EACPAuditEvent {
   id: string;
   launchId: string;
   type:
-    | 'created'
+    | 'launch-created'
     | 'package-generated'
-    | 'approval-queued'
+    | 'approval-requested'
     | 'approved'
     | 'rejected'
     | 'revision-requested'
-    | 'repo-reviewed'
-    | 'build-package-created'
-    | 'deployment-package-created'
+    | 'repo-modified'
+    | 'codex-handoff-created'
+    | 'deployment-package-generated'
+    | 'build-started'
+    | 'build-failed'
+    | 'build-completed'
+    | 'deployed'
     | 'archived';
   label: string;
   detail: string;
@@ -253,9 +258,9 @@ export async function createEACPLaunch(input: EACPLaunchInput): Promise<EACPLaun
   };
 
   const auditTrail = [
-    audit(id, 'created', 'Created', 'EACP command accepted and launch record created.', 'EACP'),
+    audit(id, 'launch-created', 'Launch Created', 'EACP command accepted and launch record created.', 'EACP'),
     audit(id, 'package-generated', 'Package generated', 'Project brief, skin brief, repo recommendations, and Codex prompt generated.', 'EACP'),
-    audit(id, 'approval-queued', 'Approval queued', 'Launch package moved under review.', 'EACP'),
+    audit(id, 'approval-requested', 'Approval Requested', 'Launch package moved under review.', 'EACP'),
   ];
 
   const record: EACPLaunchRecord = {
@@ -291,17 +296,21 @@ export async function createEACPLaunch(input: EACPLaunchInput): Promise<EACPLaun
   await updateEACPStore((store) => {
     store.launches = [record, ...store.launches.filter((launch) => launch.id !== record.id)];
     store.approvals = [approvalRecord, ...store.approvals.filter((approval) => approval.launchId !== record.id)];
+    store.auditEvents = [...store.auditEvents, ...auditTrail];
   });
 
   return record;
 }
 
 export async function listEACPLaunches() {
-  return (await readEACPStore()).launches;
+  const store = await readEACPStore();
+  return store.launches.map((launch) => hydrateLaunchAudit(launch, store.auditEvents));
 }
 
 export async function getEACPLaunch(id: string) {
-  return (await readEACPStore()).launches.find((launch) => launch.id === id);
+  const store = await readEACPStore();
+  const launch = store.launches.find((item) => item.id === id);
+  return launch ? hydrateLaunchAudit(launch, store.auditEvents) : undefined;
 }
 
 export async function listEACPApprovals() {
@@ -316,7 +325,7 @@ export async function reviewEACPRepos(launchId: string, input: RepoReviewInput) 
   let updated: EACPLaunchRecord | undefined;
   await updateEACPStore((store) => {
     const launch = store.launches.find((item) => item.id === launchId);
-    if (!launch) return;
+    if (!launch) return false;
 
     const allRepos = searchRepositories('', '', false, false);
     const nextRepos = [...launch.recommendedRepos];
@@ -350,11 +359,9 @@ export async function reviewEACPRepos(launchId: string, input: RepoReviewInput) 
     launch.buildPackage.repoRecommendations = nextRepos;
     launch.buildPackage.approvedRepoSet = nextRepos.filter((repo) => repo.reviewStatus === 'approved');
     launch.updatedAt = new Date().toISOString();
-    launch.auditTrail = [
-      audit(launch.id, 'repo-reviewed', 'Repositories reviewed', 'Recommended repository set was reviewed before approval.', input.reviewerName || 'Reviewer'),
-      ...launch.auditTrail,
-    ];
-    updated = launch;
+    const event = audit(launch.id, 'repo-modified', 'Repo Modified', 'Recommended repository set was reviewed before approval.', input.reviewerName || 'Reviewer');
+    store.auditEvents = [...store.auditEvents, event];
+    updated = hydrateLaunchAudit(launch, store.auditEvents);
   });
   return updated;
 }
@@ -363,7 +370,7 @@ export async function decideEACPApproval(launchId: string, decision: EACPApprova
   let updated: EACPLaunchRecord | undefined;
   await updateEACPStore((store) => {
     const launch = store.launches.find((item) => item.id === launchId);
-    if (!launch) return;
+    if (!launch) return false;
 
     const now = new Date().toISOString();
     const approval = store.approvals.find((item) => item.launchId === launchId) ?? launch.approvalRecord;
@@ -376,27 +383,58 @@ export async function decideEACPApproval(launchId: string, decision: EACPApprova
     launch.approvalQueue = approval;
     launch.status = decision === 'approved' ? 'approved' : decision;
     launch.updatedAt = now;
-    launch.auditTrail = [
+    const auditEvents = [
       audit(launch.id, decision, statusLabel(decision), comments || `Launch ${statusLabel(decision).toLowerCase()}.`, reviewerName),
-      ...launch.auditTrail,
     ];
 
     if (decision === 'approved') {
       const handoff = createCodexHandoff(launch);
       launch.codexHandoff = handoff;
-      launch.status = 'ready-for-deployment';
-      launch.deploymentPackage = createDeploymentPackage(launch);
-      launch.auditTrail = [
-        audit(launch.id, 'deployment-package-created', 'Deployment package created', 'Export-ready deployment package created for Chassis Deployment.', 'EACP'),
-        audit(launch.id, 'build-package-created', 'Codex handoff created', 'Approved launch package converted into a Codex Builder handoff.', 'EACP'),
-        ...launch.auditTrail,
-      ];
+      auditEvents.push(audit(launch.id, 'codex-handoff-created', 'Codex handoff created', 'Approved launch package converted into a Codex Builder handoff.', 'EACP'));
       store.codexHandoffs = [handoff, ...store.codexHandoffs.filter((item) => item.launchId !== launch.id)];
     }
 
+    store.auditEvents = [...store.auditEvents, ...auditEvents];
     store.approvals = [approval, ...store.approvals.filter((item) => item.launchId !== launchId)];
-    updated = launch;
+    updated = hydrateLaunchAudit(launch, store.auditEvents);
   });
+  return updated;
+}
+
+export async function transitionEACPLaunchLifecycle(launchId: string, action: EACPLifecycleAction, actor = 'EA Operator', detail = '') {
+  let updated: EACPLaunchRecord | undefined;
+
+  await updateEACPStore((store) => {
+    const launch = store.launches.find((item) => item.id === launchId);
+    if (!launch) return false;
+
+    const now = new Date().toISOString();
+    const next = getLifecycleTransition(launch.status, action);
+    if (!next.allowed) {
+      throw new Error(next.message);
+    }
+
+    const events: EACPAuditEvent[] = [];
+    launch.status = next.status;
+    launch.updatedAt = now;
+
+    if (action === 'complete-build') {
+      launch.deploymentPackage = createDeploymentPackage(launch);
+      events.push(audit(launch.id, 'deployment-package-generated', 'Deployment Package Generated', 'Export-ready deployment package created after build completion.', 'EACP'));
+    }
+
+    if (action === 'deploy' && launch.deploymentPackage) {
+      launch.deploymentPackage = {
+        ...launch.deploymentPackage,
+        status: 'deployed',
+      };
+    }
+
+    events.push(audit(launch.id, next.auditType, next.label, detail || next.detail, actor));
+    store.auditEvents = [...store.auditEvents, ...events];
+    updated = hydrateLaunchAudit(launch, store.auditEvents);
+  });
+
   return updated;
 }
 
@@ -657,6 +695,79 @@ function createDeploymentPackage(launch: EACPLaunchRecord): EACPDeploymentPackag
     markdownExport,
     codexExport: launch.buildPackage.codexBuildPrompt,
   };
+}
+
+function hydrateLaunchAudit(launch: EACPLaunchRecord, events: EACPAuditEvent[]) {
+  const auditTrail = events
+    .filter((event) => event.launchId === launch.id)
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  return { ...launch, auditTrail };
+}
+
+function getLifecycleTransition(status: EACPLaunchStatus, action: EACPLifecycleAction): {
+  allowed: true;
+  status: EACPLaunchStatus;
+  auditType: EACPAuditEvent['type'];
+  label: string;
+  detail: string;
+} | { allowed: false; message: string } {
+  if (action === 'start-build') {
+    if (!['approved', 'build-failed'].includes(status)) {
+      return { allowed: false, message: 'Launch must be approved before build can start.' };
+    }
+    return {
+      allowed: true,
+      status: 'building',
+      auditType: 'build-started',
+      label: 'Build Started',
+      detail: 'Approved launch entered the build lifecycle.',
+    };
+  }
+
+  if (action === 'fail-build') {
+    if (status !== 'building') return { allowed: false, message: 'Only an active build can be marked failed.' };
+    return {
+      allowed: true,
+      status: 'build-failed',
+      auditType: 'build-failed',
+      label: 'Build Failed',
+      detail: 'Build failed and requires review before retry.',
+    };
+  }
+
+  if (action === 'complete-build') {
+    if (status !== 'building') return { allowed: false, message: 'Only an active build can be completed.' };
+    return {
+      allowed: true,
+      status: 'ready-for-deployment',
+      auditType: 'build-completed',
+      label: 'Build Completed',
+      detail: 'Build completed and deployment package is ready.',
+    };
+  }
+
+  if (action === 'deploy') {
+    if (status !== 'ready-for-deployment') return { allowed: false, message: 'Launch must be ready for deployment before deploy.' };
+    return {
+      allowed: true,
+      status: 'deployed',
+      auditType: 'deployed',
+      label: 'Deployed',
+      detail: 'Deployment completed.',
+    };
+  }
+
+  if (action === 'archive') {
+    return {
+      allowed: true,
+      status: 'archived',
+      auditType: 'archived',
+      label: 'Archived',
+      detail: 'Launch archived.',
+    };
+  }
+
+  return { allowed: false, message: 'Unsupported lifecycle action.' };
 }
 
 function audit(launchId: string, type: EACPAuditEvent['type'], label: string, detail: string, actor: string): EACPAuditEvent {

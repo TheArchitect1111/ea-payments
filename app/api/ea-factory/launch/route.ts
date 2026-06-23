@@ -7,6 +7,7 @@ import {
   validateEACPLaunchInput,
   type EACPLaunchInput,
 } from '@/lib/eacp-launch';
+import { EACPPersistenceConfigurationError, EACPStoreConflictError } from '@/lib/eacp-store';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -51,7 +52,18 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const launch = await createEACPLaunch(input as EACPLaunchInput);
+  let launch;
+  try {
+    launch = await createEACPLaunch(input as EACPLaunchInput);
+  } catch (error) {
+    if (error instanceof EACPStoreConflictError) {
+      return NextResponse.json({ error: error.message }, { status: 409 });
+    }
+    if (error instanceof EACPPersistenceConfigurationError) {
+      return NextResponse.json({ error: error.message }, { status: 503 });
+    }
+    throw error;
+  }
 
   return NextResponse.json({
     message: 'EACP launch package ready.',

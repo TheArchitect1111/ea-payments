@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { reviewEACPRepos } from '@/lib/eacp-launch';
+import { EACPPersistenceConfigurationError, EACPStoreConflictError } from '@/lib/eacp-store';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -16,7 +17,18 @@ export async function POST(request: NextRequest, { params }: PageProps) {
     return NextResponse.json({ error: 'Repo review payload is required.' }, { status: 400 });
   }
 
-  const launch = await reviewEACPRepos(id, body);
+  let launch;
+  try {
+    launch = await reviewEACPRepos(id, body);
+  } catch (error) {
+    if (error instanceof EACPStoreConflictError) {
+      return NextResponse.json({ error: error.message }, { status: 409 });
+    }
+    if (error instanceof EACPPersistenceConfigurationError) {
+      return NextResponse.json({ error: error.message }, { status: 503 });
+    }
+    throw error;
+  }
   if (!launch) {
     return NextResponse.json({ error: 'Launch not found.' }, { status: 404 });
   }
