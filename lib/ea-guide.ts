@@ -36,9 +36,14 @@ export interface EAGuideContext {
   role: string;
   focus: string[];
   greeting: string;
+  badgeLabel?: string;
   sinceLastVisit: string[];
   recommendedAction: string;
   recommendationDetail: string;
+  recommendationWhy?: string[];
+  dailyBrief?: string[];
+  opportunityHealth?: string[];
+  winWall?: string[];
   actions: EAGuideAction[];
   state: EAGuideOrbState;
   protocolAwareness: string[];
@@ -54,6 +59,8 @@ export interface EAGuideMemoryItem {
 
 export const EA_GUIDE_MEMORY_KEY = 'ea-guide-memory-v1';
 export const EA_GUIDE_DAILY_BRIEF_KEY = 'ea-guide-daily-brief-v1';
+export const EA_GUIDE_LAUNCH_SIGNAL_KEY = 'ea-guide-launch-signal-v1';
+export const EA_GUIDE_FIRST_USE_KEY = 'ea-guide-first-use-complete-v1';
 
 export const EA_GUIDE_PROTOCOLS = [
   'EA Master Protocol',
@@ -86,9 +93,14 @@ function portalContext(pathname: string): EAGuideContext {
     role: 'Strategic Assistant',
     focus: ['Daily Brief', 'Portal activity', 'Follow-ups', 'Next steps'],
     greeting: 'Good afternoon.',
+    badgeLabel: 'Follow-Up Due',
     sinceLastVisit: ['Your portal workspace is ready for review.', 'Pulse, Simplifi, and Amplifi are connected.', 'One recommended action is available.'],
     recommendedAction: 'Review the current Action Center.',
     recommendationDetail: 'Start with the highest-priority item before opening dashboards or modules.',
+    recommendationWhy: ['One portal action needs review.', 'Simplifi, Pulse, and updates are connected.', 'Starting here prevents dashboard hopping.'],
+    dailyBrief: ['1 opportunity needs review', '2 follow-ups due', '1 watch-list match found', '4 opportunities advanced this week'],
+    opportunityHealth: ['Active: Current client workspace', 'Watching: New Simplifi captures', 'Follow-Up Needed: Open commitments'],
+    winWall: ['Portal workspace launched', 'Simplifi capture flow connected'],
     actions: [
       { id: 'dashboard', label: 'Open Dashboard', kind: 'href', href: slug ? `/portal/${slug}` : '/portal/login' },
       { id: 'simplifi', label: 'Open Simplifi', kind: 'href', href: slug ? `/portal/${slug}/simplifi` : '/simplifi/workspace' },
@@ -103,20 +115,25 @@ function simplifiContext(): EAGuideContext {
   return {
     id: 'simplifi',
     product: 'Simplifi',
-    role: 'Opportunity Coach',
-    focus: ['Opportunities', 'Watch Lists', 'Follow-Ups', 'Reminders', 'Prioritization'],
-    greeting: 'I am watching for opportunities worth acting on.',
-    sinceLastVisit: ['New captures should be reviewed for next steps.', 'Follow-ups create value faster than saved notes.', 'Magnifi can turn promising captures into a shareable story.'],
-    recommendedAction: 'Capture or review the strongest opportunity.',
-    recommendationDetail: 'Move from capture to understand, prioritize, act, and create value.',
+    role: 'Your digital chief of staff',
+    focus: ['Opportunities', 'Watch List', 'Follow-ups', 'Reminders', 'Next steps'],
+    greeting: 'Good morning Robert.',
+    badgeLabel: 'Opportunity Ready',
+    sinceLastVisit: ['1 opportunity needs review.', '2 follow-ups are due.', '1 watch-list match was found.', '4 opportunities advanced this week.'],
+    recommendedAction: 'Start with the highest-priority opportunity.',
+    recommendationDetail: 'Simplifi should help you move from captured to understood, prioritized, and acted on.',
+    recommendationWhy: ['Saved opportunities are waiting for next steps.', 'Follow-ups create value faster than stored notes.', 'Magnifi can turn strong captures into a shareable story.'],
+    dailyBrief: ['1 opportunity needs review', '2 follow-ups due', '1 watch-list match found', '4 opportunities advanced this week'],
+    opportunityHealth: ['Active: Captures ready for review', 'Watching: Golf Courses, Speakers, Athletes, Nonprofits', 'Follow-Up Needed: Saved items older than 7 days'],
+    winWall: ['Three opportunities advanced this week', 'One story is ready for sharing'],
     actions: [
-      { id: 'capture', label: 'Capture', kind: 'href', href: '/simplifi/capture' },
-      { id: 'workspace', label: 'Open Workspace', kind: 'href', href: '/simplifi/workspace' },
+      { id: 'start', label: 'Start Here', kind: 'href', href: '/simplifi/capture' },
+      { id: 'dashboard', label: 'View Dashboard', kind: 'href', href: '/simplifi/workspace' },
       { id: 'follow-up', label: 'Create Follow-Up', kind: 'memory' },
-      { id: 'magnifi', label: 'Send to Magnifi', kind: 'href', href: '/consider/selena' },
+      { id: 'later', label: 'Later', kind: 'memory' },
     ],
     state: 'watching',
-    protocolAwareness: ['EA Master Protocol', 'EA Chassis Protocol', 'EA Assessment Protocol', 'EA Sales Protocol'],
+    protocolAwareness: [],
   };
 }
 
@@ -127,9 +144,14 @@ function magnifiContext(): EAGuideContext {
     role: 'Business Analyst',
     focus: ['Assessments', 'Opportunity Discovery', 'Growth Opportunities', 'Recommendations', 'Future Possibilities'],
     greeting: 'I noticed this story can become a clearer decision path.',
+    badgeLabel: 'Opportunity Detected',
     sinceLastVisit: ['The opportunity narrative is ready to review.', 'Assessment and next-step signals should stay visible.', 'The strongest stories connect proof with possibility.'],
     recommendedAction: 'Review the recommendation path.',
     recommendationDetail: 'Look for the clearest transformation, then decide whether to assess, share, or follow up.',
+    recommendationWhy: ['A Magnifi story is open.', 'The viewer needs the next best action.', 'Assessment and follow-up should stay close to the story.'],
+    dailyBrief: ['1 story ready for review', '1 recommended next step available', 'Assessment path connected'],
+    opportunityHealth: ['Active: Current Magnifi story', 'Watching: Viewer engagement', 'Follow-Up Needed: Shared opportunities without response'],
+    winWall: ['Story package generated'],
     actions: [
       { id: 'assessment', label: 'Take Assessment', kind: 'href', href: '/assessment' },
       { id: 'capture', label: 'Create Capture', kind: 'href', href: '/simplifi/capture' },
@@ -148,9 +170,14 @@ function pulseContext(pathname: string): EAGuideContext {
     role: 'Strategic Advisor',
     focus: ['Visibility', 'Capacity', 'Engagement', 'Training', 'Organizational Health'],
     greeting: 'Your attention is needed on the signals that changed.',
+    badgeLabel: 'Action Recommended',
     sinceLastVisit: ['Operational health is ready for review.', 'Training and engagement should be checked together.', 'One dashboard review can clarify the next action.'],
     recommendedAction: 'Review Pulse scores before moving into module work.',
     recommendationDetail: 'Pulse should explain what changed, why it matters, and what to do next.',
+    recommendationWhy: ['Operating signals changed.', 'Training and engagement affect adoption together.', 'A quick review can prevent downstream drift.'],
+    dailyBrief: ['1 Pulse area needs review', '1 training signal changed', '1 stakeholder update may be needed'],
+    opportunityHealth: ['Active: Current Pulse dashboard', 'Watching: Engagement changes', 'Follow-Up Needed: Low-score areas'],
+    winWall: ['Operational review ready'],
     actions: [
       { id: 'review', label: 'Review', kind: 'href', href: slug ? `/portal/${slug}/pulse` : '/portal/login' },
       { id: 'report', label: 'Generate Report', kind: 'memory' },
@@ -168,9 +195,14 @@ function learningContext(): EAGuideContext {
     role: 'Training Coach',
     focus: ['Progress', 'Certifications', 'Learning Paths', 'Knowledge Retention'],
     greeting: 'I noticed training progress is part of today\'s value path.',
+    badgeLabel: 'Follow-Up Due',
     sinceLastVisit: ['Learning progress should be checked before certification work.', 'Incomplete modules are the fastest path to regain momentum.', 'Team reminders help reduce stalled adoption.'],
     recommendedAction: 'Continue the next unfinished lesson.',
     recommendationDetail: 'Completion creates confidence, retention, and better system adoption.',
+    recommendationWhy: ['A learning path is in progress.', 'Incomplete modules slow adoption.', 'Team reminders help protect momentum.'],
+    dailyBrief: ['1 lesson needs continuation', '1 learner may need a reminder', 'Training progress can be advanced today'],
+    opportunityHealth: ['Active: Learning path', 'Watching: Completion progress', 'Follow-Up Needed: Stalled modules'],
+    winWall: ['Training hub available'],
     actions: [
       { id: 'continue', label: 'Continue', kind: 'href', href: '/admin/academy' },
       { id: 'reminder', label: 'Send Reminder', kind: 'memory' },
@@ -188,13 +220,19 @@ function cprContext(): EAGuideContext {
     role: 'Recruiting Advisor',
     focus: ['Recruiting', 'Film', 'Profiles', 'Exposure', 'Next Steps'],
     greeting: 'I am watching the details that affect recruiting momentum.',
+    badgeLabel: 'Match Found',
     sinceLastVisit: ['Profile completeness affects exposure.', 'Film and deadlines should stay visible.', 'Family communication should point to the next milestone.'],
     recommendedAction: 'Review the next recruiting milestone.',
     recommendationDetail: 'The strongest path is profile, proof, outreach, and follow-up.',
+    recommendationWhy: ['Looks like you are viewing an athlete profile.', 'Recruiting progress depends on deadlines and follow-through.', 'Family communication should stay tied to the next milestone.'],
+    dailyBrief: ['1 athlete profile needs review', '1 recruiting follow-up may be due', 'Profile proof should be checked'],
+    opportunityHealth: ['Active: Athlete profile', 'Watching: Recruiting progress', 'Follow-Up Needed: Outreach milestones'],
+    winWall: ['Recruiting profile viewed'],
     actions: [
-      { id: 'profile', label: 'Review Profile', kind: 'memory' },
-      { id: 'film', label: 'Check Film', kind: 'memory' },
-      { id: 'message', label: 'Send Message', kind: 'memory' },
+      { id: 'profile', label: 'Save Athlete', kind: 'memory' },
+      { id: 'film', label: 'Track Recruiting Progress', kind: 'memory' },
+      { id: 'watch', label: 'Add To Watch List', kind: 'memory' },
+      { id: 'family', label: 'Create Family Profile', kind: 'memory' },
     ],
     state: 'watching',
     protocolAwareness: ['EA Master Protocol', 'EA Chassis Protocol', 'Industry Playbooks', 'Portal-Specific Standards'],
@@ -209,9 +247,14 @@ function updateHubContext(pathname: string): EAGuideContext {
     role: 'Concierge',
     focus: ['Messages', 'Updates', 'Tasks', 'Approvals', 'Communication'],
     greeting: 'I noticed stakeholder communication may need a clear update.',
+    badgeLabel: 'Action Recommended',
     sinceLastVisit: ['Updates reduce confusion when they are timely.', 'Pending requests should be resolved before new work starts.', 'Clear status language improves trust.'],
     recommendedAction: 'Create or review the next update.',
     recommendationDetail: 'Keep the message short, specific, and tied to visible progress.',
+    recommendationWhy: ['You are in a communication workflow.', 'Pending updates reduce client uncertainty.', 'Clear status language improves trust.'],
+    dailyBrief: ['1 update can reduce confusion', '1 pending request may need review', 'Stakeholder communication is ready'],
+    opportunityHealth: ['Active: Update hub', 'Watching: Stakeholder messages', 'Follow-Up Needed: Pending requests'],
+    winWall: ['Update workflow connected'],
     actions: [
       { id: 'create', label: 'Create Update', kind: 'href', href: slug ? `/portal/${slug}/updates/new` : '/portal/login' },
       { id: 'review', label: 'Review Updates', kind: 'href', href: slug ? `/portal/${slug}/updates` : '/portal/login' },
@@ -229,9 +272,14 @@ function adminContext(): EAGuideContext {
     role: 'Strategic Advisor',
     focus: ['Visibility', 'Capacity', 'Revenue', 'Delivery', 'Organizational Health'],
     greeting: 'I am watching the operating signals across Mission Control.',
+    badgeLabel: 'Action Recommended',
     sinceLastVisit: ['Pipeline, delivery, and approvals should stay connected.', 'EA Factory protocols are available for build direction.', 'One administrative review can prevent downstream drift.'],
     recommendedAction: 'Review the highest-leverage operating area.',
     recommendationDetail: 'Start with the section most likely to unblock revenue, delivery, or client success.',
+    recommendationWhy: ['You are in Mission Control.', 'Pipeline, delivery, and approvals affect one another.', 'EA Factory protocols are available for build direction.'],
+    dailyBrief: ['1 operating area may need review', '1 approval path should stay connected', 'EA Factory protocols are ready'],
+    opportunityHealth: ['Active: Mission Control', 'Watching: Revenue and delivery', 'Follow-Up Needed: Pending approvals'],
+    winWall: ['Admin command center active'],
     actions: [
       { id: 'master', label: 'Open Dashboard', kind: 'href', href: '/admin/master' },
       { id: 'protocols', label: 'Review Protocols', kind: 'href', href: '/admin/protocol-center' },

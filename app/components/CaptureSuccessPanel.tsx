@@ -1,113 +1,124 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import {
   openMagnifiExperience,
   shareAmplifiLink,
   type CaptureSuccessLinks,
 } from '@/lib/capture-success-flow';
 import type { AmplifiSocialDraft } from '@/lib/amplifi-draft';
-import StoryDraftPanel from '@/app/components/StoryDraftPanel';
-import '@/app/components/story-draft-panel.css';
 
 export default function CaptureSuccessPanel({
   title,
   links,
-  amplifiDraft,
+  amplifiDraft: _amplifiDraft,
   onClose,
-  autoOpenMagnifi = false,
+  onContinue,
 }: {
   title: string;
   links: CaptureSuccessLinks;
   amplifiDraft?: AmplifiSocialDraft;
   onClose?: () => void;
+  onContinue?: () => void;
   autoOpenMagnifi?: boolean;
 }) {
   const [shareNote, setShareNote] = useState('');
-  const [magnifiOpened, setMagnifiOpened] = useState(false);
+  const [selectedActions, setSelectedActions] = useState<string[]>([]);
 
-  useEffect(() => {
-    if (!autoOpenMagnifi || !links.magnifiUrl || magnifiOpened) return;
-    const ok = openMagnifiExperience(links.magnifiUrl);
-    setMagnifiOpened(ok);
-    if (!ok) setShareNote('Preview was blocked. Use the Preview story button below.');
-  }, [autoOpenMagnifi, links.magnifiUrl, magnifiOpened]);
+  const actions = [
+    'Add to Watch List',
+    'Set Reminder',
+    'Follow Up Later',
+    'Share With Someone',
+    'Create Amplifi Story',
+    'Continue Browsing',
+  ];
+
+  function toggleAction(label: string) {
+    setSelectedActions((current) =>
+      current.includes(label) ? current.filter((item) => item !== label) : [...current, label],
+    );
+  }
 
   const openMagnifi = () => {
     if (!links.magnifiUrl) return;
-    const ok = openMagnifiExperience(links.magnifiUrl);
-    setMagnifiOpened(ok);
+    openMagnifiExperience(links.magnifiUrl);
   };
 
   const shareStory = async () => {
     const shareUrl = links.considerUrl ?? links.magnifiUrl;
     if (!shareUrl) return;
     const result = await shareAmplifiLink(shareUrl, title);
-    setShareNote(result === 'shared' ? 'Shared.' : 'Story link copied.');
+    setShareNote(result === 'shared' ? 'Shared.' : 'Link copied.');
   };
 
   return (
     <div className="space-y-4">
-      <p className="text-xs font-bold uppercase tracking-wider text-[#C9A844]">Capture complete</p>
+      <p className="text-xs font-bold uppercase tracking-wider text-[#C9A844]">Nice capture</p>
       <div>
-        <p className="font-bold text-[#1B2B4D]">{title}</p>
-        <p className="mt-1 text-sm text-neutral-600">
-          Simplifi saved the item. A shareable story was created automatically.
+        <p className="text-lg font-extrabold text-[#1B2B4D]">{title}</p>
+        <p className="mt-2 text-sm leading-6 text-neutral-600">
+          Your opportunity has been saved. Simplifi reviewed it and created a summary. Now you can decide what happens
+          next.
         </p>
       </div>
 
-      <ol className="list-decimal space-y-1 pl-4 text-xs text-neutral-600">
-        <li><strong>Saved:</strong> your item is now in Simplifi.</li>
-        <li><strong>Summarized:</strong> the opportunity story is ready to review.</li>
-        <li><strong>Next:</strong> copy the story link or preview it first.</li>
-      </ol>
-
-      <div className="flex flex-col gap-2">
-        {(links.considerUrl || links.magnifiUrl) && (
-          <button
-            type="button"
-            className="w-full rounded-full bg-[#C9A844] py-3 text-sm font-extrabold text-[#1B2B4D]"
-            onClick={shareStory}
+      <div className="space-y-2">
+        {actions.map((label) => (
+          <label
+            key={label}
+            className="flex cursor-pointer items-center gap-3 rounded-xl border border-neutral-200 bg-[#FAF8F3] px-3 py-3 text-sm font-semibold text-neutral-800"
           >
-            Copy or share story link
-          </button>
-        )}
-        {links.magnifiUrl && (
+            <input
+              type="checkbox"
+              checked={selectedActions.includes(label)}
+              onChange={() => toggleAction(label)}
+              className="h-4 w-4"
+            />
+            {label}
+          </label>
+        ))}
+      </div>
+
+      {selectedActions.includes('Create Amplifi Story') && links.magnifiUrl ? (
+        <div className="flex flex-col gap-2 border-t border-neutral-100 pt-3">
           <button
             type="button"
             className="w-full rounded-full bg-[#1B2B4D] py-3 text-sm font-extrabold text-[#C9A844]"
             onClick={openMagnifi}
           >
-            {magnifiOpened ? 'Preview story again' : 'Preview story'}
+            Preview your story
           </button>
-        )}
-        {links.guidanceUrl && (
-          <a href={links.guidanceUrl} target="_blank" rel="noopener noreferrer" className="text-xs font-bold text-[#C9A844] underline">
-            What should I do next?
-          </a>
-        )}
-        {links.considerUrl && (
-          <a href={links.considerUrl} target="_blank" rel="noopener noreferrer" className="text-xs font-bold text-[#C9A844] underline">
-            Open public story page
-          </a>
-        )}
-        {links.workspaceUrl && (
-          <a href={links.workspaceUrl} className="text-xs font-bold text-[#0A66FF] underline">
-            View saved captures
-          </a>
-        )}
-      </div>
+          {(links.considerUrl || links.magnifiUrl) && (
+            <button
+              type="button"
+              className="w-full rounded-full border border-neutral-200 py-3 text-sm font-bold text-[#1B2B4D]"
+              onClick={shareStory}
+            >
+              Share with someone
+            </button>
+          )}
+        </div>
+      ) : null}
 
-      {amplifiDraft && <StoryDraftPanel draft={amplifiDraft} />}
-      {shareNote && <p className="text-xs text-neutral-600">{shareNote}</p>}
-      {links.clientMessage && (
-        <pre className="whitespace-pre-wrap border bg-neutral-50 p-3 text-xs">{links.clientMessage}</pre>
+      {links.workspaceUrl && (
+        <a href={links.workspaceUrl} className="block text-center text-xs font-bold text-[#1B2B4D] underline">
+          View all saved opportunities
+        </a>
       )}
-      {onClose && (
-        <button type="button" className="w-full py-2 text-sm font-semibold text-neutral-600" onClick={onClose}>
-          Done
-        </button>
-      )}
+
+      {shareNote ? <p className="text-xs text-neutral-600">{shareNote}</p> : null}
+
+      <button
+        type="button"
+        className="w-full rounded-full bg-[#C9A844] py-3 text-sm font-extrabold text-[#1B2B4D]"
+        onClick={() => {
+          onContinue?.();
+          onClose?.();
+        }}
+      >
+        Continue
+      </button>
     </div>
   );
 }

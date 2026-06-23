@@ -221,7 +221,7 @@
   padding: 20px 20px calc(24px + env(safe-area-inset-bottom));
   transform: translateY(110%);
   transition: transform 0.25s ease;
-  max-height: 80dvh;
+  max-height: 72dvh;
   overflow-y: auto;
 }
 

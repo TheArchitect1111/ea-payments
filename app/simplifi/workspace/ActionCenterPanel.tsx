@@ -14,8 +14,8 @@ export default function ActionCenterPanel({ center }: { center: ActionCenterPayl
 
   return (
     <section className="ac-panel">
-      <h2>Action Center</h2>
-      <p className="ac-lead">What deserves your attention right now.</p>
+      <h2>What needs your attention</h2>
+      <p className="ac-lead">Opportunities waiting for your next move.</p>
 
       {center.needsAttention.length > 0 && (
         <div className="ac-block">
@@ -40,7 +40,7 @@ export default function ActionCenterPanel({ center }: { center: ActionCenterPayl
 
       {center.recommended.length > 0 && (
         <div className="ac-block">
-          <h3>Recommended Actions</h3>
+          <h3>Recommended next steps</h3>
           <ul>
             {center.recommended.map((item) => (
               <li key={item.id} className={`ac-item ac-${item.priority}`}>
@@ -61,7 +61,7 @@ export default function ActionCenterPanel({ center }: { center: ActionCenterPayl
 
       {center.watchlist.length > 0 && (
         <div className="ac-block">
-          <h3>Watchlist</h3>
+          <h3>Watch List</h3>
           <ul>
             {center.watchlist.map((item) => (
               <li key={item.id} className="ac-item ac-medium">

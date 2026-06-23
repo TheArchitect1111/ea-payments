@@ -147,9 +147,11 @@ export default function SimplifiLoginClient() {
       <div className="pl-shell">
         <header className="pl-header">
           <Image src="/simplifi-logo.png" alt="Simplifi" width={320} height={180} className="pl-logo" priority />
-          <p className="pl-eyebrow">First Capture</p>
-          <h1 className="pl-title">Sign in and capture your first item</h1>
-          <p className="pl-lede">Paste a link or upload a screenshot first. Simplifi will show the result before sending you anywhere else.</p>
+          <p className="pl-eyebrow">Never Lose An Opportunity Again™</p>
+          <h1 className="pl-title">Welcome to Simplifi™</h1>
+          <p className="pl-lede">
+            Sign in to save opportunities, remember what matters, and follow up when the time is right.
+          </p>
         </header>
 
         <Suspense fallback={<div className="pl-card">Loading...</div>}>

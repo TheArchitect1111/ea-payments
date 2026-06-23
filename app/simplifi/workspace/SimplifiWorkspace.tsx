@@ -137,11 +137,11 @@ export default function SimplifiWorkspace({
   return (
     <main className="sw-main">
       <section className="sw-hero">
-        <p className="sw-eyebrow">Intelligence OS</p>
-        <h1>What&apos;s worth exploring today?</h1>
+        <p className="sw-eyebrow">Never Lose An Opportunity Again™</p>
+        <h1>Your opportunities, organized.</h1>
         <p className="sw-lead">
-          Capture first. Simplifi clarifies what matters, what most people do, and what we recommend
-          — so momentum doesn&apos;t slip away.
+          Save what matters. Simplifi helps you remember, prioritize, and follow up — so good opportunities
+          don&apos;t slip away.
         </p>
         <div className="sw-hero-actions">
           <Link href="/simplifi/capture" className="sw-btn sw-btn-primary">
@@ -159,7 +159,7 @@ export default function SimplifiWorkspace({
 
       <section className="sw-brief">
         <div className="sw-brief-header">
-          <h2>Daily Brief</h2>
+          <h2>Today&apos;s focus</h2>
           <span className="sw-brief-greeting">{brief.greeting}</span>
         </div>
         {brief.items.length === 0 ? (
@@ -226,7 +226,7 @@ export default function SimplifiWorkspace({
       {memoryLibrary.length > 0 && (
         <section className="sw-memory">
           <div className="sw-inbox-header">
-            <h2>Memory Library</h2>
+            <h2>Saved for later</h2>
             <span className="sw-count">{memoryLibrary.length} assets</span>
           </div>
           <p className="sw-muted">Reusable captures — adapt, don&apos;t re-capture from scratch.</p>
