@@ -16,6 +16,11 @@ const CORE_NAV_LINKS = [
   { href: '/admin/simplifi', label: 'Simplifi' },
   { href: '/admin/simplifi-audit', label: 'Simplifi Audit' },
   { href: '/admin/blueprints', label: 'Blueprints' },
+  { href: '/admin/protocol-center', label: 'Protocol Center' },
+  { href: '/admin/ea-factory', label: 'EA Factory' },
+  { href: '/admin/ea-factory/repo-library', label: 'Repo Library' },
+  { href: '/admin/ea-factory/project-generator', label: 'Project Generator' },
+  { href: '/admin/ea-factory/skin-factory', label: 'Skin Factory' },
   { href: '/admin/foundation-library', label: 'Foundation Library' },
   { href: '/admin/academy', label: 'Academy' },
   { href: '/admin/delivery', label: 'Delivery' },
@@ -45,6 +50,11 @@ const NAVIGATOR_GOALS = [
   { label: 'Run Operational MRI funnel', href: '/assessment' },
   { label: 'Open Simplifi workspace', href: '/admin/simplifi' },
   { label: 'Run Simplifi website audit', href: '/admin/simplifi-audit' },
+  { label: 'Review EA protocols', href: '/admin/protocol-center' },
+  { label: 'Open EA Factory', href: '/admin/ea-factory' },
+  { label: 'Search approved repositories', href: '/admin/ea-factory/repo-library' },
+  { label: 'Generate a project brief', href: '/admin/ea-factory/project-generator' },
+  { label: 'Generate a skin brief', href: '/admin/ea-factory/skin-factory' },
   ...(EXPERIMENTAL_ADMIN
     ? [
         { label: 'Search Knowledge Graph', href: '/admin/knowledge-graph' },
