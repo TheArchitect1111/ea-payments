@@ -18,12 +18,12 @@
 }
 
 .pl-logo {
-  width: min(200px, 70vw);
+  width: min(320px, 86vw);
   height: auto;
   margin: 0 auto 16px;
   display: block;
-  filter: drop-shadow(0 8px 24px rgba(27, 43, 77, 0.12));
-  border-radius: 16px;
+  filter: drop-shadow(0 8px 24px rgba(27, 43, 77, 0.08));
+  border-radius: 0;
 }
 
 .pl-eyebrow {
@@ -131,6 +131,16 @@
   border-radius: 12px;
   font-size: 13px;
   color: #991b1b;
+}
+
+.pl-demo-hint {
+  margin: 14px 0 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #f8fbff;
+  color: #4b5563;
+  font-size: 12px;
+  line-height: 1.5;
 }
 
 .pl-footer {

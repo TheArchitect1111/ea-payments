@@ -313,11 +313,11 @@ export default function SimplifiPortalWorkspace({
                 magnifiUrl: lastResult.magnifiUrl,
                 considerUrl: lastResult.considerUrl,
                 guidanceUrl: lastResult.guidanceUrl,
-                workspaceUrl: lastResult.workspaceUrl,
+                workspaceUrl: `/portal/${slug}/simplifi`,
                 clientMessage: lastResult.clientMessage,
               }}
               amplifiDraft={lastResult.amplifiDraft}
-              autoOpenMagnifi
+              autoOpenMagnifi={false}
             />
           </div>
         )}

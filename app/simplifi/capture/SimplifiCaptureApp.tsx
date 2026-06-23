@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useRef, useState, useEffect } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import type { CaptureRecord } from '@/lib/capture-records';
 import CaptureSuccessPanel from '@/app/components/CaptureSuccessPanel';
@@ -198,9 +199,9 @@ export default function SimplifiCaptureApp({
     return (
       <div className="sc-app">
         <header className="sc-header">
-          <Link href="/simplifi" className="sc-brand">
-            SIMPLIFI
-          </Link>
+          <div className="sc-brand-lockup">
+            <Image src="/simplifi-logo.png" alt="Simplifi" width={170} height={96} priority />
+          </div>
         </header>
         <main className="sc-main sc-main-center">
           <p className="sc-kicker">One-tap capture</p>
@@ -231,34 +232,74 @@ export default function SimplifiCaptureApp({
   return (
     <div className="sc-app">
       <header className="sc-header">
-        <Link href="/simplifi" className="sc-brand">
-          SIMPLIFI
-        </Link>
+        <div className="sc-brand-lockup">
+          <Image src="/simplifi-logo.png" alt="Simplifi" width={170} height={96} priority />
+        </div>
         {slug && (
           <Link href={`/portal/${slug}/simplifi`} className="sc-header-link">
-            Workspace
+            Saved captures
           </Link>
         )}
       </header>
 
       <main className="sc-main">
-        <p className="sc-kicker">Capture mode</p>
-        <h1 className="sc-title">Tap the button. Never lose an opportunity.</h1>
+        <p className="sc-kicker">Step 1 of 3</p>
+        <h1 className="sc-title">Capture your first item.</h1>
         <p className="sc-lede">
-          Paste a link, snap a flyer, or upload a screenshot. Simplifi scores it and Magnifi builds
-          the shareable story.
+          Paste a website link, upload a screenshot, or add a flyer. Simplifi will analyze it and show you what to do next.
         </p>
-        <ul className="sc-steps">
-          <li>Tap the gold Capture button</li>
-          <li>Choose URL or photo</li>
-          <li>Share the Consider or Magnifi link</li>
-        </ul>
+
+        <section className="sc-first-capture" aria-label="Capture your first item">
+          <label className="sc-field-label" htmlFor="first-capture-url">
+            Paste a link
+          </label>
+          <div className="sc-inline-capture">
+            <input
+              id="first-capture-url"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              placeholder="https://example.com"
+              className="sc-input"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && url.trim() && !loading) void handleCaptureUrl();
+              }}
+            />
+            <button
+              type="button"
+              className="sc-btn sc-btn-primary"
+              disabled={loading || !url.trim()}
+              onClick={handleCaptureUrl}
+            >
+              {loading ? 'Capturing...' : 'Capture link'}
+            </button>
+          </div>
+          <p className="sc-divider">or</p>
+          <label className="sc-btn sc-btn-capture-main sc-file-label">
+            Upload screenshot or flyer
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/*,.pdf,application/pdf"
+              className="sc-file-input"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) void handleCaptureFile(file);
+              }}
+            />
+          </label>
+        </section>
+
+        <ol className="sc-steps sc-steps-numbered">
+          <li><strong>Capture:</strong> paste or upload one item.</li>
+          <li><strong>Review:</strong> Simplifi summarizes the opportunity.</li>
+          <li><strong>Share:</strong> copy the story link when you are ready.</li>
+        </ol>
         <button
           type="button"
-          className="sc-btn sc-btn-capture-main"
+          className="sc-secondary-link"
           onClick={openSheet}
         >
-          Capture now
+          More capture options
         </button>
 
         {processingId && !open && (
@@ -420,12 +461,12 @@ export default function SimplifiCaptureApp({
                 magnifiUrl: result.magnifiUrl,
                 considerUrl: result.considerUrl,
                 guidanceUrl: result.guidanceUrl,
-                workspaceUrl: result.workspaceUrl,
+                workspaceUrl: slug ? `/portal/${slug}/simplifi` : result.workspaceUrl,
                 clientMessage: result.clientMessage,
               }}
               amplifiDraft={result.amplifiDraft}
               onClose={closeSheet}
-              autoOpenMagnifi
+              autoOpenMagnifi={false}
             />
           </>
         )}

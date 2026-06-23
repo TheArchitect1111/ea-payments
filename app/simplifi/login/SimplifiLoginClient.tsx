@@ -1,6 +1,7 @@
 'use client';
 
 import { FormEvent, Suspense, useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import AuthNav from '@/components/auth/AuthNav';
@@ -13,7 +14,7 @@ function safeNextPath(raw: string | null): string | null {
 
 function SimplifiLoginForm() {
   const searchParams = useSearchParams();
-  const nextPath = safeNextPath(searchParams.get('next'));
+  const nextPath = safeNextPath(searchParams.get('next')) ?? '/simplifi/capture';
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -65,7 +66,7 @@ function SimplifiLoginForm() {
         return;
       }
 
-      window.location.href = nextPath ?? `/portal/${data.slug}/simplifi`;
+      window.location.href = nextPath;
     } catch {
       setError('An unexpected error occurred. Please try again.');
       setLoading(false);
@@ -83,7 +84,7 @@ function SimplifiLoginForm() {
           onSuccess={(data) => {
             const slug = data.slug as string | undefined;
             const next = data.next as string | undefined;
-            window.location.href = next ?? (slug ? `/portal/${slug}/simplifi` : '/simplifi/login');
+            window.location.href = next ?? (slug ? '/simplifi/capture' : '/simplifi/login');
           }}
         />
       </div>
@@ -132,6 +133,9 @@ function SimplifiLoginForm() {
             {error}
           </p>
         )}
+        <p className="pl-demo-hint">
+          Demo: demo@efficiencyarchitects.online / DemoPulse2026!
+        </p>
       </form>
     </div>
   );
@@ -142,12 +146,10 @@ export default function SimplifiLoginClient() {
     <div className="pl-page">
       <div className="pl-shell">
         <header className="pl-header">
-          <Link href="/simplifi" className="simplifi-auth-brand">
-            SIMPLIFI
-          </Link>
-          <p className="pl-eyebrow">Opportunity Workspace</p>
-          <h1 className="pl-title">Sign in to Simplifi</h1>
-          <p className="pl-lede">Capture your first opportunity, build a Magnifi story, and keep follow-up visible.</p>
+          <Image src="/simplifi-logo.png" alt="Simplifi" width={320} height={180} className="pl-logo" priority />
+          <p className="pl-eyebrow">First Capture</p>
+          <h1 className="pl-title">Sign in and capture your first item</h1>
+          <p className="pl-lede">Paste a link or upload a screenshot first. Simplifi will show the result before sending you anywhere else.</p>
         </header>
 
         <Suspense fallback={<div className="pl-card">Loading...</div>}>

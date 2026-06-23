@@ -15,7 +15,7 @@ function safeNextPath(raw: string | null): string | null {
 
 function PortalLoginForm() {
   const searchParams = useSearchParams();
-  const nextPath = safeNextPath(searchParams.get('next'));
+  const nextPath = safeNextPath(searchParams.get('next')) ?? '/simplifi/capture';
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -67,7 +67,7 @@ function PortalLoginForm() {
         return;
       }
 
-      window.location.href = nextPath ?? `/portal/${data.slug}`;
+      window.location.href = nextPath;
     } catch {
       setError('An unexpected error occurred. Please try again.');
       setLoading(false);
@@ -85,7 +85,7 @@ function PortalLoginForm() {
           onSuccess={(data) => {
             const slug = data.slug as string | undefined;
             const next = data.next as string | undefined;
-            window.location.href = next ?? (slug ? `/portal/${slug}` : '/portal/login');
+            window.location.href = next ?? (slug ? '/simplifi/capture' : '/portal/login');
           }}
         />
       </div>
@@ -134,6 +134,9 @@ function PortalLoginForm() {
             {error}
           </p>
         )}
+        <p className="pl-demo-hint">
+          Demo: demo@efficiencyarchitects.online / DemoPulse2026!
+        </p>
       </form>
     </div>
   );
@@ -145,16 +148,16 @@ export default function PortalLoginPage() {
       <div className="pl-shell">
         <header className="pl-header">
           <Image
-            src="/ea-logo.png"
-            alt="Efficiency Architects"
-            width={240}
-            height={240}
+            src="/simplifi-logo.png"
+            alt="Simplifi"
+            width={320}
+            height={180}
             className="pl-logo"
             priority
           />
-          <p className="pl-eyebrow">Client Portal</p>
-          <h1 className="pl-title">Welcome in</h1>
-          <p className="pl-lede">Sign in, register, or reset your password. Two-factor verification protects your account.</p>
+          <p className="pl-eyebrow">First Capture</p>
+          <h1 className="pl-title">Sign in and capture your first item</h1>
+          <p className="pl-lede">After login, Simplifi opens the capture screen. Paste a link or upload a screenshot first; the workspace comes later.</p>
         </header>
 
         <Suspense fallback={<div className="pl-card">Loading…</div>}>
@@ -163,9 +166,9 @@ export default function PortalLoginPage() {
 
         <footer className="pl-footer">
           <p className="pl-footer-text">
-            Partner portal?{' '}
+            Need the full client portal?{' '}
             <Link href="/partners/login" className="pl-footer-link">
-              Sign in here
+              Partner sign in
             </Link>
           </p>
           <p className="pl-tagline">Systems that transform businesses.</p>
