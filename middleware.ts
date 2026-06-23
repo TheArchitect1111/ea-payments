@@ -45,7 +45,9 @@ export function middleware(request: NextRequest) {
 
   if (simplifiAppEntry) {
 
-    return NextResponse.redirect(new URL(simplifiAppEntry, request.url));
+    const target = new URL(simplifiAppEntry, request.url);
+    target.search = request.nextUrl.search;
+    return NextResponse.redirect(target);
 
   }
 
@@ -86,7 +88,18 @@ export function middleware(request: NextRequest) {
 
 export const config = {
 
-  matcher: ['/', '/capture', '/app', '/workspace', '/login', '/portal/:slug', '/portal/:slug/:path*'],
+  matcher: [
+    '/',
+    '/capture',
+    '/app',
+    '/workspace',
+    '/login',
+    '/register',
+    '/forgot-password',
+    '/reset-password',
+    '/portal/:slug',
+    '/portal/:slug/:path*',
+  ],
 
 };
 

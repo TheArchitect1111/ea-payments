@@ -335,7 +335,7 @@ export default function SimplifiPortalWorkspace({
             title="No captures yet"
             explanation="Capture your first opportunity — Simplifi analyzes it and Magnifi builds a shareable story automatically."
             actionLabel="Capture now"
-            actionHref="/capture"
+            actionHref="/simplifi/capture"
           />
         ) : (
           <table className="w-full text-sm mt-4">

@@ -15,7 +15,10 @@ const PATH_ALIASES: Record<string, string> = {
   '/app': '/simplifi/workspace',
   '/workspace': '/simplifi/workspace',
   '/capture': '/simplifi/capture',
-  '/login': '/portal/login',
+  '/login': '/simplifi/login',
+  '/register': '/simplifi/register',
+  '/forgot-password': '/simplifi/forgot-password',
+  '/reset-password': '/simplifi/reset-password',
 };
 
 export function resolveSimplifiAppHostRedirect(

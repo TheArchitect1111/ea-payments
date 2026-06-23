@@ -69,6 +69,7 @@ async function findClientByIdentifier(identifier: string): Promise<AirtableRecor
 export async function requestPortalPasswordReset(
   identifier: string,
   origin: string,
+  resetPath = '/portal/reset-password',
 ): Promise<{ resetUrl: string; email: string } | null> {
   const record = await findClientByIdentifier(identifier);
   if (!record) return null;
@@ -95,7 +96,7 @@ export async function requestPortalPasswordReset(
 
   return {
     email,
-    resetUrl: `${origin}/portal/reset-password?recordId=${encodeURIComponent(record.id)}&token=${encodeURIComponent(token)}`,
+    resetUrl: `${origin}${resetPath}?recordId=${encodeURIComponent(record.id)}&token=${encodeURIComponent(token)}`,
   };
 }
 

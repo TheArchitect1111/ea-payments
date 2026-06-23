@@ -217,7 +217,7 @@ export default function SimplifiCaptureApp({
               <button type="button" className="sc-btn sc-btn-primary" onClick={() => void startGuest()}>
                 Start capturing now
               </button>
-              <Link href={`/portal/login?next=${loginNext}`} className="sc-header-link">
+              <Link href={`/simplifi/login?next=${loginNext}`} className="sc-header-link">
                 Sign in with your account →
               </Link>
             </>

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 
-type AuthRealm = 'admin' | 'portal' | 'partner';
+type AuthRealm = 'admin' | 'portal' | 'partner' | 'simplifi';
 
 const PATHS: Record<AuthRealm, { signIn: string; register: string; forgot: string }> = {
   admin: {
@@ -19,6 +19,11 @@ const PATHS: Record<AuthRealm, { signIn: string; register: string; forgot: strin
     signIn: '/partners/login',
     register: '/partners/register',
     forgot: '/partners/forgot-password',
+  },
+  simplifi: {
+    signIn: '/simplifi/login',
+    register: '/simplifi/register',
+    forgot: '/simplifi/forgot-password',
   },
 };
 

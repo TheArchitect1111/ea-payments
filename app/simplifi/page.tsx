@@ -31,13 +31,18 @@ export default function SimplifiLaunchPage() {
           <Link href="/" className="text-lg font-extrabold tracking-[0.3em]" style={{ color: BLUE }}>
             SIMPLIFI
           </Link>
-          <a
-            href="/checkout?package=simplifi_early_access"
-            className="rounded-full px-5 py-3 text-sm font-bold text-white"
-            style={{ backgroundColor: BLUE }}
-          >
-            Start Simplifi
-          </a>
+          <div className="flex items-center gap-3">
+            <Link href="/simplifi/login" className="text-sm font-bold" style={{ color: BLUE }}>
+              Sign in
+            </Link>
+            <a
+              href="/checkout?package=simplifi_early_access"
+              className="rounded-full px-5 py-3 text-sm font-bold text-white"
+              style={{ backgroundColor: BLUE }}
+            >
+              Start Simplifi
+            </a>
+          </div>
         </header>
 
         <div className="grid flex-1 items-center gap-12 py-16 lg:grid-cols-[0.95fr_1.05fr]">
@@ -67,7 +72,7 @@ export default function SimplifiLaunchPage() {
                 Start Simplifi
               </a>
               <a
-                href="/simplifi/workspace"
+                href="/simplifi/login?next=/simplifi/workspace"
                 className="rounded-full border border-neutral-200 px-7 py-4 text-sm font-bold"
               >
                 Open Workspace

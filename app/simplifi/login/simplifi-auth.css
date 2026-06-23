@@ -1,0 +1,36 @@
+.simplifi-auth-brand {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 18px;
+  color: #0a66ff;
+  font-size: 1.25rem;
+  font-weight: 900;
+  letter-spacing: 0.3em;
+  text-decoration: none;
+}
+
+.pl-page:has(.simplifi-auth-brand) {
+  background: linear-gradient(145deg, #ffffff 0%, #eef5ff 52%, #dceaff 100%);
+}
+
+.pl-page:has(.simplifi-auth-brand) .pl-eyebrow,
+.pl-page:has(.simplifi-auth-brand) .pl-footer-link {
+  color: #0a66ff;
+}
+
+.pl-page:has(.simplifi-auth-brand) .pl-auth-nav a.is-active {
+  border-color: #0a66ff;
+  background: #eef5ff;
+}
+
+.pl-page:has(.simplifi-auth-brand) .pl-input:focus {
+  border-color: #0a66ff;
+  box-shadow: 0 0 0 3px rgba(10, 102, 255, 0.16);
+}
+
+.pl-page:has(.simplifi-auth-brand) .pl-btn {
+  background: #0a66ff;
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(10, 102, 255, 0.28);
+}
