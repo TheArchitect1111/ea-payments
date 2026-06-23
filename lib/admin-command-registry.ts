@@ -22,6 +22,7 @@ export const ADMIN_COMMANDS: CommandItem[] = [
   { id: 'nav-blueprints', label: 'Blueprint Library', group: 'Navigate', href: '/admin/blueprints', keywords: ['magnifi', 'auto blueprint'] },
   { id: 'nav-protocol-center', label: 'Protocol Center', group: 'Navigate', href: '/admin/protocol-center', keywords: ['protocols', 'versions', 'approval', 'ea factory'] },
   { id: 'nav-ea-factory', label: 'EA Factory', group: 'Navigate', href: '/admin/ea-factory', keywords: ['factory', 'protocols', 'projects', 'skins'] },
+  { id: 'nav-eacp-launches', label: 'EACP Launch Engine', group: 'Create', href: '/admin/ea-factory/launches', keywords: ['launch', 'orchestration', 'command protocol', 'approval package'] },
   { id: 'nav-repo-library', label: 'Repo Library', group: 'Navigate', href: '/admin/ea-factory/repo-library', keywords: ['repositories', 'ui libraries', 'components', 'scores'] },
   { id: 'nav-project-generator', label: 'Project Generator', group: 'Create', href: '/admin/ea-factory/project-generator', keywords: ['brief', 'codex prompt', 'new project'] },
   { id: 'nav-skin-factory', label: 'Skin Factory', group: 'Create', href: '/admin/ea-factory/skin-factory', keywords: ['skin brief', 'creative direction', 'visual requirements', 'skin factory'] },

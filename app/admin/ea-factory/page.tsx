@@ -112,6 +112,9 @@ export default async function EAFactoryPage({ searchParams }: PageProps) {
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
+              <Link href="/admin/ea-factory/launches" className="rounded-full bg-[#C9A844] px-4 py-2 text-xs font-black text-[#1B2B4D]">
+                EACP Launches
+              </Link>
               <a href="#protocol-center" className="rounded-full bg-[#1B2B4D] px-4 py-2 text-xs font-bold text-white">
                 Protocol Center
               </a>
