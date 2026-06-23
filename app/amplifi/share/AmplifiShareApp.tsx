@@ -196,7 +196,11 @@ export default function AmplifiShareApp({
               captureId={processingId}
               title={result?.record?.title}
               showActiveSave={Boolean(loggedIn && slug)}
-              onComplete={() => setProcessingId(null)}
+              onComplete={(response) => {
+                setProcessingId(null);
+                setResult(response);
+                setOpen(true);
+              }}
               onError={() => setProcessingId(null)}
             />
           </div>
