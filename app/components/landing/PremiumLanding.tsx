@@ -60,9 +60,9 @@ const scenes: Scene[] = [
     current: 'Training starts over every day.',
     possible: 'Knowledge is always available.',
     story: 'A nonprofit leader stops repeating the same explanation and lets new staff learn naturally, at the moment they need it.',
-    currentImage: 'https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=2200&q=86',
+    currentImage: 'https://images.unsplash.com/photo-1582213782179-0a00d435e7de?auto=format&fit=crop&w=2200&q=86',
     possibleImage: 'https://images.unsplash.com/photo-1523245775816-ff31a218c6be?auto=format&fit=crop&w=2200&q=86',
-    currentAlt: 'A nonprofit leader repeating the same explanation to a new volunteer',
+    currentAlt: 'A nonprofit leader walking a new volunteer through the same steps again',
     possibleAlt: 'A racially diverse group of adult learners confidently working together',
     guide: "Training transformation means knowledge no longer lives in one person's head. It becomes repeatable, visible, and easier to pass on.",
   },
@@ -74,9 +74,9 @@ const scenes: Scene[] = [
     current: "You can't see what you can't see.",
     possible: 'See what matters sooner.',
     story: 'An executive director moves from reacting all day to recognizing patterns early enough to lead with calm.',
-    currentImage: 'https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=2200&q=86',
+    currentImage: 'https://images.unsplash.com/photo-1454165804606-ff69b5c36a2c?auto=format&fit=crop&w=2200&q=86',
     possibleImage: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=2200&q=86',
-    currentAlt: 'Leaders caught off guard in a tense meeting with scattered priorities',
+    currentAlt: 'A leader surrounded by scattered reports and surprises they did not see coming',
     possibleAlt: 'A Black woman executive director reviewing priorities with calm focus',
     guide: 'Visibility is the shift from surprise to awareness. Leaders get to see signals early enough to choose, not scramble.',
   },
@@ -89,9 +89,9 @@ const scenes: Scene[] = [
     possible: 'People have space to thrive.',
     story: 'A stretched team stops surviving the week and starts contributing ideas, improving the work, and breathing again.',
     currentImage: 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=2200&q=86',
-    possibleImage: 'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&w=2200&q=86',
+    possibleImage: 'https://images.unsplash.com/photo-1573164574514-8a0c5e0e8c3b?auto=format&fit=crop&w=2200&q=86',
     currentAlt: 'An exhausted team buried in back-to-back work with no room to breathe',
-    possibleAlt: 'A diverse team with space to think, collaborate, and contribute ideas',
+    possibleAlt: 'A diverse team with breathing room to think, contribute, and improve the work',
     guide: 'Capacity is not about asking people to do more. It is about removing the repetition and friction that keep good people stretched thin.',
   },
   {
@@ -177,8 +177,8 @@ const futures = {
       'Imagine customers feeling guided, informed, and remembered.',
       'Imagine leadership energy returning to growth, relationships, and vision.',
     ],
-    image: 'https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=1600&q=86',
-    imageAlt: 'A business owner leading a diverse team with clarity and confidence',
+    image: 'https://images.unsplash.com/photo-1507679616480-389c2a94501a?auto=format&fit=crop&w=1600&q=86',
+    imageAlt: 'A business owner leading with clarity while the team moves with confidence',
   },
   creators: {
     label: 'Creators',
@@ -200,6 +200,16 @@ export default function PremiumLanding() {
   const prefersReducedMotion = useReducedMotion();
   const [activeScene, setActiveScene] = useState(scenes[0]);
   const [future, setFuture] = useState<FutureKey>('nonprofit');
+  const [showStickyCta, setShowStickyCta] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => {
+      setShowStickyCta(window.scrollY > window.innerHeight * 0.85);
+    };
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   useEffect(() => {
     if (prefersReducedMotion) return;
@@ -221,6 +231,10 @@ export default function PremiumLanding() {
       onEnterBack: () => setActiveScene(scene),
     }));
 
+    const isMobile = window.matchMedia('(max-width: 640px)').matches;
+    const hiddenClip = isMobile ? 'inset(0 75% 0 0)' : 'inset(0 100% 0 0)';
+    const dividerStart = isMobile ? '25%' : '0%';
+
     gsap.utils.toArray<HTMLElement>('.pl-story-scene').forEach((section) => {
       const possible = section.querySelector<HTMLElement>('.pl-possibility-img');
       const divider = section.querySelector<HTMLElement>('.pl-scene-divider');
@@ -234,8 +248,8 @@ export default function PremiumLanding() {
           scrub: 0.6,
         },
       })
-        .fromTo(possible, { clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)', ease: 'none' }, 0)
-        .fromTo(divider, { left: '0%' }, { left: '100%', ease: 'none' }, 0);
+        .fromTo(possible, { clipPath: hiddenClip }, { clipPath: 'inset(0 0% 0 0)', ease: 'none' }, 0)
+        .fromTo(divider, { left: dividerStart }, { left: '100%', ease: 'none' }, 0);
     });
 
     return () => {
@@ -272,6 +286,10 @@ export default function PremiumLanding() {
       </header>
 
       <section className="pl-cinema-hero" id="top" data-scene="life">
+        <div className="pl-hero-mobile">
+          <img src={heroMontage[0].src} alt={heroMontage[0].alt} />
+          <p className="pl-hero-mobile-caption">For coaches, churches, schools, and creators</p>
+        </div>
         <div className="pl-hero-grid" aria-hidden="true">
           {heroMontage.map((frame) => (
             <img key={frame.src} src={frame.src} alt="" />
@@ -288,9 +306,14 @@ export default function PremiumLanding() {
           <p>
             You started it to coach, serve, build, teach, create, lead, and make room for a life beyond the work.
           </p>
-          <a href="#communication" className="pl-cta">
-            Begin the story
-          </a>
+          <div className="pl-hero-actions">
+            <a href="#communication" className="pl-cta">
+              Begin the story
+            </a>
+            <Link href="/assessment" className="pl-cta-solid">
+              Take the Operational MRI&trade;
+            </Link>
+          </div>
         </motion.div>
       </section>
 
@@ -331,7 +354,7 @@ export default function PremiumLanding() {
         </div>
         <RealityReveal
           before="https://images.unsplash.com/photo-1573497019940-88c6a86b0a2f?auto=format&fit=crop&w=1800&q=84"
-          after="https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1800&q=84"
+          after="https://images.unsplash.com/photo-1593113598148-3655c4d566bb?auto=format&fit=crop&w=1800&q=84"
         />
       </section>
 
@@ -358,11 +381,17 @@ export default function PremiumLanding() {
               <p key={line}>{line}</p>
             ))}
           </div>
-          <Link href="/assessment" className="pl-cta pl-cta-dark">
+          <Link href="/assessment" className="pl-cta-solid pl-cta-solid-lg">
             Imagine The Possibilities&trade;
           </Link>
         </div>
       </section>
+
+      <div className={`pl-sticky-cta${showStickyCta ? ' is-visible' : ''}`} aria-hidden={!showStickyCta}>
+        <Link href="/assessment" className="pl-cta-solid pl-cta-solid-block">
+          Take the Operational MRI&trade;
+        </Link>
+      </div>
 
       <footer className="pl-footer">
         <p className="pl-footer-title">Efficiency Architects</p>
@@ -411,15 +440,15 @@ function RealityPossibilityScene({
         <p className="pl-kicker">{scene.eyebrow}</p>
         <div className="pl-reality-columns">
           <article>
-            <span>{scene.currentLabel}</span>
+            <span className="pl-column-label">{scene.currentLabel}</span>
             <h2>{scene.current}</h2>
           </article>
           <article>
-            <span>{scene.possibleLabel}</span>
+            <span className="pl-column-label">{scene.possibleLabel}</span>
             <h2>{scene.possible}</h2>
           </article>
         </div>
-        <p className="pl-micro-story">{scene.story}</p>
+        <p className="pl-micro-story pl-micro-story-mobile">{scene.story}</p>
       </div>
     </section>
   );
