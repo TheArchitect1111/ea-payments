@@ -6,7 +6,7 @@ import {
   recordConnectEngagement,
   type CreateRelationshipInput,
 } from '@/lib/connect-store';
-import { sendConnectWelcomeEmail, sendInternalNotification } from '@/lib/email';
+import { sendConnectSms, sendConnectWelcomeEmail, sendInternalNotification } from '@/lib/email';
 
 export const dynamic = 'force-dynamic';
 
@@ -75,6 +75,14 @@ export async function POST(request: NextRequest) {
       guideUrl,
       journeyUrl,
     });
+    const smsDelivery = relationship.phone
+      ? await sendConnectSms({
+          phone: relationship.phone,
+          organizationName: org.name,
+          resourceTitle: org.offer.resourceTitle,
+          journeyUrl,
+        })
+      : { ok: false, error: 'No phone number provided.' };
     const staffNotice = await sendInternalNotification({
       subject: `New ${org.name} Connect - ${relationship.name}`,
       title: 'New Connect Relationship',
@@ -92,6 +100,23 @@ export async function POST(request: NextRequest) {
         relationship.conversationNotes ?? 'No notes captured.',
       ].join('\n'),
     });
+    const automationWebhook = process.env.CONNECT_N8N_WEBHOOK_URL || process.env.N8N_WEBHOOK_URL;
+    const automationDelivery = automationWebhook
+      ? await fetch(automationWebhook, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: 'connect.relationship.created',
+            org,
+            relationship,
+            resources,
+            guideUrl,
+            journeyUrl,
+          }),
+        })
+          .then(async (response) => ({ ok: response.ok, status: response.status, error: response.ok ? undefined : await response.text().catch(() => 'Webhook failed.') }))
+          .catch((error) => ({ ok: false, error: error instanceof Error ? error.message : 'Webhook failed.' }))
+      : { ok: false, error: 'Automation webhook not configured.' };
 
     return NextResponse.json({
       relationship,
@@ -100,7 +125,9 @@ export async function POST(request: NextRequest) {
       nextSequence: org.sequence,
       delivery: {
         email: emailDelivery,
+        sms: smsDelivery,
         staffNotice,
+        automation: automationDelivery,
       },
       message: 'Relationship activated.',
     });

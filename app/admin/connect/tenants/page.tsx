@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { cookies } from 'next/headers';
 import { redirectToAdminLogin } from '@/lib/admin-redirect';
 import { EA_ADMIN_COOKIE, verifyAdminSession } from '@/lib/ea-admin-auth';
-import { listConnectOrgs } from '@/lib/connect-store';
+import { getConnectSystemStatus, listConnectOrgs } from '@/lib/connect-store';
 import ConnectTenantCreator from './ConnectTenantCreator';
 
 export const dynamic = 'force-dynamic';
@@ -16,7 +16,10 @@ export default async function ConnectTenantsPage() {
   const session = await verifyAdminSession(cookieStore.get(EA_ADMIN_COOKIE)?.value);
   if (!session) redirectToAdminLogin('/admin/connect/tenants');
 
-  const tenants = await listConnectOrgs();
+  const [tenants, systemStatus] = await Promise.all([
+    listConnectOrgs(),
+    getConnectSystemStatus(),
+  ]);
 
   return (
     <main className="min-h-screen px-5 py-8 sm:px-8" style={{ backgroundColor: PAPER, color: INK }}>
@@ -42,7 +45,7 @@ export default async function ConnectTenantsPage() {
         </header>
 
         <section className="mt-6">
-          <ConnectTenantCreator initialTenants={tenants} />
+          <ConnectTenantCreator initialTenants={tenants} initialSystemStatus={systemStatus} />
         </section>
       </div>
     </main>

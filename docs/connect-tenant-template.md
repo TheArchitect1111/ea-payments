@@ -56,11 +56,15 @@ Connect is now structured as a reusable tenant platform. A new tenant should be 
 
 Before calling a duplicated tenant complete, verify:
 
-- `CONNECT_TENANTS_TABLE_ID` or `AIRTABLE_CONNECT_TENANTS_TABLE_ID` is set in Vercel Production.
+- Airtable API credentials are set in Vercel Production.
+- `/admin/connect/tenants` shows Tenant Storage as ready, or the `Setup Storage` button has created/repaired the tables.
 - The Connect Tenants Airtable table has fields: `Slug`, `Name`, `Status`, `Config JSON`, `Created At`, `Updated At`.
+- The Connect Relationships Airtable table has fields for name, email, phone, event, rep, lead type, routed team, score, and recommended action.
 - Capture form submits and creates a relationship.
 - Welcome email sends through Resend.
 - Staff/admin notification is delivered.
+- SMS sends through Twilio when a phone number is captured and Twilio env vars are configured.
+- n8n automation webhook receives the `connect.relationship.created` event when configured.
 - Resource tracking link redirects correctly.
 - `/connect/{slug}/guide` loads with tenant copy.
 - `/connect/{slug}/journey` loads with tenant copy.
@@ -76,7 +80,7 @@ These are the remaining pieces for a full commercial template:
 - Persistent tenant CRUD instead of code-only tenant configs.
 - Resource upload/storage with file attachments.
 - Campaign builder UI and QR download pack.
-- n8n/Twilio sequence execution for delayed SMS and follow-up.
+- Delayed n8n/Twilio sequence scheduling beyond the immediate capture event.
 - OpenAI living relationship profile after each engagement event.
 - Staff task board for follow-up completion.
 - Consent/preferences language and unsubscribe handling per tenant.
@@ -106,4 +110,11 @@ Use `/admin/connect/tenants` to create a tenant from the browser. If Airtable te
 - `/connect/{slug}/guide`
 - `/connect/{slug}/journey`
 
-If Airtable tenant storage is not configured, the creator still works for local/dev testing, but the new tenant is temporary and may disappear after a serverless restart.
+If Airtable credentials are not configured, the creator still works for local/dev testing, but the new tenant is temporary and may disappear after a serverless restart.
+
+The admin page includes a `Setup Storage` button. It creates or repairs:
+
+- `Connect Tenants`
+- `Connect Relationships`
+
+The table names can be overridden with `CONNECT_TENANTS_TABLE`, `CONNECT_TENANTS_TABLE_ID`, `AIRTABLE_CONNECT_TENANTS_TABLE_ID`, `CONNECT_RELATIONSHIPS_TABLE`, `CONNECT_RELATIONSHIPS_TABLE_ID`, or `AIRTABLE_CONNECT_RELATIONSHIPS_TABLE_ID`.

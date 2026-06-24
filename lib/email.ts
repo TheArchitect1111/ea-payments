@@ -996,6 +996,48 @@ export async function sendConnectWelcomeEmail(data: {
   );
 }
 
+export async function sendConnectSms(data: {
+  phone: string;
+  organizationName: string;
+  resourceTitle: string;
+  journeyUrl: string;
+}): Promise<{ ok: boolean; error?: string }> {
+  const accountSid = process.env.TWILIO_ACCOUNT_SID?.trim();
+  const authToken = process.env.TWILIO_AUTH_TOKEN?.trim();
+  const from = process.env.TWILIO_FROM_NUMBER?.trim() || process.env.TWILIO_PHONE_NUMBER?.trim();
+
+  if (!accountSid || !authToken || !from) {
+    return { ok: false, error: 'Twilio not configured.' };
+  }
+
+  const body = `Thanks for connecting with ${data.organizationName}. Your ${data.resourceTitle} is ready: ${data.journeyUrl}`;
+  const params = new URLSearchParams({
+    To: data.phone,
+    From: from,
+    Body: body,
+  });
+
+  try {
+    const response = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Basic ${Buffer.from(`${accountSid}:${authToken}`).toString('base64')}`,
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: params,
+    });
+
+    if (!response.ok) {
+      const detail = await response.text().catch(() => '');
+      return { ok: false, error: `Twilio send failed (${response.status}). ${detail}`.trim() };
+    }
+
+    return { ok: true };
+  } catch (error) {
+    return { ok: false, error: error instanceof Error ? error.message : 'Unknown Twilio error.' };
+  }
+}
+
 export async function sendRevealEmail(data: {
   email: string;
   firstName: string;

@@ -575,6 +575,20 @@ const seededRelationships: ConnectRelationship[] = [
 
 const localRelationships: ConnectRelationship[] = [...seededRelationships];
 const localTenantOverrides: ConnectOrgConfig[] = [];
+const CONNECT_TENANTS_TABLE = (
+  process.env.CONNECT_TENANTS_TABLE_ID ||
+  process.env.AIRTABLE_CONNECT_TENANTS_TABLE_ID ||
+  process.env.CONNECT_TENANTS_TABLE ||
+  'Connect Tenants'
+).trim();
+const CONNECT_TENANTS_TABLE_NAME = process.env.CONNECT_TENANTS_TABLE || 'Connect Tenants';
+const CONNECT_RELATIONSHIPS_TABLE = (
+  process.env.CONNECT_RELATIONSHIPS_TABLE_ID ||
+  process.env.AIRTABLE_CONNECT_RELATIONSHIPS_TABLE_ID ||
+  process.env.CONNECT_RELATIONSHIPS_TABLE ||
+  'Connect Relationships'
+).trim();
+const CONNECT_RELATIONSHIPS_TABLE_NAME = process.env.CONNECT_RELATIONSHIPS_TABLE || 'Connect Relationships';
 
 function sanitizeConnectSlug(value: string): string {
   return value
@@ -588,9 +602,8 @@ function sanitizeConnectSlug(value: string): string {
 function connectTenantAirtableConfig() {
   const apiKey = process.env.AIRTABLE_API_KEY || process.env.AIRTABLE_TOKEN;
   const baseId = process.env.AIRTABLE_BASE_ID || process.env.AIRTABLE_PAYMENTS_BASE_ID || 'appv0YoLIMY45fmDA';
-  const tableId = process.env.CONNECT_TENANTS_TABLE_ID || process.env.AIRTABLE_CONNECT_TENANTS_TABLE_ID;
-  if (!apiKey || !baseId || !tableId) return null;
-  return { apiKey, baseId, tableId };
+  if (!apiKey || !baseId || !CONNECT_TENANTS_TABLE) return null;
+  return { apiKey, baseId, tableRef: CONNECT_TENANTS_TABLE };
 }
 
 function orgFromAirtableRecord(record: { id: string; fields?: Record<string, unknown> }): ConnectOrgConfig | null {
@@ -608,7 +621,7 @@ async function listAirtableTenants(): Promise<ConnectOrgConfig[]> {
   const config = connectTenantAirtableConfig();
   if (!config) return [];
 
-  const response = await fetch(`https://api.airtable.com/v0/${config.baseId}/${config.tableId}?pageSize=100`, {
+  const response = await fetch(`https://api.airtable.com/v0/${config.baseId}/${encodeURIComponent(config.tableRef)}?pageSize=100`, {
     headers: { Authorization: `Bearer ${config.apiKey}` },
     cache: 'no-store',
   });
@@ -622,6 +635,197 @@ async function listAirtableTenants(): Promise<ConnectOrgConfig[]> {
   return (data.records ?? [])
     .map(orgFromAirtableRecord)
     .filter((tenant): tenant is ConnectOrgConfig => Boolean(tenant));
+}
+
+type AirtableMetaField = {
+  id?: string;
+  name: string;
+  type: string;
+};
+
+type AirtableMetaTable = {
+  id: string;
+  name: string;
+  fields?: AirtableMetaField[];
+};
+
+async function fetchAirtableTables(apiKey: string, baseId: string): Promise<AirtableMetaTable[]> {
+  const response = await fetch(`https://api.airtable.com/v0/meta/bases/${baseId}/tables`, {
+    headers: { Authorization: `Bearer ${apiKey}` },
+    cache: 'no-store',
+  });
+  if (!response.ok) {
+    throw new Error(`Airtable metadata read failed (${response.status}).`);
+  }
+  const data = await response.json() as { tables?: AirtableMetaTable[] };
+  return data.tables ?? [];
+}
+
+async function createAirtableField(apiKey: string, baseId: string, tableId: string, name: string, type: string) {
+  const response = await fetch(`https://api.airtable.com/v0/meta/bases/${baseId}/tables/${tableId}/fields`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ name, type }),
+  });
+  if (!response.ok) {
+    const detail = await response.text().catch(() => '');
+    throw new Error(`Airtable field setup failed for ${name} (${response.status}). ${detail}`.trim());
+  }
+}
+
+export async function ensureConnectTenantStorage() {
+  const apiKey = process.env.AIRTABLE_API_KEY || process.env.AIRTABLE_TOKEN;
+  const baseId = process.env.AIRTABLE_BASE_ID || process.env.AIRTABLE_PAYMENTS_BASE_ID || 'appv0YoLIMY45fmDA';
+  if (!apiKey) {
+    return { ok: false, error: 'AIRTABLE_API_KEY or AIRTABLE_TOKEN is not configured.' };
+  }
+  const airtableApiKey = apiKey;
+
+  const tableName = CONNECT_TENANTS_TABLE_NAME;
+  const tables = await fetchAirtableTables(airtableApiKey, baseId);
+  async function ensureTable(tableNameToEnsure: string, tableRef: string, fields: Array<[string, string]>) {
+    let table = tables.find((item) => item.name === tableNameToEnsure || item.id === tableRef);
+    let tableCreated = false;
+
+    if (!table) {
+      const response = await fetch(`https://api.airtable.com/v0/meta/bases/${baseId}/tables`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${airtableApiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: tableNameToEnsure,
+          fields: fields.map(([name, type]) => ({ name, type })),
+        }),
+      });
+      if (!response.ok) {
+        const detail = await response.text().catch(() => '');
+        throw new Error(`Airtable table setup failed for ${tableNameToEnsure} (${response.status}). ${detail}`.trim());
+      }
+      table = await response.json() as AirtableMetaTable;
+      tableCreated = true;
+    }
+
+    if (!table) throw new Error(`Airtable table setup failed for ${tableNameToEnsure}.`);
+
+    const ensuredTable = table;
+    const fieldNames = new Set((ensuredTable.fields ?? []).map((field) => field.name));
+    const fieldsCreated: string[] = [];
+
+    for (const [name, type] of fields) {
+      if (!fieldNames.has(name)) {
+        await createAirtableField(airtableApiKey, baseId, ensuredTable.id, name, type);
+        fieldsCreated.push(name);
+      }
+    }
+
+    return {
+      tableId: ensuredTable.id,
+      tableName: ensuredTable.name,
+      tableRef,
+      tableCreated,
+      fieldsCreated,
+    };
+  }
+
+  const tenantFields: Array<[string, string]> = [
+    ['Slug', 'singleLineText'],
+    ['Name', 'singleLineText'],
+    ['Status', 'singleLineText'],
+    ['Config JSON', 'multilineText'],
+    ['Created At', 'singleLineText'],
+    ['Updated At', 'singleLineText'],
+  ];
+  const relationshipFields: Array<[string, string]> = [
+    ['Name', 'singleLineText'],
+    ['Email', 'email'],
+    ['Phone', 'phoneNumber'],
+    ['Organization', 'singleLineText'],
+    ['Role', 'singleLineText'],
+    ['Source', 'singleLineText'],
+    ['Event', 'singleLineText'],
+    ['Date Met', 'singleLineText'],
+    ['Representative', 'singleLineText'],
+    ['Notes', 'multilineText'],
+    ['Tags', 'multilineText'],
+    ['Status', 'singleLineText'],
+    ['Lead Type', 'singleLineText'],
+    ['Routed Team', 'singleLineText'],
+    ['Opportunity Score', 'singleLineText'],
+    ['Recommended Action', 'multilineText'],
+  ];
+
+  const tenantTable = await ensureTable(tableName, CONNECT_TENANTS_TABLE, tenantFields);
+  const relationshipTable = await ensureTable(CONNECT_RELATIONSHIPS_TABLE_NAME, CONNECT_RELATIONSHIPS_TABLE, relationshipFields);
+
+  return {
+    ok: true,
+    baseId,
+    tenantTable,
+    relationshipTable,
+  };
+}
+
+export async function getConnectSystemStatus() {
+  const tenantConfig = connectTenantAirtableConfig();
+  let tenantStorage: {
+    ok: boolean;
+    label: string;
+    detail: string;
+  };
+
+  if (!tenantConfig) {
+    tenantStorage = {
+      ok: false,
+      label: 'Tenant Storage',
+      detail: 'Airtable API key is missing. Tenant Creator will use temporary memory storage.',
+    };
+  } else {
+    try {
+      await listAirtableTenants();
+      tenantStorage = {
+        ok: true,
+        label: 'Tenant Storage',
+        detail: `Airtable tenant table is reachable: ${tenantConfig.tableRef}.`,
+      };
+    } catch (error) {
+      tenantStorage = {
+        ok: false,
+        label: 'Tenant Storage',
+        detail: error instanceof Error ? error.message : 'Airtable tenant table is not reachable.',
+      };
+    }
+  }
+
+  const relationshipStorage = process.env.AIRTABLE_API_KEY || process.env.AIRTABLE_TOKEN
+    ? `Airtable relationship table is configured by default: ${CONNECT_RELATIONSHIPS_TABLE}.`
+    : 'Airtable API key is missing; relationships will not persist to Airtable.';
+  const resendOk = Boolean(process.env.RESEND_API_KEY?.trim() && process.env.RESEND_FROM_EMAIL?.trim());
+  const twilioOk = Boolean(
+    process.env.TWILIO_ACCOUNT_SID?.trim() &&
+    process.env.TWILIO_AUTH_TOKEN?.trim() &&
+    (process.env.TWILIO_FROM_NUMBER?.trim() || process.env.TWILIO_PHONE_NUMBER?.trim())
+  );
+  const n8nOk = Boolean(process.env.N8N_WEBHOOK_URL?.trim() || process.env.CONNECT_N8N_WEBHOOK_URL?.trim());
+
+  const checks = [
+    tenantStorage,
+    { ok: Boolean(process.env.AIRTABLE_API_KEY || process.env.AIRTABLE_TOKEN), label: 'Relationship Storage', detail: relationshipStorage },
+    { ok: resendOk, label: 'Resend Email', detail: resendOk ? 'RESEND_API_KEY and RESEND_FROM_EMAIL are configured.' : 'Set RESEND_API_KEY and RESEND_FROM_EMAIL.' },
+    { ok: twilioOk, label: 'Twilio SMS', detail: twilioOk ? 'Twilio credentials and sender number are configured.' : 'Set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, and TWILIO_FROM_NUMBER.' },
+    { ok: n8nOk, label: 'Automation Webhook', detail: n8nOk ? 'n8n webhook is configured.' : 'Delayed nurture automation webhook is not configured yet.' },
+  ];
+
+  const readyCount = checks.filter((check) => check.ok).length;
+  return {
+    ready: checks.every((check) => check.ok),
+    score: Math.round((readyCount / checks.length) * 100),
+    checks,
+  };
 }
 
 function buildRelationship(
@@ -737,8 +941,8 @@ function generateOpportunityIntelligence(
 
 function airtableConfig() {
   const apiKey = process.env.AIRTABLE_API_KEY || process.env.AIRTABLE_TOKEN;
-  const baseId = process.env.AIRTABLE_BASE_ID;
-  const tableId = process.env.CONNECT_RELATIONSHIPS_TABLE_ID || process.env.AIRTABLE_CONNECT_RELATIONSHIPS_TABLE_ID;
+  const baseId = process.env.AIRTABLE_BASE_ID || process.env.AIRTABLE_PAYMENTS_BASE_ID || 'appv0YoLIMY45fmDA';
+  const tableId = CONNECT_RELATIONSHIPS_TABLE;
   if (!apiKey || !baseId || !tableId) return null;
   return { apiKey, baseId, tableId };
 }
@@ -747,7 +951,7 @@ async function postRelationshipToAirtable(relationship: ConnectRelationship) {
   const config = airtableConfig();
   if (!config) return;
 
-  await fetch(`https://api.airtable.com/v0/${config.baseId}/${config.tableId}`, {
+  await fetch(`https://api.airtable.com/v0/${config.baseId}/${encodeURIComponent(config.tableId)}`, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${config.apiKey}`,
@@ -924,12 +1128,12 @@ export async function createConnectTenant(input: {
       tenant,
       persisted: false,
       storage: 'memory',
-      warning: 'CONNECT_TENANTS_TABLE_ID is not configured, so this tenant is available only until the serverless instance restarts.',
+      warning: 'Airtable tenant storage is not configured, so this tenant is available only until the serverless instance restarts.',
     };
   }
 
   const now = new Date().toISOString();
-  const response = await fetch(`https://api.airtable.com/v0/${config.baseId}/${config.tableId}`, {
+  const response = await fetch(`https://api.airtable.com/v0/${config.baseId}/${encodeURIComponent(config.tableRef)}`, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${config.apiKey}`,
@@ -954,7 +1158,7 @@ export async function createConnectTenant(input: {
   if (!response.ok) {
     const error = await response.text();
     console.error('[connect] tenant Airtable write failed', response.status, error);
-    throw new Error('Unable to save tenant to Airtable. Check CONNECT_TENANTS_TABLE_ID and Airtable field names.');
+    throw new Error('Unable to save tenant to Airtable. Run Connect storage setup and check Airtable permissions.');
   }
 
   localTenantOverrides.unshift(tenant);
