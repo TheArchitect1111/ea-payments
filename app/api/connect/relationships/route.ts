@@ -6,6 +6,7 @@ import {
   recordConnectEngagement,
   type CreateRelationshipInput,
 } from '@/lib/connect-store';
+import { sendConnectWelcomeEmail, sendInternalNotification } from '@/lib/email';
 
 export const dynamic = 'force-dynamic';
 
@@ -60,12 +61,47 @@ export async function POST(request: NextRequest) {
       .filter((step) => step.delayDays === 0)
       .map((step) => org.resources.find((resource) => resource.id === step.resourceId))
       .filter(Boolean);
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || request.nextUrl.origin;
+    const guideResource = resources[0];
+    const guideUrl = guideResource
+      ? `${baseUrl}/api/connect/track?org=${encodeURIComponent(orgSlug)}&relationship=${encodeURIComponent(relationship.id)}&campaign=${encodeURIComponent(input.campaignId ?? '')}&resource=${encodeURIComponent(guideResource.id)}&type=link_click&to=${encodeURIComponent(guideResource.url)}`
+      : `${baseUrl}/connect/${orgSlug}/journey`;
+    const journeyUrl = `${baseUrl}/connect/${orgSlug}/journey`;
+    const emailDelivery = await sendConnectWelcomeEmail({
+      email: relationship.email,
+      name: relationship.name,
+      organizationName: org.name,
+      resourceTitle: org.offer.resourceTitle,
+      guideUrl,
+      journeyUrl,
+    });
+    const staffNotice = await sendInternalNotification({
+      subject: `New ${org.name} Connect - ${relationship.name}`,
+      title: 'New Connect Relationship',
+      body: [
+        `Name: ${relationship.name}`,
+        `Email: ${relationship.email}`,
+        `Phone: ${relationship.phone ?? 'Not provided'}`,
+        `Event: ${relationship.event ?? 'Not provided'}`,
+        `Representative: ${relationship.representative ?? 'Unassigned'}`,
+        `Lead Type: ${relationship.leadType}`,
+        `Routed Team: ${relationship.routedTeam}`,
+        `Opportunity Score: ${relationship.aiProfile.opportunityScore}`,
+        `Recommended Action: ${relationship.aiProfile.recommendedAction}`,
+        '',
+        relationship.conversationNotes ?? 'No notes captured.',
+      ].join('\n'),
+    });
 
     return NextResponse.json({
       relationship,
       resources,
       redirectDestination: org.redirectDestination,
       nextSequence: org.sequence,
+      delivery: {
+        email: emailDelivery,
+        staffNotice,
+      },
       message: 'Relationship activated.',
     });
   } catch (error) {

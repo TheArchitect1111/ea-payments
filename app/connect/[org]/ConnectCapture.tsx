@@ -7,6 +7,7 @@ import type { ConnectOrgConfig, ConnectResource, ConnectSequenceStep } from '@/l
 type Result = {
   relationship: {
     id: string;
+    orgSlug: string;
     aiProfile: {
       summary: string;
       interestLevel: string;
@@ -105,7 +106,11 @@ export default function ConnectCapture({ org, event, representative, source = 'Q
 
           <div className="connect-resource-strip" aria-label="Resources delivered">
             {result.resources.map((resource) => (
-              <a key={resource.id} href={resource.url} className="connect-resource">
+              <a
+                key={resource.id}
+                href={`/api/connect/track?org=${encodeURIComponent(result.relationship.orgSlug)}&relationship=${encodeURIComponent(result.relationship.id)}&campaign=${encodeURIComponent(campaignId ?? '')}&resource=${encodeURIComponent(resource.id)}&type=link_click&to=${encodeURIComponent(resource.url)}`}
+                className="connect-resource"
+              >
                 <span>{resource.type}</span>
                 <strong>{resource.title}</strong>
                 <small>{resource.description}</small>

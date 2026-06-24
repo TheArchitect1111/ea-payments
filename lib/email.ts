@@ -963,6 +963,39 @@ export async function sendInternalNotification(data: {
   return resendEmail(to, data.subject, baseEmailShell({ title: data.title, eyebrow: 'Internal Notice', bodyHtml }));
 }
 
+export async function sendConnectWelcomeEmail(data: {
+  email: string;
+  name: string;
+  organizationName: string;
+  resourceTitle: string;
+  guideUrl: string;
+  journeyUrl: string;
+}): Promise<{ ok: boolean; error?: string }> {
+  const firstName = data.name.split(' ')[0] || data.name;
+  const bodyHtml = `
+    <p style="margin:0 0 16px;font-size:15px;color:#1A1A2E;line-height:1.7;">Hi ${escHtml(firstName)},</p>
+    <p style="margin:0 0 18px;font-size:15px;color:#1A1A2E;line-height:1.7;">Thanks for connecting with ${escHtml(data.organizationName)}. Here is the resource we promised after your conversation.</p>
+    <div style="background:#101820;color:#fff;border-left:5px solid #D91F2A;padding:20px;margin:22px 0;">
+      <p style="margin:0 0 6px;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#ff4b4b;">Instant Resource</p>
+      <p style="margin:0;font-size:22px;font-weight:700;">${escHtml(data.resourceTitle)}</p>
+      <p style="margin:10px 0 0;font-size:13px;line-height:1.6;color:rgba(255,255,255,.76);">Faith. Family. Basketball. Future. Your journey starts with clarity.</p>
+    </div>
+    <p style="margin:0 0 16px;font-size:14px;color:#555;line-height:1.7;">We will use this connection to send useful next steps, not noise. If this was not for you, you can ignore this email.</p>
+    <p style="margin:0;font-size:14px;color:#555;line-height:1.7;">Ready for the next step? <a href="${escHtml(data.journeyUrl)}" style="color:#101820;font-weight:700;">Open Your Journey Starts Here</a>.</p>`;
+
+  return resendEmail(
+    data.email,
+    `Welcome to Canadian Prospects - ${data.resourceTitle}`,
+    baseEmailShell({
+      title: 'Welcome To Canadian Prospects',
+      eyebrow: 'Connect',
+      bodyHtml,
+      ctaLabel: 'View Guide',
+      ctaUrl: data.guideUrl,
+    }),
+  );
+}
+
 export async function sendRevealEmail(data: {
   email: string;
   firstName: string;
