@@ -38,9 +38,7 @@ export default async function SimplifiClientPage({
   const firstName = client.clientName.split(' ')[0] ?? client.clientName;
 
   return (
-    <div className="ep-page">
-      <PortalShell slug={slug} active="simplifi" firstName={firstName} />
-
+    <PortalShell slug={slug} active="simplifi" firstName={firstName}>
       <main className="ep-main">
         <div className="ep-welcome">
           <p className="ep-welcome-label">Simplifi™</p>
@@ -120,6 +118,6 @@ export default async function SimplifiClientPage({
           </p>
         </div>
       </main>
-    </div>
+    </PortalShell>
   );
 }

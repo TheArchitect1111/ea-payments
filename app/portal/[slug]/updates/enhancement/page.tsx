@@ -16,8 +16,7 @@ export default async function EnhancementRequestPage({ params }: { params: Promi
   if (session.slug !== slug) redirect(`/portal/${session.slug}/updates/enhancement`);
 
   return (
-    <div className="ep-page">
-      <PortalShell slug={slug} active="updates" />
+    <PortalShell slug={slug} active="updates">
       <main className="ep-main">
         <div className="ep-welcome">
           <p className="ep-welcome-label">Update Hub™</p>
@@ -31,6 +30,6 @@ export default async function EnhancementRequestPage({ params }: { params: Promi
           <EnhancementRequestForm slug={slug} />
         </div>
       </main>
-    </div>
+    </PortalShell>
   );
 }

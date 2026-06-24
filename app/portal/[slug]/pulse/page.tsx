@@ -51,9 +51,7 @@ export default async function PulsePage({
   const firstName = client.clientName.split(' ')[0] ?? client.clientName;
 
   return (
-    <div className="ep-page">
-      <PortalShell slug={slug} active="pulse" firstName={firstName} />
-
+    <PortalShell slug={slug} active="pulse" firstName={firstName}>
       <main className="ep-main">
         <div className="ep-welcome">
           <p className="ep-welcome-label">Pulse</p>
@@ -117,6 +115,6 @@ export default async function PulsePage({
           </ul>
         </div>
       </main>
-    </div>
+    </PortalShell>
   );
 }

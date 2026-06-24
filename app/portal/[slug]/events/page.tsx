@@ -35,7 +35,7 @@ export default async function EventsPage({ params }: { params: Promise<{ slug: s
   return (
     <PortalSubpage
       slug={slug}
-      active="home"
+      active="events"
       kicker="Events"
       title="Upcoming touchpoints"
       lede={`Workshops, reviews, and advisor sessions for ${client.organization || client.clientName}.`}

@@ -35,9 +35,7 @@ export default async function UpdatesPage({ params }: { params: Promise<{ slug: 
   const scheduled = requests.filter((r) => r.status === 'Scheduled').length;
 
   return (
-    <div className="ep-page">
-      <PortalShell slug={slug} active="updates" />
-
+    <PortalShell slug={slug} active="updates">
       <main className="ep-main">
         <div className="ep-welcome">
           <p className="ep-welcome-label">Update Hub™</p>
@@ -115,6 +113,6 @@ export default async function UpdatesPage({ params }: { params: Promise<{ slug: 
         </div>
         )}
       </main>
-    </div>
+    </PortalShell>
   );
 }

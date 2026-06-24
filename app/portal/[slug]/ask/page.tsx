@@ -21,7 +21,7 @@ export default async function AskAdvisorPage({ params }: { params: Promise<{ slu
   return (
     <PortalSubpage
       slug={slug}
-      active="home"
+      active="ask"
       kicker="Guide™"
       title="Ask your advisor"
       lede="Submit a question and our team will respond through your Update Hub activity feed."

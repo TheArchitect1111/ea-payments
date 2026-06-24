@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import Link from 'next/link';
-import { PortalShell } from '@/lib/chassis/PortalShell';
+import { PortalShell, type EAPortalTab } from '@/lib/chassis/PortalShell';
 import '../[slug]/ea-portal.css';
 
 export function PortalSubpage({
@@ -12,15 +12,14 @@ export function PortalSubpage({
   children,
 }: {
   slug: string;
-  active: 'home' | 'pulse' | 'simplifi' | 'amplifi' | 'updates';
+  active: EAPortalTab;
   kicker: string;
   title: string;
   lede: string;
   children: ReactNode;
 }) {
   return (
-    <div className="ep-page">
-      <PortalShell slug={slug} active={active} />
+    <PortalShell slug={slug} active={active} pageTitle={title}>
       <main className="ep-main">
         <div className="ep-welcome">
           <p className="ep-welcome-label">{kicker}</p>
@@ -32,6 +31,6 @@ export function PortalSubpage({
           <Link href={`/portal/${slug}`}>← Back to dashboard</Link>
         </p>
       </main>
-    </div>
+    </PortalShell>
   );
 }

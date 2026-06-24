@@ -39,7 +39,7 @@ export default async function LearningPage({ params }: { params: Promise<{ slug:
   return (
     <PortalSubpage
       slug={slug}
-      active="home"
+      active="learning"
       kicker="Training Hub™"
       title="Training & learning"
       lede="Guides, modules, and resources to support adoption — starting with the essentials below."
