@@ -56,8 +56,8 @@ export default async function AdminConnectPage() {
   const session = await verifyAdminSession(cookieStore.get(EA_ADMIN_COOKIE)?.value);
   if (!session) redirectToAdminLogin('/admin/connect');
 
-  const org = getConnectOrg('cpr');
-  const orgs = listConnectOrgs();
+  const org = await getConnectOrg('cpr');
+  const orgs = await listConnectOrgs();
   const dashboard = await getConnectDashboard(org.slug);
   const readiness = getConnectReadinessAudit();
   const productReadiness = Math.round(readiness.reduce((sum, item) => sum + item.score, 0) / readiness.length);
@@ -78,6 +78,9 @@ export default async function AdminConnectPage() {
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
+            <Link href="/admin/connect/tenants" className="inline-flex min-h-11 items-center justify-center bg-neutral-950 px-5 text-xs font-black uppercase tracking-[0.14em] text-white">
+              Tenant Creator
+            </Link>
             <Link href={`/connect/${org.slug}?event=Charlotte%20Tournament&rep=Coach%20Mike&campaign=coach-mike-charlotte`} className="inline-flex min-h-11 items-center justify-center bg-neutral-950 px-5 text-xs font-black uppercase tracking-[0.14em] text-white">
               Open Capture
             </Link>

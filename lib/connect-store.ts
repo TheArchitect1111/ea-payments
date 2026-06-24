@@ -574,13 +574,63 @@ const seededRelationships: ConnectRelationship[] = [
 ];
 
 const localRelationships: ConnectRelationship[] = [...seededRelationships];
+const localTenantOverrides: ConnectOrgConfig[] = [];
+
+function sanitizeConnectSlug(value: string): string {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9-]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 60);
+}
+
+function connectTenantAirtableConfig() {
+  const apiKey = process.env.AIRTABLE_API_KEY || process.env.AIRTABLE_TOKEN;
+  const baseId = process.env.AIRTABLE_BASE_ID || process.env.AIRTABLE_PAYMENTS_BASE_ID || 'appv0YoLIMY45fmDA';
+  const tableId = process.env.CONNECT_TENANTS_TABLE_ID || process.env.AIRTABLE_CONNECT_TENANTS_TABLE_ID;
+  if (!apiKey || !baseId || !tableId) return null;
+  return { apiKey, baseId, tableId };
+}
+
+function orgFromAirtableRecord(record: { id: string; fields?: Record<string, unknown> }): ConnectOrgConfig | null {
+  const rawConfig = record.fields?.['Config JSON'] ?? record.fields?.Config;
+  if (typeof rawConfig !== 'string') return null;
+  try {
+    const parsed = JSON.parse(rawConfig) as ConnectOrgConfig;
+    return parsed.slug && parsed.name ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+async function listAirtableTenants(): Promise<ConnectOrgConfig[]> {
+  const config = connectTenantAirtableConfig();
+  if (!config) return [];
+
+  const response = await fetch(`https://api.airtable.com/v0/${config.baseId}/${config.tableId}?pageSize=100`, {
+    headers: { Authorization: `Bearer ${config.apiKey}` },
+    cache: 'no-store',
+  });
+
+  if (!response.ok) {
+    console.error('[connect] tenant Airtable read failed', response.status, await response.text());
+    return [];
+  }
+
+  const data = await response.json() as { records?: Array<{ id: string; fields?: Record<string, unknown> }> };
+  return (data.records ?? [])
+    .map(orgFromAirtableRecord)
+    .filter((tenant): tenant is ConnectOrgConfig => Boolean(tenant));
+}
 
 function buildRelationship(
   input: CreateRelationshipInput,
   createdAt = new Date().toISOString(),
   engagementOverrides: Partial<ConnectRelationship['engagement']> = {},
+  orgOverride?: ConnectOrgConfig,
 ): ConnectRelationship {
-  const org = getConnectOrg(input.orgSlug);
+  const org = orgOverride ?? orgs.find((item) => item.slug === input.orgSlug) ?? orgs[1];
   const tags = Array.from(new Set([...(input.tags ?? []), ...(input.leadType ? [input.leadType] : [])].filter(Boolean)));
   const engagement = {
     scans: 1,
@@ -730,10 +780,6 @@ async function postRelationshipToAirtable(relationship: ConnectRelationship) {
   });
 }
 
-export function getConnectOrg(slug: string): ConnectOrgConfig {
-  return orgs.find((org) => org.slug === slug) ?? orgs[1];
-}
-
 export function createConnectTenantTemplate(input: {
   slug: string;
   name: string;
@@ -744,7 +790,7 @@ export function createConnectTenantTemplate(input: {
   leadTypes?: string[];
   teams?: string[];
 }): ConnectOrgConfig {
-  const slug = input.slug.toLowerCase().replace(/[^a-z0-9-]+/g, '-');
+  const slug = sanitizeConnectSlug(input.slug) || 'connect-tenant';
   const resourceId = `${slug}-primary-resource`;
   return {
     slug,
@@ -815,12 +861,109 @@ export function createConnectTenantTemplate(input: {
   };
 }
 
-export function listConnectOrgs(): ConnectOrgConfig[] {
-  return orgs;
+export async function listConnectOrgs(): Promise<ConnectOrgConfig[]> {
+  const airtableTenants = await listAirtableTenants();
+  const bySlug = new Map<string, ConnectOrgConfig>();
+  [...orgs, ...localTenantOverrides, ...airtableTenants].forEach((org) => bySlug.set(org.slug, org));
+  return [...bySlug.values()];
+}
+
+export async function getConnectOrg(slug: string): Promise<ConnectOrgConfig> {
+  const normalized = sanitizeConnectSlug(slug);
+  const orgList = await listConnectOrgs();
+  return orgList.find((org) => org.slug === normalized) ?? orgs[1];
+}
+
+export async function createConnectTenant(input: {
+  slug: string;
+  name: string;
+  offerHeadline: string;
+  resourceTitle: string;
+  accent?: string;
+  notificationEmails?: string[];
+  leadTypes?: string[];
+  teams?: string[];
+  guideTitle?: string;
+  guideIntro?: string;
+  journeyTitle?: string;
+  journeyIntro?: string;
+}): Promise<{ tenant: ConnectOrgConfig; persisted: boolean; storage: 'airtable' | 'memory'; warning?: string }> {
+  const tenant = createConnectTenantTemplate({
+    slug: input.slug,
+    name: input.name,
+    offerHeadline: input.offerHeadline,
+    resourceTitle: input.resourceTitle,
+    accent: input.accent,
+    leadTypes: input.leadTypes,
+    teams: input.teams,
+  });
+
+  tenant.notificationEmails = input.notificationEmails?.length
+    ? input.notificationEmails
+    : tenant.notificationEmails;
+  tenant.guide = {
+    ...tenant.guide,
+    title: input.guideTitle || input.resourceTitle,
+    intro: input.guideIntro || tenant.guide.intro,
+  };
+  tenant.journey = {
+    ...tenant.journey,
+    title: input.journeyTitle || tenant.journey.title,
+    intro: input.journeyIntro || tenant.journey.intro,
+  };
+
+  const existing = await listConnectOrgs();
+  if (existing.some((org) => org.slug === tenant.slug)) {
+    throw new Error(`A Connect tenant already exists for slug "${tenant.slug}".`);
+  }
+
+  const config = connectTenantAirtableConfig();
+  if (!config) {
+    localTenantOverrides.unshift(tenant);
+    return {
+      tenant,
+      persisted: false,
+      storage: 'memory',
+      warning: 'CONNECT_TENANTS_TABLE_ID is not configured, so this tenant is available only until the serverless instance restarts.',
+    };
+  }
+
+  const now = new Date().toISOString();
+  const response = await fetch(`https://api.airtable.com/v0/${config.baseId}/${config.tableId}`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${config.apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      records: [
+        {
+          fields: {
+            Slug: tenant.slug,
+            Name: tenant.name,
+            Status: 'Active',
+            'Config JSON': JSON.stringify(tenant),
+            'Created At': now,
+            'Updated At': now,
+          },
+        },
+      ],
+    }),
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    console.error('[connect] tenant Airtable write failed', response.status, error);
+    throw new Error('Unable to save tenant to Airtable. Check CONNECT_TENANTS_TABLE_ID and Airtable field names.');
+  }
+
+  localTenantOverrides.unshift(tenant);
+  return { tenant, persisted: true, storage: 'airtable' };
 }
 
 export async function createConnectRelationship(input: CreateRelationshipInput): Promise<ConnectRelationship> {
-  const relationship = buildRelationship(input);
+  const org = await getConnectOrg(input.orgSlug);
+  const relationship = buildRelationship(input, new Date().toISOString(), {}, org);
   localRelationships.unshift(relationship);
   try {
     await postRelationshipToAirtable(relationship);

@@ -17,7 +17,7 @@ type Props = {
 export default async function ConnectPage({ params, searchParams }: Props) {
   const { org: orgSlug } = await params;
   const query = await searchParams;
-  const org = getConnectOrg(orgSlug);
+  const org = await getConnectOrg(orgSlug);
 
   return (
     <ConnectCapture

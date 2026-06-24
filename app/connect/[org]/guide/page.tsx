@@ -10,7 +10,7 @@ type Props = {
 
 export default async function ConnectGuidePage({ params }: Props) {
   const { org: orgSlug } = await params;
-  const org = getConnectOrg(orgSlug);
+  const org = await getConnectOrg(orgSlug);
 
   return (
     <main

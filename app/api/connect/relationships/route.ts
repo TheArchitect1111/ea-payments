@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
       campaignId: input.campaignId,
       type: 'contact_exchange',
     });
-    const org = getConnectOrg(orgSlug);
+    const org = await getConnectOrg(orgSlug);
     const resources = org.sequence
       .filter((step) => step.delayDays === 0)
       .map((step) => org.resources.find((resource) => resource.id === step.resourceId))

@@ -56,6 +56,8 @@ Connect is now structured as a reusable tenant platform. A new tenant should be 
 
 Before calling a duplicated tenant complete, verify:
 
+- `CONNECT_TENANTS_TABLE_ID` or `AIRTABLE_CONNECT_TENANTS_TABLE_ID` is set in Vercel Production.
+- The Connect Tenants Airtable table has fields: `Slug`, `Name`, `Status`, `Config JSON`, `Created At`, `Updated At`.
 - Capture form submits and creates a relationship.
 - Welcome email sends through Resend.
 - Staff/admin notification is delivered.
@@ -95,3 +97,13 @@ const coalition = createConnectTenantTemplate({
 ```
 
 Then add `coalition` to the `orgs` array and customize the generated guide, journey, resources, campaigns, and sequence as needed.
+
+## Admin Creator
+
+Use `/admin/connect/tenants` to create a tenant from the browser. If Airtable tenant storage is configured, the tenant is persisted and becomes available at:
+
+- `/connect/{slug}`
+- `/connect/{slug}/guide`
+- `/connect/{slug}/journey`
+
+If Airtable tenant storage is not configured, the creator still works for local/dev testing, but the new tenant is temporary and may disappear after a serverless restart.
