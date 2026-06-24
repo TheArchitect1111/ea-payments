@@ -4,6 +4,14 @@ export type ConnectResource = {
   type: 'PDF' | 'Guide' | 'Video' | 'Landing Page' | 'Application' | 'Calendar Link' | 'Portal' | 'Custom URL';
   url: string;
   description: string;
+  audience: string;
+  permission: 'public' | 'captured-leads' | 'internal';
+  analytics: {
+    opens: number;
+    clicks: number;
+    downloads: number;
+    videoViews: number;
+  };
 };
 
 export type ConnectSequenceStep = {
@@ -12,6 +20,55 @@ export type ConnectSequenceStep = {
   title: string;
   resourceId: string;
   channel: 'email' | 'sms' | 'both';
+};
+
+export type ConnectTemplate = {
+  name: string;
+  logo?: string;
+  domain: string;
+  font: string;
+  emailFrom: string;
+  emailTemplates: {
+    welcome: string;
+    followUp: string;
+    hotLeadAlert: string;
+  };
+  smsTemplates: {
+    welcome: string;
+    followUp: string;
+    hotLeadAlert: string;
+  };
+};
+
+export type ConnectCampaign = {
+  id: string;
+  name: string;
+  type: 'Campaign QR' | 'Event QR' | 'Staff QR' | 'Location QR' | 'NFC Destination';
+  destination: string;
+  event?: string;
+  representative?: string;
+  location?: string;
+  scans: number;
+  conversions: number;
+  resourceOpens: number;
+  applications: number;
+};
+
+export type ConnectAutomationRule = {
+  id: string;
+  name: string;
+  trigger: 'New connection' | 'Guide opened' | 'Video watched' | 'Application started' | 'Application completed' | 'High opportunity score' | 'No follow-up';
+  actions: Array<'Send email' | 'Send SMS' | 'Notify staff' | 'Add tag' | 'Start sequence' | 'Create task'>;
+  enabled: boolean;
+};
+
+export type ConnectReadinessItem = {
+  area: string;
+  score: number;
+  currentState: string;
+  gaps: string[];
+  recommendation: string;
+  priority: 'Low' | 'Medium' | 'High' | 'Critical';
 };
 
 export type ConnectOrgConfig = {
@@ -27,6 +84,16 @@ export type ConnectOrgConfig = {
   nfcDestination: string;
   redirectDestination: string;
   notificationEmails: string[];
+  offer: {
+    headline: string;
+    resourceTitle: string;
+    promise: string;
+  };
+  trustSignals: string[];
+  socialProof: string[];
+  template: ConnectTemplate;
+  campaigns: ConnectCampaign[];
+  automationRules: ConnectAutomationRule[];
   resources: ConnectResource[];
   sequence: ConnectSequenceStep[];
   leadTypes: string[];
@@ -63,6 +130,7 @@ export type ConnectRelationship = {
     applicationsStarted: number;
     applicationsCompleted: number;
     messages: number;
+    followUpsCompleted: number;
   };
   aiProfile: {
     summary: string;
@@ -90,6 +158,16 @@ export type CreateRelationshipInput = {
   conversationNotes?: string;
   leadType?: string;
   tags?: string[];
+  campaignId?: string;
+};
+
+export type ConnectEngagementEvent = {
+  relationshipId?: string;
+  orgSlug: string;
+  type: 'scan' | 'contact_exchange' | 'email_open' | 'link_click' | 'resource_download' | 'video_view' | 'portal_visit' | 'application_started' | 'application_completed' | 'message' | 'follow_up_completed';
+  campaignId?: string;
+  resourceId?: string;
+  createdAt: string;
 };
 
 const demoResources: ConnectResource[] = [
@@ -99,6 +177,9 @@ const demoResources: ConnectResource[] = [
     type: 'Guide',
     url: '/portal/demo-client/resources',
     description: 'A practical first resource for families exploring recruiting support.',
+    audience: 'Parents and athletes',
+    permission: 'captured-leads',
+    analytics: { opens: 37, clicks: 24, downloads: 18, videoViews: 0 },
   },
   {
     id: 'recruiting-faq',
@@ -106,6 +187,9 @@ const demoResources: ConnectResource[] = [
     type: 'PDF',
     url: '/scorecard',
     description: 'Answers to the questions families ask after an event conversation.',
+    audience: 'Parents',
+    permission: 'captured-leads',
+    analytics: { opens: 22, clicks: 16, downloads: 11, videoViews: 0 },
   },
   {
     id: 'evaluation-invite',
@@ -113,6 +197,9 @@ const demoResources: ConnectResource[] = [
     type: 'Application',
     url: '/assessment',
     description: 'A warm next step for qualified prospects.',
+    audience: 'High-intent prospects',
+    permission: 'captured-leads',
+    analytics: { opens: 14, clicks: 9, downloads: 0, videoViews: 0 },
   },
   {
     id: 'consultation',
@@ -120,6 +207,78 @@ const demoResources: ConnectResource[] = [
     type: 'Calendar Link',
     url: '/contact',
     description: 'Direct booking path for high-intent relationships.',
+    audience: 'Hot opportunities',
+    permission: 'public',
+    analytics: { opens: 10, clicks: 7, downloads: 0, videoViews: 0 },
+  },
+];
+
+const cprCampaigns: ConnectCampaign[] = [
+  {
+    id: 'coach-mike-charlotte',
+    name: 'Coach Mike QR',
+    type: 'Staff QR',
+    destination: '/connect/cpr?event=Charlotte%20Tournament&rep=Coach%20Mike&campaign=coach-mike-charlotte',
+    event: 'Charlotte Tournament',
+    representative: 'Coach Mike',
+    scans: 42,
+    conversions: 31,
+    resourceOpens: 24,
+    applications: 6,
+  },
+  {
+    id: 'toronto-showcase',
+    name: 'Toronto Showcase QR',
+    type: 'Event QR',
+    destination: '/connect/cpr?event=Toronto%20Showcase&campaign=toronto-showcase',
+    event: 'Toronto Showcase',
+    scans: 31,
+    conversions: 19,
+    resourceOpens: 15,
+    applications: 4,
+  },
+  {
+    id: 'summer-camp',
+    name: 'Summer Camp NFC',
+    type: 'NFC Destination',
+    destination: '/connect/cpr?event=Summer%20Camp&source=NFC&campaign=summer-camp',
+    event: 'Summer Camp',
+    location: 'Main entrance',
+    scans: 18,
+    conversions: 12,
+    resourceOpens: 9,
+    applications: 2,
+  },
+];
+
+const defaultAutomationRules: ConnectAutomationRule[] = [
+  {
+    id: 'new-connection',
+    name: 'Activate new connection',
+    trigger: 'New connection',
+    actions: ['Send email', 'Notify staff', 'Start sequence', 'Add tag'],
+    enabled: true,
+  },
+  {
+    id: 'guide-opened',
+    name: 'Guide opened follow-up',
+    trigger: 'Guide opened',
+    actions: ['Add tag', 'Create task'],
+    enabled: true,
+  },
+  {
+    id: 'hot-lead',
+    name: 'Hot opportunity alert',
+    trigger: 'High opportunity score',
+    actions: ['Notify staff', 'Send SMS', 'Create task'],
+    enabled: true,
+  },
+  {
+    id: 'forgotten-opportunity',
+    name: 'Forgotten opportunity rescue',
+    trigger: 'No follow-up',
+    actions: ['Notify staff', 'Create task'],
+    enabled: true,
   },
 ];
 
@@ -132,6 +291,31 @@ const orgs: ConnectOrgConfig[] = [
     nfcDestination: '/connect/cpr',
     redirectDestination: '/assessment',
     notificationEmails: ['freedom@efficiencyarchitects.online'],
+    offer: {
+      headline: 'Get the Parent Recruiting Guide',
+      resourceTitle: 'Parent Recruiting Guide',
+      promise: 'Understand the next step in the recruiting process before you leave the event.',
+    },
+    trustSignals: ['Used after tournaments, camps, showcases, and family recruiting conversations', 'No spam. The first resource arrives immediately.', 'Follow-up is routed to the right CPR team member.'],
+    socialProof: ['Charlotte Tournament: 42 connections', 'Toronto Showcase: 31 connections', 'Parent guide is the highest-opening CPR resource'],
+    template: {
+      name: 'CPR Connect',
+      domain: 'www.efficiencyarchitects.online',
+      font: 'Inter',
+      emailFrom: 'Canadian Prospects Recruitment <noreply@prospects.ca>',
+      emailTemplates: {
+        welcome: 'Thanks for connecting with CPR. Here is the Parent Recruiting Guide we promised.',
+        followUp: 'Checking in with the next recruiting resource for your family.',
+        hotLeadAlert: 'High-interest CPR connection needs follow-up within 48 hours.',
+      },
+      smsTemplates: {
+        welcome: 'Thanks for connecting with CPR. Your recruiting guide is on the way.',
+        followUp: 'CPR follow-up: here is the next recruiting resource.',
+        hotLeadAlert: 'Hot CPR lead needs attention.',
+      },
+    },
+    campaigns: cprCampaigns,
+    automationRules: defaultAutomationRules,
     resources: demoResources,
     sequence: [
       { id: 'now-guide', delayDays: 0, title: 'Send Parent Recruiting Guide', resourceId: 'parent-recruiting-guide', channel: 'email' },
@@ -150,6 +334,43 @@ const orgs: ConnectOrgConfig[] = [
     nfcDestination: '/connect/demo',
     redirectDestination: '/contact',
     notificationEmails: ['freedom@efficiencyarchitects.online'],
+    offer: {
+      headline: 'Get the Relationship Activation Blueprint',
+      resourceTitle: 'Relationship Activation Blueprint',
+      promise: 'Turn one conversation into a trackable relationship and guided next step.',
+    },
+    trustSignals: ['Built for events, churches, schools, nonprofits, creators, and teams', 'No digital business card experience', 'Every connection becomes measurable'],
+    socialProof: ['Demo organization: live capture, nurture, routing, and intelligence enabled'],
+    template: {
+      name: 'Connect Demo',
+      domain: 'www.efficiencyarchitects.online',
+      font: 'Inter',
+      emailFrom: 'Efficiency Architects <freedom@efficiencyarchitects.online>',
+      emailTemplates: {
+        welcome: 'Thanks for connecting. Here is the resource we promised.',
+        followUp: 'Here is the next resource in your sequence.',
+        hotLeadAlert: 'A high-interest relationship needs follow-up.',
+      },
+      smsTemplates: {
+        welcome: 'Thanks for connecting. Your resource is on the way.',
+        followUp: 'Here is the next resource from Connect.',
+        hotLeadAlert: 'Connect alert: high-interest relationship.',
+      },
+    },
+    campaigns: [
+      {
+        id: 'demo-event',
+        name: 'Demo Event QR',
+        type: 'Event QR',
+        destination: '/connect/demo?event=Demo%20Event&campaign=demo-event',
+        event: 'Demo Event',
+        scans: 12,
+        conversions: 8,
+        resourceOpens: 6,
+        applications: 1,
+      },
+    ],
+    automationRules: defaultAutomationRules,
     resources: demoResources,
     sequence: [
       { id: 'now-guide', delayDays: 0, title: 'Send Welcome Guide', resourceId: 'parent-recruiting-guide', channel: 'email' },
@@ -222,6 +443,7 @@ function buildRelationship(
     applicationsStarted: 0,
     applicationsCompleted: 0,
     messages: 0,
+    followUpsCompleted: 0,
     ...engagementOverrides,
   };
   const routedTeam = routeRelationship(input.leadType ?? org.leadTypes[0], org);
@@ -277,7 +499,8 @@ function generateOpportunityIntelligence(
     engagement.portalVisits * 9 +
     engagement.applicationsStarted * 18 +
     engagement.applicationsCompleted * 30 +
-    engagement.messages * 12;
+    engagement.messages * 12 +
+    engagement.followUpsCompleted * 5;
   const daysOld = Math.max(0, Math.floor((Date.now() - new Date(createdAt).getTime()) / 86400000));
   const notes = `${input.conversationNotes ?? ''} ${input.role ?? ''} ${input.leadType ?? ''}`.toLowerCase();
   const intentWords = ['interested', 'division', 'evaluate', 'consultation', 'urgent', 'ready', 'apply'];
@@ -293,6 +516,7 @@ function generateOpportunityIntelligence(
     engagement.clicks > 0 ? `Clicked ${engagement.clicks} link${engagement.clicks === 1 ? '' : 's'}` : '',
     engagement.portalVisits > 0 ? `Returned ${engagement.portalVisits} time${engagement.portalVisits === 1 ? '' : 's'}` : '',
     engagement.applicationsStarted > 0 ? 'Started an application' : '',
+    engagement.followUpsCompleted === 0 && daysOld >= 7 ? 'No follow-up completed' : '',
     daysOld >= 7 ? `Connected ${daysOld} days ago` : '',
     input.conversationNotes ? 'Conversation notes captured' : '',
   ].filter(Boolean);
@@ -380,6 +604,72 @@ export async function listConnectRelationships(orgSlug?: string): Promise<Connec
   return localRelationships.filter((relationship) => !orgSlug || relationship.orgSlug === orgSlug);
 }
 
+export function getConnectCampaignUrl(org: ConnectOrgConfig, campaign: ConnectCampaign): string {
+  const domain = org.template.domain.startsWith('http') ? org.template.domain : `https://${org.template.domain}`;
+  return `${domain}${campaign.destination}`;
+}
+
+export function getConnectReadinessAudit(): ConnectReadinessItem[] {
+  return [
+    {
+      area: 'Core Infrastructure',
+      score: 58,
+      currentState: 'Next.js routes, API handlers, build-safe store, Airtable write hook, and seeded multi-tenant config exist.',
+      gaps: ['No durable first-party database tables for every Connect object yet', 'No production event log table verified', 'Limited structured logging'],
+      recommendation: 'Create Airtable/DB tables for orgs, resources, campaigns, events, relationships, journeys, tasks, and alerts; add request logging.',
+      priority: 'Critical',
+    },
+    {
+      area: 'Connect Experience',
+      score: 72,
+      currentState: 'Mobile guided flow exists with resource delivery and relationship activation.',
+      gaps: ['No native contact autofill', 'No SMS/email delivery confirmation in UI', 'No consent preferences'],
+      recommendation: 'Add consent language, delivery status, and Apple/Google contact-saving support after activation.',
+      priority: 'High',
+    },
+    {
+      area: 'Resource Library',
+      score: 61,
+      currentState: 'Resource objects, analytics fields, permissions, and admin visibility exist.',
+      gaps: ['No file upload/storage yet', 'No resource edit form persistence', 'No foldering/collections'],
+      recommendation: 'Wire Vercel Blob or Airtable attachment upload plus CRUD forms and collection builder.',
+      priority: 'High',
+    },
+    {
+      area: 'QR Management',
+      score: 70,
+      currentState: 'Campaign, staff, event, location, and NFC destinations exist with scan/conversion metrics.',
+      gaps: ['Generated QR is SVG endpoint only', 'No bulk download pack', 'No per-scan device/location analytics'],
+      recommendation: 'Add campaign creation form, PNG/PDF export, and scan event logging by campaign.',
+      priority: 'High',
+    },
+    {
+      area: 'Automation/Nurture',
+      score: 63,
+      currentState: 'Rules and sequence model are present with trigger/action vocabulary.',
+      gaps: ['n8n workflows are not invoked yet', 'No scheduled worker for delayed steps', 'No task completion UI'],
+      recommendation: 'Wire n8n webhook dispatch and scheduled sequence runner; add staff task board.',
+      priority: 'Critical',
+    },
+    {
+      area: 'AI Opportunity Engine',
+      score: 67,
+      currentState: 'Rule-based opportunity score, priority, recommended action, and forgotten opportunity detection exist.',
+      gaps: ['No OpenAI-generated living relationship profile yet', 'No model audit trail or confidence scoring'],
+      recommendation: 'Call OpenAI after every engagement event to update profile, risk, recommended next action, and reasons.',
+      priority: 'High',
+    },
+    {
+      area: 'Launch Testing',
+      score: 35,
+      currentState: 'Build and basic live API/page smoke tests passed.',
+      gaps: ['No 20-scan/contact/email/SMS/redirect/AI test run completed', 'No verified Resend/Twilio delivery logs'],
+      recommendation: 'Run scripted production test matrix after Airtable, Resend, Twilio, and n8n envs are connected.',
+      priority: 'Critical',
+    },
+  ];
+}
+
 export async function getConnectDashboard(orgSlug?: string) {
   const relationships = await listConnectRelationships(orgSlug);
   const total = relationships.length;
@@ -408,6 +698,40 @@ export async function getConnectDashboard(orgSlug?: string) {
     topEvents: [...events.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5),
     topRepresentatives: [...reps.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5),
     topResources: [...resources.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5),
+    conversionRate: total ? Math.round((relationships.filter((item) => item.engagement.applicationsStarted > 0 || item.status === 'Converted').length / total) * 100) : 0,
+    engagementTrend: [
+      { label: 'Scans', value: relationships.reduce((sum, item) => sum + item.engagement.scans, 0) },
+      { label: 'Opens', value: relationships.reduce((sum, item) => sum + item.engagement.opens, 0) },
+      { label: 'Clicks', value: relationships.reduce((sum, item) => sum + item.engagement.clicks, 0) },
+      { label: 'Applications', value: relationships.reduce((sum, item) => sum + item.engagement.applicationsStarted + item.engagement.applicationsCompleted, 0) },
+    ],
+  };
+}
+
+export async function recordConnectEngagement(event: Omit<ConnectEngagementEvent, 'createdAt'>) {
+  const relationship = localRelationships.find((item) => item.id === event.relationshipId);
+  if (relationship) {
+    const keyByType: Partial<Record<ConnectEngagementEvent['type'], keyof ConnectRelationship['engagement']>> = {
+      scan: 'scans',
+      email_open: 'opens',
+      link_click: 'clicks',
+      resource_download: 'downloads',
+      video_view: 'videoViews',
+      portal_visit: 'portalVisits',
+      application_started: 'applicationsStarted',
+      application_completed: 'applicationsCompleted',
+      message: 'messages',
+      follow_up_completed: 'followUpsCompleted',
+    };
+    const key = keyByType[event.type];
+    if (key) relationship.engagement[key] += 1;
+    relationship.aiProfile = generateOpportunityIntelligence(relationship, relationship.engagement, relationship.createdAt);
+    relationship.updatedAt = new Date().toISOString();
+  }
+
+  return {
+    ...event,
+    createdAt: new Date().toISOString(),
   };
 }
 

@@ -10,6 +10,7 @@ type Props = {
     event?: string;
     rep?: string;
     source?: string;
+    campaign?: string;
   }>;
 };
 
@@ -24,6 +25,7 @@ export default async function ConnectPage({ params, searchParams }: Props) {
       event={query.event}
       representative={query.rep}
       source={query.source}
+      campaignId={query.campaign}
     />
   );
 }

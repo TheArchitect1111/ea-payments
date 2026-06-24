@@ -3,6 +3,7 @@ import {
   createConnectRelationship,
   getConnectOrg,
   listConnectRelationships,
+  recordConnectEngagement,
   type CreateRelationshipInput,
 } from '@/lib/connect-store';
 
@@ -44,9 +45,16 @@ export async function POST(request: NextRequest) {
       conversationNotes: clean(body.conversationNotes),
       leadType: clean(body.leadType),
       tags: Array.isArray(body.tags) ? body.tags.map(clean).filter(Boolean) as string[] : [],
+      campaignId: clean(body.campaignId),
     };
 
     const relationship = await createConnectRelationship(input);
+    await recordConnectEngagement({
+      orgSlug,
+      relationshipId: relationship.id,
+      campaignId: input.campaignId,
+      type: 'contact_exchange',
+    });
     const org = getConnectOrg(orgSlug);
     const resources = org.sequence
       .filter((step) => step.delayDays === 0)

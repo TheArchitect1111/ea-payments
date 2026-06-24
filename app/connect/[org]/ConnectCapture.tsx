@@ -24,11 +24,12 @@ type Props = {
   event?: string;
   representative?: string;
   source?: string;
+  campaignId?: string;
 };
 
 const steps = ['Name', 'Contact', 'Context', 'Activate'];
 
-export default function ConnectCapture({ org, event, representative, source = 'QR' }: Props) {
+export default function ConnectCapture({ org, event, representative, source = 'QR', campaignId }: Props) {
   const [step, setStep] = useState(0);
   const [saving, setSaving] = useState(false);
   const [voiceNote, setVoiceNote] = useState('');
@@ -80,6 +81,7 @@ export default function ConnectCapture({ org, event, representative, source = 'Q
           source,
           event,
           representative,
+          campaignId,
           tags: [payload.role, payload.leadType, event].filter(Boolean),
         }),
       });
@@ -131,11 +133,20 @@ export default function ConnectCapture({ org, event, representative, source = 'Q
       <section className="connect-shell">
         <header className="connect-hero">
           <p className="connect-kicker">{org.qrCodeLabel}</p>
-          <h1>This moment can become a real relationship.</h1>
+          <h1>{org.offer.headline}</h1>
           <p>
-            Share your preferred contact path and {org.name} will send the right resource, remember the conversation,
-            and make follow-up easy.
+            {org.offer.promise}
           </p>
+          <div className="connect-offer-card" aria-label="Resource offer">
+            <span>Instant Resource</span>
+            <strong>{org.offer.resourceTitle}</strong>
+            <small>No business card to lose. No generic contact form. Just the promised next step.</small>
+          </div>
+          <div className="connect-trust">
+            {org.trustSignals.slice(0, 3).map((signal) => (
+              <span key={signal}>{signal}</span>
+            ))}
+          </div>
         </header>
 
         <div className="connect-progress" aria-label="Connection progress">
@@ -244,7 +255,7 @@ export default function ConnectCapture({ org, event, representative, source = 'Q
         <aside className="connect-system">
           <div><b>{event ?? 'Live event'}</b><span>Event source</span></div>
           <div><b>{representative ?? 'Auto-routed'}</b><span>Representative</span></div>
-          <div><b>{org.sequence.length}</b><span>Follow-up steps</span></div>
+          <div><b>{campaignId ?? org.sequence.length}</b><span>{campaignId ? 'Campaign' : 'Follow-up steps'}</span></div>
         </aside>
       </section>
     </main>
