@@ -71,6 +71,39 @@ export type ConnectReadinessItem = {
   priority: 'Low' | 'Medium' | 'High' | 'Critical';
 };
 
+export type ConnectGuideContent = {
+  title: string;
+  intro: string;
+  sections: Array<{
+    number: string;
+    title: string;
+    copy: string;
+  }>;
+  faqTitle: string;
+  faqs: Array<{
+    question: string;
+    answer: string;
+  }>;
+};
+
+export type ConnectJourneyContent = {
+  kicker: string;
+  title: string;
+  intro: string;
+  primaryCta: string;
+  secondaryCta: string;
+  pillars: Array<{
+    title: string;
+    copy: string;
+  }>;
+  eventsTitle: string;
+  events: string[];
+  eventNote: string;
+  consultationTitle: string;
+  consultationCopy: string;
+  consultationCta: string;
+};
+
 export type ConnectOrgConfig = {
   slug: string;
   name: string;
@@ -91,6 +124,9 @@ export type ConnectOrgConfig = {
   };
   trustSignals: string[];
   socialProof: string[];
+  theme: 'default' | 'cpr';
+  guide: ConnectGuideContent;
+  journey: ConnectJourneyContent;
   template: ConnectTemplate;
   campaigns: ConnectCampaign[];
   automationRules: ConnectAutomationRule[];
@@ -170,7 +206,7 @@ export type ConnectEngagementEvent = {
   createdAt: string;
 };
 
-const demoResources: ConnectResource[] = [
+const cprResources: ConnectResource[] = [
   {
     id: 'parent-recruiting-guide',
     title: 'Parent Recruiting Guide',
@@ -282,6 +318,113 @@ const defaultAutomationRules: ConnectAutomationRule[] = [
   },
 ];
 
+const cprGuide: ConnectGuideContent = {
+  title: 'Parent Recruiting Guide',
+  intro: 'A clear first look at what families should understand after meeting Canadian Prospects: visibility, development, exposure, academics, and the next right conversation.',
+  sections: [
+    { number: '1', title: 'Know the path', copy: 'Recruiting is a process, not a single event. Families need a plan for development, exposure, communication, and decisions.' },
+    { number: '2', title: 'Build the profile', copy: 'Academics, video, measurable growth, coachability, and consistency all shape the opportunity picture.' },
+    { number: '3', title: 'Choose the next step', copy: 'The right next step is usually evaluation, guidance, and a realistic plan for where the athlete can grow.' },
+  ],
+  faqTitle: 'Recruiting FAQ',
+  faqs: [
+    { question: 'When should families start?', answer: "Start by understanding the athlete's current level, development needs, academics, and realistic opportunities." },
+    { question: 'What happens after a showcase?', answer: 'The best follow-up is specific: profile review, film/evaluation, academic fit, and a clear next action.' },
+    { question: 'How does CPR help?', answer: "CPR helps families move from confusion to a guided pathway built around the athlete's future." },
+  ],
+};
+
+const cprJourney: ConnectJourneyContent = {
+  kicker: 'Faith. Family. Basketball. Future.',
+  title: 'Your journey starts here.',
+  intro: 'Explore programs, tryouts, camps, and opportunities built to help athletes train, compete, grow, and succeed.',
+  primaryCta: 'Programs & Camps',
+  secondaryCta: 'Upcoming Events',
+  pillars: [
+    { title: 'Train', copy: 'Skill development, evaluation, and habits that translate.' },
+    { title: 'Compete', copy: 'Showcase, camp, and team opportunities with the right visibility.' },
+    { title: 'Grow', copy: 'Academic, recruiting, and leadership guidance for the long game.' },
+    { title: 'Succeed', copy: 'A guided pathway toward the next level and the future beyond basketball.' },
+  ],
+  eventsTitle: 'Next opportunities',
+  events: ['Toronto Showcase', 'Charlotte Tournament Follow-Up', 'Summer Camp Evaluation', 'Open Gym Invitation'],
+  eventNote: 'Details and registration pathway coming through CPR.',
+  consultationTitle: 'Want CPR to review the best next step?',
+  consultationCopy: 'Use the connection you already made. Mike and the CPR team can follow up with the right pathway.',
+  consultationCta: 'Request Follow-Up',
+};
+
+const demoGuide: ConnectGuideContent = {
+  title: 'Relationship Activation Blueprint',
+  intro: 'A practical blueprint for turning a real-world conversation into value delivery, follow-up, and measurable opportunity.',
+  sections: [
+    { number: '1', title: 'Capture the moment', copy: 'Make the first exchange feel simple, useful, and worth completing.' },
+    { number: '2', title: 'Deliver value', copy: 'Send the promised resource immediately so the relationship starts with trust.' },
+    { number: '3', title: 'Follow the signal', copy: 'Use engagement to know who needs a call, resource, invite, or task.' },
+  ],
+  faqTitle: 'Activation FAQ',
+  faqs: [
+    { question: 'What is Connect?', answer: 'Connect is a relationship activation platform for events, teams, communities, and client-facing organizations.' },
+    { question: 'What happens after someone connects?', answer: 'A relationship record is created, resources are delivered, tracking begins, and follow-up can be routed.' },
+    { question: 'Can this be white-labeled?', answer: 'Yes. The tenant template controls name, colors, copy, offers, resources, campaigns, and sequences.' },
+  ],
+};
+
+const demoJourney: ConnectJourneyContent = {
+  kicker: 'Connect. Grow. Impact.',
+  title: 'Your next step is ready.',
+  intro: 'Explore the resource, choose the next action, and let the organization continue the relationship with clarity.',
+  primaryCta: 'Explore Resources',
+  secondaryCta: 'Next Steps',
+  pillars: [
+    { title: 'Connect', copy: 'Capture the relationship while the conversation is still fresh.' },
+    { title: 'Deliver', copy: 'Send the resource that makes the exchange immediately useful.' },
+    { title: 'Track', copy: 'Measure opens, clicks, visits, and applications.' },
+    { title: 'Follow Up', copy: 'Turn engagement into recommended next actions.' },
+  ],
+  eventsTitle: 'Next steps',
+  events: ['Resource Review', 'Follow-Up Call', 'Application Pathway', 'Consultation'],
+  eventNote: 'Configured by the organization inside the Connect template.',
+  consultationTitle: 'Want the next best action?',
+  consultationCopy: 'Use this connection to request follow-up from the team.',
+  consultationCta: 'Request Follow-Up',
+};
+
+function createDefaultResources(slug: string, resourceTitle: string): ConnectResource[] {
+  return [
+    {
+      id: `${slug}-primary-resource`,
+      title: resourceTitle,
+      type: 'Guide',
+      url: `/connect/${slug}/guide`,
+      description: `Primary Connect resource for ${slug}.`,
+      audience: 'Prospects',
+      permission: 'captured-leads',
+      analytics: { opens: 0, clicks: 0, downloads: 0, videoViews: 0 },
+    },
+    {
+      id: `${slug}-journey`,
+      title: 'Journey Page',
+      type: 'Landing Page',
+      url: `/connect/${slug}/journey`,
+      description: 'Next-step landing page after the first resource.',
+      audience: 'Captured leads',
+      permission: 'captured-leads',
+      analytics: { opens: 0, clicks: 0, downloads: 0, videoViews: 0 },
+    },
+    {
+      id: `${slug}-consultation`,
+      title: 'Request Follow-Up',
+      type: 'Calendar Link',
+      url: `/connect/${slug}/journey#consultation`,
+      description: 'Direct follow-up path for high-intent relationships.',
+      audience: 'Hot opportunities',
+      permission: 'public',
+      analytics: { opens: 0, clicks: 0, downloads: 0, videoViews: 0 },
+    },
+  ];
+}
+
 const orgs: ConnectOrgConfig[] = [
   {
     slug: 'cpr',
@@ -298,6 +441,9 @@ const orgs: ConnectOrgConfig[] = [
     },
     trustSignals: ['Used after tournaments, camps, showcases, and family recruiting conversations', 'No spam. The first resource arrives immediately.', 'Follow-up is routed to the right CPR team member.'],
     socialProof: ['Charlotte Tournament: 42 connections', 'Toronto Showcase: 31 connections', 'Parent guide is the highest-opening CPR resource'],
+    theme: 'cpr',
+    guide: cprGuide,
+    journey: cprJourney,
     template: {
       name: 'CPR Connect',
       domain: 'www.efficiencyarchitects.online',
@@ -316,7 +462,7 @@ const orgs: ConnectOrgConfig[] = [
     },
     campaigns: cprCampaigns,
     automationRules: defaultAutomationRules,
-    resources: demoResources,
+    resources: cprResources,
     sequence: [
       { id: 'now-guide', delayDays: 0, title: 'Send Parent Recruiting Guide', resourceId: 'parent-recruiting-guide', channel: 'email' },
       { id: 'faq-3', delayDays: 3, title: 'Send Recruiting FAQ', resourceId: 'recruiting-faq', channel: 'email' },
@@ -341,6 +487,9 @@ const orgs: ConnectOrgConfig[] = [
     },
     trustSignals: ['Built for events, churches, schools, nonprofits, creators, and teams', 'No digital business card experience', 'Every connection becomes measurable'],
     socialProof: ['Demo organization: live capture, nurture, routing, and intelligence enabled'],
+    theme: 'default',
+    guide: demoGuide,
+    journey: demoJourney,
     template: {
       name: 'Connect Demo',
       domain: 'www.efficiencyarchitects.online',
@@ -371,11 +520,11 @@ const orgs: ConnectOrgConfig[] = [
       },
     ],
     automationRules: defaultAutomationRules,
-    resources: demoResources,
+    resources: createDefaultResources('demo', 'Relationship Activation Blueprint'),
     sequence: [
-      { id: 'now-guide', delayDays: 0, title: 'Send Welcome Guide', resourceId: 'parent-recruiting-guide', channel: 'email' },
-      { id: 'faq-3', delayDays: 3, title: 'Send FAQ', resourceId: 'recruiting-faq', channel: 'email' },
-      { id: 'call-7', delayDays: 7, title: 'Invite Consultation', resourceId: 'consultation', channel: 'both' },
+      { id: 'now-guide', delayDays: 0, title: 'Send Welcome Guide', resourceId: 'demo-primary-resource', channel: 'email' },
+      { id: 'journey-3', delayDays: 3, title: 'Send Journey Page', resourceId: 'demo-journey', channel: 'email' },
+      { id: 'call-7', delayDays: 7, title: 'Invite Consultation', resourceId: 'demo-consultation', channel: 'both' },
     ],
     leadTypes: ['Prospect', 'Donor', 'Member', 'Volunteer', 'Partner'],
     teams: ['Relationship Team', 'Membership Team', 'Development Team'],
@@ -583,6 +732,87 @@ async function postRelationshipToAirtable(relationship: ConnectRelationship) {
 
 export function getConnectOrg(slug: string): ConnectOrgConfig {
   return orgs.find((org) => org.slug === slug) ?? orgs[1];
+}
+
+export function createConnectTenantTemplate(input: {
+  slug: string;
+  name: string;
+  offerHeadline: string;
+  resourceTitle: string;
+  redirectPath?: string;
+  accent?: string;
+  leadTypes?: string[];
+  teams?: string[];
+}): ConnectOrgConfig {
+  const slug = input.slug.toLowerCase().replace(/[^a-z0-9-]+/g, '-');
+  const resourceId = `${slug}-primary-resource`;
+  return {
+    slug,
+    name: input.name,
+    colors: { ink: '#171717', accent: input.accent ?? '#c9a844', soft: '#fbfaf7' },
+    qrCodeLabel: `${input.name} Connect`,
+    nfcDestination: `/connect/${slug}`,
+    redirectDestination: input.redirectPath ?? `/connect/${slug}/journey`,
+    notificationEmails: ['freedom@efficiencyarchitects.online'],
+    offer: {
+      headline: input.offerHeadline,
+      resourceTitle: input.resourceTitle,
+      promise: `Get ${input.resourceTitle} and receive a clear next step from ${input.name}.`,
+    },
+    trustSignals: ['Instant resource delivery', 'Smart follow-up', 'No business card to lose'],
+    socialProof: ['New Connect tenant template ready for launch'],
+    theme: 'default',
+    guide: demoGuide,
+    journey: demoJourney,
+    template: {
+      name: `${input.name} Connect`,
+      domain: 'www.efficiencyarchitects.online',
+      font: 'Inter',
+      emailFrom: 'Efficiency Architects <freedom@efficiencyarchitects.online>',
+      emailTemplates: {
+        welcome: `Thanks for connecting with ${input.name}. Here is ${input.resourceTitle}.`,
+        followUp: `Here is the next resource from ${input.name}.`,
+        hotLeadAlert: `A high-interest ${input.name} relationship needs follow-up.`,
+      },
+      smsTemplates: {
+        welcome: `Thanks for connecting with ${input.name}. Your resource is on the way.`,
+        followUp: `Here is the next step from ${input.name}.`,
+        hotLeadAlert: `Connect alert: high-interest relationship for ${input.name}.`,
+      },
+    },
+    campaigns: [
+      {
+        id: `${slug}-launch-qr`,
+        name: `${input.name} Launch QR`,
+        type: 'Campaign QR',
+        destination: `/connect/${slug}?campaign=${slug}-launch-qr`,
+        scans: 0,
+        conversions: 0,
+        resourceOpens: 0,
+        applications: 0,
+      },
+    ],
+    automationRules: defaultAutomationRules,
+    resources: [
+      {
+        id: resourceId,
+        title: input.resourceTitle,
+        type: 'Guide',
+        url: `/connect/${slug}/guide`,
+        description: `Primary Connect resource for ${input.name}.`,
+        audience: 'Prospects',
+        permission: 'captured-leads',
+        analytics: { opens: 0, clicks: 0, downloads: 0, videoViews: 0 },
+      },
+    ],
+    sequence: [
+      { id: 'now-guide', delayDays: 0, title: `Send ${input.resourceTitle}`, resourceId, channel: 'email' },
+      { id: 'follow-up-3', delayDays: 3, title: 'Send follow-up resource', resourceId, channel: 'email' },
+      { id: 'consult-7', delayDays: 7, title: 'Invite consultation', resourceId, channel: 'both' },
+    ],
+    leadTypes: input.leadTypes ?? ['Prospect', 'Member', 'Donor', 'Volunteer', 'Partner'],
+    teams: input.teams ?? ['Relationship Team', 'Growth Team', 'Support Team'],
+  };
 }
 
 export function listConnectOrgs(): ConnectOrgConfig[] {

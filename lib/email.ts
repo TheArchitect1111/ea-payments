@@ -978,16 +978,16 @@ export async function sendConnectWelcomeEmail(data: {
     <div style="background:#101820;color:#fff;border-left:5px solid #D91F2A;padding:20px;margin:22px 0;">
       <p style="margin:0 0 6px;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#ff4b4b;">Instant Resource</p>
       <p style="margin:0;font-size:22px;font-weight:700;">${escHtml(data.resourceTitle)}</p>
-      <p style="margin:10px 0 0;font-size:13px;line-height:1.6;color:rgba(255,255,255,.76);">Faith. Family. Basketball. Future. Your journey starts with clarity.</p>
+      <p style="margin:10px 0 0;font-size:13px;line-height:1.6;color:rgba(255,255,255,.76);">Your next step is ready. Save the resource, then open the journey page when you are ready to take action.</p>
     </div>
     <p style="margin:0 0 16px;font-size:14px;color:#555;line-height:1.7;">We will use this connection to send useful next steps, not noise. If this was not for you, you can ignore this email.</p>
     <p style="margin:0;font-size:14px;color:#555;line-height:1.7;">Ready for the next step? <a href="${escHtml(data.journeyUrl)}" style="color:#101820;font-weight:700;">Open Your Journey Starts Here</a>.</p>`;
 
   return resendEmail(
     data.email,
-    `Welcome to Canadian Prospects - ${data.resourceTitle}`,
+    `Welcome to ${data.organizationName} - ${data.resourceTitle}`,
     baseEmailShell({
-      title: 'Welcome To Canadian Prospects',
+      title: `Welcome To ${data.organizationName}`,
       eyebrow: 'Connect',
       bodyHtml,
       ctaLabel: 'View Guide',
