@@ -394,7 +394,7 @@ export default function EAGuideOrb() {
           <span className="ea-guide-ring ea-guide-ring-gold" />
           <span className="ea-guide-ring ea-guide-ring-blue" />
           <span className="ea-guide-core">
-            <Image src="/ea-logo.png" alt="" width={34} height={34} priority={false} />
+            <span className="ea-guide-core-mark" aria-hidden="true" />
           </span>
           <span className="ea-guide-state">{state === 'idle' ? 'EA Guide' : state}</span>
           {!open && badgeLabel ? <span className="ea-guide-badge">{badgeLabel}</span> : null}

@@ -78,6 +78,17 @@
   box-shadow: inset 0 0 14px rgba(27, 43, 77, 0.15);
 }
 
+.ea-guide-core-mark {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background:
+    linear-gradient(90deg, transparent 46%, #171717 46% 54%, transparent 54%),
+    linear-gradient(0deg, transparent 46%, #171717 46% 54%, transparent 54%),
+    radial-gradient(circle, #c9a844 0 42%, transparent 44%);
+  box-shadow: 0 0 0 8px rgba(201, 168, 68, 0.16);
+}
+
 .ea-guide-state {
   position: absolute;
   right: 2px;
