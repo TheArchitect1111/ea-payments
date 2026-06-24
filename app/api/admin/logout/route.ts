@@ -4,7 +4,7 @@ import { EA_ADMIN_COOKIE } from '@/lib/ea-admin-auth';
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
-  const res = NextResponse.redirect(new URL('/admin/commissions', req.url));
+  const res = NextResponse.redirect(new URL('/admin/login', req.url));
   res.cookies.set({
     name: EA_ADMIN_COOKIE,
     value: '',

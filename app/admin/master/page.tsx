@@ -1,5 +1,6 @@
 import { cookies } from 'next/headers';
 import { verifyAdminSession, EA_ADMIN_COOKIE } from '@/lib/ea-admin-auth';
+import { redirectToAdminLogin } from '@/lib/admin-redirect';
 import {
   getProposalsWithAssessments,
   getAllAssessments,
@@ -16,7 +17,6 @@ import { buildAttentionItems } from '@/lib/pulse-attention';
 import { isCaptureApiKeyConfigured } from '@/lib/capture-api-key';
 import { EA_SATELLITE_URLS } from '@/lib/platform-urls';
 import AttentionCenterPanel from './AttentionCenterPanel';
-import AdminLogin from './AdminLogin';
 
 export const dynamic = 'force-dynamic';
 
@@ -87,6 +87,30 @@ interface PlatformTileProps {
   href: string;
 }
 
+interface CommandLinkProps {
+  title: string;
+  eyebrow: string;
+  description: string;
+  href: string;
+}
+
+function CommandLink({ title, eyebrow, description, href }: CommandLinkProps) {
+  return (
+    <a
+      href={href}
+      className="bg-white border border-neutral-200 p-5 hover:border-neutral-400 transition flex flex-col gap-2"
+    >
+      <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color: GOLD }}>
+        {eyebrow}
+      </span>
+      <span className="text-sm font-extrabold uppercase tracking-wide" style={{ color: NAVY }}>
+        {title}
+      </span>
+      <span className="text-xs text-neutral-500 leading-relaxed">{description}</span>
+    </a>
+  );
+}
+
 function PlatformTile({ title, metric, metricLabel, sub, href }: PlatformTileProps) {
   return (
     <div className="bg-white border border-neutral-200 p-6 flex flex-col gap-3">
@@ -130,7 +154,7 @@ export default async function MasterPortalPage() {
   const token = cookieStore.get(EA_ADMIN_COOKIE)?.value;
 
   if (!verifyAdminSession(token)) {
-    return <AdminLogin />;
+    redirectToAdminLogin('/admin/master');
   }
 
   const [assessments, proposals, clientRecords, partnerRecords, opportunities, cprAthletes, brotherHubChapters, sisterHubChapters, captures, contentRequests] =
@@ -295,6 +319,78 @@ export default async function MasterPortalPage() {
 
       <main className="max-w-6xl mx-auto px-6 py-8 space-y-10">
 
+        <section>
+          <SectionHead title="Master Portal" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <CommandLink
+              title="Launch Command Center"
+              eyebrow="Readiness"
+              description="Production checks, go-live signals, and launch readiness."
+              href="/launch"
+            />
+            <CommandLink
+              title="Client Login"
+              eyebrow="Client Surface"
+              description="Separate login for paying clients and founder client-view testing."
+              href="/portal/login"
+            />
+            <CommandLink
+              title="Demo Client Portal"
+              eyebrow="Client Preview"
+              description="Fast path into the demo-client experience for QA and friend testing."
+              href="/portal/demo-client"
+            />
+            <CommandLink
+              title="Admin Login"
+              eyebrow="Access"
+              description="Canonical admin sign-in route for Master Control and admin dashboards."
+              href="/admin/login"
+            />
+          </div>
+        </section>
+
+        <section>
+          <SectionHead title="Admin Workspaces" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <CommandLink
+              title="Pipeline"
+              eyebrow="Assessments"
+              description="Assessment funnel, proposal movement, conversion, and revenue indicators."
+              href="/admin/dashboard"
+            />
+            <CommandLink
+              title="Proposals"
+              eyebrow="Revenue"
+              description="Review, approve, send, and monitor proposal/payment status."
+              href="/admin/proposals"
+            />
+            <CommandLink
+              title="Client Delivery"
+              eyebrow="Operations"
+              description="Use active project records below as the current delivery board."
+              href="#active-projects"
+            />
+            <CommandLink
+              title="Content Requests"
+              eyebrow="Update Hub"
+              description="Review client content requests and publish queue work."
+              href="/admin/content-requests"
+            />
+            <CommandLink
+              title="Enhancements"
+              eyebrow="Simplifi"
+              description="Review site/opportunity enhancement requests from client portals."
+              href="/admin/enhancements"
+            />
+            <CommandLink
+              title="Commissions"
+              eyebrow="Partners"
+              description="Partner opportunities, commission owed, and paid commission tracking."
+              href="/admin/commissions"
+            />
+          </div>
+        </section>
+
         <AttentionCenterPanel items={attentionItems} />
 
         {/* Section 1: Revenue Overview */}
@@ -339,7 +435,7 @@ export default async function MasterPortalPage() {
         </section>
 
         {/* Section 3: Active Projects */}
-        <section>
+        <section id="active-projects">
           <SectionHead title="Active Projects" />
           {activeProjects.length === 0 ? (
             <div className="bg-white border border-neutral-200 p-10 text-center">

@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 export default function CheckoutSuccessPage() {
   return (
     <main className="min-h-screen bg-neutral-50">
@@ -22,16 +24,16 @@ export default function CheckoutSuccessPage() {
         </p>
 
         <p className="mt-3 text-sm leading-relaxed text-neutral-600">
-          Our team will be in touch within 1 to 2 business days to begin your onboarding and
-          schedule your first session.
+          Your onboarding has been queued. Watch for your welcome email with portal access,
+          next steps, and the first items needed to begin delivery.
         </p>
 
-        <a
-          href="/checkout"
+        <Link
+          href="/portal/login"
           className="mt-10 inline-block bg-neutral-950 px-8 py-3 text-xs font-bold uppercase tracking-widest text-white hover:bg-neutral-800"
         >
-          Return to Checkout
-        </a>
+          Client Login
+        </Link>
       </div>
     </main>
   );

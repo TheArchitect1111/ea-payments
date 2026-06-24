@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers';
 import { verifyAdminSession, EA_ADMIN_COOKIE } from '@/lib/ea-admin-auth';
+import { redirectToAdminLogin } from '@/lib/admin-redirect';
 import { getOpportunities } from '@/lib/partner-network';
-import AdminLogin from './AdminLogin';
 import CommissionsDashboard from './CommissionsDashboard';
 
 export const dynamic = 'force-dynamic';
@@ -11,7 +11,7 @@ export default async function CommissionsPage() {
   const token = cookieStore.get(EA_ADMIN_COOKIE)?.value;
 
   if (!verifyAdminSession(token)) {
-    return <AdminLogin />;
+    redirectToAdminLogin('/admin/commissions');
   }
 
   const opportunities = await getOpportunities();
