@@ -5,7 +5,7 @@ export function storyImage(photoId: string, width = 1400) {
 }
 
 export const landingHero = {
-  src: storyImage('photo-1531482615719-311a4e6e2df7', 1600),
+  src: storyImage('photo-1522202176988-66273c2fd55f', 1600),
   alt: 'A diverse group of leaders, coaches, educators, and community builders engaged in purposeful conversation',
 };
 
