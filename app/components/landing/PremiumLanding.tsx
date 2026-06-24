@@ -18,7 +18,8 @@ type Scene = {
   story: string;
   currentImage: string;
   possibleImage: string;
-  alt: string;
+  currentAlt: string;
+  possibleAlt: string;
   guide: string;
 };
 
@@ -31,9 +32,10 @@ const scenes: Scene[] = [
     current: "You didn't start this to manage systems.",
     possible: 'You started this to build a life with room for purpose.',
     story: 'A founder moves from late-night dependency to mornings coaching, creating, volunteering, and being present with family.',
-    currentImage: 'https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=2200&q=86',
-    possibleImage: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=2200&q=86',
-    alt: 'A racially diverse group of friends and volunteers laughing together outdoors',
+    currentImage: 'https://images.unsplash.com/photo-1516321497487-e288fb19713f?auto=format&fit=crop&w=2200&q=86',
+    possibleImage: 'https://images.unsplash.com/photo-1476705147036-43cd080da2f3?auto=format&fit=crop&w=2200&q=86',
+    currentAlt: 'A leader working alone late at night with responsibilities piling up',
+    possibleAlt: 'A multigenerational family enjoying time together outdoors',
     guide: 'This opening scene is about freedom, not software. Notice the contrast between being buried in work and having room for people, purpose, and life.',
   },
   {
@@ -44,9 +46,10 @@ const scenes: Scene[] = [
     current: "Nobody knows what's happening.",
     possible: 'Everyone knows what comes next.',
     story: 'A coach stops answering the same parent questions and spends that time with athletes instead.',
-    currentImage: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=2200&q=86',
-    possibleImage: 'https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=2200&q=86',
-    alt: 'A racially and ethnically diverse team aligned in a bright meeting space',
+    currentImage: 'https://images.unsplash.com/photo-1573497019940-88c6a86b0a2f?auto=format&fit=crop&w=2200&q=86',
+    possibleImage: 'https://images.unsplash.com/photo-1593113598148-3655c4d566bb?auto=format&fit=crop&w=2200&q=86',
+    currentAlt: 'A coach overwhelmed by messages and scattered updates on her phone',
+    possibleAlt: 'A diverse youth sports team in a focused huddle with their coach',
     guide: 'This scene names the cost of scattered updates. The possibility is simple: people receive the right information before confusion starts.',
   },
   {
@@ -57,9 +60,10 @@ const scenes: Scene[] = [
     current: 'Training starts over every day.',
     possible: 'Knowledge is always available.',
     story: 'A nonprofit leader stops repeating the same explanation and lets new staff learn naturally, at the moment they need it.',
-    currentImage: 'https://images.unsplash.com/photo-1521791055366-0d553872125f?auto=format&fit=crop&w=2200&q=86',
-    possibleImage: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=2200&q=86',
-    alt: 'A diverse group of adult learners working together around a table',
+    currentImage: 'https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=2200&q=86',
+    possibleImage: 'https://images.unsplash.com/photo-1523245775816-ff31a218c6be?auto=format&fit=crop&w=2200&q=86',
+    currentAlt: 'A nonprofit leader repeating the same explanation to a new volunteer',
+    possibleAlt: 'A racially diverse group of adult learners confidently working together',
     guide: "Training transformation means knowledge no longer lives in one person's head. It becomes repeatable, visible, and easier to pass on.",
   },
   {
@@ -71,8 +75,9 @@ const scenes: Scene[] = [
     possible: 'See what matters sooner.',
     story: 'An executive director moves from reacting all day to recognizing patterns early enough to lead with calm.',
     currentImage: 'https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=2200&q=86',
-    possibleImage: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=2200&q=86',
-    alt: 'A racially diverse leadership group reviewing priorities together with calm focus',
+    possibleImage: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=2200&q=86',
+    currentAlt: 'Leaders caught off guard in a tense meeting with scattered priorities',
+    possibleAlt: 'A Black woman executive director reviewing priorities with calm focus',
     guide: 'Visibility is the shift from surprise to awareness. Leaders get to see signals early enough to choose, not scramble.',
   },
   {
@@ -84,8 +89,9 @@ const scenes: Scene[] = [
     possible: 'People have space to thrive.',
     story: 'A stretched team stops surviving the week and starts contributing ideas, improving the work, and breathing again.',
     currentImage: 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=2200&q=86',
-    possibleImage: 'https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&w=2200&q=86',
-    alt: 'A diverse group of colleagues smiling and collaborating in a sunlit workspace',
+    possibleImage: 'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&w=2200&q=86',
+    currentAlt: 'An exhausted team buried in back-to-back work with no room to breathe',
+    possibleAlt: 'A diverse team with space to think, collaborate, and contribute ideas',
     guide: 'Capacity is not about asking people to do more. It is about removing the repetition and friction that keep good people stretched thin.',
   },
   {
@@ -97,36 +103,98 @@ const scenes: Scene[] = [
     possible: 'More of what matters gets done.',
     story: 'A community organization captures more opportunities, serves more people, and turns good intentions into visible progress.',
     currentImage: 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=2200&q=86',
-    possibleImage: 'https://images.unsplash.com/photo-1559027615-cd4628902d4a?auto=format&fit=crop&w=2200&q=86',
-    alt: 'A racially diverse volunteer group serving a community together',
+    possibleImage: 'https://images.unsplash.com/photo-1469571486212-0f58a3e6062a?auto=format&fit=crop&w=2200&q=86',
+    currentAlt: 'Community need going unmet while resources sit unused',
+    possibleAlt: 'A racially diverse volunteer group serving meals to their community',
     guide: 'Impact is where the story becomes practical. When fewer things fall through the cracks, more people receive the help you meant to give.',
   },
 ];
 
+const heroMontage = [
+  {
+    src: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=900&q=82',
+    alt: 'A coach guiding young athletes on the field',
+  },
+  {
+    src: 'https://images.unsplash.com/photo-1507692049795-dee435f2d06b?auto=format&fit=crop&w=900&q=82',
+    alt: 'A pastor greeting members of a diverse congregation',
+  },
+  {
+    src: 'https://images.unsplash.com/photo-1580582938317-8005863959d1?auto=format&fit=crop&w=900&q=82',
+    alt: 'A school administrator walking a bright school hallway',
+  },
+  {
+    src: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=900&q=82',
+    alt: 'A creator working at a desk with purpose and focus',
+  },
+];
+
 const futures = {
-  school: [
-    'Imagine every parent knowing exactly what is happening before they need to ask.',
-    'Imagine new staff learning the rhythm of the school in days, not months.',
-    'Imagine administrators seeing small issues before they become urgent.',
-  ],
-  nonprofit: [
-    'Imagine volunteers arriving prepared, confident, and clear on what matters.',
-    'Imagine programs moving without every answer depending on one leader.',
-    'Imagine more families helped because the work finally has room to scale.',
-  ],
-  sports: [
-    'Imagine parents, athletes, and coaches sharing one clear rhythm.',
-    'Imagine training, updates, and opportunities reaching the right people at the right time.',
-    'Imagine coaches spending less time repeating details and more time developing athletes.',
-  ],
-  business: [
-    'Imagine your team knowing what matters without chasing you for every answer.',
-    'Imagine customers feeling guided, informed, and remembered.',
-    'Imagine leadership energy returning to growth, relationships, and vision.',
-  ],
+  school: {
+    label: 'Schools',
+    lines: [
+      'Imagine every parent knowing exactly what is happening before they need to ask.',
+      'Imagine new staff learning the rhythm of the school in days, not months.',
+      'Imagine administrators seeing small issues before they become urgent.',
+    ],
+    image: 'https://images.unsplash.com/photo-1580582938317-8005863959d1?auto=format&fit=crop&w=1600&q=86',
+    imageAlt: 'School administrators and staff moving with clarity through a bright campus',
+  },
+  nonprofit: {
+    label: 'Nonprofits',
+    lines: [
+      'Imagine volunteers arriving prepared, confident, and clear on what matters.',
+      'Imagine programs moving without every answer depending on one leader.',
+      'Imagine more families helped because the work finally has room to scale.',
+    ],
+    image: 'https://images.unsplash.com/photo-1559027615-cd4628902d4a?auto=format&fit=crop&w=1600&q=86',
+    imageAlt: 'A diverse volunteer team serving their community with confidence',
+  },
+  sports: {
+    label: 'Sports',
+    lines: [
+      'Imagine parents, athletes, and coaches sharing one clear rhythm.',
+      'Imagine training, updates, and opportunities reaching the right people at the right time.',
+      'Imagine coaches spending less time repeating details and more time developing athletes.',
+    ],
+    image: 'https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=1600&q=86',
+    imageAlt: 'A coach developing athletes on the field with full presence',
+  },
+  church: {
+    label: 'Churches',
+    lines: [
+      'Imagine volunteers knowing exactly where to serve before Sunday morning.',
+      'Imagine pastoral care continuing without every detail living in one inbox.',
+      'Imagine your congregation feeling informed, connected, and ready to respond.',
+    ],
+    image: 'https://images.unsplash.com/photo-1438232953991-611fd813685f?auto=format&fit=crop&w=1600&q=86',
+    imageAlt: 'A diverse congregation gathered in worship and community',
+  },
+  business: {
+    label: 'Business',
+    lines: [
+      'Imagine your team knowing what matters without chasing you for every answer.',
+      'Imagine customers feeling guided, informed, and remembered.',
+      'Imagine leadership energy returning to growth, relationships, and vision.',
+    ],
+    image: 'https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=1600&q=86',
+    imageAlt: 'A business owner leading a diverse team with clarity and confidence',
+  },
+  creators: {
+    label: 'Creators',
+    lines: [
+      'Imagine your audience receiving what you promised without you repeating yourself.',
+      'Imagine your systems running while you create, teach, and build.',
+      'Imagine more of your energy going into the work only you can do.',
+    ],
+    image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1600&q=86',
+    imageAlt: 'Creators and collaborators building something meaningful together',
+  },
 };
 
 type FutureKey = keyof typeof futures;
+
+const segmentOrder: FutureKey[] = ['school', 'nonprofit', 'sports', 'church', 'business', 'creators'];
 
 export default function PremiumLanding() {
   const prefersReducedMotion = useReducedMotion();
@@ -154,18 +222,20 @@ export default function PremiumLanding() {
     }));
 
     gsap.utils.toArray<HTMLElement>('.pl-story-scene').forEach((section) => {
-      const image = section.querySelector('.pl-possibility-img');
-      const veil = section.querySelector('.pl-reality-veil');
+      const possible = section.querySelector<HTMLElement>('.pl-possibility-img');
+      const divider = section.querySelector<HTMLElement>('.pl-scene-divider');
+      if (!possible || !divider) return;
+
       gsap.timeline({
         scrollTrigger: {
           trigger: section,
-          start: 'top 65%',
-          end: 'bottom 35%',
-          scrub: 0.9,
+          start: 'top 70%',
+          end: 'bottom 30%',
+          scrub: 0.6,
         },
       })
-        .fromTo(image, { scale: 1.06, opacity: 0.2 }, { scale: 1, opacity: 1, ease: 'none' }, 0)
-        .fromTo(veil, { opacity: 0.72 }, { opacity: 0.08, ease: 'none' }, 0);
+        .fromTo(possible, { clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)', ease: 'none' }, 0)
+        .fromTo(divider, { left: '0%' }, { left: '100%', ease: 'none' }, 0);
     });
 
     return () => {
@@ -187,7 +257,7 @@ export default function PremiumLanding() {
     }));
   }, [activeScene]);
 
-  const futureLines = useMemo(() => futures[future], [future]);
+  const futureContent = useMemo(() => futures[future], [future]);
 
   return (
     <main className="pl-site">
@@ -203,13 +273,8 @@ export default function PremiumLanding() {
 
       <section className="pl-cinema-hero" id="top" data-scene="life">
         <div className="pl-hero-grid" aria-hidden="true">
-          {[
-            'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=900&q=82',
-            'https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=900&q=82',
-            'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=900&q=82',
-            'https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&w=900&q=82',
-          ].map((src) => (
-            <img key={src} src={src} alt="" />
+          {heroMontage.map((frame) => (
+            <img key={frame.src} src={frame.src} alt="" />
           ))}
         </div>
         <motion.div
@@ -234,21 +299,23 @@ export default function PremiumLanding() {
       </section>
 
       {scenes.slice(1).map((scene, index) => (
-        <RealityPossibilityScene key={scene.id} scene={scene} index={index} />
+        <RealityPossibilityScene key={scene.id} scene={scene} index={index} reducedMotion={!!prefersReducedMotion} />
       ))}
 
       <section className="pl-goosebumps">
         <div className="pl-goosebumps-current">
           <img
-            src="https://images.unsplash.com/photo-1516321497487-e288fb19713f?auto=format&fit=crop&w=2200&q=86"
-            alt="A leader working alone late at night with messages and responsibilities piling up"
+            src="https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=2200&q=86"
+            alt="A leader alone at a desk late at night, carrying every responsibility"
           />
+          <span className="pl-goosebumps-badge pl-goosebumps-badge-current">Current Reality</span>
         </div>
         <div className="pl-goosebumps-possible">
           <img
-            src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=2200&q=86"
-            alt="A racially and ethnically diverse group of people enjoying community, family, and purpose together"
+            src="https://images.unsplash.com/photo-1511895426328-ac872781f227?auto=format&fit=crop&w=2200&q=86"
+            alt="A multigenerational family and community sharing a meal together"
           />
+          <span className="pl-goosebumps-badge pl-goosebumps-badge-possible">What&apos;s Possible</span>
         </div>
         <div className="pl-goosebumps-copy">
           <p>Future State</p>
@@ -259,10 +326,11 @@ export default function PremiumLanding() {
       <section className="pl-reveal-section" aria-labelledby="reveal-title">
         <div className="pl-reveal-copy">
           <p className="pl-kicker">Reality &rarr; Possibility&trade;</p>
-          <h2 id="reveal-title">Drag from pressure into possibility.</h2>
+          <h2 id="reveal-title">Slide right to reveal what&apos;s possible.</h2>
+          <p className="pl-reveal-hint">Left is where you are. Right is where you could be.</p>
         </div>
         <RealityReveal
-          before="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1800&q=84"
+          before="https://images.unsplash.com/photo-1573497019940-88c6a86b0a2f?auto=format&fit=crop&w=1800&q=84"
           after="https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1800&q=84"
         />
       </section>
@@ -275,14 +343,18 @@ export default function PremiumLanding() {
             What could your organization become if communication, training, visibility, and operations finally worked together?
           </p>
           <div className="pl-segments" aria-label="Choose organization type">
-            {(Object.keys(futures) as FutureKey[]).map((key) => (
+            {segmentOrder.map((key) => (
               <button key={key} type="button" className={future === key ? 'is-active' : ''} onClick={() => setFuture(key)}>
-                {key}
+                {futures[key].label}
               </button>
             ))}
           </div>
+          <div className="pl-generator-visual" key={future}>
+            <img src={futureContent.image} alt={futureContent.imageAlt} />
+            <span className="pl-generator-visual-badge">What&apos;s Possible</span>
+          </div>
           <div className="pl-future-lines">
-            {futureLines.map((line) => (
+            {futureContent.lines.map((line) => (
               <p key={line}>{line}</p>
             ))}
           </div>
@@ -307,13 +379,33 @@ export default function PremiumLanding() {
   );
 }
 
-function RealityPossibilityScene({ scene, index }: { scene: Scene; index: number }) {
+function RealityPossibilityScene({
+  scene,
+  index,
+  reducedMotion,
+}: {
+  scene: Scene;
+  index: number;
+  reducedMotion: boolean;
+}) {
   return (
     <section className="pl-story-scene" id={scene.id} data-scene={scene.id}>
       <div className="pl-scene-media">
-        <img className="pl-current-img" src={scene.currentImage} alt="" loading={index < 1 ? 'eager' : 'lazy'} />
-        <img className="pl-possibility-img" src={scene.possibleImage} alt={scene.alt} loading="lazy" />
-        <span className="pl-reality-veil" />
+        <img
+          className="pl-current-img"
+          src={scene.currentImage}
+          alt={scene.currentAlt}
+          loading={index < 1 ? 'eager' : 'lazy'}
+        />
+        <img
+          className={`pl-possibility-img${reducedMotion ? ' is-revealed' : ''}`}
+          src={scene.possibleImage}
+          alt={scene.possibleAlt}
+          loading="lazy"
+        />
+        <span className={`pl-scene-divider${reducedMotion ? ' is-revealed' : ''}`} aria-hidden="true" />
+        <span className="pl-scene-badge pl-scene-badge-current">{scene.currentLabel}</span>
+        <span className="pl-scene-badge pl-scene-badge-possible">{scene.possibleLabel}</span>
       </div>
       <div className="pl-scene-copy">
         <p className="pl-kicker">{scene.eyebrow}</p>
@@ -334,7 +426,7 @@ function RealityPossibilityScene({ scene, index }: { scene: Scene; index: number
 }
 
 function RealityReveal({ before, after }: { before: string; after: string }) {
-  const [value, setValue] = useState(50);
+  const [value, setValue] = useState(82);
   const wrapRef = useRef<HTMLDivElement | null>(null);
 
   function updateFromClientX(clientX: number) {
@@ -345,29 +437,45 @@ function RealityReveal({ before, after }: { before: string; after: string }) {
   }
 
   return (
-    <div
-      ref={wrapRef}
-      className="pl-reality-reveal"
-      onPointerMove={(event) => {
-        if (event.buttons === 1) updateFromClientX(event.clientX);
-      }}
-      onPointerDown={(event) => updateFromClientX(event.clientX)}
-    >
-      <img src={before} alt="Current reality with scattered communication and pressure" />
-      <div className="pl-reveal-after" style={{ clipPath: `inset(0 0 0 ${value}%)` }}>
-        <img src={after} alt="Possibility with a diverse aligned team communicating clearly" />
+    <div className="pl-reveal-wrap">
+      <div
+        ref={wrapRef}
+        className="pl-reality-reveal"
+        onPointerMove={(event) => {
+          if (event.buttons === 1) updateFromClientX(event.clientX);
+        }}
+        onPointerDown={(event) => updateFromClientX(event.clientX)}
+      >
+        <div className="pl-reveal-before">
+          <img src={before} alt="Current reality — pressure, scattered communication, dependency" />
+          <span className="pl-reveal-tint pl-reveal-tint-current" aria-hidden="true" />
+        </div>
+        <div className="pl-reveal-after" style={{ clipPath: `inset(0 0 0 ${value}%)` }}>
+          <img src={after} alt="What's possible — a diverse team aligned and communicating clearly" />
+          <span className="pl-reveal-tint pl-reveal-tint-possible" aria-hidden="true" />
+        </div>
+        <input
+          type="range"
+          min="8"
+          max="92"
+          value={value}
+          aria-label="Slide right to reveal what's possible"
+          aria-valuetext={`${Math.round(value)}% revealed`}
+          onChange={(event) => setValue(Number(event.target.value))}
+        />
+        <span className="pl-reveal-handle" style={{ left: `${value}%` }} aria-hidden="true">
+          <span className="pl-reveal-handle-grip" />
+        </span>
+        <span className="pl-reveal-label pl-reveal-label-top pl-reveal-left">
+          <span className="pl-reveal-direction" aria-hidden="true">&larr;</span>
+          Current Reality
+        </span>
+        <span className="pl-reveal-label pl-reveal-label-top pl-reveal-right">
+          What&apos;s Possible
+          <span className="pl-reveal-direction" aria-hidden="true">&rarr;</span>
+        </span>
       </div>
-      <input
-        type="range"
-        min="8"
-        max="92"
-        value={value}
-        aria-label="Reveal possibility"
-        onChange={(event) => setValue(Number(event.target.value))}
-      />
-      <span className="pl-reveal-handle" style={{ left: `${value}%` }} />
-      <span className="pl-reveal-label pl-reveal-left">Current Reality</span>
-      <span className="pl-reveal-label pl-reveal-right">What&apos;s Possible</span>
+      <p className="pl-reveal-mobile-hint">Drag the handle right to reveal possibility</p>
     </div>
   );
 }
