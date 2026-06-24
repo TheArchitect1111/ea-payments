@@ -1,0 +1,325 @@
+.connect-site {
+  --connect-ink: #171717;
+  --connect-accent: #c9a844;
+  --connect-soft: #fbfaf7;
+  min-height: 100svh;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.78), rgba(255,255,255,0.96)),
+    var(--connect-soft);
+  color: var(--connect-ink);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.connect-site * {
+  box-sizing: border-box;
+}
+
+.connect-shell,
+.connect-success {
+  width: min(100% - 32px, 980px);
+  margin: 0 auto;
+  padding: clamp(34px, 8vw, 86px) 0;
+}
+
+.connect-hero {
+  max-width: 760px;
+}
+
+.connect-kicker {
+  margin: 0 0 16px;
+  color: var(--connect-accent);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.connect-hero h1,
+.connect-success h1 {
+  max-width: 860px;
+  margin: 0;
+  font-size: clamp(3rem, 9vw, 7.8rem);
+  line-height: 0.92;
+  font-weight: 850;
+  letter-spacing: 0;
+}
+
+.connect-hero p,
+.connect-success > p,
+.connect-muted {
+  max-width: 680px;
+  margin: 24px 0 0;
+  color: rgba(23, 23, 23, 0.68);
+  font-size: clamp(1rem, 2.2vw, 1.3rem);
+  line-height: 1.65;
+}
+
+.connect-progress {
+  height: 4px;
+  margin: clamp(32px, 6vw, 58px) 0 18px;
+  background: rgba(23, 23, 23, 0.1);
+  overflow: hidden;
+}
+
+.connect-progress span {
+  display: block;
+  height: 100%;
+  background: var(--connect-accent);
+  transition: width 0.25s ease;
+}
+
+.connect-panel {
+  min-height: 390px;
+  display: grid;
+  align-items: center;
+  border-top: 1px solid rgba(23, 23, 23, 0.12);
+  border-bottom: 1px solid rgba(23, 23, 23, 0.12);
+  padding: clamp(28px, 6vw, 60px) 0;
+}
+
+.connect-step {
+  display: grid;
+  gap: 16px;
+  max-width: 680px;
+}
+
+.connect-step > span {
+  color: var(--connect-accent);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.connect-step h2 {
+  margin: 0 0 10px;
+  font-size: clamp(2rem, 6vw, 4.8rem);
+  line-height: 0.96;
+  font-weight: 830;
+}
+
+.connect-step input,
+.connect-step textarea {
+  width: 100%;
+  min-height: 58px;
+  border: 1px solid rgba(23, 23, 23, 0.14);
+  border-radius: 0;
+  background: #fff;
+  color: var(--connect-ink);
+  font: inherit;
+  font-size: 1.05rem;
+  padding: 16px 18px;
+  outline: none;
+}
+
+.connect-step textarea {
+  min-height: 130px;
+  resize: vertical;
+}
+
+.connect-step input:focus,
+.connect-step textarea:focus {
+  border-color: var(--connect-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--connect-accent) 22%, transparent);
+}
+
+.connect-segments {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.connect-segments button,
+.connect-secondary,
+.connect-ghost,
+.connect-primary {
+  min-height: 46px;
+  border: 1px solid rgba(23, 23, 23, 0.16);
+  background: #fff;
+  color: var(--connect-ink);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.connect-segments button {
+  flex: 0 0 auto;
+  padding: 0 15px;
+}
+
+.connect-segments button.is-active {
+  border-color: var(--connect-ink);
+  background: var(--connect-ink);
+  color: #fff;
+}
+
+.connect-secondary {
+  width: fit-content;
+  padding: 0 18px;
+}
+
+.connect-note {
+  margin: 0;
+  padding: 16px;
+  background: rgba(23, 23, 23, 0.05);
+  color: rgba(23, 23, 23, 0.72);
+  line-height: 1.55;
+}
+
+.connect-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.connect-primary,
+.connect-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  padding: 0 22px;
+}
+
+.connect-primary {
+  border-color: var(--connect-ink);
+  background: var(--connect-ink);
+  color: #fff;
+}
+
+.connect-primary:disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
+}
+
+.connect-ghost {
+  background: transparent;
+}
+
+.connect-system {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: clamp(34px, 6vw, 60px);
+}
+
+.connect-system div,
+.connect-intelligence,
+.connect-resource {
+  border: 1px solid rgba(23, 23, 23, 0.12);
+  background: rgba(255, 255, 255, 0.72);
+  padding: 18px;
+}
+
+.connect-system b,
+.connect-system span,
+.connect-resource span,
+.connect-resource strong,
+.connect-resource small {
+  display: block;
+}
+
+.connect-system b {
+  font-size: 1.15rem;
+}
+
+.connect-system span,
+.connect-resource span {
+  margin-top: 8px;
+  color: rgba(23, 23, 23, 0.56);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.connect-success {
+  min-height: 100svh;
+  display: grid;
+  align-content: center;
+}
+
+.connect-resource-strip {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: clamp(30px, 5vw, 52px);
+}
+
+.connect-resource {
+  color: var(--connect-ink);
+  text-decoration: none;
+}
+
+.connect-resource strong {
+  margin-top: 8px;
+  font-size: 1.2rem;
+}
+
+.connect-resource small {
+  margin-top: 8px;
+  color: rgba(23, 23, 23, 0.62);
+  line-height: 1.5;
+}
+
+.connect-intelligence {
+  margin: 16px 0 24px;
+}
+
+.connect-intelligence span,
+.connect-intelligence b {
+  color: var(--connect-accent);
+  font-size: 0.76rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.connect-intelligence strong {
+  display: block;
+  margin-top: 8px;
+  font-size: clamp(4rem, 13vw, 9rem);
+  line-height: 0.9;
+}
+
+.connect-intelligence p {
+  max-width: 760px;
+  color: rgba(23, 23, 23, 0.7);
+  line-height: 1.6;
+}
+
+@media (max-width: 760px) {
+  .connect-shell,
+  .connect-success {
+    width: min(100% - 24px, 620px);
+    padding: 28px 0 96px;
+  }
+
+  .connect-panel {
+    min-height: 360px;
+  }
+
+  .connect-actions {
+    position: fixed;
+    inset: auto 0 0;
+    z-index: 20;
+    padding: 12px 12px calc(12px + env(safe-area-inset-bottom, 0px));
+    background: linear-gradient(180deg, rgba(251,250,247,0), rgba(251,250,247,0.96) 30%, #fbfaf7);
+  }
+
+  .connect-primary,
+  .connect-ghost {
+    min-width: 120px;
+  }
+
+  .connect-system,
+  .connect-resource-strip {
+    grid-template-columns: 1fr;
+  }
+}
