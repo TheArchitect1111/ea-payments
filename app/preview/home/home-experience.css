@@ -209,21 +209,6 @@
   background: #7fd3cd;
 }
 .hx-cta-ghost { justify-self: start; }
-/* Section 1 — second image (coach + parent) */
-.hx-reality-second {
-  position: absolute;
-  right: clamp(1rem, 4vw, 3rem);
-  top: clamp(1.5rem, 7vw, 4.5rem);
-  width: clamp(180px, 25vw, 330px);
-  aspect-ratio: 3 / 4;
-  margin: 0;
-  border-radius: 18px;
-  overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  box-shadow: 0 26px 55px rgba(0, 0, 0, 0.5);
-  z-index: 1;
-}
-.hx-reality-second .hx-photo { width: 100%; height: 100%; }
 
 /* Section 2 — A Better Way (role scenes) ---------------------------------- */
 .hx-better { background: #11161c; }
@@ -255,6 +240,21 @@
   background:
     linear-gradient(270deg, rgba(7, 9, 12, 0.72) 0%, rgba(7, 9, 12, 0.4) 42%, rgba(7, 9, 12, 0.05) 100%);
 }
+/* Bright scenes keep faces/people clearly visible (lighter scrim) */
+.hx-scene.is-bright .hx-scene-scrim {
+  background:
+    linear-gradient(90deg, rgba(7, 9, 12, 0.58) 0%, rgba(7, 9, 12, 0.22) 40%, rgba(7, 9, 12, 0) 70%);
+}
+.hx-scene.is-bright.is-flipped .hx-scene-scrim {
+  background:
+    linear-gradient(270deg, rgba(7, 9, 12, 0.58) 0%, rgba(7, 9, 12, 0.22) 40%, rgba(7, 9, 12, 0) 70%);
+}
+.hx-scene.is-bright .hx-scene-copy h3,
+.hx-scene.is-bright .hx-scene-narrative {
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.55);
+}
+/* Coach scene: frame the photo on the faces */
+.hx-scene--coach .hx-scene-bg .hx-photo img { object-position: 64% 32%; }
 .hx-scene-inner {
   width: 100%;
   max-width: var(--hx-max);
@@ -284,6 +284,14 @@
   max-height: clamp(360px, 62vh, 620px);
   max-width: 100%;
   filter: drop-shadow(0 28px 55px rgba(0, 0, 0, 0.45));
+}
+/* Rectangular screenshots (e.g. the registration dashboard) get rounded corners */
+.hx-scene-mockup.is-rounded img {
+  width: min(100%, 560px);
+  max-height: none;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
 }
 
 .ea-dev { --dev-bg: #0f1115; filter: drop-shadow(0 22px 45px rgba(15, 17, 21, 0.4)); }
@@ -672,7 +680,21 @@
   display: grid;
   grid-template-rows: auto 1fr;
 }
-.hx-client-photo { aspect-ratio: 16 / 10; }
+.hx-client-art {
+  aspect-ratio: 16 / 9;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, #eef4f4 0%, #f6f1f8 100%);
+}
+.hx-client-icon { width: 56px; height: 56px; color: var(--hx-accent); }
+.hx-client-card--arts .hx-client-art { background: linear-gradient(135deg, #e7f5f1 0%, #eef0fb 100%); }
+.hx-client-card--arts .hx-client-icon { color: #16897e; }
+.hx-client-card--community .hx-client-art { background: linear-gradient(135deg, #f3ecfb 0%, #fbecf3 100%); }
+.hx-client-card--community .hx-client-icon { color: #8a4fc4; }
+.hx-client-card--family .hx-client-art { background: linear-gradient(135deg, #e8f0fc 0%, #eef6f7 100%); }
+.hx-client-card--family .hx-client-icon { color: #2f72c9; }
+.hx-client-card--youth .hx-client-art { background: linear-gradient(135deg, #e6f4ee 0%, #eef5e9 100%); }
+.hx-client-card--youth .hx-client-icon { color: #1d8a63; }
 .hx-client-body { padding: 1.2rem 1.3rem 1.5rem; display: grid; gap: 0.7rem; }
 .hx-client-kind {
   text-transform: uppercase;
@@ -855,14 +877,14 @@
   .hx-scene.is-flipped .hx-scene-scrim {
     background: linear-gradient(180deg, rgba(7, 9, 12, 0.35) 0%, rgba(7, 9, 12, 0.78) 100%);
   }
+  .hx-scene.is-bright .hx-scene-scrim,
+  .hx-scene.is-bright.is-flipped .hx-scene-scrim {
+    background: linear-gradient(180deg, rgba(7, 9, 12, 0.2) 0%, rgba(7, 9, 12, 0.72) 100%);
+  }
+  .hx-scene-mockup.is-rounded img { width: 100%; }
   .ea-dev-phone { width: clamp(118px, 36vw, 160px); }
   .ea-dev-laptop { width: clamp(210px, 64vw, 300px); }
   .ea-dev-desktop { width: clamp(260px, 80vw, 420px); }
-  .hx-reality-second {
-    position: static;
-    width: min(70%, 280px);
-    margin: 1.2rem auto 0;
-  }
 }
 
 @media (max-width: 520px) {
