@@ -3,53 +3,27 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { resolveGuidePageContext } from '@/lib/ea-guide-context';
+import { getPageSpecificHint } from '@/lib/ea-guide-knowledge';
 import {
-  EA_GUIDE_DAILY_BRIEF_KEY,
-  EA_GUIDE_FIRST_USE_KEY,
-  EA_GUIDE_MEMORY_KEY,
-  type EAGuideAction,
-  type EAGuideMemoryItem,
-  resolveGuideContext,
-} from '@/lib/ea-guide';
+  EA_GUIDE_FIRST_LOGIN_KEY,
+  EA_GUIDE_GUIDE_ATTEMPT_KEY,
+  EA_GUIDE_USER_KEY,
+  type EAOrbState,
+  type GuideProgress,
+  type GuideTour,
+} from '@/lib/ea-guide-types';
 import {
-  getCaptureCount,
-  shouldShowGuideRecommendations,
-} from '@/lib/simplifi-onboarding';
+  getGuideTour,
+  getRecommendedTour,
+  listToursForPage,
+} from '@/lib/ea-guide-tours';
+import { resolveGuideContext, type EAGuideAction } from '@/lib/ea-guide';
+import TourDriver, { startEAGuideTour } from './TourDriver';
 import './ea-guide.css';
 
-type LaunchSignal = {
-  launchId: string;
-  client: string;
-  message: string;
-  status: string;
-  statusLabel: string;
-  updatedAt: string;
-  links: {
-    reviewPackage: string;
-    projectBrief: string;
-    skinBrief: string;
-    approval: string;
-    codexBuilder: string;
-    deployment: string;
-  };
-};
-
-type PageContext = {
-  lead: string;
-  actions: string[];
-};
-
-type StorySectionSignal = {
-  id: string;
-  title: string;
-  message: string;
-  example: string;
-};
-
-function todayKey() {
-  return new Date().toISOString().slice(0, 10);
-}
+type PanelMode = 'home' | 'question' | 'escalation';
 
 function inferFirstName() {
   if (typeof document === 'undefined') return 'there';
@@ -58,327 +32,451 @@ function inferFirstName() {
   return 'there';
 }
 
-function simplifiPageContext(): PageContext | null {
-  if (typeof window === 'undefined') return null;
-  const host = window.location.hostname;
-  const path = window.location.pathname;
-  if (host.includes('linkedin')) {
-    return {
-      lead: "Looks like you're reviewing a potential connection.",
-      actions: ['Save Profile', 'Add To Watch List', 'Create Follow-Up', 'Generate Magnifi Report'],
-    };
+function getOrCreateUserId(): string {
+  if (typeof window === 'undefined') return 'server';
+  let id = window.localStorage.getItem(EA_GUIDE_USER_KEY);
+  if (!id) {
+    id = `u-${Math.random().toString(36).slice(2, 10)}`;
+    window.localStorage.setItem(EA_GUIDE_USER_KEY, id);
   }
-  if (path.includes('cpr') || host.includes('cpr') || host.includes('recruit')) {
-    return {
-      lead: "Looks like you're viewing an athlete profile.",
-      actions: ['Save Athlete', 'Track Recruiting Progress', 'Add To Watch List', 'Create Family Profile'],
-    };
+  return id;
+}
+
+function readLocalProgress(userId: string): GuideProgress[] {
+  try {
+    const raw = window.localStorage.getItem(`ea-guide-progress-local-${userId}`);
+    return raw ? (JSON.parse(raw) as GuideProgress[]) : [];
+  } catch {
+    return [];
   }
-  if (host.includes('zillow') || host.includes('realtor') || host.includes('redfin')) {
-    return {
-      lead: "Looks like you're reviewing a property.",
-      actions: ['Save Property', 'Compare Properties', 'Set Reminder'],
-    };
-  }
-  if (path.includes('event') || host.includes('eventbrite') || host.includes('conference')) {
-    return {
-      lead: "Looks like you're researching an event.",
-      actions: ['Save Event', 'Track Registration', 'Create Follow-Up'],
-    };
-  }
-  return null;
+}
+
+function writeLocalProgress(userId: string, rows: GuideProgress[]) {
+  window.localStorage.setItem(`ea-guide-progress-local-${userId}`, JSON.stringify(rows));
 }
 
 export default function EAGuideOrb() {
   const pathname = usePathname() ?? '/';
-  const context = useMemo(() => resolveGuideContext(pathname), [pathname]);
-  const isSimplifi = context.id === 'simplifi';
-  const scope = 'simplifi-user';
+  const legacyContext = useMemo(() => resolveGuideContext(pathname), [pathname]);
+  const pageContext = useMemo(() => resolveGuidePageContext(pathname), [pathname]);
+  const [userId] = useState(() => getOrCreateUserId());
   const [open, setOpen] = useState(false);
-  const [voiceOpen, setVoiceOpen] = useState(false);
+  const [panelMode, setPanelMode] = useState<PanelMode>('home');
+  const [question, setQuestion] = useState('');
+  const [answer, setAnswer] = useState('');
+  const [answerLoading, setAnswerLoading] = useState(false);
+  const [suggestEscalation, setSuggestEscalation] = useState(false);
   const [toast, setToast] = useState('');
-  const [memory, setMemory] = useState<EAGuideMemoryItem[]>(() => {
-    if (typeof window === 'undefined') return [];
-    try {
-      const stored = window.localStorage.getItem(EA_GUIDE_MEMORY_KEY);
-      return stored ? (JSON.parse(stored) as EAGuideMemoryItem[]) : [];
-    } catch {
-      return [];
-    }
+  const [activeTour, setActiveTour] = useState<GuideTour | null>(null);
+  const [progress, setProgress] = useState<GuideProgress[]>(() => readLocalProgress(getOrCreateUserId()));
+  const [guideAttempted, setGuideAttempted] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return window.localStorage.getItem(EA_GUIDE_GUIDE_ATTEMPT_KEY) === 'true';
   });
-  const [launchSignal, setLaunchSignal] = useState<LaunchSignal | null>(null);
-  const [storySection, setStorySection] = useState<StorySectionSignal | null>(null);
-  const [firstName] = useState(() => inferFirstName());
-  const [firstUseComplete, setFirstUseComplete] = useState(() => {
+  const [escalationSummary, setEscalationSummary] = useState('');
+  const [escalationDetails, setEscalationDetails] = useState('');
+  const [firstLoginComplete, setFirstLoginComplete] = useState(() => {
     if (typeof window === 'undefined') return true;
-    return window.localStorage.getItem(EA_GUIDE_FIRST_USE_KEY) === 'true';
+    return window.localStorage.getItem(EA_GUIDE_FIRST_LOGIN_KEY) === 'true';
   });
-  const pageContext = useMemo(() => simplifiPageContext(), []);
+  const [firstName] = useState(() => inferFirstName());
+
+  const completedTourIds = useMemo(
+    () => progress.filter((row) => row.completedAt).map((row) => row.tourId),
+    [progress],
+  );
+
+  const availableTours = useMemo(
+    () => listToursForPage(pathname, pageContext.portalType, pageContext.role),
+    [pathname, pageContext.portalType, pageContext.role],
+  );
+
+  const recommendedTour = useMemo(
+    () => getRecommendedTour(pathname, pageContext.portalType, pageContext.role, completedTourIds),
+    [pathname, pageContext.portalType, pageContext.role, completedTourIds],
+  );
+
+  const pageHint = useMemo(() => getPageSpecificHint({ ...pageContext, userId }), [pageContext, userId]);
+
+  function markGuideAttempted() {
+    setGuideAttempted(true);
+    window.localStorage.setItem(EA_GUIDE_GUIDE_ATTEMPT_KEY, 'true');
+  }
 
   useEffect(() => {
-    const key = `${EA_GUIDE_DAILY_BRIEF_KEY}-${context.id}`;
-    if (window.localStorage.getItem(key) === todayKey()) return;
-    window.localStorage.setItem(key, todayKey());
-  }, [context.id]);
+    if (firstLoginComplete) return undefined;
+    const timer = window.setTimeout(() => setOpen(true), 900);
+    return () => window.clearTimeout(timer);
+  }, [firstLoginComplete]);
 
   useEffect(() => {
-    async function loadLaunchSignal() {
+    async function syncProgress() {
       try {
-        const response = await fetch('/api/ea-factory/launch-status', { cache: 'no-store' });
-        const payload = await response.json();
-        setLaunchSignal(payload.active ?? null);
+        const res = await fetch(`/api/ea-guide/progress?userId=${encodeURIComponent(userId)}`, {
+          cache: 'no-store',
+        });
+        if (!res.ok) return;
+        const payload = (await res.json()) as { progress?: GuideProgress[] };
+        if (payload.progress?.length) {
+          setProgress(payload.progress);
+          writeLocalProgress(userId, payload.progress);
+        }
       } catch {
-        setLaunchSignal(null);
+        /* local progress is enough offline */
       }
     }
-
-    loadLaunchSignal();
-    window.addEventListener('storage', loadLaunchSignal);
-    window.addEventListener('ea-guide:launch-ready', loadLaunchSignal);
-    return () => {
-      window.removeEventListener('storage', loadLaunchSignal);
-      window.removeEventListener('ea-guide:launch-ready', loadLaunchSignal);
-    };
-  }, []);
+    syncProgress();
+  }, [userId]);
 
   useEffect(() => {
-    function updateStorySection(event: Event) {
-      const signal = (event as CustomEvent<StorySectionSignal>).detail;
-      if (signal?.id && signal.message) setStorySection(signal);
+    function onStartTour(event: Event) {
+      const tourId = (event as CustomEvent<{ tourId: string }>).detail?.tourId;
+      if (!tourId) return;
+      const tour = getGuideTour(tourId);
+      if (tour) {
+        setActiveTour(tour);
+        setOpen(false);
+        markGuideAttempted();
+      }
     }
-
-    window.addEventListener('ea-guide:story-section', updateStorySection);
-    return () => window.removeEventListener('ea-guide:story-section', updateStorySection);
+    window.addEventListener('ea-guide:start-tour', onStartTour);
+    return () => window.removeEventListener('ea-guide:start-tour', onStartTour);
   }, []);
 
-  function showToast(message: string) {
-    setToast(message);
-    window.setTimeout(() => setToast(''), 2200);
-  }
-
-  function saveMemory(label: string, detail = context.recommendedAction) {
-    const item: EAGuideMemoryItem = {
-      id: `${context.id}-${memory.length}-${label.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`,
-      label,
-      detail,
-      createdAt: new Date().toISOString(),
-      contextId: context.id,
-    };
-    const next = [item, ...memory].slice(0, 12);
-    setMemory(next);
-    window.localStorage.setItem(EA_GUIDE_MEMORY_KEY, JSON.stringify(next));
-    showToast('Saved for later.');
-  }
-
-  function runEvent(eventName?: string) {
-    if (!eventName) return;
-    window.dispatchEvent(new CustomEvent(eventName, { detail: { source: 'ea-guide', context: context.id } }));
-    showToast('Got it.');
-  }
-
-  function completeFirstUse(close = false) {
-    setFirstUseComplete(true);
-    window.localStorage.setItem(EA_GUIDE_FIRST_USE_KEY, 'true');
-    if (close) setOpen(false);
-  }
-
-  const launchReady = Boolean(launchSignal && pathname.includes('/admin'));
-  const isStoryHome = pathname === '/' && Boolean(storySection);
-  const stacked = pathname.includes('/simplifi/capture') || pathname.includes('/amplifi/share');
-  const state = voiceOpen ? 'listening' : open ? 'speaking' : launchReady ? 'success' : isStoryHome ? 'watching' : 'idle';
-  const captureCount = isSimplifi ? getCaptureCount(scope) : 0;
-  const simplifiRecommendation = isSimplifi && shouldShowGuideRecommendations(scope) && captureCount >= 3
-    ? {
-        title: `You saved ${captureCount} opportunities.`,
-        detail: '1 needs attention. Would you like to review it?',
-        actions: [
-          { id: 'review', label: 'Review', kind: 'href' as const, href: '/simplifi/workspace' },
-          { id: 'later', label: 'Later', kind: 'memory' as const },
-        ],
+  const persistProgress = useCallback(
+    async (entry: GuideProgress) => {
+      setProgress((rows) => {
+        const next = rows.filter((row) => row.tourId !== entry.tourId);
+        next.push(entry);
+        writeLocalProgress(userId, next);
+        return next;
+      });
+      try {
+        await fetch('/api/ea-guide/progress', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(entry),
+        });
+      } catch {
+        /* local copy retained */
       }
-    : null;
+    },
+    [userId],
+  );
 
-  const recommendedAction = isStoryHome && storySection
-    ? storySection.title
-    : launchReady && launchSignal ? launchSignal.message : simplifiRecommendation?.title ?? context.recommendedAction;
-  const recommendationDetail = launchReady && launchSignal
-    ? `${launchSignal.client} is ${launchSignal.statusLabel.toLowerCase()}.`
-    : isStoryHome && storySection
-      ? storySection.message
-      : simplifiRecommendation?.detail ?? context.recommendationDetail;
-  const recommendationWhy = launchReady
-    ? ['Launch workflow completed.', 'Project and skin briefs were generated.', 'Approval is the next dependency.']
-    : isStoryHome && storySection
-      ? [storySection.example, 'The site is moving from current reality toward what becomes possible.', 'Use the final section to generate a future-state narrative.']
-    : context.recommendationWhy ?? context.sinceLastVisit;
-  const dailyBrief = isStoryHome && storySection
-    ? ['I am following the active scene.', 'Click Continue the story to move through the experience.', 'Use Show me an example for a concrete version.']
-    : context.dailyBrief?.length ? context.dailyBrief : context.sinceLastVisit;
-  const opportunityHealth = context.opportunityHealth ?? ['Active: Current workspace', 'Watching: New signals', 'Follow-Up Needed: Open commitments'];
-  const winWall = context.winWall ?? ['Progress is being tracked'];
-  const badgeLabel = isStoryHome && storySection ? storySection.title : launchReady && launchSignal ? launchSignal.message : context.badgeLabel;
-  const guideActions: EAGuideAction[] = launchReady && launchSignal
-    ? [
-        { id: 'review-package', label: 'Review Package', kind: 'href', href: launchSignal.links.reviewPackage },
-        { id: 'open-skin-brief', label: 'Open Skin Brief', kind: 'href', href: launchSignal.links.skinBrief },
-        { id: 'open-project-brief', label: 'Open Project Brief', kind: 'href', href: launchSignal.links.projectBrief },
-        { id: 'approval', label: 'Continue To Approval', kind: 'href', href: launchSignal.links.approval },
-        { id: 'codex', label: 'Codex Handoff', kind: 'href', href: launchSignal.links.codexBuilder },
-        { id: 'deployment', label: 'Deployment Package', kind: 'href', href: launchSignal.links.deployment },
-      ]
-    : isStoryHome
-      ? [
-          { id: 'story-example', label: 'Show me an example', kind: 'memory' },
-          { id: 'continue-story', label: 'Continue the story', kind: 'href', href: '#possibilities' },
-          { id: 'how-it-works', label: 'How does this work?', kind: 'href', href: '/assessment' },
-        ]
-    : simplifiRecommendation
-      ? (simplifiRecommendation.actions as EAGuideAction[])
-      : context.actions;
+  const showToast = useCallback((message: string) => {
+    setToast(message);
+    window.setTimeout(() => setToast(''), 2400);
+  }, []);
+
+  const startTour = useCallback((tour: GuideTour) => {
+    markGuideAttempted();
+    setActiveTour(tour);
+    setOpen(false);
+    setPanelMode('home');
+  }, []);
+
+  const completeFirstLogin = useCallback(
+    (startOrientation = false) => {
+      window.localStorage.setItem(EA_GUIDE_FIRST_LOGIN_KEY, 'true');
+      setFirstLoginComplete(true);
+      if (startOrientation) {
+        const tour = getGuideTour('first-login-orientation');
+        if (tour) startTour(tour);
+      }
+    },
+    [startTour],
+  );
+
+  const askQuestion = useCallback(async () => {
+    const q = question.trim();
+    if (!q) return;
+    setAnswerLoading(true);
+    setPanelMode('question');
+    markGuideAttempted();
+    try {
+      const res = await fetch('/api/ea-guide/ask', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          question: q,
+          pathname,
+          userId,
+          organizationId: pageContext.organizationId,
+        }),
+      });
+      const payload = (await res.json()) as {
+        answer?: string;
+        suggestEscalation?: boolean;
+        nextSteps?: string[];
+      };
+      const base = payload.answer ?? 'I could not find an answer. Try Walk me through this page.';
+      const steps = payload.nextSteps?.length ? `\n\nNext: ${payload.nextSteps.join(' · ')}` : '';
+      setAnswer(base + steps);
+      setSuggestEscalation(Boolean(payload.suggestEscalation));
+    } catch {
+      setAnswer('Something went wrong. Try Walk me through this page, or contact the EA team.');
+      setSuggestEscalation(true);
+    } finally {
+      setAnswerLoading(false);
+    }
+  }, [question, pathname, userId, pageContext.organizationId]);
+
+  const submitEscalation = useCallback(async () => {
+    const summary = escalationSummary.trim() || question.trim();
+    if (!summary) {
+      showToast('Describe the issue first.');
+      return;
+    }
+    try {
+      const res = await fetch('/api/ea-guide/escalate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          page: pathname,
+          portalType: pageContext.portalType,
+          role: pageContext.role,
+          organizationId: pageContext.organizationId,
+          userId,
+          workflow: pageContext.workflow,
+          issueSummary: summary,
+          details: escalationDetails.trim() || answer,
+        }),
+      });
+      const payload = (await res.json()) as { message?: string };
+      showToast(payload.message ?? "Sent to the EA team.");
+      setPanelMode('home');
+      setEscalationSummary('');
+      setEscalationDetails('');
+      setOpen(false);
+    } catch {
+      showToast('Could not send. Try again in a moment.');
+    }
+  }, [
+    escalationSummary,
+    escalationDetails,
+    question,
+    pathname,
+    pageContext,
+    userId,
+    answer,
+    showToast,
+  ]);
+
+  const orbState: EAOrbState = activeTour
+    ? 'walkthrough'
+    : panelMode === 'escalation'
+      ? 'escalation'
+      : panelMode === 'question'
+        ? 'question'
+        : !firstLoginComplete
+          ? 'new-user'
+          : recommendedTour
+            ? 'tour-available'
+            : legacyContext.state === 'alert' || legacyContext.state === 'warning'
+              ? 'needs-action'
+              : 'idle';
+
+  const recommendedAction = recommendedTour?.title ?? legacyContext.recommendedAction;
+  const recommendationDetail = recommendedTour?.description ?? legacyContext.recommendationDetail;
+
+  const guideActions: EAGuideAction[] = legacyContext.actions;
+
+  const stacked = pathname.includes('/simplifi/capture') || pathname.includes('/amplifi/share');
 
   return (
     <>
       <div className={`ea-guide-shell${stacked ? ' ea-guide-shell-stacked' : ''}`}>
         {toast ? <div className="ea-guide-toast">{toast}</div> : null}
+
         {open ? (
           <section className="ea-guide-card" aria-label="EA Guide">
-            {!firstUseComplete ? (
+            <div className="ea-guide-card-head">
+              <div>
+                <p className="ea-guide-eyebrow">EA Guide&trade;</p>
+                <h2>
+                  {!firstLoginComplete
+                    ? 'Welcome'
+                    : panelMode === 'escalation'
+                      ? 'Contact EA team'
+                      : `Hi ${firstName}`}
+                </h2>
+                <p className="ea-guide-context-line">{pageContext.label}</p>
+              </div>
+              <button
+                type="button"
+                className="ea-guide-icon-btn"
+                onClick={() => {
+                  setOpen(false);
+                  setPanelMode('home');
+                }}
+                aria-label="Close EA Guide"
+              >
+                x
+              </button>
+            </div>
+
+            {!firstLoginComplete ? (
               <>
-                <div className="ea-guide-card-head">
-                  <div>
-                    <p className="ea-guide-eyebrow">EA Guide&trade;</p>
-                    <h2>Welcome.</h2>
-                    <p>I help you remember opportunities, follow through on commitments, and focus on what matters most.</p>
-                  </div>
-                  <button type="button" className="ea-guide-icon-btn" onClick={() => completeFirstUse(true)} aria-label="Close EA Guide">
-                    x
+                <p className="ea-guide-welcome-copy">
+                  Welcome. I can walk you through your portal. Let&apos;s start with what matters most today.
+                </p>
+                <div className="ea-guide-actions">
+                  <button
+                    type="button"
+                    className="ea-guide-action"
+                    onClick={() => completeFirstLogin(true)}
+                  >
+                    Walk me through my portal
+                  </button>
+                  <button
+                    type="button"
+                    className="ea-guide-action ea-guide-action-muted"
+                    onClick={() => completeFirstLogin(false)}
+                  >
+                    Explore on my own
                   </button>
                 </div>
-                <p className="ea-guide-first-use-copy">What would you like to do?</p>
+              </>
+            ) : panelMode === 'escalation' ? (
+              <>
+                <p className="ea-guide-muted">
+                  I&apos;ll send this to the EA team with your page, role, and workflow context. No help desk email required.
+                </p>
+                <label className="ea-guide-field">
+                  <span>What do you need help with?</span>
+                  <textarea
+                    value={escalationSummary}
+                    onChange={(e) => setEscalationSummary(e.target.value)}
+                    rows={3}
+                    placeholder="Brief summary of the issue"
+                  />
+                </label>
+                <label className="ea-guide-field">
+                  <span>Additional details (optional)</span>
+                  <textarea
+                    value={escalationDetails}
+                    onChange={(e) => setEscalationDetails(e.target.value)}
+                    rows={2}
+                    placeholder="Steps you tried, what you expected"
+                  />
+                </label>
                 <div className="ea-guide-actions">
-                  <button type="button" className="ea-guide-action" onClick={() => completeFirstUse()}>
-                    Show Me Around
+                  <button type="button" className="ea-guide-action" onClick={submitEscalation}>
+                    Send to EA team
                   </button>
-                  <Link href="/simplifi/capture" className="ea-guide-action" onClick={() => completeFirstUse()}>
-                    Capture Something
-                  </Link>
-                  <Link href="/simplifi/workspace" className="ea-guide-action" onClick={() => completeFirstUse()}>
-                    Review Watch List
-                  </Link>
-                  <Link href="/simplifi" className="ea-guide-action ea-guide-action-muted" onClick={() => completeFirstUse()}>
-                    Learn How Simplifi Works
-                  </Link>
-                  <button type="button" className="ea-guide-action ea-guide-action-muted" onClick={() => completeFirstUse(true)}>
-                    Not Right Now
+                  <button
+                    type="button"
+                    className="ea-guide-action ea-guide-action-muted"
+                    onClick={() => setPanelMode('home')}
+                  >
+                    Back
                   </button>
                 </div>
               </>
             ) : (
               <>
-                <div className="ea-guide-card-head">
-                  <div>
-                    <p className="ea-guide-eyebrow">EA Guide&trade;</p>
-                    <h2>{isSimplifi ? context.greeting : `Hi ${firstName}`}</h2>
-                    <p>{context.role} for {context.product}</p>
-                  </div>
-                  <button type="button" className="ea-guide-icon-btn" onClick={() => setOpen(false)} aria-label="Close EA Guide">
-                    x
-                  </button>
-                </div>
+                <p className="ea-guide-page-hint">{pageHint}</p>
 
-                <div className="ea-guide-brief">
-                  <p className="ea-guide-section-label">Today</p>
-                  <ul>
-                    {dailyBrief.map((item) => (
-                      <li key={item}>{item}</li>
-                    ))}
-                  </ul>
-                </div>
-
-                {isSimplifi && pageContext ? (
-                  <div className="ea-guide-recommendation">
-                    <p>{pageContext.lead}</p>
-                    <p className="ea-guide-muted">Possible actions:</p>
-                    <div className="ea-guide-actions">
-                      {pageContext.actions.map((label) => (
-                        <button key={label} type="button" className="ea-guide-action" onClick={() => saveMemory(label)}>
-                          {label}
-                        </button>
-                      ))}
-                    </div>
+                <div className="ea-guide-ask">
+                  <p className="ea-guide-section-label">Ask a question</p>
+                  <div className="ea-guide-ask-row">
+                    <input
+                      type="text"
+                      value={question}
+                      onChange={(e) => setQuestion(e.target.value)}
+                      placeholder="Uploads, payments, next step..."
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') askQuestion();
+                      }}
+                    />
+                    <button type="button" className="ea-guide-ask-btn" onClick={askQuestion} disabled={answerLoading}>
+                      {answerLoading ? '...' : 'Ask'}
+                    </button>
                   </div>
-                ) : null}
+                  {answer ? <p className="ea-guide-answer">{answer}</p> : null}
+                </div>
 
                 <div className="ea-guide-recommendation">
-                  <p className="ea-guide-section-label">Recommended action</p>
+                  <p className="ea-guide-section-label">Recommended next step</p>
                   <strong>{recommendedAction}</strong>
                   <span>{recommendationDetail}</span>
-                  <div className="ea-guide-why">
-                    <p>Why am I seeing this?</p>
-                    <ul>
-                      {recommendationWhy.slice(0, 4).map((item) => (
-                        <li key={item}>{item}</li>
-                      ))}
-                    </ul>
-                  </div>
+                  {recommendedTour ? (
+                    <button
+                      type="button"
+                      className="ea-guide-inline-btn"
+                      onClick={() => startTour(recommendedTour)}
+                    >
+                      Start recommended guide
+                    </button>
+                  ) : null}
                 </div>
 
                 <div className="ea-guide-actions">
-                  {guideActions.map((action) => {
-                    if (action.kind === 'href' && action.href) {
-                      return (
-                        <Link key={action.id} href={action.href} className="ea-guide-action" onClick={() => setOpen(false)}>
-                          {action.label}
-                        </Link>
-                      );
-                    }
-                    return (
-                      <button
+                  <button
+                    type="button"
+                    className="ea-guide-action"
+                    onClick={() => {
+                      const tour =
+                        availableTours.find((t) => t.tourId !== 'first-login-orientation') ?? recommendedTour;
+                      if (tour) startTour(tour);
+                      else showToast('No walkthrough for this page yet.');
+                    }}
+                  >
+                    Walk me through this page
+                  </button>
+                  {guideActions.slice(0, 2).map((action) =>
+                    action.kind === 'href' && action.href ? (
+                      <Link
                         key={action.id}
-                        type="button"
-                        className="ea-guide-action"
-                        onClick={() => {
-                          if (action.kind === 'event') runEvent(action.eventName);
-                          if (action.kind === 'memory') {
-                            saveMemory(action.label);
-                            setOpen(false);
-                          }
-                        }}
+                        href={action.href}
+                        className="ea-guide-action ea-guide-action-muted"
+                        onClick={() => setOpen(false)}
                       >
                         {action.label}
-                      </button>
-                    );
-                  })}
-                  <button type="button" className="ea-guide-action ea-guide-action-muted" onClick={() => setVoiceOpen(true)}>
-                    Voice Mode
-                  </button>
+                      </Link>
+                    ) : null,
+                  )}
                 </div>
 
-                <div className="ea-guide-grid">
-                  <div>
-                    <p className="ea-guide-section-label">Opportunity health</p>
-                    {opportunityHealth.slice(0, 3).map((item) => (
-                      <span key={item}>{item}</span>
-                    ))}
-                  </div>
-                  <div>
-                    <p className="ea-guide-section-label">Win wall</p>
-                    {winWall.slice(0, 2).map((item) => (
-                      <span key={item}>{item}</span>
-                    ))}
-                  </div>
-                </div>
-
-                {context.protocolAwareness.length > 0 ? (
-                  <div className="ea-guide-protocols">
-                    <p className="ea-guide-section-label">Protocol awareness</p>
-                    <div>
-                      {context.protocolAwareness.slice(0, 4).map((protocol) => (
-                        <span key={protocol}>{protocol.replace(' Protocol', '')}</span>
-                      ))}
-                    </div>
+                {availableTours.length > 0 ? (
+                  <div className="ea-guide-tour-list">
+                    <p className="ea-guide-section-label">Available guides</p>
+                    <ul>
+                      {availableTours.map((tour) => {
+                        const done = completedTourIds.includes(tour.tourId);
+                        return (
+                          <li key={tour.tourId}>
+                            <button type="button" onClick={() => startTour(tour)}>
+                              {tour.title}
+                              {done ? ' ✓' : ''}
+                            </button>
+                            {tour.estimatedMinutes ? (
+                              <span>{tour.estimatedMinutes} min</span>
+                            ) : null}
+                          </li>
+                        );
+                      })}
+                    </ul>
                   </div>
                 ) : null}
+
+                {(guideAttempted || suggestEscalation) ? (
+                  <div className="ea-guide-escalate">
+                    <p className="ea-guide-section-label">Still need help?</p>
+                    <button
+                      type="button"
+                      className="ea-guide-action ea-guide-action-muted"
+                      onClick={() => setPanelMode('escalation')}
+                    >
+                      Contact EA team
+                    </button>
+                  </div>
+                ) : (
+                  <p className="ea-guide-muted ea-guide-escalate-hint">
+                    Try a guide or ask a question first. Contact EA team appears after that.
+                  </p>
+                )}
               </>
             )}
           </section>
@@ -386,44 +484,49 @@ export default function EAGuideOrb() {
 
         <button
           type="button"
-          className={`ea-guide-orb ea-guide-orb-${state}`}
+          className={`ea-guide-orb ea-guide-orb-${orbState}`}
           aria-label="Open EA Guide"
-          data-state={state}
+          data-state={orbState}
           onClick={() => setOpen((value) => !value)}
         >
           <span className="ea-guide-ring ea-guide-ring-gold" />
           <span className="ea-guide-ring ea-guide-ring-blue" />
           <span className="ea-guide-core">
-            <span className="ea-guide-core-mark" aria-hidden="true" />
+            <Image src="/ea-logo.png" alt="" width={28} height={28} className="ea-guide-logo" />
           </span>
-          <span className="ea-guide-state">{state === 'idle' ? 'EA Guide' : state}</span>
-          {!open && badgeLabel ? <span className="ea-guide-badge">{badgeLabel}</span> : null}
+          <span className="ea-guide-state">{orbState.replace('-', ' ')}</span>
+          {!open && recommendedTour && !completedTourIds.includes(recommendedTour.tourId) ? (
+            <span className="ea-guide-badge">Guide available</span>
+          ) : null}
         </button>
       </div>
 
-      {voiceOpen ? (
-        <div className="ea-guide-voice" role="dialog" aria-modal="true" aria-label="EA Guide voice mode">
-          <div className="ea-guide-voice-orb">
-            <span />
-            <span />
-            <span />
-            <Image src="/ea-logo.png" alt="" width={72} height={72} />
-          </div>
-          <p className="ea-guide-eyebrow">EA Guide Voice Mode</p>
-          <h2>Listening...</h2>
-          <p>What would you like to do?</p>
-          <div className="ea-guide-voice-actions">
-            {['Save This', 'Add To Watch List', 'Create Reminder', 'Show Follow-Ups', 'Review Opportunities'].map((label) => (
-              <button key={label} type="button" onClick={() => saveMemory(label, recommendedAction)}>
-                {label}
-              </button>
-            ))}
-            <button type="button" onClick={() => setVoiceOpen(false)}>
-              Close
-            </button>
-          </div>
-        </div>
+      {activeTour ? (
+        <TourDriver
+          key={activeTour.tourId}
+          tour={activeTour}
+          open
+          onClose={({ completed, lastStepIndex }) => {
+            const now = new Date().toISOString();
+            persistProgress({
+              userId,
+              organizationId: pageContext.organizationId,
+              tourId: activeTour.tourId,
+              completedAt: completed ? now : undefined,
+              skippedAt: completed ? undefined : now,
+              lastStepIndex,
+            });
+            if (activeTour.tourId === 'first-login-orientation' && completed) {
+              window.localStorage.setItem(EA_GUIDE_FIRST_LOGIN_KEY, 'true');
+              setFirstLoginComplete(true);
+            }
+            setActiveTour(null);
+            showToast(completed ? 'Guide complete.' : 'Guide skipped.');
+          }}
+        />
       ) : null}
     </>
   );
 }
+
+export { startEAGuideTour };
