@@ -28,7 +28,8 @@ export type PulseEventType =
   | 'onboarding.blocked'
   | 'launch.verification.completed'
   | 'payment.received'
-  | 'attention.critical';
+  | 'attention.critical'
+  | 'guide.escalated';
 
 export interface PulseEvent {
   product: PulseProduct;

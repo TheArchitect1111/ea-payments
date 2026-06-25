@@ -89,6 +89,171 @@
   box-shadow: 0 0 0 8px rgba(201, 168, 68, 0.16);
 }
 
+.ea-guide-logo {
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.ea-guide-orb-new-user {
+  animation: ea-guide-alert 1.8s ease-in-out infinite;
+}
+
+.ea-guide-orb-tour-available {
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.28), 0 0 40px rgba(201, 168, 68, 0.55);
+}
+
+.ea-guide-orb-question .ea-guide-core,
+.ea-guide-orb-walkthrough .ea-guide-core {
+  animation: ea-guide-think 1.4s ease-in-out infinite;
+}
+
+.ea-guide-orb-escalation {
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.28), 0 0 36px rgba(220, 38, 38, 0.35);
+}
+
+.ea-guide-orb-needs-action {
+  animation: ea-guide-alert 2.2s ease-in-out infinite;
+}
+
+.ea-guide-context-line {
+  margin-top: 4px;
+  color: #64748b;
+  font-size: 0.8rem;
+}
+
+.ea-guide-welcome-copy,
+.ea-guide-page-hint {
+  margin-top: 12px;
+  color: #334155;
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
+.ea-guide-ask {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(27, 43, 77, 0.08);
+}
+
+.ea-guide-ask-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.ea-guide-ask-row input {
+  flex: 1;
+  min-height: 38px;
+  padding: 8px 12px;
+  border: 1px solid rgba(23, 23, 23, 0.12);
+  border-radius: 999px;
+  font-size: 0.84rem;
+}
+
+.ea-guide-ask-btn {
+  min-width: 56px;
+  min-height: 38px;
+  border: 0;
+  border-radius: 999px;
+  background: #171717;
+  color: #fff;
+  font-weight: 900;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+.ea-guide-answer {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(201, 168, 68, 0.1);
+  color: #334155;
+  font-size: 0.84rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.ea-guide-inline-btn {
+  margin-top: 10px;
+  border: 0;
+  background: transparent;
+  color: #c9a844;
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.ea-guide-tour-list {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(27, 43, 77, 0.08);
+}
+
+.ea-guide-tour-list ul {
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 8px;
+}
+
+.ea-guide-tour-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.ea-guide-tour-list button {
+  border: 0;
+  background: transparent;
+  color: #171717;
+  font-size: 0.82rem;
+  font-weight: 800;
+  text-align: left;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.ea-guide-tour-list span {
+  color: #94a3b8;
+  font-size: 0.72rem;
+  white-space: nowrap;
+}
+
+.ea-guide-field {
+  display: grid;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.ea-guide-field span {
+  font-size: 0.76rem;
+  font-weight: 800;
+  color: #334155;
+}
+
+.ea-guide-field textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid rgba(23, 23, 23, 0.12);
+  border-radius: 10px;
+  font-size: 0.84rem;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.ea-guide-escalate {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(27, 43, 77, 0.08);
+}
+
+.ea-guide-escalate-hint {
+  margin-top: 12px;
+}
+
 .ea-guide-state {
   position: absolute;
   right: 2px;
