@@ -77,6 +77,7 @@ export default function PremiumLandingV2() {
         <nav className="hx-nav-links" aria-label="Primary">
           <a href="#better-way" className="hx-nav-link">A Better Way</a>
           <a href="#pulse" className="hx-nav-link">Pulse</a>
+          <Link href="/possibilities" className="hx-nav-link">Possibilities</Link>
           <Link href="/contact" className="hx-nav-link">Contact</Link>
           <Link href="/assessment" className="hx-nav-cta">Operational MRI&trade;</Link>
         </nav>
@@ -249,6 +250,7 @@ export default function PremiumLandingV2() {
           Helping organizations become easier to run, so people can do their best work.
         </p>
         <nav className="hx-footer-nav" aria-label="Explore">
+          <Link href="/possibilities">Experience Book</Link>
           <Link href="/assessment">Operational MRI&trade;</Link>
           <Link href="/contact">Contact</Link>
           <Link href="/story/selena">Client Stories</Link>
