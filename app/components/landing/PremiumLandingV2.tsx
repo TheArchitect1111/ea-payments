@@ -5,16 +5,15 @@ import Link from 'next/link';
 import { motion, useReducedMotion } from 'framer-motion';
 import { useState } from 'react';
 import DeviceFrame from './DeviceFrame';
-import PulseDashboardShowcase from './PulseDashboardShowcase';
 import {
+  buildSectionLead,
   clientStories,
   currentRealityHero,
+  currentRealitySecond,
   ecosystemCapabilities,
   howItWorks,
   possibleOutcomes,
-  pulseActivity,
-  pulseRecommended,
-  pulseTiles,
+  pulseMockup,
   recognitionMoments,
   roleScenes,
   sectionHeroes,
@@ -83,7 +82,7 @@ export default function PremiumLandingV2() {
         </nav>
       </header>
 
-      {/* Section 1 — Current Reality */}
+      {/* Section 1 — Current Reality (two images) */}
       <section className="hx-reality" aria-labelledby="reality-title">
         <SceneImage src={currentRealityHero.src} alt={currentRealityHero.alt} priority className="hx-reality-bg" />
         <div className="hx-reality-overlay" aria-hidden="true" />
@@ -99,6 +98,9 @@ export default function PremiumLandingV2() {
           </ul>
           <a href="#better-way" className="hx-cta-ghost">See a better way</a>
         </motion.div>
+        <figure className="hx-reality-second">
+          <SceneImage src={currentRealitySecond.src} alt={currentRealitySecond.alt} />
+        </figure>
       </section>
 
       {/* Section 2 — A Better Way (full-bleed cinematic scenes) */}
@@ -122,10 +124,7 @@ export default function PremiumLandingV2() {
           <motion.div className="hx-build-hero-copy" {...rise}>
             <p className="hx-kicker">How We Build Your Experience</p>
             <h2 id="build-title">Not a stack of products. One experience, built around you.</h2>
-            <p className="hx-lead">
-              Every organization receives a custom digital experience shaped around how it actually
-              operates — with information flowing naturally between every part.
-            </p>
+            <p className="hx-lead">{buildSectionLead}</p>
           </motion.div>
         </div>
         <div className="hx-ecosystem" aria-label="Capabilities in one connected ecosystem">
@@ -218,10 +217,8 @@ export default function PremiumLandingV2() {
         </div>
       </section>
 
-      {/* Section 7 — Pulse command center */}
+      {/* Section 7 — Pulse command center (real Pulse portal) */}
       <section className="hx-pulse" id="pulse" aria-labelledby="pulse-title">
-        <SceneImage src={sectionHeroes.pulse.src} alt={sectionHeroes.pulse.alt} className="hx-pulse-bg" />
-        <div className="hx-pulse-scrim" aria-hidden="true" />
         <div className="hx-pulse-inner">
           <motion.div className="hx-section-head hx-pulse-head" {...rise}>
             <p className="hx-kicker">Pulse</p>
@@ -230,39 +227,9 @@ export default function PremiumLandingV2() {
               The place leaders gain confidence — not another application to manage.
             </p>
           </motion.div>
-          <motion.div className="hx-pulse-board" {...rise}>
-            <header className="hx-pulse-board-head">
-              <span className="hx-pulse-mark">Pulse&trade;</span>
-              <span className="hx-pulse-live"><span className="hx-pulse-livedot" aria-hidden="true" />Live overview</span>
-            </header>
-            <div className="hx-pulse-tiles">
-              {pulseTiles.map((tile) => (
-                <div key={tile.label} className="hx-pulse-tile">
-                  <span className="hx-pulse-tile-label">{tile.label}</span>
-                  <strong className="hx-pulse-tile-value">{tile.value}</strong>
-                  <span className="hx-pulse-tile-detail">{tile.detail}</span>
-                </div>
-              ))}
-            </div>
-            <div className="hx-pulse-panels">
-              <div className="hx-pulse-panel">
-                <h3>Recent Activity</h3>
-                <ul>
-                  {pulseActivity.map((a) => (
-                    <li key={a}><span className="hx-pulse-pip" aria-hidden="true" />{a}</li>
-                  ))}
-                </ul>
-              </div>
-              <div className="hx-pulse-panel">
-                <h3>Recommended Actions</h3>
-                <ul>
-                  {pulseRecommended.map((a) => (
-                    <li key={a}><span className="hx-pulse-arrow" aria-hidden="true" />{a}</li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          </motion.div>
+          <motion.figure className="hx-pulse-shot" {...rise}>
+            <SceneImage src={pulseMockup.src} alt={pulseMockup.alt} />
+          </motion.figure>
         </div>
       </section>
 
@@ -326,7 +293,13 @@ function StoryScene({
           <h3>{scene.headline}</h3>
           <p className="hx-scene-narrative">{scene.narrative}</p>
         </div>
-        <DeviceFrame device={scene.device} screen={scene.screen} className="hx-scene-device" />
+        {scene.mockup ? (
+          <div className="hx-scene-device hx-scene-mockup">
+            <img src={scene.mockup} alt={scene.mockupAlt ?? ''} loading="lazy" decoding="async" />
+          </div>
+        ) : scene.screen ? (
+          <DeviceFrame device={scene.device} screen={scene.screen} className="hx-scene-device" />
+        ) : null}
       </div>
     </motion.article>
   );
