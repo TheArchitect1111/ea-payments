@@ -1,6 +1,6 @@
-import PremiumLanding from '@/app/components/landing/PremiumLanding';
-import './landing.css';
+import PremiumLandingV2 from '@/app/components/landing/PremiumLandingV2';
+import './preview/home/home-experience.css';
 
 export default function HomePage() {
-  return <PremiumLanding />;
+  return <PremiumLandingV2 />;
 }
