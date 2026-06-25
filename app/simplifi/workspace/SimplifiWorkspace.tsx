@@ -9,6 +9,7 @@ import type { RelationshipCluster } from '@/lib/relationship-hints';
 import { priorityLevelLabel } from '@/lib/priority-engine';
 import EmptyStateGuide from '@/app/components/guided-first-success/EmptyStateGuide';
 import ActionCenterPanel from './ActionCenterPanel';
+import CompanionOrb from './CompanionOrb';
 import './action-center-panel.css';
 
 interface BriefPayload {
@@ -494,6 +495,14 @@ export default function SimplifiWorkspace({
           <p>{selected.nextAction}</p>
         </aside>
       )}
+
+      <CompanionOrb
+        slug={slug}
+        loggedIn={loggedIn}
+        brief={brief}
+        objects={localObjects}
+        actionCenter={actionCenter}
+      />
     </main>
   );
 }
