@@ -22,9 +22,17 @@ export default function DeviceFrame({
         <span className="ea-dev-appname">{screen.app}</span>
         <span className="ea-dev-live">Live</span>
       </div>
+      <div className="ea-dev-toast" aria-hidden="true">
+        <span className="ea-dev-toast-dot" />
+        <span className="ea-dev-toast-text">Resource delivered</span>
+      </div>
       <ul className="ea-dev-list">
-        {screen.items.map((item) => (
-          <li key={item} className="ea-dev-row">
+        {screen.items.map((item, i) => (
+          <li
+            key={item}
+            className={`ea-dev-row${i === 0 ? ' is-arriving' : ''}`}
+            style={{ ['--row-i' as string]: String(i) }}
+          >
             <span className="ea-dev-dot" aria-hidden="true" />
             <span className="ea-dev-rowlabel">{item}</span>
             <span className="ea-dev-chevron" aria-hidden="true" />

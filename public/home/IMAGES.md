@@ -21,6 +21,13 @@ Target ~200–400 KB each. Bright, human, editorial — "documentary, not corpor
 | `scene-creator.jpg` | 1600×1200 | Creator connecting with an audience member |
 | `scene-sports-org.jpg` | 1600×1200 | Families at a community sports event |
 
+## Section heroes (every section gets one cinematic image; AI-generated OK)
+| File | Suggested size | Scene |
+|---|---|---|
+| `build-hero.jpg` | 1600×1067 | A team designing an organization's digital experience together |
+| `steps-hero.jpg` | 1600×1067 | Collaborators mapping a clear, simple plan |
+| `pulse-hero.jpg` | 1600×1067 | A leader calmly reviewing their organization at a glance |
+
 ## Section 4 — What's Possible (AI-generated OK)
 | File | Suggested size | Scene |
 |---|---|---|

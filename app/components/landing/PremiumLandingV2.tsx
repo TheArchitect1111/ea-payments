@@ -12,8 +12,13 @@ import {
   ecosystemCapabilities,
   howItWorks,
   possibleOutcomes,
+  pulseActivity,
+  pulseRecommended,
+  pulseTiles,
   recognitionMoments,
   roleScenes,
+  sectionHeroes,
+  type HowStepIcon,
   type RoleScene,
 } from '@/lib/landing-experience';
 
@@ -96,7 +101,7 @@ export default function PremiumLandingV2() {
         </motion.div>
       </section>
 
-      {/* Section 2 — A Better Way */}
+      {/* Section 2 — A Better Way (full-bleed cinematic scenes) */}
       <section className="hx-better" id="better-way" aria-labelledby="better-title">
         <motion.div className="hx-section-head" {...rise}>
           <p className="hx-kicker">A Better Way</p>
@@ -111,18 +116,28 @@ export default function PremiumLandingV2() {
 
       {/* Section 3 — How We Build Your Experience */}
       <section className="hx-build" aria-labelledby="build-title">
-        <motion.div className="hx-section-head" {...rise}>
-          <p className="hx-kicker">How We Build Your Experience</p>
-          <h2 id="build-title">Not a stack of products. One experience, built around you.</h2>
-          <p className="hx-lead">
-            Every organization receives a custom digital experience shaped around how it actually
-            operates. Information flows naturally between every part.
-          </p>
-        </motion.div>
-        <div className="hx-ecosystem">
-          {ecosystemCapabilities.map((cap) => (
-            <motion.article key={cap.name} className="hx-eco-node" {...rise}>
-              <span className="hx-eco-pulse" aria-hidden="true" />
+        <div className="hx-build-hero">
+          <SceneImage src={sectionHeroes.build.src} alt={sectionHeroes.build.alt} />
+          <div className="hx-build-hero-scrim" aria-hidden="true" />
+          <motion.div className="hx-build-hero-copy" {...rise}>
+            <p className="hx-kicker">How We Build Your Experience</p>
+            <h2 id="build-title">Not a stack of products. One experience, built around you.</h2>
+            <p className="hx-lead">
+              Every organization receives a custom digital experience shaped around how it actually
+              operates — with information flowing naturally between every part.
+            </p>
+          </motion.div>
+        </div>
+        <div className="hx-ecosystem" aria-label="Capabilities in one connected ecosystem">
+          <span className="hx-eco-flow" aria-hidden="true" />
+          {ecosystemCapabilities.map((cap, i) => (
+            <motion.article
+              key={cap.name}
+              className="hx-eco-node"
+              style={{ ['--node-i' as string]: String(i) }}
+              {...rise}
+            >
+              <span className="hx-eco-port" aria-hidden="true" />
               <h3>{cap.name}</h3>
               <p>{cap.note}</p>
             </motion.article>
@@ -150,14 +165,19 @@ export default function PremiumLandingV2() {
 
       {/* Section 5 — How It Works */}
       <section className="hx-steps" aria-labelledby="steps-title">
-        <motion.div className="hx-section-head" {...rise}>
-          <p className="hx-kicker">How It Works</p>
-          <h2 id="steps-title">Simple, start to finish.</h2>
-        </motion.div>
+        <div className="hx-steps-hero">
+          <SceneImage src={sectionHeroes.steps.src} alt={sectionHeroes.steps.alt} />
+          <div className="hx-steps-hero-scrim" aria-hidden="true" />
+          <motion.div className="hx-steps-hero-copy" {...rise}>
+            <p className="hx-kicker">How It Works</p>
+            <h2 id="steps-title">Simple, start to finish.</h2>
+          </motion.div>
+        </div>
         <ol className="hx-steps-row">
           {howItWorks.map((s, i) => (
             <motion.li key={s.step} className="hx-step" {...rise}>
               <span className="hx-step-num">{String(i + 1).padStart(2, '0')}</span>
+              <StepIcon icon={s.icon} />
               <h3>{s.step}</h3>
               <p>{s.note}</p>
             </motion.li>
@@ -198,19 +218,52 @@ export default function PremiumLandingV2() {
         </div>
       </section>
 
-      {/* Section 7 — Pulse */}
+      {/* Section 7 — Pulse command center */}
       <section className="hx-pulse" id="pulse" aria-labelledby="pulse-title">
-        <motion.div className="hx-section-head" {...rise}>
-          <p className="hx-kicker">Pulse</p>
-          <h2 id="pulse-title">Your command center. One calm view of everything.</h2>
-          <p className="hx-lead">
-            Communication, training, engagement, opportunities, and organization health — together,
-            so leaders gain confidence instead of chasing information.
-          </p>
-        </motion.div>
-        <motion.div className="hx-pulse-stage" {...rise}>
-          <PulseDashboardShowcase />
-        </motion.div>
+        <SceneImage src={sectionHeroes.pulse.src} alt={sectionHeroes.pulse.alt} className="hx-pulse-bg" />
+        <div className="hx-pulse-scrim" aria-hidden="true" />
+        <div className="hx-pulse-inner">
+          <motion.div className="hx-section-head hx-pulse-head" {...rise}>
+            <p className="hx-kicker">Pulse</p>
+            <h2 id="pulse-title">Your command center. One calm view of everything.</h2>
+            <p className="hx-lead">
+              The place leaders gain confidence — not another application to manage.
+            </p>
+          </motion.div>
+          <motion.div className="hx-pulse-board" {...rise}>
+            <header className="hx-pulse-board-head">
+              <span className="hx-pulse-mark">Pulse&trade;</span>
+              <span className="hx-pulse-live"><span className="hx-pulse-livedot" aria-hidden="true" />Live overview</span>
+            </header>
+            <div className="hx-pulse-tiles">
+              {pulseTiles.map((tile) => (
+                <div key={tile.label} className="hx-pulse-tile">
+                  <span className="hx-pulse-tile-label">{tile.label}</span>
+                  <strong className="hx-pulse-tile-value">{tile.value}</strong>
+                  <span className="hx-pulse-tile-detail">{tile.detail}</span>
+                </div>
+              ))}
+            </div>
+            <div className="hx-pulse-panels">
+              <div className="hx-pulse-panel">
+                <h3>Recent Activity</h3>
+                <ul>
+                  {pulseActivity.map((a) => (
+                    <li key={a}><span className="hx-pulse-pip" aria-hidden="true" />{a}</li>
+                  ))}
+                </ul>
+              </div>
+              <div className="hx-pulse-panel">
+                <h3>Recommended Actions</h3>
+                <ul>
+                  {pulseRecommended.map((a) => (
+                    <li key={a}><span className="hx-pulse-arrow" aria-hidden="true" />{a}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </motion.div>
+        </div>
       </section>
 
       {/* Section 8 — Begin What's Possible */}
@@ -263,15 +316,40 @@ function StoryScene({
 }) {
   return (
     <motion.article className={`hx-scene${flip ? ' is-flipped' : ''}`} {...rise}>
-      <div className="hx-scene-media">
+      <div className="hx-scene-bg">
         <SceneImage src={scene.image} alt={scene.imageAlt} />
+      </div>
+      <div className="hx-scene-scrim" aria-hidden="true" />
+      <div className="hx-scene-inner">
+        <div className="hx-scene-copy">
+          <p className="hx-kicker">{scene.role}</p>
+          <h3>{scene.headline}</h3>
+          <p className="hx-scene-narrative">{scene.narrative}</p>
+        </div>
         <DeviceFrame device={scene.device} screen={scene.screen} className="hx-scene-device" />
       </div>
-      <div className="hx-scene-copy">
-        <p className="hx-kicker">{scene.role}</p>
-        <h3>{scene.headline}</h3>
-        <p className="hx-scene-narrative">{scene.narrative}</p>
-      </div>
     </motion.article>
+  );
+}
+
+const STEP_ICON_PATHS: Record<HowStepIcon, string> = {
+  understand: 'M12 5c-4.5 0-8 3.5-8 7s3.5 7 8 7 8-3.5 8-7-3.5-7-8-7Zm0 4.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5Z',
+  design: 'M4 16.5 14.5 6l3.5 3.5L7.5 20H4v-3.5ZM15.5 5 17 3.5 20.5 7 19 8.5 15.5 5Z',
+  build: 'M4 7h7v7H4V7Zm9 3h7v7h-7v-7ZM6 16h3v3H6v-3Z',
+  launch: 'M12 3c3.5 2 5 5.5 5 9l-2.5 2.5h-5L7 12c0-3.5 1.5-7 5-9Zm0 5.5A1.5 1.5 0 1 0 12 11a1.5 1.5 0 0 0 0-2.5ZM8 18l-1.5 3M12 18v3M16 18l1.5 3',
+  support: 'M12 4a6 6 0 0 0-6 6v3a3 3 0 0 0 3 3h1v-6H8v-0a4 4 0 0 1 8 0v6h-2a2 2 0 0 1-2 2',
+};
+
+function StepIcon({ icon }: { icon: HowStepIcon }) {
+  return (
+    <svg className="hx-step-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path
+        d={STEP_ICON_PATHS[icon]}
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }

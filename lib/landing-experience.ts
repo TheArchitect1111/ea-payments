@@ -192,12 +192,43 @@ export const possibleOutcomes = [
    Section 5 — How It Works (simple, no jargon)
    ──────────────────────────────────────────────────────────────────────── */
 
-export const howItWorks = [
-  { step: 'Understand', note: 'We learn how your organization actually runs.' },
-  { step: 'Design', note: 'We shape an experience around your people.' },
-  { step: 'Build', note: 'We assemble your ecosystem, end to end.' },
-  { step: 'Launch', note: 'We bring it to life with your team.' },
-  { step: 'Support', note: 'We stay with you as you grow.' },
+export type HowStepIcon = 'understand' | 'design' | 'build' | 'launch' | 'support';
+
+export const howItWorks: { step: string; note: string; icon: HowStepIcon }[] = [
+  { step: 'Understand', note: 'We learn how your organization actually runs.', icon: 'understand' },
+  { step: 'Design', note: 'We shape an experience around your people.', icon: 'design' },
+  { step: 'Build', note: 'We assemble your ecosystem, end to end.', icon: 'build' },
+  { step: 'Launch', note: 'We bring it to life with your team.', icon: 'launch' },
+  { step: 'Support', note: 'We stay with you as you grow.', icon: 'support' },
+];
+
+/* Section hero imagery (every section gets one cinematic image). */
+export const sectionHeroes = {
+  build: { src: '/home/build-hero.jpg', alt: 'A diverse team designing an organization’s digital experience together' },
+  steps: { src: '/home/steps-hero.jpg', alt: 'Collaborators mapping a clear, simple plan side by side' },
+  pulse: { src: '/home/pulse-hero.jpg', alt: 'A leader calmly reviewing their organization at a glance' },
+} as const;
+
+/* Section 7 — Pulse command center (calm, exact tiles from the brief). */
+export const pulseTiles = [
+  { label: 'Communication', value: 'Flowing', detail: '847 touchpoints this week' },
+  { label: 'Training', value: 'On track', detail: '92% of team current' },
+  { label: 'Engagement', value: '94%', detail: 'Up from 88%' },
+  { label: 'Opportunities', value: '23', detail: '6 new this week' },
+  { label: 'Organization Health', value: 'Strong', detail: 'All systems steady' },
+] as const;
+
+export const pulseActivity = [
+  'New family connected — welcome experience delivered',
+  'Volunteer completed onboarding',
+  'Proposal viewed by prospect',
+  'Event reminders sent to 140 parents',
+] as const;
+
+export const pulseRecommended = [
+  'Follow up with 3 warm leads',
+  'Celebrate 2 volunteers hitting milestones',
+  'Refresh the fall training module',
 ] as const;
 
 /* ────────────────────────────────────────────────────────────────────────
