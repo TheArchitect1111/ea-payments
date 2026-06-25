@@ -9,7 +9,6 @@ import {
   buildSectionLead,
   clientStories,
   currentRealityHero,
-  currentRealitySecond,
   ecosystemCapabilities,
   howItWorks,
   possibleOutcomes,
@@ -17,6 +16,7 @@ import {
   recognitionMoments,
   roleScenes,
   sectionHeroes,
+  type ClientIcon,
   type HowStepIcon,
   type RoleScene,
 } from '@/lib/landing-experience';
@@ -82,7 +82,7 @@ export default function PremiumLandingV2() {
         </nav>
       </header>
 
-      {/* Section 1 — Current Reality (two images) */}
+      {/* Section 1 — Current Reality */}
       <section className="hx-reality" aria-labelledby="reality-title">
         <SceneImage src={currentRealityHero.src} alt={currentRealityHero.alt} priority className="hx-reality-bg" />
         <div className="hx-reality-overlay" aria-hidden="true" />
@@ -98,9 +98,6 @@ export default function PremiumLandingV2() {
           </ul>
           <a href="#better-way" className="hx-cta-ghost">See a better way</a>
         </motion.div>
-        <figure className="hx-reality-second">
-          <SceneImage src={currentRealitySecond.src} alt={currentRealitySecond.alt} />
-        </figure>
       </section>
 
       {/* Section 2 — A Better Way (full-bleed cinematic scenes) */}
@@ -192,8 +189,10 @@ export default function PremiumLandingV2() {
         </motion.div>
         <div className="hx-clients-grid">
           {clientStories.map((story) => (
-            <motion.article key={story.org} className="hx-client-card" {...rise}>
-              <SceneImage src={story.image} alt={`${story.org} — ${story.kind}`} className="hx-client-photo" />
+            <motion.article key={story.org} className={`hx-client-card hx-client-card--${story.icon}`} {...rise}>
+              <div className="hx-client-art" aria-hidden="true">
+                <ClientArtIcon icon={story.icon} />
+              </div>
               <div className="hx-client-body">
                 <p className="hx-client-kind">{story.kind}</p>
                 <h3>{story.org}</h3>
@@ -205,10 +204,6 @@ export default function PremiumLandingV2() {
                   <div>
                     <dt>Solution</dt>
                     <dd>{story.solution}</dd>
-                  </div>
-                  <div>
-                    <dt>Outcome</dt>
-                    <dd>{story.outcome}</dd>
                   </div>
                 </dl>
               </div>
@@ -224,7 +219,7 @@ export default function PremiumLandingV2() {
             <p className="hx-kicker">Pulse</p>
             <h2 id="pulse-title">Your command center. One calm view of everything.</h2>
             <p className="hx-lead">
-              The place leaders gain confidence — not another application to manage.
+              The place leaders gain confidence, not another application to manage.
             </p>
           </motion.div>
           <motion.figure className="hx-pulse-shot" {...rise}>
@@ -241,7 +236,7 @@ export default function PremiumLandingV2() {
             What could your organization become if everything worked together?
           </h2>
           <p className="hx-lead">
-            Start with the Operational MRI&trade; — a clear first step toward a calmer, more capable
+            Start with the Operational MRI&trade;. A clear first step toward a calmer, more capable
             organization.
           </p>
           <Link href="/assessment" className="hx-cta-solid">Take the Operational MRI&trade;</Link>
@@ -251,7 +246,7 @@ export default function PremiumLandingV2() {
       <footer className="hx-footer">
         <p className="hx-footer-title">Efficiency Architects</p>
         <p className="hx-footer-lead">
-          Helping organizations become easier to run — so people can do their best work.
+          Helping organizations become easier to run, so people can do their best work.
         </p>
         <nav className="hx-footer-nav" aria-label="Explore">
           <Link href="/assessment">Operational MRI&trade;</Link>
@@ -281,8 +276,17 @@ function StoryScene({
   flip: boolean;
   rise: Record<string, unknown>;
 }) {
+  const articleClass = [
+    'hx-scene',
+    `hx-scene--${scene.id}`,
+    flip ? 'is-flipped' : '',
+    scene.brightScene ? 'is-bright' : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
+
   return (
-    <motion.article className={`hx-scene${flip ? ' is-flipped' : ''}`} {...rise}>
+    <motion.article className={articleClass} {...rise}>
       <div className="hx-scene-bg">
         <SceneImage src={scene.image} alt={scene.imageAlt} />
       </div>
@@ -294,7 +298,7 @@ function StoryScene({
           <p className="hx-scene-narrative">{scene.narrative}</p>
         </div>
         {scene.mockup ? (
-          <div className="hx-scene-device hx-scene-mockup">
+          <div className={`hx-scene-device hx-scene-mockup${scene.mockupRounded ? ' is-rounded' : ''}`}>
             <img src={scene.mockup} alt={scene.mockupAlt ?? ''} loading="lazy" decoding="async" />
           </div>
         ) : scene.screen ? (
@@ -323,6 +327,75 @@ function StepIcon({ icon }: { icon: HowStepIcon }) {
         strokeLinecap="round"
         strokeLinejoin="round"
       />
+    </svg>
+  );
+}
+
+function ClientArtIcon({ icon }: { icon: ClientIcon }) {
+  return (
+    <svg className="hx-client-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      {icon === 'arts' && (
+        <>
+          <path
+            d="M9 17V6.2l9-1.8V15"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <circle cx="7" cy="17" r="2" stroke="currentColor" strokeWidth="1.6" />
+          <circle cx="16" cy="15" r="2" stroke="currentColor" strokeWidth="1.6" />
+        </>
+      )}
+      {icon === 'community' && (
+        <>
+          <path
+            d="M12 20s-5.2-3.3-5.2-7a3 3 0 0 1 5.2-2 3 3 0 0 1 5.2 2c0 3.7-5.2 7-5.2 7Z"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </>
+      )}
+      {icon === 'family' && (
+        <>
+          <path
+            d="M4 11 12 5l8 6"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <path
+            d="M6 10.5V19h12v-8.5"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <path
+            d="M12 16.5s-2.2-1.4-2.2-2.9a1.3 1.3 0 0 1 2.2-.9 1.3 1.3 0 0 1 2.2.9c0 1.5-2.2 2.9-2.2 2.9Z"
+            stroke="currentColor"
+            strokeWidth="1.4"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </>
+      )}
+      {icon === 'youth' && (
+        <>
+          <circle cx="8" cy="8" r="2.2" stroke="currentColor" strokeWidth="1.6" />
+          <circle cx="16" cy="8" r="2.2" stroke="currentColor" strokeWidth="1.6" />
+          <path
+            d="M4.5 19v-1.5a3.5 3.5 0 0 1 7 0V19M12.5 19v-1.5a3.5 3.5 0 0 1 7 0V19"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </>
+      )}
     </svg>
   );
 }
