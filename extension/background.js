@@ -1,3 +1,5 @@
+importScripts('api-client.js');
+
 const DEFAULT_BASE = 'https://ea-payments.vercel.app';
 const STORAGE_KEYS = ['apiUrl', 'apiKey', 'notifyEmail', 'portalSlug', 'watchlist', 'recentOpportunities', 'dailyBrief'];
 const pendingStoryUrls = {};
@@ -16,20 +18,11 @@ function compactUrl(url = '') {
 }
 
 async function getState() {
-  const data = await chrome.storage.sync.get(STORAGE_KEYS);
-  return {
-    apiUrl: data.apiUrl || DEFAULT_BASE,
-    apiKey: data.apiKey || '',
-    notifyEmail: data.notifyEmail || '',
-    portalSlug: data.portalSlug || '',
-    watchlist: Array.isArray(data.watchlist) ? data.watchlist : [],
-    recentOpportunities: Array.isArray(data.recentOpportunities) ? data.recentOpportunities : [],
-    dailyBrief: data.dailyBrief || null,
-  };
+  return SimplifiApi.getState();
 }
 
 async function setState(patch) {
-  await chrome.storage.sync.set(patch);
+  await SimplifiApi.setState(patch);
 }
 
 async function activeTab() {
@@ -127,10 +120,7 @@ async function pollCaptureStatus(base, apiKey, captureId, title, tabId) {
   for (let attempt = 0; attempt < 45; attempt += 1) {
     await new Promise((resolve) => setTimeout(resolve, 2000));
     try {
-      const res = await fetch(`${base}/api/capture/${captureId}/status`, {
-        headers: { 'X-EA-Capture-Key': apiKey },
-      });
-      const data = await res.json();
+      const data = await SimplifiApi.fetch(`/api/capture/${captureId}/status`);
       if (data.ready) {
         const storyUrl = data.magnifiUrl?.startsWith('http')
           ? data.magnifiUrl
@@ -201,15 +191,7 @@ async function captureTab(options = {}) {
     portalSlug: state.portalSlug || undefined,
   };
 
-  const res = await fetch(`${base}/api/capture/ingest`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-EA-Capture-Key': state.apiKey,
-    },
-    body: JSON.stringify(payload),
-  });
-  const data = await res.json();
+  const data = await SimplifiApi.post('/api/capture/ingest', payload);
 
   if (!data.ok) {
     showToast(tab.id, data.error || 'Capture failed.', 'idle');
@@ -249,6 +231,10 @@ async function createFollowUp(input = {}) {
 chrome.runtime.onInstalled.addListener((details) => {
   if (details.reason === 'install') {
     chrome.tabs.create({ url: `${DEFAULT_BASE}/extension/connect` });
+  }
+
+  if (chrome.sidePanel?.setPanelBehavior) {
+    chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: false }).catch(() => {});
   }
 
   chrome.contextMenus.removeAll(() => {
@@ -338,6 +324,10 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   }
   if (msg.type === 'SIMPLIFI_DAILY_BRIEF') {
     buildDailyBrief().then(sendResponse);
+    return true;
+  }
+  if (msg.type === 'SIMPLIFI_GET_BRIEF') {
+    SimplifiApi.getBrief().then(sendResponse);
     return true;
   }
   if (msg.type === 'SIMPLIFI_GET_STATE') {

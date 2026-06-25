@@ -45,8 +45,13 @@ document.getElementById('analyze').addEventListener('click', () => run('SIMPLIFI
 document.getElementById('followup').addEventListener('click', () => run('SIMPLIFI_FOLLOW_UP', 'Follow-up created.'));
 document.getElementById('brief').addEventListener('click', async () => {
   setStatus('Generating brief...');
-  const brief = await send('SIMPLIFI_DAILY_BRIEF');
-  setStatus(`${brief.opportunities?.length || 0} captures, ${brief.watchlistActivity?.length || 0} watch items.`);
+  const brief = await send('SIMPLIFI_GET_BRIEF');
+  if (brief?.ok === false) {
+    setStatus(brief.error || 'Connect Simplifi to load your Smart Brief.');
+    return;
+  }
+  setStatus(`${brief.counts?.active || 0} active, ${brief.counts?.needsAttention || 0} need attention.`);
+  if (brief.workspaceUrl) document.getElementById('dashboard').href = brief.workspaceUrl;
   await refresh();
 });
 document.getElementById('options').addEventListener('click', (event) => {

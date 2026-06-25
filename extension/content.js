@@ -6,28 +6,23 @@
   root.innerHTML = `
     <button id="simplifi-orb" class="simplifi-orb simplifi-orb-idle" type="button" aria-label="Open Simplifi">
       <span class="simplifi-orb-ring"></span>
-      <span class="simplifi-orb-core">S</span>
-      <span class="simplifi-orb-state">Idle</span>
+      <span class="simplifi-orb-core" aria-hidden="true"></span>
     </button>
-    <section id="simplifi-panel" class="simplifi-panel" aria-label="Simplifi Opportunity Intelligence">
+    <section id="simplifi-panel" class="simplifi-panel" aria-label="Simplifi Smart Brief">
       <div class="simplifi-panel-head">
         <div>
           <p>Simplifi</p>
-          <h2>Opportunity Intelligence</h2>
+          <h2>Smart Brief</h2>
         </div>
         <button id="simplifi-close" type="button" aria-label="Close">x</button>
       </div>
-      <p id="simplifi-context" class="simplifi-context">Watching this page for anything worth saving.</p>
+      <p id="simplifi-context" class="simplifi-context">Watching quietly. Open when you want the next useful action.</p>
       <div class="simplifi-actions">
         <button data-action="capture">Capture</button>
         <button data-action="watch">Watch</button>
-        <button data-action="analyze">Analyze</button>
         <button data-action="followup">Follow Up</button>
-        <button data-action="guide">Ask EA Guide</button>
-        <button data-action="dashboard">Open Dashboard</button>
-        <button data-action="watchlist">Open Watch List</button>
-        <button data-action="recent">Recent Opportunities</button>
-        <button data-action="brief">Daily Brief</button>
+        <button data-action="brief">Refresh Brief</button>
+        <button data-action="workspace">Workspace</button>
       </div>
       <div id="simplifi-output" class="simplifi-output">
         <strong>Suggested action</strong>
@@ -60,17 +55,7 @@
 
   function setOrbState(state, detail) {
     orb.className = `simplifi-orb simplifi-orb-${state || 'idle'}`;
-    const label = orb.querySelector('.simplifi-orb-state');
-    label.textContent = stateLabel(state);
     if (detail) context.textContent = detail;
-  }
-
-  function stateLabel(state) {
-    if (state === 'watching') return 'Watching';
-    if (state === 'found') return 'Found';
-    if (state === 'followup') return 'Follow-up';
-    if (state === 'action') return 'Action';
-    return 'Idle';
   }
 
   function showToast(message, state) {
@@ -90,6 +75,21 @@
 
   function setOutput(title, detail) {
     output.innerHTML = `<strong>${escapeHtml(title)}</strong><span>${escapeHtml(detail)}</span>`;
+  }
+
+  function setOutputCards(title, cards) {
+    output.innerHTML = `
+      <strong>${escapeHtml(title)}</strong>
+      <div class="simplifi-brief-cards">
+        ${cards.map((card) => `
+          <article class="simplifi-brief-card">
+            <b>${escapeHtml(card.title)}</b>
+            <span>${escapeHtml(card.detail)}</span>
+            ${card.href ? `<a href="${escapeHtml(card.href)}" target="_blank" rel="noopener noreferrer">Open</a>` : ''}
+          </article>
+        `).join('')}
+      </div>
+    `;
   }
 
   function escapeHtml(value) {
@@ -127,23 +127,14 @@
       showToast(response.id ? `Watching ${response.title}` : response.error || 'Watch failed.', response.id ? 'watching' : 'idle');
       return;
     }
-    if (action === 'analyze') {
-      const response = await send('SIMPLIFI_CAPTURE_PAGE', { ...payload, notes: `${payload.notes}\nAnalyze this as an opportunity.` });
-      showToast(response.ok ? 'Analysis queued.' : response.error || 'Analysis failed.', response.ok ? 'action' : 'idle');
-      return;
-    }
     if (action === 'followup') {
       const response = await send('SIMPLIFI_FOLLOW_UP', payload);
       showToast(response.id ? 'Follow-up reminder created.' : response.error || 'Could not create reminder.', response.id ? 'followup' : 'idle');
       return;
     }
-    if (action === 'guide') {
-      setOutput('EA Guide', 'Capture the page first, then use the story link or guidance page to decide the next action.');
-      setOrbState('action', 'EA Guide is ready with next-step guidance.');
-      return;
-    }
-    if (action === 'dashboard') {
-      window.open('https://ea-payments.vercel.app/simplifi/capture', '_blank', 'noopener,noreferrer');
+    if (action === 'workspace') {
+      const brief = await send('SIMPLIFI_GET_BRIEF');
+      window.open(brief.workspaceUrl || 'https://ea-payments.vercel.app/simplifi/workspace', '_blank', 'noopener,noreferrer');
       return;
     }
     if (action === 'watchlist' || action === 'recent') {
@@ -153,14 +144,29 @@
       return;
     }
     if (action === 'brief') {
-      const brief = await send('SIMPLIFI_DAILY_BRIEF');
-      setOutput('Daily Brief', `${brief.opportunities?.length || 0} recent captures. ${brief.watchlistActivity?.length || 0} watch items.`);
+      await renderSmartBrief();
     }
+  }
+
+  async function renderSmartBrief() {
+    setOutput('Loading Smart Brief', 'Checking Simplifi for the newest guidance.');
+    const brief = await send('SIMPLIFI_GET_BRIEF');
+    if (brief?.ok === false) {
+      setOutput('Connect Simplifi', brief.error || 'Pair this browser from /extension/connect to load your brief.');
+      return;
+    }
+    context.textContent = brief.greeting || 'Your Smart Brief is ready.';
+    const cards = brief.cards?.length
+      ? brief.cards
+      : [{ title: 'Nothing urgent right now', detail: 'Capture a page or add something to your watch list when a useful signal appears.' }];
+    setOutputCards('Smart Brief', cards.slice(0, 4));
   }
 
   orb.addEventListener('click', () => {
     panel.classList.toggle('simplifi-panel-open');
+    if (panel.classList.contains('simplifi-panel-open')) void renderSmartBrief();
   });
+  orb.addEventListener('dblclick', () => void runAction('capture'));
   close.addEventListener('click', () => panel.classList.remove('simplifi-panel-open'));
   panel.addEventListener('click', (event) => {
     const action = event.target?.dataset?.action;
