@@ -47,6 +47,26 @@ export default function SimplifiWorkspace({
   const [actionNote, setActionNote] = useState('');
   const [intelligenceNote, setIntelligenceNote] = useState('');
   const [intelligenceLoading, setIntelligenceLoading] = useState(false);
+  const topObject = localObjects[0] ?? null;
+  const topBriefItem = brief.items[0] ?? null;
+  const recommendedItems = brief.items.slice(0, 3);
+  const recentObjects = localObjects.slice(0, 5);
+  const todayActivity = brief.items.length > 0
+    ? brief.items.slice(0, 4)
+    : recentObjects.map((obj) => ({
+        id: `recent-${obj.id}`,
+        title: obj.title,
+        detail: obj.nextAction,
+        href: obj.considerUrl ?? obj.shareUrl,
+        kind: 'explore' as const,
+      }));
+  const quickActions = [
+    { label: 'Capture', href: '/simplifi/capture' },
+    { label: 'Review Inbox', href: '#inbox' },
+    ...(slug
+      ? [{ label: 'Portal', href: `/portal/${slug}` }]
+      : [{ label: 'Sign In', href: '/simplifi/login?next=/simplifi/workspace' }]),
+  ];
 
   const toggleExpand = (obj: SimplifiObject) => {
     setExpandedId((prev) => (prev === obj.id ? null : obj.id));
@@ -136,63 +156,143 @@ export default function SimplifiWorkspace({
 
   return (
     <main className="sw-main">
-      <section className="sw-hero">
-        <p className="sw-eyebrow">Never Lose An Opportunity Again™</p>
-        <h1>Your opportunities, organized.</h1>
-        <p className="sw-lead">
-          Save what matters. Simplifi helps you remember, prioritize, and follow up — so good opportunities
-          don&apos;t slip away.
-        </p>
-        <div className="sw-hero-actions">
-          <Link href="/simplifi/capture" className="sw-btn sw-btn-primary">
-            Capture now
-          </Link>
-          {brief.recommendedNext && (
-            <Link href={brief.recommendedNext.href} className="sw-btn sw-btn-ghost">
-              {brief.recommendedNext.label}
-            </Link>
-          )}
+      <section className="sw-brief-shell" aria-label="Simplifi brief">
+        <div className="sw-brief-intro">
+          <p>{brief.greeting.replace(/\.$/, '')}</p>
+          <h1>What should I pay attention to right now?</h1>
         </div>
+
+        <label className="sw-search">
+          <span>Search Simplifi</span>
+          <input placeholder="Search opportunities, people, notes, resources..." />
+        </label>
+
+        <section className="sw-priority-card" aria-label="Top priority">
+          <p className="sw-section-label">Top Priority</p>
+          {topObject ? (
+            <>
+              <div className="sw-priority-main">
+                <div>
+                  <h2>{topObject.title}</h2>
+                  <p>{topBriefItem?.detail ?? topObject.whyThisMatters}</p>
+                </div>
+                <span>{topObject.opportunityScore != null ? `${topObject.opportunityScore}/100` : topObject.priority}</span>
+              </div>
+              <div className="sw-card-footer">
+                <strong>{topObject.nextAction}</strong>
+                <button type="button" className="sw-icon-action" onClick={() => toggleExpand(topObject)}>
+                  Review
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="sw-priority-main">
+                <div>
+                  <h2>Capture the first opportunity</h2>
+                  <p>
+                    {loggedIn
+                      ? 'Your brief is clear. Add something worth exploring and Simplifi will prioritize the next move.'
+                      : 'Sign in to see your personalized brief, or capture without an account.'}
+                  </p>
+                </div>
+                <span>Start</span>
+              </div>
+              <div className="sw-card-footer">
+                <strong>Capture something worth exploring</strong>
+                <Link href="/simplifi/capture" className="sw-icon-action">
+                  Capture
+                </Link>
+              </div>
+            </>
+          )}
+        </section>
+
+        <section className="sw-brief-grid">
+          <div className="sw-brief-panel">
+            <div className="sw-panel-heading">
+              <h2>Today&apos;s Activity</h2>
+              <span>{todayActivity.length}</span>
+            </div>
+            <ol className="sw-timeline">
+              {todayActivity.map((item) => (
+                <li key={item.id}>
+                  <span aria-hidden="true" />
+                  <div>
+                    <strong>{item.title}</strong>
+                    <p>{item.detail}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </div>
+
+          <div className="sw-brief-panel">
+            <div className="sw-panel-heading">
+              <h2>Recommended Actions</h2>
+              <span>{recommendedItems.length}</span>
+            </div>
+            <div className="sw-action-stack">
+              {recommendedItems.length === 0 ? (
+                <p className="sw-muted">No action is urgent right now.</p>
+              ) : (
+                recommendedItems.map((item) => (
+                  <div key={item.id} className={`sw-action-card sw-brief-${item.kind}`}>
+                    <div>
+                      <strong>{item.title}</strong>
+                      <p>{item.detail}</p>
+                    </div>
+                    <div className="sw-brief-actions">
+                      {item.href && (
+                        <Link href={item.href} className="sw-link">
+                          Open
+                        </Link>
+                      )}
+                      {loggedIn && item.id.startsWith('x-') && (item.kind === 'stale' || item.kind === 'overdue') && (
+                        <button type="button" className="sw-link-btn" onClick={() => snoozeItem(item.id)}>
+                          Snooze
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </section>
+
+        <section className="sw-brief-panel">
+          <div className="sw-panel-heading">
+            <h2>Recent Events</h2>
+            <span>{recentObjects.length}</span>
+          </div>
+          {recentObjects.length === 0 ? (
+            <p className="sw-muted">Recent captures will appear here.</p>
+          ) : (
+            <ul className="sw-event-list">
+              {recentObjects.map((obj) => (
+                <li key={obj.id}>
+                  <div>
+                    <strong>{obj.title}</strong>
+                    <p>{obj.type}{obj.dateCaptured ? ` - ${obj.dateCaptured}` : ''}</p>
+                  </div>
+                  <span>{obj.priority}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+
+        <section className="sw-quick-actions" aria-label="Quick actions">
+          {quickActions.map((action) => (
+            <Link key={action.href} href={action.href}>
+              {action.label}
+            </Link>
+          ))}
+        </section>
       </section>
 
       <ActionCenterPanel center={actionCenter} />
-
-      <section className="sw-brief">
-        <div className="sw-brief-header">
-          <h2>Today&apos;s focus</h2>
-          <span className="sw-brief-greeting">{brief.greeting}</span>
-        </div>
-        {brief.items.length === 0 ? (
-          <p className="sw-muted">
-            {loggedIn
-              ? 'Your inbox is clear. Capture something that caught your attention.'
-              : 'Sign in to see your personalized brief, or capture without an account.'}
-          </p>
-        ) : (
-          <ul className="sw-brief-list">
-            {brief.items.map((item) => (
-              <li key={item.id} className={`sw-brief-item sw-brief-${item.kind}`}>
-                <div>
-                  <strong>{item.title}</strong>
-                  <p>{item.detail}</p>
-                </div>
-                <div className="sw-brief-actions">
-                  {item.href && (
-                    <Link href={item.href} className="sw-link">
-                      Open
-                    </Link>
-                  )}
-                  {loggedIn && item.id.startsWith('x-') && (item.kind === 'stale' || item.kind === 'overdue') && (
-                    <button type="button" className="sw-link-btn" onClick={() => snoozeItem(item.id)}>
-                      Snooze 30d
-                    </button>
-                  )}
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
 
       {brief.completed && brief.completed.length > 0 && (
         <section className="sw-completed">
@@ -251,7 +351,7 @@ export default function SimplifiWorkspace({
         </section>
       )}
 
-      <section className="sw-inbox">
+      <section className="sw-inbox" id="inbox">
         <div className="sw-inbox-header">
           <h2>Inbox</h2>
           <span className="sw-count">{localObjects.length} active</span>
