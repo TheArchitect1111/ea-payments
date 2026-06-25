@@ -69,6 +69,16 @@
       "source": "/app",
       "destination": "/simplifi/workspace",
       "permanent": false
+    },
+    {
+      "source": "/experience",
+      "destination": "/possibilities",
+      "permanent": true
+    },
+    {
+      "source": "/what-is-ea",
+      "destination": "/possibilities",
+      "permanent": true
     }
   ],
   "headers": [
