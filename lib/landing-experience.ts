@@ -1,30 +1,17 @@
 /**
- * Data model for the transformed homepage ("documentary" story).
- * People are the heroes; technology appears quietly inside each scene
- * via the recurring DeviceFrame motif (same platform, different chapters).
- *
- * Imagery is self-hosted from /public/home (see /public/home/IMAGES.md).
- * Backdrops are supplied by the client:
- *   - AI-generated cinematic scenes for the emotional sections (1, 2, 4)
- *   - Licensed editorial stock for the named client stories (6)
- * Until files are added, slots render a graceful gradient placeholder.
+ * Homepage storytelling data.
+ * Device screens show real EA portal mockups (client-supplied) where available;
+ * the Sports Organization scene uses a built portal screen (no mockup supplied).
  */
 
-export type DeviceKind = 'phone' | 'laptop';
+export type DeviceKind = 'phone' | 'laptop' | 'tablet' | 'desktop';
 
-/** A lightweight EA "screen" rendered inside a device frame (no external screenshots). */
-export type ExperienceScreen = {
-  /** App/experience name shown in the device status bar. */
-  app: string;
-  /** The rows/items the viewer recognizes as the relevant EA experience. */
-  items: string[];
-  /** Optional quiet dashboard signals (owner/leader side of the story). */
-  signals?: string[];
+export type PortalPage = 'dashboard' | 'updates' | 'resources' | 'events';
+
+export type BuiltScreen = {
+  orgLabel: string;
+  portalPage: PortalPage;
 };
-
-/* ────────────────────────────────────────────────────────────────────────
-   Section 1 — Current Reality (recognition; people only, no software)
-   ──────────────────────────────────────────────────────────────────────── */
 
 export const recognitionMoments = [
   'The owner answering the same question for the hundredth time.',
@@ -34,24 +21,33 @@ export const recognitionMoments = [
   'The director holding every detail in their own head.',
 ] as const;
 
+/** Section 1 uses two backgrounds: the original reality image + the coach moment. */
 export const currentRealityHero = {
   src: '/home/reality-hero.jpg',
-  alt: 'A leader working alone late while everyone else waits for direction',
+  alt: 'A team working late while operational details pile up',
 };
 
-/* ────────────────────────────────────────────────────────────────────────
-   Section 2 — A Better Way (6 role scenes, recurring device motif)
-   ──────────────────────────────────────────────────────────────────────── */
+export const currentRealitySecond = {
+  src: '/home/coach-parent.jpg',
+  alt: 'A coach and a parent talking on the sideline, phone in hand',
+};
+
+export const buildSectionLead =
+  'We build around how you really work — so your people spend less time chasing answers and more time doing what matters.';
 
 export type RoleScene = {
   id: string;
   role: string;
   headline: string;
   narrative: string;
-  device: DeviceKind;
-  screen: ExperienceScreen;
   image: string;
   imageAlt: string;
+  /** Real EA portal mockup (already framed in a device). */
+  mockup?: string;
+  mockupAlt?: string;
+  /** Fallback built portal screen (used when no mockup is supplied). */
+  device?: DeviceKind;
+  screen?: BuiltScreen;
 };
 
 export const roleScenes: RoleScene[] = [
@@ -60,180 +56,138 @@ export const roleScenes: RoleScene[] = [
     role: 'The Coach',
     headline: 'Every conversation becomes an opportunity.',
     narrative:
-      'A coach meets a parent on the sideline. The parent connects instantly — and the follow-up has already begun, so the coach just keeps talking.',
-    device: 'phone',
-    screen: {
-      app: 'Recruiting Portal',
-      items: ['Recruiting Guide', 'Parent Portal', 'Upcoming Events', 'Start Application'],
-    },
-    image: '/home/scene-coach.jpg',
-    imageAlt: 'A youth sports coach talking with a parent on the sideline after practice',
+      'A coach talks with a parent on the sideline. The parent connects on their phone — guides, events, and the application are already there, so the coach keeps coaching.',
+    image: '/home/coach-parent.jpg',
+    imageAlt: 'A coach talking with a parent on the sideline after practice',
+    mockup: '/home/portal-coach.png',
+    mockupAlt: 'Recruiting Portal on a phone showing profile, events, and next steps',
   },
   {
     id: 'business',
     role: 'The Business Owner',
     headline: 'Every opportunity keeps moving.',
     narrative:
-      'A meeting ends. The prospect already has what they need, and the owner can see the relationship advancing on its own.',
-    device: 'laptop',
-    screen: {
-      app: 'Owner Dashboard',
-      items: ['Company Overview', 'Proposal', 'Booking Link'],
-      signals: ['Lead created', 'Resources delivered', 'Follow-up scheduled'],
-    },
+      'A meeting ends. The prospect already has what they need, and the owner can see the next step without chasing anyone.',
     image: '/home/scene-business.jpg',
-    imageAlt: 'A business owner shaking hands after a meeting in a bright office',
+    imageAlt: 'A business owner after a meeting in a bright office',
+    mockup: '/home/portal-business.png',
+    mockupAlt: 'Business dashboard on a phone showing revenue, leads, and activity',
   },
   {
     id: 'pastor',
     role: 'The Pastor',
     headline: 'Every visitor feels connected.',
     narrative:
-      'A new family arrives. The welcome opens on a phone, and the pastor spends the moment building a relationship instead of managing logistics.',
-    device: 'phone',
-    screen: {
-      app: 'Member Portal',
-      items: ['Welcome', 'Events', 'Groups', "Children's Ministry", 'Member Portal'],
-    },
+      'A new family arrives. Welcome info opens on their phone, and the pastor stays in the moment — not buried in logistics.',
     image: '/home/scene-pastor.jpg',
-    imageAlt: 'A pastor warmly greeting a new family in a welcoming gathering space',
+    imageAlt: 'A pastor warmly greeting a new family',
+    mockup: '/home/portal-pastor.png',
+    mockupAlt: 'Church Portal on a phone showing visitor outreach and next steps',
   },
   {
     id: 'school',
     role: 'The School',
     headline: 'Every family stays informed.',
     narrative:
-      'A parent opens the Family Portal and everything is clear and current — no email thread, no guessing.',
-    device: 'phone',
-    screen: {
-      app: 'Family Portal',
-      items: ['Announcements', 'Calendar', 'Documents', 'Teacher Updates', 'Permission Forms'],
-    },
+      'A parent opens the family portal. Schedules, announcements, payments, and forms are right there — no email thread, no guessing.',
     image: '/home/scene-school.jpg',
-    imageAlt: 'A parent and child outside a bright, welcoming school campus',
+    imageAlt: 'A parent and child outside a welcoming school campus',
+    mockup: '/home/portal-school.png',
+    mockupAlt: 'Family Portal on a phone showing schedules, payments, and forms',
   },
   {
     id: 'creator',
     role: 'The Creator',
     headline: 'Every introduction becomes a relationship.',
     narrative:
-      'A talk ends. An audience member connects and instantly receives what was promised, while the creator keeps creating.',
-    device: 'phone',
-    screen: {
-      app: 'Creator Hub',
-      items: ['Guide', 'Video', 'Community', 'Booking Link'],
-      signals: ['New connection', 'Resources delivered', 'Follow-up active'],
-    },
+      'A talk ends. Someone connects and instantly gets the guide, video, and booking link — while the creator keeps creating.',
     image: '/home/scene-creator.jpg',
     imageAlt: 'A creator connecting with an audience member after speaking',
+    mockup: '/home/portal-creator.png',
+    mockupAlt: 'Creator Hub on a phone showing connections, resources, and bookings',
   },
   {
     id: 'sports-org',
     role: 'The Sports Organization',
     headline: "Every family knows what's happening.",
     narrative:
-      'Schedules, development, photos, recruiting, payments, and forms — every family finds it all in one place.',
-    device: 'laptop',
-    screen: {
-      app: 'Organization Portal',
-      items: ['Schedules', 'Player Development', 'Photos', 'Recruiting Updates', 'Payments', 'Forms', 'Events'],
-    },
+      'Schedules, payments, photos, and forms live in one place — so every family knows what is next.',
     image: '/home/scene-sports-org.jpg',
     imageAlt: 'Families gathered at a community sports event',
+    device: 'desktop',
+    screen: { orgLabel: 'Metro Hoops Collective', portalPage: 'dashboard' },
   },
 ];
 
-/* ────────────────────────────────────────────────────────────────────────
-   Section 3 — How We Build Your Experience (one ecosystem, not products)
-   ──────────────────────────────────────────────────────────────────────── */
-
 export const ecosystemCapabilities = [
-  { name: 'Landing Experiences', note: 'The first impression that invites people in.' },
-  { name: 'Organization Portals', note: 'A home base for everyone you serve.' },
-  { name: 'Connect', note: 'Instant follow-up the moment someone reaches out.' },
-  { name: 'Update Hub', note: 'One place for news, so nobody has to ask.' },
-  { name: 'Learning Hub', note: 'Knowledge that is always available.' },
-  { name: 'Training Experiences', note: 'Onboarding that runs without you.' },
-  { name: 'Parent & Family Experiences', note: 'Clarity for the people who matter most.' },
-  { name: 'Volunteer Experiences', note: 'People arrive prepared and confident.' },
-  { name: 'Member & Client Experiences', note: 'Relationships that feel personal at scale.' },
-  { name: 'Pulse', note: 'One calm view of the whole organization.' },
-  { name: 'Simplifi', note: 'Capture an opportunity and act on it instantly.' },
+  {
+    name: 'Custom Landing Pages & Websites',
+    note: 'Built for your organization — not a template. Your site looks like you, tells your story, and points people to the right next step, instead of forcing you into a generic layout.',
+  },
+  {
+    name: 'Organization Portal',
+    note: 'A custom portal linked to your website that serves as your operations center.',
+  },
+  { name: 'Connect', note: 'When someone reaches out, follow-up starts right away — without you repeating yourself.' },
+  {
+    name: 'Update Hub',
+    note: "Say it once. It's automatically communicated to staff, clients, parents, volunteers, and members — across email, text, website, portal, and social media.",
+  },
+  { name: 'Learning Hub', note: 'Guides and resources your people can find anytime — without asking you.' },
+  {
+    name: 'Training Experiences',
+    note: 'Training and onboarding that is available virtually, 24/7 — so new people get up to speed on their own schedule.',
+  },
+  { name: 'Parent & Family Experiences', note: 'Families always know what is happening — before they have to ask.' },
+  { name: 'Volunteer Experiences', note: 'Volunteers show up prepared because the details are already in their hands.' },
+  { name: 'Member & Client Experiences', note: 'People feel known and cared for — even as you grow.' },
+  { name: 'Pulse', note: 'One calm place to see how your organization is doing — without digging through inboxes.' },
+  { name: 'Simplifi', note: 'Capture an opportunity the moment it appears — and act on it fast.' },
 ] as const;
-
-/* ────────────────────────────────────────────────────────────────────────
-   Section 4 — What's Possible (outcomes; people, not software)
-   ──────────────────────────────────────────────────────────────────────── */
 
 export const possibleOutcomes = [
   {
-    line: 'The owner is present at dinner.',
+    line: 'The owner is home for dinner.',
     image: '/home/possible-owner.jpg',
-    alt: 'A founder enjoying unhurried time with family',
+    alt: 'A multigenerational family enjoying dinner together',
   },
   {
-    line: 'The coach is coaching.',
+    line: 'The coach is on the field.',
     image: '/home/possible-coach.jpg',
-    alt: 'A coach fully present with athletes on the field',
+    alt: 'A coach fully present with athletes during practice',
   },
   {
     line: 'The leader decides with confidence.',
     image: '/home/possible-leader.jpg',
-    alt: 'An executive director leading calmly with early awareness',
+    alt: 'A leader making a calm, confident decision',
   },
   {
-    line: 'The team has room to do its best work.',
+    line: 'The team has room to breathe.',
     image: '/home/possible-team.jpg',
-    alt: 'A diverse team with breathing room to think and improve together',
+    alt: 'A diverse team collaborating with breathing room',
   },
 ] as const;
-
-/* ────────────────────────────────────────────────────────────────────────
-   Section 5 — How It Works (simple, no jargon)
-   ──────────────────────────────────────────────────────────────────────── */
 
 export type HowStepIcon = 'understand' | 'design' | 'build' | 'launch' | 'support';
 
 export const howItWorks: { step: string; note: string; icon: HowStepIcon }[] = [
-  { step: 'Understand', note: 'We learn how your organization actually runs.', icon: 'understand' },
-  { step: 'Design', note: 'We shape an experience around your people.', icon: 'design' },
-  { step: 'Build', note: 'We assemble your ecosystem, end to end.', icon: 'build' },
-  { step: 'Launch', note: 'We bring it to life with your team.', icon: 'launch' },
+  { step: 'Understand', note: 'We listen to how your organization really runs.', icon: 'understand' },
+  { step: 'Design', note: 'We map an experience around your people.', icon: 'design' },
+  { step: 'Build', note: 'We put it together, end to end.', icon: 'build' },
+  { step: 'Launch', note: 'We go live with your team.', icon: 'launch' },
   { step: 'Support', note: 'We stay with you as you grow.', icon: 'support' },
 ];
 
-/* Section hero imagery (every section gets one cinematic image). */
 export const sectionHeroes = {
-  build: { src: '/home/build-hero.jpg', alt: 'A diverse team designing an organization’s digital experience together' },
-  steps: { src: '/home/steps-hero.jpg', alt: 'Collaborators mapping a clear, simple plan side by side' },
-  pulse: { src: '/home/pulse-hero.jpg', alt: 'A leader calmly reviewing their organization at a glance' },
+  build: { src: '/home/build-hero.jpg', alt: 'A team planning an organization’s digital experience together' },
+  steps: { src: '/home/steps-hero.jpg', alt: 'Collaborators mapping a clear plan side by side' },
 } as const;
 
-/* Section 7 — Pulse command center (calm, exact tiles from the brief). */
-export const pulseTiles = [
-  { label: 'Communication', value: 'Flowing', detail: '847 touchpoints this week' },
-  { label: 'Training', value: 'On track', detail: '92% of team current' },
-  { label: 'Engagement', value: '94%', detail: 'Up from 88%' },
-  { label: 'Opportunities', value: '23', detail: '6 new this week' },
-  { label: 'Organization Health', value: 'Strong', detail: 'All systems steady' },
-] as const;
-
-export const pulseActivity = [
-  'New family connected — welcome experience delivered',
-  'Volunteer completed onboarding',
-  'Proposal viewed by prospect',
-  'Event reminders sent to 140 parents',
-] as const;
-
-export const pulseRecommended = [
-  'Follow up with 3 warm leads',
-  'Celebrate 2 volunteers hitting milestones',
-  'Refresh the fall training module',
-] as const;
-
-/* ────────────────────────────────────────────────────────────────────────
-   Section 6 — Organizations We've Helped (NAMED — DRAFT, review before publish)
-   ──────────────────────────────────────────────────────────────────────── */
+/** Section 7 — Pulse (real Pulse portal on desktop + phone). */
+export const pulseMockup = {
+  src: '/home/portal-pulse.png',
+  alt: 'Pulse command center shown on a desktop and a phone',
+};
 
 export type ClientStory = {
   org: string;
@@ -242,55 +196,52 @@ export type ClientStory = {
   solution: string;
   outcome: string;
   image: string;
-  /** Draft copy pending client approval. */
-  reviewNeeded: boolean;
 };
 
-/** NOTE: Copy below is DRAFT for review — confirm accuracy/permission before publishing. */
+/** Fictional examples — not real client names. */
 export const clientStories: ClientStory[] = [
   {
-    org: 'Canadian Prospects',
-    kind: 'Athlete Recruitment',
-    challenge: 'Recruiting updates, applications, and parent questions lived in scattered messages.',
-    solution: 'A unified recruiting portal with guides, applications, and a parent experience.',
-    outcome: 'Families self-serve answers and applications move without manual follow-up.',
-    image: '/home/client-canadian-prospects.jpg',
-    reviewNeeded: true,
+    org: 'Bright Horizons Youth Network',
+    kind: 'Youth Mentorship',
+    challenge:
+      'After-school programs, mentors, and volunteers depended on one coordinator who tracked everything with emails and spreadsheets.',
+    solution:
+      'Volunteer, mentor, and family experiences powered by an Update Hub and Learning Hub with onboarding, schedules, announcements, and training.',
+    outcome:
+      'Volunteers arrive confident, families stay informed, and programs continue smoothly even when staff members change.',
+    image: '/home/client-bright-horizons.jpg',
   },
   {
-    org: 'Coalition Basketball',
-    kind: 'Youth Sports',
-    challenge: 'Coaches spent more time relaying logistics than developing athletes.',
-    solution: 'One organization portal for schedules, development, payments, and events.',
-    outcome: 'Parents always know what is next; coaches return to coaching.',
-    image: '/home/client-coalition-basketball.jpg',
-    reviewNeeded: true,
+    org: 'Community Care Alliance',
+    kind: 'Community Outreach',
+    challenge:
+      'Food pantry operations and community outreach relied on institutional knowledge held by a few longtime volunteers.',
+    solution:
+      'A centralized Update Hub for communications and a Learning Hub for volunteer orientation, procedures, and service guides.',
+    outcome:
+      'New volunteers become productive faster, operations remain consistent, and community services expand without overwhelming staff.',
+    image: '/home/client-community-care.jpg',
   },
   {
-    org: 'Amanda Catherine',
-    kind: 'Creator / Brand',
-    challenge: 'Audience follow-up depended on repeating the same steps by hand.',
-    solution: 'A creator hub that delivers guides, video, and booking automatically.',
-    outcome: 'Every introduction turns into an active, tracked relationship.',
-    image: '/home/client-amanda-catherine.jpg',
-    reviewNeeded: true,
+    org: 'HopeBridge Family Services',
+    kind: 'Family Services',
+    challenge:
+      'Event planning, client support, and volunteer coordination became difficult as the organization grew, creating communication gaps and duplicated work.',
+    solution:
+      'A branded member experience with an Update Hub, Learning Hub, document library, and automated notifications.',
+    outcome:
+      'Teams stay aligned, volunteers know exactly what to do, and families receive a more reliable, professional experience.',
+    image: '/home/client-hopebridge.jpg',
   },
   {
-    org: 'Amplify Stables',
-    kind: 'Equestrian Program',
-    challenge: 'Schedules, forms, and member communication were managed manually.',
-    solution: 'A member experience with events, documents, and clear communication.',
-    outcome: 'Members stay informed and the program runs with less daily overhead.',
-    image: '/home/client-amplify-stables.jpg',
-    reviewNeeded: true,
-  },
-  {
-    org: 'Bob Rumball Centre',
-    kind: 'Community Nonprofit',
-    challenge: 'Programs and volunteer coordination relied on one person holding it all.',
-    solution: 'Volunteer and member experiences with an Update Hub and Learning Hub.',
-    outcome: 'Volunteers arrive prepared and programs continue without bottlenecks.',
-    image: '/home/client-bob-rumball-centre.jpg',
-    reviewNeeded: true,
+    org: 'River Valley Arts Collective',
+    kind: 'Arts & Education',
+    challenge:
+      'Workshops, instructors, and volunteers were coordinated through scattered emails and text messages, making it difficult to onboard new helpers.',
+    solution:
+      'An Update Hub for announcements, calendars, and resources paired with a Learning Hub for training, event guides, and best practices.',
+    outcome:
+      'Every volunteer starts prepared, instructors spend less time answering repetitive questions, and community events run with greater consistency.',
+    image: '/home/client-river-valley.jpg',
   },
 ];
