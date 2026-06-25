@@ -46,8 +46,9 @@ export default function SimplifiCaptureApp({
   initialUrl?: string;
 }) {
   const fileRef = useRef<HTMLInputElement>(null);
-  const [open, setOpen] = useState(false);
-  const [view, setView] = useState<SheetView>('menu');
+  const hasInitialCapture = Boolean(loggedIn && initialUrl?.trim());
+  const [open, setOpen] = useState(hasInitialCapture);
+  const [view, setView] = useState<SheetView>(hasInitialCapture ? 'url' : 'menu');
   const [url, setUrl] = useState(initialUrl ?? '');
   const [prospectName, setProspectName] = useState('');
   const [loading, setLoading] = useState(false);
@@ -73,14 +74,6 @@ export default function SimplifiCaptureApp({
       }
     }
   }, [loggedIn]);
-
-  useEffect(() => {
-    if (loggedIn && initialUrl?.trim()) {
-      setUrl(initialUrl);
-      setOpen(true);
-      setView('url');
-    }
-  }, [loggedIn, initialUrl]);
 
   const resetSheet = () => {
     setView('menu');

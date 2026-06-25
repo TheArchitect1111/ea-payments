@@ -4,10 +4,10 @@ test('homepage hero and primary CTA render', async ({ page }) => {
   await page.goto('/');
   await expect(
     page.getByRole('heading', {
-      name: /imagine the possibilities/i,
+      name: /running an organization/i,
     }),
   ).toBeVisible();
-  await expect(page.getByRole('link', { name: /begin the story/i }).first()).toBeVisible();
+  await expect(page.getByRole('link', { name: /operational mri/i }).first()).toBeVisible();
 });
 
 test('consider selena demo story is reachable', async ({ page }) => {
@@ -23,8 +23,9 @@ test('assessment page is reachable', async ({ page }) => {
 
 test('admin dashboard route prompts auth', async ({ page }) => {
   await page.goto('/admin/dashboard');
-  await expect(page.getByRole('heading', { name: /admin access/i })).toBeVisible();
-  await expect(page.getByRole('button', { name: /sign in/i })).toBeVisible();
+  await expect(page).toHaveURL(/\/admin\/login/);
+  await expect(page.getByRole('heading', { name: /admin sign in/i })).toBeVisible();
+  await expect(page.getByRole('button', { name: /sign in/i }).first()).toBeVisible();
 });
 
 test('unsubscribe page is reachable', async ({ page }) => {

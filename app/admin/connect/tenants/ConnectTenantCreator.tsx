@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { ConnectOrgConfig } from '@/lib/connect-store';
 
 type Props = {
@@ -42,7 +42,11 @@ export default function ConnectTenantCreator({ initialTenants, initialSystemStat
   const [isSaving, setIsSaving] = useState(false);
   const [isSettingUp, setIsSettingUp] = useState(false);
 
-  const defaultSlug = useMemo(() => `tenant-${Math.floor(Date.now() / 1000)}`, []);
+  const [defaultSlug, setDefaultSlug] = useState('');
+
+  useEffect(() => {
+    setDefaultSlug(`tenant-${Math.floor(Date.now() / 1000)}`);
+  }, []);
 
   async function handleSubmit(formData: FormData) {
     setIsSaving(true);
