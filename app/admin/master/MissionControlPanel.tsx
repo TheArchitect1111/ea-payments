@@ -20,12 +20,16 @@ type OrchestrationPayload = {
 
 export default function MissionControlPanel({ mission }: { mission: MissionControlResponse }) {
   const [mode, setMode] = useState<OperatingMode>('executive');
+  const [missionData, setMissionData] = useState(mission);
+  const [missionLoading, setMissionLoading] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
   const [orchestration, setOrchestration] = useState<OrchestrationPayload | null>(null);
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    setMode(readOperatingMode());
+    const initial = readOperatingMode();
+    setMode(initial);
+
     const onMode = (e: Event) => {
       const detail = (e as CustomEvent<OperatingMode>).detail;
       if (detail) setMode(detail);
@@ -33,6 +37,27 @@ export default function MissionControlPanel({ mission }: { mission: MissionContr
     window.addEventListener('ea:operating-mode-change', onMode);
     return () => window.removeEventListener('ea:operating-mode-change', onMode);
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    setMissionLoading(true);
+
+    fetch(`/api/mission-control?mode=${mode}`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data: MissionControlResponse | null) => {
+        if (!cancelled && data) setMissionData(data);
+      })
+      .catch(() => {
+        if (!cancelled) setMissionData(mission);
+      })
+      .finally(() => {
+        if (!cancelled) setMissionLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [mode, mission]);
 
   const handleIntent = async (intent: string) => {
     const q = intent.trim();
@@ -109,10 +134,13 @@ export default function MissionControlPanel({ mission }: { mission: MissionContr
   return (
     <div className="space-y-4">
       <MissionControlExperience
-        mission={mission}
+        mission={missionData}
         mode={mode}
         onIntentSubmit={handleIntent}
       />
+      {missionLoading ? (
+        <p className="text-sm text-neutral-500 px-1">Updating Mission Control for {mode} mode…</p>
+      ) : null}
       {busy ? (
         <p className="text-sm text-neutral-500 px-1">Routing intent…</p>
       ) : null}

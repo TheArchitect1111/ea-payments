@@ -3,6 +3,7 @@
  */
 
 import { normalizeActivityEvent } from '@ea/portal-chassis/activity';
+import type { ActivityEvent } from '@ea/portal-chassis/activity';
 import { toAgentRun } from '@ea/portal-chassis/agents';
 import {
   buildMissionControlResponse,
@@ -25,13 +26,21 @@ const EA_ACTION_CARDS = DEFAULT_ACTION_CARDS.map((card) => {
   return card;
 });
 
-const CONTINUE_SEEDS = [
+const CONTINUE_SEEDS: Array<{
+  id: string;
+  title: string;
+  summary: string;
+  href: string;
+  module: string;
+  modes: Array<'executive' | 'builder'>;
+}> = [
   {
     id: 'continue-factory',
     title: 'EA Factory',
     summary: 'Protocols, repos, skin briefs, and launch packages',
     href: '/admin/ea-factory',
     module: 'build',
+    modes: ['builder'],
   },
   {
     id: 'continue-skin',
@@ -39,6 +48,7 @@ const CONTINUE_SEEDS = [
     summary: 'Continue a landing page or portal skin brief',
     href: '/admin/ea-factory/skin-factory',
     module: 'build',
+    modes: ['builder'],
   },
   {
     id: 'continue-simplifi',
@@ -46,15 +56,42 @@ const CONTINUE_SEEDS = [
     summary: 'Opportunities, decisions, and daily brief',
     href: '/simplifi/workspace',
     module: 'simplifi',
+    modes: ['executive', 'builder'],
+  },
+  {
+    id: 'continue-delivery',
+    title: 'Client Delivery',
+    summary: 'Active clients, onboarding, and delivery board',
+    href: '/admin/delivery',
+    module: 'clients',
+    modes: ['executive'],
   },
 ];
+
+const QUICK_ACTIONS_EXECUTIVE = [
+  { label: 'Resource Radar', href: '/admin/resource-radar', module: 'simplifi' },
+  { label: 'Client Delivery', href: '/admin/delivery', module: 'clients' },
+  { label: 'Launch Command', href: '/launch', module: 'pulse' },
+];
+
+const QUICK_ACTIONS_BUILDER = [
+  { label: 'EA Factory', href: '/admin/ea-factory', module: 'build' },
+  { label: 'Skin Factory', href: '/admin/ea-factory/skin-factory', module: 'build' },
+  { label: 'Chassis Deploy', href: '/admin/ea-factory/chassis-deployment', module: 'build' },
+];
+
+export function parseMissionControlRole(value: string | null | undefined): 'executive' | 'builder' {
+  return value === 'builder' ? 'builder' : 'executive';
+}
 
 export function buildEAMissionControl(input: {
   attentionItems: AttentionItem[];
   pulseEvents: (PulseEvent & { at?: string })[];
+  activityEvents?: ActivityEvent[];
   userName?: string;
   role?: 'executive' | 'builder';
 }): MissionControlResponse {
+  const role = input.role ?? 'executive';
   const attentionEvents = input.attentionItems.map(attentionToPlatform);
   const pulsePlatform = input.pulseEvents.map((e) =>
     fromPulseEventRow(
@@ -74,7 +111,11 @@ export function buildEAMissionControl(input: {
     ),
   );
 
-  const continueEvents = CONTINUE_SEEDS.map((seed) =>
+  const continueSeeds = CONTINUE_SEEDS.filter((seed) =>
+    seed.modes.includes(role),
+  );
+
+  const continueEvents = continueSeeds.map((seed) =>
     fromActivityEvent(
       normalizeActivityEvent({
         organizationId: EA_ORG,
@@ -94,7 +135,11 @@ export function buildEAMissionControl(input: {
     ),
   );
 
-  const events = mergeEventStreams([], [...attentionEvents, ...pulsePlatform, ...continueEvents]);
+  const events = mergeEventStreams(input.activityEvents ?? [], [
+    ...attentionEvents,
+    ...pulsePlatform,
+    ...continueEvents,
+  ]);
 
   const agentRuns = listAgents().map((agent, index) => {
     const kind = agent.name.toLowerCase().replace(/\s+agent$/, '').replace(/\s+/g, '-');
@@ -128,16 +173,12 @@ export function buildEAMissionControl(input: {
     {
       organizationId: EA_ORG,
       userName: input.userName,
-      role: input.role ?? 'executive',
+      role,
     },
     {
       actionCards: EA_ACTION_CARDS,
       agentRuns,
-      quickActions: [
-        { label: 'Resource Radar', href: '/admin/resource-radar', module: 'simplifi' },
-        { label: 'EA Factory', href: '/admin/ea-factory', module: 'build' },
-        { label: 'Launch Command', href: '/launch', module: 'pulse' },
-      ],
+      quickActions: role === 'builder' ? QUICK_ACTIONS_BUILDER : QUICK_ACTIONS_EXECUTIVE,
     },
   );
 }

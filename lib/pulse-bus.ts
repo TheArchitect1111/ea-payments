@@ -1,7 +1,10 @@
 /**
  * Pulse™ ingestion bus — normalized activity events from all EA products.
- * Persists to Airtable when PULSE_EVENTS_TABLE is configured; always returns ok for emitters.
+ * Persists to Airtable when PULSE_EVENTS_TABLE is configured; dual-writes ActivityEvents.
  */
+
+import { fromPulseEventRow, toActivityEventInput } from '@ea/portal-chassis/platform-events';
+import { publishEAActivityEvent } from '@/lib/ea-activity-events';
 
 export type PulseProduct =
   | 'ea-platform'
@@ -96,5 +99,61 @@ export async function emitPulseEvent(event: PulseEvent): Promise<{ ok: boolean }
     console.error('[pulse-bus] Airtable persist threw:', err);
   }
 
+  void dualWriteActivityEvent(event, row.at);
+
   return { ok: true };
+}
+
+function mapProductToModule(product: PulseProduct): string {
+  const modules: Record<PulseProduct, string> = {
+    'ea-platform': 'pulse',
+    simplifi: 'simplifi',
+    magnifi: 'connect',
+    amplifi: 'update-hub',
+    pulse: 'pulse',
+    'update-hub': 'update-hub',
+    cpr: 'portal',
+    brotherhub: 'portal',
+    sisterhub: 'portal',
+  };
+  return modules[product] ?? 'pulse';
+}
+
+function pulsePriorityToScore(priority?: PulseEvent['priority']): number {
+  switch (priority) {
+    case 'critical':
+      return 95;
+    case 'high':
+      return 80;
+    case 'medium':
+      return 55;
+    case 'low':
+      return 30;
+    default:
+      return 50;
+  }
+}
+
+async function dualWriteActivityEvent(event: PulseEvent, at: string): Promise<void> {
+  const platform = fromPulseEventRow(
+    {
+      organizationId: 'ea',
+      eventType: event.type,
+      title: event.title,
+      summary: event.detail,
+      module: mapProductToModule(event.product),
+      priority: pulsePriorityToScore(event.priority),
+      actionUrl: event.href,
+      personId: event.tenantId,
+      createdAt: at,
+      metadata: {
+        ...(event.metadata as Record<string, unknown> | undefined),
+        pulseProduct: event.product,
+        objectId: event.objectId,
+      },
+    },
+    `pulse-${event.type}-${at}`,
+  );
+
+  await publishEAActivityEvent(toActivityEventInput(platform));
 }

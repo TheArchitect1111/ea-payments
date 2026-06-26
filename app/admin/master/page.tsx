@@ -15,6 +15,7 @@ import { getCaptures } from '@/lib/capture-records';
 import { buildAttentionItems } from '@/lib/pulse-attention';
 import { listRecentPulseEvents } from '@/lib/pulse-bus';
 import { buildEAMissionControl } from '@/lib/mission-control-data';
+import { listEAActivityEvents } from '@/lib/ea-activity-events';
 import { isCaptureApiKeyConfigured } from '@/lib/capture-api-key';
 import { EA_SATELLITE_URLS } from '@/lib/platform-urls';
 import MissionControlPanel from './MissionControlPanel';
@@ -232,9 +233,11 @@ export default async function MasterPortalPage() {
   });
 
   const adminUser = parseAdminSession(token);
+  const activityEvents = await listEAActivityEvents(40);
   const mission = buildEAMissionControl({
     attentionItems,
     pulseEvents: listRecentPulseEvents(30),
+    activityEvents,
     userName: adminUser?.name?.split(' ')[0] ?? adminUser?.email?.split('@')[0],
     role: 'executive',
   });
