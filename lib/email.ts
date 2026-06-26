@@ -11,6 +11,7 @@ export interface WelcomeEmailData {
   portalLoginUrl: string;
   tempCredentials?: string;
   platformName?: string;
+  nextSteps?: string;
 }
 
 export interface AdminNotificationData {
@@ -276,9 +277,16 @@ export async function sendWelcomeEmail(
     'Your portal is being prepared. You will receive access details as soon as they are ready.';
 
   const firstName = data.clientName.split(' ')[0] || data.clientName;
+  const nextSteps =
+    data.nextSteps ??
+    nextStepsForPackage(data.packageName);
   const bodyHtml = `
     <p style="margin:0 0 16px;font-size:15px;color:#1A1A2E;line-height:1.7;">You are in, ${escHtml(firstName)}. We are excited to begin this work with you.</p>
-    <p style="margin:0 0 22px;font-size:15px;color:#1A1A2E;line-height:1.7;">A reminder of what you are getting: <strong>${escHtml(data.packageName)}</strong>, full project guidance, launch support, and access to your client portal.</p>
+    <p style="margin:0 0 22px;font-size:15px;color:#1A1A2E;line-height:1.7;">A reminder of what you are getting: <strong>${escHtml(data.packageName)}</strong>, guided project support, launch visibility, and access to your client portal.</p>
+    <div style="background-color:#F8F6F2;border-left:4px solid #C9A844;padding:18px 20px;margin-bottom:22px;">
+      <p style="margin:0 0 8px;font-size:12px;font-weight:700;color:#1B2B4D;">What Happens Next</p>
+      <p style="margin:0;font-size:13px;color:#555;line-height:1.7;">${escHtml(nextSteps)}</p>
+    </div>
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #E4E4E4;margin-bottom:22px;">
       <tr><td style="padding:12px 16px;font-size:12px;font-weight:700;color:#555;">Within 24 hours</td><td style="padding:12px 16px;font-size:14px;color:#1A1A2E;">You receive your project timeline and milestone plan.</td></tr>
       <tr><td style="padding:12px 16px;font-size:12px;font-weight:700;color:#555;">Week 1</td><td style="padding:12px 16px;font-size:14px;color:#1A1A2E;">Architecture and design begin.</td></tr>

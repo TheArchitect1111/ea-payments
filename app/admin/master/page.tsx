@@ -429,7 +429,14 @@ export default async function MasterPortalPage() {
         {/* Section 5: Platform Snapshot */}
         <section>
           <SectionHead title="Platform Snapshot" />
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+            <PlatformTile
+              title="EA Factory"
+              metric="4"
+              metricLabel="Active foundation phases"
+              sub="Protocols, repos, project briefs, and skin briefs"
+              href="/admin/ea-factory"
+            />
             <PlatformTile
               title="Canadian Prospects Recruitment"
               metric={String(cprAthletes.length)}

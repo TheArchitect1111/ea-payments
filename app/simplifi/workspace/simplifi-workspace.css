@@ -847,6 +847,9 @@
   cursor: grab;
   touch-action: none;
   -webkit-tap-highlight-color: transparent;
+  opacity: 0.46;
+  filter: saturate(0.82) brightness(0.82);
+  transition: opacity 180ms ease, filter 180ms ease, transform 180ms ease;
 }
 
 .companion-orb:active,
@@ -864,23 +867,31 @@
 
 .companion-orb-halo {
   background:
-    radial-gradient(circle at 34% 28%, rgba(255, 255, 255, 0.92), transparent 28%),
-    radial-gradient(circle at 68% 72%, rgba(55, 126, 255, 0.5), transparent 38%),
-    linear-gradient(135deg, rgba(46, 111, 255, 0.48), rgba(34, 197, 94, 0.32));
+    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.9) 0 7%, rgba(130, 224, 255, 0.74) 8% 14%, transparent 15%),
+    conic-gradient(from 20deg, rgba(105, 214, 255, 0.38), rgba(138, 92, 246, 0.46), rgba(36, 99, 235, 0.5), rgba(105, 214, 255, 0.38)),
+    radial-gradient(circle at 50% 50%, rgba(76, 154, 255, 0.45), rgba(31, 29, 92, 0.88) 72%);
   filter: blur(0.2px);
-  opacity: 0.78;
+  opacity: 0.74;
   animation: companion-breathe 4.8s ease-in-out infinite;
+  box-shadow: 0 0 28px rgba(91, 185, 255, 0.36);
 }
 
 .companion-orb-core {
   inset: 9px;
   background:
-    radial-gradient(circle at 32% 24%, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.2) 24%, transparent 34%),
-    radial-gradient(circle at 70% 70%, rgba(24, 88, 255, 0.75), rgba(24, 88, 255, 0.24) 42%, transparent 70%),
-    linear-gradient(145deg, rgba(20, 36, 52, 0.96), rgba(32, 91, 168, 0.76));
+    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 1) 0 7%, rgba(145, 235, 255, 0.82) 8% 13%, rgba(116, 79, 255, 0.4) 14% 30%, transparent 31%),
+    repeating-conic-gradient(from 18deg, rgba(255, 255, 255, 0.58) 0 1deg, transparent 1deg 15deg),
+    radial-gradient(circle at 50% 50%, rgba(83, 188, 255, 0.34), rgba(92, 65, 218, 0.34) 58%, transparent 78%);
   box-shadow:
-    inset 0 1px 8px rgba(255, 255, 255, 0.34),
-    0 12px 32px rgba(23, 32, 42, 0.22);
+    inset 0 0 18px rgba(255, 255, 255, 0.28),
+    0 0 18px rgba(95, 197, 255, 0.5),
+    0 12px 32px rgba(23, 32, 42, 0.2);
+  mix-blend-mode: screen;
+}
+
+.companion-orb-aware {
+  opacity: 0.74;
+  filter: saturate(1.05) brightness(1);
 }
 
 .companion-orb-aware .companion-orb-halo {
@@ -888,13 +899,20 @@
   animation-duration: 3.2s;
 }
 
+.companion-orb-active {
+  opacity: 1;
+  filter: saturate(1.38) brightness(1.18);
+}
+
 .companion-orb-active .companion-orb-halo {
   opacity: 1;
   background:
-    radial-gradient(circle at 34% 28%, rgba(255, 255, 255, 0.96), transparent 28%),
-    radial-gradient(circle at 68% 72%, rgba(30, 111, 216, 0.72), transparent 40%),
-    linear-gradient(135deg, rgba(23, 102, 61, 0.45), rgba(27, 111, 216, 0.72));
-  box-shadow: 0 0 0 12px rgba(27, 111, 216, 0.08);
+    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 1) 0 8%, rgba(130, 224, 255, 0.92) 9% 15%, transparent 16%),
+    conic-gradient(from 20deg, rgba(105, 214, 255, 0.7), rgba(138, 92, 246, 0.72), rgba(36, 99, 235, 0.76), rgba(105, 214, 255, 0.7)),
+    radial-gradient(circle at 50% 50%, rgba(76, 154, 255, 0.64), rgba(31, 29, 92, 0.92) 72%);
+  box-shadow:
+    0 0 0 12px rgba(91, 185, 255, 0.1),
+    0 0 46px rgba(91, 185, 255, 0.72);
   animation: companion-active 2.4s ease-in-out infinite;
 }
 
@@ -970,7 +988,7 @@
 
 .companion-tabs {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 7px;
 }
 
@@ -1062,7 +1080,8 @@
 }
 
 .companion-focus-card a,
-.companion-focus-card button {
+.companion-focus-card button,
+.companion-ask-row button {
   justify-self: start;
   min-height: 34px;
   display: inline-flex;
@@ -1076,6 +1095,12 @@
   font-weight: 850;
   text-decoration: none;
   cursor: pointer;
+}
+
+.companion-focus-card .companion-why-btn {
+  border-color: #d9e0e8;
+  background: #fff;
+  color: #17202a;
 }
 
 .companion-focus-urgent {
@@ -1163,6 +1188,10 @@
   border-left: 3px solid #b42318;
 }
 
+.companion-recovery {
+  border-left: 3px solid #17663d;
+}
+
 .companion-momentum {
   border-left: 3px solid #1b6fd8;
 }
@@ -1175,6 +1204,29 @@
 .companion-capture {
   display: grid;
   gap: 10px;
+}
+
+.companion-lesson,
+.companion-answer {
+  display: grid;
+  gap: 5px;
+  padding: 11px 12px;
+  border: 1px solid #dfe5ec;
+  border-radius: 8px;
+  background: #f8fafb;
+}
+
+.companion-lesson strong {
+  color: #17202a;
+  font-size: 13px;
+}
+
+.companion-lesson p,
+.companion-answer {
+  margin: 0;
+  color: #53606d;
+  font-size: 13px;
+  line-height: 1.45;
 }
 
 .companion-hint,
@@ -1219,6 +1271,55 @@
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
+}
+
+.companion-ask {
+  display: grid;
+  gap: 10px;
+}
+
+.companion-ask-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+}
+
+.companion-ask-row input {
+  min-width: 0;
+  min-height: 38px;
+  border: 1px solid #d9e0e8;
+  border-radius: 8px;
+  padding: 0 11px;
+  font: inherit;
+  font-size: 13px;
+}
+
+.companion-prompt-grid {
+  display: grid;
+  gap: 7px;
+}
+
+.companion-prompt-grid button {
+  min-height: 34px;
+  border: 1px solid #d9e0e8;
+  border-radius: 8px;
+  background: #fff;
+  color: #17202a;
+  padding: 0 10px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  text-align: left;
+  cursor: pointer;
+}
+
+.companion-teach-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #53606d;
+  font-size: 13px;
+  font-weight: 800;
 }
 
 @keyframes companion-breathe {

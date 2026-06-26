@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import AdminLogin from '../../master/AdminLogin';
+import { hasAdminPageAccess } from '@/lib/admin-page-auth';
 import { listEACPLaunches } from '@/lib/eacp-launch';
 import LaunchesClient from './LaunchesClient';
 
@@ -8,6 +10,7 @@ const NAVY = '#1B2B4D';
 const GOLD = '#C9A844';
 
 export default async function EACPLaunchesPage() {
+  if (!(await hasAdminPageAccess())) return <AdminLogin />;
   const launches = await listEACPLaunches();
 
   return (

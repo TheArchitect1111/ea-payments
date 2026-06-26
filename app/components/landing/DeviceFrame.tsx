@@ -1,72 +1,82 @@
 'use client';
 
-import type { DeviceKind, ExperienceScreen } from '@/lib/landing-experience';
+import Image from 'next/image';
+import type { BuiltScreen, DeviceKind, PortalPage } from '@/lib/landing-experience';
 
-/**
- * Recurring visual motif: the same EA platform shown across every story.
- * Renders an EA "screen" inside a phone or laptop frame using markup only
- * (no external screenshots), so it stays crisp, fast, and on-brand.
- */
+const PAGE_LABELS: Record<PortalPage, string> = {
+  dashboard: 'Dashboard',
+  updates: 'Update Hub',
+  resources: 'Resources',
+  events: 'Events',
+};
+
+/** Built EA portal screen — used only where no real mockup is supplied. */
+function PortalScreen({ screen }: { screen: BuiltScreen }) {
+  const nav: PortalPage[] = ['dashboard', 'updates', 'resources', 'events'];
+  return (
+    <div className="ea-builtportal" role="img" aria-label={`${screen.orgLabel} EA portal`}>
+      <aside className="ea-builtportal-side" aria-hidden="true">
+        <div className="ea-builtportal-brand">
+          <Image src="/ea-logo.png" alt="" width={20} height={20} />
+          <span>{screen.orgLabel}</span>
+        </div>
+        <ul>
+          {nav.map((id) => (
+            <li key={id} className={screen.portalPage === id ? 'is-active' : ''}>
+              {PAGE_LABELS[id]}
+            </li>
+          ))}
+        </ul>
+      </aside>
+      <div className="ea-builtportal-main">
+        <header className="ea-builtportal-top">
+          <span>{PAGE_LABELS[screen.portalPage]}</span>
+          <span className="ea-builtportal-live">Live</span>
+        </header>
+        <div className="ea-builtportal-cards">
+          <div><span>Schedules</span><strong>Updated</strong></div>
+          <div><span>Payments</span><strong>$12,840</strong></div>
+          <div><span>Forms</span><strong>3 due</strong></div>
+          <div><span>Events</span><strong>5 this week</strong></div>
+        </div>
+        <div className="ea-builtportal-chart" aria-hidden="true">
+          <span /><span /><span /><span /><span /><span /><span />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** Renders a built EA portal inside a device frame (phone / laptop / desktop). */
 export default function DeviceFrame({
-  device,
+  device = 'desktop',
   screen,
   className,
 }: {
-  device: DeviceKind;
-  screen: ExperienceScreen;
+  device?: DeviceKind;
+  screen: BuiltScreen;
   className?: string;
 }) {
-  const screenInner = (
-    <div className="ea-dev-app" role="img" aria-label={`${screen.app} experience preview`}>
-      <div className="ea-dev-statusbar">
-        <span className="ea-dev-appname">{screen.app}</span>
-        <span className="ea-dev-live">Live</span>
-      </div>
-      <div className="ea-dev-toast" aria-hidden="true">
-        <span className="ea-dev-toast-dot" />
-        <span className="ea-dev-toast-text">Resource delivered</span>
-      </div>
-      <ul className="ea-dev-list">
-        {screen.items.map((item, i) => (
-          <li
-            key={item}
-            className={`ea-dev-row${i === 0 ? ' is-arriving' : ''}`}
-            style={{ ['--row-i' as string]: String(i) }}
-          >
-            <span className="ea-dev-dot" aria-hidden="true" />
-            <span className="ea-dev-rowlabel">{item}</span>
-            <span className="ea-dev-chevron" aria-hidden="true" />
-          </li>
-        ))}
-      </ul>
-      {screen.signals && screen.signals.length > 0 && (
-        <div className="ea-dev-signals">
-          {screen.signals.map((signal) => (
-            <span key={signal} className="ea-dev-signal">
-              <span className="ea-dev-check" aria-hidden="true" />
-              {signal}
-            </span>
-          ))}
-        </div>
-      )}
-    </div>
-  );
+  const content = <PortalScreen screen={screen} />;
 
   if (device === 'laptop') {
     return (
       <div className={`ea-dev ea-dev-laptop${className ? ` ${className}` : ''}`}>
         <div className="ea-dev-laptop-lid">
-          <div className="ea-dev-screen">{screenInner}</div>
+          <div className="ea-dev-screen">{content}</div>
         </div>
         <div className="ea-dev-laptop-base" aria-hidden="true" />
       </div>
     );
   }
 
+  // desktop (default for the built fallback)
   return (
-    <div className={`ea-dev ea-dev-phone${className ? ` ${className}` : ''}`}>
-      <div className="ea-dev-notch" aria-hidden="true" />
-      <div className="ea-dev-screen">{screenInner}</div>
+    <div className={`ea-dev ea-dev-desktop${className ? ` ${className}` : ''}`}>
+      <div className="ea-dev-desktop-bezel">
+        <div className="ea-dev-screen">{content}</div>
+      </div>
+      <div className="ea-dev-desktop-stand" aria-hidden="true" />
     </div>
   );
 }

@@ -1,6 +1,5 @@
-import PremiumLandingV2 from '@/app/components/landing/PremiumLandingV2';
-import './preview/home/home-experience.css';
+import { redirect } from 'next/navigation';
 
 export default function HomePage() {
-  return <PremiumLandingV2 />;
+  redirect('/discover');
 }

@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import AdminLogin from '../../master/AdminLogin';
+import { hasAdminPageAccess } from '@/lib/admin-page-auth';
 import { EA_FACTORY_REPO_CATEGORIES, searchRepositories } from '@/lib/ea-factory';
 
 export const dynamic = 'force-dynamic';
@@ -16,6 +18,7 @@ function value(params: Record<string, string | string[] | undefined>, key: strin
 }
 
 export default async function RepoLibraryPage({ searchParams }: PageProps) {
+  if (!(await hasAdminPageAccess())) return <AdminLogin />;
   const params = (await searchParams) ?? {};
   const query = value(params, 'q');
   const category = value(params, 'category');

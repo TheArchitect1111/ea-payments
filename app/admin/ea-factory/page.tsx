@@ -1,5 +1,7 @@
 import Link from 'next/link';
+import { cookies } from 'next/headers';
 import type { ReactNode } from 'react';
+import { EA_ADMIN_COOKIE, verifyAdminSession } from '@/lib/ea-admin-auth';
 import {
   buildRepoIntelligence,
   EA_FACTORY_PHASES,
@@ -8,6 +10,7 @@ import {
   generateEAFactorySkinBrief,
   searchProtocols,
 } from '@/lib/ea-factory';
+import AdminLogin from '../master/AdminLogin';
 
 export const dynamic = 'force-dynamic';
 
@@ -53,6 +56,10 @@ function SectionHeader({ eyebrow, title, body }: { eyebrow: string; title: strin
 }
 
 export default async function EAFactoryPage({ searchParams }: PageProps) {
+  const cookieStore = await cookies();
+  const token = cookieStore.get(EA_ADMIN_COOKIE)?.value;
+  if (!verifyAdminSession(token)) return <AdminLogin />;
+
   const params = (await searchParams) ?? {};
   const protocolQuery = value(params, 'protocolSearch');
   const repoQuery = value(params, 'repoSearch');
@@ -112,6 +119,12 @@ export default async function EAFactoryPage({ searchParams }: PageProps) {
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
+              <Link href="/admin/ea-factory/new-experience" className="rounded-full bg-black px-4 py-2 text-xs font-black text-white">
+                New Experience
+              </Link>
+              <Link href="/admin/ea-factory/training-transformations" className="rounded-full bg-[#111] px-4 py-2 text-xs font-black text-white">
+                Training Transformations
+              </Link>
               <Link href="/admin/ea-factory/launches" className="rounded-full bg-[#C9A844] px-4 py-2 text-xs font-black text-[#1B2B4D]">
                 EACP Launches
               </Link>

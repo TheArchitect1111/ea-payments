@@ -8,15 +8,15 @@ const SUPPORT_EMAIL = 'freedom@efficiencyarchitects.online';
 const steps = [
   {
     icon: 'clock',
-    title: 'We are reviewing your responses right now.',
+    title: 'We are turning your answers into an organization profile and first blueprint.',
   },
   {
     icon: 'email',
-    title: 'You will receive a personalized capacity analysis in your inbox shortly.',
+    title: 'You will receive next steps with the clearest opportunities we found.',
   },
   {
     icon: 'handshake',
-    title: 'When you are ready, we will walk you through exactly what we found and how we can help.',
+    title: 'When you are ready, we will walk through the recommended experience and roadmap together.',
   },
 ];
 
@@ -58,10 +58,10 @@ export default async function ThankYouPage({
           <img src="/images/ea-logo.png" alt="Efficiency Architects" className="h-20 w-auto" />
           <div className="pb-12 pt-10">
             <p className="text-xs font-bold uppercase tracking-[0.28em]" style={{ color: GOLD }}>
-              Efficiency Architects
+              Discover The Possibilities™
             </p>
             <h1 className="mt-4 text-4xl font-black uppercase tracking-wide sm:text-5xl" style={{ color: GOLD }}>
-              Your Assessment Is In.
+              Your Blueprint Is Starting.
             </h1>
             <p className="mt-4 max-w-xl text-lg leading-8 text-blue-50">
               {receivedOnly
@@ -96,7 +96,7 @@ export default async function ThankYouPage({
               className="inline-flex items-center justify-center px-8 py-4 text-xs font-black uppercase tracking-[0.22em]"
               style={{ backgroundColor: NAVY, color: GOLD }}
             >
-              View My Analysis
+              View My Blueprint
             </a>
           )}
           <a

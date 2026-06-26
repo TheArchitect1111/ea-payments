@@ -7,9 +7,19 @@ import type { ActionCenterPayload } from '@/lib/action-center';
 import { priorityLevelLabel } from '@/lib/priority-engine';
 import type { CaptureApiResponse } from '@/lib/capture-response';
 import CaptureProcessingPanel from '@/app/components/CaptureProcessingPanel';
+import {
+  answerAskSimplifi,
+  consumeContextLesson,
+  explainRecommendation,
+  getTeachMeMode,
+  recordCompanionEvent,
+  setTeachMeMode,
+  shouldOfferRecovery,
+  type SimplifiContextLesson,
+} from '@/lib/simplifi-guidance-system';
 
 type OrbState = 'silent' | 'aware' | 'active';
-type PanelView = 'brief' | 'capture' | 'inbox';
+type PanelView = 'brief' | 'capture' | 'inbox' | 'ask';
 
 interface BriefPayload {
   greeting: string;
@@ -70,10 +80,15 @@ export default function CompanionOrb({ slug, loggedIn, brief, objects, actionCen
   const [captureStatus, setCaptureStatus] = useState('');
   const [captureResult, setCaptureResult] = useState<CaptureApiResponse | null>(null);
   const [listening, setListening] = useState(false);
+  const [askInput, setAskInput] = useState('');
+  const [askAnswer, setAskAnswer] = useState('');
+  const [teachMode, setTeachModeState] = useState(false);
+  const [lesson, setLesson] = useState<SimplifiContextLesson | null>(null);
   const pointerRef = useRef<PointerStart | null>(null);
   const longPressRef = useRef<number | null>(null);
   const lastTapRef = useRef(0);
   const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
+  const scope = slug ?? 'simplifi-user';
 
   const focus = useMemo(() => buildCompanionFocus(brief, objects, actionCenter), [brief, objects, actionCenter]);
 
@@ -95,7 +110,10 @@ export default function CompanionOrb({ slug, loggedIn, brief, objects, actionCen
   useEffect(() => {
     try {
       const stored = window.localStorage.getItem(STORAGE_KEY);
-      if (!stored) return;
+      if (!stored) {
+        setPosition(defaultOrbPosition());
+        return;
+      }
       const parsed = JSON.parse(stored) as Partial<OrbPosition>;
       if (typeof parsed.x === 'number' && typeof parsed.y === 'number') {
         setPosition({
@@ -112,6 +130,10 @@ export default function CompanionOrb({ slug, loggedIn, brief, objects, actionCen
     if (longPressRef.current) window.clearTimeout(longPressRef.current);
     recognitionRef.current?.stop();
   }, []);
+
+  useEffect(() => {
+    setTeachModeState(getTeachMeMode(scope));
+  }, [scope]);
 
   useEffect(() => {
     const onResize = () => {
@@ -131,12 +153,13 @@ export default function CompanionOrb({ slug, loggedIn, brief, objects, actionCen
 
   useEffect(() => {
     if (!open) return;
+    recordCompanionEvent(scope, 'opened');
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') setOpen(false);
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [open]);
+  }, [open, scope]);
 
   const persistPosition = (next: OrbPosition) => {
     try {
@@ -162,6 +185,7 @@ export default function CompanionOrb({ slug, loggedIn, brief, objects, actionCen
 
   const startVoiceCapture = () => {
     setCaptureStatus('');
+    setLesson(consumeContextLesson(scope, 'first-voice-capture'));
     setView('capture');
     setOpen(true);
 
@@ -203,6 +227,8 @@ export default function CompanionOrb({ slug, loggedIn, brief, objects, actionCen
     }
 
     setCaptureResult(null);
+    if (mode === 'instant') setLesson(consumeContextLesson(scope, 'first-browser-capture'));
+    if (mode === 'note') setLesson(consumeContextLesson(scope, 'first-note-capture'));
     setCaptureStatus(mode === 'instant' ? 'Capturing the current context...' : 'Sending to Simplifi...');
     try {
       const note = mode === 'instant'
@@ -223,6 +249,7 @@ export default function CompanionOrb({ slug, loggedIn, brief, objects, actionCen
         return;
       }
       setCaptureText('');
+      recordCompanionEvent(scope, 'captured');
       setCaptureResult(data);
       if (data.processing) {
         setCaptureStatus('Captured. Simplifi is organizing it in the background.');
@@ -233,6 +260,23 @@ export default function CompanionOrb({ slug, loggedIn, brief, objects, actionCen
       openPanel('brief');
     } catch {
       setCaptureStatus('Capture could not be saved. Try again.');
+    }
+  };
+
+  const answerQuestion = (question = askInput) => {
+    const trimmed = question.trim();
+    if (!trimmed) return;
+    recordCompanionEvent(scope, 'asked');
+    setAskInput(trimmed);
+    setAskAnswer(answerAskSimplifi(trimmed, objects, actionCenter));
+  };
+
+  const toggleTeachMode = () => {
+    const next = !teachMode;
+    setTeachModeState(next);
+    setTeachMeMode(scope, next);
+    if (next) {
+      setAskAnswer('Teach Me is on. I will explain quiet automatic actions when they matter.');
     }
   };
 
@@ -353,6 +397,15 @@ export default function CompanionOrb({ slug, loggedIn, brief, objects, actionCen
           >
             Inbox
           </button>
+          <button
+            type="button"
+            className={view === 'ask' ? 'active' : ''}
+            aria-selected={view === 'ask'}
+            role="tab"
+            onClick={() => setView('ask')}
+          >
+            Ask
+          </button>
         </nav>
 
         {view === 'brief' ? (
@@ -374,7 +427,24 @@ export default function CompanionOrb({ slug, loggedIn, brief, objects, actionCen
                   {focus.actionLabel}
                 </button>
               )}
+              <button
+                type="button"
+                className="companion-why-btn"
+                onClick={() => {
+                  setAskAnswer(explainRecommendation({ title: focus.headline, actionCenter, objects }));
+                  setView('ask');
+                }}
+              >
+                Why?
+              </button>
             </article>
+            {shouldOfferRecovery(scope, objects) ? (
+              <article className="companion-card companion-recovery">
+                <strong>Looking for recent captures?</strong>
+                <p>I can open the Capture Inbox or explain why something is showing up.</p>
+                <button type="button" onClick={() => setView('inbox')}>Open inbox</button>
+              </article>
+            ) : null}
             {topItems.length === 0 ? (
               <article className="companion-card">
                 <strong>Nothing urgent right now</strong>
@@ -398,6 +468,18 @@ export default function CompanionOrb({ slug, loggedIn, brief, objects, actionCen
             <p className="companion-hint">
               Drop a loose thought, link, reminder, or follow-up here. Simplifi will turn it into a next move.
             </p>
+            {lesson ? (
+              <article className="companion-lesson">
+                <strong>{lesson.title}</strong>
+                <p>{lesson.body}</p>
+              </article>
+            ) : null}
+            {teachMode && !lesson ? (
+              <article className="companion-lesson">
+                <strong>Quiet learning</strong>
+                <p>I will explain what just happened only when it helps you trust the next step.</p>
+              </article>
+            ) : null}
             <textarea
               value={captureText}
               onChange={(event) => setCaptureText(event.target.value)}
@@ -454,6 +536,37 @@ export default function CompanionOrb({ slug, loggedIn, brief, objects, actionCen
                 </article>
               ))
             )}
+          </div>
+        ) : null}
+
+        {view === 'ask' ? (
+          <div className="companion-ask">
+            <p className="companion-hint">Ask naturally. I will keep it short and help you act.</p>
+            <div className="companion-ask-row">
+              <input
+                value={askInput}
+                onChange={(event) => setAskInput(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter') answerQuestion();
+                }}
+                placeholder="Why am I seeing this?"
+              />
+              <button type="button" onClick={() => answerQuestion()} disabled={!askInput.trim()}>
+                Ask
+              </button>
+            </div>
+            <div className="companion-prompt-grid">
+              {['Where did my note go?', 'Why am I seeing this?', "Show today's opportunities"].map((prompt) => (
+                <button key={prompt} type="button" onClick={() => answerQuestion(prompt)}>
+                  {prompt}
+                </button>
+              ))}
+            </div>
+            {askAnswer ? <article className="companion-answer">{askAnswer}</article> : null}
+            <label className="companion-teach-toggle">
+              <input type="checkbox" checked={teachMode} onChange={toggleTeachMode} />
+              <span>Teach Me</span>
+            </label>
           </div>
         ) : null}
       </section>
@@ -567,4 +680,12 @@ function buildCompanionFocus(
 
 function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
+}
+
+function defaultOrbPosition(): OrbPosition {
+  if (typeof window === 'undefined') return { x: 18, y: 92 };
+  return {
+    x: clamp(window.innerWidth - 86, 10, Math.max(10, window.innerWidth - 76)),
+    y: clamp(window.innerHeight - 112, 72, Math.max(72, window.innerHeight - 92)),
+  };
 }

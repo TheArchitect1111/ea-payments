@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
   try {
     const resetUrl = await requestAdminPasswordReset(email, req.nextUrl.origin);
     if (resetUrl) {
-      await sendAuthEmail({
+      const sent = await sendAuthEmail({
         to: email,
         subject: 'Reset your EA admin password',
         title: 'Reset your admin password',
@@ -23,6 +23,7 @@ export async function POST(req: NextRequest) {
         `,
         text: `Reset your admin password: ${resetUrl}`,
       });
+      if (!sent.ok) throw new Error(sent.error || 'Email send failed.');
     }
     return NextResponse.redirect(done, 303);
   } catch (err) {

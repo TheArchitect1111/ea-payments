@@ -26,6 +26,7 @@ export type PulseEventType =
   | 'portal.login'
   | 'proposal.pending'
   | 'onboarding.blocked'
+  | 'fulfillment.review_required'
   | 'launch.verification.completed'
   | 'payment.received'
   | 'attention.critical';

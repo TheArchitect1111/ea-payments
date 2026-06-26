@@ -1,4 +1,5 @@
 export type EAGuideContextId =
+  | 'discover'
   | 'portal'
   | 'simplifi'
   | 'magnifi'
@@ -74,6 +75,7 @@ export const EA_GUIDE_PROTOCOLS = [
 ];
 
 export function resolveGuideContext(pathname: string): EAGuideContext {
+  if (pathname.includes('/discover') || pathname === '/assessment' || pathname.includes('/assessment/thank-you')) return discoverContext(pathname);
   if (pathname.includes('/simplifi')) return simplifiContext();
   if (pathname.includes('/consider') || pathname.includes('/magnifi')) return magnifiContext();
   if (pathname.includes('/pulse')) return pulseContext(pathname);
@@ -83,6 +85,40 @@ export function resolveGuideContext(pathname: string): EAGuideContext {
   if (pathname.includes('/admin')) return adminContext();
   if (pathname.includes('/portal')) return portalContext(pathname);
   return portalContext(pathname);
+}
+
+function discoverContext(pathname: string): EAGuideContext {
+  const finished = pathname.includes('/thank-you');
+  return {
+    id: 'discover',
+    product: 'Discover The Possibilities™',
+    role: 'Possibility Guide',
+    focus: ['Goals', 'Training solutions', 'Pages', 'Portals', 'Automation', 'Next steps'],
+    greeting: finished ? 'I am reviewing what you shared.' : 'I am here while you discover what is possible.',
+    badgeLabel: 'Guidance Available',
+    sinceLastVisit: finished
+      ? ['Your discovery responses were received.', 'A Blueprint path can begin from what you shared.', 'Training, portals, pages, and automation will be considered together.']
+      : ['We are learning about your organization.', 'Your choices shape the path in real time.', 'Training solutions are part of this conversation.'],
+    recommendedAction: finished ? 'Review the next-step possibilities.' : "Continue with Discover What's Possible.",
+    recommendationDetail: finished
+      ? 'The next step is to turn your responses into practical recommendations.'
+      : 'Choose every option that feels useful. The prompts are designed to give you ideas.',
+    recommendationWhy: finished
+      ? ['You completed the guided discovery.', 'Your selections reveal which experiences may help first.', 'The Blueprint can now connect goals, training, systems, and communication.']
+      : ['This page adapts as you answer.', 'Training, onboarding, resource libraries, and AI-guided support may be useful.', 'More context helps the Blueprint feel specific.'],
+    dailyBrief: finished
+      ? ['Discovery received', 'Blueprint direction forming', 'Next step ready for review']
+      : ['Start with who you are', 'Choose what you want to make possible', 'Add training needs if knowledge, onboarding, or guidance matters'],
+    opportunityHealth: ['Active: Discovery path', 'Watching: Goals and training signals', 'Next: Blueprint direction'],
+    winWall: ['Discover The Possibilities™ started'],
+    actions: [
+      { id: 'walkthrough', label: 'Walk Me Through It', kind: 'event', eventName: 'ea-guide:discover-walkthrough' },
+      { id: 'training', label: 'Explain Training Solutions', kind: 'event', eventName: 'ea-guide:discover-training' },
+      { id: 'review', label: finished ? 'Review Next Step' : "Continue Discovery", kind: 'href', href: finished ? '/discover' : '#top' },
+    ],
+    state: finished ? 'success' : 'watching',
+    protocolAwareness: ['EA Master Protocol', 'EA Training Protocol', 'EA Website Protocol', 'EA Chassis Protocol'],
+  };
 }
 
 function portalContext(pathname: string): EAGuideContext {

@@ -8,6 +8,7 @@ import {
 } from '@/lib/airtable';
 import type { AirtablePackage, ProposalWithAssessment } from '@/lib/airtable';
 import { getCatalogItem } from '@/lib/catalog';
+import { buildPackageFulfillmentPlan } from '@/lib/package-fulfillment';
 import { sendWelcomeEmail, sendAdminNotification } from '@/lib/email';
 import { createPortalAccess } from '@/lib/portal-access';
 import { createOpportunityRecord } from '@/lib/partner-network';
@@ -138,6 +139,19 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
   }
 
   const catalogItem = meta.packageId ? getCatalogItem(meta.packageId) : undefined;
+  const fulfillment = catalogItem
+    ? buildPackageFulfillmentPlan(catalogItem)
+    : {
+        packageId: meta.packageId || '',
+        displayName: String(meta.packageDisplayName || packageName),
+        fulfillmentType: String(meta.fulfillmentType || 'implementation'),
+        fulfillmentLabel: String(meta.fulfillmentLabel || 'Review payment and begin onboarding.'),
+        reviewRequired: meta.reviewRequired === 'true',
+        intakePath: String(meta.intakePath || '/discover'),
+        adminHref: String(meta.adminHref || '/admin/master'),
+        clientExpectation: 'Your project workspace is being prepared. We will confirm the path before anything goes live.',
+        firstMilestone: String(meta.firstMilestone || 'Confirm project direction.'),
+      };
 
   let tempCredentials: string | undefined;
   let portalSlug: string | undefined;
@@ -203,9 +217,10 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
     const welcomeResult = await sendWelcomeEmail({
       clientName,
       email,
-      packageName,
+      packageName: fulfillment.displayName,
       portalLoginUrl,
       tempCredentials,
+      nextSteps: fulfillment.clientExpectation,
     });
     if (!welcomeResult.ok) {
       console.error('Welcome email failed for session', session.id, ':', welcomeResult.error);
@@ -219,7 +234,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
       clientName,
       organization: meta.organization || undefined,
       email,
-      packageName,
+      packageName: fulfillment.displayName,
       amountPaid,
       paymentDate,
       paymentMethodTypes,
@@ -239,6 +254,14 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
     email,
     organization: meta.organization || undefined,
     packageName,
+    packageId: fulfillment.packageId,
+    packageDisplayName: fulfillment.displayName,
+    fulfillmentType: fulfillment.fulfillmentType,
+    fulfillmentLabel: fulfillment.fulfillmentLabel,
+    reviewRequired: fulfillment.reviewRequired,
+    intakePath: fulfillment.intakePath,
+    adminHref: fulfillment.adminHref,
+    firstMilestone: fulfillment.firstMilestone,
     amountPaid,
     paymentDate,
     stripeTransactionId,
@@ -253,10 +276,35 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
     title: `Payment received — ${clientName}`,
     detail: `$${amountPaid.toFixed(2)} · ${packageName}`,
     priority: 'high',
-    href: '/admin/master',
+    href: fulfillment.adminHref,
     objectId: airtableResult.recordId,
-    metadata: { stripeSessionId: session.id, email, packageName },
+    metadata: {
+      stripeSessionId: session.id,
+      email,
+      packageName,
+      packageDisplayName: fulfillment.displayName,
+      fulfillmentType: fulfillment.fulfillmentType,
+      reviewRequired: fulfillment.reviewRequired,
+    },
   });
+
+  if (fulfillment.reviewRequired) {
+    await emitPulseEvent({
+      product: 'ea-platform',
+      type: 'fulfillment.review_required',
+      title: `Review required - ${fulfillment.displayName}`,
+      detail: `${clientName}: ${fulfillment.fulfillmentLabel}`,
+      priority: 'high',
+      href: fulfillment.adminHref,
+      objectId: airtableResult.recordId,
+      metadata: {
+        stripeSessionId: session.id,
+        email,
+        packageId: fulfillment.packageId,
+        fulfillmentType: fulfillment.fulfillmentType,
+      },
+    });
+  }
 }
 
 // ---------------------------------------------------------------------------
