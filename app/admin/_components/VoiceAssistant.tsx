@@ -100,7 +100,14 @@ export default function VoiceAssistant() {
   };
 
   useEffect(() => {
-    const onOpen = () => setOpen(true);
+    const onOpen = () => {
+      setOpen(true);
+      const prefill = sessionStorage.getItem('ea_voice_prefill');
+      if (prefill) {
+        setQuery(prefill);
+        sessionStorage.removeItem('ea_voice_prefill');
+      }
+    };
     window.addEventListener('ea:open-voice', onOpen);
     return () => window.removeEventListener('ea:open-voice', onOpen);
   }, []);
