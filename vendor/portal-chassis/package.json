@@ -1,6 +1,6 @@
 {
   "name": "@ea/portal-chassis",
-  "version": "0.1.2",
+  "version": "0.3.0",
   "description": "EA Portal Chassis — shared auth, layout, email, webhooks, and Airtable adapters for multi-tenant portals",
   "license": "UNLICENSED",
   "private": false,
@@ -64,10 +64,60 @@
       "import": "./dist/notify.js",
       "require": "./dist/notify.cjs"
     },
+    "./passwords": {
+      "types": "./dist/passwords.d.ts",
+      "import": "./dist/passwords.js",
+      "require": "./dist/passwords.cjs"
+    },
+    "./provisioning": {
+      "types": "./dist/provisioning.d.ts",
+      "import": "./dist/provisioning.js",
+      "require": "./dist/provisioning.cjs"
+    },
     "./tenant": {
       "types": "./dist/tenant.d.ts",
       "import": "./dist/tenant.js",
       "require": "./dist/tenant.cjs"
+    },
+    "./tenant-env": {
+      "types": "./dist/tenant-env.d.ts",
+      "import": "./dist/tenant-env.js",
+      "require": "./dist/tenant-env.cjs"
+    },
+    "./activity": {
+      "types": "./dist/activity.d.ts",
+      "import": "./dist/activity.js",
+      "require": "./dist/activity.cjs"
+    },
+    "./brief": {
+      "types": "./dist/brief.d.ts",
+      "import": "./dist/brief.js",
+      "require": "./dist/brief.cjs"
+    },
+    "./brief-experience": {
+      "types": "./dist/brief-experience.d.ts",
+      "import": "./dist/brief-experience.js",
+      "require": "./dist/brief-experience.cjs"
+    },
+    "./platform-events": {
+      "types": "./dist/platform-events.d.ts",
+      "import": "./dist/platform-events.js",
+      "require": "./dist/platform-events.cjs"
+    },
+    "./agents": {
+      "types": "./dist/agents.d.ts",
+      "import": "./dist/agents.js",
+      "require": "./dist/agents.cjs"
+    },
+    "./mission-control": {
+      "types": "./dist/mission-control.d.ts",
+      "import": "./dist/mission-control.js",
+      "require": "./dist/mission-control.cjs"
+    },
+    "./mission-control-experience": {
+      "types": "./dist/mission-control-experience.d.ts",
+      "import": "./dist/mission-control-experience.js",
+      "require": "./dist/mission-control-experience.cjs"
     },
     "./styles/tokens.css": "./styles/tokens.css"
   },

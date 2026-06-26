@@ -1,5 +1,5 @@
 import { cookies } from 'next/headers';
-import { verifyAdminSession, EA_ADMIN_COOKIE } from '@/lib/ea-admin-auth';
+import { verifyAdminSession, EA_ADMIN_COOKIE, parseAdminSession } from '@/lib/ea-admin-auth';
 import {
   getProposalsWithAssessments,
   getAllAssessments,
@@ -13,9 +13,11 @@ import {
 import { getOpportunities } from '@/lib/partner-network';
 import { getCaptures } from '@/lib/capture-records';
 import { buildAttentionItems } from '@/lib/pulse-attention';
+import { listRecentPulseEvents } from '@/lib/pulse-bus';
+import { buildEAMissionControl } from '@/lib/mission-control-data';
 import { isCaptureApiKeyConfigured } from '@/lib/capture-api-key';
 import { EA_SATELLITE_URLS } from '@/lib/platform-urls';
-import AttentionCenterPanel from './AttentionCenterPanel';
+import MissionControlPanel from './MissionControlPanel';
 import AdminLogin from './AdminLogin';
 
 export const dynamic = 'force-dynamic';
@@ -229,6 +231,14 @@ export default async function MasterPortalPage() {
     discoveryFollowUpCount: discoveryFollowUp,
   });
 
+  const adminUser = parseAdminSession(token);
+  const mission = buildEAMissionControl({
+    attentionItems,
+    pulseEvents: listRecentPulseEvents(30),
+    userName: adminUser?.name?.split(' ')[0] ?? adminUser?.email?.split('@')[0],
+    role: 'executive',
+  });
+
   // Recent Activity Feed
   interface ActivityItem {
     type: 'assessment' | 'approved' | 'paid' | 'onboarded';
@@ -282,10 +292,10 @@ export default async function MasterPortalPage() {
             <img src="/images/ea-logo-hd.png" alt="Efficiency Architects" style={{ height: '60px', width: 'auto' }} />
             <div>
               <h2 className="text-2xl font-extrabold" style={{ color: NAVY }}>
-                EA Master Control
+                Mission Control
               </h2>
               <p className="text-xs font-bold uppercase tracking-widest" style={{ color: GOLD }}>
-                Everything. One place.
+                What deserves your attention today
               </p>
             </div>
           </div>
@@ -295,9 +305,9 @@ export default async function MasterPortalPage() {
 
       <main className="max-w-6xl mx-auto px-6 py-8 space-y-10">
 
-        <AttentionCenterPanel items={attentionItems} />
+        <MissionControlPanel mission={mission} />
 
-        {/* Section 1: Revenue Overview */}
+        {/* Operations dashboard — revenue, pipeline, platforms */}
         <section>
           <SectionHead title="Revenue Overview" />
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
