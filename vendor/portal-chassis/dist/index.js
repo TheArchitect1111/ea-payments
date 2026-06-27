@@ -2193,6 +2193,436 @@ function readStr3(value) {
   return typeof value === "string" ? value : "";
 }
 
-export { ACTIVITY_EVENTS_TABLE, ActivityTimeline, BriefExperience, ClerkShell, DEFAULT_ACTION_CARDS, DEFAULT_INTENT_EXAMPLES, EA_AGENT_REGISTRY, HeaderPortalShell, MissionControlExperience, PortalLayout, QuickActions, RoleGuard, UniversalBriefCard, adminEmail, airtableCreate, airtableDelete, airtableGet, airtableGetOne, airtableUpdate, allowSampleData, buildBriefResponse, buildMissionControlFromStreams, buildMissionControlResponse, checkTenantEnv, createHmacPortalMiddleware, createPortalMiddleware, fromActivityEvent, fromAirtableRecord, fromPulseAirtableRecord, fromPulseEventRow, generateTempPassword, hashPassword, isActiveAgent, isDemoMode, isProductionDeploy, listActivityEvents, listAgentRuns, makeSessionCookie, mergeEventStreams, newSessionExpiry, normalizeActivityEvent, notifyAdmin, provisionPortalUser, publishActivityEvent, publishAgentRun, requireEnv, requiredEnvForTenant, scoreActivityEvent, selectBriefCards, sendEmail, signHmacSession, toActivityEventInput, toAgentRun, toBriefCard, triggerMakeWebhook, validateTenant, verifyHmacSession, verifyPassword, withRoleProtection };
+// lib/intent-router.ts
+var DEFAULT_ORCHESTRATOR = [
+  {
+    pattern: /create proposal|draft proposal|proposal for|write proposal/i,
+    intent: "create-proposal",
+    why: "Proposal workflows use the research agent to gather context before you edit in Proposals."
+  },
+  {
+    pattern: /research|find opportunit|discover opportunit|speaking opportunit/i,
+    intent: "research",
+    why: "Research intents route to the EA agent orchestrator for structured findings."
+  },
+  {
+    pattern: /generate blueprint|new blueprint|build blueprint/i,
+    intent: "generate-blueprint",
+    why: "Blueprint generation starts in the Blueprint Library with captured context."
+  }
+];
+var DEFAULT_DIRECT_NAV = [
+  {
+    pattern: /build portal|volunteer portal|client portal|launch portal/i,
+    href: "/admin/ea-factory/new-experience",
+    label: "New Experience",
+    why: "Portal builds start in the New Experience wizard."
+  },
+  {
+    pattern: /build landing|landing page|skin factory/i,
+    href: "/admin/ea-factory/skin-factory",
+    label: "Skin Factory",
+    why: "Landing page skins are authored as briefs in Skin Factory."
+  },
+  {
+    pattern: /continue|resume|pick up where/i,
+    href: "/admin/master",
+    label: "Mission Control",
+    why: "Continue Working lives on your Mission Control home."
+  },
+  {
+    pattern: /launch project|launch client|go live/i,
+    href: "/launch",
+    label: "Launch Command",
+    why: "Launch verification runs through the Launch Command Center."
+  },
+  {
+    pattern: /new client|start client|onboard client/i,
+    href: "/admin/delivery",
+    label: "Client Delivery",
+    why: "New clients are tracked on the delivery board."
+  },
+  {
+    pattern: /simplifi workspace|daily brief/i,
+    href: "/simplifi/workspace",
+    label: "Simplifi Workspace",
+    why: "Opportunity decisions and daily brief live in Simplifi."
+  },
+  {
+    pattern: /master control|mission control|dashboard|revenue/i,
+    href: "/admin/master",
+    label: "Mission Control",
+    why: "Your ranked attention feed and continue-working queue."
+  },
+  {
+    pattern: /resource radar|analyze url|radar/i,
+    href: "/admin/resource-radar",
+    label: "Resource Radar",
+    why: "URL and resource analysis for opportunity discovery."
+  },
+  {
+    pattern: /blueprint/i,
+    href: "/admin/blueprints",
+    label: "Blueprint Library",
+    why: "Implementation blueprints and build intelligence."
+  },
+  {
+    pattern: /knowledge graph|organizational memory|platform memory/i,
+    href: "/admin/knowledge-graph",
+    label: "Knowledge Graph",
+    why: "Organizational memory \u2014 org, product, capture topology."
+  },
+  {
+    pattern: /digital twin|twin/i,
+    href: "/admin/digital-twin",
+    label: "Digital Twin",
+    why: "Platform and org visibility profiles."
+  },
+  {
+    pattern: /proposal/i,
+    href: "/admin/proposals",
+    label: "Proposals",
+    why: "Proposal drafts and delivery pipeline."
+  }
+];
+function routeIntent(input, config = {}) {
+  const query = input.trim();
+  const lower = query.toLowerCase();
+  const directNav = config.directNav ?? DEFAULT_DIRECT_NAV;
+  const orchestrator = config.orchestrator ?? DEFAULT_ORCHESTRATOR;
+  if (!query) {
+    return {
+      type: "explain",
+      message: 'Tell me what you want to accomplish \u2014 for example, "Create proposal for Bob" or "Build landing page".',
+      confidence: 0
+    };
+  }
+  if (/^help|what can you/i.test(lower)) {
+    return {
+      type: "explain",
+      message: 'I can navigate Mission Control, run audits, search organizational memory, start tours, and launch workflows. Try "Create proposal for Bob" or "Show knowledge graph".',
+      confidence: 95
+    };
+  }
+  for (const nav of directNav) {
+    if (nav.pattern.test(lower)) {
+      return {
+        type: "navigate",
+        href: nav.href,
+        message: `Opening ${nav.label}.`,
+        whyRecommended: nav.why,
+        confidence: 90
+      };
+    }
+  }
+  for (const orch of orchestrator) {
+    if (orch.pattern.test(lower)) {
+      return {
+        type: "orchestrate",
+        orchestratorIntent: orch.intent,
+        query,
+        message: `Running ${orch.intent.replace(/-/g, " ")} workflow.`,
+        whyRecommended: orch.why,
+        confidence: 88
+      };
+    }
+  }
+  const voice = matchVoicePatterns(query, lower);
+  if (voice) {
+    return voice;
+  }
+  return {
+    type: "orchestrate",
+    orchestratorIntent: "general",
+    query,
+    message: `Searching agents and organizational memory for "${query}".`,
+    whyRecommended: "No exact navigation match \u2014 delegating to the EA orchestrator.",
+    confidence: 55
+  };
+}
+function matchVoicePatterns(query, lower) {
+  if (/tour|guide me|onboarding/i.test(lower)) {
+    return {
+      type: "tour",
+      message: "Starting Mission Control guided tour.",
+      confidence: 90
+    };
+  }
+  const urlMatch = query.match(/https?:\/\/[^\s]+/i);
+  if (urlMatch) {
+    if (/audit|simplifi|clarity|website/i.test(lower)) {
+      return {
+        type: "audit",
+        href: `/admin/simplifi-audit?url=${encodeURIComponent(urlMatch[0])}`,
+        query: urlMatch[0],
+        message: `Running Simplifi audit on ${urlMatch[0]}`,
+        confidence: 92
+      };
+    }
+    return {
+      type: "analyze",
+      href: "/admin/resource-radar",
+      query: urlMatch[0],
+      message: `Analyzing ${urlMatch[0]} in Resource Radar.`,
+      confidence: 88
+    };
+  }
+  if (/capture|opportunity|save signal/i.test(lower)) {
+    return {
+      type: "capture",
+      message: "Opening Quick Capture.",
+      confidence: 85
+    };
+  }
+  if (/search graph|find in graph|who uses|aligned with/i.test(lower)) {
+    const term = lower.replace(/search graph|find in graph|who uses|aligned with/gi, "").trim();
+    const href = term ? `/admin/knowledge-graph?q=${encodeURIComponent(term)}` : "/admin/knowledge-graph";
+    return {
+      type: "navigate",
+      href,
+      query: term || query,
+      message: term ? `Searching Knowledge Graph for "${term}".` : "Opening Knowledge Graph.",
+      whyRecommended: "Organizational memory search.",
+      confidence: 82
+    };
+  }
+  if (/simplifi audit|website audit|playwright/i.test(lower)) {
+    return {
+      type: "audit",
+      href: "/admin/simplifi-audit",
+      message: "Opening Simplifi Audit.",
+      confidence: 86
+    };
+  }
+  return null;
+}
+
+// lib/opportunity-graph.ts
+var OPPORTUNITY_EVENT_MARKERS = [
+  "capture",
+  "opportunity",
+  "ctp",
+  "proposal",
+  "assessment",
+  "apply"
+];
+function buildOpportunityGraph(input) {
+  const nodes = [];
+  const edges = [];
+  const nodeIds = /* @__PURE__ */ new Set();
+  function addNode(node) {
+    if (nodeIds.has(node.id)) return;
+    nodeIds.add(node.id);
+    nodes.push(node);
+  }
+  function addEdge(edge) {
+    edges.push(edge);
+  }
+  for (const seed of input.seedNodes ?? []) {
+    addNode({ ...seed, organizationId: seed.organizationId ?? input.organizationId });
+  }
+  for (const seed of input.seedEdges ?? []) {
+    addEdge(seed);
+  }
+  const orgId = `org-${slugify2(input.organizationId)}`;
+  addNode({
+    id: orgId,
+    label: input.organizationId,
+    type: "organization",
+    organizationId: input.organizationId
+  });
+  for (const intent of input.intents ?? []) {
+    const intentNodeId = `intent-${intent.id}`;
+    addNode({
+      id: intentNodeId,
+      label: truncate(intent.text, 80),
+      type: "intent",
+      summary: intent.orchestratorIntent ? `Routed to ${intent.orchestratorIntent}` : `Routed as ${intent.routeType}`,
+      href: intent.href,
+      organizationId: intent.organizationId,
+      score: intent.confidence,
+      createdAt: intent.createdAt,
+      metadata: {
+        routeType: intent.routeType,
+        orchestratorIntent: intent.orchestratorIntent,
+        rawText: intent.text
+      }
+    });
+    addEdge({
+      id: `edge-${intentNodeId}-${orgId}`,
+      source: intentNodeId,
+      target: orgId,
+      relationship: "triggered_by",
+      label: "intent for org"
+    });
+    if (intent.orchestratorIntent) {
+      const workflowId = `workflow-${slugify2(intent.orchestratorIntent)}`;
+      addNode({
+        id: workflowId,
+        label: humanize(intent.orchestratorIntent),
+        type: "action",
+        organizationId: intent.organizationId
+      });
+      addEdge({
+        id: `edge-${intentNodeId}-${workflowId}`,
+        source: intentNodeId,
+        target: workflowId,
+        relationship: "suggests",
+        weight: intent.confidence
+      });
+    }
+  }
+  for (const event of input.events ?? []) {
+    if (event.organizationId !== input.organizationId) continue;
+    const isOpportunity = OPPORTUNITY_EVENT_MARKERS.some(
+      (m) => event.eventType.toLowerCase().includes(m)
+    );
+    const nodeType = event.eventType.includes("ctp") ? "ctp_submission" : isOpportunity ? event.eventType.includes("capture") ? "capture" : "opportunity" : "action";
+    const eventNodeId = `event-${event.id || slugify2(`${event.eventType}-${event.createdAt}`)}`;
+    addNode({
+      id: eventNodeId,
+      label: event.title,
+      type: nodeType,
+      summary: event.summary,
+      href: event.actionUrl,
+      organizationId: event.organizationId,
+      score: event.priority,
+      createdAt: event.createdAt,
+      metadata: event.metadata
+    });
+    addEdge({
+      id: `edge-${eventNodeId}-${orgId}`,
+      source: eventNodeId,
+      target: orgId,
+      relationship: "relates_to"
+    });
+    if (event.personId) {
+      const personId = `org-${slugify2(event.personId)}`;
+      addNode({
+        id: personId,
+        label: event.personId,
+        type: "organization",
+        organizationId: event.organizationId
+      });
+      addEdge({
+        id: `edge-${eventNodeId}-${personId}`,
+        source: eventNodeId,
+        target: personId,
+        relationship: "refers_to"
+      });
+    }
+    const linkedIntent = readStr4(event.metadata.intentId);
+    if (linkedIntent) {
+      const intentNodeId = `intent-${linkedIntent}`;
+      if (nodeIds.has(intentNodeId)) {
+        addEdge({
+          id: `edge-${intentNodeId}-${eventNodeId}`,
+          source: intentNodeId,
+          target: eventNodeId,
+          relationship: "follows",
+          label: "intent led to event"
+        });
+      }
+    }
+  }
+  const opportunityCount = nodes.filter(
+    (n) => ["opportunity", "capture", "ctp_submission"].includes(n.type)
+  ).length;
+  const intentCount = nodes.filter((n) => n.type === "intent").length;
+  return {
+    nodes,
+    edges,
+    stats: {
+      nodeCount: nodes.length,
+      edgeCount: edges.length,
+      opportunityCount,
+      intentCount
+    },
+    generatedAt: (/* @__PURE__ */ new Date()).toISOString()
+  };
+}
+function searchOpportunityGraph(graph, query) {
+  const q = query.trim().toLowerCase();
+  if (!q) return graph;
+  const matchedNodeIds = new Set(
+    graph.nodes.filter((n) => {
+      const hay = [n.label, n.type, n.summary ?? "", JSON.stringify(n.metadata ?? {})].join(" ").toLowerCase();
+      return hay.includes(q);
+    }).map((n) => n.id)
+  );
+  for (const edge of graph.edges) {
+    if (matchedNodeIds.has(edge.source)) matchedNodeIds.add(edge.target);
+    if (matchedNodeIds.has(edge.target)) matchedNodeIds.add(edge.source);
+  }
+  const nodes = graph.nodes.filter((n) => matchedNodeIds.has(n.id));
+  const nodeIdSet = new Set(nodes.map((n) => n.id));
+  const edges = graph.edges.filter(
+    (e) => nodeIdSet.has(e.source) && nodeIdSet.has(e.target)
+  );
+  return {
+    nodes,
+    edges,
+    stats: {
+      nodeCount: nodes.length,
+      edgeCount: edges.length,
+      opportunityCount: nodes.filter(
+        (n) => ["opportunity", "capture", "ctp_submission"].includes(n.type)
+      ).length,
+      intentCount: nodes.filter((n) => n.type === "intent").length
+    },
+    generatedAt: graph.generatedAt
+  };
+}
+function linkIntentToOpportunity(graph, intentNodeId, opportunityNodeId, label = "intent surfaced opportunity") {
+  const edge = {
+    id: `edge-${intentNodeId}-${opportunityNodeId}-suggests`,
+    source: intentNodeId,
+    target: opportunityNodeId,
+    relationship: "suggests",
+    label
+  };
+  return {
+    ...graph,
+    edges: [...graph.edges, edge],
+    stats: {
+      ...graph.stats,
+      edgeCount: graph.stats.edgeCount + 1
+    }
+  };
+}
+function intentToActivityEventInput(intent) {
+  return {
+    organizationId: intent.organizationId,
+    module: "pulse",
+    eventType: "intent.resolved",
+    title: truncate(intent.text, 120),
+    summary: intent.orchestratorIntent ? `Intent routed to ${intent.orchestratorIntent}` : `Intent routed as ${intent.routeType}`,
+    priority: Math.round(intent.confidence ?? 50),
+    actionUrl: intent.href,
+    createdAt: intent.createdAt,
+    metadata: {
+      category: "agent",
+      intentId: intent.id,
+      routeType: intent.routeType,
+      orchestratorIntent: intent.orchestratorIntent,
+      rawText: intent.text,
+      graphNodeType: "intent"
+    }
+  };
+}
+function slugify2(value) {
+  return value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 48) || "unknown";
+}
+function truncate(value, max) {
+  return value.length <= max ? value : `${value.slice(0, max - 1)}\u2026`;
+}
+function humanize(value) {
+  return value.split(/[-_]/).map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+}
+function readStr4(value) {
+  return typeof value === "string" ? value : "";
+}
+
+export { ACTIVITY_EVENTS_TABLE, ActivityTimeline, BriefExperience, ClerkShell, DEFAULT_ACTION_CARDS, DEFAULT_INTENT_EXAMPLES, EA_AGENT_REGISTRY, HeaderPortalShell, MissionControlExperience, PortalLayout, QuickActions, RoleGuard, UniversalBriefCard, adminEmail, airtableCreate, airtableDelete, airtableGet, airtableGetOne, airtableUpdate, allowSampleData, buildBriefResponse, buildMissionControlFromStreams, buildMissionControlResponse, buildOpportunityGraph, checkTenantEnv, createHmacPortalMiddleware, createPortalMiddleware, fromActivityEvent, fromAirtableRecord, fromPulseAirtableRecord, fromPulseEventRow, generateTempPassword, hashPassword, intentToActivityEventInput, isActiveAgent, isDemoMode, isProductionDeploy, linkIntentToOpportunity, listActivityEvents, listAgentRuns, makeSessionCookie, mergeEventStreams, newSessionExpiry, normalizeActivityEvent, notifyAdmin, provisionPortalUser, publishActivityEvent, publishAgentRun, requireEnv, requiredEnvForTenant, routeIntent, scoreActivityEvent, searchOpportunityGraph, selectBriefCards, sendEmail, signHmacSession, toActivityEventInput, toAgentRun, toBriefCard, triggerMakeWebhook, validateTenant, verifyHmacSession, verifyPassword, withRoleProtection };
 //# sourceMappingURL=index.js.map
 //# sourceMappingURL=index.js.map

@@ -1,6 +1,6 @@
 {
   "name": "@ea/portal-chassis",
-  "version": "0.3.0",
+  "version": "0.3.2",
   "description": "EA Portal Chassis — shared auth, layout, email, webhooks, and Airtable adapters for multi-tenant portals",
   "license": "UNLICENSED",
   "private": false,
@@ -118,6 +118,16 @@
       "types": "./dist/mission-control-experience.d.ts",
       "import": "./dist/mission-control-experience.js",
       "require": "./dist/mission-control-experience.cjs"
+    },
+    "./intent": {
+      "types": "./dist/intent.d.ts",
+      "import": "./dist/intent.js",
+      "require": "./dist/intent.cjs"
+    },
+    "./opportunity-graph": {
+      "types": "./dist/opportunity-graph.d.ts",
+      "import": "./dist/opportunity-graph.js",
+      "require": "./dist/opportunity-graph.cjs"
     },
     "./styles/tokens.css": "./styles/tokens.css"
   },

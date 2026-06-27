@@ -22,6 +22,8 @@ export { BriefAction, BriefCard, BriefRequest, BriefResponse, buildBriefResponse
 export { PlatformEvent, PlatformEventCategory, PlatformEventSource, PulseEventRow, fromActivityEvent, fromPulseAirtableRecord, fromPulseEventRow, mergeEventStreams, toActivityEventInput } from './platform-events.js';
 export { AgentDefinition, AgentKind, AgentRun, AgentRunInput, AgentRunStatus, EA_AGENT_REGISTRY, isActiveAgent, listAgentRuns, publishAgentRun, toAgentRun } from './agents.js';
 export { ActionCard, ContinueWorkingItem, DEFAULT_ACTION_CARDS, DEFAULT_INTENT_EXAMPLES, MissionControlRequest, MissionControlResponse, MomentumStat, buildMissionControlFromStreams, buildMissionControlResponse } from './mission-control.js';
+export { IntentNavRoute, IntentOrchestratorRoute, IntentRouteResult, IntentRouteType, IntentRouterConfig, routeIntent } from './intent.js';
+export { OpportunityEdgeType, OpportunityGraph, OpportunityGraphEdge, OpportunityGraphInput, OpportunityGraphNode, OpportunityNodeType, ResolvedIntentRecord, buildOpportunityGraph, intentToActivityEventInput, linkIntentToOpportunity, searchOpportunityGraph } from './opportunity-graph.js';
 
 interface MiddlewareConfig {
     protectedPrefixes: string[];

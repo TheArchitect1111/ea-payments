@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { ADMIN_COMMANDS, type CommandItem } from '@/lib/admin-command-registry';
+import { executeIntentRoute, submitAdminIntent } from '@/lib/admin-intent-client';
 import { startGuidedTour } from './GuidedTour';
 
 const NAVY = '#1B2B4D';
@@ -22,6 +23,27 @@ export default function UniversalCommandBar({ onOpenNavigator }: Props) {
   const [captureUrl, setCaptureUrl] = useState('');
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
+  const [routing, setRouting] = useState(false);
+
+  const routeNaturalLanguage = useCallback(async (text: string) => {
+    const q = text.trim();
+    if (!q) return;
+    setRouting(true);
+    setMessage('');
+    try {
+      const data = await submitAdminIntent(q);
+      const result = executeIntentRoute(data, { onTour: startGuidedTour });
+      setMessage(result.status);
+      if (!result.navigated) {
+        setOpen(false);
+        setQuery('');
+      }
+    } catch {
+      setMessage('Intent routing failed.');
+    } finally {
+      setRouting(false);
+    }
+  }, []);
 
   const filtered = ADMIN_COMMANDS.filter((cmd) => {
     const q = query.toLowerCase().trim();
@@ -190,8 +212,17 @@ export default function UniversalCommandBar({ onOpenNavigator }: Props) {
               autoFocus
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search commands… (Master Control, captures, navigate)"
+              placeholder="Search commands or type an intent… (Create proposal for Bob)"
               className="w-full px-4 py-3 text-sm border-b border-neutral-200 outline-none"
+              onKeyDown={(e) => {
+                if (e.key !== 'Enter' || !query.trim()) return;
+                e.preventDefault();
+                if (filtered.length === 1) {
+                  runCommand(filtered[0]);
+                  return;
+                }
+                void routeNaturalLanguage(query);
+              }}
             />
             <ul className="max-h-72 overflow-y-auto py-2">
               {filtered.map((cmd) => (
@@ -207,9 +238,14 @@ export default function UniversalCommandBar({ onOpenNavigator }: Props) {
                 </li>
               ))}
               {filtered.length === 0 && (
-                <li className="px-4 py-6 text-sm text-neutral-400 text-center">No commands match.</li>
+                <li className="px-4 py-6 text-sm text-neutral-400 text-center">
+                  {routing ? 'Routing intent…' : 'No commands match — press Enter to route as intent.'}
+                </li>
               )}
             </ul>
+            {message ? (
+              <p className="px-4 py-2 text-xs text-neutral-600 border-t border-neutral-100">{message}</p>
+            ) : null}
           </div>
         </div>
       )}

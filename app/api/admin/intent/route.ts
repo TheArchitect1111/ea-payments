@@ -3,11 +3,32 @@ import { verifyAdminSession, EA_ADMIN_COOKIE, parseAdminSession } from '@/lib/ea
 import { routeIntent } from '@/lib/intent-router';
 import { runOrchestrator } from '@/lib/agents/orchestrator';
 import type { AIRequestContext } from '@/lib/ai/types';
+import { intentToActivityEventInput } from '@ea/portal-chassis/opportunity-graph';
+import { publishEAActivityEvent } from '@/lib/ea-activity-events';
 
 export const dynamic = 'force-dynamic';
 
 function requestId() {
   return `intent_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+}
+
+async function persistIntentResolution(
+  intentId: string,
+  query: string,
+  route: ReturnType<typeof routeIntent>,
+): Promise<void> {
+  await publishEAActivityEvent(
+    intentToActivityEventInput({
+      id: intentId,
+      text: query,
+      routeType: route.type,
+      orchestratorIntent: route.orchestratorIntent,
+      href: route.href,
+      confidence: route.confidence,
+      organizationId: 'ea',
+      createdAt: new Date().toISOString(),
+    }),
+  );
 }
 
 export async function POST(req: Request) {
@@ -23,16 +44,17 @@ export async function POST(req: Request) {
     return Response.json({ ok: false, error: 'Query is required.' }, { status: 400 });
   }
 
+  const intentId = requestId();
   const route = routeIntent(query);
+  void persistIntentResolution(intentId, query, route);
 
   if (route.type !== 'orchestrate' || body.runOrchestrator === false) {
-    return Response.json({ ok: true, route });
+    return Response.json({ ok: true, route, intentId });
   }
 
   const admin = parseAdminSession(token);
-  const id = requestId();
   const context: AIRequestContext = {
-    requestId: id,
+    requestId: intentId,
     actor: {
       id: admin?.email ?? 'admin',
       type: 'admin',
@@ -66,12 +88,14 @@ export async function POST(req: Request) {
         followUpHref,
       },
       orchestration,
+      intentId,
     });
   } catch (error) {
     return Response.json({
       ok: true,
       route,
       orchestrationError: error instanceof Error ? error.message : 'Orchestrator unavailable.',
+      intentId,
     });
   }
 }
