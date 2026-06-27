@@ -40,6 +40,12 @@ const EA_ROUTES: IntentRouterConfig = {
       why: 'Partner discovery and marketplace tools.',
     },
     {
+      pattern: /opportunity graph|intent graph|action topology/i,
+      href: '/admin/opportunity-graph',
+      label: 'Opportunity Graph',
+      why: 'Intent, opportunity, and action links across the platform.',
+    },
+    {
       pattern: /assessment|mri|operational/i,
       href: '/assessment',
       label: 'Operational MRI',
