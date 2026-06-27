@@ -24,8 +24,8 @@ export const heroContent = {
   headline: 'Live YOUR Life™',
   subheadline:
     'Imagine custom systems quietly working in the background while you focus on what matters most.',
-  image: '/home/possible-owner.jpg',
-  imageAlt: 'A person fully present with family while life runs smoothly',
+  image: '/home/he-hero-live.jpg',
+  imageAlt: 'A person calmly enjoying the morning, free to focus on what matters',
   ctaPrimary: { label: 'Consider the Possibilities™', href: '#consider' },
   ctaSecondary: { label: 'Explore the Experiences', href: '#experiences' },
 } as const;
@@ -35,7 +35,7 @@ export const experienceStories: ExperienceStory[] = [
     id: 'business',
     headline: 'Live YOUR Life™',
     sentence: 'Your business keeps moving while you enjoy what matters most.',
-    image: '/home/possible-owner.jpg',
+    image: '/home/he-business-dinner.jpg',
     imageAlt: 'Business owner enjoying dinner with family while the business runs itself',
     bright: true,
     imagePosition: 'center 40%',
@@ -50,7 +50,7 @@ export const experienceStories: ExperienceStory[] = [
     id: 'coach',
     headline: 'Coach More. Coordinate Less.',
     sentence: 'The system handles coordination while you stay with your athletes.',
-    image: '/home/possible-coach.jpg',
+    image: '/home/he-coach-athletes.jpg',
     imageAlt: 'Coach fully engaged with athletes on the field',
     bright: true,
     imagePosition: 'center 35%',
@@ -65,8 +65,8 @@ export const experienceStories: ExperienceStory[] = [
     id: 'nonprofit',
     headline: 'Focus on the Mission.',
     sentence: 'The details run themselves while you lead with presence.',
-    image: '/home/possible-leader.jpg',
-    imageAlt: 'Executive director enjoying a community event with sponsors',
+    image: '/home/he-nonprofit-golf.jpg',
+    imageAlt: 'Executive director enjoying a charity golf tournament with sponsors',
     bright: true,
     cards: [
       { icon: '⛳', label: 'Registration' },
@@ -79,7 +79,7 @@ export const experienceStories: ExperienceStory[] = [
     id: 'creator',
     headline: 'Create.',
     sentence: "We'll handle the rest.",
-    image: '/home/scene-creator.jpg',
+    image: '/home/he-creator-filming.jpg',
     imageAlt: 'Creator filming content with focus and freedom',
     bright: true,
     cards: [
@@ -93,7 +93,7 @@ export const experienceStories: ExperienceStory[] = [
     id: 'musician',
     headline: 'Perform.',
     sentence: "We'll grow your audience.",
-    image: '/home/scene-sports-org.jpg',
+    image: '/home/he-musician-stage.jpg',
     imageAlt: 'Musician performing before a packed, energized audience',
     cards: [
       { icon: '🎟️', label: 'Events' },
@@ -144,7 +144,7 @@ export const considerContent = {
       id: 'business',
       icon: '🏢',
       label: 'Growing My Business',
-      image: '/home/scene-business.jpg',
+      image: '/home/he-business-dinner.jpg',
       imageAlt: 'Business owner focused on growth',
       opener: "Let's explore what becomes possible when your business runs itself.",
       prompts: [
@@ -157,7 +157,7 @@ export const considerContent = {
       id: 'coaching',
       icon: '🏀',
       label: 'Coaching',
-      image: '/home/coach-parent.jpg',
+      image: '/home/he-coach-athletes.jpg',
       imageAlt: 'Coach present with athletes and families',
       opener: "Let's explore what becomes possible when coordination happens quietly.",
       prompts: [
@@ -170,7 +170,7 @@ export const considerContent = {
       id: 'nonprofit',
       icon: '❤️',
       label: 'Serving My Community',
-      image: '/home/scene-pastor.jpg',
+      image: '/home/he-nonprofit-golf.jpg',
       imageAlt: 'Leader serving community with presence',
       opener: "Let's explore what becomes possible when the mission comes first.",
       prompts: [
@@ -183,7 +183,7 @@ export const considerContent = {
       id: 'creator',
       icon: '🎨',
       label: 'Creating',
-      image: '/home/scene-creator.jpg',
+      image: '/home/he-creator-filming.jpg',
       imageAlt: 'Creator making content freely',
       opener: "Let's explore what becomes possible when distribution runs itself.",
       prompts: [
@@ -196,7 +196,7 @@ export const considerContent = {
       id: 'musician',
       icon: '🎵',
       label: 'Performing',
-      image: '/home/possible-team.jpg',
+      image: '/home/he-musician-stage.jpg',
       imageAlt: 'Performer connecting with an audience',
       opener: "Let's explore what becomes possible when the business side stays quiet.",
       prompts: [
