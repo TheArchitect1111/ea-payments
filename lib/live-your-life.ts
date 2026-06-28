@@ -1,6 +1,8 @@
 /**
  * Efficiency Architects Marketing Experience™
- * Live YOUR Life™ — emotional storytelling, not a website.
+ * Live YOUR Life™. Emotional storytelling, not a website.
+ *
+ * Theme: Every mission deserves an organization designed around it.
  */
 
 export type FloatingCard = { icon: string; label: string };
@@ -39,7 +41,18 @@ export const openingHero = {
     'Imagine custom systems quietly working in the background while you focus on what matters most.',
   image: '/home/he-hero-live.jpg',
   imageAlt: 'A person fully present, free to focus on what matters most',
-  cta: { label: 'Begin the Experience', href: '#chapter-1' },
+  cta: { label: 'Begin the Experience', href: '#mission' },
+} as const;
+
+export const missionIntro = {
+  id: 'mission',
+  lead: 'Every organization exists for a reason.',
+  reasons: ['To educate.', 'To coach.', 'To serve.', 'To lead.', 'To heal.', 'To build community.'],
+  body: [
+    'Yet too many organizations spend their days managing work instead of fulfilling their mission.',
+    'We believe your operations should strengthen your mission, not compete with it.',
+    'When your systems fit the way you already work, your team spends less time learning processes and more time making an impact.',
+  ],
 } as const;
 
 export const chapter1 = {
@@ -91,41 +104,55 @@ export const chapter3 = {
   ],
 } as const;
 
+export const connectedSection = {
+  id: 'connected',
+  theme: 'Every mission deserves an organization designed around it.',
+  body: 'We believe every organization deserves an experience designed around its people, its mission, and the way it serves.',
+  image: '/home/pulse-connected.png',
+  imageAlt: 'People across an organization staying connected and informed through one calm system',
+} as const;
+
 export const chapter4 = {
   id: 'chapter-4',
   title: 'What If...',
-  intro: 'This chapter is about possibility.',
+  intro: '',
   image: '/home/he-hero-live.jpg',
   imageAlt: 'A calm moment of possibility and freedom',
   questions: [
-    'Your organization never answered the same question twice?',
-    'Training improved itself?',
-    'Knowledge never disappeared?',
-    'Opportunities found you?',
-    'Your presence continued working while you slept?',
-    'Your people spent more time serving and less time searching?',
+    'parents always knew what came next?',
+    'every registration or payment was acknowledged instantly?',
+    'every confirmation included the right next steps?',
+    'receipts, reminders, reports, and updates reached the right people automatically?',
+    'volunteers always knew where to be and what to do?',
+    'every new employee felt confident from day one?',
+    'members and committees always stayed informed?',
+    'clients felt supported long after the first conversation?',
   ],
+  closing: 'What could your team accomplish if all of that simply happened?',
 } as const;
 
 export const chapter5 = {
   id: 'chapter-5',
   title: 'We Believe...',
-  intro: 'The philosophy of Efficiency Architects.',
+  intro: "Great organizations don't happen by accident.",
   image: '/home/possible-leader.jpg',
   imageAlt: 'A leader with calm confidence and clarity',
   beliefs: [
-    'Organizations should be designed around people. Not people around software.',
-    'Technology should simplify. Not complicate.',
-    'Knowledge should grow. Not disappear.',
-    'Systems should create opportunity. Not create more work.',
-    'The best technology is the kind you stop thinking about because it quietly does its job.',
+    "They're designed.",
+    'Designed around the people they serve.',
+    'Designed around the teams who bring the mission to life.',
+    'Designed to create clarity instead of confusion.',
+    'Designed to build confidence instead of uncertainty.',
+    'Designed to help people find what they need, know what comes next, and move forward with purpose.',
   ],
+  closing:
+    'Because when an organization is thoughtfully designed, people spend less time navigating the work and more time accomplishing it.',
 } as const;
 
 export const chapter6 = {
   id: 'chapter-6',
   title: 'How We Think',
-  intro: 'Watching architects create a blueprint — not consultants presenting a process.',
+  intro: 'Watching architects create a blueprint, not consultants presenting a process.',
   steps: [
     { label: 'Understand', note: 'Listen to how your organization really works.' },
     { label: 'Discover Invisible Work', note: 'Find what quietly consumes your people.' },
@@ -271,16 +298,15 @@ export const chapter7 = {
 
 export const chapter8 = {
   id: 'chapter-8',
-  title: 'Why Custom Matters',
-  intro: "Every organization is unique. Why would they all use identical software?",
+  title: 'Designed for Your Organization',
+  intro: '',
   points: [
-    'Every organization is unique.',
-    'Every mission is unique.',
-    'Every team is unique.',
-    'Every process is unique.',
+    'Every organization is different.',
+    'Every mission is different.',
+    'Every team is different.',
+    'Every community is different.',
   ],
-  conclusion:
-    'Efficiency Architects designs systems around organizations instead of forcing organizations to adapt to software.',
+  conclusion: 'So why should every organization operate the same way?',
   image: '/home/scene-business.jpg',
   imageAlt: 'A unique organization with its own identity and mission',
 } as const;
@@ -292,20 +318,14 @@ export const chapter9 = {
   headline: 'One Platform.',
   headlineAccent: 'Unlimited Possibilities.',
   subheadline: 'Everything working together through one intelligent platform.',
-  dashboardImage: '/home/portal-pulse.png',
-  dashboardAlt: 'Pulse command center connecting everything',
-  leftOrbit: [
-    { icon: '🎓', label: 'Training' },
-    { icon: '📂', label: 'Knowledge' },
-    { icon: '📢', label: 'Communication' },
-    { icon: '👥', label: 'Clients' },
-  ],
-  rightOrbit: [
-    { icon: '📅', label: 'Events' },
-    { icon: '✨', label: 'Opportunities' },
-    { icon: '📊', label: 'Reports' },
-    { icon: '🤖', label: 'AI' },
-  ],
+  dashboardImage: '/home/pulse-command-center.png',
+  dashboardAlt:
+    'The Pulse command center: a live portal showing revenue, leads, projects, pipeline, and cash flow, surrounded by the automations running quietly in the background, from lead capture and email to proposals, payments, and onboarding',
+  caption: 'A real command center. One place to see your whole organization, with every step running quietly in the background.',
+  quote: {
+    lines: ['EVERY MISSION DESERVES', 'AN ORGANIZATION', 'DESIGNED AROUND IT.'],
+    attribution: 'Efficiency Architects',
+  },
   ecosystem: [
     'Training',
     'Knowledge',
@@ -328,12 +348,12 @@ export const chapter10 = {
   choices: [
     {
       id: 'business',
-      icon: '🏢',
-      label: 'Growing my business',
+      icon: '🏡',
+      label: 'Spending time where it matters!',
       image: '/home/he-business-dinner.jpg',
-      imageAlt: 'Growing a business with freedom',
-      opener: "Let's explore what becomes possible when your business runs itself.",
-      prompts: ['Getting my evenings back', 'Scaling without more admin', 'Never missing a lead again'],
+      imageAlt: 'Present with family while the business keeps running',
+      opener: "Let's explore what becomes possible when your business runs without you in every detail.",
+      prompts: ['Getting my evenings back', 'Being present with the people I love', 'Never missing a lead again'],
     },
     {
       id: 'creating',
@@ -373,12 +393,12 @@ export const chapter10 = {
     },
     {
       id: 'training',
-      icon: '🎓',
-      label: 'Training my team',
+      icon: '🙋',
+      label: 'Volunteering',
       image: '/home/ch7-school.jpg',
-      imageAlt: 'Training and inspiring a team',
-      opener: "Let's explore what becomes possible when knowledge never disappears.",
-      prompts: ['Onboarding that runs itself', 'Training available 24/7', 'Teams that stay aligned'],
+      imageAlt: 'Volunteers giving their time and making an impact',
+      opener: "Let's explore what becomes possible when your volunteers always feel supported and prepared.",
+      prompts: ['Volunteers who show up ready', 'Schedules everyone can see', 'Less coordinating, more impact'],
     },
     {
       id: 'presence',
@@ -404,8 +424,14 @@ export const chapter10 = {
 export const finalScreen = {
   headline: 'Live YOUR Life™',
   message: "We'll build the systems that quietly make it possible.",
-  cta: { label: 'Consider the Possibilities™', href: '#chapter-10' },
+  cta: { label: 'Consider The Possibilities!', href: '#chapter-10' },
   image: '/home/he-business-dinner.jpg',
   imageAlt: 'Family, community, leadership, mentorship, purpose',
   themes: ['Family', 'Community', 'Leadership', 'Mentorship', 'Purpose'],
+} as const;
+
+export const bottomCta = {
+  theme: 'Every mission deserves an organization designed around it.',
+  message: "Let's design yours.",
+  cta: { label: 'Consider The Possibilities!', href: '/contact' },
 } as const;

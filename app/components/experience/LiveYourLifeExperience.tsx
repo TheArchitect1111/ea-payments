@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useCallback, useState } from 'react';
 import {
+  bottomCta,
   chapter1,
   chapter10,
   chapter2,
@@ -15,7 +16,9 @@ import {
   chapter7,
   chapter8,
   chapter9,
+  connectedSection,
   finalScreen,
+  missionIntro,
   openingHero,
   type ConsiderChoice,
 } from '@/lib/live-your-life';
@@ -217,7 +220,7 @@ export default function LiveYourLifeExperience() {
           <span>Efficiency Architects</span>
         </Link>
         <a href="#chapter-10" className="lyl-nav-cta">
-          Consider the Possibilities™
+          Consider The Possibilities!
         </a>
       </header>
 
@@ -233,6 +236,29 @@ export default function LiveYourLifeExperience() {
             {openingHero.cta.label}
           </a>
         </motion.div>
+      </section>
+
+      {/* Mission — Every organization exists for a reason */}
+      <section className="lyl-chapter lyl-mission" id={missionIntro.id} aria-labelledby="lyl-mission-title">
+        <div className="lyl-container lyl-mission-inner">
+          <Reveal>
+            <h2 id="lyl-mission-title" className="lyl-mission-lead">
+              {missionIntro.lead}
+            </h2>
+          </Reveal>
+          <Reveal className="lyl-mission-reasons" delay={0.05}>
+            {missionIntro.reasons.map((r) => (
+              <span key={r} className="lyl-mission-reason">
+                {r}
+              </span>
+            ))}
+          </Reveal>
+          <Reveal className="lyl-mission-body" delay={0.1}>
+            {missionIntro.body.map((p) => (
+              <p key={p}>{p}</p>
+            ))}
+          </Reveal>
+        </div>
       </section>
 
       {/* Chapter 1 — Why Did You Start? */}
@@ -300,6 +326,26 @@ export default function LiveYourLifeExperience() {
         </div>
       </section>
 
+      {/* Connected — new theme + phone with connected people */}
+      <section className="lyl-connected" id={connectedSection.id} aria-labelledby="lyl-connected-title">
+        <div className="lyl-container lyl-connected-grid">
+          <Reveal className="lyl-connected-copy">
+            <h2 id="lyl-connected-title" className="lyl-connected-theme">
+              {connectedSection.theme}
+            </h2>
+            <p className="lyl-connected-body">{connectedSection.body}</p>
+          </Reveal>
+          <Reveal className="lyl-connected-visual" delay={0.1}>
+            <img
+              src={connectedSection.image}
+              alt={connectedSection.imageAlt}
+              loading="lazy"
+              decoding="async"
+            />
+          </Reveal>
+        </div>
+      </section>
+
       {/* Chapter 4 — What If... */}
       <section className="lyl-chapter lyl-ch4" id={chapter4.id} aria-labelledby="lyl-ch4-title">
         <div className="lyl-ch4-bg">
@@ -309,7 +355,7 @@ export default function LiveYourLifeExperience() {
         <div className="lyl-container lyl-ch4-body">
           <Reveal className="lyl-ch-head lyl-ch-head-light">
             <h2 id="lyl-ch4-title">{chapter4.title}</h2>
-            <p>{chapter4.intro}</p>
+            {chapter4.intro ? <p>{chapter4.intro}</p> : null}
           </Reveal>
           <ul className="lyl-whatif-list">
             {chapter4.questions.map((q) => (
@@ -319,6 +365,9 @@ export default function LiveYourLifeExperience() {
               </li>
             ))}
           </ul>
+          <Reveal>
+            <p className="lyl-whatif-close">{chapter4.closing}</p>
+          </Reveal>
         </div>
       </section>
 
@@ -333,6 +382,7 @@ export default function LiveYourLifeExperience() {
                 <li key={b}>{b}</li>
               ))}
             </ul>
+            <p className="lyl-ch5-close">{chapter5.closing}</p>
           </Reveal>
           <Reveal className="lyl-ch5-visual" delay={0.1}>
             <ScenePhoto src={chapter5.image} alt={chapter5.imageAlt} />
@@ -387,7 +437,7 @@ export default function LiveYourLifeExperience() {
         <div className="lyl-container lyl-ch8-body">
           <Reveal className="lyl-ch-head lyl-ch-head-light">
             <h2 id="lyl-ch8-title">{chapter8.title}</h2>
-            <p>{chapter8.intro}</p>
+            {chapter8.intro ? <p>{chapter8.intro}</p> : null}
           </Reveal>
           <ul className="lyl-custom-points">
             {chapter8.points.map((p) => (
@@ -419,23 +469,20 @@ export default function LiveYourLifeExperience() {
             ))}
           </Reveal>
           <Reveal className="lyl-ch9-stage" delay={0.15}>
-            <ul className="lyl-orbit lyl-orbit-left" aria-hidden="true">
-              {chapter9.leftOrbit.map((f) => (
-                <li key={f.label}>
-                  <span>{f.icon}</span> {f.label}
-                </li>
-              ))}
-            </ul>
             <figure className="lyl-pulse-shot">
               <img src={chapter9.dashboardImage} alt={chapter9.dashboardAlt} loading="lazy" decoding="async" />
+              <figcaption>{chapter9.caption}</figcaption>
             </figure>
-            <ul className="lyl-orbit lyl-orbit-right" aria-hidden="true">
-              {chapter9.rightOrbit.map((f) => (
-                <li key={f.label}>
-                  <span>{f.icon}</span> {f.label}
-                </li>
+          </Reveal>
+          <Reveal className="lyl-ch9-quote" delay={0.2}>
+            <blockquote className="lyl-quote-card">
+              {chapter9.quote.lines.map((line) => (
+                <span key={line} className="lyl-quote-line">
+                  {line}
+                </span>
               ))}
-            </ul>
+              <cite className="lyl-quote-attr">{chapter9.quote.attribution}</cite>
+            </blockquote>
           </Reveal>
         </div>
       </section>
@@ -461,6 +508,19 @@ export default function LiveYourLifeExperience() {
             <a href={finalScreen.cta.href} className="lyl-btn lyl-btn-solid">
               {finalScreen.cta.label}
             </a>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* Bottom CTA */}
+      <section className="lyl-bottom-cta" aria-labelledby="lyl-bottom-cta-title">
+        <div className="lyl-container">
+          <Reveal className="lyl-bottom-cta-inner">
+            <h2 id="lyl-bottom-cta-title">{bottomCta.theme}</h2>
+            <p>{bottomCta.message}</p>
+            <Link href={bottomCta.cta.href} className="lyl-btn lyl-btn-solid">
+              {bottomCta.cta.label}
+            </Link>
           </Reveal>
         </div>
       </section>

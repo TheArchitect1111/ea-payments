@@ -672,36 +672,66 @@ body:has(.lyl) .ea-guide-shell {
   gap: 1.5rem;
 }
 
+/* Kill shot: maximize the command center monitor + phone */
 .lyl-pulse-shot {
   margin: 0;
-  max-width: min(100%, 680px);
+  width: 100%;
+  max-width: min(100%, 1180px);
+  display: grid;
+  gap: 1rem;
+  justify-items: center;
 }
 
 .lyl-pulse-shot img {
   width: 100%;
   height: auto;
   display: block;
-  filter: drop-shadow(0 32px 64px rgba(0, 0, 0, 0.55));
+  border-radius: 14px;
+  filter: drop-shadow(0 40px 90px rgba(0, 0, 0, 0.6));
 }
 
-.lyl-orbit {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: none;
-  gap: 0.6rem;
+.lyl-pulse-shot figcaption {
+  font-size: clamp(0.95rem, 1.6vw, 1.15rem);
+  color: rgba(255, 255, 255, 0.78);
+  max-width: 42ch;
+  text-align: center;
+  line-height: 1.5;
 }
 
-.lyl-orbit li {
+/* Quote card */
+.lyl-ch9-quote {
   display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  padding: 0.5rem 0.8rem;
-  border-radius: 999px;
-  border: 1px solid rgba(201, 168, 68, 0.25);
-  background: rgba(255, 255, 255, 0.06);
-  font-size: 0.78rem;
-  white-space: nowrap;
+  justify-content: center;
+  margin-top: clamp(2.5rem, 6vw, 4rem);
+}
+
+.lyl-quote-card {
+  margin: 0;
+  display: grid;
+  gap: 0.15rem;
+  justify-items: center;
+  text-align: center;
+  padding: clamp(2rem, 5vw, 3rem) clamp(1.75rem, 5vw, 3.5rem);
+  border-top: 2px solid var(--lyl-gold);
+  border-bottom: 2px solid var(--lyl-gold);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.lyl-quote-line {
+  font-size: clamp(1.4rem, 3.6vw, 2.6rem);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1.12;
+  color: #fff;
+}
+
+.lyl-quote-attr {
+  margin-top: 1.1rem;
+  font-style: normal;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  color: var(--lyl-gold);
 }
 
 /* Consider */
@@ -928,6 +958,145 @@ body:has(.lyl) .ea-guide-shell {
 
 .lyl-footer a:hover { color: #fff; }
 
+/* Mission intro */
+.lyl-mission { background: #faf9f7; }
+
+.lyl-mission-inner {
+  display: grid;
+  gap: clamp(1.5rem, 3vw, 2.25rem);
+  justify-items: center;
+  text-align: center;
+}
+
+.lyl-mission-lead {
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  max-width: 18ch;
+}
+
+.lyl-mission-reasons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.6rem 0.9rem;
+}
+
+.lyl-mission-reason {
+  padding: 0.45rem 1rem;
+  border-radius: 999px;
+  border: 1px solid rgba(29, 111, 107, 0.25);
+  background: rgba(29, 111, 107, 0.06);
+  color: var(--lyl-teal);
+  font-weight: 600;
+  font-size: clamp(0.95rem, 1.6vw, 1.1rem);
+}
+
+.lyl-mission-body {
+  display: grid;
+  gap: 1rem;
+  max-width: 54ch;
+}
+
+.lyl-mission-body p {
+  font-size: clamp(1.05rem, 1.7vw, 1.25rem);
+  line-height: 1.6;
+  color: var(--lyl-ink-soft);
+}
+
+/* Connected (theme + phone with people) */
+.lyl-connected {
+  background: linear-gradient(180deg, #0a0c10 0%, #12161e 100%);
+  color: #fff;
+  padding: clamp(4rem, 10vw, 7rem) 0;
+}
+
+.lyl-connected-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(2rem, 5vw, 3.5rem);
+  align-items: center;
+}
+
+.lyl-connected-theme {
+  font-size: clamp(1.9rem, 4.5vw, 3rem);
+  color: #fff;
+  max-width: 18ch;
+  margin-bottom: 1rem;
+}
+
+.lyl-connected-body {
+  font-size: clamp(1.05rem, 1.8vw, 1.3rem);
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.82);
+  max-width: 46ch;
+}
+
+.lyl-connected-visual {
+  display: flex;
+  justify-content: center;
+}
+
+.lyl-connected-visual img {
+  width: 100%;
+  max-width: 460px;
+  height: auto;
+  display: block;
+  filter: drop-shadow(0 30px 70px rgba(0, 0, 0, 0.5));
+}
+
+/* What If closing line */
+.lyl-whatif-close {
+  text-align: center;
+  margin: clamp(2rem, 5vw, 3rem) auto 0;
+  max-width: 44ch;
+  font-size: clamp(1.2rem, 2.4vw, 1.6rem);
+  font-weight: 600;
+  line-height: 1.4;
+  color: #fff;
+}
+
+/* We Believe closing line */
+.lyl-ch5-close {
+  margin-top: 1.5rem;
+  font-size: clamp(1.05rem, 1.7vw, 1.22rem);
+  line-height: 1.6;
+  color: var(--lyl-ink-soft);
+  font-style: italic;
+}
+
+/* Bottom CTA */
+.lyl-bottom-cta {
+  background: var(--lyl-teal);
+  color: #fff;
+  padding: clamp(3.5rem, 9vw, 6rem) 0;
+}
+
+.lyl-bottom-cta-inner {
+  display: grid;
+  gap: 1.25rem;
+  justify-items: center;
+  text-align: center;
+}
+
+.lyl-bottom-cta-inner h2 {
+  font-size: clamp(1.8rem, 4.5vw, 3rem);
+  color: #fff;
+  max-width: 20ch;
+}
+
+.lyl-bottom-cta-inner p {
+  font-size: clamp(1.05rem, 1.8vw, 1.25rem);
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.lyl-bottom-cta .lyl-btn-solid {
+  background: #fff;
+  color: var(--lyl-teal);
+}
+
+.lyl-bottom-cta .lyl-btn-solid:hover {
+  background: #f0efe9;
+}
+
 /* Responsive */
 @media (min-width: 640px) {
   .lyl-imagine-grid { grid-template-columns: repeat(3, 1fr); }
@@ -937,12 +1106,7 @@ body:has(.lyl) .ea-guide-shell {
 @media (min-width: 900px) {
   .lyl-ch5-grid { grid-template-columns: 1.1fr 0.9fr; }
   .lyl-invisible-grid { grid-template-columns: repeat(5, 1fr); max-width: 720px; }
-  .lyl-ch9-stage {
-    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-  }
-  .lyl-orbit { display: grid; }
-  .lyl-orbit-left { justify-items: end; }
-  .lyl-orbit-right { justify-items: start; }
+  .lyl-connected-grid { grid-template-columns: 1.05fr 0.95fr; }
 }
 
 @media (max-width: 768px) {
