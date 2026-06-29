@@ -1,5 +1,9 @@
 import { createHash, randomBytes } from 'node:crypto';
 import { hashPassword, verifyPassword } from '@/lib/ea-password-hash';
+import {
+  createAdminPasswordResetToken,
+  verifyAdminPasswordResetToken,
+} from '@/lib/ea-admin-reset-token';
 import { validatePasswordStrength } from '@/lib/password-policy';
 
 export type AdminUser = { email: string; password: string; role: string; name: string };
@@ -108,6 +112,40 @@ function hashToken(token: string) {
   return createHash('sha256').update(token).digest('hex');
 }
 
+/**
+ * Resolve an admin account by email only (no password) — used by SSO/Clerk
+ * sign-in. Sources: Airtable Admin Users → ADMIN_USERS env → ADMIN_CLERK_ALLOWLIST.
+ */
+export async function findAdminAccount(email: string): Promise<Omit<AdminUser, 'password'> | null> {
+  const normalized = email.trim().toLowerCase();
+  if (!normalized) return null;
+
+  const airtable = await findAirtableAdmin(normalized);
+  if (airtable) {
+    return { email: airtable.email, role: airtable.role || 'admin', name: airtable.name || normalized };
+  }
+
+  const envUser = adminUsers().find((user) => user.email === normalized);
+  if (envUser) {
+    return { email: envUser.email, role: envUser.role || 'admin', name: envUser.name || normalized };
+  }
+
+  const allowlist = (process.env.ADMIN_CLERK_ALLOWLIST || '')
+    .split(/[,\n;]/)
+    .map((value) => value.trim().toLowerCase())
+    .filter(Boolean);
+  if (allowlist.includes(normalized)) {
+    const ownerEmail = (process.env.ADMIN_EMAIL || '').trim().toLowerCase();
+    return {
+      email: normalized,
+      role: normalized === ownerEmail ? 'owner' : 'admin',
+      name: 'Admin',
+    };
+  }
+
+  return null;
+}
+
 export function authenticateAdmin(email: string, password: string) {
   const normalized = email.trim().toLowerCase();
   const user = adminUsers().find((item) => item.email === normalized);
@@ -124,55 +162,101 @@ export async function authenticateAdminAsync(email: string, password: string) {
 
 export async function requestAdminPasswordReset(email: string, origin: string) {
   const normalized = email.trim().toLowerCase();
-  const knownEnvUser = adminUsers().find((user) => user.email === normalized);
-  let user = await findAirtableAdmin(normalized);
-  if (!user && knownEnvUser) user = await createAirtableAdmin(normalized, knownEnvUser.name);
-  if (!user) return null;
+  const account = await findAdminAccount(normalized);
+  if (!account) return null;
 
-  if (!ADMIN_USERS_TABLE) {
-    throw new Error('Password reset requires AIRTABLE_ADMIN_USERS_TABLE_ID.');
+  let user = await findAirtableAdmin(normalized);
+  if (!user && ADMIN_USERS_TABLE && airtableToken()) {
+    try {
+      user = await createAirtableAdmin(normalized, account.name);
+    } catch (err) {
+      console.warn('Could not create Airtable admin for password reset:', err);
+    }
   }
 
-  const token = randomBytes(32).toString('base64url');
-  const headers = await airtableHeaders();
-  const expires = new Date(Date.now() + 1000 * 60 * 30).toISOString();
-  const res = await fetch(`https://api.airtable.com/v0/${BASE}/${encodeURIComponent(ADMIN_USERS_TABLE)}`, {
-    method: 'PATCH',
-    headers,
-    body: JSON.stringify({
-      records: [
-        {
-          id: user.id,
-          fields: {
-            'Password Reset Token': hashToken(token),
-            'Password Reset Expires': expires,
-          },
-        },
-      ],
-      typecast: true,
-    }),
-  });
-  if (!res.ok) throw new Error(await res.text());
-  return `${origin}/admin/reset-password?email=${encodeURIComponent(normalized)}&token=${encodeURIComponent(token)}`;
+  const rawToken = randomBytes(32).toString('base64url');
+
+  if (user && ADMIN_USERS_TABLE && airtableToken()) {
+    try {
+      const headers = await airtableHeaders();
+      const expires = new Date(Date.now() + 1000 * 60 * 30).toISOString();
+      const res = await fetch(`https://api.airtable.com/v0/${BASE}/${encodeURIComponent(ADMIN_USERS_TABLE)}`, {
+        method: 'PATCH',
+        headers,
+        body: JSON.stringify({
+          records: [
+            {
+              id: user.id,
+              fields: {
+                'Password Reset Token': hashToken(rawToken),
+                'Password Reset Expires': expires,
+              },
+            },
+          ],
+          typecast: true,
+        }),
+      });
+      if (res.ok) {
+        return `${origin}/admin/reset-password?email=${encodeURIComponent(normalized)}&token=${encodeURIComponent(rawToken)}`;
+      }
+      console.warn('Airtable password reset PATCH failed:', await res.text());
+    } catch (err) {
+      console.warn('Airtable password reset store failed:', err);
+    }
+  }
+
+  const signedToken = createAdminPasswordResetToken(normalized);
+  if (!signedToken) {
+    throw new Error(
+      'Password reset is not configured. Set ADMIN_SESSION_SECRET or AIRTABLE_ADMIN_USERS_TABLE_ID.',
+    );
+  }
+
+  return `${origin}/admin/reset-password?email=${encodeURIComponent(normalized)}&token=${encodeURIComponent(signedToken)}`;
 }
 
 export async function resetAdminPassword(email: string, token: string, password: string) {
   const validation = validatePasswordStrength(password);
   if (!validation.ok) throw new Error(validation.message);
-  const user = await findAirtableAdmin(email);
-  if (!user) throw new Error('Reset link is invalid.');
-  const headers = await airtableHeaders();
-  const res = await fetch(
-    `https://api.airtable.com/v0/${BASE}/${encodeURIComponent(ADMIN_USERS_TABLE)}/${user.id}`,
-    { headers, cache: 'no-store' },
-  );
-  if (!res.ok) throw new Error('Reset link is invalid.');
-  const record = (await res.json()) as AirtableRecord;
-  const storedToken = text(record, 'Password Reset Token');
-  const expires = Date.parse(text(record, 'Password Reset Expires'));
-  if (!storedToken || storedToken !== hashToken(token) || !expires || expires < Date.now()) {
-    throw new Error('Reset link is invalid or expired.');
+
+  const normalized = email.trim().toLowerCase();
+  let tokenValid = verifyAdminPasswordResetToken(normalized, token);
+
+  let user = await findAirtableAdmin(normalized);
+  if (!tokenValid && user && ADMIN_USERS_TABLE) {
+    const headers = await airtableHeaders();
+    const res = await fetch(
+      `https://api.airtable.com/v0/${BASE}/${encodeURIComponent(ADMIN_USERS_TABLE)}/${user.id}`,
+      { headers, cache: 'no-store' },
+    );
+    if (res.ok) {
+      const record = (await res.json()) as AirtableRecord;
+      const storedToken = text(record, 'Password Reset Token');
+      const expires = Date.parse(text(record, 'Password Reset Expires'));
+      if (storedToken && storedToken === hashToken(token) && expires && expires >= Date.now()) {
+        tokenValid = true;
+      }
+    }
   }
+
+  if (!tokenValid) throw new Error('Reset link is invalid or expired.');
+
+  if (!user && ADMIN_USERS_TABLE && airtableToken()) {
+    const account = await findAdminAccount(normalized);
+    if (account) {
+      try {
+        user = await createAirtableAdmin(normalized, account.name);
+      } catch (err) {
+        console.warn('Could not create Airtable admin during reset:', err);
+      }
+    }
+  }
+
+  if (!user || !ADMIN_USERS_TABLE) {
+    throw new Error('Could not save your new password. Ask the owner to finish admin storage setup.');
+  }
+
+  const headers = await airtableHeaders();
   const patch = await fetch(`https://api.airtable.com/v0/${BASE}/${encodeURIComponent(ADMIN_USERS_TABLE)}`, {
     method: 'PATCH',
     headers,

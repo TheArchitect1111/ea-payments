@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { startGuidedTour } from './GuidedTour';
 import TrustPanel from './TrustPanel';
@@ -17,6 +18,7 @@ type VoiceIntent = {
 };
 
 export default function VoiceAssistant() {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);
@@ -41,10 +43,10 @@ export default function VoiceAssistant() {
 
     if (result.href) {
       setTimeout(() => {
-        window.location.href = result.href!;
+        router.push(result.href!);
       }, 600);
     }
-  }, []);
+  }, [router]);
 
   const submit = async (text?: string) => {
     const q = (text ?? query).trim();

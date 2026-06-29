@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import { ADMIN_COMMANDS, type CommandItem } from '@/lib/admin-command-registry';
 import { startGuidedTour } from './GuidedTour';
@@ -12,6 +13,7 @@ type Props = {
 };
 
 export default function UniversalCommandBar({ onOpenNavigator }: Props) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [captureOpen, setCaptureOpen] = useState(false);
@@ -58,10 +60,10 @@ export default function UniversalCommandBar({ onOpenNavigator }: Props) {
         return;
       }
       if (cmd.href) {
-        window.location.href = cmd.href;
+        router.push(cmd.href);
       }
     },
-    [onOpenNavigator]
+    [onOpenNavigator, router]
   );
 
   useEffect(() => {
@@ -155,7 +157,7 @@ export default function UniversalCommandBar({ onOpenNavigator }: Props) {
       setTimeout(() => {
         setAnalyzeOpen(false);
         setMessage('');
-        window.location.href = '/admin/resource-radar';
+        router.push('/admin/resource-radar');
       }, 1200);
     } catch {
       setMessage('Analysis failed.');

@@ -1,6 +1,6 @@
 /**
- * Homepage — emotion-first storytelling.
- * Less text. More image. Systems work quietly in the background.
+ * EA Athletics Experience.
+ * A coach journey, not a generic business website.
  */
 
 export type FloatingCard = {
@@ -15,208 +15,219 @@ export type ExperienceStory = {
   image: string;
   imageAlt: string;
   cards: FloatingCard[];
-  /** Brighten scrim so faces stay visible */
   bright?: boolean;
   imagePosition?: string;
 };
 
 export const heroContent = {
-  headline: 'Live YOUR Life™',
+  headline: 'Coach Again.',
   subheadline:
-    'Imagine custom systems quietly working in the background while you focus on what matters most.',
-  image: '/home/he-hero-live.jpg',
-  imageAlt: 'A person calmly enjoying the morning, free to focus on what matters',
-  ctaPrimary: { label: 'Consider the Possibilities™', href: '#consider' },
-  ctaSecondary: { label: 'Explore the Experiences', href: '#experiences' },
+    'A cinematic journey for coaches who built something meaningful and need the organization to finally work together.',
+  image: '/home/he-coach-athletes.jpg',
+  imageAlt: 'A coach fully present with athletes during practice',
+  ctaPrimary: { label: 'Begin the Journey', href: '#experiences' },
+  ctaSecondary: { label: 'See the Landing Page + Portal', href: '#athletics' },
 } as const;
 
 export const experienceStories: ExperienceStory[] = [
   {
-    id: 'business',
-    headline: 'Live YOUR Life™',
-    sentence: 'Your business keeps moving while you enjoy what matters most.',
-    image: '/home/he-business-dinner.jpg',
-    imageAlt: 'Business owner enjoying dinner with family while the business runs itself',
-    bright: true,
-    imagePosition: 'center 40%',
-    cards: [
-      { icon: '📅', label: 'Appointments' },
-      { icon: '💳', label: 'Payments' },
-      { icon: '📄', label: 'Proposals' },
-      { icon: '📈', label: 'New Leads' },
-    ],
-  },
-  {
-    id: 'coach',
-    headline: 'Coach More. Coordinate Less.',
-    sentence: 'The system handles coordination while you stay with your athletes.',
+    id: 'why-we-coach',
+    headline: 'Every coach starts with a dream.',
+    sentence: 'A team. A season. A young athlete who needs someone to believe in them.',
     image: '/home/he-coach-athletes.jpg',
-    imageAlt: 'Coach fully engaged with athletes on the field',
+    imageAlt: 'Coach teaching athletes with focus and care',
     bright: true,
     imagePosition: 'center 35%',
     cards: [
-      { icon: '🏀', label: 'Camp Registration' },
-      { icon: '📅', label: 'Scheduling' },
-      { icon: '💬', label: 'Parent Updates' },
-      { icon: '🎥', label: 'Film Library' },
+      { icon: '01', label: 'Purpose' },
+      { icon: '02', label: 'Teaching' },
+      { icon: '03', label: 'Development' },
+      { icon: '04', label: 'Belonging' },
     ],
   },
   {
-    id: 'nonprofit',
-    headline: 'Focus on the Mission.',
-    sentence: 'The details run themselves while you lead with presence.',
-    image: '/home/he-nonprofit-golf.jpg',
-    imageAlt: 'Executive director enjoying a charity golf tournament with sponsors',
+    id: 'success-changes',
+    headline: 'Success changes everything.',
+    sentence: 'One team becomes more teams. More athletes. More parents. More camps. More details.',
+    image: '/home/scene-sports-org.jpg',
+    imageAlt: 'Families and athletes gathered at a busy sports organization event',
+    bright: true,
+    imagePosition: 'center 45%',
+    cards: [
+      { icon: '05', label: 'Teams' },
+      { icon: '06', label: 'Families' },
+      { icon: '07', label: 'Camps' },
+      { icon: '08', label: 'Volunteers' },
+    ],
+  },
+  {
+    id: 'the-weight',
+    headline: 'Then the work starts covering the coach.',
+    sentence: 'Questions, registrations, payments, waivers, schedules, hotels, film, messages, and reminders multiply.',
+    image: '/home/ch2-invisible-work.jpg',
+    imageAlt: 'A leader surrounded by invisible administrative work',
     bright: true,
     cards: [
-      { icon: '⛳', label: 'Registration' },
-      { icon: '🤝', label: 'Sponsors' },
-      { icon: '❤️', label: 'Donations' },
-      { icon: '🙋', label: 'Volunteers' },
+      { icon: '09', label: 'Registration' },
+      { icon: '10', label: 'Payments' },
+      { icon: '11', label: 'Waivers' },
+      { icon: '12', label: 'Messages' },
     ],
   },
   {
-    id: 'creator',
-    headline: 'Create.',
-    sentence: "We'll handle the rest.",
-    image: '/home/he-creator-filming.jpg',
-    imageAlt: 'Creator filming content with focus and freedom',
+    id: 'landing-page',
+    headline: 'The Landing Page starts the relationship.',
+    sentence: 'Families see the program, understand the path, trust the standard, and register with confidence.',
+    image: '/ea-athletics-samples/1000037821.png',
+    imageAlt: 'Premium athletics landing page for a volleyball organization',
     bright: true,
+    imagePosition: 'top center',
     cards: [
-      { icon: '📹', label: 'Publishing' },
-      { icon: '📱', label: 'Social Media' },
-      { icon: '📧', label: 'Newsletter' },
-      { icon: '📊', label: 'Analytics' },
+      { icon: '13', label: 'Programs' },
+      { icon: '14', label: 'Coach Bios' },
+      { icon: '15', label: 'Events' },
+      { icon: '16', label: 'Registration' },
     ],
   },
   {
-    id: 'musician',
-    headline: 'Perform.',
-    sentence: "We'll grow your audience.",
-    image: '/home/he-musician-stage.jpg',
-    imageAlt: 'Musician performing before a packed, energized audience',
+    id: 'portal',
+    headline: 'The Portal keeps everyone moving.',
+    sentence: 'Coaches, parents, athletes, staff, volunteers, and sponsors each see exactly what they need.',
+    image: '/ea-athletics-samples/1000037823.png',
+    imageAlt: 'Coach portal dashboard for a baseball organization',
+    imagePosition: 'top center',
     cards: [
-      { icon: '🎟️', label: 'Events' },
-      { icon: '🛍️', label: 'Merchandise' },
-      { icon: '🎫', label: 'VIP Members' },
-      { icon: '🎵', label: 'Bookings' },
+      { icon: '17', label: 'Schedules' },
+      { icon: '18', label: 'Attendance' },
+      { icon: '19', label: 'Messages' },
+      { icon: '20', label: 'Resources' },
+    ],
+  },
+  {
+    id: 'while-you-coach',
+    headline: 'While you coach, the organization works.',
+    sentence: 'Registration complete. Payment received. Schedule updated. Reminder sent. The coach never leaves the field.',
+    image: '/home/possible-coach.jpg',
+    imageAlt: 'Coach fully present with athletes during practice',
+    bright: true,
+    imagePosition: 'center 40%',
+    cards: [
+      { icon: '21', label: 'Reminder Sent' },
+      { icon: '22', label: 'Waiver Approved' },
+      { icon: '23', label: 'Camp Filled' },
+      { icon: '24', label: 'Profile Updated' },
     ],
   },
 ];
 
 export type PulseFeature = { icon: string; label: string };
 
+export type AthleticsSample = {
+  id: string;
+  label: string;
+  kind: 'Landing Page' | 'Portal';
+  sport: string;
+  image: string;
+  imageAlt: string;
+  theme: string;
+};
+
+export const athleticsShowcase = {
+  eyebrow: 'EA Athletics Experience',
+  headline: 'First they see the program. Then they enter the system.',
+  intro:
+    'The public Landing Page builds confidence. The private Portal removes friction. Together, they become the operating system behind the season.',
+  samples: [
+    {
+      id: 'volleyball-landing',
+      label: 'Elevate Volleyball',
+      kind: 'Landing Page',
+      sport: 'Volleyball',
+      image: '/ea-athletics-samples/1000037821.png',
+      imageAlt: 'Elevate Volleyball premium landing page with hero photography, programs, family proof, and registration calls to action',
+      theme: 'Black, white, and orange public program experience',
+    },
+    {
+      id: 'tennis-landing',
+      label: 'Elevate Tennis',
+      kind: 'Landing Page',
+      sport: 'Tennis',
+      image: '/ea-athletics-samples/1000037822.png',
+      imageAlt: 'Elevate Tennis premium landing page with programs, mission, recruiting, and camp pathways',
+      theme: 'Navy and electric green public program experience',
+    },
+    {
+      id: 'baseball-portal',
+      label: 'Redline Baseball',
+      kind: 'Portal',
+      sport: 'Baseball',
+      image: '/ea-athletics-samples/1000037823.png',
+      imageAlt: 'Redline Baseball dark coach portal dashboard with schedules, payments, announcements, tasks, and player spotlight',
+      theme: 'Dark coach command center',
+    },
+    {
+      id: 'basketball-portal',
+      label: 'Elevate Basketball',
+      kind: 'Portal',
+      sport: 'Basketball',
+      image: '/ea-athletics-samples/1000037824.png',
+      imageAlt: 'Elevate Basketball light business portal dashboard with revenue, registrations, schedules, messages, and team operations',
+      theme: 'Light program director command center',
+    },
+  ] satisfies AthleticsSample[],
+} as const;
+
 export const pulseReveal = {
-  headline: 'One Platform.',
-  headlineAccent: 'Unlimited Possibilities.',
-  subheadline: "Everything you've experienced is powered by Pulse™.",
-  dashboardImage: '/home/portal-pulse.png',
-  dashboardAlt: 'Pulse command center on desktop, tablet, and phone',
+  headline: 'Everyone connected.',
+  headlineAccent: 'The coach back on the field.',
+  subheadline:
+    'The EA Portal becomes the quiet system behind registration, communication, schedules, resources, payments, and growth.',
+  dashboardImage: '/ea-athletics-samples/1000037824.png',
+  dashboardAlt: 'Athletics program portal dashboard with teams, revenue, registrations, schedules, messages, and operations',
   leftFeatures: [
-    { icon: '🎓', label: 'Training' },
-    { icon: '👥', label: 'CRM' },
-    { icon: '📂', label: 'Knowledge' },
-    { icon: '📢', label: 'Communications' },
+    { icon: 'A', label: 'Athletes' },
+    { icon: 'P', label: 'Parents' },
+    { icon: 'C', label: 'Coaches' },
+    { icon: 'V', label: 'Volunteers' },
   ] as PulseFeature[],
   rightFeatures: [
-    { icon: '📅', label: 'Events' },
-    { icon: '📋', label: 'Projects' },
-    { icon: '📊', label: 'Reports' },
-    { icon: '🤖', label: 'AI Assistant' },
+    { icon: 'S', label: 'Schedules' },
+    { icon: 'R', label: 'Registration' },
+    { icon: '$', label: 'Payments' },
+    { icon: 'M', label: 'Messaging' },
   ] as PulseFeature[],
 } as const;
 
-export type ConsiderPath = {
+export type CoachVisionOption = {
   id: string;
-  icon: string;
   label: string;
-  image: string;
-  imageAlt: string;
-  opener: string;
-  prompts: string[];
 };
 
 export const considerContent = {
-  headline: 'Consider the Possibilities™',
-  question: 'What would you love to spend more time doing?',
-  paths: [
-    {
-      id: 'business',
-      icon: '🏢',
-      label: 'Growing My Business',
-      image: '/home/he-business-dinner.jpg',
-      imageAlt: 'Business owner focused on growth',
-      opener: "Let's explore what becomes possible when your business runs itself.",
-      prompts: [
-        'Getting my evenings and weekends back',
-        'Scaling without hiring more admin staff',
-        'Never missing a lead or follow-up again',
-      ],
-    },
-    {
-      id: 'coaching',
-      icon: '🏀',
-      label: 'Coaching',
-      image: '/home/he-coach-athletes.jpg',
-      imageAlt: 'Coach present with athletes and families',
-      opener: "Let's explore what becomes possible when coordination happens quietly.",
-      prompts: [
-        'Being on the field instead of in my inbox',
-        'Parents always knowing what is happening',
-        'Running camps without the admin chaos',
-      ],
-    },
-    {
-      id: 'nonprofit',
-      icon: '❤️',
-      label: 'Serving My Community',
-      image: '/home/he-nonprofit-golf.jpg',
-      imageAlt: 'Leader serving community with presence',
-      opener: "Let's explore what becomes possible when the mission comes first.",
-      prompts: [
-        'Events that run smoothly without me in every detail',
-        'Volunteers who show up prepared',
-        'Donors and sponsors feeling truly connected',
-      ],
-    },
-    {
-      id: 'creator',
-      icon: '🎨',
-      label: 'Creating',
-      image: '/home/he-creator-filming.jpg',
-      imageAlt: 'Creator making content freely',
-      opener: "Let's explore what becomes possible when distribution runs itself.",
-      prompts: [
-        'Publishing without the platform juggling',
-        'Growing my audience while I create',
-        'Newsletters and social on autopilot',
-      ],
-    },
-    {
-      id: 'musician',
-      icon: '🎵',
-      label: 'Performing',
-      image: '/home/he-musician-stage.jpg',
-      imageAlt: 'Performer connecting with an audience',
-      opener: "Let's explore what becomes possible when the business side stays quiet.",
-      prompts: [
-        'Selling tickets without the back-and-forth',
-        'Merch and VIP handled automatically',
-        'More stages, less spreadsheets',
-      ],
-    },
-    {
-      id: 'leading',
-      icon: '👥',
-      label: 'Leading My Team',
-      image: '/home/possible-leader.jpg',
-      imageAlt: 'Leader with a confident, calm team',
-      opener: "Let's explore what becomes possible when your team has room to breathe.",
-      prompts: [
-        'Everyone aligned without endless meetings',
-        'Clear visibility without micromanaging',
-        'Systems that scale as we grow',
-      ],
-    },
-  ] as ConsiderPath[],
+  headline: 'Imagine Your Organization',
+  question: 'Answer three questions and see the shape of your Landing Page + Portal Experience.',
+  sports: [
+    { id: 'basketball', label: 'Basketball' },
+    { id: 'football', label: 'Football' },
+    { id: 'soccer', label: 'Soccer' },
+    { id: 'baseball', label: 'Baseball' },
+    { id: 'volleyball', label: 'Volleyball' },
+    { id: 'tennis', label: 'Tennis' },
+    { id: 'swimming', label: 'Swimming' },
+    { id: 'track', label: 'Track' },
+  ] as CoachVisionOption[],
+  organizations: [
+    { id: 'school', label: 'High school program' },
+    { id: 'club', label: 'Club or travel team' },
+    { id: 'academy', label: 'Training academy' },
+    { id: 'camp', label: 'Camp or clinic business' },
+    { id: 'league', label: 'League or tournament' },
+    { id: 'recruiting', label: 'Recruiting service' },
+  ] as CoachVisionOption[],
+  athletes: [
+    { id: 'under-50', label: 'Under 50 athletes' },
+    { id: '50-150', label: '50-150 athletes' },
+    { id: '150-500', label: '150-500 athletes' },
+    { id: '500-plus', label: '500+ athletes' },
+  ] as CoachVisionOption[],
 } as const;

@@ -1,30 +1,58 @@
 'use client';
 
 import Link from 'next/link';
-import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
-import { useCallback, useState } from 'react';
-import { considerContent, type ConsiderPath } from '@/lib/home-emotion';
+import { motion, useReducedMotion } from 'framer-motion';
+import { useMemo, useState } from 'react';
+import { considerContent, type CoachVisionOption } from '@/lib/home-emotion';
 
-type Step = 'choose' | 'reflect' | 'next';
+type VisionGroupProps = {
+  label: string;
+  options: readonly CoachVisionOption[];
+  selected?: CoachVisionOption;
+  onSelect: (option: CoachVisionOption) => void;
+};
+
+function VisionGroup({ label, options, selected, onSelect }: VisionGroupProps) {
+  return (
+    <div className="he-vision-group">
+      <p className="he-convo-prompt">{label}</p>
+      <div className="he-convo-chips" role="list">
+        {options.map((option) => (
+          <button
+            key={option.id}
+            type="button"
+            className={`he-convo-chip${selected?.id === option.id ? ' is-selected' : ''}`}
+            onClick={() => onSelect(option)}
+          >
+            {option.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function ConsiderFlow() {
   const reduce = useReducedMotion();
-  const [selected, setSelected] = useState<ConsiderPath | null>(null);
-  const [step, setStep] = useState<Step>('choose');
-  const [reflection, setReflection] = useState('');
+  const [sport, setSport] = useState<CoachVisionOption | undefined>();
+  const [organization, setOrganization] = useState<CoachVisionOption | undefined>();
+  const [athletes, setAthletes] = useState<CoachVisionOption | undefined>();
 
-  const pickPath = useCallback((path: ConsiderPath) => {
-    setSelected(path);
-    setReflection('');
-    setStep('reflect');
-    document.getElementById('consider-conversation')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  }, []);
+  const isComplete = Boolean(sport && organization && athletes);
+  const vision = useMemo(() => {
+    if (!sport || !organization || !athletes) return null;
 
-  const reset = useCallback(() => {
-    setSelected(null);
-    setStep('choose');
-    setReflection('');
-  }, []);
+    return {
+      title: `${sport.label} ${organization.label}`,
+      href: `/contact?sport=${encodeURIComponent(sport.label)}&organization=${encodeURIComponent(organization.label)}&athletes=${encodeURIComponent(athletes.label)}`,
+      landing:
+        `A public home for your ${sport.label.toLowerCase()} program with programs, teams, camps, coach bios, events, recruiting pathways, and registration in one polished experience.`,
+      portal:
+        `A private portal for ${athletes.label.toLowerCase()} where coaches, parents, athletes, staff, and volunteers each see the schedules, messages, documents, payments, and resources they need.`,
+      dashboard:
+        'A coach dashboard that makes the next practice, the next parent question, and the next operational decision visible without pulling you away from your athletes.',
+    };
+  }, [sport, organization, athletes]);
 
   return (
     <section className="he-consider" id="consider" aria-labelledby="consider-title">
@@ -36,95 +64,67 @@ export default function ConsiderFlow() {
           <p className="he-consider-question">{considerContent.question}</p>
         </div>
 
-        <div className="he-consider-grid" role="list">
-          {considerContent.paths.map((path) => (
-            <button
-              type="button"
-              key={path.id}
-              className={`he-path-card${selected?.id === path.id ? ' is-active' : ''}`}
-              onClick={() => pickPath(path)}
-              aria-pressed={selected?.id === path.id}
-              role="listitem"
-            >
-              <span className="he-path-visual">
-                <img src={path.image} alt="" loading="lazy" decoding="async" />
-                <span className="he-path-icon" aria-hidden="true">
-                  {path.icon}
-                </span>
-              </span>
-              <span className="he-path-label">{path.label}</span>
-            </button>
-          ))}
-        </div>
+        <motion.div
+          className="he-conversation he-vision-builder"
+          initial={reduce ? false : { opacity: 0, y: 18 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.25 }}
+          transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <VisionGroup
+            label="What sport do you serve?"
+            options={considerContent.sports}
+            selected={sport}
+            onSelect={setSport}
+          />
+          <VisionGroup
+            label="What type of organization do you lead?"
+            options={considerContent.organizations}
+            selected={organization}
+            onSelect={setOrganization}
+          />
+          <VisionGroup
+            label="Approximately how many athletes do you support?"
+            options={considerContent.athletes}
+            selected={athletes}
+            onSelect={setAthletes}
+          />
+        </motion.div>
 
-        <AnimatePresence mode="wait">
-          {selected && step !== 'choose' ? (
-            <motion.div
-              id="consider-conversation"
-              key={selected.id + step}
-              className="he-conversation"
-              initial={reduce ? false : { opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-              role="region"
-              aria-label="Guided conversation"
-            >
-              <p className="he-convo-opener">{selected.opener}</p>
-
-              {step === 'reflect' ? (
-                <>
-                  <p className="he-convo-prompt">Which of these resonates most?</p>
-                  <ul className="he-convo-chips">
-                    {selected.prompts.map((prompt) => (
-                      <li key={prompt}>
-                        <button
-                          type="button"
-                          className={`he-convo-chip${reflection === prompt ? ' is-selected' : ''}`}
-                          onClick={() => {
-                            setReflection(prompt);
-                            setStep('next');
-                          }}
-                        >
-                          {prompt}
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                  <button type="button" className="he-convo-back" onClick={reset}>
-                    Choose a different path
-                  </button>
-                </>
-              ) : null}
-
-              {step === 'next' ? (
-                <>
-                  <blockquote className="he-convo-reflection">
-                    &ldquo;{reflection}&rdquo;
-                  </blockquote>
-                  <p className="he-convo-bridge">
-                    That is exactly the kind of freedom custom systems create. Let&apos;s explore what
-                    becomes possible for you.
-                  </p>
-                  <div className="he-convo-actions">
-                    <Link
-                      href={`/contact?interest=${encodeURIComponent(selected.id)}&focus=${encodeURIComponent(reflection)}`}
-                      className="he-cta-solid"
-                    >
-                      Start the Conversation
-                    </Link>
-                    <Link href="/possibilities" className="he-cta-ghost-dark">
-                      Explore the Experiences
-                    </Link>
-                  </div>
-                  <button type="button" className="he-convo-back" onClick={() => setStep('reflect')}>
-                    Go back
-                  </button>
-                </>
-              ) : null}
-            </motion.div>
-          ) : null}
-        </AnimatePresence>
+        {isComplete && vision ? (
+          <motion.div
+            className="he-conversation he-vision-result"
+            initial={reduce ? false : { opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+            role="region"
+            aria-label="Personalized organization vision"
+          >
+            <p className="he-convo-opener">{vision.title}</p>
+            <div className="he-vision-panes">
+              <article>
+                <span>Landing Page</span>
+                <p>{vision.landing}</p>
+              </article>
+              <article>
+                <span>Portal</span>
+                <p>{vision.portal}</p>
+              </article>
+              <article>
+                <span>Coach Dashboard</span>
+                <p>{vision.dashboard}</p>
+              </article>
+            </div>
+            <div className="he-convo-actions">
+              <Link
+                href={vision.href}
+                className="he-cta-solid"
+              >
+                Design My Organization
+              </Link>
+            </div>
+          </motion.div>
+        ) : null}
       </div>
     </section>
   );

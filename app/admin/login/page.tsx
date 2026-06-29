@@ -14,6 +14,7 @@ export default async function AdminLoginPage({
 }) {
   const params = await searchParams;
   const nextPath = params.next?.startsWith('/admin') ? params.next : '/admin/master';
+  const clerkEnabled = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
 
   return (
     <div className="pl-page">
@@ -28,6 +29,12 @@ export default async function AdminLoginPage({
         <div className="pl-card">
           {params.reset ? <p className="pl-success">Password updated. Sign in with your new password.</p> : null}
           {params.error ? <p className="pl-error">Invalid email or password.</p> : null}
+          {clerkEnabled ? (
+            <>
+              <a className="pl-google-btn" href="/admin/sign-in">Sign in with Google</a>
+              <p className="pl-or">or use your email and password</p>
+            </>
+          ) : null}
           <AdminSignInForm nextPath={nextPath} />
         </div>
       </div>

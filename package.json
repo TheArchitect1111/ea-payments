@@ -24,9 +24,11 @@
     "launch:webhooks": "node scripts/verify-webhook-readiness.mjs",
     "launch:readiness": "node scripts/launch-readiness.mjs",
     "repo:readiness": "node scripts/repo-readiness.mjs",
-    "setup:launch-verification": "node scripts/create-stripe-launch-verification.mjs"
+    "setup:launch-verification": "node scripts/create-stripe-launch-verification.mjs",
+    "warm:admin": "node scripts/warm-admin-routes.mjs"
   },
   "dependencies": {
+    "@clerk/nextjs": "^7.5.9",
     "@ea/portal-chassis": "file:./vendor/portal-chassis",
     "@ea/premium-chassis": "file:./vendor/premium-chassis",
     "@sentry/nextjs": "^10.59.0",

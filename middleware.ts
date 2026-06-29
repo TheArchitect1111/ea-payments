@@ -26,10 +26,17 @@ const { middleware: portalMiddleware } = createSlugPortalMiddleware({
 
 const PUBLIC_PORTAL_AUTH_PATHS = new Set([
   '/portal/login',
+  '/portal/sign-in',
   '/portal/register',
   '/portal/forgot-password',
   '/portal/reset-password',
 ]);
+
+function isPublicPortalAuthPath(pathname: string): boolean {
+  return [...PUBLIC_PORTAL_AUTH_PATHS].some(
+    (path) => pathname === path || pathname.startsWith(`${path}/`),
+  );
+}
 
 
 
@@ -70,7 +77,7 @@ export function middleware(request: NextRequest) {
 
 
   if (pathname.startsWith('/portal')) {
-    if (PUBLIC_PORTAL_AUTH_PATHS.has(pathname)) {
+    if (isPublicPortalAuthPath(pathname)) {
       return NextResponse.next();
     }
 

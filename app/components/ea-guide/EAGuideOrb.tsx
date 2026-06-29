@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from 'react';
 import { resolveGuidePageContext } from '@/lib/ea-guide-context';
 import { getPageSpecificHint } from '@/lib/ea-guide-knowledge';
 import {
@@ -24,6 +24,14 @@ import TourDriver, { startEAGuideTour } from './TourDriver';
 import './ea-guide.css';
 
 type PanelMode = 'home' | 'question' | 'escalation';
+
+const subscribeToClient = () => () => {};
+const getClientSnapshot = () => true;
+const getServerSnapshot = () => false;
+
+function useIsClient() {
+  return useSyncExternalStore(subscribeToClient, getClientSnapshot, getServerSnapshot);
+}
 
 function inferFirstName() {
   if (typeof document === 'undefined') return 'there';
@@ -80,6 +88,7 @@ export default function EAGuideOrb() {
     return window.localStorage.getItem(EA_GUIDE_FIRST_LOGIN_KEY) === 'true';
   });
   const [firstName] = useState(() => inferFirstName());
+  const mounted = useIsClient();
 
   const completedTourIds = useMemo(
     () => progress.filter((row) => row.completedAt).map((row) => row.tourId),
@@ -283,6 +292,12 @@ export default function EAGuideOrb() {
   const guideActions: EAGuideAction[] = legacyContext.actions;
 
   const stacked = pathname.includes('/simplifi/capture') || pathname.includes('/amplifi/share');
+  const hideOnPublicMarketing =
+    pathname === '/' ||
+    pathname === '/preview/home' ||
+    pathname === '/ea-athletics-experience';
+
+  if (!mounted || hideOnPublicMarketing) return null;
 
   return (
     <>

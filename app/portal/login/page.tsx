@@ -16,6 +16,7 @@ function safeNextPath(raw: string | null): string | null {
 function PortalLoginForm() {
   const searchParams = useSearchParams();
   const nextPath = safeNextPath(searchParams.get('next')) ?? '/simplifi/capture';
+  const clerkEnabled = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -95,6 +96,17 @@ function PortalLoginForm() {
   return (
     <div className="pl-card">
       <AuthNav realm="portal" active="sign-in" />
+      {clerkEnabled ? (
+        <>
+          <a
+            className="pl-google-btn"
+            href={`/portal/sign-in?next=${encodeURIComponent(nextPath)}`}
+          >
+            Sign in with Google or email link
+          </a>
+          <p className="pl-or">or use your email and password</p>
+        </>
+      ) : null}
       <form onSubmit={handleSubmit} noValidate className="pl-form">
         <label className="pl-label" htmlFor="email">
           Email
