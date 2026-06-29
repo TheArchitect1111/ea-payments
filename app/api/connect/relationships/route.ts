@@ -4,8 +4,11 @@ import {
   getConnectOrg,
   listConnectRelationships,
   recordConnectEngagement,
+  updateConnectRelationshipHandoff,
+  markSequenceStepSent,
   type CreateRelationshipInput,
 } from '@/lib/connect-store';
+import { handoffConnectRelationship } from '@/lib/connect-pipeline';
 import { sendConnectSms, sendConnectWelcomeEmail, sendInternalNotification } from '@/lib/email';
 
 export const dynamic = 'force-dynamic';
@@ -50,13 +53,24 @@ export async function POST(request: NextRequest) {
     };
 
     const relationship = await createConnectRelationship(input);
+    const org = await getConnectOrg(orgSlug);
+
+    const handoff = await handoffConnectRelationship(relationship, org);
+    if (handoff.simplifi.captureId || handoff.amplifi.shareUrl) {
+      await updateConnectRelationshipHandoff(relationship.id, {
+        simplifiCaptureId: handoff.simplifi.captureId,
+        amplifiShareUrl: handoff.amplifi.shareUrl,
+      });
+      relationship.simplifiCaptureId = handoff.simplifi.captureId;
+      relationship.amplifiShareUrl = handoff.amplifi.shareUrl;
+    }
+
     await recordConnectEngagement({
       orgSlug,
       relationshipId: relationship.id,
       campaignId: input.campaignId,
       type: 'contact_exchange',
     });
-    const org = await getConnectOrg(orgSlug);
     const resources = org.sequence
       .filter((step) => step.delayDays === 0)
       .map((step) => org.resources.find((resource) => resource.id === step.resourceId))
@@ -75,6 +89,10 @@ export async function POST(request: NextRequest) {
       guideUrl,
       journeyUrl,
     });
+    const welcomeStep = org.sequence.find((step) => step.delayDays === 0);
+    if (emailDelivery.ok && welcomeStep) {
+      await markSequenceStepSent(relationship.id, welcomeStep.id);
+    }
     const smsDelivery = relationship.phone
       ? await sendConnectSms({
           phone: relationship.phone,
@@ -123,6 +141,7 @@ export async function POST(request: NextRequest) {
       resources,
       redirectDestination: org.redirectDestination,
       nextSequence: org.sequence,
+      handoff,
       delivery: {
         email: emailDelivery,
         sms: smsDelivery,

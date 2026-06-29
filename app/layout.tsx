@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import { ClerkProvider } from '@clerk/nextjs';
 import EAGuideOrb from './components/ea-guide/EAGuideOrb';
 import './globals.css';
 
@@ -10,7 +9,7 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const page = (
+  return (
     <html lang="en">
       <body data-ea-guide="dashboard">
         {children}
@@ -18,7 +17,4 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </body>
     </html>
   );
-
-  const publishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
-  return publishableKey ? <ClerkProvider publishableKey={publishableKey}>{page}</ClerkProvider> : page;
 }

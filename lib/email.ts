@@ -996,6 +996,38 @@ export async function sendConnectWelcomeEmail(data: {
   );
 }
 
+export async function sendConnectSequenceEmail(data: {
+  email: string;
+  name: string;
+  organizationName: string;
+  stepTitle: string;
+  resourceTitle: string;
+  resourceUrl: string;
+  journeyUrl: string;
+}): Promise<{ ok: boolean; error?: string }> {
+  const firstName = data.name.split(' ')[0] || data.name;
+  const bodyHtml = `
+    <p style="margin:0 0 16px;font-size:15px;color:#1A1A2E;line-height:1.7;">Hi ${escHtml(firstName)},</p>
+    <p style="margin:0 0 18px;font-size:15px;color:#1A1A2E;line-height:1.7;">${escHtml(data.stepTitle)} from ${escHtml(data.organizationName)}.</p>
+    <div style="background:#101820;color:#fff;border-left:5px solid #D91F2A;padding:20px;margin:22px 0;">
+      <p style="margin:0 0 6px;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#ff4b4b;">Your next resource</p>
+      <p style="margin:0;font-size:22px;font-weight:700;">${escHtml(data.resourceTitle)}</p>
+    </div>
+    <p style="margin:0;font-size:14px;color:#555;line-height:1.7;">Continue your journey anytime: <a href="${escHtml(data.journeyUrl)}" style="color:#101820;font-weight:700;">Open journey page</a>.</p>`;
+
+  return resendEmail(
+    data.email,
+    `${data.organizationName} — ${data.resourceTitle}`,
+    baseEmailShell({
+      title: data.stepTitle,
+      eyebrow: 'Connect Follow-up',
+      bodyHtml,
+      ctaLabel: `Open ${data.resourceTitle}`,
+      ctaUrl: data.resourceUrl,
+    }),
+  );
+}
+
 export async function sendConnectSms(data: {
   phone: string;
   organizationName: string;
