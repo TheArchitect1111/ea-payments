@@ -1,17 +1,20 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import {
   openMagnifiExperience,
   shareAmplifiLink,
   type CaptureSuccessLinks,
 } from '@/lib/capture-success-flow';
 import type { AmplifiSocialDraft } from '@/lib/amplifi-draft';
+import StoryDraftPanel from '@/app/components/StoryDraftPanel';
+import '@/app/components/story-draft-panel.css';
 
 export default function CaptureSuccessPanel({
   title,
   links,
-  amplifiDraft: _amplifiDraft,
+  amplifiDraft,
   onClose,
   onContinue,
 }: {
@@ -24,6 +27,12 @@ export default function CaptureSuccessPanel({
 }) {
   const [shareNote, setShareNote] = useState('');
   const [selectedActions, setSelectedActions] = useState<string[]>([]);
+
+  const storyUrl = links.considerUrl ?? links.magnifiUrl ?? '';
+  const amplifiHref =
+    storyUrl && title
+      ? `/amplifi?${new URLSearchParams({ url: storyUrl, title }).toString()}`
+      : '/amplifi';
 
   const actions = [
     'Add to Watch List',
@@ -90,14 +99,23 @@ export default function CaptureSuccessPanel({
             Preview your story
           </button>
           {(links.considerUrl || links.magnifiUrl) && (
-            <button
-              type="button"
-              className="w-full rounded-full border border-neutral-200 py-3 text-sm font-bold text-[#1B2B4D]"
-              onClick={shareStory}
-            >
-              Share with someone
-            </button>
+            <>
+              <button
+                type="button"
+                className="w-full rounded-full border border-neutral-200 py-3 text-sm font-bold text-[#1B2B4D]"
+                onClick={shareStory}
+              >
+                Share with someone
+              </button>
+              <Link
+                href={amplifiHref}
+                className="block w-full rounded-full bg-[#C9A844] py-3 text-center text-sm font-extrabold text-[#1B2B4D]"
+              >
+                Post on social — Amplifi
+              </Link>
+            </>
           )}
+          {amplifiDraft ? <StoryDraftPanel draft={amplifiDraft} /> : null}
         </div>
       ) : null}
 

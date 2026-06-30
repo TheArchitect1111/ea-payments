@@ -79,7 +79,10 @@ export default function AmplifiPortalExperience({ experience, slug }: { experien
       >
         <p>{experience.ctaLine}</p>
         <div className="ea-amplifi-cta-actions">
-          <a href={base} className="ea-amplifi-btn ea-amplifi-btn-primary" style={{ color: theme.ctaFrom }}>
+          <a href="/amplifi" className="ea-amplifi-btn ea-amplifi-btn-primary" style={{ color: theme.ctaFrom }}>
+            Create social post
+          </a>
+          <a href={base} className="ea-amplifi-btn ea-amplifi-btn-secondary">
             Portal home
           </a>
           <a href={`${base}/simplifi`} className="ea-amplifi-btn ea-amplifi-btn-secondary">

@@ -22,7 +22,7 @@
     },
     {
       "source": "/amplify",
-      "destination": "/amplifi/share",
+      "destination": "/amplifi",
       "permanent": false
     },
     {
@@ -61,8 +61,8 @@
       "permanent": false
     },
     {
-      "source": "/amplifi",
-      "destination": "/amplify",
+      "source": "/amplifi/share",
+      "destination": "/amplifi",
       "permanent": false
     },
     {

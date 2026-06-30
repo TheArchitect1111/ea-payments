@@ -145,7 +145,7 @@ export async function GET() {
     links: {
       start: `${base}/start`,
       capture: `${base}/capture`,
-      amplify: `${base}/amplify`,
+      amplify: `${base}/amplifi`,
       storyDemo: `${base}/story/selena`,
       signIn: `${base}/sign-in`,
       simplifiWorkspace: `${base}/simplifi/workspace`,

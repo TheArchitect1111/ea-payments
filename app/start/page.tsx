@@ -4,10 +4,10 @@ import { PUBLIC_LINKS } from '@/lib/marketing-urls';
 const testerMessage = `Efficiency Architects preview — try these:
 
 Capture (Simplifi): ${PUBLIC_LINKS.capture}
-Amplify & share: ${PUBLIC_LINKS.amplify}
+Amplify & post: ${PUBLIC_LINKS.amplifi}
 Magnifi story (no login): ${PUBLIC_LINKS.storyDemo}
 
-No password needed — tap Start on /capture or /amplify. Optional account: ${PUBLIC_LINKS.signIn}
+No password needed on /amplifi — tap Try demo. Optional account: ${PUBLIC_LINKS.signIn}
 
 Use ea-payments.vercel.app or www.efficiencyarchitects.online (same platform).`;
 
@@ -18,7 +18,7 @@ export default function StartPage() {
         <p className="text-xs font-bold uppercase tracking-[0.3em] text-[#C9A844]">Friend test kit</p>
         <h1 className="mt-4 text-3xl font-black">Start here</h1>
         <p className="mt-3 text-neutral-300 leading-relaxed">
-          Send this page to testers. Pipeline: <strong className="text-white">Simplifi captures → Magnifi opens automatically → Amplifi shares the link.</strong>
+          Send this page to testers. Pipeline: <strong className="text-white">Simplifi captures → Magnifi story → Amplifi posts to social.</strong>
         </p>
 
         <section className="mt-6 border border-white/15 p-4 text-sm text-neutral-300">
@@ -30,7 +30,7 @@ export default function StartPage() {
         <section className="mt-10 grid gap-4">
           {[
             { label: 'Capture — Simplifi', href: PUBLIC_LINKS.capture, note: 'Guest session — tap Capture now' },
-            { label: 'Amplify — share a story', href: PUBLIC_LINKS.amplify, note: 'Guest session — tap Amplify' },
+            { label: 'Amplifi — social posting', href: PUBLIC_LINKS.amplifi, note: 'Try demo — no login required' },
             { label: 'Magnifi story (no login)', href: PUBLIC_LINKS.storyDemo, note: 'Full demo experience' },
             { label: 'Connect browser extension', href: '/extension/connect', note: 'One-click Chrome/Firefox pairing' },
             { label: 'Install guide', href: PUBLIC_LINKS.installAmplifi, note: 'Bookmarklet, extension, home screen' },
