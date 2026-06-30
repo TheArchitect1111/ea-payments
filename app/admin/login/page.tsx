@@ -1,6 +1,5 @@
 import Image from 'next/image';
-import MagicLinkForm from '@/components/auth/MagicLinkForm';
-import '../../portal/login/portal-login.css';
+import RealmLoginCard from '@/components/auth/RealmLoginCard';import '../../portal/login/portal-login.css';
 
 export const metadata = {
   title: 'Admin Sign In · Efficiency Architects',
@@ -39,17 +38,14 @@ export default async function AdminLoginPage({
           <p className="pl-lede">One email, one tap — no password to remember.</p>
         </header>
 
-        <div className="pl-card">
-          {error ? <p className="pl-error" role="alert">{error}</p> : null}
-          <MagicLinkForm
-            realm="admin"
-            next={nextPath}
-            showTitle={false}
-            subtitle="Enter your admin email. We will send a one-tap login link."
-            buttonLabel="Email me a login link"
-          />
-        </div>
-      </div>
+        <RealmLoginCard
+          realm="admin"
+          next={nextPath}
+          error={error}
+          showTitle={false}
+          subtitle="Enter your admin email. We will send a one-tap login link."
+          buttonLabel="Email me a login link"
+        />      </div>
     </div>
   );
 }

@@ -1,178 +1,182 @@
 {
-    "name":  "@ea/portal-chassis",
-    "version":  "0.3.2",
-    "description":  "EA Portal Chassis — shared auth, layout, email, webhooks, and Airtable adapters for multi-tenant portals",
-    "license":  "UNLICENSED",
-    "private":  false,
-    "type":  "module",
-    "main":  "./dist/index.cjs",
-    "module":  "./dist/index.js",
-    "types":  "./dist/index.d.ts",
-    "exports":  {
-                    ".":  {
-                              "types":  "./dist/index.d.ts",
-                              "import":  "./dist/index.js",
-                              "require":  "./dist/index.cjs"
-                          },
-                    "./env":  {
-                                  "types":  "./dist/env.d.ts",
-                                  "import":  "./dist/env.js",
-                                  "require":  "./dist/env.cjs"
-                              },
-                    "./hmac":  {
-                                   "types":  "./dist/hmac.d.ts",
-                                   "import":  "./dist/hmac.js",
-                                   "require":  "./dist/hmac.cjs"
-                               },
-                    "./middleware":  {
-                                         "types":  "./dist/middleware.d.ts",
-                                         "import":  "./dist/middleware.js",
-                                         "require":  "./dist/middleware.cjs"
-                                     },
-                    "./layout":  {
-                                     "types":  "./dist/layout.d.ts",
-                                     "import":  "./dist/layout.js",
-                                     "require":  "./dist/layout.cjs"
-                                 },
-                    "./portal-layout":  {
-                                            "types":  "./dist/portal-layout.d.ts",
-                                            "import":  "./dist/portal-layout.js",
-                                            "require":  "./dist/portal-layout.cjs"
-                                        },
-                    "./clerk":  {
-                                    "types":  "./dist/clerk.d.ts",
-                                    "import":  "./dist/clerk.js",
-                                    "require":  "./dist/clerk.cjs"
-                                },
-                    "./airtable":  {
-                                       "types":  "./dist/airtable.d.ts",
-                                       "import":  "./dist/airtable.js",
-                                       "require":  "./dist/airtable.cjs"
-                                   },
-                    "./email":  {
-                                    "types":  "./dist/email.d.ts",
-                                    "import":  "./dist/email.js",
-                                    "require":  "./dist/email.cjs"
-                                },
-                    "./webhooks":  {
-                                       "types":  "./dist/webhooks.d.ts",
-                                       "import":  "./dist/webhooks.js",
-                                       "require":  "./dist/webhooks.cjs"
-                                   },
-                    "./notify":  {
-                                     "types":  "./dist/notify.d.ts",
-                                     "import":  "./dist/notify.js",
-                                     "require":  "./dist/notify.cjs"
-                                 },
-                    "./passwords":  {
-                                        "types":  "./dist/passwords.d.ts",
-                                        "import":  "./dist/passwords.js",
-                                        "require":  "./dist/passwords.cjs"
-                                    },
-                    "./provisioning":  {
-                                           "types":  "./dist/provisioning.d.ts",
-                                           "import":  "./dist/provisioning.js",
-                                           "require":  "./dist/provisioning.cjs"
-                                       },
-                    "./tenant":  {
-                                     "types":  "./dist/tenant.d.ts",
-                                     "import":  "./dist/tenant.js",
-                                     "require":  "./dist/tenant.cjs"
-                                 },
-                    "./tenant-env":  {
-                                         "types":  "./dist/tenant-env.d.ts",
-                                         "import":  "./dist/tenant-env.js",
-                                         "require":  "./dist/tenant-env.cjs"
-                                     },
-                    "./activity":  {
-                                       "types":  "./dist/activity.d.ts",
-                                       "import":  "./dist/activity.js",
-                                       "require":  "./dist/activity.cjs"
-                                   },
-                    "./brief":  {
-                                    "types":  "./dist/brief.d.ts",
-                                    "import":  "./dist/brief.js",
-                                    "require":  "./dist/brief.cjs"
-                                },
-                    "./brief-experience":  {
-                                               "types":  "./dist/brief-experience.d.ts",
-                                               "import":  "./dist/brief-experience.js",
-                                               "require":  "./dist/brief-experience.cjs"
-                                           },
-                    "./platform-events":  {
-                                              "types":  "./dist/platform-events.d.ts",
-                                              "import":  "./dist/platform-events.js",
-                                              "require":  "./dist/platform-events.cjs"
-                                          },
-                    "./agents":  {
-                                     "types":  "./dist/agents.d.ts",
-                                     "import":  "./dist/agents.js",
-                                     "require":  "./dist/agents.cjs"
-                                 },
-                    "./mission-control":  {
-                                              "types":  "./dist/mission-control.d.ts",
-                                              "import":  "./dist/mission-control.js",
-                                              "require":  "./dist/mission-control.cjs"
-                                          },
-                    "./mission-control-experience":  {
-                                                         "types":  "./dist/mission-control-experience.d.ts",
-                                                         "import":  "./dist/mission-control-experience.js",
-                                                         "require":  "./dist/mission-control-experience.cjs"
-                                                     },
-                    "./intent":  {
-                                     "types":  "./dist/intent.d.ts",
-                                     "import":  "./dist/intent.js",
-                                     "require":  "./dist/intent.cjs"
-                                 },
-                    "./opportunity-graph":  {
-                                                "types":  "./dist/opportunity-graph.d.ts",
-                                                "import":  "./dist/opportunity-graph.js",
-                                                "require":  "./dist/opportunity-graph.cjs"
-                                            },
-                    "./styles/tokens.css":  "./styles/tokens.css"
-                },
-    "files":  [
-                  "dist",
-                  "styles",
-                  "README.md"
-              ],
-    "peerDependencies":  {
-                             "@clerk/nextjs":  "\u003e=5.0.0",
-                             "next":  "\u003e=14.0.0",
-                             "react":  "\u003e=18.0.0",
-                             "react-dom":  "\u003e=18.0.0"
-                         },
-    "peerDependenciesMeta":  {
-                                 "@clerk/nextjs":  {
-                                                       "optional":  true
-                                                   }
-                             },
-    "devDependencies":  {
-                            "@clerk/nextjs":  "^6.12.0",
-                            "@types/node":  "^20",
-                            "@types/react":  "^19",
-                            "@types/react-dom":  "^19",
-                            "next":  "^15.5.19",
-                            "react":  "^19.2.4",
-                            "react-dom":  "^19.2.4",
-                            "tsup":  "^8.4.0",
-                            "typescript":  "^5.8.0"
-                        },
-    "publishConfig":  {
-                          "access":  "restricted",
-                          "registry":  "https://npm.pkg.github.com"
-                      },
-    "repository":  {
-                       "type":  "git",
-                       "url":  "https://github.com/TheArchitect1111/ea-operating-system.git",
-                       "directory":  "portal-core"
-                   },
-    "keywords":  [
-                     "ea",
-                     "portal",
-                     "chassis",
-                     "nextjs",
-                     "airtable",
-                     "resend"
-                 ]
+  "name": "@ea/portal-chassis",
+  "version": "0.3.2",
+  "description": "EA Portal Chassis — shared auth, layout, email, webhooks, and Airtable adapters for multi-tenant portals",
+  "license": "UNLICENSED",
+  "private": false,
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./env": {
+      "types": "./dist/env.d.ts",
+      "import": "./dist/env.js",
+      "require": "./dist/env.cjs"
+    },
+    "./hmac": {
+      "types": "./dist/hmac.d.ts",
+      "import": "./dist/hmac.js",
+      "require": "./dist/hmac.cjs"
+    },
+    "./middleware": {
+      "types": "./dist/middleware.d.ts",
+      "import": "./dist/middleware.js",
+      "require": "./dist/middleware.cjs"
+    },
+    "./layout": {
+      "types": "./dist/layout.d.ts",
+      "import": "./dist/layout.js",
+      "require": "./dist/layout.cjs"
+    },
+    "./portal-layout": {
+      "types": "./dist/portal-layout.d.ts",
+      "import": "./dist/portal-layout.js",
+      "require": "./dist/portal-layout.cjs"
+    },
+    "./clerk": {
+      "types": "./dist/clerk.d.ts",
+      "import": "./dist/clerk.js",
+      "require": "./dist/clerk.cjs"
+    },
+    "./airtable": {
+      "types": "./dist/airtable.d.ts",
+      "import": "./dist/airtable.js",
+      "require": "./dist/airtable.cjs"
+    },
+    "./email": {
+      "types": "./dist/email.d.ts",
+      "import": "./dist/email.js",
+      "require": "./dist/email.cjs"
+    },
+    "./webhooks": {
+      "types": "./dist/webhooks.d.ts",
+      "import": "./dist/webhooks.js",
+      "require": "./dist/webhooks.cjs"
+    },
+    "./notify": {
+      "types": "./dist/notify.d.ts",
+      "import": "./dist/notify.js",
+      "require": "./dist/notify.cjs"
+    },
+    "./passwords": {
+      "types": "./dist/passwords.d.ts",
+      "import": "./dist/passwords.js",
+      "require": "./dist/passwords.cjs"
+    },
+    "./provisioning": {
+      "types": "./dist/provisioning.d.ts",
+      "import": "./dist/provisioning.js",
+      "require": "./dist/provisioning.cjs"
+    },
+    "./tenant": {
+      "types": "./dist/tenant.d.ts",
+      "import": "./dist/tenant.js",
+      "require": "./dist/tenant.cjs"
+    },
+    "./tenant-env": {
+      "types": "./dist/tenant-env.d.ts",
+      "import": "./dist/tenant-env.js",
+      "require": "./dist/tenant-env.cjs"
+    },
+    "./activity": {
+      "types": "./dist/activity.d.ts",
+      "import": "./dist/activity.js",
+      "require": "./dist/activity.cjs"
+    },
+    "./brief": {
+      "types": "./dist/brief.d.ts",
+      "import": "./dist/brief.js",
+      "require": "./dist/brief.cjs"
+    },
+    "./brief-experience": {
+      "types": "./dist/brief-experience.d.ts",
+      "import": "./dist/brief-experience.js",
+      "require": "./dist/brief-experience.cjs"
+    },
+    "./platform-events": {
+      "types": "./dist/platform-events.d.ts",
+      "import": "./dist/platform-events.js",
+      "require": "./dist/platform-events.cjs"
+    },
+    "./agents": {
+      "types": "./dist/agents.d.ts",
+      "import": "./dist/agents.js",
+      "require": "./dist/agents.cjs"
+    },
+    "./mission-control": {
+      "types": "./dist/mission-control.d.ts",
+      "import": "./dist/mission-control.js",
+      "require": "./dist/mission-control.cjs"
+    },
+    "./mission-control-experience": {
+      "types": "./dist/mission-control-experience.d.ts",
+      "import": "./dist/mission-control-experience.js",
+      "require": "./dist/mission-control-experience.cjs"
+    },
+    "./intent": {
+      "types": "./dist/intent.d.ts",
+      "import": "./dist/intent.js",
+      "require": "./dist/intent.cjs"
+    },
+    "./opportunity-graph": {
+      "types": "./dist/opportunity-graph.d.ts",
+      "import": "./dist/opportunity-graph.js",
+      "require": "./dist/opportunity-graph.cjs"
+    },
+    "./styles/tokens.css": "./styles/tokens.css"
+  },
+  "files": [
+    "dist",
+    "styles",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "@clerk/nextjs": ">=5.0.0",
+    "next": ">=14.0.0",
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@clerk/nextjs": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@clerk/nextjs": "^6.12.0",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "next": "^15.5.19",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "tsup": "^8.4.0",
+    "typescript": "^5.8.0"
+  },
+  "publishConfig": {
+    "access": "restricted",
+    "registry": "https://npm.pkg.github.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TheArchitect1111/ea-operating-system.git",
+    "directory": "portal-core"
+  },
+  "keywords": [
+    "ea",
+    "portal",
+    "chassis",
+    "nextjs",
+    "airtable",
+    "resend"
+  ]
 }

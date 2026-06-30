@@ -4,7 +4,7 @@ import { Suspense } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import MagicLinkForm from '@/components/auth/MagicLinkForm';
+import RealmLoginCard from '@/components/auth/RealmLoginCard';
 import './portal-login.css';
 
 function safeNextPath(raw: string | null): string {
@@ -31,18 +31,15 @@ function PortalLoginInner() {
   const error = errorMessage(searchParams.get('error'));
 
   return (
-    <div className="pl-card">
-      {error ? <p className="pl-error" role="alert">{error}</p> : null}
-      <MagicLinkForm
-        realm="portal"
-        next={nextPath}
-        title="Portal sign in"
-        subtitle="Enter your email on file. We will send a one-tap login link — no password needed."
-        buttonLabel="Email me a login link"
-      />
-    </div>
-  );
-}
+    <RealmLoginCard
+      realm="portal"
+      next={nextPath}
+      error={error}
+      title="Portal sign in"
+      subtitle="Enter your email on file. We will send a one-tap login link — no password needed."
+      buttonLabel="Email me a login link"
+    />
+  );}
 
 export default function PortalLoginPage() {
   return (

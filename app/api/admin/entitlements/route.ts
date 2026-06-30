@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
 import {
   adminAuthJsonError,
-  EA_ADMIN_COOKIE,
-  requireAdminAction,
-  requireAdminSession,
+  requireAdminActionFromRequest,
+  requireAdminSessionFromRequest,
 } from '@/lib/admin-session-guard';
 import { listEntitlementsForOrg, setModuleEnabled } from '@/lib/entitlements';
 import type { ModuleId } from '@/lib/modules/registry';
@@ -13,8 +11,7 @@ import { MODULE_IDS } from '@/lib/modules/registry';
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
-  const cookieStore = await cookies();
-  const auth = requireAdminSession(cookieStore.get(EA_ADMIN_COOKIE)?.value);
+  const auth = await requireAdminSessionFromRequest(req);
   if (!auth.ok) return adminAuthJsonError(auth);
 
   const orgId = req.nextUrl.searchParams.get('organizationId')?.trim();
@@ -27,8 +24,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const cookieStore = await cookies();
-  const auth = requireAdminAction(cookieStore.get(EA_ADMIN_COOKIE)?.value, 'admin:manage');
+  const auth = await requireAdminActionFromRequest(req, 'admin:manage');
   if (!auth.ok) return adminAuthJsonError(auth);
 
   let body: {
