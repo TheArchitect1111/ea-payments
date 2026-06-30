@@ -1,5 +1,6 @@
 import type { CSSProperties, ReactNode } from 'react';
 import { EAPortalNav } from './EAPortalNav';
+import type { PortalNavTab } from '@/lib/modules/portal-modules';
 
 export type EAPortalTab = 'home' | 'pulse' | 'simplifi' | 'amplifi' | 'updates';
 
@@ -10,11 +11,12 @@ type Props = {
   slug: string;
   active: EAPortalTab;
   firstName?: string;
+  navTabs?: PortalNavTab[];
   children?: ReactNode;
 };
 
 /** EA client portal — modern soft-UI shell with pill navigation. */
-export function PortalShell({ slug, active, firstName, children }: Props) {
+export function PortalShell({ slug, active, firstName, navTabs, children }: Props) {
   return (
     <div
       className="ea-shell"
@@ -25,7 +27,7 @@ export function PortalShell({ slug, active, firstName, children }: Props) {
         } as CSSProperties
       }
     >
-      <EAPortalNav slug={slug} active={active} firstName={firstName} />
+      <EAPortalNav slug={slug} active={active} firstName={firstName} navTabs={navTabs} />
       {children}
     </div>
   );

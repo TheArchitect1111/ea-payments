@@ -6,6 +6,7 @@ import { getClientSuccessProfile } from '@/lib/client-success';
 import { verifyMagicLinkToken } from '@/lib/magic-link';
 import { makeSessionCookie, signSession } from '@/lib/ea-portal-auth';
 import { emitPulseEvent } from '@/lib/pulse-bus';
+import { resolveAdminIdentity, resolvePortalIdentity } from '@/lib/org-provision';
 
 export const dynamic = 'force-dynamic';
 
@@ -60,10 +61,15 @@ export async function GET(req: NextRequest) {
 
     let sessionToken: string;
     try {
+      const identity = resolveAdminIdentity({
+        email: account.email,
+        role: account.role,
+      });
       sessionToken = signAdminSession({
         email: account.email,
         name: account.name,
         role: account.role,
+        orgId: identity.orgId,
       });
     } catch {
       return NextResponse.redirect(loginUrl(origin, 'admin', 'config', payload.next), 303);
@@ -81,7 +87,18 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(loginUrl(origin, realm, 'unauthorized', payload.next), 303);
   }
 
-  const sessionToken = await signSession(client.slug);
+  const identity = await resolvePortalIdentity({
+    email: payload.email,
+    slug: client.slug,
+    clientRecordId: client.recordId,
+  });
+
+  const sessionToken = await signSession({
+    slug: client.slug,
+    orgId: identity.orgId,
+    role: identity.role,
+    email: identity.email,
+  });
   if (!sessionToken) {
     const realm = payload.realm === 'simplifi' ? 'simplifi' : 'portal';
     return NextResponse.redirect(loginUrl(origin, realm, 'config', payload.next), 303);

@@ -136,6 +136,21 @@ test('health launch endpoint returns JSON', async ({ page }) => {
   expect(data.checks?.missingByCategory).toBeTruthy();
 });
 
+test('organizations API requires portal login', async ({ page }) => {
+  const res = await page.request.get('/api/organizations');
+  expect(res.status()).toBe(401);
+});
+
+test('admin connect setup POST requires admin manage role', async ({ page }) => {
+  const res = await page.request.post('/api/admin/connect/setup');
+  expect(res.status()).toBe(401);
+});
+
+test('portal modules API requires login', async ({ page }) => {
+  const res = await page.request.get('/api/portal/modules');
+  expect(res.status()).toBe(401);
+});
+
 test('portal documents requires login', async ({ page }) => {
   await page.goto('/portal/demo-client/documents');
   await expect(page).toHaveURL(/\/portal\/login/);

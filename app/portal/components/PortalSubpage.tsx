@@ -1,9 +1,10 @@
 import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { PortalShell } from '@/lib/chassis/PortalShell';
+import { getPortalModuleAccessForSlug } from '@/lib/modules/portal-modules';
 import '../[slug]/ea-portal.css';
 
-export function PortalSubpage({
+export async function PortalSubpage({
   slug,
   active,
   kicker,
@@ -18,9 +19,11 @@ export function PortalSubpage({
   lede: string;
   children: ReactNode;
 }) {
+  const access = await getPortalModuleAccessForSlug(slug);
+
   return (
     <div className="ep-page">
-      <PortalShell slug={slug} active={active} />
+      <PortalShell slug={slug} active={active} navTabs={access?.navTabs} />
       <main className="ep-main">
         <div className="ep-welcome">
           <p className="ep-welcome-label">{kicker}</p>

@@ -1,10 +1,8 @@
 import Link from 'next/link';
-import { cookies } from 'next/headers';
-import { redirect, notFound } from 'next/navigation';
-import { verifySession, EA_PORTAL_COOKIE } from '@/lib/ea-portal-auth';
-import { getClientByPortalSlug, getContentRequestsForClient } from '@/lib/airtable';
+import { getContentRequestsForClient } from '@/lib/airtable';
 import { getPortalCaptures } from '@/lib/capture-records';
 import { PortalShell, NAVY, GOLD } from '@/lib/chassis/PortalShell';
+import { requirePortalModule } from '@/lib/modules/portal-modules';
 import SimplifiPortalWorkspace from './SimplifiPortalWorkspace';
 import '../ea-portal.css';
 
@@ -17,18 +15,8 @@ export default async function SimplifiClientPage({
 }) {
   const { slug } = await params;
 
-  const cookieStore = await cookies();
-  const token = cookieStore.get(EA_PORTAL_COOKIE)?.value;
-  if (!token) redirect('/portal/login');
-
-  const session = await verifySession(token);
-  if (!session) redirect('/portal/login');
-  if (session.slug !== slug) redirect(`/portal/${session.slug}/simplifi`);
-
-  const client = await getClientByPortalSlug(slug);
-  if (!client) notFound();
-
-  const isSimplifi = client.packagePurchased === 'Simplifi';
+  const { client, access } = await requirePortalModule(slug, 'simplifi');
+  const isSimplifi = access.enabledModuleIds.has('simplifi');
   const requests = await getContentRequestsForClient(client.id);
   const activeRequests = requests.filter((r) =>
     ['Pending Review', 'In Progress', 'Awaiting Approval', 'Scheduled'].includes(r.status),
@@ -39,7 +27,7 @@ export default async function SimplifiClientPage({
 
   return (
     <div className="ep-page">
-      <PortalShell slug={slug} active="simplifi" firstName={firstName} />
+      <PortalShell slug={slug} active="simplifi" firstName={firstName} navTabs={access.navTabs} />
 
       <main className="ep-main">
         <div className="ep-welcome">

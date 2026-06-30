@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { clerkClient, verifyToken } from '@clerk/nextjs/server';
 import { makeAdminSessionCookie, signAdminSession } from '@/lib/ea-admin-auth';
 import { findAdminAccount } from '@/lib/ea-admin-users';
+import { resolveAdminIdentity } from '@/lib/org-provision';
 
 export const dynamic = 'force-dynamic';
 
@@ -56,7 +57,16 @@ export async function POST(req: NextRequest) {
 
   let sessionToken: string;
   try {
-    sessionToken = signAdminSession({ email: account.email, name: account.name, role: account.role });
+    const identity = resolveAdminIdentity({
+      email: account.email,
+      role: account.role,
+    });
+    sessionToken = signAdminSession({
+      email: account.email,
+      name: account.name,
+      role: account.role,
+      orgId: identity.orgId,
+    });
   } catch {
     return NextResponse.json(
       { error: 'Admin session signing is not configured (set ADMIN_SESSION_SECRET).' },

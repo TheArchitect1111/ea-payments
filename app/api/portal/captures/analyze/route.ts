@@ -5,6 +5,7 @@ import { getClientByPortalSlug } from '@/lib/airtable';
 import { type CaptureInput } from '@/lib/capture-pipeline';
 import { portalCaptureSource } from '@/lib/capture-records';
 import { submitCapture, toCaptureApiResponse } from '@/lib/capture-submit';
+import { isModuleEnabled } from '@/lib/modules/portal-modules';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -89,7 +90,15 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: 'Client record not found.' }, { status: 404 });
   }
 
-  if (client.packagePurchased !== 'Simplifi' && session.slug !== 'demo-client') {
+  const simplifiEnabled = await isModuleEnabled({
+    orgId: session.orgId,
+    slug: session.slug,
+    moduleId: 'simplifi',
+    packagePurchased: client.packagePurchased,
+    role: session.role,
+  });
+
+  if (!simplifiEnabled && session.slug !== 'demo-client') {
     return NextResponse.json(
       { ok: false, error: 'Simplifi Early Access is required to capture opportunities.' },
       { status: 403 },

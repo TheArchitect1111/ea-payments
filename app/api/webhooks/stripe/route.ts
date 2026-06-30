@@ -8,6 +8,8 @@ import {
 } from '@/lib/airtable';
 import type { AirtablePackage, ProposalWithAssessment } from '@/lib/airtable';
 import { getCatalogItem } from '@/lib/catalog';
+import { ensureOrganizationForPortal } from '@/lib/organizations';
+import { ensurePackageEntitlements } from '@/lib/modules/portal-modules';
 import { sendWelcomeEmail, sendAdminNotification } from '@/lib/email';
 import { createPortalAccess } from '@/lib/portal-access';
 import { createOpportunityRecord } from '@/lib/partner-network';
@@ -168,6 +170,24 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
           tempCredentials =
             `Your portal login credentials: Email: ${portalResult.username} | Temporary Password: ${portalResult.tempPassword}` +
             ' Log in using the button above. Contact us to update your password at any time.';
+        }
+
+        if (portalSlug && airtableResult.recordId) {
+          try {
+            const { orgId } = await ensureOrganizationForPortal({
+              portalSlug,
+              name: clientName,
+              clientRecordId: airtableResult.recordId,
+              organizationName: meta.organization || undefined,
+            });
+            await ensurePackageEntitlements({
+              orgId,
+              packagePurchased: packageName,
+              slug: portalSlug,
+            });
+          } catch (err) {
+            console.error('Entitlement sync failed for session', session.id, ':', err);
+          }
         }
       } else {
         console.error('Portal access creation failed for session', session.id, ':', portalResult.error);

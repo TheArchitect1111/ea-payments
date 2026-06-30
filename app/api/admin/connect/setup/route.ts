@@ -1,30 +1,37 @@
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
-import { EA_ADMIN_COOKIE, verifyAdminSession } from '@/lib/ea-admin-auth';
+import { EA_ADMIN_COOKIE } from '@/lib/ea-admin-auth';
+import {
+  adminAuthJsonError,
+  requireAdminAction,
+  requireAdminSession,
+} from '@/lib/admin-session-guard';
 import { ensureConnectTenantStorage, getConnectSystemStatus } from '@/lib/connect-store';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
-async function requireAdmin() {
+async function requireAdminRead() {
   const cookieStore = await cookies();
-  const session = await verifyAdminSession(cookieStore.get(EA_ADMIN_COOKIE)?.value);
-  return Boolean(session);
+  return requireAdminSession(cookieStore.get(EA_ADMIN_COOKIE)?.value);
+}
+
+async function requireAdminManage() {
+  const cookieStore = await cookies();
+  return requireAdminAction(cookieStore.get(EA_ADMIN_COOKIE)?.value, 'admin:manage');
 }
 
 export async function GET() {
-  if (!(await requireAdmin())) {
-    return NextResponse.json({ error: 'Admin login required.' }, { status: 401 });
-  }
+  const auth = await requireAdminRead();
+  if (!auth.ok) return adminAuthJsonError(auth);
 
   const status = await getConnectSystemStatus();
   return NextResponse.json(status);
 }
 
 export async function POST() {
-  if (!(await requireAdmin())) {
-    return NextResponse.json({ error: 'Admin login required.' }, { status: 401 });
-  }
+  const auth = await requireAdminManage();
+  if (!auth.ok) return adminAuthJsonError(auth);
 
   try {
     const setup = await ensureConnectTenantStorage();
