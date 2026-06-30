@@ -6,6 +6,24 @@ import { getPurchasableEACatalog, getEACatalog, formatPrice } from '@/lib/catalo
 const PURCHASABLE_PRODUCTS = getPurchasableEACatalog();
 const ALL_EA_PRODUCTS = getEACatalog();
 
+type SubscriptionPlanOption = {
+  id: string;
+  displayName: string;
+  description: string;
+  interval: 'month' | 'year';
+  priceCents: number;
+  trialDays: number;
+};
+
+function formatSubscriptionPrice(priceCents: number, interval: 'month' | 'year'): string {
+  const amount = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 0,
+  }).format(priceCents / 100);
+  return interval === 'month' ? `${amount}/mo` : `${amount}/yr`;
+}
+
 export default function CheckoutPage() {
   const [name, setName] = useState('');
   const [organization, setOrganization] = useState('');
@@ -13,21 +31,41 @@ export default function CheckoutPage() {
   const [phone, setPhone] = useState('');
   const [packageId, setPackageId] = useState('');
   const [referralSource, setReferralSource] = useState('');
+  const [subscriptionPlans, setSubscriptionPlans] = useState<SubscriptionPlanOption[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const selectedItem = PURCHASABLE_PRODUCTS.find((p) => p.id === packageId);
+  const selectedOneTime = PURCHASABLE_PRODUCTS.find((p) => p.id === packageId);
+  const selectedSubscription = subscriptionPlans.find((p) => p.id === packageId);
+  const isSubscription = Boolean(selectedSubscription);
   const contactOnlyCount = ALL_EA_PRODUCTS.length - PURCHASABLE_PRODUCTS.length;
-  const showAchNote = selectedItem && selectedItem.priceCents > 50000;
+  const showAchNote =
+    selectedOneTime && selectedOneTime.priceCents > 50000 && !isSubscription;
 
   useEffect(() => {
-    const requestedPackage = new URLSearchParams(window.location.search).get('package');
-    if (requestedPackage && PURCHASABLE_PRODUCTS.some((product) => product.id === requestedPackage)) {
-      const timer = window.setTimeout(() => setPackageId(requestedPackage), 0);
+    fetch('/api/checkout/subscription')
+      .then((res) => res.json())
+      .then((data: { plans?: SubscriptionPlanOption[] }) => {
+        if (Array.isArray(data.plans)) setSubscriptionPlans(data.plans);
+      })
+      .catch(() => undefined);
+  }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const requestedPackage = params.get('package');
+    const requestedPlan = params.get('plan');
+    const allIds = [
+      ...PURCHASABLE_PRODUCTS.map((p) => p.id),
+      ...subscriptionPlans.map((p) => p.id),
+    ];
+    const pick = requestedPlan || requestedPackage;
+    if (pick && allIds.includes(pick)) {
+      const timer = window.setTimeout(() => setPackageId(pick), 0);
       return () => window.clearTimeout(timer);
     }
     return undefined;
-  }, []);
+  }, [subscriptionPlans]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -38,11 +76,16 @@ export default function CheckoutPage() {
     setLoading(true);
     setError('');
 
+    const endpoint = isSubscription ? '/api/checkout/subscription' : '/api/checkout';
+    const body = isSubscription
+      ? { name, organization, email, phone, planId: packageId, referralSource }
+      : { name, organization, email, phone, packageId, referralSource };
+
     try {
-      const res = await fetch('/api/checkout', {
+      const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, organization, email, phone, packageId, referralSource }),
+        body: JSON.stringify(body),
       });
       const data = (await res.json()) as { url?: string; error?: string };
       if (!res.ok || data.error) {
@@ -136,11 +179,25 @@ export default function CheckoutPage() {
               onChange={(e) => setPackageId(e.target.value)}
             >
               <option value="">Select a package</option>
-              {PURCHASABLE_PRODUCTS.map((product) => (
-                <option key={product.id} value={product.id}>
-                  {product.displayName} - {formatPrice(product.priceCents)}
-                </option>
-              ))}
+              {subscriptionPlans.length > 0 && (
+                <optgroup label="Subscriptions">
+                  {subscriptionPlans.map((plan) => (
+                    <option key={plan.id} value={plan.id}>
+                      {plan.displayName} — {formatSubscriptionPrice(plan.priceCents, plan.interval)}
+                      {plan.trialDays > 0 ? ` (${plan.trialDays}-day trial)` : ''}
+                    </option>
+                  ))}
+                </optgroup>
+              )}
+              {PURCHASABLE_PRODUCTS.length > 0 && (
+                <optgroup label="One-time">
+                  {PURCHASABLE_PRODUCTS.map((product) => (
+                    <option key={product.id} value={product.id}>
+                      {product.displayName} — {formatPrice(product.priceCents)}
+                    </option>
+                  ))}
+                </optgroup>
+              )}
             </select>
             {contactOnlyCount > 0 && (
               <p className="mt-2 text-xs leading-relaxed text-neutral-500">
@@ -151,9 +208,17 @@ export default function CheckoutPage() {
                 for pricing on those tiers.
               </p>
             )}
-            {selectedItem && (
+            {selectedOneTime && !isSubscription && (
               <p className="mt-2 text-xs leading-relaxed text-neutral-500">
-                {selectedItem.description}
+                {selectedOneTime.description}
+              </p>
+            )}
+            {selectedSubscription && (
+              <p className="mt-2 text-xs leading-relaxed text-neutral-500">
+                {selectedSubscription.description}
+                {selectedSubscription.trialDays > 0
+                  ? ` Includes a ${selectedSubscription.trialDays}-day free trial.`
+                  : ''}
               </p>
             )}
           </div>
@@ -190,7 +255,11 @@ export default function CheckoutPage() {
             disabled={loading}
             className="w-full bg-neutral-950 px-6 py-4 text-xs font-bold uppercase tracking-widest text-white hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? 'Redirecting to payment...' : 'Proceed to Payment'}
+            {loading
+              ? 'Redirecting to payment...'
+              : isSubscription
+                ? 'Start Subscription'
+                : 'Proceed to Payment'}
           </button>
 
           <p className="text-center text-xs text-neutral-400">

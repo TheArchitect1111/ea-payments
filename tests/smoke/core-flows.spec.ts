@@ -82,6 +82,11 @@ test('checkout lists purchasable packages only', async ({ page }) => {
   await expect(options.filter({ hasText: /Capacity Assessment/i })).toHaveCount(0);
 });
 
+test('portal billing route requires portal login', async ({ page }) => {
+  await page.goto('/portal/demo-client/billing');
+  await expect(page).toHaveURL(/\/portal\/login/);
+});
+
 test('assessment thank-you contact link works', async ({ page }) => {
   await page.goto('/assessment/thank-you');
   await expect(page.getByRole('link', { name: /contact our team/i })).toHaveAttribute(

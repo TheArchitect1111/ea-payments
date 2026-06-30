@@ -28,6 +28,14 @@ export type PulseEventType =
   | 'onboarding.blocked'
   | 'launch.verification.completed'
   | 'payment.received'
+  | 'subscription.started'
+  | 'subscription.active'
+  | 'subscription.trialing'
+  | 'subscription.canceled'
+  | 'subscription.unpaid'
+  | 'subscription.past_due'
+  | 'subscription.invoice.paid'
+  | 'subscription.invoice.failed'
   | 'attention.critical'
   | 'guide.escalated';
 

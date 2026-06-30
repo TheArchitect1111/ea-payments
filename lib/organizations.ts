@@ -22,6 +22,10 @@ export type Organization = {
   status: OrganizationStatus;
   portalSlug?: string;
   clientRecordId?: string;
+  stripeCustomerId?: string;
+  stripeSubscriptionId?: string;
+  subscriptionPlanId?: string;
+  subscriptionStatus?: string;
 };
 
 function mapOrganization(record: AirtableRecord): Organization {
@@ -37,6 +41,10 @@ function mapOrganization(record: AirtableRecord): Organization {
     status: (f['Status'] as OrganizationStatus) || 'Active',
     portalSlug: f['Portal Slug'] ? String(f['Portal Slug']) : undefined,
     clientRecordId: f['Client Record Id'] ? String(f['Client Record Id']) : undefined,
+    stripeCustomerId: f['Stripe Customer Id'] ? String(f['Stripe Customer Id']) : undefined,
+    stripeSubscriptionId: f['Stripe Subscription Id'] ? String(f['Stripe Subscription Id']) : undefined,
+    subscriptionPlanId: f['Subscription Plan Id'] ? String(f['Subscription Plan Id']) : undefined,
+    subscriptionStatus: f['Subscription Status'] ? String(f['Subscription Status']) : undefined,
   };
 }
 
@@ -130,4 +138,41 @@ export async function suspendOrganization(orgId: string): Promise<boolean> {
   if (!platformStoreConfigured() || orgId.startsWith('org_')) return false;
   const updated = await platformUpdate(ORGANIZATIONS_TABLE, orgId, { Status: 'Suspended' });
   return Boolean(updated);
+}
+
+export async function findOrganizationByStripeCustomerId(
+  stripeCustomerId: string,
+): Promise<Organization | null> {
+  if (!platformStoreConfigured() || !stripeCustomerId) return null;
+
+  const safe = stripeCustomerId.replace(/'/g, "\\'");
+  const records = await platformQuery(
+    ORGANIZATIONS_TABLE,
+    `{Stripe Customer Id}='${safe}'`,
+    1,
+  );
+  return records[0] ? mapOrganization(records[0]) : null;
+}
+
+export async function updateOrganizationBilling(
+  orgId: string,
+  input: {
+    stripeCustomerId?: string;
+    stripeSubscriptionId?: string;
+    subscriptionPlanId?: string;
+    subscriptionStatus?: string;
+  },
+): Promise<Organization | null> {
+  if (!platformStoreConfigured() || orgId.startsWith('org_')) return null;
+
+  const fields: Record<string, string> = {};
+  if (input.stripeCustomerId) fields['Stripe Customer Id'] = input.stripeCustomerId;
+  if (input.stripeSubscriptionId) fields['Stripe Subscription Id'] = input.stripeSubscriptionId;
+  if (input.subscriptionPlanId) fields['Subscription Plan Id'] = input.subscriptionPlanId;
+  if (input.subscriptionStatus) fields['Subscription Status'] = input.subscriptionStatus;
+
+  if (Object.keys(fields).length === 0) return getOrganizationById(orgId);
+
+  const updated = await platformUpdate(ORGANIZATIONS_TABLE, orgId, fields);
+  return updated ? mapOrganization(updated) : null;
 }

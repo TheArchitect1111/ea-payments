@@ -1,6 +1,13 @@
 import Link from 'next/link';
 
-export default function CheckoutSuccessPage() {
+export default async function CheckoutSuccessPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ type?: string }>;
+}) {
+  const { type } = await searchParams;
+  const isSubscription = type === 'subscription';
+
   return (
     <main className="min-h-screen bg-neutral-50">
       <div className="bg-neutral-950 px-6 py-8 text-center">
@@ -15,17 +22,19 @@ export default function CheckoutSuccessPage() {
         </div>
 
         <h1 className="text-2xl font-extrabold uppercase tracking-wide text-neutral-900">
-          Payment Received
+          {isSubscription ? 'Subscription Started' : 'Payment Received'}
         </h1>
 
         <p className="mt-4 text-sm leading-relaxed text-neutral-600">
-          Your payment has been processed successfully. A confirmation receipt is on its way to
-          your email.
+          {isSubscription
+            ? 'Your subscription is active. A confirmation receipt is on its way to your email.'
+            : 'Your payment has been processed successfully. A confirmation receipt is on its way to your email.'}
         </p>
 
         <p className="mt-3 text-sm leading-relaxed text-neutral-600">
-          Your onboarding has been queued. Watch for your welcome email with portal access,
-          next steps, and the first items needed to begin delivery.
+          {isSubscription
+            ? 'Watch for your welcome email with portal access. Manage billing anytime from your portal after you sign in.'
+            : 'Your onboarding has been queued. Watch for your welcome email with portal access, next steps, and the first items needed to begin delivery.'}
         </p>
 
         <Link
