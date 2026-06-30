@@ -570,6 +570,46 @@ export async function createAssessmentRecord(
   }
 }
 
+export async function findPortalClientByEmail(
+  email: string,
+): Promise<{ ok: boolean; slug?: string; recordId?: string; error?: string }> {
+  if (!process.env.AIRTABLE_API_KEY) {
+    return { ok: false, error: 'Not configured.' };
+  }
+
+  const safe = email.trim().toLowerCase().replace(/'/g, "\\'");
+  const formula = encodeURIComponent(
+    `OR(LOWER({Email})='${safe}', LOWER({Portal Username})='${safe}')`,
+  );
+  const url = `https://api.airtable.com/v0/${BASE_ID}/${encodeURIComponent(TABLE)}?filterByFormula=${formula}&maxRecords=1`;
+
+  try {
+    const res = await fetch(url, { headers: authHeaders() });
+    if (!res.ok) return { ok: false, error: 'Database error.' };
+
+    const data = (await res.json()) as {
+      records?: { id: string; fields: Record<string, unknown> }[];
+    };
+    const rec = data.records?.[0];
+    if (!rec) return { ok: false, error: 'No portal account matches that email.' };
+
+    const f = rec.fields;
+    const portalSlug = (f['Portal Slug'] as string) ?? '';
+    const accessStatus = (f['Portal Access Status'] as PortalAccessStatus) ?? 'Pending';
+
+    if (accessStatus === 'Suspended') {
+      return { ok: false, error: 'Portal access suspended. Please contact support.' };
+    }
+    if (!portalSlug) {
+      return { ok: false, error: 'Portal not yet provisioned. Please contact support.' };
+    }
+
+    return { ok: true, slug: portalSlug, recordId: rec.id };
+  } catch {
+    return { ok: false, error: 'Unexpected error. Please try again.' };
+  }
+}
+
 export async function validatePortalLogin(
   email: string,
   password: string

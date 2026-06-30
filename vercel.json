@@ -91,5 +91,11 @@
         }
       ]
     }
+  ],
+  "crons": [
+    {
+      "path": "/api/cron/connect-sequence",
+      "schedule": "0 14 * * *"
+    }
   ]
 }

@@ -177,6 +177,11 @@ export type ConnectRelationship = {
     followUpPriority: 'Low' | 'Medium' | 'High' | 'Immediate';
     reasons: string[];
   };
+  campaignId?: string;
+  simplifiCaptureId?: string;
+  amplifiShareUrl?: string;
+  sequenceSent: string[];
+  airtableRecordId?: string;
   createdAt: string;
   updatedAt: string;
 };
@@ -250,6 +255,16 @@ const cprResources: ConnectResource[] = [
 ];
 
 const cprCampaigns: ConnectCampaign[] = [
+  {
+    id: 'parent-guide-qr',
+    name: 'Parent Guide QR (resource-first)',
+    type: 'Campaign QR',
+    destination: '/connect/cpr/go/parent-recruiting-guide?campaign=parent-guide-qr',
+    scans: 0,
+    conversions: 0,
+    resourceOpens: 0,
+    applications: 0,
+  },
   {
     id: 'coach-mike-charlotte',
     name: 'Coach Mike QR',
@@ -876,6 +891,8 @@ function buildRelationship(
     resourcesSent: org.sequence.filter((step) => step.delayDays === 0).map((step) => step.resourceId),
     engagement,
     aiProfile,
+    campaignId: input.campaignId,
+    sequenceSent: [],
     createdAt,
     updatedAt: new Date().toISOString(),
   };
@@ -947,11 +964,11 @@ function airtableConfig() {
   return { apiKey, baseId, tableId };
 }
 
-async function postRelationshipToAirtable(relationship: ConnectRelationship) {
+async function postRelationshipToAirtable(relationship: ConnectRelationship): Promise<string | null> {
   const config = airtableConfig();
-  if (!config) return;
+  if (!config) return null;
 
-  await fetch(`https://api.airtable.com/v0/${config.baseId}/${encodeURIComponent(config.tableId)}`, {
+  const response = await fetch(`https://api.airtable.com/v0/${config.baseId}/${encodeURIComponent(config.tableId)}`, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${config.apiKey}`,
@@ -961,6 +978,8 @@ async function postRelationshipToAirtable(relationship: ConnectRelationship) {
       records: [
         {
           fields: {
+            'Connect ID': relationship.id,
+            'Org Slug': relationship.orgSlug,
             Name: relationship.name,
             Email: relationship.email,
             Phone: relationship.phone,
@@ -977,11 +996,183 @@ async function postRelationshipToAirtable(relationship: ConnectRelationship) {
             'Routed Team': relationship.routedTeam,
             'Opportunity Score': relationship.aiProfile.opportunityScore,
             'Recommended Action': relationship.aiProfile.recommendedAction,
+            'Sequence Sent': relationship.sequenceSent.join(', '),
+            'Simplifi Capture ID': relationship.simplifiCaptureId ?? '',
+            'Amplifi URL': relationship.amplifiShareUrl ?? '',
           },
         },
       ],
+      typecast: true,
     }),
   });
+
+  if (!response.ok) {
+    console.error('[connect] Airtable relationship write failed', response.status, await response.text().catch(() => ''));
+    return null;
+  }
+
+  const data = (await response.json()) as { records?: { id: string }[] };
+  return data.records?.[0]?.id ?? null;
+}
+
+function mapAirtableRelationship(record: { id: string; fields: Record<string, unknown> }): ConnectRelationship | null {
+  const email = String(record.fields.Email ?? '').trim();
+  const name = String(record.fields.Name ?? '').trim();
+  if (!email || !name) return null;
+
+  const connectId = String(record.fields['Connect ID'] ?? record.id);
+  const sequenceRaw = String(record.fields['Sequence Sent'] ?? '');
+  const dateMet = String(record.fields['Date Met'] ?? record.fields['Created At'] ?? new Date().toISOString());
+  const opportunityScore = Number(record.fields['Opportunity Score'] ?? 50);
+
+  return {
+    id: connectId,
+    orgSlug: String(record.fields['Org Slug'] ?? 'cpr'),
+    name,
+    email,
+    phone: String(record.fields.Phone ?? '') || undefined,
+    organization: String(record.fields.Organization ?? '') || undefined,
+    role: String(record.fields.Role ?? '') || undefined,
+    source: (String(record.fields.Source ?? 'QR') as ConnectRelationship['source']) || 'QR',
+    event: String(record.fields.Event ?? '') || undefined,
+    dateMet,
+    representative: String(record.fields.Representative ?? '') || undefined,
+    conversationNotes: String(record.fields.Notes ?? '') || undefined,
+    tags: String(record.fields.Tags ?? '')
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean),
+    status: (String(record.fields.Status ?? 'New') as RelationshipStatus) || 'New',
+    leadType: String(record.fields['Lead Type'] ?? 'Prospect'),
+    routedTeam: String(record.fields['Routed Team'] ?? ''),
+    resourcesSent: [],
+    engagement: {
+      scans: 0,
+      opens: 0,
+      clicks: 0,
+      downloads: 0,
+      videoViews: 0,
+      portalVisits: 0,
+      applicationsStarted: 0,
+      applicationsCompleted: 0,
+      messages: 0,
+      followUpsCompleted: 0,
+    },
+    aiProfile: {
+      summary: String(record.fields.Notes ?? 'Imported from Airtable'),
+      interestLevel: 'Medium',
+      engagementScore: 0,
+      opportunityScore: Number.isFinite(opportunityScore) ? opportunityScore : 50,
+      recommendedAction: String(record.fields['Recommended Action'] ?? 'Continue nurture sequence.'),
+      followUpPriority: 'Medium',
+      reasons: ['Loaded from Airtable'],
+    },
+    campaignId: undefined,
+    simplifiCaptureId: String(record.fields['Simplifi Capture ID'] ?? '') || undefined,
+    amplifiShareUrl: String(record.fields['Amplifi URL'] ?? '') || undefined,
+    sequenceSent: sequenceRaw.split(',').map((s) => s.trim()).filter(Boolean),
+    airtableRecordId: record.id,
+    createdAt: dateMet,
+    updatedAt: dateMet,
+  };
+}
+
+async function fetchRelationshipsFromAirtable(orgSlug?: string): Promise<ConnectRelationship[]> {
+  const config = airtableConfig();
+  if (!config) return [];
+
+  const params = new URLSearchParams({ maxRecords: '200' });
+  if (orgSlug) {
+    const safe = orgSlug.replace(/'/g, "\\'");
+    params.set('filterByFormula', `{Org Slug}='${safe}'`);
+  }
+
+  const response = await fetch(
+    `https://api.airtable.com/v0/${config.baseId}/${encodeURIComponent(config.tableId)}?${params.toString()}`,
+    {
+      headers: { Authorization: `Bearer ${config.apiKey}` },
+      cache: 'no-store',
+    },
+  );
+
+  if (!response.ok) return [];
+
+  const data = (await response.json()) as {
+    records?: { id: string; fields: Record<string, unknown> }[];
+  };
+
+  return (data.records ?? [])
+    .map(mapAirtableRelationship)
+    .filter((item): item is ConnectRelationship => Boolean(item));
+}
+
+async function patchRelationshipInAirtable(relationship: ConnectRelationship): Promise<void> {
+  if (!relationship.airtableRecordId) return;
+  const config = airtableConfig();
+  if (!config) return;
+
+  await fetch(`https://api.airtable.com/v0/${config.baseId}/${encodeURIComponent(config.tableId)}`, {
+    method: 'PATCH',
+    headers: {
+      Authorization: `Bearer ${config.apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      records: [
+        {
+          id: relationship.airtableRecordId,
+          fields: {
+            'Sequence Sent': relationship.sequenceSent.join(', '),
+            'Simplifi Capture ID': relationship.simplifiCaptureId ?? '',
+            'Amplifi URL': relationship.amplifiShareUrl ?? '',
+          },
+        },
+      ],
+      typecast: true,
+    }),
+  }).catch((error) => console.error('[connect] Airtable patch failed', error));
+}
+
+export async function updateConnectRelationshipHandoff(
+  relationshipId: string,
+  handoff: { simplifiCaptureId?: string; amplifiShareUrl?: string },
+): Promise<void> {
+  const target = localRelationships.find((item) => item.id === relationshipId);
+  if (!target) return;
+  if (handoff.simplifiCaptureId) target.simplifiCaptureId = handoff.simplifiCaptureId;
+  if (handoff.amplifiShareUrl) target.amplifiShareUrl = handoff.amplifiShareUrl;
+  target.updatedAt = new Date().toISOString();
+  await patchRelationshipInAirtable(target);
+}
+
+export async function markSequenceStepSent(relationshipId: string, stepId: string): Promise<void> {
+  const target = localRelationships.find((item) => item.id === relationshipId);
+  if (!target) return;
+  if (!target.sequenceSent.includes(stepId)) target.sequenceSent.push(stepId);
+  target.engagement.followUpsCompleted += 1;
+  target.updatedAt = new Date().toISOString();
+  await patchRelationshipInAirtable(target);
+}
+
+export async function listConnectRelationshipsForSequence(): Promise<ConnectRelationship[]> {
+  const fromAirtable = await fetchRelationshipsFromAirtable();
+  const byId = new Map<string, ConnectRelationship>();
+
+  for (const relationship of fromAirtable) byId.set(relationship.id, relationship);
+  for (const relationship of localRelationships) {
+    const existing = byId.get(relationship.id);
+    if (existing) {
+      byId.set(relationship.id, {
+        ...existing,
+        ...relationship,
+        sequenceSent: [...new Set([...existing.sequenceSent, ...relationship.sequenceSent])],
+      });
+    } else {
+      byId.set(relationship.id, relationship);
+    }
+  }
+
+  return [...byId.values()];
 }
 
 export function createConnectTenantTemplate(input: {
@@ -1170,7 +1361,8 @@ export async function createConnectRelationship(input: CreateRelationshipInput):
   const relationship = buildRelationship(input, new Date().toISOString(), {}, org);
   localRelationships.unshift(relationship);
   try {
-    await postRelationshipToAirtable(relationship);
+    const airtableRecordId = await postRelationshipToAirtable(relationship);
+    if (airtableRecordId) relationship.airtableRecordId = airtableRecordId;
   } catch (error) {
     console.error('[connect] Airtable write failed', error);
   }

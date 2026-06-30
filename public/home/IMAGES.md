@@ -36,7 +36,18 @@ Target ~200–400 KB each. Bright, human, editorial — "documentary, not corpor
 | `possible-leader.jpg` | 1200×1600 | Leader deciding calmly |
 | `possible-team.jpg` | 1200×1600 | Team with room to do its best work |
 
-## Section 6 — Organizations We've Helped (LICENSED / REAL ONLY — not AI)
+## EA Experience Lab™ (`/experience-lab`)
+| File | Used in chapter |
+|---|---|
+| `build-hero.jpg` | Hero + Landing story |
+| `scene-business.jpg` | One Conversation |
+| `scene-coach.jpg` | One Tap (EA Connect™) |
+| `possible-leader.jpg` | The moment they say yes |
+| `pulse-hero.jpg` | Welcome to Pulse™ |
+| `ch2-invisible-work.jpg` | The Invisible Experience |
+| `possible-team.jpg` | Finale — Consider the Possibilities™ |
+
+Until these files exist, each slot shows a graceful gradient with the alt text for accessibility.
 > Copy in `lib/landing-experience.ts` is DRAFT (`reviewNeeded: true`). Confirm accuracy + permission before publishing.
 
 | File | Suggested size | Organization |

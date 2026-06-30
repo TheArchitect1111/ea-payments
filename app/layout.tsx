@@ -3,9 +3,9 @@ import EAGuideOrb from './components/ea-guide/EAGuideOrb';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Efficiency Architects - One Place For Everything',
+  title: 'EA Athletics Experience - Coach Again',
   description:
-    'A guided transformation experience for organizations that have outgrown scattered updates, training, documents, and decisions.',
+    'A coach-centered journey showing how an athletics landing page and portal help programs grow without pulling coaches away from athletes.',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

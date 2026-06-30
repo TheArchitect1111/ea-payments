@@ -1,0 +1,1156 @@
+/* EA Experience Lab™ — premium, cinematic, Apple-inspired light experience */
+
+.eax {
+  --eax-navy: #16233f;
+  --eax-navy-soft: #2b3c63;
+  --eax-gold: #c9a24b;
+  --eax-gold-bright: #e3bf68;
+  --eax-ink: #1a1f2b;
+  --eax-muted: #6b7384;
+  --eax-faint: #9aa1b1;
+  --eax-bg: #ffffff;
+  --eax-bg-warm: #f7f6f3;
+  --eax-bg-cool: #f3f5f9;
+  --eax-line: rgba(22, 35, 63, 0.1);
+  --eax-card: #ffffff;
+  --eax-max: 1100px;
+  --eax-font: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+
+  margin: 0;
+  background: var(--eax-bg);
+  color: var(--eax-ink);
+  font-family: var(--eax-font);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+.eax h2,
+.eax h3,
+.eax p,
+.eax ul,
+.eax ol {
+  margin: 0;
+  padding: 0;
+}
+
+.eax ul,
+.eax ol {
+  list-style: none;
+}
+
+.eax-container {
+  max-width: var(--eax-max);
+  margin: 0 auto;
+  padding: 0 clamp(1.25rem, 5vw, 3rem);
+  width: 100%;
+}
+
+.eax-accent {
+  color: var(--eax-navy);
+  background: linear-gradient(120deg, var(--eax-gold), var(--eax-gold-bright));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.eax-center {
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Reveal -------------------------------------------------------------- */
+.eax-reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.9s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
+}
+
+.eax-reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eax-reveal,
+  .eax-opening-line,
+  .eax-sig-btn,
+  .eax-orbit-ring,
+  .eax-orbit-word {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* Buttons ------------------------------------------------------------- */
+.eax-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  font-size: 1rem;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  padding: 0.95rem 2rem;
+  border-radius: 999px;
+  cursor: pointer;
+  border: none;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+}
+
+.eax-btn-primary {
+  background: var(--eax-navy);
+  color: #fff;
+  box-shadow: 0 18px 40px -18px rgba(22, 35, 63, 0.7);
+}
+
+.eax-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 24px 50px -18px rgba(22, 35, 63, 0.6);
+}
+
+.eax-btn-lg {
+  font-size: 1.1rem;
+  padding: 1.15rem 2.6rem;
+}
+
+/* Shared section + typography ---------------------------------------- */
+.eax-section {
+  padding: clamp(5rem, 13vh, 9rem) 0;
+  position: relative;
+}
+
+.eax-section-title {
+  font-size: clamp(2rem, 5.5vw, 3.4rem);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  max-width: 18ch;
+}
+
+.eax-eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.32em;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--eax-gold);
+}
+
+.eax-lines {
+  margin-top: 1.75rem;
+  display: grid;
+  gap: 1rem;
+  max-width: 46ch;
+}
+
+.eax-line {
+  font-size: clamp(1.05rem, 2.4vw, 1.35rem);
+  color: var(--eax-muted);
+  line-height: 1.6;
+}
+
+.eax-line-emphasis {
+  font-size: clamp(1.3rem, 3.2vw, 1.9rem);
+  font-weight: 600;
+  color: var(--eax-ink);
+  line-height: 1.3;
+  max-width: 24ch;
+  margin-top: 2rem;
+}
+
+.eax-chapter-head {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.eax-chapter-index {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--eax-gold);
+  letter-spacing: 0.1em;
+  min-width: 1.5rem;
+}
+
+.eax-chapter-kicker {
+  text-transform: uppercase;
+  letter-spacing: 0.28em;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--eax-faint);
+}
+
+.eax-chapter-head::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--eax-line);
+}
+
+/* Opening ------------------------------------------------------------- */
+.eax-opening {
+  min-height: 100vh;
+  background: #0a0f1c;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem;
+  position: relative;
+}
+
+.eax-opening-inner {
+  display: grid;
+  gap: 1.5rem;
+  max-width: 30ch;
+}
+
+.eax-opening-line {
+  font-size: clamp(1.5rem, 4.5vw, 2.6rem);
+  font-weight: 500;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  opacity: 0;
+  transform: translateY(12px);
+  animation: eax-fade-up 2s forwards;
+}
+
+@keyframes eax-fade-up {
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.eax-opening-scroll {
+  position: absolute;
+  bottom: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 0.72rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  opacity: 0;
+  animation: eax-fade-up 1.5s 5.5s forwards;
+}
+
+.eax-opening-arrow {
+  width: 1px;
+  height: 34px;
+  background: linear-gradient(rgba(255, 255, 255, 0.6), transparent);
+  animation: eax-scroll-pulse 2s infinite;
+}
+
+@keyframes eax-scroll-pulse {
+  0%,
+  100% {
+    transform: scaleY(0.6);
+    opacity: 0.4;
+  }
+  50% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
+/* Hero ---------------------------------------------------------------- */
+.eax-hero {
+  position: relative;
+  min-height: min(92vh, 920px);
+  display: grid;
+  align-items: end;
+  overflow: hidden;
+  background: #0a0f1c;
+}
+
+.eax-hero-copy {
+  position: relative;
+  z-index: 2;
+  padding: clamp(3rem, 10vh, 6rem) 0 clamp(2.5rem, 8vh, 4rem);
+  color: #fff;
+}
+
+.eax-hero-copy .eax-eyebrow {
+  color: var(--eax-gold-bright);
+}
+
+.eax-hero-copy .eax-hero-sub {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.eax-hero-copy .eax-accent {
+  -webkit-text-fill-color: #fff;
+  color: #fff;
+  background: none;
+}
+
+/* Cinematic scene panels --------------------------------------------- */
+.eax-scene {
+  position: relative;
+  overflow: hidden;
+  margin: 0;
+  border-radius: 0;
+}
+
+.eax-scene-hero {
+  position: absolute;
+  inset: 0;
+  min-height: 100%;
+}
+
+.eax-scene-wide {
+  width: 100%;
+  min-height: clamp(280px, 42vw, 520px);
+  margin-bottom: clamp(2rem, 5vw, 3.5rem);
+}
+
+.eax-section > .eax-scene-wide:first-child,
+.eax-section > .eax-scene-tall:first-child {
+  margin-top: calc(-1 * clamp(3rem, 8vh, 5rem));
+  margin-bottom: clamp(2.5rem, 6vw, 4rem);
+}
+
+.eax-scene-tall {
+  width: min(92%, 520px);
+  min-height: clamp(320px, 55vw, 560px);
+  margin: 0 auto clamp(2rem, 5vw, 3rem);
+  border-radius: 24px;
+  box-shadow: 0 40px 90px -50px rgba(22, 35, 63, 0.55);
+}
+
+.eax-scene-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.eax-scene-scrim {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.eax-scene-hero .eax-scene-scrim {
+  background: linear-gradient(
+    180deg,
+    rgba(10, 15, 28, 0.15) 0%,
+    rgba(10, 15, 28, 0.35) 45%,
+    rgba(10, 15, 28, 0.82) 100%
+  );
+}
+
+.eax-scene-wide .eax-scene-scrim,
+.eax-scene-tall .eax-scene-scrim {
+  background: linear-gradient(180deg, transparent 35%, rgba(10, 15, 28, 0.45) 100%);
+}
+
+.eax-scene-caption {
+  position: absolute;
+  left: clamp(1.25rem, 4vw, 2.5rem);
+  bottom: clamp(1rem, 3vw, 1.75rem);
+  z-index: 1;
+  max-width: 28ch;
+  color: rgba(255, 255, 255, 0.92);
+  font-size: clamp(1rem, 2.2vw, 1.25rem);
+  font-weight: 500;
+  line-height: 1.35;
+}
+
+.eax-scene-fallback-warm {
+  background: linear-gradient(135deg, #f4efe6 0%, #e8dfd0 40%, #d4c4a8 100%);
+}
+
+.eax-scene-fallback-connect {
+  background: linear-gradient(135deg, #eef2f8 0%, #d9e3f2 45%, #c9d8ec 100%);
+}
+
+.eax-scene-fallback-trust {
+  background: linear-gradient(135deg, #f8f6f2 0%, #ebe4d8 50%, #ddd2c0 100%);
+}
+
+.eax-scene-fallback-story {
+  background: linear-gradient(135deg, #f0f4fa 0%, #dfe8f5 50%, #cfd9ea 100%);
+}
+
+.eax-scene-fallback-pulse {
+  background: linear-gradient(135deg, #edf1f8 0%, #d8e0ef 55%, #c5d0e4 100%);
+}
+
+.eax-scene-fallback-calm {
+  background: linear-gradient(135deg, #f5f7fa 0%, #e8edf4 50%, #d9e1ec 100%);
+}
+
+.eax-scene-fallback-finale {
+  background: linear-gradient(135deg, #f7f3eb 0%, #ebe2d2 45%, #d9c9ad 100%);
+}
+
+.eax-hero-title {
+  margin-top: 1.2rem;
+  font-size: clamp(2.4rem, 7vw, 4.6rem);
+  font-weight: 700;
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+  max-width: 16ch;
+}
+
+.eax-hero-sub {
+  margin-top: 1.5rem;
+  font-size: clamp(1.1rem, 2.6vw, 1.4rem);
+  color: var(--eax-muted);
+  max-width: 42ch;
+  line-height: 1.5;
+}
+
+.eax-hero .eax-btn {
+  margin-top: 2.4rem;
+}
+
+/* Chapter 1 — Conversation ------------------------------------------- */
+.eax-section-conversation {
+  background: var(--eax-bg-warm);
+}
+
+/* Chapter 2 — One Tap ------------------------------------------------- */
+.eax-tap-intro {
+  font-size: clamp(1.1rem, 2.6vw, 1.4rem);
+  color: var(--eax-muted);
+  margin-bottom: 0.75rem;
+}
+
+.eax-tap-title {
+  margin-bottom: 3rem;
+}
+
+.eax-tap-stage {
+  display: grid;
+  grid-template-columns: minmax(0, 220px) minmax(0, 1fr);
+  gap: clamp(1.5rem, 4vw, 3rem);
+  align-items: center;
+}
+
+.eax-qr {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.eax-qr-frame {
+  position: relative;
+  width: 180px;
+  height: 180px;
+  border-radius: 22px;
+  background: #0a0f1c;
+  overflow: hidden;
+  box-shadow: 0 30px 60px -28px rgba(10, 15, 28, 0.7);
+}
+
+.eax-qr-dots {
+  position: absolute;
+  inset: 22px;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.85) 38%, transparent 40%);
+  background-size: 16px 16px;
+  opacity: 0.9;
+  -webkit-mask: radial-gradient(rgba(0, 0, 0, 1) 38%, transparent 40%);
+}
+
+.eax-qr-scanline {
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--eax-gold-bright), transparent);
+  box-shadow: 0 0 14px 2px rgba(227, 191, 104, 0.7);
+  animation: eax-scan 2.6s ease-in-out infinite;
+}
+
+@keyframes eax-scan {
+  0%,
+  100% {
+    top: 18%;
+  }
+  50% {
+    top: 80%;
+  }
+}
+
+.eax-qr-label {
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--eax-navy);
+}
+
+.eax-tap-cards {
+  display: grid;
+  gap: 1rem;
+}
+
+.eax-tap-card {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto;
+  column-gap: 1rem;
+  row-gap: 0.3rem;
+  padding: 1.4rem 1.6rem;
+  background: var(--eax-card);
+  border: 1px solid var(--eax-line);
+  border-radius: 18px;
+  box-shadow: 0 20px 50px -34px rgba(22, 35, 63, 0.5);
+}
+
+.eax-tap-icon {
+  grid-row: 1 / span 2;
+  width: 50px;
+  height: 50px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: linear-gradient(140deg, rgba(201, 162, 75, 0.16), rgba(22, 35, 63, 0.08));
+  color: var(--eax-navy);
+}
+
+.eax-tap-card h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.eax-tap-card p {
+  color: var(--eax-muted);
+  font-size: 0.98rem;
+  line-height: 1.5;
+}
+
+.eax-tap-caption {
+  margin-top: 2.5rem;
+  text-align: center;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--eax-navy);
+}
+
+/* Behind the scenes --------------------------------------------------- */
+.eax-section-bts {
+  background: var(--eax-navy);
+  color: #fff;
+}
+
+.eax-section-bts .eax-chapter-kicker {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.eax-section-bts .eax-chapter-head::after {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.eax-section-bts .eax-section-title {
+  color: #fff;
+  max-width: none;
+}
+
+.eax-bts-grid {
+  margin-top: 2.5rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.9rem;
+}
+
+.eax-bts-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  font-size: 0.98rem;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.eax-bts-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--eax-gold-bright);
+  box-shadow: 0 0 12px 2px rgba(227, 191, 104, 0.6);
+  flex-shrink: 0;
+}
+
+/* Chapter 3 — Trust + signature -------------------------------------- */
+.eax-signature {
+  margin-top: 2.5rem;
+  padding: clamp(1.5rem, 4vw, 2.5rem);
+  border-radius: 22px;
+  background: var(--eax-bg-cool);
+  border: 1px solid var(--eax-line);
+}
+
+.eax-signature-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 1.5rem;
+}
+
+.eax-signature-label {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--eax-navy);
+}
+
+.eax-signature-note {
+  color: var(--eax-muted);
+  font-size: 0.95rem;
+}
+
+.eax-signature-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+}
+
+.eax-sig-btn {
+  padding: 0.65rem 1.1rem;
+  border-radius: 999px;
+  background: #fff;
+  border: 1px solid var(--eax-line);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--eax-navy);
+  opacity: 0;
+  transform: translateY(8px);
+  animation: eax-fade-up 0.6s forwards;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.eax-sig-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 24px -14px rgba(22, 35, 63, 0.5);
+}
+
+.eax-seq-kicker {
+  margin: 3rem 0 1.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--eax-faint);
+}
+
+.eax-seq {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.eax-seq-card {
+  padding: 1.6rem;
+  border-radius: 18px;
+  background: var(--eax-card);
+  border: 1px solid var(--eax-line);
+  box-shadow: 0 20px 50px -36px rgba(22, 35, 63, 0.5);
+}
+
+.eax-seq-num {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--eax-gold);
+}
+
+.eax-seq-card h3 {
+  margin-top: 0.5rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.eax-seq-card p {
+  margin-top: 0.35rem;
+  color: var(--eax-muted);
+}
+
+/* Chapter 4 — Confidence --------------------------------------------- */
+.eax-section-confidence {
+  background: var(--eax-bg-warm);
+}
+
+.eax-pills {
+  margin-top: 1.75rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.eax-pill {
+  padding: 0.55rem 1.1rem;
+  border-radius: 999px;
+  border: 1px solid var(--eax-line);
+  background: #fff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--eax-navy);
+}
+
+/* Chapter 5 — The Yes ------------------------------------------------- */
+.eax-section-yes {
+  background: radial-gradient(110% 90% at 50% 30%, var(--eax-bg-cool), var(--eax-bg));
+  text-align: center;
+}
+
+.eax-section-yes .eax-chapter-head {
+  justify-content: center;
+}
+
+.eax-section-yes .eax-chapter-head::after {
+  display: none;
+}
+
+.eax-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.7rem;
+  margin-bottom: 2.5rem;
+}
+
+.eax-action {
+  padding: 0.7rem 1.4rem;
+  border-radius: 999px;
+  background: #fff;
+  border: 1px solid var(--eax-line);
+  font-weight: 700;
+  color: var(--eax-navy);
+  box-shadow: 0 14px 34px -26px rgba(22, 35, 63, 0.5);
+}
+
+.eax-yes-line {
+  font-size: clamp(1.2rem, 3vw, 1.6rem);
+  color: var(--eax-muted);
+}
+
+.eax-yes-change {
+  font-size: clamp(2.4rem, 8vw, 5rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  margin-top: 0.5rem;
+}
+
+.eax-confirm {
+  margin: 3rem auto 0;
+  max-width: 460px;
+  padding: 2.5rem;
+  border-radius: 24px;
+  background: #fff;
+  border: 1px solid var(--eax-line);
+  box-shadow: 0 40px 80px -40px rgba(22, 35, 63, 0.5);
+}
+
+.eax-confirm-check {
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  margin: 0 auto 1.25rem;
+  border-radius: 50%;
+  background: linear-gradient(140deg, var(--eax-gold), var(--eax-gold-bright));
+  color: #fff;
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+
+.eax-confirm h3 {
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+
+.eax-confirm p {
+  margin-top: 0.5rem;
+  color: var(--eax-muted);
+}
+
+/* Chapter 6 — Pulse --------------------------------------------------- */
+.eax-pulse-sub {
+  margin-top: 1rem;
+  font-size: clamp(1.05rem, 2.4vw, 1.3rem);
+  color: var(--eax-muted);
+}
+
+.eax-pulse-stage {
+  margin-top: 2.5rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: clamp(1.5rem, 4vw, 2.5rem);
+  align-items: start;
+}
+
+.eax-pulse-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 0.9rem;
+}
+
+.eax-pulse-tile {
+  padding: 1.4rem 1rem;
+  border-radius: 16px;
+  background: var(--eax-card);
+  border: 1px solid var(--eax-line);
+  font-weight: 600;
+  color: var(--eax-navy);
+  text-align: center;
+  box-shadow: 0 18px 44px -34px rgba(22, 35, 63, 0.5);
+}
+
+.eax-guide {
+  display: flex;
+  gap: 1rem;
+  padding: 1.6rem;
+  border-radius: 20px;
+  background: var(--eax-navy);
+  color: #fff;
+}
+
+.eax-guide-orb {
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, var(--eax-gold-bright), var(--eax-gold));
+  box-shadow: 0 0 22px 4px rgba(227, 191, 104, 0.5);
+  animation: eax-orb-pulse 3s ease-in-out infinite;
+}
+
+@keyframes eax-orb-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.12);
+    opacity: 1;
+  }
+}
+
+.eax-guide-name {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.eax-guide-body ul {
+  margin-top: 0.75rem;
+  display: grid;
+  gap: 0.6rem;
+}
+
+.eax-guide-body li {
+  font-size: 0.98rem;
+  color: rgba(255, 255, 255, 0.9);
+  padding-left: 1rem;
+  position: relative;
+}
+
+.eax-guide-body li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.55em;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--eax-gold-bright);
+}
+
+/* Chapter 7 — Invisible ---------------------------------------------- */
+.eax-section-invisible {
+  background: var(--eax-bg-cool);
+}
+
+.eax-invisible-grid {
+  margin-top: 2.5rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.8rem;
+}
+
+.eax-invisible-item {
+  padding: 1rem 1.25rem;
+  border-radius: 12px;
+  background: #fff;
+  border: 1px solid var(--eax-line);
+  color: var(--eax-ink);
+  font-size: 0.96rem;
+}
+
+/* The Reveal — flow --------------------------------------------------- */
+.eax-section-reveal {
+  background: var(--eax-navy);
+  color: #fff;
+}
+
+.eax-section-reveal .eax-chapter-kicker {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.eax-section-reveal .eax-chapter-head::after {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.eax-section-reveal .eax-section-title {
+  color: #fff;
+  margin-top: 3rem;
+}
+
+.eax-flow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.eax-flow-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.eax-flow-step:not(:last-child)::after {
+  content: '';
+  width: 1px;
+  height: 22px;
+  background: linear-gradient(rgba(227, 191, 104, 0.8), rgba(255, 255, 255, 0.15));
+}
+
+.eax-flow-node {
+  padding: 0.7rem 1.4rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* Final Reveal — orbit ------------------------------------------------ */
+.eax-section-orbit {
+  background: radial-gradient(120% 90% at 50% 50%, #0d1426, #070b16);
+  color: #fff;
+  overflow: hidden;
+}
+
+.eax-orbit-stage {
+  position: relative;
+  width: min(82vw, 620px);
+  height: min(82vw, 620px);
+  margin: 0 auto;
+}
+
+.eax-orbit-core {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  transform: translate(-50%, -50%);
+  width: 42%;
+  height: 42%;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  gap: 0.4rem;
+  background: radial-gradient(circle at 38% 32%, rgba(227, 191, 104, 0.28), rgba(22, 35, 63, 0.6));
+  border: 1px solid rgba(227, 191, 104, 0.4);
+  box-shadow: 0 0 60px -8px rgba(227, 191, 104, 0.5), inset 0 0 40px rgba(227, 191, 104, 0.12);
+  z-index: 2;
+  padding: 1rem;
+}
+
+.eax-orbit-core-label {
+  font-size: clamp(1.4rem, 4vw, 2.2rem);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.eax-orbit-core-sub {
+  font-size: clamp(0.72rem, 1.8vw, 0.9rem);
+  color: rgba(255, 255, 255, 0.7);
+  max-width: 22ch;
+}
+
+.eax-orbit-ring {
+  position: absolute;
+  inset: 0;
+  animation: eax-orbit-spin 60s linear infinite;
+}
+
+@keyframes eax-orbit-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.eax-orbit-word {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: rotate(var(--eax-angle)) translateY(calc(min(41vw, 310px) * -1));
+}
+
+.eax-orbit-word span {
+  display: inline-block;
+  transform: translate(-50%, -50%) rotate(calc(var(--eax-angle) * -1));
+  padding: 0.4rem 0.85rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  font-size: clamp(0.66rem, 1.6vw, 0.85rem);
+  font-weight: 600;
+  white-space: nowrap;
+  color: rgba(255, 255, 255, 0.86);
+  animation: eax-orbit-counter 60s linear infinite;
+}
+
+/* Counter-rotate so words stay upright while the ring spins. */
+@keyframes eax-orbit-counter {
+  to {
+    transform: translate(-50%, -50%) rotate(calc((var(--eax-angle) * -1) - 360deg));
+  }
+}
+
+/* Finale -------------------------------------------------------------- */
+.eax-section-finale {
+  background: linear-gradient(180deg, var(--eax-bg), var(--eax-bg-warm));
+  text-align: center;
+}
+
+.eax-finale-prompt {
+  display: grid;
+  gap: 0.75rem;
+  margin-bottom: 3rem;
+}
+
+.eax-finale-line {
+  font-size: clamp(1.4rem, 4vw, 2.4rem);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  max-width: 26ch;
+  margin: 0 auto;
+}
+
+.eax-finale-unique {
+  display: grid;
+  gap: 0.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.eax-finale-unique .eax-line {
+  margin: 0 auto;
+}
+
+.eax-your {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.8rem;
+  margin-bottom: 3.5rem;
+}
+
+.eax-your-item {
+  padding: 0.9rem 1.6rem;
+  border-radius: 999px;
+  background: #fff;
+  border: 1px solid var(--eax-line);
+  font-weight: 700;
+  color: var(--eax-navy);
+  box-shadow: 0 18px 40px -30px rgba(22, 35, 63, 0.5);
+}
+
+.eax-invite {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: clamp(2rem, 6vw, 3.5rem);
+  border-radius: 28px;
+  background: #fff;
+  border: 1px solid var(--eax-line);
+  box-shadow: 0 50px 100px -50px rgba(22, 35, 63, 0.55);
+}
+
+.eax-invite-brand {
+  display: inline-block;
+  font-size: clamp(1.5rem, 4.5vw, 2.4rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--eax-navy);
+}
+
+.eax-invite-question {
+  margin-top: 1.5rem;
+  font-size: clamp(1.2rem, 3vw, 1.6rem);
+  font-weight: 600;
+}
+
+.eax-invite-body {
+  margin-top: 1.5rem;
+  display: grid;
+  gap: 0.6rem;
+  color: var(--eax-muted);
+  font-size: 1.02rem;
+  line-height: 1.55;
+}
+
+.eax-btn-secondary {
+  background: transparent;
+  border: 1.5px solid var(--eax-line);
+  color: var(--eax-navy);
+  box-shadow: none;
+  margin-top: 0.75rem;
+}
+
+.eax-btn-secondary:hover {
+  background: var(--eax-bg-cool);
+  transform: translateY(-2px);
+}
+
+.eax-invite .eax-btn + .eax-btn {
+  margin-left: 0;
+}
+
+.eax-invite .eax-btn {
+  display: inline-flex;
+  margin-top: 1rem;
+}
+
+.eax-invite .eax-btn + .eax-btn {
+  margin-top: 0.75rem;
+}
+
+/* Responsive ---------------------------------------------------------- */
+@media (max-width: 720px) {
+  .eax-tap-stage {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
+  }
+
+  .eax-tap-card {
+    text-align: left;
+  }
+
+  .eax-pulse-stage {
+    grid-template-columns: 1fr;
+  }
+}
