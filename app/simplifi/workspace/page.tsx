@@ -45,6 +45,7 @@ export default async function SimplifiWorkspacePage() {
         </Link>
         <nav className="sw-nav">
           <Link href="/simplifi/capture">Capture</Link>
+          <Link href="/simplifi/settings">Settings</Link>
           {slug ? (
             <Link href={`/portal/${slug}`}>Portal</Link>
           ) : (

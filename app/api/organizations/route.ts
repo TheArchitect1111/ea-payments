@@ -1,6 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-import { EA_PORTAL_COOKIE, verifySession } from '@/lib/ea-portal-auth';
+import { NextResponse } from 'next/server';
+import { requirePortalSession } from '@/lib/auth/resolve-portal-session';
 import { listMembershipsForUser } from '@/lib/memberships';
 import { getOrganizationById } from '@/lib/organizations';
 
@@ -8,10 +7,7 @@ export const dynamic = 'force-dynamic';
 
 /** List organizations the current portal user belongs to. */
 export async function GET() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get(EA_PORTAL_COOKIE)?.value;
-  const session = token ? await verifySession(token) : null;
-
+  const session = await requirePortalSession();
   if (!session?.email) {
     return NextResponse.json({ error: 'Portal authentication required.' }, { status: 401 });
   }

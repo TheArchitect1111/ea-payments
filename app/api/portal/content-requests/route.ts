@@ -1,6 +1,5 @@
-import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
-import { EA_PORTAL_COOKIE, verifySession } from '@/lib/ea-portal-auth';
+import { requirePortalSession } from '@/lib/auth/resolve-portal-session';
 import { createContentRequest, getClientByPortalSlug } from '@/lib/airtable';
 import { enhanceContentRequest } from '@/lib/ai';
 import { sendContentRequestConfirmation, sendInternalNotification } from '@/lib/email';
@@ -11,9 +10,7 @@ import { fireContentRequestWebhook } from '@/lib/make-webhooks';
 export const dynamic = 'force-dynamic';
 
 async function authenticatedClient() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get(EA_PORTAL_COOKIE)?.value;
-  const session = token ? await verifySession(token) : null;
+  const session = await requirePortalSession();
   if (!session) return null;
   return getClientByPortalSlug(session.slug);
 }

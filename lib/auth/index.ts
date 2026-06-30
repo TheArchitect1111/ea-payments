@@ -8,3 +8,9 @@ export {
 } from './session';
 export { exchangeMagicLinkToken } from './magic-link-exchange';
 export type { MagicLinkExchangeResult, MagicLinkExchangeError } from './magic-link-exchange';
+export {
+  resolvePortalSession,
+  resolvePortalSessionFromRequest,
+  requirePortalSession,
+  requirePortalSessionFromRequest,
+} from './resolve-portal-session';

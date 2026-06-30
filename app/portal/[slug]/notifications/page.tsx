@@ -21,7 +21,7 @@ export default async function PortalNotificationsPage({
   const session = token ? await verifySession(token) : null;
   if (!session?.email) redirect('/portal/login');
 
-  const notifications = listPortalNotifications({
+  const notifications = await listPortalNotifications({
     slug,
     email: session.email,
     limit: 50,

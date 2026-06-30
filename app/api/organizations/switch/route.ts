@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-import { makeSessionCookie, signSession, EA_PORTAL_COOKIE, verifySession } from '@/lib/ea-portal-auth';
+import { makeSessionCookie, signSession, EA_PORTAL_COOKIE } from '@/lib/ea-portal-auth';
+import { requirePortalSessionFromRequest } from '@/lib/auth/resolve-portal-session';
 import { findMembership } from '@/lib/memberships';
 import { getOrganizationById } from '@/lib/organizations';
 
@@ -8,10 +8,7 @@ export const dynamic = 'force-dynamic';
 
 /** Switch the active organization for the current portal session. */
 export async function POST(req: NextRequest) {
-  const cookieStore = await cookies();
-  const token = cookieStore.get(EA_PORTAL_COOKIE)?.value;
-  const session = token ? await verifySession(token) : null;
-
+  const session = await requirePortalSessionFromRequest(req);
   if (!session?.email) {
     return NextResponse.json({ error: 'Portal authentication required.' }, { status: 401 });
   }

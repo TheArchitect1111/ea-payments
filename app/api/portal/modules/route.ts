@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-import { EA_PORTAL_COOKIE, verifySession } from '@/lib/ea-portal-auth';
+import { requirePortalSession } from '@/lib/auth/resolve-portal-session';
 import { getClientByPortalSlug } from '@/lib/airtable';
 import { resolvePortalModuleAccess } from '@/lib/modules/portal-modules';
 
@@ -8,10 +7,7 @@ export const dynamic = 'force-dynamic';
 
 /** Enabled modules for the current portal session. */
 export async function GET() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get(EA_PORTAL_COOKIE)?.value;
-  const session = token ? await verifySession(token) : null;
-
+  const session = await requirePortalSession();
   if (!session?.slug) {
     return NextResponse.json({ error: 'Portal authentication required.' }, { status: 401 });
   }

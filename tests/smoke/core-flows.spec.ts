@@ -150,6 +150,21 @@ test('simplifi workspace is reachable', async ({ page }) => {
   await expect(page.getByRole('link', { name: /capture now/i })).toBeVisible();
 });
 
+test('simplifi capture PWA page is reachable', async ({ page }) => {
+  await page.goto('/simplifi/capture');
+  await expect(page.getByText(/never lose an opportunity/i)).toBeVisible();
+});
+
+test('simplifi settings page is reachable', async ({ page }) => {
+  await page.goto('/simplifi/settings');
+  await expect(page.getByRole('heading', { name: /^settings$/i })).toBeVisible();
+});
+
+test('simplifi workspace API requires auth', async ({ page }) => {
+  const res = await page.request.get('/api/simplifi/workspace');
+  expect(res.status()).toBe(401);
+});
+
 test('app alias redirects to workspace', async ({ page }) => {
   await page.goto('/app');
   await expect(page).toHaveURL(/\/simplifi\/workspace/);

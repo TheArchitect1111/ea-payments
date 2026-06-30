@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-import { EA_PORTAL_COOKIE, verifySession } from '@/lib/ea-portal-auth';
+import { requirePortalSessionFromRequest } from '@/lib/auth/resolve-portal-session';
 import {
   listPortalNotifications,
   markPortalNotificationsRead,
@@ -9,16 +8,13 @@ import {
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get(EA_PORTAL_COOKIE)?.value;
-  const session = token ? await verifySession(token) : null;
-
-  if (!session?.slug || !session.email) {
+export async function GET(req: NextRequest) {
+  const session = await requirePortalSessionFromRequest(req);
+  if (!session?.email) {
     return NextResponse.json({ error: 'Portal authentication required.' }, { status: 401 });
   }
 
-  const notifications = listPortalNotifications({
+  const notifications = await listPortalNotifications({
     slug: session.slug,
     email: session.email,
     limit: 30,
@@ -27,21 +23,18 @@ export async function GET() {
   return NextResponse.json({
     ok: true,
     notifications,
-    unreadCount: countUnreadNotifications(session.slug, session.email),
+    unreadCount: await countUnreadNotifications(session.slug, session.email),
   });
 }
 
 export async function POST(req: NextRequest) {
-  const cookieStore = await cookies();
-  const token = cookieStore.get(EA_PORTAL_COOKIE)?.value;
-  const session = token ? await verifySession(token) : null;
-
-  if (!session?.slug || !session.email) {
+  const session = await requirePortalSessionFromRequest(req);
+  if (!session?.email) {
     return NextResponse.json({ error: 'Portal authentication required.' }, { status: 401 });
   }
 
   const body = (await req.json()) as { ids?: string[]; markAll?: boolean };
-  const marked = markPortalNotificationsRead(
+  const marked = await markPortalNotificationsRead(
     session.slug,
     session.email,
     body.markAll ? undefined : body.ids,
@@ -50,6 +43,6 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({
     ok: true,
     marked,
-    unreadCount: countUnreadNotifications(session.slug, session.email),
+    unreadCount: await countUnreadNotifications(session.slug, session.email),
   });
 }

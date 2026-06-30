@@ -7,6 +7,12 @@ import type { MemoryAsset } from '@/lib/memory-assets';
 import type { ActionCenterPayload } from '@/lib/action-center';
 import type { RelationshipCluster } from '@/lib/relationship-hints';
 import { priorityLevelLabel } from '@/lib/priority-engine';
+import {
+  archiveCapture,
+  fetchCaptureIntelligence,
+  recordCaptureOutcome,
+  snoozeCapture,
+} from '@/lib/simplifi-client';
 import EmptyStateGuide from '@/app/components/guided-first-success/EmptyStateGuide';
 import ActionCenterPanel from './ActionCenterPanel';
 import './action-center-panel.css';
@@ -55,12 +61,7 @@ export default function SimplifiWorkspace({
 
   const archiveObject = async (recordId: string) => {
     setActionNote('');
-    const res = await fetch('/api/portal/opportunities/manage', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'archive', recordId }),
-    });
-    const data = (await res.json()) as { ok?: boolean; error?: string };
+    const data = await archiveCapture(recordId);
     if (!data.ok) {
       setActionNote(data.error ?? 'Could not archive.');
       return;
@@ -72,12 +73,7 @@ export default function SimplifiWorkspace({
 
   const recordOutcome = async (recordId: string, outcome: 'won' | 'lost' | 'passed' | 'in_progress') => {
     setActionNote('');
-    const res = await fetch('/api/portal/captures/outcome', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ recordId, outcome }),
-    });
-    const data = (await res.json()) as { ok?: boolean; error?: string; outcomeStatus?: string };
+    const data = await recordCaptureOutcome(recordId, outcome);
     if (!data.ok) {
       setActionNote(data.error ?? 'Could not record outcome.');
       return;
@@ -93,12 +89,7 @@ export default function SimplifiWorkspace({
     const recordId = briefItemId.replace(/^x-/, '');
     if (!recordId) return;
     setActionNote('');
-    const res = await fetch('/api/portal/captures/outcome', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ recordId, action: 'snooze', days: 30 }),
-    });
-    const data = (await res.json()) as { ok?: boolean; error?: string; dueDate?: string };
+    const data = await snoozeCapture(recordId, 30);
     if (!data.ok) {
       setActionNote(data.error ?? 'Could not snooze.');
       return;
@@ -110,15 +101,7 @@ export default function SimplifiWorkspace({
     setIntelligenceLoading(true);
     setIntelligenceNote('');
     try {
-      const res = await fetch(`/api/portal/captures/${recordId}/intelligence`);
-      const data = (await res.json()) as {
-        ok?: boolean;
-        error?: string;
-        intelligence?: {
-          decision: { recommendedPath: string; confidenceScore: number };
-          build: { buildPath: string; overlayConfidence: { overall: string } };
-        };
-      };
+      const data = await fetchCaptureIntelligence(recordId);
       if (!data.ok || !data.intelligence) {
         setIntelligenceNote(data.error ?? 'Blueprint not ready — capture again for intelligence.');
         return;

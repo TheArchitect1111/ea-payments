@@ -1,12 +1,15 @@
 import { listRecentPulseEvents, type PulseEvent } from '@/lib/pulse-bus';
+import {
+  getReadNotificationKeys,
+  markAllNotificationsRead,
+  markNotificationKeysRead,
+} from '@/lib/notification-read-store';
 
 export type PortalNotification = PulseEvent & {
   id: string;
   at: string;
   read: boolean;
 };
-
-const readKeys = new Set<string>();
 
 function notificationKey(slug: string, email: string, at: string, title: string): string {
   return `${slug}:${email}:${at}:${title}`;
@@ -18,12 +21,13 @@ function eventMatchesPortal(event: PulseEvent & { at: string }, slug: string): b
   return false;
 }
 
-export function listPortalNotifications(input: {
+export async function listPortalNotifications(input: {
   slug: string;
   email: string;
   limit?: number;
-}): PortalNotification[] {
+}): Promise<PortalNotification[]> {
   const limit = input.limit ?? 40;
+  const readKeys = await getReadNotificationKeys(input.slug, input.email);
 
   return listRecentPulseEvents(limit * 2)
     .filter((event) => eventMatchesPortal(event, input.slug))
@@ -38,25 +42,25 @@ export function listPortalNotifications(input: {
     });
 }
 
-export function countUnreadNotifications(slug: string, email: string): number {
-  return listPortalNotifications({ slug, email, limit: 50 }).filter((n) => !n.read).length;
+export async function countUnreadNotifications(slug: string, email: string): Promise<number> {
+  const notifications = await listPortalNotifications({ slug, email, limit: 50 });
+  return notifications.filter((n) => !n.read).length;
 }
 
-export function markPortalNotificationsRead(
+export async function markPortalNotificationsRead(
   slug: string,
   email: string,
   ids?: string[],
-): number {
-  const notifications = listPortalNotifications({ slug, email, limit: 50 });
-  let marked = 0;
+): Promise<number> {
+  const notifications = await listPortalNotifications({ slug, email, limit: 50 });
 
-  for (const notification of notifications) {
-    if (ids && !ids.includes(notification.id)) continue;
-    if (!readKeys.has(notification.id)) {
-      readKeys.add(notification.id);
-      marked += 1;
-    }
+  if (!ids) {
+    return markAllNotificationsRead(
+      slug,
+      email,
+      notifications.map((n) => n.id),
+    );
   }
 
-  return marked;
+  return markNotificationKeysRead(slug, email, ids);
 }

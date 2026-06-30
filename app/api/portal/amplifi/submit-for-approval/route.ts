@@ -1,6 +1,5 @@
-import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
-import { EA_PORTAL_COOKIE, verifySession } from '@/lib/ea-portal-auth';
+import { requirePortalSessionFromRequest } from '@/lib/auth/resolve-portal-session';
 import { createContentRequest, getClientByPortalSlug } from '@/lib/airtable';
 import { sendContentRequestConfirmation, sendInternalNotification } from '@/lib/email';
 import { notifyPortal } from '@/lib/portal-notify';
@@ -11,9 +10,7 @@ export const dynamic = 'force-dynamic';
 const SOCIAL_POST_TYPE = 'Social Post';
 
 export async function POST(req: NextRequest) {
-  const cookieStore = await cookies();
-  const token = cookieStore.get(EA_PORTAL_COOKIE)?.value;
-  const session = token ? await verifySession(token) : null;
+  const session = await requirePortalSessionFromRequest(req, { realm: 'simplifi' });
   if (!session) {
     return NextResponse.json({ ok: false, error: 'Sign in to submit posts for approval.' }, { status: 401 });
   }
