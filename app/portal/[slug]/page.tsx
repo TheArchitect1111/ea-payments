@@ -6,7 +6,8 @@ import { getClientByPortalSlug } from '@/lib/airtable';
 import { getPortalCaptures } from '@/lib/capture-records';
 import { getClientSuccessProfile } from '@/lib/client-success';
 import PasswordChangeModal from './PasswordChangeModal';
-import { PortalShell, NAVY, GOLD } from '@/lib/chassis/PortalShell';
+import { PortalShell } from '@/lib/chassis/PortalShell';
+import { NAVY, GOLD } from '@/lib/design-system';
 import EAPortalHubCards from '@/app/portal/components/EAPortalHubCards';
 import PortalHomeExperience from '@/app/portal/components/PortalHomeExperience';
 import { getPortalModuleAccessForSlug } from '@/lib/modules/portal-modules';
@@ -56,9 +57,13 @@ export default async function PortalPage({
 
   return (
     <div className="ep-page">
-      <PortalShell slug={slug} active="home" firstName={firstName} navTabs={access?.navTabs} />
-
-      <main className="ep-main">
+      <PortalShell
+        slug={slug}
+        active="home"
+        firstName={firstName}
+        shellNavGroups={access?.shellNavGroups}
+      >
+      <main className="ep-main ep-main-shell">
         <section className="ep-hero">
           <h1 className="ep-hero-greeting">Welcome in, {firstName}</h1>
           <p className="ep-hero-sub">
@@ -214,6 +219,7 @@ export default async function PortalPage({
           </p>
         </div>
       </main>
+      </PortalShell>
       {!client.passwordChanged && <PasswordChangeModal />}
     </div>
   );

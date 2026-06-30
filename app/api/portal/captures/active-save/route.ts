@@ -8,7 +8,7 @@ import {
   type ActiveSavePurpose,
 } from '@/lib/active-save';
 import { getCaptureByIdentifier, updateActiveSave } from '@/lib/capture-records';
-import { emitPulseEvent } from '@/lib/pulse-bus';
+import { notifyPortal } from '@/lib/portal-notify';
 
 export const dynamic = 'force-dynamic';
 
@@ -64,12 +64,12 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: updated.error }, { status: 500 });
   }
 
-  await emitPulseEvent({
+  await notifyPortal({
     product: 'simplifi',
     type: 'capture.active_saved',
     title: record.title,
     detail: `${option.label} · due ${dueDate}`,
-    href: '/simplifi/workspace',
+    href: `/portal/${session.slug}/simplifi`,
     objectId: recordId,
     tenantId: session.slug,
     priority: 'medium',

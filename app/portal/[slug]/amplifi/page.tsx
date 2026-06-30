@@ -21,10 +21,11 @@ export default async function AmplifiPortalPage({ params }: { params: Promise<{ 
 
   return (
     <div className="ep-page">
-      <PortalShell slug={slug} active="amplifi" firstName={firstName} navTabs={access.navTabs} />
-      <main className="ep-main ep-main-amplifi">
+      <PortalShell slug={slug} active="amplifi" firstName={firstName} shellNavGroups={access.shellNavGroups}>
+      <main className="ep-main ep-main-shell ep-main-amplifi">
         <AmplifiPortalExperience experience={experience} slug={slug} />
       </main>
+      </PortalShell>
     </div>
   );
 }

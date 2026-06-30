@@ -4,7 +4,7 @@ import { EA_PORTAL_COOKIE, verifySession } from '@/lib/ea-portal-auth';
 import { createContentRequest, getClientByPortalSlug } from '@/lib/airtable';
 import { enhanceContentRequest } from '@/lib/ai';
 import { sendContentRequestConfirmation, sendInternalNotification } from '@/lib/email';
-import { emitPulseEvent } from '@/lib/pulse-bus';
+import { notifyPortal } from '@/lib/portal-notify';
 import { EA_PLATFORM_URL } from '@/lib/platform-urls';
 import { fireContentRequestWebhook } from '@/lib/make-webhooks';
 
@@ -70,13 +70,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: result.error ?? 'Request could not be saved.' }, { status: 500 });
   }
 
-  await emitPulseEvent({
+  await notifyPortal({
     product: 'update-hub',
     type: 'update.submitted',
     title: `Update submitted: ${title}`,
     detail: `${client.clientName} — ${requestType}`,
     priority: body.priority === 'Urgent' ? 'high' : 'medium',
-    href: `/admin/content-requests`,
+    href: `/portal/${client.portalSlug}/updates`,
     tenantId: client.portalSlug,
     objectId: result.recordId,
   });

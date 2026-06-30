@@ -1,3 +1,6 @@
+import { routeIntent, type IntentRouteResult } from '@/lib/intent-router';
+import { voiceIntentFromRoute } from '@/lib/intent-voice';
+
 export type VoiceAction =
   | 'navigate'
   | 'analyze'
@@ -17,108 +20,19 @@ export interface VoiceIntent {
   sources: string[];
 }
 
-const NAV_PATTERNS: { pattern: RegExp; href: string; label: string }[] = [
-  { pattern: /master control|dashboard|revenue/i, href: '/admin/master', label: 'Master Control' },
-  { pattern: /resource radar|analyze url|radar/i, href: '/admin/resource-radar', label: 'Resource Radar' },
-  { pattern: /blueprint/i, href: '/admin/blueprints', label: 'Blueprint Library' },
-  { pattern: /simplifi audit|website audit|playwright/i, href: '/admin/simplifi-audit', label: 'Simplifi Audit' },
-  { pattern: /academy|learn ea|training/i, href: '/admin/academy', label: 'Learn EA Academy' },
-  { pattern: /proposal/i, href: '/admin/proposals', label: 'Proposals' },
-  { pattern: /commission|partner network/i, href: '/admin/commissions', label: 'Commissions' },
-  { pattern: /marketplace|partner marketplace/i, href: '/admin/partner-marketplace', label: 'Partner Marketplace' },
-  { pattern: /knowledge graph|organizational memory/i, href: '/admin/knowledge-graph', label: 'Knowledge Graph' },
-  { pattern: /digital twin|twin/i, href: '/admin/digital-twin', label: 'Digital Twin' },
-  { pattern: /assessment|mri|operational/i, href: '/assessment', label: 'Operational MRI' },
-];
-
 export function parseVoiceQuery(input: string): VoiceIntent {
   const query = input.trim();
-  const lower = query.toLowerCase();
 
   if (!query) {
     return {
       action: 'unknown',
       message: 'Try: "Open Resource Radar" or "Analyze https://example.com"',
       confidence: 0,
-      sources: ['EA Voice intent router'],
+      sources: ['EA intent router'],
     };
   }
 
-  if (/^help|what can you/i.test(lower)) {
-    return {
-      action: 'explain',
-      message:
-        'I can navigate Mission Control, run Resource Radar or Simplifi audits, search the Knowledge Graph, start tours, and open the Partner Marketplace. Try "Show knowledge graph" or "Run website audit".',
-      confidence: 95,
-      sources: ['EA Voice Wave 5'],
-    };
-  }
-
-  if (/tour|guide me|onboarding/i.test(lower)) {
-    return {
-      action: 'tour',
-      message: 'Starting Mission Control guided tour.',
-      confidence: 90,
-      sources: ['Guided Tours'],
-    };
-  }
-
-  const urlMatch = query.match(/https?:\/\/[^\s]+/i);
-  if (urlMatch) {
-    if (/audit|simplifi|clarity|website/i.test(lower)) {
-      return {
-        action: 'audit',
-        href: `/admin/simplifi-audit?url=${encodeURIComponent(urlMatch[0])}`,
-        query: urlMatch[0],
-        message: `Running Simplifi audit on ${urlMatch[0]}`,
-        confidence: 92,
-        sources: ['Simplifi Playwright Pipeline'],
-      };
-    }
-    return {
-      action: 'analyze',
-      href: '/admin/resource-radar',
-      query: urlMatch[0],
-      message: `Analyzing ${urlMatch[0]} in Resource Radar.`,
-      confidence: 88,
-      sources: ['Resource Radar + Capture Pipeline'],
-    };
-  }
-
-  if (/capture|opportunity|save signal/i.test(lower)) {
-    return {
-      action: 'capture',
-      message: 'Opening Quick Capture.',
-      confidence: 85,
-      sources: ['EA Capture Engine'],
-    };
-  }
-
-  if (/search graph|find in graph|who uses|aligned with/i.test(lower)) {
-    const term = lower.replace(/search graph|find in graph|who uses|aligned with/gi, '').trim();
-    return {
-      action: 'search_graph',
-      href: '/admin/knowledge-graph',
-      query: term || query,
-      message: term ? `Searching Knowledge Graph for "${term}".` : 'Opening Knowledge Graph.',
-      confidence: 82,
-      sources: ['Knowledge Graph'],
-    };
-  }
-
-  for (const nav of NAV_PATTERNS) {
-    if (nav.pattern.test(lower)) {
-      return {
-        action: 'navigate',
-        href: nav.href,
-        message: `Opening ${nav.label}.`,
-        confidence: 88,
-        sources: ['EA Navigator', nav.label],
-      };
-    }
-  }
-
-  if (/what is ea|opportunity intelligence|north star/i.test(lower)) {
+  if (/what is ea|opportunity intelligence|north star/i.test(query.toLowerCase())) {
     return {
       action: 'explain',
       message:
@@ -128,19 +42,40 @@ export function parseVoiceQuery(input: string): VoiceIntent {
     };
   }
 
+  const route = routeIntent(query);
+  return mapRouteToVoiceIntent(route, query);
+}
+
+function mapRouteToVoiceIntent(route: IntentRouteResult, query: string): VoiceIntent {
+  const intent = voiceIntentFromRoute(route, query);
+
+  if (
+    intent.action === 'navigate' &&
+    intent.href?.includes('/admin/knowledge-graph') &&
+    route.query
+  ) {
+    return { ...intent, action: 'search_graph' };
+  }
+
+  if (intent.action === 'navigate') return intent;
+  if (intent.action === 'audit' || intent.action === 'analyze') return intent;
+  if (intent.action === 'capture' || intent.action === 'tour' || intent.action === 'explain') {
+    return intent;
+  }
+
   return {
-    action: 'search_graph',
-    href: '/admin/knowledge-graph',
-    query,
-    message: `Searching organizational memory for "${query}".`,
-    confidence: 55,
-    sources: ['Knowledge Graph fallback'],
+    action: 'unknown',
+    href: intent.href,
+    query: intent.query,
+    message: intent.message,
+    confidence: intent.confidence,
+    sources: intent.sources,
   };
 }
 
 export async function enhanceVoiceResponse(
   intent: VoiceIntent,
-  query: string
+  query: string,
 ): Promise<VoiceIntent> {
   const apiKey = process.env.ANTHROPIC_API_KEY ?? process.env.CLAUDE_API_KEY;
   if (!apiKey || intent.confidence >= 85) return intent;

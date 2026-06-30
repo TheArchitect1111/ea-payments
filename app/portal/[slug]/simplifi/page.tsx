@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import { getContentRequestsForClient } from '@/lib/airtable';
 import { getPortalCaptures } from '@/lib/capture-records';
-import { PortalShell, NAVY, GOLD } from '@/lib/chassis/PortalShell';
+import { PortalShell } from '@/lib/chassis/PortalShell';
+import { NAVY, GOLD } from '@/lib/design-system';
 import { requirePortalModule } from '@/lib/modules/portal-modules';
 import SimplifiPortalWorkspace from './SimplifiPortalWorkspace';
 import '../ea-portal.css';
@@ -27,9 +28,8 @@ export default async function SimplifiClientPage({
 
   return (
     <div className="ep-page">
-      <PortalShell slug={slug} active="simplifi" firstName={firstName} navTabs={access.navTabs} />
-
-      <main className="ep-main">
+      <PortalShell slug={slug} active="simplifi" firstName={firstName} shellNavGroups={access.shellNavGroups}>
+      <main className="ep-main ep-main-shell">
         <div className="ep-welcome">
           <p className="ep-welcome-label">Simplifi™</p>
           <h1 className="ep-welcome-heading">Your saved opportunities</h1>
@@ -108,6 +108,7 @@ export default async function SimplifiClientPage({
           </p>
         </div>
       </main>
+      </PortalShell>
     </div>
   );
 }

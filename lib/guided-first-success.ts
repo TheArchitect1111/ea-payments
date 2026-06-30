@@ -33,10 +33,7 @@ export interface GuidedPlatformConfig {
   coachPrompts: string[];
 }
 
-const NAVY = '#1B2B4D';
-const GOLD = '#C9A844';
-
-export const EA_BRAND = { NAVY, GOLD };
+export { EA_BRAND } from '@/lib/design-system';
 
 export const GUIDED_PLATFORMS: Record<EAPlatformId, GuidedPlatformConfig> = {
   portal: {

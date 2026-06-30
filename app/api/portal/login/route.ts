@@ -4,7 +4,7 @@ import { ensureDemoClient, isDemoCredentialAttempt } from '@/lib/demo-client';
 import { begin2FA, is2FAEnabled } from '@/lib/ea-auth-2fa';
 import { signSession, makeSessionCookie } from '@/lib/ea-portal-auth';
 import { getClientSuccessProfile } from '@/lib/client-success';
-import { emitPulseEvent } from '@/lib/pulse-bus';
+import { notifyPortal } from '@/lib/portal-notify';
 import { resolvePortalIdentity } from '@/lib/org-provision';
 
 export const dynamic = 'force-dynamic';
@@ -86,7 +86,7 @@ export async function POST(req: NextRequest) {
         const engagement = profile.scores.find((s) => s.id === 'engagement');
         if (engagement) await updateClientEngagementScore(result.recordId, engagement.value);
       }
-      await emitPulseEvent({
+      await notifyPortal({
         product: 'ea-platform',
         type: 'portal.login',
         title: `Portal login — ${client?.clientName ?? result.slug}`,

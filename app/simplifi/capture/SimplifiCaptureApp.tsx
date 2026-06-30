@@ -16,9 +16,7 @@ import {
 } from '@/lib/simplifi-onboarding';
 import { prepareCaptureUpload } from '@/lib/client-image-upload';
 import { useProductGuestSession } from '@/components/auth/useProductGuestSession';
-
-const NAVY = '#1B2B4D';
-const GOLD = '#C9A844';
+import { NAVY, GOLD } from '@/lib/design-system';
 
 interface AnalyzeResponse {
   ok?: boolean;

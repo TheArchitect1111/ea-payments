@@ -7,7 +7,7 @@ import {
   nextActionForOutcome,
   type OutcomeStatus,
 } from '@/lib/outcome-tracking';
-import { emitPulseEvent } from '@/lib/pulse-bus';
+import { notifyPortal } from '@/lib/portal-notify';
 
 export const dynamic = 'force-dynamic';
 
@@ -71,12 +71,12 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: updated.error }, { status: 500 });
   }
 
-  await emitPulseEvent({
+  await notifyPortal({
     product: 'simplifi',
     type: 'capture.outcome_recorded',
     title: `${record.title} → ${label}`,
     detail: nextAction,
-    href: '/simplifi/workspace',
+    href: `/portal/${session.slug}/simplifi`,
     objectId: recordId,
     tenantId: session.slug,
     priority: outcome === 'won' ? 'high' : 'medium',

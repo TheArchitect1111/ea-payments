@@ -1,9 +1,8 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
+import { NAVY as SKIN_NAVY, GOLD as SKIN_GOLD, CREAM as SKIN_CREAM } from '@/lib/design-system';
 
-export const SKIN_NAVY = '#1B2B4D';
-export const SKIN_GOLD = '#C9A844';
-export const SKIN_CREAM = '#FAF8F3';
+export { SKIN_NAVY, SKIN_GOLD, SKIN_CREAM };
 
 export default function SkinFactoryLayout({
   title,

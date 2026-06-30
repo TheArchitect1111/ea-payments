@@ -3,9 +3,6 @@ import Image from 'next/image';
 import type { EAPortalTab } from './PortalShell';
 import type { PortalNavTab } from '@/lib/modules/portal-modules';
 
-const NAVY = '#1B2B4D';
-const GOLD = '#C9A844';
-
 type Props = {
   slug: string;
   active: EAPortalTab;
@@ -62,4 +59,4 @@ export function EAPortalNav({ slug, active, firstName, navTabs }: Props) {
   );
 }
 
-export { NAVY, GOLD };
+export { NAVY, GOLD } from '@/lib/design-system';

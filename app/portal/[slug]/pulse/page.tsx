@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { getClientSuccessProfile } from '@/lib/client-success';
-import { PortalShell, NAVY, GOLD } from '@/lib/chassis/PortalShell';
+import { PortalShell } from '@/lib/chassis/PortalShell';
+import { NAVY, GOLD } from '@/lib/design-system';
 import { requirePortalModule } from '@/lib/modules/portal-modules';
 import OpportunitiesPanel from './OpportunitiesPanel';
 import '../ea-portal.css';
@@ -30,9 +31,8 @@ export default async function PulsePage({
 
   return (
     <div className="ep-page">
-      <PortalShell slug={slug} active="pulse" firstName={firstName} navTabs={access.navTabs} />
-
-      <main className="ep-main">
+      <PortalShell slug={slug} active="pulse" firstName={firstName} shellNavGroups={access.shellNavGroups}>
+      <main className="ep-main ep-main-shell">
         <div className="ep-welcome">
           <p className="ep-welcome-label">Pulse</p>
           <h1 className="ep-welcome-heading">Your Progress, {firstName}</h1>
@@ -95,6 +95,7 @@ export default async function PulsePage({
           </ul>
         </div>
       </main>
+      </PortalShell>
     </div>
   );
 }

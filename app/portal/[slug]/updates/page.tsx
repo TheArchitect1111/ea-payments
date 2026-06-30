@@ -1,5 +1,6 @@
 import { getContentRequestsForClient } from '@/lib/airtable';
-import { PortalShell, NAVY, GOLD } from '@/lib/chassis/PortalShell';
+import { PortalShell } from '@/lib/chassis/PortalShell';
+import { NAVY, GOLD } from '@/lib/design-system';
 import { requirePortalModule } from '@/lib/modules/portal-modules';
 import UpdateHubExperience from '@/app/portal/components/UpdateHubExperience';
 import UpdateHubFeed from '@/app/portal/components/UpdateHubFeed';
@@ -26,9 +27,8 @@ export default async function UpdatesPage({ params }: { params: Promise<{ slug: 
 
   return (
     <div className="ep-page">
-      <PortalShell slug={slug} active="updates" navTabs={access.navTabs} />
-
-      <main className="ep-main">
+      <PortalShell slug={slug} active="updates" shellNavGroups={access.shellNavGroups}>
+      <main className="ep-main ep-main-shell">
         <div className="ep-welcome">
           <p className="ep-welcome-label">Update Hub™</p>
           <h1 className="ep-welcome-heading">Communications & Requests</h1>
@@ -105,6 +105,7 @@ export default async function UpdatesPage({ params }: { params: Promise<{ slug: 
         </div>
         )}
       </main>
+      </PortalShell>
     </div>
   );
 }

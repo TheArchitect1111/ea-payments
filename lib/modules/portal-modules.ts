@@ -7,13 +7,12 @@ import {
   listEntitlementsForOrg,
   syncPackageEntitlements,
 } from '@/lib/entitlements';
-import type { ModuleId } from '@/lib/modules/registry';
+import type { ModuleDefinition, ModuleId, NavGroup } from '@/lib/modules/registry';
 import {
   MODULE_REGISTRY,
   defaultModulesForPackage,
   getModuleDefinition,
   moduleHref,
-  type ModuleDefinition,
 } from '@/lib/modules/registry';
 import { roleAtLeast, normalizeRole, type PlatformRole } from '@/lib/rbac';
 import { EA_PORTAL_COOKIE, verifySession, type EAPortalSession } from '@/lib/ea-portal-auth';
@@ -41,11 +40,34 @@ export type PortalNavTab = {
   href: string;
 };
 
+export type ShellNavItem = {
+  moduleId: ModuleId;
+  label: string;
+  href: string;
+  navGroup: NavGroup;
+};
+
+export type ShellNavGroup = {
+  id: NavGroup;
+  label: string;
+  items: ShellNavItem[];
+};
+
+export const NAV_GROUP_ORDER: NavGroup[] = ['core', 'growth', 'operations', 'platform'];
+
+export const NAV_GROUP_LABELS: Record<NavGroup, string> = {
+  core: 'Core',
+  growth: 'Growth',
+  operations: 'Operations',
+  platform: 'Platform',
+};
+
 export type PortalModuleAccess = {
   orgId: string;
   enabledModuleIds: Set<ModuleId>;
   hubModules: PortalHubModule[];
   navTabs: PortalNavTab[];
+  shellNavGroups: ShellNavGroup[];
 };
 
 
@@ -99,12 +121,19 @@ export async function resolvePortalModuleAccess(input: {
 
   const hubModules: PortalHubModule[] = [];
   const navTabs: PortalNavTab[] = [];
+  const shellItems: ShellNavItem[] = [];
 
   for (const module of MODULE_REGISTRY) {
     if (!enabledModuleIds.has(module.id)) continue;
     if (!roleCanAccessModule(role, module)) continue;
 
     hubModules.push(toHubModule(input.slug, module));
+    shellItems.push({
+      moduleId: module.id,
+      label: module.navLabel ?? module.name,
+      href: moduleHref(input.slug, module),
+      navGroup: module.navGroup,
+    });
 
     if (module.showInNav && module.navTabId && module.navLabel) {
       navTabs.push({
@@ -115,7 +144,13 @@ export async function resolvePortalModuleAccess(input: {
     }
   }
 
-  return { orgId, enabledModuleIds, hubModules, navTabs };
+  const shellNavGroups: ShellNavGroup[] = NAV_GROUP_ORDER.map((groupId) => ({
+    id: groupId,
+    label: NAV_GROUP_LABELS[groupId],
+    items: shellItems.filter((item) => item.navGroup === groupId),
+  })).filter((group) => group.items.length > 0);
+
+  return { orgId, enabledModuleIds, hubModules, navTabs, shellNavGroups };
 }
 
 export async function isModuleEnabled(input: {

@@ -87,6 +87,33 @@ test('portal billing route requires portal login', async ({ page }) => {
   await expect(page).toHaveURL(/\/portal\/login/);
 });
 
+test('mission control API requires admin auth', async ({ page }) => {
+  const res = await page.request.get('/api/mission-control');
+  expect(res.status()).toBe(401);
+});
+
+test('intent API requires admin auth', async ({ page }) => {
+  const res = await page.request.post('/api/intent', {
+    data: { intent: 'open proposals' },
+  });
+  expect(res.status()).toBe(401);
+});
+
+test('design system tokens load globally', async ({ page }) => {
+  await page.goto('/');
+  const tokens = await page.evaluate(() => ({
+    navy: getComputedStyle(document.documentElement).getPropertyValue('--ea-navy').trim(),
+    gold: getComputedStyle(document.documentElement).getPropertyValue('--ea-gold').trim(),
+  }));
+  expect(tokens.navy).toBe('#1b2b4d');
+  expect(tokens.gold).toBe('#c9a844');
+});
+
+test('portal notifications API requires auth', async ({ page }) => {
+  const res = await page.request.get('/api/portal/notifications');
+  expect(res.status()).toBe(401);
+});
+
 test('assessment thank-you contact link works', async ({ page }) => {
   await page.goto('/assessment/thank-you');
   await expect(page.getByRole('link', { name: /contact our team/i })).toHaveAttribute(

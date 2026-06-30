@@ -3,10 +3,8 @@
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import { ADMIN_COMMANDS, type CommandItem } from '@/lib/admin-command-registry';
+import { NAVY, GOLD } from '@/lib/design-system';
 import { startGuidedTour } from './GuidedTour';
-
-const NAVY = '#1B2B4D';
-const GOLD = '#C9A844';
 
 type Props = {
   onOpenNavigator: () => void;
@@ -63,7 +61,50 @@ export default function UniversalCommandBar({ onOpenNavigator }: Props) {
         router.push(cmd.href);
       }
     },
-    [onOpenNavigator, router]
+    [onOpenNavigator, router],
+  );
+
+  const routeNaturalIntent = useCallback(
+    async (text: string) => {
+      const q = text.trim();
+      if (!q) return;
+
+      if (filtered.length === 1) {
+        runCommand(filtered[0]);
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/intent', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ intent: q }),
+        });
+        const data = (await res.json()) as {
+          voice?: { action: string; href?: string };
+        };
+
+        setOpen(false);
+        setQuery('');
+
+        if (!data.voice) return;
+
+        if (data.voice.action === 'tour') {
+          startGuidedTour();
+          return;
+        }
+        if (data.voice.action === 'capture') {
+          setCaptureOpen(true);
+          return;
+        }
+        if (data.voice.href) {
+          router.push(data.voice.href);
+        }
+      } catch {
+        /* ignore */
+      }
+    },
+    [filtered, runCommand, router],
   );
 
   useEffect(() => {
@@ -192,7 +233,13 @@ export default function UniversalCommandBar({ onOpenNavigator }: Props) {
               autoFocus
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search commands… (Master Control, captures, navigate)"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  void routeNaturalIntent(query);
+                }
+              }}
+              placeholder="Search commands or type an intent… (e.g. Create proposal for Bob)"
               className="w-full px-4 py-3 text-sm border-b border-neutral-200 outline-none"
             />
             <ul className="max-h-72 overflow-y-auto py-2">
