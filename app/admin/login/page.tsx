@@ -44,7 +44,7 @@ export default async function AdminLoginPage({
           <MagicLinkForm
             realm="admin"
             next={nextPath}
-            title="Admin sign in"
+            showTitle={false}
             subtitle="Enter your admin email. We will send a one-tap login link."
             buttonLabel="Email me a login link"
           />

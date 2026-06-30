@@ -9,6 +9,8 @@ type Props = {
   title?: string;
   subtitle?: string;
   buttonLabel?: string;
+  /** Set false when the page header already shows the title (avoids duplicate headings). */
+  showTitle?: boolean;
 };
 
 export default function MagicLinkForm({
@@ -17,6 +19,7 @@ export default function MagicLinkForm({
   title = 'Sign in with email',
   subtitle = 'Enter your email and we will send you a one-tap login link. No password needed.',
   buttonLabel = 'Email me a login link',
+  showTitle = true,
 }: Props) {
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
@@ -53,7 +56,9 @@ export default function MagicLinkForm({
   if (sent) {
     return (
       <div className="pl-sent" role="status">
-        <h3 className="pl-title" style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>{title}</h3>
+        {showTitle ? (
+          <h3 className="pl-title" style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>{title}</h3>
+        ) : null}
         <p className="pl-success">Check your email — your login link is on the way.</p>
         <p className="pl-lede">Open the email on this device and tap <strong>Sign in</strong>. The link expires in 15 minutes.</p>
         <button type="button" className="pl-btn pl-btn-secondary" onClick={() => setSent(false)}>
@@ -65,7 +70,9 @@ export default function MagicLinkForm({
 
   return (
     <form onSubmit={handleSubmit} className="pl-form pl-magic-form">
-      <h3 className="pl-title" style={{ fontSize: '1.25rem', marginBottom: '0.35rem' }}>{title}</h3>
+      {showTitle ? (
+        <h3 className="pl-title" style={{ fontSize: '1.25rem', marginBottom: '0.35rem' }}>{title}</h3>
+      ) : null}
       <p className="pl-lede" style={{ marginBottom: '1rem' }}>{subtitle}</p>
 
       <label className="pl-label" htmlFor="magic-email">

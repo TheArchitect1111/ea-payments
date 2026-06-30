@@ -4,10 +4,10 @@ test('homepage hero and primary CTA render', async ({ page }) => {
   await page.goto('/');
   await expect(
     page.getByRole('heading', {
-      name: /running an organization/i,
+      name: /every coach starts with the same dream/i,
     }),
   ).toBeVisible();
-  await expect(page.getByRole('link', { name: /operational mri/i }).first()).toBeVisible();
+  await expect(page.getByRole('link', { name: /imagine yours/i }).first()).toBeVisible();
 });
 
 test('consider selena demo story is reachable', async ({ page }) => {
@@ -24,8 +24,17 @@ test('assessment page is reachable', async ({ page }) => {
 test('admin dashboard route prompts auth', async ({ page }) => {
   await page.goto('/admin/dashboard');
   await expect(page).toHaveURL(/\/admin\/login/);
-  await expect(page.getByRole('heading', { name: /admin sign in/i })).toBeVisible();
-  await expect(page.getByRole('button', { name: /sign in/i }).first()).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: /admin sign in/i })).toBeVisible();
+  await expect(page.getByRole('button', { name: /email me a login link/i })).toBeVisible();
+});
+
+test('experience lab journey is reachable', async ({ page }) => {
+  await page.goto('/experience-lab');
+  await expect(page.getByText(/every relationship begins with one conversation/i).first()).toBeVisible();
+  const finaleCta = page.getByRole('link', { name: /consider the possibilities/i });
+  await finaleCta.scrollIntoViewIfNeeded();
+  await expect(finaleCta).toBeVisible();
+  await expect(finaleCta).toHaveAttribute('href', '/possibilities');
 });
 
 test('unsubscribe page is reachable', async ({ page }) => {
