@@ -1,6 +1,5 @@
-import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
-import { EA_PORTAL_COOKIE, verifySession } from '@/lib/ea-portal-auth';
+import { requirePortalSessionFromRequest } from '@/lib/auth/resolve-portal-session';
 import { createEnhancementRequest, getClientByPortalSlug } from '@/lib/airtable';
 import { assessEnhancementRequest } from '@/lib/ai';
 import { sendEnhancementRequestConfirmation, sendInternalNotification } from '@/lib/email';
@@ -8,9 +7,7 @@ import { sendEnhancementRequestConfirmation, sendInternalNotification } from '@/
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
-  const cookieStore = await cookies();
-  const token = cookieStore.get(EA_PORTAL_COOKIE)?.value;
-  const session = token ? await verifySession(token) : null;
+  const session = await requirePortalSessionFromRequest(req);
   if (!session) {
     return NextResponse.json({ error: 'Please log in again.' }, { status: 401 });
   }

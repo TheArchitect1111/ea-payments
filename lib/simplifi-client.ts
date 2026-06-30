@@ -95,3 +95,34 @@ export async function fetchSimplifiWorkspace(): Promise<
 > {
   return simplifiFetch('/api/simplifi/workspace');
 }
+
+export async function fetchOrbContext(pathname = '/simplifi/capture'): Promise<
+  SimplifiApiResult<{
+    orb: Record<string, unknown>;
+    session: Record<string, unknown> | null;
+    authenticated: boolean;
+  }>
+> {
+  return simplifiFetch(`/api/simplifi/context?pathname=${encodeURIComponent(pathname)}`);
+}
+
+export async function fetchWhoami(): Promise<
+  SimplifiApiResult<{ authenticated: boolean; session?: Record<string, unknown> }>
+> {
+  return simplifiFetch('/api/auth/whoami');
+}
+
+export async function fetchCaptureStatus(captureId: string): Promise<SimplifiApiResult> {
+  return simplifiFetch(`/api/capture/${encodeURIComponent(captureId)}/status`);
+}
+
+export async function fetchExtensionBootstrap(): Promise<
+  SimplifiApiResult<{
+    apiUrl: string;
+    apiKey: string;
+    portalSlug: string;
+    notifyEmail?: string;
+  }>
+> {
+  return simplifiFetch('/api/extension/bootstrap');
+}

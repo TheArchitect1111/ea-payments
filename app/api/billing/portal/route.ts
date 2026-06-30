@@ -1,8 +1,6 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-import { EA_PORTAL_COOKIE, verifySession } from '@/lib/ea-portal-auth';
-import { getStripe } from '@/lib/stripe';
-import { findOrganizationByPortalSlug } from '@/lib/organizations';
+import { requirePortalSession } from '@/lib/auth/resolve-portal-session';
+import { getStripe } from '@/lib/stripe';import { findOrganizationByPortalSlug } from '@/lib/organizations';
 import { syntheticOrgId } from '@/lib/platform-store';
 
 export const dynamic = 'force-dynamic';
@@ -13,14 +11,10 @@ export async function POST() {
     return NextResponse.json({ error: 'Billing is not configured.' }, { status: 503 });
   }
 
-  const cookieStore = await cookies();
-  const token = cookieStore.get(EA_PORTAL_COOKIE)?.value;
-  const session = token ? await verifySession(token) : null;
-
+  const session = await requirePortalSession();
   if (!session?.slug) {
     return NextResponse.json({ error: 'Portal authentication required.' }, { status: 401 });
   }
-
   const org = await findOrganizationByPortalSlug(session.slug);
   const orgId = org?.id ?? session.orgId ?? syntheticOrgId(session.slug);
   const stripeCustomerId = org?.stripeCustomerId;

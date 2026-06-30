@@ -165,6 +165,14 @@ test('simplifi workspace API requires auth', async ({ page }) => {
   expect(res.status()).toBe(401);
 });
 
+test('simplifi orb context API is public', async ({ page }) => {
+  const res = await page.request.get('/api/simplifi/context?pathname=/simplifi/capture');
+  expect(res.status()).toBe(200);
+  const data = (await res.json()) as { ok?: boolean; orb?: { product?: string } };
+  expect(data.ok).toBe(true);
+  expect(data.orb?.product).toBe('simplifi');
+});
+
 test('app alias redirects to workspace', async ({ page }) => {
   await page.goto('/app');
   await expect(page).toHaveURL(/\/simplifi\/workspace/);
