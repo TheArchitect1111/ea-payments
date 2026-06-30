@@ -63,9 +63,15 @@ export default async function UpdatesPage({ params }: { params: Promise<{ slug: 
             Submit Update Request
           </a>
           <a
-            href={`/portal/${slug}/updates/enhancement`}
+            href="/amplifi"
             className="ep-pulse-cta"
             style={{ backgroundColor: NAVY, color: GOLD }}
+          >
+            Amplifi — Social Post
+          </a>
+          <a
+            href={`/portal/${slug}/updates/enhancement`}
+            className="ep-pulse-cta ep-pulse-cta-outline"
           >
             Request Enhancement
           </a>

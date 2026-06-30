@@ -12,6 +12,14 @@ import { PUBLIC_LINKS } from '@/lib/marketing-urls';
 
 const DEMO_STORY_URL = `${PUBLIC_LINKS.platform.replace(/\/$/, '')}/consider/${DEMO_CONSIDER_SLUG}`;
 
+type CaptureOption = {
+  id: string;
+  title: string;
+  shareUrl?: string;
+  businessName?: string;
+  magnifiUrl?: string;
+};
+
 export default function AmplifiPostApp({
   loggedIn,
   slug,
@@ -31,7 +39,11 @@ export default function AmplifiPostApp({
   const [quickWin, setQuickWin] = useState('');
   const [draft, setDraft] = useState<AmplifiSocialDraft | null>(null);
   const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState('');
+  const [success, setSuccess] = useState('');
+  const [captures, setCaptures] = useState<CaptureOption[]>([]);
+  const [selectedCaptureId, setSelectedCaptureId] = useState(captureId ?? '');
 
   const generateDraft = useCallback(
     (input?: { businessName: string; storyUrl: string; headline?: string; quickWin?: string }) => {
@@ -54,6 +66,16 @@ export default function AmplifiPostApp({
     },
     [businessName, storyUrl, headline, quickWin],
   );
+
+  useEffect(() => {
+    if (!loggedIn) return;
+    fetch('/api/portal/captures')
+      .then((res) => res.json())
+      .then((data: { ok?: boolean; captures?: CaptureOption[] }) => {
+        if (data.ok && data.captures) setCaptures(data.captures);
+      })
+      .catch(() => {});
+  }, [loggedIn]);
 
   useEffect(() => {
     if (!captureId || !loggedIn) return;
@@ -102,7 +124,68 @@ export default function AmplifiPostApp({
     });
   };
 
+  const pickCapture = (id: string) => {
+    setSelectedCaptureId(id);
+    const capture = captures.find((c) => c.id === id);
+    if (!capture) return;
+    setBusinessName(capture.businessName ?? capture.title);
+    const rawUrl = capture.shareUrl ?? capture.magnifiUrl ?? '';
+    const fullUrl = rawUrl.startsWith('/')
+      ? `${PUBLIC_LINKS.platform.replace(/\/$/, '')}${rawUrl}`
+      : rawUrl;
+    setStoryUrl(fullUrl);
+    setLoading(true);
+    fetch(`/api/portal/captures/${encodeURIComponent(id)}/story`)
+      .then((res) => res.json())
+      .then((data: { ok?: boolean; draft?: AmplifiSocialDraft }) => {
+        if (data.ok && data.draft) setDraft(data.draft);
+        else generateDraft({ businessName: capture.businessName ?? capture.title, storyUrl: fullUrl });
+      })
+      .catch(() => generateDraft({ businessName: capture.businessName ?? capture.title, storyUrl: fullUrl }))
+      .finally(() => setLoading(false));
+  };
+
+  const submitForApproval = async () => {
+    if (!loggedIn) {
+      setMessage('Sign in to store posts for approval.');
+      return;
+    }
+    if (!draft) {
+      setMessage('Generate posts first.');
+      return;
+    }
+    setSubmitting(true);
+    setMessage('');
+    setSuccess('');
+    try {
+      const res = await fetch('/api/portal/amplifi/submit-for-approval', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: businessName.trim(),
+          linkedIn: draft.linkedIn,
+          caption: draft.shortCaption,
+          storyUrl: storyUrl.trim(),
+          captureId: selectedCaptureId || captureId,
+        }),
+      });
+      const data = (await res.json()) as { ok?: boolean; error?: string; updatesUrl?: string; requestId?: string };
+      if (!res.ok || !data.ok) {
+        setMessage(data.error ?? 'Could not submit for approval.');
+        return;
+      }
+      setSuccess(
+        `Submitted for approval (ID: ${data.requestId ?? 'saved'}). Your team will review in Update Hub.`,
+      );
+    } catch {
+      setMessage('Network error. Try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   const portalAmplifi = slug ? `/portal/${slug}/amplifi` : null;
+  const updatesUrl = slug ? `/portal/${slug}/updates` : '/portal/login?next=%2Famplifi';
 
   return (
     <div className="af-app">
@@ -127,13 +210,44 @@ export default function AmplifiPostApp({
       <main className="af-main">
         <section className="af-hero">
           <p className="af-kicker">Social posting</p>
-          <h1 className="af-title">Write it once. Post everywhere.</h1>
+          <h1 className="af-title">Search. Create. Store for approval.</h1>
           <p className="af-lede">
-            Amplifi turns your Magnifi story into ready-to-post copy for LinkedIn, X, Facebook, and more.
+            Pick material from Simplifi captures, generate social copy, and submit to Update Hub for team approval
+            before publishing.
           </p>
         </section>
 
+        {loggedIn && captures.length > 0 ? (
+          <section className="af-card">
+            <label className="af-label" htmlFor="af-capture">
+              1. Search material (your captures)
+            </label>
+            <select
+              id="af-capture"
+              className="af-input"
+              value={selectedCaptureId}
+              onChange={(e) => pickCapture(e.target.value)}
+            >
+              <option value="">Select a capture…</option>
+              {captures.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.title}
+                  {c.businessName ? ` — ${c.businessName}` : ''}
+                </option>
+              ))}
+            </select>
+            <p className="af-note">
+              Or{' '}
+              <Link href="/capture" className="underline font-bold text-[#1B2B4D]">
+                capture new material
+              </Link>{' '}
+              with Simplifi first.
+            </p>
+          </section>
+        ) : null}
+
         <section className="af-card">
+          <p className="af-label">2. Create post</p>
           <label className="af-label" htmlFor="af-name">
             Post title
           </label>
@@ -179,6 +293,7 @@ export default function AmplifiPostApp({
           />
 
           {message ? <p className="af-error">{message}</p> : null}
+          {success ? <p className="af-success">{success}</p> : null}
 
           <div className="af-actions">
             <button
@@ -194,24 +309,41 @@ export default function AmplifiPostApp({
             </button>
           </div>
 
-          <p className="af-note">
-            Need a story first?{' '}
-            <Link href="/capture" className="underline font-bold text-[#1B2B4D]">
-              Capture with Simplifi
-            </Link>{' '}
-            → Magnifi builds the story → return here to post.
-          </p>
+          {!loggedIn ? (
+            <p className="af-note">
+              <Link href="/portal/login?next=%2Famplifi" className="underline font-bold text-[#1B2B4D]">
+                Sign in
+              </Link>{' '}
+              to search captures and store posts for approval.
+            </p>
+          ) : null}
         </section>
 
         {draft ? (
           <section className="af-card">
             <p className="af-kicker" style={{ color: '#c9a844' }}>
-              Ready to post
+              3. Review &amp; store
             </p>
             <StoryDraftPanel draft={draft} />
 
-            <p className="af-label" style={{ marginTop: 16 }}>
-              Open platform
+            <div className="af-actions" style={{ marginTop: 16 }}>
+              <button
+                type="button"
+                className="af-btn af-btn-secondary"
+                disabled={submitting || !loggedIn}
+                onClick={() => void submitForApproval()}
+              >
+                {submitting ? 'Submitting…' : 'Submit for approval'}
+              </button>
+              {loggedIn ? (
+                <Link href={updatesUrl} className="af-btn af-btn-outline">
+                  View Update Hub
+                </Link>
+              ) : null}
+            </div>
+
+            <p className="af-label" style={{ marginTop: 20 }}>
+              Or post now (skip approval)
             </p>
             <div className="af-platforms">
               <button
@@ -236,10 +368,6 @@ export default function AmplifiPostApp({
                 Facebook
               </button>
             </div>
-            <p className="af-note">
-              LinkedIn: copy the LinkedIn tab text, then paste in the compose window. X and Facebook open with your
-              caption pre-filled where the platform allows.
-            </p>
           </section>
         ) : null}
       </main>

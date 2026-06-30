@@ -21,6 +21,7 @@ const REQUEST_TYPES = [
   'Update Contact Information',
   'Update Business Hours',
   'General Website Update',
+  'Social Post',
 ];
 
 export default function NewContentRequestForm({ slug }: { slug: string }) {

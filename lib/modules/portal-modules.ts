@@ -123,23 +123,23 @@ export async function resolvePortalModuleAccess(input: {
   const navTabs: PortalNavTab[] = [];
   const shellItems: ShellNavItem[] = [];
 
-  for (const module of MODULE_REGISTRY) {
-    if (!enabledModuleIds.has(module.id)) continue;
-    if (!roleCanAccessModule(role, module)) continue;
+  for (const modDef of MODULE_REGISTRY) {
+    if (!enabledModuleIds.has(modDef.id)) continue;
+    if (!roleCanAccessModule(role, modDef)) continue;
 
-    hubModules.push(toHubModule(input.slug, module));
+    hubModules.push(toHubModule(input.slug, modDef));
     shellItems.push({
-      moduleId: module.id,
-      label: module.navLabel ?? module.name,
-      href: moduleHref(input.slug, module),
-      navGroup: module.navGroup,
+      moduleId: modDef.id,
+      label: modDef.navLabel ?? modDef.name,
+      href: moduleHref(input.slug, modDef),
+      navGroup: modDef.navGroup,
     });
 
-    if (module.showInNav && module.navTabId && module.navLabel) {
+    if (modDef.showInNav && modDef.navTabId && modDef.navLabel) {
       navTabs.push({
-        id: module.navTabId,
-        label: module.navLabel,
-        href: moduleHref(input.slug, module),
+        id: modDef.navTabId,
+        label: modDef.navLabel,
+        href: moduleHref(input.slug, modDef),
       });
     }
   }
@@ -163,10 +163,10 @@ export async function isModuleEnabled(input: {
   const enabled = await resolveEnabledModuleIds(input);
   if (!enabled.has(input.moduleId)) return false;
 
-  const module = getModuleDefinition(input.moduleId);
-  if (!module) return false;
+  const modDef = getModuleDefinition(input.moduleId);
+  if (!modDef) return false;
 
-  return roleCanAccessModule(normalizeRole(input.role ?? 'owner'), module);
+  return roleCanAccessModule(normalizeRole(input.role ?? 'owner'), modDef);
 }
 
 /** Ensure package entitlements are persisted when org tables exist. */
