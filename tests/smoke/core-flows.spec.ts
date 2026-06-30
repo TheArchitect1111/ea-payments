@@ -99,6 +99,25 @@ test('intent API requires admin auth', async ({ page }) => {
   expect(res.status()).toBe(401);
 });
 
+test('whoami API returns 401 when unauthenticated', async ({ page }) => {
+  const res = await page.request.get('/api/auth/whoami');
+  expect(res.status()).toBe(401);
+  const data = (await res.json()) as { authenticated?: boolean };
+  expect(data.authenticated).toBe(false);
+});
+
+test('auth session exchange rejects missing token', async ({ page }) => {
+  const res = await page.request.post('/api/auth/session', { data: {} });
+  expect(res.status()).toBe(400);
+});
+
+test('auth session exchange rejects invalid magic-link token', async ({ page }) => {
+  const res = await page.request.post('/api/auth/session', {
+    data: { token: 'not-a-real-token.signature' },
+  });
+  expect([401, 500]).toContain(res.status());
+});
+
 test('design system tokens load globally', async ({ page }) => {
   await page.goto('/');
   const tokens = await page.evaluate(() => ({

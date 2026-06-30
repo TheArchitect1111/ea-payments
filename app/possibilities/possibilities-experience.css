@@ -70,6 +70,26 @@
   );
 }
 
+@media (max-width: 640px) {
+  .px-scrim,
+  .px-scrim-deep {
+    background: linear-gradient(
+      180deg,
+      rgba(15, 17, 21, 0.58) 0%,
+      rgba(15, 17, 21, 0.76) 42%,
+      rgba(15, 17, 21, 0.94) 100%
+    );
+  }
+
+  .px-hero,
+  .px-lifestyle,
+  .px-control,
+  .px-industry,
+  .px-close {
+    background: #0f1115;
+  }
+}
+
 /* Photo with graceful fallback */
 .px-photo {
   position: absolute;
