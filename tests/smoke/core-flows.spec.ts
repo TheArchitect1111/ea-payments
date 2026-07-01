@@ -18,7 +18,8 @@ test('consider selena demo story is reachable', async ({ page }) => {
 
 test('assessment page is reachable', async ({ page }) => {
   await page.goto('/assessment');
-  await expect(page.getByRole('button', { name: /submit my assessment/i })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /ctp intake/i })).toBeVisible();
+  await expect(page.getByRole('button', { name: /submit my ctp intake/i })).toBeVisible();
 });
 
 test('admin dashboard route prompts auth', async ({ page }) => {
