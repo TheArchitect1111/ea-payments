@@ -1,5 +1,6 @@
 import type { ExpoConfig, ConfigContext } from 'expo/config';
-import { CANONICAL_API_BASE_URL } from './src/constants/realm-login-copy';
+
+const CANONICAL_API_BASE_URL = 'https://ea-payments.vercel.app';
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
