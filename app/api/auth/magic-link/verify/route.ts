@@ -33,6 +33,12 @@ export async function GET(req: NextRequest) {
 
   result.runSideEffects();
 
+  if (result.next.startsWith('simplifi://')) {
+    const deep = new URL(result.next);
+    deep.searchParams.set('token', result.token);
+    return NextResponse.redirect(deep.toString(), 303);
+  }
+
   const res = NextResponse.redirect(new URL(result.next, origin), 303);
   res.cookies.set(result.cookie);
   return res;

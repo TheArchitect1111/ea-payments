@@ -1,0 +1,28 @@
+{
+  "expo": {
+    "name": "Simplifi",
+    "slug": "simplifi-mobile",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "scheme": "simplifi",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "backgroundColor": "#1B2B4D"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "online.efficiencyarchitects.simplifi"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#1B2B4D"
+      },
+      "package": "online.efficiencyarchitects.simplifi"
+    },
+    "plugins": ["expo-router", "expo-secure-store"],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
