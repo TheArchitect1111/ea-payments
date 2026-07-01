@@ -152,3 +152,41 @@ export async function registerPushToken(token: string, pushToken: string) {
     body: JSON.stringify({ token: pushToken, platform: 'expo' }),
   });
 }
+
+export async function activeSaveCapture(
+  token: string,
+  body: { recordId: string; purpose: string; reason?: string; dueDate?: string },
+) {
+  return apiFetch<{ savePurpose?: string; dueDate?: string; nextAction?: string }>(
+    '/api/portal/captures/active-save',
+    { method: 'POST', token, body: JSON.stringify(body) },
+  );
+}
+
+export async function recordCaptureOutcome(
+  token: string,
+  recordId: string,
+  outcome: 'won' | 'lost' | 'passed' | 'in_progress',
+) {
+  return apiFetch<{ outcomeStatus?: string; nextAction?: string }>('/api/portal/captures/outcome', {
+    method: 'POST',
+    token,
+    body: JSON.stringify({ recordId, outcome }),
+  });
+}
+
+export async function snoozeCapture(token: string, recordId: string, days = 30) {
+  return apiFetch<{ dueDate?: string }>('/api/portal/captures/outcome', {
+    method: 'POST',
+    token,
+    body: JSON.stringify({ recordId, action: 'snooze', days }),
+  });
+}
+
+export async function archiveCapture(token: string, recordId: string) {
+  return apiFetch('/api/portal/opportunities/manage', {
+    method: 'POST',
+    token,
+    body: JSON.stringify({ action: 'archive', recordId }),
+  });
+}

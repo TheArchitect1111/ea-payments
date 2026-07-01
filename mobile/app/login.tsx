@@ -62,10 +62,13 @@ export default function LoginScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScrollView contentContainerStyle={styles.scroll}>
-        <Text style={styles.kicker}>SIMPLIFI™</Text>
-        <Text style={styles.title}>Never lose an opportunity again.</Text>
-        <Text style={styles.lede}>Sign in with the same email you use on the web app.</Text>
+        <Text style={styles.kicker}>Never Lose An Opportunity Again™</Text>
+        <Text style={styles.title}>Welcome to Simplifi™</Text>
+        <Text style={styles.lede}>
+          Enter your email on file. We will send a one-tap login link — no password needed.
+        </Text>
 
+        <Text style={styles.cardTitle}>Simplifi sign in</Text>
         <Text style={styles.label}>Email</Text>
         <TextInput
           style={styles.input}
@@ -77,7 +80,7 @@ export default function LoginScreen() {
           placeholderTextColor={colors.muted}
         />
         <Pressable style={styles.btnPrimary} onPress={() => void sendLink()} disabled={busy || !email.trim()}>
-          <Text style={styles.btnPrimaryText}>{busy ? 'Sending…' : 'Send magic link'}</Text>
+          <Text style={styles.btnPrimaryText}>{busy ? 'Sending…' : 'Email me a login link'}</Text>
         </Pressable>
 
         <Text style={[styles.label, { marginTop: 28 }]}>Paste login link or token</Text>
@@ -105,7 +108,8 @@ const styles = StyleSheet.create({
   scroll: { padding: 24, paddingTop: 72 },
   kicker: { color: colors.gold, fontWeight: '800', letterSpacing: 2, fontSize: 12 },
   title: { color: colors.white, fontSize: 28, fontWeight: '900', marginTop: 12 },
-  lede: { color: '#CBD5E1', fontSize: 15, lineHeight: 22, marginTop: 10, marginBottom: 24 },
+  lede: { color: '#CBD5E1', fontSize: 15, lineHeight: 22, marginTop: 10, marginBottom: 20 },
+  cardTitle: { color: colors.white, fontSize: 18, fontWeight: '800', marginBottom: 12 },
   label: { color: colors.gold, fontSize: 11, fontWeight: '800', letterSpacing: 1, marginBottom: 8 },
   input: {
     backgroundColor: colors.white,

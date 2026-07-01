@@ -61,3 +61,20 @@ npx expo run:android
 ```
 
 Transcripts append to the notes field and are sent with the next capture.
+
+## Workspace actions
+
+Tap an opportunity → **Actions** to record outcomes (won/lost/passed/in progress), snooze, set active-save purpose, or archive. Uses the same portal capture APIs as the web workspace.
+
+## EAS builds (TestFlight / internal)
+
+```bash
+cd mobile
+npm install -g eas-cli   # once
+eas login
+eas build:configure        # links project if needed
+npm run build:dev:ios      # dev client with native modules (voice, push)
+npm run build:preview      # internal distribution
+```
+
+Profiles live in `eas.json`: `development`, `preview`, `production`. Override `EXPO_PUBLIC_API_BASE_URL` per profile when pointing at a Vercel preview.

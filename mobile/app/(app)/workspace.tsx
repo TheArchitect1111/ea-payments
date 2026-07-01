@@ -2,15 +2,16 @@ import { useCallback, useEffect, useState } from 'react';
 import { FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { useAuth } from '../../src/auth/AuthContext';
 import { fetchWorkspace } from '../../src/api/client';
+import { WorkspaceObjectCard, type WorkspaceObject } from '../../src/components/WorkspaceObjectCard';
 import { colors } from '../../src/theme';
-
-type ObjectRow = { id: string; title: string; status?: string; nextAction?: string };
 
 export default function WorkspaceScreen() {
   const { token } = useAuth();
-  const [rows, setRows] = useState<ObjectRow[]>([]);
+  const [rows, setRows] = useState<WorkspaceObject[]>([]);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState('');
+  const [banner, setBanner] = useState('');
 
   const load = useCallback(async () => {
     if (!token) return;
@@ -21,7 +22,7 @@ export default function WorkspaceScreen() {
       return;
     }
     const workspace = (data.workspace as Record<string, unknown> | undefined) ?? {};
-    const active = (workspace.activeObjects as ObjectRow[] | undefined) ?? [];
+    const active = (workspace.activeObjects as WorkspaceObject[] | undefined) ?? [];
     setRows(active);
   }, [token]);
 
@@ -29,8 +30,19 @@ export default function WorkspaceScreen() {
     void load();
   }, [load]);
 
+  const handleUpdated = (recordId: string, message: string, remove?: boolean) => {
+    setBanner(message);
+    if (remove) {
+      setRows((prev) => prev.filter((row) => row.id !== recordId));
+      setExpandedId(null);
+    } else {
+      void load();
+    }
+  };
+
   return (
     <View style={styles.root}>
+      {banner ? <Text style={styles.banner}>{banner}</Text> : null}
       <FlatList
         data={rows}
         keyExtractor={(item) => item.id}
@@ -48,11 +60,13 @@ export default function WorkspaceScreen() {
           <Text style={styles.empty}>{error || 'No active opportunities yet. Capture something first.'}</Text>
         }
         renderItem={({ item }) => (
-          <View style={styles.card}>
-            <Text style={styles.title}>{item.title}</Text>
-            {item.nextAction ? <Text style={styles.detail}>{item.nextAction}</Text> : null}
-            {item.status ? <Text style={styles.meta}>{item.status}</Text> : null}
-          </View>
+          <WorkspaceObjectCard
+            token={token!}
+            item={item}
+            expanded={expandedId === item.id}
+            onToggle={() => setExpandedId((prev) => (prev === item.id ? null : item.id))}
+            onUpdated={(message, remove) => handleUpdated(item.id, message, remove)}
+          />
         )}
         ListFooterComponent={
           <Pressable style={styles.refreshBtn} onPress={() => void load()}>
@@ -66,19 +80,16 @@ export default function WorkspaceScreen() {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.cream },
-  empty: { color: colors.muted, textAlign: 'center', padding: 32, lineHeight: 22 },
-  card: {
+  banner: {
     marginHorizontal: 16,
     marginTop: 12,
-    backgroundColor: colors.white,
-    borderRadius: 14,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: colors.border,
+    padding: 12,
+    backgroundColor: '#DCFCE7',
+    borderRadius: 10,
+    color: '#166534',
+    fontWeight: '600',
   },
-  title: { color: colors.navy, fontWeight: '800', fontSize: 16 },
-  detail: { color: colors.muted, marginTop: 6, lineHeight: 20 },
-  meta: { color: colors.gold, marginTop: 8, fontSize: 12, fontWeight: '700' },
+  empty: { color: colors.muted, textAlign: 'center', padding: 32, lineHeight: 22 },
   refreshBtn: { alignItems: 'center', padding: 24 },
   refreshText: { color: colors.navy, fontWeight: '700' },
 });
