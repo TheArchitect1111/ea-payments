@@ -29,14 +29,14 @@ export function resolveOrbDestinations(pathname: string): OrbDestination[] {
       label: 'Capture',
       description: 'Save a URL or photo in seconds',
       kind: 'capture',
-      href: slug ? `${portal}/simplifi` : '/simplifi/capture',
+      href: '/simplifi/capture',
     },
     {
       id: 'workspace',
       label: 'Workspace',
       description: 'Review opportunities and next steps',
       kind: 'navigate',
-      href: '/simplifi/workspace',
+      href: slug ? `${portal}/simplifi` : '/simplifi/workspace',
     },
     {
       id: 'pulse',

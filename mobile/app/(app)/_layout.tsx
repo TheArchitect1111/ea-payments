@@ -1,4 +1,5 @@
 import { Tabs, Redirect } from 'expo-router';
+import { ActivityIndicator, View } from 'react-native';
 import { useAuth } from '../../src/auth/AuthContext';
 import { OfflineCaptureProvider } from '../../src/offline/OfflineCaptureContext';
 import { useRegisterPushNotifications } from '../../src/push/notifications';
@@ -8,7 +9,15 @@ export default function AppLayout() {
   const { token, loading } = useAuth();
   useRegisterPushNotifications(token);
 
-  if (!loading && !token) {
+  if (loading) {
+    return (
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.navy }}>
+        <ActivityIndicator color={colors.gold} size="large" />
+      </View>
+    );
+  }
+
+  if (!token) {
     return <Redirect href="/login" />;
   }
 

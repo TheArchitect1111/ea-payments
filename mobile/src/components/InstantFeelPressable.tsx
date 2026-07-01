@@ -1,4 +1,4 @@
-import { useRef, type ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import {
   Animated,
   Pressable,
@@ -30,7 +30,7 @@ export function InstantFeelPressable({
   onPress,
   ...rest
 }: Props) {
-  const scale = useRef(new Animated.Value(1)).current;
+  const [scale] = useState(() => new Animated.Value(1));
 
   const pressIn = (e: Parameters<NonNullable<PressableProps['onPressIn']>>[0]) => {
     Animated.timing(scale, {

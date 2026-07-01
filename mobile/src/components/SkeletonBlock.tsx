@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { Animated, StyleSheet, View, type ViewStyle } from 'react-native';
 import { colors, motion } from '../theme';
 
@@ -9,7 +9,7 @@ type Props = {
 
 /** Shimmer skeleton — never show a blank card while data loads */
 export function SkeletonBlock({ lines = 3, style }: Props) {
-  const shimmer = useRef(new Animated.Value(0)).current;
+  const [shimmer] = useState(() => new Animated.Value(0));
 
   useEffect(() => {
     const loop = Animated.loop(
