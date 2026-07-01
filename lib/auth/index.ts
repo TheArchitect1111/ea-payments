@@ -14,3 +14,9 @@ export {
   requirePortalSession,
   requirePortalSessionFromRequest,
 } from './resolve-portal-session';
+export {
+  REALM_LOGIN_COPY,
+  getRealmLoginCopy,
+  magicLinkErrorMessage,
+} from './realm-login-copy';
+export type { RealmLoginCopy } from './realm-login-copy';

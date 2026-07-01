@@ -1,4 +1,5 @@
 import Constants from 'expo-constants';
+import { CANONICAL_API_BASE_URL } from '../constants/realm-login-copy';
 
 export type ApiResult<T = Record<string, unknown>> = T & { ok?: boolean; error?: string };
 
@@ -8,7 +9,7 @@ export function getApiBaseUrl(): string {
   return (
     process.env.EXPO_PUBLIC_API_BASE_URL?.replace(/\/$/, '') ||
     extra?.apiBaseUrl?.replace(/\/$/, '') ||
-    'https://ea-payments.vercel.app'
+    CANONICAL_API_BASE_URL
   );
 }
 

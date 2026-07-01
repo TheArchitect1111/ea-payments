@@ -5,42 +5,24 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import RealmLoginCard from '@/components/auth/RealmLoginCard';
+import { getRealmLoginCopy, magicLinkErrorMessage } from '@/lib/auth/realm-login-copy';
 import '../../portal/login/portal-login.css';
 import './simplifi-auth.css';
+
+const copy = getRealmLoginCopy('simplifi');
 
 function safeNextPath(raw: string | null): string {
   if (!raw || !raw.startsWith('/') || raw.startsWith('//')) return '/simplifi/capture';
   return raw;
 }
 
-function errorMessage(code: string | null): string | null {
-  switch (code) {
-    case 'expired':
-      return 'That login link expired. Request a new one below.';
-    case 'unauthorized':
-      return 'No Simplifi account matches that email.';
-    case 'config':
-      return 'Login is not configured. Contact support.';
-    default:
-      return null;
-  }
-}
-
 function SimplifiLoginInner() {
   const searchParams = useSearchParams();
   const nextPath = safeNextPath(searchParams.get('next'));
-  const error = errorMessage(searchParams.get('error'));
+  const error = magicLinkErrorMessage('simplifi', searchParams.get('error'));
 
-  return (
-    <RealmLoginCard
-      realm="simplifi"
-      next={nextPath}
-      error={error}
-      title="Simplifi sign in"
-      subtitle="Enter your email on file. We will send a one-tap login link — no password needed."
-      buttonLabel="Email me a login link"
-    />
-  );}
+  return <RealmLoginCard realm="simplifi" next={nextPath} error={error} />;
+}
 
 export default function SimplifiLoginClient() {
   return (
@@ -48,11 +30,9 @@ export default function SimplifiLoginClient() {
       <div className="pl-shell">
         <header className="pl-header">
           <Image src="/simplifi-logo.png" alt="Simplifi" width={320} height={180} className="pl-logo" priority />
-          <p className="pl-eyebrow">Never Lose An Opportunity Again™</p>
-          <h1 className="pl-title">Welcome to Simplifi™</h1>
-          <p className="pl-lede">
-            Sign in to save opportunities, remember what matters, and follow up when the time is right.
-          </p>
+          <p className="pl-eyebrow">{copy.eyebrow}</p>
+          <h1 className="pl-title">{copy.pageTitle}</h1>
+          <p className="pl-lede">{copy.pageSubtitle}</p>
         </header>
 
         <Suspense fallback={<div className="pl-card">Loading...</div>}>

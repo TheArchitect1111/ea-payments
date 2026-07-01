@@ -1,3 +1,5 @@
+import type { ActiveSavePurpose } from '@/lib/active-save';
+
 /**
  * Thin API client for Simplifi workspace + capture actions.
  * Shared by web workspace, PWA capture, and future Expo shell.
@@ -52,6 +54,19 @@ export async function snoozeCapture(
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ recordId, action: 'snooze', days }),
+  });
+}
+
+export async function activeSaveCapture(body: {
+  recordId: string;
+  purpose: ActiveSavePurpose;
+  reason?: string;
+  dueDate?: string;
+}): Promise<SimplifiApiResult<{ savePurpose?: string; dueDate?: string; nextAction?: string }>> {
+  return simplifiFetch('/api/portal/captures/active-save', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
   });
 }
 

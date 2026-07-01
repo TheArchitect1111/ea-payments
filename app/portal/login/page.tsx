@@ -5,41 +5,23 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import RealmLoginCard from '@/components/auth/RealmLoginCard';
+import { getRealmLoginCopy, magicLinkErrorMessage } from '@/lib/auth/realm-login-copy';
 import './portal-login.css';
+
+const copy = getRealmLoginCopy('portal');
 
 function safeNextPath(raw: string | null): string {
   if (!raw || !raw.startsWith('/') || raw.startsWith('//')) return '/simplifi/capture';
   return raw;
 }
 
-function errorMessage(code: string | null): string | null {
-  switch (code) {
-    case 'expired':
-      return 'That login link expired. Request a new one below.';
-    case 'unauthorized':
-      return 'No account matches that email. Use the email from your welcome message.';
-    case 'config':
-      return 'Login is not configured. Contact support.';
-    default:
-      return null;
-  }
-}
-
 function PortalLoginInner() {
   const searchParams = useSearchParams();
   const nextPath = safeNextPath(searchParams.get('next'));
-  const error = errorMessage(searchParams.get('error'));
+  const error = magicLinkErrorMessage('portal', searchParams.get('error'));
 
-  return (
-    <RealmLoginCard
-      realm="portal"
-      next={nextPath}
-      error={error}
-      title="Portal sign in"
-      subtitle="Enter your email on file. We will send a one-tap login link — no password needed."
-      buttonLabel="Email me a login link"
-    />
-  );}
+  return <RealmLoginCard realm="portal" next={nextPath} error={error} />;
+}
 
 export default function PortalLoginPage() {
   return (

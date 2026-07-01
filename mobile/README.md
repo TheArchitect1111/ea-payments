@@ -77,4 +77,23 @@ npm run build:dev:ios      # dev client with native modules (voice, push)
 npm run build:preview      # internal distribution
 ```
 
-Profiles live in `eas.json`: `development`, `preview`, `production`. Override `EXPO_PUBLIC_API_BASE_URL` per profile when pointing at a Vercel preview.
+Set `EXPO_PUBLIC_API_BASE_URL` to your preview or production host (default: canonical `https://ea-payments.vercel.app` via `app.config.ts`).
+
+## TestFlight
+
+1. Create an Expo project: `eas init` (once)
+2. Configure App Store Connect app + credentials: `eas credentials`
+3. Build for TestFlight:
+
+```bash
+npm run build:testflight
+npm run submit:testflight
+```
+
+The `testflight` profile uses `distribution: store` and pins the canonical API URL. For Vercel preview testing, override `EXPO_PUBLIC_API_BASE_URL` in `eas.json` or EAS secrets.
+
+Required Apple env (set in EAS secrets or interactively on first submit):
+
+- Apple ID email
+- App Store Connect app ID (`ascAppId`)
+- Apple Team ID
