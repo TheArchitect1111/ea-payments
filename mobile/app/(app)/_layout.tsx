@@ -1,5 +1,6 @@
 import { Tabs, Redirect } from 'expo-router';
 import { useAuth } from '../../src/auth/AuthContext';
+import { OfflineCaptureProvider } from '../../src/offline/OfflineCaptureContext';
 import { useRegisterPushNotifications } from '../../src/push/notifications';
 import { colors } from '../../src/theme';
 
@@ -12,7 +13,8 @@ export default function AppLayout() {
   }
 
   return (
-    <Tabs
+    <OfflineCaptureProvider token={token}>
+      <Tabs
       screenOptions={{
         headerStyle: { backgroundColor: colors.navy },
         headerTintColor: colors.white,
@@ -26,5 +28,6 @@ export default function AppLayout() {
       <Tabs.Screen name="workspace" options={{ title: 'Workspace', tabBarLabel: 'Workspace' }} />
       <Tabs.Screen name="settings" options={{ title: 'Settings', tabBarLabel: 'Settings' }} />
     </Tabs>
+    </OfflineCaptureProvider>
   );
 }

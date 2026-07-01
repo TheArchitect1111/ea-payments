@@ -12,6 +12,10 @@ import {
 import { useAuth } from '../../src/auth/AuthContext';
 import { analyzeCaptureFile, analyzeUrl } from '../../src/api/client';
 import { CaptureProcessingBanner } from '../../src/components/CaptureProcessingBanner';
+import { OfflineQueueBanner } from '../../src/components/OfflineQueueBanner';
+import { VoiceNotesInput } from '../../src/components/VoiceNotesInput';
+import { enqueuePhotoCapture, enqueueUrlCapture } from '../../src/offline/capture-queue';
+import { isOnline, useOfflineCapture } from '../../src/offline/OfflineCaptureContext';
 import { colors } from '../../src/theme';
 
 function fileNameFromUri(uri: string): string {
@@ -21,6 +25,7 @@ function fileNameFromUri(uri: string): string {
 
 export default function CaptureScreen() {
   const { token } = useAuth();
+  const { refreshQueue } = useOfflineCapture();
   const [url, setUrl] = useState('');
   const [prospectName, setProspectName] = useState('');
   const [notes, setNotes] = useState('');
@@ -31,7 +36,12 @@ export default function CaptureScreen() {
   const [busy, setBusy] = useState(false);
   const [processingId, setProcessingId] = useState<string | null>(null);
 
-  const handleAnalyzeResult = (res: { ok?: boolean; error?: string; processing?: boolean; captureId?: string }) => {
+  const handleAnalyzeResult = (res: {
+    ok?: boolean;
+    error?: string;
+    processing?: boolean;
+    captureId?: string;
+  }) => {
     if (!res.ok) {
       setError(res.error ?? 'Capture failed.');
       return;
@@ -50,14 +60,45 @@ export default function CaptureScreen() {
     setError('');
     setMessage('');
     setProcessingId(null);
-    const res = await analyzeUrl(token, {
+
+    const payload = {
       url: url.trim(),
       prospectName: prospectName.trim() || undefined,
       notes: notes.trim() || undefined,
-    });
-    setBusy(false);
-    handleAnalyzeResult(res);
-    if (res.ok) setUrl('');
+    };
+
+    if (!(await isOnline())) {
+      await enqueueUrlCapture(payload);
+      await refreshQueue();
+      setMessage('Offline — capture queued. We will send when you reconnect.');
+      setUrl('');
+      setBusy(false);
+      return;
+    }
+
+    try {
+      const res = await analyzeUrl(token, payload);
+      setBusy(false);
+      if (!res.ok && !(await isOnline())) {
+        await enqueueUrlCapture(payload);
+        await refreshQueue();
+        setMessage('Offline — capture queued. We will send when you reconnect.');
+        setUrl('');
+        return;
+      }
+      handleAnalyzeResult(res);
+      if (res.ok) setUrl('');
+    } catch {
+      setBusy(false);
+      if (!(await isOnline())) {
+        await enqueueUrlCapture(payload);
+        await refreshQueue();
+        setMessage('Offline — capture queued. We will send when you reconnect.');
+        setUrl('');
+      } else {
+        setError('Network error. Try again.');
+      }
+    }
   };
 
   const submitPhoto = async () => {
@@ -66,16 +107,50 @@ export default function CaptureScreen() {
     setError('');
     setMessage('');
     setProcessingId(null);
-    const res = await analyzeCaptureFile(
-      token,
-      { uri: previewUri, name: previewMeta.name, type: previewMeta.type },
-      { prospectName: prospectName.trim() || undefined, notes: notes.trim() || undefined },
-    );
-    setBusy(false);
-    handleAnalyzeResult(res);
-    if (res.ok) {
+
+    const file = { uri: previewUri, name: previewMeta.name, type: previewMeta.type };
+    const fields = {
+      prospectName: prospectName.trim() || undefined,
+      notes: notes.trim() || undefined,
+    };
+
+    if (!(await isOnline())) {
+      await enqueuePhotoCapture(file, fields);
+      await refreshQueue();
+      setMessage('Offline — photo queued. We will upload when you reconnect.');
       setPreviewUri(null);
       setPreviewMeta(null);
+      setBusy(false);
+      return;
+    }
+
+    try {
+      const res = await analyzeCaptureFile(token, file, fields);
+      setBusy(false);
+      if (!res.ok && !(await isOnline())) {
+        await enqueuePhotoCapture(file, fields);
+        await refreshQueue();
+        setMessage('Offline — photo queued. We will upload when you reconnect.');
+        setPreviewUri(null);
+        setPreviewMeta(null);
+        return;
+      }
+      handleAnalyzeResult(res);
+      if (res.ok) {
+        setPreviewUri(null);
+        setPreviewMeta(null);
+      }
+    } catch {
+      setBusy(false);
+      if (!(await isOnline())) {
+        await enqueuePhotoCapture(file, fields);
+        await refreshQueue();
+        setMessage('Offline — photo queued. We will upload when you reconnect.');
+        setPreviewUri(null);
+        setPreviewMeta(null);
+      } else {
+        setError('Network error. Try again.');
+      }
     }
   };
 
@@ -122,8 +197,10 @@ export default function CaptureScreen() {
   return (
     <ScrollView style={styles.root} contentContainerStyle={styles.scroll}>
       <Text style={styles.lede}>
-        Capture URLs or photos. Simplifi runs the same analysis pipeline as the web app — including vision on images.
+        Capture URLs or photos. Works offline — queued captures sync when you reconnect.
       </Text>
+
+      <OfflineQueueBanner />
 
       <Text style={styles.section}>URL capture</Text>
       <Text style={styles.label}>URL</Text>
@@ -169,9 +246,10 @@ export default function CaptureScreen() {
         value={notes}
         onChangeText={setNotes}
         multiline
-        placeholder="Context, talking points, or voice transcript"
+        placeholder="Context or talking points"
         placeholderTextColor={colors.muted}
       />
+      <VoiceNotesInput value={notes} onChange={setNotes} />
 
       <Pressable style={styles.btn} onPress={() => void submitUrl()} disabled={busy || !url.trim()}>
         <Text style={styles.btnText}>{busy ? 'Capturing…' : 'Capture URL'}</Text>

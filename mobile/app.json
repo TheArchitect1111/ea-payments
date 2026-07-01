@@ -12,13 +12,18 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "online.efficiencyarchitects.simplifi"
+      "bundleIdentifier": "online.efficiencyarchitects.simplifi",
+      "infoPlist": {
+        "NSSpeechRecognitionUsageDescription": "Allow Simplifi to transcribe your voice into capture notes.",
+        "NSMicrophoneUsageDescription": "Allow Simplifi to dictate notes for captures."
+      }
     },
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#1B2B4D"
       },
-      "package": "online.efficiencyarchitects.simplifi"
+      "package": "online.efficiencyarchitects.simplifi",
+      "permissions": ["RECORD_AUDIO"]
     },
     "plugins": [
       "expo-router",

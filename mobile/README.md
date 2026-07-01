@@ -46,7 +46,18 @@ On sign-in, the app requests notification permission and registers an Expo push 
 
 Processing captures poll `GET /api/capture/{id}/status` until triaged.
 
-## Not yet in mobile
+## Offline queue
 
-- Voice-to-text capture (paste notes manually today)
-- Offline capture queue (web PWA only)
+When offline, URL and photo captures are saved locally (AsyncStorage + document directory for images). The app auto-syncs when connectivity returns — same behavior as the web PWA service worker queue.
+
+## Voice notes
+
+**Dictate notes** uses on-device speech recognition (`expo-speech-recognition`). Requires a **dev client build** — it does not work in Expo Go:
+
+```bash
+npx expo run:ios
+# or
+npx expo run:android
+```
+
+Transcripts append to the notes field and are sent with the next capture.
