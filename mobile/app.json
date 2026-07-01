@@ -20,7 +20,18 @@
       },
       "package": "online.efficiencyarchitects.simplifi"
     },
-    "plugins": ["expo-router", "expo-secure-store"],
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "expo-notifications",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow Simplifi to analyze photos of opportunities.",
+          "cameraPermission": "Allow Simplifi to capture photos of opportunities."
+        }
+      ]
+    ],
     "experiments": {
       "typedRoutes": true
     }

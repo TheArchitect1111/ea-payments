@@ -32,19 +32,21 @@ Session tokens are stored in `expo-secure-store` and sent as `Authorization: Bea
 | Tab | API |
 |-----|-----|
 | Home | `GET /api/simplifi/brief`, `/api/simplifi/me` |
-| Capture | `POST /api/portal/captures/analyze` |
+| Capture | `POST /api/portal/captures/analyze` (URL JSON or photo multipart) |
 | Workspace | `GET /api/simplifi/workspace` |
-| Settings | Sign out via `POST /api/auth/logout` |
+| Settings | Push registration + sign out |
 
-## Deep link scheme
+## Push notifications
 
-- Scheme: `simplifi://`
-- Auth callback: `simplifi://auth/callback?token={sessionToken}`
+On sign-in, the app requests notification permission and registers an Expo push token via `POST /api/simplifi/push-token`. Re-enable from **Settings → Enable push notifications**. Requires a physical device (not Expo Go simulator).
 
-Magic links requested from the app use `next=simplifi://auth/callback` so verify redirects back into the app when configured.
+## Photo capture
+
+**Capture** tab supports camera and gallery uploads. Images are sent as `multipart/form-data` to the same analyze endpoint as the web PWA; vision/OCR runs server-side.
+
+Processing captures poll `GET /api/capture/{id}/status` until triaged.
 
 ## Not yet in mobile
 
-- Camera / OCR capture (Phase 5)
-- Push notification registration UI (API exists: `POST /api/simplifi/push-token`)
-- Offline capture queue (web PWA only today)
+- Voice-to-text capture (paste notes manually today)
+- Offline capture queue (web PWA only)

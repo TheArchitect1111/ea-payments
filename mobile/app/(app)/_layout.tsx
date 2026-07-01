@@ -1,9 +1,11 @@
 import { Tabs, Redirect } from 'expo-router';
 import { useAuth } from '../../src/auth/AuthContext';
+import { useRegisterPushNotifications } from '../../src/push/notifications';
 import { colors } from '../../src/theme';
 
 export default function AppLayout() {
   const { token, loading } = useAuth();
+  useRegisterPushNotifications(token);
 
   if (!loading && !token) {
     return <Redirect href="/login" />;
