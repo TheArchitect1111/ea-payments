@@ -7,3 +7,13 @@ export const colors = {
   border: '#E8EDF5',
   error: '#B00020',
 };
+
+/** EA Instant Feel Standard™ — animation timing (ms) */
+export const motion = {
+  tap: 120,
+  small: 180,
+  menu: 220,
+  page: 300,
+  large: 400,
+  shimmer: 700,
+} as const;

@@ -120,11 +120,12 @@ export async function removeQueuedCapture(id: string): Promise<void> {
 }
 
 export async function flushCaptureQueue(
-  submit: (item: QueuedCapture) => Promise<{ ok?: boolean }>,
-): Promise<{ flushed: number; failed: number }> {
+  submit: (item: QueuedCapture) => Promise<{ ok?: boolean; captureId?: string; processing?: boolean }>,
+): Promise<{ flushed: number; failed: number; captureIds: string[] }> {
   const queue = await listQueuedCaptures();
   let flushed = 0;
   let failed = 0;
+  const captureIds: string[] = [];
 
   for (const item of queue) {
     try {
@@ -132,6 +133,7 @@ export async function flushCaptureQueue(
       if (result.ok) {
         await removeQueuedCapture(item.id);
         flushed += 1;
+        if (result.captureId) captureIds.push(result.captureId);
       } else {
         failed += 1;
       }
@@ -140,5 +142,5 @@ export async function flushCaptureQueue(
     }
   }
 
-  return { flushed, failed };
+  return { flushed, failed, captureIds };
 }

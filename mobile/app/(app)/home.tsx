@@ -1,19 +1,23 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useAuth } from '../../src/auth/AuthContext';
 import { fetchBrief } from '../../src/api/client';
+import { InstantFeelPressable } from '../../src/components/InstantFeelPressable';
+import { SkeletonBlock } from '../../src/components/SkeletonBlock';
 import { colors } from '../../src/theme';
 
 export default function HomeScreen() {
   const { token, me, refreshMe } = useAuth();
   const [brief, setBrief] = useState<Record<string, unknown> | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
     if (!token) return;
     const data = await fetchBrief(token);
     if (data.ok) setBrief(data as Record<string, unknown>);
     await refreshMe();
+    setLoading(false);
   }, [token, refreshMe]);
 
   const onRefresh = async () => {
@@ -46,7 +50,9 @@ export default function HomeScreen() {
 
       <View style={styles.card}>
         <Text style={styles.cardTitle}>Focus items</Text>
-        {items.length === 0 ? (
+        {loading ? (
+          <SkeletonBlock lines={4} style={styles.skeletonInline} />
+        ) : items.length === 0 ? (
           <Text style={styles.muted}>No focus items yet. Capture something worth exploring.</Text>
         ) : (
           items.slice(0, 5).map((item, index) => (
@@ -58,9 +64,9 @@ export default function HomeScreen() {
         )}
       </View>
 
-      <Pressable style={styles.refreshBtn} onPress={() => void onRefresh()}>
+      <InstantFeelPressable style={styles.refreshBtn} onPress={() => void onRefresh()}>
         <Text style={styles.refreshText}>Refresh brief</Text>
-      </Pressable>
+      </InstantFeelPressable>
     </ScrollView>
   );
 }
@@ -84,6 +90,7 @@ const styles = StyleSheet.create({
   row: { marginBottom: 14, paddingBottom: 14, borderBottomWidth: 1, borderBottomColor: colors.border },
   rowTitle: { color: colors.navy, fontWeight: '700', fontSize: 15 },
   rowDetail: { color: colors.muted, marginTop: 4, fontSize: 13, lineHeight: 18 },
-  refreshBtn: { alignSelf: 'center', marginBottom: 32 },
+  refreshBtn: { alignSelf: 'center', marginBottom: 32, paddingVertical: 8, paddingHorizontal: 16 },
   refreshText: { color: colors.navy, fontWeight: '700' },
+  skeletonInline: { margin: 0, borderWidth: 0, padding: 0 },
 });

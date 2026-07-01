@@ -43,6 +43,14 @@
   --pc-shadow-elevated: 0 12px 40px rgba(27, 43, 77, 0.12);
   --pc-shadow-gold-ring: 0 0 0 2px rgba(245, 166, 35, 0.25);
 
+  /* Motion (Instant Feel Standard™) */
+  --pc-motion-tap: 120ms;
+  --pc-motion-small: 180ms;
+  --pc-motion-menu: 220ms;
+  --pc-motion-page: 300ms;
+  --pc-motion-large: 400ms;
+  --pc-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+
   /* portal-chassis compatibility aliases */
   --color-brand: var(--pc-navy);
   --color-brand-light: #2a3f6b;

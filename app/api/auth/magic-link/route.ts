@@ -61,14 +61,22 @@ export async function POST(req: NextRequest) {
   } else {
     const client = await findPortalClientByEmail(email);
     authorized = client.ok;
+    if (!authorized && process.env.NODE_ENV === 'development') {
+      console.warn(
+        `[magic-link] No portal match for ${email}${client.error ? ` (${client.error})` : ''}. ` +
+          'Add AIRTABLE_API_KEY to .env.local or use an email in Client Records.',
+      );
+    }
     label = realm === 'simplifi' ? 'Simplifi' : 'EA Portal';
   }
 
   if (!authorized) {
-    return NextResponse.json({
-      ok: true,
-      message: 'If that email is registered, a login link is on its way.',
-    });
+    const missingAirtable = !process.env.AIRTABLE_API_KEY?.trim();
+    const message =
+      process.env.NODE_ENV === 'development' && missingAirtable
+        ? 'Dev setup incomplete: add AIRTABLE_API_KEY and RESEND_API_KEY to ea-wt-home/.env.local (Vercel → Settings → Environment Variables). No email was sent.'
+        : 'If that email is registered, a login link is on its way.';
+    return NextResponse.json({ ok: true, message });
   }
 
   const token = createMagicLinkToken({ realm, email, next });
@@ -77,6 +85,9 @@ export async function POST(req: NextRequest) {
   }
 
   const link = `${siteOrigin(req)}/api/auth/magic-link/verify?token=${encodeURIComponent(token)}`;
+  if (process.env.NODE_ENV === 'development') {
+    console.log(`\n[dev] Magic login link for ${email}:\n${link}\n`);
+  }
   const subject =
     realm === 'admin'
       ? 'Your EA admin login link'

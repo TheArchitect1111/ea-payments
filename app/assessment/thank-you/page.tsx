@@ -61,7 +61,7 @@ export default async function ThankYouPage({
               Efficiency Architects
             </p>
             <h1 className="mt-4 text-4xl font-black uppercase tracking-wide sm:text-5xl" style={{ color: GOLD }}>
-              Your Assessment Is In.
+              Your CTP Intake Is In.
             </h1>
             <p className="mt-4 max-w-xl text-lg leading-8 text-blue-50">
               {receivedOnly

@@ -12,8 +12,11 @@ type OfflineCaptureContextValue = {
   queueCount: number;
   syncing: boolean;
   lastMessage: string;
+  /** Latest captureId from a background queue flush — show processing banner */
+  syncedCaptureId: string | null;
+  clearSyncedCaptureId: () => void;
   refreshQueue: () => Promise<void>;
-  syncNow: () => Promise<{ flushed: number; failed: number } | null>;
+  syncNow: () => Promise<{ flushed: number; failed: number; captureIds: string[] } | null>;
 };
 
 const OfflineCaptureContext = createContext<OfflineCaptureContextValue | null>(null);
@@ -28,11 +31,14 @@ export function OfflineCaptureProvider({
   const [queueCount, setQueueCount] = useState(0);
   const [syncing, setSyncing] = useState(false);
   const [lastMessage, setLastMessage] = useState('');
+  const [syncedCaptureId, setSyncedCaptureId] = useState<string | null>(null);
 
   const refreshQueue = useCallback(async () => {
     const items = await listQueuedCaptures();
     setQueueCount(items.length);
   }, []);
+
+  const clearSyncedCaptureId = useCallback(() => setSyncedCaptureId(null), []);
 
   const submitQueuedItem = useCallback(
     async (item: QueuedCapture) => {
@@ -66,6 +72,8 @@ export function OfflineCaptureProvider({
         setLastMessage(
           `Sent ${result.flushed} queued capture${result.flushed === 1 ? '' : 's'}.`,
         );
+        const lastId = result.captureIds[result.captureIds.length - 1];
+        if (lastId) setSyncedCaptureId(lastId);
       } else if (result.failed > 0) {
         setLastMessage('Some queued captures could not be sent yet.');
       }
@@ -92,8 +100,16 @@ export function OfflineCaptureProvider({
   }, [token, syncNow]);
 
   const value = useMemo(
-    () => ({ queueCount, syncing, lastMessage, refreshQueue, syncNow }),
-    [queueCount, syncing, lastMessage, refreshQueue, syncNow],
+    () => ({
+      queueCount,
+      syncing,
+      lastMessage,
+      syncedCaptureId,
+      clearSyncedCaptureId,
+      refreshQueue,
+      syncNow,
+    }),
+    [queueCount, syncing, lastMessage, syncedCaptureId, clearSyncedCaptureId, refreshQueue, syncNow],
   );
 
   return <OfflineCaptureContext.Provider value={value}>{children}</OfflineCaptureContext.Provider>;

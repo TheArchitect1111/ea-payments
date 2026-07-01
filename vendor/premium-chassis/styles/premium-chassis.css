@@ -4,4 +4,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=Barlow:wght@400;600;700&display=swap');
 @import './tokens.css';
 @import './typography.css';
+@import './motion.css';
+@import './instant-feel.css';
 @import './components.css';

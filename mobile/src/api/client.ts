@@ -32,7 +32,10 @@ export async function apiFetch<T>(
 
   const contentType = res.headers.get('content-type') ?? '';
   if (!contentType.includes('application/json')) {
-    return { ok: false, error: `Request failed (${res.status})` } as ApiResult<T>;
+    return {
+      ok: false,
+      error: `Request failed (${res.status}) at ${url}. The API may not be deployed yet — run the web backend locally and set EXPO_PUBLIC_API_BASE_URL in mobile/.env.`,
+    } as ApiResult<T>;
   }
 
   const data = (await res.json()) as ApiResult<T>;

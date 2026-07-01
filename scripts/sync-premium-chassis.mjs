@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, '..');
-const source = resolve(root, '../../ea-operating-system/premium-chassis');
+const source = resolve(root, '../ea-operating-system/premium-chassis');
 const target = resolve(root, 'vendor/premium-chassis');
 
 if (!existsSync(source)) {

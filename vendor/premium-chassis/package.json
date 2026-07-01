@@ -19,6 +19,8 @@
     "./styles/tokens.css": "./styles/tokens.css",
     "./styles/typography.css": "./styles/typography.css",
     "./styles/components.css": "./styles/components.css",
+    "./styles/motion.css": "./styles/motion.css",
+    "./styles/instant-feel.css": "./styles/instant-feel.css",
     "./styles/premium-chassis.css": "./styles/premium-chassis.css",
     "./presets/ea-pulse.css": "./presets/ea-pulse.css"
   },

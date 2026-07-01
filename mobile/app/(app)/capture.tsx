@@ -1,8 +1,7 @@
 import * as ImagePicker from 'expo-image-picker';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Image,
-  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -12,6 +11,7 @@ import {
 import { useAuth } from '../../src/auth/AuthContext';
 import { analyzeCaptureFile, analyzeUrl } from '../../src/api/client';
 import { CaptureProcessingBanner } from '../../src/components/CaptureProcessingBanner';
+import { InstantFeelPressable } from '../../src/components/InstantFeelPressable';
 import { OfflineQueueBanner } from '../../src/components/OfflineQueueBanner';
 import { VoiceNotesInput } from '../../src/components/VoiceNotesInput';
 import { enqueuePhotoCapture, enqueueUrlCapture } from '../../src/offline/capture-queue';
@@ -23,9 +23,19 @@ function fileNameFromUri(uri: string): string {
   return segment && segment.includes('.') ? segment : `capture-${Date.now()}.jpg`;
 }
 
+function clearFields(setters: {
+  setUrl: (v: string) => void;
+  setProspectName: (v: string) => void;
+  setNotes: (v: string) => void;
+}) {
+  setters.setUrl('');
+  setters.setProspectName('');
+  setters.setNotes('');
+}
+
 export default function CaptureScreen() {
   const { token } = useAuth();
-  const { refreshQueue } = useOfflineCapture();
+  const { refreshQueue, syncedCaptureId, clearSyncedCaptureId } = useOfflineCapture();
   const [url, setUrl] = useState('');
   const [prospectName, setProspectName] = useState('');
   const [notes, setNotes] = useState('');
@@ -35,6 +45,14 @@ export default function CaptureScreen() {
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const [processingId, setProcessingId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (syncedCaptureId) {
+      setProcessingId(syncedCaptureId);
+      setMessage('Queued capture sent — analyzing now.');
+      clearSyncedCaptureId();
+    }
+  }, [syncedCaptureId, clearSyncedCaptureId]);
 
   const handleAnalyzeResult = (res: {
     ok?: boolean;
@@ -52,6 +70,7 @@ export default function CaptureScreen() {
     } else {
       setMessage('Capture saved. Open Workspace to review.');
     }
+    clearFields({ setUrl, setProspectName, setNotes });
   };
 
   const submitUrl = async () => {
@@ -216,19 +235,24 @@ export default function CaptureScreen() {
 
       <Text style={styles.section}>Photo capture</Text>
       <View style={styles.row}>
-        <Pressable style={styles.btnSecondary} onPress={() => void pickFromCamera()} disabled={busy}>
+        <InstantFeelPressable style={styles.btnSecondary} onPress={() => void pickFromCamera()} disabled={busy}>
           <Text style={styles.btnSecondaryText}>Camera</Text>
-        </Pressable>
-        <Pressable style={styles.btnSecondary} onPress={() => void pickFromLibrary()} disabled={busy}>
+        </InstantFeelPressable>
+        <InstantFeelPressable style={styles.btnSecondary} onPress={() => void pickFromLibrary()} disabled={busy}>
           <Text style={styles.btnSecondaryText}>Gallery</Text>
-        </Pressable>
+        </InstantFeelPressable>
       </View>
       {previewUri ? (
         <View style={styles.previewWrap}>
           <Image source={{ uri: previewUri }} style={styles.preview} resizeMode="cover" />
-          <Pressable style={styles.btn} onPress={() => void submitPhoto()} disabled={busy}>
+          <InstantFeelPressable
+            style={styles.btn}
+            hapticSuccess
+            onPress={() => void submitPhoto()}
+            disabled={busy}
+          >
             <Text style={styles.btnText}>{busy ? 'Uploading…' : 'Analyze photo'}</Text>
-          </Pressable>
+          </InstantFeelPressable>
         </View>
       ) : null}
 
@@ -251,9 +275,14 @@ export default function CaptureScreen() {
       />
       <VoiceNotesInput value={notes} onChange={setNotes} />
 
-      <Pressable style={styles.btn} onPress={() => void submitUrl()} disabled={busy || !url.trim()}>
+      <InstantFeelPressable
+        style={styles.btn}
+        hapticSuccess
+        onPress={() => void submitUrl()}
+        disabled={busy || !url.trim()}
+      >
         <Text style={styles.btnText}>{busy ? 'Capturing…' : 'Capture URL'}</Text>
-      </Pressable>
+      </InstantFeelPressable>
 
       {processingId && token ? (
         <CaptureProcessingBanner

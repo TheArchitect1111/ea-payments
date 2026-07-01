@@ -24,6 +24,7 @@ export { AgentDefinition, AgentKind, AgentRun, AgentRunInput, AgentRunStatus, EA
 export { ActionCard, ContinueWorkingItem, DEFAULT_ACTION_CARDS, DEFAULT_INTENT_EXAMPLES, MissionControlRequest, MissionControlResponse, MomentumStat, buildMissionControlFromStreams, buildMissionControlResponse } from './mission-control.js';
 export { IntentNavRoute, IntentOrchestratorRoute, IntentRouteResult, IntentRouteType, IntentRouterConfig, routeIntent } from './intent.js';
 export { OpportunityEdgeType, OpportunityGraph, OpportunityGraphEdge, OpportunityGraphInput, OpportunityGraphNode, OpportunityNodeType, ResolvedIntentRecord, buildOpportunityGraph, intentToActivityEventInput, linkIntentToOpportunity, searchOpportunityGraph } from './opportunity-graph.js';
+export { EAMotionDuration, InstantFeelButton, OptimisticSaveBadge, OptimisticSaveStatus, ProgressMomentum, SkeletonBlock, eaMotion, useOptimisticSave } from './instant-feel.js';
 
 interface MiddlewareConfig {
     protectedPrefixes: string[];

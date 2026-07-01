@@ -2,7 +2,6 @@ import { useState } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
-  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -13,6 +12,7 @@ import { router } from 'expo-router';
 import { useAuth } from '../src/auth/AuthContext';
 import { requestMagicLink } from '../src/api/client';
 import { SIMPLIFI_LOGIN_COPY } from '../src/constants/realm-login-copy';
+import { InstantFeelPressable } from '../src/components/InstantFeelPressable';
 import { colors } from '../src/theme';
 
 const copy = SIMPLIFI_LOGIN_COPY;
@@ -79,9 +79,9 @@ export default function LoginScreen() {
             <Text style={styles.cardTitle}>{copy.sentTitle}</Text>
             <Text style={styles.success}>{message || copy.sentMessage}</Text>
             <Text style={styles.sentDetail}>{copy.sentDetail}</Text>
-            <Pressable style={styles.btnSecondary} onPress={() => setSent(false)}>
+            <InstantFeelPressable style={styles.btnSecondary} onPress={() => setSent(false)}>
               <Text style={styles.btnSecondaryText}>{copy.sendAnotherLabel}</Text>
-            </Pressable>
+            </InstantFeelPressable>
           </View>
         ) : (
           <>
@@ -97,13 +97,13 @@ export default function LoginScreen() {
               placeholder={copy.emailPlaceholder}
               placeholderTextColor={colors.muted}
             />
-            <Pressable
+            <InstantFeelPressable
               style={styles.btnPrimary}
               onPress={() => void sendLink()}
               disabled={busy || !email.trim()}
             >
               <Text style={styles.btnPrimaryText}>{busy ? 'Sending…' : copy.buttonLabel}</Text>
-            </Pressable>
+            </InstantFeelPressable>
           </>
         )}
 
@@ -116,13 +116,13 @@ export default function LoginScreen() {
           placeholder="Paste the link from your email"
           placeholderTextColor={colors.muted}
         />
-        <Pressable
+        <InstantFeelPressable
           style={styles.btnSecondary}
           onPress={() => void completeSignIn()}
           disabled={busy || !linkPaste.trim()}
         >
           <Text style={styles.btnSecondaryText}>{busy ? 'Signing in…' : 'Complete sign in'}</Text>
-        </Pressable>
+        </InstantFeelPressable>
 
         {error ? <Text style={styles.error}>{error}</Text> : null}
       </ScrollView>
