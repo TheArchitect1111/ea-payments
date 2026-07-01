@@ -1,5 +1,6 @@
 node_modules/
 .expo/
+.expo-test-export/
 dist/
 *.jks
 *.p8
