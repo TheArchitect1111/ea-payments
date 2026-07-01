@@ -143,7 +143,9 @@
       return;
     }
     if (action === 'dashboard') {
-      window.open('https://ea-payments.vercel.app/simplifi/capture', '_blank', 'noopener,noreferrer');
+      const sdk = globalThis.EA_ORB_SDK;
+      const url = sdk?.urls?.workspace || 'https://ea-payments.vercel.app/simplifi/workspace';
+      window.open(url, '_blank', 'noopener,noreferrer');
       return;
     }
     if (action === 'watchlist' || action === 'recent') {

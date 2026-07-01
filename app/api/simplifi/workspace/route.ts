@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getClientByPortalSlug } from '@/lib/airtable';
 import { requirePortalSession } from '@/lib/auth/resolve-portal-session';
-import { loadSimplifiWorkspace } from '@/lib/simplifi-store';
+import { loadSimplifiWorkspace } from '@/lib/simplifi-core';
 import { EA_PLATFORM_URL } from '@/lib/platform-urls';
 
 export const dynamic = 'force-dynamic';

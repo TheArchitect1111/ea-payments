@@ -20,6 +20,7 @@ import {
   listToursForPage,
 } from '@/lib/ea-guide-tours';
 import { resolveGuideContext, type EAGuideAction } from '@/lib/ea-guide';
+import { resolveOrbContext } from '@/lib/orb-sdk';
 import TourDriver, { startEAGuideTour } from './TourDriver';
 import './ea-guide.css';
 
@@ -66,6 +67,7 @@ function writeLocalProgress(userId: string, rows: GuideProgress[]) {
 export default function EAGuideOrb() {
   const pathname = usePathname() ?? '/';
   const legacyContext = useMemo(() => resolveGuideContext(pathname), [pathname]);
+  const orbContext = useMemo(() => resolveOrbContext(pathname), [pathname]);
   const pageContext = useMemo(() => resolveGuidePageContext(pathname), [pathname]);
   const [userId] = useState(() => getOrCreateUserId());
   const [open, setOpen] = useState(false);
@@ -502,6 +504,7 @@ export default function EAGuideOrb() {
           className={`ea-guide-orb ea-guide-orb-${orbState}`}
           aria-label="Open EA Guide"
           data-state={orbState}
+          data-orb-product={orbContext.product}
           onClick={() => setOpen((value) => !value)}
         >
           <span className="ea-guide-ring ea-guide-ring-gold" />

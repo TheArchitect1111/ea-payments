@@ -173,6 +173,11 @@ test('simplifi orb context API is public', async ({ page }) => {
   expect(data.orb?.product).toBe('simplifi');
 });
 
+test('extension bootstrap API requires auth', async ({ page }) => {
+  const res = await page.request.get('/api/extension/bootstrap');
+  expect(res.status()).toBe(401);
+});
+
 test('app alias redirects to workspace', async ({ page }) => {
   await page.goto('/app');
   await expect(page).toHaveURL(/\/simplifi\/workspace/);
