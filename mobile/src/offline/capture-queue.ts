@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 
 const STORAGE_KEY = '@simplifi/offline-capture-queue';
 const PHOTO_DIR = `${FileSystem.documentDirectory ?? ''}offline-captures/`;
