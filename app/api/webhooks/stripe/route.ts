@@ -8,6 +8,8 @@ import {
 } from '@/lib/airtable';
 import type { AirtablePackage, ProposalWithAssessment } from '@/lib/airtable';
 import { getCatalogItem } from '@/lib/catalog';
+import { ensureOrganizationForPortal } from '@/lib/organizations';
+import { ensurePackageEntitlements } from '@/lib/modules/portal-modules';
 import { sendWelcomeEmail, sendAdminNotification } from '@/lib/email';
 import { createPortalAccess } from '@/lib/portal-access';
 import { createOpportunityRecord } from '@/lib/partner-network';
@@ -16,6 +18,14 @@ import { emitPulseEvent } from '@/lib/pulse-bus';
 import { isLaunchVerificationSession } from '@/lib/launch-verification';
 import { handleLaunchVerificationPayment } from '@/lib/launch-verification-flow';
 import { lifecycleForPaidClient } from '@/lib/client-lifecycle';
+import { getSubscriptionPlan, type SubscriptionPlanId } from '@/lib/subscription-catalog';
+import {
+  applySubscriptionEntitlements,
+  handleInvoicePaid,
+  handleSubscriptionLifecycle,
+  persistSubscriptionBilling,
+  resolveOrganizationIdForSubscription,
+} from '@/lib/subscription-sync';
 
 export const dynamic = 'force-dynamic';
 
@@ -55,6 +65,20 @@ export async function POST(req: NextRequest) {
     case 'checkout.session.completed':
       await handleCheckoutCompleted(event.data.object as Stripe.Checkout.Session);
       break;
+    case 'customer.subscription.created':
+    case 'customer.subscription.updated':
+    case 'customer.subscription.deleted':
+      await handleSubscriptionLifecycle(
+        event.data.object as Stripe.Subscription,
+        event.type,
+      );
+      break;
+    case 'invoice.paid':
+      await handleInvoicePaid(event.data.object as Stripe.Invoice);
+      break;
+    case 'invoice.payment_failed':
+      await handleInvoicePaymentFailed(event.data.object as Stripe.Invoice);
+      break;
     default:
       break;
   }
@@ -64,6 +88,11 @@ export async function POST(req: NextRequest) {
 
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promise<void> {
   const meta = session.metadata ?? {};
+
+  if (meta.checkoutType === 'subscription' || session.mode === 'subscription') {
+    await handleSubscriptionCheckoutCompleted(session);
+    return;
+  }
 
   if (isLaunchVerificationSession(meta as Record<string, string | undefined>)) {
     await handleLaunchVerificationPayment(session);
@@ -169,6 +198,24 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
             `Your portal login credentials: Email: ${portalResult.username} | Temporary Password: ${portalResult.tempPassword}` +
             ' Log in using the button above. Contact us to update your password at any time.';
         }
+
+        if (portalSlug && airtableResult.recordId) {
+          try {
+            const { orgId } = await ensureOrganizationForPortal({
+              portalSlug,
+              name: clientName,
+              clientRecordId: airtableResult.recordId,
+              organizationName: meta.organization || undefined,
+            });
+            await ensurePackageEntitlements({
+              orgId,
+              packagePurchased: packageName,
+              slug: portalSlug,
+            });
+          } catch (err) {
+            console.error('Entitlement sync failed for session', session.id, ':', err);
+          }
+        }
       } else {
         console.error('Portal access creation failed for session', session.id, ':', portalResult.error);
       }
@@ -256,6 +303,241 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
     href: '/admin/master',
     objectId: airtableResult.recordId,
     metadata: { stripeSessionId: session.id, email, packageName },
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Phase 3: subscription checkout + lifecycle
+// ---------------------------------------------------------------------------
+
+async function handleSubscriptionCheckoutCompleted(
+  session: Stripe.Checkout.Session,
+): Promise<void> {
+  const meta = session.metadata ?? {};
+  const planId = (meta.planId ?? '') as SubscriptionPlanId;
+  const plan = getSubscriptionPlan(planId);
+
+  if (!plan) {
+    console.error('Subscription checkout: invalid planId', session.id, planId);
+    return;
+  }
+
+  const customerDetails = session.customer_details;
+  const clientName = meta.clientName || customerDetails?.name || 'Unknown Client';
+  const email =
+    meta.clientEmail || customerDetails?.email || session.customer_email || '';
+
+  if (!email) {
+    console.error('Subscription checkout: no email', session.id);
+    return;
+  }
+
+  const stripeCustomerId =
+    typeof session.customer === 'string'
+      ? session.customer
+      : session.customer?.id ?? '';
+
+  const stripeSubscriptionId =
+    typeof session.subscription === 'string'
+      ? session.subscription
+      : session.subscription?.id ?? '';
+
+  const amountPaid = (session.amount_total ?? 0) / 100;
+  const paymentDate = session.created
+    ? new Date(session.created * 1000).toISOString().slice(0, 10)
+    : new Date().toISOString().slice(0, 10);
+  const paymentReceivedAt = session.created
+    ? new Date(session.created * 1000).toISOString()
+    : new Date().toISOString();
+
+  const airtableResult = await createOrUpdateClientRecord({
+    clientName,
+    organization: meta.organization || undefined,
+    email,
+    phone: meta.phone || customerDetails?.phone || undefined,
+    packagePurchased: plan.airtablePackageName,
+    amountPaid,
+    paymentDate,
+    stripeTransactionId: stripeSubscriptionId || session.id,
+    portalAccessStatus: 'Pending',
+    onboardingStatus: 'Not Started',
+    paymentReceivedAt,
+    lifecycle: lifecycleForPaidClient(plan.airtablePackageName),
+  });
+
+  if (!airtableResult.ok) {
+    console.error(
+      'Subscription checkout: Airtable write failed',
+      session.id,
+      airtableResult.error,
+    );
+    await emitPulseEvent({
+      product: 'ea-platform',
+      type: 'onboarding.blocked',
+      title: `Subscription started — Airtable failed for ${clientName}`,
+      detail: airtableResult.error ?? 'Client record not created',
+      priority: 'critical',
+      href: '/admin/dashboard',
+      metadata: { stripeSessionId: session.id, email, planId },
+    });
+    return;
+  }
+
+  let portalSlug: string | undefined;
+  let portalLoginUrl = `${process.env.NEXT_PUBLIC_BASE_URL ?? 'https://ea-payments.vercel.app'}/portal/login`;
+  let tempCredentials: string | undefined;
+
+  if (plan.portalConfig && airtableResult.recordId) {
+    try {
+      const portalResult = await createPortalAccess(
+        {
+          clientName,
+          email,
+          organization: meta.organization || undefined,
+          airtableRecordId: airtableResult.recordId,
+        },
+        plan.portalConfig,
+      );
+
+      if (portalResult.ok) {
+        portalSlug = portalResult.slug;
+        if (portalResult.portalLoginUrl) portalLoginUrl = portalResult.portalLoginUrl;
+        if (portalResult.username && portalResult.tempPassword) {
+          tempCredentials =
+            `Your portal login credentials: Email: ${portalResult.username} | Temporary Password: ${portalResult.tempPassword}` +
+            ' Log in using the button above. Contact us to update your password at any time.';
+        }
+      }
+    } catch (err) {
+      console.error('Subscription checkout: portal provisioning failed', session.id, err);
+    }
+  }
+
+  let organizationId: string | null = null;
+
+  if (portalSlug && airtableResult.recordId) {
+    try {
+      const { orgId } = await ensureOrganizationForPortal({
+        portalSlug,
+        name: clientName,
+        clientRecordId: airtableResult.recordId,
+        organizationName: meta.organization || undefined,
+      });
+      organizationId = orgId;
+
+      if (stripeCustomerId && stripeSubscriptionId && !orgId.startsWith('org_')) {
+        await persistSubscriptionBilling(orgId, {
+          stripeCustomerId,
+          stripeSubscriptionId,
+          planId,
+          status: 'trialing',
+        });
+        await applySubscriptionEntitlements(orgId, planId, 'trialing');
+      } else if (!orgId.startsWith('org_')) {
+        await ensurePackageEntitlements({
+          orgId,
+          packagePurchased: plan.airtablePackageName,
+          slug: portalSlug,
+        });
+      }
+    } catch (err) {
+      console.error('Subscription checkout: org/entitlement sync failed', session.id, err);
+    }
+  }
+
+  const referralSource = (meta.referralSource ?? '').trim();
+  if (referralSource && airtableResult.recordId) {
+    try {
+      await createOpportunityRecord({
+        clientName,
+        packageName: plan.airtablePackageName,
+        referralSource,
+        organization: meta.organization || undefined,
+        projectValue: amountPaid,
+      });
+    } catch (err) {
+      console.error('Subscription checkout: opportunity record failed', session.id, err);
+    }
+  }
+
+  try {
+    await sendWelcomeEmail({
+      clientName,
+      email,
+      packageName: plan.displayName,
+      portalLoginUrl,
+      tempCredentials,
+    });
+  } catch (err) {
+    console.error('Subscription checkout: welcome email failed', session.id, err);
+  }
+
+  try {
+    await sendAdminNotification({
+      clientName,
+      organization: meta.organization || undefined,
+      email,
+      packageName: plan.displayName,
+      amountPaid,
+      paymentDate,
+      paymentMethodTypes: session.payment_method_types ?? [],
+      stripeTransactionId: stripeSubscriptionId || session.id,
+      airtableRecordId: airtableResult.recordId,
+    });
+  } catch (err) {
+    console.error('Subscription checkout: admin notification failed', session.id, err);
+  }
+
+  await fireOnboardingWebhook({
+    event: 'payment.received',
+    clientName,
+    email,
+    organization: meta.organization || undefined,
+    packageName: plan.displayName,
+    amountPaid,
+    paymentDate,
+    stripeTransactionId: stripeSubscriptionId || session.id,
+    airtableRecordId: airtableResult.recordId,
+    portalSlug,
+    portalLoginUrl,
+  });
+
+  await emitPulseEvent({
+    product: 'ea-platform',
+    type: 'subscription.started',
+    title: `Subscription started — ${clientName}`,
+    detail: `${plan.displayName}${plan.trialDays ? ` · ${plan.trialDays}-day trial` : ''}`,
+    priority: 'high',
+    href: portalSlug ? `/portal/${portalSlug}` : '/admin/dashboard',
+    tenantId: portalSlug,
+    metadata: {
+      stripeSessionId: session.id,
+      stripeSubscriptionId: stripeSubscriptionId || '',
+      planId,
+      organizationId: organizationId ?? '',
+      email,
+    },
+  });
+}
+
+async function handleInvoicePaymentFailed(invoice: Stripe.Invoice): Promise<void> {
+  const customerId =
+    typeof invoice.customer === 'string' ? invoice.customer : invoice.customer?.id ?? '';
+
+  const organizationId = await resolveOrganizationIdForSubscription({
+    stripeCustomerId: customerId,
+  });
+
+  if (!organizationId || organizationId.startsWith('org_')) return;
+
+  await emitPulseEvent({
+    product: 'ea-platform',
+    type: 'subscription.invoice.failed',
+    title: `Invoice payment failed — ${organizationId}`,
+    detail: invoice.id ?? 'unknown invoice',
+    priority: 'high',
+    href: '/admin/dashboard',
+    metadata: { invoiceId: invoice.id, customerId },
   });
 }
 

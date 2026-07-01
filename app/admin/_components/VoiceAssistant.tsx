@@ -4,9 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { startGuidedTour } from './GuidedTour';
 import TrustPanel from './TrustPanel';
-
-const NAVY = '#1B2B4D';
-const GOLD = '#C9A844';
+import { NAVY, GOLD } from '@/lib/design-system';
 
 type VoiceIntent = {
   action: string;

@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:lan": "next dev --hostname 0.0.0.0",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
@@ -25,7 +26,10 @@
     "launch:readiness": "node scripts/launch-readiness.mjs",
     "repo:readiness": "node scripts/repo-readiness.mjs",
     "setup:launch-verification": "node scripts/create-stripe-launch-verification.mjs",
-    "warm:admin": "node scripts/warm-admin-routes.mjs"
+    "warm:admin": "node scripts/warm-admin-routes.mjs",
+    "mobile:install": "cd mobile && npm install",
+    "mobile:start": "cd mobile && npm start",
+    "mobile:lint": "cd mobile && npm run lint"
   },
   "dependencies": {
     "@clerk/nextjs": "^7.5.9",

@@ -1,6 +1,5 @@
-import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
-import { EA_PORTAL_COOKIE, verifySession } from '@/lib/ea-portal-auth';
+import { requirePortalSession } from '@/lib/auth/resolve-portal-session';
 import { getClientByPortalSlug } from '@/lib/airtable';
 import {
   defaultDueDateForPurpose,
@@ -8,14 +7,12 @@ import {
   type ActiveSavePurpose,
 } from '@/lib/active-save';
 import { getCaptureByIdentifier, updateActiveSave } from '@/lib/capture-records';
-import { emitPulseEvent } from '@/lib/pulse-bus';
+import { notifyPortal } from '@/lib/portal-notify';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
-  const cookieStore = await cookies();
-  const token = cookieStore.get(EA_PORTAL_COOKIE)?.value;
-  const session = token ? await verifySession(token) : null;
+  const session = await requirePortalSession({ realm: 'simplifi' });
   if (!session) {
     return NextResponse.json({ ok: false, error: 'Please log in again.' }, { status: 401 });
   }
@@ -64,12 +61,12 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: updated.error }, { status: 500 });
   }
 
-  await emitPulseEvent({
+  await notifyPortal({
     product: 'simplifi',
     type: 'capture.active_saved',
     title: record.title,
     detail: `${option.label} · due ${dueDate}`,
-    href: '/simplifi/workspace',
+    href: `/portal/${session.slug}/simplifi`,
     objectId: recordId,
     tenantId: session.slug,
     priority: 'medium',

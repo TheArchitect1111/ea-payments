@@ -1,0 +1,62 @@
+/**
+ * EA Platform shared UI primitives (Phase 6).
+ * Portal ep-* classes align with premium-chassis pc-* patterns via design tokens.
+ */
+
+.ep-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: 0.75rem 1.25rem;
+  border: none;
+  border-radius: var(--ea-radius-pill);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  cursor: pointer;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.ep-btn:hover:not(:disabled) {
+  opacity: 0.92;
+}
+
+.ep-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ep-btn-primary {
+  background: var(--ea-navy);
+  color: #fff;
+}
+
+.ep-btn-secondary {
+  background: rgba(27, 43, 77, 0.08);
+  color: var(--ea-navy);
+}
+
+.ep-error {
+  color: var(--ea-danger);
+  font-size: 0.85rem;
+}
+
+/* Admin surfaces — reuse tokens with Tailwind-friendly utility classes */
+.ea-admin-kicker {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ea-gold);
+}
+
+.ea-admin-heading {
+  color: var(--ea-navy);
+  font-weight: 800;
+}
+
+.ea-admin-muted {
+  color: var(--ea-muted);
+}

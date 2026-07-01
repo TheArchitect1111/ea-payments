@@ -1,7 +1,6 @@
-import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { verifyCaptureApiKey, CAPTURE_CORS_HEADERS } from '@/lib/capture-auth';
-import { EA_PORTAL_COOKIE, verifySession } from '@/lib/ea-portal-auth';
+import { requirePortalSession } from '@/lib/auth/resolve-portal-session';
 import { getCaptureByIdentifier } from '@/lib/capture-records';
 import { buildCaptureStatusResponse } from '@/lib/capture-response';
 
@@ -22,9 +21,7 @@ export async function GET(
   const { id } = await params;
   const headerKey = req.headers.get('x-ea-capture-key');
 
-  const cookieStore = await cookies();
-  const token = cookieStore.get(EA_PORTAL_COOKIE)?.value;
-  const session = token ? await verifySession(token) : null;
+  const session = await requirePortalSession({ realm: 'simplifi' });
 
   if (!session && !verifyCaptureApiKey(headerKey)) {
     return corsJson({ ok: false, error: 'Unauthorized' }, 401);

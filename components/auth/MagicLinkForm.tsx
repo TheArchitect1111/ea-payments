@@ -2,6 +2,7 @@
 
 import { FormEvent, useState } from 'react';
 import type { MagicLinkRealm } from '@/lib/magic-link';
+import { getRealmLoginCopy } from '@/lib/auth/realm-login-copy';
 
 type Props = {
   realm: MagicLinkRealm;
@@ -16,11 +17,15 @@ type Props = {
 export default function MagicLinkForm({
   realm,
   next,
-  title = 'Sign in with email',
-  subtitle = 'Enter your email and we will send you a one-tap login link. No password needed.',
-  buttonLabel = 'Email me a login link',
+  title,
+  subtitle,
+  buttonLabel,
   showTitle = true,
 }: Props) {
+  const copy = getRealmLoginCopy(realm);
+  const resolvedTitle = title ?? copy.cardTitle;
+  const resolvedSubtitle = subtitle ?? copy.cardSubtitle;
+  const resolvedButton = buttonLabel ?? copy.buttonLabel;
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const [sent, setSent] = useState(false);
@@ -57,12 +62,12 @@ export default function MagicLinkForm({
     return (
       <div className="pl-sent" role="status">
         {showTitle ? (
-          <h3 className="pl-title" style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>{title}</h3>
+          <h3 className="pl-title" style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>{resolvedTitle}</h3>
         ) : null}
-        <p className="pl-success">Check your email — your login link is on the way.</p>
-        <p className="pl-lede">Open the email on this device and tap <strong>Sign in</strong>. The link expires in 15 minutes.</p>
+        <p className="pl-success">{copy.sentMessage}</p>
+        <p className="pl-lede">{copy.sentDetail}</p>
         <button type="button" className="pl-btn pl-btn-secondary" onClick={() => setSent(false)}>
-          Send another link
+          {copy.sendAnotherLabel}
         </button>
       </div>
     );
@@ -71,9 +76,9 @@ export default function MagicLinkForm({
   return (
     <form onSubmit={handleSubmit} className="pl-form pl-magic-form">
       {showTitle ? (
-        <h3 className="pl-title" style={{ fontSize: '1.25rem', marginBottom: '0.35rem' }}>{title}</h3>
+        <h3 className="pl-title" style={{ fontSize: '1.25rem', marginBottom: '0.35rem' }}>{resolvedTitle}</h3>
       ) : null}
-      <p className="pl-lede" style={{ marginBottom: '1rem' }}>{subtitle}</p>
+      <p className="pl-lede" style={{ marginBottom: '1rem' }}>{resolvedSubtitle}</p>
 
       <label className="pl-label" htmlFor="magic-email">
         Email
@@ -85,7 +90,7 @@ export default function MagicLinkForm({
         autoComplete="email"
         autoCapitalize="none"
         spellCheck={false}
-        placeholder="you@company.com"
+        placeholder={copy.emailPlaceholder}
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         required
@@ -93,7 +98,7 @@ export default function MagicLinkForm({
       />
 
       <button type="submit" className="pl-btn" disabled={loading}>
-        {loading ? 'Sending…' : buttonLabel}
+        {loading ? 'Sending…' : resolvedButton}
       </button>
 
       {error ? (

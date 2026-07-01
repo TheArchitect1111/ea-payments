@@ -3,6 +3,9 @@
  * Persists to Airtable when PULSE_EVENTS_TABLE is configured; always returns ok for emitters.
  */
 
+import { fromPulseEventRow, toActivityEventInput } from '@ea/portal-chassis/platform-events';
+import { publishPlatformActivityEvent } from '@/lib/activity-events-store';
+
 export type PulseProduct =
   | 'ea-platform'
   | 'simplifi'
@@ -28,6 +31,14 @@ export type PulseEventType =
   | 'onboarding.blocked'
   | 'launch.verification.completed'
   | 'payment.received'
+  | 'subscription.started'
+  | 'subscription.active'
+  | 'subscription.trialing'
+  | 'subscription.canceled'
+  | 'subscription.unpaid'
+  | 'subscription.past_due'
+  | 'subscription.invoice.paid'
+  | 'subscription.invoice.failed'
   | 'attention.critical'
   | 'guide.escalated';
 
@@ -54,6 +65,8 @@ export async function emitPulseEvent(event: PulseEvent): Promise<{ ok: boolean }
   const row = { ...event, at: new Date().toISOString() };
   memoryEvents.unshift(row);
   if (memoryEvents.length > MEMORY_CAP) memoryEvents.length = MEMORY_CAP;
+
+  void mirrorPulseToActivityEvents(event, row.at);
 
   const baseId = process.env.AIRTABLE_PAYMENTS_BASE_ID;
   const table = process.env.PULSE_EVENTS_TABLE;
@@ -97,4 +110,42 @@ export async function emitPulseEvent(event: PulseEvent): Promise<{ ok: boolean }
   }
 
   return { ok: true };
+}
+
+const PRIORITY_SCORE: Record<string, number> = {
+  critical: 95,
+  high: 75,
+  medium: 50,
+  low: 30,
+};
+
+/** Dual-write Pulse events into ActivityEvents for Mission Control convergence. */
+async function mirrorPulseToActivityEvents(event: PulseEvent, at: string): Promise<void> {
+  try {
+    const platform = fromPulseEventRow(
+      {
+        organizationId: process.env.EA_INTERNAL_ORG_ID ?? 'ea',
+        clientSlug: event.tenantId,
+        eventType: event.type,
+        title: event.title,
+        summary: event.detail ?? '',
+        priority: PRIORITY_SCORE[event.priority ?? 'medium'] ?? 50,
+        module: event.product,
+        actionLabel: 'Open',
+        actionUrl: event.href,
+        personId: event.tenantId,
+        createdAt: at,
+        metadata: {
+          ...(event.metadata ?? {}),
+          objectId: event.objectId,
+          pulseProduct: event.product,
+        },
+      },
+      `pulse-${at}`,
+    );
+
+    await publishPlatformActivityEvent(toActivityEventInput(platform));
+  } catch (err) {
+    console.error('[pulse-bus] ActivityEvents mirror failed:', err);
+  }
 }

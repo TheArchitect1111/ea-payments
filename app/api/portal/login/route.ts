@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { validatePortalLogin, getClientByPortalSlug } from '@/lib/airtable';
+import { validatePortalLogin, getClientByPortalSlug, updateClientEngagementScore } from '@/lib/airtable';
 import { ensureDemoClient, isDemoCredentialAttempt } from '@/lib/demo-client';
 import { begin2FA, is2FAEnabled } from '@/lib/ea-auth-2fa';
 import { signSession, makeSessionCookie } from '@/lib/ea-portal-auth';
 import { getClientSuccessProfile } from '@/lib/client-success';
-import { updateClientEngagementScore } from '@/lib/airtable';
-import { emitPulseEvent } from '@/lib/pulse-bus';
+import { notifyPortal } from '@/lib/portal-notify';
+import { resolvePortalIdentity } from '@/lib/org-provision';
 
 export const dynamic = 'force-dynamic';
 
@@ -62,7 +62,18 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  const token = await signSession(result.slug);
+  const identity = await resolvePortalIdentity({
+    email,
+    slug: result.slug,
+    clientRecordId: result.recordId,
+  });
+
+  const token = await signSession({
+    slug: result.slug,
+    orgId: identity.orgId,
+    role: identity.role,
+    email: identity.email,
+  });
   if (!token) {
     return NextResponse.json({ error: 'Session signing failed.' }, { status: 500 });
   }
@@ -75,7 +86,7 @@ export async function POST(req: NextRequest) {
         const engagement = profile.scores.find((s) => s.id === 'engagement');
         if (engagement) await updateClientEngagementScore(result.recordId, engagement.value);
       }
-      await emitPulseEvent({
+      await notifyPortal({
         product: 'ea-platform',
         type: 'portal.login',
         title: `Portal login — ${client?.clientName ?? result.slug}`,

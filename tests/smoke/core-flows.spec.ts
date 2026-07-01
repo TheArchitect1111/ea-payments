@@ -18,7 +18,8 @@ test('consider selena demo story is reachable', async ({ page }) => {
 
 test('assessment page is reachable', async ({ page }) => {
   await page.goto('/assessment');
-  await expect(page.getByRole('button', { name: /submit my assessment/i })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /ctp intake/i })).toBeVisible();
+  await expect(page.getByRole('button', { name: /submit my ctp intake/i })).toBeVisible();
 });
 
 test('admin dashboard route prompts auth', async ({ page }) => {
@@ -65,9 +66,12 @@ test('simplifi portal route requires portal login', async ({ page }) => {
   await expect(page).toHaveURL(/\/portal\/login/);
 });
 
-test('amplifi share page is reachable', async ({ page }) => {
-  await page.goto('/amplifi/share');
-  await expect(page.getByRole('heading', { name: /amplify what you see/i })).toBeVisible();
+test('amplifi social posting page is reachable', async ({ page }) => {
+  await page.goto('/amplifi');
+  await expect(page.getByRole('heading', { name: /search\. create\. store/i })).toBeVisible();
+  await page.getByRole('button', { name: /try demo/i }).click();
+  await expect(page.getByText(/amplifi story drafts/i)).toBeVisible();
+  await expect(page.getByRole('button', { name: /submit for approval/i })).toBeVisible();
 });
 
 test('magnifi consider demo has opportunity content', async ({ page }) => {
@@ -82,6 +86,57 @@ test('checkout lists purchasable packages only', async ({ page }) => {
   await expect(options.filter({ hasText: /Capacity Assessment/i })).toHaveCount(0);
 });
 
+test('portal billing route requires portal login', async ({ page }) => {
+  await page.goto('/portal/demo-client/billing');
+  await expect(page).toHaveURL(/\/portal\/login/);
+});
+
+test('mission control API requires admin auth', async ({ page }) => {
+  const res = await page.request.get('/api/mission-control');
+  expect(res.status()).toBe(401);
+});
+
+test('intent API requires admin auth', async ({ page }) => {
+  const res = await page.request.post('/api/intent', {
+    data: { intent: 'open proposals' },
+  });
+  expect(res.status()).toBe(401);
+});
+
+test('whoami API returns 401 when unauthenticated', async ({ page }) => {
+  const res = await page.request.get('/api/auth/whoami');
+  expect(res.status()).toBe(401);
+  const data = (await res.json()) as { authenticated?: boolean };
+  expect(data.authenticated).toBe(false);
+});
+
+test('auth session exchange rejects missing token', async ({ page }) => {
+  const res = await page.request.post('/api/auth/session', { data: {} });
+  expect(res.status()).toBe(400);
+});
+
+test('auth session exchange rejects invalid magic-link token', async ({ page }) => {
+  const res = await page.request.post('/api/auth/session', {
+    data: { token: 'not-a-real-token.signature' },
+  });
+  expect([401, 500]).toContain(res.status());
+});
+
+test('design system tokens load globally', async ({ page }) => {
+  await page.goto('/');
+  const tokens = await page.evaluate(() => ({
+    navy: getComputedStyle(document.documentElement).getPropertyValue('--ea-navy').trim(),
+    gold: getComputedStyle(document.documentElement).getPropertyValue('--ea-gold').trim(),
+  }));
+  expect(tokens.navy).toBe('#1b2b4d');
+  expect(tokens.gold).toBe('#c9a844');
+});
+
+test('portal notifications API requires auth', async ({ page }) => {
+  const res = await page.request.get('/api/portal/notifications');
+  expect(res.status()).toBe(401);
+});
+
 test('assessment thank-you contact link works', async ({ page }) => {
   await page.goto('/assessment/thank-you');
   await expect(page.getByRole('link', { name: /contact our team/i })).toHaveAttribute(
@@ -94,6 +149,51 @@ test('simplifi workspace is reachable', async ({ page }) => {
   await page.goto('/simplifi/workspace');
   await expect(page.getByRole('heading', { name: /your opportunities, organized/i })).toBeVisible();
   await expect(page.getByRole('link', { name: /capture now/i })).toBeVisible();
+});
+
+test('simplifi capture PWA page is reachable', async ({ page }) => {
+  await page.goto('/simplifi/capture');
+  await expect(page.getByText(/never lose an opportunity/i)).toBeVisible();
+});
+
+test('simplifi settings page is reachable', async ({ page }) => {
+  await page.goto('/simplifi/settings');
+  await expect(page.getByRole('heading', { name: /^settings$/i })).toBeVisible();
+});
+
+test('simplifi workspace API requires auth', async ({ page }) => {
+  const res = await page.request.get('/api/simplifi/workspace');
+  expect(res.status()).toBe(401);
+});
+
+test('simplifi orb context API is public', async ({ page }) => {
+  const res = await page.request.get('/api/simplifi/context?pathname=/simplifi/capture');
+  expect(res.status()).toBe(200);
+  const data = (await res.json()) as { ok?: boolean; orb?: { product?: string } };
+  expect(data.ok).toBe(true);
+  expect(data.orb?.product).toBe('simplifi');
+});
+
+test('simplifi me API requires auth', async ({ page }) => {
+  const res = await page.request.get('/api/simplifi/me');
+  expect(res.status()).toBe(401);
+});
+
+test('simplifi brief API requires auth', async ({ page }) => {
+  const res = await page.request.get('/api/simplifi/brief');
+  expect(res.status()).toBe(401);
+});
+
+test('auth logout JSON endpoint works', async ({ page }) => {
+  const res = await page.request.post('/api/auth/logout');
+  expect(res.status()).toBe(200);
+  const data = (await res.json()) as { ok?: boolean };
+  expect(data.ok).toBe(true);
+});
+
+test('extension bootstrap API requires auth', async ({ page }) => {
+  const res = await page.request.get('/api/extension/bootstrap');
+  expect(res.status()).toBe(401);
 });
 
 test('app alias redirects to workspace', async ({ page }) => {
@@ -134,6 +234,21 @@ test('health launch endpoint returns JSON', async ({ page }) => {
   expect(typeof data.checks?.criticalReady).toBe('boolean');
   expect(typeof data.checks?.fullLaunchReady).toBe('boolean');
   expect(data.checks?.missingByCategory).toBeTruthy();
+});
+
+test('organizations API requires portal login', async ({ page }) => {
+  const res = await page.request.get('/api/organizations');
+  expect(res.status()).toBe(401);
+});
+
+test('admin connect setup POST requires admin manage role', async ({ page }) => {
+  const res = await page.request.post('/api/admin/connect/setup');
+  expect(res.status()).toBe(401);
+});
+
+test('portal modules API requires login', async ({ page }) => {
+  const res = await page.request.get('/api/portal/modules');
+  expect(res.status()).toBe(401);
 });
 
 test('portal documents requires login', async ({ page }) => {

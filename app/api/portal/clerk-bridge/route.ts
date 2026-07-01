@@ -4,6 +4,7 @@ import { findPortalClientByEmail, getClientByPortalSlug, updateClientEngagementS
 import { getClientSuccessProfile } from '@/lib/client-success';
 import { signSession, makeSessionCookie } from '@/lib/ea-portal-auth';
 import { emitPulseEvent } from '@/lib/pulse-bus';
+import { resolvePortalIdentity } from '@/lib/org-provision';
 
 export const dynamic = 'force-dynamic';
 
@@ -59,7 +60,18 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const sessionToken = await signSession(result.slug);
+  const identity = await resolvePortalIdentity({
+    email,
+    slug: result.slug,
+    clientRecordId: result.recordId,
+  });
+
+  const sessionToken = await signSession({
+    slug: result.slug,
+    orgId: identity.orgId,
+    role: identity.role,
+    email: identity.email,
+  });
   if (!sessionToken) {
     return NextResponse.json({ error: 'Session signing failed.' }, { status: 500 });
   }

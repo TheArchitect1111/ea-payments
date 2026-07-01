@@ -20,3 +20,11 @@ export declare const eaPulseTheme: {
     readonly containerNarrow: '768px';
   };
 };
+
+export declare const eaMotion: {
+  readonly tap: 120;
+  readonly small: 180;
+  readonly menu: 220;
+  readonly page: 300;
+  readonly large: 400;
+};

@@ -21,3 +21,12 @@ export const eaPulseTheme = {
     containerNarrow: '768px',
   },
 };
+
+/** EA Instant Feel Standard™ — animation timing (ms) */
+export const eaMotion = {
+  tap: 120,
+  small: 180,
+  menu: 220,
+  page: 300,
+  large: 400,
+};

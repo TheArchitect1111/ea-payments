@@ -9,7 +9,7 @@ import { spawnSync } from 'node:child_process';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, '..');
-const source = resolve(root, '../../ea-operating-system/portal-core');
+const source = resolve(root, '../ea-operating-system/portal-core');
 const target = resolve(root, 'vendor/portal-chassis');
 
 if (!existsSync(source)) {

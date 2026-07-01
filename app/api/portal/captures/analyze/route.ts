@@ -1,10 +1,10 @@
-import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
-import { EA_PORTAL_COOKIE, verifySession } from '@/lib/ea-portal-auth';
+import { requirePortalSession } from '@/lib/auth/resolve-portal-session';
 import { getClientByPortalSlug } from '@/lib/airtable';
 import { type CaptureInput } from '@/lib/capture-pipeline';
 import { portalCaptureSource } from '@/lib/capture-records';
 import { submitCapture, toCaptureApiResponse } from '@/lib/capture-submit';
+import { isModuleEnabled } from '@/lib/modules/portal-modules';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -77,9 +77,7 @@ async function parseCaptureInput(req: Request): Promise<{
 }
 
 export async function POST(req: Request) {
-  const cookieStore = await cookies();
-  const token = cookieStore.get(EA_PORTAL_COOKIE)?.value;
-  const session = token ? await verifySession(token) : null;
+  const session = await requirePortalSession({ realm: 'simplifi' });
   if (!session) {
     return NextResponse.json({ ok: false, error: 'Please log in again.' }, { status: 401 });
   }
@@ -89,7 +87,15 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: 'Client record not found.' }, { status: 404 });
   }
 
-  if (client.packagePurchased !== 'Simplifi' && session.slug !== 'demo-client') {
+  const simplifiEnabled = await isModuleEnabled({
+    orgId: session.orgId,
+    slug: session.slug,
+    moduleId: 'simplifi',
+    packagePurchased: client.packagePurchased,
+    role: session.role,
+  });
+
+  if (!simplifiEnabled && session.slug !== 'demo-client') {
     return NextResponse.json(
       { ok: false, error: 'Simplifi Early Access is required to capture opportunities.' },
       { status: 403 },

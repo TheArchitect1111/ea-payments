@@ -2,9 +2,8 @@
 
 import { usePathname } from 'next/navigation';
 import AdminSignInForm from '@/components/auth/AdminSignInForm';
+import { NAVY } from '@/lib/design-system';
 import '../../portal/login/portal-login.css';
-
-const NAVY = '#1B2B4D';
 
 export default function AdminLogin() {
   const pathname = usePathname();

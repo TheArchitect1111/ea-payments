@@ -6,6 +6,7 @@ import { signSession, makeSessionCookie } from '@/lib/ea-portal-auth';
 import { getClientSuccessProfile } from '@/lib/client-success';
 import { emitPulseEvent } from '@/lib/pulse-bus';
 import { makePartnerSessionCookie, signPartnerSession } from '@/lib/partner-session';
+import { resolveAdminIdentity, resolvePortalIdentity } from '@/lib/org-provision';
 
 export const dynamic = 'force-dynamic';
 
@@ -30,6 +31,10 @@ export async function POST(req: NextRequest) {
 
   try {
     if (payload.realm === 'admin') {
+      const identity = resolveAdminIdentity({
+        email: payload.email,
+        role: payload.data.role || 'admin',
+      });
       const res = NextResponse.json({ ok: true, next: payload.data.next || '/admin/master' });
       res.cookies.set(
         makeAdminSessionCookie(
@@ -37,6 +42,7 @@ export async function POST(req: NextRequest) {
             email: payload.email,
             name: payload.data.name || payload.email,
             role: payload.data.role || 'admin',
+            orgId: identity.orgId,
           }),
         ),
       );
@@ -47,7 +53,18 @@ export async function POST(req: NextRequest) {
       const slug = payload.data.slug;
       if (!slug) return NextResponse.json({ error: 'Invalid session.' }, { status: 400 });
 
-      const token = await signSession(slug);
+      const identity = await resolvePortalIdentity({
+        email: payload.email,
+        slug,
+        clientRecordId: payload.data.recordId,
+      });
+
+      const token = await signSession({
+        slug,
+        orgId: identity.orgId,
+        role: identity.role,
+        email: identity.email,
+      });
       if (!token) return NextResponse.json({ error: 'Session signing failed.' }, { status: 500 });
 
       const recordId = payload.data.recordId;

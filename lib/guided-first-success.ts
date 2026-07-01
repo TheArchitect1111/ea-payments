@@ -33,10 +33,7 @@ export interface GuidedPlatformConfig {
   coachPrompts: string[];
 }
 
-const NAVY = '#1B2B4D';
-const GOLD = '#C9A844';
-
-export const EA_BRAND = { NAVY, GOLD };
+export { EA_BRAND } from '@/lib/design-system';
 
 export const GUIDED_PLATFORMS: Record<EAPlatformId, GuidedPlatformConfig> = {
   portal: {
@@ -57,7 +54,7 @@ export const GUIDED_PLATFORMS: Record<EAPlatformId, GuidedPlatformConfig> = {
     nextActions: [
       { id: 'capture', label: 'Capture now', href: '/capture', description: 'Simplifi → Magnifi → Amplifi' },
       { id: 'story', label: 'View Magnifi demo', href: '/story/selena', description: 'No login required' },
-      { id: 'amplify', label: 'Open Amplifi', href: '/amplify', description: 'Share your story' },
+      { id: 'amplify', label: 'Open Amplifi', href: '/amplifi', description: 'Post to social' },
       { id: 'pulse', label: 'Open Pulse', description: 'Track progress in portal' },
     ],
     coachPrompts: [
@@ -108,7 +105,7 @@ export const GUIDED_PLATFORMS: Record<EAPlatformId, GuidedPlatformConfig> = {
     nextActions: [
       { id: 'assessment', label: 'Take assessment', href: '/assessment' },
       { id: 'capture', label: 'Create your own', href: '/capture' },
-      { id: 'share', label: 'Amplifi — share link', href: '/amplify' },
+      { id: 'share', label: 'Amplifi — post to social', href: '/amplifi' },
     ],
     coachPrompts: ['How do I share this?', 'What is Consider vs Magnifi?'],
   },

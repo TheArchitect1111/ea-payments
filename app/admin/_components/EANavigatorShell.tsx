@@ -5,9 +5,7 @@ import { useState } from 'react';
 import UniversalCommandBar from './UniversalCommandBar';
 import VoiceAssistant from './VoiceAssistant';
 import { startGuidedTour } from './GuidedTour';
-
-const NAVY = '#1B2B4D';
-const GOLD = '#C9A844';
+import { NAVY, GOLD } from '@/lib/design-system';
 
 const EXPERIMENTAL_ADMIN =
   process.env.EXPERIMENTAL_ADMIN === 'true' || process.env.EXPERIMENTAL_ADMIN === '1';

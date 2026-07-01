@@ -1115,11 +1115,31 @@ export async function sendCaptureReadyEmail(data: {
   magnifiUrl: string;
   considerUrl?: string;
   guidanceUrl?: string;
+  workspaceUrl?: string;
 }): Promise<{ ok: boolean; error?: string }> {
+  const linkRows = [
+    ['Magnifi story', data.magnifiUrl],
+    data.considerUrl ? ['CTP share link', data.considerUrl] : undefined,
+    data.workspaceUrl ? ['Workspace / portal', data.workspaceUrl] : undefined,
+    data.guidanceUrl ? ['Simplifi guidance', data.guidanceUrl] : undefined,
+  ]
+    .filter((row): row is [string, string] => Boolean(row))
+    .map(
+      ([label, url]) =>
+        `<tr>
+          <td style="padding:12px 14px;border-bottom:1px solid #E4E4E4;font-size:12px;font-weight:700;color:#555;vertical-align:top;">${escHtml(label)}</td>
+          <td style="padding:12px 14px;border-bottom:1px solid #E4E4E4;font-size:13px;line-height:1.6;word-break:break-all;"><a href="${escHtml(url)}" target="_blank" style="color:#1B2B4D;text-decoration:underline;">${escHtml(url)}</a></td>
+        </tr>`
+    )
+    .join('');
+
   const bodyHtml = `
     <p style="margin:0 0 16px;font-size:15px;color:#1A1A2E;line-height:1.7;">Your capture is ready. Simplifi analyzed it, Magnifi built the story, and Amplifi can share the link.</p>
     <p style="margin:0 0 8px;font-size:14px;font-weight:700;color:#1B2B4D;">${escHtml(data.title)}</p>
-    <p style="margin:0;font-size:13px;color:#555;line-height:1.7;">Open Magnifi for the cinematic experience, or share the Consider link with anyone.</p>`;
+    <p style="margin:0 0 18px;font-size:13px;color:#555;line-height:1.7;">Open Magnifi for the cinematic experience, share the CTP link, or continue the work from the workspace.</p>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #E4E4E4;margin:18px 0;">
+      ${linkRows}
+    </table>`;
 
   return resendEmail(
     data.email,
@@ -1128,8 +1148,8 @@ export async function sendCaptureReadyEmail(data: {
       title: 'Capture Complete',
       eyebrow: 'Simplifi → Magnifi → Amplifi',
       bodyHtml,
-      ctaLabel: 'Open Magnifi',
-      ctaUrl: data.magnifiUrl,
+      ctaLabel: data.considerUrl ? 'Open CTP Link' : 'Open Magnifi',
+      ctaUrl: data.considerUrl ?? data.magnifiUrl,
     })
   );
 }

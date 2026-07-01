@@ -22,6 +22,7 @@ const eslintConfig = defineConfig([
     "extension/**",
     "test-results/**",
     "playwright-report/**",
+    "mobile/metro.config.js",
   ]),
 ]);
 

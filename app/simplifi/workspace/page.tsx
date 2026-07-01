@@ -2,7 +2,7 @@ import { cookies } from 'next/headers';
 import Link from 'next/link';
 import { verifySession, EA_PORTAL_COOKIE } from '@/lib/ea-portal-auth';
 import { getClientByPortalSlug } from '@/lib/airtable';
-import { loadSimplifiWorkspace, type SimplifiWorkspaceData } from '@/lib/simplifi-store';
+import { loadSimplifiWorkspace, type SimplifiWorkspaceData } from '@/lib/simplifi-core';
 import { EA_PLATFORM_URL } from '@/lib/platform-urls';
 import SimplifiWorkspace from './SimplifiWorkspace';
 import './simplifi-workspace.css';
@@ -45,6 +45,7 @@ export default async function SimplifiWorkspacePage() {
         </Link>
         <nav className="sw-nav">
           <Link href="/simplifi/capture">Capture</Link>
+          <Link href="/simplifi/settings">Settings</Link>
           {slug ? (
             <Link href={`/portal/${slug}`}>Portal</Link>
           ) : (

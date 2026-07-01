@@ -1,18 +1,7 @@
 /* EA Portal — soft UI design system (Crextio-inspired, EA navy + gold) */
 
-:root {
-  --ea-navy: #1b2b4d;
-  --ea-gold: #c9a844;
-  --ea-cream: #f3efe4;
-  --ea-cream-deep: #ebe4d4;
-  --ea-surface: #ffffff;
-  --ea-text: #1a1a2e;
-  --ea-muted: #6b7280;
-  --ea-radius: 24px;
-  --ea-radius-sm: 16px;
-  --ea-shadow: 0 8px 32px rgba(27, 43, 77, 0.08);
-  --ea-shadow-lg: 0 20px 60px rgba(27, 43, 77, 0.12);
-}
+@import '../../../lib/design-system/tokens.css';
+@import '../../../lib/design-system/components.css';
 
 .ep-page,
 .ea-shell {
@@ -851,4 +840,347 @@
   font-size: 0.9rem;
   line-height: 1.5;
   color: var(--ea-muted);
+}
+
+/* ── Pulse OS App Shell (Phase 4) ── */
+.ea-app-shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+.ea-shell-sidebar {
+  width: 260px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  background: rgba(255, 255, 255, 0.92);
+  border-right: 1px solid rgba(27, 43, 77, 0.08);
+  padding: 20px 14px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.ea-shell-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 8px 18px;
+  border-bottom: 1px solid rgba(27, 43, 77, 0.08);
+  margin-bottom: 12px;
+}
+
+.ea-shell-brand-kicker {
+  margin: 0;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ea-gold);
+}
+
+.ea-shell-brand-name {
+  margin: 2px 0 0;
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--ea-navy);
+}
+
+.ea-shell-nav {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ea-shell-nav-label {
+  margin: 0 0 6px;
+  padding: 0 10px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ea-muted);
+}
+
+.ea-shell-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  text-decoration: none;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--ea-muted);
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.ea-shell-nav-link:hover {
+  background: rgba(27, 43, 77, 0.06);
+  color: var(--ea-navy);
+}
+
+.ea-shell-nav-link-active {
+  background: var(--ea-navy);
+  color: #fff;
+}
+
+.ea-shell-nav-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: rgba(201, 168, 68, 0.18);
+  color: var(--ea-navy);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.ea-shell-nav-link-active .ea-shell-nav-icon {
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+}
+
+.ea-shell-sidebar-foot {
+  padding-top: 12px;
+  border-top: 1px solid rgba(27, 43, 77, 0.08);
+}
+
+.ea-shell-logout {
+  display: block;
+  padding: 10px 12px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--ea-muted);
+  text-decoration: none;
+}
+
+.ea-shell-stage {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.ea-shell-topbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 20px;
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(27, 43, 77, 0.06);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.ea-shell-topbar-spacer {
+  flex: 1;
+}
+
+.ea-shell-menu-btn {
+  display: none;
+  flex-direction: column;
+  gap: 4px;
+  background: none;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+}
+
+.ea-shell-menu-btn span {
+  display: block;
+  width: 20px;
+  height: 2px;
+  background: var(--ea-navy);
+  border-radius: 2px;
+}
+
+.ea-shell-content {
+  flex: 1;
+  min-height: 0;
+}
+
+.ep-main-shell {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px 28px 48px;
+}
+
+.ea-shell-overlay {
+  display: none;
+}
+
+.ea-notify {
+  position: relative;
+}
+
+.ea-notify-trigger {
+  position: relative;
+  background: rgba(27, 43, 77, 0.06);
+  border: none;
+  border-radius: 999px;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.ea-notify-badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: #dc2626;
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ea-notify-backdrop {
+  position: fixed;
+  inset: 0;
+  background: transparent;
+  border: none;
+  z-index: 30;
+}
+
+.ea-notify-panel {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  width: min(360px, 92vw);
+  max-height: 420px;
+  overflow: auto;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: var(--ea-shadow-lg);
+  border: 1px solid rgba(27, 43, 77, 0.08);
+  z-index: 40;
+  padding: 12px;
+}
+
+.ea-notify-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.ea-notify-panel-title {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: var(--ea-navy);
+}
+
+.ea-notify-mark-read {
+  background: none;
+  border: none;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--ea-gold);
+  cursor: pointer;
+}
+
+.ea-notify-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.ea-notify-item {
+  border-bottom: 1px solid rgba(27, 43, 77, 0.06);
+}
+
+.ea-notify-item-unread .ea-notify-item-title {
+  font-weight: 800;
+}
+
+.ea-notify-item-link {
+  display: block;
+  padding: 10px 6px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.ea-notify-item-title {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--ea-navy);
+}
+
+.ea-notify-item-detail {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.78rem;
+  color: var(--ea-muted);
+}
+
+.ea-notify-item-time {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.72rem;
+  color: var(--ea-muted);
+}
+
+.ea-notify-empty {
+  margin: 12px 6px;
+  font-size: 0.85rem;
+  color: var(--ea-muted);
+}
+
+.ea-notify-view-all {
+  display: block;
+  margin-top: 8px;
+  padding: 10px 6px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--ea-navy);
+  text-decoration: none;
+}
+
+@media (max-width: 900px) {
+  .ea-shell-menu-btn {
+    display: flex;
+  }
+
+  .ea-shell-sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 50;
+    transform: translateX(-100%);
+    transition: transform 0.2s ease;
+    box-shadow: var(--ea-shadow-lg);
+  }
+
+  .ea-shell-sidebar-open {
+    transform: translateX(0);
+  }
+
+  .ea-shell-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(27, 43, 77, 0.35);
+    border: none;
+    z-index: 45;
+  }
+
+  .ep-main-shell {
+    padding: 16px 16px 40px;
+  }
 }

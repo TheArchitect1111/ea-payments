@@ -24,8 +24,9 @@ Add to `package.json`:
 
 ```css
 @import '@ea/premium-chassis/presets/ea-pulse.css';
-@import "tailwindcss";
 ```
+
+Includes **Instant Feel Standard™** utilities (`pc-tap`, `pc-skeleton`, `pc-save-badge`) via `motion.css` + `instant-feel.css`.
 
 TypeScript theme (optional):
 

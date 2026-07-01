@@ -1,8 +1,7 @@
-import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
-import { EA_PORTAL_COOKIE, verifySession } from '@/lib/ea-portal-auth';
-import { getClientByPortalSlug, getContentRequestsForClient } from '@/lib/airtable';
-import { PortalShell, NAVY, GOLD } from '@/lib/chassis/PortalShell';
+import { getContentRequestsForClient } from '@/lib/airtable';
+import { PortalShell } from '@/lib/chassis/PortalShell';
+import { NAVY, GOLD } from '@/lib/design-system';
+import { requirePortalModule } from '@/lib/modules/portal-modules';
 import UpdateHubExperience from '@/app/portal/components/UpdateHubExperience';
 import UpdateHubFeed from '@/app/portal/components/UpdateHubFeed';
 import { getPublishedFeedItems, getPendingRequests } from '@/lib/update-hub-feed';
@@ -17,15 +16,7 @@ function fmtDate(value?: string): string {
 
 export default async function UpdatesPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const cookieStore = await cookies();
-  const token = cookieStore.get(EA_PORTAL_COOKIE)?.value;
-  const session = token ? await verifySession(token) : null;
-
-  if (!session) redirect('/portal/login');
-  if (session.slug !== slug) redirect(`/portal/${session.slug}/updates`);
-
-  const client = await getClientByPortalSlug(slug);
-  if (!client) redirect('/portal/login');
+  const { client, access } = await requirePortalModule(slug, 'update-hub');
 
   const requests = await getContentRequestsForClient(client.id);
   const publishedFeed = getPublishedFeedItems(requests);
@@ -36,9 +27,8 @@ export default async function UpdatesPage({ params }: { params: Promise<{ slug: 
 
   return (
     <div className="ep-page">
-      <PortalShell slug={slug} active="updates" />
-
-      <main className="ep-main">
+      <PortalShell slug={slug} active="updates" shellNavGroups={access.shellNavGroups}>
+      <main className="ep-main ep-main-shell">
         <div className="ep-welcome">
           <p className="ep-welcome-label">Update Hub™</p>
           <h1 className="ep-welcome-heading">Communications & Requests</h1>
@@ -73,9 +63,15 @@ export default async function UpdatesPage({ params }: { params: Promise<{ slug: 
             Submit Update Request
           </a>
           <a
-            href={`/portal/${slug}/updates/enhancement`}
+            href="/amplifi"
             className="ep-pulse-cta"
             style={{ backgroundColor: NAVY, color: GOLD }}
+          >
+            Amplifi — Social Post
+          </a>
+          <a
+            href={`/portal/${slug}/updates/enhancement`}
+            className="ep-pulse-cta ep-pulse-cta-outline"
           >
             Request Enhancement
           </a>
@@ -115,6 +111,7 @@ export default async function UpdatesPage({ params }: { params: Promise<{ slug: 
         </div>
         )}
       </main>
+      </PortalShell>
     </div>
   );
 }

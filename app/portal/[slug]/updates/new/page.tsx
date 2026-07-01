@@ -2,6 +2,7 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { EA_PORTAL_COOKIE, verifySession } from '@/lib/ea-portal-auth';
 import { PortalShell } from '@/lib/chassis/PortalShell';
+import { getPortalModuleAccessForSlug } from '@/lib/modules/portal-modules';
 import NewContentRequestForm from './NewContentRequestForm';
 import '../../ea-portal.css';
 
@@ -15,18 +16,21 @@ export default async function NewContentRequestPage({ params }: { params: Promis
   if (!session) redirect('/portal/login');
   if (session.slug !== slug) redirect(`/portal/${session.slug}/updates/new`);
 
+  const access = await getPortalModuleAccessForSlug(slug);
+
   return (
     <div className="ep-page">
-      <PortalShell slug={slug} active="updates" />
-      <main className="ep-main">
-        <div className="ep-welcome">
-          <p className="ep-welcome-label">Update Hub™</p>
-          <h1 className="ep-welcome-heading">Submit Update Request</h1>
-        </div>
-        <div className="ep-card">
-          <NewContentRequestForm slug={slug} />
-        </div>
-      </main>
+      <PortalShell slug={slug} active="updates" shellNavGroups={access?.shellNavGroups}>
+        <main className="ep-main ep-main-shell">
+          <div className="ep-welcome">
+            <p className="ep-welcome-label">Update Hub™</p>
+            <h1 className="ep-welcome-heading">Submit Update Request</h1>
+          </div>
+          <div className="ep-card">
+            <NewContentRequestForm slug={slug} />
+          </div>
+        </main>
+      </PortalShell>
     </div>
   );
 }

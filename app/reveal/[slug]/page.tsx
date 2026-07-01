@@ -1,10 +1,9 @@
 import { notFound } from 'next/navigation';
 import { getClientByPortalSlug } from '@/lib/airtable';
+import { NAVY, GOLD } from '@/lib/design-system';
 
 export const dynamic = 'force-dynamic';
 
-const NAVY = '#1B2B4D';
-const GOLD = '#C9A844';
 const CALENDLY_URL = process.env.CALENDLY_URL ?? 'https://calendly.com/freedom-efficiencyarchitects/30min';
 
 function fmt(n: number): string {

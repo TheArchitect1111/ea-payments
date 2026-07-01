@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { begin2FA, is2FAEnabled } from '@/lib/ea-auth-2fa';
 import { makeAdminSessionCookie, signAdminSession } from '@/lib/ea-admin-auth';
 import { authenticateAdminAsync, adminUsers } from '@/lib/ea-admin-users';
+import { resolveAdminIdentity } from '@/lib/org-provision';
 
 export const dynamic = 'force-dynamic';
 
@@ -60,7 +61,13 @@ export async function POST(req: NextRequest) {
 
   let token: string;
   try {
-    token = signAdminSession({ email: user.email, name: user.name, role: user.role });
+    const identity = resolveAdminIdentity({ email: user.email, role: user.role });
+    token = signAdminSession({
+      email: user.email,
+      name: user.name,
+      role: user.role,
+      orgId: identity.orgId,
+    });
   } catch {
     return NextResponse.json({ error: 'Session signing failed.' }, { status: 500 });
   }

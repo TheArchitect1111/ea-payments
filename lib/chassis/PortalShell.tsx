@@ -1,33 +1,46 @@
-import type { CSSProperties, ReactNode } from 'react';
-import { EAPortalNav } from './EAPortalNav';
+import type { ReactNode } from 'react';
+import type { ModuleId } from '@/lib/modules/registry';
+import type { ShellNavGroup } from '@/lib/modules/portal-modules';
+import { AppShell } from './AppShell';
+import { NAVY, GOLD } from '@/lib/design-system';
 
 export type EAPortalTab = 'home' | 'pulse' | 'simplifi' | 'amplifi' | 'updates';
 
-const NAVY = '#1B2B4D';
-const GOLD = '#C9A844';
+const TAB_TO_MODULE: Record<EAPortalTab, ModuleId> = {
+  home: 'dashboard',
+  pulse: 'pulse',
+  simplifi: 'simplifi',
+  amplifi: 'amplifi',
+  updates: 'update-hub',
+};
 
 type Props = {
   slug: string;
   active: EAPortalTab;
   firstName?: string;
-  children?: ReactNode;
+  shellNavGroups?: ShellNavGroup[];
+  activeModuleId?: ModuleId;
+  children: ReactNode;
 };
 
-/** EA client portal — modern soft-UI shell with pill navigation. */
-export function PortalShell({ slug, active, firstName, children }: Props) {
+/** EA client portal — Pulse OS shell with entitlement-driven sidebar navigation. */
+export function PortalShell({
+  slug,
+  active,
+  firstName,
+  shellNavGroups,
+  activeModuleId,
+  children,
+}: Props) {
   return (
-    <div
-      className="ea-shell"
-      style={
-        {
-          '--ea-navy': NAVY,
-          '--ea-gold': GOLD,
-        } as CSSProperties
-      }
+    <AppShell
+      slug={slug}
+      firstName={firstName}
+      shellNavGroups={shellNavGroups}
+      activeModuleId={activeModuleId ?? TAB_TO_MODULE[active]}
     >
-      <EAPortalNav slug={slug} active={active} firstName={firstName} />
       {children}
-    </div>
+    </AppShell>
   );
 }
 

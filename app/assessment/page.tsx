@@ -304,16 +304,16 @@ function AssessmentPageInner() {
       }
 
       if (data.proposalId) {
-        window.location.href = `/assessment/thank-you?proposal=${encodeURIComponent(data.proposalId)}`;
+        window.location.href = `/ctp-intake/thank-you?proposal=${encodeURIComponent(data.proposalId)}`;
         return;
       }
 
       if (data.ok && data.saved === false) {
-        window.location.href = '/assessment/thank-you?received=1';
+        window.location.href = '/ctp-intake/thank-you?received=1';
         return;
       }
 
-      window.location.href = '/assessment/thank-you';
+      window.location.href = '/ctp-intake/thank-you';
     } catch {
       setError('Network error. Please check your connection and try again.');
       setLoading(false);
@@ -338,7 +338,7 @@ function AssessmentPageInner() {
             className="mt-3 text-4xl font-bold uppercase tracking-widest"
             style={{ fontFamily: CONDENSED, color: GOLD }}
           >
-            Assessment Received
+            CTP Intake Received
           </h1>
         </div>
 
@@ -354,7 +354,7 @@ function AssessmentPageInner() {
               className="mb-4 text-xl font-bold uppercase tracking-wide text-neutral-950"
               style={{ fontFamily: CONDENSED }}
             >
-              We received your assessment
+              We received your CTP intake
             </h2>
             <p className="mb-6 text-sm leading-relaxed text-neutral-600">
               Our team will review your submission and reach out within 1-2 business days
@@ -398,7 +398,7 @@ function AssessmentPageInner() {
             className="text-4xl font-bold uppercase leading-tight sm:text-5xl"
             style={{ fontFamily: CONDENSED, color: GOLD }}
           >
-            Let&apos;s See What&apos;s Possible
+            CTP Intake
           </h1>
           <p className="mx-auto mt-5 max-w-xl text-base leading-relaxed text-white">
             Answer a few questions. We&apos;ll show you what&apos;s slowing you down and what it&apos;s costing you.
@@ -594,7 +594,7 @@ function AssessmentPageInner() {
             className="w-full py-4 text-sm font-bold uppercase tracking-[0.18em] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
             style={{ fontFamily: CONDENSED, backgroundColor: BLACK, color: GOLD }}
           >
-            {loading ? 'Submitting...' : 'Submit My Assessment'}
+            {loading ? 'Submitting...' : 'Submit My CTP Intake'}
           </button>
 
           <p className="text-center text-xs text-neutral-400">

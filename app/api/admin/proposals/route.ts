@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { verifyAdminSession, EA_ADMIN_COOKIE } from '@/lib/ea-admin-auth';
+import { EA_ADMIN_COOKIE } from '@/lib/ea-admin-auth';
+import { adminAuthJsonError, requireAdminSession } from '@/lib/admin-session-guard';
 import { getProposalsWithAssessments } from '@/lib/airtable';
 
 export const dynamic = 'force-dynamic';
@@ -9,9 +10,8 @@ export async function GET(): Promise<Response> {
   const cookieStore = await cookies();
   const token = cookieStore.get(EA_ADMIN_COOKIE)?.value;
 
-  if (!verifyAdminSession(token)) {
-    return NextResponse.json({ error: 'Unauthorized.' }, { status: 401 });
-  }
+  const auth = requireAdminSession(token);
+  if (!auth.ok) return adminAuthJsonError(auth);
 
   try {
     const proposals = await getProposalsWithAssessments();

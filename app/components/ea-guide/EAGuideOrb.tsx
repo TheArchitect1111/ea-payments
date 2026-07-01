@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from 'react';
 import { resolveGuidePageContext } from '@/lib/ea-guide-context';
 import { getPageSpecificHint } from '@/lib/ea-guide-knowledge';
@@ -20,6 +20,8 @@ import {
   listToursForPage,
 } from '@/lib/ea-guide-tours';
 import { resolveGuideContext, type EAGuideAction } from '@/lib/ea-guide';
+import { resolveOrbContext } from '@/lib/orb-sdk';
+import { resolveOrbDestinations, type OrbDestination } from '@/lib/orb-sdk/destinations';
 import TourDriver, { startEAGuideTour } from './TourDriver';
 import './ea-guide.css';
 
@@ -65,10 +67,14 @@ function writeLocalProgress(userId: string, rows: GuideProgress[]) {
 
 export default function EAGuideOrb() {
   const pathname = usePathname() ?? '/';
+  const router = useRouter();
   const legacyContext = useMemo(() => resolveGuideContext(pathname), [pathname]);
+  const orbContext = useMemo(() => resolveOrbContext(pathname), [pathname]);
+  const destinations = useMemo(() => resolveOrbDestinations(pathname), [pathname]);
   const pageContext = useMemo(() => resolveGuidePageContext(pathname), [pathname]);
   const [userId] = useState(() => getOrCreateUserId());
   const [open, setOpen] = useState(false);
+  const [destOpen, setDestOpen] = useState(false);
   const [panelMode, setPanelMode] = useState<PanelMode>('home');
   const [question, setQuestion] = useState('');
   const [answer, setAnswer] = useState('');
@@ -177,6 +183,35 @@ export default function EAGuideOrb() {
     setToast(message);
     window.setTimeout(() => setToast(''), 2400);
   }, []);
+
+  const handleDestination = useCallback(
+    (dest: OrbDestination) => {
+      setDestOpen(false);
+      markGuideAttempted();
+      if (dest.kind === 'guide' || dest.event === 'ea-guide:open-panel') {
+        setOpen(true);
+        setPanelMode('home');
+        return;
+      }
+      if (dest.href) {
+        router.push(dest.href);
+      }
+    },
+    [router],
+  );
+
+  const handleOrbClick = useCallback(() => {
+    if (destOpen) {
+      setDestOpen(false);
+      return;
+    }
+    if (open) {
+      setOpen(false);
+      setPanelMode('home');
+      return;
+    }
+    setDestOpen(true);
+  }, [destOpen, open]);
 
   const startTour = useCallback((tour: GuideTour) => {
     markGuideAttempted();
@@ -497,12 +532,30 @@ export default function EAGuideOrb() {
           </section>
         ) : null}
 
+        {destOpen ? (
+          <nav className="pc-dest-menu ea-guide-dest-menu" aria-label="Go anywhere">
+            {destinations.map((dest) => (
+              <button
+                key={dest.id}
+                type="button"
+                className="pc-dest-menu-item pc-tap"
+                onClick={() => handleDestination(dest)}
+              >
+                <span className="ea-guide-dest-label">{dest.label}</span>
+                <span className="ea-guide-dest-desc">{dest.description}</span>
+              </button>
+            ))}
+          </nav>
+        ) : null}
+
         <button
           type="button"
-          className={`ea-guide-orb ea-guide-orb-${orbState}`}
-          aria-label="Open EA Guide"
+          className={`ea-guide-orb ea-guide-orb-${orbState}${destOpen ? ' ea-guide-orb-dest-open' : ''}`}
+          aria-label="Open EA destinations"
+          aria-expanded={destOpen || open}
           data-state={orbState}
-          onClick={() => setOpen((value) => !value)}
+          data-orb-product={orbContext.product}
+          onClick={handleOrbClick}
         >
           <span className="ea-guide-ring ea-guide-ring-gold" />
           <span className="ea-guide-ring ea-guide-ring-blue" />

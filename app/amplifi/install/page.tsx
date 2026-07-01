@@ -20,7 +20,7 @@ export default function AmplifiInstallPage() {
 
   const base = PUBLIC_LINKS.capture.replace(/\/capture$/, '');
 
-  const bookmarklet = `javascript:(function(){var u=location.href;var b='${base}';window.open(b+'/amplify?url='+encodeURIComponent(u),'_blank');})();`;
+  const bookmarklet = `javascript:(function(){var u=location.href;var b='${base}';window.open(b+'/amplifi?url='+encodeURIComponent(u),'_blank');})();`;
 
 
 
@@ -56,11 +56,11 @@ export default function AmplifiInstallPage() {
 
             <li>
 
-              Open <Link href="/amplify" className="underline text-[#C9A844]">/amplify</Link> in Safari or Chrome
+              Open <Link href="/amplifi" className="underline text-[#C9A844]">/amplifi</Link> in Safari or Chrome
 
             </li>
 
-            <li>Tap <strong>Start amplifying now</strong> (guest session — no password)</li>
+            <li>Tap <strong>Try demo</strong> on the social posting page</li>
 
             <li>Share → Add to Home Screen</li>
 
@@ -152,7 +152,7 @@ export default function AmplifiInstallPage() {
 
           <p className="text-sm text-neutral-300">
 
-            Opens <code className="text-[#C9A844]">/amplify?url=…</code> — guest session starts, then capture runs.
+            Opens <code className="text-[#C9A844]">/amplifi?url=…</code> — social posts pre-filled from the page link.
 
           </p>
 
@@ -178,9 +178,9 @@ export default function AmplifiInstallPage() {
 
           <p className="text-sm text-neutral-300">
 
-            Use the <strong>camera FAB</strong> on <Link href="/amplify" className="underline text-[#C9A844]">/amplify</Link>{' '}
-
-            to upload a screenshot.
+            Capture a screenshot with Simplifi at{' '}
+            <Link href="/capture" className="underline text-[#C9A844]">/capture</Link>
+            , then post from Amplifi.
 
           </p>
 
@@ -190,7 +190,7 @@ export default function AmplifiInstallPage() {
 
         <p className="mt-10 text-sm text-neutral-400">
 
-          <Link href="/amplify" className="underline">/amplify</Link> · <Link href="/capture" className="underline">/capture</Link> ·{' '}
+          <Link href="/amplifi" className="underline">/amplifi</Link> · <Link href="/capture" className="underline">/capture</Link> ·{' '}
 
           <Link href="/story/selena" className="underline">/story/selena</Link>
 
