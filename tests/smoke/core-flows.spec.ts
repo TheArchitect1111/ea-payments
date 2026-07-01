@@ -156,6 +156,12 @@ test('simplifi capture PWA page is reachable', async ({ page }) => {
   await expect(page.getByText(/never lose an opportunity/i)).toBeVisible();
 });
 
+test('try tester hub is reachable', async ({ page }) => {
+  await page.goto('/try');
+  await expect(page.getByRole('heading', { name: /try every page/i })).toBeVisible();
+  await expect(page.getByRole('button', { name: /sign in with demo account/i })).toBeVisible();
+});
+
 test('simplifi settings page is reachable', async ({ page }) => {
   await page.goto('/simplifi/settings');
   await expect(page.getByRole('heading', { name: /^settings$/i })).toBeVisible();

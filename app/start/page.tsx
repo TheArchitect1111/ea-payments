@@ -28,6 +28,13 @@ export default function StartPage() {
         </section>
 
         <section className="mt-10 grid gap-4">
+          <a
+            href="/try"
+            className="block border-2 border-[#C9A844] p-5 hover:bg-[#C9A844]/10 transition-colors"
+          >
+            <p className="font-bold text-[#C9A844]">Try every page — one login (recommended for testers)</p>
+            <p className="text-sm text-neutral-400 mt-1">Sign in once, then open Capture, Workspace, Pulse, Amplifi, and portal pages.</p>
+          </a>
           {[
             { label: 'Capture — Simplifi', href: PUBLIC_LINKS.capture, note: 'Guest session — tap Capture now' },
             { label: 'Amplifi — social posting', href: PUBLIC_LINKS.amplifi, note: 'Try demo — no login required' },

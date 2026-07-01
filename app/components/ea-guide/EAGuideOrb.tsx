@@ -66,11 +66,15 @@ function writeLocalProgress(userId: string, rows: GuideProgress[]) {
 }
 
 export default function EAGuideOrb() {
+  const [sessionSlug, setSessionSlug] = useState<string | null>(null);
   const pathname = usePathname() ?? '/';
   const router = useRouter();
   const legacyContext = useMemo(() => resolveGuideContext(pathname), [pathname]);
   const orbContext = useMemo(() => resolveOrbContext(pathname), [pathname]);
-  const destinations = useMemo(() => resolveOrbDestinations(pathname), [pathname]);
+  const destinations = useMemo(
+    () => resolveOrbDestinations(pathname, sessionSlug),
+    [pathname, sessionSlug],
+  );
   const pageContext = useMemo(() => resolveGuidePageContext(pathname), [pathname]);
   const [userId] = useState(() => getOrCreateUserId());
   const [open, setOpen] = useState(false);
@@ -142,6 +146,23 @@ export default function EAGuideOrb() {
     }
     syncProgress();
   }, [userId]);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/auth/whoami', { cache: 'no-store' })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data: { session?: { slug?: string } } | null) => {
+        if (cancelled) return;
+        const slug = data?.session?.slug?.trim();
+        setSessionSlug(slug || null);
+      })
+      .catch(() => {
+        if (!cancelled) setSessionSlug(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [pathname]);
 
   useEffect(() => {
     function onStartTour(event: Event) {

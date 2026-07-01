@@ -9,18 +9,22 @@ export type OrbDestination = {
   event?: string;
 };
 
-function portalSlug(pathname: string): string {
+function portalSlug(pathname: string, sessionSlug?: string | null): string {
   const match = pathname.match(/\/portal\/([^/]+)/);
-  const slug = match?.[1] ?? '';
-  if (['login', 'register', 'forgot-password', 'reset-password', 'sign-in'].includes(slug)) {
-    return '';
+  const fromPath = match?.[1] ?? '';
+  if (fromPath && !['login', 'register', 'forgot-password', 'reset-password', 'sign-in'].includes(fromPath)) {
+    return fromPath;
   }
-  return slug;
+  const slug = sessionSlug?.trim() ?? '';
+  if (slug && !['login', 'register', 'forgot-password', 'reset-password', 'sign-in'].includes(slug)) {
+    return slug;
+  }
+  return '';
 }
 
 /** Six primary Orb destinations — Instant Feel Standard™ bloom menu. */
-export function resolveOrbDestinations(pathname: string): OrbDestination[] {
-  const slug = portalSlug(pathname);
+export function resolveOrbDestinations(pathname: string, sessionSlug?: string | null): OrbDestination[] {
+  const slug = portalSlug(pathname, sessionSlug);
   const portal = slug ? `/portal/${slug}` : '';
 
   const all: OrbDestination[] = [
@@ -43,7 +47,7 @@ export function resolveOrbDestinations(pathname: string): OrbDestination[] {
       label: 'Pulse',
       description: 'Operating signals and health scores',
       kind: 'navigate',
-      href: slug ? `${portal}/pulse` : '/portal/login',
+      href: slug ? `${portal}/pulse` : '/portal/login?next=/portal/demo-client/pulse',
     },
     {
       id: 'amplifi',
@@ -57,7 +61,7 @@ export function resolveOrbDestinations(pathname: string): OrbDestination[] {
       label: 'Updates',
       description: 'Announcements and family feed',
       kind: 'navigate',
-      href: slug ? `${portal}/updates` : '/portal/login',
+      href: slug ? `${portal}/updates` : '/portal/login?next=/portal/demo-client/updates',
     },
     {
       id: 'guide',
