@@ -1,5 +1,5 @@
 const DEFAULT_BASE = 'https://ea-payments.vercel.app';
-const STORAGE_KEYS = ['apiUrl', 'apiKey', 'notifyEmail', 'portalSlug', 'watchlist', 'recentOpportunities', 'dailyBrief'];
+const STORAGE_KEYS = ['apiUrl', 'apiKey', 'notifyEmail', 'portalSlug', 'orbUrls', 'watchlist', 'recentOpportunities', 'dailyBrief'];
 const pendingStoryUrls = {};
 
 function nowIso() {
@@ -22,6 +22,7 @@ async function getState() {
     apiKey: data.apiKey || '',
     notifyEmail: data.notifyEmail || '',
     portalSlug: data.portalSlug || '',
+    orbUrls: data.orbUrls || null,
     watchlist: Array.isArray(data.watchlist) ? data.watchlist : [],
     recentOpportunities: Array.isArray(data.recentOpportunities) ? data.recentOpportunities : [],
     dailyBrief: data.dailyBrief || null,
@@ -312,13 +313,14 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
 
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg.type === 'EA_EXTENSION_CONFIG' && msg.config) {
-    const { apiUrl, apiKey, portalSlug, notifyEmail } = msg.config;
+    const { apiUrl, apiKey, portalSlug, notifyEmail, orb } = msg.config;
     chrome.storage.sync.set(
       {
         apiUrl: apiUrl || DEFAULT_BASE,
         apiKey: apiKey || '',
         portalSlug: portalSlug || '',
         notifyEmail: notifyEmail || '',
+        orbUrls: orb?.urls || null,
       },
       () => sendResponse({ ok: true }),
     );

@@ -143,8 +143,9 @@
       return;
     }
     if (action === 'dashboard') {
-      const sdk = globalThis.EA_ORB_SDK;
-      const url = sdk?.urls?.workspace || 'https://ea-payments.vercel.app/simplifi/workspace';
+      const state = await send('SIMPLIFI_GET_STATE');
+      const fallback = `${String(state?.apiUrl || 'https://ea-payments.vercel.app').replace(/\/$/, '')}/simplifi/workspace`;
+      const url = state?.orbUrls?.workspace || globalThis.EA_ORB_SDK?.urls?.workspace || fallback;
       window.open(url, '_blank', 'noopener,noreferrer');
       return;
     }

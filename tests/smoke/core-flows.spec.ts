@@ -173,6 +173,23 @@ test('simplifi orb context API is public', async ({ page }) => {
   expect(data.orb?.product).toBe('simplifi');
 });
 
+test('simplifi me API requires auth', async ({ page }) => {
+  const res = await page.request.get('/api/simplifi/me');
+  expect(res.status()).toBe(401);
+});
+
+test('simplifi brief API requires auth', async ({ page }) => {
+  const res = await page.request.get('/api/simplifi/brief');
+  expect(res.status()).toBe(401);
+});
+
+test('auth logout JSON endpoint works', async ({ page }) => {
+  const res = await page.request.post('/api/auth/logout');
+  expect(res.status()).toBe(200);
+  const data = (await res.json()) as { ok?: boolean };
+  expect(data.ok).toBe(true);
+});
+
 test('extension bootstrap API requires auth', async ({ page }) => {
   const res = await page.request.get('/api/extension/bootstrap');
   expect(res.status()).toBe(401);

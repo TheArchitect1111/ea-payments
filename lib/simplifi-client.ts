@@ -122,7 +122,32 @@ export async function fetchExtensionBootstrap(): Promise<
     apiKey: string;
     portalSlug: string;
     notifyEmail?: string;
+    orb?: Record<string, unknown>;
   }>
 > {
   return simplifiFetch('/api/extension/bootstrap');
+}
+
+export async function fetchSimplifiMe(): Promise<SimplifiApiResult> {
+  return simplifiFetch('/api/simplifi/me');
+}
+
+export async function fetchSimplifiBrief(): Promise<SimplifiApiResult> {
+  return simplifiFetch('/api/simplifi/brief');
+}
+
+export async function fetchPortalProfile(): Promise<SimplifiApiResult> {
+  return simplifiFetch('/api/portal/profile');
+}
+
+export async function registerPushToken(token: string, platform = 'expo'): Promise<SimplifiApiResult> {
+  return simplifiFetch('/api/simplifi/push-token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token, platform }),
+  });
+}
+
+export async function logoutSession(): Promise<SimplifiApiResult> {
+  return simplifiFetch('/api/auth/logout', { method: 'POST' });
 }
