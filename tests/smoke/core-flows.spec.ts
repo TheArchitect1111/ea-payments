@@ -282,6 +282,13 @@ test('admin connect nurture verify requires auth', async ({ page }) => {
   expect(res.status()).toBe(401);
 });
 
+test('portal connect copy API requires login', async ({ page }) => {
+  const res = await page.request.post('/api/portal/connect/copy', {
+    data: { offerHeadline: 'Test headline' },
+  });
+  expect(res.status()).toBe(401);
+});
+
 test('portal documents requires login', async ({ page }) => {
   await page.goto('/portal/demo-client/documents');
   await expect(page).toHaveURL(/\/portal\/login/);
