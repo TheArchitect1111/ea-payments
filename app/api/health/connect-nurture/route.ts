@@ -9,10 +9,20 @@ export const dynamic = 'force-dynamic';
 export async function GET() {
   const status = await getConnectSystemStatus();
   const nurture = await previewDueConnectSequences();
-  const runs = getConnectNurtureRunStatus();
+  const runs = await getConnectNurtureRunStatus();
   const resendOk = status.checks.some((check) => check.label === 'Resend Email' && check.ok);
   const tenantOk = status.checks.some((check) => check.label === 'Tenant Storage' && check.ok);
   const cronSecretConfigured = Boolean(process.env.CRON_SECRET?.trim());
+
+  const actions: string[] = [];
+  if (!cronSecretConfigured) {
+    actions.push('Set CRON_SECRET in Vercel Production — required for daily /api/cron/connect-sequence.');
+  }
+  if (nurture.dueSteps > 0) {
+    actions.push(
+      `POST /api/admin/connect/run-nurture (admin) to send ${nurture.dueSteps} due step(s) now.`,
+    );
+  }
 
   return NextResponse.json({
     ok: resendOk && tenantOk && cronSecretConfigured,
@@ -25,6 +35,8 @@ export async function GET() {
     nurture,
     lastRun: runs.lastRun,
     recentRuns: runs.recentRuns,
+    runLogSource: runs.source,
+    actions,
     checks: status.checks,
   });
 }

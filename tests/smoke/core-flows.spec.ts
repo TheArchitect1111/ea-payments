@@ -270,15 +270,21 @@ test('public connect capture page is reachable', async ({ page }) => {
 test('connect nurture health endpoint is reachable', async ({ page }) => {
   const res = await page.request.get('/api/health/connect-nurture');
   expect(res.status()).toBe(200);
-  const body = (await res.json()) as { cron?: { path?: string }; lastRun?: unknown };
+  const body = (await res.json()) as { cron?: { path?: string }; lastRun?: unknown; actions?: string[] };
   expect(body.cron?.path).toBe('/api/cron/connect-sequence');
   expect(body).toHaveProperty('lastRun');
+  expect(body).toHaveProperty('actions');
 });
 
 test('admin connect nurture verify requires auth', async ({ page }) => {
   const res = await page.request.post('/api/admin/connect/nurture-verify', {
     data: { orgSlug: 'demo-client' },
   });
+  expect(res.status()).toBe(401);
+});
+
+test('admin connect run-nurture requires auth', async ({ page }) => {
+  const res = await page.request.post('/api/admin/connect/run-nurture');
   expect(res.status()).toBe(401);
 });
 
