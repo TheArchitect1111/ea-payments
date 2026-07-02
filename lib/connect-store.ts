@@ -1263,6 +1263,150 @@ export async function listConnectOrgs(): Promise<ConnectOrgConfig[]> {
   return [...bySlug.values()];
 }
 
+async function findAirtableTenantRecordBySlug(
+  slug: string,
+): Promise<{ recordId: string; org: ConnectOrgConfig } | null> {
+  const config = connectTenantAirtableConfig();
+  if (!config) return null;
+
+  const safe = sanitizeConnectSlug(slug).replace(/'/g, "\\'");
+  const formula = encodeURIComponent(`{Slug}='${safe}'`);
+  const url = `https://api.airtable.com/v0/${config.baseId}/${encodeURIComponent(config.tableRef)}?filterByFormula=${formula}&maxRecords=1`;
+  const response = await fetch(url, {
+    headers: { Authorization: `Bearer ${config.apiKey}` },
+    cache: 'no-store',
+  });
+
+  if (!response.ok) return null;
+
+  const data = (await response.json()) as { records?: Array<{ id: string; fields?: Record<string, unknown> }> };
+  const record = data.records?.[0];
+  if (!record) return null;
+
+  const org = orgFromAirtableRecord(record);
+  if (!org) return null;
+
+  return { recordId: record.id, org };
+}
+
+export async function persistConnectOrg(
+  org: ConnectOrgConfig,
+): Promise<{ persisted: boolean; storage: 'airtable' | 'memory'; warning?: string }> {
+  const normalized: ConnectOrgConfig = { ...org, slug: sanitizeConnectSlug(org.slug) };
+
+  const overrideIndex = localTenantOverrides.findIndex((item) => item.slug === normalized.slug);
+  if (overrideIndex >= 0) localTenantOverrides.splice(overrideIndex, 1);
+  localTenantOverrides.unshift(normalized);
+
+  const config = connectTenantAirtableConfig();
+  if (!config) {
+    return {
+      persisted: false,
+      storage: 'memory',
+      warning: 'Airtable tenant storage is not configured; changes apply only for this server instance.',
+    };
+  }
+
+  const now = new Date().toISOString();
+  const existing = await findAirtableTenantRecordBySlug(normalized.slug);
+
+  if (existing) {
+    const response = await fetch(
+      `https://api.airtable.com/v0/${config.baseId}/${encodeURIComponent(config.tableRef)}/${existing.recordId}`,
+      {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${config.apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          fields: {
+            Name: normalized.name,
+            Status: 'Active',
+            'Config JSON': JSON.stringify(normalized),
+            'Updated At': now,
+          },
+        }),
+      },
+    );
+
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(`Unable to update Connect tenant (${response.status}). ${error}`.trim());
+    }
+
+    return { persisted: true, storage: 'airtable' };
+  }
+
+  const response = await fetch(
+    `https://api.airtable.com/v0/${config.baseId}/${encodeURIComponent(config.tableRef)}`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${config.apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        records: [
+          {
+            fields: {
+              Slug: normalized.slug,
+              Name: normalized.name,
+              Status: 'Active',
+              'Config JSON': JSON.stringify(normalized),
+              'Created At': now,
+              'Updated At': now,
+            },
+          },
+        ],
+      }),
+    },
+  );
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`Unable to save Connect tenant (${response.status}). ${error}`.trim());
+  }
+
+  return { persisted: true, storage: 'airtable' };
+}
+
+export async function addConnectCampaign(input: {
+  orgSlug: string;
+  campaign: ConnectCampaign;
+}): Promise<{
+  org: ConnectOrgConfig;
+  campaign: ConnectCampaign;
+  created: boolean;
+  persisted: boolean;
+  warning?: string;
+}> {
+  const slug = sanitizeConnectSlug(input.orgSlug);
+  const org = await getConnectOrg(slug);
+  if (org.slug !== slug) {
+    throw new Error(`Connect tenant not found for "${slug}".`);
+  }
+
+  const existingCampaign = org.campaigns.find((item) => item.id === input.campaign.id);
+  if (existingCampaign) {
+    return { org, campaign: existingCampaign, created: false, persisted: true };
+  }
+
+  const updatedOrg: ConnectOrgConfig = {
+    ...org,
+    campaigns: [input.campaign, ...org.campaigns],
+  };
+
+  const saveResult = await persistConnectOrg(updatedOrg);
+  return {
+    org: updatedOrg,
+    campaign: input.campaign,
+    created: true,
+    persisted: saveResult.persisted,
+    warning: saveResult.warning,
+  };
+}
+
 export async function getConnectOrg(slug: string): Promise<ConnectOrgConfig> {
   const normalized = sanitizeConnectSlug(slug);
   const orgList = await listConnectOrgs();

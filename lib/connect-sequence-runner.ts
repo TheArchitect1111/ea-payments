@@ -122,3 +122,32 @@ export async function processDueConnectSequences(): Promise<{
 
   return { processed: relationships.length, sent, skipped, errors };
 }
+
+export async function previewDueConnectSequences(): Promise<{
+  relationships: number;
+  dueSteps: number;
+  dueByOrg: Record<string, number>;
+}> {
+  const relationships = await listConnectRelationshipsForSequence();
+  const orgs = await listConnectOrgs();
+  let dueSteps = 0;
+  const dueByOrg: Record<string, number> = {};
+
+  for (const relationship of relationships) {
+    const org = orgs.find((item) => item.slug === relationship.orgSlug);
+    if (!org) continue;
+
+    const createdAt = new Date(relationship.createdAt).getTime();
+    for (const step of org.sequence) {
+      if (step.delayDays === 0) continue;
+      if (relationship.sequenceSent.includes(step.id)) continue;
+      const dueAt = createdAt + step.delayDays * 86_400_000;
+      if (Date.now() >= dueAt) {
+        dueSteps += 1;
+        dueByOrg[org.slug] = (dueByOrg[org.slug] ?? 0) + 1;
+      }
+    }
+  }
+
+  return { relationships: relationships.length, dueSteps, dueByOrg };
+}

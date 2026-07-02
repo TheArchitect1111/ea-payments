@@ -267,6 +267,13 @@ test('public connect capture page is reachable', async ({ page }) => {
   await expect(page.locator('body')).not.toBeEmpty();
 });
 
+test('connect nurture health endpoint is reachable', async ({ page }) => {
+  const res = await page.request.get('/api/health/connect-nurture');
+  expect(res.status()).toBe(200);
+  const body = (await res.json()) as { cron?: { path?: string } };
+  expect(body.cron?.path).toBe('/api/cron/connect-sequence');
+});
+
 test('portal documents requires login', async ({ page }) => {
   await page.goto('/portal/demo-client/documents');
   await expect(page).toHaveURL(/\/portal\/login/);

@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import type { ConnectKit, ConnectKitLink } from '@/lib/connect-kit';
 
@@ -9,30 +10,54 @@ type Props = {
 };
 
 export default function ConnectKitClient({ kit, canManage }: Props) {
+  const router = useRouter();
   const [eventName, setEventName] = useState('');
   const [repName, setRepName] = useState('');
   const [customLinks, setCustomLinks] = useState<ConnectKitLink[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
 
-  const links = [...kit.links, ...customLinks];
+  const links = [
+    ...customLinks,
+    ...kit.links.filter((link) => !customLinks.some((item) => item.id === link.id)),
+  ];
 
   async function createEventQr(e: React.FormEvent) {
     e.preventDefault();
     if (!canManage) return;
     setBusy(true);
     setError('');
+    setNotice('');
     try {
       const res = await fetch('/api/portal/connect/event-link', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ event: eventName.trim(), rep: repName.trim() || undefined }),
       });
-      const data = (await res.json()) as { ok?: boolean; link?: ConnectKitLink; error?: string };
+      const data = (await res.json()) as {
+        ok?: boolean;
+        link?: ConnectKitLink;
+        error?: string;
+        persisted?: boolean;
+        warning?: string;
+        created?: boolean;
+      };
       if (!res.ok || !data.link) throw new Error(data.error ?? 'Could not create event QR.');
-      setCustomLinks((current) => [data.link!, ...current]);
+      if (!data.created) {
+        setNotice('This event QR already exists — showing the saved link.');
+      } else if (data.warning) {
+        setNotice(data.warning);
+      } else if (data.persisted) {
+        setNotice('Event QR saved to your Connect kit.');
+      }
+      setCustomLinks((current) => {
+        const without = current.filter((item) => item.id !== data.link!.id);
+        return [data.link!, ...without];
+      });
       setEventName('');
       setRepName('');
+      router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not create event QR.');
     } finally {
@@ -69,6 +94,7 @@ export default function ConnectKitClient({ kit, canManage }: Props) {
             {busy ? 'Creating…' : 'Create event QR'}
           </button>
           {error ? <p style={{ color: '#b91c1c', margin: 0 }}>{error}</p> : null}
+          {notice ? <p style={{ color: '#047857', margin: 0 }}>{notice}</p> : null}
         </form>
       ) : (
         <p style={{ margin: 0, color: '#64748b', fontSize: 14 }}>Ask your portal owner to create event QR codes.</p>
