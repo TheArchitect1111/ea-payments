@@ -19,6 +19,8 @@ function buildTestLinks(slug: string): TestLink[] {
     { label: 'Portal Simplifi', href: `${portal}/simplifi`, note: 'Same tools inside the client portal' },
     { label: 'Pulse', href: `${portal}/pulse`, note: 'Health scores and operating signals' },
     { label: 'Amplifi Hub', href: `${portal}/amplifi`, note: 'Growth narrative and social links' },
+    { label: 'Connect Kit', href: `${portal}/connect`, note: 'Download QRs and create event capture links' },
+    { label: 'Connect Capture (public)', href: `/connect/${slug}`, note: 'Public scan-to-capture page — no login' },
     { label: 'Update Hub', href: `${portal}/updates`, note: 'Announcements and requests' },
     { label: 'Portal Home', href: portal, note: 'Full portal dashboard' },
     { label: 'Magnifi Story (no login)', href: '/story/selena', note: 'Public demo experience' },
@@ -102,7 +104,8 @@ export default function TryTestingHub({ initialSlug, initialEmail }: Props) {
 
 1. Click "Sign in with demo account"
 2. Open any page from the list — stay signed in everywhere
-3. Use the gold orb (bottom-right) to jump between Capture, Workspace, Pulse, etc.`}</pre>
+3. Use the gold orb (bottom-right) to jump between Capture, Workspace, Pulse, etc.
+4. Connect: portal kit for QRs + public /connect/demo-client for capture testing`}</pre>
         </section>
 
         {!signedIn ? (
