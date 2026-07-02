@@ -25,8 +25,47 @@ export function buildAttentionItems(input: {
   sisterHubMembers: number;
   clientsStuckOnboarding?: number;
   discoveryFollowUpCount?: number;
+  ctpWorkspacesPending?: number;
+  ctpStudiosReadyForReview?: number;
+  ctpReviewsScheduled?: number;
 }): AttentionItem[] {
   const items: AttentionItem[] = [];
+
+  if ((input.ctpStudiosReadyForReview ?? 0) > 0) {
+    items.push({
+      id: 'ctp-studios-ready',
+      product: 'Consider the Possibilities™',
+      title: `${input.ctpStudiosReadyForReview} CTP workspace(s) ready for review`,
+      detail: 'All design studios complete — schedule the collaborative review.',
+      priority: 'high',
+      href: '/admin/proposals',
+      cta: 'Schedule review',
+    });
+  }
+
+  if ((input.ctpWorkspacesPending ?? 0) > 0) {
+    items.push({
+      id: 'ctp-workspaces-pending',
+      product: 'Consider the Possibilities™',
+      title: `${input.ctpWorkspacesPending} CTP workspace(s) pending provisioning`,
+      detail: 'A prospect completed CTP but the workspace did not finish opening. Re-run provisioning.',
+      priority: 'high',
+      href: '/admin/master',
+      cta: 'Review',
+    });
+  }
+
+  if ((input.ctpReviewsScheduled ?? 0) > 0) {
+    items.push({
+      id: 'ctp-reviews-scheduled',
+      product: 'Consider the Possibilities™',
+      title: `${input.ctpReviewsScheduled} CTP review(s) scheduled`,
+      detail: 'Prepare proposals and implementation tasks for upcoming reviews.',
+      priority: 'medium',
+      href: '/admin/proposals',
+      cta: 'Pipeline',
+    });
+  }
 
   if (input.onboardingWebhooksMissing) {
     items.push({
