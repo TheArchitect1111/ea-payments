@@ -11,6 +11,7 @@ import {
 } from '@/lib/airtable';
 import { getCaptures } from '@/lib/capture-records';
 import { isCaptureApiKeyConfigured } from '@/lib/capture-api-key';
+import { getCtpAttentionStats } from '@/lib/ctp-submissions';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,13 +26,15 @@ export async function GET(req: Request) {
   const role = parseMissionControlRole(searchParams.get('mode'));
 
   const user = parseAdminSession(token);
-  const [proposals, clientRecords, contentRequests, captures, activityEvents] = await Promise.all([
-    getProposalsWithAssessments(),
-    getAllClientRecords(),
-    getAllContentRequests(),
-    getCaptures(20),
-    listEAActivityEvents(40),
-  ]);
+  const [proposals, clientRecords, contentRequests, captures, activityEvents, ctpStats] =
+    await Promise.all([
+      getProposalsWithAssessments(),
+      getAllClientRecords(),
+      getAllContentRequests(),
+      getCaptures(20),
+      listEAActivityEvents(40),
+      getCtpAttentionStats(),
+    ]);
 
   const proposalsPendingReview = proposals.filter((p) => p.status === 'Pending Review').length;
   const clientsStuckOnboarding = clientRecords.filter(
@@ -50,6 +53,9 @@ export async function GET(req: Request) {
     brotherHubMembers: 0,
     sisterHubMembers: 0,
     clientsStuckOnboarding,
+    ctpWorkspacesPending: ctpStats.workspacesPending,
+    ctpStudiosReadyForReview: ctpStats.studiosReadyForReview,
+    ctpReviewsScheduled: ctpStats.reviewsScheduled,
   });
 
   const mission = buildEAMissionControl({
@@ -60,5 +66,18 @@ export async function GET(req: Request) {
     role,
   });
 
-  return Response.json(mission);
+  let platformGuardian: { opsScore: number; ok: boolean; summary: string } | undefined;
+  try {
+    const { runPlatformGuardianAudit } = await import('@/lib/platform-guardian');
+    const guardian = await runPlatformGuardianAudit({ probeRoutes: false, sendDailyBrief: false });
+    platformGuardian = {
+      opsScore: guardian.opsScore,
+      ok: guardian.ok,
+      summary: guardian.executiveSummary,
+    };
+  } catch {
+    platformGuardian = undefined;
+  }
+
+  return Response.json({ ...mission, platformGuardian });
 }

@@ -150,6 +150,23 @@ test('health launch endpoint returns JSON', async ({ page }) => {
   expect(data.checks?.missingByCategory).toBeTruthy();
 });
 
+test('health ops endpoint returns JSON', async ({ page }) => {
+  const res = await page.request.get('/api/health/ops');
+  expect([200, 503]).toContain(res.status());
+  const data = (await res.json()) as {
+    ok?: boolean;
+    launchStatus?: string;
+    readinessScore?: number;
+    subsystems?: unknown[];
+    monitoring?: { sentryConfigured?: boolean };
+  };
+  expect(typeof data.ok).toBe('boolean');
+  expect(typeof data.launchStatus).toBe('string');
+  expect(typeof data.readinessScore).toBe('number');
+  expect(Array.isArray(data.subsystems)).toBe(true);
+  expect(data.monitoring).toBeTruthy();
+});
+
 test('portal documents requires login', async ({ page }) => {
   await page.goto('/portal/demo-client/documents');
   await expect(page).toHaveURL(/\/portal\/login/);

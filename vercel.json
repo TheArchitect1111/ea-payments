@@ -8,6 +8,16 @@
   ],
   "redirects": [
     {
+      "source": "/ctp",
+      "destination": "/ctp-intake",
+      "permanent": false
+    },
+    {
+      "source": "/discover",
+      "destination": "/ctp-intake",
+      "permanent": false
+    },
+    {
       "source": "/go",
       "destination": "/start",
       "permanent": false
@@ -87,6 +97,12 @@
           "value": "ea-platform"
         }
       ]
+    }
+  ],
+  "crons": [
+    {
+      "path": "/api/cron/platform-guardian",
+      "schedule": "0 6 * * *"
     }
   ]
 }

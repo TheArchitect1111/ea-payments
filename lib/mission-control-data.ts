@@ -154,7 +154,7 @@ export function buildEAMissionControl(input: {
           priority: 45,
           metric: agent.status(),
           actionLabel: 'Invoke',
-          actionUrl: '/api/agents/research',
+          actionUrl: agent.name === 'platform-guardian' ? '/api/health/ops' : '/api/agents/research',
           metadata: {
             agentKind: kind,
             agentStatus: 'queued',
