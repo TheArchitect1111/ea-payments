@@ -155,7 +155,7 @@ export default function CoachesJourneyPage() {
           <a href="/discover">Start discovery</a>
         </nav>
         <div className="journey-hero__content">
-          <p className="journey-kicker">Every Coach's Journey</p>
+          <p className="journey-kicker">Every Coach&apos;s Journey</p>
           <h1>You coach the athletes. We help run the organization.</h1>
           <p>
             Whether you coach one team or twenty, the same story unfolds: passion grows,
@@ -332,7 +332,7 @@ export default function CoachesJourneyPage() {
             The Landing Page starts the relationship. The Portal strengthens it every day.
             Together, they become the teammate behind every successful program.
           </strong>
-          <a href="/discover" className="journey-cta">Start A Coach's Journey</a>
+          <a href="/discover" className="journey-cta">Start A Coach&apos;s Journey</a>
         </div>
       </section>
     </main>
