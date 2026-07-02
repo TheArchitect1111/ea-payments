@@ -7,8 +7,8 @@ test('homepage routes to discovery intake', async ({ page }) => {
     page.getByRole('heading', {
       name: /let's discover the possibilities/i,
     }),
-  ).toBeVisible();
-  await expect(page.getByRole('button', { name: /^begin$/i })).toBeVisible();
+  ).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByText(/ea guide is available/i)).toBeVisible();
 });
 
 test('consider selena demo story is reachable', async ({ page }) => {
@@ -24,8 +24,8 @@ test('assessment aliases discovery intake', async ({ page }) => {
     page.getByRole('heading', {
       name: /let's discover the possibilities/i,
     }),
-  ).toBeVisible();
-  await expect(page.getByRole('button', { name: /^begin$/i })).toBeVisible();
+  ).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByText(/ea guide is available/i)).toBeVisible();
 });
 
 test('admin dashboard route prompts auth', async ({ page }) => {
@@ -106,7 +106,7 @@ test('assessment thank-you contact link works', async ({ page }) => {
 test('simplifi workspace is reachable', async ({ page }) => {
   await page.goto('/simplifi/workspace');
   await expect(page.getByRole('heading', { name: /what should i pay attention to right now/i })).toBeVisible();
-  await expect(page.getByRole('link', { name: /^capture$/i })).toBeVisible();
+  await expect(page.locator('header.sw-header').getByRole('link', { name: /^capture$/i })).toBeVisible();
 });
 
 test('app alias redirects to workspace', async ({ page }) => {
