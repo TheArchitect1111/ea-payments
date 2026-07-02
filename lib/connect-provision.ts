@@ -1,6 +1,7 @@
 import { CONNECT_INDUSTRY_TEMPLATES, normalizeConnectIndustry, type ConnectIndustry } from '@/lib/connect-industry-templates';
 import { buildConnectKit, type ConnectKit } from '@/lib/connect-kit';
 import { createConnectTenant, getConnectOrg, listConnectOrgs } from '@/lib/connect-store';
+import { logConnectChannelDelivery } from '@/lib/connect-delivery-log';
 import { getDemoCredentials } from '@/lib/demo-client';
 import { defaultModulesForPackage } from '@/lib/modules/registry';
 import { sendConnectKitEmail } from '@/lib/email';
@@ -41,10 +42,19 @@ export async function ensureConnectForPortal(input: EnsureConnectInput): Promise
     if (existing) {
       const kit = buildConnectKit(existing, orgSlug);
       if (input.sendWelcomeEmail) {
-        await sendConnectKitEmail({
+        const kitEmail = await sendConnectKitEmail({
           email: input.ownerEmail,
           organizationName: input.organizationName,
           kit,
+        });
+        await logConnectChannelDelivery({
+          channel: 'email',
+          provider: 'resend',
+          trigger: 'kit',
+          orgSlug,
+          recipient: input.ownerEmail,
+          subject: `Your ${input.organizationName} Connect kit is ready`,
+          result: kitEmail,
         });
       }
       return { ok: true, created: false, orgSlug, kit, persisted: true };
@@ -68,10 +78,19 @@ export async function ensureConnectForPortal(input: EnsureConnectInput): Promise
     const kit = buildConnectKit(org, orgSlug);
 
     if (input.sendWelcomeEmail) {
-      await sendConnectKitEmail({
+      const kitEmail = await sendConnectKitEmail({
         email: input.ownerEmail,
         organizationName: input.organizationName,
         kit,
+      });
+      await logConnectChannelDelivery({
+        channel: 'email',
+        provider: 'resend',
+        trigger: 'kit',
+        orgSlug,
+        recipient: input.ownerEmail,
+        subject: `Your ${input.organizationName} Connect kit is ready`,
+        result: kitEmail,
       });
     }
 

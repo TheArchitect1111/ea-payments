@@ -6,6 +6,7 @@ import {
   type ConnectRelationship,
 } from '@/lib/connect-store';
 import { sendConnectSequenceEmail, sendConnectSms } from '@/lib/email';
+import { logConnectChannelDelivery } from '@/lib/connect-delivery-log';
 import { emitPulseEvent } from '@/lib/pulse-bus';
 
 function platformBaseUrl(): string {
@@ -82,6 +83,17 @@ export async function processDueConnectSequences(): Promise<{
             resourceUrl,
             journeyUrl,
           });
+          await logConnectChannelDelivery({
+            channel: 'email',
+            provider: 'resend',
+            trigger: 'nurture',
+            orgSlug: org.slug,
+            relationshipId: relationship.id,
+            stepId: step.id,
+            recipient: relationship.email,
+            subject: step.title,
+            result: emailResult,
+          });
           if (!emailResult.ok) {
             errors.push(`${relationship.id}/${step.id}: ${emailResult.error ?? 'email failed'}`);
             continue;
@@ -89,11 +101,36 @@ export async function processDueConnectSequences(): Promise<{
         }
 
         if ((step.channel === 'sms' || step.channel === 'both') && relationship.phone) {
-          await sendConnectSms({
+          const smsResult = await sendConnectSms({
             phone: relationship.phone,
             organizationName: org.name,
             resourceTitle,
             journeyUrl: resourceUrl,
+          });
+          await logConnectChannelDelivery({
+            channel: 'sms',
+            provider: 'twilio',
+            trigger: 'nurture',
+            orgSlug: org.slug,
+            relationshipId: relationship.id,
+            stepId: step.id,
+            recipient: relationship.phone,
+            result: smsResult,
+          });
+          if (!smsResult.ok && step.channel === 'sms') {
+            errors.push(`${relationship.id}/${step.id}: ${smsResult.error ?? 'sms failed'}`);
+            continue;
+          }
+        } else if (step.channel === 'sms' || step.channel === 'both') {
+          await logConnectChannelDelivery({
+            channel: 'sms',
+            provider: 'twilio',
+            trigger: 'nurture',
+            orgSlug: org.slug,
+            relationshipId: relationship.id,
+            stepId: step.id,
+            result: { ok: false, error: 'No phone number provided.' },
+            skipped: true,
           });
         }
 
