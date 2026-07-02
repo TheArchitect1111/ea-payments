@@ -153,6 +153,20 @@ export default function ConnectKitClient({ kit, canManage, canEditCopy, copy: in
       ) : null}
 
       {canManage ? (
+        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', paddingTop: 4, borderTop: '1px solid #e2e8f0' }}>
+          <a href="/api/portal/connect/qr-pack?filter=all" className="ep-pulse-cta" style={{ textDecoration: 'none', fontSize: 13 }}>
+            Download all QRs (ZIP)
+          </a>
+          <a href="/api/portal/connect/qr-pack?filter=event" className="ep-pulse-cta" style={{ textDecoration: 'none', fontSize: 13 }}>
+            Event QRs (ZIP)
+          </a>
+          <a href="/api/portal/connect/print-pack?filter=all&autoprint=1" target="_blank" rel="noreferrer" className="ep-pulse-cta" style={{ textDecoration: 'none', fontSize: 13 }}>
+            Print pack (PDF)
+          </a>
+        </div>
+      ) : null}
+
+      {canManage ? (
         <form onSubmit={(e) => void createEventQr(e)} style={{ display: 'grid', gap: 12 }}>
           <p style={{ margin: 0, fontWeight: 800, fontSize: 14 }}>New event QR</p>
           <input
@@ -194,8 +208,11 @@ export default function ConnectKitClient({ kit, canManage, canEditCopy, copy: in
                 <p style={{ margin: '6px 0 0', fontSize: 12, color: '#94a3b8', textTransform: 'uppercase' }}>{link.note}</p>
                 <p style={{ margin: '10px 0 0', fontSize: 13, wordBreak: 'break-all' }}>{link.url}</p>
                 <div style={{ display: 'flex', gap: 12, marginTop: 12, flexWrap: 'wrap' }}>
+                  <a href={`${link.qrPath}&format=png`} download className="ep-pulse-cta" style={{ textDecoration: 'none', fontSize: 13 }}>
+                    Download PNG
+                  </a>
                   <a href={link.qrPath} download className="ep-pulse-cta" style={{ textDecoration: 'none', fontSize: 13 }}>
-                    Download QR
+                    Download SVG
                   </a>
                   <a href={link.url} target="_blank" rel="noreferrer" style={{ fontSize: 13, fontWeight: 700, color: '#1B2B4D' }}>
                     Open capture page
