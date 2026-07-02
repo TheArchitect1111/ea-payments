@@ -1513,6 +1513,42 @@ export async function createConnectRelationship(input: CreateRelationshipInput):
   return relationship;
 }
 
+/** Backdated test relationship so day-3 nurture is due immediately (admin verification). */
+export async function seedNurtureVerificationRelationship(orgSlug: string): Promise<ConnectRelationship> {
+  const slug = sanitizeConnectSlug(orgSlug);
+  const org = await getConnectOrg(slug);
+  if (org.slug !== slug) {
+    throw new Error(`Connect tenant not found for "${slug}".`);
+  }
+
+  const welcomeStep = org.sequence.find((step) => step.delayDays === 0);
+  const createdAt = new Date(Date.now() - 4 * 86_400_000).toISOString();
+  const relationship = buildRelationship(
+    {
+      orgSlug: slug,
+      name: 'Connect Nurture Verify',
+      email: `connect-nurture+${Date.now()}@efficiencyarchitects.online`,
+      source: 'Direct',
+      event: 'Nurture verification',
+      tags: ['nurture-verify'],
+    },
+    createdAt,
+    {},
+    org,
+  );
+  relationship.sequenceSent = welcomeStep ? [welcomeStep.id] : [];
+
+  localRelationships.unshift(relationship);
+  try {
+    const airtableRecordId = await postRelationshipToAirtable(relationship);
+    if (airtableRecordId) relationship.airtableRecordId = airtableRecordId;
+  } catch (error) {
+    console.error('[connect] nurture verify seed failed', error);
+  }
+
+  return relationship;
+}
+
 export async function listConnectRelationships(orgSlug?: string): Promise<ConnectRelationship[]> {
   return localRelationships.filter((relationship) => !orgSlug || relationship.orgSlug === orgSlug);
 }

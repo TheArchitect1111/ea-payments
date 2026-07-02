@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { getConnectNurtureRunStatus } from '@/lib/connect-nurture-log';
 import { previewDueConnectSequences } from '@/lib/connect-sequence-runner';
 import { getConnectSystemStatus } from '@/lib/connect-store';
 
@@ -8,6 +9,7 @@ export const dynamic = 'force-dynamic';
 export async function GET() {
   const status = await getConnectSystemStatus();
   const nurture = await previewDueConnectSequences();
+  const runs = getConnectNurtureRunStatus();
   const resendOk = status.checks.some((check) => check.label === 'Resend Email' && check.ok);
   const tenantOk = status.checks.some((check) => check.label === 'Tenant Storage' && check.ok);
   const cronSecretConfigured = Boolean(process.env.CRON_SECRET?.trim());
@@ -21,6 +23,8 @@ export async function GET() {
       secretConfigured: cronSecretConfigured,
     },
     nurture,
+    lastRun: runs.lastRun,
+    recentRuns: runs.recentRuns,
     checks: status.checks,
   });
 }
