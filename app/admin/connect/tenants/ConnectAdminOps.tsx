@@ -61,6 +61,15 @@ export default function ConnectAdminOps() {
         <button
           type="button"
           disabled={Boolean(busy)}
+          onClick={() => void run('/api/admin/connect/matrix-run', 'POST', { orgSlug: 'demo-client', count: 20, reseed: true })}
+          className="min-h-10 border border-gold-500 bg-neutral-950 px-4 text-xs font-black uppercase tracking-[0.12em] text-white disabled:opacity-60"
+          style={{ borderColor: GOLD }}
+        >
+          {busy === '/api/admin/connect/matrix-run' ? 'Running…' : 'Run full matrix'}
+        </button>
+        <button
+          type="button"
+          disabled={Boolean(busy)}
           onClick={() => void run('/api/admin/connect/test-matrix', 'POST', { orgSlug: 'demo-client', count: 20 })}
           className="min-h-10 border border-neutral-300 px-4 text-xs font-black uppercase tracking-[0.12em] disabled:opacity-60"
         >

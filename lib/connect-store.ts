@@ -1775,6 +1775,9 @@ export async function seedConnectTestRelationships(input: {
   orgSlug: string;
   count: number;
   tag?: string;
+  backdateDays?: number;
+  markWelcomeSent?: boolean;
+  simulateClicks?: boolean;
 }): Promise<ConnectRelationship[]> {
   const slug = sanitizeConnectSlug(input.orgSlug);
   const org = await getConnectOrg(slug);
@@ -1785,9 +1788,13 @@ export async function seedConnectTestRelationships(input: {
   const total = Math.max(1, Math.min(50, Math.floor(input.count)));
   const label = (input.tag ?? 'test-matrix').trim().toLowerCase().replace(/[^a-z0-9-]+/g, '-') || 'test-matrix';
   const created: ConnectRelationship[] = [];
+  const welcomeStep = org.sequence.find((step) => step.delayDays === 0);
 
   for (let i = 0; i < total; i += 1) {
     const stamp = `${Date.now()}-${i + 1}`;
+    const createdAt = input.backdateDays
+      ? new Date(Date.now() - input.backdateDays * 86_400_000).toISOString()
+      : new Date().toISOString();
     const relationship = buildRelationship(
       {
         orgSlug: slug,
@@ -1797,10 +1804,14 @@ export async function seedConnectTestRelationships(input: {
         event: 'Matrix test',
         tags: [label, 'matrix'],
       },
-      new Date().toISOString(),
-      {},
+      createdAt,
+      input.simulateClicks ? { clicks: 1 } : {},
       org,
     );
+
+    if (input.markWelcomeSent && welcomeStep) {
+      relationship.sequenceSent = [welcomeStep.id];
+    }
 
     localRelationships.unshift(relationship);
     try {
@@ -1882,8 +1893,8 @@ export function getConnectReadinessAudit(): ConnectReadinessItem[] {
       area: 'Launch Testing',
       score: 35,
       currentState: 'Build and basic live API/page smoke tests passed.',
-      gaps: ['No 20-scan/contact/email/SMS/redirect/AI test run completed', 'Run nurture + matrix seed to populate verified delivery logs'],
-      recommendation: 'Run scripted production test matrix after Airtable, Resend, Twilio, and n8n envs are connected.',
+      gaps: ['Run POST /api/admin/connect/matrix-run for scored failure report', 'Twilio/SMS and CRON_SECRET may block a 100 score until env is set'],
+      recommendation: 'Use admin Ops → Run full matrix, then fix environment blockers listed in report.failures.',
       priority: 'Critical',
     },
   ];
