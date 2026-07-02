@@ -1,8 +1,13 @@
 import type { NextConfig } from 'next';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import vercelJson from './vercel.json';
 
+const projectRoot = path.dirname(fileURLToPath(import.meta.url));
+
 const nextConfig: NextConfig = {
+  outputFileTracingRoot: projectRoot,
   transpilePackages: ['@ea/portal-chassis'],
   async redirects() {
     return (vercelJson.redirects ?? []).map((rule) => ({

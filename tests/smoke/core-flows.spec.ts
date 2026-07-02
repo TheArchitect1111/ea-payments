@@ -1,13 +1,14 @@
 import { expect, test } from '@playwright/test';
 
-test('homepage hero and primary CTA render', async ({ page }) => {
+test('homepage routes to discovery intake', async ({ page }) => {
   await page.goto('/');
+  await expect(page).toHaveURL(/\/ctp-intake|\/discover/);
   await expect(
     page.getByRole('heading', {
-      name: /imagine the possibilities/i,
+      name: /let's discover the possibilities/i,
     }),
   ).toBeVisible();
-  await expect(page.getByRole('link', { name: /begin the story/i }).first()).toBeVisible();
+  await expect(page.getByRole('button', { name: /^begin$/i })).toBeVisible();
 });
 
 test('consider selena demo story is reachable', async ({ page }) => {
@@ -16,9 +17,15 @@ test('consider selena demo story is reachable', async ({ page }) => {
   await expect(page.locator('body')).not.toBeEmpty();
 });
 
-test('assessment page is reachable', async ({ page }) => {
+test('assessment aliases discovery intake', async ({ page }) => {
   await page.goto('/assessment');
-  await expect(page.getByRole('button', { name: /submit my assessment/i })).toBeVisible();
+  await expect(page).toHaveURL(/\/ctp-intake|\/discover/);
+  await expect(
+    page.getByRole('heading', {
+      name: /let's discover the possibilities/i,
+    }),
+  ).toBeVisible();
+  await expect(page.getByRole('button', { name: /^begin$/i })).toBeVisible();
 });
 
 test('admin dashboard route prompts auth', async ({ page }) => {
@@ -65,6 +72,23 @@ test('magnifi consider demo has opportunity content', async ({ page }) => {
   await expect(page.getByRole('heading', { name: /opportunity scores/i })).toBeVisible();
 });
 
+test('magnifi cinematic demo renders without airtable', async ({ page }) => {
+  await page.goto('/magnifi/demo');
+  await expect(page.getByRole('heading', { level: 1, name: /selena executive coaching/i })).toBeVisible();
+  await expect(page.getByText(/experience engine v2/i)).toBeVisible();
+});
+
+test('magnifi classic report demo renders', async ({ page }) => {
+  await page.goto('/magnifi/demo?classic=1');
+  await expect(page.getByText(/classic report/i)).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: /selena executive coaching/i })).toBeVisible();
+});
+
+test('magnifi unknown id returns 404', async ({ page }) => {
+  const res = await page.goto('/magnifi/does-not-exist-zzz');
+  expect(res?.status()).toBe(404);
+});
+
 test('checkout lists purchasable packages only', async ({ page }) => {
   await page.goto('/checkout');
   const options = page.locator('select option');
@@ -82,8 +106,8 @@ test('assessment thank-you contact link works', async ({ page }) => {
 
 test('simplifi workspace is reachable', async ({ page }) => {
   await page.goto('/simplifi/workspace');
-  await expect(page.getByRole('heading', { name: /your opportunities, organized/i })).toBeVisible();
-  await expect(page.getByRole('link', { name: /capture now/i })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /the orb is the workspace/i })).toBeVisible();
+  await expect(page.getByRole('link', { name: /capture something/i })).toBeVisible();
 });
 
 test('app alias redirects to workspace', async ({ page }) => {
