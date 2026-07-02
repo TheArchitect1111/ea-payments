@@ -1814,7 +1814,7 @@ export function getConnectReadinessAudit(): ConnectReadinessItem[] {
     {
       area: 'Automation/Nurture',
       score: 63,
-      currentState: 'Rules and sequence model are present with trigger/action vocabulary.',
+      currentState: 'Rules and sequence model are present with trigger/action vocabulary. Delivery attempts are logged per channel with Pulse persistence.',
       gaps: ['n8n workflows are not invoked yet', 'No scheduled worker for delayed steps', 'No task completion UI'],
       recommendation: 'Wire n8n webhook dispatch and scheduled sequence runner; add staff task board.',
       priority: 'Critical',
@@ -1831,7 +1831,7 @@ export function getConnectReadinessAudit(): ConnectReadinessItem[] {
       area: 'Launch Testing',
       score: 35,
       currentState: 'Build and basic live API/page smoke tests passed.',
-      gaps: ['No 20-scan/contact/email/SMS/redirect/AI test run completed', 'No verified Resend/Twilio delivery logs'],
+      gaps: ['No 20-scan/contact/email/SMS/redirect/AI test run completed', 'Run nurture + matrix seed to populate verified delivery logs'],
       recommendation: 'Run scripted production test matrix after Airtable, Resend, Twilio, and n8n envs are connected.',
       priority: 'Critical',
     },

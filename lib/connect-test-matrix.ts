@@ -1,3 +1,4 @@
+import { getConnectDeliveryStatus } from '@/lib/connect-delivery-log';
 import { getConnectSystemStatus, listConnectRelationships } from '@/lib/connect-store';
 import { isConnectMemoryConfigured } from '@/lib/connect-relationship-memory';
 
@@ -17,6 +18,7 @@ export async function buildConnectTestMatrix(orgSlug: string): Promise<{
 }> {
   const relationships = await listConnectRelationships(orgSlug);
   const status = await getConnectSystemStatus();
+  const delivery = await getConnectDeliveryStatus(orgSlug);
 
   const scans = relationships.reduce((sum, rel) => sum + rel.engagement.scans, 0);
   const redirects = relationships.reduce((sum, rel) => sum + rel.engagement.clicks, 0);
@@ -26,7 +28,9 @@ export async function buildConnectTestMatrix(orgSlug: string): Promise<{
       ? rel.aiProfile.memorySource === 'openai'
       : rel.aiProfile.opportunityScore >= 0 && Boolean(rel.aiProfile.memoryRefreshedAt),
   ).length;
-  const nurtureSends = relationships.reduce((sum, rel) => sum + rel.sequenceSent.length, 0);
+  const verifiedEmails = delivery.stats.email.sent;
+  const verifiedSms = delivery.stats.sms.sent;
+  const emailFailures = delivery.stats.email.failed;
 
   const resendOk = status.checks.some((check) => check.label === 'Resend Email' && check.ok);
   const twilioOk = status.checks.some((check) => check.label === 'Twilio SMS' && check.ok);
@@ -50,22 +54,22 @@ export async function buildConnectTestMatrix(orgSlug: string): Promise<{
     },
     {
       id: 'emails',
-      label: 'Nurture sends recorded',
+      label: 'Verified email deliveries',
       target: 20,
-      current: nurtureSends,
-      ok: nurtureSends >= 20 && resendOk,
+      current: verifiedEmails,
+      ok: verifiedEmails >= 20 && resendOk && emailFailures === 0,
       detail: resendOk
-        ? `${nurtureSends} sequence steps marked sent.`
+        ? `${verifiedEmails} verified email send(s) logged (${emailFailures} failed).`
         : 'Resend is not configured, so sends are not production-verifiable.',
     },
     {
       id: 'sms',
-      label: 'SMS capability',
+      label: 'Verified SMS deliveries',
       target: 20,
-      current: twilioOk ? Math.min(relationships.length, 20) : 0,
-      ok: twilioOk && relationships.length >= 20,
+      current: verifiedSms,
+      ok: twilioOk ? verifiedSms >= 20 && delivery.stats.sms.failed === 0 : false,
       detail: twilioOk
-        ? 'Twilio configured; SMS can be verified during matrix run.'
+        ? `${verifiedSms} verified SMS send(s) logged (${delivery.stats.sms.failed} failed).`
         : 'Twilio not configured on production.',
     },
     {

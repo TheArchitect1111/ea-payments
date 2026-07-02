@@ -9,6 +9,7 @@ import {
   type CreateRelationshipInput,
 } from '@/lib/connect-store';
 import { handoffConnectRelationship } from '@/lib/connect-pipeline';
+import { logConnectChannelDelivery } from '@/lib/connect-delivery-log';
 import { sendConnectSms, sendConnectWelcomeEmail, sendInternalNotification } from '@/lib/email';
 
 export const dynamic = 'force-dynamic';
@@ -90,6 +91,16 @@ export async function POST(request: NextRequest) {
       guideUrl,
       journeyUrl,
     });
+    await logConnectChannelDelivery({
+      channel: 'email',
+      provider: 'resend',
+      trigger: 'capture',
+      orgSlug,
+      relationshipId: relationship.id,
+      recipient: relationship.email,
+      subject: `Welcome to ${org.name}`,
+      result: emailDelivery,
+    });
     const welcomeStep = org.sequence.find((step) => step.delayDays === 0);
     if (emailDelivery.ok && welcomeStep) {
       await markSequenceStepSent(relationship.id, welcomeStep.id);
@@ -102,6 +113,16 @@ export async function POST(request: NextRequest) {
           journeyUrl,
         })
       : { ok: false, error: 'No phone number provided.' };
+    await logConnectChannelDelivery({
+      channel: 'sms',
+      provider: 'twilio',
+      trigger: 'capture',
+      orgSlug,
+      relationshipId: relationship.id,
+      recipient: relationship.phone,
+      result: smsDelivery,
+      skipped: !relationship.phone,
+    });
     const staffNotice = await sendInternalNotification({
       subject: `New ${org.name} Connect - ${relationship.name}`,
       title: 'New Connect Relationship',
@@ -118,6 +139,15 @@ export async function POST(request: NextRequest) {
         '',
         relationship.conversationNotes ?? 'No notes captured.',
       ].join('\n'),
+    });
+    await logConnectChannelDelivery({
+      channel: 'staff',
+      provider: 'resend-internal',
+      trigger: 'staff',
+      orgSlug,
+      relationshipId: relationship.id,
+      subject: `New ${org.name} Connect - ${relationship.name}`,
+      result: staffNotice,
     });
     const automationWebhook = process.env.CONNECT_N8N_WEBHOOK_URL || process.env.N8N_WEBHOOK_URL;
     const automationDelivery = automationWebhook
@@ -136,6 +166,15 @@ export async function POST(request: NextRequest) {
           .then(async (response) => ({ ok: response.ok, status: response.status, error: response.ok ? undefined : await response.text().catch(() => 'Webhook failed.') }))
           .catch((error) => ({ ok: false, error: error instanceof Error ? error.message : 'Webhook failed.' }))
       : { ok: false, error: 'Automation webhook not configured.' };
+    await logConnectChannelDelivery({
+      channel: 'webhook',
+      provider: 'n8n',
+      trigger: 'capture',
+      orgSlug,
+      relationshipId: relationship.id,
+      result: automationDelivery,
+      skipped: !automationWebhook,
+    });
 
     return NextResponse.json({
       relationship,

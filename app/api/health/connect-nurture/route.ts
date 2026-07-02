@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { getConnectDeliveryStatus } from '@/lib/connect-delivery-log';
 import { getConnectNurtureRunStatus } from '@/lib/connect-nurture-log';
 import { previewDueConnectSequences } from '@/lib/connect-sequence-runner';
 import { buildConnectTestMatrix } from '@/lib/connect-test-matrix';
@@ -12,6 +13,7 @@ export async function GET() {
   const nurture = await previewDueConnectSequences();
   const matrix = await buildConnectTestMatrix('demo-client');
   const runs = await getConnectNurtureRunStatus();
+  const delivery = await getConnectDeliveryStatus('demo-client');
   const resendOk = status.checks.some((check) => check.label === 'Resend Email' && check.ok);
   const tenantOk = status.checks.some((check) => check.label === 'Tenant Storage' && check.ok);
   const cronSecretConfigured = Boolean(process.env.CRON_SECRET?.trim());
@@ -25,12 +27,17 @@ export async function GET() {
       `POST /api/admin/connect/run-nurture (admin) to send ${nurture.dueSteps} due step(s) now.`,
     );
   }
+  if (delivery.recentFailures.length > 0) {
+    actions.push(
+      `GET /api/admin/connect/delivery-log?org=demo-client — ${delivery.recentFailures.length} recent delivery failure(s).`,
+    );
+  }
   if (matrix.score < 100) {
     actions.push(`GET /api/admin/connect/test-matrix?org=demo-client (current score ${matrix.score}).`);
   }
 
   return NextResponse.json({
-    ok: resendOk && tenantOk && cronSecretConfigured,
+    ok: resendOk && tenantOk && cronSecretConfigured && delivery.recentFailures.length === 0,
     score: status.score,
     cron: {
       path: '/api/cron/connect-sequence',
@@ -38,6 +45,7 @@ export async function GET() {
       secretConfigured: cronSecretConfigured,
     },
     nurture,
+    delivery,
     lastRun: runs.lastRun,
     recentRuns: runs.recentRuns,
     runLogSource: runs.source,

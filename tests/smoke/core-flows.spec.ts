@@ -319,6 +319,11 @@ test('admin connect refresh-memory requires auth', async ({ page }) => {
   expect(res.status()).toBe(401);
 });
 
+test('admin connect delivery-log requires auth', async ({ page }) => {
+  const res = await page.request.get('/api/admin/connect/delivery-log?org=demo-client');
+  expect(res.status()).toBe(401);
+});
+
 test('portal documents requires login', async ({ page }) => {
   await page.goto('/portal/demo-client/documents');
   await expect(page).toHaveURL(/\/portal\/login/);
