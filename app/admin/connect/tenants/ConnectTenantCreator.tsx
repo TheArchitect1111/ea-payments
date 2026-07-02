@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import type { ConnectOrgConfig } from '@/lib/connect-store';
+import ConnectAdminOps from './ConnectAdminOps';
+import ConnectTenantEditor from './ConnectTenantEditor';
 
 type Props = {
   initialTenants: ConnectOrgConfig[];
@@ -180,6 +182,8 @@ export default function ConnectTenantCreator({ initialTenants, initialSystemStat
       </section>
 
       <section className="grid gap-5">
+        <ConnectAdminOps />
+
         <div className="border border-neutral-200 bg-white p-5">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
@@ -240,6 +244,13 @@ export default function ConnectTenantCreator({ initialTenants, initialSystemStat
                     <a href={`/connect/${tenant.slug}/journey`} className="border border-neutral-200 px-3 py-2">Journey</a>
                   </div>
                 </div>
+                <p className="mt-2 text-sm text-neutral-500">{tenant.campaigns.length} campaign(s) · {tenant.offer.headline}</p>
+                <ConnectTenantEditor
+                  tenant={tenant}
+                  onUpdated={(updated) => {
+                    setTenants((current) => current.map((item) => (item.slug === updated.slug ? updated : item)));
+                  }}
+                />
               </article>
             ))}
           </div>
