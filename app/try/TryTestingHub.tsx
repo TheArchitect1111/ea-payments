@@ -29,6 +29,8 @@ function buildTestLinks(slug: string): TestLink[] {
 
 const GUEST_LINKS: TestLink[] = [
   { label: 'Try capture without login', href: '/simplifi/capture', note: 'Guest mode — limited save' },
+  { label: 'Connect capture (demo)', href: '/connect/demo-client', note: 'Public QR landing — sign in once to manage kit' },
+  { label: 'Connect capture (CPR live)', href: '/connect/cpr', note: 'Production CPR org — no login' },
   { label: 'Magnifi story demo', href: '/story/selena', note: 'No account needed' },
 ];
 
