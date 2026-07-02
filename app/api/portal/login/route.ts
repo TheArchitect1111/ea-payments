@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { validatePortalLogin, getClientByPortalSlug, updateClientEngagementScore } from '@/lib/airtable';
+import { ensureDemoConnectTenant } from '@/lib/connect-provision';
 import { ensureDemoClient, isDemoCredentialAttempt } from '@/lib/demo-client';
 import { begin2FA, is2FAEnabled } from '@/lib/ea-auth-2fa';
 import { signSession, makeSessionCookie } from '@/lib/ea-portal-auth';
@@ -36,6 +37,14 @@ export async function POST(req: NextRequest) {
 
   if (!result.ok || !result.slug) {
     return NextResponse.json({ error: result.error ?? 'Invalid credentials.' }, { status: 401 });
+  }
+
+  if (isDemoCredentialAttempt(email, password)) {
+    try {
+      await ensureDemoConnectTenant();
+    } catch (err) {
+      console.error('[connect] demo tenant ensure failed', err);
+    }
   }
 
   if (is2FAEnabled() && !isDemoCredentialAttempt(email, password)) {

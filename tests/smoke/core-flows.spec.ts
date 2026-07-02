@@ -257,6 +257,16 @@ test('portal modules API requires login', async ({ page }) => {
   expect(res.status()).toBe(401);
 });
 
+test('portal connect route requires portal login', async ({ page }) => {
+  await page.goto('/portal/demo-client/connect');
+  await expect(page).toHaveURL(/\/portal\/login/);
+});
+
+test('public connect capture page is reachable', async ({ page }) => {
+  await page.goto('/connect/demo-client');
+  await expect(page.locator('body')).not.toBeEmpty();
+});
+
 test('portal documents requires login', async ({ page }) => {
   await page.goto('/portal/demo-client/documents');
   await expect(page).toHaveURL(/\/portal\/login/);

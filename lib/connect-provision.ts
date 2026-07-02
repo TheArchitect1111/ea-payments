@@ -1,6 +1,7 @@
 import { CONNECT_INDUSTRY_TEMPLATES, normalizeConnectIndustry, type ConnectIndustry } from '@/lib/connect-industry-templates';
 import { buildConnectKit, type ConnectKit } from '@/lib/connect-kit';
 import { createConnectTenant, getConnectOrg, listConnectOrgs } from '@/lib/connect-store';
+import { getDemoCredentials } from '@/lib/demo-client';
 import { defaultModulesForPackage } from '@/lib/modules/registry';
 import { sendConnectKitEmail } from '@/lib/email';
 
@@ -91,4 +92,15 @@ export async function ensureConnectForPortal(input: EnsureConnectInput): Promise
       error: error instanceof Error ? error.message : 'Connect provisioning failed.',
     };
   }
+}
+
+export async function ensureDemoConnectTenant(): Promise<EnsureConnectResult> {
+  const demo = getDemoCredentials();
+  return ensureConnectForPortal({
+    portalSlug: demo.slug,
+    organizationName: demo.organization,
+    ownerEmail: demo.email,
+    industry: 'business',
+    sendWelcomeEmail: false,
+  });
 }
