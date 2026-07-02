@@ -11,7 +11,7 @@ import {
 } from '@/lib/airtable';
 import { getCaptures } from '@/lib/capture-records';
 import { isCaptureApiKeyConfigured } from '@/lib/capture-api-key';
-import { getCtpAttentionStats } from '@/lib/ctp-submissions';
+import { getCtpAttentionStats } from '@/lib/ctp-attention-stats';
 
 export const dynamic = 'force-dynamic';
 
