@@ -1017,6 +1017,26 @@ async function applyRelationshipMemory(
   relationship.updatedAt = new Date().toISOString();
 }
 
+async function ensureLocalRelationship(relationshipId: string, orgSlug: string): Promise<ConnectRelationship | null> {
+  const existing = localRelationships.find((item) => item.id === relationshipId);
+  if (existing) return existing;
+
+  const relationships = await listConnectRelationshipsForSequence();
+  const match = relationships.find((item) => item.id === relationshipId && item.orgSlug === orgSlug);
+  if (!match) return null;
+
+  const copy: ConnectRelationship = {
+    ...match,
+    engagement: { ...match.engagement },
+    aiProfile: { ...match.aiProfile, reasons: [...match.aiProfile.reasons] },
+    tags: [...match.tags],
+    resourcesSent: [...match.resourcesSent],
+    sequenceSent: [...match.sequenceSent],
+  };
+  localRelationships.unshift(copy);
+  return copy;
+}
+
 export async function refreshConnectRelationshipMemoryById(
   relationshipId: string,
   context?: {
@@ -1028,6 +1048,37 @@ export async function refreshConnectRelationshipMemoryById(
   const relationship = localRelationships.find((item) => item.id === relationshipId);
   if (!relationship) return null;
   await applyRelationshipMemory(relationship, context);
+  return relationship;
+}
+
+export async function completeConnectRelationshipFollowUp(input: {
+  orgSlug: string;
+  relationshipId: string;
+  completedBy: string;
+  note?: string;
+}): Promise<ConnectRelationship | null> {
+  const slug = sanitizeConnectSlug(input.orgSlug);
+  const relationship = await ensureLocalRelationship(input.relationshipId, slug);
+  if (!relationship) return null;
+
+  if (input.note?.trim()) {
+    const line = `Follow-up (${input.completedBy.trim() || 'staff'}): ${input.note.trim()}`;
+    relationship.conversationNotes = relationship.conversationNotes
+      ? `${relationship.conversationNotes}\n\n${line}`
+      : line;
+  }
+
+  if (relationship.status === 'Needs Follow-Up' || relationship.status === 'Hot') {
+    relationship.status = 'Engaged';
+  }
+
+  await recordConnectEngagement({
+    orgSlug: slug,
+    relationshipId: relationship.id,
+    type: 'follow_up_completed',
+  });
+
+  await patchRelationshipInAirtable(relationship);
   return relationship;
 }
 
@@ -1814,9 +1865,9 @@ export function getConnectReadinessAudit(): ConnectReadinessItem[] {
     {
       area: 'Automation/Nurture',
       score: 63,
-      currentState: 'Rules and sequence model are present with trigger/action vocabulary. Delivery attempts are logged per channel with Pulse persistence.',
-      gaps: ['n8n workflows are not invoked yet', 'No scheduled worker for delayed steps', 'No task completion UI'],
-      recommendation: 'Wire n8n webhook dispatch and scheduled sequence runner; add staff task board.',
+      currentState: 'Rules and sequence model are present with trigger/action vocabulary. Delivery attempts are logged per channel with Pulse persistence. Staff task board lists open follow-ups and records completion.',
+      gaps: ['Task completions are in-memory until Airtable task table is added', 'No assignee routing by representative yet'],
+      recommendation: 'Use portal /connect task board or POST /api/admin/connect/tasks to clear open follow-ups.',
       priority: 'Critical',
     },
     {
