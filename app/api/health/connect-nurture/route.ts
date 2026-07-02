@@ -3,6 +3,7 @@ import { getConnectDeliveryStatus } from '@/lib/connect-delivery-log';
 import { listConnectFollowUpTasks } from '@/lib/connect-tasks';
 import { getConnectNurtureRunStatus } from '@/lib/connect-nurture-log';
 import { previewDueConnectSequences } from '@/lib/connect-sequence-runner';
+import { buildConnectMatrixFailureReport } from '@/lib/connect-matrix-run';
 import { buildConnectTestMatrix } from '@/lib/connect-test-matrix';
 import { getConnectSystemStatus } from '@/lib/connect-store';
 
@@ -13,6 +14,12 @@ export async function GET() {
   const status = await getConnectSystemStatus();
   const nurture = await previewDueConnectSequences();
   const matrix = await buildConnectTestMatrix('demo-client');
+  const matrixReport = buildConnectMatrixFailureReport({
+    orgSlug: 'demo-client',
+    matrix,
+    status,
+    steps: [],
+  });
   const runs = await getConnectNurtureRunStatus();
   const delivery = await getConnectDeliveryStatus('demo-client');
   const tasks = await listConnectFollowUpTasks('demo-client');
@@ -40,7 +47,7 @@ export async function GET() {
     );
   }
   if (matrix.score < 100) {
-    actions.push(`GET /api/admin/connect/test-matrix?org=demo-client (current score ${matrix.score}).`);
+    actions.push(`POST /api/admin/connect/matrix-run (current score ${matrix.score}) — ${matrixReport.summary}`);
   }
 
   return NextResponse.json({
@@ -58,6 +65,7 @@ export async function GET() {
     recentRuns: runs.recentRuns,
     runLogSource: runs.source,
     matrix,
+    matrixReport,
     actions,
     checks: status.checks,
   });
