@@ -1596,6 +1596,50 @@ export async function seedNurtureVerificationRelationship(orgSlug: string): Prom
   return relationship;
 }
 
+export async function seedConnectTestRelationships(input: {
+  orgSlug: string;
+  count: number;
+  tag?: string;
+}): Promise<ConnectRelationship[]> {
+  const slug = sanitizeConnectSlug(input.orgSlug);
+  const org = await getConnectOrg(slug);
+  if (org.slug !== slug) {
+    throw new Error(`Connect tenant not found for "${slug}".`);
+  }
+
+  const total = Math.max(1, Math.min(50, Math.floor(input.count)));
+  const label = (input.tag ?? 'test-matrix').trim().toLowerCase().replace(/[^a-z0-9-]+/g, '-') || 'test-matrix';
+  const created: ConnectRelationship[] = [];
+
+  for (let i = 0; i < total; i += 1) {
+    const stamp = `${Date.now()}-${i + 1}`;
+    const relationship = buildRelationship(
+      {
+        orgSlug: slug,
+        name: `Connect ${label} ${i + 1}`,
+        email: `connect-${label}-${stamp}@efficiencyarchitects.online`,
+        source: 'Direct',
+        event: 'Matrix test',
+        tags: [label, 'matrix'],
+      },
+      new Date().toISOString(),
+      {},
+      org,
+    );
+
+    localRelationships.unshift(relationship);
+    try {
+      const airtableRecordId = await postRelationshipToAirtable(relationship);
+      if (airtableRecordId) relationship.airtableRecordId = airtableRecordId;
+    } catch (error) {
+      console.error('[connect] test-matrix seed failed', error);
+    }
+    created.push(relationship);
+  }
+
+  return created;
+}
+
 export async function listConnectRelationships(orgSlug?: string): Promise<ConnectRelationship[]> {
   return localRelationships.filter((relationship) => !orgSlug || relationship.orgSlug === orgSlug);
 }

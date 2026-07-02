@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getConnectNurtureRunStatus } from '@/lib/connect-nurture-log';
 import { previewDueConnectSequences } from '@/lib/connect-sequence-runner';
+import { buildConnectTestMatrix } from '@/lib/connect-test-matrix';
 import { getConnectSystemStatus } from '@/lib/connect-store';
 
 export const dynamic = 'force-dynamic';
@@ -9,6 +10,7 @@ export const dynamic = 'force-dynamic';
 export async function GET() {
   const status = await getConnectSystemStatus();
   const nurture = await previewDueConnectSequences();
+  const matrix = await buildConnectTestMatrix('demo-client');
   const runs = await getConnectNurtureRunStatus();
   const resendOk = status.checks.some((check) => check.label === 'Resend Email' && check.ok);
   const tenantOk = status.checks.some((check) => check.label === 'Tenant Storage' && check.ok);
@@ -23,6 +25,9 @@ export async function GET() {
       `POST /api/admin/connect/run-nurture (admin) to send ${nurture.dueSteps} due step(s) now.`,
     );
   }
+  if (matrix.score < 100) {
+    actions.push(`GET /api/admin/connect/test-matrix?org=demo-client (current score ${matrix.score}).`);
+  }
 
   return NextResponse.json({
     ok: resendOk && tenantOk && cronSecretConfigured,
@@ -36,6 +41,7 @@ export async function GET() {
     lastRun: runs.lastRun,
     recentRuns: runs.recentRuns,
     runLogSource: runs.source,
+    matrix,
     actions,
     checks: status.checks,
   });
