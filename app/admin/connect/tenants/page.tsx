@@ -4,6 +4,7 @@ import { redirectToAdminLogin } from '@/lib/admin-redirect';
 import { EA_ADMIN_COOKIE, verifyAdminSession } from '@/lib/ea-admin-auth';
 import { getConnectSystemStatus, listConnectOrgs } from '@/lib/connect-store';
 import ConnectTenantCreator from './ConnectTenantCreator';
+import ConnectLaunchFinish from './ConnectLaunchFinish';
 
 export const dynamic = 'force-dynamic';
 
@@ -44,7 +45,8 @@ export default async function ConnectTenantsPage() {
           </div>
         </header>
 
-        <section className="mt-6">
+        <section className="mt-6 grid gap-5">
+          <ConnectLaunchFinish />
           <ConnectTenantCreator initialTenants={tenants} initialSystemStatus={systemStatus} />
         </section>
       </div>

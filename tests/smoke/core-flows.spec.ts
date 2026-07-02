@@ -341,6 +341,11 @@ test('admin connect matrix-run requires auth', async ({ page }) => {
   expect(res.status()).toBe(401);
 });
 
+test('admin connect launch requires auth', async ({ page }) => {
+  const res = await page.request.get('/api/admin/connect/launch?org=demo-client');
+  expect(res.status()).toBe(401);
+});
+
 test('portal documents requires login', async ({ page }) => {
   await page.goto('/portal/demo-client/documents');
   await expect(page).toHaveURL(/\/portal\/login/);

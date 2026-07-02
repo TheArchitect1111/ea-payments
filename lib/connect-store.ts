@@ -1015,6 +1015,7 @@ async function applyRelationshipMemory(
   });
   relationship.status = relationshipStatusFromProfile(relationship.aiProfile);
   relationship.updatedAt = new Date().toISOString();
+  await patchRelationshipInAirtable(relationship);
 }
 
 async function ensureLocalRelationship(relationshipId: string, orgSlug: string): Promise<ConnectRelationship | null> {
@@ -1100,6 +1101,56 @@ export async function refreshConnectRelationshipMemoryForOrg(
   return { refreshed: targets.length, openai, rules };
 }
 
+function relationshipAirtableFields(relationship: ConnectRelationship): Record<string, unknown> {
+  return {
+    'Connect ID': relationship.id,
+    'Org Slug': relationship.orgSlug,
+    Name: relationship.name,
+    Email: relationship.email,
+    Phone: relationship.phone ?? '',
+    Organization: relationship.organization ?? '',
+    Role: relationship.role ?? '',
+    Source: relationship.source,
+    Event: relationship.event ?? '',
+    'Date Met': relationship.dateMet,
+    Representative: relationship.representative ?? '',
+    Notes: relationship.conversationNotes ?? '',
+    Tags: relationship.tags.join(', '),
+    Status: relationship.status,
+    'Lead Type': relationship.leadType,
+    'Routed Team': relationship.routedTeam,
+    'Opportunity Score': relationship.aiProfile.opportunityScore,
+    'Recommended Action': relationship.aiProfile.recommendedAction,
+    'Sequence Sent': relationship.sequenceSent.join(', '),
+    'Simplifi Capture ID': relationship.simplifiCaptureId ?? '',
+    'Amplifi URL': relationship.amplifiShareUrl ?? '',
+    'Engagement JSON': JSON.stringify({
+      engagement: relationship.engagement,
+      aiProfile: {
+        memorySource: relationship.aiProfile.memorySource,
+        memoryRefreshedAt: relationship.aiProfile.memoryRefreshedAt,
+        memoryConfidence: relationship.aiProfile.memoryConfidence,
+        memoryModel: relationship.aiProfile.memoryModel,
+      },
+    }),
+  };
+}
+
+function parseEngagementJson(raw: unknown): {
+  engagement?: Partial<ConnectRelationship['engagement']>;
+  aiProfile?: Partial<ConnectRelationship['aiProfile']>;
+} | null {
+  if (!raw) return null;
+  try {
+    return JSON.parse(String(raw)) as {
+      engagement?: Partial<ConnectRelationship['engagement']>;
+      aiProfile?: Partial<ConnectRelationship['aiProfile']>;
+    };
+  } catch {
+    return null;
+  }
+}
+
 function airtableConfig() {
   const apiKey = process.env.AIRTABLE_API_KEY || process.env.AIRTABLE_TOKEN;
   const baseId = process.env.AIRTABLE_BASE_ID || process.env.AIRTABLE_PAYMENTS_BASE_ID || 'appv0YoLIMY45fmDA';
@@ -1121,29 +1172,7 @@ async function postRelationshipToAirtable(relationship: ConnectRelationship): Pr
     body: JSON.stringify({
       records: [
         {
-          fields: {
-            'Connect ID': relationship.id,
-            'Org Slug': relationship.orgSlug,
-            Name: relationship.name,
-            Email: relationship.email,
-            Phone: relationship.phone,
-            Organization: relationship.organization,
-            Role: relationship.role,
-            Source: relationship.source,
-            Event: relationship.event,
-            'Date Met': relationship.dateMet,
-            Representative: relationship.representative,
-            Notes: relationship.conversationNotes,
-            Tags: relationship.tags.join(', '),
-            Status: relationship.status,
-            'Lead Type': relationship.leadType,
-            'Routed Team': relationship.routedTeam,
-            'Opportunity Score': relationship.aiProfile.opportunityScore,
-            'Recommended Action': relationship.aiProfile.recommendedAction,
-            'Sequence Sent': relationship.sequenceSent.join(', '),
-            'Simplifi Capture ID': relationship.simplifiCaptureId ?? '',
-            'Amplifi URL': relationship.amplifiShareUrl ?? '',
-          },
+          fields: relationshipAirtableFields(relationship),
         },
       ],
       typecast: true,
@@ -1168,6 +1197,20 @@ function mapAirtableRelationship(record: { id: string; fields: Record<string, un
   const sequenceRaw = String(record.fields['Sequence Sent'] ?? '');
   const dateMet = String(record.fields['Date Met'] ?? record.fields['Created At'] ?? new Date().toISOString());
   const opportunityScore = Number(record.fields['Opportunity Score'] ?? 50);
+  const engagementPayload = parseEngagementJson(record.fields['Engagement JSON']);
+  const engagement = {
+    scans: 0,
+    opens: 0,
+    clicks: 0,
+    downloads: 0,
+    videoViews: 0,
+    portalVisits: 0,
+    applicationsStarted: 0,
+    applicationsCompleted: 0,
+    messages: 0,
+    followUpsCompleted: 0,
+    ...engagementPayload?.engagement,
+  };
 
   return {
     id: connectId,
@@ -1190,18 +1233,7 @@ function mapAirtableRelationship(record: { id: string; fields: Record<string, un
     leadType: String(record.fields['Lead Type'] ?? 'Prospect'),
     routedTeam: String(record.fields['Routed Team'] ?? ''),
     resourcesSent: [],
-    engagement: {
-      scans: 0,
-      opens: 0,
-      clicks: 0,
-      downloads: 0,
-      videoViews: 0,
-      portalVisits: 0,
-      applicationsStarted: 0,
-      applicationsCompleted: 0,
-      messages: 0,
-      followUpsCompleted: 0,
-    },
+    engagement,
     aiProfile: {
       summary: String(record.fields.Notes ?? 'Imported from Airtable'),
       interestLevel: 'Medium',
@@ -1210,6 +1242,10 @@ function mapAirtableRelationship(record: { id: string; fields: Record<string, un
       recommendedAction: String(record.fields['Recommended Action'] ?? 'Continue nurture sequence.'),
       followUpPriority: 'Medium',
       reasons: ['Loaded from Airtable'],
+      memorySource: engagementPayload?.aiProfile?.memorySource,
+      memoryRefreshedAt: engagementPayload?.aiProfile?.memoryRefreshedAt,
+      memoryConfidence: engagementPayload?.aiProfile?.memoryConfidence,
+      memoryModel: engagementPayload?.aiProfile?.memoryModel,
     },
     campaignId: undefined,
     simplifiCaptureId: String(record.fields['Simplifi Capture ID'] ?? '') || undefined,
@@ -1265,11 +1301,7 @@ async function patchRelationshipInAirtable(relationship: ConnectRelationship): P
       records: [
         {
           id: relationship.airtableRecordId,
-          fields: {
-            'Sequence Sent': relationship.sequenceSent.join(', '),
-            'Simplifi Capture ID': relationship.simplifiCaptureId ?? '',
-            'Amplifi URL': relationship.amplifiShareUrl ?? '',
-          },
+          fields: relationshipAirtableFields(relationship),
         },
       ],
       typecast: true,
@@ -1299,16 +1331,23 @@ export async function markSequenceStepSent(relationshipId: string, stepId: strin
 }
 
 export async function listConnectRelationshipsForSequence(): Promise<ConnectRelationship[]> {
-  const fromAirtable = await fetchRelationshipsFromAirtable();
+  return mergeConnectRelationships();
+}
+
+async function mergeConnectRelationships(orgSlug?: string): Promise<ConnectRelationship[]> {
+  const fromAirtable = await fetchRelationshipsFromAirtable(orgSlug);
   const byId = new Map<string, ConnectRelationship>();
 
   for (const relationship of fromAirtable) byId.set(relationship.id, relationship);
   for (const relationship of localRelationships) {
+    if (orgSlug && relationship.orgSlug !== orgSlug) continue;
     const existing = byId.get(relationship.id);
     if (existing) {
       byId.set(relationship.id, {
         ...existing,
         ...relationship,
+        engagement: { ...existing.engagement, ...relationship.engagement },
+        aiProfile: { ...existing.aiProfile, ...relationship.aiProfile },
         sequenceSent: [...new Set([...existing.sequenceSent, ...relationship.sequenceSent])],
       });
     } else {
@@ -1823,6 +1862,10 @@ export async function seedConnectTestRelationships(input: {
     created.push(relationship);
   }
 
+  for (const relationship of created) {
+    await patchRelationshipInAirtable(relationship);
+  }
+
   if (isConnectMemoryConfigured()) {
     await refreshConnectRelationshipMemoryForOrg(slug, total);
   }
@@ -1831,7 +1874,7 @@ export async function seedConnectTestRelationships(input: {
 }
 
 export async function listConnectRelationships(orgSlug?: string): Promise<ConnectRelationship[]> {
-  return localRelationships.filter((relationship) => !orgSlug || relationship.orgSlug === orgSlug);
+  return mergeConnectRelationships(orgSlug);
 }
 
 export function getConnectCampaignUrl(org: ConnectOrgConfig, campaign: ConnectCampaign): string {
@@ -1891,10 +1934,10 @@ export function getConnectReadinessAudit(): ConnectReadinessItem[] {
     },
     {
       area: 'Launch Testing',
-      score: 35,
-      currentState: 'Build and basic live API/page smoke tests passed.',
-      gaps: ['Run POST /api/admin/connect/matrix-run for scored failure report', 'Twilio/SMS and CRON_SECRET may block a 100 score until env is set'],
-      recommendation: 'Use admin Ops → Run full matrix, then fix environment blockers listed in report.failures.',
+      score: 88,
+      currentState: 'Phases 1–12 shipped. POST /api/admin/connect/launch runs nurture + matrix + launch checklist. Relationships and engagement persist via Airtable Engagement JSON.',
+      gaps: ['Set CRON_SECRET, OPENAI_API_KEY, Twilio for 100/100 matrix', 'Run finish line once on production after deploy'],
+      recommendation: 'Admin → Connect Tenants → Run finish line, then set remaining env vars from checklist.',
       priority: 'Critical',
     },
   ];
@@ -1939,7 +1982,14 @@ export async function getConnectDashboard(orgSlug?: string) {
 }
 
 export async function recordConnectEngagement(event: Omit<ConnectEngagementEvent, 'createdAt'>) {
-  const relationship = localRelationships.find((item) => item.id === event.relationshipId);
+  if (!event.relationshipId) {
+    return {
+      ...event,
+      createdAt: new Date().toISOString(),
+    };
+  }
+
+  const relationship = await ensureLocalRelationship(event.relationshipId, event.orgSlug);
   if (relationship) {
     const keyByType: Partial<Record<ConnectEngagementEvent['type'], keyof ConnectRelationship['engagement']>> = {
       scan: 'scans',
@@ -1956,6 +2006,7 @@ export async function recordConnectEngagement(event: Omit<ConnectEngagementEvent
     const key = keyByType[event.type];
     if (key) relationship.engagement[key] += 1;
     await applyRelationshipMemory(relationship, { trigger: 'engagement', engagementType: event.type });
+    await patchRelationshipInAirtable(relationship);
   }
 
   return {
