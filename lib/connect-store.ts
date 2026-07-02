@@ -1407,6 +1407,53 @@ export async function addConnectCampaign(input: {
   };
 }
 
+export async function updateConnectOrgCopy(input: {
+  orgSlug: string;
+  offerHeadline?: string;
+  resourceTitle?: string;
+  guideIntro?: string;
+  journeyIntro?: string;
+}): Promise<{ org: ConnectOrgConfig; persisted: boolean; warning?: string }> {
+  const slug = sanitizeConnectSlug(input.orgSlug);
+  const org = await getConnectOrg(slug);
+  if (org.slug !== slug) {
+    throw new Error(`Connect tenant not found for "${slug}".`);
+  }
+
+  const offerHeadline = input.offerHeadline?.trim();
+  const resourceTitle = input.resourceTitle?.trim();
+  const guideIntro = input.guideIntro?.trim();
+  const journeyIntro = input.journeyIntro?.trim();
+
+  const updatedOrg: ConnectOrgConfig = {
+    ...org,
+    offer: {
+      ...org.offer,
+      headline: offerHeadline || org.offer.headline,
+      resourceTitle: resourceTitle || org.offer.resourceTitle,
+      promise: resourceTitle
+        ? `Get ${resourceTitle} and receive a clear next step from ${org.name}.`
+        : org.offer.promise,
+    },
+    guide: {
+      ...org.guide,
+      title: resourceTitle || org.guide.title,
+      intro: guideIntro || org.guide.intro,
+    },
+    journey: {
+      ...org.journey,
+      intro: journeyIntro || org.journey.intro,
+    },
+  };
+
+  const saveResult = await persistConnectOrg(updatedOrg);
+  return {
+    org: updatedOrg,
+    persisted: saveResult.persisted,
+    warning: saveResult.warning,
+  };
+}
+
 export async function getConnectOrg(slug: string): Promise<ConnectOrgConfig> {
   const normalized = sanitizeConnectSlug(slug);
   const orgList = await listConnectOrgs();

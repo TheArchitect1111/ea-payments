@@ -19,6 +19,7 @@ export default async function PortalConnectKitPage({
   const org = await getConnectOrg(slug);
   const kit = buildConnectKit(org, slug);
   const canManage = roleAtLeast(normalizeRole(session.role), 'staff');
+  const canEditCopy = roleAtLeast(normalizeRole(session.role), 'owner');
   const firstName = client.clientName.split(' ')[0] ?? client.clientName;
 
   return (
@@ -33,7 +34,17 @@ export default async function PortalConnectKitPage({
             </p>
           </div>
 
-          <ConnectKitClient kit={kit} canManage={canManage} />
+          <ConnectKitClient
+            kit={kit}
+            canManage={canManage}
+            canEditCopy={canEditCopy}
+            copy={{
+              offerHeadline: org.offer.headline,
+              resourceTitle: org.offer.resourceTitle,
+              guideIntro: org.guide.intro,
+              journeyIntro: org.journey.intro,
+            }}
+          />
 
           <p style={{ marginTop: 24, fontSize: 14, color: '#64748b' }}>
             Public capture:{' '}

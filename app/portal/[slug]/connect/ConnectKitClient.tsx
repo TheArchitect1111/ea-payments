@@ -4,17 +4,28 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import type { ConnectKit, ConnectKitLink } from '@/lib/connect-kit';
 
+type ConnectCopy = {
+  offerHeadline: string;
+  resourceTitle: string;
+  guideIntro: string;
+  journeyIntro: string;
+};
+
 type Props = {
   kit: ConnectKit;
   canManage: boolean;
+  canEditCopy: boolean;
+  copy: ConnectCopy;
 };
 
-export default function ConnectKitClient({ kit, canManage }: Props) {
+export default function ConnectKitClient({ kit, canManage, canEditCopy, copy: initialCopy }: Props) {
   const router = useRouter();
   const [eventName, setEventName] = useState('');
   const [repName, setRepName] = useState('');
+  const [copy, setCopy] = useState(initialCopy);
   const [customLinks, setCustomLinks] = useState<ConnectKitLink[]>([]);
   const [busy, setBusy] = useState(false);
+  const [copyBusy, setCopyBusy] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
 
@@ -65,6 +76,36 @@ export default function ConnectKitClient({ kit, canManage }: Props) {
     }
   }
 
+  async function saveCopy(e: React.FormEvent) {
+    e.preventDefault();
+    if (!canEditCopy) return;
+    setCopyBusy(true);
+    setError('');
+    setNotice('');
+    try {
+      const res = await fetch('/api/portal/connect/copy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(copy),
+      });
+      const data = (await res.json()) as {
+        ok?: boolean;
+        copy?: ConnectCopy;
+        error?: string;
+        warning?: string;
+        persisted?: boolean;
+      };
+      if (!res.ok || !data.copy) throw new Error(data.error ?? 'Could not save copy.');
+      setCopy(data.copy);
+      setNotice(data.warning ?? (data.persisted ? 'Capture page copy saved.' : 'Copy updated for this session.'));
+      router.refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not save copy.');
+    } finally {
+      setCopyBusy(false);
+    }
+  }
+
   return (
     <div className="ep-card" style={{ display: 'grid', gap: 20 }}>
       <div>
@@ -73,6 +114,43 @@ export default function ConnectKitClient({ kit, canManage }: Props) {
           Share these links or print QR codes at events. Every scan opens your branded capture page.
         </p>
       </div>
+
+      {canEditCopy ? (
+        <form onSubmit={(e) => void saveCopy(e)} style={{ display: 'grid', gap: 12, paddingTop: 4, borderTop: '1px solid #e2e8f0' }}>
+          <p style={{ margin: 0, fontWeight: 800, fontSize: 14 }}>Capture page copy</p>
+          <input
+            value={copy.offerHeadline}
+            onChange={(e) => setCopy((current) => ({ ...current, offerHeadline: e.target.value }))}
+            placeholder="Offer headline"
+            required
+            className="ep-input"
+          />
+          <input
+            value={copy.resourceTitle}
+            onChange={(e) => setCopy((current) => ({ ...current, resourceTitle: e.target.value }))}
+            placeholder="Resource title"
+            required
+            className="ep-input"
+          />
+          <textarea
+            value={copy.guideIntro}
+            onChange={(e) => setCopy((current) => ({ ...current, guideIntro: e.target.value }))}
+            placeholder="Guide intro"
+            rows={2}
+            className="ep-input"
+          />
+          <textarea
+            value={copy.journeyIntro}
+            onChange={(e) => setCopy((current) => ({ ...current, journeyIntro: e.target.value }))}
+            placeholder="Journey intro"
+            rows={2}
+            className="ep-input"
+          />
+          <button type="submit" disabled={copyBusy} className="ep-pulse-cta" style={{ width: 'fit-content' }}>
+            {copyBusy ? 'Saving…' : 'Save capture copy'}
+          </button>
+        </form>
+      ) : null}
 
       {canManage ? (
         <form onSubmit={(e) => void createEventQr(e)} style={{ display: 'grid', gap: 12 }}>
