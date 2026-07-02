@@ -1407,12 +1407,18 @@ export async function addConnectCampaign(input: {
   };
 }
 
-export async function updateConnectOrgCopy(input: {
+export async function updateConnectTenant(input: {
   orgSlug: string;
+  name?: string;
   offerHeadline?: string;
   resourceTitle?: string;
+  guideTitle?: string;
   guideIntro?: string;
+  journeyTitle?: string;
   journeyIntro?: string;
+  notificationEmails?: string[];
+  leadTypes?: string[];
+  teams?: string[];
 }): Promise<{ org: ConnectOrgConfig; persisted: boolean; warning?: string }> {
   const slug = sanitizeConnectSlug(input.orgSlug);
   const org = await getConnectOrg(slug);
@@ -1420,28 +1426,36 @@ export async function updateConnectOrgCopy(input: {
     throw new Error(`Connect tenant not found for "${slug}".`);
   }
 
+  const name = input.name?.trim();
   const offerHeadline = input.offerHeadline?.trim();
   const resourceTitle = input.resourceTitle?.trim();
+  const guideTitle = input.guideTitle?.trim();
   const guideIntro = input.guideIntro?.trim();
+  const journeyTitle = input.journeyTitle?.trim();
   const journeyIntro = input.journeyIntro?.trim();
 
   const updatedOrg: ConnectOrgConfig = {
     ...org,
+    name: name || org.name,
+    notificationEmails: input.notificationEmails?.length ? input.notificationEmails : org.notificationEmails,
+    leadTypes: input.leadTypes?.length ? input.leadTypes : org.leadTypes,
+    teams: input.teams?.length ? input.teams : org.teams,
     offer: {
       ...org.offer,
       headline: offerHeadline || org.offer.headline,
       resourceTitle: resourceTitle || org.offer.resourceTitle,
       promise: resourceTitle
-        ? `Get ${resourceTitle} and receive a clear next step from ${org.name}.`
+        ? `Get ${resourceTitle} and receive a clear next step from ${name || org.name}.`
         : org.offer.promise,
     },
     guide: {
       ...org.guide,
-      title: resourceTitle || org.guide.title,
+      title: guideTitle || resourceTitle || org.guide.title,
       intro: guideIntro || org.guide.intro,
     },
     journey: {
       ...org.journey,
+      title: journeyTitle || org.journey.title,
       intro: journeyIntro || org.journey.intro,
     },
   };
@@ -1452,6 +1466,22 @@ export async function updateConnectOrgCopy(input: {
     persisted: saveResult.persisted,
     warning: saveResult.warning,
   };
+}
+
+export async function updateConnectOrgCopy(input: {
+  orgSlug: string;
+  offerHeadline?: string;
+  resourceTitle?: string;
+  guideIntro?: string;
+  journeyIntro?: string;
+}): Promise<{ org: ConnectOrgConfig; persisted: boolean; warning?: string }> {
+  return updateConnectTenant({
+    orgSlug: input.orgSlug,
+    offerHeadline: input.offerHeadline,
+    resourceTitle: input.resourceTitle,
+    guideIntro: input.guideIntro,
+    journeyIntro: input.journeyIntro,
+  });
 }
 
 export async function getConnectOrg(slug: string): Promise<ConnectOrgConfig> {

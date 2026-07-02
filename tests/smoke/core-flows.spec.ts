@@ -305,6 +305,13 @@ test('portal connect qr-pack requires login', async ({ page }) => {
   expect(res.status()).toBe(401);
 });
 
+test('admin connect tenant patch requires auth', async ({ page }) => {
+  const res = await page.request.patch('/api/admin/connect/tenants/demo-client', {
+    data: { offerHeadline: 'Test' },
+  });
+  expect(res.status()).toBe(401);
+});
+
 test('portal documents requires login', async ({ page }) => {
   await page.goto('/portal/demo-client/documents');
   await expect(page).toHaveURL(/\/portal\/login/);
