@@ -288,6 +288,11 @@ test('admin connect run-nurture requires auth', async ({ page }) => {
   expect(res.status()).toBe(401);
 });
 
+test('admin connect test-matrix requires auth', async ({ page }) => {
+  const res = await page.request.get('/api/admin/connect/test-matrix?org=demo-client');
+  expect(res.status()).toBe(401);
+});
+
 test('portal connect copy API requires login', async ({ page }) => {
   const res = await page.request.post('/api/portal/connect/copy', {
     data: { offerHeadline: 'Test headline' },
