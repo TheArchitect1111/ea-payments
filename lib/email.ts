@@ -996,6 +996,40 @@ export async function sendConnectWelcomeEmail(data: {
   );
 }
 
+export async function sendConnectKitEmail(data: {
+  email: string;
+  organizationName: string;
+  kit: import('@/lib/connect-kit').ConnectKit;
+}): Promise<{ ok: boolean; error?: string }> {
+  const primary = data.kit.links[0];
+  const qrUrl = primary ? `${data.kit.baseUrl}${primary.qrPath}` : `${data.kit.baseUrl}/api/connect/qr?url=${encodeURIComponent(data.kit.captureUrl)}&label=${encodeURIComponent(data.organizationName)}`;
+  const linkRows = data.kit.links
+    .map(
+      (link) =>
+        `<li style="margin:0 0 10px;font-size:14px;line-height:1.6;"><strong>${escHtml(link.label)}</strong><br/><a href="${escHtml(link.url)}" style="color:#1B2B4D;">${escHtml(link.url)}</a></li>`,
+    )
+    .join('');
+
+  const bodyHtml = `
+    <p style="margin:0 0 16px;font-size:15px;color:#1A1A2E;line-height:1.7;">Your Connect kit is ready for ${escHtml(data.organizationName)}.</p>
+    <p style="margin:0 0 16px;font-size:15px;color:#1A1A2E;line-height:1.7;">Open your kit page anytime to download QR codes and copy links for events, staff, and campaigns.</p>
+    <ul style="margin:0 0 18px;padding-left:18px;">${linkRows}</ul>
+    <p style="margin:0 0 12px;font-size:14px;color:#555;line-height:1.7;">Default QR (open or print): <a href="${escHtml(qrUrl)}" style="color:#1B2B4D;font-weight:700;">Download QR</a></p>
+    <p style="margin:0;font-size:14px;color:#555;line-height:1.7;">Kit page: <a href="${escHtml(data.kit.kitPageUrl)}" style="color:#1B2B4D;font-weight:700;">${escHtml(data.kit.kitPageUrl)}</a></p>`;
+
+  return resendEmail(
+    data.email,
+    `Your ${data.organizationName} Connect kit is ready`,
+    baseEmailShell({
+      title: 'Connect Kit Ready',
+      eyebrow: 'EA Connect',
+      bodyHtml,
+      ctaLabel: 'Open Connect Kit',
+      ctaUrl: data.kit.kitPageUrl,
+    }),
+  );
+}
+
 export async function sendConnectSequenceEmail(data: {
   email: string;
   name: string;

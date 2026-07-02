@@ -35,7 +35,7 @@ export type PortalHubModule = {
 };
 
 export type PortalNavTab = {
-  id: 'home' | 'pulse' | 'simplifi' | 'amplifi' | 'updates';
+  id: 'home' | 'pulse' | 'simplifi' | 'amplifi' | 'updates' | 'connect';
   label: string;
   href: string;
 };

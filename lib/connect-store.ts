@@ -1207,7 +1207,7 @@ export function createConnectTenantTemplate(input: {
     journey: demoJourney,
     template: {
       name: `${input.name} Connect`,
-      domain: 'www.efficiencyarchitects.online',
+      domain: (process.env.NEXT_PUBLIC_BASE_URL ?? 'https://ea-payments.vercel.app').replace(/\/$/, '').replace(/^https?:\/\//, ''),
       font: 'Inter',
       emailFrom: 'Efficiency Architects <freedom@efficiencyarchitects.online>',
       emailTemplates: {

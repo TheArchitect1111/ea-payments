@@ -26,6 +26,7 @@ import {
   persistSubscriptionBilling,
   resolveOrganizationIdForSubscription,
 } from '@/lib/subscription-sync';
+import { provisionConnectAfterCheckout } from '@/lib/connect-provision-hook';
 
 export const dynamic = 'force-dynamic';
 
@@ -211,6 +212,13 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
               orgId,
               packagePurchased: packageName,
               slug: portalSlug,
+            });
+            await provisionConnectAfterCheckout({
+              portalSlug,
+              organizationName: clientName,
+              ownerEmail: email,
+              packagePurchased: packageName,
+              connectIndustry: typeof meta.connectIndustry === 'string' ? meta.connectIndustry : null,
             });
           } catch (err) {
             console.error('Entitlement sync failed for session', session.id, ':', err);
@@ -438,6 +446,13 @@ async function handleSubscriptionCheckoutCompleted(
           orgId,
           packagePurchased: plan.airtablePackageName,
           slug: portalSlug,
+        });
+        await provisionConnectAfterCheckout({
+          portalSlug,
+          organizationName: clientName,
+          ownerEmail: email,
+          packagePurchased: plan.airtablePackageName,
+          connectIndustry: typeof meta.connectIndustry === 'string' ? meta.connectIndustry : null,
         });
       }
     } catch (err) {

@@ -33,7 +33,7 @@ export type ModuleDefinition = {
   /** Shown in top pill nav when enabled */
   showInNav: boolean;
   navLabel?: string;
-  navTabId?: 'home' | 'pulse' | 'simplifi' | 'amplifi' | 'updates';
+  navTabId?: 'home' | 'pulse' | 'simplifi' | 'amplifi' | 'updates' | 'connect';
   variant?: 'pulse' | 'amplifi' | 'simplifi' | 'default';
   requiredRole: PlatformRole;
   /** Relative path segment under /portal/{slug} — empty for dashboard */
@@ -183,7 +183,9 @@ export const MODULE_REGISTRY: ModuleDefinition[] = [
     title: 'Relationship capture',
     description: 'QR, NFC, and guided journeys that turn conversations into relationships.',
     navGroup: 'growth',
-    showInNav: false,
+    showInNav: true,
+    navTabId: 'connect',
+    navLabel: 'Connect',
     requiredRole: 'staff',
     pathSegment: 'connect',
   },
