@@ -99,10 +99,10 @@ export default function PremiumLanding() {
           />
         </div>
         <motion.div className="pl-hero-copy" {...motionProps}>
-          <p className="pl-kicker">Imagine The Possibilities&trade;</p>
-          <h1>You didn&apos;t start this to manage systems.</h1>
+          <p className="pl-kicker">Efficiency Architects</p>
+          <h1>Your organization has become harder to run.</h1>
           <p>
-            You started it to coach, serve, build, teach, create, lead, and make room for a life beyond the work.
+            Not because people stopped caring. Because the work outgrew the systems holding it together.
           </p>
           <div className="pl-hero-actions">
             <a href="#communication" className="pl-cta">

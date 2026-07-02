@@ -18,6 +18,11 @@
       "permanent": false
     },
     {
+      "source": "/assessment",
+      "destination": "/ctp-intake",
+      "permanent": false
+    },
+    {
       "source": "/go",
       "destination": "/start",
       "permanent": false
@@ -39,7 +44,7 @@
     },
     {
       "source": "/amplify",
-      "destination": "/amplifi/share",
+      "destination": "/amplifi",
       "permanent": false
     },
     {
@@ -78,14 +83,24 @@
       "permanent": false
     },
     {
-      "source": "/amplifi",
-      "destination": "/amplify",
+      "source": "/amplifi/share",
+      "destination": "/amplifi",
       "permanent": false
     },
     {
       "source": "/app",
       "destination": "/simplifi/workspace",
       "permanent": false
+    },
+    {
+      "source": "/experience",
+      "destination": "/possibilities",
+      "permanent": true
+    },
+    {
+      "source": "/what-is-ea",
+      "destination": "/possibilities",
+      "permanent": true
     }
   ],
   "headers": [
@@ -103,6 +118,10 @@
     {
       "path": "/api/cron/platform-guardian",
       "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/cron/connect-sequence",
+      "schedule": "0 14 * * *"
     }
   ]
 }

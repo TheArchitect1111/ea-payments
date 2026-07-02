@@ -971,6 +971,147 @@ export async function sendInternalNotification(data: {
   return resendEmail(to, data.subject, baseEmailShell({ title: data.title, eyebrow: 'Internal Notice', bodyHtml }));
 }
 
+export async function sendConnectWelcomeEmail(data: {
+  email: string;
+  name: string;
+  organizationName: string;
+  resourceTitle: string;
+  guideUrl: string;
+  journeyUrl: string;
+}): Promise<{ ok: boolean; error?: string }> {
+  const firstName = data.name.split(' ')[0] || data.name;
+  const bodyHtml = `
+    <p style="margin:0 0 16px;font-size:15px;color:#1A1A2E;line-height:1.7;">Hi ${escHtml(firstName)},</p>
+    <p style="margin:0 0 18px;font-size:15px;color:#1A1A2E;line-height:1.7;">Thanks for connecting with ${escHtml(data.organizationName)}. Here is the resource we promised after your conversation.</p>
+    <div style="background:#101820;color:#fff;border-left:5px solid #D91F2A;padding:20px;margin:22px 0;">
+      <p style="margin:0 0 6px;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#ff4b4b;">Instant Resource</p>
+      <p style="margin:0;font-size:22px;font-weight:700;">${escHtml(data.resourceTitle)}</p>
+      <p style="margin:10px 0 0;font-size:13px;line-height:1.6;color:rgba(255,255,255,.76);">Your next step is ready. Save the resource, then open the journey page when you are ready to take action.</p>
+    </div>
+    <p style="margin:0 0 16px;font-size:14px;color:#555;line-height:1.7;">We will use this connection to send useful next steps, not noise. If this was not for you, you can ignore this email.</p>
+    <p style="margin:0;font-size:14px;color:#555;line-height:1.7;">Ready for the next step? <a href="${escHtml(data.journeyUrl)}" style="color:#101820;font-weight:700;">Open Your Journey Starts Here</a>.</p>`;
+
+  return resendEmail(
+    data.email,
+    `Welcome to ${data.organizationName} - ${data.resourceTitle}`,
+    baseEmailShell({
+      title: `Welcome To ${data.organizationName}`,
+      eyebrow: 'Connect',
+      bodyHtml,
+      ctaLabel: 'View Guide',
+      ctaUrl: data.guideUrl,
+    }),
+  );
+}
+
+export async function sendConnectKitEmail(data: {
+  email: string;
+  organizationName: string;
+  kit: import('@/lib/connect-kit').ConnectKit;
+}): Promise<{ ok: boolean; error?: string }> {
+  const primary = data.kit.links[0];
+  const qrUrl = primary ? `${data.kit.baseUrl}${primary.qrPath}` : `${data.kit.baseUrl}/api/connect/qr?url=${encodeURIComponent(data.kit.captureUrl)}&label=${encodeURIComponent(data.organizationName)}`;
+  const linkRows = data.kit.links
+    .map(
+      (link) =>
+        `<li style="margin:0 0 10px;font-size:14px;line-height:1.6;"><strong>${escHtml(link.label)}</strong><br/><a href="${escHtml(link.url)}" style="color:#1B2B4D;">${escHtml(link.url)}</a></li>`,
+    )
+    .join('');
+
+  const bodyHtml = `
+    <p style="margin:0 0 16px;font-size:15px;color:#1A1A2E;line-height:1.7;">Your Connect kit is ready for ${escHtml(data.organizationName)}.</p>
+    <p style="margin:0 0 16px;font-size:15px;color:#1A1A2E;line-height:1.7;">Open your kit page anytime to download QR codes and copy links for events, staff, and campaigns.</p>
+    <ul style="margin:0 0 18px;padding-left:18px;">${linkRows}</ul>
+    <p style="margin:0 0 12px;font-size:14px;color:#555;line-height:1.7;">Default QR (open or print): <a href="${escHtml(qrUrl)}" style="color:#1B2B4D;font-weight:700;">Download QR</a></p>
+    <p style="margin:0;font-size:14px;color:#555;line-height:1.7;">Kit page: <a href="${escHtml(data.kit.kitPageUrl)}" style="color:#1B2B4D;font-weight:700;">${escHtml(data.kit.kitPageUrl)}</a></p>`;
+
+  return resendEmail(
+    data.email,
+    `Your ${data.organizationName} Connect kit is ready`,
+    baseEmailShell({
+      title: 'Connect Kit Ready',
+      eyebrow: 'EA Connect',
+      bodyHtml,
+      ctaLabel: 'Open Connect Kit',
+      ctaUrl: data.kit.kitPageUrl,
+    }),
+  );
+}
+
+export async function sendConnectSequenceEmail(data: {
+  email: string;
+  name: string;
+  organizationName: string;
+  stepTitle: string;
+  resourceTitle: string;
+  resourceUrl: string;
+  journeyUrl: string;
+}): Promise<{ ok: boolean; error?: string }> {
+  const firstName = data.name.split(' ')[0] || data.name;
+  const bodyHtml = `
+    <p style="margin:0 0 16px;font-size:15px;color:#1A1A2E;line-height:1.7;">Hi ${escHtml(firstName)},</p>
+    <p style="margin:0 0 18px;font-size:15px;color:#1A1A2E;line-height:1.7;">${escHtml(data.stepTitle)} from ${escHtml(data.organizationName)}.</p>
+    <div style="background:#101820;color:#fff;border-left:5px solid #D91F2A;padding:20px;margin:22px 0;">
+      <p style="margin:0 0 6px;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#ff4b4b;">Your next resource</p>
+      <p style="margin:0;font-size:22px;font-weight:700;">${escHtml(data.resourceTitle)}</p>
+    </div>
+    <p style="margin:0;font-size:14px;color:#555;line-height:1.7;">Continue your journey anytime: <a href="${escHtml(data.journeyUrl)}" style="color:#101820;font-weight:700;">Open journey page</a>.</p>`;
+
+  return resendEmail(
+    data.email,
+    `${data.organizationName} — ${data.resourceTitle}`,
+    baseEmailShell({
+      title: data.stepTitle,
+      eyebrow: 'Connect Follow-up',
+      bodyHtml,
+      ctaLabel: `Open ${data.resourceTitle}`,
+      ctaUrl: data.resourceUrl,
+    }),
+  );
+}
+
+export async function sendConnectSms(data: {
+  phone: string;
+  organizationName: string;
+  resourceTitle: string;
+  journeyUrl: string;
+}): Promise<{ ok: boolean; error?: string }> {
+  const accountSid = process.env.TWILIO_ACCOUNT_SID?.trim();
+  const authToken = process.env.TWILIO_AUTH_TOKEN?.trim();
+  const from = process.env.TWILIO_FROM_NUMBER?.trim() || process.env.TWILIO_PHONE_NUMBER?.trim();
+
+  if (!accountSid || !authToken || !from) {
+    return { ok: false, error: 'Twilio not configured.' };
+  }
+
+  const body = `Thanks for connecting with ${data.organizationName}. Your ${data.resourceTitle} is ready: ${data.journeyUrl}`;
+  const params = new URLSearchParams({
+    To: data.phone,
+    From: from,
+    Body: body,
+  });
+
+  try {
+    const response = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Basic ${Buffer.from(`${accountSid}:${authToken}`).toString('base64')}`,
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: params,
+    });
+
+    if (!response.ok) {
+      const detail = await response.text().catch(() => '');
+      return { ok: false, error: `Twilio send failed (${response.status}). ${detail}`.trim() };
+    }
+
+    return { ok: true };
+  } catch (error) {
+    return { ok: false, error: error instanceof Error ? error.message : 'Unknown Twilio error.' };
+  }
+}
+
 export async function sendRevealEmail(data: {
   email: string;
   firstName: string;
@@ -1016,11 +1157,31 @@ export async function sendCaptureReadyEmail(data: {
   magnifiUrl: string;
   considerUrl?: string;
   guidanceUrl?: string;
+  workspaceUrl?: string;
 }): Promise<{ ok: boolean; error?: string }> {
+  const linkRows = [
+    ['Magnifi story', data.magnifiUrl],
+    data.considerUrl ? ['CTP share link', data.considerUrl] : undefined,
+    data.workspaceUrl ? ['Workspace / portal', data.workspaceUrl] : undefined,
+    data.guidanceUrl ? ['Simplifi guidance', data.guidanceUrl] : undefined,
+  ]
+    .filter((row): row is [string, string] => Boolean(row))
+    .map(
+      ([label, url]) =>
+        `<tr>
+          <td style="padding:12px 14px;border-bottom:1px solid #E4E4E4;font-size:12px;font-weight:700;color:#555;vertical-align:top;">${escHtml(label)}</td>
+          <td style="padding:12px 14px;border-bottom:1px solid #E4E4E4;font-size:13px;line-height:1.6;word-break:break-all;"><a href="${escHtml(url)}" target="_blank" style="color:#1B2B4D;text-decoration:underline;">${escHtml(url)}</a></td>
+        </tr>`
+    )
+    .join('');
+
   const bodyHtml = `
     <p style="margin:0 0 16px;font-size:15px;color:#1A1A2E;line-height:1.7;">Your capture is ready. Simplifi analyzed it, Magnifi built the story, and Amplifi can share the link.</p>
     <p style="margin:0 0 8px;font-size:14px;font-weight:700;color:#1B2B4D;">${escHtml(data.title)}</p>
-    <p style="margin:0;font-size:13px;color:#555;line-height:1.7;">Open Magnifi for the cinematic experience, or share the Consider link with anyone.</p>`;
+    <p style="margin:0 0 18px;font-size:13px;color:#555;line-height:1.7;">Open Magnifi for the cinematic experience, share the CTP link, or continue the work from the workspace.</p>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #E4E4E4;margin:18px 0;">
+      ${linkRows}
+    </table>`;
 
   return resendEmail(
     data.email,
@@ -1029,8 +1190,8 @@ export async function sendCaptureReadyEmail(data: {
       title: 'Capture Complete',
       eyebrow: 'Simplifi → Magnifi → Amplifi',
       bodyHtml,
-      ctaLabel: 'Open Magnifi',
-      ctaUrl: data.magnifiUrl,
+      ctaLabel: data.considerUrl ? 'Open CTP Link' : 'Open Magnifi',
+      ctaUrl: data.considerUrl ?? data.magnifiUrl,
     })
   );
 }

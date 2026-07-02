@@ -1,0 +1,179 @@
+/**
+ * EA Instant Feel Standard™ — interaction utilities
+ * Import via premium-chassis.css or presets/ea-pulse.css
+ */
+
+/* Tap acknowledgment — every interactive control */
+.pc-tap,
+.pc-btn,
+button.pc-instant,
+a.pc-instant {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  transition:
+    transform var(--pc-motion-tap) var(--pc-ease-out),
+    box-shadow var(--pc-motion-tap) var(--pc-ease-out),
+    opacity var(--pc-motion-tap) ease,
+    background-color var(--pc-motion-tap) ease;
+}
+
+.pc-tap:active:not(:disabled),
+.pc-btn:active:not(:disabled),
+button.pc-instant:active:not(:disabled),
+a.pc-instant:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.pc-tap-glow:active:not(:disabled) {
+  box-shadow: var(--pc-shadow-gold-ring);
+}
+
+/* Skeleton loaders — never blank */
+.pc-skeleton {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--pc-radius-md);
+  background: linear-gradient(
+    90deg,
+    rgba(27, 43, 77, 0.06) 0%,
+    rgba(27, 43, 77, 0.1) 45%,
+    rgba(27, 43, 77, 0.06) 90%
+  );
+  background-size: 200% 100%;
+  animation: pc-shimmer 1.4s ease-in-out infinite;
+}
+
+.pc-skeleton-line {
+  height: 14px;
+  margin-bottom: 10px;
+}
+
+.pc-skeleton-line:last-child {
+  margin-bottom: 0;
+  width: 72%;
+}
+
+.pc-skeleton-card {
+  min-height: 120px;
+  padding: var(--pc-space-6);
+}
+
+/* Optimistic save feedback */
+.pc-save-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 28px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  transition: opacity var(--pc-motion-small) ease;
+}
+
+.pc-save-badge-saving {
+  background: rgba(27, 43, 77, 0.08);
+  color: var(--pc-navy);
+}
+
+.pc-save-badge-saved {
+  background: rgba(6, 95, 70, 0.12);
+  color: var(--pc-success);
+  animation: pc-fade-up var(--pc-motion-small) var(--pc-ease-out);
+}
+
+.pc-save-badge-error {
+  background: rgba(153, 27, 27, 0.1);
+  color: var(--pc-danger);
+  animation: pc-attention-shake 0.45s ease;
+}
+
+.pc-save-ok {
+  position: relative;
+  overflow: hidden;
+}
+
+.pc-save-ok::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 35%,
+    rgba(6, 95, 70, 0.18) 50%,
+    transparent 65%
+  );
+  animation: pc-success-sweep 0.55s var(--pc-ease-out) forwards;
+  pointer-events: none;
+}
+
+/* Progress momentum chip */
+.pc-progress-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(201, 168, 68, 0.12);
+  color: var(--pc-navy);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.pc-progress-chip::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--pc-gold-bright);
+  animation: pc-gold-sparkle 2s ease-in-out infinite;
+}
+
+/* Destination menu (Orb expansion pattern) */
+.pc-dest-menu {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border-radius: var(--pc-radius-lg);
+  background: var(--pc-surface);
+  border: 1px solid var(--pc-border);
+  box-shadow: var(--pc-shadow-elevated);
+  animation: pc-menu-in var(--pc-motion-menu) var(--pc-ease-out);
+}
+
+.pc-dest-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: var(--pc-radius-md);
+  background: transparent;
+  color: var(--pc-ink);
+  font-family: var(--pc-font-body);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+.pc-dest-menu-item:hover {
+  background: rgba(27, 43, 77, 0.05);
+}
+
+/* Orb idle breathing */
+.pc-orb-breathe {
+  animation: pc-orb-breathe 4s ease-in-out infinite;
+}
+
+.pc-orb-thinking {
+  box-shadow: 0 0 28px rgba(77, 122, 201, 0.45);
+}
+
+.pc-orb-success {
+  box-shadow: 0 0 28px rgba(6, 95, 70, 0.4);
+}

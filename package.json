@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:lan": "next dev --hostname 0.0.0.0",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
@@ -29,9 +30,16 @@
     "repo:readiness": "node scripts/repo-readiness.mjs",
     "ops:report": "node scripts/ops-report.mjs",
     "backup:verify": "node scripts/backup-verify.mjs",
-    "setup:launch-verification": "node scripts/create-stripe-launch-verification.mjs"
+    "chassis:tenant": "node scripts/create-tenant-package.mjs",
+    "guide:owner": "node scripts/generate-owner-guide.mjs",
+    "setup:launch-verification": "node scripts/create-stripe-launch-verification.mjs",
+    "warm:admin": "node scripts/warm-admin-routes.mjs",
+    "mobile:install": "cd mobile && npm install",
+    "mobile:start": "cd mobile && npm start",
+    "mobile:lint": "cd mobile && npm run lint"
   },
   "dependencies": {
+    "@clerk/nextjs": "^7.5.9",
     "@ea/portal-chassis": "file:./vendor/portal-chassis",
     "@ea/premium-chassis": "file:./vendor/premium-chassis",
     "@sentry/nextjs": "^10.59.0",
@@ -42,6 +50,7 @@
     "mammoth": "^1.12.0",
     "next": "16.2.9",
     "pdf-parse": "^2.4.5",
+    "qrcode": "^1.5.4",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "stripe": "^22.2.1"
@@ -50,6 +59,7 @@
     "@playwright/test": "^1.61.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
+    "@types/qrcode": "^1.5.6",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",

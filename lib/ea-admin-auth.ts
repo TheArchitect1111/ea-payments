@@ -7,6 +7,7 @@ export type AdminSessionUser = {
   email: string;
   name: string;
   role: string;
+  orgId?: string;
 };
 
 function secret(): string {
@@ -28,6 +29,7 @@ export function signAdminSession(user?: AdminSessionUser): string {
         email: user.email,
         name: user.name,
         role: user.role,
+        orgId: user.orgId,
         mfa: true,
         exp: Date.now() + TTL_HOURS * 60 * 60 * 1000,
       }
@@ -57,14 +59,16 @@ export function parseAdminSession(token: string | undefined): AdminSessionUser |
       email?: string;
       name?: string;
       role?: string;
+      orgId?: string;
       exp?: number;
     };
     if (typeof payload.exp !== 'number' || payload.exp < Date.now()) return null;
-    if (!payload.email) return { email: 'admin', name: 'Admin', role: 'owner' };
+    if (!payload.email) return { email: 'admin', name: 'Admin', role: 'owner', orgId: 'ea' };
     return {
       email: payload.email,
       name: payload.name || payload.email,
       role: payload.role || 'admin',
+      orgId: payload.orgId,
     };
   } catch {
     return null;

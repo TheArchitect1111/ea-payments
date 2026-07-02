@@ -1,20 +1,17 @@
-import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
-import { EA_PORTAL_COOKIE, verifySession } from '@/lib/ea-portal-auth';
+import { requirePortalSession } from '@/lib/auth/resolve-portal-session';
 import { getCaptureByIdentifier, updateOutcomeStatus, snoozeActiveSave } from '@/lib/capture-records';
 import {
   OUTCOME_LABELS,
   nextActionForOutcome,
   type OutcomeStatus,
 } from '@/lib/outcome-tracking';
-import { emitPulseEvent } from '@/lib/pulse-bus';
+import { notifyPortal } from '@/lib/portal-notify';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
-  const cookieStore = await cookies();
-  const token = cookieStore.get(EA_PORTAL_COOKIE)?.value;
-  const session = token ? await verifySession(token) : null;
+  const session = await requirePortalSession({ realm: 'simplifi' });
   if (!session) {
     return NextResponse.json({ ok: false, error: 'Please log in again.' }, { status: 401 });
   }
@@ -71,12 +68,12 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: updated.error }, { status: 500 });
   }
 
-  await emitPulseEvent({
+  await notifyPortal({
     product: 'simplifi',
     type: 'capture.outcome_recorded',
     title: `${record.title} → ${label}`,
     detail: nextAction,
-    href: '/simplifi/workspace',
+    href: `/portal/${session.slug}/simplifi`,
     objectId: recordId,
     tenantId: session.slug,
     priority: outcome === 'won' ? 'high' : 'medium',

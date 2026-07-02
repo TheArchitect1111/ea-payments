@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { getPortalCaptures } from '@/lib/capture-records';
-import { NAVY, GOLD } from '@/lib/chassis/PortalShell';
+import { NAVY, GOLD } from '@/lib/design-system';
 
 export default async function OpportunitiesPanel({ slug }: { slug: string }) {
   const captures = await getPortalCaptures(slug, 8);

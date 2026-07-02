@@ -1,49 +1,28 @@
-/** Tenant preset reference for EA platform — deploy variants use TENANT_ID on portal repos. */
+/** Tenant preset reference — module ids align with `lib/modules/registry.ts`. */
 
-export type HubModuleId =
-  | 'dashboard'
-  | 'updates'
-  | 'training'
-  | 'video-learning'
-  | 'documents'
-  | 'messaging'
-  | 'events'
-  | 'opportunities-resources';
+import {
+  TENANT_MODULE_PRESETS,
+  type ModuleId,
+} from '@/lib/modules/registry';
+
+export type HubModuleId = ModuleId;
 
 export type TenantPresetRef = {
   id: string;
-  modules: string[];
-  hubModuleIds: HubModuleId[];
+  modules: ModuleId[];
+  hubModuleIds: ModuleId[];
 };
 
 export const FAMILY_HUB_TENANT: TenantPresetRef = {
   id: 'family-hub',
-  modules: [
-    'training',
-    'video-learning',
-    'documents',
-    'assessments',
-    'updates',
-    'messaging',
-    'events',
-    'opportunities-resources',
-  ],
-  hubModuleIds: [
-    'dashboard',
-    'updates',
-    'training',
-    'video-learning',
-    'documents',
-    'messaging',
-    'events',
-    'opportunities-resources',
-  ],
+  modules: TENANT_MODULE_PRESETS['family-hub'],
+  hubModuleIds: TENANT_MODULE_PRESETS['family-hub'],
 };
 
 export const EA_CLIENT_TENANT: TenantPresetRef = {
   id: 'ea-client',
-  modules: ['pulse', 'simplifi', 'magnifi', 'amplifi', 'updates', 'assessments'],
-  hubModuleIds: ['dashboard', 'updates'],
+  modules: TENANT_MODULE_PRESETS['ea-client'],
+  hubModuleIds: TENANT_MODULE_PRESETS['ea-client'],
 };
 
 export const TENANT_PRESETS: Record<string, TenantPresetRef> = {

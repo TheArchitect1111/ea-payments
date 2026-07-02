@@ -15,10 +15,10 @@ import {
   type SimplifiOnboardingStep,
 } from '@/lib/simplifi-onboarding';
 import { prepareCaptureUpload } from '@/lib/client-image-upload';
+import { analyzeCaptureForm, analyzeCaptureUrl } from '@/lib/simplifi-client';
+import { enqueueCapture, flushCaptureQueue } from '@/lib/offline-capture-queue';
 import { useProductGuestSession } from '@/components/auth/useProductGuestSession';
-
-const NAVY = '#1B2B4D';
-const GOLD = '#C9A844';
+import { NAVY, GOLD } from '@/lib/design-system';
 
 interface AnalyzeResponse {
   ok?: boolean;
@@ -46,8 +46,9 @@ export default function SimplifiCaptureApp({
   initialUrl?: string;
 }) {
   const fileRef = useRef<HTMLInputElement>(null);
-  const [open, setOpen] = useState(false);
-  const [view, setView] = useState<SheetView>('menu');
+  const hasInitialCapture = Boolean(loggedIn && initialUrl?.trim());
+  const [open, setOpen] = useState(hasInitialCapture);
+  const [view, setView] = useState<SheetView>(hasInitialCapture ? 'url' : 'menu');
   const [url, setUrl] = useState(initialUrl ?? '');
   const [prospectName, setProspectName] = useState('');
   const [loading, setLoading] = useState(false);
@@ -67,20 +68,34 @@ export default function SimplifiCaptureApp({
   });
 
   useEffect(() => {
+    if (!loggedIn) return;
+
+    const flushQueued = async () => {
+      const result = await flushCaptureQueue(async (item) => {
+        if (item.kind !== 'url') return { ok: false };
+        return analyzeCaptureUrl({
+          url: item.url,
+          prospectName: item.prospectName,
+          notes: item.notes,
+        });
+      });
+      if (result.flushed > 0) {
+        setMessage(`Sent ${result.flushed} queued capture${result.flushed === 1 ? '' : 's'}.`);
+      }
+    };
+
+    void flushQueued();
+    window.addEventListener('online', flushQueued);
+    return () => window.removeEventListener('online', flushQueued);
+  }, [loggedIn]);
+
+  useEffect(() => {
     if (loggedIn && typeof window !== 'undefined' && 'Notification' in window) {
       if (Notification.permission === 'default') {
         Notification.requestPermission().catch(() => {});
       }
     }
   }, [loggedIn]);
-
-  useEffect(() => {
-    if (loggedIn && initialUrl?.trim()) {
-      setUrl(initialUrl);
-      setOpen(true);
-      setView('url');
-    }
-  }, [loggedIn, initialUrl]);
 
   const resetSheet = () => {
     setView('menu');
@@ -110,34 +125,11 @@ export default function SimplifiCaptureApp({
     resetSheet();
   };
 
-  const parseAnalyzeResponse = async (res: Response): Promise<AnalyzeResponse> => {
-    const contentType = res.headers.get('content-type') ?? '';
-    if (!contentType.includes('application/json')) {
-      if (res.status === 413) {
-        return { ok: false, error: 'Image is too large. Try a smaller photo or screenshot.' };
-      }
-      return { ok: false, error: `Upload failed (${res.status}). Try again.` };
-    }
-    const data = (await res.json()) as AnalyzeResponse;
-    if (!res.ok && !data.error) {
-      return { ok: false, error: 'Could not capture. Try again.' };
-    }
-    return data;
-  };
 
-  const analyzeJson = async (body: Record<string, string>) => {
-    const res = await fetch('/api/portal/captures/analyze', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    });
-    return parseAnalyzeResponse(res);
-  };
+  const analyzeJson = async (body: { url: string; prospectName?: string; notes?: string }) =>
+    analyzeCaptureUrl(body);
 
-  const analyzeForm = async (form: FormData) => {
-    const res = await fetch('/api/portal/captures/analyze', { method: 'POST', body: form });
-    return parseAnalyzeResponse(res);
-  };
+  const analyzeForm = async (form: FormData) => analyzeCaptureForm(form);
 
   const handleAnalyzeResponse = (data: AnalyzeResponse, source: 'url' | 'file' = 'url') => {
     if (!data.ok) {
@@ -170,13 +162,18 @@ export default function SimplifiCaptureApp({
     setMessage('');
     try {
       const data = await analyzeJson({ url: url.trim(), prospectName });
-      handleAnalyzeResponse(data, 'url');
+      handleAnalyzeResponse(data as AnalyzeResponse, 'url');
     } catch {
-      setMessage('Network error. Try again.');
+      if (loggedIn && typeof navigator !== 'undefined' && !navigator.onLine) {
+        await enqueueCapture({ kind: 'url', url: url.trim(), prospectName });
+        setMessage('Offline — capture queued. We will send when you are back online.');
+      } else {
+        setMessage('Network error. Try again.');
+      }
     } finally {
       setLoading(false);
     }
-  }, [url, prospectName]);
+  }, [url, prospectName, loggedIn]);
 
   const handleCaptureFile = async (file: File) => {
     setLoading(true);

@@ -4,8 +4,8 @@ type Props = {
   slug: string;
 };
 
-export default function EAPortalHubCards({ slug }: Props) {
-  const modules = getEAPortalHubModules(slug);
+export default async function EAPortalHubCards({ slug }: Props) {
+  const modules = await getEAPortalHubModules(slug);
 
   return (
     <section className="ep-hub-section">

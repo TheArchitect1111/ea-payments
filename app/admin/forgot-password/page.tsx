@@ -13,6 +13,15 @@ export default async function AdminForgotPasswordPage({
   searchParams: Promise<{ sent?: string; error?: string }>;
 }) {
   const params = await searchParams;
+  const clerkEnabled = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
+  const errorMessage =
+    params.error === 'email'
+      ? 'We found your account but could not send the email. Check that Resend is configured for this site.'
+      : params.error === 'config'
+        ? 'Password reset is not fully configured on the server yet. Try Sign in with Google instead, or contact support.'
+        : params.error
+          ? 'Could not send reset link. Please try again.'
+          : '';
 
   return (
     <div className="pl-page">
@@ -29,7 +38,13 @@ export default async function AdminForgotPasswordPage({
           {params.sent ? (
             <p className="pl-success">If an account matches, check your email for the reset link.</p>
           ) : null}
-          {params.error ? <p className="pl-error">Could not send reset link. Please try again.</p> : null}
+          {errorMessage ? <p className="pl-error">{errorMessage}</p> : null}
+          {clerkEnabled ? (
+            <>
+              <a className="pl-google-btn" href="/admin/sign-in">Sign in with Google or email link</a>
+              <p className="pl-or">or request a password reset</p>
+            </>
+          ) : null}
           <form action="/api/admin/password-reset/request" method="post" className="pl-form">
             <label className="pl-label" htmlFor="email">
               Email

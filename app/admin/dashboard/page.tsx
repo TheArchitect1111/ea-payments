@@ -1,11 +1,11 @@
 import { cookies } from 'next/headers';
 import { verifyAdminSession, EA_ADMIN_COOKIE } from '@/lib/ea-admin-auth';
+import { redirectToAdminLogin } from '@/lib/admin-redirect';
 import {
   getProposalsWithAssessments,
   getAllAssessments,
   getAllClientRecords,
 } from '@/lib/airtable';
-import AdminLogin from './AdminLogin';
 
 export const dynamic = 'force-dynamic';
 
@@ -86,7 +86,7 @@ export default async function DashboardPage() {
   const token = cookieStore.get(EA_ADMIN_COOKIE)?.value;
 
   if (!verifyAdminSession(token)) {
-    return <AdminLogin />;
+    redirectToAdminLogin('/admin/dashboard');
   }
 
   const [assessments, proposals, clientRecords] = await Promise.all([

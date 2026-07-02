@@ -114,8 +114,9 @@ function airtableErrorMessage(status: number, detail: string): string {
 }
 
 function authHeaders(): Record<string, string> {
+  const key = process.env.AIRTABLE_API_KEY || process.env.AIRTABLE_TOKEN || '';
   return {
-    Authorization: `Bearer ${process.env.AIRTABLE_API_KEY}`,
+    Authorization: `Bearer ${key}`,
     'Content-Type': 'application/json',
   };
 }
@@ -273,7 +274,7 @@ export async function getCaptureByIdentifier(identifier: string): Promise<Captur
 export async function createCaptureRecord(
   input: CreateCaptureInput
 ): Promise<{ ok: boolean; record?: CaptureRecord; error?: string }> {
-  if (!process.env.AIRTABLE_API_KEY) {
+  if (!process.env.AIRTABLE_API_KEY && !process.env.AIRTABLE_TOKEN) {
     return { ok: false, error: 'AIRTABLE_API_KEY not configured.' };
   }
 

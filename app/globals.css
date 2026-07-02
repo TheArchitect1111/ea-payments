@@ -1,4 +1,6 @@
 @import '@ea/premium-chassis/presets/ea-pulse.css';
+@import '../lib/design-system/tokens.css';
+@import '../lib/design-system/components.css';
 @import "tailwindcss";
 
 @theme inline {

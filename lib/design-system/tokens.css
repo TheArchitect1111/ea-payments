@@ -1,0 +1,55 @@
+/**
+ * EA Platform Chassis — canonical design tokens (Phase 6).
+ * Bridges @ea/premium-chassis (--pc-*) and @ea/portal-chassis (--color-*, --space-*).
+ * Import after premium-chassis preset in globals.css; portal pages import via ea-portal.css.
+ */
+
+:root {
+  /* Identity */
+  --ea-navy: var(--pc-navy, #1b2b4d);
+  --ea-gold: var(--pc-gold, #c9a844);
+  --ea-gold-bright: var(--pc-gold-bright, #f5a623);
+  --ea-cream: var(--pc-cream, #f3efe4);
+  --ea-cream-deep: var(--pc-cream-alt, #ebe4d4);
+  --ea-surface: var(--pc-surface, #ffffff);
+  --ea-text: var(--pc-ink, #1a1a2e);
+  --ea-muted: var(--pc-muted, #6b7280);
+  --ea-border: var(--pc-border, #e5e7eb);
+  --ea-success: var(--pc-success, #065f46);
+  --ea-warning: var(--pc-warning, #92400e);
+  --ea-danger: var(--pc-danger, #991b1b);
+
+  /* Portal-chassis identity aliases */
+  --color-brand: var(--ea-navy);
+  --color-brand-light: #2a3f6b;
+  --color-accent: var(--ea-gold);
+  --color-bg: var(--ea-cream-deep);
+  --color-surface: var(--ea-surface);
+  --color-text: var(--ea-text);
+  --color-text-muted: var(--ea-muted);
+  --font-display: var(--pc-font-display, 'Segoe UI', system-ui, sans-serif);
+  --font-body: var(--pc-font-body, 'Segoe UI', system-ui, sans-serif);
+
+  /* Portal soft-UI radii (larger than marketing site) */
+  --ea-radius: 24px;
+  --ea-radius-sm: 16px;
+  --ea-radius-pill: 999px;
+
+  --ea-shadow: 0 8px 32px rgba(27, 43, 77, 0.08);
+  --ea-shadow-lg: 0 20px 60px rgba(27, 43, 77, 0.12);
+
+  /* Portal-chassis shared layout tokens → premium */
+  --radius-sm: var(--pc-radius-sm, 4px);
+  --radius-md: var(--pc-radius-md, 8px);
+  --radius-lg: var(--pc-radius-lg, 16px);
+  --space-1: var(--pc-space-1, 4px);
+  --space-2: var(--pc-space-2, 8px);
+  --space-3: var(--pc-space-3, 12px);
+  --space-4: var(--pc-space-4, 16px);
+  --space-6: var(--pc-space-6, 24px);
+  --space-8: var(--pc-space-8, 32px);
+  --space-12: var(--pc-space-12, 48px);
+  --space-16: var(--pc-space-16, 64px);
+  --shadow-card: var(--pc-shadow-card, var(--ea-shadow));
+  --shadow-modal: var(--pc-shadow-elevated, var(--ea-shadow-lg));
+}

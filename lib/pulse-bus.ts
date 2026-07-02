@@ -4,7 +4,7 @@
  */
 
 import { fromPulseEventRow, toActivityEventInput } from '@ea/portal-chassis/platform-events';
-import { publishEAActivityEvent } from '@/lib/ea-activity-events';
+import { publishPlatformActivityEvent } from '@/lib/activity-events-store';
 
 export type PulseProduct =
   | 'ea-platform'
@@ -32,7 +32,16 @@ export type PulseEventType =
   | 'fulfillment.review_required'
   | 'launch.verification.completed'
   | 'payment.received'
-  | 'attention.critical';
+  | 'subscription.started'
+  | 'subscription.active'
+  | 'subscription.trialing'
+  | 'subscription.canceled'
+  | 'subscription.unpaid'
+  | 'subscription.past_due'
+  | 'subscription.invoice.paid'
+  | 'subscription.invoice.failed'
+  | 'attention.critical'
+  | 'guide.escalated';
 
 export interface PulseEvent {
   product: PulseProduct;
@@ -49,6 +58,13 @@ export interface PulseEvent {
 const MEMORY_CAP = 200;
 const memoryEvents: (PulseEvent & { at: string })[] = [];
 
+const PRIORITY_SCORE: Record<string, number> = {
+  critical: 95,
+  high: 75,
+  medium: 50,
+  low: 30,
+};
+
 export function listRecentPulseEvents(limit = 50): (PulseEvent & { at: string })[] {
   return memoryEvents.slice(0, limit);
 }
@@ -57,6 +73,8 @@ export async function emitPulseEvent(event: PulseEvent): Promise<{ ok: boolean }
   const row = { ...event, at: new Date().toISOString() };
   memoryEvents.unshift(row);
   if (memoryEvents.length > MEMORY_CAP) memoryEvents.length = MEMORY_CAP;
+
+  void mirrorPulseToActivityEvents(event, row.at);
 
   const baseId = process.env.AIRTABLE_PAYMENTS_BASE_ID;
   const table = process.env.PULSE_EVENTS_TABLE;
@@ -99,8 +117,6 @@ export async function emitPulseEvent(event: PulseEvent): Promise<{ ok: boolean }
     console.error('[pulse-bus] Airtable persist threw:', err);
   }
 
-  void dualWriteActivityEvent(event, row.at);
-
   return { ok: true };
 }
 
@@ -119,41 +135,33 @@ function mapProductToModule(product: PulseProduct): string {
   return modules[product] ?? 'pulse';
 }
 
-function pulsePriorityToScore(priority?: PulseEvent['priority']): number {
-  switch (priority) {
-    case 'critical':
-      return 95;
-    case 'high':
-      return 80;
-    case 'medium':
-      return 55;
-    case 'low':
-      return 30;
-    default:
-      return 50;
-  }
-}
-
-async function dualWriteActivityEvent(event: PulseEvent, at: string): Promise<void> {
-  const platform = fromPulseEventRow(
-    {
-      organizationId: 'ea',
-      eventType: event.type,
-      title: event.title,
-      summary: event.detail,
-      module: mapProductToModule(event.product),
-      priority: pulsePriorityToScore(event.priority),
-      actionUrl: event.href,
-      personId: event.tenantId,
-      createdAt: at,
-      metadata: {
-        ...(event.metadata as Record<string, unknown> | undefined),
-        pulseProduct: event.product,
-        objectId: event.objectId,
+/** Dual-write Pulse events into ActivityEvents for Mission Control convergence. */
+async function mirrorPulseToActivityEvents(event: PulseEvent, at: string): Promise<void> {
+  try {
+    const platform = fromPulseEventRow(
+      {
+        organizationId: process.env.EA_INTERNAL_ORG_ID ?? 'ea',
+        clientSlug: event.tenantId,
+        eventType: event.type,
+        title: event.title,
+        summary: event.detail ?? '',
+        priority: PRIORITY_SCORE[event.priority ?? 'medium'] ?? 50,
+        module: mapProductToModule(event.product),
+        actionLabel: 'Open',
+        actionUrl: event.href,
+        personId: event.tenantId,
+        createdAt: at,
+        metadata: {
+          ...(event.metadata ?? {}),
+          objectId: event.objectId,
+          pulseProduct: event.product,
+        },
       },
-    },
-    `pulse-${event.type}-${at}`,
-  );
+      `pulse-${at}`,
+    );
 
-  await publishEAActivityEvent(toActivityEventInput(platform));
+    await publishPlatformActivityEvent(toActivityEventInput(platform));
+  } catch (err) {
+    console.error('[pulse-bus] ActivityEvents mirror failed:', err);
+  }
 }

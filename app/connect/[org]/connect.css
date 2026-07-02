@@ -1,0 +1,571 @@
+.connect-site {
+  --connect-ink: #171717;
+  --connect-accent: #c9a844;
+  --connect-soft: #fbfaf7;
+  min-height: 100svh;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.78), rgba(255,255,255,0.96)),
+    var(--connect-soft);
+  color: var(--connect-ink);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.connect-cpr {
+  background:
+    radial-gradient(circle at 82% 8%, rgba(217, 31, 42, 0.18), transparent 28%),
+    linear-gradient(135deg, #ffffff 0%, #f4f4f4 42%, #ffffff 100%);
+}
+
+.connect-cpr .connect-hero h1,
+.connect-cpr .connect-success h1,
+.connect-cpr .connect-resource-page h1,
+.connect-cpr .connect-journey-hero h1 {
+  font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+  text-transform: uppercase;
+}
+
+.connect-cpr .connect-hero h1,
+.connect-cpr .connect-journey-hero h1 {
+  color: #070707;
+  text-shadow: 0 8px 0 rgba(217, 31, 42, 0.08);
+}
+
+.connect-cpr .connect-kicker {
+  color: #d91f2a;
+}
+
+.connect-site * {
+  box-sizing: border-box;
+}
+
+.connect-shell,
+.connect-success {
+  width: min(100% - 32px, 980px);
+  margin: 0 auto;
+  padding: clamp(34px, 8vw, 86px) 0;
+}
+
+.connect-hero {
+  max-width: 760px;
+}
+
+.connect-kicker {
+  margin: 0 0 16px;
+  color: var(--connect-accent);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.connect-hero h1,
+.connect-success h1 {
+  max-width: 860px;
+  margin: 0;
+  font-size: clamp(3rem, 9vw, 7.8rem);
+  line-height: 0.92;
+  font-weight: 850;
+  letter-spacing: 0;
+}
+
+.connect-hero p,
+.connect-success > p,
+.connect-muted {
+  max-width: 680px;
+  margin: 24px 0 0;
+  color: rgba(23, 23, 23, 0.68);
+  font-size: clamp(1rem, 2.2vw, 1.3rem);
+  line-height: 1.65;
+}
+
+.connect-progress {
+  height: 4px;
+  margin: clamp(32px, 6vw, 58px) 0 18px;
+  background: rgba(23, 23, 23, 0.1);
+  overflow: hidden;
+}
+
+.connect-offer-card {
+  display: grid;
+  gap: 8px;
+  max-width: 560px;
+  margin-top: 24px;
+  border-left: 4px solid var(--connect-accent);
+  background: rgba(255, 255, 255, 0.78);
+  padding: 18px;
+}
+
+.connect-cpr .connect-offer-card {
+  border-left-color: #d91f2a;
+  background:
+    linear-gradient(135deg, rgba(0, 0, 0, 0.92), rgba(35, 35, 35, 0.9)),
+    #111;
+  color: #fff;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.16);
+}
+
+.connect-cpr .connect-offer-card span {
+  color: #ff3b3b;
+}
+
+.connect-cpr .connect-offer-card small {
+  color: rgba(255, 255, 255, 0.76);
+}
+
+.connect-offer-card span,
+.connect-trust span {
+  color: var(--connect-accent);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.connect-offer-card strong {
+  font-size: clamp(1.35rem, 4vw, 2.2rem);
+  line-height: 1;
+}
+
+.connect-offer-card small {
+  color: rgba(23, 23, 23, 0.62);
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
+.connect-trust {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.connect-trust span {
+  max-width: 260px;
+  border: 1px solid rgba(23, 23, 23, 0.12);
+  background: rgba(255, 255, 255, 0.68);
+  color: rgba(23, 23, 23, 0.68);
+  letter-spacing: 0.04em;
+  line-height: 1.35;
+  padding: 9px 10px;
+  text-transform: none;
+}
+
+.connect-progress span {
+  display: block;
+  height: 100%;
+  background: var(--connect-accent);
+  transition: width 0.25s ease;
+}
+
+.connect-panel {
+  min-height: 390px;
+  display: grid;
+  align-items: center;
+  border-top: 1px solid rgba(23, 23, 23, 0.12);
+  border-bottom: 1px solid rgba(23, 23, 23, 0.12);
+  padding: clamp(28px, 6vw, 60px) 0;
+}
+
+.connect-step {
+  display: grid;
+  gap: 16px;
+  max-width: 680px;
+}
+
+.connect-step > span {
+  color: var(--connect-accent);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.connect-step h2 {
+  margin: 0 0 10px;
+  font-size: clamp(2rem, 6vw, 4.8rem);
+  line-height: 0.96;
+  font-weight: 830;
+}
+
+.connect-step input,
+.connect-step textarea {
+  width: 100%;
+  min-height: 58px;
+  border: 1px solid rgba(23, 23, 23, 0.14);
+  border-radius: 0;
+  background: #fff;
+  color: var(--connect-ink);
+  font: inherit;
+  font-size: 1.05rem;
+  padding: 16px 18px;
+  outline: none;
+}
+
+.connect-step textarea {
+  min-height: 130px;
+  resize: vertical;
+}
+
+.connect-step input:focus,
+.connect-step textarea:focus {
+  border-color: var(--connect-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--connect-accent) 22%, transparent);
+}
+
+.connect-segments {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.connect-segments button,
+.connect-secondary,
+.connect-ghost,
+.connect-primary {
+  min-height: 46px;
+  border: 1px solid rgba(23, 23, 23, 0.16);
+  background: #fff;
+  color: var(--connect-ink);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.connect-segments button {
+  flex: 0 0 auto;
+  padding: 0 15px;
+}
+
+.connect-segments button.is-active {
+  border-color: var(--connect-ink);
+  background: var(--connect-ink);
+  color: #fff;
+}
+
+.connect-secondary {
+  width: fit-content;
+  padding: 0 18px;
+}
+
+.connect-note {
+  margin: 0;
+  padding: 16px;
+  background: rgba(23, 23, 23, 0.05);
+  color: rgba(23, 23, 23, 0.72);
+  line-height: 1.55;
+}
+
+.connect-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.connect-primary,
+.connect-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  padding: 0 22px;
+}
+
+.connect-primary {
+  border-color: var(--connect-ink);
+  background: var(--connect-ink);
+  color: #fff;
+}
+
+.connect-primary:disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
+}
+
+.connect-ghost {
+  background: transparent;
+}
+
+.connect-system {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: clamp(34px, 6vw, 60px);
+}
+
+.connect-system div,
+.connect-intelligence,
+.connect-resource {
+  border: 1px solid rgba(23, 23, 23, 0.12);
+  background: rgba(255, 255, 255, 0.72);
+  padding: 18px;
+}
+
+.connect-system b,
+.connect-system span,
+.connect-resource span,
+.connect-resource strong,
+.connect-resource small {
+  display: block;
+}
+
+.connect-system b {
+  font-size: 1.15rem;
+}
+
+.connect-system span,
+.connect-resource span {
+  margin-top: 8px;
+  color: rgba(23, 23, 23, 0.56);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.connect-success {
+  min-height: 100svh;
+  display: grid;
+  align-content: center;
+}
+
+.connect-resource-page,
+.connect-journey-hero,
+.connect-events,
+.connect-consultation {
+  width: min(100% - 32px, 1080px);
+  margin: 0 auto;
+  padding: clamp(42px, 8vw, 96px) 0;
+}
+
+.connect-resource-page h1,
+.connect-journey-hero h1 {
+  max-width: 920px;
+  margin: 0;
+  font-size: clamp(3.4rem, 10vw, 8.5rem);
+  line-height: 0.88;
+}
+
+.connect-resource-page > p:not(.connect-kicker),
+.connect-journey-hero > p,
+.connect-consultation p {
+  max-width: 720px;
+  color: rgba(23, 23, 23, 0.68);
+  font-size: clamp(1.05rem, 2vw, 1.35rem);
+  line-height: 1.65;
+}
+
+.connect-guide-grid,
+.connect-journey-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  width: min(100% - 32px, 1080px);
+  margin: 0 auto;
+}
+
+.connect-guide-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: clamp(30px, 5vw, 56px) 0;
+}
+
+.connect-guide-grid article,
+.connect-journey-grid article,
+.connect-events article {
+  border: 1px solid rgba(23, 23, 23, 0.12);
+  background: rgba(255, 255, 255, 0.8);
+  padding: clamp(18px, 3vw, 28px);
+}
+
+.connect-guide-grid span,
+.connect-journey-grid span {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border-radius: 50%;
+  background: #d91f2a;
+  color: #fff;
+  font-weight: 900;
+}
+
+.connect-guide-grid h2,
+.connect-journey-grid h2,
+.connect-events h2,
+.connect-consultation h2,
+.connect-faq h2 {
+  margin: 16px 0 8px;
+  color: #111;
+  font-size: clamp(1.4rem, 3vw, 2.2rem);
+  line-height: 1;
+}
+
+.connect-guide-grid p,
+.connect-journey-grid p,
+.connect-events span,
+.connect-faq p {
+  color: rgba(23, 23, 23, 0.64);
+  line-height: 1.55;
+}
+
+.connect-faq {
+  display: grid;
+  gap: 14px;
+  margin-top: 34px;
+}
+
+.connect-faq > div {
+  border-top: 1px solid rgba(23, 23, 23, 0.12);
+  padding-top: 16px;
+}
+
+.connect-guide-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.connect-events > div {
+  display: grid;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.connect-events article {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.connect-events b,
+.connect-events span {
+  display: block;
+}
+
+.connect-consultation {
+  border-top: 1px solid rgba(23, 23, 23, 0.12);
+}
+
+.connect-resource-strip {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: clamp(30px, 5vw, 52px);
+}
+
+.connect-resource {
+  color: var(--connect-ink);
+  text-decoration: none;
+}
+
+.connect-resource strong {
+  margin-top: 8px;
+  font-size: 1.2rem;
+}
+
+.connect-resource small {
+  margin-top: 8px;
+  color: rgba(23, 23, 23, 0.62);
+  line-height: 1.5;
+}
+
+.connect-intelligence {
+  margin: 16px 0 24px;
+}
+
+.connect-intelligence span,
+.connect-intelligence b {
+  color: var(--connect-accent);
+  font-size: 0.76rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.connect-intelligence strong {
+  display: block;
+  margin-top: 8px;
+  font-size: clamp(4rem, 13vw, 9rem);
+  line-height: 0.9;
+}
+
+.connect-intelligence p {
+  max-width: 760px;
+  color: rgba(23, 23, 23, 0.7);
+  line-height: 1.6;
+}
+
+.connect-offer-shell .connect-offer-lead {
+  margin: 0 0 18px;
+  font-size: 15px;
+  line-height: 1.55;
+  color: rgba(23, 23, 23, 0.78);
+}
+
+.connect-offer-form label {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 14px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.connect-offer-form input {
+  padding: 14px 16px;
+  border: 1px solid rgba(23, 23, 23, 0.12);
+  border-radius: 12px;
+  font-size: 16px;
+}
+
+.connect-error {
+  margin: 0 0 12px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: #fff1f2;
+  color: #9f1239;
+  font-size: 14px;
+}
+
+@media (max-width: 760px) {
+  .connect-shell,
+  .connect-success {
+    width: min(100% - 24px, 620px);
+    padding: 28px 0 96px;
+  }
+
+  .connect-panel {
+    min-height: 360px;
+  }
+
+  .connect-actions {
+    position: fixed;
+    inset: auto 0 0;
+    z-index: 20;
+    padding: 12px 12px calc(12px + env(safe-area-inset-bottom, 0px));
+    background: linear-gradient(180deg, rgba(251,250,247,0), rgba(251,250,247,0.96) 30%, #fbfaf7);
+  }
+
+  .connect-primary,
+  .connect-ghost {
+    min-width: 120px;
+  }
+
+  .connect-system,
+  .connect-resource-strip,
+  .connect-guide-grid,
+  .connect-journey-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .connect-events article {
+    flex-direction: column;
+  }
+}

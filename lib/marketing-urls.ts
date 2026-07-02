@@ -17,8 +17,9 @@ export const PUBLIC_LINKS = {
   platform: BASE,
   /** Simplifi — capture an opportunity */
   capture: `${BASE}/capture`,
-  /** Amplifi — amplify and share */
-  amplify: `${BASE}/amplify`,
+  /** Amplifi — social posting hub */
+  amplify: `${BASE}/amplifi`,
+  amplifi: `${BASE}/amplifi`,
   /** Magnifi — read a story (demo) */
   storyDemo: `${BASE}/story/selena`,
   /** Portal sign-in */
@@ -26,12 +27,14 @@ export const PUBLIC_LINKS = {
   /** Install Amplifi browser button */
   installAmplifi: `${BASE}/amplifi/install`,
   start: `${BASE}/start`,
+  /** One login → test every Simplifi + portal page */
+  try: `${BASE}/try`,
 } as const;
 
 /** Future custom domains → same routes (add in Vercel Domains when ready). */
 export const CUSTOM_DOMAIN_MAP: Record<string, string> = {
   'capture.efficiencyarchitects.online': '/capture',
-  'amplify.efficiencyarchitects.online': '/amplify',
+  'amplify.efficiencyarchitects.online': '/amplifi',
   'story.efficiencyarchitects.online': '/story/selena',
   'pulse.efficiencyarchitects.online': '/sign-in?next=/pulse',
 };

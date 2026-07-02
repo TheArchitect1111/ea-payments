@@ -30,8 +30,8 @@ test('assessment aliases discovery intake', async ({ page }) => {
 
 test('admin dashboard route prompts auth', async ({ page }) => {
   await page.goto('/admin/dashboard');
-  await expect(page.getByRole('heading', { name: /admin access/i })).toBeVisible();
-  await expect(page.getByRole('button', { name: /sign in/i })).toBeVisible();
+  await expect(page).toHaveURL(/\/admin\/login/);
+  await expect(page.getByRole('heading', { name: /admin sign in/i })).toBeVisible();
 });
 
 test('unsubscribe page is reachable', async ({ page }) => {
@@ -62,9 +62,9 @@ test('simplifi portal route requires portal login', async ({ page }) => {
   await expect(page).toHaveURL(/\/portal\/login/);
 });
 
-test('amplifi share page is reachable', async ({ page }) => {
-  await page.goto('/amplifi/share');
-  await expect(page.getByRole('heading', { name: /amplify what you see/i })).toBeVisible();
+test('amplifi landing page is reachable', async ({ page }) => {
+  await page.goto('/amplifi');
+  await expect(page.getByRole('heading', { name: /search\. create\. store for approval/i })).toBeVisible();
 });
 
 test('magnifi consider demo has opportunity content', async ({ page }) => {
@@ -73,15 +73,14 @@ test('magnifi consider demo has opportunity content', async ({ page }) => {
 });
 
 test('magnifi cinematic demo renders without airtable', async ({ page }) => {
-  await page.goto('/magnifi/demo');
-  await expect(page.getByRole('heading', { level: 1, name: /selena executive coaching/i })).toBeVisible();
-  await expect(page.getByText(/experience engine v2/i)).toBeVisible();
+  await page.goto('/consider/selena');
+  await expect(page.getByRole('heading', { name: /selena executive coaching/i })).toBeVisible();
 });
 
 test('magnifi classic report demo renders', async ({ page }) => {
-  await page.goto('/magnifi/demo?classic=1');
-  await expect(page.getByText(/classic report/i)).toBeVisible();
-  await expect(page.getByRole('heading', { level: 1, name: /selena executive coaching/i })).toBeVisible();
+  await page.goto('/consider/selena');
+  await expect(page.getByRole('heading', { name: /opportunity scores/i })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /selena executive coaching/i })).toBeVisible();
 });
 
 test('magnifi unknown id returns 404', async ({ page }) => {
@@ -106,8 +105,8 @@ test('assessment thank-you contact link works', async ({ page }) => {
 
 test('simplifi workspace is reachable', async ({ page }) => {
   await page.goto('/simplifi/workspace');
-  await expect(page.getByRole('heading', { name: /the orb is the workspace/i })).toBeVisible();
-  await expect(page.getByRole('link', { name: /capture something/i })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /what should i pay attention to right now/i })).toBeVisible();
+  await expect(page.getByRole('link', { name: /^capture$/i })).toBeVisible();
 });
 
 test('app alias redirects to workspace', async ({ page }) => {

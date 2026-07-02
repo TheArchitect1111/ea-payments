@@ -31,6 +31,9 @@ export function scheduleCaptureJob(
         options.baseUrl ??
         process.env.NEXT_PUBLIC_BASE_URL ??
         EA_PLATFORM_URL;
+      const workspaceUrl = options.portalSlug
+        ? `${base}/portal/${options.portalSlug}/simplifi`
+        : `${base}/simplifi/workspace`;
 
       await sendCaptureReadyEmail({
         email: options.notifyEmail,
@@ -38,6 +41,7 @@ export function scheduleCaptureJob(
         magnifiUrl: `${base}/magnifi/${result.record.id}`,
         considerUrl: result.opportunity?.shareUrl ?? result.record.shareUrl,
         guidanceUrl: `${base}/simplifi/guidance/${result.record.id}`,
+        workspaceUrl,
       });
     } catch (err) {
       console.error('Background capture job failed:', err);

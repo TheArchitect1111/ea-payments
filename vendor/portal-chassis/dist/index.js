@@ -4,7 +4,7 @@ import { createRouteMatcher, clerkMiddleware, auth } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 
 // config/tenant-env.ts
 function requiredEnvForTenant(tenant) {
@@ -2623,6 +2623,94 @@ function readStr4(value) {
   return typeof value === "string" ? value : "";
 }
 
-export { ACTIVITY_EVENTS_TABLE, ActivityTimeline, BriefExperience, ClerkShell, DEFAULT_ACTION_CARDS, DEFAULT_INTENT_EXAMPLES, EA_AGENT_REGISTRY, HeaderPortalShell, MissionControlExperience, PortalLayout, QuickActions, RoleGuard, UniversalBriefCard, adminEmail, airtableCreate, airtableDelete, airtableGet, airtableGetOne, airtableUpdate, allowSampleData, buildBriefResponse, buildMissionControlFromStreams, buildMissionControlResponse, buildOpportunityGraph, checkTenantEnv, createHmacPortalMiddleware, createPortalMiddleware, fromActivityEvent, fromAirtableRecord, fromPulseAirtableRecord, fromPulseEventRow, generateTempPassword, hashPassword, intentToActivityEventInput, isActiveAgent, isDemoMode, isProductionDeploy, linkIntentToOpportunity, listActivityEvents, listAgentRuns, makeSessionCookie, mergeEventStreams, newSessionExpiry, normalizeActivityEvent, notifyAdmin, provisionPortalUser, publishActivityEvent, publishAgentRun, requireEnv, requiredEnvForTenant, routeIntent, scoreActivityEvent, searchOpportunityGraph, selectBriefCards, sendEmail, signHmacSession, toActivityEventInput, toAgentRun, toBriefCard, triggerMakeWebhook, validateTenant, verifyHmacSession, verifyPassword, withRoleProtection };
+// instant-feel/motion.ts
+var eaMotion = {
+  tap: 120,
+  small: 180,
+  menu: 220,
+  page: 300,
+  large: 400
+};
+function useOptimisticSave(options = {}) {
+  const savedMs = options.savedMs ?? 2400;
+  const [status, setStatus] = useState("idle");
+  const [error, setError] = useState("");
+  const timerRef = useRef(void 0);
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, []);
+  const run = useCallback(
+    async (work, onOptimistic) => {
+      setError("");
+      setStatus("saving");
+      onOptimistic?.();
+      try {
+        const result = await work();
+        setStatus("saved");
+        if (timerRef.current) clearTimeout(timerRef.current);
+        timerRef.current = setTimeout(() => setStatus("idle"), savedMs);
+        return result;
+      } catch (err) {
+        setStatus("error");
+        setError(err instanceof Error ? err.message : "Save failed");
+        return void 0;
+      }
+    },
+    [savedMs]
+  );
+  const reset = useCallback(() => {
+    setStatus("idle");
+    setError("");
+  }, []);
+  return { status, error, run, reset };
+}
+var LABEL = {
+  idle: null,
+  saving: "Saving\u2026",
+  saved: "\u2713 Saved",
+  error: "Could not save"
+};
+function OptimisticSaveBadge({ status, error, className = "" }) {
+  const label = status === "error" && error ? error : LABEL[status];
+  if (!label) return null;
+  return /* @__PURE__ */ jsx(
+    "span",
+    {
+      className: `pc-save-badge pc-save-badge-${status} ${className}`.trim(),
+      role: "status",
+      "aria-live": "polite",
+      children: label
+    }
+  );
+}
+function SkeletonBlock({ lines = 3, className = "" }) {
+  return /* @__PURE__ */ jsx("div", { className: `pc-skeleton pc-skeleton-card ${className}`.trim(), "aria-hidden": "true", children: Array.from({ length: lines }, (_, i) => /* @__PURE__ */ jsx("div", { className: "pc-skeleton-line" }, i)) });
+}
+function InstantFeelButton({
+  children,
+  variant = "primary",
+  glow = false,
+  className = "",
+  type = "button",
+  ...rest
+}) {
+  const variantClass = variant === "secondary" ? "pc-btn-secondary" : variant === "ghost" ? "pc-btn-ghost" : "pc-btn-primary";
+  return /* @__PURE__ */ jsx(
+    "button",
+    {
+      type,
+      className: `pc-btn pc-tap ${glow ? "pc-tap-glow" : ""} ${variantClass} ${className}`.trim(),
+      ...rest,
+      children
+    }
+  );
+}
+function ProgressMomentum({ label, className = "" }) {
+  return /* @__PURE__ */ jsx("span", { className: `pc-progress-chip ${className}`.trim(), role: "status", children: label });
+}
+
+export { ACTIVITY_EVENTS_TABLE, ActivityTimeline, BriefExperience, ClerkShell, DEFAULT_ACTION_CARDS, DEFAULT_INTENT_EXAMPLES, EA_AGENT_REGISTRY, HeaderPortalShell, InstantFeelButton, MissionControlExperience, OptimisticSaveBadge, PortalLayout, ProgressMomentum, QuickActions, RoleGuard, SkeletonBlock, UniversalBriefCard, adminEmail, airtableCreate, airtableDelete, airtableGet, airtableGetOne, airtableUpdate, allowSampleData, buildBriefResponse, buildMissionControlFromStreams, buildMissionControlResponse, buildOpportunityGraph, checkTenantEnv, createHmacPortalMiddleware, createPortalMiddleware, eaMotion, fromActivityEvent, fromAirtableRecord, fromPulseAirtableRecord, fromPulseEventRow, generateTempPassword, hashPassword, intentToActivityEventInput, isActiveAgent, isDemoMode, isProductionDeploy, linkIntentToOpportunity, listActivityEvents, listAgentRuns, makeSessionCookie, mergeEventStreams, newSessionExpiry, normalizeActivityEvent, notifyAdmin, provisionPortalUser, publishActivityEvent, publishAgentRun, requireEnv, requiredEnvForTenant, routeIntent, scoreActivityEvent, searchOpportunityGraph, selectBriefCards, sendEmail, signHmacSession, toActivityEventInput, toAgentRun, toBriefCard, triggerMakeWebhook, useOptimisticSave, validateTenant, verifyHmacSession, verifyPassword, withRoleProtection };
 //# sourceMappingURL=index.js.map
 //# sourceMappingURL=index.js.map
