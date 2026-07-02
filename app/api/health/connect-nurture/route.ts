@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getConnectDeliveryStatus } from '@/lib/connect-delivery-log';
+import { listConnectFollowUpTasks } from '@/lib/connect-tasks';
 import { getConnectNurtureRunStatus } from '@/lib/connect-nurture-log';
 import { previewDueConnectSequences } from '@/lib/connect-sequence-runner';
 import { buildConnectTestMatrix } from '@/lib/connect-test-matrix';
@@ -14,6 +15,7 @@ export async function GET() {
   const matrix = await buildConnectTestMatrix('demo-client');
   const runs = await getConnectNurtureRunStatus();
   const delivery = await getConnectDeliveryStatus('demo-client');
+  const tasks = await listConnectFollowUpTasks('demo-client');
   const resendOk = status.checks.some((check) => check.label === 'Resend Email' && check.ok);
   const tenantOk = status.checks.some((check) => check.label === 'Tenant Storage' && check.ok);
   const cronSecretConfigured = Boolean(process.env.CRON_SECRET?.trim());
@@ -32,6 +34,11 @@ export async function GET() {
       `GET /api/admin/connect/delivery-log?org=demo-client — ${delivery.recentFailures.length} recent delivery failure(s).`,
     );
   }
+  if (tasks.stats.open > 0) {
+    actions.push(
+      `${tasks.stats.open} open follow-up task(s) for demo-client — staff can complete them in portal Connect or via POST /api/admin/connect/tasks.`,
+    );
+  }
   if (matrix.score < 100) {
     actions.push(`GET /api/admin/connect/test-matrix?org=demo-client (current score ${matrix.score}).`);
   }
@@ -46,6 +53,7 @@ export async function GET() {
     },
     nurture,
     delivery,
+    tasks: tasks.stats,
     lastRun: runs.lastRun,
     recentRuns: runs.recentRuns,
     runLogSource: runs.source,

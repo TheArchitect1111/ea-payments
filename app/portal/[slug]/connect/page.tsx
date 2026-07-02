@@ -5,6 +5,7 @@ import { getConnectOrg } from '@/lib/connect-store';
 import { requirePortalModule } from '@/lib/modules/portal-modules';
 import { roleAtLeast, normalizeRole } from '@/lib/rbac';
 import ConnectKitClient from './ConnectKitClient';
+import ConnectTaskBoard from './ConnectTaskBoard';
 import '../ea-portal.css';
 
 export const dynamic = 'force-dynamic';
@@ -45,6 +46,8 @@ export default async function PortalConnectKitPage({
               journeyIntro: org.journey.intro,
             }}
           />
+
+          <ConnectTaskBoard canManage={canManage} />
 
           <p style={{ marginTop: 24, fontSize: 14, color: '#64748b' }}>
             Public capture:{' '}

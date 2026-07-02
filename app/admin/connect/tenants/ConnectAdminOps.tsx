@@ -77,6 +77,14 @@ export default function ConnectAdminOps() {
         <button
           type="button"
           disabled={Boolean(busy)}
+          onClick={() => void run('/api/admin/connect/tasks?org=demo-client', 'GET')}
+          className="min-h-10 border border-neutral-300 px-4 text-xs font-black uppercase tracking-[0.12em] disabled:opacity-60"
+        >
+          {busy === '/api/admin/connect/tasks?org=demo-client' ? 'Loading…' : 'Task board'}
+        </button>
+        <button
+          type="button"
+          disabled={Boolean(busy)}
           onClick={() => void run('/api/health/connect-nurture', 'GET')}
           className="min-h-10 border border-neutral-300 px-4 text-xs font-black uppercase tracking-[0.12em] disabled:opacity-60"
         >
