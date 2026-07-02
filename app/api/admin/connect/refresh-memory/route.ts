@@ -3,7 +3,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { adminAuthJsonError, requireAdminAction } from '@/lib/admin-session-guard';
 import { EA_ADMIN_COOKIE } from '@/lib/ea-admin-auth';
 import { buildConnectTestMatrix } from '@/lib/connect-test-matrix';
-import { seedConnectTestRelationships } from '@/lib/connect-store';
+import { isConnectMemoryConfigured } from '@/lib/connect-relationship-memory';
+import { refreshConnectRelationshipMemoryForOrg } from '@/lib/connect-store';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 120;
@@ -13,21 +14,12 @@ async function requireAdminManage() {
   return requireAdminAction(cookieStore.get(EA_ADMIN_COOKIE)?.value, 'admin:manage');
 }
 
-export async function GET(request: NextRequest) {
-  const auth = await requireAdminManage();
-  if (!auth.ok) return adminAuthJsonError(auth);
-
-  const orgSlug = request.nextUrl.searchParams.get('org')?.trim() || 'demo-client';
-  const matrix = await buildConnectTestMatrix(orgSlug);
-  return NextResponse.json({ ok: matrix.score === 100, matrix });
-}
-
-/** Seeds synthetic capture records for running the 20-step Connect matrix quickly. */
+/** Refreshes living relationship profiles for an org (OpenAI when configured). */
 export async function POST(request: NextRequest) {
   const auth = await requireAdminManage();
   if (!auth.ok) return adminAuthJsonError(auth);
 
-  let body: { orgSlug?: string; count?: number; tag?: string } = {};
+  let body: { orgSlug?: string; limit?: number } = {};
   try {
     body = (await request.json()) as typeof body;
   } catch {
@@ -35,19 +27,15 @@ export async function POST(request: NextRequest) {
   }
 
   const orgSlug = body.orgSlug?.trim() || 'demo-client';
-  const count = Number.isFinite(body.count) ? Math.max(1, Math.min(50, Number(body.count))) : 20;
-  const seeded = await seedConnectTestRelationships({
-    orgSlug,
-    count,
-    tag: body.tag?.trim() || 'matrix',
-  });
+  const limit = Number.isFinite(body.limit) ? Math.max(1, Math.min(50, Number(body.limit))) : 25;
+  const result = await refreshConnectRelationshipMemoryForOrg(orgSlug, limit);
   const matrix = await buildConnectTestMatrix(orgSlug);
 
   return NextResponse.json({
     ok: true,
-    seeded: seeded.length,
     orgSlug,
-    sampleEmails: seeded.slice(0, 3).map((item) => item.email),
+    openaiConfigured: isConnectMemoryConfigured(),
+    ...result,
     matrix,
   });
 }

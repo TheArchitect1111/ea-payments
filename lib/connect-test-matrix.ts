@@ -1,4 +1,5 @@
 import { getConnectSystemStatus, listConnectRelationships } from '@/lib/connect-store';
+import { isConnectMemoryConfigured } from '@/lib/connect-relationship-memory';
 
 export type ConnectMatrixCheck = {
   id: string;
@@ -19,7 +20,12 @@ export async function buildConnectTestMatrix(orgSlug: string): Promise<{
 
   const scans = relationships.reduce((sum, rel) => sum + rel.engagement.scans, 0);
   const redirects = relationships.reduce((sum, rel) => sum + rel.engagement.clicks, 0);
-  const aiEvaluations = relationships.filter((rel) => rel.aiProfile.opportunityScore >= 0).length;
+  const openAiConfigured = isConnectMemoryConfigured();
+  const aiEvaluations = relationships.filter((rel) =>
+    openAiConfigured
+      ? rel.aiProfile.memorySource === 'openai'
+      : rel.aiProfile.opportunityScore >= 0 && Boolean(rel.aiProfile.memoryRefreshedAt),
+  ).length;
   const nurtureSends = relationships.reduce((sum, rel) => sum + rel.sequenceSent.length, 0);
 
   const resendOk = status.checks.some((check) => check.label === 'Resend Email' && check.ok);
@@ -76,7 +82,9 @@ export async function buildConnectTestMatrix(orgSlug: string): Promise<{
       target: 20,
       current: aiEvaluations,
       ok: aiEvaluations >= 20,
-      detail: `${aiEvaluations} relationships have opportunity scoring.`,
+      detail: openAiConfigured
+        ? `${aiEvaluations} relationships refreshed with OpenAI memory.`
+        : `${aiEvaluations} relationships have rule-based opportunity scoring (set OPENAI_API_KEY for living profiles).`,
     },
   ];
 

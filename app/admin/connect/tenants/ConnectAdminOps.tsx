@@ -53,10 +53,18 @@ export default function ConnectAdminOps() {
         <button
           type="button"
           disabled={Boolean(busy)}
+          onClick={() => void run('/api/admin/connect/refresh-memory', 'POST', { orgSlug: 'demo-client', limit: 20 })}
+          className="min-h-10 border border-neutral-300 px-4 text-xs font-black uppercase tracking-[0.12em] disabled:opacity-60"
+        >
+          {busy === '/api/admin/connect/refresh-memory' ? 'Refreshing…' : 'Refresh AI memory'}
+        </button>
+        <button
+          type="button"
+          disabled={Boolean(busy)}
           onClick={() => void run('/api/admin/connect/test-matrix', 'POST', { orgSlug: 'demo-client', count: 20 })}
           className="min-h-10 border border-neutral-300 px-4 text-xs font-black uppercase tracking-[0.12em] disabled:opacity-60"
         >
-          Seed test matrix
+          {busy === '/api/admin/connect/test-matrix' ? 'Seeding…' : 'Seed test matrix'}
         </button>
         <button
           type="button"
