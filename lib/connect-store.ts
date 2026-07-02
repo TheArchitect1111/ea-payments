@@ -1,3 +1,5 @@
+import { isConnectMemoryConfigured, refreshConnectRelationshipMemory } from '@/lib/connect-relationship-memory';
+
 export type ConnectResource = {
   id: string;
   title: string;
@@ -176,6 +178,10 @@ export type ConnectRelationship = {
     recommendedAction: string;
     followUpPriority: 'Low' | 'Medium' | 'High' | 'Immediate';
     reasons: string[];
+    memorySource?: 'rules' | 'openai';
+    memoryModel?: string;
+    memoryRefreshedAt?: string;
+    memoryConfidence?: number;
   };
   campaignId?: string;
   simplifiCaptureId?: string;
@@ -826,6 +832,7 @@ export async function getConnectSystemStatus() {
     (process.env.TWILIO_FROM_NUMBER?.trim() || process.env.TWILIO_PHONE_NUMBER?.trim())
   );
   const n8nOk = Boolean(process.env.N8N_WEBHOOK_URL?.trim() || process.env.CONNECT_N8N_WEBHOOK_URL?.trim());
+  const openAiOk = isConnectMemoryConfigured();
 
   const checks = [
     tenantStorage,
@@ -833,6 +840,13 @@ export async function getConnectSystemStatus() {
     { ok: resendOk, label: 'Resend Email', detail: resendOk ? 'RESEND_API_KEY and RESEND_FROM_EMAIL are configured.' : 'Set RESEND_API_KEY and RESEND_FROM_EMAIL.' },
     { ok: twilioOk, label: 'Twilio SMS', detail: twilioOk ? 'Twilio credentials and sender number are configured.' : 'Set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, and TWILIO_FROM_NUMBER.' },
     { ok: n8nOk, label: 'Automation Webhook', detail: n8nOk ? 'n8n webhook is configured.' : 'Delayed nurture automation webhook is not configured yet.' },
+    {
+      ok: openAiOk,
+      label: 'OpenAI Memory',
+      detail: openAiOk
+        ? `OPENAI_API_KEY is configured (${process.env.CONNECT_OPENAI_MODEL?.trim() || 'gpt-4o-mini'}).`
+        : 'Set OPENAI_API_KEY to enable living relationship profiles after each interaction.',
+    },
   ];
 
   const readyCount = checks.filter((check) => check.ok).length;
@@ -953,7 +967,86 @@ function generateOpportunityIntelligence(
       'Keep in nurture sequence.',
     followUpPriority,
     reasons: reasons.length ? reasons : ['New connection created'],
+    memorySource: 'rules',
+    memoryRefreshedAt: new Date().toISOString(),
   };
+}
+
+function relationshipStatusFromProfile(aiProfile: ConnectRelationship['aiProfile']): RelationshipStatus {
+  return aiProfile.followUpPriority === 'Immediate' ? 'Needs Follow-Up' :
+    aiProfile.interestLevel === 'High' ? 'Hot' :
+    aiProfile.engagementScore > 25 ? 'Engaged' : 'New';
+}
+
+export function computeRuleBasedAiProfile(relationship: ConnectRelationship): ConnectRelationship['aiProfile'] {
+  return generateOpportunityIntelligence(
+    {
+      orgSlug: relationship.orgSlug,
+      name: relationship.name,
+      email: relationship.email,
+      phone: relationship.phone,
+      organization: relationship.organization,
+      role: relationship.role,
+      conversationNotes: relationship.conversationNotes,
+      leadType: relationship.leadType,
+      event: relationship.event,
+      representative: relationship.representative,
+    },
+    relationship.engagement,
+    relationship.createdAt,
+  );
+}
+
+async function applyRelationshipMemory(
+  relationship: ConnectRelationship,
+  context?: {
+    trigger?: 'capture' | 'engagement' | 'voice_note' | 'admin' | 'matrix';
+    engagementType?: string;
+    voiceNote?: string;
+  },
+): Promise<void> {
+  const baseline = computeRuleBasedAiProfile(relationship);
+  const org = await getConnectOrg(relationship.orgSlug);
+  relationship.aiProfile = await refreshConnectRelationshipMemory(relationship, baseline, {
+    org: { name: org.name, slug: org.slug, offer: org.offer },
+    trigger: context?.trigger,
+    engagementType: context?.engagementType,
+    voiceNote: context?.voiceNote,
+  });
+  relationship.status = relationshipStatusFromProfile(relationship.aiProfile);
+  relationship.updatedAt = new Date().toISOString();
+}
+
+export async function refreshConnectRelationshipMemoryById(
+  relationshipId: string,
+  context?: {
+    trigger?: 'capture' | 'engagement' | 'voice_note' | 'admin' | 'matrix';
+    engagementType?: string;
+    voiceNote?: string;
+  },
+): Promise<ConnectRelationship | null> {
+  const relationship = localRelationships.find((item) => item.id === relationshipId);
+  if (!relationship) return null;
+  await applyRelationshipMemory(relationship, context);
+  return relationship;
+}
+
+export async function refreshConnectRelationshipMemoryForOrg(
+  orgSlug: string,
+  limit = 25,
+): Promise<{ refreshed: number; openai: number; rules: number }> {
+  const slug = sanitizeConnectSlug(orgSlug);
+  const targets = localRelationships.filter((item) => item.orgSlug === slug).slice(0, Math.max(1, Math.min(50, limit)));
+  let openai = 0;
+  let rules = 0;
+
+  for (const relationship of targets) {
+    await applyRelationshipMemory(relationship, { trigger: 'admin' });
+    if (relationship.aiProfile.memorySource === 'openai') openai += 1;
+    else rules += 1;
+  }
+
+  return { refreshed: targets.length, openai, rules };
 }
 
 function airtableConfig() {
@@ -1587,6 +1680,7 @@ export async function createConnectRelationship(input: CreateRelationshipInput):
   } catch (error) {
     console.error('[connect] Airtable write failed', error);
   }
+  await applyRelationshipMemory(relationship, { trigger: 'capture' });
   return relationship;
 }
 
@@ -1667,6 +1761,10 @@ export async function seedConnectTestRelationships(input: {
     created.push(relationship);
   }
 
+  if (isConnectMemoryConfigured()) {
+    await refreshConnectRelationshipMemoryForOrg(slug, total);
+  }
+
   return created;
 }
 
@@ -1724,9 +1822,9 @@ export function getConnectReadinessAudit(): ConnectReadinessItem[] {
     {
       area: 'AI Opportunity Engine',
       score: 67,
-      currentState: 'Rule-based opportunity score, priority, recommended action, and forgotten opportunity detection exist.',
-      gaps: ['No OpenAI-generated living relationship profile yet', 'No model audit trail or confidence scoring'],
-      recommendation: 'Call OpenAI after every engagement event to update profile, risk, recommended next action, and reasons.',
+      currentState: 'Rule-based opportunity score, priority, recommended action, and forgotten opportunity detection exist. OpenAI memory refreshes after capture, engagement, and voice notes when OPENAI_API_KEY is set.',
+      gaps: ['OpenAI memory requires OPENAI_API_KEY in production', 'No model audit trail export yet'],
+      recommendation: 'Set OPENAI_API_KEY and run POST /api/admin/connect/refresh-memory after matrix seed to verify 20 AI evaluations.',
       priority: 'High',
     },
     {
@@ -1795,14 +1893,30 @@ export async function recordConnectEngagement(event: Omit<ConnectEngagementEvent
     };
     const key = keyByType[event.type];
     if (key) relationship.engagement[key] += 1;
-    relationship.aiProfile = generateOpportunityIntelligence(relationship, relationship.engagement, relationship.createdAt);
-    relationship.updatedAt = new Date().toISOString();
+    await applyRelationshipMemory(relationship, { trigger: 'engagement', engagementType: event.type });
   }
 
   return {
     ...event,
     createdAt: new Date().toISOString(),
   };
+}
+
+export async function applyVoiceNoteToRelationship(input: {
+  relationshipId: string;
+  note: string;
+}): Promise<ConnectRelationship | null> {
+  const relationship = localRelationships.find((item) => item.id === input.relationshipId);
+  if (!relationship) return null;
+
+  const note = input.note.trim();
+  if (!note) return relationship;
+
+  relationship.conversationNotes = relationship.conversationNotes
+    ? `${relationship.conversationNotes}\n\n${note}`
+    : note;
+  await applyRelationshipMemory(relationship, { trigger: 'voice_note', voiceNote: note });
+  return relationship;
 }
 
 export function summarizeVoiceNote(note: string) {

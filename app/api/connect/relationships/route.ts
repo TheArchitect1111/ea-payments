@@ -12,6 +12,7 @@ import { handoffConnectRelationship } from '@/lib/connect-pipeline';
 import { sendConnectSms, sendConnectWelcomeEmail, sendInternalNotification } from '@/lib/email';
 
 export const dynamic = 'force-dynamic';
+export const maxDuration = 60;
 
 function clean(value: unknown): string | undefined {
   if (typeof value !== 'string') return undefined;

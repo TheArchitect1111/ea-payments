@@ -312,6 +312,13 @@ test('admin connect tenant patch requires auth', async ({ page }) => {
   expect(res.status()).toBe(401);
 });
 
+test('admin connect refresh-memory requires auth', async ({ page }) => {
+  const res = await page.request.post('/api/admin/connect/refresh-memory', {
+    data: { orgSlug: 'demo-client' },
+  });
+  expect(res.status()).toBe(401);
+});
+
 test('portal documents requires login', async ({ page }) => {
   await page.goto('/portal/demo-client/documents');
   await expect(page).toHaveURL(/\/portal\/login/);
