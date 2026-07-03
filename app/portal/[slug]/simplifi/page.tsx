@@ -1,10 +1,8 @@
 import Link from 'next/link';
-import { cookies } from 'next/headers';
-import { redirect, notFound } from 'next/navigation';
-import { verifySession, EA_PORTAL_COOKIE } from '@/lib/ea-portal-auth';
-import { getClientByPortalSlug, getContentRequestsForClient } from '@/lib/airtable';
+import { getContentRequestsForClient } from '@/lib/airtable';
 import { getPortalCaptures } from '@/lib/capture-records';
 import { PortalShell, NAVY, GOLD } from '@/lib/chassis/PortalShell';
+import { requirePortalModule } from '@/lib/modules/portal-modules';
 import SimplifiPortalWorkspace from './SimplifiPortalWorkspace';
 import '../ea-portal.css';
 
@@ -16,17 +14,7 @@ export default async function SimplifiClientPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-
-  const cookieStore = await cookies();
-  const token = cookieStore.get(EA_PORTAL_COOKIE)?.value;
-  if (!token) redirect('/portal/login');
-
-  const session = await verifySession(token);
-  if (!session) redirect('/portal/login');
-  if (session.slug !== slug) redirect(`/portal/${session.slug}/simplifi`);
-
-  const client = await getClientByPortalSlug(slug);
-  if (!client) notFound();
+  const { client } = await requirePortalModule(slug, 'simplifi');
 
   const isSimplifi = client.packagePurchased === 'Simplifi';
   const requests = await getContentRequestsForClient(client.id);

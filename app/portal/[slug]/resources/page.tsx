@@ -1,8 +1,5 @@
-import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { EA_PORTAL_COOKIE, verifySession } from '@/lib/ea-portal-auth';
-import { getClientByPortalSlug } from '@/lib/airtable';
+import { requirePortalModule } from '@/lib/modules/portal-modules';
 import { PortalSubpage } from '@/app/portal/components/PortalSubpage';
 
 export const dynamic = 'force-dynamic';
@@ -17,14 +14,7 @@ const RESOURCES = [
 
 export default async function ResourcesPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const cookieStore = await cookies();
-  const token = cookieStore.get(EA_PORTAL_COOKIE)?.value;
-  const session = token ? await verifySession(token) : null;
-  if (!session) redirect('/portal/login');
-  if (session.slug !== slug) redirect(`/portal/${session.slug}/resources`);
-
-  const client = await getClientByPortalSlug(slug);
-  if (!client) redirect('/portal/login');
+  await requirePortalModule(slug, 'resources');
 
   return (
     <PortalSubpage

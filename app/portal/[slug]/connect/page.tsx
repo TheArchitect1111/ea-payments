@@ -1,6 +1,6 @@
 import Link from 'next/link';
-import { AppShell } from '@/lib/chassis/AppShell';
 import { buildConnectKit } from '@/lib/connect-kit';
+import { PortalShell } from '@/lib/chassis/PortalShell';
 import { getConnectOrg } from '@/lib/connect-store';
 import { requirePortalModule } from '@/lib/modules/portal-modules';
 import { roleAtLeast, normalizeRole } from '@/lib/rbac';
@@ -16,7 +16,7 @@ export default async function PortalConnectKitPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const { session, client, access } = await requirePortalModule(slug, 'connect');
+  const { session, client, access: _access } = await requirePortalModule(slug, 'connect');
   const org = await getConnectOrg(slug);
   const kit = buildConnectKit(org, slug);
   const canManage = roleAtLeast(normalizeRole(session.role), 'staff');
@@ -25,7 +25,7 @@ export default async function PortalConnectKitPage({
 
   return (
     <div className="ep-page">
-      <AppShell slug={slug} activeModuleId="connect" firstName={firstName} shellNavGroups={access.shellNavGroups}>
+      <PortalShell slug={slug} active="connect" firstName={firstName}>
         <main className="ep-main ep-main-shell">
           <div className="ep-welcome">
             <p className="ep-welcome-label">EA Connect™</p>
@@ -56,7 +56,7 @@ export default async function PortalConnectKitPage({
             </Link>
           </p>
         </main>
-      </AppShell>
+      </PortalShell>
     </div>
   );
 }

@@ -1,10 +1,8 @@
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import { PortalSubpage } from '@/app/portal/components/PortalSubpage';
 import { requirePortalModule } from '@/lib/modules/portal-modules';
 import { listPortalNotifications } from '@/lib/notification-inbox';
-import { cookies } from 'next/headers';
-import { EA_PORTAL_COOKIE, verifySession } from '@/lib/ea-portal-auth';
-import { redirect } from 'next/navigation';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,12 +12,10 @@ export default async function PortalNotificationsPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  await requirePortalModule(slug, 'dashboard');
-
-  const cookieStore = await cookies();
-  const token = cookieStore.get(EA_PORTAL_COOKIE)?.value;
-  const session = token ? await verifySession(token) : null;
-  if (!session?.email) redirect('/portal/login');
+  const { session } = await requirePortalModule(slug, 'dashboard');
+  if (!session.email) {
+    redirect('/portal/login');
+  }
 
   const notifications = await listPortalNotifications({
     slug,

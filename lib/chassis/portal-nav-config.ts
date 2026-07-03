@@ -4,7 +4,7 @@ export type PortalNavItem = {
   id: EAPortalTab | string;
   label: string;
   href: string;
-  icon: 'grid' | 'pulse' | 'simplifi' | 'amplifi' | 'updates' | 'documents' | 'events' | 'resources' | 'messaging' | 'learning' | 'ask';
+  icon: 'grid' | 'pulse' | 'simplifi' | 'amplifi' | 'connect' | 'updates' | 'documents' | 'events' | 'resources' | 'messaging' | 'learning' | 'ask';
 };
 
 export function portalNavItems(slug: string): { menu: PortalNavItem[]; others: PortalNavItem[] } {
@@ -14,6 +14,7 @@ export function portalNavItems(slug: string): { menu: PortalNavItem[]; others: P
       { id: 'home', label: 'Dashboard', href: base, icon: 'grid' },
       { id: 'simplifi', label: 'Simplifi™', href: `${base}/simplifi`, icon: 'simplifi' },
       { id: 'amplifi', label: 'Amplifi™', href: `${base}/amplifi`, icon: 'amplifi' },
+      { id: 'connect', label: 'Connect™', href: `${base}/connect`, icon: 'connect' },
       { id: 'pulse', label: 'Pulse™', href: `${base}/pulse`, icon: 'pulse' },
       { id: 'updates', label: 'Update Hub™', href: `${base}/updates`, icon: 'updates' },
     ],

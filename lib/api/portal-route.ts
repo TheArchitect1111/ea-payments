@@ -6,9 +6,11 @@ import {
   requirePortalSession,
   requirePortalSessionFromRequest,
 } from '@/lib/auth/resolve-portal-session';
+import { tenantFromSession, type TenantContext } from '@/lib/tenant-context';
 
 export type PortalApiSession = {
   slug: string;
+  sub?: string;
   email?: string;
   orgId?: string;
   role?: PlatformRole;
@@ -54,4 +56,8 @@ export async function guardPortalApiCookie(
 
 export function portalApiUnauthorized(result: GuardFail): NextResponse {
   return NextResponse.json({ ok: false, error: result.error }, { status: result.status });
+}
+
+export function portalTenant(session: PortalApiSession): TenantContext {
+  return tenantFromSession({ slug: session.slug, orgId: session.orgId });
 }

@@ -1,12 +1,10 @@
-import { cookies } from 'next/headers';
-import { redirect, notFound } from 'next/navigation';
+import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { verifySession, EA_PORTAL_COOKIE } from '@/lib/ea-portal-auth';
-import { getClientByPortalSlug } from '@/lib/airtable';
 import { getPortalCaptures } from '@/lib/capture-records';
 import { getClientSuccessProfile } from '@/lib/client-success';
 import PasswordChangeModal from './PasswordChangeModal';
 import { PortalShell, NAVY, GOLD } from '@/lib/chassis/PortalShell';
+import { requirePortalModule } from '@/lib/modules/portal-modules';
 import EAPortalHubCards from '@/app/portal/components/EAPortalHubCards';
 import PortalHomeExperience from '@/app/portal/components/PortalHomeExperience';
 import { MetricBoxIcon, MetricUsersIcon } from '@/lib/chassis/PortalNavIcons';
@@ -27,18 +25,7 @@ export default async function PortalPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-
-  const cookieStore = await cookies();
-  const token = cookieStore.get(EA_PORTAL_COOKIE)?.value;
-
-  if (!token) redirect('/portal/login');
-
-  const session = await verifySession(token);
-  if (!session) redirect('/portal/login');
-  if (session.slug !== slug) redirect(`/portal/${session.slug}`);
-
-  const client = await getClientByPortalSlug(slug);
-  if (!client) notFound();
+  const { client } = await requirePortalModule(slug, 'dashboard');
 
   const [profile, captures] = await Promise.all([
     getClientSuccessProfile(client),

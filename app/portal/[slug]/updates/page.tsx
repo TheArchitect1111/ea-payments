@@ -1,8 +1,7 @@
-import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { EA_PORTAL_COOKIE, verifySession } from '@/lib/ea-portal-auth';
-import { getClientByPortalSlug, getContentRequestsForClient } from '@/lib/airtable';
+import { getContentRequestsForClient } from '@/lib/airtable';
 import { PortalShell, NAVY, GOLD } from '@/lib/chassis/PortalShell';
+import { requirePortalModule } from '@/lib/modules/portal-modules';
 import UpdateHubExperience from '@/app/portal/components/UpdateHubExperience';
 import UpdateHubFeed from '@/app/portal/components/UpdateHubFeed';
 import { getPublishedFeedItems, getPendingRequests } from '@/lib/update-hub-feed';
@@ -17,15 +16,7 @@ function fmtDate(value?: string): string {
 
 export default async function UpdatesPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const cookieStore = await cookies();
-  const token = cookieStore.get(EA_PORTAL_COOKIE)?.value;
-  const session = token ? await verifySession(token) : null;
-
-  if (!session) redirect('/portal/login');
-  if (session.slug !== slug) redirect(`/portal/${session.slug}/updates`);
-
-  const client = await getClientByPortalSlug(slug);
-  if (!client) redirect('/portal/login');
+  const { client } = await requirePortalModule(slug, 'update-hub');
 
   const requests = await getContentRequestsForClient(client.id);
   const publishedFeed = getPublishedFeedItems(requests);
