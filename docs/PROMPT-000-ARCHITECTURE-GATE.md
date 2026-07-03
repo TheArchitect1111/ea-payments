@@ -74,7 +74,7 @@ When undertaking major work, complete these phases **before** coding:
 | `requirePortalModule()` on all gated portal pages | Done |
 | `portalTenant()` in `lib/api/portal-route.ts` | Done |
 | Connect portal API routes → `guardPortalApi` | Done |
-| Deprecate unused `AppShell` | Pending (no remaining imports) |
+| Deprecate unused `AppShell` | Done |
 
 ### Postpone
 
