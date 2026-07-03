@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { guardPortalApiCookie, portalApiUnauthorized } from '@/lib/api/portal-route';
+import { guardPortalApiCookie, portalApiUnauthorized, portalTenant } from '@/lib/api/portal-route';
 import { getClientByPortalSlug } from '@/lib/airtable';
 import { type CaptureInput } from '@/lib/capture-pipeline';
 import { portalCaptureSource } from '@/lib/capture-records';
@@ -79,22 +79,23 @@ async function parseCaptureInput(req: Request): Promise<{
 export async function POST(req: Request) {
   const auth = await guardPortalApiCookie({ realm: 'simplifi' });
   if (!auth.ok) return portalApiUnauthorized(auth);
+  const tenant = portalTenant(auth.session);
   const session = auth.session;
 
-  const client = await getClientByPortalSlug(session.slug);
+  const client = await getClientByPortalSlug(tenant.portalSlug);
   if (!client) {
     return NextResponse.json({ ok: false, error: 'Client record not found.' }, { status: 404 });
   }
 
   const simplifiEnabled = await isModuleEnabled({
-    orgId: session.orgId,
-    slug: session.slug,
+    orgId: tenant.organizationId,
+    slug: tenant.portalSlug,
     moduleId: 'simplifi',
     packagePurchased: client.packagePurchased,
     role: session.role,
   });
 
-  if (!simplifiEnabled && session.slug !== 'demo-client') {
+  if (!simplifiEnabled && tenant.portalSlug !== 'demo-client') {
     return NextResponse.json(
       { ok: false, error: 'Simplifi Early Access is required to capture opportunities.' },
       { status: 403 },
@@ -109,9 +110,9 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: message }, { status: 400 });
   }
 
-  const source = portalCaptureSource(session.slug);
+  const source = portalCaptureSource(tenant.portalSlug);
   const result = await submitCapture(parsed.input, source, {
-    portalSlug: session.slug,
+    portalSlug: tenant.portalSlug,
     prospectName: parsed.prospectName,
     notifyEmail: client.email,
     asyncMode: parsed.asyncMode,

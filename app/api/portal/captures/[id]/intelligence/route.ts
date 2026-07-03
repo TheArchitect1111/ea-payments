@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { guardPortalApiCookie, portalApiUnauthorized } from '@/lib/api/portal-route';
+import { guardPortalApiCookie, portalApiUnauthorized, portalTenant } from '@/lib/api/portal-route';
 import { getCaptureByIdentifier } from '@/lib/capture-records';
 import { parseOpportunityPayload } from '@/lib/opportunity-experience';
 
@@ -11,6 +11,7 @@ export async function GET(
 ) {
   const auth = await guardPortalApiCookie({ realm: 'simplifi' });
   if (!auth.ok) return portalApiUnauthorized(auth);
+  const tenant = portalTenant(auth.session);
   const session = auth.session;
 
   const { id } = await params;
@@ -19,7 +20,7 @@ export async function GET(
     return NextResponse.json({ ok: false, error: 'Not found' }, { status: 404 });
   }
 
-  if (record.portalSlug && record.portalSlug !== session.slug) {
+  if (record.portalSlug && record.portalSlug !== tenant.portalSlug) {
     return NextResponse.json({ ok: false, error: 'Forbidden' }, { status: 403 });
   }
 

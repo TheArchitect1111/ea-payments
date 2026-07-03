@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { guardPortalApi, portalApiUnauthorized } from '@/lib/api/portal-route';
+import { guardPortalApi, portalApiUnauthorized, portalTenant } from '@/lib/api/portal-route';
 import { completeConnectFollowUpTask, listConnectFollowUpTasks } from '@/lib/connect-tasks';
 import { roleAtLeast, normalizeRole } from '@/lib/rbac';
 
@@ -8,17 +8,19 @@ export const dynamic = 'force-dynamic';
 export async function GET(req: NextRequest) {
   const auth = await guardPortalApi(req, { realm: 'portal' });
   if (!auth.ok) return portalApiUnauthorized(auth);
+  const tenant = portalTenant(auth.session);
   if (!roleAtLeast(normalizeRole(auth.session.role), 'staff')) {
     return NextResponse.json({ error: 'Staff access required.' }, { status: 403 });
   }
 
-  const tasks = await listConnectFollowUpTasks(auth.session.slug);
-  return NextResponse.json({ ok: true, orgSlug: auth.session.slug, ...tasks });
+  const tasks = await listConnectFollowUpTasks(tenant.portalSlug);
+  return NextResponse.json({ ok: true, orgSlug: tenant.portalSlug, ...tasks });
 }
 
 export async function POST(req: NextRequest) {
   const auth = await guardPortalApi(req, { realm: 'portal' });
   if (!auth.ok) return portalApiUnauthorized(auth);
+  const tenant = portalTenant(auth.session);
   if (!roleAtLeast(normalizeRole(auth.session.role), 'staff')) {
     return NextResponse.json({ error: 'Staff access required.' }, { status: 403 });
   }
@@ -37,9 +39,9 @@ export async function POST(req: NextRequest) {
 
   try {
     const result = await completeConnectFollowUpTask({
-      orgSlug: auth.session.slug,
+      orgSlug: tenant.portalSlug,
       relationshipId,
-      completedBy: auth.session.email ?? auth.session.sub ?? auth.session.slug,
+      completedBy: auth.session.email ?? auth.session.sub ?? tenant.portalSlug,
       note: body.note,
     });
     return NextResponse.json({ ok: true, ...result });

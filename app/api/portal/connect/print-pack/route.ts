@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { guardPortalApiCookie, portalApiUnauthorized } from '@/lib/api/portal-route';
+import { guardPortalApiCookie, portalApiUnauthorized, portalTenant } from '@/lib/api/portal-route';
 import { buildConnectKit } from '@/lib/connect-kit';
 import { buildConnectPrintPackHtml, type QrPackFilter } from '@/lib/connect-qr-pack';
 import { getConnectOrg } from '@/lib/connect-store';
@@ -16,6 +16,7 @@ function parseFilter(raw: string | null): QrPackFilter {
 export async function GET(req: NextRequest) {
   const auth = await guardPortalApiCookie({ realm: 'portal' });
   if (!auth.ok) return portalApiUnauthorized(auth);
+  const tenant = portalTenant(auth.session);
   if (!roleAtLeast(normalizeRole(auth.session.role), 'staff')) {
     return NextResponse.json({ error: 'Owner or staff access required.' }, { status: 403 });
   }
@@ -23,8 +24,8 @@ export async function GET(req: NextRequest) {
   const filter = parseFilter(req.nextUrl.searchParams.get('filter'));
 
   try {
-    const org = await getConnectOrg(auth.session.slug);
-    const kit = buildConnectKit(org, auth.session.slug);
+    const org = await getConnectOrg(tenant.portalSlug);
+    const kit = buildConnectKit(org, tenant.portalSlug);
     const html = buildConnectPrintPackHtml(kit, filter);
 
     return new NextResponse(html, {

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { guardPortalApiCookie, portalApiUnauthorized } from '@/lib/api/portal-route';
+import { guardPortalApiCookie, portalApiUnauthorized, portalTenant } from '@/lib/api/portal-route';
 import { createContentRequest, getClientByPortalSlug } from '@/lib/airtable';
 import { enhanceContentRequest } from '@/lib/ai';
 import { sendContentRequestConfirmation, sendInternalNotification } from '@/lib/email';
@@ -12,7 +12,8 @@ export const dynamic = 'force-dynamic';
 async function authenticatedClient() {
   const auth = await guardPortalApiCookie();
   if (!auth.ok) return null;
-  return getClientByPortalSlug(auth.session.slug);
+  const tenant = portalTenant(auth.session);
+  return getClientByPortalSlug(tenant.portalSlug);
 }
 
 export async function POST(req: NextRequest) {

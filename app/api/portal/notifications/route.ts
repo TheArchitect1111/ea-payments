@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { guardPortalApi, portalApiUnauthorized } from '@/lib/api/portal-route';
+import { guardPortalApi, portalApiUnauthorized, portalTenant } from '@/lib/api/portal-route';
 import {
   listPortalNotifications,
   markPortalNotificationsRead,
@@ -11,13 +11,14 @@ export const dynamic = 'force-dynamic';
 export async function GET(req: NextRequest) {
   const auth = await guardPortalApi(req);
   if (!auth.ok) return portalApiUnauthorized(auth);
+  const tenant = portalTenant(auth.session);
   const session = auth.session;
   if (!session.email) {
     return NextResponse.json({ error: 'Portal authentication required.' }, { status: 401 });
   }
 
   const notifications = await listPortalNotifications({
-    slug: session.slug,
+    slug: tenant.portalSlug,
     email: session.email,
     limit: 30,
   });
@@ -25,13 +26,14 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({
     ok: true,
     notifications,
-    unreadCount: await countUnreadNotifications(session.slug, session.email),
+    unreadCount: await countUnreadNotifications(tenant.portalSlug, session.email),
   });
 }
 
 export async function POST(req: NextRequest) {
   const auth = await guardPortalApi(req);
   if (!auth.ok) return portalApiUnauthorized(auth);
+  const tenant = portalTenant(auth.session);
   const session = auth.session;
   if (!session.email) {
     return NextResponse.json({ error: 'Portal authentication required.' }, { status: 401 });
@@ -39,7 +41,7 @@ export async function POST(req: NextRequest) {
 
   const body = (await req.json()) as { ids?: string[]; markAll?: boolean };
   const marked = await markPortalNotificationsRead(
-    session.slug,
+    tenant.portalSlug,
     session.email,
     body.markAll ? undefined : body.ids,
   );
@@ -47,6 +49,6 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({
     ok: true,
     marked,
-    unreadCount: await countUnreadNotifications(session.slug, session.email),
+    unreadCount: await countUnreadNotifications(tenant.portalSlug, session.email),
   });
 }

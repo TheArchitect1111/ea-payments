@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { guardPortalApiCookie, portalApiUnauthorized } from '@/lib/api/portal-route';
+import { guardPortalApiCookie, portalApiUnauthorized, portalTenant } from '@/lib/api/portal-route';
 import { getCaptureByIdentifier, updateOutcomeStatus, snoozeActiveSave } from '@/lib/capture-records';
 import {
   OUTCOME_LABELS,
@@ -13,6 +13,7 @@ export const dynamic = 'force-dynamic';
 export async function POST(req: Request) {
   const auth = await guardPortalApiCookie({ realm: 'simplifi' });
   if (!auth.ok) return portalApiUnauthorized(auth);
+  const tenant = portalTenant(auth.session);
   const session = auth.session;
 
   const body = (await req.json()) as {
@@ -32,7 +33,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: 'Capture not found.' }, { status: 404 });
   }
 
-  if (record.portalSlug && record.portalSlug !== session.slug) {
+  if (record.portalSlug && record.portalSlug !== tenant.portalSlug) {
     return NextResponse.json({ ok: false, error: 'Not authorized.' }, { status: 403 });
   }
 
@@ -72,9 +73,9 @@ export async function POST(req: Request) {
     type: 'capture.outcome_recorded',
     title: `${record.title} → ${label}`,
     detail: nextAction,
-    href: `/portal/${session.slug}/simplifi`,
+    href: `/portal/${tenant.portalSlug}/simplifi`,
     objectId: recordId,
-    tenantId: session.slug,
+    tenantId: tenant.portalSlug,
     priority: outcome === 'won' ? 'high' : 'medium',
   });
 

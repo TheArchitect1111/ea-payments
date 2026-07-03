@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
 import { NextRequest, NextResponse } from 'next/server';
-import { guardPortalApi, portalApiUnauthorized } from '@/lib/api/portal-route';
+import { guardPortalApi, portalApiUnauthorized, portalTenant } from '@/lib/api/portal-route';
 import { getClientByPortalSlug, updateClientPassword } from '@/lib/airtable';
 
 export const dynamic = 'force-dynamic';
@@ -8,6 +8,7 @@ export const dynamic = 'force-dynamic';
 export async function POST(req: NextRequest) {
   const auth = await guardPortalApi(req);
   if (!auth.ok) return portalApiUnauthorized(auth);
+  const tenant = portalTenant(auth.session);
   const session = auth.session;
 
   let body: { password?: string };
@@ -22,7 +23,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Please use at least 8 characters.' }, { status: 400 });
   }
 
-  const client = await getClientByPortalSlug(session.slug);
+  const client = await getClientByPortalSlug(tenant.portalSlug);
   if (!client) {
     return NextResponse.json({ error: 'Portal record not found.' }, { status: 404 });
   }

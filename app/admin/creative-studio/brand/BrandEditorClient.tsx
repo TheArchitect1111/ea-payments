@@ -65,6 +65,7 @@ export default function BrandEditorClient() {
       <header className="cs-hero">
         <nav className="cs-subnav">
           <Link href="/admin/creative-studio">Campaigns</Link>
+          <Link href="/admin/creative-studio/media">Media</Link>
           <span className="cs-subnav-active">Brand</span>
         </nav>
         <p className="cs-kicker">EA Creative Studio™</p>
@@ -78,6 +79,16 @@ export default function BrandEditorClient() {
         <label className="cs-field">
           <span>Organization name</span>
           <input value={brand.organizationName} onChange={(e) => setBrand({ ...brand, organizationName: e.target.value })} />
+        </label>
+
+        <label className="cs-field">
+          <span>Logo URL</span>
+          <input
+            type="url"
+            placeholder="https://…"
+            value={brand.logoUrl ?? ''}
+            onChange={(e) => setBrand({ ...brand, logoUrl: e.target.value })}
+          />
         </label>
 
         <div className="cs-field-row">

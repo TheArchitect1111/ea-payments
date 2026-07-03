@@ -65,6 +65,7 @@ export default function CreativeStudioClient() {
       <header className="cs-hero">
         <nav className="cs-subnav">
           <span className="cs-subnav-active">Campaigns</span>
+          <Link href="/admin/creative-studio/media">Media</Link>
           <Link href="/admin/creative-studio/brand">Brand</Link>
         </nav>
         <p className="cs-kicker">EA Creative Studio™</p>
