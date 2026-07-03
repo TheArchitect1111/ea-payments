@@ -4,7 +4,20 @@ Creative Studio stores campaigns, brand profiles, and media assets in a single A
 
 ## 1. Create the Airtable table
 
-In the **Payments** base (`AIRTABLE_PAYMENTS_BASE_ID`), create a table named **Creative Studio** (or set `AIRTABLE_CREATIVE_STUDIO_TABLE` to your table name).
+**Option A — script (local):**
+
+```bash
+node scripts/ops-airtable-creative-studio.mjs
+```
+
+**Option B — deployed setup API** (POST with `LAUNCH_SETUP_KEY`):
+
+```bash
+curl -X POST -H "x-launch-setup-key: $LAUNCH_SETUP_KEY" \
+  https://ea-payments.vercel.app/api/health/setup-schema
+```
+
+**Option C — manual** in the **Payments** base (`AIRTABLE_PAYMENTS_BASE_ID`):
 
 | Field | Type | Notes |
 |-------|------|-------|
