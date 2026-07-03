@@ -3,9 +3,7 @@ import { publishPlatformActivityEvent } from '@/lib/activity-events-store';
 import { getCampaign, saveCampaign } from './campaign-store';
 import type { CampaignAsset, CreativeCampaign, PublishResult } from './types';
 
-function portalSlug(organizationId: string): string {
-  return process.env.CREATIVE_STUDIO_PORTAL_SLUG?.trim() || organizationId || 'demo-client';
-}
+import { resolvePortalSlugForOrg } from '@/lib/tenant-context';
 
 function assetChannel(asset: CampaignAsset): string {
   if (asset.type.startsWith('social')) return 'social';
@@ -41,7 +39,7 @@ export async function publishCampaignAsset(input: {
     return { campaign, result: { ok: false, mode: 'stub', detail: 'Asset not found.' } };
   }
 
-  const slug = portalSlug(campaign.organizationId);
+  const slug = resolvePortalSlugForOrg(campaign.organizationId);
   const actor = input.actorName ?? 'Creative Studio';
   const channel = resolvePublishChannel(asset);
   const requestType =

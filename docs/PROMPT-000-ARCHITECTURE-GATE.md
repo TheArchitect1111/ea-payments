@@ -59,11 +59,12 @@ When undertaking major work, complete these phases **before** coding:
 
 ### Change immediately
 
-1. ~~Unify Airtable access (one client)~~ → `lib/data/airtable-client.ts` (in progress)
-2. API auth middleware for `/api/admin/*` and `/api/portal/*` → start with `lib/api/admin-route.ts`
+1. ~~Unify Airtable access (one client)~~ → `lib/data/airtable-client.ts` (platform-store, Creative Studio, connect-store)
+2. ~~Portal API guard~~ → `lib/api/portal-route.ts` (portal routes migrated)
 3. ~~`lib/publishing/` shared facade~~ → `lib/publishing/publish.ts`
-4. Enforce design tokens (`@/lib/design-system`)
-5. Production persistence for tenant data (Creative Studio, events)
+4. ~~Enforce design tokens~~ → admin shell uses `@/lib/design-system`
+5. ~~Tenant model~~ → `lib/tenant-context.ts`
+6. Production persistence for tenant data (Creative Studio Airtable table setup)
 
 ### Postpone
 

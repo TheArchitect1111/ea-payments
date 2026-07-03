@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { requirePortalSession } from '@/lib/auth/resolve-portal-session';
+import { guardPortalApiCookie, portalApiUnauthorized } from '@/lib/api/portal-route';
 import { getClientByPortalSlug } from '@/lib/airtable';
 import { resolvePortalModuleAccess } from '@/lib/modules/portal-modules';
 
@@ -7,10 +7,9 @@ export const dynamic = 'force-dynamic';
 
 /** Enabled modules for the current portal session. */
 export async function GET() {
-  const session = await requirePortalSession();
-  if (!session?.slug) {
-    return NextResponse.json({ error: 'Portal authentication required.' }, { status: 401 });
-  }
+  const auth = await guardPortalApiCookie();
+  if (!auth.ok) return portalApiUnauthorized(auth);
+  const session = auth.session;
 
   const client = await getClientByPortalSlug(session.slug);
   const access = await resolvePortalModuleAccess({

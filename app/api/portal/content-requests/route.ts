@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requirePortalSession } from '@/lib/auth/resolve-portal-session';
+import { guardPortalApiCookie, portalApiUnauthorized } from '@/lib/api/portal-route';
 import { createContentRequest, getClientByPortalSlug } from '@/lib/airtable';
 import { enhanceContentRequest } from '@/lib/ai';
 import { sendContentRequestConfirmation, sendInternalNotification } from '@/lib/email';
@@ -10,9 +10,9 @@ import { fireContentRequestWebhook } from '@/lib/make-webhooks';
 export const dynamic = 'force-dynamic';
 
 async function authenticatedClient() {
-  const session = await requirePortalSession();
-  if (!session) return null;
-  return getClientByPortalSlug(session.slug);
+  const auth = await guardPortalApiCookie();
+  if (!auth.ok) return null;
+  return getClientByPortalSlug(auth.session.slug);
 }
 
 export async function POST(req: NextRequest) {

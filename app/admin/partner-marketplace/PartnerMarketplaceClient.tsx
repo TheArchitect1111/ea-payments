@@ -1,11 +1,9 @@
 'use client';
 
+import { NAVY, GOLD } from '@/lib/design-system';
 import { useMemo, useState } from 'react';
 import type { MarketplaceListing } from '@/lib/partner-marketplace';
 import { MARKETPLACE_CATEGORIES } from '@/lib/partner-marketplace';
-
-const NAVY = '#1B2B4D';
-const GOLD = '#C9A844';
 
 export default function PartnerMarketplaceClient({
   listings,

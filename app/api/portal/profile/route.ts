@@ -1,14 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getClientByPortalSlug } from '@/lib/airtable';
-import { requirePortalSessionFromRequest } from '@/lib/auth/resolve-portal-session';
+import { guardPortalApi, portalApiUnauthorized } from '@/lib/api/portal-route';
 import { getClientSuccessProfile } from '@/lib/client-success';
 
 export const dynamic = 'force-dynamic';
 
 /** Portal profile for mobile settings and account screens. */
 export async function GET(req: NextRequest) {
-  const session = await requirePortalSessionFromRequest(req);
-  if (!session?.email) {
+  const auth = await guardPortalApi(req);
+  if (!auth.ok) return portalApiUnauthorized(auth);
+  const session = auth.session;
+  if (!session.email) {
     return NextResponse.json({ ok: false, error: 'Sign in required.' }, { status: 401 });
   }
 

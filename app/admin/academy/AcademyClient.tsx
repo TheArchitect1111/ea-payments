@@ -1,11 +1,9 @@
 'use client';
 
+import { NAVY, GOLD } from '@/lib/design-system';
 import { useState } from 'react';
 import { ACADEMY_MODULES } from '@/lib/academy-modules';
 import { startGuidedTour } from '../_components/GuidedTour';
-
-const NAVY = '#1B2B4D';
-const GOLD = '#C9A844';
 
 export default function AcademyClient() {
   const [activeId, setActiveId] = useState(ACADEMY_MODULES[0]?.id ?? '');

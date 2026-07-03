@@ -1,12 +1,10 @@
 'use client';
 
+import { NAVY, GOLD } from '@/lib/design-system';
 import { useCallback, useEffect, useState } from 'react';
 import { ADMIN_COMMANDS, type CommandItem } from '@/lib/admin-command-registry';
 import { executeIntentRoute, submitAdminIntent } from '@/lib/admin-intent-client';
 import { startGuidedTour } from './GuidedTour';
-
-const NAVY = '#1B2B4D';
-const GOLD = '#C9A844';
 
 type Props = {
   onOpenNavigator: () => void;

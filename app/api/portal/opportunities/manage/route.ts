@@ -1,14 +1,13 @@
 import { NextResponse } from 'next/server';
-import { requirePortalSession } from '@/lib/auth/resolve-portal-session';
+import { guardPortalApiCookie, portalApiUnauthorized } from '@/lib/api/portal-route';
 import { archiveConsiderCapture, duplicateConsiderCapture } from '@/lib/opportunity-tracking';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
-  const session = await requirePortalSession({ realm: 'simplifi' });
-  if (!session) {
-    return NextResponse.json({ ok: false, error: 'Unauthorized' }, { status: 401 });
-  }
+  const auth = await guardPortalApiCookie({ realm: 'simplifi' });
+  if (!auth.ok) return portalApiUnauthorized(auth);
+  const session = auth.session;
 
   const body = (await req.json()) as { action?: string; recordId?: string; slug?: string };
 

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { requirePortalSession } from '@/lib/auth/resolve-portal-session';
+import { guardPortalApiCookie, portalApiUnauthorized } from '@/lib/api/portal-route';
 import { getClientByPortalSlug } from '@/lib/airtable';
 import { type CaptureInput } from '@/lib/capture-pipeline';
 import { portalCaptureSource } from '@/lib/capture-records';
@@ -77,10 +77,9 @@ async function parseCaptureInput(req: Request): Promise<{
 }
 
 export async function POST(req: Request) {
-  const session = await requirePortalSession({ realm: 'simplifi' });
-  if (!session) {
-    return NextResponse.json({ ok: false, error: 'Please log in again.' }, { status: 401 });
-  }
+  const auth = await guardPortalApiCookie({ realm: 'simplifi' });
+  if (!auth.ok) return portalApiUnauthorized(auth);
+  const session = auth.session;
 
   const client = await getClientByPortalSlug(session.slug);
   if (!client) {

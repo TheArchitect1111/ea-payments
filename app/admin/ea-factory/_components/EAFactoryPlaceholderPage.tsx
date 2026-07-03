@@ -1,7 +1,5 @@
+import { NAVY, GOLD } from '@/lib/design-system';
 import Link from 'next/link';
-
-const NAVY = '#1B2B4D';
-const GOLD = '#C9A844';
 
 export default function EAFactoryPlaceholderPage({ title, purpose }: { title: string; purpose: string }) {
   return (

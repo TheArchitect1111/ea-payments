@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { requirePortalSession } from '@/lib/auth/resolve-portal-session';
+import { guardPortalApiCookie, portalApiUnauthorized } from '@/lib/api/portal-route';
 import { getClientByPortalSlug } from '@/lib/airtable';
 import {
   defaultDueDateForPurpose,
@@ -12,10 +12,9 @@ import { notifyPortal } from '@/lib/portal-notify';
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
-  const session = await requirePortalSession({ realm: 'simplifi' });
-  if (!session) {
-    return NextResponse.json({ ok: false, error: 'Please log in again.' }, { status: 401 });
-  }
+  const auth = await guardPortalApiCookie({ realm: 'simplifi' });
+  if (!auth.ok) return portalApiUnauthorized(auth);
+  const session = auth.session;
 
   const client = await getClientByPortalSlug(session.slug);
   if (!client) {

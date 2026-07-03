@@ -1,10 +1,8 @@
 'use client';
 
+import { NAVY, GOLD } from '@/lib/design-system';
 import { useState } from 'react';
 import type { CaptureRecord } from '@/lib/capture-records';
-
-const NAVY = '#1B2B4D';
-const GOLD = '#C9A844';
 
 interface AnalyzeResponse {
   ok?: boolean;

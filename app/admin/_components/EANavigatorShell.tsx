@@ -1,5 +1,6 @@
 'use client';
 
+import { NAVY, GOLD } from '@/lib/design-system';
 import { useEffect, useState } from 'react';
 import UniversalCommandBar from './UniversalCommandBar';
 import VoiceAssistant from './VoiceAssistant';
@@ -11,9 +12,6 @@ import {
   writeOperatingMode,
   type OperatingMode,
 } from '@/lib/admin-operating-mode';
-
-const NAVY = '#1B2B4D';
-const GOLD = '#C9A844';
 
 const NAVIGATOR_GOALS = [
   { label: 'Launch a communication campaign', href: '/admin/creative-studio' },

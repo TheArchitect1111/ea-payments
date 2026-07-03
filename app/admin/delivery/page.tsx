@@ -1,3 +1,4 @@
+import { NAVY, GOLD } from '@/lib/design-system';
 import { cookies } from 'next/headers';
 import { EA_ADMIN_COOKIE, verifyAdminSession } from '@/lib/ea-admin-auth';
 import { getAllClientRecords } from '@/lib/airtable';
@@ -6,8 +7,6 @@ import AdminLogin from '../proposals/AdminLogin';
 
 export const dynamic = 'force-dynamic';
 
-const NAVY = '#1B2B4D';
-const GOLD = '#C9A844';
 const CREAM = '#FAF8F3';
 
 type RiskLevel = 'critical' | 'high' | 'medium' | 'low';

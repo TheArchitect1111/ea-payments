@@ -1,3 +1,4 @@
+import { NAVY, GOLD } from '@/lib/design-system';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import AdminLogin from '../../../master/AdminLogin';
@@ -6,9 +7,6 @@ import { getEACPLaunch, statusLabel } from '@/lib/eacp-launch';
 import { CopyCodexPrompt, RepoReviewForm } from './LaunchDetailActions';
 
 export const dynamic = 'force-dynamic';
-
-const NAVY = '#1B2B4D';
-const GOLD = '#C9A844';
 
 type PageProps = {
   params: Promise<{ id: string }>;

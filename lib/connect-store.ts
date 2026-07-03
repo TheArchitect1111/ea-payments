@@ -1,4 +1,5 @@
 import { isConnectMemoryConfigured, refreshConnectRelationshipMemory } from '@/lib/connect-relationship-memory';
+import { AIRTABLE_BASE_ID, airtableAuthHeaders, airtableConfigured } from '@/lib/data/airtable-client';
 
 export type ConnectResource = {
   id: string;
@@ -621,10 +622,8 @@ function sanitizeConnectSlug(value: string): string {
 }
 
 function connectTenantAirtableConfig() {
-  const apiKey = process.env.AIRTABLE_API_KEY || process.env.AIRTABLE_TOKEN;
-  const baseId = process.env.AIRTABLE_BASE_ID || process.env.AIRTABLE_PAYMENTS_BASE_ID || 'appv0YoLIMY45fmDA';
-  if (!apiKey || !baseId || !CONNECT_TENANTS_TABLE) return null;
-  return { apiKey, baseId, tableRef: CONNECT_TENANTS_TABLE };
+  if (!airtableConfigured() || !CONNECT_TENANTS_TABLE) return null;
+  return { headers: airtableAuthHeaders(), baseId: AIRTABLE_BASE_ID, tableRef: CONNECT_TENANTS_TABLE };
 }
 
 function orgFromAirtableRecord(record: { id: string; fields?: Record<string, unknown> }): ConnectOrgConfig | null {
@@ -643,7 +642,7 @@ async function listAirtableTenants(): Promise<ConnectOrgConfig[]> {
   if (!config) return [];
 
   const response = await fetch(`https://api.airtable.com/v0/${config.baseId}/${encodeURIComponent(config.tableRef)}?pageSize=100`, {
-    headers: { Authorization: `Bearer ${config.apiKey}` },
+    headers: config.headers,
     cache: 'no-store',
   });
 
@@ -1152,11 +1151,8 @@ function parseEngagementJson(raw: unknown): {
 }
 
 function airtableConfig() {
-  const apiKey = process.env.AIRTABLE_API_KEY || process.env.AIRTABLE_TOKEN;
-  const baseId = process.env.AIRTABLE_BASE_ID || process.env.AIRTABLE_PAYMENTS_BASE_ID || 'appv0YoLIMY45fmDA';
-  const tableId = CONNECT_RELATIONSHIPS_TABLE;
-  if (!apiKey || !baseId || !tableId) return null;
-  return { apiKey, baseId, tableId };
+  if (!airtableConfigured() || !CONNECT_RELATIONSHIPS_TABLE) return null;
+  return { headers: airtableAuthHeaders(), baseId: AIRTABLE_BASE_ID, tableId: CONNECT_RELATIONSHIPS_TABLE };
 }
 
 async function postRelationshipToAirtable(relationship: ConnectRelationship): Promise<string | null> {
@@ -1165,10 +1161,7 @@ async function postRelationshipToAirtable(relationship: ConnectRelationship): Pr
 
   const response = await fetch(`https://api.airtable.com/v0/${config.baseId}/${encodeURIComponent(config.tableId)}`, {
     method: 'POST',
-    headers: {
-      Authorization: `Bearer ${config.apiKey}`,
-      'Content-Type': 'application/json',
-    },
+    headers: config.headers,
     body: JSON.stringify({
       records: [
         {
@@ -1270,7 +1263,7 @@ async function fetchRelationshipsFromAirtable(orgSlug?: string): Promise<Connect
   const response = await fetch(
     `https://api.airtable.com/v0/${config.baseId}/${encodeURIComponent(config.tableId)}?${params.toString()}`,
     {
-      headers: { Authorization: `Bearer ${config.apiKey}` },
+      headers: config.headers,
       cache: 'no-store',
     },
   );
@@ -1293,10 +1286,7 @@ async function patchRelationshipInAirtable(relationship: ConnectRelationship): P
 
   await fetch(`https://api.airtable.com/v0/${config.baseId}/${encodeURIComponent(config.tableId)}`, {
     method: 'PATCH',
-    headers: {
-      Authorization: `Bearer ${config.apiKey}`,
-      'Content-Type': 'application/json',
-    },
+    headers: config.headers,
     body: JSON.stringify({
       records: [
         {
@@ -1456,7 +1446,7 @@ async function findAirtableTenantRecordBySlug(
   const formula = encodeURIComponent(`{Slug}='${safe}'`);
   const url = `https://api.airtable.com/v0/${config.baseId}/${encodeURIComponent(config.tableRef)}?filterByFormula=${formula}&maxRecords=1`;
   const response = await fetch(url, {
-    headers: { Authorization: `Bearer ${config.apiKey}` },
+    headers: config.headers,
     cache: 'no-store',
   });
 
@@ -1498,10 +1488,7 @@ export async function persistConnectOrg(
       `https://api.airtable.com/v0/${config.baseId}/${encodeURIComponent(config.tableRef)}/${existing.recordId}`,
       {
         method: 'PATCH',
-        headers: {
-          Authorization: `Bearer ${config.apiKey}`,
-          'Content-Type': 'application/json',
-        },
+        headers: config.headers,
         body: JSON.stringify({
           fields: {
             Name: normalized.name,
@@ -1525,10 +1512,7 @@ export async function persistConnectOrg(
     `https://api.airtable.com/v0/${config.baseId}/${encodeURIComponent(config.tableRef)}`,
     {
       method: 'POST',
-      headers: {
-        Authorization: `Bearer ${config.apiKey}`,
-        'Content-Type': 'application/json',
-      },
+      headers: config.headers,
       body: JSON.stringify({
         records: [
           {
@@ -1730,10 +1714,7 @@ export async function createConnectTenant(input: {
   const now = new Date().toISOString();
   const response = await fetch(`https://api.airtable.com/v0/${config.baseId}/${encodeURIComponent(config.tableRef)}`, {
     method: 'POST',
-    headers: {
-      Authorization: `Bearer ${config.apiKey}`,
-      'Content-Type': 'application/json',
-    },
+    headers: config.headers,
     body: JSON.stringify({
       records: [
         {

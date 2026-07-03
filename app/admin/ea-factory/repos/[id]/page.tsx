@@ -1,3 +1,4 @@
+import { NAVY, GOLD } from '@/lib/design-system';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import AdminLogin from '../../../master/AdminLogin';
@@ -5,9 +6,6 @@ import { hasAdminPageAccess } from '@/lib/admin-page-auth';
 import { getRepoIntelligenceById } from '@/lib/ea-factory';
 
 export const dynamic = 'force-dynamic';
-
-const NAVY = '#1B2B4D';
-const GOLD = '#C9A844';
 
 type PageProps = {
   params: Promise<{ id: string }>;

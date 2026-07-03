@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requirePortalSessionFromRequest } from '@/lib/auth/resolve-portal-session';
+import { guardPortalApi, portalApiUnauthorized } from '@/lib/api/portal-route';
 import { createEnhancementRequest, getClientByPortalSlug } from '@/lib/airtable';
 import { assessEnhancementRequest } from '@/lib/ai';
 import { sendEnhancementRequestConfirmation, sendInternalNotification } from '@/lib/email';
@@ -7,10 +7,9 @@ import { sendEnhancementRequestConfirmation, sendInternalNotification } from '@/
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
-  const session = await requirePortalSessionFromRequest(req);
-  if (!session) {
-    return NextResponse.json({ error: 'Please log in again.' }, { status: 401 });
-  }
+  const auth = await guardPortalApi(req);
+  if (!auth.ok) return portalApiUnauthorized(auth);
+  const session = auth.session;
 
   const client = await getClientByPortalSlug(session.slug);
   if (!client) {

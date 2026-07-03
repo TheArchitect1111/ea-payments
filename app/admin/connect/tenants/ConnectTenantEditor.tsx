@@ -1,9 +1,8 @@
 'use client';
 
+import { NAVY, GOLD } from '@/lib/design-system';
 import { useState } from 'react';
 import type { ConnectOrgConfig } from '@/lib/connect-store';
-
-const GOLD = '#c9a844';
 
 type Props = {
   tenant: ConnectOrgConfig;
