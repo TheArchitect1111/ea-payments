@@ -1,8 +1,7 @@
 'use client';
 
+import { NAVY, GOLD } from '@/lib/design-system';
 import { useState } from 'react';
-
-const GOLD = '#c9a844';
 
 export default function ConnectAdminOps() {
   const [busy, setBusy] = useState('');

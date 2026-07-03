@@ -1,9 +1,7 @@
 'use client';
 
+import { NAVY, GOLD } from '@/lib/design-system';
 import type { ProofStory } from '@/lib/proof-library';
-
-const NAVY = '#1B2B4D';
-const GOLD = '#C9A844';
 
 export default function ProofLibraryPanel({
   stories,

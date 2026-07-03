@@ -1,10 +1,8 @@
 'use client';
 
+import { NAVY, GOLD } from '@/lib/design-system';
 import type { CaptureRecord } from '@/lib/capture-records';
 import TrustPanel from '../_components/TrustPanel';
-
-const NAVY = '#1B2B4D';
-const GOLD = '#C9A844';
 
 function parsePriorities(summary?: string): string[] {
   if (!summary) return [];

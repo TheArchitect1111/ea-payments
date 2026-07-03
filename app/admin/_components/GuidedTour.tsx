@@ -1,11 +1,10 @@
 'use client';
 
+import { NAVY, GOLD } from '@/lib/design-system';
 import { useCallback, useEffect, useState } from 'react';
 import type { GuidedTour } from '@/lib/guided-tours';
 import { MISSION_CONTROL_TOUR } from '@/lib/guided-tours';
 
-const NAVY = '#1B2B4D';
-const GOLD = '#C9A844';
 const STORAGE_KEY = 'ea:tour:mission-control-v1';
 
 type Props = {

@@ -1,14 +1,12 @@
 'use client';
 
+import { NAVY, GOLD } from '@/lib/design-system';
 import { useState } from 'react';
 import type { ProposalWithAssessment } from '@/lib/airtable';
 import { computeAdoptionHealth } from '@/lib/adoption-engine';
 import { matchProofStories } from '@/lib/proof-library';
 import AdoptionHealthPanel from '../_components/AdoptionHealthPanel';
 import ProofLibraryPanel from '../_components/ProofLibraryPanel';
-
-const NAVY = '#1B2B4D';
-const GOLD = '#C9A844';
 
 type ProposalStatus =
   | 'Pending Review'

@@ -1,12 +1,10 @@
 'use client';
 
+import { NAVY, GOLD } from '@/lib/design-system';
 import { Fragment, useState } from 'react';
 import type { CaptureRecord } from '@/lib/capture-records';
 import RecommendationPanel from '../_components/RecommendationPanel';
 import TrustPanel from '../_components/TrustPanel';
-
-const NAVY = '#1B2B4D';
-const GOLD = '#C9A844';
 
 interface AnalysisResult {
   record: CaptureRecord;

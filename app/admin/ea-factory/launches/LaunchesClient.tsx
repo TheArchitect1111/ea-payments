@@ -1,11 +1,9 @@
 'use client';
 
+import { NAVY, GOLD } from '@/lib/design-system';
 import Link from 'next/link';
 import { useState } from 'react';
 import type { EACPLaunchRecord } from '@/lib/eacp-launch';
-
-const NAVY = '#1B2B4D';
-const GOLD = '#C9A844';
 
 const DEFAULT_COMMAND = 'EACP Client: Bob Rumball Centre Goal: Training Transformation Deliverable: Website + Portal + Learning Hub Notes: Convert videos, SOPs, policies, and PowerPoints into modular learning.';
 

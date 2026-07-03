@@ -1,5 +1,6 @@
 'use client';
 
+import { NAVY, GOLD } from '@/lib/design-system';
 import { useCallback, useEffect, useState } from 'react';
 import type {
   OpportunityGraph,
@@ -7,9 +8,6 @@ import type {
   OpportunityGraphNode,
 } from '@ea/portal-chassis/opportunity-graph';
 import TrustPanel from '../_components/TrustPanel';
-
-const NAVY = '#1B2B4D';
-const GOLD = '#C9A844';
 
 const TYPE_COLOR: Record<string, string> = {
   organization: '#1D4ED8',

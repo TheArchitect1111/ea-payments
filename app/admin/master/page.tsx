@@ -1,3 +1,4 @@
+import { NAVY, GOLD } from '@/lib/design-system';
 import { cookies } from 'next/headers';
 import { verifyAdminSession, EA_ADMIN_COOKIE, parseAdminSession } from '@/lib/ea-admin-auth';
 import {
@@ -23,8 +24,6 @@ import AdminLogin from './AdminLogin';
 
 export const dynamic = 'force-dynamic';
 
-const NAVY = '#1B2B4D';
-const GOLD = '#C9A844';
 const CREAM = '#FAF8F3';
 
 function fmt(n: number): string {

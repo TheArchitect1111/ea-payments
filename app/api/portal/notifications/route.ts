@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requirePortalSessionFromRequest } from '@/lib/auth/resolve-portal-session';
+import { guardPortalApi, portalApiUnauthorized } from '@/lib/api/portal-route';
 import {
   listPortalNotifications,
   markPortalNotificationsRead,
@@ -9,8 +9,10 @@ import {
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
-  const session = await requirePortalSessionFromRequest(req);
-  if (!session?.email) {
+  const auth = await guardPortalApi(req);
+  if (!auth.ok) return portalApiUnauthorized(auth);
+  const session = auth.session;
+  if (!session.email) {
     return NextResponse.json({ error: 'Portal authentication required.' }, { status: 401 });
   }
 
@@ -28,8 +30,10 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const session = await requirePortalSessionFromRequest(req);
-  if (!session?.email) {
+  const auth = await guardPortalApi(req);
+  if (!auth.ok) return portalApiUnauthorized(auth);
+  const session = auth.session;
+  if (!session.email) {
     return NextResponse.json({ error: 'Portal authentication required.' }, { status: 401 });
   }
 

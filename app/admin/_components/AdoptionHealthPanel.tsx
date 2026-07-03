@@ -1,9 +1,7 @@
 'use client';
 
+import { NAVY, GOLD } from '@/lib/design-system';
 import type { AdoptionHealthResult } from '@/lib/adoption-engine';
-
-const NAVY = '#1B2B4D';
-const GOLD = '#C9A844';
 
 const LABEL_COLOR: Record<string, string> = {
   Healthy: '#065F46',

@@ -1,5 +1,6 @@
 'use client';
 
+import { NAVY, GOLD } from '@/lib/design-system';
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import {
@@ -9,8 +10,6 @@ import {
   type EAFactoryProjectBrief,
 } from '@/lib/ea-factory';
 
-const NAVY = '#1B2B4D';
-const GOLD = '#C9A844';
 const PROJECT_TYPES = ['Website', 'Landing Page', 'Portal', 'Membership Experience', 'Training Experience', 'Event Experience', 'Recruiting Experience', 'Creator Experience'];
 
 type FormState = {

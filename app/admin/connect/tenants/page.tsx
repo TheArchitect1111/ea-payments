@@ -1,3 +1,4 @@
+import { NAVY, GOLD } from '@/lib/design-system';
 import Link from 'next/link';
 import { cookies } from 'next/headers';
 import { redirectToAdminLogin } from '@/lib/admin-redirect';
@@ -9,7 +10,6 @@ import ConnectLaunchFinish from './ConnectLaunchFinish';
 export const dynamic = 'force-dynamic';
 
 const INK = '#111111';
-const GOLD = '#c9a844';
 const PAPER = '#fbfaf7';
 
 export default async function ConnectTenantsPage() {

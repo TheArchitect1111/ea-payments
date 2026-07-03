@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requirePortalSessionFromRequest } from '@/lib/auth/resolve-portal-session';
+import { guardPortalApi, portalApiUnauthorized } from '@/lib/api/portal-route';
 import { createContentRequest, getClientByPortalSlug } from '@/lib/airtable';
 import { sendContentRequestConfirmation, sendInternalNotification } from '@/lib/email';
 import { notifyPortal } from '@/lib/portal-notify';
@@ -10,10 +10,9 @@ export const dynamic = 'force-dynamic';
 const SOCIAL_POST_TYPE = 'Social Post';
 
 export async function POST(req: NextRequest) {
-  const session = await requirePortalSessionFromRequest(req, { realm: 'simplifi' });
-  if (!session) {
-    return NextResponse.json({ ok: false, error: 'Sign in to submit posts for approval.' }, { status: 401 });
-  }
+  const auth = await guardPortalApi(req, { realm: 'simplifi' });
+  if (!auth.ok) return portalApiUnauthorized(auth);
+  const session = auth.session;
 
   const client = await getClientByPortalSlug(session.slug);
   if (!client) {

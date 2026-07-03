@@ -1,11 +1,9 @@
+import { NAVY, GOLD } from '@/lib/design-system';
 import { cookies } from 'next/headers';
 import { verifyAdminSession, EA_ADMIN_COOKIE } from '@/lib/ea-admin-auth';
 import AdminLogin from '../master/AdminLogin';
 
 export const dynamic = 'force-dynamic';
-
-const NAVY = '#1B2B4D';
-const GOLD = '#C9A844';
 
 const sections = [
   {

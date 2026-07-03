@@ -1,8 +1,6 @@
 'use client';
 
-const NAVY = '#1B2B4D';
-const GOLD = '#C9A844';
-
+import { NAVY, GOLD } from '@/lib/design-system';
 export interface TrustPanelProps {
   confidence?: number;
   confidenceLabel?: 'High' | 'Medium' | 'Low';

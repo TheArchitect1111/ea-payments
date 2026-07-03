@@ -1,3 +1,4 @@
+import { NAVY, GOLD } from '@/lib/design-system';
 import Link from 'next/link';
 import { cookies } from 'next/headers';
 import type { ReactNode } from 'react';
@@ -13,9 +14,6 @@ import {
 import AdminLogin from '../master/AdminLogin';
 
 export const dynamic = 'force-dynamic';
-
-const NAVY = '#1B2B4D';
-const GOLD = '#C9A844';
 
 type PageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;

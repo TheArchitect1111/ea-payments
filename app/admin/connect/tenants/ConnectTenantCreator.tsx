@@ -1,5 +1,6 @@
 'use client';
 
+import { NAVY, GOLD } from '@/lib/design-system';
 import { useEffect, useState } from 'react';
 import type { ConnectOrgConfig } from '@/lib/connect-store';
 import ConnectAdminOps from './ConnectAdminOps';
@@ -26,8 +27,6 @@ type ConnectSystemStatus = {
     detail: string;
   }>;
 };
-
-const GOLD = '#c9a844';
 
 function splitLines(value: string): string[] {
   return value
