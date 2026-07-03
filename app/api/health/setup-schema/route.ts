@@ -25,7 +25,13 @@ export async function POST(req: NextRequest) {
   const schema = await checkAirtableLaunchSchema();
 
   return NextResponse.json({
-    ok: setup.ok && schema.capture.ok && schema.pulse.ok && schema.assessment.ok && schema.proposal.ok,
+    ok:
+      setup.ok &&
+      schema.capture.ok &&
+      schema.pulse.ok &&
+      schema.assessment.ok &&
+      schema.proposal.ok &&
+      schema.creativeStudio.ok,
     base: baseCheck,
     setup,
     schema,
@@ -41,7 +47,12 @@ export async function GET(req: NextRequest) {
   const schema = await checkAirtableLaunchSchema();
 
   return NextResponse.json({
-    ok: baseCheck.captureTableFound && schema.capture.ok && schema.assessment.ok && schema.proposal.ok,
+    ok:
+      baseCheck.captureTableFound &&
+      schema.capture.ok &&
+      schema.assessment.ok &&
+      schema.proposal.ok &&
+      schema.creativeStudio.ok,
     base: baseCheck,
     schema,
   });

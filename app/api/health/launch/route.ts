@@ -69,6 +69,7 @@ export async function GET() {
     pulse: { ok: false, exists: false, configured: false, missingFields: [] as string[] },
     assessment: { ok: false, exists: false, missingFields: [] as string[] },
     proposal: { ok: false, exists: false, missingFields: [] as string[] },
+    creativeStudio: { ok: false, exists: false, missingFields: [] as string[] },
     captureAnalysisMissing: [] as string[],
   };
 
