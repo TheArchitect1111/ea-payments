@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Simplifi",
+    "name": "Simplifi Orb",
     "slug": "simplifi-mobile",
     "version": "0.1.0",
     "orientation": "portrait",
@@ -22,7 +22,7 @@
       "adaptiveIcon": {
         "backgroundColor": "#1B2B4D"
       },
-      "package": "online.efficiencyarchitects.simplifi",
+      "package": "com.efficiencyarchitects.simplifiorb",
       "permissions": ["RECORD_AUDIO"]
     },
     "plugins": [

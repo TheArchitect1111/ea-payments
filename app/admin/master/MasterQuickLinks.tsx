@@ -3,6 +3,7 @@ import { NAVY, GOLD } from '@/lib/design-system';
 const LINKS = [
   { title: 'Pipeline Dashboard', href: '/admin/dashboard', eyebrow: 'Revenue' },
   { title: 'Proposals', href: '/admin/proposals', eyebrow: 'Sales' },
+  { title: 'Creative Studio', href: '/admin/creative-studio', eyebrow: 'Communications' },
   { title: 'Content Requests', href: '/admin/content-requests', eyebrow: 'Delivery' },
   { title: 'Launch Command', href: '/launch', eyebrow: 'Readiness' },
   { title: 'Client Portal Login', href: '/portal/login', eyebrow: 'Clients' },

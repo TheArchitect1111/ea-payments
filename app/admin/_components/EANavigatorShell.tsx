@@ -16,6 +16,7 @@ const NAVY = '#1B2B4D';
 const GOLD = '#C9A844';
 
 const NAVIGATOR_GOALS = [
+  { label: 'Launch a communication campaign', href: '/admin/creative-studio' },
   { label: 'Review revenue & pipeline', href: '/admin/master' },
   { label: 'Run client delivery board', href: '/admin/delivery' },
   { label: 'Manage proposals', href: '/admin/proposals' },

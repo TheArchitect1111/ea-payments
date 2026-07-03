@@ -8,6 +8,7 @@ export const EXECUTIVE_NAV = [
   { href: '/admin/ea-factory/new-experience', label: 'Build' },
   { href: '/admin/simplifi', label: 'Opportunities' },
   { href: '/admin/content-requests', label: 'Content' },
+  { href: '/admin/creative-studio', label: 'Creative Studio' },
   { href: '/admin/ea-factory/training-transformations', label: 'Training' },
   { href: '/admin/foundation-library', label: 'Resources' },
   { href: '/admin/master', label: 'Agents' },

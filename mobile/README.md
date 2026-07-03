@@ -79,6 +79,40 @@ npm run build:preview      # internal distribution
 
 Set `EXPO_PUBLIC_API_BASE_URL` to your preview or production host (default: canonical `https://ea-payments.vercel.app` via `app.config.ts`).
 
+## Google Play (Android)
+
+**Package name (required):** `com.efficiencyarchitects.simplifiorb` — set in `app.json` → `expo.android.package`.
+
+### Wrong signing key
+
+Play Console expects your **upload certificate** fingerprint:
+
+`SHA1: 28:9D:26:30:12:2A:18:29:29:4A:6A:F0:FF:50:61:1A:05:B1:53:35`
+
+If your AAB shows a different SHA1 (e.g. `F7:5F:38:06:…`), it was signed with the wrong keystore — often a fresh EAS-generated key or a debug build.
+
+**Fix:**
+
+1. Locate the **original** upload keystore (`.jks` / `.keystore`) used for the first Play upload of this app.
+2. Verify it matches Play’s expected cert:
+   ```bash
+   keytool -list -v -keystore your-upload-key.jks -alias your-alias
+   ```
+3. Register that keystore with EAS (from `mobile/`):
+   ```bash
+   eas credentials -p android
+   ```
+   Choose **production** → **Keystore** → **Upload existing keystore** (not “Generate new”).
+4. Rebuild and submit:
+   ```bash
+   npm run build:production:android
+   npm run submit:production:android
+   ```
+
+If the original keystore is lost, use [Play Console → Setup → App signing → Request upload key reset](https://support.google.com/googleplay/android-developer/answer/9842756) (Google approval required).
+
+Never commit keystore files or passwords to git.
+
 ## TestFlight
 
 1. Create an Expo project: `eas init` (once)
