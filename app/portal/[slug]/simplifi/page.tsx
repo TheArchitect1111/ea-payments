@@ -1,9 +1,10 @@
 import Link from 'next/link';
-import { getContentRequestsForClient } from '@/lib/airtable';
+import { cookies } from 'next/headers';
+import { redirect, notFound } from 'next/navigation';
+import { verifySession, EA_PORTAL_COOKIE } from '@/lib/ea-portal-auth';
+import { getClientByPortalSlug, getContentRequestsForClient } from '@/lib/airtable';
 import { getPortalCaptures } from '@/lib/capture-records';
-import { PortalShell } from '@/lib/chassis/PortalShell';
-import { NAVY, GOLD } from '@/lib/design-system';
-import { requirePortalModule } from '@/lib/modules/portal-modules';
+import { PortalShell, NAVY, GOLD } from '@/lib/chassis/PortalShell';
 import SimplifiPortalWorkspace from './SimplifiPortalWorkspace';
 import '../ea-portal.css';
 
@@ -16,8 +17,18 @@ export default async function SimplifiClientPage({
 }) {
   const { slug } = await params;
 
-  const { client, access } = await requirePortalModule(slug, 'simplifi');
-  const isSimplifi = access.enabledModuleIds.has('simplifi');
+  const cookieStore = await cookies();
+  const token = cookieStore.get(EA_PORTAL_COOKIE)?.value;
+  if (!token) redirect('/portal/login');
+
+  const session = await verifySession(token);
+  if (!session) redirect('/portal/login');
+  if (session.slug !== slug) redirect(`/portal/${session.slug}/simplifi`);
+
+  const client = await getClientByPortalSlug(slug);
+  if (!client) notFound();
+
+  const isSimplifi = client.packagePurchased === 'Simplifi';
   const requests = await getContentRequestsForClient(client.id);
   const activeRequests = requests.filter((r) =>
     ['Pending Review', 'In Progress', 'Awaiting Approval', 'Scheduled'].includes(r.status),
@@ -27,9 +38,8 @@ export default async function SimplifiClientPage({
   const firstName = client.clientName.split(' ')[0] ?? client.clientName;
 
   return (
-    <div className="ep-page">
-      <PortalShell slug={slug} active="simplifi" firstName={firstName} shellNavGroups={access.shellNavGroups}>
-      <main className="ep-main ep-main-shell">
+    <PortalShell slug={slug} active="simplifi" firstName={firstName}>
+      <main className="ep-main">
         <div className="ep-welcome">
           <p className="ep-welcome-label">Simplifi™</p>
           <h1 className="ep-welcome-heading">Your saved opportunities</h1>
@@ -108,7 +118,6 @@ export default async function SimplifiClientPage({
           </p>
         </div>
       </main>
-      </PortalShell>
-    </div>
+    </PortalShell>
   );
 }

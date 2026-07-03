@@ -27,7 +27,7 @@ export default async function DocumentsPage({ params }: { params: Promise<{ slug
   return (
     <PortalSubpage
       slug={slug}
-      active="home"
+      active="documents"
       kicker="Documents"
       title="Your EA document hub"
       lede="Onboarding materials, assessments, and shared deliverables — starting with the essentials below."

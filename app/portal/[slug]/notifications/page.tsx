@@ -31,7 +31,6 @@ export default async function PortalNotificationsPage({
     <PortalSubpage
       slug={slug}
       active="home"
-      activeModuleId="dashboard"
       kicker="Activity"
       title="Notification center"
       lede="Recent activity across Pulse, Simplifi, billing, and your advisor updates."

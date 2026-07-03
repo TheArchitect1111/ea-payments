@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { PortalShell } from '@/lib/chassis/PortalShell';
+import { AppShell } from '@/lib/chassis/AppShell';
 import { buildConnectKit } from '@/lib/connect-kit';
 import { getConnectOrg } from '@/lib/connect-store';
 import { requirePortalModule } from '@/lib/modules/portal-modules';
@@ -25,7 +25,7 @@ export default async function PortalConnectKitPage({
 
   return (
     <div className="ep-page">
-      <PortalShell slug={slug} active="home" activeModuleId="connect" firstName={firstName} shellNavGroups={access.shellNavGroups}>
+      <AppShell slug={slug} activeModuleId="connect" firstName={firstName} shellNavGroups={access.shellNavGroups}>
         <main className="ep-main ep-main-shell">
           <div className="ep-welcome">
             <p className="ep-welcome-label">EA Connect™</p>
@@ -56,7 +56,7 @@ export default async function PortalConnectKitPage({
             </Link>
           </p>
         </main>
-      </PortalShell>
+      </AppShell>
     </div>
   );
 }

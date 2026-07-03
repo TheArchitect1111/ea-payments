@@ -1,47 +1,113 @@
 import type { ReactNode } from 'react';
-import type { ModuleId } from '@/lib/modules/registry';
-import type { ShellNavGroup } from '@/lib/modules/portal-modules';
-import { AppShell } from './AppShell';
-import { NAVY, GOLD } from '@/lib/design-system';
 
-export type EAPortalTab = 'home' | 'pulse' | 'simplifi' | 'amplifi' | 'updates';
+import { PortalLayout } from './PortalLayout';
 
-const TAB_TO_MODULE: Record<EAPortalTab, ModuleId> = {
-  home: 'dashboard',
-  pulse: 'pulse',
-  simplifi: 'simplifi',
-  amplifi: 'amplifi',
-  updates: 'update-hub',
-};
+
+
+export type EAPortalTab =
+
+  | 'home'
+
+  | 'pulse'
+
+  | 'simplifi'
+
+  | 'amplifi'
+
+  | 'updates'
+
+  | 'documents'
+
+  | 'events'
+
+  | 'resources'
+
+  | 'messaging'
+
+  | 'learning'
+
+  | 'ask';
+
+
+
+const NAVY = '#1B2B4D';
+
+const GOLD = '#C9A844';
+
+
 
 type Props = {
+
   slug: string;
+
   active: EAPortalTab;
+
   firstName?: string;
-  shellNavGroups?: ShellNavGroup[];
-  activeModuleId?: ModuleId;
+
+  pageTitle?: string;
+
   children: ReactNode;
+
 };
 
-/** EA client portal — Pulse OS shell with entitlement-driven sidebar navigation. */
-export function PortalShell({
-  slug,
-  active,
-  firstName,
-  shellNavGroups,
-  activeModuleId,
-  children,
-}: Props) {
+
+
+/** EA client portal — TailAdmin-style sidebar shell (portal routes only). */
+
+export function PortalShell({ slug, active, firstName, pageTitle, children }: Props) {
+
+  const titles: Record<EAPortalTab, string> = {
+
+    home: 'Dashboard',
+
+    pulse: 'Pulse™',
+
+    simplifi: 'Simplifi™',
+
+    amplifi: 'Amplifi™',
+
+    updates: 'Update Hub™',
+
+    documents: 'Documents',
+
+    events: 'Events',
+
+    resources: 'Resources',
+
+    messaging: 'Messages',
+
+    learning: 'Learning',
+
+    ask: 'Ask EA',
+
+  };
+
+
+
   return (
-    <AppShell
+
+    <PortalLayout
+
       slug={slug}
+
+      active={active}
+
       firstName={firstName}
-      shellNavGroups={shellNavGroups}
-      activeModuleId={activeModuleId ?? TAB_TO_MODULE[active]}
+
+      pageTitle={pageTitle ?? titles[active] ?? 'Dashboard'}
+
     >
+
       {children}
-    </AppShell>
+
+    </PortalLayout>
+
   );
+
 }
 
+
+
 export { NAVY, GOLD };
+
+

@@ -2,6 +2,7 @@ import type { EAGuideAction, EAGuideContextId } from '@/lib/ea-guide';
 import type { OrbAction, OrbActionKind, OrbProduct, OrbVisualState } from './types';
 
 const PRODUCT_MAP: Record<EAGuideContextId, OrbProduct> = {
+  discover: 'portal',
   simplifi: 'simplifi',
   magnifi: 'magnifi',
   pulse: 'pulse',

@@ -1,7 +1,19 @@
 {
+  "version": 2,
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/next"
+    }
+  ],
   "redirects": [
     {
       "source": "/ctp",
+      "destination": "/ctp-intake",
+      "permanent": false
+    },
+    {
+      "source": "/discover",
       "destination": "/ctp-intake",
       "permanent": false
     },
@@ -103,6 +115,10 @@
     }
   ],
   "crons": [
+    {
+      "path": "/api/cron/platform-guardian",
+      "schedule": "0 6 * * *"
+    },
     {
       "path": "/api/cron/connect-sequence",
       "schedule": "0 14 * * *"

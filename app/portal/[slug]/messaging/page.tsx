@@ -21,7 +21,7 @@ export default async function MessagingPage({ params }: { params: Promise<{ slug
   return (
     <PortalSubpage
       slug={slug}
-      active="home"
+      active="messaging"
       kicker="Communication"
       title="Messaging center"
       lede="Direct communication with your EA advisor. Post an update or enhancement request and our team will respond through your activity feed."

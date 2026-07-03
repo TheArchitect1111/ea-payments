@@ -29,7 +29,7 @@ export default async function ResourcesPage({ params }: { params: Promise<{ slug
   return (
     <PortalSubpage
       slug={slug}
-      active="home"
+      active="resources"
       kicker="Resource library"
       title="Tools & playbooks"
       lede="Curated links to Magnifi, Amplifi, assessments, and templates — your operating toolkit."

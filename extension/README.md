@@ -9,7 +9,8 @@ Personal Opportunity Intelligence across the internet.
 - Sends captures to existing Simplifi capture APIs.
 - Creates local watch list items and follow-up reminders.
 - Shows browser notifications when capture analysis is ready.
-- Provides a popup command center with Capture, Watch, Analyze, Follow Up, Daily Brief, and Dashboard.
+- Provides a popup command center with Capture, Watch, Analyze, Follow Up, Smart Brief, and Workspace.
+- Provides a browser side panel for the server-backed Smart Brief.
 
 ## Install For Testing
 
@@ -26,26 +27,36 @@ The extension stores its API URL, capture key, portal slug, and notify email in 
 Implemented:
 
 - Manifest V3
-- Floating Simplifi Orb
+- Floating Simplifi orb with no logo, letter, badge, or state text
+- Browser side panel
+- Shared extension API client
 - Capture current page
 - Capture selected text from right-click menu
 - Visible screenshot capture
 - Watch List storage
 - Follow-up reminders via browser alarms
-- Daily Brief generation from local extension activity
+- Server-backed Smart Brief from existing Simplifi workspace data
 - Browser notifications
 - Popup dashboard
 - Existing Simplifi API sync
+- `/api/extension/brief` integration
+
+Phase 1 architecture review:
+
+- See `docs/SIMPLIFI-COMPANION-EXTENSION-PHASE-1.md`.
+- Current extension is a prototype foundation that already reuses the capture pipeline.
+- API-key bootstrap and local watch lists are transitional, not the final first-class architecture.
 
 Not yet implemented:
 
+- Scoped extension session token tied to existing Simplifi login
+- Server-backed Watch Lists
 - Remote continuous web monitoring
 - Region/full-page screenshot stitching
 - Voice transcription
-- Backend watch list database
 - AI autonomous opportunity detection
 
-Those belong to Phase 2/3 once watch lists, reminders, and notifications have server-side tables.
+Those belong to the next passes once watch lists, reminders, and notifications have server-side tables.
 
 ## Package
 

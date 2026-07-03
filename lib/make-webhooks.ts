@@ -14,6 +14,14 @@ export interface OnboardingWebhookPayload {
   airtableRecordId?: string;
   portalSlug?: string;
   portalLoginUrl?: string;
+  packageId?: string;
+  packageDisplayName?: string;
+  fulfillmentType?: string;
+  fulfillmentLabel?: string;
+  reviewRequired?: boolean;
+  intakePath?: string;
+  adminHref?: string;
+  firstMilestone?: string;
 }
 
 /** Canonical fields for Make.com EA Onboarding Webhook scenario */
@@ -30,6 +38,14 @@ export function buildOnboardingWebhookBody(
     packageName: payload.packageName,
     portalSlug: payload.portalSlug,
     organization: payload.organization,
+    packageId: payload.packageId,
+    packageDisplayName: payload.packageDisplayName,
+    fulfillmentType: payload.fulfillmentType,
+    fulfillmentLabel: payload.fulfillmentLabel,
+    reviewRequired: payload.reviewRequired ?? false,
+    intakePath: payload.intakePath,
+    adminHref: payload.adminHref,
+    firstMilestone: payload.firstMilestone,
     amountPaid: payload.amountPaid,
     paymentDate: payload.paymentDate,
     stripeTransactionId: payload.stripeTransactionId,

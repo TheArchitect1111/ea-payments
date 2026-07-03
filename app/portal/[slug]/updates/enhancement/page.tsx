@@ -2,7 +2,6 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { EA_PORTAL_COOKIE, verifySession } from '@/lib/ea-portal-auth';
 import { PortalShell } from '@/lib/chassis/PortalShell';
-import { getPortalModuleAccessForSlug } from '@/lib/modules/portal-modules';
 import EnhancementRequestForm from './EnhancementRequestForm';
 import '../../ea-portal.css';
 
@@ -16,25 +15,21 @@ export default async function EnhancementRequestPage({ params }: { params: Promi
   if (!session) redirect('/portal/login');
   if (session.slug !== slug) redirect(`/portal/${session.slug}/updates/enhancement`);
 
-  const access = await getPortalModuleAccessForSlug(slug);
-
   return (
-    <div className="ep-page">
-      <PortalShell slug={slug} active="updates" shellNavGroups={access?.shellNavGroups}>
-        <main className="ep-main ep-main-shell">
-          <div className="ep-welcome">
-            <p className="ep-welcome-label">Update Hub™</p>
-            <h1 className="ep-welcome-heading">Request Enhancement</h1>
-            <p className="ep-pulse-summary">
-              Tell us what you want to add or improve. We will review the request and send an estimate
-              within 24 hours.
-            </p>
-          </div>
-          <div className="ep-card">
-            <EnhancementRequestForm slug={slug} />
-          </div>
-        </main>
-      </PortalShell>
-    </div>
+    <PortalShell slug={slug} active="updates">
+      <main className="ep-main">
+        <div className="ep-welcome">
+          <p className="ep-welcome-label">Update Hub™</p>
+          <h1 className="ep-welcome-heading">Request Enhancement</h1>
+          <p className="ep-pulse-summary">
+            Tell us what you want to add or improve. We will review the request and send an estimate
+            within 24 hours.
+          </p>
+        </div>
+        <div className="ep-card">
+          <EnhancementRequestForm slug={slug} />
+        </div>
+      </main>
+    </PortalShell>
   );
 }

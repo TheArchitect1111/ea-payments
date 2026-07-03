@@ -1,6 +1,5 @@
-import HomeEmotionLanding from '@/app/components/landing/HomeEmotionLanding';
-import './preview/home/home-emotion.css';
+import { redirect } from 'next/navigation';
 
 export default function HomePage() {
-  return <HomeEmotionLanding />;
+  redirect('/ctp-intake');
 }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { getStripe } from '@/lib/stripe';
 import { getCatalogItem } from '@/lib/catalog';
+import { buildPackageFulfillmentPlan, fulfillmentMetadata } from '@/lib/package-fulfillment';
 
 export const dynamic = 'force-dynamic';
 
@@ -58,6 +59,7 @@ export async function POST(req: NextRequest) {
 
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? 'http://localhost:3000';
     const stripe = getStripe();
+    const fulfillment = buildPackageFulfillmentPlan(item);
 
     const sessionParams: Stripe.Checkout.SessionCreateParams = {
       mode: 'payment',
@@ -84,6 +86,7 @@ export async function POST(req: NextRequest) {
         phone: phone?.trim() ?? '',
         packageId: item.id,
         packageName: item.airtablePackageName,
+        ...fulfillmentMetadata(fulfillment),
         referralSource: referralSource?.trim() ?? '',
       },
       success_url: `${baseUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,

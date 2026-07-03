@@ -16,7 +16,6 @@ export default async function PortalBillingPage({
     <PortalSubpage
       slug={slug}
       active="home"
-      activeModuleId="billing"
       kicker="Billing"
       title="Subscription & invoices"
       lede="Manage your plan, payment method, and invoice history through Stripe's secure billing portal."

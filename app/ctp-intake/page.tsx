@@ -1,3 +1,3 @@
-import AssessmentPage from '../assessment/page';
+import DiscoverPage from '../discover/page';
 
-export default AssessmentPage;
+export default DiscoverPage;

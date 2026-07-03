@@ -1,6 +1,6 @@
 /**
  * Pulse™ ingestion bus — normalized activity events from all EA products.
- * Persists to Airtable when PULSE_EVENTS_TABLE is configured; always returns ok for emitters.
+ * Persists to Airtable when PULSE_EVENTS_TABLE is configured; dual-writes ActivityEvents.
  */
 
 import { fromPulseEventRow, toActivityEventInput } from '@ea/portal-chassis/platform-events';
@@ -29,6 +29,7 @@ export type PulseEventType =
   | 'portal.login'
   | 'proposal.pending'
   | 'onboarding.blocked'
+  | 'fulfillment.review_required'
   | 'launch.verification.completed'
   | 'payment.received'
   | 'subscription.started'
@@ -56,6 +57,13 @@ export interface PulseEvent {
 
 const MEMORY_CAP = 200;
 const memoryEvents: (PulseEvent & { at: string })[] = [];
+
+const PRIORITY_SCORE: Record<string, number> = {
+  critical: 95,
+  high: 75,
+  medium: 50,
+  low: 30,
+};
 
 export function listRecentPulseEvents(limit = 50): (PulseEvent & { at: string })[] {
   return memoryEvents.slice(0, limit);
@@ -112,12 +120,20 @@ export async function emitPulseEvent(event: PulseEvent): Promise<{ ok: boolean }
   return { ok: true };
 }
 
-const PRIORITY_SCORE: Record<string, number> = {
-  critical: 95,
-  high: 75,
-  medium: 50,
-  low: 30,
-};
+function mapProductToModule(product: PulseProduct): string {
+  const modules: Record<PulseProduct, string> = {
+    'ea-platform': 'pulse',
+    simplifi: 'simplifi',
+    magnifi: 'connect',
+    amplifi: 'update-hub',
+    pulse: 'pulse',
+    'update-hub': 'update-hub',
+    cpr: 'portal',
+    brotherhub: 'portal',
+    sisterhub: 'portal',
+  };
+  return modules[product] ?? 'pulse';
+}
 
 /** Dual-write Pulse events into ActivityEvents for Mission Control convergence. */
 async function mirrorPulseToActivityEvents(event: PulseEvent, at: string): Promise<void> {
@@ -130,7 +146,7 @@ async function mirrorPulseToActivityEvents(event: PulseEvent, at: string): Promi
         title: event.title,
         summary: event.detail ?? '',
         priority: PRIORITY_SCORE[event.priority ?? 'medium'] ?? 50,
-        module: event.product,
+        module: mapProductToModule(event.product),
         actionLabel: 'Open',
         actionUrl: event.href,
         personId: event.tenantId,

@@ -3,7 +3,7 @@
   "name": "Simplifi Extension",
   "version": "4.0.0",
   "description": "Personal Opportunity Intelligence across the internet: capture, watch, analyze, follow up, and receive Simplifi alerts.",
-  "permissions": ["activeTab", "alarms", "contextMenus", "storage", "tabs", "notifications"],
+  "permissions": ["activeTab", "alarms", "contextMenus", "storage", "tabs", "notifications", "sidePanel"],
   "host_permissions": ["https://*/*", "http://*/*"],
   "action": {
     "default_popup": "popup.html",
@@ -11,6 +11,9 @@
     "default_icon": {
       "128": "icon128.png"
     }
+  },
+  "side_panel": {
+    "default_path": "sidepanel.html"
   },
   "icons": {
     "128": "icon128.png"

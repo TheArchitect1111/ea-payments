@@ -1,9 +1,13 @@
 import type { NextConfig } from 'next';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import vercelJson from './vercel.json';
 
+const projectRoot = path.dirname(fileURLToPath(import.meta.url));
+
 const nextConfig: NextConfig = {
+  outputFileTracingRoot: projectRoot,
   transpilePackages: ['@ea/portal-chassis'],
   turbopack: {
     // Avoid picking C:\Users\brick\package-lock.json when multiple lockfiles exist.

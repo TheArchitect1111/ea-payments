@@ -1,5 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import AdminLogin from '../../../master/AdminLogin';
+import { hasAdminPageAccess } from '@/lib/admin-page-auth';
 import { getEACPLaunch, statusLabel } from '@/lib/eacp-launch';
 import { CopyCodexPrompt, RepoReviewForm } from './LaunchDetailActions';
 
@@ -13,6 +15,7 @@ type PageProps = {
 };
 
 export default async function EACPLaunchDetailPage({ params }: PageProps) {
+  if (!(await hasAdminPageAccess())) return <AdminLogin />;
   const { id } = await params;
   const launch = await getEACPLaunch(id);
 

@@ -1,5 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import AdminLogin from '../../../master/AdminLogin';
+import { hasAdminPageAccess } from '@/lib/admin-page-auth';
 import { getRepoIntelligenceById } from '@/lib/ea-factory';
 
 export const dynamic = 'force-dynamic';
@@ -12,6 +14,7 @@ type PageProps = {
 };
 
 export default async function RepoDetailPage({ params }: PageProps) {
+  if (!(await hasAdminPageAccess())) return <AdminLogin />;
   const { id } = await params;
   const repo = getRepoIntelligenceById(id);
 

@@ -1,10 +1,15 @@
-export const SIMPLIFI_ONBOARDING_KEY = 'ea-simplifi-onboarding-v2';
+export const SIMPLIFI_ONBOARDING_KEY = 'ea-simplifi-onboarding-v3';
 export const SIMPLIFI_WATCH_CATEGORIES_KEY = 'ea-simplifi-watch-categories';
 export const SIMPLIFI_WATCH_ACTIVE_KEY = 'ea-simplifi-watch-active';
 export const SIMPLIFI_CAPTURE_COUNT_KEY = 'ea-simplifi-capture-count';
 export const SIMPLIFI_GUIDE_INTRO_KEY = 'ea-simplifi-guide-intro';
 
 export type SimplifiOnboardingStep =
+  | 'flight-welcome'
+  | 'flight-orb'
+  | 'flight-brief'
+  | 'flight-ai'
+  | 'flight-begin'
   | 'welcome'
   | 'interests'
   | 'watchlist'
@@ -60,7 +65,8 @@ export function getOnboardingStep(scope: string): SimplifiOnboardingStep | null 
   if (typeof window === 'undefined') return null;
   if (isOnboardingComplete(scope)) return null;
   const raw = localStorage.getItem(scopedKey(SIMPLIFI_ONBOARDING_KEY, scope));
-  if (!raw || raw === 'complete') return 'welcome';
+  if (!raw || raw === 'complete') return 'flight-welcome';
+  if (raw === 'welcome' || raw === 'interests' || raw === 'watchlist' || raw === 'explain') return 'flight-welcome';
   return raw as SimplifiOnboardingStep;
 }
 
@@ -143,12 +149,11 @@ export function shouldShowGuideRecommendations(scope: string): boolean {
 
 export function onboardingStepNumber(step: SimplifiOnboardingStep): number {
   const order: SimplifiOnboardingStep[] = [
-    'welcome',
-    'interests',
-    'watchlist',
-    'first-capture',
-    'capture-success',
-    'explain',
+    'flight-welcome',
+    'flight-orb',
+    'flight-brief',
+    'flight-ai',
+    'flight-begin',
     'complete',
   ];
   return order.indexOf(step) + 1;
