@@ -2,6 +2,7 @@ import { getAirtableApiKey } from '@/lib/integration-env';
 import {
   ASSESSMENT_REQUIRED_FIELDS,
   CAPTURE_REQUIRED_FIELDS,
+  CREATIVE_STUDIO_REQUIRED_FIELDS,
   PROPOSAL_REQUIRED_FIELDS,
   PULSE_REQUIRED_FIELDS,
 } from '@/lib/airtable-schema-check';
@@ -15,6 +16,7 @@ const PROPOSALS_TABLE_ID =
   process.env.AIRTABLE_PROPOSALS_TABLE_ID ?? 'tbl3P26zyteiPNLQY';
 const ASSESSMENTS_TABLE_NAME = process.env.AIRTABLE_ASSESSMENTS_TABLE ?? 'Assessments';
 const PROPOSALS_TABLE_NAME = process.env.AIRTABLE_PROPOSALS_TABLE ?? 'Proposals';
+const CREATIVE_STUDIO_TABLE = process.env.AIRTABLE_CREATIVE_STUDIO_TABLE ?? 'Creative Studio';
 
 type AirtableFieldDef = {
   name: string;
@@ -209,6 +211,21 @@ const ASSESSMENT_FIELD_DEFS: AirtableFieldDef[] = [
   },
 ];
 
+const CREATIVE_STUDIO_FIELD_DEFS: AirtableFieldDef[] = [
+  { name: 'Record Key', type: 'singleLineText' },
+  {
+    name: 'Record Type',
+    type: 'singleSelect',
+    options: {
+      choices: [{ name: 'Campaign' }, { name: 'Brand' }, { name: 'Media' }],
+    },
+  },
+  { name: 'Organization ID', type: 'singleLineText' },
+  { name: 'Title', type: 'singleLineText' },
+  { name: 'Payload JSON', type: 'multilineText' },
+  { name: 'Updated At', type: 'dateTime', options: { dateFormat: { name: 'iso' }, timeFormat: { name: '24hour' }, timeZone: 'utc' } },
+];
+
 type TableMeta = { id: string; name: string; fields?: { name: string }[] };
 
 function authHeaders(key: string): Record<string, string> {
@@ -292,6 +309,7 @@ export type AirtableLaunchSetupResult = {
   pulse: { tableName: string; tableId: string; created: string[]; skipped: string[] };
   assessment: { tableName: string; tableId: string; created: string[]; skipped: string[] };
   proposal: { tableName: string; tableId: string; created: string[]; skipped: string[] };
+  creativeStudio: { tableName: string; tableId: string; created: string[]; skipped: string[] };
   errors: string[];
 };
 
@@ -308,6 +326,7 @@ export async function ensureAirtableLaunchTables(): Promise<AirtableLaunchSetupR
       pulse: { tableName: PULSE_TABLE, tableId: '', created: [], skipped: [] },
       assessment: { tableName: ASSESSMENTS_TABLE_NAME, tableId: '', created: [], skipped: [] },
       proposal: { tableName: PROPOSALS_TABLE_NAME, tableId: '', created: [], skipped: [] },
+      creativeStudio: { tableName: CREATIVE_STUDIO_TABLE, tableId: '', created: [], skipped: [] },
       errors: ['AIRTABLE_API_KEY missing on server'],
     };
   }
@@ -351,6 +370,15 @@ export async function ensureAirtableLaunchTables(): Promise<AirtableLaunchSetupR
       ASSESSMENTS_TABLE_ID,
     );
 
+    const creativeStudioTables = await listTables(key);
+    const creativeStudioResult = await ensureTable(
+      key,
+      creativeStudioTables,
+      CREATIVE_STUDIO_TABLE,
+      'Creative Studio campaigns, brand profiles, and media library',
+      CREATIVE_STUDIO_FIELD_DEFS,
+    );
+
     const captureNames = new Set([
       ...(captureResult.table.fields ?? []).map((f) => f.name),
       ...captureResult.created,
@@ -367,6 +395,10 @@ export async function ensureAirtableLaunchTables(): Promise<AirtableLaunchSetupR
       ...(assessmentResult.table.fields ?? []).map((f) => f.name),
       ...assessmentResult.created,
     ]);
+    const creativeStudioNames = new Set([
+      ...(creativeStudioResult.table.fields ?? []).map((f) => f.name),
+      ...creativeStudioResult.created,
+    ]);
 
     for (const field of CAPTURE_REQUIRED_FIELDS) {
       if (!captureNames.has(field)) errors.push(`Capture missing required field: ${field}`);
@@ -379,6 +411,9 @@ export async function ensureAirtableLaunchTables(): Promise<AirtableLaunchSetupR
     }
     for (const field of ASSESSMENT_REQUIRED_FIELDS) {
       if (!assessmentNames.has(field)) errors.push(`Assessment missing required field: ${field}`);
+    }
+    for (const field of CREATIVE_STUDIO_REQUIRED_FIELDS) {
+      if (!creativeStudioNames.has(field)) errors.push(`Creative Studio missing required field: ${field}`);
     }
 
     return {
@@ -409,6 +444,12 @@ export async function ensureAirtableLaunchTables(): Promise<AirtableLaunchSetupR
         created: proposalResult.created,
         skipped: proposalResult.skipped,
       },
+      creativeStudio: {
+        tableName: creativeStudioResult.table.name,
+        tableId: creativeStudioResult.table.id,
+        created: creativeStudioResult.created,
+        skipped: creativeStudioResult.skipped,
+      },
       errors,
     };
   } catch (err) {
@@ -421,6 +462,7 @@ export async function ensureAirtableLaunchTables(): Promise<AirtableLaunchSetupR
       pulse: { tableName: PULSE_TABLE, tableId: '', created: [], skipped: [] },
       assessment: { tableName: ASSESSMENTS_TABLE_NAME, tableId: '', created: [], skipped: [] },
       proposal: { tableName: PROPOSALS_TABLE_NAME, tableId: '', created: [], skipped: [] },
+      creativeStudio: { tableName: CREATIVE_STUDIO_TABLE, tableId: '', created: [], skipped: [] },
       errors: [message],
     };
   }
