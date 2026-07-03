@@ -1,3 +1,4 @@
+import EAGuideOrb from '@/app/components/ea-guide/EAGuideOrb';
 import EANavigatorShell from './_components/EANavigatorShell';
 import GuidedTour from './_components/GuidedTour';
 import { hasAdminPageAccess } from '@/lib/admin-page-auth';
@@ -15,6 +16,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     <EANavigatorShell>
       <GuidedTour autoStart />
       {children}
+      <EAGuideOrb />
     </EANavigatorShell>
   );
 }
