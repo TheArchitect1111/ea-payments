@@ -1,17 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { EA_ADMIN_COOKIE, verifyAdminSession } from '@/lib/ea-admin-auth';
+import { adminApiUnauthorized, guardAdminApi } from '@/lib/api/admin-route';
 import { getCampaign } from '@/lib/creative-studio/campaign-store';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const token = _req.cookies.get(EA_ADMIN_COOKIE)?.value;
-  if (!verifyAdminSession(token)) {
-    return NextResponse.json({ ok: false, error: 'Admin sign-in required.' }, { status: 401 });
-  }
+  const auth = await guardAdminApi(req);
+  if (!auth.ok) return adminApiUnauthorized(auth);
 
   const { id } = await params;
   const campaign = await getCampaign(id);

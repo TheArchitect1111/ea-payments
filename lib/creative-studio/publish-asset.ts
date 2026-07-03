@@ -1,5 +1,4 @@
-import { publishToAmplifi } from '@/lib/amplifi-publish';
-import { createContentRequest, getClientByPortalSlug } from '@/lib/airtable';
+import { publishCommunication } from '@/lib/publishing';
 import { publishPlatformActivityEvent } from '@/lib/activity-events-store';
 import { getCampaign, saveCampaign } from './campaign-store';
 import type { CampaignAsset, CreativeCampaign, PublishResult } from './types';
@@ -14,6 +13,17 @@ function assetChannel(asset: CampaignAsset): string {
   if (asset.type === 'email' || asset.type === 'sms') return 'content-request';
   if (asset.type === 'landing-page' || asset.type === 'homepage-banner') return 'website';
   return 'print';
+}
+
+function resolvePublishChannel(asset: CampaignAsset): Parameters<typeof publishCommunication>[0]['channel'] {
+  if (asset.publishDestination === 'amplifi' || asset.type.startsWith('social')) return 'amplifi';
+  if (asset.publishDestination === 'portal' || asset.type === 'portal-announcement') return 'portal';
+  if (asset.publishDestination === 'content-request' || asset.type === 'email' || asset.type === 'sms') {
+    return 'content-request';
+  }
+  if (asset.publishDestination === 'website') return 'website';
+  if (asset.publishDestination === 'print') return 'print';
+  return 'manual';
 }
 
 export async function publishCampaignAsset(input: {
@@ -33,91 +43,31 @@ export async function publishCampaignAsset(input: {
 
   const slug = portalSlug(campaign.organizationId);
   const actor = input.actorName ?? 'Creative Studio';
-  let result: PublishResult;
+  const channel = resolvePublishChannel(asset);
+  const requestType =
+    asset.type === 'sms' ? 'SMS' : asset.type === 'email' ? 'Email Campaign' : asset.label;
 
-  if (asset.publishDestination === 'amplifi' || asset.type.startsWith('social')) {
-    const amplifi = await publishToAmplifi({
-      slug,
-      title: asset.previewTitle,
-      message: asset.previewBody,
-      storyUrl: asset.href,
-      actorName: actor,
-    });
-    result = {
-      ok: amplifi.ok,
-      mode: amplifi.mode,
-      detail: amplifi.detail,
-      href: amplifi.shareUrls?.amplifi,
-    };
-  } else if (asset.publishDestination === 'portal' || asset.type === 'portal-announcement') {
-    const client = await getClientByPortalSlug(slug);
-    if (!client) {
-      result = {
-        ok: true,
-        mode: 'manual',
-        detail: `Portal announcement ready — add to ${slug} updates manually.`,
-        href: `/portal/${slug}/updates`,
-      };
-    } else {
-      const created = await createContentRequest({
-        clientRecordId: client.id,
-        organizationName: client.organization ?? client.clientName,
-        requestType: 'Portal Announcement',
-        pageLocation: 'Portal Home',
-        title: asset.previewTitle,
-        description: campaign.brief.summary,
-        content: asset.previewBody,
-        additionalNotes: JSON.stringify({ source: 'creative-studio', campaignId: campaign.id, assetId: asset.id }),
-        submittedBy: actor,
-        status: 'Approved',
-      });
-      result = created.ok
-        ? {
-            ok: true,
-            mode: 'airtable',
-            detail: 'Portal announcement queued in content requests.',
-            href: '/admin/content-requests',
-          }
-        : { ok: false, mode: 'airtable', detail: created.error ?? 'Failed to queue portal announcement.' };
-    }
-  } else if (asset.publishDestination === 'content-request' || asset.type === 'email' || asset.type === 'sms') {
-    const client = await getClientByPortalSlug(slug);
-    const requestType = asset.type === 'sms' ? 'SMS' : asset.type === 'email' ? 'Email Campaign' : asset.label;
-    if (!client) {
-      result = {
-        ok: true,
-        mode: 'manual',
-        detail: `${requestType} draft ready — configure Airtable client for ${slug} to auto-queue.`,
-      };
-    } else {
-      const created = await createContentRequest({
-        clientRecordId: client.id,
-        organizationName: client.organization ?? client.clientName,
-        requestType,
-        title: asset.previewTitle,
-        description: campaign.brief.summary,
-        content: asset.previewBody,
-        additionalNotes: JSON.stringify({ source: 'creative-studio', campaignId: campaign.id, assetId: asset.id }),
-        submittedBy: actor,
-        status: 'Pending Review',
-      });
-      result = created.ok
-        ? {
-            ok: true,
-            mode: 'airtable',
-            detail: `${requestType} submitted to content requests.`,
-            href: '/admin/content-requests',
-          }
-        : { ok: false, mode: 'airtable', detail: created.error ?? 'Failed to create content request.' };
-    }
-  } else {
-    result = {
-      ok: true,
-      mode: 'manual',
-      detail: `${asset.label} marked ready for ${assetChannel(asset)} delivery.`,
-      href: asset.href,
-    };
-  }
+  const outcome = await publishCommunication({
+    channel,
+    portalSlug: slug,
+    title: asset.previewTitle,
+    body: asset.previewBody,
+    summary: campaign.brief.summary,
+    requestType,
+    storyUrl: asset.href,
+    actorName: actor,
+    source: { product: 'creative-studio', campaignId: campaign.id, assetId: asset.id },
+  });
+
+  const result: PublishResult = {
+    ok: outcome.ok,
+    mode: outcome.mode,
+    detail:
+      channel === 'manual'
+        ? `${asset.label} marked ready for ${assetChannel(asset)} delivery.`
+        : outcome.detail,
+    href: outcome.href ?? asset.href,
+  };
 
   const assets = campaign.assets.map((a) =>
     a.id === asset.id ? { ...a, status: result.ok ? ('published' as const) : a.status } : a,
