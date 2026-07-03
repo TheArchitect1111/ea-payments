@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { EA_ADMIN_COOKIE, verifyAdminSession } from '@/lib/ea-admin-auth';
+import { adminApiUnauthorized, guardAdminApi } from '@/lib/api/admin-route';
 import { publishCampaignAsset } from '@/lib/creative-studio/publish-asset';
 
 export const dynamic = 'force-dynamic';
@@ -8,10 +8,8 @@ export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const token = req.cookies.get(EA_ADMIN_COOKIE)?.value;
-  if (!verifyAdminSession(token)) {
-    return NextResponse.json({ ok: false, error: 'Admin sign-in required.' }, { status: 401 });
-  }
+  const auth = await guardAdminApi(req);
+  if (!auth.ok) return adminApiUnauthorized(auth);
 
   const { id } = await params;
   let body: { assetId?: string; actorName?: string };
@@ -28,7 +26,7 @@ export async function POST(
   const { campaign, result } = await publishCampaignAsset({
     campaignId: id,
     assetId: body.assetId,
-    actorName: body.actorName,
+    actorName: body.actorName ?? auth.user.name,
   });
 
   if (!campaign) {

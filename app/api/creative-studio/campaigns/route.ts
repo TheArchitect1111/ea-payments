@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { EA_ADMIN_COOKIE, verifyAdminSession } from '@/lib/ea-admin-auth';
+import { adminApiUnauthorized, guardAdminApi } from '@/lib/api/admin-route';
 import { createCampaign, listCampaigns } from '@/lib/creative-studio/campaign-store';
 import type { CampaignGoalId } from '@/lib/creative-studio/types';
 
@@ -18,21 +18,17 @@ const GOAL_IDS = new Set<CampaignGoalId>([
   'custom',
 ]);
 
-function unauthorized() {
-  return NextResponse.json({ ok: false, error: 'Admin sign-in required.' }, { status: 401 });
-}
-
 export async function GET(req: NextRequest) {
-  const token = req.cookies.get(EA_ADMIN_COOKIE)?.value;
-  if (!verifyAdminSession(token)) return unauthorized();
+  const auth = await guardAdminApi(req);
+  if (!auth.ok) return adminApiUnauthorized(auth);
 
   const campaigns = await listCampaigns();
   return NextResponse.json({ ok: true, campaigns });
 }
 
 export async function POST(req: NextRequest) {
-  const token = req.cookies.get(EA_ADMIN_COOKIE)?.value;
-  if (!verifyAdminSession(token)) return unauthorized();
+  const auth = await guardAdminApi(req);
+  if (!auth.ok) return adminApiUnauthorized(auth);
 
   let body: { goalId?: string; story?: string };
   try {

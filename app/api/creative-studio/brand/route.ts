@@ -1,17 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { EA_ADMIN_COOKIE, verifyAdminSession } from '@/lib/ea-admin-auth';
+import { adminApiUnauthorized, guardAdminApi } from '@/lib/api/admin-route';
 import { getBrandProfile, saveBrandProfile } from '@/lib/creative-studio/brand-store';
 import type { BrandProfile } from '@/lib/creative-studio/types';
 
 export const dynamic = 'force-dynamic';
 
-function unauthorized() {
-  return NextResponse.json({ ok: false, error: 'Admin sign-in required.' }, { status: 401 });
-}
-
 export async function GET(req: NextRequest) {
-  const token = req.cookies.get(EA_ADMIN_COOKIE)?.value;
-  if (!verifyAdminSession(token)) return unauthorized();
+  const auth = await guardAdminApi(req);
+  if (!auth.ok) return adminApiUnauthorized(auth);
 
   const orgId = req.nextUrl.searchParams.get('organizationId') ?? undefined;
   const brand = await getBrandProfile(orgId);
@@ -19,8 +15,8 @@ export async function GET(req: NextRequest) {
 }
 
 export async function PUT(req: NextRequest) {
-  const token = req.cookies.get(EA_ADMIN_COOKIE)?.value;
-  if (!verifyAdminSession(token)) return unauthorized();
+  const auth = await guardAdminApi(req);
+  if (!auth.ok) return adminApiUnauthorized(auth);
 
   let body: Partial<BrandProfile>;
   try {
