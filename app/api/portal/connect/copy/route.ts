@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { guardPortalApi, portalApiUnauthorized } from '@/lib/api/portal-route';
+import { guardPortalApi, portalApiUnauthorized, portalTenant } from '@/lib/api/portal-route';
 import { updateConnectOrgCopy } from '@/lib/connect-store';
 import { roleAtLeast, normalizeRole } from '@/lib/rbac';
 
@@ -8,6 +8,7 @@ export const dynamic = 'force-dynamic';
 export async function POST(req: NextRequest) {
   const auth = await guardPortalApi(req, { realm: 'portal' });
   if (!auth.ok) return portalApiUnauthorized(auth);
+  const tenant = portalTenant(auth.session);
   if (!roleAtLeast(normalizeRole(auth.session.role), 'owner')) {
     return NextResponse.json({ error: 'Portal owner access required.' }, { status: 403 });
   }
@@ -30,7 +31,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const result = await updateConnectOrgCopy({
-      orgSlug: auth.session.slug,
+      orgSlug: tenant.portalSlug,
       offerHeadline: body.offerHeadline,
       resourceTitle: body.resourceTitle,
       guideIntro: body.guideIntro,

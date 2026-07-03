@@ -64,6 +64,23 @@ export interface CampaignAsset {
   previewLayout: AssetPreviewLayout;
   href?: string;
   publishDestination?: 'amplifi' | 'portal' | 'content-request' | 'website' | 'print';
+  mediaIds?: string[];
+  thumbnailUrl?: string;
+  renderUrl?: string;
+}
+
+export type MediaAssetKind = 'image' | 'logo' | 'document' | 'video';
+
+export interface MediaAsset {
+  id: string;
+  organizationId: string;
+  kind: MediaAssetKind;
+  label: string;
+  url: string;
+  mimeType?: string;
+  tags: string[];
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface PublishResult {

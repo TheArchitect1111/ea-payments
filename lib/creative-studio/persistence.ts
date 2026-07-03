@@ -9,12 +9,18 @@ const TABLE = process.env.AIRTABLE_CREATIVE_STUDIO_TABLE ?? 'Creative Studio';
 
 const memory = new Map<string, { payload: string; organizationId: string; title?: string; updatedAt: string }>();
 
-export function studioRecordKey(recordType: 'campaign' | 'brand', id: string): string {
+export function studioRecordKey(recordType: 'campaign' | 'brand' | 'media', id: string): string {
   return `${recordType}:${id}`;
 }
 
+const RECORD_TYPE_LABEL: Record<'campaign' | 'brand' | 'media', string> = {
+  campaign: 'Campaign',
+  brand: 'Brand',
+  media: 'Media',
+};
+
 export async function saveStudioRecord(input: {
-  recordType: 'campaign' | 'brand';
+  recordType: 'campaign' | 'brand' | 'media';
   id: string;
   organizationId: string;
   payload: unknown;
@@ -39,7 +45,7 @@ export async function saveStudioRecord(input: {
       key,
       {
         'Record Key': key,
-        'Record Type': input.recordType === 'campaign' ? 'Campaign' : 'Brand',
+        'Record Type': RECORD_TYPE_LABEL[input.recordType],
         'Organization ID': input.organizationId,
         Title: input.title ?? input.id,
         'Payload JSON': payload,
@@ -53,7 +59,7 @@ export async function saveStudioRecord(input: {
 }
 
 export async function loadStudioRecord<T>(
-  recordType: 'campaign' | 'brand',
+  recordType: 'campaign' | 'brand' | 'media',
   id: string,
 ): Promise<T | null> {
   const key = studioRecordKey(recordType, id);
@@ -89,7 +95,7 @@ export async function loadStudioRecord<T>(
 }
 
 export async function listStudioRecords<T>(
-  recordType: 'campaign' | 'brand',
+  recordType: 'campaign' | 'brand' | 'media',
   organizationId: string,
 ): Promise<T[]> {
   const prefix = `${recordType}:`;
@@ -107,7 +113,7 @@ export async function listStudioRecords<T>(
   if (!airtableConfigured()) return fromMemory;
 
   try {
-    const formula = `AND({Record Type}='${recordType === 'campaign' ? 'Campaign' : 'Brand'}',{Organization ID}='${escapeAirtableString(organizationId)}')`;
+    const formula = `AND({Record Type}='${RECORD_TYPE_LABEL[recordType]}',{Organization ID}='${escapeAirtableString(organizationId)}')`;
     const records = await airtableQuery(TABLE, {
       filterByFormula: formula,
       maxRecords: 100,

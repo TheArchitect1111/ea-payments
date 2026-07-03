@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { guardPortalApiCookie, portalApiUnauthorized } from '@/lib/api/portal-route';
+import { guardPortalApiCookie, portalApiUnauthorized, portalTenant } from '@/lib/api/portal-route';
 import { getClientByPortalSlug } from '@/lib/airtable';
 import {
   defaultDueDateForPurpose,
@@ -14,9 +14,10 @@ export const dynamic = 'force-dynamic';
 export async function POST(req: Request) {
   const auth = await guardPortalApiCookie({ realm: 'simplifi' });
   if (!auth.ok) return portalApiUnauthorized(auth);
+  const tenant = portalTenant(auth.session);
   const session = auth.session;
 
-  const client = await getClientByPortalSlug(session.slug);
+  const client = await getClientByPortalSlug(tenant.portalSlug);
   if (!client) {
     return NextResponse.json({ ok: false, error: 'Client record not found.' }, { status: 404 });
   }
@@ -44,7 +45,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: 'Capture not found.' }, { status: 404 });
   }
 
-  if (record.portalSlug && record.portalSlug !== session.slug) {
+  if (record.portalSlug && record.portalSlug !== tenant.portalSlug) {
     return NextResponse.json({ ok: false, error: 'Not authorized for this capture.' }, { status: 403 });
   }
 
@@ -65,9 +66,9 @@ export async function POST(req: Request) {
     type: 'capture.active_saved',
     title: record.title,
     detail: `${option.label} · due ${dueDate}`,
-    href: `/portal/${session.slug}/simplifi`,
+    href: `/portal/${tenant.portalSlug}/simplifi`,
     objectId: recordId,
-    tenantId: session.slug,
+    tenantId: tenant.portalSlug,
     priority: 'medium',
   });
 

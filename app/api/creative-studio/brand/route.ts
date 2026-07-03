@@ -35,6 +35,7 @@ export async function PUT(req: NextRequest) {
     secondaryColor: String(body.secondaryColor ?? existing.secondaryColor).trim() || existing.secondaryColor,
     voice: String(body.voice ?? existing.voice).trim() || existing.voice,
     preferredCta: String(body.preferredCta ?? existing.preferredCta).trim() || existing.preferredCta,
+    logoUrl: body.logoUrl?.trim() || existing.logoUrl,
     preferredHeadlines: Array.isArray(body.preferredHeadlines)
       ? body.preferredHeadlines.map((h) => String(h).trim()).filter(Boolean)
       : existing.preferredHeadlines,

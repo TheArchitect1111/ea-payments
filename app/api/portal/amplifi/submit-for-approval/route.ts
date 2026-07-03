@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { guardPortalApi, portalApiUnauthorized } from '@/lib/api/portal-route';
+import { guardPortalApi, portalApiUnauthorized, portalTenant } from '@/lib/api/portal-route';
 import { createContentRequest, getClientByPortalSlug } from '@/lib/airtable';
 import { sendContentRequestConfirmation, sendInternalNotification } from '@/lib/email';
 import { notifyPortal } from '@/lib/portal-notify';
@@ -12,9 +12,10 @@ const SOCIAL_POST_TYPE = 'Social Post';
 export async function POST(req: NextRequest) {
   const auth = await guardPortalApi(req, { realm: 'simplifi' });
   if (!auth.ok) return portalApiUnauthorized(auth);
+  const tenant = portalTenant(auth.session);
   const session = auth.session;
 
-  const client = await getClientByPortalSlug(session.slug);
+  const client = await getClientByPortalSlug(tenant.portalSlug);
   if (!client) {
     return NextResponse.json({ ok: false, error: 'Client not found.' }, { status: 404 });
   }

@@ -64,7 +64,17 @@ When undertaking major work, complete these phases **before** coding:
 3. ~~`lib/publishing/` shared facade~~ → `lib/publishing/publish.ts`
 4. ~~Enforce design tokens~~ → admin shell uses `@/lib/design-system`
 5. ~~Tenant model~~ → `lib/tenant-context.ts`
-6. Production persistence for tenant data (Creative Studio Airtable table setup)
+6. ~~Production persistence for tenant data~~ → Creative Studio Airtable table + `docs/CREATIVE-STUDIO-SETUP.md`
+
+### Phase 3 — Tenant scoping + Creative Studio M3 (July 2026)
+
+| Item | Status |
+|------|--------|
+| `portalTenant()` wired in portal API routes | Done |
+| `opportunities/manage` tenant authorization | Done |
+| Creative Studio media library + schema health check | Done |
+| Creative Studio Airtable table in production | Ops — create table per setup doc |
+| Asset editing API + binary upload storage | Next |
 
 ### Phase 2 — Portal foundation (July 2026)
 

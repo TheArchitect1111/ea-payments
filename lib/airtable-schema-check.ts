@@ -80,6 +80,17 @@ export const ASSESSMENT_REQUIRED_FIELDS = [
   'Linked Proposal',
 ] as const;
 
+export const CREATIVE_STUDIO_REQUIRED_FIELDS = [
+  'Record Key',
+  'Record Type',
+  'Organization ID',
+  'Title',
+  'Payload JSON',
+  'Updated At',
+] as const;
+
+const CREATIVE_STUDIO_TABLE = process.env.AIRTABLE_CREATIVE_STUDIO_TABLE ?? 'Creative Studio';
+
 export const PROPOSAL_REQUIRED_FIELDS = [
   'Proposal ID',
   'Business Name',
@@ -161,6 +172,11 @@ export async function checkAssessmentSchema(): Promise<TableSchemaCheck> {
   return checkTable(tables, ASSESSMENTS_TABLE_NAME, ASSESSMENT_REQUIRED_FIELDS, ASSESSMENTS_TABLE_ID);
 }
 
+export async function checkCreativeStudioSchema(): Promise<TableSchemaCheck> {
+  const tables = await listTables();
+  return checkTable(tables, CREATIVE_STUDIO_TABLE, CREATIVE_STUDIO_REQUIRED_FIELDS);
+}
+
 export async function checkProposalSchema(): Promise<TableSchemaCheck> {
   const tables = await listTables();
   return checkTable(tables, PROPOSALS_TABLE_NAME, PROPOSAL_REQUIRED_FIELDS, PROPOSALS_TABLE_ID);
@@ -171,6 +187,7 @@ export async function checkAirtableLaunchSchema(): Promise<{
   pulse: TableSchemaCheck & { configured: boolean };
   assessment: TableSchemaCheck;
   proposal: TableSchemaCheck;
+  creativeStudio: TableSchemaCheck;
   captureAnalysisMissing: string[];
 }> {
   const tables = await listTables();
@@ -191,10 +208,11 @@ export async function checkAirtableLaunchSchema(): Promise<{
     PROPOSAL_REQUIRED_FIELDS,
     PROPOSALS_TABLE_ID,
   );
+  const creativeStudio = checkTable(tables, CREATIVE_STUDIO_TABLE, CREATIVE_STUDIO_REQUIRED_FIELDS);
 
   const captureTable = tables.find((t) => t.name === CAPTURES_TABLE);
   const captureNames = new Set((captureTable?.fields ?? []).map((f) => f.name));
   const captureAnalysisMissing = CAPTURE_ANALYSIS_FIELDS.filter((f) => !captureNames.has(f));
 
-  return { capture, pulse, assessment, proposal, captureAnalysisMissing };
+  return { capture, pulse, assessment, proposal, creativeStudio, captureAnalysisMissing };
 }

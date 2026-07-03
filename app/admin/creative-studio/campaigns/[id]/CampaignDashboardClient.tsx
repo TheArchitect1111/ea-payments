@@ -142,6 +142,7 @@ export default function CampaignDashboardClient({ campaignId }: { campaignId: st
       <header className="cs-campaign-header">
         <nav className="cs-subnav">
           <Link href="/admin/creative-studio">Campaigns</Link>
+          <Link href="/admin/creative-studio/media">Media</Link>
           <Link href="/admin/creative-studio/brand">Brand</Link>
         </nav>
         <p className="cs-kicker">{campaign.goalLabel}</p>

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { guardPortalApiCookie, portalApiUnauthorized } from '@/lib/api/portal-route';
+import { guardPortalApiCookie, portalApiUnauthorized, portalTenant } from '@/lib/api/portal-route';
 import { getPortalCaptures } from '@/lib/capture-records';
 
 export const dynamic = 'force-dynamic';
@@ -7,9 +7,10 @@ export const dynamic = 'force-dynamic';
 export async function GET() {
   const auth = await guardPortalApiCookie({ realm: 'simplifi' });
   if (!auth.ok) return portalApiUnauthorized(auth);
+  const tenant = portalTenant(auth.session);
   const session = auth.session;
 
-  const captures = await getPortalCaptures(session.slug, 25);
+  const captures = await getPortalCaptures(tenant.portalSlug, 25);
   return NextResponse.json({
     ok: true,
     captures: captures.map((c) => ({
