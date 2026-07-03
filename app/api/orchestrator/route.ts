@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { resolveAIActor } from '@/lib/ai/auth';
 import { AIGatewayError } from '@/lib/ai/gateway';
-import type { AIRequestContext } from '@/lib/ai/types';
+import type { AIActor, AIRequestContext } from '@/lib/ai/types';
 import { runOrchestrator } from '@/lib/agents/orchestrator';
 import type { OrchestratorRequest } from '@/lib/agents/types';
 
@@ -21,10 +21,17 @@ function routeError(error: unknown, id: string) {
   );
 }
 
+function anonymousActor(req: NextRequest): AIActor {
+  const forwarded = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim();
+  return {
+    id: `anonymous:${forwarded ?? 'orbie'}`,
+    type: 'anonymous',
+  };
+}
+
 export async function POST(req: NextRequest) {
   const id = requestId();
-  const actor = await resolveAIActor();
-  if (!actor) return NextResponse.json({ ok: false, requestId: id, error: 'Unauthorized.', code: 'UNAUTHORIZED' }, { status: 401 });
+  const actor = await resolveAIActor() ?? anonymousActor(req);
 
   let body: OrchestratorRequest;
   try {

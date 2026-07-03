@@ -7,7 +7,6 @@ import {
   EA_GUIDE_DAILY_BRIEF_KEY,
   EA_GUIDE_FIRST_USE_KEY,
   EA_GUIDE_MEMORY_KEY,
-  type EAGuideAction,
   type EAGuideMemoryItem,
   resolveGuideContext,
 } from '@/lib/ea-guide';
@@ -15,6 +14,7 @@ import {
   getCaptureCount,
   shouldShowGuideRecommendations,
 } from '@/lib/simplifi-onboarding';
+import { buildUniversalIntelligence } from '@/lib/universal-intelligence';
 import './ea-guide.css';
 
 type LaunchSignal = {
@@ -312,11 +312,40 @@ function understandingItems(signal: DiscoverGuideSignal | null) {
   ];
 }
 
+function shouldUseResearchSpecialist(message: string) {
+  return /\b(research|source|sources|find|grant|competitor|market|industry|rule|rules|ncaa|sponsor|funding|compare)\b/i.test(message);
+}
+
+function formatOrbieAnswer(payload: {
+  response?: {
+    summary?: string;
+    keyFindings?: Array<{ title: string; detail: string }>;
+    opportunities?: Array<{ title: string; detail: string }>;
+    risks?: Array<{ title: string; detail: string }>;
+    recommendedNextSteps?: string[];
+    sources?: string[];
+    memory?: { title: string };
+    possibility?: { title: string; detail: string };
+  };
+}) {
+  const response = payload.response;
+  if (!response) return 'Orbie reviewed that and saved the context.';
+  const lines = [response.summary].filter(Boolean) as string[];
+  if (response.possibility?.title) lines.push(`Possibility: ${response.possibility.title}`);
+  if (response.keyFindings?.[0]) lines.push(`Finding: ${response.keyFindings[0].title} - ${response.keyFindings[0].detail}`);
+  if (response.risks?.[0]) lines.push(`Risk: ${response.risks[0].title} - ${response.risks[0].detail}`);
+  if (response.recommendedNextSteps?.[0]) lines.push(`Next: ${response.recommendedNextSteps[0]}`);
+  if (response.sources?.length) lines.push(`Sources: ${response.sources.slice(0, 3).join(', ')}`);
+  if (response.memory?.title) lines.push(`Saved to memory: ${response.memory.title}`);
+  return lines.join('\n\n') || 'Orbie reviewed that and saved the context.';
+}
+
 export default function EAGuideOrb() {
   const pathname = usePathname() ?? '/';
   const context = useMemo(() => resolveGuideContext(pathname), [pathname]);
   const isSimplifi = context.id === 'simplifi';
   const isDiscover = context.id === 'discover';
+  const intelligence = useMemo(() => buildUniversalIntelligence(context), [context]);
   const scope = 'simplifi-user';
   const [open, setOpen] = useState(false);
   const [voiceOpen, setVoiceOpen] = useState(false);
@@ -471,14 +500,17 @@ export default function EAGuideOrb() {
   async function askOrchestrator(message: string) {
     setOrbLoading(true);
     setOrbAnswer('');
+    const useResearch = shouldUseResearchSpecialist(message);
     try {
       const response = await fetch('/api/orchestrator', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message,
-          intent: context.id,
+          intent: useResearch ? 'research' : context.id,
           conversationId: `orb-${context.id}`,
+          requestedAgents: useResearch ? ['research'] : undefined,
+          maxAgents: useResearch ? 1 : 2,
           context: {
             path: pathname,
             product: context.product,
@@ -491,7 +523,7 @@ export default function EAGuideOrb() {
       });
       const payload = await response.json();
       if (!response.ok || !payload.ok) throw new Error(payload.error ?? 'The Orb could not complete that request.');
-      setOrbAnswer(payload.response?.summary ?? 'I reviewed that and saved the context.');
+      setOrbAnswer(formatOrbieAnswer(payload));
     } catch (err) {
       setOrbAnswer(err instanceof Error ? err.message : 'The Orb could not complete that request.');
     } finally {
@@ -531,27 +563,6 @@ export default function EAGuideOrb() {
   const dailyBrief = isStoryHome && storySection
     ? ['I am following the active scene.', 'Click Continue the story to move through the experience.', 'Use Show me an example for a concrete version.']
     : context.dailyBrief?.length ? context.dailyBrief : context.sinceLastVisit;
-  const opportunityHealth = context.opportunityHealth ?? ['Active: Current workspace', 'Watching: New signals', 'Follow-Up Needed: Open commitments'];
-  const winWall = context.winWall ?? ['Progress is being tracked'];
-  const guideActions: EAGuideAction[] = launchReady && launchSignal
-    ? [
-        { id: 'review-package', label: 'Review Package', kind: 'href', href: launchSignal.links.reviewPackage },
-        { id: 'open-skin-brief', label: 'Open Skin Brief', kind: 'href', href: launchSignal.links.skinBrief },
-        { id: 'open-project-brief', label: 'Open Project Brief', kind: 'href', href: launchSignal.links.projectBrief },
-        { id: 'approval', label: 'Continue To Approval', kind: 'href', href: launchSignal.links.approval },
-        { id: 'codex', label: 'Codex Handoff', kind: 'href', href: launchSignal.links.codexBuilder },
-        { id: 'deployment', label: 'Deployment Package', kind: 'href', href: launchSignal.links.deployment },
-      ]
-    : isStoryHome
-      ? [
-          { id: 'story-example', label: 'Show me an example', kind: 'memory' },
-          { id: 'continue-story', label: 'Continue the story', kind: 'href', href: '#possibilities' },
-          { id: 'how-it-works', label: 'How does this work?', kind: 'href', href: '/assessment' },
-        ]
-    : simplifiRecommendation
-      ? (simplifiRecommendation.actions as EAGuideAction[])
-      : context.actions;
-
   if (isSimplifi) return null;
 
   return (
@@ -564,11 +575,11 @@ export default function EAGuideOrb() {
               <>
                 <div className="ea-guide-card-head">
                   <div>
-                    <p className="ea-guide-eyebrow">EA Guide&trade;</p>
+                    <p className="ea-guide-eyebrow">Orbie</p>
                     <h2>Welcome.</h2>
-                    <p>I&apos;m your EA Guide. I&apos;ll stay with you throughout this journey. Together we&apos;ll discover what&apos;s possible, why it matters, and what the next right step could be.</p>
+                    <p>I&apos;m Orbie, your Digital Chief of Staff. I&apos;ll stay with you throughout this journey, coordinate the right Specialists, and keep the next step clear.</p>
                   </div>
-                  <button type="button" className="ea-guide-icon-btn" onClick={() => completeFirstUse(true)} aria-label="Close EA Guide">
+                  <button type="button" className="ea-guide-icon-btn" onClick={() => completeFirstUse(true)} aria-label="Close Orbie">
                     x
                   </button>
                 </div>
@@ -581,7 +592,7 @@ export default function EAGuideOrb() {
                     I&apos;ll Explore
                   </button>
                   <button type="button" className="ea-guide-action ea-guide-action-muted" onClick={() => { completeFirstUse(); setVoiceOpen(true); }}>
-                    Ask Me Anything
+                    Ask Orbie
                   </button>
                   <button type="button" className="ea-guide-action ea-guide-action-muted" onClick={() => completeFirstUse(true)}>
                     Not Right Now
@@ -592,11 +603,11 @@ export default function EAGuideOrb() {
               <>
                 <div className="ea-guide-card-head">
                   <div>
-                    <p className="ea-guide-eyebrow">EA Guide&trade;</p>
+                    <p className="ea-guide-eyebrow">Orbie</p>
                     <h2>{needsHelp ? 'Need help deciding?' : discoverSignal?.sectionTitle ?? 'Discover the possibilities.'}</h2>
                     <p>{discoverSignal?.progressMessage ?? 'I can help you think through your goals, compare options, and decide what to share next.'}</p>
                   </div>
-                  <button type="button" className="ea-guide-icon-btn" onClick={() => setOpen(false)} aria-label="Close EA Guide">
+                  <button type="button" className="ea-guide-icon-btn" onClick={() => setOpen(false)} aria-label="Close Orbie">
                     x
                   </button>
                 </div>
@@ -679,7 +690,7 @@ export default function EAGuideOrb() {
                     Walk Me Through It
                   </button>
                   <button type="button" className="ea-guide-action ea-guide-action-muted" onClick={() => setVoiceOpen(true)}>
-                    Ask Me Anything
+                    Ask Orbie
                   </button>
                   <button type="button" className="ea-guide-action ea-guide-action-muted" onClick={() => setOpen(false)}>
                     Not Right Now
@@ -690,9 +701,9 @@ export default function EAGuideOrb() {
               <>
                 <div className="ea-guide-card-head">
                   <div>
-                    <p className="ea-guide-eyebrow">EA Guide&trade;</p>
+                    <p className="ea-guide-eyebrow">Orbie</p>
                     <h2>{isSimplifi ? context.greeting : `Hi ${firstName}`}</h2>
-                    <p>{context.role} for {context.product}</p>
+                    <p>{intelligence.orbieRole} for {context.product}</p>
                   </div>
                   <button type="button" className="ea-guide-icon-btn" onClick={() => setOpen(false)} aria-label="Close EA Guide">
                     x
@@ -723,9 +734,9 @@ export default function EAGuideOrb() {
                 ) : null}
 
                 <div className="ea-guide-recommendation">
-                  <p className="ea-guide-section-label">Recommended action</p>
-                  <strong>{recommendedAction}</strong>
-                  <span>{recommendationDetail}</span>
+                  <p className="ea-guide-section-label">Possibility Center</p>
+                  <strong>{intelligence.primary.title || recommendedAction}</strong>
+                  <span>{intelligence.primary.detail || recommendationDetail}</span>
                   <div className="ea-guide-why">
                     <p>Why am I seeing this?</p>
                     <ul>
@@ -734,14 +745,31 @@ export default function EAGuideOrb() {
                       ))}
                     </ul>
                   </div>
+                  <div className="ea-guide-why">
+                    <p>Secondary possibilities</p>
+                    <ul>
+                      {intelligence.secondary.map((item) => (
+                        <li key={item.id}>{item.title}</li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
 
                 <div className="ea-guide-actions">
-                  {guideActions.map((action) => {
-                    if (action.kind === 'href' && action.href) {
+                  {intelligence.primary.href ? (
+                    <Link href={intelligence.primary.href} className="ea-guide-action" onClick={() => setOpen(false)}>
+                      {intelligence.primary.actionLabel}
+                    </Link>
+                  ) : (
+                    <button type="button" className="ea-guide-action" onClick={() => saveMemory(intelligence.primary.actionLabel, intelligence.primary.detail)}>
+                      {intelligence.primary.actionLabel}
+                    </button>
+                  )}
+                  {intelligence.secondary.map((action) => {
+                    if (action.href) {
                       return (
-                        <Link key={action.id} href={action.href} className="ea-guide-action" onClick={() => setOpen(false)}>
-                          {action.label}
+                        <Link key={action.id} href={action.href} className="ea-guide-action ea-guide-action-muted" onClick={() => setOpen(false)}>
+                          {action.actionLabel}
                         </Link>
                       );
                     }
@@ -749,34 +777,36 @@ export default function EAGuideOrb() {
                       <button
                         key={action.id}
                         type="button"
-                        className="ea-guide-action"
+                        className="ea-guide-action ea-guide-action-muted"
                         onClick={() => {
-                          if (action.kind === 'event') runEvent(action.eventName);
-                          if (action.kind === 'memory') {
-                            saveMemory(action.label);
-                            setOpen(false);
+                          if (action.specialistId === 'research') {
+                            setVoiceOpen(true);
+                            void askOrchestrator(action.title);
+                            return;
                           }
+                          saveMemory(action.actionLabel, action.detail);
+                          setOpen(false);
                         }}
                       >
-                        {action.label}
+                        {action.actionLabel}
                       </button>
                     );
                   })}
                   <button type="button" className="ea-guide-action ea-guide-action-muted" onClick={() => setVoiceOpen(true)}>
-                    Voice Mode
+                    Ask Orbie
                   </button>
                 </div>
 
                 <div className="ea-guide-grid">
                   <div>
-                    <p className="ea-guide-section-label">Opportunity health</p>
-                    {opportunityHealth.slice(0, 3).map((item) => (
-                      <span key={item}>{item}</span>
+                    <p className="ea-guide-section-label">Active specialists</p>
+                    {intelligence.activeSpecialists.slice(0, 3).map((item) => (
+                      <span key={item.id}>{item.name}</span>
                     ))}
                   </div>
                   <div>
-                    <p className="ea-guide-section-label">Win wall</p>
-                    {winWall.slice(0, 2).map((item) => (
+                    <p className="ea-guide-section-label">Shared memory</p>
+                    {intelligence.memorySignals.slice(0, 3).map((item) => (
                       <span key={item}>{item}</span>
                     ))}
                   </div>
@@ -784,10 +814,10 @@ export default function EAGuideOrb() {
 
                 {context.protocolAwareness.length > 0 ? (
                   <div className="ea-guide-protocols">
-                    <p className="ea-guide-section-label">Protocol awareness</p>
+                    <p className="ea-guide-section-label">Smartchitecture check</p>
                     <div>
-                      {context.protocolAwareness.slice(0, 4).map((protocol) => (
-                        <span key={protocol}>{protocol.replace(' Protocol', '')}</span>
+                      {intelligence.smartchitectureChecks.slice(0, 4).map((check) => (
+                        <span key={check}>{check}</span>
                       ))}
                     </div>
                   </div>
@@ -800,7 +830,7 @@ export default function EAGuideOrb() {
         <button
           type="button"
           className={`ea-guide-orb ea-guide-orb-${state}`}
-          aria-label="Open EA Guide"
+          aria-label="Open Orbie"
           data-state={state}
           onClick={() => setOpen((value) => !value)}
         >
@@ -811,20 +841,20 @@ export default function EAGuideOrb() {
       </div>
 
       {voiceOpen ? (
-        <div className="ea-guide-voice" role="dialog" aria-modal="true" aria-label="EA Guide voice mode">
+        <div className="ea-guide-voice" role="dialog" aria-modal="true" aria-label="Orbie ask mode">
           <div className="ea-guide-voice-orb">
             <span />
             <span />
             <span />
           </div>
-          <p className="ea-guide-eyebrow">EA Guide Voice Mode</p>
+          <p className="ea-guide-eyebrow">Ask Orbie</p>
           <h2>{orbLoading ? 'Thinking...' : 'Listening...'}</h2>
           <p>What would you like to do?</p>
           {orbAnswer ? <p className="ea-guide-muted">{orbAnswer}</p> : null}
           <div className="ea-guide-voice-actions">
             {(isDiscover
-              ? ['Explain This Question', 'Show Me Possibilities', 'Walk Me Through It', 'Review My Direction', 'Talk About Training']
-              : ['Save This', 'Add To Watch List', 'Create Reminder', 'Show Follow-Ups', 'Review Opportunities']
+              ? ['Explain This Question', 'Research Similar Organizations', 'Show Me Possibilities', 'Review My Direction', 'Talk About Training']
+              : ['Research This', 'Find Sources', 'Create Reminder', 'Show Follow-Ups', 'Review Possibilities']
             ).map((label) => (
               <button key={label} type="button" onClick={() => askOrchestrator(label)}>
                 {label}

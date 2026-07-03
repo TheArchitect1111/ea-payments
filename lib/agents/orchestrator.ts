@@ -26,6 +26,8 @@ function mergeResults(results: AgentExecutionResult[]) {
     recommendedNextSteps: Array.from(new Set(results.flatMap((result) => result.recommendedNextSteps))).slice(0, 8),
     confidence: Number(confidence.toFixed(2)),
     sources: Array.from(new Set(results.flatMap((result) => result.sources))).slice(0, 12),
+    memory: results.find((result) => result.memory)?.memory,
+    possibility: results.find((result) => result.possibility)?.possibility,
   };
 }
 
@@ -33,7 +35,11 @@ export async function runOrchestrator(request: OrchestratorRequest, context: AIR
   const message = request.message?.trim();
   if (!message) throw new Error('Orchestrator requires a message.');
 
-  const selectedAgents = matchAgents(`${request.intent ?? ''} ${message}`, request.requestedAgents).slice(0, request.maxAgents ?? 2);
+  const isAnonymous = context.actor.type === 'anonymous';
+  const selectedAgents = matchAgents(
+    `${request.intent ?? ''} ${message}`,
+    isAnonymous ? ['research'] : request.requestedAgents,
+  ).slice(0, isAnonymous ? 1 : request.maxAgents ?? 2);
   logAIEvent('orchestrator.dispatch', context, { agents: selectedAgents.map((agent) => agent.name) });
 
   const settled = await Promise.allSettled(selectedAgents.map((agent) => agent.execute({
@@ -41,6 +47,7 @@ export async function runOrchestrator(request: OrchestratorRequest, context: AIR
     query: message,
     context: request.context,
     conversationId: request.conversationId,
+    mode: isAnonymous ? 'local' : 'live',
   }, context)));
 
   const results = settled

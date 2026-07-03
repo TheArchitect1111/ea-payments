@@ -41,7 +41,8 @@ export type PulseEventType =
   | 'subscription.invoice.paid'
   | 'subscription.invoice.failed'
   | 'attention.critical'
-  | 'guide.escalated';
+  | 'guide.escalated'
+  | 'research.completed';
 
 export interface PulseEvent {
   product: PulseProduct;

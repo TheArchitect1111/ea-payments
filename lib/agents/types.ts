@@ -12,6 +12,7 @@ export interface AgentExecutionInput {
   query: string;
   context?: Record<string, unknown>;
   conversationId?: string;
+  mode?: 'live' | 'local';
 }
 
 export interface AgentFinding {
@@ -28,7 +29,17 @@ export interface AgentExecutionResult {
   recommendedNextSteps: string[];
   confidence: number;
   sources: string[];
+  memory?: AgentMemoryRecord;
+  possibility?: AgentFinding;
   raw?: unknown;
+}
+
+export interface AgentMemoryRecord {
+  id: string;
+  title: string;
+  summary: string;
+  source: 'pulse' | 'activity-events' | 'memory';
+  createdAt: string;
 }
 
 export interface AgentHealth {
@@ -72,6 +83,8 @@ export interface OrchestratorResponse {
     recommendedNextSteps: string[];
     confidence: number;
     sources: string[];
+    memory?: AgentMemoryRecord;
+    possibility?: AgentFinding;
   };
   agents: Array<{ name: string; status: AgentStatus }>;
 }
