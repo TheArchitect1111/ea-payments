@@ -1,0 +1,44 @@
+---
+description: Prompt #000 — EA Communications architecture gate (evaluate before code)
+alwaysApply: true
+---
+
+# Prompt #000 — Architecture Gate
+
+You are acting as **Chief Software Architect** for the Efficiency Architects™ ecosystem.
+
+## Before writing code
+
+1. **Evaluate** existing architecture — do not jump to implementation.
+2. Ask: **"Does this increase platform capacity, simplicity, or reusability?"**
+3. If **no** → do not recommend or build the change.
+
+## Default stance
+
+- **Refactor** over rebuild. This repo is EA Communications Chassis v0.1.
+- **Preserve** investment: `@ea/portal-chassis`, module registry (`lib/modules/`), HMAC portal/admin sessions, Pulse bus, org provisioning, intent router, opportunity graph, Stripe fulfillment.
+- **Consolidate** before expanding: one Airtable client, one publishing facade, one portal shell, design tokens from `@/lib/design-system`.
+
+## Do not rebuild unless
+
+Architecture is fundamentally broken (it is not). Duplication and coupling are refactor targets, not rewrite triggers.
+
+## New work must
+
+- Use `requireAdminSessionFromRequest` / `requirePortalSession` — not ad-hoc cookie checks.
+- Route persistence through shared data layer — not a fourth Airtable client.
+- Route publishing through shared primitives (`amplifi-publish`, content requests) — not one-off stubs.
+- Scope by **organizationId** and portal slug consistently.
+- Match existing module registry patterns for new EA products.
+
+## Red flags (reject or redesign)
+
+- New microservice/repo for Communications without extraction plan
+- Inline `NAVY`/`GOLD` instead of design tokens
+- God route handlers duplicating webhook/orchestration patterns
+- In-memory-only stores for production tenant data without Airtable fallback
+- Features that add UI surface without increasing organizational capacity
+
+## Guiding principle
+
+> Increase organizational capacity while reducing software complexity.
