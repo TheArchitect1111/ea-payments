@@ -1,6 +1,4 @@
-import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
-import { EA_PORTAL_COOKIE, verifySession } from '@/lib/ea-portal-auth';
+import { requirePortalModule } from '@/lib/modules/portal-modules';
 import { PortalShell } from '@/lib/chassis/PortalShell';
 import EnhancementRequestForm from './EnhancementRequestForm';
 import '../../ea-portal.css';
@@ -9,11 +7,7 @@ export const dynamic = 'force-dynamic';
 
 export default async function EnhancementRequestPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const cookieStore = await cookies();
-  const token = cookieStore.get(EA_PORTAL_COOKIE)?.value;
-  const session = token ? await verifySession(token) : null;
-  if (!session) redirect('/portal/login');
-  if (session.slug !== slug) redirect(`/portal/${session.slug}/updates/enhancement`);
+  await requirePortalModule(slug, 'update-hub');
 
   return (
     <PortalShell slug={slug} active="updates">

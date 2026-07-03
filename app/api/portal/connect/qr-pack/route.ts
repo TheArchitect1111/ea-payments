@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { resolveSessionFromRequest } from '@/lib/auth';
+import { guardPortalApiCookie, portalApiUnauthorized } from '@/lib/api/portal-route';
 import { buildConnectKit } from '@/lib/connect-kit';
 import { buildConnectQrPackZip, type QrPackFilter } from '@/lib/connect-qr-pack';
 import { getConnectOrg } from '@/lib/connect-store';
@@ -14,11 +14,9 @@ function parseFilter(raw: string | null): QrPackFilter {
 }
 
 export async function GET(req: NextRequest) {
-  const session = await resolveSessionFromRequest(req, { realm: 'portal' });
-  if (!session?.slug) {
-    return NextResponse.json({ error: 'Portal login required.' }, { status: 401 });
-  }
-  if (!roleAtLeast(normalizeRole(session.role), 'staff')) {
+  const auth = await guardPortalApiCookie({ realm: 'portal' });
+  if (!auth.ok) return portalApiUnauthorized(auth);
+  if (!roleAtLeast(normalizeRole(auth.session.role), 'staff')) {
     return NextResponse.json({ error: 'Owner or staff access required.' }, { status: 403 });
   }
 
@@ -26,8 +24,8 @@ export async function GET(req: NextRequest) {
   const format = req.nextUrl.searchParams.get('format') === 'svg' ? 'svg' : 'png';
 
   try {
-    const org = await getConnectOrg(session.slug);
-    const kit = buildConnectKit(org, session.slug);
+    const org = await getConnectOrg(auth.session.slug);
+    const kit = buildConnectKit(org, auth.session.slug);
     const pack = await buildConnectQrPackZip(kit, { filter, format });
 
     return new NextResponse(new Uint8Array(pack.buffer), {

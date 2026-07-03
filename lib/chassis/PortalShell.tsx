@@ -1,38 +1,21 @@
 import type { ReactNode } from 'react';
 
 import { PortalLayout } from './PortalLayout';
-
-
+import { NAVY, GOLD } from '@/lib/design-system';
 
 export type EAPortalTab =
-
   | 'home'
-
   | 'pulse'
-
   | 'simplifi'
-
   | 'amplifi'
-
+  | 'connect'
   | 'updates'
-
   | 'documents'
-
   | 'events'
-
   | 'resources'
-
   | 'messaging'
-
   | 'learning'
-
   | 'ask';
-
-
-
-const NAVY = '#1B2B4D';
-
-const GOLD = '#C9A844';
 
 
 
@@ -65,7 +48,7 @@ export function PortalShell({ slug, active, firstName, pageTitle, children }: Pr
     simplifi: 'Simplifi™',
 
     amplifi: 'Amplifi™',
-
+    connect: 'EA Connect™',
     updates: 'Update Hub™',
 
     documents: 'Documents',

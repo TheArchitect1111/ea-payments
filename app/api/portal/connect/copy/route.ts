@@ -1,16 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { resolveSessionFromRequest } from '@/lib/auth';
+import { guardPortalApi, portalApiUnauthorized } from '@/lib/api/portal-route';
 import { updateConnectOrgCopy } from '@/lib/connect-store';
 import { roleAtLeast, normalizeRole } from '@/lib/rbac';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
-  const session = await resolveSessionFromRequest(req, { realm: 'portal' });
-  if (!session?.slug) {
-    return NextResponse.json({ error: 'Portal login required.' }, { status: 401 });
-  }
-  if (!roleAtLeast(normalizeRole(session.role), 'owner')) {
+  const auth = await guardPortalApi(req, { realm: 'portal' });
+  if (!auth.ok) return portalApiUnauthorized(auth);
+  if (!roleAtLeast(normalizeRole(auth.session.role), 'owner')) {
     return NextResponse.json({ error: 'Portal owner access required.' }, { status: 403 });
   }
 
@@ -32,7 +30,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const result = await updateConnectOrgCopy({
-      orgSlug: session.slug,
+      orgSlug: auth.session.slug,
       offerHeadline: body.offerHeadline,
       resourceTitle: body.resourceTitle,
       guideIntro: body.guideIntro,

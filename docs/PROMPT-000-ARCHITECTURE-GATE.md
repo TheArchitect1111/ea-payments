@@ -66,6 +66,16 @@ When undertaking major work, complete these phases **before** coding:
 5. ~~Tenant model~~ → `lib/tenant-context.ts`
 6. Production persistence for tenant data (Creative Studio Airtable table setup)
 
+### Phase 2 — Portal foundation (July 2026)
+
+| Item | Status |
+|------|--------|
+| Unified `PortalShell` (Connect migrated off `AppShell`) | Done |
+| `requirePortalModule()` on all gated portal pages | Done |
+| `portalTenant()` in `lib/api/portal-route.ts` | Done |
+| Connect portal API routes → `guardPortalApi` | Done |
+| Deprecate unused `AppShell` | Pending (no remaining imports) |
+
 ### Postpone
 
 - Analytics warehouse

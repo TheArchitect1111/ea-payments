@@ -1,29 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { resolveSessionFromRequest } from '@/lib/auth';
+import { guardPortalApi, portalApiUnauthorized } from '@/lib/api/portal-route';
 import { completeConnectFollowUpTask, listConnectFollowUpTasks } from '@/lib/connect-tasks';
 import { roleAtLeast, normalizeRole } from '@/lib/rbac';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
-  const session = await resolveSessionFromRequest(req, { realm: 'portal' });
-  if (!session?.slug) {
-    return NextResponse.json({ error: 'Portal login required.' }, { status: 401 });
-  }
-  if (!roleAtLeast(normalizeRole(session.role), 'staff')) {
+  const auth = await guardPortalApi(req, { realm: 'portal' });
+  if (!auth.ok) return portalApiUnauthorized(auth);
+  if (!roleAtLeast(normalizeRole(auth.session.role), 'staff')) {
     return NextResponse.json({ error: 'Staff access required.' }, { status: 403 });
   }
 
-  const tasks = await listConnectFollowUpTasks(session.slug);
-  return NextResponse.json({ ok: true, orgSlug: session.slug, ...tasks });
+  const tasks = await listConnectFollowUpTasks(auth.session.slug);
+  return NextResponse.json({ ok: true, orgSlug: auth.session.slug, ...tasks });
 }
 
 export async function POST(req: NextRequest) {
-  const session = await resolveSessionFromRequest(req, { realm: 'portal' });
-  if (!session?.slug) {
-    return NextResponse.json({ error: 'Portal login required.' }, { status: 401 });
-  }
-  if (!roleAtLeast(normalizeRole(session.role), 'staff')) {
+  const auth = await guardPortalApi(req, { realm: 'portal' });
+  if (!auth.ok) return portalApiUnauthorized(auth);
+  if (!roleAtLeast(normalizeRole(auth.session.role), 'staff')) {
     return NextResponse.json({ error: 'Staff access required.' }, { status: 403 });
   }
 
@@ -41,9 +37,9 @@ export async function POST(req: NextRequest) {
 
   try {
     const result = await completeConnectFollowUpTask({
-      orgSlug: session.slug,
+      orgSlug: auth.session.slug,
       relationshipId,
-      completedBy: session.email ?? session.sub,
+      completedBy: auth.session.email ?? auth.session.sub ?? auth.session.slug,
       note: body.note,
     });
     return NextResponse.json({ ok: true, ...result });
