@@ -135,13 +135,17 @@ Mission Control
 
 ---
 
-## Future (not in this release)
+## Future (Phase 2 — scoped)
 
-- Portal `/portal/[slug]/ctp` status page
-- Workspace auto-provision on CTP complete (Stripe webhook pattern)
-- Creative Studio campaign auto-create per submission
-- Intake agent post-submit orchestration
-- Binary asset upload from discovery `asset-select`
+See **`docs/CTP-PHASE-2-SCOPE.md`** for work packages, build order, acceptance criteria, and PR breakdown.
+
+| Package | Summary |
+|---------|---------|
+| CTP-2D | Intake agent post-submit orchestration |
+| CTP-2B | Workspace auto-provision (`createPortalAccess` pattern) |
+| CTP-2A | Portal `/portal/[slug]/ctp` status module |
+| CTP-2C | Creative Studio auto-campaign per submission |
+| CTP-2E | Binary asset upload for discovery `asset-select` |
 
 ---
 
