@@ -101,6 +101,7 @@ export const CTP_SUBMISSIONS_REQUIRED_FIELDS = [
   'Studio Status',
   'Assessment ID',
   'Proposal ID',
+  'Intake Analysis JSON',
   'Payload JSON',
   'Submitted At',
   'Updated At',

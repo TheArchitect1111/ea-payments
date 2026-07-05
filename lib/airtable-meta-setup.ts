@@ -278,6 +278,7 @@ const CTP_SUBMISSIONS_FIELD_DEFS: AirtableFieldDef[] = [
   { name: 'Assessment ID', type: 'singleLineText' },
   { name: 'Proposal ID', type: 'singleLineText' },
   { name: 'Discovery Version', type: 'singleLineText' },
+  { name: 'Intake Analysis JSON', type: 'multilineText' },
   { name: 'Payload JSON', type: 'multilineText' },
   { name: 'Submitted At', type: 'dateTime', options: { dateFormat: { name: 'iso' }, timeFormat: { name: '24hour' }, timeZone: 'utc' } },
   { name: 'Updated At', type: 'dateTime', options: { dateFormat: { name: 'iso' }, timeFormat: { name: '24hour' }, timeZone: 'utc' } },
