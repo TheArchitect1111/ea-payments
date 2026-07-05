@@ -4,6 +4,7 @@ import type {
   CtpSubmissionStatus,
   CtpWorkspaceStatus,
 } from '@/lib/ctp-submissions';
+import { buildCtpAdminAssetViews, type CtpAdminAssetView } from '@/lib/ctp-admin-view';
 
 export type CtpTimelineStepState = 'complete' | 'active' | 'pending' | 'failed';
 
@@ -24,6 +25,7 @@ export type CtpPortalStatusView = {
   proposalId: string;
   submittedAt: string;
   intakeSummary?: string;
+  assets: CtpAdminAssetView[];
   timeline: CtpTimelineStep[];
 };
 
@@ -91,6 +93,7 @@ export function buildCtpPortalStatusView(submission: CtpSubmission): CtpPortalSt
     proposalId: submission.proposalId,
     submittedAt: submission.submittedAt,
     intakeSummary: submission.intakeAnalysis?.summary,
+    assets: buildCtpAdminAssetViews(submission.assetManifest),
     timeline: [
       {
         id: 'submitted',

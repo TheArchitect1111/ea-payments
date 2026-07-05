@@ -135,15 +135,26 @@ Mission Control
 
 ---
 
-## Future (Phase 3 — scoped)
+## Future (Phase 4 — scoped)
 
-See **`docs/CTP-PHASE-3-SCOPE.md`** for work packages, build order, acceptance criteria, and PR breakdown.
+See **`docs/CTP-PHASE-4-SCOPE.md`**.
+
+| Package | Summary |
+|---------|---------|
+| CTP-4B | Portal asset gallery on `/portal/[slug]/ctp` |
+| CTP-4C | Admin review scheduling + `ctp.review.scheduled` |
+
+---
+
+## Future (Phase 3 — complete)
+
+See **`docs/CTP-PHASE-3-SCOPE.md`**.
 
 | Package | Summary |
 |---------|---------|
 | CTP-3A | Logo → Creative Studio brand profile bridge |
 | CTP-3B | Studio ready-for-review automation + `ctp.studio.ready` |
-| CTP-3C | Admin asset viewer for discovery uploads | In progress (PR) |
+| CTP-3C | Admin asset viewer for discovery uploads |
 
 ---
 

@@ -143,6 +143,13 @@ export async function GET() {
         asyncCapture: captureReady,
       },
       airtableSchema,
+      ctp: {
+        submissionsSchemaOk: airtableSchema.ctpSubmissions.ok,
+        creativeStudioSchemaOk: airtableSchema.creativeStudio.ok,
+        intakeAgentReady: Boolean(process.env.OPENAI_API_KEY?.trim()),
+        assetUploadReady: true,
+        phase4Ready: airtableSchema.ctpSubmissions.ok && airtableSchema.creativeStudio.ok,
+      },
     },
     links: {
       start: `${base}/start`,
