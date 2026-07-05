@@ -6,7 +6,9 @@ import type { ProposalWithAssessment } from '@/lib/airtable';
 import { computeAdoptionHealth } from '@/lib/adoption-engine';
 import { matchProofStories } from '@/lib/proof-library';
 import AdoptionHealthPanel from '../_components/AdoptionHealthPanel';
+import CtpAssetManifestPanel from '../_components/CtpAssetManifestPanel';
 import ProofLibraryPanel from '../_components/ProofLibraryPanel';
+import type { CtpAdminSubmissionView } from '@/lib/ctp-admin-view';
 
 type ProposalStatus =
   | 'Pending Review'
@@ -53,6 +55,7 @@ function fmtDate(str: string | undefined): string {
 
 interface Props {
   initialData: ProposalWithAssessment[];
+  ctpByProposalId?: Record<string, CtpAdminSubmissionView>;
 }
 
 interface EditState {
@@ -60,7 +63,7 @@ interface EditState {
   scope: string;
 }
 
-export default function ProposalsDashboard({ initialData }: Props) {
+export default function ProposalsDashboard({ initialData, ctpByProposalId = {} }: Props) {
   const [proposals, setProposals] = useState(initialData);
   const [statusFilter, setStatusFilter] = useState<string>('Pending Review');
   const [updating, setUpdating] = useState<Record<string, boolean>>({});
@@ -221,6 +224,12 @@ export default function ProposalsDashboard({ initialData }: Props) {
               Master
             </a>
             <a
+              href="/admin/ctp"
+              className="text-xs font-semibold text-blue-200 hover:text-white transition"
+            >
+              CTP
+            </a>
+            <a
               href="/admin/commissions"
               className="text-xs font-semibold text-blue-200 hover:text-white transition"
             >
@@ -312,6 +321,7 @@ export default function ProposalsDashboard({ initialData }: Props) {
               const edit = edits[proposal.id] ?? { fee: String(proposal.recommendedFee), scope: proposal.scopeSummary };
               const adoption = computeAdoptionHealth(proposal);
               const proofStories = matchProofStories(proposal);
+              const ctpSubmission = ctpByProposalId[proposal.proposalId];
 
               return (
                 <div
@@ -554,6 +564,25 @@ export default function ProposalsDashboard({ initialData }: Props) {
                     <AdoptionHealthPanel adoption={adoption} compact />
                     <ProofLibraryPanel stories={proofStories} title="Matched Proof Stories" />
                   </div>
+
+                  {ctpSubmission ? (
+                    <div className="px-6 pb-6 mx-6 border-t border-neutral-100 pt-4">
+                      <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
+                        <SectionLabel label="CTP Discovery Assets" color={GOLD} />
+                        <a
+                          href="/admin/ctp"
+                          className="text-xs font-semibold text-blue-700 hover:text-blue-900"
+                        >
+                          Open CTP admin · {ctpSubmission.id}
+                        </a>
+                      </div>
+                      <CtpAssetManifestPanel
+                        assets={ctpSubmission.assets}
+                        compact
+                        emptyMessage="No discovery assets uploaded yet."
+                      />
+                    </div>
+                  ) : null}
 
                   {/* Proposal ID footer */}
                   <div className="px-6 py-2 border-t border-neutral-100 bg-neutral-50 flex justify-between items-center">

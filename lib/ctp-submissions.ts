@@ -344,6 +344,34 @@ export async function getCtpSubmissionForPortal(input: {
   }
 }
 
+export async function getCtpSubmissionByProposalId(proposalId: string): Promise<CtpSubmission | null> {
+  const trimmed = proposalId.trim();
+  if (!trimmed) return null;
+
+  const fromMemory = [...memory.values()]
+    .filter((row) => row.proposalId === trimmed)
+    .sort((a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime())[0];
+  if (fromMemory) return fromMemory;
+
+  if (!airtableConfigured()) return null;
+
+  try {
+    const formula = `{Proposal ID}='${escapeAirtableString(trimmed)}'`;
+    const records = await airtableQuery(TABLE, {
+      filterByFormula: formula,
+      maxRecords: 1,
+      sortField: 'Submitted At',
+      sortDirection: 'desc',
+    });
+    const row = fromAirtableRecord(records[0]?.fields ?? {});
+    if (row) memory.set(row.id, row);
+    return row;
+  } catch (err) {
+    console.error('[ctp-submissions] proposal lookup failed:', err);
+    return fromMemory ?? null;
+  }
+}
+
 export async function getCtpSubmissionById(id: string): Promise<CtpSubmission | null> {
   const cached = memory.get(id);
   if (cached) return cached;
