@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import type { CtpAssetManifest } from '@/lib/ctp-asset-store';
 import {
   airtableConfigured,
   airtableQuery,
@@ -52,6 +53,7 @@ export type CtpSubmission = {
   desiredExperiences?: string[];
   recommendations?: unknown;
   intakeAnalysis?: CtpIntakeAnalysisRecord;
+  assetManifest?: CtpAssetManifest;
   submittedAt: string;
   updatedAt: string;
 };
@@ -66,6 +68,7 @@ export type CtpSubmissionUpdate = Partial<
     | 'intakeAnalysis'
     | 'portalSlug'
     | 'creativeCampaignId'
+    | 'assetManifest'
   >
 >;
 
@@ -98,6 +101,9 @@ function toAirtableFields(submission: CtpSubmission): Record<string, unknown> {
     'Discovery Version': submission.discoveryVersion ?? '',
     'Intake Analysis JSON': submission.intakeAnalysis
       ? JSON.stringify(submission.intakeAnalysis)
+      : '',
+    'Asset Manifest JSON': submission.assetManifest
+      ? JSON.stringify(submission.assetManifest)
       : '',
     'Payload JSON': JSON.stringify({
       discoveryAnswers: submission.discoveryAnswers,
@@ -137,6 +143,16 @@ function fromAirtableRecord(fields: Record<string, unknown>): CtpSubmission | nu
     }
   }
 
+  let assetManifest: CtpAssetManifest | undefined;
+  const manifestRaw = fields['Asset Manifest JSON'];
+  if (typeof manifestRaw === 'string' && manifestRaw.trim()) {
+    try {
+      assetManifest = JSON.parse(manifestRaw) as CtpAssetManifest;
+    } catch {
+      assetManifest = undefined;
+    }
+  }
+
   return {
     id,
     businessName: String(fields['Business Name'] ?? ''),
@@ -159,6 +175,7 @@ function fromAirtableRecord(fields: Record<string, unknown>): CtpSubmission | nu
     desiredExperiences: payload.desiredExperiences,
     recommendations: payload.recommendations,
     intakeAnalysis,
+    assetManifest,
     submittedAt: String(fields['Submitted At'] ?? new Date().toISOString()),
     updatedAt: String(fields['Updated At'] ?? new Date().toISOString()),
   };
@@ -176,6 +193,7 @@ export async function createCtpSubmission(input: {
   discoveryAnswers?: Record<string, unknown>;
   desiredExperiences?: string[];
   recommendations?: unknown;
+  assetManifest?: CtpAssetManifest;
   portalRequired?: boolean;
 }): Promise<{ ok: boolean; submission?: CtpSubmission; error?: string }> {
   const now = new Date().toISOString();
@@ -196,6 +214,7 @@ export async function createCtpSubmission(input: {
     discoveryAnswers: input.discoveryAnswers,
     desiredExperiences: input.desiredExperiences,
     recommendations: input.recommendations,
+    assetManifest: input.assetManifest,
     submittedAt: now,
     updatedAt: now,
   };

@@ -67,7 +67,18 @@ function buildCampaignStory(submission: CtpSubmission): string {
 }
 
 function studioOrganizationId(submission: CtpSubmission): string {
-  if (submission.portalSlug) return syntheticOrgId(submission.portalSlug);
+  return resolveCtpOrganizationId({
+    portalSlug: submission.portalSlug,
+    considerSlug: submission.considerSlug,
+  });
+}
+
+export function resolveCtpOrganizationId(input: {
+  portalSlug?: string;
+  considerSlug?: string;
+}): string {
+  if (input.portalSlug) return syntheticOrgId(input.portalSlug);
+  if (input.considerSlug) return syntheticOrgId(input.considerSlug);
   return EA_INTERNAL_ORG_ID;
 }
 

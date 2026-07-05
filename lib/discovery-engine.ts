@@ -19,7 +19,25 @@ export type DiscoveryProject =
   | 'events';
 
 export type DiscoveryMultiTextValue = { selected?: string[]; note?: string };
-export type DiscoveryAnswerValue = string | string[] | number | DiscoveryMultiTextValue | undefined;
+export type DiscoveryAssetUploadValue = Record<
+  string,
+  {
+    id: string;
+    assetType: string;
+    fileName: string;
+    mimeType: string;
+    size: number;
+    url: string;
+    uploadedAt: string;
+  }
+>;
+export type DiscoveryAnswerValue =
+  | string
+  | string[]
+  | number
+  | DiscoveryMultiTextValue
+  | DiscoveryAssetUploadValue
+  | undefined;
 
 export interface DiscoveryChoice {
   id: string;
@@ -805,6 +823,14 @@ export function chunkQuestions(questions: DiscoveryQuestion[], size = 3) {
   return chunks;
 }
 
+function isMultiTextValue(value: DiscoveryAnswerValue): value is DiscoveryMultiTextValue {
+  return typeof value === 'object' && value !== null && !Array.isArray(value) && ('selected' in value || 'note' in value);
+}
+
+function isAssetUploadValue(value: DiscoveryAnswerValue): value is DiscoveryAssetUploadValue {
+  return typeof value === 'object' && value !== null && !Array.isArray(value) && !isMultiTextValue(value);
+}
+
 export function answerLabel(question: DiscoveryQuestion, value: DiscoveryAnswerValue) {
   if (value === undefined || value === '' || (Array.isArray(value) && value.length === 0)) return '';
   if (isMultiTextValue(value)) {
@@ -813,8 +839,14 @@ export function answerLabel(question: DiscoveryQuestion, value: DiscoveryAnswerV
     const note = value.note?.trim();
     return [...labels, note].filter(Boolean).join(', ');
   }
+  if (isAssetUploadValue(value)) {
+    return Object.values(value)
+      .map((item) => item.fileName)
+      .filter(Boolean)
+      .join(', ');
+  }
   if (typeof value === 'number') return String(value);
-  if (!Array.isArray(value)) {
+  if (!Array.isArray(value) && typeof value === 'string') {
     return question.choices?.find((choice) => choice.id === value)?.label ?? value;
   }
   return value.map((item) => question.choices?.find((choice) => choice.id === item)?.label ?? item).join(', ');
@@ -918,7 +950,14 @@ export function buildSubmissionPayload(answers: DiscoveryAnswers, considerSlug?:
     discoveryVersion: DISCOVERY_SCHEMA.version,
     discoveryAnswers: answers,
     desiredExperiences: arrayAnswer(answers.desired_experiences),
+    assetUploads: assetUploadAnswer(answers.asset_uploads),
   };
+}
+
+function assetUploadAnswer(value: DiscoveryAnswerValue) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return undefined;
+  if ('selected' in value || 'note' in value) return undefined;
+  return value as DiscoveryAssetUploadValue;
 }
 
 function stringAnswer(value: DiscoveryAnswerValue) {
@@ -927,10 +966,6 @@ function stringAnswer(value: DiscoveryAnswerValue) {
 
 function arrayAnswer(value: DiscoveryAnswerValue) {
   return Array.isArray(value) ? value : [];
-}
-
-function isMultiTextValue(value: DiscoveryAnswerValue): value is DiscoveryMultiTextValue {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
 function multiTextAnswer(value: DiscoveryAnswerValue) {
