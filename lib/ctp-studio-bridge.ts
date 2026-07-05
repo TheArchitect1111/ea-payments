@@ -1,5 +1,6 @@
 import { createCampaign } from '@/lib/creative-studio/campaign-store';
 import type { CampaignGoalId } from '@/lib/creative-studio/types';
+import { applyCtpBrandFromSubmission } from '@/lib/ctp-brand-bridge';
 import {
   getCtpSubmissionById,
   updateCtpSubmission,
@@ -107,18 +108,22 @@ export async function runCtpStudioCampaign(
   }
 
   try {
+    const organizationId = studioOrganizationId(submission);
+    await applyCtpBrandFromSubmission(submission, organizationId);
+
     const goalId = mapGoalId(submission);
     const story = buildCampaignStory(submission);
     const campaign = await createCampaign({
       goalId,
       story,
-      organizationId: studioOrganizationId(submission),
+      organizationId,
     });
 
+    const readyForReview = campaign.completionPercent >= 100;
     await updateCtpSubmission(submissionId, {
       creativeCampaignId: campaign.id,
-      studioStatus: 'In Progress',
-      status: 'Studio In Progress',
+      studioStatus: readyForReview ? 'Ready For Review' : 'In Progress',
+      status: readyForReview ? 'Ready For Review' : 'Studio In Progress',
     });
 
     await emitPulseEvent({
@@ -136,6 +141,24 @@ export async function runCtpStudioCampaign(
         goalId: campaign.goalId,
       },
     });
+
+    if (readyForReview) {
+      await emitPulseEvent({
+        product: 'ea-platform',
+        type: 'ctp.studio.ready',
+        title: `CTP studio ready for review — ${submission.businessName}`,
+        detail: `${campaign.brief.title} · ${campaign.completionPercent}% complete`,
+        priority: 'medium',
+        href: `/admin/creative-studio/campaigns/${campaign.id}`,
+        tenantId: submission.considerSlug,
+        objectId: submission.id,
+        metadata: {
+          ctpSubmissionId: submission.id,
+          creativeCampaignId: campaign.id,
+          completionPercent: campaign.completionPercent,
+        },
+      });
+    }
 
     return { ok: true, campaignId: campaign.id };
   } catch (err) {
