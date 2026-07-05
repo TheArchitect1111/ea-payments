@@ -102,6 +102,7 @@ export const CTP_SUBMISSIONS_REQUIRED_FIELDS = [
   'Assessment ID',
   'Proposal ID',
   'Portal Slug',
+  'Creative Campaign ID',
   'Intake Analysis JSON',
   'Payload JSON',
   'Submitted At',

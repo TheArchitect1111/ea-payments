@@ -4,6 +4,7 @@ import { ensurePackageEntitlements } from '@/lib/modules/portal-modules';
 import { ensureOrganizationForPortal } from '@/lib/organizations';
 import { createPortalAccess } from '@/lib/portal-access';
 import type { PortalConfig } from '@/lib/catalog';
+import { scheduleCtpStudioCampaign } from '@/lib/ctp-studio-bridge';
 import {
   getCtpSubmissionById,
   updateCtpSubmission,
@@ -66,6 +67,7 @@ async function markWorkspaceActive(
     'ctp.workspace.active',
     `Portal ready at /portal/${portalSlug}`,
   );
+  scheduleCtpStudioCampaign(submission.id);
 }
 
 export async function runCtpWorkspaceProvision(

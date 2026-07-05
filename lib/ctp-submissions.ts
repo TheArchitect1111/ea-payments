@@ -44,6 +44,7 @@ export type CtpSubmission = {
   considerSlug?: string;
   partnerSlug?: string;
   portalSlug?: string;
+  creativeCampaignId?: string;
   assessmentId: string;
   proposalId: string;
   discoveryVersion?: string;
@@ -64,6 +65,7 @@ export type CtpSubmissionUpdate = Partial<
     | 'reviewScheduledAt'
     | 'intakeAnalysis'
     | 'portalSlug'
+    | 'creativeCampaignId'
   >
 >;
 
@@ -90,6 +92,7 @@ function toAirtableFields(submission: CtpSubmission): Record<string, unknown> {
     'Consider Slug': submission.considerSlug ?? '',
     'Partner Slug': submission.partnerSlug ?? '',
     'Portal Slug': submission.portalSlug ?? '',
+    'Creative Campaign ID': submission.creativeCampaignId ?? '',
     'Assessment ID': submission.assessmentId,
     'Proposal ID': submission.proposalId,
     'Discovery Version': submission.discoveryVersion ?? '',
@@ -148,6 +151,7 @@ function fromAirtableRecord(fields: Record<string, unknown>): CtpSubmission | nu
     considerSlug: String(fields['Consider Slug'] ?? '').trim() || undefined,
     partnerSlug: String(fields['Partner Slug'] ?? '').trim() || undefined,
     portalSlug: String(fields['Portal Slug'] ?? '').trim() || undefined,
+    creativeCampaignId: String(fields['Creative Campaign ID'] ?? '').trim() || undefined,
     assessmentId: String(fields['Assessment ID'] ?? ''),
     proposalId: String(fields['Proposal ID'] ?? ''),
     discoveryVersion: String(fields['Discovery Version'] ?? '').trim() || undefined,

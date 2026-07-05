@@ -10,6 +10,7 @@ import { emitPulseEvent } from '@/lib/pulse-bus';
 import { createCtpSubmission, isCtpDiscoverySubmit } from '@/lib/ctp-submissions';
 import { scheduleCtpIntakeAnalysis } from '@/lib/ctp-intake-orchestrator';
 import { scheduleCtpWorkspaceProvision } from '@/lib/ctp-workspace-provision';
+import { scheduleCtpStudioCampaign } from '@/lib/ctp-studio-bridge';
 import { buildDiscoveryRecommendations, type DiscoveryAnswers } from '@/lib/discovery-engine';
 
 function mapTeamSize(label: string): number {
@@ -329,6 +330,8 @@ export async function POST(req: NextRequest) {
           scheduleCtpIntakeAnalysis(ctpResult.submission.id);
           if (ctpResult.submission.workspaceStatus === 'Pending') {
             scheduleCtpWorkspaceProvision(ctpResult.submission.id);
+          } else {
+            scheduleCtpStudioCampaign(ctpResult.submission.id);
           }
         }
       } catch (err) {
