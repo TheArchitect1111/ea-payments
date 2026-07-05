@@ -143,7 +143,7 @@ See **`docs/CTP-PHASE-3-SCOPE.md`** for work packages, build order, acceptance c
 |---------|---------|
 | CTP-3A | Logo → Creative Studio brand profile bridge |
 | CTP-3B | Studio ready-for-review automation + `ctp.studio.ready` |
-| CTP-3C | Admin asset viewer for discovery uploads |
+| CTP-3C | Admin asset viewer for discovery uploads | In progress (PR) |
 
 ---
 

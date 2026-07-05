@@ -64,10 +64,10 @@ Studio In Progress
 
 ### Acceptance criteria
 
-- [ ] CTP submission with `assetManifest.logo` → brand profile `logoUrl` set for org
-- [ ] `organizationName` on brand profile uses submission `businessName` when logo applied
-- [ ] Campaign generation runs after brand sync (logo available to package)
-- [ ] No logo in manifest → brand profile unchanged (except org name optional skip)
+- [x] CTP submission with `assetManifest.logo` → brand profile `logoUrl` set for org
+- [x] `organizationName` on brand profile uses submission `businessName` when logo applied
+- [x] Campaign generation runs after brand sync (logo available to package)
+- [x] No logo in manifest → brand profile unchanged (except org name optional skip)
 
 ### Effort
 
@@ -89,10 +89,10 @@ Studio In Progress
 
 ### Acceptance criteria
 
-- [ ] After studio campaign creation, CTP row shows `Ready For Review` when package is complete
-- [ ] Pulse shows `ctp.studio.ready`
-- [ ] Mission Control CTP attention includes ready-for-review count
-- [ ] Partial campaigns (future) stay `In Progress`
+- [x] After studio campaign creation, CTP row shows `Ready For Review` when package is complete
+- [x] Pulse shows `ctp.studio.ready`
+- [x] Mission Control CTP attention includes ready-for-review count
+- [x] Partial campaigns (future) stay `In Progress`
 
 ### Effort
 
@@ -113,8 +113,8 @@ Studio In Progress
 
 ### Acceptance criteria
 
-- [ ] Admin can open uploaded logo/photos from CTP submission detail
-- [ ] Manifest empty state handled gracefully
+- [x] Admin can open uploaded logo/photos from CTP submission detail
+- [x] Manifest empty state handled gracefully
 
 ### Effort
 
