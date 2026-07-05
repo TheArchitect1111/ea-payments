@@ -31,7 +31,8 @@ export async function POST(req: NextRequest) {
       schema.pulse.ok &&
       schema.assessment.ok &&
       schema.proposal.ok &&
-      schema.creativeStudio.ok,
+      schema.creativeStudio.ok &&
+      schema.ctpSubmissions.ok,
     base: baseCheck,
     setup,
     schema,
@@ -52,7 +53,8 @@ export async function GET(req: NextRequest) {
       schema.capture.ok &&
       schema.assessment.ok &&
       schema.proposal.ok &&
-      schema.creativeStudio.ok,
+      schema.creativeStudio.ok &&
+      schema.ctpSubmissions.ok,
     base: baseCheck,
     schema,
   });

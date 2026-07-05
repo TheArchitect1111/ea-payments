@@ -3,6 +3,7 @@ import {
   ASSESSMENT_REQUIRED_FIELDS,
   CAPTURE_REQUIRED_FIELDS,
   CREATIVE_STUDIO_REQUIRED_FIELDS,
+  CTP_SUBMISSIONS_REQUIRED_FIELDS,
   PROPOSAL_REQUIRED_FIELDS,
   PULSE_REQUIRED_FIELDS,
 } from '@/lib/airtable-schema-check';
@@ -17,6 +18,7 @@ const PROPOSALS_TABLE_ID =
 const ASSESSMENTS_TABLE_NAME = process.env.AIRTABLE_ASSESSMENTS_TABLE ?? 'Assessments';
 const PROPOSALS_TABLE_NAME = process.env.AIRTABLE_PROPOSALS_TABLE ?? 'Proposals';
 const CREATIVE_STUDIO_TABLE = process.env.AIRTABLE_CREATIVE_STUDIO_TABLE ?? 'Creative Studio';
+const CTP_SUBMISSIONS_TABLE = process.env.AIRTABLE_CTP_SUBMISSIONS_TABLE ?? 'CTP Submissions';
 
 type AirtableFieldDef = {
   name: string;
@@ -226,6 +228,61 @@ const CREATIVE_STUDIO_FIELD_DEFS: AirtableFieldDef[] = [
   { name: 'Updated At', type: 'dateTime', options: { dateFormat: { name: 'iso' }, timeFormat: { name: '24hour' }, timeZone: 'utc' } },
 ];
 
+const CTP_SUBMISSIONS_FIELD_DEFS: AirtableFieldDef[] = [
+  { name: 'Submission ID', type: 'singleLineText' },
+  { name: 'Business Name', type: 'singleLineText' },
+  { name: 'Contact Name', type: 'singleLineText' },
+  { name: 'Email', type: 'email' },
+  {
+    name: 'Status',
+    type: 'singleSelect',
+    options: {
+      choices: [
+        { name: 'Submitted' },
+        { name: 'Workspace Pending' },
+        { name: 'Workspace Active' },
+        { name: 'Studio In Progress' },
+        { name: 'Ready For Review' },
+        { name: 'Review Scheduled' },
+        { name: 'Completed' },
+      ],
+    },
+  },
+  {
+    name: 'Workspace Status',
+    type: 'singleSelect',
+    options: {
+      choices: [
+        { name: 'Pending' },
+        { name: 'Provisioning' },
+        { name: 'Active' },
+        { name: 'Failed' },
+      ],
+    },
+  },
+  {
+    name: 'Studio Status',
+    type: 'singleSelect',
+    options: {
+      choices: [
+        { name: 'Not Started' },
+        { name: 'In Progress' },
+        { name: 'Ready For Review' },
+        { name: 'Completed' },
+      ],
+    },
+  },
+  { name: 'Review Scheduled At', type: 'dateTime', options: { dateFormat: { name: 'iso' }, timeFormat: { name: '24hour' }, timeZone: 'utc' } },
+  { name: 'Consider Slug', type: 'singleLineText' },
+  { name: 'Partner Slug', type: 'singleLineText' },
+  { name: 'Assessment ID', type: 'singleLineText' },
+  { name: 'Proposal ID', type: 'singleLineText' },
+  { name: 'Discovery Version', type: 'singleLineText' },
+  { name: 'Payload JSON', type: 'multilineText' },
+  { name: 'Submitted At', type: 'dateTime', options: { dateFormat: { name: 'iso' }, timeFormat: { name: '24hour' }, timeZone: 'utc' } },
+  { name: 'Updated At', type: 'dateTime', options: { dateFormat: { name: 'iso' }, timeFormat: { name: '24hour' }, timeZone: 'utc' } },
+];
+
 type TableMeta = { id: string; name: string; fields?: { name: string }[] };
 
 function authHeaders(key: string): Record<string, string> {
@@ -310,6 +367,7 @@ export type AirtableLaunchSetupResult = {
   assessment: { tableName: string; tableId: string; created: string[]; skipped: string[] };
   proposal: { tableName: string; tableId: string; created: string[]; skipped: string[] };
   creativeStudio: { tableName: string; tableId: string; created: string[]; skipped: string[] };
+  ctpSubmissions: { tableName: string; tableId: string; created: string[]; skipped: string[] };
   errors: string[];
 };
 
@@ -327,6 +385,7 @@ export async function ensureAirtableLaunchTables(): Promise<AirtableLaunchSetupR
       assessment: { tableName: ASSESSMENTS_TABLE_NAME, tableId: '', created: [], skipped: [] },
       proposal: { tableName: PROPOSALS_TABLE_NAME, tableId: '', created: [], skipped: [] },
       creativeStudio: { tableName: CREATIVE_STUDIO_TABLE, tableId: '', created: [], skipped: [] },
+      ctpSubmissions: { tableName: CTP_SUBMISSIONS_TABLE, tableId: '', created: [], skipped: [] },
       errors: ['AIRTABLE_API_KEY missing on server'],
     };
   }
@@ -379,6 +438,15 @@ export async function ensureAirtableLaunchTables(): Promise<AirtableLaunchSetupR
       CREATIVE_STUDIO_FIELD_DEFS,
     );
 
+    const ctpTables = await listTables(key);
+    const ctpSubmissionsResult = await ensureTable(
+      key,
+      ctpTables,
+      CTP_SUBMISSIONS_TABLE,
+      'Consider The Possibilities™ discovery submissions and lifecycle',
+      CTP_SUBMISSIONS_FIELD_DEFS,
+    );
+
     const captureNames = new Set([
       ...(captureResult.table.fields ?? []).map((f) => f.name),
       ...captureResult.created,
@@ -399,6 +467,10 @@ export async function ensureAirtableLaunchTables(): Promise<AirtableLaunchSetupR
       ...(creativeStudioResult.table.fields ?? []).map((f) => f.name),
       ...creativeStudioResult.created,
     ]);
+    const ctpSubmissionNames = new Set([
+      ...(ctpSubmissionsResult.table.fields ?? []).map((f) => f.name),
+      ...ctpSubmissionsResult.created,
+    ]);
 
     for (const field of CAPTURE_REQUIRED_FIELDS) {
       if (!captureNames.has(field)) errors.push(`Capture missing required field: ${field}`);
@@ -414,6 +486,9 @@ export async function ensureAirtableLaunchTables(): Promise<AirtableLaunchSetupR
     }
     for (const field of CREATIVE_STUDIO_REQUIRED_FIELDS) {
       if (!creativeStudioNames.has(field)) errors.push(`Creative Studio missing required field: ${field}`);
+    }
+    for (const field of CTP_SUBMISSIONS_REQUIRED_FIELDS) {
+      if (!ctpSubmissionNames.has(field)) errors.push(`CTP Submissions missing required field: ${field}`);
     }
 
     return {
@@ -450,6 +525,12 @@ export async function ensureAirtableLaunchTables(): Promise<AirtableLaunchSetupR
         created: creativeStudioResult.created,
         skipped: creativeStudioResult.skipped,
       },
+      ctpSubmissions: {
+        tableName: ctpSubmissionsResult.table.name,
+        tableId: ctpSubmissionsResult.table.id,
+        created: ctpSubmissionsResult.created,
+        skipped: ctpSubmissionsResult.skipped,
+      },
       errors,
     };
   } catch (err) {
@@ -463,6 +544,7 @@ export async function ensureAirtableLaunchTables(): Promise<AirtableLaunchSetupR
       assessment: { tableName: ASSESSMENTS_TABLE_NAME, tableId: '', created: [], skipped: [] },
       proposal: { tableName: PROPOSALS_TABLE_NAME, tableId: '', created: [], skipped: [] },
       creativeStudio: { tableName: CREATIVE_STUDIO_TABLE, tableId: '', created: [], skipped: [] },
+      ctpSubmissions: { tableName: CTP_SUBMISSIONS_TABLE, tableId: '', created: [], skipped: [] },
       errors: [message],
     };
   }

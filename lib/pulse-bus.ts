@@ -25,6 +25,7 @@ export type PulseEventType =
   | 'update.submitted'
   | 'update.published'
   | 'assessment.submitted'
+  | 'ctp.submitted'
   | 'apply.submitted'
   | 'portal.login'
   | 'proposal.pending'

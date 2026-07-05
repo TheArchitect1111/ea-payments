@@ -1,3 +1,3 @@
-import ThankYouPage from '../../assessment/thank-you/page';
+import DiscoverThankYouPage from '@/app/discover/thank-you/page';
 
-export default ThankYouPage;
+export default DiscoverThankYouPage;

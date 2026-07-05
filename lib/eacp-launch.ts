@@ -518,6 +518,14 @@ function selectProtocols(protocols: EAFactoryProtocol[], input: Required<EACPLau
   if (blob.includes('portal') || blob.includes('member') || blob.includes('dashboard')) desired.add('portal');
   if (blob.includes('training') || blob.includes('learning') || blob.includes('onboarding')) desired.add('training');
   if (blob.includes('assessment') || blob.includes('transformation') || blob.includes('growth')) desired.add('assessment');
+  if (
+    blob.includes('ctp') ||
+    blob.includes('consider') ||
+    blob.includes('possibilities') ||
+    blob.includes('discovery')
+  ) {
+    desired.add('ctp');
+  }
 
   const selected = [...EA_FACTORY_PROTOCOLS, ...protocols].filter((protocol) => {
     const haystack = `${protocol.id} ${protocol.name} ${protocol.category} ${protocol.tags.join(' ')}`.toLowerCase();
