@@ -44,6 +44,7 @@ const REQUIRED = [
   'Studio Status',
   'Assessment ID',
   'Proposal ID',
+  'Intake Analysis JSON',
   'Payload JSON',
   'Submitted At',
   'Updated At',
@@ -103,6 +104,7 @@ const FIELD_DEFS = [
   { name: 'Assessment ID', type: 'singleLineText' },
   { name: 'Proposal ID', type: 'singleLineText' },
   { name: 'Discovery Version', type: 'singleLineText' },
+  { name: 'Intake Analysis JSON', type: 'multilineText' },
   { name: 'Payload JSON', type: 'multilineText' },
   {
     name: 'Submitted At',

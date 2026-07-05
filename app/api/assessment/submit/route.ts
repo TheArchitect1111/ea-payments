@@ -8,6 +8,7 @@ import { sendAssessmentAdminNotification, sendAssessmentConfirmationEmail } from
 import { trackConsiderEvent } from '@/lib/opportunity-tracking';
 import { emitPulseEvent } from '@/lib/pulse-bus';
 import { createCtpSubmission, isCtpDiscoverySubmit } from '@/lib/ctp-submissions';
+import { scheduleCtpIntakeAnalysis } from '@/lib/ctp-intake-orchestrator';
 import { buildDiscoveryRecommendations, type DiscoveryAnswers } from '@/lib/discovery-engine';
 
 function mapTeamSize(label: string): number {
@@ -324,6 +325,7 @@ export async function POST(req: NextRequest) {
               flow: 'ctp',
             },
           });
+          scheduleCtpIntakeAnalysis(ctpResult.submission.id);
         }
       } catch (err) {
         console.error('[assessment/submit] CTP submission failed:', err);

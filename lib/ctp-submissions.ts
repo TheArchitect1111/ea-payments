@@ -19,6 +19,19 @@ export type CtpSubmissionStatus =
   | 'Review Scheduled'
   | 'Completed';
 
+export type CtpIntakeAnalysisRecord = {
+  agent: string;
+  summary: string;
+  keyFindings: Array<{ title: string; detail: string }>;
+  opportunities: Array<{ title: string; detail: string }>;
+  risks: Array<{ title: string; detail: string }>;
+  recommendedNextSteps: string[];
+  confidence: number;
+  sources: string[];
+  analyzedAt: string;
+  requestId: string;
+};
+
 export type CtpSubmission = {
   id: string;
   businessName: string;
@@ -36,9 +49,17 @@ export type CtpSubmission = {
   discoveryAnswers?: Record<string, unknown>;
   desiredExperiences?: string[];
   recommendations?: unknown;
+  intakeAnalysis?: CtpIntakeAnalysisRecord;
   submittedAt: string;
   updatedAt: string;
 };
+
+export type CtpSubmissionUpdate = Partial<
+  Pick<
+    CtpSubmission,
+    'status' | 'workspaceStatus' | 'studioStatus' | 'reviewScheduledAt' | 'intakeAnalysis'
+  >
+>;
 
 const memory = new Map<string, CtpSubmission>();
 
@@ -65,6 +86,9 @@ function toAirtableFields(submission: CtpSubmission): Record<string, unknown> {
     'Assessment ID': submission.assessmentId,
     'Proposal ID': submission.proposalId,
     'Discovery Version': submission.discoveryVersion ?? '',
+    'Intake Analysis JSON': submission.intakeAnalysis
+      ? JSON.stringify(submission.intakeAnalysis)
+      : '',
     'Payload JSON': JSON.stringify({
       discoveryAnswers: submission.discoveryAnswers,
       desiredExperiences: submission.desiredExperiences,
@@ -93,6 +117,16 @@ function fromAirtableRecord(fields: Record<string, unknown>): CtpSubmission | nu
     }
   }
 
+  let intakeAnalysis: CtpIntakeAnalysisRecord | undefined;
+  const intakeRaw = fields['Intake Analysis JSON'];
+  if (typeof intakeRaw === 'string' && intakeRaw.trim()) {
+    try {
+      intakeAnalysis = JSON.parse(intakeRaw) as CtpIntakeAnalysisRecord;
+    } catch {
+      intakeAnalysis = undefined;
+    }
+  }
+
   return {
     id,
     businessName: String(fields['Business Name'] ?? ''),
@@ -112,6 +146,7 @@ function fromAirtableRecord(fields: Record<string, unknown>): CtpSubmission | nu
     discoveryAnswers: payload.discoveryAnswers,
     desiredExperiences: payload.desiredExperiences,
     recommendations: payload.recommendations,
+    intakeAnalysis,
     submittedAt: String(fields['Submitted At'] ?? new Date().toISOString()),
     updatedAt: String(fields['Updated At'] ?? new Date().toISOString()),
   };
@@ -199,6 +234,42 @@ export async function listCtpSubmissions(limit = 100): Promise<CtpSubmission[]> 
   } catch (err) {
     console.error('[ctp-submissions] Airtable list failed:', err);
     return fromMemory.slice(0, limit);
+  }
+}
+
+export async function updateCtpSubmission(
+  id: string,
+  patch: CtpSubmissionUpdate,
+): Promise<{ ok: boolean; submission?: CtpSubmission; error?: string }> {
+  const existing = memory.get(id) ?? (await getCtpSubmissionById(id));
+  if (!existing) {
+    return { ok: false, error: 'CTP submission not found.' };
+  }
+
+  const submission: CtpSubmission = {
+    ...existing,
+    ...patch,
+    updatedAt: new Date().toISOString(),
+  };
+
+  memory.set(submission.id, submission);
+
+  if (!airtableConfigured()) {
+    return { ok: true, submission };
+  }
+
+  try {
+    await airtableUpsertByField(
+      TABLE,
+      'Submission ID',
+      submission.id,
+      toAirtableFields(submission),
+      true,
+    );
+    return { ok: true, submission };
+  } catch (err) {
+    console.error('[ctp-submissions] Airtable update failed:', err);
+    return { ok: true, submission };
   }
 }
 
