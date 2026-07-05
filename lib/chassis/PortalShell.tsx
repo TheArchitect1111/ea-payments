@@ -15,7 +15,8 @@ export type EAPortalTab =
   | 'resources'
   | 'messaging'
   | 'learning'
-  | 'ask';
+  | 'ask'
+  | 'ctp';
 
 
 
@@ -62,6 +63,8 @@ export function PortalShell({ slug, active, firstName, pageTitle, children }: Pr
     learning: 'Learning',
 
     ask: 'Ask EA',
+
+    ctp: 'Consider the Possibilities™',
 
   };
 

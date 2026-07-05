@@ -11,6 +11,7 @@ export {
 import { cookies } from 'next/headers';
 import { EA_PORTAL_COOKIE, verifySession } from '@/lib/ea-portal-auth';
 import { getClientByPortalSlug } from '@/lib/airtable';
+import { getCtpSubmissionForPortal } from '@/lib/ctp-submissions';
 import { resolvePortalModuleAccess } from '@/lib/modules/portal-modules';
 
 export async function getEAPortalHubModules(slug: string) {
@@ -25,6 +26,19 @@ export async function getEAPortalHubModules(slug: string) {
     packagePurchased: client?.packagePurchased,
     role: session?.role,
   });
+
+  if (!access.enabledModuleIds.has('ctp')) {
+    return access.hubModules;
+  }
+
+  const ctpSubmission = await getCtpSubmissionForPortal({
+    portalSlug: slug,
+    email: session?.email ?? client?.email,
+  });
+
+  if (!ctpSubmission) {
+    return access.hubModules.filter((mod) => mod.moduleId !== 'ctp');
+  }
 
   return access.hubModules;
 }

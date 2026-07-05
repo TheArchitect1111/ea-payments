@@ -281,6 +281,46 @@ export async function updateCtpSubmission(
   }
 }
 
+export async function getCtpSubmissionForPortal(input: {
+  portalSlug: string;
+  email?: string;
+}): Promise<CtpSubmission | null> {
+  const portalSlug = input.portalSlug.trim();
+  const email = input.email?.trim().toLowerCase();
+
+  const fromMemory = [...memory.values()]
+    .filter(
+      (row) =>
+        (portalSlug && row.portalSlug === portalSlug) ||
+        (email && row.email.toLowerCase() === email),
+    )
+    .sort((a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime());
+
+  if (fromMemory[0]) return fromMemory[0];
+
+  if (!airtableConfigured() || (!portalSlug && !email)) return null;
+
+  const parts: string[] = [];
+  if (portalSlug) parts.push(`{Portal Slug}='${escapeAirtableString(portalSlug)}'`);
+  if (email) parts.push(`LOWER({Email})='${escapeAirtableString(email)}'`);
+  const formula = parts.length === 1 ? parts[0] : `OR(${parts.join(',')})`;
+
+  try {
+    const records = await airtableQuery(TABLE, {
+      filterByFormula: formula,
+      maxRecords: 1,
+      sortField: 'Submitted At',
+      sortDirection: 'desc',
+    });
+    const row = fromAirtableRecord(records[0]?.fields ?? {});
+    if (row) memory.set(row.id, row);
+    return row;
+  } catch (err) {
+    console.error('[ctp-submissions] portal lookup failed:', err);
+    return fromMemory[0] ?? null;
+  }
+}
+
 export async function getCtpSubmissionById(id: string): Promise<CtpSubmission | null> {
   const cached = memory.get(id);
   if (cached) return cached;

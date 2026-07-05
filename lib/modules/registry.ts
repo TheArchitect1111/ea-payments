@@ -17,6 +17,7 @@ export const MODULE_IDS = [
   'resources',
   'ask',
   'billing',
+  'ctp',
 ] as const;
 
 export type ModuleId = (typeof MODULE_IDS)[number];
@@ -202,6 +203,17 @@ export const MODULE_REGISTRY: ModuleDefinition[] = [
     demoOnly: true,
   },
   {
+    id: 'ctp',
+    name: 'Consider the Possibilities',
+    tag: 'CTP™',
+    title: 'Your discovery journey',
+    description: 'Track workspace, design studio, and review progress from your Consider submission.',
+    navGroup: 'operations',
+    showInNav: false,
+    requiredRole: 'guest',
+    pathSegment: 'ctp',
+  },
+  {
     id: 'landing',
     name: 'Landing Pages',
     tag: 'Landing Pages',
@@ -268,8 +280,8 @@ export const TENANT_MODULE_PRESETS: Record<string, ModuleId[]> = {
 export const PACKAGE_MODULE_GRANTS: Record<string, ModuleId[]> = {
   Simplifi: ['simplifi', 'amplifi'],
   'Implementation Package': ['simplifi', 'amplifi', 'connect'],
-  'Capacity Assessment': ['dashboard', 'pulse', 'update-hub', 'documents', 'ask', 'discovery'],
-  'Capacity Blueprint': ['dashboard', 'pulse', 'update-hub', 'documents', 'ask', 'discovery'],
+  'Capacity Assessment': ['dashboard', 'pulse', 'update-hub', 'documents', 'ask', 'discovery', 'ctp'],
+  'Capacity Blueprint': ['dashboard', 'pulse', 'update-hub', 'documents', 'ask', 'discovery', 'ctp'],
   'Launch Verification': ['dashboard', 'pulse', 'update-hub', 'ask'],
 };
 
