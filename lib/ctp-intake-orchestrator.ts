@@ -8,6 +8,7 @@ import {
   type CtpIntakeAnalysisRecord,
   type CtpSubmission,
 } from '@/lib/ctp-submissions';
+import { scheduleCtpStudioCampaign } from '@/lib/ctp-studio-bridge';
 import { emitPulseEvent } from '@/lib/pulse-bus';
 
 function systemRequestId(): string {
@@ -115,6 +116,8 @@ export async function runCtpIntakeAnalysis(
       submissionId,
       confidence: result.confidence,
     });
+
+    scheduleCtpStudioCampaign(submissionId);
 
     return { ok: true, analysis };
   } catch (err) {

@@ -278,6 +278,7 @@ const CTP_SUBMISSIONS_FIELD_DEFS: AirtableFieldDef[] = [
   { name: 'Assessment ID', type: 'singleLineText' },
   { name: 'Proposal ID', type: 'singleLineText' },
   { name: 'Portal Slug', type: 'singleLineText' },
+  { name: 'Creative Campaign ID', type: 'singleLineText' },
   { name: 'Discovery Version', type: 'singleLineText' },
   { name: 'Intake Analysis JSON', type: 'multilineText' },
   { name: 'Payload JSON', type: 'multilineText' },
