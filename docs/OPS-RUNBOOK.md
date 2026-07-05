@@ -2,30 +2,24 @@
 
 Quick operational tasks for production readiness after Phase 3.
 
-## 1. Creative Studio Airtable table
+## 1. Creative Studio + CTP Airtable tables
 
 **Automated (recommended):**
 
 ```bash
 node scripts/ops-airtable-creative-studio.mjs
+node scripts/ops-airtable-ctp-submissions.mjs
 ```
 
-Requires `AIRTABLE_API_KEY` (or `AIRTABLE_PAT`) in `.env.local`. Creates the **Creative Studio** table and fields in the Payments base.
+Or POST `/api/health/setup-schema` with `LAUNCH_SETUP_KEY` (creates both tables).
 
-**Via deployed API** (after merge + deploy):
+**Verify:**
 
 ```bash
-curl -X POST -H "x-launch-setup-key: $LAUNCH_SETUP_KEY" \
-  https://ea-payments.vercel.app/api/health/setup-schema
+curl https://ea-payments.vercel.app/api/health/launch | jq '.checks.airtableSchema.creativeStudio, .checks.airtableSchema.ctpSubmissions'
 ```
 
-Check `schema.creativeStudio.ok` and `setup.creativeStudio` in the response.
-
-**Verify on launch health:**
-
-```bash
-curl https://ea-payments.vercel.app/api/health/launch | jq '.checks.airtableSchema.creativeStudio'
-```
+See also `docs/CTP-SETUP.md` and `docs/CTP-ARCHITECTURE.md`.
 
 ## 2. Vercel environment variables
 

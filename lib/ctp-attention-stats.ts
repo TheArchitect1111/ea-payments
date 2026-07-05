@@ -1,4 +1,4 @@
-/** CTP attention stats for Mission Control — stub until full CTP submissions ship on this branch. */
+import { listCtpSubmissions } from '@/lib/ctp-submissions';
 
 export type CtpAttentionStats = {
   workspacesPending: number;
@@ -8,10 +8,18 @@ export type CtpAttentionStats = {
 };
 
 export async function getCtpAttentionStats(): Promise<CtpAttentionStats> {
+  const submissions = await listCtpSubmissions(200);
+
   return {
-    workspacesPending: 0,
-    studiosInProgress: 0,
-    studiosReadyForReview: 0,
-    reviewsScheduled: 0,
+    workspacesPending: submissions.filter(
+      (s) => s.workspaceStatus === 'Pending' || s.workspaceStatus === 'Failed',
+    ).length,
+    studiosInProgress: submissions.filter((s) => s.studioStatus === 'In Progress').length,
+    studiosReadyForReview: submissions.filter(
+      (s) => s.studioStatus === 'Ready For Review' || s.status === 'Ready For Review',
+    ).length,
+    reviewsScheduled: submissions.filter(
+      (s) => s.status === 'Review Scheduled' || Boolean(s.reviewScheduledAt),
+    ).length,
   };
 }

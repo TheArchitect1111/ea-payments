@@ -91,6 +91,23 @@ export const CREATIVE_STUDIO_REQUIRED_FIELDS = [
 
 const CREATIVE_STUDIO_TABLE = process.env.AIRTABLE_CREATIVE_STUDIO_TABLE ?? 'Creative Studio';
 
+export const CTP_SUBMISSIONS_REQUIRED_FIELDS = [
+  'Submission ID',
+  'Business Name',
+  'Contact Name',
+  'Email',
+  'Status',
+  'Workspace Status',
+  'Studio Status',
+  'Assessment ID',
+  'Proposal ID',
+  'Payload JSON',
+  'Submitted At',
+  'Updated At',
+] as const;
+
+const CTP_SUBMISSIONS_TABLE = process.env.AIRTABLE_CTP_SUBMISSIONS_TABLE ?? 'CTP Submissions';
+
 export const PROPOSAL_REQUIRED_FIELDS = [
   'Proposal ID',
   'Business Name',
@@ -177,6 +194,11 @@ export async function checkCreativeStudioSchema(): Promise<TableSchemaCheck> {
   return checkTable(tables, CREATIVE_STUDIO_TABLE, CREATIVE_STUDIO_REQUIRED_FIELDS);
 }
 
+export async function checkCtpSubmissionsSchema(): Promise<TableSchemaCheck> {
+  const tables = await listTables();
+  return checkTable(tables, CTP_SUBMISSIONS_TABLE, CTP_SUBMISSIONS_REQUIRED_FIELDS);
+}
+
 export async function checkProposalSchema(): Promise<TableSchemaCheck> {
   const tables = await listTables();
   return checkTable(tables, PROPOSALS_TABLE_NAME, PROPOSAL_REQUIRED_FIELDS, PROPOSALS_TABLE_ID);
@@ -188,6 +210,7 @@ export async function checkAirtableLaunchSchema(): Promise<{
   assessment: TableSchemaCheck;
   proposal: TableSchemaCheck;
   creativeStudio: TableSchemaCheck;
+  ctpSubmissions: TableSchemaCheck;
   captureAnalysisMissing: string[];
 }> {
   const tables = await listTables();
@@ -209,10 +232,11 @@ export async function checkAirtableLaunchSchema(): Promise<{
     PROPOSALS_TABLE_ID,
   );
   const creativeStudio = checkTable(tables, CREATIVE_STUDIO_TABLE, CREATIVE_STUDIO_REQUIRED_FIELDS);
+  const ctpSubmissions = checkTable(tables, CTP_SUBMISSIONS_TABLE, CTP_SUBMISSIONS_REQUIRED_FIELDS);
 
   const captureTable = tables.find((t) => t.name === CAPTURES_TABLE);
   const captureNames = new Set((captureTable?.fields ?? []).map((f) => f.name));
   const captureAnalysisMissing = CAPTURE_ANALYSIS_FIELDS.filter((f) => !captureNames.has(f));
 
-  return { capture, pulse, assessment, proposal, creativeStudio, captureAnalysisMissing };
+  return { capture, pulse, assessment, proposal, creativeStudio, ctpSubmissions, captureAnalysisMissing };
 }

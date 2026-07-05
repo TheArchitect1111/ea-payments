@@ -70,6 +70,7 @@ export async function GET() {
     assessment: { ok: false, exists: false, missingFields: [] as string[] },
     proposal: { ok: false, exists: false, missingFields: [] as string[] },
     creativeStudio: { ok: false, exists: false, missingFields: [] as string[] },
+    ctpSubmissions: { ok: false, exists: false, missingFields: [] as string[] },
     captureAnalysisMissing: [] as string[],
   };
 

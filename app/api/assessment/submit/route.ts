@@ -7,6 +7,8 @@ import { createAssessmentRecord, createProposalRecord, upsertProspectFromAssessm
 import { sendAssessmentAdminNotification, sendAssessmentConfirmationEmail } from '@/lib/email';
 import { trackConsiderEvent } from '@/lib/opportunity-tracking';
 import { emitPulseEvent } from '@/lib/pulse-bus';
+import { createCtpSubmission, isCtpDiscoverySubmit } from '@/lib/ctp-submissions';
+import { buildDiscoveryRecommendations, type DiscoveryAnswers } from '@/lib/discovery-engine';
 
 function mapTeamSize(label: string): number {
   const map: Record<string, number> = {
@@ -132,7 +134,17 @@ export async function POST(req: NextRequest) {
       capacityConstraints: String(body.capacityConstraints ?? '').trim(),
       considerSlug: String(body.considerSlug ?? '').trim() || undefined,
       partnerSlug: String(body.partnerSlug ?? '').trim() || undefined,
+      discoveryVersion: String(body.discoveryVersion ?? '').trim() || undefined,
+      discoveryAnswers:
+        body.discoveryAnswers && typeof body.discoveryAnswers === 'object'
+          ? (body.discoveryAnswers as Record<string, unknown>)
+          : undefined,
+      desiredExperiences: Array.isArray(body.desiredExperiences)
+        ? (body.desiredExperiences as string[])
+        : undefined,
     };
+
+    const isCtpFlow = isCtpDiscoverySubmit(body);
 
     if (
       !input.businessName ||
@@ -268,6 +280,56 @@ export async function POST(req: NextRequest) {
       console.error('Pulse assessment.submitted failed:', err);
     }
 
+    if (isCtpFlow) {
+      let recommendations: unknown;
+      if (input.discoveryAnswers) {
+        try {
+          recommendations = buildDiscoveryRecommendations(input.discoveryAnswers as DiscoveryAnswers);
+        } catch (err) {
+          console.error('[assessment/submit] discovery recommendations failed:', err);
+        }
+      }
+
+      try {
+        const ctpResult = await createCtpSubmission({
+          businessName: input.businessName,
+          contactName: input.contactName,
+          email: input.email,
+          assessmentId,
+          proposalId,
+          considerSlug: input.considerSlug,
+          partnerSlug: input.partnerSlug,
+          discoveryVersion: input.discoveryVersion,
+          discoveryAnswers: input.discoveryAnswers,
+          desiredExperiences: input.desiredExperiences,
+          recommendations,
+          portalRequired: scope.portalRequired,
+        });
+
+        if (ctpResult.submission) {
+          await emitPulseEvent({
+            product: 'ea-platform',
+            type: 'ctp.submitted',
+            title: `CTP submitted — ${input.businessName}`,
+            detail: `${input.contactName} · ${ctpResult.submission.id}`,
+            priority: 'medium',
+            href: '/admin/proposals',
+            tenantId: input.considerSlug,
+            objectId: ctpResult.submission.id,
+            metadata: {
+              email: input.email,
+              proposalId,
+              assessmentId,
+              ctpSubmissionId: ctpResult.submission.id,
+              flow: 'ctp',
+            },
+          });
+        }
+      } catch (err) {
+        console.error('[assessment/submit] CTP submission failed:', err);
+      }
+    }
+
     try {
       await sendAssessmentAdminNotification({
         businessName: input.businessName,
@@ -327,7 +389,11 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    return NextResponse.json({ ok: true, proposalId });
+    return NextResponse.json({
+      ok: true,
+      proposalId,
+      ...(isCtpFlow ? { flow: 'ctp' as const } : {}),
+    });
   } catch (err) {
     console.error(
       'Assessment submit unhandled error:',
