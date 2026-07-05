@@ -6,6 +6,7 @@ import { PortalSubpage } from '@/app/portal/components/PortalSubpage';
 import { buildCtpPortalStatusView } from '@/lib/ctp-portal-status';
 import type { CtpTimelineStepState } from '@/lib/ctp-portal-status';
 import { getCtpSubmissionForPortal } from '@/lib/ctp-submissions';
+import PortalCtpAssetGallery from '@/app/portal/components/PortalCtpAssetGallery';
 
 export const dynamic = 'force-dynamic';
 
@@ -132,6 +133,8 @@ export default async function PortalCtpStatusPage({
           </li>
         ))}
       </ol>
+
+      <PortalCtpAssetGallery assets={view.assets} />
 
       {view.proposalId ? (
         <div className="ep-module-card" style={{ marginTop: '1.25rem' }}>

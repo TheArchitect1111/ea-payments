@@ -5,6 +5,7 @@ import { useMemo, useState } from 'react';
 import { NAVY, GOLD } from '@/lib/design-system';
 import type { CtpAdminSubmissionView } from '@/lib/ctp-admin-view';
 import CtpAssetManifestPanel from '../_components/CtpAssetManifestPanel';
+import CtpReviewSchedulePanel from '../_components/CtpReviewSchedulePanel';
 
 function formatDate(value: string): string {
   const date = new Date(value);
@@ -21,11 +22,12 @@ export default function CtpSubmissionsClient({
   const [expandedId, setExpandedId] = useState<string | null>(
     initialSubmissions[0]?.id ?? null,
   );
+  const [submissions, setSubmissions] = useState(initialSubmissions);
 
   const filtered = useMemo(() => {
     const needle = query.trim().toLowerCase();
-    if (!needle) return initialSubmissions;
-    return initialSubmissions.filter((submission) =>
+    if (!needle) return submissions;
+    return submissions.filter((submission) =>
       [
         submission.businessName,
         submission.contactName,
@@ -38,7 +40,7 @@ export default function CtpSubmissionsClient({
         .toLowerCase()
         .includes(needle),
     );
-  }, [initialSubmissions, query]);
+  }, [submissions, query]);
 
   return (
     <div className="min-h-screen bg-neutral-50">
@@ -140,6 +142,15 @@ export default function CtpSubmissionsClient({
                           </p>
                         </div>
                       ) : null}
+
+                      <CtpReviewSchedulePanel
+                        submission={submission}
+                        onScheduled={(next) => {
+                          setSubmissions((current) =>
+                            current.map((item) => (item.id === next.id ? next : item)),
+                          );
+                        }}
+                      />
 
                       <div>
                         <div className="flex flex-wrap items-center justify-between gap-3 mb-3">

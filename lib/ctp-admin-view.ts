@@ -39,6 +39,7 @@ export type CtpAdminSubmissionView = {
   creativeCampaignId?: string;
   portalSlug?: string;
   considerSlug?: string;
+  reviewScheduledAt?: string;
   assets: CtpAdminAssetView[];
   intakeSummary?: string;
 };
@@ -82,6 +83,7 @@ export function buildCtpAdminSubmissionView(submission: CtpSubmission): CtpAdmin
     creativeCampaignId: submission.creativeCampaignId,
     portalSlug: submission.portalSlug,
     considerSlug: submission.considerSlug,
+    reviewScheduledAt: submission.reviewScheduledAt,
     assets: buildCtpAdminAssetViews(submission.assetManifest),
     intakeSummary: submission.intakeAnalysis?.summary,
   };

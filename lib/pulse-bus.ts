@@ -32,6 +32,7 @@ export type PulseEventType =
   | 'ctp.workspace.failed'
   | 'ctp.studio.started'
   | 'ctp.studio.ready'
+  | 'ctp.review.scheduled'
   | 'apply.submitted'
   | 'portal.login'
   | 'proposal.pending'
