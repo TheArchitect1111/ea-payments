@@ -47,6 +47,7 @@ const REQUIRED = [
   'Portal Slug',
   'Creative Campaign ID',
   'Intake Analysis JSON',
+  'Asset Manifest JSON',
   'Payload JSON',
   'Submitted At',
   'Updated At',
@@ -109,6 +110,7 @@ const FIELD_DEFS = [
   { name: 'Creative Campaign ID', type: 'singleLineText' },
   { name: 'Discovery Version', type: 'singleLineText' },
   { name: 'Intake Analysis JSON', type: 'multilineText' },
+  { name: 'Asset Manifest JSON', type: 'multilineText' },
   { name: 'Payload JSON', type: 'multilineText' },
   {
     name: 'Submitted At',

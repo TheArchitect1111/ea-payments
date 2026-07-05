@@ -1,7 +1,7 @@
 ﻿'use client';
 
 import Link from 'next/link';
-import { ChangeEvent, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
+import { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import {
   DISCOVERY_SCHEMA,
@@ -13,6 +13,7 @@ import {
   visibleSections,
   type DiscoveryAnswerValue,
   type DiscoveryAnswers,
+  type DiscoveryAssetUploadValue,
   type DiscoveryMultiTextValue,
   type DiscoveryQuestion,
   type DiscoverySection,
@@ -26,6 +27,7 @@ const GOLD_BRIGHT = '#F6D66B';
 const INK = '#FFFFFF';
 const MUTED = '#B8B8B8';
 const STORAGE_KEY = 'ea-discovery-engine-v2';
+const DRAFT_TOKEN_KEY = 'ea-discovery-draft-token';
 
 type SavedState = {
   answers: DiscoveryAnswers;
@@ -72,6 +74,9 @@ function DiscoverPageInner() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [draftReady, setDraftReady] = useState(false);
+  const [draftToken, setDraftToken] = useState('');
+  const [uploadingAsset, setUploadingAsset] = useState<string | null>(null);
+  const [uploadError, setUploadError] = useState('');
 
   const sections = useMemo(() => visibleSections(DISCOVERY_SCHEMA, answers), [answers]);
   const effectiveSectionIndex = Math.min(sectionIndex, Math.max(0, sections.length - 1));
@@ -93,6 +98,7 @@ function DiscoverPageInner() {
       setSectionIndex(saved.sectionIndex);
       setPageIndex(saved.pageIndex);
       setReviewMode(saved.reviewMode);
+      setDraftToken(readDraftToken());
       setDraftReady(true);
     }, 0);
     return () => window.clearTimeout(timer);
@@ -169,6 +175,38 @@ function DiscoverPageInner() {
     setError('');
   }
 
+  const assetUploads = useMemo(() => readAssetUploads(answers.asset_uploads), [answers.asset_uploads]);
+
+  async function uploadAsset(assetType: string, file: File) {
+    if (!draftToken) {
+      setUploadError('Draft session is not ready yet. Please try again.');
+      return;
+    }
+    setUploadError('');
+    setUploadingAsset(assetType);
+    try {
+      const form = new FormData();
+      form.set('draftToken', draftToken);
+      form.set('assetType', assetType);
+      form.set('file', file);
+      const res = await fetch('/api/ctp/assets', { method: 'POST', body: form });
+      const data = (await res.json().catch(() => ({}))) as {
+        ok?: boolean;
+        error?: string;
+        asset?: DiscoveryAssetUploadValue[string];
+      };
+      if (!res.ok || !data.ok || !data.asset) {
+        setUploadError(data.error ?? 'Upload failed. Please try another file.');
+        return;
+      }
+      updateAnswer('asset_uploads', { ...assetUploads, [assetType]: data.asset });
+    } catch {
+      setUploadError('Network error during upload. Please try again.');
+    } finally {
+      setUploadingAsset(null);
+    }
+  }
+
   function next() {
     setError('');
     const validation = validateQuestions(questions, answers);
@@ -231,6 +269,7 @@ function DiscoverPageInner() {
         return;
       }
       window.localStorage.removeItem(STORAGE_KEY);
+      window.localStorage.removeItem(DRAFT_TOKEN_KEY);
       const suffix = data.proposalId ? `?proposal=${encodeURIComponent(data.proposalId)}` : data.saved === false ? '?received=1' : '';
       window.location.href = `/discover/thank-you${suffix}`;
     } catch {
@@ -241,11 +280,14 @@ function DiscoverPageInner() {
 
   function resetDraft() {
     window.localStorage.removeItem(STORAGE_KEY);
+    window.localStorage.removeItem(DRAFT_TOKEN_KEY);
     setAnswers({});
     setSectionIndex(0);
     setPageIndex(0);
     setReviewMode(false);
     setError('');
+    setUploadError('');
+    setDraftToken(createDraftToken());
   }
 
   return (
@@ -374,6 +416,10 @@ function DiscoverPageInner() {
                       value={answers[question.id]}
                       onChange={(value) => updateAnswer(question.id, value)}
                       onHelp={() => openGuideForQuestion(question)}
+                      assetUploads={assetUploads}
+                      uploadingAsset={uploadingAsset}
+                      uploadError={uploadError}
+                      onAssetUpload={(assetType, file) => void uploadAsset(assetType, file)}
                     />
                   ))}
                 </div>
@@ -438,11 +484,19 @@ function QuestionCard({
   value,
   onChange,
   onHelp,
+  assetUploads,
+  uploadingAsset,
+  uploadError,
+  onAssetUpload,
 }: {
   question: DiscoveryQuestion;
   value: DiscoveryAnswerValue;
   onChange: (value: DiscoveryAnswerValue) => void;
   onHelp: () => void;
+  assetUploads: DiscoveryAssetUploadValue;
+  uploadingAsset: string | null;
+  uploadError: string;
+  onAssetUpload: (assetType: string, file: File) => void;
 }) {
   const isMulti = question.type === 'multi' || question.type === 'asset-select' || question.type === 'multi-text';
   return (
@@ -471,7 +525,15 @@ function QuestionCard({
         </p>
       ) : null}
       <div className="mt-5">
-        <QuestionInput question={question} value={value} onChange={onChange} />
+        <QuestionInput
+          question={question}
+          value={value}
+          onChange={onChange}
+          assetUploads={assetUploads}
+          uploadingAsset={uploadingAsset}
+          uploadError={uploadError}
+          onAssetUpload={onAssetUpload}
+        />
       </div>
     </article>
   );
@@ -481,10 +543,18 @@ function QuestionInput({
   question,
   value,
   onChange,
+  assetUploads,
+  uploadingAsset,
+  uploadError,
+  onAssetUpload,
 }: {
   question: DiscoveryQuestion;
   value: DiscoveryAnswerValue;
   onChange: (value: DiscoveryAnswerValue) => void;
+  assetUploads: DiscoveryAssetUploadValue;
+  uploadingAsset: string | null;
+  uploadError: string;
+  onAssetUpload: (assetType: string, file: File) => void;
 }) {
   if (question.type === 'text' || question.type === 'email') {
     return (
@@ -637,12 +707,38 @@ function QuestionInput({
       </div>
       {question.type === 'asset-select' && selected.length ? (
         <div className="mt-4 space-y-3 rounded-2xl border border-dashed border-[#D8AD3D]/25 bg-black/30 p-4">
-          {selected.map((asset) => (
-            <label key={asset} className="block text-sm font-semibold text-white/75">
-              {assetLabel(question, asset)}
-              <input type="file" className="mt-2 block w-full rounded-xl border border-white/10 bg-black/30 p-2 text-xs text-white/50" onChange={noopFile} />
-            </label>
-          ))}
+          {selected.map((asset) => {
+            const uploaded = assetUploads[asset];
+            const busy = uploadingAsset === asset;
+            return (
+              <label key={asset} className="block text-sm font-semibold text-white/75">
+                {assetLabel(question, asset)}
+                <input
+                  type="file"
+                  accept={assetAcceptHint(asset)}
+                  className="mt-2 block w-full rounded-xl border border-white/10 bg-black/30 p-2 text-xs text-white/50"
+                  disabled={busy}
+                  onChange={(event) => {
+                    const file = event.currentTarget.files?.[0];
+                    event.currentTarget.value = '';
+                    if (file) onAssetUpload(asset, file);
+                  }}
+                />
+                {busy ? (
+                  <span className="mt-2 block text-xs font-semibold text-[#F6D66B]">Uploading…</span>
+                ) : uploaded ? (
+                  <span className="mt-2 block text-xs font-semibold text-emerald-300">
+                    Uploaded: {uploaded.fileName} ({formatFileSize(uploaded.size)})
+                  </span>
+                ) : (
+                  <span className="mt-2 block text-xs text-white/40">Optional — up to 2MB</span>
+                )}
+              </label>
+            );
+          })}
+          {uploadError ? (
+            <p className="text-xs font-semibold text-red-300">{uploadError}</p>
+          ) : null}
         </div>
       ) : null}
     </div>
@@ -737,12 +833,45 @@ function assetLabel(question: DiscoveryQuestion, asset: string) {
   return question.choices?.find((choice) => choice.id === asset)?.label ?? asset;
 }
 
-function isMultiTextValue(value: DiscoveryAnswerValue): value is DiscoveryMultiTextValue {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
+function assetAcceptHint(assetType: string) {
+  if (assetType === 'logo' || assetType === 'photos') return 'image/*';
+  if (assetType === 'videos') return 'video/mp4,video/quicktime,image/*';
+  if (assetType === 'presentations') {
+    return '.ppt,.pptx,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation';
+  }
+  return 'image/*,application/pdf,.doc,.docx,.txt,video/mp4';
 }
 
-function noopFile(event: ChangeEvent<HTMLInputElement>) {
-  event.currentTarget.value = '';
+function formatFileSize(size: number) {
+  if (size < 1024) return `${size} B`;
+  if (size < 1024 * 1024) return `${Math.round(size / 1024)} KB`;
+  return `${(size / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function readAssetUploads(value: DiscoveryAnswerValue): DiscoveryAssetUploadValue {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
+  if ('selected' in value || 'note' in value) return {};
+  return value as DiscoveryAssetUploadValue;
+}
+
+function createDraftToken() {
+  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
+    return crypto.randomUUID();
+  }
+  return `draft-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
+function readDraftToken() {
+  if (typeof window === 'undefined') return createDraftToken();
+  const existing = window.localStorage.getItem(DRAFT_TOKEN_KEY)?.trim();
+  if (existing && existing.length >= 8) return existing;
+  const next = createDraftToken();
+  window.localStorage.setItem(DRAFT_TOKEN_KEY, next);
+  return next;
+}
+
+function isMultiTextValue(value: DiscoveryAnswerValue): value is DiscoveryMultiTextValue {
+  return typeof value === 'object' && value !== null && !Array.isArray(value) && ('selected' in value || 'note' in value);
 }
 
 function hasAnswer(value: DiscoveryAnswerValue) {
@@ -750,6 +879,7 @@ function hasAnswer(value: DiscoveryAnswerValue) {
   if (typeof value === 'number') return true;
   if (typeof value === 'string') return value.trim().length > 0;
   if (isMultiTextValue(value)) return Boolean(value.note?.trim() || value.selected?.length);
+  if (value && typeof value === 'object') return Object.keys(value).length > 0;
   return false;
 }
 

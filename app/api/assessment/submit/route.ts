@@ -8,6 +8,8 @@ import { sendAssessmentAdminNotification, sendAssessmentConfirmationEmail } from
 import { trackConsiderEvent } from '@/lib/opportunity-tracking';
 import { emitPulseEvent } from '@/lib/pulse-bus';
 import { createCtpSubmission, isCtpDiscoverySubmit } from '@/lib/ctp-submissions';
+import { finalizeCtpAssetManifest, parseAssetUploads } from '@/lib/ctp-asset-store';
+import { resolveCtpOrganizationId } from '@/lib/ctp-studio-bridge';
 import { scheduleCtpIntakeAnalysis } from '@/lib/ctp-intake-orchestrator';
 import { scheduleCtpWorkspaceProvision } from '@/lib/ctp-workspace-provision';
 import { scheduleCtpStudioCampaign } from '@/lib/ctp-studio-bridge';
@@ -145,6 +147,7 @@ export async function POST(req: NextRequest) {
       desiredExperiences: Array.isArray(body.desiredExperiences)
         ? (body.desiredExperiences as string[])
         : undefined,
+      assetUploads: body.assetUploads,
     };
 
     const isCtpFlow = isCtpDiscoverySubmit(body);
@@ -294,6 +297,23 @@ export async function POST(req: NextRequest) {
       }
 
       try {
+        const parsedUploads = parseAssetUploads(input.assetUploads);
+        const assetManifest = parsedUploads
+          ? await finalizeCtpAssetManifest(
+              parsedUploads,
+              resolveCtpOrganizationId({ considerSlug: input.considerSlug }),
+            )
+          : undefined;
+
+        const discoveryAnswers = input.discoveryAnswers
+          ? {
+              ...input.discoveryAnswers,
+              ...(assetManifest ? { asset_uploads: assetManifest } : {}),
+            }
+          : assetManifest
+            ? { asset_uploads: assetManifest }
+            : undefined;
+
         const ctpResult = await createCtpSubmission({
           businessName: input.businessName,
           contactName: input.contactName,
@@ -303,9 +323,10 @@ export async function POST(req: NextRequest) {
           considerSlug: input.considerSlug,
           partnerSlug: input.partnerSlug,
           discoveryVersion: input.discoveryVersion,
-          discoveryAnswers: input.discoveryAnswers,
+          discoveryAnswers,
           desiredExperiences: input.desiredExperiences,
           recommendations,
+          assetManifest,
           portalRequired: scope.portalRequired,
         });
 
