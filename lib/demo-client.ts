@@ -28,6 +28,11 @@ export function isDemoCredentialAttempt(email: string, password: string): boolea
 }
 
 export async function ensureDemoClient(): Promise<{ ok: boolean; error?: string }> {
+  const { localDemoFallbackEnabled } = await import('@/lib/demo-local-fallback');
+  if (localDemoFallbackEnabled()) {
+    return { ok: true };
+  }
+
   if (!process.env.AIRTABLE_API_KEY) {
     return { ok: false, error: 'AIRTABLE_API_KEY not configured.' };
   }

@@ -1,0 +1,227 @@
+.eb-block {
+  font-family: var(--pc-font-body, 'Segoe UI', system-ui, sans-serif);
+  color: var(--ea-text, #101828);
+}
+
+.eb-hero {
+  background: linear-gradient(145deg, var(--ea-navy, #1b2b4d) 0%, #243a66 100%);
+  color: #fff;
+  padding: 4rem 1.5rem;
+  text-align: center;
+}
+
+.eb-hero-eyebrow {
+  margin: 0 0 0.75rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ea-gold, #c9a844);
+}
+
+.eb-hero-title {
+  margin: 0 0 1rem;
+  font-size: clamp(1.75rem, 4vw, 2.75rem);
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+.eb-hero-subtitle {
+  margin: 0 auto 1.5rem;
+  max-width: 42rem;
+  font-size: 1.05rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.eb-cta-row {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.eb-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.25rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+}
+
+.eb-btn-primary {
+  background: var(--ea-gold, #c9a844);
+  color: var(--ea-navy, #1b2b4d);
+}
+
+.eb-btn-secondary {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+}
+
+.eb-section {
+  padding: 3rem 1.5rem;
+  background: var(--ea-cream, #faf8f3);
+}
+
+.eb-section-inner {
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.eb-section-label {
+  margin: 0 0 0.5rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ea-gold, #c9a844);
+}
+
+.eb-section-title {
+  margin: 0 0 0.75rem;
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--ea-navy, #1b2b4d);
+}
+
+.eb-section-body {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.65;
+  color: var(--ea-muted, #667085);
+}
+
+.eb-features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.eb-feature-card {
+  background: #fff;
+  border: 1px solid var(--ea-border, #e4e7ec);
+  border-radius: 14px;
+  padding: 1.25rem;
+  box-shadow: var(--ea-shadow, 0 1px 3px rgba(16, 24, 40, 0.08));
+}
+
+.eb-feature-title {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--ea-navy, #1b2b4d);
+}
+
+.eb-feature-body {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: var(--ea-muted, #667085);
+}
+
+.eb-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.eb-metric {
+  background: #fff;
+  border-radius: 14px;
+  padding: 1.25rem;
+  border: 1px solid var(--ea-border, #e4e7ec);
+  text-align: center;
+}
+
+.eb-metric-value {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--ea-navy, #1b2b4d);
+}
+
+.eb-metric-label {
+  margin: 0.35rem 0 0;
+  font-size: 0.85rem;
+  color: var(--ea-muted, #667085);
+}
+
+.eb-cta-band {
+  background: var(--ea-navy, #1b2b4d);
+  color: #fff;
+  padding: 3rem 1.5rem;
+  text-align: center;
+}
+
+.eb-cta-band .eb-section-title {
+  color: #fff;
+}
+
+.eb-cta-band .eb-section-body {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.eb-builder-shell {
+  min-height: 100vh;
+  background: #f8fafc;
+}
+
+.eb-builder-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #e2e8f0;
+  background: #fff;
+}
+
+.eb-builder-toolbar h1 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--ea-navy, #1b2b4d);
+}
+
+.eb-builder-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.eb-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.eb-list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background: #fff;
+  border: 1px solid var(--ea-border, #e4e7ec);
+  border-radius: 12px;
+}
+
+.eb-status {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ea-gold, #c9a844);
+}
+
+.eb-status-published {
+  color: #0f766e;
+}
