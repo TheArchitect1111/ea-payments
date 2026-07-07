@@ -1,7 +1,8 @@
-# Simplifi Launch Readiness — Production Validation Report
+# Simplifi Final Launch Report — Early Access
 
 **Date:** 2026-07-07  
-**Sprint:** Phase 1 — Launch Readiness  
+**Sprint:** Final Launch Sprint  
+**Commit:** `9a772d3` on `master`  
 **Production:** https://ea-payments.vercel.app  
 **Validator:** `scripts/validate-simplifi-launch-readiness.mjs`
 
@@ -9,112 +10,77 @@
 
 ## Executive summary
 
-| Verdict | **NO-GO** for full Early Access exit criteria |
-|---------|-----------------------------------------------|
-| **Reason** | `app.simplifi.ai` DNS does not resolve — exit criterion **DNS works** fails |
-| **Conditional** | Core pipeline **GO** on `ea-payments.vercel.app` — capture, Magnifi, guidance, intelligence, auth, health |
+| Verdict | **CONDITIONAL GO** for Early Access on primary URL |
+|---------|-----------------------------------------------------|
+| **Core pipeline** | **GO** — capture, persist, Magnifi, guidance, intelligence, auth, health |
+| **CI / deploy** | **GO** — GitHub Actions green; Vercel Production `success` on `9a772d3` |
+| **DNS** | **NO-GO** for `app.simplifi.ai` — domain does not resolve (operator action required) |
+
+Early Access may proceed on `https://ea-payments.vercel.app/simplifi/*` (or `efficiencyarchitects.online/simplifi/*`) while `app.simplifi.ai` DNS is configured separately.
 
 ---
 
-## Phase 1 checklist
+## Sprint completion
 
-| # | Item | Result | Evidence |
+| # | Task | Result | Evidence |
 |---|------|--------|----------|
-| 1 | Fix CI `verify:deploy` | **Ready locally** | `scripts/start-production.mjs`, `scripts/ensure-production-build.mjs`, `playwright.smoke.config.ts` updated — **must be committed to master** for GitHub CI |
-| 2 | Airtable Capture Records on production | **PASS** | `checks.airtableSchema.capture.ok: true`, table `Capture Records` |
-| 3 | `products.simplifi = true` | **PASS** | Health endpoint 2026-07-07 |
-| 4 | E2E: Capture → Analyze → Persist → Magnifi → Guidance | **PASS** | Record `recNf1zV7SX0AtWFn` — analyze 200, magnifi 200, guidance 200 |
-| 5 | `app.simplifi.ai` DNS, SSL, redirects | **FAIL** | NXDOMAIN / fetch failed; middleware on primary host **PASS** (`/capture` → `/simplifi/capture`, `/app` → workspace) |
-| 6 | Portal login, Simplifi login, demo provisioning | **PASS** | Portal login → `demo-client`; `/simplifi/login` → 200 |
-| 7 | Branding decision | **Recommend A** | Launch with existing Simplifi blue — see below |
-| 8 | Tester documentation | **DONE** | `docs/SIMPLIFI-EARLY-ACCESS-TESTER-GUIDE.md` |
-| 9 | Decision Intelligence on new captures | **PASS** | `recommendedPath: overlay`, API 200 |
+| 1 | Commit CI deployment files | **DONE** | `9a772d3` — 16 files (scripts, CI, docs, screenshots) |
+| 2 | Push to master | **DONE** | `f57b365..9a772d3` |
+| 3 | Verify GitHub Actions | **PASS** | [CI run 28889703343](https://github.com/TheArchitect1111/ea-payments/actions/runs/28889703343) — lint + verify:deploy (2m8s) |
+| 4 | Verify Vercel production deploy | **PASS** | Deployment `5349837824`, sha `9a772d3`, state `success` |
+| 5 | Re-run launch validation | **13/14 PASS** | Only `app-simplifi-dns` fails |
+| 6 | Final launch report | **DONE** | This document |
 
 ---
 
-## Branding decision (Item 7)
+## Production validation (post-deploy)
 
-### Recommendation: **Option A — Launch with existing Simplifi blue branding**
+**Command:** `node scripts/validate-simplifi-launch-readiness.mjs https://ea-payments.vercel.app`  
+**Record ID:** `recoFMsMVV5rvKs4v`
 
-| Option | Pros | Cons |
-|--------|------|------|
-| **A. Simplifi blue** | Zero launch risk; no CSS churn; matches PWA `themeColor`; users already see blue on landing/capture | Differs from EA navy/gold on portal |
-| **B. Migrate to EA tokens** | Brand unity with portal | Requires CSS edits across landing, capture, workspace — **violates no-redesign sprint scope**; regression risk before launch |
-
-**Decision:** Ship Early Access on **Option A**. Document the split in tester guide. Schedule EA token alignment for Phase 2 (post-launch), not a launch blocker.
-
----
-
-## Production validation detail
-
-### Health (`GET /api/health/launch`)
-
-```json
-"products": { "simplifi": true },
-"airtableSchema": { "capture": { "ok": true, "tableName": "Capture Records" } }
-```
-
-### Full pipeline (latest validation run)
-
-| Step | Status |
+| Step | Result |
 |------|--------|
-| Portal login | ✓ `demo-client` |
-| Capture analyze | ✓ 200, status `Routed` |
-| Persist | ✓ `recNf1zV7SX0AtWFn` |
-| Magnifi | ✓ `/magnifi/recNf1zV7SX0AtWFn` → 200 |
-| Guidance | ✓ `/simplifi/guidance/recNf1zV7SX0AtWFn` → 200 |
-| Decision intelligence | ✓ `overlay` |
-
-### Middleware (primary host)
-
-| Path | Redirect | Status |
-|------|----------|--------|
-| `/capture` | `/simplifi/capture` | 307 ✓ |
-| `/app` | `/simplifi/workspace` | 307 ✓ |
-
-### app.simplifi.ai
-
-| Check | Result |
-|-------|--------|
-| DNS resolution | **FAIL** — non-existent domain |
-| SSL | N/A |
-| Root → workspace | N/A |
-| `/capture` alias | N/A |
-
-**Remediation:** Add `app.simplifi.ai` in Vercel project domains → CNAME `cname.vercel-dns.com` (documented in health `manual.simplifiAppDns`).
-
-**Workaround for Early Access:** Use `https://ea-payments.vercel.app/simplifi/*` or `https://www.efficiencyarchitects.online/simplifi/*`.
+| health-endpoint | ✓ 200 |
+| products.simplifi | ✓ true |
+| airtable-capture-schema | ✓ Capture Records |
+| portal-login | ✓ demo-client |
+| demo-provisioning | ✓ |
+| simplifi-login-page | ✓ 200 |
+| capture-analyze | ✓ Routed |
+| capture-persist | ✓ Airtable record returned |
+| magnifi-reachable | ✓ `/magnifi/recoFMsMVV5rvKs4v` → 200 |
+| guidance-reachable | ✓ `/simplifi/guidance/recoFMsMVV5rvKs4v` → 200 |
+| decision-intelligence | ✓ `overlay` |
+| middleware-capture-alias | ✓ `/capture` → `/simplifi/capture` (307) |
+| middleware-app-alias | ✓ `/app` → `/simplifi/workspace` (307) |
+| **app-simplifi-dns** | **✗ fetch failed** |
 
 ---
 
-## CI fix (Item 1)
+## CI fix (resolved)
 
-**Root cause:** `playwright.smoke.config.ts` references `scripts/start-production.mjs` which was **untracked** on master → CI `MODULE_NOT_FOUND`.
+**Root cause:** `package.json` `verify:deploy` and Playwright referenced scripts missing from `master`.
 
-**Files changed:**
+**Committed in `9a772d3`:**
 
-| File | Change |
-|------|--------|
-| `scripts/start-production.mjs` | Self-healing `next start` wrapper (new, was untracked) |
-| `scripts/ensure-production-build.mjs` | Build guard before start (new, was untracked) |
-| `playwright.smoke.config.ts` | Use `start-production.mjs`; `reuseExistingServer` in CI |
-| `scripts/validate-simplifi-launch-readiness.mjs` | Production validation script (new) |
-| `docs/SIMPLIFI-EARLY-ACCESS-TESTER-GUIDE.md` | Tester limitations doc (new) |
-| `docs/SIMPLIFI-LAUNCH-READINESS-REPORT.md` | This report (new) |
+| File | Purpose |
+|------|---------|
+| `scripts/start-production.mjs` | Self-healing `next start` for smoke tests |
+| `scripts/ensure-production-build.mjs` | Build guard before production server |
+| `scripts/test-portal-nav-resolver.mjs` | Offline nav preset checks |
+| `scripts/test-experience-registry.mjs` | Offline registry wiring checks |
+| `playwright.smoke.config.ts` | Uses `start-production.mjs`; CI reuse disabled |
+| `.github/workflows/ci.yml` | Single `verify:deploy` step (build + resolver + smoke) |
+| `scripts/validate-simplifi-launch-readiness.mjs` | Production validation suite |
+| `docs/SIMPLIFI-EARLY-ACCESS-TESTER-GUIDE.md` | Tester matrix |
 
-**Action required:** Commit and push the above to `master` so GitHub Actions `verify:deploy` passes.
+**Previous CI failure:** PR #54 merge (`f57b365`) — `MODULE_NOT_FOUND` for `start-production.mjs`. **Fixed.**
 
 ---
 
-## Screenshots
+## Branding decision
 
-Capture with:
-
-```bash
-node scripts/capture-simplifi-launch-screenshots.mjs https://ea-payments.vercel.app
-```
-
-Output: `docs/screenshots/simplifi/launch-readiness/`
+**Option A — Launch with existing Simplifi blue (`#0A66FF`).** No token migration before Early Access. Documented in tester guide.
 
 ---
 
@@ -126,39 +92,37 @@ Output: `docs/screenshots/simplifi/launch-readiness/`
 | Magnifi works | ✓ |
 | Guidance works | ✓ |
 | Health endpoint passes | ✓ |
-| CI passes | ⏳ Local fix ready; **pending commit to master** |
-| DNS works | ✗ `app.simplifi.ai` |
-| SSL works | ✗ (blocked by DNS) |
+| CI passes | ✓ (`9a772d3`) |
+| Vercel production deploy | ✓ |
+| DNS works (`app.simplifi.ai`) | ✗ |
+| SSL works (`app.simplifi.ai`) | ✗ (blocked by DNS) |
 | Auth works | ✓ |
-| No production blocker remains | ✗ **DNS blocker** |
 
 ---
 
-## Remaining blockers
+## Remaining blockers (operator)
 
-| Priority | Blocker | Owner action |
-|----------|---------|--------------|
-| **P0** | `app.simplifi.ai` DNS not configured | Vercel Domains + DNS CNAME |
-| **P0** | CI scripts not on `master` | Commit `start-production.mjs`, `ensure-production-build.mjs`, `playwright.smoke.config.ts` |
-| P2 | Sentry / uptime not set | Not required for Early Access (full launch only) |
-| P2 | CTP Submissions schema incomplete | Unrelated to Simplifi capture |
+| Priority | Item | Action |
+|----------|------|--------|
+| **P0** | `app.simplifi.ai` DNS | Add domain in Vercel → CNAME `cname.vercel-dns.com` |
+| P2 | Sentry / uptime | Not required for Early Access |
+| P2 | CTP Submissions schema | Unrelated to Simplifi capture |
+
+**Early Access workaround:** Direct testers to `https://ea-payments.vercel.app/simplifi/capture` and portal `demo-client`.
 
 ---
 
 ## Launch recommendation
 
-### Early Access: **CONDITIONAL NO-GO** until:
+### Early Access: **GO** (conditional)
 
-1. **`app.simplifi.ai` DNS** is live **OR** launch explicitly uses `ea-payments.vercel.app` / `efficiencyarchitects.online` only (update marketing materials).
-2. **CI fix committed** to master and green.
+- **Product:** Ready — full capture → Magnifi → guidance pipeline validated on production.
+- **Platform:** CI green, Vercel production deployed.
+- **Marketing URL:** Defer `app.simplifi.ai` until DNS is configured, or launch on primary Vercel URL only.
 
-### Core product: **GO**
+### Distribution
 
-The Simplifi capture → Magnifi → guidance pipeline is **production-validated**. Testers can begin on the primary URL immediately if DNS deferral is accepted.
-
-### After DNS + CI:
-
-**GO for Early Access** with Option A branding and `docs/SIMPLIFI-EARLY-ACCESS-TESTER-GUIDE.md` distributed to testers.
+Share `docs/SIMPLIFI-EARLY-ACCESS-TESTER-GUIDE.md` with Early Access testers.
 
 ---
 
@@ -166,6 +130,6 @@ The Simplifi capture → Magnifi → guidance pipeline is **production-validated
 
 ```bash
 node scripts/validate-simplifi-launch-readiness.mjs https://ea-payments.vercel.app
-node scripts/test-capture-e2e.mjs https://ea-payments.vercel.app
 npm run verify:deploy
+gh run list --branch master --limit 1
 ```
