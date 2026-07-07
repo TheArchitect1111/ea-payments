@@ -40,7 +40,7 @@ Add to `.env.local` (see `.env.example` for full platform list):
 ```env
 # Portal auth + client records
 AIRTABLE_API_KEY=pat_...
-AIRTABLE_PAYMENTS_BASE_ID=appv0YoLIMY45fmDA
+AIRTABLE_PAYMENTS_BASE_ID=appXXXXXXXXXXXXXX
 
 # Creative Studio — experience page persistence
 AIRTABLE_CREATIVE_STUDIO_TABLE=Creative Studio
