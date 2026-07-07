@@ -24,6 +24,22 @@ export type PortalSessionInput = {
   email?: string;
 };
 
+/** Chassis treats VERCEL_ENV=production as prod even under `next dev`. Unset for local signing. */
+async function withLocalDevSessionSecrets<T>(fn: () => Promise<T>): Promise<T> {
+  if (process.env.NODE_ENV !== 'development') return fn();
+
+  const vercelEnv = process.env.VERCEL_ENV;
+  const shouldUnset = vercelEnv === 'production' && !process.env.SESSION_SECRET?.trim();
+  if (!shouldUnset) return fn();
+
+  try {
+    delete process.env.VERCEL_ENV;
+    return await fn();
+  } finally {
+    process.env.VERCEL_ENV = vercelEnv;
+  }
+}
+
 export async function signSession(
   input: string | PortalSessionInput,
 ): Promise<string | null> {
@@ -38,11 +54,11 @@ export async function signSession(
           exp: newSessionExpiry(),
         };
 
-  return signHmacSession(payload, EA_PORTAL_SESSION);
+  return withLocalDevSessionSecrets(() => signHmacSession(payload, EA_PORTAL_SESSION));
 }
 
 export async function verifySession(token: string): Promise<EAPortalSession | null> {
-  return verifyHmacSession<EAPortalSession>(token, EA_PORTAL_SESSION);
+  return withLocalDevSessionSecrets(() => verifyHmacSession<EAPortalSession>(token, EA_PORTAL_SESSION));
 }
 
 export function makeSessionCookie(value: string) {

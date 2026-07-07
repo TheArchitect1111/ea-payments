@@ -271,6 +271,10 @@ export async function setPortalCredentials(
 }
 
 export async function getClientByPortalSlug(slug: string): Promise<PortalClientRecord | null> {
+  const { localDemoPortalClient } = await import('@/lib/demo-local-fallback');
+  const localDemo = localDemoPortalClient(slug);
+  if (localDemo) return localDemo;
+
   if (!process.env.AIRTABLE_API_KEY) return null;
 
   const safe = slug.replace(/'/g, "\\'");
@@ -614,6 +618,10 @@ export async function validatePortalLogin(
   email: string,
   password: string
 ): Promise<{ ok: boolean; slug?: string; recordId?: string; error?: string; passwordChanged?: boolean }> {
+  const { validateLocalDemoLogin } = await import('@/lib/demo-local-fallback');
+  const localLogin = validateLocalDemoLogin(email, password);
+  if (localLogin) return localLogin;
+
   if (!process.env.AIRTABLE_API_KEY) {
     return { ok: false, error: 'Not configured.' };
   }

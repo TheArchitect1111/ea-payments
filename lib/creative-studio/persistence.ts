@@ -7,20 +7,37 @@ import {
 
 const TABLE = process.env.AIRTABLE_CREATIVE_STUDIO_TABLE ?? 'Creative Studio';
 
-const memory = new Map<string, { payload: string; organizationId: string; title?: string; updatedAt: string }>();
+type MemoryRow = {
+  payload: string;
+  organizationId: string;
+  title?: string;
+  updatedAt: string;
+};
 
-export function studioRecordKey(recordType: 'campaign' | 'brand' | 'media', id: string): string {
+const globalForStudio = globalThis as typeof globalThis & {
+  __eaCreativeStudioMemory?: Map<string, MemoryRow>;
+};
+
+function studioMemory(): Map<string, MemoryRow> {
+  if (!globalForStudio.__eaCreativeStudioMemory) {
+    globalForStudio.__eaCreativeStudioMemory = new Map();
+  }
+  return globalForStudio.__eaCreativeStudioMemory;
+}
+
+export function studioRecordKey(recordType: 'campaign' | 'brand' | 'media' | 'experience', id: string): string {
   return `${recordType}:${id}`;
 }
 
-const RECORD_TYPE_LABEL: Record<'campaign' | 'brand' | 'media', string> = {
+const RECORD_TYPE_LABEL: Record<'campaign' | 'brand' | 'media' | 'experience', string> = {
   campaign: 'Campaign',
   brand: 'Brand',
   media: 'Media',
+  experience: 'Experience',
 };
 
 export async function saveStudioRecord(input: {
-  recordType: 'campaign' | 'brand' | 'media';
+  recordType: 'campaign' | 'brand' | 'media' | 'experience';
   id: string;
   organizationId: string;
   payload: unknown;
@@ -29,7 +46,7 @@ export async function saveStudioRecord(input: {
   const key = studioRecordKey(input.recordType, input.id);
   const updatedAt = new Date().toISOString();
   const payload = JSON.stringify(input.payload);
-  memory.set(key, {
+  studioMemory().set(key, {
     payload,
     organizationId: input.organizationId,
     title: input.title,
@@ -59,11 +76,11 @@ export async function saveStudioRecord(input: {
 }
 
 export async function loadStudioRecord<T>(
-  recordType: 'campaign' | 'brand' | 'media',
+  recordType: 'campaign' | 'brand' | 'media' | 'experience',
   id: string,
 ): Promise<T | null> {
   const key = studioRecordKey(recordType, id);
-  const cached = memory.get(key);
+  const cached = studioMemory().get(key);
   if (cached) {
     try {
       return JSON.parse(cached.payload) as T;
@@ -81,7 +98,7 @@ export async function loadStudioRecord<T>(
     if (typeof raw !== 'string' || !raw.trim()) return null;
 
     const parsed = JSON.parse(raw) as T;
-    memory.set(key, {
+    studioMemory().set(key, {
       payload: raw,
       organizationId: String(records[0]?.fields?.['Organization ID'] ?? 'ea'),
       title: String(records[0]?.fields?.Title ?? ''),
@@ -95,11 +112,11 @@ export async function loadStudioRecord<T>(
 }
 
 export async function listStudioRecords<T>(
-  recordType: 'campaign' | 'brand' | 'media',
+  recordType: 'campaign' | 'brand' | 'media' | 'experience',
   organizationId: string,
 ): Promise<T[]> {
   const prefix = `${recordType}:`;
-  const fromMemory = [...memory.entries()]
+  const fromMemory = [...studioMemory().entries()]
     .filter(([key, row]) => key.startsWith(prefix) && row.organizationId === organizationId)
     .map(([, row]) => {
       try {
@@ -126,7 +143,7 @@ export async function listStudioRecords<T>(
         const raw = record.fields?.['Payload JSON'];
         const recordKey = String(record.fields?.['Record Key'] ?? '');
         if (typeof raw !== 'string' || !recordKey) return null;
-        memory.set(recordKey, {
+        studioMemory().set(recordKey, {
           payload: raw,
           organizationId,
           title: String(record.fields?.Title ?? ''),
