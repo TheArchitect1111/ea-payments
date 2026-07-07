@@ -1,0 +1,42 @@
+{
+  "capturedAt": "2026-07-07T18:21:20.817Z",
+  "base": "https://ea-payments.vercel.app",
+  "pages": [
+    {
+      "name": "capture-desktop",
+      "url": "https://ea-payments.vercel.app/simplifi/capture",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "file": "capture-desktop.png"
+    },
+    {
+      "name": "capture-mobile",
+      "url": "https://ea-payments.vercel.app/simplifi/capture",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "capture-mobile.png"
+    },
+    {
+      "name": "workspace-desktop",
+      "url": "https://ea-payments.vercel.app/simplifi/workspace",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "file": "workspace-desktop.png"
+    },
+    {
+      "name": "landing-desktop",
+      "url": "https://ea-payments.vercel.app/simplifi",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "file": "landing-desktop.png"
+    }
+  ]
+}

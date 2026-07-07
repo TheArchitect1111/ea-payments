@@ -15,9 +15,9 @@ export default defineConfig({
   webServer: process.env.SMOKE_BASE_URL
     ? undefined
     : {
-        command: `npm run build && npm run start -- --hostname 127.0.0.1 --port ${port}`,
+        command: `node scripts/start-production.mjs --hostname 127.0.0.1 --port ${port}`,
         port,
-        reuseExistingServer: false,
+        reuseExistingServer: !process.env.CI,
         timeout: 180_000,
       },
   projects: [

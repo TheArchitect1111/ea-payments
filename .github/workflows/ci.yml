@@ -33,11 +33,7 @@ jobs:
       - name: Lint
         run: npm run lint
 
-      - name: Build
-        run: npm run build
-
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium
-
-      - name: Smoke tests
-        run: npm run test:smoke
+      - name: Verify deploy (build + resolver + smoke)
+        run: |
+          npx playwright install --with-deps chromium
+          npm run verify:deploy

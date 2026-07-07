@@ -28,6 +28,8 @@ Not full public launch ready until:
 
 ## Known Limitations
 
+See **`docs/SIMPLIFI-EARLY-ACCESS-TESTER-GUIDE.md`** for the full Early Access tester matrix (2026-07-07).
+
 ### Simplifi
 
 - Large files may fail and should be retried with a smaller asset.
