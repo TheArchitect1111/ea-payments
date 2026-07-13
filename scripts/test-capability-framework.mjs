@@ -134,6 +134,18 @@ assert(
   readFileSync(join(root, 'lib/mission-control-data.ts'), 'utf8').includes('getPackageSyncHealth'),
   'Mission Control must surface package sync attention',
 );
+assert(
+  readFileSync(join(root, 'lib/entitlements.ts'), 'utf8').includes('setModulesEnabledBulk'),
+  'entitlements must support bulk enable/disable',
+);
+assert(
+  readFileSync(join(root, 'app/api/admin/entitlements/route.ts'), 'utf8').includes('enable-mapped'),
+  'entitlements API must support enable-mapped bulk action',
+);
+assert(
+  readFileSync(join(root, 'app/api/admin/entitlements/route.ts'), 'utf8').includes('platformCapabilityId'),
+  'entitlements API must expose platform capability ids',
+);
 assert(existsSync(join(root, 'app/api/admin/organizations/route.ts')), 'Missing organizations list API');
 assert(
   readFileSync(join(root, 'lib/organizations.ts'), 'utf8').includes('listOrganizations'),
