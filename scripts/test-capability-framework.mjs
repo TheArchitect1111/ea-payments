@@ -166,8 +166,12 @@ assert(
   readFileSync(join(root, 'app/api/webhooks/stripe/route.ts'), 'utf8').includes('resolveCheckoutOffer'),
   'stripe webhook must resolve commerce offers',
 );
+const offersPath = existsSync(join(root, 'vendor/payments-contract/src/offers.ts'))
+  ? join(root, 'vendor/payments-contract/src/offers.ts')
+  : join(osRoot, 'packages/payments-contract/src/offers.ts');
 assert(
-  readFileSync(join(osRoot, 'packages/payments-contract/src/offers.ts'), 'utf8').includes('COMMERCE_OFFERS'),
+  existsSync(offersPath) &&
+    readFileSync(offersPath, 'utf8').includes('COMMERCE_OFFERS'),
   'payments-contract must define COMMERCE_OFFERS',
 );
 
