@@ -42,7 +42,7 @@ export const defaultWorkspaceTheme: WorkspaceTheme = {
   id: EA_DEFAULT_THEME_ID,
   organizationId: 'ea',
   name: 'Efficiency Architects',
-  logo: '/EA_Logo.png',
+  logo: '/ea-logo.png',
   logoAlt: 'Efficiency Architects',
   favicon: '/favicon.ico',
   heroImage: '',

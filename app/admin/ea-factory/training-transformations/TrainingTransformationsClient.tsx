@@ -49,7 +49,7 @@ export default function TrainingTransformationsClient({ initialRecords }: Props)
     <div className="mt-6 grid gap-5 lg:grid-cols-[380px_1fr]">
       <aside className="space-y-3">
         {records.length === 0 ? (
-          <div className="border border-dashed border-[#4d3b11] bg-[#111] p-6 text-sm leading-7 text-neutral-300">
+          <div className="border border-dashed border-[#e8d9a8] bg-white p-6 text-sm leading-7 text-neutral-600">
             No generated training transformations are waiting yet. Upload or paste source material through the Training Transformation API to create the first review item.
           </div>
         ) : null}
@@ -59,12 +59,14 @@ export default function TrainingTransformationsClient({ initialRecords }: Props)
             type="button"
             onClick={() => setSelectedId(record.id)}
             className={`w-full border p-4 text-left transition ${
-              selected?.id === record.id ? 'border-[#f2c94c] bg-[#15120a]' : 'border-[#2a2a2a] bg-[#101010] hover:border-[#8a6f22]'
+              selected?.id === record.id
+                ? 'border-[#f2c94c] bg-[#fff8e6]'
+                : 'border-[#e8d9a8] bg-white hover:border-[#f2c94c]'
             }`}
           >
-            <span className="text-[10px] font-black uppercase tracking-[0.22em] text-[#f2c94c]">{record.status}</span>
-            <h2 className="mt-2 text-lg font-black text-white">{record.title}</h2>
-            <p className="mt-2 text-xs leading-5 text-neutral-400">
+            <span className="text-[10px] font-black uppercase tracking-[0.22em] text-[#8a6a12]">{record.status}</span>
+            <h2 className="mt-2 text-lg font-black text-neutral-900">{record.title}</h2>
+            <p className="mt-2 text-xs leading-5 text-neutral-500">
               {record.source.kind} {record.source.extractionStatus ? `/ ${record.source.extractionStatus}` : ''} / {new Date(record.updatedAt).toLocaleString()}
             </p>
           </button>
@@ -72,12 +74,12 @@ export default function TrainingTransformationsClient({ initialRecords }: Props)
       </aside>
 
       {selected ? (
-        <section className="border border-[#4d3b11] bg-[#111] p-5">
+        <section className="border border-[#e8d9a8] bg-white p-5 shadow-sm">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
-              <p className="text-xs font-black uppercase tracking-[0.24em] text-[#f2c94c]">Review Package</p>
-              <h2 className="mt-2 text-3xl font-black">{selected.title}</h2>
-              <p className="mt-2 text-sm text-neutral-400">
+              <p className="text-xs font-black uppercase tracking-[0.24em] text-[#8a6a12]">Review Package</p>
+              <h2 className="mt-2 text-3xl font-black text-neutral-900">{selected.title}</h2>
+              <p className="mt-2 text-sm text-neutral-500">
                 Source: {selected.source.fileName ?? selected.source.kind}
               </p>
             </div>
@@ -86,7 +88,7 @@ export default function TrainingTransformationsClient({ initialRecords }: Props)
                 type="button"
                 disabled={busy === selected.id}
                 onClick={() => updateRecord(selected.id, { status: 'approved' })}
-                className="rounded-full border border-[#f2c94c] px-4 py-2 text-xs font-black uppercase tracking-wider text-[#f2c94c] disabled:opacity-50"
+                className="rounded-full border border-[#8a6a12] px-4 py-2 text-xs font-black uppercase tracking-wider text-[#8a6a12] disabled:opacity-50"
               >
                 Approve
               </button>
@@ -103,21 +105,21 @@ export default function TrainingTransformationsClient({ initialRecords }: Props)
 
           <div className="mt-5 grid gap-3 md:grid-cols-3">
             {TARGETS.map((target) => (
-              <div key={target} className="border border-[#2d2d2d] bg-black p-4">
-                <p className="text-xs font-black uppercase tracking-wider text-[#f2c94c]">{target}</p>
-                <p className="mt-2 text-xs leading-5 text-neutral-400">
+              <div key={target} className="border border-[#e8d9a8] bg-[#FAF8F3] p-4">
+                <p className="text-xs font-black uppercase tracking-wider text-[#8a6a12]">{target}</p>
+                <p className="mt-2 text-xs leading-5 text-neutral-500">
                   {selected.publishedTargets.includes(target) ? 'Published' : selected.publishTargets.includes(target) ? 'Ready' : 'Optional'}
                 </p>
               </div>
             ))}
           </div>
 
-          <article className="mt-5 border border-[#2d2d2d] bg-black p-5">
-            <h3 className="text-lg font-black">What EA Intelligence understood</h3>
-            <p className="mt-3 text-sm leading-7 text-neutral-300">{selected.understanding.summary}</p>
+          <article className="mt-5 border border-[#e8d9a8] bg-[#FAF8F3] p-5">
+            <h3 className="text-lg font-black text-neutral-900">What EA Intelligence understood</h3>
+            <p className="mt-3 text-sm leading-7 text-neutral-600">{selected.understanding.summary}</p>
             <div className="mt-4 flex flex-wrap gap-2">
               {selected.understanding.opportunities.slice(0, 6).map((item) => (
-                <span key={item} className="rounded-full border border-[#4d3b11] px-3 py-1 text-xs text-neutral-300">
+                <span key={item} className="rounded-full border border-[#e8d9a8] bg-white px-3 py-1 text-xs text-neutral-600">
                   {item}
                 </span>
               ))}
@@ -126,10 +128,10 @@ export default function TrainingTransformationsClient({ initialRecords }: Props)
 
           <div className="mt-5 grid gap-4">
             {selected.outputs.map((output) => (
-              <article key={`${selected.id}-${output.type}`} className="border border-[#2d2d2d] bg-black p-5">
-                <p className="text-xs font-black uppercase tracking-[0.2em] text-[#f2c94c]">{output.type}</p>
-                <h3 className="mt-2 text-xl font-black">{output.title}</h3>
-                <pre className="mt-4 whitespace-pre-wrap text-sm leading-7 text-neutral-300">{output.body}</pre>
+              <article key={`${selected.id}-${output.type}`} className="border border-[#e8d9a8] bg-[#FAF8F3] p-5">
+                <p className="text-xs font-black uppercase tracking-[0.2em] text-[#8a6a12]">{output.type}</p>
+                <h3 className="mt-2 text-xl font-black text-neutral-900">{output.title}</h3>
+                <pre className="mt-4 whitespace-pre-wrap text-sm leading-7 text-neutral-600">{output.body}</pre>
                 <p className="mt-4 text-xs font-bold text-neutral-500">Targets: {output.publishTargets.join(', ')}</p>
               </article>
             ))}

@@ -74,13 +74,13 @@ export default function NewExperienceClient() {
   }
 
   return (
-    <main className="min-h-screen bg-black px-6 py-10 text-white">
+    <main className="min-h-screen bg-[#FAF8F3] px-6 py-10 text-neutral-900">
       <section className="mx-auto max-w-6xl">
-        <p className="text-xs font-black uppercase tracking-[0.28em] text-[#d6ad36]">EA Intelligence Engine</p>
-        <div className="mt-4 flex flex-col gap-4 border-b border-[#d6ad36]/30 pb-8 lg:flex-row lg:items-end lg:justify-between">
+        <p className="text-xs font-black uppercase tracking-[0.28em] text-[#8a6a12]">EA Intelligence Engine</p>
+        <div className="mt-4 flex flex-col gap-4 border-b border-[#d6ad36]/40 pb-8 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <h1 className="max-w-4xl text-4xl font-black tracking-tight md:text-6xl">New Experience</h1>
-            <p className="mt-4 max-w-2xl text-base leading-7 text-white/70">
+            <p className="mt-4 max-w-2xl text-base leading-7 text-neutral-600">
               Choose the goal, audience, and available context. The shared engine recommends the best starting experience, components, automations, training, communications, dashboard, and outcomes.
             </p>
           </div>
@@ -94,17 +94,17 @@ export default function NewExperienceClient() {
         </div>
 
         <div className="mt-8 grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
-          <section className="rounded-[8px] border border-[#d6ad36]/25 bg-[#111]/95 p-6">
+          <section className="rounded-[8px] border border-[#e8d9a8] bg-white p-6 shadow-sm">
             <div className="space-y-8">
               <ChoiceGroup title="Step 1: Choose Goal" values={GOALS} selected={goals} onToggle={(value) => setGoals(toggle(goals, value))} />
               <ChoiceGroup title="Step 2: Choose Audience" values={AUDIENCES} selected={audience} onToggle={(value) => setAudience(toggle(audience, value))} />
 
               <div>
-                <label className="text-xs font-black uppercase tracking-[0.2em] text-[#d6ad36]">Organization Type</label>
+                <label className="text-xs font-black uppercase tracking-[0.2em] text-[#8a6a12]">Organization Type</label>
                 <select
                   value={organizationType}
                   onChange={(event) => setOrganizationType(event.target.value)}
-                  className="mt-3 w-full rounded-[8px] border border-white/15 bg-black px-4 py-4 text-white outline-none focus:border-[#f3c74d]"
+                  className="mt-3 w-full rounded-[8px] border border-[#e8d9a8] bg-[#FAF8F3] px-4 py-4 text-neutral-900 outline-none focus:border-[#f3c74d]"
                 >
                   {ORG_TYPES.map((type) => (
                     <option key={type}>{type}</option>
@@ -113,28 +113,28 @@ export default function NewExperienceClient() {
               </div>
 
               <div>
-                <label className="text-xs font-black uppercase tracking-[0.2em] text-[#d6ad36]">Available Material Or Notes</label>
+                <label className="text-xs font-black uppercase tracking-[0.2em] text-[#8a6a12]">Available Material Or Notes</label>
                 <textarea
                   value={notes}
                   onChange={(event) => setNotes(event.target.value)}
                   rows={7}
-                  className="mt-3 w-full rounded-[8px] border border-white/15 bg-black px-4 py-4 text-white outline-none focus:border-[#f3c74d]"
+                  className="mt-3 w-full rounded-[8px] border border-[#e8d9a8] bg-[#FAF8F3] px-4 py-4 text-neutral-900 outline-none focus:border-[#f3c74d]"
                   placeholder="Paste notes about SOPs, policies, videos, training, offers, audiences, systems, or goals."
                 />
               </div>
             </div>
           </section>
 
-          <section className="rounded-[8px] border border-[#d6ad36]/25 bg-[#151515] p-6">
-            <p className="text-xs font-black uppercase tracking-[0.2em] text-[#d6ad36]">Engine Recommendation</p>
-            <p className="mt-3 text-sm text-white/60">{status || 'Select what matters, then ask the engine for the starting point.'}</p>
+          <section className="rounded-[8px] border border-[#e8d9a8] bg-white p-6 shadow-sm">
+            <p className="text-xs font-black uppercase tracking-[0.2em] text-[#8a6a12]">Engine Recommendation</p>
+            <p className="mt-3 text-sm text-neutral-600">{status || 'Select what matters, then ask the engine for the starting point.'}</p>
 
             {plan && (
               <div className="mt-8 space-y-6">
-                <div className="rounded-[8px] border border-[#f3c74d]/30 bg-black p-5">
-                  <p className="text-sm uppercase tracking-[0.18em] text-white/50">Best Experience</p>
-                  <h2 className="mt-2 text-3xl font-black capitalize text-[#f3c74d]">{plan.bestExperience.replace(/-/g, ' ')}</h2>
-                  <p className="mt-4 text-white/70">{plan.recommendations[0]?.reason}</p>
+                <div className="rounded-[8px] border border-[#f3c74d]/50 bg-[#FAF8F3] p-5">
+                  <p className="text-sm uppercase tracking-[0.18em] text-neutral-500">Best Experience</p>
+                  <h2 className="mt-2 text-3xl font-black capitalize text-[#8a6a12]">{plan.bestExperience.replace(/-/g, ' ')}</h2>
+                  <p className="mt-4 text-neutral-600">{plan.recommendations[0]?.reason}</p>
                 </div>
 
                 <PlanBlock title="Required Components" items={plan.requiredComponents} />
@@ -145,14 +145,14 @@ export default function NewExperienceClient() {
                 <PlanBlock title="Dashboard Signals" items={plan.suggestedDashboard} />
                 <PlanBlock title="Expected Outcomes" items={plan.expectedOutcomes} />
 
-                <div className="rounded-[8px] border border-white/10 bg-black p-5">
-                  <p className="text-xs font-black uppercase tracking-[0.2em] text-[#d6ad36]">Why Am I Seeing This?</p>
+                <div className="rounded-[8px] border border-[#e8d9a8] bg-[#FAF8F3] p-5">
+                  <p className="text-xs font-black uppercase tracking-[0.2em] text-[#8a6a12]">Why Am I Seeing This?</p>
                   <div className="mt-4 space-y-3">
                     {plan.recommendations.slice(0, 3).map((item) => (
-                      <div key={`${item.experience}-${item.recommendation}`} className="border-t border-white/10 pt-3">
+                      <div key={`${item.experience}-${item.recommendation}`} className="border-t border-[#e8d9a8] pt-3">
                         <p className="font-black">{item.recommendation}</p>
-                        <p className="mt-1 text-sm text-white/65">{item.reason}</p>
-                        <p className="mt-2 text-xs uppercase tracking-[0.16em] text-[#f3c74d]">
+                        <p className="mt-1 text-sm text-neutral-600">{item.reason}</p>
+                        <p className="mt-2 text-xs uppercase tracking-[0.16em] text-[#8a6a12]">
                           {item.confidence} confidence · {item.suggestedAction}
                         </p>
                       </div>
@@ -176,7 +176,7 @@ function ChoiceGroup(props: {
 }) {
   return (
     <div>
-      <p className="text-xs font-black uppercase tracking-[0.2em] text-[#d6ad36]">{props.title}</p>
+      <p className="text-xs font-black uppercase tracking-[0.2em] text-[#8a6a12]">{props.title}</p>
       <div className="mt-3 grid gap-3 sm:grid-cols-2">
         {props.values.map((value) => {
           const active = props.selected.includes(value);
@@ -188,7 +188,7 @@ function ChoiceGroup(props: {
               className={`rounded-[8px] border px-4 py-3 text-left text-sm font-bold transition ${
                 active
                   ? 'border-[#f3c74d] bg-[#f3c74d] text-black'
-                  : 'border-white/15 bg-black text-white hover:border-[#f3c74d]/70'
+                  : 'border-[#e8d9a8] bg-[#FAF8F3] text-neutral-900 hover:border-[#f3c74d]'
               }`}
             >
               {value}
@@ -203,10 +203,10 @@ function ChoiceGroup(props: {
 function PlanBlock({ title, items }: { title: string; items: string[] }) {
   return (
     <div>
-      <p className="text-xs font-black uppercase tracking-[0.2em] text-[#d6ad36]">{title}</p>
+      <p className="text-xs font-black uppercase tracking-[0.2em] text-[#8a6a12]">{title}</p>
       <div className="mt-3 grid gap-2 sm:grid-cols-2">
         {items.map((item) => (
-          <div key={item} className="rounded-[8px] border border-white/10 bg-black px-4 py-3 text-sm text-white/75">
+          <div key={item} className="rounded-[8px] border border-[#e8d9a8] bg-[#FAF8F3] px-4 py-3 text-sm text-neutral-700">
             {item}
           </div>
         ))}

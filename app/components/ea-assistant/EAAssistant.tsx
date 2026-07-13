@@ -47,7 +47,8 @@ export default function EAAssistant({ surface, workspaceAiContext }: EAAssistant
   const [userId, setUserId] = useState('anon');
 
   const isDiscover = surface === 'discover' || pathname.includes('/discover') || pathname.includes('/assessment');
-  const hideOnSimplifi = pathname.includes('/simplifi');
+  const hideOnSimplifi =
+    pathname.startsWith('/simplifi') || pathname.includes('/portal/') && pathname.includes('/simplifi');
 
   useEffect(() => {
     setUserId(getOrCreateUserId());

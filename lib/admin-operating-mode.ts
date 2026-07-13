@@ -11,7 +11,7 @@ export const EXECUTIVE_NAV = [
   { href: '/admin/creative-studio', label: 'Creative Studio' },
   { href: '/admin/ea-factory/training-transformations', label: 'Training' },
   { href: '/admin/foundation-library', label: 'Resources' },
-  { href: '/admin/master', label: 'Agents' },
+  { href: '/admin/capability-marketplace', label: 'Agents' },
   { href: '/admin/resource-radar', label: 'Insights' },
   { href: '/admin/dashboard', label: 'Administration' },
 ] as const;
