@@ -10,7 +10,7 @@ import {
   listPlatformClients,
 } from '@/lib/platform/client-configs';
 import {
-  assembleLandingTemplate,
+  assembleWebsiteForClient,
   getWebsiteEngineSummary,
   listUnifiedWebsiteSections,
 } from '@/lib/platform/website-bridge';
@@ -67,12 +67,21 @@ export default async function CapabilityMarketplacePage() {
     blockId: s.blockId ?? null,
     category: s.category ?? null,
   }));
-  const websiteDemo = assembleLandingTemplate({
-    id: 'cpr-home',
-    name: 'CPR Home',
-    organizationId: 'cpr',
-    themeId: 'cpr-theme',
-  });
+  const websiteDemoAssembled = assembleWebsiteForClient('ea');
+  const websiteDemo = websiteDemoAssembled
+    ? {
+        page: websiteDemoAssembled.assembly.page,
+        missingSectionIds: websiteDemoAssembled.missingSectionIds,
+        resolved: websiteDemoAssembled.assembly.resolved,
+      }
+    : {
+        page: { id: 'ea-home', name: 'EA Home' },
+        missingSectionIds: [] as string[],
+        resolved: [] as Array<{
+          instance: { sectionId: string; kind: string; order: number };
+          definition?: { name?: string; source?: string };
+        }>,
+      };
 
   const clients = listPlatformClients().map((client) => {
     const app = assembleClientApplication(client.id);

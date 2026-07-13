@@ -8,6 +8,8 @@ import { listPlatformClients } from './client-configs';
 import { getWebsiteEngineSummary } from './website-bridge';
 import { listWorkspaceShellSummaries } from './workspace-bridge';
 import { getPackageSyncHealth } from './package-sync-health';
+import { getClientDomainMapHealth } from './domain-map';
+import { listContentPackSummaries } from './content-packs';
 
 export type FoundationPackageId =
   | 'capability-registry'
@@ -36,6 +38,8 @@ export function getPlatformFoundationStatus() {
   const workspaceSummaries = listWorkspaceShellSummaries();
   const clients = listPlatformClients();
   const packageSync = getPackageSyncHealth();
+  const domains = getClientDomainMapHealth();
+  const contentPacks = listContentPackSummaries();
 
   const slices = [
     {
@@ -74,7 +78,7 @@ export function getPlatformFoundationStatus() {
       id: 'website',
       label: 'Website engine',
       ok: website.totalSections > 0,
-      detail: `${website.totalSections} sections`,
+      detail: `${website.totalSections} sections · ${contentPacks.length} content packs`,
       href: '/admin/capability-marketplace?tab=website',
     },
     {
@@ -83,6 +87,13 @@ export function getPlatformFoundationStatus() {
       ok: workspaceSummaries.length > 0,
       detail: `${workspaceSummaries.length} client shells | ${clients.length} configs`,
       href: '/admin/workspace-preview',
+    },
+    {
+      id: 'domains',
+      label: 'Client domains',
+      ok: domains.ok,
+      detail: `${domains.bindingCount} bindings (${domains.siteBindings} site / ${domains.portalBindings} portal)`,
+      href: '/api/platform/domains',
     },
   ];
 
@@ -120,5 +131,7 @@ export function getPlatformFoundationStatus() {
     website,
     workspaceShellCount: workspaceSummaries.length,
     clientConfigCount: clients.length,
+    domains,
+    contentPackCount: contentPacks.length,
   };
 }

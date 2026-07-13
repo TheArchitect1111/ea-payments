@@ -381,10 +381,29 @@ export default function CapabilityMarketplaceClient({
       )}
 
       {tab === 'clients' && (
-        <div className="grid grid-cols-1 gap-4">
-          {clients.map((client) => (
-            <ClientCard key={client.id} client={client} />
-          ))}
+        <div className="space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-3 border border-neutral-200 bg-white p-4">
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-wider" style={{ color: GOLD }}>
+                Reproduce
+              </p>
+              <p className="text-sm text-neutral-600 mt-1">
+                Spin up an org + workspace + hub entitlements from any preset below.
+              </p>
+            </div>
+            <Link
+              href="/admin/ea-factory/client-factory"
+              className="rounded-full px-4 py-2 text-xs font-black uppercase tracking-wider text-white"
+              style={{ backgroundColor: NAVY }}
+            >
+              New Client Factory
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 gap-4">
+            {clients.map((client) => (
+              <ClientCard key={client.id} client={client} />
+            ))}
+          </div>
         </div>
       )}
 
@@ -493,7 +512,7 @@ export default function CapabilityMarketplaceClient({
 
           <div className="bg-white border border-neutral-200 p-5">
             <p className="text-[11px] font-bold uppercase tracking-wider" style={{ color: GOLD }}>
-              Demo assembly
+              ClientConfig assembly
             </p>
             <h3 className="text-lg font-bold mt-1" style={{ color: NAVY }}>
               {websiteDemo.pageName}
@@ -504,7 +523,7 @@ export default function CapabilityMarketplaceClient({
                 <li key={section.sectionId}>
                   <span className="font-mono text-xs text-neutral-400 mr-2">{section.order}</span>
                   {section.name}
-                  <span className="text-xs text-neutral-400"> ? {section.kind} ? {section.source}</span>
+                  <span className="text-xs text-neutral-400"> · {section.kind} · {section.source}</span>
                 </li>
               ))}
             </ol>
@@ -513,13 +532,29 @@ export default function CapabilityMarketplaceClient({
                 Missing: {websiteDemo.missingSectionIds.join(', ')}
               </p>
             )}
-            <Link
-              href="/api/platform/website?view=assemble&id=cpr-home&name=CPR%20Home&org=cpr&theme=cpr-theme"
-              className="inline-block mt-4 text-xs font-bold uppercase tracking-wider underline"
-              style={{ color: NAVY }}
-            >
-              View assemble JSON
-            </Link>
+            <div className="mt-4 flex flex-wrap gap-4">
+              <Link
+                href="/admin/reproduce-preview?client=ea"
+                className="text-xs font-bold uppercase tracking-wider underline"
+                style={{ color: NAVY }}
+              >
+                Open reproduce preview
+              </Link>
+              <Link
+                href="/site/ea"
+                className="text-xs font-bold uppercase tracking-wider underline"
+                style={{ color: NAVY }}
+              >
+                Public site
+              </Link>
+              <Link
+                href="/api/platform/website?view=client&client=ea"
+                className="text-xs font-bold uppercase tracking-wider underline"
+                style={{ color: NAVY }}
+              >
+                View client JSON
+              </Link>
+            </div>
           </div>
 
           <div className="flex flex-wrap gap-3 items-end">
@@ -733,13 +768,20 @@ function ClientCard({ client }: { client: ClientRow }) {
           Missing in registry: {client.missingCapabilityIds.join(', ')}
         </p>
       )}
-      <div className="mt-4">
+      <div className="mt-4 flex flex-wrap gap-4">
+        <Link
+          href={`/admin/reproduce-preview?client=${encodeURIComponent(client.id)}`}
+          className="text-xs font-bold uppercase tracking-wider underline"
+          style={{ color: NAVY }}
+        >
+          Reproduce preview
+        </Link>
         <Link
           href={`/api/platform/clients?client=${encodeURIComponent(client.id)}`}
           className="text-xs font-bold uppercase tracking-wider underline"
           style={{ color: NAVY }}
         >
-          View assembled JSON
+          Assembled JSON
         </Link>
       </div>
     </article>

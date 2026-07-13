@@ -117,7 +117,13 @@ export default async function EAFactoryPage({ searchParams }: PageProps) {
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
-              <Link href="/admin/ea-factory/new-experience" className="rounded-full bg-black px-4 py-2 text-xs font-black text-white">
+              <Link href="/admin/ea-factory/client-factory" className="rounded-full bg-black px-4 py-2 text-xs font-black text-white">
+                New Client
+              </Link>
+              <Link href="/admin/reproduce-preview" className="rounded-full bg-[#111] px-4 py-2 text-xs font-black text-white">
+                Reproduce Preview
+              </Link>
+              <Link href="/admin/ea-factory/new-experience" className="rounded-full bg-[#1B2B4D] px-4 py-2 text-xs font-black text-white">
                 New Experience
               </Link>
               <Link href="/admin/ea-factory/training-transformations" className="rounded-full bg-[#111] px-4 py-2 text-xs font-black text-white">

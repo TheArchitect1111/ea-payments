@@ -16,7 +16,57 @@ export {
   getPlatformClientConfig,
   assembleClientApplication,
 } from './client-configs';
-export type { PlatformClientConfig, AssembledClientApplication } from './client-configs';
+export type { PlatformClientConfig, PlatformClientLandingConfig, AssembledClientApplication } from './client-configs';
+
+export {
+  reproduceClientFromPreset,
+  enableKeysToHubModuleIds,
+  listClientFactoryPresets,
+} from './client-factory';
+export type {
+  ClientFactoryInput,
+  ClientFactoryResult,
+  ClientFactoryError,
+} from './client-factory';
+
+export { applyPortalCopy } from './portal-copy';
+
+export {
+  assembleReproduceSurfaces,
+  listReproduceClientOptions,
+} from './reproduce';
+export type { ReproduceSurfaces } from './reproduce';
+
+export {
+  buildLandingPageConfigForClient,
+  resolvePublicSiteBySlug,
+  publicSitePathForSlug,
+  publicSitePathForClient,
+  listPublicSiteClients,
+} from './landing-from-client';
+export type { LandingSiteOverrides, ResolvedPublicSite } from './landing-from-client';
+
+export {
+  listContentPacks,
+  listContentPackSummaries,
+  getContentPackForClient,
+  getContentPackById,
+  cprAthleticsContentPack,
+  eaPlatformContentPack,
+  etfmCoachingContentPack,
+  threeHcReadinessContentPack,
+  bobRumballLearningContentPack,
+} from './content-packs';
+
+export {
+  listClientDomainBindings,
+  getClientDomainBinding,
+  listDomainsForSlug,
+  resolveClientDomainEntry,
+  getClientDomainMapHealth,
+  CLIENT_DOMAIN_BINDINGS,
+} from './domain-map';
+export type { ClientDomainBinding, ClientDomainSurface } from './domain-map';
 
 export {
   getWebsiteSectionRegistry,
@@ -24,8 +74,11 @@ export {
   listWebsiteSectionsBySource,
   assembleLandingTemplate,
   assembleCustomWebsitePage,
+  assembleWebsiteForClient,
+  buildClientLandingManifest,
   getWebsiteEngineSummary,
 } from './website-bridge';
+export type { AssembledClientWebsite, LandingPreviewCopy } from './website-bridge';
 
 export {
   assembleWorkspaceForClient,

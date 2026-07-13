@@ -9,6 +9,7 @@ import { EA_PORTAL_COOKIE, EA_PORTAL_SESSION } from '@/lib/chassis/ea-portal';
 import { resolveProductHostRedirect } from '@/lib/product-routes';
 import { resolveCustomDomainRedirect } from '@/lib/marketing-urls';
 import { resolveSimplifiAppHostRedirect } from '@/lib/simplifi-app-host';
+import { resolveClientDomainEntry } from '@/lib/platform/domain-map';
 
 const EA_ADMIN_COOKIE = 'ea_admin_session';
 
@@ -129,18 +130,19 @@ export async function middleware(request: NextRequest) {
 
 
 
-  const productEntry =
+  const clientDomainEntry = resolveClientDomainEntry(host, pathname);
+  if (clientDomainEntry) {
+    const target = new URL(clientDomainEntry.path, request.url);
+    target.search = request.nextUrl.search;
+    return NextResponse.rewrite(target);
+  }
 
+  const productEntry =
     resolveCustomDomainRedirect(host, pathname) ?? resolveProductHostRedirect(host, pathname);
 
-
-
   if (productEntry) {
-
     const target = new URL(productEntry, request.url);
-
     return NextResponse.redirect(target);
-
   }
 
 

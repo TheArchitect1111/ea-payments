@@ -12,9 +12,10 @@ export default async function MessagingPage({ params }: { params: Promise<{ slug
     <PortalSubpage
       slug={slug}
       active="messaging"
+      module="messaging"
       kicker="Communication"
       title="Messaging center"
-      lede="Direct communication with your EA advisor. Post an update or enhancement request and our team will respond through your activity feed."
+      lede="Direct communication for {members} in {workspace}. Post an update or request and the team will respond through your activity feed."
     >
       <ul className="ep-module-list">
         <li className="ep-module-card">

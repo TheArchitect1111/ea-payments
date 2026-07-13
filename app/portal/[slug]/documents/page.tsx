@@ -18,9 +18,10 @@ export default async function DocumentsPage({ params }: { params: Promise<{ slug
     <PortalSubpage
       slug={slug}
       active="documents"
-      kicker="Documents"
-      title="Your EA document hub"
-      lede="Onboarding materials, assessments, and shared deliverables — starting with the essentials below."
+      module="documents"
+      kicker="{brand}"
+      title="Your {brand} document hub"
+      lede="Onboarding materials, assessments, and shared deliverables for {members} — starting with the essentials below."
     >
       <ul className="ep-module-list">
         {STARTER_DOCUMENTS.map((doc) => (

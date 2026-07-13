@@ -27,9 +27,10 @@ export default async function PortalNotificationsPage({
     <PortalSubpage
       slug={slug}
       active="home"
+      module="notifications"
       kicker="Activity"
       title="Notification center"
-      lede="Recent activity across Pulse, Simplifi, billing, and your advisor updates."
+      lede="Recent activity across {workspace} — Pulse, Simplifi, billing, and advisor updates for {members}."
     >
       <ul className="ep-module-list">
         {notifications.length === 0 ? (

@@ -16,9 +16,10 @@ export default async function PortalBillingPage({
     <PortalSubpage
       slug={slug}
       active="home"
+      module="billing"
       kicker="Billing"
       title="Subscription & invoices"
-      lede="Manage your plan, payment method, and invoice history through Stripe's secure billing portal."
+      lede="Manage your {brand} plan, payment method, and invoice history through Stripe's secure billing portal."
     >
       <div className="ep-module-card" style={{ maxWidth: 520 }}>
         <p className="ep-module-card-title">Self-serve billing</p>
