@@ -1,10 +1,19 @@
-import EAGuideOrb from '@/app/components/ea-guide/EAGuideOrb';
+import EAAssistant from '@/app/components/ea-assistant/EAAssistant';
+import { resolvePortalWorkspaceChrome } from '@/lib/platform/portal-workspace';
 
-export default function PortalLayout({ children }: { children: React.ReactNode }) {
+type Props = {
+  children: React.ReactNode;
+  params: Promise<{ slug: string }>;
+};
+
+export default async function PortalRouteLayout({ children, params }: Props) {
+  const { slug } = await params;
+  const chrome = await resolvePortalWorkspaceChrome(slug);
+
   return (
     <>
       {children}
-      <EAGuideOrb />
+      <EAAssistant surface="portal" workspaceAiContext={chrome.aiContext || undefined} />
     </>
   );
 }

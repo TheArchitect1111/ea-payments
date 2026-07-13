@@ -1,3 +1,20 @@
+
+/* workspace shell aliases */
+.ep-workspace-shell {
+  --ea-navy: var(--workspace-primary, #1b2b4d);
+  --ea-gold: var(--workspace-accent, #c9a844);
+  --ea-cream: var(--workspace-background, #f9fafb);
+  --ea-surface: var(--workspace-surface, #ffffff);
+  --ea-text: var(--workspace-text, #101828);
+  --ea-muted: var(--workspace-muted-text, #667085);
+  --ea-border: var(--workspace-border, #e4e7ec);
+  --ep-brand: var(--workspace-primary, #465fff);
+  --ep-brand-soft: color-mix(in srgb, var(--workspace-primary, #465fff) 12%, white);
+  --ep-brand-hover: var(--workspace-accent, #3641f5);
+  background: var(--workspace-background, var(--ea-cream));
+  color: var(--workspace-text, var(--ea-text));
+  font-family: var(--workspace-font-body, 'Segoe UI', system-ui, sans-serif);
+}
 /* EA Portal — TailAdmin-inspired layout (client portal only) */
 
 :root {
@@ -1296,4 +1313,86 @@
   font-size: 0.9rem;
   line-height: 1.5;
   color: var(--ea-muted);
+}
+
+/* Module pages — compact workspace identity under shell chrome */
+.ep-module-chrome {
+  margin: 0 0 1rem;
+  padding: 0.75rem 0 0.85rem;
+  border-bottom: 1px solid var(--ea-border);
+}
+.ep-module-chrome-brand {
+  margin: 0;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ea-gold);
+}
+.ep-module-chrome-meta {
+  margin: 0.35rem 0 0;
+  font-size: 0.8rem;
+  color: var(--ea-muted);
+}
+
+/* personality dashboard rail */
+.ep-personality-rail {
+  margin-bottom: 1.25rem;
+  padding: 1.1rem 1.25rem;
+  border: 1px solid var(--ea-border);
+  border-radius: var(--ea-radius-sm);
+  background: var(--ea-surface);
+  box-shadow: var(--ea-shadow);
+}
+.ep-personality-rail-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.ep-personality-eyebrow {
+  margin: 0 0 0.25rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ea-gold);
+}
+.ep-personality-title {
+  margin: 0;
+  font-size: 1.25rem;
+  color: var(--ea-navy);
+  font-family: var(--workspace-font-heading, inherit);
+}
+.ep-personality-sub {
+  margin: 0.25rem 0 0;
+  color: var(--ea-muted);
+  font-size: 0.9rem;
+}
+.ep-personality-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.ep-personality-empty {
+  margin-top: 0.85rem;
+}
+.ep-personality-widgets {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.65rem;
+  margin-top: 0.9rem;
+}
+.ep-personality-widget {
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--ea-border);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--ea-cream) 70%, white);
+}
+.ep-personality-widget strong {
+  display: block;
+  margin-top: 0.35rem;
+  font-size: 0.9rem;
+  color: var(--ea-navy);
 }

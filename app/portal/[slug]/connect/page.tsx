@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { buildConnectKit } from '@/lib/connect-kit';
 import { PortalShell } from '@/lib/chassis/PortalShell';
+import { PortalModuleChromeStrip } from '@/lib/chassis/PortalChromeContext';
 import { getConnectOrg } from '@/lib/connect-store';
 import { requirePortalModule } from '@/lib/modules/portal-modules';
 import { roleAtLeast, normalizeRole } from '@/lib/rbac';
@@ -27,6 +28,7 @@ export default async function PortalConnectKitPage({
     <div className="ep-page">
       <PortalShell slug={slug} active="connect" firstName={firstName}>
         <main className="ep-main ep-main-shell">
+          <PortalModuleChromeStrip />
           <div className="ep-welcome">
             <p className="ep-welcome-label">EA Connect™</p>
             <h1 className="ep-welcome-heading">QR codes & capture links</h1>

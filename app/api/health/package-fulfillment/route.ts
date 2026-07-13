@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getPurchasableEACatalog } from '@/lib/catalog';
+import { resolveCheckoutOffer } from '@/lib/platform/payments-bridge';
 import { buildPackageFulfillmentPlan } from '@/lib/package-fulfillment';
 
 export const dynamic = 'force-dynamic';

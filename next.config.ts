@@ -8,7 +8,16 @@ const projectRoot = path.dirname(fileURLToPath(import.meta.url));
 
 const nextConfig: NextConfig = {
   outputFileTracingRoot: projectRoot,
-  transpilePackages: ['@ea/portal-chassis'],
+  transpilePackages: [
+    '@ea/portal-chassis',
+    '@ea/capability-registry',
+    '@ea/module-engine',
+    '@ea/theme-engine',
+    '@ea/personality-engine',
+    '@ea/website-engine',
+    '@ea/workspace-engine',
+    '@ea/payments-contract',
+  ],
   turbopack: {
     // Avoid picking C:\Users\brick\package-lock.json when multiple lockfiles exist.
     root: path.join(__dirname),

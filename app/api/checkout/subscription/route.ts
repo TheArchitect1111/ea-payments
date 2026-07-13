@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { getStripe } from '@/lib/stripe';
+import { getPurchasableSubscriptionPlans } from '@/lib/subscription-catalog';
 import {
-  getPurchasableSubscriptionPlans,
-  getSubscriptionPlan,
-  isSubscriptionPlanPurchasable,
-} from '@/lib/subscription-catalog';
+  buildCommerceCheckoutMetadata,
+  isCheckoutOfferPurchasable,
+  resolveCheckoutOffer,
+} from '@/lib/platform/payments-bridge';
 
 export const dynamic = 'force-dynamic';
 
@@ -56,16 +57,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const plan = getSubscriptionPlan(planId.trim());
-    if (!plan || !isSubscriptionPlanPurchasable(plan)) {
+    const offer = resolveCheckoutOffer(planId.trim());
+    if (!offer || offer.kind !== 'subscription' || !isCheckoutOfferPurchasable(offer)) {
       return NextResponse.json(
         { error: 'Invalid or unavailable subscription plan.' },
         { status: 400 },
       );
     }
 
-    const stripePriceId = process.env[plan.stripePriceEnvKey];
-    if (!stripePriceId && !plan.allowInlineStripePrice) {
+    const stripePriceId = process.env[offer.stripePriceEnvKey];
+    if (!stripePriceId && !offer.allowInlineStripePrice) {
       return NextResponse.json(
         {
           error:
@@ -77,6 +78,15 @@ export async function POST(req: NextRequest) {
 
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? 'http://localhost:3000';
     const stripe = getStripe();
+    const interval = offer.interval ?? 'month';
+
+    const commerceMeta = buildCommerceCheckoutMetadata(offer, {
+      clientName: name.trim(),
+      organization: organization?.trim() ?? '',
+      phone: phone?.trim() ?? '',
+      referralSource: referralSource?.trim() ?? '',
+      clientEmail: email.trim().toLowerCase(),
+    });
 
     const sessionParams: Stripe.Checkout.SessionCreateParams = {
       mode: 'subscription',
@@ -88,11 +98,11 @@ export async function POST(req: NextRequest) {
           : {
               price_data: {
                 currency: 'usd',
-                unit_amount: plan.priceCents,
-                recurring: { interval: plan.interval },
+                unit_amount: offer.priceCents,
+                recurring: { interval },
                 product_data: {
-                  name: plan.displayName,
-                  description: plan.description,
+                  name: offer.displayName,
+                  description: offer.description,
                 },
               },
               quantity: 1,
@@ -100,27 +110,19 @@ export async function POST(req: NextRequest) {
       ],
       customer_email: email.trim(),
       subscription_data: {
-        ...(plan.trialDays && plan.trialDays > 0
-          ? { trial_period_days: plan.trialDays }
+        ...(offer.trialDays && offer.trialDays > 0
+          ? { trial_period_days: offer.trialDays }
           : {}),
         metadata: {
-          planId: plan.id,
-          packageName: plan.airtablePackageName,
+          planId: offer.id,
+          packageName: offer.airtablePackageName,
+          commerceOfferId: offer.id,
           clientEmail: email.trim().toLowerCase(),
           clientName: name.trim(),
           organization: organization?.trim() ?? '',
         },
       },
-      metadata: {
-        checkoutType: 'subscription',
-        planId: plan.id,
-        packageName: plan.airtablePackageName,
-        clientName: name.trim(),
-        organization: organization?.trim() ?? '',
-        phone: phone?.trim() ?? '',
-        referralSource: referralSource?.trim() ?? '',
-        clientEmail: email.trim().toLowerCase(),
-      },
+      metadata: commerceMeta,
       success_url: `${baseUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}&type=subscription`,
       cancel_url: `${baseUrl}/checkout/cancel`,
     };

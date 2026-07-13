@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { getClientSuccessProfile } from '@/lib/client-success';
 import { PortalShell, NAVY, GOLD } from '@/lib/chassis/PortalShell';
+import { PortalModuleChromeStrip } from '@/lib/chassis/PortalChromeContext';
 import { requirePortalModule } from '@/lib/modules/portal-modules';
 import OpportunitiesPanel from './OpportunitiesPanel';
 import '../ea-portal.css';
@@ -29,6 +30,7 @@ export default async function PulsePage({
   return (
     <PortalShell slug={slug} active="pulse" firstName={firstName}>
       <main className="ep-main">
+        <PortalModuleChromeStrip />
         <div className="ep-welcome">
           <p className="ep-welcome-label">Pulse</p>
           <h1 className="ep-welcome-heading">Your Progress, {firstName}</h1>

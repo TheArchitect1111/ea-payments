@@ -4,9 +4,16 @@ import {
   requireAdminActionFromRequest,
   requireAdminSessionFromRequest,
 } from '@/lib/admin-session-guard';
-import { listEntitlementsForOrg, setModuleEnabled } from '@/lib/entitlements';
+import {
+  activeModuleIdsFromEntitlements,
+  listEntitlementsForOrg,
+  setModuleEnabled,
+} from '@/lib/entitlements';
+import { getCapabilityByModuleId } from '@/lib/experience-registry';
 import type { ModuleId } from '@/lib/modules/registry';
-import { MODULE_IDS } from '@/lib/modules/registry';
+import { MODULE_IDS, MODULE_REGISTRY } from '@/lib/modules/registry';
+import { platformStoreConfigured } from '@/lib/platform-store';
+import { isSyntheticOrganizationId } from '@/lib/tenant-context';
 
 export const dynamic = 'force-dynamic';
 
@@ -20,7 +27,31 @@ export async function GET(req: NextRequest) {
   }
 
   const entitlements = await listEntitlementsForOrg(orgId);
-  return NextResponse.json({ organizationId: orgId, entitlements });
+  const active = activeModuleIdsFromEntitlements(entitlements);
+  const modules = MODULE_REGISTRY.map((mod) => {
+    const capability = getCapabilityByModuleId(mod.id);
+    const entitlement = entitlements.find((row) => row.moduleId === mod.id) ?? null;
+    return {
+      moduleId: mod.id,
+      name: mod.name,
+      title: mod.title,
+      description: mod.description,
+      requiredRole: mod.requiredRole,
+      capabilityId: capability?.id ?? null,
+      capabilityLabel: capability?.displayLabel ?? mod.name,
+      enabled: active.has(mod.id),
+      entitlement,
+    };
+  });
+
+  return NextResponse.json({
+    organizationId: orgId,
+    entitlements,
+    modules,
+    storeConfigured: platformStoreConfigured(),
+    isSynthetic: isSyntheticOrganizationId(orgId),
+    writable: platformStoreConfigured() && !isSyntheticOrganizationId(orgId),
+  });
 }
 
 export async function POST(req: NextRequest) {
