@@ -12,7 +12,9 @@ const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, '..');
 const home = resolve(root, '../..');
 const osRoot = join(home, 'ea-operating-system');
-const idMapPath = join(osRoot, 'packages/capability-registry/src/id-map.ts');
+const vendorIdMap = join(root, 'vendor/capability-registry/src/id-map.ts');
+const osIdMap = join(osRoot, 'packages/capability-registry/src/id-map.ts');
+const idMapPath = existsSync(vendorIdMap) ? vendorIdMap : osIdMap;
 const bootstrapPath = join(root, 'lib/platform/capability-bootstrap.ts');
 const apiPath = join(root, 'app/api/platform/capabilities/route.ts');
 const pkgPath = join(root, 'package.json');
@@ -26,6 +28,10 @@ function assert(condition, message) {
 assert(existsSync(idMapPath), `Missing capability ID map at ${idMapPath}`);
 assert(existsSync(bootstrapPath), 'Missing lib/platform/capability-bootstrap.ts');
 assert(existsSync(apiPath), 'Missing app/api/platform/capabilities/route.ts');
+assert(
+  existsSync(join(root, 'vendor/capability-registry/package.json')),
+  'Missing vendored @ea/capability-registry (run npm run sync-platform-packages)',
+);
 
 const pkg = JSON.parse(readFileSync(pkgPath, 'utf8'));
 assert(
@@ -35,6 +41,10 @@ assert(
 assert(
   Boolean(pkg.dependencies?.['@ea/module-engine']),
   'package.json missing @ea/module-engine dependency',
+);
+assert(
+  String(pkg.dependencies?.['@ea/capability-registry'] || '').includes('vendor/'),
+  '@ea/capability-registry must resolve via file:./vendor/ for CI',
 );
 
 const MODULE_IDS = [
@@ -135,12 +145,14 @@ assert(
   'PortalSubpage must render module chrome strip',
 );
 assert(
-  existsSync(join(osRoot, 'packages/capability-registry/src/cpr-readiness.ts')),
-  'Missing OS cpr-readiness package module',
+  existsSync(join(root, 'vendor/capability-registry/src/cpr-readiness.ts')) ||
+    existsSync(join(osRoot, 'packages/capability-registry/src/cpr-readiness.ts')),
+  'Missing cpr-readiness package module (vendor or OS)',
 );
 assert(
-  existsSync(join(osRoot, 'packages/module-engine/src/adapters/cpr-hub.ts')),
-  'Missing CPR hub adapter',
+  existsSync(join(root, 'vendor/module-engine/src/adapters/cpr-hub.ts')) ||
+    existsSync(join(osRoot, 'packages/module-engine/src/adapters/cpr-hub.ts')),
+  'Missing CPR hub adapter (vendor or OS)',
 );
 assert(
   readFileSync(join(root, 'app/api/checkout/route.ts'), 'utf8').includes('resolveCheckoutOffer'),

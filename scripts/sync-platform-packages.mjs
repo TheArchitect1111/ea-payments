@@ -1,46 +1,61 @@
 #!/usr/bin/env node
 /**
- * Verify local file: links to ea-operating-system platform packages.
- * (No copy step — Next resolves via package.json file: deps.)
+ * Sync @ea platform packages from ea-operating-system into vendor/
+ * (same pattern as portal/premium chassis — CI/Vercel resolve file:./vendor/*).
  */
-import { existsSync } from 'node:fs';
+import {
+  cpSync,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, '..');
-const osPackages = resolve(root, '../../ea-operating-system/packages');
 
-const required = [
-  join(osPackages, 'capability-registry/package.json'),
-  join(osPackages, 'capability-registry/src/index.ts'),
-  join(osPackages, 'module-engine/package.json'),
-  join(osPackages, 'module-engine/src/index.ts'),
-  join(osPackages, 'theme-engine/package.json'),
-  join(osPackages, 'theme-engine/src/index.ts'),
-  join(osPackages, 'personality-engine/package.json'),
-  join(osPackages, 'personality-engine/src/index.ts'),
-  join(osPackages, 'website-engine/package.json'),
-  join(osPackages, 'website-engine/src/index.ts'),
-  join(osPackages, 'workspace-engine/package.json'),
-  join(osPackages, 'workspace-engine/src/index.ts'),
-  join(osPackages, 'payments-contract/package.json'),
-  join(osPackages, 'payments-contract/src/index.ts'),
+/** Prefer sibling of ea-launch-audit, then sibling of ea-payments (legacy). */
+const osCandidates = [
+  resolve(root, '../../ea-operating-system/packages'),
+  resolve(root, '../ea-operating-system/packages'),
 ];
 
-let ok = true;
-for (const path of required) {
-  if (!existsSync(path)) {
-    console.error('Missing:', path);
-    ok = false;
-  } else {
-    console.log('OK', path);
-  }
-}
-
-if (!ok) {
-  console.error('\nRun from a machine that has ea-operating-system checked out as a sibling of ea-launch-audit.');
+const osPackages = osCandidates.find((p) => existsSync(p));
+if (!osPackages) {
+  console.error('ea-operating-system/packages not found. Tried:\n', osCandidates.join('\n'));
   process.exit(1);
 }
 
-console.log('\nPlatform packages linked via file: deps — ready.');
+const PACKAGES = [
+  'capability-registry',
+  'module-engine',
+  'theme-engine',
+  'personality-engine',
+  'website-engine',
+  'workspace-engine',
+  'payments-contract',
+];
+
+for (const name of PACKAGES) {
+  const source = join(osPackages, name);
+  const target = join(root, 'vendor', name);
+  if (!existsSync(join(source, 'package.json')) || !existsSync(join(source, 'src'))) {
+    console.error('Missing package source:', source);
+    process.exit(1);
+  }
+  if (existsSync(target)) rmSync(target, { recursive: true, force: true });
+  mkdirSync(target, { recursive: true });
+  cpSync(join(source, 'src'), join(target, 'src'), { recursive: true });
+  if (existsSync(join(source, 'README.md'))) {
+    cpSync(join(source, 'README.md'), join(target, 'README.md'));
+  }
+  const pkg = JSON.parse(readFileSync(join(source, 'package.json'), 'utf8'));
+  // Keep relative file: deps among vendored siblings (../capability-registry etc.)
+  writeFileSync(join(target, 'package.json'), `${JSON.stringify(pkg, null, 2)}\n`);
+  console.log('Synced @ea/' + name, '→', target);
+}
+
+console.log('\nPlatform packages vendored. package.json should use file:./vendor/<name>.');

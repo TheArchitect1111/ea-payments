@@ -44,8 +44,8 @@
   },
   "dependencies": {
     "@clerk/nextjs": "^7.5.9",
-    "@ea/capability-registry": "file:../../ea-operating-system/packages/capability-registry",
-    "@ea/module-engine": "file:../../ea-operating-system/packages/module-engine",
+    "@ea/capability-registry": "file:./vendor/capability-registry",
+    "@ea/module-engine": "file:./vendor/module-engine",
     "@ea/portal-chassis": "file:./vendor/portal-chassis",
     "@ea/premium-chassis": "file:./vendor/premium-chassis",
     "@measured/puck": "^0.20.2",
@@ -61,11 +61,11 @@
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "stripe": "^22.2.1",
-    "@ea/theme-engine": "file:../../ea-operating-system/packages/theme-engine",
-    "@ea/personality-engine": "file:../../ea-operating-system/packages/personality-engine",
-    "@ea/website-engine": "file:../../ea-operating-system/packages/website-engine",
-    "@ea/workspace-engine": "file:../../ea-operating-system/packages/workspace-engine",
-    "@ea/payments-contract": "file:../../ea-operating-system/packages/payments-contract"
+    "@ea/theme-engine": "file:./vendor/theme-engine",
+    "@ea/personality-engine": "file:./vendor/personality-engine",
+    "@ea/website-engine": "file:./vendor/website-engine",
+    "@ea/workspace-engine": "file:./vendor/workspace-engine",
+    "@ea/payments-contract": "file:./vendor/payments-contract"
   },
   "devDependencies": {
     "@playwright/test": "^1.61.0",
