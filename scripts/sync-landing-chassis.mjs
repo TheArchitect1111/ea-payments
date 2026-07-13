@@ -2,7 +2,7 @@
 /**
  * Sync landing-chassis from ea-operating-system into ea-payments (reference copy).
  */
-import { cpSync, existsSync, mkdirSync, rmSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, rmSync, renameSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -19,9 +19,26 @@ if (!existsSync(source)) {
 if (existsSync(target)) rmSync(target, { recursive: true, force: true });
 mkdirSync(target, { recursive: true });
 
-for (const item of ['index.ts', 'LandingPage.tsx', 'landing.css', 'types.ts', 'config.ts', 'README.md']) {
+const files = [
+  'index.ts',
+  'LandingPage.tsx',
+  'icons.tsx',
+  'types.ts',
+  'README.md',
+  'landing-chassis.css',
+  'landing.css',
+  'config.ts',
+];
+
+for (const item of files) {
   const src = join(source, item);
   if (existsSync(src)) cpSync(src, join(target, item));
+}
+
+const cssSrc = join(target, 'landing-chassis.css');
+const cssDest = join(target, 'landing.css');
+if (existsSync(cssSrc) && !existsSync(cssDest)) {
+  renameSync(cssSrc, cssDest);
 }
 
 console.log('Synced landing-chassis to', target);

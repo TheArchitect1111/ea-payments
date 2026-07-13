@@ -18,6 +18,8 @@ export const EXECUTIVE_NAV = [
 
 export const BUILDER_NAV = [
   { href: '/admin/ea-factory', label: 'EA Factory' },
+  { href: '/admin/ea-factory/client-factory', label: 'New Client' },
+  { href: '/admin/reproduce-preview', label: 'Reproduce' },
   { href: '/admin/capability-marketplace', label: 'Capabilities' },
   { href: '/admin/workspace-preview', label: 'Workspace Preview' },
   { href: '/admin/protocol-center', label: 'Protocols' },

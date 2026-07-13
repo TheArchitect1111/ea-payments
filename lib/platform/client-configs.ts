@@ -23,6 +23,19 @@ import {
 } from '@ea/theme-engine';
 import { getPlatformCapabilityRegistry } from './capability-bootstrap';
 
+/** Optional marketing landing overrides on the same ClientConfig that drives the portal. */
+export type PlatformClientLandingConfig = {
+  /** Page id used in WebsitePageManifest (defaults to `{clientId}-home`). */
+  pageId?: string;
+  seoTitle?: string;
+  seoDescription?: string;
+  heroHeadline?: string;
+  heroLede?: string;
+  ctaLabel?: string;
+  /** Disable chassis section ids from the default landing template. */
+  disabledSectionIds?: string[];
+};
+
 export type PlatformClientConfig = {
   id: string;
   organizationId: string;
@@ -33,6 +46,8 @@ export type PlatformClientConfig = {
   enabledModuleKeys: string[];
   plannedModuleKeys: string[];
   terminology: Record<string, string>;
+  /** Landing / website surface — same config envelope as the portal. */
+  landing?: PlatformClientLandingConfig;
 };
 
 export const PLATFORM_CLIENT_CONFIGS: Record<string, PlatformClientConfig> = {
@@ -46,6 +61,13 @@ export const PLATFORM_CLIENT_CONFIGS: Record<string, PlatformClientConfig> = {
     enabledModuleKeys: ['clients', 'pulse', 'training', 'updateHub', 'amplifi', 'magnifi', 'growthPortal', 'connections'],
     plannedModuleKeys: [],
     terminology: { members: 'Clients', startPrompt: 'What would you like to build today?' },
+    landing: {
+      heroHeadline: 'Build the operating system your clients feel.',
+      heroLede: 'Portals, landings, and entitlements from one client configuration.',
+      ctaLabel: 'Start building',
+      seoTitle: 'Efficiency Architects — Platform',
+      seoDescription: 'Reproduce branded portals and landings from a single ClientConfig.',
+    },
   },
   cpr: {
     id: 'cpr',
@@ -54,9 +76,34 @@ export const PLATFORM_CLIENT_CONFIGS: Record<string, PlatformClientConfig> = {
     workspaceName: 'CPR Team Portal',
     personalityId: 'athletics',
     themeId: 'cpr-theme',
-    enabledModuleKeys: ['playerProfiles', 'recruiting', 'eligibility', 'events', 'documents', 'payments', 'coachNotes', 'video', 'messaging', 'calendar', 'familyPortal', 'connections', 'aiAdvisor'],
+    enabledModuleKeys: [
+      'playerProfiles',
+      'recruiting',
+      'eligibility',
+      'events',
+      'documents',
+      'payments',
+      'coachNotes',
+      'video',
+      'messaging',
+      'calendar',
+      'familyPortal',
+      'connections',
+      'aiAdvisor',
+      'training',
+      'updateHub',
+    ],
     plannedModuleKeys: [],
     terminology: { members: 'Players', startPrompt: 'What would you like to create for your players or families?', aiAdvisor: 'Recruiting Advisor' },
+    landing: {
+      heroHeadline: 'Every prospect. Every family. One recruiting home.',
+      heroLede:
+        'Canadian Prospects helps athletes get seen — and helps parents understand the next right step after camp, showcase, or tryout.',
+      ctaLabel: 'Get the Parent Recruiting Guide',
+      seoTitle: 'Canadian Prospects Recruitment | Faith. Family. Basketball. Future.',
+      seoDescription:
+        'Camps, showcases, eligibility, film, and family communication — CPR athletics pack on the EA chassis.',
+    },
   },
   etfm: {
     id: 'etfm',
@@ -68,6 +115,13 @@ export const PLATFORM_CLIENT_CONFIGS: Record<string, PlatformClientConfig> = {
     enabledModuleKeys: ['training', 'updateHub', 'connections'],
     plannedModuleKeys: ['financialBlueprint'],
     terminology: { members: 'Clients', startPrompt: 'What client outcome would you like to support?' },
+    landing: {
+      heroHeadline: 'Coaching that clarifies the next financial move.',
+      heroLede: 'Assessments, action plans, and progress in one coaching portal.',
+      ctaLabel: 'Enter coaching portal',
+      seoTitle: 'ETFM Coaching',
+      seoDescription: 'Financial coaching portal and landing — ETFM pack on the EA chassis.',
+    },
   },
   '3hc': {
     id: '3hc',
@@ -79,6 +133,13 @@ export const PLATFORM_CLIENT_CONFIGS: Record<string, PlatformClientConfig> = {
     enabledModuleKeys: ['training', 'updateHub', 'connections'],
     plannedModuleKeys: ['evidenceLibrary'],
     terminology: { members: 'Staff', startPrompt: 'What compliance process would you like to improve?' },
+    landing: {
+      heroHeadline: 'Readiness you can demonstrate.',
+      heroLede: 'Training, evidence, and staff workflows — 3HC readiness pack.',
+      ctaLabel: 'Enter readiness center',
+      seoTitle: '3HC Readiness Center',
+      seoDescription: 'Compliance readiness portal and landing on the EA chassis.',
+    },
   },
   'bob-rumball': {
     id: 'bob-rumball',
@@ -90,6 +151,13 @@ export const PLATFORM_CLIENT_CONFIGS: Record<string, PlatformClientConfig> = {
     enabledModuleKeys: ['training', 'updateHub', 'connections'],
     plannedModuleKeys: ['evidenceLibrary'],
     terminology: { members: 'Learners', startPrompt: 'What learning or accessibility outcome would you like to support?' },
+    landing: {
+      heroHeadline: 'Learning that meets every learner where they are.',
+      heroLede: 'Accessible training workspace and landing — Bob Rumball learning pack.',
+      ctaLabel: 'Start learning',
+      seoTitle: 'Bob Rumball Learning',
+      seoDescription: 'Accessible learning portal and landing on the EA chassis.',
+    },
   },
 };
 

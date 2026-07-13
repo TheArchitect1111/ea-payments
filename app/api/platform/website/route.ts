@@ -2,10 +2,12 @@ import { cookies } from 'next/headers';
 import { EA_ADMIN_COOKIE, verifyAdminSession } from '@/lib/ea-admin-auth';
 import {
   assembleLandingTemplate,
+  assembleWebsiteForClient,
   getWebsiteEngineSummary,
   listUnifiedWebsiteSections,
   listWebsiteSectionsBySource,
 } from '@/lib/platform/website-bridge';
+import { getContentPackForClient } from '@/lib/platform/content-packs';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,6 +16,7 @@ export const dynamic = 'force-dynamic';
  * GET /api/platform/website
  * GET /api/platform/website?view=landing
  * GET /api/platform/website?view=experience
+ * GET /api/platform/website?view=client&client=cpr
  * GET /api/platform/website?view=assemble&id=cpr-home&name=CPR%20Home&org=cpr&theme=cpr-theme
  */
 export async function GET(req: Request) {
@@ -42,6 +45,34 @@ export async function GET(req: Request) {
 
   if (view === 'sections') {
     return Response.json({ ok: true, sections: listUnifiedWebsiteSections() });
+  }
+
+  if (view === 'client') {
+    const clientId = searchParams.get('client')?.trim() || 'ea';
+    const assembled = assembleWebsiteForClient(clientId);
+    if (!assembled) {
+      return Response.json({ error: `Unknown client: ${clientId}` }, { status: 404 });
+    }
+    return Response.json({
+      ok: true,
+      clientId: assembled.clientId,
+      clientName: assembled.clientName,
+      themeId: assembled.themeId,
+      personalityId: assembled.personalityId,
+      personalityName: assembled.personalityName,
+      copy: assembled.copy,
+      terminology: assembled.terminology,
+      page: assembled.assembly.page,
+      sections: assembled.sections,
+      missingSectionIds: assembled.missingSectionIds,
+      cssVars: assembled.cssVars,
+      contentPack: (() => {
+        const pack = getContentPackForClient(assembled.clientId);
+        return pack
+          ? { id: pack.id, label: pack.label, vertical: pack.vertical, summary: pack.summary }
+          : null;
+      })(),
+    });
   }
 
   if (view === 'assemble') {

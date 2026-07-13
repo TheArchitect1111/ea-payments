@@ -13,9 +13,10 @@ export default async function AskAdvisorPage({ params }: { params: Promise<{ slu
     <PortalSubpage
       slug={slug}
       active="ask"
-      kicker="Guide™"
+      module="ask"
+      kicker="{focus}"
       title="Ask your advisor"
-      lede="Submit a question and our team will respond through your Update Hub activity feed."
+      lede="Submit a question from {workspace} and the team will respond through your activity feed."
     >
       <div className="ep-module-card" style={{ maxWidth: '36rem' }}>
         <p className="ep-module-card-note" style={{ marginBottom: '1rem' }}>

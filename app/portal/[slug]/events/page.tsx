@@ -1,9 +1,14 @@
 import { requirePortalModule } from '@/lib/modules/portal-modules';
 import { PortalSubpage } from '@/app/portal/components/PortalSubpage';
+import { resolvePortalWorkspaceChrome } from '@/lib/platform/portal-workspace';
+import {
+  CPR_PORTAL_EVENTS,
+  isCprPortalClient,
+} from '@/lib/platform/content-packs/cpr-portal';
 
 export const dynamic = 'force-dynamic';
 
-const UPCOMING_EVENTS = [
+const DEFAULT_EVENTS = [
   {
     title: 'Simplifi friend-testing office hours',
     when: 'Rolling — book via Calendly',
@@ -21,23 +26,29 @@ const UPCOMING_EVENTS = [
 export default async function EventsPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const { client } = await requirePortalModule(slug, 'events');
+  const chrome = await resolvePortalWorkspaceChrome(slug);
+  const events = isCprPortalClient(chrome.platformClientId)
+    ? CPR_PORTAL_EVENTS
+    : DEFAULT_EVENTS;
 
   return (
     <PortalSubpage
       slug={slug}
       active="events"
+      module="events"
       kicker="Events"
       title="Upcoming touchpoints"
-      lede={`Workshops, reviews, and advisor sessions for ${client.organization || client.clientName}.`}
+      lede={`Workshops, reviews, and advisor sessions for {brand} — ${client.organization || client.clientName}.`}
     >
       <ul className="ep-module-list">
-        {UPCOMING_EVENTS.map((event) => (
+        {events.map((event) => (
           <li key={event.title} className="ep-module-card">
-            <a href={event.href} className="ep-module-card-title" target={event.href.startsWith('http') ? '_blank' : undefined} rel="noreferrer">
+            <a href={event.href} className="ep-module-card-title">
               {event.title}
             </a>
-            <p className="ep-module-card-meta">{event.when}</p>
-            <p className="ep-module-card-note">{event.detail}</p>
+            <p className="ep-module-card-note">
+              <strong>{event.when}</strong> — {event.detail}
+            </p>
           </li>
         ))}
       </ul>

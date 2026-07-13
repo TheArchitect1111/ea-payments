@@ -37,7 +37,71 @@ const CONTINUE_SEEDS: Array<{
   module: string;
   modes: Array<'executive' | 'builder'>;
 }> = [
-    {
+  {
+    id: 'continue-client-factory',
+    title: 'New Client Factory',
+    summary: 'Reproduce a portal from a ClientConfig preset (org + entitlements + workspace)',
+    href: '/admin/ea-factory/client-factory',
+    module: 'build',
+    modes: ['builder'],
+  },
+  {
+    id: 'continue-reproduce-preview',
+    title: 'Reproduce Preview',
+    summary: 'Portal + landing assembled from the same ClientConfig',
+    href: '/admin/reproduce-preview',
+    module: 'build',
+    modes: ['builder'],
+  },
+  {
+    id: 'continue-public-site',
+    title: 'Public site (EA)',
+    summary: 'Live landing rendered from ClientConfig via landing-chassis',
+    href: '/site/ea',
+    module: 'build',
+    modes: ['builder', 'executive'],
+  },
+  {
+    id: 'continue-cpr-site',
+    title: 'CPR Athletics site',
+    summary: 'Vertical content pack proof — recruiting landing from CPR ClientConfig',
+    href: '/site/cpr',
+    module: 'build',
+    modes: ['builder', 'executive'],
+  },
+  {
+    id: 'continue-etfm-site',
+    title: 'ETFM Coaching site',
+    summary: 'Financial coaching pack — portal + landing from ETFM ClientConfig',
+    href: '/site/etfm',
+    module: 'build',
+    modes: ['builder'],
+  },
+  {
+    id: 'continue-3hc-site',
+    title: '3HC Readiness site',
+    summary: 'Compliance readiness pack from 3HC ClientConfig',
+    href: '/site/3hc',
+    module: 'build',
+    modes: ['builder'],
+  },
+  {
+    id: 'continue-bob-rumball-site',
+    title: 'Bob Rumball Learning site',
+    summary: 'Accessible learning pack from Bob Rumball ClientConfig',
+    href: '/site/bob-rumball',
+    module: 'build',
+    modes: ['builder'],
+  },
+  {
+    id: 'continue-domains',
+    title: 'Client domain map',
+    summary: 'Custom host → site/portal slug bindings (seed + EA_CLIENT_DOMAIN_MAP)',
+    href: '/api/platform/domains',
+    module: 'build',
+    modes: ['builder'],
+  },
+  {
     id: 'continue-workspace-preview',
     title: 'Workspace Preview',
     summary: 'Live shell with theme, personality, and capability nav',
@@ -45,7 +109,7 @@ const CONTINUE_SEEDS: Array<{
     module: 'build',
     modes: ['builder'],
   },
-{
+  {
     id: 'continue-platform-foundation',
     title: 'Platform Foundation',
     summary: 'Capability, payments, CPR readiness, and vendor package sync',
@@ -111,6 +175,8 @@ const QUICK_ACTIONS_EXECUTIVE = [
 
 const QUICK_ACTIONS_BUILDER = [
   { label: 'EA Factory', href: '/admin/ea-factory', module: 'build' },
+  { label: 'New Client', href: '/admin/ea-factory/client-factory', module: 'build' },
+  { label: 'Reproduce', href: '/admin/reproduce-preview', module: 'build' },
   { label: 'Skin Factory', href: '/admin/ea-factory/skin-factory', module: 'build' },
   { label: 'Chassis Deploy', href: '/admin/ea-factory/chassis-deployment', module: 'build' },
 ];
