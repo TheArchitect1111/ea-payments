@@ -17,6 +17,7 @@ import { listAgents } from '@/lib/agents/registry';
 import { listPlatformActivityEvents } from '@/lib/activity-events-store';
 import type { AttentionItem } from '@/lib/pulse-attention';
 import { listRecentPulseEvents, type PulseEvent } from '@/lib/pulse-bus';
+import { getPackageSyncHealth } from '@/lib/platform/package-sync-health';
 
 const EA_ORG = 'ea';
 
@@ -47,7 +48,15 @@ const CONTINUE_SEEDS: Array<{
 {
     id: 'continue-platform-foundation',
     title: 'Platform Foundation',
-    summary: 'Capability, payments, CPR readiness, and package health',
+    summary: 'Capability, payments, CPR readiness, and vendor package sync',
+    href: '/admin/capability-marketplace?tab=foundation',
+    module: 'build',
+    modes: ['builder'],
+  },
+  {
+    id: 'continue-package-sync',
+    title: 'Sync platform packages',
+    summary: 'Refresh vendor/@ea copies from ea-operating-system when drift appears',
     href: '/admin/capability-marketplace?tab=foundation',
     module: 'build',
     modes: ['builder'],
@@ -161,8 +170,38 @@ export function buildEAMissionControl(input: {
     ),
   );
 
+  const packageSync = getPackageSyncHealth();
+  const packageSyncEvents: PlatformEvent[] = [];
+  if (!packageSync.ok) {
+    packageSyncEvents.push(
+      fromActivityEvent(
+        normalizeActivityEvent(
+          {
+            organizationId: EA_ORG,
+            module: 'build',
+            eventType: 'attention.item',
+            title: 'Platform package sync needed',
+            summary: packageSync.syncHint,
+            priority: packageSync.missing.length ? 85 : 70,
+            actionLabel: 'Open foundation',
+            actionUrl: '/admin/capability-marketplace?tab=foundation',
+            metadata: {
+              whyRecommended: packageSync.drifted.length
+                ? `Drifted: ${packageSync.drifted.join(', ')}`
+                : `Missing: ${packageSync.missing.join(', ')}`,
+              source: 'package-sync-health',
+              category: 'platform',
+            },
+          },
+          'attention-package-sync',
+        ),
+      ),
+    );
+  }
+
   const events = mergeEventStreams(input.activityEvents ?? [], [
     ...attentionEvents,
+    ...packageSyncEvents,
     ...pulsePlatform,
     ...continueEvents,
   ]);

@@ -78,3 +78,10 @@ export {
 
 export { getPlatformFoundationStatus } from './foundation-status';
 export type { FoundationPackageId } from './foundation-status';
+
+export {
+  getPackageSyncHealth,
+  PLATFORM_VENDOR_PACKAGES,
+  CHASSIS_VENDOR_PACKAGES,
+} from './package-sync-health';
+export type { PackageSyncRow, VendorPackageName } from './package-sync-health';
