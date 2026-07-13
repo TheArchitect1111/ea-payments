@@ -1,3 +1,3 @@
-export type { WorkspaceAssembleInput, WorkspaceShell } from './types.js';
-export { assembleWorkspaceShell } from './assemble.js';
-export type { WorkspaceAssembleOptions } from './assemble.js';
+export type { WorkspaceAssembleInput, WorkspaceShell } from './types';
+export { assembleWorkspaceShell } from './assemble';
+export type { WorkspaceAssembleOptions } from './assemble';

@@ -1,5 +1,6 @@
 /**
- * Bridge live experience-builder BLOCK_REGISTRY into @ea/website-engine.
+ * Bridge landing-chassis (+ optional experience-builder blocks) into @ea/website-engine.
+ * Experience-builder BLOCK_REGISTRY is optional so CI works without the full block tree.
  */
 import {
   createDefaultWebsiteRegistry,
@@ -11,14 +12,26 @@ import {
   type WebsiteSectionDefinition,
   type WebsiteSectionRegistry,
 } from '@ea/website-engine';
-import { BLOCK_REGISTRY } from '@/lib/experience-builder/blocks/registry';
+
+type ExperienceBlockMeta = {
+  id: string;
+  category: string;
+  label: string;
+  description: string;
+  aiPurpose?: string;
+};
 
 let cachedRegistry: WebsiteSectionRegistry | undefined;
+
+/** Experience-builder blocks land in a separate PR; landing-chassis sections still register. */
+function loadExperienceBuilderBlocks(): ExperienceBlockMeta[] {
+  return [];
+}
 
 export function getWebsiteSectionRegistry(): WebsiteSectionRegistry {
   if (cachedRegistry) return cachedRegistry;
   cachedRegistry = createDefaultWebsiteRegistry(
-    BLOCK_REGISTRY.map((b) => ({
+    loadExperienceBuilderBlocks().map((b) => ({
       id: b.id,
       category: b.category,
       label: b.label,

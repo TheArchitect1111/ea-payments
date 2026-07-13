@@ -1,4 +1,4 @@
-import type { WebsiteSectionDefinition, WebsiteSectionKind } from './types.js';
+import type { WebsiteSectionDefinition, WebsiteSectionKind } from './types';
 
 /** Minimal block registry row from ea-payments experience-builder. */
 export type ExperienceBlockInput = {

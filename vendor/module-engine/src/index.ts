@@ -3,13 +3,13 @@ export type {
   AssembledSurface,
   EaPortalModuleInput,
   EaExperienceCapabilityInput,
-} from './types.js';
+} from './types';
 
 export {
   CapabilityRegistry,
   getDefaultRegistry,
   resetDefaultRegistry,
-} from './registry.js';
+} from './registry';
 
 export {
   assembleFromCapabilityIds,
@@ -17,20 +17,20 @@ export {
   assembleFromModuleIds,
   assembleFromClientConfig,
   findMissingDependencies,
-} from './assemble.js';
+} from './assemble';
 
-export type { AssembleOptions } from './assemble.js';
+export type { AssembleOptions } from './assemble';
 
-export { discoverCapabilities } from './discovery.js';
-export type { DiscoverySource } from './discovery.js';
+export { discoverCapabilities } from './discovery';
+export type { DiscoverySource } from './discovery';
 
 export {
   adaptEaPortalRegistries,
   discoverFromEaPortalRegistries,
-} from './adapters/ea-portal.js';
+} from './adapters/ea-portal';
 
 export {
   adaptCprHubModules,
   discoverFromCprHubModules,
-} from './adapters/cpr-hub.js';
-export type { CprHubModuleInput } from './adapters/cpr-hub.js';
+} from './adapters/cpr-hub';
+export type { CprHubModuleInput } from './adapters/cpr-hub';

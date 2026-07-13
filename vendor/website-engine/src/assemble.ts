@@ -1,5 +1,5 @@
-import type { WebsiteAssembly, WebsitePageManifest } from './types.js';
-import { getDefaultWebsiteRegistry, type WebsiteSectionRegistry } from './registry.js';
+import type { WebsiteAssembly, WebsitePageManifest } from './types';
+import { getDefaultWebsiteRegistry, type WebsiteSectionRegistry } from './registry';
 
 export function assembleWebsitePage(
   page: WebsitePageManifest,

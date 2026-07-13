@@ -3,8 +3,8 @@ import {
   moduleIdsToCapabilityIds,
   type ClientCapabilityConfig,
 } from '@ea/capability-registry';
-import { getDefaultRegistry, type CapabilityRegistry } from './registry.js';
-import type { AssembledSurface } from './types.js';
+import { getDefaultRegistry, type CapabilityRegistry } from './registry';
+import type { AssembledSurface } from './types';
 
 export type AssembleOptions = {
   registry?: CapabilityRegistry;

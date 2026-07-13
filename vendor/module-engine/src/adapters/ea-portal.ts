@@ -8,7 +8,7 @@ import {
   getMapRowByModuleId,
   resolveCanonicalCapabilityId,
 } from '@ea/capability-registry';
-import type { EaExperienceCapabilityInput, EaPortalModuleInput } from '../types.js';
+import type { EaExperienceCapabilityInput, EaPortalModuleInput } from '../types';
 
 const CATEGORY_FALLBACK: CapabilityCategory = 'Other';
 

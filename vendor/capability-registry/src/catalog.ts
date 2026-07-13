@@ -3,8 +3,8 @@
  * Status Certified only where multi-consumer evidence exists.
  */
 
-import type { CapabilityManifest } from './types.js';
-import { CAPABILITY_ID_MAP } from './id-map.js';
+import type { CapabilityManifest } from './types';
+import { CAPABILITY_ID_MAP } from './id-map';
 
 function baseFromMap(
   capabilityId: string,

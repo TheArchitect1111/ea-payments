@@ -3,7 +3,7 @@
  * Does NOT migrate CPR. Prepares for a future CPR ? platform cutover.
  */
 
-import { getMapRowByHubModuleId, validateIdMapIntegrity } from './id-map.js';
+import { getMapRowByHubModuleId, validateIdMapIntegrity } from './id-map';
 
 /** Canonical CPR / family-hub portal hub module ids (cpr-governance-baseline). */
 export const CPR_HUB_MODULE_IDS = [

@@ -12,11 +12,11 @@ export type {
   ExtractionEffort,
   RiskLevel,
   Priority,
-} from './types.js';
+} from './types';
 
-export { CAPABILITY_STATUSES, CAPABILITY_CATEGORIES } from './types.js';
+export { CAPABILITY_STATUSES, CAPABILITY_CATEGORIES } from './types';
 
-export type { IdMapRow } from './id-map.js';
+export type { IdMapRow } from './id-map';
 export {
   CAPABILITY_ID_MAP,
   getMapRowByCapabilityId,
@@ -28,14 +28,14 @@ export {
   enableKeysToCapabilityIds,
   moduleIdsToCapabilityIds,
   validateIdMapIntegrity,
-} from './id-map.js';
+} from './id-map';
 
 export {
   CAPABILITY_CATALOG,
   getCapabilityManifest,
   listCapabilityManifests,
   listCertifiedCapabilities,
-} from './catalog.js';
+} from './catalog';
 
 export {
   CPR_HUB_MODULE_IDS,
@@ -43,5 +43,5 @@ export {
   FAMILY_HUB_MODULE_IDS,
   getCprHubReadiness,
   resolveCprHubCapabilityIds,
-} from './cpr-readiness.js';
-export type { CprHubModuleId, CprHubReadiness } from './cpr-readiness.js';
+} from './cpr-readiness';
+export type { CprHubModuleId, CprHubReadiness } from './cpr-readiness';

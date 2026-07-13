@@ -1,4 +1,4 @@
-import type { WebsiteSectionDefinition } from './types.js';
+import type { WebsiteSectionDefinition } from './types';
 
 /** Map EA Landing Page Chassis config keys to canonical website section kinds. */
 export const LANDING_CHASSIS_SECTIONS: WebsiteSectionDefinition[] = [

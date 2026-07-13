@@ -14,7 +14,7 @@ import {
   normalizeWorkspaceTheme,
   workspaceThemeToCssVars,
 } from '@ea/theme-engine';
-import type { WorkspaceAssembleInput, WorkspaceShell } from './types.js';
+import type { WorkspaceAssembleInput, WorkspaceShell } from './types';
 
 export type WorkspaceAssembleOptions = {
   registry?: CapabilityRegistry;

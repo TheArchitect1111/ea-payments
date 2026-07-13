@@ -1,7 +1,7 @@
 import type { CapabilityManifest } from '@ea/capability-registry';
-import { CapabilityRegistry } from './registry.js';
-import { discoverFromEaPortalRegistries } from './adapters/ea-portal.js';
-import type { EaExperienceCapabilityInput, EaPortalModuleInput } from './types.js';
+import { CapabilityRegistry } from './registry';
+import { discoverFromEaPortalRegistries } from './adapters/ea-portal';
+import type { EaExperienceCapabilityInput, EaPortalModuleInput } from './types';
 
 export type DiscoverySource =
   | { type: 'seed' }

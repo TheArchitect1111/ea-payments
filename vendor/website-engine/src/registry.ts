@@ -1,10 +1,10 @@
-import type { WebsiteSectionDefinition, WebsiteSectionKind } from './types.js';
-import { LANDING_CHASSIS_SECTIONS } from './landing-map.js';
+import type { WebsiteSectionDefinition, WebsiteSectionKind } from './types';
+import { LANDING_CHASSIS_SECTIONS } from './landing-map';
 import {
   EXPERIENCE_BUILDER_SEED_SECTIONS,
   adaptExperienceBlocks,
   type ExperienceBlockInput,
-} from './puck-map.js';
+} from './puck-map';
 
 export class WebsiteSectionRegistry {
   private sections = new Map<string, WebsiteSectionDefinition>();

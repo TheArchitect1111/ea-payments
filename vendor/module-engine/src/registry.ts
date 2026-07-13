@@ -3,7 +3,7 @@ import {
   getCapabilityManifest,
   type CapabilityManifest,
 } from '@ea/capability-registry';
-import type { CapabilityContribution } from './types.js';
+import type { CapabilityContribution } from './types';
 
 /**
  * In-memory capability registry.
