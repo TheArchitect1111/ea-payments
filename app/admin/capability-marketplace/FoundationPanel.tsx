@@ -9,11 +9,34 @@ export type FoundationSlice = {
   href: string;
 };
 
+export type PackageSyncRow = {
+  name: string;
+  kind: string;
+  vendorPath: string;
+  present: boolean;
+  vendorVersion: string | null;
+  osVersion: string | null;
+  versionMatch: boolean | null;
+  contentMatch: boolean | null;
+  detail: string;
+  ok: boolean;
+};
+
 export type FoundationStatus = {
   ok: boolean;
   generatedAt: string;
   packages: string[];
   slices: FoundationSlice[];
+  packageSync?: {
+    ok: boolean;
+    osAvailable: boolean;
+    packageCount: number;
+    presentCount: number;
+    missing: string[];
+    drifted: string[];
+    packages: PackageSyncRow[];
+    syncHint: string;
+  };
   capabilities: {
     ok: boolean;
     registryCount: number;
@@ -43,6 +66,8 @@ export type FoundationStatus = {
 };
 
 export default function FoundationPanel({ status }: { status: FoundationStatus }) {
+  const sync = status.packageSync;
+
   return (
     <div className="space-y-6">
       <div className="bg-white border border-neutral-200 p-5 flex flex-wrap items-center justify-between gap-4">
@@ -98,6 +123,67 @@ export default function FoundationPanel({ status }: { status: FoundationStatus }
         ))}
       </div>
 
+      {sync && (
+        <div className="bg-white border border-neutral-200 p-5 space-y-4">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest text-neutral-400">
+                Vendor package sync
+              </p>
+              <h4 className="text-lg font-bold mt-1" style={{ color: NAVY }}>
+                {sync.ok ? 'Vendor copies healthy' : 'Sync needed'}
+              </h4>
+              <p className="text-sm text-neutral-600 mt-1">{sync.syncHint}</p>
+              <p className="text-xs text-neutral-400 mt-1">
+                OS checkout {sync.osAvailable ? 'detected' : 'not available'} ·{' '}
+                {sync.presentCount}/{sync.packageCount} present
+              </p>
+            </div>
+            <span
+              className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded ${
+                sync.ok ? 'bg-green-50 text-green-800' : 'bg-amber-50 text-amber-900'
+              }`}
+            >
+              {sync.ok ? 'OK' : 'Drift'}
+            </span>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead>
+                <tr className="border-b border-neutral-200 text-neutral-400 uppercase tracking-wider">
+                  <th className="py-2 pr-3 font-semibold">Package</th>
+                  <th className="py-2 pr-3 font-semibold">Kind</th>
+                  <th className="py-2 pr-3 font-semibold">Vendor</th>
+                  <th className="py-2 pr-3 font-semibold">OS</th>
+                  <th className="py-2 font-semibold">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sync.packages.map((row) => (
+                  <tr key={row.name} className="border-b border-neutral-100 align-top">
+                    <td className="py-2 pr-3 font-mono text-neutral-800">@ea/{row.name}</td>
+                    <td className="py-2 pr-3 text-neutral-500">{row.kind}</td>
+                    <td className="py-2 pr-3">{row.vendorVersion ?? '—'}</td>
+                    <td className="py-2 pr-3">{row.osVersion ?? '—'}</td>
+                    <td className="py-2">
+                      <span
+                        className={`font-bold uppercase ${
+                          row.ok ? 'text-green-800' : 'text-rose-700'
+                        }`}
+                      >
+                        {row.ok ? 'OK' : 'Issue'}
+                      </span>
+                      <p className="text-neutral-500 mt-0.5">{row.detail}</p>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
       <div className="bg-white border border-neutral-200 p-5">
         <p className="text-xs font-bold uppercase tracking-widest text-neutral-400 mb-3">
           Linked packages
@@ -122,7 +208,7 @@ export default function FoundationPanel({ status }: { status: FoundationStatus }
           <div>
             <dt className="font-semibold text-neutral-400">CPR hub mapped</dt>
             <dd>
-              {status.cpr.mapped} mapped / unmapped {status.cpr.unmapped.length}
+              {status.cpr.mapped} mapped / {status.cpr.unmapped.length} unmapped
             </dd>
           </div>
           <div>
@@ -132,7 +218,7 @@ export default function FoundationPanel({ status }: { status: FoundationStatus }
           <div>
             <dt className="font-semibold text-neutral-400">Workspace shells</dt>
             <dd>
-              {status.workspaceShellCount} ? {status.clientConfigCount} clients
+              {status.workspaceShellCount} | {status.clientConfigCount} clients
             </dd>
           </div>
         </dl>

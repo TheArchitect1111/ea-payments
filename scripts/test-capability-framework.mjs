@@ -125,6 +125,15 @@ assert(existsSync(join(root, 'lib/platform/cpr-readiness.ts')), 'Missing cpr-rea
 assert(existsSync(join(root, 'app/api/platform/cpr-readiness/route.ts')), 'Missing cpr-readiness API');
 assert(existsSync(join(root, 'lib/platform/foundation-status.ts')), 'Missing foundation-status');
 assert(existsSync(join(root, 'app/api/platform/foundation/route.ts')), 'Missing foundation API');
+assert(existsSync(join(root, 'lib/platform/package-sync-health.ts')), 'Missing package-sync-health');
+assert(
+  readFileSync(join(root, 'lib/platform/foundation-status.ts'), 'utf8').includes('getPackageSyncHealth'),
+  'foundation-status must include package sync health',
+);
+assert(
+  readFileSync(join(root, 'lib/mission-control-data.ts'), 'utf8').includes('getPackageSyncHealth'),
+  'Mission Control must surface package sync attention',
+);
 assert(existsSync(join(root, 'app/api/admin/organizations/route.ts')), 'Missing organizations list API');
 assert(
   readFileSync(join(root, 'lib/organizations.ts'), 'utf8').includes('listOrganizations'),

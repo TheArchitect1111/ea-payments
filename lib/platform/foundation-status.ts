@@ -7,6 +7,7 @@ import { getPlatformCprReadiness } from './cpr-readiness';
 import { listPlatformClients } from './client-configs';
 import { getWebsiteEngineSummary } from './website-bridge';
 import { listWorkspaceShellSummaries } from './workspace-bridge';
+import { getPackageSyncHealth } from './package-sync-health';
 
 export type FoundationPackageId =
   | 'capability-registry'
@@ -34,8 +35,20 @@ export function getPlatformFoundationStatus() {
   const website = getWebsiteEngineSummary();
   const workspaceSummaries = listWorkspaceShellSummaries();
   const clients = listPlatformClients();
+  const packageSync = getPackageSyncHealth();
 
   const slices = [
+    {
+      id: 'package-sync',
+      label: 'Package sync',
+      ok: packageSync.ok,
+      detail: packageSync.drifted.length
+        ? `${packageSync.drifted.length} drifted · ${packageSync.syncHint}`
+        : packageSync.missing.length
+          ? `${packageSync.missing.length} missing · ${packageSync.syncHint}`
+          : `${packageSync.presentCount}/${packageSync.packageCount} vendor packages OK`,
+      href: '/admin/capability-marketplace?tab=foundation',
+    },
     {
       id: 'capabilities',
       label: 'Capability framework',
@@ -80,6 +93,7 @@ export function getPlatformFoundationStatus() {
     generatedAt: new Date().toISOString(),
     packages: FOUNDATION_PACKAGES,
     slices,
+    packageSync,
     capabilities: {
       ok: capabilities.ok,
       registryCount: capabilities.registryCount,
