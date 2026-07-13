@@ -1,4 +1,6 @@
+import { resolveModuleEntitlements } from '@ea/payments-contract';
 import type { PlatformRole } from '@/lib/rbac';
+import { getCapabilityByModuleId } from '@/lib/experience-registry';
 
 /** Canonical module ids for the EA Platform Chassis. */
 export const MODULE_IDS = [
@@ -42,17 +44,18 @@ export type ModuleDefinition = {
   demoOnly?: boolean;
 };
 
-export const MODULE_REGISTRY: ModuleDefinition[] = [
+type TechnicalModuleDefinition = Omit<
+  ModuleDefinition,
+  'navGroup' | 'showInNav' | 'navLabel' | 'navTabId'
+>;
+
+const TECHNICAL_MODULE_REGISTRY: TechnicalModuleDefinition[] = [
   {
     id: 'dashboard',
     name: 'Dashboard',
     tag: 'Dashboard',
     title: 'Your command view',
     description: 'Operational health, account status, and your latest share links.',
-    navGroup: 'core',
-    showInNav: true,
-    navLabel: 'Dashboard',
-    navTabId: 'home',
     requiredRole: 'guest',
     pathSegment: '',
   },
@@ -62,10 +65,6 @@ export const MODULE_REGISTRY: ModuleDefinition[] = [
     tag: 'Pulse™',
     title: 'Visibility & intelligence',
     description: 'Scores, bottlenecks, capacity, and what needs attention — one calm view.',
-    navGroup: 'core',
-    showInNav: true,
-    navLabel: 'Pulse',
-    navTabId: 'pulse',
     variant: 'pulse',
     requiredRole: 'guest',
     pathSegment: 'pulse',
@@ -76,10 +75,6 @@ export const MODULE_REGISTRY: ModuleDefinition[] = [
     tag: 'Simplifi™',
     title: 'Capture & decide',
     description: 'Paste any URL, score the opportunity, and launch Magnifi automatically.',
-    navGroup: 'growth',
-    showInNav: true,
-    navLabel: 'Simplifi',
-    navTabId: 'simplifi',
     variant: 'simplifi',
     requiredRole: 'staff',
     pathSegment: 'simplifi',
@@ -90,10 +85,6 @@ export const MODULE_REGISTRY: ModuleDefinition[] = [
     tag: 'Amplifi™',
     title: 'Amplify & share',
     description: 'Your amplification narrative, stats, and links to Magnifi experiences.',
-    navGroup: 'growth',
-    showInNav: true,
-    navLabel: 'Amplifi',
-    navTabId: 'amplifi',
     variant: 'amplifi',
     requiredRole: 'guest',
     pathSegment: 'amplifi',
@@ -104,10 +95,6 @@ export const MODULE_REGISTRY: ModuleDefinition[] = [
     tag: 'Update Hub™',
     title: 'Activity feed',
     description: 'Captures, outreach, enhancements, and advisor updates in one timeline.',
-    navGroup: 'core',
-    showInNav: true,
-    navLabel: 'Updates',
-    navTabId: 'updates',
     requiredRole: 'guest',
     pathSegment: 'updates',
   },
@@ -117,8 +104,6 @@ export const MODULE_REGISTRY: ModuleDefinition[] = [
     tag: 'Communication',
     title: 'Messaging center',
     description: 'Direct messages with your EA advisor team.',
-    navGroup: 'operations',
-    showInNav: false,
     requiredRole: 'guest',
     pathSegment: 'messaging',
   },
@@ -128,8 +113,6 @@ export const MODULE_REGISTRY: ModuleDefinition[] = [
     tag: 'Document Hub™',
     title: 'Document vault',
     description: 'Assessments, agreements, scorecards, and onboarding materials.',
-    navGroup: 'operations',
-    showInNav: false,
     requiredRole: 'guest',
     pathSegment: 'documents',
   },
@@ -139,8 +122,6 @@ export const MODULE_REGISTRY: ModuleDefinition[] = [
     tag: 'Training Hub™',
     title: 'Training & learning',
     description: 'Guides, modules, and resources for your transformation journey.',
-    navGroup: 'operations',
-    showInNav: false,
     requiredRole: 'guest',
     pathSegment: 'learning',
   },
@@ -150,8 +131,6 @@ export const MODULE_REGISTRY: ModuleDefinition[] = [
     tag: 'Event Hub™',
     title: 'Upcoming events',
     description: 'Office hours, review calls, and scheduled touchpoints.',
-    navGroup: 'operations',
-    showInNav: false,
     requiredRole: 'guest',
     pathSegment: 'events',
   },
@@ -161,8 +140,6 @@ export const MODULE_REGISTRY: ModuleDefinition[] = [
     tag: 'Resource library',
     title: 'Tools & templates',
     description: 'Magnifi templates, workspace links, and curated resources.',
-    navGroup: 'operations',
-    showInNav: false,
     requiredRole: 'guest',
     pathSegment: 'resources',
   },
@@ -172,8 +149,6 @@ export const MODULE_REGISTRY: ModuleDefinition[] = [
     tag: 'Guide™',
     title: 'Ask your advisor',
     description: 'Submit questions directly to your Efficiency Architects team.',
-    navGroup: 'operations',
-    showInNav: false,
     requiredRole: 'guest',
     pathSegment: 'ask',
   },
@@ -183,10 +158,6 @@ export const MODULE_REGISTRY: ModuleDefinition[] = [
     tag: 'Connect™',
     title: 'Relationship capture',
     description: 'QR, NFC, and guided journeys that turn conversations into relationships.',
-    navGroup: 'growth',
-    showInNav: true,
-    navTabId: 'connect',
-    navLabel: 'Connect',
     requiredRole: 'staff',
     pathSegment: 'connect',
   },
@@ -196,8 +167,6 @@ export const MODULE_REGISTRY: ModuleDefinition[] = [
     tag: 'Operational MRI™',
     title: 'Guided discovery',
     description: 'Capacity assessment and transformation scoping for your organization.',
-    navGroup: 'growth',
-    showInNav: false,
     requiredRole: 'guest',
     pathSegment: 'discovery',
     demoOnly: true,
@@ -208,8 +177,6 @@ export const MODULE_REGISTRY: ModuleDefinition[] = [
     tag: 'CTP™',
     title: 'Your discovery journey',
     description: 'Track workspace, design studio, and review progress from your Consider submission.',
-    navGroup: 'operations',
-    showInNav: false,
     requiredRole: 'guest',
     pathSegment: 'ctp',
   },
@@ -219,8 +186,6 @@ export const MODULE_REGISTRY: ModuleDefinition[] = [
     tag: 'Landing Pages',
     title: 'Landing page experiences',
     description: 'Cinematic marketing journeys designed for your mission.',
-    navGroup: 'growth',
-    showInNav: false,
     requiredRole: 'admin',
     pathSegment: 'landing',
   },
@@ -230,12 +195,35 @@ export const MODULE_REGISTRY: ModuleDefinition[] = [
     tag: 'Billing',
     title: 'Subscription & invoices',
     description: 'Manage your plan, payment method, and billing history.',
-    navGroup: 'platform',
-    showInNav: false,
     requiredRole: 'owner',
     pathSegment: 'billing',
   },
 ];
+
+function mergeModuleWithCapability(technical: TechnicalModuleDefinition): ModuleDefinition {
+  const capability = getCapabilityByModuleId(technical.id);
+  if (!capability) {
+    throw new Error(`Missing capability map entry for module: ${technical.id}`);
+  }
+
+  return {
+    ...technical,
+    navGroup: capability.navGroup,
+    showInNav: capability.showInPillNav,
+    navLabel: capability.displayLabel,
+    navTabId: capability.navTabId,
+    variant: capability.hubVariant ?? technical.variant,
+  };
+}
+
+/** Portal modules — navigation fields sourced from EA Capability Map (experience-registry). */
+export const MODULE_REGISTRY: ModuleDefinition[] = TECHNICAL_MODULE_REGISTRY.map(mergeModuleWithCapability);
+
+for (const moduleId of MODULE_IDS) {
+  if (!getCapabilityByModuleId(moduleId)) {
+    throw new Error(`EA Capability Map missing entry for module: ${moduleId}`);
+  }
+}
 
 const REGISTRY_BY_ID = new Map(MODULE_REGISTRY.map((m) => [m.id, m]));
 
@@ -295,17 +283,31 @@ export function defaultModulesForPackage(
   packagePurchased: string,
   options?: { isDemo?: boolean; tenantPreset?: string },
 ): ModuleId[] {
-  const preset = TENANT_MODULE_PRESETS[options?.tenantPreset ?? 'ea-client'] ?? TENANT_MODULE_PRESETS['ea-client'];
+  // Canonical source: @ea/payments-contract (Airtable package or offer id).
+  const fromContract = resolveModuleEntitlements(packagePurchased, {
+    isDemo: options?.isDemo,
+  }) as ModuleId[];
+  if (fromContract.length > 0) {
+    // Non-ea tenant presets still merge contract grants onto the requested preset.
+    if (options?.tenantPreset && options.tenantPreset !== 'ea-client') {
+      const preset =
+        TENANT_MODULE_PRESETS[options.tenantPreset] ?? TENANT_MODULE_PRESETS['ea-client'];
+      return [...new Set<ModuleId>([...preset, ...fromContract])];
+    }
+    return fromContract;
+  }
+
+  // Legacy fallback if package name is unknown to the contract.
+  const preset =
+    TENANT_MODULE_PRESETS[options?.tenantPreset ?? 'ea-client'] ??
+    TENANT_MODULE_PRESETS['ea-client'];
   const grants = PACKAGE_MODULE_GRANTS[packagePurchased] ?? [];
   const ids = new Set<ModuleId>([...preset, ...grants]);
-
   if (options?.isDemo) {
     DEMO_MODULE_IDS.forEach((id) => ids.add(id));
   }
-
   if (packagePurchased === 'Launch Verification') {
     return PACKAGE_MODULE_GRANTS['Launch Verification'] ?? ['dashboard', 'pulse', 'update-hub', 'ask'];
   }
-
   return [...ids];
 }

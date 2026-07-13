@@ -2,6 +2,7 @@ import { getPortalCaptures } from '@/lib/capture-records';
 import { getClientSuccessProfile } from '@/lib/client-success';
 import { buildAmplifiPortalExperience } from '@/lib/amplifi-portal';
 import { PortalShell } from '@/lib/chassis/PortalShell';
+import { PortalModuleChromeStrip } from '@/lib/chassis/PortalChromeContext';
 import { requirePortalModule } from '@/lib/modules/portal-modules';
 import AmplifiPortalExperience from './AmplifiPortalExperience';
 import '../ea-portal.css';
@@ -21,6 +22,7 @@ export default async function AmplifiPortalPage({ params }: { params: Promise<{ 
   return (
     <PortalShell slug={slug} active="amplifi" firstName={firstName}>
       <main className="ep-main ep-main-amplifi">
+        <PortalModuleChromeStrip />
         <AmplifiPortalExperience experience={experience} slug={slug} />
       </main>
     </PortalShell>

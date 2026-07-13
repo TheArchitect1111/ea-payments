@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { getStripe } from '@/lib/stripe';
-import { getCatalogItem } from '@/lib/catalog';
 import { buildPackageFulfillmentPlan, fulfillmentMetadata } from '@/lib/package-fulfillment';
+import {
+  buildCommerceCheckoutMetadata,
+  isCheckoutOfferPurchasable,
+  resolveCheckoutOffer,
+} from '@/lib/platform/payments-bridge';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,43 +27,53 @@ export async function POST(req: NextRequest) {
     if (!name?.trim() || !email?.trim() || !packageId?.trim()) {
       return NextResponse.json(
         { error: 'Name, email, and package selection are required.' },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (!/\S+@\S+\.\S+/.test(email)) {
       return NextResponse.json(
         { error: 'A valid email address is required.' },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (!process.env.STRIPE_SECRET_KEY) {
       return NextResponse.json(
         { error: 'Payment processing is not yet configured. Please contact us directly.' },
-        { status: 503 }
+        { status: 503 },
       );
     }
 
-    const item = getCatalogItem(packageId.trim());
-    if (!item) {
+    const offer = resolveCheckoutOffer(packageId.trim());
+    if (!offer || offer.kind !== 'one_time') {
       return NextResponse.json({ error: 'Invalid package selected.' }, { status: 400 });
     }
 
-    const stripePriceId = process.env[item.stripePriceEnvKey];
-    if (!stripePriceId && !item.allowInlineStripePrice) {
+    if (!isCheckoutOfferPurchasable(offer) && !offer.allowInlineStripePrice) {
       return NextResponse.json(
         {
           error:
             'This package is not yet available for online purchase. Please contact us to arrange payment.',
         },
-        { status: 503 }
+        { status: 503 },
+      );
+    }
+
+    const stripePriceId = process.env[offer.stripePriceEnvKey];
+    if (!stripePriceId && !offer.allowInlineStripePrice) {
+      return NextResponse.json(
+        {
+          error:
+            'This package is not yet available for online purchase. Please contact us to arrange payment.',
+        },
+        { status: 503 },
       );
     }
 
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? 'http://localhost:3000';
     const stripe = getStripe();
-    const fulfillment = buildPackageFulfillmentPlan(item);
+    const fulfillment = buildPackageFulfillmentPlan(offer);
 
     const sessionParams: Stripe.Checkout.SessionCreateParams = {
       mode: 'payment',
@@ -70,10 +84,10 @@ export async function POST(req: NextRequest) {
           : {
               price_data: {
                 currency: 'usd',
-                unit_amount: item.priceCents,
+                unit_amount: offer.priceCents,
                 product_data: {
-                  name: item.displayName,
-                  description: item.description,
+                  name: offer.displayName,
+                  description: offer.description,
                 },
               },
               quantity: 1,
@@ -81,19 +95,19 @@ export async function POST(req: NextRequest) {
       ],
       customer_email: email.trim(),
       metadata: {
-        clientName: name.trim(),
-        organization: organization?.trim() ?? '',
-        phone: phone?.trim() ?? '',
-        packageId: item.id,
-        packageName: item.airtablePackageName,
+        ...buildCommerceCheckoutMetadata(offer, {
+          clientName: name.trim(),
+          organization: organization?.trim() ?? '',
+          phone: phone?.trim() ?? '',
+          referralSource: referralSource?.trim() ?? '',
+        }),
         ...fulfillmentMetadata(fulfillment),
-        referralSource: referralSource?.trim() ?? '',
       },
       success_url: `${baseUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${baseUrl}/checkout/cancel`,
     };
 
-    if (item.priceCents > 50000) {
+    if (offer.priceCents > 50000) {
       sessionParams.custom_text = {
         after_submit: {
           message:
@@ -102,7 +116,7 @@ export async function POST(req: NextRequest) {
       };
     }
 
-    if (item.priceCents > 250000) {
+    if (offer.priceCents > 250000) {
       sessionParams.invoice_creation = { enabled: true };
     }
 
@@ -111,7 +125,7 @@ export async function POST(req: NextRequest) {
     if (!session.url) {
       return NextResponse.json(
         { error: 'Failed to create checkout session.' },
-        { status: 500 }
+        { status: 500 },
       );
     }
 

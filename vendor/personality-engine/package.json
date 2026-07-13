@@ -1,0 +1,32 @@
+{
+  "name": "@ea/personality-engine",
+  "version": "0.1.0",
+  "description": "EA Personality Engine — workspace personalities, terminology, AI instructions, dashboard sections",
+  "license": "UNLICENSED",
+  "private": false,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "files": [
+    "src",
+    "README.md"
+  ],
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.0"
+  },
+  "publishConfig": {
+    "access": "restricted",
+    "registry": "https://npm.pkg.github.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TheArchitect1111/ea-operating-system.git",
+    "directory": "packages/personality-engine"
+  }
+}

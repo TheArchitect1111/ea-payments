@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { getContentRequestsForClient } from '@/lib/airtable';
 import { PortalShell, NAVY, GOLD } from '@/lib/chassis/PortalShell';
+import { PortalModuleChromeStrip } from '@/lib/chassis/PortalChromeContext';
 import { requirePortalModule } from '@/lib/modules/portal-modules';
 import UpdateHubExperience from '@/app/portal/components/UpdateHubExperience';
 import UpdateHubFeed from '@/app/portal/components/UpdateHubFeed';
@@ -28,6 +29,7 @@ export default async function UpdatesPage({ params }: { params: Promise<{ slug: 
   return (
     <PortalShell slug={slug} active="updates">
       <main className="ep-main">
+        <PortalModuleChromeStrip />
         <div className="ep-welcome">
           <p className="ep-welcome-label">Update Hub™</p>
           <h1 className="ep-welcome-heading">Communications & Requests</h1>

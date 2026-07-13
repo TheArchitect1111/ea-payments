@@ -1,12 +1,11 @@
 /**
- * Subscription plans for the EA Platform Chassis billing engine (Phase 3).
- * Maps Stripe subscriptions → module entitlements.
+ * Subscription plans ? derived from @ea/payments-contract.
  */
 
 import type Stripe from 'stripe';
 import type { PortalConfig } from '@/lib/catalog';
 import type { ModuleId } from '@/lib/modules/registry';
-import { TENANT_MODULE_PRESETS } from '@/lib/modules/registry';
+import { listCommerceOffers, type CommerceOffer } from '@ea/payments-contract';
 
 export type SubscriptionPlanId =
   | 'simplifi_monthly'
@@ -31,81 +30,29 @@ export type SubscriptionPlan = {
   portalConfig?: PortalConfig;
 };
 
-const SIMPLIFI_MODULES: ModuleId[] = [
-  'dashboard',
-  'pulse',
-  'simplifi',
-  'amplifi',
-  'update-hub',
-  'messaging',
-  'documents',
-  'training',
-  'events',
-  'resources',
-  'ask',
-  'billing',
-];
+function toSubscriptionPlan(offer: CommerceOffer): SubscriptionPlan | null {
+  if (offer.kind !== 'subscription' || !offer.interval) return null;
+  return {
+    id: offer.id as SubscriptionPlanId,
+    name: offer.name,
+    displayName: offer.displayName,
+    description: offer.description,
+    interval: offer.interval,
+    priceCents: offer.priceCents,
+    stripePriceEnvKey: offer.stripePriceEnvKey,
+    allowInlineStripePrice: offer.allowInlineStripePrice,
+    trialDays: offer.trialDays,
+    airtablePackageName: offer.airtablePackageName as
+      | 'Simplifi'
+      | 'Implementation Package',
+    moduleIds: [...offer.moduleIds] as ModuleId[],
+    portalConfig: offer.portalConfig,
+  };
+}
 
-const PLATFORM_MODULES: ModuleId[] = TENANT_MODULE_PRESETS['ea-client'];
-
-export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
-  {
-    id: 'simplifi_monthly',
-    name: 'Simplifi Monthly',
-    displayName: 'Simplifi™ — Monthly',
-    description:
-      'Personal Opportunity Intelligence: capture, analyze, and act on opportunities. Billed monthly.',
-    interval: 'month',
-    priceCents: 14900,
-    stripePriceEnvKey: 'STRIPE_PRICE_SIMPLIFI_MONTHLY',
-    allowInlineStripePrice: true,
-    trialDays: 14,
-    airtablePackageName: 'Simplifi',
-    moduleIds: SIMPLIFI_MODULES,
-    portalConfig: { platform: 'efficiency-architects', loginPath: '/portal/login' },
-  },
-  {
-    id: 'simplifi_annual',
-    name: 'Simplifi Annual',
-    displayName: 'Simplifi™ — Annual',
-    description:
-      'Same Simplifi™ capabilities with annual billing (save vs monthly).',
-    interval: 'year',
-    priceCents: 149000,
-    stripePriceEnvKey: 'STRIPE_PRICE_SIMPLIFI_ANNUAL',
-    allowInlineStripePrice: true,
-    trialDays: 14,
-    airtablePackageName: 'Simplifi',
-    moduleIds: SIMPLIFI_MODULES,
-    portalConfig: { platform: 'efficiency-architects', loginPath: '/portal/login' },
-  },
-  {
-    id: 'platform_monthly',
-    name: 'EA Platform Monthly',
-    displayName: 'EA Platform — Monthly',
-    description: 'Full client operating system: Pulse, Simplifi, Amplifi, and core modules.',
-    interval: 'month',
-    priceCents: 49700,
-    stripePriceEnvKey: 'STRIPE_PRICE_PLATFORM_MONTHLY',
-    trialDays: 7,
-    airtablePackageName: 'Implementation Package',
-    moduleIds: [...PLATFORM_MODULES, 'billing'],
-    portalConfig: { platform: 'efficiency-architects', loginPath: '/portal/login' },
-  },
-  {
-    id: 'platform_annual',
-    name: 'EA Platform Annual',
-    displayName: 'EA Platform — Annual',
-    description: 'Full EA Platform bundle with annual billing.',
-    interval: 'year',
-    priceCents: 497000,
-    stripePriceEnvKey: 'STRIPE_PRICE_PLATFORM_ANNUAL',
-    trialDays: 7,
-    airtablePackageName: 'Implementation Package',
-    moduleIds: [...PLATFORM_MODULES, 'billing', 'connect'],
-    portalConfig: { platform: 'efficiency-architects', loginPath: '/portal/login' },
-  },
-];
+export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = listCommerceOffers('subscription')
+  .map(toSubscriptionPlan)
+  .filter((plan): plan is SubscriptionPlan => Boolean(plan));
 
 const PLAN_BY_ID = new Map(SUBSCRIPTION_PLANS.map((p) => [p.id, p]));
 

@@ -1,0 +1,42 @@
+{
+  "name": "@ea/capability-registry",
+  "version": "0.1.0",
+  "description": "EA Capability Framework — metadata schema, status model, and cross-system ID map",
+  "license": "UNLICENSED",
+  "private": false,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./types": "./src/types.ts",
+    "./id-map": "./src/id-map.ts",
+    "./catalog": "./src/catalog.ts"
+  },
+  "files": [
+    "src",
+    "README.md"
+  ],
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "verify-id-map": "node ../../scripts/verify-capability-id-map.mjs"
+  },
+  "publishConfig": {
+    "access": "restricted",
+    "registry": "https://npm.pkg.github.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TheArchitect1111/ea-operating-system.git",
+    "directory": "packages/capability-registry"
+  },
+  "keywords": [
+    "ea",
+    "capability",
+    "registry",
+    "platform"
+  ],
+  "devDependencies": {
+    "typescript": "^5.8.0"
+  }
+}

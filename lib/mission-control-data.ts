@@ -36,6 +36,30 @@ const CONTINUE_SEEDS: Array<{
   module: string;
   modes: Array<'executive' | 'builder'>;
 }> = [
+    {
+    id: 'continue-workspace-preview',
+    title: 'Workspace Preview',
+    summary: 'Live shell with theme, personality, and capability nav',
+    href: '/admin/workspace-preview',
+    module: 'build',
+    modes: ['builder'],
+  },
+{
+    id: 'continue-platform-foundation',
+    title: 'Platform Foundation',
+    summary: 'Capability, payments, CPR readiness, and package health',
+    href: '/admin/capability-marketplace?tab=foundation',
+    module: 'build',
+    modes: ['builder'],
+  },
+  {
+    id: 'continue-capabilities',
+    title: 'Capability Marketplace',
+    summary: 'Browse platform capabilities, clients, and assembly health',
+    href: '/admin/capability-marketplace',
+    module: 'build',
+    modes: ['builder'],
+  },
   {
     id: 'continue-factory',
     title: 'EA Factory',

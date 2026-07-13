@@ -1,4 +1,5 @@
 import type { CatalogItem } from '@/lib/catalog';
+import type { ResolvedCheckoutOffer } from '@/lib/platform/payments-bridge';
 
 export interface PackageFulfillmentPlan {
   packageId: string;
@@ -12,46 +13,86 @@ export interface PackageFulfillmentPlan {
   firstMilestone: string;
 }
 
+/** Minimal fulfillment input ? CatalogItem or contract-resolved offer. */
+export type FulfillmentSource = {
+  id: string;
+  displayName: string;
+  fulfillmentType?: string;
+  fulfillmentLabel?: string;
+  reviewRequired?: boolean;
+  intakePath?: string;
+};
+
 const DEFAULT_ADMIN_HREF = '/admin/master';
 
-export function buildPackageFulfillmentPlan(item: CatalogItem): PackageFulfillmentPlan {
-  const intakePath = item.intakePath ?? '/discover';
+export function fulfillmentSourceFromOffer(offer: ResolvedCheckoutOffer): FulfillmentSource {
+  return {
+    id: offer.id,
+    displayName: offer.displayName,
+    fulfillmentType: offer.fulfillmentType,
+    fulfillmentLabel: offer.fulfillmentLabel,
+    reviewRequired: offer.reviewRequired,
+    intakePath: offer.intakePath,
+  };
+}
+
+export function buildPackageFulfillmentPlan(
+  item: CatalogItem | FulfillmentSource | ResolvedCheckoutOffer,
+): PackageFulfillmentPlan {
+  const source: FulfillmentSource =
+    'kind' in item
+      ? fulfillmentSourceFromOffer(item)
+      : {
+          id: item.id,
+          displayName: item.displayName,
+          fulfillmentType: item.fulfillmentType,
+          fulfillmentLabel: 'fulfillmentLabel' in item ? item.fulfillmentLabel : undefined,
+          reviewRequired: 'reviewRequired' in item ? item.reviewRequired : undefined,
+          intakePath: 'intakePath' in item ? item.intakePath : undefined,
+        };
+
+  const intakePath = source.intakePath ?? '/discover';
+  const fulfillmentType = source.fulfillmentType ?? 'implementation';
   const base = {
-    packageId: item.id,
-    displayName: item.displayName,
-    fulfillmentType: item.fulfillmentType,
-    fulfillmentLabel: item.fulfillmentLabel,
-    reviewRequired: item.reviewRequired ?? false,
+    packageId: source.id,
+    displayName: source.displayName,
+    fulfillmentType,
+    fulfillmentLabel: source.fulfillmentLabel ?? 'Review payment and begin onboarding.',
+    reviewRequired: source.reviewRequired ?? false,
     intakePath,
   };
 
-  switch (item.fulfillmentType) {
+  switch (fulfillmentType) {
     case 'connect-profile':
       return {
         ...base,
         adminHref: '/admin/connect/profiles',
-        clientExpectation: 'Your Connect profile direction is being prepared. We will confirm the offer, audience, proof, and next action before anything goes live.',
+        clientExpectation:
+          'Your Connect profile direction is being prepared. We will confirm the offer, audience, proof, and next action before anything goes live.',
         firstMilestone: 'Confirm profile audience and primary action.',
       };
     case 'landing-page':
       return {
         ...base,
         adminHref: '/admin/ea-factory/new-experience',
-        clientExpectation: 'Your landing page blueprint is being prepared. We will confirm the offer, audience, trust builders, and primary action before launch.',
+        clientExpectation:
+          'Your landing page blueprint is being prepared. We will confirm the offer, audience, trust builders, and primary action before launch.',
         firstMilestone: 'Confirm offer, audience, proof, and call to action.',
       };
     case 'client-portal':
       return {
         ...base,
         adminHref: '/admin/ea-factory/new-experience',
-        clientExpectation: 'Your portal workspace is being prepared. We will confirm users, resources, training needs, and communication flow before launch.',
+        clientExpectation:
+          'Your portal workspace is being prepared. We will confirm users, resources, training needs, and communication flow before launch.',
         firstMilestone: 'Confirm portal users, resources, training, and update flow.',
       };
     case 'simplifi':
       return {
         ...base,
         adminHref: '/admin/simplifi',
-        clientExpectation: 'Your Simplifi access is being prepared so you can begin capturing and acting on opportunities.',
+        clientExpectation:
+          'Your Simplifi access is being prepared so you can begin capturing and acting on opportunities.',
         firstMilestone: 'Confirm portal login and first capture path.',
       };
     case 'launch-verification':
@@ -65,7 +106,8 @@ export function buildPackageFulfillmentPlan(item: CatalogItem): PackageFulfillme
       return {
         ...base,
         adminHref: DEFAULT_ADMIN_HREF,
-        clientExpectation: 'Your project workspace is being prepared. We will confirm the recommended path before anything goes live.',
+        clientExpectation:
+          'Your project workspace is being prepared. We will confirm the recommended path before anything goes live.',
         firstMilestone: 'Confirm project direction and first implementation milestone.',
       };
   }

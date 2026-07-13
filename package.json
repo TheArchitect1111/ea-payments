@@ -10,11 +10,13 @@
     "start:next": "next start",
     "lint": "eslint",
     "test:smoke": "playwright test --config=playwright.smoke.config.ts",
-    "verify:deploy": "node scripts/ensure-production-build.mjs && node scripts/test-portal-nav-resolver.mjs && node scripts/test-experience-registry.mjs && npm run test:smoke",
+    "verify:deploy": "node scripts/ensure-production-build.mjs && node scripts/test-portal-nav-resolver.mjs && node scripts/test-experience-registry.mjs && node scripts/test-capability-framework.mjs && npm run test:smoke",
+    "test:capability-framework": "node scripts/test-capability-framework.mjs",
     "sync-chassis": "node scripts/sync-portal-chassis.mjs",
     "sync-premium": "node scripts/sync-premium-chassis.mjs",
     "sync-landing": "node scripts/sync-landing-chassis.mjs",
     "sync-all-chassis": "npm run sync-chassis && npm run sync-premium && npm run sync-landing",
+    "sync-platform-packages": "node scripts/sync-platform-packages.mjs",
     "setup-capture-records": "node scripts/setup-capture-records-table.mjs",
     "setup-pulse-events": "node scripts/setup-pulse-events-table.mjs",
     "verify-airtable": "node scripts/verify-airtable-schema.mjs",
@@ -42,6 +44,8 @@
   },
   "dependencies": {
     "@clerk/nextjs": "^7.5.9",
+    "@ea/capability-registry": "file:./vendor/capability-registry",
+    "@ea/module-engine": "file:./vendor/module-engine",
     "@ea/portal-chassis": "file:./vendor/portal-chassis",
     "@ea/premium-chassis": "file:./vendor/premium-chassis",
     "@measured/puck": "^0.20.2",
@@ -56,7 +60,12 @@
     "qrcode": "^1.5.4",
     "react": "19.2.4",
     "react-dom": "19.2.4",
-    "stripe": "^22.2.1"
+    "stripe": "^22.2.1",
+    "@ea/theme-engine": "file:./vendor/theme-engine",
+    "@ea/personality-engine": "file:./vendor/personality-engine",
+    "@ea/website-engine": "file:./vendor/website-engine",
+    "@ea/workspace-engine": "file:./vendor/workspace-engine",
+    "@ea/payments-contract": "file:./vendor/payments-contract"
   },
   "devDependencies": {
     "@playwright/test": "^1.61.0",

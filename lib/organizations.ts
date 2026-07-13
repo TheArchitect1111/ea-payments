@@ -26,6 +26,11 @@ export type Organization = {
   stripeSubscriptionId?: string;
   subscriptionPlanId?: string;
   subscriptionStatus?: string;
+  /** Platform preset id: ea | cpr | etfm | 3hc | bob-rumball */
+  platformClientId?: string;
+  themeId?: string;
+  personalityId?: string;
+  workspaceName?: string;
 };
 
 function mapOrganization(record: AirtableRecord): Organization {
@@ -45,6 +50,10 @@ function mapOrganization(record: AirtableRecord): Organization {
     stripeSubscriptionId: f['Stripe Subscription Id'] ? String(f['Stripe Subscription Id']) : undefined,
     subscriptionPlanId: f['Subscription Plan Id'] ? String(f['Subscription Plan Id']) : undefined,
     subscriptionStatus: f['Subscription Status'] ? String(f['Subscription Status']) : undefined,
+    platformClientId: f['Platform Client Id'] ? String(f['Platform Client Id']) : undefined,
+    themeId: f['Theme Id'] ? String(f['Theme Id']) : undefined,
+    personalityId: f['Personality Id'] ? String(f['Personality Id']) : undefined,
+    workspaceName: f['Workspace Name'] ? String(f['Workspace Name']) : undefined,
   };
 }
 
@@ -59,6 +68,25 @@ export async function getOrganizationById(orgId: string): Promise<Organization |
     1,
   );
   return records[0] ? mapOrganization(records[0]) : null;
+}
+
+/** List Organizations from Airtable for admin pickers (Entitlements, Org workspace). */
+export async function listOrganizations(options?: {
+  status?: OrganizationStatus | 'All';
+  maxRecords?: number;
+}): Promise<Organization[]> {
+  if (!platformStoreConfigured()) return [];
+
+  const status = options?.status ?? 'Active';
+  const maxRecords = options?.maxRecords ?? 100;
+  const filterByFormula =
+    status === 'All' ? undefined : `{Status}='${status.replace(/'/g, "\\'")}'`;
+
+  const records = await platformQuery(ORGANIZATIONS_TABLE, filterByFormula, maxRecords);
+  return records
+    .map(mapOrganization)
+    .filter((org) => Boolean(org.id) && Boolean(org.name))
+    .sort((a, b) => a.name.localeCompare(b.name));
 }
 
 export async function findOrganizationByPortalSlug(
@@ -170,6 +198,35 @@ export async function updateOrganizationBilling(
   if (input.stripeSubscriptionId) fields['Stripe Subscription Id'] = input.stripeSubscriptionId;
   if (input.subscriptionPlanId) fields['Subscription Plan Id'] = input.subscriptionPlanId;
   if (input.subscriptionStatus) fields['Subscription Status'] = input.subscriptionStatus;
+
+  if (Object.keys(fields).length === 0) return getOrganizationById(orgId);
+
+  const updated = await platformUpdate(ORGANIZATIONS_TABLE, orgId, fields);
+  return updated ? mapOrganization(updated) : null;
+}
+
+
+/** Optional workspace identity fields on Organizations (Airtable Title Case columns). */
+export async function updateOrganizationWorkspaceConfig(
+  orgId: string,
+  input: {
+    platformClientId?: string;
+    themeId?: string;
+    personalityId?: string;
+    workspaceName?: string;
+    logo?: string;
+    brandColors?: string;
+  },
+): Promise<Organization | null> {
+  if (!platformStoreConfigured() || orgId.startsWith('org_')) return null;
+
+  const fields: Record<string, string> = {};
+  if (input.platformClientId !== undefined) fields['Platform Client Id'] = input.platformClientId;
+  if (input.themeId !== undefined) fields['Theme Id'] = input.themeId;
+  if (input.personalityId !== undefined) fields['Personality Id'] = input.personalityId;
+  if (input.workspaceName !== undefined) fields['Workspace Name'] = input.workspaceName;
+  if (input.logo !== undefined) fields['Logo'] = input.logo;
+  if (input.brandColors !== undefined) fields['Brand Colors'] = input.brandColors;
 
   if (Object.keys(fields).length === 0) return getOrganizationById(orgId);
 

@@ -1,36 +1,50 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { portalNavItems } from './portal-nav-config';
 import { PortalNavIcon } from './PortalNavIcons';
 import { usePortalSidebar } from './PortalSidebarContext';
+import type { PortalSidebarNavGroup } from '@/lib/modules/portal-modules';
 
 type Props = {
   slug: string;
   active?: string;
+  shellNavGroups: PortalSidebarNavGroup[];
+  brandName?: string;
+  workspaceName?: string;
+  logoSrc?: string;
+  logoAlt?: string;
+  promoTitle?: string;
+  promoCopy?: string;
 };
 
-function isActive(pathname: string, href: string, id: string, active?: string) {
-  if (active && active === id) return true;
-  if (id === 'home') return pathname === href;
+function isActive(pathname: string, href: string, activeTab: string, active?: string) {
+  if (active && active === activeTab) return true;
+  if (activeTab === 'home') return pathname === href;
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-export function PortalSidebar({ slug, active }: Props) {
+export function PortalSidebar({
+  slug,
+  active,
+  shellNavGroups,
+  brandName = 'Efficiency Architects',
+  workspaceName = 'Client Portal',
+  logoSrc = '/ea-logo.png',
+  logoAlt = 'Efficiency Architects',
+  promoTitle = 'Your operating rhythm',
+  promoCopy = 'Pulse, Simplifi, Magnifi, and Amplifi ? unified in one portal.',
+}: Props) {
   const pathname = usePathname();
   const { mobileOpen, sidebarExpanded, closeMobile } = usePortalSidebar();
-  const [, setHovered] = useState(false);
-  const { menu, others } = portalNavItems(slug);
 
-  const renderItems = (items: typeof menu) => (
+  const renderItems = (items: PortalSidebarNavGroup['items']) => (
     <ul className="ep-sidebar-list">
       {items.map((item) => {
-        const on = isActive(pathname, item.href, item.id, active);
+        const on = isActive(pathname, item.href, item.activeTab, active);
         return (
-          <li key={item.id}>
+          <li key={item.moduleId}>
             <Link
               href={item.href}
               className={`ep-sidebar-link${on ? ' ep-sidebar-link-active' : ''}`}
@@ -56,24 +70,29 @@ export function PortalSidebar({ slug, active }: Props) {
         className={`ep-sidebar${mobileOpen ? ' ep-sidebar-mobile-open' : ''}${sidebarExpanded ? '' : ' ep-sidebar-collapsed'}`}
       >
         <div className="ep-sidebar-brand">
-          <Image src="/ea-logo.png" alt="Efficiency Architects" width={40} height={40} className="ep-sidebar-logo" />
+          <Image src={logoSrc} alt={logoAlt} width={40} height={40} className="ep-sidebar-logo" />
           <div className="ep-sidebar-brand-text">
-            <strong>Efficiency Architects</strong>
-            <span>Client Portal</span>
+            <strong>{brandName}</strong>
+            <span>{workspaceName}</span>
           </div>
         </div>
 
         <nav className="ep-sidebar-nav" aria-label="Portal menu">
-          <p className="ep-sidebar-heading">Menu</p>
-          {renderItems(menu)}
-
-          <p className="ep-sidebar-heading ep-sidebar-heading-others">Others</p>
-          {renderItems(others)}
+          {shellNavGroups.length === 0 ? (
+            <p className="ep-sidebar-heading">Menu</p>
+          ) : (
+            shellNavGroups.map((group) => (
+              <div key={group.id}>
+                <p className="ep-sidebar-heading">{group.label}</p>
+                {renderItems(group.items)}
+              </div>
+            ))
+          )}
         </nav>
 
         <div className="ep-sidebar-promo">
-          <p className="ep-sidebar-promo-title">Your operating rhythm</p>
-          <p className="ep-sidebar-promo-copy">Pulse, Simplifi, Magnifi, and Amplifi — unified in one portal.</p>
+          <p className="ep-sidebar-promo-title">{promoTitle}</p>
+          <p className="ep-sidebar-promo-copy">{promoCopy}</p>
         </div>
       </aside>
     </>

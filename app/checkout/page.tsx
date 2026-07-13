@@ -1,27 +1,31 @@
 'use client';
 
-import { useEffect, useState, FormEvent } from 'react';
-import { getPurchasableEACatalog, getEACatalog, formatPrice } from '@/lib/catalog';
+import { useEffect, useMemo, useState, FormEvent } from 'react';
 
-const PURCHASABLE_PRODUCTS = getPurchasableEACatalog();
-const ALL_EA_PRODUCTS = getEACatalog();
-
-type SubscriptionPlanOption = {
+type CheckoutOfferOption = {
   id: string;
+  kind: 'one_time' | 'subscription';
   displayName: string;
   description: string;
-  interval: 'month' | 'year';
   priceCents: number;
+  interval: 'month' | 'year' | null;
   trialDays: number;
+  purchasable: boolean;
 };
 
-function formatSubscriptionPrice(priceCents: number, interval: 'month' | 'year'): string {
-  const amount = new Intl.NumberFormat('en-US', {
+function formatMoney(priceCents: number): string {
+  if (priceCents === 0) return 'Contact for pricing';
+  return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
     minimumFractionDigits: 0,
   }).format(priceCents / 100);
-  return interval === 'month' ? `${amount}/mo` : `${amount}/yr`;
+}
+
+function formatOfferPrice(offer: CheckoutOfferOption): string {
+  const amount = formatMoney(offer.priceCents);
+  if (offer.kind !== 'subscription' || !offer.interval) return amount;
+  return offer.interval === 'month' ? `${amount}/mo` : `${amount}/yr`;
 }
 
 export default function CheckoutPage() {
@@ -31,41 +35,57 @@ export default function CheckoutPage() {
   const [phone, setPhone] = useState('');
   const [packageId, setPackageId] = useState('');
   const [referralSource, setReferralSource] = useState('');
-  const [subscriptionPlans, setSubscriptionPlans] = useState<SubscriptionPlanOption[]>([]);
+  const [offers, setOffers] = useState<CheckoutOfferOption[]>([]);
+  const [offersLoading, setOffersLoading] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const selectedOneTime = PURCHASABLE_PRODUCTS.find((p) => p.id === packageId);
-  const selectedSubscription = subscriptionPlans.find((p) => p.id === packageId);
-  const isSubscription = Boolean(selectedSubscription);
-  const contactOnlyCount = ALL_EA_PRODUCTS.length - PURCHASABLE_PRODUCTS.length;
+  const subscriptionOffers = useMemo(
+    () => offers.filter((o) => o.kind === 'subscription' && o.purchasable),
+    [offers],
+  );
+  const oneTimeOffers = useMemo(
+    () => offers.filter((o) => o.kind === 'one_time' && o.purchasable),
+    [offers],
+  );
+  const contactOnlyCount = useMemo(
+    () => offers.filter((o) => o.kind === 'one_time' && !o.purchasable).length,
+    [offers],
+  );
+
+  const selected = offers.find((o) => o.id === packageId);
+  const isSubscription = selected?.kind === 'subscription';
   const showAchNote =
-    selectedOneTime && selectedOneTime.priceCents > 50000 && !isSubscription;
+    selected && selected.kind === 'one_time' && selected.priceCents > 50000;
 
   useEffect(() => {
-    fetch('/api/checkout/subscription')
+    let cancelled = false;
+    setOffersLoading(true);
+    fetch('/api/checkout/offers?purchasable=0')
       .then((res) => res.json())
-      .then((data: { plans?: SubscriptionPlanOption[] }) => {
-        if (Array.isArray(data.plans)) setSubscriptionPlans(data.plans);
+      .then((data: { offers?: CheckoutOfferOption[] }) => {
+        if (cancelled) return;
+        if (Array.isArray(data.offers)) setOffers(data.offers);
       })
-      .catch(() => undefined);
+      .catch(() => undefined)
+      .finally(() => {
+        if (!cancelled) setOffersLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
+    if (offersLoading || offers.length === 0) return;
     const params = new URLSearchParams(window.location.search);
-    const requestedPackage = params.get('package');
-    const requestedPlan = params.get('plan');
-    const allIds = [
-      ...PURCHASABLE_PRODUCTS.map((p) => p.id),
-      ...subscriptionPlans.map((p) => p.id),
-    ];
-    const pick = requestedPlan || requestedPackage;
-    if (pick && allIds.includes(pick)) {
-      const timer = window.setTimeout(() => setPackageId(pick), 0);
-      return () => window.clearTimeout(timer);
-    }
-    return undefined;
-  }, [subscriptionPlans]);
+    const pick = params.get('plan') || params.get('package');
+    if (!pick) return;
+    const match = offers.find((o) => o.id === pick && o.purchasable);
+    if (!match) return;
+    const timer = window.setTimeout(() => setPackageId(match.id), 0);
+    return () => window.clearTimeout(timer);
+  }, [offers, offersLoading]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -177,23 +197,26 @@ export default function CheckoutPage() {
               className="w-full border border-neutral-300 bg-white px-4 py-3 text-sm outline-none focus:border-neutral-800 focus:ring-1 focus:ring-neutral-800"
               value={packageId}
               onChange={(e) => setPackageId(e.target.value)}
+              disabled={offersLoading}
             >
-              <option value="">Select a package</option>
-              {subscriptionPlans.length > 0 && (
+              <option value="">
+                {offersLoading ? 'Loading packages?' : 'Select a package'}
+              </option>
+              {subscriptionOffers.length > 0 && (
                 <optgroup label="Subscriptions">
-                  {subscriptionPlans.map((plan) => (
+                  {subscriptionOffers.map((plan) => (
                     <option key={plan.id} value={plan.id}>
-                      {plan.displayName} — {formatSubscriptionPrice(plan.priceCents, plan.interval)}
+                      {plan.displayName} ? {formatOfferPrice(plan)}
                       {plan.trialDays > 0 ? ` (${plan.trialDays}-day trial)` : ''}
                     </option>
                   ))}
                 </optgroup>
               )}
-              {PURCHASABLE_PRODUCTS.length > 0 && (
+              {oneTimeOffers.length > 0 && (
                 <optgroup label="One-time">
-                  {PURCHASABLE_PRODUCTS.map((product) => (
+                  {oneTimeOffers.map((product) => (
                     <option key={product.id} value={product.id}>
-                      {product.displayName} — {formatPrice(product.priceCents)}
+                      {product.displayName} ? {formatOfferPrice(product)}
                     </option>
                   ))}
                 </optgroup>
@@ -208,16 +231,11 @@ export default function CheckoutPage() {
                 for pricing on those tiers.
               </p>
             )}
-            {selectedOneTime && !isSubscription && (
+            {selected && (
               <p className="mt-2 text-xs leading-relaxed text-neutral-500">
-                {selectedOneTime.description}
-              </p>
-            )}
-            {selectedSubscription && (
-              <p className="mt-2 text-xs leading-relaxed text-neutral-500">
-                {selectedSubscription.description}
-                {selectedSubscription.trialDays > 0
-                  ? ` Includes a ${selectedSubscription.trialDays}-day free trial.`
+                {selected.description}
+                {selected.kind === 'subscription' && selected.trialDays > 0
+                  ? ` Includes a ${selected.trialDays}-day free trial.`
                   : ''}
               </p>
             )}
@@ -252,7 +270,7 @@ export default function CheckoutPage() {
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || offersLoading}
             className="w-full bg-neutral-950 px-6 py-4 text-xs font-bold uppercase tracking-widest text-white hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading

@@ -9,6 +9,7 @@ import {
 import type { AirtablePackage, ProposalWithAssessment } from '@/lib/airtable';
 import { getCatalogItem } from '@/lib/catalog';
 import { buildPackageFulfillmentPlan } from '@/lib/package-fulfillment';
+import { resolveCheckoutOffer } from '@/lib/platform/payments-bridge';
 import { ensureOrganizationForPortal } from '@/lib/organizations';
 import { ensurePackageEntitlements } from '@/lib/modules/portal-modules';
 import { sendWelcomeEmail, sendAdminNotification } from '@/lib/email';
@@ -168,28 +169,36 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
     return;
   }
 
+  const offerId = String(meta.commerceOfferId || meta.packageId || '');
+  const checkoutOffer = offerId ? resolveCheckoutOffer(offerId) : null;
   const catalogItem = meta.packageId ? getCatalogItem(meta.packageId) : undefined;
-  const fulfillment = catalogItem
-    ? buildPackageFulfillmentPlan(catalogItem)
-    : {
-        packageId: meta.packageId || '',
-        displayName: String(meta.packageDisplayName || packageName),
-        fulfillmentType: String(meta.fulfillmentType || 'implementation'),
-        fulfillmentLabel: String(meta.fulfillmentLabel || 'Review payment and begin onboarding.'),
-        reviewRequired: meta.reviewRequired === 'true',
-        intakePath: String(meta.intakePath || '/discover'),
-        adminHref: String(meta.adminHref || '/admin/master'),
-        clientExpectation: 'Your project workspace is being prepared. We will confirm the path before anything goes live.',
-        firstMilestone: String(meta.firstMilestone || 'Confirm project direction.'),
-      };
+  const fulfillment = checkoutOffer
+    ? buildPackageFulfillmentPlan(checkoutOffer)
+    : catalogItem
+      ? buildPackageFulfillmentPlan(catalogItem)
+      : {
+          packageId: meta.packageId || '',
+          displayName: String(meta.packageDisplayName || packageName),
+          fulfillmentType: String(meta.fulfillmentType || 'implementation'),
+          fulfillmentLabel: String(meta.fulfillmentLabel || 'Review payment and begin onboarding.'),
+          reviewRequired: meta.reviewRequired === 'true',
+          intakePath: String(meta.intakePath || '/discover'),
+          adminHref: String(meta.adminHref || '/admin/master'),
+          clientExpectation: 'Your project workspace is being prepared. We will confirm the path before anything goes live.',
+          firstMilestone: String(meta.firstMilestone || 'Confirm project direction.'),
+        };
 
-  let tempCredentials: string | undefined;
-  let portalSlug: string | undefined;
-  let portalLoginUrl: string =
+  const portalConfig = checkoutOffer?.portalConfig ?? catalogItem?.portalConfig;
+  const portalLoginFallback =
     catalogItem?.portalLoginUrl ??
     `${process.env.NEXT_PUBLIC_BASE_URL ?? 'https://ea-payments.vercel.app'}/portal/login`;
 
-  if (catalogItem?.portalConfig && airtableResult.recordId) {
+  let tempCredentials: string | undefined;
+  let portalSlug: string | undefined;
+  let portalLoginUrl: string = portalLoginFallback;
+
+  if (portalConfig && airtableResult.recordId) {
+
     try {
       const portalResult = await createPortalAccess(
         {
@@ -198,7 +207,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
           organization: meta.organization || undefined,
           airtableRecordId: airtableResult.recordId,
         },
-        catalogItem.portalConfig
+        portalConfig
       );
 
       if (portalResult.ok) {
@@ -370,7 +379,7 @@ async function handleSubscriptionCheckoutCompleted(
   session: Stripe.Checkout.Session,
 ): Promise<void> {
   const meta = session.metadata ?? {};
-  const planId = (meta.planId ?? '') as SubscriptionPlanId;
+  const planId = (meta.commerceOfferId || meta.planId || '') as SubscriptionPlanId;
   const plan = getSubscriptionPlan(planId);
 
   if (!plan) {

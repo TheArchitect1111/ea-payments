@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { getContentRequestsForClient } from '@/lib/airtable';
 import { getPortalCaptures } from '@/lib/capture-records';
 import { PortalShell, NAVY, GOLD } from '@/lib/chassis/PortalShell';
+import { PortalModuleChromeStrip } from '@/lib/chassis/PortalChromeContext';
 import { requirePortalModule } from '@/lib/modules/portal-modules';
 import SimplifiPortalWorkspace from './SimplifiPortalWorkspace';
 import '../ea-portal.css';
@@ -28,6 +29,7 @@ export default async function SimplifiClientPage({
   return (
     <PortalShell slug={slug} active="simplifi" firstName={firstName}>
       <main className="ep-main">
+        <PortalModuleChromeStrip />
         <div className="ep-welcome">
           <p className="ep-welcome-label">Simplifi™</p>
           <h1 className="ep-welcome-heading">Your saved opportunities</h1>
