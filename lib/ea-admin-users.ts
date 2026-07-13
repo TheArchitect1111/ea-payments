@@ -116,6 +116,25 @@ function hashToken(token: string) {
  * Resolve an admin account by email only (no password) — used by SSO/Clerk
  * sign-in. Sources: Airtable Admin Users → ADMIN_USERS env → ADMIN_CLERK_ALLOWLIST.
  */
+/** Owner / architect emails that must be able to request admin magic links. */
+function configuredOwnerEmails(): string[] {
+  const emails = new Set<string>();
+  for (const source of [
+    process.env.ADMIN_EMAIL,
+    process.env.ADMIN_USER,
+    process.env.ADMIN_CLERK_ALLOWLIST,
+    process.env.ARCHITECT_EMAILS,
+  ]) {
+    for (const part of String(source || '').split(/[,\n;]/)) {
+      const normalized = part.trim().toLowerCase();
+      if (normalized.includes('@')) emails.add(normalized);
+    }
+  }
+  // Canonical EA owner fallback when env is incomplete on Production.
+  emails.add('freedom@efficiencyarchitects.online');
+  return [...emails];
+}
+
 export async function findAdminAccount(email: string): Promise<Omit<AdminUser, 'password'> | null> {
   const normalized = email.trim().toLowerCase();
   if (!normalized) return null;
@@ -130,16 +149,13 @@ export async function findAdminAccount(email: string): Promise<Omit<AdminUser, '
     return { email: envUser.email, role: envUser.role || 'admin', name: envUser.name || normalized };
   }
 
-  const allowlist = (process.env.ADMIN_CLERK_ALLOWLIST || '')
-    .split(/[,\n;]/)
-    .map((value) => value.trim().toLowerCase())
-    .filter(Boolean);
-  if (allowlist.includes(normalized)) {
-    const ownerEmail = (process.env.ADMIN_EMAIL || '').trim().toLowerCase();
+  const owners = configuredOwnerEmails();
+  if (owners.includes(normalized)) {
+    const primary = (process.env.ADMIN_EMAIL || '').trim().toLowerCase();
     return {
       email: normalized,
-      role: normalized === ownerEmail ? 'owner' : 'admin',
-      name: 'Admin',
+      role: !primary || normalized === primary ? 'owner' : 'admin',
+      name: normalized === 'freedom@efficiencyarchitects.online' ? 'Robert' : 'Admin',
     };
   }
 
