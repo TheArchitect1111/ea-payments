@@ -35,6 +35,15 @@ const SECTION_ALIASES: Record<string, string> = {
 
 export function resolvePrimaryActionHref(slug: string, action: string): string {
   const a = action.toLowerCase();
+  if (a.includes('player') || a.includes('profile') || a.includes('athlete')) {
+    return `/portal/${slug}/documents`;
+  }
+  if (a.includes('recruit') || a.includes('eligibility') || a.includes('timeline')) {
+    return `/portal/${slug}/events`;
+  }
+  if (a.includes('family') || a.includes('message') || a.includes('update')) {
+    return `/portal/${slug}/updates`;
+  }
   if (a.includes('pulse') || a.includes('brief') || a.includes('recommend') || a.includes('decision')) {
     return `/portal/${slug}/pulse`;
   }
@@ -44,14 +53,17 @@ export function resolvePrimaryActionHref(slug: string, action: string): string {
   if (a.includes('train') || a.includes('lesson') || a.includes('learning') || a.includes('certif')) {
     return `/portal/${slug}/learning`;
   }
-  if (a.includes('update') || a.includes('family') || a.includes('message')) {
-    return `/portal/${slug}/updates`;
-  }
   if (a.includes('connect') || a.includes('session') || a.includes('schedule')) {
     return `/portal/${slug}/connect`;
   }
   if (a.includes('amplifi') || a.includes('campaign')) {
     return `/portal/${slug}/amplifi`;
+  }
+  if (a.includes('create for players') || a.includes('players or families')) {
+    // CPR families: live portal login — not EA /portal/cpr chassis preview
+    return slug === 'cpr'
+      ? 'https://canadianprospectrecruitment.vercel.app/portal/login'
+      : `/connect/${slug}`;
   }
   return `/portal/${slug}`;
 }

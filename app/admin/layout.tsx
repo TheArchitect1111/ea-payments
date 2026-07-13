@@ -1,5 +1,6 @@
-import EANavigatorShell from './_components/EANavigatorShell';
 import GuidedTour from './_components/GuidedTour';
+import AdminWorkspaceShell from './_components/AdminWorkspaceShell';
+import EAAssistant from '@/app/components/ea-assistant/EAAssistant';
 import { hasAdminPageAccess } from '@/lib/admin-page-auth';
 
 export const dynamic = 'force-dynamic';
@@ -12,9 +13,10 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   }
 
   return (
-    <EANavigatorShell>
+    <AdminWorkspaceShell>
       <GuidedTour autoStart />
       {children}
-    </EANavigatorShell>
+      <EAAssistant surface="admin" />
+    </AdminWorkspaceShell>
   );
 }

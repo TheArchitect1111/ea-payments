@@ -288,24 +288,17 @@ export default async function MasterPortalPage() {
 
   return (
     <>
-      <div className="bg-white border-b border-neutral-200 px-6 py-8">
-        <div className="max-w-6xl mx-auto flex items-center justify-between flex-wrap gap-4">
-          <div className="flex items-center gap-4">
-            <img src="/images/ea-logo-hd.png" alt="Efficiency Architects" style={{ height: '60px', width: 'auto' }} />
-            <div>
-              <h2 className="text-2xl font-extrabold" style={{ color: NAVY }}>
-                Mission Control
-              </h2>
-              <p className="text-xs font-bold uppercase tracking-widest" style={{ color: GOLD }}>
-                What deserves your attention today
-              </p>
-            </div>
-          </div>
-          <p className="text-xs text-neutral-400">Last updated {lastUpdated}</p>
+      {/* Brand chrome comes from AdminWorkspaceShell (portal TailAdmin layout). */}
+      <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p className="text-xs font-bold uppercase tracking-widest" style={{ color: GOLD }}>
+            What deserves your attention today
+          </p>
+          <p className="text-xs text-neutral-400 mt-1">Last updated {lastUpdated}</p>
         </div>
       </div>
 
-      <main className="max-w-6xl mx-auto px-6 py-8 space-y-10">
+      <div className="space-y-10">
 
         <MissionControlPanel mission={mission} />
 
@@ -549,7 +542,7 @@ export default async function MasterPortalPage() {
           )}
         </section>
 
-      </main>
+      </div>
     </>
   );
 }
