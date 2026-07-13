@@ -61,6 +61,36 @@ export default function CprReadinessPanel({ readiness }: { readiness: CprReadine
         </p>
       </div>
 
+      <div className="bg-amber-50 border border-amber-200 p-5 space-y-2">
+        <p className="text-[11px] font-bold uppercase tracking-wider text-amber-900">Where families login</p>
+        <p className="text-sm text-amber-950">
+          Canonical:{" "}
+          <a
+            className="font-semibold underline"
+            href="https://canadianprospectrecruitment.vercel.app/portal/login"
+            target="_blank"
+            rel="noreferrer"
+          >
+            canadianprospectrecruitment.vercel.app/portal/login
+          </a>
+          {" "}(staff:{" "}
+          <a
+            className="underline"
+            href="https://canadianprospectrecruitment.vercel.app/admin/login"
+            target="_blank"
+            rel="noreferrer"
+          >
+            /admin/login
+          </a>
+          ).
+        </p>
+        <p className="text-sm text-amber-900">
+          Quarantined (do not send enrolled kids/parents): EA <code>/portal/cpr</code>,{" "}
+          <code>/site/cpr</code> login CTAs that used to say “Team Portal”, and{" "}
+          <code>portal.cpr.efficiencyarchitects.online</code> until real cutover.
+        </p>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <article className="bg-white border border-neutral-200 p-5">
           <p className="text-[11px] font-bold uppercase tracking-wider" style={{ color: GOLD }}>

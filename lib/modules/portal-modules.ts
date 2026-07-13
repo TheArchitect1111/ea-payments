@@ -93,7 +93,8 @@ export type PortalModuleAccess = {
 
 /** Serializable sidebar nav â€” passed from server PortalShell to client PortalSidebar. */
 export type PortalSidebarNavItem = {
-  moduleId: ModuleId;
+  /** Module id or synthetic admin nav key (used as React key + active match). */
+  moduleId: ModuleId | string;
   label: string;
   href: string;
   icon: PortalNavIconName;

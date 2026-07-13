@@ -1,4 +1,4 @@
-export {
+﻿export {
   getPlatformCapabilityRegistry,
   resetPlatformCapabilityRegistry,
   listPlatformCapabilities,
@@ -85,3 +85,6 @@ export {
   CHASSIS_VENDOR_PACKAGES,
 } from './package-sync-health';
 export type { PackageSyncRow, VendorPackageName } from './package-sync-health';
+
+export { resolveAdminWorkspaceChrome } from './admin-workspace-chrome';
+
