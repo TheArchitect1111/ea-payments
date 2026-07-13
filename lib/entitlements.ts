@@ -98,6 +98,25 @@ export async function setModuleEnabled(
   });
 }
 
+/** Bulk enable/disable modules for a real Airtable organization. */
+export async function setModulesEnabledBulk(
+  organizationId: string,
+  moduleIds: ModuleId[],
+  enabled: boolean,
+  source: EntitlementSource = 'manual',
+): Promise<{ ok: ModuleId[]; failed: ModuleId[] }> {
+  const ok: ModuleId[] = [];
+  const failed: ModuleId[] = [];
+
+  for (const moduleId of moduleIds) {
+    const row = await setModuleEnabled(organizationId, moduleId, enabled, source);
+    if (row) ok.push(moduleId);
+    else failed.push(moduleId);
+  }
+
+  return { ok, failed };
+}
+
 /** Write package-derived entitlements after payment or login backfill. */
 export async function syncPackageEntitlements(
   organizationId: string,
