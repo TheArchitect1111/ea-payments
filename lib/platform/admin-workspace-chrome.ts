@@ -82,7 +82,7 @@ export function resolveAdminWorkspaceChrome(): PortalWorkspaceChrome {
     cssVars,
     brandName: shell?.name || 'Efficiency Architects',
     workspaceName: shell?.workspaceName || 'EA Command Center',
-    logoSrc: theme?.logo?.trim() || '/ea-logo.png',
+    logoSrc: '/ea-logo.png',
     logoAlt: theme?.logoAlt || 'Efficiency Architects',
     memberLabel: shell?.terminology.members || 'Admin',
     homeLabel: shell?.terminology.home || 'Mission Control',

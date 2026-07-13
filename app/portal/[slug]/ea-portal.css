@@ -86,6 +86,19 @@
   gap: 12px;
   padding: 24px 20px 20px;
   border-bottom: 1px solid var(--ea-border);
+  text-decoration: none;
+  color: inherit;
+}
+
+a.ep-sidebar-promo {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+a.ep-sidebar-promo:hover {
+  border-color: var(--workspace-accent, var(--ea-gold));
 }
 
 .ep-sidebar-logo {

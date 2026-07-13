@@ -22,14 +22,16 @@ export default async function AdminWorkspaceShell({ children }: { children: Reac
       cssVars={chrome.cssVars}
       brandName={chrome.brandName}
       workspaceName={chrome.workspaceName}
-      logoSrc={chrome.logoSrc}
+      logoSrc="/ea-logo.png"
       logoAlt={chrome.logoAlt}
       memberLabel={chrome.memberLabel}
       promoTitle={chrome.promoTitle}
       promoCopy={chrome.promoCopy}
+      promoHref="/admin/master"
       personalityName={chrome.personalityName}
       personalityId={chrome.personalityId}
       homeLabel={chrome.homeLabel}
+      logoutHref="/api/admin/logout"
     >
       {children}
     </PortalLayout>

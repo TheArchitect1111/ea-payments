@@ -22,9 +22,12 @@ export type PortalWorkspaceLayoutProps = {
   memberLabel?: string;
   promoTitle?: string;
   promoCopy?: string;
+  promoHref?: string;
   personalityName?: string;
   personalityId?: string;
   homeLabel?: string;
+  /** Defaults to portal logout; admin shell passes /api/admin/logout. */
+  logoutHref?: string;
   children: ReactNode;
 };
 
@@ -42,9 +45,11 @@ function PortalLayoutFrame({
   memberLabel,
   promoTitle,
   promoCopy,
+  promoHref,
   personalityName,
   personalityId,
   homeLabel,
+  logoutHref = '/api/portal/logout',
   children,
 }: PortalWorkspaceLayoutProps) {
   const { sidebarExpanded } = usePortalSidebar();
@@ -72,9 +77,15 @@ function PortalLayoutFrame({
           logoAlt={logoAlt}
           promoTitle={promoTitle}
           promoCopy={promoCopy}
+          promoHref={promoHref}
         />
         <div className={`ep-tailadmin-main${sidebarExpanded ? '' : ' ep-tailadmin-main-collapsed'}`}>
-          <PortalHeader firstName={firstName} pageTitle={pageTitle} memberLabel={memberLabel} />
+          <PortalHeader
+            firstName={firstName}
+            pageTitle={pageTitle}
+            memberLabel={memberLabel}
+            logoutHref={logoutHref}
+          />
           <div className="ep-tailadmin-content">{children}</div>
         </div>
       </div>

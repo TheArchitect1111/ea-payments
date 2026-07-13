@@ -17,6 +17,7 @@ type Props = {
   logoAlt?: string;
   promoTitle?: string;
   promoCopy?: string;
+  promoHref?: string;
 };
 
 function isActive(pathname: string, href: string, activeTab: string, active?: string) {
@@ -34,7 +35,8 @@ export function PortalSidebar({
   logoSrc = '/ea-logo.png',
   logoAlt = 'Efficiency Architects',
   promoTitle = 'Your operating rhythm',
-  promoCopy = 'Pulse, Simplifi, Magnifi, and Amplifi ? unified in one portal.',
+  promoCopy = 'Pulse, Simplifi, Magnifi, and Amplifi — unified in one portal.',
+  promoHref,
 }: Props) {
   const pathname = usePathname();
   const { mobileOpen, sidebarExpanded, closeMobile } = usePortalSidebar();
@@ -59,6 +61,9 @@ export function PortalSidebar({
     </ul>
   );
 
+  const brandHref = slug === 'ea' ? '/admin/master' : `/portal/${slug}`;
+  const resolvedLogo = logoSrc?.trim() && logoSrc !== '/EA_Logo.png' ? logoSrc : '/ea-logo.png';
+
   return (
     <>
       <div
@@ -69,13 +74,13 @@ export function PortalSidebar({
       <aside
         className={`ep-sidebar${mobileOpen ? ' ep-sidebar-mobile-open' : ''}${sidebarExpanded ? '' : ' ep-sidebar-collapsed'}`}
       >
-        <div className="ep-sidebar-brand">
-          <Image src={logoSrc} alt={logoAlt} width={40} height={40} className="ep-sidebar-logo" />
+        <Link href={brandHref} className="ep-sidebar-brand" onClick={closeMobile}>
+          <Image src={resolvedLogo} alt={logoAlt} width={40} height={40} className="ep-sidebar-logo" />
           <div className="ep-sidebar-brand-text">
             <strong>{brandName}</strong>
             <span>{workspaceName}</span>
           </div>
-        </div>
+        </Link>
 
         <nav className="ep-sidebar-nav" aria-label="Portal menu">
           {shellNavGroups.length === 0 ? (
@@ -90,10 +95,17 @@ export function PortalSidebar({
           )}
         </nav>
 
-        <div className="ep-sidebar-promo">
-          <p className="ep-sidebar-promo-title">{promoTitle}</p>
-          <p className="ep-sidebar-promo-copy">{promoCopy}</p>
-        </div>
+        {promoHref ? (
+          <Link href={promoHref} className="ep-sidebar-promo" onClick={closeMobile}>
+            <p className="ep-sidebar-promo-title">{promoTitle}</p>
+            <p className="ep-sidebar-promo-copy">{promoCopy}</p>
+          </Link>
+        ) : (
+          <div className="ep-sidebar-promo">
+            <p className="ep-sidebar-promo-title">{promoTitle}</p>
+            <p className="ep-sidebar-promo-copy">{promoCopy}</p>
+          </div>
+        )}
       </aside>
     </>
   );

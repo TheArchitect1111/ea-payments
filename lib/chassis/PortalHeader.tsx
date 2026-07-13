@@ -7,9 +7,15 @@ type Props = {
   firstName?: string;
   pageTitle?: string;
   memberLabel?: string;
+  logoutHref?: string;
 };
 
-export function PortalHeader({ firstName, pageTitle = 'Dashboard', memberLabel = 'Portal member' }: Props) {
+export function PortalHeader({
+  firstName,
+  pageTitle = 'Dashboard',
+  memberLabel = 'Portal member',
+  logoutHref = '/api/portal/logout',
+}: Props) {
   const { toggleMobile, toggleSidebar } = usePortalSidebar();
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -47,8 +53,8 @@ export function PortalHeader({ firstName, pageTitle = 'Dashboard', memberLabel =
           <svg className="ep-header-search-icon" viewBox="0 0 20 20" fill="none" aria-hidden>
             <path d="M9.167 15.833a6.667 6.667 0 1 0 0-13.333 6.667 6.667 0 0 0 0 13.333Zm5.834-1.667-3.25-3.25" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
           </svg>
-          <input ref={inputRef} type="search" placeholder="Search portal?" className="ep-header-search-input" aria-label="Search portal" />
-          <kbd className="ep-header-kbd">? K</kbd>
+          <input ref={inputRef} type="search" placeholder="Search portal…" className="ep-header-search-input" aria-label="Search portal" />
+          <kbd className="ep-header-kbd">⌘ K</kbd>
         </div>
 
         <div className="ep-header-user">
@@ -59,7 +65,9 @@ export function PortalHeader({ firstName, pageTitle = 'Dashboard', memberLabel =
           </div>
         </div>
 
-        <a href="/api/portal/logout" className="ep-header-logout">Sign out</a>
+        <a href={logoutHref} className="ep-header-logout">
+          Sign out
+        </a>
       </div>
     </header>
   );
