@@ -11,13 +11,22 @@ import {
 } from '@/lib/email';
 import { trackConsiderEvent } from '@/lib/opportunity-tracking';
 import { emitPulseEvent } from '@/lib/pulse-bus';
-import { createCtpSubmission, isCtpDiscoverySubmit } from '@/lib/ctp-submissions';
+import {
+  createCtpSubmission,
+  isCtpDiscoverySubmit,
+  updateCtpSubmission,
+} from '@/lib/ctp-submissions';
 import { finalizeCtpAssetManifest, parseAssetUploads } from '@/lib/ctp-asset-store';
 import { resolveCtpOrganizationId } from '@/lib/ctp-studio-bridge';
 import { scheduleCtpIntakeAnalysis } from '@/lib/ctp-intake-orchestrator';
 import { scheduleCtpWorkspaceProvision } from '@/lib/ctp-workspace-provision';
 import { scheduleCtpStudioCampaign } from '@/lib/ctp-studio-bridge';
 import { scheduleCtpWebsiteProvision } from '@/lib/ctp-website-provision';
+import {
+  runCtpDigitalPresenceAudit,
+  scheduleCtpDigitalPresenceAudit,
+} from '@/lib/ctp-digital-presence-run';
+import { auditDigitalPresence, type DigitalPresenceAudit } from '@/lib/ctp-digital-presence';
 import { classifyCtpClientType } from '@/lib/ctp-client-type';
 import { buildDiscoveryRecommendations, type DiscoveryAnswers } from '@/lib/discovery-engine';
 
@@ -294,6 +303,8 @@ export async function POST(req: NextRequest) {
 
     let ctpClassification: ReturnType<typeof classifyCtpClientType> | undefined;
     let recommendations: unknown;
+    let digitalPresenceAudit: DigitalPresenceAudit | undefined;
+    let ctpSubmissionId: string | undefined;
 
     if (isCtpFlow) {
       if (input.discoveryAnswers) {
@@ -350,6 +361,7 @@ export async function POST(req: NextRequest) {
         });
 
         if (ctpResult.submission) {
+          ctpSubmissionId = ctpResult.submission.id;
           await emitPulseEvent({
             product: 'ea-platform',
             type: 'ctp.submitted',
@@ -376,6 +388,25 @@ export async function POST(req: NextRequest) {
             // Website-only tracks skip portal Pending — still auto-build the site.
             if (ctpClassification.websiteRequired) {
               scheduleCtpWebsiteProvision(ctpResult.submission.id);
+            }
+          }
+
+          if (ctpClassification.digitalAudit) {
+            try {
+              const urlFromAnswers =
+                (typeof input.discoveryAnswers?.current_url === 'string'
+                  ? input.discoveryAnswers.current_url
+                  : undefined) || undefined;
+              digitalPresenceAudit = await auditDigitalPresence({
+                url: urlFromAnswers,
+                businessName: input.businessName,
+              });
+              await updateCtpSubmission(ctpResult.submission.id, {
+                digitalPresenceAudit,
+              });
+            } catch (err) {
+              console.error('[assessment/submit] digital presence audit failed:', err);
+              scheduleCtpDigitalPresenceAudit(ctpResult.submission.id);
             }
           }
         }
@@ -419,6 +450,13 @@ export async function POST(req: NextRequest) {
     if (proposalResult.recordId) {
       try {
         if (isCtpFlow && ctpClassification) {
+          if (!digitalPresenceAudit && ctpSubmissionId && ctpClassification.digitalAudit) {
+            try {
+              await runCtpDigitalPresenceAudit(ctpSubmissionId);
+            } catch {
+              /* non-blocking */
+            }
+          }
           await sendCtpExecutiveEmail({
             email: input.email,
             contactName: input.contactName,
@@ -435,6 +473,7 @@ export async function POST(req: NextRequest) {
             recommendedFee: pricing.recommendedFee,
             recommendations,
             operationalChallenges: challengeIds,
+            digitalPresenceAudit,
           });
         } else {
           await sendAssessmentConfirmationEmail({

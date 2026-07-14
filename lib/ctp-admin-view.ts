@@ -44,6 +44,8 @@ export type CtpAdminSubmissionView = {
   reviewScheduledAt?: string;
   clientType?: string;
   clientTypeLabel?: string;
+  digitalScore?: number;
+  digitalImpact?: string;
   assets: CtpAdminAssetView[];
   intakeSummary?: string;
 };
@@ -93,6 +95,8 @@ export function buildCtpAdminSubmissionView(submission: CtpSubmission): CtpAdmin
     clientTypeLabel: submission.clientType
       ? ctpClientTypeLabel(submission.clientType)
       : undefined,
+    digitalScore: submission.digitalPresenceAudit?.overallScore,
+    digitalImpact: submission.digitalPresenceAudit?.impactEstimate,
     assets: buildCtpAdminAssetViews(submission.assetManifest),
     intakeSummary: submission.intakeAnalysis?.summary,
   };

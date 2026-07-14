@@ -1043,6 +1043,7 @@ export type CtpExecutiveEmailData = {
   /** When portal is already live at send time. */
   portalUrl?: string;
   scheduleUrl?: string;
+  digitalPresenceAudit?: import('@/lib/ctp-digital-presence').DigitalPresenceAudit;
 };
 
 /** CTP Phase 6 — executive consulting deliverable (not marketing copy). */
@@ -1125,6 +1126,25 @@ export async function sendCtpExecutiveEmail(
       <tr><td style="padding:12px 16px;font-size:12px;font-weight:700;color:#555;">Weekly Capacity Loss</td><td style="padding:12px 16px;font-size:14px;font-weight:700;color:#1B2B4D;">${data.weeklyTimeRecovery} hours</td></tr>
       <tr><td style="padding:12px 16px;font-size:12px;font-weight:700;color:#555;">Primary Constraint</td><td style="padding:12px 16px;font-size:14px;font-weight:700;color:#1B2B4D;">${escHtml(data.primaryConstraint)}</td></tr>
     </table>
+
+    ${
+      data.digitalPresenceAudit
+        ? `<p style="margin:0 0 10px;font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#1B2B4D;">Digital Presence Score</p>
+    <div style="background-color:#F8F6F2;border-left:4px solid #C9A844;padding:16px 18px;margin-bottom:12px;">
+      <p style="margin:0 0 6px;font-size:28px;font-weight:700;color:#1B2B4D;">${data.digitalPresenceAudit.overallScore} / 100</p>
+      <p style="margin:0;font-size:13px;color:#555;line-height:1.7;">${escHtml(data.digitalPresenceAudit.impactEstimate)}</p>
+    </div>
+    <ul style="margin:0 0 22px;padding-left:20px;">
+      ${data.digitalPresenceAudit.findings
+        .slice(0, 5)
+        .map(
+          (item) =>
+            `<li style="margin:0 0 8px;font-size:14px;color:#1A1A2E;line-height:1.6;"><strong>${escHtml(item.title)}</strong> — ${escHtml(item.detail)}</li>`,
+        )
+        .join('')}
+    </ul>`
+        : ''
+    }
 
     <p style="margin:0 0 10px;font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#1B2B4D;">Recommended Solution &amp; Scope</p>
     <div style="background-color:#F8F6F2;border:1px solid #E4E4E4;padding:16px 18px;margin-bottom:12px;">
