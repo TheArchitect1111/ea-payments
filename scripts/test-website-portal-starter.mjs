@@ -137,6 +137,15 @@ assert(
   'Creative Studio schema must include Experience record type',
 );
 
+const readinessLib = join(root, 'lib/website-portal-readiness.ts');
+const readinessApi = join(root, 'app/api/admin/website-portal/readiness/route.ts');
+assert(existsSync(readinessLib), 'Missing website-portal-readiness helper');
+assert(existsSync(readinessApi), 'Missing admin website-portal readiness API');
+assert(
+  readFileSync(opsPanelPath, 'utf8').includes('/api/admin/website-portal/readiness'),
+  'Ops panel must load readiness status',
+);
+
 if (failures.length) {
   console.error('Website + Portal Starter checks FAILED:');
   for (const failure of failures) console.error(`  - ${failure}`);
