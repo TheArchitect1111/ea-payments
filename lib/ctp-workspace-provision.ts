@@ -159,14 +159,20 @@ export async function runCtpWorkspaceProvision(
       `Temporary Password: ${portalResult.tempPassword}. ` +
       'Log in using the button above. Contact us to update your password at any time.';
     try {
+      const portalUrl =
+        portalResult.portalLoginUrl ??
+        `${(process.env.NEXT_PUBLIC_BASE_URL ?? 'https://efficiencyarchitects.online').replace(/\/$/, '')}/portal/${slug}`;
+      const track =
+        submission.clientTypeClassification?.label ||
+        submission.clientType ||
+        'discovery';
       await sendWelcomeEmail({
         clientName: submission.contactName,
         email: submission.email,
         packageName: CTP_WELCOME_PACKAGE,
-        portalLoginUrl: portalResult.portalLoginUrl ?? portalLoginUrl(),
+        portalLoginUrl: portalUrl,
         tempCredentials,
-        nextSteps:
-          'Explore your workspace, review your discovery summary, and prepare for your collaborative design review.',
+        nextSteps: `Your ${track} workspace is live at /portal/${slug}. Review your executive brief, then book an Executive Strategy Session when you are ready to decide direction.`,
       });
     } catch (err) {
       console.error('[ctp-workspace-provision] welcome email failed:', err);

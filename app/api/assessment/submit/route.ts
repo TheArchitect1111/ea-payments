@@ -4,7 +4,11 @@ import { analyzeAssessment, OPERATIONAL_CHALLENGES } from '@/lib/analysis-engine
 import type { RevenueRange, Complexity } from '@/lib/analysis-engine';
 import { calculateFee } from '@/lib/pricing-engine';
 import { createAssessmentRecord, createProposalRecord, upsertProspectFromAssessment } from '@/lib/airtable';
-import { sendAssessmentAdminNotification, sendAssessmentConfirmationEmail } from '@/lib/email';
+import {
+  sendAssessmentAdminNotification,
+  sendAssessmentConfirmationEmail,
+  sendCtpExecutiveEmail,
+} from '@/lib/email';
 import { trackConsiderEvent } from '@/lib/opportunity-tracking';
 import { emitPulseEvent } from '@/lib/pulse-bus';
 import { createCtpSubmission, isCtpDiscoverySubmit } from '@/lib/ctp-submissions';
@@ -288,9 +292,9 @@ export async function POST(req: NextRequest) {
     }
 
     let ctpClassification: ReturnType<typeof classifyCtpClientType> | undefined;
+    let recommendations: unknown;
 
     if (isCtpFlow) {
-      let recommendations: unknown;
       if (input.discoveryAnswers) {
         try {
           recommendations = buildDiscoveryRecommendations(input.discoveryAnswers as DiscoveryAnswers);
@@ -409,19 +413,39 @@ export async function POST(req: NextRequest) {
 
     if (proposalResult.recordId) {
       try {
-        await sendAssessmentConfirmationEmail({
-          email: input.email,
-          contactName: input.contactName,
-          capacityScore: analysis.capacityScore,
-          scoreBand: analysis.scoreBand,
-          weeklyTimeRecovery: analysis.weeklyTimeRecovery,
-          opportunityLow: analysis.opportunityLow,
-          opportunityHigh: analysis.opportunityHigh,
-          projectTypeLabel: pricing.projectTypeLabel,
-          recommendedFee: pricing.recommendedFee,
-          proposalId,
-          clientTypeLabel: ctpClassification?.label,
-        });
+        if (isCtpFlow && ctpClassification) {
+          await sendCtpExecutiveEmail({
+            email: input.email,
+            contactName: input.contactName,
+            businessName: input.businessName,
+            proposalId,
+            clientType: ctpClassification.clientType,
+            capacityScore: analysis.capacityScore,
+            scoreBand: analysis.scoreBand,
+            primaryConstraint: analysis.primaryConstraint,
+            weeklyTimeRecovery: analysis.weeklyTimeRecovery,
+            opportunityLow: analysis.opportunityLow,
+            opportunityHigh: analysis.opportunityHigh,
+            projectTypeLabel: pricing.projectTypeLabel,
+            recommendedFee: pricing.recommendedFee,
+            recommendations,
+            operationalChallenges: challengeIds,
+          });
+        } else {
+          await sendAssessmentConfirmationEmail({
+            email: input.email,
+            contactName: input.contactName,
+            capacityScore: analysis.capacityScore,
+            scoreBand: analysis.scoreBand,
+            weeklyTimeRecovery: analysis.weeklyTimeRecovery,
+            opportunityLow: analysis.opportunityLow,
+            opportunityHigh: analysis.opportunityHigh,
+            projectTypeLabel: pricing.projectTypeLabel,
+            recommendedFee: pricing.recommendedFee,
+            proposalId,
+            clientTypeLabel: ctpClassification?.label,
+          });
+        }
       } catch (err) {
         console.error('Assessment confirmation email error:', err);
       }

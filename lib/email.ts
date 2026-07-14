@@ -1024,6 +1024,138 @@ export async function sendAssessmentConfirmationEmail(data: {
   );
 }
 
+export type CtpExecutiveEmailData = {
+  email: string;
+  contactName: string;
+  businessName: string;
+  proposalId: string;
+  clientType: import('@/lib/ctp-client-type').CtpClientType;
+  capacityScore: number;
+  scoreBand: string;
+  primaryConstraint: string;
+  weeklyTimeRecovery: number;
+  opportunityLow: number;
+  opportunityHigh: number;
+  projectTypeLabel: string;
+  recommendedFee: number;
+  recommendations?: string[] | unknown;
+  operationalChallenges?: string[];
+  /** When portal is already live at send time. */
+  portalUrl?: string;
+  scheduleUrl?: string;
+};
+
+/** CTP Phase 6 — executive consulting deliverable (not marketing copy). */
+export async function sendCtpExecutiveEmail(
+  data: CtpExecutiveEmailData,
+): Promise<{ ok: boolean; error?: string }> {
+  const { buildCtpExecutiveBrief } = await import('@/lib/ctp-executive-brief');
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? EA_PLATFORM_URL;
+  const proposalUrl = `${baseUrl}/proposal/${encodeURIComponent(data.proposalId)}`;
+  const scheduleUrl =
+    data.scheduleUrl ||
+    process.env.CALENDLY_URL ||
+    'https://calendly.com/freedom-efficiencyarchitects/30min';
+  const supportEmail =
+    process.env.SUPPORT_EMAIL ?? 'freedom@efficiencyarchitects.online';
+  const firstName = data.contactName.split(' ')[0] || data.contactName;
+  const fmt = (n: number) =>
+    new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+    }).format(n);
+
+  const brief = buildCtpExecutiveBrief({
+    businessName: data.businessName,
+    contactName: data.contactName,
+    clientType: data.clientType,
+    capacityScore: data.capacityScore,
+    scoreBand: data.scoreBand,
+    primaryConstraint: data.primaryConstraint,
+    weeklyTimeRecovery: data.weeklyTimeRecovery,
+    opportunityLow: data.opportunityLow,
+    opportunityHigh: data.opportunityHigh,
+    projectTypeLabel: data.projectTypeLabel,
+    recommendedFee: data.recommendedFee,
+    recommendations: data.recommendations,
+    operationalChallenges: data.operationalChallenges,
+  });
+
+  const findingsHtml = brief.topFindings
+    .map(
+      (item) =>
+        `<li style="margin:0 0 8px;font-size:14px;color:#1A1A2E;line-height:1.6;">${escHtml(item)}</li>`,
+    )
+    .join('');
+  const scopeHtml = brief.scopeLines
+    .map(
+      (item) =>
+        `<li style="margin:0 0 8px;font-size:14px;color:#1A1A2E;line-height:1.6;">${escHtml(item)}</li>`,
+    )
+    .join('');
+
+  const portalBlock = data.portalUrl
+    ? `<div style="background-color:#F8F6F2;border-left:4px solid #C9A844;padding:16px 18px;margin-bottom:22px;">
+      <p style="margin:0 0 8px;font-size:12px;font-weight:700;color:#1B2B4D;">Your Personalized Portal</p>
+      <p style="margin:0;font-size:13px;color:#555;line-height:1.7;">Your workspace is ready: <a href="${escHtml(data.portalUrl)}" style="color:#1B2B4D;font-weight:700;text-decoration:underline;">${escHtml(data.portalUrl)}</a></p>
+    </div>`
+    : `<div style="background-color:#F8F6F2;border-left:4px solid #C9A844;padding:16px 18px;margin-bottom:22px;">
+      <p style="margin:0 0 8px;font-size:12px;font-weight:700;color:#1B2B4D;">Your Personalized Portal</p>
+      <p style="margin:0;font-size:13px;color:#555;line-height:1.7;">We are opening your private workspace now. You will receive portal access as soon as it is live — usually within a few minutes.</p>
+    </div>`;
+
+  const primaryCtaUrl = data.portalUrl || proposalUrl;
+  const primaryCtaLabel = data.portalUrl ? 'View My Personalized Portal' : 'View My Executive Brief';
+
+  const bodyHtml = `
+    <p style="margin:0 0 18px;font-size:15px;color:#1A1A2E;line-height:1.7;">Thank you, ${escHtml(firstName)}.</p>
+    <p style="margin:0 0 22px;font-size:15px;color:#1A1A2E;line-height:1.7;">We have already begun shaping the ${escHtml(brief.clientTypeLabel)} path for <strong>${escHtml(data.businessName)}</strong>. This is your executive brief — not a marketing follow-up.</p>
+
+    <p style="margin:0 0 10px;font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#1B2B4D;">Executive Summary</p>
+    <p style="margin:0 0 22px;font-size:15px;color:#1A1A2E;line-height:1.7;">${escHtml(brief.executiveSummary)}</p>
+
+    <p style="margin:0 0 10px;font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#1B2B4D;">Top Findings</p>
+    <ul style="margin:0 0 22px;padding-left:20px;">${findingsHtml}</ul>
+
+    <p style="margin:0 0 10px;font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#1B2B4D;">Capacity &amp; Opportunity</p>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #E4E4E4;margin-bottom:22px;">
+      <tr><td style="padding:12px 16px;font-size:12px;font-weight:700;color:#555;">Capacity Score</td><td style="padding:12px 16px;font-size:14px;font-weight:700;color:#1B2B4D;">${data.capacityScore} / 100</td></tr>
+      <tr><td style="padding:12px 16px;font-size:12px;font-weight:700;color:#555;">Annual Opportunity</td><td style="padding:12px 16px;font-size:14px;font-weight:700;color:#1B2B4D;">${fmt(data.opportunityLow)}–${fmt(data.opportunityHigh)}</td></tr>
+      <tr><td style="padding:12px 16px;font-size:12px;font-weight:700;color:#555;">Weekly Capacity Loss</td><td style="padding:12px 16px;font-size:14px;font-weight:700;color:#1B2B4D;">${data.weeklyTimeRecovery} hours</td></tr>
+      <tr><td style="padding:12px 16px;font-size:12px;font-weight:700;color:#555;">Primary Constraint</td><td style="padding:12px 16px;font-size:14px;font-weight:700;color:#1B2B4D;">${escHtml(data.primaryConstraint)}</td></tr>
+    </table>
+
+    <p style="margin:0 0 10px;font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#1B2B4D;">Recommended Solution &amp; Scope</p>
+    <div style="background-color:#F8F6F2;border:1px solid #E4E4E4;padding:16px 18px;margin-bottom:12px;">
+      <p style="margin:0 0 6px;font-size:15px;font-weight:700;color:#1B2B4D;">${escHtml(data.projectTypeLabel)}</p>
+      <p style="margin:0 0 10px;font-size:13px;color:#555;">Primary track: <strong style="color:#1B2B4D;">${escHtml(brief.clientTypeLabel)}</strong></p>
+      <ul style="margin:0;padding-left:18px;">${scopeHtml}</ul>
+    </div>
+    <p style="margin:0 0 8px;font-size:14px;color:#1A1A2E;line-height:1.7;">${escHtml(brief.timelineLabel)}</p>
+    <p style="margin:0 0 8px;font-size:14px;color:#1A1A2E;line-height:1.7;">${escHtml(brief.investmentLabel)}</p>
+    <p style="margin:0 0 22px;font-size:14px;color:#1A1A2E;line-height:1.7;">${escHtml(brief.expectedRoiLabel)}</p>
+
+    ${portalBlock}
+
+    <p style="margin:0 0 10px;font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#1B2B4D;">Next Step</p>
+    <p style="margin:0 0 12px;font-size:14px;color:#1A1A2E;line-height:1.7;">Review your brief, then book an Executive Strategy Session when you are ready to decide direction with us.</p>
+    <p style="margin:0 0 22px;font-size:14px;"><a href="${escHtml(scheduleUrl)}" style="color:#1B2B4D;font-weight:700;text-decoration:underline;">Schedule Executive Strategy Session</a></p>
+    <p style="margin:0;font-size:13px;color:#555;line-height:1.7;">Questions? Reply to this email or reach us at <a href="mailto:${escHtml(supportEmail)}" style="color:#1B2B4D;text-decoration:underline;">${escHtml(supportEmail)}</a>.</p>`;
+
+  return resendEmail(
+    data.email,
+    `${firstName}, your executive brief for ${data.businessName} is ready.`,
+    baseEmailShell({
+      title: 'Executive Brief',
+      eyebrow: 'Consider The Possibilities™',
+      bodyHtml,
+      ctaLabel: primaryCtaLabel,
+      ctaUrl: primaryCtaUrl,
+    }),
+  );
+}
+
 export async function sendInternalNotification(data: {
   subject: string;
   title: string;
