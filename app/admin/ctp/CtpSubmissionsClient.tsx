@@ -177,6 +177,19 @@ export default function CtpSubmissionsClient({
                           <p className="mt-2 text-sm leading-6 text-neutral-700 whitespace-pre-wrap">
                             {submission.snapshotSummary}
                           </p>
+                          {submission.portalSlug ? (
+                            <p className="mt-2 text-sm">
+                              <a
+                                href={`/portal/${encodeURIComponent(submission.portalSlug)}/ctp/bi`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="font-bold underline"
+                                style={{ color: NAVY }}
+                              >
+                                Open client BI view
+                              </a>
+                            </p>
+                          ) : null}
                         </div>
                       ) : null}
                       {submission.digitalImpact ? (
