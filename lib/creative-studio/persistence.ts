@@ -36,13 +36,27 @@ const RECORD_TYPE_LABEL: Record<'campaign' | 'brand' | 'media' | 'experience', s
   experience: 'Experience',
 };
 
+export type SaveStudioRecordResult = {
+  ok: boolean;
+  /** True when Airtable is configured and the upsert succeeded. */
+  persistedToAirtable: boolean;
+  error?: string;
+};
+
+export function clearStudioMemoryKey(
+  recordType: 'campaign' | 'brand' | 'media' | 'experience',
+  id: string,
+): void {
+  studioMemory().delete(studioRecordKey(recordType, id));
+}
+
 export async function saveStudioRecord(input: {
   recordType: 'campaign' | 'brand' | 'media' | 'experience';
   id: string;
   organizationId: string;
   payload: unknown;
   title?: string;
-}): Promise<void> {
+}): Promise<SaveStudioRecordResult> {
   const key = studioRecordKey(input.recordType, input.id);
   const updatedAt = new Date().toISOString();
   const payload = JSON.stringify(input.payload);
@@ -53,10 +67,12 @@ export async function saveStudioRecord(input: {
     updatedAt,
   });
 
-  if (!airtableConfigured()) return;
+  if (!airtableConfigured()) {
+    return { ok: true, persistedToAirtable: false, error: 'Airtable not configured' };
+  }
 
   try {
-    await airtableUpsertByField(
+    const saved = await airtableUpsertByField(
       TABLE,
       'Record Key',
       key,
@@ -70,8 +86,34 @@ export async function saveStudioRecord(input: {
       },
       true,
     );
+    if (!saved) {
+      return { ok: false, persistedToAirtable: false, error: 'Airtable upsert returned empty' };
+    }
+    return { ok: true, persistedToAirtable: true };
   } catch (err) {
+    const message = err instanceof Error ? err.message : 'Airtable save failed';
     console.error('[creative-studio] Airtable save failed:', err);
+    return { ok: false, persistedToAirtable: false, error: message };
+  }
+}
+
+/** Load from Airtable only (skips memory cache). Used to verify durable writes. */
+export async function loadStudioRecordFromAirtable<T>(
+  recordType: 'campaign' | 'brand' | 'media' | 'experience',
+  id: string,
+): Promise<T | null> {
+  if (!airtableConfigured()) return null;
+
+  const key = studioRecordKey(recordType, id);
+  try {
+    const formula = `{Record Key}='${escapeAirtableString(key)}'`;
+    const records = await airtableQuery(TABLE, { filterByFormula: formula, maxRecords: 1 });
+    const raw = records[0]?.fields?.['Payload JSON'];
+    if (typeof raw !== 'string' || !raw.trim()) return null;
+    return JSON.parse(raw) as T;
+  } catch (err) {
+    console.error('[creative-studio] Airtable durable load failed:', err);
+    return null;
   }
 }
 
