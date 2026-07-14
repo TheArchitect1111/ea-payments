@@ -215,6 +215,15 @@ export default function CtpSubmissionsClient({
                               >
                                 Open documents
                               </a>
+                              <a
+                                href={`/portal/${encodeURIComponent(submission.portalSlug)}/ctp/support`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="font-bold underline"
+                                style={{ color: NAVY }}
+                              >
+                                Open support
+                              </a>
                             </p>
                           ) : null}
                         </div>
