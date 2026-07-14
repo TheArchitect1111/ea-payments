@@ -25,6 +25,7 @@ export type PortalConfig = {
 export type FulfillmentType =
   | 'landing-page'
   | 'client-portal'
+  | 'website-portal-auto'
   | 'connect-profile'
   | 'assessment'
   | 'blueprint'
@@ -38,6 +39,7 @@ export type CommerceOfferId =
   | 'connect_profile'
   | 'landing_page'
   | 'client_portal'
+  | 'website_portal_starter'
   | 'simplifi_early_access'
   | 'capacity_assessment'
   | 'capacity_blueprint'

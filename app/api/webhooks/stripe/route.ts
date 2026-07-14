@@ -29,6 +29,7 @@ import {
   resolveOrganizationIdForSubscription,
 } from '@/lib/subscription-sync';
 import { provisionConnectAfterCheckout } from '@/lib/connect-provision-hook';
+import { provisionWebsitePortalSite } from '@/lib/provision-website-portal';
 
 export const dynamic = 'force-dynamic';
 
@@ -196,6 +197,8 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
   let tempCredentials: string | undefined;
   let portalSlug: string | undefined;
   let portalLoginUrl: string = portalLoginFallback;
+  let siteUrl: string | undefined;
+  const isWebsitePortalAuto = fulfillment.fulfillmentType === 'website-portal-auto';
 
   if (portalConfig && airtableResult.recordId) {
 
@@ -233,16 +236,37 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
             });
             await ensurePackageEntitlements({
               orgId,
-              packagePurchased: packageName,
+              packagePurchased: offerId || packageName,
               slug: portalSlug,
             });
             await provisionConnectAfterCheckout({
               portalSlug,
               organizationName: clientName,
               ownerEmail: email,
-              packagePurchased: packageName,
+              packagePurchased: offerId || packageName,
               connectIndustry: typeof meta.connectIndustry === 'string' ? meta.connectIndustry : null,
             });
+
+            if (isWebsitePortalAuto) {
+              const siteResult = await provisionWebsitePortalSite({
+                portalSlug,
+                businessName: clientName,
+                organizationName: meta.organization || undefined,
+                tagline: typeof meta.tagline === 'string' ? meta.tagline : undefined,
+                industry: typeof meta.industry === 'string' ? meta.industry : undefined,
+                email,
+              });
+              if (siteResult.ok && siteResult.siteUrl) {
+                siteUrl = siteResult.siteUrl;
+              } else {
+                console.error(
+                  'Website provision failed for session',
+                  session.id,
+                  ':',
+                  siteResult.error,
+                );
+              }
+            }
           } catch (err) {
             console.error('Entitlement sync failed for session', session.id, ':', err);
           }
@@ -284,7 +308,11 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
       packageName: fulfillment.displayName,
       portalLoginUrl,
       tempCredentials,
-      nextSteps: fulfillment.clientExpectation,
+      nextSteps: siteUrl
+        ? `${fulfillment.clientExpectation} Your live website: ${siteUrl}`
+        : fulfillment.clientExpectation,
+      siteUrl,
+      readyNow: isWebsitePortalAuto && Boolean(siteUrl),
     });
     if (!welcomeResult.ok) {
       console.error('Welcome email failed for session', session.id, ':', welcomeResult.error);
@@ -366,6 +394,26 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
         email,
         packageId: fulfillment.packageId,
         fulfillmentType: fulfillment.fulfillmentType,
+      },
+    });
+  } else if (isWebsitePortalAuto) {
+    await emitPulseEvent({
+      product: 'ea-platform',
+      type: 'fulfillment.provisioned',
+      title: `Website + portal live — ${clientName}`,
+      detail: siteUrl
+        ? `Site ${siteUrl} · Portal ${portalLoginUrl}`
+        : `Portal ${portalLoginUrl} (site provision pending)`,
+      priority: 'high',
+      href: siteUrl || fulfillment.adminHref,
+      objectId: airtableResult.recordId,
+      metadata: {
+        stripeSessionId: session.id,
+        email,
+        packageId: fulfillment.packageId,
+        fulfillmentType: fulfillment.fulfillmentType,
+        portalSlug: portalSlug || '',
+        siteUrl: siteUrl || '',
       },
     });
   }

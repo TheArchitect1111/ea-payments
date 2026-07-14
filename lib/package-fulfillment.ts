@@ -87,6 +87,14 @@ export function buildPackageFulfillmentPlan(
           'Your portal workspace is being prepared. We will confirm users, resources, training needs, and communication flow before launch.',
         firstMilestone: 'Confirm portal users, resources, training, and update flow.',
       };
+    case 'website-portal-auto':
+      return {
+        ...base,
+        adminHref: '/admin/master',
+        clientExpectation:
+          'Your website and client portal are live. Open your site link and sign in to your portal with the credentials in this email.',
+        firstMilestone: 'Open your live website and complete first portal login.',
+      };
     case 'simplifi':
       return {
         ...base,

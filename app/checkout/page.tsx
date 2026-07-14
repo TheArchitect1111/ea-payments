@@ -35,6 +35,8 @@ export default function CheckoutPage() {
   const [phone, setPhone] = useState('');
   const [packageId, setPackageId] = useState('');
   const [referralSource, setReferralSource] = useState('');
+  const [tagline, setTagline] = useState('');
+  const [industry, setIndustry] = useState('');
   const [offers, setOffers] = useState<CheckoutOfferOption[]>([]);
   const [offersLoading, setOffersLoading] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -55,6 +57,7 @@ export default function CheckoutPage() {
 
   const selected = offers.find((o) => o.id === packageId);
   const isSubscription = selected?.kind === 'subscription';
+  const isWebsitePortalStarter = packageId === 'website_portal_starter';
   const showAchNote =
     selected && selected.kind === 'one_time' && selected.priceCents > 50000;
 
@@ -99,7 +102,17 @@ export default function CheckoutPage() {
     const endpoint = isSubscription ? '/api/checkout/subscription' : '/api/checkout';
     const body = isSubscription
       ? { name, organization, email, phone, planId: packageId, referralSource }
-      : { name, organization, email, phone, packageId, referralSource };
+      : {
+          name,
+          organization,
+          email,
+          phone,
+          packageId,
+          referralSource,
+          ...(isWebsitePortalStarter
+            ? { tagline: tagline.trim(), industry: industry.trim() }
+            : {}),
+        };
 
     try {
       const res = await fetch(endpoint, {
@@ -222,6 +235,11 @@ export default function CheckoutPage() {
                 </optgroup>
               )}
             </select>
+            {isWebsitePortalStarter ? (
+              <p className="mt-2 text-xs leading-5 text-neutral-500">
+                Instant delivery: your website and portal go live right after payment.
+              </p>
+            ) : null}
             {contactOnlyCount > 0 && (
               <p className="mt-2 text-xs leading-relaxed text-neutral-500">
                 Capacity and implementation packages are scoped after your assessment. Email{' '}
@@ -240,6 +258,35 @@ export default function CheckoutPage() {
               </p>
             )}
           </div>
+
+          {isWebsitePortalStarter ? (
+            <>
+              <div>
+                <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-neutral-700">
+                  Industry
+                </label>
+                <input
+                  type="text"
+                  className="w-full border border-neutral-300 bg-white px-4 py-3 text-sm outline-none focus:border-neutral-800 focus:ring-1 focus:ring-neutral-800"
+                  value={industry}
+                  onChange={(e) => setIndustry(e.target.value)}
+                  placeholder="e.g. Recruiting, coaching, consulting"
+                />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-neutral-700">
+                  Website tagline
+                </label>
+                <input
+                  type="text"
+                  className="w-full border border-neutral-300 bg-white px-4 py-3 text-sm outline-none focus:border-neutral-800 focus:ring-1 focus:ring-neutral-800"
+                  value={tagline}
+                  onChange={(e) => setTagline(e.target.value)}
+                  placeholder="One sentence visitors should understand immediately"
+                />
+              </div>
+            </>
+          ) : null}
 
           <div>
             <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-neutral-700">

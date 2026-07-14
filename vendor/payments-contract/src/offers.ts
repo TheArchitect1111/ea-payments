@@ -8,6 +8,7 @@ import {
   PLATFORM_MONTHLY_MODULES,
   SIMPLIFI_ONE_TIME_MODULES,
   SIMPLIFI_SUBSCRIPTION_MODULES,
+  WEBSITE_PORTAL_MODULES,
 } from './presets';
 
 const EA_PORTAL = {
@@ -87,6 +88,25 @@ export const COMMERCE_OFFERS: CommerceOffer[] = [
       'Provision a client portal foundation with resources, updates, training signals, and guided review before launch.',
     reviewRequired: true,
     intakePath: '/discover',
+  },
+  {
+    id: 'website_portal_starter',
+    kind: 'one_time',
+    name: 'Website + Portal Starter',
+    displayName: 'Website + Portal Starter',
+    description:
+      'Instant branded website and client portal on the EA hub — live after checkout with no human approval gate.',
+    stripePriceEnvKey: 'STRIPE_PRICE_WEBSITE_PORTAL_STARTER',
+    airtablePackageName: 'Implementation Package',
+    priceCents: 249700,
+    allowInlineStripePrice: true,
+    moduleIds: [...WEBSITE_PORTAL_MODULES],
+    portalConfig: EA_PORTAL,
+    fulfillmentType: 'website-portal-auto',
+    fulfillmentLabel:
+      'Auto-provision a public website and lean client portal on the EA hub immediately after payment.',
+    reviewRequired: false,
+    intakePath: '/buy',
   },
   {
     id: 'simplifi_early_access',

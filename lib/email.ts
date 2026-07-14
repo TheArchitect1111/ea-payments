@@ -12,6 +12,9 @@ export interface WelcomeEmailData {
   tempCredentials?: string;
   platformName?: string;
   nextSteps?: string;
+  siteUrl?: string;
+  /** When true, copy reflects immediate auto-provision (website + portal). */
+  readyNow?: boolean;
 }
 
 export interface AdminNotificationData {
@@ -280,6 +283,42 @@ export async function sendWelcomeEmail(
   const nextSteps =
     data.nextSteps ??
     nextStepsForPackage(data.packageName);
+
+  if (data.readyNow) {
+    const siteBlock = data.siteUrl
+      ? `<div style="background-color:#F8F6F2;border-left:4px solid #C9A844;padding:18px 20px;margin-bottom:22px;">
+      <p style="margin:0 0 8px;font-size:12px;font-weight:700;color:#1B2B4D;">Your Live Website</p>
+      <p style="margin:0;font-size:13px;color:#555;line-height:1.7;"><a href="${escHtml(data.siteUrl)}" style="color:#1B2B4D;text-decoration:underline;">${escHtml(data.siteUrl)}</a></p>
+    </div>`
+      : '';
+    const bodyHtml = `
+    <p style="margin:0 0 16px;font-size:15px;color:#1A1A2E;line-height:1.7;">You are live, ${escHtml(firstName)}.</p>
+    <p style="margin:0 0 22px;font-size:15px;color:#1A1A2E;line-height:1.7;">Your <strong>${escHtml(data.packageName)}</strong> website and client portal are ready now — no waiting for a build queue.</p>
+    ${siteBlock}
+    <div style="background-color:#F8F6F2;border-left:4px solid #C9A844;padding:18px 20px;margin-bottom:22px;">
+      <p style="margin:0 0 8px;font-size:12px;font-weight:700;color:#1B2B4D;">What To Do Next</p>
+      <p style="margin:0;font-size:13px;color:#555;line-height:1.7;">${escHtml(nextSteps)}</p>
+    </div>
+    <div style="background-color:#F8F6F2;border-left:4px solid #C9A844;padding:18px 20px;">
+      <p style="margin:0 0 8px;font-size:12px;font-weight:700;color:#1B2B4D;">Portal Access</p>
+      <p style="margin:0;font-size:13px;color:#555;line-height:1.7;">${escHtml(tempCredentials)}</p>
+      <p style="margin:10px 0 0;font-size:12px;color:#777;">This is a temporary password. You will be prompted to create a new one on your first login.</p>
+    </div>
+    <p style="margin:22px 0 0;font-size:13px;color:#555;line-height:1.7;">Questions? Reply to this email or reach us at <a href="mailto:${escHtml(supportEmail)}" style="color:#1B2B4D;text-decoration:underline;">${escHtml(supportEmail)}</a>.</p>`;
+
+    return resendEmail(
+      data.email,
+      `You are live, ${firstName}. Your website and portal are ready.`,
+      baseEmailShell({
+        title: 'You Are Live',
+        eyebrow: platformName,
+        bodyHtml,
+        ctaLabel: data.siteUrl ? 'Open My Website' : 'Access My Portal',
+        ctaUrl: data.siteUrl || data.portalLoginUrl,
+      }),
+    );
+  }
+
   const bodyHtml = `
     <p style="margin:0 0 16px;font-size:15px;color:#1A1A2E;line-height:1.7;">You are in, ${escHtml(firstName)}. We are excited to begin this work with you.</p>
     <p style="margin:0 0 22px;font-size:15px;color:#1A1A2E;line-height:1.7;">A reminder of what you are getting: <strong>${escHtml(data.packageName)}</strong>, guided project support, launch visibility, and access to your client portal.</p>
