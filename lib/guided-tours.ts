@@ -14,54 +14,43 @@ export interface GuidedTour {
 
 export const MISSION_CONTROL_TOUR: GuidedTour = {
   id: 'mission-control-v1',
-  name: 'Mission Control Orientation',
+  name: 'Morning Brief Orientation',
   steps: [
     {
       id: 'welcome',
-      title: 'Welcome to Mission Control™',
-      body: 'Everything in one place — revenue, pipeline, captures, and intelligence. This tour takes about 2 minutes.',
+      title: 'Welcome to the Morning Brief',
+      body: 'This home surface answers four questions: What happened? What matters? What needs me? What should I do next? Everything else lives in a certified workspace.',
+      href: '/admin/master',
+    },
+    {
+      id: 'next-move',
+      title: 'One recommended next move',
+      body: 'Start with the hero action. It is the single highest-priority executive move for today.',
+      href: '/admin/master#next-move',
     },
     {
       id: 'navigator',
       title: 'EA Navigator',
-      body: 'Click EA Navigator anytime to answer: "What am I trying to accomplish?" — it routes you to the right product surface.',
+      body: 'Click EA Navigator anytime to answer: "What am I trying to accomplish?" — it routes you to the right workspace.',
       target: 'ea-navigator-btn',
     },
     {
       id: 'command',
       title: 'Universal Command Bar',
-      body: 'Press ⌘K (or Ctrl+K) to search commands, quick-capture opportunities, or analyze any URL.',
+      body: 'Press ⌘K (or Ctrl+K) to search commands and jump to Decisions, Organizations, Operations, Factory, or Search.',
       target: 'ea-command-bar',
     },
     {
-      id: 'radar',
-      title: 'Resource Radar™',
-      body: 'Paste any URL — classify, score, recommend, and generate Auto Blueprint stubs with Trust Layer confidence.',
-      href: '/admin/resource-radar',
+      id: 'decisions',
+      title: 'Decision Intelligence',
+      body: 'When the brief is not enough, open Decisions for the full evidenced queue — Immediate, Today, This Week, and Strategic.',
+      href: '/admin/decisions',
     },
     {
-      id: 'simplifi',
-      title: 'Simplifi Website Audit',
-      body: 'Run Playwright pipeline audits that produce clarity — not reports. Top 3 priorities, not twenty recommendations.',
-      href: '/admin/simplifi-audit',
-    },
-    {
-      id: 'academy',
-      title: 'Learn EA Academy',
-      body: 'Role-based learning modules for Magnifi, Simplifi, Capture Engine, and adoption.',
-      href: '/admin/academy',
-    },
-    {
-      id: 'intelligence',
-      title: 'Wave 5 Intelligence',
-      body: 'Knowledge Graph connects organizational memory. Digital Twin mirrors platform health. EA Voice navigates by speech or text.',
-      href: '/admin/knowledge-graph',
-    },
-    {
-      id: 'marketplace',
-      title: 'Partner Marketplace',
-      body: 'Referral programs, satellite hubs (CPR, BrotherHub), and co-sell packages.',
-      href: '/admin/partner-marketplace',
+      id: 'factory',
+      title: 'Executive Factory',
+      body: 'Start something new here — diagnose, sell, build, launch, operate, or grow. Creation no longer lives on the Morning Brief.',
+      href: '/admin/factory',
     },
   ],
 };
@@ -83,7 +72,7 @@ export const ACADEMY_ONBOARDING_TOUR: GuidedTour = {
     {
       id: 'capture',
       title: 'Capture Engine',
-      body: 'Extension + Resource Radar turn any URL into structured intelligence in Mission Control.',
+      body: 'Extension + Resource Radar turn any URL into structured intelligence for follow-up in the right workspace.',
     },
   ],
 };

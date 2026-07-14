@@ -12,7 +12,11 @@ import { buildPackageFulfillmentPlan } from '@/lib/package-fulfillment';
 import { resolveCheckoutOffer } from '@/lib/platform/payments-bridge';
 import { ensureOrganizationForPortal } from '@/lib/organizations';
 import { ensurePackageEntitlements } from '@/lib/modules/portal-modules';
-import { sendWelcomeEmail, sendAdminNotification } from '@/lib/email';
+import {
+  sendWelcomeEmail,
+  sendAdminNotification,
+  sendPaymentConfirmationEmail,
+} from '@/lib/email';
 import { createPortalAccess } from '@/lib/portal-access';
 import { createOpportunityRecord } from '@/lib/partner-network';
 import { fireOnboardingWebhook } from '@/lib/make-webhooks';
@@ -47,6 +51,103 @@ const VALID_PACKAGES: AirtablePackage[] = [
   'Simplifi',
   'Launch Verification',
 ];
+
+async function sendPaymentConfirmationSafely(input: {
+  email: string;
+  clientName: string;
+  packageName: string;
+  amountPaid: number;
+  paymentDate: string;
+  portalUrl: string;
+  stripeTransactionId: string;
+  context: string;
+}): Promise<void> {
+  try {
+    const paymentResult = await sendPaymentConfirmationEmail({
+      email: input.email,
+      clientName: input.clientName,
+      packageName: input.packageName,
+      amountPaid: input.amountPaid,
+      paymentDate: input.paymentDate,
+      portalUrl: input.portalUrl,
+      stripeTransactionId: input.stripeTransactionId,
+    });
+    if (!paymentResult.ok) {
+      console.error(`${input.context}: payment confirmation failed:`, paymentResult.error);
+      return;
+    }
+    await emitPulseEvent({
+      product: 'ea-platform',
+      type: 'payment.confirmation_sent',
+      title: `Payment confirmation sent - ${input.clientName}`,
+      detail: `${input.packageName} - ${input.email}`,
+      priority: 'medium',
+      href: input.portalUrl,
+      metadata: {
+        email: input.email,
+        packageName: input.packageName,
+        stripeTransactionId: input.stripeTransactionId,
+      },
+    });
+  } catch (err) {
+    console.error(`${input.context}: payment confirmation threw:`, err);
+  }
+}
+
+async function emitPortalProvisioned(input: {
+  clientName: string;
+  email: string;
+  packageName: string;
+  portalSlug?: string;
+  portalLoginUrl: string;
+  clientRecordId?: string;
+  stripeSessionId: string;
+}): Promise<void> {
+  if (!input.portalSlug && !input.clientRecordId) return;
+  await emitPulseEvent({
+    product: 'ea-platform',
+    type: 'portal.provisioned',
+    title: `Portal provisioned - ${input.clientName}`,
+    detail: input.portalSlug
+      ? `${input.portalSlug} - ${input.packageName}`
+      : input.packageName,
+    priority: 'high',
+    href: input.portalLoginUrl,
+    tenantId: input.portalSlug,
+    objectId: input.clientRecordId,
+    metadata: {
+      email: input.email,
+      packageName: input.packageName,
+      stripeSessionId: input.stripeSessionId,
+    },
+  });
+}
+
+async function emitOnboardingStarted(input: {
+  clientName: string;
+  email: string;
+  packageName: string;
+  portalSlug?: string;
+  portalLoginUrl: string;
+  clientRecordId?: string;
+  stripeSessionId: string;
+}): Promise<void> {
+  await emitPulseEvent({
+    product: 'ea-platform',
+    type: 'onboarding.started',
+    title: `Onboarding started - ${input.clientName}`,
+    detail: `${input.packageName} - customer success workflow active`,
+    priority: 'high',
+    href: input.portalLoginUrl,
+    tenantId: input.portalSlug,
+    objectId: input.clientRecordId,
+    metadata: {
+      email: input.email,
+      packageName: input.packageName,
+      stripeSessionId: input.stripeSessionId,
+    },
+  });
+}
 
 export async function POST(req: NextRequest) {
   const body = await req.text();
@@ -367,6 +468,27 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
     console.error('Admin notification threw for session', session.id, ':', err);
   }
 
+  await sendPaymentConfirmationSafely({
+    email,
+    clientName,
+    packageName,
+    amountPaid,
+    paymentDate,
+    portalUrl: portalLoginUrl,
+    stripeTransactionId,
+    context: `checkout session ${session.id}`,
+  });
+
+  await emitPortalProvisioned({
+    clientName,
+    email,
+    packageName,
+    portalSlug,
+    portalLoginUrl,
+    clientRecordId: airtableResult.recordId,
+    stripeSessionId: session.id,
+  });
+
   await fireOnboardingWebhook({
     event: 'payment.received',
     clientName,
@@ -388,6 +510,16 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
     portalSlug,
     portalLoginUrl,
     siteUrl,
+  });
+
+  await emitOnboardingStarted({
+    clientName,
+    email,
+    packageName,
+    portalSlug,
+    portalLoginUrl,
+    clientRecordId: airtableResult.recordId,
+    stripeSessionId: session.id,
   });
 
   await emitPulseEvent({
@@ -638,6 +770,27 @@ async function handleSubscriptionCheckoutCompleted(
     console.error('Subscription checkout: admin notification failed', session.id, err);
   }
 
+  await sendPaymentConfirmationSafely({
+    email,
+    clientName,
+    packageName: plan.displayName,
+    amountPaid,
+    paymentDate,
+    portalUrl: portalLoginUrl,
+    stripeTransactionId: stripeSubscriptionId || session.id,
+    context: `subscription checkout ${session.id}`,
+  });
+
+  await emitPortalProvisioned({
+    clientName,
+    email,
+    packageName: plan.displayName,
+    portalSlug,
+    portalLoginUrl,
+    clientRecordId: airtableResult.recordId,
+    stripeSessionId: session.id,
+  });
+
   await fireOnboardingWebhook({
     event: 'payment.received',
     clientName,
@@ -650,6 +803,16 @@ async function handleSubscriptionCheckoutCompleted(
     airtableRecordId: airtableResult.recordId,
     portalSlug,
     portalLoginUrl,
+  });
+
+  await emitOnboardingStarted({
+    clientName,
+    email,
+    packageName: plan.displayName,
+    portalSlug,
+    portalLoginUrl,
+    clientRecordId: airtableResult.recordId,
+    stripeSessionId: session.id,
   });
 
   await emitPulseEvent({
@@ -869,6 +1032,27 @@ async function handleProposalPayment(
     console.error(`handleProposalPayment [${proposalId}]: sendWelcomeEmail threw:`, err);
   }
 
+  await sendPaymentConfirmationSafely({
+    email,
+    clientName,
+    packageName: packageLabel,
+    amountPaid,
+    paymentDate,
+    portalUrl: portalLoginUrl,
+    stripeTransactionId,
+    context: `proposal payment ${proposalId}`,
+  });
+
+  await emitPortalProvisioned({
+    clientName,
+    email,
+    packageName: packageLabel,
+    portalSlug,
+    portalLoginUrl,
+    clientRecordId: airtableResult.recordId,
+    stripeSessionId: session.id,
+  });
+
   await fireOnboardingWebhook({
     event: 'payment.received',
     clientName,
@@ -881,6 +1065,16 @@ async function handleProposalPayment(
     airtableRecordId: airtableResult.recordId,
     portalSlug,
     portalLoginUrl,
+  });
+
+  await emitOnboardingStarted({
+    clientName,
+    email,
+    packageName: packageLabel,
+    portalSlug,
+    portalLoginUrl,
+    clientRecordId: airtableResult.recordId,
+    stripeSessionId: session.id,
   });
 
   await emitPulseEvent({

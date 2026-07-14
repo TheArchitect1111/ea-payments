@@ -1,9 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-import { verifyAdminSession, EA_ADMIN_COOKIE } from '@/lib/ea-admin-auth';
 import { updateProposal, getProposalByRecordId, getClientByEmail, updateClientLifecycleByEmail } from '@/lib/airtable';
-import { sendInternalNotification, sendProposalEmail, sendRevealEmail } from '@/lib/email';
+import {
+  sendDiscoveryCallEmail,
+  sendInternalNotification,
+  sendProposalEmail,
+  sendRevealEmail,
+} from '@/lib/email';
 import { lifecycleForDiscoveryScheduled } from '@/lib/client-lifecycle';
+import { emitPulseEvent } from '@/lib/pulse-bus';
+import {
+  adminAuthJsonError,
+  requireAdminActionFromRequest,
+} from '@/lib/platform-authorization';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,16 +33,45 @@ const VALID_ACTIONS: ProposalAction[] = [
   'send_reveal',
 ];
 
+async function emitProposalWorkflowEvent(input: {
+  type:
+    | 'proposal.approved'
+    | 'proposal.rejected'
+    | 'proposal.discovery_requested'
+    | 'proposal.completed'
+    | 'proposal.reveal_sent';
+  title: string;
+  proposalRecordId: string;
+  email?: string;
+  businessName?: string;
+  priority?: 'critical' | 'high' | 'medium' | 'low';
+}): Promise<void> {
+  try {
+    await emitPulseEvent({
+      product: 'ea-platform',
+      type: input.type,
+      title: input.title,
+      detail: input.businessName ?? input.email ?? input.proposalRecordId,
+      priority: input.priority ?? 'high',
+      href: '/admin/proposals',
+      objectId: input.proposalRecordId,
+      metadata: {
+        proposalRecordId: input.proposalRecordId,
+        email: input.email ?? '',
+        businessName: input.businessName ?? '',
+      },
+    });
+  } catch (err) {
+    console.error('Proposal workflow Pulse event failed:', err);
+  }
+}
+
 export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ): Promise<Response> {
-  const cookieStore = await cookies();
-  const token = cookieStore.get(EA_ADMIN_COOKIE)?.value;
-
-  if (!verifyAdminSession(token)) {
-    return NextResponse.json({ error: 'Unauthorized.' }, { status: 401 });
-  }
+  const auth = await requireAdminActionFromRequest(req, 'admin:manage');
+  if (!auth.ok) return adminAuthJsonError(auth);
 
   const { id } = await params;
   if (!id) {
@@ -108,7 +145,26 @@ export async function PATCH(
       const proposal = await getProposalByRecordId(id);
       if (proposal?.email) {
         await updateClientLifecycleByEmail(proposal.email, lifecycleForDiscoveryScheduled());
+        const schedulingUrl =
+          process.env.DISCOVERY_CALL_URL ??
+          `${process.env.NEXT_PUBLIC_BASE_URL ?? 'https://ea-payments.vercel.app'}/contact`;
+        const emailResult = await sendDiscoveryCallEmail({
+          email: proposal.email,
+          clientName: proposal.contactName || proposal.businessName || 'there',
+          schedulingUrl,
+        });
+        if (!emailResult.ok) {
+          console.error('sendDiscoveryCallEmail failed:', emailResult.error);
+        }
       }
+      await emitProposalWorkflowEvent({
+        type: 'proposal.discovery_requested',
+        title: `Discovery requested - ${proposal?.businessName ?? id}`,
+        proposalRecordId: id,
+        email: proposal?.email,
+        businessName: proposal?.businessName,
+        priority: 'high',
+      });
     } catch (err) {
       console.error('Discovery lifecycle update failed:', err);
     }
@@ -126,6 +182,14 @@ export async function PATCH(
           emailWarning = emailResult.error;
           console.error('sendProposalEmail failed:', emailWarning);
         }
+        await emitProposalWorkflowEvent({
+          type: 'proposal.approved',
+          title: `Proposal approved - ${fullProposal.businessName}`,
+          proposalRecordId: id,
+          email: fullProposal.email,
+          businessName: fullProposal.businessName,
+          priority: 'high',
+        });
       } else {
         emailWarning = 'Proposal approved but could not be fetched for email delivery.';
         console.error(emailWarning);
@@ -143,6 +207,14 @@ export async function PATCH(
       subject: `Project complete for ${proposal?.businessName ?? id}`,
       title: 'Project Complete',
       body: `Project complete for ${proposal?.contactName ?? 'client'}. Review and approve the reveal email before it sends.`,
+    });
+    await emitProposalWorkflowEvent({
+      type: 'proposal.completed',
+      title: `Project complete - ${proposal?.businessName ?? id}`,
+      proposalRecordId: id,
+      email: proposal?.email,
+      businessName: proposal?.businessName,
+      priority: 'medium',
     });
     return NextResponse.json({ ok: true });
   }
@@ -169,7 +241,27 @@ export async function PATCH(
       systemsAutomated: 1,
       revealUrl: `${baseUrl}/reveal/${slug}`,
     });
+    await emitProposalWorkflowEvent({
+      type: 'proposal.reveal_sent',
+      title: `Reveal sent - ${proposal.businessName}`,
+      proposalRecordId: id,
+      email: proposal.email,
+      businessName: proposal.businessName,
+      priority: 'medium',
+    });
     return NextResponse.json({ ok: true });
+  }
+
+  if (body.action === 'reject') {
+    const proposal = await getProposalByRecordId(id);
+    await emitProposalWorkflowEvent({
+      type: 'proposal.rejected',
+      title: `Proposal rejected - ${proposal?.businessName ?? id}`,
+      proposalRecordId: id,
+      email: proposal?.email,
+      businessName: proposal?.businessName,
+      priority: 'medium',
+    });
   }
 
   return NextResponse.json({ ok: true });

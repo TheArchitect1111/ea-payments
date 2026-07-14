@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { transitionEACPLaunchLifecycle, type EACPLifecycleAction } from '@/lib/eacp-launch';
 import { EACPPersistenceConfigurationError, EACPStoreConflictError } from '@/lib/eacp-store';
+import {
+  adminAuthJsonError,
+  requireAdminActionFromRequest,
+} from '@/lib/admin-session-guard';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -12,6 +16,9 @@ type PageProps = {
 };
 
 export async function POST(request: NextRequest, { params }: PageProps) {
+  const auth = await requireAdminActionFromRequest(request, 'admin:manage');
+  if (!auth.ok) return adminAuthJsonError(auth);
+
   const { id } = await params;
   const body = await request.json().catch(() => null) as {
     action?: EACPLifecycleAction;
