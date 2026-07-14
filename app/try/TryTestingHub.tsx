@@ -1,8 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import DemoPasswordLogin from '@/components/auth/DemoPasswordLogin';
+import RealmLoginCard from '@/components/auth/RealmLoginCard';
 import '../portal/login/portal-login.css';
 
 type TestLink = {
@@ -40,7 +39,6 @@ type Props = {
 };
 
 export default function TryTestingHub({ initialSlug, initialEmail }: Props) {
-  const router = useRouter();
   const signedIn = Boolean(initialSlug);
   const links = signedIn ? buildTestLinks(initialSlug!) : GUEST_LINKS;
 
@@ -50,7 +48,7 @@ export default function TryTestingHub({ initialSlug, initialEmail }: Props) {
         <p className="text-xs font-bold uppercase tracking-[0.3em] text-[#C9A844]">Tester kit</p>
         <h1 className="mt-4 text-3xl font-black">Try every page — one login</h1>
         <p className="mt-3 text-neutral-300 leading-relaxed">
-          Sign in once with the demo account below. Your session works on{' '}
+          Sign in once with an email login link. Your session works on{' '}
           <strong className="text-white">every</strong> Simplifi and portal page — capture, workspace, Pulse,
           Amplifi, and more.
         </p>
@@ -74,12 +72,7 @@ export default function TryTestingHub({ initialSlug, initialEmail }: Props) {
         ) : (
           <section className="mt-8 pl-page" style={{ minHeight: 'auto', padding: 0, background: 'transparent' }}>
             <div className="pl-shell" style={{ maxWidth: '100%' }}>
-              <div className="pl-card">
-                <DemoPasswordLogin
-                  next="/try"
-                  onSuccess={() => router.refresh()}
-                />
-              </div>
+              <RealmLoginCard realm="portal" next="/try" showTitle={false} />
             </div>
           </section>
         )}
@@ -100,24 +93,12 @@ export default function TryTestingHub({ initialSlug, initialEmail }: Props) {
           ))}
         </section>
 
-        <section className="mt-10 border border-white/15 p-5 rounded-lg">
-          <p className="text-sm font-bold text-[#C9A844]">Send to testers</p>
-          <pre className="mt-3 text-xs text-neutral-300 whitespace-pre-wrap leading-relaxed">{`Open: https://ea-payments.vercel.app/try
-
-1. Click "Sign in with demo account"
-2. Open any page from the list — stay signed in everywhere
-3. Use the gold orb (bottom-right) to jump between Capture, Workspace, Pulse, etc.
-4. Connect: portal kit for QRs + public /connect/demo-client for capture testing`}</pre>
-        </section>
-
-        {!signedIn ? (
-          <p className="mt-6 text-sm text-neutral-500">
-            Already have your own account?{' '}
-            <Link href="/simplifi/login?next=/try" className="text-[#C9A844] underline">
-              Magic-link sign in
-            </Link>
-          </p>
-        ) : null}
+        <p className="mt-10 text-center text-xs text-neutral-500">
+          Prefer the full client portal?{' '}
+          <Link href="/portal/login" className="text-[#C9A844] underline">
+            Portal sign in
+          </Link>
+        </p>
       </div>
     </main>
   );

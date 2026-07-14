@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { exchangeMagicLinkToken, type MagicLinkExchangeError } from '@/lib/auth';
+import { authSiteOrigin } from '@/lib/auth/site-origin';
 import type { MagicLinkRealm } from '@/lib/magic-link';
 
 export const dynamic = 'force-dynamic';
@@ -20,7 +21,8 @@ function redirectError(error: MagicLinkExchangeError): string {
 
 export async function GET(req: NextRequest) {
   const token = req.nextUrl.searchParams.get('token') || '';
-  const origin = req.nextUrl.origin;
+  // Land on the stable hub origin — never the vanity portal host after verify.
+  const origin = authSiteOrigin(req);
 
   const result = await exchangeMagicLinkToken(token);
 

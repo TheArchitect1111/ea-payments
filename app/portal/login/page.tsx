@@ -23,15 +23,7 @@ function PortalLoginInner() {
   const nextPath = safeNextPath(searchParams.get('next'));
   const error = magicLinkErrorMessage('portal', searchParams.get('error'));
 
-  return (
-    <RealmLoginCard
-      realm="portal"
-      next={nextPath}
-      error={error}
-      showTitle={false}
-      demoFallback="ctp"
-    />
-  );
+  return <RealmLoginCard realm="portal" next={nextPath} error={error} showTitle={false} />;
 }
 
 export default function PortalLoginPage() {
