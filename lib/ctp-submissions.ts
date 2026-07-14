@@ -37,6 +37,21 @@ export type CtpIntakeAnalysisRecord = {
   requestId: string;
 };
 
+/** Persisted fields for deferred CTP executive email (portal tracks). */
+export type CtpExecutiveEmailDraft = {
+  clientType: CtpClientType;
+  capacityScore: number;
+  scoreBand: string;
+  primaryConstraint: string;
+  weeklyTimeRecovery: number;
+  opportunityLow: number;
+  opportunityHigh: number;
+  projectTypeLabel: string;
+  recommendedFee: number;
+  recommendations?: unknown;
+  operationalChallenges?: string[];
+};
+
 export type CtpSubmission = {
   id: string;
   businessName: string;
