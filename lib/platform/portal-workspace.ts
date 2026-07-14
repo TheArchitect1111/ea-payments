@@ -142,55 +142,66 @@ function chromeFromShell(
 export async function resolvePortalWorkspaceChrome(
   slug: string,
 ): Promise<PortalWorkspaceChrome> {
-  const cookieStore = await cookies();
-  const token = cookieStore.get(EA_PORTAL_COOKIE)?.value;
-  const session = token ? await verifySession(token) : null;
-  if (!session || session.slug !== slug) {
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get(EA_PORTAL_COOKIE)?.value;
+    const session = token ? await verifySession(token) : null;
+    if (!session || session.slug !== slug) {
+      return { ...EA_DEFAULT_CHROME, shellNavGroups: [] };
+    }
+
+    const client = await getClientByPortalSlug(slug);
+    if (!client) {
+      return { ...EA_DEFAULT_CHROME, shellNavGroups: [] };
+    }
+
+    const access = await resolvePortalModuleAccess({
+      orgId: session.orgId,
+      slug,
+      packagePurchased: client.packagePurchased,
+      commerceOfferId: client.commerceOfferId,
+      role: session.role,
+    });
+
+    const filtered = await applyCtpPortalModuleFilter(access, {
+      portalSlug: slug,
+      email: session.email ?? client.email,
+    });
+
+    const shellNavGroups = toPortalSidebarNavGroups(filtered.shellNavGroups);
+    const orgId = session.orgId ?? access.orgId;
+
+    let organization: Organization | null = null;
+    try {
+      if (orgId && !orgId.startsWith('org_')) {
+        organization = await getOrganizationById(orgId);
+      }
+      if (!organization) {
+        organization = await findOrganizationByPortalSlug(slug);
+      }
+    } catch (err) {
+      // Never 500 the portal shell over org/Airtable chrome lookup.
+      console.error('resolvePortalWorkspaceChrome org lookup failed:', err);
+      organization = null;
+    }
+
+    const overrides = resolveWorkspaceConfigFromOrg(organization, slug, orgId);
+    const shell = resolveWorkspaceShellForPortal({
+      slug,
+      orgId,
+      enabledModuleIds: access.enabledModuleIds,
+      organization,
+      platformClientId: overrides.platformClientId,
+      themeId: overrides.themeId,
+      personalityId: overrides.personalityId,
+      workspaceName: overrides.workspaceName,
+      brandName: overrides.brandName,
+      themeOverlay: overrides.themeOverlay,
+    });
+
+    return chromeFromShell(overrides.platformClientId, shell, shellNavGroups);
+  } catch (err) {
+    console.error('resolvePortalWorkspaceChrome failed:', err);
     return { ...EA_DEFAULT_CHROME, shellNavGroups: [] };
   }
-
-  const client = await getClientByPortalSlug(slug);
-  if (!client) {
-    return { ...EA_DEFAULT_CHROME, shellNavGroups: [] };
-  }
-
-  const access = await resolvePortalModuleAccess({
-    orgId: session.orgId,
-    slug,
-    packagePurchased: client.packagePurchased,
-    commerceOfferId: client.commerceOfferId,
-    role: session.role,
-  });
-
-  const filtered = await applyCtpPortalModuleFilter(access, {
-    portalSlug: slug,
-    email: session.email ?? client.email,
-  });
-
-  const shellNavGroups = toPortalSidebarNavGroups(filtered.shellNavGroups);
-  const orgId = session.orgId ?? access.orgId;
-
-  let organization: Organization | null = null;
-  if (orgId && !orgId.startsWith('org_')) {
-    organization = await getOrganizationById(orgId);
-  }
-  if (!organization) {
-    organization = await findOrganizationByPortalSlug(slug);
-  }
-
-  const overrides = resolveWorkspaceConfigFromOrg(organization, slug, orgId);
-  const shell = resolveWorkspaceShellForPortal({
-    slug,
-    orgId,
-    enabledModuleIds: access.enabledModuleIds,
-    organization,
-    platformClientId: overrides.platformClientId,
-    themeId: overrides.themeId,
-    personalityId: overrides.personalityId,
-    workspaceName: overrides.workspaceName,
-    brandName: overrides.brandName,
-    themeOverlay: overrides.themeOverlay,
-  });
-
-  return chromeFromShell(overrides.platformClientId, shell, shellNavGroups);
 }

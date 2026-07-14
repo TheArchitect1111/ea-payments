@@ -95,12 +95,33 @@ export async function findOrganizationByPortalSlug(
   if (!platformStoreConfigured()) return null;
 
   const safe = escapeAirtableString(portalSlug);
-  const records = await platformQuery(
-    ORGANIZATIONS_TABLE,
-    `OR(LOWER({Portal Slug})='${safe}', LOWER({Slug})='${safe}')`,
-    1,
-  );
-  return records[0] ? mapOrganization(records[0]) : null;
+
+  // Query Slug first — production Organizations may not have Portal Slug yet.
+  // Airtable rejects the whole formula if any referenced field is missing.
+  try {
+    const bySlug = await platformQuery(
+      ORGANIZATIONS_TABLE,
+      `LOWER({Slug})='${safe}'`,
+      1,
+    );
+    if (bySlug[0]) return mapOrganization(bySlug[0]);
+  } catch (err) {
+    console.error('findOrganizationByPortalSlug (Slug) failed:', err);
+    return null;
+  }
+
+  try {
+    const byPortal = await platformQuery(
+      ORGANIZATIONS_TABLE,
+      `LOWER({Portal Slug})='${safe}'`,
+      1,
+    );
+    return byPortal[0] ? mapOrganization(byPortal[0]) : null;
+  } catch (err) {
+    // Unknown field Portal Slug — treat as no match.
+    console.error('findOrganizationByPortalSlug (Portal Slug) failed:', err);
+    return null;
+  }
 }
 
 export async function createOrganization(input: {
@@ -113,17 +134,27 @@ export async function createOrganization(input: {
 }): Promise<Organization | null> {
   if (!platformStoreConfigured()) return null;
 
-  const record = await platformCreate(ORGANIZATIONS_TABLE, {
+  const baseFields: Record<string, string> = {
     Name: input.name,
     Slug: input.slug,
-    'Portal Slug': input.portalSlug,
     Status: 'Active',
     ...(input.clientRecordId ? { 'Client Record Id': input.clientRecordId } : {}),
     ...(input.mission ? { Mission: input.mission } : {}),
     ...(input.industry ? { Industry: input.industry } : {}),
-  });
+  };
 
-  return record ? mapOrganization(record) : null;
+  try {
+    const record = await platformCreate(ORGANIZATIONS_TABLE, {
+      ...baseFields,
+      'Portal Slug': input.portalSlug,
+    });
+    return record ? mapOrganization(record) : null;
+  } catch (err) {
+    // Older bases without Portal Slug still work via Slug alone.
+    console.error('createOrganization with Portal Slug failed, retrying without:', err);
+    const record = await platformCreate(ORGANIZATIONS_TABLE, baseFields);
+    return record ? mapOrganization(record) : null;
+  }
 }
 
 export async function ensureOrganizationForPortal(input: {
