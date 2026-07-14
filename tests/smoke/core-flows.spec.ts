@@ -92,7 +92,16 @@ test('checkout lists purchasable packages only', async ({ page }) => {
   await page.goto('/checkout');
   const options = page.locator('select option');
   await expect(options.filter({ hasText: /Simplifi Early Access/i })).toHaveCount(1);
+  await expect(options.filter({ hasText: /Website \+ Portal Starter/i })).toHaveCount(1);
   await expect(options.filter({ hasText: /Capacity Assessment/i })).toHaveCount(0);
+});
+
+test('buy path preselects Website + Portal Starter', async ({ page }) => {
+  await page.goto('/buy');
+  await expect(page).toHaveURL(/\/checkout\?package=website_portal_starter/);
+  const select = page.locator('select');
+  await expect(select).toHaveValue('website_portal_starter', { timeout: 15_000 });
+  await expect(page.getByText(/instant delivery/i)).toBeVisible();
 });
 
 test('assessment thank-you contact link works', async ({ page }) => {

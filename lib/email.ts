@@ -13,6 +13,8 @@ export interface WelcomeEmailData {
   platformName?: string;
   nextSteps?: string;
   siteUrl?: string;
+  /** One-click portal login (longer TTL when issued from purchase webhook). */
+  magicLoginUrl?: string;
   /** When true, copy reflects immediate auto-provision (website + portal). */
   readyNow?: boolean;
 }
@@ -291,20 +293,35 @@ export async function sendWelcomeEmail(
       <p style="margin:0;font-size:13px;color:#555;line-height:1.7;"><a href="${escHtml(data.siteUrl)}" style="color:#1B2B4D;text-decoration:underline;">${escHtml(data.siteUrl)}</a></p>
     </div>`
       : '';
+    const magicBlock = data.magicLoginUrl
+      ? `<div style="background-color:#F8F6F2;border-left:4px solid #C9A844;padding:18px 20px;margin-bottom:22px;">
+      <p style="margin:0 0 8px;font-size:12px;font-weight:700;color:#1B2B4D;">One-Click Portal Login</p>
+      <p style="margin:0;font-size:13px;color:#555;line-height:1.7;">Use this secure link to open your portal (valid for 48 hours):</p>
+      <p style="margin:12px 0 0;"><a href="${escHtml(data.magicLoginUrl)}" style="color:#1B2B4D;font-weight:700;text-decoration:underline;">Sign in to my portal</a></p>
+    </div>`
+      : '';
     const bodyHtml = `
     <p style="margin:0 0 16px;font-size:15px;color:#1A1A2E;line-height:1.7;">You are live, ${escHtml(firstName)}.</p>
     <p style="margin:0 0 22px;font-size:15px;color:#1A1A2E;line-height:1.7;">Your <strong>${escHtml(data.packageName)}</strong> website and client portal are ready now — no waiting for a build queue.</p>
     ${siteBlock}
+    ${magicBlock}
     <div style="background-color:#F8F6F2;border-left:4px solid #C9A844;padding:18px 20px;margin-bottom:22px;">
       <p style="margin:0 0 8px;font-size:12px;font-weight:700;color:#1B2B4D;">What To Do Next</p>
       <p style="margin:0;font-size:13px;color:#555;line-height:1.7;">${escHtml(nextSteps)}</p>
     </div>
     <div style="background-color:#F8F6F2;border-left:4px solid #C9A844;padding:18px 20px;">
-      <p style="margin:0 0 8px;font-size:12px;font-weight:700;color:#1B2B4D;">Portal Access</p>
+      <p style="margin:0 0 8px;font-size:12px;font-weight:700;color:#1B2B4D;">Password Backup</p>
       <p style="margin:0;font-size:13px;color:#555;line-height:1.7;">${escHtml(tempCredentials)}</p>
-      <p style="margin:10px 0 0;font-size:12px;color:#777;">This is a temporary password. You will be prompted to create a new one on your first login.</p>
+      <p style="margin:10px 0 0;font-size:12px;color:#777;">Prefer email login later? Use magic link from the portal login page. Temporary password works as a backup.</p>
     </div>
     <p style="margin:22px 0 0;font-size:13px;color:#555;line-height:1.7;">Questions? Reply to this email or reach us at <a href="mailto:${escHtml(supportEmail)}" style="color:#1B2B4D;text-decoration:underline;">${escHtml(supportEmail)}</a>.</p>`;
+
+    const ctaUrl = data.magicLoginUrl || data.siteUrl || data.portalLoginUrl;
+    const ctaLabel = data.magicLoginUrl
+      ? 'Sign In To Portal'
+      : data.siteUrl
+        ? 'Open My Website'
+        : 'Access My Portal';
 
     return resendEmail(
       data.email,
@@ -313,8 +330,8 @@ export async function sendWelcomeEmail(
         title: 'You Are Live',
         eyebrow: platformName,
         bodyHtml,
-        ctaLabel: data.siteUrl ? 'Open My Website' : 'Access My Portal',
-        ctaUrl: data.siteUrl || data.portalLoginUrl,
+        ctaLabel,
+        ctaUrl,
       }),
     );
   }
