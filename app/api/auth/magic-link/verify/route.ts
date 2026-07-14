@@ -14,9 +14,9 @@ function loginUrl(origin: string, realm: MagicLinkRealm, error: string, next?: s
   return url;
 }
 
-/** Map exchange error codes to the legacy login redirect error params. */
+/** Map exchange error codes to login redirect error params. */
 function redirectError(error: MagicLinkExchangeError): string {
-  return error === 'invalid' ? 'expired' : error;
+  return error;
 }
 
 export async function GET(req: NextRequest) {

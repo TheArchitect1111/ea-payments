@@ -36,6 +36,8 @@ export function magicLinkErrorMessage(code: string | null | undefined): string |
   switch (code) {
     case 'expired':
       return 'That login link expired. Request a new one below.';
+    case 'invalid':
+      return 'That login link is invalid. Request a new one below — use only the newest email.';
     case 'unauthorized':
       return 'No Simplifi account matches that email.';
     case 'config':

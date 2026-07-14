@@ -70,6 +70,8 @@ export function magicLinkErrorMessage(
   switch (code) {
     case 'expired':
       return 'That login link expired. Request a new one below.';
+    case 'invalid':
+      return 'That login link is invalid. Request a new one below — use only the newest email.';
     case 'unauthorized':
       if (realm === 'admin') return 'That email is not registered as an EA admin.';
       if (realm === 'simplifi') return 'No Simplifi account matches that email.';

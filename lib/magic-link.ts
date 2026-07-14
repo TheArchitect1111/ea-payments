@@ -46,12 +46,18 @@ export function createMagicLinkToken(input: {
   return `${encoded}.${sign(encoded, secret)}`;
 }
 
-export function verifyMagicLinkToken(token: string): MagicLinkPayload | null {
+export type MagicLinkVerifyFailure = 'missing_secret' | 'invalid' | 'expired';
+
+export type MagicLinkVerifyResult =
+  | { ok: true; payload: MagicLinkPayload }
+  | { ok: false; error: MagicLinkVerifyFailure };
+
+export function verifyMagicLinkTokenDetailed(token: string): MagicLinkVerifyResult {
   const secret = signingSecret();
-  if (!secret) return null;
+  if (!secret) return { ok: false, error: 'missing_secret' };
 
   const dot = token.lastIndexOf('.');
-  if (dot < 0) return null;
+  if (dot < 0) return { ok: false, error: 'invalid' };
 
   const encoded = token.slice(0, dot);
   const provided = token.slice(dot + 1);
@@ -60,21 +66,33 @@ export function verifyMagicLinkToken(token: string): MagicLinkPayload | null {
   try {
     const a = Buffer.from(provided);
     const b = Buffer.from(expected);
-    if (a.length !== b.length || !timingSafeEqual(a, b)) return null;
+    if (a.length !== b.length || !timingSafeEqual(a, b)) {
+      return { ok: false, error: 'invalid' };
+    }
   } catch {
-    return null;
+    return { ok: false, error: 'invalid' };
   }
 
   try {
     const payload = JSON.parse(Buffer.from(encoded, 'base64url').toString('utf8')) as MagicLinkPayload;
-    if (!payload.email || !payload.realm || !payload.exp || payload.exp < Date.now()) return null;
-    if (payload.realm !== 'admin' && payload.realm !== 'portal' && payload.realm !== 'simplifi') {
-      return null;
+    if (!payload.email || !payload.realm || !payload.exp) {
+      return { ok: false, error: 'invalid' };
     }
-    return payload;
+    if (payload.realm !== 'admin' && payload.realm !== 'portal' && payload.realm !== 'simplifi') {
+      return { ok: false, error: 'invalid' };
+    }
+    if (payload.exp < Date.now()) {
+      return { ok: false, error: 'expired' };
+    }
+    return { ok: true, payload };
   } catch {
-    return null;
+    return { ok: false, error: 'invalid' };
   }
+}
+
+export function verifyMagicLinkToken(token: string): MagicLinkPayload | null {
+  const result = verifyMagicLinkTokenDetailed(token);
+  return result.ok ? result.payload : null;
 }
 
 export function magicLinkConfigured(): boolean {
