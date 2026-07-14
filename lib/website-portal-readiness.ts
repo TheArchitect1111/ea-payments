@@ -43,7 +43,9 @@ export async function getWebsitePortalReadiness(): Promise<WebsitePortalReadines
   if (!offerPurchasable) blockers.push('Starter offer is not purchasable (price / Stripe Price ID)');
   if (!airtableOk) blockers.push('Airtable not configured (AIRTABLE_API_KEY + base)');
   if (airtableOk && !creativeStudioSchemaOk) {
-    blockers.push('Creative Studio table schema incomplete — run /api/health/setup-schema');
+    blockers.push(
+      'Creative Studio table schema incomplete — use Fix schema on this desk (or /api/health/setup-schema)',
+    );
   }
   if (!magicOk) blockers.push('Magic link not configured (ADMIN_SESSION_SECRET)');
 

@@ -139,11 +139,25 @@ assert(
 
 const readinessLib = join(root, 'lib/website-portal-readiness.ts');
 const readinessApi = join(root, 'app/api/admin/website-portal/readiness/route.ts');
+const setupSchemaApi = join(root, 'app/api/admin/website-portal/setup-schema/route.ts');
 assert(existsSync(readinessLib), 'Missing website-portal-readiness helper');
 assert(existsSync(readinessApi), 'Missing admin website-portal readiness API');
+assert(existsSync(setupSchemaApi), 'Missing admin website-portal setup-schema API');
 assert(
   readFileSync(opsPanelPath, 'utf8').includes('/api/admin/website-portal/readiness'),
   'Ops panel must load readiness status',
+);
+assert(
+  readFileSync(opsPanelPath, 'utf8').includes('/api/admin/website-portal/setup-schema'),
+  'Ops panel must call admin setup-schema API',
+);
+assert(
+  readFileSync(setupSchemaApi, 'utf8').includes('ensureAirtableLaunchTables'),
+  'Setup-schema API must ensure Airtable launch tables',
+);
+assert(
+  readFileSync(setupSchemaApi, 'utf8').includes('requireAdminActionFromRequest'),
+  'Setup-schema API must require admin auth',
 );
 
 if (failures.length) {

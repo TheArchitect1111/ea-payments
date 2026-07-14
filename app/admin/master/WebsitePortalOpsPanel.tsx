@@ -26,8 +26,10 @@ export default function WebsitePortalOpsPanel() {
   const [businessName, setBusinessName] = useState('Demo Client');
   const [force, setForce] = useState(true);
   const [busy, setBusy] = useState(false);
+  const [setupBusy, setSetupBusy] = useState(false);
   const [result, setResult] = useState<ProvisionResult | null>(null);
   const [error, setError] = useState('');
+  const [setupMessage, setSetupMessage] = useState('');
   const [readiness, setReadiness] = useState<Readiness | null>(null);
 
   async function loadReadiness() {
@@ -47,6 +49,41 @@ export default function WebsitePortalOpsPanel() {
   useEffect(() => {
     void loadReadiness();
   }, []);
+
+  async function fixSchema() {
+    setSetupBusy(true);
+    setError('');
+    setSetupMessage('');
+    try {
+      const res = await fetch('/api/admin/website-portal/setup-schema', { method: 'POST' });
+      const data = (await res.json()) as {
+        ok?: boolean;
+        error?: string;
+        setup?: { errors?: string[] };
+        schema?: { creativeStudio?: { ok?: boolean; missingFields?: string[] } };
+      };
+      if (!res.ok || data.error) {
+        setError(data.error || `Schema setup failed (${res.status})`);
+        return;
+      }
+      const missing = data.schema?.creativeStudio?.missingFields?.join(', ');
+      if (data.ok) {
+        setSetupMessage('Creative Studio schema is ready.');
+      } else {
+        setError(
+          data.setup?.errors?.join('; ') ||
+            (missing
+              ? `Creative Studio still incomplete: ${missing}`
+              : 'Schema setup finished but Creative Studio is still incomplete.'),
+        );
+      }
+      await loadReadiness();
+    } catch {
+      setError('Network error running schema setup.');
+    } finally {
+      setSetupBusy(false);
+    }
+  }
 
   async function provision() {
     setBusy(true);
@@ -123,12 +160,31 @@ export default function WebsitePortalOpsPanel() {
             ))}
           </ul>
         ) : null}
-        <div className="mt-3 flex flex-wrap gap-3 text-[11px] font-bold uppercase tracking-wider">
+        <div className="mt-3 flex flex-wrap items-center gap-3 text-[11px] font-bold uppercase tracking-wider">
           <span>Airtable {readiness?.airtableConfigured ? '✓' : '✗'}</span>
           <span>Creative Studio {readiness?.creativeStudioSchemaOk ? '✓' : '✗'}</span>
           <span>Offer {readiness?.offerPurchasable ? '✓' : '✗'}</span>
           <span>Magic link {readiness?.magicLinkConfigured ? '✓' : '✗'}</span>
+          {readiness && !readiness.creativeStudioSchemaOk ? (
+            <button
+              type="button"
+              disabled={setupBusy || busy}
+              onClick={() => void fixSchema()}
+              className="rounded-sm border border-amber-400 bg-white px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-amber-950 hover:border-amber-700 disabled:opacity-50"
+            >
+              {setupBusy ? 'Fixing schema…' : 'Fix schema'}
+            </button>
+          ) : null}
+          <button
+            type="button"
+            disabled={setupBusy || busy}
+            onClick={() => void loadReadiness()}
+            className="rounded-sm border border-neutral-300 bg-white px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-neutral-700 hover:border-neutral-800 disabled:opacity-50"
+          >
+            Refresh status
+          </button>
         </div>
+        {setupMessage ? <p className="mt-2 text-xs font-semibold text-emerald-800">{setupMessage}</p> : null}
       </div>
 
       <div className="mt-5 grid gap-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
