@@ -85,6 +85,8 @@ assert(webhook.includes('WELCOME_MAGIC_LINK_TTL_MS'), 'Webhook must use welcome 
 assert(webhook.includes('magicLoginUrl'), 'Webhook must pass magicLoginUrl to welcome email');
 
 assert(buy.includes('website_portal_starter'), 'Buy page must target website_portal_starter');
+assert(buy.includes('Continue to checkout') || buy.includes('checkout?package='), 'Buy page must CTA into checkout');
+assert(!buy.includes('redirect(') || buy.includes('Website + Portal Starter'), 'Buy page should be a sales surface');
 assert(magic.includes('WELCOME_MAGIC_LINK_TTL_MS'), 'Magic-link module missing welcome TTL export');
 assert(magic.includes('ttlMs'), 'createMagicLinkToken must accept ttlMs override');
 assert(email.includes('magicLoginUrl'), 'Welcome email must support magicLoginUrl');
