@@ -158,6 +158,7 @@ export async function resolvePortalWorkspaceChrome(
     orgId: session.orgId,
     slug,
     packagePurchased: client.packagePurchased,
+    commerceOfferId: client.commerceOfferId,
     role: session.role,
   });
 

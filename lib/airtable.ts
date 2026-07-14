@@ -32,6 +32,8 @@ export interface ClientRecord {
   email: string;
   phone?: string;
   packagePurchased: AirtablePackage;
+  /** Canonical commerce offer id (e.g. website_portal_starter) when Package Purchased is coarse. */
+  commerceOfferId?: string;
   amountPaid: number;
   paymentDate: string;
   stripeTransactionId: string;
@@ -49,6 +51,8 @@ export interface PortalClientRecord {
   email: string;
   organization?: string;
   packagePurchased: AirtablePackage;
+  /** Canonical commerce offer id when present on the Client Records row. */
+  commerceOfferId?: string;
   amountPaid: number;
   paymentDate: string;
   portalAccessStatus: PortalAccessStatus;
@@ -103,49 +107,72 @@ export async function createOrUpdateClientRecord(
 
   if (record.organization) raw['Organization'] = record.organization;
   if (record.phone) raw['Phone'] = record.phone;
+  if (record.commerceOfferId?.trim()) raw['Commerce Offer Id'] = record.commerceOfferId.trim();
   if (record.paymentReceivedAt) raw['Payment Received At'] = record.paymentReceivedAt;
   if (record.docsSentAt) raw['Docs Sent At'] = record.docsSentAt;
   if (record.docsSignedAt) raw['Docs Signed At'] = record.docsSignedAt;
   Object.assign(raw, lifecycleFieldsToAirtable(record.lifecycle ?? {}));
 
-  try {
-    const existingId = await findRecordByEmail(record.email);
-    let recordId: string | undefined;
-
+  async function writeFields(
+    fields: Record<string, string | number | boolean>,
+    existingId: string | null,
+  ): Promise<{ ok: boolean; recordId?: string; detail?: string }> {
     if (existingId) {
       const res = await fetch(
         `https://api.airtable.com/v0/${BASE_ID}/${encodeURIComponent(TABLE)}/${existingId}`,
         {
           method: 'PATCH',
           headers: authHeaders(),
-          body: JSON.stringify({ fields: raw, typecast: true }),
-        }
+          body: JSON.stringify({ fields, typecast: true }),
+        },
       );
       if (!res.ok) {
-        const detail = await res.text();
-        console.error('Airtable PATCH failed:', detail);
-        return { ok: false, error: 'Failed to update client record.' };
+        return { ok: false, detail: await res.text() };
       }
-      recordId = existingId;
-    } else {
-      const res = await fetch(
-        `https://api.airtable.com/v0/${BASE_ID}/${encodeURIComponent(TABLE)}`,
-        {
-          method: 'POST',
-          headers: authHeaders(),
-          body: JSON.stringify({ records: [{ fields: raw }], typecast: true }),
-        }
-      );
-      if (!res.ok) {
-        const detail = await res.text();
-        console.error('Airtable POST failed:', detail);
-        return { ok: false, error: 'Failed to create client record.' };
-      }
-      const data = (await res.json()) as { records?: { id: string }[] };
-      recordId = data.records?.[0]?.id;
+      return { ok: true, recordId: existingId };
     }
 
-    return { ok: true, recordId };
+    const res = await fetch(
+      `https://api.airtable.com/v0/${BASE_ID}/${encodeURIComponent(TABLE)}`,
+      {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({ records: [{ fields }], typecast: true }),
+      },
+    );
+    if (!res.ok) {
+      return { ok: false, detail: await res.text() };
+    }
+    const data = (await res.json()) as { records?: { id: string }[] };
+    return { ok: true, recordId: data.records?.[0]?.id };
+  }
+
+  try {
+    const existingId = await findRecordByEmail(record.email);
+    let result = await writeFields(raw, existingId);
+
+    // Optional column: retry without Commerce Offer Id if the base lacks the field.
+    if (
+      !result.ok &&
+      raw['Commerce Offer Id'] &&
+      /UNKNOWN_FIELD_NAME|Unknown field|Commerce Offer Id/i.test(result.detail || '')
+    ) {
+      const { 'Commerce Offer Id': _omit, ...withoutOffer } = raw;
+      console.warn(
+        'Airtable Client Records missing Commerce Offer Id — retrying without it. Add the single-line text field for offer-accurate entitlements.',
+      );
+      result = await writeFields(withoutOffer, existingId);
+    }
+
+    if (!result.ok) {
+      console.error('Airtable write failed:', result.detail);
+      return {
+        ok: false,
+        error: existingId ? 'Failed to update client record.' : 'Failed to create client record.',
+      };
+    }
+
+    return { ok: true, recordId: result.recordId };
   } catch (err) {
     console.error('Airtable error:', err);
     return { ok: false, error: 'Unexpected error writing to Airtable.' };
@@ -292,24 +319,34 @@ export async function getClientByPortalSlug(slug: string): Promise<PortalClientR
     if (!rec) return null;
 
     const f = rec.fields;
-    return {
-      id: rec.id,
-      clientName: (f['Client Name'] as string) ?? '',
-      email: (f['Email'] as string) ?? '',
-      organization: (f['Organization'] as string) || undefined,
-      packagePurchased: (f['Package Purchased'] as AirtablePackage) ?? 'Capacity Assessment',
-      amountPaid: (f['Amount Paid'] as number) ?? 0,
-      paymentDate: (f['Payment Date'] as string) ?? '',
-      portalAccessStatus: (f['Portal Access Status'] as PortalAccessStatus) ?? 'Pending',
-      portalSlug: slug,
-      passwordChanged: Boolean(f['Password Changed']),
-      passwordHash: (f['Password Hash'] as string) || undefined,
-      tempPassword: (f['Temp Password'] as string) || undefined,
-      onboardingStatus: (f['Onboarding Status'] as OnboardingStatus) || undefined,
-    };
+    return mapPortalClientRecord(rec.id, f, slug);
   } catch {
     return null;
   }
+}
+
+function mapPortalClientRecord(
+  id: string,
+  f: Record<string, unknown>,
+  portalSlug: string,
+): PortalClientRecord {
+  const commerceOfferId = String(f['Commerce Offer Id'] ?? '').trim() || undefined;
+  return {
+    id,
+    clientName: (f['Client Name'] as string) ?? '',
+    email: (f['Email'] as string) ?? '',
+    organization: (f['Organization'] as string) || undefined,
+    packagePurchased: (f['Package Purchased'] as AirtablePackage) ?? 'Capacity Assessment',
+    commerceOfferId,
+    amountPaid: (f['Amount Paid'] as number) ?? 0,
+    paymentDate: (f['Payment Date'] as string) ?? '',
+    portalAccessStatus: (f['Portal Access Status'] as PortalAccessStatus) ?? 'Pending',
+    portalSlug,
+    passwordChanged: Boolean(f['Password Changed']),
+    passwordHash: (f['Password Hash'] as string) || undefined,
+    tempPassword: (f['Temp Password'] as string) || undefined,
+    onboardingStatus: (f['Onboarding Status'] as OnboardingStatus) || undefined,
+  };
 }
 
 export async function getClientByRecordId(recordId: string): Promise<PortalClientRecord | null> {
@@ -325,22 +362,7 @@ export async function getClientByRecordId(recordId: string): Promise<PortalClien
     const rec = (await res.json()) as { id: string; fields: Record<string, unknown> };
     const f = rec.fields;
     const slug = (f['Portal Slug'] as string) ?? '';
-
-    return {
-      id: rec.id,
-      clientName: (f['Client Name'] as string) ?? '',
-      email: (f['Email'] as string) ?? '',
-      organization: (f['Organization'] as string) || undefined,
-      packagePurchased: (f['Package Purchased'] as AirtablePackage) ?? 'Capacity Assessment',
-      amountPaid: (f['Amount Paid'] as number) ?? 0,
-      paymentDate: (f['Payment Date'] as string) ?? '',
-      portalAccessStatus: (f['Portal Access Status'] as PortalAccessStatus) ?? 'Pending',
-      portalSlug: slug,
-      passwordChanged: Boolean(f['Password Changed']),
-      passwordHash: (f['Password Hash'] as string) || undefined,
-      tempPassword: (f['Temp Password'] as string) || undefined,
-      onboardingStatus: (f['Onboarding Status'] as OnboardingStatus) || undefined,
-    };
+    return mapPortalClientRecord(rec.id, f, slug);
   } catch {
     return null;
   }
@@ -364,21 +386,7 @@ export async function getClientByEmail(email: string): Promise<PortalClientRecor
     if (!rec) return null;
 
     const f = rec.fields;
-    return {
-      id: rec.id,
-      clientName: (f['Client Name'] as string) ?? '',
-      email: (f['Email'] as string) ?? '',
-      organization: (f['Organization'] as string) || undefined,
-      packagePurchased: (f['Package Purchased'] as AirtablePackage) ?? 'Capacity Assessment',
-      amountPaid: (f['Amount Paid'] as number) ?? 0,
-      paymentDate: (f['Payment Date'] as string) ?? '',
-      portalAccessStatus: (f['Portal Access Status'] as PortalAccessStatus) ?? 'Pending',
-      portalSlug: (f['Portal Slug'] as string) ?? '',
-      passwordChanged: Boolean(f['Password Changed']),
-      passwordHash: (f['Password Hash'] as string) || undefined,
-      tempPassword: (f['Temp Password'] as string) || undefined,
-      onboardingStatus: (f['Onboarding Status'] as OnboardingStatus) || undefined,
-    };
+    return mapPortalClientRecord(rec.id, f, (f['Portal Slug'] as string) ?? '');
   } catch {
     return null;
   }

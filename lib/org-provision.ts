@@ -23,6 +23,7 @@ export async function resolvePortalIdentity(input: {
   let clientName = input.slug;
   let organizationName: string | undefined;
   let packagePurchased = 'Capacity Assessment';
+  let commerceOfferId: string | undefined;
 
   try {
     const client = await getClientByPortalSlug(input.slug);
@@ -30,6 +31,7 @@ export async function resolvePortalIdentity(input: {
       clientName = client.clientName || clientName;
       organizationName = client.organization;
       packagePurchased = client.packagePurchased;
+      commerceOfferId = client.commerceOfferId;
     }
   } catch {
     // Non-fatal — proceed with slug as name
@@ -50,6 +52,7 @@ export async function resolvePortalIdentity(input: {
   void ensurePackageEntitlements({
     orgId,
     packagePurchased,
+    commerceOfferId,
     slug: input.slug,
   });
 
