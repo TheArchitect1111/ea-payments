@@ -31,6 +31,9 @@ export type CtpBiView = {
   projectTypeLabel?: string;
   digitalScore?: number;
   digitalImpact?: string;
+  socialScore?: number;
+  gbpScore?: number;
+  socialChannels?: Array<{ platform: string; url: string; reachable?: boolean }>;
   productionHeadline?: string;
 };
 
@@ -61,6 +64,9 @@ export function buildCtpBiView(submission: CtpSubmission): CtpBiView {
       scopeStack: [],
       digitalScore: submission.digitalPresenceAudit?.overallScore,
       digitalImpact: submission.digitalPresenceAudit?.impactEstimate,
+      socialScore: submission.digitalPresenceAudit?.scores?.socialPresence,
+      gbpScore: submission.digitalPresenceAudit?.scores?.googleBusinessProfile,
+      socialChannels: submission.digitalPresenceAudit?.socialChannels,
       productionHeadline: submission.productionPackage?.headline,
     };
   }
@@ -107,6 +113,9 @@ export function buildCtpBiView(submission: CtpSubmission): CtpBiView {
     projectTypeLabel: snap.scope.projectTypeLabel,
     digitalScore: submission.digitalPresenceAudit?.overallScore,
     digitalImpact: submission.digitalPresenceAudit?.impactEstimate,
+    socialScore: submission.digitalPresenceAudit?.scores?.socialPresence,
+    gbpScore: submission.digitalPresenceAudit?.scores?.googleBusinessProfile,
+    socialChannels: submission.digitalPresenceAudit?.socialChannels,
     productionHeadline: submission.productionPackage?.headline,
   };
 }
