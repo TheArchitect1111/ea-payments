@@ -160,6 +160,33 @@ assert(
   'Setup-schema API must require admin auth',
 );
 
+const entitlementKeyPath = join(root, 'lib/modules/entitlement-package-key.ts');
+const portalModulesPath = join(root, 'lib/modules/portal-modules.ts');
+const airtablePath = join(root, 'lib/airtable.ts');
+const webhookSrc = readFileSync(webhookPath, 'utf8');
+assert(existsSync(entitlementKeyPath), 'Missing entitlement-package-key helper');
+assert(
+  readFileSync(entitlementKeyPath, 'utf8').includes('resolveEntitlementPackageKey'),
+  'resolveEntitlementPackageKey missing',
+);
+assert(
+  readFileSync(portalModulesPath, 'utf8').includes('resolveEntitlementPackageKey'),
+  'portal-modules must resolve entitlement package key',
+);
+assert(
+  readFileSync(portalModulesPath, 'utf8').includes('commerceOfferId'),
+  'portal-modules must accept commerceOfferId',
+);
+assert(
+  readFileSync(airtablePath, 'utf8').includes('Commerce Offer Id'),
+  'Airtable client records must persist Commerce Offer Id',
+);
+assert(webhookSrc.includes('commerceOfferId: offerId'), 'Webhook must persist commerceOfferId on client');
+assert(
+  readFileSync(join(root, 'lib/entitlements.ts'), 'utf8').includes("source === 'package'"),
+  'Package entitlement sync must suspend modules removed from offer set',
+);
+
 if (failures.length) {
   console.error('Website + Portal Starter checks FAILED:');
   for (const failure of failures) console.error(`  - ${failure}`);

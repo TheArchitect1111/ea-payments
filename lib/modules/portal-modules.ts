@@ -7,6 +7,7 @@ import {
   listEntitlementsForOrg,
   syncPackageEntitlements,
 } from '@/lib/entitlements';
+import { resolveEntitlementPackageKey } from '@/lib/modules/entitlement-package-key';
 import type { ModuleDefinition, ModuleId, NavGroup } from '@/lib/modules/registry';
 import {
   MODULE_REGISTRY,
@@ -129,6 +130,7 @@ export async function resolveEnabledModuleIds(input: {
   orgId?: string;
   slug: string;
   packagePurchased?: string;
+  commerceOfferId?: string;
   role?: PlatformRole;
 }): Promise<Set<ModuleId>> {
   const orgId = input.orgId ?? syntheticOrgId(input.slug);
@@ -139,8 +141,9 @@ export async function resolveEnabledModuleIds(input: {
     return activeModuleIdsFromEntitlements(stored);
   }
 
+  const packageKey = resolveEntitlementPackageKey(input);
   return new Set(
-    defaultModulesForPackage(input.packagePurchased ?? 'Capacity Assessment', {
+    defaultModulesForPackage(packageKey, {
       isDemo,
       tenantPreset: 'ea-client',
     }),
@@ -151,6 +154,7 @@ export async function resolvePortalModuleAccess(input: {
   orgId?: string;
   slug: string;
   packagePurchased?: string;
+  commerceOfferId?: string;
   role?: PlatformRole;
 }): Promise<PortalModuleAccess> {
   const orgId = input.orgId ?? syntheticOrgId(input.slug);
@@ -321,6 +325,7 @@ export async function resolvePortalSidebarNav(slug: string): Promise<PortalSideb
     orgId: session.orgId,
     slug,
     packagePurchased: client.packagePurchased,
+    commerceOfferId: client.commerceOfferId,
     role: session.role,
   });
 
@@ -337,6 +342,7 @@ export async function isModuleEnabled(input: {
   slug: string;
   moduleId: ModuleId;
   packagePurchased?: string;
+  commerceOfferId?: string;
   role?: PlatformRole;
 }): Promise<boolean> {
   const enabled = await resolveEnabledModuleIds(input);
@@ -352,16 +358,27 @@ export async function isModuleEnabled(input: {
 export async function ensurePackageEntitlements(input: {
   orgId: string;
   packagePurchased: string;
+  commerceOfferId?: string;
   slug: string;
 }): Promise<void> {
   if (input.orgId.startsWith('org_')) return;
 
-  const existing = await listEntitlementsForOrg(input.orgId);
-  if (existing.some((e) => e.source === 'package')) return;
-
-  const moduleIds = defaultModulesForPackage(input.packagePurchased, {
+  const packageKey = resolveEntitlementPackageKey(input);
+  const moduleIds = defaultModulesForPackage(packageKey, {
     isDemo: isDemoPortalSlug(input.slug),
   });
+  const desired = new Set(moduleIds);
+  const existing = await listEntitlementsForOrg(input.orgId);
+  const activePackage = new Set(
+    existing
+      .filter((e) => e.source === 'package' && (e.status === 'active' || e.status === 'trial'))
+      .map((e) => e.moduleId),
+  );
+  const alreadyMatched =
+    desired.size === activePackage.size && [...desired].every((id) => activePackage.has(id));
+
+  if (alreadyMatched) return;
+
   await syncPackageEntitlements(input.orgId, moduleIds);
 }
 
@@ -378,6 +395,7 @@ export async function getPortalModuleAccessForSlug(slug: string): Promise<Portal
     orgId: session.orgId,
     slug,
     packagePurchased: client.packagePurchased,
+    commerceOfferId: client.commerceOfferId,
     role: session.role,
   });
 }
@@ -401,6 +419,7 @@ export async function requirePortalModule(
     orgId: session.orgId,
     slug,
     packagePurchased: client.packagePurchased,
+    commerceOfferId: client.commerceOfferId,
     role: session.role,
   });
 

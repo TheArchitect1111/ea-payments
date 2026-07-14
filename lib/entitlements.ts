@@ -124,6 +124,24 @@ export async function syncPackageEntitlements(
 ): Promise<void> {
   if (!platformStoreConfigured() || organizationId.startsWith('org_')) return;
 
+  const desired = new Set(moduleIds);
+  const existing = await listEntitlementsForOrg(organizationId);
+
+  // Suspend package-sourced modules that are no longer in the offer set
+  // (e.g. Implementation Package → website_portal_starter lean set).
+  await Promise.all(
+    existing
+      .filter((row) => row.source === 'package' && !desired.has(row.moduleId))
+      .map((row) =>
+        upsertEntitlement({
+          organizationId,
+          moduleId: row.moduleId,
+          status: 'suspended',
+          source: 'package',
+        }),
+      ),
+  );
+
   await Promise.all(
     moduleIds.map((moduleId) =>
       upsertEntitlement({

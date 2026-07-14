@@ -147,12 +147,16 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
       ? session.payment_intent
       : (session.payment_intent as Stripe.PaymentIntent | null)?.id ?? session.id;
 
+  const offerId = String(meta.commerceOfferId || meta.packageId || '');
+  const checkoutOffer = offerId ? resolveCheckoutOffer(offerId) : null;
+
   const airtableResult = await createOrUpdateClientRecord({
     clientName,
     organization: meta.organization || undefined,
     email,
     phone: meta.phone || customerDetails?.phone || undefined,
     packagePurchased: packageName,
+    commerceOfferId: offerId || undefined,
     amountPaid,
     paymentDate,
     stripeTransactionId,
@@ -175,9 +179,6 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
     });
     return;
   }
-
-  const offerId = String(meta.commerceOfferId || meta.packageId || '');
-  const checkoutOffer = offerId ? resolveCheckoutOffer(offerId) : null;
   const catalogItem = meta.packageId ? getCatalogItem(meta.packageId) : undefined;
   const fulfillment = checkoutOffer
     ? buildPackageFulfillmentPlan(checkoutOffer)
@@ -243,7 +244,8 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
             });
             await ensurePackageEntitlements({
               orgId,
-              packagePurchased: offerId || packageName,
+              packagePurchased: packageName,
+              commerceOfferId: offerId || undefined,
               slug: portalSlug,
             });
             await provisionConnectAfterCheckout({
@@ -495,6 +497,7 @@ async function handleSubscriptionCheckoutCompleted(
     email,
     phone: meta.phone || customerDetails?.phone || undefined,
     packagePurchased: plan.airtablePackageName,
+    commerceOfferId: planId || undefined,
     amountPaid,
     paymentDate,
     stripeTransactionId: stripeSubscriptionId || session.id,
@@ -576,13 +579,14 @@ async function handleSubscriptionCheckoutCompleted(
         await ensurePackageEntitlements({
           orgId,
           packagePurchased: plan.airtablePackageName,
+          commerceOfferId: planId || undefined,
           slug: portalSlug,
         });
         await provisionConnectAfterCheckout({
           portalSlug,
           organizationName: clientName,
           ownerEmail: email,
-          packagePurchased: plan.airtablePackageName,
+          packagePurchased: planId || plan.airtablePackageName,
           connectIndustry: typeof meta.connectIndustry === 'string' ? meta.connectIndustry : null,
         });
       }
