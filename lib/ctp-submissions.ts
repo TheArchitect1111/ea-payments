@@ -66,6 +66,10 @@ export type CtpSubmission = {
   executiveSnapshot?: CtpExecutiveSnapshot;
   /** Phase 10 AI production package (blueprint / site / portal artifacts). */
   productionPackage?: CtpProductionPackage;
+  /** Draft fields for deferred executive email (portal tracks). */
+  executiveEmailDraft?: CtpExecutiveEmailDraft;
+  /** ISO timestamp when the executive email was successfully sent. */
+  executiveEmailSentAt?: string;
   intakeAnalysis?: CtpIntakeAnalysisRecord;
   assetManifest?: CtpAssetManifest;
   submittedAt: string;
@@ -89,6 +93,8 @@ export type CtpSubmissionUpdate = Partial<
     | 'digitalPresenceAudit'
     | 'executiveSnapshot'
     | 'productionPackage'
+    | 'executiveEmailDraft'
+    | 'executiveEmailSentAt'
     | 'discoveryAnswers'
   >
 >;
@@ -136,6 +142,8 @@ function toAirtableFields(submission: CtpSubmission): Record<string, unknown> {
       digitalPresenceAudit: submission.digitalPresenceAudit,
       executiveSnapshot: submission.executiveSnapshot,
       productionPackage: submission.productionPackage,
+      executiveEmailDraft: submission.executiveEmailDraft,
+      executiveEmailSentAt: submission.executiveEmailSentAt,
     }),
     'Submitted At': submission.submittedAt,
     'Updated At': submission.updatedAt,
@@ -156,6 +164,8 @@ function fromAirtableRecord(fields: Record<string, unknown>): CtpSubmission | nu
     digitalPresenceAudit?: DigitalPresenceAudit;
     executiveSnapshot?: CtpExecutiveSnapshot;
     productionPackage?: CtpProductionPackage;
+    executiveEmailDraft?: CtpExecutiveEmailDraft;
+    executiveEmailSentAt?: string;
   } = {};
   const raw = fields['Payload JSON'];
   if (typeof raw === 'string' && raw.trim()) {
@@ -213,6 +223,8 @@ function fromAirtableRecord(fields: Record<string, unknown>): CtpSubmission | nu
     digitalPresenceAudit: payload.digitalPresenceAudit,
     executiveSnapshot: payload.executiveSnapshot,
     productionPackage: payload.productionPackage,
+    executiveEmailDraft: payload.executiveEmailDraft,
+    executiveEmailSentAt: payload.executiveEmailSentAt,
     intakeAnalysis,
     assetManifest,
     submittedAt: String(fields['Submitted At'] ?? new Date().toISOString()),

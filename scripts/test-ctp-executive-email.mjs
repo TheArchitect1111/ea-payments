@@ -16,22 +16,28 @@ function assert(condition, message) {
 
 const briefPath = join(root, 'lib/ctp-executive-brief.ts');
 const emailPath = join(root, 'lib/email.ts');
+const sendPath = join(root, 'lib/ctp-executive-email-send.ts');
 const submitPath = join(root, 'app/api/assessment/submit/route.ts');
 const provisionPath = join(root, 'lib/ctp-workspace-provision.ts');
+const submissionsPath = join(root, 'lib/ctp-submissions.ts');
 
 for (const [path, label] of [
   [briefPath, 'ctp-executive-brief.ts'],
   [emailPath, 'email.ts'],
+  [sendPath, 'ctp-executive-email-send.ts'],
   [submitPath, 'assessment submit'],
   [provisionPath, 'ctp-workspace-provision'],
+  [submissionsPath, 'ctp-submissions'],
 ]) {
   assert(existsSync(path), `Missing ${label}`);
 }
 
 const brief = readFileSync(briefPath, 'utf8');
 const email = readFileSync(emailPath, 'utf8');
+const send = readFileSync(sendPath, 'utf8');
 const submit = readFileSync(submitPath, 'utf8');
 const provision = readFileSync(provisionPath, 'utf8');
+const submissions = readFileSync(submissionsPath, 'utf8');
 
 assert(brief.includes('buildCtpExecutiveBrief'), 'Missing buildCtpExecutiveBrief');
 assert(brief.includes('executiveSummary'), 'Brief must include executiveSummary');
@@ -40,7 +46,26 @@ assert(email.includes('sendCtpExecutiveEmail'), 'Missing sendCtpExecutiveEmail')
 assert(email.includes('Schedule Executive Strategy Session'), 'Email must include schedule CTA');
 assert(email.includes('View My Personalized Portal'), 'Email must include portal CTA copy');
 assert(email.includes('Executive Brief'), 'Email title should be Executive Brief');
-assert(submit.includes('sendCtpExecutiveEmail'), 'Submit must send CTP executive email');
+assert(send.includes('sendCtpExecutiveEmailForSubmission'), 'Missing send helper');
+assert(send.includes('publicPortalUrl'), 'Send helper must resolve vanity portal URL');
+assert(send.includes('executiveEmailDraft'), 'Send helper must use email draft');
+assert(submissions.includes('executiveEmailDraft'), 'Submission must persist email draft');
+assert(submissions.includes('executiveEmailSentAt'), 'Submission must track email sent timestamp');
+assert(submit.includes('executiveEmailDraft'), 'Submit must persist executive email draft');
+assert(submit.includes('deferExecutiveEmail'), 'Submit must defer portal-track executive email');
+assert(submit.includes('sendCtpExecutiveEmailForSubmission'), 'Submit must use send helper');
+assert(
+  !submit.includes('await sendCtpExecutiveEmail({'),
+  'Submit must not send executive email inline without portal URL path',
+);
+assert(
+  provision.includes('sendCtpExecutiveEmailForSubmission'),
+  'Provision must send deferred executive email',
+);
+assert(
+  provision.includes("publicPortalUrl(portalSlug, 'ctp')"),
+  'Provision must attach vanity CTP portalUrl',
+);
 assert(
   provision.includes('executive brief') || provision.includes('Executive Strategy Session'),
   'Portal-ready welcome should point to executive brief / strategy session',
