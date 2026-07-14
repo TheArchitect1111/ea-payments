@@ -1,4 +1,5 @@
 import type { CtpAssetManifest, CtpAssetManifestEntry } from '@/lib/ctp-asset-store';
+import { ctpClientTypeLabel } from '@/lib/ctp-client-type';
 import type { CtpSubmission } from '@/lib/ctp-submissions';
 
 const ASSET_TYPE_LABELS: Record<string, string> = {
@@ -40,6 +41,8 @@ export type CtpAdminSubmissionView = {
   portalSlug?: string;
   considerSlug?: string;
   reviewScheduledAt?: string;
+  clientType?: string;
+  clientTypeLabel?: string;
   assets: CtpAdminAssetView[];
   intakeSummary?: string;
 };
@@ -84,6 +87,10 @@ export function buildCtpAdminSubmissionView(submission: CtpSubmission): CtpAdmin
     portalSlug: submission.portalSlug,
     considerSlug: submission.considerSlug,
     reviewScheduledAt: submission.reviewScheduledAt,
+    clientType: submission.clientType,
+    clientTypeLabel: submission.clientType
+      ? ctpClientTypeLabel(submission.clientType)
+      : undefined,
     assets: buildCtpAdminAssetViews(submission.assetManifest),
     intakeSummary: submission.intakeAnalysis?.summary,
   };

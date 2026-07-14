@@ -35,6 +35,8 @@ export default function CtpSubmissionsClient({
         submission.id,
         submission.proposalId,
         submission.status,
+        submission.clientTypeLabel,
+        submission.clientType,
       ]
         .join(' ')
         .toLowerCase()
@@ -108,6 +110,14 @@ export default function CtpSubmissionsClient({
                         <span className="text-xs font-bold px-2 py-0.5 bg-white/10 text-white">
                           {submission.status}
                         </span>
+                        {submission.clientTypeLabel ? (
+                          <span
+                            className="text-xs font-bold px-2 py-0.5"
+                            style={{ backgroundColor: GOLD, color: NAVY }}
+                          >
+                            {submission.clientTypeLabel}
+                          </span>
+                        ) : null}
                         <span className="text-white font-bold">{submission.businessName}</span>
                       </div>
                       <p className="text-sm text-blue-200 mt-1">
@@ -126,6 +136,7 @@ export default function CtpSubmissionsClient({
                   {expanded ? (
                     <div className="p-6 space-y-6">
                       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 text-sm">
+                        <Meta label="Client type" value={submission.clientTypeLabel || '—'} />
                         <Meta label="Proposal" value={submission.proposalId} />
                         <Meta label="Assessment" value={submission.assessmentId} />
                         <Meta label="Workspace" value={submission.workspaceStatus} />

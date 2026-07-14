@@ -283,6 +283,19 @@ const CTP_SUBMISSIONS_FIELD_DEFS: AirtableFieldDef[] = [
   { name: 'Intake Analysis JSON', type: 'multilineText' },
   { name: 'Asset Manifest JSON', type: 'multilineText' },
   { name: 'Payload JSON', type: 'multilineText' },
+  {
+    name: 'Client Type',
+    type: 'singleSelect',
+    options: {
+      choices: [
+        { name: 'business_transformation' },
+        { name: 'website' },
+        { name: 'website_portal' },
+        { name: 'portal_only' },
+        { name: 'other' },
+      ],
+    },
+  },
   { name: 'Submitted At', type: 'dateTime', options: { dateFormat: { name: 'iso' }, timeFormat: { name: '24hour' }, timeZone: 'utc' } },
   { name: 'Updated At', type: 'dateTime', options: { dateFormat: { name: 'iso' }, timeFormat: { name: '24hour' }, timeZone: 'utc' } },
 ];

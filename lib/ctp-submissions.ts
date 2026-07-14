@@ -1,5 +1,6 @@
 import crypto from 'crypto';
 import type { CtpAssetManifest } from '@/lib/ctp-asset-store';
+import type { CtpClientType, CtpClientTypeClassification } from '@/lib/ctp-client-type';
 import {
   airtableConfigured,
   airtableQuery,
@@ -52,6 +53,9 @@ export type CtpSubmission = {
   discoveryAnswers?: Record<string, unknown>;
   desiredExperiences?: string[];
   recommendations?: unknown;
+  /** Acquisition track — Business / Website / Website+Portal / Portal Only / Other. */
+  clientType?: CtpClientType;
+  clientTypeClassification?: CtpClientTypeClassification;
   intakeAnalysis?: CtpIntakeAnalysisRecord;
   assetManifest?: CtpAssetManifest;
   submittedAt: string;
@@ -69,6 +73,8 @@ export type CtpSubmissionUpdate = Partial<
     | 'portalSlug'
     | 'creativeCampaignId'
     | 'assetManifest'
+    | 'clientType'
+    | 'clientTypeClassification'
   >
 >;
 
@@ -109,6 +115,8 @@ function toAirtableFields(submission: CtpSubmission): Record<string, unknown> {
       discoveryAnswers: submission.discoveryAnswers,
       desiredExperiences: submission.desiredExperiences,
       recommendations: submission.recommendations,
+      clientType: submission.clientType,
+      clientTypeClassification: submission.clientTypeClassification,
     }),
     'Submitted At': submission.submittedAt,
     'Updated At': submission.updatedAt,
@@ -123,6 +131,8 @@ function fromAirtableRecord(fields: Record<string, unknown>): CtpSubmission | nu
     discoveryAnswers?: Record<string, unknown>;
     desiredExperiences?: string[];
     recommendations?: unknown;
+    clientType?: CtpClientType;
+    clientTypeClassification?: CtpClientTypeClassification;
   } = {};
   const raw = fields['Payload JSON'];
   if (typeof raw === 'string' && raw.trim()) {
@@ -174,6 +184,8 @@ function fromAirtableRecord(fields: Record<string, unknown>): CtpSubmission | nu
     discoveryAnswers: payload.discoveryAnswers,
     desiredExperiences: payload.desiredExperiences,
     recommendations: payload.recommendations,
+    clientType: payload.clientType,
+    clientTypeClassification: payload.clientTypeClassification,
     intakeAnalysis,
     assetManifest,
     submittedAt: String(fields['Submitted At'] ?? new Date().toISOString()),
@@ -193,6 +205,8 @@ export async function createCtpSubmission(input: {
   discoveryAnswers?: Record<string, unknown>;
   desiredExperiences?: string[];
   recommendations?: unknown;
+  clientType?: CtpClientType;
+  clientTypeClassification?: CtpClientTypeClassification;
   assetManifest?: CtpAssetManifest;
   portalRequired?: boolean;
 }): Promise<{ ok: boolean; submission?: CtpSubmission; error?: string }> {
@@ -214,6 +228,8 @@ export async function createCtpSubmission(input: {
     discoveryAnswers: input.discoveryAnswers,
     desiredExperiences: input.desiredExperiences,
     recommendations: input.recommendations,
+    clientType: input.clientType,
+    clientTypeClassification: input.clientTypeClassification,
     assetManifest: input.assetManifest,
     submittedAt: now,
     updatedAt: now,

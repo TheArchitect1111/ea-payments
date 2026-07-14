@@ -949,6 +949,8 @@ export async function sendAssessmentConfirmationEmail(data: {
   projectTypeLabel: string;
   recommendedFee: number;
   proposalId: string;
+  /** CTP acquisition track label when classified (Website + Portal, etc.). */
+  clientTypeLabel?: string;
 }): Promise<{ ok: boolean; error?: string }> {
   const baseUrl =
     process.env.NEXT_PUBLIC_BASE_URL ?? EA_PLATFORM_URL;
@@ -998,6 +1000,11 @@ export async function sendAssessmentConfirmationEmail(data: {
     <p style="margin:0 0 10px;font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#1B2B4D;">Recommended Solution</p>
     <div style="background-color:#F8F6F2;border:1px solid #E4E4E4;padding:16px 18px;margin-bottom:8px;">
       <p style="margin:0 0 6px;font-size:15px;font-weight:700;color:#1B2B4D;">${escHtml(data.projectTypeLabel)}</p>
+      ${
+        data.clientTypeLabel
+          ? `<p style="margin:0 0 8px;font-size:13px;color:#555;line-height:1.6;">Primary track: <strong style="color:#1B2B4D;">${escHtml(data.clientTypeLabel)}</strong></p>`
+          : ''
+      }
       <p style="margin:0;font-size:24px;font-weight:700;color:#1B2B4D;">${fmt(data.recommendedFee)}</p>
     </div>
 

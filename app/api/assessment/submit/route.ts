@@ -13,6 +13,7 @@ import { resolveCtpOrganizationId } from '@/lib/ctp-studio-bridge';
 import { scheduleCtpIntakeAnalysis } from '@/lib/ctp-intake-orchestrator';
 import { scheduleCtpWorkspaceProvision } from '@/lib/ctp-workspace-provision';
 import { scheduleCtpStudioCampaign } from '@/lib/ctp-studio-bridge';
+import { classifyCtpClientType } from '@/lib/ctp-client-type';
 import { buildDiscoveryRecommendations, type DiscoveryAnswers } from '@/lib/discovery-engine';
 
 function mapTeamSize(label: string): number {
@@ -286,6 +287,8 @@ export async function POST(req: NextRequest) {
       console.error('Pulse assessment.submitted failed:', err);
     }
 
+    let ctpClassification: ReturnType<typeof classifyCtpClientType> | undefined;
+
     if (isCtpFlow) {
       let recommendations: unknown;
       if (input.discoveryAnswers) {
@@ -295,6 +298,13 @@ export async function POST(req: NextRequest) {
           console.error('[assessment/submit] discovery recommendations failed:', err);
         }
       }
+
+      ctpClassification = classifyCtpClientType({
+        desiredExperiences: input.desiredExperiences,
+        discoveryAnswers: input.discoveryAnswers,
+        operationalChallenges: challengeIds,
+        recommendedProjectType: analysis.recommendedProjectType,
+      });
 
       try {
         const parsedUploads = parseAssetUploads(input.assetUploads);
@@ -314,6 +324,8 @@ export async function POST(req: NextRequest) {
             ? { asset_uploads: assetManifest }
             : undefined;
 
+        const portalRequired = scope.portalRequired || ctpClassification.portalRequired;
+
         const ctpResult = await createCtpSubmission({
           businessName: input.businessName,
           contactName: input.contactName,
@@ -326,8 +338,10 @@ export async function POST(req: NextRequest) {
           discoveryAnswers,
           desiredExperiences: input.desiredExperiences,
           recommendations,
+          clientType: ctpClassification.clientType,
+          clientTypeClassification: ctpClassification,
           assetManifest,
-          portalRequired: scope.portalRequired,
+          portalRequired,
         });
 
         if (ctpResult.submission) {
@@ -335,9 +349,9 @@ export async function POST(req: NextRequest) {
             product: 'ea-platform',
             type: 'ctp.submitted',
             title: `CTP submitted — ${input.businessName}`,
-            detail: `${input.contactName} · ${ctpResult.submission.id}`,
+            detail: `${input.contactName} · ${ctpClassification.label} · ${ctpResult.submission.id}`,
             priority: 'medium',
-            href: '/admin/proposals',
+            href: '/admin/ctp',
             tenantId: input.considerSlug,
             objectId: ctpResult.submission.id,
             metadata: {
@@ -345,6 +359,7 @@ export async function POST(req: NextRequest) {
               proposalId,
               assessmentId,
               ctpSubmissionId: ctpResult.submission.id,
+              clientType: ctpClassification.clientType,
               flow: 'ctp',
             },
           });
@@ -405,6 +420,7 @@ export async function POST(req: NextRequest) {
           projectTypeLabel: pricing.projectTypeLabel,
           recommendedFee: pricing.recommendedFee,
           proposalId,
+          clientTypeLabel: ctpClassification?.label,
         });
       } catch (err) {
         console.error('Assessment confirmation email error:', err);
@@ -422,7 +438,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       ok: true,
       proposalId,
-      ...(isCtpFlow ? { flow: 'ctp' as const } : {}),
+      ...(isCtpFlow
+        ? {
+            flow: 'ctp' as const,
+            clientType: ctpClassification?.clientType,
+            clientTypeLabel: ctpClassification?.label,
+          }
+        : {}),
     });
   } catch (err) {
     console.error(
