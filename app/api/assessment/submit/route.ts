@@ -7,7 +7,6 @@ import { createAssessmentRecord, createProposalRecord, upsertProspectFromAssessm
 import {
   sendAssessmentAdminNotification,
   sendAssessmentConfirmationEmail,
-  sendCtpExecutiveEmail,
 } from '@/lib/email';
 import { trackConsiderEvent } from '@/lib/opportunity-tracking';
 import { emitPulseEvent } from '@/lib/pulse-bus';
@@ -16,6 +15,7 @@ import {
   isCtpDiscoverySubmit,
   updateCtpSubmission,
 } from '@/lib/ctp-submissions';
+import { sendCtpExecutiveEmailForSubmission } from '@/lib/ctp-executive-email-send';
 import { finalizeCtpAssetManifest, parseAssetUploads } from '@/lib/ctp-asset-store';
 import { resolveCtpOrganizationId } from '@/lib/ctp-studio-bridge';
 import { scheduleCtpIntakeAnalysis } from '@/lib/ctp-intake-orchestrator';
@@ -306,6 +306,7 @@ export async function POST(req: NextRequest) {
     let recommendations: unknown;
     let digitalPresenceAudit: DigitalPresenceAudit | undefined;
     let ctpSubmissionId: string | undefined;
+    let deferExecutiveEmail = false;
 
     if (isCtpFlow) {
       if (input.discoveryAnswers) {
@@ -382,15 +383,6 @@ export async function POST(req: NextRequest) {
             },
           });
           scheduleCtpIntakeAnalysis(ctpResult.submission.id);
-          if (ctpResult.submission.workspaceStatus === 'Pending') {
-            scheduleCtpWorkspaceProvision(ctpResult.submission.id);
-          } else {
-            scheduleCtpStudioCampaign(ctpResult.submission.id);
-            // Website-only tracks skip portal Pending — still auto-build the site.
-            if (ctpClassification.websiteRequired) {
-              scheduleCtpWebsiteProvision(ctpResult.submission.id);
-            }
-          }
 
           if (ctpClassification.digitalAudit) {
             try {
@@ -430,6 +422,34 @@ export async function POST(req: NextRequest) {
               });
             } catch (err) {
               console.error('[assessment/submit] executive snapshot failed:', err);
+            }
+          }
+
+          // Persist email draft before scheduling provision so the deferred send has context.
+          await updateCtpSubmission(ctpResult.submission.id, {
+            executiveEmailDraft: {
+              clientType: ctpClassification.clientType,
+              capacityScore: analysis.capacityScore,
+              scoreBand: analysis.scoreBand,
+              primaryConstraint: analysis.primaryConstraint,
+              weeklyTimeRecovery: analysis.weeklyTimeRecovery,
+              opportunityLow: analysis.opportunityLow,
+              opportunityHigh: analysis.opportunityHigh,
+              projectTypeLabel: pricing.projectTypeLabel,
+              recommendedFee: pricing.recommendedFee,
+              recommendations,
+              operationalChallenges: challengeIds,
+            },
+          });
+
+          if (ctpResult.submission.workspaceStatus === 'Pending') {
+            deferExecutiveEmail = true;
+            scheduleCtpWorkspaceProvision(ctpResult.submission.id);
+          } else {
+            scheduleCtpStudioCampaign(ctpResult.submission.id);
+            // Website-only tracks skip portal Pending — still auto-build the site.
+            if (ctpClassification.websiteRequired) {
+              scheduleCtpWebsiteProvision(ctpResult.submission.id);
             }
           }
         }
@@ -472,33 +492,19 @@ export async function POST(req: NextRequest) {
 
     if (proposalResult.recordId) {
       try {
-        if (isCtpFlow && ctpClassification) {
-          if (!digitalPresenceAudit && ctpSubmissionId && ctpClassification.digitalAudit) {
+        if (isCtpFlow && ctpClassification && ctpSubmissionId) {
+          if (!digitalPresenceAudit && ctpClassification.digitalAudit) {
             try {
               await runCtpDigitalPresenceAudit(ctpSubmissionId);
             } catch {
               /* non-blocking */
             }
           }
-          await sendCtpExecutiveEmail({
-            email: input.email,
-            contactName: input.contactName,
-            businessName: input.businessName,
-            proposalId,
-            clientType: ctpClassification.clientType,
-            capacityScore: analysis.capacityScore,
-            scoreBand: analysis.scoreBand,
-            primaryConstraint: analysis.primaryConstraint,
-            weeklyTimeRecovery: analysis.weeklyTimeRecovery,
-            opportunityLow: analysis.opportunityLow,
-            opportunityHigh: analysis.opportunityHigh,
-            projectTypeLabel: pricing.projectTypeLabel,
-            recommendedFee: pricing.recommendedFee,
-            recommendations,
-            operationalChallenges: challengeIds,
-            digitalPresenceAudit,
-          });
-        } else {
+
+          if (!deferExecutiveEmail) {
+            await sendCtpExecutiveEmailForSubmission(ctpSubmissionId);
+          }
+        } else if (!isCtpFlow) {
           await sendAssessmentConfirmationEmail({
             email: input.email,
             contactName: input.contactName,

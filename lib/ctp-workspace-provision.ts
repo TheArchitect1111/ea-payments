@@ -8,6 +8,7 @@ import { scheduleCtpStudioCampaign } from '@/lib/ctp-studio-bridge';
 import { scheduleCtpWebsiteProvision } from '@/lib/ctp-website-provision';
 import { scheduleCtpProduction } from '@/lib/ctp-production-run';
 import { publicPortalLoginUrl, publicPortalUrl } from '@/lib/ctp-portal-host';
+import { sendCtpExecutiveEmailForSubmission } from '@/lib/ctp-executive-email-send';
 import {
   getCtpSubmissionById,
   updateCtpSubmission,
@@ -69,6 +70,15 @@ async function markWorkspaceActive(
     'ctp.workspace.active',
     `Portal ready at ${publicPortalUrl(portalSlug)}`,
   );
+
+  try {
+    await sendCtpExecutiveEmailForSubmission(submission.id, {
+      portalUrl: publicPortalUrl(portalSlug, 'ctp'),
+    });
+  } catch (err) {
+    console.error('[ctp-workspace-provision] executive email failed:', err);
+  }
+
   scheduleCtpStudioCampaign(submission.id);
   scheduleCtpWebsiteProvision(submission.id);
   scheduleCtpProduction(submission.id);
