@@ -90,7 +90,7 @@ export function publicPortalLoginUrl(): string {
 
 export type PortalVanityHostProbe = {
   ok: boolean;
-  skipped?: boolean;
+  skipped: boolean;
   host: string;
   loginUrl: string;
   status?: number;
@@ -125,6 +125,7 @@ export async function probePortalVanityHost(): Promise<PortalVanityHostProbe> {
     const ok = res.ok || res.status === 401 || res.status === 403;
     return {
       ok,
+      skipped: false,
       host,
       loginUrl,
       status: res.status,
@@ -133,6 +134,7 @@ export async function probePortalVanityHost(): Promise<PortalVanityHostProbe> {
   } catch (err) {
     return {
       ok: false,
+      skipped: false,
       host,
       loginUrl,
       error: err instanceof Error ? err.message : 'Vanity host probe failed',
