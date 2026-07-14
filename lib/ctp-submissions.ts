@@ -89,6 +89,7 @@ export type CtpSubmissionUpdate = Partial<
     | 'digitalPresenceAudit'
     | 'executiveSnapshot'
     | 'productionPackage'
+    | 'discoveryAnswers'
   >
 >;
 
