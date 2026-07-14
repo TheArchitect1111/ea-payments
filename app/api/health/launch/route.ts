@@ -141,6 +141,10 @@ export async function GET() {
         extensionConnect: captureExtensionKey,
         guestSessions: demoClient,
         asyncCapture: captureReady,
+        websitePortalAuto:
+          airtableSchema.creativeStudio.ok &&
+          Boolean(process.env.STRIPE_SECRET_KEY?.trim()) &&
+          Boolean(process.env.ADMIN_SESSION_SECRET?.trim()),
       },
       airtableSchema,
       ctp: {
@@ -153,6 +157,7 @@ export async function GET() {
     },
     links: {
       start: `${base}/start`,
+      buyWebsitePortal: `${base}/buy`,
       capture: `${base}/capture`,
       amplify: `${base}/amplifi`,
       storyDemo: `${base}/story/selena`,

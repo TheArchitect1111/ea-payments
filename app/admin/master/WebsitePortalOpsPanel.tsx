@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { GOLD, NAVY } from '@/lib/design-system';
 
 type ProvisionResult = {
@@ -12,6 +12,15 @@ type ProvisionResult = {
   forced?: boolean;
 };
 
+type Readiness = {
+  ready?: boolean;
+  airtableConfigured?: boolean;
+  creativeStudioSchemaOk?: boolean;
+  offerPurchasable?: boolean;
+  magicLinkConfigured?: boolean;
+  blockers?: string[];
+};
+
 export default function WebsitePortalOpsPanel() {
   const [portalSlug, setPortalSlug] = useState('demo-client');
   const [businessName, setBusinessName] = useState('Demo Client');
@@ -19,6 +28,25 @@ export default function WebsitePortalOpsPanel() {
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<ProvisionResult | null>(null);
   const [error, setError] = useState('');
+  const [readiness, setReadiness] = useState<Readiness | null>(null);
+
+  async function loadReadiness() {
+    try {
+      const res = await fetch('/api/admin/website-portal/readiness');
+      const data = (await res.json()) as Readiness & { error?: string };
+      if (!res.ok) {
+        setReadiness({ ready: false, blockers: [data.error || 'Could not load readiness'] });
+        return;
+      }
+      setReadiness(data);
+    } catch {
+      setReadiness({ ready: false, blockers: ['Network error loading readiness'] });
+    }
+  }
+
+  useEffect(() => {
+    void loadReadiness();
+  }, []);
 
   async function provision() {
     setBusy(true);
@@ -40,6 +68,7 @@ export default function WebsitePortalOpsPanel() {
         return;
       }
       setResult(data);
+      void loadReadiness();
     } catch {
       setError('Network error. Try again.');
     } finally {
@@ -58,7 +87,7 @@ export default function WebsitePortalOpsPanel() {
             Launch proof desk
           </h2>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-neutral-600">
-            Prove starter site generation without a Stripe purchase. Buy path stays at{' '}
+            Confirm durability, prove starter site generation without Stripe, then sell at{' '}
             <a href="/buy" className="font-semibold underline" style={{ color: NAVY }}>
               /buy
             </a>
@@ -71,6 +100,35 @@ export default function WebsitePortalOpsPanel() {
         >
           Open buy path
         </a>
+      </div>
+
+      <div
+        className={`mt-4 border px-4 py-3 text-sm ${
+          readiness?.ready
+            ? 'border-emerald-200 bg-emerald-50 text-emerald-900'
+            : 'border-amber-200 bg-amber-50 text-amber-950'
+        }`}
+      >
+        <p className="font-bold">
+          {readiness == null
+            ? 'Checking readiness…'
+            : readiness.ready
+              ? 'Ready for durable Website + Portal sales'
+              : 'Not fully ready — fix blockers before a live purchase'}
+        </p>
+        {readiness?.blockers && readiness.blockers.length > 0 ? (
+          <ul className="mt-2 list-disc space-y-1 pl-5 text-xs leading-5">
+            {readiness.blockers.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        ) : null}
+        <div className="mt-3 flex flex-wrap gap-3 text-[11px] font-bold uppercase tracking-wider">
+          <span>Airtable {readiness?.airtableConfigured ? '✓' : '✗'}</span>
+          <span>Creative Studio {readiness?.creativeStudioSchemaOk ? '✓' : '✗'}</span>
+          <span>Offer {readiness?.offerPurchasable ? '✓' : '✗'}</span>
+          <span>Magic link {readiness?.magicLinkConfigured ? '✓' : '✗'}</span>
+        </div>
       </div>
 
       <div className="mt-5 grid gap-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
