@@ -38,6 +38,7 @@ export type PulseEventType =
   | 'proposal.pending'
   | 'onboarding.blocked'
   | 'fulfillment.review_required'
+  | 'fulfillment.provisioned'
   | 'launch.verification.completed'
   | 'payment.received'
   | 'subscription.started'

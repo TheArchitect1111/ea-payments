@@ -17,6 +17,7 @@ export type PortalConfig = ContractPortalConfig;
 export type PackageId =
   | 'landing_page'
   | 'client_portal'
+  | 'website_portal_starter'
   | 'connect_profile'
   | 'capacity_assessment'
   | 'capacity_blueprint'

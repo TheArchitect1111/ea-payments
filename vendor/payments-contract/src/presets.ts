@@ -38,6 +38,18 @@ export const IMPLEMENTATION_MODULES = [
 
 export const SIMPLIFI_ONE_TIME_MODULES = [...EA_CLIENT_MODULES] as const;
 
+/** Lean client portal modules for automated website + portal starter. */
+export const WEBSITE_PORTAL_MODULES = [
+  'dashboard',
+  'update-hub',
+  'messaging',
+  'documents',
+  'training',
+  'resources',
+  'ask',
+  'connect',
+] as const;
+
 export const PLATFORM_MONTHLY_MODULES = [
   ...EA_CLIENT_MODULES,
   'billing',

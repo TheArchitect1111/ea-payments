@@ -17,12 +17,14 @@ interface CheckoutBody {
   phone?: string;
   packageId?: string;
   referralSource?: string;
+  tagline?: string;
+  industry?: string;
 }
 
 export async function POST(req: NextRequest) {
   try {
     const body = (await req.json()) as CheckoutBody;
-    const { name, organization, email, phone, packageId, referralSource } = body;
+    const { name, organization, email, phone, packageId, referralSource, tagline, industry } = body;
 
     if (!name?.trim() || !email?.trim() || !packageId?.trim()) {
       return NextResponse.json(
@@ -100,6 +102,8 @@ export async function POST(req: NextRequest) {
           organization: organization?.trim() ?? '',
           phone: phone?.trim() ?? '',
           referralSource: referralSource?.trim() ?? '',
+          tagline: tagline?.trim() ?? '',
+          industry: industry?.trim() ?? '',
         }),
         ...fulfillmentMetadata(fulfillment),
       },
