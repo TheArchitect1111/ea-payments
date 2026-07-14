@@ -148,7 +148,7 @@ export default async function PortalCtpDocumentsPage({
             No brand assets uploaded yet. Add logo, photos, or documents in Design Studio.
           </p>
           <Link
-            href={`/portal/${slug}/ctp`}
+            href={`/portal/${slug}/ctp/progress`}
             className="inline-block rounded-full px-5 py-2.5 text-sm font-bold"
             style={{ border: '1px solid rgba(255,255,255,0.35)', color: '#fff' }}
           >
@@ -163,7 +163,7 @@ export default async function PortalCtpDocumentsPage({
           className="inline-block rounded-full px-6 py-3 text-sm font-bold"
           style={{ backgroundColor: GOLD, color: NAVY }}
         >
-          Back to progress
+          Back to overview
         </Link>
         <Link
           href={`/portal/${slug}/ctp/bi`}

@@ -44,7 +44,7 @@ export function buildCtpDocumentsView(submission: CtpSubmission, slug: string): 
         : 'Proposal link prepares after assessment save.',
       href: submission.proposalId
         ? `/proposal/${encodeURIComponent(submission.proposalId)}`
-        : `/portal/${slug}/ctp`,
+        : `/portal/${slug}/ctp/progress`,
       ready: Boolean(submission.proposalId),
     },
     {
@@ -76,7 +76,7 @@ export function buildCtpDocumentsView(submission: CtpSubmission, slug: string): 
       detail: submission.productionPackage
         ? `${submission.productionPackage.artifacts.length} artifacts · ${submission.productionPackage.timelineLabel}`
         : 'Builds after intake / studio / website production runs.',
-      href: `/portal/${slug}/ctp`,
+      href: `/portal/${slug}/ctp/progress`,
       ready: Boolean(submission.productionPackage?.artifacts?.length),
     },
     {
@@ -84,6 +84,14 @@ export function buildCtpDocumentsView(submission: CtpSubmission, slug: string): 
       kind: 'link',
       title: 'Live project progress',
       detail: 'Timeline, Design Studio, and status.',
+      href: `/portal/${slug}/ctp/progress`,
+      ready: true,
+    },
+    {
+      id: 'overview',
+      kind: 'link',
+      title: 'CTP Overview',
+      detail: 'Hub for every CTP workspace surface.',
       href: `/portal/${slug}/ctp`,
       ready: true,
     },
