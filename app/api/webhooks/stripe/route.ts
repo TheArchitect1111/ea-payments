@@ -360,6 +360,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
     airtableRecordId: airtableResult.recordId,
     portalSlug,
     portalLoginUrl,
+    siteUrl,
   });
 
   await emitPulseEvent({
@@ -368,7 +369,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
     title: `Payment received — ${clientName}`,
     detail: `$${amountPaid.toFixed(2)} · ${packageName}`,
     priority: 'high',
-    href: fulfillment.adminHref,
+    href: siteUrl || fulfillment.adminHref,
     objectId: airtableResult.recordId,
     metadata: {
       stripeSessionId: session.id,

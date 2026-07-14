@@ -3,10 +3,12 @@ import Link from 'next/link';
 export default async function CheckoutSuccessPage({
   searchParams,
 }: {
-  searchParams: Promise<{ type?: string }>;
+  searchParams: Promise<{ type?: string; package?: string; fulfillment?: string }>;
 }) {
-  const { type } = await searchParams;
+  const { type, package: packageId, fulfillment } = await searchParams;
   const isSubscription = type === 'subscription';
+  const isWebsitePortalAuto =
+    fulfillment === 'website-portal-auto' || packageId === 'website_portal_starter';
 
   return (
     <main className="min-h-screen bg-neutral-50">
@@ -22,19 +24,27 @@ export default async function CheckoutSuccessPage({
         </div>
 
         <h1 className="text-2xl font-extrabold uppercase tracking-wide text-neutral-900">
-          {isSubscription ? 'Subscription Started' : 'Payment Received'}
+          {isWebsitePortalAuto
+            ? 'You Are Live'
+            : isSubscription
+              ? 'Subscription Started'
+              : 'Payment Received'}
         </h1>
 
         <p className="mt-4 text-sm leading-relaxed text-neutral-600">
-          {isSubscription
-            ? 'Your subscription is active. A confirmation receipt is on its way to your email.'
-            : 'Your payment has been processed successfully. A confirmation receipt is on its way to your email.'}
+          {isWebsitePortalAuto
+            ? 'Your payment went through. We are finishing your website and client portal now — usually within a minute.'
+            : isSubscription
+              ? 'Your subscription is active. A confirmation receipt is on its way to your email.'
+              : 'Your payment has been processed successfully. A confirmation receipt is on its way to your email.'}
         </p>
 
         <p className="mt-3 text-sm leading-relaxed text-neutral-600">
-          {isSubscription
-            ? 'Watch for your welcome email with portal access. Manage billing anytime from your portal after you sign in.'
-            : 'Your onboarding has been queued. Watch for your welcome email with portal access, next steps, and the first items needed to begin delivery.'}
+          {isWebsitePortalAuto
+            ? 'Check your email for your live website link and portal login credentials. You can also open the client login below once that email arrives.'
+            : isSubscription
+              ? 'Watch for your welcome email with portal access. Manage billing anytime from your portal after you sign in.'
+              : 'Your onboarding has been queued. Watch for your welcome email with portal access, next steps, and the first items needed to begin delivery.'}
         </p>
 
         <Link

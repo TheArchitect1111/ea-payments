@@ -14,6 +14,7 @@ export interface OnboardingWebhookPayload {
   airtableRecordId?: string;
   portalSlug?: string;
   portalLoginUrl?: string;
+  siteUrl?: string;
   packageId?: string;
   packageDisplayName?: string;
   fulfillmentType?: string;
@@ -37,6 +38,7 @@ export function buildOnboardingWebhookBody(
     packagePurchased: payload.packageName,
     packageName: payload.packageName,
     portalSlug: payload.portalSlug,
+    siteUrl: payload.siteUrl,
     organization: payload.organization,
     packageId: payload.packageId,
     packageDisplayName: payload.packageDisplayName,
