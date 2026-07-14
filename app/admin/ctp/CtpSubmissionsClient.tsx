@@ -141,7 +141,22 @@ export default function CtpSubmissionsClient({
                         <Meta label="Assessment" value={submission.assessmentId} />
                         <Meta label="Workspace" value={submission.workspaceStatus} />
                         <Meta label="Studio" value={submission.studioStatus} />
+                        <Meta label="Portal" value={submission.portalSlug ? `/portal/${submission.portalSlug}` : '—'} />
+                        <Meta label="Site" value={submission.siteUrl || '—'} />
                       </div>
+                      {submission.siteUrl ? (
+                        <p className="text-sm">
+                          <a
+                            href={submission.siteUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="font-bold underline"
+                            style={{ color: NAVY }}
+                          >
+                            Open live site
+                          </a>
+                        </p>
+                      ) : null}
 
                       {submission.intakeSummary ? (
                         <div>

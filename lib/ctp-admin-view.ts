@@ -39,6 +39,7 @@ export type CtpAdminSubmissionView = {
   submittedAt: string;
   creativeCampaignId?: string;
   portalSlug?: string;
+  siteUrl?: string;
   considerSlug?: string;
   reviewScheduledAt?: string;
   clientType?: string;
@@ -85,6 +86,7 @@ export function buildCtpAdminSubmissionView(submission: CtpSubmission): CtpAdmin
     submittedAt: submission.submittedAt,
     creativeCampaignId: submission.creativeCampaignId,
     portalSlug: submission.portalSlug,
+    siteUrl: submission.siteUrl,
     considerSlug: submission.considerSlug,
     reviewScheduledAt: submission.reviewScheduledAt,
     clientType: submission.clientType,

@@ -5,6 +5,7 @@ import { ensureOrganizationForPortal } from '@/lib/organizations';
 import { createPortalAccess } from '@/lib/portal-access';
 import type { PortalConfig } from '@/lib/catalog';
 import { scheduleCtpStudioCampaign } from '@/lib/ctp-studio-bridge';
+import { scheduleCtpWebsiteProvision } from '@/lib/ctp-website-provision';
 import {
   getCtpSubmissionById,
   updateCtpSubmission,
@@ -68,6 +69,7 @@ async function markWorkspaceActive(
     `Portal ready at /portal/${portalSlug}`,
   );
   scheduleCtpStudioCampaign(submission.id);
+  scheduleCtpWebsiteProvision(submission.id);
 }
 
 export async function runCtpWorkspaceProvision(
