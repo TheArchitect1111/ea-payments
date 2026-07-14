@@ -7,6 +7,7 @@ const LINKS = [
   { title: 'Creative Studio', href: '/admin/creative-studio', eyebrow: 'Communications' },
   { title: 'Content Requests', href: '/admin/content-requests', eyebrow: 'Delivery' },
   { title: 'Launch Command', href: '/launch', eyebrow: 'Readiness' },
+  { title: 'Buy Website + Portal', href: '/buy', eyebrow: 'Commerce' },
   { title: 'Capability Marketplace', href: '/admin/capability-marketplace', eyebrow: 'Platform' },
   { title: 'Workspace Preview', href: '/admin/workspace-preview', eyebrow: 'Platform' },
   { title: 'Client Portal Login', href: '/portal/login', eyebrow: 'Clients' },

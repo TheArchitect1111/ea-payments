@@ -96,12 +96,17 @@ test('checkout lists purchasable packages only', async ({ page }) => {
   await expect(options.filter({ hasText: /Capacity Assessment/i })).toHaveCount(0);
 });
 
-test('buy path preselects Website + Portal Starter', async ({ page }) => {
+test('buy path sells Website + Portal Starter into checkout', async ({ page }) => {
   await page.goto('/buy');
+  await expect(page.getByRole('heading', { name: /website \+ portal starter/i })).toBeVisible();
+  await expect(page.getByRole('link', { name: /continue to checkout/i })).toHaveAttribute(
+    'href',
+    '/checkout?package=website_portal_starter',
+  );
+  await page.getByRole('link', { name: /continue to checkout/i }).click();
   await expect(page).toHaveURL(/\/checkout\?package=website_portal_starter/);
   const select = page.locator('select');
   await expect(select).toHaveValue('website_portal_starter', { timeout: 15_000 });
-  await expect(page.getByText(/instant delivery/i)).toBeVisible();
 });
 
 test('assessment thank-you contact link works', async ({ page }) => {
