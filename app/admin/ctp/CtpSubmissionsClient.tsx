@@ -142,13 +142,37 @@ export default function CtpSubmissionsClient({
                         <Meta label="Assessment" value={submission.assessmentId} />
                         <Meta label="Workspace" value={submission.workspaceStatus} />
                         <Meta label="Studio" value={submission.studioStatus} />
-                        <Meta label="Portal" value={submission.portalSlug ? `/portal/${submission.portalSlug}` : '—'} />
+                        <Meta
+                          label="Portal"
+                          value={
+                            submission.portalPublicUrl ||
+                            (submission.portalSlug ? `/portal/${submission.portalSlug}` : '—')
+                          }
+                        />
                         <Meta label="Site" value={submission.siteUrl || '—'} />
                         <Meta
                           label="Digital score"
                           value={
                             typeof submission.digitalScore === 'number'
                               ? `${submission.digitalScore}/100`
+                              : '—'
+                          }
+                        />
+                        <Meta
+                          label="Social / GBP"
+                          value={
+                            typeof submission.socialScore === 'number' ||
+                            typeof submission.gbpScore === 'number'
+                              ? [
+                                  typeof submission.socialScore === 'number'
+                                    ? `Social ${submission.socialScore}`
+                                    : null,
+                                  typeof submission.gbpScore === 'number'
+                                    ? `GBP ${submission.gbpScore}`
+                                    : null,
+                                ]
+                                  .filter(Boolean)
+                                  .join(' · ')
                               : '—'
                           }
                         />
@@ -179,6 +203,17 @@ export default function CtpSubmissionsClient({
                           </p>
                           {submission.portalSlug ? (
                             <p className="mt-2 text-sm flex flex-wrap gap-3">
+                              {submission.portalPublicUrl ? (
+                                <a
+                                  href={submission.portalPublicUrl}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="font-bold underline"
+                                  style={{ color: NAVY }}
+                                >
+                                  Client vanity portal
+                                </a>
+                              ) : null}
                               <a
                                 href={`/portal/${encodeURIComponent(submission.portalSlug)}/ctp`}
                                 target="_blank"

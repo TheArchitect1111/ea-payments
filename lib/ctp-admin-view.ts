@@ -1,5 +1,6 @@
 import type { CtpAssetManifest, CtpAssetManifestEntry } from '@/lib/ctp-asset-store';
 import { ctpClientTypeLabel } from '@/lib/ctp-client-type';
+import { publicPortalUrl } from '@/lib/ctp-portal-host';
 import type { CtpSubmission } from '@/lib/ctp-submissions';
 
 const ASSET_TYPE_LABELS: Record<string, string> = {
@@ -39,6 +40,8 @@ export type CtpAdminSubmissionView = {
   submittedAt: string;
   creativeCampaignId?: string;
   portalSlug?: string;
+  /** Client-facing vanity URL: portal.efficiencyarchitects.online/{slug}/ctp */
+  portalPublicUrl?: string;
   siteUrl?: string;
   considerSlug?: string;
   reviewScheduledAt?: string;
@@ -46,6 +49,8 @@ export type CtpAdminSubmissionView = {
   clientTypeLabel?: string;
   digitalScore?: number;
   digitalImpact?: string;
+  socialScore?: number;
+  gbpScore?: number;
   maturityScore?: number;
   adminWastePercent?: number;
   snapshotSummary?: string;
@@ -95,6 +100,9 @@ export function buildCtpAdminSubmissionView(submission: CtpSubmission): CtpAdmin
     submittedAt: submission.submittedAt,
     creativeCampaignId: submission.creativeCampaignId,
     portalSlug: submission.portalSlug,
+    portalPublicUrl: submission.portalSlug
+      ? publicPortalUrl(submission.portalSlug, 'ctp')
+      : undefined,
     siteUrl: submission.siteUrl,
     considerSlug: submission.considerSlug,
     reviewScheduledAt: submission.reviewScheduledAt,
@@ -104,6 +112,8 @@ export function buildCtpAdminSubmissionView(submission: CtpSubmission): CtpAdmin
       : undefined,
     digitalScore: submission.digitalPresenceAudit?.overallScore,
     digitalImpact: submission.digitalPresenceAudit?.impactEstimate,
+    socialScore: submission.digitalPresenceAudit?.scores?.socialPresence,
+    gbpScore: submission.digitalPresenceAudit?.scores?.googleBusinessProfile,
     maturityScore: submission.executiveSnapshot?.operationalMaturity,
     adminWastePercent: submission.executiveSnapshot?.adminWastePercent,
     snapshotSummary: submission.executiveSnapshot?.summary,
