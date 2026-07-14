@@ -36,6 +36,10 @@ const css = readFileSync(cssPath, 'utf8');
 assert(lib.includes('buildCtpRevealView'), 'Must export reveal view builder');
 assert(lib.includes('executiveSnapshot'), 'Reveal should use executive snapshot when present');
 assert(lib.includes('productionPackage'), 'Reveal should surface production artifacts');
+assert(lib.includes('socialPresence'), 'Reveal digital metric must include socialPresence');
+assert(lib.includes('googleBusinessProfile'), 'Reveal digital metric must include GBP');
+assert(lib.includes('Social '), 'Reveal detail must surface Social score');
+assert(lib.includes('GBP '), 'Reveal detail must surface GBP score');
 assert(lib.includes('publicPortalUrl'), 'Reveal CTAs must use vanity portal host helper');
 assert(lib.includes("publicPortalUrl(input.slug, 'ctp')"), 'Enter portal must deep-link vanity CTP overview');
 assert(
