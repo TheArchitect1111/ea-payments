@@ -54,8 +54,8 @@ Code already rewrites `portal.efficiencyarchitects.online/{client}` → `/portal
    - Hub paths `/portal/{slug}/ctp` must keep working
 
 4. **Local / preview**  
-   - Without the domain attached, emails still *print* vanity URLs; clicks 404 until DNS/Vercel are live  
-   - Hub URLs remain the fallback for internal admin links
+   - Emails/CTAs default to hub `/portal/{slug}` URLs (reliable). Vanity is opt-in via `EA_PORTAL_USE_VANITY_URLS=1`  
+   - Admin desk also links hub `/portal/{slug}/ctp` paths
 
 ```bash
 node scripts/test-ctp-portal-host.mjs

@@ -108,7 +108,7 @@ export async function POST(req: NextRequest) {
     subject,
     title: `Sign in to ${label}`,
     bodyHtml: `
-      <p>Tap the button below to sign in. This link expires in 15 minutes.</p>
+      <p>Tap the button below to sign in. This link expires in 2 hours.</p>
       <p style="margin:24px 0">
         <a href="${link}" style="display:inline-block;background:#1B2B4D;color:#fff;padding:14px 24px;border-radius:6px;font-weight:700;text-decoration:none">
           Sign in to ${label}

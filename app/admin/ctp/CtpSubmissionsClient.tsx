@@ -221,7 +221,7 @@ export default function CtpSubmissionsClient({
                                   className="font-bold underline"
                                   style={{ color: NAVY }}
                                 >
-                                  Client vanity portal
+                                  Client portal
                                 </a>
                               ) : null}
                               <a

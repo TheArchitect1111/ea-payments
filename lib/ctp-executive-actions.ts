@@ -25,12 +25,10 @@ export type CtpExecutiveAction =
   | 'reprovision_workspace';
 
 function baseUrl(): string {
-  return (
-    process.env.REVEAL_BASE_URL ||
-    process.env.NEXT_PUBLIC_BASE_URL ||
-    EA_PLATFORM_URL ||
-    'https://efficiencyarchitects.online'
-  ).replace(/\/$/, '');
+  return (process.env.REVEAL_BASE_URL || process.env.NEXT_PUBLIC_BASE_URL || EA_PLATFORM_URL).replace(
+    /\/$/,
+    '',
+  );
 }
 
 function deliverablesFor(submission: CtpSubmission): string[] {

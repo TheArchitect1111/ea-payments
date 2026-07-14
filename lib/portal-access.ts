@@ -1,6 +1,8 @@
 import crypto from 'node:crypto';
 import { setPortalCredentials } from '@/lib/airtable';
 import type { PortalConfig } from '@/lib/catalog';
+import { publicPortalLoginUrl } from '@/lib/ctp-portal-host';
+import { EA_PLATFORM_URL } from '@/lib/platform-urls';
 
 export interface PortalAccessInput {
   clientName: string;
@@ -103,7 +105,11 @@ async function createEAPortalAccess(
   baseUrl: string,
   loginPath: string
 ): Promise<PortalAccessResult> {
-  const portalLoginUrl = `${baseUrl}${loginPath}`;
+  // Always use the canonical hub login for EA portal — never vercel.app / vanity defaults.
+  const portalLoginUrl =
+    loginPath === '/portal/login' || loginPath === '/sign-in'
+      ? publicPortalLoginUrl()
+      : `${baseUrl.replace(/\/$/, '')}${loginPath}`;
 
   if (!clientData.airtableRecordId) {
     return { ok: false, error: 'Airtable record ID required for EA portal access creation.' };
@@ -161,7 +167,7 @@ export async function createPortalAccess(
   clientData: PortalAccessInput,
   config: PortalConfig
 ): Promise<PortalAccessResult> {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://ea-payments.vercel.app';
+  const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL ?? EA_PLATFORM_URL).replace(/\/$/, '');
 
   switch (config.platform) {
     case 'efficiency-architects':

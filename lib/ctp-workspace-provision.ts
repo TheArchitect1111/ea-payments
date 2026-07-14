@@ -173,7 +173,7 @@ export async function runCtpWorkspaceProvision(
       `Temporary Password: ${portalResult.tempPassword}. ` +
       'Log in using the button above. Contact us to update your password at any time.';
     try {
-      // Prefer vanity host CTAs (portal.efficiencyarchitects.online/{slug})
+      // Hub portal CTAs by default (publicPortalUrl); vanity opt-in via EA_PORTAL_USE_VANITY_URLS=1
       // over hub /portal/login links from createPortalAccess.
       const portalUrl = publicPortalUrl(slug, 'ctp');
       const loginUrl = portalLoginUrl();

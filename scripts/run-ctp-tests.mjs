@@ -17,6 +17,7 @@ const SPINE = [
   'test-ctp-client-type.mjs',
   'test-ctp-digital-presence.mjs',
   'test-ctp-portal-host.mjs',
+  'test-canonical-portal-links.mjs',
   'test-ctp-executive-email.mjs',
   'test-ctp-approve-reveal.mjs',
   'test-ctp-mission-control-attention.mjs',

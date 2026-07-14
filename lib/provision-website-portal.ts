@@ -10,6 +10,7 @@ import {
 } from '@/lib/experience-builder/page-store';
 import { previewPathForPage, type ExperiencePage } from '@/lib/experience-builder/types';
 import { airtableConfigured } from '@/lib/data/airtable-client';
+import { publicPortalLoginUrl } from '@/lib/ctp-portal-host';
 import { EA_PLATFORM_URL } from '@/lib/platform-urls';
 import { syntheticOrgId } from '@/lib/platform-store';
 
@@ -33,10 +34,7 @@ export type WebsitePortalProvisionResult = {
 };
 
 function baseUrl(): string {
-  return (process.env.NEXT_PUBLIC_BASE_URL || EA_PLATFORM_URL || 'https://efficiencyarchitects.online').replace(
-    /\/$/,
-    '',
-  );
+  return (process.env.NEXT_PUBLIC_BASE_URL || EA_PLATFORM_URL).replace(/\/$/, '');
 }
 
 export function sitePathForSlug(portalSlug: string): string {
@@ -53,7 +51,7 @@ export function buildStarterWebsitePuckData(input: WebsitePortalProvisionInput):
     input.tagline?.trim() ||
     'A clear offer, a trusted next step, and a client portal that keeps work moving.';
   const industry = input.industry?.trim();
-  const portalLogin = `${baseUrl()}/portal/login`;
+  const portalLogin = publicPortalLoginUrl();
   const sitePath = sitePathForSlug(input.portalSlug);
 
   return {

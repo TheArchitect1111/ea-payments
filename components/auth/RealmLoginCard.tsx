@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import MagicLinkForm from '@/components/auth/MagicLinkForm';
 import type { MagicLinkRealm } from '@/lib/magic-link';
 
@@ -23,9 +24,12 @@ export default function RealmLoginCard({
   buttonLabel,
   showTitle,
 }: Props) {
+  const [dismissed, setDismissed] = useState(false);
+  const showError = Boolean(error) && !dismissed;
+
   return (
     <div className="pl-card">
-      {error ? (
+      {showError ? (
         <p className="pl-error" role="alert">
           {error}
         </p>
@@ -37,6 +41,7 @@ export default function RealmLoginCard({
         subtitle={subtitle}
         buttonLabel={buttonLabel}
         showTitle={showTitle}
+        onSent={() => setDismissed(true)}
       />
     </div>
   );

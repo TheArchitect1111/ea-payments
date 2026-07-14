@@ -1,6 +1,8 @@
 /**
  * Market-facing names and clean public URLs (no demo-client, no ea-payments in tester links).
  */
+import { EA_PLATFORM_URL } from '@/lib/platform-urls';
+
 export const PRODUCT_NAMES = {
   platform: 'Efficiency Architects',
   simplifiCapture: 'capture.efficiencyarchitects.app',
@@ -9,8 +11,7 @@ export const PRODUCT_NAMES = {
   pulseHub: 'pulse.efficiencyarchitects.app',
 } as const;
 
-const BASE =
-  process.env.NEXT_PUBLIC_BASE_URL?.replace(/\/$/, '') ?? 'https://ea-payments.vercel.app';
+const BASE = process.env.NEXT_PUBLIC_BASE_URL?.replace(/\/$/, '') ?? EA_PLATFORM_URL;
 
 /** Links you send to real testers — product verb in path, not backend slug. */
 export const PUBLIC_LINKS = {
@@ -23,7 +24,7 @@ export const PUBLIC_LINKS = {
   /** Magnifi — read a story (demo) */
   storyDemo: `${BASE}/story/selena`,
   /** Portal sign-in */
-  signIn: `${BASE}/sign-in`,
+  signIn: `${BASE}/portal/login`,
   /** Install Amplifi browser button */
   installAmplifi: `${BASE}/amplifi/install`,
   start: `${BASE}/start`,
@@ -36,7 +37,7 @@ export const CUSTOM_DOMAIN_MAP: Record<string, string> = {
   'capture.efficiencyarchitects.online': '/capture',
   'amplify.efficiencyarchitects.online': '/amplifi',
   'story.efficiencyarchitects.online': '/story/selena',
-  'pulse.efficiencyarchitects.online': '/sign-in?next=/pulse',
+  'pulse.efficiencyarchitects.online': '/portal/login?next=/portal/demo-client/pulse',
   // Portal vanity root is handled by lib/ctp-portal-host (rewrite /{slug} → /portal/{slug}).
 };
 

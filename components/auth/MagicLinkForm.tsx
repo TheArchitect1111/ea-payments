@@ -1,6 +1,7 @@
 'use client';
 
 import { FormEvent, useState } from 'react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import type { MagicLinkRealm } from '@/lib/magic-link';
 import { getRealmLoginCopy } from '@/lib/auth/realm-login-copy';
 
@@ -12,6 +13,8 @@ type Props = {
   buttonLabel?: string;
   /** Set false when the page header already shows the title (avoids duplicate headings). */
   showTitle?: boolean;
+  /** Called after a successful send so parents can clear sticky URL errors. */
+  onSent?: () => void;
 };
 
 export default function MagicLinkForm({
@@ -21,20 +24,33 @@ export default function MagicLinkForm({
   subtitle,
   buttonLabel,
   showTitle = true,
+  onSent,
 }: Props) {
   const copy = getRealmLoginCopy(realm);
   const resolvedTitle = title ?? copy.cardTitle;
   const resolvedSubtitle = subtitle ?? copy.cardSubtitle;
   const resolvedButton = buttonLabel ?? copy.buttonLabel;
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  function clearStickyUrlError() {
+    if (!searchParams.get('error')) return;
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete('error');
+    const qs = params.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+  }
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError('');
     setLoading(true);
+    clearStickyUrlError();
 
     try {
       const res = await fetch('/api/auth/magic-link', {
@@ -52,6 +68,7 @@ export default function MagicLinkForm({
 
       setSent(true);
       setLoading(false);
+      onSent?.();
     } catch {
       setError('Something went wrong. Please try again.');
       setLoading(false);
@@ -66,6 +83,9 @@ export default function MagicLinkForm({
         ) : null}
         <p className="pl-success">{copy.sentMessage}</p>
         <p className="pl-lede">{copy.sentDetail}</p>
+        <p className="pl-lede" style={{ marginTop: '0.75rem' }}>
+          Use only the newest email. Older login links will keep failing.
+        </p>
         <button type="button" className="pl-btn pl-btn-secondary" onClick={() => setSent(false)}>
           {copy.sendAnotherLabel}
         </button>

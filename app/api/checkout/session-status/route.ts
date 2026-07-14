@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { findPortalClientByEmail } from '@/lib/airtable';
+import { publicPortalLoginUrl } from '@/lib/ctp-portal-host';
 import { getStripe } from '@/lib/stripe';
 import { findPublishedSitePage, siteUrlForSlug } from '@/lib/provision-website-portal';
 
@@ -49,11 +50,7 @@ export async function GET(req: NextRequest) {
       const client = await findPortalClientByEmail(email);
       if (client.ok && client.slug) {
         portalSlug = client.slug;
-        const base = (process.env.NEXT_PUBLIC_BASE_URL || 'https://efficiencyarchitects.online').replace(
-          /\/$/,
-          '',
-        );
-        portalLoginUrl = `${base}/portal/login`;
+        portalLoginUrl = publicPortalLoginUrl();
         if (isWebsitePortalAuto) {
           const page = await findPublishedSitePage(portalSlug);
           if (page) siteUrl = siteUrlForSlug(portalSlug);

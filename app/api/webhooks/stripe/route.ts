@@ -35,6 +35,7 @@ import {
   magicLinkConfigured,
   WELCOME_MAGIC_LINK_TTL_MS,
 } from '@/lib/magic-link';
+import { publicPortalLoginUrl } from '@/lib/ctp-portal-host';
 import { EA_PLATFORM_URL } from '@/lib/platform-urls';
 
 export const dynamic = 'force-dynamic';
@@ -198,8 +199,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
 
   const portalConfig = checkoutOffer?.portalConfig ?? catalogItem?.portalConfig;
   const portalLoginFallback =
-    catalogItem?.portalLoginUrl ??
-    `${process.env.NEXT_PUBLIC_BASE_URL ?? 'https://ea-payments.vercel.app'}/portal/login`;
+    catalogItem?.portalLoginUrl ?? publicPortalLoginUrl();
 
   let tempCredentials: string | undefined;
   let portalSlug: string | undefined;
@@ -526,7 +526,7 @@ async function handleSubscriptionCheckoutCompleted(
   }
 
   let portalSlug: string | undefined;
-  let portalLoginUrl = `${process.env.NEXT_PUBLIC_BASE_URL ?? 'https://ea-payments.vercel.app'}/portal/login`;
+  let portalLoginUrl = publicPortalLoginUrl();
   let tempCredentials: string | undefined;
 
   if (plan.portalConfig && airtableResult.recordId) {
@@ -809,8 +809,8 @@ async function handleProposalPayment(
   }
 
   // 6. Provision EA portal access and write credentials to the Client Record.
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://ea-payments.vercel.app';
-  let portalLoginUrl = `${baseUrl}/portal/login`;
+  const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL ?? EA_PLATFORM_URL).replace(/\/$/, '');
+  let portalLoginUrl = publicPortalLoginUrl();
   let portalSlug: string | undefined;
   let tempCredentials: string | undefined;
 

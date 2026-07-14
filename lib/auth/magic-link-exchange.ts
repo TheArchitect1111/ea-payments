@@ -2,7 +2,7 @@ import { findPortalClientByEmail, getClientByPortalSlug, updateClientEngagementS
 import { findAdminAccount } from '@/lib/ea-admin-users';
 import { makeAdminSessionCookie, signAdminSession } from '@/lib/ea-admin-auth';
 import { getClientSuccessProfile } from '@/lib/client-success';
-import { verifyMagicLinkToken, type MagicLinkRealm } from '@/lib/magic-link';
+import { verifyMagicLinkTokenDetailed, type MagicLinkRealm } from '@/lib/magic-link';
 import { makeSessionCookie, signSession } from '@/lib/ea-portal-auth';
 import { emitPulseEvent } from '@/lib/pulse-bus';
 import { resolveAdminIdentity, resolvePortalIdentity } from '@/lib/org-provision';
@@ -57,10 +57,14 @@ async function completePortalLogin(slug: string, recordId: string | undefined): 
  * removes the prior duplication between the two flows.
  */
 export async function exchangeMagicLinkToken(token: string): Promise<MagicLinkExchangeResult> {
-  const payload = verifyMagicLinkToken(token);
-  if (!payload) {
-    return { ok: false, realm: 'portal', error: 'expired' };
+  const verified = verifyMagicLinkTokenDetailed(token);
+  if (!verified.ok) {
+    if (verified.error === 'missing_secret') {
+      return { ok: false, realm: 'portal', error: 'config' };
+    }
+    return { ok: false, realm: 'portal', error: verified.error };
   }
+  const payload = verified.payload;
 
   if (payload.realm === 'admin') {
     const account = await findAdminAccount(payload.email);

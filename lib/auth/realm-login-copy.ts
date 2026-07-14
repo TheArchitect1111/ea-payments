@@ -21,7 +21,8 @@ const DEFAULT_FORM: Pick<
   cardSubtitle: 'Enter your email on file. We will send a one-tap login link — no password needed.',
   buttonLabel: 'Email me a login link',
   sentMessage: 'Check your email — your login link is on the way.',
-  sentDetail: 'Open the email on this device and tap Sign in. The link expires in 15 minutes.',
+  sentDetail:
+    'Open the newest email on this device and tap Sign in. The link expires in 2 hours. No email? That address is not on a portal record yet.',
   sendAnotherLabel: 'Send another link',
   emailPlaceholder: 'you@company.com',
 };
@@ -70,6 +71,8 @@ export function magicLinkErrorMessage(
   switch (code) {
     case 'expired':
       return 'That login link expired. Request a new one below.';
+    case 'invalid':
+      return 'That login link is invalid. Request a new one below — use only the newest email.';
     case 'unauthorized':
       if (realm === 'admin') return 'That email is not registered as an EA admin.';
       if (realm === 'simplifi') return 'No Simplifi account matches that email.';
