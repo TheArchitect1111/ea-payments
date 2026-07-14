@@ -47,6 +47,7 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  // Demo credentials skip email 2FA so portal can be opened when inbox delivery fails.
   if (is2FAEnabled() && !isDemoCredentialAttempt(email, password)) {
     try {
       const pending = await begin2FA({
@@ -55,7 +56,7 @@ export async function POST(req: NextRequest) {
         data: {
           slug: result.slug,
           recordId: result.recordId ?? '',
-          next: nextPath ?? `/portal/${result.slug}`,
+          next: nextPath ?? `/portal/${result.slug}/ctp`,
         },
       });
       return NextResponse.json({
@@ -110,7 +111,8 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  const res = NextResponse.json({ slug: result.slug });
+  const destination = nextPath?.startsWith('/') ? nextPath : `/portal/${result.slug}/ctp`;
+  const res = NextResponse.json({ slug: result.slug, next: destination });
   res.cookies.set(makeSessionCookie(token));
   return res;
 }

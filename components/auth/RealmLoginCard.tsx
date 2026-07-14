@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import MagicLinkForm from '@/components/auth/MagicLinkForm';
+import PortalPasswordLogin from '@/components/auth/PortalPasswordLogin';
 import type { MagicLinkRealm } from '@/lib/magic-link';
 
 type Props = {
@@ -14,7 +15,7 @@ type Props = {
   showTitle?: boolean;
 };
 
-/** Shared magic-link login card — email link only (no password) across admin, portal, and Simplifi. */
+/** Shared login card — email code/link, plus password fallback on portal when inbox delivery fails. */
 export default function RealmLoginCard({
   realm,
   next,
@@ -43,6 +44,7 @@ export default function RealmLoginCard({
         showTitle={showTitle}
         onSent={() => setDismissed(true)}
       />
+      {realm === 'portal' ? <PortalPasswordLogin next={next} /> : null}
     </div>
   );
 }
