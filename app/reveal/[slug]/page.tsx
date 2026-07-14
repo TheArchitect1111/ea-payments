@@ -1,16 +1,10 @@
 import { notFound } from 'next/navigation';
 import { getClientByPortalSlug } from '@/lib/airtable';
-import { NAVY, GOLD } from '@/lib/design-system';
 import { getCtpSubmissionForPortal } from '@/lib/ctp-submissions';
-import { ctpClientTypeLabel } from '@/lib/ctp-client-type';
+import { buildCtpRevealView } from '@/lib/ctp-reveal';
+import RevealExperience from './RevealExperience';
 
 export const dynamic = 'force-dynamic';
-
-const CALENDLY_URL = process.env.CALENDLY_URL ?? 'https://calendly.com/freedom-efficiencyarchitects/30min';
-
-function fmt(n: number): string {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0 }).format(n);
-}
 
 export default async function RevealPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -22,92 +16,13 @@ export default async function RevealPage({ params }: { params: Promise<{ slug: s
     email: client.email,
   });
 
-  const deliverables = [
-    'Your client portal is ready',
-    ctp?.siteUrl ? 'Your starter website is live on the EA hub' : 'Your core operating structure is in place',
-    ctp?.clientType
-      ? `${ctpClientTypeLabel(ctp.clientType)} path is unlocked`
-      : 'Your training and next steps are prepared',
-    'Your executive brief and progress workspace are available',
-  ];
+  const view = buildCtpRevealView({
+    slug,
+    brandName: client.organization || client.clientName,
+    contactName: client.clientName,
+    amountPaid: client.amountPaid,
+    ctp,
+  });
 
-  return (
-    <main className="min-h-screen bg-[#1B2B4D] text-white">
-      <section className="mx-auto max-w-5xl px-6 py-8">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/images/ea-logo.png" alt="Efficiency Architects" className="h-20 w-auto" />
-        <div className="py-12">
-          <p className="text-xs font-bold uppercase tracking-[0.28em]" style={{ color: GOLD }}>
-            {client.organization || client.clientName}
-          </p>
-          <h1 className="mt-4 max-w-3xl text-4xl font-black uppercase tracking-wide sm:text-6xl" style={{ color: GOLD }}>
-            Welcome to the other side.
-          </h1>
-          <p className="mt-5 max-w-2xl text-lg leading-8 text-blue-100/90">
-            This is not a file drop. It is the moment your transformation becomes visible.
-          </p>
-        </div>
-
-        <div className="grid gap-6 lg:grid-cols-[1fr_0.8fr]">
-          <div className="border border-white/15 bg-white/8 p-6">
-            <p className="text-xs font-bold uppercase tracking-[0.22em]" style={{ color: GOLD }}>What We Built</p>
-            <ul className="mt-5 space-y-3">
-              {deliverables.map((item) => (
-                <li key={item} className="flex gap-3 text-sm leading-7 text-blue-50">
-                  <span style={{ color: GOLD }}>✓</span>
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div className="border border-white/15 bg-white/8 p-6">
-            <p className="text-xs font-bold uppercase tracking-[0.22em]" style={{ color: GOLD }}>Impact</p>
-            <div className="mt-5 space-y-4">
-              <div>
-                <p className="text-3xl font-black" style={{ color: GOLD }}>
-                  {ctp?.status === 'Completed' ? 'Unlocked' : 'Ready'}
-                </p>
-                <p className="text-xs uppercase tracking-wider text-blue-100">Reveal Status</p>
-              </div>
-              {typeof ctp?.digitalPresenceAudit?.overallScore === 'number' ? (
-                <div>
-                  <p className="text-3xl font-black" style={{ color: GOLD }}>
-                    {ctp.digitalPresenceAudit.overallScore}/100
-                  </p>
-                  <p className="text-xs uppercase tracking-wider text-blue-100">Digital Presence Baseline</p>
-                </div>
-              ) : (
-                <div>
-                  <p className="text-3xl font-black" style={{ color: GOLD }}>{fmt(client.amountPaid || 0)}</p>
-                  <p className="text-xs uppercase tracking-wider text-blue-100">Project Investment Confirmed</p>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-8 flex flex-wrap gap-3">
-          <a href={`/portal/${slug}`} className="px-6 py-4 text-xs font-black uppercase tracking-[0.2em]" style={{ backgroundColor: GOLD, color: NAVY }}>
-            Enter Your Portal
-          </a>
-          {ctp?.siteUrl ? (
-            <a
-              href={ctp.siteUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="border border-white/40 px-6 py-4 text-xs font-black uppercase tracking-[0.2em] text-white"
-            >
-              Open Live Website
-            </a>
-          ) : null}
-          <a href={`/portal/${slug}/ctp`} className="border border-white/40 px-6 py-4 text-xs font-black uppercase tracking-[0.2em] text-white">
-            View Progress
-          </a>
-          <a href={CALENDLY_URL} className="border border-white/40 px-6 py-4 text-xs font-black uppercase tracking-[0.2em] text-white">
-            Book Strategy Session
-          </a>
-        </div>
-      </section>
-    </main>
-  );
+  return <RevealExperience view={view} />;
 }

@@ -1,0 +1,278 @@
+.reveal {
+  --reveal-navy: #0f1a33;
+  --reveal-ink: #1b2b4d;
+  --reveal-gold: #d8ad3d;
+  --reveal-cream: #f4efe4;
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+  color: var(--reveal-cream);
+  background: var(--reveal-navy);
+}
+
+.atmosphere {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 55% at 50% -10%, rgba(216, 173, 61, 0.28), transparent 55%),
+    radial-gradient(ellipse 50% 40% at 90% 80%, rgba(70, 110, 180, 0.18), transparent 50%),
+    linear-gradient(165deg, #0c1428 0%, #1b2b4d 48%, #121c34 100%);
+}
+
+.grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.08;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  pointer-events: none;
+}
+
+.stage {
+  position: relative;
+  z-index: 1;
+  max-width: 56rem;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 4rem;
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.9s ease, transform 0.9s ease;
+}
+
+.stageIn {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.logo {
+  height: 4.5rem;
+  width: auto;
+  margin-bottom: 2rem;
+}
+
+.brand {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--reveal-gold);
+}
+
+.track {
+  margin: 0.45rem 0 0;
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  color: rgba(244, 239, 228, 0.65);
+}
+
+.headline {
+  margin: 1.5rem 0 0;
+  max-width: 14ch;
+  font-size: clamp(2.6rem, 7vw, 4.6rem);
+  font-weight: 700;
+  line-height: 1.05;
+  color: var(--reveal-gold);
+}
+
+.lede {
+  margin: 1.25rem 0 0;
+  max-width: 34rem;
+  font-size: 1.125rem;
+  line-height: 1.7;
+  color: rgba(244, 239, 228, 0.86);
+}
+
+.shimmer {
+  margin-top: 1.75rem;
+  height: 2px;
+  width: min(100%, 18rem);
+  background: linear-gradient(90deg, transparent, var(--reveal-gold), transparent);
+  background-size: 200% 100%;
+  animation: ctpRevealShimmer 2.4s ease-in-out infinite;
+}
+
+.panel {
+  margin-top: 2.25rem;
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+.panelVisible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.metrics {
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+}
+
+.metricValue {
+  margin: 0;
+  font-size: clamp(2rem, 4vw, 2.75rem);
+  font-weight: 700;
+  color: var(--reveal-gold);
+}
+
+.metricLabel {
+  margin: 0.35rem 0 0;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(244, 239, 228, 0.72);
+}
+
+.metricDetail {
+  margin: 0.35rem 0 0;
+  font-size: 0.85rem;
+  color: rgba(244, 239, 228, 0.55);
+}
+
+.sectionLabel {
+  margin: 0 0 0.75rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--reveal-gold);
+}
+
+.production {
+  margin: 0 0 1rem;
+  font-size: 1rem;
+  color: rgba(244, 239, 228, 0.78);
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.listItem {
+  display: flex;
+  gap: 0.75rem;
+  font-size: 1rem;
+  line-height: 1.55;
+  color: rgba(244, 239, 228, 0.9);
+  opacity: 0;
+  transform: translateX(-8px);
+}
+
+.listItemVisible {
+  animation: ctpRevealItem 0.55s ease forwards;
+}
+
+.check {
+  color: var(--reveal-gold);
+  font-weight: 800;
+}
+
+.cta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.95rem 1.25rem;
+  border: 1px solid rgba(244, 239, 228, 0.35);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--reveal-cream);
+  text-decoration: none;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.btn:hover {
+  border-color: var(--reveal-gold);
+  color: var(--reveal-gold);
+}
+
+.btnPrimary {
+  background: var(--reveal-gold);
+  border-color: var(--reveal-gold);
+  color: var(--reveal-ink);
+}
+
+.btnPrimary:hover {
+  color: var(--reveal-ink);
+  filter: brightness(1.05);
+}
+
+.controls {
+  margin-top: 2.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+}
+
+.continue {
+  border: none;
+  background: transparent;
+  color: rgba(244, 239, 228, 0.7);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  cursor: pointer;
+  padding: 0;
+}
+
+.continue:disabled {
+  cursor: default;
+  color: rgba(216, 173, 61, 0.85);
+}
+
+.dots {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.dot {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 9999px;
+  background: rgba(244, 239, 228, 0.25);
+}
+
+.dotOn {
+  background: var(--reveal-gold);
+}
+
+@keyframes ctpRevealShimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+@keyframes ctpRevealItem {
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@media (max-width: 640px) {
+  .stage {
+    padding-top: 1.75rem;
+  }
+
+  .logo {
+    height: 3.5rem;
+  }
+}
