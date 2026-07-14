@@ -80,11 +80,36 @@ export async function POST(req: NextRequest) {
 
   if (!authorized) {
     const missingAirtable = !process.env.AIRTABLE_API_KEY?.trim();
-    const message =
-      process.env.NODE_ENV === 'development' && missingAirtable
-        ? 'Dev setup incomplete: add AIRTABLE_API_KEY and RESEND_API_KEY to ea-wt-home/.env.local (Vercel → Settings → Environment Variables). No email was sent.'
-        : 'If that email is registered, a login link is on its way.';
-    return NextResponse.json({ ok: true, message });
+    if (process.env.NODE_ENV === 'development' && missingAirtable) {
+      return NextResponse.json(
+        {
+          error:
+            'Dev setup incomplete: add AIRTABLE_API_KEY and RESEND_API_KEY to .env.local. No email was sent.',
+        },
+        { status: 503 },
+      );
+    }
+    // Be honest — the prior "ok: true" silent no-op made users click stale links
+    // and report endless "login link expired" failures.
+    if (realm === 'admin') {
+      return NextResponse.json(
+        { error: 'That email is not registered as an EA admin.' },
+        { status: 404 },
+      );
+    }
+    if (realm === 'simplifi') {
+      return NextResponse.json(
+        { error: 'No Simplifi account matches that email.' },
+        { status: 404 },
+      );
+    }
+    return NextResponse.json(
+      {
+        error:
+          'No portal account matches that email. Use the Email / Portal Username on the Client Record (or demo@efficiencyarchitects.online for the demo).',
+      },
+      { status: 404 },
+    );
   }
 
   const token = createMagicLinkToken({ realm, email, next });
