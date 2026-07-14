@@ -9,6 +9,7 @@ import { EA_PORTAL_COOKIE, EA_PORTAL_SESSION } from '@/lib/chassis/ea-portal';
 import { resolveProductHostRedirect } from '@/lib/product-routes';
 import { resolveCustomDomainRedirect } from '@/lib/marketing-urls';
 import { resolveSimplifiAppHostRedirect } from '@/lib/simplifi-app-host';
+import { resolvePortalHostRewrite } from '@/lib/ctp-portal-host';
 
 const EA_ADMIN_COOKIE = 'ea_admin_session';
 
@@ -115,7 +116,17 @@ export async function middleware(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname;
 
-
+  const portalHost = resolvePortalHostRewrite(host, pathname);
+  if (portalHost) {
+    if ('redirectPath' in portalHost) {
+      const target = new URL(portalHost.redirectPath, request.url);
+      target.search = request.nextUrl.search;
+      return NextResponse.redirect(target);
+    }
+    const url = request.nextUrl.clone();
+    url.pathname = portalHost.rewritePath;
+    return NextResponse.rewrite(url);
+  }
 
   const simplifiAppEntry = resolveSimplifiAppHostRedirect(host, pathname);
 
@@ -197,6 +208,9 @@ export const config = {
     '/portal/:slug',
     '/portal/:slug/:path*',
     '/admin/:path*',
+    // Vanity portal host: portal.efficiencyarchitects.online/{client}
+    '/:slug',
+    '/:slug/:path*',
   ],
 
 };

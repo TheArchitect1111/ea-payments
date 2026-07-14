@@ -7,6 +7,7 @@ import type { PortalConfig } from '@/lib/catalog';
 import { scheduleCtpStudioCampaign } from '@/lib/ctp-studio-bridge';
 import { scheduleCtpWebsiteProvision } from '@/lib/ctp-website-provision';
 import { scheduleCtpProduction } from '@/lib/ctp-production-run';
+import { publicPortalLoginUrl, publicPortalUrl } from '@/lib/ctp-portal-host';
 import {
   getCtpSubmissionById,
   updateCtpSubmission,
@@ -22,8 +23,7 @@ const EA_PORTAL_CONFIG: PortalConfig = {
 const CTP_WELCOME_PACKAGE = 'Consider The Possibilities™';
 
 function portalLoginUrl(): string {
-  const base = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://ea-payments.vercel.app';
-  return `${base}/portal/login`;
+  return publicPortalLoginUrl();
 }
 
 async function emitWorkspacePulse(
@@ -67,7 +67,7 @@ async function markWorkspaceActive(
   await emitWorkspacePulse(
     { ...submission, portalSlug },
     'ctp.workspace.active',
-    `Portal ready at /portal/${portalSlug}`,
+    `Portal ready at ${publicPortalUrl(portalSlug)}`,
   );
   scheduleCtpStudioCampaign(submission.id);
   scheduleCtpWebsiteProvision(submission.id);
@@ -163,9 +163,7 @@ export async function runCtpWorkspaceProvision(
       `Temporary Password: ${portalResult.tempPassword}. ` +
       'Log in using the button above. Contact us to update your password at any time.';
     try {
-      const portalUrl =
-        portalResult.portalLoginUrl ??
-        `${(process.env.NEXT_PUBLIC_BASE_URL ?? 'https://efficiencyarchitects.online').replace(/\/$/, '')}/portal/${slug}`;
+      const portalUrl = portalResult.portalLoginUrl ?? publicPortalUrl(slug);
       const track =
         submission.clientTypeClassification?.label ||
         submission.clientType ||
@@ -176,7 +174,7 @@ export async function runCtpWorkspaceProvision(
         packageName: CTP_WELCOME_PACKAGE,
         portalLoginUrl: portalUrl,
         tempCredentials,
-        nextSteps: `Your ${track} workspace is live at /portal/${slug}. Review your executive brief, then book an Executive Strategy Session when you are ready to decide direction.`,
+        nextSteps: `Your ${track} workspace is live at ${publicPortalUrl(slug)}. Review your executive brief, then book an Executive Strategy Session when you are ready to decide direction.`,
       });
     } catch (err) {
       console.error('[ctp-workspace-provision] welcome email failed:', err);
