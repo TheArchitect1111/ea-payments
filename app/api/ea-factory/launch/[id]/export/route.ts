@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { exportEACPLaunchJson, exportEACPLaunchMarkdown, getEACPLaunch } from '@/lib/eacp-launch';
+import {
+  adminAuthJsonError,
+  requireAdminActionFromRequest,
+} from '@/lib/admin-session-guard';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -9,6 +13,9 @@ type PageProps = {
 };
 
 export async function GET(request: NextRequest, { params }: PageProps) {
+  const auth = await requireAdminActionFromRequest(request, 'admin:manage');
+  if (!auth.ok) return adminAuthJsonError(auth);
+
   const { id } = await params;
   const launch = await getEACPLaunch(id);
   if (!launch) {

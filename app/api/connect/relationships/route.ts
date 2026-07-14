@@ -11,6 +11,10 @@ import {
 import { handoffConnectRelationship } from '@/lib/connect-pipeline';
 import { logConnectChannelDelivery } from '@/lib/connect-delivery-log';
 import { sendConnectSms, sendConnectWelcomeEmail, sendInternalNotification } from '@/lib/email';
+import {
+  adminAuthJsonError,
+  requireAdminSessionFromRequest,
+} from '@/lib/admin-session-guard';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -21,7 +25,11 @@ function clean(value: unknown): string | undefined {
   return trimmed || undefined;
 }
 
+/** Admin-only list — public GET leaked relationship PII. POST remains public for Connect capture. */
 export async function GET(request: NextRequest) {
+  const auth = await requireAdminSessionFromRequest(request);
+  if (!auth.ok) return adminAuthJsonError(auth);
+
   const org = request.nextUrl.searchParams.get('org') ?? undefined;
   const relationships = await listConnectRelationships(org);
   return NextResponse.json({ relationships });

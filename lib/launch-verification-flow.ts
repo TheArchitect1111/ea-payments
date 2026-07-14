@@ -1,6 +1,6 @@
 import type Stripe from 'stripe';
 import { createOrUpdateClientRecord } from '@/lib/airtable';
-import { sendWelcomeEmail, sendAdminNotification } from '@/lib/email';
+import { sendWelcomeEmail, sendAdminNotification, sendPaymentConfirmationEmail } from '@/lib/email';
 import { fireOnboardingWebhook } from '@/lib/make-webhooks';
 import {
   LAUNCH_VERIFICATION_AIRTABLE_PACKAGE,
@@ -9,6 +9,7 @@ import {
 } from '@/lib/launch-verification';
 import { lifecycleForPaidClient } from '@/lib/client-lifecycle';
 import { emitPulseEvent } from '@/lib/pulse-bus';
+import { createPortalAccess } from '@/lib/portal-access';
 
 function logLaunchVerificationTransaction(payload: Record<string, unknown>): void {
   console.info('[launch-verification]', JSON.stringify({ ...payload, at: new Date().toISOString() }));
@@ -79,7 +80,39 @@ export async function handleLaunchVerificationPayment(
   }
 
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://www.efficiencyarchitects.online';
-  const portalLoginUrl = `${baseUrl}/portal/login`;
+  let portalLoginUrl = `${baseUrl}/portal/login`;
+  let portalSlug: string | undefined;
+  let tempCredentials: string | undefined;
+
+  // Same portal provision path as proposal payments — required for first login.
+  if (airtableResult.recordId) {
+    try {
+      const portalResult = await createPortalAccess(
+        {
+          clientName,
+          email,
+          organization: meta.organization || undefined,
+          airtableRecordId: airtableResult.recordId,
+        },
+        { platform: 'efficiency-architects', loginPath: '/portal/login' },
+      );
+
+      if (portalResult.ok) {
+        if (portalResult.slug) portalSlug = portalResult.slug;
+        if (portalResult.portalLoginUrl) portalLoginUrl = portalResult.portalLoginUrl;
+        if (portalResult.username && portalResult.tempPassword) {
+          tempCredentials =
+            `Your portal login credentials. Email: ${portalResult.username}. ` +
+            `Temporary Password: ${portalResult.tempPassword}. ` +
+            `Log in using the button above. Contact us to update your password at any time.`;
+        }
+      } else {
+        console.error('[launch-verification] createPortalAccess failed:', portalResult.error);
+      }
+    } catch (err) {
+      console.error('[launch-verification] createPortalAccess threw:', err);
+    }
+  }
 
   try {
     const welcomeResult = await sendWelcomeEmail({
@@ -87,6 +120,7 @@ export async function handleLaunchVerificationPayment(
       email,
       packageName: LAUNCH_VERIFICATION_PRODUCT_NAME,
       portalLoginUrl,
+      tempCredentials,
       platformName: 'Efficiency Architects — Launch Verification',
     });
     if (!welcomeResult.ok) {
@@ -115,6 +149,39 @@ export async function handleLaunchVerificationPayment(
     console.error('[launch-verification] Admin notification threw:', err);
   }
 
+  try {
+    const paymentResult = await sendPaymentConfirmationEmail({
+      email,
+      clientName,
+      packageName: LAUNCH_VERIFICATION_PRODUCT_NAME,
+      amountPaid,
+      paymentDate,
+      portalUrl: portalLoginUrl,
+      stripeTransactionId,
+    });
+    if (!paymentResult.ok) {
+      console.error('[launch-verification] Payment confirmation failed:', paymentResult.error);
+    } else {
+      await emitPulseEvent({
+        product: 'ea-platform',
+        type: 'payment.confirmation_sent',
+        title: `Payment confirmation sent - ${clientName}`,
+        detail: `${LAUNCH_VERIFICATION_PRODUCT_NAME} - ${email}`,
+        priority: 'medium',
+        href: portalLoginUrl,
+        objectId: airtableResult.recordId,
+        metadata: {
+          stripeSessionId: session.id,
+          stripeTransactionId,
+          email,
+          flow: 'launch_verification',
+        },
+      });
+    }
+  } catch (err) {
+    console.error('[launch-verification] Payment confirmation threw:', err);
+  }
+
   await fireOnboardingWebhook({
     event: 'payment.received',
     clientName,
@@ -130,6 +197,22 @@ export async function handleLaunchVerificationPayment(
 
   await emitPulseEvent({
     product: 'ea-platform',
+    type: 'onboarding.started',
+    title: `Onboarding started - ${clientName}`,
+    detail: `${LAUNCH_VERIFICATION_PRODUCT_NAME} - controlled launch validation`,
+    priority: 'high',
+    href: portalLoginUrl,
+    objectId: airtableResult.recordId,
+    metadata: {
+      stripeSessionId: session.id,
+      stripeTransactionId,
+      email,
+      flow: 'launch_verification',
+    },
+  });
+
+  await emitPulseEvent({
+    product: 'ea-platform',
     type: 'launch.verification.completed',
     title: `Launch Verification payment — ${clientName}`,
     detail: `$${amountPaid.toFixed(2)} USD · ${email} · onboarding task created`,
@@ -141,8 +224,27 @@ export async function handleLaunchVerificationPayment(
       stripeTransactionId,
       email,
       flow: 'launch_verification',
+      portalSlug: portalSlug ?? '',
     },
   });
+
+  if (portalSlug) {
+    await emitPulseEvent({
+      product: 'ea-platform',
+      type: 'portal.provisioned',
+      title: `Portal provisioned — ${clientName}`,
+      detail: `Launch Verification · /portal/${portalSlug}`,
+      priority: 'high',
+      href: portalLoginUrl,
+      objectId: airtableResult.recordId,
+      metadata: {
+        stripeSessionId: session.id,
+        email,
+        portalSlug,
+        flow: 'launch_verification',
+      },
+    });
+  }
 
   await emitPulseEvent({
     product: 'ea-platform',
@@ -165,5 +267,6 @@ export async function handleLaunchVerificationPayment(
     stripeSessionId: session.id,
     airtableRecordId: airtableResult.recordId,
     onboardingStatus: LAUNCH_VERIFICATION_ONBOARDING_STATUS,
+    portalSlug: portalSlug ?? null,
   });
 }

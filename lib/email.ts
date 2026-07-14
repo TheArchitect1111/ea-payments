@@ -938,6 +938,366 @@ export async function sendEnhancementRequestConfirmation(data: {
   );
 }
 
+function formatUsd(amount: number): string {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: amount % 1 === 0 ? 0 : 2,
+  }).format(amount);
+}
+
+function firstNameOf(name: string): string {
+  return name.split(' ')[0] || name || 'there';
+}
+
+export async function sendPaymentConfirmationEmail(data: {
+  email: string;
+  clientName: string;
+  packageName: string;
+  amountPaid: number;
+  paymentDate: string;
+  portalUrl: string;
+  stripeTransactionId?: string;
+}): Promise<{ ok: boolean; error?: string }> {
+  const firstName = firstNameOf(data.clientName);
+  const supportEmail = process.env.SUPPORT_EMAIL ?? 'freedom@efficiencyarchitects.online';
+  const rows: [string, string][] = [
+    ['Product', data.packageName],
+    ['Amount', formatUsd(data.amountPaid)],
+    ['Date', data.paymentDate],
+    ['Reference', data.stripeTransactionId ?? 'Stripe checkout'],
+  ];
+  const bodyHtml = `
+    <p style="margin:0 0 16px;font-size:15px;color:#1A1A2E;line-height:1.7;">Hi ${escHtml(firstName)},</p>
+    <p style="margin:0 0 18px;font-size:15px;color:#1A1A2E;line-height:1.7;">Your payment was received. Your EA workflow is moving into onboarding now.</p>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #E4E4E4;margin:22px 0;">
+      ${rows.map(([label, value]) => `<tr><td style="padding:12px 16px;font-size:12px;font-weight:700;color:#555;">${escHtml(label)}</td><td style="padding:12px 16px;font-size:14px;color:#1A1A2E;">${escHtml(value)}</td></tr>`).join('')}
+    </table>
+    <p style="margin:0;font-size:14px;color:#555;line-height:1.7;">If anything looks incorrect, reply to this email or contact <a href="mailto:${escHtml(supportEmail)}" style="color:#1B2B4D;text-decoration:underline;">${escHtml(supportEmail)}</a>.</p>`;
+
+  return resendEmail(
+    data.email,
+    `Payment confirmed for ${data.packageName}`,
+    baseEmailShell({
+      title: 'Payment Confirmed',
+      eyebrow: 'Commercial Workflow',
+      bodyHtml,
+      ctaLabel: 'Open My Portal',
+      ctaUrl: data.portalUrl,
+    })
+  );
+}
+
+export async function sendPortalInvitationEmail(data: {
+  email: string;
+  clientName: string;
+  portalUrl: string;
+  accessNote?: string;
+}): Promise<{ ok: boolean; error?: string }> {
+  const firstName = firstNameOf(data.clientName);
+  const bodyHtml = `
+    <p style="margin:0 0 16px;font-size:15px;color:#1A1A2E;line-height:1.7;">Hi ${escHtml(firstName)},</p>
+    <p style="margin:0 0 18px;font-size:15px;color:#1A1A2E;line-height:1.7;">Your client experience is ready. This is where your next steps, documents, updates, and launch guidance will live.</p>
+    <p style="margin:0;font-size:14px;color:#555;line-height:1.7;">${escHtml(data.accessNote ?? 'Use the portal link below. If a password reset or magic link is required, follow the prompt on the sign-in screen.')}</p>`;
+
+  return resendEmail(
+    data.email,
+    'Your EA client portal is ready',
+    baseEmailShell({
+      title: 'Portal Invitation',
+      eyebrow: 'Client Experience',
+      bodyHtml,
+      ctaLabel: 'Open Client Experience',
+      ctaUrl: data.portalUrl,
+    })
+  );
+}
+
+export async function sendDiscoveryCallEmail(data: {
+  email: string;
+  clientName: string;
+  schedulingUrl: string;
+}): Promise<{ ok: boolean; error?: string }> {
+  const firstName = firstNameOf(data.clientName);
+  const bodyHtml = `
+    <p style="margin:0 0 16px;font-size:15px;color:#1A1A2E;line-height:1.7;">Hi ${escHtml(firstName)},</p>
+    <p style="margin:0 0 18px;font-size:15px;color:#1A1A2E;line-height:1.7;">Your next step is a discovery call so we can confirm priorities, constraints, and the right operating path before work begins.</p>`;
+
+  return resendEmail(
+    data.email,
+    'Schedule your EA discovery call',
+    baseEmailShell({
+      title: 'Discovery Call',
+      eyebrow: 'Next Step',
+      bodyHtml,
+      ctaLabel: 'Schedule Call',
+      ctaUrl: data.schedulingUrl,
+    })
+  );
+}
+
+export async function sendOnboardingEmail(data: {
+  email: string;
+  clientName: string;
+  portalUrl: string;
+  nextStep?: string;
+}): Promise<{ ok: boolean; error?: string }> {
+  const firstName = firstNameOf(data.clientName);
+  const bodyHtml = `
+    <p style="margin:0 0 16px;font-size:15px;color:#1A1A2E;line-height:1.7;">Hi ${escHtml(firstName)},</p>
+    <p style="margin:0 0 18px;font-size:15px;color:#1A1A2E;line-height:1.7;">Onboarding has started. Your current next step is: <strong>${escHtml(data.nextStep ?? 'open your portal and review the first guidance item')}</strong>.</p>
+    <p style="margin:0;font-size:14px;color:#555;line-height:1.7;">We will keep your portal updated as work moves from onboarding into delivery.</p>`;
+
+  return resendEmail(
+    data.email,
+    'Your EA onboarding has started',
+    baseEmailShell({
+      title: 'Onboarding Started',
+      eyebrow: 'Customer Success',
+      bodyHtml,
+      ctaLabel: 'Open My Portal',
+      ctaUrl: data.portalUrl,
+    })
+  );
+}
+
+export async function sendLearningReminderEmail(data: {
+  email: string;
+  clientName: string;
+  moduleTitle: string;
+  portalUrl: string;
+}): Promise<{ ok: boolean; error?: string }> {
+  const firstName = firstNameOf(data.clientName);
+  const bodyHtml = `
+    <p style="margin:0 0 16px;font-size:15px;color:#1A1A2E;line-height:1.7;">Hi ${escHtml(firstName)},</p>
+    <p style="margin:0 0 18px;font-size:15px;color:#1A1A2E;line-height:1.7;">Your next learning item is ready: <strong>${escHtml(data.moduleTitle)}</strong>.</p>`;
+
+  return resendEmail(
+    data.email,
+    `Learning reminder: ${data.moduleTitle}`,
+    baseEmailShell({
+      title: 'Learning Reminder',
+      eyebrow: 'Training',
+      bodyHtml,
+      ctaLabel: 'Continue Learning',
+      ctaUrl: data.portalUrl,
+    })
+  );
+}
+
+export async function sendCompletionEmail(data: {
+  email: string;
+  clientName: string;
+  outcome: string;
+  portalUrl: string;
+}): Promise<{ ok: boolean; error?: string }> {
+  const firstName = firstNameOf(data.clientName);
+  const bodyHtml = `
+    <p style="margin:0 0 16px;font-size:15px;color:#1A1A2E;line-height:1.7;">Hi ${escHtml(firstName)},</p>
+    <p style="margin:0 0 18px;font-size:15px;color:#1A1A2E;line-height:1.7;">This milestone is complete: <strong>${escHtml(data.outcome)}</strong>.</p>
+    <p style="margin:0;font-size:14px;color:#555;line-height:1.7;">Open your portal for the current status and next recommendation.</p>`;
+
+  return resendEmail(
+    data.email,
+    `Completed: ${data.outcome}`,
+    baseEmailShell({
+      title: 'Milestone Complete',
+      eyebrow: 'Customer Success',
+      bodyHtml,
+      ctaLabel: 'View Progress',
+      ctaUrl: data.portalUrl,
+    })
+  );
+}
+
+export async function sendCertificateEmail(data: {
+  email: string;
+  clientName: string;
+  certificateTitle: string;
+  certificateUrl: string;
+}): Promise<{ ok: boolean; error?: string }> {
+  const firstName = firstNameOf(data.clientName);
+  const bodyHtml = `
+    <p style="margin:0 0 16px;font-size:15px;color:#1A1A2E;line-height:1.7;">Hi ${escHtml(firstName)},</p>
+    <p style="margin:0 0 18px;font-size:15px;color:#1A1A2E;line-height:1.7;">Congratulations. Your certificate is ready: <strong>${escHtml(data.certificateTitle)}</strong>.</p>`;
+
+  return resendEmail(
+    data.email,
+    `Certificate ready: ${data.certificateTitle}`,
+    baseEmailShell({
+      title: 'Certificate Ready',
+      eyebrow: 'Training',
+      bodyHtml,
+      ctaLabel: 'View Certificate',
+      ctaUrl: data.certificateUrl,
+    })
+  );
+}
+
+export async function sendRenewalReminderEmail(data: {
+  email: string;
+  clientName: string;
+  renewalDate: string;
+  portalUrl: string;
+}): Promise<{ ok: boolean; error?: string }> {
+  const firstName = firstNameOf(data.clientName);
+  const bodyHtml = `
+    <p style="margin:0 0 16px;font-size:15px;color:#1A1A2E;line-height:1.7;">Hi ${escHtml(firstName)},</p>
+    <p style="margin:0 0 18px;font-size:15px;color:#1A1A2E;line-height:1.7;">Your EA renewal review is coming up on <strong>${escHtml(data.renewalDate)}</strong>. We will use it to confirm outcomes, priorities, and the next operating cycle.</p>`;
+
+  return resendEmail(
+    data.email,
+    'Your EA renewal review is coming up',
+    baseEmailShell({
+      title: 'Renewal Review',
+      eyebrow: 'Customer Success',
+      bodyHtml,
+      ctaLabel: 'Open My Portal',
+      ctaUrl: data.portalUrl,
+    })
+  );
+}
+
+export async function sendUpsellEmail(data: {
+  email: string;
+  clientName: string;
+  recommendation: string;
+  portalUrl: string;
+}): Promise<{ ok: boolean; error?: string }> {
+  const firstName = firstNameOf(data.clientName);
+  const bodyHtml = `
+    <p style="margin:0 0 16px;font-size:15px;color:#1A1A2E;line-height:1.7;">Hi ${escHtml(firstName)},</p>
+    <p style="margin:0 0 18px;font-size:15px;color:#1A1A2E;line-height:1.7;">Based on the work already underway, the next opportunity we recommend reviewing is: <strong>${escHtml(data.recommendation)}</strong>.</p>
+    <p style="margin:0;font-size:14px;color:#555;line-height:1.7;">Open your portal to review context before deciding.</p>`;
+
+  return resendEmail(
+    data.email,
+    'A recommended next opportunity',
+    baseEmailShell({
+      title: 'Recommended Next Move',
+      eyebrow: 'Growth',
+      bodyHtml,
+      ctaLabel: 'Review Recommendation',
+      ctaUrl: data.portalUrl,
+    })
+  );
+}
+
+export async function sendReferralInvitationEmail(data: {
+  email: string;
+  clientName: string;
+  referralUrl: string;
+}): Promise<{ ok: boolean; error?: string }> {
+  const firstName = firstNameOf(data.clientName);
+  const bodyHtml = `
+    <p style="margin:0 0 16px;font-size:15px;color:#1A1A2E;line-height:1.7;">Hi ${escHtml(firstName)},</p>
+    <p style="margin:0 0 18px;font-size:15px;color:#1A1A2E;line-height:1.7;">If EA has helped create meaningful capacity in your business, you can introduce someone who would benefit from the same operating clarity.</p>`;
+
+  return resendEmail(
+    data.email,
+    'Know a business that needs more capacity?',
+    baseEmailShell({
+      title: 'Referral Invitation',
+      eyebrow: 'Advocate',
+      bodyHtml,
+      ctaLabel: 'Make An Introduction',
+      ctaUrl: data.referralUrl,
+    })
+  );
+}
+
+export async function sendAbandonedAssessmentEmail(data: {
+  email: string;
+  clientName: string;
+  assessmentUrl: string;
+}): Promise<{ ok: boolean; error?: string }> {
+  const firstName = firstNameOf(data.clientName);
+  const bodyHtml = `
+    <p style="margin:0 0 16px;font-size:15px;color:#1A1A2E;line-height:1.7;">Hi ${escHtml(firstName)},</p>
+    <p style="margin:0 0 18px;font-size:15px;color:#1A1A2E;line-height:1.7;">Your assessment is still available. Completing it gives us the context to identify capacity leaks and recommend the right next step.</p>`;
+
+  return resendEmail(
+    data.email,
+    'Finish your EA assessment',
+    baseEmailShell({
+      title: 'Assessment Still Open',
+      eyebrow: 'Operational MRI',
+      bodyHtml,
+      ctaLabel: 'Finish Assessment',
+      ctaUrl: data.assessmentUrl,
+    })
+  );
+}
+
+export async function sendAbandonedProposalEmail(data: {
+  email: string;
+  clientName: string;
+  proposalUrl: string;
+}): Promise<{ ok: boolean; error?: string }> {
+  const firstName = firstNameOf(data.clientName);
+  const bodyHtml = `
+    <p style="margin:0 0 16px;font-size:15px;color:#1A1A2E;line-height:1.7;">Hi ${escHtml(firstName)},</p>
+    <p style="margin:0 0 18px;font-size:15px;color:#1A1A2E;line-height:1.7;">Your proposal is still ready for review. It includes the recommended operating path, expected outcomes, and next step to begin.</p>`;
+
+  return resendEmail(
+    data.email,
+    'Your EA proposal is ready when you are',
+    baseEmailShell({
+      title: 'Proposal Ready',
+      eyebrow: 'Commercial Workflow',
+      bodyHtml,
+      ctaLabel: 'Review Proposal',
+      ctaUrl: data.proposalUrl,
+    })
+  );
+}
+
+export async function sendFailedPaymentEmail(data: {
+  email: string;
+  clientName: string;
+  portalUrl: string;
+}): Promise<{ ok: boolean; error?: string }> {
+  const firstName = firstNameOf(data.clientName);
+  const bodyHtml = `
+    <p style="margin:0 0 16px;font-size:15px;color:#1A1A2E;line-height:1.7;">Hi ${escHtml(firstName)},</p>
+    <p style="margin:0 0 18px;font-size:15px;color:#1A1A2E;line-height:1.7;">A payment did not complete. Your account is still active, but this needs attention so service does not pause.</p>`;
+
+  return resendEmail(
+    data.email,
+    'Payment needs attention',
+    baseEmailShell({
+      title: 'Payment Needs Attention',
+      eyebrow: 'Account',
+      bodyHtml,
+      ctaLabel: 'Open Billing',
+      ctaUrl: data.portalUrl,
+    })
+  );
+}
+
+export async function sendPaymentRecoveryEmail(data: {
+  email: string;
+  clientName: string;
+  checkoutUrl: string;
+}): Promise<{ ok: boolean; error?: string }> {
+  const firstName = firstNameOf(data.clientName);
+  const bodyHtml = `
+    <p style="margin:0 0 16px;font-size:15px;color:#1A1A2E;line-height:1.7;">Hi ${escHtml(firstName)},</p>
+    <p style="margin:0 0 18px;font-size:15px;color:#1A1A2E;line-height:1.7;">Use the secure checkout link below to complete payment and keep your EA workflow moving.</p>`;
+
+  return resendEmail(
+    data.email,
+    'Complete your EA payment',
+    baseEmailShell({
+      title: 'Complete Payment',
+      eyebrow: 'Payment Recovery',
+      bodyHtml,
+      ctaLabel: 'Complete Payment',
+      ctaUrl: data.checkoutUrl,
+    })
+  );
+}
+
 export async function sendAssessmentConfirmationEmail(data: {
   email: string;
   contactName: string;

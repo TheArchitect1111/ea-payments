@@ -8,6 +8,10 @@ import {
   type EACPLaunchInput,
 } from '@/lib/eacp-launch';
 import { EACPPersistenceConfigurationError, EACPStoreConflictError } from '@/lib/eacp-store';
+import {
+  adminAuthJsonError,
+  requireAdminActionFromRequest,
+} from '@/lib/admin-session-guard';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -16,11 +20,17 @@ type LaunchRequest = Partial<EACPLaunchInput> & {
   command?: string;
 };
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const auth = await requireAdminActionFromRequest(request, 'admin:manage');
+  if (!auth.ok) return adminAuthJsonError(auth);
+
   return NextResponse.json({ launches: await listEACPLaunches() });
 }
 
 export async function POST(request: NextRequest) {
+  const auth = await requireAdminActionFromRequest(request, 'admin:manage');
+  if (!auth.ok) return adminAuthJsonError(auth);
+
   let body: LaunchRequest;
 
   try {

@@ -1,50 +1,65 @@
 'use client';
 
-import { NAVY, GOLD } from '@/lib/design-system';
-import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { useState } from 'react';
 import UniversalCommandBar from './UniversalCommandBar';
 import VoiceAssistant from './VoiceAssistant';
-import { startGuidedTour } from './GuidedTour';
-import {
-  BUILDER_NAV,
-  EXECUTIVE_NAV,
-  readOperatingMode,
-  writeOperatingMode,
-  type OperatingMode,
-} from '@/lib/admin-operating-mode';
+import { NAVY, GOLD } from '@/lib/design-system';
+
+const EXPERIMENTAL_ADMIN =
+  process.env.EXPERIMENTAL_ADMIN === 'true' || process.env.EXPERIMENTAL_ADMIN === '1';
+
+const CORE_NAV_LINKS = [
+  { href: '/admin/master', label: 'Home', description: "Today's signals and next move" },
+  { href: '/admin/decisions', label: 'Decisions', description: 'Commitments that need your judgment' },
+  { href: '/admin/organizations', label: 'Organizations', description: 'Account health and next moves' },
+  { href: '/admin/operations', label: 'Operations', description: 'Operating condition and blockers' },
+  { href: '/admin/products', label: 'Products', description: 'Portfolio strength and gaps' },
+  {
+    href: '/admin/intelligence',
+    label: 'Intelligence',
+    description: 'Interpretation of what the business is saying',
+  },
+  { href: '/admin/factory', label: 'Factory', description: 'Launch the next delivery motion' },
+  { href: '/admin/search', label: 'Search', description: 'Locate any certified EA asset' },
+  { href: '/admin/atlas', label: 'Atlas', description: 'How the enterprise connects' },
+];
+
+const NAV_LINKS = CORE_NAV_LINKS;
 
 const NAVIGATOR_GOALS = [
-  { label: 'Launch a communication campaign', href: '/admin/creative-studio' },
-  { label: 'Review revenue & pipeline', href: '/admin/master' },
-  { label: 'Run client delivery board', href: '/admin/delivery' },
-  { label: 'Manage proposals', href: '/admin/proposals' },
-  { label: 'Build portal or landing page', href: '/admin/ea-factory/new-experience' },
+  { label: 'Review Revenue & Pipeline', href: '/admin/dashboard' },
+  { label: 'Open Organizations', href: '/admin/organizations' },
+  { label: 'Review Operations', href: '/admin/operations' },
+  { label: 'Open Product Operations', href: '/admin/products' },
+  { label: 'Review Decisions', href: '/admin/decisions' },
+  { label: 'Track partner commissions', href: '/admin/commissions' },
+  { label: 'Run Operational MRI funnel', href: '/assessment' },
   { label: 'Open Simplifi workspace', href: '/admin/simplifi' },
+  { label: 'Run Simplifi website audit', href: '/admin/simplifi-audit' },
+  { label: 'Review EA protocols', href: '/admin/protocol-center' },
   { label: 'Open EA Factory', href: '/admin/ea-factory' },
+  { label: 'Launch EACP workflow', href: '/admin/ea-factory/launches' },
+  { label: 'Search approved repositories', href: '/admin/ea-factory/repo-library' },
+  { label: 'Generate a project brief', href: '/admin/ea-factory/project-generator' },
   { label: 'Generate a skin brief', href: '/admin/ea-factory/skin-factory' },
+  ...(EXPERIMENTAL_ADMIN
+    ? [
+        { label: 'Search Knowledge Graph', href: '/admin/knowledge-graph' },
+        { label: 'Open Atlas', href: '/admin/atlas' },
+        { label: 'View Digital Twin', href: '/admin/digital-twin' },
+        { label: 'Browse Partner Marketplace', href: '/admin/partner-marketplace' },
+        { label: 'Analyze a URL (Resource Radar)', action: 'analyze' as const },
+      ]
+    : []),
+  { label: 'Learn EA Academy', href: '/admin/academy' },
+  { label: 'View Auto Blueprints', href: '/admin/blueprints' },
+  { label: 'Open Knowledge Center', href: '/admin/knowledge' },
   { label: 'Capture an opportunity', action: 'capture' as const },
 ];
 
 export default function EANavigatorShell({ children }: { children: React.ReactNode }) {
   const [navigatorOpen, setNavigatorOpen] = useState(false);
-  const [mode, setMode] = useState<OperatingMode>('executive');
-
-  useEffect(() => {
-    setMode(readOperatingMode());
-    const onMode = (e: Event) => {
-      const detail = (e as CustomEvent<OperatingMode>).detail;
-      if (detail) setMode(detail);
-    };
-    window.addEventListener('ea:operating-mode-change', onMode);
-    return () => window.removeEventListener('ea:operating-mode-change', onMode);
-  }, []);
-
-  const navLinks = mode === 'builder' ? BUILDER_NAV : EXECUTIVE_NAV;
-
-  const setModeAndPersist = (next: OperatingMode) => {
-    setMode(next);
-    writeOperatingMode(next);
-  };
 
   return (
     <div className="min-h-screen bg-neutral-50">
@@ -55,46 +70,20 @@ export default function EANavigatorShell({ children }: { children: React.ReactNo
               Efficiency Architects
             </p>
             <h1 className="text-lg font-extrabold uppercase tracking-widest text-white">
-              Mission Control
+              Executive Operating System
             </h1>
           </div>
           <div className="flex items-center gap-3 flex-wrap">
-            <div
-              className="flex rounded overflow-hidden border border-blue-400/40"
-              role="group"
-              aria-label="Operating mode"
-            >
-              <button
-                type="button"
-                onClick={() => setModeAndPersist('executive')}
-                className="text-xs font-semibold px-2.5 py-1 transition"
-                style={{
-                  backgroundColor: mode === 'executive' ? GOLD : 'transparent',
-                  color: mode === 'executive' ? NAVY : '#bfdbfe',
-                }}
-              >
-                Executive
-              </button>
-              <button
-                type="button"
-                onClick={() => setModeAndPersist('builder')}
-                className="text-xs font-semibold px-2.5 py-1 transition"
-                style={{
-                  backgroundColor: mode === 'builder' ? GOLD : 'transparent',
-                  color: mode === 'builder' ? NAVY : '#bfdbfe',
-                }}
-              >
-                Builder
-              </button>
-            </div>
-            {navLinks.map((link) => (
-              <a
-                key={`${mode}-${link.href}-${link.label}`}
+            {NAV_LINKS.map((link) => (
+              <Link
+                key={link.href}
                 href={link.href}
+                prefetch={false}
+                title={link.description}
                 className="text-xs font-semibold text-blue-200 hover:text-white transition"
               >
                 {link.label}
-              </a>
+              </Link>
             ))}
             <UniversalCommandBar onOpenNavigator={() => setNavigatorOpen(true)} />
             <VoiceAssistant />
@@ -105,14 +94,7 @@ export default function EANavigatorShell({ children }: { children: React.ReactNo
               className="text-xs font-semibold px-3 py-1.5 rounded text-white transition"
               style={{ backgroundColor: GOLD, color: NAVY }}
             >
-              EA Navigator
-            </button>
-            <button
-              type="button"
-              onClick={startGuidedTour}
-              className="text-xs font-semibold text-blue-200 hover:text-white transition"
-            >
-              Tour
+              Navigator
             </button>
             <a
               href="/api/admin/logout"
@@ -141,7 +123,7 @@ export default function EANavigatorShell({ children }: { children: React.ReactNo
               What are you trying to accomplish?
             </h2>
             <p className="text-xs text-neutral-500 mb-4 leading-relaxed">
-              Pick a path — or type your intent on Mission Control home.
+              Pick a path — or press ⌘K to search commands and quick-capture opportunities.
             </p>
             <ul className="space-y-2">
               {NAVIGATOR_GOALS.map((goal) => (
@@ -157,13 +139,25 @@ export default function EANavigatorShell({ children }: { children: React.ReactNo
                     >
                       {goal.label} →
                     </button>
+                  ) : goal.action === 'analyze' ? (
+                    <button
+                      type="button"
+                      className="w-full text-left text-sm px-3 py-2 rounded border border-neutral-200 hover:border-neutral-400"
+                      onClick={() => {
+                        setNavigatorOpen(false);
+                        window.dispatchEvent(new CustomEvent('ea:open-analyze'));
+                      }}
+                    >
+                      {goal.label} →
+                    </button>
                   ) : (
-                    <a
+                    <Link
                       href={goal.href}
+                      prefetch={false}
                       className="block text-sm px-3 py-2 rounded border border-neutral-200 hover:border-neutral-400"
                     >
                       {goal.label} →
-                    </a>
+                    </Link>
                   )}
                 </li>
               ))}

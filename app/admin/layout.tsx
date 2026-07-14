@@ -1,22 +1,11 @@
+import EANavigatorShell from './_components/EANavigatorShell';
 import GuidedTour from './_components/GuidedTour';
-import AdminWorkspaceShell from './_components/AdminWorkspaceShell';
-import EAAssistant from '@/app/components/ea-assistant/EAAssistant';
-import { hasAdminPageAccess } from '@/lib/admin-page-auth';
 
-export const dynamic = 'force-dynamic';
-
-export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  const authenticated = await hasAdminPageAccess();
-
-  if (!authenticated) {
-    return <>{children}</>;
-  }
-
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
-    <AdminWorkspaceShell>
-      <GuidedTour autoStart />
+    <EANavigatorShell>
+      <GuidedTour />
       {children}
-      <EAAssistant surface="admin" />
-    </AdminWorkspaceShell>
+    </EANavigatorShell>
   );
 }
