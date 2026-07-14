@@ -24,6 +24,8 @@ const buyPath = join(root, 'app/buy/page.tsx');
 const sitesPath = join(root, 'app/sites/[slug]/page.tsx');
 const magicPath = join(root, 'lib/magic-link.ts');
 const emailPath = join(root, 'lib/email.ts');
+const sessionStatusPath = join(root, 'app/api/checkout/session-status/route.ts');
+const successClientPath = join(root, 'app/checkout/success/CheckoutSuccessClient.tsx');
 
 for (const [path, label] of [
   [offerPath, 'offers.ts'],
@@ -36,6 +38,8 @@ for (const [path, label] of [
   [sitesPath, 'sites page'],
   [magicPath, 'magic-link.ts'],
   [emailPath, 'email.ts'],
+  [sessionStatusPath, 'session-status API'],
+  [successClientPath, 'checkout success client'],
 ]) {
   assert(existsSync(path), `Missing ${label} at ${path}`);
 }
@@ -83,6 +87,13 @@ assert(magic.includes('WELCOME_MAGIC_LINK_TTL_MS'), 'Magic-link module missing w
 assert(magic.includes('ttlMs'), 'createMagicLinkToken must accept ttlMs override');
 assert(email.includes('magicLoginUrl'), 'Welcome email must support magicLoginUrl');
 assert(email.includes('readyNow'), 'Welcome email must support readyNow auto copy');
+
+const sessionStatus = readFileSync(sessionStatusPath, 'utf8');
+const successClient = readFileSync(successClientPath, 'utf8');
+assert(sessionStatus.includes('findPublishedSitePage'), 'session-status must resolve published site');
+assert(sessionStatus.includes('findPortalClientByEmail'), 'session-status must resolve portal client');
+assert(successClient.includes('/api/checkout/session-status'), 'Success page must poll session-status');
+assert(successClient.includes('Open My Website'), 'Success page must offer live site CTA when ready');
 
 if (failures.length) {
   console.error('Website + Portal Starter checks FAILED:');
