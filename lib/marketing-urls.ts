@@ -37,6 +37,7 @@ export const CUSTOM_DOMAIN_MAP: Record<string, string> = {
   'amplify.efficiencyarchitects.online': '/amplifi',
   'story.efficiencyarchitects.online': '/story/selena',
   'pulse.efficiencyarchitects.online': '/sign-in?next=/pulse',
+  // Portal vanity root is handled by lib/ctp-portal-host (rewrite /{slug} → /portal/{slug}).
 };
 
 export function resolveCustomDomainRedirect(host: string | null, pathname: string): string | null {
