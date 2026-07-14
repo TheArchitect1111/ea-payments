@@ -29,6 +29,7 @@ import {
 import { auditDigitalPresence, type DigitalPresenceAudit } from '@/lib/ctp-digital-presence';
 import { classifyCtpClientType } from '@/lib/ctp-client-type';
 import { buildDiscoveryRecommendations, type DiscoveryAnswers } from '@/lib/discovery-engine';
+import { runCtpExecutiveSnapshot } from '@/lib/ctp-executive-snapshot-run';
 
 function mapTeamSize(label: string): number {
   const map: Record<string, number> = {
@@ -407,6 +408,27 @@ export async function POST(req: NextRequest) {
             } catch (err) {
               console.error('[assessment/submit] digital presence audit failed:', err);
               scheduleCtpDigitalPresenceAudit(ctpResult.submission.id);
+            }
+          }
+
+          if (ctpClassification.businessIntelligence) {
+            try {
+              await runCtpExecutiveSnapshot(ctpResult.submission.id, {
+                analysis: {
+                  capacityScore: analysis.capacityScore,
+                  scoreBand: analysis.scoreBand,
+                  primaryConstraint: analysis.primaryConstraint,
+                  weeklyTimeRecovery: analysis.weeklyTimeRecovery,
+                  opportunityLow: analysis.opportunityLow,
+                  opportunityHigh: analysis.opportunityHigh,
+                },
+                projectTypeLabel: pricing.projectTypeLabel,
+                recommendedFee: pricing.recommendedFee,
+                operationalChallenges: challengeIds,
+                recommendations,
+              });
+            } catch (err) {
+              console.error('[assessment/submit] executive snapshot failed:', err);
             }
           }
         }

@@ -259,13 +259,18 @@ export function buildCtpProductionPackage(submission: CtpSubmission): CtpProduct
     offerSummary,
   });
 
+  const snapshot = submission.executiveSnapshot;
   const headline = `${submission.businessName} — ${clientTypeLabel} production package`;
   const summary = [
     submission.intakeAnalysis?.summary?.slice(0, 280),
+    snapshot?.summary?.slice(0, 220),
     `Track: ${clientTypeLabel}.`,
     submission.siteUrl ? `Starter site: ${submission.siteUrl}.` : null,
     typeof submission.digitalPresenceAudit?.overallScore === 'number'
       ? `Digital Presence ${submission.digitalPresenceAudit.overallScore}/100.`
+      : null,
+    typeof snapshot?.operationalMaturity === 'number'
+      ? `Operational maturity ${snapshot.operationalMaturity}/100.`
       : null,
   ]
     .filter(Boolean)

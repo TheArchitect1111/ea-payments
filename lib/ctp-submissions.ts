@@ -3,6 +3,7 @@ import type { CtpAssetManifest } from '@/lib/ctp-asset-store';
 import type { CtpClientType, CtpClientTypeClassification } from '@/lib/ctp-client-type';
 import type { DigitalPresenceAudit } from '@/lib/ctp-digital-presence';
 import type { CtpProductionPackage } from '@/lib/ctp-production';
+import type { CtpExecutiveSnapshot } from '@/lib/ctp-executive-snapshot';
 import {
   airtableConfigured,
   airtableQuery,
@@ -61,6 +62,8 @@ export type CtpSubmission = {
   clientType?: CtpClientType;
   clientTypeClassification?: CtpClientTypeClassification;
   digitalPresenceAudit?: DigitalPresenceAudit;
+  /** Phase 3 executive snapshot (BI capacity / maturity / ROI). */
+  executiveSnapshot?: CtpExecutiveSnapshot;
   /** Phase 10 AI production package (blueprint / site / portal artifacts). */
   productionPackage?: CtpProductionPackage;
   intakeAnalysis?: CtpIntakeAnalysisRecord;
@@ -84,6 +87,7 @@ export type CtpSubmissionUpdate = Partial<
     | 'clientType'
     | 'clientTypeClassification'
     | 'digitalPresenceAudit'
+    | 'executiveSnapshot'
     | 'productionPackage'
   >
 >;
@@ -129,6 +133,7 @@ function toAirtableFields(submission: CtpSubmission): Record<string, unknown> {
       clientTypeClassification: submission.clientTypeClassification,
       siteUrl: submission.siteUrl,
       digitalPresenceAudit: submission.digitalPresenceAudit,
+      executiveSnapshot: submission.executiveSnapshot,
       productionPackage: submission.productionPackage,
     }),
     'Submitted At': submission.submittedAt,
@@ -148,6 +153,7 @@ function fromAirtableRecord(fields: Record<string, unknown>): CtpSubmission | nu
     clientTypeClassification?: CtpClientTypeClassification;
     siteUrl?: string;
     digitalPresenceAudit?: DigitalPresenceAudit;
+    executiveSnapshot?: CtpExecutiveSnapshot;
     productionPackage?: CtpProductionPackage;
   } = {};
   const raw = fields['Payload JSON'];
@@ -204,6 +210,7 @@ function fromAirtableRecord(fields: Record<string, unknown>): CtpSubmission | nu
     clientTypeClassification: payload.clientTypeClassification,
     siteUrl: payload.siteUrl,
     digitalPresenceAudit: payload.digitalPresenceAudit,
+    executiveSnapshot: payload.executiveSnapshot,
     productionPackage: payload.productionPackage,
     intakeAnalysis,
     assetManifest,
