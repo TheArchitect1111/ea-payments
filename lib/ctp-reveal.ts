@@ -74,31 +74,47 @@ export function buildCtpRevealView(input: {
       value: `${ctp.executiveSnapshot.operationalMaturity}/100`,
       detail: `Admin drag ~${ctp.executiveSnapshot.adminWastePercent}%`,
     });
-  } else if (typeof ctp?.digitalPresenceAudit?.overallScore === 'number') {
+  }
+
+  if (typeof ctp?.digitalPresenceAudit?.overallScore === 'number') {
+    const audit = ctp.digitalPresenceAudit;
+    const parts: string[] = [];
+    if (typeof audit.scores?.socialPresence === 'number') {
+      parts.push(`Social ${audit.scores.socialPresence}`);
+    }
+    if (typeof audit.scores?.googleBusinessProfile === 'number') {
+      parts.push(`GBP ${audit.scores.googleBusinessProfile}`);
+    }
     metrics.push({
       label: 'Digital presence',
-      value: `${ctp.digitalPresenceAudit.overallScore}/100`,
-      detail: 'Baseline before the build',
+      value: `${audit.overallScore}/100`,
+      detail: parts.length ? parts.join(' · ') : 'Baseline before the build',
     });
-  } else if (input.amountPaid && input.amountPaid > 0) {
+  } else if (
+    metrics.length < 2 &&
+    input.amountPaid &&
+    input.amountPaid > 0
+  ) {
     metrics.push({
       label: 'Investment confirmed',
       value: fmtMoney(input.amountPaid),
     });
   }
 
-  if (typeof ctp?.executiveSnapshot?.weeklyHoursRecoverable === 'number') {
-    metrics.push({
-      label: 'Hours / week recoverable',
-      value: String(ctp.executiveSnapshot.weeklyHoursRecoverable),
-      detail: 'Capacity returned to the business',
-    });
-  } else if (ctp?.productionPackage?.artifacts.length) {
-    metrics.push({
-      label: 'Production artifacts',
-      value: String(ctp.productionPackage.artifacts.length),
-      detail: ctp.productionPackage.timelineLabel,
-    });
+  if (metrics.length < 3) {
+    if (typeof ctp?.executiveSnapshot?.weeklyHoursRecoverable === 'number') {
+      metrics.push({
+        label: 'Hours / week recoverable',
+        value: String(ctp.executiveSnapshot.weeklyHoursRecoverable),
+        detail: 'Capacity returned to the business',
+      });
+    } else if (ctp?.productionPackage?.artifacts.length) {
+      metrics.push({
+        label: 'Production artifacts',
+        value: String(ctp.productionPackage.artifacts.length),
+        detail: ctp.productionPackage.timelineLabel,
+      });
+    }
   }
 
   return {
