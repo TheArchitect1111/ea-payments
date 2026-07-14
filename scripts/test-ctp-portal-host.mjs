@@ -46,7 +46,7 @@ assert(
   !workspace.includes('portalResult.portalLoginUrl ??'),
   'Must not prefer createPortalAccess login URL over publicPortalLoginUrl',
 );
-assert(hostSrc.includes('useVanityPublicUrls'), 'Must support opt-in vanity public URLs');
+assert(hostSrc.includes('vanityPublicUrlsEnabled'), 'Must support opt-in vanity public URLs');
 assert(hostSrc.includes('/portal/${cleanSlug'), 'Default public portal URLs must use hub /portal/{slug}');
 
 const setupDocPath = join(root, 'docs/CTP-SETUP.md');

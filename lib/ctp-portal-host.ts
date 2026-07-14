@@ -82,13 +82,13 @@ function hubPortalOrigin(): string {
 }
 
 /** When true, emails/CTAs use portal.efficiencyarchitects.online/{slug}. */
-export function useVanityPublicUrls(): boolean {
+export function vanityPublicUrlsEnabled(): boolean {
   return process.env.EA_PORTAL_USE_VANITY_URLS === '1';
 }
 
 /**
  * Public client portal URL for emails and CTAs.
- * Default (reliable): https://www.efficiencyarchitects.online/portal/acme/ctp
+ * Default (reliable): https://efficiencyarchitects.online/portal/acme/ctp
  * Vanity (opt-in):    https://portal.efficiencyarchitects.online/acme/ctp
  */
 export function publicPortalUrl(slug: string, pathSuffix = ''): string {
@@ -96,7 +96,7 @@ export function publicPortalUrl(slug: string, pathSuffix = ''): string {
   const suffix = pathSuffix
     ? `/${pathSuffix.replace(/^\/+|\/+$/g, '')}`
     : '';
-  if (useVanityPublicUrls()) {
+  if (vanityPublicUrlsEnabled()) {
     return `${vanityPortalOrigin()}/${cleanSlug}${suffix}`;
   }
   return `${hubPortalOrigin()}/portal/${cleanSlug}${suffix}`;
@@ -104,7 +104,7 @@ export function publicPortalUrl(slug: string, pathSuffix = ''): string {
 
 /** Public portal login URL for emails and CTAs. */
 export function publicPortalLoginUrl(): string {
-  if (useVanityPublicUrls()) {
+  if (vanityPublicUrlsEnabled()) {
     return `${vanityPortalOrigin()}/login`;
   }
   return `${hubPortalOrigin()}/portal/login`;
