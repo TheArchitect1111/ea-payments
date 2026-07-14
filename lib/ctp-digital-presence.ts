@@ -470,14 +470,16 @@ export async function auditDigitalPresence(input: {
     return {
       overallScore,
       scores,
-      findings: [
-        {
-          title: 'No website URL — social/GBP only',
-          detail: 'Auditing public social and Google Business signals without a primary website.',
-          severity: 'warning',
-        },
-        ...social.findings,
-      ].slice(0, 10),
+      findings: (
+        [
+          {
+            title: 'No website URL — social/GBP only',
+            detail: 'Auditing public social and Google Business signals without a primary website.',
+            severity: 'warning' as const,
+          },
+          ...social.findings,
+        ] satisfies DigitalPresenceFinding[]
+      ).slice(0, 10),
       impactEstimate:
         'Without a primary website, social and local listings carry the brand — conversion and trust usually underperform.',
       socialChannels: social.channels,
@@ -513,15 +515,17 @@ export async function auditDigitalPresence(input: {
           socialPresence: social.socialScore,
           googleBusinessProfile: social.gbpScore,
         },
-        findings: [
-          {
-            title: 'Website unreachable or empty',
-            detail: `We could not audit ${sourceUrl} (HTTP ${res.status}). Treating this as a weak public presence.`,
-            severity: 'critical',
-          },
-          ...social.findings,
-          ...generic.findings.slice(0, 2),
-        ].slice(0, 10),
+        findings: (
+          [
+            {
+              title: 'Website unreachable or empty',
+              detail: `We could not audit ${sourceUrl} (HTTP ${res.status}). Treating this as a weak public presence.`,
+              severity: 'critical' as const,
+            },
+            ...social.findings,
+            ...generic.findings.slice(0, 2),
+          ] satisfies DigitalPresenceFinding[]
+        ).slice(0, 10),
         socialChannels: social.channels,
         mode: 'live-audit',
         overallScore: 28,
@@ -557,15 +561,17 @@ export async function auditDigitalPresence(input: {
         socialPresence: social.socialScore,
         googleBusinessProfile: social.gbpScore,
       },
-      findings: [
-        {
-          title: 'Could not reach the provided URL',
-          detail: `The audit could not load ${sourceUrl}. Continuing with a baseline evaluation so the workflow does not stall.`,
-          severity: 'warning',
-        },
-        ...social.findings,
-        ...generic.findings.slice(0, 2),
-      ].slice(0, 10),
+      findings: (
+        [
+          {
+            title: 'Could not reach the provided URL',
+            detail: `The audit could not load ${sourceUrl}. Continuing with a baseline evaluation so the workflow does not stall.`,
+            severity: 'warning' as const,
+          },
+          ...social.findings,
+          ...generic.findings.slice(0, 2),
+        ] satisfies DigitalPresenceFinding[]
+      ).slice(0, 10),
       socialChannels: social.channels,
       mode: 'live-audit',
       overallScore: 30,
