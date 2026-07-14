@@ -26,8 +26,10 @@ export function buildAttentionItems(input: {
   clientsStuckOnboarding?: number;
   discoveryFollowUpCount?: number;
   ctpWorkspacesPending?: number;
+  ctpStudiosInProgress?: number;
   ctpStudiosReadyForReview?: number;
   ctpReviewsScheduled?: number;
+  ctpExecutiveEmailsPending?: number;
 }): AttentionItem[] {
   const items: AttentionItem[] = [];
 
@@ -38,8 +40,20 @@ export function buildAttentionItems(input: {
       title: `${input.ctpStudiosReadyForReview} CTP workspace(s) ready for review`,
       detail: 'All design studios complete — schedule the collaborative review.',
       priority: 'high',
-      href: '/admin/proposals',
-      cta: 'Schedule review',
+      href: '/admin/ctp',
+      cta: 'Open CTP desk',
+    });
+  }
+
+  if ((input.ctpExecutiveEmailsPending ?? 0) > 0) {
+    items.push({
+      id: 'ctp-executive-emails-pending',
+      product: 'Consider the Possibilities™',
+      title: `${input.ctpExecutiveEmailsPending} CTP executive email(s) not sent`,
+      detail: 'Portal is active but the executive brief never went out. Resend from the CTP desk.',
+      priority: 'high',
+      href: '/admin/ctp',
+      cta: 'Resend email',
     });
   }
 
@@ -50,8 +64,20 @@ export function buildAttentionItems(input: {
       title: `${input.ctpWorkspacesPending} CTP workspace(s) pending provisioning`,
       detail: 'A prospect completed CTP but the workspace did not finish opening. Re-run provisioning.',
       priority: 'high',
-      href: '/admin/master',
-      cta: 'Review',
+      href: '/admin/ctp',
+      cta: 'Re-provision',
+    });
+  }
+
+  if ((input.ctpStudiosInProgress ?? 0) > 0) {
+    items.push({
+      id: 'ctp-studios-in-progress',
+      product: 'Consider the Possibilities™',
+      title: `${input.ctpStudiosInProgress} CTP Design Studio(s) in progress`,
+      detail: 'Clients are still completing brand inputs — monitor for stalls.',
+      priority: 'medium',
+      href: '/admin/ctp',
+      cta: 'Open CTP desk',
     });
   }
 
@@ -62,8 +88,8 @@ export function buildAttentionItems(input: {
       title: `${input.ctpReviewsScheduled} CTP review(s) scheduled`,
       detail: 'Prepare proposals and implementation tasks for upcoming reviews.',
       priority: 'medium',
-      href: '/admin/proposals',
-      cta: 'Pipeline',
+      href: '/admin/ctp',
+      cta: 'Open CTP desk',
     });
   }
 
