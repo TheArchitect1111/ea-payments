@@ -10,8 +10,11 @@ import './portal-login.css';
 
 const copy = getRealmLoginCopy('portal');
 
-function safeNextPath(raw: string | null): string {
-  if (!raw || !raw.startsWith('/') || raw.startsWith('//')) return '/simplifi/capture';
+/** Only honor same-origin relative next paths; otherwise let the auth exchange pick the client hub. */
+function safeNextPath(raw: string | null): string | undefined {
+  if (!raw || !raw.startsWith('/') || raw.startsWith('//')) return undefined;
+  // Never send portal-realm logins into the Simplifi product shell by default.
+  if (raw === '/simplifi/capture' || raw.startsWith('/simplifi/')) return undefined;
   return raw;
 }
 
@@ -20,7 +23,15 @@ function PortalLoginInner() {
   const nextPath = safeNextPath(searchParams.get('next'));
   const error = magicLinkErrorMessage('portal', searchParams.get('error'));
 
-  return <RealmLoginCard realm="portal" next={nextPath} error={error} />;
+  return (
+    <RealmLoginCard
+      realm="portal"
+      next={nextPath}
+      error={error}
+      showTitle={false}
+      demoFallback="ctp"
+    />
+  );
 }
 
 export default function PortalLoginPage() {
@@ -29,18 +40,16 @@ export default function PortalLoginPage() {
       <div className="pl-shell">
         <header className="pl-header">
           <Image
-            src="/simplifi-logo.png"
-            alt="Simplifi"
-            width={320}
-            height={180}
+            src="/ea-logo.png"
+            alt="Efficiency Architects"
+            width={200}
+            height={200}
             className="pl-logo"
             priority
           />
-          <p className="pl-eyebrow">First Capture</p>
-          <h1 className="pl-title">Sign in and capture your first item</h1>
-          <p className="pl-lede">
-            After login, Simplifi opens the capture screen. Paste a link or upload a screenshot first.
-          </p>
+          {copy.eyebrow ? <p className="pl-eyebrow">{copy.eyebrow}</p> : null}
+          <h1 className="pl-title">{copy.pageTitle}</h1>
+          <p className="pl-lede">{copy.pageSubtitle}</p>
         </header>
 
         <Suspense fallback={<div className="pl-card">Loading…</div>}>
@@ -49,7 +58,13 @@ export default function PortalLoginPage() {
 
         <footer className="pl-footer">
           <p className="pl-footer-text">
-            Need the full client portal?{' '}
+            Looking for Simplifi capture?{' '}
+            <Link href="/simplifi/login" className="pl-footer-link">
+              Simplifi sign in
+            </Link>
+          </p>
+          <p className="pl-footer-text">
+            Partner account?{' '}
             <Link href="/partners/login" className="pl-footer-link">
               Partner sign in
             </Link>

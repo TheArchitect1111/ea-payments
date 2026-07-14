@@ -37,8 +37,10 @@ export const REALM_LOGIN_COPY: Record<MagicLinkRealm, RealmLoginCopy> = {
     ...DEFAULT_FORM,
   },
   portal: {
+    eyebrow: 'Client Portal',
     pageTitle: 'Welcome to your portal',
-    pageSubtitle: 'Your command center for tasks, documents, and progress.',
+    pageSubtitle:
+      'Sign in to open your CTP workspace — overview, progress, recommendations, and documents.',
     cardTitle: 'Portal sign in',
     sentTitle: 'Portal sign in',
     ...DEFAULT_FORM,
