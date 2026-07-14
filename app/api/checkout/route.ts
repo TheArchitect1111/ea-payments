@@ -107,7 +107,7 @@ export async function POST(req: NextRequest) {
         }),
         ...fulfillmentMetadata(fulfillment),
       },
-      success_url: `${baseUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${baseUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}&package=${encodeURIComponent(offer.id)}&fulfillment=${encodeURIComponent(fulfillment.fulfillmentType)}`,
       cancel_url: `${baseUrl}/checkout/cancel`,
     };
 
