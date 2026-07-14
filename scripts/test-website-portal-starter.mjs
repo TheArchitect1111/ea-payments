@@ -116,6 +116,27 @@ assert(
   'Ops panel must call admin provision API',
 );
 
+const persistencePath = join(root, 'lib/creative-studio/persistence.ts');
+const pageStorePath = join(root, 'lib/experience-builder/page-store.ts');
+const metaSetupPath = join(root, 'lib/airtable-meta-setup.ts');
+assert(existsSync(persistencePath), 'Missing creative-studio persistence');
+assert(
+  readFileSync(persistencePath, 'utf8').includes('loadStudioRecordFromAirtable'),
+  'Persistence must support Airtable-only durable load',
+);
+assert(
+  readFileSync(pageStorePath, 'utf8').includes('verifyExperiencePageDurable'),
+  'page-store must verify Experience durability',
+);
+assert(
+  readFileSync(provisionPath, 'utf8').includes('verifyExperiencePageDurable'),
+  'Provisioner must verify Airtable durability before returning siteUrl',
+);
+assert(
+  readFileSync(metaSetupPath, 'utf8').includes("{ name: 'Experience' }"),
+  'Creative Studio schema must include Experience record type',
+);
+
 if (failures.length) {
   console.error('Website + Portal Starter checks FAILED:');
   for (const failure of failures) console.error(`  - ${failure}`);

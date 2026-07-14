@@ -219,7 +219,7 @@ const CREATIVE_STUDIO_FIELD_DEFS: AirtableFieldDef[] = [
     name: 'Record Type',
     type: 'singleSelect',
     options: {
-      choices: [{ name: 'Campaign' }, { name: 'Brand' }, { name: 'Media' }],
+      choices: [{ name: 'Campaign' }, { name: 'Brand' }, { name: 'Media' }, { name: 'Experience' }],
     },
   },
   { name: 'Organization ID', type: 'singleLineText' },

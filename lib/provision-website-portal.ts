@@ -6,8 +6,10 @@ import {
   getExperiencePage,
   listExperiencePages,
   saveExperiencePage,
+  verifyExperiencePageDurable,
 } from '@/lib/experience-builder/page-store';
 import { previewPathForPage, type ExperiencePage } from '@/lib/experience-builder/types';
+import { airtableConfigured } from '@/lib/data/airtable-client';
 import { EA_PLATFORM_URL } from '@/lib/platform-urls';
 import { syntheticOrgId } from '@/lib/platform-store';
 
@@ -155,6 +157,17 @@ export async function provisionWebsitePortalSite(
     const saved = await getExperiencePage(id);
     if (!saved) {
       return { ok: false, error: 'Failed to persist website page' };
+    }
+
+    if (airtableConfigured()) {
+      const durable = await verifyExperiencePageDurable(id);
+      if (!durable) {
+        return {
+          ok: false,
+          error:
+            'Website page saved to memory but not confirmed in Airtable Creative Studio. Ensure the Creative Studio table exists and Record Type includes Experience.',
+        };
+      }
     }
 
     return {

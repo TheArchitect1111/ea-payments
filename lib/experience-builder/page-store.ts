@@ -1,4 +1,11 @@
-import { listStudioRecords, loadStudioRecord, saveStudioRecord } from '@/lib/creative-studio/persistence';
+import {
+  clearStudioMemoryKey,
+  listStudioRecords,
+  loadStudioRecord,
+  loadStudioRecordFromAirtable,
+  saveStudioRecord,
+} from '@/lib/creative-studio/persistence';
+import { airtableConfigured } from '@/lib/data/airtable-client';
 import { syntheticOrgId } from '@/lib/platform-store';
 import { createEmptyPuckData, previewPathForPage, type ExperiencePage } from './types';
 
@@ -24,14 +31,25 @@ export async function saveExperiencePage(page: ExperiencePage): Promise<Experien
     updatedAt: new Date().toISOString(),
     previewPath: previewPathForPage(page.portalSlug, page.id),
   };
-  await saveStudioRecord({
+  const saved = await saveStudioRecord({
     recordType: 'experience',
     id: updated.id,
     organizationId: updated.organizationId,
     title: updated.title,
     payload: updated,
   });
+  if (!saved.ok && airtableConfigured()) {
+    throw new Error(saved.error || 'Failed to persist experience page to Airtable');
+  }
   return updated;
+}
+
+/** Confirm the page exists in Airtable (not just instance memory). */
+export async function verifyExperiencePageDurable(pageId: string): Promise<boolean> {
+  if (!airtableConfigured()) return false;
+  clearStudioMemoryKey('experience', pageId);
+  const fromAirtable = await loadStudioRecordFromAirtable<ExperiencePage>('experience', pageId);
+  return Boolean(fromAirtable?.id === pageId);
 }
 
 export async function createExperiencePage(portalSlug: string, title?: string): Promise<ExperiencePage> {

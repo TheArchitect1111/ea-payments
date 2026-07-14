@@ -48,7 +48,7 @@ const FIELD_DEFS = [
   {
     name: 'Record Type',
     type: 'singleSelect',
-    options: { choices: [{ name: 'Campaign' }, { name: 'Brand' }, { name: 'Media' }] },
+    options: { choices: [{ name: 'Campaign' }, { name: 'Brand' }, { name: 'Media' }, { name: 'Experience' }] },
   },
   { name: 'Organization ID', type: 'singleLineText' },
   { name: 'Title', type: 'singleLineText' },
