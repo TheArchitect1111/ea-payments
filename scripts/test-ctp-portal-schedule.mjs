@@ -16,13 +16,15 @@ function assert(condition, message) {
 
 const viewPath = join(root, 'lib/ctp-schedule-view.ts');
 const pagePath = join(root, 'app/portal/[slug]/ctp/schedule/page.tsx');
-const ctpPagePath = join(root, 'app/portal/[slug]/ctp/page.tsx');
+const overviewViewPath = join(root, 'lib/ctp-overview-view.ts');
+const progressPath = join(root, 'app/portal/[slug]/ctp/progress/page.tsx');
 const adminPath = join(root, 'app/admin/ctp/CtpSubmissionsClient.tsx');
 
 for (const [path, label] of [
   [viewPath, 'ctp-schedule-view.ts'],
   [pagePath, 'schedule page'],
-  [ctpPagePath, 'portal CTP page'],
+  [overviewViewPath, 'portal overview view'],
+  [progressPath, 'portal progress page'],
   [adminPath, 'admin CTP client'],
 ]) {
   assert(existsSync(path), `Missing ${label}`);
@@ -30,7 +32,8 @@ for (const [path, label] of [
 
 const view = readFileSync(viewPath, 'utf8');
 const page = readFileSync(pagePath, 'utf8');
-const ctpPage = readFileSync(ctpPagePath, 'utf8');
+const overviewView = readFileSync(overviewViewPath, 'utf8');
+const progress = readFileSync(progressPath, 'utf8');
 const admin = readFileSync(adminPath, 'utf8');
 
 assert(view.includes('buildCtpScheduleView'), 'Must export schedule view builder');
@@ -39,8 +42,8 @@ assert(view.includes('CALENDLY'), 'Must include Calendly CTA URL');
 assert(page.includes('buildCtpScheduleView'), 'Page must use schedule view');
 assert(page.includes('Book strategy session'), 'Page must expose booking CTA');
 assert(page.includes('requirePortalModule'), 'Page must require ctp module');
-assert(ctpPage.includes('/ctp/schedule'), 'Progress must link to schedule');
-assert(ctpPage.includes('reviewScheduledAt'), 'Progress must show scheduled review when present');
+assert(overviewView.includes('/ctp/schedule'), 'Overview must link to schedule');
+assert(progress.includes('reviewScheduledAt'), 'Progress must show scheduled review when present');
 assert(admin.includes('/ctp/schedule'), 'Admin must link to scheduling');
 
 if (failures.length) {
