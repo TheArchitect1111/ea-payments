@@ -6,6 +6,7 @@ import { NAVY, GOLD } from '@/lib/design-system';
 import type { CtpAdminSubmissionView } from '@/lib/ctp-admin-view';
 import CtpAssetManifestPanel from '../_components/CtpAssetManifestPanel';
 import CtpReviewSchedulePanel from '../_components/CtpReviewSchedulePanel';
+import CtpExecutiveActionsPanel from './CtpExecutiveActionsPanel';
 
 function formatDate(value: string): string {
   const date = new Date(value);
@@ -179,6 +180,15 @@ export default function CtpSubmissionsClient({
                           </p>
                         </div>
                       ) : null}
+
+                      <CtpExecutiveActionsPanel
+                        submission={submission}
+                        onUpdated={(next) => {
+                          setSubmissions((current) =>
+                            current.map((item) => (item.id === next.id ? next : item)),
+                          );
+                        }}
+                      />
 
                       <CtpReviewSchedulePanel
                         submission={submission}
