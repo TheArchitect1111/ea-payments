@@ -124,6 +124,16 @@ assert(realmCard.includes('MagicLinkForm'), 'Realm login card must use magic lin
 assert(!realmCard.includes('DemoPasswordLogin'), 'Realm login card must not include demo password login');
 assert(!existsSync(join(root, 'components/auth/DemoPasswordLogin.tsx')), 'DemoPasswordLogin component must be removed');
 
+const siteOriginPath = join(root, 'lib/auth/site-origin.ts');
+assert(existsSync(siteOriginPath), 'Missing auth site-origin helper');
+const siteOrigin = readFileSync(siteOriginPath, 'utf8');
+assert(siteOrigin.includes('authSiteOrigin'), 'Must export authSiteOrigin');
+assert(siteOrigin.includes('isPortalVanityHost'), 'Auth origin must reject vanity portal host');
+const magicLinkRoute = readFileSync(join(root, 'app/api/auth/magic-link/route.ts'), 'utf8');
+assert(magicLinkRoute.includes('authSiteOrigin'), 'Magic-link emails must use authSiteOrigin');
+const verifyRoute = readFileSync(join(root, 'app/api/auth/magic-link/verify/route.ts'), 'utf8');
+assert(verifyRoute.includes('authSiteOrigin'), 'Magic-link verify must redirect via authSiteOrigin');
+
 if (failures.length) {
   console.error('CTP portal host checks FAILED:');
   for (const failure of failures) console.error(`  - ${failure}`);

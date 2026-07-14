@@ -4,16 +4,12 @@ import { sendAuthEmail } from '@/lib/ea-auth-email';
 import { findAdminAccount } from '@/lib/ea-admin-users';
 import { makeAdminSessionCookie, signAdminSession } from '@/lib/ea-admin-auth';
 import { getClientSuccessProfile } from '@/lib/client-success';
+import { authSiteOrigin } from '@/lib/auth/site-origin';
 import { createMagicLinkToken, magicLinkConfigured, type MagicLinkRealm } from '@/lib/magic-link';
 import { makeSessionCookie, signSession } from '@/lib/ea-portal-auth';
 import { emitPulseEvent } from '@/lib/pulse-bus';
 
 export const dynamic = 'force-dynamic';
-
-function siteOrigin(req: NextRequest): string {
-  const configured = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '');
-  return configured || req.nextUrl.origin;
-}
 
 function safeNextPath(raw: string | undefined, realm: MagicLinkRealm): string {
   if (raw?.startsWith('simplifi://') && realm === 'simplifi') {
@@ -84,7 +80,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Login is temporarily unavailable.' }, { status: 503 });
   }
 
-  const link = `${siteOrigin(req)}/api/auth/magic-link/verify?token=${encodeURIComponent(token)}`;
+  const link = `${authSiteOrigin(req)}/api/auth/magic-link/verify?token=${encodeURIComponent(token)}`;
   if (process.env.NODE_ENV === 'development') {
     console.log(`\n[dev] Magic login link for ${email}:\n${link}\n`);
   }
