@@ -146,22 +146,22 @@ export function buildCtpExecutiveSnapshot(
     {
       title: `${analysis.weeklyTimeRecovery} hours / week recoverable`,
       detail: `At current friction, roughly ${analysis.weeklyTimeRecovery} hours per week can return to leadership and delivery.`,
-      severity: analysis.weeklyTimeRecovery >= 12 ? 'critical' : 'warning',
+      severity: analysis.weeklyTimeRecovery >= 12 ? ('critical' as const) : ('warning' as const),
     },
     {
       title: `Admin drag ≈ ${adminWastePercent}%`,
       detail: 'Estimated share of operating capacity lost to manual work, tool sprawl, and missing visibility.',
-      severity: adminWastePercent >= 45 ? 'critical' : 'warning',
+      severity: adminWastePercent >= 45 ? ('critical' as const) : ('warning' as const),
     },
-    ...challenges.slice(0, 4).map((id) => ({
+    ...challenges.slice(0, 4).map((id): CtpSnapshotFinding => ({
       title: challengeLabel(id),
       detail: 'Called out in discovery as an active operational challenge.',
-      severity: 'warning' as const,
+      severity: 'warning',
     })),
-    ...recommendations.slice(0, 2).map((line) => ({
+    ...recommendations.slice(0, 2).map((line): CtpSnapshotFinding => ({
       title: line,
       detail: 'Recommended from discovery synthesis.',
-      severity: 'info' as const,
+      severity: 'info',
     })),
   ].slice(0, 8);
 
