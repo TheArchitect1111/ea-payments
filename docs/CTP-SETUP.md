@@ -34,7 +34,9 @@ ARCHITECT_EMAILS=freedom@efficiencyarchitects.online
 
 ## Portal vanity host (client URLs)
 
-Code already rewrites `portal.efficiencyarchitects.online/{client}` → `/portal/{client}` (see `lib/ctp-portal-host.ts` + `middleware.ts`). Welcome email, executive email, admin desk, and reveal CTAs use these vanity URLs.
+Code already rewrites `portal.efficiencyarchitects.online/{client}` → `/portal/{client}` (see `lib/ctp-portal-host.ts` + `middleware.ts`).
+
+**Public links default to the hub** (`https://www.efficiencyarchitects.online/portal/{client}/ctp`) so clients are not blocked when vanity DNS is slow. Set `EA_PORTAL_USE_VANITY_URLS=1` in Vercel when you want emails/CTAs to use `portal.efficiencyarchitects.online/{client}` instead.
 
 **Attach the domain so production resolves:**
 

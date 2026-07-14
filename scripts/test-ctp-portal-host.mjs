@@ -40,12 +40,14 @@ assert(existsSync(launchPath), 'Missing launch health route');
 const launch = readFileSync(launchPath, 'utf8');
 assert(launch.includes('probePortalVanityHost'), 'Launch health must probe vanity portal host');
 assert(launch.includes('portalVanityHost'), 'Launch health must expose portalVanityHost check');
-assert(workspace.includes("publicPortalUrl(slug, 'ctp')"), 'Welcome must deep-link vanity CTP overview');
-assert(workspace.includes('portalLoginUrl()'), 'Welcome CTA must use vanity login helper');
+assert(workspace.includes("publicPortalUrl(slug, 'ctp')"), 'Welcome must deep-link CTP overview');
+assert(workspace.includes('portalLoginUrl()'), 'Welcome CTA must use portal login helper');
 assert(
   !workspace.includes('portalResult.portalLoginUrl ??'),
-  'Must not prefer hub createPortalAccess login URL over vanity host',
+  'Must not prefer createPortalAccess login URL over publicPortalLoginUrl',
 );
+assert(hostSrc.includes('useVanityPublicUrls'), 'Must support opt-in vanity public URLs');
+assert(hostSrc.includes('/portal/${cleanSlug'), 'Default public portal URLs must use hub /portal/{slug}');
 
 const setupDocPath = join(root, 'docs/CTP-SETUP.md');
 assert(existsSync(setupDocPath), 'Missing docs/CTP-SETUP.md');
@@ -65,10 +67,10 @@ assert(existsSync(emailPath), 'Missing email.ts');
 const adminView = readFileSync(adminViewPath, 'utf8');
 const adminUi = readFileSync(adminUiPath, 'utf8');
 const email = readFileSync(emailPath, 'utf8');
-assert(adminView.includes('portalPublicUrl'), 'Admin view must expose vanity portalPublicUrl');
-assert(adminView.includes("publicPortalUrl(submission.portalSlug, 'ctp')"), 'Admin vanity CTP URL');
-assert(adminUi.includes('portalPublicUrl'), 'Admin UI must surface vanity portal URL');
-assert(adminUi.includes('Client vanity portal'), 'Admin UI must link client vanity portal');
+assert(adminView.includes('portalPublicUrl'), 'Admin view must expose portalPublicUrl');
+assert(adminView.includes("publicPortalUrl(submission.portalSlug, 'ctp')"), 'Admin CTP portal URL');
+assert(adminUi.includes('portalPublicUrl'), 'Admin UI must surface portal URL');
+assert(adminUi.includes('Client vanity portal') || adminUi.includes('Client portal'), 'Admin UI must link client portal');
 assert(email.includes('socialPresence'), 'Executive email must include social score');
 assert(email.includes('googleBusinessProfile'), 'Executive email must include GBP score');
 
