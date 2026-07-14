@@ -10,7 +10,8 @@ export type MagicLinkPayload = {
   next?: string;
 };
 
-const TTL_MS = 15 * 60 * 1000;
+/** Default login-link window — long enough for email delay / inbox lag. */
+const TTL_MS = 2 * 60 * 60 * 1000;
 /** Longer TTL for post-purchase welcome emails (buyer may open hours later). */
 export const WELCOME_MAGIC_LINK_TTL_MS = 48 * 60 * 60 * 1000;
 
@@ -26,7 +27,7 @@ export function createMagicLinkToken(input: {
   realm: MagicLinkRealm;
   email: string;
   next?: string;
-  /** Override default 15-minute expiry (ms from now). */
+  /** Override default 2-hour expiry (ms from now). */
   ttlMs?: number;
 }): string | null {
   const secret = signingSecret();

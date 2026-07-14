@@ -27,7 +27,7 @@ export const SIMPLIFI_LOGIN_COPY: RealmLoginCopy = {
   buttonLabel: 'Email me a login link',
   sentTitle: 'Simplifi sign in',
   sentMessage: 'Check your email — your login link is on the way.',
-  sentDetail: 'Open the email on this device and tap Sign in. The link expires in 15 minutes.',
+  sentDetail: 'Open the email on this device and tap Sign in. The link expires in 2 hours.',
   sendAnotherLabel: 'Send another link',
   emailPlaceholder: 'you@company.com',
 };
