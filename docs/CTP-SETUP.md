@@ -59,6 +59,14 @@ Code already rewrites `portal.efficiencyarchitects.online/{client}` → `/portal
 node scripts/test-ctp-portal-host.mjs
 ```
 
+Launch health also probes the vanity host (non-blocking):
+
+```bash
+curl https://ea-payments.vercel.app/api/health/launch | jq '.checks.ctp.portalVanityHost'
+```
+
+Set `EA_SKIP_PORTAL_HOST_PROBE=1` in local/CI if DNS is not attached yet.
+
 ## Verify
 
 ```bash

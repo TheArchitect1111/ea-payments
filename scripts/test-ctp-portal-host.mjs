@@ -29,10 +29,17 @@ const workspace = readFileSync(workspacePath, 'utf8');
 assert(hostSrc.includes('portal.efficiencyarchitects.online'), 'Default portal host required');
 assert(hostSrc.includes('resolvePortalHostRewrite'), 'Must export rewrite resolver');
 assert(hostSrc.includes('publicPortalUrl'), 'Must export publicPortalUrl');
+assert(hostSrc.includes('probePortalVanityHost'), 'Must export vanity host health probe');
 assert(middleware.includes('resolvePortalHostRewrite'), 'Middleware must use portal host resolver');
 assert(middleware.includes('NextResponse.rewrite'), 'Middleware must rewrite vanity paths');
 assert(middleware.includes('/:slug'), 'Matcher must include vanity slug paths');
 assert(workspace.includes('publicPortalUrl'), 'Welcome flow must use vanity portal URLs');
+
+const launchPath = join(root, 'app/api/health/launch/route.ts');
+assert(existsSync(launchPath), 'Missing launch health route');
+const launch = readFileSync(launchPath, 'utf8');
+assert(launch.includes('probePortalVanityHost'), 'Launch health must probe vanity portal host');
+assert(launch.includes('portalVanityHost'), 'Launch health must expose portalVanityHost check');
 assert(workspace.includes("publicPortalUrl(slug, 'ctp')"), 'Welcome must deep-link vanity CTP overview');
 assert(workspace.includes('portalLoginUrl()'), 'Welcome CTA must use vanity login helper');
 assert(
