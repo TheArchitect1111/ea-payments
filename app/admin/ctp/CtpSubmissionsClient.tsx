@@ -143,7 +143,18 @@ export default function CtpSubmissionsClient({
                         <Meta label="Studio" value={submission.studioStatus} />
                         <Meta label="Portal" value={submission.portalSlug ? `/portal/${submission.portalSlug}` : '—'} />
                         <Meta label="Site" value={submission.siteUrl || '—'} />
+                        <Meta
+                          label="Digital score"
+                          value={
+                            typeof submission.digitalScore === 'number'
+                              ? `${submission.digitalScore}/100`
+                              : '—'
+                          }
+                        />
                       </div>
+                      {submission.digitalImpact ? (
+                        <p className="text-sm text-neutral-600 leading-6">{submission.digitalImpact}</p>
+                      ) : null}
                       {submission.siteUrl ? (
                         <p className="text-sm">
                           <a

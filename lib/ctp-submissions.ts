@@ -1,6 +1,7 @@
 import crypto from 'crypto';
 import type { CtpAssetManifest } from '@/lib/ctp-asset-store';
 import type { CtpClientType, CtpClientTypeClassification } from '@/lib/ctp-client-type';
+import type { DigitalPresenceAudit } from '@/lib/ctp-digital-presence';
 import {
   airtableConfigured,
   airtableQuery,
@@ -58,6 +59,7 @@ export type CtpSubmission = {
   /** Acquisition track — Business / Website / Website+Portal / Portal Only / Other. */
   clientType?: CtpClientType;
   clientTypeClassification?: CtpClientTypeClassification;
+  digitalPresenceAudit?: DigitalPresenceAudit;
   intakeAnalysis?: CtpIntakeAnalysisRecord;
   assetManifest?: CtpAssetManifest;
   submittedAt: string;
@@ -78,6 +80,7 @@ export type CtpSubmissionUpdate = Partial<
     | 'assetManifest'
     | 'clientType'
     | 'clientTypeClassification'
+    | 'digitalPresenceAudit'
   >
 >;
 
@@ -121,6 +124,7 @@ function toAirtableFields(submission: CtpSubmission): Record<string, unknown> {
       clientType: submission.clientType,
       clientTypeClassification: submission.clientTypeClassification,
       siteUrl: submission.siteUrl,
+      digitalPresenceAudit: submission.digitalPresenceAudit,
     }),
     'Submitted At': submission.submittedAt,
     'Updated At': submission.updatedAt,
@@ -138,6 +142,7 @@ function fromAirtableRecord(fields: Record<string, unknown>): CtpSubmission | nu
     clientType?: CtpClientType;
     clientTypeClassification?: CtpClientTypeClassification;
     siteUrl?: string;
+    digitalPresenceAudit?: DigitalPresenceAudit;
   } = {};
   const raw = fields['Payload JSON'];
   if (typeof raw === 'string' && raw.trim()) {
@@ -192,6 +197,7 @@ function fromAirtableRecord(fields: Record<string, unknown>): CtpSubmission | nu
     clientType: payload.clientType,
     clientTypeClassification: payload.clientTypeClassification,
     siteUrl: payload.siteUrl,
+    digitalPresenceAudit: payload.digitalPresenceAudit,
     intakeAnalysis,
     assetManifest,
     submittedAt: String(fields['Submitted At'] ?? new Date().toISOString()),
