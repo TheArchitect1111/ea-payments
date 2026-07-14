@@ -16,13 +16,13 @@ function assert(condition, message) {
 
 const biViewPath = join(root, 'lib/ctp-bi-view.ts');
 const pagePath = join(root, 'app/portal/[slug]/ctp/bi/page.tsx');
-const ctpPagePath = join(root, 'app/portal/[slug]/ctp/page.tsx');
+const overviewViewPath = join(root, 'lib/ctp-overview-view.ts');
 const adminPath = join(root, 'app/admin/ctp/CtpSubmissionsClient.tsx');
 
 for (const [path, label] of [
   [biViewPath, 'ctp-bi-view.ts'],
   [pagePath, 'portal BI page'],
-  [ctpPagePath, 'portal CTP page'],
+  [overviewViewPath, 'portal overview view'],
   [adminPath, 'admin CTP client'],
 ]) {
   assert(existsSync(path), `Missing ${label}`);
@@ -30,7 +30,7 @@ for (const [path, label] of [
 
 const biView = readFileSync(biViewPath, 'utf8');
 const page = readFileSync(pagePath, 'utf8');
-const ctpPage = readFileSync(ctpPagePath, 'utf8');
+const overviewView = readFileSync(overviewViewPath, 'utf8');
 const admin = readFileSync(adminPath, 'utf8');
 
 assert(biView.includes('buildCtpBiView'), 'Must export BI view builder');
@@ -39,7 +39,7 @@ assert(biView.includes('scopeStack') || biView.includes('scope.stack'), 'BI must
 assert(page.includes('buildCtpBiView'), 'BI page must use view builder');
 assert(page.includes('requirePortalModule'), 'BI page must require ctp module');
 assert(page.includes('Project scope'), 'BI page must show project scope');
-assert(ctpPage.includes('/ctp/bi'), 'CTP progress must link to BI');
+assert(overviewView.includes('/ctp/bi'), 'CTP overview must link to BI');
 assert(admin.includes('/ctp/bi'), 'Admin must link to client BI view');
 
 if (failures.length) {

@@ -24,7 +24,7 @@ const studioPath = join(root, 'lib/ctp-studio-bridge.ts');
 const portalStatusPath = join(root, 'lib/ctp-portal-status.ts');
 const actionsPath = join(root, 'lib/ctp-executive-actions.ts');
 const panelPath = join(root, 'app/admin/ctp/CtpExecutiveActionsPanel.tsx');
-const portalPagePath = join(root, 'app/portal/[slug]/ctp/page.tsx');
+const progressPagePath = join(root, 'app/portal/[slug]/ctp/progress/page.tsx');
 
 for (const [path, label] of [
   [productionPath, 'ctp-production.ts'],
@@ -37,7 +37,7 @@ for (const [path, label] of [
   [portalStatusPath, 'portal status'],
   [actionsPath, 'executive actions'],
   [panelPath, 'executive panel'],
-  [portalPagePath, 'portal CTP page'],
+  [progressPagePath, 'portal CTP progress page'],
 ]) {
   assert(existsSync(path), `Missing ${label}`);
 }
@@ -52,7 +52,7 @@ const studio = readFileSync(studioPath, 'utf8');
 const portalStatus = readFileSync(portalStatusPath, 'utf8');
 const actions = readFileSync(actionsPath, 'utf8');
 const panel = readFileSync(panelPath, 'utf8');
-const portalPage = readFileSync(portalPagePath, 'utf8');
+const progressPage = readFileSync(progressPagePath, 'utf8');
 
 assert(production.includes('buildCtpProductionPackage'), 'Must export package builder');
 assert(production.includes('website_brief'), 'Website track artifacts required');
@@ -67,7 +67,7 @@ assert(studio.includes('scheduleCtpProduction'), 'Studio bridge must schedule pr
 assert(portalStatus.includes('productionReady'), 'Timeline must honor production package');
 assert(actions.includes('run_production'), 'Executive desk must support run_production');
 assert(panel.includes('Run AI production'), 'Admin panel must expose run button');
-assert(portalPage.includes('AI production'), 'Portal must surface production package');
+assert(progressPage.includes('AI production'), 'Progress must surface production package');
 
 if (failures.length) {
   console.error('CTP AI production checks FAILED:');

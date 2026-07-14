@@ -70,8 +70,16 @@ Set `EA_SKIP_PORTAL_HOST_PROBE=1` in local/CI if DNS is not attached yet.
 ## Verify
 
 ```bash
+# Acquisition-spine wiring (deploy subset)
+npm run test:ctp:spine
+
+# Full CTP suite (all test-ctp-*.mjs)
+npm run test:ctp
+
 curl https://ea-payments.vercel.app/api/health/launch | jq '.checks.airtableSchema.ctpSubmissions'
 ```
+
+`verify:deploy` includes `test:ctp:spine` before Playwright smoke.
 
 Complete a Discover submission at `/ctp-intake` — confirm a row appears in **CTP Submissions** with `Payload JSON` containing discovery answers.
 

@@ -16,13 +16,13 @@ function assert(condition, message) {
 
 const viewPath = join(root, 'lib/ctp-support-view.ts');
 const pagePath = join(root, 'app/portal/[slug]/ctp/support/page.tsx');
-const ctpPagePath = join(root, 'app/portal/[slug]/ctp/page.tsx');
+const overviewViewPath = join(root, 'lib/ctp-overview-view.ts');
 const adminPath = join(root, 'app/admin/ctp/CtpSubmissionsClient.tsx');
 
 for (const [path, label] of [
   [viewPath, 'ctp-support-view.ts'],
   [pagePath, 'support page'],
-  [ctpPagePath, 'portal CTP page'],
+  [overviewViewPath, 'portal overview view'],
   [adminPath, 'admin CTP client'],
 ]) {
   assert(existsSync(path), `Missing ${label}`);
@@ -30,7 +30,7 @@ for (const [path, label] of [
 
 const view = readFileSync(viewPath, 'utf8');
 const page = readFileSync(pagePath, 'utf8');
-const ctpPage = readFileSync(ctpPagePath, 'utf8');
+const overviewView = readFileSync(overviewViewPath, 'utf8');
 const admin = readFileSync(adminPath, 'utf8');
 
 assert(view.includes('buildCtpSupportView'), 'Must export support view builder');
@@ -40,7 +40,7 @@ assert(view.includes('CALENDLY') || view.includes('calendly'), 'Must include Cal
 assert(page.includes('buildCtpSupportView'), 'Page must use support view');
 assert(page.includes('Messages & Support'), 'Page must brand as Messages & Support');
 assert(page.includes('requirePortalModule'), 'Page must require ctp module');
-assert(ctpPage.includes('/ctp/support'), 'Progress must link to support');
+assert(overviewView.includes('/ctp/support'), 'Overview must link to support');
 assert(admin.includes('/ctp/support'), 'Admin must link to support');
 
 if (failures.length) {
