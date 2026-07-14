@@ -1,10 +1,7 @@
 'use client';
 
 import MagicLinkForm from '@/components/auth/MagicLinkForm';
-import DemoPasswordLogin from '@/components/auth/DemoPasswordLogin';
 import type { MagicLinkRealm } from '@/lib/magic-link';
-
-type DemoFallback = 'portal' | 'ctp' | 'simplifi';
 
 type Props = {
   realm: MagicLinkRealm;
@@ -14,10 +11,9 @@ type Props = {
   subtitle?: string;
   buttonLabel?: string;
   showTitle?: boolean;
-  demoFallback?: DemoFallback;
 };
 
-/** Shared magic-link login card used across admin, portal, and Simplifi sign-in pages. */
+/** Shared magic-link login card — email link only (no password) across admin, portal, and Simplifi. */
 export default function RealmLoginCard({
   realm,
   next,
@@ -26,12 +22,7 @@ export default function RealmLoginCard({
   subtitle,
   buttonLabel,
   showTitle,
-  demoFallback,
 }: Props) {
-  const showDemo = realm === 'portal' || realm === 'simplifi';
-  const resolvedDemoFallback: DemoFallback =
-    demoFallback ?? (realm === 'simplifi' ? 'simplifi' : 'portal');
-
   return (
     <div className="pl-card">
       {error ? (
@@ -47,12 +38,6 @@ export default function RealmLoginCard({
         buttonLabel={buttonLabel}
         showTitle={showTitle}
       />
-      {showDemo ? (
-        <>
-          <div className="pl-divider" aria-hidden />
-          <DemoPasswordLogin next={next} compact fallback={resolvedDemoFallback} />
-        </>
-      ) : null}
     </div>
   );
 }

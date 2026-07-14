@@ -21,7 +21,7 @@ function SimplifiLoginInner() {
   const nextPath = safeNextPath(searchParams.get('next'));
   const error = magicLinkErrorMessage('simplifi', searchParams.get('error'));
 
-  return <RealmLoginCard realm="simplifi" next={nextPath} error={error} />;
+  return <RealmLoginCard realm="simplifi" next={nextPath} error={error} showTitle={false} />;
 }
 
 export default function SimplifiLoginClient() {

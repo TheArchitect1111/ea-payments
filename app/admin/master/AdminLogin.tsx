@@ -1,7 +1,7 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import AdminSignInForm from '@/components/auth/AdminSignInForm';
+import RealmLoginCard from '@/components/auth/RealmLoginCard';
 import { NAVY } from '@/lib/design-system';
 import '../../portal/login/portal-login.css';
 
@@ -20,15 +20,13 @@ export default function AdminLogin() {
 
       <main className="flex-1 flex items-center justify-center px-6 py-12">
         <div className="w-full max-w-md">
-          <div className="bg-white border border-neutral-200 p-8">
-            <div className="mb-5">
-              <h2 className="text-base font-bold uppercase tracking-wider text-neutral-800">Master Control</h2>
-              <p className="text-xs text-neutral-400 mt-1">
-                Sign in, register, or reset your password. Two-factor verification is required when email is configured.
-              </p>
-            </div>
-            <AdminSignInForm nextPath={nextPath} />
+          <div className="mb-5">
+            <h2 className="text-base font-bold uppercase tracking-wider text-neutral-800">Master Control</h2>
+            <p className="text-xs text-neutral-400 mt-1">
+              Enter your admin email — we send a one-tap login link. No password.
+            </p>
           </div>
+          <RealmLoginCard realm="admin" next={nextPath} showTitle={false} />
         </div>
       </main>
     </div>
