@@ -102,6 +102,16 @@ export default async function PortalCtpOverviewPage({
               Digital <strong style={{ color: GOLD }}>{view.digitalScore}/100</strong>
             </span>
           ) : null}
+          {typeof view.socialScore === 'number' ? (
+            <span>
+              Social <strong style={{ color: GOLD }}>{view.socialScore}/100</strong>
+            </span>
+          ) : null}
+          {typeof view.gbpScore === 'number' ? (
+            <span>
+              Google Business <strong style={{ color: GOLD }}>{view.gbpScore}/100</strong>
+            </span>
+          ) : null}
         </div>
 
         <p style={{ margin: '1.1rem 0 0' }}>

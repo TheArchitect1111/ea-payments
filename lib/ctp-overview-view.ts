@@ -25,6 +25,8 @@ export type CtpOverviewView = {
   siteUrl?: string;
   maturityScore?: number;
   digitalScore?: number;
+  socialScore?: number;
+  gbpScore?: number;
 };
 
 export function buildCtpOverviewView(submission: CtpSubmission, slug: string): CtpOverviewView {
@@ -127,5 +129,7 @@ export function buildCtpOverviewView(submission: CtpSubmission, slug: string): C
     siteUrl: submission.siteUrl,
     maturityScore: submission.executiveSnapshot?.operationalMaturity,
     digitalScore: submission.digitalPresenceAudit?.overallScore,
+    socialScore: submission.digitalPresenceAudit?.scores?.socialPresence,
+    gbpScore: submission.digitalPresenceAudit?.scores?.googleBusinessProfile,
   };
 }

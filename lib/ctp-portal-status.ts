@@ -53,6 +53,8 @@ export type CtpPortalStatusView = {
   clientTypeLabel?: string;
   siteUrl?: string;
   digitalScore?: number;
+  socialScore?: number;
+  gbpScore?: number;
   maturityScore?: number;
   adminWastePercent?: number;
   snapshotSummary?: string;
@@ -134,7 +136,17 @@ function buildTimeline(submission: CtpSubmission, assets: CtpAdminAssetView[]): 
         ? 'active'
         : 'pending',
     digitalDone
-      ? `Digital Presence Score ${submission.digitalPresenceAudit!.overallScore}/100.`
+      ? (() => {
+          const audit = submission.digitalPresenceAudit!;
+          const parts = [`Digital Presence Score ${audit.overallScore}/100`];
+          if (typeof audit.scores?.socialPresence === 'number') {
+            parts.push(`Social ${audit.scores.socialPresence}`);
+          }
+          if (typeof audit.scores?.googleBusinessProfile === 'number') {
+            parts.push(`GBP ${audit.scores.googleBusinessProfile}`);
+          }
+          return `${parts.join(' · ')}.`;
+        })()
       : submission.clientTypeClassification?.digitalAudit
         ? 'Evaluating your public digital presence.'
         : 'Digital audit not required for this track.',
@@ -313,6 +325,8 @@ export function buildCtpPortalStatusView(submission: CtpSubmission): CtpPortalSt
       : undefined,
     siteUrl: submission.siteUrl,
     digitalScore: submission.digitalPresenceAudit?.overallScore,
+    socialScore: submission.digitalPresenceAudit?.scores?.socialPresence,
+    gbpScore: submission.digitalPresenceAudit?.scores?.googleBusinessProfile,
     maturityScore: submission.executiveSnapshot?.operationalMaturity,
     adminWastePercent: submission.executiveSnapshot?.adminWastePercent,
     snapshotSummary: submission.executiveSnapshot?.summary,

@@ -64,6 +64,28 @@ assert(biView.includes('gbpScore'), 'BI view must expose gbpScore');
 assert(biPage.includes('socialScore'), 'BI page must surface social score');
 assert(biPage.includes('gbpScore'), 'BI page must surface GBP score');
 
+const statusPath = join(root, 'lib/ctp-portal-status.ts');
+const overviewViewPath = join(root, 'lib/ctp-overview-view.ts');
+const overviewPagePath = join(root, 'app/portal/[slug]/ctp/page.tsx');
+const progressPagePath = join(root, 'app/portal/[slug]/ctp/progress/page.tsx');
+assert(existsSync(statusPath), 'Missing ctp-portal-status.ts');
+assert(existsSync(overviewViewPath), 'Missing ctp-overview-view.ts');
+assert(existsSync(overviewPagePath), 'Missing CTP overview page');
+assert(existsSync(progressPagePath), 'Missing CTP progress page');
+const status = readFileSync(statusPath, 'utf8');
+const overviewView = readFileSync(overviewViewPath, 'utf8');
+const overviewPage = readFileSync(overviewPagePath, 'utf8');
+const progressPage = readFileSync(progressPagePath, 'utf8');
+assert(status.includes('socialScore'), 'Portal status must expose socialScore');
+assert(status.includes('gbpScore'), 'Portal status must expose gbpScore');
+assert(status.includes('Social '), 'Timeline digital step must mention Social');
+assert(overviewView.includes('socialScore'), 'Overview view must expose socialScore');
+assert(overviewView.includes('gbpScore'), 'Overview view must expose gbpScore');
+assert(overviewPage.includes('socialScore'), 'Overview page must surface social score');
+assert(overviewPage.includes('gbpScore'), 'Overview page must surface GBP score');
+assert(progressPage.includes('socialScore'), 'Progress page must surface social score');
+assert(progressPage.includes('gbpScore'), 'Progress page must surface GBP score');
+
 if (failures.length) {
   console.error('CTP digital presence checks FAILED:');
   for (const failure of failures) console.error(`  - ${failure}`);

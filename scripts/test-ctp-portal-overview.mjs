@@ -34,11 +34,17 @@ assert(view.includes('buildCtpOverviewView'), 'Must export overview builder');
 assert(view.includes('/ctp/progress'), 'Overview cards must link to progress');
 assert(view.includes('/ctp/bi'), 'Overview must include BI card');
 assert(view.includes('/ctp/support'), 'Overview must include support card');
+assert(view.includes('socialScore'), 'Overview must expose socialScore');
+assert(view.includes('gbpScore'), 'Overview must expose gbpScore');
 assert(overview.includes('buildCtpOverviewView'), 'Root CTP page must be overview');
 assert(overview.includes('Open live progress'), 'Overview must CTA to progress');
+assert(overview.includes('socialScore'), 'Overview page must surface social score');
+assert(overview.includes('gbpScore'), 'Overview page must surface GBP score');
 assert(progress.includes('PortalCtpDesignStudioForm'), 'Progress must keep Design Studio');
 assert(progress.includes('Your live project progress'), 'Progress page title must remain');
 assert(progress.includes(`href={\`/portal/\${slug}/ctp\`}`), 'Progress must link back to overview');
+assert(progress.includes('socialScore'), 'Progress page must surface social score');
+assert(progress.includes('gbpScore'), 'Progress page must surface GBP score');
 
 if (failures.length) {
   console.error('CTP portal overview checks FAILED:');

@@ -69,6 +69,18 @@ export default async function PortalCtpStatusPage({
               · Digital Presence <strong>{view.digitalScore}/100</strong>
             </>
           ) : null}
+          {typeof view.socialScore === 'number' ? (
+            <>
+              {' '}
+              · Social <strong>{view.socialScore}/100</strong>
+            </>
+          ) : null}
+          {typeof view.gbpScore === 'number' ? (
+            <>
+              {' '}
+              · Google Business <strong>{view.gbpScore}/100</strong>
+            </>
+          ) : null}
           {typeof view.maturityScore === 'number' ? (
             <>
               {' '}
