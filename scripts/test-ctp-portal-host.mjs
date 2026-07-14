@@ -33,6 +33,28 @@ assert(middleware.includes('resolvePortalHostRewrite'), 'Middleware must use por
 assert(middleware.includes('NextResponse.rewrite'), 'Middleware must rewrite vanity paths');
 assert(middleware.includes('/:slug'), 'Matcher must include vanity slug paths');
 assert(workspace.includes('publicPortalUrl'), 'Welcome flow must use vanity portal URLs');
+assert(workspace.includes("publicPortalUrl(slug, 'ctp')"), 'Welcome must deep-link vanity CTP overview');
+assert(workspace.includes('portalLoginUrl()'), 'Welcome CTA must use vanity login helper');
+assert(
+  !workspace.includes('portalResult.portalLoginUrl ??'),
+  'Must not prefer hub createPortalAccess login URL over vanity host',
+);
+
+const adminViewPath = join(root, 'lib/ctp-admin-view.ts');
+const adminUiPath = join(root, 'app/admin/ctp/CtpSubmissionsClient.tsx');
+const emailPath = join(root, 'lib/email.ts');
+assert(existsSync(adminViewPath), 'Missing ctp-admin-view.ts');
+assert(existsSync(adminUiPath), 'Missing CTP admin client');
+assert(existsSync(emailPath), 'Missing email.ts');
+const adminView = readFileSync(adminViewPath, 'utf8');
+const adminUi = readFileSync(adminUiPath, 'utf8');
+const email = readFileSync(emailPath, 'utf8');
+assert(adminView.includes('portalPublicUrl'), 'Admin view must expose vanity portalPublicUrl');
+assert(adminView.includes("publicPortalUrl(submission.portalSlug, 'ctp')"), 'Admin vanity CTP URL');
+assert(adminUi.includes('portalPublicUrl'), 'Admin UI must surface vanity portal URL');
+assert(adminUi.includes('Client vanity portal'), 'Admin UI must link client vanity portal');
+assert(email.includes('socialPresence'), 'Executive email must include social score');
+assert(email.includes('googleBusinessProfile'), 'Executive email must include GBP score');
 
 // Runtime checks via ts transpile isn't available — duplicate pure logic for smoke.
 function normalizeHost(host) {

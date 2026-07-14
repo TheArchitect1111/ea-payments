@@ -163,7 +163,10 @@ export async function runCtpWorkspaceProvision(
       `Temporary Password: ${portalResult.tempPassword}. ` +
       'Log in using the button above. Contact us to update your password at any time.';
     try {
-      const portalUrl = portalResult.portalLoginUrl ?? publicPortalUrl(slug);
+      // Prefer vanity host CTAs (portal.efficiencyarchitects.online/{slug})
+      // over hub /portal/login links from createPortalAccess.
+      const portalUrl = publicPortalUrl(slug, 'ctp');
+      const loginUrl = portalLoginUrl();
       const track =
         submission.clientTypeClassification?.label ||
         submission.clientType ||
@@ -172,9 +175,9 @@ export async function runCtpWorkspaceProvision(
         clientName: submission.contactName,
         email: submission.email,
         packageName: CTP_WELCOME_PACKAGE,
-        portalLoginUrl: portalUrl,
+        portalLoginUrl: loginUrl,
         tempCredentials,
-        nextSteps: `Your ${track} workspace is live at ${publicPortalUrl(slug)}. Review your executive brief, then book an Executive Strategy Session when you are ready to decide direction.`,
+        nextSteps: `Your ${track} workspace is live at ${portalUrl}. Sign in at ${loginUrl}, then open your Consider the Possibilities overview to review the executive brief and book a strategy session when ready.`,
       });
     } catch (err) {
       console.error('[ctp-workspace-provision] welcome email failed:', err);

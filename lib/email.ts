@@ -1132,6 +1132,25 @@ export async function sendCtpExecutiveEmail(
         ? `<p style="margin:0 0 10px;font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#1B2B4D;">Digital Presence Score</p>
     <div style="background-color:#F8F6F2;border-left:4px solid #C9A844;padding:16px 18px;margin-bottom:12px;">
       <p style="margin:0 0 6px;font-size:28px;font-weight:700;color:#1B2B4D;">${data.digitalPresenceAudit.overallScore} / 100</p>
+      ${
+        typeof data.digitalPresenceAudit.scores?.socialPresence === 'number' ||
+        typeof data.digitalPresenceAudit.scores?.googleBusinessProfile === 'number'
+          ? `<p style="margin:0 0 6px;font-size:13px;color:#1B2B4D;line-height:1.7;">${
+              typeof data.digitalPresenceAudit.scores?.socialPresence === 'number'
+                ? `Social ${data.digitalPresenceAudit.scores.socialPresence}/100`
+                : ''
+            }${
+              typeof data.digitalPresenceAudit.scores?.socialPresence === 'number' &&
+              typeof data.digitalPresenceAudit.scores?.googleBusinessProfile === 'number'
+                ? ' · '
+                : ''
+            }${
+              typeof data.digitalPresenceAudit.scores?.googleBusinessProfile === 'number'
+                ? `Google Business ${data.digitalPresenceAudit.scores.googleBusinessProfile}/100`
+                : ''
+            }</p>`
+          : ''
+      }
       <p style="margin:0;font-size:13px;color:#555;line-height:1.7;">${escHtml(data.digitalPresenceAudit.impactEstimate)}</p>
     </div>
     <ul style="margin:0 0 22px;padding-left:20px;">
