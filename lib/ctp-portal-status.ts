@@ -5,14 +5,32 @@ import type {
   CtpWorkspaceStatus,
 } from '@/lib/ctp-submissions';
 import { buildCtpAdminAssetViews, type CtpAdminAssetView } from '@/lib/ctp-admin-view';
+import { ctpClientTypeLabel } from '@/lib/ctp-client-type';
 
 export type CtpTimelineStepState = 'complete' | 'active' | 'pending' | 'failed';
 
+export type CtpTimelineStepId =
+  | 'assessment'
+  | 'ai-evaluation'
+  | 'digital-audit'
+  | 'executive-report'
+  | 'client-input'
+  | 'ai-building'
+  | 'executive-review'
+  | 'reveal';
+
 export type CtpTimelineStep = {
-  id: 'submitted' | 'workspace' | 'studio' | 'review';
+  id: CtpTimelineStepId;
   label: string;
   detail: string;
   state: CtpTimelineStepState;
+};
+
+export type CtpDesignStudioItem = {
+  id: string;
+  label: string;
+  status: 'ready' | 'needed';
+  detail: string;
 };
 
 export type CtpPortalStatusView = {
@@ -25,63 +43,231 @@ export type CtpPortalStatusView = {
   proposalId: string;
   submittedAt: string;
   intakeSummary?: string;
+  clientTypeLabel?: string;
+  siteUrl?: string;
+  digitalScore?: number;
+  percentComplete: number;
   assets: CtpAdminAssetView[];
   timeline: CtpTimelineStep[];
+  designStudio: CtpDesignStudioItem[];
 };
 
-function workspaceStep(
-  workspaceStatus: CtpWorkspaceStatus,
-  status: CtpSubmissionStatus,
-): Pick<CtpTimelineStep, 'state' | 'detail'> {
-  if (workspaceStatus === 'Failed') {
-    return { state: 'failed', detail: 'Workspace setup needs attention — our team has been notified.' };
-  }
-  if (workspaceStatus === 'Provisioning') {
-    return { state: 'active', detail: 'Your workspace is opening now.' };
-  }
-  if (workspaceStatus === 'Active' || status === 'Workspace Active') {
-    return { state: 'complete', detail: 'Your portal workspace is ready.' };
-  }
-  return { state: 'pending', detail: 'We will open your workspace after discovery review.' };
+function step(
+  id: CtpTimelineStepId,
+  label: string,
+  state: CtpTimelineStepState,
+  detail: string,
+): CtpTimelineStep {
+  return { id, label, state, detail };
 }
 
-function studioStep(studioStatus: CtpStudioStatus): Pick<CtpTimelineStep, 'state' | 'detail'> {
-  if (studioStatus === 'Completed') {
-    return { state: 'complete', detail: 'Design studio work is complete.' };
-  }
-  if (studioStatus === 'Ready For Review') {
-    return { state: 'complete', detail: 'Studios are ready for your collaborative review.' };
-  }
-  if (studioStatus === 'In Progress') {
-    return { state: 'active', detail: 'Our team is shaping your first experience concepts.' };
-  }
-  return { state: 'pending', detail: 'Studio work begins after your workspace is active.' };
+function hasClientInput(submission: CtpSubmission, assets: CtpAdminAssetView[]): boolean {
+  if (assets.length > 0) return true;
+  const answers = submission.discoveryAnswers ?? {};
+  const brandHints = ['brand_voice', 'brand_colors', 'logo', 'inspiration', 'competitors'];
+  return brandHints.some((key) => {
+    const value = answers[key];
+    if (typeof value === 'string' && value.trim()) return true;
+    if (Array.isArray(value) && value.length) return true;
+    return false;
+  });
 }
 
-function reviewStep(
-  status: CtpSubmissionStatus,
-  reviewScheduledAt?: string,
-): Pick<CtpTimelineStep, 'state' | 'detail'> {
-  if (status === 'Completed') {
-    return { state: 'complete', detail: 'Your CTP journey is complete — next builds are underway.' };
+function buildTimeline(submission: CtpSubmission, assets: CtpAdminAssetView[]): CtpTimelineStep[] {
+  const intakeDone = Boolean(submission.intakeAnalysis?.summary);
+  const digitalDone = Boolean(submission.digitalPresenceAudit);
+  const reportDone = Boolean(submission.proposalId);
+  const workspaceActive = submission.workspaceStatus === 'Active';
+  const workspaceFailed = submission.workspaceStatus === 'Failed';
+  const siteLive = Boolean(submission.siteUrl);
+  const studioInProgress = submission.studioStatus === 'In Progress';
+  const studioReady =
+    submission.studioStatus === 'Ready For Review' || submission.studioStatus === 'Completed';
+  const reviewScheduled = submission.status === 'Review Scheduled';
+  const completed = submission.status === 'Completed';
+  const clientInput = hasClientInput(submission, assets);
+
+  const assessment = step(
+    'assessment',
+    'Assessment Complete',
+    'complete',
+    'Your Consider the Possibilities™ answers are saved.',
+  );
+
+  const aiEvaluation = step(
+    'ai-evaluation',
+    'AI Evaluation Complete',
+    intakeDone ? 'complete' : workspaceActive || reportDone ? 'active' : 'pending',
+    intakeDone
+      ? 'Intake analysis synthesized your discovery into priorities.'
+      : 'AI evaluation is running on your submission.',
+  );
+
+  const digitalAudit = step(
+    'digital-audit',
+    'Digital Audit Complete',
+    digitalDone
+      ? 'complete'
+      : submission.clientTypeClassification?.digitalAudit
+        ? 'active'
+        : 'pending',
+    digitalDone
+      ? `Digital Presence Score ${submission.digitalPresenceAudit!.overallScore}/100.`
+      : submission.clientTypeClassification?.digitalAudit
+        ? 'Evaluating your public digital presence.'
+        : 'Digital audit not required for this track.',
+  );
+
+  const executiveReport = step(
+    'executive-report',
+    'Executive Report Generated',
+    reportDone ? 'complete' : 'pending',
+    reportDone
+      ? 'Your executive brief and proposal blueprint are ready.'
+      : 'Executive brief will appear after analysis completes.',
+  );
+
+  let clientInputState: CtpTimelineStepState = 'pending';
+  let clientInputDetail = 'Share brand assets and preferences in Design Studio when ready.';
+  if (clientInput) {
+    clientInputState = 'complete';
+    clientInputDetail = 'Thanks — we have client input / assets to work with.';
+  } else if (reportDone && workspaceActive) {
+    clientInputState = 'active';
+    clientInputDetail = 'Waiting for your Design Studio inputs (logo, colors, brand voice, inspiration).';
   }
-  if (status === 'Review Scheduled' && reviewScheduledAt) {
-    const when = new Date(reviewScheduledAt).toLocaleString('en-US', {
-      dateStyle: 'medium',
-      timeStyle: 'short',
-    });
-    return { state: 'active', detail: `Review scheduled for ${when}.` };
+
+  let buildingState: CtpTimelineStepState = 'pending';
+  let buildingDetail = 'AI production begins after your inputs and executive direction.';
+  if (workspaceFailed) {
+    buildingState = 'failed';
+    buildingDetail = 'Workspace setup needs attention — our team has been notified.';
+  } else if (siteLive || studioReady) {
+    buildingState = 'complete';
+    buildingDetail = siteLive
+      ? `Starter solution is live${submission.siteUrl ? ` at your site` : ''}.`
+      : 'Studio concepts are ready for review.';
+  } else if (studioInProgress || (workspaceActive && clientInput)) {
+    buildingState = 'active';
+    buildingDetail = 'AI is assembling your solution from discovery + studio inputs.';
+  } else if (workspaceActive) {
+    buildingState = 'active';
+    buildingDetail = 'Workspace is open — solution build can proceed as inputs arrive.';
   }
-  if (status === 'Ready For Review') {
-    return { state: 'active', detail: 'We are scheduling your collaborative review.' };
+
+  let reviewState: CtpTimelineStepState = 'pending';
+  let reviewDetail = 'EA executive review happens before final reveal.';
+  if (completed) {
+    reviewState = 'complete';
+    reviewDetail = 'Executive review complete.';
+  } else if (reviewScheduled || submission.status === 'Ready For Review' || studioReady) {
+    reviewState = 'active';
+    reviewDetail = reviewScheduled && submission.reviewScheduledAt
+      ? `Review scheduled for ${new Date(submission.reviewScheduledAt).toLocaleString('en-US', {
+          dateStyle: 'medium',
+          timeStyle: 'short',
+        })}.`
+      : 'Ready for executive review.';
   }
-  return { state: 'pending', detail: 'We will schedule a review when studio work is ready.' };
+
+  let revealState: CtpTimelineStepState = 'pending';
+  let revealDetail = 'Reveal unlocks after executive approval.';
+  if (completed) {
+    revealState = 'complete';
+    revealDetail = 'Reveal is unlocked — celebrate the transformation.';
+  } else if (reviewState === 'active') {
+    revealState = 'pending';
+    revealDetail = 'Next: approval unlocks your reveal experience.';
+  }
+
+  return [
+    assessment,
+    aiEvaluation,
+    digitalAudit,
+    executiveReport,
+    step('client-input', 'Waiting For Client Input', clientInputState, clientInputDetail),
+    step('ai-building', 'AI Building Solution', buildingState, buildingDetail),
+    step('executive-review', 'Executive Review', reviewState, reviewDetail),
+    step('reveal', 'Ready For Reveal', revealState, revealDetail),
+  ];
+}
+
+function buildDesignStudio(submission: CtpSubmission, assets: CtpAdminAssetView[]): CtpDesignStudioItem[] {
+  const byType = new Set(assets.map((asset) => asset.assetType));
+  const answers = submission.discoveryAnswers ?? {};
+
+  const item = (
+    id: string,
+    label: string,
+    ready: boolean,
+    readyDetail: string,
+    neededDetail: string,
+  ): CtpDesignStudioItem => ({
+    id,
+    label,
+    status: ready ? 'ready' : 'needed',
+    detail: ready ? readyDetail : neededDetail,
+  });
+
+  return [
+    item('logo', 'Logo', byType.has('logo'), 'Logo on file.', 'Upload your logo when ready.'),
+    item(
+      'colors',
+      'Brand colors',
+      Boolean(answers.brand_colors) || byType.has('brand-guidelines'),
+      'Color direction captured.',
+      'Share primary / secondary colors.',
+    ),
+    item(
+      'fonts',
+      'Fonts',
+      Boolean(answers.brand_fonts),
+      'Font preferences noted.',
+      'Optional — share preferred typefaces.',
+    ),
+    item(
+      'photography',
+      'Photography',
+      byType.has('photos'),
+      'Photo assets received.',
+      'Upload brand or venue photography.',
+    ),
+    item(
+      'brand-voice',
+      'Brand voice',
+      Boolean(answers.brand_voice) || Boolean(answers.success_definition),
+      'Voice / tone signals captured from discovery.',
+      'Describe how you want to sound.',
+    ),
+    item(
+      'competitors',
+      'Competitors / inspiration',
+      Boolean(answers.competitors) || Boolean(answers.inspiration) || Boolean(answers.current_url),
+      'Reference links captured.',
+      'Share competitor or inspiration URLs.',
+    ),
+    item(
+      'documents',
+      'Documents / policies',
+      byType.has('documents') || byType.has('policies'),
+      'Documents on file.',
+      'Upload policies or supporting docs if needed.',
+    ),
+    item(
+      'services',
+      'Products / services',
+      Boolean(answers.desired_experiences) || Boolean(answers.offer_summary),
+      'Offer direction captured in discovery.',
+      'Clarify products and services for the build.',
+    ),
+  ];
 }
 
 export function buildCtpPortalStatusView(submission: CtpSubmission): CtpPortalStatusView {
-  const workspace = workspaceStep(submission.workspaceStatus, submission.status);
-  const studio = studioStep(submission.studioStatus);
-  const review = reviewStep(submission.status, submission.reviewScheduledAt);
+  const assets = buildCtpAdminAssetViews(submission.assetManifest);
+  const timeline = buildTimeline(submission, assets);
+  const completeCount = timeline.filter((step) => step.state === 'complete').length;
+  const percentComplete = Math.round((completeCount / timeline.length) * 100);
 
   return {
     id: submission.id,
@@ -93,29 +279,14 @@ export function buildCtpPortalStatusView(submission: CtpSubmission): CtpPortalSt
     proposalId: submission.proposalId,
     submittedAt: submission.submittedAt,
     intakeSummary: submission.intakeAnalysis?.summary,
-    assets: buildCtpAdminAssetViews(submission.assetManifest),
-    timeline: [
-      {
-        id: 'submitted',
-        label: 'Discovery submitted',
-        detail: 'Thank you — your answers are saved and our team is reviewing them.',
-        state: 'complete',
-      },
-      {
-        id: 'workspace',
-        label: 'Workspace',
-        ...workspace,
-      },
-      {
-        id: 'studio',
-        label: 'Design studio',
-        ...studio,
-      },
-      {
-        id: 'review',
-        label: 'Collaborative review',
-        ...review,
-      },
-    ],
+    clientTypeLabel: submission.clientType
+      ? ctpClientTypeLabel(submission.clientType)
+      : undefined,
+    siteUrl: submission.siteUrl,
+    digitalScore: submission.digitalPresenceAudit?.overallScore,
+    percentComplete,
+    assets,
+    timeline,
+    designStudio: buildDesignStudio(submission, assets),
   };
 }
