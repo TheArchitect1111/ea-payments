@@ -1,12 +1,13 @@
 import { createCampaign } from '@/lib/creative-studio/campaign-store';
 import type { CampaignGoalId } from '@/lib/creative-studio/types';
 import { applyCtpBrandFromSubmission } from '@/lib/ctp-brand-bridge';
+import { finalizeCtpAssetManifest } from '@/lib/ctp-asset-store';
 import {
   getCtpSubmissionById,
   updateCtpSubmission,
   type CtpSubmission,
 } from '@/lib/ctp-submissions';
-import { syntheticOrgId, EA_INTERNAL_ORG_ID } from '@/lib/platform-store';
+import { findOrganizationByPortalSlug } from '@/lib/organizations';
 import { emitPulseEvent } from '@/lib/pulse-bus';
 import { scheduleCtpProduction } from '@/lib/ctp-production-run';
 
@@ -68,20 +69,14 @@ function buildCampaignStory(submission: CtpSubmission): string {
   return parts.join('\n\n');
 }
 
-function studioOrganizationId(submission: CtpSubmission): string {
-  return resolveCtpOrganizationId({
-    portalSlug: submission.portalSlug,
-    considerSlug: submission.considerSlug,
-  });
-}
-
-export function resolveCtpOrganizationId(input: {
+export async function resolveCtpOrganizationId(input: {
   portalSlug?: string;
-  considerSlug?: string;
-}): string {
-  if (input.portalSlug) return syntheticOrgId(input.portalSlug);
-  if (input.considerSlug) return syntheticOrgId(input.considerSlug);
-  return EA_INTERNAL_ORG_ID;
+}): Promise<string | null> {
+  const portalSlug = input.portalSlug?.trim();
+  if (!portalSlug) return null;
+  const organization = await findOrganizationByPortalSlug(portalSlug);
+  if (!organization || organization.status !== 'Active') return null;
+  return organization.id;
 }
 
 export async function runCtpStudioCampaign(
@@ -109,11 +104,17 @@ export async function runCtpStudioCampaign(
   }
 
   try {
-    const organizationId = studioOrganizationId(submission);
-    await applyCtpBrandFromSubmission(submission, organizationId);
+    const organizationId = await resolveCtpOrganizationId({ portalSlug: submission.portalSlug });
+    if (!organizationId) {
+      return { ok: false, error: 'An active persisted organization is required before studio creation.' };
+    }
+    const assetManifest = await finalizeCtpAssetManifest(submission.assetManifest, organizationId);
+    const tenantSubmission = assetManifest ? { ...submission, assetManifest } : submission;
+    if (assetManifest) await updateCtpSubmission(submission.id, { assetManifest });
+    await applyCtpBrandFromSubmission(tenantSubmission, organizationId);
 
-    const goalId = mapGoalId(submission);
-    const story = buildCampaignStory(submission);
+    const goalId = mapGoalId(tenantSubmission);
+    const story = buildCampaignStory(tenantSubmission);
     const campaign = await createCampaign({
       goalId,
       story,
@@ -134,7 +135,7 @@ export async function runCtpStudioCampaign(
       detail: `${campaign.brief.title} · ${campaign.goalLabel}`,
       priority: 'medium',
       href: `/admin/creative-studio/campaigns/${campaign.id}`,
-      tenantId: submission.considerSlug,
+      tenantId: organizationId,
       objectId: submission.id,
       metadata: {
         ctpSubmissionId: submission.id,
@@ -151,7 +152,7 @@ export async function runCtpStudioCampaign(
         detail: `${campaign.brief.title} · ${campaign.completionPercent}% complete`,
         priority: 'medium',
         href: `/admin/creative-studio/campaigns/${campaign.id}`,
-        tenantId: submission.considerSlug,
+        tenantId: organizationId,
         objectId: submission.id,
         metadata: {
           ctpSubmissionId: submission.id,

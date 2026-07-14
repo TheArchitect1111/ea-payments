@@ -6,6 +6,16 @@ import type { AIGatewayRequest, AIGatewayResponse, AIMessage, AIRequestContext, 
 
 const conversationHistory = new Map<string, AIMessage[]>();
 
+function conversationHistoryKey(
+  conversationId: string | undefined,
+  context: AIRequestContext,
+): string | null {
+  if (!conversationId) return null;
+  const tenantScope = context.actor.portalSlug?.trim() || context.actor.id.trim();
+  if (!tenantScope) return null;
+  return `${context.actor.type}:${tenantScope}:${conversationId}`;
+}
+
 export class AIGatewayError extends Error {
   constructor(message: string, public code = 'AI_GATEWAY_ERROR', public status = 500) {
     super(message);
@@ -42,16 +52,18 @@ function openAIInput(messages: AIMessage[]) {
   }));
 }
 
-function withHistory(request: AIGatewayRequest, maxHistoryMessages: number): AIMessage[] {
-  if (!request.conversationId) return request.messages;
-  const stored = conversationHistory.get(request.conversationId) ?? [];
+function withHistory(request: AIGatewayRequest, context: AIRequestContext, maxHistoryMessages: number): AIMessage[] {
+  const key = conversationHistoryKey(request.conversationId, context);
+  if (!key) return request.messages;
+  const stored = conversationHistory.get(key) ?? [];
   return [...stored, ...request.messages].slice(-maxHistoryMessages);
 }
 
-function saveHistory(conversationId: string | undefined, messages: AIMessage[], assistantText: string, maxHistoryMessages: number) {
-  if (!conversationId) return;
+function saveHistory(conversationId: string | undefined, context: AIRequestContext, messages: AIMessage[], assistantText: string, maxHistoryMessages: number) {
+  const key = conversationHistoryKey(conversationId, context);
+  if (!key) return;
   const assistantMessage: AIMessage = { role: 'assistant', content: assistantText };
-  conversationHistory.set(conversationId, [...messages, assistantMessage].slice(-maxHistoryMessages));
+  conversationHistory.set(key, [...messages, assistantMessage].slice(-maxHistoryMessages));
 }
 
 async function fetchWithRetry(url: string, init: RequestInit, retries: number, timeoutMs: number) {
@@ -79,7 +91,7 @@ export async function runAIGateway(request: AIGatewayRequest, context: AIRequest
   const limit = checkRateLimit(context.actor.id, config.rateLimitMaxRequests, config.rateLimitWindowMs);
   if (!limit.ok) throw new AIGatewayError('AI rate limit reached. Try again shortly.', 'AI_RATE_LIMITED', 429);
 
-  const messages = withHistory(request, config.maxHistoryMessages);
+  const messages = withHistory(request, context, config.maxHistoryMessages);
   const injectionSignals = detectPromptInjection(messages);
   if (injectionSignals.length) {
     logAIEvent('ai.prompt_injection_signal', context, { signals: injectionSignals.length });
@@ -122,7 +134,7 @@ export async function runAIGateway(request: AIGatewayRequest, context: AIRequest
   const data = await response.json();
   const text = textFromOpenAI(data);
   const usage = usageFromOpenAI(data.usage);
-  saveHistory(request.conversationId, messages, text, config.maxHistoryMessages);
+  saveHistory(request.conversationId, context, messages, text, config.maxHistoryMessages);
   trackAIUsage(context, model, usage);
 
   return { ok: true, requestId: context.requestId, model, text, usage, promptVersion };
@@ -135,7 +147,7 @@ export async function streamAIGateway(request: AIGatewayRequest, context: AIRequ
   const limit = checkRateLimit(context.actor.id, config.rateLimitMaxRequests, config.rateLimitWindowMs);
   if (!limit.ok) throw new AIGatewayError('AI rate limit reached. Try again shortly.', 'AI_RATE_LIMITED', 429);
 
-  const messages = withHistory(request, config.maxHistoryMessages);
+  const messages = withHistory(request, context, config.maxHistoryMessages);
   const promptVersion = request.promptVersion ?? config.promptVersion;
   const system = buildGatewaySystemPrompt(request.system ?? '', promptVersion);
   const model = request.model ?? config.defaultModel;

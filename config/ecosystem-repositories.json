@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "description": "Verified repository inventory. Paths are relative to this repository unless supplied through EA_ECOSYSTEM_REPOSITORIES.",
+  "repositories": [
+    {
+      "id": "ea-payments",
+      "name": "EA Ecosystem Platform (repository: ea-payments)",
+      "path": ".",
+      "criticality": "launch-critical",
+      "role": "Canonical integration foundation for revenue, portal, workspace, modules, and intelligence",
+      "expectedScripts": [
+        "build",
+        "lint",
+        "test:smoke",
+        "test:capture-e2e",
+        "test:tenant-safety",
+        "launch:report"
+      ]
+    }
+  ]
+}

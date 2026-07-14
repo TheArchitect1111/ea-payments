@@ -27,16 +27,6 @@ export async function GET() {
     }),
   );
 
-  if (organizations.length === 0 && session.orgId) {
-    organizations.push({
-      organizationId: session.orgId,
-      role: session.role ?? 'owner',
-      name: session.slug,
-      slug: session.slug,
-      portalSlug: session.slug,
-      isCurrent: true,
-    });
-  }
 
   return NextResponse.json({
     currentOrgId: session.orgId ?? null,

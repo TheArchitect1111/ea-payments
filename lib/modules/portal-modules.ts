@@ -141,6 +141,10 @@ export async function resolveEnabledModuleIds(input: {
     return activeModuleIdsFromEntitlements(stored);
   }
 
+  if (process.env.NODE_ENV === 'production' && !isDemo) {
+    return new Set<ModuleId>();
+  }
+
   const packageKey = resolveEntitlementPackageKey(input);
   return new Set(
     defaultModulesForPackage(packageKey, {
@@ -158,7 +162,7 @@ export async function resolvePortalModuleAccess(input: {
   role?: PlatformRole;
 }): Promise<PortalModuleAccess> {
   const orgId = input.orgId ?? syntheticOrgId(input.slug);
-  const role = normalizeRole(input.role ?? 'owner');
+  const role = normalizeRole(input.role ?? 'guest');
   const enabledModuleIds = await resolveEnabledModuleIds(input);
 
   const hubModules: PortalHubModule[] = [];
@@ -351,7 +355,7 @@ export async function isModuleEnabled(input: {
   const modDef = getModuleDefinition(input.moduleId);
   if (!modDef) return false;
 
-  return roleCanAccessModule(normalizeRole(input.role ?? 'owner'), modDef);
+  return roleCanAccessModule(normalizeRole(input.role ?? 'guest'), modDef);
 }
 
 /** Ensure package entitlements are persisted when org tables exist. */

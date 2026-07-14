@@ -16,7 +16,7 @@ import {
   updateCtpSubmission,
 } from '@/lib/ctp-submissions';
 import { sendCtpExecutiveEmailForSubmission } from '@/lib/ctp-executive-email-send';
-import { finalizeCtpAssetManifest, parseAssetUploads } from '@/lib/ctp-asset-store';
+import { ctpAssetStagingScope, finalizeCtpAssetManifest, parseAssetUploads } from '@/lib/ctp-asset-store';
 import { resolveCtpOrganizationId } from '@/lib/ctp-studio-bridge';
 import { scheduleCtpIntakeAnalysis } from '@/lib/ctp-intake-orchestrator';
 import { scheduleCtpWorkspaceProvision } from '@/lib/ctp-workspace-provision';
@@ -336,7 +336,7 @@ export async function POST(req: NextRequest) {
         const assetManifest = parsedUploads
           ? await finalizeCtpAssetManifest(
               parsedUploads,
-              resolveCtpOrganizationId({ considerSlug: input.considerSlug }),
+              ctpAssetStagingScope(input.considerSlug || input.email),
             )
           : undefined;
 

@@ -1,33 +1,41 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { adminApiUnauthorized, guardAdminApi } from '@/lib/api/admin-route';
+import { resolveSessionFromRequest } from '@/lib/auth/session';
 import { createEscalation, listEscalations } from '@/lib/ea-guide-store';
 import { resolveGuidePageContext } from '@/lib/ea-guide-context';
 import { emitPulseEvent } from '@/lib/pulse-bus';
 import type { EscalationDraft, EscalationRecord } from '@/lib/ea-guide-types';
 
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const limit = Number(searchParams.get('limit') ?? '50');
+export async function GET(request: NextRequest) {
+  const auth = await guardAdminApi(request);
+  if (!auth.ok) return adminApiUnauthorized(auth);
+  const limit = Number(request.nextUrl.searchParams.get('limit') ?? '50');
   const escalations = await listEscalations(Number.isFinite(limit) ? limit : 50);
   return NextResponse.json({ escalations });
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   const body = (await request.json()) as EscalationDraft;
   if (!body.issueSummary?.trim()) {
     return NextResponse.json({ error: 'issueSummary required' }, { status: 400 });
   }
 
-  const context = resolveGuidePageContext(body.page ?? '/', body.userId);
+  const session = await resolveSessionFromRequest(request);
+  const userId = session?.email ?? session?.sub;
+  const organizationId = session?.orgId ?? session?.slug;
+  const context = resolveGuidePageContext(body.page ?? '/', userId);
+  context.organizationId = organizationId;
+
   const record: EscalationRecord = {
     id: `esc-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
     source: 'ea-guide',
     status: 'open',
     createdAt: new Date().toISOString(),
     page: body.page ?? context.pathname,
-    portalType: body.portalType ?? context.portalType,
-    role: body.role ?? context.role,
-    organizationId: body.organizationId ?? context.organizationId,
-    userId: body.userId,
+    portalType: context.portalType,
+    role: context.role,
+    organizationId,
+    userId,
     workflow: body.workflow ?? context.workflow,
     issueSummary: body.issueSummary.trim(),
     details: body.details,
@@ -35,20 +43,16 @@ export async function POST(request: Request) {
   };
 
   await createEscalation(record);
-
   await emitPulseEvent({
     product: 'ea-platform',
     type: 'guide.escalated',
     title: `EA Guide escalation: ${record.issueSummary.slice(0, 80)}`,
-    detail: `${record.portalType} · ${record.role} · ${record.page}`,
+    detail: `${record.portalType} � ${record.role} � ${record.page}`,
     priority: 'high',
     href: '/admin/ea-guide',
     tenantId: record.organizationId,
     objectId: record.id,
-    metadata: {
-      workflow: record.workflow ?? '',
-      userId: record.userId ?? '',
-    },
+    metadata: { workflow: record.workflow ?? '', userId: record.userId ?? '' },
   });
 
   return NextResponse.json({

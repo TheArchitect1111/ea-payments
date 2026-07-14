@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { requirePortalSession } from '@/lib/auth/resolve-portal-session';
-import { getCaptureApiKey } from '@/lib/capture-api-key';
+import { createCaptureTenantToken } from '@/lib/capture-auth';
 import { getDemoCredentials } from '@/lib/demo-client';
 import { getClientByPortalSlug } from '@/lib/airtable';
 import { EA_PLATFORM_URL } from '@/lib/platform-urls';
@@ -14,7 +14,7 @@ export async function GET() {
     return NextResponse.json({ ok: false, error: 'Sign in or start a guest session first.' }, { status: 401 });
   }
 
-  const apiKey = getCaptureApiKey();
+  const apiKey = createCaptureTenantToken(session.slug);
   if (!apiKey) {
     return NextResponse.json(
       { ok: false, error: 'Capture API not configured (set EA_CAPTURE_API_KEY or ADMIN_SESSION_SECRET).' },

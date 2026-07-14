@@ -226,9 +226,34 @@ export function portalCaptureSource(slug: string): string {
 }
 
 export async function getPortalCaptures(slug: string, limit = 20): Promise<CaptureRecord[]> {
-  const prefix = portalCaptureSource(slug);
-  const all = await getCaptures(Math.max(limit, 50));
-  return all.filter((c) => c.source === prefix || c.source.startsWith(`${prefix} `)).slice(0, limit);
+  if (!process.env.AIRTABLE_API_KEY) return [];
+
+  const normalizedSlug = slug.trim().toLowerCase();
+  if (!normalizedSlug) return [];
+  const safeSlug = normalizedSlug.replace(/'/g, "\\'");
+  const params = new URLSearchParams({
+    filterByFormula: `LOWER({Portal Slug})='${safeSlug}'`,
+    maxRecords: String(limit),
+    'sort[0][field]': 'Date Captured',
+    'sort[0][direction]': 'desc',
+  });
+
+  try {
+    const res = await fetch(
+      `https://api.airtable.com/v0/${BASE_ID}/${encodeURIComponent(CAPTURES_TABLE)}?${params.toString()}`,
+      { headers: authHeaders(), cache: 'no-store' },
+    );
+    if (!res.ok) return [];
+    const data = (await res.json()) as {
+      records?: { id: string; fields: Record<string, unknown> }[];
+    };
+    return (data.records ?? [])
+      .map(mapRecord)
+      .filter((record) => record.portalSlug?.trim().toLowerCase() === normalizedSlug)
+      .slice(0, limit);
+  } catch {
+    return [];
+  }
 }
 
 export async function getCaptureByIdentifier(identifier: string): Promise<CaptureRecord | null> {

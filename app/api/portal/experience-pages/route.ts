@@ -4,31 +4,29 @@ import { createExperiencePage, listExperiencePages } from '@/lib/experience-buil
 
 export const dynamic = 'force-dynamic';
 
+function organizationId(session: { orgId?: string }) {
+  return session.orgId && !session.orgId.startsWith('org_') ? session.orgId : null;
+}
+
 export async function GET(req: NextRequest) {
   const slug = req.nextUrl.searchParams.get('slug') ?? undefined;
-  if (!slug) {
-    return NextResponse.json({ ok: false, error: 'slug required' }, { status: 400 });
-  }
-
+  if (!slug) return NextResponse.json({ ok: false, error: 'slug required' }, { status: 400 });
   const auth = await guardPortalApi(req, { slug });
   if (!auth.ok) return portalApiUnauthorized(auth);
-
-  const pages = await listExperiencePages(slug);
-  return NextResponse.json({ ok: true, pages });
+  const orgId = organizationId(auth.session);
+  if (!orgId) return NextResponse.json({ ok: false, error: 'Persisted organization required.' }, { status: 403 });
+  return NextResponse.json({ ok: true, pages: await listExperiencePages(orgId, slug) });
 }
 
 export async function POST(req: NextRequest) {
   const auth = await guardPortalApi(req);
   if (!auth.ok) return portalApiUnauthorized(auth);
-
   const body = (await req.json()) as { slug?: string; title?: string };
-  if (!body.slug) {
-    return NextResponse.json({ ok: false, error: 'slug required' }, { status: 400 });
-  }
-  if (body.slug !== auth.session.slug) {
+  if (!body.slug || body.slug !== auth.session.slug) {
     return NextResponse.json({ ok: false, error: 'Portal access denied.' }, { status: 403 });
   }
-
-  const page = await createExperiencePage(body.slug, body.title);
+  const orgId = organizationId(auth.session);
+  if (!orgId) return NextResponse.json({ ok: false, error: 'Persisted organization required.' }, { status: 403 });
+  const page = await createExperiencePage(orgId, body.slug, body.title);
   return NextResponse.json({ ok: true, page });
 }

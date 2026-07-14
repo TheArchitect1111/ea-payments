@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { makeSessionCookie, signSession, EA_PORTAL_COOKIE } from '@/lib/ea-portal-auth';
+import { makeSessionCookie, signSession } from '@/lib/ea-portal-auth';
 import { requirePortalSessionFromRequest } from '@/lib/auth/resolve-portal-session';
 import { findMembership } from '@/lib/memberships';
 import { getOrganizationById } from '@/lib/organizations';
@@ -26,11 +26,10 @@ export async function POST(req: NextRequest) {
   }
 
   const membership = await findMembership(session.email, organizationId);
-  const role = membership?.role ?? (organizationId === session.orgId ? session.role : undefined);
-
-  if (!role) {
+  if (!membership || membership.status !== 'active') {
     return NextResponse.json({ error: 'You are not a member of that organization.' }, { status: 403 });
   }
+  const role = membership.role;
 
   const org = await getOrganizationById(organizationId);
   const portalSlug = org?.portalSlug ?? session.slug;

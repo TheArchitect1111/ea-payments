@@ -5,15 +5,11 @@ import ExperienceBuilderEditor from './ExperienceBuilderEditor';
 
 export const dynamic = 'force-dynamic';
 
-export default async function ExperienceBuilderEditPage({
-  params,
-}: {
-  params: Promise<{ slug: string; pageId: string }>;
-}) {
+export default async function ExperienceBuilderEditPage({ params }: { params: Promise<{ slug: string; pageId: string }> }) {
   const { slug, pageId } = await params;
-  await requirePortalModule(slug, 'landing');
-  const page = await getExperiencePage(pageId);
+  const { session } = await requirePortalModule(slug, 'landing');
+  if (!session.orgId || session.orgId.startsWith('org_')) notFound();
+  const page = await getExperiencePage(pageId, session.orgId);
   if (!page || page.portalSlug !== slug) notFound();
-
   return <ExperienceBuilderEditor slug={slug} page={page} />;
 }
