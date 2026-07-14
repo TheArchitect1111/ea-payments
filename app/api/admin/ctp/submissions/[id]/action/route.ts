@@ -14,6 +14,7 @@ const ACTIONS = new Set<CtpExecutiveAction>([
   'ready_for_review',
   'approve_reveal',
   'run_production',
+  'run_digital_audit',
 ]);
 
 export async function POST(req: NextRequest, context: RouteContext) {
@@ -38,7 +39,8 @@ export async function POST(req: NextRequest, context: RouteContext) {
     return NextResponse.json(
       {
         ok: false,
-        error: 'action must be ready_for_review, approve_reveal, or run_production.',
+        error:
+          'action must be ready_for_review, approve_reveal, run_production, or run_digital_audit.',
       },
       { status: 400 },
     );

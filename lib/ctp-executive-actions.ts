@@ -10,9 +10,14 @@ import {
 } from '@/lib/ctp-submissions';
 import { sendRevealEmail } from '@/lib/email';
 import { emitPulseEvent } from '@/lib/pulse-bus';
+import { runCtpDigitalPresenceAudit } from '@/lib/ctp-digital-presence-run';
 import { runCtpProduction } from '@/lib/ctp-production-run';
 
-export type CtpExecutiveAction = 'ready_for_review' | 'approve_reveal' | 'run_production';
+export type CtpExecutiveAction =
+  | 'ready_for_review'
+  | 'approve_reveal'
+  | 'run_production'
+  | 'run_digital_audit';
 
 function baseUrl(): string {
   return (
@@ -148,6 +153,18 @@ export async function runCtpExecutiveAction(
     const refreshed = await getCtpSubmissionById(submissionId);
     if (!refreshed) {
       return { ok: false, error: 'Production saved but submission reload failed.' };
+    }
+    return { ok: true, submission: refreshed };
+  }
+
+  if (action === 'run_digital_audit') {
+    const result = await runCtpDigitalPresenceAudit(submissionId, { force: true });
+    if (!result.ok) {
+      return { ok: false, error: result.error ?? 'Digital presence audit failed.' };
+    }
+    const refreshed = await getCtpSubmissionById(submissionId);
+    if (!refreshed) {
+      return { ok: false, error: 'Audit saved but submission reload failed.' };
     }
     return { ok: true, submission: refreshed };
   }
