@@ -3,14 +3,12 @@
  * Run: node scripts/test-ctp-portal-host.mjs
  */
 import { existsSync, readFileSync } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
+import { dirname, join, resolve as resolvePath } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { createRequire } from 'node:module';
 
 const here = dirname(fileURLToPath(import.meta.url));
-const root = resolve(here, '..');
+const root = resolvePath(here, '..');
 const failures = [];
-const require = createRequire(import.meta.url);
 
 function assert(condition, message) {
   if (!condition) failures.push(message);
@@ -41,7 +39,7 @@ function normalizeHost(host) {
   return (host ?? '').split(':')[0]?.toLowerCase() ?? '';
 }
 
-function resolve(host, pathname) {
+function resolveVanity(host, pathname) {
   const hosts = ['portal.efficiencyarchitects.online', 'portal.efficiencyarchitects.app'];
   if (!hosts.includes(normalizeHost(host))) return null;
   if (pathname === '/' || pathname === '') return { redirectPath: '/portal/login' };
@@ -56,23 +54,20 @@ function resolve(host, pathname) {
   return { rewritePath: rest ? `/portal/${first}/${rest}` : `/portal/${first}` };
 }
 
-const rootRedirect = resolve('portal.efficiencyarchitects.online', '/');
+const rootRedirect = resolveVanity('portal.efficiencyarchitects.online', '/');
 assert(rootRedirect?.redirectPath === '/portal/login', 'Root should redirect to portal login');
 
-const slugRewrite = resolve('portal.efficiencyarchitects.online', '/acme');
+const slugRewrite = resolveVanity('portal.efficiencyarchitects.online', '/acme');
 assert(slugRewrite?.rewritePath === '/portal/acme', 'Slug should rewrite to /portal/{slug}');
 
-const nested = resolve('portal.efficiencyarchitects.online', '/acme/ctp');
+const nested = resolveVanity('portal.efficiencyarchitects.online', '/acme/ctp');
 assert(nested?.rewritePath === '/portal/acme/ctp', 'Nested path should rewrite');
 
-const ignored = resolve('www.efficiencyarchitects.online', '/acme');
+const ignored = resolveVanity('www.efficiencyarchitects.online', '/acme');
 assert(ignored === null, 'Non-portal hosts must not rewrite');
 
-const login = resolve('portal.efficiencyarchitects.online', '/login');
+const login = resolveVanity('portal.efficiencyarchitects.online', '/login');
 assert(login?.redirectPath === '/portal/login', 'Vanity /login should map to /portal/login');
-
-void require;
-void hostSrc;
 
 if (failures.length) {
   console.error('CTP portal host checks FAILED:');
