@@ -47,22 +47,67 @@ export default async function PortalCtpStatusPage({
     month: 'long',
     day: 'numeric',
   });
+  const studioReady = view.designStudio.filter((item) => item.status === 'ready').length;
+  const studioTotal = view.designStudio.length;
 
   return (
     <PortalSubpage
       slug={slug}
       active="ctp"
       kicker="Consider the Possibilities™"
-      title="Your discovery journey"
-      lede="Follow workspace, studio, and review progress — everything we are building from your discovery conversation."
+      title="Your live project progress"
+      lede="We have already started. Track every stage — from assessment through reveal — and complete Design Studio when you are ready."
     >
       <div className="ep-module-card" style={{ marginBottom: '1.25rem' }}>
         <p className="ep-module-card-note" style={{ marginBottom: '0.35rem' }}>
           {view.businessName} · Submitted {submittedDate}
+          {view.clientTypeLabel ? ` · ${view.clientTypeLabel}` : ''}
         </p>
         <p style={{ margin: 0, fontSize: '0.95rem', lineHeight: 1.6, color: 'rgba(255,255,255,0.78)' }}>
           Current status: <strong>{view.status}</strong>
+          {typeof view.digitalScore === 'number' ? (
+            <>
+              {' '}
+              · Digital Presence <strong>{view.digitalScore}/100</strong>
+            </>
+          ) : null}
         </p>
+
+        <div style={{ marginTop: '1rem' }}>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              marginBottom: '0.4rem',
+              fontSize: '0.75rem',
+              fontWeight: 800,
+              letterSpacing: '0.12em',
+              textTransform: 'uppercase',
+              color: 'rgba(216,173,61,0.9)',
+            }}
+          >
+            <span>Progress</span>
+            <span>{view.percentComplete}%</span>
+          </div>
+          <div
+            style={{
+              height: '0.55rem',
+              borderRadius: '9999px',
+              background: 'rgba(255,255,255,0.12)',
+              overflow: 'hidden',
+            }}
+          >
+            <div
+              style={{
+                width: `${view.percentComplete}%`,
+                height: '100%',
+                background: `linear-gradient(90deg, ${GOLD}, #f0d78a)`,
+                transition: 'width 0.6s ease',
+              }}
+            />
+          </div>
+        </div>
+
         {view.intakeSummary ? (
           <p
             style={{
@@ -75,18 +120,33 @@ export default async function PortalCtpStatusPage({
             {view.intakeSummary}
           </p>
         ) : null}
+
+        {view.siteUrl ? (
+          <p style={{ margin: '1rem 0 0' }}>
+            <a
+              href={view.siteUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-block rounded-full px-5 py-2.5 text-sm font-bold"
+              style={{ backgroundColor: GOLD, color: NAVY }}
+            >
+              Open live website
+            </a>
+          </p>
+        ) : null}
       </div>
 
       <ol className="ctp-timeline" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-        {view.timeline.map((step, index) => (
+        {view.timeline.map((item, index) => (
           <li
-            key={step.id}
-            className={`ctp-timeline-step ${stateClass(step.state)}`}
+            key={item.id}
+            className={`ctp-timeline-step ${stateClass(item.state)}`}
             style={{
               position: 'relative',
               paddingLeft: '2rem',
               paddingBottom: index < view.timeline.length - 1 ? '1.5rem' : 0,
-              borderLeft: index < view.timeline.length - 1 ? '2px solid rgba(216,173,61,0.25)' : undefined,
+              borderLeft:
+                index < view.timeline.length - 1 ? '2px solid rgba(216,173,61,0.25)' : undefined,
               marginLeft: '0.65rem',
             }}
           >
@@ -100,14 +160,15 @@ export default async function PortalCtpStatusPage({
                 height: '0.85rem',
                 borderRadius: '9999px',
                 backgroundColor:
-                  step.state === 'complete'
+                  item.state === 'complete'
                     ? GOLD
-                    : step.state === 'active'
+                    : item.state === 'active'
                       ? GOLD
-                      : step.state === 'failed'
+                      : item.state === 'failed'
                         ? '#e57373'
                         : 'rgba(255,255,255,0.25)',
-                boxShadow: step.state === 'active' ? `0 0 0 4px rgba(216,173,61,0.2)` : undefined,
+                boxShadow: item.state === 'active' ? `0 0 0 4px rgba(216,173,61,0.2)` : undefined,
+                animation: item.state === 'active' ? 'ctpPulse 1.8s ease-in-out infinite' : undefined,
               }}
             />
             <div className="ep-module-card">
@@ -121,35 +182,101 @@ export default async function PortalCtpStatusPage({
                   color: 'rgba(216,173,61,0.85)',
                 }}
               >
-                {STATE_LABEL[step.state]}
+                {STATE_LABEL[item.state]}
               </p>
               <h2 style={{ margin: '0 0 0.5rem', fontSize: '1.15rem', fontWeight: 800, color: '#fff' }}>
-                {step.label}
+                {item.label}
               </h2>
               <p style={{ margin: 0, fontSize: '0.9rem', lineHeight: 1.6, color: 'rgba(255,255,255,0.72)' }}>
-                {step.detail}
+                {item.detail}
               </p>
             </div>
           </li>
         ))}
       </ol>
 
+      <section className="ep-module-card" style={{ marginTop: '1.5rem' }}>
+        <p
+          style={{
+            margin: '0 0 0.35rem',
+            fontSize: '0.7rem',
+            fontWeight: 800,
+            letterSpacing: '0.18em',
+            textTransform: 'uppercase',
+            color: 'rgba(216,173,61,0.85)',
+          }}
+        >
+          Design Studio
+        </p>
+        <h2 style={{ margin: '0 0 0.5rem', fontSize: '1.25rem', fontWeight: 800, color: '#fff' }}>
+          Brand & project inputs
+        </h2>
+        <p style={{ margin: '0 0 1rem', fontSize: '0.9rem', lineHeight: 1.6, color: 'rgba(255,255,255,0.7)' }}>
+          {studioReady}/{studioTotal} ready. This is a premium workspace — not another questionnaire.
+          Upload what you have; elegant defaults fill the rest.
+        </p>
+        <div
+          style={{
+            display: 'grid',
+            gap: '0.75rem',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+          }}
+        >
+          {view.designStudio.map((item) => (
+            <div
+              key={item.id}
+              style={{
+                border: '1px solid rgba(255,255,255,0.12)',
+                borderRadius: '0.75rem',
+                padding: '0.9rem 1rem',
+                background:
+                  item.status === 'ready' ? 'rgba(216,173,61,0.08)' : 'rgba(255,255,255,0.03)',
+              }}
+            >
+              <p
+                style={{
+                  margin: '0 0 0.35rem',
+                  fontSize: '0.68rem',
+                  fontWeight: 800,
+                  letterSpacing: '0.14em',
+                  textTransform: 'uppercase',
+                  color: item.status === 'ready' ? GOLD : 'rgba(255,255,255,0.45)',
+                }}
+              >
+                {item.status === 'ready' ? 'Ready' : 'Needed'}
+              </p>
+              <p style={{ margin: '0 0 0.35rem', fontWeight: 700, color: '#fff' }}>{item.label}</p>
+              <p style={{ margin: 0, fontSize: '0.82rem', lineHeight: 1.5, color: 'rgba(255,255,255,0.65)' }}>
+                {item.detail}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
       <PortalCtpAssetGallery assets={view.assets} />
 
       {view.proposalId ? (
         <div className="ep-module-card" style={{ marginTop: '1.25rem' }}>
           <p className="ep-module-card-note" style={{ marginBottom: '0.75rem' }}>
-            Your blueprint is ready when you are.
+            Your executive brief is ready when you are.
           </p>
           <Link
             href={`/proposal/${encodeURIComponent(view.proposalId)}`}
             className="inline-block rounded-full px-6 py-3 text-sm font-bold"
             style={{ backgroundColor: GOLD, color: NAVY }}
           >
-            View blueprint
+            View executive brief
           </Link>
         </div>
       ) : null}
+
+      <style>{`
+        @keyframes ctpPulse {
+          0%, 100% { box-shadow: 0 0 0 4px rgba(216,173,61,0.15); }
+          50% { box-shadow: 0 0 0 8px rgba(216,173,61,0.28); }
+        }
+      `}</style>
     </PortalSubpage>
   );
 }
