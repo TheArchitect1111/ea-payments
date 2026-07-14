@@ -26,6 +26,7 @@ const magicPath = join(root, 'lib/magic-link.ts');
 const emailPath = join(root, 'lib/email.ts');
 const sessionStatusPath = join(root, 'app/api/checkout/session-status/route.ts');
 const successClientPath = join(root, 'app/checkout/success/CheckoutSuccessClient.tsx');
+const adminProvisionPath = join(root, 'app/api/admin/website-portal/provision/route.ts');
 
 for (const [path, label] of [
   [offerPath, 'offers.ts'],
@@ -40,6 +41,7 @@ for (const [path, label] of [
   [emailPath, 'email.ts'],
   [sessionStatusPath, 'session-status API'],
   [successClientPath, 'checkout success client'],
+  [adminProvisionPath, 'admin website-portal provision API'],
 ]) {
   assert(existsSync(path), `Missing ${label} at ${path}`);
 }
@@ -94,6 +96,11 @@ assert(sessionStatus.includes('findPublishedSitePage'), 'session-status must res
 assert(sessionStatus.includes('findPortalClientByEmail'), 'session-status must resolve portal client');
 assert(successClient.includes('/api/checkout/session-status'), 'Success page must poll session-status');
 assert(successClient.includes('Open My Website'), 'Success page must offer live site CTA when ready');
+
+const adminProvision = readFileSync(adminProvisionPath, 'utf8');
+assert(adminProvision.includes('provisionWebsitePortalSite'), 'Admin provision API must call provisioner');
+assert(adminProvision.includes('requireAdminActionFromRequest'), 'Admin provision API must require admin auth');
+assert(provision.includes('force?: boolean') || provision.includes('force?'), 'Provisioner must support force refresh');
 
 if (failures.length) {
   console.error('Website + Portal Starter checks FAILED:');
