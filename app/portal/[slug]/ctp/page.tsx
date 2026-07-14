@@ -94,8 +94,8 @@ export default async function PortalCtpStatusPage({
             {view.snapshotSummary}
           </p>
         ) : null}
-        {typeof view.maturityScore === 'number' || view.snapshotSummary ? (
-          <p style={{ margin: '1rem 0 0' }}>
+        <div style={{ marginTop: '1rem', display: 'flex', flexWrap: 'wrap', gap: '0.65rem' }}>
+          {typeof view.maturityScore === 'number' || view.snapshotSummary ? (
             <Link
               href={`/portal/${slug}/ctp/bi`}
               className="inline-block rounded-full px-5 py-2.5 text-sm font-bold"
@@ -103,8 +103,15 @@ export default async function PortalCtpStatusPage({
             >
               Open Executive Snapshot
             </Link>
-          </p>
-        ) : null}
+          ) : null}
+          <Link
+            href={`/portal/${slug}/ctp/recommendations`}
+            className="inline-block rounded-full px-5 py-2.5 text-sm font-bold"
+            style={{ border: '1px solid rgba(255,255,255,0.35)', color: '#fff' }}
+          >
+            View recommendations
+          </Link>
+        </div>
 
         <div style={{ marginTop: '1rem' }}>
           <div

@@ -178,7 +178,7 @@ export default function CtpSubmissionsClient({
                             {submission.snapshotSummary}
                           </p>
                           {submission.portalSlug ? (
-                            <p className="mt-2 text-sm">
+                            <p className="mt-2 text-sm flex flex-wrap gap-3">
                               <a
                                 href={`/portal/${encodeURIComponent(submission.portalSlug)}/ctp/bi`}
                                 target="_blank"
@@ -187,6 +187,15 @@ export default function CtpSubmissionsClient({
                                 style={{ color: NAVY }}
                               >
                                 Open client BI view
+                              </a>
+                              <a
+                                href={`/portal/${encodeURIComponent(submission.portalSlug)}/ctp/recommendations`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="font-bold underline"
+                                style={{ color: NAVY }}
+                              >
+                                Open recommendations
                               </a>
                             </p>
                           ) : null}
