@@ -40,7 +40,7 @@ export type CtpAdminSubmissionView = {
   submittedAt: string;
   creativeCampaignId?: string;
   portalSlug?: string;
-  /** Client-facing vanity URL: portal.efficiencyarchitects.online/{slug}/ctp */
+  /** Client-facing portal URL (hub /portal/{slug}/ctp by default) */
   portalPublicUrl?: string;
   siteUrl?: string;
   considerSlug?: string;

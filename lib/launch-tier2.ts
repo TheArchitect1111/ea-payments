@@ -1,5 +1,6 @@
 import type { OnboardingWebhookPayload } from '@/lib/make-webhooks';
 import { buildOnboardingWebhookBody } from '@/lib/make-webhooks';
+import { publicPortalLoginUrl } from '@/lib/ctp-portal-host';
 import { EA_PLATFORM_URL } from '@/lib/platform-urls';
 
 export type Tier2EnvChecks = {
@@ -34,7 +35,6 @@ export function isTier2AutomationReady(checks: Tier2EnvChecks): boolean {
 }
 
 export function sampleOnboardingWebhookPayload(): OnboardingWebhookPayload {
-  const base = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://ea-payments.vercel.app';
   return {
     event: 'payment.received',
     clientName: 'Tier 2 Test Client',
@@ -46,7 +46,7 @@ export function sampleOnboardingWebhookPayload(): OnboardingWebhookPayload {
     stripeTransactionId: `pi_test_tier2_${Date.now()}`,
     airtableRecordId: 'recREPLACE_WITH_REAL_ID',
     portalSlug: 'demo-client',
-    portalLoginUrl: `${base}/portal/login`,
+    portalLoginUrl: publicPortalLoginUrl(),
   };
 }
 
