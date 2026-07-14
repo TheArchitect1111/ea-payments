@@ -11,6 +11,8 @@ export type MagicLinkPayload = {
 };
 
 const TTL_MS = 15 * 60 * 1000;
+/** Longer TTL for post-purchase welcome emails (buyer may open hours later). */
+export const WELCOME_MAGIC_LINK_TTL_MS = 48 * 60 * 60 * 1000;
 
 function signingSecret(): string {
   return process.env.ADMIN_SESSION_SECRET?.trim() || '';
@@ -24,14 +26,17 @@ export function createMagicLinkToken(input: {
   realm: MagicLinkRealm;
   email: string;
   next?: string;
+  /** Override default 15-minute expiry (ms from now). */
+  ttlMs?: number;
 }): string | null {
   const secret = signingSecret();
   if (!secret) return null;
 
+  const ttl = typeof input.ttlMs === 'number' && input.ttlMs > 0 ? input.ttlMs : TTL_MS;
   const payload: MagicLinkPayload = {
     realm: input.realm,
     email: input.email.trim().toLowerCase(),
-    exp: Date.now() + TTL_MS,
+    exp: Date.now() + ttl,
     nonce: randomBytes(16).toString('base64url'),
     next: input.next,
   };

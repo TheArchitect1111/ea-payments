@@ -30,6 +30,12 @@ import {
 } from '@/lib/subscription-sync';
 import { provisionConnectAfterCheckout } from '@/lib/connect-provision-hook';
 import { provisionWebsitePortalSite } from '@/lib/provision-website-portal';
+import {
+  createMagicLinkToken,
+  magicLinkConfigured,
+  WELCOME_MAGIC_LINK_TTL_MS,
+} from '@/lib/magic-link';
+import { EA_PLATFORM_URL } from '@/lib/platform-urls';
 
 export const dynamic = 'force-dynamic';
 
@@ -198,6 +204,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
   let portalSlug: string | undefined;
   let portalLoginUrl: string = portalLoginFallback;
   let siteUrl: string | undefined;
+  let magicLoginUrl: string | undefined;
   const isWebsitePortalAuto = fulfillment.fulfillmentType === 'website-portal-auto';
 
   if (portalConfig && airtableResult.recordId) {
@@ -266,6 +273,23 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
                   siteResult.error,
                 );
               }
+
+              if (magicLinkConfigured()) {
+                const token = createMagicLinkToken({
+                  realm: 'portal',
+                  email,
+                  next: `/portal/${portalSlug}`,
+                  ttlMs: WELCOME_MAGIC_LINK_TTL_MS,
+                });
+                if (token) {
+                  const origin = (
+                    process.env.NEXT_PUBLIC_SITE_URL ||
+                    process.env.NEXT_PUBLIC_BASE_URL ||
+                    EA_PLATFORM_URL
+                  ).replace(/\/$/, '');
+                  magicLoginUrl = `${origin}/api/auth/magic-link/verify?token=${encodeURIComponent(token)}`;
+                }
+              }
             }
           } catch (err) {
             console.error('Entitlement sync failed for session', session.id, ':', err);
@@ -312,6 +336,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
         ? `${fulfillment.clientExpectation} Your live website: ${siteUrl}`
         : fulfillment.clientExpectation,
       siteUrl,
+      magicLoginUrl,
       readyNow: isWebsitePortalAuto && Boolean(siteUrl),
     });
     if (!welcomeResult.ok) {
