@@ -40,6 +40,15 @@ assert(
   'Must not prefer hub createPortalAccess login URL over vanity host',
 );
 
+const setupDocPath = join(root, 'docs/CTP-SETUP.md');
+assert(existsSync(setupDocPath), 'Missing docs/CTP-SETUP.md');
+const setupDoc = readFileSync(setupDocPath, 'utf8');
+assert(
+  setupDoc.includes('portal.efficiencyarchitects.online'),
+  'CTP setup docs must cover vanity portal host',
+);
+assert(setupDoc.includes('EA_PORTAL_HOSTS') || setupDoc.includes('Domains'), 'Setup docs must cover domain attach');
+
 const adminViewPath = join(root, 'lib/ctp-admin-view.ts');
 const adminUiPath = join(root, 'app/admin/ctp/CtpSubmissionsClient.tsx');
 const emailPath = join(root, 'lib/email.ts');

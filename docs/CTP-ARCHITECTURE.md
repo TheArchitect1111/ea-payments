@@ -135,6 +135,15 @@ Mission Control
 
 ---
 
+## Portal vanity host
+
+| Layer | Status |
+|-------|--------|
+| Rewrite + `publicPortalUrl()` | **Built** — `lib/ctp-portal-host.ts`, middleware |
+| Client CTAs (welcome / exec email / reveal) | **Built** — vanity deep links |
+| Admin desk vanity link | **Built** |
+| DNS + Vercel domain attach | **Ops** — see `docs/CTP-SETUP.md` → Portal vanity host |
+
 ## Future (Phase 4 — scoped)
 
 See **`docs/CTP-PHASE-4-SCOPE.md`**.

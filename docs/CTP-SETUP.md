@@ -25,6 +25,38 @@ Requires `AIRTABLE_API_KEY` in `.env.local`.
 AIRTABLE_CTP_SUBMISSIONS_TABLE=CTP Submissions
 ARCHITECT_PORTAL_SLUGS=demo-client
 ARCHITECT_EMAILS=freedom@efficiencyarchitects.online
+
+# Optional — override vanity portal hosts (comma-separated). Defaults include:
+# portal.efficiencyarchitects.online, portal.efficiencyarchitects.app
+# EA_PORTAL_HOSTS=portal.efficiencyarchitects.online
+# EA_PORTAL_HOST_PROTOCOL=https
+```
+
+## Portal vanity host (client URLs)
+
+Code already rewrites `portal.efficiencyarchitects.online/{client}` → `/portal/{client}` (see `lib/ctp-portal-host.ts` + `middleware.ts`). Welcome email, executive email, admin desk, and reveal CTAs use these vanity URLs.
+
+**Attach the domain so production resolves:**
+
+1. **Vercel** → ea-payments → Settings → Domains  
+   - Add `portal.efficiencyarchitects.online` (and optional `portal.efficiencyarchitects.app`)  
+   - Point both at the **ea-payments** project (not a separate portal app)
+
+2. **DNS** (Namecheap / registrar)  
+   - `portal` CNAME → `cname.vercel-dns.com` (or the target Vercel shows)  
+   - Wait for Vercel SSL to show **Valid**
+
+3. **Smoke**  
+   - `https://portal.efficiencyarchitects.online/login` → portal login  
+   - `https://portal.efficiencyarchitects.online/{slug}/ctp` → that client’s CTP overview  
+   - Hub paths `/portal/{slug}/ctp` must keep working
+
+4. **Local / preview**  
+   - Without the domain attached, emails still *print* vanity URLs; clicks 404 until DNS/Vercel are live  
+   - Hub URLs remain the fallback for internal admin links
+
+```bash
+node scripts/test-ctp-portal-host.mjs
 ```
 
 ## Verify
