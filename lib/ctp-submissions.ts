@@ -4,6 +4,7 @@ import type { CtpClientType, CtpClientTypeClassification } from '@/lib/ctp-clien
 import type { DigitalPresenceAudit } from '@/lib/ctp-digital-presence';
 import type { CtpProductionPackage } from '@/lib/ctp-production';
 import type { CtpExecutiveSnapshot } from '@/lib/ctp-executive-snapshot';
+import type { CtpExecutiveScore } from '@/lib/ctp-executive-scoring';
 import {
   airtableConfigured,
   airtableQuery,
@@ -69,6 +70,7 @@ export type CtpSubmission = {
   creativeCampaignId?: string;
   assessmentId: string;
   proposalId: string;
+  factoryOpportunity?: string;
   discoveryVersion?: string;
   discoveryAnswers?: Record<string, unknown>;
   desiredExperiences?: string[];
@@ -85,6 +87,7 @@ export type CtpSubmission = {
   executiveEmailDraft?: CtpExecutiveEmailDraft;
   /** ISO timestamp when the executive email was successfully sent. */
   executiveEmailSentAt?: string;
+  executiveScoring?: CtpExecutiveScore;
   intakeAnalysis?: CtpIntakeAnalysisRecord;
   assetManifest?: CtpAssetManifest;
   submittedAt: string;
@@ -149,6 +152,7 @@ function toAirtableFields(submission: CtpSubmission): Record<string, unknown> {
       : '',
     'Payload JSON': JSON.stringify({
       discoveryAnswers: submission.discoveryAnswers,
+      factoryOpportunity: submission.factoryOpportunity,
       desiredExperiences: submission.desiredExperiences,
       recommendations: submission.recommendations,
       clientType: submission.clientType,
@@ -159,6 +163,7 @@ function toAirtableFields(submission: CtpSubmission): Record<string, unknown> {
       productionPackage: submission.productionPackage,
       executiveEmailDraft: submission.executiveEmailDraft,
       executiveEmailSentAt: submission.executiveEmailSentAt,
+      executiveScoring: submission.executiveScoring,
     }),
     'Submitted At': submission.submittedAt,
     'Updated At': submission.updatedAt,
@@ -171,6 +176,7 @@ function fromAirtableRecord(fields: Record<string, unknown>): CtpSubmission | nu
 
   let payload: {
     discoveryAnswers?: Record<string, unknown>;
+    factoryOpportunity?: string;
     desiredExperiences?: string[];
     recommendations?: unknown;
     clientType?: CtpClientType;
@@ -181,6 +187,7 @@ function fromAirtableRecord(fields: Record<string, unknown>): CtpSubmission | nu
     productionPackage?: CtpProductionPackage;
     executiveEmailDraft?: CtpExecutiveEmailDraft;
     executiveEmailSentAt?: string;
+    executiveScoring?: CtpExecutiveScore;
   } = {};
   const raw = fields['Payload JSON'];
   if (typeof raw === 'string' && raw.trim()) {
@@ -228,6 +235,7 @@ function fromAirtableRecord(fields: Record<string, unknown>): CtpSubmission | nu
     creativeCampaignId: String(fields['Creative Campaign ID'] ?? '').trim() || undefined,
     assessmentId: String(fields['Assessment ID'] ?? ''),
     proposalId: String(fields['Proposal ID'] ?? ''),
+    factoryOpportunity: payload.factoryOpportunity,
     discoveryVersion: String(fields['Discovery Version'] ?? '').trim() || undefined,
     discoveryAnswers: payload.discoveryAnswers,
     desiredExperiences: payload.desiredExperiences,
@@ -240,6 +248,7 @@ function fromAirtableRecord(fields: Record<string, unknown>): CtpSubmission | nu
     productionPackage: payload.productionPackage,
     executiveEmailDraft: payload.executiveEmailDraft,
     executiveEmailSentAt: payload.executiveEmailSentAt,
+    executiveScoring: payload.executiveScoring,
     intakeAnalysis,
     assetManifest,
     submittedAt: String(fields['Submitted At'] ?? new Date().toISOString()),
@@ -261,6 +270,7 @@ export async function createCtpSubmission(input: {
   recommendations?: unknown;
   clientType?: CtpClientType;
   clientTypeClassification?: CtpClientTypeClassification;
+  executiveScoring?: CtpExecutiveScore;
   assetManifest?: CtpAssetManifest;
   portalRequired?: boolean;
 }): Promise<{ ok: boolean; submission?: CtpSubmission; error?: string }> {
@@ -278,12 +288,14 @@ export async function createCtpSubmission(input: {
     partnerSlug: input.partnerSlug,
     assessmentId: input.assessmentId,
     proposalId: input.proposalId,
+    factoryOpportunity: input.factoryOpportunity,
     discoveryVersion: input.discoveryVersion,
     discoveryAnswers: input.discoveryAnswers,
     desiredExperiences: input.desiredExperiences,
     recommendations: input.recommendations,
     clientType: input.clientType,
     clientTypeClassification: input.clientTypeClassification,
+    executiveScoring: input.executiveScoring,
     assetManifest: input.assetManifest,
     submittedAt: now,
     updatedAt: now,

@@ -93,7 +93,7 @@ export default function CheckoutPage() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !email.trim() || !packageId) {
-      setError('Please fill in all required fields.');
+      setError('Please complete the required details so we can prepare your secure confirmation.');
       return;
     }
     setLoading(true);
@@ -122,13 +122,13 @@ export default function CheckoutPage() {
       });
       const data = (await res.json()) as { url?: string; error?: string };
       if (!res.ok || data.error) {
-        setError(data.error ?? 'Something went wrong. Please try again.');
+        setError(data.error ?? 'We could not open secure confirmation. Please try again.');
         setLoading(false);
         return;
       }
       if (data.url) window.location.href = data.url;
     } catch {
-      setError('Network error. Please check your connection and try again.');
+      setError('Connection issue. Please check your connection and try again.');
       setLoading(false);
     }
   };
@@ -140,7 +140,7 @@ export default function CheckoutPage() {
           Efficiency Architects
         </p>
         <h1 className="mt-2 text-2xl font-extrabold uppercase tracking-widest text-white">
-          Get Started
+          Confirm Your Blueprint
         </h1>
       </div>
 
@@ -204,7 +204,7 @@ export default function CheckoutPage() {
 
           <div>
             <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-neutral-700">
-              Package <span className="text-red-600">*</span>
+              Recommended Path <span className="text-red-600">*</span>
             </label>
             <select
               className="w-full border border-neutral-300 bg-white px-4 py-3 text-sm outline-none focus:border-neutral-800 focus:ring-1 focus:ring-neutral-800"
@@ -213,13 +213,13 @@ export default function CheckoutPage() {
               disabled={offersLoading}
             >
               <option value="">
-                {offersLoading ? 'Loading packages?' : 'Select a package'}
+                {offersLoading ? 'Loading packages…' : 'Select a package'}
               </option>
               {subscriptionOffers.length > 0 && (
                 <optgroup label="Subscriptions">
                   {subscriptionOffers.map((plan) => (
                     <option key={plan.id} value={plan.id}>
-                      {plan.displayName} ? {formatOfferPrice(plan)}
+                      {plan.displayName} – {formatOfferPrice(plan)}
                       {plan.trialDays > 0 ? ` (${plan.trialDays}-day trial)` : ''}
                     </option>
                   ))}
@@ -229,7 +229,7 @@ export default function CheckoutPage() {
                 <optgroup label="One-time">
                   {oneTimeOffers.map((product) => (
                     <option key={product.id} value={product.id}>
-                      {product.displayName} ? {formatOfferPrice(product)}
+                      {product.displayName} – {formatOfferPrice(product)}
                     </option>
                   ))}
                 </optgroup>
@@ -242,7 +242,7 @@ export default function CheckoutPage() {
             ) : null}
             {contactOnlyCount > 0 && (
               <p className="mt-2 text-xs leading-relaxed text-neutral-500">
-                Capacity and implementation packages are scoped after your assessment. Email{' '}
+                Capacity and implementation paths are scoped after your discovery conversation. Email{' '}
                 <a href="mailto:freedom@efficiencyarchitects.online" className="font-semibold underline">
                   freedom@efficiencyarchitects.online
                 </a>{' '}
@@ -305,7 +305,7 @@ export default function CheckoutPage() {
             <div className="border-l-4 border-blue-500 bg-blue-50 px-4 py-3 text-sm text-blue-800">
               <strong>ACH bank transfer recommended.</strong> For this amount, paying by ACH (US
               bank account) significantly reduces processing fees. You will be offered this option
-              at checkout.
+              during secure confirmation.
             </div>
           )}
 
@@ -321,10 +321,10 @@ export default function CheckoutPage() {
             className="w-full bg-neutral-950 px-6 py-4 text-xs font-bold uppercase tracking-widest text-white hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading
-              ? 'Redirecting to payment...'
+              ? 'Opening secure confirmation...'
               : isSubscription
-                ? 'Start Subscription'
-                : 'Proceed to Payment'}
+                ? 'Begin My Membership'
+                : 'Confirm Securely'}
           </button>
 
           <p className="text-center text-xs text-neutral-400">

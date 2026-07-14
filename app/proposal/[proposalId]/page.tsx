@@ -10,6 +10,13 @@ export const dynamic = 'force-dynamic';
 const CALENDLY_URL =
   process.env.CALENDLY_URL ?? 'https://calendly.com/freedom-efficiencyarchitects/30min';
 
+const CREAM = '#F5F1E8';
+const PAPER = '#FFFBF2';
+const BLACK = '#0A0A0A';
+const EARTH = '#5E5141';
+const GOLD = '#D8AD3D';
+const GOLD_BRIGHT = '#F6D66B';
+
 const RESULTS_STATUSES = new Set([
   'Pending Review',
   'Approved',
@@ -29,22 +36,22 @@ function fmt(n: number): string {
 
 function Unavailable() {
   return (
-    <main className="min-h-screen bg-neutral-50">
-      <div className="bg-neutral-950 px-6 py-8 text-center">
-        <p className="text-xs font-bold uppercase tracking-widest text-neutral-400">
+    <main className="min-h-screen" style={{ backgroundColor: CREAM, color: BLACK }}>
+      <div className="border-b px-6 py-8 text-center" style={{ borderColor: 'rgba(10,10,10,0.08)' }}>
+        <p className="text-xs font-bold uppercase tracking-widest" style={{ color: GOLD }}>
           Efficiency Architects
         </p>
-        <h1 className="mt-2 text-2xl font-extrabold uppercase tracking-widest text-white">
-          Proposal
+        <h1 className="mt-2 text-2xl font-extrabold uppercase tracking-widest">
+          Strategic Blueprint
         </h1>
       </div>
       <div className="mx-auto max-w-xl px-6 py-20 text-center">
-        <p className="text-sm text-neutral-500">
-          This proposal is not available. It may not exist, or it may not be ready yet.
-          Contact us at{' '}
+        <p className="text-sm" style={{ color: EARTH }}>
+          This Blueprint is not available yet. It may still be in preparation. Contact us at{' '}
           <a
             href="mailto:freedom@efficiencyarchitects.online"
-            className="font-semibold text-neutral-800 underline"
+            className="font-semibold underline"
+            style={{ color: BLACK }}
           >
             freedom@efficiencyarchitects.online
           </a>{' '}
@@ -61,8 +68,7 @@ function PaymentBanner({ status }: { status: string | undefined }) {
   if (status === 'success') {
     return (
       <div className="border border-green-200 bg-green-50 p-4 text-sm text-green-800">
-        <strong>Payment received.</strong> Thank you for your investment. We will be in
-        touch shortly to kick off your engagement.
+        <strong>Investment confirmed.</strong> Thank you. We will be in touch shortly to begin the Blueprint work.
       </div>
     );
   }
@@ -70,16 +76,24 @@ function PaymentBanner({ status }: { status: string | undefined }) {
   if (status === 'cancelled') {
     return (
       <div className="border border-neutral-200 bg-neutral-100 p-4 text-sm text-neutral-600">
-        Your checkout was cancelled. You can complete your investment below when you are
-        ready.
+        Your secure confirmation was paused. You can return to your Blueprint whenever you are ready.
       </div>
     );
   }
 
+  if (status === 'pending_review') {
+    return (
+      <div className="border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+        <strong>Your Blueprint is being finalized.</strong> Secure confirmation opens once our team completes the review, usually within one business day. We will email you when it is ready.
+      </div>
+    );
+  }
+
+
   if (status === 'error') {
     return (
       <div className="border border-red-200 bg-red-50 p-4 text-sm text-red-800">
-        We were unable to start your checkout. Please try again or contact us at{' '}
+        We were unable to open secure confirmation. Please try again or contact us at{' '}
         <a
           href="mailto:freedom@efficiencyarchitects.online"
           className="font-semibold underline"
@@ -111,168 +125,152 @@ function ProposalContent({
     proposal.contactName.split(' ')[0] || proposal.contactName || 'there';
   const solutionLabel =
     proposal.projectTypeLabel || proposal.recommendedProjectType || 'Custom Solution';
-
   const paid = paymentStatus === 'success';
 
   return (
-    <main className="min-h-screen bg-neutral-50">
-      {/* Header */}
-      <div className="bg-neutral-950 px-6 py-8 text-center">
-        <p className="text-xs font-bold uppercase tracking-widest text-neutral-400">
+    <main className="min-h-screen" style={{ backgroundColor: CREAM, color: BLACK }}>
+      <div
+        className="border-b px-6 py-8 text-center"
+        style={{ borderColor: 'rgba(10,10,10,0.08)', backgroundColor: 'rgba(245,241,232,0.9)' }}
+      >
+        <p className="text-xs font-bold uppercase tracking-widest" style={{ color: GOLD }}>
           Efficiency Architects
         </p>
-        <h1 className="mt-2 text-2xl font-extrabold uppercase tracking-widest text-white">
-          {paymentReady ? 'Your Proposal' : 'Your Capacity Analysis'}
+        <h1 className="mt-2 text-2xl font-extrabold uppercase tracking-widest">
+          {paymentReady ? 'Your Strategic Blueprint' : 'Your Blueprint Preview'}
         </h1>
       </div>
 
-      <div className="mx-auto max-w-2xl px-6 py-12 space-y-6">
-        {/* Payment status banner */}
+      <div className="mx-auto max-w-3xl space-y-6 px-6 py-12">
         <PaymentBanner status={paymentStatus} />
 
         {!paymentReady && (
           <div className="border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-            <strong>Your analysis is ready.</strong> Our team may reach out to walk through
-            findings before checkout opens. Save this link — you can return anytime.
+            <strong>Your Blueprint preview is ready.</strong> Our team may reach out to walk through
+            findings before secure confirmation opens. Save this link and return anytime.
           </div>
         )}
 
-        {/* Greeting */}
-        <div className="border border-neutral-200 bg-white p-8">
+        <div className="border p-8 shadow-[0_18px_60px_rgba(10,10,10,0.06)]" style={{ backgroundColor: PAPER, borderColor: 'rgba(10,10,10,0.1)' }}>
           <p
             className="mb-2 text-xs font-bold uppercase tracking-widest"
-            style={{ color: '#C9A844' }}
+            style={{ color: GOLD }}
           >
-            Efficiency Architects
+            Continue The Conversation
           </p>
-          <h2 className="text-xl font-extrabold uppercase tracking-wide text-neutral-950">
+          <h2 className="text-3xl font-extrabold leading-tight">
             Hi {firstName}
           </h2>
-          <p className="mt-3 text-sm leading-relaxed text-neutral-600">
+          <p className="mt-3 text-sm leading-relaxed" style={{ color: EARTH }}>
             {paymentReady ? (
               <>
-                Here is the capacity analysis and proposal we prepared for{' '}
-                <strong className="text-neutral-900">{proposal.businessName}</strong>. It
-                is based on what you shared in your assessment. Take a look at what we
-                found.
+                Here is the Strategic Blueprint we prepared for{' '}
+                <strong style={{ color: BLACK }}>{proposal.businessName}</strong>. It
+                continues from what you shared in the discovery conversation and turns the insight into a practical path.
               </>
             ) : (
               <>
                 Here is what we found for{' '}
-                <strong className="text-neutral-900">{proposal.businessName}</strong> based
-                on your assessment. Review your capacity score and opportunity range below.
+                <strong style={{ color: BLACK }}>{proposal.businessName}</strong> based
+                on the discovery conversation. Review the capacity signal and opportunity range below.
               </>
             )}
           </p>
         </div>
 
-        {/* Opportunity cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="border border-neutral-200 bg-white p-6">
-            <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mb-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="border p-6" style={{ backgroundColor: PAPER, borderColor: 'rgba(10,10,10,0.1)' }}>
+            <p className="mb-2 text-xs font-bold uppercase tracking-wider" style={{ color: GOLD }}>
               Annual Opportunity
             </p>
-            <p
-              className="text-2xl font-extrabold leading-tight"
-              style={{ color: '#1B2B4D' }}
-            >
+            <p className="text-2xl font-extrabold leading-tight">
               {fmt(proposal.opportunityLow)}
-              <span className="text-lg font-semibold text-neutral-400"> to </span>
+              <span className="text-lg font-semibold" style={{ color: EARTH }}> to </span>
               {fmt(proposal.opportunityHigh)}
             </p>
-            <p className="mt-1 text-xs text-neutral-500">
+            <p className="mt-1 text-xs" style={{ color: EARTH }}>
               in recoverable capacity and growth opportunity per year
             </p>
           </div>
 
-          <div className="border border-neutral-200 bg-white p-6">
-            <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mb-2">
+          <div className="border p-6" style={{ backgroundColor: PAPER, borderColor: 'rgba(10,10,10,0.1)' }}>
+            <p className="mb-2 text-xs font-bold uppercase tracking-wider" style={{ color: GOLD }}>
               Weekly Time Recovery
             </p>
-            <p
-              className="text-2xl font-extrabold leading-tight"
-              style={{ color: '#1B2B4D' }}
-            >
+            <p className="text-2xl font-extrabold leading-tight">
               {proposal.weeklyTimeRecovery}
-              <span className="text-base font-semibold text-neutral-400"> hrs / week</span>
+              <span className="text-base font-semibold" style={{ color: EARTH }}> hrs / week</span>
             </p>
-            <p className="mt-1 text-xs text-neutral-500">
+            <p className="mt-1 text-xs" style={{ color: EARTH }}>
               estimated hours your team can recover each week
             </p>
           </div>
         </div>
 
-        {/* Analysis */}
-        <div className="border border-neutral-200 bg-white p-8">
+        <div className="border p-8" style={{ backgroundColor: PAPER, borderColor: 'rgba(10,10,10,0.1)' }}>
           <p
             className="mb-5 text-xs font-bold uppercase tracking-widest"
-            style={{ color: '#C9A844' }}
+            style={{ color: GOLD }}
           >
-            Analysis
+            Blueprint Signals
           </p>
           <div className="divide-y divide-neutral-100">
             <div className="flex justify-between py-3 text-sm">
-              <span className="font-bold uppercase tracking-wider text-neutral-500 text-xs">
+              <span className="text-xs font-bold uppercase tracking-wider" style={{ color: EARTH }}>
                 Capacity Score
               </span>
-              <span className="font-semibold text-neutral-900">{proposal.capacityScore}</span>
+              <span className="font-semibold">{proposal.capacityScore}</span>
             </div>
             <div className="py-3 text-sm">
-              <span className="block font-bold uppercase tracking-wider text-neutral-500 text-xs mb-1">
+              <span className="mb-1 block text-xs font-bold uppercase tracking-wider" style={{ color: EARTH }}>
                 Primary Focus Area
               </span>
-              <span className="text-neutral-900">{proposal.primaryConstraint}</span>
+              <span>{proposal.primaryConstraint}</span>
             </div>
             <div className="flex justify-between py-3 text-sm">
-              <span className="font-bold uppercase tracking-wider text-neutral-500 text-xs">
+              <span className="text-xs font-bold uppercase tracking-wider" style={{ color: EARTH }}>
                 Solution Category
               </span>
-              <span className="font-semibold text-neutral-900">{solutionLabel}</span>
+              <span className="font-semibold">{solutionLabel}</span>
             </div>
           </div>
         </div>
 
-        {/* Adoption + Proof (Wave 4) */}
         <AdoptionHealthPanel adoption={adoption} />
         <ProofLibraryPanel stories={proofStories} />
 
         {paymentReady && (
           <>
-            {/* Recommended investment */}
-            <div className="border border-neutral-200 bg-white p-8 text-center">
-              <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mb-3">
+            <div className="border p-8 text-center" style={{ backgroundColor: PAPER, borderColor: 'rgba(10,10,10,0.1)' }}>
+              <p className="mb-3 text-xs font-bold uppercase tracking-wider" style={{ color: GOLD }}>
                 Recommended Investment
               </p>
-              <p
-                className="text-4xl font-extrabold"
-                style={{ color: '#1B2B4D' }}
-              >
+              <p className="text-4xl font-extrabold">
                 {fmt(proposal.recommendedFee)}
               </p>
-              <p className="mt-2 text-xs text-neutral-500">one-time project investment</p>
+              <p className="mt-2 text-xs" style={{ color: EARTH }}>one-time project investment</p>
             </div>
 
-            {/* CTA — hidden once payment is confirmed */}
             {!paid && (
-              <div className="border border-neutral-200 bg-white p-8 text-center">
-                <p className="mb-2 text-sm font-semibold text-neutral-700">
-                  Ready to move forward?
+              <div className="border p-8 text-center" style={{ backgroundColor: BLACK, borderColor: 'rgba(216,173,61,0.28)' }}>
+                <p className="mb-2 text-sm font-semibold text-white/80">
+                  Ready to build the Blueprint?
                 </p>
-                <p className="mb-6 text-sm leading-relaxed text-neutral-500">
-                  Click below to start your engagement. You will be taken to a secure
-                  checkout to confirm your investment and kick off the work.
+                <p className="mb-6 text-sm leading-relaxed text-white/60">
+                  Use the secure confirmation step to reserve the work and begin the guided implementation.
                 </p>
                 <a
                   href={`/commitment/${encodeURIComponent(proposal.proposalId)}`}
-                  className="block w-full bg-neutral-950 px-6 py-4 text-xs font-bold uppercase tracking-widest text-white hover:bg-neutral-800"
+                  className="block w-full rounded-full px-6 py-4 text-xs font-bold uppercase tracking-widest text-black transition-transform duration-300 hover:-translate-y-0.5"
+                  style={{ background: `linear-gradient(135deg, ${GOLD_BRIGHT}, ${GOLD})` }}
                 >
-                  Start My Transformation
+                  Let&apos;s Build Your Blueprint
                 </a>
                 <p className="mt-4 text-xs text-neutral-400">
-                  Questions before you commit? Email us at{' '}
+                  Questions before you decide? Email us at{' '}
                   <a
                     href="mailto:freedom@efficiencyarchitects.online"
-                    className="font-semibold text-neutral-700 underline"
+                    className="font-semibold text-neutral-200 underline"
                   >
                     freedom@efficiencyarchitects.online
                   </a>
@@ -283,16 +281,17 @@ function ProposalContent({
         )}
 
         {!paymentReady && (
-          <div className="border border-neutral-200 bg-white p-8 text-center">
-            <p className="mb-2 text-sm font-semibold text-neutral-700">
+          <div className="border p-8 text-center" style={{ backgroundColor: PAPER, borderColor: 'rgba(10,10,10,0.1)' }}>
+            <p className="mb-2 text-sm font-semibold">
               Questions about your results?
             </p>
-            <p className="mb-6 text-sm leading-relaxed text-neutral-500">
-              Email us and we will schedule a walkthrough of your analysis and next steps.
+            <p className="mb-6 text-sm leading-relaxed" style={{ color: EARTH }}>
+              Email us and we will schedule a walkthrough of your Blueprint and recommended path.
             </p>
             <a
               href="mailto:freedom@efficiencyarchitects.online"
-              className="inline-block bg-neutral-950 px-6 py-4 text-xs font-bold uppercase tracking-widest text-white hover:bg-neutral-800"
+              className="inline-block rounded-full px-6 py-4 text-xs font-bold uppercase tracking-widest text-white hover:opacity-90"
+              style={{ backgroundColor: BLACK }}
             >
               Talk With Our Team
             </a>
@@ -300,25 +299,25 @@ function ProposalContent({
               href={CALENDLY_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-4 inline-block border border-neutral-300 px-6 py-4 text-xs font-bold uppercase tracking-widest text-neutral-700 hover:bg-neutral-50"
+              className="mt-4 inline-block rounded-full border px-6 py-4 text-xs font-bold uppercase tracking-widest hover:bg-neutral-50"
+              style={{ borderColor: 'rgba(10,10,10,0.18)', color: BLACK }}
             >
               Schedule a Call
             </a>
           </div>
         )}
 
-        {/* What happens next — shown after successful payment */}
         {paid && (
-          <div className="border border-neutral-200 bg-white p-8">
+          <div className="border p-8" style={{ backgroundColor: PAPER, borderColor: 'rgba(10,10,10,0.1)' }}>
             <p
               className="mb-3 text-xs font-bold uppercase tracking-widest"
-              style={{ color: '#C9A844' }}
+              style={{ color: GOLD }}
             >
-              What Happens Next
+              What Happens From Here
             </p>
-            <p className="text-sm leading-relaxed text-neutral-600">
+            <p className="text-sm leading-relaxed" style={{ color: EARTH }}>
               Our team will reach out within one business day to schedule your kickoff
-              call and walk you through the next steps. Check your inbox for a
+              call and walk you through the path ahead. Check your inbox for a
               confirmation receipt.
             </p>
           </div>

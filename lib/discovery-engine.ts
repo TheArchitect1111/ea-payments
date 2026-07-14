@@ -924,7 +924,16 @@ export function buildDiscoveryRecommendations(answers: DiscoveryAnswers) {
   return recommendations;
 }
 
-export function buildSubmissionPayload(answers: DiscoveryAnswers, considerSlug?: string, partnerSlug?: string) {
+export function buildSubmissionPayload(
+  answers: DiscoveryAnswers,
+  considerSlug?: string,
+  partnerSlug?: string,
+  factoryOpportunity?: string,
+) {
+  const discoveryAnswers = factoryOpportunity
+    ? { ...answers, factory_opportunity: factoryOpportunity }
+    : answers;
+
   return {
     businessName: stringAnswer(answers.organization_name),
     contactName: stringAnswer(answers.contact_name),
@@ -948,7 +957,8 @@ export function buildSubmissionPayload(answers: DiscoveryAnswers, considerSlug?:
     considerSlug,
     partnerSlug,
     discoveryVersion: DISCOVERY_SCHEMA.version,
-    discoveryAnswers: answers,
+    factoryOpportunity,
+    discoveryAnswers,
     desiredExperiences: arrayAnswer(answers.desired_experiences),
     assetUploads: assetUploadAnswer(answers.asset_uploads),
   };

@@ -23,8 +23,8 @@ function estimateTimeline(fee: number): string {
 }
 
 const steps = [
-  'Your investment is confirmed. Work begins immediately.',
-  'We review your assessment in detail and map your full solution.',
+  'Your investment is confirmed. The Blueprint work begins immediately.',
+  'We review your discovery conversation in detail and map your full solution.',
   'You receive a project timeline and milestone plan within 24 hours.',
   'We build. You stay informed. Nothing launches without your approval.',
   'You receive your completed system, full training, and portal access.',
@@ -52,13 +52,13 @@ export default async function CommitmentPage({
           <img src="/images/ea-logo.png" alt="Efficiency Architects" className="h-20 w-auto" />
           <div className="pb-12 pt-10">
             <p className="text-xs font-bold uppercase tracking-[0.28em]" style={{ color: GOLD }}>
-              Before You Begin
+              Blueprint Confirmation
             </p>
             <h1 className="mt-4 max-w-3xl text-4xl font-black uppercase tracking-wide sm:text-5xl" style={{ color: GOLD }}>
-              Here is exactly what happens when you say yes.
+              Here is how the conversation becomes the work.
             </h1>
             <p className="mt-5 max-w-2xl text-base leading-8 text-blue-50">
-              This is a guided process. You will know what is happening, what comes next, and what needs your approval before anything goes live.
+              This is a guided process. You will know what is happening, where the work is heading, and what needs your approval before anything goes live.
             </p>
           </div>
         </div>
@@ -111,10 +111,10 @@ export default async function CommitmentPage({
               className="w-full px-5 py-4 text-xs font-black uppercase tracking-[0.2em]"
               style={{ backgroundColor: GOLD, color: NAVY }}
             >
-              I Am Ready. Let&apos;s Begin.
+              Let&apos;s Build The Blueprint
             </button>
           </form>
-          <p className="mt-4 text-center text-xs text-neutral-400">Not ready yet? Save this page.</p>
+          <p className="mt-4 text-center text-xs text-neutral-400">Need more time? Save this page.</p>
         </aside>
       </section>
     </main>
