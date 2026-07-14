@@ -58,6 +58,20 @@ export async function saveExperiencePage(page: ExperiencePage): Promise<Experien
   return updated;
 }
 
+/** Confirm the page exists in Airtable (not just instance memory). */
+export async function verifyExperiencePageDurable(pageId: string): Promise<boolean> {
+  if (!airtableConfigured()) return false;
+  clearStudioMemoryKey('experience', pageId);
+  const fromAirtable = await loadStudioRecordFromAirtable<ExperiencePage>('experience', pageId);
+  return Boolean(fromAirtable?.id === pageId);
+}
+
+export async function createExperiencePage(
+  organizationId: string,
+  portalSlug: string,
+  title?: string,
+): Promise<ExperiencePage> {
+  const orgId = persistedOrganizationId(organizationId);
   const id = `exp-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
   const pageTitle = title?.trim() || 'Untitled experience';
   return saveExperiencePage({
