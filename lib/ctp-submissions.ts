@@ -2,6 +2,7 @@ import crypto from 'crypto';
 import type { CtpAssetManifest } from '@/lib/ctp-asset-store';
 import type { CtpClientType, CtpClientTypeClassification } from '@/lib/ctp-client-type';
 import type { DigitalPresenceAudit } from '@/lib/ctp-digital-presence';
+import type { CtpProductionPackage } from '@/lib/ctp-production';
 import {
   airtableConfigured,
   airtableQuery,
@@ -60,6 +61,8 @@ export type CtpSubmission = {
   clientType?: CtpClientType;
   clientTypeClassification?: CtpClientTypeClassification;
   digitalPresenceAudit?: DigitalPresenceAudit;
+  /** Phase 10 AI production package (blueprint / site / portal artifacts). */
+  productionPackage?: CtpProductionPackage;
   intakeAnalysis?: CtpIntakeAnalysisRecord;
   assetManifest?: CtpAssetManifest;
   submittedAt: string;
@@ -81,6 +84,7 @@ export type CtpSubmissionUpdate = Partial<
     | 'clientType'
     | 'clientTypeClassification'
     | 'digitalPresenceAudit'
+    | 'productionPackage'
   >
 >;
 
@@ -125,6 +129,7 @@ function toAirtableFields(submission: CtpSubmission): Record<string, unknown> {
       clientTypeClassification: submission.clientTypeClassification,
       siteUrl: submission.siteUrl,
       digitalPresenceAudit: submission.digitalPresenceAudit,
+      productionPackage: submission.productionPackage,
     }),
     'Submitted At': submission.submittedAt,
     'Updated At': submission.updatedAt,
@@ -143,6 +148,7 @@ function fromAirtableRecord(fields: Record<string, unknown>): CtpSubmission | nu
     clientTypeClassification?: CtpClientTypeClassification;
     siteUrl?: string;
     digitalPresenceAudit?: DigitalPresenceAudit;
+    productionPackage?: CtpProductionPackage;
   } = {};
   const raw = fields['Payload JSON'];
   if (typeof raw === 'string' && raw.trim()) {
@@ -198,6 +204,7 @@ function fromAirtableRecord(fields: Record<string, unknown>): CtpSubmission | nu
     clientTypeClassification: payload.clientTypeClassification,
     siteUrl: payload.siteUrl,
     digitalPresenceAudit: payload.digitalPresenceAudit,
+    productionPackage: payload.productionPackage,
     intakeAnalysis,
     assetManifest,
     submittedAt: String(fields['Submitted At'] ?? new Date().toISOString()),
