@@ -227,17 +227,15 @@ export default async function PortalCtpBiPage({
           className="inline-block rounded-full px-6 py-3 text-sm font-bold"
           style={{ backgroundColor: GOLD, color: NAVY }}
         >
-          Back to progress
+          Back to overview
         </Link>
-        {view.productionHeadline ? (
-          <Link
-            href={`/portal/${slug}/ctp`}
-            className="inline-block rounded-full px-6 py-3 text-sm font-bold"
-            style={{ border: '1px solid rgba(255,255,255,0.35)', color: '#fff' }}
-          >
-            View production package
-          </Link>
-        ) : null}
+        <Link
+          href={`/portal/${slug}/ctp/progress`}
+          className="inline-block rounded-full px-6 py-3 text-sm font-bold"
+          style={{ border: '1px solid rgba(255,255,255,0.35)', color: '#fff' }}
+        >
+          Live progress
+        </Link>
       </div>
     </PortalSubpage>
   );

@@ -93,7 +93,7 @@ export default async function PortalCtpSupportPage({
           className="inline-block rounded-full px-6 py-3 text-sm font-bold"
           style={{ border: '1px solid rgba(255,255,255,0.35)', color: '#fff' }}
         >
-          Back to progress
+          Back to overview
         </Link>
         <Link
           href={`/portal/${slug}/ctp/documents`}

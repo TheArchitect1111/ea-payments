@@ -134,7 +134,7 @@ export default async function PortalCtpRecommendationsPage({
           className="inline-block rounded-full px-6 py-3 text-sm font-bold"
           style={{ backgroundColor: GOLD, color: NAVY }}
         >
-          Back to progress
+          Back to overview
         </Link>
         <Link
           href={`/portal/${slug}/ctp/bi`}

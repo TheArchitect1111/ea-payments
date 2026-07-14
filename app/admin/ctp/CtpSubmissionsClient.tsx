@@ -180,6 +180,15 @@ export default function CtpSubmissionsClient({
                           {submission.portalSlug ? (
                             <p className="mt-2 text-sm flex flex-wrap gap-3">
                               <a
+                                href={`/portal/${encodeURIComponent(submission.portalSlug)}/ctp`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="font-bold underline"
+                                style={{ color: NAVY }}
+                              >
+                                Open overview
+                              </a>
+                              <a
                                 href={`/portal/${encodeURIComponent(submission.portalSlug)}/ctp/bi`}
                                 target="_blank"
                                 rel="noreferrer"
