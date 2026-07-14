@@ -3,9 +3,10 @@ import { ensureDemoClient, getDemoCredentials } from '@/lib/demo-client';
 import { ensureDemoConnectTenant } from '@/lib/connect-provision';
 import { signSession, makeSessionCookie } from '@/lib/ea-portal-auth';
 import { resolvePortalIdentity } from '@/lib/org-provision';
-import { EA_PLATFORM_URL } from '@/lib/platform-urls';
-
 export const dynamic = 'force-dynamic';
+
+/** Always apex — www may still map to the legacy app; cookies must match host. */
+const HUB_ORIGIN = 'https://efficiencyarchitects.online';
 
 /**
  * One-click demo portal entry — no email.
@@ -13,7 +14,7 @@ export const dynamic = 'force-dynamic';
  */
 export async function GET() {
   const demo = getDemoCredentials();
-  const origin = EA_PLATFORM_URL.replace(/\/$/, '') || 'https://efficiencyarchitects.online';
+  const origin = HUB_ORIGIN
 
   try {
     const provision = await ensureDemoClient();
