@@ -33,6 +33,6 @@ export function authSiteOrigin(req: NextRequest): string {
     nonVanityOrigin(process.env.NEXT_PUBLIC_BASE_URL) ||
     nonVanityOrigin(process.env.NEXT_PUBLIC_SITE_URL) ||
     nonVanityOrigin(EA_PLATFORM_URL) ||
-    'https://www.efficiencyarchitects.online'
+    'https://efficiencyarchitects.online'
   );
 }
