@@ -1,10 +1,15 @@
 import { listEscalations } from '@/lib/ea-guide-store';
+import { getAirtableApiKey } from '@/lib/integration-env';
 
 export const dynamic = 'force-dynamic';
 
 export default async function EAGuideAdminPage() {
   const escalations = await listEscalations(100);
   const open = escalations.filter((row) => row.status === 'open');
+  const durable = Boolean(
+    getAirtableApiKey() && (process.env.EA_GUIDE_AIRTABLE_TABLE ?? process.env.EACP_AIRTABLE_TABLE)?.trim(),
+  );
+  const ephemeral = !durable && (process.env.VERCEL === '1' || process.env.VERCEL === 'true');
 
   return (
     <main className="ea-guide-admin" data-ea-guide="dashboard">
@@ -12,6 +17,13 @@ export default async function EAGuideAdminPage() {
         <p className="ea-guide-admin-eyebrow">EA Guide&trade;</p>
         <h1>Guide escalations</h1>
         <p>Internal tasks created when the Orb cannot resolve a user issue. No help desk email required.</p>
+        {ephemeral ? (
+          <p className="ea-guide-admin-warn">
+            Durable storage is not configured. Escalations still notify the team via Pulse, but this queue
+            may not persist between requests. Set EA_GUIDE_AIRTABLE_TABLE (or EACP_AIRTABLE_TABLE) and
+            AIRTABLE_API_KEY to enable durable persistence.
+          </p>
+        ) : null}
       </header>
 
       <section className="ea-guide-admin-stats">
@@ -120,6 +132,15 @@ export default async function EAGuideAdminPage() {
         }
         .ea-guide-admin-empty {
           color: #64748b;
+        }
+        .ea-guide-admin-warn {
+          margin-top: 12px;
+          padding: 12px 14px;
+          border-radius: 10px;
+          background: rgba(220, 38, 38, 0.08);
+          color: #b91c1c;
+          font-size: 0.86rem;
+          line-height: 1.5;
         }
       `}</style>
     </main>

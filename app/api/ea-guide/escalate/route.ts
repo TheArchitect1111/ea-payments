@@ -34,7 +34,15 @@ export async function POST(request: Request) {
     screenshotDataUrl: body.screenshotDataUrl,
   };
 
-  await createEscalation(record);
+  // Persist to the durable store, but never block notifying the team. If durable
+  // persistence is not configured in production, the Pulse event still reaches admin.
+  let persisted = true;
+  try {
+    await createEscalation(record);
+  } catch (error) {
+    persisted = false;
+    console.error('[ea-guide] escalation persistence failed:', error);
+  }
 
   await emitPulseEvent({
     product: 'ea-platform',
@@ -48,11 +56,13 @@ export async function POST(request: Request) {
     metadata: {
       workflow: record.workflow ?? '',
       userId: record.userId ?? '',
+      persisted: String(persisted),
     },
   });
 
   return NextResponse.json({
     ok: true,
+    persisted,
     escalation: record,
     message: "I've sent this to the EA team with the details from your current page.",
   });
