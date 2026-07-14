@@ -34,12 +34,26 @@ export function ctpWantsDigitalAudit(submission: CtpSubmission): boolean {
 
 export async function runCtpDigitalPresenceAudit(
   submissionId: string,
-): Promise<{ ok: boolean; skipped?: boolean; overallScore?: number; error?: string }> {
+  options?: { force?: boolean },
+): Promise<{
+  ok: boolean;
+  skipped?: boolean;
+  overallScore?: number;
+  socialScore?: number;
+  gbpScore?: number;
+  error?: string;
+}> {
   const submission = await getCtpSubmissionById(submissionId);
   if (!submission) return { ok: false, error: 'CTP submission not found.' };
   if (!ctpWantsDigitalAudit(submission)) return { ok: true, skipped: true };
-  if (submission.digitalPresenceAudit) {
-    return { ok: true, skipped: true, overallScore: submission.digitalPresenceAudit.overallScore };
+  if (submission.digitalPresenceAudit && !options?.force) {
+    return {
+      ok: true,
+      skipped: true,
+      overallScore: submission.digitalPresenceAudit.overallScore,
+      socialScore: submission.digitalPresenceAudit.scores?.socialPresence,
+      gbpScore: submission.digitalPresenceAudit.scores?.googleBusinessProfile,
+    };
   }
 
   const audit = await auditDigitalPresence({
@@ -54,19 +68,29 @@ export async function runCtpDigitalPresenceAudit(
     product: 'ea-platform',
     type: 'ctp.digital.audit',
     title: `Digital presence ${audit.overallScore}/100 — ${submission.businessName}`,
-    detail: audit.impactEstimate,
+    detail: options?.force
+      ? `Re-run · ${audit.impactEstimate}`
+      : audit.impactEstimate,
     priority: 'medium',
     href: '/admin/ctp',
     objectId: submission.id,
     metadata: {
       ctpSubmissionId: submission.id,
       overallScore: audit.overallScore,
+      socialScore: audit.scores.socialPresence,
+      gbpScore: audit.scores.googleBusinessProfile,
       mode: audit.mode,
       sourceUrl: audit.sourceUrl ?? '',
+      force: Boolean(options?.force),
     },
   });
 
-  return { ok: true, overallScore: audit.overallScore };
+  return {
+    ok: true,
+    overallScore: audit.overallScore,
+    socialScore: audit.scores.socialPresence,
+    gbpScore: audit.scores.googleBusinessProfile,
+  };
 }
 
 export function scheduleCtpDigitalPresenceAudit(submissionId: string): void {

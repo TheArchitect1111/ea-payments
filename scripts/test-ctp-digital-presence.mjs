@@ -46,6 +46,7 @@ assert(audit.includes('scoreSocialAndGbp'), 'Missing scoreSocialAndGbp helper');
 assert(audit.includes('extractPresenceUrls'), 'Missing extractPresenceUrls helper');
 assert(run.includes('scheduleCtpDigitalPresenceAudit'), 'Missing schedule helper');
 assert(run.includes('discoveryAnswers'), 'Run helper must pass discovery answers for social/GBP');
+assert(run.includes('force'), 'Runner must support force re-run for admin desk');
 assert(submit.includes('auditDigitalPresence'), 'Submit must run digital audit');
 assert(submit.includes('discoveryAnswers'), 'Submit audit must pass discovery answers');
 assert(submit.includes('digitalPresenceAudit'), 'Submit must pass audit into email path');

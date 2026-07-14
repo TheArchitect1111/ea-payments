@@ -38,12 +38,22 @@ const reveal = readFileSync(revealPath, 'utf8');
 
 assert(actions.includes("ready_for_review"), 'Must support ready_for_review');
 assert(actions.includes("approve_reveal"), 'Must support approve_reveal');
+assert(actions.includes('run_digital_audit'), 'Must support run_digital_audit');
+assert(actions.includes('runCtpDigitalPresenceAudit'), 'Digital audit action must call runner');
+assert(actions.includes('force: true'), 'Digital audit re-run must force');
 assert(actions.includes('sendRevealEmail'), 'Approve must send reveal email');
 assert(api.includes('runCtpExecutiveAction'), 'API must call executive actions');
+assert(api.includes('run_digital_audit'), 'API must accept run_digital_audit');
 assert(panel.includes('Approve & reveal'), 'Panel must expose approve button');
+assert(panel.includes('Re-run digital audit'), 'Panel must expose digital audit re-run');
 assert(client.includes('CtpExecutiveActionsPanel'), 'Admin client must mount panel');
 assert(reveal.includes('Welcome to the other side'), 'Reveal page should feel celebratory');
 assert(reveal.includes('Open Live Website') || reveal.includes('siteUrl'), 'Reveal should surface site when present');
+
+const runPath = join(root, 'lib/ctp-digital-presence-run.ts');
+assert(existsSync(runPath), 'Missing digital presence run helper');
+const runSrc = readFileSync(runPath, 'utf8');
+assert(runSrc.includes('options?.force'), 'Runner must honor force re-run option');
 
 if (failures.length) {
   console.error('CTP approve/reveal checks FAILED:');

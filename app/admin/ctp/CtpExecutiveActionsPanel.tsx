@@ -9,7 +9,7 @@ type Props = {
   onUpdated: (next: CtpAdminSubmissionView) => void;
 };
 
-type Action = 'ready_for_review' | 'approve_reveal' | 'run_production';
+type Action = 'ready_for_review' | 'approve_reveal' | 'run_production' | 'run_digital_audit';
 
 export default function CtpExecutiveActionsPanel({ submission, onUpdated }: Props) {
   const [busy, setBusy] = useState<Action | null>(null);
@@ -90,6 +90,14 @@ export default function CtpExecutiveActionsPanel({ submission, onUpdated }: Prop
       )}
 
       <div className="flex flex-wrap gap-2">
+        <button
+          type="button"
+          disabled={Boolean(busy)}
+          onClick={() => void run('run_digital_audit')}
+          className="px-3 py-2 text-xs font-bold uppercase tracking-wider border border-neutral-300 bg-white text-neutral-800 disabled:opacity-50"
+        >
+          {busy === 'run_digital_audit' ? 'Auditing…' : 'Re-run digital audit'}
+        </button>
         <button
           type="button"
           disabled={Boolean(busy) || completed}
