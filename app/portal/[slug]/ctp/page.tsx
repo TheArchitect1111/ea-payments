@@ -137,6 +137,13 @@ export default async function PortalCtpStatusPage({
           >
             Scheduling
           </Link>
+          <Link
+            href={`/portal/${slug}/ctp/documents`}
+            className="inline-block rounded-full px-5 py-2.5 text-sm font-bold"
+            style={{ border: '1px solid rgba(255,255,255,0.35)', color: '#fff' }}
+          >
+            Documents
+          </Link>
         </div>
 
         <div style={{ marginTop: '1rem' }}>

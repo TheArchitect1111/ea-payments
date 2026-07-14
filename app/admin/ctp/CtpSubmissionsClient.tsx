@@ -206,6 +206,15 @@ export default function CtpSubmissionsClient({
                               >
                                 Open scheduling
                               </a>
+                              <a
+                                href={`/portal/${encodeURIComponent(submission.portalSlug)}/ctp/documents`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="font-bold underline"
+                                style={{ color: NAVY }}
+                              >
+                                Open documents
+                              </a>
                             </p>
                           ) : null}
                         </div>
