@@ -2,6 +2,7 @@
  * Pure view-model for the CTP keynote reveal experience.
  */
 import { ctpClientTypeLabel } from '@/lib/ctp-client-type';
+import { publicPortalUrl } from '@/lib/ctp-portal-host';
 import type { CtpSubmission } from '@/lib/ctp-submissions';
 
 export type CtpRevealMetric = {
@@ -110,8 +111,8 @@ export function buildCtpRevealView(input: {
     deliverables,
     metrics: metrics.slice(0, 3),
     siteUrl: ctp?.siteUrl,
-    portalPath: `/portal/${input.slug}`,
-    progressPath: `/portal/${input.slug}/ctp`,
+    portalPath: publicPortalUrl(input.slug, 'ctp'),
+    progressPath: publicPortalUrl(input.slug, 'ctp/progress'),
     calendlyUrl: input.calendlyUrl ?? DEFAULT_CALENDLY,
     productionHeadline: ctp?.productionPackage?.headline,
   };

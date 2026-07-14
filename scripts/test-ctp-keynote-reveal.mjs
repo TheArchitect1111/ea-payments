@@ -36,6 +36,13 @@ const css = readFileSync(cssPath, 'utf8');
 assert(lib.includes('buildCtpRevealView'), 'Must export reveal view builder');
 assert(lib.includes('executiveSnapshot'), 'Reveal should use executive snapshot when present');
 assert(lib.includes('productionPackage'), 'Reveal should surface production artifacts');
+assert(lib.includes('publicPortalUrl'), 'Reveal CTAs must use vanity portal host helper');
+assert(lib.includes("publicPortalUrl(input.slug, 'ctp')"), 'Enter portal must deep-link vanity CTP overview');
+assert(
+  lib.includes("publicPortalUrl(input.slug, 'ctp/progress')"),
+  'Progress CTA must deep-link vanity CTP progress',
+);
+assert(!lib.includes('`/portal/${input.slug}`'), 'Reveal must not hardcode hub /portal paths');
 assert(page.includes('RevealExperience'), 'Page must mount keynote experience');
 assert(page.includes('buildCtpRevealView'), 'Page must build reveal view model');
 assert(experience.includes('Continue'), 'Keynote must support staged continue');
