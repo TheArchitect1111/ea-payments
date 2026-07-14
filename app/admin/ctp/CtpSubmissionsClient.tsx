@@ -143,6 +143,16 @@ export default function CtpSubmissionsClient({
                         <Meta label="Workspace" value={submission.workspaceStatus} />
                         <Meta label="Studio" value={submission.studioStatus} />
                         <Meta
+                          label="Executive email"
+                          value={
+                            submission.executiveEmailStatus
+                              ? submission.executiveEmailSentAt
+                                ? `${submission.executiveEmailStatus} · ${formatDate(submission.executiveEmailSentAt)}`
+                                : submission.executiveEmailStatus
+                              : '—'
+                          }
+                        />
+                        <Meta
                           label="Portal"
                           value={
                             submission.portalPublicUrl ||

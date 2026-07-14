@@ -54,8 +54,10 @@ export async function GET(req: Request) {
     sisterHubMembers: 0,
     clientsStuckOnboarding,
     ctpWorkspacesPending: ctpStats.workspacesPending,
+    ctpStudiosInProgress: ctpStats.studiosInProgress,
     ctpStudiosReadyForReview: ctpStats.studiosReadyForReview,
     ctpReviewsScheduled: ctpStats.reviewsScheduled,
+    ctpExecutiveEmailsPending: ctpStats.executiveEmailsPending,
   });
 
   const mission = buildEAMissionControl({

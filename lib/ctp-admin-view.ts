@@ -54,6 +54,9 @@ export type CtpAdminSubmissionView = {
   maturityScore?: number;
   adminWastePercent?: number;
   snapshotSummary?: string;
+  /** Sent | Pending | Deferred | Missing */
+  executiveEmailStatus?: string;
+  executiveEmailSentAt?: string;
   assets: CtpAdminAssetView[];
   intakeSummary?: string;
   productionHeadline?: string;
@@ -117,6 +120,16 @@ export function buildCtpAdminSubmissionView(submission: CtpSubmission): CtpAdmin
     maturityScore: submission.executiveSnapshot?.operationalMaturity,
     adminWastePercent: submission.executiveSnapshot?.adminWastePercent,
     snapshotSummary: submission.executiveSnapshot?.summary,
+    executiveEmailStatus: submission.executiveEmailSentAt
+      ? 'Sent'
+      : submission.executiveEmailDraft
+        ? submission.workspaceStatus === 'Active'
+          ? 'Pending'
+          : 'Deferred'
+        : submission.executiveSnapshot
+          ? 'Ready'
+          : 'Missing',
+    executiveEmailSentAt: submission.executiveEmailSentAt,
     assets: buildCtpAdminAssetViews(submission.assetManifest),
     intakeSummary: submission.intakeAnalysis?.summary,
     productionHeadline: submission.productionPackage?.headline,

@@ -5,6 +5,8 @@ export type CtpAttentionStats = {
   studiosInProgress: number;
   studiosReadyForReview: number;
   reviewsScheduled: number;
+  /** Portal active + email draft exists, but executive email never sent. */
+  executiveEmailsPending: number;
 };
 
 export async function getCtpAttentionStats(): Promise<CtpAttentionStats> {
@@ -20,6 +22,12 @@ export async function getCtpAttentionStats(): Promise<CtpAttentionStats> {
     ).length,
     reviewsScheduled: submissions.filter(
       (s) => s.status === 'Review Scheduled' || Boolean(s.reviewScheduledAt),
+    ).length,
+    executiveEmailsPending: submissions.filter(
+      (s) =>
+        s.workspaceStatus === 'Active' &&
+        Boolean(s.executiveEmailDraft || s.executiveSnapshot) &&
+        !s.executiveEmailSentAt,
     ).length,
   };
 }

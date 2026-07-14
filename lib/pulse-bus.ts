@@ -41,6 +41,7 @@ export type PulseEventType =
   | 'ctp.ready_for_review'
   | 'ctp.revealed'
   | 'ctp.review.scheduled'
+  | 'ctp.executive_email.resent'
   | 'apply.submitted'
   | 'portal.login'
   | 'proposal.pending'
