@@ -18,6 +18,8 @@ export type WebsitePortalProvisionInput = {
   tagline?: string;
   industry?: string;
   email?: string;
+  /** When true, refresh/create Home page even if one already exists. */
+  force?: boolean;
 };
 
 export type WebsitePortalProvisionResult = {
@@ -126,7 +128,7 @@ export async function provisionWebsitePortalSite(
 
   try {
     const existing = await findPublishedSitePage(slug);
-    if (existing) {
+    if (existing && !input.force) {
       return {
         ok: true,
         pageId: existing.id,
@@ -135,8 +137,8 @@ export async function provisionWebsitePortalSite(
       };
     }
 
-    const id = `exp-home-${slug}-${Date.now().toString(36)}`;
     const now = new Date().toISOString();
+    const id = existing?.id || `exp-home-${slug}-${Date.now().toString(36)}`;
     const page: ExperiencePage = {
       id,
       organizationId: syntheticOrgId(slug),
@@ -145,7 +147,7 @@ export async function provisionWebsitePortalSite(
       status: 'published',
       puckData: buildStarterWebsitePuckData({ ...input, portalSlug: slug }),
       updatedAt: now,
-      publishedAt: now,
+      publishedAt: existing?.publishedAt || now,
       previewPath: previewPathForPage(slug, id),
     };
 
