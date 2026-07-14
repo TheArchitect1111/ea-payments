@@ -8,7 +8,10 @@ import { checkAirtableLaunchSchema } from '@/lib/airtable-schema-check';
 import { isCaptureApiKeyConfigured } from '@/lib/capture-api-key';
 import { ESIGNATURES_CALLBACK_URL, getTier2EnvChecks, isTier2AutomationReady } from '@/lib/launch-tier2';
 import { buildLaunchReadinessModel } from '@/lib/launch-readiness';
-import { probePortalVanityHost } from '@/lib/ctp-portal-host';
+import {
+  probePortalVanityHost,
+  type PortalVanityHostProbe,
+} from '@/lib/ctp-portal-host';
 
 export const dynamic = 'force-dynamic';
 
@@ -112,7 +115,7 @@ export async function GET() {
     },
   });
 
-  let portalVanityHost = {
+  let portalVanityHost: PortalVanityHostProbe = {
     ok: false,
     skipped: true,
     host: 'portal.efficiencyarchitects.online',
