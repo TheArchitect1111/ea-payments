@@ -11,16 +11,28 @@ import { emitPulseEvent } from '@/lib/pulse-bus';
 
 export const dynamic = 'force-dynamic';
 
-function safeNextPath(raw: string | undefined, realm: MagicLinkRealm): string {
+const PORTAL_AUTH_DEAD_ENDS = new Set([
+  '/portal/login',
+  '/portal/sign-in',
+  '/portal/register',
+  '/portal/forgot-password',
+  '/portal/reset-password',
+]);
+
+function safeNextPath(raw: string | undefined, realm: MagicLinkRealm): string | undefined {
   if (raw?.startsWith('simplifi://') && realm === 'simplifi') {
     return raw;
   }
   if (!raw || !raw.startsWith('/') || raw.startsWith('//')) {
     if (realm === 'admin') return '/admin/master';
     if (realm === 'simplifi') return '/simplifi/capture';
-    return '/portal/login';
+    // Portal: omit next so verify lands on /portal/{slug}/ctp for the matched client.
+    return undefined;
   }
   if (realm === 'admin' && !raw.startsWith('/admin')) return '/admin/master';
+  if (realm === 'portal' && PORTAL_AUTH_DEAD_ENDS.has(raw.split('?')[0] ?? raw)) {
+    return undefined;
+  }
   return raw;
 }
 

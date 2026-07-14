@@ -1,7 +1,13 @@
 /**
  * Portal vanity host — portal.efficiencyarchitects.online/{client}
  * Rewrites to /portal/{slug} while keeping the clean host URL.
+ *
+ * Public links (emails/CTAs) default to hub `/portal/{slug}` URLs so clients
+ * are not blocked when vanity DNS has not propagated. Set EA_PORTAL_USE_VANITY_URLS=1
+ * to emit vanity links once DNS is reliable everywhere.
  */
+
+import { EA_PLATFORM_URL } from '@/lib/platform-urls';
 
 const DEFAULT_PORTAL_HOSTS = [
   'portal.efficiencyarchitects.online',
@@ -65,27 +71,48 @@ export function primaryPortalHost(): string {
   return portalHostList()[0] ?? 'portal.efficiencyarchitects.online';
 }
 
-/**
- * Public client portal URL using the vanity host when available.
- * Example: https://portal.efficiencyarchitects.online/acme/ctp
- */
-function portalHostOrigin(): string {
+function vanityPortalOrigin(): string {
   const host = primaryPortalHost();
   const proto = process.env.EA_PORTAL_HOST_PROTOCOL?.replace(/:$/, '') || 'https';
   return `${proto}://${host}`;
 }
 
+function hubPortalOrigin(): string {
+  return EA_PLATFORM_URL.replace(/\/$/, '');
+}
+
+/** When true, emails/CTAs use portal.efficiencyarchitects.online/{slug}. */
+export function useVanityPublicUrls(): boolean {
+  return process.env.EA_PORTAL_USE_VANITY_URLS === '1';
+}
+
+/**
+ * Public client portal URL for emails and CTAs.
+ * Default (reliable): https://www.efficiencyarchitects.online/portal/acme/ctp
+ * Vanity (opt-in):    https://portal.efficiencyarchitects.online/acme/ctp
+ */
 export function publicPortalUrl(slug: string, pathSuffix = ''): string {
   const cleanSlug = slug.trim().replace(/^\/+|\/+$/g, '').toLowerCase();
   const suffix = pathSuffix
     ? `/${pathSuffix.replace(/^\/+|\/+$/g, '')}`
     : '';
-  return `${portalHostOrigin()}/${cleanSlug}${suffix}`;
+  if (useVanityPublicUrls()) {
+    return `${vanityPortalOrigin()}/${cleanSlug}${suffix}`;
+  }
+  return `${hubPortalOrigin()}/portal/${cleanSlug}${suffix}`;
 }
 
-/** Vanity-host login — middleware maps /login → /portal/login. */
+/** Public portal login URL for emails and CTAs. */
 export function publicPortalLoginUrl(): string {
-  return `${portalHostOrigin()}/login`;
+  if (useVanityPublicUrls()) {
+    return `${vanityPortalOrigin()}/login`;
+  }
+  return `${hubPortalOrigin()}/portal/login`;
+}
+
+/** Always the vanity login URL — used by the launch-health DNS probe. */
+export function vanityPortalLoginUrl(): string {
+  return `${vanityPortalOrigin()}/login`;
 }
 
 export type PortalVanityHostProbe = {
@@ -103,7 +130,7 @@ export type PortalVanityHostProbe = {
  */
 export async function probePortalVanityHost(): Promise<PortalVanityHostProbe> {
   const host = primaryPortalHost();
-  const loginUrl = publicPortalLoginUrl();
+  const loginUrl = vanityPortalLoginUrl();
 
   if (process.env.EA_SKIP_PORTAL_HOST_PROBE === '1') {
     return { ok: false, skipped: true, host, loginUrl, error: 'Probe skipped (EA_SKIP_PORTAL_HOST_PROBE=1).' };

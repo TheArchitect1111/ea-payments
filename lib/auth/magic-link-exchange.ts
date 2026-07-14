@@ -125,8 +125,17 @@ export async function exchangeMagicLinkToken(token: string): Promise<MagicLinkEx
   }
 
   const realm: MagicLinkRealm = payload.realm === 'simplifi' ? 'simplifi' : 'portal';
-  const defaultNext = realm === 'simplifi' ? '/simplifi/capture' : `/portal/${client.slug}`;
-  const next = payload.next && payload.next.startsWith('/') ? payload.next : defaultNext;
+  const defaultNext = realm === 'simplifi' ? '/simplifi/capture' : `/portal/${client.slug}/ctp`;
+  const authDeadEnd =
+    realm === 'portal' &&
+    Boolean(
+      payload.next &&
+        /^\/portal\/(login|sign-in|register|forgot-password|reset-password)(\/|$|\?)/.test(
+          payload.next,
+        ),
+    );
+  const next =
+    payload.next && payload.next.startsWith('/') && !authDeadEnd ? payload.next : defaultNext;
   const slug = client.slug;
   const recordId = client.recordId;
 
