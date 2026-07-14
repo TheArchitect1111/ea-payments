@@ -30,6 +30,8 @@ import { auditDigitalPresence, type DigitalPresenceAudit } from '@/lib/ctp-digit
 import { classifyCtpClientType } from '@/lib/ctp-client-type';
 import { buildDiscoveryRecommendations, type DiscoveryAnswers } from '@/lib/discovery-engine';
 import { runCtpExecutiveSnapshot } from '@/lib/ctp-executive-snapshot-run';
+import type { CtpExecutiveScore } from '@/lib/ctp-executive-scoring';
+import { normalizeFactoryOpportunity } from '@/lib/factory-opportunities';
 
 function mapTeamSize(label: string): number {
   const map: Record<string, number> = {
@@ -155,6 +157,7 @@ export async function POST(req: NextRequest) {
       capacityConstraints: String(body.capacityConstraints ?? '').trim(),
       considerSlug: String(body.considerSlug ?? '').trim() || undefined,
       partnerSlug: String(body.partnerSlug ?? '').trim() || undefined,
+      factoryOpportunity: normalizeFactoryOpportunity(String(body.factoryOpportunity ?? body.opportunity ?? '')),
       discoveryVersion: String(body.discoveryVersion ?? '').trim() || undefined,
       discoveryAnswers:
         body.discoveryAnswers && typeof body.discoveryAnswers === 'object'
@@ -164,6 +167,10 @@ export async function POST(req: NextRequest) {
         ? (body.desiredExperiences as string[])
         : undefined,
       assetUploads: body.assetUploads,
+      executiveScoring:
+        body.executiveScoring && typeof body.executiveScoring === 'object'
+          ? (body.executiveScoring as CtpExecutiveScore)
+          : undefined,
     };
 
     const isCtpFlow = isCtpDiscoverySubmit(body);
@@ -296,7 +303,7 @@ export async function POST(req: NextRequest) {
         priority: 'medium',
         href: '/admin/proposals',
         objectId: assessmentResult.recordId,
-        metadata: { email: input.email, proposalId },
+        metadata: { email: input.email, proposalId, factoryOpportunity: input.factoryOpportunity },
       });
     } catch (err) {
       console.error('Pulse assessment.submitted failed:', err);
@@ -336,10 +343,16 @@ export async function POST(req: NextRequest) {
         const discoveryAnswers = input.discoveryAnswers
           ? {
               ...input.discoveryAnswers,
+              ...(input.factoryOpportunity ? { factory_opportunity: input.factoryOpportunity } : {}),
               ...(assetManifest ? { asset_uploads: assetManifest } : {}),
             }
           : assetManifest
-            ? { asset_uploads: assetManifest }
+            ? {
+                ...(input.factoryOpportunity ? { factory_opportunity: input.factoryOpportunity } : {}),
+                asset_uploads: assetManifest,
+              }
+            : input.factoryOpportunity
+              ? { factory_opportunity: input.factoryOpportunity }
             : undefined;
 
         const portalRequired = scope.portalRequired || ctpClassification.portalRequired;
@@ -350,6 +363,7 @@ export async function POST(req: NextRequest) {
           email: input.email,
           assessmentId,
           proposalId,
+          factoryOpportunity: input.factoryOpportunity,
           considerSlug: input.considerSlug,
           partnerSlug: input.partnerSlug,
           discoveryVersion: input.discoveryVersion,
@@ -358,6 +372,7 @@ export async function POST(req: NextRequest) {
           recommendations,
           clientType: ctpClassification.clientType,
           clientTypeClassification: ctpClassification,
+          executiveScoring: input.executiveScoring,
           assetManifest,
           portalRequired,
         });
@@ -379,6 +394,7 @@ export async function POST(req: NextRequest) {
               assessmentId,
               ctpSubmissionId: ctpResult.submission.id,
               clientType: ctpClassification.clientType,
+              factoryOpportunity: input.factoryOpportunity,
               flow: 'ctp',
             },
           });

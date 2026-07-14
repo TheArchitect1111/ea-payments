@@ -2,6 +2,7 @@
 
 import { NAVY, GOLD } from '@/lib/design-system';
 import { useCallback, useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import type { GuidedTour } from '@/lib/guided-tours';
 import { MISSION_CONTROL_TOUR } from '@/lib/guided-tours';
 
@@ -13,6 +14,7 @@ type Props = {
 };
 
 export default function GuidedTourOverlay({ tour = MISSION_CONTROL_TOUR, autoStart = false }: Props) {
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
 
@@ -37,10 +39,11 @@ export default function GuidedTourOverlay({ tour = MISSION_CONTROL_TOUR, autoSta
 
   useEffect(() => {
     if (!autoStart) return;
+    if (pathname.startsWith('/admin/factory')) return;
     if (localStorage.getItem(STORAGE_KEY) === 'done') return;
     const t = setTimeout(start, 800);
     return () => clearTimeout(t);
-  }, [autoStart, start]);
+  }, [autoStart, pathname, start]);
 
   if (!open || !step) return null;
 
