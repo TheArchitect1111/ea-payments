@@ -91,7 +91,8 @@ export async function POST(req: NextRequest) {
         }
       }
 
-      const res = NextResponse.json({ slug, next: payload.data.next });
+      const destination = payload.data.next || `/portal/${slug}/ctp`;
+      const res = NextResponse.json({ ok: true, slug, next: destination });
       res.cookies.set(makeSessionCookie(token));
       return res;
     }

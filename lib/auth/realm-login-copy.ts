@@ -18,12 +18,12 @@ const DEFAULT_FORM: Pick<
   RealmLoginCopy,
   'cardSubtitle' | 'buttonLabel' | 'sentMessage' | 'sentDetail' | 'sendAnotherLabel' | 'emailPlaceholder'
 > = {
-  cardSubtitle: 'Enter your email on file. We will send a one-tap login link — no password needed.',
-  buttonLabel: 'Email me a login link',
-  sentMessage: 'Check your email — your login link is on the way.',
+  cardSubtitle: 'Enter your email on file. We will send a 6-digit code — type it here to sign in.',
+  buttonLabel: 'Email me a login code',
+  sentMessage: 'Check your email — your login code is on the way.',
   sentDetail:
-    'Open the newest email on this device and tap Sign in. The link expires in 2 hours. No email? That address is not on a portal record yet.',
-  sendAnotherLabel: 'Send another link',
+    'Open the newest email and enter the 6-digit code on this page. No email? That address is not on a portal record yet.',
+  sendAnotherLabel: 'Send another code',
   emailPlaceholder: 'you@company.com',
 };
 
@@ -35,7 +35,12 @@ export const REALM_LOGIN_COPY: Record<MagicLinkRealm, RealmLoginCopy> = {
       'Sign in to save opportunities, remember what matters, and follow up when the time is right.',
     cardTitle: 'Simplifi sign in',
     sentTitle: 'Simplifi sign in',
-    ...DEFAULT_FORM,
+    cardSubtitle: 'Enter your email on file. We will send a one-tap login link — no password needed.',
+    buttonLabel: 'Email me a login link',
+    sentMessage: 'Check your email — your login link is on the way.',
+    sentDetail: 'Open the newest email and tap Sign in. The link expires in 2 hours.',
+    sendAnotherLabel: 'Send another link',
+    emailPlaceholder: 'you@company.com',
   },
   portal: {
     eyebrow: 'Client Portal',
@@ -48,11 +53,11 @@ export const REALM_LOGIN_COPY: Record<MagicLinkRealm, RealmLoginCopy> = {
   },
   admin: {
     pageTitle: 'Admin sign in',
-    pageSubtitle: 'One email, one tap — no password to remember.',
+    pageSubtitle: 'One email, one code — no password to remember.',
     cardTitle: 'Admin sign in',
     sentTitle: 'Admin sign in',
-    cardSubtitle: 'Enter your admin email. We will send a one-tap login link.',
-    buttonLabel: 'Email me a login link',
+    cardSubtitle: 'Enter your admin email. We will send a 6-digit login code.',
+    buttonLabel: 'Email me a login code',
     sentMessage: DEFAULT_FORM.sentMessage,
     sentDetail: DEFAULT_FORM.sentDetail,
     sendAnotherLabel: DEFAULT_FORM.sendAnotherLabel,

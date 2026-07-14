@@ -1,13 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { findPortalClientByEmail, getClientByPortalSlug, updateClientEngagementScore } from '@/lib/airtable';
-import { sendAuthEmail } from '@/lib/ea-auth-email';
+import { findPortalClientByEmail } from '@/lib/airtable';
 import { findAdminAccount } from '@/lib/ea-admin-users';
-import { makeAdminSessionCookie, signAdminSession } from '@/lib/ea-admin-auth';
-import { getClientSuccessProfile } from '@/lib/client-success';
+import { begin2FA } from '@/lib/ea-auth-2fa';
 import { authSiteOrigin } from '@/lib/auth/site-origin';
 import { createMagicLinkToken, magicLinkConfigured, type MagicLinkRealm } from '@/lib/magic-link';
-import { makeSessionCookie, signSession } from '@/lib/ea-portal-auth';
-import { emitPulseEvent } from '@/lib/pulse-bus';
+import { sendAuthEmail } from '@/lib/ea-auth-email';
 
 export const dynamic = 'force-dynamic';
 
@@ -26,7 +23,6 @@ function safeNextPath(raw: string | undefined, realm: MagicLinkRealm): string | 
   if (!raw || !raw.startsWith('/') || raw.startsWith('//')) {
     if (realm === 'admin') return '/admin/master';
     if (realm === 'simplifi') return '/simplifi/capture';
-    // Portal: omit next so verify lands on /portal/{slug}/ctp for the matched client.
     return undefined;
   }
   if (realm === 'admin' && !raw.startsWith('/admin')) return '/admin/master';
@@ -36,6 +32,12 @@ function safeNextPath(raw: string | undefined, realm: MagicLinkRealm): string | 
   return raw;
 }
 
+/**
+ * Portal + admin: email a 6-digit code (typed on the login page).
+ * Avoids Outlook Safe Links / broken href click-through failures.
+ *
+ * Simplifi (and mobile deep links): keep one-tap magic links.
+ */
 export async function POST(req: NextRequest) {
   if (!magicLinkConfigured()) {
     return NextResponse.json(
@@ -60,88 +62,115 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Enter your email address.' }, { status: 400 });
   }
 
-  let authorized = false;
-  let label = 'EA Portal';
-
   if (realm === 'admin') {
-    authorized = Boolean(await findAdminAccount(email));
-    label = 'EA Admin';
-  } else {
-    const client = await findPortalClientByEmail(email);
-    authorized = client.ok;
-    if (!authorized && process.env.NODE_ENV === 'development') {
-      console.warn(
-        `[magic-link] No portal match for ${email}${client.error ? ` (${client.error})` : ''}. ` +
-          'Add AIRTABLE_API_KEY to .env.local or use an email in Client Records.',
-      );
-    }
-    label = realm === 'simplifi' ? 'Simplifi' : 'EA Portal';
-  }
-
-  if (!authorized) {
-    const missingAirtable = !process.env.AIRTABLE_API_KEY?.trim();
-    if (process.env.NODE_ENV === 'development' && missingAirtable) {
-      return NextResponse.json(
-        {
-          error:
-            'Dev setup incomplete: add AIRTABLE_API_KEY and RESEND_API_KEY to .env.local. No email was sent.',
-        },
-        { status: 503 },
-      );
-    }
-    // Be honest — the prior "ok: true" silent no-op made users click stale links
-    // and report endless "login link expired" failures.
-    if (realm === 'admin') {
+    const account = await findAdminAccount(email);
+    if (!account) {
       return NextResponse.json(
         { error: 'That email is not registered as an EA admin.' },
         { status: 404 },
       );
     }
-    if (realm === 'simplifi') {
+    try {
+      const started = await begin2FA({
+        realm: 'admin',
+        email,
+        data: {
+          role: account.role || 'admin',
+          name: account.name || email,
+          next: next || '/admin/master',
+        },
+      });
+      return NextResponse.json({
+        ok: true,
+        mode: 'otp',
+        pendingToken: started.pendingToken,
+        maskedEmail: started.maskedEmail,
+        message: 'Check your email for a 6-digit code.',
+      });
+    } catch (err) {
       return NextResponse.json(
-        { error: 'No Simplifi account matches that email.' },
+        { error: err instanceof Error ? err.message : 'Could not send login code.' },
+        { status: 503 },
+      );
+    }
+  }
+
+  if (realm === 'portal') {
+    const client = await findPortalClientByEmail(email);
+    if (!client.ok || !client.slug) {
+      const missingAirtable = !process.env.AIRTABLE_API_KEY?.trim();
+      if (process.env.NODE_ENV === 'development' && missingAirtable) {
+        return NextResponse.json(
+          {
+            error:
+              'Dev setup incomplete: add AIRTABLE_API_KEY and RESEND_API_KEY to .env.local. No email was sent.',
+          },
+          { status: 503 },
+        );
+      }
+      return NextResponse.json(
+        {
+          error:
+            'No portal account matches that email. Use the Email / Portal Username on the Client Record (or demo@efficiencyarchitects.online for the demo).',
+        },
         { status: 404 },
       );
     }
+
+    const defaultNext = `/portal/${client.slug}/ctp`;
+    try {
+      const started = await begin2FA({
+        realm: 'portal',
+        email,
+        data: {
+          slug: client.slug,
+          recordId: client.recordId || '',
+          next: next || defaultNext,
+        },
+      });
+      return NextResponse.json({
+        ok: true,
+        mode: 'otp',
+        pendingToken: started.pendingToken,
+        maskedEmail: started.maskedEmail,
+        message: 'Check your email for a 6-digit code.',
+      });
+    } catch (err) {
+      return NextResponse.json(
+        { error: err instanceof Error ? err.message : 'Could not send login code.' },
+        { status: 503 },
+      );
+    }
+  }
+
+  // Simplifi — keep magic link (mobile deep-link next=simplifi://…)
+  const client = await findPortalClientByEmail(email);
+  if (!client.ok) {
     return NextResponse.json(
-      {
-        error:
-          'No portal account matches that email. Use the Email / Portal Username on the Client Record (or demo@efficiencyarchitects.online for the demo).',
-      },
+      { error: 'No Simplifi account matches that email.' },
       { status: 404 },
     );
   }
 
-  const token = createMagicLinkToken({ realm, email, next });
+  const token = createMagicLinkToken({ realm: 'simplifi', email, next });
   if (!token) {
     return NextResponse.json({ error: 'Login is temporarily unavailable.' }, { status: 503 });
   }
 
   const link = `${authSiteOrigin(req)}/api/auth/magic-link/verify?token=${encodeURIComponent(token)}`;
-  if (process.env.NODE_ENV === 'development') {
-    console.log(`\n[dev] Magic login link for ${email}:\n${link}\n`);
-  }
-  const subject =
-    realm === 'admin'
-      ? 'Your EA admin login link'
-      : realm === 'simplifi'
-        ? 'Your Simplifi login link'
-        : 'Your EA portal login link';
-
   const mail = await sendAuthEmail({
     to: email,
-    subject,
-    title: `Sign in to ${label}`,
+    subject: 'Your Simplifi login link',
+    title: 'Sign in to Simplifi',
     bodyHtml: `
       <p>Tap the button below to sign in. This link expires in 2 hours.</p>
       <p style="margin:24px 0">
         <a href="${link}" style="display:inline-block;background:#1B2B4D;color:#fff;padding:14px 24px;border-radius:6px;font-weight:700;text-decoration:none">
-          Sign in to ${label}
+          Sign in to Simplifi
         </a>
       </p>
-      <p style="font-size:13px;color:#64748b">If you did not request this, you can ignore this email.</p>
     `,
-    text: `Sign in to ${label}: ${link}`,
+    text: `Sign in to Simplifi: ${link}`,
   });
 
   if (!mail.ok) {
@@ -150,6 +179,7 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json({
     ok: true,
+    mode: 'link',
     message: 'Check your email — your login link is on the way.',
   });
 }
