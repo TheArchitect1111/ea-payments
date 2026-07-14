@@ -94,6 +94,17 @@ export default async function PortalCtpStatusPage({
             {view.snapshotSummary}
           </p>
         ) : null}
+        {typeof view.maturityScore === 'number' || view.snapshotSummary ? (
+          <p style={{ margin: '1rem 0 0' }}>
+            <Link
+              href={`/portal/${slug}/ctp/bi`}
+              className="inline-block rounded-full px-5 py-2.5 text-sm font-bold"
+              style={{ backgroundColor: GOLD, color: NAVY }}
+            >
+              Open Executive Snapshot
+            </Link>
+          </p>
+        ) : null}
 
         <div style={{ marginTop: '1rem' }}>
           <div
