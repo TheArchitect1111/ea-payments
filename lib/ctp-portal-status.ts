@@ -33,6 +33,13 @@ export type CtpDesignStudioItem = {
   detail: string;
 };
 
+export type CtpProductionArtifactView = {
+  id: string;
+  title: string;
+  summary: string;
+  bullets: string[];
+};
+
 export type CtpPortalStatusView = {
   id: string;
   businessName: string;
@@ -47,6 +54,9 @@ export type CtpPortalStatusView = {
   siteUrl?: string;
   digitalScore?: number;
   percentComplete: number;
+  productionHeadline?: string;
+  productionStack?: string[];
+  productionArtifacts?: CtpProductionArtifactView[];
   assets: CtpAdminAssetView[];
   timeline: CtpTimelineStep[];
   designStudio: CtpDesignStudioItem[];
@@ -83,6 +93,7 @@ function buildTimeline(submission: CtpSubmission, assets: CtpAdminAssetView[]): 
   const studioInProgress = submission.studioStatus === 'In Progress';
   const studioReady =
     submission.studioStatus === 'Ready For Review' || submission.studioStatus === 'Completed';
+  const productionReady = Boolean(submission.productionPackage?.artifacts?.length);
   const reviewScheduled = submission.status === 'Review Scheduled';
   const completed = submission.status === 'Completed';
   const clientInput = hasClientInput(submission, assets);
@@ -142,11 +153,14 @@ function buildTimeline(submission: CtpSubmission, assets: CtpAdminAssetView[]): 
   if (workspaceFailed) {
     buildingState = 'failed';
     buildingDetail = 'Workspace setup needs attention — our team has been notified.';
-  } else if (siteLive || studioReady) {
+  } else if (productionReady || siteLive || studioReady) {
     buildingState = 'complete';
-    buildingDetail = siteLive
-      ? `Starter solution is live${submission.siteUrl ? ` at your site` : ''}.`
-      : 'Studio concepts are ready for review.';
+    const artifactCount = submission.productionPackage?.artifacts.length ?? 0;
+    buildingDetail = productionReady
+      ? `AI production package ready (${artifactCount} artifact${artifactCount === 1 ? '' : 's'}).`
+      : siteLive
+        ? 'Starter solution is live on your site.'
+        : 'Studio concepts are ready for review.';
   } else if (studioInProgress || (workspaceActive && clientInput)) {
     buildingState = 'active';
     buildingDetail = 'AI is assembling your solution from discovery + studio inputs.';
@@ -269,6 +283,8 @@ export function buildCtpPortalStatusView(submission: CtpSubmission): CtpPortalSt
   const completeCount = timeline.filter((step) => step.state === 'complete').length;
   const percentComplete = Math.round((completeCount / timeline.length) * 100);
 
+  const production = submission.productionPackage;
+
   return {
     id: submission.id,
     businessName: submission.businessName,
@@ -285,6 +301,14 @@ export function buildCtpPortalStatusView(submission: CtpSubmission): CtpPortalSt
     siteUrl: submission.siteUrl,
     digitalScore: submission.digitalPresenceAudit?.overallScore,
     percentComplete,
+    productionHeadline: production?.headline,
+    productionStack: production?.stack,
+    productionArtifacts: production?.artifacts.map((artifact) => ({
+      id: artifact.id,
+      title: artifact.title,
+      summary: artifact.summary,
+      bullets: artifact.bullets,
+    })),
     assets,
     timeline,
     designStudio: buildDesignStudio(submission, assets),

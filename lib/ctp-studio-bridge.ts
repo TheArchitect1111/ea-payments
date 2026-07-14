@@ -8,6 +8,7 @@ import {
 } from '@/lib/ctp-submissions';
 import { syntheticOrgId, EA_INTERNAL_ORG_ID } from '@/lib/platform-store';
 import { emitPulseEvent } from '@/lib/pulse-bus';
+import { scheduleCtpProduction } from '@/lib/ctp-production-run';
 
 const EXPERIENCE_GOAL_MAP: Array<{ pattern: RegExp; goalId: CampaignGoalId }> = [
   { pattern: /event|camp|tournament|game/i, goalId: 'promote-event' },
@@ -159,6 +160,8 @@ export async function runCtpStudioCampaign(
         },
       });
     }
+
+    scheduleCtpProduction(submissionId);
 
     return { ok: true, campaignId: campaign.id };
   } catch (err) {

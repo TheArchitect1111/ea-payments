@@ -6,6 +6,7 @@ import { createPortalAccess } from '@/lib/portal-access';
 import type { PortalConfig } from '@/lib/catalog';
 import { scheduleCtpStudioCampaign } from '@/lib/ctp-studio-bridge';
 import { scheduleCtpWebsiteProvision } from '@/lib/ctp-website-provision';
+import { scheduleCtpProduction } from '@/lib/ctp-production-run';
 import {
   getCtpSubmissionById,
   updateCtpSubmission,
@@ -70,6 +71,7 @@ async function markWorkspaceActive(
   );
   scheduleCtpStudioCampaign(submission.id);
   scheduleCtpWebsiteProvision(submission.id);
+  scheduleCtpProduction(submission.id);
 }
 
 export async function runCtpWorkspaceProvision(

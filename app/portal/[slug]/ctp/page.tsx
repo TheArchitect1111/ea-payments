@@ -136,6 +136,48 @@ export default async function PortalCtpStatusPage({
         ) : null}
       </div>
 
+      {view.productionArtifacts?.length ? (
+        <div className="ep-module-card" style={{ marginBottom: '1.25rem' }}>
+          <p
+            style={{
+              margin: '0 0 0.35rem',
+              fontSize: '0.7rem',
+              fontWeight: 800,
+              letterSpacing: '0.18em',
+              textTransform: 'uppercase',
+              color: 'rgba(216,173,61,0.85)',
+            }}
+          >
+            AI production
+          </p>
+          <h2 style={{ margin: '0 0 0.5rem', fontSize: '1.2rem', fontWeight: 800, color: '#fff' }}>
+            {view.productionHeadline || 'Your solution package'}
+          </h2>
+          {view.productionStack?.length ? (
+            <p style={{ margin: '0 0 1rem', fontSize: '0.85rem', color: 'rgba(255,255,255,0.65)' }}>
+              Stack: {view.productionStack.join(' · ')}
+            </p>
+          ) : null}
+          <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'grid', gap: '0.75rem' }}>
+            {view.productionArtifacts.map((artifact) => (
+              <li
+                key={artifact.id}
+                style={{
+                  border: '1px solid rgba(255,255,255,0.12)',
+                  padding: '0.85rem 1rem',
+                  background: 'rgba(255,255,255,0.04)',
+                }}
+              >
+                <p style={{ margin: 0, fontWeight: 700, color: '#fff' }}>{artifact.title}</p>
+                <p style={{ margin: '0.35rem 0 0', fontSize: '0.85rem', color: 'rgba(255,255,255,0.7)' }}>
+                  {artifact.summary}
+                </p>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+
       <ol className="ctp-timeline" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
         {view.timeline.map((item, index) => (
           <li

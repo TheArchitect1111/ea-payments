@@ -10,8 +10,9 @@ import {
 } from '@/lib/ctp-submissions';
 import { sendRevealEmail } from '@/lib/email';
 import { emitPulseEvent } from '@/lib/pulse-bus';
+import { runCtpProduction } from '@/lib/ctp-production-run';
 
-export type CtpExecutiveAction = 'ready_for_review' | 'approve_reveal';
+export type CtpExecutiveAction = 'ready_for_review' | 'approve_reveal' | 'run_production';
 
 function baseUrl(): string {
   return (
@@ -137,6 +138,18 @@ export async function runCtpExecutiveAction(
     });
 
     return { ok: true, submission: updated.submission, revealUrl };
+  }
+
+  if (action === 'run_production') {
+    const result = await runCtpProduction(submissionId, { force: true });
+    if (!result.ok) {
+      return { ok: false, error: result.error ?? 'Production run failed.' };
+    }
+    const refreshed = await getCtpSubmissionById(submissionId);
+    if (!refreshed) {
+      return { ok: false, error: 'Production saved but submission reload failed.' };
+    }
+    return { ok: true, submission: refreshed };
   }
 
   return { ok: false, error: 'Unknown action.' };

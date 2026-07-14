@@ -14,6 +14,7 @@ import { provisionWebsitePortalSite, siteUrlForSlug } from '@/lib/provision-webs
 import { emitPulseEvent } from '@/lib/pulse-bus';
 import { ensureOrganizationForPortal } from '@/lib/organizations';
 import { ensurePackageEntitlements } from '@/lib/modules/portal-modules';
+import { scheduleCtpProduction } from '@/lib/ctp-production-run';
 
 const EA_PORTAL_CONFIG: PortalConfig = {
   platform: 'efficiency-architects',
@@ -142,6 +143,9 @@ export async function runCtpWebsiteProvision(
       clientType: submission.clientType ?? '',
     },
   });
+
+  // Refresh production package so artifacts include the live site URL.
+  scheduleCtpProduction(submission.id, { force: true });
 
   return { ok: true, siteUrl };
 }

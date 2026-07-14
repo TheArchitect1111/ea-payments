@@ -9,6 +9,7 @@ import {
   type CtpSubmission,
 } from '@/lib/ctp-submissions';
 import { scheduleCtpStudioCampaign } from '@/lib/ctp-studio-bridge';
+import { scheduleCtpProduction } from '@/lib/ctp-production-run';
 import { emitPulseEvent } from '@/lib/pulse-bus';
 
 function systemRequestId(): string {
@@ -118,6 +119,7 @@ export async function runCtpIntakeAnalysis(
     });
 
     scheduleCtpStudioCampaign(submissionId);
+    scheduleCtpProduction(submissionId);
 
     return { ok: true, analysis };
   } catch (err) {

@@ -48,6 +48,10 @@ export type CtpAdminSubmissionView = {
   digitalImpact?: string;
   assets: CtpAdminAssetView[];
   intakeSummary?: string;
+  productionHeadline?: string;
+  productionArtifactCount?: number;
+  productionStack?: string[];
+  productionArtifacts?: Array<{ id: string; title: string; summary: string; bullets: string[] }>;
 };
 
 function assetLabel(assetType: string, entry: CtpAssetManifestEntry): string {
@@ -99,6 +103,15 @@ export function buildCtpAdminSubmissionView(submission: CtpSubmission): CtpAdmin
     digitalImpact: submission.digitalPresenceAudit?.impactEstimate,
     assets: buildCtpAdminAssetViews(submission.assetManifest),
     intakeSummary: submission.intakeAnalysis?.summary,
+    productionHeadline: submission.productionPackage?.headline,
+    productionArtifactCount: submission.productionPackage?.artifacts.length,
+    productionStack: submission.productionPackage?.stack,
+    productionArtifacts: submission.productionPackage?.artifacts.map((artifact) => ({
+      id: artifact.id,
+      title: artifact.title,
+      summary: artifact.summary,
+      bullets: artifact.bullets,
+    })),
   };
 }
 

@@ -10,7 +10,11 @@ export const dynamic = 'force-dynamic';
 
 type RouteContext = { params: Promise<{ id: string }> };
 
-const ACTIONS = new Set<CtpExecutiveAction>(['ready_for_review', 'approve_reveal']);
+const ACTIONS = new Set<CtpExecutiveAction>([
+  'ready_for_review',
+  'approve_reveal',
+  'run_production',
+]);
 
 export async function POST(req: NextRequest, context: RouteContext) {
   const auth = await guardAdminApi(req);
@@ -32,7 +36,10 @@ export async function POST(req: NextRequest, context: RouteContext) {
   const action = String(body.action ?? '').trim() as CtpExecutiveAction;
   if (!ACTIONS.has(action)) {
     return NextResponse.json(
-      { ok: false, error: 'action must be ready_for_review or approve_reveal.' },
+      {
+        ok: false,
+        error: 'action must be ready_for_review, approve_reveal, or run_production.',
+      },
       { status: 400 },
     );
   }

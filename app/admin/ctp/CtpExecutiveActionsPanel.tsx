@@ -9,12 +9,14 @@ type Props = {
   onUpdated: (next: CtpAdminSubmissionView) => void;
 };
 
+type Action = 'ready_for_review' | 'approve_reveal' | 'run_production';
+
 export default function CtpExecutiveActionsPanel({ submission, onUpdated }: Props) {
-  const [busy, setBusy] = useState<'ready_for_review' | 'approve_reveal' | null>(null);
+  const [busy, setBusy] = useState<Action | null>(null);
   const [error, setError] = useState('');
   const [revealUrl, setRevealUrl] = useState('');
 
-  async function run(action: 'ready_for_review' | 'approve_reveal') {
+  async function run(action: Action) {
     setBusy(action);
     setError('');
     setRevealUrl('');
@@ -47,16 +49,55 @@ export default function CtpExecutiveActionsPanel({ submission, onUpdated }: Prop
   }
 
   const completed = submission.status === 'Completed';
+  const artifactCount = submission.productionArtifactCount ?? 0;
 
   return (
-    <div className="border border-neutral-200 bg-neutral-50 p-4">
-      <p className="text-xs font-bold uppercase tracking-wider" style={{ color: GOLD }}>
-        Executive desk
-      </p>
-      <p className="mt-1 text-sm text-neutral-600 leading-6">
-        One-click review and reveal. Approval emails the client and unlocks their reveal experience.
-      </p>
-      <div className="mt-4 flex flex-wrap gap-2">
+    <div className="border border-neutral-200 bg-neutral-50 p-4 space-y-4">
+      <div>
+        <p className="text-xs font-bold uppercase tracking-wider" style={{ color: GOLD }}>
+          Executive desk
+        </p>
+        <p className="mt-1 text-sm text-neutral-600 leading-6">
+          Run AI production, mark ready for review, then approve & reveal.
+        </p>
+      </div>
+
+      {submission.productionHeadline ? (
+        <div className="border border-neutral-200 bg-white p-3">
+          <p className="text-xs font-bold uppercase tracking-wider text-neutral-500">
+            Production package
+          </p>
+          <p className="mt-1 text-sm font-semibold text-neutral-900">{submission.productionHeadline}</p>
+          <p className="mt-1 text-xs text-neutral-600">
+            {artifactCount} artifact{artifactCount === 1 ? '' : 's'}
+            {submission.productionStack?.length
+              ? ` · ${submission.productionStack.slice(0, 3).join(' · ')}`
+              : ''}
+          </p>
+          {submission.productionArtifacts?.length ? (
+            <ul className="mt-3 space-y-2">
+              {submission.productionArtifacts.map((artifact) => (
+                <li key={artifact.id} className="text-sm text-neutral-700">
+                  <span className="font-semibold">{artifact.title}</span>
+                  <span className="text-neutral-500"> — {artifact.summary}</span>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+        </div>
+      ) : (
+        <p className="text-sm text-neutral-600">No production package yet — run AI production.</p>
+      )}
+
+      <div className="flex flex-wrap gap-2">
+        <button
+          type="button"
+          disabled={Boolean(busy) || completed}
+          onClick={() => void run('run_production')}
+          className="px-3 py-2 text-xs font-bold uppercase tracking-wider border border-neutral-300 bg-white text-neutral-800 disabled:opacity-50"
+        >
+          {busy === 'run_production' ? 'Building…' : 'Run AI production'}
+        </button>
         <button
           type="button"
           disabled={Boolean(busy) || completed}
@@ -85,9 +126,9 @@ export default function CtpExecutiveActionsPanel({ submission, onUpdated }: Prop
           </a>
         ) : null}
       </div>
-      {error ? <p className="mt-3 text-sm text-red-700">{error}</p> : null}
+      {error ? <p className="text-sm text-red-700">{error}</p> : null}
       {revealUrl ? (
-        <p className="mt-3 text-sm text-emerald-800">
+        <p className="text-sm text-emerald-800">
           Reveal sent.{' '}
           <a href={revealUrl} className="font-bold underline" target="_blank" rel="noreferrer">
             Open reveal
@@ -95,7 +136,7 @@ export default function CtpExecutiveActionsPanel({ submission, onUpdated }: Prop
         </p>
       ) : null}
       {completed ? (
-        <p className="mt-3 text-sm font-semibold text-emerald-800">This submission is completed / revealed.</p>
+        <p className="text-sm font-semibold text-emerald-800">This submission is completed / revealed.</p>
       ) : null}
     </div>
   );
