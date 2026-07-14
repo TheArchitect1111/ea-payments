@@ -88,6 +88,58 @@ export function publicPortalLoginUrl(): string {
   return `${portalHostOrigin()}/login`;
 }
 
+export type PortalVanityHostProbe = {
+  ok: boolean;
+  skipped?: boolean;
+  host: string;
+  loginUrl: string;
+  status?: number;
+  error?: string;
+};
+
+/**
+ * Best-effort probe that the vanity portal host resolves in production DNS/Vercel.
+ * Skipped when EA_SKIP_PORTAL_HOST_PROBE=1 (local/CI without public DNS).
+ */
+export async function probePortalVanityHost(): Promise<PortalVanityHostProbe> {
+  const host = primaryPortalHost();
+  const loginUrl = publicPortalLoginUrl();
+
+  if (process.env.EA_SKIP_PORTAL_HOST_PROBE === '1') {
+    return { ok: false, skipped: true, host, loginUrl, error: 'Probe skipped (EA_SKIP_PORTAL_HOST_PROBE=1).' };
+  }
+
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000);
+    const res = await fetch(loginUrl, {
+      method: 'GET',
+      redirect: 'follow',
+      signal: controller.signal,
+      headers: {
+        'User-Agent': 'EfficiencyArchitects-CTP-VanityProbe/1.0',
+        Accept: 'text/html',
+      },
+    });
+    clearTimeout(timeout);
+    const ok = res.ok || res.status === 401 || res.status === 403;
+    return {
+      ok,
+      host,
+      loginUrl,
+      status: res.status,
+      error: ok ? undefined : `Unexpected HTTP ${res.status} from ${loginUrl}`,
+    };
+  } catch (err) {
+    return {
+      ok: false,
+      host,
+      loginUrl,
+      error: err instanceof Error ? err.message : 'Vanity host probe failed',
+    };
+  }
+}
+
 /**
  * Resolve a vanity-host request to an internal /portal rewrite path.
  * Returns null when this request should not be rewritten.

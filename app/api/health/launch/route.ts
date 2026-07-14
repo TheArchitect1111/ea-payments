@@ -8,6 +8,7 @@ import { checkAirtableLaunchSchema } from '@/lib/airtable-schema-check';
 import { isCaptureApiKeyConfigured } from '@/lib/capture-api-key';
 import { ESIGNATURES_CALLBACK_URL, getTier2EnvChecks, isTier2AutomationReady } from '@/lib/launch-tier2';
 import { buildLaunchReadinessModel } from '@/lib/launch-readiness';
+import { probePortalVanityHost } from '@/lib/ctp-portal-host';
 
 export const dynamic = 'force-dynamic';
 
@@ -111,6 +112,19 @@ export async function GET() {
     },
   });
 
+  let portalVanityHost = {
+    ok: false,
+    skipped: true,
+    host: 'portal.efficiencyarchitects.online',
+    loginUrl: 'https://portal.efficiencyarchitects.online/login',
+    error: 'Probe not run',
+  };
+  try {
+    portalVanityHost = await probePortalVanityHost();
+  } catch {
+    // best-effort — do not fail launch JSON
+  }
+
   return NextResponse.json({
     ok: friendTestingReady && captureReady && assessmentPathReady,
     status: readiness.status,
@@ -153,9 +167,11 @@ export async function GET() {
         intakeAgentReady: Boolean(process.env.OPENAI_API_KEY?.trim()),
         assetUploadReady: true,
         phase4Ready: airtableSchema.ctpSubmissions.ok && airtableSchema.creativeStudio.ok,
+        portalVanityHost,
       },
     },
     links: {
+      portalVanityLogin: portalVanityHost.loginUrl,
       start: `${base}/start`,
       buyWebsitePortal: `${base}/buy`,
       capture: `${base}/capture`,
@@ -181,6 +197,10 @@ export async function GET() {
         ? 'Run one live checkout at /checkout and confirm Make + welcome email'
         : null,
       dns: null,
+      portalVanityHost:
+        portalVanityHost.ok || portalVanityHost.skipped
+          ? null
+          : `Attach ${portalVanityHost.host} in Vercel Domains + DNS CNAME — see docs/CTP-SETUP.md (Portal vanity host). Probe: ${portalVanityHost.error ?? 'failed'}`,
       simplifiAppDns:
         'Add app.simplifi.ai in Vercel Domains (same project) → CNAME to cname.vercel-dns.com — middleware routes / to workspace',
       resend: env.resend && env.resendFrom ? null : 'Set RESEND_API_KEY + RESEND_FROM_EMAIL + verify domain',
