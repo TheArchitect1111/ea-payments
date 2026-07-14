@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import Image from 'next/image';
 import RealmLoginCard from '@/components/auth/RealmLoginCard';
 import { getRealmLoginCopy, magicLinkErrorMessage } from '@/lib/auth/realm-login-copy';
@@ -29,7 +30,9 @@ export default async function AdminLoginPage({
           <p className="pl-lede">{copy.pageSubtitle}</p>
         </header>
 
-        <RealmLoginCard realm="admin" next={nextPath} error={error} showTitle={false} />
+        <Suspense fallback={<div className="pl-card">Loading…</div>}>
+          <RealmLoginCard realm="admin" next={nextPath} error={error} showTitle={false} />
+        </Suspense>
       </div>
     </div>
   );
