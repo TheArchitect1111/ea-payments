@@ -46,6 +46,8 @@ export type CtpSubmission = {
   considerSlug?: string;
   partnerSlug?: string;
   portalSlug?: string;
+  /** Live starter site URL when website track auto-provisioned. */
+  siteUrl?: string;
   creativeCampaignId?: string;
   assessmentId: string;
   proposalId: string;
@@ -71,6 +73,7 @@ export type CtpSubmissionUpdate = Partial<
     | 'reviewScheduledAt'
     | 'intakeAnalysis'
     | 'portalSlug'
+    | 'siteUrl'
     | 'creativeCampaignId'
     | 'assetManifest'
     | 'clientType'
@@ -117,6 +120,7 @@ function toAirtableFields(submission: CtpSubmission): Record<string, unknown> {
       recommendations: submission.recommendations,
       clientType: submission.clientType,
       clientTypeClassification: submission.clientTypeClassification,
+      siteUrl: submission.siteUrl,
     }),
     'Submitted At': submission.submittedAt,
     'Updated At': submission.updatedAt,
@@ -133,6 +137,7 @@ function fromAirtableRecord(fields: Record<string, unknown>): CtpSubmission | nu
     recommendations?: unknown;
     clientType?: CtpClientType;
     clientTypeClassification?: CtpClientTypeClassification;
+    siteUrl?: string;
   } = {};
   const raw = fields['Payload JSON'];
   if (typeof raw === 'string' && raw.trim()) {
@@ -186,6 +191,7 @@ function fromAirtableRecord(fields: Record<string, unknown>): CtpSubmission | nu
     recommendations: payload.recommendations,
     clientType: payload.clientType,
     clientTypeClassification: payload.clientTypeClassification,
+    siteUrl: payload.siteUrl,
     intakeAnalysis,
     assetManifest,
     submittedAt: String(fields['Submitted At'] ?? new Date().toISOString()),

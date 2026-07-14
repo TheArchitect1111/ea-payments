@@ -17,6 +17,7 @@ import { resolveCtpOrganizationId } from '@/lib/ctp-studio-bridge';
 import { scheduleCtpIntakeAnalysis } from '@/lib/ctp-intake-orchestrator';
 import { scheduleCtpWorkspaceProvision } from '@/lib/ctp-workspace-provision';
 import { scheduleCtpStudioCampaign } from '@/lib/ctp-studio-bridge';
+import { scheduleCtpWebsiteProvision } from '@/lib/ctp-website-provision';
 import { classifyCtpClientType } from '@/lib/ctp-client-type';
 import { buildDiscoveryRecommendations, type DiscoveryAnswers } from '@/lib/discovery-engine';
 
@@ -372,6 +373,10 @@ export async function POST(req: NextRequest) {
             scheduleCtpWorkspaceProvision(ctpResult.submission.id);
           } else {
             scheduleCtpStudioCampaign(ctpResult.submission.id);
+            // Website-only tracks skip portal Pending — still auto-build the site.
+            if (ctpClassification.websiteRequired) {
+              scheduleCtpWebsiteProvision(ctpResult.submission.id);
+            }
           }
         }
       } catch (err) {
