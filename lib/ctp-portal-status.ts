@@ -53,6 +53,9 @@ export type CtpPortalStatusView = {
   clientTypeLabel?: string;
   siteUrl?: string;
   digitalScore?: number;
+  maturityScore?: number;
+  adminWastePercent?: number;
+  snapshotSummary?: string;
   percentComplete: number;
   productionHeadline?: string;
   productionStack?: string[];
@@ -86,7 +89,7 @@ function hasClientInput(submission: CtpSubmission, assets: CtpAdminAssetView[]):
 function buildTimeline(submission: CtpSubmission, assets: CtpAdminAssetView[]): CtpTimelineStep[] {
   const intakeDone = Boolean(submission.intakeAnalysis?.summary);
   const digitalDone = Boolean(submission.digitalPresenceAudit);
-  const reportDone = Boolean(submission.proposalId);
+  const reportDone = Boolean(submission.proposalId || submission.executiveSnapshot);
   const workspaceActive = submission.workspaceStatus === 'Active';
   const workspaceFailed = submission.workspaceStatus === 'Failed';
   const siteLive = Boolean(submission.siteUrl);
@@ -134,7 +137,9 @@ function buildTimeline(submission: CtpSubmission, assets: CtpAdminAssetView[]): 
     'Executive Report Generated',
     reportDone ? 'complete' : 'pending',
     reportDone
-      ? 'Your executive brief and proposal blueprint are ready.'
+      ? submission.executiveSnapshot
+        ? `Executive Snapshot ready — maturity ${submission.executiveSnapshot.operationalMaturity}/100.`
+        : 'Your executive brief and proposal blueprint are ready.'
       : 'Executive brief will appear after analysis completes.',
   );
 
@@ -300,6 +305,9 @@ export function buildCtpPortalStatusView(submission: CtpSubmission): CtpPortalSt
       : undefined,
     siteUrl: submission.siteUrl,
     digitalScore: submission.digitalPresenceAudit?.overallScore,
+    maturityScore: submission.executiveSnapshot?.operationalMaturity,
+    adminWastePercent: submission.executiveSnapshot?.adminWastePercent,
+    snapshotSummary: submission.executiveSnapshot?.summary,
     percentComplete,
     productionHeadline: production?.headline,
     productionStack: production?.stack,

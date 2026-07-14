@@ -71,7 +71,31 @@ export default async function PortalCtpStatusPage({
               · Digital Presence <strong>{view.digitalScore}/100</strong>
             </>
           ) : null}
+          {typeof view.maturityScore === 'number' ? (
+            <>
+              {' '}
+              · Maturity <strong>{view.maturityScore}/100</strong>
+            </>
+          ) : null}
+          {typeof view.adminWastePercent === 'number' ? (
+            <>
+              {' '}
+              · Admin drag <strong>{view.adminWastePercent}%</strong>
+            </>
+          ) : null}
         </p>
+        {view.snapshotSummary ? (
+          <p
+            style={{
+              margin: '0.85rem 0 0',
+              fontSize: '0.9rem',
+              lineHeight: 1.65,
+              color: 'rgba(255,255,255,0.65)',
+            }}
+          >
+            {view.snapshotSummary}
+          </p>
+        ) : null}
 
         <div style={{ marginTop: '1rem' }}>
           <div

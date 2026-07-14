@@ -152,7 +152,33 @@ export default function CtpSubmissionsClient({
                               : '—'
                           }
                         />
+                        <Meta
+                          label="Maturity"
+                          value={
+                            typeof submission.maturityScore === 'number'
+                              ? `${submission.maturityScore}/100`
+                              : '—'
+                          }
+                        />
+                        <Meta
+                          label="Admin drag"
+                          value={
+                            typeof submission.adminWastePercent === 'number'
+                              ? `${submission.adminWastePercent}%`
+                              : '—'
+                          }
+                        />
                       </div>
+                      {submission.snapshotSummary ? (
+                        <div>
+                          <p className="text-xs font-bold uppercase tracking-wider" style={{ color: GOLD }}>
+                            Executive Snapshot
+                          </p>
+                          <p className="mt-2 text-sm leading-6 text-neutral-700 whitespace-pre-wrap">
+                            {submission.snapshotSummary}
+                          </p>
+                        </div>
+                      ) : null}
                       {submission.digitalImpact ? (
                         <p className="text-sm text-neutral-600 leading-6">{submission.digitalImpact}</p>
                       ) : null}

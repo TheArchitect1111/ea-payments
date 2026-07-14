@@ -46,6 +46,9 @@ export type CtpAdminSubmissionView = {
   clientTypeLabel?: string;
   digitalScore?: number;
   digitalImpact?: string;
+  maturityScore?: number;
+  adminWastePercent?: number;
+  snapshotSummary?: string;
   assets: CtpAdminAssetView[];
   intakeSummary?: string;
   productionHeadline?: string;
@@ -101,6 +104,9 @@ export function buildCtpAdminSubmissionView(submission: CtpSubmission): CtpAdmin
       : undefined,
     digitalScore: submission.digitalPresenceAudit?.overallScore,
     digitalImpact: submission.digitalPresenceAudit?.impactEstimate,
+    maturityScore: submission.executiveSnapshot?.operationalMaturity,
+    adminWastePercent: submission.executiveSnapshot?.adminWastePercent,
+    snapshotSummary: submission.executiveSnapshot?.summary,
     assets: buildCtpAdminAssetViews(submission.assetManifest),
     intakeSummary: submission.intakeAnalysis?.summary,
     productionHeadline: submission.productionPackage?.headline,
