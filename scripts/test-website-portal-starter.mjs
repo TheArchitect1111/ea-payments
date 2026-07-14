@@ -102,6 +102,18 @@ assert(adminProvision.includes('provisionWebsitePortalSite'), 'Admin provision A
 assert(adminProvision.includes('requireAdminActionFromRequest'), 'Admin provision API must require admin auth');
 assert(provision.includes('force?: boolean') || provision.includes('force?'), 'Provisioner must support force refresh');
 
+const opsPanelPath = join(root, 'app/admin/master/WebsitePortalOpsPanel.tsx');
+const masterPagePath = join(root, 'app/admin/master/page.tsx');
+assert(existsSync(opsPanelPath), 'Missing WebsitePortalOpsPanel on Master CC');
+assert(
+  readFileSync(masterPagePath, 'utf8').includes('WebsitePortalOpsPanel'),
+  'Master CC page must mount WebsitePortalOpsPanel',
+);
+assert(
+  readFileSync(opsPanelPath, 'utf8').includes('/api/admin/website-portal/provision'),
+  'Ops panel must call admin provision API',
+);
+
 if (failures.length) {
   console.error('Website + Portal Starter checks FAILED:');
   for (const failure of failures) console.error(`  - ${failure}`);

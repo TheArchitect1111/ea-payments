@@ -20,6 +20,7 @@ import { listEAActivityEvents } from '@/lib/ea-activity-events';
 import { isCaptureApiKeyConfigured } from '@/lib/capture-api-key';
 import { EA_SATELLITE_URLS } from '@/lib/platform-urls';
 import MissionControlPanel from './MissionControlPanel';
+import WebsitePortalOpsPanel from './WebsitePortalOpsPanel';
 import AdminLogin from './AdminLogin';
 
 export const dynamic = 'force-dynamic';
@@ -301,6 +302,8 @@ export default async function MasterPortalPage() {
       <div className="space-y-10">
 
         <MissionControlPanel mission={mission} />
+
+        <WebsitePortalOpsPanel />
 
         {/* Operations dashboard — revenue, pipeline, platforms */}
         <section>
