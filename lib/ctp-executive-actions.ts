@@ -11,13 +11,18 @@ import {
 import { sendRevealEmail } from '@/lib/email';
 import { emitPulseEvent } from '@/lib/pulse-bus';
 import { runCtpDigitalPresenceAudit } from '@/lib/ctp-digital-presence-run';
+import { sendCtpExecutiveEmailForSubmission } from '@/lib/ctp-executive-email-send';
+import { publicPortalUrl } from '@/lib/ctp-portal-host';
 import { runCtpProduction } from '@/lib/ctp-production-run';
+import { runCtpWorkspaceProvision } from '@/lib/ctp-workspace-provision';
 
 export type CtpExecutiveAction =
   | 'ready_for_review'
   | 'approve_reveal'
   | 'run_production'
-  | 'run_digital_audit';
+  | 'run_digital_audit'
+  | 'resend_executive_email'
+  | 'reprovision_workspace';
 
 function baseUrl(): string {
   return (
@@ -165,6 +170,75 @@ export async function runCtpExecutiveAction(
     const refreshed = await getCtpSubmissionById(submissionId);
     if (!refreshed) {
       return { ok: false, error: 'Audit saved but submission reload failed.' };
+    }
+    return { ok: true, submission: refreshed };
+  }
+
+  if (action === 'resend_executive_email') {
+    const portalUrl = submission.portalSlug
+      ? publicPortalUrl(submission.portalSlug, 'ctp')
+      : undefined;
+    const result = await sendCtpExecutiveEmailForSubmission(submissionId, {
+      force: true,
+      portalUrl,
+    });
+    if (!result.ok) {
+      return { ok: false, error: result.error ?? 'Executive email failed to send.' };
+    }
+    const refreshed = await getCtpSubmissionById(submissionId);
+    if (!refreshed) {
+      return { ok: false, error: 'Email sent but submission reload failed.' };
+    }
+    await emitPulseEvent({
+      product: 'ea-platform',
+      type: 'ctp.executive_email.resent',
+      title: `CTP executive email resent — ${submission.businessName}`,
+      detail: portalUrl || 'Sent without portal URL (workspace not active yet).',
+      priority: 'medium',
+      href: '/admin/ctp',
+      objectId: submission.id,
+      metadata: {
+        ctpSubmissionId: submission.id,
+        portalUrl: portalUrl ?? '',
+      },
+    });
+    return { ok: true, submission: refreshed };
+  }
+
+  if (action === 'reprovision_workspace') {
+    if (submission.workspaceStatus === 'Provisioning') {
+      return { ok: false, error: 'Workspace provisioning already in progress.' };
+    }
+    if (submission.workspaceStatus === 'Active' && submission.portalSlug) {
+      return {
+        ok: false,
+        error: 'Workspace is already active. Resend the executive email if the client needs the portal link.',
+      };
+    }
+
+    // Allow retry from Failed / stuck non-pending states.
+    if (submission.workspaceStatus !== 'Pending' && submission.workspaceStatus !== 'Failed') {
+      const reset = await updateCtpSubmission(submissionId, {
+        workspaceStatus: 'Pending',
+        status: 'Workspace Pending',
+      });
+      if (!reset.ok) {
+        return { ok: false, error: reset.error ?? 'Could not reset workspace status.' };
+      }
+    } else if (submission.workspaceStatus === 'Failed') {
+      await updateCtpSubmission(submissionId, {
+        workspaceStatus: 'Pending',
+        status: 'Workspace Pending',
+      });
+    }
+
+    const result = await runCtpWorkspaceProvision(submissionId);
+    if (!result.ok) {
+      return { ok: false, error: result.error ?? 'Workspace provision failed.' };
+    }
+    const refreshed = await getCtpSubmissionById(submissionId);
+    if (!refreshed) {
+      return { ok: false, error: 'Provision finished but submission reload failed.' };
     }
     return { ok: true, submission: refreshed };
   }
