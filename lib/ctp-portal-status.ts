@@ -63,6 +63,14 @@ export type CtpPortalStatusView = {
   assets: CtpAdminAssetView[];
   timeline: CtpTimelineStep[];
   designStudio: CtpDesignStudioItem[];
+  designStudioFields?: {
+    brand_colors?: string;
+    brand_fonts?: string;
+    brand_voice?: string;
+    competitors?: string;
+    inspiration?: string;
+    offer_summary?: string;
+  };
 };
 
 function step(
@@ -320,5 +328,31 @@ export function buildCtpPortalStatusView(submission: CtpSubmission): CtpPortalSt
     assets,
     timeline,
     designStudio: buildDesignStudio(submission, assets),
+    designStudioFields: {
+      brand_colors:
+        typeof submission.discoveryAnswers?.brand_colors === 'string'
+          ? submission.discoveryAnswers.brand_colors
+          : undefined,
+      brand_fonts:
+        typeof submission.discoveryAnswers?.brand_fonts === 'string'
+          ? submission.discoveryAnswers.brand_fonts
+          : undefined,
+      brand_voice:
+        typeof submission.discoveryAnswers?.brand_voice === 'string'
+          ? submission.discoveryAnswers.brand_voice
+          : undefined,
+      competitors:
+        typeof submission.discoveryAnswers?.competitors === 'string'
+          ? submission.discoveryAnswers.competitors
+          : undefined,
+      inspiration:
+        typeof submission.discoveryAnswers?.inspiration === 'string'
+          ? submission.discoveryAnswers.inspiration
+          : undefined,
+      offer_summary:
+        typeof submission.discoveryAnswers?.offer_summary === 'string'
+          ? submission.discoveryAnswers.offer_summary
+          : undefined,
+    },
   };
 }

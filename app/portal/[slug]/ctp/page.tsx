@@ -7,6 +7,7 @@ import { buildCtpPortalStatusView } from '@/lib/ctp-portal-status';
 import type { CtpTimelineStepState } from '@/lib/ctp-portal-status';
 import { getCtpSubmissionForPortal } from '@/lib/ctp-submissions';
 import PortalCtpAssetGallery from '@/app/portal/components/PortalCtpAssetGallery';
+import PortalCtpDesignStudioForm from '@/app/portal/components/PortalCtpDesignStudioForm';
 
 export const dynamic = 'force-dynamic';
 
@@ -47,9 +48,6 @@ export default async function PortalCtpStatusPage({
     month: 'long',
     day: 'numeric',
   });
-  const studioReady = view.designStudio.filter((item) => item.status === 'ready').length;
-  const studioTotal = view.designStudio.length;
-
   return (
     <PortalSubpage
       slug={slug}
@@ -261,64 +259,11 @@ export default async function PortalCtpStatusPage({
         ))}
       </ol>
 
-      <section className="ep-module-card" style={{ marginTop: '1.5rem' }}>
-        <p
-          style={{
-            margin: '0 0 0.35rem',
-            fontSize: '0.7rem',
-            fontWeight: 800,
-            letterSpacing: '0.18em',
-            textTransform: 'uppercase',
-            color: 'rgba(216,173,61,0.85)',
-          }}
-        >
-          Design Studio
-        </p>
-        <h2 style={{ margin: '0 0 0.5rem', fontSize: '1.25rem', fontWeight: 800, color: '#fff' }}>
-          Brand & project inputs
-        </h2>
-        <p style={{ margin: '0 0 1rem', fontSize: '0.9rem', lineHeight: 1.6, color: 'rgba(255,255,255,0.7)' }}>
-          {studioReady}/{studioTotal} ready. This is a premium workspace — not another questionnaire.
-          Upload what you have; elegant defaults fill the rest.
-        </p>
-        <div
-          style={{
-            display: 'grid',
-            gap: '0.75rem',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-          }}
-        >
-          {view.designStudio.map((item) => (
-            <div
-              key={item.id}
-              style={{
-                border: '1px solid rgba(255,255,255,0.12)',
-                borderRadius: '0.75rem',
-                padding: '0.9rem 1rem',
-                background:
-                  item.status === 'ready' ? 'rgba(216,173,61,0.08)' : 'rgba(255,255,255,0.03)',
-              }}
-            >
-              <p
-                style={{
-                  margin: '0 0 0.35rem',
-                  fontSize: '0.68rem',
-                  fontWeight: 800,
-                  letterSpacing: '0.14em',
-                  textTransform: 'uppercase',
-                  color: item.status === 'ready' ? GOLD : 'rgba(255,255,255,0.45)',
-                }}
-              >
-                {item.status === 'ready' ? 'Ready' : 'Needed'}
-              </p>
-              <p style={{ margin: '0 0 0.35rem', fontWeight: 700, color: '#fff' }}>{item.label}</p>
-              <p style={{ margin: 0, fontSize: '0.82rem', lineHeight: 1.5, color: 'rgba(255,255,255,0.65)' }}>
-                {item.detail}
-              </p>
-            </div>
-          ))}
-        </div>
-      </section>
+      <PortalCtpDesignStudioForm
+        slug={slug}
+        designStudio={view.designStudio}
+        initial={view.designStudioFields}
+      />
 
       <PortalCtpAssetGallery assets={view.assets} />
 
