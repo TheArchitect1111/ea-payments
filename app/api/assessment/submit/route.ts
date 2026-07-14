@@ -401,6 +401,7 @@ export async function POST(req: NextRequest) {
               digitalPresenceAudit = await auditDigitalPresence({
                 url: urlFromAnswers,
                 businessName: input.businessName,
+                discoveryAnswers: input.discoveryAnswers ?? undefined,
               });
               await updateCtpSubmission(ctpResult.submission.id, {
                 digitalPresenceAudit,

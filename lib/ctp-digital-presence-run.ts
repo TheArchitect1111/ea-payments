@@ -45,6 +45,7 @@ export async function runCtpDigitalPresenceAudit(
   const audit = await auditDigitalPresence({
     url: discoveryUrl(submission),
     businessName: submission.businessName,
+    discoveryAnswers: submission.discoveryAnswers,
   });
 
   await updateCtpSubmission(submissionId, { digitalPresenceAudit: audit });

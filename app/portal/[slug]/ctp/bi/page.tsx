@@ -218,6 +218,30 @@ export default async function PortalCtpBiPage({
               {view.digitalImpact}
             </p>
           ) : null}
+          {typeof view.socialScore === 'number' || typeof view.gbpScore === 'number' ? (
+            <p style={{ margin: '0.75rem 0 0', color: 'rgba(255,255,255,0.72)', fontSize: '0.9rem' }}>
+              {typeof view.socialScore === 'number' ? (
+                <>
+                  Social <strong style={{ color: GOLD }}>{view.socialScore}/100</strong>
+                </>
+              ) : null}
+              {typeof view.socialScore === 'number' && typeof view.gbpScore === 'number' ? ' · ' : null}
+              {typeof view.gbpScore === 'number' ? (
+                <>
+                  Google Business <strong style={{ color: GOLD }}>{view.gbpScore}/100</strong>
+                </>
+              ) : null}
+            </p>
+          ) : null}
+          {view.socialChannels?.length ? (
+            <p style={{ margin: '0.4rem 0 0', color: 'rgba(255,255,255,0.55)', fontSize: '0.85rem' }}>
+              Channels:{' '}
+              {view.socialChannels
+                .map((c) => c.platform)
+                .filter((v, i, a) => a.indexOf(v) === i)
+                .join(', ')}
+            </p>
+          ) : null}
         </div>
       ) : null}
 

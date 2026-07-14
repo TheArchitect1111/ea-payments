@@ -40,11 +40,28 @@ assert(audit.includes('buildGenericDigitalPresenceAudit'), 'Must support generic
 assert(audit.includes('auditDigitalPresence'), 'Missing auditDigitalPresence');
 assert(audit.includes('overallScore'), 'Must expose overallScore');
 assert(audit.includes('leadCapture'), 'Must score leadCapture dimension');
+assert(audit.includes('socialPresence'), 'Must score socialPresence dimension');
+assert(audit.includes('googleBusinessProfile'), 'Must score googleBusinessProfile dimension');
+assert(audit.includes('scoreSocialAndGbp'), 'Missing scoreSocialAndGbp helper');
+assert(audit.includes('extractPresenceUrls'), 'Missing extractPresenceUrls helper');
 assert(run.includes('scheduleCtpDigitalPresenceAudit'), 'Missing schedule helper');
+assert(run.includes('discoveryAnswers'), 'Run helper must pass discovery answers for social/GBP');
 assert(submit.includes('auditDigitalPresence'), 'Submit must run digital audit');
+assert(submit.includes('discoveryAnswers'), 'Submit audit must pass discovery answers');
 assert(submit.includes('digitalPresenceAudit'), 'Submit must pass audit into email path');
 assert(email.includes('Digital Presence Score'), 'Executive email must include digital score');
 assert(submissions.includes('digitalPresenceAudit'), 'CTP submission must persist audit');
+
+const biViewPath = join(root, 'lib/ctp-bi-view.ts');
+const biPagePath = join(root, 'app/portal/[slug]/ctp/bi/page.tsx');
+assert(existsSync(biViewPath), 'Missing ctp-bi-view.ts');
+assert(existsSync(biPagePath), 'Missing CTP BI page');
+const biView = readFileSync(biViewPath, 'utf8');
+const biPage = readFileSync(biPagePath, 'utf8');
+assert(biView.includes('socialScore'), 'BI view must expose socialScore');
+assert(biView.includes('gbpScore'), 'BI view must expose gbpScore');
+assert(biPage.includes('socialScore'), 'BI page must surface social score');
+assert(biPage.includes('gbpScore'), 'BI page must surface GBP score');
 
 if (failures.length) {
   console.error('CTP digital presence checks FAILED:');
