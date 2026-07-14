@@ -94,6 +94,25 @@ export default async function PortalCtpStatusPage({
             {view.snapshotSummary}
           </p>
         ) : null}
+        {view.reviewScheduledAt ? (
+          <p
+            style={{
+              margin: '1rem 0 0',
+              fontSize: '0.9rem',
+              lineHeight: 1.6,
+              color: 'rgba(255,255,255,0.75)',
+            }}
+          >
+            Review scheduled:{' '}
+            <strong style={{ color: GOLD }}>
+              {new Date(view.reviewScheduledAt).toLocaleString('en-US', {
+                dateStyle: 'medium',
+                timeStyle: 'short',
+              })}
+            </strong>
+          </p>
+        ) : null}
+
         <div style={{ marginTop: '1rem', display: 'flex', flexWrap: 'wrap', gap: '0.65rem' }}>
           {typeof view.maturityScore === 'number' || view.snapshotSummary ? (
             <Link
@@ -110,6 +129,13 @@ export default async function PortalCtpStatusPage({
             style={{ border: '1px solid rgba(255,255,255,0.35)', color: '#fff' }}
           >
             View recommendations
+          </Link>
+          <Link
+            href={`/portal/${slug}/ctp/schedule`}
+            className="inline-block rounded-full px-5 py-2.5 text-sm font-bold"
+            style={{ border: '1px solid rgba(255,255,255,0.35)', color: '#fff' }}
+          >
+            Scheduling
           </Link>
         </div>
 
