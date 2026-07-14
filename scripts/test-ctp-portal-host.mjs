@@ -107,6 +107,16 @@ assert(ignored === null, 'Non-portal hosts must not rewrite');
 const login = resolveVanity('portal.efficiencyarchitects.online', '/login');
 assert(login?.redirectPath === '/portal/login', 'Vanity /login should map to /portal/login');
 
+const portalLoginPath = join(root, 'app/portal/login/page.tsx');
+assert(existsSync(portalLoginPath), 'Missing portal login page');
+const portalLogin = readFileSync(portalLoginPath, 'utf8');
+assert(portalLogin.includes('/ea-logo.png'), 'Portal login must use EA logo');
+assert(portalLogin.includes("realm=\"portal\""), 'Portal login must use portal realm');
+assert(portalLogin.includes('demoFallback="ctp"'), 'Portal demo login should land on CTP overview');
+assert(!portalLogin.includes('simplifi-logo.png'), 'Portal login must not use Simplifi logo');
+assert(!portalLogin.includes("return '/simplifi/capture'"), 'Portal login must not default next to Simplifi capture');
+assert(portalLogin.includes('Looking for Simplifi capture?'), 'Portal login should point Simplifi users to /simplifi/login');
+
 if (failures.length) {
   console.error('CTP portal host checks FAILED:');
   for (const failure of failures) console.error(`  - ${failure}`);

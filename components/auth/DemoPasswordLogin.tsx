@@ -5,15 +5,39 @@ import { FormEvent, useState } from 'react';
 const DEMO_EMAIL = 'demo@efficiencyarchitects.online';
 const DEMO_PASSWORD = 'DemoPulse2026!';
 
+type DemoFallback = 'portal' | 'ctp' | 'simplifi';
+
 type Props = {
   next?: string;
   /** Compact layout for login cards */
   compact?: boolean;
   onSuccess?: (slug: string) => void;
+  /**
+   * Destination when `next` is omitted.
+   * - portal → /portal/{slug}
+   * - ctp → /portal/{slug}/ctp
+   * - simplifi → /portal/{slug}/simplifi (or /simplifi/capture)
+   */
+  fallback?: DemoFallback;
 };
 
+function resolveDemoTarget(slug: string | undefined, next: string | undefined, fallback: DemoFallback): string {
+  if (next && next.startsWith('/') && !next.startsWith('//')) return next;
+  if (!slug) {
+    return fallback === 'simplifi' ? '/simplifi/capture' : '/portal/login';
+  }
+  if (fallback === 'simplifi') return `/portal/${slug}/simplifi`;
+  if (fallback === 'ctp') return `/portal/${slug}/ctp`;
+  return `/portal/${slug}`;
+}
+
 /** Shared demo credentials — one sign-in works across /simplifi/* and /portal/* pages. */
-export default function DemoPasswordLogin({ next, compact = false, onSuccess }: Props) {
+export default function DemoPasswordLogin({
+  next,
+  compact = false,
+  onSuccess,
+  fallback = 'portal',
+}: Props) {
   const [email, setEmail] = useState(DEMO_EMAIL);
   const [password, setPassword] = useState(DEMO_PASSWORD);
   const [error, setError] = useState('');
@@ -48,13 +72,7 @@ export default function DemoPasswordLogin({ next, compact = false, onSuccess }: 
         return;
       }
 
-      const target =
-        next && next.startsWith('/') && !next.startsWith('//')
-          ? next
-          : data.slug
-            ? `/portal/${data.slug}/simplifi`
-            : '/simplifi/capture';
-      window.location.href = target;
+      window.location.href = resolveDemoTarget(data.slug, next, fallback);
     } catch {
       setError('Network error. Check your connection and try again.');
       setLoading(false);
