@@ -5,6 +5,11 @@ import type { AuthRealm, UnifiedSession } from '@/lib/auth/types';
 
 type PortalSession = UnifiedSession & { slug: string; email?: string };
 
+function hasRequiredOrganization(session: UnifiedSession): boolean {
+  if (process.env.NODE_ENV !== 'production') return true;
+  return Boolean(session.orgId && !session.orgId.startsWith('org_'));
+}
+
 /** Resolve portal/simplifi session from cookies + Bearer (App Router route handlers). */
 export async function resolvePortalSession(
   opts: { realm?: AuthRealm } = {},
@@ -31,7 +36,7 @@ export async function requirePortalSession(
   opts: { realm?: AuthRealm } = {},
 ): Promise<PortalSession | null> {
   const session = await resolvePortalSession(opts);
-  if (!session?.slug) return null;
+  if (!session?.slug || !hasRequiredOrganization(session)) return null;
   return session as PortalSession;
 }
 
@@ -40,7 +45,7 @@ export function requirePortalSessionFromRequest(
   opts: { realm?: AuthRealm } = {},
 ): Promise<PortalSession | null> {
   return resolvePortalSessionFromRequest(req, opts).then((session) => {
-    if (!session?.slug) return null;
+    if (!session?.slug || !hasRequiredOrganization(session)) return null;
     return session as PortalSession;
   });
 }

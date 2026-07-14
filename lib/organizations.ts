@@ -157,6 +157,10 @@ export async function createOrganization(input: {
   }
 }
 
+function allowSyntheticOrganizationFallback(): boolean {
+  return process.env.NODE_ENV !== 'production';
+}
+
 export async function ensureOrganizationForPortal(input: {
   portalSlug: string;
   name: string;
@@ -166,6 +170,9 @@ export async function ensureOrganizationForPortal(input: {
   const fallbackId = syntheticOrgId(input.portalSlug);
 
   if (!platformStoreConfigured()) {
+    if (!allowSyntheticOrganizationFallback()) {
+      throw new Error('Platform store is required to provision a production organization.');
+    }
     return { orgId: fallbackId, org: null };
   }
 
@@ -188,9 +195,13 @@ export async function ensureOrganizationForPortal(input: {
     }
   } catch (err) {
     console.error('ensureOrganizationForPortal failed:', err);
+    if (!allowSyntheticOrganizationFallback()) throw err;
   }
 
   return { orgId: fallbackId, org: null };
+  if (!allowSyntheticOrganizationFallback()) {
+    throw new Error('Organization provisioning failed without a persisted organization.');
+  }
 }
 
 export async function suspendOrganization(orgId: string): Promise<boolean> {

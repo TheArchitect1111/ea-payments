@@ -12,18 +12,17 @@ export type PortalIdentity = {
   email: string;
 };
 
-/** Resolve org + role for a portal login; creates org/membership on first login. */
 export async function resolvePortalIdentity(input: {
   email: string;
   slug: string;
   clientRecordId?: string;
 }): Promise<PortalIdentity> {
   const email = input.email.trim().toLowerCase();
-
   let clientName = input.slug;
   let organizationName: string | undefined;
   let packagePurchased = 'Capacity Assessment';
   let commerceOfferId: string | undefined;
+  let authoritativeOwnerEmail: string | undefined;
 
   try {
     const client = await getClientByPortalSlug(input.slug);
@@ -32,9 +31,10 @@ export async function resolvePortalIdentity(input: {
       organizationName = client.organization;
       packagePurchased = client.packagePurchased;
       commerceOfferId = client.commerceOfferId;
+      authoritativeOwnerEmail = client.email?.trim().toLowerCase();
     }
   } catch {
-    // Non-fatal — proceed with slug as name
+    // Persistence and membership checks still fail closed.
   }
 
   const { orgId } = await ensureOrganizationForPortal({
@@ -47,6 +47,7 @@ export async function resolvePortalIdentity(input: {
   const { role } = await ensureOwnerMembership({
     userEmail: email,
     organizationId: orgId,
+    allowOwnerBootstrap: Boolean(authoritativeOwnerEmail && email === authoritativeOwnerEmail),
   });
 
   void ensurePackageEntitlements({
@@ -56,10 +57,10 @@ export async function resolvePortalIdentity(input: {
     slug: input.slug,
   });
 
+
   return { orgId, role, email };
 }
 
-/** EA internal admin identity — single org for all admin users. */
 export function resolveAdminIdentity(input: {
   email: string;
   role: string;

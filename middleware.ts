@@ -64,7 +64,8 @@ async function parseAdminSessionEdge(token: string | undefined): Promise<EdgeAdm
       exp?: number;
     };
     if (typeof payload.exp !== 'number' || payload.exp < Date.now()) return null;
-    return { role: payload.role ?? 'owner' };
+    if (typeof payload.role !== 'string' || !payload.role.trim()) return null;
+    return { role: payload.role };
   } catch {
     return null;
   }

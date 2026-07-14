@@ -5,27 +5,21 @@ import { previewPathForPage } from './types';
 
 export async function publishExperiencePage(input: {
   pageId: string;
+  organizationId: string;
   portalSlug: string;
   actorName?: string;
 }) {
-  const page = await getExperiencePage(input.pageId);
-  if (!page) {
-    return { ok: false as const, detail: 'Experience page not found.' };
-  }
-  if (page.portalSlug !== input.portalSlug) {
+  const page = await getExperiencePage(input.pageId, input.organizationId);
+  if (!page || page.portalSlug !== input.portalSlug) {
     return { ok: false as const, detail: 'Portal access denied for this page.' };
   }
 
   const previewPath = previewPathForPage(input.portalSlug, input.pageId);
   const actor = input.actorName ?? 'Experience Builder';
-  const summary = page.puckData.content
-    .slice(0, 3)
-    .map((block) => {
-      const props = block.props as Record<string, unknown>;
-      return String(props.title ?? props.eyebrow ?? block.type);
-    })
-    .filter(Boolean)
-    .join(' · ');
+  const summary = page.puckData.content.slice(0, 3).map((block) => {
+    const props = block.props as Record<string, unknown>;
+    return String(props.title ?? props.eyebrow ?? block.type);
+  }).filter(Boolean).join(' � ');
 
   const outcome = await publishCommunication({
     channel: 'website',
@@ -39,11 +33,10 @@ export async function publishExperiencePage(input: {
     source: { product: 'experience-builder', campaignId: page.id, assetId: page.id },
   });
 
-  const updated = await markExperiencePagePublished(input.pageId);
-
+  const updated = await markExperiencePagePublished(input.pageId, input.organizationId);
   if (outcome.ok && updated) {
     await publishPlatformActivityEvent({
-      organizationId: page.organizationId,
+      organizationId: input.organizationId,
       module: 'landing',
       eventType: 'experience-builder.publish',
       title: `Published ${page.title}`,
@@ -53,12 +46,5 @@ export async function publishExperiencePage(input: {
       metadata: { pageId: page.id, portalSlug: input.portalSlug, actorName: actor },
     }).catch(() => undefined);
   }
-
-  return {
-    ok: outcome.ok,
-    detail: outcome.detail,
-    href: outcome.href ?? previewPath,
-    page: updated,
-    mode: outcome.mode,
-  };
+  return { ok: outcome.ok, detail: outcome.detail, href: outcome.href ?? previewPath, page: updated, mode: outcome.mode };
 }

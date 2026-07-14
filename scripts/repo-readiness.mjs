@@ -3,67 +3,33 @@ import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 
 const ROOT = process.cwd();
-const USER_ROOT = path.resolve(ROOT, '..', '..');
+const REGISTRY_PATH = path.join(ROOT, 'config', 'ecosystem-repositories.json');
 
-const repos = [
-  {
-    id: 'ea-payments',
-    name: 'EA Payments / Simplifi Platform',
-    path: path.resolve(ROOT),
-    criticality: 'launch-critical',
-    role: 'Revenue, Simplifi, Magnifi, Amplifi, Pulse, portal, launch command center',
-    expectedScripts: ['build', 'lint', 'test:smoke', 'test:capture-e2e', 'launch:report'],
-  },
-  {
-    id: 'portal-core',
-    name: 'EA Portal Chassis',
-    path: path.join(USER_ROOT, 'ea-operating-system', 'portal-core'),
-    criticality: 'shared-critical',
-    role: 'Reusable portal auth, layout, Airtable, email, webhook adapters',
-    expectedScripts: ['build', 'typecheck'],
-  },
-  {
-    id: 'premium-chassis',
-    name: 'EA Premium Chassis',
-    path: path.join(USER_ROOT, 'ea-operating-system', 'premium-chassis'),
-    criticality: 'shared-critical',
-    role: 'Reusable EA brand tokens, typography, UI chassis',
-    expectedScripts: [],
-  },
-  {
-    id: 'cpr-site',
-    name: 'Canadian Prospects / CPR Site',
-    path: path.join(USER_ROOT, 'ea-launch-audit', 'cpr-site'),
-    criticality: 'ecosystem-important',
-    role: 'Athlete/recruiting vertical and template proving ground',
-    expectedScripts: ['build', 'lint', 'test:smoke'],
-  },
-  {
-    id: 'sisterhub',
-    name: 'SisterHub',
-    path: path.join(USER_ROOT, 'ea-launch-audit', 'SisterHub'),
-    criticality: 'ecosystem-important',
-    role: 'Portal chassis consumer and community vertical',
-    expectedScripts: ['build'],
-  },
-  {
-    id: 'brotherhub',
-    name: 'BrotherHub',
-    path: path.join(USER_ROOT, 'ea-launch-audit', 'BrotherHub'),
-    criticality: 'reuse-candidate',
-    role: 'Overlay/reuse candidate for community hub builds',
-    expectedScripts: ['build', 'lint'],
-  },
-  {
-    id: 'efficiency-architects-marketing',
-    name: 'Efficiency Architects Marketing Site',
-    path: path.join(USER_ROOT, 'ea-launch-audit', 'efficiency-architects'),
-    criticality: 'brand-critical',
-    role: 'Public EA marketing and product routing surface',
-    expectedScripts: ['build'],
-  },
-];
+function loadRepositoryRegistry() {
+  const configured = JSON.parse(readFileSync(REGISTRY_PATH, 'utf8'));
+  const repos = configured.repositories.map((repo) => ({
+    ...repo,
+    path: path.resolve(ROOT, repo.path),
+  }));
 
+  const extraPaths = (process.env.EA_ECOSYSTEM_REPOSITORIES ?? '')
+    .split(path.delimiter)
+    .map((value) => value.trim())
+    .filter(Boolean);
+  for (const repoPath of extraPaths) {
+    repos.push({
+      id: path.basename(repoPath).toLowerCase(),
+      name: path.basename(repoPath),
+      path: path.resolve(repoPath),
+      criticality: 'unclassified',
+      role: 'Operator-supplied repository; classify after verification',
+      expectedScripts: [],
+    });
+  }
+  return repos;
+}
+
+const repos = loadRepositoryRegistry();
 function runGit(repoPath, args) {
   try {
     return execFileSync('git', args, {

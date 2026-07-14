@@ -15,6 +15,11 @@ export const REALM_COOKIE: Record<AuthRealm, string> = {
 
 /** Order used when probing an unhinted Bearer token or multiple cookies. */
 const REALM_PRIORITY: AuthRealm[] = ['admin', 'portal', 'partner'];
+const AUTH_REALMS = new Set<AuthRealm>(['admin', 'portal', 'simplifi', 'partner']);
+
+function authRealm(value: string | null): AuthRealm | undefined {
+  return value && AUTH_REALMS.has(value as AuthRealm) ? (value as AuthRealm) : undefined;
+}
 
 /** Extract a Bearer token from an Authorization header. */
 export function getBearerToken(headers: Headers): string | null {
@@ -81,9 +86,7 @@ async function verifyAnyRealm(
   token: string,
   hint?: AuthRealm,
 ): Promise<UnifiedSession | null> {
-  const order = hint
-    ? [hint, ...REALM_PRIORITY.filter((r) => r !== hint)]
-    : REALM_PRIORITY;
+  const order = hint ? [hint] : REALM_PRIORITY;
   for (const realm of order) {
     const session = await verifyRealmToken(realm, token);
     if (session) return session;
@@ -107,8 +110,11 @@ export async function resolveSession(
   source: SessionSource,
   opts: { realm?: AuthRealm } = {},
 ): Promise<UnifiedSession | null> {
-  const headerRealm = source.headers.get('x-ea-realm') as AuthRealm | null;
-  const hint = opts.realm ?? (headerRealm ?? undefined);
+  const rawHeaderRealm = source.headers.get('x-ea-realm');
+  const headerRealm = authRealm(rawHeaderRealm);
+  if (rawHeaderRealm && !headerRealm) return null;
+  if (opts.realm && headerRealm && opts.realm !== headerRealm) return null;
+  const hint = opts.realm ?? headerRealm;
 
   const bearer = getBearerToken(source.headers);
   if (bearer) {
@@ -116,9 +122,7 @@ export async function resolveSession(
     if (fromBearer) return fromBearer;
   }
 
-  const probe: AuthRealm[] = hint
-    ? [hint, ...REALM_PRIORITY.filter((r) => r !== hint)]
-    : REALM_PRIORITY;
+  const probe: AuthRealm[] = hint ? [hint] : REALM_PRIORITY;
 
   for (const realm of probe) {
     const cookie = source.cookies.get(REALM_COOKIE[realm])?.value;

@@ -1,7 +1,7 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { saveStudioRecord, loadStudioRecord } from '@/lib/creative-studio/persistence';
 
 export type CtpAssetManifestEntry = {
@@ -41,6 +41,12 @@ type ChunkPayload = {
 
 const CHUNK_BYTES = 65_000;
 export const CTP_ASSET_MAX_BYTES = 2 * 1024 * 1024;
+
+/** Non-organization scope used only until workspace provisioning resolves a persisted tenant. */
+export function ctpAssetStagingScope(draftIdentity: string): string {
+  const digest = createHash('sha256').update(draftIdentity.trim().toLowerCase()).digest('hex').slice(0, 20);
+  return 'staging_ctp_' + digest;
+}
 
 const ALLOWED_MIME = new Set([
   'image/jpeg',

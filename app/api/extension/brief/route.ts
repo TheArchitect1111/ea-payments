@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 import { getClientByPortalSlug } from '@/lib/airtable';
-import { CAPTURE_CORS_HEADERS, verifyCaptureApiKey } from '@/lib/capture-auth';
+import { CAPTURE_CORS_HEADERS, verifyCaptureTenantToken } from '@/lib/capture-auth';
 import { EA_PORTAL_COOKIE, verifySession } from '@/lib/ea-portal-auth';
 import { EA_PLATFORM_URL } from '@/lib/platform-urls';
 import { loadSimplifiWorkspace } from '@/lib/simplifi-store';
@@ -45,8 +45,12 @@ export async function GET(request: NextRequest) {
   const headerSlug = request.headers.get('x-ea-portal-slug');
   const querySlug = request.nextUrl.searchParams.get('portalSlug');
   const requestedSlug = headerSlug || querySlug || '';
-  const hasExtensionAccess = verifyCaptureApiKey(apiKey);
-  const portalSlug = session?.slug || (hasExtensionAccess ? requestedSlug : '');
+  const tokenSlug = verifyCaptureTenantToken(apiKey);
+  if (tokenSlug && requestedSlug && tokenSlug !== requestedSlug) {
+    return json({ ok: false, error: 'Extension tenant mismatch.' }, { status: 403 });
+  }
+  const hasExtensionAccess = Boolean(tokenSlug);
+  const portalSlug = session?.slug || tokenSlug || '';
 
   if (!portalSlug) {
     return json(
