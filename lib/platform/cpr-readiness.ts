@@ -19,7 +19,7 @@ import {
 export const CPR_HUB_CATALOG: Record<string, Omit<CprHubModuleInput, 'hubModuleId'>> = {
   dashboard: { title: 'Dashboard', path: '', tag: 'Core' },
   amplifi: { title: 'Amplifi', path: 'amplifi', tag: 'Amplifi' },
-  updates: { title: 'Updates', path: 'updates', tag: 'Updates' },
+  updates: { title: 'Update Hub', path: 'updates', tag: 'Updates' },
   'recruiting-timeline': { title: 'Timeline', path: 'recruiting-timeline', tag: 'Recruiting' },
   'eligibility-center': { title: 'Requirements', path: 'eligibility-center', tag: 'Recruiting' },
   'scholarship-center': { title: 'Opportunities', path: 'scholarship-center', tag: 'Recruiting' },
@@ -57,8 +57,9 @@ export function getPlatformCprReadiness() {
       unmappedHubModuleIds: familyHub.unmappedHubModuleIds,
       capabilityIds: resolveCprHubCapabilityIds(FAMILY_HUB_MODULE_IDS),
     },
-    migrationStatus: 'not-started' as const,
-    note: 'Readiness only ? CPR portal runtime is not migrated.',
+    migrationStatus: 'partial' as const,
+    note:
+      'CPR runtime stays on cpr-site. Update Hub™ content-request parity and in-portal payments shipped on CPR main; full chassis migration not started.',
   };
 }
 
