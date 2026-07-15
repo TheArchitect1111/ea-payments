@@ -576,9 +576,9 @@ export async function POST(req: NextRequest) {
             }
           }
 
-          if (!deferExecutiveEmail) {
-            await sendCtpExecutiveEmailForSubmission(ctpSubmissionId);
-          }
+          // Always send the CTP welcome immediately so launch submissions are never silent
+          // if workspace provisioning is slow or fails. Provision may upgrade the portal URL later.
+          await sendCtpExecutiveEmailForSubmission(ctpSubmissionId);
         } else if (!isCtpFlow) {
           await sendAssessmentConfirmationEmail({
             email: input.email,
