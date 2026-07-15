@@ -11,15 +11,21 @@ import type { PortalWorkspaceChrome } from './portal-workspace';
 function iconForLabel(label: string): PortalNavIconName {
   const l = label.toLowerCase();
   if (l.includes('home') || l.includes('agent')) return 'grid';
+  if (l.includes('decision')) return 'ask';
+  if (l.includes('organization') || l.includes('client') || l.includes('deliver')) return 'documents';
+  if (l.includes('operation') || l.includes('admin')) return 'grid';
+  if (l.includes('product') || l.includes('factory')) return 'amplifi';
+  if (l.includes('intelligence') || l.includes('insight') || l.includes('pulse') || l.includes('atlas')) {
+    return 'pulse';
+  }
+  if (l.includes('search')) return 'resources';
   if (l.includes('opportunit') || l.includes('simplifi')) return 'simplifi';
   if (l.includes('content') || l.includes('update')) return 'updates';
   if (l.includes('creative') || l.includes('amplifi')) return 'amplifi';
   if (l.includes('train') || l.includes('learn')) return 'learning';
   if (l.includes('resource') || l.includes('protocol') || l.includes('repo')) return 'resources';
-  if (l.includes('insight') || l.includes('pulse')) return 'pulse';
   if (l.includes('connect') || l.includes('partner')) return 'connect';
-  if (l.includes('client') || l.includes('deliver')) return 'documents';
-  if (l.includes('ask') || l.includes('admin')) return 'ask';
+  if (l.includes('ask')) return 'ask';
   return 'grid';
 }
 

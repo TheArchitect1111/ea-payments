@@ -1,11 +1,11 @@
-import EANavigatorShell from './_components/EANavigatorShell';
+import AdminWorkspaceShell from './_components/AdminWorkspaceShell';
 import GuidedTour from './_components/GuidedTour';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
-    <EANavigatorShell>
+    <AdminWorkspaceShell>
       <GuidedTour />
       {children}
-    </EANavigatorShell>
+    </AdminWorkspaceShell>
   );
 }
