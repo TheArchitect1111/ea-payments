@@ -16,7 +16,7 @@ export const dynamic = 'force-dynamic';
 
 const OPPORTUNITY_PROMPTS = [
   { label: 'A new client', href: '/admin/factory/operational-mri' },
-  { label: 'A nonprofit', href: '/ctp-intake' },
+  { label: 'A nonprofit', href: '/consider/selena' },
   { label: 'A sports organization', href: '/admin/ea-factory/launches' },
   { label: 'A school', href: '/admin/ea-factory/launches' },
   { label: 'A conference', href: '/admin/ea-factory/launches' },

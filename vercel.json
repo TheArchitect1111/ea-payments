@@ -8,18 +8,23 @@
   ],
   "redirects": [
     {
-      "source": "/ctp",
-      "destination": "/ctp-intake",
-      "permanent": false
+      "source": "/ctp-intake",
+      "destination": "/consider/selena",
+      "permanent": true
     },
     {
-      "source": "/discover",
-      "destination": "/ctp-intake",
+      "source": "/ctp-intake/:path*",
+      "destination": "/consider/selena",
+      "permanent": true
+    },
+    {
+      "source": "/ctp",
+      "destination": "/consider/selena",
       "permanent": false
     },
     {
       "source": "/assessment",
-      "destination": "/ctp-intake",
+      "destination": "/consider/selena",
       "permanent": false
     },
     {

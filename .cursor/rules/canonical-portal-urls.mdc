@@ -1,41 +1,53 @@
 ---
-description: Canonical EA / CTP portal URLs — never chase www, cc, or LaunchPad links
+description: Canonical EA / CTP portal URLs — NEVER recommend quarantined paths
 alwaysApply: true
 ---
 
 # Canonical portal URLs (EA / CTP)
 
-## Production (ea-payments on Vercel)
+## QUARANTINED — never recommend, never link, never open as CTP
+
+| Status | URL |
+|--------|-----|
+| **QUARANTINED** | `https://efficiencyarchitects.online/ctp-intake` |
+| **QUARANTINED** | `https://efficiencyarchitects.online/ctp-intake/*` |
+| **QUARANTINED** | Any `/ctp-intake` path on ea-payments apex |
+
+This is the Discover wizard alias mislabeled as CTP. It is **not** Consider the Possibilities™ intake. Agents that suggest this URL are wrong. Production redirects it away.
+
+## Production — correct CTP surfaces
 
 | Purpose | URL |
 |---------|-----|
-| **Codex CTP “Consider the Possibilities™” intake (canonical)** | https://cc.efficiencyarchitects.online/ctp |
-| Same deploy | https://efficiency-architects.vercel.app/ctp |
-| Source | OneDrive `efficiency-architects` → `OperationalMRI.jsx` route `/ctp` |
-| Do NOT confuse with | `https://efficiencyarchitects.online/ctp-intake` (ea-payments Discover wizard — different product) |
+| **CTP Magnifi story entry (preferred public entry)** | https://efficiencyarchitects.online/consider/selena |
+| **Codex Operational MRI / CTP on CRA (when restored)** | https://cc.efficiencyarchitects.online/ctp |
+| Same CRA deploy (when restored) | https://efficiency-architects.vercel.app/ctp |
+| CRA source | nested `efficiency-architects/efficiency-architects` → `OperationalMRI.jsx` |
 | Legacy MRI quiz on CRA | https://cc.efficiencyarchitects.online/operational-mri |
-| **CTP Magnifi story entry** | https://efficiencyarchitects.online/consider/selena |
 | **Client portal login** | https://efficiencyarchitects.online/portal/login |
-| **EA portal home (new chrome)** | https://efficiencyarchitects.online/portal/ea |
+| **EA portal home** | https://efficiencyarchitects.online/portal/ea |
 | **Demo CTP workspace** | https://efficiencyarchitects.online/portal/demo-client/ctp |
-| **One-click demo session (preferred entry)** | https://efficiencyarchitects.online/api/auth/demo-enter |
+| **One-click demo session** | https://efficiencyarchitects.online/api/auth/demo-enter |
 
-Funnel: `/consider/{slug}` → CTA → `/ctp-intake` (Discover wizard) → thank-you → portal.  
-`/buy` is Website + Portal Starter — not CTP intake.
+Funnel: `/consider/{slug}` → portal CTP workspace after provision.  
+`/buy` is Website + Portal Starter — not CTP intake.  
+`/discover` is the Discover wizard product — **not** CTP branding; do not call it CTP.
 
-Also OK (same CTP app): `https://portal.efficiencyarchitects.online/...`
+Also OK (portal host): `https://portal.efficiencyarchitects.online/...`
 
 ## Wrong surfaces (do not treat as CTP)
 
 - `www.efficiencyarchitects.online` — often old Growth Portal / wrong Vercel project
-- `cc.efficiencyarchitects.online` — Command Center / old LaunchPad
+- `cc.efficiencyarchitects.online` root when it serves NextStepsPro LaunchPad (not EA CTP)
 - Next Steps Pro “Portal unavailable” LaunchPad — not this app
+- **`/ctp-intake` on efficiencyarchitects.online — QUARANTINED**
 
 ## Local
 
 - Login: http://localhost:3000/portal/login
 - Prefer password sign-in when `RESEND_API_KEY` / OTP is not wired
 - Do not use `/api/auth/demo-enter` locally if it redirects to production apex
+- `/ctp-intake` locally redirects to `/consider/selena` (quarantine)
 
 ## Local env needed for email OTP
 
