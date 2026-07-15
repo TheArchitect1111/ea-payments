@@ -97,10 +97,14 @@ export async function applyCtpDesignStudioInput(
     return { ok: false, error: 'Provide at least one brand field or asset.' };
   }
 
-  const organizationId = resolveCtpOrganizationId({
-    portalSlug: submission.portalSlug,
-    considerSlug: submission.considerSlug,
-  });
+  const organizationId =
+    (await resolveCtpOrganizationId({
+      portalSlug: submission.portalSlug,
+      considerSlug: submission.considerSlug,
+    })) ||
+    submission.portalSlug ||
+    submission.considerSlug ||
+    submission.id;
 
   const finalizedAssets = hasAssets
     ? await finalizeCtpAssetManifest(input.assets, organizationId)

@@ -577,6 +577,13 @@ export function listExperienceCatalog(): ExperienceCatalogEntry[] {
   return Object.values(EXPERIENCE_CATALOG);
 }
 
+/** Array form used by executive capability maps. */
+export const EXPERIENCE_REGISTRY: Array<ExperienceCatalogEntry & { capabilityId: string }> =
+  listExperienceCatalog().map((entry) => ({
+    ...entry,
+    capabilityId: entry.id,
+  }));
+
 export function getExperienceKind(id: ExperienceKindId): ExperienceCatalogEntry {
   return EXPERIENCE_CATALOG[id];
 }

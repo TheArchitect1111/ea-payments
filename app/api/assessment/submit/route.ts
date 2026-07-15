@@ -309,7 +309,11 @@ export async function POST(req: NextRequest) {
         priority: 'medium',
         href: '/admin/proposals',
         objectId: assessmentResult.recordId,
-        metadata: { email: input.email, proposalId, factoryOpportunity: input.factoryOpportunity },
+        metadata: {
+          email: input.email,
+          proposalId,
+          ...(input.factoryOpportunity ? { factoryOpportunity: input.factoryOpportunity } : {}),
+        },
       });
     } catch (err) {
       console.error('Pulse assessment.submitted failed:', err);
@@ -435,8 +439,10 @@ export async function POST(req: NextRequest) {
               assessmentId,
               ctpSubmissionId: ctpResult.submission.id,
               clientType: ctpClassification.clientType,
-              factoryOpportunity: input.factoryOpportunity,
               flow: 'ctp',
+              ...(input.factoryOpportunity
+                ? { factoryOpportunity: input.factoryOpportunity }
+                : {}),
             },
           });
           scheduleCtpIntakeAnalysis(ctpResult.submission.id);

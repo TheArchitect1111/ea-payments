@@ -186,15 +186,15 @@ export function buildOpsWelcomeEmail(model: CtpWelcomeEmailModel): {
 
     <p style="${section}">What Comes Next</p>
     <p style="${p}">There's nothing you need to figure out on your own. Open your workspace, take a look around, and continue when you're ready.</p>
-    <p style="${p}">With each step, the picture becomes clearer, the plan becomes more personalized, and your solution becomes more complete.</p>
-    <p style="margin:0;font-size:15px;color:#1A1A2E;line-height:1.75;">We're excited to see where this journey leads.</p>
+    <p style="${p}">With each step, the picture becomes clearer, the plan becomes more personal, and your path forward becomes easier to see.</p>
+    <p style="margin:0;font-size:15px;color:#1A1A2E;line-height:1.75;">We're glad you're here — and we're ready when you are.</p>
     <p style="margin:18px 0 0;font-size:13px;color:#555;">Questions? Reply to this email or reach us at <a href="mailto:${esc(model.supportEmail)}" style="color:#1B2B4D;">${esc(model.supportEmail)}</a>.</p>
   `;
 
   return {
     subject: `Welcome. Let's Explore What's Possible.`,
     title: `Welcome, ${model.firstName}`,
-    eyebrow: "Let's uncover what's holding your business back.",
+    eyebrow: "Let's explore what becomes possible from here.",
     ctaLabel: 'Open My Workspace',
     ctaUrl: workspaceUrl,
     bodyHtml,

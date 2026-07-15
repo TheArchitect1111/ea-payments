@@ -71,8 +71,9 @@ function buildCampaignStory(submission: CtpSubmission): string {
 
 export async function resolveCtpOrganizationId(input: {
   portalSlug?: string;
+  considerSlug?: string;
 }): Promise<string | null> {
-  const portalSlug = input.portalSlug?.trim();
+  const portalSlug = input.portalSlug?.trim() || input.considerSlug?.trim();
   if (!portalSlug) return null;
   const organization = await findOrganizationByPortalSlug(portalSlug);
   if (!organization || organization.status !== 'Active') return null;

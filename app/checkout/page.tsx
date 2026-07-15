@@ -213,13 +213,13 @@ export default function CheckoutPage() {
               disabled={offersLoading}
             >
               <option value="">
-                {offersLoading ? 'Loading packages…' : 'Select a package'}
+                {offersLoading ? 'Loading packages...' : 'Select a package'}
               </option>
               {subscriptionOffers.length > 0 && (
                 <optgroup label="Subscriptions">
                   {subscriptionOffers.map((plan) => (
                     <option key={plan.id} value={plan.id}>
-                      {plan.displayName} – {formatOfferPrice(plan)}
+                      {plan.displayName} - {formatOfferPrice(plan)}
                       {plan.trialDays > 0 ? ` (${plan.trialDays}-day trial)` : ''}
                     </option>
                   ))}
@@ -229,7 +229,7 @@ export default function CheckoutPage() {
                 <optgroup label="One-time">
                   {oneTimeOffers.map((product) => (
                     <option key={product.id} value={product.id}>
-                      {product.displayName} – {formatOfferPrice(product)}
+                      {product.displayName} - {formatOfferPrice(product)}
                     </option>
                   ))}
                 </optgroup>
