@@ -1,7 +1,7 @@
 /**
  * Send / defer CTP executive email with optional vanity portal CTA.
  */
-import { publicPortalUrl } from '@/lib/ctp-portal-host';
+import { primaryPortalHost, publicPortalUrl } from '@/lib/ctp-portal-host';
 import {
   getCtpSubmissionById,
   updateCtpSubmission,
@@ -9,8 +9,20 @@ import {
   type CtpSubmission,
 } from '@/lib/ctp-submissions';
 import { sendCtpExecutiveEmail, type CtpExecutiveEmailData } from '@/lib/email';
+import { ctpWelcomeEmailTrack, ctpWelcomeStudioPath } from '@/lib/ctp-welcome-email';
 
 export type { CtpExecutiveEmailDraft };
+
+/** Prefer vanity host in CTP welcome emails (matches approved copy). */
+function ctpEmailPortalUrl(slug: string, pathSuffix: string): string {
+  if (process.env.EA_PORTAL_EMAIL_HUB_URLS === '1') {
+    return publicPortalUrl(slug, pathSuffix);
+  }
+  const cleanSlug = slug.trim().replace(/^\/+|\/+$/g, '').toLowerCase();
+  const suffix = pathSuffix ? `/${pathSuffix.replace(/^\/+|\/+$/g, '')}` : '';
+  const host = primaryPortalHost();
+  return `https://${host}/${cleanSlug}${suffix}`;
+}
 
 export function buildCtpExecutiveEmailData(
   submission: CtpSubmission,
@@ -46,9 +58,11 @@ export function buildCtpExecutiveEmailData(
     return null;
   }
 
+  const track = ctpWelcomeEmailTrack(clientType);
+  const studioPath = ctpWelcomeStudioPath(track);
   const resolvedPortalUrl =
     portalUrl ||
-    (submission.portalSlug ? publicPortalUrl(submission.portalSlug, 'ctp') : undefined);
+    (submission.portalSlug ? ctpEmailPortalUrl(submission.portalSlug, studioPath) : undefined);
 
   return {
     email: submission.email,
