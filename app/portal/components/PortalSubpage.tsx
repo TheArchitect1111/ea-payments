@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import Link from 'next/link';
+import PortalCtpHelpDrawer from '@/app/portal/components/PortalCtpHelpDrawer';
 import { PortalShell, type EAPortalTab } from '@/lib/chassis/PortalShell';
 import { PortalModuleChromeStrip } from '@/lib/chassis/PortalChromeContext';
 import { resolvePortalWorkspaceChrome } from '@/lib/platform/portal-workspace';
@@ -36,6 +37,7 @@ export async function PortalSubpage({
           <Link href={`/portal/${slug}`}>← Back to {chrome.homeLabel}</Link>
         </p>
       </main>
+      {active === 'ctp' ? <PortalCtpHelpDrawer /> : null}
     </PortalShell>
   );
 }

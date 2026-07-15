@@ -9,6 +9,7 @@ import type { CtpAssetManifestEntry } from '@/lib/ctp-asset-store';
 type Props = {
   slug: string;
   designStudio: CtpDesignStudioItem[];
+  studioStatus?: string;
   initial?: {
     brand_colors?: string;
     brand_fonts?: string;
@@ -53,6 +54,7 @@ function draftTokenFor(slug: string): string {
 export default function PortalCtpDesignStudioForm({
   slug,
   designStudio,
+  studioStatus,
   initial,
 }: Props) {
   const router = useRouter();
@@ -67,8 +69,11 @@ export default function PortalCtpDesignStudioForm({
   const [assets, setAssets] = useState<Record<string, CtpAssetManifestEntry>>({});
   const [uploading, setUploading] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [completing, setCompleting] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const alreadyComplete =
+    studioStatus === 'Ready For Review' || studioStatus === 'Completed';
 
   const readyCount = useMemo(
     () => designStudio.filter((item) => item.status === 'ready').length,
@@ -130,6 +135,30 @@ export default function PortalCtpDesignStudioForm({
       setError('Network error. Try again.');
     } finally {
       setBusy(false);
+    }
+  }
+
+  async function markComplete() {
+    setCompleting(true);
+    setError('');
+    setSuccess('');
+    try {
+      const res = await fetch('/api/portal/ctp/studio', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'complete' }),
+      });
+      const data = (await res.json()) as { ok?: boolean; error?: string };
+      if (!res.ok || !data.ok) {
+        setError(data.error || 'Could not mark Design Studio complete.');
+        return;
+      }
+      setSuccess('Marked complete. Our team has been notified — you can still add more later.');
+      router.refresh();
+    } catch {
+      setError('Network error. Try again.');
+    } finally {
+      setCompleting(false);
     }
   }
 
@@ -310,7 +339,7 @@ export default function PortalCtpDesignStudioForm({
       <div style={{ marginTop: '1.25rem', display: 'flex', flexWrap: 'wrap', gap: '0.75rem', alignItems: 'center' }}>
         <button
           type="button"
-          disabled={busy || Boolean(uploading)}
+          disabled={busy || completing || Boolean(uploading)}
           onClick={() => void save()}
           style={{
             border: 'none',
@@ -322,15 +351,43 @@ export default function PortalCtpDesignStudioForm({
             textTransform: 'uppercase',
             backgroundColor: GOLD,
             color: NAVY,
-            opacity: busy || uploading ? 0.6 : 1,
-            cursor: busy || uploading ? 'not-allowed' : 'pointer',
+            opacity: busy || completing || uploading ? 0.6 : 1,
+            cursor: busy || completing || uploading ? 'not-allowed' : 'pointer',
           }}
         >
           {busy ? 'Saving…' : 'Save Design Studio'}
         </button>
+        <button
+          type="button"
+          disabled={busy || completing || Boolean(uploading) || alreadyComplete}
+          onClick={() => void markComplete()}
+          style={{
+            border: '1px solid rgba(255,255,255,0.35)',
+            borderRadius: '9999px',
+            padding: '0.75rem 1.35rem',
+            fontSize: '0.82rem',
+            fontWeight: 800,
+            letterSpacing: '0.08em',
+            textTransform: 'uppercase',
+            background: 'transparent',
+            color: '#fff',
+            opacity: busy || completing || uploading || alreadyComplete ? 0.55 : 1,
+            cursor:
+              busy || completing || uploading || alreadyComplete ? 'not-allowed' : 'pointer',
+          }}
+        >
+          {alreadyComplete
+            ? 'Ready for review'
+            : completing
+              ? 'Notifying…'
+              : 'Mark complete'}
+        </button>
         {error ? <p style={{ margin: 0, color: '#f5a8a8', fontSize: '0.85rem' }}>{error}</p> : null}
         {success ? <p style={{ margin: 0, color: '#b7e4c7', fontSize: '0.85rem' }}>{success}</p> : null}
       </div>
+      <p style={{ margin: '0.85rem 0 0', fontSize: '0.82rem', color: 'rgba(255,255,255,0.55)', lineHeight: 1.5 }}>
+        Save anytime. Mark complete when you want our team notified that you are ready for review.
+      </p>
     </section>
   );
 }

@@ -5,6 +5,8 @@ import { ctpClientTypeLabel } from '@/lib/ctp-client-type';
 import { buildCtpPortalStatusView } from '@/lib/ctp-portal-status';
 import type { CtpSubmission } from '@/lib/ctp-submissions';
 
+const PAYMENT_READY_STATUSES = new Set(['Approved', 'Sent']);
+
 export type CtpOverviewCard = {
   id: string;
   title: string;
@@ -12,6 +14,13 @@ export type CtpOverviewCard = {
   href: string;
   status: 'ready' | 'active' | 'pending';
   statusLabel: string;
+};
+
+export type CtpOverviewPayment = {
+  proposalId: string;
+  feeLabel: string;
+  projectLabel: string;
+  commitmentHref: string;
 };
 
 export type CtpOverviewView = {
@@ -27,9 +36,18 @@ export type CtpOverviewView = {
   digitalScore?: number;
   socialScore?: number;
   gbpScore?: number;
+  payment?: CtpOverviewPayment;
 };
 
-export function buildCtpOverviewView(submission: CtpSubmission, slug: string): CtpOverviewView {
+export function buildCtpOverviewView(
+  submission: CtpSubmission,
+  slug: string,
+  options?: {
+    proposalStatus?: string;
+    recommendedFee?: number;
+    projectTypeLabel?: string;
+  },
+): CtpOverviewView {
   const statusView = buildCtpPortalStatusView(submission);
   const clientTypeLabel = submission.clientType
     ? ctpClientTypeLabel(submission.clientType)
@@ -117,6 +135,20 @@ export function buildCtpOverviewView(submission: CtpSubmission, slug: string): C
     });
   }
 
+  const proposalStatus = options?.proposalStatus?.trim() ?? '';
+  const payment =
+    submission.proposalId && PAYMENT_READY_STATUSES.has(proposalStatus)
+      ? {
+          proposalId: submission.proposalId,
+          feeLabel:
+            typeof options?.recommendedFee === 'number' && options.recommendedFee > 0
+              ? `$${Math.round(options.recommendedFee).toLocaleString('en-US')}`
+              : 'Your investment',
+          projectLabel: options?.projectTypeLabel?.trim() || 'Your project',
+          commitmentHref: `/commitment/${encodeURIComponent(submission.proposalId)}`,
+        }
+      : undefined;
+
   return {
     businessName: submission.businessName,
     clientTypeLabel,
@@ -131,5 +163,6 @@ export function buildCtpOverviewView(submission: CtpSubmission, slug: string): C
     digitalScore: submission.digitalPresenceAudit?.overallScore,
     socialScore: submission.digitalPresenceAudit?.scores?.socialPresence,
     gbpScore: submission.digitalPresenceAudit?.scores?.googleBusinessProfile,
+    payment,
   };
 }
