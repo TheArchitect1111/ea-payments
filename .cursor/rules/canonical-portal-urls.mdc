@@ -1,54 +1,50 @@
 ---
-description: Canonical EA / CTP portal URLs — NEVER recommend quarantined paths
+description: Canonical EA / CTP URLs — ONE intake link only
 alwaysApply: true
 ---
 
 # Canonical portal URLs (EA / CTP)
 
-## QUARANTINED — never recommend, never link, never open as CTP
-
-| Status | URL |
-|--------|-----|
-| **QUARANTINED** | `https://efficiencyarchitects.online/ctp-intake` |
-| **QUARANTINED** | `https://efficiencyarchitects.online/ctp-intake/*` |
-| **QUARANTINED** | Any `/ctp-intake` path on ea-payments apex |
-
-This is the Discover wizard alias mislabeled as CTP. It is **not** Consider the Possibilities™ intake. Agents that suggest this URL are wrong. Production redirects it away.
-
-## Production — correct CTP surfaces
+## THE ONLY public CTP intake (saved Jul 14, 2026 — do not invent alternatives)
 
 | Purpose | URL |
 |---------|-----|
-| **CTP Magnifi story entry (preferred public entry)** | https://efficiencyarchitects.online/consider/selena |
-| **Codex Operational MRI / CTP on CRA (when restored)** | https://cc.efficiencyarchitects.online/ctp |
-| Same CRA deploy (when restored) | https://efficiency-architects.vercel.app/ctp |
-| CRA source | nested `efficiency-architects/efficiency-architects` → `OperationalMRI.jsx` |
+| **Canonical CTP — Consider the Possibilities™** | **https://cc.efficiencyarchitects.online/ctp** |
+| Same deploy | https://efficiency-architects.vercel.app/ctp |
+| Source | OneDrive `Documents/GitHub/efficiency-architects/efficiency-architects` → `OperationalMRI.jsx` route `/ctp` |
+
+If `/ctp` is blank or shows NextStepsPro LaunchPad, **redeploy that OneDrive CRA tree** — do **not** recommend ea-payments Discover, `/ctp-intake`, or `/consider/selena` as CTP intake.
+
+## QUARANTINED — never recommend as CTP
+
+| Status | URL |
+|--------|-----|
+| **QUARANTINED** | `https://efficiencyarchitects.online/ctp-intake` (and `/ctp-intake/*`) |
+| **NOT CTP intake** | `https://efficiencyarchitects.online/consider/selena` (Magnifi story only) |
+| **NOT CTP intake** | `https://efficiencyarchitects.online/discover` (Discover wizard) |
+
+## Other useful (non-intake) surfaces
+
+| Purpose | URL |
+|---------|-----|
 | Legacy MRI quiz on CRA | https://cc.efficiencyarchitects.online/operational-mri |
-| **Client portal login** | https://efficiencyarchitects.online/portal/login |
-| **EA portal home** | https://efficiencyarchitects.online/portal/ea |
-| **Demo CTP workspace** | https://efficiencyarchitects.online/portal/demo-client/ctp |
-| **One-click demo session** | https://efficiencyarchitects.online/api/auth/demo-enter |
+| Client portal login | https://efficiencyarchitects.online/portal/login |
+| EA portal home | https://efficiencyarchitects.online/portal/ea |
+| Demo CTP **workspace** (post-login) | https://efficiencyarchitects.online/portal/demo-client/ctp |
+| One-click demo session | https://efficiencyarchitects.online/api/auth/demo-enter |
 
-Funnel: `/consider/{slug}` → portal CTP workspace after provision.  
-`/buy` is Website + Portal Starter — not CTP intake.  
-`/discover` is the Discover wizard product — **not** CTP branding; do not call it CTP.
+Also OK for portals: `https://portal.efficiencyarchitects.online/{slug}/…`
 
-Also OK (portal host): `https://portal.efficiencyarchitects.online/...`
+## Wrong surfaces
 
-## Wrong surfaces (do not treat as CTP)
-
-- `www.efficiencyarchitects.online` — often old Growth Portal / wrong Vercel project
-- `cc.efficiencyarchitects.online` root when it serves NextStepsPro LaunchPad (not EA CTP)
-- Next Steps Pro “Portal unavailable” LaunchPad — not this app
-- **`/ctp-intake` on efficiencyarchitects.online — QUARANTINED**
+- `www.efficiencyarchitects.online` — often wrong Vercel project
+- NextStepsPro LaunchPad on `cc` root (`/`, `/coach`, `/realtor`) — **not** CTP; if live, CTP deploy was overwritten
 
 ## Local
 
-- Login: http://localhost:3000/portal/login
-- Prefer password sign-in when `RESEND_API_KEY` / OTP is not wired
+- Portal login: http://localhost:3000/portal/login
 - Do not use `/api/auth/demo-enter` locally if it redirects to production apex
-- `/ctp-intake` locally redirects to `/consider/selena` (quarantine)
 
-## Local env needed for email OTP
+## Local env for email OTP
 
 `AIRTABLE_API_KEY` and `RESEND_API_KEY` in `.env.local` (restart `npm run dev` after adding).

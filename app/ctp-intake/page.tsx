@@ -1,10 +1,12 @@
 import { redirect } from 'next/navigation';
 
+/** Canonical CTP intake (saved Jul 14): CRA OperationalMRI on /ctp */
+const CANONICAL_CTP = 'https://cc.efficiencyarchitects.online/ctp';
+
 /**
  * QUARANTINED — Do not restore as CTP.
- * This path was the Discover wizard mislabeled as Consider the Possibilities™.
- * Canonical public CTP entry: /consider/selena
+ * Discover wizard mislabeled as Consider the Possibilities™.
  */
 export default function QuarantinedCtpIntakePage() {
-  redirect('/consider/selena');
+  redirect(CANONICAL_CTP);
 }

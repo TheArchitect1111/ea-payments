@@ -9,22 +9,22 @@
   "redirects": [
     {
       "source": "/ctp-intake",
-      "destination": "/consider/selena",
+      "destination": "https://cc.efficiencyarchitects.online/ctp",
       "permanent": true
     },
     {
       "source": "/ctp-intake/:path*",
-      "destination": "/consider/selena",
+      "destination": "https://cc.efficiencyarchitects.online/ctp",
       "permanent": true
     },
     {
       "source": "/ctp",
-      "destination": "/consider/selena",
+      "destination": "https://cc.efficiencyarchitects.online/ctp",
       "permanent": false
     },
     {
       "source": "/assessment",
-      "destination": "/consider/selena",
+      "destination": "https://cc.efficiencyarchitects.online/ctp",
       "permanent": false
     },
     {
