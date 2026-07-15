@@ -1,9 +1,8 @@
 import { expect, test } from '@playwright/test';
 
-test('homepage routes to CTP consider entry (ctp-intake quarantined)', async ({ page }) => {
+test('homepage routes to canonical CTP on cc', async ({ page }) => {
   await page.goto('/');
-  await expect(page).toHaveURL(/\/consider\/selena/);
-  await expect(page.locator('body')).not.toBeEmpty();
+  await expect(page).toHaveURL(/cc\.efficiencyarchitects\.online\/ctp/);
 });
 
 test('consider selena demo story is reachable', async ({ page }) => {
@@ -12,14 +11,14 @@ test('consider selena demo story is reachable', async ({ page }) => {
   await expect(page.locator('body')).not.toBeEmpty();
 });
 
-test('quarantined ctp-intake redirects to consider entry', async ({ page }) => {
+test('quarantined ctp-intake redirects to canonical CTP', async ({ page }) => {
   await page.goto('/ctp-intake');
-  await expect(page).toHaveURL(/\/consider\/selena/);
+  await expect(page).toHaveURL(/cc\.efficiencyarchitects\.online\/ctp/);
 });
 
-test('assessment aliases consider entry (ctp-intake quarantined)', async ({ page }) => {
+test('assessment aliases canonical CTP', async ({ page }) => {
   await page.goto('/assessment');
-  await expect(page).toHaveURL(/\/consider\/selena/);
+  await expect(page).toHaveURL(/cc\.efficiencyarchitects\.online\/ctp/);
 });
 
 test('admin dashboard route prompts auth', async ({ page }) => {
