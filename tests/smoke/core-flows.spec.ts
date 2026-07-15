@@ -1,14 +1,9 @@
 import { expect, test } from '@playwright/test';
 
-test('homepage routes to discovery intake', async ({ page }) => {
+test('homepage routes to CTP consider entry (ctp-intake quarantined)', async ({ page }) => {
   await page.goto('/');
-  await expect(page).toHaveURL(/\/ctp-intake|\/discover/);
-  await expect(
-    page.getByRole('heading', {
-      name: /let's discover the possibilities/i,
-    }),
-  ).toBeVisible({ timeout: 15_000 });
-  await expect(page.getByText(/ea guide is available/i)).toBeVisible();
+  await expect(page).toHaveURL(/\/consider\/selena/);
+  await expect(page.locator('body')).not.toBeEmpty();
 });
 
 test('consider selena demo story is reachable', async ({ page }) => {
@@ -17,15 +12,14 @@ test('consider selena demo story is reachable', async ({ page }) => {
   await expect(page.locator('body')).not.toBeEmpty();
 });
 
-test('assessment aliases discovery intake', async ({ page }) => {
+test('quarantined ctp-intake redirects to consider entry', async ({ page }) => {
+  await page.goto('/ctp-intake');
+  await expect(page).toHaveURL(/\/consider\/selena/);
+});
+
+test('assessment aliases consider entry (ctp-intake quarantined)', async ({ page }) => {
   await page.goto('/assessment');
-  await expect(page).toHaveURL(/\/ctp-intake|\/discover/);
-  await expect(
-    page.getByRole('heading', {
-      name: /let's discover the possibilities/i,
-    }),
-  ).toBeVisible({ timeout: 15_000 });
-  await expect(page.getByText(/ea guide is available/i)).toBeVisible();
+  await expect(page).toHaveURL(/\/consider\/selena/);
 });
 
 test('admin dashboard route prompts auth', async ({ page }) => {

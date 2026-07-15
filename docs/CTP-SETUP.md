@@ -83,7 +83,7 @@ curl https://ea-payments.vercel.app/api/health/launch | jq '.checks.airtableSche
 
 `verify:deploy` includes `test:ctp:spine` before Playwright smoke.
 
-Complete a Discover submission at `/ctp-intake` — confirm a row appears in **CTP Submissions** with `Payload JSON` containing discovery answers.
+Complete a Consider → portal CTP flow (not `/ctp-intake` — quarantined). Confirm a row appears in **CTP Submissions** with `Payload JSON` containing discovery answers.
 
 ## Architecture
 

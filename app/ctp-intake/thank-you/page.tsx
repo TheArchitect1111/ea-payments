@@ -1,3 +1,6 @@
-import DiscoverThankYouPage from '@/app/discover/thank-you/page';
+import { redirect } from 'next/navigation';
 
-export default DiscoverThankYouPage;
+/** QUARANTINED thank-you — see /ctp-intake page. */
+export default function QuarantinedCtpIntakeThankYouPage() {
+  redirect('/consider/selena');
+}

@@ -11,7 +11,9 @@
 CTP is the guided discovery funnel in the EA Intelligence OS:
 
 ```
-Magnifi/Consider share → /consider/{slug} → /ctp-intake (Discover wizard)
+Magnifi/Consider share → /consider/{slug} → portal CTP workspace after provision
+
+> **QUARANTINED:** `/ctp-intake` on efficiencyarchitects.online is not CTP. Do not document or link it as intake.
   → POST /api/assessment/submit → Assessments + Proposals + CTP Submissions
   → Pulse (assessment.submitted + ctp.submitted) → Mission Control attention
 ```
@@ -131,7 +133,7 @@ Mission Control
 - [ ] Mission Control CTP attention items when statuses set
 - [ ] Opportunity Graph links CTP events
 - [ ] Consider slug tracking still works
-- [ ] `/ctp-intake/thank-you` matches discover thank-you
+- [ ] `/ctp-intake` is quarantined (308/redirect to `/consider/selena`)
 
 ---
 

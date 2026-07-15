@@ -517,7 +517,7 @@ export const EXPERIENCE_CATALOG: Record<ExperienceKindId, ExperienceCatalogEntry
     magnifiTemplateIds: ALL_MAGNIFI_TEMPLATE_IDS,
     phases: {
       discover: { label: 'Consider share', route: '/consider/{slug}' },
-      engage: { label: 'CTP Discover', route: '/ctp-intake' },
+      engage: { label: 'CTP Consider', route: '/consider/selena' },
       convert: { label: 'Assessment submit', route: '/api/assessment/submit' },
       prepare: { label: 'Workspace provision', route: '/api/ctp/submissions/{id}/provision-workspace' },
       experience: { label: 'Portal CTP status', route: '/portal/{slug}/ctp', moduleId: 'ctp' },

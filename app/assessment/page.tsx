@@ -1,5 +1,5 @@
 ﻿import { redirect } from 'next/navigation';
 
-export default function AssessmentRedirectPage() {
-  redirect('/ctp-intake');
+export default function AssessmentPage() {
+  redirect('/consider/selena');
 }
