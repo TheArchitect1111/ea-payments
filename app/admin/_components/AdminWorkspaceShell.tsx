@@ -2,10 +2,13 @@ import type { ReactNode } from 'react';
 import { PortalLayout } from '@/lib/chassis/PortalLayout';
 import { resolveAdminWorkspaceChrome } from '@/lib/platform/admin-workspace-chrome';
 import { getAdminPageUser } from '@/lib/admin-page-auth';
+import AdminChromeTools from './AdminChromeTools';
+import AdminShellGate from './AdminShellGate';
 import '@/app/portal/[slug]/ea-portal.css';
 
 /**
  * Same TailAdmin portal chrome as client portals — wraps authenticated /admin.
+ * Command bar / voice / navigator live in AdminChromeTools above page content.
  */
 export default async function AdminWorkspaceShell({ children }: { children: ReactNode }) {
   const chrome = resolveAdminWorkspaceChrome();
@@ -13,7 +16,7 @@ export default async function AdminWorkspaceShell({ children }: { children: Reac
   const firstName =
     user?.name?.split(' ')[0] || user?.email?.split('@')[0] || 'Admin';
 
-  return (
+  const shell = (
     <PortalLayout
       slug="ea"
       firstName={firstName}
@@ -33,7 +36,12 @@ export default async function AdminWorkspaceShell({ children }: { children: Reac
       homeLabel={chrome.homeLabel}
       logoutHref="/api/admin/logout"
     >
+      <AdminChromeTools />
       {children}
     </PortalLayout>
+  );
+
+  return (
+    <AdminShellGate chrome={shell}>{children}</AdminShellGate>
   );
 }

@@ -2,17 +2,20 @@ export type OperatingMode = 'executive' | 'builder';
 
 export const EA_OPERATING_MODE_KEY = 'ea_operating_mode';
 
+/** Mission Control / executive OS operate nav (TailAdmin sidebar). */
 export const EXECUTIVE_NAV = [
   { href: '/admin/master', label: 'Home' },
+  { href: '/admin/decisions', label: 'Decisions' },
+  { href: '/admin/organizations', label: 'Organizations' },
+  { href: '/admin/operations', label: 'Operations' },
+  { href: '/admin/products', label: 'Products' },
+  { href: '/admin/intelligence', label: 'Intelligence' },
+  { href: '/admin/factory', label: 'Factory' },
+  { href: '/admin/search', label: 'Search' },
+  { href: '/admin/atlas', label: 'Atlas' },
   { href: '/admin/delivery', label: 'Clients' },
-  { href: '/admin/ea-factory/new-experience', label: 'Build' },
-  { href: '/admin/simplifi', label: 'Opportunities' },
   { href: '/admin/content-requests', label: 'Content' },
-  { href: '/admin/creative-studio', label: 'Creative Studio' },
-  { href: '/admin/ea-factory/training-transformations', label: 'Training' },
-  { href: '/admin/foundation-library', label: 'Resources' },
-  { href: '/admin/capability-marketplace', label: 'Agents' },
-  { href: '/admin/resource-radar', label: 'Insights' },
+  { href: '/admin/simplifi', label: 'Opportunities' },
   { href: '/admin/dashboard', label: 'Administration' },
 ] as const;
 
