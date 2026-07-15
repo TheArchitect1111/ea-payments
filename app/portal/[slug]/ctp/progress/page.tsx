@@ -316,6 +316,7 @@ export default async function PortalCtpStatusPage({
       <PortalCtpDesignStudioForm
         slug={slug}
         designStudio={view.designStudio}
+        studioStatus={view.studioStatus}
         initial={view.designStudioFields}
       />
 

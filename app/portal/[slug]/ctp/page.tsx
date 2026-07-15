@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { GOLD, NAVY } from '@/lib/design-system';
+import { getProposalByProposalId } from '@/lib/airtable';
 import { requirePortalModule } from '@/lib/modules/portal-modules';
 import { PortalSubpage } from '@/app/portal/components/PortalSubpage';
 import { buildCtpOverviewView } from '@/lib/ctp-overview-view';
@@ -25,7 +26,15 @@ export default async function PortalCtpOverviewPage({
     redirect(`/portal/${slug}`);
   }
 
-  const view = buildCtpOverviewView(submission, slug);
+  const proposal = submission.proposalId
+    ? await getProposalByProposalId(submission.proposalId)
+    : null;
+
+  const view = buildCtpOverviewView(submission, slug, {
+    proposalStatus: proposal?.status,
+    recommendedFee: proposal?.recommendedFee,
+    projectTypeLabel: proposal?.projectTypeLabel,
+  });
 
   return (
     <PortalSubpage
@@ -35,6 +44,43 @@ export default async function PortalCtpOverviewPage({
       title="Overview"
       lede="Your transformation workspace — progress, intelligence, recommendations, documents, scheduling, and support in one place."
     >
+      {view.payment ? (
+        <div
+          className="ep-module-card"
+          style={{
+            marginBottom: '1.25rem',
+            borderColor: 'rgba(216,173,61,0.45)',
+            background: 'linear-gradient(135deg, rgba(216,173,61,0.12), rgba(255,255,255,0.03))',
+          }}
+        >
+          <p
+            style={{
+              margin: '0 0 0.35rem',
+              fontSize: '0.7rem',
+              fontWeight: 800,
+              letterSpacing: '0.14em',
+              textTransform: 'uppercase',
+              color: GOLD,
+            }}
+          >
+            Ready to commit
+          </p>
+          <h2 style={{ margin: '0 0 0.5rem', fontSize: '1.25rem', fontWeight: 800, color: '#fff' }}>
+            Pay for {view.payment.projectLabel}
+          </h2>
+          <p style={{ margin: '0 0 1rem', fontSize: '0.95rem', lineHeight: 1.65, color: 'rgba(255,255,255,0.72)' }}>
+            Your proposal is approved. Secure checkout is ready — {view.payment.feeLabel}.
+          </p>
+          <Link
+            href={view.payment.commitmentHref}
+            className="inline-block rounded-full px-6 py-3 text-sm font-bold"
+            style={{ backgroundColor: GOLD, color: NAVY }}
+          >
+            Pay now
+          </Link>
+        </div>
+      ) : null}
+
       <div className="ep-module-card" style={{ marginBottom: '1.25rem' }}>
         <p className="ep-module-card-note" style={{ marginBottom: '0.35rem' }}>
           {view.businessName}

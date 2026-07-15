@@ -33,6 +33,7 @@ export type PulseEventType =
   | 'ctp.studio.started'
   | 'ctp.studio.ready'
   | 'ctp.studio.input'
+  | 'ctp.studio.complete'
   | 'ctp.production.ready'
   | 'ctp.bi.ready'
   | 'ctp.digital.audit'

@@ -156,3 +156,73 @@ export async function applyCtpDesignStudioInput(
 
   return { ok: true, submission: updated.submission };
 }
+
+/**
+ * Client marks Design Studio complete → Pulse + founder email so Brick
+ * does not need to poll the portal.
+ */
+export async function completeCtpDesignStudio(
+  submissionId: string,
+): Promise<{ ok: boolean; submission?: CtpSubmission; error?: string }> {
+  const submission = await getCtpSubmissionById(submissionId);
+  if (!submission) {
+    return { ok: false, error: 'CTP submission not found.' };
+  }
+
+  if (submission.status === 'Completed') {
+    return { ok: false, error: 'Design Studio is locked after reveal.' };
+  }
+
+  const updated = await updateCtpSubmission(submissionId, {
+    studioStatus: 'Ready For Review',
+  });
+
+  if (!updated.ok || !updated.submission) {
+    return { ok: false, error: updated.error ?? 'Could not mark Design Studio complete.' };
+  }
+
+  const portalPath = submission.portalSlug
+    ? `/portal/${submission.portalSlug}/ctp/progress`
+    : '/admin/ctp';
+  const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL ?? 'https://efficiencyarchitects.online').replace(
+    /\/$/,
+    '',
+  );
+
+  await emitPulseEvent({
+    product: 'ea-platform',
+    type: 'ctp.studio.complete',
+    title: `Design Studio complete — ${submission.businessName}`,
+    detail: `${submission.contactName} · ${submission.email} marked inputs ready for review`,
+    priority: 'high',
+    href: '/admin/ctp',
+    tenantId: submission.considerSlug ?? submission.portalSlug,
+    objectId: submission.id,
+    metadata: {
+      ctpSubmissionId: submission.id,
+      portalSlug: submission.portalSlug ?? '',
+      businessName: submission.businessName,
+    },
+  });
+
+  try {
+    const { sendInternalNotification } = await import('@/lib/email');
+    await sendInternalNotification({
+      subject: `Design Studio ready — ${submission.businessName}`,
+      title: 'CTP Design Studio complete',
+      body: [
+        `${submission.contactName} (${submission.email}) marked Design Studio complete for ${submission.businessName}.`,
+        '',
+        `Portal: ${baseUrl}${portalPath}`,
+        `Admin: ${baseUrl}/admin/ctp`,
+        submission.proposalId ? `Proposal: ${submission.proposalId}` : null,
+      ]
+        .filter(Boolean)
+        .join('\n'),
+    });
+  } catch (err) {
+    console.error('completeCtpDesignStudio: founder notification failed', err);
+  }
+
+  return { ok: true, submission: updated.submission };
+}
