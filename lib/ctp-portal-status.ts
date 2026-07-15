@@ -159,7 +159,7 @@ function buildTimeline(submission: CtpSubmission, assets: CtpAdminAssetView[]): 
     reportDone
       ? submission.executiveSnapshot
         ? `Executive Snapshot ready — maturity ${submission.executiveSnapshot.operationalMaturity}/100.`
-        : 'Your executive brief and proposal blueprint are ready.'
+        : 'Your project overview and proposal blueprint are ready.'
       : 'Executive brief will appear after analysis completes.',
   );
 

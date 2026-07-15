@@ -56,7 +56,7 @@ export function buildCtpRevealView(input: {
     trackLabel ? `${trackLabel} path is unlocked` : 'Your training and next steps are prepared',
     ctp?.executiveSnapshot
       ? `Executive Snapshot complete — maturity ${ctp.executiveSnapshot.operationalMaturity}/100`
-      : 'Your executive brief and progress workspace are available',
+      : 'Your project overview and progress workspace are available',
     ...(ctp?.productionPackage?.artifacts.slice(0, 2).map((a) => a.title) ?? []),
   ].slice(0, 6);
 

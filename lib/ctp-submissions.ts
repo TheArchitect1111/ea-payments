@@ -268,6 +268,7 @@ export async function createCtpSubmission(input: {
   email: string;
   assessmentId: string;
   proposalId: string;
+  factoryOpportunity?: string;
   considerSlug?: string;
   partnerSlug?: string;
   discoveryVersion?: string;

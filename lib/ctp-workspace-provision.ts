@@ -188,17 +188,13 @@ export async function runCtpWorkspaceProvision(
       // over hub /portal/login links from createPortalAccess.
       const portalUrl = publicPortalUrl(slug, 'ctp');
       const loginUrl = portalLoginUrl();
-      const track =
-        submission.clientTypeClassification?.label ||
-        submission.clientType ||
-        'discovery';
       await sendWelcomeEmail({
         clientName: submission.contactName,
         email: submission.email,
         packageName: CTP_WELCOME_PACKAGE,
         portalLoginUrl: loginUrl,
         tempCredentials,
-        nextSteps: `Your ${track} workspace is live at ${portalUrl}. Sign in at ${loginUrl}, then open your Consider the Possibilities overview to review the executive brief and book a strategy session when ready.`,
+        nextSteps: `Your workspace is ready at ${portalUrl}. Sign in at ${loginUrl}, then open Consider the Possibilities to see what we found and continue at your own pace.`,
       });
     } catch (err) {
       console.error('[ctp-workspace-provision] welcome email failed:', err);

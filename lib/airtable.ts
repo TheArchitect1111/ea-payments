@@ -1531,6 +1531,8 @@ export interface ClientRecordSummary {
   packagePurchased: string;
   createdTime?: string;
   paymentReceivedAt?: string;
+  paymentDate?: string;
+  portalSlug?: string;
   lifecycleStage?: string;
   discoveryStatus?: string;
   buildStatus?: string;
@@ -1580,6 +1582,8 @@ export async function getAllClientRecords(): Promise<ClientRecordSummary[]> {
           packagePurchased: (r.fields['Package Purchased'] as string) ?? '',
           createdTime: r.createdTime || undefined,
           paymentReceivedAt: (r.fields['Payment Received At'] as string) || undefined,
+          paymentDate: (r.fields['Payment Date'] as string) || undefined,
+          portalSlug: (r.fields['PortalSlug'] as string) || (r.fields['Portal Slug'] as string) || undefined,
           lifecycleStage: lifecycle.lifecycleStage,
           discoveryStatus: lifecycle.discoveryStatus,
           buildStatus: lifecycle.buildStatus,

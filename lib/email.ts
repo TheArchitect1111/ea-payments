@@ -1454,6 +1454,9 @@ export async function sendCtpExecutiveEmail(
   const investmentLow = data.investmentLow ?? Math.round(data.recommendedFee * 0.9);
   const investmentHigh = data.investmentHigh ?? Math.round(data.recommendedFee * 1.15);
   const track = ctpWelcomeEmailTrack(data.clientType);
+  const { publicPortalLoginUrl } = await import('@/lib/ctp-portal-host');
+  // Always send people into the branded portal experience — never a bare proposal "brief".
+  const guidedPortalUrl = data.portalUrl || publicPortalLoginUrl();
   const model = {
     firstName,
     businessName: data.businessName,
@@ -1469,7 +1472,7 @@ export async function sendCtpExecutiveEmail(
     investmentLow,
     investmentHigh,
     scopePhases: data.scopePhases,
-    portalUrl: data.portalUrl,
+    portalUrl: guidedPortalUrl,
     proposalUrl,
     supportEmail,
     includesPortal: data.clientType === 'website_portal' || data.clientType === 'portal_only',

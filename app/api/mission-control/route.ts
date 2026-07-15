@@ -1,19 +1,12 @@
 import { cookies } from 'next/headers';
 import { verifyAdminSession, EA_ADMIN_COOKIE, parseAdminSession } from '@/lib/ea-admin-auth';
-import { buildAttentionItems } from '@/lib/pulse-attention';
-import { listRecentPulseEvents } from '@/lib/pulse-bus';
-import { buildEAMissionControl, parseMissionControlRole } from '@/lib/mission-control-data';
-import { listEAActivityEvents } from '@/lib/ea-activity-events';
-import {
-  getProposalsWithAssessments,
-  getAllClientRecords,
-  getAllContentRequests,
-} from '@/lib/airtable';
-import { getCaptures } from '@/lib/capture-records';
-import { isCaptureApiKeyConfigured } from '@/lib/capture-api-key';
-import { getCtpAttentionStats } from '@/lib/ctp-attention-stats';
+import { buildMissionControlPayload } from '@/lib/mission-control-data';
 
 export const dynamic = 'force-dynamic';
+
+function parseMissionControlRole(raw: string | null): 'executive' | 'builder' {
+  return raw === 'builder' ? 'builder' : 'executive';
+}
 
 export async function GET(req: Request) {
   const cookieStore = await cookies();
@@ -24,48 +17,11 @@ export async function GET(req: Request) {
 
   const { searchParams } = new URL(req.url);
   const role = parseMissionControlRole(searchParams.get('mode'));
-
   const user = parseAdminSession(token);
-  const [proposals, clientRecords, contentRequests, captures, activityEvents, ctpStats] =
-    await Promise.all([
-      getProposalsWithAssessments(),
-      getAllClientRecords(),
-      getAllContentRequests(),
-      getCaptures(20),
-      listEAActivityEvents(40),
-      getCtpAttentionStats(),
-    ]);
 
-  const proposalsPendingReview = proposals.filter((p) => p.status === 'Pending Review').length;
-  const clientsStuckOnboarding = clientRecords.filter(
-    (c) => c.onboardingStatus === 'In Progress' && c.createdTime,
-  ).length;
-
-  const attentionItems = buildAttentionItems({
-    captures,
-    contentRequests,
-    proposalsPendingReview,
-    onboardingWebhooksMissing:
-      !process.env.ONBOARDING_WEBHOOK_URL?.trim() || !process.env.ESIGN_WEBHOOK_URL?.trim(),
-    captureApiKeyMissing: !isCaptureApiKeyConfigured(),
-    cprAthleteCount: 0,
-    cprActiveCount: 0,
-    brotherHubMembers: 0,
-    sisterHubMembers: 0,
-    clientsStuckOnboarding,
-    ctpWorkspacesPending: ctpStats.workspacesPending,
-    ctpStudiosInProgress: ctpStats.studiosInProgress,
-    ctpStudiosReadyForReview: ctpStats.studiosReadyForReview,
-    ctpReviewsScheduled: ctpStats.reviewsScheduled,
-    ctpExecutiveEmailsPending: ctpStats.executiveEmailsPending,
-  });
-
-  const mission = buildEAMissionControl({
-    attentionItems,
-    pulseEvents: listRecentPulseEvents(30),
-    activityEvents,
-    userName: user?.name?.split(' ')[0] ?? user?.email?.split('@')[0],
+  const mission = await buildMissionControlPayload({
     role,
+    userName: user?.name?.split(' ')[0] ?? user?.email?.split('@')[0] ?? 'there',
   });
 
   let platformGuardian: { opsScore: number; ok: boolean; summary: string } | undefined;

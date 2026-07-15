@@ -43,11 +43,12 @@ assert(brief.includes('buildCtpExecutiveBrief'), 'Missing buildCtpExecutiveBrief
 assert(brief.includes('executiveSummary'), 'Brief must include executiveSummary');
 assert(brief.includes('Investment guidance'), 'Brief must include investment guidance');
 assert(email.includes('sendCtpExecutiveEmail'), 'Missing sendCtpExecutiveEmail');
-assert(email.includes('Schedule Executive Strategy Session'), 'Email must include schedule CTA');
-assert(email.includes('View My Personalized Portal'), 'Email must include portal CTA copy');
-assert(email.includes('Executive Brief'), 'Email title should be Executive Brief');
+assert(email.includes('ctp-welcome-email') || email.includes('buildOpsWelcomeEmail'), 'Email must use welcome builders');
+assert(email.includes('Open My Workspace') || email.includes('premium: true'), 'Welcome email path must be wired');
+assert(!email.includes('View My Executive Brief'), 'Must not use Executive Brief CTA label');
+assert(!email.includes('Schedule Executive Strategy Session'), 'Must not use consultant strategy-session CTA');
 assert(send.includes('sendCtpExecutiveEmailForSubmission'), 'Missing send helper');
-assert(send.includes('publicPortalUrl'), 'Send helper must resolve vanity portal URL');
+assert(send.includes('publicPortalUrl') || send.includes('ctpEmailPortalUrl'), 'Send helper must resolve branded portal URL');
 assert(send.includes('executiveEmailDraft'), 'Send helper must use email draft');
 assert(submissions.includes('executiveEmailDraft'), 'Submission must persist email draft');
 assert(submissions.includes('executiveEmailSentAt'), 'Submission must track email sent timestamp');
@@ -63,12 +64,13 @@ assert(
   'Provision must send deferred executive email',
 );
 assert(
-  provision.includes("publicPortalUrl(portalSlug, 'ctp')"),
-  'Provision must attach vanity CTP portalUrl',
+  provision.includes("publicPortalUrl(portalSlug, 'ctp')") ||
+    provision.includes("publicPortalUrl(slug, 'ctp')"),
+  'Provision must attach branded CTP portalUrl',
 );
 assert(
-  provision.includes('executive brief') || provision.includes('Executive Strategy Session'),
-  'Portal-ready welcome should point to executive brief / strategy session',
+  !provision.toLowerCase().includes('executive brief'),
+  'Portal-ready welcome must not say executive brief',
 );
 
 if (failures.length) {
