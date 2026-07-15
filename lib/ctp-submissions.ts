@@ -51,6 +51,12 @@ export type CtpExecutiveEmailDraft = {
   recommendedFee: number;
   recommendations?: unknown;
   operationalChallenges?: string[];
+  /** Prefer journey investment range from CTP when present. */
+  investmentLow?: number;
+  investmentHigh?: number;
+  timelineLabel?: string;
+  /** Plain-language project scope bullets from the journey assignment. */
+  scopePhases?: string[];
 };
 
 export type CtpSubmission = {

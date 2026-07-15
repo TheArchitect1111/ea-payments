@@ -44,6 +44,10 @@ export function buildCtpExecutiveEmailData(
     draft?.recommendedFee ??
     snap?.scope.investmentHigh ??
     snap?.scope.investmentLow;
+  const investmentLow = draft?.investmentLow ?? snap?.scope.investmentLow;
+  const investmentHigh = draft?.investmentHigh ?? snap?.scope.investmentHigh;
+  const timelineLabel = draft?.timelineLabel ?? snap?.scope.timelineLabel;
+  const scopePhases = draft?.scopePhases;
 
   if (
     capacityScore == null ||
@@ -78,6 +82,10 @@ export function buildCtpExecutiveEmailData(
     opportunityHigh,
     projectTypeLabel,
     recommendedFee,
+    investmentLow,
+    investmentHigh,
+    timelineLabel,
+    scopePhases,
     recommendations: draft?.recommendations ?? submission.recommendations,
     operationalChallenges: draft?.operationalChallenges,
     digitalPresenceAudit: submission.digitalPresenceAudit,

@@ -27,7 +27,7 @@ import {
   scheduleCtpDigitalPresenceAudit,
 } from '@/lib/ctp-digital-presence-run';
 import { auditDigitalPresence, type DigitalPresenceAudit } from '@/lib/ctp-digital-presence';
-import { classifyCtpClientType } from '@/lib/ctp-client-type';
+import { classifyCtpClientType, parseInvestmentRangeLabel } from '@/lib/ctp-client-type';
 import { buildDiscoveryRecommendations, type DiscoveryAnswers } from '@/lib/discovery-engine';
 import { runCtpExecutiveSnapshot } from '@/lib/ctp-executive-snapshot-run';
 import type { CtpExecutiveScore } from '@/lib/ctp-executive-scoring';
@@ -165,6 +165,12 @@ export async function POST(req: NextRequest) {
           : undefined,
       desiredExperiences: Array.isArray(body.desiredExperiences)
         ? (body.desiredExperiences as string[])
+        : undefined,
+      journeyKey: String(body.journeyKey ?? '').trim() || undefined,
+      primaryJourney: String(body.primaryJourney ?? '').trim() || undefined,
+      estimatedInvestmentRange: String(body.estimatedInvestmentRange ?? '').trim() || undefined,
+      preliminaryProjectScope: Array.isArray(body.preliminaryProjectScope)
+        ? (body.preliminaryProjectScope as string[]).map(String).filter(Boolean)
         : undefined,
       assetUploads: body.assetUploads,
       executiveScoring:
@@ -326,10 +332,21 @@ export async function POST(req: NextRequest) {
 
       ctpClassification = classifyCtpClientType({
         desiredExperiences: input.desiredExperiences,
-        discoveryAnswers: input.discoveryAnswers,
+        discoveryAnswers: {
+          ...(input.discoveryAnswers ?? {}),
+          ...(input.journeyKey ? { journeyKey: input.journeyKey } : {}),
+          ...(input.primaryJourney ? { primaryJourney: input.primaryJourney } : {}),
+        },
         operationalChallenges: challengeIds,
         recommendedProjectType: analysis.recommendedProjectType,
       });
+
+      const journeyInvestment = parseInvestmentRangeLabel(input.estimatedInvestmentRange);
+      const presenceProjectLabel =
+        input.primaryJourney ||
+        (ctpClassification.clientType === 'website' || ctpClassification.clientType === 'website_portal'
+          ? 'Website / Digital Presence'
+          : pricing.projectTypeLabel);
 
       try {
         const parsedUploads = parseAssetUploads(input.assetUploads);
@@ -345,15 +362,39 @@ export async function POST(req: NextRequest) {
               ...input.discoveryAnswers,
               ...(input.factoryOpportunity ? { factory_opportunity: input.factoryOpportunity } : {}),
               ...(assetManifest ? { asset_uploads: assetManifest } : {}),
+              ...(input.journeyKey ? { journeyKey: input.journeyKey } : {}),
+              ...(input.primaryJourney ? { primaryJourney: input.primaryJourney } : {}),
+              ...(input.estimatedInvestmentRange
+                ? { estimatedInvestmentRange: input.estimatedInvestmentRange }
+                : {}),
+              ...(input.preliminaryProjectScope?.length
+                ? { preliminaryProjectScope: input.preliminaryProjectScope }
+                : {}),
             }
           : assetManifest
             ? {
                 ...(input.factoryOpportunity ? { factory_opportunity: input.factoryOpportunity } : {}),
                 asset_uploads: assetManifest,
+                ...(input.journeyKey ? { journeyKey: input.journeyKey } : {}),
+                ...(input.primaryJourney ? { primaryJourney: input.primaryJourney } : {}),
+                ...(input.estimatedInvestmentRange
+                  ? { estimatedInvestmentRange: input.estimatedInvestmentRange }
+                  : {}),
+                ...(input.preliminaryProjectScope?.length
+                  ? { preliminaryProjectScope: input.preliminaryProjectScope }
+                  : {}),
               }
-            : input.factoryOpportunity
-              ? { factory_opportunity: input.factoryOpportunity }
-            : undefined;
+            : {
+                ...(input.factoryOpportunity ? { factory_opportunity: input.factoryOpportunity } : {}),
+                ...(input.journeyKey ? { journeyKey: input.journeyKey } : {}),
+                ...(input.primaryJourney ? { primaryJourney: input.primaryJourney } : {}),
+                ...(input.estimatedInvestmentRange
+                  ? { estimatedInvestmentRange: input.estimatedInvestmentRange }
+                  : {}),
+                ...(input.preliminaryProjectScope?.length
+                  ? { preliminaryProjectScope: input.preliminaryProjectScope }
+                  : {}),
+              };
 
         const portalRequired = scope.portalRequired || ctpClassification.portalRequired;
 
@@ -451,8 +492,20 @@ export async function POST(req: NextRequest) {
               weeklyTimeRecovery: analysis.weeklyTimeRecovery,
               opportunityLow: analysis.opportunityLow,
               opportunityHigh: analysis.opportunityHigh,
-              projectTypeLabel: pricing.projectTypeLabel,
-              recommendedFee: pricing.recommendedFee,
+              projectTypeLabel:
+                ctpClassification.clientType === 'website' ||
+                ctpClassification.clientType === 'website_portal'
+                  ? presenceProjectLabel
+                  : pricing.projectTypeLabel,
+              recommendedFee: journeyInvestment?.high ?? pricing.recommendedFee,
+              investmentLow: journeyInvestment?.low,
+              investmentHigh: journeyInvestment?.high,
+              timelineLabel:
+                ctpClassification.clientType === 'website' ||
+                ctpClassification.clientType === 'website_portal'
+                  ? '3-5 Weeks'
+                  : undefined,
+              scopePhases: input.preliminaryProjectScope,
               recommendations,
               operationalChallenges: challengeIds,
             },

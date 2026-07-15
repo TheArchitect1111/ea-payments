@@ -824,6 +824,8 @@ function baseEmailShell(params: {
   bodyHtml: string;
   ctaLabel?: string;
   ctaUrl?: string;
+  /** Slightly richer header treatment for CTP welcome emails. */
+  premium?: boolean;
 }): string {
   const year = new Date().getFullYear();
   const cta = params.ctaLabel && params.ctaUrl
@@ -834,23 +836,30 @@ function baseEmailShell(params: {
       </table>`
     : '';
 
+  const headerPad = params.premium ? '36px 40px 28px' : '30px 36px';
+  const bodyPad = params.premium ? '32px 40px 40px' : '36px';
+  const accentBar = params.premium
+    ? `<tr><td style="height:3px;background:linear-gradient(90deg,#C9A844 0%,#E8D48B 50%,#C9A844 100%);font-size:0;line-height:0;">&nbsp;</td></tr>`
+    : '';
+
   return `<!DOCTYPE html>
 <html lang="en">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>${escHtml(params.title)}</title></head>
-<body style="margin:0;padding:0;background-color:#F8F6F2;font-family:Arial,Helvetica,sans-serif;">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#F8F6F2;padding:36px 18px;">
+<body style="margin:0;padding:0;background-color:#F3F0EA;font-family:Georgia,'Times New Roman',serif;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#F3F0EA;padding:40px 16px;">
 <tr><td>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:620px;margin:0 auto;background-color:#FFFFFF;">
-<tr><td style="background-color:#1B2B4D;padding:30px 36px;text-align:center;">
-  <p style="margin:0;color:#C9A844;font-size:10px;font-weight:700;letter-spacing:4px;text-transform:uppercase;">Efficiency Architects</p>
-  <h1 style="margin:10px 0 0;color:#FFFFFF;font-size:22px;font-weight:700;">${escHtml(params.title)}</h1>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:640px;margin:0 auto;background-color:#FFFFFF;border:1px solid #E6E0D4;">
+<tr><td style="background-color:#1B2B4D;padding:${headerPad};text-align:center;">
+  <p style="margin:0;color:#C9A844;font-size:11px;font-weight:700;letter-spacing:4px;text-transform:uppercase;font-family:Arial,Helvetica,sans-serif;">Efficiency Architects</p>
+  <h1 style="margin:14px 0 0;color:#FFFFFF;font-size:${params.premium ? '26px' : '22px'};font-weight:700;line-height:1.3;font-family:Georgia,'Times New Roman',serif;">${escHtml(params.title)}</h1>
 </td></tr>
-<tr><td style="padding:36px;">
-  <p style="margin:0 0 18px;color:#C9A844;font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;">${escHtml(params.eyebrow)}</p>
+${accentBar}
+<tr><td style="padding:${bodyPad};font-family:Arial,Helvetica,sans-serif;">
+  <p style="margin:0 0 20px;color:#C9A844;font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;">${escHtml(params.eyebrow)}</p>
   ${params.bodyHtml}
   ${cta}
 </td></tr>
-<tr><td style="background-color:#1B2B4D;padding:20px 36px;text-align:center;">
+<tr><td style="background-color:#1B2B4D;padding:22px 36px;text-align:center;font-family:Arial,Helvetica,sans-serif;">
   <p style="margin:0 0 8px;font-size:10px;color:#8896AF;letter-spacing:2px;text-transform:uppercase;">Efficiency Architects &copy; ${year}</p>
   <p style="margin:0;font-size:11px;color:#8896AF;"><a href="${escHtml(process.env.UNSUBSCRIBE_URL ?? '#')}" style="color:#8896AF;text-decoration:underline;">Unsubscribe</a></p>
 </td></tr>
@@ -1398,6 +1407,10 @@ export type CtpExecutiveEmailData = {
   opportunityHigh: number;
   projectTypeLabel: string;
   recommendedFee: number;
+  investmentLow?: number;
+  investmentHigh?: number;
+  timelineLabel?: string;
+  scopePhases?: string[];
   recommendations?: string[] | unknown;
   operationalChallenges?: string[];
   /** When portal is already live at send time. */
@@ -1406,7 +1419,7 @@ export type CtpExecutiveEmailData = {
   digitalPresenceAudit?: import('@/lib/ctp-digital-presence').DigitalPresenceAudit;
 };
 
-/** CTP post-intake welcome — ops capacity brief OR website/Connect studio welcome. */
+/** CTP post-intake welcome — ops capacity brief OR website/presence studio welcome. */
 export async function sendCtpExecutiveEmail(
   data: CtpExecutiveEmailData,
 ): Promise<{ ok: boolean; error?: string }> {
@@ -1438,8 +1451,8 @@ export async function sendCtpExecutiveEmail(
     operationalChallenges: data.operationalChallenges,
   });
 
-  const investmentLow = Math.round(data.recommendedFee * 0.9);
-  const investmentHigh = Math.round(data.recommendedFee * 1.15);
+  const investmentLow = data.investmentLow ?? Math.round(data.recommendedFee * 0.9);
+  const investmentHigh = data.investmentHigh ?? Math.round(data.recommendedFee * 1.15);
   const track = ctpWelcomeEmailTrack(data.clientType);
   const model = {
     firstName,
@@ -1452,9 +1465,10 @@ export async function sendCtpExecutiveEmail(
     opportunityHigh: data.opportunityHigh,
     projectTypeLabel: data.projectTypeLabel,
     recommendedFee: data.recommendedFee,
-    timelineLabel: brief.timelineLabel,
+    timelineLabel: data.timelineLabel || brief.timelineLabel,
     investmentLow,
     investmentHigh,
+    scopePhases: data.scopePhases,
     portalUrl: data.portalUrl,
     proposalUrl,
     supportEmail,
@@ -1473,6 +1487,7 @@ export async function sendCtpExecutiveEmail(
       bodyHtml: built.bodyHtml,
       ctaLabel: built.ctaLabel,
       ctaUrl: built.ctaUrl,
+      premium: true,
     }),
   );
 }

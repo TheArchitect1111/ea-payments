@@ -63,6 +63,32 @@ try {
 
   const website = classifyCtpClientType({ desiredExperiences: ['landing-page'] });
   assert(website.clientType === 'website', 'landing-only => website');
+  assert(website.portalRequired && website.websiteRequired, 'website track needs portal + site');
+
+  const fromCraTitle = classifyCtpClientType({
+    desiredExperiences: ['Landing Page Experience™'],
+  });
+  assert(fromCraTitle.clientType === 'website', 'CRA landing title => website');
+
+  const fromPresenceAnswers = classifyCtpClientType({
+    discoveryAnswers: {
+      journeyKey: 'landing',
+      presenceGoal: {
+        selected: ['A clear website that explains who we are and how to get involved.'],
+      },
+    },
+  });
+  assert(fromPresenceAnswers.clientType === 'website', 'presenceGoal website => website');
+
+  const fromFollowUp = classifyCtpClientType({
+    discoveryAnswers: {
+      journeyKey: 'connect',
+      connectionPath: {
+        selected: ['They can book a call or visit without having to chase us.'],
+      },
+    },
+  });
+  assert(fromFollowUp.clientType === 'website', 'follow-up journey => website/presence');
 
   const portal = classifyCtpClientType({ desiredExperiences: ['portal'] });
   assert(portal.clientType === 'portal_only', 'portal-only => portal_only');
