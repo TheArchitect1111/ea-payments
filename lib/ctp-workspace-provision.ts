@@ -7,8 +7,9 @@ import type { PortalConfig } from '@/lib/catalog';
 import { scheduleCtpStudioCampaign } from '@/lib/ctp-studio-bridge';
 import { scheduleCtpWebsiteProvision } from '@/lib/ctp-website-provision';
 import { scheduleCtpProduction } from '@/lib/ctp-production-run';
-import { publicPortalLoginUrl, publicPortalUrl } from '@/lib/ctp-portal-host';
+import { publicPortalLoginUrl, publicPortalUrl, primaryPortalHost } from '@/lib/ctp-portal-host';
 import { sendCtpExecutiveEmailForSubmission } from '@/lib/ctp-executive-email-send';
+import { ctpWelcomeEmailTrack, ctpWelcomeStudioPath } from '@/lib/ctp-welcome-email';
 import {
   getCtpSubmissionById,
   updateCtpSubmission,
@@ -22,6 +23,16 @@ const EA_PORTAL_CONFIG: PortalConfig = {
 };
 
 const CTP_WELCOME_PACKAGE = 'Consider The Possibilities™';
+
+function emailWorkspaceUrl(portalSlug: string, clientType: CtpSubmission['clientType']): string {
+  const track = ctpWelcomeEmailTrack(clientType);
+  const path = ctpWelcomeStudioPath(track);
+  if (process.env.EA_PORTAL_EMAIL_HUB_URLS === '1') {
+    return publicPortalUrl(portalSlug, path);
+  }
+  const host = primaryPortalHost();
+  return `https://${host}/${portalSlug}/${path}`;
+}
 
 function portalLoginUrl(): string {
   return publicPortalLoginUrl();
@@ -73,7 +84,7 @@ async function markWorkspaceActive(
 
   try {
     await sendCtpExecutiveEmailForSubmission(submission.id, {
-      portalUrl: publicPortalUrl(portalSlug, 'ctp'),
+      portalUrl: emailWorkspaceUrl(portalSlug, submission.clientType),
     });
   } catch (err) {
     console.error('[ctp-workspace-provision] executive email failed:', err);
