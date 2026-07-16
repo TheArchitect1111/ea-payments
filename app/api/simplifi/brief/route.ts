@@ -23,5 +23,22 @@ export async function GET() {
     brief: workspace.brief,
     actionCenter: workspace.actionCenter,
     activeCount: workspace.activeObjects.length,
+    recentObjects: workspace.activeObjects.slice(0, 5).map((obj) => ({
+      id: obj.id,
+      title: obj.title,
+      type: obj.type,
+      status: obj.status,
+      priority: obj.priority,
+      priorityLevel: obj.priorityLevel,
+      opportunityScore: obj.opportunityScore,
+      nextAction: obj.nextAction,
+      dueDate: obj.dueDate,
+      savePurpose: obj.savePurpose,
+      saveReason: obj.saveReason,
+      dateCaptured: obj.dateCaptured,
+      outcomeStatus: obj.outcomeStatus,
+      considerUrl: obj.considerUrl,
+      magnifiUrl: obj.magnifiUrl,
+    })),
   });
 }
