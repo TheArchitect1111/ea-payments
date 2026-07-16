@@ -33,6 +33,9 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Verify Simplifi Orb and monitoring contracts
+        run: npm run test:simplifi-hardening
+
       - name: Verify deploy (build + resolver + smoke)
         run: |
           npx playwright install --with-deps chromium

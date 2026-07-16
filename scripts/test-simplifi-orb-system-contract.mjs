@@ -44,6 +44,8 @@ const globalOrb = readFileSync(join(root, 'app/simplifi/components/GlobalOrb.tsx
 assert(globalOrb.includes('Ask anything'), 'expanded ask required');
 assert(globalOrb.includes('Recommended next step'), 'recommendation block required');
 assert(globalOrb.includes('global-orb-btn'), 'resting orb button required');
+assert(globalOrb.includes("e.key !== 'Tab'"), 'expanded panel must trap keyboard focus');
+assert(globalOrb.includes("document.body.style.overflow = 'hidden'"), 'expanded panel must lock background scroll');
 
 const css = readFileSync(join(root, 'app/simplifi/components/global-orb.css'), 'utf8');
 assert(css.includes('safe-area-inset'), 'safe-area required');
