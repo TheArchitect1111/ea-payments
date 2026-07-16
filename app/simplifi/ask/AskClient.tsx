@@ -2,14 +2,18 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import type { SimplifiObject } from '@/lib/simplifi-objects';
 import type { ActionCenterPayload } from '@/lib/action-center';
+import { interpretOrbIntent, resolveOrbIntentHref } from '@/lib/orb-os';
 import { answerConversationalAsk, searchOpportunities } from '@/lib/simplifi-ask';
 
 const SUGGESTIONS = [
   'What deserves attention today?',
   'What follow-ups are due?',
   "What's fading?",
+  'Show my inbox',
+  'Open capture',
 ];
 
 export default function AskClient({
@@ -17,12 +21,15 @@ export default function AskClient({
   loggedIn,
   objects,
   actionCenter,
+  slug,
 }: {
   greeting: string;
   loggedIn: boolean;
   objects: SimplifiObject[];
   actionCenter: ActionCenterPayload;
+  slug?: string | null;
 }) {
+  const router = useRouter();
   const [question, setQuestion] = useState('');
   const [answer, setAnswer] = useState('');
   const [matches, setMatches] = useState<SimplifiObject[]>([]);
@@ -31,8 +38,27 @@ export default function AskClient({
     const trimmed = q.trim();
     if (!trimmed) return;
     setQuestion(trimmed);
+
+    const intent = interpretOrbIntent(trimmed);
+    const hits = searchOpportunities(intent.query ?? trimmed, objects);
+    const soleMatch =
+      (intent.surface === 'search' || intent.surface === 'ask') && hits.length === 1 ? hits[0] : null;
+    const href = resolveOrbIntentHref(intent, {
+      slug,
+      draft: intent.draft,
+      query: intent.query,
+      opportunityId: soleMatch?.id,
+    });
+
+    if (href) {
+      setAnswer(intent.reply);
+      setMatches([]);
+      router.push(href);
+      return;
+    }
+
     setAnswer(answerConversationalAsk(trimmed, objects, actionCenter));
-    setMatches(searchOpportunities(trimmed, objects).slice(0, 5));
+    setMatches(hits.slice(0, 5));
   };
 
   return (

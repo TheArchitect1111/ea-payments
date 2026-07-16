@@ -9,6 +9,7 @@ import { answerConversationalAsk, searchOpportunities } from '@/lib/simplifi-ask
 import {
   buildAmbientOpening,
   interpretOrbIntent,
+  resolveOrbIntentHref,
   writeOrbOsPreviewPreference,
   type OrbSurface,
 } from '@/lib/orb-os';
@@ -140,23 +141,19 @@ export default function OrbOsShell({
       await exitPreview();
       return;
     }
-    if (intent.surface === 'settings') {
-      router.push('/simplifi/settings');
+
+    // Leave-the-shell surfaces share the GlobalOrb route table.
+    if (
+      intent.surface === 'settings' ||
+      intent.surface === 'portal' ||
+      intent.surface === 'followups' ||
+      intent.surface === 'calendar'
+    ) {
+      const href = resolveOrbIntentHref(intent, { slug });
+      if (href) router.push(href);
       return;
     }
-    if (intent.surface === 'portal') {
-      if (slug) router.push(`/portal/${slug}`);
-      else router.push('/portal/login?next=/simplifi/orb');
-      return;
-    }
-    if (intent.surface === 'followups') {
-      router.push('/simplifi/follow-ups');
-      return;
-    }
-    if (intent.surface === 'calendar') {
-      router.push('/simplifi/calendar');
-      return;
-    }
+
     if (intent.surface === 'capture') {
       setCaptureDraft(intent.draft ?? '');
       if (intent.draft) void runCapture(intent.draft);
