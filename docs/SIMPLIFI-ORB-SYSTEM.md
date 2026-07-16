@@ -52,7 +52,7 @@ Upgrade of materials, motion, and copy. State engine and intent routing unchange
 | `--orb-champagne` | soft gold halo | Presence without neon |
 | Glass highlight | inset white + soft depth | Organic, not FAB lift |
 
-Resting diameter: **56px**. Soft box-shadow only (no plastic FAB lift).
+Resting diameter: **64px** with glass rim, visible liquid light (~9s), soft **ORB** wordmark underneath, and a calm attention count when findings exist. Soft depth only — not Material FAB lift.
 
 ### Animation timing
 
