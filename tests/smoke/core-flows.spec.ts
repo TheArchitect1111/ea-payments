@@ -176,6 +176,14 @@ test('simplifi chrome fade toggle lives in settings', async ({ page }) => {
   await expect(toggle).toHaveAttribute('aria-checked', 'false');
 });
 
+test('simplifi capture seeds share-target text and url', async ({ page }) => {
+  await page.goto(
+    '/simplifi/capture?title=Lead%20idea&text=Check%20https%3A%2F%2Fexample.com%2Fopp%20tomorrow&url=',
+  );
+  await expect(page.getByPlaceholder('https://…')).toHaveValue('https://example.com/opp');
+  await expect(page.getByLabel(/capture notes/i)).toContainText(/Lead idea/i);
+});
+
 test('app alias redirects to workspace', async ({ page }) => {
   await page.goto('/app');
   await expect(page).toHaveURL(/\/simplifi\/workspace/);

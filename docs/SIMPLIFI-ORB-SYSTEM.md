@@ -139,6 +139,23 @@ When enabled:
 Helpers: `lib/simplifi/chrome-fade.ts`. `SimplifiProductShell` resolves the preference
 client-side and listens for toggle events.
 
+## Channels / native (Step 6)
+
+Every capture door feeds the **same** `submitCapture` → Airtable →
+`loadSimplifiWorkspace` / `loadOrbWorkspaceSlice` loop. No second product.
+
+| Channel | Front door | Auth | Lands in Brief / Orb |
+|---------|------------|------|----------------------|
+| Web / PWA capture | `POST /api/portal/captures/analyze` | Portal cookie | Yes — `SimplifiProductShell` + GlobalOrb |
+| PWA share sheet | `GET /simplifi/capture?title&text&url` → analyze | Portal cookie | Yes — `parseShareTargetParams` seeds URL + notes |
+| Browser extension | `POST /api/capture/ingest` | Extension HMAC token | Yes — same portalSlug records; Brief via `/api/extension/brief` |
+| Mobile (Expo) | `POST /api/portal/captures/analyze` | Bearer magic-link | Yes — Brief/Inbox tabs; Orb UI deferred to web |
+| Amplifi share | `POST /api/portal/captures/analyze` | Portal cookie | Yes — share-story UX branch, same captures |
+
+Notes-only shares (no URL) are accepted by analyze and enter the pipeline as text assets.
+Orb capture intents seed `?url=` for links or `?text=` for notes.
+Extension `SIMPLIFI_DAILY_BRIEF` prefers the server Brief (same workspace loader as web).
+
 ## Verification
 
 ```bash
@@ -148,8 +165,10 @@ node scripts/test-simplifi-orb-session-workspace-contract.mjs
 node scripts/test-simplifi-orb-ambient-openers-contract.mjs
 node scripts/test-simplifi-orb-outcome-states-contract.mjs
 node scripts/test-simplifi-chrome-fade-contract.mjs
+node scripts/test-simplifi-channels-contract.mjs
 ```
 
 Open `/simplifi/workspace` — full nav by default. Settings → enable Chrome Fade —
 Brief/Capture/Inbox links disappear; brand + Settings remain; Orb still opens inbox /
-capture sessions. Disable to restore full chrome.
+capture sessions. Share a link or note to the Simplifi PWA — capture opens with
+URL/notes seeded and saves into the same Inbox the Orb reads.

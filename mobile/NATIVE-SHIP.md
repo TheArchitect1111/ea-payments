@@ -17,3 +17,9 @@ npx eas build --profile preview --platform ios
 ```
 
 Web PWA (Add to Home Screen) remains the Early Access install path until TestFlight ships.
+
+## Orb loop
+
+Native tabs already hit the same Brief / Capture / Workspace APIs that power web
+`GlobalOrb`. The corner Orb UI stays on web for now — mobile is a capture → Brief
+→ Inbox channel, not a second product.

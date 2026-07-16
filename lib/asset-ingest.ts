@@ -43,8 +43,11 @@ export function titleFromUrl(url: string): string {
 export function buildPageFromUpload(input: IngestInput): ScrapedPage {
   const kind = detectUploadKind(input);
   const fileName = input.fileName ?? 'uploaded-asset';
-  const title = titleFromFileName(fileName);
   const notes = input.notes?.trim() ?? '';
+  const title =
+    fileName === 'shared-note.txt' && notes
+      ? notes.slice(0, 120)
+      : titleFromFileName(fileName);
 
   const markdown = [
     `# ${title}`,
@@ -134,6 +137,7 @@ export function derivePendingTitle(input: IngestInput & { url?: string }): strin
   if (input.url?.trim()) return titleFromUrl(input.url.trim());
   if (input.pageUrl?.trim()) return titleFromUrl(input.pageUrl.trim());
   if (input.fileName?.trim()) return titleFromFileName(input.fileName);
+  if (input.notes?.trim()) return input.notes.trim().slice(0, 80);
   if (input.screenshotBase64 || input.fileBase64) return 'Screenshot capture';
   return 'New capture';
 }

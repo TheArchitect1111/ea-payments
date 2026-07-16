@@ -101,7 +101,17 @@ async function resolvePageInput(input: CaptureInput): Promise<{ page: Awaited<Re
     return { page, sourceUrl: page.url };
   }
 
-  throw new Error('Provide a URL or upload a file.');
+  // Text / share-sheet notes without a URL still enter the same capture pipeline.
+  if (input.notes?.trim()) {
+    const page = await buildPageFromAsset({
+      ...input,
+      fileName: input.fileName?.trim() || 'shared-note.txt',
+      mimeType: input.mimeType?.trim() || 'text/plain',
+    });
+    return { page, sourceUrl: page.url };
+  }
+
+  throw new Error('Provide a URL, notes, or upload a file.');
 }
 
 async function runCapturePipeline(

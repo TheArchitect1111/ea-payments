@@ -51,12 +51,22 @@ async function parseCaptureInput(req: Request): Promise<{
       return { input: { url, notes }, prospectName, notes, asyncMode };
     }
 
-    throw new Error('URL or file is required.');
+    if (notes) {
+      return {
+        input: { notes, fileName: 'shared-note.txt', mimeType: 'text/plain' },
+        prospectName,
+        notes,
+        asyncMode,
+      };
+    }
+
+    throw new Error('URL, notes, or file is required.');
   }
 
   const body = (await req.json()) as {
     url?: string;
     notes?: string;
+    title?: string;
     prospectName?: string;
     async?: boolean;
     screenshotBase64?: string;
@@ -64,21 +74,35 @@ async function parseCaptureInput(req: Request): Promise<{
   };
 
   const url = body.url?.trim();
-  if (!url && !body.screenshotBase64) {
-    throw new Error('URL is required.');
+  const notes = body.notes?.trim() || body.title?.trim();
+  if (!url && !body.screenshotBase64 && !notes) {
+    throw new Error('URL, notes, or screenshot is required.');
+  }
+
+  if (!url && !body.screenshotBase64 && notes) {
+    return {
+      input: {
+        notes,
+        fileName: 'shared-note.txt',
+        mimeType: 'text/plain',
+      },
+      prospectName: body.prospectName?.trim(),
+      notes,
+      asyncMode: body.async !== false,
+    };
   }
 
   return {
     input: {
       url,
-      notes: body.notes?.trim(),
+      notes,
       screenshotBase64: body.screenshotBase64,
       pageUrl: body.pageUrl?.trim() || url,
       fileName: body.screenshotBase64 ? 'screenshot.png' : undefined,
       mimeType: body.screenshotBase64 ? 'image/png' : undefined,
     },
     prospectName: body.prospectName?.trim(),
-    notes: body.notes?.trim(),
+    notes,
     asyncMode: body.async !== false,
   };
 }
