@@ -18,6 +18,7 @@ const productionPath = join(root, 'lib/ctp-production.ts');
 const runPath = join(root, 'lib/ctp-production-run.ts');
 const submissionsPath = join(root, 'lib/ctp-submissions.ts');
 const intakePath = join(root, 'lib/ctp-intake-orchestrator.ts');
+const praisonPath = join(root, 'lib/praison-ai/orchestrator.ts');
 const workspacePath = join(root, 'lib/ctp-workspace-provision.ts');
 const websitePath = join(root, 'lib/ctp-website-provision.ts');
 const studioPath = join(root, 'lib/ctp-studio-bridge.ts');
@@ -31,6 +32,7 @@ for (const [path, label] of [
   [runPath, 'ctp-production-run.ts'],
   [submissionsPath, 'ctp-submissions.ts'],
   [intakePath, 'intake orchestrator'],
+  [praisonPath, 'praison orchestrator'],
   [workspacePath, 'workspace provision'],
   [websitePath, 'website provision'],
   [studioPath, 'studio bridge'],
@@ -46,6 +48,7 @@ const production = readFileSync(productionPath, 'utf8');
 const run = readFileSync(runPath, 'utf8');
 const submissions = readFileSync(submissionsPath, 'utf8');
 const intake = readFileSync(intakePath, 'utf8');
+const praison = readFileSync(praisonPath, 'utf8');
 const workspace = readFileSync(workspacePath, 'utf8');
 const website = readFileSync(websitePath, 'utf8');
 const studio = readFileSync(studioPath, 'utf8');
@@ -60,7 +63,11 @@ assert(production.includes('executive_blueprint'), 'Business track artifacts req
 assert(run.includes('ctp.production.ready'), 'Must emit production ready Pulse');
 assert(run.includes('scheduleCtpProduction'), 'Must expose schedule helper');
 assert(submissions.includes('productionPackage'), 'Submissions must persist productionPackage');
-assert(intake.includes('scheduleCtpProduction'), 'Intake must schedule production');
+assert(
+  intake.includes('schedulePraisonWorkforce') || intake.includes('scheduleCtpProduction'),
+  'Intake must schedule Praison workforce (which schedules production)',
+);
+assert(praison.includes('scheduleCtpProduction'), 'Praison workforce must schedule production');
 assert(workspace.includes('scheduleCtpProduction'), 'Workspace active must schedule production');
 assert(website.includes('force: true'), 'Website live must refresh production');
 assert(studio.includes('scheduleCtpProduction'), 'Studio bridge must schedule production');
