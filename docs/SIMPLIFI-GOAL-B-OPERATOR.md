@@ -68,7 +68,13 @@ Contract: `node scripts/test-simplifi-goal-b-pass3.mjs`
 
 Contract: `node scripts/test-simplifi-goal-b-pass4.mjs`
 
-Operator note: optional Airtable table `Simplifi Watch List` (or `AIRTABLE_SIMPLIFI_WATCH_LIST_TABLE`). Without it, watch lists use in-memory fallback on the server (dev-safe; create the table for production durability).
+Operator note: optional Airtable table `Simplifi Watch List` (or `AIRTABLE_SIMPLIFI_WATCH_LIST_TABLE`). Create with:
+
+```bash
+node scripts/setup-simplifi-watch-list-table.mjs
+```
+
+Without it, watch lists use in-memory fallback on the server (dev-safe; create the table for production durability).
 
 ## Tester handoff
 
