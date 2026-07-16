@@ -66,7 +66,7 @@
 }
 
 .ac-high {
-  border-left-color: #0a66ff;
+  border-left-color: #1B2B4D;
 }
 
 .ac-medium {
@@ -76,7 +76,7 @@
 .ac-link {
   font-size: 12px;
   font-weight: 800;
-  color: #0a66ff;
+  color: #1B2B4D;
   white-space: nowrap;
   align-self: center;
 }

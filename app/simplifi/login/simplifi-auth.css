@@ -3,7 +3,7 @@
   align-items: center;
   justify-content: center;
   margin: 0 auto 18px;
-  color: #0a66ff;
+  color: #1B2B4D;
   font-size: 1.25rem;
   font-weight: 900;
   letter-spacing: 0.3em;
@@ -16,21 +16,21 @@
 
 .pl-page:has(.simplifi-auth-brand) .pl-eyebrow,
 .pl-page:has(.simplifi-auth-brand) .pl-footer-link {
-  color: #0a66ff;
+  color: #1B2B4D;
 }
 
 .pl-page:has(.simplifi-auth-brand) .pl-auth-nav a.is-active {
-  border-color: #0a66ff;
+  border-color: #1B2B4D;
   background: #eef5ff;
 }
 
 .pl-page:has(.simplifi-auth-brand) .pl-input:focus {
-  border-color: #0a66ff;
+  border-color: #1B2B4D;
   box-shadow: 0 0 0 3px rgba(10, 102, 255, 0.16);
 }
 
 .pl-page:has(.simplifi-auth-brand) .pl-btn {
-  background: #0a66ff;
+  background: #1B2B4D;
   color: #ffffff;
   box-shadow: 0 4px 14px rgba(10, 102, 255, 0.28);
 }

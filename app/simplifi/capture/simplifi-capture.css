@@ -15,6 +15,14 @@
   border-bottom: 1px solid #eee;
 }
 
+.sc-header-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: flex-end;
+}
+
 .sc-brand-lockup {
   display: flex;
   align-items: center;
@@ -52,7 +60,7 @@
   font-weight: 800;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: #0a66ff;
+  color: #1B2B4D;
   margin: 0 0 12px;
 }
 
@@ -167,7 +175,7 @@
   padding: 0;
   border: 0;
   background: transparent;
-  color: #0a66ff;
+  color: #1B2B4D;
   font-size: 13px;
   font-weight: 800;
   text-decoration: underline;
@@ -194,7 +202,7 @@
 }
 
 .sc-btn-primary {
-  background: #0a66ff;
+  background: #1B2B4D;
   color: #fff;
 }
 

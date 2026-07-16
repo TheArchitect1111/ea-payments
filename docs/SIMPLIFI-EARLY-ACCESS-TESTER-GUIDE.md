@@ -15,11 +15,11 @@ Simplifi captures opportunities, runs analysis, builds a Magnifi story (with Dow
 
 ## Phone in 2 minutes
 
-1. Open **https://efficiencyarchitects.online/simplifi/capture**
-2. Sign in: https://efficiencyarchitects.online/portal/login → **Sign in with password instead** →  
-   `demo@efficiencyarchitects.online` / `DemoPulse2026!`
-3. Capture a business URL
-4. Share → **Add to Home Screen** to install the capture PWA
+1. Open **https://efficiencyarchitects.online/simplifi/workspace** (Today's Brief — home)
+2. Sign in: https://efficiencyarchitects.online/simplifi/login or portal login →  
+   `demo@efficiencyarchitects.online` / `DemoPulse2026!` (password on portal)
+3. From Brief, tap **Capture** (or Ask Orb) to save a URL
+4. Share → **Add to Home Screen** — PWA opens Today's Brief
 
 **Do not use `simplifi.ai` yet** — DNS still points at a lander stub until Pass 1 DNS is fixed.
 
@@ -29,9 +29,10 @@ Simplifi captures opportunities, runs analysis, builds a Magnifi story (with Dow
 
 | Step | URL |
 |------|-----|
-| Capture | https://efficiencyarchitects.online/simplifi/capture |
+| Today's Brief (home) | https://efficiencyarchitects.online/simplifi/workspace |
+| Quick Capture | https://efficiencyarchitects.online/simplifi/capture |
+| Inbox | https://efficiencyarchitects.online/simplifi/inbox |
 | Capture alias | https://efficiencyarchitects.online/capture |
-| Workspace | https://efficiencyarchitects.online/simplifi/workspace |
 | Portal login | https://efficiencyarchitects.online/portal/login |
 | Simplifi magic-link login | https://efficiencyarchitects.online/simplifi/login |
 | Start | https://efficiencyarchitects.online/start |

@@ -22,7 +22,7 @@ function safeNextPath(raw: string | undefined, realm: MagicLinkRealm): string | 
   }
   if (!raw || !raw.startsWith('/') || raw.startsWith('//')) {
     if (realm === 'admin') return '/admin/master';
-    if (realm === 'simplifi') return '/simplifi/capture';
+    if (realm === 'simplifi') return '/simplifi/workspace';
     return undefined;
   }
   if (realm === 'admin' && !raw.startsWith('/admin')) return '/admin/master';

@@ -7,8 +7,9 @@ export const PLATFORM_BASE =
 
 export const PRODUCT_LINKS = {
   home: PLATFORM_BASE,
-  simplifi: `${PLATFORM_BASE}/simplifi`,
+  simplifi: `${PLATFORM_BASE}/simplifi/workspace`,
   simplifiCapture: `${PLATFORM_BASE}/simplifi/capture`,
+  simplifiInbox: `${PLATFORM_BASE}/simplifi/inbox`,
   magnifiDemo: `${PLATFORM_BASE}/consider/selena`,
   amplifi: `${PLATFORM_BASE}/amplifi`,
   pulse: `${PLATFORM_BASE}/portal/login?next=${encodeURIComponent('/portal/demo-client/pulse')}`,
@@ -18,12 +19,12 @@ export const PRODUCT_LINKS = {
 
 /** Vercel project domains → default landing path (root `/` redirect). */
 export const PRODUCT_HOST_ENTRY: Record<string, string> = {
-  'ea-simplifi.vercel.app': '/simplifi/capture',
+  'ea-simplifi.vercel.app': '/simplifi/workspace',
   'ea-magnifi.vercel.app': '/consider/selena',
   'ea-amplifi.vercel.app': '/amplifi',
   'ea-pulse.vercel.app': '/portal/login?next=/portal/demo-client/pulse',
-  'simplifi.ai': '/simplifi/capture',
-  'www.simplifi.ai': '/simplifi/capture',
+  'simplifi.ai': '/simplifi/workspace',
+  'www.simplifi.ai': '/simplifi/workspace',
   'app.simplifi.ai': '/simplifi/workspace',
   'app-simplifi.vercel.app': '/simplifi/workspace',
 };

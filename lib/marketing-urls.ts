@@ -16,8 +16,10 @@ const BASE = process.env.NEXT_PUBLIC_BASE_URL?.replace(/\/$/, '') ?? EA_PLATFORM
 /** Links you send to real testers — product verb in path, not backend slug. */
 export const PUBLIC_LINKS = {
   platform: BASE,
-  /** Simplifi — capture an opportunity */
-  capture: `${BASE}/capture`,
+  /** Simplifi — Today's Brief (default home) */
+  workspace: `${BASE}/simplifi/workspace`,
+  /** Simplifi — quick capture */
+  capture: `${BASE}/simplifi/capture`,
   /** Amplifi — social posting hub */
   amplify: `${BASE}/amplifi`,
   amplifi: `${BASE}/amplifi`,

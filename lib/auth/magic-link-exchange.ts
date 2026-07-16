@@ -129,7 +129,7 @@ export async function exchangeMagicLinkToken(token: string): Promise<MagicLinkEx
   }
 
   const realm: MagicLinkRealm = payload.realm === 'simplifi' ? 'simplifi' : 'portal';
-  const defaultNext = realm === 'simplifi' ? '/simplifi/capture' : `/portal/${client.slug}/ctp`;
+  const defaultNext = realm === 'simplifi' ? '/simplifi/workspace' : `/portal/${client.slug}/ctp`;
   const authDeadEnd =
     realm === 'portal' &&
     Boolean(
