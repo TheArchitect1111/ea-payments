@@ -11,10 +11,15 @@ import {
   archiveCapture,
   fetchCaptureIntelligence,
   recordCaptureOutcome,
-  snoozeCapture,
 } from '@/lib/simplifi-client';
 import { searchOpportunities } from '@/lib/simplifi-ask';
 import { buildBriefAmbientLead } from '@/lib/orb';
+import {
+  briefHomeEmptyState,
+  buildBriefHomeSummaries,
+  opportunityStatusLine,
+  type BriefHomeSummaryTone,
+} from '@/lib/simplifi/brief-home';
 import EmptyStateGuide from '@/app/components/guided-first-success/EmptyStateGuide';
 import ActionCenterPanel from './ActionCenterPanel';
 import './action-center-panel.css';
@@ -55,30 +60,16 @@ function formatBriefDate(date = new Date()): string {
   });
 }
 
-function relativeUpdatedLabel(iso: string): string {
-  const captured = new Date(iso);
-  if (Number.isNaN(captured.getTime())) return 'Updated recently';
-  const diffMs = Date.now() - captured.getTime();
-  const mins = Math.floor(diffMs / 60000);
-  if (mins < 60) return `Updated ${Math.max(1, mins)}m ago`;
-  const hours = Math.floor(mins / 60);
-  if (hours < 24) return `Updated ${hours}h ago`;
-  const days = Math.floor(hours / 24);
-  if (days === 1) return 'Updated yesterday';
-  if (days < 7) return `Updated ${days}d ago`;
-  return `Updated ${captured.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
-}
-
-function briefKindIcon(kind: BriefPayload['items'][number]['kind']): string {
-  switch (kind) {
-    case 'momentum':
+function summaryToneIcon(tone: BriefHomeSummaryTone): string {
+  switch (tone) {
+    case 'attention':
       return '★';
-    case 'deadline':
-    case 'due-soon':
-    case 'overdue':
-      return '◷';
-    case 'stale':
-      return '◎';
+    case 'proposal':
+      return '▤';
+    case 'followup':
+      return '◉';
+    case 'reading':
+      return '◆';
     default:
       return '◆';
   }
@@ -115,10 +106,26 @@ export default function SimplifiWorkspace({
     [localObjects, searchQuery],
   );
 
-  const todayBriefItems = brief.items.slice(0, 4);
+  const todaySummaries = useMemo(
+    () =>
+      buildBriefHomeSummaries({
+        objects: localObjects,
+        actionCenter,
+        briefItems: brief.items,
+      }),
+    [localObjects, actionCenter, brief.items],
+  );
   const recentObjects = localObjects.slice(0, 5);
   const ambientLead = buildBriefAmbientLead({ brief, actionCenter });
   const todayLabel = useMemo(() => formatBriefDate(), []);
+  const todayEmpty = briefHomeEmptyState({
+    loggedIn,
+    hasObjects: localObjects.length > 0,
+  });
+  const recentEmpty = briefHomeEmptyState({
+    loggedIn,
+    hasObjects: false,
+  });
 
   const toggleExpand = (obj: SimplifiObject) => {
     setExpandedId((prev) => (prev === obj.id ? null : obj.id));
@@ -149,18 +156,6 @@ export default function SimplifiWorkspace({
       setExpandedId(null);
     }
     setActionNote(`Outcome: ${data.outcomeStatus ?? outcome}`);
-  };
-
-  const snoozeItem = async (briefItemId: string) => {
-    const recordId = briefItemId.replace(/^x-/, '');
-    if (!recordId) return;
-    setActionNote('');
-    const data = await snoozeCapture(recordId, 30);
-    if (!data.ok) {
-      setActionNote(data.error ?? 'Could not snooze.');
-      return;
-    }
-    setActionNote(`Snoozed until ${data.dueDate ?? 'later'}.`);
   };
 
   const loadIntelligence = async (recordId: string) => {
@@ -199,42 +194,35 @@ export default function SimplifiWorkspace({
         <section className="sw-today-brief" aria-label="Today's Brief">
           <div className="sw-today-brief-head">
             <h2>Today&apos;s Brief</h2>
-            {todayBriefItems.length > 0 ? (
+            {todaySummaries.length > 0 ? (
               <Link href="/simplifi/follow-ups" className="sw-today-view-all">
                 View all
               </Link>
             ) : null}
           </div>
 
-          {todayBriefItems.length === 0 ? (
+          {todaySummaries.length === 0 ? (
             <div className="sw-today-empty">
-              <p>{ambientLead}</p>
-              <Link href="/simplifi/capture" className="sw-today-capture">
-                Capture something
+              <p className="sw-today-empty-title">{todayEmpty.title}</p>
+              <p>{todayEmpty.explanation}</p>
+              <p className="sw-ambient-lead">{ambientLead}</p>
+              <Link href={todayEmpty.actionHref} className="sw-today-capture">
+                {todayEmpty.actionLabel}
               </Link>
             </div>
           ) : (
             <ul className="sw-today-list">
-              {todayBriefItems.map((item) => (
+              {todaySummaries.map((item) => (
                 <li key={item.id}>
-                  <span className={`sw-today-icon sw-today-icon--${item.kind}`} aria-hidden="true">
-                    {briefKindIcon(item.kind)}
+                  <span className={`sw-today-icon sw-today-icon--${item.tone}`} aria-hidden="true">
+                    {summaryToneIcon(item.tone)}
                   </span>
                   <div className="sw-today-copy">
-                    {item.href ? (
-                      <Link href={item.href}>
-                        <strong>{item.title}</strong>
-                      </Link>
-                    ) : (
+                    <Link href={item.href}>
                       <strong>{item.title}</strong>
-                    )}
-                    <p>{item.detail}</p>
+                    </Link>
+                    {item.detail ? <p>{item.detail}</p> : null}
                   </div>
-                  {loggedIn && item.id.startsWith('x-') && (item.kind === 'stale' || item.kind === 'overdue') ? (
-                    <button type="button" className="sw-link-btn" onClick={() => snoozeItem(item.id)}>
-                      Snooze
-                    </button>
-                  ) : null}
                 </li>
               ))}
             </ul>
@@ -251,10 +239,10 @@ export default function SimplifiWorkspace({
 
           {recentObjects.length === 0 ? (
             <EmptyStateGuide
-              title="Nothing captured yet"
-              explanation="Paste a URL, upload a file, or jot a note — Simplifi will score the opportunity and surface your next move."
-              actionLabel="Quick capture"
-              actionHref="/simplifi/capture"
+              title={recentEmpty.title}
+              explanation={recentEmpty.explanation}
+              actionLabel={recentEmpty.actionLabel}
+              actionHref={recentEmpty.actionHref}
             />
           ) : (
             <ul className="sw-recent-list">
@@ -270,11 +258,7 @@ export default function SimplifiWorkspace({
                     </span>
                     <span className="sw-recent-copy">
                       <strong>{obj.title}</strong>
-                      <span>
-                        {obj.nextAction}
-                        {' · '}
-                        {relativeUpdatedLabel(obj.dateCaptured)}
-                      </span>
+                      <span>{opportunityStatusLine(obj)}</span>
                     </span>
                     <span className="sw-recent-chevron" aria-hidden="true">
                       ›
