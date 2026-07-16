@@ -4,24 +4,27 @@ These items require account access or a business decision. The repo is ready to 
 
 ## Monitoring Setup
 
-### Sentry
+### GlitchTip (error monitoring)
 
 Required value:
 
-- `NEXT_PUBLIC_SENTRY_DSN`
+- `NEXT_PUBLIC_GLITCHTIP_DSN`
 
 Steps:
 
-1. Create or open the Sentry project for `ea-payments`.
-2. Copy the browser/client DSN.
-3. Add it to Vercel Production as `NEXT_PUBLIC_SENTRY_DSN`.
+1. Create or open the GlitchTip project for `ea-payments`.
+2. Copy the Sentry-compatible DSN.
+3. Add it to Vercel Production as `NEXT_PUBLIC_GLITCHTIP_DSN`.
 4. Redeploy production.
 5. Trigger a safe test event.
-6. Confirm event appears in Sentry.
+6. Confirm event appears in GlitchTip.
 
 Acceptance:
 
-- `/api/health/launch` reports monitoring missing list no longer includes `NEXT_PUBLIC_SENTRY_DSN`.
+- `/api/health/launch` reports monitoring ready (`sentryDsn` / `glitchtipDsn` true).
+- Full guide: `docs/GLITCHTIP-SETUP.md`.
+
+Legacy: `NEXT_PUBLIC_SENTRY_DSN` is still accepted during migration.
 
 ### Uptime
 

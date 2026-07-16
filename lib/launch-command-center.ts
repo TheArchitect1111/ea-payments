@@ -324,7 +324,7 @@ function recommendNextAction(items: LaunchCheckItem[], tier2Ready: boolean): str
     return 'Simplifi Pass 1: branded host down — confirm simplifi.ai on Vercel Domains — docs/SIMPLIFI-GOAL-B-OPERATOR.md';
   }
   if (byId.sentry && byId.sentry.status !== 'complete') {
-    return 'Simplifi Pass 1: set NEXT_PUBLIC_SENTRY_DSN on Vercel Production and redeploy — docs/sentry-setup.md';
+    return 'Simplifi Pass 1: set NEXT_PUBLIC_GLITCHTIP_DSN on Vercel Production and redeploy — docs/GLITCHTIP-SETUP.md';
   }
   if (byId.uptime_dashboard && byId.uptime_dashboard.status !== 'complete') {
     return 'Simplifi Pass 1: set UPTIME_KUMA_DASHBOARD_URL (or UPTIME_MONITORING_URL) and confirm Simplifi monitors.';
@@ -753,15 +753,15 @@ export async function runLaunchCommandCenter(options?: {
     item({
       id: 'sentry',
       section: 'security',
-      category: 'Sentry',
-      name: 'Error monitoring (Sentry DSN)',
+      category: 'GlitchTip',
+      name: 'Error monitoring (GlitchTip DSN)',
       automation: 'partially_automated',
       status: sentryConfigured() ? 'complete' : 'needs_human_action',
       maxScore: 4,
       message: sentryConfigured()
-        ? 'NEXT_PUBLIC_SENTRY_DSN set — Sentry enabled.'
-        : 'Set NEXT_PUBLIC_SENTRY_DSN on Vercel Production and redeploy — docs/sentry-setup.md',
-      fix: 'https://sentry.io → NEXT_PUBLIC_SENTRY_DSN on Vercel',
+        ? 'GlitchTip DSN set — error monitoring enabled (Sentry-compatible SDK).'
+        : 'Set NEXT_PUBLIC_GLITCHTIP_DSN on Vercel Production and redeploy — docs/GLITCHTIP-SETUP.md',
+      fix: 'docs/GLITCHTIP-SETUP.md → NEXT_PUBLIC_GLITCHTIP_DSN on Vercel',
     }),
     item({
       id: 'uptime_dashboard',

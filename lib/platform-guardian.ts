@@ -48,8 +48,13 @@ function buildGuardianAnalysis(ops: PlatformOpsReport): Pick<
   }
 
   if (!ops.monitoring.sentryConfigured) {
-    risks.push(finding('Sentry not configured', 'NEXT_PUBLIC_SENTRY_DSN is unset — errors are not tracked.'));
-    recommendations.push('Set NEXT_PUBLIC_SENTRY_DSN on Vercel Production (docs/sentry-setup.md).');
+    risks.push(
+      finding(
+        'Error monitoring not configured',
+        'NEXT_PUBLIC_GLITCHTIP_DSN is unset — exceptions are not tracked in GlitchTip.',
+      ),
+    );
+    recommendations.push('Set NEXT_PUBLIC_GLITCHTIP_DSN on Vercel Production (docs/GLITCHTIP-SETUP.md).');
   }
 
   if (!ops.monitoring.uptimeDashboardConfigured) {

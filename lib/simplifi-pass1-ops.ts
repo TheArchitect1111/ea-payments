@@ -3,6 +3,7 @@
  * Shared by Launch Command Center and Mission Control attention.
  */
 import type { AttentionItem } from '@/lib/pulse-attention';
+import { monitoringConfigured, monitoringDsnEnvHint } from '@/lib/monitoring';
 
 /** Preferred branded host once DNS points at ea-payments. */
 export const SIMPLIFI_BRAND_URL =
@@ -97,7 +98,7 @@ export async function probeSimplifiAppDns(): Promise<{
 }
 
 export function sentryConfigured(): boolean {
-  return Boolean(process.env.NEXT_PUBLIC_SENTRY_DSN?.trim());
+  return monitoringConfigured();
 }
 
 export function uptimeConfigured(): boolean {
@@ -108,6 +109,8 @@ export function uptimeConfigured(): boolean {
 
 export async function getSimplifiPass1Checks(): Promise<SimplifiPass1Check[]> {
   const dns = await probeSimplifiAppDns();
+  const monitoringOk = monitoringConfigured();
+  const dsnHint = monitoringDsnEnvHint();
   return [
     {
       id: 'dns_simplifi_app',
@@ -117,11 +120,11 @@ export async function getSimplifiPass1Checks(): Promise<SimplifiPass1Check[]> {
     },
     {
       id: 'sentry',
-      ok: sentryConfigured(),
-      message: sentryConfigured()
-        ? 'NEXT_PUBLIC_SENTRY_DSN set — Sentry enabled.'
-        : 'NEXT_PUBLIC_SENTRY_DSN missing — set on Vercel Production and redeploy.',
-      fix: 'docs/sentry-setup.md',
+      ok: monitoringOk,
+      message: monitoringOk
+        ? 'GlitchTip DSN set — error monitoring enabled (Sentry-compatible SDK).'
+        : `${dsnHint} missing — set NEXT_PUBLIC_GLITCHTIP_DSN on Vercel Production and redeploy.`,
+      fix: 'docs/GLITCHTIP-SETUP.md',
     },
     {
       id: 'uptime',
@@ -155,7 +158,7 @@ export async function buildSimplifiPass1AttentionItems(): Promise<AttentionItem[
         return {
           id: 'ops-sentry-dsn',
           product: 'Platform',
-          title: 'Set Sentry DSN (Pass 1)',
+          title: 'Set GlitchTip DSN (Pass 1)',
           detail: check.message,
           priority: 'high' as const,
           href: '/launch',

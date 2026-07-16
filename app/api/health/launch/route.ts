@@ -6,6 +6,7 @@ import { SIMPLIFI_APP_URL } from '@/lib/simplifi-app-host';
 import { productionSecretIssues } from '@/lib/integration-env';
 import { checkAirtableLaunchSchema } from '@/lib/airtable-schema-check';
 import { isCaptureApiKeyConfigured } from '@/lib/capture-api-key';
+import { monitoringConfigured, monitoringDsnEnvHint } from '@/lib/monitoring';
 import { ESIGNATURES_CALLBACK_URL, getTier2EnvChecks, isTier2AutomationReady } from '@/lib/launch-tier2';
 import { buildLaunchReadinessModel } from '@/lib/launch-readiness';
 import {
@@ -57,14 +58,15 @@ export async function GET() {
 
   const secretIssues = productionSecretIssues();
   const controls = {
-    sentryDsn: Boolean(process.env.NEXT_PUBLIC_SENTRY_DSN?.trim()),
+    sentryDsn: monitoringConfigured(),
+    glitchtipDsn: monitoringConfigured(),
     uptimeDashboard: Boolean(
       process.env.UPTIME_KUMA_DASHBOARD_URL?.trim() || process.env.UPTIME_MONITORING_URL?.trim(),
     ),
     backupDestination: Boolean(process.env.BACKUP_DESTINATION_URI?.trim()),
   };
   const controlIssues: string[] = [];
-  if (!controls.sentryDsn) controlIssues.push('NEXT_PUBLIC_SENTRY_DSN');
+  if (!controls.sentryDsn) controlIssues.push(monitoringDsnEnvHint());
   if (!controls.uptimeDashboard) controlIssues.push('UPTIME_KUMA_DASHBOARD_URL');
   if (!controls.backupDestination) controlIssues.push('BACKUP_DESTINATION_URI');
 
@@ -226,7 +228,7 @@ export async function GET() {
           : 'Optional — set GITHUB_TOKEN for Open Design → GitHub PR handoff (docs/OPEN-DESIGN-ARCHITECTURE.md)',
       sentryDsn: controls.sentryDsn
         ? null
-        : 'Set NEXT_PUBLIC_SENTRY_DSN in Vercel Production (required for full launch readiness)',
+        : `Set ${monitoringDsnEnvHint()} (prefer NEXT_PUBLIC_GLITCHTIP_DSN) in Vercel Production — docs/GLITCHTIP-SETUP.md`,
       uptimeDashboard: controls.uptimeDashboard
         ? null
         : 'Set UPTIME_KUMA_DASHBOARD_URL (or UPTIME_MONITORING_URL) to your monitoring dashboard URL',

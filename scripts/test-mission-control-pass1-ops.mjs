@@ -34,7 +34,9 @@ assert(opsSrc.includes('simplifi.ai') || opsSrc.includes('SIMPLIFI_BRAND_URL'), 
 assert(opsSrc.includes('probeSimplifiAppDns'), 'DNS probe required');
 assert(opsSrc.includes('buildSimplifiPass1AttentionItems'), 'attention builder required');
 assert(opsSrc.includes('sentryConfigured'), 'sentry helper required');
+assert(opsSrc.includes('monitoringConfigured') || opsSrc.includes('GLITCHTIP'), 'GlitchTip monitoring required');
 assert(opsSrc.includes('uptimeConfigured'), 'uptime helper required');
+assert(opsSrc.includes('GLITCHTIP-SETUP') || opsSrc.includes('GlitchTip'), 'Pass 1 should point at GlitchTip docs');
 
 const mcSrc = readFileSync(mc, 'utf8');
 assert(mcSrc.includes('buildSimplifiPass1AttentionItems'), 'Mission Control must import Pass 1 attention');

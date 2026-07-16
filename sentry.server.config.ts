@@ -1,4 +1,8 @@
 import * as Sentry from '@sentry/nextjs';
-import { getSentryOptions } from './lib/sentry-options';
+import { getMonitoringOptions } from '@/lib/monitoring';
 
-Sentry.init(getSentryOptions());
+try {
+  Sentry.init(getMonitoringOptions());
+} catch {
+  // Monitoring must never break the server.
+}
