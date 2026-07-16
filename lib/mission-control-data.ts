@@ -21,6 +21,7 @@ import { getCtpAttentionStats } from '@/lib/ctp-attention-stats';
 import { getPackageSyncHealth } from '@/lib/platform/package-sync-health';
 import { buildAttentionItems, type AttentionItem } from '@/lib/pulse-attention';
 import { buildWorkforceAttentionItems } from '@/lib/praison-ai/mission-control';
+import { buildCreativeAttentionItems } from '@/lib/open-design/creative-status';
 import { listCanonicalPulseEvents } from '@/lib/pulse-event-store';
 import { type PulseEvent, listRecentPulseEvents } from '@/lib/pulse-bus';
 
@@ -127,6 +128,33 @@ function praisonAttentionEvents(organizationId: string): PlatformEvent[] {
   ).map((item) => attentionItemToPlatform(item, organizationId));
 }
 
+function openDesignAttentionEvents(organizationId: string): PlatformEvent[] {
+  const recent = listRecentPulseEvents(80);
+  const briefs = recent
+    .filter(
+      (e) => e.type === 'open.design.story.blocked' || e.type === 'open.design.review.awaiting',
+    )
+    .slice(0, 12)
+    .map((e) => {
+      const organizationName = e.title
+        .replace(/^Story gate blocked — |^Creative review ready — /, '')
+        .trim();
+      const blocked = e.type === 'open.design.story.blocked';
+      return {
+        id: String(e.objectId ?? e.at),
+        organizationName: organizationName || 'Organization',
+        reviewStatus: blocked
+          ? ('story-extracted' as const)
+          : ('awaiting-executive-review' as const),
+        blockers: blocked ? [e.detail ?? 'Story sentence required.'] : [],
+      };
+    });
+
+  return buildCreativeAttentionItems(briefs).map((item) =>
+    attentionItemToPlatform(item, organizationId),
+  );
+}
+
 async function ctpAttentionEvents(organizationId: string): Promise<PlatformEvent[]> {
   const ctpStats = await getCtpAttentionStats();
   const items = buildAttentionItems({
@@ -203,10 +231,19 @@ export async function buildMissionControlPayload(input?: {
 
   const packageSyncSignals = packageSyncAttentionEvents(organizationId);
   const praisonSignals = praisonAttentionEvents(organizationId);
+  const openDesignSignals = openDesignAttentionEvents(organizationId);
 
   return buildMissionControlFromStreams(
     activity,
-    [...packageSyncSignals, ...praisonSignals, ...ctpSignals, ...rhythmSignals, ...customerSignals, ...pulseRows],
+    [
+      ...packageSyncSignals,
+      ...praisonSignals,
+      ...openDesignSignals,
+      ...ctpSignals,
+      ...rhythmSignals,
+      ...customerSignals,
+      ...pulseRows,
+    ],
     {
       organizationId,
       userName,

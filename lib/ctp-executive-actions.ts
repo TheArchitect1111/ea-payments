@@ -17,10 +17,22 @@ import { runCtpProduction } from '@/lib/ctp-production-run';
 import { runCtpWorkspaceProvision } from '@/lib/ctp-workspace-provision';
 import {
   executiveInputFromCtpSubmission,
+  formatCursorHandoffMarkdown,
   generateCreativeExperienceBrief,
   runOpenDesignImplementationHandoff,
+  type CursorHandoffPackage,
 } from '@/lib/open-design';
 import { resolveCtpOrganizationId } from '@/lib/ctp-studio-bridge';
+
+export type CtpOpenDesignHandoffPayload = {
+  mode: 'github-pr' | 'package-only' | 'failed';
+  storySentence: string;
+  creativeDnaSummary: string;
+  deliverableTitles: string[];
+  markdown: string;
+  packageJson: CursorHandoffPackage;
+  pullRequestUrl?: string;
+};
 
 export type CtpExecutiveAction =
   | 'ready_for_review'
@@ -59,6 +71,7 @@ export async function runCtpExecutiveAction(
   submission?: CtpSubmission;
   revealUrl?: string;
   handoffUrl?: string;
+  handoff?: CtpOpenDesignHandoffPayload;
   error?: string;
 }> {
   const submission = await getCtpSubmissionById(submissionId);
@@ -191,10 +204,20 @@ export async function runCtpExecutiveAction(
       return { ok: false, error: result.error ?? 'Open Design handoff failed.' };
     }
     const refreshed = await getCtpSubmissionById(submissionId);
+    const handoff: CtpOpenDesignHandoffPayload = {
+      mode: result.mode,
+      storySentence: result.handoff.storySentence,
+      creativeDnaSummary: result.handoff.creativeDnaSummary,
+      deliverableTitles: result.handoff.deliverables.map((d) => d.title),
+      markdown: formatCursorHandoffMarkdown(result.handoff),
+      packageJson: result.handoff,
+      pullRequestUrl: result.pullRequestUrl,
+    };
     return {
       ok: true,
       submission: refreshed ?? submission,
       handoffUrl: result.pullRequestUrl,
+      handoff,
     };
   }
 

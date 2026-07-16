@@ -87,3 +87,49 @@ export function buildCursorHandoffPackage(brief: CreativeExperienceBrief): Curso
     generatedAt: new Date().toISOString(),
   };
 }
+
+/** Markdown suitable for Cursor paste / admin copy. */
+export function formatCursorHandoffMarkdown(handoff: CursorHandoffPackage): string {
+  return [
+    `# Open Design Handoff — ${handoff.organizationId}`,
+    '',
+    `Brief: \`${handoff.briefId}\``,
+    `Generated: ${handoff.generatedAt}`,
+    '',
+    '## Story',
+    '',
+    handoff.storySentence,
+    '',
+    '## Creative DNA',
+    '',
+    handoff.creativeDnaSummary || '_Not set_',
+    '',
+    '## Design tokens',
+    '',
+    `- Source: \`${handoff.tokens.source}\``,
+    `- Primary: ${handoff.tokens.primary}`,
+    `- Secondary: ${handoff.tokens.secondary}`,
+    handoff.tokens.accent ? `- Accent: ${handoff.tokens.accent}` : '',
+    `- Display type: ${handoff.tokens.typography.display}`,
+    `- Body type: ${handoff.tokens.typography.body}`,
+    '',
+    '## Deliverables',
+    '',
+    ...handoff.deliverables.flatMap((d) => [
+      `### ${d.title} (\`${d.kind}\`)`,
+      '',
+      `Story beat: ${d.storyBeat}`,
+      '',
+      d.layoutNotes,
+      '',
+      d.tailwindNotes,
+      '',
+    ]),
+    '## Standing rules',
+    '',
+    ...handoff.standingRules.map((r) => `- ${r}`),
+    '',
+  ]
+    .filter(Boolean)
+    .join('\n');
+}

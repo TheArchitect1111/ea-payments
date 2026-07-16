@@ -44,6 +44,7 @@ export { STANDING_DESIGN_RULES, DEFAULT_ANTI_PATTERNS, SECTION_STORY_PROMPT } fr
 
 export {
   buildCursorHandoffPackage,
+  formatCursorHandoffMarkdown,
   type CursorHandoffPackage,
   type DesignTokenHandoff,
 } from './output-contract';
@@ -52,6 +53,7 @@ export {
   creativeStatusLabel,
   buildCreativeAttentionItems,
   MISSION_CONTROL_CREATIVE_STATUSES,
+  type CreativeAttentionBrief,
 } from './creative-status';
 
 export { beginOpenDesignFromCtp } from './ctp-integration';
