@@ -16,6 +16,9 @@ export type OrbVisualState =
   | 'celebration'
   | 'offline';
 
+/** Transient Orb flash after a real user action (not derived from Brief). */
+export type OrbOutcomeFlash = 'success' | 'learning' | 'celebration';
+
 export type OrbFinding = {
   id: string;
   title: string;

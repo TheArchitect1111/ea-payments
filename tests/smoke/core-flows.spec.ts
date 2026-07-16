@@ -158,6 +158,16 @@ test('simplifi orb ask opens inbox session workspace in place', async ({ page })
   await expect(page.getByRole('heading', { name: /what deserves your attention/i })).toBeVisible();
 });
 
+test('simplifi orb outcome flash wiring is present on capture session', async ({ page }) => {
+  await page.goto('/simplifi/workspace');
+  await page.getByRole('button', { name: /SIMPLIFI Orb/i }).click();
+  await page.getByRole('textbox', { name: /Ask Simplifi/i }).fill('open capture');
+  await page.getByRole('button', { name: /^ask$/i }).click();
+  await expect(page.getByRole('dialog', { name: /capture workspace/i })).toBeVisible();
+  // Orb button remains mounted so outcome flashes can apply data-state.
+  await expect(page.locator('.global-orb-btn')).toBeVisible();
+});
+
 test('app alias redirects to workspace', async ({ page }) => {
   await page.goto('/app');
   await expect(page).toHaveURL(/\/simplifi\/workspace/);

@@ -6,6 +6,7 @@ import type { SimplifiObject } from '@/lib/simplifi-objects';
 import { priorityLevelLabel } from '@/lib/priority-engine';
 import { buildExpirationAlerts } from '@/lib/smart-expiration';
 import { analyzeCaptureUrl } from '@/lib/simplifi-client';
+import type { OrbOutcomeFlash } from '@/lib/orb';
 import OpportunityActions from '@/app/simplifi/opportunity/[id]/OpportunityActions';
 import './session-workspace.css';
 
@@ -27,6 +28,7 @@ export default function SessionWorkspace({
   onClose,
   onOpenOpportunity,
   onBackToInbox,
+  onOutcomeFlash,
 }: {
   view: SessionView;
   objects: SimplifiObject[];
@@ -34,6 +36,7 @@ export default function SessionWorkspace({
   onClose: () => void;
   onOpenOpportunity: (id: string) => void;
   onBackToInbox: () => void;
+  onOutcomeFlash?: (flash: OrbOutcomeFlash) => void;
 }) {
   const panelRef = useRef<HTMLElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
@@ -112,9 +115,13 @@ export default function SessionWorkspace({
           ) : view.kind === 'calendar' ? (
             <CalendarView objects={objects} loggedIn={loggedIn} onOpenOpportunity={onOpenOpportunity} />
           ) : view.kind === 'capture' ? (
-            <CaptureView initialDraft={view.draft} />
+            <CaptureView initialDraft={view.draft} onOutcomeFlash={onOutcomeFlash} />
           ) : opportunity ? (
-            <OpportunityView opportunity={opportunity} loggedIn={loggedIn} />
+            <OpportunityView
+              opportunity={opportunity}
+              loggedIn={loggedIn}
+              onOutcomeFlash={onOutcomeFlash}
+            />
           ) : (
             <div className="orb-session-empty">
               <p>That opportunity isn’t in this session.</p>
@@ -195,9 +202,11 @@ function InboxView({
 function OpportunityView({
   opportunity,
   loggedIn,
+  onOutcomeFlash,
 }: {
   opportunity: SimplifiObject;
   loggedIn: boolean;
+  onOutcomeFlash?: (flash: OrbOutcomeFlash) => void;
 }) {
   return (
     <>
@@ -226,6 +235,7 @@ function OpportunityView({
           recordId={opportunity.id}
           dueDate={opportunity.dueDate}
           outcomeStatus={opportunity.outcomeStatus}
+          onOutcomeFlash={onOutcomeFlash}
         />
       ) : null}
 
@@ -396,7 +406,13 @@ function CalendarView({
   );
 }
 
-function CaptureView({ initialDraft }: { initialDraft?: string }) {
+function CaptureView({
+  initialDraft,
+  onOutcomeFlash,
+}: {
+  initialDraft?: string;
+  onOutcomeFlash?: (flash: OrbOutcomeFlash) => void;
+}) {
   const [draft, setDraft] = useState(initialDraft ?? '');
   const [status, setStatus] = useState('');
   const [saving, setSaving] = useState(false);
@@ -409,7 +425,12 @@ function CaptureView({ initialDraft }: { initialDraft?: string }) {
       if (looksLikeUrl) {
         const data = await analyzeCaptureUrl({ url: text.trim() });
         const record = data.record as { title?: string } | undefined;
-        setStatus(data.ok ? (record?.title ? `Captured: ${record.title}` : 'Captured.') : data.error ?? 'Could not capture.');
+        if (data.ok) {
+          setStatus(record?.title ? `Captured: ${record.title}` : 'Captured.');
+          onOutcomeFlash?.('success');
+        } else {
+          setStatus(data.error ?? 'Could not capture.');
+        }
         return;
       }
       const res = await fetch('/api/portal/captures/analyze', {
@@ -424,6 +445,7 @@ function CaptureView({ initialDraft }: { initialDraft?: string }) {
       }
       setStatus(data.record?.title ? `Captured: ${data.record.title}` : 'Captured.');
       setDraft('');
+      onOutcomeFlash?.('success');
     } catch {
       setStatus('Capture could not be saved.');
     } finally {

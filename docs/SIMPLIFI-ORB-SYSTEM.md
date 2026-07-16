@@ -98,6 +98,24 @@ from Action Center `needsAttention` and Brief items only. No invented insights.
 
 Helpers live in `lib/orb/ambient.ts` and reuse `buildAmbientOpening` from `lib/orb-os`.
 
+## Outcome states (Step 4)
+
+After a **real** user action succeeds, the resting Orb briefly flashes an outcome
+visual (CSS already existed; previously unused). Flashes last ~1.2s and override
+display via `outcomeFlash` — they are **not** pushed into `deriveOrbSession`
+(priority would lose to attention states).
+
+| Real event | Visual |
+|------------|--------|
+| Capture saved (session CaptureView) | `success` (bloom) |
+| Opportunity marked won | `success` |
+| Build Intelligence returns data | `learning` (purple core) |
+| Snooze / in progress / pass / archive | none (inline note only) |
+| `celebration` | reserved — not wired until a genuine milestone exists |
+
+Wiring: `GlobalOrb.flashOutcome` → `SessionWorkspace.onOutcomeFlash` →
+`CaptureView` / `OpportunityActions` (optional prop; full opportunity page works without it).
+
 ## Verification
 
 ```bash
@@ -105,10 +123,11 @@ node scripts/test-simplifi-orb-system-contract.mjs
 node scripts/test-simplifi-orb-route-intents-contract.mjs
 node scripts/test-simplifi-orb-session-workspace-contract.mjs
 node scripts/test-simplifi-orb-ambient-openers-contract.mjs
+node scripts/test-simplifi-orb-outcome-states-contract.mjs
 ```
 
 Open `/simplifi/workspace` — Brief shows a grounded attention lead. Tap Orb —
 ambient opener appears above findings; **Review them** opens the inbox session.
-Ask “show my inbox” — a session workspace opens in place over the Brief; `Done`
-restores the Brief. Ask a name that matches one opportunity — its quick view
-opens with snooze / outcome actions.
+Ask “open capture”, save a note — Orb blooms `success`. On an opportunity quick
+view, **Build Intelligence** flashes `learning`; **Won** flashes `success`.
+Ask “show my inbox” — a session workspace opens in place; `Done` restores the Brief.
