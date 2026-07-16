@@ -75,23 +75,43 @@ export function buildMagnifiNarrative(
   analysis: OpportunityAnalysis,
   extraction: BusinessExtraction,
   recommendations?: RecommendationResult,
+  options?: { lowSignal?: boolean },
 ): MagnifiOpportunityNarrative {
+  const lowSignal = Boolean(options?.lowSignal);
   const avg =
     Object.values(analysis.scores).reduce((a, b) => a + b, 0) /
     Object.keys(analysis.scores).length;
 
-  const currentState = [
-    `${businessName} presents ${analysis.strengths[0]?.toLowerCase() ?? 'a foundation with identifiable strengths'}.`,
-    extraction.messaging ? `Current messaging: "${extraction.messaging.slice(0, 160)}…"` : '',
-    `Composite opportunity score: ${Math.round(avg)}/100 across visibility, exposure, conversion, differentiation, modernity, and trust.`,
-  ]
-    .filter(Boolean)
-    .join(' ');
+  const currentState = lowSignal
+    ? [
+        `${businessName} did not provide enough public page content for a high-confidence Magnifi.`,
+        extraction.messaging
+          ? `Available messaging fragment: "${extraction.messaging.slice(0, 160)}…"`
+          : 'Little on-page messaging was detected.',
+        'Treat this report as a directional first pass — recapture with a deeper URL or screenshot for stronger guidance.',
+      ].join(' ')
+    : [
+        `${businessName} presents ${analysis.strengths[0]?.toLowerCase() ?? 'a foundation with identifiable strengths'}.`,
+        extraction.messaging ? `Current messaging: "${extraction.messaging.slice(0, 160)}…"` : '',
+        `Composite opportunity score: ${Math.round(avg)}/100 across visibility, exposure, conversion, differentiation, modernity, and trust.`,
+      ]
+        .filter(Boolean)
+        .join(' ');
+
+  const revenueLine =
+    lowSignal ||
+    (analysis.estimates.revenueLeftOnTable.low === 0 &&
+      analysis.estimates.revenueLeftOnTable.high === 0)
+      ? analysis.estimates.revenueLeftOnTable.assumption
+      : `Estimated revenue opportunity: $${analysis.estimates.revenueLeftOnTable.low.toLocaleString()}–$${analysis.estimates.revenueLeftOnTable.high.toLocaleString()} annually (${analysis.estimates.revenueLeftOnTable.assumption})`;
 
   const opportunityAnalysis = [
-    analysis.weaknesses[0] ?? 'Some gaps may limit how quickly prospects understand the value.',
+    analysis.weaknesses[0] ??
+      (lowSignal
+        ? 'Insufficient public content to diagnose conversion gaps with confidence.'
+        : 'Some gaps may limit how quickly prospects understand the value.'),
     analysis.missedOpportunities.join(' '),
-    `Estimated revenue opportunity: $${analysis.estimates.revenueLeftOnTable.low.toLocaleString()}–$${analysis.estimates.revenueLeftOnTable.high.toLocaleString()} annually (${analysis.estimates.revenueLeftOnTable.assumption})`,
+    revenueLine,
   ].join(' ');
 
   const futureState = [
@@ -153,6 +173,7 @@ export function buildOpportunityPayload(input: {
   captureRecordId?: string;
   uniqueSuffix?: string;
   intelligence?: SimplifiIntelligenceBundle;
+  lowSignal?: boolean;
 }): OpportunityExperiencePayload {
   const prospectSlug = buildProspectSlug(input.businessName, input.uniqueSuffix);
   const shareUrl = `${input.baseUrl.replace(/\/$/, '')}/consider/${prospectSlug}`;
@@ -161,6 +182,7 @@ export function buildOpportunityPayload(input: {
     input.analysis,
     input.extraction,
     input.recommendations,
+    { lowSignal: input.lowSignal },
   );
 
   return {

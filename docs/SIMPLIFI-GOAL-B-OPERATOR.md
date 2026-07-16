@@ -45,6 +45,17 @@ Confirm monitors include:
 | Resume processing after refresh | Start capture, refresh page → banner resumes |
 | Guest → sign-in claim | Capture as guest, sign in → captures move to your slug |
 
+## Pass 3 — Magnifi deliverable + honest URL analysis (shipped in code)
+
+| Capability | How to verify |
+|------------|---------------|
+| Magnifi **Download PDF** | Open Magnifi or Classic → Download PDF → browser print / Save as PDF |
+| Print route auth | `/api/portal/captures/{id}/print` requires Simplifi session + matching portal |
+| Thin URL honesty | Capture a thin page (e.g. bare example.com) → Low confidence note, no invented revenue $ |
+| Website audit merge | Thin HTTP URL → analysis includes audit findings / clearer gaps |
+
+Contract: `node scripts/test-simplifi-goal-b-pass3.mjs`
+
 ## Tester handoff
 
 1. Guide: `docs/SIMPLIFI-EARLY-ACCESS-TESTER-GUIDE.md`
@@ -56,4 +67,10 @@ Confirm monitors include:
 - [ ] Pass 1 DNS live
 - [ ] Pass 1 Sentry live
 - [x] Pass 2 reliability in production
-- [ ] One full smoke: URL capture → Magnifi → guidance → workspace
+- [x] Pass 3 Magnifi print + thin-URL honesty in code
+- [ ] One full smoke: URL capture → Magnifi → PDF → guidance → workspace
+
+## Still out of Early Access “100%” (Pass 4 / later)
+
+- Extension scoped session token + server watch lists
+- True binary PDF generation (Puppeteer) — not required; print-pack is the platform pattern
