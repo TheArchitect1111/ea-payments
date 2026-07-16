@@ -114,7 +114,8 @@ function hashToken(token: string) {
 
 /**
  * Resolve an admin account by email only (no password) — used by SSO/Clerk
- * sign-in. Sources: Airtable Admin Users → ADMIN_USERS env → ADMIN_CLERK_ALLOWLIST.
+ * and admin magic-link. Sources: Airtable Admin Users → ADMIN_USERS env →
+ * ADMIN_EMAIL / ADMIN_CLERK_ALLOWLIST / ARCHITECT_EMAILS (+ owner fallback).
  */
 /** Owner / architect emails that must be able to request admin magic links. */
 function configuredOwnerEmails(): string[] {
