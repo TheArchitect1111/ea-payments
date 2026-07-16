@@ -321,7 +321,7 @@ function recommendNextAction(items: LaunchCheckItem[], tier2Ready: boolean): str
     return byId.esignatures_templates.message;
   }
   if (byId.dns_simplifi_app && byId.dns_simplifi_app.status !== 'complete') {
-    return 'Simplifi Pass 1: attach app.simplifi.ai in Vercel Domains + CNAME — docs/SIMPLIFI-GOAL-B-OPERATOR.md';
+    return 'Simplifi Pass 1: branded host down — confirm simplifi.ai on Vercel Domains — docs/SIMPLIFI-GOAL-B-OPERATOR.md';
   }
   if (byId.sentry && byId.sentry.status !== 'complete') {
     return 'Simplifi Pass 1: set NEXT_PUBLIC_SENTRY_DSN on Vercel Production and redeploy — docs/sentry-setup.md';
@@ -689,13 +689,13 @@ export async function runLaunchCommandCenter(options?: {
       id: 'dns_simplifi_app',
       section: 'domains',
       category: 'DNS',
-      name: 'app.simplifi.ai workspace alias',
+      name: 'simplifi.ai branded host (real app)',
       automation: 'partially_automated',
       status: simplifiDns.ok ? 'complete' : 'needs_human_action',
       maxScore: 4,
       message: simplifiDns.ok
         ? simplifiDns.message
-        : `${simplifiDns.message} Add in Vercel Domains + CNAME app → cname.vercel-dns.com.`,
+        : `${simplifiDns.message} GoDaddy: A record → 76.76.21.21 for apex and app.`,
       fix: 'docs/SIMPLIFI-GOAL-B-OPERATOR.md',
       verify: 'node scripts/validate-simplifi-launch-readiness.mjs https://efficiencyarchitects.online',
     }),

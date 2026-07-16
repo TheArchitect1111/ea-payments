@@ -1,99 +1,91 @@
 # Simplifi Goal B — Operator checklist (100% Early Access)
 
-Code for Pass 2 (upload limits, processing UX, guest claim) ships in the app.  
-These items still need **operator / Vercel** action.
+Product code for Pass 2–4 is on `master`.  
+**You can test on a phone today** on the working host below. Branded `simplifi.ai` DNS still needs a fix.
 
-## Pass 1 — Infrastructure
+## Phone testing — do this now (works today)
 
-Open **Mission Control** (`/admin/master`) after deploy — incomplete Pass 1 items appear as attention cards linking to `/launch`.
+### Option A — Browser + Add to Home Screen (recommended)
 
-### 1. `app.simplifi.ai` DNS
+1. On your phone open:  
+   **https://efficiencyarchitects.online/simplifi/capture**
+2. **Sign in (for history):**  
+   - https://efficiencyarchitects.online/portal/login  
+   - Tap **Sign in with password instead**  
+   - Email: `demo@efficiencyarchitects.online`  
+   - Password: `DemoPulse2026!`  
+   - Then go back to `/simplifi/capture`  
+   **Or** use https://efficiencyarchitects.online/simplifi/login → enter the demo email → open the magic link from email **on the phone**.
+3. Paste a business URL (or upload a JPEG — not HEIC) → Capture.
+4. **Install on phone:** Share → **Add to Home Screen**.  
+   That installs the Simplifi Capture PWA (standalone icon).
 
-1. Vercel project → **Domains** → add `app.simplifi.ai`
-2. DNS provider → CNAME `app` → `cname.vercel-dns.com`
-3. Wait for SSL
-4. Confirm:
-   - `https://app.simplifi.ai` → Simplifi workspace/capture
-   - `/capture` and `/app` aliases work on that host
+### Option B — Native app download
 
-Until then, testers use:
+There is **no App Store / Play Store / TestFlight build published**.
 
-- https://efficiencyarchitects.online/simplifi/capture
-- https://efficiencyarchitects.online/simplifi/workspace
+| Want | Do this |
+|------|---------|
+| Try native UI quickly | Install **Expo Go** → on a computer `cd mobile`, set `EXPO_PUBLIC_API_BASE_URL=https://efficiencyarchitects.online`, `npm install`, `npm start`, scan QR |
+| Real installable build | Follow `mobile/README.md` (`npm run build:testflight` / Android preview) with EAS + Apple/Google accounts |
+
+---
+
+## Pass 1 — What you still need to finish (operator)
+
+Open **Mission Control** (`/admin/master`) — incomplete items show as attention cards → `/launch`.
+
+### 1. Fix `simplifi.ai` DNS (GoDaddy / Domaincontrol)
+
+Vercel already has `simplifi.ai` + `app.simplifi.ai` on **ea-payments**, but public DNS still serves a **/lander** stub (not the app). Nameservers are Domaincontrol, not Vercel.
+
+**In GoDaddy DNS for `simplifi.ai`:**
+
+1. Open DNS management for `simplifi.ai`
+2. Set apex **A** record → `76.76.21.21` (Vercel)
+3. For `app` subdomain: **A** `app` → `76.76.21.21`  
+   (or the exact record shown in Vercel → ea-payments → Settings → Domains)
+4. Remove conflicting parking/lander records
+5. Wait for SSL → confirm:
+   - https://simplifi.ai/api/health/launch returns JSON `ok: true`
+   - https://simplifi.ai/simplifi/capture shows the real capture UI (not redirect to `/lander`)
+
+Until then, testers use **efficiencyarchitects.online** only.
 
 ### 2. Sentry DSN
 
-1. Create/open Sentry project for `ea-payments`
-2. Copy client DSN
-3. Vercel Production → `NEXT_PUBLIC_SENTRY_DSN` = DSN
-4. Redeploy
-5. Confirm `/api/health/launch` → `checks.controls.sentryDsn: true`
+1. Sentry → project `ea-payments` → Client Keys (DSN)
+2. Vercel Production → `NEXT_PUBLIC_SENTRY_DSN` = DSN
+3. Redeploy
+4. Confirm `/api/health/launch` → `checks.controls.sentryDsn: true`  
+   Details: `docs/sentry-setup.md`
 
-### 3. Uptime (already configured if health shows uptime=true)
+### 3. Uptime
 
-Confirm monitors include:
+Set `UPTIME_KUMA_DASHBOARD_URL` or `UPTIME_MONITORING_URL` if missing.  
+Monitors should include `/simplifi/capture`, `/simplifi/workspace`, `/api/health/launch`.
 
-- `/simplifi/capture`
-- `/simplifi/workspace`
-- `/api/health/launch`
+---
 
-## Pass 2 — Shipped in code (verify)
-
-| Capability | How to verify |
-|------------|---------------|
-| Upload size limit (3.5 MB) client + server | Oversized PDF → clear error / 413 |
-| HEIC rejected with camera tip | Upload HEIC → friendly message |
-| Processing timeout → workspace link | Slow capture → “Open workspace” |
-| Resume processing after refresh | Start capture, refresh page → banner resumes |
-| Guest → sign-in claim | Capture as guest, sign in → captures move to your slug |
-
-## Pass 3 — Magnifi deliverable + honest URL analysis (shipped in code)
-
-| Capability | How to verify |
-|------------|---------------|
-| Magnifi **Download PDF** | Open Magnifi or Classic → Download PDF → browser print / Save as PDF |
-| Print route auth | `/api/portal/captures/{id}/print` requires Simplifi session + matching portal |
-| Thin URL honesty | Capture a thin page (e.g. bare example.com) → Low confidence note, no invented revenue $ |
-| Website audit merge | Thin HTTP URL → analysis includes audit findings / clearer gaps |
-
-Contract: `node scripts/test-simplifi-goal-b-pass3.mjs`
-
-## Pass 4 — Extension session + server watch lists (shipped in code)
-
-| Capability | How to verify |
-|------------|---------------|
-| Scoped extension token | `/extension/connect` → bootstrap returns `extensionToken` + `tokenExpiresAt` (no long-lived `apiKey`) |
-| Token refresh | `POST /api/extension/session/refresh` with Bearer token → new token |
-| Capture with session | Extension ingest/status accept `Authorization: Bearer` / `X-EA-Extension-Token` |
-| Server watch list | `GET/POST /api/extension/watch-list` + portal `/api/portal/simplifi/watch-list` |
-| Local migration | Connect with local watch items → uploaded when server list empty |
-
-Contract: `node scripts/test-simplifi-goal-b-pass4.mjs`
-
-Operator note: optional Airtable table `Simplifi Watch List` (or `AIRTABLE_SIMPLIFI_WATCH_LIST_TABLE`). Create with:
+## Pass 2–4 — Shipped in code
 
 ```bash
-node scripts/setup-simplifi-watch-list-table.mjs
+node scripts/validate-simplifi-launch-readiness.mjs https://efficiencyarchitects.online
+node scripts/test-simplifi-goal-b-pass2.mjs
+node scripts/test-simplifi-goal-b-pass3.mjs
+node scripts/test-simplifi-goal-b-pass4.mjs
 ```
 
-Without it, watch lists use in-memory fallback on the server (dev-safe; create the table for production durability).
+## Definition of done
 
-## Tester handoff
+- [ ] `simplifi.ai` serves ea-payments (not `/lander`)
+- [ ] Optional `app.simplifi.ai` resolves to workspace/capture
+- [ ] Sentry DSN live
+- [ ] Uptime env/monitors
+- [x] Pass 2–4 product code
+- [ ] Phone smoke: capture → Magnifi → PDF → guidance → workspace
 
-1. Guide: `docs/SIMPLIFI-EARLY-ACCESS-TESTER-GUIDE.md`
-2. Entry: `/start`
-3. Demo: `demo@efficiencyarchitects.online` / `DemoPulse2026!`
+## Demo credentials
 
-## Definition of done (Goal B Early Access)
-
-- [ ] Pass 1 DNS live
-- [ ] Pass 1 Sentry live
-- [x] Pass 2 reliability in production
-- [x] Pass 3 Magnifi print + thin-URL honesty in code
-- [x] Pass 4 extension session + watch lists in code
-- [ ] One full smoke: URL capture → Magnifi → PDF → guidance → workspace
-
-## Optional later
-
-- True binary PDF generation (Puppeteer) — not required; print-pack is the platform pattern
-- Extension revoke blocklist by `sid` (stateless expiry is enough for Pass 4)
+`demo@efficiencyarchitects.online` / `DemoPulse2026!`  
+(Password works on **portal** login; Simplifi login is magic-link only.)

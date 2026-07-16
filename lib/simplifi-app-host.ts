@@ -1,6 +1,8 @@
 /** Hosts that should land on the Simplifi product shell (same Vercel project). */
 export const SIMPLIFI_APP_HOSTS = new Set(
   [
+    'simplifi.ai',
+    'www.simplifi.ai',
     'app.simplifi.ai',
     'www.app.simplifi.ai',
     'app-simplifi.vercel.app',
@@ -38,4 +40,4 @@ export function resolveSimplifiAppHostRedirect(
 }
 
 export const SIMPLIFI_APP_URL =
-  process.env.NEXT_PUBLIC_SIMPLIFI_APP_URL?.replace(/\/$/, '') ?? 'https://app.simplifi.ai';
+  process.env.NEXT_PUBLIC_SIMPLIFI_APP_URL?.replace(/\/$/, '') ?? 'https://simplifi.ai';
