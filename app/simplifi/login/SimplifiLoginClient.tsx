@@ -41,9 +41,12 @@ export default function SimplifiLoginClient() {
 
         <footer className="pl-footer">
           <p className="pl-footer-text">
-            Full EA client portal?{' '}
+            Simplifi sends a <strong>one-tap email link</strong> — no password here.
+          </p>
+          <p className="pl-footer-text">
+            Need the EA client portal (email code or password)?{' '}
             <Link href="/portal/login" className="pl-footer-link">
-              Sign in here
+              Portal sign in
             </Link>
           </p>
         </footer>

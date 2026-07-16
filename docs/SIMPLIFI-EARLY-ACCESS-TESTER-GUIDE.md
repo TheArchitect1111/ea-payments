@@ -16,8 +16,9 @@ Simplifi captures opportunities, runs analysis, builds a Magnifi story (with Dow
 ## Phone in 2 minutes
 
 1. Open **https://efficiencyarchitects.online/simplifi/workspace** (Today's Brief — home)
-2. Sign in: https://efficiencyarchitects.online/simplifi/login or portal login →  
-   `demo@efficiencyarchitects.online` / `DemoPulse2026!` (password on portal)
+2. Sign in — easiest is the **one-click demo** straight to the Brief:  
+   **https://efficiencyarchitects.online/api/auth/demo-enter?next=/simplifi/workspace**  
+   (or `simplifi/login` magic link, or portal login → `demo@efficiencyarchitects.online` / `DemoPulse2026!`)
 3. From Brief, tap **Capture** (or Ask Orb) to save a URL
 4. Share → **Add to Home Screen** — PWA opens Today's Brief
 
@@ -30,6 +31,7 @@ Simplifi captures opportunities, runs analysis, builds a Magnifi story (with Dow
 | Step | URL |
 |------|-----|
 | Today's Brief (home) | https://efficiencyarchitects.online/simplifi/workspace |
+| One-click demo → Brief | https://efficiencyarchitects.online/api/auth/demo-enter?next=/simplifi/workspace |
 | Quick Capture | https://efficiencyarchitects.online/simplifi/capture |
 | Inbox | https://efficiencyarchitects.online/simplifi/inbox |
 | Capture alias | https://efficiencyarchitects.online/capture |
@@ -42,7 +44,7 @@ Simplifi captures opportunities, runs analysis, builds a Magnifi story (with Dow
 
 ## Recommended test flow
 
-1. Sign in (portal password or Simplifi magic link)
+1. Sign in — one-click demo (`/api/auth/demo-enter?next=/simplifi/workspace`), Simplifi magic link, or portal password
 2. Capture a real business URL
 3. Open Magnifi → Download PDF
 4. Open guidance → workspace
