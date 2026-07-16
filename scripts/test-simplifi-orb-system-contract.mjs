@@ -45,6 +45,8 @@ assert(globalOrb.includes('Ask about your workspace'), 'expanded ask required');
 assert(globalOrb.includes('Recommended next step'), 'recommendation block required');
 assert(globalOrb.includes('global-orb-btn'), 'resting orb button required');
 assert(globalOrb.includes('global-orb-liquid'), 'liquid-light core required');
+assert(globalOrb.includes('global-orb-mark'), 'ORB wordmark required for companion presence');
+assert(globalOrb.includes('global-orb-rim'), 'glass rim required');
 assert(globalOrb.includes('visibilitychange'), 'must pause motion when tab hidden');
 assert(globalOrb.includes('aria-controls'), 'orb button must control panel');
 assert(globalOrb.includes("e.key !== 'Tab'"), 'expanded panel must trap keyboard focus');
@@ -58,6 +60,9 @@ assert(css.includes('#c9a844') || css.includes('--orb-gold'), 'gold brand requir
 assert(css.includes('global-orb-liquid'), 'liquid light CSS required');
 assert(css.includes('global-orb-blossom'), 'blossom panel entrance required');
 assert(css.includes('data-paused'), 'paused motion CSS required');
+assert(css.includes('--orb-size') || css.includes('64px'), 'companion size required');
+assert(css.includes('global-orb-mark'), 'wordmark CSS required');
+assert(css.includes('global-orb-rim'), 'rim CSS required');
 
 const workspace = readFileSync(join(root, 'app/simplifi/workspace/page.tsx'), 'utf8');
 assert(workspace.includes('SimplifiProductShell'), 'workspace must use product shell');

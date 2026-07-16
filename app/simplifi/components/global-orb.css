@@ -1,9 +1,11 @@
 .global-orb-root {
   --orb-navy: #1b2b4d;
-  --orb-navy-deep: #121c33;
+  --orb-navy-deep: #0e1628;
   --orb-gold: #c9a844;
-  --orb-champagne: rgba(232, 213, 163, 0.5);
-  --orb-glass: rgba(255, 255, 255, 0.14);
+  --orb-gold-bright: #f0d78a;
+  --orb-champagne: rgba(232, 213, 163, 0.72);
+  --orb-glass: rgba(255, 255, 255, 0.22);
+  --orb-size: 64px;
   position: contents;
 }
 
@@ -15,18 +17,25 @@
   clip: rect(0 0 0 0);
 }
 
+/* Companion cluster — not a lone Material FAB */
 .global-orb-btn {
   position: fixed;
-  right: max(16px, env(safe-area-inset-right));
-  bottom: max(88px, calc(72px + env(safe-area-inset-bottom)));
+  right: max(14px, env(safe-area-inset-right));
+  bottom: max(92px, calc(76px + env(safe-area-inset-bottom)));
   z-index: 90;
-  width: 56px;
-  height: 56px;
-  padding: 0;
+  width: auto;
+  height: auto;
+  min-width: 72px;
+  min-height: 72px;
+  padding: 6px 4px 2px;
   border: 0;
-  border-radius: 50%;
+  border-radius: 0;
   background: transparent;
   cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
 }
@@ -34,26 +43,45 @@
 .global-orb-btn:focus-visible {
   outline: 2px solid var(--orb-gold);
   outline-offset: 4px;
+  border-radius: 16px;
 }
 
 .global-orb-visual {
   position: relative;
-  width: 56px;
-  height: 56px;
+  width: var(--orb-size);
+  height: var(--orb-size);
   border-radius: 50%;
   display: block;
   overflow: visible;
+  flex-shrink: 0;
 }
 
 .global-orb-halo {
   position: absolute;
-  inset: -5px;
+  inset: -10px;
   border-radius: 50%;
-  background: radial-gradient(circle, var(--orb-champagne) 0%, transparent 68%);
-  opacity: 0.55;
+  background:
+    radial-gradient(circle, var(--orb-champagne) 0%, rgba(201, 168, 68, 0.2) 42%, transparent 72%);
+  opacity: 0.75;
   animation: global-orb-breathe 7s ease-in-out infinite;
   pointer-events: none;
   will-change: transform, opacity;
+}
+
+/* Outer glass rim — signature edge, not a flat button */
+.global-orb-rim {
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.45) 0%,
+    rgba(201, 168, 68, 0.35) 35%,
+    rgba(27, 43, 77, 0.4) 70%,
+    rgba(255, 255, 255, 0.15) 100%
+  );
+  pointer-events: none;
+  opacity: 0.9;
 }
 
 .global-orb-shell {
@@ -61,40 +89,74 @@
   inset: 0;
   border-radius: 50%;
   background:
-    radial-gradient(circle at 32% 26%, var(--orb-glass), transparent 44%),
-    radial-gradient(circle at 68% 72%, rgba(201, 168, 68, 0.08), transparent 50%),
-    radial-gradient(circle at 50% 58%, #243556 0%, var(--orb-navy) 55%, var(--orb-navy-deep) 100%);
+    radial-gradient(circle at 30% 22%, rgba(255, 255, 255, 0.32), transparent 40%),
+    radial-gradient(circle at 72% 68%, rgba(201, 168, 68, 0.18), transparent 48%),
+    radial-gradient(circle at 50% 55%, #2c4068 0%, var(--orb-navy) 48%, var(--orb-navy-deep) 100%);
   box-shadow:
-    0 4px 18px rgba(18, 28, 51, 0.22),
-    inset 0 1px 1px rgba(255, 255, 255, 0.16),
-    inset 0 -6px 14px rgba(18, 28, 51, 0.35);
+    0 2px 8px rgba(14, 22, 40, 0.18),
+    inset 0 2px 3px rgba(255, 255, 255, 0.2),
+    inset 0 -10px 20px rgba(8, 12, 24, 0.45);
   pointer-events: none;
 }
 
 .global-orb-core {
   position: absolute;
-  inset: 28%;
+  inset: 24%;
   border-radius: 50%;
   overflow: hidden;
-  background: radial-gradient(circle at 40% 35%, #f0d78a 0%, var(--orb-gold) 55%, #8a7028 100%);
+  background: radial-gradient(circle at 38% 32%, #fff6d0 0%, var(--orb-gold-bright) 28%, var(--orb-gold) 58%, #6e5820 100%);
   box-shadow:
-    0 0 10px rgba(201, 168, 68, 0.4),
-    inset 0 1px 2px rgba(255, 255, 255, 0.35);
+    0 0 16px rgba(201, 168, 68, 0.65),
+    0 0 28px rgba(201, 168, 68, 0.25),
+    inset 0 1px 3px rgba(255, 255, 255, 0.5);
   pointer-events: none;
 }
 
-/* Slow liquid light — almost subconscious internal energy */
+/* Visible liquid light — readable in one glance */
 .global-orb-liquid {
   position: absolute;
-  inset: -40%;
+  inset: -55%;
   border-radius: 50%;
   background:
-    radial-gradient(circle at 30% 40%, rgba(255, 248, 220, 0.55) 0%, transparent 42%),
-    radial-gradient(circle at 70% 60%, rgba(232, 200, 110, 0.35) 0%, transparent 48%),
-    radial-gradient(circle at 50% 80%, rgba(180, 140, 50, 0.25) 0%, transparent 40%);
-  animation: global-orb-liquid 15s ease-in-out infinite;
+    radial-gradient(ellipse 50% 40% at 28% 35%, rgba(255, 255, 255, 0.85) 0%, transparent 55%),
+    radial-gradient(ellipse 45% 50% at 72% 55%, rgba(255, 220, 120, 0.7) 0%, transparent 50%),
+    radial-gradient(circle at 48% 78%, rgba(180, 130, 40, 0.45) 0%, transparent 45%);
+  animation: global-orb-liquid 9s ease-in-out infinite;
   pointer-events: none;
   will-change: transform, opacity;
+  mix-blend-mode: soft-light;
+}
+
+.global-orb-mark {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  text-indent: 0.28em;
+  color: var(--orb-navy);
+  opacity: 0.78;
+  line-height: 1;
+  pointer-events: none;
+  user-select: none;
+}
+
+.global-orb-signal {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--orb-navy);
+  color: var(--orb-gold);
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 18px;
+  text-align: center;
+  box-shadow: 0 0 0 2px rgba(250, 248, 243, 0.95);
+  pointer-events: none;
+  z-index: 2;
 }
 
 /* Pause all orb motion when the tab is hidden */
@@ -106,70 +168,71 @@
 
 /* States */
 .global-orb-btn[data-state='quiet'] .global-orb-halo {
-  opacity: 0.28;
+  opacity: 0.4;
   animation-duration: 10s;
 }
 
 .global-orb-btn[data-state='quiet'] .global-orb-core {
-  opacity: 0.55;
+  opacity: 0.7;
 }
 
 .global-orb-btn[data-state='quiet'] .global-orb-liquid {
-  opacity: 0.45;
-  animation-duration: 20s;
+  opacity: 0.55;
+  animation-duration: 14s;
 }
 
 .global-orb-btn[data-state='idle'] .global-orb-halo {
-  opacity: 0.55;
+  opacity: 0.8;
 }
 
 .global-orb-btn[data-state='listening'] .global-orb-halo {
-  opacity: 0.92;
-  transform: scale(1.06);
+  opacity: 1;
+  transform: scale(1.12);
   animation: none;
 }
 
 .global-orb-btn[data-state='listening'] .global-orb-core {
-  filter: brightness(1.12);
+  filter: brightness(1.18);
 }
 
 .global-orb-btn[data-state='listening'] .global-orb-liquid {
-  animation-duration: 6s;
-  opacity: 0.9;
+  animation-duration: 5s;
+  opacity: 1;
 }
 
 .global-orb-btn[data-state='thinking'] .global-orb-liquid {
-  animation: global-orb-plasma 8s ease-in-out infinite;
+  animation: global-orb-plasma 6s ease-in-out infinite;
+  mix-blend-mode: screen;
 }
 
 .global-orb-btn[data-state='speaking'] .global-orb-halo {
-  animation: global-orb-breathe 2.8s ease-in-out infinite;
-  opacity: 0.88;
+  animation: global-orb-breathe 2.6s ease-in-out infinite;
+  opacity: 0.95;
 }
 
 .global-orb-btn[data-state='discovery'] .global-orb-halo {
-  background: radial-gradient(circle, rgba(212, 160, 80, 0.65) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(212, 160, 80, 0.8) 0%, transparent 70%);
 }
 
 .global-orb-btn[data-state='recommendation'] .global-orb-halo {
-  opacity: 0.82;
+  opacity: 0.95;
   animation-duration: 5s;
 }
 
 .global-orb-btn[data-state='opportunity'] .global-orb-core {
-  background: radial-gradient(circle at 40% 35%, #d4e8c8 0%, #3d7a52 45%, var(--orb-gold) 100%);
+  background: radial-gradient(circle at 40% 35%, #e8f5dc 0%, #4a9a62 42%, var(--orb-gold) 100%);
 }
 
 .global-orb-btn[data-state='opportunity'] .global-orb-liquid {
   background:
-    radial-gradient(circle at 35% 35%, rgba(220, 255, 210, 0.5) 0%, transparent 45%),
-    radial-gradient(circle at 65% 65%, rgba(201, 168, 68, 0.35) 0%, transparent 50%);
+    radial-gradient(circle at 35% 35%, rgba(240, 255, 230, 0.75) 0%, transparent 45%),
+    radial-gradient(circle at 65% 65%, rgba(201, 168, 68, 0.45) 0%, transparent 50%);
 }
 
 .global-orb-btn[data-state='timeSensitive'] .global-orb-halo {
-  background: radial-gradient(circle, rgba(196, 120, 40, 0.7) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(196, 120, 40, 0.85) 0%, transparent 70%);
   animation-duration: 4s;
-  opacity: 0.88;
+  opacity: 0.95;
 }
 
 .global-orb-btn[data-state='success'] .global-orb-halo {
@@ -177,17 +240,17 @@
 }
 
 .global-orb-btn[data-state='learning'] .global-orb-core {
-  background: radial-gradient(circle at 40% 35%, #e8d4f0 0%, #7a5a8a 50%, var(--orb-gold) 100%);
+  background: radial-gradient(circle at 40% 35%, #f0e0f8 0%, #7a5a8a 50%, var(--orb-gold) 100%);
 }
 
 .global-orb-btn[data-state='celebration'] .global-orb-halo {
-  background: radial-gradient(circle, rgba(232, 213, 163, 0.7) 0%, rgba(201, 168, 68, 0.35) 40%, transparent 70%);
+  background: radial-gradient(circle, rgba(232, 213, 163, 0.85) 0%, rgba(201, 168, 68, 0.4) 40%, transparent 70%);
   animation: global-orb-bloom 1.2s ease-out 1;
 }
 
 .global-orb-btn[data-state='offline'] .global-orb-halo {
   animation: none;
-  opacity: 0.2;
+  opacity: 0.25;
   background: radial-gradient(circle, rgba(120, 140, 160, 0.4) 0%, transparent 70%);
 }
 
@@ -198,7 +261,7 @@
 
 .global-orb-btn[data-state='offline'] .global-orb-liquid {
   animation: none;
-  opacity: 0.2;
+  opacity: 0.15;
 }
 
 .global-orb-btn[data-state='offline'] .global-orb-shell {
@@ -206,12 +269,16 @@
   box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.08);
 }
 
-/* Expanded panel — blossom from corner, page stays visible */
+.global-orb-btn[data-state='offline'] .global-orb-mark {
+  opacity: 0.4;
+}
+
+/* Expanded panel — blossom from the Orb */
 .global-orb-scrim {
   position: fixed;
   inset: 0;
   z-index: 95;
-  background: rgba(27, 43, 77, 0.12);
+  background: rgba(27, 43, 77, 0.14);
   border: 0;
   padding: 0;
   cursor: pointer;
@@ -221,20 +288,22 @@
   position: fixed;
   z-index: 100;
   right: max(12px, env(safe-area-inset-right));
-  bottom: max(88px, calc(72px + env(safe-area-inset-bottom)));
+  bottom: max(108px, calc(92px + env(safe-area-inset-bottom)));
   width: min(400px, calc(100vw - 24px));
   max-height: min(58vh, 520px);
   display: flex;
   flex-direction: column;
-  border-radius: 22px;
-  background: rgba(250, 248, 243, 0.94);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(27, 43, 77, 0.08);
-  box-shadow: 0 12px 36px rgba(18, 28, 51, 0.16);
+  border-radius: 24px;
+  background: rgba(250, 248, 243, 0.96);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(201, 168, 68, 0.22);
+  box-shadow:
+    0 16px 48px rgba(14, 22, 40, 0.2),
+    0 0 0 1px rgba(255, 255, 255, 0.4) inset;
   overflow: hidden;
   transform-origin: bottom right;
-  animation: global-orb-blossom 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+  animation: global-orb-blossom 0.42s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .global-orb-panel-head {
@@ -246,12 +315,16 @@
 }
 
 .global-orb-panel-mini {
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   flex-shrink: 0;
   border-radius: 50%;
   position: relative;
   overflow: hidden;
+}
+
+.global-orb-panel-mini .global-orb-rim {
+  inset: -1px;
 }
 
 .global-orb-panel-mini .global-orb-shell {
@@ -259,11 +332,11 @@
 }
 
 .global-orb-panel-mini .global-orb-core {
-  inset: 26%;
+  inset: 24%;
 }
 
 .global-orb-panel-mini .global-orb-liquid {
-  animation-duration: 18s;
+  animation-duration: 10s;
 }
 
 .global-orb-panel-head h2 {
@@ -452,39 +525,38 @@
   0%,
   100% {
     transform: scale(1);
-    opacity: 0.48;
+    opacity: 0.62;
   }
   50% {
-    transform: scale(1.045);
-    opacity: 0.72;
+    transform: scale(1.1);
+    opacity: 0.95;
   }
 }
 
 @keyframes global-orb-liquid {
   0%,
   100% {
-    transform: translate3d(-4%, -3%, 0) scale(1);
-    opacity: 0.7;
+    transform: translate3d(-12%, -8%, 0) scale(1.05);
+    opacity: 0.75;
   }
   33% {
-    transform: translate3d(5%, 2%, 0) scale(1.08);
-    opacity: 0.9;
+    transform: translate3d(14%, 6%, 0) scale(1.22);
+    opacity: 1;
   }
   66% {
-    transform: translate3d(2%, 6%, 0) scale(0.96);
-    opacity: 0.75;
+    transform: translate3d(4%, 16%, 0) scale(0.92);
+    opacity: 0.8;
   }
 }
 
-/* Thinking: subtle plasma drift — not a spinner */
 @keyframes global-orb-plasma {
   0%,
   100% {
-    transform: translate3d(-6%, 0, 0) rotate(0deg) scale(1.05);
-    opacity: 0.85;
+    transform: translate3d(-12%, 0, 0) rotate(-4deg) scale(1.1);
+    opacity: 0.9;
   }
   50% {
-    transform: translate3d(6%, 4%, 0) rotate(8deg) scale(1.12);
+    transform: translate3d(12%, 8%, 0) rotate(10deg) scale(1.28);
     opacity: 1;
   }
 }
@@ -495,19 +567,19 @@
     opacity: 0.55;
   }
   40% {
-    transform: scale(1.18);
-    opacity: 0.95;
+    transform: scale(1.28);
+    opacity: 1;
   }
   100% {
     transform: scale(1);
-    opacity: 0.6;
+    opacity: 0.7;
   }
 }
 
 @keyframes global-orb-blossom {
   from {
     opacity: 0;
-    transform: scale(0.88) translate(8px, 12px);
+    transform: scale(0.62) translate(18px, 28px);
   }
   to {
     opacity: 1;
@@ -519,19 +591,20 @@
   .global-orb-panel {
     left: max(8px, env(safe-area-inset-left));
     right: max(8px, env(safe-area-inset-right));
-    bottom: max(96px, calc(80px + env(safe-area-inset-bottom)));
+    bottom: max(118px, calc(100px + env(safe-area-inset-bottom)));
     width: auto;
-    max-height: min(52vh, 480px);
-    border-radius: 20px;
+    max-height: min(50vh, 460px);
+    border-radius: 22px;
     transform-origin: bottom center;
   }
 
   .global-orb-btn {
-    bottom: max(96px, calc(80px + env(safe-area-inset-bottom)));
+    bottom: max(100px, calc(84px + env(safe-area-inset-bottom)));
+    right: max(10px, env(safe-area-inset-right));
   }
 
   .global-orb-scrim {
-    background: rgba(27, 43, 77, 0.1);
+    background: rgba(27, 43, 77, 0.12);
   }
 }
 

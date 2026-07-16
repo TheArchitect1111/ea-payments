@@ -270,15 +270,27 @@ export default function GlobalOrb({
   const state = session.state as OrbVisualState;
   const displayState = (outcomeFlash ?? interaction ?? state) as OrbVisualState;
   const showAmbientGreeting = Boolean(ambientOpener);
+  const signalCount = findings.length > 0 ? Math.min(findings.length, 9) : 0;
 
   const orbVisual = (
-    <span className="global-orb-visual">
-      <span className="global-orb-halo" aria-hidden="true" />
-      <span className="global-orb-shell" aria-hidden="true" />
-      <span className="global-orb-core" aria-hidden="true">
-        <span className="global-orb-liquid" />
+    <>
+      <span className="global-orb-visual">
+        <span className="global-orb-halo" aria-hidden="true" />
+        <span className="global-orb-rim" aria-hidden="true" />
+        <span className="global-orb-shell" aria-hidden="true" />
+        <span className="global-orb-core" aria-hidden="true">
+          <span className="global-orb-liquid" />
+        </span>
+        {signalCount > 0 && !open ? (
+          <span className="global-orb-signal" aria-hidden="true">
+            {signalCount}
+          </span>
+        ) : null}
       </span>
-    </span>
+      <span className="global-orb-mark" aria-hidden="true">
+        ORB
+      </span>
+    </>
   );
 
   return (
@@ -306,6 +318,7 @@ export default function GlobalOrb({
           >
             <header className={`global-orb-panel-head${showAmbientGreeting ? ' global-orb-panel-head--ambient-only' : ''}`}>
               <span className="global-orb-panel-mini" aria-hidden="true">
+                <span className="global-orb-rim" />
                 <span className="global-orb-shell" />
                 <span className="global-orb-core">
                   <span className="global-orb-liquid" />
