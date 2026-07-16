@@ -17,7 +17,7 @@ function assert(condition, message) {
 const auditPath = join(root, 'lib/ctp-digital-presence.ts');
 const runPath = join(root, 'lib/ctp-digital-presence-run.ts');
 const submitPath = join(root, 'app/api/assessment/submit/route.ts');
-const emailPath = join(root, 'lib/email.ts');
+const emailPath = join(root, 'lib/ctp-opportunity-email.ts');
 const submissionsPath = join(root, 'lib/ctp-submissions.ts');
 
 for (const [path, label] of [
@@ -50,7 +50,8 @@ assert(run.includes('force'), 'Runner must support force re-run for admin desk')
 assert(submit.includes('auditDigitalPresence'), 'Submit must run digital audit');
 assert(submit.includes('discoveryAnswers'), 'Submit audit must pass discovery answers');
 assert(submit.includes('digitalPresenceAudit'), 'Submit must pass audit into email path');
-assert(email.includes('Digital Presence Score'), 'Executive email must include digital score');
+assert(email.includes('Your Digital Foundation'), 'Opportunity email must include digital foundation');
+assert(email.includes('categoryScores'), 'Opportunity email must support category health scores');
 assert(submissions.includes('digitalPresenceAudit'), 'CTP submission must persist audit');
 
 const biViewPath = join(root, 'lib/ctp-bi-view.ts');
@@ -65,24 +66,24 @@ assert(biPage.includes('socialScore'), 'BI page must surface social score');
 assert(biPage.includes('gbpScore'), 'BI page must surface GBP score');
 
 const statusPath = join(root, 'lib/ctp-portal-status.ts');
-const overviewViewPath = join(root, 'lib/ctp-overview-view.ts');
+const opportunityViewPath = join(root, 'lib/ctp-opportunity-view.ts');
 const overviewPagePath = join(root, 'app/portal/[slug]/ctp/page.tsx');
 const progressPagePath = join(root, 'app/portal/[slug]/ctp/progress/page.tsx');
 assert(existsSync(statusPath), 'Missing ctp-portal-status.ts');
-assert(existsSync(overviewViewPath), 'Missing ctp-overview-view.ts');
-assert(existsSync(overviewPagePath), 'Missing CTP overview page');
+assert(existsSync(opportunityViewPath), 'Missing ctp-opportunity-view.ts');
+assert(existsSync(overviewPagePath), 'Missing CTP dashboard page');
 assert(existsSync(progressPagePath), 'Missing CTP progress page');
 const status = readFileSync(statusPath, 'utf8');
-const overviewView = readFileSync(overviewViewPath, 'utf8');
+const opportunityView = readFileSync(opportunityViewPath, 'utf8');
 const overviewPage = readFileSync(overviewPagePath, 'utf8');
 const progressPage = readFileSync(progressPagePath, 'utf8');
 assert(status.includes('socialScore'), 'Portal status must expose socialScore');
 assert(status.includes('gbpScore'), 'Portal status must expose gbpScore');
 assert(status.includes('Social '), 'Timeline digital step must mention Social');
-assert(overviewView.includes('socialScore'), 'Overview view must expose socialScore');
-assert(overviewView.includes('gbpScore'), 'Overview view must expose gbpScore');
-assert(overviewPage.includes('socialScore'), 'Overview page must surface social score');
-assert(overviewPage.includes('gbpScore'), 'Overview page must surface GBP score');
+assert(opportunityView.includes('socialPresence'), 'Opportunity view must use social presence scores');
+assert(opportunityView.includes('googleBusinessProfile'), 'Opportunity view must use GBP scores');
+assert(overviewPage.includes('OpportunityDashboard'), 'CTP landing must render Opportunity Dashboard');
+assert(overviewPage.includes('buildCtpOpportunityDashboardView'), 'CTP landing must use opportunity view');
 assert(progressPage.includes('socialScore'), 'Progress page must surface social score');
 assert(progressPage.includes('gbpScore'), 'Progress page must surface GBP score');
 

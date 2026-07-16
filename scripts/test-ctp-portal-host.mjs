@@ -60,7 +60,7 @@ assert(setupDoc.includes('EA_PORTAL_HOSTS') || setupDoc.includes('Domains'), 'Se
 
 const adminViewPath = join(root, 'lib/ctp-admin-view.ts');
 const adminUiPath = join(root, 'app/admin/ctp/CtpSubmissionsClient.tsx');
-const emailPath = join(root, 'lib/email.ts');
+const emailPath = join(root, 'lib/ctp-opportunity-email.ts');
 assert(existsSync(adminViewPath), 'Missing ctp-admin-view.ts');
 assert(existsSync(adminUiPath), 'Missing CTP admin client');
 assert(existsSync(emailPath), 'Missing email.ts');
@@ -71,8 +71,8 @@ assert(adminView.includes('portalPublicUrl'), 'Admin view must expose portalPubl
 assert(adminView.includes("publicPortalUrl(submission.portalSlug, 'ctp')"), 'Admin CTP portal URL');
 assert(adminUi.includes('portalPublicUrl'), 'Admin UI must surface portal URL');
 assert(adminUi.includes('Client vanity portal') || adminUi.includes('Client portal'), 'Admin UI must link client portal');
-assert(email.includes('socialPresence'), 'Executive email must include social score');
-assert(email.includes('googleBusinessProfile'), 'Executive email must include GBP score');
+assert(email.includes('categoryScores'), 'Opportunity email must include category health scores');
+assert(email.includes('opportunityEmailHealthRows'), 'Opportunity email must map digital health rows');
 
 // Runtime checks via ts transpile isn't available — duplicate pure logic for smoke.
 function normalizeHost(host) {

@@ -61,7 +61,12 @@ assert(adminView.includes('maturityScore'), 'Admin view must expose maturity');
 assert(portalStatus.includes('executiveSnapshot'), 'Portal timeline must use snapshot');
 assert(pulse.includes("'ctp.bi.ready'"), 'Pulse union must include ctp.bi.ready');
 assert(adminClient.includes('Executive Snapshot'), 'Admin UI must show snapshot');
-assert(portalPage.includes('maturityScore'), 'Portal page must show maturity');
+assert(portalPage.includes('buildCtpOpportunityDashboardView'), 'Portal page must use opportunity dashboard view');
+assert(
+  readFileSync(join(root, 'lib/ctp-opportunity-view.ts'), 'utf8').includes('readinessScore') ||
+    readFileSync(join(root, 'lib/ctp-portal-status.ts'), 'utf8').includes('maturityScore'),
+  'Opportunity or status view must expose maturity/readiness signal',
+);
 
 if (failures.length) {
   console.error('CTP executive snapshot checks FAILED:');
