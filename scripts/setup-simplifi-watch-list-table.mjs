@@ -32,11 +32,16 @@ const envFromFile = (() => {
 const env = { ...envFromFile, ...process.env };
 
 const key = env.AIRTABLE_API_KEY;
-const baseId = env.AIRTABLE_PAYMENTS_BASE_ID || 'appv0YoLIMY45fmDA';
+const baseId = env.AIRTABLE_PAYMENTS_BASE_ID?.trim();
 const tableName = env.AIRTABLE_SIMPLIFI_WATCH_LIST_TABLE || 'Simplifi Watch List';
 
 if (!key?.trim()) {
   console.error('Missing AIRTABLE_API_KEY.');
+  process.exit(1);
+}
+
+if (!baseId) {
+  console.error('Missing AIRTABLE_PAYMENTS_BASE_ID.');
   process.exit(1);
 }
 
