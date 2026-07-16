@@ -49,6 +49,7 @@ export default function GlobalOrb({
   const [dismissedIds, setDismissedIds] = useState<string[]>([]);
   const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const sync = () => setOnline(typeof navigator === 'undefined' ? true : navigator.onLine);
@@ -65,12 +66,40 @@ export default function GlobalOrb({
 
   useEffect(() => {
     if (!open) return;
+    const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const previousOverflow = document.body.style.overflow;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setOpen(false);
+      if (e.key === 'Escape') {
+        setOpen(false);
+        return;
+      }
+      if (e.key !== 'Tab' || !panelRef.current) return;
+
+      const focusable = Array.from(
+        panelRef.current.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        ),
+      ).filter((element) => !element.hasAttribute('hidden'));
+      const first = focusable[0];
+      const last = focusable.at(-1);
+      if (!first || !last) return;
+
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
     };
     window.addEventListener('keydown', onKey);
+    document.body.style.overflow = 'hidden';
     closeRef.current?.focus();
-    return () => window.removeEventListener('keydown', onKey);
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      document.body.style.overflow = previousOverflow;
+      previousFocus?.focus();
+    };
   }, [open]);
 
   const session = useMemo(
@@ -148,7 +177,13 @@ export default function GlobalOrb({
       {open ? (
         <>
           <button type="button" className="global-orb-scrim" aria-label="Dismiss Orb panel" onClick={() => setOpen(false)} />
-          <section className="global-orb-panel" role="dialog" aria-modal="true" aria-label="SIMPLIFI intelligence">
+          <section
+            ref={panelRef}
+            className="global-orb-panel"
+            role="dialog"
+            aria-modal="true"
+            aria-label="SIMPLIFI intelligence"
+          >
             <header className="global-orb-panel-head">
               <span className="global-orb-panel-mini" aria-hidden="true">
                 <span className="global-orb-shell" />

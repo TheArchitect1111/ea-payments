@@ -92,9 +92,18 @@ npx tsc --noEmit --pretty false 2>&1 | findstr /i "orb GlobalOrb SimplifiProduct
 
 Re-run after fixes: **no lines matched** the filter (orb-related TS clean).
 
+## Step 0 production QA — 2026-07-16
+
+- Entered the production `demo-client` session and verified `/simplifi/workspace` uses real Brief and Action Center data.
+- Verified the resting Orb is fixed in the lower-right, opens a grounded intelligence panel, and persists on `/simplifi/inbox`.
+- Verified the phone layout at `390 × 844`: the panel becomes a full-width bottom sheet and the 56px Orb remains inside the viewport.
+- Verified `Escape` closes the panel and `prefers-reduced-motion: reduce` removes Orb animation.
+- Added focus trapping, background scroll locking, and focus restoration to the modal panel after accessibility QA.
+- Added Orb UI smoke coverage and a CI hardening gate for Orb, preview-route, and GlitchTip contracts.
+
 ## Remaining gaps
 
-- **Screenshots / visual QA:** Not captured in this pass — pending local browser verification (orb states, drawer, Orb OS preview, capture status strings).
+- **Production monitoring:** `/api/health/launch` reports `NEXT_PUBLIC_GLITCHTIP_DSN` missing. No local DSN is available to promote; set it in Vercel Production and redeploy.
 - **Type consolidation:** `SimplifiWorkspace` and `CompanionOrb` still define local `BriefPayload` with stricter `kind` unions; align with `OrbBriefSlice` when touching those files.
 - **`analyzeCaptureUrl` typing:** Could add a generic `record?: { title?: string }` on `SimplifiApiResult` in `lib/simplifi-client.ts` to avoid casts at call sites.
 - **Orb OS route:** Default redirect to workspace; preview gated on `?chat=1` and `orb-preview` API preference — confirm product intent before wide release.

@@ -112,8 +112,24 @@ test('assessment thank-you contact link works', async ({ page }) => {
 
 test('simplifi workspace is reachable', async ({ page }) => {
   await page.goto('/simplifi/workspace');
-  await expect(page.getByRole('heading', { name: /what should i pay attention to right now/i })).toBeVisible();
-  await expect(page.locator('header.sw-header').getByRole('link', { name: /^capture$/i })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /what deserves your attention/i })).toBeVisible();
+  await expect(
+    page.getByRole('navigation', { name: /Simplifi primary/i }).getByRole('link', { name: /^capture$/i }),
+  ).toBeVisible();
+
+  const orb = page.getByRole('button', { name: /SIMPLIFI Orb/i });
+  await expect(orb).toBeVisible();
+  await orb.click();
+  await expect(page.getByRole('dialog', { name: /SIMPLIFI intelligence/i })).toBeVisible();
+  await expect(page.getByRole('button', { name: /^close$/i })).toBeFocused();
+  await page.keyboard.press('Shift+Tab');
+  expect(
+    await page
+      .getByRole('dialog', { name: /SIMPLIFI intelligence/i })
+      .evaluate((dialog) => dialog.contains(document.activeElement)),
+  ).toBe(true);
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('dialog', { name: /SIMPLIFI intelligence/i })).toBeHidden();
 });
 
 test('app alias redirects to workspace', async ({ page }) => {
