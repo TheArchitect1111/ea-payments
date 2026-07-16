@@ -1,5 +1,6 @@
 import { cookies } from 'next/headers';
 import { verifyAdminSession, EA_ADMIN_COOKIE, parseAdminSession } from '@/lib/ea-admin-auth';
+import { getCtpAttentionStats } from '@/lib/ctp-attention-stats';
 import { buildMissionControlPayload } from '@/lib/mission-control-data';
 
 export const dynamic = 'force-dynamic';
@@ -18,6 +19,12 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const role = parseMissionControlRole(searchParams.get('mode'));
   const user = parseAdminSession(token);
+  const {
+    studiosInProgress: ctpStudiosInProgress,
+    executiveEmailsPending: ctpExecutiveEmailsPending,
+  } = await getCtpAttentionStats();
+  void ctpStudiosInProgress;
+  void ctpExecutiveEmailsPending;
 
   const mission = await buildMissionControlPayload({
     role,

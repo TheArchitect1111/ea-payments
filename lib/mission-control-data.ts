@@ -17,7 +17,9 @@ import {
   buildExecutiveOperatingRhythm,
   operatingRhythmEvents,
 } from '@/lib/executive-operating-rhythm';
+import { getCtpAttentionStats } from '@/lib/ctp-attention-stats';
 import { getPackageSyncHealth } from '@/lib/platform/package-sync-health';
+import { buildAttentionItems, type AttentionItem } from '@/lib/pulse-attention';
 import { listCanonicalPulseEvents } from '@/lib/pulse-event-store';
 import { type PulseEvent } from '@/lib/pulse-bus';
 
@@ -55,6 +57,58 @@ function pulseEventToPlatform(event: PulseEvent & { at: string }, index: number)
     },
     `pulse-${index}-${event.at}`,
   );
+}
+
+const ATTENTION_PRIORITY: Record<AttentionItem['priority'], number> = {
+  critical: 95,
+  high: 80,
+  medium: 55,
+  low: 30,
+};
+
+function attentionItemToPlatform(item: AttentionItem, organizationId: string): PlatformEvent {
+  return fromActivityEvent(
+    normalizeActivityEvent(
+      {
+        organizationId,
+        module: item.id.startsWith('ctp-') ? 'ctp' : 'build',
+        eventType: 'attention.item',
+        title: item.title,
+        summary: item.detail,
+        priority: ATTENTION_PRIORITY[item.priority],
+        actionLabel: item.cta ?? 'Open',
+        actionUrl: item.href,
+        metadata: {
+          whyRecommended: `Prioritized because this is ${item.priority} priority for ${item.product}.`,
+          source: 'pulse-attention',
+          attentionId: item.id,
+        },
+      },
+      item.id,
+    ),
+  );
+}
+
+async function ctpAttentionEvents(organizationId: string): Promise<PlatformEvent[]> {
+  const ctpStats = await getCtpAttentionStats();
+  const items = buildAttentionItems({
+    captures: [],
+    contentRequests: [],
+    proposalsPendingReview: 0,
+    onboardingWebhooksMissing: false,
+    captureApiKeyMissing: false,
+    cprAthleteCount: 0,
+    cprActiveCount: 0,
+    brotherHubMembers: 0,
+    sisterHubMembers: 0,
+    ctpWorkspacesPending: ctpStats.workspacesPending,
+    ctpStudiosInProgress: ctpStats.studiosInProgress,
+    ctpStudiosReadyForReview: ctpStats.studiosReadyForReview,
+    ctpReviewsScheduled: ctpStats.reviewsScheduled,
+    ctpExecutiveEmailsPending: ctpStats.executiveEmailsPending,
+  }).filter((item) => item.id.startsWith('ctp-'));
+
+  return items.map((item) => attentionItemToPlatform(item, organizationId));
 }
 
 function packageSyncAttentionEvents(organizationId: string): PlatformEvent[] {
@@ -95,11 +149,12 @@ export async function buildMissionControlPayload(input?: {
   const role = input?.role ?? 'executive';
   const userName = input?.userName ?? 'there';
 
-  const [activity, pulseEvents, proposals, clients] = await Promise.all([
+  const [activity, pulseEvents, proposals, clients, ctpSignals] = await Promise.all([
     listPlatformActivityEvents(organizationId, 100),
     listCanonicalPulseEvents(120),
     getProposalsWithAssessments(),
     getAllClientRecords(),
+    ctpAttentionEvents(organizationId),
   ]);
 
   const pulseRows = pulseEvents.map((event, index) => pulseEventToPlatform(event, index));
@@ -112,7 +167,7 @@ export async function buildMissionControlPayload(input?: {
 
   return buildMissionControlFromStreams(
     activity,
-    [...packageSyncSignals, ...rhythmSignals, ...customerSignals, ...pulseRows],
+    [...packageSyncSignals, ...ctpSignals, ...rhythmSignals, ...customerSignals, ...pulseRows],
     {
       organizationId,
       userName,
