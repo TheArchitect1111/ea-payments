@@ -44,6 +44,11 @@ assert(workspace.includes('sw-ambient-lead'), 'Brief lead must use ambient class
 const orbShell = readFileSync(join(root, 'app/simplifi/orb/OrbOsShell.tsx'), 'utf8');
 assert(orbShell.includes('buildAmbientOpeningFromSession'), 'OrbOsShell must reuse session ambient helper');
 
+const intent = readFileSync(join(root, 'lib/orb-os/intent.ts'), 'utf8');
+assert(intent.includes('While you were away'), 'attention ambient must lead with value');
+assert(!intent.includes('How can I help'), 'ambient must never use chatbot greeting');
+assert(intent.includes('Your day is clear'), 'quiet ambient must prove calm readiness');
+
 if (failures.length) {
   console.error('FAIL');
   for (const f of failures) console.error(' -', f);

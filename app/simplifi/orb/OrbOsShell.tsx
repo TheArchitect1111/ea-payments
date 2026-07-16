@@ -221,7 +221,7 @@ export default function OrbOsShell({
           <span className="orb-os-core" />
         </div>
         <p className="orb-os-wordmark">ORB</p>
-        <p className="orb-os-prompt">How can I help today?</p>
+        <p className="orb-os-prompt">While you were away, I reviewed what changed.</p>
 
         {orbReply ? (
           <article className="orb-os-reply" aria-live="polite">

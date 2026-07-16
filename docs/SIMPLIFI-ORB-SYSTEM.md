@@ -34,16 +34,76 @@ SimplifiProductShell
 | `lib/orb-os/routes.ts` | Surface → `/simplifi/*` hrefs; navigable vs session surfaces |
 | `app/simplifi/components/GlobalOrb.tsx` | Resting orb + panel + route navigation + session overlays + ambient opener |
 | `app/simplifi/components/session/SessionWorkspace.tsx` | Temporary inbox / opportunity / follow-ups / calendar / capture workspace over the Brief |
-| `app/simplifi/components/global-orb.css` | Navy / gold visuals, states, safe-area |
+| `app/simplifi/components/global-orb.css` | Navy / gold visuals, liquid light, blossom panel, safe-area |
 | `app/simplifi/components/SimplifiProductShell.tsx` | Shell wrapper + Chrome Fade resolution |
 | `lib/simplifi/chrome-fade.ts` | Chrome Fade flag (cookie / env / localStorage) |
 | `app/simplifi/workspace/CompanionOrb.tsx` | Legacy companion (kept; not mounted on Brief) |
+
+## Orb v2 — living companion (presentation)
+
+Upgrade of materials, motion, and copy. State engine and intent routing unchanged.
+
+### Materials
+
+| Token | Value | Role |
+|-------|-------|------|
+| `--orb-navy` / `--orb-navy-deep` | `#1b2b4d` / `#121c33` | Midnight shell |
+| `--orb-gold` | `#c9a844` | Warm core light |
+| `--orb-champagne` | soft gold halo | Presence without neon |
+| Glass highlight | inset white + soft depth | Organic, not FAB lift |
+
+Resting diameter: **56px**. Soft box-shadow only (no plastic FAB lift).
+
+### Animation timing
+
+| Motion | Duration | Notes |
+|--------|----------|-------|
+| Halo breathe | **7s** | Quiet: 10s; never bounce/flash |
+| Liquid light (core) | **~15s** | GPU `transform` / `opacity` only |
+| Thinking plasma | **8s** | Subtle drift — not a spinner |
+| Outcome bloom | **1.2s** | Then return to derived state |
+| Panel blossom | **0.32s** | `transform-origin: bottom right` |
+
+Tab hidden → `data-paused="true"` → `animation-play-state: paused`.  
+`prefers-reduced-motion: reduce` disables liquid, breathe, and blossom.
+
+### Copy rules
+
+- **Never** greet with “How can I help?”
+- Ambient leads with value (“While you were away…”) or quiet clarity (“Your day is clear.”)
+- Panel order: greeting / ambient → findings → recommendation → Ask last
+- Ask placeholder: “Ask about your workspace…” (secondary)
+
+### Panel (blossom)
+
+- Light scrim; page remains readable
+- Anchored lower-right above mobile dock (`bottom` clears dock + safe-area)
+- Intelligence before conversation; greeting de-duped when ambient opener is shown
 
 ## States
 
 Derived from Action Center + Brief only (no fabricated insights):
 
-`offline` → `timeSensitive` → interaction (`listening` / `thinking` / `speaking`) → `opportunity` / `recommendation` / `discovery` → `quiet` / `idle`
+```text
+offline → timeSensitive → listening/thinking/speaking
+  → opportunity / recommendation / discovery
+  → success / learning / celebration (transient flashes)
+  → quiet → idle
+```
+
+| State | Visual language |
+|-------|-----------------|
+| idle | Deep navy, gold core, soft halo |
+| quiet | Dimmer core, slower breathe |
+| listening | Brighter gold, expanded halo |
+| thinking | Slow liquid plasma in core |
+| speaking | Faster soft breathe |
+| opportunity | Emerald + gold core |
+| recommendation | Warmer halo |
+| timeSensitive | Deep amber halo (never bright red) |
+| learning | Gold + purple accent |
+| offline | Muted gray, no breathing |
+| success / celebration | Short gold bloom |
 
 ## Route intents (Step 1)
 
@@ -88,8 +148,9 @@ link out to them.
 ## Ambient openers (Step 3)
 
 When the Orb expands for the first time on a page load, it speaks a grounded
-morning opener from `buildAmbientOpeningFromSession` — greeting + up to 3 titles
-from Action Center `needsAttention` and Brief items only. No invented insights.
+value-first opener from `buildAmbientOpeningFromSession` — greeting + up to 3 titles
+from Action Center `needsAttention` and Brief items only. Quiet path: “Your day is clear.”
+Attention path: “While you were away…” — never “How can I help?”
 
 | Surface | Behavior |
 |---------|----------|
