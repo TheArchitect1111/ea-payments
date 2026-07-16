@@ -89,6 +89,28 @@
   font-weight: 700;
 }
 
+.sc-guest-banner {
+  margin: 14px 0 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(201, 168, 68, 0.35);
+  background: rgba(201, 168, 68, 0.08);
+  font-size: 14px;
+  line-height: 1.55;
+  color: #4b5563;
+}
+
+.sc-guest-banner a {
+  color: #1b2b4d;
+  font-weight: 700;
+}
+
+.sc-inline-link {
+  color: #1b2b4d;
+  font-weight: 700;
+  text-decoration: underline;
+}
+
 .sc-steps {
   margin: 0;
   padding-left: 20px;

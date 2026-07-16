@@ -1,7 +1,15 @@
 /** Resize/compress phone photos so multipart uploads stay under Vercel body limits. */
-const MAX_UPLOAD_BYTES = 3.5 * 1024 * 1024;
-const MAX_DIMENSION = 1920;
+import {
+  MAX_CAPTURE_DIMENSION,
+  MAX_CAPTURE_UPLOAD_BYTES,
+  formatCaptureUploadSize,
+} from '@/lib/capture-upload-limits';
+
+const MAX_UPLOAD_BYTES = MAX_CAPTURE_UPLOAD_BYTES;
+const MAX_DIMENSION = MAX_CAPTURE_DIMENSION;
 const JPEG_QUALITY = 0.82;
+
+export { formatCaptureUploadSize as formatUploadSize, MAX_CAPTURE_UPLOAD_BYTES };
 
 function loadImageFromFile(file: File): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
@@ -35,22 +43,31 @@ function canvasToJpegBlob(canvas: HTMLCanvasElement, quality: number): Promise<B
   });
 }
 
-export function formatUploadSize(bytes: number): string {
-  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
-
 function isImageFile(file: File): boolean {
   if (file.type.startsWith('image/')) return true;
   return /\.(jpe?g|png|gif|webp|heic|heif|bmp)$/i.test(file.name);
 }
 
+function isHeic(file: File): boolean {
+  return /\.heic$/i.test(file.name) || /\.heif$/i.test(file.name) || /heic|heif/i.test(file.type);
+}
+
 export async function prepareCaptureUpload(file: File): Promise<File> {
+  if (isHeic(file)) {
+    throw new Error(
+      'iPhone HEIC photos are not supported here. In Settings → Camera → Formats, choose “Most Compatible,” or upload a screenshot instead.',
+    );
+  }
+
   if (!isImageFile(file)) {
     if (file.size > MAX_UPLOAD_BYTES) {
       throw new Error(
-        `File is ${formatUploadSize(file.size)}. Keep uploads under ${formatUploadSize(MAX_UPLOAD_BYTES)}.`,
+        `File is ${formatCaptureUploadSize(file.size)}. Keep uploads under ${formatCaptureUploadSize(MAX_UPLOAD_BYTES)}.`,
       );
+    }
+    if (/\.pdf$/i.test(file.name) || file.type === 'application/pdf') {
+      // PDF accepted under size cap — no compress path
+      return file;
     }
     return file;
   }
@@ -82,22 +99,21 @@ export async function prepareCaptureUpload(file: File): Promise<File> {
 
     if (blob.size > MAX_UPLOAD_BYTES) {
       throw new Error(
-        `Image is still too large (${formatUploadSize(blob.size)}). Try a smaller screenshot.`,
+        `Image is still too large (${formatCaptureUploadSize(blob.size)}). Try a smaller screenshot.`,
       );
     }
 
     const baseName = file.name.replace(/\.[^.]+$/, '') || 'capture';
     return new File([blob], `${baseName}.jpg`, { type: 'image/jpeg', lastModified: Date.now() });
   } catch (err) {
+    if (err instanceof Error && /HEIC|Most Compatible|still too large|File is /.test(err.message)) {
+      throw err;
+    }
     if (file.size <= MAX_UPLOAD_BYTES) {
       return file;
     }
-    const hint =
-      /\.heic$/i.test(file.name) || file.type === 'image/heic'
-        ? ' iPhone HEIC photos may need “Most Compatible” format in Settings → Camera.'
-        : '';
     throw new Error(
-      `Could not prepare this image (${formatUploadSize(file.size)}).${hint} Try a screenshot instead.`,
+      `Could not prepare this image (${formatCaptureUploadSize(file.size)}). Try a screenshot instead.`,
     );
   }
 }

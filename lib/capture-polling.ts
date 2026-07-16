@@ -30,5 +30,7 @@ export async function pollCaptureUntilReady(
     await new Promise((resolve) => setTimeout(resolve, intervalMs));
   }
 
-  throw new Error('Analysis is taking longer than expected. Check Pulse for your capture.');
+  throw new Error(
+    'Analysis is taking longer than expected. Open your Simplifi workspace — your capture is still processing there.',
+  );
 }

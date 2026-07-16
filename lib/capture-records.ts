@@ -664,6 +664,33 @@ export async function updateCaptureStatus(
   return updateCaptureAnalysis(recordId, { status });
 }
 
+/** Reassign a capture to another portal slug (guest → signed-in claim). */
+export async function updateCapturePortalSlug(
+  recordId: string,
+  portalSlug: string,
+): Promise<{ ok: boolean; error?: string }> {
+  if (!process.env.AIRTABLE_API_KEY) {
+    return { ok: false, error: 'AIRTABLE_API_KEY not configured.' };
+  }
+  const slug = portalSlug.trim().toLowerCase();
+  if (!slug) return { ok: false, error: 'Portal slug required.' };
+
+  try {
+    const res = await fetch(
+      `https://api.airtable.com/v0/${BASE_ID}/${encodeURIComponent(CAPTURES_TABLE)}/${recordId}`,
+      {
+        method: 'PATCH',
+        headers: authHeaders(),
+        body: JSON.stringify({ fields: { 'Portal Slug': slug }, typecast: true }),
+      },
+    );
+    if (!res.ok) return { ok: false, error: 'Failed to update portal slug.' };
+    return { ok: true };
+  } catch {
+    return { ok: false, error: 'Unexpected error.' };
+  }
+}
+
 export async function saveOpportunityPayload(
   recordId: string,
   description: string,
