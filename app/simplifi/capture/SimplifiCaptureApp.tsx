@@ -20,6 +20,11 @@ import { enqueueCapture, flushCaptureQueue } from '@/lib/offline-capture-queue';
 import { useProductGuestSession } from '@/components/auth/useProductGuestSession';
 import { NAVY, GOLD } from '@/lib/design-system';
 
+const EA_PLATFORM_PURPOSE =
+  'Efficiency Architects helps you capture what matters, track progress, and turn activity into momentum.';
+
+const CAPTURE_OUTCOME_TAGLINE = 'Save what matters. Follow up when it\'s time.';
+
 interface AnalyzeResponse {
   ok?: boolean;
   error?: string;
@@ -256,11 +261,12 @@ export default function SimplifiCaptureApp({
       </header>
 
       <main className="sc-main">
-        <p className="sc-kicker">Never Lose An Opportunity Again™</p>
+        <p className="sc-kicker">{CAPTURE_OUTCOME_TAGLINE}</p>
         <h1 className="sc-title">Let&apos;s capture your first opportunity.</h1>
         <p className="sc-lede">
           Paste a link, upload a screenshot, save a flyer, or capture something worth remembering.
         </p>
+        <p className="sc-platform-purpose">{EA_PLATFORM_PURPOSE}</p>
 
         <section className="sc-first-capture" aria-label="Capture your first item">
           <label className="sc-field-label" htmlFor="first-capture-url">
@@ -307,6 +313,15 @@ export default function SimplifiCaptureApp({
           <li><strong>Understand it:</strong> Simplifi creates a clear summary.</li>
           <li><strong>Act on it:</strong> follow up when the time is right.</li>
         </ol>
+        <p className="sc-next-step">
+          Saved captures appear in your portal Activity.{' '}
+          {slug ? (
+            <Link href={`/portal/${slug}`}>Open your portal</Link>
+          ) : (
+            <Link href="/portal/login?next=/simplifi/capture">Sign in to your portal</Link>
+          )}
+          {' '}to track them.
+        </p>
         <button
           type="button"
           className="sc-secondary-link"
