@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, type NextRequest } from 'next/server';
 import { ensureDemoClient, getDemoCredentials } from '@/lib/demo-client';
 import { ensureDemoConnectTenant } from '@/lib/connect-provision';
 import { signSession, makeSessionCookie } from '@/lib/ea-portal-auth';
@@ -8,13 +8,21 @@ export const dynamic = 'force-dynamic';
 /** Always apex — www may still map to the legacy app; cookies must match host. */
 const HUB_ORIGIN = 'https://efficiencyarchitects.online';
 
+/** Only same-origin relative paths are honored; default preserves the CTP demo. */
+function safeDemoNext(raw: string | null): string {
+  if (!raw || !raw.startsWith('/') || raw.startsWith('//')) return '/portal/demo-client/ctp';
+  return raw;
+}
+
 /**
  * One-click demo portal entry — no email.
  * GET /api/auth/demo-enter → sets session cookie → /portal/demo-client/ctp
+ * Optional ?next=/simplifi/workspace lands testers on the Simplifi Brief instead.
  */
-export async function GET() {
+export async function GET(req: NextRequest) {
   const demo = getDemoCredentials();
-  const origin = HUB_ORIGIN
+  const origin = HUB_ORIGIN;
+  const next = safeDemoNext(req.nextUrl.searchParams.get('next'));
 
   try {
     const provision = await ensureDemoClient();
@@ -47,7 +55,7 @@ export async function GET() {
       return NextResponse.redirect(new URL('/portal/login?error=config', origin), 303);
     }
 
-    const res = NextResponse.redirect(new URL(`/portal/${demo.slug}/ctp`, origin), 303);
+    const res = NextResponse.redirect(new URL(next, origin), 303);
     res.cookies.set(makeSessionCookie(token));
     return res;
   } catch (err) {

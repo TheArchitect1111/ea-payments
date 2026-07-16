@@ -32,6 +32,7 @@ If `/ctp` is blank or shows NextStepsPro LaunchPad, **redeploy that OneDrive CRA
 | EA portal home | https://efficiencyarchitects.online/portal/ea |
 | Demo CTP **workspace** (post-login) | https://efficiencyarchitects.online/portal/demo-client/ctp |
 | One-click demo session | https://efficiencyarchitects.online/api/auth/demo-enter |
+| One-click demo → Simplifi Brief | https://efficiencyarchitects.online/api/auth/demo-enter?next=/simplifi/workspace |
 
 Also OK for portals: `https://portal.efficiencyarchitects.online/{slug}/…`
 
