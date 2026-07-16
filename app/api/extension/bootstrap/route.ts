@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server';
 import { requirePortalSession } from '@/lib/auth/resolve-portal-session';
-import { createCaptureTenantToken } from '@/lib/capture-auth';
 import { getDemoCredentials } from '@/lib/demo-client';
 import { getClientByPortalSlug } from '@/lib/airtable';
 import { EA_PLATFORM_URL } from '@/lib/platform-urls';
 import { buildOrbUrls, EXTENSION_ORB_ACTIONS, SIMPLIFI_ORB_ACTIONS } from '@/lib/orb-sdk';
+import { signExtensionSession, verifyExtensionSession } from '@/lib/extension-session';
+import { randomUUID } from 'node:crypto';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,14 +15,20 @@ export async function GET() {
     return NextResponse.json({ ok: false, error: 'Sign in or start a guest session first.' }, { status: 401 });
   }
 
-  const apiKey = createCaptureTenantToken(session.slug);
-  if (!apiKey) {
+  const extensionToken = await signExtensionSession({
+    slug: session.slug,
+    orgId: session.orgId,
+    email: session.email,
+    sid: randomUUID(),
+  });
+  if (!extensionToken) {
     return NextResponse.json(
-      { ok: false, error: 'Capture API not configured (set EA_CAPTURE_API_KEY or ADMIN_SESSION_SECRET).' },
+      { ok: false, error: 'Extension session not configured (set ADMIN_SESSION_SECRET).' },
       { status: 503 },
     );
   }
 
+  const verified = await verifyExtensionSession(extensionToken);
   const base = process.env.NEXT_PUBLIC_BASE_URL?.replace(/\/$/, '') ?? EA_PLATFORM_URL;
   const client = await getClientByPortalSlug(session.slug);
   const demo = getDemoCredentials();
@@ -30,7 +37,8 @@ export async function GET() {
   return NextResponse.json({
     ok: true,
     apiUrl: base,
-    apiKey,
+    extensionToken,
+    tokenExpiresAt: verified?.exp ?? null,
     portalSlug: session.slug,
     notifyEmail: client?.email ?? (session.slug === demo.slug ? demo.email : undefined),
     orb: {

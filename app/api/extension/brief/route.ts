@@ -1,23 +1,20 @@
-import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 import { getClientByPortalSlug } from '@/lib/airtable';
-import { CAPTURE_CORS_HEADERS, verifyCaptureTenantToken } from '@/lib/capture-auth';
-import { EA_PORTAL_COOKIE, verifySession } from '@/lib/ea-portal-auth';
+import {
+  EXTENSION_API_CORS_HEADERS,
+  assertExtensionTenant,
+  resolveExtensionAccess,
+} from '@/lib/extension-api-auth';
 import { EA_PLATFORM_URL } from '@/lib/platform-urls';
 import { loadSimplifiWorkspace } from '@/lib/simplifi-store';
 
 export const dynamic = 'force-dynamic';
 
-const EXTENSION_CORS_HEADERS = {
-  ...CAPTURE_CORS_HEADERS,
-  'Access-Control-Allow-Headers': 'Content-Type, X-EA-Capture-Key, X-EA-Portal-Slug',
-};
-
 function json(data: unknown, init?: ResponseInit) {
   return NextResponse.json(data, {
     ...init,
     headers: {
-      ...EXTENSION_CORS_HEADERS,
+      ...EXTENSION_API_CORS_HEADERS,
       ...(init?.headers ?? {}),
     },
   });
@@ -34,33 +31,23 @@ function firstNameFrom(name = '') {
 }
 
 export async function OPTIONS() {
-  return new NextResponse(null, { status: 204, headers: EXTENSION_CORS_HEADERS });
+  return new NextResponse(null, { status: 204, headers: EXTENSION_API_CORS_HEADERS });
 }
 
 export async function GET(request: NextRequest) {
-  const cookieStore = await cookies();
-  const token = cookieStore.get(EA_PORTAL_COOKIE)?.value;
-  const session = token ? await verifySession(token) : null;
-  const apiKey = request.headers.get('x-ea-capture-key');
-  const headerSlug = request.headers.get('x-ea-portal-slug');
-  const querySlug = request.nextUrl.searchParams.get('portalSlug');
-  const requestedSlug = headerSlug || querySlug || '';
-  const tokenSlug = verifyCaptureTenantToken(apiKey);
-  if (tokenSlug && requestedSlug && tokenSlug !== requestedSlug) {
-    return json({ ok: false, error: 'Extension tenant mismatch.' }, { status: 403 });
-  }
-  const hasExtensionAccess = Boolean(tokenSlug);
-  const portalSlug = session?.slug || tokenSlug || '';
-
-  if (!portalSlug) {
+  const access = await resolveExtensionAccess(request);
+  if (!access) {
     return json(
       { ok: false, error: 'Connect Simplifi before opening the companion brief.' },
       { status: 401 },
     );
   }
 
-  if (!session && !hasExtensionAccess) {
-    return json({ ok: false, error: 'Extension access is not configured.' }, { status: 401 });
+  const requestedSlug =
+    request.headers.get('x-ea-portal-slug') || request.nextUrl.searchParams.get('portalSlug');
+  const portalSlug = assertExtensionTenant(access, requestedSlug);
+  if (!portalSlug) {
+    return json({ ok: false, error: 'Extension tenant mismatch.' }, { status: 403 });
   }
 
   const base = process.env.NEXT_PUBLIC_BASE_URL?.replace(/\/$/, '') ?? EA_PLATFORM_URL;

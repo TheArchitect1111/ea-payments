@@ -228,7 +228,7 @@ Recommended backend endpoints:
 - Existing `/api/capture/[id]/status`
 - New `/api/extension/brief`
 - New `/api/extension/search`
-- Future `/api/extension/watch-lists`
+- Future `/api/extension/watch-lists` → **shipped as** `/api/extension/watch-list`
 - Future `/api/extension/notifications`
 - Future `/api/extension/settings`
 
@@ -246,12 +246,20 @@ Implemented after the architecture review:
 - Updated popup brief behavior to use the server-backed brief.
 - Changed the popup's main destination from capture dashboard to Simplifi workspace.
 
+**Goal B Pass 4 (session + watch lists):**
+
+- `/api/extension/bootstrap` returns a 7-day HMAC `extensionToken` (+ `tokenExpiresAt`), not a non-expiring capture tenant key.
+- `POST /api/extension/session/refresh` rotates tokens for the service worker.
+- Capture ingest/status and brief accept `Authorization: Bearer` / `X-EA-Extension-Token`.
+- `/api/extension/watch-list` (+ `[id]`) and `/api/portal/simplifi/watch-list` persist user watch items (Airtable table `Simplifi Watch List`, memory fallback).
+- Extension hydrates/migrates local watch items on connect.
+
 Still transitional:
 
-- `/api/extension/bootstrap` still returns a shared capture API key. A scoped extension session token remains the right next security pass.
-- Watch List items created in the extension still live in `chrome.storage.sync`.
+- Legacy `X-EA-Capture-Key` still accepted for one release window.
 - Voice capture, full gesture model, and notification center are not yet implemented.
 - Store-readiness permission narrowing is still pending.
+- Optional revoke blocklist by `sid` not yet required (expiry is the revoke mechanism).
 
 ## Phase 1 Status
 

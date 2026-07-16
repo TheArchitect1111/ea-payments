@@ -1,7 +1,17 @@
 importScripts('api-client.js');
 
 const DEFAULT_BASE = 'https://ea-payments.vercel.app';
-const STORAGE_KEYS = ['apiUrl', 'apiKey', 'notifyEmail', 'portalSlug', 'watchlist', 'recentOpportunities', 'dailyBrief'];
+const STORAGE_KEYS = [
+  'apiUrl',
+  'apiKey',
+  'extensionToken',
+  'tokenExpiresAt',
+  'notifyEmail',
+  'portalSlug',
+  'watchlist',
+  'recentOpportunities',
+  'dailyBrief',
+];
 const pendingStoryUrls = {};
 
 function nowIso() {
@@ -76,24 +86,68 @@ async function addWatchItem(input) {
   const tab = input.tab || await activeTab();
   const title = input.title || input.text || tab?.title || 'Watch item';
   const url = input.url || tab?.url || '';
-  const item = {
-    id: `watch-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+  const payload = {
     title: title.trim(),
     url,
     category: input.category || 'Opportunity',
     source: input.source || compactUrl(url),
-    createdAt: nowIso(),
-    lastCheckedAt: null,
-    status: 'watching',
     notes: input.notes || '',
+    kind: 'item',
   };
-  const next = [item, ...state.watchlist].slice(0, 100);
+
+  let item = null;
+  if (state.extensionToken || state.apiKey) {
+    const result = await SimplifiApi.addWatchListItem(payload);
+    if (result?.ok && result.item) {
+      item = result.item;
+    }
+  }
+  if (!item) {
+    item = {
+      id: `watch-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      ...payload,
+      createdAt: nowIso(),
+      lastCheckedAt: null,
+      status: 'watching',
+    };
+  }
+
+  const next = [item, ...state.watchlist.filter((entry) => entry.id !== item.id)].slice(0, 100);
   await setState({ watchlist: next });
   if (tab?.id) {
     updateOrb(tab.id, 'watching', `Watching ${item.title}`);
     showToast(tab.id, `Watching: ${item.title}`, 'watching');
   }
   return item;
+}
+
+async function hydrateWatchListFromServer() {
+  const state = await getState();
+  if (!state.extensionToken && !state.apiKey) return state.watchlist;
+
+  const remote = await SimplifiApi.getWatchList();
+  if (!remote?.ok || !Array.isArray(remote.items)) return state.watchlist;
+
+  if (remote.items.length === 0 && state.watchlist.length > 0) {
+    for (const local of state.watchlist.slice(0, 40)) {
+      await SimplifiApi.addWatchListItem({
+        title: local.title,
+        url: local.url,
+        category: local.category,
+        source: local.source,
+        notes: local.notes,
+        kind: 'item',
+      });
+    }
+    const refreshed = await SimplifiApi.getWatchList();
+    if (refreshed?.ok && Array.isArray(refreshed.items)) {
+      await setState({ watchlist: refreshed.items });
+      return refreshed.items;
+    }
+  }
+
+  await setState({ watchlist: remote.items });
+  return remote.items;
 }
 
 async function buildDailyBrief() {
@@ -155,7 +209,7 @@ async function captureTab(options = {}) {
   const state = await getState();
   const base = state.apiUrl || DEFAULT_BASE;
 
-  if (!state.apiKey) {
+  if (!state.extensionToken && !state.apiKey) {
     chrome.runtime.openOptionsPage();
     return { ok: false, error: 'Connect Simplifi first from /extension/connect.' };
   }
@@ -298,15 +352,21 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
 
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg.type === 'EA_EXTENSION_CONFIG' && msg.config) {
-    const { apiUrl, apiKey, portalSlug, notifyEmail } = msg.config;
+    const { apiUrl, apiKey, extensionToken, tokenExpiresAt, portalSlug, notifyEmail } = msg.config;
     chrome.storage.sync.set(
       {
         apiUrl: apiUrl || DEFAULT_BASE,
-        apiKey: apiKey || '',
+        extensionToken: extensionToken || '',
+        tokenExpiresAt: typeof tokenExpiresAt === 'number' ? tokenExpiresAt : 0,
+        apiKey: extensionToken ? '' : apiKey || '',
         portalSlug: portalSlug || '',
         notifyEmail: notifyEmail || '',
       },
-      () => sendResponse({ ok: true }),
+      () => {
+        hydrateWatchListFromServer()
+          .then(() => sendResponse({ ok: true }))
+          .catch(() => sendResponse({ ok: true }));
+      },
     );
     return true;
   }
