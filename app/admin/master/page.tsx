@@ -12,6 +12,7 @@ import {
   type DecisionIntelligenceBundle,
 } from '@/lib/executive-decision-intelligence';
 import { ExecutiveShellPhaseOne } from './ExecutiveShellPhaseOne';
+import WebsitePortalOpsPanel from './WebsitePortalOpsPanel';
 
 export const dynamic = 'force-dynamic';
 
@@ -117,6 +118,9 @@ export default async function MasterPortalPage() {
         decisions={decisions}
         lastUpdated={lastUpdated}
       />
+      <section className="mt-10">
+        <WebsitePortalOpsPanel />
+      </section>
     </main>
   );
 }
