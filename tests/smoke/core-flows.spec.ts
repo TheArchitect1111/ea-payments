@@ -113,8 +113,11 @@ test('assessment thank-you contact link works', async ({ page }) => {
 test('simplifi workspace is reachable', async ({ page }) => {
   await page.goto('/simplifi/workspace');
   await expect(page.getByRole('heading', { name: /what deserves your attention/i })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /today.?s brief/i })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /recent opportunities/i })).toBeVisible();
   await expect(page.locator('.sw-ambient-lead')).toBeVisible();
   await expect(page.locator('.sw-ambient-lead')).toContainText(/Nothing urgent|deserve/i);
+  await expect(page.getByRole('navigation', { name: /Simplifi mobile/i })).toBeVisible();
   await expect(
     page.getByRole('navigation', { name: /Simplifi primary/i }).getByRole('link', { name: /^capture$/i }),
   ).toBeVisible();
@@ -145,6 +148,7 @@ test('simplifiorb entry redirects to Brief', async ({ page }) => {
   await page.goto('/simplifiorb');
   await expect(page).toHaveURL(/\/simplifi\/workspace/);
   await expect(page.getByRole('heading', { name: /what deserves your attention/i })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /today.?s brief/i })).toBeVisible();
 });
 
 test('simplifi orb ask opens inbox session workspace in place', async ({ page }) => {
