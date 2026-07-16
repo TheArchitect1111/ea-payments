@@ -3,6 +3,7 @@ import { CAPTURE_CORS_HEADERS, verifyCaptureApiKey, verifyCaptureTenantToken } f
 import { requirePortalSession } from '@/lib/auth/resolve-portal-session';
 import { getCaptureByIdentifier } from '@/lib/capture-records';
 import { buildCaptureStatusResponse } from '@/lib/capture-response';
+import { verifyExtensionSession } from '@/lib/extension-session';
 
 export const dynamic = 'force-dynamic';
 const corsJson = (body: unknown, status = 200) =>
@@ -12,10 +13,21 @@ export async function OPTIONS() {
   return new Response(null, { headers: CAPTURE_CORS_HEADERS });
 }
 
+async function resolveScopedSlug(req: Request): Promise<string | null> {
+  const extensionToken =
+    req.headers.get('x-ea-extension-token') ||
+    req.headers.get('authorization')?.replace(/^Bearer\s+/i, '').trim();
+  if (extensionToken) {
+    const session = await verifyExtensionSession(extensionToken);
+    if (session?.slug) return session.slug;
+  }
+  return verifyCaptureTenantToken(req.headers.get('x-ea-capture-key'));
+}
+
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const headerKey = req.headers.get('x-ea-capture-key');
-  const tokenSlug = verifyCaptureTenantToken(headerKey);
+  const tokenSlug = await resolveScopedSlug(req);
   const session = await requirePortalSession({ realm: 'simplifi' });
   if (!session && !tokenSlug && !verifyCaptureApiKey(headerKey)) {
     return corsJson({ ok: false, error: 'Unauthorized' }, 401);

@@ -56,6 +56,20 @@ Confirm monitors include:
 
 Contract: `node scripts/test-simplifi-goal-b-pass3.mjs`
 
+## Pass 4 — Extension session + server watch lists (shipped in code)
+
+| Capability | How to verify |
+|------------|---------------|
+| Scoped extension token | `/extension/connect` → bootstrap returns `extensionToken` + `tokenExpiresAt` (no long-lived `apiKey`) |
+| Token refresh | `POST /api/extension/session/refresh` with Bearer token → new token |
+| Capture with session | Extension ingest/status accept `Authorization: Bearer` / `X-EA-Extension-Token` |
+| Server watch list | `GET/POST /api/extension/watch-list` + portal `/api/portal/simplifi/watch-list` |
+| Local migration | Connect with local watch items → uploaded when server list empty |
+
+Contract: `node scripts/test-simplifi-goal-b-pass4.mjs`
+
+Operator note: optional Airtable table `Simplifi Watch List` (or `AIRTABLE_SIMPLIFI_WATCH_LIST_TABLE`). Without it, watch lists use in-memory fallback on the server (dev-safe; create the table for production durability).
+
 ## Tester handoff
 
 1. Guide: `docs/SIMPLIFI-EARLY-ACCESS-TESTER-GUIDE.md`
@@ -68,9 +82,10 @@ Contract: `node scripts/test-simplifi-goal-b-pass3.mjs`
 - [ ] Pass 1 Sentry live
 - [x] Pass 2 reliability in production
 - [x] Pass 3 Magnifi print + thin-URL honesty in code
+- [x] Pass 4 extension session + watch lists in code
 - [ ] One full smoke: URL capture → Magnifi → PDF → guidance → workspace
 
-## Still out of Early Access “100%” (Pass 4 / later)
+## Optional later
 
-- Extension scoped session token + server watch lists
 - True binary PDF generation (Puppeteer) — not required; print-pack is the platform pattern
+- Extension revoke blocklist by `sid` (stateless expiry is enough for Pass 4)

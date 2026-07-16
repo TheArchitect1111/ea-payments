@@ -41,5 +41,6 @@ export function verifyCaptureTenantToken(
 export const CAPTURE_CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, X-EA-Capture-Key, Authorization, X-EA-Realm',
+  'Access-Control-Allow-Headers':
+    'Content-Type, X-EA-Capture-Key, X-EA-Extension-Token, X-EA-Portal-Slug, Authorization, X-EA-Realm',
 };
