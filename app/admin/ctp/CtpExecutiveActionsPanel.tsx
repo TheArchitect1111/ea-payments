@@ -14,6 +14,7 @@ type Action =
   | 'approve_reveal'
   | 'run_production'
   | 'run_digital_audit'
+  | 'run_open_design_handoff'
   | 'resend_executive_email'
   | 'reprovision_workspace';
 
@@ -21,11 +22,13 @@ export default function CtpExecutiveActionsPanel({ submission, onUpdated }: Prop
   const [busy, setBusy] = useState<Action | null>(null);
   const [error, setError] = useState('');
   const [revealUrl, setRevealUrl] = useState('');
+  const [handoffUrl, setHandoffUrl] = useState('');
 
   async function run(action: Action) {
     setBusy(action);
     setError('');
     setRevealUrl('');
+    setHandoffUrl('');
     try {
       const res = await fetch(
         `/api/admin/ctp/submissions/${encodeURIComponent(submission.id)}/action`,
@@ -39,6 +42,7 @@ export default function CtpExecutiveActionsPanel({ submission, onUpdated }: Prop
         ok?: boolean;
         error?: string;
         revealUrl?: string;
+        handoffUrl?: string;
         submission?: CtpAdminSubmissionView;
       };
       if (!res.ok || !data.ok || !data.submission) {
@@ -47,6 +51,7 @@ export default function CtpExecutiveActionsPanel({ submission, onUpdated }: Prop
       }
       onUpdated(data.submission);
       if (data.revealUrl) setRevealUrl(data.revealUrl);
+      if (data.handoffUrl) setHandoffUrl(data.handoffUrl);
     } catch {
       setError('Network error. Try again.');
     } finally {
@@ -136,6 +141,14 @@ export default function CtpExecutiveActionsPanel({ submission, onUpdated }: Prop
         </button>
         <button
           type="button"
+          disabled={Boolean(busy)}
+          onClick={() => void run('run_open_design_handoff')}
+          className="px-3 py-2 text-xs font-bold uppercase tracking-wider border border-neutral-300 bg-white text-neutral-800 disabled:opacity-50"
+        >
+          {busy === 'run_open_design_handoff' ? 'Handing off…' : 'Open Design → GitHub'}
+        </button>
+        <button
+          type="button"
           disabled={Boolean(busy) || completed}
           onClick={() => void run('ready_for_review')}
           className="px-3 py-2 text-xs font-bold uppercase tracking-wider border border-neutral-300 bg-white text-neutral-800 disabled:opacity-50"
@@ -168,6 +181,14 @@ export default function CtpExecutiveActionsPanel({ submission, onUpdated }: Prop
           Reveal sent.{' '}
           <a href={revealUrl} className="font-bold underline" target="_blank" rel="noreferrer">
             Open reveal
+          </a>
+        </p>
+      ) : null}
+      {handoffUrl ? (
+        <p className="text-sm text-emerald-800">
+          Open Design handoff PR:{' '}
+          <a href={handoffUrl} className="font-bold underline" target="_blank" rel="noreferrer">
+            Open pull request
           </a>
         </p>
       ) : null}

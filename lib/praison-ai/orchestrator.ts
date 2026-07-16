@@ -15,6 +15,7 @@ import {
 import { scheduleCtpStudioCampaign } from '@/lib/ctp-studio-bridge';
 import { scheduleCtpProduction } from '@/lib/ctp-production-run';
 import { emitPulseEvent } from '@/lib/pulse-bus';
+import { reportOpsError } from '@/lib/ops-error';
 import { buildPulseInsights, mergeExecutiveSummary } from './executive-agent';
 import { runQaValidation } from './qa-agent';
 import { buildKnowledgeGraph } from './knowledge-graph';
@@ -379,6 +380,10 @@ export async function runPraisonWorkforce(
     return { ok: true, package: pkg };
   } catch (err) {
     console.error('[praison-orchestrator] workforce failed:', err);
+    await reportOpsError(err, {
+      scope: 'praison.workforce',
+      tags: { submissionId, businessName: submission.businessName },
+    });
     logAIEvent('praison.workforce.failed', aiContext, {
       submissionId,
       error: err instanceof Error ? err.message : 'unknown',

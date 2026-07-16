@@ -168,6 +168,14 @@ export async function GET() {
         submissionsSchemaOk: airtableSchema.ctpSubmissions.ok,
         creativeStudioSchemaOk: airtableSchema.creativeStudio.ok,
         intakeAgentReady: Boolean(process.env.OPENAI_API_KEY?.trim()),
+        praisonPackageWebhook: Boolean(
+          process.env.PRAISON_PACKAGE_WEBHOOK_URL?.trim() ||
+            process.env.CTP_INTELLIGENCE_WEBHOOK_URL?.trim(),
+        ),
+        openDesignGithub: Boolean(
+          process.env.GITHUB_TOKEN?.trim() || process.env.OPEN_DESIGN_GITHUB_TOKEN?.trim(),
+        ),
+        openDesignVercelHook: Boolean(process.env.OPEN_DESIGN_VERCEL_DEPLOY_HOOK_URL?.trim()),
         assetUploadReady: true,
         phase4Ready: airtableSchema.ctpSubmissions.ok && airtableSchema.creativeStudio.ok,
         portalVanityHost,
@@ -207,6 +215,15 @@ export async function GET() {
       simplifiAppDns:
         'Add app.simplifi.ai in Vercel Domains (same project) → CNAME to cname.vercel-dns.com — middleware routes / to workspace',
       resend: env.resend && env.resendFrom ? null : 'Set RESEND_API_KEY + RESEND_FROM_EMAIL + verify domain',
+      praisonPackageWebhook:
+        process.env.PRAISON_PACKAGE_WEBHOOK_URL?.trim() ||
+        process.env.CTP_INTELLIGENCE_WEBHOOK_URL?.trim()
+          ? null
+          : 'Optional — set PRAISON_PACKAGE_WEBHOOK_URL for Make CTP intelligence automation (docs/MAKE-PRAISON-CTP.md)',
+      openDesignGithub:
+        process.env.GITHUB_TOKEN?.trim() || process.env.OPEN_DESIGN_GITHUB_TOKEN?.trim()
+          ? null
+          : 'Optional — set GITHUB_TOKEN for Open Design → GitHub PR handoff (docs/OPEN-DESIGN-ARCHITECTURE.md)',
       sentryDsn: controls.sentryDsn
         ? null
         : 'Set NEXT_PUBLIC_SENTRY_DSN in Vercel Production (required for full launch readiness)',

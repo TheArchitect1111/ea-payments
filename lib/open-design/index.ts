@@ -55,3 +55,10 @@ export {
 } from './creative-status';
 
 export { beginOpenDesignFromCtp } from './ctp-integration';
+
+export {
+  runOpenDesignImplementationHandoff,
+  openDesignGithubConfigured,
+  openDesignVercelHookConfigured,
+  type ImplementationHandoffResult,
+} from './implementation-runner';

@@ -25,6 +25,7 @@ const required = [
   'lib/open-design/output-contract.ts',
   'lib/open-design/creative-status.ts',
   'lib/open-design/ctp-integration.ts',
+  'lib/open-design/implementation-runner.ts',
   'lib/agents/open-design-agent.ts',
 ];
 
@@ -45,6 +46,11 @@ assert(bridge.includes('beginOpenDesignFromCtp'), 'CTP studio bridge must start 
 
 const pulse = readFileSync(join(root, 'lib/pulse-bus.ts'), 'utf8');
 assert(pulse.includes('open.design.story.blocked'), 'pulse bus must include open.design events');
+assert(pulse.includes('open.design.deploy.preview'), 'pulse bus must include deploy preview event');
+
+const runner = readFileSync(join(root, 'lib/open-design/implementation-runner.ts'), 'utf8');
+assert(runner.includes('runOpenDesignImplementationHandoff'), 'implementation runner required');
+assert(runner.includes('createGithubPullRequest') || runner.includes('github-pr'), 'GitHub PR handoff required');
 
 const factory = readFileSync(join(root, 'lib/ea-factory.ts'), 'utf8');
 assert(factory.includes('ea-open-design'), 'EA Factory must register open design protocol');
