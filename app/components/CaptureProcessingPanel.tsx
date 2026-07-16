@@ -1,10 +1,12 @@
 'use client';
 
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import type { CaptureApiResponse } from '@/lib/capture-response';
 import { pollCaptureUntilReady } from '@/lib/capture-polling';
 import CaptureSuccessPanel from '@/app/components/CaptureSuccessPanel';
 import ActiveSavePanel from '@/app/components/ActiveSavePanel';
+import { clearProcessingCaptureId } from '@/lib/capture-upload-limits';
 
 export default function CaptureProcessingPanel({
   captureId,
@@ -14,6 +16,7 @@ export default function CaptureProcessingPanel({
   autoOpenMagnifi = true,
   showActiveSave = false,
   variant = 'default',
+  workspaceHref = '/simplifi/workspace',
 }: {
   captureId: string;
   title?: string;
@@ -22,10 +25,12 @@ export default function CaptureProcessingPanel({
   autoOpenMagnifi?: boolean;
   showActiveSave?: boolean;
   variant?: 'default' | 'capture';
+  workspaceHref?: string;
 }) {
   const [message, setMessage] = useState('Analyzing in the background…');
   const [result, setResult] = useState<CaptureApiResponse | null>(null);
   const [failed, setFailed] = useState(false);
+  const [timedOut, setTimedOut] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -38,6 +43,7 @@ export default function CaptureProcessingPanel({
     })
       .then((response) => {
         if (cancelled) return;
+        clearProcessingCaptureId();
         setResult(response);
         setMessage('');
         onComplete?.(response);
@@ -53,6 +59,7 @@ export default function CaptureProcessingPanel({
         if (cancelled) return;
         const msg = err instanceof Error ? err.message : 'Capture failed.';
         setFailed(true);
+        setTimedOut(/longer than expected/i.test(msg));
         setMessage(msg);
         onError?.(msg);
       });
@@ -93,6 +100,26 @@ export default function CaptureProcessingPanel({
         <p className="sc-processing-kicker">{failed ? 'Capture issue' : 'Processing'}</p>
         <p className={failed ? 'sc-error' : 'sc-processing-message'}>{message}</p>
         {!failed && <p className="sc-processing-hint">Magnifi builds automatically when scoring finishes.</p>}
+        {failed ? (
+          <p className="sc-processing-hint" style={{ marginTop: '0.75rem' }}>
+            {timedOut ? (
+              <>
+                Your capture may still finish in the background.{' '}
+                <Link href={workspaceHref} className="sc-inline-link">
+                  Open workspace
+                </Link>
+              </>
+            ) : (
+              <>
+                You can try again, or{' '}
+                <Link href={workspaceHref} className="sc-inline-link">
+                  check your workspace
+                </Link>
+                .
+              </>
+            )}
+          </p>
+        ) : null}
       </div>
     );
   }
@@ -108,6 +135,14 @@ export default function CaptureProcessingPanel({
           You can keep browsing. We&apos;ll notify you here and by email when Magnifi is ready.
         </p>
       )}
+      {failed ? (
+        <p className="text-xs text-neutral-600">
+          <Link href={workspaceHref} className="font-semibold underline">
+            Open Simplifi workspace
+          </Link>
+          {timedOut ? ' — analysis may still complete there.' : '.'}
+        </p>
+      ) : null}
     </div>
   );
 }

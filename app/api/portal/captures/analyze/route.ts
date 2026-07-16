@@ -5,6 +5,10 @@ import { type CaptureInput } from '@/lib/capture-pipeline';
 import { portalCaptureSource } from '@/lib/capture-records';
 import { submitCapture, toCaptureApiResponse } from '@/lib/capture-submit';
 import { isModuleEnabled } from '@/lib/modules/portal-modules';
+import {
+  MAX_CAPTURE_UPLOAD_BYTES,
+  captureUploadTooLargeMessage,
+} from '@/lib/capture-upload-limits';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -26,6 +30,9 @@ async function parseCaptureInput(req: Request): Promise<{
     const file = form.get('file');
 
     if (file instanceof File && file.size > 0) {
+      if (file.size > MAX_CAPTURE_UPLOAD_BYTES) {
+        throw new Error(captureUploadTooLargeMessage(file.size));
+      }
       const buffer = Buffer.from(await file.arrayBuffer());
       return {
         input: {
@@ -107,7 +114,8 @@ export async function POST(req: Request) {
     parsed = await parseCaptureInput(req);
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Invalid capture request.';
-    return NextResponse.json({ ok: false, error: message }, { status: 400 });
+    const status = /Keep uploads under|File is /i.test(message) ? 413 : 400;
+    return NextResponse.json({ ok: false, error: message }, { status });
   }
 
   const source = portalCaptureSource(tenant.portalSlug);

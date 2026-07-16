@@ -19,6 +19,14 @@ import { analyzeCaptureForm, analyzeCaptureUrl } from '@/lib/simplifi-client';
 import { enqueueCapture, flushCaptureQueue } from '@/lib/offline-capture-queue';
 import { useProductGuestSession } from '@/components/auth/useProductGuestSession';
 import { NAVY, GOLD } from '@/lib/design-system';
+import {
+  clearGuestCaptureIds,
+  clearProcessingCaptureId,
+  readGuestCaptureIds,
+  readProcessingCaptureId,
+  rememberGuestCaptureId,
+  stashProcessingCaptureId,
+} from '@/lib/capture-upload-limits';
 
 const EA_PLATFORM_PURPOSE =
   'Efficiency Architects helps you capture what matters, track progress, and turn activity into momentum.';
@@ -61,16 +69,43 @@ export default function SimplifiCaptureApp({
   const [message, setMessage] = useState('');
   const [result, setResult] = useState<AnalyzeResponse | null>(null);
   const [processingId, setProcessingId] = useState<string | null>(null);
+  const [bannerError, setBannerError] = useState('');
   const [externalOnboardingStep, setExternalOnboardingStep] = useState<SimplifiOnboardingStep | null>(null);
 
   const loginNext = encodeURIComponent('/simplifi/capture');
   const onboardingScope = slug ?? 'simplifi-user';
+  const isGuestDemo = slug === 'demo-client';
 
   const { starting: guestStarting, error: guestError, startGuest } = useProductGuestSession({
     loggedIn,
     autoStart: true,
     initialUrl,
   });
+
+  useEffect(() => {
+    const stored = readProcessingCaptureId();
+    if (stored) setProcessingId(stored);
+  }, []);
+
+  useEffect(() => {
+    if (!loggedIn || !slug || slug === 'demo-client') return;
+    const ids = readGuestCaptureIds();
+    if (!ids.length) return;
+
+    void fetch('/api/portal/captures/claim', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ captureIds: ids }),
+    })
+      .then(async (res) => {
+        const data = (await res.json()) as { ok?: boolean; claimed?: number };
+        if (res.ok && data.ok && (data.claimed ?? 0) > 0) {
+          clearGuestCaptureIds();
+          setMessage(`Moved ${data.claimed} guest capture${data.claimed === 1 ? '' : 's'} into your workspace.`);
+        }
+      })
+      .catch(() => {});
+  }, [loggedIn, slug]);
 
   useEffect(() => {
     if (!loggedIn) return;
@@ -144,10 +179,17 @@ export default function SimplifiCaptureApp({
     }
     if (data.processing && data.captureId) {
       setProcessingId(data.captureId);
+      stashProcessingCaptureId(data.captureId);
+      if (isGuestDemo || !slug || slug === 'demo-client') {
+        rememberGuestCaptureId(data.captureId);
+      }
       setResult(data);
       setView('processing');
       setOpen(true);
       return;
+    }
+    if (data.captureId && (isGuestDemo || !slug || slug === 'demo-client')) {
+      rememberGuestCaptureId(data.captureId);
     }
     setResult(data);
     setView('result');
@@ -322,6 +364,13 @@ export default function SimplifiCaptureApp({
           )}
           {' '}to track them.
         </p>
+        {isGuestDemo ? (
+          <p className="sc-guest-banner">
+            You&apos;re capturing as a guest.{" "}
+            <Link href={`/portal/login?next=${loginNext}`}>Sign in</Link> to keep these captures in
+            your own workspace.
+          </p>
+        ) : null}
         <button
           type="button"
           className="sc-secondary-link"
@@ -330,6 +379,8 @@ export default function SimplifiCaptureApp({
           More capture options
         </button>
 
+        {bannerError ? <p className="sc-error">{bannerError}</p> : null}
+
         {processingId && !open && (
           <div className="sc-processing-banner">
             <CaptureProcessingPanel
@@ -337,8 +388,12 @@ export default function SimplifiCaptureApp({
               title={result?.record?.title}
               showActiveSave={loggedIn}
               variant="capture"
-              onComplete={() => setProcessingId(null)}
-              onError={() => {}}
+              onComplete={() => {
+                clearProcessingCaptureId();
+                setProcessingId(null);
+                setBannerError('');
+              }}
+              onError={(msg) => setBannerError(msg)}
             />
           </div>
         )}
@@ -446,6 +501,7 @@ export default function SimplifiCaptureApp({
               showActiveSave={loggedIn}
               variant="capture"
               onComplete={(response) => {
+                clearProcessingCaptureId();
                 setProcessingId(null);
                 setResult(response);
                 setView('result');
