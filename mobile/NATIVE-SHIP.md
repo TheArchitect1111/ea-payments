@@ -2,7 +2,7 @@
 
 Brief-first tabs match web IA: **Brief · Capture · Inbox · Settings**.
 
-- `mobile/app/(app)/home.tsx` — Today's Brief
+- `mobile/app/(app)/home.tsx` — Today's Brief (hero + summaries + recent opportunities)
 - `mobile/app/(app)/capture.tsx` — quick capture
 - `mobile/app/(app)/workspace.tsx` — inbox / workspace list
 - `mobile/app/(app)/settings.tsx` — settings
