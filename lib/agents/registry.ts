@@ -2,6 +2,7 @@ import { researchAgent } from '@/lib/agents/research-agent';
 import { intakeAgent } from '@/lib/agents/intake-agent';
 import { presentationAgent } from '@/lib/agents/presentation-agent';
 import { platformGuardianAgent } from '@/lib/agents/platform-guardian-agent';
+import { openDesignAgent } from '@/lib/agents/open-design-agent';
 import type { EAAgent } from '@/lib/agents/types';
 
 const agents = new Map<string, EAAgent>();
@@ -41,3 +42,4 @@ registerAgent(researchAgent);
 registerAgent(intakeAgent);
 registerAgent(presentationAgent);
 registerAgent(platformGuardianAgent);
+registerAgent(openDesignAgent);

@@ -76,6 +76,12 @@ export type PulseEventType =
   | 'customer.health.changed'
   | 'expansion.opportunity'
   | 'attention.critical'
+  | 'open.design.story.extracted'
+  | 'open.design.story.blocked'
+  | 'open.design.dna.generated'
+  | 'open.design.concept.ready'
+  | 'open.design.review.awaiting'
+  | 'open.design.handoff.cursor'
   | 'guide.escalated';
 
 export interface PulseEvent {

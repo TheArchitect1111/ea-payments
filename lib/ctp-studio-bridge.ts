@@ -10,6 +10,7 @@ import {
 import { findOrganizationByPortalSlug } from '@/lib/organizations';
 import { emitPulseEvent } from '@/lib/pulse-bus';
 import { scheduleCtpProduction } from '@/lib/ctp-production-run';
+import { beginOpenDesignFromCtp } from '@/lib/open-design/ctp-integration';
 
 const EXPERIENCE_GOAL_MAP: Array<{ pattern: RegExp; goalId: CampaignGoalId }> = [
   { pattern: /event|camp|tournament|game/i, goalId: 'promote-event' },
@@ -162,6 +163,15 @@ export async function runCtpStudioCampaign(
         },
       });
     }
+
+    void beginOpenDesignFromCtp({
+      submission,
+      organizationId,
+      story,
+      goalId,
+    }).catch((err) => {
+      console.error('[ctp-studio-bridge] Open Design pipeline start failed:', err);
+    });
 
     scheduleCtpProduction(submissionId);
 
