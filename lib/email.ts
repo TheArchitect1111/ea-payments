@@ -1094,6 +1094,41 @@ export async function sendLearningReminderEmail(data: {
   );
 }
 
+export async function sendCtpReviewReminderEmail(data: {
+  email: string;
+  contactName: string;
+  businessName: string;
+  reviewScheduledAt: string;
+  portalUrl: string;
+}): Promise<{ ok: boolean; error?: string }> {
+  const firstName = firstNameOf(data.contactName);
+  const whenLabel = new Date(data.reviewScheduledAt).toLocaleString('en-US', {
+    dateStyle: 'full',
+    timeStyle: 'short',
+  });
+  const bodyHtml = `
+    <p style="margin:0 0 16px;font-size:15px;color:#1A1A2E;line-height:1.7;">Hi ${escHtml(firstName)},</p>
+    <p style="margin:0 0 18px;font-size:15px;color:#1A1A2E;line-height:1.7;">
+      This is a reminder that your collaborative review for <strong>${escHtml(data.businessName)}</strong>
+      is scheduled for <strong>${escHtml(whenLabel)}</strong>.
+    </p>
+    <p style="margin:0;font-size:14px;color:#555;line-height:1.7;">
+      Open your Opportunity Dashboard beforehand to review discoveries and prepare questions.
+    </p>`;
+
+  return resendEmail(
+    data.email,
+    `Review reminder: ${data.businessName}`,
+    baseEmailShell({
+      title: 'Review Reminder',
+      eyebrow: 'Consider the Possibilities™',
+      bodyHtml,
+      ctaLabel: 'Open Opportunity Dashboard',
+      ctaUrl: data.portalUrl,
+    }),
+  );
+}
+
 export async function sendCompletionEmail(data: {
   email: string;
   clientName: string;

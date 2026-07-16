@@ -127,6 +127,10 @@
     {
       "path": "/api/cron/connect-sequence",
       "schedule": "0 14 * * *"
+    },
+    {
+      "path": "/api/cron/ctp-review-reminders",
+      "schedule": "0 * * * *"
     }
   ]
 }
