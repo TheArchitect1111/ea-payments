@@ -9,6 +9,7 @@ import {
   buildAmbientOpeningFromSession,
   deriveOrbSession,
   type OrbBriefSlice,
+  type OrbOutcomeFlash,
   type OrbVisualState,
 } from '@/lib/orb';
 import { interpretOrbIntent, isOrbSessionSurface, resolveOrbIntentHref } from '@/lib/orb-os';
@@ -17,6 +18,7 @@ import { explainRecommendation } from '@/lib/simplifi-guidance-system';
 import SessionWorkspace, { type SessionView } from './session/SessionWorkspace';
 import './global-orb.css';
 
+const OUTCOME_FLASH_MS = 1200;
 type SpeechRecognitionLike = {
   lang: string;
   continuous: boolean;
@@ -66,12 +68,14 @@ export default function GlobalOrb({
   const [askInput, setAskInput] = useState('');
   const [askAnswer, setAskAnswer] = useState('');
   const [ambientOpener, setAmbientOpener] = useState('');
+  const [outcomeFlash, setOutcomeFlash] = useState<OrbOutcomeFlash | null>(null);
   const [dismissedIds, setDismissedIds] = useState<string[]>([]);
   const [sessionView, setSessionView] = useState<SessionView | null>(null);
   const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLElement>(null);
   const ambientShownRef = useRef(false);
+  const outcomeTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
     const sync = () => setOnline(typeof navigator === 'undefined' ? true : navigator.onLine);
@@ -85,6 +89,22 @@ export default function GlobalOrb({
   }, []);
 
   useEffect(() => () => recognitionRef.current?.stop(), []);
+
+  useEffect(
+    () => () => {
+      if (outcomeTimerRef.current != null) window.clearTimeout(outcomeTimerRef.current);
+    },
+    [],
+  );
+
+  const flashOutcome = (flash: OrbOutcomeFlash) => {
+    if (outcomeTimerRef.current != null) window.clearTimeout(outcomeTimerRef.current);
+    setOutcomeFlash(flash);
+    outcomeTimerRef.current = window.setTimeout(() => {
+      setOutcomeFlash(null);
+      outcomeTimerRef.current = null;
+    }, OUTCOME_FLASH_MS);
+  };
 
   // One-shot ambient opener on first expand — titles from Brief / Action Center only.
   useEffect(() => {
@@ -238,11 +258,18 @@ export default function GlobalOrb({
   };
 
   const state = session.state as OrbVisualState;
+  const displayState = (outcomeFlash ?? interaction ?? state) as OrbVisualState;
 
   return (
     <div className="global-orb-root">
       <div className="global-orb-live" aria-live="polite">
-        {open ? '' : session.ariaLabel}
+        {open
+          ? ''
+          : outcomeFlash === 'success'
+            ? 'SIMPLIFI Orb, action completed'
+            : outcomeFlash === 'learning'
+              ? 'SIMPLIFI Orb, intelligence updated'
+              : session.ariaLabel}
       </div>
 
       {open ? (
@@ -376,7 +403,7 @@ export default function GlobalOrb({
         <button
           type="button"
           className="global-orb-btn"
-          data-state={state}
+          data-state={displayState}
           aria-label={session.ariaLabel}
           title={session.ariaLabel}
           onClick={() => setOpen(true)}
@@ -391,7 +418,7 @@ export default function GlobalOrb({
         <button
           type="button"
           className="global-orb-btn"
-          data-state={interaction ?? state}
+          data-state={displayState}
           aria-label="SIMPLIFI Orb expanded"
           aria-expanded="true"
           onClick={() => setOpen(false)}
@@ -413,6 +440,7 @@ export default function GlobalOrb({
           onClose={() => setSessionView(null)}
           onOpenOpportunity={(id) => setSessionView({ kind: 'opportunity', id })}
           onBackToInbox={() => setSessionView({ kind: 'inbox' })}
+          onOutcomeFlash={flashOutcome}
         />
       ) : null}
     </div>

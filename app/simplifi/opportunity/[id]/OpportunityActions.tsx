@@ -8,15 +8,18 @@ import {
   recordCaptureOutcome,
   snoozeCapture,
 } from '@/lib/simplifi-client';
+import type { OrbOutcomeFlash } from '@/lib/orb';
 
 export default function OpportunityActions({
   recordId,
   dueDate,
   outcomeStatus,
+  onOutcomeFlash,
 }: {
   recordId: string;
   dueDate?: string;
   outcomeStatus?: string;
+  onOutcomeFlash?: (flash: OrbOutcomeFlash) => void;
 }) {
   const router = useRouter();
   const [note, setNote] = useState('');
@@ -76,6 +79,7 @@ export default function OpportunityActions({
             void run(async () => {
               const data = await recordCaptureOutcome(recordId, 'won');
               setNote(data.ok ? 'Marked won.' : data.error ?? 'Could not update.');
+              if (data.ok) onOutcomeFlash?.('success');
             })
           }
         >
@@ -122,6 +126,7 @@ export default function OpportunityActions({
               setIntel(
                 `Path: ${decision.recommendedPath} (${decision.confidenceScore}/100) · ${build.buildPath}`,
               );
+              onOutcomeFlash?.('learning');
             })
           }
         >
