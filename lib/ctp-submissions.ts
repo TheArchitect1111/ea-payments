@@ -5,6 +5,7 @@ import type { DigitalPresenceAudit } from '@/lib/ctp-digital-presence';
 import type { CtpProductionPackage } from '@/lib/ctp-production';
 import type { CtpExecutiveSnapshot } from '@/lib/ctp-executive-snapshot';
 import type { CtpExecutiveScore } from '@/lib/ctp-executive-scoring';
+import type { ExecutiveIntelligencePackage } from '@/lib/praison-ai/types';
 import {
   airtableConfigured,
   airtableQuery,
@@ -95,6 +96,8 @@ export type CtpSubmission = {
   executiveEmailSentAt?: string;
   executiveScoring?: CtpExecutiveScore;
   intakeAnalysis?: CtpIntakeAnalysisRecord;
+  /** PraisonAI workforce package — full executive intelligence output. */
+  workforcePackage?: ExecutiveIntelligencePackage;
   assetManifest?: CtpAssetManifest;
   submittedAt: string;
   updatedAt: string;
@@ -108,6 +111,7 @@ export type CtpSubmissionUpdate = Partial<
     | 'studioStatus'
     | 'reviewScheduledAt'
     | 'intakeAnalysis'
+    | 'workforcePackage'
     | 'portalSlug'
     | 'siteUrl'
     | 'creativeCampaignId'
@@ -170,6 +174,7 @@ function toAirtableFields(submission: CtpSubmission): Record<string, unknown> {
       executiveEmailDraft: submission.executiveEmailDraft,
       executiveEmailSentAt: submission.executiveEmailSentAt,
       executiveScoring: submission.executiveScoring,
+      workforcePackage: submission.workforcePackage,
     }),
     'Submitted At': submission.submittedAt,
     'Updated At': submission.updatedAt,
@@ -194,6 +199,7 @@ function fromAirtableRecord(fields: Record<string, unknown>): CtpSubmission | nu
     executiveEmailDraft?: CtpExecutiveEmailDraft;
     executiveEmailSentAt?: string;
     executiveScoring?: CtpExecutiveScore;
+    workforcePackage?: ExecutiveIntelligencePackage;
   } = {};
   const raw = fields['Payload JSON'];
   if (typeof raw === 'string' && raw.trim()) {
@@ -255,6 +261,7 @@ function fromAirtableRecord(fields: Record<string, unknown>): CtpSubmission | nu
     executiveEmailDraft: payload.executiveEmailDraft,
     executiveEmailSentAt: payload.executiveEmailSentAt,
     executiveScoring: payload.executiveScoring,
+    workforcePackage: payload.workforcePackage,
     intakeAnalysis,
     assetManifest,
     submittedAt: String(fields['Submitted At'] ?? new Date().toISOString()),

@@ -135,6 +135,23 @@ export function executiveInputFromCtpSubmission(
   submission: CtpSubmission,
   organizationId: string,
 ): ExecutiveIntelligenceInput {
+  if (submission.workforcePackage) {
+    const pkg = submission.workforcePackage;
+    return {
+      organizationId,
+      organizationName: submission.businessName,
+      industry: pkg.research?.data?.industry as string | undefined,
+      mission: submission.discoveryAnswers?.mission as string | undefined,
+      audience: submission.contactName,
+      differentiators: submission.desiredExperiences,
+      executiveSummary: pkg.executiveSummary.narrative,
+      websiteAuditNotes: pkg.websiteAudit?.summary,
+      portalRecommendations: pkg.portal?.data?.recommendedModules,
+      marketingNotes: pkg.marketing?.summary,
+      discoveryAnswers: submission.discoveryAnswers as Record<string, unknown> | undefined,
+    };
+  }
+
   return {
     organizationId,
     organizationName: submission.businessName,

@@ -20,8 +20,9 @@ import {
 import { getCtpAttentionStats } from '@/lib/ctp-attention-stats';
 import { getPackageSyncHealth } from '@/lib/platform/package-sync-health';
 import { buildAttentionItems, type AttentionItem } from '@/lib/pulse-attention';
+import { buildWorkforceAttentionItems } from '@/lib/praison-ai/mission-control';
 import { listCanonicalPulseEvents } from '@/lib/pulse-event-store';
-import { type PulseEvent } from '@/lib/pulse-bus';
+import { type PulseEvent, listRecentPulseEvents } from '@/lib/pulse-bus';
 
 const PRIORITY_SCORE: Record<string, number> = {
   critical: 95,
@@ -87,6 +88,43 @@ function attentionItemToPlatform(item: AttentionItem, organizationId: string): P
       item.id,
     ),
   );
+}
+
+function praisonAttentionEvents(organizationId: string): PlatformEvent[] {
+  const recent = listRecentPulseEvents(80);
+  const packages = recent
+    .filter((e) => e.type === 'praison.package.ready' || e.type === 'praison.qa.failed')
+    .slice(0, 10)
+    .map((e) => ({
+      id: String(e.objectId ?? e.at),
+      submissionId: String(e.objectId ?? ''),
+      businessName: e.title.replace(/^Executive intelligence ready — |^QA blocked — /, ''),
+      reviewStatus:
+        e.type === 'praison.qa.failed'
+          ? ('qa-failed' as const)
+          : ('awaiting-executive-review' as const),
+      qa:
+        e.type === 'praison.qa.failed'
+          ? { passed: false, blockers: [e.detail ?? ''] }
+          : { passed: true },
+      pulseInsights: e.detail ? [e.detail] : [],
+    }));
+
+  return buildWorkforceAttentionItems(
+    packages.map((p) => ({
+      ...p,
+      qa: p.qa?.passed === false
+        ? {
+            agentId: 'qa' as const,
+            passed: false,
+            checks: [],
+            blockers: p.qa.blockers ?? [],
+            confidence: 0,
+            reviewedAt: new Date().toISOString(),
+          }
+        : undefined,
+    })),
+  ).map((item) => attentionItemToPlatform(item, organizationId));
 }
 
 async function ctpAttentionEvents(organizationId: string): Promise<PlatformEvent[]> {
@@ -164,10 +202,11 @@ export async function buildMissionControlPayload(input?: {
   );
 
   const packageSyncSignals = packageSyncAttentionEvents(organizationId);
+  const praisonSignals = praisonAttentionEvents(organizationId);
 
   return buildMissionControlFromStreams(
     activity,
-    [...packageSyncSignals, ...ctpSignals, ...rhythmSignals, ...customerSignals, ...pulseRows],
+    [...packageSyncSignals, ...praisonSignals, ...ctpSignals, ...rhythmSignals, ...customerSignals, ...pulseRows],
     {
       organizationId,
       userName,

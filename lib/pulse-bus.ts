@@ -82,7 +82,12 @@ export type PulseEventType =
   | 'open.design.concept.ready'
   | 'open.design.review.awaiting'
   | 'open.design.handoff.cursor'
-  | 'guide.escalated';
+  | 'guide.escalated'
+  | 'praison.workforce.started'
+  | 'praison.agent.complete'
+  | 'praison.qa.passed'
+  | 'praison.qa.failed'
+  | 'praison.package.ready';
 
 export interface PulseEvent {
   product: PulseProduct;
