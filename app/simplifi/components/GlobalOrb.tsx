@@ -27,6 +27,21 @@ type SpeechRecognitionLike = {
   onerror: (() => void) | null;
 };
 
+function sessionViewForSurface(surface: string, draft?: string): SessionView | null {
+  switch (surface) {
+    case 'inbox':
+      return { kind: 'inbox' };
+    case 'followups':
+      return { kind: 'followups' };
+    case 'calendar':
+      return { kind: 'calendar' };
+    case 'capture':
+      return { kind: 'capture', draft };
+    default:
+      return null;
+  }
+}
+
 export default function GlobalOrb({
   slug,
   loggedIn,
@@ -132,12 +147,15 @@ export default function GlobalOrb({
     try {
       const intent = interpretOrbIntent(q);
 
-      // Session surfaces (e.g. inbox) render as a temporary workspace in place.
+      // Session surfaces render as a temporary workspace over the Brief.
       if (isOrbSessionSurface(intent.surface)) {
-        setAskAnswer(intent.reply);
-        setOpen(false);
-        setSessionView({ kind: 'inbox' });
-        return;
+        const view = sessionViewForSurface(intent.surface, intent.draft);
+        if (view) {
+          setAskAnswer(intent.reply);
+          setOpen(false);
+          setSessionView(view);
+          return;
+        }
       }
 
       const matches = searchOpportunities(intent.query ?? q, objects);

@@ -35,7 +35,12 @@ export function isNavigableOrbSurface(surface: OrbSurface): boolean {
  * Surfaces the Orb can render as a temporary in-place session workspace
  * (over the Brief) instead of a full route navigation.
  */
-export const ORB_SESSION_SURFACES: readonly OrbSurface[] = ['inbox'] as const;
+export const ORB_SESSION_SURFACES: readonly OrbSurface[] = [
+  'inbox',
+  'followups',
+  'calendar',
+  'capture',
+] as const;
 
 export function isOrbSessionSurface(surface: OrbSurface): boolean {
   return (ORB_SESSION_SURFACES as readonly string[]).includes(surface);

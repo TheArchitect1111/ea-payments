@@ -224,6 +224,71 @@
   cursor: pointer;
 }
 
+.orb-session-group {
+  margin-bottom: 16px;
+}
+
+.orb-session-group h3 {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0 0 8px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--orb-gold, #c9a844);
+}
+
+.orb-session-group h3 span {
+  color: #5f6b7a;
+  letter-spacing: 0;
+  text-transform: none;
+  font-weight: 600;
+}
+
+.orb-session-due {
+  color: #8a5316;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.orb-session-textarea {
+  width: 100%;
+  border: 1px solid rgba(27, 43, 77, 0.15);
+  border-radius: 12px;
+  padding: 12px;
+  font: inherit;
+  color: #1b2b4d;
+  background: #fff;
+  resize: vertical;
+  min-height: 96px;
+}
+
+.orb-session-textarea:focus-visible {
+  outline: 2px solid var(--orb-gold, #c9a844);
+  outline-offset: 2px;
+}
+
+.orb-session-row-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.orb-session-row-actions a {
+  color: #1b2b4d;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.orb-session-status {
+  margin-top: 10px;
+  color: #1b2b4d;
+  font-size: 0.9rem;
+}
+
 @keyframes orb-session-in {
   from {
     opacity: 0;
