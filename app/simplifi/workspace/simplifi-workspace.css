@@ -244,22 +244,33 @@ a.sw-card-head {
   background: #1b2b4d;
 }
 
-.sw-today-icon--momentum {
+.sw-today-icon--momentum,
+.sw-today-icon--attention {
   background: #c9a844;
 }
 
 .sw-today-icon--deadline,
-.sw-today-icon--due-soon {
+.sw-today-icon--due-soon,
+.sw-today-icon--proposal {
   background: #3b82f6;
 }
 
 .sw-today-icon--overdue,
-.sw-today-icon--stale {
+.sw-today-icon--stale,
+.sw-today-icon--followup {
   background: #7c3aed;
 }
 
-.sw-today-icon--explore {
+.sw-today-icon--explore,
+.sw-today-icon--reading {
   background: #0f766e;
+}
+
+.sw-today-empty-title {
+  margin: 0 0 6px;
+  font-size: 15px;
+  font-weight: 800;
+  color: #1b2b4d;
 }
 
 .sw-today-copy strong,
