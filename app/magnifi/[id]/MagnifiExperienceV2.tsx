@@ -132,6 +132,16 @@ export default function MagnifiExperienceV2({ experience }: { experience: Magnif
               Classic report
             </Link>
             {' · '}
+            <a
+              href={`/api/portal/captures/${experience.captureId}/print?autoprint=1`}
+              target="_blank"
+              rel="noreferrer"
+              className="underline"
+              style={{ color: theme.navy }}
+            >
+              Download PDF
+            </a>
+            {' · '}
             <Link href="/experience/templates" className="underline" style={{ color: theme.navy }}>
               All templates
             </Link>

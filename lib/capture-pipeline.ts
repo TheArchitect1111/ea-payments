@@ -49,6 +49,15 @@ import {
   buildSimplifiIntelligence,
   formatIntelligenceSummary,
 } from './intelligence-bundle';
+import {
+  applyThinContentTrustPenalty,
+  countPageWords,
+  isThinPage,
+  mergeAuditIntoAnalysis,
+  thinContentUserNote,
+} from './capture-signal-quality';
+import { runWebsiteAudit } from './website-audit';
+import type { OpportunityAnalysis } from './simplifi-business-analysis';
 
 export interface CapturePipelineResult {
   ok: boolean;
@@ -106,9 +115,42 @@ async function runCapturePipeline(
   const classification = classifyResource(sourceUrl, page);
   const eaFitScore = computeEaFitScore(classification, page);
   const scores = scoreOpportunity(classification, page, eaFitScore);
-  const businessAnalysis = analyzeBusinessOpportunity(page, classification, eaFitScore, uploadType);
+  let businessAnalysis: OpportunityAnalysis = analyzeBusinessOpportunity(
+    page,
+    classification,
+    eaFitScore,
+    uploadType,
+  );
   const extraction = extractBusinessSignals(page, classification, uploadType);
-  const trust = buildTrustMetadata(page, classification, scores, sourceUrl);
+  const wordCount = countPageWords(page);
+  const thin = isThinPage(page);
+  let trust = applyThinContentTrustPenalty(
+    buildTrustMetadata(page, classification, scores, sourceUrl),
+    wordCount,
+  );
+
+  const isHttpUrl = /^https?:\/\//i.test(sourceUrl);
+  if (isHttpUrl && thin) {
+    try {
+      const audit = await runWebsiteAudit(sourceUrl);
+      businessAnalysis = mergeAuditIntoAnalysis(businessAnalysis, audit);
+      trust = {
+        ...trust,
+        confidenceLabel: 'Low',
+        reasoning: [
+          ...trust.reasoning,
+          `Website audit (${audit.source}) clarity ${audit.clarityScore}/100; ${audit.findings.length} finding(s).`,
+        ],
+        sources: [
+          ...trust.sources,
+          { label: `Website audit · ${audit.source}`, type: 'pattern', url: sourceUrl },
+        ],
+      };
+    } catch {
+      // Audit is enrichment only — pipeline continues with thin-content note.
+    }
+  }
+
   const recommendations = generateRecommendations(classification, page, scores);
   const blueprint =
     options.generateBlueprint !== false
@@ -135,6 +177,7 @@ async function runCapturePipeline(
   const analysisSummary = [
     buildAnalysisSummary(page, classification, scores),
     formatScoresLine(businessAnalysis.scores),
+    thin ? thinContentUserNote(wordCount) : '',
     '',
     `Strengths: ${businessAnalysis.strengths.join('; ')}`,
     `Missed: ${businessAnalysis.missedOpportunities.join('; ')}`,
@@ -175,7 +218,7 @@ async function runCapturePipeline(
       productAlignment: classification.productAlignment,
       status: 'Analyzing',
       blueprintTemplate: recommendations.template.name,
-      trustConfidence: businessAnalysis.scores.trust,
+      trustConfidence: Math.min(businessAnalysis.scores.trust, trust.confidence),
       recommendationSummary: formatRecommendationSummary(recommendations),
       blueprintSummary: blueprint ? formatBlueprintSummary(blueprint) : undefined,
       visibilityScore: businessAnalysis.scores.visibility,
@@ -207,6 +250,7 @@ async function runCapturePipeline(
     captureRecordId: recordId,
     uniqueSuffix: recordId.replace('rec', '').slice(-6),
     intelligence,
+    lowSignal: thin || trust.confidenceLabel === 'Low',
   });
 
   const descriptionWithPayload = embedOpportunityPayload(analysisSummary, opportunity);
@@ -219,7 +263,7 @@ async function runCapturePipeline(
     opportunityScore: scores.opportunityScore,
     productAlignment: classification.productAlignment,
     blueprintTemplate: recommendations.template.name,
-    trustConfidence: businessAnalysis.scores.trust,
+    trustConfidence: Math.min(businessAnalysis.scores.trust, trust.confidence),
     recommendationSummary: formatRecommendationSummary(recommendations),
     blueprintSummary: blueprint ? formatBlueprintSummary(blueprint) : undefined,
     considerSlug: opportunity.prospectSlug,

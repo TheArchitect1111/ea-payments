@@ -21,9 +21,20 @@ export default function MagnifiClassicReport({ capture }: { capture: CaptureReco
           <h1 className="text-4xl sm:text-5xl font-extrabold leading-tight" style={{ color: NAVY }}>
             {capture.title}
           </h1>
-          <Link href={`/magnifi/${capture.id}`} className="text-xs underline mt-4 inline-block" style={{ color: GOLD }}>
-            ← Cinematic experience
-          </Link>
+          <div className="mt-4 flex flex-wrap gap-4 text-xs">
+            <Link href={`/magnifi/${capture.id}`} className="underline" style={{ color: GOLD }}>
+              ← Cinematic experience
+            </Link>
+            <a
+              href={`/api/portal/captures/${capture.id}/print?autoprint=1`}
+              target="_blank"
+              rel="noreferrer"
+              className="underline font-semibold"
+              style={{ color: NAVY }}
+            >
+              Download PDF
+            </a>
+          </div>
         </div>
       </section>
       <section className="max-w-5xl mx-auto px-6 py-10 grid lg:grid-cols-[1fr_280px] gap-6">
