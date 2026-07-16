@@ -1417,18 +1417,17 @@ export type CtpExecutiveEmailData = {
   portalUrl?: string;
   scheduleUrl?: string;
   digitalPresenceAudit?: import('@/lib/ctp-digital-presence').DigitalPresenceAudit;
+  /** Opportunity Experience snapshot extras (no fabrication). */
+  opportunitySummary?: string;
+  categoryScores?: Array<{ label: string; score: number }>;
 };
 
-/** CTP post-intake welcome — ops capacity brief OR website/presence studio welcome. */
+/** CTP post-intake welcome — Opportunity Experience confirmation. */
 export async function sendCtpExecutiveEmail(
   data: CtpExecutiveEmailData,
 ): Promise<{ ok: boolean; error?: string }> {
   const { buildCtpExecutiveBrief } = await import('@/lib/ctp-executive-brief');
-  const {
-    buildOpsWelcomeEmail,
-    buildPresenceWelcomeEmail,
-    ctpWelcomeEmailTrack,
-  } = await import('@/lib/ctp-welcome-email');
+  const { buildOpportunityExperienceEmail } = await import('@/lib/ctp-opportunity-email');
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? EA_PLATFORM_URL;
   const proposalUrl = `${baseUrl}/proposal/${encodeURIComponent(data.proposalId)}`;
   const supportEmail =
@@ -1453,9 +1452,8 @@ export async function sendCtpExecutiveEmail(
 
   const investmentLow = data.investmentLow ?? Math.round(data.recommendedFee * 0.9);
   const investmentHigh = data.investmentHigh ?? Math.round(data.recommendedFee * 1.15);
-  const track = ctpWelcomeEmailTrack(data.clientType);
   const { publicPortalLoginUrl } = await import('@/lib/ctp-portal-host');
-  // Always send people into the branded portal experience — never a bare proposal "brief".
+  // Opportunity Dashboard — never bare proposal or Design Studio as primary CTA.
   const guidedPortalUrl = data.portalUrl || publicPortalLoginUrl();
   const model = {
     firstName,
@@ -1476,10 +1474,12 @@ export async function sendCtpExecutiveEmail(
     proposalUrl,
     supportEmail,
     includesPortal: data.clientType === 'website_portal' || data.clientType === 'portal_only',
+    clientType: data.clientType,
+    opportunitySummary: data.opportunitySummary,
+    categoryScores: data.categoryScores,
   };
 
-  const built =
-    track === 'presence' ? buildPresenceWelcomeEmail(model) : buildOpsWelcomeEmail(model);
+  const built = buildOpportunityExperienceEmail(model);
 
   return resendEmail(
     data.email,

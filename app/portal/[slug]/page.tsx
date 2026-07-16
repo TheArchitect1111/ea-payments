@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import { getPortalCaptures } from '@/lib/capture-records';
 import { getClientSuccessProfile } from '@/lib/client-success';
 import PasswordChangeModal from './PasswordChangeModal';
@@ -12,6 +13,8 @@ import {
 } from '@/app/portal/components/PortalPersonalityDashboard';
 import { resolvePortalWorkspaceChrome } from '@/lib/platform/portal-workspace';
 import { MetricBoxIcon, MetricUsersIcon } from '@/lib/chassis/PortalNavIcons';
+import { getCtpSubmissionForPortal } from '@/lib/ctp-submissions';
+import { resolveCtpClientLandingPath } from '@/lib/ctp-opportunity-routes';
 import './ea-portal.css';
 
 export const dynamic = 'force-dynamic';
@@ -29,7 +32,16 @@ export default async function PortalPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const { client } = await requirePortalModule(slug, 'dashboard');
+  const { client, session } = await requirePortalModule(slug, 'dashboard');
+
+  // CTP intake clients belong in the branded CTP workspace — not the Simplifi hub home.
+  const ctpSubmission = await getCtpSubmissionForPortal({
+    portalSlug: slug,
+    email: session.email ?? client.email,
+  });
+  if (ctpSubmission) {
+    redirect(resolveCtpClientLandingPath(slug));
+  }
 
   const [profile, captures, chrome] = await Promise.all([
     getClientSuccessProfile(client),

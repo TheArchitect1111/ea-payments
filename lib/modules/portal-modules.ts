@@ -404,20 +404,34 @@ export async function getPortalModuleAccessForSlug(slug: string): Promise<Portal
   });
 }
 
+function portalLoginRedirect(nextPath: string): never {
+  const next = encodeURIComponent(nextPath);
+  redirect(`/portal/login?next=${next}`);
+}
+
+function portalModulePath(slug: string, moduleId: ModuleId): string {
+  const moduleDef = getModuleDefinition(moduleId);
+  if (moduleDef) return moduleHref(slug, moduleDef);
+  if (moduleId === 'dashboard') return `/portal/${slug}`;
+  return `/portal/${slug}/${moduleId}`;
+}
+
 export async function requirePortalModule(
   slug: string,
   moduleId: ModuleId,
 ): Promise<{ session: EAPortalSession; client: PortalClientRecord; access: PortalModuleAccess }> {
   const cookieStore = await cookies();
   const token = cookieStore.get(EA_PORTAL_COOKIE)?.value;
-  if (!token) redirect('/portal/login');
+  const intendedPath = portalModulePath(slug, moduleId);
+
+  if (!token) portalLoginRedirect(intendedPath);
 
   const session = await verifySession(token);
-  if (!session) redirect('/portal/login');
+  if (!session) portalLoginRedirect(intendedPath);
   if (session.slug !== slug) redirect(`/portal/${session.slug}`);
 
   const client = await getClientByPortalSlug(slug);
-  if (!client) redirect('/portal/login');
+  if (!client) portalLoginRedirect(intendedPath);
 
   const access = await resolvePortalModuleAccess({
     orgId: session.orgId,
@@ -428,6 +442,16 @@ export async function requirePortalModule(
   });
 
   if (!access.enabledModuleIds.has(moduleId)) {
+    // CTP intake clients still reach their branded workspace if entitlements lag.
+    if (moduleId === 'ctp') {
+      const submission = await getCtpSubmissionForPortal({
+        portalSlug: slug,
+        email: session.email ?? client.email,
+      });
+      if (submission) {
+        return { session, client, access };
+      }
+    }
     redirect(`/portal/${slug}`);
   }
 
