@@ -30,7 +30,12 @@ for (const [p, label] of [
 }
 
 const opsSrc = readFileSync(ops, 'utf8');
-assert(opsSrc.includes('simplifi.ai') || opsSrc.includes('SIMPLIFI_BRAND_URL'), 'branded host required');
+assert(
+  opsSrc.includes('app.efficiencyarchitects.online') ||
+    opsSrc.includes('simplifi.ai') ||
+    opsSrc.includes('SIMPLIFI_BRAND_URL'),
+  'branded host required',
+);
 assert(opsSrc.includes('probeSimplifiAppDns'), 'DNS probe required');
 assert(opsSrc.includes('buildSimplifiPass1AttentionItems'), 'attention builder required');
 assert(opsSrc.includes('sentryConfigured'), 'sentry helper required');

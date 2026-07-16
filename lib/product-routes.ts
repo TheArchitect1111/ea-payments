@@ -23,6 +23,7 @@ export const PRODUCT_HOST_ENTRY: Record<string, string> = {
   'ea-magnifi.vercel.app': '/consider/selena',
   'ea-amplifi.vercel.app': '/amplifi',
   'ea-pulse.vercel.app': '/portal/login?next=/portal/demo-client/pulse',
+  'app.efficiencyarchitects.online': '/simplifiorb',
   'simplifi.ai': '/simplifi/workspace',
   'www.simplifi.ai': '/simplifi/workspace',
   'app.simplifi.ai': '/simplifi/workspace',

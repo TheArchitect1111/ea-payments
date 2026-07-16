@@ -42,6 +42,7 @@ export const PORTAL_HOST_RESERVED = new Set([
   'site',
   'sites',
   'simplifi',
+  'simplifiorb',
   'amplifi',
   'capture',
   'start',

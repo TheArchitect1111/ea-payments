@@ -201,6 +201,7 @@ export const config = {
     '/',
     '/capture',
     '/app',
+    '/simplifiorb',
     '/workspace',
     '/login',
     '/register',

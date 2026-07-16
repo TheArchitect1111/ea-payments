@@ -215,7 +215,7 @@ export async function GET() {
           ? null
           : `Attach ${portalVanityHost.host} in Vercel Domains + DNS CNAME — see docs/CTP-SETUP.md (Portal vanity host). Probe: ${portalVanityHost.error ?? 'failed'}`,
       simplifiAppDns:
-        'Add app.simplifi.ai in Vercel Domains (same project) → CNAME to cname.vercel-dns.com — middleware routes / to workspace',
+        'Add app.efficiencyarchitects.online in Vercel Domains → Namecheap CNAME app → cname.vercel-dns.com — entry path /simplifiorb',
       resend: env.resend && env.resendFrom ? null : 'Set RESEND_API_KEY + RESEND_FROM_EMAIL + verify domain',
       praisonPackageWebhook:
         process.env.PRAISON_PACKAGE_WEBHOOK_URL?.trim() ||

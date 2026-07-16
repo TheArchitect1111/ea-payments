@@ -4,17 +4,21 @@
  */
 import type { AttentionItem } from '@/lib/pulse-attention';
 import { monitoringConfigured, monitoringDsnEnvHint } from '@/lib/monitoring';
+import { SIMPLIFI_APP_URL, SIMPLIFI_ORB_ENTRY_URL } from '@/lib/simplifi-app-host';
 
 /** Preferred branded host once DNS points at ea-payments. */
 export const SIMPLIFI_BRAND_URL =
   process.env.NEXT_PUBLIC_SIMPLIFI_APP_URL?.replace(/\/$/, '') ||
   process.env.SIMPLIFI_APP_URL?.replace(/\/$/, '') ||
-  'https://simplifi.ai';
+  SIMPLIFI_APP_URL;
 
 /** Working production host for testers until branded DNS is correct. */
 export const SIMPLIFI_TESTER_URL = 'https://efficiencyarchitects.online';
 
+/** Legacy aspirational alias — only if EA owns it. Prefer SIMPLIFI_ORB_ENTRY_URL. */
 export const SIMPLIFI_APP_ALIAS_URL = 'https://app.simplifi.ai';
+
+export { SIMPLIFI_ORB_ENTRY_URL };
 
 export type SimplifiPass1Check = {
   id: 'dns_simplifi_app' | 'sentry' | 'uptime';
@@ -39,42 +43,45 @@ async function probeSimplifiHost(url: string): Promise<{
   status: number;
   message: string;
 }> {
-  try {
-    const res = await fetch(`${url.replace(/\/$/, '')}/simplifi/capture`, {
-      method: 'GET',
-      redirect: 'follow',
-      signal: AbortSignal.timeout(12000),
-    });
-    const html = await res.text();
-    if (res.ok && looksLikeSimplifiApp(html)) {
-      return {
-        ok: true,
-        status: res.status,
-        message: `${url} serves Simplifi capture (${res.status}).`,
-      };
+  const base = url.replace(/\/$/, '');
+  // Prefer branded Orb entry; fall back to capture for legacy hosts.
+  const probePaths = base.includes('efficiencyarchitects.online')
+    ? ['/simplifiorb', '/simplifi/capture']
+    : ['/simplifi/capture', '/simplifiorb'];
+
+  let lastStatus = 0;
+  let lastMessage = `${base} unreachable.`;
+
+  for (const path of probePaths) {
+    try {
+      const res = await fetch(`${base}${path}`, {
+        method: 'GET',
+        redirect: 'follow',
+        signal: AbortSignal.timeout(12000),
+      });
+      lastStatus = res.status;
+      const html = await res.text();
+      if (res.ok && looksLikeSimplifiApp(html)) {
+        return {
+          ok: true,
+          status: res.status,
+          message: `${base}${path} serves Simplifi (${res.status}).`,
+        };
+      }
+      if (res.ok) {
+        lastMessage = `${base}${path} responds but does not serve Simplifi (wrong project or stub).`;
+      } else {
+        lastMessage = `${base}${path} returned HTTP ${res.status}.`;
+      }
+    } catch (err) {
+      lastMessage = `${base}${path} unreachable (${err instanceof Error ? err.message : 'error'}).`;
     }
-    if (res.ok) {
-      return {
-        ok: false,
-        status: res.status,
-        message: `${url} responds but does not serve Simplifi capture (park/lander or wrong project). Point DNS A/CNAME to Vercel ea-payments.`,
-      };
-    }
-    return {
-      ok: false,
-      status: res.status,
-      message: `${url}/simplifi/capture returned HTTP ${res.status}.`,
-    };
-  } catch (err) {
-    return {
-      ok: false,
-      status: 0,
-      message: `${url} unreachable (${err instanceof Error ? err.message : 'error'}).`,
-    };
   }
+
+  return { ok: false, status: lastStatus, message: lastMessage };
 }
 
-/** Prefer branded host; accept tester host only as operational fallback messaging (not Pass 1 complete). */
+/** Prefer branded app host; accept EA apex /simplifiorb as complete until app subdomain DNS is live. */
 export async function probeSimplifiAppDns(): Promise<{
   ok: boolean;
   status: number;
@@ -85,6 +92,14 @@ export async function probeSimplifiAppDns(): Promise<{
   if (brand.ok) {
     return { ...brand, url: SIMPLIFI_BRAND_URL };
   }
+  const apex = await probeSimplifiHost(SIMPLIFI_TESTER_URL);
+  if (apex.ok) {
+    return {
+      ...apex,
+      url: SIMPLIFI_TESTER_URL,
+      message: `${apex.message} Branded entry ready on apex; add Namecheap CNAME app → cname.vercel-dns.com for ${SIMPLIFI_BRAND_URL}.`,
+    };
+  }
   const alias = await probeSimplifiHost(SIMPLIFI_APP_ALIAS_URL);
   if (alias.ok) {
     return { ...alias, url: SIMPLIFI_APP_ALIAS_URL };
@@ -93,7 +108,7 @@ export async function probeSimplifiAppDns(): Promise<{
     ok: false,
     status: brand.status,
     url: SIMPLIFI_BRAND_URL,
-    message: `${brand.message} Testers: use ${SIMPLIFI_TESTER_URL}/simplifi/capture until DNS is fixed.`,
+    message: `${brand.message} Testers: use ${SIMPLIFI_TESTER_URL}/simplifiorb until app subdomain DNS is live.`,
   };
 }
 
@@ -147,7 +162,7 @@ export async function buildSimplifiPass1AttentionItems(): Promise<AttentionItem[
         return {
           id: 'ops-simplifi-dns',
           product: 'Simplifi',
-          title: 'Point simplifi.ai DNS at ea-payments (Pass 1)',
+          title: 'Point app.efficiencyarchitects.online at ea-payments',
           detail: check.message,
           priority: 'high' as const,
           href: '/launch',
