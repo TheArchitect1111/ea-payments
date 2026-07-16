@@ -149,6 +149,18 @@
   color: #1b2b4d;
 }
 
+.sc-share-seed {
+  width: min(100%, 420px);
+  margin: 0 auto 20px;
+  text-align: left;
+  display: grid;
+  gap: 8px;
+}
+
+.sc-share-seed .sc-input {
+  margin-bottom: 4px;
+}
+
 .sc-inline-capture {
   display: grid;
   gap: 10px;

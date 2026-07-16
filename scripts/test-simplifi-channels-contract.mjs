@@ -41,6 +41,8 @@ assert(capturePage.includes('title?:'), 'capture page must accept title searchPa
 
 const captureApp = read('app/simplifi/capture/SimplifiCaptureApp.tsx');
 assert(captureApp.includes('initialNotes'), 'capture app must seed notes');
+assert(captureApp.includes('hasShareSeed'), 'capture app must detect share seeds');
+assert(captureApp.includes('sc-share-seed') || captureApp.includes('Shared capture'), 'signed-out share seed UI required');
 assert(captureApp.includes('notes.trim()'), 'capture app must allow notes-only capture');
 
 const analyze = read('app/api/portal/captures/analyze/route.ts');

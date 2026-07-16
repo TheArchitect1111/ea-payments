@@ -269,18 +269,63 @@ export default function SimplifiCaptureApp({
         <main className="sc-main sc-main-center">
           <p className="sc-kicker">Never Lose An Opportunity Again™</p>
           <h1 className="sc-title">
-            {guestStarting ? 'Getting ready…' : 'Save what matters before it slips away'}
+            {guestStarting
+              ? 'Getting ready…'
+              : hasShareSeed
+                ? 'Ready to save what you shared'
+                : 'Save what matters before it slips away'}
           </h1>
           <p className="sc-lede">
-            Simplifi helps you save opportunities, remember them, and act when the time is right.
+            {hasShareSeed
+              ? 'Sign in or start capturing to save this into Today’s Brief — same Inbox the Orb reads.'
+              : 'Simplifi helps you save opportunities, remember them, and act when the time is right.'}
           </p>
+
+          {hasShareSeed ? (
+            <section className="sc-share-seed" aria-label="Shared capture">
+              <label className="sc-field-label" htmlFor="share-seed-url">
+                Link
+              </label>
+              <input
+                id="share-seed-url"
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+                placeholder="https://…"
+                className="sc-input"
+                aria-label="Shared URL"
+              />
+              <label className="sc-field-label" htmlFor="share-seed-notes">
+                Notes
+              </label>
+              <textarea
+                id="share-seed-notes"
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Notes from share sheet (optional)"
+                className="sc-input"
+                rows={3}
+                aria-label="Capture notes"
+              />
+            </section>
+          ) : null}
+
           {guestError ? <p className="sc-error">{guestError}</p> : null}
           {!guestStarting && (
             <>
               <button type="button" className="sc-btn sc-btn-primary" onClick={() => void startGuest()}>
-                Start capturing now
+                {hasShareSeed ? 'Save this capture' : 'Start capturing now'}
               </button>
-              <Link href={`/simplifi/login?next=${loginNext}`} className="sc-header-link">
+              <Link
+                href={`/simplifi/login?next=${encodeURIComponent(
+                  hasShareSeed
+                    ? `/simplifi/capture?${new URLSearchParams({
+                        ...(url ? { url } : {}),
+                        ...(notes ? { text: notes } : {}),
+                      }).toString()}`
+                    : '/simplifi/workspace',
+                )}`}
+                className="sc-header-link"
+              >
                 Sign in with your account →
               </Link>
             </>
