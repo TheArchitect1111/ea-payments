@@ -2,6 +2,7 @@ import { listAgents } from '@/lib/agents/registry';
 import type { AgentHealth } from '@/lib/agents/types';
 import { productionSecretIssues } from '@/lib/integration-env';
 import { buildLaunchCommandCenterReport, type LaunchCommandCenterReport } from '@/lib/launch-command-center';
+import { monitoringConfigured } from '@/lib/monitoring';
 import { EA_PLATFORM_URL } from '@/lib/platform-urls';
 
 export type OpsSubsystemStatus = 'healthy' | 'degraded' | 'critical' | 'unknown' | 'not_configured';
@@ -25,6 +26,7 @@ export type PlatformOpsReport = {
   agents: AgentHealth[];
   monitoring: {
     sentryConfigured: boolean;
+    glitchtipConfigured?: boolean;
     uptimeDashboardConfigured: boolean;
     backupDestinationConfigured: boolean;
     backupDestinationReachable: boolean | null;
@@ -198,7 +200,8 @@ export async function buildPlatformOpsReport(options?: {
     subsystems,
     agents: agentHealth,
     monitoring: {
-      sentryConfigured: Boolean(process.env.NEXT_PUBLIC_SENTRY_DSN?.trim()),
+      sentryConfigured: monitoringConfigured(),
+      glitchtipConfigured: monitoringConfigured(),
       uptimeDashboardConfigured: Boolean(
         process.env.UPTIME_KUMA_DASHBOARD_URL?.trim() || process.env.UPTIME_MONITORING_URL?.trim(),
       ),

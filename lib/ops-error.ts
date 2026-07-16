@@ -1,6 +1,7 @@
 /**
- * Ops error reporting — logs always; Sentry when NEXT_PUBLIC_SENTRY_DSN is set.
+ * Ops error reporting — logs always; GlitchTip (Sentry SDK) when a DSN is set.
  */
+import { monitoringConfigured } from '@/lib/monitoring';
 
 export async function reportOpsError(
   error: unknown,
@@ -13,7 +14,7 @@ export async function reportOpsError(
   const message = error instanceof Error ? error.message : String(error);
   console.error(`[${context.scope}]`, message, context.extra ?? '');
 
-  if (!process.env.NEXT_PUBLIC_SENTRY_DSN?.trim()) return;
+  if (!monitoringConfigured()) return;
 
   try {
     const Sentry = await import('@sentry/nextjs');

@@ -14,7 +14,7 @@ export default function GlobalError({
     try {
       Sentry.captureException(error);
     } catch {
-      // Sentry may be unconfigured in production — never crash the error page.
+      // GlitchTip/Sentry may be unconfigured — never crash the error page.
     }
   }, [error]);
 

@@ -1,15 +1,20 @@
 import * as Sentry from '@sentry/nextjs';
+import { monitoringConfigured } from '@/lib/monitoring';
 
 export async function register() {
-  if (!process.env.NEXT_PUBLIC_SENTRY_DSN?.trim()) {
+  if (!monitoringConfigured()) {
     return;
   }
 
-  if (process.env.NEXT_RUNTIME === 'nodejs') {
-    await import('./sentry.server.config');
-  }
-  if (process.env.NEXT_RUNTIME === 'edge') {
-    await import('./sentry.edge.config');
+  try {
+    if (process.env.NEXT_RUNTIME === 'nodejs') {
+      await import('./sentry.server.config');
+    }
+    if (process.env.NEXT_RUNTIME === 'edge') {
+      await import('./sentry.edge.config');
+    }
+  } catch {
+    // Monitoring must never block boot.
   }
 }
 

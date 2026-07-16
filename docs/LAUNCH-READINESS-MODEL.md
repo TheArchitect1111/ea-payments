@@ -8,7 +8,7 @@ The launch health system uses staged readiness instead of a single pass/fail gat
 | --- | --- | --- |
 | Revenue | `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `AIRTABLE_API_KEY`, `RESEND_API_KEY`, `RESEND_FROM_EMAIL` | Can EA accept money, record customers, and communicate with buyers? |
 | Delivery | `ONBOARDING_WEBHOOK_URL`, `ESIGN_WEBHOOK_URL`, Capture Records schema, Pulse Events schema | Can EA onboard clients and deliver the service after purchase? |
-| Monitoring | `NEXT_PUBLIC_SENTRY_DSN`, `UPTIME_KUMA_DASHBOARD_URL` or `UPTIME_MONITORING_URL` | Can EA detect incidents quickly? |
+| Monitoring | `NEXT_PUBLIC_GLITCHTIP_DSN` (legacy `NEXT_PUBLIC_SENTRY_DSN`), `UPTIME_KUMA_DASHBOARD_URL` or `UPTIME_MONITORING_URL` | Can EA detect incidents quickly? |
 | Resilience | `BACKUP_DESTINATION_URI` | Can EA recover from operational failure or data loss? |
 | Scale | Full launch readiness plus operational maturity and founder dependency reduction | Can EA support broader acquisition with mature operations? |
 

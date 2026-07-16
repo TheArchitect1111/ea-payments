@@ -88,7 +88,7 @@ export function buildLaunchReadinessModel(inputs: LaunchReadinessInputs): Launch
   });
 
   const monitoringMissing = missingFrom({
-    NEXT_PUBLIC_SENTRY_DSN: inputs.monitoring.sentryDsn,
+    NEXT_PUBLIC_GLITCHTIP_DSN: inputs.monitoring.sentryDsn,
     UPTIME_KUMA_DASHBOARD_URL: inputs.monitoring.uptimeDashboard,
   });
 

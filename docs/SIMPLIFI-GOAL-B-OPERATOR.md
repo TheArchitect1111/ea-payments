@@ -52,13 +52,13 @@ Vercel already has `simplifi.ai` + `app.simplifi.ai` on **ea-payments**, but pub
 
 Until then, testers use **efficiencyarchitects.online** only.
 
-### 2. Sentry DSN
+### 2. GlitchTip DSN (error monitoring)
 
-1. Sentry → project `ea-payments` → Client Keys (DSN)
-2. Vercel Production → `NEXT_PUBLIC_SENTRY_DSN` = DSN
-3. Redeploy
-4. Confirm `/api/health/launch` → `checks.controls.sentryDsn: true`  
-   Details: `docs/sentry-setup.md`
+1. GlitchTip → project for `ea-payments` → copy DSN  
+2. Vercel Production → `NEXT_PUBLIC_GLITCHTIP_DSN` = DSN  
+3. Redeploy  
+4. Confirm `/api/health/launch` → `checks.controls.sentryDsn` / `glitchtipDsn: true`  
+   Details: `docs/GLITCHTIP-SETUP.md`
 
 ### 3. Uptime
 
@@ -80,7 +80,7 @@ node scripts/test-simplifi-goal-b-pass4.mjs
 
 - [ ] `simplifi.ai` serves ea-payments (not `/lander`)
 - [ ] Optional `app.simplifi.ai` resolves to workspace/capture
-- [ ] Sentry DSN live
+- [ ] GlitchTip DSN live (`NEXT_PUBLIC_GLITCHTIP_DSN`)
 - [ ] Uptime env/monitors
 - [x] Pass 2–4 product code
 - [ ] Phone smoke: capture → Magnifi → PDF → guidance → workspace
