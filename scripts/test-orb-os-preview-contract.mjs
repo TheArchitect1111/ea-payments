@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Contract: Orb OS Preview (feature-flagged conversational shell).
+ * Contract: Orb OS Preview legacy chat shell (escape hatch only).
  * Run: node scripts/test-orb-os-preview-contract.mjs
  */
 import { existsSync, readFileSync } from 'node:fs';
@@ -32,24 +32,20 @@ for (const rel of files) {
 const intent = readFileSync(join(root, 'lib/orb-os/intent.ts'), 'utf8');
 assert(intent.includes('interpretOrbIntent'), 'intent router required');
 assert(intent.includes('buildAmbientOpening'), 'ambient opening required');
-assert(intent.includes("'capture'"), 'capture intent required');
-assert(intent.includes("'brief'"), 'brief intent required');
-
-const preview = readFileSync(join(root, 'lib/orb-os/preview.ts'), 'utf8');
-assert(preview.includes('ORB_OS_PREVIEW_COOKIE'), 'preview cookie required');
-assert(preview.includes('NEXT_PUBLIC_ORB_OS_PREVIEW'), 'env flag required');
 
 const shell = readFileSync(join(root, 'app/simplifi/orb/OrbOsShell.tsx'), 'utf8');
-assert(shell.includes('How can I help today?'), 'Orb prompt required');
-assert(shell.includes('Classic Simplifi'), 'classic escape required');
+assert(shell.includes('How can I help today?'), 'chat shell prompt retained for ?chat=1');
 assert(shell.includes('answerConversationalAsk'), 'must reuse ask engine');
 
+const orbPage = readFileSync(join(root, 'app/simplifi/orb/page.tsx'), 'utf8');
+assert(orbPage.includes("redirect('/simplifi/workspace')"), 'default redirect to Brief');
+assert(orbPage.includes('chat'), 'chat escape hatch required');
+
 const workspace = readFileSync(join(root, 'app/simplifi/workspace/page.tsx'), 'utf8');
-assert(workspace.includes('isOrbOsPreviewEnabled'), 'workspace must respect Orb flag');
-assert(workspace.includes('classic'), 'classic override required');
+assert(workspace.includes('SimplifiProductShell'), 'workspace uses product shell');
 
 const doc = readFileSync(join(root, 'docs/ORB-OS-PREVIEW.md'), 'utf8');
-assert(doc.includes('Do not rebuild') || doc.includes('do not rebuild'), 'evolution doctrine required');
+assert(doc.includes('chat=1') || doc.includes('legacy'), 'docs note chat-first is legacy');
 
 if (failures.length) {
   console.error('FAIL');

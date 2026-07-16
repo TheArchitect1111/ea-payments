@@ -1,9 +1,7 @@
 import { cookies } from 'next/headers';
 import { EA_PORTAL_COOKIE, verifySession } from '@/lib/ea-portal-auth';
-import { getClientByPortalSlug } from '@/lib/airtable';
-import { loadSimplifiWorkspace } from '@/lib/simplifi-core';
-import { EA_PLATFORM_URL } from '@/lib/platform-urls';
-import SimplifiAppChrome from '../components/SimplifiAppChrome';
+import { loadOrbWorkspaceSlice } from '@/lib/orb';
+import SimplifiProductShell from '../components/SimplifiProductShell';
 import AskClient from './AskClient';
 import '../workspace/simplifi-workspace.css';
 
@@ -14,35 +12,25 @@ export default async function SimplifiAskPage() {
   const token = cookieStore.get(EA_PORTAL_COOKIE)?.value;
   const session = token ? await verifySession(token) : null;
   const slug = session?.slug ?? null;
-
-  let objects = [] as Awaited<ReturnType<typeof loadSimplifiWorkspace>>['activeObjects'];
-  let actionCenter = {
-    needsAttention: [] as Awaited<ReturnType<typeof loadSimplifiWorkspace>>['actionCenter']['needsAttention'],
-    recommended: [] as Awaited<ReturnType<typeof loadSimplifiWorkspace>>['actionCenter']['recommended'],
-    watchlist: [] as Awaited<ReturnType<typeof loadSimplifiWorkspace>>['actionCenter']['watchlist'],
-  };
-  let greeting = 'Good morning.';
-
-  if (slug) {
-    const client = await getClientByPortalSlug(slug);
-    const firstName = client?.clientName?.split(' ')[0] ?? '';
-    const workspace = await loadSimplifiWorkspace(slug, EA_PLATFORM_URL, firstName);
-    objects = workspace.activeObjects;
-    actionCenter = workspace.actionCenter;
-    greeting = workspace.brief.greeting;
-  }
+  const slice = await loadOrbWorkspaceSlice(slug);
 
   return (
-    <div className="sw-app">
-      <SimplifiAppChrome active="brief" slug={slug} />
+    <SimplifiProductShell
+      active="brief"
+      slug={slug}
+      loggedIn={Boolean(session)}
+      brief={slice.brief}
+      objects={slice.objects}
+      actionCenter={slice.actionCenter}
+    >
       <main className="sw-main">
         <AskClient
-          greeting={greeting}
+          greeting={slice.brief.greeting}
           loggedIn={Boolean(session)}
-          objects={objects}
-          actionCenter={actionCenter}
+          objects={slice.objects}
+          actionCenter={slice.actionCenter}
         />
       </main>
-    </div>
+    </SimplifiProductShell>
   );
 }

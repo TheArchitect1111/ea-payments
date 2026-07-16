@@ -1,11 +1,9 @@
 import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
 import { verifySession, EA_PORTAL_COOKIE } from '@/lib/ea-portal-auth';
 import { getClientByPortalSlug } from '@/lib/airtable';
 import { loadSimplifiWorkspace, type SimplifiWorkspaceData } from '@/lib/simplifi-core';
 import { EA_PLATFORM_URL } from '@/lib/platform-urls';
-import { isOrbOsPreviewEnabled, ORB_OS_PREVIEW_COOKIE } from '@/lib/orb-os';
-import SimplifiAppChrome from '../components/SimplifiAppChrome';
+import SimplifiProductShell from '../components/SimplifiProductShell';
 import SimplifiWorkspace from './SimplifiWorkspace';
 import './simplifi-workspace.css';
 
@@ -25,23 +23,8 @@ const EMPTY_WORKSPACE: SimplifiWorkspaceData = {
   relationships: [],
 };
 
-type Props = { searchParams: Promise<{ orb?: string; classic?: string }> };
-
-export default async function SimplifiWorkspacePage({ searchParams }: Props) {
-  const params = await searchParams;
+export default async function SimplifiWorkspacePage() {
   const cookieStore = await cookies();
-
-  // Orb OS Preview: conversation-first shell (classic stays with ?classic=1).
-  if (
-    params.classic !== '1' &&
-    isOrbOsPreviewEnabled({
-      cookieValue: cookieStore.get(ORB_OS_PREVIEW_COOKIE)?.value,
-      queryOrb: params.orb,
-    })
-  ) {
-    redirect('/simplifi/orb');
-  }
-
   const token = cookieStore.get(EA_PORTAL_COOKIE)?.value;
   const session = token ? await verifySession(token) : null;
   const slug = session?.slug ?? null;
@@ -55,8 +38,14 @@ export default async function SimplifiWorkspacePage({ searchParams }: Props) {
   }
 
   return (
-    <div className="sw-app">
-      <SimplifiAppChrome active="brief" slug={slug} />
+    <SimplifiProductShell
+      active="brief"
+      slug={slug}
+      loggedIn={Boolean(session)}
+      brief={workspace.brief}
+      objects={workspace.activeObjects}
+      actionCenter={workspace.actionCenter}
+    >
       <SimplifiWorkspace
         slug={slug}
         loggedIn={Boolean(session)}
@@ -66,6 +55,6 @@ export default async function SimplifiWorkspacePage({ searchParams }: Props) {
         actionCenter={workspace.actionCenter}
         relationships={workspace.relationships}
       />
-    </div>
+    </SimplifiProductShell>
   );
 }

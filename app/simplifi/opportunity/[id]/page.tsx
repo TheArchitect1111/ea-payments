@@ -6,7 +6,8 @@ import { getCaptureByIdentifier } from '@/lib/capture-records';
 import { captureToObject } from '@/lib/simplifi-objects';
 import { computePriorityScore, priorityLevelLabel } from '@/lib/priority-engine';
 import { EA_PLATFORM_URL } from '@/lib/platform-urls';
-import SimplifiAppChrome from '../../components/SimplifiAppChrome';
+import { loadOrbWorkspaceSlice } from '@/lib/orb';
+import SimplifiProductShell from '../../components/SimplifiProductShell';
 import OpportunityActions from './OpportunityActions';
 import '../../workspace/simplifi-workspace.css';
 
@@ -20,6 +21,7 @@ export default async function OpportunityProfilePage({ params }: Props) {
   const token = cookieStore.get(EA_PORTAL_COOKIE)?.value;
   const session = token ? await verifySession(token) : null;
   const slug = session?.slug ?? null;
+  const slice = await loadOrbWorkspaceSlice(slug);
 
   const capture = await getCaptureByIdentifier(id);
   if (!capture) notFound();
@@ -34,8 +36,15 @@ export default async function OpportunityProfilePage({ params }: Props) {
   const guidanceUrl = `/simplifi/guidance/${capture.id}`;
 
   return (
-    <div className="sw-app">
-      <SimplifiAppChrome active="inbox" slug={slug} />
+    <SimplifiProductShell
+      active="inbox"
+      slug={slug}
+      loggedIn={Boolean(session)}
+      brief={slice.brief}
+      objects={slice.objects}
+      actionCenter={slice.actionCenter}
+      entityId={obj.id}
+    >
       <main className="sw-main">
         <p className="sw-section-label">Opportunity profile</p>
         <header className="sw-priority-card">
@@ -48,9 +57,7 @@ export default async function OpportunityProfilePage({ params }: Props) {
                 {obj.dateCaptured ? ` · captured ${obj.dateCaptured}` : ''}
               </p>
             </div>
-            <span>
-              {obj.opportunityScore != null ? `${obj.opportunityScore}/100` : obj.priority}
-            </span>
+            <span>{obj.opportunityScore != null ? `${obj.opportunityScore}/100` : obj.priority}</span>
           </div>
           <div className="sw-card-footer">
             <strong>{obj.nextAction}</strong>
@@ -102,6 +109,6 @@ export default async function OpportunityProfilePage({ params }: Props) {
           </p>
         )}
       </main>
-    </div>
+    </SimplifiProductShell>
   );
 }

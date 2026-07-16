@@ -1,11 +1,9 @@
 import { cookies } from 'next/headers';
 import Link from 'next/link';
 import { EA_PORTAL_COOKIE, verifySession } from '@/lib/ea-portal-auth';
-import { getClientByPortalSlug } from '@/lib/airtable';
-import { loadSimplifiWorkspace } from '@/lib/simplifi-core';
-import { EA_PLATFORM_URL } from '@/lib/platform-urls';
+import { loadOrbWorkspaceSlice } from '@/lib/orb';
 import { priorityLevelLabel } from '@/lib/priority-engine';
-import SimplifiAppChrome from '../components/SimplifiAppChrome';
+import SimplifiProductShell from '../components/SimplifiProductShell';
 import EmptyStateGuide from '@/app/components/guided-first-success/EmptyStateGuide';
 import '../workspace/simplifi-workspace.css';
 
@@ -16,18 +14,17 @@ export default async function SimplifiInboxPage() {
   const token = cookieStore.get(EA_PORTAL_COOKIE)?.value;
   const session = token ? await verifySession(token) : null;
   const slug = session?.slug ?? null;
-
-  let objects = [] as Awaited<ReturnType<typeof loadSimplifiWorkspace>>['activeObjects'];
-  if (slug) {
-    const client = await getClientByPortalSlug(slug);
-    const firstName = client?.clientName?.split(' ')[0] ?? '';
-    const workspace = await loadSimplifiWorkspace(slug, EA_PLATFORM_URL, firstName);
-    objects = workspace.activeObjects;
-  }
+  const slice = await loadOrbWorkspaceSlice(slug);
 
   return (
-    <div className="sw-app">
-      <SimplifiAppChrome active="inbox" slug={slug} />
+    <SimplifiProductShell
+      active="inbox"
+      slug={slug}
+      loggedIn={Boolean(session)}
+      brief={slice.brief}
+      objects={slice.objects}
+      actionCenter={slice.actionCenter}
+    >
       <main className="sw-main">
         <section className="sw-brief-intro">
           <p>Opportunity Center</p>
@@ -42,7 +39,7 @@ export default async function SimplifiInboxPage() {
             actionLabel="Sign in"
             actionHref="/simplifi/login?next=/simplifi/inbox"
           />
-        ) : objects.length === 0 ? (
+        ) : slice.objects.length === 0 ? (
           <EmptyStateGuide
             title="Inbox is clear"
             explanation="Capture a link, note, or screenshot — Simplifi will score it and put it here."
@@ -51,7 +48,7 @@ export default async function SimplifiInboxPage() {
           />
         ) : (
           <ul className="sw-inbox-list">
-            {objects.map((obj) => (
+            {slice.objects.map((obj) => (
               <li key={obj.id} className="sw-card">
                 <Link href={`/simplifi/opportunity/${obj.id}`} className="sw-card-head">
                   <div>
@@ -83,6 +80,6 @@ export default async function SimplifiInboxPage() {
           <Link href="/simplifi/calendar">Calendar</Link>
         </section>
       </main>
-    </div>
+    </SimplifiProductShell>
   );
 }

@@ -13,6 +13,7 @@ import {
   type OrbSurface,
 } from '@/lib/orb-os';
 import { analyzeCaptureUrl } from '@/lib/simplifi-client';
+import type { OrbBriefSlice } from '@/lib/orb';
 import './orb-os.css';
 
 type SpeechRecognitionLike = {
@@ -26,17 +27,6 @@ type SpeechRecognitionLike = {
   onerror: (() => void) | null;
 };
 
-interface BriefPayload {
-  greeting: string;
-  items: {
-    id: string;
-    title: string;
-    detail: string;
-    href?: string;
-    kind: string;
-  }[];
-  recommendedNext: { label: string; href: string } | null;
-}
 
 export default function OrbOsShell({
   slug,
@@ -49,7 +39,7 @@ export default function OrbOsShell({
   slug: string | null;
   loggedIn: boolean;
   firstName: string;
-  brief: BriefPayload;
+  brief: OrbBriefSlice;
   objects: SimplifiObject[];
   actionCenter: ActionCenterPayload;
 }) {
@@ -106,7 +96,7 @@ export default function OrbOsShell({
   };
 
   const runCapture = async (text: string) => {
-    setCaptureStatus('Capturing…');
+    setCaptureStatus('Capturingâ€¦');
     try {
       const looksLikeUrl = /^https?:\/\//i.test(text.trim());
       if (looksLikeUrl) {
@@ -115,7 +105,8 @@ export default function OrbOsShell({
           setCaptureStatus(data.error ?? 'Could not capture.');
           return;
         }
-        setCaptureStatus(data.record?.title ? `Captured: ${data.record.title}` : 'Captured.');
+        const record = data.record as { title?: string } | undefined;
+        setCaptureStatus(record?.title ? `Captured: ${record.title}` : 'Captured.');
         return;
       }
       const res = await fetch('/api/portal/captures/analyze', {
@@ -267,7 +258,7 @@ export default function OrbOsShell({
             autoComplete="off"
           />
           <button type="button" className="orb-os-voice" onClick={startVoice} aria-label="Speak">
-            {listening ? '…' : 'Speak'}
+            {listening ? 'â€¦' : 'Speak'}
           </button>
           <button type="submit" disabled={!input.trim()}>
             Send
@@ -327,7 +318,7 @@ export default function OrbOsShell({
             <textarea
               value={captureDraft}
               onChange={(e) => setCaptureDraft(e.target.value)}
-              placeholder="Link, note, or idea…"
+              placeholder="Link, note, or ideaâ€¦"
               rows={3}
             />
             <div className="orb-os-row">
