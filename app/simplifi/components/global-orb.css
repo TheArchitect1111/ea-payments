@@ -245,6 +245,22 @@
   color: var(--orb-navy);
 }
 
+.global-orb-findings a {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
+.global-orb-findings a:hover strong {
+  text-decoration: underline;
+}
+
+.global-orb-findings a:focus-visible {
+  outline: 2px solid var(--orb-gold);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
 .global-orb-findings li span {
   display: block;
   color: #5f6b7a;

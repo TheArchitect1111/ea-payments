@@ -128,8 +128,18 @@ test('simplifi workspace is reachable', async ({ page }) => {
       .getByRole('dialog', { name: /SIMPLIFI intelligence/i })
       .evaluate((dialog) => dialog.contains(document.activeElement)),
   ).toBe(true);
-  await page.keyboard.press('Escape');
-  await expect(page.getByRole('dialog', { name: /SIMPLIFI intelligence/i })).toBeHidden();
+
+  await page.getByRole('textbox', { name: /Ask Simplifi/i }).fill('open capture');
+  await page.getByRole('button', { name: /^ask$/i }).click();
+  await expect(page).toHaveURL(/\/simplifi\/capture/);
+});
+
+test('simplifi orb ask opens inbox route', async ({ page }) => {
+  await page.goto('/simplifi/workspace');
+  await page.getByRole('button', { name: /SIMPLIFI Orb/i }).click();
+  await page.getByRole('textbox', { name: /Ask Simplifi/i }).fill('show my inbox');
+  await page.getByRole('button', { name: /^ask$/i }).click();
+  await expect(page).toHaveURL(/\/simplifi\/inbox/);
 });
 
 test('app alias redirects to workspace', async ({ page }) => {

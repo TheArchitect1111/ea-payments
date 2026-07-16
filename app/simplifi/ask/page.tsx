@@ -29,6 +29,7 @@ export default async function SimplifiAskPage() {
           loggedIn={Boolean(session)}
           objects={slice.objects}
           actionCenter={slice.actionCenter}
+          slug={slug}
         />
       </main>
     </SimplifiProductShell>

@@ -12,3 +12,10 @@ export {
   type OrbIntent,
   type OrbSurface,
 } from './intent';
+export {
+  ORB_NAVIGABLE_SURFACES,
+  isNavigableOrbSurface,
+  resolveOrbSurfaceHref,
+  resolveOrbIntentHref,
+  type ResolveOrbHrefOptions,
+} from './routes';

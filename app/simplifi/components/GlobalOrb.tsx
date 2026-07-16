@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import type { ActionCenterPayload } from '@/lib/action-center';
 import type { SimplifiObject } from '@/lib/simplifi-objects';
 import {
@@ -10,7 +10,8 @@ import {
   type OrbBriefSlice,
   type OrbVisualState,
 } from '@/lib/orb';
-import { answerConversationalAsk } from '@/lib/simplifi-ask';
+import { interpretOrbIntent, resolveOrbIntentHref } from '@/lib/orb-os';
+import { answerConversationalAsk, searchOpportunities } from '@/lib/simplifi-ask';
 import { explainRecommendation } from '@/lib/simplifi-guidance-system';
 import './global-orb.css';
 
@@ -41,6 +42,7 @@ export default function GlobalOrb({
   entityId?: string | null;
 }) {
   const pathname = usePathname() || '/simplifi/workspace';
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [online, setOnline] = useState(true);
   const [interaction, setInteraction] = useState<'listening' | 'thinking' | 'speaking' | null>(null);
@@ -117,6 +119,8 @@ export default function GlobalOrb({
   );
 
   const findings = session.findings.filter((f) => !dismissedIds.includes(f.id));
+  const viewAllHref =
+    session.state === 'timeSensitive' ? '/simplifi/follow-ups' : '/simplifi/inbox';
 
   const ask = (question?: string) => {
     const q = (question ?? askInput).trim();
@@ -124,6 +128,27 @@ export default function GlobalOrb({
     setInteraction('thinking');
     setAskInput(q);
     try {
+      const intent = interpretOrbIntent(q);
+      const matches = searchOpportunities(intent.query ?? q, objects);
+      const soleMatch =
+        (intent.surface === 'search' || intent.surface === 'ask') && matches.length === 1
+          ? matches[0]
+          : null;
+
+      const href = resolveOrbIntentHref(intent, {
+        slug,
+        draft: intent.draft,
+        query: intent.query,
+        opportunityId: soleMatch?.id,
+      });
+
+      if (href) {
+        setAskAnswer(intent.reply);
+        setOpen(false);
+        router.push(href);
+        return;
+      }
+
       setAskAnswer(answerConversationalAsk(q, objects, actionCenter));
     } finally {
       window.setTimeout(() => setInteraction(null), 400);
@@ -203,8 +228,17 @@ export default function GlobalOrb({
                 <ul className="global-orb-findings">
                   {findings.map((f) => (
                     <li key={f.id}>
-                      <strong>{f.title}</strong>
-                      {f.detail ? <span>{f.detail}</span> : null}
+                      {f.href ? (
+                        <Link href={f.href} onClick={() => setOpen(false)}>
+                          <strong>{f.title}</strong>
+                          {f.detail ? <span>{f.detail}</span> : null}
+                        </Link>
+                      ) : (
+                        <>
+                          <strong>{f.title}</strong>
+                          {f.detail ? <span>{f.detail}</span> : null}
+                        </>
+                      )}
                     </li>
                   ))}
                 </ul>
@@ -234,7 +268,7 @@ export default function GlobalOrb({
                     >
                       Dismiss
                     </button>
-                    <Link href="/simplifi/inbox" onClick={() => setOpen(false)}>
+                    <Link href={viewAllHref} onClick={() => setOpen(false)}>
                       View All
                     </Link>
                   </div>
