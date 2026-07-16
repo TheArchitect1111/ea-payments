@@ -62,6 +62,7 @@ export async function POST(req: NextRequest, context: RouteContext) {
     action,
     revealUrl: result.revealUrl,
     handoffUrl: result.handoffUrl,
+    handoff: result.handoff,
     submission: buildCtpAdminSubmissionView(result.submission),
   });
 }

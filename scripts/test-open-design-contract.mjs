@@ -61,6 +61,16 @@ assert(registry.includes('openDesignAgent'), 'agent registry must register open-
 const rules = readFileSync(join(root, 'lib/open-design/creative-rules.ts'), 'utf8');
 assert(rules.includes('Story before layout'), 'standing design rules required');
 
+const mission = readFileSync(join(root, 'lib/mission-control-data.ts'), 'utf8');
+assert(mission.includes('buildCreativeAttentionItems'), 'Mission Control must wire creative attention');
+assert(mission.includes('openDesignAttentionEvents') || mission.includes('open.design.story.blocked'), 'MC must read open.design Pulse');
+
+const handoffPanel = readFileSync(join(root, 'app/admin/ctp/CtpExecutiveActionsPanel.tsx'), 'utf8');
+assert(handoffPanel.includes('Copy markdown') || handoffPanel.includes('copyText'), 'CTP desk must expose Cursor handoff copy');
+
+const output = readFileSync(join(root, 'lib/open-design/output-contract.ts'), 'utf8');
+assert(output.includes('formatCursorHandoffMarkdown'), 'handoff markdown formatter required');
+
 if (failures.length) {
   console.error('open-design contract: FAIL');
   for (const f of failures) console.error(' -', f);

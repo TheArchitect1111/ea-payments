@@ -18,17 +18,30 @@ type Action =
   | 'resend_executive_email'
   | 'reprovision_workspace';
 
+type HandoffPayload = {
+  mode: 'github-pr' | 'package-only' | 'failed';
+  storySentence: string;
+  creativeDnaSummary: string;
+  deliverableTitles: string[];
+  markdown: string;
+  packageJson: unknown;
+  pullRequestUrl?: string;
+};
+
 export default function CtpExecutiveActionsPanel({ submission, onUpdated }: Props) {
   const [busy, setBusy] = useState<Action | null>(null);
   const [error, setError] = useState('');
   const [revealUrl, setRevealUrl] = useState('');
   const [handoffUrl, setHandoffUrl] = useState('');
+  const [handoff, setHandoff] = useState<HandoffPayload | null>(null);
+  const [copied, setCopied] = useState<'md' | 'json' | null>(null);
 
   async function run(action: Action) {
     setBusy(action);
     setError('');
     setRevealUrl('');
     setHandoffUrl('');
+    if (action === 'run_open_design_handoff') setHandoff(null);
     try {
       const res = await fetch(
         `/api/admin/ctp/submissions/${encodeURIComponent(submission.id)}/action`,
@@ -43,6 +56,7 @@ export default function CtpExecutiveActionsPanel({ submission, onUpdated }: Prop
         error?: string;
         revealUrl?: string;
         handoffUrl?: string;
+        handoff?: HandoffPayload;
         submission?: CtpAdminSubmissionView;
       };
       if (!res.ok || !data.ok || !data.submission) {
@@ -52,10 +66,21 @@ export default function CtpExecutiveActionsPanel({ submission, onUpdated }: Prop
       onUpdated(data.submission);
       if (data.revealUrl) setRevealUrl(data.revealUrl);
       if (data.handoffUrl) setHandoffUrl(data.handoffUrl);
+      if (data.handoff) setHandoff(data.handoff);
     } catch {
       setError('Network error. Try again.');
     } finally {
       setBusy(null);
+    }
+  }
+
+  async function copyText(kind: 'md' | 'json', value: string) {
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopied(kind);
+      window.setTimeout(() => setCopied(null), 2000);
+    } catch {
+      setError('Could not copy to clipboard.');
     }
   }
 
@@ -145,7 +170,7 @@ export default function CtpExecutiveActionsPanel({ submission, onUpdated }: Prop
           onClick={() => void run('run_open_design_handoff')}
           className="px-3 py-2 text-xs font-bold uppercase tracking-wider border border-neutral-300 bg-white text-neutral-800 disabled:opacity-50"
         >
-          {busy === 'run_open_design_handoff' ? 'Handing off…' : 'Open Design → GitHub'}
+          {busy === 'run_open_design_handoff' ? 'Handing off…' : 'Open Design → Cursor'}
         </button>
         <button
           type="button"
@@ -184,13 +209,48 @@ export default function CtpExecutiveActionsPanel({ submission, onUpdated }: Prop
           </a>
         </p>
       ) : null}
-      {handoffUrl ? (
-        <p className="text-sm text-emerald-800">
-          Open Design handoff PR:{' '}
-          <a href={handoffUrl} className="font-bold underline" target="_blank" rel="noreferrer">
-            Open pull request
-          </a>
-        </p>
+      {handoff ? (
+        <div className="border border-neutral-200 bg-white p-3 space-y-3">
+          <p className="text-xs font-bold uppercase tracking-wider text-neutral-500">
+            Cursor handoff · {handoff.mode === 'github-pr' ? 'GitHub PR' : 'Package only'}
+          </p>
+          <p className="text-sm font-semibold text-neutral-900 leading-6">{handoff.storySentence}</p>
+          {handoff.creativeDnaSummary ? (
+            <p className="text-xs text-neutral-600 leading-5">{handoff.creativeDnaSummary}</p>
+          ) : null}
+          {handoff.deliverableTitles.length ? (
+            <p className="text-xs text-neutral-600">
+              Deliverables: {handoff.deliverableTitles.slice(0, 5).join(' · ')}
+              {handoff.deliverableTitles.length > 5 ? '…' : ''}
+            </p>
+          ) : null}
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => void copyText('md', handoff.markdown)}
+              className="px-3 py-2 text-xs font-bold uppercase tracking-wider border border-neutral-300 bg-white text-neutral-800"
+            >
+              {copied === 'md' ? 'Copied markdown' : 'Copy markdown'}
+            </button>
+            <button
+              type="button"
+              onClick={() => void copyText('json', JSON.stringify(handoff.packageJson, null, 2))}
+              className="px-3 py-2 text-xs font-bold uppercase tracking-wider border border-neutral-300 bg-white text-neutral-800"
+            >
+              {copied === 'json' ? 'Copied JSON' : 'Copy JSON'}
+            </button>
+            {handoffUrl || handoff.pullRequestUrl ? (
+              <a
+                href={handoffUrl || handoff.pullRequestUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="px-3 py-2 text-xs font-bold uppercase tracking-wider border border-neutral-300 bg-white text-neutral-800"
+              >
+                Open pull request
+              </a>
+            ) : null}
+          </div>
+        </div>
       ) : null}
       {completed ? (
         <p className="text-sm font-semibold text-emerald-800">This submission is completed / revealed.</p>

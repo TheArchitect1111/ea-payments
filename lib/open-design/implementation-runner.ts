@@ -4,7 +4,11 @@
  * Never auto-promotes to production — preview/hook only.
  */
 
-import { buildCursorHandoffPackage, type CursorHandoffPackage } from './output-contract';
+import {
+  buildCursorHandoffPackage,
+  formatCursorHandoffMarkdown,
+  type CursorHandoffPackage,
+} from './output-contract';
 import type { CreativeExperienceBrief } from './types';
 import { emitPulseEvent } from '@/lib/pulse-bus';
 import { reportOpsError } from '@/lib/ops-error';
@@ -29,53 +33,14 @@ function githubConfig() {
 
 function handoffMarkdown(handoff: CursorHandoffPackage): string {
   return [
-    `# Open Design Handoff — ${handoff.organizationId}`,
-    '',
-    `Brief: \`${handoff.briefId}\``,
-    `Generated: ${handoff.generatedAt}`,
-    '',
-    '## Story',
-    '',
-    handoff.storySentence,
-    '',
-    '## Creative DNA',
-    '',
-    handoff.creativeDnaSummary || '_Not set_',
-    '',
-    '## Design tokens',
-    '',
-    `- Source: \`${handoff.tokens.source}\``,
-    `- Primary: ${handoff.tokens.primary}`,
-    `- Secondary: ${handoff.tokens.secondary}`,
-    handoff.tokens.accent ? `- Accent: ${handoff.tokens.accent}` : '',
-    `- Display type: ${handoff.tokens.typography.display}`,
-    `- Body type: ${handoff.tokens.typography.body}`,
-    '',
-    '## Deliverables',
-    '',
-    ...handoff.deliverables.flatMap((d) => [
-      `### ${d.title} (\`${d.kind}\`)`,
-      '',
-      `Story beat: ${d.storyBeat}`,
-      '',
-      d.layoutNotes,
-      '',
-      d.tailwindNotes,
-      '',
-    ]),
-    '## Standing rules',
-    '',
-    ...handoff.standingRules.map((r) => `- ${r}`),
-    '',
+    formatCursorHandoffMarkdown(handoff),
     '## Implementation notes',
     '',
     '- Implement in Cursor using this package as the source of truth.',
     '- Map colors to `@/lib/design-system` — no ad-hoc brand hex.',
     '- Do not auto-merge; wait for executive / design review.',
     '',
-  ]
-    .filter(Boolean)
-    .join('\n');
+  ].join('\n');
 }
 
 async function githubHeaders(token: string): Promise<Record<string, string>> {
