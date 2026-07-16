@@ -68,14 +68,21 @@ page. The interface appears on intent and is dismissed when done (`Done` / Escap
 scrim), restoring the Brief underneath. These reuse data the Orb already holds
 (`objects`) — no new fetch.
 
+Session surfaces are listed in `ORB_SESSION_SURFACES`; `GlobalOrb.sessionViewForSurface`
+maps each to a view.
+
 | Intent | Session workspace |
 |--------|-------------------|
-| inbox / opportunities (`ORB_SESSION_SURFACES`) | Inbox list; rows open a quick view |
+| inbox / opportunities | Inbox list; rows open a quick view |
+| follow-ups / due | `buildExpirationAlerts` + dated commitments; rows open quick view |
+| calendar / schedule | Dated opportunities grouped by month; rows open quick view |
+| capture / save | Quick capture textarea → `analyzeCaptureUrl` / `/api/portal/captures/analyze` |
 | unique search match | Opportunity quick view (guidance triple + `OpportunityActions`) |
 
-Everything else still routes via `resolveOrbIntentHref` (Step 1). `OpportunityActions`
-and the full `/simplifi/inbox` and `/simplifi/opportunity/[id]` routes remain the
-deep-link / full surfaces (linked from the session footer).
+Everything else (brief / settings / portal / classic) still routes via
+`resolveOrbIntentHref` (Step 1). The full `/simplifi/*` routes remain the deep-link /
+full surfaces — e.g. capture's "More sources" (photos, URL) and each session footer
+link out to them.
 
 ## Verification
 

@@ -131,7 +131,9 @@ test('simplifi workspace is reachable', async ({ page }) => {
 
   await page.getByRole('textbox', { name: /Ask Simplifi/i }).fill('open capture');
   await page.getByRole('button', { name: /^ask$/i }).click();
-  await expect(page).toHaveURL(/\/simplifi\/capture/);
+  // Capture is now a temporary session workspace over the Brief.
+  await expect(page).toHaveURL(/\/simplifi\/workspace/);
+  await expect(page.getByRole('dialog', { name: /capture workspace/i })).toBeVisible();
 });
 
 test('simplifi orb ask opens inbox session workspace in place', async ({ page }) => {
