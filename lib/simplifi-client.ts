@@ -82,7 +82,8 @@ export async function fetchCaptureIntelligence(recordId: string): Promise<
 }
 
 export async function analyzeCaptureUrl(body: {
-  url: string;
+  url?: string;
+  title?: string;
   prospectName?: string;
   notes?: string;
 }): Promise<SimplifiApiResult> {

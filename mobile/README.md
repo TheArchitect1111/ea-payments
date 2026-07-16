@@ -36,6 +36,9 @@ Session tokens are stored in `expo-secure-store` and sent as `Authorization: Bea
 | Workspace | `GET /api/simplifi/workspace` |
 | Settings | Push registration + sign out |
 
+Orb UI (corner intelligence) remains on the web PWA for now. These tabs feed the
+same capture → Brief → Inbox records GlobalOrb reads on `/simplifi/*`.
+
 ## Push notifications
 
 On sign-in, the app requests notification permission and registers an Expo push token via `POST /api/simplifi/push-token`. Re-enable from **Settings → Enable push notifications**. Requires a physical device (not Expo Go simulator).

@@ -50,16 +50,19 @@ export default function SimplifiCaptureApp({
   slug,
   loggedIn,
   initialUrl,
+  initialNotes,
 }: {
   slug: string | null;
   loggedIn: boolean;
   initialUrl?: string;
+  initialNotes?: string;
 }) {
   const fileRef = useRef<HTMLInputElement>(null);
-  const hasInitialCapture = Boolean(loggedIn && initialUrl?.trim());
-  const [open, setOpen] = useState(hasInitialCapture);
-  const [view, setView] = useState<SheetView>(hasInitialCapture ? 'url' : 'menu');
+  const hasShareSeed = Boolean(initialUrl?.trim() || initialNotes?.trim());
+  const [open, setOpen] = useState(hasShareSeed);
+  const [view, setView] = useState<SheetView>(hasShareSeed ? 'url' : 'menu');
   const [url, setUrl] = useState(initialUrl ?? '');
+  const [notes, setNotes] = useState(initialNotes ?? '');
   const [prospectName, setProspectName] = useState('');
   const [loading, setLoading] = useState(false);
   const [uploadLabel, setUploadLabel] = useState('');
@@ -163,7 +166,7 @@ export default function SimplifiCaptureApp({
   };
 
 
-  const analyzeJson = async (body: { url: string; prospectName?: string; notes?: string }) =>
+  const analyzeJson = async (body: { url?: string; prospectName?: string; notes?: string }) =>
     analyzeCaptureUrl(body);
 
   const analyzeForm = async (form: FormData) => analyzeCaptureForm(form);
@@ -201,15 +204,21 @@ export default function SimplifiCaptureApp({
   };
 
   const handleCaptureUrl = useCallback(async () => {
-    if (!url.trim()) return;
+    const trimmedUrl = url.trim();
+    const trimmedNotes = notes.trim();
+    if (!trimmedUrl && !trimmedNotes) return;
     setLoading(true);
     setMessage('');
     try {
-      const data = await analyzeJson({ url: url.trim(), prospectName });
+      const data = await analyzeJson({
+        url: trimmedUrl || undefined,
+        prospectName,
+        notes: trimmedNotes || undefined,
+      });
       handleAnalyzeResponse(data as AnalyzeResponse, 'url');
     } catch {
-      if (loggedIn && typeof navigator !== 'undefined' && !navigator.onLine) {
-        await enqueueCapture({ kind: 'url', url: url.trim(), prospectName });
+      if (loggedIn && typeof navigator !== 'undefined' && !navigator.onLine && trimmedUrl) {
+        await enqueueCapture({ kind: 'url', url: trimmedUrl, prospectName, notes: trimmedNotes || undefined });
         setMessage('Offline — capture queued. We will send when you are back online.');
       } else {
         setMessage('Network error. Try again.');
@@ -217,7 +226,7 @@ export default function SimplifiCaptureApp({
     } finally {
       setLoading(false);
     }
-  }, [url, prospectName, loggedIn]);
+  }, [url, notes, prospectName, loggedIn]);
 
   const handleCaptureFile = async (file: File) => {
     setLoading(true);
@@ -531,13 +540,21 @@ export default function SimplifiCaptureApp({
 
         {view === 'url' && (
           <>
-            <p className="sc-sheet-title">Paste URL</p>
+            <p className="sc-sheet-title">{url.trim() ? 'Paste URL' : notes.trim() ? 'Shared note' : 'Paste URL'}</p>
             <input
               value={url}
               onChange={(e) => setUrl(e.target.value)}
               placeholder="https://…"
               className="sc-input"
-              autoFocus
+              autoFocus={!notes.trim()}
+            />
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Notes from share sheet (optional)"
+              className="sc-input"
+              rows={3}
+              aria-label="Capture notes"
             />
             <input
               value={prospectName}
@@ -549,7 +566,7 @@ export default function SimplifiCaptureApp({
             <button
               type="button"
               className="sc-btn sc-btn-primary sc-btn-block"
-              disabled={loading || !url.trim()}
+              disabled={loading || (!url.trim() && !notes.trim())}
               onClick={handleCaptureUrl}
             >
               {loading ? 'Capturing…' : 'Capture'}

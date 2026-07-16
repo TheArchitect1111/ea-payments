@@ -57,9 +57,11 @@ export function resolveOrbSurfaceHref(
       return '/simplifi/workspace';
     case 'capture': {
       const draft = opts.draft?.trim();
-      // Capture page seeds from ?url= only today.
       if (draft && /^https?:\/\//i.test(draft)) {
         return `/simplifi/capture?url=${encodeURIComponent(draft.slice(0, 2000))}`;
+      }
+      if (draft) {
+        return `/simplifi/capture?text=${encodeURIComponent(draft.slice(0, 2000))}`;
       }
       return '/simplifi/capture';
     }

@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers';
 import { verifySession, EA_PORTAL_COOKIE } from '@/lib/ea-portal-auth';
 import { loadOrbWorkspaceSlice } from '@/lib/orb';
+import { parseShareTargetParams } from '@/lib/simplifi/share-intake';
 import SimplifiProductShell from '../components/SimplifiProductShell';
 import SimplifiCaptureApp from './SimplifiCaptureApp';
 import './simplifi-capture.css';
@@ -11,9 +12,10 @@ export const dynamic = 'force-dynamic';
 export default async function SimplifiCapturePage({
   searchParams,
 }: {
-  searchParams: Promise<{ url?: string }>;
+  searchParams: Promise<{ url?: string; text?: string; title?: string }>;
 }) {
-  const { url: initialUrl } = await searchParams;
+  const params = await searchParams;
+  const intake = parseShareTargetParams(params);
   const cookieStore = await cookies();
   const token = cookieStore.get(EA_PORTAL_COOKIE)?.value;
   const session = token ? await verifySession(token) : null;
@@ -30,7 +32,12 @@ export default async function SimplifiCapturePage({
       actionCenter={slice.actionCenter}
       showChrome={false}
     >
-      <SimplifiCaptureApp slug={slug} loggedIn={Boolean(session)} initialUrl={initialUrl} />
+      <SimplifiCaptureApp
+        slug={slug}
+        loggedIn={Boolean(session)}
+        initialUrl={intake.url || undefined}
+        initialNotes={intake.notes || undefined}
+      />
     </SimplifiProductShell>
   );
 }

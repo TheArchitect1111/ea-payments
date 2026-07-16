@@ -383,7 +383,10 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     return true;
   }
   if (msg.type === 'SIMPLIFI_DAILY_BRIEF') {
-    buildDailyBrief().then(sendResponse);
+    // Prefer server Brief (same loadSimplifiWorkspace as web Orb); fall back to local cache offline.
+    SimplifiApi.getBrief()
+      .then(sendResponse)
+      .catch(() => buildDailyBrief().then(sendResponse));
     return true;
   }
   if (msg.type === 'SIMPLIFI_GET_BRIEF') {
