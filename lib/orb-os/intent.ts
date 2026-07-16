@@ -115,7 +115,7 @@ export function interpretOrbIntent(utterance: string): OrbIntent {
   };
 }
 
-/** Ambient morning line from existing brief / action center data. */
+/** Ambient morning line from existing brief / action center data. Value-first — never chatbot greeting. */
 export function buildAmbientOpening(input: {
   greeting: string;
   attentionTitles: string[];
@@ -124,8 +124,9 @@ export function buildAmbientOpening(input: {
   const name = nameMatch?.[1]?.trim();
   const hello = name ? `Good morning, ${name}.` : input.greeting.replace(/\.$/, '') + '.';
   if (input.attentionTitles.length === 0) {
-    return `${hello}\nNothing urgent is waiting. How can I help today?`;
+    return `${hello}\nNothing urgent is waiting. Your day is clear.`;
   }
   const lines = input.attentionTitles.slice(0, 3).map((t, i) => `${i + 1}. ${t}`);
-  return `${hello}\n${lines.length} thing${lines.length === 1 ? '' : 's'} deserve${lines.length === 1 ? 's' : ''} your attention:\n${lines.join('\n')}\nWould you like to review them?`;
+  const count = lines.length;
+  return `${hello}\nWhile you were away, I found ${count} thing${count === 1 ? '' : 's'} that deserve${count === 1 ? 's' : ''} attention:\n${lines.join('\n')}`;
 }

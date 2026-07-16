@@ -71,11 +71,13 @@ export default function GlobalOrb({
   const [outcomeFlash, setOutcomeFlash] = useState<OrbOutcomeFlash | null>(null);
   const [dismissedIds, setDismissedIds] = useState<string[]>([]);
   const [sessionView, setSessionView] = useState<SessionView | null>(null);
+  const [paused, setPaused] = useState(false);
   const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLElement>(null);
   const ambientShownRef = useRef(false);
   const outcomeTimerRef = useRef<number | null>(null);
+  const panelId = 'simplifi-orb-panel';
 
   useEffect(() => {
     const sync = () => setOnline(typeof navigator === 'undefined' ? true : navigator.onLine);
@@ -86,6 +88,14 @@ export default function GlobalOrb({
       window.removeEventListener('online', sync);
       window.removeEventListener('offline', sync);
     };
+  }, []);
+
+  // Pause breathing / liquid light when the tab is inactive (battery + calm presence).
+  useEffect(() => {
+    const syncPaused = () => setPaused(typeof document !== 'undefined' && document.hidden);
+    syncPaused();
+    document.addEventListener('visibilitychange', syncPaused);
+    return () => document.removeEventListener('visibilitychange', syncPaused);
   }, []);
 
   useEffect(() => () => recognitionRef.current?.stop(), []);
@@ -259,9 +269,20 @@ export default function GlobalOrb({
 
   const state = session.state as OrbVisualState;
   const displayState = (outcomeFlash ?? interaction ?? state) as OrbVisualState;
+  const showAmbientGreeting = Boolean(ambientOpener);
+
+  const orbVisual = (
+    <span className="global-orb-visual">
+      <span className="global-orb-halo" aria-hidden="true" />
+      <span className="global-orb-shell" aria-hidden="true" />
+      <span className="global-orb-core" aria-hidden="true">
+        <span className="global-orb-liquid" />
+      </span>
+    </span>
+  );
 
   return (
-    <div className="global-orb-root">
+    <div className="global-orb-root" data-paused={paused ? 'true' : 'false'}>
       <div className="global-orb-live" aria-live="polite">
         {open
           ? ''
@@ -276,20 +297,29 @@ export default function GlobalOrb({
         <>
           <button type="button" className="global-orb-scrim" aria-label="Dismiss Orb panel" onClick={() => setOpen(false)} />
           <section
+            id={panelId}
             ref={panelRef}
             className="global-orb-panel"
             role="dialog"
             aria-modal="true"
             aria-label="SIMPLIFI intelligence"
           >
-            <header className="global-orb-panel-head">
+            <header className={`global-orb-panel-head${showAmbientGreeting ? ' global-orb-panel-head--ambient-only' : ''}`}>
               <span className="global-orb-panel-mini" aria-hidden="true">
                 <span className="global-orb-shell" />
-                <span className="global-orb-core" />
+                <span className="global-orb-core">
+                  <span className="global-orb-liquid" />
+                </span>
               </span>
               <div>
-                <h2>{session.title}</h2>
-                <p>{session.summary}</p>
+                {showAmbientGreeting ? (
+                  <h2>{session.summary}</h2>
+                ) : (
+                  <>
+                    <h2>{session.title}</h2>
+                    <p>{session.summary}</p>
+                  </>
+                )}
               </div>
               <button ref={closeRef} type="button" className="global-orb-close" onClick={() => setOpen(false)}>
                 Close
@@ -338,7 +368,7 @@ export default function GlobalOrb({
                   ))}
                 </ul>
               ) : (
-                <p className="global-orb-answer">Nothing urgent is waiting. I’m ready when you need me.</p>
+                <p className="global-orb-answer">Nothing urgent is waiting. Your day is clear.</p>
               )}
 
               {session.recommendation ? (
@@ -377,7 +407,7 @@ export default function GlobalOrb({
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') ask();
                   }}
-                  placeholder="Ask anything…"
+                  placeholder="Ask about your workspace…"
                   aria-label="Ask Simplifi"
                 />
                 <button type="button" className="ghost" onClick={startVoice}>
@@ -405,14 +435,12 @@ export default function GlobalOrb({
           className="global-orb-btn"
           data-state={displayState}
           aria-label={session.ariaLabel}
+          aria-controls={panelId}
+          aria-expanded="false"
           title={session.ariaLabel}
           onClick={() => setOpen(true)}
         >
-          <span className="global-orb-visual">
-            <span className="global-orb-halo" aria-hidden="true" />
-            <span className="global-orb-shell" aria-hidden="true" />
-            <span className="global-orb-core" aria-hidden="true" />
-          </span>
+          {orbVisual}
         </button>
       ) : (
         <button
@@ -420,15 +448,12 @@ export default function GlobalOrb({
           className="global-orb-btn"
           data-state={displayState}
           aria-label="SIMPLIFI Orb expanded"
+          aria-controls={panelId}
           aria-expanded="true"
           onClick={() => setOpen(false)}
           style={{ opacity: 0.35 }}
         >
-          <span className="global-orb-visual">
-            <span className="global-orb-halo" aria-hidden="true" />
-            <span className="global-orb-shell" aria-hidden="true" />
-            <span className="global-orb-core" aria-hidden="true" />
-          </span>
+          {orbVisual}
         </button>
       )}
 

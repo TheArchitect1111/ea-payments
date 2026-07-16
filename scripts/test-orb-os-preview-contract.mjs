@@ -34,8 +34,13 @@ assert(intent.includes('interpretOrbIntent'), 'intent router required');
 assert(intent.includes('buildAmbientOpening'), 'ambient opening required');
 
 const shell = readFileSync(join(root, 'app/simplifi/orb/OrbOsShell.tsx'), 'utf8');
-assert(shell.includes('How can I help today?'), 'chat shell prompt retained for ?chat=1');
+assert(shell.includes('While you were away'), 'chat shell uses value-first prompt');
+assert(!shell.includes('How can I help'), 'must not use chatbot greeting');
 assert(shell.includes('answerConversationalAsk'), 'must reuse ask engine');
+
+const intentCopy = readFileSync(join(root, 'lib/orb-os/intent.ts'), 'utf8');
+assert(intentCopy.includes('Your day is clear'), 'quiet ambient must be value-first');
+assert(!intentCopy.includes('How can I help'), 'ambient must not ask how can I help');
 
 const orbPage = readFileSync(join(root, 'app/simplifi/orb/page.tsx'), 'utf8');
 assert(orbPage.includes("redirect('/simplifi/workspace')"), 'default redirect to Brief');
