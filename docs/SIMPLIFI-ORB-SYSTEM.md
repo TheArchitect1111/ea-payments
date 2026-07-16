@@ -29,11 +29,11 @@ SimplifiProductShell
 
 | Path | Purpose |
 |------|---------|
-| `lib/orb/` | Types, priority, derive-state, grounded copy, load-context |
-| `lib/orb-os/intent.ts` | NL → surface |
+| `lib/orb/` | Types, priority, derive-state, grounded copy, load-context, ambient openers |
+| `lib/orb-os/intent.ts` | NL → surface; `buildAmbientOpening` |
 | `lib/orb-os/routes.ts` | Surface → `/simplifi/*` hrefs; navigable vs session surfaces |
-| `app/simplifi/components/GlobalOrb.tsx` | Resting orb + panel + route navigation + session overlays |
-| `app/simplifi/components/session/SessionWorkspace.tsx` | Temporary inbox / opportunity workspace over the Brief |
+| `app/simplifi/components/GlobalOrb.tsx` | Resting orb + panel + route navigation + session overlays + ambient opener |
+| `app/simplifi/components/session/SessionWorkspace.tsx` | Temporary inbox / opportunity / follow-ups / calendar / capture workspace over the Brief |
 | `app/simplifi/components/global-orb.css` | Navy / gold visuals, states, safe-area |
 | `app/simplifi/components/SimplifiProductShell.tsx` | Shell wrapper |
 | `app/simplifi/workspace/CompanionOrb.tsx` | Legacy companion (kept; not mounted on Brief) |
@@ -84,14 +84,31 @@ Everything else (brief / settings / portal / classic) still routes via
 full surfaces — e.g. capture's "More sources" (photos, URL) and each session footer
 link out to them.
 
+## Ambient openers (Step 3)
+
+When the Orb expands for the first time on a page load, it speaks a grounded
+morning opener from `buildAmbientOpeningFromSession` — greeting + up to 3 titles
+from Action Center `needsAttention` and Brief items only. No invented insights.
+
+| Surface | Behavior |
+|---------|----------|
+| GlobalOrb expand (first open) | Full ambient opener + **Review them** → inbox session when findings exist |
+| Brief (`/simplifi/workspace`) | Lead line via `buildBriefAmbientLead` (count only; list is already on the page) |
+| Orb OS Preview shell | Same helper (shared with GlobalOrb) |
+
+Helpers live in `lib/orb/ambient.ts` and reuse `buildAmbientOpening` from `lib/orb-os`.
+
 ## Verification
 
 ```bash
 node scripts/test-simplifi-orb-system-contract.mjs
 node scripts/test-simplifi-orb-route-intents-contract.mjs
 node scripts/test-simplifi-orb-session-workspace-contract.mjs
+node scripts/test-simplifi-orb-ambient-openers-contract.mjs
 ```
 
-Open `/simplifi/workspace`, tap Orb, ask “show my inbox” — a session workspace opens
-in place over the Brief; `Done` restores the Brief. Ask a name that matches one
-opportunity — its quick view opens with snooze / outcome actions.
+Open `/simplifi/workspace` — Brief shows a grounded attention lead. Tap Orb —
+ambient opener appears above findings; **Review them** opens the inbox session.
+Ask “show my inbox” — a session workspace opens in place over the Brief; `Done`
+restores the Brief. Ask a name that matches one opportunity — its quick view
+opens with snooze / outcome actions.

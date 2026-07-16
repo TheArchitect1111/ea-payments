@@ -14,6 +14,7 @@ import {
   snoozeCapture,
 } from '@/lib/simplifi-client';
 import { searchOpportunities } from '@/lib/simplifi-ask';
+import { buildBriefAmbientLead } from '@/lib/orb';
 import EmptyStateGuide from '@/app/components/guided-first-success/EmptyStateGuide';
 import ActionCenterPanel from './ActionCenterPanel';
 import './action-center-panel.css';
@@ -151,6 +152,7 @@ export default function SimplifiWorkspace({
         <div className="sw-brief-intro">
           <p>{brief.greeting.replace(/\.$/, '')}</p>
           <h1>What deserves your attention?</h1>
+          <p className="sw-ambient-lead">{buildBriefAmbientLead({ brief, actionCenter })}</p>
           <p className="sw-muted">The Orb in the corner stays aware — tap it when you want a recommendation.</p>
         </div>
 

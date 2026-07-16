@@ -352,6 +352,24 @@
   border: 1px solid rgba(27, 43, 77, 0.15);
 }
 
+.global-orb-ambient {
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(27, 43, 77, 0.08);
+}
+
+.global-orb-ambient p {
+  margin: 0 0 6px;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  color: var(--orb-navy);
+  white-space: pre-wrap;
+}
+
+.global-orb-ambient p:last-of-type {
+  margin-bottom: 0;
+}
+
 .global-orb-answer {
   margin-top: 10px;
   font-size: 0.9rem;

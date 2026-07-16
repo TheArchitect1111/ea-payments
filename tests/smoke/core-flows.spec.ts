@@ -113,6 +113,8 @@ test('assessment thank-you contact link works', async ({ page }) => {
 test('simplifi workspace is reachable', async ({ page }) => {
   await page.goto('/simplifi/workspace');
   await expect(page.getByRole('heading', { name: /what deserves your attention/i })).toBeVisible();
+  await expect(page.locator('.sw-ambient-lead')).toBeVisible();
+  await expect(page.locator('.sw-ambient-lead')).toContainText(/Nothing urgent|deserve/i);
   await expect(
     page.getByRole('navigation', { name: /Simplifi primary/i }).getByRole('link', { name: /^capture$/i }),
   ).toBeVisible();
@@ -121,6 +123,9 @@ test('simplifi workspace is reachable', async ({ page }) => {
   await expect(orb).toBeVisible();
   await orb.click();
   await expect(page.getByRole('dialog', { name: /SIMPLIFI intelligence/i })).toBeVisible();
+  // Ambient opener (Step 3) — grounded greeting / attention copy on first expand.
+  await expect(page.locator('.global-orb-ambient')).toBeVisible();
+  await expect(page.locator('.global-orb-ambient')).toContainText(/Good morning|Nothing urgent|deserve/i);
   await expect(page.getByRole('button', { name: /^close$/i })).toBeFocused();
   await page.keyboard.press('Shift+Tab');
   expect(
