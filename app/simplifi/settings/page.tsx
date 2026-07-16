@@ -1,7 +1,9 @@
 import Link from 'next/link';
 import { cookies } from 'next/headers';
 import { EA_PORTAL_COOKIE, verifySession } from '@/lib/ea-portal-auth';
+import { isOrbOsPreviewEnabled, ORB_OS_PREVIEW_COOKIE } from '@/lib/orb-os';
 import SimplifiAppChrome from '../components/SimplifiAppChrome';
+import OrbOsPreviewToggle from './OrbOsPreviewToggle';
 import '../workspace/simplifi-workspace.css';
 import '../capture/simplifi-capture.css';
 
@@ -12,6 +14,9 @@ export default async function SimplifiSettingsPage() {
   const token = cookieStore.get(EA_PORTAL_COOKIE)?.value;
   const session = token ? await verifySession(token) : null;
   const slug = session?.slug ?? null;
+  const orbPreview = isOrbOsPreviewEnabled({
+    cookieValue: cookieStore.get(ORB_OS_PREVIEW_COOKIE)?.value,
+  });
 
   return (
     <div className="sw-app">
@@ -21,6 +26,11 @@ export default async function SimplifiSettingsPage() {
           <p>Simplifi</p>
           <h1>Settings</h1>
           <p className="sw-muted">Account, notifications, and capture preferences.</p>
+        </section>
+
+        <section className="sw-brief-panel">
+          <h2>Orb OS Preview</h2>
+          <OrbOsPreviewToggle initiallyEnabled={orbPreview} />
         </section>
 
         <section className="sw-brief-panel">
@@ -88,6 +98,13 @@ export default async function SimplifiSettingsPage() {
                 </strong>
               </div>
             </li>
+            <li>
+              <div>
+                <strong>
+                  <Link href="/simplifi/orb?orb=1">Open Orb OS Preview</Link>
+                </strong>
+              </div>
+            </li>
           </ul>
         </section>
 
@@ -105,7 +122,7 @@ export default async function SimplifiSettingsPage() {
         {slug ? (
           <section className="sw-quick-actions">
             <Link href={`/portal/${slug}`}>EA portal home</Link>
-            <Link href="/simplifi/workspace">Brief</Link>
+            <Link href="/simplifi/workspace?classic=1">Classic Brief</Link>
           </section>
         ) : null}
       </main>
