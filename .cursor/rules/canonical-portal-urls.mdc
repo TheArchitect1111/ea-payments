@@ -33,6 +33,8 @@ If `/ctp` is blank or shows NextStepsPro LaunchPad, **redeploy that OneDrive CRA
 | Demo CTP **workspace** (post-login) | https://efficiencyarchitects.online/portal/demo-client/ctp |
 | One-click demo session | https://efficiencyarchitects.online/api/auth/demo-enter |
 | One-click demo → Simplifi Brief | https://efficiencyarchitects.online/api/auth/demo-enter?next=/simplifi/workspace |
+| Simplifi Orb branded entry | https://efficiencyarchitects.online/simplifiorb |
+| Simplifi Orb on app host (after DNS) | https://app.efficiencyarchitects.online/simplifiorb |
 
 Also OK for portals: `https://portal.efficiencyarchitects.online/{slug}/…`
 

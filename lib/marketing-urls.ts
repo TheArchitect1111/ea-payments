@@ -16,6 +16,8 @@ const BASE = process.env.NEXT_PUBLIC_BASE_URL?.replace(/\/$/, '') ?? EA_PLATFORM
 /** Links you send to real testers — product verb in path, not backend slug. */
 export const PUBLIC_LINKS = {
   platform: BASE,
+  /** Simplifi Orb branded entry (EA-owned) */
+  simplifiOrb: 'https://app.efficiencyarchitects.online/simplifiorb',
   /** Simplifi — Today's Brief (default home) */
   workspace: `${BASE}/simplifi/workspace`,
   /** Simplifi — quick capture */
@@ -36,6 +38,7 @@ export const PUBLIC_LINKS = {
 
 /** Future custom domains → same routes (add in Vercel Domains when ready). */
 export const CUSTOM_DOMAIN_MAP: Record<string, string> = {
+  'app.efficiencyarchitects.online': '/simplifiorb',
   'capture.efficiencyarchitects.online': '/capture',
   'amplify.efficiencyarchitects.online': '/amplifi',
   'story.efficiencyarchitects.online': '/story/selena',

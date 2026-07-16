@@ -1,21 +1,19 @@
 # Simplifi Goal B — Operator checklist (100% Early Access)
 
 Product code for Pass 2–4 is on `master`.  
-**You can test on a phone today** on the working host below. Branded `simplifi.ai` DNS still needs a fix.
+**You can test on a phone today** on the working host below. Branded entry is `/simplifiorb` on the EA domain.
 
 ## Phone testing — do this now (works today)
 
 ### Option A — Browser + Add to Home Screen (recommended)
 
 1. On your phone open:  
-   **https://efficiencyarchitects.online/simplifi/workspace** (Today's Brief)
+   **https://efficiencyarchitects.online/simplifiorb** (Simplifi Orb → Today's Brief)
 2. **Sign in (for history):**  
-   - https://efficiencyarchitects.online/portal/login  
-   - Tap **Sign in with password instead**  
-   - Email: `demo@efficiencyarchitects.online`  
-   - Password: `DemoPulse2026!`  
-   - Then open `/simplifi/workspace`  
-   **Or** use https://efficiencyarchitects.online/simplifi/login → enter the demo email → open the magic link from email **on the phone**.
+   - One-click: https://efficiencyarchitects.online/api/auth/demo-enter?next=/simplifi/workspace  
+   - Or https://efficiencyarchitects.online/portal/login → **Sign in with password instead**  
+     Email: `demo@efficiencyarchitects.online` / Password: `DemoPulse2026!`  
+   - Or https://efficiencyarchitects.online/simplifi/login → magic link on the phone
 3. From Brief, tap **Capture** → paste a business URL (or upload a JPEG — not HEIC).
 4. **Install on phone:** Share → **Add to Home Screen**.  
    PWA `start_url` opens Today's Brief (standalone icon).
@@ -35,22 +33,22 @@ There is **no App Store / Play Store / TestFlight build published**.
 
 Open **Mission Control** (`/admin/master`) — incomplete items show as attention cards → `/launch`.
 
-### 1. Fix `simplifi.ai` DNS (GoDaddy / Domaincontrol)
+### 1. Branded Simplifi entry — `app.efficiencyarchitects.online/simplifiorb`
 
-Vercel already has `simplifi.ai` + `app.simplifi.ai` on **ea-payments**, but public DNS still serves a **/lander** stub (not the app). Nameservers are Domaincontrol, not Vercel.
+`simplifi.ai` is **not** EA-owned. Use the EA domain instead.
 
-**In GoDaddy DNS for `simplifi.ai`:**
+**Vercel:** Domains → `ea-payments` → add `app.efficiencyarchitects.online`
 
-1. Open DNS management for `simplifi.ai`
-2. Set apex **A** record → `76.76.21.21` (Vercel)
-3. For `app` subdomain: **A** `app` → `76.76.21.21`  
-   (or the exact record shown in Vercel → ea-payments → Settings → Domains)
-4. Remove conflicting parking/lander records
-5. Wait for SSL → confirm:
-   - https://simplifi.ai/api/health/launch returns JSON `ok: true`
-   - https://simplifi.ai/simplifi/capture shows the real capture UI (not redirect to `/lander`)
+**Namecheap** (for `efficiencyarchitects.online` → Advanced DNS):
 
-Until then, testers use **efficiencyarchitects.online** only.
+1. Add **CNAME** host `app` → `cname.vercel-dns.com`
+2. Wait for SSL
+3. Confirm:
+   - https://app.efficiencyarchitects.online/simplifiorb opens Today's Brief
+   - https://app.efficiencyarchitects.online/api/health/launch returns JSON `ok: true`
+
+**Works today without that DNS step:**  
+https://efficiencyarchitects.online/simplifiorb
 
 ### 2. GlitchTip DSN (error monitoring)
 
@@ -63,7 +61,7 @@ Until then, testers use **efficiencyarchitects.online** only.
 ### 3. Uptime
 
 Set `UPTIME_KUMA_DASHBOARD_URL` or `UPTIME_MONITORING_URL` if missing.  
-Monitors should include `/simplifi/capture`, `/simplifi/workspace`, `/api/health/launch`.
+Monitors should include `/simplifiorb`, `/simplifi/capture`, `/simplifi/workspace`, `/api/health/launch`.
 
 ---
 
@@ -78,12 +76,11 @@ node scripts/test-simplifi-goal-b-pass4.mjs
 
 ## Definition of done
 
-- [ ] `simplifi.ai` serves ea-payments (not `/lander`)
-- [ ] Optional `app.simplifi.ai` resolves to workspace/capture
-- [ ] GlitchTip DSN live (`NEXT_PUBLIC_GLITCHTIP_DSN`)
+- [ ] `app.efficiencyarchitects.online/simplifiorb` serves Simplifi Brief (or apex `/simplifiorb` accepted until CNAME is live)
+- [x] GlitchTip DSN live (`NEXT_PUBLIC_GLITCHTIP_DSN`)
 - [ ] Uptime env/monitors
 - [x] Pass 2–4 product code
-- [ ] Phone smoke: capture → Magnifi → PDF → guidance → workspace
+- [ ] Phone smoke: Orb entry → capture → Magnifi → PDF → guidance → workspace
 
 ## Demo credentials
 

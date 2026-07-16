@@ -1,6 +1,10 @@
 /** Hosts that should land on the Simplifi product shell (same Vercel project). */
 export const SIMPLIFI_APP_HOSTS = new Set(
   [
+    // EA-owned branded host (preferred while simplifi.ai is not EA-controlled)
+    'app.efficiencyarchitects.online',
+    'www.app.efficiencyarchitects.online',
+    // Legacy / aspirational hosts (keep until DNS ownership is confirmed)
     'simplifi.ai',
     'www.simplifi.ai',
     'app.simplifi.ai',
@@ -15,6 +19,7 @@ export const SIMPLIFI_APP_HOSTS = new Set(
 const PATH_ALIASES: Record<string, string> = {
   '/': '/simplifi/workspace',
   '/app': '/simplifi/workspace',
+  '/simplifiorb': '/simplifi/workspace',
   '/workspace': '/simplifi/workspace',
   '/capture': '/simplifi/capture',
   '/login': '/simplifi/login',
@@ -39,5 +44,10 @@ export function resolveSimplifiAppHostRedirect(
   return PATH_ALIASES[path] ?? null;
 }
 
+/** Preferred Simplifi app host (EA-owned). Path entry is `/simplifiorb`. */
 export const SIMPLIFI_APP_URL =
-  process.env.NEXT_PUBLIC_SIMPLIFI_APP_URL?.replace(/\/$/, '') ?? 'https://simplifi.ai';
+  process.env.NEXT_PUBLIC_SIMPLIFI_APP_URL?.replace(/\/$/, '') ??
+  'https://app.efficiencyarchitects.online';
+
+/** Public branded entry for testers and QR codes. */
+export const SIMPLIFI_ORB_ENTRY_URL = `${SIMPLIFI_APP_URL}/simplifiorb`;

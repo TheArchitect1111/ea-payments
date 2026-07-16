@@ -141,6 +141,12 @@ test('simplifi workspace is reachable', async ({ page }) => {
   await expect(page.getByRole('dialog', { name: /capture workspace/i })).toBeVisible();
 });
 
+test('simplifiorb entry redirects to Brief', async ({ page }) => {
+  await page.goto('/simplifiorb');
+  await expect(page).toHaveURL(/\/simplifi\/workspace/);
+  await expect(page.getByRole('heading', { name: /what deserves your attention/i })).toBeVisible();
+});
+
 test('simplifi orb ask opens inbox session workspace in place', async ({ page }) => {
   await page.goto('/simplifi/workspace');
   await page.getByRole('button', { name: /SIMPLIFI Orb/i }).click();

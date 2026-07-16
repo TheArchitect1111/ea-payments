@@ -15,14 +15,15 @@ Simplifi captures opportunities, runs analysis, builds a Magnifi story (with Dow
 
 ## Phone in 2 minutes
 
-1. Open **https://efficiencyarchitects.online/simplifi/workspace** (Today's Brief — home)
+1. Open **https://efficiencyarchitects.online/simplifiorb** (Simplifi Orb → Today's Brief)
 2. Sign in — easiest is the **one-click demo** straight to the Brief:  
    **https://efficiencyarchitects.online/api/auth/demo-enter?next=/simplifi/workspace**  
    (or `simplifi/login` magic link, or portal login → `demo@efficiencyarchitects.online` / `DemoPulse2026!`)
 3. From Brief, tap **Capture** (or Ask Orb) to save a URL
 4. Share → **Add to Home Screen** — PWA opens Today's Brief
 
-**Do not use `simplifi.ai` yet** — DNS still points at a lander stub until Pass 1 DNS is fixed.
+**Branded entry (once DNS is live):** https://app.efficiencyarchitects.online/simplifiorb  
+Until then, use the apex `/simplifiorb` link above. Do not use `simplifi.ai` (not EA-owned).
 
 ---
 
@@ -30,6 +31,8 @@ Simplifi captures opportunities, runs analysis, builds a Magnifi story (with Dow
 
 | Step | URL |
 |------|-----|
+| Simplifi Orb entry | https://efficiencyarchitects.online/simplifiorb |
+| Branded Orb entry (after DNS) | https://app.efficiencyarchitects.online/simplifiorb |
 | Today's Brief (home) | https://efficiencyarchitects.online/simplifi/workspace |
 | One-click demo → Brief | https://efficiencyarchitects.online/api/auth/demo-enter?next=/simplifi/workspace |
 | Quick Capture | https://efficiencyarchitects.online/simplifi/capture |
@@ -58,7 +61,7 @@ Simplifi captures opportunities, runs analysis, builds a Magnifi story (with Dow
 - Thin URLs show Low confidence  
 - Portal login has password; Simplifi login is magic-link only  
 - Native app: Expo Go or EAS build only (`mobile/`) — no App Store link yet  
-- `simplifi.ai` / `app.simplifi.ai` branded DNS incomplete  
+- `simplifi.ai` is not the EA branded host — use `/simplifiorb` on efficiencyarchitects.online (or app. subdomain when DNS is live)  
 
 ---
 
