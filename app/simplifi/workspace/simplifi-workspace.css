@@ -1,6 +1,6 @@
 .sw-app {
   min-height: 100dvh;
-  background: #f7f9fc;
+  background: #faf8f3;
   color: #111;
 }
 
@@ -17,7 +17,7 @@
   font-weight: 900;
   letter-spacing: 0.3em;
   font-size: 14px;
-  color: #0a66ff;
+  color: #1B2B4D;
   text-decoration: none;
 }
 
@@ -35,6 +35,52 @@
 
 .sw-nav a:hover {
   text-decoration: underline;
+}
+
+.sw-nav a.sw-nav-active {
+  color: #c9a844;
+  text-decoration: none;
+  border-bottom: 2px solid #c9a844;
+  padding-bottom: 2px;
+}
+
+.sw-orb-cta {
+  margin-top: 12px;
+  border: 1px solid #1b2b4d33;
+  background: #fff;
+  color: #1b2b4d;
+  font-weight: 700;
+  font-size: 13px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.sw-orb-cta:hover {
+  border-color: #c9a844;
+  color: #1b2b4d;
+}
+
+.sw-quick-actions button {
+  border: 1px solid #1b2b4d22;
+  background: #fff;
+  color: #1b2b4d;
+  font-weight: 700;
+  font-size: 13px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+a.sw-card-head {
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
 }
 
 .sw-main {
@@ -56,7 +102,7 @@
   font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.2em;
-  color: #0a66ff;
+  color: #1B2B4D;
   margin-bottom: 8px;
 }
 
@@ -94,7 +140,7 @@
 }
 
 .sw-btn-primary {
-  background: #0a66ff;
+  background: #1B2B4D;
   color: #fff;
 }
 
@@ -175,7 +221,7 @@
 }
 
 .sw-brief-momentum {
-  border-left: 3px solid #0a66ff;
+  border-left: 3px solid #1B2B4D;
 }
 
 .sw-brief-deadline {
@@ -196,7 +242,7 @@
 }
 
 .sw-brief-due-soon {
-  border-left: 3px solid #0a66ff;
+  border-left: 3px solid #1B2B4D;
 }
 
 .sw-memory {
@@ -242,7 +288,7 @@
   padding: 2px 8px;
   border-radius: 999px;
   background: #eaf2ff;
-  color: #0a66ff;
+  color: #1B2B4D;
 }
 
 .sw-brief-actions {
@@ -257,7 +303,7 @@
   background: none;
   font-size: 12px;
   font-weight: 800;
-  color: #0a66ff;
+  color: #1B2B4D;
   cursor: pointer;
   text-decoration: underline;
 }
@@ -295,7 +341,7 @@
 
 .sw-action-note {
   font-size: 13px;
-  color: #0a66ff;
+  color: #1B2B4D;
   margin: 0 0 12px;
 }
 
@@ -311,7 +357,7 @@
 .sw-link {
   font-size: 12px;
   font-weight: 800;
-  color: #0a66ff;
+  color: #1B2B4D;
   white-space: nowrap;
 }
 
@@ -374,7 +420,7 @@
 
 .sw-priority-normal {
   background: #eaf2ff;
-  color: #0a66ff;
+  color: #1B2B4D;
 }
 
 .sw-priority-low {
@@ -398,7 +444,7 @@
 
 .sw-dyn-high {
   background: #eaf2ff;
-  color: #0a66ff;
+  color: #1B2B4D;
 }
 
 .sw-dyn-medium {
@@ -450,7 +496,7 @@
   margin-top: 8px;
   font-size: 11px;
   font-weight: 700;
-  color: #0a66ff;
+  color: #1B2B4D;
 }
 
 .sw-chevron {

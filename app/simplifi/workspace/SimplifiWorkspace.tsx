@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import type { SimplifiObject } from '@/lib/simplifi-objects';
 import type { MemoryAsset } from '@/lib/memory-assets';
@@ -13,6 +13,7 @@ import {
   recordCaptureOutcome,
   snoozeCapture,
 } from '@/lib/simplifi-client';
+import { searchOpportunities } from '@/lib/simplifi-ask';
 import EmptyStateGuide from '@/app/components/guided-first-success/EmptyStateGuide';
 import ActionCenterPanel from './ActionCenterPanel';
 import CompanionOrb from './CompanionOrb';
@@ -54,26 +55,40 @@ export default function SimplifiWorkspace({
   const [actionNote, setActionNote] = useState('');
   const [intelligenceNote, setIntelligenceNote] = useState('');
   const [intelligenceLoading, setIntelligenceLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [orbOpenSignal, setOrbOpenSignal] = useState(0);
+  const [orbOpenView, setOrbOpenView] = useState<'brief' | 'capture' | 'inbox' | 'ask'>('brief');
+
+  const filteredObjects = useMemo(
+    () => (searchQuery.trim() ? searchOpportunities(searchQuery, localObjects) : localObjects),
+    [localObjects, searchQuery],
+  );
+
   const topObject = localObjects[0] ?? null;
   const topBriefItem = brief.items[0] ?? null;
   const recommendedItems = brief.items.slice(0, 3);
   const recentObjects = localObjects.slice(0, 5);
-  const todayActivity = brief.items.length > 0
-    ? brief.items.slice(0, 4)
-    : recentObjects.map((obj) => ({
-        id: `recent-${obj.id}`,
-        title: obj.title,
-        detail: obj.nextAction,
-        href: obj.considerUrl ?? obj.shareUrl,
-        kind: 'explore' as const,
-      }));
+  const todayActivity =
+    brief.items.length > 0
+      ? brief.items.slice(0, 4)
+      : recentObjects.map((obj) => ({
+          id: `recent-${obj.id}`,
+          title: obj.title,
+          detail: obj.nextAction,
+          href: `/simplifi/opportunity/${obj.id}`,
+          kind: 'explore' as const,
+        }));
   const quickActions = [
     { label: 'Capture', href: '/simplifi/capture' },
-    { label: 'Review Inbox', href: '#inbox' },
-    ...(slug
-      ? [{ label: 'Portal', href: `/portal/${slug}` }]
-      : [{ label: 'Sign In', href: '/simplifi/login?next=/simplifi/workspace' }]),
+    { label: 'Inbox', href: '/simplifi/inbox' },
+    { label: 'Follow-ups', href: '/simplifi/follow-ups' },
+    { label: 'Ask', href: '/simplifi/ask' },
   ];
+
+  const openOrb = (view: 'brief' | 'capture' | 'inbox' | 'ask' = 'brief') => {
+    setOrbOpenView(view);
+    setOrbOpenSignal((n) => n + 1);
+  };
 
   const toggleExpand = (obj: SimplifiObject) => {
     setExpandedId((prev) => (prev === obj.id ? null : obj.id));
@@ -143,13 +158,47 @@ export default function SimplifiWorkspace({
       <section className="sw-brief-shell" aria-label="Simplifi brief">
         <div className="sw-brief-intro">
           <p>{brief.greeting.replace(/\.$/, '')}</p>
-          <h1>What should I pay attention to right now?</h1>
+          <h1>What deserves your attention?</h1>
+          <button type="button" className="sw-orb-cta" onClick={() => openOrb('ask')}>
+            Ask Orb
+          </button>
         </div>
 
         <label className="sw-search">
           <span>Search Simplifi</span>
-          <input placeholder="Search opportunities, people, notes, resources..." />
+          <input
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search opportunities, people, notes, resources..."
+            aria-label="Search opportunities"
+          />
         </label>
+
+        {searchQuery.trim() ? (
+          <section className="sw-brief-panel" aria-label="Search results">
+            <div className="sw-panel-heading">
+              <h2>Search results</h2>
+              <span>{filteredObjects.length}</span>
+            </div>
+            {filteredObjects.length === 0 ? (
+              <p className="sw-muted">No matches. Try another name, topic, or next action.</p>
+            ) : (
+              <ul className="sw-event-list">
+                {filteredObjects.slice(0, 12).map((obj) => (
+                  <li key={obj.id}>
+                    <div>
+                      <strong>
+                        <Link href={`/simplifi/opportunity/${obj.id}`}>{obj.title}</Link>
+                      </strong>
+                      <p>{obj.nextAction}</p>
+                    </div>
+                    <span>{obj.priority}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        ) : null}
 
         <section className="sw-priority-card" aria-label="Top priority">
           <p className="sw-section-label">Top Priority</p>
@@ -157,33 +206,37 @@ export default function SimplifiWorkspace({
             <>
               <div className="sw-priority-main">
                 <div>
-                  <h2>{topObject.title}</h2>
+                  <h2>
+                    <Link href={`/simplifi/opportunity/${topObject.id}`}>{topObject.title}</Link>
+                  </h2>
                   <p>{topBriefItem?.detail ?? topObject.whyThisMatters}</p>
                 </div>
-                <span>{topObject.opportunityScore != null ? `${topObject.opportunityScore}/100` : topObject.priority}</span>
+                <span>
+                  {topObject.opportunityScore != null ? `${topObject.opportunityScore}/100` : topObject.priority}
+                </span>
               </div>
               <div className="sw-card-footer">
                 <strong>{topObject.nextAction}</strong>
-                <button type="button" className="sw-icon-action" onClick={() => toggleExpand(topObject)}>
-                  Review
-                </button>
+                <Link href={`/simplifi/opportunity/${topObject.id}`} className="sw-icon-action">
+                  Open
+                </Link>
               </div>
             </>
           ) : (
             <>
               <div className="sw-priority-main">
                 <div>
-                  <h2>Capture the first opportunity</h2>
+                  <h2>Your brief is clear</h2>
                   <p>
                     {loggedIn
-                      ? 'Your brief is clear. Add something worth exploring and Simplifi will prioritize the next move.'
-                      : 'Sign in to see your personalized brief, or capture without an account.'}
+                      ? 'Capture something worth exploring — Simplifi will prioritize the next move here.'
+                      : 'Sign in for a personalized brief, or capture without an account.'}
                   </p>
                 </div>
-                <span>Start</span>
+                <span>Ready</span>
               </div>
               <div className="sw-card-footer">
-                <strong>Capture something worth exploring</strong>
+                <strong>One tap to capture</strong>
                 <Link href="/simplifi/capture" className="sw-icon-action">
                   Capture
                 </Link>
@@ -257,8 +310,13 @@ export default function SimplifiWorkspace({
               {recentObjects.map((obj) => (
                 <li key={obj.id}>
                   <div>
-                    <strong>{obj.title}</strong>
-                    <p>{obj.type}{obj.dateCaptured ? ` - ${obj.dateCaptured}` : ''}</p>
+                    <strong>
+                      <Link href={`/simplifi/opportunity/${obj.id}`}>{obj.title}</Link>
+                    </strong>
+                    <p>
+                      {obj.type}
+                      {obj.dateCaptured ? ` - ${obj.dateCaptured}` : ''}
+                    </p>
                   </div>
                   <span>{obj.priority}</span>
                 </li>
@@ -273,6 +331,9 @@ export default function SimplifiWorkspace({
               {action.label}
             </Link>
           ))}
+          <button type="button" onClick={() => openOrb('capture')}>
+            Orb Capture
+          </button>
         </section>
       </section>
 
@@ -320,9 +381,7 @@ export default function SimplifiWorkspace({
                 <div>
                   <strong>{asset.title}</strong>
                   <p>{asset.reuseHint.slice(0, 100)}</p>
-                  {asset.savePurpose && (
-                    <span className="sw-memory-tag">{asset.savePurpose}</span>
-                  )}
+                  {asset.savePurpose && <span className="sw-memory-tag">{asset.savePurpose}</span>}
                 </div>
                 {asset.href && (
                   <Link href={asset.href} className="sw-link">
@@ -337,8 +396,10 @@ export default function SimplifiWorkspace({
 
       <section className="sw-inbox" id="inbox">
         <div className="sw-inbox-header">
-          <h2>Inbox</h2>
-          <span className="sw-count">{localObjects.length} active</span>
+          <h2>Inbox preview</h2>
+          <Link href="/simplifi/inbox" className="sw-link">
+            Open full inbox
+          </Link>
         </div>
         {actionNote && <p className="sw-action-note">{actionNote}</p>}
 
@@ -346,24 +407,18 @@ export default function SimplifiWorkspace({
           <EmptyStateGuide
             title="Nothing in your inbox yet"
             explanation="Paste a URL, upload a file, or jot a note — Simplifi will score the opportunity and surface your next move."
-            actionLabel="First capture"
+            actionLabel="Quick capture"
             actionHref="/simplifi/capture"
           />
         ) : (
           <ul className="sw-inbox-list">
-            {localObjects.map((obj) => {
+            {localObjects.slice(0, 5).map((obj) => {
               const open = expandedId === obj.id;
               return (
                 <li key={obj.id} className={`sw-card ${open ? 'sw-card-open' : ''}`}>
-                  <button
-                    type="button"
-                    className="sw-card-head"
-                    onClick={() => toggleExpand(obj)}
-                  >
+                  <button type="button" className="sw-card-head" onClick={() => toggleExpand(obj)}>
                     <div>
-                      <span className={`sw-priority sw-priority-${obj.priority.toLowerCase()}`}>
-                        {obj.priority}
-                      </span>
+                      <span className={`sw-priority sw-priority-${obj.priority.toLowerCase()}`}>{obj.priority}</span>
                       {obj.priorityLevel && obj.priorityLevel !== 'low' && (
                         <span className={`sw-dyn-priority sw-dyn-${obj.priorityLevel}`}>
                           {priorityLevelLabel(obj.priorityLevel)}
@@ -387,10 +442,6 @@ export default function SimplifiWorkspace({
                           <h4>Why this matters</h4>
                           <p>{obj.whyThisMatters}</p>
                         </div>
-                        <div>
-                          <h4>What most people do</h4>
-                          <p>{obj.whatMostPeopleDo}</p>
-                        </div>
                         <div className="sw-recommend">
                           <h4>What we recommend</h4>
                           <p>{obj.whatWeRecommend}</p>
@@ -399,19 +450,15 @@ export default function SimplifiWorkspace({
                           </p>
                         </div>
                       </div>
-                      {intelligenceNote && open && (
-                        <p className="sw-intelligence-note">{intelligenceNote}</p>
-                      )}
+                      {intelligenceNote && open && <p className="sw-intelligence-note">{intelligenceNote}</p>}
                       <div className="sw-card-actions">
+                        <Link href={`/simplifi/opportunity/${obj.id}`} className="sw-btn sw-btn-small">
+                          Opportunity profile
+                        </Link>
                         {obj.considerUrl && (
-                          <Link href={obj.considerUrl} className="sw-btn sw-btn-small">
+                          <Link href={obj.considerUrl} className="sw-btn sw-btn-small sw-btn-ghost">
                             Magnifi
                           </Link>
-                        )}
-                        {obj.shareUrl && (
-                          <a href={obj.shareUrl} className="sw-btn sw-btn-small sw-btn-ghost">
-                            Share
-                          </a>
                         )}
                         {loggedIn && (
                           <>
@@ -433,33 +480,11 @@ export default function SimplifiWorkspace({
                             <button
                               type="button"
                               className="sw-btn sw-btn-small sw-btn-ghost"
-                              onClick={() => recordOutcome(obj.id, 'in_progress')}
-                            >
-                              In progress
-                            </button>
-                            <button
-                              type="button"
-                              className="sw-btn sw-btn-small sw-btn-ghost"
-                              onClick={() => recordOutcome(obj.id, 'passed')}
-                            >
-                              Pass
-                            </button>
-                            <button
-                              type="button"
-                              className="sw-btn sw-btn-small sw-btn-ghost"
                               onClick={() => archiveObject(obj.id)}
                             >
                               Archive
                             </button>
                           </>
-                        )}
-                        {slug && (
-                          <Link
-                            href={`/portal/${slug}/simplifi`}
-                            className="sw-btn sw-btn-small sw-btn-ghost"
-                          >
-                            Portal workspace
-                          </Link>
                         )}
                       </div>
                     </div>
@@ -485,6 +510,8 @@ export default function SimplifiWorkspace({
         brief={brief}
         objects={localObjects}
         actionCenter={actionCenter}
+        openSignal={orbOpenSignal}
+        openView={orbOpenView}
       />
     </main>
   );

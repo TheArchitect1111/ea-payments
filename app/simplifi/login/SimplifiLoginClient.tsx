@@ -12,7 +12,7 @@ import './simplifi-auth.css';
 const copy = getRealmLoginCopy('simplifi');
 
 function safeNextPath(raw: string | null): string {
-  if (!raw || !raw.startsWith('/') || raw.startsWith('//')) return '/simplifi/capture';
+  if (!raw || !raw.startsWith('/') || raw.startsWith('//')) return '/simplifi/workspace';
   return raw;
 }
 

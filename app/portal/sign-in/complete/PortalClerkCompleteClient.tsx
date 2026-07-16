@@ -6,7 +6,7 @@ import { useSearchParams } from 'next/navigation';
 import '../../login/portal-login.css';
 
 function safeNextPath(raw: string | null): string {
-  if (!raw || !raw.startsWith('/') || raw.startsWith('//')) return '/simplifi/capture';
+  if (!raw || !raw.startsWith('/') || raw.startsWith('//')) return '/simplifi/workspace';
   return raw;
 }
 

@@ -42,7 +42,7 @@ export function buildActionCenter(objects: SimplifiObject[]): ActionCenterPayloa
         id: `rec-${obj.id}`,
         title: obj.nextAction,
         detail: `${priorityLevelLabel(ps.level)} · ${obj.title}`,
-        href: obj.considerUrl ?? '/simplifi/capture',
+        href: `/simplifi/opportunity/${obj.id}`,
         priority: ps.level,
         section: 'recommended',
       });
@@ -51,7 +51,7 @@ export function buildActionCenter(objects: SimplifiObject[]): ActionCenterPayloa
         id: `watch-${obj.id}`,
         title: obj.title,
         detail: `${obj.savePurpose}${obj.dueDate ? ` · due ${obj.dueDate}` : ''}`,
-        href: obj.considerUrl,
+        href: `/simplifi/opportunity/${obj.id}`,
         priority: ps.level,
         section: 'watchlist',
       });

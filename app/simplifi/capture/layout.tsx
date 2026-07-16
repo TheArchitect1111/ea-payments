@@ -3,8 +3,8 @@ import './simplifi-capture.css';
 import SimplifiCaptureSwRegister from './SimplifiCaptureSwRegister';
 
 export const metadata: Metadata = {
-  title: 'Simplifi Capture — One Tap',
-  description: 'Capture opportunities from your phone with Simplifi.',
+  title: 'Simplifi — Quick Capture',
+  description: 'One-tap capture — then return to Today\'s Brief.',
   manifest: '/manifest-simplifi.json',
   appleWebApp: {
     capable: true,
@@ -17,7 +17,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   viewportFit: 'cover',
-  themeColor: '#0A66FF',
+  themeColor: '#1B2B4D',
 };
 
 export default function SimplifiCaptureLayout({ children }: { children: React.ReactNode }) {

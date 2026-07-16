@@ -3,13 +3,14 @@ import { PUBLIC_LINKS } from '@/lib/marketing-urls';
 
 const testerMessage = `Efficiency Architects preview — try these:
 
-Capture (Simplifi): ${PUBLIC_LINKS.capture}
+Simplifi Brief: ${PUBLIC_LINKS.workspace}
+Quick Capture: ${PUBLIC_LINKS.capture}
 Amplify & post: ${PUBLIC_LINKS.amplifi}
 Magnifi story (no login): ${PUBLIC_LINKS.storyDemo}
 
-No password needed on /amplifi — tap Try demo. Optional account: ${PUBLIC_LINKS.signIn}
+Sign in: ${PUBLIC_LINKS.signIn}
 
-Use ea-payments.vercel.app or www.efficiencyarchitects.online (same platform).`;
+Use efficiencyarchitects.online (same platform).`;
 
 export default function StartPage() {
   return (
@@ -33,10 +34,11 @@ export default function StartPage() {
             className="block border-2 border-[#C9A844] p-5 hover:bg-[#C9A844]/10 transition-colors"
           >
             <p className="font-bold text-[#C9A844]">Try every page — one login (recommended for testers)</p>
-            <p className="text-sm text-neutral-400 mt-1">Sign in once, then open Capture, Workspace, Pulse, Amplifi, and portal pages.</p>
+            <p className="text-sm text-neutral-400 mt-1">Sign in once, then open Today&apos;s Brief, Capture, Pulse, Amplifi, and portal pages.</p>
           </a>
           {[
-            { label: 'Capture — Simplifi', href: PUBLIC_LINKS.capture, note: 'Guest session — tap Capture now' },
+            { label: 'Simplifi — Today\'s Brief', href: PUBLIC_LINKS.workspace, note: 'What deserves attention now' },
+            { label: 'Quick Capture', href: PUBLIC_LINKS.capture, note: 'One-tap save — guest or signed in' },
             { label: 'Amplifi — social posting', href: PUBLIC_LINKS.amplifi, note: 'Try demo — no login required' },
             { label: 'Magnifi story (no login)', href: PUBLIC_LINKS.storyDemo, note: 'Full demo experience' },
             { label: 'Connect browser extension', href: '/extension/connect', note: 'One-click Chrome/Firefox pairing' },

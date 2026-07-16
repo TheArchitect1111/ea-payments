@@ -28,9 +28,6 @@ import {
   stashProcessingCaptureId,
 } from '@/lib/capture-upload-limits';
 
-const EA_PLATFORM_PURPOSE =
-  'Efficiency Architects helps you capture what matters, track progress, and turn activity into momentum.';
-
 const CAPTURE_OUTCOME_TAGLINE = 'Save what matters. Follow up when it\'s time.';
 
 interface AnalyzeResponse {
@@ -72,7 +69,7 @@ export default function SimplifiCaptureApp({
   const [bannerError, setBannerError] = useState('');
   const [externalOnboardingStep, setExternalOnboardingStep] = useState<SimplifiOnboardingStep | null>(null);
 
-  const loginNext = encodeURIComponent('/simplifi/capture');
+  const loginNext = encodeURIComponent('/simplifi/workspace');
   const onboardingScope = slug ?? 'simplifi-user';
   const isGuestDemo = slug === 'demo-client';
 
@@ -291,24 +288,26 @@ export default function SimplifiCaptureApp({
         <div className="sc-brand-lockup">
           <Image src="/simplifi-logo.png" alt="Simplifi" width={170} height={96} priority />
         </div>
-        {slug ? (
+        <nav className="sc-header-nav" aria-label="Simplifi">
           <Link href="/simplifi/workspace" className="sc-header-link">
-            My opportunities
+            Brief
           </Link>
-        ) : (
-          <Link href="/simplifi/workspace" className="sc-header-link">
-            My dashboard
+          <Link href="/simplifi/inbox" className="sc-header-link">
+            Inbox
           </Link>
-        )}
+          <Link href="/simplifi/settings" className="sc-header-link">
+            Settings
+          </Link>
+        </nav>
       </header>
 
       <main className="sc-main">
-        <p className="sc-kicker">{CAPTURE_OUTCOME_TAGLINE}</p>
-        <h1 className="sc-title">Let&apos;s capture your first opportunity.</h1>
+        <p className="sc-kicker">Quick capture</p>
+        <h1 className="sc-title">Save it. Simplifi will tell you when it matters.</h1>
         <p className="sc-lede">
-          Paste a link, upload a screenshot, save a flyer, or capture something worth remembering.
+          Paste a link, upload a screenshot, or save a flyer — then return to Today&apos;s Brief.
         </p>
-        <p className="sc-platform-purpose">{EA_PLATFORM_PURPOSE}</p>
+        <p className="sc-platform-purpose">{CAPTURE_OUTCOME_TAGLINE}</p>
 
         <section className="sc-first-capture" aria-label="Capture your first item">
           <label className="sc-field-label" htmlFor="first-capture-url">
@@ -356,13 +355,15 @@ export default function SimplifiCaptureApp({
           <li><strong>Act on it:</strong> follow up when the time is right.</li>
         </ol>
         <p className="sc-next-step">
-          Saved captures appear in your portal Activity.{' '}
+          After you capture, open{' '}
+          <Link href="/simplifi/workspace">Today&apos;s Brief</Link>
+          {' '}or your{' '}
           {slug ? (
-            <Link href={`/portal/${slug}`}>Open your portal</Link>
+            <Link href="/simplifi/inbox">Opportunity Inbox</Link>
           ) : (
-            <Link href="/portal/login?next=/simplifi/capture">Sign in to your portal</Link>
+            <Link href={`/portal/login?next=${loginNext}`}>signed-in inbox</Link>
           )}
-          {' '}to track them.
+          .
         </p>
         {isGuestDemo ? (
           <p className="sc-guest-banner">

@@ -1,11 +1,11 @@
 {
-  "name": "Simplifi Capture",
+  "name": "Simplifi",
   "short_name": "Simplifi",
-  "description": "One-tap opportunity capture for Efficiency Architects Simplifi",
-  "start_url": "/simplifi/capture",
+  "description": "Today's Brief and opportunity intelligence from Efficiency Architects",
+  "start_url": "/simplifi/workspace",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#0A66FF",
+  "background_color": "#FAF8F3",
+  "theme_color": "#1B2B4D",
   "icons": [
     {
       "src": "/ea-logo.png",

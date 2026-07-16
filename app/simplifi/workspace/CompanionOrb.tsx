@@ -8,7 +8,6 @@ import { priorityLevelLabel } from '@/lib/priority-engine';
 import type { CaptureApiResponse } from '@/lib/capture-response';
 import CaptureProcessingPanel from '@/app/components/CaptureProcessingPanel';
 import {
-  answerAskSimplifi,
   consumeContextLesson,
   explainRecommendation,
   getTeachMeMode,
@@ -17,6 +16,7 @@ import {
   shouldOfferRecovery,
   type SimplifiContextLesson,
 } from '@/lib/simplifi-guidance-system';
+import { answerConversationalAsk } from '@/lib/simplifi-ask';
 
 type OrbState = 'silent' | 'aware' | 'active';
 type PanelView = 'brief' | 'capture' | 'inbox' | 'ask';
@@ -39,6 +39,12 @@ interface CompanionOrbProps {
   brief: BriefPayload;
   objects: SimplifiObject[];
   actionCenter: ActionCenterPayload;
+  /** Open companion on mount (e.g. Ask CTA). */
+  defaultOpen?: boolean;
+  initialView?: PanelView;
+  /** Increment to request opening the companion from the parent. */
+  openSignal?: number;
+  openView?: PanelView;
 }
 
 interface OrbPosition {
@@ -71,9 +77,19 @@ const LONG_PRESS_MS = 520;
 const DOUBLE_TAP_MS = 280;
 const DRAG_THRESHOLD = 8;
 
-export default function CompanionOrb({ slug, loggedIn, brief, objects, actionCenter }: CompanionOrbProps) {
-  const [open, setOpen] = useState(false);
-  const [view, setView] = useState<PanelView>('brief');
+export default function CompanionOrb({
+  slug,
+  loggedIn,
+  brief,
+  objects,
+  actionCenter,
+  defaultOpen = false,
+  initialView = 'brief',
+  openSignal = 0,
+  openView = 'brief',
+}: CompanionOrbProps) {
+  const [open, setOpen] = useState(defaultOpen);
+  const [view, setView] = useState<PanelView>(initialView);
   const [position, setPosition] = useState<OrbPosition>({ x: 18, y: 92 });
   const [dragging, setDragging] = useState(false);
   const [captureText, setCaptureText] = useState('');
@@ -134,6 +150,13 @@ export default function CompanionOrb({ slug, loggedIn, brief, objects, actionCen
   useEffect(() => {
     setTeachModeState(getTeachMeMode(scope));
   }, [scope]);
+
+  useEffect(() => {
+    if (openSignal > 0) {
+      setView(openView);
+      setOpen(true);
+    }
+  }, [openSignal, openView]);
 
   useEffect(() => {
     const onResize = () => {
@@ -268,7 +291,7 @@ export default function CompanionOrb({ slug, loggedIn, brief, objects, actionCen
     if (!trimmed) return;
     recordCompanionEvent(scope, 'asked');
     setAskInput(trimmed);
-    setAskAnswer(answerAskSimplifi(trimmed, objects, actionCenter));
+    setAskAnswer(answerConversationalAsk(trimmed, objects, actionCenter));
   };
 
   const toggleTeachMode = () => {

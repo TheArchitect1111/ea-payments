@@ -39,7 +39,7 @@ export function buildExpirationAlerts(objects: SimplifiObject[]): ExpirationAler
         title: o.title,
         detail: `Active Save overdue — ${o.savePurpose ?? o.nextAction}. Due ${o.dueDate}.`,
         kind: 'overdue',
-        href: o.considerUrl ?? '/simplifi/capture',
+        href: `/simplifi/opportunity/${o.id}`,
         daysSinceCapture: age,
       });
       continue;
@@ -51,7 +51,7 @@ export function buildExpirationAlerts(objects: SimplifiObject[]): ExpirationAler
         title: o.nextAction,
         detail: `Due in ${dueIn} day${dueIn === 1 ? '' : 's'} · ${o.savePurpose ?? 'Active Save'}`,
         kind: 'due-soon',
-        href: o.considerUrl ?? '/simplifi/workspace',
+        href: `/simplifi/opportunity/${o.id}`,
         daysSinceCapture: age,
       });
       continue;
@@ -63,7 +63,7 @@ export function buildExpirationAlerts(objects: SimplifiObject[]): ExpirationAler
         title: o.title,
         detail: `Saved ${age} days ago as "${o.savePurpose}" — still interested?`,
         kind: 'stale',
-        href: o.considerUrl ?? '/simplifi/workspace',
+        href: `/simplifi/opportunity/${o.id}`,
         daysSinceCapture: age,
       });
     }

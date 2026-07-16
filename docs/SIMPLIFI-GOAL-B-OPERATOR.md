@@ -8,17 +8,17 @@ Product code for Pass 2–4 is on `master`.
 ### Option A — Browser + Add to Home Screen (recommended)
 
 1. On your phone open:  
-   **https://efficiencyarchitects.online/simplifi/capture**
+   **https://efficiencyarchitects.online/simplifi/workspace** (Today's Brief)
 2. **Sign in (for history):**  
    - https://efficiencyarchitects.online/portal/login  
    - Tap **Sign in with password instead**  
    - Email: `demo@efficiencyarchitects.online`  
    - Password: `DemoPulse2026!`  
-   - Then go back to `/simplifi/capture`  
+   - Then open `/simplifi/workspace`  
    **Or** use https://efficiencyarchitects.online/simplifi/login → enter the demo email → open the magic link from email **on the phone**.
-3. Paste a business URL (or upload a JPEG — not HEIC) → Capture.
+3. From Brief, tap **Capture** → paste a business URL (or upload a JPEG — not HEIC).
 4. **Install on phone:** Share → **Add to Home Screen**.  
-   That installs the Simplifi Capture PWA (standalone icon).
+   PWA `start_url` opens Today's Brief (standalone icon).
 
 ### Option B — Native app download
 
@@ -27,7 +27,7 @@ There is **no App Store / Play Store / TestFlight build published**.
 | Want | Do this |
 |------|---------|
 | Try native UI quickly | Install **Expo Go** → on a computer `cd mobile`, set `EXPO_PUBLIC_API_BASE_URL=https://efficiencyarchitects.online`, `npm install`, `npm start`, scan QR |
-| Real installable build | Follow `mobile/README.md` (`npm run build:testflight` / Android preview) with EAS + Apple/Google accounts |
+| Real installable build | Follow `mobile/NATIVE-SHIP.md` and `mobile/README.md` (`eas build` / TestFlight) with EAS + Apple/Google accounts |
 
 ---
 

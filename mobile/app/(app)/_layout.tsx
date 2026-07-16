@@ -32,9 +32,9 @@ export default function AppLayout() {
         tabBarStyle: { backgroundColor: colors.white, borderTopColor: colors.border },
       }}
     >
-      <Tabs.Screen name="home" options={{ title: 'Home', tabBarLabel: 'Home' }} />
+      <Tabs.Screen name="home" options={{ title: "Today's Brief", tabBarLabel: 'Brief' }} />
       <Tabs.Screen name="capture" options={{ title: 'Capture', tabBarLabel: 'Capture' }} />
-      <Tabs.Screen name="workspace" options={{ title: 'Workspace', tabBarLabel: 'Workspace' }} />
+      <Tabs.Screen name="workspace" options={{ title: 'Inbox', tabBarLabel: 'Inbox' }} />
       <Tabs.Screen name="settings" options={{ title: 'Settings', tabBarLabel: 'Settings' }} />
     </Tabs>
     </OfflineCaptureProvider>

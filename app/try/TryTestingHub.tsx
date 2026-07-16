@@ -13,8 +13,9 @@ type TestLink = {
 function buildTestLinks(slug: string): TestLink[] {
   const portal = `/portal/${slug}`;
   return [
-    { label: 'Simplifi Capture', href: '/simplifi/capture', note: 'Paste a URL or upload a photo' },
-    { label: 'Simplifi Workspace', href: '/simplifi/workspace', note: 'Standalone workspace view' },
+    { label: "Simplifi — Today's Brief", href: '/simplifi/workspace', note: 'What deserves attention now' },
+    { label: 'Quick Capture', href: '/simplifi/capture', note: 'Paste a URL or upload a photo' },
+    { label: 'Opportunity Inbox', href: '/simplifi/inbox', note: 'Everything captured, organized' },
     { label: 'Portal Simplifi', href: `${portal}/simplifi`, note: 'Same tools inside the client portal' },
     { label: 'Pulse', href: `${portal}/pulse`, note: 'Health scores and operating signals' },
     { label: 'Amplifi Hub', href: `${portal}/amplifi`, note: 'Growth narrative and social links' },
@@ -27,6 +28,7 @@ function buildTestLinks(slug: string): TestLink[] {
 }
 
 const GUEST_LINKS: TestLink[] = [
+  { label: "Open Today's Brief", href: '/simplifi/workspace', note: 'Home — what deserves attention' },
   { label: 'Try capture without login', href: '/simplifi/capture', note: 'Guest mode — limited save' },
   { label: 'Connect capture (demo)', href: '/connect/demo-client', note: 'Public QR landing — sign in once to manage kit' },
   { label: 'Connect capture (CPR live)', href: '/connect/cpr', note: 'Production CPR org — no login' },

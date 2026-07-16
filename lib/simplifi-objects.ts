@@ -130,7 +130,7 @@ export function buildDailyBrief(
       id: `x-${alert.objectId}`,
       title: alert.title,
       detail: alert.detail,
-      href: alert.href,
+      href: alert.href ?? `/simplifi/opportunity/${alert.objectId}`,
       kind: alert.kind,
     });
   }
@@ -141,7 +141,7 @@ export function buildDailyBrief(
       id: `m-${o.id}`,
       title: o.title,
       detail: 'Showing momentum — worth a focused next step.',
-      href: o.considerUrl ?? o.shareUrl,
+      href: `/simplifi/opportunity/${o.id}`,
       kind: 'momentum',
     });
   }
@@ -152,7 +152,7 @@ export function buildDailyBrief(
       id: `d-${o.id}`,
       title: o.nextAction,
       detail: `Target: ${o.dueDate}`,
-      href: o.considerUrl ?? '/capture',
+      href: `/simplifi/opportunity/${o.id}`,
       kind: 'deadline',
     });
   }
@@ -163,7 +163,7 @@ export function buildDailyBrief(
       id: `e-${explore.id}`,
       title: explore.title,
       detail: explore.whyThisMatters.slice(0, 120),
-      href: explore.considerUrl ?? '/capture',
+      href: `/simplifi/opportunity/${explore.id}`,
       kind: 'explore',
     });
   }
@@ -178,9 +178,9 @@ export function buildDailyBrief(
   const recommendedNext = first
     ? {
         label: first.nextAction,
-        href: first.considerUrl ?? first.shareUrl ?? '/capture',
+        href: `/simplifi/opportunity/${first.id}`,
       }
-    : { label: 'Capture something worth exploring', href: '/capture' };
+    : { label: 'Capture something worth exploring', href: '/simplifi/capture' };
 
   return {
     greeting: `Good morning${firstName ? `, ${firstName}` : ''}.`,

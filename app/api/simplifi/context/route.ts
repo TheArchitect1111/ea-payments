@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic';
 
 /** Orb context + optional session for mobile/PWA clients. */
 export async function GET(req: NextRequest) {
-  const pathname = req.nextUrl.searchParams.get('pathname')?.trim() || '/simplifi/capture';
+  const pathname = req.nextUrl.searchParams.get('pathname')?.trim() || '/simplifi/workspace';
   const orb = resolveOrbContext(pathname);
   const session = await requirePortalSessionFromRequest(req, { realm: 'simplifi' });
 
