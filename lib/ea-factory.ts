@@ -396,7 +396,7 @@ export const EA_FACTORY_PROTOCOLS: EAFactoryProtocol[] = [
     modifiedDate: '2026-07-04',
     approvedBy: 'EA Founder',
     approvalStatus: 'active',
-    futureNotes: 'Brand-feel color sync and automated review reminder email.',
+    futureNotes: 'Optional: richer brand-feel photography/voice mapping; reminder timezone personalization.',
     tags: ['ctp', 'consider', 'discovery', 'intake', 'magnifi', 'possibilities'],
     purpose:
       'Governs Consider The Possibilities™ — Magnifi share → guided discovery → CTP submission → workspace, studio, and collaborative review lifecycle.',
@@ -407,6 +407,8 @@ export const EA_FACTORY_PROTOCOLS: EAFactoryProtocol[] = [
       'workspace provisioning status',
       'design studio readiness',
       'review scheduling',
+      'brand-feel color sync',
+      'review reminder email',
       'Pulse ctp.submitted + ctp.intake.analyzed + ctp.workspace.* events',
       'post-submit intake agent orchestration',
       'workspace auto-provision on portal-required submissions',

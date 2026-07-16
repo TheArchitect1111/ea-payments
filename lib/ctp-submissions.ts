@@ -94,6 +94,8 @@ export type CtpSubmission = {
   executiveEmailDraft?: CtpExecutiveEmailDraft;
   /** ISO timestamp when the executive email was successfully sent. */
   executiveEmailSentAt?: string;
+  /** ISO timestamp when a collaborative review reminder email was sent. */
+  reviewReminderSentAt?: string;
   executiveScoring?: CtpExecutiveScore;
   intakeAnalysis?: CtpIntakeAnalysisRecord;
   /** PraisonAI workforce package — full executive intelligence output. */
@@ -123,6 +125,7 @@ export type CtpSubmissionUpdate = Partial<
     | 'productionPackage'
     | 'executiveEmailDraft'
     | 'executiveEmailSentAt'
+    | 'reviewReminderSentAt'
     | 'discoveryAnswers'
   >
 >;
@@ -173,6 +176,7 @@ function toAirtableFields(submission: CtpSubmission): Record<string, unknown> {
       productionPackage: submission.productionPackage,
       executiveEmailDraft: submission.executiveEmailDraft,
       executiveEmailSentAt: submission.executiveEmailSentAt,
+      reviewReminderSentAt: submission.reviewReminderSentAt,
       executiveScoring: submission.executiveScoring,
       workforcePackage: submission.workforcePackage,
     }),
@@ -198,6 +202,7 @@ function fromAirtableRecord(fields: Record<string, unknown>): CtpSubmission | nu
     productionPackage?: CtpProductionPackage;
     executiveEmailDraft?: CtpExecutiveEmailDraft;
     executiveEmailSentAt?: string;
+    reviewReminderSentAt?: string;
     executiveScoring?: CtpExecutiveScore;
     workforcePackage?: ExecutiveIntelligencePackage;
   } = {};
@@ -260,6 +265,7 @@ function fromAirtableRecord(fields: Record<string, unknown>): CtpSubmission | nu
     productionPackage: payload.productionPackage,
     executiveEmailDraft: payload.executiveEmailDraft,
     executiveEmailSentAt: payload.executiveEmailSentAt,
+    reviewReminderSentAt: payload.reviewReminderSentAt,
     executiveScoring: payload.executiveScoring,
     workforcePackage: payload.workforcePackage,
     intakeAnalysis,
