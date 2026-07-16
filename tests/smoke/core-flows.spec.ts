@@ -168,6 +168,14 @@ test('simplifi orb outcome flash wiring is present on capture session', async ({
   await expect(page.locator('.global-orb-btn')).toBeVisible();
 });
 
+test('simplifi chrome fade toggle lives in settings', async ({ page }) => {
+  await page.goto('/simplifi/settings');
+  await expect(page.getByRole('heading', { name: /^settings$/i })).toBeVisible();
+  const toggle = page.getByRole('switch', { name: /chrome fade/i });
+  await expect(toggle).toBeVisible();
+  await expect(toggle).toHaveAttribute('aria-checked', 'false');
+});
+
 test('app alias redirects to workspace', async ({ page }) => {
   await page.goto('/app');
   await expect(page).toHaveURL(/\/simplifi\/workspace/);

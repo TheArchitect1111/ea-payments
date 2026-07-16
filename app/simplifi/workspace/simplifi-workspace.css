@@ -44,6 +44,21 @@
   padding-bottom: 2px;
 }
 
+/* Chrome Fade (opt-in): compact header; primary links hidden in TSX */
+.sw-header--fade {
+  padding: 8px 16px;
+}
+
+.sw-header--fade .sw-brand {
+  font-size: 14px;
+  letter-spacing: 0.08em;
+}
+
+.sw-header--fade .sw-nav {
+  gap: 12px;
+  font-size: 12px;
+}
+
 .sw-orb-cta {
   margin-top: 12px;
   border: 1px solid #1b2b4d33;

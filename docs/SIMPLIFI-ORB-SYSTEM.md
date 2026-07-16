@@ -35,7 +35,8 @@ SimplifiProductShell
 | `app/simplifi/components/GlobalOrb.tsx` | Resting orb + panel + route navigation + session overlays + ambient opener |
 | `app/simplifi/components/session/SessionWorkspace.tsx` | Temporary inbox / opportunity / follow-ups / calendar / capture workspace over the Brief |
 | `app/simplifi/components/global-orb.css` | Navy / gold visuals, states, safe-area |
-| `app/simplifi/components/SimplifiProductShell.tsx` | Shell wrapper |
+| `app/simplifi/components/SimplifiProductShell.tsx` | Shell wrapper + Chrome Fade resolution |
+| `lib/simplifi/chrome-fade.ts` | Chrome Fade flag (cookie / env / localStorage) |
 | `app/simplifi/workspace/CompanionOrb.tsx` | Legacy companion (kept; not mounted on Brief) |
 
 ## States
@@ -116,6 +117,28 @@ display via `outcomeFlash` — they are **not** pushed into `deriveOrbSession`
 Wiring: `GlobalOrb.flashOutcome` → `SessionWorkspace.onOutcomeFlash` →
 `CaptureView` / `OpportunityActions` (optional prop; full opportunity page works without it).
 
+## Chrome Fade (Step 5)
+
+Opt-in compact navigation for denser users. **Default chrome is unchanged.**
+Brief remains home. Chat-first Orb is still legacy (`/simplifi/orb?chat=1`).
+
+| Layer | Value |
+|-------|-------|
+| Env | `NEXT_PUBLIC_SIMPLIFI_CHROME_FADE` |
+| Cookie / localStorage | `ea-simplifi-chrome-fade` |
+| API | `GET/POST /api/simplifi/chrome-fade` |
+| Toggle | Settings → SIMPLIFI Orb → Chrome Fade |
+
+When enabled:
+
+- Header uses `sw-header--fade` (tighter padding)
+- Brief / Capture / Inbox links hide
+- Brand (→ workspace), Settings, and Portal / Sign in stay
+- Orb Ask + session workspaces cover the hidden surfaces
+
+Helpers: `lib/simplifi/chrome-fade.ts`. `SimplifiProductShell` resolves the preference
+client-side and listens for toggle events.
+
 ## Verification
 
 ```bash
@@ -124,10 +147,9 @@ node scripts/test-simplifi-orb-route-intents-contract.mjs
 node scripts/test-simplifi-orb-session-workspace-contract.mjs
 node scripts/test-simplifi-orb-ambient-openers-contract.mjs
 node scripts/test-simplifi-orb-outcome-states-contract.mjs
+node scripts/test-simplifi-chrome-fade-contract.mjs
 ```
 
-Open `/simplifi/workspace` — Brief shows a grounded attention lead. Tap Orb —
-ambient opener appears above findings; **Review them** opens the inbox session.
-Ask “open capture”, save a note — Orb blooms `success`. On an opportunity quick
-view, **Build Intelligence** flashes `learning`; **Won** flashes `success`.
-Ask “show my inbox” — a session workspace opens in place; `Done` restores the Brief.
+Open `/simplifi/workspace` — full nav by default. Settings → enable Chrome Fade —
+Brief/Capture/Inbox links disappear; brand + Settings remain; Orb still opens inbox /
+capture sessions. Disable to restore full chrome.

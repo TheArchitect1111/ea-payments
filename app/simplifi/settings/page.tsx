@@ -2,7 +2,9 @@ import Link from 'next/link';
 import { cookies } from 'next/headers';
 import { EA_PORTAL_COOKIE, verifySession } from '@/lib/ea-portal-auth';
 import { loadOrbWorkspaceSlice } from '@/lib/orb';
+import { CHROME_FADE_COOKIE, isChromeFadeEnabled } from '@/lib/simplifi/chrome-fade';
 import SimplifiProductShell from '../components/SimplifiProductShell';
+import ChromeFadeToggle from './ChromeFadeToggle';
 import '../workspace/simplifi-workspace.css';
 import '../capture/simplifi-capture.css';
 
@@ -14,6 +16,9 @@ export default async function SimplifiSettingsPage() {
   const session = token ? await verifySession(token) : null;
   const slug = session?.slug ?? null;
   const slice = await loadOrbWorkspaceSlice(slug);
+  const chromeFade = isChromeFadeEnabled({
+    cookieValue: cookieStore.get(CHROME_FADE_COOKIE)?.value,
+  });
 
   return (
     <SimplifiProductShell
@@ -23,6 +28,7 @@ export default async function SimplifiSettingsPage() {
       brief={slice.brief}
       objects={slice.objects}
       actionCenter={slice.actionCenter}
+      chromeFade={chromeFade}
     >
       <main className="sw-main">
         <section className="sw-brief-intro">
@@ -37,7 +43,10 @@ export default async function SimplifiSettingsPage() {
             The Orb lives in the corner of every Simplifi screen — quiet intelligence over your Brief, not a
             chatbot home. Tap it for recommendations, Ask, and voice.
           </p>
-          <p className="sw-muted" style={{ marginTop: 8 }}>
+          <div style={{ marginTop: 12 }}>
+            <ChromeFadeToggle initialEnabled={chromeFade} />
+          </div>
+          <p className="sw-muted" style={{ marginTop: 12 }}>
             Experimental chat-first shell (legacy):{' '}
             <Link href="/simplifi/orb?chat=1">/simplifi/orb?chat=1</Link>
           </p>
