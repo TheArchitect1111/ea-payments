@@ -29,9 +29,9 @@ Phase 4 extends **prospect visibility** and **EA scheduling control** — assets
 
 ### Acceptance criteria
 
-- [ ] Portal CTP page shows logo/photo thumbnails when manifest exists
-- [ ] Empty manifest → section hidden
-- [ ] Asset links use `/api/ctp/assets/{id}`
+- [x] Portal CTP page shows logo/photo thumbnails when manifest exists
+- [x] Empty manifest → section hidden
+- [x] Asset links use `/api/ctp/assets/{id}`
 
 ---
 
@@ -48,9 +48,9 @@ Phase 4 extends **prospect visibility** and **EA scheduling control** — assets
 
 ### Acceptance criteria
 
-- [ ] Admin schedules review → `Review Scheduled At` + status `Review Scheduled`
-- [ ] Pulse emits `ctp.review.scheduled`
-- [ ] Portal timeline shows scheduled datetime
+- [x] Admin schedules review → `Review Scheduled At` + status `Review Scheduled`
+- [x] Pulse emits `ctp.review.scheduled`
+- [x] Portal timeline shows scheduled datetime
 
 ---
 
@@ -58,4 +58,4 @@ Phase 4 extends **prospect visibility** and **EA scheduling control** — assets
 
 | PR | Title |
 |----|-------|
-| #53 | `feat(ctp): portal asset gallery + review scheduling` |
+| — | `feat(ctp): portal asset gallery on Opportunity Dashboard` |
