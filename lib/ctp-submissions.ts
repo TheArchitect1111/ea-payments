@@ -424,8 +424,10 @@ export async function getCtpSubmissionForPortal(input: {
       sortField: 'Submitted At',
       sortDirection: 'desc',
     });
-    const row = fromAirtableRecord(records[0]?.fields ?? {});
-    if (row) memory.set(row.id, row);
+    if (!records[0]) return null;
+    const row = fromAirtableRecord(records[0].fields ?? {});
+    if (!row) return null;
+    memory.set(row.id, row);
     return row;
   } catch (err) {
     console.error('[ctp-submissions] portal lookup failed:', err);

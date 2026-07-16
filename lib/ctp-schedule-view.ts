@@ -1,11 +1,9 @@
 /**
- * Client-facing CTP scheduling view — review appointment + strategy session CTA.
+ * Client-facing CTP scheduling — Opportunity Review + Calendly CTA.
  */
+import { ctpCalendlyUrl } from '@/lib/ctp-calendly';
 import { ctpClientTypeLabel } from '@/lib/ctp-client-type';
 import type { CtpSubmission } from '@/lib/ctp-submissions';
-
-const DEFAULT_CALENDLY =
-  process.env.CALENDLY_URL ?? 'https://calendly.com/freedom-efficiencyarchitects/30min';
 
 export type CtpScheduleView = {
   businessName: string;
@@ -29,21 +27,24 @@ export function buildCtpScheduleView(submission: CtpSubmission): CtpScheduleView
       })
     : undefined;
 
-  let headline = 'Schedule your strategy session';
+  let headline = 'Schedule your Opportunity Review';
   let summary =
-    'Book time with the EA team to review your Executive Snapshot, recommendations, and production package.';
+    'Book time to walk through your Opportunity Dashboard — findings, recommendations, and investment expectations prepared specifically for your organization.';
 
   if (completed) {
-    headline = 'Reveal complete — keep the momentum';
+    headline = 'Keep the momentum';
     summary =
-      'Your transformation is unlocked. Book a follow-up strategy session anytime you want a guided next move.';
+      'Your transformation is unlocked. Book a follow-up Opportunity Review anytime you want a guided next move.';
   } else if (reviewLabel) {
-    headline = 'Your review is on the calendar';
-    summary = `We have you scheduled for ${reviewLabel}. You can also book an additional strategy session if you need another slot.`;
-  } else if (submission.status === 'Ready For Review' || submission.studioStatus === 'Ready For Review') {
-    headline = 'Ready for executive review';
+    headline = 'Your Opportunity Review is on the calendar';
+    summary = `We have you scheduled for ${reviewLabel}. You can also book an additional session if you need another slot.`;
+  } else if (
+    submission.status === 'Ready For Review' ||
+    submission.studioStatus === 'Ready For Review'
+  ) {
+    headline = 'Ready for your Opportunity Review';
     summary =
-      'Your package is ready. Book a strategy session so we can walk the reveal path together, or wait for EA to confirm a review time.';
+      'Your analysis package is ready. Schedule an Opportunity Review so we can walk through recommendations together.';
   }
 
   return {
@@ -56,7 +57,7 @@ export function buildCtpScheduleView(submission: CtpSubmission): CtpScheduleView
     reviewLabel,
     headline,
     summary,
-    calendlyUrl: DEFAULT_CALENDLY,
+    calendlyUrl: ctpCalendlyUrl(),
     completed,
   };
 }

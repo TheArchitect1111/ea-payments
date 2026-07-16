@@ -1,7 +1,8 @@
 /**
- * Send / defer CTP executive email with optional vanity portal CTA.
+ * Send CTP welcome email with branded portal CTA.
  */
-import { primaryPortalHost, publicPortalUrl } from '@/lib/ctp-portal-host';
+import { publicPortalUrl } from '@/lib/ctp-portal-host';
+import { opportunityDashboardPublicUrl, opportunityEmailPathSuffix } from '@/lib/ctp-opportunity-routes';
 import {
   getCtpSubmissionById,
   updateCtpSubmission,
@@ -9,19 +10,17 @@ import {
   type CtpSubmission,
 } from '@/lib/ctp-submissions';
 import { sendCtpExecutiveEmail, type CtpExecutiveEmailData } from '@/lib/email';
-import { ctpWelcomeEmailTrack, ctpWelcomeStudioPath } from '@/lib/ctp-welcome-email';
+import {
+  opportunityEmailHealthRows,
+  opportunityEmailReadiness,
+  opportunityEmailSummary,
+} from '@/lib/ctp-opportunity-view';
 
 export type { CtpExecutiveEmailDraft };
 
-/** Prefer vanity host in CTP welcome emails (matches approved copy). */
-function ctpEmailPortalUrl(slug: string, pathSuffix: string): string {
-  if (process.env.EA_PORTAL_EMAIL_HUB_URLS === '1') {
-    return publicPortalUrl(slug, pathSuffix);
-  }
-  const cleanSlug = slug.trim().replace(/^\/+|\/+$/g, '').toLowerCase();
-  const suffix = pathSuffix ? `/${pathSuffix.replace(/^\/+|\/+$/g, '')}` : '';
-  const host = primaryPortalHost();
-  return `https://${host}/${cleanSlug}${suffix}`;
+/** Hub portal URLs for email CTAs — Opportunity Dashboard entry. */
+function ctpEmailPortalUrl(slug: string, pathSuffix?: string): string {
+  return publicPortalUrl(slug, pathSuffix ?? opportunityEmailPathSuffix());
 }
 
 export function buildCtpExecutiveEmailData(
@@ -62,11 +61,13 @@ export function buildCtpExecutiveEmailData(
     return null;
   }
 
-  const track = ctpWelcomeEmailTrack(clientType);
-  const studioPath = ctpWelcomeStudioPath(track);
   const resolvedPortalUrl =
     portalUrl ||
-    (submission.portalSlug ? ctpEmailPortalUrl(submission.portalSlug, studioPath) : undefined);
+    (submission.portalSlug
+      ? opportunityDashboardPublicUrl(submission.portalSlug)
+      : undefined);
+
+  const readinessOverride = opportunityEmailReadiness(submission);
 
   return {
     email: submission.email,
@@ -74,7 +75,7 @@ export function buildCtpExecutiveEmailData(
     businessName: submission.businessName,
     proposalId: submission.proposalId,
     clientType,
-    capacityScore,
+    capacityScore: readinessOverride ?? capacityScore,
     scoreBand,
     primaryConstraint,
     weeklyTimeRecovery,
@@ -90,6 +91,8 @@ export function buildCtpExecutiveEmailData(
     operationalChallenges: draft?.operationalChallenges,
     digitalPresenceAudit: submission.digitalPresenceAudit,
     portalUrl: resolvedPortalUrl,
+    opportunitySummary: opportunityEmailSummary(submission),
+    categoryScores: opportunityEmailHealthRows(submission),
   };
 }
 

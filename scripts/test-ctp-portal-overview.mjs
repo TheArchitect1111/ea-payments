@@ -1,5 +1,5 @@
 /**
- * CTP portal Overview hub wiring checks.
+ * CTP Opportunity Dashboard landing checks (replaces CRM overview hub).
  * Run: node scripts/test-ctp-portal-overview.mjs
  */
 import { existsSync, readFileSync } from 'node:fs';
@@ -14,37 +14,44 @@ function assert(condition, message) {
   if (!condition) failures.push(message);
 }
 
-const viewPath = join(root, 'lib/ctp-overview-view.ts');
-const overviewPath = join(root, 'app/portal/[slug]/ctp/page.tsx');
+const pagePath = join(root, 'app/portal/[slug]/ctp/page.tsx');
+const viewPath = join(root, 'lib/ctp-opportunity-view.ts');
+const dashPath = join(root, 'app/portal/components/OpportunityDashboard.tsx');
+const reviewPath = join(root, 'app/portal/[slug]/ctp/review/page.tsx');
+const detailPath = join(root, 'app/portal/[slug]/ctp/opportunities/[opportunityId]/page.tsx');
 const progressPath = join(root, 'app/portal/[slug]/ctp/progress/page.tsx');
 
 for (const [path, label] of [
-  [viewPath, 'ctp-overview-view.ts'],
-  [overviewPath, 'CTP overview page'],
-  [progressPath, 'CTP progress page'],
+  [pagePath, 'ctp page'],
+  [viewPath, 'opportunity view'],
+  [dashPath, 'OpportunityDashboard'],
+  [reviewPath, 'review page'],
+  [detailPath, 'detail page'],
+  [progressPath, 'progress / Design Studio'],
 ]) {
   assert(existsSync(path), `Missing ${label}`);
 }
 
+const page = readFileSync(pagePath, 'utf8');
 const view = readFileSync(viewPath, 'utf8');
-const overview = readFileSync(overviewPath, 'utf8');
-const progress = readFileSync(progressPath, 'utf8');
+const dash = readFileSync(dashPath, 'utf8');
+const review = readFileSync(reviewPath, 'utf8');
 
-assert(view.includes('buildCtpOverviewView'), 'Must export overview builder');
-assert(view.includes('/ctp/progress'), 'Overview cards must link to progress');
-assert(view.includes('/ctp/bi'), 'Overview must include BI card');
-assert(view.includes('/ctp/support'), 'Overview must include support card');
-assert(view.includes('socialScore'), 'Overview must expose socialScore');
-assert(view.includes('gbpScore'), 'Overview must expose gbpScore');
-assert(overview.includes('buildCtpOverviewView'), 'Root CTP page must be overview');
-assert(overview.includes('Open live progress'), 'Overview must CTA to progress');
-assert(overview.includes('socialScore'), 'Overview page must surface social score');
-assert(overview.includes('gbpScore'), 'Overview page must surface GBP score');
-assert(progress.includes('PortalCtpDesignStudioForm'), 'Progress must keep Design Studio');
-assert(progress.includes('Your live project progress'), 'Progress page title must remain');
-assert(progress.includes(`href={\`/portal/\${slug}/ctp\`}`), 'Progress must link back to overview');
-assert(progress.includes('socialScore'), 'Progress page must surface social score');
-assert(progress.includes('gbpScore'), 'Progress page must surface GBP score');
+assert(page.includes('OpportunityDashboard'), 'Landing must render Opportunity Dashboard');
+assert(page.includes('buildCtpOpportunityDashboardView'), 'Landing must use opportunity view');
+assert(!page.includes('buildCtpOverviewView'), 'Landing must not use CRM overview cards');
+assert(view.includes('Executive Snapshot') || dash.includes('Executive Snapshot'), 'Must show executive snapshot');
+assert(dash.includes('Business Health') || view.includes('healthAreas'), 'Must include business health');
+assert(dash.includes('Project Preview'), 'Must include project preview');
+assert(dash.includes('Estimated Investment'), 'Must include investment section');
+assert(
+  review.includes('Schedule My Opportunity Review') ||
+    review.includes('ctaLabel') ||
+    view.includes('Schedule My Opportunity Review'),
+  'Review page CTA required',
+);
+assert(review.includes('calendlyUrl') || review.includes('CALENDLY') || view.includes('calendlyUrl'), 'Calendly must be wired');
+assert(view.includes('designStudioHref'), 'Design Studio remains secondary link');
 
 if (failures.length) {
   console.error('CTP portal overview checks FAILED:');

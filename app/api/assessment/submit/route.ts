@@ -19,7 +19,7 @@ import { sendCtpExecutiveEmailForSubmission } from '@/lib/ctp-executive-email-se
 import { ctpAssetStagingScope, finalizeCtpAssetManifest, parseAssetUploads } from '@/lib/ctp-asset-store';
 import { resolveCtpOrganizationId } from '@/lib/ctp-studio-bridge';
 import { scheduleCtpIntakeAnalysis } from '@/lib/ctp-intake-orchestrator';
-import { scheduleCtpWorkspaceProvision } from '@/lib/ctp-workspace-provision';
+import { runCtpWorkspaceProvision } from '@/lib/ctp-workspace-provision';
 import { scheduleCtpStudioCampaign } from '@/lib/ctp-studio-bridge';
 import { scheduleCtpWebsiteProvision } from '@/lib/ctp-website-provision';
 import {
@@ -323,7 +323,6 @@ export async function POST(req: NextRequest) {
     let recommendations: unknown;
     let digitalPresenceAudit: DigitalPresenceAudit | undefined;
     let ctpSubmissionId: string | undefined;
-    let deferExecutiveEmail = false;
 
     if (isCtpFlow) {
       if (input.discoveryAnswers) {
@@ -518,8 +517,13 @@ export async function POST(req: NextRequest) {
           });
 
           if (ctpResult.submission.workspaceStatus === 'Pending') {
-            deferExecutiveEmail = true;
-            scheduleCtpWorkspaceProvision(ctpResult.submission.id);
+            // Await provision so the welcome email CTA has a branded portal URL
+            // (not bare /portal/login → Simplifi hub).
+            try {
+              await runCtpWorkspaceProvision(ctpResult.submission.id);
+            } catch (err) {
+              console.error('[assessment/submit] CTP workspace provision failed:', err);
+            }
           } else {
             scheduleCtpStudioCampaign(ctpResult.submission.id);
             // Website-only tracks skip portal Pending — still auto-build the site.
@@ -576,8 +580,8 @@ export async function POST(req: NextRequest) {
             }
           }
 
-          // Always send the CTP welcome immediately so launch submissions are never silent
-          // if workspace provisioning is slow or fails. Provision may upgrade the portal URL later.
+          // Await provision above when portal is required so the CTA has a branded URL.
+          // Always call send here too — idempotent if provision already sent; covers slow/failed provision.
           await sendCtpExecutiveEmailForSubmission(ctpSubmissionId);
         } else if (!isCtpFlow) {
           await sendAssessmentConfirmationEmail({
