@@ -134,12 +134,21 @@ test('simplifi workspace is reachable', async ({ page }) => {
   await expect(page).toHaveURL(/\/simplifi\/capture/);
 });
 
-test('simplifi orb ask opens inbox route', async ({ page }) => {
+test('simplifi orb ask opens inbox session workspace in place', async ({ page }) => {
   await page.goto('/simplifi/workspace');
   await page.getByRole('button', { name: /SIMPLIFI Orb/i }).click();
   await page.getByRole('textbox', { name: /Ask Simplifi/i }).fill('show my inbox');
   await page.getByRole('button', { name: /^ask$/i }).click();
-  await expect(page).toHaveURL(/\/simplifi\/inbox/);
+
+  // Inbox is now a temporary session workspace over the Brief, not a route change.
+  await expect(page).toHaveURL(/\/simplifi\/workspace/);
+  const session = page.getByRole('dialog', { name: /inbox workspace/i });
+  await expect(session).toBeVisible();
+
+  // Dismiss returns to the Brief underneath.
+  await page.getByRole('button', { name: /^done$/i }).click();
+  await expect(session).toBeHidden();
+  await expect(page.getByRole('heading', { name: /what deserves your attention/i })).toBeVisible();
 });
 
 test('app alias redirects to workspace', async ({ page }) => {

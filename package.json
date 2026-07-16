@@ -13,7 +13,7 @@
     "audit:tenant-data": "node scripts/audit-tenant-data-readiness.mjs",
     "test:tenant-data-audit": "node scripts/test-tenant-data-audit.mjs",
     "test:smoke": "playwright test --config=playwright.smoke.config.ts",
-    "test:simplifi-hardening": "node scripts/test-simplifi-orb-system-contract.mjs && node scripts/test-orb-os-preview-contract.mjs && node scripts/test-glitchtip-monitoring-contract.mjs && node scripts/test-simplifi-orb-route-intents-contract.mjs",
+    "test:simplifi-hardening": "node scripts/test-simplifi-orb-system-contract.mjs && node scripts/test-orb-os-preview-contract.mjs && node scripts/test-glitchtip-monitoring-contract.mjs && node scripts/test-simplifi-orb-route-intents-contract.mjs && node scripts/test-simplifi-orb-session-workspace-contract.mjs",
     "test:ctp": "node scripts/run-ctp-tests.mjs",
     "test:ctp:spine": "node scripts/run-ctp-tests.mjs --spine",
     "verify:deploy": "node scripts/ensure-production-build.mjs && node scripts/test-portal-nav-resolver.mjs && node scripts/test-experience-registry.mjs && node scripts/test-capability-framework.mjs && node scripts/test-website-portal-starter.mjs && npm run test:ctp:spine && npm run test:smoke",
