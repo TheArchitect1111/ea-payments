@@ -66,6 +66,12 @@ Research Complete → Website Review Complete → Proposal Draft Ready → QA Pa
 
 `praison.workforce.started`, `praison.agent.complete`, `praison.qa.passed`, `praison.qa.failed`, `praison.package.ready`
 
+## Make.com handoff
+
+After QA passes, ea-payments POSTs to `PRAISON_PACKAGE_WEBHOOK_URL` (or `CTP_INTELLIGENCE_WEBHOOK_URL`).
+
+See **`docs/MAKE-PRAISON-CTP.md`** for scenario setup. Health surface: `/api/health/launch` → `checks.ctp.praisonPackageWebhook`.
+
 ## Extension
 
 New agents register in `lib/praison-ai/workforce-registry.ts` without changing the orchestrator framework.

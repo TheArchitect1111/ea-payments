@@ -82,6 +82,7 @@ export type PulseEventType =
   | 'open.design.concept.ready'
   | 'open.design.review.awaiting'
   | 'open.design.handoff.cursor'
+  | 'open.design.deploy.preview'
   | 'guide.escalated'
   | 'praison.workforce.started'
   | 'praison.agent.complete'

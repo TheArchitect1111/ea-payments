@@ -696,6 +696,44 @@ export async function runLaunchCommandCenter(options?: {
           : `Missing: ${secretIssues.join(', ')}`,
     }),
     item({
+      id: 'praison_make_webhook',
+      section: 'infrastructure',
+      category: 'CTP Intelligence',
+      name: 'PraisonAI → Make package webhook',
+      automation: 'partially_automated',
+      status:
+        process.env.PRAISON_PACKAGE_WEBHOOK_URL?.trim() ||
+        process.env.CTP_INTELLIGENCE_WEBHOOK_URL?.trim()
+          ? 'complete'
+          : 'needs_human_action',
+      maxScore: 0,
+      score: 0,
+      message:
+        process.env.PRAISON_PACKAGE_WEBHOOK_URL?.trim() ||
+        process.env.CTP_INTELLIGENCE_WEBHOOK_URL?.trim()
+          ? 'Praison package webhook configured.'
+          : 'Optional — Make scenario for praison.package.ready',
+      fix: 'docs/MAKE-PRAISON-CTP.md → PRAISON_PACKAGE_WEBHOOK_URL on Vercel',
+    }),
+    item({
+      id: 'open_design_github',
+      section: 'infrastructure',
+      category: 'Open Design',
+      name: 'Open Design → GitHub handoff',
+      automation: 'partially_automated',
+      status:
+        process.env.GITHUB_TOKEN?.trim() || process.env.OPEN_DESIGN_GITHUB_TOKEN?.trim()
+          ? 'complete'
+          : 'needs_human_action',
+      maxScore: 0,
+      score: 0,
+      message:
+        process.env.GITHUB_TOKEN?.trim() || process.env.OPEN_DESIGN_GITHUB_TOKEN?.trim()
+          ? 'GitHub token ready for Open Design PRs.'
+          : 'Optional — enables Cursor handoff PRs from Open Design',
+      fix: 'Set GITHUB_TOKEN on Vercel — docs/OPEN-DESIGN-ARCHITECTURE.md',
+    }),
+    item({
       id: 'sentry',
       section: 'security',
       category: 'Sentry',

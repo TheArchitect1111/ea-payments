@@ -49,6 +49,12 @@ assert(qa.includes('passed'), 'QA agent must validate outputs');
 const makeBridge = readFileSync(join(root, 'lib/praison-ai/make-bridge.ts'), 'utf8');
 assert(makeBridge.includes('praison.package.ready'), 'Make bridge must emit praison.package.ready');
 
+const makeDoc = join(root, 'docs/MAKE-PRAISON-CTP.md');
+assert(existsSync(makeDoc), 'missing docs/MAKE-PRAISON-CTP.md');
+
+const health = readFileSync(join(root, 'app/api/health/launch/route.ts'), 'utf8');
+assert(health.includes('praisonPackageWebhook'), 'launch health must surface Praison Make webhook');
+
 const intake = readFileSync(join(root, 'lib/ctp-intake-orchestrator.ts'), 'utf8');
 assert(intake.includes('schedulePraisonWorkforce'), 'CTP intake must schedule Praison workforce');
 

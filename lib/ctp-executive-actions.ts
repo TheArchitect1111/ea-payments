@@ -15,12 +15,19 @@ import { sendCtpExecutiveEmailForSubmission } from '@/lib/ctp-executive-email-se
 import { publicPortalUrl } from '@/lib/ctp-portal-host';
 import { runCtpProduction } from '@/lib/ctp-production-run';
 import { runCtpWorkspaceProvision } from '@/lib/ctp-workspace-provision';
+import {
+  executiveInputFromCtpSubmission,
+  generateCreativeExperienceBrief,
+  runOpenDesignImplementationHandoff,
+} from '@/lib/open-design';
+import { resolveCtpOrganizationId } from '@/lib/ctp-studio-bridge';
 
 export type CtpExecutiveAction =
   | 'ready_for_review'
   | 'approve_reveal'
   | 'run_production'
   | 'run_digital_audit'
+  | 'run_open_design_handoff'
   | 'resend_executive_email'
   | 'reprovision_workspace';
 
@@ -47,7 +54,13 @@ function deliverablesFor(submission: CtpSubmission): string[] {
 export async function runCtpExecutiveAction(
   submissionId: string,
   action: CtpExecutiveAction,
-): Promise<{ ok: boolean; submission?: CtpSubmission; revealUrl?: string; error?: string }> {
+): Promise<{
+  ok: boolean;
+  submission?: CtpSubmission;
+  revealUrl?: string;
+  handoffUrl?: string;
+  error?: string;
+}> {
   const submission = await getCtpSubmissionById(submissionId);
   if (!submission) {
     return { ok: false, error: 'CTP submission not found.' };
@@ -158,6 +171,31 @@ export async function runCtpExecutiveAction(
       return { ok: false, error: 'Production saved but submission reload failed.' };
     }
     return { ok: true, submission: refreshed };
+  }
+
+  if (action === 'run_open_design_handoff') {
+    const organizationId =
+      (await resolveCtpOrganizationId(submission)) ??
+      submission.portalSlug ??
+      submission.considerSlug ??
+      submission.id;
+    const input = executiveInputFromCtpSubmission(submission, organizationId);
+    const brief = generateCreativeExperienceBrief(input, {
+      submissionId: submission.id,
+      goalId: 'custom',
+    });
+    const result = await runOpenDesignImplementationHandoff(brief, {
+      tenantId: submission.portalSlug ?? submission.considerSlug,
+    });
+    if (!result.ok) {
+      return { ok: false, error: result.error ?? 'Open Design handoff failed.' };
+    }
+    const refreshed = await getCtpSubmissionById(submissionId);
+    return {
+      ok: true,
+      submission: refreshed ?? submission,
+      handoffUrl: result.pullRequestUrl,
+    };
   }
 
   if (action === 'run_digital_audit') {

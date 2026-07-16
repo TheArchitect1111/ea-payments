@@ -56,6 +56,26 @@ Every design request follows `lib/open-design/pipeline.ts`:
 | 5 | Executive Review | Mission Control | Awaiting executive approval |
 | 6 | Implementation | Cursor → GitHub → Vercel | Production deploy |
 
+### Phase 6 — Implementation automation (`lib/open-design/implementation-runner.ts`)
+
+| Mode | When | Behavior |
+|------|------|----------|
+| **GitHub PR** | `GITHUB_TOKEN` or `OPEN_DESIGN_GITHUB_TOKEN` set | Creates branch + PR with handoff markdown/JSON under `docs/open-design-handoffs/` |
+| **Package only** | No GitHub token | Emits Pulse + returns Cursor package for manual handoff |
+| **Vercel preview hook** | `OPEN_DESIGN_VERCEL_DEPLOY_HOOK_URL` set | Fires deploy hook after PR (preview only — never auto-promotes production) |
+
+Admin trigger: CTP desk → **Open Design → GitHub** (`run_open_design_handoff`).
+
+Env (optional):
+
+| Variable | Purpose |
+|----------|---------|
+| `GITHUB_TOKEN` / `OPEN_DESIGN_GITHUB_TOKEN` | Create handoff PRs |
+| `OPEN_DESIGN_GITHUB_OWNER` | Default `TheArchitect1111` |
+| `OPEN_DESIGN_GITHUB_REPO` | Default `ea-payments` |
+| `OPEN_DESIGN_GITHUB_BASE` | Default `master` |
+| `OPEN_DESIGN_VERCEL_DEPLOY_HOOK_URL` | Preview deploy hook |
+
 ### Phase 2 — Story gate (non-negotiable)
 
 If a one-sentence story cannot be written, **do not design**.

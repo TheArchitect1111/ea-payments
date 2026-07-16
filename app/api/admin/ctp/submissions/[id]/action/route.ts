@@ -15,6 +15,7 @@ const ACTIONS = new Set<CtpExecutiveAction>([
   'approve_reveal',
   'run_production',
   'run_digital_audit',
+  'run_open_design_handoff',
   'resend_executive_email',
   'reprovision_workspace',
 ]);
@@ -42,7 +43,7 @@ export async function POST(req: NextRequest, context: RouteContext) {
       {
         ok: false,
         error:
-          'action must be ready_for_review, approve_reveal, run_production, run_digital_audit, resend_executive_email, or reprovision_workspace.',
+          'action must be ready_for_review, approve_reveal, run_production, run_digital_audit, run_open_design_handoff, resend_executive_email, or reprovision_workspace.',
       },
       { status: 400 },
     );
@@ -60,6 +61,7 @@ export async function POST(req: NextRequest, context: RouteContext) {
     ok: true,
     action,
     revealUrl: result.revealUrl,
+    handoffUrl: result.handoffUrl,
     submission: buildCtpAdminSubmissionView(result.submission),
   });
 }
