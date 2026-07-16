@@ -4,8 +4,16 @@
  */
 import type { AttentionItem } from '@/lib/pulse-attention';
 
-export const SIMPLIFI_APP_URL =
-  process.env.SIMPLIFI_APP_URL?.replace(/\/$/, '') || 'https://app.simplifi.ai';
+/** Preferred branded host once DNS points at ea-payments. */
+export const SIMPLIFI_BRAND_URL =
+  process.env.NEXT_PUBLIC_SIMPLIFI_APP_URL?.replace(/\/$/, '') ||
+  process.env.SIMPLIFI_APP_URL?.replace(/\/$/, '') ||
+  'https://simplifi.ai';
+
+/** Working production host for testers until branded DNS is correct. */
+export const SIMPLIFI_TESTER_URL = 'https://efficiencyarchitects.online';
+
+export const SIMPLIFI_APP_ALIAS_URL = 'https://app.simplifi.ai';
 
 export type SimplifiPass1Check = {
   id: 'dns_simplifi_app' | 'sentry' | 'uptime';
@@ -14,36 +22,78 @@ export type SimplifiPass1Check = {
   fix: string;
 };
 
-export async function probeSimplifiAppDns(): Promise<{
+function looksLikeSimplifiApp(html: string): boolean {
+  const lower = html.toLowerCase();
+  if (lower.includes('/lander') && html.length < 400) return false;
+  return (
+    lower.includes('simplifi') ||
+    lower.includes('efficiency architects') ||
+    lower.includes('capture') ||
+    lower.includes('manifest-simplifi')
+  );
+}
+
+async function probeSimplifiHost(url: string): Promise<{
   ok: boolean;
   status: number;
   message: string;
 }> {
   try {
-    const res = await fetch(`${SIMPLIFI_APP_URL}/`, {
+    const res = await fetch(`${url.replace(/\/$/, '')}/simplifi/capture`, {
       method: 'GET',
       redirect: 'follow',
-      signal: AbortSignal.timeout(10000),
+      signal: AbortSignal.timeout(12000),
     });
-    if (res.status > 0 && res.status < 500) {
+    const html = await res.text();
+    if (res.ok && looksLikeSimplifiApp(html)) {
       return {
         ok: true,
         status: res.status,
-        message: `${SIMPLIFI_APP_URL} responds (HTTP ${res.status}).`,
+        message: `${url} serves Simplifi capture (${res.status}).`,
+      };
+    }
+    if (res.ok) {
+      return {
+        ok: false,
+        status: res.status,
+        message: `${url} responds but does not serve Simplifi capture (park/lander or wrong project). Point DNS A/CNAME to Vercel ea-payments.`,
       };
     }
     return {
       ok: false,
       status: res.status,
-      message: `${SIMPLIFI_APP_URL} returned HTTP ${res.status}.`,
+      message: `${url}/simplifi/capture returned HTTP ${res.status}.`,
     };
   } catch (err) {
     return {
       ok: false,
       status: 0,
-      message: `${SIMPLIFI_APP_URL} does not resolve or is unreachable (${err instanceof Error ? err.message : 'error'}).`,
+      message: `${url} unreachable (${err instanceof Error ? err.message : 'error'}).`,
     };
   }
+}
+
+/** Prefer branded host; accept tester host only as operational fallback messaging (not Pass 1 complete). */
+export async function probeSimplifiAppDns(): Promise<{
+  ok: boolean;
+  status: number;
+  message: string;
+  url: string;
+}> {
+  const brand = await probeSimplifiHost(SIMPLIFI_BRAND_URL);
+  if (brand.ok) {
+    return { ...brand, url: SIMPLIFI_BRAND_URL };
+  }
+  const alias = await probeSimplifiHost(SIMPLIFI_APP_ALIAS_URL);
+  if (alias.ok) {
+    return { ...alias, url: SIMPLIFI_APP_ALIAS_URL };
+  }
+  return {
+    ok: false,
+    status: brand.status,
+    url: SIMPLIFI_BRAND_URL,
+    message: `${brand.message} Testers: use ${SIMPLIFI_TESTER_URL}/simplifi/capture until DNS is fixed.`,
+  };
 }
 
 export function sentryConfigured(): boolean {
@@ -62,9 +112,7 @@ export async function getSimplifiPass1Checks(): Promise<SimplifiPass1Check[]> {
     {
       id: 'dns_simplifi_app',
       ok: dns.ok,
-      message: dns.ok
-        ? dns.message
-        : `${dns.message} Add domain in Vercel + CNAME app → cname.vercel-dns.com.`,
+      message: dns.message,
       fix: 'docs/SIMPLIFI-GOAL-B-OPERATOR.md#pass-1--infrastructure',
     },
     {
@@ -96,7 +144,7 @@ export async function buildSimplifiPass1AttentionItems(): Promise<AttentionItem[
         return {
           id: 'ops-simplifi-dns',
           product: 'Simplifi',
-          title: 'Attach app.simplifi.ai (Pass 1)',
+          title: 'Point simplifi.ai DNS at ea-payments (Pass 1)',
           detail: check.message,
           priority: 'high' as const,
           href: '/launch',

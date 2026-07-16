@@ -7,6 +7,7 @@
  */
 const BASE = (process.argv[2] || 'https://ea-payments.vercel.app').replace(/\/$/, '');
 const SIMPLIFI_APP = process.env.SIMPLIFI_APP_URL || 'https://app.simplifi.ai';
+const SIMPLIFI_BRAND = process.env.SIMPLIFI_BRAND_URL || 'https://simplifi.ai';
 const EMAIL = process.env.DEMO_CLIENT_EMAIL || 'demo@efficiencyarchitects.online';
 const PASSWORD = process.env.DEMO_CLIENT_PASSWORD || 'DemoPulse2026!';
 
@@ -192,27 +193,48 @@ async function main() {
     }
   }
 
-  // 6. app.simplifi.ai DNS / SSL / redirects
+  // 6. Branded Simplifi host — must serve real capture (not /lander stub)
   let simplifiAppDns = false;
   try {
+    const brandCapture = await fetch(`${SIMPLIFI_BRAND}/simplifi/capture`, {
+      redirect: 'follow',
+      signal: AbortSignal.timeout(12000),
+    });
+    const brandHtml = await brandCapture.text();
+    const brandOk =
+      brandCapture.ok &&
+      brandHtml.length > 400 &&
+      !brandHtml.includes('/lander') &&
+      /simplifi|capture|efficiency/i.test(brandHtml);
+    record('simplifi-brand-host', brandOk, {
+      status: brandCapture.status,
+      detail: brandOk ? SIMPLIFI_BRAND : 'serves lander/stub — fix GoDaddy DNS A → 76.76.21.21',
+    });
+
     const appRoot = await fetchStatus(`${SIMPLIFI_APP}/`);
-    simplifiAppDns = appRoot.status > 0;
-    record('app-simplifi-dns', simplifiAppDns, { status: appRoot.status, error: appRoot.error });
+    simplifiAppDns = appRoot.status > 0 && appRoot.status < 500;
+    record('app-simplifi-dns', simplifiAppDns, { status: appRoot.status, error: appRoot.error, url: SIMPLIFI_APP });
     if (simplifiAppDns) {
       const appCapture = await fetchStatus(`${SIMPLIFI_APP}/capture`);
-      record('app-simplifi-capture-redirect', appCapture.status === 307 || appCapture.status === 308, {
+      record('app-simplifi-capture', appCapture.status === 200 || appCapture.status === 307 || appCapture.status === 308, {
         status: appCapture.status,
         location: appCapture.res?.headers?.get('location'),
       });
       record('app-simplifi-ssl', SIMPLIFI_APP.startsWith('https://'), { detail: SIMPLIFI_APP });
     }
   } catch (err) {
+    record('simplifi-brand-host', false, { error: String(err.message || err) });
     record('app-simplifi-dns', false, { error: String(err.message || err) });
   }
 
   const failed = results.filter((r) => !r.ok);
-  // DNS is operator-owned — report separately so Goal B product checks can still pass.
-  const productFailed = failed.filter((f) => f.step !== 'app-simplifi-dns' && !String(f.step).startsWith('app-simplifi-'));
+  // Branded DNS is operator-owned — report separately so product checks can still pass on efficiencyarchitects.online.
+  const productFailed = failed.filter(
+    (f) =>
+      f.step !== 'app-simplifi-dns' &&
+      f.step !== 'simplifi-brand-host' &&
+      !String(f.step).startsWith('app-simplifi-'),
+  );
   const pass = productFailed.length === 0;
 
   console.log('\n--- SUMMARY ---');
