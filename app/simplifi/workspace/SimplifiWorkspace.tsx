@@ -32,8 +32,60 @@ interface BriefPayload {
   completed?: SimplifiObject[];
 }
 
+const AVATAR_PALETTE = ['#1B2B4D', '#3B82F6', '#C9A844', '#7C3AED', '#0F766E', '#B45309'];
+
+function initialsFromTitle(title: string): string {
+  const parts = title.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return '?';
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return `${parts[0][0] ?? ''}${parts[1][0] ?? ''}`.toUpperCase();
+}
+
+function avatarColor(title: string): string {
+  let hash = 0;
+  for (let i = 0; i < title.length; i += 1) hash = (hash + title.charCodeAt(i) * (i + 1)) % 997;
+  return AVATAR_PALETTE[hash % AVATAR_PALETTE.length];
+}
+
+function formatBriefDate(date = new Date()): string {
+  return date.toLocaleDateString('en-US', {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+  });
+}
+
+function relativeUpdatedLabel(iso: string): string {
+  const captured = new Date(iso);
+  if (Number.isNaN(captured.getTime())) return 'Updated recently';
+  const diffMs = Date.now() - captured.getTime();
+  const mins = Math.floor(diffMs / 60000);
+  if (mins < 60) return `Updated ${Math.max(1, mins)}m ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `Updated ${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days === 1) return 'Updated yesterday';
+  if (days < 7) return `Updated ${days}d ago`;
+  return `Updated ${captured.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+}
+
+function briefKindIcon(kind: BriefPayload['items'][number]['kind']): string {
+  switch (kind) {
+    case 'momentum':
+      return '★';
+    case 'deadline':
+    case 'due-soon':
+    case 'overdue':
+      return '◷';
+    case 'stale':
+      return '◎';
+    default:
+      return '◆';
+  }
+}
+
 export default function SimplifiWorkspace({
-  slug,
+  slug: _slug,
   loggedIn,
   objects,
   brief,
@@ -56,32 +108,17 @@ export default function SimplifiWorkspace({
   const [intelligenceNote, setIntelligenceNote] = useState('');
   const [intelligenceLoading, setIntelligenceLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchOpen, setSearchOpen] = useState(false);
 
   const filteredObjects = useMemo(
     () => (searchQuery.trim() ? searchOpportunities(searchQuery, localObjects) : localObjects),
     [localObjects, searchQuery],
   );
 
-  const topObject = localObjects[0] ?? null;
-  const topBriefItem = brief.items[0] ?? null;
-  const recommendedItems = brief.items.slice(0, 3);
+  const todayBriefItems = brief.items.slice(0, 4);
   const recentObjects = localObjects.slice(0, 5);
-  const todayActivity =
-    brief.items.length > 0
-      ? brief.items.slice(0, 4)
-      : recentObjects.map((obj) => ({
-          id: `recent-${obj.id}`,
-          title: obj.title,
-          detail: obj.nextAction,
-          href: `/simplifi/opportunity/${obj.id}`,
-          kind: 'explore' as const,
-        }));
-  const quickActions = [
-    { label: 'Capture', href: '/simplifi/capture' },
-    { label: 'Inbox', href: '/simplifi/inbox' },
-    { label: 'Follow-ups', href: '/simplifi/follow-ups' },
-    { label: 'Ask', href: '/simplifi/ask' },
-  ];
+  const ambientLead = buildBriefAmbientLead({ brief, actionCenter });
+  const todayLabel = useMemo(() => formatBriefDate(), []);
 
   const toggleExpand = (obj: SimplifiObject) => {
     setExpandedId((prev) => (prev === obj.id ? null : obj.id));
@@ -147,24 +184,120 @@ export default function SimplifiWorkspace({
   };
 
   return (
-    <main className="sw-main">
-      <section className="sw-brief-shell" aria-label="Simplifi brief">
-        <div className="sw-brief-intro">
-          <p>{brief.greeting.replace(/\.$/, '')}</p>
-          <h1>What deserves your attention?</h1>
-          <p className="sw-ambient-lead">{buildBriefAmbientLead({ brief, actionCenter })}</p>
-          <p className="sw-muted">The Orb in the corner stays aware — tap it when you want a recommendation.</p>
-        </div>
+    <main className="sw-main sw-main--home">
+      <section className="sw-home" aria-label="Simplifi brief">
+        <header className="sw-home-hero">
+          <div className="sw-home-hero-glow" aria-hidden="true" />
+          <div className="sw-home-hero-copy">
+            <p className="sw-home-greeting">{brief.greeting.replace(/\.$/, '')}</p>
+            <p className="sw-home-date">{todayLabel}</p>
+            <h1 className="sw-home-title">What deserves your attention?</h1>
+            <p className="sw-ambient-lead">{ambientLead}</p>
+          </div>
+        </header>
 
-        <label className="sw-search">
-          <span>Search Simplifi</span>
-          <input
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search opportunities, people, notes, resources..."
-            aria-label="Search opportunities"
-          />
-        </label>
+        <section className="sw-today-brief" aria-label="Today's Brief">
+          <div className="sw-today-brief-head">
+            <h2>Today&apos;s Brief</h2>
+            {todayBriefItems.length > 0 ? (
+              <Link href="/simplifi/follow-ups" className="sw-today-view-all">
+                View all
+              </Link>
+            ) : null}
+          </div>
+
+          {todayBriefItems.length === 0 ? (
+            <div className="sw-today-empty">
+              <p>{ambientLead}</p>
+              <Link href="/simplifi/capture" className="sw-today-capture">
+                Capture something
+              </Link>
+            </div>
+          ) : (
+            <ul className="sw-today-list">
+              {todayBriefItems.map((item) => (
+                <li key={item.id}>
+                  <span className={`sw-today-icon sw-today-icon--${item.kind}`} aria-hidden="true">
+                    {briefKindIcon(item.kind)}
+                  </span>
+                  <div className="sw-today-copy">
+                    {item.href ? (
+                      <Link href={item.href}>
+                        <strong>{item.title}</strong>
+                      </Link>
+                    ) : (
+                      <strong>{item.title}</strong>
+                    )}
+                    <p>{item.detail}</p>
+                  </div>
+                  {loggedIn && item.id.startsWith('x-') && (item.kind === 'stale' || item.kind === 'overdue') ? (
+                    <button type="button" className="sw-link-btn" onClick={() => snoozeItem(item.id)}>
+                      Snooze
+                    </button>
+                  ) : null}
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+
+        <section className="sw-recent-opps" aria-label="Recent opportunities">
+          <div className="sw-recent-head">
+            <h2>Recent Opportunities</h2>
+            <Link href="/simplifi/inbox" className="sw-today-view-all">
+              View all
+            </Link>
+          </div>
+
+          {recentObjects.length === 0 ? (
+            <EmptyStateGuide
+              title="Nothing captured yet"
+              explanation="Paste a URL, upload a file, or jot a note — Simplifi will score the opportunity and surface your next move."
+              actionLabel="Quick capture"
+              actionHref="/simplifi/capture"
+            />
+          ) : (
+            <ul className="sw-recent-list">
+              {recentObjects.map((obj) => (
+                <li key={obj.id}>
+                  <Link href={`/simplifi/opportunity/${obj.id}`} className="sw-recent-row">
+                    <span
+                      className="sw-recent-avatar"
+                      style={{ backgroundColor: avatarColor(obj.title) }}
+                      aria-hidden="true"
+                    >
+                      {initialsFromTitle(obj.title)}
+                    </span>
+                    <span className="sw-recent-copy">
+                      <strong>{obj.title}</strong>
+                      <span>
+                        {obj.nextAction}
+                        {' · '}
+                        {relativeUpdatedLabel(obj.dateCaptured)}
+                      </span>
+                    </span>
+                    <span className="sw-recent-chevron" aria-hidden="true">
+                      ›
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+
+        {(searchOpen || searchQuery.trim()) && (
+          <label className="sw-search sw-search--home">
+            <span>Search Simplifi</span>
+            <input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search opportunities, people, notes..."
+              aria-label="Search opportunities"
+              autoFocus={searchOpen}
+            />
+          </label>
+        )}
 
         {searchQuery.trim() ? (
           <section className="sw-brief-panel" aria-label="Search results">
@@ -191,140 +324,34 @@ export default function SimplifiWorkspace({
             )}
           </section>
         ) : null}
-
-        <section className="sw-priority-card" aria-label="Top priority">
-          <p className="sw-section-label">Top Priority</p>
-          {topObject ? (
-            <>
-              <div className="sw-priority-main">
-                <div>
-                  <h2>
-                    <Link href={`/simplifi/opportunity/${topObject.id}`}>{topObject.title}</Link>
-                  </h2>
-                  <p>{topBriefItem?.detail ?? topObject.whyThisMatters}</p>
-                </div>
-                <span>
-                  {topObject.opportunityScore != null ? `${topObject.opportunityScore}/100` : topObject.priority}
-                </span>
-              </div>
-              <div className="sw-card-footer">
-                <strong>{topObject.nextAction}</strong>
-                <Link href={`/simplifi/opportunity/${topObject.id}`} className="sw-icon-action">
-                  Open
-                </Link>
-              </div>
-            </>
-          ) : (
-            <>
-              <div className="sw-priority-main">
-                <div>
-                  <h2>Your brief is clear</h2>
-                  <p>
-                    {loggedIn
-                      ? 'Capture something worth exploring — Simplifi will prioritize the next move here.'
-                      : 'Sign in for a personalized brief, or capture without an account.'}
-                  </p>
-                </div>
-                <span>Ready</span>
-              </div>
-              <div className="sw-card-footer">
-                <strong>One tap to capture</strong>
-                <Link href="/simplifi/capture" className="sw-icon-action">
-                  Capture
-                </Link>
-              </div>
-            </>
-          )}
-        </section>
-
-        <section className="sw-brief-grid">
-          <div className="sw-brief-panel">
-            <div className="sw-panel-heading">
-              <h2>Today&apos;s Activity</h2>
-              <span>{todayActivity.length}</span>
-            </div>
-            <ol className="sw-timeline">
-              {todayActivity.map((item) => (
-                <li key={item.id}>
-                  <span aria-hidden="true" />
-                  <div>
-                    <strong>{item.title}</strong>
-                    <p>{item.detail}</p>
-                  </div>
-                </li>
-              ))}
-            </ol>
-          </div>
-
-          <div className="sw-brief-panel">
-            <div className="sw-panel-heading">
-              <h2>Recommended Actions</h2>
-              <span>{recommendedItems.length}</span>
-            </div>
-            <div className="sw-action-stack">
-              {recommendedItems.length === 0 ? (
-                <p className="sw-muted">No action is urgent right now.</p>
-              ) : (
-                recommendedItems.map((item) => (
-                  <div key={item.id} className={`sw-action-card sw-brief-${item.kind}`}>
-                    <div>
-                      <strong>{item.title}</strong>
-                      <p>{item.detail}</p>
-                    </div>
-                    <div className="sw-brief-actions">
-                      {item.href && (
-                        <Link href={item.href} className="sw-link">
-                          Open
-                        </Link>
-                      )}
-                      {loggedIn && item.id.startsWith('x-') && (item.kind === 'stale' || item.kind === 'overdue') && (
-                        <button type="button" className="sw-link-btn" onClick={() => snoozeItem(item.id)}>
-                          Snooze
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-        </section>
-
-        <section className="sw-brief-panel">
-          <div className="sw-panel-heading">
-            <h2>Recent Events</h2>
-            <span>{recentObjects.length}</span>
-          </div>
-          {recentObjects.length === 0 ? (
-            <p className="sw-muted">Recent captures will appear here.</p>
-          ) : (
-            <ul className="sw-event-list">
-              {recentObjects.map((obj) => (
-                <li key={obj.id}>
-                  <div>
-                    <strong>
-                      <Link href={`/simplifi/opportunity/${obj.id}`}>{obj.title}</Link>
-                    </strong>
-                    <p>
-                      {obj.type}
-                      {obj.dateCaptured ? ` - ${obj.dateCaptured}` : ''}
-                    </p>
-                  </div>
-                  <span>{obj.priority}</span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-
-        <section className="sw-quick-actions" aria-label="Quick actions">
-          {quickActions.map((action) => (
-            <Link key={action.href} href={action.href}>
-              {action.label}
-            </Link>
-          ))}
-        </section>
       </section>
+
+      <nav className="sw-mobile-dock" aria-label="Simplifi mobile">
+        <Link href="/simplifi/workspace" className="sw-dock-item sw-dock-item--active" aria-current="page">
+          <span aria-hidden="true">⌂</span>
+          Home
+        </Link>
+        <Link href="/simplifi/capture" className="sw-dock-item">
+          <span aria-hidden="true">＋</span>
+          Capture
+        </Link>
+        <button
+          type="button"
+          className={`sw-dock-item${searchOpen ? ' sw-dock-item--active' : ''}`}
+          onClick={() => setSearchOpen((open) => !open)}
+        >
+          <span aria-hidden="true">⌕</span>
+          Search
+        </button>
+        <Link href="/simplifi/calendar" className="sw-dock-item">
+          <span aria-hidden="true">▦</span>
+          Calendar
+        </Link>
+        <Link href="/simplifi/settings" className="sw-dock-item">
+          <span aria-hidden="true">☰</span>
+          More
+        </Link>
+      </nav>
 
       <ActionCenterPanel center={actionCenter} />
 
@@ -383,9 +410,9 @@ export default function SimplifiWorkspace({
         </section>
       )}
 
-      <section className="sw-inbox" id="inbox">
+      <section className="sw-inbox sw-inbox--secondary" id="inbox">
         <div className="sw-inbox-header">
-          <h2>Inbox preview</h2>
+          <h2>Inbox detail</h2>
           <Link href="/simplifi/inbox" className="sw-link">
             Open full inbox
           </Link>
@@ -393,12 +420,7 @@ export default function SimplifiWorkspace({
         {actionNote && <p className="sw-action-note">{actionNote}</p>}
 
         {localObjects.length === 0 ? (
-          <EmptyStateGuide
-            title="Nothing in your inbox yet"
-            explanation="Paste a URL, upload a file, or jot a note — Simplifi will score the opportunity and surface your next move."
-            actionLabel="Quick capture"
-            actionHref="/simplifi/capture"
-          />
+          <p className="sw-muted">Capture to build your opportunity list.</p>
         ) : (
           <ul className="sw-inbox-list">
             {localObjects.slice(0, 5).map((obj) => {
