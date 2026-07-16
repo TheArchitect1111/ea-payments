@@ -1,9 +1,8 @@
 import Link from 'next/link';
 import { cookies } from 'next/headers';
 import { EA_PORTAL_COOKIE, verifySession } from '@/lib/ea-portal-auth';
-import { isOrbOsPreviewEnabled, ORB_OS_PREVIEW_COOKIE } from '@/lib/orb-os';
-import SimplifiAppChrome from '../components/SimplifiAppChrome';
-import OrbOsPreviewToggle from './OrbOsPreviewToggle';
+import { loadOrbWorkspaceSlice } from '@/lib/orb';
+import SimplifiProductShell from '../components/SimplifiProductShell';
 import '../workspace/simplifi-workspace.css';
 import '../capture/simplifi-capture.css';
 
@@ -14,13 +13,17 @@ export default async function SimplifiSettingsPage() {
   const token = cookieStore.get(EA_PORTAL_COOKIE)?.value;
   const session = token ? await verifySession(token) : null;
   const slug = session?.slug ?? null;
-  const orbPreview = isOrbOsPreviewEnabled({
-    cookieValue: cookieStore.get(ORB_OS_PREVIEW_COOKIE)?.value,
-  });
+  const slice = await loadOrbWorkspaceSlice(slug);
 
   return (
-    <div className="sw-app">
-      <SimplifiAppChrome active="settings" slug={slug} />
+    <SimplifiProductShell
+      active="settings"
+      slug={slug}
+      loggedIn={Boolean(session)}
+      brief={slice.brief}
+      objects={slice.objects}
+      actionCenter={slice.actionCenter}
+    >
       <main className="sw-main">
         <section className="sw-brief-intro">
           <p>Simplifi</p>
@@ -29,8 +32,15 @@ export default async function SimplifiSettingsPage() {
         </section>
 
         <section className="sw-brief-panel">
-          <h2>Orb OS Preview</h2>
-          <OrbOsPreviewToggle initiallyEnabled={orbPreview} />
+          <h2>SIMPLIFI Orb</h2>
+          <p className="sw-muted">
+            The Orb lives in the corner of every Simplifi screen — quiet intelligence over your Brief, not a
+            chatbot home. Tap it for recommendations, Ask, and voice.
+          </p>
+          <p className="sw-muted" style={{ marginTop: 8 }}>
+            Experimental chat-first shell (legacy):{' '}
+            <Link href="/simplifi/orb?chat=1">/simplifi/orb?chat=1</Link>
+          </p>
         </section>
 
         <section className="sw-brief-panel">
@@ -80,6 +90,13 @@ export default async function SimplifiSettingsPage() {
             <li>
               <div>
                 <strong>
+                  <Link href="/simplifi/workspace">Today&apos;s Brief</Link>
+                </strong>
+              </div>
+            </li>
+            <li>
+              <div>
+                <strong>
                   <Link href="/simplifi/follow-ups">Follow-ups hub</Link>
                 </strong>
               </div>
@@ -95,13 +112,6 @@ export default async function SimplifiSettingsPage() {
               <div>
                 <strong>
                   <Link href="/simplifi/ask">Ask Simplifi</Link>
-                </strong>
-              </div>
-            </li>
-            <li>
-              <div>
-                <strong>
-                  <Link href="/simplifi/orb?orb=1">Open Orb OS Preview</Link>
                 </strong>
               </div>
             </li>
@@ -122,10 +132,10 @@ export default async function SimplifiSettingsPage() {
         {slug ? (
           <section className="sw-quick-actions">
             <Link href={`/portal/${slug}`}>EA portal home</Link>
-            <Link href="/simplifi/workspace?classic=1">Classic Brief</Link>
+            <Link href="/simplifi/workspace">Brief</Link>
           </section>
         ) : null}
       </main>
-    </div>
+    </SimplifiProductShell>
   );
 }

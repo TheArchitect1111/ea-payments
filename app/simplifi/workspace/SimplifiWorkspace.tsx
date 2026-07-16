@@ -16,7 +16,6 @@ import {
 import { searchOpportunities } from '@/lib/simplifi-ask';
 import EmptyStateGuide from '@/app/components/guided-first-success/EmptyStateGuide';
 import ActionCenterPanel from './ActionCenterPanel';
-import CompanionOrb from './CompanionOrb';
 import './action-center-panel.css';
 
 interface BriefPayload {
@@ -56,8 +55,6 @@ export default function SimplifiWorkspace({
   const [intelligenceNote, setIntelligenceNote] = useState('');
   const [intelligenceLoading, setIntelligenceLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [orbOpenSignal, setOrbOpenSignal] = useState(0);
-  const [orbOpenView, setOrbOpenView] = useState<'brief' | 'capture' | 'inbox' | 'ask'>('brief');
 
   const filteredObjects = useMemo(
     () => (searchQuery.trim() ? searchOpportunities(searchQuery, localObjects) : localObjects),
@@ -84,11 +81,6 @@ export default function SimplifiWorkspace({
     { label: 'Follow-ups', href: '/simplifi/follow-ups' },
     { label: 'Ask', href: '/simplifi/ask' },
   ];
-
-  const openOrb = (view: 'brief' | 'capture' | 'inbox' | 'ask' = 'brief') => {
-    setOrbOpenView(view);
-    setOrbOpenSignal((n) => n + 1);
-  };
 
   const toggleExpand = (obj: SimplifiObject) => {
     setExpandedId((prev) => (prev === obj.id ? null : obj.id));
@@ -159,9 +151,7 @@ export default function SimplifiWorkspace({
         <div className="sw-brief-intro">
           <p>{brief.greeting.replace(/\.$/, '')}</p>
           <h1>What deserves your attention?</h1>
-          <button type="button" className="sw-orb-cta" onClick={() => openOrb('ask')}>
-            Ask Orb
-          </button>
+          <p className="sw-muted">The Orb in the corner stays aware — tap it when you want a recommendation.</p>
         </div>
 
         <label className="sw-search">
@@ -331,9 +321,6 @@ export default function SimplifiWorkspace({
               {action.label}
             </Link>
           ))}
-          <button type="button" onClick={() => openOrb('capture')}>
-            Orb Capture
-          </button>
         </section>
       </section>
 
@@ -503,16 +490,6 @@ export default function SimplifiWorkspace({
           <p>{selected.nextAction}</p>
         </aside>
       )}
-
-      <CompanionOrb
-        slug={slug}
-        loggedIn={loggedIn}
-        brief={brief}
-        objects={localObjects}
-        actionCenter={actionCenter}
-        openSignal={orbOpenSignal}
-        openView={orbOpenView}
-      />
     </main>
   );
 }

@@ -1,10 +1,8 @@
 import { cookies } from 'next/headers';
 import Link from 'next/link';
 import { EA_PORTAL_COOKIE, verifySession } from '@/lib/ea-portal-auth';
-import { getClientByPortalSlug } from '@/lib/airtable';
-import { loadSimplifiWorkspace } from '@/lib/simplifi-core';
-import { EA_PLATFORM_URL } from '@/lib/platform-urls';
-import SimplifiAppChrome from '../components/SimplifiAppChrome';
+import { loadOrbWorkspaceSlice } from '@/lib/orb';
+import SimplifiProductShell from '../components/SimplifiProductShell';
 import EmptyStateGuide from '@/app/components/guided-first-success/EmptyStateGuide';
 import '../workspace/simplifi-workspace.css';
 
@@ -21,17 +19,11 @@ export default async function OpportunityCalendarPage() {
   const token = cookieStore.get(EA_PORTAL_COOKIE)?.value;
   const session = token ? await verifySession(token) : null;
   const slug = session?.slug ?? null;
+  const slice = await loadOrbWorkspaceSlice(slug);
+  const dated = slice.objects.filter((o) => o.dueDate);
 
-  let objects = [] as Awaited<ReturnType<typeof loadSimplifiWorkspace>>['activeObjects'];
-  if (slug) {
-    const client = await getClientByPortalSlug(slug);
-    const firstName = client?.clientName?.split(' ')[0] ?? '';
-    const workspace = await loadSimplifiWorkspace(slug, EA_PLATFORM_URL, firstName);
-    objects = workspace.activeObjects.filter((o) => o.dueDate);
-  }
-
-  const byMonth = new Map<string, typeof objects>();
-  for (const obj of objects) {
+  const byMonth = new Map<string, typeof dated>();
+  for (const obj of dated) {
     const key = monthKey(obj.dueDate!);
     const list = byMonth.get(key) ?? [];
     list.push(obj);
@@ -40,8 +32,14 @@ export default async function OpportunityCalendarPage() {
   const months = [...byMonth.entries()].sort(([a], [b]) => a.localeCompare(b));
 
   return (
-    <div className="sw-app">
-      <SimplifiAppChrome active="inbox" slug={slug} />
+    <SimplifiProductShell
+      active="inbox"
+      slug={slug}
+      loggedIn={Boolean(session)}
+      brief={slice.brief}
+      objects={slice.objects}
+      actionCenter={slice.actionCenter}
+    >
       <main className="sw-main">
         <section className="sw-brief-intro">
           <p>Commitments only</p>
@@ -94,6 +92,6 @@ export default async function OpportunityCalendarPage() {
           <Link href="/simplifi/workspace">Brief</Link>
         </section>
       </main>
-    </div>
+    </SimplifiProductShell>
   );
 }

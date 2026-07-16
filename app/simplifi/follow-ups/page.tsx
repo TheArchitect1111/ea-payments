@@ -1,11 +1,9 @@
 import { cookies } from 'next/headers';
 import Link from 'next/link';
 import { EA_PORTAL_COOKIE, verifySession } from '@/lib/ea-portal-auth';
-import { getClientByPortalSlug } from '@/lib/airtable';
-import { loadSimplifiWorkspace } from '@/lib/simplifi-core';
-import { EA_PLATFORM_URL } from '@/lib/platform-urls';
+import { loadOrbWorkspaceSlice } from '@/lib/orb';
 import { buildExpirationAlerts } from '@/lib/smart-expiration';
-import SimplifiAppChrome from '../components/SimplifiAppChrome';
+import SimplifiProductShell from '../components/SimplifiProductShell';
 import EmptyStateGuide from '@/app/components/guided-first-success/EmptyStateGuide';
 import '../workspace/simplifi-workspace.css';
 
@@ -16,25 +14,21 @@ export default async function FollowUpsPage() {
   const token = cookieStore.get(EA_PORTAL_COOKIE)?.value;
   const session = token ? await verifySession(token) : null;
   const slug = session?.slug ?? null;
-
-  let objects = [] as Awaited<ReturnType<typeof loadSimplifiWorkspace>>['activeObjects'];
-  let alerts: ReturnType<typeof buildExpirationAlerts> = [];
-
-  if (slug) {
-    const client = await getClientByPortalSlug(slug);
-    const firstName = client?.clientName?.split(' ')[0] ?? '';
-    const workspace = await loadSimplifiWorkspace(slug, EA_PLATFORM_URL, firstName);
-    objects = workspace.activeObjects;
-    alerts = buildExpirationAlerts(objects);
-  }
-
-  const dated = [...objects]
+  const slice = await loadOrbWorkspaceSlice(slug);
+  const alerts = buildExpirationAlerts(slice.objects);
+  const dated = [...slice.objects]
     .filter((o) => o.dueDate)
     .sort((a, b) => String(a.dueDate).localeCompare(String(b.dueDate)));
 
   return (
-    <div className="sw-app">
-      <SimplifiAppChrome active="inbox" slug={slug} />
+    <SimplifiProductShell
+      active="inbox"
+      slug={slug}
+      loggedIn={Boolean(session)}
+      brief={slice.brief}
+      objects={slice.objects}
+      actionCenter={slice.actionCenter}
+    >
       <main className="sw-main">
         <section className="sw-brief-intro">
           <p>Stay on it</p>
@@ -105,6 +99,6 @@ export default async function FollowUpsPage() {
           <Link href="/simplifi/workspace">Brief</Link>
         </section>
       </main>
-    </div>
+    </SimplifiProductShell>
   );
 }
