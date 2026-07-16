@@ -22,6 +22,7 @@ import { getPackageSyncHealth } from '@/lib/platform/package-sync-health';
 import { buildAttentionItems, type AttentionItem } from '@/lib/pulse-attention';
 import { buildWorkforceAttentionItems } from '@/lib/praison-ai/mission-control';
 import { buildCreativeAttentionItems } from '@/lib/open-design/creative-status';
+import { buildSimplifiPass1AttentionItems } from '@/lib/simplifi-pass1-ops';
 import { listCanonicalPulseEvents } from '@/lib/pulse-event-store';
 import { type PulseEvent, listRecentPulseEvents } from '@/lib/pulse-bus';
 
@@ -207,6 +208,11 @@ function packageSyncAttentionEvents(organizationId: string): PlatformEvent[] {
   ];
 }
 
+async function launchOpsAttentionEvents(organizationId: string): Promise<PlatformEvent[]> {
+  const items = await buildSimplifiPass1AttentionItems();
+  return items.map((item) => attentionItemToPlatform(item, organizationId));
+}
+
 export async function buildMissionControlPayload(input?: {
   role?: 'executive' | 'builder';
   userName?: string;
@@ -215,12 +221,13 @@ export async function buildMissionControlPayload(input?: {
   const role = input?.role ?? 'executive';
   const userName = input?.userName ?? 'there';
 
-  const [activity, pulseEvents, proposals, clients, ctpSignals] = await Promise.all([
+  const [activity, pulseEvents, proposals, clients, ctpSignals, launchOpsSignals] = await Promise.all([
     listPlatformActivityEvents(organizationId, 100),
     listCanonicalPulseEvents(120),
     getProposalsWithAssessments(),
     getAllClientRecords(),
     ctpAttentionEvents(organizationId),
+    launchOpsAttentionEvents(organizationId),
   ]);
 
   const pulseRows = pulseEvents.map((event, index) => pulseEventToPlatform(event, index));
@@ -236,6 +243,7 @@ export async function buildMissionControlPayload(input?: {
   return buildMissionControlFromStreams(
     activity,
     [
+      ...launchOpsSignals,
       ...packageSyncSignals,
       ...praisonSignals,
       ...openDesignSignals,

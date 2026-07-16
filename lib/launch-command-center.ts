@@ -6,6 +6,11 @@ import { buildLaunchReadinessModel } from '@/lib/launch-readiness';
 import type { LaunchReadinessModel, LaunchReadinessStatus } from '@/lib/launch-readiness';
 import { EA_PLATFORM_URL } from '@/lib/platform-urls';
 import { parseResendFromEmail, RESEND_FROM_EMAIL_EXAMPLE } from '@/lib/resend-env';
+import {
+  probeSimplifiAppDns,
+  sentryConfigured,
+  uptimeConfigured,
+} from '@/lib/simplifi-pass1-ops';
 
 export const CANONICAL_PRODUCTION_URL = 'https://www.efficiencyarchitects.online';
 
@@ -315,6 +320,15 @@ function recommendNextAction(items: LaunchCheckItem[], tier2Ready: boolean): str
   if (byId.esignatures_templates && byId.esignatures_templates.status !== 'complete') {
     return byId.esignatures_templates.message;
   }
+  if (byId.dns_simplifi_app && byId.dns_simplifi_app.status !== 'complete') {
+    return 'Simplifi Pass 1: attach app.simplifi.ai in Vercel Domains + CNAME — docs/SIMPLIFI-GOAL-B-OPERATOR.md';
+  }
+  if (byId.sentry && byId.sentry.status !== 'complete') {
+    return 'Simplifi Pass 1: set NEXT_PUBLIC_SENTRY_DSN on Vercel Production and redeploy — docs/sentry-setup.md';
+  }
+  if (byId.uptime_dashboard && byId.uptime_dashboard.status !== 'complete') {
+    return 'Simplifi Pass 1: set UPTIME_KUMA_DASHBOARD_URL (or UPTIME_MONITORING_URL) and confirm Simplifi monitors.';
+  }
   if (byId.resend_domain?.status === 'complete' && byId.make_esign_webhook?.status === 'complete' && !tier2Ready) {
     return 'Complete remaining Tier 2 env vars (Resend + Stripe webhook secret).';
   }
@@ -436,6 +450,7 @@ export async function runLaunchCommandCenter(options?: {
   const resendDomain = await checkResendDomain();
   const stripeApi = await checkStripeApi();
   const dns = await checkDnsCanonical();
+  const simplifiDns = await probeSimplifiAppDns();
   const esignCallback = await checkEsignaturesCallback();
   const esignTemplates = checkEsignTemplateEnv();
   const onboardingProbe = await probeMakeWebhook(process.env.ONBOARDING_WEBHOOK_URL, 'ONBOARDING_WEBHOOK_URL');
@@ -675,12 +690,14 @@ export async function runLaunchCommandCenter(options?: {
       section: 'domains',
       category: 'DNS',
       name: 'app.simplifi.ai workspace alias',
-      automation: 'manual_only',
-      status: 'needs_human_action',
-      maxScore: 0,
-      score: 0,
-      message: 'Optional — add app.simplifi.ai in Vercel Domains.',
-      fix: 'Vercel Domains → CNAME cname.vercel-dns.com',
+      automation: 'partially_automated',
+      status: simplifiDns.ok ? 'complete' : 'needs_human_action',
+      maxScore: 4,
+      message: simplifiDns.ok
+        ? simplifiDns.message
+        : `${simplifiDns.message} Add in Vercel Domains + CNAME app → cname.vercel-dns.com.`,
+      fix: 'docs/SIMPLIFI-GOAL-B-OPERATOR.md',
+      verify: 'node scripts/validate-simplifi-launch-readiness.mjs https://efficiencyarchitects.online',
     }),
     item({
       id: 'session_secrets',
@@ -739,12 +756,25 @@ export async function runLaunchCommandCenter(options?: {
       category: 'Sentry',
       name: 'Error monitoring (Sentry DSN)',
       automation: 'partially_automated',
-      status: process.env.NEXT_PUBLIC_SENTRY_DSN?.trim() ? 'complete' : 'needs_human_action',
+      status: sentryConfigured() ? 'complete' : 'needs_human_action',
       maxScore: 4,
-      message: process.env.NEXT_PUBLIC_SENTRY_DSN
+      message: sentryConfigured()
         ? 'NEXT_PUBLIC_SENTRY_DSN set — Sentry enabled.'
-        : 'Optional but recommended — docs/sentry-setup.md',
+        : 'Set NEXT_PUBLIC_SENTRY_DSN on Vercel Production and redeploy — docs/sentry-setup.md',
       fix: 'https://sentry.io → NEXT_PUBLIC_SENTRY_DSN on Vercel',
+    }),
+    item({
+      id: 'uptime_dashboard',
+      section: 'security',
+      category: 'Uptime',
+      name: 'Uptime monitoring dashboard',
+      automation: 'partially_automated',
+      status: uptimeConfigured() ? 'complete' : 'needs_human_action',
+      maxScore: 3,
+      message: uptimeConfigured()
+        ? 'Uptime dashboard URL configured.'
+        : 'Set UPTIME_KUMA_DASHBOARD_URL or UPTIME_MONITORING_URL; cover /simplifi/capture + /api/health/launch.',
+      fix: 'docs/SIMPLIFI-GOAL-B-OPERATOR.md',
     }),
     item({
       id: 'clerk',
@@ -813,10 +843,8 @@ export async function runLaunchCommandCenter(options?: {
   const readinessScore = max > 0 ? Math.round((earned / max) * 100) : 0;
 
   const controls = {
-    sentryDsn: Boolean(process.env.NEXT_PUBLIC_SENTRY_DSN?.trim()),
-    uptimeDashboard: Boolean(
-      process.env.UPTIME_KUMA_DASHBOARD_URL?.trim() || process.env.UPTIME_MONITORING_URL?.trim(),
-    ),
+    sentryDsn: sentryConfigured(),
+    uptimeDashboard: uptimeConfigured(),
     backupDestination: Boolean(process.env.BACKUP_DESTINATION_URI?.trim()),
   };
   const readiness = buildLaunchReadinessModel({

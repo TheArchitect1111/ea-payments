@@ -5,6 +5,8 @@ These items still need **operator / Vercel** action.
 
 ## Pass 1 — Infrastructure
 
+Open **Mission Control** (`/admin/master`) after deploy — incomplete Pass 1 items appear as attention cards linking to `/launch`.
+
 ### 1. `app.simplifi.ai` DNS
 
 1. Vercel project → **Domains** → add `app.simplifi.ai`
