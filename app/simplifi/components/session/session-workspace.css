@@ -1,0 +1,253 @@
+.orb-session-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 110;
+  background: rgba(27, 43, 77, 0.32);
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+.orb-session-panel {
+  position: fixed;
+  z-index: 115;
+  right: max(12px, env(safe-area-inset-right));
+  bottom: max(12px, env(safe-area-inset-bottom));
+  width: min(460px, calc(100vw - 24px));
+  max-height: min(82vh, 760px);
+  display: flex;
+  flex-direction: column;
+  border-radius: 20px;
+  background: rgba(250, 248, 243, 0.98);
+  border: 1px solid rgba(27, 43, 77, 0.1);
+  box-shadow: 0 24px 56px rgba(27, 43, 77, 0.26);
+  overflow: hidden;
+  animation: orb-session-in 0.28s ease-out;
+}
+
+.orb-session-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(27, 43, 77, 0.08);
+}
+
+.orb-session-kicker {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--orb-gold, #c9a844);
+}
+
+.orb-session-back,
+.orb-session-close {
+  border: 0;
+  background: transparent;
+  color: #1b2b4d;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 6px 8px;
+  border-radius: 8px;
+}
+
+.orb-session-back:focus-visible,
+.orb-session-close:focus-visible,
+.orb-session-row:focus-visible,
+.orb-session-primary:focus-visible {
+  outline: 2px solid var(--orb-gold, #c9a844);
+  outline-offset: 2px;
+}
+
+.orb-session-body {
+  padding: 14px 16px 18px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.orb-session-title {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.orb-session-title h2 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #1b2b4d;
+  font-weight: 700;
+}
+
+.orb-session-title span {
+  color: #5f6b7a;
+  font-size: 0.85rem;
+}
+
+.orb-session-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.orb-session-row {
+  display: grid;
+  gap: 4px;
+  width: 100%;
+  text-align: left;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(27, 43, 77, 0.1);
+  background: #fff;
+  cursor: pointer;
+}
+
+.orb-session-row:hover {
+  border-color: rgba(201, 168, 68, 0.5);
+}
+
+.orb-session-row-head {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.orb-session-priority {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(27, 43, 77, 0.08);
+  color: #1b2b4d;
+}
+
+.orb-session-priority-high {
+  background: rgba(196, 120, 40, 0.16);
+  color: #8a5316;
+}
+
+.orb-session-dyn {
+  font-size: 10px;
+  font-weight: 700;
+  color: #5f6b7a;
+}
+
+.orb-session-row strong {
+  color: #1b2b4d;
+  font-size: 0.95rem;
+}
+
+.orb-session-meta {
+  color: #5f6b7a;
+  font-size: 0.82rem;
+}
+
+.orb-session-next {
+  color: #3d4a5c;
+  font-size: 0.85rem;
+}
+
+.orb-session-next-lg {
+  margin: 12px 0;
+  font-weight: 600;
+}
+
+.orb-session-guidance {
+  margin: 8px 0 0;
+  display: grid;
+  gap: 4px;
+}
+
+.orb-session-guidance dt {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--orb-gold, #c9a844);
+  margin-top: 8px;
+}
+
+.orb-session-guidance dd {
+  margin: 0;
+  color: #1b2b4d;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.orb-session-foot {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(27, 43, 77, 0.08);
+}
+
+.orb-session-foot a {
+  color: #1b2b4d;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.orb-session-empty {
+  text-align: center;
+  padding: 24px 12px;
+  display: grid;
+  gap: 10px;
+  justify-items: center;
+}
+
+.orb-session-empty h2 {
+  margin: 0;
+  color: #1b2b4d;
+}
+
+.orb-session-empty p {
+  margin: 0;
+  color: #5f6b7a;
+}
+
+.orb-session-primary {
+  display: inline-block;
+  background: #1b2b4d;
+  color: #c9a844;
+  font-weight: 700;
+  font-size: 13px;
+  padding: 10px 16px;
+  border: 0;
+  border-radius: 999px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+@keyframes orb-session-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 720px) {
+  .orb-session-panel {
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    max-height: 88vh;
+    border-radius: 20px 20px 0 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .orb-session-panel {
+    animation: none !important;
+  }
+}

@@ -14,7 +14,9 @@ export {
 } from './intent';
 export {
   ORB_NAVIGABLE_SURFACES,
+  ORB_SESSION_SURFACES,
   isNavigableOrbSurface,
+  isOrbSessionSurface,
   resolveOrbSurfaceHref,
   resolveOrbIntentHref,
   type ResolveOrbHrefOptions,

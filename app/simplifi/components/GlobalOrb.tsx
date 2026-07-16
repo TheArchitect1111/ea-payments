@@ -10,9 +10,10 @@ import {
   type OrbBriefSlice,
   type OrbVisualState,
 } from '@/lib/orb';
-import { interpretOrbIntent, resolveOrbIntentHref } from '@/lib/orb-os';
+import { interpretOrbIntent, isOrbSessionSurface, resolveOrbIntentHref } from '@/lib/orb-os';
 import { answerConversationalAsk, searchOpportunities } from '@/lib/simplifi-ask';
 import { explainRecommendation } from '@/lib/simplifi-guidance-system';
+import SessionWorkspace, { type SessionView } from './session/SessionWorkspace';
 import './global-orb.css';
 
 type SpeechRecognitionLike = {
@@ -49,6 +50,7 @@ export default function GlobalOrb({
   const [askInput, setAskInput] = useState('');
   const [askAnswer, setAskAnswer] = useState('');
   const [dismissedIds, setDismissedIds] = useState<string[]>([]);
+  const [sessionView, setSessionView] = useState<SessionView | null>(null);
   const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLElement>(null);
@@ -129,17 +131,33 @@ export default function GlobalOrb({
     setAskInput(q);
     try {
       const intent = interpretOrbIntent(q);
+
+      // Session surfaces (e.g. inbox) render as a temporary workspace in place.
+      if (isOrbSessionSurface(intent.surface)) {
+        setAskAnswer(intent.reply);
+        setOpen(false);
+        setSessionView({ kind: 'inbox' });
+        return;
+      }
+
       const matches = searchOpportunities(intent.query ?? q, objects);
       const soleMatch =
         (intent.surface === 'search' || intent.surface === 'ask') && matches.length === 1
           ? matches[0]
           : null;
 
+      // A single confident match opens a quick-view opportunity workspace.
+      if (soleMatch) {
+        setAskAnswer(intent.reply);
+        setOpen(false);
+        setSessionView({ kind: 'opportunity', id: soleMatch.id });
+        return;
+      }
+
       const href = resolveOrbIntentHref(intent, {
         slug,
         draft: intent.draft,
         query: intent.query,
-        opportunityId: soleMatch?.id,
       });
 
       if (href) {
@@ -336,6 +354,17 @@ export default function GlobalOrb({
           </span>
         </button>
       )}
+
+      {sessionView ? (
+        <SessionWorkspace
+          view={sessionView}
+          objects={objects}
+          loggedIn={loggedIn}
+          onClose={() => setSessionView(null)}
+          onOpenOpportunity={(id) => setSessionView({ kind: 'opportunity', id })}
+          onBackToInbox={() => setSessionView({ kind: 'inbox' })}
+        />
+      ) : null}
     </div>
   );
 }
