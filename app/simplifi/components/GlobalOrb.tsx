@@ -6,6 +6,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import type { ActionCenterPayload } from '@/lib/action-center';
 import type { SimplifiObject } from '@/lib/simplifi-objects';
 import {
+  buildAmbientOpeningFromSession,
   deriveOrbSession,
   type OrbBriefSlice,
   type OrbVisualState,
@@ -64,11 +65,13 @@ export default function GlobalOrb({
   const [interaction, setInteraction] = useState<'listening' | 'thinking' | 'speaking' | null>(null);
   const [askInput, setAskInput] = useState('');
   const [askAnswer, setAskAnswer] = useState('');
+  const [ambientOpener, setAmbientOpener] = useState('');
   const [dismissedIds, setDismissedIds] = useState<string[]>([]);
   const [sessionView, setSessionView] = useState<SessionView | null>(null);
   const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLElement>(null);
+  const ambientShownRef = useRef(false);
 
   useEffect(() => {
     const sync = () => setOnline(typeof navigator === 'undefined' ? true : navigator.onLine);
@@ -82,6 +85,13 @@ export default function GlobalOrb({
   }, []);
 
   useEffect(() => () => recognitionRef.current?.stop(), []);
+
+  // One-shot ambient opener on first expand — titles from Brief / Action Center only.
+  useEffect(() => {
+    if (!open || ambientShownRef.current) return;
+    ambientShownRef.current = true;
+    setAmbientOpener(buildAmbientOpeningFromSession({ brief, actionCenter }));
+  }, [open, brief, actionCenter]);
 
   useEffect(() => {
     if (!open) return;
@@ -260,6 +270,28 @@ export default function GlobalOrb({
             </header>
 
             <div className="global-orb-panel-body">
+              {ambientOpener ? (
+                <div className="global-orb-ambient" aria-live="polite">
+                  {ambientOpener.split('\n').map((line, i) => (
+                    <p key={`ambient-${i}`}>{line}</p>
+                  ))}
+                  {findings.length > 0 ? (
+                    <div className="global-orb-actions" style={{ marginTop: 8, marginBottom: 0 }}>
+                      <button
+                        type="button"
+                        className="primary"
+                        onClick={() => {
+                          setOpen(false);
+                          setSessionView({ kind: 'inbox' });
+                        }}
+                      >
+                        Review them
+                      </button>
+                    </div>
+                  ) : null}
+                </div>
+              ) : null}
+
               {findings.length > 0 ? (
                 <ul className="global-orb-findings">
                   {findings.map((f) => (

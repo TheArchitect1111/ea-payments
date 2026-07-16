@@ -7,14 +7,13 @@ import type { SimplifiObject } from '@/lib/simplifi-objects';
 import type { ActionCenterPayload } from '@/lib/action-center';
 import { answerConversationalAsk, searchOpportunities } from '@/lib/simplifi-ask';
 import {
-  buildAmbientOpening,
   interpretOrbIntent,
   resolveOrbIntentHref,
   writeOrbOsPreviewPreference,
   type OrbSurface,
 } from '@/lib/orb-os';
 import { analyzeCaptureUrl } from '@/lib/simplifi-client';
-import type { OrbBriefSlice } from '@/lib/orb';
+import { buildAmbientOpeningFromSession, type OrbBriefSlice } from '@/lib/orb';
 import './orb-os.css';
 
 type SpeechRecognitionLike = {
@@ -60,15 +59,8 @@ export default function OrbOsShell({
   const greetingLine = displayName ? `Good morning, ${displayName}` : brief.greeting.replace(/\.$/, '');
 
   const ambient = useMemo(
-    () =>
-      buildAmbientOpening({
-        greeting: brief.greeting,
-        attentionTitles: [
-          ...actionCenter.needsAttention.map((i) => i.title),
-          ...brief.items.map((i) => i.title),
-        ].filter(Boolean),
-      }),
-    [actionCenter.needsAttention, brief.greeting, brief.items],
+    () => buildAmbientOpeningFromSession({ brief, actionCenter }),
+    [actionCenter, brief],
   );
 
   useEffect(() => {

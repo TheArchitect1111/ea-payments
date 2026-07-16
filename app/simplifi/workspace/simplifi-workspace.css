@@ -612,6 +612,13 @@ a.sw-card-head {
   letter-spacing: 0;
 }
 
+.sw-ambient-lead {
+  margin: 0;
+  color: #1b2b4d !important;
+  font-size: 16px !important;
+  font-weight: 650 !important;
+}
+
 .sw-search {
   display: grid;
   gap: 7px;
