@@ -580,8 +580,8 @@ export async function POST(req: NextRequest) {
             }
           }
 
-          // When deferred, provision already attempted to send with the branded portal URL.
-          // Send here if still unsent (provision skipped/failed, or workspace was already Active).
+          // Await provision above when portal is required so the CTA has a branded URL.
+          // Always call send here too — idempotent if provision already sent; covers slow/failed provision.
           await sendCtpExecutiveEmailForSubmission(ctpSubmissionId);
         } else if (!isCtpFlow) {
           await sendAssessmentConfirmationEmail({
