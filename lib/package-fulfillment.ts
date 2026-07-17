@@ -66,7 +66,7 @@ export function buildPackageFulfillmentPlan(
     case 'connect-profile':
       return {
         ...base,
-        adminHref: '/admin/connect/profiles',
+        adminHref: '/admin/connect/tenants',
         clientExpectation:
           'Your Connect profile direction is being prepared. We will confirm the offer, audience, proof, and next action before anything goes live.',
         firstMilestone: 'Confirm profile audience and primary action.',
