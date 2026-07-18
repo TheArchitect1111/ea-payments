@@ -2,6 +2,7 @@
  * Factory founder notifications — start + ready/failed only.
  * Ready email = sit-down Concept Pack (eval + 3 concept screens).
  */
+import { readCtpAssetBytes } from '@/lib/ctp-asset-store';
 import { sendFactoryPackageReadyEmail, sendInternalNotification } from '@/lib/email';
 import {
   buildFactoryConceptPack,
@@ -9,9 +10,42 @@ import {
   renderFactoryConceptPackEmailHtml,
 } from '@/lib/factory-concept-pack';
 import { getProject } from '@/lib/factory-project';
+import { ctpAssetIdFromUrl } from '@/lib/factory-research/image-signal';
 import { saveFactoryProject, type FactoryProject } from '@/lib/factory-project-store';
 import { factoryFriendlyLabel } from '@/lib/factory-status-labels';
 import { EA_PLATFORM_URL } from '@/lib/platform-urls';
+
+async function loadInlineHero(project: FactoryProject): Promise<{
+  heroCidUrl?: string;
+  inlineImages?: Array<{
+    filename: string;
+    contentBase64: string;
+    contentId: string;
+    mimeType?: string;
+  }>;
+}> {
+  const image =
+    (project.attachments || []).find((a) => a.type === 'image' && a.url) ||
+    (project.attachments || []).find((a) => a.url);
+  const assetId = ctpAssetIdFromUrl(image?.url);
+  if (!assetId) return {};
+
+  const loaded = await readCtpAssetBytes(assetId);
+  if (!loaded) return {};
+
+  const contentId = 'concept-hero';
+  return {
+    heroCidUrl: `cid:${contentId}`,
+    inlineImages: [
+      {
+        filename: loaded.meta.fileName || image?.name || 'launch-photo.jpg',
+        contentBase64: loaded.bytes.toString('base64'),
+        contentId,
+        mimeType: loaded.meta.mimeType || 'image/jpeg',
+      },
+    ],
+  };
+}
 
 function escHtml(s: string): string {
   return s
@@ -100,6 +134,10 @@ export async function notifyFactoryDone(
   if (!okStop) return { ok: false, error: 'Project is still processing.' };
 
   const pack = buildFactoryConceptPack(project);
+  const inline = await loadInlineHero(project);
+  if (inline.heroCidUrl) {
+    pack.heroImageUrl = inline.heroCidUrl;
+  }
   const packageMarkdown = exportFactoryConceptPackMarkdown(pack);
   const packageHtml = renderFactoryConceptPackEmailHtml(pack, escHtml);
   const safeName = project.client.replace(/[^\w.-]+/g, '-').slice(0, 48) || 'concept-pack';
@@ -111,6 +149,7 @@ export async function notifyFactoryDone(
       packageMarkdown,
       packageHtml,
       filename: `concept-pack-${safeName}-${project.id}.md`,
+      inlineImages: inline.inlineImages,
     });
     if (!sent.ok) {
       console.error('[factory-notify] done email failed', projectId, sent.error);

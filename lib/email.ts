@@ -1549,6 +1549,13 @@ export async function sendFactoryPackageReadyEmail(data: {
   packageMarkdown: string;
   packageHtml: string;
   filename?: string;
+  /** Inline images for email clients (Resend content_id). */
+  inlineImages?: Array<{
+    filename: string;
+    contentBase64: string;
+    contentId: string;
+    mimeType?: string;
+  }>;
 }): Promise<{ ok: boolean; error?: string }> {
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.RESEND_FROM_EMAIL;
@@ -1571,6 +1578,22 @@ export async function sendFactoryPackageReadyEmail(data: {
     bodyHtml: data.packageHtml,
   });
 
+  const attachments: Array<Record<string, string | boolean>> = [
+    {
+      filename,
+      content: Buffer.from(data.packageMarkdown, 'utf8').toString('base64'),
+    },
+  ];
+
+  for (const image of data.inlineImages || []) {
+    attachments.push({
+      filename: image.filename,
+      content: image.contentBase64,
+      content_id: image.contentId,
+      content_type: image.mimeType || 'image/jpeg',
+    });
+  }
+
   try {
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
@@ -1583,12 +1606,7 @@ export async function sendFactoryPackageReadyEmail(data: {
         to: [to],
         subject: data.subject,
         html,
-        attachments: [
-          {
-            filename,
-            content: Buffer.from(data.packageMarkdown, 'utf8').toString('base64'),
-          },
-        ],
+        attachments,
       }),
     });
     if (!res.ok) {

@@ -94,6 +94,14 @@ function pickOpportunities(project: FactoryProject, fallback: string[]): string[
   return fallback;
 }
 
+function brandingCta(project: FactoryProject): string | undefined {
+  const branding = [...(project.context?.artifacts || [])]
+    .reverse()
+    .find((a) => a.kind === 'branding');
+  const cta = branding?.data?.cta;
+  return typeof cta === 'string' && cta.trim() ? cta.trim().slice(0, 40) : undefined;
+}
+
 export function buildFactoryConceptPack(project: FactoryProject): FactoryConceptPack {
   const base = buildFactoryClientPackage(project);
   const scorecard = buildFactoryCapacityScorecard(project);
@@ -101,6 +109,9 @@ export function buildFactoryConceptPack(project: FactoryProject): FactoryConcept
   const description =
     base.siteSnapshot.description ||
     `${project.client} is building capacity with a clearer public face, client portal, and member experience.`;
+  const fromPhoto = Boolean(
+    (project.attachments || []).some((a) => a.type === 'image') && !project.url,
+  );
 
   const pageTitles = base.websitePages.map((p) => p.title).filter(Boolean);
   const opportunities = pickOpportunities(project, [
@@ -121,10 +132,16 @@ export function buildFactoryConceptPack(project: FactoryProject): FactoryConcept
     `Capacity score: ${scorecard.overallScore}/100 (category benchmark ~${scorecard.benchmark}/100).`,
     scorecard.capacityLost.headline,
     scorecard.opportunityGained.headline,
-    project.url ? `We reviewed ${project.url} as the starting signal.` : 'We used your launch notes as the starting signal.',
+    project.url
+      ? `We reviewed ${project.url} as the starting signal.`
+      : fromPhoto
+        ? 'We read your launch photo as the starting signal (not a finished website audit).'
+        : 'We used your launch notes as the starting signal.',
     description,
     `Primary goal in this pack: ${project.goal}.`,
   ];
+
+  const cta = brandingCta(project) || 'Start here';
 
   return {
     version: 1,
@@ -142,12 +159,19 @@ export function buildFactoryConceptPack(project: FactoryProject): FactoryConcept
     },
     landing: {
       headline: siteTitle,
-      subhead: description.slice(0, 180),
-      cta: 'Start here',
+      subhead: description.slice(0, 220),
+      cta,
       points:
         pageTitles.slice(0, 4).length >= 2
           ? pageTitles.slice(0, 4)
-          : ['Home', 'About / Mission', 'Programs or Services', 'Contact / Next step'],
+          : fromPhoto
+            ? [
+                'Hero — who this is for (from your photo)',
+                'Offer / programs in plain language',
+                'Proof / trust near the ask',
+                `${cta} — clear next step`,
+              ]
+            : ['Home', 'About / Mission', 'Programs or Services', 'Contact / Next step'],
     },
     portal: {
       headline: `${project.client} Client Portal`,
@@ -182,6 +206,8 @@ export function exportFactoryConceptPackMarkdown(pack: FactoryConceptPack): stri
     '',
     `Project: ${pack.projectId}`,
     pack.sourceUrl ? `Website: ${pack.sourceUrl}` : '',
+    '',
+    pack.heroImageUrl ? `Source image: ${pack.heroImageUrl}` : '',
     '',
     '## Capacity score',
     '',
@@ -332,6 +358,17 @@ export function renderFactoryConceptPackEmailHtml(
     <h1 style="margin:0 0 10px;font-size:26px;line-height:1.25;color:${NAVY};">${escHtml(pack.clientName)}</h1>
     <p style="margin:0 0 8px;font-size:16px;color:#1A1A2E;line-height:1.6;">${escHtml(pack.coverLine)}</p>
     <p style="margin:0 0 18px;font-size:12px;color:#888;">Project ${escHtml(pack.projectId)}${pack.sourceUrl ? ` · ${escHtml(pack.sourceUrl)}` : ''}</p>
+
+    ${
+      pack.heroImageUrl
+        ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 18px;">
+      <tr><td>
+        <p style="margin:0 0 8px;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:${GOLD};">Source photo</p>
+        <img src="${escHtml(pack.heroImageUrl)}" alt="Launch photo" width="560" style="width:100%;max-width:560px;height:auto;display:block;border:0;" />
+      </td></tr>
+    </table>`
+        : ''
+    }
 
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 18px;">
       <tr>

@@ -40,26 +40,64 @@ function str(value: unknown): string | undefined {
   return typeof value === 'string' && value.trim() ? value.trim() : undefined;
 }
 
+function absolutizeAssetUrl(url: string): string {
+  if (/^https?:\/\//i.test(url)) return url;
+  if (url.startsWith('/')) {
+    const base = (
+      process.env.NEXT_PUBLIC_BASE_URL ||
+      process.env.EA_PLATFORM_URL ||
+      'https://efficiencyarchitects.online'
+    ).replace(/\/$/, '');
+    return `${base}${url}`;
+  }
+  return url;
+}
+
 function collectImageUrls(project: FactoryProject, artifacts: ArtifactLike[]): string[] {
   const urls = new Set<string>();
 
   for (const attachment of project.attachments || []) {
-    if (attachment.type === 'image' && attachment.url) urls.add(attachment.url);
+    if (attachment.type === 'image' && attachment.url) urls.add(absolutizeAssetUrl(attachment.url));
   }
 
   for (const art of artifacts) {
     const data = art.data || {};
     const extracted = asRecord(data.extracted);
     const ogImage = str(extracted?.ogImage);
-    if (ogImage) urls.add(ogImage);
+    if (ogImage) urls.add(absolutizeAssetUrl(ogImage));
 
     const brandingUrl = str(data.url) || str(data.imageUrl) || str(data.logoUrl);
-    if (art.kind === 'branding' && brandingUrl?.match(/^https?:\/\//i)) {
-      urls.add(brandingUrl);
+    if (art.kind === 'branding' && brandingUrl) {
+      urls.add(absolutizeAssetUrl(brandingUrl));
     }
   }
 
   return [...urls].slice(0, 8);
+}
+
+function brandingVision(artifacts: ArtifactLike[]): {
+  title?: string;
+  description?: string;
+  imageUrl?: string;
+  opportunities: string[];
+  cta?: string;
+} {
+  const branding = [...artifacts]
+    .reverse()
+    .find((a) => a.kind === 'branding' && (a.data?.hasVision || a.data?.visionSummary || a.data?.textPreview));
+  if (!branding?.data) return { opportunities: [] };
+  const data = branding.data;
+  const opps = Array.isArray(data.opportunities)
+    ? data.opportunities.map((item) => (typeof item === 'string' ? item : '')).filter(Boolean)
+    : [];
+  const imageUrl = str(data.imageUrl) || str(data.url);
+  return {
+    title: str(data.suggestedClientName) || str(data.brandName),
+    description: str(data.visionSummary) || str(data.whatTheyDo) || str(data.textPreview),
+    imageUrl: imageUrl ? absolutizeAssetUrl(imageUrl) : undefined,
+    opportunities: opps.slice(0, 5),
+    cta: str(data.cta),
+  };
 }
 
 function websitePagesFromArtifacts(artifacts: ArtifactLike[]): FactoryClientPackage['websitePages'] {
@@ -129,22 +167,31 @@ export function buildFactoryClientPackage(project: FactoryProject): FactoryClien
   const artifacts = (project.context?.artifacts || []) as ArtifactLike[];
   const websiteArt = [...artifacts].reverse().find((a) => a.kind === 'website');
   const extracted = asRecord(asRecord(websiteArt?.data)?.extracted) || {};
+  const vision = brandingVision(artifacts);
   const imageUrls = collectImageUrls(project, artifacts);
   const pages = websitePagesFromArtifacts(artifacts);
   const deliverables = deliverablesFromArtifacts(artifacts);
-  const recommendations = recommendationsFromArtifacts(artifacts);
+  const recommendations = [
+    ...vision.opportunities,
+    ...recommendationsFromArtifacts(artifacts),
+  ].filter((item, index, arr) => arr.indexOf(item) === index);
 
-  const siteTitle = str(extracted.title) || str(extracted.ogTitle) || project.client;
-  const siteDescription = str(extracted.description);
-  const siteImage = str(extracted.ogImage) || imageUrls[0];
+  const siteTitle =
+    str(extracted.title) || str(extracted.ogTitle) || vision.title || project.client;
+  const siteDescription = str(extracted.description) || vision.description;
+  const siteImage = str(extracted.ogImage) || vision.imageUrl || imageUrls[0];
 
   const summaryParts = [
     `EA Factory finished the automatic pass for ${project.client}.`,
     project.url ? `Source site: ${project.url}.` : '',
-    siteDescription ? `What we read from the site: ${siteDescription}` : '',
+    siteDescription
+      ? `What we read: ${siteDescription}`
+      : vision.title
+        ? 'What we read came from your launch photo.'
+        : '',
     pages.length
       ? `Recommended website structure: ${pages.length} page(s) ready for review.`
-      : 'Website structure is still thin — open the project to continue production.',
+      : 'Website structure is a concept preview for discussion.',
   ].filter(Boolean);
 
   return {

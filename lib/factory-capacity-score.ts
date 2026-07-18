@@ -56,9 +56,22 @@ function str(value: unknown): string | undefined {
 function artifactText(project: FactoryProject): { title: string; description?: string; markdown: string; url: string } {
   const artifacts = project.context?.artifacts || [];
   const website = [...artifacts].reverse().find((a) => a.kind === 'website');
+  const branding = [...artifacts]
+    .reverse()
+    .find((a) => a.kind === 'branding' && (a.data?.visionText || a.data?.visionSummary));
+  const brandingData = branding?.data || {};
   const extracted = asRecord(asRecord(website?.data)?.extracted) || {};
-  const title = str(extracted.title) || str(extracted.ogTitle) || project.client;
-  const description = str(extracted.description) || project.notes?.slice(0, 280);
+  const title =
+    str(extracted.title) ||
+    str(extracted.ogTitle) ||
+    str(brandingData.suggestedClientName) ||
+    str(brandingData.brandName) ||
+    project.client;
+  const description =
+    str(extracted.description) ||
+    str(brandingData.visionSummary) ||
+    str(brandingData.whatTheyDo) ||
+    project.notes?.slice(0, 280);
 
   const chunks: string[] = [
     project.client,
@@ -67,6 +80,8 @@ function artifactText(project: FactoryProject): { title: string; description?: s
     project.notes || '',
     title,
     description || '',
+    str(brandingData.visionText) || '',
+    str(brandingData.textPreview) || '',
   ];
 
   for (const art of artifacts) {
@@ -78,7 +93,11 @@ function artifactText(project: FactoryProject): { title: string; description?: s
     title,
     description,
     markdown: chunks.join('\n').slice(0, 8000),
-    url: project.url || str(asRecord(website?.data)?.url) || `https://example.com/${project.id}`,
+    url:
+      project.url ||
+      str(brandingData.detectedUrl) ||
+      str(asRecord(website?.data)?.url) ||
+      `https://example.com/${project.id}`,
   };
 }
 
