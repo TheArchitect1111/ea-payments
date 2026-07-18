@@ -9,7 +9,8 @@ import {
   exportFactoryConceptPackMarkdown,
   renderFactoryConceptPackEmailHtml,
 } from '@/lib/factory-concept-pack';
-import { loadConceptSampleInlineImages } from '@/lib/factory-concept-mockups';
+import { formatUsdRange } from '@/lib/factory-capacity-score';
+import { generateCustomConceptInlineImages } from '@/lib/factory-concept-mockups';
 import { getProject } from '@/lib/factory-project';
 import { ctpAssetIdFromUrl } from '@/lib/factory-research/image-signal';
 import { saveFactoryProject, type FactoryProject } from '@/lib/factory-project-store';
@@ -135,15 +136,44 @@ export async function notifyFactoryDone(
   if (!okStop) return { ok: false, error: 'Project is still processing.' };
 
   const pack = buildFactoryConceptPack(project);
+  const publicHeroUrl = pack.heroImageUrl?.startsWith('http') ? pack.heroImageUrl : undefined;
+
+  let customSamples: Awaited<ReturnType<typeof generateCustomConceptInlineImages>> = [];
+  try {
+    customSamples = await generateCustomConceptInlineImages({
+      clientName: pack.clientName,
+      tagline: pack.landing.subhead,
+      cta: pack.landing.cta,
+      score: pack.scorecard.overallScore,
+      capacityLabel: formatUsdRange(
+        pack.scorecard.capacityLost.annualLow,
+        pack.scorecard.capacityLost.annualHigh,
+      ),
+      opportunityLabel: formatUsdRange(
+        pack.scorecard.opportunityGained.annualLow,
+        pack.scorecard.opportunityGained.annualHigh,
+      ),
+      heroImageUrl: publicHeroUrl,
+    });
+    console.info('[factory-notify] custom mockups generated', {
+      projectId,
+      count: customSamples.length,
+    });
+  } catch (err) {
+    console.error('[factory-notify] custom mockup generation failed', projectId, err);
+  }
+
   const inline = await loadInlineHero(project);
-  const samples = await loadConceptSampleInlineImages();
   if (inline.heroCidUrl) {
     pack.heroImageUrl = inline.heroCidUrl;
   }
+
   const packageMarkdown = exportFactoryConceptPackMarkdown(pack);
-  const packageHtml = renderFactoryConceptPackEmailHtml(pack, escHtml, { inlineSamples: true });
+  const packageHtml = renderFactoryConceptPackEmailHtml(pack, escHtml, {
+    inlineSamples: customSamples.length > 0,
+  });
   const safeName = pack.clientName.replace(/[^\w.-]+/g, '-').slice(0, 48) || 'concept-pack';
-  const inlineImages = [...(inline.inlineImages || []), ...samples];
+  const inlineImages = [...(inline.inlineImages || []), ...customSamples];
 
   try {
     let sent = await sendFactoryPackageReadyEmail({
@@ -154,7 +184,6 @@ export async function notifyFactoryDone(
       filename: `concept-pack-${safeName}-${project.id}.md`,
       inlineImages,
     });
-    // If attachments blow limits, retry with public sample URLs (no CID samples).
     if (!sent.ok && inlineImages.length) {
       console.warn('[factory-notify] retry ready email without heavy inline assets', projectId, sent.error);
       const packRetry = buildFactoryConceptPack(project);
@@ -164,6 +193,7 @@ export async function notifyFactoryDone(
         packageMarkdown: exportFactoryConceptPackMarkdown(packRetry),
         packageHtml: renderFactoryConceptPackEmailHtml(packRetry, escHtml, { inlineSamples: false }),
         filename: `concept-pack-${safeName}-${project.id}.md`,
+        inlineImages: customSamples,
       });
     }
     if (!sent.ok) {
@@ -173,7 +203,7 @@ export async function notifyFactoryDone(
     console.info('[factory-notify] Concept Pack emailed', {
       projectId,
       client: pack.clientName,
-      sampleCount: samples.length,
+      customMockups: customSamples.length,
       hasHero: Boolean(inline.inlineImages?.length),
       score: pack.scorecard.overallScore,
     });
