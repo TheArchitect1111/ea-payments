@@ -182,6 +182,11 @@ export function factoryQueueHealth(projects: FactoryProject[]): {
   intake: number;
   intakeComplete: number;
   researching: number;
+  discovering: number;
+  planning: number;
+  building: number;
+  underReview: number;
+  failed: number;
   oldestQueuedAt: string | null;
 } {
   const queued = projects.filter((p) => p.pipelineStatus === 'QUEUED');
@@ -189,6 +194,11 @@ export function factoryQueueHealth(projects: FactoryProject[]): {
   const intake = projects.filter((p) => p.pipelineStatus === 'INTAKE');
   const intakeComplete = projects.filter((p) => p.pipelineStatus === 'INTAKE_COMPLETE');
   const researching = projects.filter((p) => p.pipelineStatus === 'RESEARCHING');
+  const discovering = projects.filter((p) => p.pipelineStatus === 'DISCOVERING');
+  const planning = projects.filter((p) => p.pipelineStatus === 'PLANNING');
+  const building = projects.filter((p) => p.pipelineStatus === 'BUILDING');
+  const underReview = projects.filter((p) => p.pipelineStatus === 'UNDER_REVIEW');
+  const failed = projects.filter((p) => p.pipelineStatus === 'FAILED');
   const oldest = queued
     .map((p) => p.queuedAt || p.updatedAt)
     .sort()[0];
@@ -198,6 +208,11 @@ export function factoryQueueHealth(projects: FactoryProject[]): {
     intake: intake.length,
     intakeComplete: intakeComplete.length,
     researching: researching.length,
+    discovering: discovering.length,
+    planning: planning.length,
+    building: building.length,
+    underReview: underReview.length,
+    failed: failed.length,
     oldestQueuedAt: oldest ?? null,
   };
 }
