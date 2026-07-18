@@ -91,7 +91,11 @@ export default function ProjectsClient({ initialProjects }: { initialProjects: P
             {projects.length === 0 ? (
               <tr>
                 <td colSpan={6} className="px-4 py-8 text-center text-neutral-500">
-                  No factory projects yet. POST /api/launch or say “Launch …” from ChatGPT.
+                  No factory projects yet.{' '}
+                  <Link href="/admin/ea-factory/launch" className="font-semibold underline">
+                    Start a Launch
+                  </Link>
+                  .
                 </td>
               </tr>
             ) : (
