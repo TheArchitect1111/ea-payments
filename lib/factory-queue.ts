@@ -191,5 +191,11 @@ export async function launchFactoryProjectFlow(
   const queued = await enqueueFactoryProject(projectId);
   if (!queued) return null;
   scheduleFactoryGenerateJob(projectId);
+  try {
+    const { notifyFactoryStarted } = await import('@/lib/factory-notify');
+    await notifyFactoryStarted(projectId);
+  } catch (err) {
+    console.error('[factory-queue] start notify failed', projectId, err);
+  }
   return queued;
 }

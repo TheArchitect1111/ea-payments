@@ -166,6 +166,14 @@ export async function runFactoryOrchestrator(projectId: string): Promise<Factory
     });
     const { scheduleFactoryGenerateJob } = await import('@/lib/factory-queue');
     scheduleFactoryGenerateJob(projectId);
+  } else if (leftover) {
+    // No more automatic work — email once (done). Failures notify separately.
+    try {
+      const { notifyFactoryDone } = await import('@/lib/factory-notify');
+      await notifyFactoryDone(projectId);
+    } catch (err) {
+      console.error('[factory-orchestrator] done notify failed', projectId, err);
+    }
   }
 
   return getProject(projectId);
@@ -187,5 +195,14 @@ export async function failOrchestration(
   projectId: string,
   message: string,
 ): Promise<FactoryProject | null> {
-  return transitionFactoryProject(projectId, 'FAILED', 'generate', message, { error: message });
+  const failed = await transitionFactoryProject(projectId, 'FAILED', 'generate', message, {
+    error: message,
+  });
+  try {
+    const { notifyFactoryFailed } = await import('@/lib/factory-notify');
+    await notifyFactoryFailed(projectId);
+  } catch (err) {
+    console.error('[factory-orchestrator] failed notify failed', projectId, err);
+  }
+  return failed;
 }

@@ -142,6 +142,12 @@ export type FactoryProject = {
   updatedAt: string;
   queuedAt?: string;
   activity: FactoryActivity[];
+  /** Email notify dedupe — start / done / failed only (not every step). */
+  notifySent?: {
+    startedAt?: string;
+    doneAt?: string;
+    failedAt?: string;
+  };
 };
 
 const ORG_ID = 'ea-factory';
