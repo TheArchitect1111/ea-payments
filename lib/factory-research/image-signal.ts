@@ -63,30 +63,58 @@ function parseOpportunities(text: string): string[] {
     .slice(0, 5);
 }
 
+function cleanBusinessName(raw: string | undefined, fallbackName: string): string {
+  if (!raw?.trim()) return fallbackName;
+  const name = raw
+    .replace(/^#+\s*/, '')
+    .replace(/^\*+\s*/, '')
+    .replace(/^BUSINESS_NAME:\s*/i, '')
+    .replace(/\.(jpg|jpeg|png|webp|heic)$/i, '')
+    .replace(/^["']|["']$/g, '')
+    .trim()
+    .slice(0, 120);
+
+  if (!name || name.length < 2) return fallbackName;
+  if (/^https?:\/\//i.test(name)) return fallbackName;
+  if (/\/api\/ctp\/assets\//i.test(name)) return fallbackName;
+  if (/^(screenshot|image capture|photo project|duckduckgo)\b/i.test(name)) return fallbackName;
+  // Bare hostnames from a bad website scrape of our own asset/CDN are not client names.
+  if (/^[\w.-]+\.(online|com|org|net|io)$/i.test(name) && /efficiencyarchitects/i.test(name)) {
+    return fallbackName;
+  }
+  return name;
+}
+
 export function parseFactoryVisionText(
   visionText: string,
   fallbackName: string,
 ): Omit<FactoryImageSignal, 'assetId' | 'imageUrl' | 'fileName' | 'mimeType' | 'visionText'> {
-  const suggested =
-    lineValue(visionText, 'BUSINESS_NAME') ||
-    visionText
-      .split('\n')
-      .map((l) => l.trim())
-      .find((l) => l.length > 2 && l.length < 80 && !/^(this is|screenshot|image|the photo)/i.test(l)) ||
-    fallbackName;
+  const labeled = lineValue(visionText, 'BUSINESS_NAME');
+  const proseLine = visionText
+    .split('\n')
+    .map((l) => l.trim())
+    .find(
+      (l) =>
+        l.length > 2 &&
+        l.length < 80 &&
+        !/^#+\s*/.test(l) &&
+        !/^(this is|screenshot|image|the photo|BUSINESS_NAME|WHAT_THEY_DO|AUDIENCE|CTA|URL|OPPORTUNITIES|SUMMARY)\b/i.test(
+          l,
+        ),
+    );
 
-  const cleanName = suggested
-    .replace(/^BUSINESS_NAME:\s*/i, '')
-    .replace(/\.(jpg|jpeg|png|webp|heic)$/i, '')
-    .trim()
-    .slice(0, 120);
+  const suggestedClientName = cleanBusinessName(labeled || proseLine, fallbackName);
+
+  const rawUrl = lineValue(visionText, 'URL')?.match(/https?:\/\/\S+/i)?.[0] || lineValue(visionText, 'URL');
+  const url =
+    rawUrl && !/\/api\/ctp\/assets\//i.test(rawUrl) && /^https?:\/\//i.test(rawUrl) ? rawUrl : undefined;
 
   return {
-    suggestedClientName: cleanName || fallbackName,
+    suggestedClientName,
     whatTheyDo: lineValue(visionText, 'WHAT_THEY_DO'),
     audience: lineValue(visionText, 'AUDIENCE'),
     cta: lineValue(visionText, 'CTA'),
-    url: lineValue(visionText, 'URL')?.match(/https?:\/\/\S+/i)?.[0] || lineValue(visionText, 'URL'),
+    url,
     opportunities: parseOpportunities(visionText),
     summary:
       lineValue(visionText, 'SUMMARY') ||
