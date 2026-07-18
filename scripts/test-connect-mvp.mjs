@@ -1,6 +1,8 @@
 const baseUrl = (process.env.CONNECT_SMOKE_BASE_URL || 'http://localhost:3000').replace(/\/$/, '');
 const orgSlug = process.env.CONNECT_SMOKE_SLUG || process.env.CONNECT_SMOKE_ORG || 'demo-client';
-const email = process.env.CONNECT_SMOKE_EMAIL || `connect-smoke-${Date.now()}@example.com`;
+const email =
+  process.env.CONNECT_SMOKE_EMAIL ||
+  `connect-smoke-${Date.now()}@efficiencyarchitects.online`;
 
 async function readJson(res) {
   const text = await res.text();

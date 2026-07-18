@@ -11,6 +11,7 @@ import {
 import { previewPathForPage, type ExperiencePage } from '@/lib/experience-builder/types';
 import { airtableConfigured } from '@/lib/data/airtable-client';
 import { publicPortalLoginUrl } from '@/lib/ctp-portal-host';
+import { ensureOrganizationForPortal, findOrganizationByPortalSlug } from '@/lib/organizations';
 import { EA_PLATFORM_URL } from '@/lib/platform-urls';
 import { syntheticOrgId } from '@/lib/platform-store';
 
@@ -18,6 +19,8 @@ export type WebsitePortalProvisionInput = {
   portalSlug: string;
   businessName: string;
   organizationName?: string;
+  /** Persisted Organizations record id (not synthetic org_*). */
+  organizationId?: string;
   tagline?: string;
   industry?: string;
   email?: string;
@@ -111,11 +114,47 @@ export function buildStarterWebsitePuckData(input: WebsitePortalProvisionInput):
 }
 
 export async function findPublishedSitePage(portalSlug: string): Promise<ExperiencePage | null> {
-  const pages = await listExperiencePages(portalSlug);
-  const published = pages.filter((page) => page.status === 'published');
-  if (published.length === 0) return null;
-  const home = published.find((page) => page.title.toLowerCase() === 'home' || page.id.includes('-home-'));
-  return home || published[0];
+  const slug = portalSlug.trim().toLowerCase();
+  const orgCandidates = [syntheticOrgId(slug), slug];
+  try {
+    const org = await findOrganizationByPortalSlug(slug);
+    if (org?.id) orgCandidates.unshift(org.id);
+  } catch {
+    // optional org lookup
+  }
+
+  for (const orgId of [...new Set(orgCandidates)]) {
+    try {
+      const pages = await listExperiencePages(orgId, slug);
+      const published = pages.filter((page) => page.status === 'published');
+      if (published.length === 0) continue;
+      const home = published.find(
+        (page) => page.title.toLowerCase() === 'home' || page.id.includes('-home-'),
+      );
+      return home || published[0];
+    } catch {
+      // try next org candidate
+    }
+  }
+  return null;
+}
+
+async function resolvePersistedOrgId(input: WebsitePortalProvisionInput, slug: string): Promise<string | null> {
+  const candidates = [input.organizationId, (await findOrganizationByPortalSlug(slug).catch(() => null))?.id];
+  for (const id of candidates) {
+    if (id && !id.startsWith('org_')) return id;
+  }
+  try {
+    const { orgId } = await ensureOrganizationForPortal({
+      portalSlug: slug,
+      name: input.businessName,
+      organizationName: input.organizationName || input.businessName,
+    });
+    if (orgId && !orgId.startsWith('org_')) return orgId;
+  } catch {
+    return null;
+  }
+  return null;
 }
 
 export async function provisionWebsitePortalSite(
@@ -127,6 +166,15 @@ export async function provisionWebsitePortalSite(
   }
 
   try {
+    const organizationId = await resolvePersistedOrgId(input, slug);
+    if (!organizationId) {
+      return {
+        ok: false,
+        error:
+          'Experience Builder requires a persisted organization ID. Ensure Organizations table provisioning succeeded for this portal slug.',
+      };
+    }
+
     const existing = await findPublishedSitePage(slug);
     if (existing && !input.force) {
       return {
@@ -141,7 +189,7 @@ export async function provisionWebsitePortalSite(
     const id = existing?.id || `exp-home-${slug}-${Date.now().toString(36)}`;
     const page: ExperiencePage = {
       id,
-      organizationId: syntheticOrgId(slug),
+      organizationId,
       portalSlug: slug,
       title: 'Home',
       status: 'published',

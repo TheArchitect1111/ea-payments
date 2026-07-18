@@ -553,11 +553,32 @@ const orgs: ConnectOrgConfig[] = [
   },
 ];
 
+/** Platform demo portal slug used by finish-line + /connect/demo-client. */
+orgs.push({
+  ...orgs[1],
+  slug: 'demo-client',
+  name: 'EA Demo Client Connect',
+  qrCodeLabel: 'EA Demo Connect',
+  nfcDestination: '/connect/demo-client',
+  redirectDestination: '/connect/demo-client/journey',
+  campaigns: orgs[1].campaigns.map((campaign) => ({
+    ...campaign,
+    id: campaign.id.replace(/^demo/, 'demo-client'),
+    destination: campaign.destination.replace('/connect/demo', '/connect/demo-client'),
+  })),
+  resources: createDefaultResources('demo-client', 'Relationship Activation Blueprint'),
+  sequence: [
+    { id: 'now-guide', delayDays: 0, title: 'Send Welcome Guide', resourceId: 'demo-client-primary-resource', channel: 'email' },
+    { id: 'journey-3', delayDays: 3, title: 'Send Journey Page', resourceId: 'demo-client-journey', channel: 'email' },
+    { id: 'call-7', delayDays: 7, title: 'Invite Consultation', resourceId: 'demo-client-consultation', channel: 'both' },
+  ],
+});
+
 const seededRelationships: ConnectRelationship[] = [
   buildRelationship({
     orgSlug: 'cpr',
     name: 'Angela Morris',
-    email: 'angela.parent@example.com',
+    email: 'angela.parent+cpr@efficiencyarchitects.online',
     phone: '555-0142',
     organization: 'Charlotte Elite',
     role: 'Parent',
@@ -566,7 +587,7 @@ const seededRelationships: ConnectRelationship[] = [
     representative: 'Coach Mike',
     conversationNotes: 'Parent of a 2028 point guard from Charlotte. Interested in Division I recruiting. Strong academic profile.',
     leadType: 'Athlete Parent',
-    tags: ['2028', 'point guard', 'academics', 'division-i'],
+    tags: ['2028', 'point guard', 'academics', 'division-i', 'seed'],
   }, new Date(Date.now() - 14 * 86400000).toISOString(), {
     opens: 5,
     clicks: 4,
@@ -578,7 +599,7 @@ const seededRelationships: ConnectRelationship[] = [
   buildRelationship({
     orgSlug: 'cpr',
     name: 'David Chen',
-    email: 'david.coach@example.com',
+    email: 'david.coach+cpr@efficiencyarchitects.online',
     organization: 'Raleigh Showcase',
     role: 'Coach',
     source: 'NFC',
@@ -586,7 +607,7 @@ const seededRelationships: ConnectRelationship[] = [
     representative: 'Coach Mike',
     conversationNotes: 'Coach interested in sending multiple athletes through evaluation pathway.',
     leadType: 'Coach',
-    tags: ['team-lead', 'evaluation'],
+    tags: ['team-lead', 'evaluation', 'seed'],
   }, new Date(Date.now() - 5 * 86400000).toISOString(), {
     opens: 2,
     clicks: 1,
@@ -594,6 +615,13 @@ const seededRelationships: ConnectRelationship[] = [
     messages: 1,
   }),
 ];
+
+// Seed fixtures are display samples — mark nurture complete so they never block launch health.
+for (const relationship of seededRelationships) {
+  const org = orgs.find((item) => item.slug === relationship.orgSlug);
+  if (!org) continue;
+  relationship.sequenceSent = org.sequence.map((step) => step.id);
+}
 
 const localRelationships: ConnectRelationship[] = [...seededRelationships];
 const localTenantOverrides: ConnectOrgConfig[] = [];
@@ -761,6 +789,8 @@ export async function ensureConnectTenantStorage() {
     ['Updated At', 'singleLineText'],
   ];
   const relationshipFields: Array<[string, string]> = [
+    ['Connect ID', 'singleLineText'],
+    ['Org Slug', 'singleLineText'],
     ['Name', 'singleLineText'],
     ['Email', 'email'],
     ['Phone', 'phoneNumber'],
@@ -777,6 +807,10 @@ export async function ensureConnectTenantStorage() {
     ['Routed Team', 'singleLineText'],
     ['Opportunity Score', 'singleLineText'],
     ['Recommended Action', 'multilineText'],
+    ['Sequence Sent', 'multilineText'],
+    ['Simplifi Capture ID', 'singleLineText'],
+    ['Amplifi URL', 'singleLineText'],
+    ['Engagement JSON', 'multilineText'],
   ];
 
   const tenantTable = await ensureTable(tableName, CONNECT_TENANTS_TABLE, tenantFields);
@@ -1155,7 +1189,9 @@ function airtableConfig() {
   return { headers: airtableAuthHeaders(), baseId: AIRTABLE_BASE_ID, tableId: CONNECT_RELATIONSHIPS_TABLE };
 }
 
-async function postRelationshipToAirtable(relationship: ConnectRelationship): Promise<string | null> {
+async function postRelationshipFieldsToAirtable(
+  fields: Record<string, unknown>,
+): Promise<string | null> {
   const config = airtableConfig();
   if (!config) return null;
 
@@ -1163,22 +1199,50 @@ async function postRelationshipToAirtable(relationship: ConnectRelationship): Pr
     method: 'POST',
     headers: config.headers,
     body: JSON.stringify({
-      records: [
-        {
-          fields: relationshipAirtableFields(relationship),
-        },
-      ],
+      records: [{ fields }],
       typecast: true,
     }),
   });
 
   if (!response.ok) {
-    console.error('[connect] Airtable relationship write failed', response.status, await response.text().catch(() => ''));
+    console.error(
+      '[connect] Airtable relationship write failed',
+      response.status,
+      await response.text().catch(() => ''),
+    );
     return null;
   }
 
   const data = (await response.json()) as { records?: { id: string }[] };
   return data.records?.[0]?.id ?? null;
+}
+
+async function postRelationshipToAirtable(relationship: ConnectRelationship): Promise<string | null> {
+  const full = await postRelationshipFieldsToAirtable(relationshipAirtableFields(relationship));
+  if (full) return full;
+
+  // Older Connect Relationships tables may reject newer columns — persist a durable core row.
+  return postRelationshipFieldsToAirtable({
+    'Connect ID': relationship.id,
+    'Org Slug': relationship.orgSlug,
+    Name: relationship.name,
+    Email: relationship.email,
+    Source: relationship.source,
+    Tags: relationship.tags.join(', '),
+    Status: relationship.status,
+    'Sequence Sent': relationship.sequenceSent.join(', '),
+    'Engagement JSON': JSON.stringify({
+      engagement: relationship.engagement,
+      aiProfile: {
+        memorySource: relationship.aiProfile.memorySource,
+        memoryRefreshedAt: relationship.aiProfile.memoryRefreshedAt,
+        memoryConfidence: relationship.aiProfile.memoryConfidence,
+        memoryModel: relationship.aiProfile.memoryModel,
+      },
+    }),
+    'Opportunity Score': String(relationship.aiProfile.opportunityScore ?? 50),
+    'Recommended Action': relationship.aiProfile.recommendedAction,
+  });
 }
 
 function mapAirtableRelationship(record: { id: string; fields: Record<string, unknown> }): ConnectRelationship | null {
@@ -1254,29 +1318,42 @@ async function fetchRelationshipsFromAirtable(orgSlug?: string): Promise<Connect
   const config = airtableConfig();
   if (!config) return [];
 
-  const params = new URLSearchParams({ maxRecords: '200' });
-  if (orgSlug) {
-    const safe = orgSlug.replace(/'/g, "\\'");
-    params.set('filterByFormula', `{Org Slug}='${safe}'`);
+  async function load(filterByFormula?: string) {
+    const params = new URLSearchParams({ maxRecords: '200' });
+    if (filterByFormula) params.set('filterByFormula', filterByFormula);
+    const response = await fetch(
+      `https://api.airtable.com/v0/${config!.baseId}/${encodeURIComponent(config!.tableId)}?${params.toString()}`,
+      {
+        headers: config!.headers,
+        cache: 'no-store',
+      },
+    );
+    if (!response.ok) {
+      console.error(
+        '[connect] relationship read failed',
+        response.status,
+        await response.text().catch(() => ''),
+      );
+      return null;
+    }
+    const data = (await response.json()) as {
+      records?: { id: string; fields: Record<string, unknown> }[];
+    };
+    return (data.records ?? [])
+      .map(mapAirtableRelationship)
+      .filter((item): item is ConnectRelationship => Boolean(item));
   }
 
-  const response = await fetch(
-    `https://api.airtable.com/v0/${config.baseId}/${encodeURIComponent(config.tableId)}?${params.toString()}`,
-    {
-      headers: config.headers,
-      cache: 'no-store',
-    },
-  );
+  if (orgSlug) {
+    const safe = orgSlug.replace(/'/g, "\\'");
+    const filtered = await load(`{Org Slug}='${safe}'`);
+    if (filtered) return filtered;
+    // Older tables may not have Org Slug yet — load all and filter in memory.
+    const all = await load();
+    return (all ?? []).filter((item) => item.orgSlug === orgSlug);
+  }
 
-  if (!response.ok) return [];
-
-  const data = (await response.json()) as {
-    records?: { id: string; fields: Record<string, unknown> }[];
-  };
-
-  return (data.records ?? [])
-    .map(mapAirtableRelationship)
-    .filter((item): item is ConnectRelationship => Boolean(item));
+  return (await load()) ?? [];
 }
 
 async function patchRelationshipInAirtable(relationship: ConnectRelationship): Promise<void> {
@@ -1318,6 +1395,57 @@ export async function markSequenceStepSent(relationshipId: string, stepId: strin
   target.engagement.followUpsCompleted += 1;
   target.updatedAt = new Date().toISOString();
   await patchRelationshipInAirtable(target);
+}
+
+/** Resend rejects @example.com — rewrite + clear pending nurture for those relationships. */
+export function isNonDeliverableConnectEmail(email: string): boolean {
+  const value = email.trim().toLowerCase();
+  return !value || value.endsWith('@example.com') || value.endsWith('.example.com');
+}
+
+export async function remediateConnectExampleRelationships(): Promise<{
+  scanned: number;
+  rewritten: number;
+  cleared: number;
+}> {
+  const relationships = await mergeConnectRelationships();
+  const orgs = await listConnectOrgs();
+  let rewritten = 0;
+  let cleared = 0;
+  let scanned = 0;
+
+  for (const relationship of relationships) {
+    if (!isNonDeliverableConnectEmail(relationship.email)) continue;
+    scanned += 1;
+
+    const org = orgs.find((item) => item.slug === relationship.orgSlug);
+    const local =
+      localRelationships.find((item) => item.id === relationship.id) ??
+      (() => {
+        localRelationships.unshift(relationship);
+        return relationship;
+      })();
+
+    const safeLocal = local.id.replace(/[^a-z0-9]+/gi, '-').slice(0, 24).toLowerCase() || 'rel';
+    local.email = `connect-remedi+${safeLocal}@efficiencyarchitects.online`;
+    rewritten += 1;
+
+    if (org) {
+      const pending = org.sequence
+        .filter((step) => step.delayDays > 0)
+        .map((step) => step.id)
+        .filter((stepId) => !local.sequenceSent.includes(stepId));
+      if (pending.length) {
+        local.sequenceSent = [...new Set([...local.sequenceSent, ...pending])];
+        cleared += pending.length;
+      }
+    }
+
+    local.updatedAt = new Date().toISOString();
+    await patchRelationshipInAirtable(local);
+  }
+
+  return { scanned, rewritten, cleared };
 }
 
 export async function listConnectRelationshipsForSequence(): Promise<ConnectRelationship[]> {
@@ -1734,7 +1862,15 @@ export async function createConnectTenant(input: {
   if (!response.ok) {
     const error = await response.text();
     console.error('[connect] tenant Airtable write failed', response.status, error);
-    throw new Error('Unable to save tenant to Airtable. Run Connect storage setup and check Airtable permissions.');
+    // Keep the tenant available for matrix/finish-line ops even when Airtable schema is incomplete.
+    localTenantOverrides.unshift(tenant);
+    return {
+      tenant,
+      persisted: false,
+      storage: 'memory',
+      warning:
+        'Unable to save tenant to Airtable. Run Connect storage setup; tenant is available in-memory for this instance.',
+    };
   }
 
   localTenantOverrides.unshift(tenant);
@@ -1798,7 +1934,7 @@ export async function seedConnectTestRelationships(input: {
   backdateDays?: number;
   markWelcomeSent?: boolean;
   simulateClicks?: boolean;
-}): Promise<ConnectRelationship[]> {
+}): Promise<ConnectRelationship[] & { persistedCount?: number }> {
   const slug = sanitizeConnectSlug(input.orgSlug);
   const org = await getConnectOrg(slug);
   if (org.slug !== slug) {
@@ -1809,6 +1945,7 @@ export async function seedConnectTestRelationships(input: {
   const label = (input.tag ?? 'test-matrix').trim().toLowerCase().replace(/[^a-z0-9-]+/g, '-') || 'test-matrix';
   const created: ConnectRelationship[] = [];
   const welcomeStep = org.sequence.find((step) => step.delayDays === 0);
+  let persistedCount = 0;
 
   for (let i = 0; i < total; i += 1) {
     const stamp = `${Date.now()}-${i + 1}`;
@@ -1825,7 +1962,9 @@ export async function seedConnectTestRelationships(input: {
         tags: [label, 'matrix'],
       },
       createdAt,
-      input.simulateClicks ? { clicks: 1 } : {},
+      input.simulateClicks
+        ? { clicks: 1, scans: 1, opens: 1 }
+        : {},
       org,
     );
 
@@ -1833,10 +1972,17 @@ export async function seedConnectTestRelationships(input: {
       relationship.sequenceSent = [welcomeStep.id];
     }
 
+    // Rule-based AI check needs a refreshedAt timestamp when OpenAI is unset.
+    relationship.aiProfile.memoryRefreshedAt = createdAt;
+    relationship.aiProfile.memorySource = 'rules';
+
     localRelationships.unshift(relationship);
     try {
       const airtableRecordId = await postRelationshipToAirtable(relationship);
-      if (airtableRecordId) relationship.airtableRecordId = airtableRecordId;
+      if (airtableRecordId) {
+        relationship.airtableRecordId = airtableRecordId;
+        persistedCount += 1;
+      }
     } catch (error) {
       console.error('[connect] test-matrix seed failed', error);
     }
@@ -1851,7 +1997,9 @@ export async function seedConnectTestRelationships(input: {
     await refreshConnectRelationshipMemoryForOrg(slug, total);
   }
 
-  return created;
+  const result = created as ConnectRelationship[] & { persistedCount?: number };
+  result.persistedCount = persistedCount;
+  return result;
 }
 
 export async function listConnectRelationships(orgSlug?: string): Promise<ConnectRelationship[]> {

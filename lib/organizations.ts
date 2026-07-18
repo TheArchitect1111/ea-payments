@@ -1,7 +1,7 @@
+import { airtableCreate } from '@/lib/data/airtable-client';
 import {
   ORGANIZATIONS_TABLE,
   escapeAirtableString,
-  platformCreate,
   platformQuery,
   platformStoreConfigured,
   platformUpdate,
@@ -134,27 +134,46 @@ export async function createOrganization(input: {
 }): Promise<Organization | null> {
   if (!platformStoreConfigured()) return null;
 
-  const baseFields: Record<string, string> = {
+  const fullFields: Record<string, string> = {
     Name: input.name,
     Slug: input.slug,
     Status: 'Active',
+    'Portal Slug': input.portalSlug,
     ...(input.clientRecordId ? { 'Client Record Id': input.clientRecordId } : {}),
     ...(input.mission ? { Mission: input.mission } : {}),
     ...(input.industry ? { Industry: input.industry } : {}),
   };
 
-  try {
-    const record = await platformCreate(ORGANIZATIONS_TABLE, {
-      ...baseFields,
+  // Production bases vary — try richest payload first, then strip optional columns.
+  const attempts: Record<string, string>[] = [
+    fullFields,
+    {
+      Name: input.name,
+      Slug: input.slug,
+      Status: 'Active',
       'Portal Slug': input.portalSlug,
-    });
-    return record ? mapOrganization(record) : null;
-  } catch (err) {
-    // Older bases without Portal Slug still work via Slug alone.
-    console.error('createOrganization with Portal Slug failed, retrying without:', err);
-    const record = await platformCreate(ORGANIZATIONS_TABLE, baseFields);
-    return record ? mapOrganization(record) : null;
+    },
+    {
+      Name: input.name,
+      Slug: input.slug,
+      Status: 'Active',
+    },
+    {
+      Name: input.name,
+      Slug: input.slug,
+    },
+  ];
+
+  for (const fields of attempts) {
+    try {
+      const record = await airtableCreate(ORGANIZATIONS_TABLE, fields, true);
+      if (record) return mapOrganization(record);
+    } catch (err) {
+      console.error('createOrganization attempt failed:', err);
+    }
   }
+
+  return null;
 }
 
 function allowSyntheticOrganizationFallback(): boolean {
@@ -193,15 +212,18 @@ export async function ensureOrganizationForPortal(input: {
     if (created) {
       return { orgId: created.id, org: created };
     }
+
+    if (!allowSyntheticOrganizationFallback()) {
+      throw new Error(
+        `Organization provisioning failed for portal "${input.portalSlug}". Check Organizations table fields (Name, Slug, Status).`,
+      );
+    }
   } catch (err) {
     console.error('ensureOrganizationForPortal failed:', err);
     if (!allowSyntheticOrganizationFallback()) throw err;
   }
 
   return { orgId: fallbackId, org: null };
-  if (!allowSyntheticOrganizationFallback()) {
-    throw new Error('Organization provisioning failed without a persisted organization.');
-  }
 }
 
 export async function suspendOrganization(orgId: string): Promise<boolean> {

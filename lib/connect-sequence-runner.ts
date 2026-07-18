@@ -1,5 +1,6 @@
 import {
   getConnectOrg,
+  isNonDeliverableConnectEmail,
   listConnectOrgs,
   listConnectRelationshipsForSequence,
   markSequenceStepSent,
@@ -73,6 +74,25 @@ export async function processDueConnectSequences(): Promise<{
         : journeyUrl;
 
       try {
+        if (isNonDeliverableConnectEmail(relationship.email)) {
+          await logConnectChannelDelivery({
+            channel: 'email',
+            provider: 'resend',
+            trigger: 'nurture',
+            orgSlug: org.slug,
+            relationshipId: relationship.id,
+            stepId: step.id,
+            recipient: relationship.email,
+            subject: step.title,
+            result: { ok: false, error: 'Non-deliverable email (@example.com); step cleared.' },
+            skipped: true,
+          });
+          await markSequenceStepSent(relationship.id, step.id);
+          relationship.sequenceSent.push(step.id);
+          skipped += 1;
+          continue;
+        }
+
         if (step.channel === 'email' || step.channel === 'both') {
           const emailResult = await sendConnectSequenceEmail({
             email: relationship.email,
@@ -95,7 +115,14 @@ export async function processDueConnectSequences(): Promise<{
             result: emailResult,
           });
           if (!emailResult.ok) {
-            errors.push(`${relationship.id}/${step.id}: ${emailResult.error ?? 'email failed'}`);
+            const detail = emailResult.error ?? 'email failed';
+            errors.push(`${relationship.id}/${step.id}: ${detail}`);
+            // Permanent provider rejects (e.g. @example.com) should not block launch forever.
+            if (/422|invalid|example\.com|not allowed|undeliver/i.test(detail)) {
+              await markSequenceStepSent(relationship.id, step.id);
+              relationship.sequenceSent.push(step.id);
+              skipped += 1;
+            }
             continue;
           }
         }
@@ -173,6 +200,7 @@ export async function previewDueConnectSequences(): Promise<{
   for (const relationship of relationships) {
     const org = orgs.find((item) => item.slug === relationship.orgSlug);
     if (!org) continue;
+    if (isNonDeliverableConnectEmail(relationship.email)) continue;
 
     const createdAt = new Date(relationship.createdAt).getTime();
     for (const step of org.sequence) {

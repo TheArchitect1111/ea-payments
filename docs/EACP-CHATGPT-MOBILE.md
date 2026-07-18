@@ -4,9 +4,13 @@ This connects ChatGPT mobile to EACP through a protected GPT Action.
 
 ## Production URLs
 
-- OpenAPI schema: `https://ea-payments.vercel.app/api/eacp/openapi`
-- Protected launch endpoint: `https://ea-payments.vercel.app/api/eacp/chatgpt-launch`
-- Review launches: `https://ea-payments.vercel.app/admin/ea-factory/launches`
+- OpenAPI schema: `https://efficiencyarchitects.online/api/eacp/openapi`
+- EACP brief launch: `https://efficiencyarchitects.online/api/eacp/chatgpt-launch`
+- Field demo (site + portal + report + email): `https://efficiencyarchitects.online/api/eacp/field-demo`
+- Connect finish line (ops): `https://efficiencyarchitects.online/api/eacp/connect-finish`
+- Review launches: `https://efficiencyarchitects.online/admin/ea-factory/launches`
+
+Legacy alias: `https://ea-payments.vercel.app/api/eacp/...` also works when that deployment is current.
 
 ## Required Vercel Environment Variable
 
@@ -18,6 +22,8 @@ EACP_CHATGPT_ACTION_KEY=<long-random-secret>
 
 Use the same value as the ChatGPT Action bearer token.
 
+Also required for field demos: `AIRTABLE_API_KEY`, `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `ADMIN_NOTIFICATION_EMAIL`, Creative Studio table, and `ADMIN_SESSION_SECRET` / org store as for normal portal provision.
+
 ## Custom GPT Setup
 
 1. Open ChatGPT on desktop.
@@ -26,7 +32,7 @@ Use the same value as the ChatGPT Action bearer token.
 4. Import the schema from:
 
 ```text
-https://ea-payments.vercel.app/api/eacp/openapi
+https://efficiencyarchitects.online/api/eacp/openapi
 ```
 
 5. Set authentication to API key / bearer token.
@@ -39,9 +45,27 @@ https://ea-payments.vercel.app/api/eacp/openapi
 ```text
 You are EA Factory Command Center.
 
-When the user gives an EACP command, call launchEACPFromChatGPT.
+When the user wants a FIELD DEMO / something to SHOW a client in the room
+(phrases like "field demo", "show this client", "generate a demo", "I am with a prospect"),
+call launchFieldDemo.
 
-Required fields:
+Required for field demo:
+- client (business name)
+- goal
+
+Optional: industry, notes, deliverable (defaults to Website + Portal), contactEmail.
+
+After launchFieldDemo returns, summarize:
+- siteUrl (show this first)
+- reportUrl (findings)
+- portalLoginUrl
+- talkingPoints
+- remind them to check email for the full pack
+
+When the user gives a normal EACP packaging command (briefs only, no live site),
+call launchEACPFromChatGPT instead.
+
+Required for EACP brief launch:
 - client
 - goal
 - deliverable
@@ -49,12 +73,22 @@ Required fields:
 Industry is optional. Notes are strongly recommended.
 
 Do not approve, build, deploy, or archive launches.
-After the action returns, summarize the launch ID, status, and review package link.
-Tell the user that approval must happen inside EA Factory.
+Do not invent URLs — only use links returned by the action.
 If information is missing, ask for the missing fields instead of guessing.
 ```
 
-## Phone Command Example
+## Phone Command Examples
+
+### Field demo (preferred in-room)
+
+```text
+Field demo for: Acme Roofing, Atlanta.
+Industry: home services.
+Goal: book more estimate appointments.
+They use Facebook and word of mouth; no real website.
+```
+
+### EACP brief package only
 
 ```text
 EACP Client: Bob Rumball Centre
@@ -63,7 +97,19 @@ Deliverable: Website + Portal + Learning Hub
 Notes: Convert videos, SOPs, policies, and PowerPoints into modular learning.
 ```
 
+## What field demo creates
+
+1. EACP launch package (Factory trail)
+2. Client record + portal credentials
+3. Organization + package entitlements
+4. Creative Studio brand profile
+5. Live starter website at `/sites/{slug}`
+6. Public findings report at `/demo/{slug}/report`
+7. Founder email via `ADMIN_NOTIFICATION_EMAIL` with show links
+
 ## Security Notes
 
-The ChatGPT action can create EACP launch packages only. It cannot approve,
-start builds, or deploy. Keep approval and deployment inside EA Factory.
+- The ChatGPT action cannot approve, start builds, or charge Stripe.
+- Field demos are tagged `source: field-demo` in Pulse metadata and use synthetic field-demo emails when no contactEmail is provided.
+- Keep `EACP_CHATGPT_ACTION_KEY` secret; rotate if exposed.
+- Field demo is rate-limited per IP.
