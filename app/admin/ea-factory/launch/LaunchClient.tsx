@@ -118,8 +118,9 @@ export default function LaunchClient() {
         Launch
       </h1>
       <p className="mt-2 text-sm leading-6 text-neutral-600">
-        Type a website or company name. Optional: add a photo. After Launch, this screen shows live
-        progress. You’ll get an email when it starts and when it’s ready — not for every step.
+        Type a website, company name, or add a photo — then Launch. The Factory runs automatically.
+        You’ll get an email when it starts and when your <strong>Concept Pack</strong> is ready (same
+        sit-down pack as on a laptop). No login needed to open the email.
       </p>
 
       {result ? (
