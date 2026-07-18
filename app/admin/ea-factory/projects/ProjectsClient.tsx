@@ -210,14 +210,22 @@ export default function ProjectsClient({ initialProjects }: { initialProjects: P
                   <td className="px-4 py-3">
                     <div className="font-semibold text-neutral-900">{project.client}</div>
                     <div className="mt-1 font-mono text-[11px] text-neutral-400">{project.id}</div>
-                    {project.launchReviewUrl ? (
+                    <div className="mt-1 flex flex-wrap gap-2">
                       <Link
-                        href={project.launchReviewUrl}
-                        className="mt-1 inline-block text-xs font-semibold text-[#1B2B4D] underline"
+                        href={`/api/projects/${encodeURIComponent(project.id)}/export`}
+                        className="text-xs font-semibold text-[#1B2B4D] underline"
                       >
-                        Review package
+                        Download package
                       </Link>
-                    ) : null}
+                      {project.launchReviewUrl ? (
+                        <Link
+                          href={project.launchReviewUrl}
+                          className="text-xs font-semibold text-[#1B2B4D] underline"
+                        >
+                          Review package
+                        </Link>
+                      ) : null}
+                    </div>
                     {project.error ? (
                       <p className="mt-1 text-xs text-red-600">{project.error}</p>
                     ) : null}
