@@ -62,8 +62,11 @@ export async function parseFactoryLaunchBody(
   request: NextRequest,
 ): Promise<{ ok: true; body: LaunchProjectInput } | { ok: false; error: string }> {
   const contentType = request.headers.get('content-type') || '';
+  // Prefer JSON when explicitly JSON. Otherwise treat as form (multipart / urlencoded).
+  // Do not require "multipart/form-data" substring — some runtimes omit or rewrite it.
+  const preferJson = contentType.includes('application/json');
 
-  if (contentType.includes('multipart/form-data')) {
+  if (!preferJson) {
     try {
       const form = await request.formData();
       const command = String(form.get('command') ?? form.get('text') ?? '').trim();
@@ -109,6 +112,6 @@ export async function parseFactoryLaunchBody(
     const body = (await request.json()) as LaunchProjectInput;
     return { ok: true, body };
   } catch {
-    return { ok: false, error: 'Invalid JSON body.' };
+    return { ok: false, error: 'Could not read launch details. Try again.' };
   }
 }
