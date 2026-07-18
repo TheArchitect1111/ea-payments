@@ -212,10 +212,17 @@ export default function ProjectsClient({ initialProjects }: { initialProjects: P
                     <div className="mt-1 font-mono text-[11px] text-neutral-400">{project.id}</div>
                     <div className="mt-1 flex flex-wrap gap-2">
                       <Link
+                        href={`/api/projects/${encodeURIComponent(project.id)}/concept-pack`}
+                        target="_blank"
+                        className="text-xs font-semibold text-[#1B2B4D] underline"
+                      >
+                        Concept Pack
+                      </Link>
+                      <Link
                         href={`/api/projects/${encodeURIComponent(project.id)}/export`}
                         className="text-xs font-semibold text-[#1B2B4D] underline"
                       >
-                        Download package
+                        Download
                       </Link>
                       {project.launchReviewUrl ? (
                         <Link
