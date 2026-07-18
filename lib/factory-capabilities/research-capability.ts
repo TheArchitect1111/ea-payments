@@ -37,11 +37,23 @@ async function applyImageSignalIdentity(projectId: string): Promise<void> {
   const shouldRename = isSyntheticPhotoClient(project.client);
   const summary = str(branding.data.visionSummary) || str(branding.data.textPreview);
   const detectedUrl = str(branding.data.detectedUrl);
+  const usableDetectedUrl =
+    detectedUrl &&
+    /^https?:\/\//i.test(detectedUrl) &&
+    !/\/api\/ctp\/assets\//i.test(detectedUrl)
+      ? detectedUrl
+      : undefined;
   const whatTheyDo = str(branding.data.whatTheyDo);
+  const renameLooksValid =
+    shouldRename &&
+    suggested.length > 2 &&
+    !/^#/.test(suggested) &&
+    !/\/api\/ctp\/assets\//i.test(suggested) &&
+    !/^efficiencyarchitects\.online$/i.test(suggested);
 
-  if (!shouldRename && !summary) return;
+  if (!renameLooksValid && !summary) return;
 
-  const nextClient = shouldRename ? suggested : project.client;
+  const nextClient = renameLooksValid ? suggested : project.client;
   const noteBits = [
     project.notes,
     summary && !project.notes?.includes(summary.slice(0, 40)) ? `Photo read: ${summary}` : undefined,
@@ -51,14 +63,14 @@ async function applyImageSignalIdentity(projectId: string): Promise<void> {
   const next = {
     ...project,
     client: nextClient,
-    url: project.url || (detectedUrl?.startsWith('http') ? detectedUrl : project.url),
+    url: project.url || usableDetectedUrl,
     notes: noteBits.join('\n\n') || project.notes,
     context: {
       ...project.context,
       seed: {
         ...project.context.seed,
         client: nextClient,
-        url: project.context.seed.url || (detectedUrl?.startsWith('http') ? detectedUrl : project.context.seed.url),
+        url: project.context.seed.url || usableDetectedUrl,
         notes: noteBits.join('\n\n') || project.context.seed.notes,
       },
     },

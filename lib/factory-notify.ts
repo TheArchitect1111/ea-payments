@@ -143,7 +143,7 @@ export async function notifyFactoryDone(
   const safeName = project.client.replace(/[^\w.-]+/g, '-').slice(0, 48) || 'concept-pack';
 
   try {
-    const sent = await sendFactoryPackageReadyEmail({
+    let sent = await sendFactoryPackageReadyEmail({
       subject: `Concept Pack ready — ${project.client}`,
       clientName: project.client,
       packageMarkdown,
@@ -151,10 +151,28 @@ export async function notifyFactoryDone(
       filename: `concept-pack-${safeName}-${project.id}.md`,
       inlineImages: inline.inlineImages,
     });
+    // If inline photo blows the attach limit / client rules, still send the pack.
+    if (!sent.ok && inline.inlineImages?.length) {
+      console.warn('[factory-notify] retry ready email without inline image', projectId, sent.error);
+      const packNoCid = buildFactoryConceptPack(project);
+      sent = await sendFactoryPackageReadyEmail({
+        subject: `Concept Pack ready — ${project.client}`,
+        clientName: project.client,
+        packageMarkdown: exportFactoryConceptPackMarkdown(packNoCid),
+        packageHtml: renderFactoryConceptPackEmailHtml(packNoCid, escHtml),
+        filename: `concept-pack-${safeName}-${project.id}.md`,
+      });
+    }
     if (!sent.ok) {
       console.error('[factory-notify] done email failed', projectId, sent.error);
       return { ok: false, error: sent.error || 'Email failed.' };
     }
+    console.info('[factory-notify] Concept Pack emailed', {
+      projectId,
+      client: project.client,
+      hasInlineImage: Boolean(inline.inlineImages?.length),
+      score: pack.scorecard.overallScore,
+    });
   } catch (err) {
     console.error('[factory-notify] done email failed', projectId, err);
     return { ok: false, error: err instanceof Error ? err.message : 'Email failed.' };
