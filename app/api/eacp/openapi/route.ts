@@ -1,16 +1,32 @@
 import { NextResponse } from 'next/server';
-import { EA_PLATFORM_URL } from '@/lib/platform-urls';
 
 export const dynamic = 'force-dynamic';
 
+/**
+ * ChatGPT Actions must call the apex host. `www.efficiencyarchitects.online`
+ * often resolves to a different Vercel project and returns NOT_FOUND for API routes.
+ * Prefer apex even when NEXT_PUBLIC_BASE_URL is set to www.
+ */
+function chatgptActionBaseUrl(): string {
+  const raw = (
+    process.env.NEXT_PUBLIC_BASE_URL ||
+    process.env.EA_PLATFORM_URL ||
+    'https://efficiencyarchitects.online'
+  ).replace(/\/$/, '');
+  return raw.replace(
+    /^https?:\/\/www\.efficiencyarchitects\.online/i,
+    'https://efficiencyarchitects.online',
+  );
+}
+
 export async function GET() {
-  const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL || EA_PLATFORM_URL).replace(/\/$/, '');
+  const baseUrl = chatgptActionBaseUrl();
 
   return NextResponse.json({
     openapi: '3.1.0',
     info: {
       title: 'EACP Mobile Launch Action',
-      version: '1.2.0',
+      version: '1.2.1',
       description:
         'Launch EA Factory projects (pipeline) and EACP packages from ChatGPT mobile.',
     },
