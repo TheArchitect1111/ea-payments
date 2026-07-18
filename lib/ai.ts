@@ -4,7 +4,11 @@ export interface EnhancementAssessment {
   estimatedRange: string;
 }
 
-async function callClaude(prompt: string): Promise<string | null> {
+/** Shared Anthropic text call for Factory / content helpers. */
+export async function callClaudeText(
+  prompt: string,
+  options?: { maxTokens?: number },
+): Promise<string | null> {
   const apiKey = process.env.ANTHROPIC_API_KEY ?? process.env.CLAUDE_API_KEY;
   if (!apiKey) return null;
 
@@ -18,7 +22,7 @@ async function callClaude(prompt: string): Promise<string | null> {
       },
       body: JSON.stringify({
         model: process.env.CLAUDE_MODEL ?? 'claude-sonnet-4-6',
-        max_tokens: 900,
+        max_tokens: options?.maxTokens ?? 900,
         messages: [{ role: 'user', content: prompt }],
       }),
     });
@@ -35,6 +39,10 @@ async function callClaude(prompt: string): Promise<string | null> {
     console.error('Claude request error:', err);
     return null;
   }
+}
+
+async function callClaude(prompt: string): Promise<string | null> {
+  return callClaudeText(prompt);
 }
 
 export async function enhanceContentRequest(input: string): Promise<string> {

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireFactoryApiAccess } from '@/lib/factory-api-auth';
 import {
-  buildFactoryConceptPack,
+  buildFactoryConceptPackAsync,
   exportFactoryConceptPackMarkdown,
   renderFactoryConceptPackDocument,
 } from '@/lib/factory-concept-pack';
@@ -9,6 +9,7 @@ import { getProject } from '@/lib/factory-project';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+export const maxDuration = 60;
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -26,7 +27,7 @@ export async function GET(request: NextRequest, { params }: Params) {
     return NextResponse.json({ ok: false, error: 'Project not found.' }, { status: 404 });
   }
 
-  const pack = buildFactoryConceptPack(project);
+  const pack = await buildFactoryConceptPackAsync(project);
   const format = request.nextUrl.searchParams.get('format') || 'html';
   const safeName = project.client.replace(/[^\w.-]+/g, '-').slice(0, 48) || project.id;
 

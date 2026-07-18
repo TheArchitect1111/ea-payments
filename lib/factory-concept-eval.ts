@@ -5,6 +5,7 @@ import {
   formatUsdRange,
   type FactoryCapacityScorecard,
 } from '@/lib/factory-capacity-score';
+import type { FactoryEntityProfile } from '@/lib/factory-entity-profile';
 
 export type ConceptFinding = {
   title: string;
@@ -22,9 +23,22 @@ export type ConceptOpportunity = {
   evidence: string;
 };
 
+export type ConceptWhoTheyAre = {
+  entityType: FactoryEntityProfile['entityType'];
+  narrative: string;
+  whoTheyServe?: string;
+  whatTheyOffer?: string;
+  primaryAsk?: string;
+  howTheySound?: string;
+  opsReality?: string;
+  confidence: FactoryEntityProfile['confidence'];
+  evidence: string[];
+};
+
 export type ConceptConsultantEval = {
   headline: string;
   guideIntro: string;
+  whoTheyAre: ConceptWhoTheyAre;
   findings: ConceptFinding[];
   opportunities: ConceptOpportunity[];
   /** Flat bullets kept for older render paths */
@@ -97,23 +111,91 @@ function dimKeyFromLabel(label: string): string | undefined {
   return undefined;
 }
 
+function evidenceJoin(profile: FactoryEntityProfile, extra?: string): string {
+  const parts = [...profile.evidence.slice(0, 3), extra].filter(Boolean) as string[];
+  return parts.join(' · ').slice(0, 280) || profile.sourceNote;
+}
+
+function profileAwareObservation(
+  key: string | undefined,
+  guide: (typeof DIMENSION_GUIDE)[string] | undefined,
+  profile: FactoryEntityProfile,
+  lineLabel: string,
+): string {
+  if (key === 'visibility' && profile.whatTheyOffer) {
+    return `For ${profile.name}, the offer reads as “${profile.whatTheyOffer.slice(0, 140)}” — but a stranger still needs that in one breath at the front door.`;
+  }
+  if (key === 'conversion' && profile.primaryAsk) {
+    return `The ask we see is “${profile.primaryAsk}” — interested people still stall if that step is buried or feels heavy.`;
+  }
+  if (key === 'trust' && profile.proofSignals.length) {
+    return `Proof exists (${profile.proofSignals.slice(0, 2).join('; ')}), but it may not sit next to the decision moment.`;
+  }
+  if (key === 'trust' && !profile.proofSignals.length) {
+    return `We do not yet see strong proof beside the ask for ${profile.name}.`;
+  }
+  if (profile.frictionSignals[0] && (key === 'conversion' || key === 'visibility')) {
+    return profile.frictionSignals[0];
+  }
+  return guide?.observation || `We see pressure in ${lineLabel.toLowerCase()}.`;
+}
+
 export function buildConsultantEval(input: {
   clientName: string;
   scorecard: FactoryCapacityScorecard;
   signalNote: string;
   summary: string;
   rawOpportunityHints: string[];
+  profile: FactoryEntityProfile;
 }): ConceptConsultantEval {
-  const { clientName, scorecard, signalNote, summary, rawOpportunityHints } = input;
+  const { clientName, scorecard, signalNote, summary, rawOpportunityHints, profile } = input;
   const lost = formatUsdRange(scorecard.capacityLost.annualLow, scorecard.capacityLost.annualHigh);
   const gained = formatUsdRange(
     scorecard.opportunityGained.annualLow,
     scorecard.opportunityGained.annualHigh,
   );
 
-  const guideIntro = `Here’s how I’d walk ${clientName} through this in a sit-down: what we see, why it costs capacity, what to change first, and the evidence behind each recommendation. ${signalNote}`;
+  const entityLabel =
+    profile.entityType === 'person'
+      ? 'person'
+      : profile.entityType === 'business'
+        ? 'business'
+        : profile.entityType === 'organization'
+          ? 'organization'
+          : 'entity';
+
+  const guideIntro = `Here’s how I’d walk ${clientName} through this in a sit-down: who they are, what we see, why it costs capacity, what to change first, and the evidence behind each recommendation. ${signalNote} Confidence in this read: ${profile.confidence}.`;
+
+  const whoTheyAre: ConceptWhoTheyAre = {
+    entityType: profile.entityType,
+    narrative: profile.whoTheyAre,
+    whoTheyServe: profile.whoTheyServe,
+    whatTheyOffer: profile.whatTheyOffer,
+    primaryAsk: profile.primaryAsk,
+    howTheySound: profile.howTheySound,
+    opsReality: profile.opsReality,
+    confidence: profile.confidence,
+    evidence: profile.evidence,
+  };
 
   const findings: ConceptFinding[] = [
+    {
+      title: `Who ${clientName} is`,
+      observation: profile.whoTheyAre,
+      whyItMatters: `The Concept Pack only works if we are talking about the right ${entityLabel} — audience, offer, and ask have to match reality.`,
+      recommendation: [
+        profile.whoTheyServe ? `Keep serving ${profile.whoTheyServe.replace(/\.$/, '')}.` : null,
+        profile.whatTheyOffer
+          ? `Make “${profile.whatTheyOffer.slice(0, 100)}” unmistakable in the first viewport.`
+          : 'Lead with one plain-language promise.',
+        profile.primaryAsk
+          ? `Put “${profile.primaryAsk}” where people decide.`
+          : 'Name one primary next step.',
+      ]
+        .filter(Boolean)
+        .join(' '),
+      evidence: evidenceJoin(profile, summary.slice(0, 100)),
+    },
     {
       title: 'Overall capacity score',
       observation: `${clientName} scores ${scorecard.overallScore}/100 against a healthy benchmark near ${scorecard.benchmark}/100.`,
@@ -130,7 +212,7 @@ export function buildConsultantEval(input: {
         'That number is not accounting — it is a working range so leadership can feel the cost of “good enough” digital.',
       recommendation:
         'Treat this as the case for a guided system: public clarity + ops control + member belonging.',
-      evidence: `${scorecard.capacityLost.headline}. ${scorecard.opportunityGained.assumption}`,
+      evidence: `${scorecard.capacityLost.headline}. ${profile.opsReality || scorecard.opportunityGained.assumption}`,
     },
     {
       title: 'Opportunity if the system is in place',
@@ -148,10 +230,10 @@ export function buildConsultantEval(input: {
     const guide = key ? DIMENSION_GUIDE[key] : undefined;
     findings.push({
       title: guide?.title || line.label,
-      observation: guide?.observation || `We see pressure in ${line.label.toLowerCase()}.`,
+      observation: profileAwareObservation(key, guide, profile, line.label),
       whyItMatters: guide?.why || line.why,
       recommendation: guide?.recommend || 'Address this gap in the public site and the member journey.',
-      evidence: `${formatUsdRange(line.annualLow, line.annualHigh)}/yr tied to this gap · ${line.why}`,
+      evidence: `${formatUsdRange(line.annualLow, line.annualHigh)}/yr tied to this gap · ${evidenceJoin(profile, line.why)}`,
     });
   }
 
@@ -159,7 +241,9 @@ export function buildConsultantEval(input: {
     {
       title: 'One clear public front door',
       plainEnglish:
-        'Right now, people should not have to work to understand who you are for and what to do next.',
+        profile.whatTheyOffer
+          ? `${clientName} should not make people work to understand “${profile.whatTheyOffer.slice(0, 100)}” and what to do next.`
+          : 'Right now, people should not have to work to understand who you are for and what to do next.',
       whatChanges:
         'A calm Apple-simple landing page with one promise and one primary action.',
       impact: `Supports reclaiming part of the ${lost}/yr capacity range.`,
@@ -168,6 +252,7 @@ export function buildConsultantEval(input: {
     {
       title: 'One place to run the operation',
       plainEnglish:
+        profile.opsReality ||
         'Staff should not chase registrations, payments, and messages across scattered tools.',
       whatChanges:
         'An ops portal where today’s work, people, events, and money sit in one view.',
@@ -185,6 +270,17 @@ export function buildConsultantEval(input: {
     },
   ];
 
+  const frictionOpps: ConceptOpportunity[] = profile.frictionSignals
+    .filter((h) => h.trim().length > 12)
+    .slice(0, 2)
+    .map((hint) => ({
+      title: hint.length > 60 ? `${hint.slice(0, 57)}…` : hint,
+      plainEnglish: hint,
+      whatChanges: 'Fold this into the website story and the member journey so it is visible, not buried.',
+      impact: `Supports closing part of the ${lost}/yr gap.`,
+      evidence: evidenceJoin(profile, 'From entity friction signals'),
+    }));
+
   const hintOpps: ConceptOpportunity[] = rawOpportunityHints
     .filter((h) => h.trim().length > 12)
     .slice(0, 2)
@@ -196,11 +292,12 @@ export function buildConsultantEval(input: {
       evidence: 'Drawn from your launch signal and capacity gaps.',
     }));
 
-  const opportunities = [...hintOpps, ...defaultOpps].slice(0, 4);
+  const opportunities = [...frictionOpps, ...hintOpps, ...defaultOpps].slice(0, 5);
 
   return {
     headline: 'Consultant briefing — evidence behind the recommendation',
     guideIntro,
+    whoTheyAre,
     findings,
     opportunities,
     bullets: findings.map(

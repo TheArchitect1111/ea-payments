@@ -83,6 +83,10 @@ function researchFixture(projectId = 'proj-disc-1') {
           title: 'Boys & Girls Clubs of America',
           description: 'Youth development programs and community services',
           ogImage: 'https://cdn.example/og.png',
+          textPreview: 'Great futures start here. Programs for youth and families.',
+          h1: ['Great Futures Start Here'],
+          navLabels: ['About', 'Programs', 'Contact'],
+          ctas: ['Join today'],
         },
       },
     }),
@@ -100,7 +104,20 @@ function researchFixture(projectId = 'proj-disc-1') {
       kind: 'branding',
       providerId: 'branding',
       provenance: { capabilityId: 'research', sourceType: 'image', collectedAt: at, seedClient: 'BGCA' },
-      data: { brandName: 'BGCA', assetType: 'image', name: 'logo.png' },
+      data: {
+        brandName: 'BGCA',
+        suggestedClientName: 'Boys & Girls Clubs',
+        assetType: 'image',
+        name: 'logo.png',
+        hasVision: true,
+        entityType: 'organization',
+        whoTheyAre: 'A youth development nonprofit building great futures.',
+        whatTheyDo: 'After-school programs and mentoring',
+        audience: 'Youth and families',
+        offer: 'Clubs, programs, and mentoring',
+        cta: 'Join today',
+        visionSummary: 'Youth programs with a clear membership ask.',
+      },
     }),
   ];
 }
@@ -156,6 +173,12 @@ function researchFixture(projectId = 'proj-disc-1') {
     recs.every((r) => typeof r.confidence === 'number' && Array.isArray(r.evidence) && r.evidence.length > 0),
     'each recommendation has confidence + evidence',
   );
+
+  const orgProfile = drafts.find((d) => d.kind === 'organization_profile');
+  assert(orgProfile?.data?.whatTheyDo === 'After-school programs and mentoring', 'org profile whatTheyDo from branding');
+  assert(orgProfile?.data?.audience === 'Youth and families', 'org profile audience from branding');
+  assert(orgProfile?.data?.entityType === 'organization', 'org profile entityType');
+  assert(orgProfile?.data?.websiteTextPreview?.includes('Great futures'), 'org profile websiteTextPreview');
 }
 
 // --- Unit: discoveryCanRun gate ---

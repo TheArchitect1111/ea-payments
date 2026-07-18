@@ -20,13 +20,104 @@ import {
   buildConsultantEval,
   type ConceptConsultantEval,
 } from '@/lib/factory-concept-eval';
-import { renderConceptSampleMockups } from '@/lib/factory-concept-mockups';
+import {
+  CONCEPT_CUSTOM_CONTENT_IDS,
+  type ConceptSampleKind,
+} from '@/lib/factory-concept-mockups';
+import {
+  buildFactoryEntityProfileSync,
+  synthesizeFactoryEntityProfile,
+  type FactoryEntityProfile,
+} from '@/lib/factory-entity-profile';
 import { isSyntheticPhotoClient } from '@/lib/factory-research/image-signal';
 import type { FactoryProject } from '@/lib/factory-project-store';
+import { EA_PLATFORM_URL } from '@/lib/platform-urls';
 
 const NAVY = '#1B2B4D';
 const GOLD = '#C9A844';
 const CREAM = '#F8F6F2';
+
+export type ConceptPackEmailOptions = {
+  inlineSamples?: boolean;
+  /** Founder first name — defaults to Robert */
+  recipientName?: string;
+  /** e.g. "2 minutes 14 seconds" */
+  generatedInLabel?: string;
+  reviewUrl?: string;
+  regenerateUrl?: string;
+  newLaunchUrl?: string;
+};
+
+export function formatFactoryGeneratedDuration(startedAtIso: string, endedAt = new Date()): string {
+  const start = Date.parse(startedAtIso);
+  if (!Number.isFinite(start)) return 'a few minutes';
+  const totalSec = Math.max(1, Math.round((endedAt.getTime() - start) / 1000));
+  const minutes = Math.floor(totalSec / 60);
+  const seconds = totalSec % 60;
+  if (minutes <= 0) return `${seconds} second${seconds === 1 ? '' : 's'}`;
+  return `${minutes} minute${minutes === 1 ? '' : 's'} ${seconds} second${seconds === 1 ? '' : 's'}`;
+}
+
+function defaultTalkingPoints(pack: FactoryConceptPack): string[] {
+  const fromOpps = pack.consultant.opportunities
+    .map((o) => o.plainEnglish.trim())
+    .filter((line) => line.length > 24);
+
+  const fromFindings = pack.consultant.findings
+    .filter((f) => /friction|clarity|ops|trust|who /i.test(f.title))
+    .map((f) => f.observation.trim())
+    .filter((line) => line.length > 24 && line.length < 220);
+
+  const defaults = [
+    'Their story could be communicated more clearly within the first few seconds.',
+    'Several day-to-day activities appear to rely on disconnected systems.',
+    'A more connected digital experience could improve engagement while reducing administrative effort.',
+    'Their organization has an opportunity to create a more modern, guided experience for everyone they serve.',
+  ];
+
+  const merged = [...fromOpps, ...fromFindings, ...defaults];
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const line of merged) {
+    const key = line.toLowerCase().slice(0, 48);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(line.length > 180 ? `${line.slice(0, 177)}…` : line);
+    if (out.length >= 4) break;
+  }
+  return out;
+}
+
+function conceptPreviewBlock(
+  kind: ConceptSampleKind,
+  title: string,
+  blurb: string,
+  escHtml: (s: string) => string,
+  useCid: boolean,
+): string {
+  const preview = useCid
+    ? `<img src="cid:${escHtml(CONCEPT_CUSTOM_CONTENT_IDS[kind])}" alt="${escHtml(title)}" width="560" style="width:100%;max-width:560px;height:auto;display:block;border:0;border:1px solid #e8e4dc;" />`
+    : `<p style="margin:0;padding:28px 16px;background:#f5f5f7;border:1px solid #e8e4dc;font-size:13px;color:#777;text-align:center;">Preview image will appear in your emailed Concept Pack.</p>`;
+  return `
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 22px;">
+      <tr><td>
+        <p style="margin:0 0 6px;font-size:16px;font-weight:800;color:${NAVY};line-height:1.35;">${escHtml(title)}</p>
+        <p style="margin:0 0 12px;font-size:14px;color:#444;line-height:1.55;">${escHtml(blurb)}</p>
+        ${preview}
+      </td></tr>
+    </table>`;
+}
+
+function emailCtaButton(label: string, url: string, escHtml: (s: string) => string, primary = false): string {
+  const bg = primary ? GOLD : NAVY;
+  const color = primary ? NAVY : '#FFFFFF';
+  return `
+    <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 10px;">
+      <tr><td style="background-color:${bg};border-radius:2px;">
+        <a href="${escHtml(url)}" target="_blank" style="display:inline-block;padding:14px 22px;color:${color};text-decoration:none;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;font-family:Arial,Helvetica,sans-serif;">${escHtml(label)}</a>
+      </td></tr>
+    </table>`;
+}
 
 function isJunkCopy(text: string | undefined): boolean {
   if (!text?.trim()) return true;
@@ -156,33 +247,34 @@ function brandingCta(project: FactoryProject): string | undefined {
   return typeof cta === 'string' && cta.trim() ? cta.trim().slice(0, 40) : undefined;
 }
 
-export function buildFactoryConceptPack(project: FactoryProject): FactoryConceptPack {
+export function buildFactoryConceptPack(
+  project: FactoryProject,
+  options?: { profile?: FactoryEntityProfile },
+): FactoryConceptPack {
+  const profile = options?.profile ?? buildFactoryEntityProfileSync(project);
   const base = buildFactoryClientPackage(project);
   const scorecard = buildFactoryCapacityScorecard(project);
   const clientName =
-    brandingClientName(project) ||
-    cleanDisplayName(
-      (!isJunkCopy(base.siteSnapshot.title) && base.siteSnapshot.title) || project.client,
-    );
+    cleanDisplayName(profile.name) !== 'Your organization'
+      ? cleanDisplayName(profile.name)
+      : brandingClientName(project) ||
+        cleanDisplayName(
+          (!isJunkCopy(base.siteSnapshot.title) && base.siteSnapshot.title) || project.client,
+        );
   const description =
+    profile.tagline ||
+    profile.whoTheyAre.slice(0, 220) ||
     brandingSummary(project) ||
     (!isJunkCopy(base.siteSnapshot.description) ? base.siteSnapshot.description : undefined) ||
     `${clientName} gets a clear public face, an ops portal to run the work, and a member home that keeps people connected.`;
-  const fromPhoto = Boolean(
-    (project.attachments || []).some((a) => a.type === 'image') &&
-      !(project.url && !/\/api\/ctp\/assets\//i.test(project.url)),
-  );
 
   const rawHints = pickOpportunities(project, [
+    ...profile.frictionSignals,
     ...base.recommendations.filter((r) => !isJunkCopy(r)),
     ...scorecard.gaps,
   ]).slice(0, 5);
 
-  const signalNote = fromPhoto
-    ? 'We started from your launch photo (a sit-down concept — not a finished website audit).'
-    : project.url && !/\/api\/ctp\/assets\//i.test(project.url)
-      ? `We started from ${project.url}.`
-      : 'We started from your launch notes.';
+  const signalNote = profile.sourceNote;
 
   const consultant = buildConsultantEval({
     clientName,
@@ -190,16 +282,17 @@ export function buildFactoryConceptPack(project: FactoryProject): FactoryConcept
     signalNote,
     summary: description,
     rawOpportunityHints: rawHints,
+    profile: { ...profile, name: clientName },
   });
 
-  const cta = brandingCta(project) || 'Get started';
+  const cta = profile.primaryAsk || brandingCta(project) || 'Get started';
 
   return {
     version: 1,
     label: 'Concept Pack',
     clientName,
     projectId: project.id,
-    coverLine: `A consultant briefing for ${clientName}: evidence, plain-English opportunities, and custom product concepts.`,
+    coverLine: `A consultant briefing for ${clientName}: who they are, evidence, plain-English opportunities, and custom product concepts.`,
     sourceUrl: project.url && !/\/api\/ctp\/assets\//i.test(project.url) ? project.url : undefined,
     heroImageUrl: base.imageUrls[0] || base.siteSnapshot.imageUrl,
     scorecard,
@@ -212,7 +305,7 @@ export function buildFactoryConceptPack(project: FactoryProject): FactoryConcept
     landing: {
       headline: clientName,
       subhead: description.slice(0, 220),
-      cta,
+      cta: cta.slice(0, 40),
       points: ['Get started', 'Learn', 'Engage', 'Belong'],
     },
     portal: {
@@ -232,6 +325,14 @@ export function buildFactoryConceptPack(project: FactoryProject): FactoryConcept
     },
     ask: 'If this direction feels right, the next step is approval to refine the Skin Brief and move toward build — with your brand on these concepts.',
   };
+}
+
+/** Prefer this for ready email / print — includes LLM entity synthesis when available. */
+export async function buildFactoryConceptPackAsync(
+  project: FactoryProject,
+): Promise<FactoryConceptPack> {
+  const profile = await synthesizeFactoryEntityProfile(project);
+  return buildFactoryConceptPack(project, { profile });
 }
 
 export function exportFactoryConceptPackMarkdown(pack: FactoryConceptPack): string {
@@ -276,6 +377,26 @@ export function exportFactoryConceptPackMarkdown(pack: FactoryConceptPack): stri
     '',
     pack.consultant.guideIntro,
     '',
+    '## Who they are',
+    '',
+    pack.consultant.whoTheyAre.narrative,
+    '',
+    pack.consultant.whoTheyAre.whoTheyServe
+      ? `**Who they serve:** ${pack.consultant.whoTheyAre.whoTheyServe}`
+      : '',
+    pack.consultant.whoTheyAre.whatTheyOffer
+      ? `**What they offer:** ${pack.consultant.whoTheyAre.whatTheyOffer}`
+      : '',
+    pack.consultant.whoTheyAre.primaryAsk
+      ? `**Primary ask:** ${pack.consultant.whoTheyAre.primaryAsk}`
+      : '',
+    pack.consultant.whoTheyAre.opsReality
+      ? `**Ops reality:** ${pack.consultant.whoTheyAre.opsReality}`
+      : '',
+    `**Confidence:** ${pack.consultant.whoTheyAre.confidence}`,
+    '',
+    ...pack.consultant.whoTheyAre.evidence.map((e) => `- ${e}`),
+    '',
     ...pack.consultant.findings.flatMap((f) => [
       `### ${f.title}`,
       '',
@@ -307,104 +428,155 @@ export function exportFactoryConceptPackMarkdown(pack: FactoryConceptPack): stri
     '',
     pack.ask,
     '',
+    '## Conversation Strategy',
+    '',
+    '1. Start with the website and ask, "Does this feel like your organization?"',
+    '2. Transition to the portal: "What if your staff started every morning here?"',
+    '3. End with the member page: "Imagine every person you serve having a space like this."',
+    '4. Ask which concept generated the most excitement.',
+    '5. Let the client tell you what matters most before discussing implementation.',
+    '',
   ]
     .filter((line, i, arr) => !(line === '' && arr[i - 1] === ''))
     .join('\n');
 }
 
-/** HTML for email body + printable sit-down preview. */
+/**
+ * Canonical Launch Complete email — meeting companion for the founder.
+ * Use this every time a Concept Pack is ready.
+ */
 export function renderFactoryConceptPackEmailHtml(
   pack: FactoryConceptPack,
   escHtml: (s: string) => string,
-  options?: { inlineSamples?: boolean },
+  options?: ConceptPackEmailOptions,
 ): string {
   const s = pack.scorecard;
-  const heroForSignal =
-    pack.heroImageUrl && !pack.heroImageUrl.startsWith('cid:concept-')
-      ? pack.heroImageUrl
-      : undefined;
-  const productMockups = renderConceptSampleMockups({
-    clientName: pack.clientName,
-    heroImageUrl: heroForSignal,
-    useCid: Boolean(options?.inlineSamples),
-    escHtml,
-  });
+  const org = pack.clientName;
+  const recipient = (options?.recipientName || 'Robert').trim() || 'Robert';
+  const generatedIn = options?.generatedInLabel || 'a few minutes';
+  const base = EA_PLATFORM_URL.replace(/\/$/, '');
+  const reviewUrl =
+    options?.reviewUrl || `${base}/api/projects/${encodeURIComponent(pack.projectId)}/concept-pack`;
+  const regenerateUrl =
+    options?.regenerateUrl || `${base}/admin/ea-factory/projects`;
+  const newLaunchUrl = options?.newLaunchUrl || `${base}/admin/ea-factory/launch`;
+  const useCid = options?.inlineSamples !== false;
+  const opportunityRange = formatUsdRange(
+    s.opportunityGained.annualLow,
+    s.opportunityGained.annualHigh,
+  );
+  const talkingPoints = defaultTalkingPoints(pack);
+  const who = pack.consultant.whoTheyAre;
 
-  const findingBlocks = pack.consultant.findings
+  const talkingList = talkingPoints
     .map(
-      (f) => `
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 14px;background:#fff;border:1px solid #e8e4dc;">
-        <tr><td style="padding:14px 16px;">
-          <p style="margin:0 0 8px;font-size:15px;font-weight:800;color:${NAVY};">${escHtml(f.title)}</p>
-          <p style="margin:0 0 6px;font-size:13px;color:#333;line-height:1.55;"><strong>What we see:</strong> ${escHtml(f.observation)}</p>
-          <p style="margin:0 0 6px;font-size:13px;color:#333;line-height:1.55;"><strong>Why it matters:</strong> ${escHtml(f.whyItMatters)}</p>
-          <p style="margin:0 0 6px;font-size:13px;color:#333;line-height:1.55;"><strong>Recommendation:</strong> ${escHtml(f.recommendation)}</p>
-          <p style="margin:0;font-size:12px;color:#777;line-height:1.5;"><strong>Evidence:</strong> ${escHtml(f.evidence)}</p>
-        </td></tr>
-      </table>`,
+      (point) =>
+        `<tr><td style="padding:0 0 10px 0;font-size:14px;color:#333;line-height:1.55;">• ${escHtml(point)}</td></tr>`,
     )
     .join('');
 
-  const opportunityBlocks = pack.consultant.opportunities
-    .map(
-      (o) => `
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 12px;background:#fff;border-left:4px solid ${GOLD};">
-        <tr><td style="padding:14px 16px;">
-          <p style="margin:0 0 8px;font-size:15px;font-weight:800;color:${NAVY};">${escHtml(o.title)}</p>
-          <p style="margin:0 0 8px;font-size:14px;color:#333;line-height:1.55;">${escHtml(o.plainEnglish)}</p>
-          <p style="margin:0 0 4px;font-size:13px;color:#444;"><strong>What changes:</strong> ${escHtml(o.whatChanges)}</p>
-          <p style="margin:0 0 4px;font-size:13px;color:#444;"><strong>Impact:</strong> ${escHtml(o.impact)}</p>
-          <p style="margin:0;font-size:12px;color:#777;"><strong>Evidence:</strong> ${escHtml(o.evidence)}</p>
-        </td></tr>
-      </table>`,
-    )
-    .join('');
+  const whoLine = who?.narrative
+    ? `<p style="margin:0 0 18px;font-size:14px;color:#555;line-height:1.6;"><strong style="color:${NAVY};">Who they are:</strong> ${escHtml(who.narrative.slice(0, 320))}${who.narrative.length > 320 ? '…' : ''}</p>`
+    : '';
 
   return `
-    <p style="margin:0 0 8px;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:${GOLD};">${escHtml(pack.label)} · Consultant briefing</p>
-    <h1 style="margin:0 0 10px;font-size:26px;line-height:1.25;color:${NAVY};">${escHtml(pack.clientName)}</h1>
-    <p style="margin:0 0 8px;font-size:16px;color:#1A1A2E;line-height:1.6;">${escHtml(pack.coverLine)}</p>
-    <p style="margin:0 0 18px;font-size:13px;color:#555;line-height:1.55;">${escHtml(pack.consultant.guideIntro)}</p>
-    <p style="margin:0 0 18px;font-size:12px;color:#888;">Project ${escHtml(pack.projectId)}${pack.sourceUrl ? ` · ${escHtml(pack.sourceUrl)}` : ''}</p>
+    <p style="margin:0 0 16px;font-size:16px;color:#1A1A2E;line-height:1.7;">Hi ${escHtml(recipient)},</p>
+    <p style="margin:0 0 14px;font-size:16px;color:#1A1A2E;line-height:1.7;">Your Launch Concept Pack for <strong>${escHtml(org)}</strong> is complete and ready for review.</p>
+    <p style="margin:0 0 22px;font-size:15px;color:#444;line-height:1.7;">This version is designed to help you lead a live conversation with the client by showing them what their organization could become.</p>
 
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 18px;">
+    ${whoLine}
+
+    <p style="margin:0 0 12px;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:${GOLD};font-family:Arial,Helvetica,sans-serif;">Executive Snapshot</p>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 26px;border:1px solid #e8e4dc;">
       <tr>
-        <td width="33%" style="padding:14px;background:${NAVY};vertical-align:top;">
-          <p style="margin:0 0 6px;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:${GOLD};">Score</p>
-          <p style="margin:0;font-size:32px;font-weight:800;color:#fff;line-height:1;">${s.overallScore}<span style="font-size:14px;font-weight:600;color:rgba(255,255,255,.75);">/100</span></p>
-          <p style="margin:8px 0 0;font-size:11px;color:rgba(255,255,255,.7);">Benchmark ~${s.benchmark}</p>
+        <td style="padding:14px 16px;border-bottom:1px solid #eee;">
+          <p style="margin:0 0 4px;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:#888;font-family:Arial,Helvetica,sans-serif;">Organization</p>
+          <p style="margin:0;font-size:16px;font-weight:700;color:${NAVY};">${escHtml(org)}</p>
         </td>
-        <td width="34%" style="padding:14px;background:#3a2a1a;vertical-align:top;">
-          <p style="margin:0 0 6px;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:#f0c36a;">Capacity lost</p>
-          <p style="margin:0;font-size:18px;font-weight:800;color:#fff;line-height:1.25;">${escHtml(formatUsdRange(s.capacityLost.annualLow, s.capacityLost.annualHigh))}</p>
-          <p style="margin:8px 0 0;font-size:11px;color:rgba(255,255,255,.7);">per year (est.)</p>
+      </tr>
+      <tr>
+        <td style="padding:14px 16px;border-bottom:1px solid #eee;">
+          <p style="margin:0 0 4px;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:#888;font-family:Arial,Helvetica,sans-serif;">Overall Opportunity</p>
+          <p style="margin:0;font-size:22px;font-weight:800;color:${NAVY};">${s.overallScore} <span style="font-size:14px;font-weight:600;color:#777;">/ 100</span></p>
         </td>
-        <td width="33%" style="padding:14px;background:#1e3d2f;vertical-align:top;">
-          <p style="margin:0 0 6px;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:#8fd6a8;">Opportunity gained</p>
-          <p style="margin:0;font-size:18px;font-weight:800;color:#fff;line-height:1.25;">${escHtml(formatUsdRange(s.opportunityGained.annualLow, s.opportunityGained.annualHigh))}</p>
-          <p style="margin:8px 0 0;font-size:11px;color:rgba(255,255,255,.7);">per year (est.)</p>
+      </tr>
+      <tr>
+        <td style="padding:14px 16px;border-bottom:1px solid #eee;">
+          <p style="margin:0 0 4px;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:#888;font-family:Arial,Helvetica,sans-serif;">Estimated Annual Opportunity</p>
+          <p style="margin:0;font-size:18px;font-weight:800;color:${NAVY};">${escHtml(opportunityRange)}</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding:14px 16px;">
+          <p style="margin:0 0 4px;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:#888;font-family:Arial,Helvetica,sans-serif;">Generated In</p>
+          <p style="margin:0;font-size:15px;font-weight:600;color:${NAVY};">${escHtml(generatedIn)}</p>
         </td>
       </tr>
     </table>
 
-    <p style="margin:0 0 12px;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:${NAVY};">${escHtml(pack.consultant.headline)}</p>
-    ${findingBlocks}
+    <p style="margin:0 0 14px;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:${GOLD};font-family:Arial,Helvetica,sans-serif;">What's Ready</p>
 
-    <p style="margin:18px 0 12px;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:${NAVY};">Opportunities — in plain English</p>
-    ${opportunityBlocks}
+    ${conceptPreviewBlock(
+      'landing',
+      '🌐 Website Experience',
+      'A custom homepage concept designed around their mission, audience, and first impression.',
+      escHtml,
+      useCid,
+    )}
+    ${conceptPreviewBlock(
+      'portal',
+      '🖥 Executive Operations Portal',
+      'A working concept showing how leadership could manage registrations, communication, reporting, events, documents, and daily operations from one place.',
+      escHtml,
+      useCid,
+    )}
+    ${conceptPreviewBlock(
+      'member',
+      '👤 Member Experience',
+      'A personalized member page showing how participants, families, donors, volunteers, clients, or employees could stay connected through one digital home.',
+      escHtml,
+      useCid,
+    )}
 
-    <p style="margin:22px 0 12px;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:${NAVY};">Custom product concepts</p>
-    ${productMockups}
-
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:8px 0 0;background:${NAVY};">
-      <tr>
-        <td style="padding:20px;">
-          <p style="margin:0 0 8px;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:${GOLD};">The ask</p>
-          <p style="margin:0;font-size:15px;color:#fff;line-height:1.6;">${escHtml(pack.ask)}</p>
-        </td>
-      </tr>
+    <p style="margin:8px 0 10px;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:${GOLD};font-family:Arial,Helvetica,sans-serif;">Talking Points</p>
+    <p style="margin:0 0 12px;font-size:14px;color:#555;line-height:1.55;">Based on the information provided, these are likely to resonate during your conversation.</p>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 26px;">
+      ${talkingList}
     </table>
-    <p style="margin:16px 0 0;font-size:11px;color:#999;line-height:1.5;">Concept Pack for discussion — not a finished production website or portal.</p>
+
+    <p style="margin:0 0 10px;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:${GOLD};font-family:Arial,Helvetica,sans-serif;">Before You Walk Into The Meeting</p>
+    <p style="margin:0 0 12px;font-size:14px;color:#555;line-height:1.55;">Ask yourself three questions.</p>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 14px;">
+      <tr><td style="padding:0 0 10px;font-size:14px;color:#333;line-height:1.55;">✅ Does the website accurately reflect who they are?</td></tr>
+      <tr><td style="padding:0 0 10px;font-size:14px;color:#333;line-height:1.55;">✅ Does the portal look like something their leadership team would actually use every day?</td></tr>
+      <tr><td style="padding:0 0 10px;font-size:14px;color:#333;line-height:1.55;">✅ Does the member page feel like it belongs to this organization?</td></tr>
+    </table>
+    <p style="margin:0 0 8px;font-size:15px;color:#1A1A2E;line-height:1.6;">If the answer is yes, you're ready.</p>
+    <p style="margin:0 0 22px;font-size:15px;color:#444;line-height:1.6;">If not — select <strong>Regenerate</strong> and Launch will create a new concept.</p>
+
+    <p style="margin:0 0 14px;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:${GOLD};font-family:Arial,Helvetica,sans-serif;">Open Your Concept Pack</p>
+    ${emailCtaButton('Review Concept Pack', reviewUrl, escHtml, true)}
+    ${emailCtaButton('Regenerate Concepts', regenerateUrl, escHtml, false)}
+    ${emailCtaButton('Start New Launch', newLaunchUrl, escHtml, false)}
+
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:28px 0 0;border-top:1px solid #e8e4dc;">
+      <tr><td style="padding:22px 0 0;">
+        <p style="margin:0 0 8px;font-size:14px;font-weight:700;color:${NAVY};">Efficiency Architects</p>
+        <p style="margin:0;font-size:13px;color:#777;line-height:1.55;font-style:italic;">"Helping organizations see what's possible before a single line of code is written."</p>
+      </td></tr>
+    </table>
+
+    <p style="margin:28px 0 10px;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:${GOLD};font-family:Arial,Helvetica,sans-serif;">Conversation Strategy</p>
+    <p style="margin:0 0 12px;font-size:13px;color:#666;line-height:1.5;">Executive Conversation Guide — glance at these before you walk in.</p>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 8px;background:${CREAM};border-left:4px solid ${GOLD};">
+      <tr><td style="padding:16px 18px;">
+        <p style="margin:0 0 10px;font-size:14px;color:#333;line-height:1.55;">1. Start with the website and ask, "Does this feel like your organization?"</p>
+        <p style="margin:0 0 10px;font-size:14px;color:#333;line-height:1.55;">2. Transition to the portal: "What if your staff started every morning here?"</p>
+        <p style="margin:0 0 10px;font-size:14px;color:#333;line-height:1.55;">3. End with the member page: "Imagine every person you serve having a space like this."</p>
+        <p style="margin:0 0 10px;font-size:14px;color:#333;line-height:1.55;">4. Ask which concept generated the most excitement.</p>
+        <p style="margin:0;font-size:14px;color:#333;line-height:1.55;">5. Let the client tell you what matters most before discussing implementation.</p>
+      </td></tr>
+    </table>
   `;
 }
 

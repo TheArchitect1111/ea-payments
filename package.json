@@ -33,6 +33,8 @@
     "test:factory-project-context": "node scripts/test-factory-project-context.mjs",
     "test:factory-capability-registry": "node scripts/test-factory-capability-registry.mjs",
     "test:factory-research": "node scripts/test-factory-research.mjs",
+    "test:factory-entity-audit": "node scripts/test-factory-entity-audit.mjs",
+    "test:factory-launch-email": "node scripts/test-factory-launch-email.mjs",
     "test:factory-discovery": "node scripts/test-factory-discovery.mjs",
     "test:factory-planning": "node scripts/test-factory-planning.mjs",
     "test:factory-production": "node scripts/test-factory-production.mjs",

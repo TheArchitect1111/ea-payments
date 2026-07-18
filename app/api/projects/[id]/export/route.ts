@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireFactoryApiAccess } from '@/lib/factory-api-auth';
 import {
-  buildFactoryConceptPack,
+  buildFactoryConceptPackAsync,
   exportFactoryConceptPackMarkdown,
 } from '@/lib/factory-concept-pack';
 import {
@@ -12,6 +12,7 @@ import { getProject } from '@/lib/factory-project';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+export const maxDuration = 60;
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -51,7 +52,7 @@ export async function GET(request: NextRequest, { params }: Params) {
   }
 
   // Default: sit-down Concept Pack
-  const pack = buildFactoryConceptPack(project);
+  const pack = await buildFactoryConceptPackAsync(project);
   return new NextResponse(exportFactoryConceptPackMarkdown(pack), {
     headers: {
       'Content-Type': 'text/markdown; charset=utf-8',

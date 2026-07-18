@@ -1573,8 +1573,8 @@ export async function sendFactoryPackageReadyEmail(data: {
     `factory-${data.clientName.replace(/[^\w.-]+/g, '-').slice(0, 48) || 'package'}.md`;
 
   const html = baseEmailShell({
-    title: `${data.clientName} — Concept Pack`,
-    eyebrow: 'EA Factory · Sit-down pack',
+    title: 'Launch Complete',
+    eyebrow: `${data.clientName} · Concept Pack Ready`,
     bodyHtml: data.packageHtml,
   });
 

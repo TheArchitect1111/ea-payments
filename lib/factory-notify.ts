@@ -5,8 +5,9 @@
 import { readCtpAssetBytes } from '@/lib/ctp-asset-store';
 import { sendFactoryPackageReadyEmail, sendInternalNotification } from '@/lib/email';
 import {
-  buildFactoryConceptPack,
+  buildFactoryConceptPackAsync,
   exportFactoryConceptPackMarkdown,
+  formatFactoryGeneratedDuration,
   renderFactoryConceptPackEmailHtml,
 } from '@/lib/factory-concept-pack';
 import { formatUsdRange } from '@/lib/factory-capacity-score';
@@ -16,6 +17,8 @@ import { ctpAssetIdFromUrl } from '@/lib/factory-research/image-signal';
 import { saveFactoryProject, type FactoryProject } from '@/lib/factory-project-store';
 import { factoryFriendlyLabel } from '@/lib/factory-status-labels';
 import { EA_PLATFORM_URL } from '@/lib/platform-urls';
+
+const LAUNCH_FOUNDER_NAME = process.env.FACTORY_FOUNDER_NAME?.trim() || 'Robert';
 
 async function loadInlineHero(project: FactoryProject): Promise<{
   heroCidUrl?: string;
@@ -135,7 +138,7 @@ export async function notifyFactoryDone(
         project.pipelineStatus === 'INTAKE_COMPLETE'));
   if (!okStop) return { ok: false, error: 'Project is still processing.' };
 
-  const pack = buildFactoryConceptPack(project);
+  const pack = await buildFactoryConceptPackAsync(project);
   const publicHeroUrl = pack.heroImageUrl?.startsWith('http') ? pack.heroImageUrl : undefined;
 
   let customSamples: Awaited<ReturnType<typeof generateCustomConceptInlineImages>> = [];
@@ -168,16 +171,25 @@ export async function notifyFactoryDone(
     pack.heroImageUrl = inline.heroCidUrl;
   }
 
-  const packageMarkdown = exportFactoryConceptPackMarkdown(pack);
-  const packageHtml = renderFactoryConceptPackEmailHtml(pack, escHtml, {
+  const generatedInLabel = formatFactoryGeneratedDuration(project.createdAt);
+  const base = EA_PLATFORM_URL.replace(/\/$/, '');
+  const emailOptions = {
     inlineSamples: customSamples.length > 0,
-  });
+    recipientName: LAUNCH_FOUNDER_NAME,
+    generatedInLabel,
+    reviewUrl: `${base}/api/projects/${encodeURIComponent(project.id)}/concept-pack`,
+    regenerateUrl: `${base}/admin/ea-factory/projects`,
+    newLaunchUrl: `${base}/admin/ea-factory/launch`,
+  };
+  const packageMarkdown = exportFactoryConceptPackMarkdown(pack);
+  const packageHtml = renderFactoryConceptPackEmailHtml(pack, escHtml, emailOptions);
   const safeName = pack.clientName.replace(/[^\w.-]+/g, '-').slice(0, 48) || 'concept-pack';
   const inlineImages = [...(inline.inlineImages || []), ...customSamples];
+  const readySubject = `🚀 Launch Complete | ${pack.clientName} Concept Pack is Ready`;
 
   try {
     let sent = await sendFactoryPackageReadyEmail({
-      subject: `Concept Pack ready — ${pack.clientName}`,
+      subject: readySubject,
       clientName: pack.clientName,
       packageMarkdown,
       packageHtml,
@@ -186,12 +198,14 @@ export async function notifyFactoryDone(
     });
     if (!sent.ok && inlineImages.length) {
       console.warn('[factory-notify] retry ready email without heavy inline assets', projectId, sent.error);
-      const packRetry = buildFactoryConceptPack(project);
       sent = await sendFactoryPackageReadyEmail({
-        subject: `Concept Pack ready — ${packRetry.clientName}`,
-        clientName: packRetry.clientName,
-        packageMarkdown: exportFactoryConceptPackMarkdown(packRetry),
-        packageHtml: renderFactoryConceptPackEmailHtml(packRetry, escHtml, { inlineSamples: false }),
+        subject: readySubject,
+        clientName: pack.clientName,
+        packageMarkdown,
+        packageHtml: renderFactoryConceptPackEmailHtml(pack, escHtml, {
+          ...emailOptions,
+          inlineSamples: false,
+        }),
         filename: `concept-pack-${safeName}-${project.id}.md`,
         inlineImages: customSamples,
       });
