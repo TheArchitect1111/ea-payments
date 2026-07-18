@@ -10,6 +10,11 @@
  *
  * Labeled as Concept Pack (preview), not finished production.
  */
+import {
+  buildFactoryCapacityScorecard,
+  formatUsdRange,
+  type FactoryCapacityScorecard,
+} from '@/lib/factory-capacity-score';
 import { buildFactoryClientPackage } from '@/lib/factory-client-package';
 import type { FactoryProject } from '@/lib/factory-project-store';
 
@@ -25,6 +30,7 @@ export type FactoryConceptPack = {
   coverLine: string;
   sourceUrl?: string;
   heroImageUrl?: string;
+  scorecard: FactoryCapacityScorecard;
   eval: {
     headline: string;
     bullets: string[];
@@ -90,13 +96,17 @@ function pickOpportunities(project: FactoryProject, fallback: string[]): string[
 
 export function buildFactoryConceptPack(project: FactoryProject): FactoryConceptPack {
   const base = buildFactoryClientPackage(project);
+  const scorecard = buildFactoryCapacityScorecard(project);
   const siteTitle = base.siteSnapshot.title || project.client;
   const description =
     base.siteSnapshot.description ||
     `${project.client} is building capacity with a clearer public face, client portal, and member experience.`;
 
   const pageTitles = base.websitePages.map((p) => p.title).filter(Boolean);
-  const opportunities = pickOpportunities(project, base.recommendations).slice(0, 5);
+  const opportunities = pickOpportunities(project, [
+    ...base.recommendations,
+    ...scorecard.gaps,
+  ]).slice(0, 5);
   while (opportunities.length < 3) {
     opportunities.push(
       [
@@ -108,10 +118,12 @@ export function buildFactoryConceptPack(project: FactoryProject): FactoryConcept
   }
 
   const evalBullets = [
+    `Capacity score: ${scorecard.overallScore}/100 (category benchmark ~${scorecard.benchmark}/100).`,
+    scorecard.capacityLost.headline,
+    scorecard.opportunityGained.headline,
     project.url ? `We reviewed ${project.url} as the starting signal.` : 'We used your launch notes as the starting signal.',
     description,
     `Primary goal in this pack: ${project.goal}.`,
-    `Target deliverable direction: ${project.deliverable}.`,
   ];
 
   return {
@@ -122,6 +134,7 @@ export function buildFactoryConceptPack(project: FactoryProject): FactoryConcept
     coverLine: `A clear path from interest → trust → membership for ${siteTitle}.`,
     sourceUrl: project.url,
     heroImageUrl: base.siteSnapshot.imageUrl || base.imageUrls[0],
+    scorecard,
     eval: {
       headline: 'Business eval & breakdown',
       bullets: evalBullets,
@@ -161,6 +174,7 @@ export function buildFactoryConceptPack(project: FactoryProject): FactoryConcept
 }
 
 export function exportFactoryConceptPackMarkdown(pack: FactoryConceptPack): string {
+  const s = pack.scorecard;
   return [
     `# ${pack.clientName} — ${pack.label}`,
     '',
@@ -168,6 +182,32 @@ export function exportFactoryConceptPackMarkdown(pack: FactoryConceptPack): stri
     '',
     `Project: ${pack.projectId}`,
     pack.sourceUrl ? `Website: ${pack.sourceUrl}` : '',
+    '',
+    '## Capacity score',
+    '',
+    `**${s.overallScore}/100** (benchmark ~${s.benchmark}/100)`,
+    '',
+    `- Visibility ${s.scores.visibility}/100`,
+    `- Exposure ${s.scores.exposure}/100`,
+    `- Conversion ${s.scores.conversion}/100`,
+    `- Differentiation ${s.scores.differentiation}/100`,
+    `- Modernity ${s.scores.modernity}/100`,
+    `- Trust ${s.scores.trust}/100`,
+    '',
+    '## Capacity lost (annual estimate)',
+    '',
+    s.capacityLost.headline,
+    '',
+    ...s.capacityLost.breakdown.map(
+      (line) =>
+        `- **${line.label}:** ${formatUsdRange(line.annualLow, line.annualHigh)}/yr — ${line.why}`,
+    ),
+    '',
+    '## Potential opportunity gained',
+    '',
+    s.opportunityGained.headline,
+    '',
+    `_${s.opportunityGained.assumption}_`,
     '',
     `## 1. ${pack.eval.headline}`,
     '',
@@ -276,11 +316,52 @@ export function renderFactoryConceptPackEmailHtml(
     `,
   });
 
+  const s = pack.scorecard;
+  const breakdownRows = s.capacityLost.breakdown
+    .map(
+      (line) => `
+      <tr>
+        <td style="padding:8px 0;border-bottom:1px solid #e8e4dc;font-size:13px;color:#333;">${escHtml(line.label)}</td>
+        <td style="padding:8px 0;border-bottom:1px solid #e8e4dc;font-size:13px;color:${NAVY};font-weight:700;text-align:right;">${escHtml(formatUsdRange(line.annualLow, line.annualHigh))}/yr</td>
+      </tr>`,
+    )
+    .join('');
+
   return `
     <p style="margin:0 0 8px;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:${GOLD};">${escHtml(pack.label)} · Preview</p>
     <h1 style="margin:0 0 10px;font-size:26px;line-height:1.25;color:${NAVY};">${escHtml(pack.clientName)}</h1>
     <p style="margin:0 0 8px;font-size:16px;color:#1A1A2E;line-height:1.6;">${escHtml(pack.coverLine)}</p>
-    <p style="margin:0 0 22px;font-size:12px;color:#888;">Project ${escHtml(pack.projectId)}${pack.sourceUrl ? ` · ${escHtml(pack.sourceUrl)}` : ''}</p>
+    <p style="margin:0 0 18px;font-size:12px;color:#888;">Project ${escHtml(pack.projectId)}${pack.sourceUrl ? ` · ${escHtml(pack.sourceUrl)}` : ''}</p>
+
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 18px;">
+      <tr>
+        <td width="33%" style="padding:14px;background:${NAVY};vertical-align:top;">
+          <p style="margin:0 0 6px;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:${GOLD};">Score</p>
+          <p style="margin:0;font-size:32px;font-weight:800;color:#fff;line-height:1;">${s.overallScore}<span style="font-size:14px;font-weight:600;color:rgba(255,255,255,.75);">/100</span></p>
+          <p style="margin:8px 0 0;font-size:11px;color:rgba(255,255,255,.7);">Benchmark ~${s.benchmark}</p>
+        </td>
+        <td width="34%" style="padding:14px;background:#3a2a1a;vertical-align:top;">
+          <p style="margin:0 0 6px;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:#f0c36a;">Capacity lost</p>
+          <p style="margin:0;font-size:18px;font-weight:800;color:#fff;line-height:1.25;">${escHtml(formatUsdRange(s.capacityLost.annualLow, s.capacityLost.annualHigh))}</p>
+          <p style="margin:8px 0 0;font-size:11px;color:rgba(255,255,255,.7);">per year (est.)</p>
+        </td>
+        <td width="33%" style="padding:14px;background:#1e3d2f;vertical-align:top;">
+          <p style="margin:0 0 6px;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:#8fd6a8;">Opportunity gained</p>
+          <p style="margin:0;font-size:18px;font-weight:800;color:#fff;line-height:1.25;">${escHtml(formatUsdRange(s.opportunityGained.annualLow, s.opportunityGained.annualHigh))}</p>
+          <p style="margin:8px 0 0;font-size:11px;color:rgba(255,255,255,.7);">per year (est.)</p>
+        </td>
+      </tr>
+    </table>
+
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 18px;background:${CREAM};">
+      <tr>
+        <td style="padding:16px 18px;">
+          <p style="margin:0 0 10px;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:${NAVY};">Capacity lost breakdown</p>
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0">${breakdownRows}</table>
+          <p style="margin:12px 0 0;font-size:11px;color:#888;line-height:1.5;">${escHtml(s.opportunityGained.assumption)}</p>
+        </td>
+      </tr>
+    </table>
 
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 22px;background:${CREAM};border-left:4px solid ${GOLD};">
       <tr>
