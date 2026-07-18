@@ -1,9 +1,9 @@
 /**
  * Factory founder notifications — email only on start and terminal done/failed.
- * Not on every pipeline step (by design).
+ * Ready email includes the full package (attachment + body) — no login required.
  */
-import { sendInternalNotification } from '@/lib/email';
-import { factoryPackageDownloadUrl } from '@/lib/factory-export';
+import { sendFactoryPackageReadyEmail, sendInternalNotification } from '@/lib/email';
+import { exportFactoryProjectMarkdown } from '@/lib/factory-export';
 import { getProject } from '@/lib/factory-project';
 import { saveFactoryProject, type FactoryProject } from '@/lib/factory-project-store';
 import { factoryFriendlyLabel } from '@/lib/factory-status-labels';
@@ -70,33 +70,25 @@ export async function notifyFactoryDone(projectId: string): Promise<void> {
     project.pipelineStatus === 'PUBLISHED';
   if (!okStop) return;
 
-  const href = projectsUrl(projectId);
-  const downloadUrl = factoryPackageDownloadUrl(projectId);
-  const base = downloadUrl.replace(/\/api\/projects\/.*$/, '');
-  const eacpDownload = project.launchId
-    ? `${base}/api/ea-factory/launch/${encodeURIComponent(project.launchId)}/export?type=markdown`
-    : null;
+  const packageMarkdown = exportFactoryProjectMarkdown(project);
+  const safeName = project.client.replace(/[^\w.-]+/g, '-').slice(0, 48) || 'package';
 
   try {
-    await sendInternalNotification({
+    const sent = await sendFactoryPackageReadyEmail({
       subject: `Factory ready — ${project.client}`,
-      title: 'Factory work is ready for you',
-      body: [
-        `${project.client} finished automatic Factory processing.`,
-        `Project: ${project.id}`,
-        `Status: ${factoryFriendlyLabel(project.pipelineStatus)}`,
-        '',
-        'Download your Factory package (stay logged into admin, then open):',
-        downloadUrl,
-        ...(eacpDownload
-          ? ['', 'EACP package download:', eacpDownload]
-          : []),
-        '',
-        `Project page: ${href}`,
-      ].join('\n'),
+      clientName: project.client,
+      projectId: project.id,
+      statusLabel: factoryFriendlyLabel(project.pipelineStatus),
+      packageMarkdown,
+      filename: `factory-${safeName}-${project.id}.md`,
     });
+    if (!sent.ok) {
+      console.error('[factory-notify] done email failed', projectId, sent.error);
+      return;
+    }
   } catch (err) {
     console.error('[factory-notify] done email failed', projectId, err);
+    return;
   }
 
   const latest = (await getProject(projectId)) ?? project;
