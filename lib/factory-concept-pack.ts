@@ -16,6 +16,10 @@ import {
   type FactoryCapacityScorecard,
 } from '@/lib/factory-capacity-score';
 import { buildFactoryClientPackage } from '@/lib/factory-client-package';
+import {
+  buildConsultantEval,
+  type ConceptConsultantEval,
+} from '@/lib/factory-concept-eval';
 import { renderConceptSampleMockups } from '@/lib/factory-concept-mockups';
 import { isSyntheticPhotoClient } from '@/lib/factory-research/image-signal';
 import type { FactoryProject } from '@/lib/factory-project-store';
@@ -80,6 +84,7 @@ export type FactoryConceptPack = {
   sourceUrl?: string;
   heroImageUrl?: string;
   scorecard: FactoryCapacityScorecard;
+  consultant: ConceptConsultantEval;
   eval: {
     headline: string;
     bullets: string[];
@@ -168,53 +173,47 @@ export function buildFactoryConceptPack(project: FactoryProject): FactoryConcept
       !(project.url && !/\/api\/ctp\/assets\//i.test(project.url)),
   );
 
-  const opportunities = pickOpportunities(project, [
+  const rawHints = pickOpportunities(project, [
     ...base.recommendations.filter((r) => !isJunkCopy(r)),
     ...scorecard.gaps,
   ]).slice(0, 5);
-  while (opportunities.length < 3) {
-    opportunities.push(
-      [
-        'Turn interest into one clear next step on the public site',
-        'Run registrations, payments, and follow-up from one ops portal',
-        'Give members a home for progress, schedule, and belonging',
-      ][opportunities.length],
-    );
-  }
 
-  const evalBullets = [
-    `Capacity score: ${scorecard.overallScore}/100 (benchmark ~${scorecard.benchmark}/100).`,
-    scorecard.capacityLost.headline,
-    scorecard.opportunityGained.headline,
-    fromPhoto
-      ? 'Signal: launch photo (sit-down Concept Pack — not a finished website audit).'
-      : project.url
-        ? `Signal: ${project.url}.`
-        : 'Signal: launch notes.',
-    description,
-  ];
+  const signalNote = fromPhoto
+    ? 'We started from your launch photo (a sit-down concept — not a finished website audit).'
+    : project.url && !/\/api\/ctp\/assets\//i.test(project.url)
+      ? `We started from ${project.url}.`
+      : 'We started from your launch notes.';
 
-  const cta = brandingCta(project) || 'Join the journey';
+  const consultant = buildConsultantEval({
+    clientName,
+    scorecard,
+    signalNote,
+    summary: description,
+    rawOpportunityHints: rawHints,
+  });
+
+  const cta = brandingCta(project) || 'Get started';
 
   return {
     version: 1,
     label: 'Concept Pack',
     clientName,
     projectId: project.id,
-    coverLine: `Product concept samples for ${clientName}: website, ops portal, and member home — with the numbers to back the conversation.`,
+    coverLine: `A consultant briefing for ${clientName}: evidence, plain-English opportunities, and custom product concepts.`,
     sourceUrl: project.url && !/\/api\/ctp\/assets\//i.test(project.url) ? project.url : undefined,
     heroImageUrl: base.imageUrls[0] || base.siteSnapshot.imageUrl,
     scorecard,
+    consultant,
     eval: {
-      headline: 'The numbers (why this matters)',
-      bullets: evalBullets,
-      opportunities,
+      headline: consultant.headline,
+      bullets: consultant.bullets,
+      opportunities: consultant.opportunityLines,
     },
     landing: {
       headline: clientName,
       subhead: description.slice(0, 220),
       cta,
-      points: ['Get started', 'Develop', 'Compete / engage', 'Get seen', 'Belong'],
+      points: ['Get started', 'Learn', 'Engage', 'Belong'],
     },
     portal: {
       headline: `${clientName} Ops Portal`,
@@ -231,7 +230,7 @@ export function buildFactoryConceptPack(project: FactoryProject): FactoryConcept
       headline: `${clientName} Member Home`,
       modules: ['Dashboard', 'My journey', 'Schedule', 'Resources', 'Messages', 'Profile'],
     },
-    ask: 'If this direction feels right, approve the next step: refine the Skin Brief and move toward build.',
+    ask: 'If this direction feels right, the next step is approval to refine the Skin Brief and move toward build — with your brand on these concepts.',
   };
 }
 
@@ -273,29 +272,40 @@ export function exportFactoryConceptPackMarkdown(pack: FactoryConceptPack): stri
     '',
     `_${s.opportunityGained.assumption}_`,
     '',
-    `## 1. ${pack.eval.headline}`,
+    `## ${pack.consultant.headline}`,
     '',
-    ...pack.eval.bullets.map((b) => `- ${b}`),
+    pack.consultant.guideIntro,
     '',
-    '### Opportunities',
+    ...pack.consultant.findings.flatMap((f) => [
+      `### ${f.title}`,
+      '',
+      `**What we see:** ${f.observation}`,
+      `**Why it matters:** ${f.whyItMatters}`,
+      `**Recommendation:** ${f.recommendation}`,
+      `**Evidence:** ${f.evidence}`,
+      '',
+    ]),
+    '## Opportunities (plain English)',
     '',
-    ...pack.eval.opportunities.map((o) => `- ${o}`),
+    ...pack.consultant.opportunities.flatMap((o) => [
+      `### ${o.title}`,
+      '',
+      o.plainEnglish,
+      '',
+      `**What changes:** ${o.whatChanges}`,
+      `**Impact:** ${o.impact}`,
+      `**Evidence:** ${o.evidence}`,
+      '',
+    ]),
+    '## Custom product concepts (see HTML email for images)',
     '',
-    '## Product concept samples (full visuals are in the HTML email)',
-    '',
-    '1. Website / landing — public face',
-    '2. Ops / client portal — where you run the system',
-    '3. Member home — where their people live',
-    '',
-    pack.landing.subhead,
+    '1. Website / landing',
+    '2. Ops / client portal',
+    '3. Member home',
     '',
     '## The ask',
     '',
     pack.ask,
-    '',
-    '---',
-    '',
-    '_Open the HTML email to see the three high-fidelity product samples._',
     '',
   ]
     .filter((line, i, arr) => !(line === '' && arr[i - 1] === ''))
@@ -308,11 +318,9 @@ export function renderFactoryConceptPackEmailHtml(
   escHtml: (s: string) => string,
   options?: { inlineSamples?: boolean },
 ): string {
-  const evalBullets = pack.eval.bullets.map((b) => `<li>${escHtml(b)}</li>`).join('');
-  const opps = pack.eval.opportunities.map((o) => `<li>${escHtml(o)}</li>`).join('');
   const s = pack.scorecard;
   const heroForSignal =
-    pack.heroImageUrl && !pack.heroImageUrl.startsWith('cid:concept-sample')
+    pack.heroImageUrl && !pack.heroImageUrl.startsWith('cid:concept-')
       ? pack.heroImageUrl
       : undefined;
   const productMockups = renderConceptSampleMockups({
@@ -321,21 +329,42 @@ export function renderFactoryConceptPackEmailHtml(
     useCid: Boolean(options?.inlineSamples),
     escHtml,
   });
-  const breakdownRows = s.capacityLost.breakdown
+
+  const findingBlocks = pack.consultant.findings
     .map(
-      (line) => `
-      <tr>
-        <td style="padding:8px 0;border-bottom:1px solid #e8e4dc;font-size:13px;color:#333;">${escHtml(line.label)}</td>
-        <td style="padding:8px 0;border-bottom:1px solid #e8e4dc;font-size:13px;color:${NAVY};font-weight:700;text-align:right;">${escHtml(formatUsdRange(line.annualLow, line.annualHigh))}/yr</td>
-      </tr>`,
+      (f) => `
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 14px;background:#fff;border:1px solid #e8e4dc;">
+        <tr><td style="padding:14px 16px;">
+          <p style="margin:0 0 8px;font-size:15px;font-weight:800;color:${NAVY};">${escHtml(f.title)}</p>
+          <p style="margin:0 0 6px;font-size:13px;color:#333;line-height:1.55;"><strong>What we see:</strong> ${escHtml(f.observation)}</p>
+          <p style="margin:0 0 6px;font-size:13px;color:#333;line-height:1.55;"><strong>Why it matters:</strong> ${escHtml(f.whyItMatters)}</p>
+          <p style="margin:0 0 6px;font-size:13px;color:#333;line-height:1.55;"><strong>Recommendation:</strong> ${escHtml(f.recommendation)}</p>
+          <p style="margin:0;font-size:12px;color:#777;line-height:1.5;"><strong>Evidence:</strong> ${escHtml(f.evidence)}</p>
+        </td></tr>
+      </table>`,
+    )
+    .join('');
+
+  const opportunityBlocks = pack.consultant.opportunities
+    .map(
+      (o) => `
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 12px;background:#fff;border-left:4px solid ${GOLD};">
+        <tr><td style="padding:14px 16px;">
+          <p style="margin:0 0 8px;font-size:15px;font-weight:800;color:${NAVY};">${escHtml(o.title)}</p>
+          <p style="margin:0 0 8px;font-size:14px;color:#333;line-height:1.55;">${escHtml(o.plainEnglish)}</p>
+          <p style="margin:0 0 4px;font-size:13px;color:#444;"><strong>What changes:</strong> ${escHtml(o.whatChanges)}</p>
+          <p style="margin:0 0 4px;font-size:13px;color:#444;"><strong>Impact:</strong> ${escHtml(o.impact)}</p>
+          <p style="margin:0;font-size:12px;color:#777;"><strong>Evidence:</strong> ${escHtml(o.evidence)}</p>
+        </td></tr>
+      </table>`,
     )
     .join('');
 
   return `
-    <p style="margin:0 0 8px;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:${GOLD};">${escHtml(pack.label)} · Preview</p>
+    <p style="margin:0 0 8px;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:${GOLD};">${escHtml(pack.label)} · Consultant briefing</p>
     <h1 style="margin:0 0 10px;font-size:26px;line-height:1.25;color:${NAVY};">${escHtml(pack.clientName)}</h1>
     <p style="margin:0 0 8px;font-size:16px;color:#1A1A2E;line-height:1.6;">${escHtml(pack.coverLine)}</p>
-    <p style="margin:0 0 6px;font-size:13px;color:#555;line-height:1.5;">Sit-down pack: <strong>proof numbers</strong> + <strong>three high-fidelity product samples</strong> (website, ops portal, member home).</p>
+    <p style="margin:0 0 18px;font-size:13px;color:#555;line-height:1.55;">${escHtml(pack.consultant.guideIntro)}</p>
     <p style="margin:0 0 18px;font-size:12px;color:#888;">Project ${escHtml(pack.projectId)}${pack.sourceUrl ? ` · ${escHtml(pack.sourceUrl)}` : ''}</p>
 
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 18px;">
@@ -358,27 +387,13 @@ export function renderFactoryConceptPackEmailHtml(
       </tr>
     </table>
 
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 18px;background:${CREAM};">
-      <tr>
-        <td style="padding:16px 18px;">
-          <p style="margin:0 0 10px;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:${NAVY};">Capacity lost breakdown</p>
-          <table role="presentation" width="100%" cellpadding="0" cellspacing="0">${breakdownRows}</table>
-          <p style="margin:12px 0 0;font-size:11px;color:#888;line-height:1.5;">${escHtml(s.opportunityGained.assumption)}</p>
-        </td>
-      </tr>
-    </table>
+    <p style="margin:0 0 12px;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:${NAVY};">${escHtml(pack.consultant.headline)}</p>
+    ${findingBlocks}
 
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 22px;background:${CREAM};border-left:4px solid ${GOLD};">
-      <tr>
-        <td style="padding:18px 20px;">
-          <p style="margin:0 0 10px;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:${NAVY};">${escHtml(pack.eval.headline)}</p>
-          <ul style="margin:0 0 12px;padding-left:18px;font-size:14px;color:#555;line-height:1.7;">${evalBullets}</ul>
-          <p style="margin:0 0 8px;font-size:12px;font-weight:700;color:${NAVY};">Opportunities</p>
-          <ul style="margin:0;padding-left:18px;font-size:14px;color:#555;line-height:1.7;">${opps}</ul>
-        </td>
-      </tr>
-    </table>
+    <p style="margin:18px 0 12px;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:${NAVY};">Opportunities — in plain English</p>
+    ${opportunityBlocks}
 
+    <p style="margin:22px 0 12px;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:${NAVY};">Custom product concepts</p>
     ${productMockups}
 
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:8px 0 0;background:${NAVY};">

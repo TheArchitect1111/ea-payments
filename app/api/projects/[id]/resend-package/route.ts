@@ -5,7 +5,7 @@ import { getProject } from '@/lib/factory-project';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
-export const maxDuration = 30;
+export const maxDuration = 60;
 
 type Params = { params: Promise<{ id: string }> };
 
