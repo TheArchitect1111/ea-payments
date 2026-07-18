@@ -11,16 +11,57 @@ export type FactoryPipelineStatus =
   | 'CREATED'
   | 'QUEUED'
   | 'GENERATING'
-  | 'UNDER_REVIEW'
+  | 'INTAKE'
+  | 'INTAKE_COMPLETE'
   | 'RESEARCHING'
   | 'DISCOVERING'
   | 'PLANNING'
   | 'BUILDING'
   | 'QA'
+  | 'PUBLISHING'
+  | 'UNDER_REVIEW'
   | 'PUBLISHED'
   | 'COMPLETE'
   | 'FAILED'
   | 'CANCELLED';
+
+/** Normalized launch source — downstream workers must not care about original channel. */
+export type FactorySourceType =
+  | 'website'
+  | 'organization'
+  | 'pdf'
+  | 'image'
+  | 'powerpoint'
+  | 'word'
+  | 'text'
+  | 'voice'
+  | 'other';
+
+export type FactoryIntakeSource = {
+  type: FactorySourceType;
+  label: string;
+  url?: string;
+  textPreview?: string;
+  name?: string;
+  attachmentIndex?: number;
+};
+
+export type FactoryIntakeRecord = {
+  version: 1;
+  projectId: string;
+  primarySourceType: FactorySourceType;
+  sources: FactoryIntakeSource[];
+  normalized: {
+    client: string;
+    organizationName: string;
+    goal: string;
+    deliverable: string;
+    industry?: string;
+    notes?: string;
+    primaryUrl?: string;
+  };
+  completedAt: string;
+};
 
 export type FactoryProjectSource = 'api' | 'chatgpt' | 'admin' | 'cron';
 
@@ -39,6 +80,42 @@ export type FactoryActivity = {
   detail?: string;
 };
 
+/** Persisted ProjectContext blob (see lib/factory-project-context.ts). */
+export type FactoryProjectContextBlob = {
+  schemaVersion: number;
+  projectId: string;
+  seed: {
+    client: string;
+    goal: string;
+    deliverable: string;
+    industry?: string;
+    notes?: string;
+    url?: string;
+    attachments: FactoryAttachmentMeta[];
+    source: FactoryProjectSource;
+  };
+  pipelineStatus: FactoryPipelineStatus;
+  outputs: Array<{
+    id: string;
+    kind: string;
+    worker: string;
+    createdAt: string;
+    payload: Record<string, unknown>;
+  }>;
+  artifacts?: Array<{
+    schemaVersion: number;
+    id: string;
+    projectId: string;
+    kind: string;
+    providerId: string;
+    createdAt: string;
+    provenance: Record<string, unknown>;
+    data: Record<string, unknown>;
+  }>;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type FactoryProject = {
   version: 1;
   id: string;
@@ -53,6 +130,13 @@ export type FactoryProject = {
   pipelineStatus: FactoryPipelineStatus;
   launchId?: string;
   launchReviewUrl?: string;
+  /**
+   * Shared execution context for all workers (append-only outputs).
+   * Preferred over reading ad-hoc project fields inside workers.
+   */
+  context?: FactoryProjectContextBlob;
+  /** Compat mirror of latest intake output payload. */
+  intake?: FactoryIntakeRecord;
   error?: string;
   createdAt: string;
   updatedAt: string;
@@ -95,16 +179,25 @@ export async function listFactoryProjects(): Promise<FactoryProject[]> {
 export function factoryQueueHealth(projects: FactoryProject[]): {
   queued: number;
   generating: number;
+  intake: number;
+  intakeComplete: number;
+  researching: number;
   oldestQueuedAt: string | null;
 } {
   const queued = projects.filter((p) => p.pipelineStatus === 'QUEUED');
   const generating = projects.filter((p) => p.pipelineStatus === 'GENERATING');
+  const intake = projects.filter((p) => p.pipelineStatus === 'INTAKE');
+  const intakeComplete = projects.filter((p) => p.pipelineStatus === 'INTAKE_COMPLETE');
+  const researching = projects.filter((p) => p.pipelineStatus === 'RESEARCHING');
   const oldest = queued
     .map((p) => p.queuedAt || p.updatedAt)
     .sort()[0];
   return {
     queued: queued.length,
     generating: generating.length,
+    intake: intake.length,
+    intakeComplete: intakeComplete.length,
+    researching: researching.length,
     oldestQueuedAt: oldest ?? null,
   };
 }

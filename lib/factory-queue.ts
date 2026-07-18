@@ -1,10 +1,15 @@
 /**
- * Factory queue — after() + cron drain. No BullMQ/Redis in Phase 1.
- * Workers communicate only via project status updates.
+ * Factory queue — after() + cron drain.
+ * GenerateWorker entry is preserved; body is the Orchestrator.
  */
 import { after } from 'next/server';
 import { createEACPLaunch } from '@/lib/eacp-launch';
 import { sendInternalNotification } from '@/lib/email';
+import {
+  failOrchestration,
+  ORCHESTRATOR_DRAIN_STATUSES,
+  runFactoryOrchestrator,
+} from '@/lib/factory-orchestrator';
 import {
   getProject,
   listProjects,
@@ -46,7 +51,12 @@ async function emitFactoryPulse(
 }
 
 export async function enqueueFactoryProject(projectId: string): Promise<FactoryProject | null> {
-  const queued = await transitionFactoryProject(projectId, 'QUEUED', 'queue', 'Enqueued for GenerateWorker');
+  const queued = await transitionFactoryProject(
+    projectId,
+    'QUEUED',
+    'queue',
+    'Enqueued for GenerateWorker (Orchestrator)',
+  );
   if (!queued) return null;
   await emitFactoryPulse(queued, 'factory.project.queued', `Factory project queued — ${queued.client}`);
   return queued;
@@ -57,39 +67,43 @@ export function scheduleFactoryGenerateJob(projectId: string) {
     try {
       await runGenerateWorker(projectId);
     } catch (err) {
-      console.error('[factory-queue] background generate failed', projectId, err);
-      await transitionFactoryProject(
+      console.error('[factory-queue] background generate/orchestrator failed', projectId, err);
+      await failOrchestration(
         projectId,
-        'FAILED',
-        'generate',
-        err instanceof Error ? err.message : 'Generate worker failed',
-        { error: err instanceof Error ? err.message : 'Generate worker failed' },
+        err instanceof Error ? err.message : 'Generate worker (orchestrator) failed',
       );
     }
   });
 }
 
+/**
+ * GenerateWorker — preserved public entry.
+ * Phase 2: orchestration only (Intake → Research stub). Does not build EACP packages.
+ */
 export async function runGenerateWorker(projectId: string): Promise<FactoryProject | null> {
+  console.info('[factory-generate] orchestrator entry', { projectId });
+  return runFactoryOrchestrator(projectId);
+}
+
+/**
+ * Phase 1 package path — retained for backward compatibility / future Publishing stage.
+ * Not invoked by the Orchestrator in Phase 2.
+ */
+export async function runLegacyGeneratePackageWorker(
+  projectId: string,
+): Promise<FactoryProject | null> {
   const current = await getProject(projectId);
   if (!current) return null;
   if (current.pipelineStatus === 'CANCELLED') return current;
   if (current.pipelineStatus === 'UNDER_REVIEW' && current.launchId) return current;
-  if (current.pipelineStatus !== 'QUEUED' && current.pipelineStatus !== 'GENERATING') {
-    if (current.pipelineStatus === 'CREATED') {
-      await enqueueFactoryProject(projectId);
-    } else {
-      return current;
-    }
-  }
 
   const generating = await transitionFactoryProject(
     projectId,
     'GENERATING',
     'generate',
-    'GenerateWorker started package generation',
+    'Legacy GenerateWorker package generation',
   );
   if (!generating) return null;
-  await emitFactoryPulse(generating, 'factory.project.status', `Factory generating — ${generating.client}`);
 
   try {
     const launch = await createEACPLaunch({
@@ -122,12 +136,8 @@ export async function runGenerateWorker(projectId: string): Promise<FactoryProje
             `Project: ${done.id}`,
             `Status: ${done.pipelineStatus}`,
             `Goal: ${done.goal}`,
-            `Deliverable: ${done.deliverable}`,
-            done.url ? `URL: ${done.url}` : null,
             `Launch: ${done.launchId}`,
             `Review: ${done.launchReviewUrl}`,
-            '',
-            'Phase 1 GenerateWorker complete. Approve in EA Factory before build/deploy.',
           ]
             .filter(Boolean)
             .join('\n'),
@@ -140,17 +150,11 @@ export async function runGenerateWorker(projectId: string): Promise<FactoryProje
     return done;
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Package generation failed';
-    const failed = await transitionFactoryProject(projectId, 'FAILED', 'generate', message, {
-      error: message,
-    });
-    if (failed) {
-      await emitFactoryPulse(failed, 'factory.project.status', `Factory failed — ${failed.client}`);
-    }
-    return failed;
+    return transitionFactoryProject(projectId, 'FAILED', 'generate', message, { error: message });
   }
 }
 
-/** Drain stuck QUEUED jobs (cron safety net). */
+/** Drain projects waiting on orchestrator-owned statuses. */
 export async function drainFactoryQueue(limit = 5): Promise<{
   processed: number;
   projectIds: string[];
@@ -158,7 +162,7 @@ export async function drainFactoryQueue(limit = 5): Promise<{
 }> {
   const projects = await listProjects();
   const due = projects
-    .filter((p) => p.pipelineStatus === 'QUEUED')
+    .filter((p) => ORCHESTRATOR_DRAIN_STATUSES.includes(p.pipelineStatus))
     .sort((a, b) => (a.queuedAt || a.createdAt).localeCompare(b.queuedAt || b.createdAt))
     .slice(0, Math.max(1, Math.min(20, limit)));
 
@@ -170,9 +174,7 @@ export async function drainFactoryQueue(limit = 5): Promise<{
       await runGenerateWorker(project.id);
       projectIds.push(project.id);
     } catch (err) {
-      errors.push(
-        `${project.id}: ${err instanceof Error ? err.message : 'drain failed'}`,
-      );
+      errors.push(`${project.id}: ${err instanceof Error ? err.message : 'drain failed'}`);
     }
   }
 

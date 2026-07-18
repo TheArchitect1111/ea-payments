@@ -4,6 +4,7 @@
  */
 import crypto from 'node:crypto';
 import { parseEACPCommand, type EACPLaunchInput } from '@/lib/eacp-launch';
+import { createProjectContext as createProjectContextPure } from '@/lib/factory-project-context.mjs';
 import {
   getFactoryProject,
   listFactoryProjects,
@@ -144,6 +145,22 @@ export async function createFactoryProject(
 
   const now = new Date().toISOString();
   const id = createProjectId();
+  const source = body.source || 'api';
+  const context = createProjectContextPure(
+    {
+      projectId: id,
+      client: resolved.input.client,
+      goal: resolved.input.goal,
+      deliverable: resolved.input.deliverable,
+      industry: resolved.input.industry,
+      notes: resolved.input.notes,
+      url: resolved.input.url,
+      attachments: resolved.input.attachments,
+      source,
+    },
+    'CREATED',
+    now,
+  );
   const project: FactoryProject = {
     version: 1,
     id,
@@ -154,8 +171,9 @@ export async function createFactoryProject(
     notes: resolved.input.notes,
     url: resolved.input.url,
     attachments: resolved.input.attachments,
-    source: body.source || 'api',
+    source,
     pipelineStatus: 'CREATED',
+    context,
     createdAt: now,
     updatedAt: now,
     queuedAt: undefined,
@@ -179,7 +197,9 @@ export async function transitionFactoryProject(
   to: FactoryPipelineStatus,
   worker: string,
   detail?: string,
-  patch?: Partial<Pick<FactoryProject, 'launchId' | 'launchReviewUrl' | 'error'>>,
+  patch?: Partial<
+    Pick<FactoryProject, 'launchId' | 'launchReviewUrl' | 'error' | 'intake' | 'context'>
+  >,
 ): Promise<FactoryProject | null> {
   const project = await getFactoryProject(projectId);
   if (!project) return null;
@@ -196,10 +216,21 @@ export async function transitionFactoryProject(
     detail,
   };
 
+  const nextContext =
+    patch?.context ??
+    (project.context
+      ? {
+          ...project.context,
+          pipelineStatus: to,
+          updatedAt: now,
+        }
+      : undefined);
+
   const next: FactoryProject = {
     ...project,
     ...patch,
     pipelineStatus: to,
+    context: nextContext,
     updatedAt: now,
     queuedAt: to === 'QUEUED' ? now : project.queuedAt,
     activity: [...project.activity, activity].slice(-100),
@@ -234,6 +265,9 @@ export function canCancel(project: FactoryProject): boolean {
   return (
     project.pipelineStatus === 'CREATED' ||
     project.pipelineStatus === 'QUEUED' ||
-    project.pipelineStatus === 'GENERATING'
+    project.pipelineStatus === 'GENERATING' ||
+    project.pipelineStatus === 'INTAKE' ||
+    project.pipelineStatus === 'INTAKE_COMPLETE' ||
+    project.pipelineStatus === 'RESEARCHING'
   );
 }

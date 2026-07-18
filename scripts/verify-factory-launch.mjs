@@ -88,9 +88,53 @@ for (let i = 0; i < 12; i += 1) {
   detail = await getJson(`/api/projects/${encodeURIComponent(launch.body.projectId)}`);
   const st = detail.body.project?.pipelineStatus;
   console.log(`[poll ${i + 1}]`, st, detail.body.project?.launchId || '');
-  if (st === 'UNDER_REVIEW' || st === 'FAILED' || st === 'CANCELLED') break;
+  if (
+    st === 'BUILDING' ||
+    st === 'UNDER_REVIEW' ||
+    st === 'FAILED' ||
+    st === 'CANCELLED'
+  ) {
+    break;
+  }
 }
 
 const finalStatus = detail?.body?.project?.pipelineStatus;
-const ok = launch.status < 500 && launch.body.ok && (finalStatus === 'UNDER_REVIEW' || finalStatus === 'QUEUED' || finalStatus === 'GENERATING');
+const project = detail?.body?.project;
+const artifacts = project?.context?.artifacts || [];
+const artifactCount = artifacts.length;
+const discoveryCount = artifacts.filter((a) => a.provenance?.capabilityId === 'discovery').length;
+const planningCount = artifacts.filter(
+  (a) => a.provenance?.capabilityId === 'planning' && a.kind !== 'work_order',
+).length;
+const websiteSites = artifacts.filter((a) => a.kind === 'website_site').length;
+const deliverables = artifacts.filter((a) => a.kind === 'deliverable').length;
+const ok =
+  launch.status < 500 &&
+  launch.body.ok &&
+  (finalStatus === 'BUILDING' ||
+    finalStatus === 'PLANNING' ||
+    finalStatus === 'DISCOVERING' ||
+    finalStatus === 'RESEARCHING' ||
+    finalStatus === 'INTAKE_COMPLETE' ||
+    finalStatus === 'QUEUED' ||
+    finalStatus === 'INTAKE' ||
+    finalStatus === 'UNDER_REVIEW') &&
+  (finalStatus !== 'BUILDING' ||
+    (Boolean(project?.intake?.primarySourceType) &&
+      discoveryCount >= 10 &&
+      planningCount >= 11 &&
+      websiteSites >= 1 &&
+      deliverables >= 1));
+console.log(
+  '[artifacts]',
+  artifactCount,
+  'discovery=',
+  discoveryCount,
+  'planning=',
+  planningCount,
+  'website_site=',
+  websiteSites,
+  'deliverables=',
+  deliverables,
+);
 process.exit(ok ? 0 : 1);

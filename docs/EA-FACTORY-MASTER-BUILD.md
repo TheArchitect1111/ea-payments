@@ -201,11 +201,13 @@ Complete:
 - Project Brief and Skin Brief generation UI
 - Human approval gate in generated briefs
 
-## Runtime Launcher Phase 1 (2026)
+## Runtime Launcher + Orchestrator (2026)
 
-Autonomous **project create → queue → GenerateWorker → UNDER_REVIEW** foundation inside this repo (extends EACP; no Prisma/Redis greenfield).
+Autonomous **project create → queue → GenerateWorker (Orchestrator) → Intake → Research stub** foundation inside this repo (extends EACP; no Prisma/Redis greenfield).
 
-Pipeline statuses: `CREATED` → `QUEUED` → `GENERATING` → `UNDER_REVIEW` (later: research/build workers).
+See [`docs/architecture/orchestrator.md`](architecture/orchestrator.md).
+
+Pipeline statuses (Phase 2): `CREATED` → `QUEUED` → `INTAKE` → `INTAKE_COMPLETE` → `RESEARCHING` (later: discovery/build/publish; legacy package path retained off the default hot path).
 
 | Surface | Path |
 |---------|------|

@@ -1,11 +1,12 @@
 /**
- * Worker registry — Phase 1 ships GenerateWorker only.
- * Other workers are typed placeholders for later phases (no fake implementations).
+ * Worker / capability catalog (UI + ops).
+ * Runtime dispatch uses CapabilityRegistry — see lib/factory-capability*.
  */
 import type { FactoryPipelineStatus } from '@/lib/factory-project-store';
 
 export type FactoryWorkerId =
   | 'generate'
+  | 'intake'
   | 'research'
   | 'discovery'
   | 'planning'
@@ -24,43 +25,64 @@ export type FactoryWorkerDescriptor = {
   /** Pipeline statuses this worker may write when implemented. */
   advancesTo: FactoryPipelineStatus[];
   implemented: boolean;
+  role: 'orchestrator' | 'worker' | 'stub';
+  /** CapabilityRegistry id when applicable. */
+  capabilityId?: string;
 };
 
 export const FACTORY_WORKERS: FactoryWorkerDescriptor[] = [
   {
     id: 'generate',
-    label: 'Generate Worker',
+    label: 'Generate Worker (Orchestrator)',
     phase: 1,
-    advancesTo: ['GENERATING', 'UNDER_REVIEW', 'FAILED'],
+    advancesTo: [],
     implemented: true,
+    role: 'orchestrator',
+  },
+  {
+    id: 'intake',
+    label: 'Intake Capability',
+    phase: 3,
+    advancesTo: ['INTAKE', 'INTAKE_COMPLETE', 'FAILED'],
+    implemented: true,
+    role: 'worker',
+    capabilityId: 'intake',
   },
   {
     id: 'research',
-    label: 'Research Worker',
-    phase: 2,
+    label: 'Research Capability',
+    phase: 4,
     advancesTo: ['RESEARCHING'],
-    implemented: false,
+    implemented: true,
+    role: 'worker',
+    capabilityId: 'research',
   },
   {
     id: 'discovery',
-    label: 'Discovery Worker',
-    phase: 2,
+    label: 'Discovery Capability',
+    phase: 5,
     advancesTo: ['DISCOVERING'],
-    implemented: false,
+    implemented: true,
+    role: 'worker',
+    capabilityId: 'discovery',
   },
   {
     id: 'planning',
-    label: 'Planning Worker',
-    phase: 2,
+    label: 'Planning Capability',
+    phase: 6,
     advancesTo: ['PLANNING'],
-    implemented: false,
+    implemented: true,
+    role: 'worker',
+    capabilityId: 'planning',
   },
   {
     id: 'website',
     label: 'Website Builder',
-    phase: 3,
+    phase: 7,
     advancesTo: ['BUILDING'],
-    implemented: false,
+    implemented: true,
+    role: 'worker',
+    capabilityId: 'production',
   },
   {
     id: 'portal',
@@ -68,6 +90,7 @@ export const FACTORY_WORKERS: FactoryWorkerDescriptor[] = [
     phase: 3,
     advancesTo: ['BUILDING'],
     implemented: false,
+    role: 'stub',
   },
   {
     id: 'learning',
@@ -75,6 +98,7 @@ export const FACTORY_WORKERS: FactoryWorkerDescriptor[] = [
     phase: 3,
     advancesTo: ['BUILDING'],
     implemented: false,
+    role: 'stub',
   },
   {
     id: 'knowledge',
@@ -82,6 +106,7 @@ export const FACTORY_WORKERS: FactoryWorkerDescriptor[] = [
     phase: 3,
     advancesTo: ['BUILDING'],
     implemented: false,
+    role: 'stub',
   },
   {
     id: 'report',
@@ -89,19 +114,22 @@ export const FACTORY_WORKERS: FactoryWorkerDescriptor[] = [
     phase: 3,
     advancesTo: ['BUILDING'],
     implemented: false,
+    role: 'stub',
   },
   {
     id: 'qa',
-    label: 'QA Worker',
+    label: 'QA Capability',
     phase: 3,
     advancesTo: ['QA'],
     implemented: false,
+    role: 'stub',
   },
   {
     id: 'notification',
-    label: 'Notification Worker',
+    label: 'Notification Capability',
     phase: 1,
     advancesTo: ['UNDER_REVIEW', 'COMPLETE'],
     implemented: false,
+    role: 'stub',
   },
 ];
