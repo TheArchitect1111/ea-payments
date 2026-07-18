@@ -4,6 +4,7 @@ This connects ChatGPT mobile to EACP through a protected GPT Action.
 
 ## Production URLs
 
+- **Phone Launch page (recommended):** `https://efficiencyarchitects.online/admin/ea-factory/launch`
 - OpenAPI schema: `https://efficiencyarchitects.online/api/eacp/openapi`
 - Factory project launch (pipeline): `https://efficiencyarchitects.online/api/launch`
 - EACP brief launch: `https://efficiencyarchitects.online/api/eacp/chatgpt-launch`

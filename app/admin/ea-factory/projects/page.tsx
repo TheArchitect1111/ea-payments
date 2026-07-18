@@ -41,6 +41,12 @@ export default async function FactoryProjectsPage({ searchParams }: PageProps) {
             </div>
             <div className="flex flex-wrap gap-2">
               <Link
+                href="/admin/ea-factory/launch"
+                className="rounded-full bg-[#1B2B4D] px-4 py-2 text-xs font-bold text-white"
+              >
+                New Launch
+              </Link>
+              <Link
                 href="/admin/ea-factory"
                 className="rounded-full bg-white px-4 py-2 text-xs font-bold text-neutral-700 ring-1 ring-neutral-200"
               >
@@ -54,7 +60,7 @@ export default async function FactoryProjectsPage({ searchParams }: PageProps) {
               </Link>
               <Link
                 href="/api/health/factory-queue"
-                className="rounded-full bg-[#1B2B4D] px-4 py-2 text-xs font-bold text-white"
+                className="rounded-full bg-white px-4 py-2 text-xs font-bold text-neutral-700 ring-1 ring-neutral-200"
               >
                 Queue health
               </Link>

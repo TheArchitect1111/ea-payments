@@ -123,6 +123,12 @@ export default async function EAFactoryPage({ searchParams }: PageProps) {
               <Link href="/admin/ea-factory/training-transformations" className="rounded-full bg-[#111] px-4 py-2 text-xs font-black text-white">
                 Training Transformations
               </Link>
+              <Link
+                href="/admin/ea-factory/launch"
+                className="rounded-full bg-[#C9A844] px-4 py-2 text-xs font-black text-[#1B2B4D]"
+              >
+                Launch
+              </Link>
               <Link href="/admin/ea-factory/projects" className="rounded-full bg-black px-4 py-2 text-xs font-black text-white">
                 Projects
               </Link>
