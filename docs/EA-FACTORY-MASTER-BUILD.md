@@ -201,10 +201,30 @@ Complete:
 - Project Brief and Skin Brief generation UI
 - Human approval gate in generated briefs
 
+## Runtime Launcher Phase 1 (2026)
+
+Autonomous **project create → queue → GenerateWorker → UNDER_REVIEW** foundation inside this repo (extends EACP; no Prisma/Redis greenfield).
+
+Pipeline statuses: `CREATED` → `QUEUED` → `GENERATING` → `UNDER_REVIEW` (later: research/build workers).
+
+| Surface | Path |
+|---------|------|
+| Launch API | `POST /api/launch` |
+| Projects API | `GET /api/projects`, `GET /api/projects/{id}`, restart/cancel |
+| Queue cron | `GET /api/cron/factory-queue` |
+| Queue health | `GET /api/health/factory-queue` |
+| Admin board | `/admin/ea-factory/projects` |
+| Domain | `lib/factory-project.ts`, `lib/factory-queue.ts`, `lib/factory-workers.ts` |
+
+ChatGPT Action: `launchProject` in `/api/eacp/openapi`. Field demo remains a separate fast path (`launchFieldDemo`).
+
+Deferred to later phases: research/discovery/planning AI, website/portal builders, R2 ingestion, BullMQ/Postgres.
+
 ## Pulse Routes
 
 - `/admin/master` includes an EA Factory entry point.
 - `/admin/ea-factory` opens the Phase 1-4 workspace.
+- `/admin/ea-factory/projects` opens the Runtime Launcher project board.
 - `/admin/protocol-center` jumps to Protocol Center.
 - `/admin/ea-factory/repo-library` jumps to Repo Library.
 - `/admin/ea-factory/project-generator` jumps to Project Generator.
@@ -217,6 +237,8 @@ Complete:
 - `GET /api/ea-factory/repos`
 - `POST /api/ea-factory/project-brief`
 - `POST /api/ea-factory/skin-brief`
+- `POST /api/launch` (Runtime Launcher)
+- `GET /api/projects` / `GET /api/projects/{id}`
 
 Still manual / future build:
 
@@ -226,7 +248,7 @@ Still manual / future build:
 - Approval Center UI
 - Codex Builder queue
 - Chassis Deployment approval workflow
-- Pulse analytics ingestion for factory actions
+- Full worker mesh (research → publish) beyond GenerateWorker
 
 ## Build Principle
 

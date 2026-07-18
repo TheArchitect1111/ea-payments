@@ -131,6 +131,10 @@
     {
       "path": "/api/cron/ctp-review-reminders",
       "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/cron/factory-queue",
+      "schedule": "5 * * * *"
     }
   ]
 }

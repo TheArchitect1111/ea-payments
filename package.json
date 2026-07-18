@@ -28,6 +28,7 @@
     "setup-pulse-events": "node scripts/setup-pulse-events-table.mjs",
     "verify-airtable": "node scripts/verify-airtable-schema.mjs",
     "verify:eacp": "node scripts/verify-eacp-readiness.mjs",
+    "verify:factory-launch": "node scripts/verify-factory-launch.mjs",
     "test:capture-e2e": "node scripts/test-capture-e2e.mjs",
     "test:connect-mvp": "node scripts/test-connect-mvp.mjs",
     "test:agents": "node scripts/test-agent-framework.mjs",
