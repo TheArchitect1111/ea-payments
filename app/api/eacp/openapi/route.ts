@@ -10,8 +10,9 @@ export async function GET() {
     openapi: '3.1.0',
     info: {
       title: 'EACP Mobile Launch Action',
-      version: '1.0.0',
-      description: 'Launch EA Factory EACP packages from ChatGPT mobile.',
+      version: '1.1.0',
+      description:
+        'Launch EA Factory EACP packages and field demos (live site + portal + findings) from ChatGPT mobile.',
     },
     servers: [{ url: baseUrl }],
     paths: {
@@ -41,10 +42,7 @@ export async function GET() {
                     industry: { type: 'string', description: 'Optional. EACP can infer this if omitted.' },
                     notes: { type: 'string' },
                   },
-                  anyOf: [
-                    { required: ['command'] },
-                    { required: ['client', 'goal', 'deliverable'] },
-                  ],
+                  anyOf: [{ required: ['command'] }, { required: ['client', 'goal', 'deliverable'] }],
                 },
               },
             },
@@ -74,6 +72,103 @@ export async function GET() {
             '400': { description: 'Missing or invalid launch fields.' },
             '401': { description: 'Missing or invalid bearer token.' },
             '503': { description: 'EACP persistence is not configured.' },
+          },
+        },
+      },
+      '/api/eacp/field-demo': {
+        post: {
+          operationId: 'launchFieldDemo',
+          summary: 'Create a field demo show pack',
+          description:
+            'Creates an EA business profile, live starter website, portal access, findings report, EACP launch trail, and emails the founder a show pack. Use when the user says field demo, show this client, or wants something to present in the room.',
+          security: [{ bearerAuth: [] }],
+          requestBody: {
+            required: true,
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  additionalProperties: false,
+                  properties: {
+                    command: {
+                      type: 'string',
+                      description:
+                        'Natural language field-demo command. Example: Field demo for Acme Roofing, Atlanta. Industry: home services. Goal: book more estimate appointments.',
+                    },
+                    client: { type: 'string', description: 'Business or client name' },
+                    goal: { type: 'string', description: 'Primary business goal' },
+                    deliverable: {
+                      type: 'string',
+                      description: 'Optional. Defaults to Website + Portal.',
+                    },
+                    industry: { type: 'string' },
+                    notes: { type: 'string' },
+                    contactEmail: {
+                      type: 'string',
+                      description: 'Optional prospect email for the demo portal login.',
+                    },
+                  },
+                  anyOf: [{ required: ['command'] }, { required: ['client', 'goal'] }],
+                },
+              },
+            },
+          },
+          responses: {
+            '200': {
+              description: 'Field demo pack created (or partially created with warnings).',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      ok: { type: 'boolean' },
+                      message: { type: 'string' },
+                      slug: { type: 'string' },
+                      siteUrl: { type: 'string' },
+                      reportUrl: { type: 'string' },
+                      portalUrl: { type: 'string' },
+                      portalLoginUrl: { type: 'string' },
+                      launchId: { type: 'string' },
+                      launchReviewUrl: { type: 'string' },
+                      talkingPoints: { type: 'string' },
+                      checkEmail: { type: 'string' },
+                      errors: { type: 'array', items: { type: 'string' } },
+                    },
+                  },
+                },
+              },
+            },
+            '400': { description: 'Missing required fields.' },
+            '401': { description: 'Missing or invalid bearer token.' },
+            '429': { description: 'Rate limit exceeded.' },
+          },
+        },
+      },
+      '/api/eacp/connect-finish': {
+        post: {
+          operationId: 'runConnectFinishLine',
+          summary: 'Run Connect launch finish line',
+          description:
+            'Clears due Connect nurture, reseeds production matrix for an org (default demo-client), and returns Connect launch readiness. Founder ops helper.',
+          security: [{ bearerAuth: [] }],
+          requestBody: {
+            required: false,
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  additionalProperties: false,
+                  properties: {
+                    orgSlug: { type: 'string', default: 'demo-client' },
+                    count: { type: 'integer', minimum: 1, maximum: 50, default: 20 },
+                  },
+                },
+              },
+            },
+          },
+          responses: {
+            '200': { description: 'Connect finish line result.' },
+            '401': { description: 'Missing or invalid bearer token.' },
           },
         },
       },

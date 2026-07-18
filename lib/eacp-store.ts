@@ -27,10 +27,11 @@ const STORE_FILE = process.env.VERCEL
   ? path.join(os.tmpdir(), STORE_FILE_NAME)
   : path.join(/* turbopackIgnore: true */ process.cwd(), '.data', STORE_FILE_NAME);
 const AIRTABLE_BASE_ID = process.env.AIRTABLE_PAYMENTS_BASE_ID ?? 'appv0YoLIMY45fmDA';
-const AIRTABLE_TABLE = process.env.EACP_AIRTABLE_TABLE?.trim();
+const AIRTABLE_TABLE = process.env.EACP_AIRTABLE_TABLE?.trim() || 'EACP Store';
 const AIRTABLE_KEY_FIELD = process.env.EACP_AIRTABLE_KEY_FIELD?.trim() || 'Key';
 const AIRTABLE_PAYLOAD_FIELD = process.env.EACP_AIRTABLE_PAYLOAD_FIELD?.trim() || 'Payload';
 const STORE_RECORD_KEY = 'eacp-store-v1';
+let eacpTableEnsureAttempted = false;
 
 export class EACPStoreConflictError extends Error {
   code = 'EACP_STORE_CONFLICT';
@@ -115,36 +116,71 @@ async function writeAirtableStore(data: EACPStoreData, expectedVersion?: number)
   const key = getAirtableApiKey();
   if (!key || !AIRTABLE_TABLE) return false;
 
-  const payload = JSON.stringify(data);
+  // Keep payload under Airtable multiline limits by retaining a rolling window.
+  const compact: EACPStoreData = {
+    ...data,
+    launches: data.launches.slice(0, 40),
+    approvals: data.approvals.slice(0, 40),
+    codexHandoffs: data.codexHandoffs.slice(0, 40),
+    auditEvents: data.auditEvents.slice(-200),
+  };
+  const payload = JSON.stringify(compact);
   try {
-    const existing = await findAirtableStoreRecord(key);
-    if (expectedVersion !== undefined) {
-      const current = await readAirtableStore();
-      if (current && current.version !== expectedVersion) throw new EACPStoreConflictError();
-    }
+    const wrote = await persistAirtableStorePayload(key, payload, expectedVersion);
+    if (wrote) return true;
 
-    const body = JSON.stringify({
-      fields: {
-        [AIRTABLE_KEY_FIELD]: STORE_RECORD_KEY,
-        [AIRTABLE_PAYLOAD_FIELD]: payload,
-      },
-    });
-    const url = existing
-      ? `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(AIRTABLE_TABLE)}/${existing}`
-      : `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(AIRTABLE_TABLE)}`;
-    const res = await fetch(url, {
-      method: existing ? 'PATCH' : 'POST',
-      headers: {
-        Authorization: `Bearer ${key}`,
-        'Content-Type': 'application/json',
-      },
-      body,
-    });
-    return res.ok;
+    if (!eacpTableEnsureAttempted) {
+      eacpTableEnsureAttempted = true;
+      try {
+        const { ensureEACPStoreTable } = await import('./eacp-store-setup');
+        const setup = await ensureEACPStoreTable();
+        if (setup.ok) {
+          return persistAirtableStorePayload(key, payload, expectedVersion);
+        }
+      } catch (setupError) {
+        console.error('[eacp-store] ensure table failed', setupError);
+      }
+    }
+    return false;
   } catch (error) {
     if (error instanceof EACPStoreConflictError) throw error;
+    console.error('[eacp-store] write failed', error);
     return false;
   }
+}
+
+async function persistAirtableStorePayload(
+  key: string,
+  payload: string,
+  expectedVersion?: number,
+): Promise<boolean> {
+  const existing = await findAirtableStoreRecord(key);
+  if (expectedVersion !== undefined) {
+    const current = await readAirtableStore();
+    if (current && current.version !== expectedVersion) throw new EACPStoreConflictError();
+  }
+
+  const body = JSON.stringify({
+    fields: {
+      [AIRTABLE_KEY_FIELD]: STORE_RECORD_KEY,
+      [AIRTABLE_PAYLOAD_FIELD]: payload,
+    },
+  });
+  const url = existing
+    ? `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(AIRTABLE_TABLE)}/${existing}`
+    : `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(AIRTABLE_TABLE)}`;
+  const res = await fetch(url, {
+    method: existing ? 'PATCH' : 'POST',
+    headers: {
+      Authorization: `Bearer ${key}`,
+      'Content-Type': 'application/json',
+    },
+    body,
+  });
+  if (!res.ok) {
+    console.error('[eacp-store] Airtable write failed', res.status, await res.text().catch(() => ''));
+  }
+  return res.ok;
 }
 
 async function readFileStore(): Promise<EACPStoreData> {

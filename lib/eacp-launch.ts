@@ -13,7 +13,11 @@ import {
   type SkinBriefRecord,
   type SkinProjectType,
 } from './skin-factory';
-import { readEACPStore, updateEACPStore } from './eacp-store';
+import {
+  EACPPersistenceConfigurationError,
+  readEACPStore,
+  updateEACPStore,
+} from './eacp-store';
 
 export type EACPLaunchStatus =
   | 'draft'
@@ -194,6 +198,13 @@ export function parseEACPCommand(command: string): Partial<EACPLaunchInput> {
 }
 
 export async function createEACPLaunch(input: EACPLaunchInput): Promise<EACPLaunchRecord> {
+  try {
+    const { ensureEACPStoreTable } = await import('./eacp-store-setup');
+    await ensureEACPStoreTable();
+  } catch {
+    // Best-effort — write path will surface persistence errors if setup cannot run.
+  }
+
   const normalized = normalizeLaunchInput(input);
   const timestamp = new Date().toISOString();
   const id = createLaunchId();
@@ -293,11 +304,21 @@ export async function createEACPLaunch(input: EACPLaunchInput): Promise<EACPLaun
     },
   };
 
-  await updateEACPStore((store) => {
-    store.launches = [record, ...store.launches.filter((launch) => launch.id !== record.id)];
-    store.approvals = [approvalRecord, ...store.approvals.filter((approval) => approval.launchId !== record.id)];
-    store.auditEvents = [...store.auditEvents, ...auditTrail];
-  });
+  try {
+    await updateEACPStore((store) => {
+      store.launches = [record, ...store.launches.filter((launch) => launch.id !== record.id)];
+      store.approvals = [approvalRecord, ...store.approvals.filter((approval) => approval.launchId !== record.id)];
+      store.auditEvents = [...store.auditEvents, ...auditTrail];
+    });
+  } catch (error) {
+    // Field-demo / ChatGPT should still return a usable package when EACP Store Airtable
+    // setup is incomplete; admin Factory may not list this record until storage is fixed.
+    if (error instanceof EACPPersistenceConfigurationError) {
+      console.error('[eacp-launch] durable store unavailable; returning ephemeral launch', record.id);
+      return record;
+    }
+    throw error;
+  }
 
   return record;
 }

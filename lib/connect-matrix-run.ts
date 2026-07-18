@@ -196,11 +196,12 @@ export async function runConnectProductionMatrix(input: {
       markWelcomeSent: true,
       simulateClicks: true,
     });
+    const persistedCount = seeded.persistedCount ?? seeded.filter((item) => item.airtableRecordId).length;
     steps.push({
       id: 'seed',
       label: 'Seed captures',
-      ok: seeded.length >= count,
-      detail: `Seeded ${seeded.length} capture(s) tagged "${tag}" with backdated nurture eligibility.`,
+      ok: seeded.length >= count && persistedCount >= Math.min(count, seeded.length),
+      detail: `Seeded ${seeded.length} capture(s) tagged "${tag}" (${persistedCount} persisted to Airtable).`,
     });
   }
 

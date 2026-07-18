@@ -5,7 +5,13 @@ import { EA_ADMIN_COOKIE } from '@/lib/ea-admin-auth';
 import { buildConnectLaunchReadiness } from '@/lib/connect-launch-readiness';
 import { runConnectProductionMatrix } from '@/lib/connect-matrix-run';
 import { logConnectNurtureRun } from '@/lib/connect-nurture-log';
+import { ensureConnectForPortal, ensureDemoConnectTenant } from '@/lib/connect-provision';
 import { processDueConnectSequences } from '@/lib/connect-sequence-runner';
+import {
+  ensureConnectTenantStorage,
+  remediateConnectExampleRelationships,
+} from '@/lib/connect-store';
+import { getDemoCredentials } from '@/lib/demo-client';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 180;
@@ -40,6 +46,42 @@ export async function POST(request: NextRequest) {
   const orgSlug = body.orgSlug?.trim() || 'demo-client';
   const count = Number.isFinite(body.count) ? Math.max(1, Math.min(50, Number(body.count))) : 20;
 
+  let storageSetup: { ok: boolean; error?: string } | Awaited<ReturnType<typeof ensureConnectTenantStorage>> | null =
+    null;
+  try {
+    storageSetup = await ensureConnectTenantStorage();
+  } catch (error) {
+    storageSetup = {
+      ok: false,
+      error: error instanceof Error ? error.message : 'Connect storage setup failed.',
+    };
+  }
+
+  const tenant =
+    orgSlug === 'demo-client'
+      ? await ensureDemoConnectTenant()
+      : await ensureConnectForPortal({
+          portalSlug: orgSlug,
+          organizationName: orgSlug,
+          ownerEmail: getDemoCredentials().email,
+          industry: 'business',
+          sendWelcomeEmail: false,
+        });
+
+  if (!tenant.ok && orgSlug !== 'demo-client') {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: tenant.error || `Connect tenant could not be ensured for "${orgSlug}".`,
+        tenant,
+        storageSetup,
+      },
+      { status: 500 },
+    );
+  }
+
+  const exampleRemediation = await remediateConnectExampleRelationships();
+
   const nurture = await processDueConnectSequences();
   await logConnectNurtureRun(nurture, 'admin-run', { tenantId: orgSlug, note: 'Connect launch finish line' });
 
@@ -54,6 +96,9 @@ export async function POST(request: NextRequest) {
 
   return NextResponse.json({
     ok: readiness.ready,
+    tenant,
+    storageSetup,
+    exampleRemediation,
     nurture,
     matrixRun,
     ...readiness,
