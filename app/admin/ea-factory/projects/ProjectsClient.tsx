@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 
 type ProjectRow = {
@@ -9,6 +9,8 @@ type ProjectRow = {
   goal: string;
   deliverable?: string;
   pipelineStatus: string;
+  statusLabel?: string;
+  inProgress?: boolean;
   source: string;
   launchId?: string;
   launchReviewUrl?: string;
@@ -90,6 +92,16 @@ export default function ProjectsClient({ initialProjects }: { initialProjects: P
     }
     return false;
   }
+
+  const anyWorking = projects.some((p) => p.inProgress);
+  // Visual-only auto-refresh while anything is in progress (not email).
+  useEffect(() => {
+    if (!anyWorking) return;
+    const id = window.setInterval(() => {
+      void refresh();
+    }, 5000);
+    return () => window.clearInterval(id);
+  }, [anyWorking]);
 
   async function pollRefresh(times = 6, delayMs = 2500) {
     for (let i = 0; i < times; i += 1) {
@@ -216,8 +228,11 @@ export default function ProjectsClient({ initialProjects }: { initialProjects: P
                         STATUS_STYLE[project.pipelineStatus] || 'bg-neutral-100 text-neutral-700'
                       }`}
                     >
-                      {project.pipelineStatus}
+                      {project.statusLabel || project.pipelineStatus}
                     </span>
+                    <p className="mt-1 font-mono text-[10px] text-neutral-400">
+                      {project.pipelineStatus}
+                    </p>
                     {statusHint(project.pipelineStatus) ? (
                       <p className="mt-1 text-[11px] text-neutral-500">
                         {statusHint(project.pipelineStatus)}

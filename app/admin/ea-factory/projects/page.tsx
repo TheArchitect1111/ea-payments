@@ -3,6 +3,7 @@ import Link from 'next/link';
 import AdminLogin from '../../master/AdminLogin';
 import { hasAdminPageAccess } from '@/lib/admin-page-auth';
 import { listFactoryProjects } from '@/lib/factory-project-store';
+import { factoryFriendlyLabel, factoryIsInProgress } from '@/lib/factory-status-labels';
 import { FACTORY_WORKERS } from '@/lib/factory-workers';
 import ProjectsClient from './ProjectsClient';
 
@@ -104,7 +105,24 @@ export default async function FactoryProjectsPage({ searchParams }: PageProps) {
           </section>
         ) : null}
 
-        <ProjectsClient initialProjects={projects} />
+        <ProjectsClient
+          initialProjects={projects.map((p) => ({
+            id: p.id,
+            client: p.client,
+            goal: p.goal,
+            deliverable: p.deliverable,
+            pipelineStatus: p.pipelineStatus,
+            statusLabel: factoryFriendlyLabel(p.pipelineStatus),
+            inProgress: factoryIsInProgress(p.pipelineStatus),
+            source: p.source,
+            launchId: p.launchId,
+            launchReviewUrl: p.launchReviewUrl,
+            url: p.url,
+            createdAt: p.createdAt,
+            updatedAt: p.updatedAt,
+            error: p.error,
+          }))}
+        />
       </div>
     </main>
   );
