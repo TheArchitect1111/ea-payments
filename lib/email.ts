@@ -1541,14 +1541,13 @@ export async function sendInternalNotification(data: {
 }
 
 /**
- * Factory "ready" email — full package attached + inlined (no login required).
+ * Factory "ready" email — founder brief in HTML + readable .md attachment (no login).
  */
 export async function sendFactoryPackageReadyEmail(data: {
   subject: string;
   clientName: string;
-  projectId: string;
-  statusLabel: string;
   packageMarkdown: string;
+  packageHtml: string;
   filename?: string;
 }): Promise<{ ok: boolean; error?: string }> {
   const apiKey = process.env.RESEND_API_KEY;
@@ -1564,32 +1563,12 @@ export async function sendFactoryPackageReadyEmail(data: {
 
   const filename =
     data.filename ||
-    `factory-${data.clientName.replace(/[^\w.-]+/g, '-').slice(0, 48) || 'package'}-${data.projectId}.md`;
-
-  // Keep body readable on phone; full file is always the attachment.
-  const BODY_CHARS = 60_000;
-  const bodyPackage =
-    data.packageMarkdown.length > BODY_CHARS
-      ? `${data.packageMarkdown.slice(0, BODY_CHARS)}\n\n…(truncated in email body — open the attached .md for the full package)`
-      : data.packageMarkdown;
-
-  const bodyHtml = `
-    <p style="margin:0 0 14px;font-size:15px;color:#1A1A2E;line-height:1.7;">
-      <strong>${escHtml(data.clientName)}</strong> finished automatic Factory processing.
-    </p>
-    <p style="margin:0 0 8px;font-size:14px;color:#555;line-height:1.7;">Project: ${escHtml(data.projectId)}</p>
-    <p style="margin:0 0 18px;font-size:14px;color:#555;line-height:1.7;">Status: ${escHtml(data.statusLabel)}</p>
-    <p style="margin:0 0 12px;font-size:14px;color:#1A1A2E;line-height:1.7;">
-      Your full Factory package is <strong>attached</strong> as <code>${escHtml(filename)}</code> — no login needed.
-    </p>
-    <p style="margin:0 0 8px;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#1B2B4D;">Package</p>
-    <pre style="margin:0;padding:16px;background:#F4F1EA;border-left:4px solid #C9A844;font-size:11px;line-height:1.5;white-space:pre-wrap;word-break:break-word;color:#1A1A2E;overflow-wrap:anywhere;">${escHtml(bodyPackage)}</pre>
-  `;
+    `factory-${data.clientName.replace(/[^\w.-]+/g, '-').slice(0, 48) || 'package'}.md`;
 
   const html = baseEmailShell({
-    title: 'Factory package ready',
+    title: `${data.clientName} — Factory package`,
     eyebrow: 'EA Factory',
-    bodyHtml,
+    bodyHtml: data.packageHtml,
   });
 
   try {
