@@ -49,24 +49,46 @@ export default function LaunchClient() {
     setResult(null);
 
     try {
-      const form = new FormData();
       const trimmed = command.trim();
-      if (trimmed) form.set('command', trimmed);
-      if (file) form.set('image', file);
+      let res: Response;
 
-      const res = await fetch('/api/launch', {
-        method: 'POST',
-        credentials: 'include',
-        body: form,
-      });
-      const data = (await res.json()) as {
+      if (file) {
+        const form = new FormData();
+        if (trimmed) form.set('command', trimmed);
+        form.set('image', file);
+        res = await fetch('/api/launch', {
+          method: 'POST',
+          credentials: 'include',
+          body: form,
+        });
+      } else {
+        res = await fetch('/api/launch', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ command: trimmed }),
+        });
+      }
+
+      const raw = await res.text();
+      let data: {
         ok?: boolean;
         error?: string;
         correction?: string;
         projectId?: string;
         status?: string;
         client?: string;
-      };
+      } = {};
+      try {
+        data = raw ? (JSON.parse(raw) as typeof data) : {};
+      } catch {
+        if (res.status === 401 || /login/i.test(raw)) {
+          setError('Please log in again, then try Launch.');
+          return;
+        }
+        setError('Launch did not complete. Please try again.');
+        return;
+      }
 
       if (!res.ok || !data.ok || !data.projectId) {
         setError(data.correction || data.error || 'Launch failed. Try again.');
