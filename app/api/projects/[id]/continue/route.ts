@@ -1,17 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireFactoryApiAccess } from '@/lib/factory-api-auth';
+import { setProjectContextStatus } from '@/lib/factory-project-context';
 import { canContinueFactoryProject, getProject } from '@/lib/factory-project';
-import { runFactoryOrchestrator } from '@/lib/factory-orchestrator';
 import { scheduleFactoryGenerateJob } from '@/lib/factory-queue';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
-export const maxDuration = 60;
+export const maxDuration = 30;
 
 type Params = { params: Promise<{ id: string }> };
 
 /**
- * Resume a mid-pipeline Factory project (e.g. stuck at INTAKE_COMPLETE after after() timed out).
+ * Resume a mid-pipeline Factory project.
+ * Returns quickly — heavy work runs in after() so phone UI does not hang.
  */
 export async function POST(request: NextRequest, { params }: Params) {
   const auth = await requireFactoryApiAccess(request);
@@ -34,15 +35,30 @@ export async function POST(request: NextRequest, { params }: Params) {
     );
   }
 
-  // Kick a background pass and also try one synchronous orchestrator run for immediate progress.
+  let status = project.pipelineStatus;
+
+  // Visible progress right away when stuck after intake.
+  if (status === 'INTAKE_COMPLETE') {
+    const moved = await setProjectContextStatus(
+      projectId,
+      'RESEARCHING',
+      'continue',
+      'Continue requested — starting research',
+    );
+    if (moved?.project) {
+      status = moved.project.pipelineStatus;
+    }
+  }
+
   scheduleFactoryGenerateJob(projectId);
-  const updated = await runFactoryOrchestrator(projectId);
+
+  const latest = (await getProject(projectId)) ?? project;
 
   return NextResponse.json({
     ok: true,
     projectId,
-    status: updated?.pipelineStatus ?? project.pipelineStatus,
-    timestamp: updated?.updatedAt ?? project.updatedAt,
-    message: 'Factory continue started.',
+    status: latest.pipelineStatus || status,
+    timestamp: latest.updatedAt,
+    message: 'Factory continue started. Tap Refresh in a few seconds.',
   });
 }

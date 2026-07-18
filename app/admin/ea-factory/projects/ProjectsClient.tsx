@@ -56,6 +56,26 @@ function statusHint(status: string): string {
   }
 }
 
+type ActionResponse = {
+  ok?: boolean;
+  error?: string;
+  status?: string;
+  message?: string;
+  projects?: ProjectRow[];
+};
+
+async function readJson(res: Response): Promise<ActionResponse> {
+  const raw = await res.text();
+  try {
+    return raw ? (JSON.parse(raw) as ActionResponse) : {};
+  } catch {
+    if (res.status === 401 || /login/i.test(raw)) {
+      return { ok: false, error: 'Please log in again, then try Continue.' };
+    }
+    return { ok: false, error: 'Request failed. Please try again.' };
+  }
+}
+
 export default function ProjectsClient({ initialProjects }: { initialProjects: ProjectRow[] }) {
   const [projects, setProjects] = useState(initialProjects);
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -63,26 +83,54 @@ export default function ProjectsClient({ initialProjects }: { initialProjects: P
 
   async function refresh() {
     const res = await fetch('/api/projects', { credentials: 'include' });
-    const data = await res.json();
+    const data = await readJson(res);
     if (data.ok && Array.isArray(data.projects)) {
       setProjects(data.projects);
+      return true;
+    }
+    return false;
+  }
+
+  async function pollRefresh(times = 6, delayMs = 2500) {
+    for (let i = 0; i < times; i += 1) {
+      await new Promise((r) => window.setTimeout(r, delayMs));
+      await refresh();
     }
   }
 
   async function runAction(id: string, action: 'restart' | 'cancel' | 'continue') {
     setBusyId(id);
-    setMessage(null);
+    setMessage(action === 'continue' ? 'Starting Continue…' : null);
     try {
       const res = await fetch(`/api/projects/${encodeURIComponent(id)}/${action}`, {
         method: 'POST',
         credentials: 'include',
       });
-      const data = await res.json();
+      const data = await readJson(res);
       if (!res.ok || !data.ok) {
         setMessage(data.error || `${action} failed`);
-      } else {
-        setMessage(`${action} → ${data.status}`);
-        await refresh();
+        return;
+      }
+
+      setMessage(
+        data.message ||
+          (data.status ? `${action} → ${data.status}` : `${action} started`),
+      );
+
+      // Optimistic status update when Continue moves intake → research
+      if (action === 'continue' && data.status) {
+        setProjects((prev) =>
+          prev.map((p) =>
+            p.id === id
+              ? { ...p, pipelineStatus: data.status!, updatedAt: new Date().toISOString() }
+              : p,
+          ),
+        );
+      }
+
+      await refresh();
+      if (action === 'continue') {
+        void pollRefresh();
       }
     } catch (err) {
       setMessage(err instanceof Error ? err.message : `${action} failed`);
@@ -116,7 +164,11 @@ export default function ProjectsClient({ initialProjects }: { initialProjects: P
           Refresh
         </button>
       </div>
-      {message ? <p className="text-sm text-neutral-600">{message}</p> : null}
+      {message ? (
+        <p className="rounded-xl bg-[#FAF8F3] px-4 py-3 text-sm font-medium text-neutral-800 ring-1 ring-neutral-200">
+          {message}
+        </p>
+      ) : null}
       <div className="overflow-x-auto border border-neutral-200 bg-white">
         <table className="min-w-full text-left text-sm">
           <thead className="border-b border-neutral-200 bg-[#FAF8F3] text-xs uppercase tracking-wider text-neutral-500">
@@ -190,9 +242,9 @@ export default function ProjectsClient({ initialProjects }: { initialProjects: P
                           type="button"
                           disabled={busyId === project.id}
                           onClick={() => void runAction(project.id, 'continue')}
-                          className="text-xs font-bold text-[#1B2B4D] underline disabled:opacity-50"
+                          className="rounded-full bg-[#1B2B4D] px-3 py-1.5 text-xs font-bold text-white disabled:opacity-50"
                         >
-                          Continue
+                          {busyId === project.id ? 'Working…' : 'Continue'}
                         </button>
                       ) : null}
                       {(project.pipelineStatus === 'FAILED' ||
@@ -208,7 +260,9 @@ export default function ProjectsClient({ initialProjects }: { initialProjects: P
                       )}
                       {(project.pipelineStatus === 'CREATED' ||
                         project.pipelineStatus === 'QUEUED' ||
-                        project.pipelineStatus === 'GENERATING') && (
+                        project.pipelineStatus === 'GENERATING' ||
+                        project.pipelineStatus === 'INTAKE' ||
+                        project.pipelineStatus === 'INTAKE_COMPLETE') && (
                         <button
                           type="button"
                           disabled={busyId === project.id}
