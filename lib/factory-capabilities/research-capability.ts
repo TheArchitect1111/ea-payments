@@ -9,6 +9,7 @@ import {
   appendProjectContextOutput,
   getLatestProjectContextOutput,
   loadProjectContext,
+  setProjectContextStatus,
   type ProjectContext,
 } from '@/lib/factory-project-context';
 import { getProject } from '@/lib/factory-project';
@@ -45,6 +46,14 @@ export async function executeResearch(context: ProjectContext): Promise<Capabili
     hasUrl: Boolean(context.seed.url),
     attachmentCount: context.seed.attachments?.length ?? 0,
   });
+
+  // Mark progress immediately so a timeout during website fetch does not look like a stuck intake.
+  await setProjectContextStatus(
+    projectId,
+    'RESEARCHING',
+    'research',
+    'Research capability collecting artifacts',
+  );
 
   const { drafts, runs } = await collectResearchArtifacts(context);
 

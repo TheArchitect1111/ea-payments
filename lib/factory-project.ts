@@ -270,6 +270,20 @@ export function canRestart(project: FactoryProject): boolean {
   return project.pipelineStatus === 'FAILED' || project.pipelineStatus === 'CANCELLED';
 }
 
+/** Mid-pipeline statuses that can be nudged forward without a full restart. */
+export function canContinueFactoryProject(project: FactoryProject): boolean {
+  return (
+    project.pipelineStatus === 'QUEUED' ||
+    project.pipelineStatus === 'INTAKE' ||
+    project.pipelineStatus === 'INTAKE_COMPLETE' ||
+    project.pipelineStatus === 'RESEARCHING' ||
+    project.pipelineStatus === 'DISCOVERING' ||
+    project.pipelineStatus === 'PLANNING' ||
+    project.pipelineStatus === 'BUILDING' ||
+    project.pipelineStatus === 'GENERATING'
+  );
+}
+
 export function canCancel(project: FactoryProject): boolean {
   return (
     project.pipelineStatus === 'CREATED' ||

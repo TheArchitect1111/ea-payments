@@ -69,7 +69,7 @@ export default function ProjectsClient({ initialProjects }: { initialProjects: P
     }
   }
 
-  async function runAction(id: string, action: 'restart' | 'cancel') {
+  async function runAction(id: string, action: 'restart' | 'cancel' | 'continue') {
     setBusyId(id);
     setMessage(null);
     try {
@@ -89,6 +89,19 @@ export default function ProjectsClient({ initialProjects }: { initialProjects: P
     } finally {
       setBusyId(null);
     }
+  }
+
+  function canContinue(status: string): boolean {
+    return (
+      status === 'QUEUED' ||
+      status === 'INTAKE' ||
+      status === 'INTAKE_COMPLETE' ||
+      status === 'RESEARCHING' ||
+      status === 'DISCOVERING' ||
+      status === 'PLANNING' ||
+      status === 'BUILDING' ||
+      status === 'GENERATING'
+    );
   }
 
   return (
@@ -172,6 +185,16 @@ export default function ProjectsClient({ initialProjects }: { initialProjects: P
                       >
                         Detail
                       </Link>
+                      {canContinue(project.pipelineStatus) ? (
+                        <button
+                          type="button"
+                          disabled={busyId === project.id}
+                          onClick={() => void runAction(project.id, 'continue')}
+                          className="text-xs font-bold text-[#1B2B4D] underline disabled:opacity-50"
+                        >
+                          Continue
+                        </button>
+                      ) : null}
                       {(project.pipelineStatus === 'FAILED' ||
                         project.pipelineStatus === 'CANCELLED') && (
                         <button
