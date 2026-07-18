@@ -3,6 +3,7 @@
  * Not on every pipeline step (by design).
  */
 import { sendInternalNotification } from '@/lib/email';
+import { factoryPackageDownloadUrl } from '@/lib/factory-export';
 import { getProject } from '@/lib/factory-project';
 import { saveFactoryProject, type FactoryProject } from '@/lib/factory-project-store';
 import { factoryFriendlyLabel } from '@/lib/factory-status-labels';
@@ -70,6 +71,12 @@ export async function notifyFactoryDone(projectId: string): Promise<void> {
   if (!okStop) return;
 
   const href = projectsUrl(projectId);
+  const downloadUrl = factoryPackageDownloadUrl(projectId);
+  const base = downloadUrl.replace(/\/api\/projects\/.*$/, '');
+  const eacpDownload = project.launchId
+    ? `${base}/api/ea-factory/launch/${encodeURIComponent(project.launchId)}/export?type=markdown`
+    : null;
+
   try {
     await sendInternalNotification({
       subject: `Factory ready — ${project.client}`,
@@ -79,7 +86,13 @@ export async function notifyFactoryDone(projectId: string): Promise<void> {
         `Project: ${project.id}`,
         `Status: ${factoryFriendlyLabel(project.pipelineStatus)}`,
         '',
-        `Open it: ${href}`,
+        'Download your Factory package (stay logged into admin, then open):',
+        downloadUrl,
+        ...(eacpDownload
+          ? ['', 'EACP package download:', eacpDownload]
+          : []),
+        '',
+        `Project page: ${href}`,
       ].join('\n'),
     });
   } catch (err) {
