@@ -1,12 +1,15 @@
 /**
- * Website research provider — fetches public HTML metadata (no AI summarization).
+ * Website research provider — fetches public HTML + light same-origin crawl.
  */
 import { provenanceFromContext, type ArtifactDraft } from '@/lib/factory-artifact';
 import {
   providerCanCollect,
   resolveResearchUrl,
 } from '@/lib/factory-research/providers.mjs';
-import { buildWebsiteArtifactData } from '@/lib/factory-research/website-extract.mjs';
+import {
+  buildWebsiteArtifactData,
+  selectCrawlCandidateUrls,
+} from '@/lib/factory-research/website-extract.mjs';
 import type { ResearchProvider } from '@/lib/factory-research/types';
 import type { ProjectContext } from '@/lib/factory-project-context';
 
@@ -19,6 +22,7 @@ export type WebsiteFetchResult = {
 export type WebsiteFetcher = (url: string) => Promise<WebsiteFetchResult>;
 
 const MAX_HTML_BYTES = 512_000;
+const MAX_CRAWL_PAGES = 3;
 
 async function defaultFetchWebsite(url: string): Promise<WebsiteFetchResult> {
   const res = await fetch(url, {
@@ -49,6 +53,31 @@ export function setWebsiteFetcher(fetcher: WebsiteFetcher | null) {
   activeFetcher = fetcher || defaultFetchWebsite;
 }
 
+async function crawlRelatedPages(
+  run: WebsiteFetcher,
+  homeUrl: string,
+  homeHtml: string,
+): Promise<Array<{ url: string; html: string }>> {
+  const candidates = selectCrawlCandidateUrls(homeHtml, homeUrl, MAX_CRAWL_PAGES);
+  if (!candidates.length) return [];
+
+  const pages: Array<{ url: string; html: string }> = [];
+  for (const candidate of candidates) {
+    try {
+      const page = await run(candidate);
+      if (page.status >= 200 && page.status < 400 && page.html) {
+        pages.push({ url: candidate, html: page.html });
+      }
+    } catch (err) {
+      console.warn('[factory-research:website] crawl page failed', {
+        url: candidate,
+        error: err instanceof Error ? err.message : 'fetch failed',
+      });
+    }
+  }
+  return pages;
+}
+
 export function createWebsiteProvider(fetcher?: WebsiteFetcher): ResearchProvider {
   const run = fetcher ?? ((url: string) => activeFetcher(url));
 
@@ -69,17 +98,20 @@ export function createWebsiteProvider(fetcher?: WebsiteFetcher): ResearchProvide
       let data: Record<string, unknown>;
       try {
         const page = await run(url);
+        const extraPages = await crawlRelatedPages(run, url, page.html);
         data = buildWebsiteArtifactData({
           url,
           status: page.status,
           contentType: page.contentType,
           html: page.html,
+          extraPages,
         });
         console.info('[factory-research:website] collect ok', {
           projectId: context.projectId,
           url,
           httpStatus: page.status,
           title: (data.extracted as { title?: string } | null)?.title || null,
+          relatedPages: extraPages.length,
         });
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Website fetch failed';

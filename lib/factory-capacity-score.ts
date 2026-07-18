@@ -53,6 +53,13 @@ function str(value: unknown): string | undefined {
   return typeof value === 'string' && value.trim() ? value.trim() : undefined;
 }
 
+function strListJoin(value: unknown): string {
+  if (!Array.isArray(value)) return '';
+  return value
+    .filter((item): item is string => typeof item === 'string' && item.trim().length > 0)
+    .join(' ');
+}
+
 function artifactText(project: FactoryProject): { title: string; description?: string; markdown: string; url: string } {
   const artifacts = project.context?.artifacts || [];
   const website = [...artifacts].reverse().find((a) => a.kind === 'website');
@@ -82,6 +89,13 @@ function artifactText(project: FactoryProject): { title: string; description?: s
     description || '',
     str(brandingData.visionText) || '',
     str(brandingData.textPreview) || '',
+    str(brandingData.whoTheyAre) || '',
+    str(brandingData.offer) || '',
+    str(brandingData.friction) || '',
+    str(extracted.textPreview) || '',
+    strListJoin(extracted.h1),
+    strListJoin(extracted.ctas),
+    strListJoin(extracted.navLabels),
   ];
 
   for (const art of artifacts) {

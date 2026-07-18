@@ -34,7 +34,15 @@ const {
   appendProjectContextOutput,
   appendProjectContextArtifacts,
 } = contextMod;
-const { extractTitle, extractMetaContent, buildWebsiteArtifactData } = extractMod;
+const {
+  extractTitle,
+  extractMetaContent,
+  buildWebsiteArtifactData,
+  extractHeadings,
+  extractNavLabels,
+  extractCtaLabels,
+  selectCrawlCandidateUrls,
+} = extractMod;
 const {
   planMetadataArtifact,
   planOrganizationArtifact,
@@ -104,18 +112,40 @@ const {
     <meta name="description" content="Youth programs">
     <meta property="og:image" content="https://cdn.example/og.png">
     <link rel="canonical" href="https://www.bgca.org/">
-  </head><body></body></html>`;
+  </head><body>
+    <nav><a href="/about">About</a><a href="/programs">Programs</a><a href="/contact">Contact</a></nav>
+    <h1>Great Futures Start Here</h1>
+    <h2>Youth development</h2>
+    <a href="/join">Join today</a>
+    <p>Email us at hello@bgca.org or call 555-123-4567 for membership.</p>
+  </body></html>`;
   assert(extractTitle(html) === 'Boys & Girls Clubs', 'extract title entities');
   assert(extractMetaContent(html, 'description') === 'Youth programs', 'extract description');
+  assert(extractHeadings(html, 'h1')[0] === 'Great Futures Start Here', 'extract h1');
+  assert(extractNavLabels(html).includes('About'), 'extract nav About');
+  assert(extractCtaLabels(html).some((c) => /join/i.test(c)), 'extract join CTA');
+  const crawl = selectCrawlCandidateUrls(html, 'https://www.bgca.org', 3);
+  assert(crawl.some((u) => /about/i.test(u)), 'crawl candidate about');
+  assert(crawl.length <= 3, 'crawl candidates capped at 3');
   const data = buildWebsiteArtifactData({
     url: 'https://www.bgca.org',
     status: 200,
     contentType: 'text/html',
     html,
+    extraPages: [
+      {
+        url: 'https://www.bgca.org/about',
+        html: '<html><body><h1>Our Mission</h1><p>We enable youth to reach great futures.</p></body></html>',
+      },
+    ],
   });
   assert(data.ok === true, 'website data ok');
   assert(data.extracted.title === 'Boys & Girls Clubs', 'website extracted title');
   assert(data.extracted.ogImage === 'https://cdn.example/og.png', 'website og:image');
+  assert(Array.isArray(data.extracted.h1) && data.extracted.h1.length > 0, 'website h1 list');
+  assert(typeof data.extracted.textPreview === 'string' && data.extracted.textPreview.length > 20, 'website textPreview');
+  assert(data.extracted.email === 'hello@bgca.org', 'website contact email');
+  assert(data.extracted.pages?.length === 2, 'website pages include crawl');
 }
 
 // --- Unit: provider plans ---
