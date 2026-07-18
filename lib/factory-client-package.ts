@@ -176,10 +176,20 @@ export function buildFactoryClientPackage(project: FactoryProject): FactoryClien
     ...recommendationsFromArtifacts(artifacts),
   ].filter((item, index, arr) => arr.indexOf(item) === index);
 
+  const junk = (text?: string) =>
+    !text ||
+    /screenshot submitted|source page:.*ctp\/assets|evaluate visible messaging/i.test(text);
+
   const siteTitle =
-    str(extracted.title) || str(extracted.ogTitle) || vision.title || project.client;
-  const siteDescription = str(extracted.description) || vision.description;
-  const siteImage = str(extracted.ogImage) || vision.imageUrl || imageUrls[0];
+    (!junk(str(extracted.title)) && str(extracted.title)) ||
+    (!junk(str(extracted.ogTitle)) && str(extracted.ogTitle)) ||
+    vision.title ||
+    project.client;
+  const siteDescription =
+    (!junk(str(extracted.description)) && str(extracted.description)) ||
+    (!junk(vision.description) && vision.description) ||
+    undefined;
+  const siteImage = vision.imageUrl || imageUrls[0] || str(extracted.ogImage);
 
   const summaryParts = [
     `EA Factory finished the automatic pass for ${project.client}.`,

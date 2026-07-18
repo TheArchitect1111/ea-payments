@@ -16,11 +16,46 @@ import {
   type FactoryCapacityScorecard,
 } from '@/lib/factory-capacity-score';
 import { buildFactoryClientPackage } from '@/lib/factory-client-package';
+import {
+  renderLandingMockup,
+  renderMemberMockup,
+  renderPortalMockup,
+} from '@/lib/factory-concept-mockups';
+import { isSyntheticPhotoClient } from '@/lib/factory-research/image-signal';
 import type { FactoryProject } from '@/lib/factory-project-store';
 
 const NAVY = '#1B2B4D';
 const GOLD = '#C9A844';
 const CREAM = '#F8F6F2';
+
+function isJunkCopy(text: string | undefined): boolean {
+  if (!text?.trim()) return true;
+  return /screenshot submitted|source page:.*ctp\/assets|evaluate visible messaging|upload:\/\//i.test(
+    text,
+  );
+}
+
+function cleanDisplayName(name: string): string {
+  const cleaned = name.replace(/^#+\s*/, '').trim();
+  if (!cleaned || isSyntheticPhotoClient(cleaned) || /^screenshot\b/i.test(cleaned)) {
+    return 'Your organization';
+  }
+  if (/efficiencyarchitects\.online/i.test(cleaned) && cleaned.length < 40) {
+    return 'Your organization';
+  }
+  return cleaned;
+}
+
+function brandingSummary(project: FactoryProject): string | undefined {
+  const branding = [...(project.context?.artifacts || [])]
+    .reverse()
+    .find((a) => a.kind === 'branding');
+  const summary =
+    (typeof branding?.data?.visionSummary === 'string' && branding.data.visionSummary) ||
+    (typeof branding?.data?.whatTheyDo === 'string' && branding.data.whatTheyDo) ||
+    undefined;
+  return summary && !isJunkCopy(summary) ? summary.trim().slice(0, 220) : undefined;
+}
 
 export type FactoryConceptPack = {
   version: 1;
@@ -105,95 +140,82 @@ function brandingCta(project: FactoryProject): string | undefined {
 export function buildFactoryConceptPack(project: FactoryProject): FactoryConceptPack {
   const base = buildFactoryClientPackage(project);
   const scorecard = buildFactoryCapacityScorecard(project);
-  const siteTitle = base.siteSnapshot.title || project.client;
+  const clientName = cleanDisplayName(
+    (!isJunkCopy(base.siteSnapshot.title) && base.siteSnapshot.title) || project.client,
+  );
   const description =
-    base.siteSnapshot.description ||
-    `${project.client} is building capacity with a clearer public face, client portal, and member experience.`;
+    brandingSummary(project) ||
+    (!isJunkCopy(base.siteSnapshot.description) ? base.siteSnapshot.description : undefined) ||
+    `${clientName} gets a clear public face, an ops portal to run the work, and a member home that keeps people connected.`;
   const fromPhoto = Boolean(
-    (project.attachments || []).some((a) => a.type === 'image') && !project.url,
+    (project.attachments || []).some((a) => a.type === 'image') &&
+      !(project.url && !/\/api\/ctp\/assets\//i.test(project.url)),
   );
 
-  const pageTitles = base.websitePages.map((p) => p.title).filter(Boolean);
   const opportunities = pickOpportunities(project, [
-    ...base.recommendations,
+    ...base.recommendations.filter((r) => !isJunkCopy(r)),
     ...scorecard.gaps,
   ]).slice(0, 5);
   while (opportunities.length < 3) {
     opportunities.push(
       [
-        'Reduce scattered tools into one guided client experience',
-        'Make the public website convert interest into a clear next step',
-        'Give members a home for learning, updates, and belonging',
+        'Turn interest into one clear next step on the public site',
+        'Run registrations, payments, and follow-up from one ops portal',
+        'Give members a home for progress, schedule, and belonging',
       ][opportunities.length],
     );
   }
 
   const evalBullets = [
-    `Capacity score: ${scorecard.overallScore}/100 (category benchmark ~${scorecard.benchmark}/100).`,
+    `Capacity score: ${scorecard.overallScore}/100 (benchmark ~${scorecard.benchmark}/100).`,
     scorecard.capacityLost.headline,
     scorecard.opportunityGained.headline,
-    project.url
-      ? `We reviewed ${project.url} as the starting signal.`
-      : fromPhoto
-        ? 'We read your launch photo as the starting signal (not a finished website audit).'
-        : 'We used your launch notes as the starting signal.',
+    fromPhoto
+      ? 'Signal: launch photo (sit-down Concept Pack — not a finished website audit).'
+      : project.url
+        ? `Signal: ${project.url}.`
+        : 'Signal: launch notes.',
     description,
-    `Primary goal in this pack: ${project.goal}.`,
   ];
 
-  const cta = brandingCta(project) || 'Start here';
+  const cta = brandingCta(project) || 'Join the journey';
 
   return {
     version: 1,
     label: 'Concept Pack',
-    clientName: project.client,
+    clientName,
     projectId: project.id,
-    coverLine: `A clear path from interest → trust → membership for ${siteTitle}.`,
-    sourceUrl: project.url,
-    heroImageUrl: base.siteSnapshot.imageUrl || base.imageUrls[0],
+    coverLine: `Show the product: website → ops portal → member home for ${clientName}.`,
+    sourceUrl: project.url && !/\/api\/ctp\/assets\//i.test(project.url) ? project.url : undefined,
+    heroImageUrl: base.imageUrls[0] || base.siteSnapshot.imageUrl,
     scorecard,
     eval: {
-      headline: 'Business eval & breakdown',
+      headline: 'The numbers (why this matters)',
       bullets: evalBullets,
       opportunities,
     },
     landing: {
-      headline: siteTitle,
+      headline: clientName,
       subhead: description.slice(0, 220),
       cta,
-      points:
-        pageTitles.slice(0, 4).length >= 2
-          ? pageTitles.slice(0, 4)
-          : fromPhoto
-            ? [
-                'Hero — who this is for (from your photo)',
-                'Offer / programs in plain language',
-                'Proof / trust near the ask',
-                `${cta} — clear next step`,
-              ]
-            : ['Home', 'About / Mission', 'Programs or Services', 'Contact / Next step'],
+      points: ['Get started', 'Develop', 'Compete / engage', 'Get seen', 'Belong'],
     },
     portal: {
-      headline: `${project.client} Client Portal`,
+      headline: `${clientName} Ops Portal`,
       modules: [
-        'Home — what needs attention today',
-        'Projects & progress',
-        'Documents & approvals',
-        'Messages / next steps',
-        'Simplifi captures (optional)',
+        'Dashboard',
+        'People / members',
+        'Teams / programs',
+        'Events & schedule',
+        'Payments',
+        'Communications',
       ],
     },
     member: {
-      headline: `${project.client} Member Home`,
-      modules: [
-        'Welcome & orientation',
-        'Learning / resources',
-        'Community updates',
-        'Events & sessions',
-        'Profile & access',
-      ],
+      headline: `${clientName} Member Home`,
+      modules: ['Dashboard', 'My journey', 'Schedule', 'Resources', 'Messages', 'Profile'],
     },
-    ask: 'If this direction feels right, the next step is approval to refine the Skin Brief and move toward build.',
+    ask: 'If this direction feels right, approve the next step: refine the Skin Brief and move toward build.',
   };
 }
 
@@ -243,26 +265,17 @@ export function exportFactoryConceptPackMarkdown(pack: FactoryConceptPack): stri
     '',
     ...pack.eval.opportunities.map((o) => `- ${o}`),
     '',
-    '## 2. Website / landing concept',
+    '## Product mockups (see HTML email for branded visuals)',
     '',
-    `**${pack.landing.headline}**`,
-    '',
+    '### 1. Website / landing',
     pack.landing.subhead,
-    '',
     `CTA: ${pack.landing.cta}`,
-    '',
     ...pack.landing.points.map((p) => `- ${p}`),
     '',
-    '## 3. Portal concept',
-    '',
-    `**${pack.portal.headline}**`,
-    '',
+    '### 2. Ops / client portal',
     ...pack.portal.modules.map((m) => `- ${m}`),
     '',
-    '## 4. Member concept',
-    '',
-    `**${pack.member.headline}**`,
-    '',
+    '### 3. Member home',
     ...pack.member.modules.map((m) => `- ${m}`),
     '',
     '## The ask',
@@ -271,34 +284,11 @@ export function exportFactoryConceptPackMarkdown(pack: FactoryConceptPack): stri
     '',
     '---',
     '',
-    '_Concept Pack — preview for discussion, not a finished production build._',
+    '_Visual mockups are in the HTML email — this file is the data + outline._',
     '',
   ]
     .filter((line, i, arr) => !(line === '' && arr[i - 1] === ''))
     .join('\n');
-}
-
-function screenCard(opts: {
-  eyebrow: string;
-  title: string;
-  bodyHtml: string;
-  imageUrl?: string;
-}): string {
-  const img = opts.imageUrl
-    ? `<img src="${opts.imageUrl}" alt="" width="560" style="width:100%;max-width:560px;height:160px;object-fit:cover;display:block;border:0;" />`
-    : `<div style="height:160px;background:linear-gradient(135deg,${NAVY},${GOLD});"></div>`;
-
-  return `
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 22px;border:1px solid #e5e5e5;background:#fff;">
-    <tr><td>${img}</td></tr>
-    <tr>
-      <td style="padding:18px 20px;">
-        <p style="margin:0 0 6px;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:${GOLD};">${opts.eyebrow}</p>
-        <p style="margin:0 0 10px;font-size:18px;font-weight:800;color:${NAVY};">${opts.title}</p>
-        ${opts.bodyHtml}
-      </td>
-    </tr>
-  </table>`;
 }
 
 /** HTML for email body + printable sit-down preview. */
@@ -308,41 +298,27 @@ export function renderFactoryConceptPackEmailHtml(
 ): string {
   const evalBullets = pack.eval.bullets.map((b) => `<li>${escHtml(b)}</li>`).join('');
   const opps = pack.eval.opportunities.map((o) => `<li>${escHtml(o)}</li>`).join('');
-  const landingPoints = pack.landing.points.map((p) => `<li>${escHtml(p)}</li>`).join('');
-  const portalMods = pack.portal.modules.map((m) => `<li>${escHtml(m)}</li>`).join('');
-  const memberMods = pack.member.modules.map((m) => `<li>${escHtml(m)}</li>`).join('');
-  const hero = pack.heroImageUrl ? escHtml(pack.heroImageUrl) : undefined;
-
-  const landingScreen = screenCard({
-    eyebrow: '1 · Website / landing',
-    title: escHtml(pack.landing.headline),
-    imageUrl: hero,
-    bodyHtml: `
-      <p style="margin:0 0 12px;font-size:14px;color:#555;line-height:1.6;">${escHtml(pack.landing.subhead)}</p>
-      <p style="margin:0 0 12px;display:inline-block;background:${NAVY};color:#fff;padding:10px 16px;font-size:12px;font-weight:700;">${escHtml(pack.landing.cta)}</p>
-      <ul style="margin:12px 0 0;padding-left:18px;font-size:13px;color:#555;line-height:1.6;">${landingPoints}</ul>
-    `,
-  });
-
-  const portalScreen = screenCard({
-    eyebrow: '2 · Client portal',
-    title: escHtml(pack.portal.headline),
-    bodyHtml: `
-      <p style="margin:0 0 10px;font-size:13px;color:#555;">Where they work with you after they say yes.</p>
-      <ul style="margin:0;padding-left:18px;font-size:13px;color:#555;line-height:1.6;">${portalMods}</ul>
-    `,
-  });
-
-  const memberScreen = screenCard({
-    eyebrow: '3 · Member home',
-    title: escHtml(pack.member.headline),
-    bodyHtml: `
-      <p style="margin:0 0 10px;font-size:13px;color:#555;">Where their people belong, learn, and stay connected.</p>
-      <ul style="margin:0;padding-left:18px;font-size:13px;color:#555;line-height:1.6;">${memberMods}</ul>
-    `,
-  });
-
   const s = pack.scorecard;
+  const lostShort = formatUsdRange(s.capacityLost.annualLow, s.capacityLost.annualHigh);
+  const gainedShort = formatUsdRange(s.opportunityGained.annualLow, s.opportunityGained.annualHigh);
+
+  const mockInput = {
+    clientName: pack.clientName,
+    tagline: pack.landing.subhead,
+    cta: pack.landing.cta,
+    heroImageUrl: pack.heroImageUrl,
+    score: s.overallScore,
+    capacityLostLabel: lostShort,
+    opportunityLabel: gainedShort,
+    landingSections: pack.landing.points,
+    portalNav: pack.portal.modules,
+    memberNav: pack.member.modules,
+    escHtml,
+  };
+
+  const landingScreen = renderLandingMockup(mockInput);
+  const portalScreen = renderPortalMockup(mockInput);
+  const memberScreen = renderMemberMockup(mockInput);
   const breakdownRows = s.capacityLost.breakdown
     .map(
       (line) => `
@@ -357,6 +333,7 @@ export function renderFactoryConceptPackEmailHtml(
     <p style="margin:0 0 8px;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:${GOLD};">${escHtml(pack.label)} · Preview</p>
     <h1 style="margin:0 0 10px;font-size:26px;line-height:1.25;color:${NAVY};">${escHtml(pack.clientName)}</h1>
     <p style="margin:0 0 8px;font-size:16px;color:#1A1A2E;line-height:1.6;">${escHtml(pack.coverLine)}</p>
+    <p style="margin:0 0 6px;font-size:13px;color:#555;line-height:1.5;">Sit-down pack: <strong>proof numbers</strong> + <strong>three branded product mockups</strong> (website, ops portal, member home).</p>
     <p style="margin:0 0 18px;font-size:12px;color:#888;">Project ${escHtml(pack.projectId)}${pack.sourceUrl ? ` · ${escHtml(pack.sourceUrl)}` : ''}</p>
 
     ${
