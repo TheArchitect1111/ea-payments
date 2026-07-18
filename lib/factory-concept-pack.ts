@@ -16,11 +16,7 @@ import {
   type FactoryCapacityScorecard,
 } from '@/lib/factory-capacity-score';
 import { buildFactoryClientPackage } from '@/lib/factory-client-package';
-import {
-  renderLandingMockup,
-  renderMemberMockup,
-  renderPortalMockup,
-} from '@/lib/factory-concept-mockups';
+import { renderConceptSampleMockups } from '@/lib/factory-concept-mockups';
 import { isSyntheticPhotoClient } from '@/lib/factory-research/image-signal';
 import type { FactoryProject } from '@/lib/factory-project-store';
 
@@ -46,15 +42,33 @@ function cleanDisplayName(name: string): string {
   return cleaned;
 }
 
-function brandingSummary(project: FactoryProject): string | undefined {
+function brandingArtifact(project: FactoryProject): Record<string, unknown> | null {
   const branding = [...(project.context?.artifacts || [])]
     .reverse()
     .find((a) => a.kind === 'branding');
+  return branding?.data && typeof branding.data === 'object'
+    ? (branding.data as Record<string, unknown>)
+    : null;
+}
+
+function brandingSummary(project: FactoryProject): string | undefined {
+  const data = brandingArtifact(project);
   const summary =
-    (typeof branding?.data?.visionSummary === 'string' && branding.data.visionSummary) ||
-    (typeof branding?.data?.whatTheyDo === 'string' && branding.data.whatTheyDo) ||
+    (typeof data?.visionSummary === 'string' && data.visionSummary) ||
+    (typeof data?.whatTheyDo === 'string' && data.whatTheyDo) ||
     undefined;
   return summary && !isJunkCopy(summary) ? summary.trim().slice(0, 220) : undefined;
+}
+
+function brandingClientName(project: FactoryProject): string | undefined {
+  const data = brandingArtifact(project);
+  const name =
+    (typeof data?.suggestedClientName === 'string' && data.suggestedClientName) ||
+    (typeof data?.brandName === 'string' && data.brandName) ||
+    undefined;
+  if (!name || isJunkCopy(name) || isSyntheticPhotoClient(name)) return undefined;
+  const cleaned = cleanDisplayName(name);
+  return cleaned === 'Your organization' ? undefined : cleaned;
 }
 
 export type FactoryConceptPack = {
@@ -140,9 +154,11 @@ function brandingCta(project: FactoryProject): string | undefined {
 export function buildFactoryConceptPack(project: FactoryProject): FactoryConceptPack {
   const base = buildFactoryClientPackage(project);
   const scorecard = buildFactoryCapacityScorecard(project);
-  const clientName = cleanDisplayName(
-    (!isJunkCopy(base.siteSnapshot.title) && base.siteSnapshot.title) || project.client,
-  );
+  const clientName =
+    brandingClientName(project) ||
+    cleanDisplayName(
+      (!isJunkCopy(base.siteSnapshot.title) && base.siteSnapshot.title) || project.client,
+    );
   const description =
     brandingSummary(project) ||
     (!isJunkCopy(base.siteSnapshot.description) ? base.siteSnapshot.description : undefined) ||
@@ -185,7 +201,7 @@ export function buildFactoryConceptPack(project: FactoryProject): FactoryConcept
     label: 'Concept Pack',
     clientName,
     projectId: project.id,
-    coverLine: `Show the product: website → ops portal → member home for ${clientName}.`,
+    coverLine: `Product concept samples for ${clientName}: website, ops portal, and member home — with the numbers to back the conversation.`,
     sourceUrl: project.url && !/\/api\/ctp\/assets\//i.test(project.url) ? project.url : undefined,
     heroImageUrl: base.imageUrls[0] || base.siteSnapshot.imageUrl,
     scorecard,
@@ -265,18 +281,13 @@ export function exportFactoryConceptPackMarkdown(pack: FactoryConceptPack): stri
     '',
     ...pack.eval.opportunities.map((o) => `- ${o}`),
     '',
-    '## Product mockups (see HTML email for branded visuals)',
+    '## Product concept samples (full visuals are in the HTML email)',
     '',
-    '### 1. Website / landing',
+    '1. Website / landing — public face',
+    '2. Ops / client portal — where you run the system',
+    '3. Member home — where their people live',
+    '',
     pack.landing.subhead,
-    `CTA: ${pack.landing.cta}`,
-    ...pack.landing.points.map((p) => `- ${p}`),
-    '',
-    '### 2. Ops / client portal',
-    ...pack.portal.modules.map((m) => `- ${m}`),
-    '',
-    '### 3. Member home',
-    ...pack.member.modules.map((m) => `- ${m}`),
     '',
     '## The ask',
     '',
@@ -284,7 +295,7 @@ export function exportFactoryConceptPackMarkdown(pack: FactoryConceptPack): stri
     '',
     '---',
     '',
-    '_Visual mockups are in the HTML email — this file is the data + outline._',
+    '_Open the HTML email to see the three high-fidelity product samples._',
     '',
   ]
     .filter((line, i, arr) => !(line === '' && arr[i - 1] === ''))
@@ -295,30 +306,21 @@ export function exportFactoryConceptPackMarkdown(pack: FactoryConceptPack): stri
 export function renderFactoryConceptPackEmailHtml(
   pack: FactoryConceptPack,
   escHtml: (s: string) => string,
+  options?: { inlineSamples?: boolean },
 ): string {
   const evalBullets = pack.eval.bullets.map((b) => `<li>${escHtml(b)}</li>`).join('');
   const opps = pack.eval.opportunities.map((o) => `<li>${escHtml(o)}</li>`).join('');
   const s = pack.scorecard;
-  const lostShort = formatUsdRange(s.capacityLost.annualLow, s.capacityLost.annualHigh);
-  const gainedShort = formatUsdRange(s.opportunityGained.annualLow, s.opportunityGained.annualHigh);
-
-  const mockInput = {
+  const heroForSignal =
+    pack.heroImageUrl && !pack.heroImageUrl.startsWith('cid:concept-sample')
+      ? pack.heroImageUrl
+      : undefined;
+  const productMockups = renderConceptSampleMockups({
     clientName: pack.clientName,
-    tagline: pack.landing.subhead,
-    cta: pack.landing.cta,
-    heroImageUrl: pack.heroImageUrl,
-    score: s.overallScore,
-    capacityLostLabel: lostShort,
-    opportunityLabel: gainedShort,
-    landingSections: pack.landing.points,
-    portalNav: pack.portal.modules,
-    memberNav: pack.member.modules,
+    heroImageUrl: heroForSignal,
+    useCid: Boolean(options?.inlineSamples),
     escHtml,
-  };
-
-  const landingScreen = renderLandingMockup(mockInput);
-  const portalScreen = renderPortalMockup(mockInput);
-  const memberScreen = renderMemberMockup(mockInput);
+  });
   const breakdownRows = s.capacityLost.breakdown
     .map(
       (line) => `
@@ -333,19 +335,8 @@ export function renderFactoryConceptPackEmailHtml(
     <p style="margin:0 0 8px;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:${GOLD};">${escHtml(pack.label)} · Preview</p>
     <h1 style="margin:0 0 10px;font-size:26px;line-height:1.25;color:${NAVY};">${escHtml(pack.clientName)}</h1>
     <p style="margin:0 0 8px;font-size:16px;color:#1A1A2E;line-height:1.6;">${escHtml(pack.coverLine)}</p>
-    <p style="margin:0 0 6px;font-size:13px;color:#555;line-height:1.5;">Sit-down pack: <strong>proof numbers</strong> + <strong>three branded product mockups</strong> (website, ops portal, member home).</p>
+    <p style="margin:0 0 6px;font-size:13px;color:#555;line-height:1.5;">Sit-down pack: <strong>proof numbers</strong> + <strong>three high-fidelity product samples</strong> (website, ops portal, member home).</p>
     <p style="margin:0 0 18px;font-size:12px;color:#888;">Project ${escHtml(pack.projectId)}${pack.sourceUrl ? ` · ${escHtml(pack.sourceUrl)}` : ''}</p>
-
-    ${
-      pack.heroImageUrl
-        ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 18px;">
-      <tr><td>
-        <p style="margin:0 0 8px;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:${GOLD};">Source photo</p>
-        <img src="${escHtml(pack.heroImageUrl)}" alt="Launch photo" width="560" style="width:100%;max-width:560px;height:auto;display:block;border:0;" />
-      </td></tr>
-    </table>`
-        : ''
-    }
 
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 18px;">
       <tr>
@@ -388,9 +379,7 @@ export function renderFactoryConceptPackEmailHtml(
       </tr>
     </table>
 
-    ${landingScreen}
-    ${portalScreen}
-    ${memberScreen}
+    ${productMockups}
 
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:8px 0 0;background:${NAVY};">
       <tr>
@@ -408,7 +397,7 @@ export function renderFactoryConceptPackEmailHtml(
 export function renderFactoryConceptPackDocument(pack: FactoryConceptPack): string {
   const esc = (s: string) =>
     s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-  const body = renderFactoryConceptPackEmailHtml(pack, esc);
+  const body = renderFactoryConceptPackEmailHtml(pack, esc, { inlineSamples: false });
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
