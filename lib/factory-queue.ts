@@ -63,6 +63,7 @@ export async function enqueueFactoryProject(projectId: string): Promise<FactoryP
 }
 
 export function scheduleFactoryGenerateJob(projectId: string) {
+  // Each after() tick runs one capability, then runFactoryOrchestrator schedules the next.
   after(async () => {
     try {
       await runGenerateWorker(projectId);

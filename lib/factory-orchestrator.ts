@@ -115,8 +115,11 @@ export async function orchestrateOnce(projectId: string): Promise<OrchestratorSt
 }
 
 /**
- * Run orchestration until quiescent or max steps.
- * GenerateWorker entry delegates here — Orchestrator is the only dispatcher.
+ * Run one orchestration step, then auto-chain the next in a fresh background job.
+ *
+ * Why one step: Vercel `after()` / request budgets often die mid-pipeline if we run
+ * intake→research→discovery→… in a single pass. Chaining keeps Launch automatic
+ * without asking a human to click Continue.
  */
 export async function runFactoryOrchestrator(projectId: string): Promise<FactoryProject | null> {
   let project = await getProject(projectId);
@@ -136,36 +139,30 @@ export async function runFactoryOrchestrator(projectId: string): Promise<Factory
     status: project?.pipelineStatus,
   });
 
-  let dispatchedAny = false;
-  for (let step = 0; step < 8; step += 1) {
-    const result = await orchestrateOnce(projectId);
-    project = result.project;
-    if (!result.dispatched) {
-      console.info('[factory-orchestrator] idle', {
-        projectId,
-        status: project?.pipelineStatus,
-        steps: step,
-      });
-      break;
-    }
-    dispatchedAny = true;
+  const result = await orchestrateOnce(projectId);
+  project = result.project;
+
+  if (result.dispatched) {
     console.info('[factory-orchestrator] dispatched', {
       projectId,
       capabilityId: result.capabilityId,
       worker: result.worker,
       status: project?.pipelineStatus,
-      step,
+    });
+  } else {
+    console.info('[factory-orchestrator] idle', {
+      projectId,
+      status: project?.pipelineStatus,
     });
   }
 
-  // If more work remains (common when after()/request time budget ends mid-chain), schedule another pass.
+  // Always chain while work remains — this is the automatic Factory conveyor.
   await ensureProjectContext(projectId);
   const leftover = await loadProjectContext(projectId);
   if (leftover && discoverNextFromRegistry(leftover)) {
-    console.info('[factory-orchestrator] reschedule — more capabilities runnable', {
+    console.info('[factory-orchestrator] auto-chain next capability', {
       projectId,
       status: leftover.pipelineStatus,
-      dispatchedAny,
     });
     const { scheduleFactoryGenerateJob } = await import('@/lib/factory-queue');
     scheduleFactoryGenerateJob(projectId);

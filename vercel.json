@@ -134,7 +134,7 @@
     },
     {
       "path": "/api/cron/factory-queue",
-      "schedule": "5 * * * *"
+      "schedule": "*/5 * * * *"
     }
   ]
 }
