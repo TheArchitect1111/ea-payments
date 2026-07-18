@@ -110,7 +110,7 @@ export default function ProjectsClient({ initialProjects }: { initialProjects: P
     }
   }
 
-  async function runAction(id: string, action: 'restart' | 'cancel' | 'continue') {
+  async function runAction(id: string, action: 'restart' | 'cancel' | 'continue' | 'resend-package') {
     setBusyId(id);
     setMessage(action === 'continue' ? 'Starting Continue…' : null);
     try {
@@ -270,6 +270,14 @@ export default function ProjectsClient({ initialProjects }: { initialProjects: P
                           {busyId === project.id ? 'Working…' : 'Continue'}
                         </button>
                       ) : null}
+                      <button
+                        type="button"
+                        disabled={busyId === project.id}
+                        onClick={() => void runAction(project.id, 'resend-package')}
+                        className="text-xs font-bold text-[#1B2B4D] underline disabled:opacity-50"
+                      >
+                        Email package
+                      </button>
                       {(project.pipelineStatus === 'FAILED' ||
                         project.pipelineStatus === 'CANCELLED') && (
                         <button

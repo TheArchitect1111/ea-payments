@@ -170,7 +170,10 @@ export async function runFactoryOrchestrator(projectId: string): Promise<Factory
     // No more automatic work — email once (done). Failures notify separately.
     try {
       const { notifyFactoryDone } = await import('@/lib/factory-notify');
-      await notifyFactoryDone(projectId);
+      const notified = await notifyFactoryDone(projectId);
+      if (!notified.ok && notified.error && !/already sent/i.test(notified.error)) {
+        console.error('[factory-orchestrator] done notify failed', projectId, notified.error);
+      }
     } catch (err) {
       console.error('[factory-orchestrator] done notify failed', projectId, err);
     }
