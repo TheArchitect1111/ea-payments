@@ -35,8 +35,8 @@ export default async function FactoryProjectsPage({ searchParams }: PageProps) {
                 Projects
               </h1>
               <p className="mt-2 max-w-3xl text-sm leading-6 text-neutral-500">
-                Phase 1 launcher pipeline: CREATED → QUEUED → GENERATING → UNDER_REVIEW. GenerateWorker
-                creates the EACP package; humans still approve before build/deploy.
+                Factory pipeline: intake → research → discovery → planning → building. After Launch,
+                open a project to see status and activity. Human approval still comes before publish.
               </p>
             </div>
             <div className="flex flex-wrap gap-2">

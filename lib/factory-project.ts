@@ -188,7 +188,16 @@ export async function createFactoryProject(
     ],
   };
 
-  await saveFactoryProject(project);
+  const saved = await saveFactoryProject(project);
+  if (!saved.ok) {
+    return {
+      ok: false,
+      missing: ['storage'],
+      correction:
+        saved.error ||
+        'Could not save the project. Check Creative Studio / Airtable, then try Launch again.',
+    };
+  }
   return { ok: true, project };
 }
 

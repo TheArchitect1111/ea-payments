@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { NAVY, GOLD } from '@/lib/design-system';
 
 type LaunchResult = {
@@ -13,6 +14,7 @@ type LaunchResult = {
 const MAX_BYTES = 2 * 1024 * 1024;
 
 export default function LaunchClient() {
+  const router = useRouter();
   const [command, setCommand] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -102,6 +104,13 @@ export default function LaunchClient() {
       });
       setCommand('');
       onFileChange(null);
+
+      // Take the user straight to the project so Launch never feels like “nothing happened.”
+      window.setTimeout(() => {
+        router.push(
+          `/admin/ea-factory/projects?focus=${encodeURIComponent(data.projectId!)}`,
+        );
+      }, 600);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Launch failed. Try again.');
     } finally {
@@ -118,7 +127,8 @@ export default function LaunchClient() {
         Launch
       </h1>
       <p className="mt-2 text-sm leading-6 text-neutral-600">
-        Type a website or company name. Optional: add a photo. Tap Launch.
+        Type a website or company name. Optional: add a photo. Tap Launch — you’ll be taken to the
+        project page.
       </p>
 
       <form onSubmit={(e) => void onSubmit(e)} className="mt-8 space-y-5">
@@ -160,7 +170,7 @@ export default function LaunchClient() {
 
         {result ? (
           <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-4 text-sm text-emerald-900">
-            <p className="font-bold">Launch started</p>
+            <p className="font-bold">Launch started — opening your project…</p>
             {result.client ? <p className="mt-1">Client: {result.client}</p> : null}
             <p className="mt-1 font-mono text-xs">{result.projectId}</p>
             <p className="mt-1">Status: {result.status}</p>
@@ -169,7 +179,7 @@ export default function LaunchClient() {
               className="mt-3 inline-block font-bold underline"
               style={{ color: NAVY }}
             >
-              Open project
+              Open project now
             </Link>
           </div>
         ) : null}

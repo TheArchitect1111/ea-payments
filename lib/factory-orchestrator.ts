@@ -165,6 +165,9 @@ export const ORCHESTRATOR_DRAIN_STATUSES: FactoryPipelineStatus[] = [
   'INTAKE',
   'INTAKE_COMPLETE',
   'RESEARCHING',
+  'DISCOVERING',
+  'PLANNING',
+  'BUILDING',
   'GENERATING',
 ];
 

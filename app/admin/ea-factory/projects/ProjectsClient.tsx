@@ -22,10 +22,39 @@ const STATUS_STYLE: Record<string, string> = {
   CREATED: 'bg-neutral-100 text-neutral-700',
   QUEUED: 'bg-amber-50 text-amber-800',
   GENERATING: 'bg-sky-50 text-sky-800',
+  INTAKE: 'bg-sky-50 text-sky-800',
+  INTAKE_COMPLETE: 'bg-sky-50 text-sky-800',
+  RESEARCHING: 'bg-indigo-50 text-indigo-800',
+  DISCOVERING: 'bg-violet-50 text-violet-800',
+  PLANNING: 'bg-fuchsia-50 text-fuchsia-800',
+  BUILDING: 'bg-blue-50 text-blue-800',
   UNDER_REVIEW: 'bg-emerald-50 text-emerald-800',
+  COMPLETE: 'bg-emerald-50 text-emerald-800',
   FAILED: 'bg-red-50 text-red-800',
   CANCELLED: 'bg-neutral-200 text-neutral-600',
 };
+
+function statusHint(status: string): string {
+  switch (status) {
+    case 'QUEUED':
+    case 'INTAKE':
+    case 'INTAKE_COMPLETE':
+    case 'RESEARCHING':
+    case 'DISCOVERING':
+    case 'PLANNING':
+    case 'GENERATING':
+      return 'Factory is working on this…';
+    case 'BUILDING':
+      return 'Build stage reached — check activity below for progress.';
+    case 'UNDER_REVIEW':
+    case 'COMPLETE':
+      return 'Ready for review.';
+    case 'FAILED':
+      return 'Something failed — open Detail for the error.';
+    default:
+      return '';
+  }
+}
 
 export default function ProjectsClient({ initialProjects }: { initialProjects: ProjectRow[] }) {
   const [projects, setProjects] = useState(initialProjects);
@@ -124,6 +153,11 @@ export default function ProjectsClient({ initialProjects }: { initialProjects: P
                     >
                       {project.pipelineStatus}
                     </span>
+                    {statusHint(project.pipelineStatus) ? (
+                      <p className="mt-1 text-[11px] text-neutral-500">
+                        {statusHint(project.pipelineStatus)}
+                      </p>
+                    ) : null}
                   </td>
                   <td className="max-w-xs px-4 py-3 text-neutral-600">{project.goal}</td>
                   <td className="px-4 py-3 text-neutral-500">{project.source}</td>
