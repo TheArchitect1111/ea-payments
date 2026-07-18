@@ -1,13 +1,13 @@
 /**
- * Factory founder notifications — email only on start and terminal done/failed.
- * Ready email is a plain-language brief + images (when available), not raw JSON.
+ * Factory founder notifications — start + ready/failed only.
+ * Ready email = sit-down Concept Pack (eval + 3 concept screens).
  */
 import { sendFactoryPackageReadyEmail, sendInternalNotification } from '@/lib/email';
 import {
-  buildFactoryClientPackage,
-  exportFactoryClientPackageMarkdown,
-  renderFactoryClientPackageEmailHtml,
-} from '@/lib/factory-client-package';
+  buildFactoryConceptPack,
+  exportFactoryConceptPackMarkdown,
+  renderFactoryConceptPackEmailHtml,
+} from '@/lib/factory-concept-pack';
 import { getProject } from '@/lib/factory-project';
 import { saveFactoryProject, type FactoryProject } from '@/lib/factory-project-store';
 import { factoryFriendlyLabel } from '@/lib/factory-status-labels';
@@ -68,7 +68,6 @@ export async function notifyFactoryStarted(projectId: string): Promise<void> {
   await persistNotify(latest, { startedAt: new Date().toISOString() });
 }
 
-/** Call when the automatic pipeline has no more work and status is a success stop. */
 export async function notifyFactoryDone(
   projectId: string,
   options?: { force?: boolean },
@@ -90,18 +89,18 @@ export async function notifyFactoryDone(
     options?.force;
   if (!okStop) return { ok: false, error: 'Project is still processing.' };
 
-  const pkg = buildFactoryClientPackage(project);
-  const packageMarkdown = exportFactoryClientPackageMarkdown(pkg);
-  const packageHtml = renderFactoryClientPackageEmailHtml(pkg, escHtml);
-  const safeName = project.client.replace(/[^\w.-]+/g, '-').slice(0, 48) || 'package';
+  const pack = buildFactoryConceptPack(project);
+  const packageMarkdown = exportFactoryConceptPackMarkdown(pack);
+  const packageHtml = renderFactoryConceptPackEmailHtml(pack, escHtml);
+  const safeName = project.client.replace(/[^\w.-]+/g, '-').slice(0, 48) || 'concept-pack';
 
   try {
     const sent = await sendFactoryPackageReadyEmail({
-      subject: `Factory package ready — ${project.client}`,
+      subject: `Concept Pack ready — ${project.client}`,
       clientName: project.client,
       packageMarkdown,
       packageHtml,
-      filename: `factory-${safeName}-${project.id}.md`,
+      filename: `concept-pack-${safeName}-${project.id}.md`,
     });
     if (!sent.ok) {
       console.error('[factory-notify] done email failed', projectId, sent.error);

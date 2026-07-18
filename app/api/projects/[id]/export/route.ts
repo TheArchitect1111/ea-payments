@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireFactoryApiAccess } from '@/lib/factory-api-auth';
 import {
+  buildFactoryConceptPack,
+  exportFactoryConceptPackMarkdown,
+} from '@/lib/factory-concept-pack';
+import {
   exportFactoryProjectJson,
   exportFactoryProjectMarkdown,
 } from '@/lib/factory-export';
@@ -25,7 +29,7 @@ export async function GET(request: NextRequest, { params }: Params) {
     return NextResponse.json({ ok: false, error: 'Project not found.' }, { status: 404 });
   }
 
-  const type = request.nextUrl.searchParams.get('type') ?? 'markdown';
+  const type = request.nextUrl.searchParams.get('type') ?? 'concept';
   const safeName = project.client.replace(/[^\w.-]+/g, '-').slice(0, 48) || project.id;
 
   if (type === 'json') {
@@ -37,10 +41,21 @@ export async function GET(request: NextRequest, { params }: Params) {
     });
   }
 
-  return new NextResponse(exportFactoryProjectMarkdown(project), {
+  if (type === 'brief' || type === 'markdown') {
+    return new NextResponse(exportFactoryProjectMarkdown(project), {
+      headers: {
+        'Content-Type': 'text/markdown; charset=utf-8',
+        'Content-Disposition': `attachment; filename="factory-brief-${safeName}-${project.id}.md"`,
+      },
+    });
+  }
+
+  // Default: sit-down Concept Pack
+  const pack = buildFactoryConceptPack(project);
+  return new NextResponse(exportFactoryConceptPackMarkdown(pack), {
     headers: {
       'Content-Type': 'text/markdown; charset=utf-8',
-      'Content-Disposition': `attachment; filename="factory-${safeName}-${project.id}.md"`,
+      'Content-Disposition': `attachment; filename="concept-pack-${safeName}-${project.id}.md"`,
     },
   });
 }
