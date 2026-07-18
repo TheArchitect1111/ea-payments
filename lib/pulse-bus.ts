@@ -89,7 +89,10 @@ export type PulseEventType =
   | 'praison.agent.complete'
   | 'praison.qa.passed'
   | 'praison.qa.failed'
-  | 'praison.package.ready';
+  | 'praison.package.ready'
+  | 'factory.project.created'
+  | 'factory.project.queued'
+  | 'factory.project.status';
 
 export interface PulseEvent {
   product: PulseProduct;

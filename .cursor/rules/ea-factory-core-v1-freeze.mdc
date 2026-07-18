@@ -1,0 +1,24 @@
+# EA Factory Core v1.0 — Frozen
+
+EA Factory Core is complete (`ea-factory-core-v1.0`). See `docs/architecture/ea-factory-core-v1.md`.
+
+## Frozen — treat as versioned APIs
+
+Launcher, Orchestrator, Capability interface/Registry, ProjectContext, ArtifactService, WorkOrder, ProductionController, Builder Registry, Deliverable, Review Gates.
+
+Do not redesign these. Do not add a new orchestration layer or framework pattern.
+
+## Extend only via
+
+- New **capabilities** (manifest + bootstrap + `canRun`/`execute`)
+- New **builders** (Builder Registry)
+- Append-only **artifacts / deliverables / review gates** with provenance
+
+## Product work style
+
+One capability or builder at a time → tests → logging → docs → stop for review.  
+Optimize reliability, observability, performance, UX — not architecture.
+
+## Definition of done
+
+Founder launches from ChatGPT → research → discover → plan → build → QA → publish → notify → review-ready deliverable.

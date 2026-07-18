@@ -4,9 +4,13 @@ This connects ChatGPT mobile to EACP through a protected GPT Action.
 
 ## Production URLs
 
-- OpenAPI schema: `https://ea-payments.vercel.app/api/eacp/openapi`
-- Protected launch endpoint: `https://ea-payments.vercel.app/api/eacp/chatgpt-launch`
-- Review launches: `https://ea-payments.vercel.app/admin/ea-factory/launches`
+- OpenAPI schema: `https://efficiencyarchitects.online/api/eacp/openapi`
+- Factory project launch (pipeline): `https://efficiencyarchitects.online/api/launch`
+- EACP brief launch: `https://efficiencyarchitects.online/api/eacp/chatgpt-launch`
+- Factory projects dashboard: `https://efficiencyarchitects.online/admin/ea-factory/projects`
+- Review launches: `https://efficiencyarchitects.online/admin/ea-factory/launches`
+
+Legacy alias: `https://ea-payments.vercel.app/api/eacp/...` also works when that deployment is current.
 
 ## Required Vercel Environment Variable
 
@@ -26,7 +30,7 @@ Use the same value as the ChatGPT Action bearer token.
 4. Import the schema from:
 
 ```text
-https://ea-payments.vercel.app/api/eacp/openapi
+https://efficiencyarchitects.online/api/eacp/openapi
 ```
 
 5. Set authentication to API key / bearer token.
@@ -39,9 +43,17 @@ https://ea-payments.vercel.app/api/eacp/openapi
 ```text
 You are EA Factory Command Center.
 
-When the user gives an EACP command, call launchEACPFromChatGPT.
+When the user says Launch … (URL, company name, PDF/image note, or plain text project start),
+call launchProject. Examples: "Launch https://www.bgca.org", "Launch Bob Rumball Centre",
+"Launch Acme and create a complete learning ecosystem."
 
-Required fields:
+After launchProject returns, summarize projectId, status, timestamp, and tell them to check
+Admin → EA Factory → Projects (or poll GET /api/projects/{id}).
+
+When the user gives a normal EACP packaging command (briefs only, no live site, not "Launch"),
+call launchEACPFromChatGPT instead.
+
+Required for EACP brief launch:
 - client
 - goal
 - deliverable
@@ -49,12 +61,24 @@ Required fields:
 Industry is optional. Notes are strongly recommended.
 
 Do not approve, build, deploy, or archive launches.
-After the action returns, summarize the launch ID, status, and review package link.
-Tell the user that approval must happen inside EA Factory.
+Do not invent URLs — only use links returned by the action.
 If information is missing, ask for the missing fields instead of guessing.
 ```
 
-## Phone Command Example
+## Phone Command Examples
+
+### Factory project (autonomous pipeline)
+
+```text
+Launch https://www.bgca.org
+```
+
+```text
+Launch Bob Rumball Centre
+Goal: training transformation
+```
+
+### EACP brief package only
 
 ```text
 EACP Client: Bob Rumball Centre
@@ -65,5 +89,5 @@ Notes: Convert videos, SOPs, policies, and PowerPoints into modular learning.
 
 ## Security Notes
 
-The ChatGPT action can create EACP launch packages only. It cannot approve,
+The ChatGPT action can create Factory projects and EACP launch packages only. It cannot approve,
 start builds, or deploy. Keep approval and deployment inside EA Factory.
