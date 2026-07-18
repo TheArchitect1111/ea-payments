@@ -81,12 +81,22 @@ export async function notifyFactoryDone(
     return { ok: false, error: 'Project is not in a ready state.' };
   }
 
+  const hasResearch = Boolean(
+    project.context?.outputs?.some((item) => item.kind === 'research') ||
+      (project.context?.artifacts?.length ?? 0) > 0,
+  );
+  // Email Concept Pack when Factory is done OR idle with enough signal for a sit-down.
   const okStop =
+    options?.force ||
     project.pipelineStatus === 'BUILDING' ||
     project.pipelineStatus === 'UNDER_REVIEW' ||
     project.pipelineStatus === 'COMPLETE' ||
     project.pipelineStatus === 'PUBLISHED' ||
-    options?.force;
+    project.pipelineStatus === 'PLANNING' ||
+    project.pipelineStatus === 'DISCOVERING' ||
+    (hasResearch &&
+      (project.pipelineStatus === 'RESEARCHING' ||
+        project.pipelineStatus === 'INTAKE_COMPLETE'));
   if (!okStop) return { ok: false, error: 'Project is still processing.' };
 
   const pack = buildFactoryConceptPack(project);
