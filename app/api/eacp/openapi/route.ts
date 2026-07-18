@@ -26,7 +26,7 @@ export async function GET() {
     openapi: '3.1.0',
     info: {
       title: 'EACP Mobile Launch Action',
-      version: '1.2.1',
+      version: '1.2.2',
       description:
         'Launch EA Factory projects (pipeline) and EACP packages from ChatGPT mobile.',
     },
@@ -43,41 +43,7 @@ export async function GET() {
             required: true,
             content: {
               'application/json': {
-                schema: {
-                  type: 'object',
-                  additionalProperties: false,
-                  properties: {
-                    command: {
-                      type: 'string',
-                      description:
-                        'Natural language. Examples: Launch https://www.bgca.org — Launch Bob Rumball Centre — Launch Acme and create a complete learning ecosystem.',
-                    },
-                    client: { type: 'string' },
-                    companyName: { type: 'string' },
-                    url: { type: 'string' },
-                    website: { type: 'string' },
-                    goal: { type: 'string' },
-                    deliverable: { type: 'string' },
-                    industry: { type: 'string' },
-                    notes: { type: 'string' },
-                    text: { type: 'string' },
-                    attachments: {
-                      type: 'array',
-                      items: {
-                        type: 'object',
-                        properties: {
-                          type: {
-                            type: 'string',
-                            enum: ['image', 'pdf', 'powerpoint', 'word', 'text', 'voice', 'other'],
-                          },
-                          url: { type: 'string' },
-                          textPreview: { type: 'string' },
-                          name: { type: 'string' },
-                        },
-                      },
-                    },
-                  },
-                },
+                schema: { $ref: '#/components/schemas/LaunchProjectRequest' },
               },
             },
           },
@@ -86,16 +52,7 @@ export async function GET() {
               description: 'Project created and queued.',
               content: {
                 'application/json': {
-                  schema: {
-                    type: 'object',
-                    properties: {
-                      ok: { type: 'boolean' },
-                      projectId: { type: 'string' },
-                      status: { type: 'string' },
-                      timestamp: { type: 'string' },
-                      message: { type: 'string' },
-                    },
-                  },
+                  schema: { $ref: '#/components/schemas/LaunchProjectResponse' },
                 },
               },
             },
@@ -116,26 +73,7 @@ export async function GET() {
             required: true,
             content: {
               'application/json': {
-                schema: {
-                  type: 'object',
-                  additionalProperties: false,
-                  properties: {
-                    command: {
-                      type: 'string',
-                      description:
-                        'Full EACP command. Example: EACP Client: Bob Rumball Centre Goal: Training Transformation Deliverable: Website + Portal + Learning Hub Notes: Convert videos, SOPs, policies, and PowerPoints into modular learning.',
-                    },
-                    client: { type: 'string' },
-                    goal: { type: 'string' },
-                    deliverable: { type: 'string' },
-                    industry: { type: 'string', description: 'Optional. EACP can infer this if omitted.' },
-                    notes: { type: 'string' },
-                  },
-                  anyOf: [
-                    { required: ['command'] },
-                    { required: ['client', 'goal', 'deliverable'] },
-                  ],
-                },
+                schema: { $ref: '#/components/schemas/EacpLaunchRequest' },
               },
             },
           },
@@ -144,20 +82,7 @@ export async function GET() {
               description: 'EACP launch package created.',
               content: {
                 'application/json': {
-                  schema: {
-                    type: 'object',
-                    properties: {
-                      ok: { type: 'boolean' },
-                      message: { type: 'string' },
-                      launchId: { type: 'string' },
-                      status: { type: 'string' },
-                      reviewPackageUrl: { type: 'string' },
-                      projectBriefUrl: { type: 'string' },
-                      skinBriefUrl: { type: 'string' },
-                      approvalUrl: { type: 'string' },
-                      codexBuilderUrl: { type: 'string' },
-                    },
-                  },
+                  schema: { $ref: '#/components/schemas/EacpLaunchResponse' },
                 },
               },
             },
@@ -169,6 +94,88 @@ export async function GET() {
       },
     },
     components: {
+      // ChatGPT Actions require components.schemas to be an object (even if unused).
+      schemas: {
+        LaunchProjectRequest: {
+          type: 'object',
+          additionalProperties: false,
+          properties: {
+            command: {
+              type: 'string',
+              description:
+                'Natural language. Examples: Launch https://www.bgca.org — Launch Bob Rumball Centre — Launch Acme and create a complete learning ecosystem.',
+            },
+            client: { type: 'string' },
+            companyName: { type: 'string' },
+            url: { type: 'string' },
+            website: { type: 'string' },
+            goal: { type: 'string' },
+            deliverable: { type: 'string' },
+            industry: { type: 'string' },
+            notes: { type: 'string' },
+            text: { type: 'string' },
+            attachments: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  type: {
+                    type: 'string',
+                    enum: ['image', 'pdf', 'powerpoint', 'word', 'text', 'voice', 'other'],
+                  },
+                  url: { type: 'string' },
+                  textPreview: { type: 'string' },
+                  name: { type: 'string' },
+                },
+              },
+            },
+          },
+        },
+        LaunchProjectResponse: {
+          type: 'object',
+          properties: {
+            ok: { type: 'boolean' },
+            projectId: { type: 'string' },
+            status: { type: 'string' },
+            timestamp: { type: 'string' },
+            message: { type: 'string' },
+          },
+        },
+        EacpLaunchRequest: {
+          type: 'object',
+          additionalProperties: false,
+          properties: {
+            command: {
+              type: 'string',
+              description:
+                'Full EACP command. Example: EACP Client: Bob Rumball Centre Goal: Training Transformation Deliverable: Website + Portal + Learning Hub Notes: Convert videos, SOPs, policies, and PowerPoints into modular learning.',
+            },
+            client: { type: 'string' },
+            goal: { type: 'string' },
+            deliverable: { type: 'string' },
+            industry: {
+              type: 'string',
+              description: 'Optional. EACP can infer this if omitted.',
+            },
+            notes: { type: 'string' },
+          },
+          anyOf: [{ required: ['command'] }, { required: ['client', 'goal', 'deliverable'] }],
+        },
+        EacpLaunchResponse: {
+          type: 'object',
+          properties: {
+            ok: { type: 'boolean' },
+            message: { type: 'string' },
+            launchId: { type: 'string' },
+            status: { type: 'string' },
+            reviewPackageUrl: { type: 'string' },
+            projectBriefUrl: { type: 'string' },
+            skinBriefUrl: { type: 'string' },
+            approvalUrl: { type: 'string' },
+            codexBuilderUrl: { type: 'string' },
+          },
+        },
+      },
       securitySchemes: {
         bearerAuth: {
           type: 'http',
