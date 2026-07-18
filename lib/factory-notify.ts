@@ -9,6 +9,7 @@ import {
   exportFactoryConceptPackMarkdown,
   renderFactoryConceptPackEmailHtml,
 } from '@/lib/factory-concept-pack';
+import { loadConceptSampleInlineImages } from '@/lib/factory-concept-mockups';
 import { getProject } from '@/lib/factory-project';
 import { ctpAssetIdFromUrl } from '@/lib/factory-research/image-signal';
 import { saveFactoryProject, type FactoryProject } from '@/lib/factory-project-store';
@@ -135,31 +136,33 @@ export async function notifyFactoryDone(
 
   const pack = buildFactoryConceptPack(project);
   const inline = await loadInlineHero(project);
+  const samples = await loadConceptSampleInlineImages();
   if (inline.heroCidUrl) {
     pack.heroImageUrl = inline.heroCidUrl;
   }
   const packageMarkdown = exportFactoryConceptPackMarkdown(pack);
-  const packageHtml = renderFactoryConceptPackEmailHtml(pack, escHtml);
-  const safeName = project.client.replace(/[^\w.-]+/g, '-').slice(0, 48) || 'concept-pack';
+  const packageHtml = renderFactoryConceptPackEmailHtml(pack, escHtml, { inlineSamples: true });
+  const safeName = pack.clientName.replace(/[^\w.-]+/g, '-').slice(0, 48) || 'concept-pack';
+  const inlineImages = [...(inline.inlineImages || []), ...samples];
 
   try {
     let sent = await sendFactoryPackageReadyEmail({
-      subject: `Concept Pack ready — ${project.client}`,
-      clientName: project.client,
+      subject: `Concept Pack ready — ${pack.clientName}`,
+      clientName: pack.clientName,
       packageMarkdown,
       packageHtml,
       filename: `concept-pack-${safeName}-${project.id}.md`,
-      inlineImages: inline.inlineImages,
+      inlineImages,
     });
-    // If inline photo blows the attach limit / client rules, still send the pack.
-    if (!sent.ok && inline.inlineImages?.length) {
-      console.warn('[factory-notify] retry ready email without inline image', projectId, sent.error);
-      const packNoCid = buildFactoryConceptPack(project);
+    // If attachments blow limits, retry with public sample URLs (no CID samples).
+    if (!sent.ok && inlineImages.length) {
+      console.warn('[factory-notify] retry ready email without heavy inline assets', projectId, sent.error);
+      const packRetry = buildFactoryConceptPack(project);
       sent = await sendFactoryPackageReadyEmail({
-        subject: `Concept Pack ready — ${project.client}`,
-        clientName: project.client,
-        packageMarkdown: exportFactoryConceptPackMarkdown(packNoCid),
-        packageHtml: renderFactoryConceptPackEmailHtml(packNoCid, escHtml),
+        subject: `Concept Pack ready — ${packRetry.clientName}`,
+        clientName: packRetry.clientName,
+        packageMarkdown: exportFactoryConceptPackMarkdown(packRetry),
+        packageHtml: renderFactoryConceptPackEmailHtml(packRetry, escHtml, { inlineSamples: false }),
         filename: `concept-pack-${safeName}-${project.id}.md`,
       });
     }
@@ -169,8 +172,9 @@ export async function notifyFactoryDone(
     }
     console.info('[factory-notify] Concept Pack emailed', {
       projectId,
-      client: project.client,
-      hasInlineImage: Boolean(inline.inlineImages?.length),
+      client: pack.clientName,
+      sampleCount: samples.length,
+      hasHero: Boolean(inline.inlineImages?.length),
       score: pack.scorecard.overallScore,
     });
   } catch (err) {
