@@ -136,6 +136,7 @@ export async function runFactoryOrchestrator(projectId: string): Promise<Factory
     status: project?.pipelineStatus,
   });
 
+  let dispatchedAny = false;
   for (let step = 0; step < 8; step += 1) {
     const result = await orchestrateOnce(projectId);
     project = result.project;
@@ -147,6 +148,7 @@ export async function runFactoryOrchestrator(projectId: string): Promise<Factory
       });
       break;
     }
+    dispatchedAny = true;
     console.info('[factory-orchestrator] dispatched', {
       projectId,
       capabilityId: result.capabilityId,
@@ -154,6 +156,19 @@ export async function runFactoryOrchestrator(projectId: string): Promise<Factory
       status: project?.pipelineStatus,
       step,
     });
+  }
+
+  // If more work remains (common when after()/request time budget ends mid-chain), schedule another pass.
+  await ensureProjectContext(projectId);
+  const leftover = await loadProjectContext(projectId);
+  if (leftover && discoverNextFromRegistry(leftover)) {
+    console.info('[factory-orchestrator] reschedule — more capabilities runnable', {
+      projectId,
+      status: leftover.pipelineStatus,
+      dispatchedAny,
+    });
+    const { scheduleFactoryGenerateJob } = await import('@/lib/factory-queue');
+    scheduleFactoryGenerateJob(projectId);
   }
 
   return getProject(projectId);
