@@ -18,7 +18,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const result = await drainFactoryQueue(5);
+  // Safety net every few minutes — picks up projects if a background chain was interrupted.
+  const result = await drainFactoryQueue(10);
   const health = factoryQueueHealth(await listFactoryProjects());
 
   return NextResponse.json({

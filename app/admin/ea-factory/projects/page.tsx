@@ -35,8 +35,9 @@ export default async function FactoryProjectsPage({ searchParams }: PageProps) {
                 Projects
               </h1>
               <p className="mt-2 max-w-3xl text-sm leading-6 text-neutral-500">
-                Factory pipeline: intake → research → discovery → planning → building. After Launch,
-                open a project to see status and activity. Human approval still comes before publish.
+                After Launch, the Factory runs automatically (intake → research → discovery → planning
+                → building). Refresh to watch status. Continue is only a backup if something stalls.
+                Human approval still comes before publish.
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
