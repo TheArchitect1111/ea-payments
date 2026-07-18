@@ -1,7 +1,16 @@
+const DEFAULT_VISION_PROMPT = `Describe this screenshot for a business opportunity capture system. Include:
+- What type of content this is (website, flyer, recipe, quote, social post, product, etc.)
+- Visible text, headlines, business names, URLs, CTAs
+- Who the audience might be
+- Any marketing or conversion signals
+
+Return plain text only — no markdown fences.`;
+
 /** Optional Claude vision pass for screenshot / image captures. */
 export async function describeScreenshotBase64(
   base64: string,
   mimeType = 'image/png',
+  options?: { prompt?: string },
 ): Promise<string | null> {
   const apiKey = process.env.ANTHROPIC_API_KEY ?? process.env.CLAUDE_API_KEY;
   if (!apiKey || !base64) return null;
@@ -31,13 +40,7 @@ export async function describeScreenshotBase64(
               },
               {
                 type: 'text',
-                text: `Describe this screenshot for a business opportunity capture system. Include:
-- What type of content this is (website, flyer, recipe, quote, social post, product, etc.)
-- Visible text, headlines, business names, URLs, CTAs
-- Who the audience might be
-- Any marketing or conversion signals
-
-Return plain text only — no markdown fences.`,
+                text: options?.prompt?.trim() || DEFAULT_VISION_PROMPT,
               },
             ],
           },

@@ -85,18 +85,28 @@ export async function parseFactoryLaunchBody(
         };
       }
 
+      // Keep a neutral seed name — research vision renames to the real business.
       const resolvedCommand =
         command ||
-        (attachments[0]?.name
-          ? `Launch Photo project (${attachments[0].name})`
-          : 'Launch Photo project');
+        (attachments.length
+          ? 'Launch Image capture'
+          : '');
+
+      if (!resolvedCommand) {
+        return {
+          ok: false,
+          error: 'Enter a website, company name, or notes — or add a photo.',
+        };
+      }
 
       return {
         ok: true,
         body: {
           command: resolvedCommand,
           text: command || undefined,
-          notes: notes || undefined,
+          notes:
+            notes ||
+            (attachments[0]?.name ? `Launch photo: ${attachments[0].name}` : undefined),
           attachments,
         },
       };
