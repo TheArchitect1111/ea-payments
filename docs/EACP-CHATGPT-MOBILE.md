@@ -10,6 +10,8 @@ This connects ChatGPT mobile to EACP through a protected GPT Action.
 - Factory projects dashboard: `https://efficiencyarchitects.online/admin/ea-factory/projects`
 - Review launches: `https://efficiencyarchitects.online/admin/ea-factory/launches`
 
+**Do not use `www.efficiencyarchitects.online` for Actions** — it often points at a different Vercel project and returns `NOT_FOUND` for `/api/launch`. The OpenAPI `servers` URL is forced to the apex host for this reason.
+
 Legacy alias: `https://ea-payments.vercel.app/api/eacp/...` also works when that deployment is current.
 
 ## Required Vercel Environment Variable
