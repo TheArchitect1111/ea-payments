@@ -21,6 +21,12 @@ export type WebsitePortalProvisionInput = {
   tagline?: string;
   industry?: string;
   email?: string;
+  /** Optional About section body (notes / presence context). */
+  aboutBody?: string;
+  /** Their current site or presence link — mentioned in About when aboutBody is absent. */
+  existingWebsiteUrl?: string;
+  /** Logo/photo URL — stored for callers; About may mention presence without EAHero schema changes. */
+  logoUrl?: string;
   /** When true, refresh/create Home page even if one already exists. */
   force?: boolean;
   /** Override Open client portal CTA (defaults to publicPortalLoginUrl). */
@@ -47,12 +53,30 @@ export function siteUrlForSlug(portalSlug: string): string {
   return `${baseUrl()}${sitePathForSlug(portalSlug)}`;
 }
 
+function buildDefaultAboutBody(input: {
+  brand: string;
+  industry?: string;
+  existingWebsiteUrl?: string;
+}): string {
+  const base = input.industry
+    ? `${input.brand} helps people in ${input.industry} move from interest to action with a clear offer and guided next steps.`
+    : `${input.brand} helps people move from interest to action with a clear offer, proof, and a simple next step.`;
+  if (input.existingWebsiteUrl) {
+    return `${base}\n\nCurrent presence: ${input.existingWebsiteUrl}`;
+  }
+  return base;
+}
+
 export function buildStarterWebsitePuckData(input: WebsitePortalProvisionInput): Data {
   const brand = input.organizationName?.trim() || input.businessName.trim() || 'Your Business';
   const tagline =
     input.tagline?.trim() ||
     'A clear offer, a trusted next step, and a client portal that keeps work moving.';
   const industry = input.industry?.trim();
+  const existingWebsiteUrl = input.existingWebsiteUrl?.trim() || undefined;
+  const aboutBody =
+    input.aboutBody?.trim() ||
+    buildDefaultAboutBody({ brand, industry, existingWebsiteUrl });
   const portalLogin = input.portalLoginHref || publicPortalLoginUrl();
   const sitePath = sitePathForSlug(input.portalSlug);
 
@@ -76,9 +100,7 @@ export function buildStarterWebsitePuckData(input: WebsitePortalProvisionInput):
           id: 'about-1',
           label: 'About',
           title: `Welcome to ${brand}`,
-          body: industry
-            ? `${brand} helps people in ${industry} move from interest to action with a clear offer and guided next steps.`
-            : `${brand} helps people move from interest to action with a clear offer, proof, and a simple next step.`,
+          body: aboutBody,
         },
       },
       {
