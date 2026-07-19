@@ -1,6 +1,6 @@
 /**
  * Factory founder notifications — start + ready/failed only.
- * Ready email = sit-down Concept Pack (eval + 3 concept screens).
+ * Ready email = Opportunity Intelligence Brief™ (intelligence + 3 concept renders).
  */
 import { readCtpAssetBytes } from '@/lib/ctp-asset-store';
 import { sendFactoryPackageReadyEmail, sendInternalNotification } from '@/lib/email';
@@ -141,12 +141,15 @@ export async function notifyFactoryDone(
   const pack = await buildFactoryConceptPackAsync(project);
   const publicHeroUrl = pack.heroImageUrl?.startsWith('http') ? pack.heroImageUrl : undefined;
 
-  let customSamples: Awaited<ReturnType<typeof generateCustomConceptInlineImages>> = [];
+  const brief = pack.opportunityBrief;
+  let customSamples: Awaited<ReturnType<typeof generateCustomConceptInlineImages>>['images'] = [];
+  let visualConfidenceNote: string | undefined;
   try {
-    customSamples = await generateCustomConceptInlineImages({
+    const mockupResult = await generateCustomConceptInlineImages({
       clientName: pack.clientName,
-      tagline: pack.landing.subhead,
-      cta: pack.landing.cta,
+      tagline: brief.brand.subhead || pack.landing.subhead,
+      story: brief.story || pack.research.story,
+      cta: brief.brand.cta || pack.landing.cta,
       score: pack.scorecard.overallScore,
       capacityLabel: formatUsdRange(
         pack.scorecard.capacityLost.annualLow,
@@ -156,14 +159,32 @@ export async function notifyFactoryDone(
         pack.scorecard.opportunityGained.annualLow,
         pack.scorecard.opportunityGained.annualHigh,
       ),
-      heroImageUrl: publicHeroUrl,
+      heroImageUrl: publicHeroUrl || brief.brand.logoUrl,
+      primaryColor: brief.brand.primary,
+      accentColor: brief.brand.accent,
+      logoUrl: brief.brand.logoUrl,
+      headline: brief.brand.headline,
+      portalModules: brief.portal.modules,
+      memberPersona: brief.member.persona,
+      memberTiles: brief.member.tiles,
+      programLabels: brief.portal.modules.slice(0, 3),
     });
-    console.info('[factory-notify] custom mockups generated', {
+    customSamples = mockupResult.images;
+    visualConfidenceNote = mockupResult.thinConfidenceNote;
+    if (visualConfidenceNote) {
+      pack.opportunityBrief = {
+        ...pack.opportunityBrief,
+        visualConfidenceNote,
+      };
+    }
+    console.info('[factory-notify] concept renders generated', {
       projectId,
       count: customSamples.length,
+      qualityOk: mockupResult.qualityOk,
+      regenerated: mockupResult.regenerated,
     });
   } catch (err) {
-    console.error('[factory-notify] custom mockup generation failed', projectId, err);
+    console.error('[factory-notify] concept render generation failed', projectId, err);
   }
 
   const inline = await loadInlineHero(project);
@@ -180,12 +201,13 @@ export async function notifyFactoryDone(
     reviewUrl: `${base}/api/projects/${encodeURIComponent(project.id)}/concept-pack`,
     regenerateUrl: `${base}/admin/ea-factory/projects`,
     newLaunchUrl: `${base}/admin/ea-factory/launch`,
+    visualConfidenceNote,
   };
   const packageMarkdown = exportFactoryConceptPackMarkdown(pack);
   const packageHtml = renderFactoryConceptPackEmailHtml(pack, escHtml, emailOptions);
-  const safeName = pack.clientName.replace(/[^\w.-]+/g, '-').slice(0, 48) || 'concept-pack';
+  const safeName = pack.clientName.replace(/[^\w.-]+/g, '-').slice(0, 48) || 'oib';
   const inlineImages = [...(inline.inlineImages || []), ...customSamples];
-  const readySubject = `🚀 Launch Complete | ${pack.clientName} Concept Pack is Ready`;
+  const readySubject = `Opportunity Intelligence Brief™ | ${pack.clientName}`;
 
   try {
     let sent = await sendFactoryPackageReadyEmail({
@@ -193,7 +215,7 @@ export async function notifyFactoryDone(
       clientName: pack.clientName,
       packageMarkdown,
       packageHtml,
-      filename: `concept-pack-${safeName}-${project.id}.md`,
+      filename: `opportunity-brief-${safeName}-${project.id}.md`,
       inlineImages,
     });
     if (!sent.ok && inlineImages.length) {
@@ -206,7 +228,7 @@ export async function notifyFactoryDone(
           ...emailOptions,
           inlineSamples: false,
         }),
-        filename: `concept-pack-${safeName}-${project.id}.md`,
+        filename: `opportunity-brief-${safeName}-${project.id}.md`,
         inlineImages: customSamples,
       });
     }
@@ -214,7 +236,7 @@ export async function notifyFactoryDone(
       console.error('[factory-notify] done email failed', projectId, sent.error);
       return { ok: false, error: sent.error || 'Email failed.' };
     }
-    console.info('[factory-notify] Concept Pack emailed', {
+    console.info('[factory-notify] Opportunity Intelligence Brief™ emailed', {
       projectId,
       client: pack.clientName,
       customMockups: customSamples.length,
