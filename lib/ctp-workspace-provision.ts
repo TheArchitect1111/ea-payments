@@ -5,7 +5,7 @@ import { ensureOrganizationForPortal } from '@/lib/organizations';
 import { createPortalAccess } from '@/lib/portal-access';
 import type { PortalConfig } from '@/lib/catalog';
 import { scheduleCtpStudioCampaign } from '@/lib/ctp-studio-bridge';
-import { scheduleCtpWebsiteProvision } from '@/lib/ctp-website-provision';
+import { scheduleCtpProductionProvision } from '@/lib/ctp-production-provision';
 import { scheduleCtpProduction } from '@/lib/ctp-production-run';
 import { publicPortalLoginUrl, publicPortalUrl } from '@/lib/ctp-portal-host';
 import {
@@ -87,7 +87,8 @@ async function markWorkspaceActive(
   }
 
   scheduleCtpStudioCampaign(submission.id);
-  scheduleCtpWebsiteProvision(submission.id);
+  // Production provision includes website + TenantClientConfig persistence + site↔portal relink.
+  scheduleCtpProductionProvision(submission.id);
   scheduleCtpProduction(submission.id);
 }
 

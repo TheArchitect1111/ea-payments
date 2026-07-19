@@ -23,6 +23,8 @@ export type WebsitePortalProvisionInput = {
   email?: string;
   /** When true, refresh/create Home page even if one already exists. */
   force?: boolean;
+  /** Override Open client portal CTA (defaults to publicPortalLoginUrl). */
+  portalLoginHref?: string;
 };
 
 export type WebsitePortalProvisionResult = {
@@ -51,7 +53,7 @@ export function buildStarterWebsitePuckData(input: WebsitePortalProvisionInput):
     input.tagline?.trim() ||
     'A clear offer, a trusted next step, and a client portal that keeps work moving.';
   const industry = input.industry?.trim();
-  const portalLogin = publicPortalLoginUrl();
+  const portalLogin = input.portalLoginHref || publicPortalLoginUrl();
   const sitePath = sitePathForSlug(input.portalSlug);
 
   return {
