@@ -10,6 +10,8 @@ type Props = {
   slug: string;
   designStudio: CtpDesignStudioItem[];
   studioStatus?: string;
+  /** Softer copy + light editorial styling for Client Experience. */
+  experienceMode?: boolean;
   initial?: {
     brand_colors?: string;
     brand_fonts?: string;
@@ -23,15 +25,48 @@ type Props = {
 const FIELD_META: Array<{
   id: keyof NonNullable<Props['initial']>;
   label: string;
+  experienceLabel: string;
   placeholder: string;
   rows?: number;
 }> = [
-  { id: 'brand_colors', label: 'Brand colors', placeholder: 'e.g. Navy #1B2B4D, Gold #D8AD3D' },
-  { id: 'brand_fonts', label: 'Fonts', placeholder: 'e.g. Playfair for headlines, Inter for body' },
-  { id: 'brand_voice', label: 'Brand voice', placeholder: 'How should you sound?', rows: 3 },
-  { id: 'offer_summary', label: 'Products / services', placeholder: 'What do you sell or deliver?', rows: 3 },
-  { id: 'competitors', label: 'Competitors', placeholder: 'Who do prospects compare you to?' },
-  { id: 'inspiration', label: 'Inspiration URLs', placeholder: 'Sites or brands you love' },
+  {
+    id: 'brand_colors',
+    label: 'Brand colors',
+    experienceLabel: 'Colors that feel like you',
+    placeholder: 'e.g. Navy #1B2B4D, Gold #D8AD3D',
+  },
+  {
+    id: 'brand_fonts',
+    label: 'Fonts',
+    experienceLabel: 'Typography you love',
+    placeholder: 'e.g. Playfair for headlines, Inter for body',
+  },
+  {
+    id: 'brand_voice',
+    label: 'Brand voice',
+    experienceLabel: 'How you want to sound',
+    placeholder: 'How should you sound?',
+    rows: 3,
+  },
+  {
+    id: 'offer_summary',
+    label: 'Products / services',
+    experienceLabel: 'What you offer',
+    placeholder: 'What do you sell or deliver?',
+    rows: 3,
+  },
+  {
+    id: 'competitors',
+    label: 'Competitors',
+    experienceLabel: 'Who people compare you to',
+    placeholder: 'Who do prospects compare you to?',
+  },
+  {
+    id: 'inspiration',
+    label: 'Inspiration URLs',
+    experienceLabel: 'Inspiration',
+    placeholder: 'Sites or brands you love',
+  },
 ];
 
 const UPLOAD_TYPES = [
@@ -55,6 +90,7 @@ export default function PortalCtpDesignStudioForm({
   slug,
   designStudio,
   studioStatus,
+  experienceMode = false,
   initial,
 }: Props) {
   const router = useRouter();
@@ -160,6 +196,188 @@ export default function PortalCtpDesignStudioForm({
     } finally {
       setCompleting(false);
     }
+  }
+
+  if (experienceMode) {
+    return (
+      <section className="cex-studio-form">
+        <p className="cex-studio-eyebrow">Your story</p>
+        <h3 className="cex-studio-heading">Brand details & materials</h3>
+        <p className="cex-studio-copy">
+          {readyCount}/{designStudio.length} pieces in place. Share what you have — we&apos;ll shape the
+          rest together.
+        </p>
+
+        <div className="cex-studio-checklist">
+          {designStudio.map((item) => (
+            <div key={item.id} className="cex-studio-check">
+              <p className="cex-studio-check-status">
+                {item.status === 'ready' ? 'Ready' : 'Still open'}
+              </p>
+              <p className="cex-studio-check-label">{item.label}</p>
+              <p className="cex-studio-check-detail">{item.detail}</p>
+            </div>
+          ))}
+        </div>
+
+        <div style={{ display: 'grid', gap: '0.85rem' }}>
+          {FIELD_META.map((field) => (
+            <label key={field.id} style={{ display: 'grid', gap: '0.35rem' }}>
+              <span
+                style={{
+                  fontSize: '0.72rem',
+                  fontWeight: 800,
+                  letterSpacing: '0.12em',
+                  textTransform: 'uppercase',
+                }}
+              >
+                {field.experienceLabel}
+              </span>
+              {field.rows ? (
+                <textarea
+                  value={fields[field.id]}
+                  onChange={(event) =>
+                    setFields((current) => ({ ...current, [field.id]: event.target.value }))
+                  }
+                  rows={field.rows}
+                  placeholder={field.placeholder}
+                  style={{
+                    width: '100%',
+                    borderRadius: '0.65rem',
+                    padding: '0.75rem 0.85rem',
+                    fontSize: '0.9rem',
+                    lineHeight: 1.5,
+                    resize: 'vertical',
+                  }}
+                />
+              ) : (
+                <input
+                  value={fields[field.id]}
+                  onChange={(event) =>
+                    setFields((current) => ({ ...current, [field.id]: event.target.value }))
+                  }
+                  placeholder={field.placeholder}
+                  style={{
+                    width: '100%',
+                    borderRadius: '0.65rem',
+                    padding: '0.75rem 0.85rem',
+                    fontSize: '0.9rem',
+                  }}
+                />
+              )}
+            </label>
+          ))}
+        </div>
+
+        <div style={{ marginTop: '1.25rem', display: 'grid', gap: '0.75rem' }}>
+          <p className="cex-studio-eyebrow" style={{ margin: 0 }}>
+            Uploads
+          </p>
+          <div
+            style={{
+              display: 'grid',
+              gap: '0.75rem',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+            }}
+          >
+            {UPLOAD_TYPES.map((item) => (
+              <label
+                key={item.id}
+                className="cex-studio-upload"
+                style={{
+                  borderRadius: '0.75rem',
+                  padding: '0.85rem',
+                  cursor: 'pointer',
+                }}
+              >
+                <span style={{ display: 'block', marginBottom: '0.35rem' }}>{item.label}</span>
+                <span style={{ display: 'block', fontSize: '0.78rem' }}>
+                  {uploading === item.id
+                    ? 'Uploading…'
+                    : assets[item.id]
+                      ? assets[item.id]!.fileName
+                      : 'Choose file'}
+                </span>
+                <input
+                  type="file"
+                  accept={item.accept}
+                  style={{ display: 'none' }}
+                  disabled={Boolean(uploading) || busy}
+                  onChange={(event) => {
+                    const file = event.target.files?.[0];
+                    if (file) void uploadAsset(item.id, file);
+                    event.target.value = '';
+                  }}
+                />
+              </label>
+            ))}
+          </div>
+        </div>
+
+        <div
+          style={{
+            marginTop: '1.25rem',
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: '0.75rem',
+            alignItems: 'center',
+          }}
+        >
+          <button
+            type="button"
+            disabled={busy || completing || Boolean(uploading)}
+            onClick={() => void save()}
+            style={{
+              border: 'none',
+              borderRadius: '9999px',
+              padding: '0.75rem 1.35rem',
+              fontSize: '0.82rem',
+              fontWeight: 800,
+              letterSpacing: '0.08em',
+              textTransform: 'uppercase',
+              backgroundColor: GOLD,
+              color: NAVY,
+              opacity: busy || completing || uploading ? 0.6 : 1,
+              cursor: busy || completing || uploading ? 'not-allowed' : 'pointer',
+            }}
+          >
+            {busy ? 'Saving…' : 'Save progress'}
+          </button>
+          <button
+            type="button"
+            disabled={busy || completing || Boolean(uploading) || alreadyComplete}
+            onClick={() => void markComplete()}
+            style={{
+              border: `1px solid ${NAVY}`,
+              borderRadius: '9999px',
+              padding: '0.75rem 1.35rem',
+              fontSize: '0.82rem',
+              fontWeight: 800,
+              letterSpacing: '0.08em',
+              textTransform: 'uppercase',
+              background: 'transparent',
+              color: NAVY,
+              opacity: busy || completing || uploading || alreadyComplete ? 0.55 : 1,
+              cursor:
+                busy || completing || uploading || alreadyComplete ? 'not-allowed' : 'pointer',
+            }}
+          >
+            {alreadyComplete
+              ? 'Ready for review'
+              : completing
+                ? 'Notifying…'
+                : 'I\'m ready for review'}
+          </button>
+          {error ? <p style={{ margin: 0, color: '#a33', fontSize: '0.85rem' }}>{error}</p> : null}
+          {success ? (
+            <p style={{ margin: 0, color: '#2d6a4f', fontSize: '0.85rem' }}>{success}</p>
+          ) : null}
+        </div>
+        <p style={{ margin: '0.85rem 0 0', fontSize: '0.82rem', color: 'var(--cex-muted, #5c6470)', lineHeight: 1.5 }}>
+          Save anytime. Tell us when you&apos;re ready for review — you can keep adding later.
+        </p>
+      </section>
+    );
   }
 
   return (

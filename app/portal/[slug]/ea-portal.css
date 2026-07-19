@@ -15,6 +15,11 @@
   color: var(--workspace-text, var(--ea-text));
   font-family: var(--workspace-font-body, 'Segoe UI', system-ui, sans-serif);
 }
+
+.ep-client-experience-shell {
+  min-height: 100vh;
+  width: 100%;
+}
 /* EA Portal — TailAdmin-inspired layout (client portal only) */
 
 :root {

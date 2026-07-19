@@ -11,6 +11,20 @@ import {
   opportunityReviewPath,
 } from '@/lib/ctp-opportunity-routes';
 import type { CtpSubmission } from '@/lib/ctp-submissions';
+import {
+  consultingBeginCards,
+  consultingCurrentStage,
+  consultingJourneySteps,
+  consultingLearnedCards,
+  consultingMeaningFromSubmission,
+  consultingPrimaryOpportunity,
+  consultingRecommendedSolution,
+  consultingTimeline,
+  moneyRangeLabel,
+  type ConsultingBeginCard,
+  type ConsultingJourneyStep,
+  type ConsultingLearnedCard,
+} from '@/lib/ctp-consulting-narrative';
 import type { DigitalPresenceScores } from '@/lib/ctp-digital-presence';
 
 function isPresenceTrack(clientType: CtpClientType | undefined | null): boolean {
@@ -68,6 +82,7 @@ export type CtpOpportunityDashboardView = {
   firstName: string;
   businessName: string;
   greeting: string;
+  welcomeLede: string;
   clientType?: CtpClientType;
   showDesignStudio: boolean;
   designStudioHref: string;
@@ -75,6 +90,28 @@ export type CtpOpportunityDashboardView = {
   opportunityStars: number;
   potentialLabel: string;
   executiveSummary: string;
+  /** Executive Snapshot - consulting clarity, not scores. */
+  organizationLabel: string;
+  currentStage: string;
+  primaryOpportunity: string;
+  estimatedAnnualOpportunity: string;
+  recommendedSolution: string;
+  estimatedTimeline: string;
+  learnedIntro: string;
+  learnedCards: ConsultingLearnedCard[];
+  meaningIntro: string;
+  estimatedTimeSavings: string;
+  potentialBusinessImpact: string;
+  beginIntro: string;
+  beginCards: ConsultingBeginCard[];
+  estimatedProjectEffort: string;
+  estimatedProjectInvestment: string;
+  beginNote: string;
+  journeySteps: ConsultingJourneyStep[];
+  continueIntro: string;
+  communicationHref: string;
+  documentsHref: string;
+  messagingHref: string;
   progress: OpportunityProgressStep[];
   opportunities: OpportunityCard[];
   healthAreas: OpportunityHealthArea[];
@@ -558,10 +595,15 @@ export function buildCtpOpportunityDashboardView(
     isPresenceTrack(submission.clientType) ||
     Boolean(submission.clientTypeClassification?.websiteRequired);
 
+  const meaning = consultingMeaningFromSubmission(submission);
+  const stage = consultingCurrentStage(submission);
+  const recommended = consultingRecommendedSolution(submission);
+
   return {
     firstName,
     businessName: submission.businessName,
-    greeting: `${timeGreeting()}, ${firstName}`,
+    greeting: `Welcome, ${firstName}`,
+    welcomeLede: `We've started learning about ${submission.businessName} and have already identified several opportunities that could strengthen your organization. This workspace is where we'll continue building your project together.`,
     clientType: submission.clientType,
     showDesignStudio,
     designStudioHref: designStudioPath(slug),
@@ -569,6 +611,30 @@ export function buildCtpOpportunityDashboardView(
     opportunityStars,
     potentialLabel: potentialFromStars(opportunityStars),
     executiveSummary: resolveSummary(submission),
+    organizationLabel: submission.businessName,
+    currentStage: stage,
+    primaryOpportunity: consultingPrimaryOpportunity(submission),
+    estimatedAnnualOpportunity: meaning.annualOpportunityLabel,
+    recommendedSolution: recommended,
+    estimatedTimeline: consultingTimeline(submission),
+    learnedIntro: 'As we reviewed what you shared, a few opportunities began to stand out.',
+    learnedCards: consultingLearnedCards(),
+    meaningIntro:
+      'Small improvements in how your organization communicates, serves customers, and manages daily operations often create meaningful long-term results.',
+    estimatedTimeSavings: meaning.timeSavingsLabel,
+    potentialBusinessImpact: meaning.businessImpactLabel,
+    beginIntro: 'Based on what we\'ve learned so far, these are the areas we\'d recommend focusing on first.',
+    beginCards: consultingBeginCards(),
+    estimatedProjectEffort: '28-50 Hours',
+    estimatedProjectInvestment: moneyRangeLabel(meaning.investLow, meaning.investHigh),
+    beginNote:
+      'Every organization is different. Some projects require a streamlined website and portal, while others include additional functionality. The estimate reflects the size and complexity of your organization. A final proposal will follow after discovery.',
+    journeySteps: consultingJourneySteps(submission),
+    continueIntro:
+      "We've only scratched the surface. Share a little more so every recommendation becomes more tailored to your goals.",
+    communicationHref: `/portal/${slug}/ctp/support`,
+    documentsHref: `/portal/${slug}/ctp/documents`,
+    messagingHref: `/portal/${slug}/updates/new`,
     progress: buildProgress(submission),
     opportunities: buildOpportunities(submission, slug),
     healthAreas: mapHealthAreas(submission, slug),
@@ -576,12 +642,12 @@ export function buildCtpOpportunityDashboardView(
     projectPreview: buildProjectPreview(submission),
     investment: resolveInvestment(submission),
     reviewHref: opportunityReviewPath(slug),
-    primaryCtaLabel: 'Review My Opportunity Plan',
+    primaryCtaLabel: 'Continue the Conversation',
     utilities: [
       { label: 'Documents', href: `/portal/${slug}/ctp/documents` },
-      { label: 'Support', href: `/portal/${slug}/ctp/support` },
-      { label: 'Opportunity Review', href: opportunityReviewPath(slug) },
-      ...(showDesignStudio ? [{ label: 'Design Studio', href: designStudioPath(slug) }] : []),
+      { label: 'Messages', href: `/portal/${slug}/ctp/support` },
+      { label: 'Project Progress', href: `/portal/${slug}/ctp/progress` },
+      { label: 'Schedule a Conversation', href: opportunityReviewPath(slug) },
     ],
   };
 }

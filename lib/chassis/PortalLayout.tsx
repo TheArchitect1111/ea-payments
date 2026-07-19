@@ -28,6 +28,8 @@ export type PortalWorkspaceLayoutProps = {
   homeLabel?: string;
   /** Defaults to portal logout; admin shell passes /api/admin/logout. */
   logoutHref?: string;
+  /** `experience` = full-bleed Client Experience without sidebar/header. */
+  presentation?: 'workspace' | 'experience';
   children: ReactNode;
 };
 
@@ -50,22 +52,33 @@ function PortalLayoutFrame({
   personalityId,
   homeLabel,
   logoutHref = '/api/portal/logout',
+  presentation = 'workspace',
   children,
 }: PortalWorkspaceLayoutProps) {
   const { sidebarExpanded } = usePortalSidebar();
   const style = (cssVars ?? {}) as CSSProperties;
 
+  const chromeValue = {
+    brandName,
+    workspaceName,
+    personalityName,
+    memberLabel,
+    homeLabel,
+    personalityId,
+  };
+
+  if (presentation === 'experience') {
+    return (
+      <PortalChromeProvider value={chromeValue}>
+        <div className="ep-client-experience-shell ep-workspace-shell" style={style}>
+          {children}
+        </div>
+      </PortalChromeProvider>
+    );
+  }
+
   return (
-    <PortalChromeProvider
-      value={{
-        brandName,
-        workspaceName,
-        personalityName,
-        memberLabel,
-        homeLabel,
-        personalityId,
-      }}
-    >
+    <PortalChromeProvider value={chromeValue}>
       <div className="ep-tailadmin ep-workspace-shell" style={style}>
         <PortalSidebar
           slug={slug}
@@ -94,6 +107,9 @@ function PortalLayoutFrame({
 }
 
 export function PortalLayout(props: PortalWorkspaceLayoutProps) {
+  if (props.presentation === 'experience') {
+    return <PortalLayoutFrame {...props} />;
+  }
   return (
     <PortalSidebarProvider>
       <PortalLayoutFrame {...props} />

@@ -18,7 +18,7 @@ import {
 
 export type { CtpExecutiveEmailDraft };
 
-/** Hub portal URLs for email CTAs — Opportunity Dashboard entry. */
+/** Hub portal URLs for email CTAs - Opportunity Dashboard entry. */
 function ctpEmailPortalUrl(slug: string, pathSuffix?: string): string {
   return publicPortalUrl(slug, pathSuffix ?? opportunityEmailPathSuffix());
 }
@@ -104,18 +104,35 @@ export async function sendCtpExecutiveEmailForSubmission(
   submissionId: string,
   options?: { portalUrl?: string | null; force?: boolean },
 ): Promise<{ ok: boolean; skipped?: boolean; portalUrl?: string; error?: string }> {
-  const submission = await getCtpSubmissionById(submissionId);
+  let submission = await getCtpSubmissionById(submissionId);
   if (!submission) return { ok: false, error: 'CTP submission not found.' };
 
   if (submission.executiveEmailSentAt && !options?.force) {
     return { ok: true, skipped: true, portalUrl: options?.portalUrl ?? undefined };
   }
 
-  const data = buildCtpExecutiveEmailData(submission, options?.portalUrl);
+  let portalUrl = options?.portalUrl ?? null;
+  if (!portalUrl && !submission.portalSlug) {
+    try {
+      const { runCtpWorkspaceProvision } = await import('@/lib/ctp-workspace-provision');
+      const provisioned = await runCtpWorkspaceProvision(submissionId);
+      if (provisioned.ok && provisioned.portalSlug) {
+        portalUrl = opportunityDashboardPublicUrl(provisioned.portalSlug);
+      }
+      submission = (await getCtpSubmissionById(submissionId)) ?? submission;
+    } catch (err) {
+      console.error('[ctp-executive-email-send] provision-before-send failed:', err);
+    }
+  }
+  if (!portalUrl && submission.portalSlug) {
+    portalUrl = opportunityDashboardPublicUrl(submission.portalSlug);
+  }
+
+  const data = buildCtpExecutiveEmailData(submission, portalUrl);
   if (!data) {
     return {
       ok: false,
-      error: 'Executive email context incomplete — save a draft or run BI snapshot first.',
+      error: 'Executive email context incomplete - save a draft or run BI snapshot first.',
     };
   }
 

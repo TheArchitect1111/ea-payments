@@ -1,0 +1,612 @@
+/* Efficiency Architects Client Experience™ — cinematic editorial scenes */
+
+.ep-client-experience-shell {
+  min-height: 100vh;
+  width: 100%;
+}
+
+.cex {
+  --cex-navy: var(--ea-navy, #1b2b4d);
+  --cex-gold: var(--ea-gold, #c9a844);
+  --cex-cream: #f7f3eb;
+  --cex-ink: #1a1f2e;
+  --cex-muted: #5c6470;
+  --cex-line: rgba(27, 43, 77, 0.12);
+  position: relative;
+  min-height: 100vh;
+  overflow-x: hidden;
+  overflow-y: auto;
+  color: var(--cex-ink);
+  background:
+    radial-gradient(ellipse 70% 50% at 15% 0%, rgba(201, 168, 68, 0.14), transparent 55%),
+    radial-gradient(ellipse 55% 45% at 95% 85%, rgba(27, 43, 77, 0.08), transparent 50%),
+    linear-gradient(165deg, #faf7f1 0%, var(--cex-cream) 45%, #efe9dc 100%);
+}
+
+.cex-grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.04;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  z-index: 0;
+}
+
+.cex-escape {
+  position: fixed;
+  top: 1.15rem;
+  right: 1.25rem;
+  z-index: 40;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.cex-escape a {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--cex-muted);
+  text-decoration: none;
+  transition: color 0.25s ease;
+}
+
+.cex-escape a:hover {
+  color: var(--cex-navy);
+}
+
+.cex-dots {
+  position: fixed;
+  left: 1.25rem;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.cex-dot {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  border: 1.5px solid rgba(27, 43, 77, 0.35);
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  transition: background 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
+}
+
+.cex-dot[aria-current='true'] {
+  background: var(--cex-gold);
+  border-color: var(--cex-gold);
+  transform: scale(1.2);
+}
+
+.cex-dot:hover {
+  border-color: var(--cex-navy);
+}
+
+.cex-stage {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: clamp(3.5rem, 8vh, 5rem) clamp(1.5rem, 6vw, 4.5rem) 5rem;
+}
+
+.cex-stage:has(.cex-welcome),
+.cex-stage:has(.cex-imagine) {
+  align-items: center;
+}
+
+.cex-scene {
+  width: 100%;
+  max-width: 68rem;
+  opacity: 0;
+  transform: translateY(22px);
+  animation: cex-enter 0.85s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes cex-enter {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.cex-kicker {
+  margin: 0 0 1rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--cex-gold);
+}
+
+.cex-headline {
+  margin: 0;
+  font-size: clamp(2.4rem, 6vw, 4.2rem);
+  font-weight: 600;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  color: var(--cex-navy);
+  max-width: 16ch;
+}
+
+.cex-lede {
+  margin: 1.35rem 0 0;
+  max-width: 34rem;
+  font-size: clamp(1.05rem, 2vw, 1.25rem);
+  line-height: 1.65;
+  color: var(--cex-muted);
+}
+
+.cex-lede + .cex-lede {
+  margin-top: 0.85rem;
+}
+
+.cex-cta {
+  margin-top: 2.25rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  border: none;
+  border-radius: 9999px;
+  padding: 0.95rem 1.75rem;
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background: var(--cex-navy);
+  color: #f7f3eb;
+  cursor: pointer;
+  transition: background 0.25s ease, transform 0.25s ease;
+}
+
+.cex-cta:hover {
+  background: #243658;
+  transform: translateY(-1px);
+}
+
+.cex-cta:focus-visible {
+  outline: 2px solid var(--cex-gold);
+  outline-offset: 3px;
+}
+
+a.cex-cta {
+  text-decoration: none;
+}
+
+.cex-welcome {
+  text-align: left;
+}
+
+.cex-imagine {
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: clamp(1.5rem, 4vw, 3.5rem);
+  align-items: center;
+}
+
+.cex-imagine-photo {
+  position: relative;
+  min-height: min(62vh, 34rem);
+  border-radius: 0;
+  overflow: hidden;
+  background-size: cover;
+  background-position: center;
+  box-shadow: 0 24px 60px rgba(27, 43, 77, 0.18);
+}
+
+.cex-imagine-photo::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, rgba(27, 43, 77, 0.18), transparent 55%);
+}
+
+.cex-insights {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.cex-insight {
+  display: grid;
+  grid-template-columns: minmax(10rem, 0.9fr) 1.1fr;
+  gap: clamp(1.25rem, 3vw, 2.5rem);
+  align-items: center;
+  padding: 1.75rem 0;
+  border-bottom: 1px solid var(--cex-line);
+}
+
+.cex-insight:first-child {
+  padding-top: 0;
+}
+
+.cex-insight:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.cex-insight-photo {
+  min-height: 11rem;
+  background-size: cover;
+  background-position: center;
+}
+
+.cex-insight-title {
+  margin: 0 0 0.5rem;
+  font-size: clamp(1.35rem, 2.4vw, 1.85rem);
+  font-weight: 600;
+  color: var(--cex-navy);
+  line-height: 1.2;
+}
+
+.cex-insight-body {
+  margin: 0;
+  font-size: 0.98rem;
+  line-height: 1.65;
+  color: var(--cex-muted);
+}
+
+.cex-insight-impact {
+  margin: 0.75rem 0 0;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: var(--cex-navy);
+  font-weight: 600;
+}
+
+.cex-begin-list {
+  list-style: none;
+  margin: 1.75rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.cex-begin-item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 1rem 1.5rem;
+  padding: 1.35rem 0;
+  border-top: 1px solid var(--cex-line);
+}
+
+.cex-begin-item:last-child {
+  border-bottom: 1px solid var(--cex-line);
+}
+
+.cex-begin-title {
+  margin: 0 0 0.35rem;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--cex-navy);
+}
+
+.cex-begin-purpose {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--cex-muted);
+  max-width: 38rem;
+}
+
+.cex-begin-time {
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--cex-gold);
+  white-space: nowrap;
+  padding-top: 0.25rem;
+}
+
+.cex-estimates {
+  margin-top: 1.75rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem 2.5rem;
+}
+
+.cex-estimate dt {
+  margin: 0;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--cex-gold);
+}
+
+.cex-estimate dd {
+  margin: 0.35rem 0 0;
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: var(--cex-navy);
+}
+
+.cex-note {
+  margin: 1.25rem 0 0;
+  max-width: 40rem;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--cex-muted);
+  font-style: italic;
+}
+
+.cex-studio-wrap {
+  max-width: 52rem;
+}
+
+.cex-studio-wrap .ep-module-card,
+.cex-studio-wrap .cex-studio-form {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.cex-journey {
+  position: relative;
+  margin: 2rem 0 0;
+  padding-left: 1.75rem;
+}
+
+.cex-journey::before {
+  content: '';
+  position: absolute;
+  left: 0.35rem;
+  top: 0.35rem;
+  bottom: 0.35rem;
+  width: 1px;
+  background: linear-gradient(180deg, var(--cex-gold), rgba(27, 43, 77, 0.15));
+}
+
+.cex-journey-step {
+  position: relative;
+  padding: 0 0 1.5rem;
+}
+
+.cex-journey-step:last-child {
+  padding-bottom: 0;
+}
+
+.cex-journey-step::before {
+  content: '';
+  position: absolute;
+  left: -1.52rem;
+  top: 0.35rem;
+  width: 0.65rem;
+  height: 0.65rem;
+  border-radius: 50%;
+  border: 2px solid var(--cex-navy);
+  background: var(--cex-cream);
+}
+
+.cex-journey-step[data-state='complete']::before {
+  background: var(--cex-gold);
+  border-color: var(--cex-gold);
+}
+
+.cex-journey-step[data-state='active']::before {
+  background: var(--cex-navy);
+  border-color: var(--cex-navy);
+  box-shadow: 0 0 0 4px rgba(201, 168, 68, 0.28);
+}
+
+.cex-journey-label {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--cex-navy);
+}
+
+.cex-journey-step[data-state='pending'] .cex-journey-label {
+  color: var(--cex-muted);
+  font-weight: 500;
+}
+
+.cex-connect-links {
+  list-style: none;
+  margin: 2rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.cex-connect-links a {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  text-decoration: none;
+  color: var(--cex-navy);
+  font-size: 1.2rem;
+  font-weight: 600;
+  transition: color 0.25s ease;
+}
+
+.cex-connect-links a:hover {
+  color: var(--cex-gold);
+}
+
+.cex-connect-links span {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--cex-gold);
+}
+
+.cex-nav-row {
+  margin-top: 2.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+}
+
+.cex-back {
+  border: none;
+  background: transparent;
+  color: var(--cex-muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  padding: 0.5rem 0;
+}
+
+.cex-back:hover {
+  color: var(--cex-navy);
+}
+
+/* Experience-mode design studio — soft editorial inputs */
+.cex-studio-form {
+  color: var(--cex-ink);
+}
+
+.cex-studio-form .cex-studio-eyebrow {
+  margin: 0 0 0.35rem;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--cex-gold);
+}
+
+.cex-studio-form .cex-studio-heading {
+  margin: 0 0 0.5rem;
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: var(--cex-navy);
+}
+
+.cex-studio-form .cex-studio-copy {
+  margin: 0 0 1.25rem;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--cex-muted);
+}
+
+.cex-studio-form .cex-studio-checklist {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  margin-bottom: 1.5rem;
+}
+
+.cex-studio-form .cex-studio-check {
+  border-top: 1px solid var(--cex-line);
+  padding: 0.85rem 0;
+}
+
+.cex-studio-form .cex-studio-check-status {
+  margin: 0 0 0.3rem;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--cex-gold);
+}
+
+.cex-studio-form .cex-studio-check-label {
+  margin: 0 0 0.25rem;
+  font-weight: 700;
+  color: var(--cex-navy);
+}
+
+.cex-studio-form .cex-studio-check-detail {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--cex-muted);
+}
+
+.cex-studio-form label span {
+  color: var(--cex-gold) !important;
+}
+
+.cex-studio-form input,
+.cex-studio-form textarea {
+  border: 1px solid rgba(27, 43, 77, 0.18) !important;
+  background: rgba(255, 255, 255, 0.65) !important;
+  color: var(--cex-ink) !important;
+}
+
+.cex-studio-form .cex-studio-upload {
+  border: 1px dashed rgba(27, 43, 77, 0.28) !important;
+  background: rgba(255, 255, 255, 0.4) !important;
+}
+
+.cex-studio-form .cex-studio-upload span {
+  color: var(--cex-navy) !important;
+  letter-spacing: normal !important;
+  text-transform: none !important;
+  font-size: inherit !important;
+  font-weight: 700 !important;
+}
+
+.cex-studio-form .cex-studio-upload span + span {
+  color: var(--cex-muted) !important;
+  font-weight: 500 !important;
+}
+
+.cex-studio-wrap .ep-module-card p,
+.cex-studio-wrap .ep-module-card span,
+.cex-studio-wrap .ep-module-card h2 {
+  color: inherit;
+}
+
+.cex-studio-wrap .ep-module-card {
+  color: var(--cex-ink);
+}
+
+.cex-studio-wrap .ep-module-card [style*='color: #fff'],
+.cex-studio-wrap .ep-module-card [style*='color:#fff'],
+.cex-studio-wrap .ep-module-card [style*='color: rgb(255'] {
+  color: var(--cex-navy) !important;
+}
+
+@media (max-width: 900px) {
+  .cex-dots {
+    left: 50%;
+    top: auto;
+    bottom: 1.15rem;
+    transform: translateX(-50%);
+    flex-direction: row;
+  }
+
+  .cex-imagine {
+    grid-template-columns: 1fr;
+  }
+
+  .cex-imagine-photo {
+    min-height: 14rem;
+    order: -1;
+  }
+
+  .cex-insight {
+    grid-template-columns: 1fr;
+  }
+
+  .cex-insight-photo {
+    min-height: 9rem;
+  }
+
+  .cex-begin-item {
+    grid-template-columns: 1fr;
+  }
+
+  .cex-stage {
+    padding-bottom: 4.5rem;
+  }
+}

@@ -29,6 +29,8 @@ type Props = {
   pageTitle?: string;
   /** Pre-resolved chrome — skips a second resolve when the page already loaded it. */
   chrome?: PortalWorkspaceChrome;
+  /** `experience` = full-bleed Client Experience without sidebar/header. */
+  presentation?: 'workspace' | 'experience';
   children: ReactNode;
 };
 
@@ -66,6 +68,7 @@ export async function PortalShell({
   firstName,
   pageTitle,
   chrome: chromeProp,
+  presentation = 'workspace',
   children,
 }: Props) {
   const chrome = chromeProp ?? (await resolvePortalWorkspaceChrome(slug));
@@ -94,6 +97,7 @@ export async function PortalShell({
       personalityName={chrome.personalityName}
       personalityId={chrome.personalityId}
       homeLabel={chrome.homeLabel}
+      presentation={presentation}
     >
       {children}
     </PortalLayout>

@@ -1,4 +1,4 @@
-import { getClientByEmail } from '@/lib/airtable';
+import { getClientByEmail, upsertProspectFromAssessment } from '@/lib/airtable';
 import { sendWelcomeEmail } from '@/lib/email';
 import { ensurePackageEntitlements } from '@/lib/modules/portal-modules';
 import { ensureOrganizationForPortal } from '@/lib/organizations';
@@ -111,7 +111,20 @@ export async function runCtpWorkspaceProvision(
     return { ok: false, error: `Cannot provision from workspace status ${submission.workspaceStatus}.` };
   }
 
-  const client = await getClientByEmail(submission.email);
+  let client = await getClientByEmail(submission.email);
+  if (!client?.id) {
+    try {
+      await upsertProspectFromAssessment({
+        contactName: submission.contactName,
+        businessName: submission.businessName,
+        email: submission.email,
+        assessmentId: submission.assessmentId || submission.id,
+      });
+    } catch (err) {
+      console.error('[ctp-workspace-provision] prospect upsert recovery failed:', err);
+    }
+    client = await getClientByEmail(submission.email);
+  }
   if (!client?.id) {
     await updateCtpSubmission(submissionId, { workspaceStatus: 'Failed' });
     await emitWorkspacePulse(

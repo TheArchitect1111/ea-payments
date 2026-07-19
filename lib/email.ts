@@ -1,4 +1,4 @@
-import { EA_PLATFORM_URL } from './platform-urls';
+import { EA_PLATFORM_URL, canonicalPlatformOrigin } from './platform-urls';
 import { sendEmail } from '@ea/portal-chassis/email';
 import { getAdminNotificationEmail } from './integration-env';
 
@@ -1489,7 +1489,10 @@ export async function sendCtpExecutiveEmail(
   const investmentHigh = data.investmentHigh ?? Math.round(data.recommendedFee * 1.15);
   const { publicPortalLoginUrl } = await import('@/lib/ctp-portal-host');
   // Opportunity Dashboard — never bare proposal or Design Studio as primary CTA.
-  const guidedPortalUrl = data.portalUrl || publicPortalLoginUrl();
+  const rawPortalUrl = data.portalUrl || publicPortalLoginUrl();
+  const guidedPortalUrl = rawPortalUrl
+    .replace(/^https?:\/\/www\.efficiencyarchitects\.online/i, canonicalPlatformOrigin())
+    .replace(/^https?:\/\/cc\.efficiencyarchitects\.online/i, canonicalPlatformOrigin());
   const model = {
     firstName,
     businessName: data.businessName,

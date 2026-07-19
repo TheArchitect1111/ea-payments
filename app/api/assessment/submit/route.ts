@@ -582,7 +582,23 @@ export async function POST(req: NextRequest) {
 
           // Await provision above when portal is required so the CTA has a branded URL.
           // Always call send here too — idempotent if provision already sent; covers slow/failed provision.
-          await sendCtpExecutiveEmailForSubmission(ctpSubmissionId);
+          const execMail = await sendCtpExecutiveEmailForSubmission(ctpSubmissionId);
+          if (!execMail.ok && !execMail.skipped) {
+            console.error('[assessment/submit] CTP client email failed:', execMail.error);
+            await sendAssessmentConfirmationEmail({
+              email: input.email,
+              contactName: input.contactName,
+              capacityScore: analysis.capacityScore,
+              scoreBand: analysis.scoreBand,
+              weeklyTimeRecovery: analysis.weeklyTimeRecovery,
+              opportunityLow: analysis.opportunityLow,
+              opportunityHigh: analysis.opportunityHigh,
+              projectTypeLabel: pricing.projectTypeLabel,
+              recommendedFee: pricing.recommendedFee,
+              proposalId,
+              clientTypeLabel: ctpClassification?.label,
+            });
+          }
         } else if (!isCtpFlow) {
           await sendAssessmentConfirmationEmail({
             email: input.email,

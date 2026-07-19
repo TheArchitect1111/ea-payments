@@ -7,7 +7,7 @@
  * to emit vanity links once DNS is reliable everywhere.
  */
 
-import { EA_PLATFORM_URL } from '@/lib/platform-urls';
+import { EA_PLATFORM_URL, canonicalPlatformOrigin } from '@/lib/platform-urls';
 
 const DEFAULT_PORTAL_HOSTS = [
   'portal.efficiencyarchitects.online',
@@ -79,7 +79,8 @@ function vanityPortalOrigin(): string {
 }
 
 function hubPortalOrigin(): string {
-  return EA_PLATFORM_URL.replace(/\/$/, '');
+  // Never emit www — that host serves the CRA marketing site.
+  return canonicalPlatformOrigin(EA_PLATFORM_URL);
 }
 
 /** When true, emails/CTAs use portal.efficiencyarchitects.online/{slug}. */
