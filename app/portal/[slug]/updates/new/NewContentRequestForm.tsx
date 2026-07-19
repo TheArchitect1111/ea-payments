@@ -1,6 +1,11 @@
 'use client';
 
 import { useState } from 'react';
+import {
+  UPDATE_HUB_CHANNELS,
+  UPDATE_HUB_CHANNEL_LABELS,
+  type UpdateHubChannel,
+} from '@/lib/update-hub-channels';
 
 const REQUEST_TYPES = [
   'Add Event',
@@ -27,6 +32,7 @@ const REQUEST_TYPES = [
 export default function NewContentRequestForm({ slug }: { slug: string }) {
   const [step, setStep] = useState(1);
   const [requestType, setRequestType] = useState('');
+  const [channel, setChannel] = useState<UpdateHubChannel | ''>('');
   const [form, setForm] = useState({
     pageLocation: '',
     title: '',
@@ -77,12 +83,23 @@ export default function NewContentRequestForm({ slug }: { slug: string }) {
     setError('');
     setLoading(true);
     try {
+      const channelPrefix = channel
+        ? `Channel: ${UPDATE_HUB_CHANNEL_LABELS[channel]}. `
+        : '';
+      const additionalNotes = channelPrefix
+        ? `${channelPrefix}${form.additionalNotes}`.trim()
+        : form.additionalNotes;
+      const description = channelPrefix && !form.additionalNotes.trim()
+        ? `${channelPrefix}${form.description}`.trim()
+        : form.description;
       const res = await fetch('/api/portal/content-requests', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           requestType,
           ...form,
+          description,
+          additionalNotes,
           selectedContent: useEnhanced ? enhanced : form.content,
         }),
       });
@@ -158,6 +175,21 @@ export default function NewContentRequestForm({ slug }: { slug: string }) {
                 )}
               </label>
             ))}
+            <label className="text-xs font-bold uppercase tracking-wider text-neutral-500">
+              Channel (optional)
+              <select
+                value={channel}
+                onChange={(e) => setChannel((e.target.value || '') as UpdateHubChannel | '')}
+                className="mt-1 block w-full border border-neutral-300 p-3 text-sm font-normal normal-case tracking-normal text-neutral-900"
+              >
+                <option value="">None</option>
+                {UPDATE_HUB_CHANNELS.map((ch) => (
+                  <option key={ch} value={ch}>
+                    {UPDATE_HUB_CHANNEL_LABELS[ch]}
+                  </option>
+                ))}
+              </select>
+            </label>
             <label className="text-xs font-bold uppercase tracking-wider text-neutral-500">
               Priority
               <select value={form.priority} onChange={(e) => update('priority', e.target.value)} className="mt-1 block w-full border border-neutral-300 p-3 text-sm font-normal normal-case tracking-normal text-neutral-900">

@@ -29,6 +29,7 @@
     "verify-airtable": "node scripts/verify-airtable-schema.mjs",
     "verify:eacp": "node scripts/verify-eacp-readiness.mjs",
     "verify:factory-launch": "node scripts/verify-factory-launch.mjs",
+    "verify:os-taxonomy": "node scripts/verify-os-taxonomy.mjs",
     "test:factory-orchestrator": "node scripts/test-factory-orchestrator.mjs",
     "test:factory-project-context": "node scripts/test-factory-project-context.mjs",
     "test:factory-capability-registry": "node scripts/test-factory-capability-registry.mjs",

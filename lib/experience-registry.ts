@@ -5,6 +5,7 @@
  * Module technical fields (path, RBAC) remain in lib/modules/registry.ts.
  */
 import type { ModuleId, NavGroup } from '@/lib/modules/registry';
+import type { OsLifecycleTag } from '@/lib/os-lifecycle';
 import {
   ALL_MAGNIFI_TEMPLATE_IDS,
   getMagnifiTemplate,
@@ -92,6 +93,8 @@ export interface CapabilityDefinition {
   orbPolicy: OrbiePolicy;
   /** Pathname fragments for Orbie / context resolution (first match wins). */
   routePatterns: string[];
+  /** Brick OS lifecycle tag (Capture → Organize → Communicate → Act → Measure). */
+  osLifecycle?: OsLifecycleTag;
 }
 
 export const CAPABILITY_REGISTRY: CapabilityDefinition[] = [
@@ -111,6 +114,7 @@ export const CAPABILITY_REGISTRY: CapabilityDefinition[] = [
     showOnDashboardHub: true,
     orbPolicy: 'introduce',
     routePatterns: ['/portal/login'],
+    osLifecycle: 'measure',
   },
   {
     id: 'organization-health',
@@ -130,6 +134,7 @@ export const CAPABILITY_REGISTRY: CapabilityDefinition[] = [
     hubVariant: 'pulse',
     orbPolicy: 'summarize',
     routePatterns: ['/pulse'],
+    osLifecycle: 'measure',
   },
   {
     id: 'opportunity-capture',
@@ -149,6 +154,7 @@ export const CAPABILITY_REGISTRY: CapabilityDefinition[] = [
     hubVariant: 'simplifi',
     orbPolicy: 'introduce',
     routePatterns: ['/simplifi'],
+    osLifecycle: 'capture',
   },
   {
     id: 'amplification',
@@ -168,6 +174,7 @@ export const CAPABILITY_REGISTRY: CapabilityDefinition[] = [
     hubVariant: 'amplifi',
     orbPolicy: 'recommend',
     routePatterns: ['/amplifi'],
+    osLifecycle: 'communicate',
   },
   {
     id: 'advisor-activity',
@@ -186,6 +193,7 @@ export const CAPABILITY_REGISTRY: CapabilityDefinition[] = [
     showOnDashboardHub: true,
     orbPolicy: 'recommend',
     routePatterns: ['/updates'],
+    osLifecycle: 'communicate',
   },
   {
     id: 'messaging',
@@ -202,6 +210,7 @@ export const CAPABILITY_REGISTRY: CapabilityDefinition[] = [
     showOnDashboardHub: true,
     orbPolicy: 'route-to-activity',
     routePatterns: ['/messaging', '/messages'],
+    osLifecycle: 'communicate',
   },
   {
     id: 'documents',
@@ -218,6 +227,7 @@ export const CAPABILITY_REGISTRY: CapabilityDefinition[] = [
     showOnDashboardHub: true,
     orbPolicy: 'ignore',
     routePatterns: ['/documents'],
+    osLifecycle: 'organize',
   },
   {
     id: 'learning',
@@ -234,6 +244,7 @@ export const CAPABILITY_REGISTRY: CapabilityDefinition[] = [
     showOnDashboardHub: true,
     orbPolicy: 'teach',
     routePatterns: ['/learning', '/academy'],
+    osLifecycle: 'organize',
   },
   {
     id: 'events',
@@ -250,6 +261,7 @@ export const CAPABILITY_REGISTRY: CapabilityDefinition[] = [
     showOnDashboardHub: true,
     orbPolicy: 'ignore',
     routePatterns: ['/events'],
+    osLifecycle: 'organize',
   },
   {
     id: 'resources',
@@ -266,6 +278,7 @@ export const CAPABILITY_REGISTRY: CapabilityDefinition[] = [
     showOnDashboardHub: true,
     orbPolicy: 'ignore',
     routePatterns: ['/resources'],
+    osLifecycle: 'organize',
   },
   {
     id: 'ask-advisor',
@@ -282,6 +295,7 @@ export const CAPABILITY_REGISTRY: CapabilityDefinition[] = [
     showOnDashboardHub: true,
     orbPolicy: 'route-to-activity',
     routePatterns: ['/ask'],
+    osLifecycle: 'communicate',
   },
   {
     id: 'relationship-capture',
@@ -299,6 +313,7 @@ export const CAPABILITY_REGISTRY: CapabilityDefinition[] = [
     showOnDashboardHub: true,
     orbPolicy: 'teach',
     routePatterns: ['/connect'],
+    osLifecycle: 'capture',
   },
   {
     id: 'guided-discovery',
@@ -315,6 +330,7 @@ export const CAPABILITY_REGISTRY: CapabilityDefinition[] = [
     showOnDashboardHub: true,
     orbPolicy: 'contextual',
     routePatterns: ['/assessment', '/discovery'],
+    osLifecycle: 'measure',
   },
   {
     id: 'your-build',
@@ -331,6 +347,7 @@ export const CAPABILITY_REGISTRY: CapabilityDefinition[] = [
     showOnDashboardHub: true,
     orbPolicy: 'contextual',
     routePatterns: ['/ctp'],
+    osLifecycle: 'act',
   },
   {
     id: 'landing-pages',
@@ -347,6 +364,7 @@ export const CAPABILITY_REGISTRY: CapabilityDefinition[] = [
     showOnDashboardHub: true,
     orbPolicy: 'ignore',
     routePatterns: ['/preview/home', '/story'],
+    osLifecycle: 'capture',
   },
   {
     id: 'billing',
@@ -363,6 +381,7 @@ export const CAPABILITY_REGISTRY: CapabilityDefinition[] = [
     showOnDashboardHub: true,
     orbPolicy: 'ignore',
     routePatterns: ['/billing'],
+    osLifecycle: 'act',
   },
 ];
 

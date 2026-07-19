@@ -186,6 +186,25 @@ export async function resolvePortalWorkspaceChrome(
     }
 
     const overrides = resolveWorkspaceConfigFromOrg(organization, slug, orgId);
+
+    // Prefer Creative Studio brand logo when org logo is unset and chrome would stay default.
+    if (!overrides.logo && orgId && !String(orgId).startsWith('org_')) {
+      try {
+        const { getBrandProfile } = await import('@/lib/creative-studio/brand-store');
+        const brand = await getBrandProfile(orgId);
+        const brandLogo = brand.logoUrl?.trim();
+        if (brandLogo) {
+          overrides.logo = brandLogo;
+          overrides.themeOverlay = {
+            ...overrides.themeOverlay,
+            logo: brandLogo,
+          };
+        }
+      } catch (err) {
+        console.error('resolvePortalWorkspaceChrome brand profile failed:', err);
+      }
+    }
+
     const shell = resolveWorkspaceShellForPortal({
       slug,
       orgId,

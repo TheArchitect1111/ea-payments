@@ -41,6 +41,9 @@ export const SIMPLIFI_ONE_TIME_MODULES = [...EA_CLIENT_MODULES] as const;
 /** Lean client portal modules for automated website + portal starter. */
 export const WEBSITE_PORTAL_MODULES = [
   'dashboard',
+  'landing',
+  'pulse',
+  'ctp',
   'update-hub',
   'messaging',
   'documents',
@@ -68,6 +71,7 @@ export const AIRTABLE_PACKAGE_MODULES: Record<string, readonly string[]> = {
   'Implementation Package': IMPLEMENTATION_MODULES,
   'Capacity Assessment': CAPACITY_MODULES,
   'Capacity Blueprint': CAPACITY_MODULES,
+  'Website + Portal Starter': WEBSITE_PORTAL_MODULES,
 };
 
 export const DEMO_MODULE_IDS = ['discovery', 'connect', 'landing'] as const;
