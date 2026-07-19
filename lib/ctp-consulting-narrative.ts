@@ -88,13 +88,13 @@ export function consultingBeginCards(): ConsultingBeginCard[] {
     },
     {
       id: 'portal',
-      title: 'Client Management Portal',
+      title: 'Client Experience Portal',
       purpose: 'A private place for progress, documents, updates, and ongoing collaboration.',
       estimatedBuildTime: '8-14 hrs',
     },
     {
       id: 'engagement',
-      title: 'Customer Engagement Tools',
+      title: 'Customer Engagement',
       purpose: 'Simple ways for people to reach you, book time, and move forward.',
       estimatedBuildTime: '4-8 hrs',
     },
@@ -133,11 +133,11 @@ export function consultingMeaningFromSubmission(submission: CtpSubmission): Cons
 export function consultingCurrentStage(submission: CtpSubmission): string {
   if (submission.status === 'Completed') return 'Project Complete';
   if (submission.status === 'Ready For Review' || submission.studioStatus === 'Ready For Review') {
-    return 'Ready for Project Proposal';
+    return 'Ready for Proposal';
   }
-  if (submission.workspaceStatus === 'Active') return 'Discovery In Progress';
+  if (submission.workspaceStatus === 'Active') return 'Discovery';
   if (submission.workspaceStatus === 'Provisioning') return 'Opening Your Workspace';
-  return 'Initial Review Complete';
+  return 'Initial Review';
 }
 
 export function consultingPrimaryOpportunity(submission: CtpSubmission): string {
@@ -152,7 +152,7 @@ export function consultingRecommendedSolution(submission: CtpSubmission): string
   return (
     submission.executiveEmailDraft?.projectTypeLabel ||
     submission.executiveSnapshot?.scope.projectTypeLabel ||
-    'Story-Driven Website + Client Management Portal'
+    'Story-Driven Website + Client Experience Portal'
   );
 }
 
@@ -181,15 +181,15 @@ export function consultingJourneySteps(submission: CtpSubmission): ConsultingJou
 
   return [
     { id: 'questionnaire', label: 'Questionnaire Received', state: 'complete' },
-    { id: 'review', label: 'Initial Review Complete', state: 'complete' },
+    { id: 'review', label: 'Initial Review', state: 'complete' },
     {
       id: 'discovery',
-      label: 'Discovery In Progress',
+      label: 'Discovery',
       state: mark(proposalReady || completed, discoveryActive && !proposalReady && !completed),
     },
     {
       id: 'proposal',
-      label: 'Project Proposal',
+      label: 'Proposal',
       state: mark(completed, proposalReady && !completed),
     },
     { id: 'approval', label: 'Approval', state: mark(completed, false) },
