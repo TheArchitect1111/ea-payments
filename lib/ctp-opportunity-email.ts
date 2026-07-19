@@ -70,10 +70,17 @@ const tableWrap = `border:1px solid #E8E2D6;margin:0 0 18px;`;
 export function resolveCtpEmailPortalUrl(model: CtpWelcomeEmailModel): string {
   const direct = model.portalUrl?.trim();
   if (direct) {
-    if (/efficiencyarchitects\.online\/ctp\/?(\?|$)/i.test(direct)) {
+    // Rewrite www/cc → apex so clients never land on the CRA marketing site.
+    let url = direct
+      .replace(/^https?:\/\/www\.efficiencyarchitects\.online/i, 'https://efficiencyarchitects.online')
+      .replace(/^https?:\/\/cc\.efficiencyarchitects\.online/i, 'https://efficiencyarchitects.online');
+    // Bare /ctp on apex redirects to public CTP intake — never use as portal CTA.
+    if (/efficiencyarchitects\.online\/ctp\/?(\?|$)/i.test(url)) {
       return publicPortalLoginUrl();
     }
-    return direct;
+    // Prefer branded portal paths; login is acceptable only as last resort.
+    if (url.includes('/portal/')) return url;
+    return url;
   }
   return publicPortalLoginUrl();
 }
