@@ -325,6 +325,7 @@ export default function ClientExperience({ view, slug, studio }: Props) {
           {sceneIndex === 4 ? (
             <section className="cex-studio-wrap" aria-labelledby="cex-studio-title">
               <BrandOnboardingPaths
+                key={`brand-onboarding-${slug}`}
                 slug={slug}
                 studio={studio}
                 businessName={view.businessName}

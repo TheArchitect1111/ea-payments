@@ -159,17 +159,10 @@ export default function BrandOnboardingPaths({
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
+    // Always land on the four-path chooser. Do not auto-open a prior path
+    // (that was hiding "Let's Build Your Story Together" after one selection).
+    setActivePath(null);
     try {
-      const stored = window.localStorage.getItem(STORAGE_KEY(slug));
-      if (
-        stored === 'existing_brand' ||
-        stored === 'brand_discovery' ||
-        stored === 'inspiration' ||
-        stored === 'creative_freedom'
-      ) {
-        setActivePath(stored);
-      }
-
       const discRaw = window.localStorage.getItem(DISCOVERY_KEY(slug));
       if (discRaw) {
         const parsed = JSON.parse(discRaw) as Partial<DiscoveryAnswers>;
@@ -195,7 +188,7 @@ export default function BrandOnboardingPaths({
 
   async function selectPath(path: BrandOnboardingPath) {
     setActivePath(path);
-    setDiscoverySaved(false);
+    if (path !== 'brand_discovery') setDiscoverySaved(false);
     try {
       window.localStorage.setItem(STORAGE_KEY(slug), path);
     } catch {
@@ -204,6 +197,12 @@ export default function BrandOnboardingPaths({
     setSaving(true);
     await persistOnboarding(path, { brandOnboardingPath: path });
     setSaving(false);
+    requestAnimationFrame(() => {
+      document.getElementById('bop-path-panel')?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    });
   }
 
   function clearPath() {
@@ -277,32 +276,35 @@ export default function BrandOnboardingPaths({
         We&apos;ll take it from there.
       </p>
 
-      {!activePath ? (
-        <div className="bop-grid" role="list">
-          {PATH_CARDS.map((card) => (
-            <article key={card.value} className="bop-card" role="listitem">
-              <PathPhoto src={card.src} alt={card.alt} />
-              <div className="bop-card-body">
-                <h3 className={`bop-card-title ${display.className}`}>{card.title}</h3>
-                <p className="bop-card-copy">{card.sentence}</p>
-                <button
-                  type="button"
-                  className="bop-card-cta"
-                  onClick={() => selectPath(card.value)}
-                  disabled={saving}
-                >
-                  {card.cta}
-                </button>
-              </div>
-            </article>
-          ))}
-        </div>
-      ) : null}
+      <div className="bop-grid" role="list">
+        {PATH_CARDS.map((card) => (
+          <article
+            key={card.value}
+            className={`bop-card${activePath === card.value ? ' is-selected' : ''}`}
+            role="listitem"
+          >
+            <PathPhoto src={card.src} alt={card.alt} />
+            <div className="bop-card-body">
+              <h3 className={`bop-card-title ${display.className}`}>{card.title}</h3>
+              <p className="bop-card-copy">{card.sentence}</p>
+              <button
+                type="button"
+                className="bop-card-cta"
+                onClick={() => selectPath(card.value)}
+                disabled={saving}
+                aria-pressed={activePath === card.value}
+              >
+                {activePath === card.value ? 'Selected' : card.cta}
+              </button>
+            </div>
+          </article>
+        ))}
+      </div>
 
       {activePath === 'existing_brand' ? (
-        <div className="bop-panel">
+        <div className="bop-panel" id="bop-path-panel">
           <button type="button" className="bop-back" onClick={clearPath}>
-            Back to paths
+            Choose a different path
           </button>
           <h3 className={`bop-panel-title ${display.className}`}>Upload My Brand</h3>
           <p className="bop-panel-lede">
@@ -319,9 +321,9 @@ export default function BrandOnboardingPaths({
       ) : null}
 
       {activePath === 'brand_discovery' ? (
-        <div className="bop-panel">
+        <div className="bop-panel" id="bop-path-panel">
           <button type="button" className="bop-back" onClick={clearPath}>
-            Back to paths
+            Choose a different path
           </button>
           <h3 className={`bop-panel-title ${display.className}`}>Brand Discovery</h3>
           <p className="bop-panel-lede">
@@ -388,9 +390,9 @@ export default function BrandOnboardingPaths({
       ) : null}
 
       {activePath === 'inspiration' ? (
-        <div className="bop-panel">
+        <div className="bop-panel" id="bop-path-panel">
           <button type="button" className="bop-back" onClick={clearPath}>
-            Back to paths
+            Choose a different path
           </button>
           <h3 className={`bop-panel-title ${display.className}`}>Inspiration Studio</h3>
           <p className="bop-panel-lede">
@@ -437,9 +439,9 @@ export default function BrandOnboardingPaths({
       ) : null}
 
       {activePath === 'creative_freedom' ? (
-        <div className="bop-panel bop-panel-freedom">
+        <div className="bop-panel bop-panel-freedom" id="bop-path-panel">
           <button type="button" className="bop-back" onClick={clearPath}>
-            Back to paths
+            Choose a different path
           </button>
           <h3 className={`bop-panel-title ${display.className}`}>We&apos;ve got you.</h3>
           <p className="bop-panel-lede">
