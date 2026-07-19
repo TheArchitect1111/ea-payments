@@ -7,3 +7,14 @@ export function ctpCalendlyUrl(): string {
     'https://calendly.com/freedom-efficiencyarchitects/30min'
   );
 }
+
+/** Append Calendly redirect_url so booking returns to an EA-branded confirmation. */
+export function withCalendlyRedirect(calendlyUrl: string, redirectUrl: string): string {
+  try {
+    const u = new URL(calendlyUrl);
+    u.searchParams.set('redirect_url', redirectUrl);
+    return u.toString();
+  } catch {
+    return calendlyUrl;
+  }
+}

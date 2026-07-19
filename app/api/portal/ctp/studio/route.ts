@@ -7,7 +7,7 @@ import {
   normalizeDesignStudioInput,
 } from '@/lib/ctp-design-studio';
 import { buildCtpPortalStatusView } from '@/lib/ctp-portal-status';
-import { getCtpSubmissionForPortal } from '@/lib/ctp-submissions';
+import { getCtpSubmissionForPortal, updateCtpSubmission } from '@/lib/ctp-submissions';
 
 export const dynamic = 'force-dynamic';
 
@@ -50,6 +50,38 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       ok: true,
       completed: true,
+      submission: buildCtpPortalStatusView(result.submission),
+    });
+  }
+
+  if (action === 'onboarding') {
+    const raw = body && typeof body === 'object' ? (body as Record<string, unknown>) : {};
+    const path = typeof raw.path === 'string' ? raw.path.trim() : '';
+    const answers =
+      raw.answers && typeof raw.answers === 'object' && !Array.isArray(raw.answers)
+        ? (raw.answers as Record<string, unknown>)
+        : {};
+
+    if (!path) {
+      return NextResponse.json({ ok: false, error: 'Missing onboarding path.' }, { status: 400 });
+    }
+
+    const discoveryAnswers = {
+      ...(submission.discoveryAnswers ?? {}),
+      ...answers,
+      brandOnboardingPath: path,
+    };
+
+    const result = await updateCtpSubmission(submission.id, { discoveryAnswers });
+    if (!result.ok || !result.submission) {
+      return NextResponse.json(
+        { ok: false, error: result.error ?? 'Could not save onboarding path.' },
+        { status: 400 },
+      );
+    }
+
+    return NextResponse.json({
+      ok: true,
       submission: buildCtpPortalStatusView(result.submission),
     });
   }

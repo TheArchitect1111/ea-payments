@@ -587,8 +587,9 @@ export function buildCtpOpportunityDashboardView(
 ): CtpOpportunityDashboardView {
   const firstName =
     options?.firstName?.trim() ||
-    submission.contactName.split(' ')[0] ||
-    submission.contactName;
+    submission.contactName?.trim().split(/\s+/)[0] ||
+    submission.contactName ||
+    'there';
   const readinessScore = resolveReadiness(submission);
   const opportunityStars = starsFromScore(readinessScore);
   const showDesignStudio =
@@ -686,8 +687,9 @@ export function buildCtpOpportunityReviewView(
 ): CtpOpportunityReviewView {
   const firstName =
     options?.firstName?.trim() ||
-    submission.contactName.split(' ')[0] ||
-    submission.contactName;
+    submission.contactName?.trim().split(/\s+/)[0] ||
+    submission.contactName ||
+    'there';
   const schedule = buildCtpScheduleView(submission);
 
   return {

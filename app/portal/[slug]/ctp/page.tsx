@@ -28,7 +28,14 @@ export default async function PortalCtpOpportunityDashboardPage({
     redirect(`/portal/${slug}`);
   }
 
-  const firstName = (client.clientName || submission.contactName).split(' ')[0];
+  const firstName = (
+    submission.contactName ||
+    client.clientName ||
+    session.email ||
+    'there'
+  )
+    .trim()
+    .split(/\s+/)[0];
   const view = buildCtpOpportunityDashboardView(submission, slug, { firstName });
   const statusView = buildCtpPortalStatusView(submission);
   const discovery = (submission.discoveryAnswers ?? {}) as Record<string, unknown>;
