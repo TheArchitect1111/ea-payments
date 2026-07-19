@@ -4,6 +4,7 @@ import { useEffect, useState, type ReactNode } from 'react';
 import Link from 'next/link';
 import { Fraunces, Manrope } from 'next/font/google';
 import type { CtpOpportunityDashboardView } from '@/lib/ctp-opportunity-view';
+import BrandOnboardingPaths from './BrandOnboardingPaths';
 import './client-experience.css';
 
 const display = Fraunces({
@@ -56,24 +57,14 @@ const SCENE_LABELS = [
   'Next',
 ] as const;
 
-const DESIGN_LEAD_NOTE =
-  "No materials yet. We'll help design with what we know. Share anything below if you'd like.";
-
-function designLeadKey(slug: string) {
-  return `ctp-design-lead:${slug}`;
+function brandOnboardingKey(slug: string) {
+  return `ctp-brand-onboarding:${slug}`;
 }
 
 function scrollExperienceToTop() {
   window.scrollTo(0, 0);
   document.querySelector('.cex')?.scrollTo(0, 0);
   document.querySelector('.cex-stage')?.scrollTo(0, 0);
-}
-
-function scrollToStudioForm() {
-  document.getElementById('cex-studio-form')?.scrollIntoView({
-    behavior: 'smooth',
-    block: 'start',
-  });
 }
 
 function EditorialPhoto({
@@ -112,16 +103,16 @@ type Props = {
 
 export default function ClientExperience({ view, slug, studio }: Props) {
   const [sceneIndex, setSceneIndex] = useState(0);
-  const [studioNote, setStudioNote] = useState<string | null>(null);
   const [designLead, setDesignLead] = useState(false);
 
   useEffect(() => {
     try {
-      setDesignLead(window.localStorage.getItem(designLeadKey(slug)) === '1');
+      const path = window.localStorage.getItem(brandOnboardingKey(slug));
+      setDesignLead(path === 'creative_freedom' || path === 'brand_discovery');
     } catch {
       setDesignLead(false);
     }
-  }, [slug]);
+  }, [slug, sceneIndex]);
 
   useEffect(() => {
     scrollExperienceToTop();
@@ -136,47 +127,11 @@ export default function ClientExperience({ view, slug, studio }: Props) {
     goTo(sceneIndex + 1);
   }
 
-  function clearDesignLead() {
-    try {
-      window.localStorage.removeItem(designLeadKey(slug));
-    } catch {
-      /* ignore */
-    }
-    setDesignLead(false);
-  }
-
-  function setDesignLeadFlag() {
-    try {
-      window.localStorage.setItem(designLeadKey(slug), '1');
-    } catch {
-      /* ignore */
-    }
-    setDesignLead(true);
-  }
-
-  function skipForNow() {
-    clearDesignLead();
-    setStudioNote(null);
-    goTo(5);
-  }
-
-  function noMaterials() {
-    setDesignLeadFlag();
-    setStudioNote(DESIGN_LEAD_NOTE);
-    requestAnimationFrame(() => scrollToStudioForm());
-  }
-
-  function designImmediately() {
-    setDesignLeadFlag();
-    setStudioNote(DESIGN_LEAD_NOTE);
-    requestAnimationFrame(() => scrollToStudioForm());
-  }
-
   const continueLabel =
     sceneIndex === 0
       ? 'Show Me What You Found'
       : sceneIndex === 4
-        ? 'Continue with what I shared'
+        ? null
         : sceneIndex >= SCENE_COUNT - 1
           ? null
           : 'Continue';
@@ -326,7 +281,7 @@ export default function ClientExperience({ view, slug, studio }: Props) {
               </h2>
               <p className="cex-lede">{view.beginIntro}</p>
               <EditorialPhoto
-                className="cex-begin-hero"
+                className="cex-begin-hero cex-begin-photo cex-photo-contain"
                 src={PHOTO_BY_ID.begin}
                 alt={PHOTO_ALT_BY_ID.begin}
               />
@@ -369,39 +324,12 @@ export default function ClientExperience({ view, slug, studio }: Props) {
 
           {sceneIndex === 4 ? (
             <section className="cex-studio-wrap" aria-labelledby="cex-studio-title">
-              <p className="cex-kicker">Collaboration</p>
-              <h2 id="cex-studio-title" className={`cex-headline ${display.className}`}>
-                Help us tell your story.
-              </h2>
-              <p className="cex-lede">
-                Share brand details, inspiration, and assets so we can shape the next chapter with
-                you. Everything saves as you go.
-              </p>
-              <EditorialPhoto
-                className="cex-story-photo"
-                src={PHOTO_BY_ID.story}
-                alt={PHOTO_ALT_BY_ID.story}
+              <BrandOnboardingPaths
+                slug={slug}
+                studio={studio}
+                businessName={view.businessName}
+                onPathComplete={() => goTo(5)}
               />
-              <div className="cex-choice-row" role="group" aria-label="Story options">
-                <button type="button" className="cex-choice" onClick={skipForNow}>
-                  Skip for now
-                </button>
-                <button type="button" className="cex-choice" onClick={noMaterials}>
-                  I don&apos;t have materials
-                </button>
-                <button type="button" className="cex-choice cex-choice-primary" onClick={designImmediately}>
-                  Help me design immediately
-                </button>
-              </div>
-              <p className="cex-choice-helper">
-                Choosing &ldquo;I don&apos;t have materials&rdquo; or &ldquo;Help me design
-                immediately&rdquo; means we&apos;ll lead design with what we already know — you can
-                still share anything in the form below.
-              </p>
-              {studioNote ? <p className="cex-choice-note">{studioNote}</p> : null}
-              <div id="cex-studio-form" className="cex-studio-form">
-                {studio}
-              </div>
             </section>
           ) : null}
 
@@ -419,7 +347,6 @@ export default function ClientExperience({ view, slug, studio }: Props) {
                 src={PHOTO_BY_ID.journey}
                 alt={PHOTO_ALT_BY_ID.journey}
               />
-              {studioNote ? <p className="cex-choice-note">{studioNote}</p> : null}
               <ol className="cex-journey">
                 {view.journeySteps.map((step) => (
                   <li key={step.id} className="cex-journey-step" data-state={step.state}>
