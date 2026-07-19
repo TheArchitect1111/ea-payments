@@ -2,10 +2,8 @@ import { redirect } from 'next/navigation';
 import { requirePortalModule } from '@/lib/modules/portal-modules';
 import { PortalShell } from '@/lib/chassis/PortalShell';
 import OpportunityReviewExperience from '@/app/portal/components/OpportunityReviewExperience';
-import { withCalendlyRedirect } from '@/lib/ctp-calendly';
 import { buildCtpOpportunityReviewView } from '@/lib/ctp-opportunity-view';
 import { getCtpSubmissionForPortal } from '@/lib/ctp-submissions';
-import { canonicalPlatformOrigin } from '@/lib/platform-urls';
 
 export const dynamic = 'force-dynamic';
 
@@ -34,16 +32,11 @@ export default async function PortalCtpOpportunityReviewPage({
   )
     .trim()
     .split(/\s+/)[0];
-  const confirmedHref = `${canonicalPlatformOrigin()}/portal/${slug}/ctp/review/confirmed`;
   const view = buildCtpOpportunityReviewView(submission, slug, { firstName });
-  const calendlyUrl = withCalendlyRedirect(view.calendlyUrl, confirmedHref);
 
   return (
     <PortalShell slug={slug} active="ctp" presentation="experience" firstName={firstName}>
-      <OpportunityReviewExperience
-        view={{ ...view, calendlyUrl }}
-        confirmedHref={confirmedHref}
-      />
+      <OpportunityReviewExperience view={view} />
     </PortalShell>
   );
 }
