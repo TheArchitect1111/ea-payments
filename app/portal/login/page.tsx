@@ -42,7 +42,19 @@ export default function PortalLoginPage() {
           {copy.eyebrow ? <p className="pl-eyebrow">{copy.eyebrow}</p> : null}
           <h1 className="pl-title">{copy.pageTitle}</h1>
           <p className="pl-lede">{copy.pageSubtitle}</p>
+          <p className="pl-portal-line">Sign in to your Client Experience portal</p>
         </header>
+
+        <div className="pl-hero" aria-hidden={false}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            className="pl-hero-img"
+            src="/client-experience/welcome-possibility-strip.png"
+            alt="Welcoming collage of people living with ease and possibility"
+            width={1200}
+            height={640}
+          />
+        </div>
 
         <Suspense fallback={<div className="pl-card">Loading…</div>}>
           <PortalLoginInner />

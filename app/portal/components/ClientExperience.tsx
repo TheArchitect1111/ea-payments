@@ -19,16 +19,25 @@ const sans = Manrope({
 const SCENE_COUNT = 7;
 
 const PHOTO_BY_ID: Record<string, string> = {
-  imagine:
-    'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1600&q=85',
-  'first-impression':
-    'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1200&q=85',
-  communication:
-    'https://images.unsplash.com/photo-1516321497487-e288fb19713f?auto=format&fit=crop&w=1200&q=85',
-  'customer-experience':
-    'https://images.unsplash.com/photo-1556745757-8d76bdb6984c?auto=format&fit=crop&w=1200&q=85',
-  'business-operations':
-    'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1200&q=85',
+  welcome: '/client-experience/welcome-possibility-strip.png',
+  imagine: '/client-experience/first-impression-entrance.png',
+  'first-impression': '/client-experience/first-impression-entrance.png',
+  communication: '/client-experience/communication-understood.png',
+  'customer-experience': '/client-experience/customer-experience-welcome.png',
+  'business-operations': '/client-experience/operations-harmony.png',
+  begin: '/client-experience/begin-life-freedom.png',
+  story: '/client-experience/story-brand-process.png',
+};
+
+const PHOTO_ALT_BY_ID: Record<string, string> = {
+  welcome: 'Welcoming collage of diverse people living with ease and possibility',
+  imagine: 'Warm, open entrance that invites trust and a strong first impression',
+  'first-impression': 'Warm, open entrance that invites trust and a strong first impression',
+  communication: 'Attentive listening conversation where someone feels truly understood',
+  'customer-experience': 'Concierge warmly welcoming a family',
+  'business-operations': 'Orchestra playing in harmony, a metaphor for aligned operations',
+  begin: 'Emotionally charged collage of life, freedom, family, and purposeful living',
+  story: 'Brand and creative process collage for shaping your story together',
 };
 
 const SCENE_LABELS = [
@@ -126,7 +135,7 @@ export default function ClientExperience({ view, slug, studio }: Props) {
 
   function noMaterials() {
     clearDesignLead();
-    setStudioNote('No materials yet — we will shape direction with you.');
+    setStudioNote('No materials yet. We will shape direction with you.');
     goTo(5);
   }
 
@@ -150,7 +159,7 @@ export default function ClientExperience({ view, slug, studio }: Props) {
       num: '01',
       label: 'Refine',
       copy: designLead
-        ? 'We lead design direction based on what we learned — you can share materials anytime.'
+        ? 'We lead design direction based on what we learned. You can share materials anytime.'
         : 'We refine recommendations from anything you shared in your story.',
     },
     {
@@ -166,7 +175,7 @@ export default function ClientExperience({ view, slug, studio }: Props) {
     {
       num: '04',
       label: 'Approval & payment',
-      copy: 'Payment happens at Approval — after you approve the proposal, before build begins.',
+      copy: 'You approve the proposal and complete payment. That\'s when we begin the build.',
     },
     {
       num: '05',
@@ -201,12 +210,19 @@ export default function ClientExperience({ view, slug, studio }: Props) {
         <div className="cex-scene" key={sceneIndex}>
           {sceneIndex === 0 ? (
             <section className="cex-welcome" aria-labelledby="cex-welcome-title">
-              <p className="cex-kicker">Client Experience</p>
-              <h1 id="cex-welcome-title" className={`cex-headline ${display.className}`}>
-                Welcome, {view.firstName}.
-              </h1>
-              <p className="cex-lede">We&apos;ve spent time learning about your organization.</p>
-              <p className="cex-lede">We&apos;re excited to show you what we see.</p>
+              <div>
+                <p className="cex-kicker">Client Experience</p>
+                <h1 id="cex-welcome-title" className={`cex-headline ${display.className}`}>
+                  Welcome, {view.firstName}.
+                </h1>
+                <p className="cex-lede">We&apos;ve spent time learning about your organization.</p>
+                <p className="cex-lede">We&apos;re excited to show you what we see.</p>
+              </div>
+              <EditorialPhoto
+                className="cex-welcome-photo"
+                src={PHOTO_BY_ID.welcome}
+                alt={PHOTO_ALT_BY_ID.welcome}
+              />
             </section>
           ) : null}
 
@@ -215,17 +231,34 @@ export default function ClientExperience({ view, slug, studio }: Props) {
               <div>
                 <p className="cex-kicker">Possibility</p>
                 <h2 id="cex-imagine-title" className={`cex-headline ${display.className}`}>
-                  Imagine what&apos;s possible for {view.businessName}.
+                  Imagine Your Business Operating in a Way That Creates...
                 </h2>
-                <p className="cex-lede">
-                  A clearer first impression. A calmer rhythm of work. A customer journey that feels
-                  intentional, so your mission has room to grow.
+                <ul className="cex-imagine-list">
+                  <li>More time for the people who matter most.</li>
+                  <li>The freedom to step away without everything stopping.</li>
+                  <li>Mornings that begin with purpose instead of putting out fires.</li>
+                  <li>
+                    Confidence that your business is moving forward, even when you&apos;re not
+                    watching every detail.
+                  </li>
+                  <li>
+                    Stronger relationships with customers because every interaction feels
+                    intentional.
+                  </li>
+                  <li>Space to think strategically instead of constantly reacting.</li>
+                  <li>
+                    More energy to invest in your family, your health, your community, and the life
+                    you&apos;re building.
+                  </li>
+                </ul>
+                <p className="cex-lede cex-imagine-close">
+                  That is the future we&apos;re building together.
                 </p>
               </div>
               <EditorialPhoto
                 className="cex-imagine-photo"
                 src={PHOTO_BY_ID.imagine}
-                alt="Light-filled architecture studio"
+                alt={PHOTO_ALT_BY_ID.imagine}
               />
             </section>
           ) : null}
@@ -243,7 +276,7 @@ export default function ClientExperience({ view, slug, studio }: Props) {
                     <EditorialPhoto
                       className="cex-insight-photo"
                       src={PHOTO_BY_ID[card.id] || PHOTO_BY_ID['first-impression']}
-                      alt=""
+                      alt={PHOTO_ALT_BY_ID[card.id] || PHOTO_ALT_BY_ID['first-impression']}
                     />
                     <div>
                       <h3 className={`cex-insight-title ${display.className}`}>{card.title}</h3>
@@ -265,6 +298,11 @@ export default function ClientExperience({ view, slug, studio }: Props) {
                 Here&apos;s where we&apos;d begin.
               </h2>
               <p className="cex-lede">{view.beginIntro}</p>
+              <EditorialPhoto
+                className="cex-begin-hero"
+                src={PHOTO_BY_ID.begin}
+                alt={PHOTO_ALT_BY_ID.begin}
+              />
               <ul className="cex-begin-list">
                 {view.beginCards.slice(0, 4).map((card) => (
                   <li key={card.id} className="cex-begin-item">
@@ -303,6 +341,11 @@ export default function ClientExperience({ view, slug, studio }: Props) {
                 Share brand details, inspiration, and assets so we can shape the next chapter with
                 you. Everything saves as you go.
               </p>
+              <EditorialPhoto
+                className="cex-story-photo"
+                src={PHOTO_BY_ID.story}
+                alt={PHOTO_ALT_BY_ID.story}
+              />
               <div className="cex-choice-row" role="group" aria-label="Story options">
                 <button type="button" className="cex-choice" onClick={skipForNow}>
                   Skip for now
@@ -336,8 +379,8 @@ export default function ClientExperience({ view, slug, studio }: Props) {
                 ))}
               </ol>
               <p className="cex-note">
-                Payment is at Approval — after you approve the proposal, before design and
-                development begin.
+                You&apos;ll pay when you approve the proposal. Design and development start after
+                that.
               </p>
             </section>
           ) : null}
@@ -349,7 +392,7 @@ export default function ClientExperience({ view, slug, studio }: Props) {
                 What happens next.
               </h2>
               <p className="cex-lede">
-                Where you are: <strong>Discovery</strong>. We&apos;ve started — your portal is the
+                Where you are: <strong>Discovery</strong>. We&apos;ve started. Your portal is the
                 home base for everything ahead.
               </p>
               <ol className="cex-next-steps">
