@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Fraunces, Manrope } from 'next/font/google';
 import type { CtpOpportunityReviewView } from '@/lib/ctp-opportunity-view';
+import { withCalendlyRedirect } from '@/lib/ctp-calendly';
 import './opportunity-review-experience.css';
 
 const display = Fraunces({
@@ -95,9 +96,11 @@ const JOURNEY_STEPS = [
 
 type Props = {
   view: CtpOpportunityReviewView;
+  confirmedHref: string;
 };
 
-export default function OpportunityReviewExperience({ view }: Props) {
+export default function OpportunityReviewExperience({ view, confirmedHref }: Props) {
+  const calendlyHref = withCalendlyRedirect(view.calendlyUrl, confirmedHref);
   return (
     <main className={`ore ${sans.className}`}>
       <div className="ore-grain" aria-hidden />
@@ -124,7 +127,7 @@ export default function OpportunityReviewExperience({ view }: Props) {
           <div className="ore-hero-actions">
             <a
               className="ore-cta"
-              href={view.calendlyUrl}
+              href={calendlyHref}
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -233,7 +236,7 @@ export default function OpportunityReviewExperience({ view }: Props) {
           </p>
           <a
             className="ore-cta"
-            href={view.calendlyUrl}
+            href={calendlyHref}
             target="_blank"
             rel="noopener noreferrer"
           >
