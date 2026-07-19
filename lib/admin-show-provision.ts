@@ -3,6 +3,7 @@
  * Reuses createPortalAccess + website provision — no new engines.
  */
 import type { PortalConfig } from '@/lib/catalog';
+import { createOrUpdateClientRecord } from '@/lib/airtable';
 import { createPortalAccess } from '@/lib/portal-access';
 import { ensureOrganizationForPortal } from '@/lib/organizations';
 import { ensurePackageEntitlements } from '@/lib/modules/portal-modules';
@@ -53,12 +54,34 @@ export async function runAdminShowProvision(
   }
 
   const email = (input.email?.trim() || showEmailForName(businessName)).toLowerCase();
+  const today = new Date().toISOString().slice(0, 10);
+
+  // EA createPortalAccess requires an existing Client Records row.
+  const clientRow = await createOrUpdateClientRecord({
+    clientName: businessName,
+    organization: businessName,
+    email,
+    packagePurchased: 'Website + Portal Starter',
+    commerceOfferId: 'website_portal_starter',
+    amountPaid: 0,
+    paymentDate: today,
+    stripeTransactionId: `admin-show-${Date.now().toString(36)}`,
+    portalAccessStatus: 'Pending',
+    onboardingStatus: 'Not Started',
+  });
+  if (!clientRow.ok || !clientRow.recordId) {
+    return {
+      ok: false,
+      error: clientRow.error ?? 'Could not create Client Records row for show.',
+    };
+  }
 
   const portalResult = await createPortalAccess(
     {
       clientName: businessName,
       email,
       organization: businessName,
+      airtableRecordId: clientRow.recordId,
     },
     EA_PORTAL_CONFIG,
   );
