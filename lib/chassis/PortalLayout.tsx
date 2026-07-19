@@ -107,9 +107,6 @@ function PortalLayoutFrame({
 }
 
 export function PortalLayout(props: PortalWorkspaceLayoutProps) {
-  if (props.presentation === 'experience') {
-    return <PortalLayoutFrame {...props} />;
-  }
   return (
     <PortalSidebarProvider>
       <PortalLayoutFrame {...props} />
