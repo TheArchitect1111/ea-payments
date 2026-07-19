@@ -27,6 +27,9 @@ const PHOTO_BY_ID: Record<string, string> = {
   'business-operations': '/client-experience/operations-harmony.png',
   begin: '/client-experience/begin-life-freedom.png',
   story: '/client-experience/story-brand-process.png',
+  journey: '/client-experience/journey-path.png',
+  next: '/client-experience/continuity-portrait.png',
+  continuity: '/client-experience/continuity-portrait.png',
 };
 
 const PHOTO_ALT_BY_ID: Record<string, string> = {
@@ -38,6 +41,9 @@ const PHOTO_ALT_BY_ID: Record<string, string> = {
   'business-operations': 'Orchestra playing in harmony, a metaphor for aligned operations',
   begin: 'Emotionally charged collage of life, freedom, family, and purposeful living',
   story: 'Brand and creative process collage for shaping your story together',
+  journey: 'A clear path forward through calm landscape and purposeful travel',
+  next: 'Portrait conveying continuity, care, and what happens next',
+  continuity: 'Portrait conveying continuity, care, and what happens next',
 };
 
 const SCENE_LABELS = [
@@ -50,8 +56,24 @@ const SCENE_LABELS = [
   'Next',
 ] as const;
 
+const DESIGN_LEAD_NOTE =
+  "No materials yet. We'll help design with what we know. Share anything below if you'd like.";
+
 function designLeadKey(slug: string) {
   return `ctp-design-lead:${slug}`;
+}
+
+function scrollExperienceToTop() {
+  window.scrollTo(0, 0);
+  document.querySelector('.cex')?.scrollTo(0, 0);
+  document.querySelector('.cex-stage')?.scrollTo(0, 0);
+}
+
+function scrollToStudioForm() {
+  document.getElementById('cex-studio-form')?.scrollIntoView({
+    behavior: 'smooth',
+    block: 'start',
+  });
 }
 
 function EditorialPhoto({
@@ -101,8 +123,13 @@ export default function ClientExperience({ view, slug, studio }: Props) {
     }
   }, [slug]);
 
+  useEffect(() => {
+    scrollExperienceToTop();
+  }, [sceneIndex]);
+
   function goTo(index: number) {
     setSceneIndex(Math.max(0, Math.min(SCENE_COUNT - 1, index)));
+    scrollExperienceToTop();
   }
 
   function continueScene() {
@@ -134,15 +161,15 @@ export default function ClientExperience({ view, slug, studio }: Props) {
   }
 
   function noMaterials() {
-    clearDesignLead();
-    setStudioNote('No materials yet. We will shape direction with you.');
-    goTo(5);
+    setDesignLeadFlag();
+    setStudioNote(DESIGN_LEAD_NOTE);
+    requestAnimationFrame(() => scrollToStudioForm());
   }
 
   function designImmediately() {
     setDesignLeadFlag();
-    setStudioNote('EA will lead creative direction from here.');
-    goTo(5);
+    setStudioNote(DESIGN_LEAD_NOTE);
+    requestAnimationFrame(() => scrollToStudioForm());
   }
 
   const continueLabel =
@@ -304,13 +331,22 @@ export default function ClientExperience({ view, slug, studio }: Props) {
                 alt={PHOTO_ALT_BY_ID.begin}
               />
               <ul className="cex-begin-list">
-                {view.beginCards.slice(0, 4).map((card) => (
+                {view.beginCards.map((card) => (
                   <li key={card.id} className="cex-begin-item">
                     <div>
                       <p className={`cex-begin-title ${display.className}`}>{card.title}</p>
                       <p className="cex-begin-purpose">{card.purpose}</p>
                     </div>
-                    <span className="cex-begin-time">{card.estimatedBuildTime}</span>
+                    <span className="cex-begin-time">
+                      {card.id === 'maintenance' ? (
+                        <>
+                          <span className="cex-begin-time-label">Investment</span>
+                          {card.estimatedBuildTime}
+                        </>
+                      ) : (
+                        card.estimatedBuildTime
+                      )}
+                    </span>
                   </li>
                 ))}
               </ul>
@@ -357,7 +393,15 @@ export default function ClientExperience({ view, slug, studio }: Props) {
                   Help me design immediately
                 </button>
               </div>
-              <div style={{ marginTop: '1.75rem' }}>{studio}</div>
+              <p className="cex-choice-helper">
+                Choosing &ldquo;I don&apos;t have materials&rdquo; or &ldquo;Help me design
+                immediately&rdquo; means we&apos;ll lead design with what we already know — you can
+                still share anything in the form below.
+              </p>
+              {studioNote ? <p className="cex-choice-note">{studioNote}</p> : null}
+              <div id="cex-studio-form" className="cex-studio-form">
+                {studio}
+              </div>
             </section>
           ) : null}
 
@@ -370,6 +414,11 @@ export default function ClientExperience({ view, slug, studio }: Props) {
               <p className="cex-lede">
                 A clear sequence from first review through launch, so you always know where you are.
               </p>
+              <EditorialPhoto
+                className="cex-begin-hero"
+                src={PHOTO_BY_ID.journey}
+                alt={PHOTO_ALT_BY_ID.journey}
+              />
               {studioNote ? <p className="cex-choice-note">{studioNote}</p> : null}
               <ol className="cex-journey">
                 {view.journeySteps.map((step) => (
@@ -395,6 +444,11 @@ export default function ClientExperience({ view, slug, studio }: Props) {
                 Where you are: <strong>Discovery</strong>. We&apos;ve started. Your portal is the
                 home base for everything ahead.
               </p>
+              <EditorialPhoto
+                className="cex-begin-hero"
+                src={PHOTO_BY_ID.next}
+                alt={PHOTO_ALT_BY_ID.next}
+              />
               <ol className="cex-next-steps">
                 {nextSteps.map((step) => (
                   <li key={step.num}>

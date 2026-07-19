@@ -104,6 +104,12 @@ export function consultingBeginCards(): ConsultingBeginCard[] {
       purpose: 'A careful launch with refinements so the experience performs from day one.',
       estimatedBuildTime: '6-10 hrs',
     },
+    {
+      id: 'maintenance',
+      title: 'Annual Maintenance Package',
+      purpose: 'Ongoing care so your presence stays polished, current, and performing after launch.',
+      estimatedBuildTime: '$49/mo',
+    },
   ];
 }
 
