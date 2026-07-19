@@ -79,7 +79,8 @@ function foundationForModel(model: CtpWelcomeEmailModel): Array<{ included: stri
 
 function resolveCtaUrl(model: CtpWelcomeEmailModel): string {
   if (model.portalUrl?.trim()) return model.portalUrl.trim();
-  throw new Error('Opportunity confirmation email requires portalUrl — provision workspace before send.');
+  // Hub login is always a valid CTA when workspace provision has not finished.
+  return 'https://efficiencyarchitects.online/portal/login';
 }
 
 /**
@@ -230,15 +231,20 @@ export function buildOpportunityEmailModelFromSubmission(
   };
 }
 
-/** Guardrail: confirmation email must use business language only. */
+/** Guardrail: static CTA/title copy + destination only (body may include snapshot text). */
 export function assertOpportunityEmailLanguage(email: OpportunityConfirmationEmail): void {
-  const blob = `${email.subject} ${email.title} ${email.ctaLabel} ${email.bodyHtml}`;
+  const cta = email.ctaUrl;
+  const okCta =
+    cta.includes('/ctp') ||
+    cta.includes('portal/login') ||
+    /\/login(?:\?|$)/.test(cta);
+  if (!okCta) {
+    throw new Error('Opportunity email CTA must target Opportunity Dashboard or portal login.');
+  }
+  const staticCopy = `${email.subject} ${email.title} ${email.ctaLabel}`;
   for (const term of FORBIDDEN_EMAIL_TERMS) {
-    if (blob.includes(term)) {
+    if (staticCopy.includes(term)) {
       throw new Error(`Opportunity email must not include forbidden term: ${term}`);
     }
-  }
-  if (!email.ctaUrl.includes('/ctp') && !email.ctaUrl.includes('portal/login')) {
-    throw new Error('Opportunity email CTA must target Opportunity Dashboard or portal login.');
   }
 }
