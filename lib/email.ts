@@ -1573,9 +1573,10 @@ export async function sendFactoryPackageReadyEmail(data: {
     `factory-${data.clientName.replace(/[^\w.-]+/g, '-').slice(0, 48) || 'package'}.md`;
 
   const html = baseEmailShell({
-    title: 'Launch Complete',
-    eyebrow: `${data.clientName} · Concept Pack Ready`,
+    title: 'Opportunity Intelligence Brief™',
+    eyebrow: `${data.clientName} · Launch Protocol v3`,
     bodyHtml: data.packageHtml,
+    premium: true,
   });
 
   const attachments: Array<Record<string, string | boolean>> = [

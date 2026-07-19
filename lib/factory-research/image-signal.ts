@@ -26,6 +26,9 @@ export type FactoryImageSignal = {
   opsClue?: string;
   cta?: string;
   url?: string;
+  primaryColor?: string;
+  accentColor?: string;
+  industry?: string;
   opportunities: string[];
 };
 
@@ -44,6 +47,9 @@ FRICTION: (capacity, conversion, or trust gaps visible, separated by " | ")
 OPS_CLUE: (how work seems to run today — paper, DM, form, portal — or none)
 CTA: (any ask / next step visible)
 URL: (any website or handle if visible, else none)
+PRIMARY_COLOR: (#hex brand color if visible, else none)
+ACCENT_COLOR: (#hex accent if visible, else none)
+INDUSTRY: (short industry guess)
 OPPORTUNITIES: (3 short bullets separated by " | " — capacity, conversion, trust gaps)
 SUMMARY: (2-3 sentences describing what you see and the business opportunity)
 
