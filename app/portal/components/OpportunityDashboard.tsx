@@ -1,272 +1,179 @@
-import Link from 'next/link';
+﻿import Link from 'next/link';
 import type { CtpOpportunityDashboardView } from '@/lib/ctp-opportunity-view';
 import { NAVY, GOLD } from '@/lib/design-system';
 import './opportunity-experience.css';
 
-const RANK_MEDAL: Record<1 | 2 | 3, string> = {
-  1: '🥇',
-  2: '🥈',
-  3: '🥉',
-};
-
-function Stars({ count }: { count: number }) {
-  const filled = Math.max(0, Math.min(5, Math.round(count)));
-  return (
-    <span className="oe-stars" aria-label={`${filled} out of 5 stars`}>
-      {'★'.repeat(filled)}
-      <span className="oe-stars-empty">{'☆'.repeat(5 - filled)}</span>
-    </span>
-  );
-}
-
-function money(n: number): string {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 0,
-  }).format(n);
+function JourneyMark({ state }: { state: 'complete' | 'active' | 'pending' }) {
+  if (state === 'complete') return <span aria-hidden>✅</span>;
+  if (state === 'active') return <span aria-hidden>🟡</span>;
+  return <span aria-hidden className="oe-journey-dot">○</span>;
 }
 
 export default function OpportunityDashboard({ view }: { view: CtpOpportunityDashboardView }) {
   return (
-    <div className="oe-report">
+    <div className="oe-report oe-workspace">
       <header className="oe-hero">
-        <p className="oe-greeting">{view.greeting}</p>
-        <h2 className="oe-hero-title">We&apos;ve completed your initial opportunity analysis.</h2>
-        <p className="oe-hero-lede">Here&apos;s what we discovered.</p>
+        <h2 className="oe-greeting">{view.greeting}</h2>
+        <p className="oe-hero-lede">{view.welcomeLede}</p>
       </header>
 
       <section className="oe-section" aria-labelledby="oe-snapshot">
         <h3 id="oe-snapshot" className="oe-section-title">
           Executive Snapshot
         </h3>
-        <div className="oe-snapshot-grid">
-          <div className="oe-metric">
-            <p className="oe-metric-label">Overall Readiness</p>
-            <p className="oe-metric-value">
-              {view.readinessScore != null ? (
-                <>
-                  {view.readinessScore}
-                  <span className="oe-metric-unit"> / 100</span>
-                </>
-              ) : (
-                'In progress'
-              )}
-            </p>
+        <div className="oe-snapshot-list">
+          <div className="oe-snapshot-row">
+            <span>Organization</span>
+            <strong>{view.organizationLabel}</strong>
           </div>
-          <div className="oe-metric">
-            <p className="oe-metric-label">Opportunity Rating</p>
-            <p className="oe-metric-value">
-              <Stars count={view.opportunityStars} />
-            </p>
-            <p className="oe-metric-sub">{view.potentialLabel}</p>
+          <div className="oe-snapshot-row">
+            <span>Current Stage</span>
+            <strong>{view.currentStage}</strong>
           </div>
-        </div>
-        <p className="oe-narrative oe-snapshot-summary">{view.executiveSummary}</p>
-      </section>
-
-      <section className="oe-section" aria-labelledby="oe-progress">
-        <h3 id="oe-progress" className="oe-section-title">
-          Progress Tracker
-        </h3>
-        <ul className="oe-progress-list">
-          {view.progress.map((step) => (
-            <li key={step.id} className={`oe-progress-item oe-progress-${step.state}`}>
-              <div className="oe-progress-label-row">
-                <span className="oe-progress-label">{step.label}</span>
-                <span className="oe-progress-pct">{step.fill}%</span>
-              </div>
-              <div
-                className="oe-progress-track"
-                role="progressbar"
-                aria-valuenow={step.fill}
-                aria-valuemin={0}
-                aria-valuemax={100}
-                aria-label={step.label}
-              >
-                <div className="oe-progress-fill" style={{ width: `${step.fill}%` }} />
-              </div>
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      <section className="oe-section" aria-labelledby="oe-summary">
-        <h3 id="oe-summary" className="oe-section-title">
-          Opportunity Summary
-        </h3>
-        <p className="oe-narrative">{view.executiveSummary}</p>
-      </section>
-
-      <section className="oe-section" aria-labelledby="oe-top">
-        <h3 id="oe-top" className="oe-section-title">
-          Top Three Opportunities
-        </h3>
-        {view.opportunities.length > 0 ? (
-          <div className="oe-opp-grid">
-            {view.opportunities.map((opp) => (
-              <Link key={opp.id} href={opp.href} className="oe-opp-card">
-                <p className="oe-opp-rank" aria-hidden>
-                  {RANK_MEDAL[opp.rank]}
-                </p>
-                <h4 className="oe-opp-title">{opp.title}</h4>
-                <p className="oe-opp-impact-label">Estimated Impact</p>
-                <Stars count={opp.impactStars} />
-                <p className="oe-opp-summary">{opp.summary}</p>
-              </Link>
-            ))}
+          <div className="oe-snapshot-row">
+            <span>Primary Opportunity</span>
+            <strong>{view.primaryOpportunity}</strong>
           </div>
-        ) : (
-          <p className="oe-section-lede">
-            Your personalized opportunity cards will appear here as our analysis completes. Check
-            back soon — or schedule your Opportunity Review when you are ready.
-          </p>
-        )}
-      </section>
-
-      {view.healthAreas.length > 0 ? (
-        <section className="oe-section" aria-labelledby="oe-health">
-          <h3 id="oe-health" className="oe-section-title">
-            Business Health
-          </h3>
-          <div className="oe-health-grid">
-            {view.healthAreas.map((area) => (
-              <Link key={area.id} href={area.href} className="oe-health-card">
-                <p className="oe-health-label">{area.label}</p>
-                <p className="oe-health-score">
-                  {area.score}
-                  <span className="oe-health-unit"> / 100</span>
-                </p>
-              </Link>
-            ))}
+          <div className="oe-snapshot-row">
+            <span>Estimated Annual Opportunity</span>
+            <strong>{view.estimatedAnnualOpportunity}</strong>
           </div>
-        </section>
-      ) : null}
-
-      <section className="oe-section" aria-labelledby="oe-bench">
-        <h3 id="oe-bench" className="oe-section-title">
-          Benchmarks
-        </h3>
-        <div className="oe-benchmark">
-          <p>
-            Organizations similar to yours typically score:{' '}
-            <strong className="oe-bench-placeholder">Coming soon</strong>
-          </p>
-          <p>
-            Organizations implementing similar recommendations average:{' '}
-            <strong className="oe-bench-placeholder">Coming soon</strong>
-          </p>
-          <p className="oe-bench-note">
-            Benchmark comparisons will appear here once enough anonymized results are available. We do
-            not invent comparison numbers.
-          </p>
+          <div className="oe-snapshot-row">
+            <span>Recommended Solution</span>
+            <strong>{view.recommendedSolution}</strong>
+          </div>
+          <div className="oe-snapshot-row">
+            <span>Estimated Project Timeline</span>
+            <strong>{view.estimatedTimeline}</strong>
+          </div>
         </div>
       </section>
 
-      <section className="oe-section" aria-labelledby="oe-foundation">
-        <h3 id="oe-foundation" className="oe-section-title">
-          Recommended Digital Foundation
+      <section className="oe-section" aria-labelledby="oe-learned">
+        <h3 id="oe-learned" className="oe-section-title">
+          What We Learned
         </h3>
-        <div className="oe-foundation-grid">
-          {view.foundation.map((card) => (
-            <article key={card.id} className="oe-foundation-card">
-              <p className="oe-foundation-status">{card.status}</p>
-              <h4 className="oe-foundation-title">{card.title}</h4>
-              <p className="oe-foundation-why">{card.why}</p>
+        <p className="oe-section-lede">{view.learnedIntro}</p>
+        <div className="oe-learn-grid">
+          {view.learnedCards.map((card) => (
+            <article key={card.id} className="oe-learn-card">
+              <h4>{card.title}</h4>
+              <p className="oe-learn-observation">{card.observation}</p>
+              <p>
+                <span className="oe-learn-label">Why it matters</span>
+                {card.whyItMatters}
+              </p>
+              <p>
+                <span className="oe-learn-label">Potential impact</span>
+                {card.potentialImpact}
+              </p>
             </article>
           ))}
         </div>
       </section>
 
-      <section className="oe-section" aria-labelledby="oe-preview">
-        <h3 id="oe-preview" className="oe-section-title">
-          Project Preview
+      <section className="oe-section" aria-labelledby="oe-meaning">
+        <h3 id="oe-meaning" className="oe-section-title">
+          What This Could Mean
         </h3>
-        <p className="oe-section-lede">A first look at the experience we recommend building together.</p>
-        <div className="oe-preview-grid">
-          {view.projectPreview.map((block) => (
-            <div key={block.id} className="oe-wireframe">
-              <p className="oe-wireframe-title">{block.title}</p>
-              <ul className="oe-wireframe-pages">
-                {block.pages.map((page) => (
-                  <li key={page}>
-                    <span className="oe-wireframe-block" />
-                    {page}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+        <p className="oe-section-lede">{view.meaningIntro}</p>
+        <div className="oe-meaning-grid">
+          <article className="oe-meaning-card">
+            <p className="oe-metric-label">Estimated Annual Opportunity</p>
+            <p className="oe-metric-value">{view.estimatedAnnualOpportunity}</p>
+          </article>
+          <article className="oe-meaning-card">
+            <p className="oe-metric-label">Estimated Time Savings</p>
+            <p className="oe-metric-value oe-metric-value-sm">{view.estimatedTimeSavings}</p>
+          </article>
+          <article className="oe-meaning-card oe-meaning-wide">
+            <p className="oe-metric-label">Potential Business Impact</p>
+            <p className="oe-narrative">{view.potentialBusinessImpact}</p>
+          </article>
         </div>
       </section>
 
-      <section className="oe-section" aria-labelledby="oe-invest">
-        <h3 id="oe-invest" className="oe-section-title">
-          Estimated Investment
+      <section className="oe-section" aria-labelledby="oe-begin">
+        <h3 id="oe-begin" className="oe-section-title">
+          Here&apos;s Where We&apos;d Begin
         </h3>
-        {view.investment.mode === 'assessment' ? (
-          <div className="oe-invest">
-            {view.investment.label ? <p className="oe-invest-label">{view.investment.label}</p> : null}
-            <p className="oe-invest-range">
-              {money(view.investment.low)} – {money(view.investment.high)}
-            </p>
-            <p className="oe-section-lede">
-              Investment depends on features and functionality. Every project includes a professional
-              website experience and a private management portal.
-            </p>
-          </div>
-        ) : (
-          <div className="oe-invest">
-            <p className="oe-section-lede">
-              Typical investment ranges help set expectations before your Opportunity Review. Final
-              investment depends on features and functionality.
-            </p>
-            <table className="oe-table">
-              <thead>
-                <tr>
-                  <th>Organization</th>
-                  <th>Typical Investment</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>Nonprofit Organizations</td>
-                  <td>Starting at $997</td>
-                </tr>
-                <tr>
-                  <td>Businesses &amp; Organizations</td>
-                  <td>Starting at $1,497</td>
-                </tr>
-                <tr>
-                  <td>Larger Multi-System Projects</td>
-                  <td>Custom Proposal</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        )}
-      </section>
-
-      <section className="oe-cta-block">
-        <Link
-          href={view.reviewHref}
-          className="oe-cta-primary"
-          style={{ backgroundColor: GOLD, color: NAVY }}
-        >
-          {view.primaryCtaLabel}
-        </Link>
-        <p className="oe-cta-alt">
-          <Link href={view.reviewHref}>Walk Me Through My Recommendations</Link>
-        </p>
-        {view.showDesignStudio ? (
-          <p className="oe-cta-secondary">
-            When you&apos;re ready to share brand materials:{' '}
-            <Link href={view.designStudioHref}>Open Design Studio</Link>
+        <p className="oe-section-lede">{view.beginIntro}</p>
+        <div className="oe-begin-grid">
+          {view.beginCards.map((card) => (
+            <article key={card.id} className="oe-begin-card">
+              <h4>{card.title}</h4>
+              <p>{card.purpose}</p>
+              <p className="oe-begin-time">{card.estimatedBuildTime}</p>
+            </article>
+          ))}
+        </div>
+        <div className="oe-invest oe-invest-soft">
+          <p className="oe-metric-label">Estimated Project Effort</p>
+          <p className="oe-metric-value oe-metric-value-sm">{view.estimatedProjectEffort}</p>
+          <p className="oe-metric-label" style={{ marginTop: '1rem' }}>
+            Estimated Project Investment
           </p>
-        ) : null}
+          <p className="oe-metric-value oe-metric-value-sm">{view.estimatedProjectInvestment}</p>
+          <p className="oe-section-lede" style={{ marginTop: '1rem', marginBottom: 0 }}>
+            {view.beginNote}
+          </p>
+        </div>
       </section>
 
-      <nav className="oe-utilities" aria-label="More tools">
+      <section className="oe-section" aria-labelledby="oe-continue">
+        <h3 id="oe-continue" className="oe-section-title">
+          Continue the Conversation
+        </h3>
+        <p className="oe-section-lede">{view.continueIntro}</p>
+        <ul className="oe-continue-list">
+          <li>Tell us more about your organization</li>
+          <li>What are your biggest goals?</li>
+          <li>What challenges would you most like to solve?</li>
+          <li>Upload logo, brand guide, photos, and current materials</li>
+        </ul>
+        <p className="oe-cta-alt">
+          <Link href={view.designStudioHref}>Share details &amp; uploads</Link>
+          {' · '}
+          <Link href={view.documentsHref}>Open documents</Link>
+        </p>
+      </section>
+
+      <section className="oe-section" aria-labelledby="oe-journey">
+        <h3 id="oe-journey" className="oe-section-title">
+          Project Journey
+        </h3>
+        <ol className="oe-journey-list">
+          {view.journeySteps.map((step) => (
+            <li key={step.id} className={`oe-journey-item oe-journey-${step.state}`}>
+              <JourneyMark state={step.state} />
+              <span>{step.label}</span>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      <section className="oe-section" aria-labelledby="oe-comm">
+        <h3 id="oe-comm" className="oe-section-title">
+          Communication Center
+        </h3>
+        <p className="oe-section-lede">
+          One place for questions, messages, file uploads, project updates, and recommendations.
+          Everything stays here - no email chains.
+        </p>
+        <div className="oe-comm-actions">
+          <Link href={view.messagingHref} className="oe-cta-primary" style={{ backgroundColor: GOLD, color: NAVY }}>
+            Message your advisor
+          </Link>
+          <Link href={view.communicationHref} className="oe-comm-link">
+            Open messages &amp; support
+          </Link>
+          <Link href={view.reviewHref} className="oe-comm-link">
+            Schedule a conversation
+          </Link>
+        </div>
+      </section>
+
+      <nav className="oe-utilities" aria-label="More in your workspace">
         {view.utilities.map((u) => (
           <Link key={u.href} href={u.href}>
             {u.label}
