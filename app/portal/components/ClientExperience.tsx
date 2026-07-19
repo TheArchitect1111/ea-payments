@@ -356,8 +356,8 @@ export default function ClientExperience({ view, slug, studio }: Props) {
                 ))}
               </ol>
               <p className="cex-note">
-                You&apos;ll pay when you approve the proposal. Design and development start after
-                that.
+                There is no payment until you approve your proposal. Once you do, we begin design
+                and development together.
               </p>
             </section>
           ) : null}
