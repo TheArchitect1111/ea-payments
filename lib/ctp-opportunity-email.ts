@@ -1,18 +1,18 @@
 /**
- * EA Opportunity Experience™ — Phase 2 confirmation email.
- * One structure for all CTP tracks; dynamic snapshot from submission data only.
+ * Consider The Possibilities confirmation email.
+ * Guided consulting voice - not an assessment report.
+ * Never use em dashes. Prefer hyphens or plain punctuation.
  */
 import type { CtpClientType } from '@/lib/ctp-client-type';
 import { opportunityDashboardPublicUrl } from '@/lib/ctp-opportunity-routes';
+import { publicPortalLoginUrl } from '@/lib/ctp-portal-host';
 import {
   opportunityEmailHealthRows,
   opportunityEmailReadiness,
-  opportunityEmailStars,
   opportunityEmailSummary,
-  opportunityFoundationRows,
 } from '@/lib/ctp-opportunity-view';
 import type { CtpSubmission } from '@/lib/ctp-submissions';
-import { ctpWelcomeEmailTrack, type CtpWelcomeEmailModel } from '@/lib/ctp-welcome-email';
+import type { CtpWelcomeEmailModel } from '@/lib/ctp-welcome-email';
 
 export type OpportunityConfirmationEmail = {
   subject: string;
@@ -25,18 +25,15 @@ export type OpportunityConfirmationEmail = {
 
 const FORBIDDEN_EMAIL_TERMS = [
   'Automation',
-  'Workflow',
-  'Backend',
-  'CMS',
-  'API',
-  'Infrastructure',
-  'Deployment',
-  'Design Studio',
+  'Assessment',
+  'Capacity',
+  'Readiness score',
+  'Operational maturity',
   'Open My Workspace',
-  'Client Portal',
   'Executive Brief',
   'Project Scope',
   'Website Package',
+  'Design Studio',
 ] as const;
 
 function esc(s: string): string {
@@ -47,131 +44,150 @@ function esc(s: string): string {
     .replace(/"/g, '&quot;');
 }
 
-function starRow(count: number): string {
-  const filled = Math.max(0, Math.min(5, Math.round(count)));
-  return `${'★'.repeat(filled)}${'☆'.repeat(5 - filled)}`;
+function plain(s: string): string {
+  return s.replace(/\u2014/g, '-').replace(/\u2013/g, '-');
+}
+
+function moneyRange(low: number, high: number): string {
+  const fmt = (n: number) =>
+    new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      maximumFractionDigits: 0,
+    }).format(Math.max(0, Math.round(n)));
+  return `${fmt(low)}-${fmt(high)}`;
 }
 
 const th = `padding:12px 14px;font-size:11px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:#6B7280;border-bottom:1px solid #E8E2D6;text-align:left;background:#FAF8F4;`;
+const thRight = `${th}text-align:right;`;
 const td = `padding:12px 14px;font-size:14px;color:#1A1A2E;border-bottom:1px solid #E8E2D6;vertical-align:top;line-height:1.5;`;
-const section = `margin:0 0 10px;font-size:12px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:#1B2B4D;`;
-const p = `margin:0 0 16px;font-size:15px;color:#1A1A2E;line-height:1.75;`;
-const hero = `margin:0 0 12px;font-size:22px;font-weight:700;line-height:1.35;color:#1B2B4D;letter-spacing:-0.02em;`;
+const tdRight = `${td}text-align:right;`;
+const section = `margin:28px 0 10px;font-size:18px;font-weight:700;letter-spacing:-0.01em;color:#1B2B4D;`;
+const p = `margin:0 0 14px;font-size:15px;color:#1A1A2E;line-height:1.75;`;
+const subhead = `margin:18px 0 8px;font-size:15px;font-weight:700;color:#1B2B4D;`;
+const tableWrap = `border:1px solid #E8E2D6;margin:0 0 18px;`;
 
-function foundationForModel(model: CtpWelcomeEmailModel): Array<{ included: string; why: string }> {
-  const stub = {
-    clientType: model.clientType,
-    clientTypeClassification: {
-      clientType: model.clientType ?? 'website',
-      label: '',
-      confidence: 1,
-      reasons: [],
-      portalRequired: Boolean(model.includesPortal) || model.clientType === 'portal_only',
-      websiteRequired:
-        ctpWelcomeEmailTrack(model.clientType) === 'presence' ||
-        model.clientType === 'website_portal',
-      businessIntelligence: false,
-      digitalAudit: false,
-    },
-  } as Pick<CtpSubmission, 'clientType' | 'clientTypeClassification'>;
-  return opportunityFoundationRows(stub).slice(0, 7);
+export function resolveCtpEmailPortalUrl(model: CtpWelcomeEmailModel): string {
+  const direct = model.portalUrl?.trim();
+  if (direct) {
+    if (/efficiencyarchitects\.online\/ctp\/?(\?|$)/i.test(direct)) {
+      return publicPortalLoginUrl();
+    }
+    return direct;
+  }
+  return publicPortalLoginUrl();
 }
 
-function resolveCtaUrl(model: CtpWelcomeEmailModel): string {
-  if (model.portalUrl?.trim()) return model.portalUrl.trim();
-  // Hub login is always a valid CTA when workspace provision has not finished.
-  return 'https://efficiencyarchitects.online/portal/login';
-}
-
-/**
- * Build Stage One confirmation email HTML (all CTP clients).
- */
-export function buildOpportunityExperienceEmail(model: CtpWelcomeEmailModel): OpportunityConfirmationEmail {
-  const first = esc(model.firstName);
-  const business = esc(model.businessName);
-  const dashboardUrl = resolveCtaUrl(model);
-  const readiness = model.capacityScore;
-  const stars = opportunityEmailStars(readiness);
-  const summary =
-    model.opportunitySummary?.trim() ||
-    `Your organization has a strong foundation with clear growth potential. Our initial review identified opportunities to improve customer experience, strengthen your online presence, and simplify everyday operations.`;
-  const healthRows = model.categoryScores ?? [];
-  const foundation = foundationForModel(model);
-
-  const healthTable =
-    healthRows.length > 0
-      ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #E8E2D6;margin-bottom:22px;">
-      <tr><th style="${th}">Area</th><th style="${th}">Score</th></tr>
-      ${healthRows
-        .map(
-          (row) =>
-            `<tr><td style="${td}">${esc(row.label)}</td><td style="${td}"><strong>${row.score}</strong></td></tr>`,
-        )
-        .join('')}
-    </table>`
-      : `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #E8E2D6;margin-bottom:22px;">
-      <tr><td style="${td}">Overall Readiness</td><td style="${td}"><strong>${readiness} / 100</strong></td></tr>
-      <tr><td style="${td}">Journey band</td><td style="${td}"><strong>${esc(model.scoreBand)}</strong></td></tr>
-    </table>`;
-
-  const foundationRows = foundation
-    .map(
-      (row) =>
-        `<tr><td style="${td}"><strong>${esc(row.included)}</strong></td><td style="${td}">${esc(row.why)}</td></tr>`,
-    )
+function noticedRowsHtml(): string {
+  const rows: Array<[string, string]> = [
+    ['First impressions could be stronger.', 'Create greater confidence with visitors and potential customers.'],
+    ['Your story could be communicated more clearly.', 'Help people quickly understand your value and what makes your organization unique.'],
+    ['Customer interactions could be simplified.', 'Make it easier for people to contact you, schedule appointments, or become customers.'],
+    ['Everyday work could become more organized.', 'Reduce unnecessary administrative effort so your team can focus on what matters most.'],
+  ];
+  return rows
+    .map(([noticed, why]) => `<tr><td style="${td}">${esc(noticed)}</td><td style="${td}">${esc(why)}</td></tr>`)
     .join('');
+}
 
-  const bodyHtml = `
-    <p style="${hero}">Let's Build Something You'll Be Proud To Share.</p>
+function impactRowsHtml(model: CtpWelcomeEmailModel): string {
+  const low = Math.max(8000, Math.round(model.opportunityLow * 0.25));
+  const mid = Math.max(10000, Math.round(model.opportunityLow * 0.35));
+  const high = Math.max(12000, Math.round(model.opportunityHigh * 0.4));
+  const rows: Array<[string, string]> = [
+    ['Customer Experience', `${moneyRange(mid, Math.round(mid * 2.5))} annually`],
+    ['Business Operations', `${moneyRange(low, Math.round(low * 2.5))} annually`],
+    ['Administrative Time Savings', `${Math.max(3, Math.round(model.weeklyTimeRecovery * 0.5))}-${Math.max(8, model.weeklyTimeRecovery)} hours each week`],
+    ['Growth Opportunities', `${moneyRange(high, Math.round(high * 2.8))} annually`],
+  ];
+  return rows
+    .map(([label, impact]) => `<tr><td style="${td}">${esc(label)}</td><td style="${tdRight}"><strong>${esc(impact)}</strong></td></tr>`)
+    .join('');
+}
+
+function beginRowsHtml(): string {
+  const rows: Array<[string, string]> = [
+    ['Story-Driven Website', '10-18 hrs'],
+    ['Client Management Portal', '8-14 hrs'],
+    ['Customer Engagement Tools', '4-8 hrs'],
+    ['Launch & Optimization', '6-10 hrs'],
+  ];
+  return rows
+    .map(([solution, hours]) => `<tr><td style="${td}">${esc(solution)}</td><td style="${tdRight}"><strong>${esc(hours)}</strong></td></tr>`)
+    .join('');
+}
+
+export function buildOpportunityExperienceEmail(model: CtpWelcomeEmailModel): OpportunityConfirmationEmail {
+  const first = esc(plain(model.firstName));
+  const portalUrl = resolveCtpEmailPortalUrl(model);
+  const annualLow = Math.max(30000, model.opportunityLow || 30000);
+  const annualHigh = Math.max(annualLow + 10000, model.opportunityHigh || 80000);
+  const investLow = model.investmentLow ?? 1497;
+  const investHigh = Math.max(investLow, model.investmentHigh ?? 4995);
+
+  const bodyHtml = plain(`
     <p style="${p}">Hello ${first},</p>
-    <p style="${p}">Thank you for completing the Consider the Possibilities™ Assessment.</p>
-    <p style="${p}margin-bottom:22px;">We've already begun analyzing what you shared about ${business}. Your Opportunity Dashboard is ready — a clear picture of where things stand today, and where growth is possible next.</p>
+    <p style="${p}">Thank you for taking the time to share information about your organization through the Consider The Possibilities™ questionnaire.</p>
+    <p style="${p}">We've started getting to know your business and have completed an initial review based on what you shared.</p>
+    <p style="${p}">Your personalized portal is now ready and contains our first observations, recommendations, and next steps.</p>
 
-    <p style="${section}">Project Status</p>
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #E8E2D6;margin-bottom:22px;">
-      <tr><th style="${th}">Step</th><th style="${th}">Status</th></tr>
-      <tr><td style="${td}">Assessment Received</td><td style="${td}"><strong>✅ Complete</strong></td></tr>
-      <tr><td style="${td}">Initial Review</td><td style="${td}"><strong>✅ Complete</strong></td></tr>
-      <tr><td style="${td}">Opportunity Analysis</td><td style="${td}"><strong>✅ Complete</strong></td></tr>
-      <tr><td style="${td}">Opportunity Dashboard Ready</td><td style="${td}"><strong>✅ Ready</strong></td></tr>
+    <p style="${section}">What We Learned</p>
+    <p style="${p}">As we reviewed what you shared, a few opportunities began to stand out.</p>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="${tableWrap}">
+      <tr>
+        <th style="${th}">What We Noticed</th>
+        <th style="${th}">Why It Matters</th>
+      </tr>
+      ${noticedRowsHtml()}
     </table>
 
-    <p style="${section}">Project Snapshot</p>
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #E8E2D6;margin-bottom:12px;">
-      <tr><td style="${td}">Overall Readiness Score</td><td style="${td}"><strong>${readiness} / 100</strong></td></tr>
-      <tr><td style="${td}">Opportunity Rating</td><td style="${td}"><strong>${starRow(stars)}</strong></td></tr>
+    <p style="${section}">What This Could Mean</p>
+    <p style="${p}">Small improvements in how your organization communicates, serves customers, and manages daily operations often create meaningful long-term results.</p>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="${tableWrap}">
+      <tr>
+        <th style="${th}">Opportunity</th>
+        <th style="${thRight}">Estimated Impact</th>
+      </tr>
+      ${impactRowsHtml(model)}
     </table>
-    ${healthTable}
+    <p style="${subhead}">Estimated Annual Opportunity</p>
+    <p style="${p}"><strong>${esc(moneyRange(annualLow, annualHigh))}+</strong></p>
 
-    <p style="${section}">Opportunity Summary</p>
-    <p style="${p}margin-bottom:22px;">${esc(summary)}</p>
-
-    <p style="${section}">Your Digital Foundation</p>
-    <p style="${p}">Every project includes a professional website experience and a private management portal — shaped around what your organization actually needs.</p>
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #E8E2D6;margin-bottom:22px;">
-      <tr><th style="${th}">Included</th><th style="${th}">Why It Matters</th></tr>
-      ${foundationRows}
+    <p style="${section}">Here's Where We'd Begin</p>
+    <p style="${p}">Based on what we've learned so far, these are the areas we'd recommend focusing on first.</p>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="${tableWrap}">
+      <tr>
+        <th style="${th}">Recommended Solution</th>
+        <th style="${thRight}">Estimated Build Time</th>
+      </tr>
+      ${beginRowsHtml()}
     </table>
+    <p style="${subhead}">Estimated Project Effort</p>
+    <p style="${p}"><strong>28-50 Hours</strong></p>
+    <p style="${p}">Every organization is different. Some projects require a streamlined website and portal, while others include additional functionality, custom workflows, or specialized integrations. The estimated effort above reflects the size and complexity of your project.</p>
+    <p style="${subhead}">Estimated Project Investment</p>
+    <p style="${p}"><strong>Most organizations invest between ${esc(moneyRange(investLow, investHigh))}.</strong></p>
+    <p style="${p}">The final investment depends on the size and complexity of your project. As we continue learning about your organization through your personalized portal, we'll refine the solution and provide a clear proposal before any work begins.</p>
 
-    <p style="${section}">Typical Investment</p>
-    <p style="${p}">Investment depends on features and functionality. Every project includes both a professional website and a private management portal.</p>
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #E8E2D6;margin-bottom:22px;">
-      <tr><th style="${th}">Organization</th><th style="${th}">Typical Investment</th></tr>
-      <tr><td style="${td}">Nonprofit Organizations</td><td style="${td}"><strong>Starting at $997</strong></td></tr>
-      <tr><td style="${td}">Businesses &amp; Organizations</td><td style="${td}"><strong>Starting at $1,497</strong></td></tr>
-      <tr><td style="${td}">Larger Multi-System Projects</td><td style="${td}"><strong>Custom Proposal</strong></td></tr>
-    </table>
-
-    <p style="${p}">Open your Opportunity Dashboard to see what we've discovered about ${business}.</p>
+    <p style="${section}">Continue the Conversation</p>
+    <p style="${p}">We've only scratched the surface.</p>
+    <p style="${p}">Your personalized portal is where we'll continue learning about your organization so every recommendation becomes more tailored to your goals.</p>
+    <ul style="margin:0 0 18px;padding:0 0 0 20px;font-size:15px;color:#1A1A2E;line-height:1.8;">
+      <li>Review our observations</li>
+      <li>Share additional information</li>
+      <li>Upload documents and branding</li>
+      <li>Track project progress</li>
+      <li>Communicate directly with our team</li>
+    </ul>
     <p style="margin:18px 0 0;font-size:13px;color:#555;">Questions? Reply to this email or reach us at <a href="mailto:${esc(model.supportEmail)}" style="color:#1B2B4D;">${esc(model.supportEmail)}</a>.</p>
-  `;
+  `);
 
   const result: OpportunityConfirmationEmail = {
-    subject: `Let's Build Something You'll Be Proud To Share.`,
-    title: `Let's Build Something You'll Be Proud To Share.`,
+    subject: plain(`We've started getting to know your organization`),
+    title: plain(`Thank You`),
     eyebrow: 'Consider The Possibilities™',
-    ctaLabel: 'VIEW MY OPPORTUNITY DASHBOARD',
-    ctaUrl: dashboardUrl,
+    ctaLabel: 'Open My Personalized Portal',
+    ctaUrl: portalUrl,
     bodyHtml,
   };
 
@@ -179,7 +195,6 @@ export function buildOpportunityExperienceEmail(model: CtpWelcomeEmailModel): Op
   return result;
 }
 
-/** Build confirmation email model fields from a live CTP submission. */
 export function buildOpportunityEmailModelFromSubmission(
   submission: CtpSubmission,
   options: {
@@ -231,20 +246,22 @@ export function buildOpportunityEmailModelFromSubmission(
   };
 }
 
-/** Guardrail: static CTA/title copy + destination only (body may include snapshot text). */
 export function assertOpportunityEmailLanguage(email: OpportunityConfirmationEmail): void {
   const cta = email.ctaUrl;
+  const hitsMarketingCtp = /efficiencyarchitects\.online\/ctp\/?(\?|$)/i.test(cta);
   const okCta =
-    cta.includes('/ctp') ||
-    cta.includes('portal/login') ||
-    /\/login(?:\?|$)/.test(cta);
+    !hitsMarketingCtp &&
+    (cta.includes('/portal/') || cta.includes('portal/login') || /\/login(?:\?|$)/.test(cta));
   if (!okCta) {
-    throw new Error('Opportunity email CTA must target Opportunity Dashboard or portal login.');
+    throw new Error('Opportunity email CTA must target a branded portal or portal login.');
   }
   const staticCopy = `${email.subject} ${email.title} ${email.ctaLabel}`;
   for (const term of FORBIDDEN_EMAIL_TERMS) {
     if (staticCopy.includes(term)) {
       throw new Error(`Opportunity email must not include forbidden term: ${term}`);
     }
+  }
+  if (staticCopy.includes('\u2014')) {
+    throw new Error('Opportunity email must not include em dashes.');
   }
 }
