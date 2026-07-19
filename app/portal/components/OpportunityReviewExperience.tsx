@@ -1,6 +1,9 @@
+'use client';
+
 import Link from 'next/link';
 import { Fraunces, Manrope } from 'next/font/google';
 import type { CtpOpportunityReviewView } from '@/lib/ctp-opportunity-view';
+import { withCalendlyRedirect } from '@/lib/ctp-calendly';
 import './opportunity-review-experience.css';
 
 const display = Fraunces({
@@ -95,9 +98,21 @@ const JOURNEY_STEPS = [
 
 type Props = {
   view: CtpOpportunityReviewView;
+  confirmedHref?: string;
 };
 
-export default function OpportunityReviewExperience({ view }: Props) {
+function resolveCalendlyHref(view: CtpOpportunityReviewView, confirmedHref?: string): string {
+  if (!confirmedHref) return view.calendlyUrl;
+  if (typeof window !== 'undefined' && !confirmedHref.startsWith('http')) {
+    return withCalendlyRedirect(view.calendlyUrl, `${window.location.origin}${confirmedHref}`);
+  }
+  return withCalendlyRedirect(view.calendlyUrl, confirmedHref);
+}
+
+export default function OpportunityReviewExperience({ view, confirmedHref }: Props) {
+  const calendlyHref = resolveCalendlyHref(view, confirmedHref);
+  const isScheduled = Boolean(view.reviewLabel);
+
   return (
     <main className={`ore ${sans.className}`}>
       <div className="ore-grain" aria-hidden />
@@ -106,33 +121,66 @@ export default function OpportunityReviewExperience({ view }: Props) {
         <div className="ore-hero-copy">
           <p className="ore-kicker">Your Opportunity Review</p>
           <h1 id="ore-hero-title" className={`ore-headline ${display.className}`}>
-            We&apos;ve Prepared Something Specifically For You
+            {isScheduled
+              ? `You're scheduled, ${view.firstName}`
+              : "We've Prepared Something Specifically For You"}
           </h1>
           <p className="ore-lede">
-            {view.firstName}, this is a focused conversation about {view.businessName} — what we
-            found, what we recommend, and how we can move forward together. Not a sales script. A
-            prepared review of your opportunity.
+            {isScheduled ? (
+              <>
+                We look forward to speaking with you about {view.businessName}. A calendar invitation
+                is on its way — use the link below if you need to reschedule.
+              </>
+            ) : (
+              <>
+                {view.firstName}, this is a focused conversation about {view.businessName} — what we
+                found, what we recommend, and how we can move forward together. Not a sales script. A
+                prepared review of your opportunity.
+              </>
+            )}
           </p>
           <div className="ore-badge-row">
-            <span className="ore-badge">Analysis Complete</span>
-            {view.reviewLabel ? (
-              <span className="ore-confirmed">
-                Confirmed · <strong>{view.reviewLabel}</strong>
-              </span>
-            ) : null}
+            {isScheduled ? (
+              <>
+                <span className="ore-badge">Scheduled</span>
+                <span className="ore-confirmed">
+                  Confirmed · <strong>{view.reviewLabel}</strong>
+                </span>
+              </>
+            ) : (
+              <span className="ore-badge">Analysis Complete</span>
+            )}
           </div>
           <div className="ore-hero-actions">
-            <a
-              className="ore-cta"
-              href={view.calendlyUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {view.ctaLabel}
-            </a>
-            <Link className="ore-secondary" href={view.backHref}>
-              Continue Exploring My Dashboard
-            </Link>
+            {isScheduled ? (
+              <>
+                <a className="ore-cta" href="#ore-final">
+                  View Details
+                </a>
+                <a
+                  className="ore-secondary"
+                  href={calendlyHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Reschedule
+                </a>
+              </>
+            ) : (
+              <>
+                <a
+                  className="ore-cta"
+                  href={calendlyHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {view.ctaLabel}
+                </a>
+                <Link className="ore-secondary" href={view.backHref}>
+                  Continue Exploring My Dashboard
+                </Link>
+              </>
+            )}
           </div>
         </div>
         <div className="ore-hero-photo">
@@ -203,41 +251,78 @@ export default function OpportunityReviewExperience({ view }: Props) {
         <h2 id="ore-journey-title" className={`ore-section-title ${display.className}`}>
           Where you are now
         </h2>
-        <ol className="ore-journey">
-          {JOURNEY_STEPS.map((step) => (
-            <li key={step.id} className="ore-journey-step" data-state={step.state}>
-              <span className="ore-journey-dot" aria-hidden />
-              <span className={`ore-journey-label ${display.className}`}>{step.label}</span>
-            </li>
-          ))}
-        </ol>
+        <div className="ore-journey-layout">
+          <div className="ore-journey-visual">
+            <div className="ore-journey-photo">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/client-experience/journey-continues.png"
+                alt="Captain at the helm — steady guidance as your journey continues"
+                width={1200}
+                height={900}
+              />
+            </div>
+            <a
+              className="ore-cta"
+              href={isScheduled ? calendlyHref : '#ore-final'}
+              {...(isScheduled
+                ? { target: '_blank', rel: 'noopener noreferrer' }
+                : {})}
+            >
+              {isScheduled ? 'Schedule My Opportunity Review' : 'Continue to Schedule'}
+            </a>
+          </div>
+          <ol className="ore-journey">
+            {JOURNEY_STEPS.map((step) => (
+              <li key={step.id} className="ore-journey-step" data-state={step.state}>
+                <span className="ore-journey-dot" aria-hidden />
+                <span className={`ore-journey-label ${display.className}`}>{step.label}</span>
+              </li>
+            ))}
+          </ol>
+        </div>
       </section>
 
-      <section className="ore-final" aria-labelledby="ore-final-title">
+      <section className="ore-final" id="ore-final" aria-labelledby="ore-final-title">
         <div className="ore-final-photo">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/client-experience/review-choose-time.png"
-            alt="Calm lifestyle moment — time and space to choose when you are ready"
+            alt="Captain at the helm — choose a time when you are ready"
             width={1400}
             height={800}
           />
         </div>
         <div className="ore-final-copy">
           <h2 id="ore-final-title" className={`ore-final-headline ${display.className}`}>
-            We&apos;re Ready Whenever You Are
+            {isScheduled ? "You're on the calendar" : "We're Ready Whenever You Are"}
           </h2>
           <p className="ore-final-lede">
-            Choose a time that works. There is no pressure — only a prepared conversation about what
-            is possible for {view.businessName}.
+            {isScheduled ? (
+              <>
+                Your Opportunity Review is set
+                {view.reviewLabel ? (
+                  <>
+                    {' '}
+                    for <strong>{view.reviewLabel}</strong>
+                  </>
+                ) : null}
+                . Need a different time? Reschedule below — we&apos;ll meet you there.
+              </>
+            ) : (
+              <>
+                Choose a time that works. There is no pressure — only a prepared conversation about
+                what is possible for {view.businessName}.
+              </>
+            )}
           </p>
           <a
             className="ore-cta"
-            href={view.calendlyUrl}
+            href={calendlyHref}
             target="_blank"
             rel="noopener noreferrer"
           >
-            Choose My Time
+            {isScheduled ? 'Reschedule' : 'Choose My Time'}
           </a>
           <p className="ore-reassure">No obligation. Just clarity.</p>
         </div>

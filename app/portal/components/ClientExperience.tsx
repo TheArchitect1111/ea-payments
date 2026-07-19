@@ -376,6 +376,11 @@ export default function ClientExperience({ view, slug, studio }: Props) {
                 src={PHOTO_BY_ID.next}
                 alt={PHOTO_ALT_BY_ID.next}
               />
+              <div className="cex-nav-row cex-nav-row-primary">
+                <Link className="cex-cta" href={view.reviewHref}>
+                  Schedule your Opportunity Review
+                </Link>
+              </div>
               <ol className="cex-next-steps">
                 {nextSteps.map((step) => (
                   <li key={step.num}>
@@ -387,11 +392,6 @@ export default function ClientExperience({ view, slug, studio }: Props) {
                   </li>
                 ))}
               </ol>
-              <div className="cex-nav-row cex-nav-row-primary">
-                <Link className="cex-cta" href={view.reviewHref}>
-                  Schedule your Opportunity Review
-                </Link>
-              </div>
               <p className="cex-support-label">Support anytime</p>
               <ul className="cex-support-links">
                 <li>
