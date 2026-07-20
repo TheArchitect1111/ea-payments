@@ -29,6 +29,7 @@ const MODULE_NAV_ICONS: Partial<Record<ModuleId, PortalNavIconName>> = {
   training: 'learning',
   ask: 'ask',
   ctp: 'grid',
+  member: 'grid',
   billing: 'documents',
 };
 
@@ -46,6 +47,7 @@ const MODULE_ACTIVE_TABS: Partial<Record<ModuleId, EAPortalTab>> = {
   training: 'learning',
   ask: 'ask',
   ctp: 'ctp',
+  member: 'member',
 };
 
 export function portalNavIconForModule(moduleId: ModuleId): PortalNavIconName {

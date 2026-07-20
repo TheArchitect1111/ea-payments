@@ -20,6 +20,7 @@ export const MODULE_IDS = [
   'ask',
   'billing',
   'ctp',
+  'member',
 ] as const;
 
 export type ModuleId = (typeof MODULE_IDS)[number];
@@ -181,6 +182,15 @@ const TECHNICAL_MODULE_REGISTRY: TechnicalModuleDefinition[] = [
     pathSegment: 'ctp',
   },
   {
+    id: 'member',
+    name: 'Member Experience',
+    tag: 'Member',
+    title: 'Member home',
+    description: 'Persona-shaped home with the tiles and next steps your members actually need.',
+    requiredRole: 'guest',
+    pathSegment: 'member',
+  },
+  {
     id: 'landing',
     name: 'Landing Pages',
     tag: 'Landing Pages',
@@ -267,7 +277,8 @@ export const TENANT_MODULE_PRESETS: Record<string, ModuleId[]> = {
 /** Package-based extras merged onto the ea-client preset. */
 export const PACKAGE_MODULE_GRANTS: Record<string, ModuleId[]> = {
   Simplifi: ['simplifi', 'amplifi'],
-  'Implementation Package': ['simplifi', 'amplifi', 'connect'],
+  'Implementation Package': ['simplifi', 'amplifi', 'connect', 'member'],
+  'Website + Portal Starter': ['member'],
   'Capacity Assessment': ['dashboard', 'pulse', 'update-hub', 'documents', 'ask', 'discovery', 'ctp'],
   'Capacity Blueprint': ['dashboard', 'pulse', 'update-hub', 'documents', 'ask', 'discovery', 'ctp'],
   'Launch Verification': ['dashboard', 'pulse', 'update-hub', 'ask'],

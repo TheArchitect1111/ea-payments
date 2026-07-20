@@ -218,7 +218,21 @@ export async function resolvePortalWorkspaceChrome(
       themeOverlay: overrides.themeOverlay,
     });
 
-    return chromeFromShell(overrides.platformClientId, shell, shellNavGroups);
+    const chrome = chromeFromShell(overrides.platformClientId, shell, shellNavGroups);
+
+    // OIB member persona skins the shell member label when Member Experience is stored.
+    if (orgId && !String(orgId).startsWith('org_')) {
+      try {
+        const { getPortalMemberHome } = await import('@/lib/portal-member-home');
+        const memberHome = await getPortalMemberHome(slug, orgId);
+        const persona = memberHome?.persona?.trim();
+        if (persona) chrome.memberLabel = persona;
+      } catch (err) {
+        console.error('resolvePortalWorkspaceChrome member home failed:', err);
+      }
+    }
+
+    return chrome;
   } catch (err) {
     console.error('resolvePortalWorkspaceChrome failed:', err);
     return { ...EA_DEFAULT_CHROME, shellNavGroups: [] };

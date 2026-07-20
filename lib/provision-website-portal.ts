@@ -13,7 +13,16 @@ import { previewPathForPage, type ExperiencePage } from '@/lib/experience-builde
 import { airtableConfigured } from '@/lib/data/airtable-client';
 import { publicPortalLoginUrl } from '@/lib/ctp-portal-host';
 import { EA_PLATFORM_URL } from '@/lib/platform-urls';
-import { ensureOrganizationForPortal, findOrganizationByPortalSlug } from '@/lib/organizations';
+import {
+  ensureOrganizationForPortal,
+  findOrganizationByPortalSlug,
+  updateOrganizationWorkspaceConfig,
+} from '@/lib/organizations';
+import {
+  buildDefaultMemberHome,
+  getPortalMemberHome,
+  savePortalMemberHome,
+} from '@/lib/portal-member-home';
 
 export type WebsitePortalProvisionInput = {
   portalSlug: string;
@@ -186,6 +195,58 @@ export async function findPublishedSitePage(portalSlug: string): Promise<Experie
   return home || published[0];
 }
 
+/** Apply OIB/site brand tokens onto Organizations so PortalShell skins. */
+export async function syncOrganizationPortalSkin(
+  organizationId: string,
+  input: {
+    primaryColor?: string;
+    accentColor?: string;
+    logoUrl?: string;
+    workspaceName?: string;
+  },
+): Promise<void> {
+  if (!organizationId || organizationId.startsWith('org_')) return;
+  const primary = input.primaryColor?.trim();
+  const accent = input.accentColor?.trim();
+  const logo = input.logoUrl?.trim();
+  const workspaceName = input.workspaceName?.trim();
+  if (!primary && !accent && !logo && !workspaceName) return;
+
+  const brandColors =
+    primary || accent
+      ? JSON.stringify({
+          ...(primary ? { primary } : {}),
+          ...(accent ? { accent } : {}),
+        })
+      : undefined;
+
+  await updateOrganizationWorkspaceConfig(organizationId, {
+    ...(brandColors ? { brandColors } : {}),
+    ...(logo ? { logo } : {}),
+    ...(workspaceName ? { workspaceName } : {}),
+  });
+}
+
+async function ensureDefaultMemberHome(input: {
+  portalSlug: string;
+  organizationId: string;
+  organizationName: string;
+}): Promise<void> {
+  try {
+    const existing = await getPortalMemberHome(input.portalSlug, input.organizationId);
+    if (existing) return;
+    await savePortalMemberHome(
+      buildDefaultMemberHome({
+        portalSlug: input.portalSlug,
+        organizationId: input.organizationId,
+        organizationName: input.organizationName,
+      }),
+    );
+  } catch (err) {
+    console.error('[provision-website-portal] member home seed failed:', err);
+  }
+}
+
 export async function provisionWebsitePortalSite(
   input: WebsitePortalProvisionInput,
 ): Promise<WebsitePortalProvisionResult> {
@@ -203,6 +264,21 @@ export async function provisionWebsitePortalSite(
           'Website publish requires a durable organization. Check Airtable Organizations for this portal slug.',
       };
     }
+
+    const businessName =
+      input.organizationName?.trim() || input.businessName.trim() || 'Your Business';
+
+    await syncOrganizationPortalSkin(organizationId, {
+      primaryColor: input.primaryColor,
+      accentColor: input.accentColor,
+      logoUrl: input.logoUrl,
+      workspaceName: businessName,
+    });
+    await ensureDefaultMemberHome({
+      portalSlug: slug,
+      organizationId,
+      organizationName: businessName,
+    });
 
     const existing = await findPublishedSitePage(slug);
     if (existing && !input.force) {

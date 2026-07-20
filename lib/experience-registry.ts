@@ -62,6 +62,7 @@ export type CapabilityId =
   | 'messaging'
   | 'ask-advisor'
   | 'your-build'
+  | 'member-experience'
   | 'relationship-capture'
   | 'documents'
   | 'learning'
@@ -348,6 +349,23 @@ export const CAPABILITY_REGISTRY: CapabilityDefinition[] = [
     orbPolicy: 'contextual',
     routePatterns: ['/ctp'],
     osLifecycle: 'act',
+  },
+  {
+    id: 'member-experience',
+    moduleId: 'member',
+    customerGoal: 'Give members a clear home',
+    plainLanguage: 'Member home',
+    eaCapability: 'Member Experience',
+    displayLabel: 'Member',
+    disclosureLevel: 'L1',
+    navGroup: 'operations',
+    showInSidebar: true,
+    showInPillNav: false,
+    dashboardZone: 'today',
+    showOnDashboardHub: true,
+    orbPolicy: 'introduce',
+    routePatterns: ['/member'],
+    osLifecycle: 'communicate',
   },
   {
     id: 'landing-pages',

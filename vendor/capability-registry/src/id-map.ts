@@ -141,6 +141,13 @@ export const CAPABILITY_ID_MAP: IdMapRow[] = [
     category: 'Workflow',
   },
   {
+    capabilityId: 'member-experience',
+    moduleId: 'member',
+    experienceCapabilityId: 'member-experience',
+    category: 'Workflow',
+    notes: 'OIB Member Experience → portal member home',
+  },
+  {
     capabilityId: 'landing-pages',
     moduleId: 'landing',
     experienceCapabilityId: 'landing-pages',

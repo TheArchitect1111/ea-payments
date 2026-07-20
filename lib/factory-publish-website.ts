@@ -6,6 +6,10 @@ import { buildFactoryConceptPackAsync } from '@/lib/factory-concept-pack';
 import { getFactoryProject, type FactoryProject } from '@/lib/factory-project-store';
 import { ensureOrganizationForPortal } from '@/lib/organizations';
 import {
+  buildMemberHomeFromOpportunityBrief,
+  savePortalMemberHome,
+} from '@/lib/portal-member-home';
+import {
   provisionWebsitePortalSite,
   type WebsitePortalProvisionResult,
 } from '@/lib/provision-website-portal';
@@ -124,6 +128,21 @@ export async function publishFactoryWebsite(input: {
     existingWebsiteUrl: project.url,
     force: input.force !== false,
   });
+
+  if (result.ok && pack.opportunityBrief?.member) {
+    try {
+      await savePortalMemberHome(
+        buildMemberHomeFromOpportunityBrief({
+          portalSlug,
+          organizationId: orgId,
+          organizationName: businessName,
+          brief: pack.opportunityBrief,
+        }),
+      );
+    } catch (err) {
+      console.error('[factory-publish-website] member home save failed:', err);
+    }
+  }
 
   return { ...result, portalSlug, gate };
 }

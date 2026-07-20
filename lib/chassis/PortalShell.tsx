@@ -20,7 +20,8 @@ export type EAPortalTab =
   | 'messaging'
   | 'learning'
   | 'ask'
-  | 'ctp';
+  | 'ctp'
+  | 'member';
 
 type Props = {
   slug: string;
@@ -48,6 +49,7 @@ const FALLBACK_TITLES: Record<EAPortalTab, string> = {
   learning: 'Learning',
   ask: 'Ask EA',
   ctp: 'Consider the Possibilities',
+  member: 'Member Experience',
 };
 
 function titleFromNav(chrome: PortalWorkspaceChrome, active: EAPortalTab): string | undefined {

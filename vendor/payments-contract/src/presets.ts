@@ -34,6 +34,7 @@ export const CAPACITY_MODULES = [
 export const IMPLEMENTATION_MODULES = [
   ...EA_CLIENT_MODULES,
   'connect',
+  'member',
 ] as const;
 
 export const SIMPLIFI_ONE_TIME_MODULES = [...EA_CLIENT_MODULES] as const;
@@ -44,6 +45,7 @@ export const WEBSITE_PORTAL_MODULES = [
   'landing',
   'pulse',
   'ctp',
+  'member',
   'update-hub',
   'messaging',
   'documents',
