@@ -1,0 +1,186 @@
+/* Guide Progress — Client Experience only. No Executive chrome. */
+
+.guide-progress {
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.guide-progress-hero {
+  margin-bottom: 1.75rem;
+}
+
+.guide-progress-kicker {
+  margin: 0 0 0.5rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(216, 173, 61, 0.9);
+}
+
+.guide-progress-title {
+  margin: 0 0 0.65rem;
+  font-size: clamp(1.85rem, 4vw, 2.4rem);
+  font-weight: 800;
+  line-height: 1.15;
+  color: #fff;
+}
+
+.guide-progress-lede {
+  margin: 0;
+  font-size: 1.05rem;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.72);
+  max-width: 36rem;
+}
+
+.guide-progress-stage {
+  margin-bottom: 1.5rem;
+  padding: 1.35rem 1.4rem;
+  border: 1px solid rgba(216, 173, 61, 0.35);
+  background: rgba(216, 173, 61, 0.08);
+}
+
+.guide-progress-stage-label {
+  margin: 0 0 0.35rem;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(216, 173, 61, 0.95);
+}
+
+.guide-progress-stage-name {
+  margin: 0 0 0.65rem;
+  font-size: 1.55rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.guide-progress-stage-why {
+  margin: 0;
+  font-size: 0.98rem;
+  line-height: 1.65;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.guide-progress-eta {
+  margin: 0.85rem 0 0;
+  font-size: 0.88rem;
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.guide-progress-nba {
+  margin-bottom: 1.75rem;
+  padding: 1.5rem 1.45rem;
+  border: 1px solid rgba(216, 173, 61, 0.55);
+  background: rgba(15, 36, 66, 0.55);
+}
+
+.guide-progress-nba-label {
+  margin: 0 0 0.75rem;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(216, 173, 61, 0.95);
+}
+
+.guide-progress-nba-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.95rem 1.5rem;
+  border-radius: 999px;
+  font-size: 1.05rem;
+  font-weight: 800;
+  text-decoration: none;
+  background: #d8ad3d;
+  color: #0f2442;
+}
+
+.guide-progress-nba-cta:hover {
+  filter: brightness(1.05);
+}
+
+.guide-progress-nba-why {
+  margin: 1rem 0 0;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.guide-progress-nba-meta {
+  margin: 0.55rem 0 0;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.guide-progress-section {
+  margin-bottom: 1.5rem;
+}
+
+.guide-progress-section-title {
+  margin: 0 0 0.85rem;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.guide-progress-milestones {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.guide-progress-milestone {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.guide-progress-milestone summary {
+  cursor: pointer;
+  list-style: none;
+  padding: 0.85rem 1rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.guide-progress-milestone summary::-webkit-details-marker {
+  display: none;
+}
+
+.guide-progress-milestone summary::before {
+  content: '✓ ';
+  color: #d8ad3d;
+  font-weight: 800;
+}
+
+.guide-progress-milestone p {
+  margin: 0;
+  padding: 0 1rem 0.95rem 1.85rem;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.guide-progress-panel {
+  padding: 1.1rem 1.2rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.guide-progress-panel p {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.guide-progress-empty {
+  margin: 0;
+  font-size: 0.92rem;
+  color: rgba(255, 255, 255, 0.55);
+}
