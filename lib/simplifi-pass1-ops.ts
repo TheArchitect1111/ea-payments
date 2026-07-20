@@ -6,17 +6,14 @@ import type { AttentionItem } from '@/lib/pulse-attention';
 import { monitoringConfigured, monitoringDsnEnvHint } from '@/lib/monitoring';
 import { SIMPLIFI_APP_URL, SIMPLIFI_ORB_ENTRY_URL } from '@/lib/simplifi-app-host';
 
-/** Preferred branded host once DNS points at ea-payments. */
+/** EA branded Simplifi host (product lives on EA domains only). */
 export const SIMPLIFI_BRAND_URL =
   process.env.NEXT_PUBLIC_SIMPLIFI_APP_URL?.replace(/\/$/, '') ||
   process.env.SIMPLIFI_APP_URL?.replace(/\/$/, '') ||
   SIMPLIFI_APP_URL;
 
-/** Working production host for testers until branded DNS is correct. */
+/** Apex production host for testers (same ea-payments deploy). */
 export const SIMPLIFI_TESTER_URL = 'https://efficiencyarchitects.online';
-
-/** Legacy aspirational alias — only if EA owns it. Prefer SIMPLIFI_ORB_ENTRY_URL. */
-export const SIMPLIFI_APP_ALIAS_URL = 'https://app.simplifi.ai';
 
 export { SIMPLIFI_ORB_ENTRY_URL };
 
@@ -81,14 +78,13 @@ async function probeSimplifiHost(url: string): Promise<{
   return { ok: false, status: lastStatus, message: lastMessage };
 }
 
-/** Prefer EA-owned app host; apex fallback; unowned simplifi.ai is last/optional only. */
+/** Probe EA Simplifi hosts only (app. + apex). No third-party brand domains. */
 export async function probeSimplifiAppDns(): Promise<{
   ok: boolean;
   status: number;
   message: string;
   url: string;
 }> {
-  // Hard-prefer EA-owned host so env pointing at unowned simplifi.ai cannot false-fail Pass 1.
   const preferred = 'https://app.efficiencyarchitects.online';
   const preferredProbe = await probeSimplifiHost(preferred);
   if (preferredProbe.ok) {
@@ -107,21 +103,15 @@ export async function probeSimplifiAppDns(): Promise<{
     return {
       ...apex,
       url: SIMPLIFI_TESTER_URL,
-      message: `${apex.message} Preferred host ${preferred} not ready; apex /simplifiorb works. Confirm Namecheap CNAME app → cname.vercel-dns.com.`,
+      message: `${apex.message} Preferred host ${preferred} not ready; apex /simplifiorb works.`,
     };
-  }
-
-  // Unowned legacy — informational only after EA hosts fail.
-  const alias = await probeSimplifiHost(SIMPLIFI_APP_ALIAS_URL);
-  if (alias.ok) {
-    return { ...alias, url: SIMPLIFI_APP_ALIAS_URL };
   }
 
   return {
     ok: false,
     status: preferredProbe.status,
     url: preferred,
-    message: `${preferredProbe.message} Testers: use ${SIMPLIFI_TESTER_URL}/simplifiorb. Unowned simplifi.ai DNS is optional.`,
+    message: `${preferredProbe.message} Testers: use ${SIMPLIFI_TESTER_URL}/simplifiorb.`,
   };
 }
 

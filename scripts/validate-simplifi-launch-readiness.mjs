@@ -3,12 +3,11 @@
  * Usage: node scripts/validate-simplifi-launch-readiness.mjs [baseUrl]
  *
  * Runs: health, Airtable schema, auth, full capture pipeline, magnifi/guidance,
- * decision intelligence, EA app host (primary), simplifi.ai DNS (optional/warning).
+ * decision intelligence, EA app host (app.efficiencyarchitects.online).
+ * Simplifi is an EA product — no third-party brand-domain checks.
  */
 const BASE = (process.argv[2] || 'https://ea-payments.vercel.app').replace(/\/$/, '');
 const SIMPLIFI_APP = process.env.SIMPLIFI_APP_URL || 'https://app.efficiencyarchitects.online';
-const SIMPLIFI_BRAND = process.env.SIMPLIFI_BRAND_URL || 'https://simplifi.ai';
-const SIMPLIFI_LEGACY_APP = process.env.SIMPLIFI_LEGACY_APP_URL || 'https://app.simplifi.ai';
 const EMAIL = process.env.DEMO_CLIENT_EMAIL || 'demo@efficiencyarchitects.online';
 const PASSWORD = process.env.DEMO_CLIENT_PASSWORD || 'DemoPulse2026!';
 
@@ -224,61 +223,10 @@ async function main() {
     record('ea-app-host-capture', false, { error: String(err.message || err) });
   }
 
-  // 6b. Unowned simplifi.ai / app.simplifi.ai — optional; dnsPending only (not product fail)
-  try {
-    const brandCapture = await fetch(`${SIMPLIFI_BRAND}/simplifi/capture`, {
-      redirect: 'follow',
-      signal: AbortSignal.timeout(12000),
-    });
-    const brandHtml = await brandCapture.text();
-    const brandOk =
-      brandCapture.ok &&
-      brandHtml.length > 400 &&
-      !brandHtml.includes('/lander') &&
-      /simplifi|capture|efficiency/i.test(brandHtml);
-    record('simplifi-brand-host', brandOk, {
-      status: brandCapture.status,
-      detail: brandOk
-        ? SIMPLIFI_BRAND
-        : 'optional — unowned/DNS pending; primary host is app.efficiencyarchitects.online',
-    });
-  } catch (err) {
-    record('simplifi-brand-host', false, {
-      error: String(err.message || err),
-      detail: 'optional — dnsPending',
-    });
-  }
-
-  try {
-    const legacyRoot = await fetchStatus(`${SIMPLIFI_LEGACY_APP}/`);
-    const legacyDns = legacyRoot.status > 0 && legacyRoot.status < 500;
-    record('app-simplifi-dns', legacyDns, {
-      status: legacyRoot.status,
-      error: legacyRoot.error,
-      url: SIMPLIFI_LEGACY_APP,
-      detail: legacyDns ? undefined : 'optional — app.simplifi.ai DNS not configured',
-    });
-    if (legacyDns) {
-      const legacyCapture = await fetchStatus(`${SIMPLIFI_LEGACY_APP}/capture`);
-      record('app-simplifi-capture', legacyCapture.status === 200 || legacyCapture.status === 307 || legacyCapture.status === 308, {
-        status: legacyCapture.status,
-        location: legacyCapture.res?.headers?.get('location'),
-      });
-      record('app-simplifi-ssl', SIMPLIFI_LEGACY_APP.startsWith('https://'), { detail: SIMPLIFI_LEGACY_APP });
-    }
-  } catch (err) {
-    record('app-simplifi-dns', false, {
-      error: String(err.message || err),
-      detail: 'optional — dnsPending',
-    });
-  }
-
   const failed = results.filter((r) => !r.ok);
-  // Unowned simplifi.ai DNS is operator/third-party — soft-fail so test-ready reflects EA app host.
-  const softFailSteps = new Set(['simplifi-brand-host', 'app-simplifi-dns', 'app-simplifi-capture', 'app-simplifi-ssl']);
-  const productFailed = failed.filter((f) => !softFailSteps.has(f.step) && !String(f.step).startsWith('app-simplifi-'));
+  const productFailed = failed;
   const pass = productFailed.length === 0;
-  const dnsPending = failed.some((f) => softFailSteps.has(f.step) || String(f.step).startsWith('app-simplifi-'));
+  const dnsPending = failed.some((f) => String(f.step).startsWith('ea-app-host-'));
 
   console.log('\n--- SUMMARY ---');
   console.log(
@@ -286,8 +234,6 @@ async function main() {
       {
         base: BASE,
         simplifiApp: SIMPLIFI_APP,
-        simplifiBrandOptional: SIMPLIFI_BRAND,
-        simplifiLegacyOptional: SIMPLIFI_LEGACY_APP,
         pass,
         dnsPending,
         failedSteps: failed.map((f) => f.step),

@@ -33,22 +33,17 @@ There is **no App Store / Play Store / TestFlight build published**.
 
 Open **Mission Control** (`/admin/master`) — incomplete items show as attention cards → `/launch`.
 
-### 1. Branded Simplifi entry — `app.efficiencyarchitects.online/simplifiorb`
+### 1. Branded Simplifi entry — EA product hosts only
 
-`simplifi.ai` is **not** EA-owned. Use the EA domain instead.
+Simplifi is an **EA product**. There is no `app.simplifi.ai` product host.
 
-**Vercel:** Domains → `ea-payments` → add `app.efficiencyarchitects.online`
+| Host | Role |
+|------|------|
+| https://app.efficiencyarchitects.online/simplifiorb | Preferred branded entry |
+| https://efficiencyarchitects.online/simplifiorb | Apex fallback (same deploy) |
 
-**Namecheap** (for `efficiencyarchitects.online` → Advanced DNS):
-
-1. Add **CNAME** host `app` → `cname.vercel-dns.com`
-2. Wait for SSL
-3. Confirm:
-   - https://app.efficiencyarchitects.online/simplifiorb opens Today's Brief
-   - https://app.efficiencyarchitects.online/api/health/launch returns JSON `ok: true`
-
-**Works today without that DNS step:**  
-https://efficiencyarchitects.online/simplifiorb
+**Vercel:** Domains → `ea-payments` → `app.efficiencyarchitects.online`  
+**DNS:** CNAME `app` → `cname.vercel-dns.com` on `efficiencyarchitects.online` (already live if health returns JSON).
 
 ### 2. GlitchTip DSN (error monitoring)
 
