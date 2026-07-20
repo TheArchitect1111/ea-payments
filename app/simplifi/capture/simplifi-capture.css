@@ -113,6 +113,40 @@
   font-weight: 700;
 }
 
+.sc-claim-banner {
+  margin: 14px 0 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.sc-claim-banner--ok {
+  border: 1px solid rgba(15, 118, 110, 0.35);
+  background: rgba(15, 118, 110, 0.08);
+  color: #0f766e;
+}
+
+.sc-claim-banner--err {
+  border: 1px solid rgba(185, 28, 28, 0.3);
+  background: rgba(185, 28, 28, 0.06);
+  color: #991b1b;
+}
+
+button.sc-claim-retry {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+}
+
+button.sc-claim-retry:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
 .sc-inline-link {
   color: #1b2b4d;
   font-weight: 700;

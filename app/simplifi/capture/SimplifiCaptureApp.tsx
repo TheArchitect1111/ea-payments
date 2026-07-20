@@ -14,14 +14,15 @@ import {
   setOnboardingStep as persistOnboardingStep,
   type SimplifiOnboardingStep,
 } from '@/lib/simplifi-onboarding';
-import { prepareCaptureUpload } from '@/lib/client-image-upload';
+import { isHeicCaptureFile, prepareCaptureUpload } from '@/lib/client-image-upload';
 import { analyzeCaptureForm, analyzeCaptureUrl } from '@/lib/simplifi-client';
 import { enqueueCapture, flushCaptureQueue } from '@/lib/offline-capture-queue';
 import { useProductGuestSession } from '@/components/auth/useProductGuestSession';
 import { NAVY, GOLD } from '@/lib/design-system';
 import {
-  clearGuestCaptureIds,
+  claimPendingGuestCaptures,
   clearProcessingCaptureId,
+  guestClaimSuccessMessage,
   readGuestCaptureIds,
   readProcessingCaptureId,
   rememberGuestCaptureId,
@@ -70,6 +71,8 @@ export default function SimplifiCaptureApp({
   const [result, setResult] = useState<AnalyzeResponse | null>(null);
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [bannerError, setBannerError] = useState('');
+  const [claimBanner, setClaimBanner] = useState<{ kind: 'ok' | 'err'; text: string } | null>(null);
+  const [claimRetrying, setClaimRetrying] = useState(false);
   const [externalOnboardingStep, setExternalOnboardingStep] = useState<SimplifiOnboardingStep | null>(null);
 
   const loginNext = encodeURIComponent('/simplifi/workspace');
@@ -87,25 +90,33 @@ export default function SimplifiCaptureApp({
     if (stored) setProcessingId(stored);
   }, []);
 
-  useEffect(() => {
+  const runGuestClaim = useCallback(async () => {
     if (!loggedIn || !slug || slug === 'demo-client') return;
-    const ids = readGuestCaptureIds();
-    if (!ids.length) return;
+    if (!readGuestCaptureIds().length) return;
 
-    void fetch('/api/portal/captures/claim', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ captureIds: ids }),
-    })
-      .then(async (res) => {
-        const data = (await res.json()) as { ok?: boolean; claimed?: number };
-        if (res.ok && data.ok && (data.claimed ?? 0) > 0) {
-          clearGuestCaptureIds();
-          setMessage(`Moved ${data.claimed} guest capture${data.claimed === 1 ? '' : 's'} into your workspace.`);
-        }
-      })
-      .catch(() => {});
+    setClaimRetrying(true);
+    try {
+      const result = await claimPendingGuestCaptures();
+      if (!result) return;
+      if (result.ok && result.claimed > 0) {
+        setClaimBanner({ kind: 'ok', text: guestClaimSuccessMessage(result.claimed) });
+        setMessage(guestClaimSuccessMessage(result.claimed));
+        return;
+      }
+      if (!result.ok) {
+        setClaimBanner({
+          kind: 'err',
+          text: result.error ?? 'Could not move guest captures. Try again.',
+        });
+      }
+    } finally {
+      setClaimRetrying(false);
+    }
   }, [loggedIn, slug]);
+
+  useEffect(() => {
+    void runGuestClaim();
+  }, [runGuestClaim]);
 
   useEffect(() => {
     if (!loggedIn) return;
@@ -231,11 +242,12 @@ export default function SimplifiCaptureApp({
   const handleCaptureFile = async (file: File) => {
     setLoading(true);
     setMessage('');
-    setUploadLabel(file.name);
+    setUploadLabel(isHeicCaptureFile(file) ? `Converting ${file.name}…` : file.name);
     setView('upload');
     setOpen(true);
     try {
       const prepared = await prepareCaptureUpload(file);
+      setUploadLabel(prepared.name);
       const form = new FormData();
       form.append('file', prepared);
       if (prospectName) form.append('prospectName', prospectName);
@@ -393,7 +405,7 @@ export default function SimplifiCaptureApp({
             <input
               ref={fileRef}
               type="file"
-              accept="image/*,.pdf,application/pdf"
+              accept="image/*,.heic,.heif,image/heic,image/heif,.pdf,application/pdf"
               className="sc-file-input"
               onChange={(e) => {
                 const file = e.target.files?.[0];
@@ -424,6 +436,27 @@ export default function SimplifiCaptureApp({
             You&apos;re capturing as a guest.{" "}
             <Link href={`/portal/login?next=${loginNext}`}>Sign in</Link> to keep these captures in
             your own workspace.
+          </p>
+        ) : null}
+        {claimBanner ? (
+          <p
+            className={claimBanner.kind === 'ok' ? 'sc-claim-banner sc-claim-banner--ok' : 'sc-claim-banner sc-claim-banner--err'}
+            role="status"
+          >
+            {claimBanner.text}
+            {claimBanner.kind === 'err' ? (
+              <>
+                {' '}
+                <button
+                  type="button"
+                  className="sc-inline-link sc-claim-retry"
+                  disabled={claimRetrying}
+                  onClick={() => void runGuestClaim()}
+                >
+                  {claimRetrying ? 'Retrying…' : 'Retry'}
+                </button>
+              </>
+            ) : null}
           </p>
         ) : null}
         <button
@@ -471,7 +504,7 @@ export default function SimplifiCaptureApp({
               <input
                 ref={fileRef}
                 type="file"
-                accept="image/*,.pdf,application/pdf"
+                accept="image/*,.heic,.heif,image/heic,image/heif,.pdf,application/pdf"
                 className="sc-file-input"
                 onChange={(e) => {
                   const file = e.target.files?.[0];
@@ -483,7 +516,7 @@ export default function SimplifiCaptureApp({
               Upload Flyer
               <input
                 type="file"
-                accept="image/*,.pdf,application/pdf"
+                accept="image/*,.heic,.heif,image/heic,image/heif,.pdf,application/pdf"
                 className="sc-file-input"
                 onChange={(e) => {
                   const file = e.target.files?.[0];

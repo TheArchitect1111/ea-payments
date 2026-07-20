@@ -5,6 +5,8 @@ import { loadOrbWorkspaceSlice } from '@/lib/orb';
 import { buildExpirationAlerts } from '@/lib/smart-expiration';
 import SimplifiProductShell from '../components/SimplifiProductShell';
 import EmptyStateGuide from '@/app/components/guided-first-success/EmptyStateGuide';
+import FollowUpActions from './FollowUpActions';
+import FollowUpsReminderMount from './FollowUpsReminderMount';
 import '../workspace/simplifi-workspace.css';
 
 export const dynamic = 'force-dynamic';
@@ -45,6 +47,11 @@ export default async function FollowUpsPage() {
           />
         ) : (
           <>
+            <FollowUpsReminderMount
+              items={dated
+                .filter((o) => o.dueDate)
+                .map((o) => ({ id: o.id, title: o.title, dueDate: o.dueDate as string }))}
+            />
             {alerts.length > 0 ? (
               <section className="sw-brief-panel">
                 <div className="sw-panel-heading">
@@ -77,15 +84,13 @@ export default async function FollowUpsPage() {
               ) : (
                 <ul className="sw-event-list">
                   {dated.map((obj) => (
-                    <li key={obj.id}>
-                      <div>
-                        <strong>
-                          <Link href={`/simplifi/opportunity/${obj.id}`}>{obj.title}</Link>
-                        </strong>
-                        <p>{obj.nextAction}</p>
-                      </div>
-                      <span>{obj.dueDate}</span>
-                    </li>
+                    <FollowUpActions
+                      key={obj.id}
+                      recordId={obj.id}
+                      title={obj.title}
+                      nextAction={obj.nextAction}
+                      dueDate={obj.dueDate}
+                    />
                   ))}
                 </ul>
               )}

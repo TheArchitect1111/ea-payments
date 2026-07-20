@@ -5,6 +5,7 @@ import { EA_PORTAL_COOKIE, verifySession } from '@/lib/ea-portal-auth';
 import { getCaptureByIdentifier } from '@/lib/capture-records';
 import { captureToObject } from '@/lib/simplifi-objects';
 import { computePriorityScore, priorityLevelLabel } from '@/lib/priority-engine';
+import { parseBlueprintSummary } from '@/lib/blueprint-summary';
 import { EA_PLATFORM_URL } from '@/lib/platform-urls';
 import { loadOrbWorkspaceSlice } from '@/lib/orb';
 import SimplifiProductShell from '../../components/SimplifiProductShell';
@@ -34,6 +35,7 @@ export default async function OpportunityProfilePage({ params }: Props) {
   const ps = computePriorityScore(base);
   const obj = { ...base, priorityScore: ps.score, priorityLevel: ps.level };
   const guidanceUrl = `/simplifi/guidance/${capture.id}`;
+  const blueprint = parseBlueprintSummary(capture.blueprintSummary || capture.analysisSummary);
 
   return (
     <SimplifiProductShell
@@ -84,6 +86,60 @@ export default async function OpportunityProfilePage({ params }: Props) {
             {obj.dueDate ? ` · due ${obj.dueDate}` : ''}
           </p>
         </article>
+
+        {(blueprint.meta.length > 0 || blueprint.sections.length > 0 || blueprint.roadmap.length > 0) && (
+          <section className="sw-brief-panel" aria-label="Blueprint stub">
+            <h2>Blueprint preview</h2>
+            <p className="sw-muted">
+              Early outline from capture analysis — react to this in the field; full delivery plans come later.
+            </p>
+            {blueprint.meta.length > 0 ? (
+              <ul className="sw-event-list" style={{ marginTop: 12 }}>
+                {blueprint.meta.slice(0, 6).map((line) => (
+                  <li key={line}>
+                    <div>
+                      <p>{line}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+            {blueprint.sections.slice(0, 4).map((section) => (
+              <article key={section.title} style={{ marginTop: 12 }}>
+                <h3 style={{ margin: '0 0 4px', fontSize: '1rem' }}>{section.title}</h3>
+                <p className="sw-muted" style={{ whiteSpace: 'pre-wrap' }}>
+                  {section.content.slice(0, 480)}
+                  {section.content.length > 480 ? '…' : ''}
+                </p>
+              </article>
+            ))}
+            {blueprint.roadmap.length > 0 ? (
+              <ul className="sw-event-list" style={{ marginTop: 12 }}>
+                {blueprint.roadmap.slice(0, 5).map((item) => (
+                  <li key={`${item.phase}-${item.focus}`}>
+                    <div>
+                      <strong>{item.phase}</strong>
+                      <p>{item.focus}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+            <p style={{ marginTop: 12 }}>
+              <Link href={guidanceUrl} className="sw-link">
+                Open guidance
+              </Link>
+              {obj.magnifiUrl || obj.considerUrl ? (
+                <>
+                  {' · '}
+                  <Link href={obj.magnifiUrl || obj.considerUrl || guidanceUrl} className="sw-link">
+                    Magnifi story
+                  </Link>
+                </>
+              ) : null}
+            </p>
+          </section>
+        )}
 
         <section className="sw-quick-actions" aria-label="Opportunity links">
           <Link href={guidanceUrl}>Guidance</Link>

@@ -5,6 +5,7 @@ import { loadOrbWorkspaceSlice } from '@/lib/orb';
 import { CHROME_FADE_COOKIE, isChromeFadeEnabled } from '@/lib/simplifi/chrome-fade';
 import SimplifiProductShell from '../components/SimplifiProductShell';
 import ChromeFadeToggle from './ChromeFadeToggle';
+import DueReminderToggle from '../components/DueReminderClient';
 import '../workspace/simplifi-workspace.css';
 import '../capture/simplifi-capture.css';
 
@@ -19,6 +20,9 @@ export default async function SimplifiSettingsPage() {
   const chromeFade = isChromeFadeEnabled({
     cookieValue: cookieStore.get(CHROME_FADE_COOKIE)?.value,
   });
+  const dueItems = slice.objects
+    .filter((o) => o.dueDate)
+    .map((o) => ({ id: o.id, title: o.title, dueDate: o.dueDate as string }));
 
   return (
     <SimplifiProductShell
@@ -128,14 +132,20 @@ export default async function SimplifiSettingsPage() {
         </section>
 
         <section className="sw-brief-panel">
-          <h2>Notifications</h2>
-          <p className="sw-muted">
-            {slug ? (
-              <Link href={`/portal/${slug}/notifications`}>Open notification center</Link>
-            ) : (
-              'Sign in to manage notification preferences.'
-            )}
-          </p>
+          <h2>Notifications &amp; capture prefs</h2>
+          {session ? (
+            <DueReminderToggle dueItems={dueItems} />
+          ) : (
+            <p className="sw-muted">
+              <Link href="/simplifi/login?next=/simplifi/settings">Sign in</Link> to manage due
+              reminders and capture tips.
+            </p>
+          )}
+          {slug ? (
+            <p className="sw-muted" style={{ marginTop: 12 }}>
+              <Link href={`/portal/${slug}/notifications`}>Open portal notification center</Link>
+            </p>
+          ) : null}
         </section>
 
         {slug ? (

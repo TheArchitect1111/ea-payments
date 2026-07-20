@@ -9,6 +9,9 @@ const MAX_UPLOAD_BYTES = MAX_CAPTURE_UPLOAD_BYTES;
 const MAX_DIMENSION = MAX_CAPTURE_DIMENSION;
 const JPEG_QUALITY = 0.82;
 
+const HEIC_CONVERT_FAIL =
+  'Could not convert this iPhone HEIC photo. Save as JPEG or take a screenshot, then try again.';
+
 export { formatCaptureUploadSize as formatUploadSize, MAX_CAPTURE_UPLOAD_BYTES };
 
 function loadImageFromFile(file: File): Promise<HTMLImageElement> {
@@ -48,36 +51,80 @@ function isImageFile(file: File): boolean {
   return /\.(jpe?g|png|gif|webp|heic|heif|bmp)$/i.test(file.name);
 }
 
-function isHeic(file: File): boolean {
+export function isHeicCaptureFile(file: File): boolean {
   return /\.heic$/i.test(file.name) || /\.heif$/i.test(file.name) || /heic|heif/i.test(file.type);
 }
 
-export async function prepareCaptureUpload(file: File): Promise<File> {
-  if (isHeic(file)) {
-    throw new Error(
-      'iPhone HEIC photos are not supported here. In Settings → Camera → Formats, choose “Most Compatible,” or upload a screenshot instead.',
-    );
-  }
+function jpegFileFromBlob(blob: Blob, sourceName: string): File {
+  const baseName = sourceName.replace(/\.[^.]+$/, '') || 'capture';
+  return new File([blob], `${baseName}.jpg`, { type: 'image/jpeg', lastModified: Date.now() });
+}
 
-  if (!isImageFile(file)) {
-    if (file.size > MAX_UPLOAD_BYTES) {
-      throw new Error(
-        `File is ${formatCaptureUploadSize(file.size)}. Keep uploads under ${formatCaptureUploadSize(MAX_UPLOAD_BYTES)}.`,
-      );
-    }
-    if (/\.pdf$/i.test(file.name) || file.type === 'application/pdf') {
-      // PDF accepted under size cap — no compress path
-      return file;
-    }
-    return file;
-  }
+async function bitmapToJpegFile(bitmap: ImageBitmap, sourceName: string): Promise<File> {
+  const canvas = document.createElement('canvas');
+  canvas.width = bitmap.width;
+  canvas.height = bitmap.height;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) throw new Error(HEIC_CONVERT_FAIL);
+  ctx.drawImage(bitmap, 0, 0);
+  bitmap.close();
+  const blob = await canvasToJpegBlob(canvas, 0.92);
+  return jpegFileFromBlob(blob, sourceName);
+}
 
-  if (file.size <= MAX_UPLOAD_BYTES && (file.type === 'image/jpeg' || file.type === 'image/webp')) {
-    return file;
+/** Convert HEIC/HEIF to JPEG in the browser before compress/upload. */
+async function convertHeicToJpeg(file: File): Promise<File> {
+  if (typeof createImageBitmap === 'function') {
+    try {
+      const bitmap = await createImageBitmap(file);
+      return await bitmapToJpegFile(bitmap, file.name);
+    } catch {
+      // Browser cannot decode HEIC — fall through to heic2any.
+    }
   }
 
   try {
-    const img = await loadImageFromFile(file);
+    const heic2any = (await import('heic2any')).default;
+    const converted = await heic2any({
+      blob: file,
+      toType: 'image/jpeg',
+      quality: 0.92,
+    });
+    const blob = Array.isArray(converted) ? converted[0] : converted;
+    if (!(blob instanceof Blob)) throw new Error(HEIC_CONVERT_FAIL);
+    return jpegFileFromBlob(blob, file.name);
+  } catch (err) {
+    if (err instanceof Error && err.message === HEIC_CONVERT_FAIL) throw err;
+    throw new Error(HEIC_CONVERT_FAIL);
+  }
+}
+
+export async function prepareCaptureUpload(file: File): Promise<File> {
+  let working = file;
+
+  if (isHeicCaptureFile(file)) {
+    working = await convertHeicToJpeg(file);
+  }
+
+  if (!isImageFile(working)) {
+    if (working.size > MAX_UPLOAD_BYTES) {
+      throw new Error(
+        `File is ${formatCaptureUploadSize(working.size)}. Keep uploads under ${formatCaptureUploadSize(MAX_UPLOAD_BYTES)}.`,
+      );
+    }
+    if (/\.pdf$/i.test(working.name) || working.type === 'application/pdf') {
+      // PDF accepted under size cap — no compress path
+      return working;
+    }
+    return working;
+  }
+
+  if (working.size <= MAX_UPLOAD_BYTES && (working.type === 'image/jpeg' || working.type === 'image/webp')) {
+    return working;
+  }
+
+  try {
+    const img = await loadImageFromFile(working);
     const scale = Math.min(1, MAX_DIMENSION / Math.max(img.width, img.height));
     const width = Math.max(1, Math.round(img.width * scale));
     const height = Math.max(1, Math.round(img.height * scale));
@@ -103,17 +150,19 @@ export async function prepareCaptureUpload(file: File): Promise<File> {
       );
     }
 
-    const baseName = file.name.replace(/\.[^.]+$/, '') || 'capture';
-    return new File([blob], `${baseName}.jpg`, { type: 'image/jpeg', lastModified: Date.now() });
+    return jpegFileFromBlob(blob, working.name);
   } catch (err) {
-    if (err instanceof Error && /HEIC|Most Compatible|still too large|File is /.test(err.message)) {
+    if (
+      err instanceof Error &&
+      /HEIC|screenshot|still too large|File is |Could not convert/i.test(err.message)
+    ) {
       throw err;
     }
-    if (file.size <= MAX_UPLOAD_BYTES) {
-      return file;
+    if (working.size <= MAX_UPLOAD_BYTES) {
+      return working;
     }
     throw new Error(
-      `Could not prepare this image (${formatCaptureUploadSize(file.size)}). Try a screenshot instead.`,
+      `Could not prepare this image (${formatCaptureUploadSize(working.size)}). Try a screenshot instead.`,
     );
   }
 }

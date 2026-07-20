@@ -31,5 +31,37 @@ self.addEventListener('fetch', (event) => {
 self.addEventListener('message', (event) => {
   if (event.data?.type === 'SKIP_WAITING') {
     self.skipWaiting();
+    return;
   }
+  if (event.data?.type === 'DUE_REMINDERS' && Array.isArray(event.data.items)) {
+    const items = event.data.items;
+    event.waitUntil(
+      Promise.all(
+        items.map((item) =>
+          self.registration.showNotification(item.title || 'Follow-up due', {
+            body: item.dueDate ? `Due ${item.dueDate}` : 'Open Simplifi Follow-ups',
+            tag: `due-${item.id}`,
+            data: { href: item.href || '/simplifi/follow-ups' },
+            icon: '/simplifi-logo.png',
+          }),
+        ),
+      ),
+    );
+  }
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const href = event.notification.data?.href || '/simplifi/follow-ups';
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
+      for (const client of clients) {
+        if ('focus' in client) {
+          client.navigate?.(href);
+          return client.focus();
+        }
+      }
+      if (self.clients.openWindow) return self.clients.openWindow(href);
+    }),
+  );
 });
