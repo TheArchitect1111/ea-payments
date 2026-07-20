@@ -28,7 +28,8 @@ function websiteDemoLocalMode(): boolean {
   return !isProductionDeploy();
 }
 
-const BASE_ID = process.env.AIRTABLE_PAYMENTS_BASE_ID ?? 'appv0YoLIMY45fmDA';
+const BASE_ID =
+  process.env.AIRTABLE_PAYMENTS_BASE_ID?.trim() || 'appv0YoLIMY45fmDA';
 const TABLE = 'Client Records';
 
 function authHeaders(): Record<string, string> {

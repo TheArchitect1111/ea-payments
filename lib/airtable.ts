@@ -7,7 +7,8 @@ import {
   type ClientLifecycleFields,
 } from '@/lib/client-lifecycle';
 
-const BASE_ID = process.env.AIRTABLE_PAYMENTS_BASE_ID ?? 'appv0YoLIMY45fmDA';
+const BASE_ID =
+  process.env.AIRTABLE_PAYMENTS_BASE_ID?.trim() || 'appv0YoLIMY45fmDA';
 const TABLE = 'Client Records';
 
 export type AirtablePackage =
