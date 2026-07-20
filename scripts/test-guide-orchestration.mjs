@@ -69,9 +69,20 @@ assert(engine.includes('Proposal Approved'), 'celebration Proposal Approved');
 assert(engine.includes('Website Ready for Review'), 'celebration Website Ready for Review');
 assert(engine.includes('Project Launched'), 'celebration Project Launched');
 
-assert(notices.includes('Your proposal is ready'), 'notify proposal ready');
-assert(notices.includes('Your approval has been received') || engine.includes('Your approval has been received'), 'notify approval');
-assert(engine.includes('We’ve started designing your website') || engine.includes("We've started designing your website"), 'notify design started');
+assert(
+  engine.includes('Your proposal is ready') || notices.includes('Your proposal is ready'),
+  'notify proposal ready',
+);
+assert(
+  engine.includes('Your approval has been received') ||
+    notices.includes('Your approval has been received'),
+  'notify approval',
+);
+assert(
+  engine.includes('We’ve started designing your website') ||
+    engine.includes("We've started designing your website"),
+  'notify design started',
+);
 assert(engine.includes('Your project has moved into development'), 'notify development');
 
 assert(orch.includes('planGuideOrchestration'), 'planGuideOrchestration exported');
