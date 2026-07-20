@@ -1,14 +1,9 @@
 /**
  * Factory / OIB → live /sites/{slug} publish bridge.
- * Reuses provisionWebsitePortalSite — no new page engine.
- * Experience Director must Approve before publish.
+ * Uses the unified publishWebsiteThroughDirectorGate only — no separate ED bypass.
  */
 import { buildFactoryConceptPackAsync } from '@/lib/factory-concept-pack';
-import { getLatestExperienceReviewFromProject } from '@/lib/factory-experience-director';
-import {
-  assertExperienceDirectorPublishGate,
-  type ExperienceDirectorApprovalStatus,
-} from '@/lib/factory-experience-review';
+import type { ExperienceDirectorApprovalStatus } from '@/lib/factory-experience-review';
 import { getFactoryProject, type FactoryProject } from '@/lib/factory-project-store';
 import { ensureOrganizationForPortal } from '@/lib/organizations';
 import {
@@ -34,6 +29,7 @@ export type WebsitePublishGateResult = {
   missing: string[];
 };
 
+/** Brand completeness check only — not the Experience Director publish gate. */
 export function assertWebsitePublishGate(input: WebsitePublishGateInput): WebsitePublishGateResult {
   const missing: string[] = [];
   if (!input.businessName.trim()) missing.push('business name');
@@ -67,8 +63,7 @@ export type PublishFactoryWebsiteResult = WebsitePortalProvisionResult & {
 };
 
 /**
- * Load OIB/concept brand from a Factory project and publish (or refresh) /sites/{slug}.
- * Blocked unless latest Experience Review is Approved.
+ * Load OIB/concept brand from a Factory project and publish via the unified Director gate.
  */
 export async function publishFactoryWebsite(input: {
   projectId: string;
@@ -78,20 +73,6 @@ export async function publishFactoryWebsite(input: {
   const project = await getFactoryProject(input.projectId);
   if (!project) {
     return { ok: false, error: 'Factory project not found.' };
-  }
-
-  const latestReview = getLatestExperienceReviewFromProject(project);
-  const directorGate = assertExperienceDirectorPublishGate(latestReview?.review ?? null);
-  if (!directorGate.ok) {
-    return {
-      ok: false,
-      error: directorGate.error,
-      directorGate: {
-        ok: false,
-        approvalStatus: directorGate.approvalStatus,
-        error: directorGate.error,
-      },
-    };
   }
 
   const pack = await buildFactoryConceptPackAsync(project);
@@ -118,7 +99,6 @@ export async function publishFactoryWebsite(input: {
       ok: false,
       error: `Publish gate failed — missing: ${gate.missing.join(', ')}`,
       gate,
-      directorGate: { ok: true, approvalStatus: 'Approved' },
     };
   }
 
@@ -136,10 +116,11 @@ export async function publishFactoryWebsite(input: {
         'Could not create a durable organization for this site. Check Airtable Organizations, then retry.',
       portalSlug,
       gate,
-      directorGate: { ok: true, approvalStatus: 'Approved' },
     };
   }
 
+  const brief = pack.opportunityBrief;
+  const hidden = brief?.hiddenOpportunities?.[0];
   const result = await provisionWebsitePortalSite({
     portalSlug,
     businessName,
@@ -150,11 +131,28 @@ export async function publishFactoryWebsite(input: {
     ctaLabel,
     primaryColor,
     accentColor,
-    industry: pack.opportunityBrief?.industry || project.industry,
+    industry: brief?.industry || project.industry,
     logoUrl: brand?.logoUrl,
-    aboutBody: pack.opportunityBrief?.whoTheyAre || pack.opportunityBrief?.website?.purpose,
+    aboutBody: brief?.whoTheyAre || brief?.website?.purpose,
     existingWebsiteUrl: project.url,
     force: input.force !== false,
+    whoTheyAre: brief?.whoTheyAre,
+    mission: brief?.website?.purpose || brief?.whoTheyAre,
+    story: brief?.story,
+    whyTheyExist: brief?.website?.purpose || brief?.whoTheyAre,
+    whoTheyHelp: brief?.primaryAudience,
+    whyItMatters: hidden?.businessImpact || brief?.story,
+    whatChanges: hidden?.possibleFuture || brief?.recommendedStartingPoint,
+    primaryAudience: brief?.primaryAudience,
+    differentiators: (brief?.whatWeLearned || []).slice(0, 4),
+    member: brief?.member
+      ? {
+          purpose: brief.member.purpose,
+          whereYouAre: brief.member.talkingPoint || brief.member.purpose,
+          whatNext: brief.nextSteps?.immediate,
+          whatSuccessLooksLike: brief.member.businessValue,
+        }
+      : undefined,
   });
 
   if (result.ok && pack.opportunityBrief?.member) {
@@ -176,6 +174,6 @@ export async function publishFactoryWebsite(input: {
     ...result,
     portalSlug,
     gate,
-    directorGate: { ok: true, approvalStatus: 'Approved' },
+    directorGate: result.directorGate,
   };
 }

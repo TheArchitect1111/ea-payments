@@ -23,12 +23,20 @@ function read(rel) {
 
 const publish = read('lib/factory-publish-website.ts');
 assert(publish.includes('publishFactoryWebsite'), 'publishFactoryWebsite required');
-assert(publish.includes('assertWebsitePublishGate'), 'publish gate required');
-assert(publish.includes('assertExperienceDirectorPublishGate'), 'Experience Director gate required');
+assert(publish.includes('assertWebsitePublishGate'), 'brand completeness gate required');
 assert(publish.includes('provisionWebsitePortalSite'), 'must reuse provisionWebsitePortalSite');
+assert(
+  !publish.includes('getLatestExperienceReviewFromProject'),
+  'must not use separate Factory-only ED pre-check',
+);
 assert(publish.includes('buildFactoryConceptPackAsync'), 'must load concept/OIB pack');
 assert(publish.includes('primaryColor'), 'must pass primary color');
 assert(publish.includes('headline'), 'must pass headline');
+
+const unified = read('lib/website-publish-gate.ts');
+assert(unified.includes('publishWebsiteThroughDirectorGate'), 'unified publish gate required');
+assert(unified.includes('assertExperienceDirectorPublishGate'), 'ED Approved required in unified gate');
+assert(unified.includes('evaluateExperienceForDirector'), 'must evaluate before publish');
 
 const director = read('lib/factory-experience-review.ts');
 assert(director.includes('Approved'), 'Experience Review statuses required');
@@ -46,9 +54,10 @@ assert(
 const provision = read('lib/provision-website-portal.ts');
 assert(provision.includes('primaryColor'), 'starter Puck must accept primaryColor');
 assert(provision.includes('headline'), 'starter Puck must accept headline');
-assert(provision.includes('ensureOrganizationForPortal'), 'must ensure durable org');
-assert(provision.includes('findOrganizationByPortalSlug'), 'findPublishedSitePage must resolve org');
-assert(!provision.includes('listExperiencePages(portalSlug)'), 'must not call listExperiencePages with one arg');
+assert(
+  provision.includes('publishWebsiteThroughDirectorGate'),
+  'provision must delegate to unified publish gate',
+);
 
 const api = read('app/api/admin/factory/publish-website/route.ts');
 assert(api.includes('publishFactoryWebsite'), 'admin API must call publishFactoryWebsite');

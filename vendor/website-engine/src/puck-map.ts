@@ -24,6 +24,7 @@ const BLOCK_KIND_MAP: Record<string, WebsiteSectionKind> = {
   EAHeading: 'content',
   EARichText: 'content',
   EATextSection: 'content',
+  EASplitNarrative: 'content',
   EASection: 'content',
   EAContainer: 'content',
   EASpacer: 'other',

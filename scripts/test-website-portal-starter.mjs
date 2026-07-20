@@ -74,8 +74,23 @@ assert(
 
 assert(provision.includes('buildStarterWebsitePuckData'), 'Starter website template builder missing');
 assert(provision.includes('provisionWebsitePortalSite'), 'provisionWebsitePortalSite missing');
-assert(provision.includes("status: 'published'"), 'Provisioned site must be published');
-assert(provision.includes('/sites/'), 'Site path helper must use /sites/');
+assert(provision.includes('composeDirectedWebsite'), 'Provision must use Layout Composer directed path');
+assert(provision.includes('publishWebsiteThroughDirectorGate'), 'Provision must use unified publish gate');
+assert(!provision.includes("type: 'EAFeatures'"), 'Directed provision must not hardcode EAFeatures×3');
+assert(provision.includes("status: 'published'") === false, 'Provision adapter must not publish directly');
+assert(provision.includes('/sites/') || readFileSync(join(root, 'lib/website-publish-gate.ts'), 'utf8').includes('/sites/'), 'Site path helper must use /sites/');
+
+const layoutComposer = join(root, 'lib/layout-composer/index.ts');
+const websiteDirector = join(root, 'lib/website-director/index.ts');
+const publishGate = join(root, 'lib/website-publish-gate.ts');
+assert(existsSync(layoutComposer), 'layout-composer module missing');
+assert(existsSync(websiteDirector), 'website-director module missing');
+assert(existsSync(publishGate), 'website-publish-gate module missing');
+const composerSrc = readFileSync(join(root, 'lib/layout-composer/compose-puck-data.ts'), 'utf8');
+assert(composerSrc.includes('Never emits EAFeatures'), 'Composer must forbid feature-card emit');
+const gateSrc = readFileSync(publishGate, 'utf8');
+assert(gateSrc.includes('evaluateExperienceForDirector'), 'Unified gate must run Experience Director');
+assert(gateSrc.includes("status: 'published'"), 'Unified gate is the sole publisher');
 
 assert(
   webhook.includes('provisionWebsitePortalSite') || webhook.includes('fulfillPaidClient'),
@@ -112,7 +127,7 @@ assert(successClient.includes('Open My Website'), 'Success page must offer live 
 const adminProvision = readFileSync(adminProvisionPath, 'utf8');
 assert(adminProvision.includes('provisionWebsitePortalSite'), 'Admin provision API must call provisioner');
 assert(adminProvision.includes('requireAdminActionFromRequest'), 'Admin provision API must require admin auth');
-assert(provision.includes('force?: boolean') || provision.includes('force?'), 'Provisioner must support force refresh');
+assert(provision.includes('force?: boolean') || provision.includes('force?') || gateSrc.includes('force'), 'Provisioner must support force refresh');
 
 const opsPanelPath = join(root, 'app/admin/master/WebsitePortalOpsPanel.tsx');
 const masterPagePath = join(root, 'app/admin/master/page.tsx');
@@ -139,7 +154,7 @@ assert(
   'page-store must verify Experience durability',
 );
 assert(
-  readFileSync(provisionPath, 'utf8').includes('verifyExperiencePageDurable'),
+  gateSrc.includes('verifyExperiencePageDurable'),
   'Provisioner must verify Airtable durability before returning siteUrl',
 );
 assert(

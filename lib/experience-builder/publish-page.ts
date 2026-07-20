@@ -1,7 +1,8 @@
 import { publishCommunication } from '@/lib/publishing';
 import { publishPlatformActivityEvent } from '@/lib/activity-events-store';
-import { getExperiencePage, markExperiencePagePublished } from './page-store';
+import { getExperiencePage } from './page-store';
 import { previewPathForPage } from './types';
+import { publishExistingExperiencePageThroughDirectorGate } from '@/lib/website-publish-gate';
 
 export async function publishExperiencePage(input: {
   pageId: string;
@@ -14,12 +15,31 @@ export async function publishExperiencePage(input: {
     return { ok: false as const, detail: 'Portal access denied for this page.' };
   }
 
+  const gated = await publishExistingExperiencePageThroughDirectorGate({
+    pageId: input.pageId,
+    organizationId: input.organizationId,
+    portalSlug: input.portalSlug,
+  });
+  if (!gated.ok) {
+    return {
+      ok: false as const,
+      detail:
+        gated.error ||
+        'Experience Director did not Approve — publish blocked by unified publish gate.',
+      directorReview: gated.directorReview,
+    };
+  }
+
   const previewPath = previewPathForPage(input.portalSlug, input.pageId);
   const actor = input.actorName ?? 'Experience Builder';
-  const summary = page.puckData.content.slice(0, 3).map((block) => {
-    const props = block.props as Record<string, unknown>;
-    return String(props.title ?? props.eyebrow ?? block.type);
-  }).filter(Boolean).join(' � ');
+  const summary = page.puckData.content
+    .slice(0, 3)
+    .map((block) => {
+      const props = block.props as Record<string, unknown>;
+      return String(props.title ?? props.eyebrow ?? block.type);
+    })
+    .filter(Boolean)
+    .join(' · ');
 
   const outcome = await publishCommunication({
     channel: 'website',
@@ -33,7 +53,7 @@ export async function publishExperiencePage(input: {
     source: { product: 'experience-builder', campaignId: page.id, assetId: page.id },
   });
 
-  const updated = await markExperiencePagePublished(input.pageId, input.organizationId);
+  const updated = await getExperiencePage(input.pageId, input.organizationId);
   if (outcome.ok && updated) {
     await publishPlatformActivityEvent({
       organizationId: input.organizationId,
@@ -46,5 +66,12 @@ export async function publishExperiencePage(input: {
       metadata: { pageId: page.id, portalSlug: input.portalSlug, actorName: actor },
     }).catch(() => undefined);
   }
-  return { ok: outcome.ok, detail: outcome.detail, href: outcome.href ?? previewPath, page: updated, mode: outcome.mode };
+  return {
+    ok: outcome.ok,
+    detail: outcome.detail,
+    href: outcome.href ?? previewPath,
+    page: updated,
+    mode: outcome.mode,
+    directorReview: gated.directorReview,
+  };
 }
