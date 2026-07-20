@@ -1,5 +1,5 @@
 import crypto from 'node:crypto';
-import { setPortalCredentials } from '@/lib/airtable';
+import { getClientByRecordId, setPortalCredentials } from '@/lib/airtable';
 import type { PortalConfig } from '@/lib/catalog';
 import { publicPortalLoginUrl } from '@/lib/ctp-portal-host';
 import { EA_PLATFORM_URL } from '@/lib/platform-urls';
@@ -115,19 +115,25 @@ async function createEAPortalAccess(
     return { ok: false, error: 'Airtable record ID required for EA portal access creation.' };
   }
 
-  const slug = generatePortalSlug(clientData.clientName, clientData.organization);
-  const tempPassword = generateTempPassword();
+  // Idempotent re-fulfill: reuse existing portal slug + temp password when present.
+  const existing = await getClientByRecordId(clientData.airtableRecordId);
+  const existingSlug = existing?.portalSlug?.trim();
+  const existingPassword = existing?.tempPassword?.trim();
+  const slug =
+    existingSlug || generatePortalSlug(clientData.clientName, clientData.organization);
+  const tempPassword = existingPassword || generateTempPassword();
   const username = clientData.email;
 
-  const result = await setPortalCredentials(
-    clientData.airtableRecordId,
-    slug,
-    tempPassword,
-    username
-  );
-
-  if (!result.ok) {
-    return { ok: false, error: result.error ?? 'Failed to write portal credentials.' };
+  if (!existingSlug || !existingPassword) {
+    const result = await setPortalCredentials(
+      clientData.airtableRecordId,
+      slug,
+      tempPassword,
+      username,
+    );
+    if (!result.ok) {
+      return { ok: false, error: result.error ?? 'Failed to write portal credentials.' };
+    }
   }
 
   return { ok: true, slug, username, tempPassword, portalLoginUrl };

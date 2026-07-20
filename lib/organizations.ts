@@ -134,27 +134,42 @@ export async function createOrganization(input: {
 }): Promise<Organization | null> {
   if (!platformStoreConfigured()) return null;
 
-  const baseFields: Record<string, string> = {
+  const core: Record<string, string> = {
     Name: input.name,
     Slug: input.slug,
     Status: 'Active',
-    ...(input.clientRecordId ? { 'Client Record Id': input.clientRecordId } : {}),
     ...(input.mission ? { Mission: input.mission } : {}),
     ...(input.industry ? { Industry: input.industry } : {}),
   };
 
-  try {
-    const record = await platformCreate(ORGANIZATIONS_TABLE, {
-      ...baseFields,
+  // airtableCreate returns null on unknown fields (does not throw) — try optional
+  // columns from richest → core so older Organizations schemas still provision.
+  const attempts: Record<string, string>[] = [
+    {
+      ...core,
       'Portal Slug': input.portalSlug,
-    });
-    return record ? mapOrganization(record) : null;
-  } catch (err) {
-    // Older bases without Portal Slug still work via Slug alone.
-    console.error('createOrganization with Portal Slug failed, retrying without:', err);
-    const record = await platformCreate(ORGANIZATIONS_TABLE, baseFields);
-    return record ? mapOrganization(record) : null;
+      ...(input.clientRecordId ? { 'Client Record Id': input.clientRecordId } : {}),
+    },
+    {
+      ...core,
+      'Portal Slug': input.portalSlug,
+    },
+    {
+      ...core,
+      ...(input.clientRecordId ? { 'Client Record Id': input.clientRecordId } : {}),
+    },
+    core,
+  ];
+
+  for (const fields of attempts) {
+    const record = await platformCreate(ORGANIZATIONS_TABLE, fields);
+    if (record) return mapOrganization(record);
   }
+
+  console.error(
+    'createOrganization failed for all field variants (Slug / Portal Slug / Client Record Id).',
+  );
+  return null;
 }
 
 function allowSyntheticOrganizationFallback(): boolean {
@@ -198,10 +213,8 @@ export async function ensureOrganizationForPortal(input: {
     if (!allowSyntheticOrganizationFallback()) throw err;
   }
 
+  // Soft fallback: website publish requires a durable org later; portal + CTP can continue.
   return { orgId: fallbackId, org: null };
-  if (!allowSyntheticOrganizationFallback()) {
-    throw new Error('Organization provisioning failed without a persisted organization.');
-  }
 }
 
 export async function suspendOrganization(orgId: string): Promise<boolean> {
