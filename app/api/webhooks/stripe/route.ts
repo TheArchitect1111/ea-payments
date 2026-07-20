@@ -926,6 +926,25 @@ async function handleProposalPayment(
     }
   }
 
+  // 6b. Project State Engine — payment is the ONLY Agreement→Design authority.
+  try {
+    const { getCtpSubmissionByProposalId, applyProjectEvidenceToSubmission } = await import(
+      '@/lib/ctp-submissions'
+    );
+    const { isAuthoritativeProposalId } = await import('@/lib/project-state-engine');
+    const ctp = await getCtpSubmissionByProposalId(proposalId);
+    if (ctp) {
+      const kinds: Array<
+        'proposal.ready' | 'payment.completed' | 'portal.bound' | 'discovery.complete'
+      > = ['payment.completed'];
+      if (isAuthoritativeProposalId(proposalId)) kinds.unshift('proposal.ready');
+      if (ctp.portalSlug || portalSlug) kinds.push('portal.bound', 'discovery.complete');
+      await applyProjectEvidenceToSubmission(ctp.id, kinds);
+    }
+  } catch (err) {
+    console.error(`handleProposalPayment [${proposalId}]: project state evidence failed:`, err);
+  }
+
   // 7. Send welcome email to the new client (E10).
   try {
     const welcomeResult = await sendWelcomeEmail({

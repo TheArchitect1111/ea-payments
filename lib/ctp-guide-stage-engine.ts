@@ -1,8 +1,9 @@
 /**
- * Guide Stage Transition Engine — canonical lifecycle rules.
- * Pure predicates over CtpPortalStatusView. No second status system.
+ * Guide Stage Transition Engine — definitions + SSOT resolution.
+ * Current stage comes ONLY from Project State Engine (submission.guideStage).
+ * siteUrl / proposalId / WPS / payments are evidence elsewhere — never stage here.
  */
-import type { CtpPortalStatusView, CtpTimelineStep } from '@/lib/ctp-portal-status';
+import type { CtpPortalStatusView } from '@/lib/ctp-portal-status';
 
 export const GUIDE_LIFECYCLE_STAGES = [
   'Welcome',
@@ -47,14 +48,6 @@ export type GuideStageTransition = {
   to: GuideLifecycleStage;
   newlyCompleted: GuideLifecycleStage[];
 };
-
-function step(timeline: CtpTimelineStep[], id: string): CtpTimelineStep | undefined {
-  return timeline.find((item) => item.id === id);
-}
-
-function isComplete(timeline: CtpTimelineStep[], id: string): boolean {
-  return step(timeline, id)?.state === 'complete';
-}
 
 /** Explicit catalog for every Welcome → Care edge. */
 export const GUIDE_STAGE_DEFINITIONS: Record<GuideLifecycleStage, GuideStageDefinition> = {
@@ -232,67 +225,32 @@ export const GUIDE_STAGE_DEFINITIONS: Record<GuideLifecycleStage, GuideStageDefi
   },
 };
 
+/**
+ * Done map from canonical current stage only.
+ * Stages strictly before current are complete. No inference from siteUrl/proposalId.
+ */
 export function resolveGuideStageDone(
-  view: CtpPortalStatusView,
+  current: GuideLifecycleStage,
 ): Record<GuideLifecycleStage, boolean> {
-  const t = view.timeline;
-  const digital = step(t, 'digital-audit');
-  const digitalDone =
-    isComplete(t, 'digital-audit') ||
-    Boolean(digital?.detail.toLowerCase().includes('not required'));
-  const discoveryDone =
-    isComplete(t, 'assessment') &&
-    (isComplete(t, 'ai-evaluation') || Boolean(view.intakeSummary)) &&
-    digitalDone;
-
-  const strategyDone =
-    isComplete(t, 'executive-report') ||
-    Boolean(view.reviewScheduledAt) ||
-    Boolean(view.snapshotSummary);
-  const proposalDone = Boolean(view.proposalId);
-  const designDone = isComplete(t, 'client-input');
-  const agreementDone =
-    designDone ||
-    view.studioStatus === 'In Progress' ||
-    view.studioStatus === 'Ready For Review' ||
-    view.studioStatus === 'Completed' ||
-    isComplete(t, 'ai-building') ||
-    Boolean(view.siteUrl);
-  const buildDone = isComplete(t, 'ai-building') || Boolean(view.siteUrl);
-  const reviewDone = isComplete(t, 'executive-review') || view.status === 'Completed';
-  const launchDone =
-    isComplete(t, 'reveal') || (view.status === 'Completed' && Boolean(view.siteUrl));
-  const careDone = view.status === 'Completed' && Boolean(view.siteUrl);
-
-  return {
-    Welcome: true,
-    Discovery: Boolean(discoveryDone || strategyDone || proposalDone),
-    Strategy: Boolean(strategyDone || proposalDone),
-    Proposal: proposalDone,
-    Agreement: Boolean(agreementDone),
-    Design: designDone,
-    Build: buildDone,
-    Review: reviewDone,
-    Launch: launchDone,
-    Care: careDone,
-  };
+  const currentIndex = GUIDE_LIFECYCLE_STAGES.indexOf(current);
+  const done = {} as Record<GuideLifecycleStage, boolean>;
+  for (let i = 0; i < GUIDE_LIFECYCLE_STAGES.length; i += 1) {
+    const stage = GUIDE_LIFECYCLE_STAGES[i]!;
+    done[stage] = i < currentIndex;
+  }
+  return done;
 }
 
-export function resolveGuideCurrentStage(
-  done: Record<GuideLifecycleStage, boolean>,
-  view: CtpPortalStatusView,
-): GuideLifecycleStage {
-  if (view.status === 'Completed' && view.siteUrl) return 'Care';
-
-  for (const stage of GUIDE_LIFECYCLE_STAGES) {
-    if (!done[stage]) return stage;
+export function resolveGuideCurrentStage(view: CtpPortalStatusView): GuideLifecycleStage {
+  if (view.guideStage && GUIDE_LIFECYCLE_STAGES.includes(view.guideStage)) {
+    return view.guideStage;
   }
-  return 'Care';
+  return 'Welcome';
 }
 
 export function resolveGuideStages(view: CtpPortalStatusView): GuideStageResolution {
-  const done = resolveGuideStageDone(view);
-  const current = resolveGuideCurrentStage(done, view);
+  const current = resolveGuideCurrentStage(view);
+  const done = resolveGuideStageDone(current);
   const completed = GUIDE_LIFECYCLE_STAGES.filter((stage) => done[stage]);
   return { current, done, completed };
 }

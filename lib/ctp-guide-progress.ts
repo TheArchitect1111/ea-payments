@@ -5,7 +5,6 @@
 import type { CtpPortalStatusView } from '@/lib/ctp-portal-status';
 import {
   designStudioPath,
-  opportunityDashboardPath,
   opportunityReviewPath,
   portalCtpPath,
 } from '@/lib/ctp-opportunity-routes';
@@ -462,7 +461,6 @@ function resolveNba(
   stage: GuideLifecycleStage,
   view: CtpPortalStatusView,
 ): GuideNextBestAction {
-  const journey = opportunityDashboardPath(slug);
   const progress = designStudioPath(slug);
   const reviewHref = opportunityReviewPath(slug);
   const support = portalCtpPath(slug, 'ctp/support');
@@ -508,13 +506,17 @@ function resolveNba(
   }
 
   // 3 — Required approval (Agreement / Proposal confirmation)
-  if ((stage === 'Agreement' || stage === 'Proposal') && hasProposal) {
+  // Never send clients to synthetic WPS proposal IDs.
+  const realProposal =
+    hasProposal && view.proposalId && !/^WPS-/i.test(view.proposalId) ? view.proposalId : null;
+
+  if ((stage === 'Agreement' || stage === 'Proposal') && realProposal) {
     candidates.push({
-      priority: stage === 'Agreement' ? 3 : 3,
+      priority: 3,
       kind: 'approval',
       nothingRequired: false,
       label: stage === 'Agreement' ? 'Confirm to continue' : 'Review your proposal',
-      href: `/proposal/${encodeURIComponent(view.proposalId!)}`,
+      href: `/proposal/${encodeURIComponent(realProposal)}`,
       why:
         stage === 'Agreement'
           ? 'Confirmation lets us begin Design without delay.'
@@ -547,13 +549,13 @@ function resolveNba(
   }
 
   // 5 — Required payment (same surface as approval when proposal exists at Agreement)
-  if (stage === 'Agreement' && hasProposal) {
+  if (stage === 'Agreement' && realProposal) {
     candidates.push({
       priority: 5,
       kind: 'payment',
       nothingRequired: false,
       label: 'Complete confirmation',
-      href: `/proposal/${encodeURIComponent(view.proposalId!)}`,
+      href: `/proposal/${encodeURIComponent(realProposal)}`,
       why: 'This unlocks Design and keeps the project moving.',
       duration: 'A few minutes',
       after: 'We’ll begin Design immediately on our side.',
@@ -566,8 +568,8 @@ function resolveNba(
       priority: 6,
       kind: 'information',
       nothingRequired: false,
-      label: 'Continue Your Journey',
-      href: journey,
+      label: 'Continue Your Project',
+      href: progress,
       why: 'See what we’ve already noticed — it sets up everything that follows.',
       duration: '5–10 minutes',
       after: 'Return here for the one next step that moves the project forward.',

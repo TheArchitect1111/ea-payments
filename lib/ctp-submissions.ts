@@ -12,6 +12,10 @@ import {
   airtableUpsertByField,
   escapeAirtableString,
 } from '@/lib/data/airtable-client';
+import type {
+  GuideLifecycleStage,
+  ProjectEvidenceState,
+} from '@/lib/project-state-engine';
 
 const TABLE = process.env.AIRTABLE_CTP_SUBMISSIONS_TABLE ?? 'CTP Submissions';
 
@@ -101,6 +105,15 @@ export type CtpSubmission = {
   /** PraisonAI workforce package — full executive intelligence output. */
   workforcePackage?: ExecutiveIntelligencePackage;
   assetManifest?: CtpAssetManifest;
+  /**
+   * Canonical Guide stage — Project State Engine SSOT.
+   * Never derive from siteUrl / WPS / incidental fields at read time.
+   */
+  guideStage?: GuideLifecycleStage;
+  /** Accumulated evidence flags for the Project State Engine. */
+  projectEvidence?: ProjectEvidenceState;
+  /** ISO timestamp when authoritative payment completed Agreement. */
+  agreementPaidAt?: string;
   submittedAt: string;
   updatedAt: string;
 };
@@ -127,6 +140,10 @@ export type CtpSubmissionUpdate = Partial<
     | 'executiveEmailSentAt'
     | 'reviewReminderSentAt'
     | 'discoveryAnswers'
+    | 'guideStage'
+    | 'projectEvidence'
+    | 'agreementPaidAt'
+    | 'proposalId'
   >
 >;
 
@@ -179,6 +196,9 @@ function toAirtableFields(submission: CtpSubmission): Record<string, unknown> {
       reviewReminderSentAt: submission.reviewReminderSentAt,
       executiveScoring: submission.executiveScoring,
       workforcePackage: submission.workforcePackage,
+      guideStage: submission.guideStage,
+      projectEvidence: submission.projectEvidence,
+      agreementPaidAt: submission.agreementPaidAt,
     }),
     'Submitted At': submission.submittedAt,
     'Updated At': submission.updatedAt,
@@ -205,6 +225,9 @@ function fromAirtableRecord(fields: Record<string, unknown>): CtpSubmission | nu
     reviewReminderSentAt?: string;
     executiveScoring?: CtpExecutiveScore;
     workforcePackage?: ExecutiveIntelligencePackage;
+    guideStage?: GuideLifecycleStage;
+    projectEvidence?: ProjectEvidenceState;
+    agreementPaidAt?: string;
   } = {};
   const raw = fields['Payload JSON'];
   if (typeof raw === 'string' && raw.trim()) {
@@ -270,6 +293,9 @@ function fromAirtableRecord(fields: Record<string, unknown>): CtpSubmission | nu
     workforcePackage: payload.workforcePackage,
     intakeAnalysis,
     assetManifest,
+    guideStage: payload.guideStage,
+    projectEvidence: payload.projectEvidence,
+    agreementPaidAt: payload.agreementPaidAt,
     submittedAt: String(fields['Submitted At'] ?? new Date().toISOString()),
     updatedAt: String(fields['Updated At'] ?? new Date().toISOString()),
   };
@@ -317,6 +343,8 @@ export async function createCtpSubmission(input: {
     clientTypeClassification: input.clientTypeClassification,
     executiveScoring: input.executiveScoring,
     assetManifest: input.assetManifest,
+    guideStage: 'Welcome',
+    projectEvidence: { flags: {}, at: {} },
     submittedAt: now,
     updatedAt: now,
   };
@@ -440,7 +468,7 @@ export async function getCtpSubmissionForPortal(input: {
     )
     .sort((a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime());
 
-  if (fromMemory[0]) return fromMemory[0];
+  if (fromMemory[0]) return await ensureCanonicalProjectState(fromMemory[0]);
 
   if (!airtableConfigured() || (!portalSlug && !email)) return null;
 
@@ -460,10 +488,10 @@ export async function getCtpSubmissionForPortal(input: {
     const row = fromAirtableRecord(records[0].fields ?? {});
     if (!row) return null;
     memory.set(row.id, row);
-    return row;
+    return await ensureCanonicalProjectState(row);
   } catch (err) {
     console.error('[ctp-submissions] portal lookup failed:', err);
-    return fromMemory[0] ?? null;
+    return fromMemory[0] ? await ensureCanonicalProjectState(fromMemory[0]) : null;
   }
 }
 
@@ -511,6 +539,59 @@ export async function getCtpSubmissionById(id: string): Promise<CtpSubmission | 
     console.error('[ctp-submissions] Airtable load failed:', err);
     return null;
   }
+}
+
+/**
+ * Ensure guideStage is persisted. Bootstraps from legacy evidence once.
+ * Does not use siteUrl / WPS as Agreement or Design.
+ */
+export async function ensureCanonicalProjectState(
+  submission: CtpSubmission,
+): Promise<CtpSubmission> {
+  if (submission.guideStage && submission.projectEvidence) {
+    return submission;
+  }
+
+  const { bootstrapProjectStateFromLegacy } = await import('@/lib/project-state-engine');
+  const boot = bootstrapProjectStateFromLegacy(submission);
+  const updated = await updateCtpSubmission(submission.id, boot.patch);
+  return updated.submission ?? { ...submission, ...boot.patch };
+}
+
+/** Emit evidence → Project State Engine decides stage (only authority). */
+export async function applyProjectEvidenceToSubmission(
+  submissionId: string,
+  kinds: import('@/lib/project-state-engine').ProjectEvidenceKind[],
+): Promise<{ ok: boolean; submission?: CtpSubmission; error?: string }> {
+  const existing = memory.get(submissionId) ?? (await getCtpSubmissionById(submissionId));
+  if (!existing) return { ok: false, error: 'CTP submission not found.' };
+
+  const ensured = await ensureCanonicalProjectState(existing);
+  const { applyProjectEvidence, reconcileProjectState } = await import(
+    '@/lib/project-state-engine'
+  );
+  const applied = applyProjectEvidence(
+    {
+      stage: ensured.guideStage ?? 'Welcome',
+      evidence: ensured.projectEvidence,
+      agreementPaidAt: ensured.agreementPaidAt,
+    },
+    kinds,
+  );
+  const result = reconcileProjectState({
+    stage: applied.stage,
+    evidence: applied.evidence,
+    agreementPaidAt: applied.patch.agreementPaidAt ?? ensured.agreementPaidAt,
+  });
+
+  const sameFlags =
+    JSON.stringify(ensured.projectEvidence?.flags ?? {}) ===
+    JSON.stringify(result.evidence.flags);
+  if (!result.changed && sameFlags && ensured.guideStage === result.stage) {
+    return { ok: true, submission: ensured };
+  }
+
+  return updateCtpSubmission(submissionId, result.patch);
 }
 
 export function isCtpDiscoverySubmit(body: Record<string, unknown>): boolean {

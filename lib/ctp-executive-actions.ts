@@ -107,6 +107,13 @@ export async function runCtpExecutiveAction(
       return { ok: false, error: updated.error ?? 'Could not mark ready for review.' };
     }
 
+    try {
+      const { applyProjectEvidenceToSubmission } = await import('@/lib/ctp-submissions');
+      await applyProjectEvidenceToSubmission(submissionId, ['build.ready_for_review']);
+    } catch (err) {
+      console.error('[ctp-executive-actions] ready_for_review evidence failed:', err);
+    }
+
     await emitPulseEvent({
       product: 'ea-platform',
       type: 'ctp.ready_for_review',
@@ -168,6 +175,16 @@ export async function runCtpExecutiveAction(
 
     if (!updated.ok || !updated.submission) {
       return { ok: false, error: updated.error ?? 'Reveal email sent but status update failed.' };
+    }
+
+    try {
+      const { applyProjectEvidenceToSubmission } = await import('@/lib/ctp-submissions');
+      await applyProjectEvidenceToSubmission(submissionId, [
+        'review.approved',
+        'project.launched',
+      ]);
+    } catch (err) {
+      console.error('[ctp-executive-actions] approve_reveal evidence failed:', err);
     }
 
     await emitPulseEvent({
