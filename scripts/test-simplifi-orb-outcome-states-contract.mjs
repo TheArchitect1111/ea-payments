@@ -41,8 +41,9 @@ assert(session.includes("onOutcomeFlash?.('success')"), 'capture success must fl
 
 const actions = readFileSync(join(root, 'app/simplifi/opportunity/[id]/OpportunityActions.tsx'), 'utf8');
 assert(actions.includes('onOutcomeFlash'), 'OpportunityActions must accept onOutcomeFlash');
-assert(actions.includes("onOutcomeFlash?.('success')"), 'won must flash success');
+assert(actions.includes("onOutcomeFlash?.('celebration')"), 'won must flash celebration');
 assert(actions.includes("onOutcomeFlash?.('learning')"), 'Build Intelligence must flash learning');
+assert(actions.includes("emitOrbOutcomeFlash('celebration')"), 'won must emit celebration for full page');
 
 if (failures.length) {
   console.error('FAIL');

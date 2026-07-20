@@ -51,8 +51,8 @@ export default async function SimplifiSettingsPage() {
             <ChromeFadeToggle initialEnabled={chromeFade} />
           </div>
           <p className="sw-muted" style={{ marginTop: 12 }}>
-            Experimental chat-first shell (legacy):{' '}
-            <Link href="/simplifi/orb?chat=1">/simplifi/orb?chat=1</Link>
+            Deprecated — use the corner Orb. Escape hatch only:{' '}
+            <Link href="/simplifi/orb?chat=1&legacy=1">/simplifi/orb?chat=1&amp;legacy=1</Link>
           </p>
         </section>
 

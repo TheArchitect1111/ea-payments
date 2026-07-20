@@ -44,13 +44,19 @@ assert(!intentCopy.includes('How can I help'), 'ambient must not ask how can I h
 
 const orbPage = readFileSync(join(root, 'app/simplifi/orb/page.tsx'), 'utf8');
 assert(orbPage.includes("redirect('/simplifi/workspace')"), 'default redirect to Brief');
-assert(orbPage.includes('chat'), 'chat escape hatch required');
+assert(orbPage.includes("chat === '1'") && orbPage.includes("legacy === '1'"), 'legacy=1 gate required');
+assert(orbPage.includes('legacyChat'), 'must compute legacy chat gate');
 
 const workspace = readFileSync(join(root, 'app/simplifi/workspace/page.tsx'), 'utf8');
 assert(workspace.includes('SimplifiProductShell'), 'workspace uses product shell');
 
+const settings = readFileSync(join(root, 'app/simplifi/settings/page.tsx'), 'utf8');
+assert(settings.includes('legacy=1'), 'Settings escape hatch must require legacy=1');
+assert(settings.includes('Deprecated'), 'Settings must label chat shell deprecated');
+
 const doc = readFileSync(join(root, 'docs/ORB-OS-PREVIEW.md'), 'utf8');
-assert(doc.includes('chat=1') || doc.includes('legacy'), 'docs note chat-first is legacy');
+assert(doc.includes('legacy=1'), 'docs note legacy=1 escape hatch');
+assert(doc.includes('deprecated') || doc.includes('Deprecated'), 'docs mark chat-first deprecated');
 
 if (failures.length) {
   console.error('FAIL');

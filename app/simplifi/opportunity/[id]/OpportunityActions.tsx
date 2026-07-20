@@ -149,8 +149,8 @@ export default function OpportunityActions({
               const data = await recordCaptureOutcome(recordId, 'won');
               setNote(data.ok ? 'Marked won.' : data.error ?? 'Could not update.');
               if (data.ok) {
-                onOutcomeFlash?.('success');
-                emitOrbOutcomeFlash('success');
+                onOutcomeFlash?.('celebration');
+                emitOrbOutcomeFlash('celebration');
               }
             })
           }

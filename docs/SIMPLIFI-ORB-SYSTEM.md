@@ -11,7 +11,7 @@ The Orb is the **persistent visual intelligence layer** of SIMPLIFI — not a ch
 | **Expanded panel** | Contextual intelligence + Ask / voice (only when opened) |
 | **Language → route** | Ask / Speak uses `interpretOrbIntent` + `resolveOrbIntentHref` to open existing surfaces |
 
-Chat-first shell at `/simplifi/orb` redirects to Brief. Experimental: `/simplifi/orb?chat=1`.
+Chat-first shell at `/simplifi/orb` redirects to Brief. Deprecated escape hatch: `/simplifi/orb?chat=1&legacy=1`.
 
 ## Architecture
 
@@ -170,18 +170,17 @@ display via `outcomeFlash` — they are **not** pushed into `deriveOrbSession`
 | Real event | Visual |
 |------------|--------|
 | Capture saved (session CaptureView) | `success` (bloom) |
-| Opportunity marked won | `success` |
+| Opportunity marked won | `celebration` (milestone bloom) |
 | Build Intelligence returns data | `learning` (purple core) |
 | Snooze / in progress / pass / archive | none (inline note only) |
-| `celebration` | reserved — not wired until a genuine milestone exists |
 
 Wiring: `GlobalOrb.flashOutcome` → `SessionWorkspace.onOutcomeFlash` →
-`CaptureView` / `OpportunityActions` (optional prop; full opportunity page works without it).
+`CaptureView` / `OpportunityActions` (plus `emitOrbOutcomeFlash` for full opportunity page).
 
 ## Chrome Fade (Step 5)
 
 Opt-in compact navigation for denser users. **Default chrome is unchanged.**
-Brief remains home. Chat-first Orb is still legacy (`/simplifi/orb?chat=1`).
+Brief remains home. Chat-first Orb is deprecated (`/simplifi/orb?chat=1&legacy=1` only).
 
 | Layer | Value |
 |-------|-------|

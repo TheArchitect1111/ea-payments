@@ -70,7 +70,7 @@ assert(!workspace.includes("redirect('/simplifi/orb')"), 'workspace must not red
 
 const orbPage = readFileSync(join(root, 'app/simplifi/orb/page.tsx'), 'utf8');
 assert(orbPage.includes("redirect('/simplifi/workspace')"), 'orb default must redirect to workspace');
-assert(orbPage.includes("chat !== '1'") || orbPage.includes('chat=1'), 'chat escape hatch required');
+assert(orbPage.includes("chat === '1'") && orbPage.includes("legacy === '1'"), 'legacy chat escape hatch required');
 
 const workspaceClient = readFileSync(join(root, 'app/simplifi/workspace/SimplifiWorkspace.tsx'), 'utf8');
 assert(!workspaceClient.includes('CompanionOrb'), 'Brief must not double-mount CompanionOrb');

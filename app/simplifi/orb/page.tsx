@@ -6,12 +6,13 @@ import OrbOsShell from './OrbOsShell';
 
 export const dynamic = 'force-dynamic';
 
-type Props = { searchParams: Promise<{ chat?: string; orb?: string }> };
+type Props = { searchParams: Promise<{ chat?: string; orb?: string; legacy?: string }> };
 
-/** Default: Brief home. Experimental chat-first shell only with ?chat=1. */
+/** Default: Brief home. Deprecated chat-first shell only with ?chat=1&legacy=1. */
 export default async function OrbOsPage({ searchParams }: Props) {
   const params = await searchParams;
-  if (params.chat !== '1') {
+  const legacyChat = params.chat === '1' && params.legacy === '1';
+  if (!legacyChat) {
     redirect('/simplifi/workspace');
   }
 

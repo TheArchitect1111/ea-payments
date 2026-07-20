@@ -382,7 +382,9 @@ export default function GlobalOrb({
             ? 'SIMPLIFI Orb, action completed'
             : outcomeFlash === 'learning'
               ? 'SIMPLIFI Orb, intelligence updated'
-              : session.ariaLabel}
+              : outcomeFlash === 'celebration'
+                ? 'SIMPLIFI Orb, milestone reached'
+                : session.ariaLabel}
       </div>
 
       {open ? (
