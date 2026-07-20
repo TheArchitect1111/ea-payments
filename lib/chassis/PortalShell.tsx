@@ -63,7 +63,7 @@ const FALLBACK_TITLES: Record<EAPortalTab, string> = {
   messaging: 'Messages',
   learning: 'Learning',
   ask: 'Ask EA',
-  ctp: 'Your Journey',
+  ctp: 'Your Project',
   member: 'Member Experience',
   landing: 'Landing Pages',
 };
@@ -109,7 +109,7 @@ export async function PortalShell({
     clientNavActiveProp || resolveClientNavActive(pathname, slug);
 
   const clientTitle =
-    clientNavItems.find((item) => item.id === clientNavActive)?.label ?? 'Your Journey';
+    clientNavItems.find((item) => item.id === clientNavActive)?.label ?? 'Your Project';
 
   const resolvedTitle =
     pageTitle ??
@@ -139,7 +139,7 @@ export async function PortalShell({
       promoCopy={chrome.promoCopy}
       personalityName={chrome.personalityName}
       personalityId={chrome.personalityId}
-      homeLabel={effectivePresentation === 'client' ? 'Your Journey' : chrome.homeLabel}
+      homeLabel={effectivePresentation === 'client' ? 'Your Project' : chrome.homeLabel}
       presentation={effectivePresentation}
       clientNavItems={clientNavItems}
       clientNavActive={clientNavActive}

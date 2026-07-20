@@ -664,7 +664,7 @@ export function buildCtpOpportunityDetailView(
     return {
       opportunity: fromCards,
       businessName: submission.businessName,
-      backHref: opportunityDashboardPath(slug),
+      backHref: designStudioPath(slug),
     };
   }
 
@@ -673,7 +673,7 @@ export function buildCtpOpportunityDetailView(
     return {
       opportunity: healthAreaAsOpportunity(health, submission),
       businessName: submission.businessName,
-      backHref: opportunityDashboardPath(slug),
+      backHref: designStudioPath(slug),
     };
   }
 
@@ -707,7 +707,7 @@ export function buildCtpOpportunityReviewView(
     ],
     calendlyUrl: schedule.calendlyUrl,
     reviewLabel: schedule.reviewLabel,
-    backHref: opportunityDashboardPath(slug),
+    backHref: designStudioPath(slug),
     ctaLabel: 'Schedule My Opportunity Review',
   };
 }

@@ -106,9 +106,9 @@ export default async function PortalCtpMessagesPage({
         <Link
           href={`/portal/${slug}/ctp/progress`}
           className="inline-block rounded-full px-6 py-3 text-sm font-bold"
-          style={{ border: '1px solid rgba(255,255,255,0.35)', color: '#fff' }}
+          style={{ backgroundColor: GOLD, color: NAVY }}
         >
-          Progress
+          Back to Your Project
         </Link>
       </div>
     </PortalSubpage>

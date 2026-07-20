@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { getStripe } from '@/lib/stripe';
 import { getProposalByProposalId, updateProposal } from '@/lib/airtable';
+import { getCtpSubmissionByProposalId } from '@/lib/ctp-submissions';
+import { designStudioPath } from '@/lib/ctp-opportunity-routes';
 
 export const dynamic = 'force-dynamic';
 
@@ -34,6 +36,10 @@ export async function POST(req: NextRequest): Promise<Response> {
   }
 
   const proposalUrl = `${baseUrl}/proposal/${encodeURIComponent(proposalId)}`;
+  const ctpBound = await getCtpSubmissionByProposalId(proposalId).catch(() => null);
+  const guideReturnUrl = ctpBound?.portalSlug
+    ? `${baseUrl}${designStudioPath(ctpBound.portalSlug)}?payment=success`
+    : `${proposalUrl}?payment=success`;
 
   const errorRedirect = (reason: string) => {
     console.error(`checkout/proposal [${proposalId}]:`, reason);
@@ -96,7 +102,7 @@ export async function POST(req: NextRequest): Promise<Response> {
         proposalId: proposal.proposalId,
         airtableRecordId: proposal.id,
       },
-      success_url: `${proposalUrl}?payment=success`,
+      success_url: guideReturnUrl,
       cancel_url: `${proposalUrl}?payment=cancelled`,
     };
 

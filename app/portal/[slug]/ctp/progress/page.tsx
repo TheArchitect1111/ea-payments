@@ -16,10 +16,13 @@ export const dynamic = 'force-dynamic';
  */
 export default async function PortalCtpStatusPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { slug } = await params;
+  const query = await searchParams;
   const { session, client } = await requirePortalModule(slug, 'ctp');
 
   const submission = await getCtpSubmissionForPortal({
@@ -33,6 +36,18 @@ export default async function PortalCtpStatusPage({
 
   const statusView = buildCtpPortalStatusView(submission);
   const guide = buildGuideProgressView(slug, statusView);
+
+  const meetingConfirmed =
+    query.meeting === 'confirmed' ||
+    (Array.isArray(query.meeting) && query.meeting[0] === 'confirmed');
+  const paymentSuccess =
+    query.payment === 'success' ||
+    (Array.isArray(query.payment) && query.payment[0] === 'success');
+  const returnCelebration = meetingConfirmed
+    ? 'You’re scheduled — thank you. We’ve updated your project and prepared what comes next.'
+    : paymentSuccess
+      ? 'Your confirmation is received. We’ve updated your project and prepared Design.'
+      : guide.celebrationMessage;
 
   return (
     <PortalSubpage
@@ -53,9 +68,9 @@ export default async function PortalCtpStatusPage({
             <strong>{guide.headline}</strong>
           </p>
           <p className="guide-progress-stage-why">{guide.summary}</p>
-          {guide.celebrationMessage ? (
+          {returnCelebration ? (
             <p className="guide-progress-eta">
-              <strong>{guide.celebrationMessage}</strong>
+              <strong>{returnCelebration}</strong>
             </p>
           ) : null}
           {guide.estimatedCompletion ? (

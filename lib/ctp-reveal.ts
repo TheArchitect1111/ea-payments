@@ -127,7 +127,7 @@ export function buildCtpRevealView(input: {
     deliverables,
     metrics: metrics.slice(0, 3),
     siteUrl: ctp?.siteUrl,
-    portalPath: publicPortalUrl(input.slug, 'ctp'),
+    portalPath: publicPortalUrl(input.slug, 'ctp/progress'),
     progressPath: publicPortalUrl(input.slug, 'ctp/progress'),
     calendlyUrl: input.calendlyUrl ?? DEFAULT_CALENDLY,
     productionHeadline: ctp?.productionPackage?.headline,

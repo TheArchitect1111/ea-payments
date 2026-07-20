@@ -5,6 +5,7 @@ import { requirePortalModule } from '@/lib/modules/portal-modules';
 import { PortalSubpage } from '@/app/portal/components/PortalSubpage';
 import { buildCtpSupportView } from '@/lib/ctp-support-view';
 import { getCtpSubmissionForPortal } from '@/lib/ctp-submissions';
+import { designStudioPath } from '@/lib/ctp-opportunity-routes';
 
 export const dynamic = 'force-dynamic';
 
@@ -26,6 +27,8 @@ export default async function PortalCtpSupportPage({
   }
 
   const view = buildCtpSupportView(submission, slug);
+  const { guide } = view;
+  const progressHref = designStudioPath(slug);
   const primary = view.actions.find((action) => action.primary) ?? view.actions[0];
 
   return (
@@ -35,13 +38,13 @@ export default async function PortalCtpSupportPage({
       clientNavActive="support"
       kicker="Support"
       title="We're here when you need us"
-      lede="Questions, scheduling, and direct help for your journey — without the internal EA workspace."
+      lede="You never need to re-explain where your project stands — we already know."
     >
       <div className="ep-module-card" style={{ marginBottom: '1.25rem' }}>
         <p className="ep-module-card-note" style={{ marginBottom: '0.35rem' }}>
           {view.businessName}
           {view.clientTypeLabel ? ` · ${view.clientTypeLabel}` : ''}
-          {` · ${view.status}`}
+          {` · ${guide.currentStage}`}
         </p>
         <h2 style={{ margin: '0 0 0.5rem', fontSize: '1.35rem', fontWeight: 800, color: '#fff' }}>
           {view.headline}
@@ -60,6 +63,38 @@ export default async function PortalCtpSupportPage({
             </a>
           </p>
         ) : null}
+      </div>
+
+      <div className="ep-module-card" style={{ marginBottom: '1.25rem' }}>
+        <p
+          style={{
+            margin: '0 0 0.75rem',
+            fontSize: '0.7rem',
+            fontWeight: 800,
+            letterSpacing: '0.18em',
+            textTransform: 'uppercase',
+            color: 'rgba(216,173,61,0.85)',
+          }}
+        >
+          Your project context
+        </p>
+        <p style={{ margin: '0 0 0.5rem', color: 'rgba(255,255,255,0.85)', lineHeight: 1.55 }}>
+          <strong>Current stage:</strong> {guide.currentStage}
+        </p>
+        <p style={{ margin: '0 0 0.5rem', color: 'rgba(255,255,255,0.85)', lineHeight: 1.55 }}>
+          <strong>Next Best Action:</strong> {guide.nbaLabel}
+        </p>
+        <p style={{ margin: '0 0 0.5rem', color: 'rgba(255,255,255,0.7)', lineHeight: 1.55 }}>
+          {guide.nbaWhy}
+        </p>
+        {guide.recentMilestones.length ? (
+          <p style={{ margin: '0 0 0.5rem', color: 'rgba(255,255,255,0.7)', lineHeight: 1.55 }}>
+            <strong>Recent milestones:</strong> {guide.recentMilestones.join(' · ')}
+          </p>
+        ) : null}
+        <p style={{ margin: 0, color: 'rgba(255,255,255,0.7)', lineHeight: 1.55 }}>
+          <strong>Pending:</strong> {guide.pendingActions.join(' · ')}
+        </p>
       </div>
 
       <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'grid', gap: '0.75rem' }}>
@@ -90,11 +125,11 @@ export default async function PortalCtpSupportPage({
 
       <div style={{ marginTop: '1.25rem', display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
         <Link
-          href={`/portal/${slug}/ctp`}
+          href={progressHref}
           className="inline-block rounded-full px-6 py-3 text-sm font-bold"
-          style={{ border: '1px solid rgba(255,255,255,0.35)', color: '#fff' }}
+          style={{ backgroundColor: GOLD, color: NAVY }}
         >
-          Back to overview
+          Back to Your Project
         </Link>
         <Link
           href={`/portal/${slug}/ctp/documents`}

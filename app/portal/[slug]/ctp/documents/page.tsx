@@ -5,6 +5,7 @@ import { requirePortalModule } from '@/lib/modules/portal-modules';
 import { PortalSubpage } from '@/app/portal/components/PortalSubpage';
 import { buildCtpDocumentsView } from '@/lib/ctp-documents-view';
 import { getCtpSubmissionForPortal } from '@/lib/ctp-submissions';
+import { designStudioPath } from '@/lib/ctp-opportunity-routes';
 import PortalCtpAssetGallery from '@/app/portal/components/PortalCtpAssetGallery';
 
 export const dynamic = 'force-dynamic';
@@ -27,6 +28,7 @@ export default async function PortalCtpDocumentsPage({
   }
 
   const view = buildCtpDocumentsView(submission, slug);
+  const progressHref = designStudioPath(slug);
 
   return (
     <PortalSubpage
@@ -35,7 +37,7 @@ export default async function PortalCtpDocumentsPage({
       clientNavActive="documents"
       kicker="Documents"
       title="Your documents"
-      lede="Uploads from Design Studio and generated deliverables — one place for the work product of your transformation."
+      lede="Everything prepared for you — why it’s here, when to review it, and what happens next."
     >
       <div className="ep-module-card" style={{ marginBottom: '1.25rem' }}>
         <p className="ep-module-card-note" style={{ marginBottom: '0.35rem' }}>
@@ -64,7 +66,7 @@ export default async function PortalCtpDocumentsPage({
             color: 'rgba(216,173,61,0.85)',
           }}
         >
-          Generated deliverables
+          Prepared for you
         </p>
         <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'grid', gap: '0.75rem' }}>
           {view.deliverables.map((doc) => (
@@ -111,6 +113,36 @@ export default async function PortalCtpDocumentsPage({
                   >
                     {doc.detail}
                   </p>
+                  <p
+                    style={{
+                      margin: '0.65rem 0 0',
+                      fontSize: '0.85rem',
+                      lineHeight: 1.55,
+                      color: 'rgba(255,255,255,0.72)',
+                    }}
+                  >
+                    <strong>Why you’re receiving this:</strong> {doc.why}
+                  </p>
+                  <p
+                    style={{
+                      margin: '0.35rem 0 0',
+                      fontSize: '0.85rem',
+                      lineHeight: 1.55,
+                      color: 'rgba(255,255,255,0.72)',
+                    }}
+                  >
+                    <strong>When to review:</strong> {doc.when}
+                  </p>
+                  <p
+                    style={{
+                      margin: '0.35rem 0 0',
+                      fontSize: '0.85rem',
+                      lineHeight: 1.55,
+                      color: 'rgba(255,255,255,0.72)',
+                    }}
+                  >
+                    <strong>After you complete it:</strong> {doc.after}
+                  </p>
                 </div>
                 {doc.ready ? (
                   <a
@@ -146,32 +178,25 @@ export default async function PortalCtpDocumentsPage({
             Uploads
           </p>
           <p style={{ margin: '0 0 1rem', color: 'rgba(255,255,255,0.65)', lineHeight: 1.6 }}>
-            No brand assets uploaded yet. Add logo, photos, or documents in Design Studio.
+            No brand assets uploaded yet. Add logo, photos, or documents when Progress asks.
           </p>
           <Link
-            href={`/portal/${slug}/ctp/progress`}
+            href={progressHref}
             className="inline-block rounded-full px-5 py-2.5 text-sm font-bold"
             style={{ border: '1px solid rgba(255,255,255,0.35)', color: '#fff' }}
           >
-            Open Design Studio
+            Open Your Project
           </Link>
         </section>
       )}
 
       <div style={{ marginTop: '1.25rem', display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
         <Link
-          href={`/portal/${slug}/ctp`}
+          href={progressHref}
           className="inline-block rounded-full px-6 py-3 text-sm font-bold"
           style={{ backgroundColor: GOLD, color: NAVY }}
         >
-          Back to overview
-        </Link>
-        <Link
-          href={`/portal/${slug}/ctp/bi`}
-          className="inline-block rounded-full px-6 py-3 text-sm font-bold"
-          style={{ border: '1px solid rgba(255,255,255,0.35)', color: '#fff' }}
-        >
-          Executive Snapshot
+          Back to Your Project
         </Link>
       </div>
     </PortalSubpage>

@@ -8,7 +8,7 @@ import {
   shouldUseClientExperienceShell,
   type ClientExperienceNavId,
 } from '@/lib/ctp-client-nav';
-import { opportunityDashboardPath } from '@/lib/ctp-opportunity-routes';
+import { designStudioPath } from '@/lib/ctp-opportunity-routes';
 import '../[slug]/ea-portal.css';
 
 export async function PortalSubpage({
@@ -30,7 +30,7 @@ export async function PortalSubpage({
 }) {
   const chrome = await resolvePortalWorkspaceChrome(slug);
   const clientShell = await shouldUseClientExperienceShell(slug);
-  const journeyHref = opportunityDashboardPath(slug);
+  const guideHref = designStudioPath(slug);
 
   return (
     <PortalShell
@@ -50,8 +50,8 @@ export async function PortalSubpage({
         </div>
         {children}
         <p className="ep-muted-link">
-          <Link href={clientShell ? journeyHref : `/portal/${slug}`}>
-            ← Back to {clientShell ? 'Your Journey' : chrome.homeLabel}
+          <Link href={clientShell ? guideHref : `/portal/${slug}`}>
+            ← Back to {clientShell ? 'Your Project' : chrome.homeLabel}
           </Link>
         </p>
       </main>

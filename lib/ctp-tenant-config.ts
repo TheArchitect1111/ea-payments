@@ -4,7 +4,7 @@
  */
 import type { CtpSubmission } from '@/lib/ctp-submissions';
 import { publicPortalLoginUrl, publicPortalUrl } from '@/lib/ctp-portal-host';
-import { opportunityDashboardPath } from '@/lib/ctp-opportunity-routes';
+import { designStudioPath } from '@/lib/ctp-opportunity-routes';
 import { sitePathForSlug, siteUrlForSlug } from '@/lib/provision-website-portal';
 
 export type BrandOnboardingPath =
@@ -110,7 +110,7 @@ export function buildTenantClientConfigFromCtp(
       ? 'Website + Portal Starter'
       : 'Consider The Possibilities™';
 
-  const homePath = opportunityDashboardPath(slug);
+  const homePath = designStudioPath(slug);
   const tagline =
     discoveryString(answers, 'success_definition') ||
     discoveryString(answers, 'offer_summary') ||

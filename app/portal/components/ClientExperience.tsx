@@ -369,8 +369,8 @@ export default function ClientExperience({ view, slug, studio }: Props) {
                 What happens next.
               </h2>
               <p className="cex-lede">
-                Where you are: <strong>Discovery</strong>. We&apos;ve started. Your portal is the
-                home base for everything ahead.
+                Where you are: <strong>{view.currentStage || 'Welcome'}</strong>. Your Project
+                (Progress) is the home base for everything ahead.
               </p>
               <EditorialPhoto
                 className="cex-begin-hero"

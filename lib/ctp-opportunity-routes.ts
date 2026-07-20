@@ -6,12 +6,12 @@ import { publicPortalUrl } from '@/lib/ctp-portal-host';
 
 /** Path suffixes under `/portal/{slug}/` for the Opportunity Experience journey. */
 export const CTP_OPPORTUNITY_SEGMENTS = {
-  /** Primary landing — Opportunity Dashboard (not Simplifi hub, not Design Studio). */
+  /** Story / Journey surface (not the Guide front door). */
   dashboard: 'ctp',
   review: 'ctp/review',
   /** Detail pages: `ctp/opportunities/{opportunityId}` */
   detail: 'ctp/opportunities',
-  /** Secondary — brand/uploads after insights; never the email CTA. */
+  /** Guide home — Progress (canonical client front door). */
   designStudio: 'ctp/progress',
   schedule: 'ctp/schedule',
 } as const;
@@ -47,22 +47,21 @@ export function opportunitySchedulePath(slug: string): string {
 }
 
 /**
- * Public hub URL for emails and provision CTAs.
- * Default: `https://efficiencyarchitects.online/portal/{slug}/ctp`
+ * Public Guide URL for emails and provision CTAs.
+ * Default: `https://efficiencyarchitects.online/portal/{slug}/ctp/progress`
  */
 export function opportunityDashboardPublicUrl(slug: string): string {
-  return publicPortalUrl(slug, CTP_OPPORTUNITY_SEGMENTS.dashboard);
+  return publicPortalUrl(slug, CTP_OPPORTUNITY_SEGMENTS.designStudio);
 }
 
 /** Relative suffix passed to `publicPortalUrl(slug, suffix)` for welcome emails. */
 export function opportunityEmailPathSuffix(): string {
-  return CTP_OPPORTUNITY_SEGMENTS.dashboard;
+  return CTP_OPPORTUNITY_SEGMENTS.designStudio;
 }
 
 /**
- * Where CTP intake clients land after portal home or email CTA.
- * Design Studio is never the primary destination.
+ * Where CTP clients land after portal home or email CTA — Guide Progress.
  */
 export function resolveCtpClientLandingPath(slug: string): string {
-  return opportunityDashboardPath(slug);
+  return designStudioPath(slug);
 }

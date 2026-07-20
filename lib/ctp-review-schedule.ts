@@ -32,8 +32,8 @@ export async function sendCtpReviewReminderForSubmission(
   }
 
   const portalUrl = submission.portalSlug
-    ? publicPortalUrl(submission.portalSlug, 'ctp')
-    : publicPortalUrl('demo-client', 'ctp');
+    ? publicPortalUrl(submission.portalSlug, 'ctp/progress')
+    : publicPortalUrl('demo-client', 'ctp/progress');
 
   const emailResult = await sendCtpReviewReminderEmail({
     email: submission.email,
