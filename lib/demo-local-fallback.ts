@@ -1,5 +1,6 @@
 import type { PortalClientRecord } from '@/lib/airtable';
 import { getDemoCredentials, isDemoCredentialAttempt } from '@/lib/demo-client';
+import { getDemoWebsitePortalCredentials } from '@/lib/demo-website-portal';
 import { getAirtableApiKey, isProductionDeploy } from '@/lib/integration-env';
 
 /** Local dev only: allow demo portal flows when Airtable is not configured. */
@@ -12,6 +13,25 @@ export function localDemoFallbackEnabled(): boolean {
 
 export function localDemoPortalClient(slug: string): PortalClientRecord | null {
   if (!localDemoFallbackEnabled()) return null;
+
+  const website = getDemoWebsitePortalCredentials();
+  if (slug === website.slug) {
+    return {
+      id: 'local-demo-website',
+      clientName: website.clientName,
+      email: website.email,
+      organization: website.organization,
+      packagePurchased: website.packagePurchased,
+      commerceOfferId: website.commerceOfferId,
+      amountPaid: 2497,
+      paymentDate: new Date().toISOString().slice(0, 10),
+      portalAccessStatus: 'Active',
+      portalSlug: website.slug,
+      passwordChanged: true,
+      tempPassword: website.password,
+      onboardingStatus: 'In Progress',
+    };
+  }
 
   const demo = getDemoCredentials();
   if (slug !== demo.slug) return null;

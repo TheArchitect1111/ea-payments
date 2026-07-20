@@ -15,6 +15,8 @@ import {
   WELCOME_MAGIC_LINK_TTL_MS,
 } from '@/lib/magic-link';
 import { publicPortalLoginUrl } from '@/lib/ctp-portal-host';
+import { opportunityDashboardPath } from '@/lib/ctp-opportunity-routes';
+import { ensureCtpWorkspaceForWebsitePortal } from '@/lib/ctp-website-portal-workspace';
 import { EA_PLATFORM_URL } from '@/lib/platform-urls';
 
 export const DEFAULT_PORTAL_CONFIG: PortalConfig = {
@@ -141,11 +143,31 @@ export async function fulfillPaidClient(
           console.error('fulfillPaidClient website provision failed:', siteResult.error);
         }
 
+        // Option A: bind standard CTP workspace to the portal already provisioned above.
+        try {
+          const workspace = await ensureCtpWorkspaceForWebsitePortal({
+            portalSlug,
+            email: input.email,
+            clientName: input.clientName,
+            organization: input.organization,
+            siteUrl,
+          });
+          if (!workspace.ok) {
+            console.error(
+              'fulfillPaidClient CTP workspace bind failed:',
+              workspace.error || 'unknown',
+            );
+          }
+        } catch (err) {
+          console.error('fulfillPaidClient CTP workspace bind threw:', err);
+        }
+
+        const ctpLanding = opportunityDashboardPath(portalSlug);
         if (magicLinkConfigured()) {
           const token = createMagicLinkToken({
             realm: 'portal',
             email: input.email,
-            next: `/portal/${portalSlug}`,
+            next: ctpLanding,
             ttlMs: WELCOME_MAGIC_LINK_TTL_MS,
           });
           if (token) {

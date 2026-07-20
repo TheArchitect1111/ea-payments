@@ -33,7 +33,7 @@ import { EA_PORTAL_COOKIE, verifySession, type EAPortalSession } from '@/lib/ea-
 import { syntheticOrgId } from '@/lib/platform-store';
 import { mapModuleIdsToCapabilityIds } from '@/lib/platform/capability-bootstrap';
 
-const DEMO_SLUGS = new Set(['demo-client']);
+const DEMO_SLUGS = new Set(['demo-client', 'demo-website']);
 
 export function isDemoPortalSlug(slug: string): boolean {
   return DEMO_SLUGS.has(slug);

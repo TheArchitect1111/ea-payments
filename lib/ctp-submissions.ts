@@ -413,6 +413,16 @@ export async function getCtpSubmissionForPortal(input: {
   const portalSlug = input.portalSlug.trim();
   const email = input.email?.trim().toLowerCase();
 
+  // Website + Portal demo: ensure in-memory/Airtable bind before lookup (idempotent).
+  if (portalSlug === 'demo-website') {
+    try {
+      const { ensureDemoWebsitePortal } = await import('@/lib/demo-website-portal');
+      await ensureDemoWebsitePortal();
+    } catch (err) {
+      console.error('[ctp-submissions] demo-website ensure failed:', err);
+    }
+  }
+
   const fromMemory = [...memory.values()]
     .filter(
       (row) =>
