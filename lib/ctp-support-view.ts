@@ -1,14 +1,11 @@
 /**
- * Messages & Support — Guide-aware help for the client experience.
+ * Messages & Support — Guide-driven help. No independent workflow CTAs.
  */
 import { ctpClientTypeLabel } from '@/lib/ctp-client-type';
 import { buildCtpPortalStatusView } from '@/lib/ctp-portal-status';
 import { buildGuideProgressView, type GuideProgressView } from '@/lib/ctp-guide-progress';
 import { designStudioPath } from '@/lib/ctp-opportunity-routes';
 import type { CtpSubmission } from '@/lib/ctp-submissions';
-
-const DEFAULT_CALENDLY =
-  process.env.CALENDLY_URL ?? 'https://calendly.com/freedom-efficiencyarchitects/30min';
 
 const DEFAULT_SUPPORT_EMAIL =
   process.env.SUPPORT_EMAIL ?? 'freedom@efficiencyarchitects.online';
@@ -30,6 +27,8 @@ export type CtpSupportGuideContext = {
   nothingRequired: boolean;
   pendingActions: string[];
   narrative: string;
+  behindTheScenes: string;
+  confidenceMessage: string;
   progressHref: string;
 };
 
@@ -50,9 +49,6 @@ function buildGuideContext(slug: string, guide: GuideProgressView): CtpSupportGu
   if (!guide.nba.nothingRequired) {
     pendingActions.push(guide.nba.label);
   }
-  if (guide.showDesignStudio) {
-    pendingActions.push('Complete Design details on Progress when asked');
-  }
 
   return {
     currentStage: guide.currentStage,
@@ -63,8 +59,10 @@ function buildGuideContext(slug: string, guide: GuideProgressView): CtpSupportGu
     pendingActions:
       pendingActions.length > 0
         ? pendingActions
-        : ['Nothing needed from you today — we’re advancing the project'],
+        : ["We've got everything we need — nothing required from you today"],
     narrative: `${guide.headline} ${guide.summary}`.trim(),
+    behindTheScenes: guide.behindTheScenes,
+    confidenceMessage: guide.confidenceMessage,
     progressHref: designStudioPath(slug),
   };
 }
@@ -74,64 +72,32 @@ export function buildCtpSupportView(submission: CtpSubmission, slug: string): Ct
   const guideView = buildGuideProgressView(slug, statusView);
   const guide = buildGuideContext(slug, guideView);
 
-  const completed = submission.status === 'Completed';
-  const ready =
-    submission.status === 'Ready For Review' || submission.studioStatus === 'Ready For Review';
-
   let headline = `You're in ${guide.currentStage}`;
   let summary = guide.narrative;
 
-  if (completed && submission.siteUrl) {
-    headline = 'Care — we’re still with you';
-    summary =
-      'Your project is live. Reach out anytime — we already know where you are and what’s next.';
-  } else if (ready) {
-    headline = 'We’re ready when you are';
-    summary =
-      'Your reviewable work is prepared. Message us with questions, or open Progress for your next step.';
-  } else if (submission.reviewScheduledAt) {
-    headline = 'Help before your conversation';
-    summary = `Your strategy conversation is scheduled for ${new Date(
-      submission.reviewScheduledAt,
-    ).toLocaleString('en-US', {
-      dateStyle: 'medium',
-      timeStyle: 'short',
-    })}. Send context ahead of time — Progress already reflects the booking.`;
+  if (guide.nothingRequired) {
+    headline = "We've got everything we need";
+    summary = `${guide.confidenceMessage} ${guide.behindTheScenes}`.trim();
+  } else if (guideView.nba.kind === 'meeting') {
+    headline = 'A conversation will keep us aligned';
+    summary = `${guide.nbaLabel}. ${guide.nbaWhy}`;
+  } else {
+    headline = `You're in ${guide.currentStage}`;
+    summary = `${guide.narrative} Next: ${guide.nbaLabel}.`;
   }
 
   const actions: CtpSupportAction[] = [
     {
       id: 'progress',
-      title: 'Open Your Project',
+      title: guide.nothingRequired ? 'Open Your Project' : guide.nbaLabel,
       detail: guide.nothingRequired
-        ? 'See where you are and what’s happening now — nothing required from you today.'
-        : `Next step: ${guide.nbaLabel}`,
-      href: guide.progressHref,
+        ? "See where you are and what we're doing — nothing required from you today."
+        : guide.nbaWhy,
+      href: guide.nothingRequired
+        ? guide.progressHref
+        : guideView.nba.href || guide.progressHref,
       primary: true,
-    },
-    {
-      id: 'message',
-      title: 'Message your advisor',
-      detail: 'Send a question or file — we’ll reply with your project context already in hand.',
-      href: `/portal/${slug}/updates/new`,
-    },
-    {
-      id: 'activity',
-      title: 'View activity & replies',
-      detail: 'See outreach and advisor responses in one timeline.',
-      href: `/portal/${slug}/updates`,
-    },
-    {
-      id: 'schedule',
-      title: 'Scheduling',
-      detail: 'Confirmed conversation time and booking.',
-      href: `/portal/${slug}/ctp/schedule`,
-    },
-    {
-      id: 'documents',
-      title: 'Documents',
-      detail: 'Everything prepared for you, with why / when / what happens next.',
-      href: `/portal/${slug}/ctp/documents`,
+      external: !guide.nothingRequired ? guideView.nba.external : undefined,
     },
     {
       id: 'email',
@@ -140,14 +106,30 @@ export function buildCtpSupportView(submission: CtpSubmission, slug: string): Ct
       href: `mailto:${DEFAULT_SUPPORT_EMAIL}`,
       external: true,
     },
-    {
-      id: 'calendly',
-      title: 'Book strategy conversation',
-      detail: 'Direct booking with your team.',
-      href: DEFAULT_CALENDLY,
-      external: true,
-    },
   ];
+
+  // Contact/help only when idle — no Calendly, Schedule, or Update Hub prompts.
+  if (!guide.nothingRequired) {
+    actions.push({
+      id: 'message',
+      title: 'Message your advisor',
+      detail: 'Send a question — we already know your stage and next step.',
+      href: `/portal/${slug}/ctp/messages`,
+    });
+    actions.push({
+      id: 'documents',
+      title: 'Documents',
+      detail: 'Everything prepared for you, with why / when / what happens next.',
+      href: `/portal/${slug}/ctp/documents`,
+    });
+  } else {
+    actions.push({
+      id: 'message',
+      title: 'Ask a question anytime',
+      detail: 'Optional — only if something comes up. No action is required.',
+      href: `/portal/${slug}/ctp/messages`,
+    });
+  }
 
   return {
     businessName: submission.businessName,
@@ -158,7 +140,7 @@ export function buildCtpSupportView(submission: CtpSubmission, slug: string): Ct
     headline,
     summary,
     supportEmail: DEFAULT_SUPPORT_EMAIL,
-    calendlyUrl: DEFAULT_CALENDLY,
+    calendlyUrl: '',
     actions,
     guide,
   };
