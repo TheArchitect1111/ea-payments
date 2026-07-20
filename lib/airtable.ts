@@ -302,6 +302,18 @@ export async function getClientByPortalSlug(slug: string): Promise<PortalClientR
   const localDemo = localDemoPortalClient(slug);
   if (localDemo) return localDemo;
 
+  const {
+    getSeededDemoWebsiteClient,
+    getDemoWebsitePortalClientRecord,
+    isDemoWebsitePortalSlug,
+  } = await import('@/lib/demo-website-portal-identity');
+  const seededWebsite = getSeededDemoWebsiteClient(slug);
+  if (seededWebsite) return seededWebsite;
+  // Durable fixture identity for Website + Portal demo (CTP bind still required).
+  if (isDemoWebsitePortalSlug(slug) && process.env.NODE_ENV === 'development') {
+    return getDemoWebsitePortalClientRecord();
+  }
+
   if (!process.env.AIRTABLE_API_KEY) return null;
 
   const safe = slug.replace(/'/g, "\\'");
