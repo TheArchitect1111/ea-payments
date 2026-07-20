@@ -387,6 +387,15 @@ export async function updateCtpSubmission(
 
   memory.set(submission.id, submission);
 
+  // Guide orchestration — adapts Progress from project state (non-blocking).
+  void import('@/lib/ctp-guide-orchestration')
+    .then(({ orchestrateGuideAfterSubmissionUpdate }) =>
+      orchestrateGuideAfterSubmissionUpdate(existing, submission),
+    )
+    .catch((err) => {
+      console.error('[ctp-submissions] guide orchestration failed:', err);
+    });
+
   if (!airtableConfigured()) {
     return { ok: true, submission };
   }

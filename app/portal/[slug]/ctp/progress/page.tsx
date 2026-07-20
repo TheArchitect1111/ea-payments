@@ -11,8 +11,8 @@ import '@/app/portal/components/guide-progress.css';
 export const dynamic = 'force-dynamic';
 
 /**
- * Guide home — dynamic intelligence driven by project state.
- * Structure unchanged; messaging is stage-aware.
+ * Guide home — orchestrated from project state (stage engine + intelligence).
+ * Structure unchanged; messaging and NBA recalculate automatically.
  */
 export default async function PortalCtpStatusPage({
   params,
@@ -53,6 +53,11 @@ export default async function PortalCtpStatusPage({
             <strong>{guide.headline}</strong>
           </p>
           <p className="guide-progress-stage-why">{guide.summary}</p>
+          {guide.celebrationMessage ? (
+            <p className="guide-progress-eta">
+              <strong>{guide.celebrationMessage}</strong>
+            </p>
+          ) : null}
           {guide.estimatedCompletion ? (
             <p className="guide-progress-eta">
               <strong>Typical timing:</strong> {guide.estimatedCompletion}
@@ -166,6 +171,23 @@ export default async function PortalCtpStatusPage({
                 guide.whatsNextCopy
               )}
             </p>
+            {guide.documentsAvailable.length ? (
+              <p style={{ marginTop: 12 }}>
+                <strong>Available to you:</strong>{' '}
+                {guide.documentsAvailable.map((doc, index) => (
+                  <span key={doc.label}>
+                    {index > 0 ? ' · ' : null}
+                    {doc.href ? (
+                      <a href={doc.href} style={{ color: 'rgba(216,173,61,0.95)' }}>
+                        {doc.label}
+                      </a>
+                    ) : (
+                      doc.label
+                    )}
+                  </span>
+                ))}
+              </p>
+            ) : null}
           </div>
         </section>
 
