@@ -35,7 +35,13 @@ export default async function PortalCtpOpportunityReviewConfirmedPage({
   const schedule = buildCtpScheduleView(submission);
 
   return (
-    <PortalShell slug={slug} active="ctp" presentation="experience" firstName={firstName}>
+    <PortalShell
+      slug={slug}
+      active="ctp"
+      presentation="client"
+      clientNavActive="journey"
+      firstName={firstName}
+    >
       <OpportunityReviewConfirmed
         firstName={firstName}
         businessName={submission.businessName}

@@ -170,9 +170,9 @@ export default function ClientExperience({ view, slug, studio }: Props) {
     <main className={`cex ${sans.className}`}>
       <div className="cex-grain" aria-hidden />
 
-      <nav className="cex-escape" aria-label="Portal shortcuts">
-        <Link href={`/portal/${slug}`}>Portal home</Link>
-        <a href="/api/portal/logout">Log out</a>
+      <nav className="cex-escape" aria-label="Client shortcuts">
+        <Link href={`/portal/${slug}/ctp/progress`}>Progress</Link>
+        <Link href={`/portal/${slug}/ctp/support`}>Support</Link>
       </nav>
 
       <nav className="cex-dots" aria-label="Experience scenes">
@@ -396,13 +396,13 @@ export default function ClientExperience({ view, slug, studio }: Props) {
               <p className="cex-support-label">Support anytime</p>
               <ul className="cex-support-links">
                 <li>
-                  <a href={view.messagingHref}>Messages</a>
+                  <Link href={`/portal/${slug}/ctp/messages`}>Messages</Link>
                 </li>
                 <li>
-                  <a href={view.documentsHref}>Documents</a>
+                  <Link href={`/portal/${slug}/ctp/documents`}>Documents</Link>
                 </li>
                 <li>
-                  <a href={view.communicationHref}>Updates</a>
+                  <Link href={`/portal/${slug}/ctp/support`}>Support</Link>
                 </li>
               </ul>
             </section>

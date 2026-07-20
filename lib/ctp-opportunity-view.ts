@@ -635,7 +635,7 @@ export function buildCtpOpportunityDashboardView(
       "We've only scratched the surface. Share a little more so every recommendation becomes more tailored to your goals.",
     communicationHref: `/portal/${slug}/ctp/support`,
     documentsHref: `/portal/${slug}/ctp/documents`,
-    messagingHref: `/portal/${slug}/updates/new`,
+    messagingHref: `/portal/${slug}/ctp/messages`,
     progress: buildProgress(submission),
     opportunities: buildOpportunities(submission, slug),
     healthAreas: mapHealthAreas(submission, slug),
@@ -646,7 +646,7 @@ export function buildCtpOpportunityDashboardView(
     primaryCtaLabel: 'Continue the Conversation',
     utilities: [
       { label: 'Documents', href: `/portal/${slug}/ctp/documents` },
-      { label: 'Messages', href: `/portal/${slug}/ctp/support` },
+      { label: 'Messages', href: `/portal/${slug}/ctp/messages` },
       { label: 'Project Progress', href: `/portal/${slug}/ctp/progress` },
       { label: 'Schedule a Conversation', href: opportunityReviewPath(slug) },
     ],

@@ -4,6 +4,11 @@ import PortalCtpHelpDrawer from '@/app/portal/components/PortalCtpHelpDrawer';
 import { PortalShell, type EAPortalTab } from '@/lib/chassis/PortalShell';
 import { PortalModuleChromeStrip } from '@/lib/chassis/PortalChromeContext';
 import { resolvePortalWorkspaceChrome } from '@/lib/platform/portal-workspace';
+import {
+  shouldUseClientExperienceShell,
+  type ClientExperienceNavId,
+} from '@/lib/ctp-client-nav';
+import { opportunityDashboardPath } from '@/lib/ctp-opportunity-routes';
 import '../[slug]/ea-portal.css';
 
 export async function PortalSubpage({
@@ -12,6 +17,7 @@ export async function PortalSubpage({
   kicker,
   title,
   lede,
+  clientNavActive,
   children,
 }: {
   slug: string;
@@ -19,14 +25,24 @@ export async function PortalSubpage({
   kicker: string;
   title: string;
   lede: string;
+  clientNavActive?: ClientExperienceNavId;
   children: ReactNode;
 }) {
   const chrome = await resolvePortalWorkspaceChrome(slug);
+  const clientShell = await shouldUseClientExperienceShell(slug);
+  const journeyHref = opportunityDashboardPath(slug);
 
   return (
-    <PortalShell slug={slug} active={active} pageTitle={title} chrome={chrome}>
+    <PortalShell
+      slug={slug}
+      active={active}
+      pageTitle={title}
+      chrome={chrome}
+      presentation={clientShell ? 'client' : 'workspace'}
+      clientNavActive={clientNavActive}
+    >
       <main className="ep-main">
-        <PortalModuleChromeStrip />
+        {clientShell ? null : <PortalModuleChromeStrip />}
         <div className="ep-welcome">
           <p className="ep-welcome-label">{kicker}</p>
           <h1 className="ep-welcome-heading">{title}</h1>
@@ -34,7 +50,9 @@ export async function PortalSubpage({
         </div>
         {children}
         <p className="ep-muted-link">
-          <Link href={`/portal/${slug}`}>← Back to {chrome.homeLabel}</Link>
+          <Link href={clientShell ? journeyHref : `/portal/${slug}`}>
+            ← Back to {clientShell ? 'Your Journey' : chrome.homeLabel}
+          </Link>
         </p>
       </main>
       {active === 'ctp' ? <PortalCtpHelpDrawer /> : null}

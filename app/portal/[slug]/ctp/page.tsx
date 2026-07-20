@@ -62,7 +62,14 @@ export default async function PortalCtpOpportunityDashboardPage({
   );
 
   return (
-    <PortalShell slug={slug} active="ctp" presentation="experience" firstName={firstName}>
+    <PortalShell
+      slug={slug}
+      active="ctp"
+      presentation="client"
+      clientNavActive="journey"
+      firstName={firstName}
+      pageTitle="Your Journey"
+    >
       <ClientExperience view={view} slug={slug} studio={studio} />
     </PortalShell>
   );
