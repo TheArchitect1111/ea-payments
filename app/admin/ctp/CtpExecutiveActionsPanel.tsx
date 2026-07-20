@@ -12,6 +12,7 @@ type Props = {
 type Action =
   | 'ready_for_review'
   | 'approve_reveal'
+  | 'send_proposal'
   | 'run_production'
   | 'run_digital_audit'
   | 'run_open_design_handoff'
@@ -57,6 +58,7 @@ export default function CtpExecutiveActionsPanel({ submission, onUpdated }: Prop
         revealUrl?: string;
         handoffUrl?: string;
         handoff?: HandoffPayload;
+        emailWarning?: string;
         submission?: CtpAdminSubmissionView;
       };
       if (!res.ok || !data.ok || !data.submission) {
@@ -67,6 +69,7 @@ export default function CtpExecutiveActionsPanel({ submission, onUpdated }: Prop
       if (data.revealUrl) setRevealUrl(data.revealUrl);
       if (data.handoffUrl) setHandoffUrl(data.handoffUrl);
       if (data.handoff) setHandoff(data.handoff);
+      if (data.emailWarning) setError(`Sent with warning: ${data.emailWarning}`);
     } catch {
       setError('Network error. Try again.');
     } finally {
@@ -98,7 +101,7 @@ export default function CtpExecutiveActionsPanel({ submission, onUpdated }: Prop
           Executive desk
         </p>
         <p className="mt-1 text-sm text-neutral-600 leading-6">
-          Run AI production, mark ready for review, then approve & reveal.
+          Close path: ready for review → send proposal → (paid) → approve & reveal. See docs/CTP-CLOSE-SOP.md.
         </p>
       </div>
 
@@ -180,6 +183,29 @@ export default function CtpExecutiveActionsPanel({ submission, onUpdated }: Prop
         >
           {busy === 'ready_for_review' ? 'Marking…' : 'Mark ready for review'}
         </button>
+        <button
+          type="button"
+          disabled={Boolean(busy) || !submission.proposalId || Boolean(submission.paid)}
+          onClick={() => void run('send_proposal')}
+          className="px-3 py-2 text-xs font-bold uppercase tracking-wider border border-neutral-300 bg-white text-neutral-800 disabled:opacity-50"
+          title={
+            !submission.proposalId
+              ? 'No proposal linked'
+              : submission.paid
+                ? 'Already paid'
+                : 'Approve proposal and email the client'
+          }
+        >
+          {busy === 'send_proposal' ? 'Sending…' : 'Approve & send proposal'}
+        </button>
+        {submission.proposalRecordId ? (
+          <a
+            href={`/admin/proposals`}
+            className="px-3 py-2 text-xs font-bold uppercase tracking-wider border border-neutral-300 bg-white text-neutral-800"
+          >
+            Open proposals desk
+          </a>
+        ) : null}
         <button
           type="button"
           disabled={Boolean(busy) || completed}

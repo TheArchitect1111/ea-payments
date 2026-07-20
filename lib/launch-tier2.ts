@@ -1,7 +1,7 @@
 import type { OnboardingWebhookPayload } from '@/lib/make-webhooks';
 import { buildOnboardingWebhookBody } from '@/lib/make-webhooks';
 import { publicPortalLoginUrl } from '@/lib/ctp-portal-host';
-import { EA_PLATFORM_URL } from '@/lib/platform-urls';
+import { esignaturesCallbackUrl } from '@/lib/esignatures-config';
 
 export type Tier2EnvChecks = {
   onboardingWebhook: boolean;
@@ -66,4 +66,5 @@ export function sampleEsignWebhookPayload(): Record<string, unknown> {
   };
 }
 
-export const ESIGNATURES_CALLBACK_URL = `${EA_PLATFORM_URL}/api/webhooks/esignatures`;
+/** Apex callback — never www (CRA marketing). */
+export const ESIGNATURES_CALLBACK_URL = esignaturesCallbackUrl();

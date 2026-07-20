@@ -111,6 +111,6 @@ Check Make scenario history for a green run.
 
 - [ ] Scenario **EA Contract Signed** created and ON
 - [ ] `ESIGN_WEBHOOK_URL` on Vercel Production
-- [ ] eSignatures callback → `https://www.efficiencyarchitects.online/api/webhooks/esignatures`
+- [ ] eSignatures callback → `https://efficiencyarchitects.online/api/webhooks/esignatures` (apex — not www)
 - [ ] Command Center: `ESIGN_WEBHOOK_URL` probe HTTP 200
 - [ ] Test sign flow updates Client Records + Pulse Events

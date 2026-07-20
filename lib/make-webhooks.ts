@@ -1,4 +1,5 @@
 import { triggerMakeWebhook } from '@ea/portal-chassis/webhooks';
+import { esignaturesMakeTemplateFields } from '@/lib/esignatures-config';
 
 export interface OnboardingWebhookPayload {
   event: 'payment.received';
@@ -52,6 +53,7 @@ export function buildOnboardingWebhookBody(
     paymentDate: payload.paymentDate,
     stripeTransactionId: payload.stripeTransactionId,
     portalLoginUrl: payload.portalLoginUrl,
+    ...esignaturesMakeTemplateFields(),
   };
 }
 

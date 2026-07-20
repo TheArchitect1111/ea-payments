@@ -7,6 +7,7 @@ import { productionSecretIssues } from '@/lib/integration-env';
 import { checkAirtableLaunchSchema } from '@/lib/airtable-schema-check';
 import { isCaptureApiKeyConfigured } from '@/lib/capture-api-key';
 import { monitoringConfigured, monitoringDsnEnvHint } from '@/lib/monitoring';
+import { getEsignaturesTemplateConfig } from '@/lib/esignatures-config';
 import { ESIGNATURES_CALLBACK_URL, getTier2EnvChecks, isTier2AutomationReady } from '@/lib/launch-tier2';
 import { buildLaunchReadinessModel } from '@/lib/launch-readiness';
 import {
@@ -92,6 +93,10 @@ export async function GET() {
   const captureReady = airtableSchema.capture.ok;
   const assessmentPathReady = airtableSchema.assessment.ok && airtableSchema.proposal.ok;
   const tier2Ready = isTier2AutomationReady(tier2);
+  const scaleAttestation = {
+    operationalMaturity: process.env.LAUNCH_OPERATIONAL_MATURITY === 'true',
+    founderDependencyReduced: process.env.LAUNCH_FOUNDER_DEPENDENCY_REDUCED === 'true',
+  };
   const readiness = buildLaunchReadinessModel({
     revenue: {
       stripe: env.stripe,
@@ -115,6 +120,7 @@ export async function GET() {
     resilience: {
       backupDestination: controls.backupDestination,
     },
+    scale: scaleAttestation,
   });
 
   let portalVanityHost: PortalVanityHostProbe = {
@@ -152,6 +158,12 @@ export async function GET() {
       criticalReady: readiness.criticalReady,
       fullLaunchReady: readiness.fullLaunchReady,
       scaleReady: readiness.scaleReady,
+      scaleAttestation: {
+        ...scaleAttestation,
+        sop: 'docs/CTP-CLOSE-SOP.md',
+        note: 'Set LAUNCH_OPERATIONAL_MATURITY=true and LAUNCH_FOUNDER_DEPENDENCY_REDUCED=true only after a second person closes a CTP using the SOP.',
+      },
+      esignatures: getEsignaturesTemplateConfig(),
       products: {
         magnifi: magnifiOperational,
         amplifi: amplifiOperational,

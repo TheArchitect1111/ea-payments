@@ -1,6 +1,7 @@
 import { getAirtableApiKey, productionSecretIssues } from '@/lib/integration-env';
 import { checkAirtableLaunchSchema } from '@/lib/airtable-schema-check';
 import { isCaptureApiKeyConfigured } from '@/lib/capture-api-key';
+import { esignaturesCallbackUrl } from '@/lib/esignatures-config';
 import { getTier2EnvChecks, isTier2AutomationReady } from '@/lib/launch-tier2';
 import { buildLaunchReadinessModel } from '@/lib/launch-readiness';
 import type { LaunchReadinessModel, LaunchReadinessStatus } from '@/lib/launch-readiness';
@@ -225,7 +226,7 @@ async function checkEsignaturesCallback(): Promise<{
   status: LaunchStatus;
   message: string;
 }> {
-  const url = `${EA_PLATFORM_URL}/api/webhooks/esignatures`;
+  const url = esignaturesCallbackUrl();
   try {
     const res = await fetch(url, {
       method: 'POST',
@@ -648,7 +649,7 @@ export async function runLaunchCommandCenter(options?: {
       status: esignCallback.status,
       maxScore: 4,
       message: esignCallback.message,
-      fix: `${EA_PLATFORM_URL}/api/webhooks/esignatures`,
+      fix: esignaturesCallbackUrl(),
       verify: 'docs/ESIGNATURES-SETUP.md',
     }),
     item({
