@@ -6,8 +6,34 @@ import { sendContentRequestConfirmation, sendInternalNotification } from '@/lib/
 import { notifyPortal } from '@/lib/portal-notify';
 import { EA_PLATFORM_URL } from '@/lib/platform-urls';
 import { fireContentRequestWebhook } from '@/lib/make-webhooks';
+import {
+  channelFromRequestType,
+  normalizeUpdateHubChannel,
+  type UpdateHubChannel,
+} from '@/lib/update-hub-channels';
+import { notifyUpdateHubAudience } from '@/lib/update-hub-notify';
 
 export const dynamic = 'force-dynamic';
+
+function channelFromNotes(notes?: string, requestType?: string): UpdateHubChannel {
+  const match = notes?.match(/Channel:\s*([^.\n]+)/i);
+  if (match?.[1]) {
+    const label = match[1].trim().toLowerCase();
+    const byLabel: Record<string, UpdateHubChannel> = {
+      members: 'members',
+      staff: 'staff',
+      volunteers: 'volunteers',
+      stakeholders: 'stakeholders',
+      'organization-wide': 'organization',
+      organization: 'organization',
+    };
+    const fromLabel = byLabel[label];
+    if (fromLabel) return fromLabel;
+    const normalized = normalizeUpdateHubChannel(label.replace(/\s+/g, ''));
+    if (normalized) return normalized;
+  }
+  return channelFromRequestType(requestType ?? '');
+}
 
 async function authenticatedClient() {
   const auth = await guardPortalApiCookie();
@@ -93,6 +119,21 @@ export async function POST(req: NextRequest) {
     });
   } catch (err) {
     console.error('sendContentRequestConfirmation failed:', err);
+  }
+
+  // Channel email — use client email so field testers receive the loop (not skip).
+  try {
+    const channel = channelFromNotes(body.additionalNotes, requestType);
+    await notifyUpdateHubAudience({
+      channel,
+      organizationName: client.organization || client.clientName,
+      title,
+      summary: (body.description || body.content || '').trim() || `${requestType} request submitted.`,
+      portalHref: portalUrl,
+      recipientEmail: client.email,
+    });
+  } catch (err) {
+    console.error('notifyUpdateHubAudience failed:', err);
   }
 
   try {

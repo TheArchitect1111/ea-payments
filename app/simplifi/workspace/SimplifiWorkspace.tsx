@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import type { SimplifiObject } from '@/lib/simplifi-objects';
 import type { MemoryAsset } from '@/lib/memory-assets';
@@ -20,6 +20,11 @@ import {
   opportunityStatusLine,
   type BriefHomeSummaryTone,
 } from '@/lib/simplifi/brief-home';
+import {
+  claimPendingGuestCaptures,
+  guestClaimSuccessMessage,
+  readGuestCaptureIds,
+} from '@/lib/capture-upload-limits';
 import EmptyStateGuide from '@/app/components/guided-first-success/EmptyStateGuide';
 import ActionCenterPanel from './ActionCenterPanel';
 import './action-center-panel.css';
@@ -76,7 +81,7 @@ function summaryToneIcon(tone: BriefHomeSummaryTone): string {
 }
 
 export default function SimplifiWorkspace({
-  slug: _slug,
+  slug,
   loggedIn,
   objects,
   brief,
@@ -100,6 +105,35 @@ export default function SimplifiWorkspace({
   const [intelligenceLoading, setIntelligenceLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
+  const [claimBanner, setClaimBanner] = useState<{ kind: 'ok' | 'err'; text: string } | null>(null);
+  const [claimRetrying, setClaimRetrying] = useState(false);
+
+  const runGuestClaim = useCallback(async () => {
+    if (!loggedIn || !slug || slug === 'demo-client') return;
+    if (!readGuestCaptureIds().length) return;
+
+    setClaimRetrying(true);
+    try {
+      const result = await claimPendingGuestCaptures();
+      if (!result) return;
+      if (result.ok && result.claimed > 0) {
+        setClaimBanner({ kind: 'ok', text: guestClaimSuccessMessage(result.claimed) });
+        return;
+      }
+      if (!result.ok) {
+        setClaimBanner({
+          kind: 'err',
+          text: result.error ?? 'Could not move guest captures. Try again.',
+        });
+      }
+    } finally {
+      setClaimRetrying(false);
+    }
+  }, [loggedIn, slug]);
+
+  useEffect(() => {
+    void runGuestClaim();
+  }, [runGuestClaim]);
 
   const filteredObjects = useMemo(
     () => (searchQuery.trim() ? searchOpportunities(searchQuery, localObjects) : localObjects),
@@ -181,6 +215,31 @@ export default function SimplifiWorkspace({
   return (
     <main className="sw-main sw-main--home">
       <section className="sw-home" aria-label="Simplifi brief">
+        {claimBanner ? (
+          <p
+            className={
+              claimBanner.kind === 'ok'
+                ? 'sw-claim-banner sw-claim-banner--ok'
+                : 'sw-claim-banner sw-claim-banner--err'
+            }
+            role="status"
+          >
+            {claimBanner.text}
+            {claimBanner.kind === 'err' ? (
+              <>
+                {' '}
+                <button
+                  type="button"
+                  className="sw-claim-retry"
+                  disabled={claimRetrying}
+                  onClick={() => void runGuestClaim()}
+                >
+                  {claimRetrying ? 'Retrying…' : 'Retry'}
+                </button>
+              </>
+            ) : null}
+          </p>
+        ) : null}
         <header className="sw-home-hero">
           <div className="sw-home-hero-glow" aria-hidden="true" />
           <div className="sw-home-hero-copy">

@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers';
 import { verifyAdminSession, EA_ADMIN_COOKIE } from '@/lib/ea-admin-auth';
 import { redirectToAdminLogin } from '@/lib/admin-redirect';
-import { buildCtpAdminSubmissionView } from '@/lib/ctp-admin-view';
+import { enrichCtpAdminViewWithCommercial } from '@/lib/ctp-commercial-desk';
 import { listCtpSubmissions } from '@/lib/ctp-submissions';
 import CtpSubmissionsClient from './CtpSubmissionsClient';
 
@@ -16,7 +16,7 @@ export default async function AdminCtpPage() {
   }
 
   const submissions = await listCtpSubmissions(200);
-  const views = submissions.map(buildCtpAdminSubmissionView);
+  const views = await Promise.all(submissions.map((row) => enrichCtpAdminViewWithCommercial(row)));
 
   return <CtpSubmissionsClient initialSubmissions={views} />;
 }

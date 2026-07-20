@@ -142,4 +142,10 @@ Phase 7 terminal for WebsiteBuilder: `BUILDING` with website WorkOrder complete;
 
 ---
 
+## Related (proposed)
+
+Experience Blueprint elevates `website_site` to the publish SoT. **Experience Director** (`experience_director`, order 60) evaluates the blueprint before Publish — see [experience-blueprint.md](./experience-blueprint.md). Does not change ProductionController or WebsiteBuilder’s no-deploy rule.
+
+---
+
 *Stop here for review before additional builders.*

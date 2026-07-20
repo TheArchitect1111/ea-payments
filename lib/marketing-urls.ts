@@ -16,6 +16,8 @@ const BASE = process.env.NEXT_PUBLIC_BASE_URL?.replace(/\/$/, '') ?? EA_PLATFORM
 /** Links you send to real testers — product verb in path, not backend slug. */
 export const PUBLIC_LINKS = {
   platform: BASE,
+  /** Canonical CTP intake — Consider the Possibilities™ (cc host only) */
+  ctp: 'https://cc.efficiencyarchitects.online/ctp',
   /** Simplifi Orb branded entry (EA-owned) */
   simplifiOrb: 'https://app.efficiencyarchitects.online/simplifiorb',
   /** Simplifi — Today's Brief (default home) */
@@ -25,10 +27,12 @@ export const PUBLIC_LINKS = {
   /** Amplifi — social posting hub */
   amplify: `${BASE}/amplifi`,
   amplifi: `${BASE}/amplifi`,
-  /** Magnifi — read a story (demo) */
+  /** Magnifi — read a story (demo) — NOT CTP intake */
   storyDemo: `${BASE}/story/selena`,
   /** Portal sign-in */
   signIn: `${BASE}/portal/login`,
+  /** Website + Portal Starter checkout */
+  buyStarter: `${BASE}/buy`,
   /** Install Amplifi browser button */
   installAmplifi: `${BASE}/amplifi/install`,
   start: `${BASE}/start`,

@@ -10,14 +10,11 @@ import type { AirtablePackage, ProposalWithAssessment } from '@/lib/airtable';
 import { getCatalogItem } from '@/lib/catalog';
 import { buildPackageFulfillmentPlan } from '@/lib/package-fulfillment';
 import { resolveCheckoutOffer } from '@/lib/platform/payments-bridge';
-import { ensureOrganizationForPortal } from '@/lib/organizations';
-import { ensurePackageEntitlements } from '@/lib/modules/portal-modules';
 import {
   sendWelcomeEmail,
   sendAdminNotification,
   sendPaymentConfirmationEmail,
 } from '@/lib/email';
-import { createPortalAccess } from '@/lib/portal-access';
 import { createOpportunityRecord } from '@/lib/partner-network';
 import { fireOnboardingWebhook } from '@/lib/make-webhooks';
 import { emitPulseEvent } from '@/lib/pulse-bus';
@@ -32,15 +29,13 @@ import {
   persistSubscriptionBilling,
   resolveOrganizationIdForSubscription,
 } from '@/lib/subscription-sync';
+import { DEFAULT_PORTAL_CONFIG, fulfillPaidClient } from '@/lib/fulfill-paid-client';
+import { createPortalAccess } from '@/lib/portal-access';
+import { ensureOrganizationForPortal } from '@/lib/organizations';
+import { ensurePackageEntitlements } from '@/lib/modules/portal-modules';
 import { provisionConnectAfterCheckout } from '@/lib/connect-provision-hook';
-import { provisionWebsitePortalSite } from '@/lib/provision-website-portal';
-import {
-  createMagicLinkToken,
-  magicLinkConfigured,
-  WELCOME_MAGIC_LINK_TTL_MS,
-} from '@/lib/magic-link';
 import { publicPortalLoginUrl } from '@/lib/ctp-portal-host';
-import { EA_PLATFORM_URL } from '@/lib/platform-urls';
+import { CANONICAL_CTP_INTAKE_URL } from '@/lib/platform-urls';
 
 export const dynamic = 'force-dynamic';
 
@@ -292,7 +287,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
           fulfillmentType: String(meta.fulfillmentType || 'implementation'),
           fulfillmentLabel: String(meta.fulfillmentLabel || 'Review payment and begin onboarding.'),
           reviewRequired: meta.reviewRequired === 'true',
-          intakePath: String(meta.intakePath || '/discover'),
+          intakePath: String(meta.intakePath || CANONICAL_CTP_INTAKE_URL),
           adminHref: String(meta.adminHref || '/admin/master'),
           clientExpectation: 'Your project workspace is being prepared. We will confirm the path before anything goes live.',
           firstMilestone: String(meta.firstMilestone || 'Confirm project direction.'),
@@ -310,99 +305,27 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
   const isWebsitePortalAuto = fulfillment.fulfillmentType === 'website-portal-auto';
 
   if (portalConfig && airtableResult.recordId) {
-
-    try {
-      const portalResult = await createPortalAccess(
-        {
-          clientName,
-          email,
-          organization: meta.organization || undefined,
-          airtableRecordId: airtableResult.recordId,
-        },
-        portalConfig
-      );
-
-      if (portalResult.ok) {
-        if (portalResult.slug) {
-          portalSlug = portalResult.slug;
-        }
-        if (portalResult.portalLoginUrl) {
-          portalLoginUrl = portalResult.portalLoginUrl;
-        }
-        if (portalResult.username && portalResult.tempPassword) {
-          tempCredentials =
-            `Your portal login credentials: Email: ${portalResult.username} | Temporary Password: ${portalResult.tempPassword}` +
-            ' Log in using the button above. Contact us to update your password at any time.';
-        }
-
-        if (portalSlug && airtableResult.recordId) {
-          try {
-            const { orgId } = await ensureOrganizationForPortal({
-              portalSlug,
-              name: clientName,
-              clientRecordId: airtableResult.recordId,
-              organizationName: meta.organization || undefined,
-            });
-            await ensurePackageEntitlements({
-              orgId,
-              packagePurchased: packageName,
-              commerceOfferId: offerId || undefined,
-              slug: portalSlug,
-            });
-            await provisionConnectAfterCheckout({
-              portalSlug,
-              organizationName: clientName,
-              ownerEmail: email,
-              packagePurchased: offerId || packageName,
-              connectIndustry: typeof meta.connectIndustry === 'string' ? meta.connectIndustry : null,
-            });
-
-            if (isWebsitePortalAuto) {
-              const siteResult = await provisionWebsitePortalSite({
-                portalSlug,
-                businessName: clientName,
-                organizationName: meta.organization || undefined,
-                tagline: typeof meta.tagline === 'string' ? meta.tagline : undefined,
-                industry: typeof meta.industry === 'string' ? meta.industry : undefined,
-                email,
-              });
-              if (siteResult.ok && siteResult.siteUrl) {
-                siteUrl = siteResult.siteUrl;
-              } else {
-                console.error(
-                  'Website provision failed for session',
-                  session.id,
-                  ':',
-                  siteResult.error,
-                );
-              }
-
-              if (magicLinkConfigured()) {
-                const token = createMagicLinkToken({
-                  realm: 'portal',
-                  email,
-                  next: `/portal/${portalSlug}`,
-                  ttlMs: WELCOME_MAGIC_LINK_TTL_MS,
-                });
-                if (token) {
-                  const origin = (
-                    process.env.NEXT_PUBLIC_SITE_URL ||
-                    process.env.NEXT_PUBLIC_BASE_URL ||
-                    EA_PLATFORM_URL
-                  ).replace(/\/$/, '');
-                  magicLoginUrl = `${origin}/api/auth/magic-link/verify?token=${encodeURIComponent(token)}`;
-                }
-              }
-            }
-          } catch (err) {
-            console.error('Entitlement sync failed for session', session.id, ':', err);
-          }
-        }
-      } else {
-        console.error('Portal access creation failed for session', session.id, ':', portalResult.error);
-      }
-    } catch (err) {
-      console.error('Portal access creation threw for session', session.id, ':', err);
+    const fulfill = await fulfillPaidClient({
+      clientName,
+      email,
+      organization: meta.organization || undefined,
+      airtableRecordId: airtableResult.recordId,
+      packagePurchased: packageName,
+      commerceOfferId: offerId || undefined,
+      portalConfig,
+      provisionWebsite: isWebsitePortalAuto,
+      tagline: typeof meta.tagline === 'string' ? meta.tagline : undefined,
+      industry: typeof meta.industry === 'string' ? meta.industry : undefined,
+      connectIndustry: typeof meta.connectIndustry === 'string' ? meta.connectIndustry : null,
+    });
+    if (fulfill.ok) {
+      portalSlug = fulfill.portalSlug;
+      portalLoginUrl = fulfill.portalLoginUrl;
+      tempCredentials = fulfill.tempCredentials;
+      siteUrl = fulfill.siteUrl;
+      magicLoginUrl = fulfill.magicLoginUrl;
+    } else {
+      console.error('Portal fulfillment failed for session', session.id, ':', fulfill.error);
     }
   }
 
@@ -971,45 +894,35 @@ async function handleProposalPayment(
     return;
   }
 
-  // 6. Provision EA portal access and write credentials to the Client Record.
-  const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL ?? EA_PLATFORM_URL).replace(/\/$/, '');
+  // 6. Shared fulfill path (portal + entitlements + Connect + site) — parity with /buy starter.
   let portalLoginUrl = publicPortalLoginUrl();
   let portalSlug: string | undefined;
   let tempCredentials: string | undefined;
+  let siteUrl: string | undefined;
+  let magicLoginUrl: string | undefined;
 
   if (airtableResult.ok && airtableResult.recordId) {
-    try {
-      const portalResult = await createPortalAccess(
-        {
-          clientName,
-          email,
-          organization: businessName || undefined,
-          airtableRecordId: airtableResult.recordId,
-        },
-        { platform: 'efficiency-architects', loginPath: '/portal/login' }
+    const fulfill = await fulfillPaidClient({
+      clientName,
+      email,
+      organization: businessName || undefined,
+      airtableRecordId: airtableResult.recordId,
+      packagePurchased: 'Implementation Package',
+      commerceOfferId: 'website_portal_starter',
+      portalConfig: DEFAULT_PORTAL_CONFIG,
+      provisionWebsite: true,
+    });
+    if (fulfill.ok) {
+      portalSlug = fulfill.portalSlug;
+      portalLoginUrl = fulfill.portalLoginUrl;
+      tempCredentials = fulfill.tempCredentials;
+      siteUrl = fulfill.siteUrl;
+      magicLoginUrl = fulfill.magicLoginUrl;
+    } else {
+      console.error(
+        `handleProposalPayment [${proposalId}]: fulfillPaidClient failed:`,
+        fulfill.error,
       );
-
-      if (portalResult.ok) {
-        if (portalResult.slug) {
-          portalSlug = portalResult.slug;
-        }
-        if (portalResult.portalLoginUrl) {
-          portalLoginUrl = portalResult.portalLoginUrl;
-        }
-        if (portalResult.username && portalResult.tempPassword) {
-          tempCredentials =
-            `Your portal login credentials. Email: ${portalResult.username}. ` +
-            `Temporary Password: ${portalResult.tempPassword}. ` +
-            `Log in using the button above. Contact us to update your password at any time.`;
-        }
-      } else {
-        console.error(
-          `handleProposalPayment [${proposalId}]: createPortalAccess failed:`,
-          portalResult.error
-        );
-      }
-    } catch (err) {
-      console.error(`handleProposalPayment [${proposalId}]: createPortalAccess threw:`, err);
     }
   }
 
@@ -1021,6 +934,12 @@ async function handleProposalPayment(
       packageName: packageLabel,
       portalLoginUrl,
       tempCredentials,
+      nextSteps: siteUrl
+        ? `Your website and client portal are live. Your live website: ${siteUrl}`
+        : undefined,
+      siteUrl,
+      magicLoginUrl,
+      readyNow: Boolean(siteUrl),
     });
     if (!welcomeResult.ok) {
       console.error(

@@ -83,3 +83,82 @@ export function clearGuestCaptureIds(): void {
     // ignore
   }
 }
+
+export type ClaimGuestCapturesResult = {
+  ok: boolean;
+  claimed: number;
+  skipped: number;
+  error?: string;
+  /** Remaining guest ids when claim failed (kept for retry). */
+  pendingIds: string[];
+};
+
+let claimInFlight: Promise<ClaimGuestCapturesResult | null> | null = null;
+
+/**
+ * Claim guest capture IDs stashed in sessionStorage into the signed-in portal.
+ * On failure, ids are kept so the caller can show a retry banner.
+ */
+export function claimPendingGuestCaptures(): Promise<ClaimGuestCapturesResult | null> {
+  if (typeof window === 'undefined') return Promise.resolve(null);
+  if (claimInFlight) return claimInFlight;
+
+  claimInFlight = (async () => {
+    const ids = readGuestCaptureIds();
+    if (!ids.length) return null;
+
+    try {
+      const res = await fetch('/api/portal/captures/claim', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ captureIds: ids }),
+      });
+      const data = (await res.json()) as {
+        ok?: boolean;
+        claimed?: number;
+        skipped?: number;
+        error?: string;
+      };
+
+      if (!res.ok || !data.ok) {
+        return {
+          ok: false,
+          claimed: 0,
+          skipped: 0,
+          error: data.error ?? 'Could not move guest captures into your workspace.',
+          pendingIds: ids,
+        };
+      }
+
+      const claimed = data.claimed ?? 0;
+      const skipped = data.skipped ?? 0;
+      if (claimed > 0) {
+        clearGuestCaptureIds();
+        return { ok: true, claimed, skipped, pendingIds: [] };
+      }
+
+      // Nothing moved (stale / already elsewhere) — drop ids so we do not loop forever.
+      if (skipped > 0) {
+        clearGuestCaptureIds();
+      }
+
+      return { ok: true, claimed: 0, skipped, pendingIds: skipped > 0 ? [] : ids };
+    } catch {
+      return {
+        ok: false,
+        claimed: 0,
+        skipped: 0,
+        error: 'Could not move guest captures. Check your connection and try again.',
+        pendingIds: ids,
+      };
+    }
+  })().finally(() => {
+    claimInFlight = null;
+  });
+
+  return claimInFlight;
+}
+
+export function guestClaimSuccessMessage(claimed: number): string {
+  return `Moved ${claimed} guest capture${claimed === 1 ? '' : 's'} into your workspace.`;
+}

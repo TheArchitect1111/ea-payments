@@ -32,10 +32,13 @@ Document **execution order** and **dependencies** for Factory capabilities so th
 | 30 | `discovery` | `research` | yes | worker — discovery artifacts from research only |
 | 40 | `planning` | `discovery` | yes | worker — planning artifacts + WorkOrders |
 | 50 | `production` | `planning` | yes | worker — ProductionController + WebsiteBuilder |
+| 60 | `experience_director` | `production` | **proposed** | evaluator — Experience Review vs Constitution; never generates/deploys |
 
 ```text
-intake → research → discovery → planning → production → (more builders…)
+intake → research → discovery → planning → production → experience_director → (publish when Approved)
 ```
+
+**Proposed (not implemented):** `experience_director` — see [experience-blueprint.md](./experience-blueprint.md). Evaluates the Experience Blueprint; emits Experience Review (`Approved` | `Needs Refinement` | `Rejected`). Publish is blocked unless Approved. Does not fork Launch or replace the Orchestrator.
 
 Dependency rule used by the registry: a dependency is satisfied when ProjectContext has an output with `kind === dependencyId`.
 
@@ -70,4 +73,5 @@ Dependency rule used by the registry: a dependency is satisfied when ProjectCont
 - Discovery: [discovery-capability.md](./discovery-capability.md)
 - Planning / WorkOrders: [planning-capability.md](./planning-capability.md)
 - Production framework: [production-framework.md](./production-framework.md)
+- Experience Blueprint + Director (proposal): [experience-blueprint.md](./experience-blueprint.md)
 - ProjectContext contract: `lib/factory-project-context.ts`

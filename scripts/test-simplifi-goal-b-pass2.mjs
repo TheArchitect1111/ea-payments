@@ -40,7 +40,9 @@ assert(limitsSrc.includes('stashProcessingCaptureId'), 'processing resume stash 
 
 const clientSrc = readFileSync(clientUpload, 'utf8');
 assert(clientSrc.includes('MAX_CAPTURE_UPLOAD_BYTES'), 'client must use shared limit');
-assert(clientSrc.includes('HEIC'), 'HEIC guard required');
+assert(clientSrc.includes('HEIC') || clientSrc.includes('heic'), 'HEIC handling required');
+assert(clientSrc.includes('heic2any') || clientSrc.includes('createImageBitmap'), 'HEIC→JPEG conversion required');
+assert(limitsSrc.includes('claimPendingGuestCaptures'), 'shared guest claim helper required');
 
 const analyzeSrc = readFileSync(analyze, 'utf8');
 assert(analyzeSrc.includes('MAX_CAPTURE_UPLOAD_BYTES'), 'server must enforce upload limit');
@@ -55,8 +57,17 @@ assert(panelSrc.includes('Open workspace') || panelSrc.includes('workspaceHref')
 
 const appSrc = readFileSync(captureApp, 'utf8');
 assert(appSrc.includes('rememberGuestCaptureId'), 'capture app must stash guest ids');
-assert(appSrc.includes('/api/portal/captures/claim'), 'capture app must claim on login');
+assert(
+  appSrc.includes('claimPendingGuestCaptures') || appSrc.includes('/api/portal/captures/claim'),
+  'capture app must claim on login',
+);
+assert(appSrc.includes('claimBanner') || appSrc.includes('sc-claim-banner'), 'guest claim banner required');
 assert(appSrc.includes('sc-guest-banner') || appSrc.includes('guest'), 'guest sign-in banner required');
+
+const workspaceApp = join(root, 'app/simplifi/workspace/SimplifiWorkspace.tsx');
+assert(existsSync(workspaceApp), 'workspace brief page required');
+const workspaceSrc = readFileSync(workspaceApp, 'utf8');
+assert(workspaceSrc.includes('claimPendingGuestCaptures'), 'workspace must claim guest captures on mount');
 
 const pollSrc = readFileSync(polling, 'utf8');
 assert(pollSrc.includes('workspace'), 'timeout message should point to workspace');

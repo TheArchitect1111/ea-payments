@@ -1,14 +1,9 @@
-/** Hosts that should land on the Simplifi product shell (same Vercel project). */
+/** Hosts that should land on the Simplifi product shell (EA product — EA domains only). */
 export const SIMPLIFI_APP_HOSTS = new Set(
   [
-    // EA-owned branded host (preferred while simplifi.ai is not EA-controlled)
     'app.efficiencyarchitects.online',
     'www.app.efficiencyarchitects.online',
-    // Legacy / aspirational hosts (keep until DNS ownership is confirmed)
-    'simplifi.ai',
-    'www.simplifi.ai',
-    'app.simplifi.ai',
-    'www.app.simplifi.ai',
+    // Preview / temporary Vercel alias for the same ea-payments project
     'app-simplifi.vercel.app',
     process.env.SIMPLIFI_APP_HOST,
   ]

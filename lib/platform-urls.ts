@@ -16,6 +16,9 @@ export const SIMPLIFI_PRODUCT_NAME = 'Simplifi';
 /** Apex hub — www points at the CRA marketing project, not the portal. */
 export const EA_APEX_URL = 'https://efficiencyarchitects.online';
 
+/** THE ONLY public CTP intake (do not invent alternatives). */
+export const CANONICAL_CTP_INTAKE_URL = 'https://cc.efficiencyarchitects.online/ctp';
+
 /**
  * Force portal/email/API public origins onto the apex host.
  * www.efficiencyarchitects.online is the CRA marketing site (Visibility Scorecard).

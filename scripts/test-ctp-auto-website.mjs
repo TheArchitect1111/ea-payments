@@ -38,7 +38,10 @@ const submissionsSrc = readFileSync(submissions, 'utf8');
 assert(websiteSrc.includes('provisionWebsitePortalSite'), 'Must reuse website provisioner');
 assert(websiteSrc.includes('scheduleCtpWebsiteProvision'), 'Must export schedule helper');
 assert(websiteSrc.includes('website_portal'), 'Must detect website_portal track');
-assert(workspaceSrc.includes('scheduleCtpWebsiteProvision'), 'Workspace provision must schedule website');
+assert(
+  workspaceSrc.includes('scheduleCtpProductionProvision'),
+  'Workspace provision must schedule production provision (includes website)',
+);
 assert(submitSrc.includes('scheduleCtpWebsiteProvision'), 'Submit must schedule website for websiteRequired');
 assert(submissionsSrc.includes('siteUrl'), 'CTP submission must persist siteUrl');
 

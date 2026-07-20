@@ -67,6 +67,22 @@ export function resolvePlatformClientIdForPortal(
   ) {
     return 'bob-rumball';
   }
+  if (s.includes('church') || s.includes('ministry') || o.includes('church')) return 'church';
+  if (s.includes('coach') || s.includes('athletic') || o.includes('coach')) return 'coach';
+  if (s.includes('nonprofit') || s.includes('charity') || o.includes('nonprofit')) {
+    return 'nonprofit';
+  }
+  if (s.includes('association') || s.includes('chamber') || o.includes('association')) {
+    return 'association';
+  }
+  if (
+    s.includes('small-business') ||
+    s.includes('smallbiz') ||
+    s.includes('smb') ||
+    o.includes('small-business')
+  ) {
+    return 'small-business';
+  }
 
   return 'ea';
 }

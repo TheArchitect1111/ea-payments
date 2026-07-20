@@ -125,6 +125,10 @@ export async function emitPulseEvent(event: PulseEvent): Promise<{ ok: boolean }
   memoryEvents.unshift(row);
   if (memoryEvents.length > MEMORY_CAP) memoryEvents.length = MEMORY_CAP;
 
+  void import('@/lib/pulse-act-hooks')
+    .then((m) => m.runPulseActHooks(row))
+    .catch((err) => console.error('[pulse-bus] act hooks failed:', err));
+
   void mirrorPulseToActivityEvents(event, row.at);
 
   const baseId = process.env.AIRTABLE_PAYMENTS_BASE_ID;

@@ -14,14 +14,16 @@ import {
   setOnboardingStep as persistOnboardingStep,
   type SimplifiOnboardingStep,
 } from '@/lib/simplifi-onboarding';
-import { prepareCaptureUpload } from '@/lib/client-image-upload';
+import { isHeicCaptureFile, prepareCaptureUpload } from '@/lib/client-image-upload';
 import { analyzeCaptureForm, analyzeCaptureUrl } from '@/lib/simplifi-client';
 import { enqueueCapture, flushCaptureQueue } from '@/lib/offline-capture-queue';
+import { takePendingSharedFile } from '@/lib/simplifi/pending-share';
 import { useProductGuestSession } from '@/components/auth/useProductGuestSession';
 import { NAVY, GOLD } from '@/lib/design-system';
 import {
-  clearGuestCaptureIds,
+  claimPendingGuestCaptures,
   clearProcessingCaptureId,
+  guestClaimSuccessMessage,
   readGuestCaptureIds,
   readProcessingCaptureId,
   rememberGuestCaptureId,
@@ -51,26 +53,39 @@ export default function SimplifiCaptureApp({
   loggedIn,
   initialUrl,
   initialNotes,
+  expectSharedFile = false,
+  shareHint,
 }: {
   slug: string | null;
   loggedIn: boolean;
   initialUrl?: string;
   initialNotes?: string;
+  expectSharedFile?: boolean;
+  shareHint?: 'pwa';
 }) {
   const fileRef = useRef<HTMLInputElement>(null);
-  const hasShareSeed = Boolean(initialUrl?.trim() || initialNotes?.trim());
+  const hasShareSeed = Boolean(initialUrl?.trim() || initialNotes?.trim() || expectSharedFile);
   const [open, setOpen] = useState(hasShareSeed);
-  const [view, setView] = useState<SheetView>(hasShareSeed ? 'url' : 'menu');
+  const [view, setView] = useState<SheetView>(
+    expectSharedFile ? 'upload' : hasShareSeed ? 'url' : 'menu',
+  );
   const [url, setUrl] = useState(initialUrl ?? '');
   const [notes, setNotes] = useState(initialNotes ?? '');
   const [prospectName, setProspectName] = useState('');
   const [loading, setLoading] = useState(false);
   const [uploadLabel, setUploadLabel] = useState('');
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState(
+    shareHint === 'pwa'
+      ? 'Install Simplifi as an app to share photos into Capture. Text and links still work.'
+      : '',
+  );
   const [result, setResult] = useState<AnalyzeResponse | null>(null);
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [bannerError, setBannerError] = useState('');
+  const [claimBanner, setClaimBanner] = useState<{ kind: 'ok' | 'err'; text: string } | null>(null);
+  const [claimRetrying, setClaimRetrying] = useState(false);
   const [externalOnboardingStep, setExternalOnboardingStep] = useState<SimplifiOnboardingStep | null>(null);
+  const sharedFileHandled = useRef(false);
 
   const loginNext = encodeURIComponent('/simplifi/workspace');
   const onboardingScope = slug ?? 'simplifi-user';
@@ -87,37 +102,56 @@ export default function SimplifiCaptureApp({
     if (stored) setProcessingId(stored);
   }, []);
 
-  useEffect(() => {
+  const runGuestClaim = useCallback(async () => {
     if (!loggedIn || !slug || slug === 'demo-client') return;
-    const ids = readGuestCaptureIds();
-    if (!ids.length) return;
+    if (!readGuestCaptureIds().length) return;
 
-    void fetch('/api/portal/captures/claim', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ captureIds: ids }),
-    })
-      .then(async (res) => {
-        const data = (await res.json()) as { ok?: boolean; claimed?: number };
-        if (res.ok && data.ok && (data.claimed ?? 0) > 0) {
-          clearGuestCaptureIds();
-          setMessage(`Moved ${data.claimed} guest capture${data.claimed === 1 ? '' : 's'} into your workspace.`);
-        }
-      })
-      .catch(() => {});
+    setClaimRetrying(true);
+    try {
+      const result = await claimPendingGuestCaptures();
+      if (!result) return;
+      if (result.ok && result.claimed > 0) {
+        setClaimBanner({ kind: 'ok', text: guestClaimSuccessMessage(result.claimed) });
+        setMessage(guestClaimSuccessMessage(result.claimed));
+        return;
+      }
+      if (!result.ok) {
+        setClaimBanner({
+          kind: 'err',
+          text: result.error ?? 'Could not move guest captures. Try again.',
+        });
+      }
+    } finally {
+      setClaimRetrying(false);
+    }
   }, [loggedIn, slug]);
+
+  useEffect(() => {
+    void runGuestClaim();
+  }, [runGuestClaim]);
 
   useEffect(() => {
     if (!loggedIn) return;
 
     const flushQueued = async () => {
       const result = await flushCaptureQueue(async (item) => {
-        if (item.kind !== 'url') return { ok: false };
-        return analyzeCaptureUrl({
-          url: item.url,
-          prospectName: item.prospectName,
-          notes: item.notes,
-        });
+        if (item.kind === 'url') {
+          return analyzeCaptureUrl({
+            url: item.url,
+            prospectName: item.prospectName,
+            notes: item.notes,
+          });
+        }
+        if (item.kind === 'file') {
+          const form = new FormData();
+          form.append(
+            'file',
+            new File([item.blob], item.fileName, { type: item.mimeType || 'image/jpeg' }),
+          );
+          if (item.prospectName) form.append('prospectName', item.prospectName);
+          return analyzeCaptureForm(form);
+        }
+        return { ok: false };
       });
       if (result.flushed > 0) {
         setMessage(`Sent ${result.flushed} queued capture${result.flushed === 1 ? '' : 's'}.`);
@@ -231,25 +265,66 @@ export default function SimplifiCaptureApp({
   const handleCaptureFile = async (file: File) => {
     setLoading(true);
     setMessage('');
-    setUploadLabel(file.name);
+    setUploadLabel(isHeicCaptureFile(file) ? `Converting ${file.name}…` : file.name);
     setView('upload');
     setOpen(true);
+    let prepared: File | null = null;
     try {
-      const prepared = await prepareCaptureUpload(file);
+      prepared = await prepareCaptureUpload(file);
+      setUploadLabel(prepared.name);
       const form = new FormData();
       form.append('file', prepared);
       if (prospectName) form.append('prospectName', prospectName);
       const data = await analyzeForm(form);
       handleAnalyzeResponse(data, 'file');
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Network error. Try again.';
-      setMessage(msg);
+      if (
+        loggedIn &&
+        typeof navigator !== 'undefined' &&
+        !navigator.onLine &&
+        (prepared || file)
+      ) {
+        const queued = prepared ?? file;
+        await enqueueCapture({
+          kind: 'file',
+          blob: queued,
+          fileName: queued.name,
+          mimeType: queued.type || 'image/jpeg',
+          prospectName: prospectName || undefined,
+        });
+        setMessage('Offline — photo queued. We will send when you are back online.');
+      } else {
+        const msg = err instanceof Error ? err.message : 'Network error. Try again.';
+        setMessage(msg);
+      }
       setView('upload');
     } finally {
       setLoading(false);
       if (fileRef.current) fileRef.current.value = '';
     }
   };
+
+  useEffect(() => {
+    if (sharedFileHandled.current) return;
+    sharedFileHandled.current = true;
+    void (async () => {
+      const pending = await takePendingSharedFile();
+      if (!pending) {
+        if (expectSharedFile) {
+          setMessage('Shared photo not found. Try sharing again from an installed Simplifi app.');
+          setOpen(true);
+          setView('upload');
+        }
+        return;
+      }
+      const file = new File([pending.blob], pending.name, {
+        type: pending.type || 'image/jpeg',
+      });
+      await handleCaptureFile(file);
+    })();
+    // Mount-only: consume share-target stash once.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const captureCurrentPage = () => {
     if (typeof window !== 'undefined' && window.location.href) {
@@ -393,7 +468,7 @@ export default function SimplifiCaptureApp({
             <input
               ref={fileRef}
               type="file"
-              accept="image/*,.pdf,application/pdf"
+              accept="image/*,.heic,.heif,image/heic,image/heif,.pdf,application/pdf"
               className="sc-file-input"
               onChange={(e) => {
                 const file = e.target.files?.[0];
@@ -424,6 +499,27 @@ export default function SimplifiCaptureApp({
             You&apos;re capturing as a guest.{" "}
             <Link href={`/portal/login?next=${loginNext}`}>Sign in</Link> to keep these captures in
             your own workspace.
+          </p>
+        ) : null}
+        {claimBanner ? (
+          <p
+            className={claimBanner.kind === 'ok' ? 'sc-claim-banner sc-claim-banner--ok' : 'sc-claim-banner sc-claim-banner--err'}
+            role="status"
+          >
+            {claimBanner.text}
+            {claimBanner.kind === 'err' ? (
+              <>
+                {' '}
+                <button
+                  type="button"
+                  className="sc-inline-link sc-claim-retry"
+                  disabled={claimRetrying}
+                  onClick={() => void runGuestClaim()}
+                >
+                  {claimRetrying ? 'Retrying…' : 'Retry'}
+                </button>
+              </>
+            ) : null}
           </p>
         ) : null}
         <button
@@ -471,7 +567,7 @@ export default function SimplifiCaptureApp({
               <input
                 ref={fileRef}
                 type="file"
-                accept="image/*,.pdf,application/pdf"
+                accept="image/*,.heic,.heif,image/heic,image/heif,.pdf,application/pdf"
                 className="sc-file-input"
                 onChange={(e) => {
                   const file = e.target.files?.[0];
@@ -483,7 +579,7 @@ export default function SimplifiCaptureApp({
               Upload Flyer
               <input
                 type="file"
-                accept="image/*,.pdf,application/pdf"
+                accept="image/*,.heic,.heif,image/heic,image/heif,.pdf,application/pdf"
                 className="sc-file-input"
                 onChange={(e) => {
                   const file = e.target.files?.[0];

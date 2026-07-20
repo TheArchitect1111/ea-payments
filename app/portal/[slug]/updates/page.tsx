@@ -6,6 +6,7 @@ import { requirePortalModule } from '@/lib/modules/portal-modules';
 import UpdateHubExperience from '@/app/portal/components/UpdateHubExperience';
 import UpdateHubFeed from '@/app/portal/components/UpdateHubFeed';
 import { getPublishedFeedItems, getPendingRequests } from '@/lib/update-hub-feed';
+import { UPDATE_HUB_CHANNEL_LABELS, UPDATE_HUB_CHANNELS } from '@/lib/update-hub-channels';
 import '../ea-portal.css';
 
 export const dynamic = 'force-dynamic';
@@ -33,6 +34,12 @@ export default async function UpdatesPage({ params }: { params: Promise<{ slug: 
         <div className="ep-welcome">
           <p className="ep-welcome-label">Update Hub™</p>
           <h1 className="ep-welcome-heading">Communications & Requests</h1>
+          <p className="ep-pulse-summary" style={{ marginTop: '0.75rem' }}>
+            Channels:{' '}
+            {UPDATE_HUB_CHANNELS.map((ch) => UPDATE_HUB_CHANNEL_LABELS[ch]).join(' · ')}. Update Hub
+            is the communication backbone for members, staff, volunteers, stakeholders, and the
+            organization.
+          </p>
         </div>
 
         <div className="ep-pulse-grid">

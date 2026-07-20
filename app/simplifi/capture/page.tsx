@@ -12,7 +12,13 @@ export const dynamic = 'force-dynamic';
 export default async function SimplifiCapturePage({
   searchParams,
 }: {
-  searchParams: Promise<{ url?: string; text?: string; title?: string }>;
+  searchParams: Promise<{
+    url?: string;
+    text?: string;
+    title?: string;
+    sharedFile?: string;
+    shareHint?: string;
+  }>;
 }) {
   const params = await searchParams;
   const intake = parseShareTargetParams(params);
@@ -37,6 +43,8 @@ export default async function SimplifiCapturePage({
         loggedIn={Boolean(session)}
         initialUrl={intake.url || undefined}
         initialNotes={intake.notes || undefined}
+        expectSharedFile={params.sharedFile === '1'}
+        shareHint={params.shareHint === 'pwa' ? 'pwa' : undefined}
       />
     </SimplifiProductShell>
   );

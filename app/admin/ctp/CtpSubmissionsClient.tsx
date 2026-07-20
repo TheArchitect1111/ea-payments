@@ -35,6 +35,8 @@ export default function CtpSubmissionsClient({
         submission.email,
         submission.id,
         submission.proposalId,
+        submission.proposalStatus,
+        submission.commercialLabel,
         submission.status,
         submission.clientTypeLabel,
         submission.clientType,
@@ -119,6 +121,17 @@ export default function CtpSubmissionsClient({
                             {submission.clientTypeLabel}
                           </span>
                         ) : null}
+                        {submission.commercialLabel ? (
+                          <span
+                            className={`text-xs font-bold px-2 py-0.5 ${
+                              submission.paid
+                                ? 'bg-emerald-400 text-emerald-950'
+                                : 'bg-amber-300 text-amber-950'
+                            }`}
+                          >
+                            {submission.commercialLabel}
+                          </span>
+                        ) : null}
                         <span className="text-white font-bold">{submission.businessName}</span>
                       </div>
                       <p className="text-sm text-blue-200 mt-1">
@@ -138,7 +151,22 @@ export default function CtpSubmissionsClient({
                     <div className="p-6 space-y-6">
                       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 text-sm">
                         <Meta label="Client type" value={submission.clientTypeLabel || '—'} />
-                        <Meta label="Proposal" value={submission.proposalId} />
+                        <Meta
+                          label="Proposal"
+                          value={
+                            submission.proposalRecordId
+                              ? `${submission.proposalId || '—'} (${submission.proposalStatus || '—'})`
+                              : submission.proposalId || '—'
+                          }
+                        />
+                        <Meta
+                          label="Commercial"
+                          value={
+                            submission.paid
+                              ? `Paid${typeof submission.amountPaid === 'number' ? ` · $${submission.amountPaid}` : ''}`
+                              : submission.commercialLabel || '—'
+                          }
+                        />
                         <Meta label="Assessment" value={submission.assessmentId} />
                         <Meta label="Workspace" value={submission.workspaceStatus} />
                         <Meta label="Studio" value={submission.studioStatus} />

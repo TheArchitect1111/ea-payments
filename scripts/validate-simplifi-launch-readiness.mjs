@@ -3,11 +3,11 @@
  * Usage: node scripts/validate-simplifi-launch-readiness.mjs [baseUrl]
  *
  * Runs: health, Airtable schema, auth, full capture pipeline, magnifi/guidance,
- * decision intelligence, app.simplifi.ai DNS/SSL (when resolvable).
+ * decision intelligence, EA app host (app.efficiencyarchitects.online).
+ * Simplifi is an EA product — no third-party brand-domain checks.
  */
 const BASE = (process.argv[2] || 'https://ea-payments.vercel.app').replace(/\/$/, '');
-const SIMPLIFI_APP = process.env.SIMPLIFI_APP_URL || 'https://app.simplifi.ai';
-const SIMPLIFI_BRAND = process.env.SIMPLIFI_BRAND_URL || 'https://simplifi.ai';
+const SIMPLIFI_APP = process.env.SIMPLIFI_APP_URL || 'https://app.efficiencyarchitects.online';
 const EMAIL = process.env.DEMO_CLIENT_EMAIL || 'demo@efficiencyarchitects.online';
 const PASSWORD = process.env.DEMO_CLIENT_PASSWORD || 'DemoPulse2026!';
 
@@ -193,49 +193,40 @@ async function main() {
     }
   }
 
-  // 6. Branded Simplifi host — must serve real capture (not /lander stub)
-  let simplifiAppDns = false;
+﻿  // 6. EA-owned Simplifi app host (primary) — must serve real product, not lander stub
   try {
-    const brandCapture = await fetch(`${SIMPLIFI_BRAND}/simplifi/capture`, {
+    const eaOrb = await fetch(`${SIMPLIFI_APP}/simplifiorb`, {
       redirect: 'follow',
       signal: AbortSignal.timeout(12000),
     });
-    const brandHtml = await brandCapture.text();
-    const brandOk =
-      brandCapture.ok &&
-      brandHtml.length > 400 &&
-      !brandHtml.includes('/lander') &&
-      /simplifi|capture|efficiency/i.test(brandHtml);
-    record('simplifi-brand-host', brandOk, {
-      status: brandCapture.status,
-      detail: brandOk ? SIMPLIFI_BRAND : 'serves lander/stub — fix GoDaddy DNS A → 76.76.21.21',
+    const eaOrbHtml = await eaOrb.text();
+    const eaOrbOk =
+      eaOrb.ok &&
+      eaOrbHtml.length > 400 &&
+      !eaOrbHtml.includes('/lander') &&
+      /simplifi|capture|efficiency/i.test(eaOrbHtml);
+    record('ea-app-host-orb', eaOrbOk, {
+      status: eaOrb.status,
+      url: `${SIMPLIFI_APP}/simplifiorb`,
+      detail: eaOrbOk ? 'primary branded host ready' : 'EA app host not serving Simplifi Orb',
     });
 
-    const appRoot = await fetchStatus(`${SIMPLIFI_APP}/`);
-    simplifiAppDns = appRoot.status > 0 && appRoot.status < 500;
-    record('app-simplifi-dns', simplifiAppDns, { status: appRoot.status, error: appRoot.error, url: SIMPLIFI_APP });
-    if (simplifiAppDns) {
-      const appCapture = await fetchStatus(`${SIMPLIFI_APP}/capture`);
-      record('app-simplifi-capture', appCapture.status === 200 || appCapture.status === 307 || appCapture.status === 308, {
-        status: appCapture.status,
-        location: appCapture.res?.headers?.get('location'),
-      });
-      record('app-simplifi-ssl', SIMPLIFI_APP.startsWith('https://'), { detail: SIMPLIFI_APP });
-    }
+    const eaCapture = await fetchStatus(`${SIMPLIFI_APP}/capture`);
+    record('ea-app-host-capture', eaCapture.status === 200 || eaCapture.status === 307 || eaCapture.status === 308, {
+      status: eaCapture.status,
+      location: eaCapture.res?.headers?.get('location'),
+      url: SIMPLIFI_APP,
+    });
+    record('ea-app-host-ssl', SIMPLIFI_APP.startsWith('https://'), { detail: SIMPLIFI_APP });
   } catch (err) {
-    record('simplifi-brand-host', false, { error: String(err.message || err) });
-    record('app-simplifi-dns', false, { error: String(err.message || err) });
+    record('ea-app-host-orb', false, { error: String(err.message || err), url: SIMPLIFI_APP });
+    record('ea-app-host-capture', false, { error: String(err.message || err) });
   }
 
   const failed = results.filter((r) => !r.ok);
-  // Branded DNS is operator-owned — report separately so product checks can still pass on efficiencyarchitects.online.
-  const productFailed = failed.filter(
-    (f) =>
-      f.step !== 'app-simplifi-dns' &&
-      f.step !== 'simplifi-brand-host' &&
-      !String(f.step).startsWith('app-simplifi-'),
-  );
+  const productFailed = failed;
   const pass = productFailed.length === 0;
+  const dnsPending = failed.some((f) => String(f.step).startsWith('ea-app-host-'));
 
   console.log('\n--- SUMMARY ---');
   console.log(
@@ -244,7 +235,7 @@ async function main() {
         base: BASE,
         simplifiApp: SIMPLIFI_APP,
         pass,
-        dnsPending: failed.some((f) => String(f.step).startsWith('app-simplifi')),
+        dnsPending,
         failedSteps: failed.map((f) => f.step),
         productFailedSteps: productFailed.map((f) => f.step),
         recordId,

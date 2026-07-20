@@ -207,7 +207,7 @@ export default function OrbOsShell({
           Classic Simplifi
         </button>
         {!loggedIn ? (
-          <Link href="/simplifi/login?next=/simplifi/orb">Sign in</Link>
+          <Link href="/simplifi/login?next=/simplifi/orb%3Fchat%3D1%26legacy%3D1">Sign in</Link>
         ) : (
           <span className="orb-os-muted">{slug}</span>
         )}

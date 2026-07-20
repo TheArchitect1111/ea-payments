@@ -683,6 +683,43 @@ a.sw-card-head {
   margin: 0 0 12px;
 }
 
+.sw-claim-banner {
+  margin: 0 16px 4px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.sw-claim-banner--ok {
+  border: 1px solid rgba(15, 118, 110, 0.35);
+  background: rgba(15, 118, 110, 0.08);
+  color: #0f766e;
+}
+
+.sw-claim-banner--err {
+  border: 1px solid rgba(185, 28, 28, 0.3);
+  background: rgba(185, 28, 28, 0.06);
+  color: #991b1b;
+}
+
+button.sw-claim-retry {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  color: inherit;
+  font: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+button.sw-claim-retry:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
 .sw-intelligence-note {
   font-size: 0.82rem;
   line-height: 1.5;

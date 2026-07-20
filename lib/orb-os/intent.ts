@@ -115,14 +115,23 @@ export function interpretOrbIntent(utterance: string): OrbIntent {
   };
 }
 
-/** Ambient morning line from existing brief / action center data. Value-first — never chatbot greeting. */
+function partOfDayGreeting(now = new Date()): string {
+  const hour = now.getHours();
+  if (hour < 12) return 'Good morning';
+  if (hour < 17) return 'Good afternoon';
+  return 'Good evening';
+}
+
+/** Ambient opener from existing brief / action center data. Value-first — never chatbot greeting. */
 export function buildAmbientOpening(input: {
   greeting: string;
   attentionTitles: string[];
 }): string {
   const nameMatch = input.greeting.match(/,\s*([^.]+)/);
   const name = nameMatch?.[1]?.trim();
-  const hello = name ? `Good morning, ${name}.` : input.greeting.replace(/\.$/, '') + '.';
+  const hello = name
+    ? `${partOfDayGreeting()}, ${name}.`
+    : input.greeting.replace(/\.$/, '') + '.';
   if (input.attentionTitles.length === 0) {
     return `${hello}\nNothing urgent is waiting. Your day is clear.`;
   }

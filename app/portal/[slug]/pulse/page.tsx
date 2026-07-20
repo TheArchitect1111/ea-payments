@@ -3,6 +3,7 @@ import { getClientSuccessProfile } from '@/lib/client-success';
 import { PortalShell, NAVY, GOLD } from '@/lib/chassis/PortalShell';
 import { PortalModuleChromeStrip } from '@/lib/chassis/PortalChromeContext';
 import { requirePortalModule } from '@/lib/modules/portal-modules';
+import { getTenantPulseMeasure } from '@/lib/portal-pulse-measure';
 import OpportunitiesPanel from './OpportunitiesPanel';
 import '../ea-portal.css';
 
@@ -25,6 +26,7 @@ export default async function PulsePage({
   const { slug } = await params;
   const { client } = await requirePortalModule(slug, 'pulse');
   const profile = await getClientSuccessProfile(client);
+  const measure = getTenantPulseMeasure(slug);
   const firstName = client.clientName.split(' ')[0] ?? client.clientName;
 
   return (
@@ -82,6 +84,36 @@ export default async function PulsePage({
         )}
 
         <OpportunitiesPanel slug={slug} />
+
+        <div className="ep-card">
+          <p className="ep-card-title">Recent activity</p>
+          <p className="ep-placeholder-text">
+            {measure.counts.total} tenant events · {measure.counts.highOrCritical} high or critical
+          </p>
+          {measure.recent.length === 0 ? (
+            <p className="ep-placeholder-text">No recent Pulse activity for this portal yet.</p>
+          ) : (
+            <ul className="ep-pulse-list">
+              {measure.recent.map((item) => (
+                <li key={`${item.at}-${item.title}`}>
+                  {item.href ? (
+                    <Link href={item.href} style={{ color: NAVY }}>
+                      {item.title}
+                    </Link>
+                  ) : (
+                    item.title
+                  )}
+                  {item.detail ? ` — ${item.detail}` : ''}
+                  <span className="ep-pulse-score-detail">
+                    {' '}
+                    · {new Date(item.at).toLocaleString()}
+                    {item.priority ? ` · ${item.priority}` : ''}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
 
         <div className="ep-card">
           <p className="ep-card-title">What Pulse Tracks</p>

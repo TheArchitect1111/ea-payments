@@ -21,6 +21,10 @@ export async function POST(req: NextRequest) {
     organizationName?: string;
     tagline?: string;
     industry?: string;
+    headline?: string;
+    ctaLabel?: string;
+    primaryColor?: string;
+    accentColor?: string;
     force?: boolean;
   };
   try {
@@ -51,6 +55,10 @@ export async function POST(req: NextRequest) {
     organizationName,
     tagline: body.tagline?.trim() || undefined,
     industry: body.industry?.trim() || undefined,
+    headline: body.headline?.trim() || undefined,
+    ctaLabel: body.ctaLabel?.trim() || undefined,
+    primaryColor: body.primaryColor?.trim() || undefined,
+    accentColor: body.accentColor?.trim() || undefined,
     email: client?.email,
     force: body.force === true,
   });

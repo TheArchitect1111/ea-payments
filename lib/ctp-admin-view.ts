@@ -36,6 +36,15 @@ export type CtpAdminSubmissionView = {
   workspaceStatus: string;
   studioStatus: string;
   proposalId: string;
+  /** Airtable record id for /admin/proposals deep link */
+  proposalRecordId?: string;
+  proposalStatus?: string;
+  paymentStatus?: string;
+  recommendedFee?: number;
+  paid?: boolean;
+  amountPaid?: number;
+  portalAccessStatus?: string;
+  commercialLabel?: string;
   assessmentId: string;
   submittedAt: string;
   creativeCampaignId?: string;

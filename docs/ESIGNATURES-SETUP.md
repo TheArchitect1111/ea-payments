@@ -30,21 +30,24 @@ Complete this before the **EA Contract Signed** Make scenario can run end-to-end
 
 eSignatures.io must POST signed-document events to **ea-payments**, not directly to Make.
 
-**Production callback URL:**
+**Production callback URL (apex only — never www):**
 
 ```
-https://www.efficiencyarchitects.online/api/webhooks/esignatures
+https://efficiencyarchitects.online/api/webhooks/esignatures
 ```
+
+`www.efficiencyarchitects.online` is the CRA marketing site and will **404** this route.
 
 In eSignatures.io → **Settings** → **Webhooks** (or per-template callback):
 
-- Set callback URL to the value above
+- Set callback URL to the apex value above
 - ea-payments forwards the payload to `ESIGN_WEBHOOK_URL` (Make)
 
 Verify route is live:
 
 ```powershell
-curl.exe -s -o NUL -w "%{http_code}" -X POST "https://www.efficiencyarchitects.online/api/webhooks/esignatures" -H "Content-Type: application/json" -d "{\"test\":true}"
+curl.exe -s "https://efficiencyarchitects.online/api/webhooks/esignatures"
+curl.exe -s -o NUL -w "%{http_code}" -X POST "https://efficiencyarchitects.online/api/webhooks/esignatures" -H "Content-Type: application/json" -d "{\"test\":true}"
 ```
 
 Expected: **200** (or route responds — not 404).

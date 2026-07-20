@@ -37,6 +37,7 @@ export type CtpOpenDesignHandoffPayload = {
 export type CtpExecutiveAction =
   | 'ready_for_review'
   | 'approve_reveal'
+  | 'send_proposal'
   | 'run_production'
   | 'run_digital_audit'
   | 'run_open_design_handoff'
@@ -72,11 +73,25 @@ export async function runCtpExecutiveAction(
   revealUrl?: string;
   handoffUrl?: string;
   handoff?: CtpOpenDesignHandoffPayload;
+  emailWarning?: string;
   error?: string;
 }> {
   const submission = await getCtpSubmissionById(submissionId);
   if (!submission) {
     return { ok: false, error: 'CTP submission not found.' };
+  }
+
+  if (action === 'send_proposal') {
+    const { sendCtpProposalFromDesk } = await import('@/lib/ctp-commercial-desk');
+    const result = await sendCtpProposalFromDesk(submissionId);
+    if (!result.ok || !result.submission) {
+      return { ok: false, error: result.error ?? 'Send proposal failed.' };
+    }
+    return {
+      ok: true,
+      submission: result.submission,
+      emailWarning: result.emailWarning,
+    };
   }
 
   if (action === 'ready_for_review') {

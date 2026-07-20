@@ -64,6 +64,7 @@ const MODULE_IDS = [
   'ask',
   'billing',
   'ctp',
+  'member',
 ];
 
 const idMap = readFileSync(idMapPath, 'utf8');

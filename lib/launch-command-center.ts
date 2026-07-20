@@ -1,6 +1,7 @@
 import { getAirtableApiKey, productionSecretIssues } from '@/lib/integration-env';
 import { checkAirtableLaunchSchema } from '@/lib/airtable-schema-check';
 import { isCaptureApiKeyConfigured } from '@/lib/capture-api-key';
+import { esignaturesCallbackUrl } from '@/lib/esignatures-config';
 import { getTier2EnvChecks, isTier2AutomationReady } from '@/lib/launch-tier2';
 import { buildLaunchReadinessModel } from '@/lib/launch-readiness';
 import type { LaunchReadinessModel, LaunchReadinessStatus } from '@/lib/launch-readiness';
@@ -225,7 +226,7 @@ async function checkEsignaturesCallback(): Promise<{
   status: LaunchStatus;
   message: string;
 }> {
-  const url = `${EA_PLATFORM_URL}/api/webhooks/esignatures`;
+  const url = esignaturesCallbackUrl();
   try {
     const res = await fetch(url, {
       method: 'POST',
@@ -321,7 +322,7 @@ function recommendNextAction(items: LaunchCheckItem[], tier2Ready: boolean): str
     return byId.esignatures_templates.message;
   }
   if (byId.dns_simplifi_app && byId.dns_simplifi_app.status !== 'complete') {
-    return 'Simplifi Pass 1: branded host down — confirm simplifi.ai on Vercel Domains — docs/SIMPLIFI-GOAL-B-OPERATOR.md';
+    return 'Simplifi Pass 1: EA app host down — confirm app.efficiencyarchitects.online on ea-payments — docs/SIMPLIFI-GOAL-B-OPERATOR.md';
   }
   if (byId.sentry && byId.sentry.status !== 'complete') {
     return 'Simplifi Pass 1: set NEXT_PUBLIC_GLITCHTIP_DSN on Vercel Production and redeploy — docs/GLITCHTIP-SETUP.md';
@@ -648,7 +649,7 @@ export async function runLaunchCommandCenter(options?: {
       status: esignCallback.status,
       maxScore: 4,
       message: esignCallback.message,
-      fix: `${EA_PLATFORM_URL}/api/webhooks/esignatures`,
+      fix: esignaturesCallbackUrl(),
       verify: 'docs/ESIGNATURES-SETUP.md',
     }),
     item({
@@ -689,13 +690,13 @@ export async function runLaunchCommandCenter(options?: {
       id: 'dns_simplifi_app',
       section: 'domains',
       category: 'DNS',
-      name: 'simplifi.ai branded host (real app)',
+      name: 'EA Simplifi host (app.efficiencyarchitects.online)',
       automation: 'partially_automated',
       status: simplifiDns.ok ? 'complete' : 'needs_human_action',
       maxScore: 4,
       message: simplifiDns.ok
         ? simplifiDns.message
-        : `${simplifiDns.message} GoDaddy: A record → 76.76.21.21 for apex and app.`,
+        : `${simplifiDns.message} Confirm app.efficiencyarchitects.online on ea-payments (apex /simplifiorb is the fallback).`,
       fix: 'docs/SIMPLIFI-GOAL-B-OPERATOR.md',
       verify: 'node scripts/validate-simplifi-launch-readiness.mjs https://efficiencyarchitects.online',
     }),

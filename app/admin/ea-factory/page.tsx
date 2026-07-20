@@ -132,6 +132,9 @@ export default async function EAFactoryPage({ searchParams }: PageProps) {
               <Link href="/admin/ea-factory/projects" className="rounded-full bg-black px-4 py-2 text-xs font-black text-white">
                 Projects
               </Link>
+              <Link href="/admin/ea-factory/experience-director" className="rounded-full bg-[#1B2B4D] px-4 py-2 text-xs font-black text-white">
+                Experience Director
+              </Link>
               <Link href="/admin/ea-factory/launches" className="rounded-full bg-[#C9A844] px-4 py-2 text-xs font-black text-[#1B2B4D]">
                 EACP Launches
               </Link>

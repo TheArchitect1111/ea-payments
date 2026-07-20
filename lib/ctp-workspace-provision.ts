@@ -1,11 +1,10 @@
 import { getClientByEmail, upsertProspectFromAssessment } from '@/lib/airtable';
 import { sendWelcomeEmail } from '@/lib/email';
-import { ensurePackageEntitlements } from '@/lib/modules/portal-modules';
-import { ensureOrganizationForPortal } from '@/lib/organizations';
+import { ensureTenantFoundation } from '@/lib/tenant-foundation';
 import { createPortalAccess } from '@/lib/portal-access';
 import type { PortalConfig } from '@/lib/catalog';
 import { scheduleCtpStudioCampaign } from '@/lib/ctp-studio-bridge';
-import { scheduleCtpWebsiteProvision } from '@/lib/ctp-website-provision';
+import { scheduleCtpProductionProvision } from '@/lib/ctp-production-provision';
 import { scheduleCtpProduction } from '@/lib/ctp-production-run';
 import { publicPortalLoginUrl, publicPortalUrl } from '@/lib/ctp-portal-host';
 import {
@@ -87,7 +86,8 @@ async function markWorkspaceActive(
   }
 
   scheduleCtpStudioCampaign(submission.id);
-  scheduleCtpWebsiteProvision(submission.id);
+  // Production provision includes website + TenantClientConfig persistence + site↔portal relink.
+  scheduleCtpProductionProvision(submission.id);
   scheduleCtpProduction(submission.id);
 }
 
@@ -172,16 +172,13 @@ export async function runCtpWorkspaceProvision(
   const slug = portalResult.slug;
 
   try {
-    const { orgId } = await ensureOrganizationForPortal({
+    await ensureTenantFoundation({
       portalSlug: slug,
-      name: submission.contactName,
+      clientName: submission.contactName,
       clientRecordId: client.id,
       organizationName: submission.businessName,
-    });
-    await ensurePackageEntitlements({
-      orgId,
       packagePurchased: client.packagePurchased,
-      slug,
+      commerceOfferId: client.commerceOfferId,
     });
   } catch (err) {
     console.error('[ctp-workspace-provision] org/entitlements failed:', err);

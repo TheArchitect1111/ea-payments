@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { adminApiUnauthorized, guardAdminApi } from '@/lib/api/admin-route';
-import { buildCtpAdminSubmissionView } from '@/lib/ctp-admin-view';
+import { enrichCtpAdminViewWithCommercial } from '@/lib/ctp-commercial-desk';
 import {
   runCtpExecutiveAction,
   type CtpExecutiveAction,
@@ -13,6 +13,7 @@ type RouteContext = { params: Promise<{ id: string }> };
 const ACTIONS = new Set<CtpExecutiveAction>([
   'ready_for_review',
   'approve_reveal',
+  'send_proposal',
   'run_production',
   'run_digital_audit',
   'run_open_design_handoff',
@@ -43,7 +44,7 @@ export async function POST(req: NextRequest, context: RouteContext) {
       {
         ok: false,
         error:
-          'action must be ready_for_review, approve_reveal, run_production, run_digital_audit, run_open_design_handoff, resend_executive_email, or reprovision_workspace.',
+          'action must be ready_for_review, approve_reveal, send_proposal, run_production, run_digital_audit, run_open_design_handoff, resend_executive_email, or reprovision_workspace.',
       },
       { status: 400 },
     );
@@ -63,6 +64,7 @@ export async function POST(req: NextRequest, context: RouteContext) {
     revealUrl: result.revealUrl,
     handoffUrl: result.handoffUrl,
     handoff: result.handoff,
-    submission: buildCtpAdminSubmissionView(result.submission),
+    emailWarning: result.emailWarning,
+    submission: await enrichCtpAdminViewWithCommercial(result.submission),
   });
 }

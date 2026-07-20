@@ -1,5 +1,6 @@
 import type { CatalogItem } from '@/lib/catalog';
 import type { ResolvedCheckoutOffer } from '@/lib/platform/payments-bridge';
+import { CANONICAL_CTP_INTAKE_URL } from '@/lib/platform-urls';
 
 export interface PackageFulfillmentPlan {
   packageId: string;
@@ -51,7 +52,7 @@ export function buildPackageFulfillmentPlan(
           intakePath: 'intakePath' in item ? item.intakePath : undefined,
         };
 
-  const intakePath = source.intakePath ?? '/discover';
+  const intakePath = source.intakePath ?? CANONICAL_CTP_INTAKE_URL;
   const fulfillmentType = source.fulfillmentType ?? 'implementation';
   const base = {
     packageId: source.id,
