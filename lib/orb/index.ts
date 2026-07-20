@@ -8,3 +8,8 @@ export {
   buildAmbientOpeningFromSession,
   buildBriefAmbientLead,
 } from './ambient';
+export {
+  ORB_OUTCOME_FLASH_EVENT,
+  emitOrbOutcomeFlash,
+  subscribeOrbOutcomeFlash,
+} from './outcome-events';

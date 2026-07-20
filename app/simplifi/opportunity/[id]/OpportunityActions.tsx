@@ -13,7 +13,7 @@ import {
   recordCaptureOutcome,
   snoozeCapture,
 } from '@/lib/simplifi-client';
-import type { OrbOutcomeFlash } from '@/lib/orb';
+import { emitOrbOutcomeFlash, type OrbOutcomeFlash } from '@/lib/orb';
 
 function defaultDatePlus(days: number): string {
   const d = new Date();
@@ -148,7 +148,10 @@ export default function OpportunityActions({
             void run(async () => {
               const data = await recordCaptureOutcome(recordId, 'won');
               setNote(data.ok ? 'Marked won.' : data.error ?? 'Could not update.');
-              if (data.ok) onOutcomeFlash?.('success');
+              if (data.ok) {
+                onOutcomeFlash?.('success');
+                emitOrbOutcomeFlash('success');
+              }
             })
           }
         >
@@ -195,6 +198,8 @@ export default function OpportunityActions({
               setIntel(
                 `${decision.recommendedPath} (${decision.confidenceScore}%) · ${build.buildPath} · ${build.overlayConfidence.overall}`,
               );
+              onOutcomeFlash?.('learning');
+              emitOrbOutcomeFlash('learning');
             })
           }
         >

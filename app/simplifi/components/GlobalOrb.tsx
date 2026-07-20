@@ -8,17 +8,20 @@ import type { SimplifiObject } from '@/lib/simplifi-objects';
 import {
   buildAmbientOpeningFromSession,
   deriveOrbSession,
+  subscribeOrbOutcomeFlash,
   type OrbBriefSlice,
   type OrbOutcomeFlash,
   type OrbVisualState,
 } from '@/lib/orb';
 import { interpretOrbIntent, isOrbSessionSurface, resolveOrbIntentHref } from '@/lib/orb-os';
+import { resolveChromeFadeClient } from '@/lib/simplifi/chrome-fade';
 import { answerConversationalAsk, searchOpportunities } from '@/lib/simplifi-ask';
 import { explainRecommendation } from '@/lib/simplifi-guidance-system';
 import SessionWorkspace, { type SessionView } from './session/SessionWorkspace';
 import './global-orb.css';
 
 const OUTCOME_FLASH_MS = 1200;
+const SPEAKING_MS = 1600;
 type SpeechRecognitionLike = {
   lang: string;
   continuous: boolean;
@@ -43,6 +46,27 @@ function sessionViewForSurface(surface: string, draft?: string): SessionView | n
     default:
       return null;
   }
+}
+
+function sessionViewFromHref(href: string): SessionView | null {
+  try {
+    const u = new URL(href, 'https://efficiencyarchitects.online');
+    const path = u.pathname;
+    if (path.includes('/follow-ups')) return { kind: 'followups' };
+    if (path.includes('/simplifi/inbox') || path.endsWith('/inbox')) return { kind: 'inbox' };
+    if (path.includes('/calendar')) return { kind: 'calendar' };
+    if (path.includes('/capture')) {
+      return {
+        kind: 'capture',
+        draft: u.searchParams.get('text') || u.searchParams.get('url') || undefined,
+      };
+    }
+    const match = path.match(/\/simplifi\/opportunity\/([^/]+)/);
+    if (match?.[1]) return { kind: 'opportunity', id: match[1] };
+  } catch {
+    // ignore malformed hrefs
+  }
+  return null;
 }
 
 export default function GlobalOrb({
@@ -77,6 +101,7 @@ export default function GlobalOrb({
   const panelRef = useRef<HTMLElement>(null);
   const ambientShownRef = useRef(false);
   const outcomeTimerRef = useRef<number | null>(null);
+  const speakingTimerRef = useRef<number | null>(null);
   const panelId = 'simplifi-orb-panel';
 
   useEffect(() => {
@@ -103,6 +128,7 @@ export default function GlobalOrb({
   useEffect(
     () => () => {
       if (outcomeTimerRef.current != null) window.clearTimeout(outcomeTimerRef.current);
+      if (speakingTimerRef.current != null) window.clearTimeout(speakingTimerRef.current);
     },
     [],
   );
@@ -114,6 +140,55 @@ export default function GlobalOrb({
       setOutcomeFlash(null);
       outcomeTimerRef.current = null;
     }, OUTCOME_FLASH_MS);
+  };
+
+  // Opportunity page (and other surfaces) flash Orb via custom event.
+  useEffect(() => subscribeOrbOutcomeFlash(flashOutcome), []);
+
+  // AskClient / deep links: ?orbSession=inbox|followups|calendar|capture|opportunity&id=
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    const surface = params.get('orbSession');
+    if (!surface) return;
+
+    let view: SessionView | null = null;
+    if (surface === 'opportunity') {
+      const id = params.get('id')?.trim();
+      if (id) view = { kind: 'opportunity', id };
+    } else {
+      view = sessionViewForSurface(surface, params.get('draft') || undefined);
+    }
+    if (!view) return;
+
+    setSessionView(view);
+    const url = new URL(window.location.href);
+    url.searchParams.delete('orbSession');
+    url.searchParams.delete('draft');
+    url.searchParams.delete('id');
+    const next = `${url.pathname}${url.searchParams.toString() ? `?${url.searchParams}` : ''}`;
+    router.replace(next);
+  }, [pathname, router]);
+
+  const enterSpeaking = () => {
+    if (speakingTimerRef.current != null) window.clearTimeout(speakingTimerRef.current);
+    setInteraction('speaking');
+    speakingTimerRef.current = window.setTimeout(() => {
+      setInteraction(null);
+      speakingTimerRef.current = null;
+    }, SPEAKING_MS);
+  };
+
+  const openHrefPreferSession = (href: string) => {
+    setOpen(false);
+    if (resolveChromeFadeClient()) {
+      const view = sessionViewFromHref(href);
+      if (view) {
+        setSessionView(view);
+        return;
+      }
+    }
+    router.push(href);
   };
 
   // One-shot ambient opener on first expand — titles from Brief / Action Center only.
@@ -227,7 +302,7 @@ export default function GlobalOrb({
 
       setAskAnswer(answerConversationalAsk(q, objects, actionCenter));
     } finally {
-      window.setTimeout(() => setInteraction(null), 400);
+      enterSpeaking();
     }
   };
 
@@ -248,8 +323,12 @@ export default function GlobalOrb({
       const transcript = event.results[0]?.[0]?.transcript?.trim();
       if (transcript) ask(transcript);
     };
-    recognition.onend = () => setInteraction(null);
-    recognition.onerror = () => setInteraction(null);
+    recognition.onend = () => {
+      setInteraction((cur) => (cur === 'listening' ? null : cur));
+    };
+    recognition.onerror = () => {
+      setInteraction((cur) => (cur === 'listening' ? null : cur));
+    };
     recognitionRef.current = recognition;
     setInteraction('listening');
     setOpen(true);
@@ -265,6 +344,7 @@ export default function GlobalOrb({
         objects,
       }),
     );
+    enterSpeaking();
   };
 
   const state = session.state as OrbVisualState;
@@ -367,7 +447,21 @@ export default function GlobalOrb({
                   {findings.map((f) => (
                     <li key={f.id}>
                       {f.href ? (
-                        <Link href={f.href} onClick={() => setOpen(false)}>
+                        <Link
+                          href={f.href}
+                          onClick={(e) => {
+                            if (resolveChromeFadeClient()) {
+                              const view = sessionViewFromHref(f.href!);
+                              if (view) {
+                                e.preventDefault();
+                                setOpen(false);
+                                setSessionView(view);
+                                return;
+                              }
+                            }
+                            setOpen(false);
+                          }}
+                        >
                           <strong>{f.title}</strong>
                           {f.detail ? <span>{f.detail}</span> : null}
                         </Link>
@@ -390,9 +484,13 @@ export default function GlobalOrb({
                   <strong>{session.recommendation.label}</strong>
                   {session.recommendation.why ? <span style={{ color: '#5f6b7a', fontSize: '0.85rem' }}>{session.recommendation.why}</span> : null}
                   <div className="global-orb-actions" style={{ marginTop: 10, marginBottom: 0 }}>
-                    <Link className="primary" href={session.recommendation.href} onClick={() => setOpen(false)}>
+                    <button
+                      type="button"
+                      className="primary"
+                      onClick={() => openHrefPreferSession(session.recommendation!.href)}
+                    >
                       Show Me
-                    </Link>
+                    </button>
                     <button type="button" onClick={why}>
                       Explain Why
                     </button>
@@ -406,9 +504,9 @@ export default function GlobalOrb({
                     >
                       Dismiss
                     </button>
-                    <Link href={viewAllHref} onClick={() => setOpen(false)}>
+                    <button type="button" onClick={() => openHrefPreferSession(viewAllHref)}>
                       View All
-                    </Link>
+                    </button>
                   </div>
                 </div>
               ) : null}

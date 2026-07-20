@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import type { SimplifiObject } from '@/lib/simplifi-objects';
 import type { ActionCenterPayload } from '@/lib/action-center';
-import { interpretOrbIntent, resolveOrbIntentHref } from '@/lib/orb-os';
+import { interpretOrbIntent, isOrbSessionSurface, resolveOrbIntentHref } from '@/lib/orb-os';
 import { answerConversationalAsk, searchOpportunities } from '@/lib/simplifi-ask';
 
 const SUGGESTIONS = [
@@ -43,11 +43,30 @@ export default function AskClient({
     const hits = searchOpportunities(intent.query ?? trimmed, objects);
     const soleMatch =
       (intent.surface === 'search' || intent.surface === 'ask') && hits.length === 1 ? hits[0] : null;
+
+    // Match GlobalOrb: session surfaces + sole match open workspace overlays.
+    if (soleMatch) {
+      setAnswer(intent.reply);
+      setMatches([]);
+      router.push(
+        `/simplifi/workspace?orbSession=opportunity&id=${encodeURIComponent(soleMatch.id)}`,
+      );
+      return;
+    }
+
+    if (isOrbSessionSurface(intent.surface)) {
+      const params = new URLSearchParams({ orbSession: intent.surface });
+      if (intent.draft) params.set('draft', intent.draft.slice(0, 2000));
+      setAnswer(intent.reply);
+      setMatches([]);
+      router.push(`/simplifi/workspace?${params}`);
+      return;
+    }
+
     const href = resolveOrbIntentHref(intent, {
       slug,
       draft: intent.draft,
       query: intent.query,
-      opportunityId: soleMatch?.id,
     });
 
     if (href) {
