@@ -1,6 +1,6 @@
 import type { PortalClientRecord } from '@/lib/airtable';
 import { getDemoCredentials, isDemoCredentialAttempt } from '@/lib/demo-client';
-import { getDemoWebsitePortalCredentials } from '@/lib/demo-website-portal';
+import { getDemoWebsitePortalCredentials } from '@/lib/demo-website-portal-identity';
 import { getAirtableApiKey, isProductionDeploy } from '@/lib/integration-env';
 
 /** Local dev only: allow demo portal flows when Airtable is not configured. */

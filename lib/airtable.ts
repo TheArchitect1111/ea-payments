@@ -306,7 +306,7 @@ export async function getClientByPortalSlug(slug: string): Promise<PortalClientR
     getSeededDemoWebsiteClient,
     getDemoWebsitePortalClientRecord,
     isDemoWebsitePortalSlug,
-  } = await import('@/lib/demo-website-portal');
+  } = await import('@/lib/demo-website-portal-identity');
   const seededWebsite = getSeededDemoWebsiteClient(slug);
   if (seededWebsite) return seededWebsite;
   // Durable fixture identity for Website + Portal demo (CTP bind still required).

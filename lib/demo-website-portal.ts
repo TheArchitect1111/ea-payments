@@ -1,12 +1,26 @@
 /**
  * Dedicated Website + Portal demo fixture (not Simplifi demo-client).
- * Ensures ctp entitlement + linked CTP submission so login lands in Client Experience.
+ * Server-only ensure path — do not import from client bundles.
  */
-import type { PortalClientRecord } from '@/lib/airtable';
 import { ensureOrganizationForPortal } from '@/lib/organizations';
 import { ensurePackageEntitlements } from '@/lib/modules/portal-modules';
 import { ensureCtpWorkspaceForWebsitePortal } from '@/lib/ctp-website-portal-workspace';
 import { getAirtableApiKey, isProductionDeploy } from '@/lib/integration-env';
+import {
+  DEMO_WEBSITE_PORTAL,
+  getDemoWebsitePortalCredentials,
+  getDemoWebsitePortalClientRecord,
+  getSeededDemoWebsiteClient,
+  isDemoWebsitePortalSlug,
+  seedDemoWebsiteMemoryClient,
+} from '@/lib/demo-website-portal-identity';
+
+export {
+  getDemoWebsitePortalCredentials,
+  getDemoWebsitePortalClientRecord,
+  getSeededDemoWebsiteClient,
+  isDemoWebsitePortalSlug,
+};
 
 function websiteDemoLocalMode(): boolean {
   if (getAirtableApiKey()) return false;
@@ -17,22 +31,6 @@ function websiteDemoLocalMode(): boolean {
 const BASE_ID = process.env.AIRTABLE_PAYMENTS_BASE_ID ?? 'appv0YoLIMY45fmDA';
 const TABLE = 'Client Records';
 
-const DEMO_WEBSITE = {
-  slug: 'demo-website',
-  email: (
-    process.env.DEMO_WEBSITE_PORTAL_EMAIL ?? 'demo-website@efficiencyarchitects.online'
-  ).toLowerCase(),
-  password: process.env.DEMO_WEBSITE_PORTAL_PASSWORD ?? 'DemoWebsite2026!',
-  clientName: 'Demo Website Client',
-  organization: 'EA Website + Portal Demo',
-  commerceOfferId: 'website_portal_starter',
-  /** Coarse Airtable package; entitlements prefer commerceOfferId. */
-  packagePurchased: 'Implementation Package' as const,
-};
-
-/** In-process client when Airtable is unavailable (dev / unreachable). */
-let seededMemoryClient: PortalClientRecord | null = null;
-
 function authHeaders(): Record<string, string> {
   return {
     Authorization: `Bearer ${process.env.AIRTABLE_API_KEY}`,
@@ -40,50 +38,8 @@ function authHeaders(): Record<string, string> {
   };
 }
 
-function buildDemoClientRecord(recordId: string): PortalClientRecord {
-  const demo = DEMO_WEBSITE;
-  return {
-    id: recordId,
-    clientName: demo.clientName,
-    email: demo.email,
-    organization: demo.organization,
-    packagePurchased: demo.packagePurchased,
-    commerceOfferId: demo.commerceOfferId,
-    amountPaid: 2497,
-    paymentDate: new Date().toISOString().slice(0, 10),
-    portalAccessStatus: 'Active',
-    portalSlug: demo.slug,
-    passwordChanged: true,
-    tempPassword: demo.password,
-    onboardingStatus: 'In Progress',
-  };
-}
-
-function seedMemoryClient(recordId = 'memory-demo-website'): PortalClientRecord {
-  seededMemoryClient = buildDemoClientRecord(recordId);
-  return seededMemoryClient;
-}
-
-export function getDemoWebsitePortalCredentials() {
-  return { ...DEMO_WEBSITE };
-}
-
-export function isDemoWebsitePortalSlug(slug: string): boolean {
-  return slug.trim() === DEMO_WEBSITE.slug;
-}
-
-export function getDemoWebsitePortalClientRecord(): PortalClientRecord {
-  return buildDemoClientRecord(seededMemoryClient?.id ?? 'demo-website-fixture');
-}
-
-/** Used by getClientByPortalSlug when Airtable seed fell back to memory. */
-export function getSeededDemoWebsiteClient(slug: string): PortalClientRecord | null {
-  if (slug.trim() !== DEMO_WEBSITE.slug) return null;
-  return seededMemoryClient;
-}
-
 async function seedWorkspace(): Promise<{ ok: boolean; error?: string }> {
-  const demo = DEMO_WEBSITE;
+  const demo = DEMO_WEBSITE_PORTAL;
   const workspace = await ensureCtpWorkspaceForWebsitePortal({
     portalSlug: demo.slug,
     email: demo.email,
@@ -97,10 +53,10 @@ async function seedWorkspace(): Promise<{ ok: boolean; error?: string }> {
 }
 
 async function seedMemoryFixture(): Promise<{ ok: boolean; error?: string; portalSlug?: string }> {
-  seedMemoryClient();
+  seedDemoWebsiteMemoryClient();
   const workspace = await seedWorkspace();
   if (!workspace.ok) return { ok: false, error: workspace.error };
-  return { ok: true, portalSlug: DEMO_WEBSITE.slug };
+  return { ok: true, portalSlug: DEMO_WEBSITE_PORTAL.slug };
 }
 
 export async function ensureDemoWebsitePortal(): Promise<{
@@ -108,7 +64,7 @@ export async function ensureDemoWebsitePortal(): Promise<{
   error?: string;
   portalSlug?: string;
 }> {
-  const demo = DEMO_WEBSITE;
+  const demo = DEMO_WEBSITE_PORTAL;
 
   if (websiteDemoLocalMode()) {
     return seedMemoryFixture();
@@ -185,7 +141,7 @@ export async function ensureDemoWebsitePortal(): Promise<{
       return { ok: false, error: 'Demo client record id missing.' };
     }
 
-    seedMemoryClient(recordId);
+    seedDemoWebsiteMemoryClient(recordId);
 
     try {
       const org = await ensureOrganizationForPortal({

@@ -42,10 +42,15 @@ assert(!workspace.includes('scheduleCtpProductionProvision'), 'does not re-sched
 assert(!workspace.includes('createPortalAccess'), 'does not create a second portal');
 
 const demo = read('lib/demo-website-portal.ts');
-assert(demo.includes("slug: 'demo-website'"), 'dedicated demo slug');
-assert(demo.includes('website_portal_starter'), 'demo uses Website + Portal offer');
+const demoId = read('lib/demo-website-portal-identity.ts');
+assert(demoId.includes("slug: 'demo-website'"), 'dedicated demo slug');
+assert(demoId.includes('website_portal_starter'), 'demo uses Website + Portal offer');
 assert(demo.includes('ensureCtpWorkspaceForWebsitePortal'), 'demo seeds CTP submission');
-assert(!demo.includes("Package Purchased': 'Simplifi'"), 'demo is not Simplifi');
+assert(!demoId.includes("Package Purchased': 'Simplifi'"), 'demo is not Simplifi');
+assert(
+  !demoId.includes('portal-modules') && !demoId.includes('next/headers'),
+  'demo identity stays client-safe (no portal-modules / next/headers)',
+);
 
 const enter = read('app/api/auth/demo-website-enter/route.ts');
 assert(enter.includes('ensureDemoWebsitePortal'), 'demo-website-enter provisions fixture');
