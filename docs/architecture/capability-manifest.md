@@ -32,13 +32,15 @@ Document **execution order** and **dependencies** for Factory capabilities so th
 | 30 | `discovery` | `research` | yes | worker — discovery artifacts from research only |
 | 40 | `planning` | `discovery` | yes | worker — planning artifacts + WorkOrders |
 | 50 | `production` | `planning` | yes | worker — ProductionController + WebsiteBuilder |
-| 60 | `experience_director` | `production` | **proposed** | evaluator — Experience Review vs Constitution; never generates/deploys |
+| 60 | `experience_director` | `production` | **v1 complete*** | evaluator — Experience Review vs Constitution; never generates/deploys |
+
+\*v1 is **admin dashboard + publish gate** (not Launch-orchestrated). See [experience-director-v1.md](./experience-director-v1.md). Do not schedule further Director work unless it directly helps launch EA.
 
 ```text
 intake → research → discovery → planning → production → experience_director → (publish when Approved)
 ```
 
-**Proposed (not implemented):** `experience_director` — see [experience-blueprint.md](./experience-blueprint.md). Evaluates the Experience Blueprint; emits Experience Review (`Approved` | `Needs Refinement` | `Rejected`). Publish is blocked unless Approved. Does not fork Launch or replace the Orchestrator.
+**Experience Director v1 (complete):** admin evaluator, Experience Review artifact, Approved-only publish gate, validation + calibration. Not registered in Launch orchestration yet — backlog only if launch-critical. See [experience-blueprint.md](./experience-blueprint.md).
 
 Dependency rule used by the registry: a dependency is satisfied when ProjectContext has an output with `kind === dependencyId`.
 

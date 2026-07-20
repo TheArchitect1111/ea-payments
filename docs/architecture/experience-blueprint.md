@@ -1,8 +1,8 @@
 # Experience Blueprint Architecture (Proposal)
 
-**Status:** Awaiting review / approval — **not implemented**  
+**Status:** Experience Director **v1 complete** (admin evaluator + publish gate + validation + calibration) — see [experience-director-v1.md](./experience-director-v1.md). Blueprint schema / WebsiteBuilder emit path remains evolutionary.  
 **Document ID:** ASC-XP-BLUEPRINT-2026-1.0  
-**Amendment:** Experience Director capability (ASC-XP-DIRECTOR-2026-1.0)  
+**Amendment:** Experience Director capability (ASC-XP-DIRECTOR-2026-1.0) — **v1 shipped; do not revisit unless defect or justified feedback**  
 **Constitution:** EA Experience Constitution (mandatory) — see below  
 **Principle:** One Factory, one Launch pipeline, one Experience Blueprint, one publishing path. Do not fork Launch.
 
@@ -668,15 +668,15 @@ flowchart TB
 
 ## Approval checklist
 
-- [ ] Approve Experience Constitution as mandatory  
-- [ ] Approve language: “premium digital experience” (not “build a website”)  
-- [ ] Approve schema v1 with **`experience`** (not `creativeDirection`)  
-- [ ] Approve **Experience Director** as Factory capability (order 60, after Production, before Publish)  
-- [ ] Approve Experience Review artifact (scores + `Approved` / `Needs Refinement` / `Rejected`)  
-- [ ] Approve: publish **only** when status is **Approved**  
-- [ ] Approve keep artifact kind `website_site`  
-- [ ] Approve Concept Pack as enrich-only  
-- [ ] Approve: no Launch fork, no parallel review system, no orchestrator replacement  
-- [ ] Approve Phase 1: public home from blueprint + portal continuity later  
+- [x] Approve Experience Constitution as mandatory  
+- [x] Approve language: “premium digital experience” (not “build a website”)  
+- [x] Approve schema v1 with **`experience`** (not `creativeDirection`)  
+- [x] Approve **Experience Director** as Factory capability (order 60, after Production, before Publish) — **v1 complete** (admin + publish gate; Launch wiring deferred)  
+- [x] Approve Experience Review artifact (scores + `Approved` / `Needs Refinement` / `Rejected`)  
+- [x] Approve: publish **only** when status is **Approved**  
+- [x] Approve keep artifact kind `website_site`  
+- [x] Approve Concept Pack as enrich-only  
+- [x] Approve: no Launch fork, no parallel review system, no orchestrator replacement  
+- [ ] Approve Phase 1: public home from blueprint + portal continuity later — backlog (launch filter applies)
 
-**Do not implement until this amended proposal is approved.**
+**Experience Director v1 is complete.** Further Director work only for real defects or justified user feedback.

@@ -1,0 +1,21 @@
+---
+description: Every sprint must directly help launch EA; otherwise backlog
+alwaysApply: true
+---
+
+# Launch sprint filter
+
+From 2026-07-20 forward, every sprint answers one question:
+
+> **Does this directly help us launch EA?**
+
+- If **yes** → schedule and ship.
+- If **no** → backlog. Do not start it in the current sprint.
+
+## Closed work (do not reopen)
+
+- **Experience Director v1** — complete. Do not revisit unless a real defect is found or user feedback justifies a change. See `docs/architecture/experience-director-v1.md`.
+
+## How to apply
+
+Before proposing or implementing non-trivial work, state the launch impact in one sentence. If you cannot, put it in the backlog and ask for a launch-critical priority instead.
