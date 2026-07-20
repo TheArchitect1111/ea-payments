@@ -34,9 +34,16 @@ assert(validation.includes('blueprintVersion'), 'blueprint version');
 assert(validation.includes('reviewer'), 'reviewer');
 assert(validation.includes('rationale'), 'rationale');
 
+assert(validation.includes('writeStoreAtomic') || validation.includes('.tmp'), 'atomic store write');
+assert(validation.includes('appendChain') || validation.includes('Serialize appends'), 'append serialization');
+assert(validation.includes('isExperienceDirectorApprovalStatus'), 'approval status validation');
+assert(validation.includes('quarantineCorruptStore') || validation.includes('corrupt'), 'corrupt store quarantine');
+
 const api = read('app/api/admin/factory/experience-director/validation/route.ts');
 assert(api.includes('validationMode'), 'validation mode API');
 assert(api.includes('requireAdminActionFromRequest'), 'admin auth');
+assert(api.includes('appendValidationEntryAndAnalytics'), 'single-read append+analytics');
+assert(!api.includes('withConfidence'), 'confidence owned by createValidationEntryFromReview');
 
 const dash = read('app/admin/ea-factory/experience-director/validation/page.tsx');
 assert(dash.includes('Validation Framework'), 'validation dashboard page');

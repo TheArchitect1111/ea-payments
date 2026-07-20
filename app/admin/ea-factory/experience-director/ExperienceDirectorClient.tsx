@@ -238,7 +238,11 @@ export default function ExperienceDirectorClient({
   return (
     <div className="space-y-8">
       {message ? (
-        <p className="rounded-xl bg-[#FAF8F3] px-4 py-3 text-sm font-medium text-neutral-800 ring-1 ring-neutral-200">
+        <p
+          role="status"
+          aria-live="polite"
+          className="rounded-xl bg-[#FAF8F3] px-4 py-3 text-sm font-medium text-neutral-800 ring-1 ring-neutral-200"
+        >
           {message}
         </p>
       ) : null}
@@ -249,9 +253,14 @@ export default function ExperienceDirectorClient({
             type="checkbox"
             checked={validationMode}
             onChange={(e) => setValidationMode(e.target.checked)}
+            aria-describedby="validation-mode-help"
           />
           Validation Mode
         </label>
+        <p id="validation-mode-help" className="sr-only">
+          When enabled, reviews are logged to the Validation Framework for quality analysis without
+          changing publish rules.
+        </p>
         <Link
           href="/admin/ea-factory/experience-director/validation"
           className="rounded-full bg-[#C9A844] px-4 py-2 text-xs font-black text-[#1B2B4D]"
@@ -376,6 +385,8 @@ export default function ExperienceDirectorClient({
                         onChange={(e) => setReviewer(e.target.value)}
                         className="mt-1 w-full border border-neutral-200 bg-white px-3 py-2 text-sm"
                         placeholder="Reviewer name or email"
+                        autoComplete="name"
+                        maxLength={200}
                       />
                     </label>
                     <label className="block text-sm">
@@ -388,6 +399,7 @@ export default function ExperienceDirectorClient({
                         rows={3}
                         className="mt-1 w-full border border-neutral-200 bg-white px-3 py-2 text-sm"
                         placeholder="Optional: strengths, weaknesses, why this status — Director auto-rationale used if blank"
+                        maxLength={8000}
                       />
                     </label>
                   </div>
@@ -397,6 +409,7 @@ export default function ExperienceDirectorClient({
                   <button
                     type="button"
                     disabled={busy === focused.projectId}
+                    aria-busy={busy === focused.projectId}
                     onClick={() => void runReview(focused.projectId)}
                     className="rounded-full bg-[#1B2B4D] px-4 py-2 text-xs font-bold text-white disabled:opacity-50"
                   >

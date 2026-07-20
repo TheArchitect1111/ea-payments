@@ -4,13 +4,11 @@ import {
   getLatestExperienceReview,
   runExperienceDirectorReview,
 } from '@/lib/factory-experience-director';
-import { computeReviewConfidence } from '@/lib/factory-experience-director-confidence';
 import {
-  appendExperienceDirectorValidationEntry,
+  appendValidationEntryAndAnalytics,
   createValidationEntryFromReview,
   getExperienceDirectorValidationAnalytics,
   listValidationEntriesForComparison,
-  type ExperienceDirectorValidationEntry,
 } from '@/lib/factory-experience-director-validation';
 import { getFactoryProject } from '@/lib/factory-project-store';
 
@@ -34,27 +32,22 @@ export async function GET(req: NextRequest) {
     const ids = compareRaw
       .split(',')
       .map((id) => id.trim())
-      .filter(Boolean);
+      .filter(Boolean)
+      .slice(0, 4);
     const entries = await listValidationEntriesForComparison(ids);
     return NextResponse.json({ ok: true, mode: 'compare', entries });
   }
 
-  const analytics = await getExperienceDirectorValidationAnalytics();
-  return NextResponse.json({ ok: true, mode: 'analytics', analytics });
-}
-
-function withConfidence(
-  base: Omit<ExperienceDirectorValidationEntry, 'id' | 'schemaVersion' | 'validationMode'>,
-): Omit<ExperienceDirectorValidationEntry, 'id' | 'schemaVersion' | 'validationMode'> {
-  return {
-    ...base,
-    confidence: computeReviewConfidence({
-      scores: base.scores,
-      answers: base.answers,
-      requiredImprovements: base.requiredImprovements,
-      rationale: base.rationale,
-    }),
-  };
+  try {
+    const analytics = await getExperienceDirectorValidationAnalytics();
+    return NextResponse.json({ ok: true, mode: 'analytics', analytics });
+  } catch (err) {
+    console.error('[experience-director-validation] GET failed:', err);
+    return NextResponse.json(
+      { error: 'Could not load validation analytics.' },
+      { status: 500 },
+    );
+  }
 }
 
 export async function POST(req: NextRequest) {
@@ -81,61 +74,66 @@ export async function POST(req: NextRequest) {
   }
 
   const reviewer =
-    String(body.reviewer || auth.user?.email || auth.user?.name || 'Experience Director').trim() ||
+    String(body.reviewer || auth.user.email || auth.user.name || 'Experience Director').trim() ||
     'Experience Director';
-  const rationale = body.rationale != null ? String(body.rationale) : undefined;
+  const rationale = body.rationale != null ? String(body.rationale).slice(0, 8000) : undefined;
 
-  let entry: ExperienceDirectorValidationEntry;
+  try {
+    let draft;
 
-  if (body.useLatestReview) {
-    const project = await getFactoryProject(projectId);
-    const latest = await getLatestExperienceReview(projectId);
-    if (!project || !latest) {
-      return NextResponse.json(
-        { error: 'No latest Experience Review found for this project.' },
-        { status: 400 },
-      );
+    if (body.useLatestReview) {
+      const project = await getFactoryProject(projectId);
+      const latest = await getLatestExperienceReview(projectId);
+      if (!project || !latest) {
+        return NextResponse.json(
+          { error: 'No latest Experience Review found for this project.' },
+          { status: 400 },
+        );
+      }
+      draft = createValidationEntryFromReview({
+        projectId,
+        client: project.client,
+        industry: project.industry,
+        artifactId: latest.artifactId,
+        blueprintVersion: latest.review.blueprintRef,
+        review: latest.review,
+        reviewer,
+        rationale,
+      });
+    } else {
+      const result = await runExperienceDirectorReview(projectId);
+      if (!result.ok || !result.summary) {
+        return NextResponse.json({ error: result.error || 'Review failed.' }, { status: 400 });
+      }
+      draft = createValidationEntryFromReview({
+        projectId,
+        client: result.summary.client,
+        industry: result.industry,
+        artifactId: result.summary.artifactId,
+        blueprintVersion: result.blueprintVersion || result.summary.review.blueprintRef,
+        review: result.summary.review,
+        reviewer,
+        rationale,
+      });
     }
-    entry = await appendExperienceDirectorValidationEntry(
-      withConfidence(
-        createValidationEntryFromReview({
-          projectId,
-          client: project.client,
-          industry: project.industry,
-          artifactId: latest.artifactId,
-          blueprintVersion: latest.review.blueprintRef,
-          review: latest.review,
-          reviewer,
-          rationale,
-        }),
-      ),
-    );
-  } else {
-    const result = await runExperienceDirectorReview(projectId);
-    if (!result.ok || !result.summary) {
-      return NextResponse.json({ error: result.error || 'Review failed.' }, { status: 400 });
-    }
-    entry = await appendExperienceDirectorValidationEntry(
-      withConfidence(
-        createValidationEntryFromReview({
-          projectId,
-          client: result.summary.client,
-          industry: result.industry,
-          artifactId: result.summary.artifactId,
-          blueprintVersion: result.blueprintVersion || result.summary.review.blueprintRef,
-          review: result.summary.review,
-          reviewer,
-          rationale,
-        }),
-      ),
+
+    const { entry, analytics } = await appendValidationEntryAndAnalytics(draft);
+    return NextResponse.json({
+      ok: true,
+      validationMode: true,
+      entry,
+      analytics,
+    });
+  } catch (err) {
+    console.error('[experience-director-validation] POST failed:', err);
+    return NextResponse.json(
+      {
+        error:
+          err instanceof Error && err.message
+            ? err.message
+            : 'Could not save Validation Mode review.',
+      },
+      { status: 500 },
     );
   }
-
-  const analytics = await getExperienceDirectorValidationAnalytics();
-  return NextResponse.json({
-    ok: true,
-    validationMode: true,
-    entry,
-    analytics,
-  });
 }
