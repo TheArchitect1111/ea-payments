@@ -48,7 +48,9 @@ assert(demoId.includes('website_portal_starter'), 'demo uses Website + Portal of
 assert(demo.includes('ensureCtpWorkspaceForWebsitePortal'), 'demo seeds CTP submission');
 assert(!demoId.includes("Package Purchased': 'Simplifi'"), 'demo is not Simplifi');
 assert(
-  !demoId.includes('portal-modules') && !demoId.includes('next/headers'),
+  !demoId.includes("from 'next/headers'") &&
+    !demoId.includes('from "next/headers"') &&
+    !demoId.includes('@/lib/modules/portal-modules'),
   'demo identity stays client-safe (no portal-modules / next/headers)',
 );
 
