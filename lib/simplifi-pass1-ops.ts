@@ -81,34 +81,47 @@ async function probeSimplifiHost(url: string): Promise<{
   return { ok: false, status: lastStatus, message: lastMessage };
 }
 
-/** Prefer branded app host; accept EA apex /simplifiorb as complete until app subdomain DNS is live. */
+/** Prefer EA-owned app host; apex fallback; unowned simplifi.ai is last/optional only. */
 export async function probeSimplifiAppDns(): Promise<{
   ok: boolean;
   status: number;
   message: string;
   url: string;
 }> {
-  const brand = await probeSimplifiHost(SIMPLIFI_BRAND_URL);
-  if (brand.ok) {
-    return { ...brand, url: SIMPLIFI_BRAND_URL };
+  // Hard-prefer EA-owned host so env pointing at unowned simplifi.ai cannot false-fail Pass 1.
+  const preferred = 'https://app.efficiencyarchitects.online';
+  const preferredProbe = await probeSimplifiHost(preferred);
+  if (preferredProbe.ok) {
+    return { ...preferredProbe, url: preferred };
   }
+
+  if (SIMPLIFI_BRAND_URL.replace(/\/$/, '') !== preferred) {
+    const brand = await probeSimplifiHost(SIMPLIFI_BRAND_URL);
+    if (brand.ok) {
+      return { ...brand, url: SIMPLIFI_BRAND_URL };
+    }
+  }
+
   const apex = await probeSimplifiHost(SIMPLIFI_TESTER_URL);
   if (apex.ok) {
     return {
       ...apex,
       url: SIMPLIFI_TESTER_URL,
-      message: `${apex.message} Branded entry ready on apex; add Namecheap CNAME app → cname.vercel-dns.com for ${SIMPLIFI_BRAND_URL}.`,
+      message: `${apex.message} Preferred host ${preferred} not ready; apex /simplifiorb works. Confirm Namecheap CNAME app → cname.vercel-dns.com.`,
     };
   }
+
+  // Unowned legacy — informational only after EA hosts fail.
   const alias = await probeSimplifiHost(SIMPLIFI_APP_ALIAS_URL);
   if (alias.ok) {
     return { ...alias, url: SIMPLIFI_APP_ALIAS_URL };
   }
+
   return {
     ok: false,
-    status: brand.status,
-    url: SIMPLIFI_BRAND_URL,
-    message: `${brand.message} Testers: use ${SIMPLIFI_TESTER_URL}/simplifiorb until app subdomain DNS is live.`,
+    status: preferredProbe.status,
+    url: preferred,
+    message: `${preferredProbe.message} Testers: use ${SIMPLIFI_TESTER_URL}/simplifiorb. Unowned simplifi.ai DNS is optional.`,
   };
 }
 
