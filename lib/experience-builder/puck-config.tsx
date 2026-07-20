@@ -3,16 +3,31 @@ import './experience-builder.css';
 
 export type ExperienceBuilderProps = {
   EAHero: {
+    variant: string;
     eyebrow: string;
     title: string;
     subtitle: string;
     ctaLabel: string;
     ctaHref: string;
+    imageUrl: string;
   };
   EATextSection: {
+    variant: string;
     label: string;
     title: string;
     body: string;
+    accentValue: string;
+    accentCaption: string;
+  };
+  EASplitNarrative: {
+    label: string;
+    title: string;
+    leftLabel: string;
+    leftTitle: string;
+    leftBody: string;
+    rightLabel: string;
+    rightTitle: string;
+    rightBody: string;
   };
   EAFeatures: {
     label: string;
@@ -25,6 +40,7 @@ export type ExperienceBuilderProps = {
     featureThreeBody: string;
   };
   EAMetrics: {
+    variant: string;
     label: string;
     title: string;
     metricOneValue: string;
@@ -35,6 +51,7 @@ export type ExperienceBuilderProps = {
     metricThreeLabel: string;
   };
   EACtaBand: {
+    variant: string;
     title: string;
     body: string;
     primaryLabel: string;
@@ -46,35 +63,58 @@ export type ExperienceBuilderProps = {
 
 export const puckConfig: Config<ExperienceBuilderProps> = {
   categories: {
-    layout: { title: 'Layout', components: ['EAHero', 'EACtaBand'] },
-    content: { title: 'Content', components: ['EATextSection', 'EAFeatures', 'EAMetrics'] },
+    layout: { title: 'Layout', components: ['EAHero', 'EACtaBand', 'EASplitNarrative'] },
+    content: {
+      title: 'Content',
+      components: ['EATextSection', 'EAMetrics', 'EAFeatures'],
+    },
   },
   components: {
     EAHero: {
       label: 'EA Hero',
       fields: {
+        variant: {
+          type: 'select',
+          label: 'Composition',
+          options: [
+            { label: 'Companion', value: 'companion' },
+            { label: 'Threshold', value: 'threshold' },
+            { label: 'Craft', value: 'craft' },
+          ],
+        },
         eyebrow: { type: 'text', label: 'Eyebrow' },
         title: { type: 'text', label: 'Headline' },
         subtitle: { type: 'textarea', label: 'Subtitle' },
         ctaLabel: { type: 'text', label: 'CTA label' },
         ctaHref: { type: 'text', label: 'CTA link' },
+        imageUrl: { type: 'text', label: 'Image URL' },
       },
       defaultProps: {
+        variant: 'companion',
         eyebrow: 'Efficiency Architects',
         title: 'Discover what becomes possible',
         subtitle: 'A premium experience aligned with your mission, audience, and next step.',
         ctaLabel: 'Begin discovery',
         ctaHref: '/assessment',
+        imageUrl: '',
       },
-      render: ({ eyebrow, title, subtitle, ctaLabel, ctaHref }) => (
-        <section className="eb-block eb-hero">
-          <p className="eb-hero-eyebrow">{eyebrow}</p>
-          <h1 className="eb-hero-title">{title}</h1>
-          <p className="eb-hero-subtitle">{subtitle}</p>
-          <div className="eb-cta-row">
-            <a className="eb-btn eb-btn-primary" href={ctaHref}>
-              {ctaLabel}
-            </a>
+      render: ({ variant, eyebrow, title, subtitle, ctaLabel, ctaHref, imageUrl }) => (
+        <section className={`eb-block eb-hero eb-hero--${variant || 'companion'}`}>
+          {imageUrl ? (
+            <div className="eb-hero-media" aria-hidden="true">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={imageUrl} alt="" />
+            </div>
+          ) : null}
+          <div className="eb-hero-copy">
+            {eyebrow ? <p className="eb-hero-eyebrow">{eyebrow}</p> : null}
+            <h1 className="eb-hero-title">{title}</h1>
+            <p className="eb-hero-subtitle">{subtitle}</p>
+            <div className="eb-cta-row">
+              <a className="eb-btn eb-btn-primary" href={ctaHref}>
+                {ctaLabel}
+              </a>
+            </div>
           </div>
         </section>
       ),
@@ -82,21 +122,97 @@ export const puckConfig: Config<ExperienceBuilderProps> = {
     EATextSection: {
       label: 'EA Text Section',
       fields: {
+        variant: {
+          type: 'select',
+          label: 'Composition',
+          options: [
+            { label: 'Default', value: 'default' },
+            { label: 'Documentary', value: 'documentary' },
+            { label: 'Confrontational', value: 'confrontational' },
+            { label: 'Mission plane', value: 'mission-plane' },
+            { label: 'Legacy', value: 'legacy' },
+            { label: 'Process', value: 'process' },
+            { label: 'Proof', value: 'proof' },
+          ],
+        },
         label: { type: 'text', label: 'Section label' },
         title: { type: 'text', label: 'Title' },
         body: { type: 'textarea', label: 'Body' },
+        accentValue: { type: 'text', label: 'Accent value' },
+        accentCaption: { type: 'textarea', label: 'Accent caption' },
       },
       defaultProps: {
+        variant: 'default',
         label: 'Situation',
         title: 'Why this matters now',
         body: 'Use plain language to explain the opportunity, the audience, and the outcome you are guiding people toward.',
+        accentValue: '',
+        accentCaption: '',
       },
-      render: ({ label, title, body }) => (
-        <section className="eb-block eb-section">
+      render: ({ variant, label, title, body, accentValue, accentCaption }) => (
+        <section className={`eb-block eb-section eb-section--${variant || 'default'}`}>
           <div className="eb-section-inner">
-            <p className="eb-section-label">{label}</p>
+            {label ? <p className="eb-section-label">{label}</p> : null}
             <h2 className="eb-section-title">{title}</h2>
             <p className="eb-section-body">{body}</p>
+            {accentValue || accentCaption ? (
+              <aside className="eb-accent-stat">
+                {accentValue ? <p className="eb-accent-value">{accentValue}</p> : null}
+                {accentCaption ? <p className="eb-accent-caption">{accentCaption}</p> : null}
+              </aside>
+            ) : null}
+          </div>
+        </section>
+      ),
+    },
+    EASplitNarrative: {
+      label: 'EA Split Narrative',
+      fields: {
+        label: { type: 'text', label: 'Section label' },
+        title: { type: 'text', label: 'Title' },
+        leftLabel: { type: 'text', label: 'Left label' },
+        leftTitle: { type: 'text', label: 'Left title' },
+        leftBody: { type: 'textarea', label: 'Left body' },
+        rightLabel: { type: 'text', label: 'Right label' },
+        rightTitle: { type: 'text', label: 'Right title' },
+        rightBody: { type: 'textarea', label: 'Right body' },
+      },
+      defaultProps: {
+        label: 'Change',
+        title: 'From stuck to moving',
+        leftLabel: 'Before',
+        leftTitle: 'Unresolved',
+        leftBody: 'The cost of waiting.',
+        rightLabel: 'After',
+        rightTitle: 'What becomes possible',
+        rightBody: 'Clarity and a next step.',
+      },
+      render: ({
+        label,
+        title,
+        leftLabel,
+        leftTitle,
+        leftBody,
+        rightLabel,
+        rightTitle,
+        rightBody,
+      }) => (
+        <section className="eb-block eb-section eb-split">
+          <div className="eb-section-inner">
+            {label ? <p className="eb-section-label">{label}</p> : null}
+            <h2 className="eb-section-title">{title}</h2>
+            <div className="eb-split-grid">
+              <article>
+                <p className="eb-split-label">{leftLabel}</p>
+                <h3 className="eb-split-title">{leftTitle}</h3>
+                <p className="eb-split-body">{leftBody}</p>
+              </article>
+              <article>
+                <p className="eb-split-label">{rightLabel}</p>
+                <h3 className="eb-split-title">{rightTitle}</h3>
+                <p className="eb-split-body">{rightBody}</p>
+              </article>
+            </div>
           </div>
         </section>
       ),
@@ -158,6 +274,14 @@ export const puckConfig: Config<ExperienceBuilderProps> = {
     EAMetrics: {
       label: 'EA Metrics',
       fields: {
+        variant: {
+          type: 'select',
+          label: 'Composition',
+          options: [
+            { label: 'Cards', value: 'cards' },
+            { label: 'Editorial', value: 'editorial' },
+          ],
+        },
         label: { type: 'text', label: 'Section label' },
         title: { type: 'text', label: 'Title' },
         metricOneValue: { type: 'text', label: 'Metric 1 value' },
@@ -168,6 +292,7 @@ export const puckConfig: Config<ExperienceBuilderProps> = {
         metricThreeLabel: { type: 'text', label: 'Metric 3 label' },
       },
       defaultProps: {
+        variant: 'editorial',
         label: 'Proof',
         title: 'Signals that build trust',
         metricOneValue: '10s',
@@ -178,6 +303,7 @@ export const puckConfig: Config<ExperienceBuilderProps> = {
         metricThreeLabel: 'Recommended action',
       },
       render: ({
+        variant,
         label,
         title,
         metricOneValue,
@@ -187,23 +313,29 @@ export const puckConfig: Config<ExperienceBuilderProps> = {
         metricThreeValue,
         metricThreeLabel,
       }) => (
-        <section className="eb-block eb-section">
+        <section className={`eb-block eb-section eb-metrics-wrap eb-metrics-wrap--${variant || 'editorial'}`}>
           <div className="eb-section-inner">
             <p className="eb-section-label">{label}</p>
             <h2 className="eb-section-title">{title}</h2>
             <div className="eb-metrics">
-              <div className="eb-metric">
-                <p className="eb-metric-value">{metricOneValue}</p>
-                <p className="eb-metric-label">{metricOneLabel}</p>
-              </div>
-              <div className="eb-metric">
-                <p className="eb-metric-value">{metricTwoValue}</p>
-                <p className="eb-metric-label">{metricTwoLabel}</p>
-              </div>
-              <div className="eb-metric">
-                <p className="eb-metric-value">{metricThreeValue}</p>
-                <p className="eb-metric-label">{metricThreeLabel}</p>
-              </div>
+              {metricOneValue ? (
+                <div className="eb-metric">
+                  <p className="eb-metric-value">{metricOneValue}</p>
+                  <p className="eb-metric-label">{metricOneLabel}</p>
+                </div>
+              ) : null}
+              {metricTwoValue ? (
+                <div className="eb-metric">
+                  <p className="eb-metric-value">{metricTwoValue}</p>
+                  <p className="eb-metric-label">{metricTwoLabel}</p>
+                </div>
+              ) : null}
+              {metricThreeValue ? (
+                <div className="eb-metric">
+                  <p className="eb-metric-value">{metricThreeValue}</p>
+                  <p className="eb-metric-label">{metricThreeLabel}</p>
+                </div>
+              ) : null}
             </div>
           </div>
         </section>
@@ -212,6 +344,15 @@ export const puckConfig: Config<ExperienceBuilderProps> = {
     EACtaBand: {
       label: 'EA CTA Band',
       fields: {
+        variant: {
+          type: 'select',
+          label: 'Composition',
+          options: [
+            { label: 'Belonging', value: 'belonging' },
+            { label: 'Commission', value: 'commission' },
+            { label: 'Protect', value: 'protect' },
+          ],
+        },
         title: { type: 'text', label: 'Title' },
         body: { type: 'textarea', label: 'Body' },
         primaryLabel: { type: 'text', label: 'Primary label' },
@@ -220,6 +361,7 @@ export const puckConfig: Config<ExperienceBuilderProps> = {
         secondaryHref: { type: 'text', label: 'Secondary link' },
       },
       defaultProps: {
+        variant: 'belonging',
         title: 'Ready for the next step?',
         body: 'Start with one clear action. The platform will guide the rest.',
         primaryLabel: 'Get started',
@@ -227,8 +369,16 @@ export const puckConfig: Config<ExperienceBuilderProps> = {
         secondaryLabel: 'Contact EA',
         secondaryHref: '/contact',
       },
-      render: ({ title, body, primaryLabel, primaryHref, secondaryLabel, secondaryHref }) => (
-        <section className="eb-block eb-cta-band">
+      render: ({
+        variant,
+        title,
+        body,
+        primaryLabel,
+        primaryHref,
+        secondaryLabel,
+        secondaryHref,
+      }) => (
+        <section className={`eb-block eb-cta-band eb-cta-band--${variant || 'belonging'}`} id="invite">
           <div className="eb-section-inner">
             <h2 className="eb-section-title">{title}</h2>
             <p className="eb-section-body">{body}</p>

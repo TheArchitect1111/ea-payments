@@ -4,10 +4,61 @@
 }
 
 .eb-hero {
-  background: linear-gradient(145deg, var(--ea-navy, #1b2b4d) 0%, #243a66 100%);
+  position: relative;
+  background: var(--ea-navy, #1b2b4d);
   color: #fff;
-  padding: 4rem 1.5rem;
+  padding: 4.5rem 1.5rem 3.5rem;
+  text-align: left;
+  overflow: hidden;
+  min-height: min(72vh, 640px);
+  display: flex;
+  align-items: flex-end;
+}
+
+.eb-hero--companion {
   text-align: center;
+  align-items: center;
+  justify-content: center;
+  min-height: min(64vh, 560px);
+}
+
+.eb-hero--threshold {
+  align-items: flex-end;
+}
+
+.eb-hero--craft {
+  background: #1a1714;
+  min-height: min(68vh, 600px);
+}
+
+.eb-hero-media {
+  position: absolute;
+  inset: 0;
+}
+
+.eb-hero-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.eb-hero-media::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(16, 24, 40, 0.55);
+}
+
+.eb-hero-copy {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.eb-hero--companion .eb-hero-copy {
+  max-width: 42rem;
 }
 
 .eb-hero-eyebrow {
@@ -36,9 +87,14 @@
 
 .eb-cta-row {
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 0.75rem;
   flex-wrap: wrap;
+}
+
+.eb-hero--companion .eb-cta-row,
+.eb-cta-band .eb-cta-row {
+  justify-content: center;
 }
 
 .eb-btn {
@@ -66,8 +122,148 @@
 }
 
 .eb-section {
-  padding: 3rem 1.5rem;
+  padding: 3.5rem 1.5rem;
   background: var(--ea-cream, #faf8f3);
+}
+
+.eb-section--documentary,
+.eb-section--confrontational {
+  background: var(--ea-navy, #1b2b4d);
+  color: #fff;
+}
+
+.eb-section--documentary .eb-section-title,
+.eb-section--confrontational .eb-section-title {
+  color: #fff;
+}
+
+.eb-section--documentary .eb-section-body,
+.eb-section--confrontational .eb-section-body {
+  color: rgba(255, 255, 255, 0.86);
+}
+
+.eb-section--confrontational {
+  background: #120f0c;
+}
+
+.eb-section--mission-plane {
+  background: var(--ea-navy, #1b2b4d);
+  color: #fff;
+  text-align: center;
+  padding: 5rem 1.5rem;
+}
+
+.eb-section--mission-plane .eb-section-inner {
+  max-width: 36rem;
+}
+
+.eb-section--mission-plane .eb-section-title {
+  color: #fff;
+  font-size: clamp(2rem, 5vw, 3.25rem);
+}
+
+.eb-section--mission-plane .eb-section-body {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.eb-section--legacy {
+  background: #f3efe6;
+}
+
+.eb-section--process .eb-section-body {
+  white-space: pre-line;
+  font-size: 1.05rem;
+}
+
+.eb-section--proof {
+  background: #fff;
+}
+
+.eb-accent-stat {
+  margin-top: 2rem;
+  padding-left: 1.1rem;
+  border-left: 3px solid var(--ea-gold, #c9a844);
+}
+
+.eb-accent-value {
+  margin: 0;
+  font-size: clamp(2.5rem, 6vw, 4rem);
+  font-weight: 800;
+  line-height: 1;
+  color: inherit;
+}
+
+.eb-accent-caption {
+  margin: 0.75rem 0 0;
+  max-width: 28ch;
+  color: inherit;
+  opacity: 0.88;
+}
+
+.eb-split-grid {
+  display: grid;
+  gap: 2rem;
+  margin-top: 2rem;
+  border-top: 1px solid var(--ea-border, #e4e7ec);
+  padding-top: 1.75rem;
+}
+
+@media (min-width: 800px) {
+  .eb-split-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .eb-split-grid article:first-child {
+    padding-right: 2rem;
+    border-right: 1px solid var(--ea-border, #e4e7ec);
+  }
+
+  .eb-split-grid article:last-child {
+    padding-left: 2rem;
+  }
+}
+
+.eb-split-label {
+  margin: 0 0 0.5rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ea-navy, #1b2b4d);
+}
+
+.eb-split-title {
+  margin: 0 0 0.65rem;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--ea-navy, #1b2b4d);
+}
+
+.eb-split-body {
+  margin: 0;
+  color: var(--ea-muted, #667085);
+  line-height: 1.6;
+}
+
+.eb-metrics-wrap--editorial .eb-metric {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  text-align: left;
+  padding: 0;
+  box-shadow: none;
+}
+
+.eb-metrics-wrap--editorial .eb-metric-value {
+  font-size: clamp(2.25rem, 4vw, 3.25rem);
+}
+
+.eb-cta-band--commission {
+  background: #1a1714;
+}
+
+.eb-cta-band--protect {
+  background: #0f1c2e;
 }
 
 .eb-section-inner {

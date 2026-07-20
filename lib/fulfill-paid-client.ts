@@ -137,10 +137,25 @@ export async function fulfillPaidClient(
           industry: input.industry,
           email: input.email,
         });
-        if (siteResult.ok && siteResult.siteUrl) {
+        if (!siteResult.ok) {
+          const message =
+            siteResult.error ||
+            'Website publish blocked by Experience Director (unified publish gate).';
+          console.error('fulfillPaidClient website provision failed:', message, {
+            approvalStatus: siteResult.directorReview?.approvalStatus,
+            overall: siteResult.directorReview?.scores?.overall,
+          });
+          return {
+            ok: false,
+            portalSlug,
+            portalLoginUrl,
+            tempCredentials,
+            orgId,
+            error: message,
+          };
+        }
+        if (siteResult.siteUrl) {
           siteUrl = siteResult.siteUrl;
-        } else if (siteResult.error) {
-          console.error('fulfillPaidClient website provision failed:', siteResult.error);
         }
 
         // Option A: bind standard CTP workspace to the portal already provisioned above.

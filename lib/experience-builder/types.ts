@@ -22,11 +22,13 @@ export function createEmptyPuckData(title = 'New experience'): Data {
         type: 'EAHero',
         props: {
           id: 'hero-1',
+          variant: 'companion',
           eyebrow: 'Efficiency Architects',
           title: title,
           subtitle: 'Describe what becomes possible for your audience.',
           ctaLabel: 'Take the next step',
           ctaHref: '/assessment',
+          imageUrl: '',
         },
       },
     ],

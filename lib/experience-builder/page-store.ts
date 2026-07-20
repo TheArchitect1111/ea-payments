@@ -86,15 +86,16 @@ export async function createExperiencePage(
   });
 }
 
+/**
+ * @deprecated Do not call directly — publish must go through
+ * publishWebsiteThroughDirectorGate / publishExistingExperiencePageThroughDirectorGate.
+ * Kept for type compatibility; throws to prevent bypass.
+ */
 export async function markExperiencePagePublished(
-  pageId: string,
-  organizationId: string,
+  _pageId: string,
+  _organizationId: string,
 ): Promise<ExperiencePage | null> {
-  const page = await getExperiencePage(pageId, organizationId);
-  if (!page) return null;
-  return saveExperiencePage({
-    ...page,
-    status: 'published',
-    publishedAt: new Date().toISOString(),
-  });
+  throw new Error(
+    'markExperiencePagePublished bypasses the unified publish gate. Use publishExistingExperiencePageThroughDirectorGate.',
+  );
 }
