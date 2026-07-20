@@ -17,6 +17,7 @@ import {
 import { isHeicCaptureFile, prepareCaptureUpload } from '@/lib/client-image-upload';
 import { analyzeCaptureForm, analyzeCaptureUrl } from '@/lib/simplifi-client';
 import { enqueueCapture, flushCaptureQueue } from '@/lib/offline-capture-queue';
+import { takePendingSharedFile } from '@/lib/simplifi/pending-share';
 import { useProductGuestSession } from '@/components/auth/useProductGuestSession';
 import { NAVY, GOLD } from '@/lib/design-system';
 import {
@@ -52,28 +53,39 @@ export default function SimplifiCaptureApp({
   loggedIn,
   initialUrl,
   initialNotes,
+  expectSharedFile = false,
+  shareHint,
 }: {
   slug: string | null;
   loggedIn: boolean;
   initialUrl?: string;
   initialNotes?: string;
+  expectSharedFile?: boolean;
+  shareHint?: 'pwa';
 }) {
   const fileRef = useRef<HTMLInputElement>(null);
-  const hasShareSeed = Boolean(initialUrl?.trim() || initialNotes?.trim());
+  const hasShareSeed = Boolean(initialUrl?.trim() || initialNotes?.trim() || expectSharedFile);
   const [open, setOpen] = useState(hasShareSeed);
-  const [view, setView] = useState<SheetView>(hasShareSeed ? 'url' : 'menu');
+  const [view, setView] = useState<SheetView>(
+    expectSharedFile ? 'upload' : hasShareSeed ? 'url' : 'menu',
+  );
   const [url, setUrl] = useState(initialUrl ?? '');
   const [notes, setNotes] = useState(initialNotes ?? '');
   const [prospectName, setProspectName] = useState('');
   const [loading, setLoading] = useState(false);
   const [uploadLabel, setUploadLabel] = useState('');
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState(
+    shareHint === 'pwa'
+      ? 'Install Simplifi as an app to share photos into Capture. Text and links still work.'
+      : '',
+  );
   const [result, setResult] = useState<AnalyzeResponse | null>(null);
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [bannerError, setBannerError] = useState('');
   const [claimBanner, setClaimBanner] = useState<{ kind: 'ok' | 'err'; text: string } | null>(null);
   const [claimRetrying, setClaimRetrying] = useState(false);
   const [externalOnboardingStep, setExternalOnboardingStep] = useState<SimplifiOnboardingStep | null>(null);
+  const sharedFileHandled = useRef(false);
 
   const loginNext = encodeURIComponent('/simplifi/workspace');
   const onboardingScope = slug ?? 'simplifi-user';
@@ -123,12 +135,23 @@ export default function SimplifiCaptureApp({
 
     const flushQueued = async () => {
       const result = await flushCaptureQueue(async (item) => {
-        if (item.kind !== 'url') return { ok: false };
-        return analyzeCaptureUrl({
-          url: item.url,
-          prospectName: item.prospectName,
-          notes: item.notes,
-        });
+        if (item.kind === 'url') {
+          return analyzeCaptureUrl({
+            url: item.url,
+            prospectName: item.prospectName,
+            notes: item.notes,
+          });
+        }
+        if (item.kind === 'file') {
+          const form = new FormData();
+          form.append(
+            'file',
+            new File([item.blob], item.fileName, { type: item.mimeType || 'image/jpeg' }),
+          );
+          if (item.prospectName) form.append('prospectName', item.prospectName);
+          return analyzeCaptureForm(form);
+        }
+        return { ok: false };
       });
       if (result.flushed > 0) {
         setMessage(`Sent ${result.flushed} queued capture${result.flushed === 1 ? '' : 's'}.`);
@@ -245,8 +268,9 @@ export default function SimplifiCaptureApp({
     setUploadLabel(isHeicCaptureFile(file) ? `Converting ${file.name}…` : file.name);
     setView('upload');
     setOpen(true);
+    let prepared: File | null = null;
     try {
-      const prepared = await prepareCaptureUpload(file);
+      prepared = await prepareCaptureUpload(file);
       setUploadLabel(prepared.name);
       const form = new FormData();
       form.append('file', prepared);
@@ -254,14 +278,53 @@ export default function SimplifiCaptureApp({
       const data = await analyzeForm(form);
       handleAnalyzeResponse(data, 'file');
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Network error. Try again.';
-      setMessage(msg);
+      if (
+        loggedIn &&
+        typeof navigator !== 'undefined' &&
+        !navigator.onLine &&
+        (prepared || file)
+      ) {
+        const queued = prepared ?? file;
+        await enqueueCapture({
+          kind: 'file',
+          blob: queued,
+          fileName: queued.name,
+          mimeType: queued.type || 'image/jpeg',
+          prospectName: prospectName || undefined,
+        });
+        setMessage('Offline — photo queued. We will send when you are back online.');
+      } else {
+        const msg = err instanceof Error ? err.message : 'Network error. Try again.';
+        setMessage(msg);
+      }
       setView('upload');
     } finally {
       setLoading(false);
       if (fileRef.current) fileRef.current.value = '';
     }
   };
+
+  useEffect(() => {
+    if (sharedFileHandled.current) return;
+    sharedFileHandled.current = true;
+    void (async () => {
+      const pending = await takePendingSharedFile();
+      if (!pending) {
+        if (expectSharedFile) {
+          setMessage('Shared photo not found. Try sharing again from an installed Simplifi app.');
+          setOpen(true);
+          setView('upload');
+        }
+        return;
+      }
+      const file = new File([pending.blob], pending.name, {
+        type: pending.type || 'image/jpeg',
+      });
+      await handleCaptureFile(file);
+    })();
+    // Mount-only: consume share-target stash once.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const captureCurrentPage = () => {
     if (typeof window !== 'undefined' && window.location.href) {

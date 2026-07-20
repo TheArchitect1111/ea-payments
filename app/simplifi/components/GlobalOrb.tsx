@@ -15,8 +15,14 @@ import {
 } from '@/lib/orb';
 import { interpretOrbIntent, isOrbSessionSurface, resolveOrbIntentHref } from '@/lib/orb-os';
 import { resolveChromeFadeClient } from '@/lib/simplifi/chrome-fade';
-import { answerConversationalAsk, searchOpportunities } from '@/lib/simplifi-ask';
+import {
+  answerConversationalAskDetailed,
+  searchOpportunities,
+  type AskCitation,
+} from '@/lib/simplifi-ask';
+import { pushAskHistory } from '@/lib/simplifi/ask-session-history';
 import { explainRecommendation } from '@/lib/simplifi-guidance-system';
+import AskAnswerBody from './AskAnswerBody';
 import SessionWorkspace, { type SessionView } from './session/SessionWorkspace';
 import './global-orb.css';
 
@@ -91,6 +97,7 @@ export default function GlobalOrb({
   const [interaction, setInteraction] = useState<'listening' | 'thinking' | 'speaking' | null>(null);
   const [askInput, setAskInput] = useState('');
   const [askAnswer, setAskAnswer] = useState('');
+  const [askCitations, setAskCitations] = useState<AskCitation[]>([]);
   const [ambientOpener, setAmbientOpener] = useState('');
   const [outcomeFlash, setOutcomeFlash] = useState<OrbOutcomeFlash | null>(null);
   const [dismissedIds, setDismissedIds] = useState<string[]>([]);
@@ -267,6 +274,7 @@ export default function GlobalOrb({
         const view = sessionViewForSurface(intent.surface, intent.draft);
         if (view) {
           setAskAnswer(intent.reply);
+          setAskCitations([]);
           setOpen(false);
           setSessionView(view);
           return;
@@ -282,6 +290,9 @@ export default function GlobalOrb({
       // A single confident match opens a quick-view opportunity workspace.
       if (soleMatch) {
         setAskAnswer(intent.reply);
+        setAskCitations([
+          { id: soleMatch.id, title: soleMatch.title, href: `/simplifi/opportunity/${soleMatch.id}` },
+        ]);
         setOpen(false);
         setSessionView({ kind: 'opportunity', id: soleMatch.id });
         return;
@@ -295,12 +306,20 @@ export default function GlobalOrb({
 
       if (href) {
         setAskAnswer(intent.reply);
+        setAskCitations([]);
         setOpen(false);
         router.push(href);
         return;
       }
 
-      setAskAnswer(answerConversationalAsk(q, objects, actionCenter));
+      const detailed = answerConversationalAskDetailed(q, objects, actionCenter);
+      setAskAnswer(detailed.answer);
+      setAskCitations(detailed.citations);
+      pushAskHistory({
+        question: q,
+        answer: detailed.answer,
+        citations: detailed.citations,
+      });
     } finally {
       enterSpeaking();
     }
@@ -530,7 +549,18 @@ export default function GlobalOrb({
                   Ask
                 </button>
               </div>
-              {askAnswer ? <p className="global-orb-answer">{askAnswer}</p> : null}
+              {askAnswer ? (
+                <div className="global-orb-answer">
+                  <AskAnswerBody
+                    answer={askAnswer}
+                    citations={askCitations}
+                    onOpenOpportunity={(id) => {
+                      setOpen(false);
+                      setSessionView({ kind: 'opportunity', id });
+                    }}
+                  />
+                </div>
+              ) : null}
               {!loggedIn ? (
                 <p className="global-orb-answer">
                   <Link href={`/simplifi/login?next=${encodeURIComponent(pathname)}`}>Sign in</Link> for a personalized Brief.

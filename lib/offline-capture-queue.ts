@@ -1,14 +1,37 @@
 /**
  * Client-side offline queue for Simplifi capture requests (PWA).
+ * Supports URL captures and image Blobs (structured clone).
  */
 
 const DB_NAME = 'simplifi-offline';
 const STORE = 'capture-queue';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 export type QueuedCapture =
   | { id: string; kind: 'url'; url: string; prospectName?: string; notes?: string; queuedAt: string }
-  | { id: string; kind: 'json'; body: Record<string, string>; queuedAt: string };
+  | { id: string; kind: 'json'; body: Record<string, string>; queuedAt: string }
+  | {
+      id: string;
+      kind: 'file';
+      blob: Blob;
+      fileName: string;
+      mimeType: string;
+      prospectName?: string;
+      notes?: string;
+      queuedAt: string;
+    };
+
+export type QueuedCaptureInput =
+  | { kind: 'url'; url: string; prospectName?: string; notes?: string }
+  | { kind: 'json'; body: Record<string, string> }
+  | {
+      kind: 'file';
+      blob: Blob;
+      fileName: string;
+      mimeType: string;
+      prospectName?: string;
+      notes?: string;
+    };
 
 function openDb(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
@@ -23,10 +46,6 @@ function openDb(): Promise<IDBDatabase> {
     };
   });
 }
-
-export type QueuedCaptureInput =
-  | { kind: 'url'; url: string; prospectName?: string; notes?: string }
-  | { kind: 'json'; body: Record<string, string> };
 
 export async function enqueueCapture(
   item: QueuedCaptureInput & { id?: string },

@@ -616,3 +616,25 @@
     animation: none !important;
   }
 }
+
+.ask-answer-citations {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ask-answer-cite {
+  display: inline-block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--orb-navy, #1b2b4d);
+  background: transparent;
+  border: none;
+  padding: 0;
+  text-align: left;
+  text-decoration: underline;
+  cursor: pointer;
+}

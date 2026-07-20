@@ -29,9 +29,24 @@ assert(share.includes('url'), 'share intake must handle url');
 
 const manifest = read('public/manifest-simplifi.json');
 assert(manifest.includes('"share_target"'), 'PWA share_target required');
-assert(manifest.includes('/simplifi/capture'), 'share_target must open Simplifi capture');
+assert(manifest.includes('/simplifi/share-target'), 'share_target must POST to share-target route');
+assert(manifest.includes('"POST"'), 'share_target must use POST for files');
+assert(manifest.includes('"media"'), 'share_target must accept media files');
 assert(manifest.includes('"title"'), 'share_target title param required');
 assert(manifest.includes('"text"'), 'share_target text param required');
+
+const shareRoute = read('app/simplifi/share-target/route.ts');
+assert(shareRoute.includes('export async function POST'), 'share-target POST route required');
+
+const sw = read('public/sw-simplifi-capture.js');
+assert(sw.includes('/simplifi/share-target'), 'SW must intercept share-target POST');
+assert(sw.includes('stashSharedFile') || sw.includes('simplifi-share'), 'SW must stash shared files');
+
+const pendingShare = read('lib/simplifi/pending-share.ts');
+assert(pendingShare.includes('takePendingSharedFile'), 'pending share helper required');
+
+const offlineQueue = read('lib/offline-capture-queue.ts');
+assert(offlineQueue.includes("kind: 'file'"), 'offline queue must support file blobs');
 
 const capturePage = read('app/simplifi/capture/page.tsx');
 assert(capturePage.includes('parseShareTargetParams'), 'capture page must parse share params');

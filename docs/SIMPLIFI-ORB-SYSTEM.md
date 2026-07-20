@@ -207,7 +207,7 @@ Every capture door feeds the **same** `submitCapture` → Airtable →
 | Channel | Front door | Auth | Lands in Brief / Orb |
 |---------|------------|------|----------------------|
 | Web / PWA capture | `POST /api/portal/captures/analyze` | Portal cookie | Yes — `SimplifiProductShell` + GlobalOrb |
-| PWA share sheet | `GET /simplifi/capture?title&text&url` → analyze | Portal cookie | Yes — `parseShareTargetParams` seeds URL + notes |
+| PWA share sheet | `POST /simplifi/share-target` (multipart; images via SW → IndexedDB) → Capture | Portal cookie | Yes — text/url seed + shared photos |
 | Browser extension | `POST /api/capture/ingest` | Extension HMAC token | Yes — same portalSlug records; Brief via `/api/extension/brief` |
 | Mobile (Expo) | `POST /api/portal/captures/analyze` | Bearer magic-link | Yes — Brief/Inbox tabs; Orb UI deferred to web |
 | Amplifi share | `POST /api/portal/captures/analyze` | Portal cookie | Yes — share-story UX branch, same captures |
@@ -230,5 +230,5 @@ node scripts/test-simplifi-channels-contract.mjs
 
 Open `/simplifi/workspace` — full nav by default. Settings → enable Chrome Fade —
 Brief/Capture/Inbox links disappear; brand + Settings remain; Orb still opens inbox /
-capture sessions. Share a link or note to the Simplifi PWA — capture opens with
-URL/notes seeded and saves into the same Inbox the Orb reads.
+capture sessions. Share a link, note, or photo to the installed Simplifi PWA — Capture opens
+with seeds (and shared images when the service worker is active) into the same Inbox the Orb reads.
