@@ -24,10 +24,24 @@ function read(rel) {
 const publish = read('lib/factory-publish-website.ts');
 assert(publish.includes('publishFactoryWebsite'), 'publishFactoryWebsite required');
 assert(publish.includes('assertWebsitePublishGate'), 'publish gate required');
+assert(publish.includes('assertExperienceDirectorPublishGate'), 'Experience Director gate required');
 assert(publish.includes('provisionWebsitePortalSite'), 'must reuse provisionWebsitePortalSite');
 assert(publish.includes('buildFactoryConceptPackAsync'), 'must load concept/OIB pack');
 assert(publish.includes('primaryColor'), 'must pass primary color');
 assert(publish.includes('headline'), 'must pass headline');
+
+const director = read('lib/factory-experience-review.ts');
+assert(director.includes('Approved'), 'Experience Review statuses required');
+assert(director.includes('assertExperienceDirectorPublishGate'), 'director publish gate helper');
+
+const directorDash = read('app/admin/ea-factory/experience-director/page.tsx');
+assert(directorDash.includes('Experience Director'), 'Experience Director dashboard page required');
+assert(
+  read('app/admin/ea-factory/experience-director/ExperienceDirectorClient.tsx').includes(
+    'canPublish',
+  ),
+  'dashboard must gate Publish on Approved',
+);
 
 const provision = read('lib/provision-website-portal.ts');
 assert(provision.includes('primaryColor'), 'starter Puck must accept primaryColor');
@@ -48,7 +62,10 @@ const preview = read('app/preview/experience/[slug]/[pageId]/ExperiencePreview.t
 assert(preview.includes('primaryColor') || preview.includes('--ea-navy'), 'preview must apply brand colors');
 
 const fulfill = read('lib/fulfill-paid-client.ts');
-assert(fulfill.includes('organizationId: orgId'), 'fulfill must pass org id into site provision');
+assert(
+  fulfill.includes('organizationId: orgId') || fulfill.includes('orgId: run.organizationId'),
+  'fulfill must pass org id into site provision',
+);
 
 if (failures.length) {
   console.error('FAIL');

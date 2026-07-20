@@ -37,9 +37,10 @@ export async function POST(req: NextRequest) {
       {
         error: result.error || 'Publish failed.',
         gate: result.gate,
+        directorGate: result.directorGate,
         portalSlug: result.portalSlug,
       },
-      { status: result.gate && !result.gate.ok ? 400 : 500 },
+      { status: result.gate && !result.gate.ok ? 400 : result.directorGate && !result.directorGate.ok ? 403 : 500 },
     );
   }
 

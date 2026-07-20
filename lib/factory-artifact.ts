@@ -88,11 +88,14 @@ export type ProductionArtifactKind =
   | 'review_gate'
   | 'production_progress';
 
+export type ExperienceDirectorArtifactKind = 'experience_review';
+
 export type ArtifactKind =
   | ResearchArtifactKind
   | DiscoveryArtifactKind
   | PlanningArtifactKind
-  | ProductionArtifactKind;
+  | ProductionArtifactKind
+  | ExperienceDirectorArtifactKind;
 
 export type ArtifactProvenance = {
   capabilityId: string;

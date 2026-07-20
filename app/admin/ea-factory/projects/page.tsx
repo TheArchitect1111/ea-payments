@@ -49,6 +49,12 @@ export default async function FactoryProjectsPage({ searchParams }: PageProps) {
                 New Launch
               </Link>
               <Link
+                href="/admin/ea-factory/experience-director"
+                className="rounded-full bg-[#C9A844] px-4 py-2 text-xs font-black text-[#1B2B4D]"
+              >
+                Experience Director
+              </Link>
+              <Link
                 href="/admin/ea-factory"
                 className="rounded-full bg-white px-4 py-2 text-xs font-bold text-neutral-700 ring-1 ring-neutral-200"
               >

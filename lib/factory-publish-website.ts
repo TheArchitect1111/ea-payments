@@ -1,8 +1,14 @@
 /**
  * Factory / OIB → live /sites/{slug} publish bridge.
  * Reuses provisionWebsitePortalSite — no new page engine.
+ * Experience Director must Approve before publish.
  */
 import { buildFactoryConceptPackAsync } from '@/lib/factory-concept-pack';
+import { getLatestExperienceReviewFromProject } from '@/lib/factory-experience-director';
+import {
+  assertExperienceDirectorPublishGate,
+  type ExperienceDirectorApprovalStatus,
+} from '@/lib/factory-experience-review';
 import { getFactoryProject, type FactoryProject } from '@/lib/factory-project-store';
 import { ensureOrganizationForPortal } from '@/lib/organizations';
 import {
@@ -53,10 +59,16 @@ export function portalSlugFromFactoryProject(project: FactoryProject, override?:
 export type PublishFactoryWebsiteResult = WebsitePortalProvisionResult & {
   portalSlug?: string;
   gate?: WebsitePublishGateResult;
+  directorGate?: {
+    ok: boolean;
+    approvalStatus?: ExperienceDirectorApprovalStatus | 'Missing';
+    error?: string;
+  };
 };
 
 /**
  * Load OIB/concept brand from a Factory project and publish (or refresh) /sites/{slug}.
+ * Blocked unless latest Experience Review is Approved.
  */
 export async function publishFactoryWebsite(input: {
   projectId: string;
@@ -66,6 +78,20 @@ export async function publishFactoryWebsite(input: {
   const project = await getFactoryProject(input.projectId);
   if (!project) {
     return { ok: false, error: 'Factory project not found.' };
+  }
+
+  const latestReview = getLatestExperienceReviewFromProject(project);
+  const directorGate = assertExperienceDirectorPublishGate(latestReview?.review ?? null);
+  if (!directorGate.ok) {
+    return {
+      ok: false,
+      error: directorGate.error,
+      directorGate: {
+        ok: false,
+        approvalStatus: directorGate.approvalStatus,
+        error: directorGate.error,
+      },
+    };
   }
 
   const pack = await buildFactoryConceptPackAsync(project);
@@ -92,6 +118,7 @@ export async function publishFactoryWebsite(input: {
       ok: false,
       error: `Publish gate failed — missing: ${gate.missing.join(', ')}`,
       gate,
+      directorGate: { ok: true, approvalStatus: 'Approved' },
     };
   }
 
@@ -109,6 +136,7 @@ export async function publishFactoryWebsite(input: {
         'Could not create a durable organization for this site. Check Airtable Organizations, then retry.',
       portalSlug,
       gate,
+      directorGate: { ok: true, approvalStatus: 'Approved' },
     };
   }
 
@@ -144,5 +172,10 @@ export async function publishFactoryWebsite(input: {
     }
   }
 
-  return { ...result, portalSlug, gate };
+  return {
+    ...result,
+    portalSlug,
+    gate,
+    directorGate: { ok: true, approvalStatus: 'Approved' },
+  };
 }
