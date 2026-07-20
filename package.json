@@ -49,6 +49,7 @@
     "launch:check": "node scripts/launch-check.mjs",
     "launch:webhooks": "node scripts/verify-webhook-readiness.mjs",
     "launch:readiness": "node scripts/launch-readiness.mjs",
+    "launch:preflight": "node scripts/launch-preflight.mjs",
     "repo:readiness": "node scripts/repo-readiness.mjs",
     "ops:report": "node scripts/ops-report.mjs",
     "backup:verify": "node scripts/backup-verify.mjs",

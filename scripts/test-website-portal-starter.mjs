@@ -77,11 +77,21 @@ assert(provision.includes('provisionWebsitePortalSite'), 'provisionWebsitePortal
 assert(provision.includes("status: 'published'"), 'Provisioned site must be published');
 assert(provision.includes('/sites/'), 'Site path helper must use /sites/');
 
-assert(webhook.includes('provisionWebsitePortalSite'), 'Webhook must call website provisioner');
+assert(
+  webhook.includes('provisionWebsitePortalSite') || webhook.includes('fulfillPaidClient'),
+  'Webhook must call website provisioner (direct or via fulfillPaidClient)',
+);
 assert(webhook.includes('website-portal-auto'), 'Webhook must detect website-portal-auto');
 assert(webhook.includes('fulfillment.provisioned'), 'Webhook must emit fulfillment.provisioned');
-assert(webhook.includes('createMagicLinkToken'), 'Webhook must issue welcome magic link');
-assert(webhook.includes('WELCOME_MAGIC_LINK_TTL_MS'), 'Webhook must use welcome magic-link TTL');
+assert(
+  webhook.includes('createMagicLinkToken') || webhook.includes('fulfillPaidClient'),
+  'Webhook must issue welcome magic link (direct or via fulfillPaidClient)',
+);
+assert(
+  webhook.includes('WELCOME_MAGIC_LINK_TTL_MS') ||
+    readFileSync(join(root, 'lib/fulfill-paid-client.ts'), 'utf8').includes('WELCOME_MAGIC_LINK_TTL_MS'),
+  'Welcome magic-link TTL must be used in fulfill path',
+);
 assert(webhook.includes('magicLoginUrl'), 'Webhook must pass magicLoginUrl to welcome email');
 
 assert(buy.includes('website_portal_starter'), 'Buy page must target website_portal_starter');

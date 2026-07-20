@@ -133,7 +133,7 @@ Mission Control
 - [ ] Mission Control CTP attention items when statuses set
 - [ ] Opportunity Graph links CTP events
 - [ ] Consider slug tracking still works
-- [ ] `/ctp-intake` is quarantined (308/redirect to `/consider/selena`)
+- [ ] `/ctp-intake` is quarantined (redirect away — never CTP intake; canonical is https://cc.efficiencyarchitects.online/ctp)
 
 ---
 
