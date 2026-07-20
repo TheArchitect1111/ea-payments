@@ -139,30 +139,21 @@ export default function ClientExperience({ view, slug, studio }: Props) {
   const nextSteps = [
     {
       num: '01',
-      label: 'Refine',
-      copy: designLead
-        ? 'We lead design direction based on what we learned. You can share materials anytime.'
-        : 'We refine recommendations from anything you shared in your story.',
+      label: view.guide?.stage || view.currentStage || 'Welcome',
+      copy: view.guide?.summary || view.guide?.headline || 'Your project home shows where things stand.',
     },
     {
       num: '02',
-      label: 'Opportunity Review',
-      copy: 'A focused conversation to align on priorities and the path forward.',
+      label: view.guide?.nothingRequired ? 'Nothing needed from you' : 'Your next step',
+      copy: view.guide?.nothingRequired
+        ? view.guide.confidenceMessage ||
+          "We've got everything we need. We'll update Your Project when it's your turn."
+        : view.guide?.nbaLabel || 'Open Your Project for the one clear next step.',
     },
     {
       num: '03',
-      label: 'Proposal',
-      copy: 'A clear written proposal with scope, timeline, and investment.',
-    },
-    {
-      num: '04',
-      label: 'Approval & payment',
-      copy: 'You approve the proposal and complete payment. That\'s when we begin the build.',
-    },
-    {
-      num: '05',
-      label: 'Design → Development → Launch',
-      copy: 'We build and launch once Approval is complete.',
+      label: 'What happens next',
+      copy: view.guide?.whatsNextCopy || view.guide?.behindTheScenes || 'Progress always shows what comes next.',
     },
   ];
 
@@ -369,9 +360,15 @@ export default function ClientExperience({ view, slug, studio }: Props) {
                 What happens next.
               </h2>
               <p className="cex-lede">
-                Where you are: <strong>{view.currentStage || 'Welcome'}</strong>. Your Project
-                (Progress) is the home base for everything ahead.
+                Where you are: <strong>{view.guide?.stage || view.currentStage || 'Welcome'}</strong>.{' '}
+                {view.guide?.confidenceMessage ||
+                  'Your Project (Progress) is the home base for everything ahead.'}
               </p>
+              {view.guide?.headline ? (
+                <p className="cex-lede">
+                  <strong>{view.guide.headline}</strong> {view.guide.summary}
+                </p>
+              ) : null}
               <EditorialPhoto
                 className="cex-begin-hero"
                 src={PHOTO_BY_ID.next}
@@ -389,9 +386,24 @@ export default function ClientExperience({ view, slug, studio }: Props) {
                 ))}
               </ol>
               <div className="cex-nav-row cex-nav-row-primary">
-                <Link className="cex-cta" href={view.reviewHref}>
-                  Schedule your Opportunity Review
-                </Link>
+                {view.guide?.nothingRequired ? (
+                  <Link className="cex-cta" href={`/portal/${slug}/ctp/progress`}>
+                    We&apos;ve got everything we need — open Your Project
+                  </Link>
+                ) : view.guide?.nbaHref ? (
+                  <Link
+                    className="cex-cta"
+                    href={view.guide.nbaHref}
+                    target={view.guide.nbaExternal ? '_blank' : undefined}
+                    rel={view.guide.nbaExternal ? 'noreferrer' : undefined}
+                  >
+                    {view.guide.nbaLabel}
+                  </Link>
+                ) : (
+                  <Link className="cex-cta" href={`/portal/${slug}/ctp/progress`}>
+                    {view.primaryCtaLabel || 'Open Your Project'}
+                  </Link>
+                )}
               </div>
               <p className="cex-support-label">Support anytime</p>
               <ul className="cex-support-links">

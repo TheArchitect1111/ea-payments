@@ -6,11 +6,12 @@ import type { CtpClientType } from '@/lib/ctp-client-type';
 import { buildCtpScheduleView } from '@/lib/ctp-schedule-view';
 import {
   designStudioPath,
-  opportunityDashboardPath,
   opportunityDetailPath,
   opportunityReviewPath,
 } from '@/lib/ctp-opportunity-routes';
 import type { CtpSubmission } from '@/lib/ctp-submissions';
+import { buildCtpPortalStatusView } from '@/lib/ctp-portal-status';
+import { buildGuideProgressView } from '@/lib/ctp-guide-progress';
 import {
   consultingBeginCards,
   consultingCurrentStage,
@@ -121,6 +122,19 @@ export type CtpOpportunityDashboardView = {
   reviewHref: string;
   primaryCtaLabel: string;
   utilities: Array<{ label: string; href: string }>;
+  /** Guide model — Journey must not invent actions outside this. */
+  guide: {
+    stage: string;
+    headline: string;
+    summary: string;
+    confidenceMessage: string;
+    behindTheScenes: string;
+    nbaLabel: string;
+    nbaHref?: string;
+    nbaExternal?: boolean;
+    nothingRequired: boolean;
+    whatsNextCopy: string;
+  };
 };
 
 export type CtpOpportunityDetailView = {
@@ -599,6 +613,30 @@ export function buildCtpOpportunityDashboardView(
   const meaning = consultingMeaningFromSubmission(submission);
   const stage = consultingCurrentStage(submission);
   const recommended = consultingRecommendedSolution(submission);
+  const statusView = buildCtpPortalStatusView(submission);
+  const guideView = buildGuideProgressView(slug, statusView);
+  const guide = {
+    stage: guideView.currentStage,
+    headline: guideView.headline,
+    summary: guideView.summary,
+    confidenceMessage: guideView.confidenceMessage,
+    behindTheScenes: guideView.behindTheScenes,
+    nbaLabel: guideView.nba.label,
+    nbaHref: guideView.nba.href,
+    nbaExternal: guideView.nba.external,
+    nothingRequired: guideView.nba.nothingRequired,
+    whatsNextCopy: guideView.whatsNextCopy,
+  };
+
+  const utilities: Array<{ label: string; href: string }> = [
+    { label: 'Your Project', href: designStudioPath(slug) },
+    { label: 'Documents', href: `/portal/${slug}/ctp/documents` },
+    { label: 'Messages', href: `/portal/${slug}/ctp/messages` },
+  ];
+  // Never invent Schedule when Guide says nothing is required.
+  if (!guide.nothingRequired && guideView.nba.kind === 'meeting') {
+    utilities.push({ label: 'Schedule conversation', href: opportunityReviewPath(slug) });
+  }
 
   return {
     firstName,
@@ -613,7 +651,7 @@ export function buildCtpOpportunityDashboardView(
     potentialLabel: potentialFromStars(opportunityStars),
     executiveSummary: resolveSummary(submission),
     organizationLabel: submission.businessName,
-    currentStage: stage,
+    currentStage: guide.stage || stage,
     primaryOpportunity: consultingPrimaryOpportunity(submission),
     estimatedAnnualOpportunity: meaning.annualOpportunityLabel,
     recommendedSolution: recommended,
@@ -642,14 +680,12 @@ export function buildCtpOpportunityDashboardView(
     foundation: buildFoundation(submission),
     projectPreview: buildProjectPreview(submission),
     investment: resolveInvestment(submission),
-    reviewHref: opportunityReviewPath(slug),
-    primaryCtaLabel: 'Continue the Conversation',
-    utilities: [
-      { label: 'Documents', href: `/portal/${slug}/ctp/documents` },
-      { label: 'Messages', href: `/portal/${slug}/ctp/messages` },
-      { label: 'Project Progress', href: `/portal/${slug}/ctp/progress` },
-      { label: 'Schedule a Conversation', href: opportunityReviewPath(slug) },
-    ],
+    reviewHref: guide.nbaHref || designStudioPath(slug),
+    primaryCtaLabel: guide.nothingRequired
+      ? 'Open Your Project'
+      : guide.nbaLabel || 'Continue Your Project',
+    utilities,
+    guide,
   };
 }
 

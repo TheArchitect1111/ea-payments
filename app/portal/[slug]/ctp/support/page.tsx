@@ -92,8 +92,14 @@ export default async function PortalCtpSupportPage({
             <strong>Recent milestones:</strong> {guide.recentMilestones.join(' · ')}
           </p>
         ) : null}
-        <p style={{ margin: 0, color: 'rgba(255,255,255,0.7)', lineHeight: 1.55 }}>
+        <p style={{ margin: '0 0 0.5rem', color: 'rgba(255,255,255,0.7)', lineHeight: 1.55 }}>
           <strong>Pending:</strong> {guide.pendingActions.join(' · ')}
+        </p>
+        <p style={{ margin: '0 0 0.5rem', color: 'rgba(255,255,255,0.7)', lineHeight: 1.55 }}>
+          <strong>Behind the scenes:</strong> {guide.behindTheScenes}
+        </p>
+        <p style={{ margin: 0, color: 'rgba(255,255,255,0.7)', lineHeight: 1.55 }}>
+          {guide.confidenceMessage}
         </p>
       </div>
 
