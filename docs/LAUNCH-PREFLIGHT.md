@@ -65,3 +65,15 @@ After Stripe payment (fixed package **or** proposal):
 5. Optional website (`provisionWebsite`) + magic link  
 
 Shared helper: `lib/fulfill-paid-client.ts` — called from `app/api/webhooks/stripe/route.ts` for both `/buy` starter and proposal payment.
+
+## Publish Future Website (S2)
+
+From Factory projects desk → **Publish Future Website**:
+
+1. Loads OIB / concept pack brand (name, headline, colors, CTA)
+2. Publish gate (name + headline + primary/accent hex)
+3. Ensures durable organization
+4. `provisionWebsitePortalSite` → public `/sites/{slug}`
+
+API: `POST /api/admin/factory/publish-website` `{ projectId, force? }`  
+Contract: `node scripts/test-factory-publish-website.mjs`

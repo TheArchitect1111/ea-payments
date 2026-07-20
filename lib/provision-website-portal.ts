@@ -1,5 +1,6 @@
 /**
- * Auto-provision a published starter website for Website + Portal Starter purchases.
+ * Auto-provision a published starter website for Website + Portal Starter purchases
+ * and Factory “Publish Future Website”.
  */
 import type { Data } from '@measured/puck';
 import {
@@ -12,13 +13,21 @@ import { previewPathForPage, type ExperiencePage } from '@/lib/experience-builde
 import { airtableConfigured } from '@/lib/data/airtable-client';
 import { publicPortalLoginUrl } from '@/lib/ctp-portal-host';
 import { EA_PLATFORM_URL } from '@/lib/platform-urls';
-import { syntheticOrgId } from '@/lib/platform-store';
+import { ensureOrganizationForPortal, findOrganizationByPortalSlug } from '@/lib/organizations';
 
 export type WebsitePortalProvisionInput = {
   portalSlug: string;
   businessName: string;
   organizationName?: string;
+  /** Persisted org id (Airtable). Required for durable publish when Airtable is configured. */
+  organizationId?: string;
+  clientRecordId?: string;
   tagline?: string;
+  /** Hero title override (defaults to brand name). */
+  headline?: string;
+  ctaLabel?: string;
+  primaryColor?: string;
+  accentColor?: string;
   industry?: string;
   email?: string;
   /** Optional About section body (notes / presence context). */
@@ -69,6 +78,7 @@ function buildDefaultAboutBody(input: {
 
 export function buildStarterWebsitePuckData(input: WebsitePortalProvisionInput): Data {
   const brand = input.organizationName?.trim() || input.businessName.trim() || 'Your Business';
+  const headline = input.headline?.trim() || brand;
   const tagline =
     input.tagline?.trim() ||
     'A clear offer, a trusted next step, and a client portal that keeps work moving.';
@@ -79,18 +89,27 @@ export function buildStarterWebsitePuckData(input: WebsitePortalProvisionInput):
     buildDefaultAboutBody({ brand, industry, existingWebsiteUrl });
   const portalLogin = input.portalLoginHref || publicPortalLoginUrl();
   const sitePath = sitePathForSlug(input.portalSlug);
+  const ctaLabel = input.ctaLabel?.trim() || 'Get started';
+  const primaryColor = input.primaryColor?.trim() || undefined;
+  const accentColor = input.accentColor?.trim() || undefined;
 
   return {
-    root: { props: { title: brand } },
+    root: {
+      props: {
+        title: brand,
+        ...(primaryColor ? { primaryColor } : {}),
+        ...(accentColor ? { accentColor } : {}),
+      },
+    },
     content: [
       {
         type: 'EAHero',
         props: {
           id: 'hero-1',
           eyebrow: industry || 'Now live',
-          title: brand,
+          title: headline,
           subtitle: tagline,
-          ctaLabel: 'Get started',
+          ctaLabel,
           ctaHref: '#contact',
         },
       },
@@ -134,11 +153,36 @@ export function buildStarterWebsitePuckData(input: WebsitePortalProvisionInput):
   };
 }
 
+async function resolveOrganizationId(input: WebsitePortalProvisionInput, slug: string): Promise<string | null> {
+  const provided = input.organizationId?.trim();
+  if (provided && !provided.startsWith('org_')) return provided;
+
+  const existing = await findOrganizationByPortalSlug(slug);
+  if (existing?.id && !existing.id.startsWith('org_')) return existing.id;
+
+  const ensured = await ensureOrganizationForPortal({
+    portalSlug: slug,
+    name: input.businessName,
+    organizationName: input.organizationName,
+    clientRecordId: input.clientRecordId,
+  });
+  if (ensured.orgId && !ensured.orgId.startsWith('org_')) return ensured.orgId;
+  return null;
+}
+
 export async function findPublishedSitePage(portalSlug: string): Promise<ExperiencePage | null> {
-  const pages = await listExperiencePages(portalSlug);
+  const slug = portalSlug.trim().toLowerCase();
+  if (!slug) return null;
+
+  const org = await findOrganizationByPortalSlug(slug);
+  if (!org?.id || org.id.startsWith('org_')) return null;
+
+  const pages = await listExperiencePages(org.id, slug);
   const published = pages.filter((page) => page.status === 'published');
   if (published.length === 0) return null;
-  const home = published.find((page) => page.title.toLowerCase() === 'home' || page.id.includes('-home-'));
+  const home = published.find(
+    (page) => page.title.toLowerCase() === 'home' || page.id.includes('-home-'),
+  );
   return home || published[0];
 }
 
@@ -151,6 +195,15 @@ export async function provisionWebsitePortalSite(
   }
 
   try {
+    const organizationId = await resolveOrganizationId(input, slug);
+    if (!organizationId) {
+      return {
+        ok: false,
+        error:
+          'Website publish requires a durable organization. Check Airtable Organizations for this portal slug.',
+      };
+    }
+
     const existing = await findPublishedSitePage(slug);
     if (existing && !input.force) {
       return {
@@ -165,7 +218,7 @@ export async function provisionWebsitePortalSite(
     const id = existing?.id || `exp-home-${slug}-${Date.now().toString(36)}`;
     const page: ExperiencePage = {
       id,
-      organizationId: syntheticOrgId(slug),
+      organizationId,
       portalSlug: slug,
       title: 'Home',
       status: 'published',

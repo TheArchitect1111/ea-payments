@@ -129,6 +129,8 @@ export async function fulfillPaidClient(
           portalSlug,
           businessName: input.clientName,
           organizationName: input.organization,
+          organizationId: orgId,
+          clientRecordId: input.airtableRecordId,
           tagline: input.tagline,
           industry: input.industry,
           email: input.email,

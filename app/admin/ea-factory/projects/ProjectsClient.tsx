@@ -83,6 +83,41 @@ export default function ProjectsClient({ initialProjects }: { initialProjects: P
   const [busyId, setBusyId] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
+  async function publishWebsite(projectId: string) {
+    setBusyId(projectId);
+    setMessage(null);
+    try {
+      const res = await fetch('/api/admin/factory/publish-website', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ projectId, force: true }),
+      });
+      const data = (await res.json().catch(() => ({}))) as {
+        ok?: boolean;
+        error?: string;
+        siteUrl?: string;
+        portalSlug?: string;
+      };
+      if (!res.ok || !data.ok) {
+        setMessage(data.error || 'Could not publish website.');
+        return;
+      }
+      setMessage(
+        data.siteUrl
+          ? `Published Future Website: ${data.siteUrl}`
+          : `Published site for ${data.portalSlug || projectId}`,
+      );
+      if (data.siteUrl) {
+        window.open(data.siteUrl, '_blank', 'noopener,noreferrer');
+      }
+    } catch {
+      setMessage('Could not publish website.');
+    } finally {
+      setBusyId(null);
+    }
+  }
+
   async function refresh() {
     const res = await fetch('/api/projects', { credentials: 'include' });
     const data = await readJson(res);
@@ -218,6 +253,14 @@ export default function ProjectsClient({ initialProjects }: { initialProjects: P
                       >
                         Concept Pack
                       </Link>
+                      <button
+                        type="button"
+                        className="text-xs font-semibold text-[#1B2B4D] underline disabled:opacity-50"
+                        disabled={busyId === project.id}
+                        onClick={() => void publishWebsite(project.id)}
+                      >
+                        Publish Future Website
+                      </button>
                       <Link
                         href={`/api/projects/${encodeURIComponent(project.id)}/export`}
                         className="text-xs font-semibold text-[#1B2B4D] underline"

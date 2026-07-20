@@ -23,6 +23,7 @@ const STEPS = [
   { id: 'ctp-spine', cmd: 'node', args: ['scripts/run-ctp-tests.mjs', '--spine'], soft: true },
   { id: 'website-portal-starter', cmd: 'node', args: ['scripts/test-website-portal-starter.mjs'] },
   { id: 'fulfill-paid-client', cmd: 'node', args: ['scripts/test-fulfill-paid-client.mjs'] },
+  { id: 'factory-publish-website', cmd: 'node', args: ['scripts/test-factory-publish-website.mjs'] },
   { id: 'oib-email', cmd: 'node', args: ['scripts/test-factory-launch-email.mjs'] },
   { id: 'canonical-ctp', cmd: 'node', args: ['scripts/test-canonical-ctp-intake.mjs'] },
 ];

@@ -42,6 +42,11 @@ assert(
   'proposal pay must map to website_portal_starter entitlements',
 );
 assert(webhook.includes('provisionWebsite: true') || webhook.includes('provisionWebsite: isWebsitePortalAuto'), 'website provision flag required');
+assert(
+  fulfill.includes('organizationId: orgId') || fulfill.includes('organizationId:orgId'),
+  'fulfill must pass organizationId into website provision',
+);
+assert(fulfill.includes('clientRecordId'), 'fulfill must pass clientRecordId for org ensure');
 
 const starter = read('scripts/test-website-portal-starter.mjs');
 assert(starter.includes('website-portal-auto') || starter.includes('website_portal_starter'), 'starter contract still present');
