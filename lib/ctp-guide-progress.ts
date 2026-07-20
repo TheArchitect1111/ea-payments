@@ -2,28 +2,21 @@
  * Dynamic Guide Intelligence — Guide Operating System.
  * Presentation logic only. No auth, routing, or provisioning changes.
  */
-import type { CtpPortalStatusView, CtpTimelineStep } from '@/lib/ctp-portal-status';
+import type { CtpPortalStatusView } from '@/lib/ctp-portal-status';
 import {
   designStudioPath,
   opportunityDashboardPath,
   opportunityReviewPath,
   portalCtpPath,
 } from '@/lib/ctp-opportunity-routes';
+import {
+  GUIDE_LIFECYCLE_STAGES,
+  resolveGuideDocumentsAvailable,
+  resolveGuideStages,
+  type GuideLifecycleStage,
+} from '@/lib/ctp-guide-stage-engine';
 
-export const GUIDE_LIFECYCLE_STAGES = [
-  'Welcome',
-  'Discovery',
-  'Strategy',
-  'Proposal',
-  'Agreement',
-  'Design',
-  'Build',
-  'Review',
-  'Launch',
-  'Care',
-] as const;
-
-export type GuideLifecycleStage = (typeof GUIDE_LIFECYCLE_STAGES)[number];
+export { GUIDE_LIFECYCLE_STAGES, type GuideLifecycleStage };
 
 export type GuideStageNarrative = {
   headline: string;
@@ -67,6 +60,11 @@ export type GuideNextBestAction = {
   nothingRequired: boolean;
 };
 
+export type GuideDocumentLink = {
+  label: string;
+  href?: string;
+};
+
 export type GuideProgressView = {
   businessName: string;
   currentStage: GuideLifecycleStage;
@@ -75,11 +73,16 @@ export type GuideProgressView = {
   stageWhy: string;
   estimatedCompletion?: string;
   confidenceMessage: string;
+  /** Warm celebration line when a major milestone is current. */
+  celebrationMessage?: string;
   behindTheScenes: string;
   commonQuestions: { question: string; answer: string }[];
   whatsNextStage: GuideLifecycleStage | null;
   whatsNextCopy: string;
   completed: GuideMilestone[];
+  /** Auto-grown timeline from completed stages (canonical Guide language). */
+  timeline: GuideMilestone[];
+  documentsAvailable: GuideDocumentLink[];
   nba: GuideNextBestAction;
   showDesignStudio: boolean;
 };
@@ -299,72 +302,21 @@ export const GUIDE_STAGE_NARRATIVES: Record<GuideLifecycleStage, GuideStageNarra
 
 type NbaCandidate = GuideNextBestAction & { priority: number };
 
-function step(timeline: CtpTimelineStep[], id: string): CtpTimelineStep | undefined {
-  return timeline.find((item) => item.id === id);
-}
-
-function isComplete(timeline: CtpTimelineStep[], id: string): boolean {
-  return step(timeline, id)?.state === 'complete';
-}
-
 function designStillNeeded(view: CtpPortalStatusView): boolean {
   return view.designStudio.some((item) => item.status === 'needed');
 }
 
-function resolveStageStates(view: CtpPortalStatusView): Record<GuideLifecycleStage, boolean> {
-  const t = view.timeline;
-  const digital = step(t, 'digital-audit');
-  const digitalDone =
-    isComplete(t, 'digital-audit') ||
-    Boolean(digital?.detail.toLowerCase().includes('not required'));
-  const discoveryDone =
-    isComplete(t, 'assessment') &&
-    (isComplete(t, 'ai-evaluation') || Boolean(view.intakeSummary)) &&
-    digitalDone;
-
-  const strategyDone =
-    isComplete(t, 'executive-report') ||
-    Boolean(view.reviewScheduledAt) ||
-    Boolean(view.snapshotSummary);
-  const proposalDone = Boolean(view.proposalId);
-  const designDone = isComplete(t, 'client-input');
-  const agreementDone =
-    designDone ||
-    view.studioStatus === 'In Progress' ||
-    view.studioStatus === 'Ready For Review' ||
-    view.studioStatus === 'Completed' ||
-    isComplete(t, 'ai-building') ||
-    Boolean(view.siteUrl);
-  const buildDone = isComplete(t, 'ai-building') || Boolean(view.siteUrl);
-  const reviewDone = isComplete(t, 'executive-review') || view.status === 'Completed';
-  const launchDone =
-    isComplete(t, 'reveal') || (view.status === 'Completed' && Boolean(view.siteUrl));
-  const careDone = view.status === 'Completed' && Boolean(view.siteUrl);
-
-  return {
-    Welcome: true,
-    Discovery: Boolean(discoveryDone || strategyDone || proposalDone),
-    Strategy: Boolean(strategyDone || proposalDone),
-    Proposal: proposalDone,
-    Agreement: Boolean(agreementDone),
-    Design: designDone,
-    Build: buildDone,
-    Review: reviewDone,
-    Launch: launchDone,
-    Care: careDone,
-  };
-}
-
-function resolveCurrentStage(
-  done: Record<GuideLifecycleStage, boolean>,
-  view: CtpPortalStatusView,
-): GuideLifecycleStage {
-  if (view.status === 'Completed' && view.siteUrl) return 'Care';
-
-  for (const stage of GUIDE_LIFECYCLE_STAGES) {
-    if (!done[stage]) return stage;
+function celebrationForStage(
+  stage: GuideLifecycleStage,
+  nba: GuideNextBestAction,
+): string | undefined {
+  if (nba.kind === 'celebrate') {
+    if (stage === 'Care' || stage === 'Launch') {
+      return 'Project Launched — your presence is live. Take a moment, then use Care anytime.';
+    }
+    return 'A real milestone — take a moment, then we’ll show what’s next.';
   }
-  return 'Care';
+  return undefined;
 }
 
 function milestoneTitle(stage: GuideLifecycleStage): string {
@@ -723,8 +675,7 @@ export function buildGuideProgressView(
   slug: string,
   view: CtpPortalStatusView,
 ): GuideProgressView {
-  const done = resolveStageStates(view);
-  const currentStage = resolveCurrentStage(done, view);
+  const { current: currentStage, done } = resolveGuideStages(view);
   const narrative = GUIDE_STAGE_NARRATIVES[currentStage];
   const currentIndex = GUIDE_LIFECYCLE_STAGES.indexOf(currentStage);
   const whatsNextStage =
@@ -744,6 +695,8 @@ export function buildGuideProgressView(
 
   const nba = resolveNba(slug, currentStage, view);
   const confidenceMessage = confidenceForStage(currentStage, view, nba);
+  const celebrationMessage = celebrationForStage(currentStage, nba);
+  const documentsAvailable = resolveGuideDocumentsAvailable(done, view);
 
   const showDesignStudio =
     currentStage === 'Design' ||
@@ -760,11 +713,14 @@ export function buildGuideProgressView(
     stageWhy: narrative.summary,
     estimatedCompletion: narrative.expectedDuration,
     confidenceMessage,
+    celebrationMessage,
     behindTheScenes: narrative.behindTheScenes,
     commonQuestions: narrative.commonQuestions,
     whatsNextStage,
     whatsNextCopy: narrative.transitionToNext,
     completed: completedBefore,
+    timeline: completedBefore,
+    documentsAvailable,
     nba,
     showDesignStudio,
   };
