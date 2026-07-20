@@ -89,11 +89,6 @@ function isComplete(timeline: CtpTimelineStep[], id: string): boolean {
   return step(timeline, id)?.state === 'complete';
 }
 
-function isActive(timeline: CtpTimelineStep[], id: string): boolean {
-  const state = step(timeline, id)?.state;
-  return state === 'active' || state === 'failed';
-}
-
 function resolveStageStates(view: CtpPortalStatusView): Record<GuideLifecycleStage, boolean> {
   const t = view.timeline;
   const digital = step(t, 'digital-audit');
