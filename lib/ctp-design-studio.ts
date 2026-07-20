@@ -134,6 +134,13 @@ export async function applyCtpDesignStudioInput(
     return { ok: false, error: updated.error ?? 'Could not save Design Studio inputs.' };
   }
 
+  try {
+    const { applyProjectEvidenceToSubmission } = await import('@/lib/ctp-submissions');
+    await applyProjectEvidenceToSubmission(submissionId, ['design.started']);
+  } catch (err) {
+    console.error('[ctp-design-studio] project state evidence failed:', err);
+  }
+
   await emitPulseEvent({
     product: 'ea-platform',
     type: 'ctp.studio.input',
@@ -183,6 +190,17 @@ export async function completeCtpDesignStudio(
 
   if (!updated.ok || !updated.submission) {
     return { ok: false, error: updated.error ?? 'Could not mark Design Studio complete.' };
+  }
+
+  try {
+    const { applyProjectEvidenceToSubmission } = await import('@/lib/ctp-submissions');
+    await applyProjectEvidenceToSubmission(submissionId, [
+      'design.started',
+      'design.complete',
+      'build.ready_for_review',
+    ]);
+  } catch (err) {
+    console.error('[ctp-design-studio] complete project state evidence failed:', err);
   }
 
   const portalPath = submission.portalSlug

@@ -46,6 +46,8 @@ export type CtpPortalStatusView = {
   status: CtpSubmissionStatus;
   workspaceStatus: CtpWorkspaceStatus;
   studioStatus: CtpStudioStatus;
+  /** Canonical Guide stage from Project State Engine SSOT. */
+  guideStage?: import('@/lib/project-state-engine').GuideLifecycleStage;
   reviewScheduledAt?: string;
   proposalId: string;
   submittedAt: string;
@@ -316,6 +318,7 @@ export function buildCtpPortalStatusView(submission: CtpSubmission): CtpPortalSt
     status: submission.status,
     workspaceStatus: submission.workspaceStatus,
     studioStatus: submission.studioStatus,
+    guideStage: submission.guideStage,
     reviewScheduledAt: submission.reviewScheduledAt,
     proposalId: submission.proposalId,
     submittedAt: submission.submittedAt,

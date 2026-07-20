@@ -126,6 +126,13 @@ export async function scheduleCtpReview(
   }
 
   try {
+    const { applyProjectEvidenceToSubmission } = await import('@/lib/ctp-submissions');
+    await applyProjectEvidenceToSubmission(submissionId, ['strategy.ready']);
+  } catch (err) {
+    console.error('[ctp-review-schedule] project state evidence failed:', err);
+  }
+
+  try {
     await emitPulseEvent({
       product: 'ea-platform',
       type: 'ctp.review.scheduled',

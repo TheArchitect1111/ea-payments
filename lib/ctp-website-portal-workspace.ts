@@ -8,6 +8,7 @@
  */
 import {
   createCtpSubmission,
+  getCtpSubmissionById,
   getCtpSubmissionByProposalId,
   getCtpSubmissionForPortal,
   updateCtpSubmission,
@@ -53,14 +54,25 @@ async function linkSubmissionToPortal(
     ...(siteUrl ? { siteUrl } : {}),
   });
 
-  const linked = result.submission ?? {
-    ...submission,
-    portalSlug,
-    workspaceStatus: 'Active' as const,
-    status: 'Workspace Active' as const,
-    clientType: 'website_portal' as const,
-    siteUrl: siteUrl ?? submission.siteUrl,
-  };
+  // siteUrl is infrastructure evidence only — never Agreement/Design.
+  // WPS proposalId is never proposal.ready.
+  try {
+    const { applyProjectEvidenceToSubmission } = await import('@/lib/ctp-submissions');
+    await applyProjectEvidenceToSubmission(submission.id, ['portal.bound', 'discovery.complete']);
+  } catch (err) {
+    console.error('[ctp-website-portal-workspace] project state evidence failed:', err);
+  }
+
+  const linked =
+    (await getCtpSubmissionById(submission.id)) ??
+    result.submission ?? {
+      ...submission,
+      portalSlug,
+      workspaceStatus: 'Active' as const,
+      status: 'Workspace Active' as const,
+      clientType: 'website_portal' as const,
+      siteUrl: siteUrl ?? submission.siteUrl,
+    };
 
   if (!isLinkedActive(submission, portalSlug)) {
     try {

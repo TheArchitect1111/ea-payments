@@ -136,14 +136,10 @@ export function consultingMeaningFromSubmission(submission: CtpSubmission): Cons
   };
 }
 
+/** Journey visualization — reads Project State Engine SSOT only. */
 export function consultingCurrentStage(submission: CtpSubmission): string {
-  if (submission.status === 'Completed') return 'Project Complete';
-  if (submission.status === 'Ready For Review' || submission.studioStatus === 'Ready For Review') {
-    return 'Ready for Proposal';
-  }
-  if (submission.workspaceStatus === 'Active') return 'Discovery';
-  if (submission.workspaceStatus === 'Provisioning') return 'Opening Your Workspace';
-  return 'Initial Review';
+  if (submission.guideStage) return submission.guideStage;
+  return 'Welcome';
 }
 
 export function consultingPrimaryOpportunity(submission: CtpSubmission): string {
