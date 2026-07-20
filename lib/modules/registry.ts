@@ -195,8 +195,8 @@ const TECHNICAL_MODULE_REGISTRY: TechnicalModuleDefinition[] = [
     name: 'Landing Pages',
     tag: 'Landing Pages',
     title: 'Landing page experiences',
-    description: 'Cinematic marketing journeys designed for your mission.',
-    requiredRole: 'admin',
+    description: 'Your public site and Experience Builder publish workspace.',
+    requiredRole: 'owner',
     pathSegment: 'landing',
   },
   {
@@ -278,7 +278,7 @@ export const TENANT_MODULE_PRESETS: Record<string, ModuleId[]> = {
 export const PACKAGE_MODULE_GRANTS: Record<string, ModuleId[]> = {
   Simplifi: ['simplifi', 'amplifi'],
   'Implementation Package': ['simplifi', 'amplifi', 'connect', 'member'],
-  'Website + Portal Starter': ['member'],
+  'Website + Portal Starter': ['member', 'events'],
   'Capacity Assessment': ['dashboard', 'pulse', 'update-hub', 'documents', 'ask', 'discovery', 'ctp'],
   'Capacity Blueprint': ['dashboard', 'pulse', 'update-hub', 'documents', 'ask', 'discovery', 'ctp'],
   'Launch Verification': ['dashboard', 'pulse', 'update-hub', 'ask'],

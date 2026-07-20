@@ -49,6 +49,7 @@ export const WEBSITE_PORTAL_MODULES = [
   'update-hub',
   'messaging',
   'documents',
+  'events',
   'training',
   'resources',
   'ask',

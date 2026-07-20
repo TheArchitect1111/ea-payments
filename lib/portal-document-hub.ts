@@ -1,42 +1,68 @@
 /**
- * Tenant document hub — real links for the portal documents module.
+ * Tenant document hub — CTP vault + Update Hub files + training (not static stubs only).
  */
 import type { PortalClientRecord } from '@/lib/airtable';
 import { getContentRequestsForClient } from '@/lib/airtable';
+import { buildCtpDocumentsView } from '@/lib/ctp-documents-view';
+import { getCtpSubmissionForPortal } from '@/lib/ctp-submissions';
 import {
   findPublishedSitePage,
   siteUrlForSlug,
 } from '@/lib/provision-website-portal';
 import { listPublishedTrainingForTenant } from '@/lib/training-transformation-store';
-import { listOsCapabilitiesByModule } from '@/lib/os-capability-taxonomy';
 
 export type PortalDocumentItem = {
   title: string;
   href: string;
   note: string;
   source: 'package' | 'site' | 'ctp' | 'training' | 'request' | 'hub';
+  external?: boolean;
 };
 
 export async function listPortalDocuments(
   slug: string,
   client: PortalClientRecord,
 ): Promise<PortalDocumentItem[]> {
-  void listOsCapabilitiesByModule('documents');
+  const items: PortalDocumentItem[] = [];
+  let hasTenantVault = false;
 
-  const items: PortalDocumentItem[] = [
-    {
-      title: 'Visibility Assessment Scorecard',
-      href: '/scorecard',
-      note: 'Lead magnet scorecard for capacity conversations.',
-      source: 'package',
-    },
-    {
-      title: 'Operational MRI™',
-      href: '/assessment',
-      note: 'Capacity assessment funnel.',
-      source: 'package',
-    },
-  ];
+  try {
+    const submission = await getCtpSubmissionForPortal({
+      portalSlug: slug,
+      email: client.email,
+    });
+    if (submission) {
+      const view = buildCtpDocumentsView(submission, slug);
+      for (const upload of view.uploads) {
+        hasTenantVault = true;
+        items.push({
+          title: upload.fileName || upload.label,
+          href: upload.url,
+          note: `CTP upload · ${upload.label}`,
+          source: 'ctp',
+          external: /^https?:\/\//i.test(upload.url),
+        });
+      }
+      for (const deliverable of view.deliverables.filter((d) => d.ready)) {
+        hasTenantVault = true;
+        items.push({
+          title: deliverable.title,
+          href: deliverable.href,
+          note: deliverable.detail,
+          source: 'ctp',
+          external: Boolean(deliverable.external) || /^https?:\/\//i.test(deliverable.href),
+        });
+      }
+      items.push({
+        title: 'CTP document vault',
+        href: `/portal/${slug}/ctp/documents`,
+        note: `${view.readyCount} ready · upload brand assets and open deliverables`,
+        source: 'ctp',
+      });
+    }
+  } catch {
+    // CTP vault is best-effort.
+  }
 
   try {
     const site = await findPublishedSitePage(slug);
@@ -53,12 +79,6 @@ export async function listPortalDocuments(
   }
 
   items.push(
-    {
-      title: 'Client Experience / CTP',
-      href: `/portal/${slug}/ctp`,
-      note: 'Opportunity workspace and deliverables.',
-      source: 'ctp',
-    },
     {
       title: 'Update Hub',
       href: `/portal/${slug}/updates`,
@@ -92,17 +112,37 @@ export async function listPortalDocuments(
       const requests = await getContentRequestsForClient(client.id);
       for (const req of requests) {
         if (req.documentUrl) {
+          hasTenantVault = true;
           items.push({
             title: req.title || 'Shared document',
             href: req.documentUrl,
             note: `From Update Hub request · ${req.status}`,
             source: 'request',
+            external: /^https?:\/\//i.test(req.documentUrl),
           });
         }
       }
     } catch {
       // non-fatal
     }
+  }
+
+  // Global EA funnels only when this tenant has no real vault yet.
+  if (!hasTenantVault) {
+    items.unshift(
+      {
+        title: 'Visibility Assessment Scorecard',
+        href: '/scorecard',
+        note: 'Lead magnet scorecard for capacity conversations.',
+        source: 'package',
+      },
+      {
+        title: 'Operational MRI™',
+        href: '/assessment',
+        note: 'Capacity assessment funnel.',
+        source: 'package',
+      },
+    );
   }
 
   if (client.packagePurchased) {
