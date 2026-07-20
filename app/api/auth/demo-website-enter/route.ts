@@ -5,23 +5,23 @@ import {
 } from '@/lib/demo-website-portal';
 import { signSession, makeSessionCookie } from '@/lib/ea-portal-auth';
 import { resolvePortalIdentity } from '@/lib/org-provision';
-import { opportunityDashboardPath } from '@/lib/ctp-opportunity-routes';
+import { designStudioPath } from '@/lib/ctp-opportunity-routes';
 
 export const dynamic = 'force-dynamic';
 
 /** Always apex — www may still map to the legacy app; cookies must match host. */
 const HUB_ORIGIN = 'https://efficiencyarchitects.online';
 
-/** Only same-origin relative paths; default = Website + Portal Client Experience. */
+/** Only same-origin relative paths; default = Website + Portal Guide Progress. */
 function safeDemoNext(raw: string | null, slug: string): string {
-  const fallback = opportunityDashboardPath(slug);
+  const fallback = designStudioPath(slug);
   if (!raw || !raw.startsWith('/') || raw.startsWith('//')) return fallback;
   return raw;
 }
 
 /**
  * One-click Website + Portal demo entry (not Simplifi demo-client).
- * GET /api/auth/demo-website-enter → session → /portal/demo-website/ctp
+ * GET /api/auth/demo-website-enter → session → /portal/demo-website/ctp/progress
  */
 function resolveEnterOrigin(req: NextRequest): string {
   const host = req.nextUrl.host || '';

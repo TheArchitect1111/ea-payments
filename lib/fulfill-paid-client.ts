@@ -15,7 +15,7 @@ import {
   WELCOME_MAGIC_LINK_TTL_MS,
 } from '@/lib/magic-link';
 import { publicPortalLoginUrl } from '@/lib/ctp-portal-host';
-import { opportunityDashboardPath } from '@/lib/ctp-opportunity-routes';
+import { designStudioPath } from '@/lib/ctp-opportunity-routes';
 import { ensureCtpWorkspaceForWebsitePortal } from '@/lib/ctp-website-portal-workspace';
 import { EA_PLATFORM_URL } from '@/lib/platform-urls';
 
@@ -162,7 +162,7 @@ export async function fulfillPaidClient(
           console.error('fulfillPaidClient CTP workspace bind threw:', err);
         }
 
-        const ctpLanding = opportunityDashboardPath(portalSlug);
+        const ctpLanding = designStudioPath(portalSlug);
         if (magicLinkConfigured()) {
           const token = createMagicLinkToken({
             realm: 'portal',

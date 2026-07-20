@@ -52,11 +52,11 @@ export default function OpportunityReviewConfirmed({
             </div>
           )}
           <div className="ore-hero-actions">
-            <Link className="ore-cta" href={`/portal/${slug}/ctp`}>
-              Return to Client Experience
+            <Link className="ore-cta" href={`/portal/${slug}/ctp/progress`}>
+              Return to Your Project
             </Link>
-            <Link className="ore-secondary" href={`/portal/${slug}`}>
-              Open portal home
+            <Link className="ore-secondary" href={`/portal/${slug}/ctp/progress`}>
+              Open Progress
             </Link>
           </div>
         </div>

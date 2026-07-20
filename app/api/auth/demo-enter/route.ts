@@ -8,15 +8,17 @@ export const dynamic = 'force-dynamic';
 /** Always apex — www may still map to the legacy app; cookies must match host. */
 const HUB_ORIGIN = 'https://efficiencyarchitects.online';
 
-/** Only same-origin relative paths are honored; default preserves the CTP demo. */
+/** Only same-origin relative paths are honored; default = Guide Progress. */
 function safeDemoNext(raw: string | null): string {
-  if (!raw || !raw.startsWith('/') || raw.startsWith('//')) return '/portal/demo-client/ctp';
+  if (!raw || !raw.startsWith('/') || raw.startsWith('//')) {
+    return '/portal/demo-client/ctp/progress';
+  }
   return raw;
 }
 
 /**
  * One-click demo portal entry — no email.
- * GET /api/auth/demo-enter → sets session cookie → /portal/demo-client/ctp
+ * GET /api/auth/demo-enter → sets session cookie → /portal/demo-client/ctp/progress
  * Optional ?next=/simplifi/workspace lands testers on the Simplifi Brief instead.
  */
 export async function GET(req: NextRequest) {

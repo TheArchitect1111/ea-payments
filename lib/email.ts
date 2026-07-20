@@ -1123,7 +1123,7 @@ export async function sendCtpReviewReminderEmail(data: {
       title: 'Review Reminder',
       eyebrow: 'Consider the Possibilities™',
       bodyHtml,
-      ctaLabel: 'Open Opportunity Dashboard',
+      ctaLabel: 'Open Your Project',
       ctaUrl: data.portalUrl,
     }),
   );
