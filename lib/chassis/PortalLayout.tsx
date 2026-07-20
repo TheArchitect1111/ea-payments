@@ -7,6 +7,12 @@ import { PortalHeader } from './PortalHeader';
 import { PortalChromeProvider } from './PortalChromeContext';
 import type { EAPortalTab } from './PortalShell';
 import type { PortalSidebarNavGroup } from '@/lib/modules/portal-modules';
+import type {
+  ClientExperienceNavId,
+  ClientExperienceNavItem,
+} from '@/lib/ctp-client-nav';
+import ClientExperienceNav from '@/app/portal/components/ClientExperienceNav';
+import '@/app/portal/components/client-experience-shell.css';
 
 export type PortalWorkspaceLayoutProps = {
   slug: string;
@@ -28,8 +34,14 @@ export type PortalWorkspaceLayoutProps = {
   homeLabel?: string;
   /** Defaults to portal logout; admin shell passes /api/admin/logout. */
   logoutHref?: string;
-  /** `experience` = full-bleed Client Experience without sidebar/header. */
-  presentation?: 'workspace' | 'experience';
+  /**
+   * `workspace` = Executive sidebar shell.
+   * `experience` = full-bleed (legacy cinematic, no chrome).
+   * `client` = Client Experience shell with client-only nav.
+   */
+  presentation?: 'workspace' | 'experience' | 'client';
+  clientNavItems?: ClientExperienceNavItem[];
+  clientNavActive?: ClientExperienceNavId;
   children: ReactNode;
 };
 
@@ -53,6 +65,8 @@ function PortalLayoutFrame({
   homeLabel,
   logoutHref = '/api/portal/logout',
   presentation = 'workspace',
+  clientNavItems = [],
+  clientNavActive = 'journey',
   children,
 }: PortalWorkspaceLayoutProps) {
   const { sidebarExpanded } = usePortalSidebar();
@@ -66,6 +80,25 @@ function PortalLayoutFrame({
     homeLabel,
     personalityId,
   };
+
+  if (presentation === 'client') {
+    return (
+      <PortalChromeProvider value={chromeValue}>
+        <div
+          className="ep-client-experience-shell cex-shell-frame ep-workspace-shell"
+          style={style}
+        >
+          <ClientExperienceNav
+            items={clientNavItems}
+            active={clientNavActive}
+            brandName={brandName}
+            logoutHref={logoutHref}
+          />
+          <div className="cex-shell-main">{children}</div>
+        </div>
+      </PortalChromeProvider>
+    );
+  }
 
   if (presentation === 'experience') {
     return (

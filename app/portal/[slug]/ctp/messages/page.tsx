@@ -8,7 +8,11 @@ import { getCtpSubmissionForPortal } from '@/lib/ctp-submissions';
 
 export const dynamic = 'force-dynamic';
 
-export default async function PortalCtpSupportPage({
+/**
+ * Client Experience — Messages.
+ * Reuses the CTP support communication actions without Executive Workspace chrome.
+ */
+export default async function PortalCtpMessagesPage({
   params,
 }: {
   params: Promise<{ slug: string }>;
@@ -26,28 +30,31 @@ export default async function PortalCtpSupportPage({
   }
 
   const view = buildCtpSupportView(submission, slug);
-  const primary = view.actions.find((action) => action.primary) ?? view.actions[0];
+  const messageActions = view.actions.filter((action) =>
+    /message|email|reach|contact|reply/i.test(`${action.title} ${action.detail}`),
+  );
+  const actions = messageActions.length ? messageActions : view.actions.slice(0, 2);
+  const primary = actions.find((action) => action.primary) ?? actions[0];
 
   return (
     <PortalSubpage
       slug={slug}
       active="ctp"
-      clientNavActive="support"
-      kicker="Support"
-      title="We're here when you need us"
-      lede="Questions, scheduling, and direct help for your journey — without the internal EA workspace."
+      clientNavActive="messages"
+      kicker="Messages"
+      title="Message your team"
+      lede="Stay in the loop on your build — send a note or check the conversation without leaving Client Experience."
     >
       <div className="ep-module-card" style={{ marginBottom: '1.25rem' }}>
         <p className="ep-module-card-note" style={{ marginBottom: '0.35rem' }}>
           {view.businessName}
           {view.clientTypeLabel ? ` · ${view.clientTypeLabel}` : ''}
-          {` · ${view.status}`}
         </p>
         <h2 style={{ margin: '0 0 0.5rem', fontSize: '1.35rem', fontWeight: 800, color: '#fff' }}>
-          {view.headline}
+          Your conversation space
         </h2>
         <p style={{ margin: 0, fontSize: '0.95rem', lineHeight: 1.65, color: 'rgba(255,255,255,0.72)' }}>
-          {view.summary}
+          Reach the people building with you. Support and scheduling live next door under Support.
         </p>
         {primary ? (
           <p style={{ margin: '1rem 0 0' }}>
@@ -63,7 +70,7 @@ export default async function PortalCtpSupportPage({
       </div>
 
       <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'grid', gap: '0.75rem' }}>
-        {view.actions.map((action) => (
+        {actions.map((action) => (
           <li key={action.id} className="ep-module-card" style={{ margin: 0 }}>
             <a
               href={action.href}
@@ -90,18 +97,18 @@ export default async function PortalCtpSupportPage({
 
       <div style={{ marginTop: '1.25rem', display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
         <Link
-          href={`/portal/${slug}/ctp`}
+          href={`/portal/${slug}/ctp/support`}
           className="inline-block rounded-full px-6 py-3 text-sm font-bold"
           style={{ border: '1px solid rgba(255,255,255,0.35)', color: '#fff' }}
         >
-          Back to overview
+          Support
         </Link>
         <Link
-          href={`/portal/${slug}/ctp/documents`}
+          href={`/portal/${slug}/ctp/progress`}
           className="inline-block rounded-full px-6 py-3 text-sm font-bold"
           style={{ border: '1px solid rgba(255,255,255,0.35)', color: '#fff' }}
         >
-          Documents
+          Progress
         </Link>
       </div>
     </PortalSubpage>

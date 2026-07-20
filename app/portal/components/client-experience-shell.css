@@ -1,0 +1,140 @@
+/* Client Experience shell — no Executive Workspace chrome */
+
+.ep-client-experience-shell.cex-shell-frame {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background:
+    radial-gradient(1200px 600px at 10% -10%, rgba(201, 162, 39, 0.12), transparent 55%),
+    radial-gradient(900px 500px at 90% 0%, rgba(15, 36, 66, 0.08), transparent 50%),
+    linear-gradient(180deg, #f7f4ee 0%, #efe9df 100%);
+  color: #0f2442;
+}
+
+.cex-shell-nav {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  border-bottom: 1px solid rgba(15, 36, 66, 0.1);
+  background: rgba(247, 244, 238, 0.92);
+  backdrop-filter: blur(10px);
+}
+
+.cex-shell-nav-inner {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0.75rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.cex-shell-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-width: 0;
+}
+
+.cex-shell-brand-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  background: #0f2442;
+  color: #c9a227;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.cex-shell-brand-text {
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #0f2442;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 12rem;
+}
+
+.cex-shell-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  flex: 1;
+  justify-content: center;
+}
+
+.cex-shell-link {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.45rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: rgba(15, 36, 66, 0.72);
+  text-decoration: none;
+  transition: background 160ms ease, color 160ms ease;
+}
+
+.cex-shell-link:hover {
+  color: #0f2442;
+  background: rgba(15, 36, 66, 0.06);
+}
+
+.cex-shell-link-active {
+  color: #0f2442;
+  background: rgba(201, 162, 39, 0.22);
+}
+
+.cex-shell-logout {
+  margin-left: auto;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: rgba(15, 36, 66, 0.65);
+  text-decoration: none;
+}
+
+.cex-shell-logout:hover {
+  color: #0f2442;
+}
+
+.cex-shell-main {
+  flex: 1;
+  width: 100%;
+}
+
+.cex-shell-main > .ep-main {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 1.5rem 1.25rem 3rem;
+}
+
+@media (max-width: 720px) {
+  .cex-shell-nav-inner {
+    padding: 0.65rem 0.85rem;
+  }
+
+  .cex-shell-brand-text {
+    display: none;
+  }
+
+  .cex-shell-links {
+    order: 3;
+    width: 100%;
+    justify-content: flex-start;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 0.15rem;
+  }
+
+  .cex-shell-link {
+    white-space: nowrap;
+  }
+}

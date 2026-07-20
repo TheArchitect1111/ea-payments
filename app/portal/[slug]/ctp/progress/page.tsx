@@ -52,7 +52,8 @@ export default async function PortalCtpStatusPage({
     <PortalSubpage
       slug={slug}
       active="ctp"
-      kicker="Consider the Possibilities™"
+      clientNavActive="progress"
+      kicker="Progress"
       title="Your live project progress"
       lede="Track every stage — from assessment through reveal — and complete Design Studio when you are ready."
     >
@@ -134,11 +135,11 @@ export default async function PortalCtpStatusPage({
             Overview
           </Link>
           <Link
-            href={`/portal/${slug}/ctp/bi`}
+            href={`/portal/${slug}/ctp/messages`}
             className="inline-block rounded-full px-5 py-2.5 text-sm font-bold"
             style={{ border: '1px solid rgba(255,255,255,0.35)', color: '#fff' }}
           >
-            Executive Snapshot
+            Messages
           </Link>
           <Link
             href={`/portal/${slug}/ctp/documents`}

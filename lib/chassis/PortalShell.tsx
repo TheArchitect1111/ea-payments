@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { headers } from 'next/headers';
 
 import { PortalLayout } from './PortalLayout';
 import { NAVY, GOLD } from '@/lib/design-system';
@@ -6,6 +7,12 @@ import {
   resolvePortalWorkspaceChrome,
   type PortalWorkspaceChrome,
 } from '@/lib/platform/portal-workspace';
+import {
+  buildClientExperienceNav,
+  resolveClientNavActive,
+  shouldUseClientExperienceShell,
+  type ClientExperienceNavId,
+} from '@/lib/ctp-client-nav';
 
 export type EAPortalTab =
   | 'home'
@@ -31,8 +38,15 @@ type Props = {
   pageTitle?: string;
   /** Pre-resolved chrome — skips a second resolve when the page already loaded it. */
   chrome?: PortalWorkspaceChrome;
-  /** `experience` = full-bleed Client Experience without sidebar/header. */
-  presentation?: 'workspace' | 'experience';
+  /**
+   * `workspace` = Executive sidebar.
+   * `experience` = full-bleed cinematic (no chrome).
+   * `client` = Client Experience nav shell.
+   * CTP-bound portals coerce to `client` so Executive nav never appears.
+   */
+  presentation?: 'workspace' | 'experience' | 'client';
+  /** Override active Client Experience nav item when known. */
+  clientNavActive?: ClientExperienceNavId;
   children: ReactNode;
 };
 
@@ -49,7 +63,7 @@ const FALLBACK_TITLES: Record<EAPortalTab, string> = {
   messaging: 'Messages',
   learning: 'Learning',
   ask: 'Ask EA',
-  ctp: 'Consider the Possibilities',
+  ctp: 'Your Journey',
   member: 'Member Experience',
   landing: 'Landing Pages',
 };
@@ -65,7 +79,7 @@ function titleFromNav(chrome: PortalWorkspaceChrome, active: EAPortalTab): strin
   return undefined;
 }
 
-/** EA client portal - TailAdmin-style sidebar shell (portal routes only). */
+/** EA client portal shell — Executive workspace or Client Experience. */
 export async function PortalShell({
   slug,
   active,
@@ -73,15 +87,38 @@ export async function PortalShell({
   pageTitle,
   chrome: chromeProp,
   presentation = 'workspace',
+  clientNavActive: clientNavActiveProp,
   children,
 }: Props) {
   const chrome = chromeProp ?? (await resolvePortalWorkspaceChrome(slug));
+  const useClientShell = await shouldUseClientExperienceShell(slug);
+  const effectivePresentation = useClientShell
+    ? 'client'
+    : presentation === 'experience'
+      ? 'experience'
+      : presentation;
+
+  const headerList = await headers();
+  const pathname =
+    headerList.get('x-pathname') ||
+    headerList.get('x-invoke-path') ||
+    headerList.get('next-url') ||
+    '';
+  const clientNavItems = buildClientExperienceNav(slug);
+  const clientNavActive =
+    clientNavActiveProp || resolveClientNavActive(pathname, slug);
+
+  const clientTitle =
+    clientNavItems.find((item) => item.id === clientNavActive)?.label ?? 'Your Journey';
+
   const resolvedTitle =
     pageTitle ??
-    (active === 'home' ? chrome.homeLabel : undefined) ??
-    titleFromNav(chrome, active) ??
-    FALLBACK_TITLES[active] ??
-    'Dashboard';
+    (effectivePresentation === 'client'
+      ? clientTitle
+      : (active === 'home' ? chrome.homeLabel : undefined) ??
+        titleFromNav(chrome, active) ??
+        FALLBACK_TITLES[active] ??
+        'Dashboard');
 
   return (
     <PortalLayout
@@ -89,10 +126,12 @@ export async function PortalShell({
       active={active}
       firstName={firstName}
       pageTitle={resolvedTitle}
-      shellNavGroups={chrome.shellNavGroups}
+      shellNavGroups={effectivePresentation === 'client' ? [] : chrome.shellNavGroups}
       cssVars={chrome.cssVars}
       brandName={chrome.brandName}
-      workspaceName={chrome.workspaceName}
+      workspaceName={
+        effectivePresentation === 'client' ? 'Client Experience' : chrome.workspaceName
+      }
       logoSrc={chrome.logoSrc}
       logoAlt={chrome.logoAlt}
       memberLabel={chrome.memberLabel}
@@ -100,8 +139,10 @@ export async function PortalShell({
       promoCopy={chrome.promoCopy}
       personalityName={chrome.personalityName}
       personalityId={chrome.personalityId}
-      homeLabel={chrome.homeLabel}
-      presentation={presentation}
+      homeLabel={effectivePresentation === 'client' ? 'Your Journey' : chrome.homeLabel}
+      presentation={effectivePresentation}
+      clientNavItems={clientNavItems}
+      clientNavActive={clientNavActive}
     >
       {children}
     </PortalLayout>

@@ -37,7 +37,13 @@ export default async function PortalCtpOpportunityReviewPage({
   const confirmedHref = `${canonicalPlatformOrigin()}/portal/${slug}/ctp/review/confirmed`;
 
   return (
-    <PortalShell slug={slug} active="ctp" presentation="experience" firstName={firstName}>
+    <PortalShell
+      slug={slug}
+      active="ctp"
+      presentation="client"
+      clientNavActive="journey"
+      firstName={firstName}
+    >
       <OpportunityReviewExperience view={view} confirmedHref={confirmedHref} />
     </PortalShell>
   );

@@ -32,8 +32,9 @@ export default async function PortalCtpDocumentsPage({
     <PortalSubpage
       slug={slug}
       active="ctp"
+      clientNavActive="documents"
       kicker="Documents"
-      title="Your CTP document vault"
+      title="Your documents"
       lede="Uploads from Design Studio and generated deliverables — one place for the work product of your transformation."
     >
       <div className="ep-module-card" style={{ marginBottom: '1.25rem' }}>
