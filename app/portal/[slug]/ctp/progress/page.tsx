@@ -11,8 +11,8 @@ import '@/app/portal/components/guide-progress.css';
 export const dynamic = 'force-dynamic';
 
 /**
- * Guide home (Progress) — Guide Operating System presentation.
- * Auth, routing, and submission reads unchanged.
+ * Guide home — dynamic intelligence driven by project state.
+ * Structure unchanged; messaging is stage-aware.
  */
 export default async function PortalCtpStatusPage({
   params,
@@ -49,32 +49,64 @@ export default async function PortalCtpStatusPage({
           <h2 id="guide-current-stage" className="guide-progress-stage-name">
             {guide.currentStage}
           </h2>
-          <p className="guide-progress-stage-why">{guide.stageWhy}</p>
+          <p className="guide-progress-stage-why">
+            <strong>{guide.headline}</strong>
+          </p>
+          <p className="guide-progress-stage-why">{guide.summary}</p>
           {guide.estimatedCompletion ? (
-            <p className="guide-progress-eta">{guide.estimatedCompletion}</p>
+            <p className="guide-progress-eta">
+              <strong>Typical timing:</strong> {guide.estimatedCompletion}
+            </p>
           ) : null}
+          <p className="guide-progress-eta">{guide.confidenceMessage}</p>
         </section>
 
         <section className="guide-progress-nba" aria-labelledby="guide-nba-heading">
           <p id="guide-nba-heading" className="guide-progress-nba-label">
-            What you need to do
+            {guide.nba.nothingRequired ? 'Nothing needed from you' : 'What you need to do'}
           </p>
-          <a
-            href={guide.nba.href}
-            className="guide-progress-nba-cta"
-            target={guide.nba.external ? '_blank' : undefined}
-            rel={guide.nba.external ? 'noreferrer' : undefined}
-          >
-            {guide.nba.label}
-          </a>
-          <p className="guide-progress-nba-why">
-            <strong>Why it matters:</strong> {guide.nba.why}
-          </p>
-          <p className="guide-progress-nba-meta">
-            <strong>Time:</strong> {guide.nba.duration}
-            <br />
-            <strong>After this:</strong> {guide.nba.after}
-          </p>
+          {guide.nba.nothingRequired ? (
+            <p className="guide-progress-nba-why" style={{ marginTop: 0 }}>
+              {guide.nba.label}. {guide.nba.why}
+            </p>
+          ) : guide.nba.href ? (
+            <a
+              href={guide.nba.href}
+              className="guide-progress-nba-cta"
+              target={guide.nba.external ? '_blank' : undefined}
+              rel={guide.nba.external ? 'noreferrer' : undefined}
+            >
+              {guide.nba.label}
+            </a>
+          ) : (
+            <p className="guide-progress-nba-why" style={{ marginTop: 0 }}>
+              {guide.nba.label}
+            </p>
+          )}
+          {!guide.nba.nothingRequired ? (
+            <>
+              <p className="guide-progress-nba-why">
+                <strong>Why it matters:</strong> {guide.nba.why}
+              </p>
+              <p className="guide-progress-nba-meta">
+                <strong>Time:</strong> {guide.nba.duration}
+                <br />
+                <strong>After this:</strong> {guide.nba.after}
+              </p>
+            </>
+          ) : (
+            <p className="guide-progress-nba-meta">
+              <strong>After this:</strong> {guide.nba.after}
+              {guide.nba.href ? (
+                <>
+                  <br />
+                  <a href={guide.nba.href} style={{ color: 'rgba(216,173,61,0.95)' }}>
+                    Message your team if a question comes up
+                  </a>
+                </>
+              ) : null}
+            </p>
+          )}
         </section>
 
         <section className="guide-progress-section" aria-labelledby="guide-milestones-heading">
@@ -87,15 +119,26 @@ export default async function PortalCtpStatusPage({
                 <li key={item.stage} className="guide-progress-milestone">
                   <details>
                     <summary>{item.title}</summary>
-                    <p>{item.explanation}</p>
+                    <p>
+                      <strong>What happened:</strong> {item.whatHappened}
+                    </p>
+                    <p>
+                      <strong>Why it matters:</strong> {item.whyItMatters}
+                    </p>
+                    <p>
+                      <strong>What it unlocked:</strong> {item.whatItUnlocked}
+                    </p>
+                    <p>
+                      <strong>What happens next:</strong> {item.whatHappensNext}
+                    </p>
                   </details>
                 </li>
               ))}
             </ul>
           ) : (
             <p className="guide-progress-empty">
-              You&apos;re at the beginning — Welcome is underway. Everything ahead will show
-              here as we complete it together.
+              You&apos;re at the beginning — Welcome is underway. Completed milestones will
+              appear here as we finish them together.
             </p>
           )}
         </section>
@@ -125,6 +168,24 @@ export default async function PortalCtpStatusPage({
             </p>
           </div>
         </section>
+
+        {guide.commonQuestions.length ? (
+          <section className="guide-progress-section" aria-labelledby="guide-faq-heading">
+            <h2 id="guide-faq-heading" className="guide-progress-section-title">
+              Common questions
+            </h2>
+            <ul className="guide-progress-milestones">
+              {guide.commonQuestions.map((item) => (
+                <li key={item.question} className="guide-progress-milestone">
+                  <details>
+                    <summary>{item.question}</summary>
+                    <p>{item.answer}</p>
+                  </details>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
 
         {guide.showDesignStudio ? (
           <section
