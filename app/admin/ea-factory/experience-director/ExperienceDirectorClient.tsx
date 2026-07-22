@@ -33,6 +33,18 @@ const SCORE_ROWS: Array<{ key: keyof ExperienceReviewData['scores']; label: stri
   { key: 'wow', label: 'Wow Score' },
 ];
 
+const EXPERIENCE_THEMES = [
+  { id: 'ea-default-theme', label: 'EA Default' },
+  { id: 'amanda-editorial', label: 'Amanda Editorial' },
+] as const;
+
+type ActivationLinks = {
+  website?: string;
+  portal?: string;
+  portalLogin?: string;
+  admin?: string;
+};
+
 function StatusBadge({ status }: { status: ExperienceDirectorApprovalStatus | 'Missing' }) {
   return (
     <span
@@ -86,6 +98,8 @@ export default function ExperienceDirectorClient({
   const [validationMode, setValidationMode] = useState(true);
   const [reviewer, setReviewer] = useState('Experience Director');
   const [rationale, setRationale] = useState('');
+  const [themeId, setThemeId] = useState('ea-default-theme');
+  const [activationLinks, setActivationLinks] = useState<ActivationLinks | null>(null);
 
   const focused = useMemo(
     () => rows.find((r) => r.projectId === focusId) || null,
@@ -111,6 +125,7 @@ export default function ExperienceDirectorClient({
   async function runReview(projectId: string) {
     setBusy(projectId);
     setMessage(null);
+    setActivationLinks(null);
     try {
       if (validationMode) {
         const res = await fetch('/api/admin/factory/experience-director/validation', {
@@ -207,13 +222,16 @@ export default function ExperienceDirectorClient({
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ projectId, force: true }),
+        body: JSON.stringify({ projectId, themeId, force: true }),
       });
       const data = (await res.json().catch(() => ({}))) as {
         ok?: boolean;
         error?: string;
         siteUrl?: string;
         portalSlug?: string;
+        portalLoginUrl?: string;
+        portalUrl?: string;
+        adminUrl?: string;
         directorGate?: { approvalStatus?: string };
       };
       if (!res.ok || !data.ok) {
@@ -225,6 +243,12 @@ export default function ExperienceDirectorClient({
           ? `Published Future Website: ${data.siteUrl}`
           : `Published site for ${data.portalSlug || projectId}`,
       );
+      setActivationLinks({
+        website: data.siteUrl,
+        portal: data.portalUrl,
+        portalLogin: data.portalLoginUrl,
+        admin: data.adminUrl,
+      });
       if (data.siteUrl) {
         window.open(data.siteUrl, '_blank', 'noopener,noreferrer');
       }
@@ -406,6 +430,20 @@ export default function ExperienceDirectorClient({
                 ) : null}
 
                 <div className="mt-6 flex flex-wrap gap-2">
+                  <label className="flex items-center gap-2 border border-neutral-200 bg-white px-3 py-2 text-xs font-bold text-neutral-700">
+                    Experience Theme
+                    <select
+                      value={themeId}
+                      onChange={(event) => setThemeId(event.target.value)}
+                      className="bg-transparent text-xs font-semibold outline-none"
+                    >
+                      {EXPERIENCE_THEMES.map((theme) => (
+                        <option key={theme.id} value={theme.id}>
+                          {theme.label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
                   <button
                     type="button"
                     disabled={busy === focused.projectId}
@@ -456,6 +494,28 @@ export default function ExperienceDirectorClient({
                     Refresh
                   </button>
                 </div>
+                {activationLinks ? (
+                  <div className="mt-5 grid gap-2 border border-[#C9A844]/50 bg-[#FAF8F3] p-4 sm:grid-cols-2">
+                    {[
+                      ['Website', activationLinks.website],
+                      ['Portal', activationLinks.portal],
+                      ['Portal Login', activationLinks.portalLogin],
+                      ['Admin Portal', activationLinks.admin],
+                    ].map(([label, href]) =>
+                      href ? (
+                        <a
+                          key={label}
+                          href={href}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-sm font-bold text-[#1B2B4D] underline"
+                        >
+                          Open {label}
+                        </a>
+                      ) : null,
+                    )}
+                  </div>
+                ) : null}
               </article>
 
               {review ? (

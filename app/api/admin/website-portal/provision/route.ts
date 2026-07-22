@@ -25,6 +25,7 @@ export async function POST(req: NextRequest) {
     ctaLabel?: string;
     primaryColor?: string;
     accentColor?: string;
+    themeId?: string;
     force?: boolean;
   };
   try {
@@ -59,6 +60,7 @@ export async function POST(req: NextRequest) {
     ctaLabel: body.ctaLabel?.trim() || undefined,
     primaryColor: body.primaryColor?.trim() || undefined,
     accentColor: body.accentColor?.trim() || undefined,
+    themeId: body.themeId?.trim() || undefined,
     email: client?.email,
     force: body.force === true,
   });

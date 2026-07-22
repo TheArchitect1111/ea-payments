@@ -32,6 +32,7 @@ export type PortalWorkspaceWidget = {
 /** Serializable props for PortalLayout / sidebar / header / assistant / dashboard. */
 export type PortalWorkspaceChrome = {
   platformClientId: string;
+  themeId: string;
   cssVars: Record<string, string>;
   brandName: string;
   workspaceName: string;
@@ -57,6 +58,7 @@ export type PortalWorkspaceChrome = {
 
 const EA_DEFAULT_CHROME: Omit<PortalWorkspaceChrome, 'shellNavGroups'> = {
   platformClientId: 'ea',
+  themeId: 'ea-default-theme',
   cssVars: {},
   brandName: 'Efficiency Architects',
   workspaceName: 'Client Portal',
@@ -99,6 +101,7 @@ function chromeFromShell(
   const logo = shell.theme.logo?.trim();
   return {
     platformClientId,
+    themeId: shell.theme.id,
     cssVars: shell.cssVars,
     brandName: shell.name,
     workspaceName: shell.workspaceName,

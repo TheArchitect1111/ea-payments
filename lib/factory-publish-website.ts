@@ -68,6 +68,7 @@ export type PublishFactoryWebsiteResult = WebsitePortalProvisionResult & {
 export async function publishFactoryWebsite(input: {
   projectId: string;
   portalSlug?: string;
+  themeId?: string;
   force?: boolean;
 }): Promise<PublishFactoryWebsiteResult> {
   const project = await getFactoryProject(input.projectId);
@@ -133,6 +134,7 @@ export async function publishFactoryWebsite(input: {
     accentColor,
     industry: brief?.industry || project.industry,
     logoUrl: brand?.logoUrl,
+    themeId: input.themeId,
     aboutBody: brief?.whoTheyAre || brief?.website?.purpose,
     existingWebsiteUrl: project.url,
     force: input.force !== false,

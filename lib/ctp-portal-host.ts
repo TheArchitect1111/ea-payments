@@ -105,11 +105,18 @@ export function publicPortalUrl(slug: string, pathSuffix = ''): string {
 }
 
 /** Public portal login URL for emails and CTAs. */
-export function publicPortalLoginUrl(): string {
+export function publicPortalLoginUrl(slug?: string): string {
+  const cleanSlug = slug?.trim().replace(/^\/+|\/+$/g, '').toLowerCase();
   if (vanityPublicUrlsEnabled()) {
-    return `${vanityPortalOrigin()}/login`;
+    const loginUrl = `${vanityPortalOrigin()}/login`;
+    return cleanSlug
+      ? `${loginUrl}?next=${encodeURIComponent(`/${cleanSlug}`)}`
+      : loginUrl;
   }
-  return `${hubPortalOrigin()}/portal/login`;
+  const loginUrl = `${hubPortalOrigin()}/portal/login`;
+  return cleanSlug
+    ? `${loginUrl}?next=${encodeURIComponent(`/portal/${cleanSlug}`)}`
+    : loginUrl;
 }
 
 /** Always the vanity login URL — used by the launch-health DNS probe. */
