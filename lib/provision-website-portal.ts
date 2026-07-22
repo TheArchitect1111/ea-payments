@@ -43,7 +43,7 @@ export function buildStarterWebsitePuckData(input: WebsitePortalProvisionInput):
   const aboutBody =
     input.aboutBody?.trim() ||
     buildDefaultAboutBody({ brand, industry, existingWebsiteUrl });
-  const portalLogin = input.portalLoginHref || publicPortalLoginUrl();
+  const portalLogin = input.portalLoginHref || publicPortalLoginUrl(input.portalSlug);
   const sitePath = sitePathForSlug(input.portalSlug);
 
   const { puckData, director, composed } = composeDirectedWebsite({
@@ -90,8 +90,11 @@ export function buildStarterWebsitePuckData(input: WebsitePortalProvisionInput):
     ...puckData,
     root: {
       ...(puckData.root || {}),
-      props: rootProps,
-    },
+      props: {
+        ...rootProps,
+        themeId: input.themeId?.trim() || 'ea-default-theme',
+      },
+    } as Data['root'],
   };
 }
 

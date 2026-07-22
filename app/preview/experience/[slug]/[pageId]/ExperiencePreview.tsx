@@ -5,12 +5,14 @@ import { Render } from '@measured/puck';
 import { puckConfig } from '@/lib/experience-builder/puck-config';
 import type { Data } from '@measured/puck';
 import '@/lib/experience-builder/experience-builder.css';
+import '@/app/components/experience/themes/amanda-editorial/amanda-editorial.css';
 
-function rootBrand(data: Data): { primary?: string; accent?: string } {
+function rootBrand(data: Data): { primary?: string; accent?: string; themeId?: string } {
   const props = (data.root as { props?: Record<string, unknown> } | undefined)?.props;
   const primary = typeof props?.primaryColor === 'string' ? props.primaryColor : undefined;
   const accent = typeof props?.accentColor === 'string' ? props.accentColor : undefined;
-  return { primary, accent };
+  const themeId = typeof props?.themeId === 'string' ? props.themeId : undefined;
+  return { primary, accent, themeId };
 }
 
 export default function ExperiencePreview({
@@ -29,7 +31,7 @@ export default function ExperiencePreview({
   };
 
   return (
-    <main style={style}>
+    <main style={style} className={brand.themeId === 'amanda-editorial' ? 'amanda-editorial-theme' : undefined}>
       <Render config={puckConfig} data={data} />
       <footer style={{ padding: '1rem', textAlign: 'center', fontSize: '0.8rem', color: '#667085' }}>
         {footerLabel} · {title}

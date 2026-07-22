@@ -1,0 +1,58 @@
+.amanda-editorial-theme {
+  --ae-ink: #171512; --ae-paper: #f7f3ec; --ae-surface: #fffcf7;
+  --ae-gold: #b9894f; --ae-muted: #716b63; --ae-line: #ddd3c5;
+  --ae-display: 'Cormorant Garamond', 'Iowan Old Style', Baskerville, Georgia, serif;
+  --ae-body: 'DM Sans', 'Avenir Next', Avenir, system-ui, sans-serif;
+  --ae-script: 'Brittany Signature', 'Segoe Script', 'Bradley Hand', cursive;
+  color: var(--ae-ink); background: var(--ae-paper); font-family: var(--ae-body);
+}
+.ae-nav { position:absolute; z-index:5; inset:0 0 auto; min-height:88px; padding:1.2rem clamp(1.25rem,4vw,4.5rem); display:flex; align-items:center; justify-content:space-between; gap:2rem; }
+.ae-nav__brand { font-family:var(--ae-script); font-size:clamp(1.7rem,3vw,2.8rem); }
+.ae-nav__links { display:flex; align-items:center; gap:clamp(1rem,2.4vw,2.4rem); }
+.ae-nav a,.ae-footer a { color:inherit; text-decoration:none; text-transform:uppercase; letter-spacing:.13em; font-size:.7rem; }
+.ae-hero { min-height:min(86svh,920px); position:relative; display:flex; align-items:center; overflow:hidden; background:var(--ae-surface); }
+.ae-hero__image { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center 28%; }
+.ae-hero__veil { position:absolute; inset:0; background:linear-gradient(90deg,rgba(250,247,241,.99),rgba(250,247,241,.9) 35%,rgba(250,247,241,.08) 68%); }
+.ae-hero__copy { position:relative; z-index:2; width:min(44rem,52vw); margin-left:clamp(1.25rem,7vw,7.5rem); padding:8rem 0 4rem; }
+.ae-eyebrow { margin:0 0 1rem; color:var(--ae-gold); font-size:.68rem; font-weight:600; letter-spacing:.22em; text-transform:uppercase; }
+.ae-hero h1,.ae-section h2,.ae-cta h2 { font-family:var(--ae-display); font-weight:400; letter-spacing:-.035em; line-height:.94; }
+.ae-hero h1 { margin:0; font-size:clamp(3.2rem,6.2vw,7rem); max-width:11ch; }
+.ae-hero h1 em { color:var(--ae-gold); font-style:normal; }
+.ae-body { max-width:44rem; color:var(--ae-muted); line-height:1.75; font-size:clamp(.95rem,1.25vw,1.1rem); }
+.ae-hero__copy .ae-body { max-width:35rem; margin:1.6rem 0; }
+.ae-signature-link { display:inline-flex; gap:1.5rem; align-items:center; color:var(--ae-ink); font-family:var(--ae-script); font-size:clamp(1.8rem,3vw,3rem); text-decoration:none; }
+.ae-hero__quote { position:absolute; z-index:2; right:8%; bottom:12%; width:15rem; color:#fff; font-family:var(--ae-script); font-size:1.8rem; line-height:1.25; }
+.ae-section { padding:clamp(4.5rem,9vw,9rem) clamp(1.25rem,4vw,4.5rem); max-width:1440px; margin:auto; }
+.ae-section__header { max-width:42rem; }
+.ae-section h2,.ae-cta h2 { margin:0 0 1rem; font-size:clamp(2.6rem,5vw,5rem); }
+.ae-card-rail { display:grid; grid-auto-flow:column; grid-auto-columns:minmax(250px,1fr); overflow-x:auto; gap:6px; margin-top:3rem; scroll-snap-type:x mandatory; }
+.ae-card { position:relative; min-height:480px; overflow:hidden; color:white; text-decoration:none; scroll-snap-align:start; }
+.ae-card img,.ae-card__placeholder,.ae-card__overlay { position:absolute; inset:0; width:100%; height:100%; }
+.ae-card img { object-fit:cover; transition:transform .6s cubic-bezier(.2,.8,.2,1); }
+.ae-card:hover img { transform:scale(1.035); }
+.ae-card__placeholder { background:linear-gradient(145deg,#d8c5aa,#5f4a35); }
+.ae-card__overlay { background:linear-gradient(180deg,transparent 25%,rgba(10,8,6,.9)); }
+.ae-card__copy { position:absolute; z-index:2; inset:auto 1.5rem 1.5rem; display:grid; gap:.55rem; }
+.ae-card__eyebrow { color:#d9ae72; font-family:var(--ae-script); font-size:2.1rem; }
+.ae-card strong { font-family:var(--ae-display); font-size:2rem; font-weight:400; }
+.ae-card__copy>span:not(.ae-card__eyebrow) { font-size:.82rem; line-height:1.6; }
+.ae-card i { width:2rem; height:2rem; border:1px solid rgba(255,255,255,.65); border-radius:50%; display:grid; place-items:center; font-style:normal; }
+.ae-mosaic { display:grid; grid-template-columns:1.2fr .8fr 1fr 1.1fr; gap:6px; }
+.ae-mosaic img { width:100%; height:clamp(280px,40vw,600px); object-fit:cover; }
+.ae-mosaic img:nth-child(even) { clip-path:polygon(10% 0,100% 0,90% 100%,0 100%); margin-left:-5%; width:110%; }
+.ae-quote { padding:clamp(4rem,9vw,8rem); text-align:center; margin:0; background:var(--ae-surface); }
+.ae-quote blockquote { max-width:20ch; margin:auto; font-family:var(--ae-script); font-size:clamp(2.2rem,5vw,5.5rem); line-height:1.1; }
+.ae-quote figcaption { margin-top:1.5rem; color:var(--ae-muted); font-size:.75rem; letter-spacing:.12em; text-transform:uppercase; }
+.ae-cta { padding:clamp(4rem,8vw,8rem) clamp(1.25rem,7vw,7.5rem); display:grid; grid-template-columns:1fr auto; gap:3rem; align-items:end; border-top:1px solid var(--ae-line); }
+.ae-cta p { color:var(--ae-muted); line-height:1.7; }
+.ae-cta__actions { display:flex; gap:1rem; align-items:center; }
+.ae-button { min-height:48px; padding:0 1.65rem; display:inline-flex; align-items:center; justify-content:center; text-decoration:none; text-transform:uppercase; letter-spacing:.14em; font-size:.68rem; }
+.ae-button--outline { border:1px solid var(--ae-gold); color:var(--ae-ink); }
+.ae-button--dark { background:var(--ae-ink); color:white; }
+.ae-button--text { color:var(--ae-ink); border-bottom:1px solid var(--ae-gold); }
+.ae-footer { padding:2rem clamp(1.25rem,4vw,4.5rem); display:flex; justify-content:space-between; gap:2rem; border-top:1px solid var(--ae-line); }
+.ae-footer nav { display:flex; gap:1.5rem; flex-wrap:wrap; }
+@media (max-width:800px) {
+  .ae-nav__links a:not(.ae-button){display:none}.ae-nav{min-height:72px}.ae-hero{min-height:760px;align-items:flex-end}.ae-hero__veil{background:linear-gradient(180deg,rgba(247,243,236,.08) 25%,rgba(247,243,236,.98) 66%)}.ae-hero__copy{width:auto;margin:0;padding:22rem 1.25rem 4rem}.ae-hero__quote{display:none}.ae-card-rail{grid-auto-columns:82vw}.ae-mosaic{grid-template-columns:1fr 1fr}.ae-mosaic img{height:320px}.ae-mosaic img:nth-child(even){clip-path:none;margin:0;width:100%}.ae-cta{grid-template-columns:1fr}.ae-footer{flex-direction:column}
+}
+@media (prefers-reduced-motion:reduce){.amanda-editorial-theme *{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important}}

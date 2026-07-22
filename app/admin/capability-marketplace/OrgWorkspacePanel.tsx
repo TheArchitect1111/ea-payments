@@ -49,6 +49,7 @@ const PLATFORM_CLIENT_OPTIONS = [
 
 const THEME_OPTIONS = [
   { id: 'ea-default-theme', label: 'EA default' },
+  { id: 'amanda-editorial', label: 'Amanda Editorial' },
   { id: 'cpr-theme', label: 'CPR' },
   { id: 'etfm-theme', label: 'ETFM' },
   { id: '3hc-theme', label: '3HC' },

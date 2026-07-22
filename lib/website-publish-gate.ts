@@ -51,6 +51,7 @@ export type WebsitePortalProvisionInput = {
   aboutBody?: string;
   existingWebsiteUrl?: string;
   logoUrl?: string;
+  themeId?: string;
   force?: boolean;
   portalLoginHref?: string;
   whoTheyAre?: string;
@@ -136,6 +137,7 @@ async function syncOrganizationPortalSkin(
     accentColor?: string;
     logoUrl?: string;
     workspaceName?: string;
+    themeId?: string;
   },
 ): Promise<void> {
   if (!organizationId || organizationId.startsWith('org_')) return;
@@ -143,7 +145,8 @@ async function syncOrganizationPortalSkin(
   const accent = input.accentColor?.trim();
   const logo = input.logoUrl?.trim();
   const workspaceName = input.workspaceName?.trim();
-  if (!primary && !accent && !logo && !workspaceName) return;
+  const themeId = input.themeId?.trim();
+  if (!primary && !accent && !logo && !workspaceName && !themeId) return;
 
   const brandColors =
     primary || accent
@@ -157,6 +160,7 @@ async function syncOrganizationPortalSkin(
     ...(brandColors ? { brandColors } : {}),
     ...(logo ? { logo } : {}),
     ...(workspaceName ? { workspaceName } : {}),
+    ...(themeId ? { themeId } : {}),
   });
 }
 
@@ -259,7 +263,7 @@ function attachDirectorMeta(
     root: {
       ...(puckData.root || {}),
       props: rootProps,
-    },
+    } as Data['root'],
   };
 }
 
@@ -293,6 +297,7 @@ export async function publishWebsiteThroughDirectorGate(
       accentColor: input.accentColor,
       logoUrl: input.logoUrl,
       workspaceName: businessName,
+      themeId: input.themeId,
     });
     await ensureDefaultMemberHome({
       portalSlug: slug,
@@ -311,7 +316,7 @@ export async function publishWebsiteThroughDirectorGate(
       };
     }
 
-    const portalLogin = input.portalLoginHref || publicPortalLoginUrl();
+    const portalLogin = input.portalLoginHref || publicPortalLoginUrl(slug);
     const sitePath = sitePathForSlug(slug);
     const industry = input.industry?.trim();
     const existingWebsiteUrl = input.existingWebsiteUrl?.trim() || undefined;
@@ -390,6 +395,16 @@ export async function publishWebsiteThroughDirectorGate(
       directorReview,
       websiteSite: composed.websiteSite,
     });
+    const themedPuckData: Data = {
+      ...puckData,
+      root: {
+        ...(puckData.root || {}),
+        props: {
+          ...((puckData.root as { props?: Record<string, unknown> } | undefined)?.props || {}),
+          themeId: input.themeId?.trim() || 'ea-default-theme',
+        },
+      } as Data['root'],
+    };
 
     const now = new Date().toISOString();
     const id = existing?.id || `exp-home-${slug}-${Date.now().toString(36)}`;
@@ -399,7 +414,7 @@ export async function publishWebsiteThroughDirectorGate(
       portalSlug: slug,
       title: 'Home',
       status: 'published',
-      puckData,
+      puckData: themedPuckData,
       updatedAt: now,
       publishedAt: existing?.publishedAt || now,
       previewPath: previewPathForPage(slug, id),

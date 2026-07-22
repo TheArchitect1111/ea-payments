@@ -21,6 +21,7 @@ export type PortalWorkspaceLayoutProps = {
   pageTitle?: string;
   shellNavGroups: PortalSidebarNavGroup[];
   cssVars?: Record<string, string>;
+  themeId?: string;
   brandName?: string;
   workspaceName?: string;
   logoSrc?: string;
@@ -52,6 +53,7 @@ function PortalLayoutFrame({
   pageTitle,
   shellNavGroups,
   cssVars,
+  themeId = 'ea-default-theme',
   brandName,
   workspaceName,
   logoSrc,
@@ -85,7 +87,8 @@ function PortalLayoutFrame({
     return (
       <PortalChromeProvider value={chromeValue}>
         <div
-          className="ep-client-experience-shell cex-shell-frame ep-workspace-shell"
+          className={`ep-client-experience-shell cex-shell-frame ep-workspace-shell theme-${themeId}`}
+          data-workspace-theme={themeId}
           style={style}
         >
           <ClientExperienceNav
@@ -103,7 +106,11 @@ function PortalLayoutFrame({
   if (presentation === 'experience') {
     return (
       <PortalChromeProvider value={chromeValue}>
-        <div className="ep-client-experience-shell ep-workspace-shell" style={style}>
+        <div
+          className={`ep-client-experience-shell ep-workspace-shell theme-${themeId}`}
+          data-workspace-theme={themeId}
+          style={style}
+        >
           {children}
         </div>
       </PortalChromeProvider>
@@ -112,7 +119,11 @@ function PortalLayoutFrame({
 
   return (
     <PortalChromeProvider value={chromeValue}>
-      <div className="ep-tailadmin ep-workspace-shell" style={style}>
+      <div
+        className={`ep-tailadmin ep-workspace-shell theme-${themeId}`}
+        data-workspace-theme={themeId}
+        style={style}
+      >
         <PortalSidebar
           slug={slug}
           active={active}

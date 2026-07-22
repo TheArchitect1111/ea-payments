@@ -1,6 +1,9 @@
 export type ThemeAppearance = 'light' | 'dark';
 export type ThemeDensity = 'compact' | 'comfortable' | 'spacious';
 
+import { amandaEditorialTheme } from './themes/amanda-editorial/theme';
+export * from './themes/amanda-editorial';
+
 /** Brand / workspace theme contract for multi-tenant shells. */
 export type WorkspaceTheme = {
   id: string;
@@ -75,6 +78,7 @@ export const defaultWorkspaceTheme: WorkspaceTheme = {
 /** Seed themes for known EA clients (from workspace clientConfigs). */
 export const WORKSPACE_THEMES: Record<string, WorkspaceTheme> = {
   [EA_DEFAULT_THEME_ID]: defaultWorkspaceTheme,
+  [amandaEditorialTheme.id]: amandaEditorialTheme,
   'cpr-theme': {
     id: 'cpr-theme',
     organizationId: 'cpr',

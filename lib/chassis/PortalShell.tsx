@@ -128,6 +128,7 @@ export async function PortalShell({
       pageTitle={resolvedTitle}
       shellNavGroups={effectivePresentation === 'client' ? [] : chrome.shellNavGroups}
       cssVars={chrome.cssVars}
+      themeId={chrome.themeId}
       brandName={chrome.brandName}
       workspaceName={
         effectivePresentation === 'client' ? 'Client Experience' : chrome.workspaceName
