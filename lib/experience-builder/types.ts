@@ -14,9 +14,9 @@ export interface ExperiencePage {
   previewPath: string;
 }
 
-export function createEmptyPuckData(title = 'New experience'): Data {
+export function createEmptyPuckData(title = 'New experience', themeId = 'ea-default-theme'): Data {
   return {
-    root: { props: { title } },
+    root: { props: { title, themeId } } as Data['root'],
     content: [
       {
         type: 'EAHero',

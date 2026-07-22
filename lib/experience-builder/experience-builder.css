@@ -358,6 +358,54 @@
   text-align: center;
 }
 
+/* Amanda Editorial is a presentation-only overlay. Existing Puck blocks and CTA hrefs remain intact. */
+.amanda-editorial-theme .eb-block {
+  --ea-navy: #171512;
+  --ea-gold: #b9894f;
+  --ea-cream: #f7f3ec;
+  --ea-text: #171512;
+  --ea-muted: #716b63;
+  --ea-border: #ddd3c5;
+  --ea-shadow: 0 28px 80px rgba(42, 32, 20, 0.12);
+  font-family: 'DM Sans', 'Avenir Next', Avenir, system-ui, sans-serif;
+}
+.amanda-editorial-theme .eb-hero {
+  min-height: min(86svh, 920px);
+  background: #fffcf7;
+  color: #171512;
+  align-items: center;
+  padding: 8rem clamp(1.25rem, 7vw, 7.5rem) 5rem;
+}
+.amanda-editorial-theme .eb-hero-media::after {
+  background: linear-gradient(90deg, rgba(247,243,236,.98), rgba(247,243,236,.88) 38%, rgba(247,243,236,.05) 70%);
+}
+.amanda-editorial-theme .eb-hero-copy { margin: 0; max-width: min(44rem, 52vw); }
+.amanda-editorial-theme .eb-hero-title,
+.amanda-editorial-theme .eb-section-title {
+  font-family: 'Cormorant Garamond', 'Iowan Old Style', Baskerville, Georgia, serif;
+  font-weight: 400;
+  letter-spacing: -.035em;
+}
+.amanda-editorial-theme .eb-hero-title { font-size: clamp(3.3rem, 6.2vw, 7rem); line-height: .94; }
+.amanda-editorial-theme .eb-hero-subtitle { margin: 1.6rem 0; color: #716b63; line-height: 1.75; }
+.amanda-editorial-theme .eb-hero-eyebrow,
+.amanda-editorial-theme .eb-section-label { color: #b9894f; letter-spacing: .22em; font-weight: 600; }
+.amanda-editorial-theme .eb-btn { border-radius: 0; min-height: 48px; padding-inline: 1.65rem; text-transform: uppercase; letter-spacing: .14em; font-size: .68rem; }
+.amanda-editorial-theme .eb-btn-primary { background: #171512; color: #fff; }
+.amanda-editorial-theme .eb-btn-secondary { color: #171512; border: 0; border-bottom: 1px solid #b9894f; background: transparent; }
+.amanda-editorial-theme .eb-section { padding: clamp(4.5rem, 9vw, 9rem) clamp(1.25rem, 4vw, 4.5rem); background: #f7f3ec; }
+.amanda-editorial-theme .eb-section-inner { max-width: 1440px; }
+.amanda-editorial-theme .eb-section-title { font-size: clamp(2.6rem, 5vw, 5rem); line-height: 1; }
+.amanda-editorial-theme .eb-feature-card,
+.amanda-editorial-theme .eb-metric { border-radius: 0; box-shadow: none; border-width: 0 0 1px; background: transparent; padding: 1.5rem 0; }
+.amanda-editorial-theme .eb-cta-band { background: #171512; padding: clamp(4.5rem, 8vw, 8rem) clamp(1.25rem, 7vw, 7.5rem); }
+.amanda-editorial-theme .eb-cta-band .eb-section-title { color: #fff; }
+@media (max-width: 800px) {
+  .amanda-editorial-theme .eb-hero { min-height: 760px; align-items: flex-end; padding: 24rem 1.25rem 4rem; }
+  .amanda-editorial-theme .eb-hero-media::after { background: linear-gradient(180deg, rgba(247,243,236,.04) 25%, rgba(247,243,236,.98) 66%); }
+  .amanda-editorial-theme .eb-hero-copy { max-width: none; }
+}
+
 .eb-cta-band .eb-section-title {
   color: #fff;
 }

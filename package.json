@@ -19,6 +19,7 @@
     "verify:deploy": "node scripts/ensure-production-build.mjs && node scripts/test-portal-nav-resolver.mjs && node scripts/test-experience-registry.mjs && node scripts/test-capability-framework.mjs && node scripts/test-website-portal-starter.mjs && node scripts/test-portal-skin-pack.mjs && node scripts/test-portal-hub-realism.mjs && node scripts/test-ops-scale-pack.mjs && npm run test:ctp:spine && npm run test:smoke",
     "test:capability-framework": "node scripts/test-capability-framework.mjs",
     "test:website-portal-starter": "node scripts/test-website-portal-starter.mjs",
+    "test:amanda-editorial-theme": "node scripts/test-amanda-editorial-theme.mjs",
     "sync-chassis": "node scripts/sync-portal-chassis.mjs",
     "sync-premium": "node scripts/sync-premium-chassis.mjs",
     "sync-landing": "node scripts/sync-landing-chassis.mjs",
