@@ -16,6 +16,7 @@ export const EXPERIENCE_LAUNCH_PRESETS: ExperienceLaunchPreset[] = [
       portalSlug: 'amanda-catherine',
       businessName: 'Amanda Catherine',
       organizationName: 'Amanda Catherine',
+      email: 'amandacatherinec@gmail.com',
       themeId: 'amanda-editorial',
       headline: 'Turn your gifts into purpose, impact, and sustainable opportunity.',
       tagline: 'Helping people transform creativity, wellness, education, and empowerment into meaningful work.',

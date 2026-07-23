@@ -7,6 +7,7 @@ import PortalCtpDesignStudioForm from '@/app/portal/components/PortalCtpDesignSt
 import { buildCtpOpportunityDashboardView } from '@/lib/ctp-opportunity-view';
 import { buildCtpPortalStatusView } from '@/lib/ctp-portal-status';
 import { getCtpSubmissionForPortal } from '@/lib/ctp-submissions';
+import { resolvePortalWorkspaceChrome } from '@/lib/platform/portal-workspace';
 import '../ea-portal.css';
 
 export const dynamic = 'force-dynamic';
@@ -37,6 +38,7 @@ export default async function PortalCtpOpportunityDashboardPage({
     .trim()
     .split(/\s+/)[0];
   const view = buildCtpOpportunityDashboardView(submission, slug, { firstName });
+  const chrome = await resolvePortalWorkspaceChrome(slug);
   const statusView = buildCtpPortalStatusView(submission);
   const discovery = (submission.discoveryAnswers ?? {}) as Record<string, unknown>;
 
@@ -69,8 +71,14 @@ export default async function PortalCtpOpportunityDashboardPage({
       clientNavActive="journey"
       firstName={firstName}
       pageTitle="Your Journey"
+      chrome={chrome}
     >
-      <ClientExperience view={view} slug={slug} studio={studio} />
+      <ClientExperience
+        view={view}
+        slug={slug}
+        studio={studio}
+        themeId={chrome.themeId}
+      />
     </PortalShell>
   );
 }

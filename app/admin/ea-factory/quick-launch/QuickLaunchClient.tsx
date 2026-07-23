@@ -7,6 +7,8 @@ type LaunchResult = {
   portalUrl?: string;
   portalLoginUrl?: string;
   adminUrl?: string;
+  websiteStatus?: 'quarantined' | 'live';
+  tempCredentials?: string;
 };
 
 export default function QuickLaunchClient() {
@@ -34,7 +36,11 @@ export default function QuickLaunchClient() {
         return;
       }
       setResult(payload);
-      setMessage('Amanda Catherine Editorial is live.');
+      setMessage(
+        payload.websiteStatus === 'quarantined'
+          ? 'Amanda’s portal is ready. The website remains quarantined.'
+          : 'Amanda Catherine Editorial is live.',
+      );
     } catch {
       setMessage('The launch request could not be completed.');
     } finally {
@@ -95,6 +101,14 @@ export default function QuickLaunchClient() {
                 </a>
               ) : null,
             )}
+          </div>
+        ) : null}
+        {result?.tempCredentials ? (
+          <div className="mt-5 border border-[#D9CFC1] bg-[#FBF8F3] p-5">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#B9894D]">
+              Portal credentials
+            </p>
+            <p className="mt-2 text-sm leading-6 text-[#665F57]">{result.tempCredentials}</p>
           </div>
         ) : null}
       </section>
