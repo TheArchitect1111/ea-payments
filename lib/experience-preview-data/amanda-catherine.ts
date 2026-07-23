@@ -6,7 +6,7 @@ export const amandaWebsitePreview: AmandaWebsiteProps = {
   hero: {
     eyebrow: 'Helping people', title: 'Turn their gifts into purpose,', accent: 'impact, and sustainable opportunity.',
     body: 'Through creativity, wellness, education, and empowerment, we build lives and businesses that make a difference.',
-    image: '/home/scene-creator.jpg', quote: 'You were created for more than you can imagine.', action: { label: 'Find Your Path', href: '#experiences' },
+    image: '/images/ctp-editorial/05-calm-morning-owner.png', quote: 'You were created for more than you can imagine.', action: { label: 'Find Your Path', href: '#experiences' },
   },
   paths: [
     { number: '01', script: 'Create', label: 'Empower Art Collective', body: 'For artists and creatives building sustainable careers.', href: '#', image: '/home/scene-creator.jpg' },
