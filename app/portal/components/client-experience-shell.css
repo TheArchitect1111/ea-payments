@@ -1,14 +1,15 @@
-/* Client Experience shell — no Executive Workspace chrome */
+/* Client Experience shell — quiet chrome, premium atmosphere */
 
 .ep-client-experience-shell.cex-shell-frame {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   background:
-    radial-gradient(1200px 600px at 10% -10%, rgba(201, 162, 39, 0.12), transparent 55%),
-    radial-gradient(900px 500px at 90% 0%, rgba(15, 36, 66, 0.08), transparent 50%),
-    linear-gradient(180deg, #f7f4ee 0%, #efe9df 100%);
-  color: #0f2442;
+    radial-gradient(1100px 520px at 8% -8%, rgba(184, 149, 47, 0.1), transparent 55%),
+    radial-gradient(900px 480px at 92% 0%, rgba(15, 36, 66, 0.05), transparent 52%),
+    linear-gradient(180deg, #f8f5ef 0%, #f1ebe1 100%);
+  color: #101828;
+  font-family: var(--cex-font-sans), 'Segoe UI', system-ui, sans-serif;
 }
 
 .ep-client-experience-shell.cex-shell-frame[data-workspace-theme='amanda-editorial'] {
@@ -41,15 +42,16 @@
   position: sticky;
   top: 0;
   z-index: 40;
-  border-bottom: 1px solid rgba(15, 36, 66, 0.1);
-  background: rgba(247, 244, 238, 0.92);
-  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(16, 24, 40, 0.06);
+  background: rgba(248, 245, 239, 0.82);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
 }
 
 .cex-shell-nav-inner {
   max-width: 1120px;
   margin: 0 auto;
-  padding: 0.75rem 1.25rem;
+  padding: 0.7rem 1.35rem;
   display: flex;
   align-items: center;
   gap: 1rem;
@@ -67,32 +69,32 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2rem;
-  height: 2rem;
+  width: 1.85rem;
+  height: 1.85rem;
   border-radius: 999px;
-  background: #0f2442;
-  color: #c9a227;
-  font-size: 0.7rem;
+  background: #101828;
+  color: #d4b45a;
+  font-size: 0.62rem;
   font-weight: 800;
   letter-spacing: 0.04em;
 }
 
 .cex-shell-brand-text {
-  font-size: 0.82rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
+  font-size: 0.78rem;
+  font-weight: 650;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #0f2442;
+  color: rgba(16, 24, 40, 0.55);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 12rem;
+  max-width: 11rem;
 }
 
 .cex-shell-links {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.35rem;
+  gap: 0.2rem;
   flex: 1;
   justify-content: center;
 }
@@ -100,35 +102,99 @@
 .cex-shell-link {
   display: inline-flex;
   align-items: center;
-  padding: 0.45rem 0.75rem;
+  justify-content: center;
+  min-height: 2.4rem;
+  padding: 0.4rem 0.85rem;
   border-radius: 999px;
   font-size: 0.88rem;
   font-weight: 600;
-  color: rgba(15, 36, 66, 0.72);
+  color: rgba(16, 24, 40, 0.55);
   text-decoration: none;
   transition: background 160ms ease, color 160ms ease;
 }
 
 .cex-shell-link:hover {
-  color: #0f2442;
-  background: rgba(15, 36, 66, 0.06);
+  color: #101828;
+  background: rgba(16, 24, 40, 0.04);
+}
+
+.cex-shell-link:focus-visible {
+  outline: 2px solid #b8952f;
+  outline-offset: 2px;
 }
 
 .cex-shell-link-active {
-  color: #0f2442;
-  background: rgba(201, 162, 39, 0.22);
+  color: #101828;
+  background: rgba(184, 149, 47, 0.18);
 }
 
-.cex-shell-logout {
+.cex-shell-link-quiet {
+  color: rgba(16, 24, 40, 0.38);
+  font-weight: 550;
+}
+
+.cex-shell-account {
+  position: relative;
   margin-left: auto;
-  font-size: 0.82rem;
+}
+
+.cex-shell-account-summary {
+  list-style: none;
+  cursor: pointer;
+  min-height: 2.4rem;
+  min-width: 2.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
   font-weight: 600;
-  color: rgba(15, 36, 66, 0.65);
+  color: rgba(16, 24, 40, 0.45);
+  transition: color 160ms ease, background 160ms ease;
+}
+
+.cex-shell-account-summary::-webkit-details-marker {
+  display: none;
+}
+
+.cex-shell-account-summary:hover {
+  color: #101828;
+  background: rgba(16, 24, 40, 0.04);
+}
+
+.cex-shell-account-summary:focus-visible {
+  outline: 2px solid #b8952f;
+  outline-offset: 2px;
+}
+
+.cex-shell-account-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.35rem);
+  min-width: 9.5rem;
+  padding: 0.4rem;
+  border-radius: 0.75rem;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(16, 24, 40, 0.08);
+  box-shadow: 0 16px 36px rgba(16, 24, 40, 0.1);
+  z-index: 50;
+}
+
+.cex-shell-account-logout {
+  display: flex;
+  align-items: center;
+  min-height: 2.5rem;
+  padding: 0.45rem 0.75rem;
+  border-radius: 0.55rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #101828;
   text-decoration: none;
 }
 
-.cex-shell-logout:hover {
-  color: #0f2442;
+.cex-shell-account-logout:hover {
+  background: rgba(16, 24, 40, 0.05);
 }
 
 .cex-shell-main {
@@ -137,30 +203,130 @@
 }
 
 .cex-shell-main > .ep-main {
-  max-width: 960px;
+  max-width: 720px;
   margin: 0 auto;
-  padding: 1.5rem 1.25rem 3rem;
+  padding: 2rem 1.35rem 4rem;
 }
 
 @media (max-width: 720px) {
-  .cex-shell-nav-inner {
-    padding: 0.65rem 0.85rem;
+  .cex-shell-main {
+    order: 1;
   }
 
-  .cex-shell-brand-text {
+  .cex-shell-nav {
+    position: sticky;
+    top: auto;
+    bottom: 0;
+    border-bottom: none;
+    border-top: 1px solid rgba(16, 24, 40, 0.08);
+    order: 2;
+    background: rgba(248, 245, 239, 0.94);
+  }
+
+  .cex-shell-nav-inner {
+    padding: 0.5rem 0.65rem calc(0.5rem + env(safe-area-inset-bottom, 0px));
+    gap: 0.4rem;
+  }
+
+  .cex-shell-brand {
     display: none;
   }
 
   .cex-shell-links {
-    order: 3;
     width: 100%;
-    justify-content: flex-start;
+    justify-content: space-between;
     overflow-x: auto;
     flex-wrap: nowrap;
-    padding-bottom: 0.15rem;
+    gap: 0.15rem;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .cex-shell-links::-webkit-scrollbar {
+    display: none;
   }
 
   .cex-shell-link {
     white-space: nowrap;
+    flex: 1 0 auto;
+    min-width: 4.25rem;
+    min-height: 2.75rem;
+    padding: 0.55rem 0.55rem;
+    font-size: 0.8rem;
   }
+
+  .cex-shell-link-quiet {
+    opacity: 0.75;
+  }
+
+  .cex-shell-account {
+    position: fixed;
+    top: 0.65rem;
+    right: 0.75rem;
+    margin-left: 0;
+    z-index: 45;
+  }
+
+  .cex-shell-account-summary {
+    min-height: 2.75rem;
+    background: rgba(248, 245, 239, 0.92);
+    border: 1px solid rgba(16, 24, 40, 0.08);
+    box-shadow: 0 8px 20px rgba(16, 24, 40, 0.06);
+  }
+
+  .cex-shell-account-menu {
+    top: calc(100% + 0.4rem);
+  }
+
+  .cex-shell-main > .ep-main {
+    padding: 3.25rem 1.1rem 1.75rem;
+  }
+}
+
+/* Help FAQ (in-page on Help — not a floating control) */
+.cex-help-faq {
+  scroll-margin-top: 5rem;
+}
+
+.cex-help-faq .cex-help-drawer-list {
+  margin-top: 1rem;
+}
+
+.cex-help-drawer-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.cex-help-drawer-item {
+  border: 1px solid rgba(16, 24, 40, 0.08);
+  border-radius: 0.85rem;
+  background: rgba(255, 253, 248, 0.9);
+  padding: 0.15rem 0.85rem;
+}
+
+.cex-help-drawer-item summary {
+  cursor: pointer;
+  list-style: none;
+  font-weight: 650;
+  font-size: 0.92rem;
+  color: #101828;
+  padding: 0.75rem 0;
+}
+
+.cex-help-drawer-item summary::-webkit-details-marker {
+  display: none;
+}
+
+.cex-help-drawer-item summary:focus-visible {
+  outline: 2px solid rgba(184, 149, 47, 0.55);
+  outline-offset: 2px;
+  border-radius: 0.35rem;
+}
+
+.cex-help-drawer-item p {
+  margin: 0 0 0.85rem;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: rgba(16, 24, 40, 0.72);
 }

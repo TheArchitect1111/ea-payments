@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import type { EAGuideAction } from '@/lib/ea-guide';
 import { applyDiscoverSignal, buildAdvisorBrief } from '@/lib/assistant/brief';
-import { ASSISTANT_LABELS, SURFACE_EYEBROW } from '@/lib/assistant/constants';
+import { ASSISTANT_LABELS, CX_ASSISTANT_LABELS, CX_SURFACE_EYEBROW, SURFACE_EYEBROW } from '@/lib/assistant/constants';
 import { trackAssistantEvent } from '@/lib/assistant/instrumentation';
 import { applyLiveSignals, type LiveBriefSignals } from '@/lib/assistant/signals';
 import type {
@@ -20,6 +20,7 @@ import AssistantDetails from './AssistantDetails';
 import AssistantPanel from './AssistantPanel';
 import AssistantTrigger from './AssistantTrigger';
 import GetGuidanceFlow from './GetGuidanceFlow';
+import { AssistantLabelsProvider } from './assistant-labels';
 import './assistant.css';
 
 type EAAssistantProps = {
@@ -85,6 +86,27 @@ export default function EAAssistant({ surface, workspaceAiContext }: EAAssistant
       if (!slug || ['login', 'register', 'forgot-password', 'reset-password'].includes(slug)) return;
       if (pathname.includes('/updates')) return;
 
+      // Client Experience — never push Simplifi capture language (path or shell).
+      // Prefer trusted shell marker (slug-matched) over collapsing detection to /ctp only.
+      const clientShell = typeof document !== 'undefined'
+        ? document.querySelector('[data-ea-experience="client"]')
+        : null;
+      const shellSlug = clientShell?.getAttribute('data-portal-slug') || '';
+      // Tenant isolation: shell marker counts only when it matches this portal slug.
+      const clientShellTrusted = Boolean(clientShell) && shellSlug === slug;
+      const onCtpPath = pathname.includes('/ctp/') || pathname.endsWith('/ctp');
+      if (onCtpPath || clientShellTrusted) {
+        setLiveSignals({
+          kind: 'portal',
+          slug,
+          captureCount: 0,
+          opportunityCount: 0,
+          experienceMode: 'ctp',
+          pathname,
+        });
+        return;
+      }
+
       try {
         const response = await fetch('/api/portal/captures', { cache: 'no-store' });
         if (!response.ok) return;
@@ -98,6 +120,7 @@ export default function EAAssistant({ surface, workspaceAiContext }: EAAssistant
           slug,
           captureCount: captures.length,
           opportunityCount,
+          experienceMode: 'executive',
         });
       } catch {
         // Keep static brief when live data is unavailable.
@@ -275,7 +298,10 @@ export default function EAAssistant({ surface, workspaceAiContext }: EAAssistant
       const assistantMessage: GuidanceMessage = {
         id: `assistant-${Date.now()}`,
         role: 'assistant',
-        content: ASSISTANT_LABELS.askFailure,
+        content:
+          liveSignals?.kind === 'portal' && liveSignals.experienceMode === 'ctp'
+            ? CX_ASSISTANT_LABELS.askFailure
+            : ASSISTANT_LABELS.askFailure,
       };
       setMessages((prev) => [...prev, assistantMessage]);
       trackAssistantEvent({
@@ -289,57 +315,65 @@ export default function EAAssistant({ surface, workspaceAiContext }: EAAssistant
       });
       return assistantMessage;
     }
-  }, [pathname, userId, brief.pageContext.organizationId, surface]);
+  }, [pathname, userId, brief.pageContext.organizationId, surface, liveSignals]);
 
   if (hideOnSimplifi) return null;
 
+  const isCtpExperience =
+    liveSignals?.kind === 'portal' && liveSignals.experienceMode === 'ctp';
+  const labels = isCtpExperience ? CX_ASSISTANT_LABELS : ASSISTANT_LABELS;
+  const eyebrow =
+    isCtpExperience && surface === 'portal' ? CX_SURFACE_EYEBROW : SURFACE_EYEBROW[surface];
+
   const panelTitle =
     level === 'guidance'
-      ? ASSISTANT_LABELS.getGuidance
+      ? labels.getGuidance
       : level === 'details'
-        ? ASSISTANT_LABELS.viewDetails
-        : ASSISTANT_LABELS.briefTitle;
+        ? labels.viewDetails
+        : labels.briefTitle;
 
   return (
-    <div className="ea-assistant-root" data-ea-assistant={surface}>
-      <AssistantPanel
-        open={open}
-        title={panelTitle}
-        eyebrow={SURFACE_EYEBROW[surface]}
-        subtitle={brief.greeting}
-        onClose={handleClose}
-      >
-        {level === 'brief' ? (
-          <AdvisorBrief
-            brief={brief}
-            onAction={handleAction}
-            onGetGuidance={() => {
-              trackAssistantEvent({
-                event: 'assistant.guidance_selected',
-                surface,
-                pathname,
-                userId,
-                organizationId: brief.pageContext.organizationId,
-              });
-              setLevel('guidance');
-            }}
-            onViewDetails={() => setLevel('details')}
-          />
-        ) : null}
-        {level === 'guidance' ? (
-          <GetGuidanceFlow
-            pageContext={brief.pageContext}
-            messages={messages}
-            onBack={() => setLevel('brief')}
-            onAsk={handleAsk}
-          />
-        ) : null}
-        {level === 'details' ? (
-          <AssistantDetails details={brief.details} onBack={() => setLevel('brief')} />
-        ) : null}
-      </AssistantPanel>
+    <AssistantLabelsProvider labels={labels}>
+      <div className="ea-assistant-root" data-ea-assistant={surface}>
+        <AssistantPanel
+          open={open}
+          title={panelTitle}
+          eyebrow={eyebrow}
+          subtitle={brief.greeting}
+          onClose={handleClose}
+        >
+          {level === 'brief' ? (
+            <AdvisorBrief
+              brief={brief}
+              onAction={handleAction}
+              onGetGuidance={() => {
+                trackAssistantEvent({
+                  event: 'assistant.guidance_selected',
+                  surface,
+                  pathname,
+                  userId,
+                  organizationId: brief.pageContext.organizationId,
+                });
+                setLevel('guidance');
+              }}
+              onViewDetails={() => setLevel('details')}
+            />
+          ) : null}
+          {level === 'guidance' ? (
+            <GetGuidanceFlow
+              pageContext={brief.pageContext}
+              messages={messages}
+              onBack={() => setLevel('brief')}
+              onAsk={handleAsk}
+            />
+          ) : null}
+          {level === 'details' ? (
+            <AssistantDetails details={brief.details} onBack={() => setLevel('brief')} />
+          ) : null}
+        </AssistantPanel>
 
-      <AssistantTrigger open={open} showBadge={showBadge} onToggle={handleToggle} />
-    </div>
+        <AssistantTrigger open={open} showBadge={showBadge} onToggle={handleToggle} />
+      </div>
+    </AssistantLabelsProvider>
   );
 }

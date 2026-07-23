@@ -89,6 +89,8 @@ function PortalLayoutFrame({
         <div
           className={`ep-client-experience-shell cex-shell-frame ep-workspace-shell theme-${themeId}`}
           data-workspace-theme={themeId}
+          data-ea-experience="client"
+          data-portal-slug={slug}
           style={style}
         >
           <ClientExperienceNav

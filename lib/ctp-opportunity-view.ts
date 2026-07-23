@@ -27,6 +27,7 @@ import {
   type ConsultingLearnedCard,
 } from '@/lib/ctp-consulting-narrative';
 import type { DigitalPresenceScores } from '@/lib/ctp-digital-presence';
+import { GUIDE_LIFECYCLE_STAGES } from '@/lib/ctp-guide-stage-engine';
 
 function isPresenceTrack(clientType: CtpClientType | undefined | null): boolean {
   return clientType === 'website' || clientType === 'website_portal';
@@ -518,8 +519,8 @@ function buildProjectPreview(submission: CtpSubmission): ProjectPreviewBlock[] {
   ) {
     blocks.push({
       id: 'portal',
-      title: 'Management Portal',
-      pages: ['Dashboard', 'Updates', 'Resources', 'Support'],
+      title: 'Client Experience',
+      pages: ['Your Project', 'Documents', 'Contact', 'Help'],
     });
   }
 
@@ -534,44 +535,20 @@ function buildProjectPreview(submission: CtpSubmission): ProjectPreviewBlock[] {
   return blocks;
 }
 
+/** Progress strip = Guide lifecycle (same SSOT as Journey / Progress home). */
 function buildProgress(submission: CtpSubmission): OpportunityProgressStep[] {
-  const hasSnapshot = Boolean(submission.executiveSnapshot || submission.executiveScoring);
-  const hasRecs = Boolean(
-    submission.intakeAnalysis?.opportunities?.length ||
-      submission.recommendations ||
-      submission.executiveScoring?.prioritizedNextSteps?.length,
-  );
-  const studioDone =
-    submission.studioStatus === 'Ready For Review' || submission.studioStatus === 'Completed';
-  const reviewDone = Boolean(submission.reviewScheduledAt) || submission.status === 'Review Scheduled';
-  const buildDone = submission.status === 'Completed' || Boolean(submission.siteUrl);
-  const launched = submission.status === 'Completed';
+  const current = submission.guideStage ?? 'Welcome';
+  const idx = GUIDE_LIFECYCLE_STAGES.indexOf(current);
+  const activeIdx = idx >= 0 ? idx : 0;
 
-  const steps: Array<{ id: string; label: string; done: boolean; active: boolean }> = [
-    { id: 'assessment', label: 'Assessment', done: true, active: false },
-    { id: 'analysis', label: 'Analysis', done: true, active: false },
-    { id: 'recommendations', label: 'Recommendations', done: hasRecs, active: hasSnapshot && !hasRecs },
-    {
-      id: 'planning',
-      label: 'Project Planning',
-      done: studioDone || submission.workspaceStatus === 'Active',
-      active: hasRecs && !studioDone && !reviewDone,
-    },
-    {
-      id: 'review',
-      label: 'Opportunity Review',
-      done: reviewDone,
-      active: !reviewDone && (hasRecs || submission.workspaceStatus === 'Active'),
-    },
-    { id: 'build', label: 'Build', done: buildDone, active: reviewDone && !buildDone },
-    { id: 'launch', label: 'Launch', done: launched, active: buildDone && !launched },
-  ];
-
-  return steps.map((step) => ({
-    id: step.id,
-    label: step.label,
-    state: step.done ? 'complete' : step.active ? 'active' : 'pending',
-    fill: step.done ? 100 : step.active ? 55 : 0,
+  return GUIDE_LIFECYCLE_STAGES.map((stage, i) => ({
+    id: stage.toLowerCase(),
+    label: stage,
+    state: (i < activeIdx ? 'complete' : i === activeIdx ? 'active' : 'pending') as
+      | 'complete'
+      | 'active'
+      | 'pending',
+    fill: i < activeIdx ? 100 : i === activeIdx ? 55 : 0,
   }));
 }
 
@@ -631,7 +608,7 @@ export function buildCtpOpportunityDashboardView(
   const utilities: Array<{ label: string; href: string }> = [
     { label: 'Your Project', href: designStudioPath(slug) },
     { label: 'Documents', href: `/portal/${slug}/ctp/documents` },
-    { label: 'Messages', href: `/portal/${slug}/ctp/messages` },
+    { label: 'Contact', href: `/portal/${slug}/ctp/messages` },
   ];
   // Never invent Schedule when Guide says nothing is required.
   if (!guide.nothingRequired && guideView.nba.kind === 'meeting') {

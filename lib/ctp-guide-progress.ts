@@ -98,7 +98,8 @@ export const GUIDE_STAGE_NARRATIVES: Record<GuideLifecycleStage, GuideStageNarra
     commonQuestions: [
       {
         question: 'Do I need to do anything right now?',
-        answer: 'Start with Your Journey, then return here — we’ll always show one clear next step.',
+        answer:
+          'Open Journey in the menu for a short orientation, then return to Your Project — we’ll always show one clear next step.',
       },
       {
         question: 'Is my project already underway?',
@@ -224,7 +225,7 @@ export const GUIDE_STAGE_NARRATIVES: Record<GuideLifecycleStage, GuideStageNarra
     commonQuestions: [
       {
         question: 'Should I check in every day?',
-        answer: 'No. We’ll notify you when it’s your turn. Checking Progress here is enough.',
+        answer: 'No. We’ll notify you when it’s your turn. Checking Your Project here is enough.',
       },
       {
         question: 'What if I think of new content?',
@@ -287,7 +288,7 @@ export const GUIDE_STAGE_NARRATIVES: Record<GuideLifecycleStage, GuideStageNarra
     commonQuestions: [
       {
         question: 'How do I get help?',
-        answer: 'Use Support or Messages — a real person on your team will respond.',
+        answer: 'Use Help or Contact — a real person on your team will respond.',
       },
       {
         question: 'What if we want to grow further?',
@@ -320,16 +321,16 @@ function celebrationForStage(
 
 function milestoneTitle(stage: GuideLifecycleStage): string {
   const map: Record<GuideLifecycleStage, string> = {
-    Welcome: 'Welcome Complete',
-    Discovery: 'Discovery Complete',
-    Strategy: 'Strategy Complete',
-    Proposal: 'Proposal Delivered',
-    Agreement: 'Agreement Signed',
-    Design: 'Design Complete',
-    Build: 'Build Complete',
-    Review: 'Review Complete',
-    Launch: 'Launch Complete',
-    Care: 'Care Underway',
+    Welcome: 'Your project home is open',
+    Discovery: 'We’ve learned what matters about your organization',
+    Strategy: 'Your priorities are clear',
+    Proposal: 'Your proposal is ready',
+    Agreement: 'You’re confirmed — we can build with confidence',
+    Design: 'Your creative direction is in place',
+    Build: 'Your website foundation is assembled',
+    Review: 'Your review shaped the finish',
+    Launch: 'Your new website is live',
+    Care: 'We’re still with you',
   };
   return map[stage];
 }
@@ -345,54 +346,54 @@ function buildMilestone(
     Pick<GuideMilestone, 'whatHappened' | 'whyItMatters' | 'whatItUnlocked'>
   > = {
     Welcome: {
-      whatHappened: 'Your project home opened and you were connected to your experience.',
+      whatHappened: 'Your project home opened and you were connected to your guide',
       whyItMatters: 'You always have one clear place to see where things stand.',
-      whatItUnlocked: 'Discovery — learning your business with context.',
+      whatItUnlocked: 'every next conversation about your organization',
     },
     Discovery: {
-      whatHappened: 'We captured what matters about your business and how you show up today.',
+      whatHappened: 'We’ve completed our research into your organization',
       whyItMatters: 'Recommendations stay grounded in your real operations.',
-      whatItUnlocked: 'Strategy — priorities worth your time.',
+      whatItUnlocked: 'every design and strategy decision',
     },
     Strategy: {
-      whatHappened: 'We defined the priorities that create the most capacity for you.',
-      whyItMatters: 'You avoid scattered work and stay focused on what moves the needle.',
-      whatItUnlocked: 'Proposal — a clear plan and investment.',
+      whatHappened: 'We confirmed the priorities that matter most for you',
+      whyItMatters: 'You stay focused on what moves the needle.',
+      whatItUnlocked: 'a clear proposal shaped around those priorities',
     },
     Proposal: {
-      whatHappened: 'Your plan and investment details were delivered for review.',
+      whatHappened: 'Your proposal is ready — it reflects everything we’ve learned about your organization',
       whyItMatters: 'You can decide with clarity instead of guessing.',
-      whatItUnlocked: 'Agreement — confirmation to begin Design.',
+      whatItUnlocked: 'confirmation so Design can begin',
     },
     Agreement: {
-      whatHappened: 'You’re confirmed so we can build with confidence.',
+      whatHappened: 'You’re confirmed so we can build with confidence',
       whyItMatters: 'Momentum stays intact and scope stays clear.',
-      whatItUnlocked: 'Design — brand direction and first concepts.',
+      whatItUnlocked: 'brand direction and first concepts',
     },
     Design: {
-      whatHappened: 'Brand direction and materials are in place for concepts.',
+      whatHappened: 'Your creative direction and materials are in place',
       whyItMatters: 'What we build will look and sound like you.',
-      whatItUnlocked: 'Build — crafting your website and portal.',
+      whatItUnlocked: 'the craft of your website and portal',
     },
     Build: {
-      whatHappened: 'Your website and portal foundation were assembled.',
+      whatHappened: 'Your website and portal foundation were assembled',
       whyItMatters: 'There’s something real to review — not just a plan.',
-      whatItUnlocked: 'Review — your feedback shapes the finish.',
+      whatItUnlocked: 'your review before launch',
     },
     Review: {
-      whatHappened: 'You reviewed the work and shared what to refine.',
+      whatHappened: 'Your review shaped the final refinements',
       whyItMatters: 'Launch reflects your standards, not assumptions.',
-      whatItUnlocked: 'Launch — going live with confidence.',
+      whatItUnlocked: 'a confident go-live',
     },
     Launch: {
-      whatHappened: 'Your presence is live for customers to meet.',
+      whatHappened: 'Your new website is now live and ready to welcome visitors',
       whyItMatters: 'The work is in the world — not stuck in drafts.',
-      whatItUnlocked: 'Care — ongoing support after go-live.',
+      whatItUnlocked: 'ongoing care whenever you need us',
     },
     Care: {
-      whatHappened: 'You’re in ongoing care with your team.',
+      whatHappened: 'You’re in ongoing care with your Efficiency Architects team',
       whyItMatters: 'Launch is a beginning, not a goodbye.',
-      whatItUnlocked: 'Continued help whenever you need it.',
+      whatItUnlocked: 'continued help whenever you need it',
     },
   };
 
@@ -421,7 +422,10 @@ function confidenceForStage(
     if (stage === 'Discovery' || stage === 'Strategy') {
       return 'We’re already preparing the next phase. We’ll ask only when something truly needs you.';
     }
-    return 'Nothing is needed from you today. Our team is advancing the project.';
+    if (stage === 'Care') {
+      return 'You’re live — and we’re still with you. Nothing is needed from you today.';
+    }
+    return 'Nothing is needed from you today. Rest easy — our team is advancing the project.';
   }
 
   if (view.reviewScheduledAt && (stage === 'Strategy' || stage === 'Discovery')) {
@@ -562,17 +566,30 @@ function resolveNba(
     });
   }
 
-  // 6 — Information request (non-upload design fields / journey orientation)
-  if (stage === 'Welcome' || (stage === 'Discovery' && !hasProposal && !view.snapshotSummary)) {
+  // Welcome: nothing required — Journey stays in nav as optional story, not homework
+  if (stage === 'Welcome') {
+    candidates.push({
+      priority: 9,
+      kind: 'wait',
+      nothingRequired: true,
+      label: "You're all set for now",
+      href: progress,
+      why: 'We’re preparing what’s next. Journey is there anytime if you’d like the short story of what we noticed.',
+      duration: 'No action required',
+      after: 'We’ll let you know when something needs you.',
+    });
+  }
+
+  if (stage === 'Discovery' && !hasProposal && !view.snapshotSummary) {
     candidates.push({
       priority: 6,
       kind: 'information',
       nothingRequired: false,
-      label: 'Continue Your Project',
+      label: 'Review Your Project',
       href: progress,
-      why: 'See what we’ve already noticed — it sets up everything that follows.',
-      duration: '5–10 minutes',
-      after: 'Return here for the one next step that moves the project forward.',
+      why: 'See what we’re learning and the one next step when we need you.',
+      duration: 'A few minutes',
+      after: 'We’ll notify you if anything is required on your side.',
     });
   }
 
@@ -642,7 +659,7 @@ function resolveNba(
       priority: 9,
       kind: 'wait',
       nothingRequired: true,
-      label: 'Nothing is needed from you today',
+      label: "You're all set for now",
       href: support,
       why:
         stage === 'Build'
@@ -651,7 +668,7 @@ function resolveNba(
             ? 'We’re preparing for your scheduled conversation.'
             : 'We’re advancing Discovery and will ask only when something needs you.',
       duration: 'No action required',
-      after: 'We’ll update this Guide when it’s your turn again.',
+      after: 'We’ll let you know when the next step is ready.',
     });
   }
 
@@ -660,11 +677,11 @@ function resolveNba(
     priority: 9,
     kind: 'wait',
     nothingRequired: true,
-    label: 'Nothing is needed from you today',
+    label: "You're all set for now",
     href: support,
     why: 'Our team is preparing the next chapter of your project.',
     duration: 'No action required',
-    after: 'Your next action will appear here when it’s your turn.',
+    after: 'We’ll let you know when the next step is ready.',
   });
 
   candidates.sort((a, b) => a.priority - b.priority);

@@ -16,6 +16,9 @@ export default function ClientExperienceNav({
   brandName = 'Efficiency Architects',
   logoutHref = '/api/portal/logout',
 }: Props) {
+  const primary = items.filter((item) => item.id !== 'journey');
+  const journey = items.find((item) => item.id === 'journey');
+
   return (
     <header className="cex-shell-nav" role="banner">
       <div className="cex-shell-nav-inner">
@@ -25,8 +28,8 @@ export default function ClientExperienceNav({
           </span>
           <span className="cex-shell-brand-text">{brandName}</span>
         </div>
-        <nav className="cex-shell-links" aria-label="Client experience">
-          {items.map((item) => {
+        <nav className="cex-shell-links" aria-label="Your project">
+          {primary.map((item) => {
             const isActive = item.id === active;
             return (
               <Link
@@ -39,10 +42,28 @@ export default function ClientExperienceNav({
               </Link>
             );
           })}
+          {journey ? (
+            <Link
+              href={journey.href}
+              className={`cex-shell-link cex-shell-link-quiet${
+                active === 'journey' ? ' cex-shell-link-active' : ''
+              }`}
+              aria-current={active === 'journey' ? 'page' : undefined}
+            >
+              {journey.label}
+            </Link>
+          ) : null}
         </nav>
-        <Link href={logoutHref} className="cex-shell-logout">
-          Log out
-        </Link>
+        <details className="cex-shell-account">
+          <summary className="cex-shell-account-summary" aria-label="Account menu">
+            Account
+          </summary>
+          <div className="cex-shell-account-menu" role="menu">
+            <Link href={logoutHref} className="cex-shell-account-logout" role="menuitem">
+              Log out
+            </Link>
+          </div>
+        </details>
       </div>
     </header>
   );

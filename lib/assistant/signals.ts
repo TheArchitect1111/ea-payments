@@ -6,6 +6,10 @@ export type PortalLiveSignals = {
   slug: string;
   captureCount: number;
   opportunityCount: number;
+  /** When set, assistant follows Client Experience Guide language — not Simplifi capture. */
+  experienceMode?: 'executive' | 'ctp';
+  /** Current portal pathname so CTP briefs stay route-aware (not collapsed to /ctp only). */
+  pathname?: string;
 };
 
 export type UpdateHubLiveSignals = {
@@ -55,6 +59,11 @@ export function applyLiveSignals(brief: AdvisorBriefModel, signals: LiveBriefSig
 
 function applyPortalSignals(brief: AdvisorBriefModel, signals: PortalLiveSignals): AdvisorBriefModel {
   const base = `/portal/${signals.slug}`;
+
+  if (signals.experienceMode === 'ctp') {
+    return applyCtpClientSignals(brief, signals, base);
+  }
+
   const today: string[] = [];
   let recommendation = brief.recommendation;
   let recommendationDetail = brief.recommendationDetail;
@@ -117,6 +126,100 @@ function applyPortalSignals(brief: AdvisorBriefModel, signals: PortalLiveSignals
         ...brief.details.organization.slice(0, 1),
       ],
     },
+  };
+}
+
+/** Client Experience overlay — keep pathname brief; route-aware CTAs within this slug only. */
+function applyCtpClientSignals(
+  brief: AdvisorBriefModel,
+  signals: PortalLiveSignals,
+  base: string,
+): AdvisorBriefModel {
+  const pathname = signals.pathname || '';
+  const actions = ctpClientActionsForPath(base, pathname);
+  const pageHint = brief.situation?.trim() || brief.details.aboutPage?.trim();
+
+  return {
+    ...brief,
+    recommendation: brief.needsAttention ? brief.recommendation : 'You’re in good hands.',
+    recommendationDetail:
+      brief.recommendationDetail?.trim() ||
+      'Your Project always shows one clear next step. Nothing here requires capturing opportunities.',
+    whyBullets: [
+      pageHint || 'This is your private project home — calm, guided, and personal.',
+      'When something needs you, Your Project will say so clearly.',
+      'Need a person? Contact reaches your guide within one business day.',
+    ].slice(0, 3),
+    primaryAction: actions.primary,
+    secondaryAction: actions.secondary,
+    needsAttention: false,
+    details: {
+      ...brief.details,
+      today: [
+        brief.pageLabel
+          ? `Here: ${brief.pageLabel}`
+          : 'Guided project home · nothing urgent unless Your Project says so',
+        ...brief.details.today.slice(0, 1),
+      ],
+      aboutPage: [brief.details.aboutPage, actions.aboutExtra].filter(Boolean).join('\n\n'),
+      organization: ['Mode: Client Experience', ...brief.details.organization.slice(0, 1)],
+    },
+  };
+}
+
+function ctpClientActionsForPath(
+  base: string,
+  pathname: string,
+): { primary: EAGuideAction; secondary: EAGuideAction; aboutExtra?: string } {
+  const progress = `${base}/ctp/progress`;
+  const documents = `${base}/ctp/documents`;
+  const contact = `${base}/ctp/messages`;
+  const help = `${base}/ctp/support`;
+  const normalized = pathname.replace(/\/+$/, '') || '/';
+
+  const onSegment = (segment: string) =>
+    normalized.endsWith(segment) || normalized.includes(`${segment}/`);
+
+  if (onSegment('/ctp/documents')) {
+    return {
+      primary: { id: 'your-project', label: 'Open Your Project', kind: 'href', href: progress },
+      secondary: { id: 'contact', label: 'Contact your guide', kind: 'href', href: contact },
+      aboutExtra: 'Documents holds materials we prepare for you.',
+    };
+  }
+  if (onSegment('/ctp/messages')) {
+    return {
+      primary: { id: 'your-project', label: 'Open Your Project', kind: 'href', href: progress },
+      secondary: { id: 'help', label: 'Open Help', kind: 'href', href: help },
+      aboutExtra: 'Contact reaches your guide within one business day.',
+    };
+  }
+  if (onSegment('/ctp/support')) {
+    return {
+      primary: { id: 'your-project', label: 'Open Your Project', kind: 'href', href: progress },
+      secondary: { id: 'contact', label: 'Contact your guide', kind: 'href', href: contact },
+      aboutExtra: 'Help has quick answers and a path to your guide.',
+    };
+  }
+  if (normalized.endsWith('/ctp')) {
+    return {
+      primary: { id: 'your-project', label: 'Open Your Project', kind: 'href', href: progress },
+      secondary: { id: 'help', label: 'Need a hand?', kind: 'href', href: help },
+      aboutExtra: 'Journey is orientation — Your Project is home.',
+    };
+  }
+  if (onSegment('/ctp/progress')) {
+    return {
+      primary: { id: 'help', label: 'Need a hand?', kind: 'href', href: help },
+      secondary: { id: 'documents', label: 'Documents', kind: 'href', href: documents },
+      aboutExtra: 'Your Project shows one clear next step for this stage.',
+    };
+  }
+
+  // Client shell on any other path under this slug — stay in CX destinations only.
+  return {
+    primary: { id: 'your-project', label: 'Open Your Project', kind: 'href', href: progress },
+    secondary: { id: 'help', label: 'Need a hand?', kind: 'href', href: help },
   };
 }
 

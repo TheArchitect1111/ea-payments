@@ -1,5 +1,5 @@
 /**
- * Messages & Support — Guide-driven help. No independent workflow CTAs.
+ * Help & Contact — Guide-driven help for Client Experience. No independent workflow CTAs.
  */
 import { ctpClientTypeLabel } from '@/lib/ctp-client-type';
 import { buildCtpPortalStatusView } from '@/lib/ctp-portal-status';
@@ -9,6 +9,11 @@ import type { CtpSubmission } from '@/lib/ctp-submissions';
 
 const DEFAULT_SUPPORT_EMAIL =
   process.env.SUPPORT_EMAIL ?? 'freedom@efficiencyarchitects.online';
+
+const SUPPORT_HOURS = 'Monday–Friday, 9:00am–5:00pm Eastern';
+const SUPPORT_RESPONSE = 'We typically respond within one business day.';
+const SUPPORT_URGENT =
+  'For urgent live-site issues, email us and include “Urgent” in the subject. We’ll prioritize during business hours.';
 
 export type CtpSupportAction = {
   id: string;
@@ -39,6 +44,10 @@ export type CtpSupportView = {
   headline: string;
   summary: string;
   supportEmail: string;
+  supportHours: string;
+  supportResponse: string;
+  supportUrgent: string;
+  helpMailto: string;
   calendlyUrl: string;
   actions: CtpSupportAction[];
   guide: CtpSupportGuideContext;
@@ -59,7 +68,7 @@ function buildGuideContext(slug: string, guide: GuideProgressView): CtpSupportGu
     pendingActions:
       pendingActions.length > 0
         ? pendingActions
-        : ["We've got everything we need — nothing required from you today"],
+        : ["You're all set for now — nothing is needed from you today"],
     narrative: `${guide.headline} ${guide.summary}`.trim(),
     behindTheScenes: guide.behindTheScenes,
     confidenceMessage: guide.confidenceMessage,
@@ -67,17 +76,50 @@ function buildGuideContext(slug: string, guide: GuideProgressView): CtpSupportGu
   };
 }
 
-export function buildCtpSupportView(submission: CtpSubmission, slug: string): CtpSupportView {
+function buildHelpMailto(input: {
+  email: string;
+  businessName: string;
+  slug: string;
+  stage: string;
+  page: string;
+}): string {
+  const subject = encodeURIComponent(
+    `Help request — ${input.businessName} — ${input.stage}`,
+  );
+  const body = encodeURIComponent(
+    [
+      'Hi Efficiency Architects,',
+      '',
+      'I need help with my project.',
+      '',
+      `Client: ${input.businessName}`,
+      `Portal: ${input.slug}`,
+      `Current stage: ${input.stage}`,
+      `Page: ${input.page}`,
+      '',
+      'Here’s what I need:',
+      '',
+    ].join('\n'),
+  );
+  return `mailto:${input.email}?subject=${subject}&body=${body}`;
+}
+
+export function buildCtpSupportView(
+  submission: CtpSubmission,
+  slug: string,
+  options?: { pagePath?: string },
+): CtpSupportView {
   const statusView = buildCtpPortalStatusView(submission);
   const guideView = buildGuideProgressView(slug, statusView);
   const guide = buildGuideContext(slug, guideView);
+  const pagePath = options?.pagePath ?? `/portal/${slug}/ctp/support`;
 
   let headline = `You're in ${guide.currentStage}`;
   let summary = guide.narrative;
 
   if (guide.nothingRequired) {
-    headline = "We've got everything we need";
-    summary = `${guide.confidenceMessage} ${guide.behindTheScenes}`.trim();
+    headline = "You're all set for now";
+    summary = `${guide.confidenceMessage} Need us anyway? Send a message and we’ll respond within one business day.`;
   } else if (guideView.nba.kind === 'meeting') {
     headline = 'A conversation will keep us aligned';
     summary = `${guide.nbaLabel}. ${guide.nbaWhy}`;
@@ -85,6 +127,14 @@ export function buildCtpSupportView(submission: CtpSubmission, slug: string): Ct
     headline = `You're in ${guide.currentStage}`;
     summary = `${guide.narrative} Next: ${guide.nbaLabel}.`;
   }
+
+  const helpMailto = buildHelpMailto({
+    email: DEFAULT_SUPPORT_EMAIL,
+    businessName: submission.businessName || slug,
+    slug,
+    stage: guide.currentStage,
+    page: pagePath,
+  });
 
   const actions: CtpSupportAction[] = [
     {
@@ -101,9 +151,9 @@ export function buildCtpSupportView(submission: CtpSubmission, slug: string): Ct
     },
     {
       id: 'email',
-      title: 'Email support',
-      detail: DEFAULT_SUPPORT_EMAIL,
-      href: `mailto:${DEFAULT_SUPPORT_EMAIL}`,
+      title: 'Contact your guide',
+      detail: `${DEFAULT_SUPPORT_EMAIL} · ${SUPPORT_RESPONSE}`,
+      href: helpMailto,
       external: true,
     },
   ];
@@ -112,14 +162,14 @@ export function buildCtpSupportView(submission: CtpSubmission, slug: string): Ct
   if (!guide.nothingRequired) {
     actions.push({
       id: 'message',
-      title: 'Message your advisor',
-      detail: 'Send a question — we already know your stage and next step.',
+      title: 'Contact your guide',
+      detail: 'Email a question — we already know your stage and next step.',
       href: `/portal/${slug}/ctp/messages`,
     });
     actions.push({
       id: 'documents',
       title: 'Documents',
-      detail: 'Everything prepared for you, with why / when / what happens next.',
+      detail: 'Your proposal and project documents are ready here when prepared.',
       href: `/portal/${slug}/ctp/documents`,
     });
   } else {
@@ -140,6 +190,10 @@ export function buildCtpSupportView(submission: CtpSubmission, slug: string): Ct
     headline,
     summary,
     supportEmail: DEFAULT_SUPPORT_EMAIL,
+    supportHours: SUPPORT_HOURS,
+    supportResponse: SUPPORT_RESPONSE,
+    supportUrgent: SUPPORT_URGENT,
+    helpMailto,
     calendlyUrl: '',
     actions,
     guide,

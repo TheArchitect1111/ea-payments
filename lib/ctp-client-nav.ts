@@ -23,13 +23,17 @@ export type ClientExperienceNavItem = {
   href: string;
 };
 
+/**
+ * Primary destinations match the client mental model.
+ * Journey stays reachable but is not a competing home.
+ */
 export function buildClientExperienceNav(slug: string): ClientExperienceNavItem[] {
   return [
-    { id: 'journey', label: 'Your Journey', href: opportunityDashboardPath(slug) },
-    { id: 'progress', label: 'Progress', href: designStudioPath(slug) },
+    { id: 'progress', label: 'Your Project', href: designStudioPath(slug) },
     { id: 'documents', label: 'Documents', href: portalCtpPath(slug, 'ctp/documents') },
-    { id: 'messages', label: 'Messages', href: portalCtpPath(slug, 'ctp/messages') },
-    { id: 'support', label: 'Support', href: portalCtpPath(slug, 'ctp/support') },
+    { id: 'messages', label: 'Contact', href: portalCtpPath(slug, 'ctp/messages') },
+    { id: 'support', label: 'Help', href: portalCtpPath(slug, 'ctp/support') },
+    { id: 'journey', label: 'Journey', href: opportunityDashboardPath(slug) },
   ];
 }
 
@@ -43,7 +47,7 @@ export function resolveClientNavActive(
   for (const item of ordered) {
     if (path === item.href || path.startsWith(`${item.href}/`)) return item.id;
   }
-  return 'journey';
+  return 'progress';
 }
 
 /**
