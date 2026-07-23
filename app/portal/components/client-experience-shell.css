@@ -11,6 +11,32 @@
   color: #0f2442;
 }
 
+.ep-client-experience-shell.cex-shell-frame[data-workspace-theme='amanda-editorial'] {
+  background: linear-gradient(180deg, #fffdf9 0%, #f2e9dd 100%);
+  color: #17130f;
+}
+
+.ep-client-experience-shell[data-workspace-theme='amanda-editorial'] .cex-shell-nav {
+  border-color: rgba(23, 19, 15, 0.12);
+  background: rgba(255, 253, 249, 0.94);
+}
+
+.ep-client-experience-shell[data-workspace-theme='amanda-editorial'] .cex-shell-brand-mark {
+  border-radius: 0;
+  background: #17130f;
+  color: #b9894d;
+}
+
+.ep-client-experience-shell[data-workspace-theme='amanda-editorial'] .cex-shell-brand-text,
+.ep-client-experience-shell[data-workspace-theme='amanda-editorial'] .cex-shell-link-active {
+  color: #17130f;
+}
+
+.ep-client-experience-shell[data-workspace-theme='amanda-editorial'] .cex-shell-link-active {
+  border-radius: 0;
+  background: rgba(185, 137, 77, 0.18);
+}
+
 .cex-shell-nav {
   position: sticky;
   top: 0;

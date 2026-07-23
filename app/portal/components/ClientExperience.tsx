@@ -47,6 +47,19 @@ const PHOTO_ALT_BY_ID: Record<string, string> = {
   continuity: 'Portrait conveying continuity, care, and what happens next',
 };
 
+const AMANDA_PHOTO_BY_ID: Record<string, string> = {
+  ...PHOTO_BY_ID,
+  welcome: '/home/client-amanda-catherine.jpg',
+  imagine: '/home/scene-creator.jpg',
+  'first-impression': '/home/scene-creator.jpg',
+  communication: '/images/ctp-editorial/02-purpose-service-leader.png',
+  'customer-experience': '/images/ctp-editorial/09-legacy-founder-mentoring.png',
+  'business-operations': '/images/ctp-editorial/10-clarity-blueprint-planning.png',
+  begin: '/home/scene-creator.jpg',
+  journey: '/images/ctp-editorial/11-momentum-designed-future.png',
+  next: '/home/client-amanda-catherine.jpg',
+};
+
 const SCENE_LABELS = [
   'Welcome',
   'Imagine',
@@ -99,11 +112,14 @@ type Props = {
   view: CtpOpportunityDashboardView;
   slug: string;
   studio: ReactNode;
+  themeId?: string;
 };
 
-export default function ClientExperience({ view, slug, studio }: Props) {
+export default function ClientExperience({ view, slug, studio, themeId }: Props) {
   const [sceneIndex, setSceneIndex] = useState(0);
   const [designLead, setDesignLead] = useState(false);
+  const isAmandaEditorial = themeId === 'amanda-editorial';
+  const photos = isAmandaEditorial ? AMANDA_PHOTO_BY_ID : PHOTO_BY_ID;
 
   useEffect(() => {
     try {
@@ -184,16 +200,26 @@ export default function ClientExperience({ view, slug, studio }: Props) {
           {sceneIndex === 0 ? (
             <section className="cex-welcome" aria-labelledby="cex-welcome-title">
               <div>
-                <p className="cex-kicker">Client Experience</p>
+                <p className="cex-kicker">
+                  {isAmandaEditorial ? 'Amanda Catherine Experience' : 'Client Experience'}
+                </p>
                 <h1 id="cex-welcome-title" className={`cex-headline ${display.className}`}>
                   Welcome, {view.firstName}.
                 </h1>
-                <p className="cex-lede">We&apos;ve spent time learning about your organization.</p>
-                <p className="cex-lede">We&apos;re excited to show you what we see.</p>
+                <p className="cex-lede">
+                  {isAmandaEditorial
+                    ? 'Your editorial workspace is ready.'
+                    : 'We\'ve spent time learning about your organization.'}
+                </p>
+                <p className="cex-lede">
+                  {isAmandaEditorial
+                    ? 'Together, we’ll shape every path your audience will experience.'
+                    : 'We\'re excited to show you what we see.'}
+                </p>
               </div>
               <EditorialPhoto
                 className="cex-welcome-photo"
-                src={PHOTO_BY_ID.welcome}
+                src={photos.welcome}
                 alt={PHOTO_ALT_BY_ID.welcome}
               />
             </section>
@@ -230,7 +256,7 @@ export default function ClientExperience({ view, slug, studio }: Props) {
               </div>
               <EditorialPhoto
                 className="cex-imagine-photo"
-                src={PHOTO_BY_ID.imagine}
+                src={photos.imagine}
                 alt={PHOTO_ALT_BY_ID.imagine}
               />
             </section>
@@ -248,7 +274,7 @@ export default function ClientExperience({ view, slug, studio }: Props) {
                   <article key={card.id} className="cex-insight">
                     <EditorialPhoto
                       className="cex-insight-photo"
-                      src={PHOTO_BY_ID[card.id] || PHOTO_BY_ID['first-impression']}
+                      src={photos[card.id] || photos['first-impression']}
                       alt={PHOTO_ALT_BY_ID[card.id] || PHOTO_ALT_BY_ID['first-impression']}
                     />
                     <div>
@@ -273,7 +299,7 @@ export default function ClientExperience({ view, slug, studio }: Props) {
               <p className="cex-lede">{view.beginIntro}</p>
               <EditorialPhoto
                 className="cex-begin-hero cex-begin-photo cex-photo-contain"
-                src={PHOTO_BY_ID.begin}
+                src={photos.begin}
                 alt={PHOTO_ALT_BY_ID.begin}
               />
               <ul className="cex-begin-list">
@@ -336,7 +362,7 @@ export default function ClientExperience({ view, slug, studio }: Props) {
               </p>
               <EditorialPhoto
                 className="cex-begin-hero"
-                src={PHOTO_BY_ID.journey}
+                src={photos.journey}
                 alt={PHOTO_ALT_BY_ID.journey}
               />
               <ol className="cex-journey">
@@ -371,7 +397,7 @@ export default function ClientExperience({ view, slug, studio }: Props) {
               ) : null}
               <EditorialPhoto
                 className="cex-begin-hero"
-                src={PHOTO_BY_ID.next}
+                src={photos.next}
                 alt={PHOTO_ALT_BY_ID.next}
               />
               <ol className="cex-next-steps">

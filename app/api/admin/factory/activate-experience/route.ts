@@ -4,6 +4,7 @@ import { getExperienceLaunchPreset } from '@/lib/experience-launch-presets';
 import { provisionWebsitePortalSite } from '@/lib/provision-website-portal';
 import { publicPortalLoginUrl, publicPortalUrl } from '@/lib/ctp-portal-host';
 import { isSiteQuarantined } from '@/lib/site-quarantine';
+import { provisionExperiencePortalTenant } from '@/lib/experience-portal-provision';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -28,35 +29,48 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Experience preset not found.' }, { status: 404 });
   }
 
-  if (isSiteQuarantined(preset.provision.portalSlug)) {
+  const email = preset.provision.email?.trim();
+  if (!email) {
+    return NextResponse.json({ error: 'The experience preset needs a portal email.' }, { status: 400 });
+  }
+
+  const portal = await provisionExperiencePortalTenant({
+    clientName: preset.provision.businessName,
+    organization: preset.provision.organizationName || preset.provision.businessName,
+    email,
+    themeId: preset.provision.themeId || 'ea-default-theme',
+    workspaceName: `${preset.provision.businessName} Experience`,
+    primaryColor: preset.provision.primaryColor || '#17130F',
+    accentColor: preset.provision.accentColor || '#B9894D',
+  });
+  if (!portal.ok || !portal.portalSlug) {
     return NextResponse.json(
-      { error: 'This experience is quarantined and cannot be published.' },
-      { status: 409 },
+      { error: portal.error || 'Portal tenant activation failed.' },
+      { status: 500 },
     );
   }
 
-  const result = await provisionWebsitePortalSite(preset.provision);
-  if (!result.ok) {
+  const quarantined = isSiteQuarantined(preset.provision.portalSlug);
+  const result = quarantined ? null : await provisionWebsitePortalSite(preset.provision);
+  if (result && !result.ok) {
     return NextResponse.json(
-      {
-        error: result.error || 'Experience activation failed.',
-        directorGate: result.directorGate,
-        directorReview: result.directorReview,
-      },
+      { error: result.error || 'Experience website activation failed.', directorGate: result.directorGate },
       { status: result.directorGate && !result.directorGate.ok ? 403 : 500 },
     );
   }
 
   const origin = new URL(req.url).origin;
-  const slug = preset.provision.portalSlug;
+  const slug = portal.portalSlug;
   return NextResponse.json({
     ok: true,
     presetId: preset.id,
-    pageId: result.pageId,
-    websiteUrl: result.siteUrl,
-    portalUrl: publicPortalUrl(slug),
+    pageId: result?.pageId,
+    websiteUrl: result?.siteUrl,
+    websiteStatus: quarantined ? 'quarantined' : 'live',
+    portalUrl: publicPortalUrl(slug, 'ctp'),
     portalLoginUrl: publicPortalLoginUrl(slug),
     adminUrl: `${origin}/admin/capability-marketplace`,
-    directorReview: result.directorReview,
+    tempCredentials: portal.tempCredentials,
+    directorReview: result?.directorReview,
   });
 }
