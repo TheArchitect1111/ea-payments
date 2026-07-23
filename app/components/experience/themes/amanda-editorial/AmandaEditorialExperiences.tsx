@@ -4,12 +4,12 @@ import { AmandaEditorialTheme } from './AmandaEditorialTheme';
 import './amanda-experiences.css';
 
 type Link = { label: string; href: string };
-type Path = Link & { number: string; script: string; body: string; image: string };
+type Path = Link & { number: string; script: string; body: string; image: string; imagePosition?: string };
 
 export type AmandaWebsiteProps = {
   brand: { first: string; last: string };
   navigation: Link[];
-  hero: { eyebrow: string; title: string; accent: string; body: string; image: string; quote: string; action: Link };
+  hero: { eyebrow: string; title: string; accent: string; tail?: string; body: string; image: string; quote: string; action: Link };
   paths: Path[];
   mission: { eyebrow: string; title: string; body: string; signature: string };
   identities: string[];
@@ -30,7 +30,7 @@ export function AmandaEditorialWebsite({ brand, navigation, hero, paths, mission
         <section className="aex-site-hero" id="top">
           <div className="aex-site-hero-copy">
             <p className="aex-kicker">{hero.eyebrow}</p>
-            <h1>{hero.title}<em>{hero.accent}</em></h1>
+            <h1>{hero.title} <em>{hero.accent}</em>{hero.tail ? <> {hero.tail}</> : null}</h1>
             <p>{hero.body}</p>
             <a className="aex-script-link" href={hero.action.href}>{hero.action.label}<i aria-hidden>⟶</i></a>
           </div>
@@ -48,7 +48,7 @@ export function AmandaEditorialWebsite({ brand, navigation, hero, paths, mission
           </div>
           <div className="aex-path-rail">
             {paths.map((path) => (
-              <a className="aex-path" href={path.href} key={path.script} style={{ backgroundImage: `url(${path.image})` }}>
+              <a className="aex-path" href={path.href} key={path.script} style={{ backgroundImage: `url(${path.image})`, backgroundPosition: path.imagePosition }}>
                 <span className="aex-path-shade" />
                 <span className="aex-path-copy"><small>{path.number}</small><strong>{path.script}</strong><b>{path.label}</b><span>{path.body}</span><i aria-hidden>→</i></span>
               </a>
@@ -98,7 +98,7 @@ export function AmandaEditorialPortal({ firstName, brandName, navItems }: Amanda
               <a className="aex-dark-action" href="#next">Continue your journey <span>→</span></a>
             </div>
             <div className="aex-portal-portrait">
-              <img src="/images/ctp-editorial/05-calm-morning-owner.png" alt="Creative entrepreneur reflecting beside her journal" />
+              <img src="/images/amanda-editorial/amanda-studio-hero.jpg" alt="Amanda Catherine in her creative studio" />
               <span>Purpose in motion.</span>
             </div>
           </section>
