@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
-const [engine, theme, preview, components, publishGate, portalChrome, portalLayout, factoryUi, launchPreset, quickLaunch, activationRoute] = await Promise.all([
+const [engine, theme, preview, components, publishGate, portalChrome, portalLayout, factoryUi, launchPreset, quickLaunch, activationRoute, publicSite, quarantine] = await Promise.all([
   read('vendor/theme-engine/src/index.ts'),
   read('vendor/theme-engine/src/themes/amanda-editorial/theme.ts'),
   read('app/preview/experience/[slug]/[pageId]/ExperiencePreview.tsx'),
@@ -14,6 +14,8 @@ const [engine, theme, preview, components, publishGate, portalChrome, portalLayo
   read('lib/experience-launch-presets.ts'),
   read('app/admin/ea-factory/quick-launch/QuickLaunchClient.tsx'),
   read('app/api/admin/factory/activate-experience/route.ts'),
+  read('app/sites/[slug]/page.tsx'),
+  read('lib/site-quarantine.ts'),
 ]);
 
 assert.match(engine, /amandaEditorialTheme/);
@@ -30,6 +32,9 @@ assert.match(launchPreset, /themeId: 'amanda-editorial'/);
 assert.match(quickLaunch, /Launch Amanda Experience/);
 assert.match(activationRoute, /provisionWebsitePortalSite\(preset\.provision\)/);
 assert.match(activationRoute, /requireAdminActionFromRequest/);
+assert.match(activationRoute, /isSiteQuarantined/);
+assert.match(publicSite, /if \(isSiteQuarantined\(slug\)\) notFound\(\)/);
+assert.match(quarantine, /'amanda-catherine'/);
 for (const component of [
   'EditorialNavigation', 'EditorialHero', 'EditorialSection', 'EditorialCardRail',
   'EditorialImageMosaic', 'EditorialQuote', 'EditorialCta', 'EditorialFooter',
