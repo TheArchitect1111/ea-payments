@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import ExperiencePreview from '@/app/preview/experience/[slug]/[pageId]/ExperiencePreview';
 import { findPublishedSitePage, sitePathForSlug } from '@/lib/provision-website-portal';
+import { isSiteQuarantined } from '@/lib/site-quarantine';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,6 +11,9 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
+  if (isSiteQuarantined(slug)) {
+    return { title: 'Site unavailable', robots: { index: false, follow: false } };
+  }
   const page = await findPublishedSitePage(slug);
   if (!page) {
     return { title: 'Site not found', robots: { index: false, follow: false } };
@@ -27,6 +31,7 @@ export default async function PublicSitePage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
+  if (isSiteQuarantined(slug)) notFound();
   const page = await findPublishedSitePage(slug);
   if (!page) notFound();
 

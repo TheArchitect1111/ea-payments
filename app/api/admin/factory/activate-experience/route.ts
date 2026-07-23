@@ -3,6 +3,7 @@ import { requireAdminActionFromRequest } from '@/lib/admin-session-guard';
 import { getExperienceLaunchPreset } from '@/lib/experience-launch-presets';
 import { provisionWebsitePortalSite } from '@/lib/provision-website-portal';
 import { publicPortalLoginUrl, publicPortalUrl } from '@/lib/ctp-portal-host';
+import { isSiteQuarantined } from '@/lib/site-quarantine';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -25,6 +26,13 @@ export async function POST(req: NextRequest) {
   const preset = getExperienceLaunchPreset(String(body.presetId || '').trim());
   if (!preset) {
     return NextResponse.json({ error: 'Experience preset not found.' }, { status: 404 });
+  }
+
+  if (isSiteQuarantined(preset.provision.portalSlug)) {
+    return NextResponse.json(
+      { error: 'This experience is quarantined and cannot be published.' },
+      { status: 409 },
+    );
   }
 
   const result = await provisionWebsitePortalSite(preset.provision);
