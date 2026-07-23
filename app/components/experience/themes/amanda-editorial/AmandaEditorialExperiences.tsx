@@ -98,7 +98,7 @@ export function AmandaEditorialPortal({ firstName, brandName, navItems }: Amanda
               <a className="aex-dark-action" href="#next">Continue your journey <span>→</span></a>
             </div>
             <div className="aex-portal-portrait">
-              <img src="/home/he-creator-filming.jpg" alt="Creative entrepreneur at work" />
+              <img src="/images/ctp-editorial/05-calm-morning-owner.png" alt="Creative entrepreneur reflecting beside her journal" />
               <span>Purpose in motion.</span>
             </div>
           </section>
