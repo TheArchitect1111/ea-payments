@@ -1,8 +1,18 @@
 /**
  * Tier 2 launch readiness — env + health + optional webhook dry-run.
  * Usage: node scripts/test-tier2-launch.mjs [baseUrl]
+ *
+ * Public path smoke uses unauthenticated /api/health/launch ({ ok, status }).
+ * Full diagnostics require ADMIN_SESSION_SECRET (EA admin Bearer).
  */
+import {
+  fetchLaunchHealthDiagnostic,
+  fetchLaunchHealthPublic,
+  loadDotEnvLocal,
+} from './lib/admin-bearer.mjs';
+
 const BASE = process.argv[2] || 'https://ea-payments.vercel.app';
+const env = loadDotEnvLocal();
 
 console.log('Tier 2 launch check —', BASE, '\n');
 
@@ -21,8 +31,16 @@ for (const [path, expect] of paths) {
 }
 
 try {
-  const health = await fetch(`${BASE}/api/health/launch`);
-  const data = await health.json();
+  const { body: publicBody } = await fetchLaunchHealthPublic(BASE);
+  console.log('\nPublic status:', publicBody.status);
+  console.log('Public ok:', publicBody.ok ? 'YES' : 'NO');
+
+  const { res, body: data } = await fetchLaunchHealthDiagnostic(BASE, env);
+  if (!res.ok || !data?.checks) {
+    console.log('Diagnostic fetch failed:', res.status, data?.error || 'missing checks');
+    process.exit(1);
+  }
+
   console.log('\nStatus:', data.status);
   console.log('Revenue ready:', data.checks?.revenueReady ? 'YES' : 'NO');
   console.log('Delivery ready:', data.checks?.deliveryReady ? 'YES' : 'NO');

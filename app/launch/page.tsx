@@ -1,4 +1,7 @@
 import Link from 'next/link';
+import { cookies } from 'next/headers';
+import { verifyAdminSession, EA_ADMIN_COOKIE } from '@/lib/ea-admin-auth';
+import { redirectToAdminLogin } from '@/lib/admin-redirect';
 import { buildLaunchCommandCenterReport } from '@/lib/launch-command-center';
 import type { LaunchCheckItem, LaunchSectionSummary, LaunchStatus } from '@/lib/launch-command-center';
 import type { LaunchReadinessCategory, LaunchReadinessStatus } from '@/lib/launch-readiness';
@@ -128,6 +131,12 @@ function SectionBlock({ section }: { section: LaunchSectionSummary }) {
 }
 
 export default async function LaunchCommandCenterPage() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get(EA_ADMIN_COOKIE)?.value;
+  if (!verifyAdminSession(token)) {
+    redirectToAdminLogin('/launch');
+  }
+
   const report = await buildLaunchCommandCenterReport();
 
   return (

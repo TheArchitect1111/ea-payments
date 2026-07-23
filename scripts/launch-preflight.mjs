@@ -55,9 +55,8 @@ async function liveApiSmokes() {
     const health = await healthRes.json().catch(() => ({}));
     out.launchHealth = {
       status: healthRes.status,
-      ok: Boolean(health?.ok ?? health?.full_launch_ready ?? healthRes.ok),
-      websitePortalAuto: health?.websitePortalAuto ?? health?.checks?.websitePortalAuto,
-      score: health?.score ?? health?.launchScore,
+      ok: Boolean(health?.ok ?? healthRes.ok),
+      statusLabel: health?.status ?? null,
     };
   } catch (e) {
     out.launchHealth = { ok: false, error: e instanceof Error ? e.message : String(e) };

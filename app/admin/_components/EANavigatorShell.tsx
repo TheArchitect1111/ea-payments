@@ -11,28 +11,20 @@ const EXPERIMENTAL_ADMIN =
 
 const CORE_NAV_LINKS = [
   { href: '/admin/master', label: 'Home', description: "Today's signals and next move" },
-  { href: '/admin/decisions', label: 'Decisions', description: 'Commitments that need your judgment' },
-  { href: '/admin/organizations', label: 'Organizations', description: 'Account health and next moves' },
-  { href: '/admin/operations', label: 'Operations', description: 'Operating condition and blockers' },
-  { href: '/admin/products', label: 'Products', description: 'Portfolio strength and gaps' },
-  {
-    href: '/admin/intelligence',
-    label: 'Intelligence',
-    description: 'Interpretation of what the business is saying',
-  },
+  { href: '/admin/delivery', label: 'Clients', description: 'Account health and next moves' },
+  { href: '/admin/ctp', label: 'CTP', description: 'Intake submissions and desk' },
+  { href: '/admin/content-requests', label: 'Content', description: 'Content requests' },
+  { href: '/admin/simplifi', label: 'Opportunities', description: 'Simplifi workspace' },
+  { href: '/admin/dashboard', label: 'Pipeline', description: 'Revenue and assessments' },
   { href: '/admin/factory', label: 'Factory', description: 'Launch the next delivery motion' },
-  { href: '/admin/search', label: 'Search', description: 'Locate any certified EA asset' },
-  { href: '/admin/atlas', label: 'Atlas', description: 'How the enterprise connects' },
 ];
 
 const NAV_LINKS = CORE_NAV_LINKS;
 
 const NAVIGATOR_GOALS = [
   { label: 'Review Revenue & Pipeline', href: '/admin/dashboard' },
-  { label: 'Open Organizations', href: '/admin/organizations' },
-  { label: 'Review Operations', href: '/admin/operations' },
-  { label: 'Open Product Operations', href: '/admin/products' },
-  { label: 'Review Decisions', href: '/admin/decisions' },
+  { label: 'Open Clients', href: '/admin/delivery' },
+  { label: 'Open CTP desk', href: '/admin/ctp' },
   { label: 'Track partner commissions', href: '/admin/commissions' },
   { label: 'Run Operational MRI funnel', href: '/assessment' },
   { label: 'Open Simplifi workspace', href: '/admin/simplifi' },
@@ -46,7 +38,6 @@ const NAVIGATOR_GOALS = [
   ...(EXPERIMENTAL_ADMIN
     ? [
         { label: 'Search Knowledge Graph', href: '/admin/knowledge-graph' },
-        { label: 'Open Atlas', href: '/admin/atlas' },
         { label: 'View Digital Twin', href: '/admin/digital-twin' },
         { label: 'Browse Partner Marketplace', href: '/admin/partner-marketplace' },
         { label: 'Analyze a URL (Resource Radar)', action: 'analyze' as const },
@@ -54,7 +45,9 @@ const NAVIGATOR_GOALS = [
     : []),
   { label: 'Learn EA Academy', href: '/admin/academy' },
   { label: 'View Auto Blueprints', href: '/admin/blueprints' },
-  { label: 'Open Knowledge Center', href: '/admin/knowledge' },
+  { label: 'Open Foundation Library', href: '/admin/foundation-library' },
+  { label: 'Open Capability Marketplace', href: '/admin/capability-marketplace' },
+  { label: 'Launch readiness', href: '/launch' },
   { label: 'Capture an opportunity', action: 'capture' as const },
 ];
 

@@ -6,10 +6,13 @@
  * decision intelligence, EA app host (app.efficiencyarchitects.online).
  * Simplifi is an EA product — no third-party brand-domain checks.
  */
+import { fetchLaunchHealthDiagnostic, loadDotEnvLocal } from './lib/admin-bearer.mjs';
+
 const BASE = (process.argv[2] || 'https://ea-payments.vercel.app').replace(/\/$/, '');
 const SIMPLIFI_APP = process.env.SIMPLIFI_APP_URL || 'https://app.efficiencyarchitects.online';
 const EMAIL = process.env.DEMO_CLIENT_EMAIL || 'demo@efficiencyarchitects.online';
 const PASSWORD = process.env.DEMO_CLIENT_PASSWORD || 'DemoPulse2026!';
+const env = loadDotEnvLocal();
 
 const results = [];
 function record(step, ok, extra = {}) {
@@ -45,9 +48,9 @@ async function main() {
   console.log('Simplifi Launch Readiness —', BASE, '\n');
 
   // 1. Health + Airtable + products.simplifi
-  const healthRes = await fetch(`${BASE}/api/health/launch`);
-  const health = await healthRes.json().catch(() => ({}));
-  record('health-endpoint', healthRes.ok, { status: healthRes.status });
+  const healthRes = await fetchLaunchHealthDiagnostic(BASE, env);
+  const health = healthRes.body;
+  record('health-endpoint', healthRes.res.ok, { status: healthRes.res.status });
   record('products-simplifi', health?.checks?.products?.simplifi === true, {
     detail: String(health?.checks?.products?.simplifi),
   });

@@ -63,10 +63,14 @@ const client = read('app/admin/ctp/CtpSubmissionsClient.tsx');
 assert(client.includes('commercialLabel'), 'list UI shows commercial badge');
 assert(client.includes('submission.paid'), 'list UI shows paid state');
 
-const health = read('app/api/health/launch/route.ts');
+const health = read('lib/launch-health.ts');
 assert(health.includes('LAUNCH_OPERATIONAL_MATURITY'), 'health must read operational maturity flag');
 assert(health.includes('LAUNCH_FOUNDER_DEPENDENCY_REDUCED'), 'health must read founder-dependency flag');
 assert(health.includes('scaleAttestation'), 'health must surface scale attestation');
+assert(existsSync(join(root, 'app/api/health/launch/route.ts')), 'launch health route missing');
+const route = read('app/api/health/launch/route.ts');
+assert(route.includes('requireAdminSessionFromRequest'), 'launch health route must gate diagnostics');
+assert(route.includes('buildLaunchHealthDiagnostic'), 'launch health route must use shared builder');
 
 const envEx = read('.env.example');
 assert(envEx.includes('LAUNCH_OPERATIONAL_MATURITY'), '.env.example scale flags');

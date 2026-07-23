@@ -189,6 +189,23 @@ export async function middleware(request: NextRequest) {
 
 
 
+  if (pathname === '/launch' || pathname.startsWith('/launch/')) {
+    const adminToken = request.cookies.get(EA_ADMIN_COOKIE)?.value;
+    const adminSession = await parseAdminSessionEdge(adminToken);
+    if (!adminSession) {
+      const login = new URL('/admin/login', request.url);
+      login.searchParams.set('next', pathname);
+      return NextResponse.redirect(login);
+    }
+
+    const role = normalizeAdminRole(adminSession.role);
+    if (!can(role, 'admin:access')) {
+      const login = new URL('/admin/login', request.url);
+      login.searchParams.set('error', 'unauthorized');
+      return NextResponse.redirect(login);
+    }
+  }
+
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set('x-pathname', request.nextUrl.pathname);
   return NextResponse.next({
@@ -214,6 +231,7 @@ export const config = {
     '/portal/:slug',
     '/portal/:slug/:path*',
     '/admin/:path*',
+    '/launch',
     // Vanity portal host: portal.efficiencyarchitects.online/{client}
     '/:slug',
     '/:slug/:path*',

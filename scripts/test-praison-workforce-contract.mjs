@@ -52,8 +52,10 @@ assert(makeBridge.includes('praison.package.ready'), 'Make bridge must emit prai
 const makeDoc = join(root, 'docs/MAKE-PRAISON-CTP.md');
 assert(existsSync(makeDoc), 'missing docs/MAKE-PRAISON-CTP.md');
 
-const health = readFileSync(join(root, 'app/api/health/launch/route.ts'), 'utf8');
+const health = readFileSync(join(root, 'lib/launch-health.ts'), 'utf8');
 assert(health.includes('praisonPackageWebhook'), 'launch health must surface Praison Make webhook');
+const healthRoute = readFileSync(join(root, 'app/api/health/launch/route.ts'), 'utf8');
+assert(healthRoute.includes('requireAdminSessionFromRequest'), 'launch health diagnostics must require admin auth');
 
 const intake = readFileSync(join(root, 'lib/ctp-intake-orchestrator.ts'), 'utf8');
 assert(intake.includes('schedulePraisonWorkforce'), 'CTP intake must schedule Praison workforce');

@@ -207,33 +207,34 @@ test('experience templates library is reachable', async ({ page }) => {
   await expect(page.getByRole('heading', { name: /Executive Transformation/i })).toBeVisible();
 });
 
-test('health launch endpoint returns JSON', async ({ page }) => {
+test('health launch endpoint returns public JSON summary', async ({ page }) => {
   const res = await page.request.get('/api/health/launch');
   expect(res.status()).toBe(200);
   const data = (await res.json()) as {
     ok?: boolean;
     status?: string;
-    checks?: {
-      demoClient?: boolean;
-      revenueReady?: boolean;
-      deliveryReady?: boolean;
-      monitoringReady?: boolean;
-      resilienceReady?: boolean;
-      criticalReady?: boolean;
-      fullLaunchReady?: boolean;
-      missingByCategory?: unknown;
-    };
+    checks?: unknown;
+    manual?: unknown;
+    links?: unknown;
   };
   expect(typeof data.ok).toBe('boolean');
   expect(typeof data.status).toBe('string');
-  expect(data.checks).toBeTruthy();
-  expect(typeof data.checks?.revenueReady).toBe('boolean');
-  expect(typeof data.checks?.deliveryReady).toBe('boolean');
-  expect(typeof data.checks?.monitoringReady).toBe('boolean');
-  expect(typeof data.checks?.resilienceReady).toBe('boolean');
-  expect(typeof data.checks?.criticalReady).toBe('boolean');
-  expect(typeof data.checks?.fullLaunchReady).toBe('boolean');
-  expect(data.checks?.missingByCategory).toBeTruthy();
+  expect(data.checks).toBeUndefined();
+  expect(data.manual).toBeUndefined();
+  expect(data.links).toBeUndefined();
+  expect(Object.keys(data).sort()).toEqual(['ok', 'status']);
+});
+
+test('health launch expand attempts stay public without admin auth', async ({ page }) => {
+  const res = await page.request.get('/api/health/launch?full=1&detail=true', {
+    headers: {
+      'x-ea-launch-detail': '1',
+      'x-launch-setup-key': 'not-a-real-key',
+    },
+  });
+  expect(res.status()).toBe(200);
+  const data = (await res.json()) as Record<string, unknown>;
+  expect(Object.keys(data).sort()).toEqual(['ok', 'status']);
 });
 
 test('health ops endpoint returns JSON', async ({ page }) => {

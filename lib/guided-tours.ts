@@ -37,14 +37,14 @@ export const MISSION_CONTROL_TOUR: GuidedTour = {
     {
       id: 'command',
       title: 'Universal Command Bar',
-      body: 'Press ⌘K (or Ctrl+K) to search commands and jump to Decisions, Organizations, Operations, Factory, or Search.',
+      body: 'Press ⌘K (or Ctrl+K) to search commands and jump to Clients, Factory, Pipeline, CTP, or Launch readiness.',
       target: 'ea-command-bar',
     },
     {
-      id: 'decisions',
-      title: 'Decision Intelligence',
-      body: 'When the brief is not enough, open Decisions for the full evidenced queue — Immediate, Today, This Week, and Strategic.',
-      href: '/admin/decisions',
+      id: 'clients',
+      title: 'Client Delivery',
+      body: 'Open Clients for account delivery status and next moves when the brief is not enough.',
+      href: '/admin/delivery',
     },
     {
       id: 'factory',

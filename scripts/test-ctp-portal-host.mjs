@@ -35,11 +35,14 @@ assert(middleware.includes('NextResponse.rewrite'), 'Middleware must rewrite van
 assert(middleware.includes('/:slug'), 'Matcher must include vanity slug paths');
 assert(workspace.includes('publicPortalUrl'), 'Welcome flow must use vanity portal URLs');
 
-const launchPath = join(root, 'app/api/health/launch/route.ts');
-assert(existsSync(launchPath), 'Missing launch health route');
+const launchPath = join(root, 'lib/launch-health.ts');
+assert(existsSync(launchPath), 'Missing launch health builder');
+assert(existsSync(join(root, 'app/api/health/launch/route.ts')), 'Missing launch health route');
 const launch = readFileSync(launchPath, 'utf8');
 assert(launch.includes('probePortalVanityHost'), 'Launch health must probe vanity portal host');
 assert(launch.includes('portalVanityHost'), 'Launch health must expose portalVanityHost check');
+const launchRoute = readFileSync(join(root, 'app/api/health/launch/route.ts'), 'utf8');
+assert(launchRoute.includes('requireAdminSessionFromRequest'), 'Launch health diagnostics must require admin auth');
 assert(workspace.includes("publicPortalUrl(slug, 'ctp')"), 'Welcome must deep-link CTP overview');
 assert(workspace.includes('portalLoginUrl()'), 'Welcome CTA must use portal login helper');
 assert(
