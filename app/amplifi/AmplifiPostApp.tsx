@@ -7,6 +7,11 @@ import '@/app/components/story-draft-panel.css';
 import { buildAmplifiSocialDraft } from '@/lib/amplifi-draft';
 import type { AmplifiSocialDraft } from '@/lib/amplifi-draft';
 import { openSocialShare } from '@/lib/amplifi-social-share';
+import {
+  absoluteAmplifiShareUrl,
+  MAGNIFI_PUBLIC_LINK_WARNING,
+  preferPortalMagnifiUrl,
+} from '@/lib/amplifi-share-policy';
 import { DEMO_CONSIDER_SLUG } from '@/lib/demo-consider-selena';
 import { PUBLIC_LINKS } from '@/lib/marketing-urls';
 
@@ -129,9 +134,14 @@ export default function AmplifiPostApp({
     const capture = captures.find((c) => c.id === id);
     if (!capture) return;
     setBusinessName(capture.businessName ?? capture.title);
-    const rawUrl = capture.shareUrl ?? capture.magnifiUrl ?? '';
+    const rawUrl =
+      preferPortalMagnifiUrl({
+        magnifiUrl: capture.magnifiUrl,
+        shareUrl: capture.shareUrl,
+        captureId: capture.id,
+      }) ?? '';
     const fullUrl = rawUrl.startsWith('/')
-      ? `${PUBLIC_LINKS.platform.replace(/\/$/, '')}${rawUrl}`
+      ? absoluteAmplifiShareUrl(rawUrl, PUBLIC_LINKS.platform.replace(/\/$/, ''))
       : rawUrl;
     setStoryUrl(fullUrl);
     setLoading(true);
@@ -175,7 +185,7 @@ export default function AmplifiPostApp({
         return;
       }
       setSuccess(
-        `Submitted for approval (ID: ${data.requestId ?? 'saved'}). Your team will review in Update Hub.`,
+        `Submitted for review (ID: ${data.requestId ?? 'saved'}). Nothing posts automatically — your team reviews in Update Hub before publishing.`,
       );
     } catch {
       setMessage('Network error. Try again.');
@@ -209,11 +219,11 @@ export default function AmplifiPostApp({
 
       <main className="af-main">
         <section className="af-hero">
-          <p className="af-kicker">Social posting</p>
-          <h1 className="af-title">Search. Create. Store for approval.</h1>
+          <p className="af-kicker">Review before posting</p>
+          <h1 className="af-title">Draft. Review. Share when ready.</h1>
           <p className="af-lede">
-            Pick material from Simplifi captures, generate social copy, and submit to Update Hub for team approval
-            before publishing.
+            Pick a Magnifi story from your Simplifi captures, generate share copy, and review every draft before you
+            post — Amplifi does not auto-publish or run a Communications calendar. {MAGNIFI_PUBLIC_LINK_WARNING}
           </p>
         </section>
 
@@ -322,7 +332,11 @@ export default function AmplifiPostApp({
         {draft ? (
           <section className="af-card">
             <p className="af-kicker" style={{ color: '#c9a844' }}>
-              3. Review &amp; store
+              3. Review before posting
+            </p>
+            <p className="af-note" style={{ marginBottom: 12 }}>
+              Read the draft below. Submit for team approval, or copy/open a network yourself — Amplifi never posts for
+              you. {MAGNIFI_PUBLIC_LINK_WARNING}
             </p>
             <StoryDraftPanel draft={draft} />
 
@@ -343,7 +357,7 @@ export default function AmplifiPostApp({
             </div>
 
             <p className="af-label" style={{ marginTop: 20 }}>
-              Or post now (skip approval)
+              Share manually (you post)
             </p>
             <div className="af-platforms">
               <button

@@ -14,7 +14,14 @@ function fadeUp(delay = 0) {
   };
 }
 
-export default function MagnifiExperienceV2({ experience }: { experience: MagnifiCinematicExperience }) {
+export default function MagnifiExperienceV2({
+  experience,
+  publicLinkWarning,
+}: {
+  experience: MagnifiCinematicExperience;
+  /** V1 public-by-link notice for sharers previewing the story. */
+  publicLinkWarning?: string;
+}) {
   const { theme } = experience;
   const containerRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ container: containerRef });
@@ -116,6 +123,9 @@ export default function MagnifiExperienceV2({ experience }: { experience: Magnif
             {experience.cta.headline}
           </h2>
           <p className="mt-6 text-lg text-neutral-600">{experience.cta.body}</p>
+          {publicLinkWarning ? (
+            <p className="mt-4 text-sm font-medium text-neutral-500">{publicLinkWarning}</p>
+          ) : null}
           <Link
             href={experience.cta.href}
             className="mt-10 inline-flex px-10 py-4 text-xs font-black uppercase tracking-[0.25em]"

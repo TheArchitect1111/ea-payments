@@ -8,7 +8,7 @@ import {
 } from './capture-pipeline';
 import { scheduleCaptureJob, type ScheduleCaptureJobOptions } from './capture-async';
 import type { CaptureRecord } from './capture-records';
-import { buildCaptureApiResponse, type CaptureApiResponse } from './capture-response';
+import { buildCaptureApiResponse, sanitizeCaptureClientError, type CaptureApiResponse } from './capture-response';
 import { emitCaptureCompleted } from './capture-pulse';
 
 export interface CaptureSubmissionOptions extends AnalyzeOptions, ScheduleCaptureJobOptions {
@@ -68,7 +68,7 @@ export async function submitCapture(
 
 export function toCaptureApiResponse(result: CaptureSubmissionResult): CaptureApiResponse {
   if (!result.ok) {
-    return { ok: false, error: result.error ?? 'Capture failed.' };
+    return { ok: false, error: sanitizeCaptureClientError(result.error ?? 'Capture failed.') };
   }
 
   if (result.asyncQueued && result.record) {
@@ -89,5 +89,5 @@ export function toCaptureApiResponse(result: CaptureSubmissionResult): CaptureAp
     return { ...response, workspaceUrl: '/simplifi/workspace' };
   }
 
-  return { ok: false, error: 'Capture failed.' };
+  return { ok: false, error: sanitizeCaptureClientError('Capture failed.') };
 }

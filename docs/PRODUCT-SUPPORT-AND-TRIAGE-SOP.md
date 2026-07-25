@@ -44,14 +44,42 @@ Capture these details before troubleshooting:
 ## Missing Magnifi Link SOP
 
 1. Open `/magnifi/{captureId}`.
-2. If 404, check whether the capture exists and is not archived.
-3. Open `/consider/{slug}` if the record has a Consider Slug.
+2. If unavailable / retired, check whether the capture exists and is not archived.
+3. Open `/consider/{slug}` if the record has a Consider Slug (demo / CTP path — unchanged).
 4. If Consider opens but Magnifi does not:
    - Confirm the record ID used by the Magnifi URL.
    - Confirm Airtable identifier lookup can find the capture.
+   - Confirm Status is not `Archived` (archived captures intentionally stop Magnifi).
 5. If neither opens:
    - Check Capture Records schema and `Share URL` / `Consider Slug`.
    - Escalate with capture ID.
+
+## Retire / Unshare Sensitive Magnifi Capture
+
+**Policy (V1):** Magnifi is **public-by-link**. Anyone with `/magnifi/{id}` can view the story until it is retired. Session-gated Magnifi is backlog after portal-ready.
+
+**Client-facing warning:** “Anyone with the link can view this story.” (portal Amplifi hub, capture success share, Amplifi draft tool, capture-ready email, Magnifi CTA footer)
+
+### Operator steps
+
+1. Confirm capture ID from the Magnifi URL (`/magnifi/{id}` → `{id}`).
+2. Ask where the link was shared (email, LinkedIn, SMS, etc.) and tell the client to **stop resharing**.
+3. In Simplifi workspace or portal Simplifi, **Archive** the capture (or set Status = `Archived` in Capture Records).
+4. Verify: open `/magnifi/{id}` in a private window → should show **Story retired** (not the cinematic story).
+5. Confirm the capture is gone from the client’s active Amplifi / Simplifi lists.
+6. Log: capture ID, client slug, who archived, where the link had been posted, time.
+
+### Escalate when
+
+- The story contains private client data that already circulated widely.
+- Archive does not retire Magnifi (technical defect — escalate with capture ID + Status field value).
+- Client needs a formal unpublish confirmation for compliance.
+
+### What not to do
+
+- Do not promise Magnifi is private or login-gated in V1.
+- Do not point clients at Amplifi Communications / Postiz (not shipped).
+- Do not invent alternate public URLs; prefer `/magnifi/{id}` for portal share.
 
 ## Login Or Portal Access SOP
 
@@ -123,3 +151,5 @@ The capture was received, but the share link is not ready yet. We are checking t
 ### Share Fallback
 
 If native share does not open on your device, use Copy Link and paste it into email, SMS, or LinkedIn.
+
+Remind the client: **Anyone with the link can view this story.** Prefer sharing the Magnifi URL (`/magnifi/{id}`), not an internal portal path.

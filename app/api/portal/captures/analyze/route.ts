@@ -4,6 +4,7 @@ import { getClientByPortalSlug } from '@/lib/airtable';
 import { type CaptureInput } from '@/lib/capture-pipeline';
 import { portalCaptureSource } from '@/lib/capture-records';
 import { submitCapture, toCaptureApiResponse } from '@/lib/capture-submit';
+import { sanitizeCaptureClientError } from '@/lib/capture-response';
 import { isModuleEnabled } from '@/lib/modules/portal-modules';
 import {
   MAX_CAPTURE_UPLOAD_BYTES,
@@ -152,7 +153,12 @@ export async function POST(req: Request) {
 
   if (!result.ok) {
     return NextResponse.json(
-      { ok: false, error: result.error ?? 'Simplifi could not process this opportunity.' },
+      {
+        ok: false,
+        error: sanitizeCaptureClientError(
+          result.error ?? 'Simplifi could not process this opportunity.',
+        ),
+      },
       { status: 500 },
     );
   }

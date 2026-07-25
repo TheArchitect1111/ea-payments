@@ -509,11 +509,12 @@ export default function SimplifiWorkspace({
                         <Link href={`/simplifi/opportunity/${obj.id}`} className="sw-btn sw-btn-small">
                           Opportunity profile
                         </Link>
-                        {obj.considerUrl && (
-                          <Link href={obj.considerUrl} className="sw-btn sw-btn-small sw-btn-ghost">
-                            Magnifi
-                          </Link>
-                        )}
+                        <Link
+                          href={obj.magnifiUrl || `/magnifi/${obj.id}`}
+                          className="sw-btn sw-btn-small sw-btn-ghost"
+                        >
+                          Magnifi
+                        </Link>
                         {loggedIn && (
                           <>
                             <button

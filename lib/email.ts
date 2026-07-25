@@ -1827,9 +1827,10 @@ export async function sendCaptureReadyEmail(data: {
     .join('');
 
   const bodyHtml = `
-    <p style="margin:0 0 16px;font-size:15px;color:#1A1A2E;line-height:1.7;">Your capture is ready. Simplifi analyzed it, Magnifi built the story, and Amplifi can share the link.</p>
+    <p style="margin:0 0 16px;font-size:15px;color:#1A1A2E;line-height:1.7;">Your capture is ready. Simplifi analyzed it, Magnifi built the story, and Amplifi can help you share the Magnifi link.</p>
     <p style="margin:0 0 8px;font-size:14px;font-weight:700;color:#1B2B4D;">${escHtml(data.title)}</p>
-    <p style="margin:0 0 18px;font-size:13px;color:#555;line-height:1.7;">Open Magnifi for the cinematic experience, share the CTP link, or continue the work from the workspace.</p>
+    <p style="margin:0 0 12px;font-size:13px;color:#555;line-height:1.7;">Open Magnifi for the cinematic experience, or continue from the workspace. Amplifi drafts do not auto-post.</p>
+    <p style="margin:0 0 18px;font-size:13px;color:#8B5A00;line-height:1.7;font-weight:600;">Anyone with the link can view this story. Do not share sensitive captures — archive the capture in Simplifi to retire the public Magnifi page.</p>
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #E4E4E4;margin:18px 0;">
       ${linkRows}
     </table>`;
@@ -1841,8 +1842,8 @@ export async function sendCaptureReadyEmail(data: {
       title: 'Capture Complete',
       eyebrow: 'Simplifi → Magnifi → Amplifi',
       bodyHtml,
-      ctaLabel: data.considerUrl ? 'Open CTP Link' : 'Open Magnifi',
-      ctaUrl: data.considerUrl ?? data.magnifiUrl,
+      ctaLabel: 'Open Magnifi',
+      ctaUrl: data.magnifiUrl,
     })
   );
 }

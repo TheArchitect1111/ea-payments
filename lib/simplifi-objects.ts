@@ -55,7 +55,8 @@ export function captureToObject(capture: CaptureRecord, baseUrl?: string): Simpl
   const base = baseUrl?.replace(/\/$/, '') ?? '';
   const considerUrl =
     capture.considerSlug && base ? `${base}/consider/${capture.considerSlug}` : undefined;
-  const magnifiUrl = capture.considerSlug && base ? `${base}/magnifi/${capture.id}` : undefined;
+  // Always durable relative Magnifi path — matches capture-response / portal Simplifi.
+  const magnifiUrl = `/magnifi/${capture.id}`;
 
   return {
     id: capture.id,

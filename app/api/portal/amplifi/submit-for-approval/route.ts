@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { guardPortalApi, portalApiUnauthorized, portalTenant } from '@/lib/api/portal-route';
 import { createContentRequest, getClientByPortalSlug } from '@/lib/airtable';
 import { sendContentRequestConfirmation, sendInternalNotification } from '@/lib/email';
+import { isModuleEnabled } from '@/lib/modules/portal-modules';
 import { notifyPortal } from '@/lib/portal-notify';
 import { EA_PLATFORM_URL } from '@/lib/platform-urls';
 
@@ -18,6 +19,21 @@ export async function POST(req: NextRequest) {
   const client = await getClientByPortalSlug(tenant.portalSlug);
   if (!client) {
     return NextResponse.json({ ok: false, error: 'Client not found.' }, { status: 404 });
+  }
+
+  const amplifiEnabled = await isModuleEnabled({
+    orgId: tenant.organizationId,
+    slug: tenant.portalSlug,
+    moduleId: 'amplifi',
+    packagePurchased: client.packagePurchased,
+    role: session.role,
+  });
+
+  if (!amplifiEnabled && tenant.portalSlug !== 'demo-client') {
+    return NextResponse.json(
+      { ok: false, error: 'Amplifi is required to submit drafts for approval.' },
+      { status: 403 },
+    );
   }
 
   const body = (await req.json()) as {

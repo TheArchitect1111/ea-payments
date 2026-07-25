@@ -57,6 +57,21 @@
   margin: 0 0 14px;
 }
 
+.ea-amplifi-state-title {
+  margin: 0 0 10px;
+  font-size: 22px;
+  color: var(--pc-navy, #1b2b4d);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.ea-amplifi-state-empty,
+.ea-amplifi-state-error {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
 .ea-amplifi-steps {
   display: grid;
   gap: 12px;
@@ -151,10 +166,19 @@
   text-align: center;
 }
 
-.ea-amplifi-cta p {
-  margin: 0 0 18px;
+.ea-amplifi-cta > p:first-child {
+  margin: 0 0 10px;
   font-size: 17px;
   font-weight: 700;
+}
+
+.ea-amplifi-disclaimer {
+  margin: 0 auto 18px;
+  max-width: 36rem;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.78);
 }
 
 .ea-amplifi-cta-actions {
@@ -164,10 +188,16 @@
   justify-content: center;
 }
 
+.ea-amplifi-cta-actions-inline {
+  margin-top: 16px;
+  justify-content: flex-start;
+}
+
 .ea-amplifi-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  min-height: 44px;
   padding: 11px 16px;
   border-radius: 4px;
   font-size: 11px;
@@ -175,6 +205,7 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
   text-decoration: none;
+  box-sizing: border-box;
 }
 
 .ea-amplifi-btn-primary {
@@ -184,6 +215,18 @@
 .ea-amplifi-btn-secondary {
   border: 1.5px solid rgba(255, 255, 255, 0.45);
   color: #fff;
+}
+
+.ea-amplifi-btn-ink {
+  background: var(--pc-navy, #1b2b4d);
+  color: #fff;
+  border: 1.5px solid transparent;
+}
+
+.ea-amplifi-btn-ink-outline {
+  background: transparent;
+  color: var(--pc-navy, #1b2b4d);
+  border: 1.5px solid #d1d5db;
 }
 
 @keyframes eaAmplifiFadeUp {
@@ -197,12 +240,54 @@
   }
 }
 
+/* Phone viewport (~390×844) — stacked CTAs, reachable share actions */
 @media (max-width: 760px) {
+  .ea-amplifi-page {
+    gap: 16px;
+  }
+
   .ea-amplifi-stat-grid {
     grid-template-columns: 1fr;
   }
 
   .ea-amplifi-reveal {
     padding: 28px 20px;
+    min-height: 0;
+  }
+
+  .ea-amplifi-panel,
+  .ea-amplifi-cta {
+    padding: 20px 16px;
+  }
+
+  .ea-amplifi-cta-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ea-amplifi-btn {
+    width: 100%;
+  }
+
+  .ea-amplifi-step {
+    grid-template-columns: 40px 1fr;
+    gap: 12px;
+    padding: 12px;
+  }
+}
+
+@media (max-width: 420px) {
+  .ea-amplifi-reveal h1 {
+    font-size: 26px;
+  }
+
+  .ea-amplifi-lede {
+    font-size: 15px;
+  }
+
+  .ea-amplifi-btn {
+    letter-spacing: 0.06em;
+    font-size: 10px;
+    padding: 12px 14px;
   }
 }

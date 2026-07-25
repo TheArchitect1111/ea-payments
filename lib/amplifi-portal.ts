@@ -29,6 +29,9 @@ export interface AmplifiPortalExperience {
   futureTitle: string;
   futureBullets: string[];
   ctaLine: string;
+  /** Hub never auto-posts — drafts are for review and manual share. */
+  shareDisclaimer: string;
+  captureCount: number;
   theme: {
     revealFrom: string;
     revealVia: string;
@@ -39,7 +42,10 @@ export interface AmplifiPortalExperience {
   };
   magnifiUrl?: string;
   guidanceUrl?: string;
+  /** /amplifi draft tool prefilled with latest Magnifi when available. */
+  draftShareUrl?: string;
   latestCaptureTitle?: string;
+  latestCaptureId?: string;
 }
 
 const VISIBILITY_JOURNEY: AmplifiJourneyStep[] = [
@@ -139,6 +145,14 @@ export function buildAmplifiPortalExperience(
 
   const magnifiUrl = latestCapture ? `/magnifi/${latestCapture.id}` : undefined;
   const guidanceUrl = latestCapture ? `/simplifi/guidance/${latestCapture.id}` : undefined;
+  const draftShareUrl = latestCapture
+    ? `/amplifi?capture=${encodeURIComponent(latestCapture.id)}`
+    : '/amplifi';
+  const shareDisclaimer =
+    'Amplifi helps you draft and share Magnifi stories. Nothing auto-posts — you review every draft before you (or your team) publish. Anyone with the link can view this story.';
+
+  const emptyLede =
+    'Capture once in Simplifi to create a Magnifi story you can open, draft from, and share. Amplifi does not auto-post or run a content calendar.';
 
   if (mode === 'athlete') {
     return {
@@ -146,17 +160,17 @@ export function buildAmplifiPortalExperience(
       modeLabel: 'Amplifi™ · Athlete Development',
       firstName,
       organization,
-      headline: `${firstName}, your future`,
-      headlineAccent: ' is bigger than you think.',
-      lede: 'This is not a report. This is your development story — told the way it deserves to be told.',
+      headline: captureCount === 0 ? `${firstName}, start with one story` : `${firstName}, your future`,
+      headlineAccent: captureCount === 0 ? ' worth sharing.' : ' is bigger than you think.',
+      lede: captureCount === 0 ? emptyLede : 'This is not a report. This is your development story — told the way it deserves to be told.',
       journey: ATHLETE_JOURNEY,
       stats: [
         { label: 'Profile', value: organization, detail: client.packagePurchased },
         { label: 'Onboarding', value: `${pct}%`, detail: client.onboardingStatus ?? 'In progress' },
-        { label: 'Captures', value: String(captureCount), detail: 'Simplifi opportunities tracked' },
+        { label: 'Stories', value: String(captureCount), detail: captureCount ? 'Ready to open & share' : 'Capture once to begin' },
       ],
       insightCopy:
-        'Decision-makers are not looking for perfect. They are looking for prepared, visible, and ready. Amplifi exists to make that preparation impossible to miss.',
+        'Decision-makers are not looking for perfect. They are looking for prepared, visible, and ready. Amplifi makes that story easy to open and share — you stay in control of every post.',
       futureTitle: 'Twelve months from now',
       futureBullets: [
         'Your story is active with programs and partners that match your goals.',
@@ -164,11 +178,18 @@ export function buildAmplifiPortalExperience(
         'Conversations turn into visits, offers, and decisions you control.',
         'You are not chasing opportunity. Opportunity knows where to find you.',
       ],
-      ctaLine: 'I can see it. I believe it. I know how to get there.',
+      ctaLine:
+        captureCount === 0
+          ? 'Capture once. Then open your Magnifi story and share when you are ready.'
+          : 'Open your Magnifi story. Review a draft before you post.',
+      shareDisclaimer,
+      captureCount,
       theme: themeForMode(mode),
       magnifiUrl,
       guidanceUrl,
+      draftShareUrl,
       latestCaptureTitle: latestCapture?.title,
+      latestCaptureId: latestCapture?.id,
     };
   }
 
@@ -178,29 +199,36 @@ export function buildAmplifiPortalExperience(
       modeLabel: 'Amplifi™ · Media & Reach',
       firstName,
       organization,
-      headline: `${firstName}, your audience`,
-      headlineAccent: ' deserves a platform.',
-      lede: magnifiDef.cinematicHook(organization),
+      headline: captureCount === 0 ? `${firstName}, start with one story` : `${firstName}, your audience`,
+      headlineAccent: captureCount === 0 ? ' worth sharing.' : ' deserves a platform.',
+      lede: captureCount === 0 ? emptyLede : magnifiDef.cinematicHook(organization),
       journey: MEDIA_JOURNEY,
       stats: [
         { label: 'Brand', value: organization, detail: 'Creator / media profile' },
         { label: 'Pulse health', value: profile.healthLabel, detail: `${profile.operationalHealth}/100 operational` },
-        { label: 'Captures', value: String(captureCount), detail: 'Content & opportunity signals' },
+        { label: 'Stories', value: String(captureCount), detail: captureCount ? 'Ready to open & share' : 'Capture once to begin' },
       ],
       insightCopy:
-        'Attention without systems becomes exhaustion. Amplifi turns your message into momentum people can see and share.',
+        'Attention without systems becomes exhaustion. Amplifi turns Simplifi captures into Magnifi stories and share drafts you review — not an auto-publish calendar.',
       futureTitle: 'Twelve months from now',
       futureBullets: [
         'Editorial rhythm runs without burning you out.',
         'Community and sponsors see consistent, premium presence.',
-        'Simplifi captures ideas once; Magnifi turns them into experiences.',
+        'Simplifi captures ideas once; Magnifi turns them into experiences you share.',
         'Your platform compounds — it does not reset every Monday.',
       ],
-      ctaLine: 'I can see the platform. I am ready to build it.',
+      ctaLine:
+        captureCount === 0
+          ? 'Capture once. Then open your Magnifi story and share when you are ready.'
+          : 'Open your Magnifi story. Review a draft before you post.',
+      shareDisclaimer,
+      captureCount,
       theme: themeForMode(mode),
       magnifiUrl,
       guidanceUrl,
+      draftShareUrl,
       latestCaptureTitle: latestCapture?.title,
+      latestCaptureId: latestCapture?.id,
     };
   }
 
@@ -209,17 +237,20 @@ export function buildAmplifiPortalExperience(
     modeLabel: 'Amplifi™ · Share More. Reach More.',
     firstName,
     organization,
-    headline: `${firstName}, your impact`,
-    headlineAccent: ' should be visible.',
-    lede: 'One message can create visibility across your entire organization. Show reach. Show momentum. Show progress.',
+    headline: captureCount === 0 ? `${firstName}, start with one story` : `${firstName}, your impact`,
+    headlineAccent: captureCount === 0 ? ' worth sharing.' : ' should be visible.',
+    lede:
+      captureCount === 0
+        ? emptyLede
+        : 'Open Magnifi stories from your Simplifi captures. Draft copy to share — Amplifi never auto-posts.',
     journey: VISIBILITY_JOURNEY,
     stats: [
       { label: 'Organization', value: organization, detail: client.packagePurchased },
       { label: 'Onboarding', value: `${pct}%`, detail: client.onboardingStatus ?? 'Getting started' },
-      { label: 'Pulse', value: profile.healthLabel, detail: `${profile.operationalHealth}/100 health score` },
+      { label: 'Stories', value: String(captureCount), detail: captureCount ? 'Ready to open & share' : 'Capture once to begin' },
     ],
     insightCopy:
-      'Leaders lose hours chasing updates. Amplifi connects Simplifi captures, Magnifi stories, and Pulse scores so everyone sees what is happening.',
+      'Amplifi connects Simplifi captures to Magnifi stories you can open and share. Drafts stay under review until you (or your team) decide to post — no Communications calendar, no auto-publish.',
     futureTitle: 'Twelve months from now',
     futureBullets: [
       'Stakeholders see progress without another status meeting.',
@@ -227,10 +258,17 @@ export function buildAmplifiPortalExperience(
       'Pulse tracks client success scores your team can stand behind.',
       'You spend less time explaining — more time executing.',
     ],
-    ctaLine: 'I can see it. I know how to amplify it.',
+    ctaLine:
+      captureCount === 0
+        ? 'Capture once. Then open your Magnifi story and share when you are ready.'
+        : 'Open your Magnifi story. Review a draft before you post.',
+    shareDisclaimer,
+    captureCount,
     theme: themeForMode('visibility'),
     magnifiUrl,
     guidanceUrl,
+    draftShareUrl,
     latestCaptureTitle: latestCapture?.title,
+    latestCaptureId: latestCapture?.id,
   };
 }

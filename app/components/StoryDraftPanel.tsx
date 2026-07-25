@@ -31,7 +31,7 @@ export default function StoryDraftPanel({ draft }: { draft: AmplifiSocialDraft }
 
   return (
     <div className="sdp-panel">
-      <p className="sdp-label">Amplifi story drafts</p>
+      <p className="sdp-label">Review before posting</p>
       <div className="sdp-tabs">
         {tabs
           .filter((t) => t.show)

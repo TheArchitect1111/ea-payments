@@ -5,8 +5,8 @@ import AmplifiPostApp from './AmplifiPostApp';
 import './amplifi.css';
 
 export const metadata: Metadata = {
-  title: 'Amplifi™ — Social Posting',
-  description: 'Turn Magnifi stories into LinkedIn, X, and Facebook posts.',
+  title: 'Amplifi™ — Review before posting',
+  description: 'Draft share copy from Magnifi stories. Review before you post — Amplifi does not auto-publish.',
 };
 
 export const dynamic = 'force-dynamic';

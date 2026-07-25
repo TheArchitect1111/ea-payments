@@ -10,7 +10,9 @@ export async function GET() {
   const tenant = portalTenant(auth.session);
   const session = auth.session;
 
-  const captures = await getPortalCaptures(tenant.portalSlug, 25);
+  const captures = (await getPortalCaptures(tenant.portalSlug, 25)).filter(
+    (c) => c.status !== 'Archived',
+  );
   return NextResponse.json({
     ok: true,
     captures: captures.map((c) => ({
@@ -21,7 +23,7 @@ export async function GET() {
       shareUrl: c.shareUrl,
       considerSlug: c.considerSlug,
       dateCaptured: c.dateCaptured,
-      magnifiUrl: c.considerSlug ? `/consider/${c.considerSlug}` : c.shareUrl,
+      magnifiUrl: `/magnifi/${c.id}`,
     })),
   });
 }

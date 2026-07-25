@@ -14,7 +14,14 @@ export default async function AmplifiPortalPage({ params }: { params: Promise<{ 
   const { slug } = await params;
   const { client } = await requirePortalModule(slug, 'amplifi');
 
-  const captures = await getPortalCaptures(slug, 5);
+  let captures: Awaited<ReturnType<typeof getPortalCaptures>> = [];
+  let loadError: string | null = null;
+  try {
+    captures = (await getPortalCaptures(slug, 5)).filter((c) => c.status !== 'Archived');
+  } catch {
+    loadError = 'Stories could not be loaded right now. Try again in a moment, or open Simplifi to capture.';
+  }
+
   const profile = await getClientSuccessProfile(client);
   const firstName = client.clientName.split(' ')[0] ?? client.clientName;
   const experience = buildAmplifiPortalExperience(client, captures, profile);
@@ -23,7 +30,7 @@ export default async function AmplifiPortalPage({ params }: { params: Promise<{ 
     <PortalShell slug={slug} active="amplifi" firstName={firstName}>
       <main className="ep-main ep-main-amplifi">
         <PortalModuleChromeStrip />
-        <AmplifiPortalExperience experience={experience} slug={slug} />
+        <AmplifiPortalExperience experience={experience} slug={slug} loadError={loadError} />
       </main>
     </PortalShell>
   );

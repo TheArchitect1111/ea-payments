@@ -3,7 +3,6 @@
 import { useCallback, useRef, useState, useEffect } from 'react';
 import Link from 'next/link';
 import CaptureSuccessPanel from '@/app/components/CaptureSuccessPanel';
-import ActiveSavePanel from '@/app/components/ActiveSavePanel';
 import CaptureProcessingPanel from '@/app/components/CaptureProcessingPanel';
 import type { AmplifiSocialDraft } from '@/lib/amplifi-draft';
 import GuidedFirstSuccessFlow from '@/app/components/guided-first-success/GuidedFirstSuccessFlow';
@@ -18,13 +17,18 @@ interface AnalyzeResponse {
   error?: string;
   processing?: boolean;
   captureId?: string;
-  record?: { id?: string; title?: string };
+  record?: { id?: string; title?: string; opportunityScore?: number; nextAction?: string };
   considerUrl?: string;
   magnifiUrl?: string;
   guidanceUrl?: string;
   workspaceUrl?: string;
+  opportunityUrl?: string;
   clientMessage?: string;
   amplifiDraft?: AmplifiSocialDraft;
+  decisionPath?: string;
+  decisionConfidence?: number;
+  decisionRationale?: string;
+  nextAction?: string;
 }
 
 export default function AmplifiShareApp({
@@ -209,19 +213,23 @@ export default function AmplifiShareApp({
 
       {open && result?.record && !result.processing && (
         <div className="as-sheet as-sheet-open" role="dialog">
-          {loggedIn && result.record.id && (
-            <ActiveSavePanel
-              recordId={result.record.id}
-              title={result.record.title ?? 'Your Amplifi story'}
-            />
-          )}
           <CaptureSuccessPanel
             title={result.record.title ?? 'Your Amplifi story'}
+            recordId={result.record.id}
+            loggedIn={loggedIn}
+            insight={{
+              opportunityScore: result.record.opportunityScore,
+              nextAction: result.nextAction ?? result.record.nextAction,
+              decisionPath: result.decisionPath,
+              decisionConfidence: result.decisionConfidence,
+              decisionRationale: result.decisionRationale,
+            }}
             links={{
               magnifiUrl: result.magnifiUrl,
               considerUrl: result.considerUrl,
               guidanceUrl: result.guidanceUrl,
               workspaceUrl: result.workspaceUrl,
+              opportunityUrl: result.opportunityUrl ?? `/simplifi/opportunity/${result.record.id}`,
               clientMessage: result.clientMessage,
             }}
             amplifiDraft={result.amplifiDraft}

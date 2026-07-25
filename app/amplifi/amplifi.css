@@ -186,3 +186,19 @@
   font-size: 13px;
   margin-top: 8px;
 }
+
+@media (max-width: 420px) {
+  .af-platforms {
+    grid-template-columns: 1fr;
+  }
+
+  .af-platform,
+  .af-btn {
+    min-height: 44px;
+    width: 100%;
+  }
+
+  .af-actions {
+    flex-direction: column;
+  }
+}
