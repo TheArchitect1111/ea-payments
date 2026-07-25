@@ -32,7 +32,7 @@ A entitled client can, without EA operator help:
 | 3 | Amplifi portal hub | Empty/full states + clear CTAs | 1–2 — **COMPLETE** |
 | 4 | Share & access policy | Auth/public rules + copy | 2–3 — **COMPLETE** (session gate deferred) |
 | 5 | Client QA cert | Real slug smoke + checklist | 1–4 — **COMPLETE** |
-| 6 | Ops gate | Monitoring + support SOP | 5 |
+| 6 | Ops gate | Monitoring + support SOP | 5 — **COMPLETE** |
 
 Do not start Phase 6 until Phase 5 passes on production.
 
@@ -232,15 +232,29 @@ Checklist (production):
 
 ---
 
-## Phase 6 — Ops & support gate (½ day)
+## Phase 6 — Ops & support gate — **COMPLETE 2026-07-25**
 
-**Owner:** Ops
+**Owner:** Ops + engineering
 
-- [ ] Uptime (or health) includes Magnifi sample + `/portal/.../amplifi` auth-aware check if practical.  
-- [ ] Triage SOP: Magnifi 404, empty Amplifi, entitlement missing — first responder steps (`docs/PRODUCT-SUPPORT-AND-TRIAGE-SOP.md`).  
-- [ ] Re-run `node scripts/validate-simplifi-launch-readiness.mjs https://efficiencyarchitects.online` (Magnifi reachable still green).
+### Shipped
 
-**Exit:** Support can clear client Amplifi/Magnifi issues without engineering on call.
+| Item | Change |
+|------|--------|
+| Health probes | `lib/amplifi-magnifi-health.ts` — Magnifi sample/unavailable + Amplifi unauth/authed |
+| Platform ops | `/api/health/ops` always includes Amplifi+Magnifi subsystem |
+| Launch health | Diagnostic `products.amplifiMagnifiPortalReady` + probe detail (admin) |
+| Uptime guidance | Pass-1 ops copy lists Magnifi + Amplifi monitors |
+| Launch readiness | `validate-simplifi-launch-readiness.mjs` checks Magnifi calm page + Amplifi gates |
+| Triage SOP | Empty Amplifi Hub + Entitlement Missing (+ existing Magnifi 404 / retire) |
+| Tests | `node scripts/test-amplifi-magnifi-portal-phase6.mjs` |
+
+### Phase 6 checklist
+
+- [x] Uptime/health includes Magnifi sample + Amplifi auth-aware check  
+- [x] Triage SOP: Magnifi unavailable, empty Amplifi, entitlement missing  
+- [x] Re-run `node scripts/validate-simplifi-launch-readiness.mjs https://efficiencyarchitects.online`
+
+**Exit:** Support can clear client Amplifi/Magnifi issues without engineering on call. **Portal-ready sequence complete.**
 
 ---
 

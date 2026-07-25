@@ -119,6 +119,51 @@ async function main() {
     record('magnifi-reachable', false, { error: 'no magnifiUrl' });
   }
 
+  // Phase 6 — Amplifi hub auth-aware + Magnifi unavailable calm page
+  const magnifiMissing = await fetchStatus(`${BASE}/magnifi/__ea_ops_probe_missing__`);
+  let missingHtml = '';
+  if (magnifiMissing.status === 200 && magnifiMissing.res) {
+    missingHtml = await magnifiMissing.res.text();
+  }
+  record(
+    'magnifi-unavailable-calm',
+    magnifiMissing.status === 200 && /Story unavailable|Magnifi/i.test(missingHtml),
+    { status: magnifiMissing.status },
+  );
+
+  const amplifiUnauth = await fetchStatus(`${BASE}/portal/demo-client/amplifi`);
+  record(
+    'amplifi-unauth-login-gate',
+    (amplifiUnauth.status === 307 || amplifiUnauth.status === 308) &&
+      /portal\/login/i.test(amplifiUnauth.res?.headers?.get('location') || ''),
+    {
+      status: amplifiUnauth.status,
+      location: amplifiUnauth.res?.headers?.get('location'),
+    },
+  );
+
+  let amplifiCookie = cookie;
+  if (!amplifiCookie) {
+    const enter = await fetch(`${BASE}/api/auth/demo-enter?next=${encodeURIComponent('/portal/demo-client/amplifi')}`, {
+      redirect: 'manual',
+    });
+    amplifiCookie = cookieHeader(parseCookies(enter));
+  }
+  if (amplifiCookie) {
+    const amplifiRes = await fetch(`${BASE}/portal/demo-client/amplifi`, {
+      headers: { Cookie: amplifiCookie },
+      redirect: 'follow',
+    });
+    const amplifiHtml = await amplifiRes.text();
+    record(
+      'amplifi-hub-authed',
+      amplifiRes.ok && /Amplifi/i.test(amplifiHtml) && amplifiHtml.length > 4000,
+      { status: amplifiRes.status, bytes: amplifiHtml.length },
+    );
+  } else {
+    record('amplifi-hub-authed', false, { error: 'no portal session cookie' });
+  }
+
   if (guidancePath) {
     const guidance = await fetchStatus(`${BASE}${guidancePath}`);
     record('guidance-reachable', guidance.status === 200, { path: guidancePath, status: guidance.status });

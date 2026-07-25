@@ -4,6 +4,7 @@
  */
 import { getClientByPortalSlug } from '@/lib/airtable';
 import { resolveConsiderExperience } from '@/lib/consider-resolve';
+import { probeAmplifiMagnifiPortalReady } from '@/lib/amplifi-magnifi-health';
 import { EA_PLATFORM_URL } from '@/lib/platform-urls';
 import { SIMPLIFI_APP_URL } from '@/lib/simplifi-app-host';
 import { productionSecretIssues } from '@/lib/integration-env';
@@ -65,6 +66,8 @@ export async function buildLaunchHealthDiagnostic(): Promise<{
   const magnifiOperational = selenaCapture;
   const amplifiOperational = friendTestingReady && env.resend && env.resendFrom;
   const simplifiGuestCapture = demoClient;
+
+  const amplifiMagnifiProbe = await probeAmplifiMagnifiPortalReady();
 
   const secretIssues = productionSecretIssues();
   const controls = {
@@ -190,6 +193,9 @@ export async function buildLaunchHealthDiagnostic(): Promise<{
           airtableSchema.creativeStudio.ok &&
           Boolean(process.env.STRIPE_SECRET_KEY?.trim()) &&
           Boolean(process.env.ADMIN_SESSION_SECRET?.trim()),
+        /** Live HTTP probes — Magnifi sample + Amplifi auth gates (Phase 6). */
+        amplifiMagnifiPortalReady: amplifiMagnifiProbe.ok,
+        amplifiMagnifiProbe,
       },
       airtableSchema,
       ctp: {

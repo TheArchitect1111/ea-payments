@@ -32,7 +32,7 @@ Stabilize and launch Version 1 (Website + Guided Project Experience). Prefer con
 1. Complete TEST commercial certification (blocked on `sk_test` + Resend).
 2. ~~Simplify Mission Control / Command Center (less is more)~~ — done on `/admin/master`.
 3. Amplifi Communications + Postiz engine — deferred product sprint.
-4. **Amplifi + Magnifi portal-ready** — Phases 0–5 complete (`docs/AMPLIFI-MAGNIFI-PORTAL-READY-BUILD.md`); next = Phase 6 ops & support gate. Deploy local Phase 2–4 polish when ready for copy/warning parity.
+4. **Amplifi + Magnifi portal-ready** — Phases 0–6 complete (`docs/AMPLIFI-MAGNIFI-PORTAL-READY-BUILD.md`). Sequence done; deploy Phase 6 health probes when ready.
 
 ## Review gate
 

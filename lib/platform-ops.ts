@@ -1,8 +1,14 @@
 import { listAgents } from '@/lib/agents/registry';
 import type { AgentHealth } from '@/lib/agents/types';
+import {
+  amplifiMagnifiSubsystem,
+  probeAmplifiMagnifiPortalReady,
+} from '@/lib/amplifi-magnifi-health';
 import { productionSecretIssues } from '@/lib/integration-env';
 import { buildLaunchCommandCenterReport, type LaunchCommandCenterReport } from '@/lib/launch-command-center';
 import { monitoringConfigured } from '@/lib/monitoring';
+import { launchProvidersAsOpsSubsystems, listLaunchProviderHealth } from '@/lib/platform/launch-provider-catalog';
+import type { LaunchProviderHealth } from '@/lib/platform/launch-provider-catalog';
 import { EA_PLATFORM_URL } from '@/lib/platform-urls';
 
 export type OpsSubsystemStatus = 'healthy' | 'degraded' | 'critical' | 'unknown' | 'not_configured';
@@ -23,6 +29,8 @@ export type PlatformOpsReport = {
   launchBlockers: number;
   recommendedNextAction: string;
   subsystems: PlatformOpsSubsystem[];
+  /** Optional / future engines from launch-provider-catalog (disabled until configured). */
+  launchProviders: LaunchProviderHealth[];
   agents: AgentHealth[];
   monitoring: {
     sentryConfigured: boolean;
@@ -37,6 +45,8 @@ export type PlatformOpsReport = {
     commandCenter: string;
     healthLaunch: string;
     missionControl: string;
+    stackDoc: string;
+    integrationGate: string;
   };
 };
 
@@ -45,6 +55,7 @@ const CRITICAL_ROUTE_PATHS = [
   '/api/health/command-center',
   '/start',
   '/checkout',
+  '/magnifi/__ea_ops_probe_missing__',
 ] as const;
 
 async function probeRoute(path: string): Promise<{ ok: boolean; status: number }> {
@@ -152,14 +163,20 @@ export async function buildPlatformOpsReport(options?: {
   const probeRoutes = options?.probeRoutes ?? process.env.PLATFORM_OPS_PROBE_ROUTES === 'true';
   const verifyBackup = options?.verifyBackup ?? true;
 
-  const [launchReport, backup, agentHealth] = await Promise.all([
+  const [launchReport, backup, agentHealth, amplifiMagnifi] = await Promise.all([
     buildLaunchCommandCenterReport(),
     verifyBackup ? verifyBackupDestination() : Promise.resolve(null),
     Promise.all(listAgents().map((agent) => agent.health())),
+    probeAmplifiMagnifiPortalReady(),
   ]);
 
   const secretIssues = productionSecretIssues();
-  const subsystems = subsystemFromLaunch(launchReport);
+  const subsystems = [
+    ...subsystemFromLaunch(launchReport),
+    ...launchProvidersAsOpsSubsystems(),
+    amplifiMagnifiSubsystem(amplifiMagnifi),
+  ];
+  const launchProviders = listLaunchProviderHealth();
 
   if (probeRoutes) {
     const routeResults = await Promise.all(
@@ -198,6 +215,7 @@ export async function buildPlatformOpsReport(options?: {
     launchBlockers: launchReport.launchBlockers,
     recommendedNextAction: launchReport.recommendedNextAction,
     subsystems,
+    launchProviders,
     agents: agentHealth,
     monitoring: {
       sentryConfigured: monitoringConfigured(),
@@ -214,6 +232,8 @@ export async function buildPlatformOpsReport(options?: {
       commandCenter: `${platformUrl}/api/health/command-center`,
       healthLaunch: `${platformUrl}/api/health/launch`,
       missionControl: `${platformUrl}/api/mission-control`,
+      stackDoc: 'docs/EA-Core-Technology-Stack.md',
+      integrationGate: 'docs/INTEGRATION-GATE.md',
     },
   };
 }

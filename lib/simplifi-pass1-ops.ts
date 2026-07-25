@@ -149,7 +149,7 @@ export async function getSimplifiPass1Checks(): Promise<SimplifiPass1Check[]> {
       ok: uptimeConfigured(),
       message: uptimeConfigured()
         ? 'Uptime dashboard URL configured.'
-        : 'UPTIME_KUMA_DASHBOARD_URL (or UPTIME_MONITORING_URL) not set — confirm monitors cover /simplifi/capture + /api/health/launch.',
+        : 'UPTIME_KUMA_DASHBOARD_URL (or UPTIME_MONITORING_URL) not set — confirm monitors cover /simplifi/capture, /magnifi/{id}, /portal/{slug}/amplifi (auth), and /api/health/launch.',
       fix: 'docs/SIMPLIFI-GOAL-B-OPERATOR.md#pass-1--infrastructure',
     },
   ];

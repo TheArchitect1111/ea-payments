@@ -1,0 +1,35 @@
+{
+  "phase": 6,
+  "name": "Amplifi/Magnifi ops & support gate",
+  "base": "https://efficiencyarchitects.online",
+  "checkedAt": "2026-07-25T15:20:00.000Z",
+  "contractTests": {
+    "script": "scripts/test-amplifi-magnifi-portal-phase6.mjs",
+    "pass": true
+  },
+  "launchReadiness": {
+    "script": "scripts/validate-simplifi-launch-readiness.mjs",
+    "magnifiReachable": true,
+    "magnifiUnavailableCalm": true,
+    "amplifiUnauthLoginGate": true,
+    "amplifiHubAuthed": true,
+    "sampleCaptureId": "recHySVwRFWRx5q4L",
+    "note": "Public /api/health/launch returns summary-only without admin Bearer — products-simplifi / airtable-capture-schema appear undefined (pre-existing). Phase 6 Magnifi + Amplifi gates all green."
+  },
+  "sop": {
+    "doc": "docs/PRODUCT-SUPPORT-AND-TRIAGE-SOP.md",
+    "sections": [
+      "Missing Magnifi Link SOP",
+      "Empty Amplifi Hub SOP",
+      "Amplifi Entitlement Missing SOP",
+      "Retire / Unshare Sensitive Magnifi Capture"
+    ]
+  },
+  "health": {
+    "lib": "lib/amplifi-magnifi-health.ts",
+    "wiredInto": ["lib/platform-ops.ts", "lib/launch-health.ts"],
+    "deployRequired": true,
+    "note": "Live Amplifi/Magnifi HTTP probes land on production after Phase 6 deploy."
+  },
+  "pass": true
+}

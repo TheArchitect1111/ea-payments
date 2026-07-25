@@ -8,6 +8,7 @@ This SOP covers Simplifi, Magnifi, and Amplifi support. It is designed for the f
 |---|---|---|---|
 | Capture failures | Product operator | Technical owner | API returns 500, Airtable write fails, repeated file failures |
 | Missing Magnifi or Consider link | Product operator | Technical owner | Capture exists but link fields are empty or route 404s |
+| Empty Amplifi hub / missing Amplifi nav | Product operator | Client success | Entitlement grant needed or capture never created |
 | Login or portal access | Client success | Technical owner | Password reset/session issue affects multiple users |
 | Share copy or story quality | Product operator | Founder/editor | Story is technically correct but strategically off-brand |
 | Payment or onboarding handoff | Client success | Founder | Client paid but portal, email, or Make scenario did not fire |
@@ -53,6 +54,30 @@ Capture these details before troubleshooting:
 5. If neither opens:
    - Check Capture Records schema and `Share URL` / `Consider Slug`.
    - Escalate with capture ID.
+
+## Empty Amplifi Hub SOP
+
+Client opens `/portal/{slug}/amplifi` and sees “No Magnifi stories yet” (or no latest story CTA).
+
+1. Confirm they are on the **correct portal slug** and signed in.
+2. Confirm package entitles **Amplifi** (Simplifi / Implementation — not Website + Portal alone). See Entitlement Missing SOP if Amplifi nav is absent.
+3. Ask whether they have ever captured in Simplifi for this slug.
+4. If captures exist in Airtable but hub is empty:
+   - Confirm Capture Records `Portal Slug` matches exactly.
+   - Confirm Status is not all `Archived` (archived stories are hidden from the hub and Magnifi shows **Story retired**).
+5. Guide: open Simplifi → capture a URL or note once → return to Amplifi → **Open latest Magnifi story** / **Review draft before posting**.
+6. Remind: Amplifi does **not** auto-post; Magnifi links are public-by-link.
+
+## Amplifi Entitlement Missing SOP
+
+Client cannot see Amplifi in portal chrome, or `/portal/{slug}/amplifi` redirects to portal home.
+
+1. Confirm product package: **Simplifi** / `simplifi_early_access` or **Implementation Package** should include `simplifi` + `amplifi`. Website + Portal Starter does **not**.
+2. Mission Control → Capability Marketplace → **Entitlements** → enable `simplifi` and `amplifi` for the org (Phase 1 grant path).
+3. Client hard-refreshes `/portal/{slug}` — Amplifi should appear when not on CTP Client Experience chrome.
+4. Deep link check: entitled → hub loads; not entitled → redirect home (not a 500).
+5. CTP Client Experience tenants: Amplifi is intentionally out of primary CX nav — do not “fix” by adding an Amplifi tab to CX.
+6. Escalate if fulfillment/login backfill (`ensurePackageEntitlements`) failed after a paid Simplifi checkout.
 
 ## Retire / Unshare Sensitive Magnifi Capture
 
