@@ -15,7 +15,8 @@ export type PulseProduct =
   | 'update-hub'
   | 'cpr'
   | 'brotherhub'
-  | 'sisterhub';
+  | 'sisterhub'
+  | 'events';
 
 export type PulseEventType =
   | 'capture.completed'
@@ -95,7 +96,9 @@ export type PulseEventType =
   | 'praison.package.ready'
   | 'factory.project.created'
   | 'factory.project.queued'
-  | 'factory.project.status';
+  | 'factory.project.status'
+  | 'event.registration.placed'
+  | 'event.registration.confirmed';
 
 export interface PulseEvent {
   product: PulseProduct;
@@ -189,6 +192,7 @@ function mapProductToModule(product: PulseProduct): string {
     cpr: 'portal',
     brotherhub: 'portal',
     sisterhub: 'portal',
+    events: 'events',
   };
   return modules[product] ?? 'pulse';
 }

@@ -131,7 +131,8 @@ const TECHNICAL_MODULE_REGISTRY: TechnicalModuleDefinition[] = [
     name: 'Event Hub™',
     tag: 'Event Hub™',
     title: 'Upcoming events',
-    description: 'Office hours, review calls, and scheduled touchpoints.',
+    description:
+      'Camps, tournaments, and registrations via pretix — plus reviews and advisor bookings.',
     requiredRole: 'guest',
     pathSegment: 'events',
   },

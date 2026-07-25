@@ -22,7 +22,8 @@ export type PulseProduct =
   | 'update-hub'
   | 'cpr'
   | 'brotherhub'
-  | 'sisterhub';
+  | 'sisterhub'
+  | 'events';
 
 export type PulseEventType =
   | 'capture.completed'
@@ -73,7 +74,9 @@ export type PulseEventType =
   | 'customer.health.changed'
   | 'expansion.opportunity'
   | 'attention.critical'
-  | 'guide.escalated';
+  | 'guide.escalated'
+  | 'event.registration.placed'
+  | 'event.registration.confirmed';
 
 export interface PulseEvent {
   product: PulseProduct;
