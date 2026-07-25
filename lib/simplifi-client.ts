@@ -164,6 +164,20 @@ export async function registerPushToken(token: string, platform = 'expo'): Promi
   });
 }
 
+export async function createWatchListItem(body: {
+  title: string;
+  url?: string;
+  notes?: string;
+  source?: string;
+  category?: string;
+}): Promise<SimplifiApiResult<{ item?: { id: string; title: string } }>> {
+  return simplifiFetch('/api/portal/simplifi/watch-list', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+}
+
 export async function logoutSession(): Promise<SimplifiApiResult> {
   return simplifiFetch('/api/auth/logout', { method: 'POST' });
 }
