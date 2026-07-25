@@ -7,8 +7,6 @@ import {
 import { productionSecretIssues } from '@/lib/integration-env';
 import { buildLaunchCommandCenterReport, type LaunchCommandCenterReport } from '@/lib/launch-command-center';
 import { monitoringConfigured } from '@/lib/monitoring';
-import { launchProvidersAsOpsSubsystems, listLaunchProviderHealth } from '@/lib/platform/launch-provider-catalog';
-import type { LaunchProviderHealth } from '@/lib/platform/launch-provider-catalog';
 import { EA_PLATFORM_URL } from '@/lib/platform-urls';
 
 export type OpsSubsystemStatus = 'healthy' | 'degraded' | 'critical' | 'unknown' | 'not_configured';
@@ -29,8 +27,6 @@ export type PlatformOpsReport = {
   launchBlockers: number;
   recommendedNextAction: string;
   subsystems: PlatformOpsSubsystem[];
-  /** Optional / future engines from launch-provider-catalog (disabled until configured). */
-  launchProviders: LaunchProviderHealth[];
   agents: AgentHealth[];
   monitoring: {
     sentryConfigured: boolean;
@@ -45,8 +41,6 @@ export type PlatformOpsReport = {
     commandCenter: string;
     healthLaunch: string;
     missionControl: string;
-    stackDoc: string;
-    integrationGate: string;
   };
 };
 
@@ -90,7 +84,7 @@ export async function verifyBackupDestination(): Promise<{
     return {
       configured: true,
       reachable: null,
-      message: 'BACKUP_DESTINATION_URI is set (non-HTTP scheme — manual verification required).',
+      message: 'BACKUP_DESTINATION_URI is set (non-HTTP scheme ΓÇö manual verification required).',
     };
   }
 
@@ -173,10 +167,8 @@ export async function buildPlatformOpsReport(options?: {
   const secretIssues = productionSecretIssues();
   const subsystems = [
     ...subsystemFromLaunch(launchReport),
-    ...launchProvidersAsOpsSubsystems(),
     amplifiMagnifiSubsystem(amplifiMagnifi),
   ];
-  const launchProviders = listLaunchProviderHealth();
 
   if (probeRoutes) {
     const routeResults = await Promise.all(
@@ -215,7 +207,6 @@ export async function buildPlatformOpsReport(options?: {
     launchBlockers: launchReport.launchBlockers,
     recommendedNextAction: launchReport.recommendedNextAction,
     subsystems,
-    launchProviders,
     agents: agentHealth,
     monitoring: {
       sentryConfigured: monitoringConfigured(),
@@ -232,8 +223,6 @@ export async function buildPlatformOpsReport(options?: {
       commandCenter: `${platformUrl}/api/health/command-center`,
       healthLaunch: `${platformUrl}/api/health/launch`,
       missionControl: `${platformUrl}/api/mission-control`,
-      stackDoc: 'docs/EA-Core-Technology-Stack.md',
-      integrationGate: 'docs/INTEGRATION-GATE.md',
     },
   };
 }
