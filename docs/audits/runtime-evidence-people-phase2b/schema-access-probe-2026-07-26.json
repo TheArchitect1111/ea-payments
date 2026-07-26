@@ -1,0 +1,47 @@
+{
+  "credentialsPresent": true,
+  "credentialLength": 82,
+  "effectiveBaseRedacted": "appGB…cINU",
+  "differsFromProduction": true,
+  "probes": [
+    {
+      "label": "meta_list_bases",
+      "status": 200,
+      "ok": true,
+      "bodySnippet": "{\"bases\":[{\"id\":\"appv0YoLIMY45fmDA\",\"name\":\"Efficiency Architects - Payments & Clients\",\"permissionLevel\":\"create\"},{\"id\":\"appGBriTtQXXBcINU\",\"name\":\"EA People Phase 2B Certificati"
+    },
+    {
+      "label": "meta_cert_tables",
+      "status": 200,
+      "ok": true,
+      "bodySnippet": "{\"tables\":[{\"id\":\"tbl73mBTKSig3pMCj\",\"name\":\"Table 1\",\"primaryFieldId\":\"fldfaOBJeErKpnby2\",\"fields\":[{\"type\":\"singleLineText\",\"id\":\"fldfaOBJeErKpnby2\",\"name\":\"Name\"},{\"type\":\"multi"
+    },
+    {
+      "label": "meta_prod_tables",
+      "status": 200,
+      "ok": true,
+      "bodySnippet": "{\"tables\":[{\"id\":\"tblEtkE88ADyIitnm\",\"name\":\"Client Records\",\"primaryFieldId\":\"flda2h23WS45dq8hK\",\"fields\":[{\"type\":\"singleLineText\",\"id\":\"flda2h23WS45dq8hK\",\"name\":\"Client Name\"},"
+    },
+    {
+      "label": "data_cert_people",
+      "status": 403,
+      "ok": false,
+      "bodySnippet": "{\"error\":{\"type\":\"INVALID_PERMISSIONS_OR_MODEL_NOT_FOUND\",\"message\":\"Invalid permissions, or the requested model was not found. Check that both your user and your token have the re"
+    }
+  ],
+  "accessibleBases": [
+    {
+      "idRedacted": "appv0…fmDA",
+      "name": "Efficiency Architects - Payments & Clients",
+      "isCert": false,
+      "isProdDefault": true
+    },
+    {
+      "idRedacted": "appGB…cINU",
+      "name": "EA People Phase 2B Certification",
+      "isCert": true,
+      "isProdDefault": false
+    }
+  ],
+  "certBaseVisibleToToken": true
+}

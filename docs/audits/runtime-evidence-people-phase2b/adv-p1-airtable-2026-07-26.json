@@ -1,0 +1,32 @@
+{
+  "ok": false,
+  "test": "ADV-P-1",
+  "adapter": "airtable",
+  "method": "multi-process simultaneous upsertPersonByIdentity",
+  "baseRedacted": "appGB…cINU",
+  "differsFromProduction": true,
+  "concurrencyPerRepetition": 12,
+  "repetitionsRequested": 5,
+  "repetitionsExecuted": 1,
+  "repetitions": [
+    {
+      "repetition": 1,
+      "concurrency": 12,
+      "orgEmailKeyRedacted": "certorg_advp1_r1#***@cert.example.test",
+      "workersOk": 12,
+      "workersTotal": 12,
+      "adapterCreatedTrueCount": 1,
+      "airtableAuthoritativeRowCount": 3,
+      "distinctPersonKeys": 3,
+      "duplicate": true,
+      "workerErrors": []
+    }
+  ],
+  "durableUniquenessProvidedByAirtable": false,
+  "note": "Process-local identity locks were NOT shared across workers. Direct OrgEmailKey query is the SoR check.",
+  "verdict": "REQUIRES DIFFERENT DATASTORE",
+  "UNIVERSAL_PEOPLE_leftOffOutsideWorkers": true,
+  "committed": false,
+  "pushed": false,
+  "deployed": false
+}

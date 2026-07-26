@@ -1,0 +1,13 @@
+{
+  "artifact": "people-phase2c-runtime-cert",
+  "verdict": "BLOCKED",
+  "at": "2026-07-26",
+  "blockers": [
+    "PEOPLE_CERT_ISOLATED=1 required (operator affirms isolated cert project)",
+    "PEOPLE_SUPABASE_URL + PEOPLE_SUPABASE_KEY (people_app) required",
+    "No local Postgres/Supabase CLI available for applying 007_people_phase2c_schema.sql in this environment"
+  ],
+  "results": [],
+  "note": "Skipped/not-run live ADV-P tests are not passes. Production was not touched.",
+  "redaction": "No secrets included"
+}

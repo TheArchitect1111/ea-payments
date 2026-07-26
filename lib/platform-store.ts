@@ -10,6 +10,7 @@ import {
   airtableCreate,
   airtableQuery,
   airtableUpdate,
+  airtableUpsertByField,
   type AirtableRecord,
 } from '@/lib/data/airtable-client';
 
@@ -23,6 +24,12 @@ export const MEMBERSHIPS_TABLE =
 
 export const EA_INTERNAL_ORG_ID =
   process.env.EA_INTERNAL_ORG_ID?.trim() || 'ea';
+
+/**
+ * People durable SoR is Postgres schema `people` (Phase 2C). Airtable People table
+ * constants were quarantined under `lib/people/_quarantine_airtable_sor/` — do not
+ * re-export them from the platform facade (INV-33).
+ */
 
 export type { AirtableRecord };
 
@@ -55,6 +62,22 @@ export async function platformUpdate(
   fields: Record<string, string | number | boolean>,
 ): Promise<AirtableRecord | null> {
   return airtableUpdate(table, recordId, fields);
+}
+
+/**
+ * Idempotent upsert keyed by an indexed lookup field — the platform pattern for
+ * emulating a UNIQUE constraint (Creative Studio / CTP Submissions / People keys).
+ * Returns `null` when Airtable is unconfigured or the write soft-failed; callers
+ * that require durability must treat `null` as a dependency failure.
+ */
+export async function platformUpsertByField(
+  table: string,
+  lookupField: string,
+  lookupValue: string,
+  fields: Record<string, unknown>,
+  typecast = true,
+): Promise<AirtableRecord | null> {
+  return airtableUpsertByField(table, lookupField, lookupValue, fields, typecast);
 }
 
 export function escapeAirtableString(value: string): string {

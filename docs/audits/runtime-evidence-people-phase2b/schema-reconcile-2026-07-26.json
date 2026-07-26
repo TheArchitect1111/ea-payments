@@ -1,0 +1,237 @@
+{
+  "ok": true,
+  "stage": "reconcile",
+  "baseRedacted": "appGB…cINU",
+  "productionUntouched": true,
+  "tables": [
+    {
+      "name": "People",
+      "tableCreated": true,
+      "fieldsCreated": [
+        "Person Key",
+        "Organization Id",
+        "Portal Slug",
+        "Display Name",
+        "Legal Name",
+        "Preferred Name",
+        "Primary Email",
+        "OrgEmailKey",
+        "OrgEmailKeys",
+        "Emails JSON",
+        "Phones JSON",
+        "Date Of Birth",
+        "Is Minor",
+        "External Ids JSON",
+        "Client Record Id",
+        "OrgExternalKey",
+        "OrgExternalKeys",
+        "Lifecycle Status",
+        "Deceased At",
+        "Merged Into Person Key",
+        "Duplicate Of Person Key",
+        "Created By User Email",
+        "Owner User Email",
+        "Source",
+        "Merge Job Id",
+        "Updated At",
+        "Created At",
+        "Payload JSON"
+      ],
+      "fieldsAlreadyPresent": 1
+    },
+    {
+      "name": "People Org Memberships",
+      "tableCreated": true,
+      "fieldsCreated": [
+        "Membership Key",
+        "Organization Id",
+        "Person Key",
+        "Roles JSON",
+        "Status",
+        "Title",
+        "Portal Membership Id",
+        "Client Record Id",
+        "Started At",
+        "Ended At"
+      ],
+      "fieldsAlreadyPresent": 1
+    },
+    {
+      "name": "People Households",
+      "tableCreated": true,
+      "fieldsCreated": [
+        "Household Key",
+        "Organization Id",
+        "Display Name",
+        "Status",
+        "Primary Contact Person Key"
+      ],
+      "fieldsAlreadyPresent": 1
+    },
+    {
+      "name": "People Household Members",
+      "tableCreated": true,
+      "fieldsCreated": [
+        "Member Key",
+        "Organization Id",
+        "Household Key",
+        "Person Key",
+        "Role",
+        "Is Authorized Representative",
+        "Authz Expires At"
+      ],
+      "fieldsAlreadyPresent": 1
+    },
+    {
+      "name": "People Relationships",
+      "tableCreated": true,
+      "fieldsCreated": [
+        "Edge Key",
+        "Organization Id",
+        "From Person Key",
+        "To Person Key",
+        "Type",
+        "Status",
+        "Expires At",
+        "Bidirectional Mirror Id",
+        "Notes"
+      ],
+      "fieldsAlreadyPresent": 1
+    },
+    {
+      "name": "People Program Links",
+      "tableCreated": true,
+      "fieldsCreated": [
+        "Link Key",
+        "Organization Id",
+        "Person Key",
+        "Kind",
+        "External Ref",
+        "Label",
+        "Status",
+        "Role In Program"
+      ],
+      "fieldsAlreadyPresent": 1
+    },
+    {
+      "name": "People Consents",
+      "tableCreated": true,
+      "fieldsCreated": [
+        "Consent Key",
+        "Organization Id",
+        "Person Key",
+        "Purpose",
+        "Status",
+        "Captured At",
+        "Expires At",
+        "Source",
+        "Actor Person Key"
+      ],
+      "fieldsAlreadyPresent": 1
+    },
+    {
+      "name": "People ACL Grants",
+      "tableCreated": true,
+      "fieldsCreated": [
+        "Grant Key",
+        "Organization Id",
+        "Resource Type",
+        "Resource Id",
+        "Grantee Kind",
+        "Grantee Value",
+        "Relation",
+        "Fields Allow JSON",
+        "Fields Deny JSON",
+        "Expires At"
+      ],
+      "fieldsAlreadyPresent": 1
+    },
+    {
+      "name": "People Audit",
+      "tableCreated": true,
+      "fieldsCreated": [
+        "Audit Key",
+        "Organization Id",
+        "Actor Email",
+        "Actor Person Key",
+        "Action",
+        "Subject Person Key",
+        "At",
+        "Meta JSON"
+      ],
+      "fieldsAlreadyPresent": 1
+    },
+    {
+      "name": "People Merge Jobs",
+      "tableCreated": true,
+      "fieldsCreated": [
+        "Job Id",
+        "Job Key",
+        "Organization Id",
+        "Survivor Person Key",
+        "Absorbed Person Key",
+        "Status",
+        "Completed Steps JSON",
+        "Attempts",
+        "Actor Email",
+        "Last Error",
+        "Meta JSON",
+        "Created At",
+        "Updated At"
+      ],
+      "fieldsAlreadyPresent": 1
+    },
+    {
+      "name": "People Import Jobs",
+      "tableCreated": true,
+      "fieldsCreated": [
+        "Job Id",
+        "Organization Id",
+        "Idempotency Key",
+        "Source",
+        "Status",
+        "Row Count",
+        "Ok Count",
+        "Failed Count",
+        "Actor Email",
+        "Dry Run",
+        "Last Error",
+        "Meta JSON",
+        "Created At",
+        "Updated At"
+      ],
+      "fieldsAlreadyPresent": 1
+    },
+    {
+      "name": "People Import Row Results",
+      "tableCreated": true,
+      "fieldsCreated": [
+        "Row Key",
+        "Organization Id",
+        "Import Job Id",
+        "Row Number",
+        "Status",
+        "Person Key",
+        "Error",
+        "Created At"
+      ],
+      "fieldsAlreadyPresent": 1
+    },
+    {
+      "name": "People Migration Checkpoints",
+      "tableCreated": true,
+      "fieldsCreated": [
+        "Checkpoint Key",
+        "Organization Id",
+        "Job Id",
+        "Last Client Record Id",
+        "Processed",
+        "Created",
+        "Linked",
+        "Status",
+        "Updated At"
+      ],
+      "fieldsAlreadyPresent": 1
+    }
+  ]
+}

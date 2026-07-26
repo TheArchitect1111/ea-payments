@@ -1,0 +1,65 @@
+{
+  "artifact": "people-phase2b-airtable-cert-session-final",
+  "date": "2026-07-26",
+  "preflight": {
+    "credentialsAvailable": true,
+    "certBaseRedacted": "appGB…cINU",
+    "certBaseName": "EA People Phase 2B Certification",
+    "differsFromProduction": true,
+    "productionDefaultRedacted": "appv0…fmDA",
+    "tokenSeesCertBase": true,
+    "baseHadOnlyDefaultTable1BeforeReconcile": true,
+    "productionUntouched": true
+  },
+  "uniquenessAssumption": {
+    "airtableNativeUniqueOnOrdinaryTextFields": false,
+    "correctedInDocs": true
+  },
+  "schema": {
+    "reconcileExit": 0,
+    "tablesCreated": [
+      "People",
+      "People Org Memberships",
+      "People Households",
+      "People Household Members",
+      "People Relationships",
+      "People Program Links",
+      "People Consents",
+      "People ACL Grants",
+      "People Audit",
+      "People Merge Jobs",
+      "People Import Jobs",
+      "People Import Row Results",
+      "People Migration Checkpoints"
+    ],
+    "changes": "additive create-if-missing only; no deletes/renames/truncates",
+    "schemaVerifier": {
+      "result": "PASS — all 13 tables and required fields present",
+      "exitCodeIntended": 0,
+      "note": "Windows node teardown assertion may non-zero the shell after successful PASS print"
+    }
+  },
+  "advP1": {
+    "method": "12 separate Node processes × upsertPersonByIdentity (no shared identity lock)",
+    "concurrency": 12,
+    "repetitionsRequested": 5,
+    "repetitionsExecutedBeforeHardStop": 1,
+    "workersOk": 12,
+    "adapterCreatedTrueCount": 1,
+    "airtableAuthoritativeRowCountForSameOrgEmailKey": 3,
+    "distinctPersonKeys": 3,
+    "duplicateKeyQueryResult": "DUPLICATES FOUND — 3 authoritative Persons for one OrgEmailKey",
+    "durableUniquenessProvidedByAirtable": false,
+    "note": "Adapter reported a single created:true; direct Airtable query proved multiple rows. Application prechecks are not durable uniqueness."
+  },
+  "flags": {
+    "UNIVERSAL_PEOPLE": "OFF outside workers",
+    "UNIVERSAL_PEOPLE_PERSIST": "OFF outside workers"
+  },
+  "committed": false,
+  "pushed": false,
+  "deployed": false,
+  "peopleEnabledInProduction": false,
+  "clientRecordMigrationRun": false,
+  "finalVerdict": "REQUIRES DIFFERENT DATASTORE"
+}

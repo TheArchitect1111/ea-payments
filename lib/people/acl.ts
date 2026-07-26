@@ -12,12 +12,36 @@ import {
   listConsents,
   listRelationshipsForOrg,
 } from '@/lib/people/store';
-import type { AclRelation, AclResourceType, Person, PersonId } from '@/lib/people/types';
+import type {
+  AclRelation,
+  AclResourceType,
+  Person,
+  PersonAclGrant,
+  PersonConsent,
+  PersonDirectoryMembership,
+  PersonId,
+  PersonRelationship,
+} from '@/lib/people/types';
 
 export type PeopleAccessActor = {
   email?: string;
   role: PlatformRole;
   personId?: PersonId;
+};
+
+/**
+ * Per-request rows loaded by the caller (see `lib/people/acl-context.ts`).
+ *
+ * INV-27: this is request-scoped only. It must never be memoized across requests —
+ * guardian edges, consents, expiry, and majority are always re-evaluated from the
+ * system of record at check time.
+ */
+export type PeopleAclContext = {
+  person?: Person | null;
+  relationships?: PersonRelationship[];
+  consents?: PersonConsent[];
+  grants?: PersonAclGrant[];
+  actorDirectoryMembership?: PersonDirectoryMembership | null;
 };
 
 export type PeopleAccessResult =
@@ -33,8 +57,10 @@ function hasGuardianEdge(params: {
   actorPersonId: PersonId;
   subjectPersonId: PersonId;
   now: Date;
+  relationships?: PersonRelationship[];
 }): boolean {
-  return listRelationshipsForOrg(params.organizationId).some((r) => {
+  const edges = params.relationships ?? listRelationshipsForOrg(params.organizationId);
+  return edges.some((r) => {
     if (r.status !== 'active') return false;
     if (isExpired(r.expiresAt, params.now)) return false;
     if (r.fromPersonId !== params.actorPersonId || r.toPersonId !== params.subjectPersonId) {
@@ -44,8 +70,12 @@ function hasGuardianEdge(params: {
   });
 }
 
-function guardianConsentOk(subjectPersonId: PersonId, now: Date): boolean {
-  return listConsents(subjectPersonId).some((c) => {
+function guardianConsentOk(
+  subjectPersonId: PersonId,
+  now: Date,
+  consents?: PersonConsent[],
+): boolean {
+  return (consents ?? listConsents(subjectPersonId)).some((c) => {
     if (c.purpose !== 'share_with_guardian' && c.purpose !== 'portal_access') return false;
     if (c.status !== 'granted') return false;
     if (isExpired(c.expiresAt, now)) return false;
@@ -53,8 +83,12 @@ function guardianConsentOk(subjectPersonId: PersonId, now: Date): boolean {
   });
 }
 
-function actorHasGuardianDirectoryRole(organizationId: string, actorPersonId: PersonId): boolean {
-  const m = getDirectoryMembership(organizationId, actorPersonId);
+function actorHasGuardianDirectoryRole(
+  organizationId: string,
+  actorPersonId: PersonId,
+  membership?: PersonDirectoryMembership | null,
+): boolean {
+  const m = membership === undefined ? getDirectoryMembership(organizationId, actorPersonId) : membership;
   if (!m || m.status !== 'active') return false;
   return m.roles.includes('parent_guardian') || m.roles.includes('authorized_representative');
 }
@@ -69,8 +103,11 @@ export async function assertPeopleAccess(input: {
   relationNeeded: AclRelation | AclRelation[];
   field?: string;
   now?: Date;
+  /** Request-scoped rows (durable adapter path). Omit to read the memory store. */
+  context?: PeopleAclContext;
 }): Promise<PeopleAccessResult> {
   const now = input.now || new Date();
+  const ctx = input.context;
 
   if (!isUniversalPeopleEnabled()) {
     return { ok: false, code: 'not_found' };
@@ -84,7 +121,7 @@ export async function assertPeopleAccess(input: {
     return { ok: false, code: 'forbidden' };
   }
 
-  const person = getPersonById(input.resourceId);
+  const person = ctx && 'person' in ctx ? ctx.person : getPersonById(input.resourceId);
   if (!person) return { ok: false, code: 'not_found' };
 
   if (person.organizationId !== input.organizationId) {
@@ -107,7 +144,8 @@ export async function assertPeopleAccess(input: {
     return { ok: false, code: 'not_found' };
   }
 
-  const grants = listAclGrantsForResource(input.organizationId, 'person', person.id);
+  const grants =
+    ctx?.grants ?? listAclGrantsForResource(input.organizationId, 'person', person.id);
   for (const g of grants) {
     if (isExpired(g.expiresAt, now)) continue;
     const matchesGrantee =
@@ -144,9 +182,14 @@ export async function assertPeopleAccess(input: {
       actorPersonId: input.actor.personId,
       subjectPersonId: person.id,
       now,
+      relationships: ctx?.relationships,
     });
-    const dirOk = actorHasGuardianDirectoryRole(input.organizationId, input.actor.personId);
-    const consentOk = guardianConsentOk(person.id, now);
+    const dirOk = actorHasGuardianDirectoryRole(
+      input.organizationId,
+      input.actor.personId,
+      ctx && 'actorDirectoryMembership' in ctx ? ctx.actorDirectoryMembership : undefined,
+    );
+    const consentOk = guardianConsentOk(person.id, now, ctx?.consents);
     if (edge && dirOk && consentOk) {
       if (needed.includes('guardian') || needed.includes('viewer')) {
         return { ok: true, relation: 'guardian' };

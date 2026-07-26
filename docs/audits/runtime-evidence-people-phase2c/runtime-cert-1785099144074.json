@@ -1,0 +1,61 @@
+{
+  "artifact": "people-phase2c-runtime-cert",
+  "verdict": "BLOCKED",
+  "passed": 3,
+  "failed": 1,
+  "skipped": 0,
+  "missingRequired": [
+    "ADV-P-2",
+    "ADV-P-3",
+    "ADV-P-4",
+    "ADV-P-5",
+    "ADV-P-6",
+    "ADV-P-7",
+    "ADV-P-8",
+    "ADV-P-9",
+    "ADV-P-10",
+    "ADV-P-11",
+    "ADV-P-12",
+    "ADV-P-13",
+    "ADV-P-14"
+  ],
+  "results": [
+    {
+      "id": "SCHEMA",
+      "status": "PASS",
+      "detail": "tables=15 force_rls=15 rpcs=4"
+    },
+    {
+      "id": "ADV-P-1",
+      "status": "PASS",
+      "detail": "12 concurrent ensures; sql_count=1",
+      "evidence": {
+        "processes": 12,
+        "ids": [
+          "person_0e8824aaa0be48e7"
+        ],
+        "sql_count": 1,
+        "rest_count": 1,
+        "created_true": 1
+      }
+    },
+    {
+      "id": "ADV-P-1b",
+      "status": "PASS",
+      "detail": "concurrent staff create → one id"
+    },
+    {
+      "id": "LIVE",
+      "status": "FAIL",
+      "detail": "duplicate key value violates unique constraint \"relationships_active_uq\""
+    }
+  ],
+  "envRedacted": {
+    "PEOPLE_SUPABASE_URL": "http:/…4321",
+    "PEOPLE_SUPABASE_KEY": "[redacted-jwt]",
+    "PEOPLE_CERT_SERVICE_ROLE_KEY": "[redacted-jwt]",
+    "PEOPLE_CERT_ISOLATED": true
+  },
+  "note": "Skipped tests are not passes. Secrets redacted.",
+  "at": "2026-07-26T20:52:29.391Z"
+}

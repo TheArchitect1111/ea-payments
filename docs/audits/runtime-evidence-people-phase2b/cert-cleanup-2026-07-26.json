@@ -1,0 +1,42 @@
+{
+  "artifact": "people-phase2b-airtable-cert-cleanup",
+  "date": "2026-07-26",
+  "revokedToken": {
+    "locatedIn": [".env.local AIRTABLE_API_KEY"],
+    "fingerprintBeforeRemoval": {
+      "sha256_12": "c5db4c6110eb",
+      "length": 82,
+      "prefix3": "pat"
+    },
+    "absentAfterCleanup": true
+  },
+  "priorKeyRestoration": {
+    "attempted": false,
+    "restored": false,
+    "reason": "No authorized local source proven to match pre-cert .env.local key. .env.local.bak empty; .env.test.local fingerprint a389b3faabe3 differs — not used.",
+    "localAirtableAccessNeedsCredentialRestoration": true
+  },
+  "certOverrides": {
+    "PEOPLE_AIRTABLE_CERT_BASE_ID_inFiles": "absent/empty",
+    "AIRTABLE_PAYMENTS_BASE_ID_inEnvLocal": "empty",
+    "shellCleared": true,
+    "certBaseNoLongerSelected": true
+  },
+  "flags": {
+    "UNIVERSAL_PEOPLE": "OFF/empty",
+    "UNIVERSAL_PEOPLE_PERSIST": "OFF/empty"
+  },
+  "git": {
+    "envLocalIgnored": true,
+    "envLocalTracked": false,
+    "envLocalInHistory": false
+  },
+  "productionConfigChanged": false,
+  "certBaseDeleted": false,
+  "evidenceDeleted": false,
+  "productCodeModified": false,
+  "committed": false,
+  "pushed": false,
+  "deployed": false,
+  "peopleEnabled": false
+}

@@ -1,0 +1,29 @@
+{
+  "artifact": "airtable-api-key-restore-from-test-local",
+  "date": "2026-07-26",
+  "sourceFingerprint": { "sha256_12": "a389b3faabe3", "length": 82, "prefix3": "pat" },
+  "accessCheck": {
+    "listBases": "PASS",
+    "productionPaymentsBase": "PASS",
+    "prodMetaRead": "PASS",
+    "clientRecordsVisible": "PASS",
+    "recordsMutated": false
+  },
+  "restore": {
+    "copiedToEnvLocal": true,
+    "fingerprintMatch": true,
+    "AIRTABLE_PAYMENTS_BASE_ID": "empty",
+    "PEOPLE_AIRTABLE_CERT_BASE_ID": "cleared",
+    "UNIVERSAL_PEOPLE": "OFF",
+    "UNIVERSAL_PEOPLE_PERSIST": "OFF"
+  },
+  "postVerify": "PASS",
+  "git": { "envLocalIgnored": true, "tracked": false },
+  "vercelOrProductionEnvModified": false,
+  "tokenCreatedOrRotated": false,
+  "committed": false,
+  "pushed": false,
+  "deployed": false,
+  "peopleEnabled": false,
+  "verdict": "PASS"
+}

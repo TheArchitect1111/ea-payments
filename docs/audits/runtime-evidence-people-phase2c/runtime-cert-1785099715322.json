@@ -1,0 +1,107 @@
+{
+  "artifact": "people-phase2c-runtime-cert",
+  "verdict": "BLOCKED",
+  "passed": 14,
+  "failed": 2,
+  "skipped": 0,
+  "missingRequired": [
+    "ADV-P-1",
+    "ADV-P-8"
+  ],
+  "results": [
+    {
+      "id": "SCHEMA",
+      "status": "PASS",
+      "detail": "tables=15 force_rls=15 rpcs=5"
+    },
+    {
+      "id": "ADV-P-1",
+      "status": "FAIL",
+      "detail": "JWT not yet valid"
+    },
+    {
+      "id": "ADV-P-1b",
+      "status": "PASS",
+      "detail": "concurrent staff create → one id"
+    },
+    {
+      "id": "ADV-P-2",
+      "status": "PASS",
+      "detail": "one active edge under concurrency",
+      "evidence": {
+        "sql_count": 1
+      }
+    },
+    {
+      "id": "ADV-P-3",
+      "status": "PASS",
+      "detail": "duplicate import collapsed",
+      "evidence": {
+        "jobId": "impjob_3c6fbe2b60244233"
+      }
+    },
+    {
+      "id": "ADV-P-4",
+      "status": "PASS",
+      "detail": "merge finalize atomic tombstone"
+    },
+    {
+      "id": "ADV-P-5",
+      "status": "PASS",
+      "detail": "forced SQL rollback left no partial state"
+    },
+    {
+      "id": "ADV-P-6",
+      "status": "PASS",
+      "detail": "concurrent merge_finalize completed"
+    },
+    {
+      "id": "ADV-P-7",
+      "status": "PASS",
+      "detail": "body org stripped; RLS hides other org"
+    },
+    {
+      "id": "ADV-P-8",
+      "status": "FAIL",
+      "detail": "The expression evaluated to a falsy value:\n\n  assert.ok(person)\n"
+    },
+    {
+      "id": "ADV-P-9",
+      "status": "PASS",
+      "detail": "migration checkpoint durable"
+    },
+    {
+      "id": "ADV-P-10",
+      "status": "PASS",
+      "detail": "outage/missing creds fail-closed"
+    },
+    {
+      "id": "ADV-P-11",
+      "status": "PASS",
+      "detail": "People ON Persist OFF prod denied"
+    },
+    {
+      "id": "ADV-P-12",
+      "status": "PASS",
+      "detail": "service_role denied select=403 insert=403"
+    },
+    {
+      "id": "ADV-P-13",
+      "status": "PASS",
+      "detail": "tombstoned persons sql_count=3"
+    },
+    {
+      "id": "ADV-P-14",
+      "status": "PASS",
+      "detail": "audit update denied via REST and SQL trigger"
+    }
+  ],
+  "envRedacted": {
+    "PEOPLE_SUPABASE_URL": "http:/…4321",
+    "PEOPLE_SUPABASE_KEY": "[redacted-jwt]",
+    "PEOPLE_CERT_SERVICE_ROLE_KEY": "[redacted-jwt]",
+    "PEOPLE_CERT_ISOLATED": true
+  },
+  "note": "Skipped tests are not passes. Secrets redacted. Local Docker only.",
+  "at": "2026-07-26T21:02:06.492Z"
+}

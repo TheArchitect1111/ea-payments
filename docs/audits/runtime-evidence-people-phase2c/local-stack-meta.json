@@ -1,0 +1,10 @@
+{
+  "apiUrl": "http://127.0.0.1:54321",
+  "dbHost": "127.0.0.1",
+  "dbPort": 54322,
+  "peopleSchemaExposed": true,
+  "jwtRole": "people_app",
+  "serviceRolePresent": true,
+  "secrets": "redacted",
+  "at": "2026-07-26T21:14:37.780Z"
+}

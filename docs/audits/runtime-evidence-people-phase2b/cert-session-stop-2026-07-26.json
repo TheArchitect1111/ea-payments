@@ -1,0 +1,66 @@
+{
+  "artifact": "people-phase2b-airtable-cert-session",
+  "date": "2026-07-26",
+  "decision": "STOP_BEFORE_SCHEMA_AND_ADV_P1",
+  "sessionEnvOnly": {
+    "AIRTABLE_PAYMENTS_BASE_ID_redacted": "appGB…cINU",
+    "PEOPLE_AIRTABLE_CERT_BASE_ID_redacted": "appGB…cINU",
+    "writtenToProductionEnvFiles": false
+  },
+  "preflight": {
+    "effectiveBaseIsCert": true,
+    "differsFromProduction": true,
+    "productionDefaultRedacted": "appv0…fmDA",
+    "credentialsAvailable": true,
+    "tokenHasSchemaAndRecordAccessToCertBase": false,
+    "certBaseVisibleToToken": false,
+    "tokenAccessibleBases": [
+      {
+        "idRedacted": "appv0…fmDA",
+        "name": "Efficiency Architects - Payments & Clients",
+        "isProductionPayments": true
+      }
+    ],
+    "baseEmptyCheck": "NOT_RUN — no access to cert base",
+    "productionUntouched": true
+  },
+  "uniquenessAssumptionCorrected": {
+    "airtableNativeUniqueOnTextFields": false,
+    "doNotClaimUiUniqueSetting": true
+  },
+  "schemaReconcile": {
+    "attempted": false,
+    "tablesCreated": [],
+    "fieldsCreated": []
+  },
+  "schemaVerifier": {
+    "run": false,
+    "exitCode": null
+  },
+  "advP1": {
+    "run": false,
+    "concurrency": null,
+    "repetitions": null,
+    "duplicateKeyQuery": null,
+    "durableUniquenessFromAirtable": null
+  },
+  "blockers": [
+    "API token can see only production Payments base (appv0…fmDA). Certification base appGB…cINU returns 403 for meta and data APIs."
+  ],
+  "exactOperatorAction": [
+    "Open Airtable → Developer hub → Personal access tokens for the key used locally (AIRTABLE_API_KEY).",
+    "Add access to base appGBriTtQXXBcINU (EA People Phase 2B certification base).",
+    "Grant scopes at minimum: data.records:read, data.records:write, schema.bases:read, schema.bases:write.",
+    "Confirm the token lists the cert base and does not require writing to production.",
+    "Re-run this certification session (session env only; do not put cert base id into production Vercel env)."
+  ],
+  "flags": {
+    "UNIVERSAL_PEOPLE": "OFF",
+    "UNIVERSAL_PEOPLE_PERSIST": "OFF"
+  },
+  "committed": false,
+  "pushed": false,
+  "deployed": false,
+  "peopleEnabledInProduction": false,
+  "finalVerdict": "BLOCKED — token lacks cert-base access (neither CONTINUE AIRTABLE nor REQUIRES DIFFERENT DATASTORE; ADV-P-1 not run)"
+}

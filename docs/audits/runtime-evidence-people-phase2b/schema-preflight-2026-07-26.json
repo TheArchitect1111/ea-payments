@@ -1,0 +1,45 @@
+{
+  "artifact": "people-phase2b-airtable-schema-preflight",
+  "date": "2026-07-26",
+  "decision": "STOP_BEFORE_CHANGES",
+  "credentials": {
+    "available": true,
+    "which": "AIRTABLE_API_KEY",
+    "length": 82,
+    "tokenPrinted": false
+  },
+  "configuredBase": {
+    "AIRTABLE_PAYMENTS_BASE_ID_present": false,
+    "effectiveBaseRedacted": "appv0…fmDA",
+    "matchesKnownProductionDefault": true,
+    "PEOPLE_AIRTABLE_CERT_BASE_ID_present": false,
+    "explicitlyDesignatedForCertification": false
+  },
+  "proofNonProduction": {
+    "passed": false,
+    "reason": "Effective base equals known production Payments default; no PEOPLE_AIRTABLE_CERT_BASE_ID designation"
+  },
+  "flagsObserved": {
+    "UNIVERSAL_PEOPLE": "OFF/unset",
+    "UNIVERSAL_PEOPLE_PERSIST": "OFF/unset",
+    "illegalPeopleOnPersistOffProhibitedInCode": true
+  },
+  "schemaOperation": {
+    "attempted": false,
+    "productionUntouched": true,
+    "committed": false,
+    "pushed": false,
+    "deployed": false,
+    "UNIVERSAL_PEOPLE_enabled": false
+  },
+  "blockers": [
+    "Configured/effective Airtable base is the known production Payments default (redacted appv0…fmDA)",
+    "No PEOPLE_AIRTABLE_CERT_BASE_ID (or equivalent) proving a dedicated certification base",
+    "Airtable Meta API cannot set field uniqueness required for ADV-P-1 (OrgEmailKey / OrgExternalKey / Person Key etc.) — requires manual Airtable UI"
+  ],
+  "schemaVerifier": {
+    "run": false,
+    "exitCode": null,
+    "reason": "Preflight stop — verifier not run against production default"
+  }
+}
