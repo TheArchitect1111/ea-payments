@@ -1,0 +1,335 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Phase 1 Universal Portal CX nav smoke</title>
+  <style>
+    /* Inlined critical .cex-shell-nav* rules from app/portal/components/client-experience-shell.css (file:// safe) */
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      color: #101828;
+      background: linear-gradient(180deg, #f8f5ef 0%, #f1ebe1 100%);
+    }
+    .smoke-page {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 1.5rem 1.35rem 3rem;
+    }
+    .smoke-page h1 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      margin: 0 0 0.35rem;
+    }
+    .smoke-page > p {
+      margin: 0 0 1.75rem;
+      color: rgba(16, 24, 40, 0.55);
+      font-size: 0.92rem;
+    }
+    .smoke-section {
+      margin-bottom: 2.5rem;
+    }
+    .smoke-section h2 {
+      font-size: 0.78rem;
+      font-weight: 650;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: rgba(16, 24, 40, 0.55);
+      margin: 0 0 0.75rem;
+    }
+    .smoke-frame {
+      border: 1px solid rgba(16, 24, 40, 0.08);
+      border-radius: 0.85rem;
+      overflow: hidden;
+      background: rgba(255, 253, 248, 0.9);
+    }
+    .smoke-note {
+      padding: 0.75rem 1.1rem;
+      font-size: 0.85rem;
+      color: rgba(16, 24, 40, 0.62);
+      border-top: 1px solid rgba(16, 24, 40, 0.06);
+    }
+
+    .cex-shell-nav {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      border-bottom: 1px solid rgba(16, 24, 40, 0.06);
+      background: rgba(248, 245, 239, 0.82);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+
+    .cex-shell-nav-inner {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 0.7rem 1.35rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .cex-shell-brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+      min-width: 0;
+    }
+
+    .cex-shell-brand-mark {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.85rem;
+      height: 1.85rem;
+      border-radius: 999px;
+      background: #101828;
+      color: #d4b45a;
+      font-size: 0.62rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+    }
+
+    .cex-shell-brand-text {
+      font-size: 0.78rem;
+      font-weight: 650;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: rgba(16, 24, 40, 0.55);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 11rem;
+    }
+
+    .cex-shell-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.2rem;
+      flex: 1;
+      justify-content: center;
+    }
+
+    .cex-shell-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 2.4rem;
+      padding: 0.4rem 0.85rem;
+      border-radius: 999px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: rgba(16, 24, 40, 0.55);
+      text-decoration: none;
+      transition: background 160ms ease, color 160ms ease;
+    }
+
+    .cex-shell-link:hover {
+      color: #101828;
+      background: rgba(16, 24, 40, 0.04);
+    }
+
+    .cex-shell-link:focus-visible {
+      outline: 2px solid #b8952f;
+      outline-offset: 2px;
+    }
+
+    .cex-shell-link-active {
+      color: #101828;
+      background: rgba(184, 149, 47, 0.18);
+    }
+
+    .cex-shell-link-quiet {
+      color: rgba(16, 24, 40, 0.38);
+      font-weight: 550;
+    }
+
+    .cex-shell-account {
+      position: relative;
+      margin-left: auto;
+    }
+
+    .cex-shell-account-summary {
+      list-style: none;
+      cursor: pointer;
+      min-height: 2.4rem;
+      min-width: 2.75rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.35rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: rgba(16, 24, 40, 0.45);
+      transition: color 160ms ease, background 160ms ease;
+    }
+
+    .cex-shell-account-summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .cex-shell-account-summary:hover {
+      color: #101828;
+      background: rgba(16, 24, 40, 0.04);
+    }
+
+    .cex-shell-account-summary:focus-visible {
+      outline: 2px solid #b8952f;
+      outline-offset: 2px;
+    }
+
+    .cex-shell-account-menu {
+      position: absolute;
+      right: 0;
+      top: calc(100% + 0.35rem);
+      min-width: 9.5rem;
+      padding: 0.4rem;
+      border-radius: 0.75rem;
+      background: rgba(255, 255, 255, 0.96);
+      border: 1px solid rgba(16, 24, 40, 0.08);
+      box-shadow: 0 16px 36px rgba(16, 24, 40, 0.1);
+      z-index: 50;
+    }
+
+    .cex-shell-account-logout {
+      display: flex;
+      align-items: center;
+      min-height: 2.5rem;
+      padding: 0.45rem 0.75rem;
+      border-radius: 0.55rem;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: #101828;
+      text-decoration: none;
+    }
+
+    .cex-shell-account-logout:hover {
+      background: rgba(16, 24, 40, 0.05);
+    }
+
+    @media (max-width: 720px) {
+      .cex-shell-nav {
+        position: sticky;
+        top: auto;
+        bottom: 0;
+        border-bottom: none;
+        border-top: 1px solid rgba(16, 24, 40, 0.08);
+        background: rgba(248, 245, 239, 0.94);
+      }
+
+      .cex-shell-nav-inner {
+        padding: 0.5rem 0.65rem calc(0.5rem + env(safe-area-inset-bottom, 0px));
+        gap: 0.4rem;
+      }
+
+      .cex-shell-brand {
+        display: none;
+      }
+
+      .cex-shell-links {
+        width: 100%;
+        justify-content: space-between;
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        gap: 0.15rem;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+      }
+
+      .cex-shell-links::-webkit-scrollbar {
+        display: none;
+      }
+
+      .cex-shell-link {
+        white-space: nowrap;
+        flex: 1 0 auto;
+        min-width: 4.25rem;
+        min-height: 2.75rem;
+        padding: 0.55rem 0.55rem;
+        font-size: 0.8rem;
+      }
+
+      .cex-shell-link-quiet {
+        opacity: 0.75;
+      }
+
+      .cex-shell-account {
+        position: relative;
+        margin-left: auto;
+      }
+
+      .cex-shell-account-summary {
+        min-height: 2.75rem;
+        background: rgba(248, 245, 239, 0.92);
+        border: 1px solid rgba(16, 24, 40, 0.08);
+        box-shadow: 0 8px 20px rgba(16, 24, 40, 0.06);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="smoke-page">
+    <h1>Phase 1 Universal Portal CX nav smoke</h1>
+    <p>Static mirror of <code>ClientExperienceNav</code> — Flag OFF vs Flag ON both render the same five CX links.</p>
+
+    <section class="smoke-section" aria-labelledby="flag-off">
+      <h2 id="flag-off">Flag OFF (legacy)</h2>
+      <div class="smoke-frame">
+        <header class="cex-shell-nav" role="banner">
+          <div class="cex-shell-nav-inner">
+            <div class="cex-shell-brand">
+              <span class="cex-shell-brand-mark" aria-hidden="true">EA</span>
+              <span class="cex-shell-brand-text">Efficiency Architects</span>
+            </div>
+            <nav class="cex-shell-links" aria-label="Your project">
+              <a class="cex-shell-link cex-shell-link-active" href="#project" aria-current="page">Your Project</a>
+              <a class="cex-shell-link" href="#documents">Documents</a>
+              <a class="cex-shell-link" href="#contact">Contact</a>
+              <a class="cex-shell-link" href="#help">Help</a>
+              <a class="cex-shell-link cex-shell-link-quiet" href="#journey">Journey</a>
+            </nav>
+            <details class="cex-shell-account">
+              <summary class="cex-shell-account-summary" aria-label="Account menu">Account</summary>
+              <div class="cex-shell-account-menu" role="menu">
+                <a class="cex-shell-account-logout" href="#logout" role="menuitem">Log out</a>
+              </div>
+            </details>
+          </div>
+        </header>
+        <p class="smoke-note">Legacy path — identical five-link CX nav set (Your Project, Documents, Contact, Help, Journey).</p>
+      </div>
+    </section>
+
+    <section class="smoke-section" aria-labelledby="flag-on">
+      <h2 id="flag-on">Flag ON (ctp-client pack)</h2>
+      <div class="smoke-frame">
+        <header class="cex-shell-nav" role="banner">
+          <div class="cex-shell-nav-inner">
+            <div class="cex-shell-brand">
+              <span class="cex-shell-brand-mark" aria-hidden="true">EA</span>
+              <span class="cex-shell-brand-text">Efficiency Architects</span>
+            </div>
+            <nav class="cex-shell-links" aria-label="Your project">
+              <a class="cex-shell-link cex-shell-link-active" href="#project" aria-current="page">Your Project</a>
+              <a class="cex-shell-link" href="#documents">Documents</a>
+              <a class="cex-shell-link" href="#contact">Contact</a>
+              <a class="cex-shell-link" href="#help">Help</a>
+              <a class="cex-shell-link cex-shell-link-quiet" href="#journey">Journey</a>
+            </nav>
+            <details class="cex-shell-account">
+              <summary class="cex-shell-account-summary" aria-label="Account menu">Account</summary>
+              <div class="cex-shell-account-menu" role="menu">
+                <a class="cex-shell-account-logout" href="#logout" role="menuitem">Log out</a>
+              </div>
+            </details>
+          </div>
+        </header>
+        <p class="smoke-note">ctp-client pack path — same five-link CX nav set as Flag OFF (parity smoke).</p>
+      </div>
+    </section>
+  </div>
+</body>
+</html>

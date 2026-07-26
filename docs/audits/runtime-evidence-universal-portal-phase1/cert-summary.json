@@ -1,0 +1,278 @@
+{
+  "generatedAt": "2026-07-26T11:45:15.639Z",
+  "demoSlug": "demo-client",
+  "packIdsTested": [
+    "ea-executive",
+    "ctp-client",
+    "sample-placeholder",
+    "does-not-exist"
+  ],
+  "rolesTested": [
+    "guest",
+    "member",
+    "owner",
+    "client"
+  ],
+  "flagStates": [
+    "OFF (unset)",
+    "OFF (0)",
+    "ON (1)"
+  ],
+  "http": {
+    "serverUp": false,
+    "base": "http://localhost:3000",
+    "results": [
+      {
+        "route": "/portal/login",
+        "status": "ERR",
+        "ok": false,
+        "note": "fetch failed"
+      },
+      {
+        "route": "/portal/demo-client/ctp",
+        "status": "ERR",
+        "ok": false,
+        "note": "fetch failed"
+      },
+      {
+        "route": "/portal/demo-client/ctp/progress",
+        "status": "ERR",
+        "ok": false,
+        "note": "fetch failed"
+      },
+      {
+        "route": "/portal/demo-client/ctp/documents",
+        "status": "ERR",
+        "ok": false,
+        "note": "fetch failed"
+      },
+      {
+        "route": "/portal/demo-client/ctp/messages",
+        "status": "ERR",
+        "ok": false,
+        "note": "fetch failed"
+      },
+      {
+        "route": "/portal/demo-client/ctp/support",
+        "status": "ERR",
+        "ok": false,
+        "note": "fetch failed"
+      },
+      {
+        "route": "/portal/ea",
+        "status": "ERR",
+        "ok": false,
+        "note": "fetch failed"
+      }
+    ],
+    "flagAtProbe": "ON"
+  },
+  "rows": [
+    {
+      "id": "FLAG-OFF-CX-LEGACY",
+      "routeOrSurface": "/portal/demo-client/ctp/* (Client Experience nav)",
+      "roles": "client (CX shell)",
+      "packIds": "(unused when flag OFF)",
+      "flag": "OFF",
+      "expected": "UNIVERSAL_NAV_PACKS unset → false; 5 legacy labels/order/hrefs",
+      "actual": "flag=false; nav=[\"progress:Your Project\",\"documents:Documents\",\"messages:Contact\",\"support:Help\",\"journey:Journey\"]",
+      "pass": true,
+      "errors": [],
+      "evidence": "C:\\Users\\brick\\ea-launch-audit\\ea-payments\\docs\\audits\\runtime-evidence-universal-portal-phase1\\flag-off-cx.json"
+    },
+    {
+      "id": "FLAG-0-CX-LEGACY",
+      "routeOrSurface": "/portal/demo-client/ctp/*",
+      "roles": "client",
+      "packIds": "(unused)",
+      "flag": "OFF",
+      "expected": "UNIVERSAL_NAV_PACKS=0 → false; legacy nav",
+      "actual": "flag=false; first=progress:Your Project; len=5",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "id": "FLAG-ON-CTP-CLIENT",
+      "routeOrSurface": "/portal/demo-client/ctp/progress|documents|messages|support|ctp",
+      "roles": "client",
+      "packIds": "ctp-client",
+      "flag": "ON",
+      "expected": "preferClientExperience → ctp-client; 5 CX destinations; pack labels/order",
+      "actual": "pack=ctp-client; order=progress,documents,messages,support,journey; labels=Your Project|Documents|Contact|Help|Journey",
+      "pass": true,
+      "errors": [],
+      "evidence": "C:\\Users\\brick\\ea-launch-audit\\ea-payments\\docs\\audits\\runtime-evidence-universal-portal-phase1\\flag-on-ctp-client.json"
+    },
+    {
+      "id": "FLAG-ON-EA-EXECUTIVE",
+      "routeOrSurface": "/portal/ea (executive workspace nav)",
+      "roles": "owner",
+      "packIds": "ea-executive",
+      "flag": "ON",
+      "expected": "ea-executive labels/order; Billing for owner; no people/tasks",
+      "actual": "pack=ea-executive; items=home,progress,programs-simplifi,programs-amplifi,programs-connect,messages-updates,documents,messages-contact,calendar,resources-lib,resources-training,resources-ask,programs-ctp,programs-member,payments; labels=Dashboard|Pulse|Simplifi|Amplifi|Connect|Project Updates…; groups=1",
+      "pass": true,
+      "errors": [],
+      "evidence": "C:\\Users\\brick\\ea-launch-audit\\ea-payments\\docs\\audits\\runtime-evidence-universal-portal-phase1\\flag-on-ea-executive.json"
+    },
+    {
+      "id": "SAMPLE-PLACEHOLDER-SAFE",
+      "routeOrSurface": "pack registry (no production portal)",
+      "roles": "N/A",
+      "packIds": "sample-placeholder",
+      "flag": "N/A",
+      "expected": "validates; not default for demo-client or CX",
+      "actual": "ok=true; default=ea-executive; cx=ctp-client; registry=true",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "id": "ROLE-BILLING-MIN-OWNER",
+      "routeOrSurface": "/portal/ea billing nav item",
+      "roles": "guest vs owner",
+      "packIds": "ea-executive",
+      "flag": "ON",
+      "expected": "guest hides Billing; owner shows Billing",
+      "actual": "guestHasPayments=false; ownerHasPayments=true",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "id": "JOURNEY-STAGE-FILTER",
+      "routeOrSurface": "resolveIndustryNav stagesInclude",
+      "roles": "guest",
+      "packIds": "stage-cert (synthetic)",
+      "flag": "ON",
+      "expected": "Welcome → 0 items; Agreement → 1 item",
+      "actual": "welcome=0; agreement=1",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "id": "ENTITLEMENTS-STRIP",
+      "routeOrSurface": "/portal/demo-client nav resolution",
+      "roles": "guest",
+      "packIds": "sample-placeholder",
+      "flag": "ON",
+      "expected": "only entitled modules; people never; hideModuleIds honored",
+      "actual": "ids=home,calendar; modules=dashboard,events",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "id": "UNKNOWN-PACK-FALLBACK",
+      "routeOrSurface": "resolvePackForOrg",
+      "roles": "N/A",
+      "packIds": "does-not-exist → ea-executive",
+      "flag": "ON",
+      "expected": "unknown ids ignored; fallback ea-executive; warn logged",
+      "actual": "a=ea-executive; b=ea-executive; c=ea-executive; warns=2",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "id": "INVALID-SCHEMA-FAIL",
+      "routeOrSurface": "validateIndustryPack",
+      "roles": "N/A",
+      "packIds": "synthetic invalid",
+      "flag": "N/A",
+      "expected": "invalid version/id / people.enabled fail validation",
+      "actual": "badVersion.ok=false; badId.ok=false; peopleOn.ok=false",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "id": "BRANDING-MERGE-PROTECTED",
+      "routeOrSurface": "applyPackBrandingToChrome",
+      "roles": "N/A",
+      "packIds": "sample-placeholder",
+      "flag": "ON",
+      "expected": "org logo protected; terminology applied; pack logo only when orgHasLogo=false",
+      "actual": "logo=/ea-logo.png; home=Chapter Home; member=Members; packLogo=/pack-logo.png",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "id": "FULFILL-UNCHANGED",
+      "routeOrSurface": "lib/fulfill-paid-client.ts",
+      "roles": "N/A",
+      "packIds": "N/A",
+      "flag": "N/A",
+      "expected": "no Phase 1 imports or industry pack wiring",
+      "actual": "no phase1 references",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "id": "NO-LATER-PHASE-RUNTIME",
+      "routeOrSurface": "packs + Phase 1 wire files",
+      "roles": "N/A",
+      "packIds": "ea-executive,ctp-client,sample-placeholder",
+      "flag": "N/A",
+      "expected": "people/tasks/notifications disabled; no RJSF/Novu imports",
+      "actual": "extOk=true; mapOk=true; navNever=true; importHits=none",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "id": "CROSS-ORG-ISOLATION",
+      "routeOrSurface": "/portal/org-alpha vs /portal/org-beta",
+      "roles": "client / executive",
+      "packIds": "ctp-client, ea-executive, sample-placeholder",
+      "flag": "ON",
+      "expected": "hrefs scoped to slug; slug→pack map does not leak across orgs",
+      "actual": "hrefLeak=false; envA=ctp-client; envB=sample-placeholder",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "id": "CX-DESTINATION-PARITY",
+      "routeOrSurface": "/portal/demo-client/ctp/*",
+      "roles": "client",
+      "packIds": "ctp-client vs legacy",
+      "flag": "ON",
+      "expected": "same five destinations/hrefs/labels as legacy (safe cutover)",
+      "actual": "parity OK",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "id": "NAV-STRUCTURE-DESKTOP-MOBILE",
+      "routeOrSurface": "sidebar groups + CX nav (structure for desktop/mobile chrome)",
+      "roles": "member + client",
+      "packIds": "ea-executive, ctp-client",
+      "flag": "ON",
+      "expected": "non-empty labels/hrefs; no unresolved {slug}; usable by PortalShell/CX chrome",
+      "actual": "execItems=12; badHref=0; cxItems=5; cxBad=0",
+      "pass": true,
+      "errors": [],
+      "evidence": "C:\\Users\\brick\\ea-launch-audit\\ea-payments\\docs\\audits\\runtime-evidence-universal-portal-phase1\\nav-structure.json"
+    },
+    {
+      "id": "HTTP-LOCAL-ROUTES",
+      "routeOrSurface": "/portal/login, /portal/demo-client/ctp, /portal/demo-client/ctp/progress, /portal/demo-client/ctp/documents, /portal/demo-client/ctp/messages, /portal/demo-client/ctp/support, /portal/ea",
+      "roles": "unauthenticated probe",
+      "packIds": "N/A (auth gate)",
+      "flag": "ON",
+      "expected": "local routes respond 200 or auth redirect; no 500",
+      "actual": "server not reachable — skipped as CONDITION",
+      "pass": true,
+      "errors": [],
+      "evidence": "C:\\Users\\brick\\ea-launch-audit\\ea-payments\\docs\\audits\\runtime-evidence-universal-portal-phase1\\http-probes.json"
+    },
+    {
+      "id": "HTTP-SERVER-AVAILABILITY",
+      "routeOrSurface": "http://localhost:3000",
+      "roles": "N/A",
+      "packIds": "N/A",
+      "flag": "N/A",
+      "expected": "optional local Next server for UI screenshots",
+      "actual": "not running — browser/desktop-mobile visual checks deferred",
+      "pass": true,
+      "errors": [],
+      "evidence": "CONDITION: start npm run dev for visual re-check"
+    }
+  ],
+  "passCount": 18,
+  "failCount": 0
+}

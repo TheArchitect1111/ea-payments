@@ -1,0 +1,316 @@
+{
+  "generatedAt": "2026-07-26T11:45:13.229Z",
+  "harness": "scripts/test-industry-pack-runtime-cert.mts",
+  "demoFixtures": {
+    "DEMO_SLUG": "demo-client",
+    "EA_SLUG": "ea",
+    "OTHER_SLUG": "other-org-demo"
+  },
+  "passCount": 17,
+  "failCount": 0,
+  "rows": [
+    {
+      "id": "FLAG-OFF-legacy-cx-nav",
+      "routes": [
+        "/portal/demo-client/ctp/progress",
+        "/portal/demo-client/ctp/documents",
+        "/portal/demo-client/ctp/messages",
+        "/portal/demo-client/ctp/support",
+        "/portal/demo-client/ctp"
+      ],
+      "roles": [
+        "guest"
+      ],
+      "packIds": [],
+      "flagState": "OFF",
+      "expected": "UNIVERSAL_NAV_PACKS unset → false; CX ids/labels/order match hardcoded legacy",
+      "actual": "enabled=false; ids=progress,documents,messages,support,journey; labels=Your Project|Documents|Contact|Help|Journey",
+      "pass": true
+    },
+    {
+      "id": "FLAG-0-legacy-cx-nav",
+      "routes": [
+        "/portal/demo-client/ctp/progress",
+        "/portal/demo-client/ctp/documents",
+        "/portal/demo-client/ctp/messages",
+        "/portal/demo-client/ctp/support",
+        "/portal/demo-client/ctp"
+      ],
+      "roles": [
+        "guest"
+      ],
+      "packIds": [],
+      "flagState": "OFF",
+      "expected": "UNIVERSAL_NAV_PACKS=0 → false; same five CX destinations",
+      "actual": "enabled=false; count=5",
+      "pass": true
+    },
+    {
+      "id": "FLAG-ON-ea-executive",
+      "routes": [
+        "/portal/ea",
+        "/portal/ea/pulse",
+        "/portal/ea/simplifi",
+        "/portal/ea/amplifi",
+        "/portal/ea/connect",
+        "/portal/ea/updates",
+        "/portal/ea/documents",
+        "/portal/ea/messaging",
+        "/portal/ea/events",
+        "/portal/ea/resources",
+        "/portal/ea/learning",
+        "/portal/ea/ask",
+        "/portal/ea/ctp",
+        "/portal/ea/member",
+        "/portal/ea/billing"
+      ],
+      "roles": [
+        "owner"
+      ],
+      "packIds": [
+        "ea-executive"
+      ],
+      "flagState": "ON",
+      "expected": "Default pack ea-executive; nav ordered; Dashboard/Pulse/Simplifi…; People/Tasks hidden; Billing for owner",
+      "actual": "pack=ea-executive; items=15; ordered=true; noPeopleTasks=true; billing=true; groups=1; first=Dashboard",
+      "pass": true
+    },
+    {
+      "id": "FLAG-ON-ctp-client",
+      "routes": [
+        "/portal/demo-client/ctp/progress",
+        "/portal/demo-client/ctp/documents",
+        "/portal/demo-client/ctp/messages",
+        "/portal/demo-client/ctp/support",
+        "/portal/demo-client/ctp"
+      ],
+      "roles": [
+        "guest"
+      ],
+      "packIds": [
+        "ctp-client"
+      ],
+      "flagState": "ON",
+      "expected": "preferClientExperience → ctp-client; five CX destinations; pack labels/order; no executive paths",
+      "actual": "pack=ctp-client; ids=progress,documents,messages,support,journey; labels=Your Project|Documents|Contact|Help|Journey; noExec=true",
+      "pass": true
+    },
+    {
+      "id": "sample-placeholder-not-production",
+      "routes": [],
+      "roles": [],
+      "packIds": [
+        "sample-placeholder"
+      ],
+      "flagState": "N/A",
+      "expected": "Validates; not default for random slug; only when pinned; describes non-production",
+      "actual": "ok=true; default=ea-executive; pinned=sample-placeholder; descHasNot=true",
+      "pass": true
+    },
+    {
+      "id": "pack-labels-order-visibility",
+      "routes": [
+        "/portal/demo-client",
+        "/portal/demo-client/events",
+        "/portal/demo-client/messaging",
+        "/portal/demo-client/documents",
+        "/portal/demo-client/resources"
+      ],
+      "roles": [
+        "guest"
+      ],
+      "packIds": [
+        "sample-placeholder"
+      ],
+      "flagState": "ON",
+      "expected": "Chapter Home → Calendar → Messages → Documents → Training; people/tasks never",
+      "actual": "Chapter Home → Calendar & Events → Messages → Documents & Forms → Training & Support",
+      "pass": true
+    },
+    {
+      "id": "role-restrictions-billing",
+      "routes": [
+        "/portal/ea/billing"
+      ],
+      "roles": [
+        "guest",
+        "staff",
+        "owner"
+      ],
+      "packIds": [
+        "ea-executive"
+      ],
+      "flagState": "ON",
+      "expected": "payments/Billing only for owner (minRole); guest/staff hide",
+      "actual": "guestHas=false; staffHas=false; ownerHas=true",
+      "pass": true
+    },
+    {
+      "id": "journey-stage-restrictions",
+      "routes": [
+        "/portal/demo-client",
+        "/portal/demo-client/documents"
+      ],
+      "roles": [
+        "guest"
+      ],
+      "packIds": [
+        "stage-cert"
+      ],
+      "flagState": "ON",
+      "expected": "Welcome: no home (include), no docs (exclude); Agreement: home+docs",
+      "actual": "welcome=(none); agreement=home,docs",
+      "pass": true
+    },
+    {
+      "id": "entitlements-rbac-filter",
+      "routes": [
+        "/portal/ea",
+        "/portal/ea/events"
+      ],
+      "roles": [
+        "guest"
+      ],
+      "packIds": [
+        "ea-executive"
+      ],
+      "flagState": "ON",
+      "expected": "Only entitled modules surface (dashboard, events); Simplifi/Billing hidden",
+      "actual": "modules=dashboard,events; count=2",
+      "pass": true
+    },
+    {
+      "id": "hideModuleIds-enforced",
+      "routes": [
+        "/portal/demo-client",
+        "/portal/demo-client/events"
+      ],
+      "roles": [
+        "guest"
+      ],
+      "packIds": [
+        "sample-placeholder"
+      ],
+      "flagState": "ON",
+      "expected": "hideModuleIds removes simplifi even if entitled",
+      "actual": "hasSimplifi=false",
+      "pass": true
+    },
+    {
+      "id": "unknown-pack-fallback",
+      "routes": [
+        "/portal/demo-client"
+      ],
+      "roles": [],
+      "packIds": [
+        "does-not-exist-xyz",
+        "bogus-pack",
+        "not-a-real-pack"
+      ],
+      "flagState": "ON",
+      "expected": "Fall back to ea-executive",
+      "actual": "unknown=ea-executive; empty=ea-executive; badOrg=ea-executive; badEnv=ea-executive",
+      "pass": true
+    },
+    {
+      "id": "invalid-schema-fail-safe",
+      "routes": [],
+      "roles": [],
+      "packIds": [
+        "bad-version-pack",
+        "Bad_ID",
+        "people-on"
+      ],
+      "flagState": "N/A",
+      "expected": "Non-semver / bad id / phase1 enabled people → ok:false; registry packs still valid",
+      "actual": "badVersion=false; badId=false; peopleOn=false; registry=3",
+      "pass": true
+    },
+    {
+      "id": "branding-merge-protected",
+      "routes": [],
+      "roles": [],
+      "packIds": [
+        "sample-placeholder"
+      ],
+      "flagState": "ON",
+      "expected": "Org logo wins; pack logo applies when no org logo; homeLabel/workspaceName from pack; platformClientId untouched",
+      "actual": "orgLogoKept=/ea-logo.png; packLogo=/pack-logo.png; home=Chapter Home; ws=Sample Chapter Portal; platform=ea",
+      "pass": true
+    },
+    {
+      "id": "ctp-fulfillment-unchanged",
+      "routes": [],
+      "roles": [],
+      "packIds": [],
+      "flagState": "N/A",
+      "expected": "fulfill-paid-client has no IndustryPack / UNIVERSAL_NAV coupling",
+      "actual": "hasPortalUniversal=false; hasPack=false; packsImportFulfill=false",
+      "pass": true
+    },
+    {
+      "id": "no-later-phase-runtime",
+      "routes": [],
+      "roles": [],
+      "packIds": [
+        "ea-executive",
+        "ctp-client",
+        "sample-placeholder"
+      ],
+      "flagState": "N/A",
+      "expected": "No @rjsf/@novu imports under portal-universal; extensions disabled; people/tasks map empty",
+      "actual": "runtimeHits=0; allExtOff=true; peopleModulesEmpty=true; caps=10",
+      "pass": true
+    },
+    {
+      "id": "cross-org-href-isolation",
+      "routes": [
+        "/portal/demo-client/ctp/progress",
+        "/portal/demo-client/ctp/documents",
+        "/portal/demo-client/ctp/messages",
+        "/portal/demo-client/ctp/support",
+        "/portal/demo-client/ctp",
+        "/portal/org-alpha",
+        "/portal/org-alpha/documents",
+        "/portal/org-beta",
+        "/portal/org-beta/documents"
+      ],
+      "roles": [
+        "guest"
+      ],
+      "packIds": [
+        "ctp-client",
+        "ea-executive"
+      ],
+      "flagState": "ON",
+      "expected": "All hrefs scoped to requesting portal slug; no cross-slug leakage",
+      "actual": "cxIsolated=true; execIsolated=true",
+      "pass": true
+    },
+    {
+      "id": "flag-off-vs-on-cx-destination-parity",
+      "routes": [
+        "/portal/demo-client/ctp/progress",
+        "/portal/demo-client/ctp/documents",
+        "/portal/demo-client/ctp/messages",
+        "/portal/demo-client/ctp/support",
+        "/portal/demo-client/ctp",
+        "/portal/demo-client/ctp/progress",
+        "/portal/demo-client/ctp/documents",
+        "/portal/demo-client/ctp/messages",
+        "/portal/demo-client/ctp/support",
+        "/portal/demo-client/ctp"
+      ],
+      "roles": [
+        "guest"
+      ],
+      "packIds": [
+        "ctp-client"
+      ],
+      "flagState": "ON",
+      "expected": "Same five CX ids under both modes; hrefs remain under /portal/demo-client/ctp*",
+      "actual": "offIds=progress,documents,messages,support,journey; onIds=progress,documents,messages,support,journey",
+      "pass": true
+    }
+  ]
+}

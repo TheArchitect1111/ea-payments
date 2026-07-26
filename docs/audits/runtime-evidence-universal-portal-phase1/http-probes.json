@@ -1,0 +1,48 @@
+{
+  "base": "http://localhost:3000",
+  "flagAtProbe": "ON",
+  "results": [
+    {
+      "route": "/portal/login",
+      "status": "ERR",
+      "ok": false,
+      "note": "fetch failed"
+    },
+    {
+      "route": "/portal/demo-client/ctp",
+      "status": "ERR",
+      "ok": false,
+      "note": "fetch failed"
+    },
+    {
+      "route": "/portal/demo-client/ctp/progress",
+      "status": "ERR",
+      "ok": false,
+      "note": "fetch failed"
+    },
+    {
+      "route": "/portal/demo-client/ctp/documents",
+      "status": "ERR",
+      "ok": false,
+      "note": "fetch failed"
+    },
+    {
+      "route": "/portal/demo-client/ctp/messages",
+      "status": "ERR",
+      "ok": false,
+      "note": "fetch failed"
+    },
+    {
+      "route": "/portal/demo-client/ctp/support",
+      "status": "ERR",
+      "ok": false,
+      "note": "fetch failed"
+    },
+    {
+      "route": "/portal/ea",
+      "status": "ERR",
+      "ok": false,
+      "note": "fetch failed"
+    }
+  ]
+}

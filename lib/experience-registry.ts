@@ -3,6 +3,12 @@
  *
  * Single source of truth for customer goals, navigation, dashboard zones, and Orbie policy.
  * Module technical fields (path, RBAC) remain in lib/modules/registry.ts.
+ *
+ * Dual map (Phase 1 Universal Portal):
+ * - ModuleId — technical portal modules (lib/modules/registry.ts)
+ * - CapabilityId — EA product capability map (this file)
+ * - UniversalCapabilityId — industry-agnostic capabilities (lib/portal-universal/capability-ids.ts)
+ * IndustryPacks label/order nav using UniversalCapabilityId without renaming ModuleId/CapabilityId.
  */
 import type { ModuleId, NavGroup } from '@/lib/modules/registry';
 import type { OsLifecycleTag } from '@/lib/os-lifecycle';

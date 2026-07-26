@@ -1,0 +1,30 @@
+{
+  "enabled": false,
+  "nav": [
+    {
+      "id": "progress",
+      "label": "Your Project",
+      "href": "/portal/demo-client/ctp/progress"
+    },
+    {
+      "id": "documents",
+      "label": "Documents",
+      "href": "/portal/demo-client/ctp/documents"
+    },
+    {
+      "id": "messages",
+      "label": "Contact",
+      "href": "/portal/demo-client/ctp/messages"
+    },
+    {
+      "id": "support",
+      "label": "Help",
+      "href": "/portal/demo-client/ctp/support"
+    },
+    {
+      "id": "journey",
+      "label": "Journey",
+      "href": "/portal/demo-client/ctp"
+    }
+  ]
+}

@@ -1,0 +1,238 @@
+{
+  "packId": "ea-executive",
+  "resolved": [
+    {
+      "id": "home",
+      "universalCapabilityId": "home",
+      "label": "Dashboard",
+      "href": "/portal/ea",
+      "moduleId": "dashboard",
+      "order": 10
+    },
+    {
+      "id": "progress",
+      "universalCapabilityId": "progress",
+      "label": "Pulse",
+      "href": "/portal/ea/pulse",
+      "moduleId": "pulse",
+      "order": 20
+    },
+    {
+      "id": "programs-simplifi",
+      "universalCapabilityId": "programs",
+      "label": "Simplifi",
+      "href": "/portal/ea/simplifi",
+      "moduleId": "simplifi",
+      "order": 30
+    },
+    {
+      "id": "programs-amplifi",
+      "universalCapabilityId": "programs",
+      "label": "Amplifi",
+      "href": "/portal/ea/amplifi",
+      "moduleId": "amplifi",
+      "order": 40
+    },
+    {
+      "id": "programs-connect",
+      "universalCapabilityId": "programs",
+      "label": "Connect",
+      "href": "/portal/ea/connect",
+      "moduleId": "connect",
+      "order": 50
+    },
+    {
+      "id": "messages-updates",
+      "universalCapabilityId": "messages",
+      "label": "Project Updates",
+      "href": "/portal/ea/updates",
+      "moduleId": "update-hub",
+      "order": 60
+    },
+    {
+      "id": "documents",
+      "universalCapabilityId": "documents",
+      "label": "Document Hub™",
+      "href": "/portal/ea/documents",
+      "moduleId": "documents",
+      "order": 70
+    },
+    {
+      "id": "messages-contact",
+      "universalCapabilityId": "messages",
+      "label": "Contact",
+      "href": "/portal/ea/messaging",
+      "moduleId": "messaging",
+      "order": 80
+    },
+    {
+      "id": "calendar",
+      "universalCapabilityId": "calendar",
+      "label": "Event Hub™",
+      "href": "/portal/ea/events",
+      "moduleId": "events",
+      "order": 90
+    },
+    {
+      "id": "resources-lib",
+      "universalCapabilityId": "resources",
+      "label": "Resource library",
+      "href": "/portal/ea/resources",
+      "moduleId": "resources",
+      "order": 100
+    },
+    {
+      "id": "resources-training",
+      "universalCapabilityId": "resources",
+      "label": "Training Hub™",
+      "href": "/portal/ea/learning",
+      "moduleId": "training",
+      "order": 110
+    },
+    {
+      "id": "resources-ask",
+      "universalCapabilityId": "resources",
+      "label": "Guide™",
+      "href": "/portal/ea/ask",
+      "moduleId": "ask",
+      "order": 120
+    },
+    {
+      "id": "programs-ctp",
+      "universalCapabilityId": "programs",
+      "label": "Consider the Possibilities",
+      "href": "/portal/ea/ctp",
+      "moduleId": "ctp",
+      "order": 130
+    },
+    {
+      "id": "programs-member",
+      "universalCapabilityId": "programs",
+      "label": "Member",
+      "href": "/portal/ea/member",
+      "moduleId": "member",
+      "order": 140
+    },
+    {
+      "id": "payments",
+      "universalCapabilityId": "payments",
+      "label": "Billing",
+      "href": "/portal/ea/billing",
+      "moduleId": "billing",
+      "order": 150
+    }
+  ],
+  "groups": [
+    {
+      "id": "core",
+      "label": "Workspace",
+      "items": [
+        {
+          "moduleId": "dashboard",
+          "label": "Dashboard",
+          "href": "/portal/ea",
+          "icon": "grid",
+          "activeTab": "home"
+        },
+        {
+          "moduleId": "pulse",
+          "label": "Pulse",
+          "href": "/portal/ea/pulse",
+          "icon": "pulse",
+          "activeTab": "pulse"
+        },
+        {
+          "moduleId": "simplifi",
+          "label": "Simplifi",
+          "href": "/portal/ea/simplifi",
+          "icon": "simplifi",
+          "activeTab": "simplifi"
+        },
+        {
+          "moduleId": "amplifi",
+          "label": "Amplifi",
+          "href": "/portal/ea/amplifi",
+          "icon": "amplifi",
+          "activeTab": "amplifi"
+        },
+        {
+          "moduleId": "connect",
+          "label": "Connect",
+          "href": "/portal/ea/connect",
+          "icon": "connect",
+          "activeTab": "connect"
+        },
+        {
+          "moduleId": "update-hub",
+          "label": "Project Updates",
+          "href": "/portal/ea/updates",
+          "icon": "updates",
+          "activeTab": "updates"
+        },
+        {
+          "moduleId": "documents",
+          "label": "Document Hub™",
+          "href": "/portal/ea/documents",
+          "icon": "documents",
+          "activeTab": "documents"
+        },
+        {
+          "moduleId": "messaging",
+          "label": "Contact",
+          "href": "/portal/ea/messaging",
+          "icon": "messaging",
+          "activeTab": "messaging"
+        },
+        {
+          "moduleId": "events",
+          "label": "Event Hub™",
+          "href": "/portal/ea/events",
+          "icon": "events",
+          "activeTab": "events"
+        },
+        {
+          "moduleId": "resources",
+          "label": "Resource library",
+          "href": "/portal/ea/resources",
+          "icon": "resources",
+          "activeTab": "resources"
+        },
+        {
+          "moduleId": "training",
+          "label": "Training Hub™",
+          "href": "/portal/ea/learning",
+          "icon": "learning",
+          "activeTab": "learning"
+        },
+        {
+          "moduleId": "ask",
+          "label": "Guide™",
+          "href": "/portal/ea/ask",
+          "icon": "ask",
+          "activeTab": "ask"
+        },
+        {
+          "moduleId": "ctp",
+          "label": "Consider the Possibilities",
+          "href": "/portal/ea/ctp",
+          "icon": "grid",
+          "activeTab": "ctp"
+        },
+        {
+          "moduleId": "member",
+          "label": "Member",
+          "href": "/portal/ea/member",
+          "icon": "grid",
+          "activeTab": "member"
+        },
+        {
+          "moduleId": "billing",
+          "label": "Billing",
+          "href": "/portal/ea/billing",
+          "icon": "documents",
+          "activeTab": "billing"
+        }
+      ]
+    }
+  ]
+}

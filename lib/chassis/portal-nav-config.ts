@@ -1,12 +1,31 @@
 import type { EAPortalTab } from './PortalShell';
 
+/**
+ * @deprecated Phase 1 Universal Portal — orphan static nav.
+ * Live nav comes from entitlements (`resolvePortalModuleAccess`) or IndustryPack
+ * when UNIVERSAL_NAV_PACKS is enabled. Do not import for PortalShell.
+ * @see docs/plans/EA-UNIVERSAL-PORTAL-PHASE-1-BLUEPRINT.md (A-029)
+ */
 export type PortalNavItem = {
   id: EAPortalTab | string;
   label: string;
   href: string;
-  icon: 'grid' | 'pulse' | 'simplifi' | 'amplifi' | 'connect' | 'updates' | 'documents' | 'events' | 'resources' | 'messaging' | 'learning' | 'ask';
+  icon:
+    | 'grid'
+    | 'pulse'
+    | 'simplifi'
+    | 'amplifi'
+    | 'connect'
+    | 'updates'
+    | 'documents'
+    | 'events'
+    | 'resources'
+    | 'messaging'
+    | 'learning'
+    | 'ask';
 };
 
+/** @deprecated See file header — not used by live PortalShell. */
 export function portalNavItems(slug: string): { menu: PortalNavItem[]; others: PortalNavItem[] } {
   const base = `/portal/${slug}`;
   return {

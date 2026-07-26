@@ -31,6 +31,8 @@ export type Organization = {
   themeId?: string;
   personalityId?: string;
   workspaceName?: string;
+  /** Optional IndustryPack id (Phase 1 Universal Portal) */
+  industryPackId?: string;
 };
 
 function mapOrganization(record: AirtableRecord): Organization {
@@ -54,6 +56,7 @@ function mapOrganization(record: AirtableRecord): Organization {
     themeId: f['Theme Id'] ? String(f['Theme Id']) : undefined,
     personalityId: f['Personality Id'] ? String(f['Personality Id']) : undefined,
     workspaceName: f['Workspace Name'] ? String(f['Workspace Name']) : undefined,
+    industryPackId: f['Industry Pack Id'] ? String(f['Industry Pack Id']) : undefined,
   };
 }
 
@@ -271,6 +274,7 @@ export async function updateOrganizationWorkspaceConfig(
     workspaceName?: string;
     logo?: string;
     brandColors?: string;
+    industryPackId?: string;
   },
 ): Promise<Organization | null> {
   if (!platformStoreConfigured() || orgId.startsWith('org_')) return null;
@@ -282,6 +286,7 @@ export async function updateOrganizationWorkspaceConfig(
   if (input.workspaceName !== undefined) fields['Workspace Name'] = input.workspaceName;
   if (input.logo !== undefined) fields['Logo'] = input.logo;
   if (input.brandColors !== undefined) fields['Brand Colors'] = input.brandColors;
+  if (input.industryPackId !== undefined) fields['Industry Pack Id'] = input.industryPackId;
 
   if (Object.keys(fields).length === 0) return getOrganizationById(orgId);
 

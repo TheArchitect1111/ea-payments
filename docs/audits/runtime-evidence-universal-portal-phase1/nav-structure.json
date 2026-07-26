@@ -1,0 +1,121 @@
+{
+  "groups": [
+    {
+      "id": "core",
+      "label": "Workspace",
+      "items": [
+        {
+          "moduleId": "dashboard",
+          "label": "Dashboard",
+          "href": "/portal/ea",
+          "icon": "grid",
+          "activeTab": "home"
+        },
+        {
+          "moduleId": "pulse",
+          "label": "Pulse",
+          "href": "/portal/ea/pulse",
+          "icon": "pulse",
+          "activeTab": "pulse"
+        },
+        {
+          "moduleId": "amplifi",
+          "label": "Amplifi",
+          "href": "/portal/ea/amplifi",
+          "icon": "amplifi",
+          "activeTab": "amplifi"
+        },
+        {
+          "moduleId": "update-hub",
+          "label": "Project Updates",
+          "href": "/portal/ea/updates",
+          "icon": "updates",
+          "activeTab": "updates"
+        },
+        {
+          "moduleId": "documents",
+          "label": "Document Hub™",
+          "href": "/portal/ea/documents",
+          "icon": "documents",
+          "activeTab": "documents"
+        },
+        {
+          "moduleId": "messaging",
+          "label": "Contact",
+          "href": "/portal/ea/messaging",
+          "icon": "messaging",
+          "activeTab": "messaging"
+        },
+        {
+          "moduleId": "events",
+          "label": "Event Hub™",
+          "href": "/portal/ea/events",
+          "icon": "events",
+          "activeTab": "events"
+        },
+        {
+          "moduleId": "resources",
+          "label": "Resource library",
+          "href": "/portal/ea/resources",
+          "icon": "resources",
+          "activeTab": "resources"
+        },
+        {
+          "moduleId": "training",
+          "label": "Training Hub™",
+          "href": "/portal/ea/learning",
+          "icon": "learning",
+          "activeTab": "learning"
+        },
+        {
+          "moduleId": "ask",
+          "label": "Guide™",
+          "href": "/portal/ea/ask",
+          "icon": "ask",
+          "activeTab": "ask"
+        },
+        {
+          "moduleId": "ctp",
+          "label": "Consider the Possibilities",
+          "href": "/portal/ea/ctp",
+          "icon": "grid",
+          "activeTab": "ctp"
+        },
+        {
+          "moduleId": "member",
+          "label": "Member",
+          "href": "/portal/ea/member",
+          "icon": "grid",
+          "activeTab": "member"
+        }
+      ]
+    }
+  ],
+  "cx": [
+    {
+      "id": "progress",
+      "label": "Your Project",
+      "href": "/portal/demo-client/ctp/progress"
+    },
+    {
+      "id": "documents",
+      "label": "Documents",
+      "href": "/portal/demo-client/ctp/documents"
+    },
+    {
+      "id": "messages",
+      "label": "Contact",
+      "href": "/portal/demo-client/ctp/messages"
+    },
+    {
+      "id": "support",
+      "label": "Help",
+      "href": "/portal/demo-client/ctp/support"
+    },
+    {
+      "id": "journey",
+      "label": "Journey",
+      "href": "/portal/demo-client/ctp"
+    }
+  ]
+}

@@ -1,10 +1,12 @@
 /**
- * Live portal chrome ? entitlement nav + workspace shell theme/terminology.
+ * Live portal chrome — entitlement nav + workspace shell theme/terminology.
+ * When UNIVERSAL_NAV_PACKS is enabled, IndustryPack branding + nav reshape chrome.
  */
 import { cookies } from 'next/headers';
 import { getClientByPortalSlug } from '@/lib/airtable';
 import { EA_PORTAL_COOKIE } from '@/lib/chassis/ea-portal';
 import { verifySession } from '@/lib/ea-portal-auth';
+import { shouldUseClientExperienceShell } from '@/lib/ctp-client-nav';
 import {
   applyCtpPortalModuleFilter,
   resolvePortalModuleAccess,
@@ -16,6 +18,14 @@ import {
   getOrganizationById,
   type Organization,
 } from '@/lib/organizations';
+import { normalizeRole } from '@/lib/rbac';
+import { applyPackBrandingToChrome } from '@/lib/portal-universal/apply-branding';
+import { isUniversalNavPacksEnabled } from '@/lib/portal-universal/flags';
+import {
+  resolveIndustryNav,
+  resolvedNavToSidebarGroups,
+} from '@/lib/portal-universal/resolve-nav';
+import { resolvePackForOrg } from '@/lib/portal-universal/resolve-pack-for-org';
 import {
   resolveWorkspaceConfigFromOrg,
   resolveWorkspaceShellForPortal,
@@ -171,7 +181,7 @@ export async function resolvePortalWorkspaceChrome(
       email: session.email ?? client.email,
     });
 
-    const shellNavGroups = toPortalSidebarNavGroups(filtered.shellNavGroups);
+    let shellNavGroups = toPortalSidebarNavGroups(filtered.shellNavGroups);
     const orgId = session.orgId ?? access.orgId;
 
     let organization: Organization | null = null;
@@ -186,6 +196,26 @@ export async function resolvePortalWorkspaceChrome(
       // Never 500 the portal shell over org/Airtable chrome lookup.
       console.error('resolvePortalWorkspaceChrome org lookup failed:', err);
       organization = null;
+    }
+
+    const preferClientExperience = await shouldUseClientExperienceShell(slug);
+    const packsEnabled = isUniversalNavPacksEnabled();
+    const pack = packsEnabled
+      ? resolvePackForOrg({
+          organization,
+          portalSlug: slug,
+          preferClientExperience,
+        })
+      : null;
+
+    if (packsEnabled && pack && !pack.useClientExperienceChrome) {
+      const resolved = resolveIndustryNav({
+        slug,
+        pack,
+        enabledModuleIds: filtered.enabledModuleIds,
+        role: normalizeRole(session.role),
+      });
+      shellNavGroups = resolvedNavToSidebarGroups(resolved);
     }
 
     const overrides = resolveWorkspaceConfigFromOrg(organization, slug, orgId);
@@ -208,6 +238,22 @@ export async function resolvePortalWorkspaceChrome(
       }
     }
 
+    // Pack branding fills gaps; org theme/personality/workspace still preferred when set.
+    if (packsEnabled && pack?.branding) {
+      if (!overrides.themeId && pack.branding.themeId) {
+        overrides.themeId = pack.branding.themeId;
+      }
+      if (!overrides.personalityId && pack.branding.personalityId) {
+        overrides.personalityId = pack.branding.personalityId;
+      }
+      if (!overrides.workspaceName && pack.branding.workspaceName) {
+        overrides.workspaceName = pack.branding.workspaceName;
+      }
+      if (!overrides.brandName && pack.branding.brandName) {
+        overrides.brandName = pack.branding.brandName;
+      }
+    }
+
     const shell = resolveWorkspaceShellForPortal({
       slug,
       orgId,
@@ -221,7 +267,13 @@ export async function resolvePortalWorkspaceChrome(
       themeOverlay: overrides.themeOverlay,
     });
 
-    const chrome = chromeFromShell(overrides.platformClientId, shell, shellNavGroups);
+    let chrome = chromeFromShell(overrides.platformClientId, shell, shellNavGroups);
+
+    if (packsEnabled && pack) {
+      chrome = applyPackBrandingToChrome(chrome, pack, {
+        orgHasLogo: Boolean(organization?.logo?.trim() || overrides.logo?.trim()),
+      });
+    }
 
     // OIB member persona skins the shell member label when Member Experience is stored.
     if (orgId && !String(orgId).startsWith('org_')) {
