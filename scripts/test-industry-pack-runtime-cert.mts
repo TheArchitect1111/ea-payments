@@ -603,16 +603,18 @@ const CX_LEGACY_LABELS = ['Your Project', 'Documents', 'Contact', 'Help', 'Journ
     CTP_CLIENT_PACK.extensions?.tasks?.enabled !== true &&
     SAMPLE_PLACEHOLDER_PACK.extensions?.people?.enabled !== true &&
     SAMPLE_PLACEHOLDER_PACK.extensions?.notifications?.enabled !== true;
-  const peopleModulesEmpty = UNIVERSAL_TO_MODULES.people.length === 0 && UNIVERSAL_TO_MODULES.tasks.length === 0;
+  const peopleModulesMapped = UNIVERSAL_TO_MODULES.people.includes('people');
+  const tasksStillEmpty = UNIVERSAL_TO_MODULES.tasks.length === 0;
   record({
     id: 'no-later-phase-runtime',
     routes: [],
     roles: [],
     packIds: ['ea-executive', 'ctp-client', 'sample-placeholder'],
     flagState: 'N/A',
-    expected: 'No @rjsf/@novu imports under portal-universal; extensions disabled; people/tasks map empty',
-    actual: `runtimeHits=${runtimeHits}; allExtOff=${allExtOff}; peopleModulesEmpty=${peopleModulesEmpty}; caps=${UNIVERSAL_CAPABILITY_IDS.length}`,
-    pass: runtimeHits === 0 && allExtOff && peopleModulesEmpty,
+    expected:
+      'No @rjsf/@novu imports under portal-universal; extensions disabled; tasks map empty; people maps to module',
+    actual: `runtimeHits=${runtimeHits}; allExtOff=${allExtOff}; peopleMapped=${peopleModulesMapped}; tasksEmpty=${tasksStillEmpty}; caps=${UNIVERSAL_CAPABILITY_IDS.length}`,
+    pass: runtimeHits === 0 && allExtOff && peopleModulesMapped && tasksStillEmpty,
   });
 }
 

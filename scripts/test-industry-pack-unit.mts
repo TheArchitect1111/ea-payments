@@ -35,7 +35,7 @@ function setFlag(on: boolean) {
 
 // --- capability ids ---
 assert.equal(UNIVERSAL_CAPABILITY_IDS.length, 10);
-assert.deepEqual(UNIVERSAL_TO_MODULES.people, []);
+assert.deepEqual(UNIVERSAL_TO_MODULES.people, ['people']);
 assert.deepEqual(UNIVERSAL_TO_MODULES.tasks, []);
 assert.ok(UNIVERSAL_TO_MODULES.home.includes('dashboard'));
 

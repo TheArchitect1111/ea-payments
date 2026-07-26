@@ -23,7 +23,7 @@ export type UniversalCapabilityId = (typeof UNIVERSAL_CAPABILITY_IDS)[number];
 /** Default Universal → ModuleId mapping (primary first). Empty = not shipped yet. */
 export const UNIVERSAL_TO_MODULES: Record<UniversalCapabilityId, ModuleId[]> = {
   home: ['dashboard'],
-  people: [],
+  people: ['people'],
   messages: ['messaging', 'update-hub'],
   tasks: [],
   calendar: ['events'],

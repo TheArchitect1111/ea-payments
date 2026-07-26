@@ -118,6 +118,25 @@ export async function fulfillPaidClient(
         slug: portalSlug,
       });
 
+      // Phase 2A People — flag-gated no-op when UNIVERSAL_PEOPLE is OFF (INV-17).
+      try {
+        const { isUniversalPeopleEnabled } = await import('@/lib/people/flags');
+        if (isUniversalPeopleEnabled() && orgId && !String(orgId).startsWith('org_')) {
+          const { ensurePersonForClientRecord } = await import('@/lib/people/ensure-person');
+          ensurePersonForClientRecord({
+            organizationId: orgId,
+            portalSlug,
+            clientRecordId: input.airtableRecordId,
+            email: input.email,
+            displayName: input.clientName,
+            source: 'provisioning',
+            actorEmail: input.email,
+          });
+        }
+      } catch (peopleErr) {
+        console.error('fulfillPaidClient People ensure failed (non-fatal):', peopleErr);
+      }
+
       await provisionConnectAfterCheckout({
         portalSlug,
         organizationName: input.clientName,

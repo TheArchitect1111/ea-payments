@@ -1,0 +1,75 @@
+{
+  "generatedAt": "2026-07-26T12:31:36.294Z",
+  "base": "http://127.0.0.1:3010",
+  "flag": "ON (server env)",
+  "passCount": 6,
+  "failCount": 0,
+  "rows": [
+    {
+      "id": "HTTP-AUTH-CREATE-BODY-ORG-IGNORED",
+      "route": "/api/portal/demo-client/people",
+      "method": "POST",
+      "role": "staff",
+      "slug": "demo-client",
+      "expected": "200; portalSlug=demo-client; body organizationId ignored",
+      "status": 200,
+      "bodySnippet": "{\"ok\":true,\"person\":{\"id\":\"person_94be31dfb66646c3\",\"organizationId\":\"cert_org_demo_client\",\"portalSlug\":\"demo-client\",\"displayName\":\"Cert Ada\",\"lifecycleStatus\":\"active\",\"source\":\"manual\",\"createdAt\":\"2026-07-26T12:31:35.140Z\",\"updatedAt\":\"20",
+      "pass": true
+    },
+    {
+      "id": "HTTP-AUTH-GUEST-LIST-FORBIDDEN",
+      "route": "/api/portal/demo-client/people",
+      "method": "GET",
+      "role": "guest",
+      "slug": "demo-client",
+      "expected": "403 Forbidden (role < staff)",
+      "status": 403,
+      "bodySnippet": "{\"ok\":false,\"error\":\"Forbidden\"}",
+      "pass": true
+    },
+    {
+      "id": "HTTP-AUTH-STAFF-LIST",
+      "route": "/api/portal/demo-client/people",
+      "method": "GET",
+      "role": "staff",
+      "slug": "demo-client",
+      "expected": "200 with people array",
+      "status": 200,
+      "bodySnippet": "{\"ok\":true,\"people\":[{\"id\":\"person_68cd506841fb4017\",\"organizationId\":\"cert_org_demo_client\",\"portalSlug\":\"demo-client\",\"displayName\":\"Cert Ada\",\"lifecycleStatus\":\"active\",\"source\":\"manual\",\"createdAt\":\"2026-07-26T12:29:00.041Z\",\"updatedAt\":\"2",
+      "pass": true
+    },
+    {
+      "id": "HTTP-AUTH-CROSS-SLUG-DENIED",
+      "route": "/api/portal/demo-client/people",
+      "method": "GET",
+      "role": "owner@other-org-demo",
+      "slug": "demo-client",
+      "expected": "403 portal access denied",
+      "status": 403,
+      "bodySnippet": "{\"ok\":false,\"error\":\"Portal access denied.\"}",
+      "pass": true
+    },
+    {
+      "id": "HTTP-AUTH-PAGE-RENDER",
+      "route": "/portal/demo-client/people",
+      "method": "GET",
+      "role": "staff",
+      "slug": "demo-client",
+      "expected": "200 People shell, or portal legal gate in front of it (not People hard-404)",
+      "status": 200,
+      "bodySnippet": "<!DOCTYPE html><html lang=\"en\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><link rel=\"stylesheet\" href=\"/_next/static/chunks/app_globals_0yg4wg8.c",
+      "pass": true
+    },
+    {
+      "id": "HTTP-UNAUTH-API-401",
+      "route": "/api/portal/demo-client/people",
+      "method": "GET",
+      "role": "none",
+      "slug": "demo-client",
+      "expected": "401",
+      "status": 401,
+      "bodySnippet": "{\"ok\":false,\"error\":\"Please log in again.\"}",
+      "pass": true
+    }
+  ]
+}

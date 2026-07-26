@@ -1,0 +1,26 @@
+{
+  "generatedAt": "2026-07-26T12:36:00.000Z",
+  "verdict": "PASS WITH CONDITIONS",
+  "report": "docs/reports/EA-UNIVERSAL-PORTAL-PHASE-2A-PEOPLE-RUNTIME-CERTIFICATION.md",
+  "suites": {
+    "adversarialADV1to22": { "pass": 22, "fail": 0 },
+    "inProcessRuntimeCert": { "pass": 25, "fail": 0, "serverUp": true },
+    "httpAuthFlagOn": { "pass": 6, "fail": 0 },
+    "httpAuthFlagOff": { "pass": 7, "fail": 0 },
+    "provisioningRegression": { "pass": true },
+    "phase1PackContract": { "pass": true }
+  },
+  "defectFixed": {
+    "id": "INV-17-GET-405",
+    "files": [
+      "app/api/portal/[slug]/people/merge/route.ts",
+      "app/api/portal/[slug]/people/import/route.ts"
+    ],
+    "fix": "GET handlers call guardPeopleApi so flag OFF returns 404 instead of bare 405"
+  },
+  "screenshots": [
+    "people-desktop.png",
+    "people-mobile-390.png"
+  ],
+  "commitPushDeploy": false
+}

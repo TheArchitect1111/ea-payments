@@ -1,0 +1,35 @@
+{
+  "base": "http://127.0.0.1:3010",
+  "httpResults": [
+    {
+      "route": "/portal/demo-client/people",
+      "flag": "OFF",
+      "status": 307,
+      "note": "redirect"
+    },
+    {
+      "route": "/api/portal/demo-client/people",
+      "flag": "OFF",
+      "status": 404,
+      "note": "ok"
+    },
+    {
+      "route": "/portal/demo-client/people",
+      "flag": "ON",
+      "status": 307,
+      "note": "redirect"
+    },
+    {
+      "route": "/api/portal/demo-client/people",
+      "flag": "ON",
+      "status": 404,
+      "note": "ok"
+    },
+    {
+      "route": "/portal/login",
+      "flag": "ON",
+      "status": 200,
+      "note": "ok"
+    }
+  ]
+}

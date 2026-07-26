@@ -1,0 +1,62 @@
+{
+  "generatedAt": "2026-07-26T12:34:13.981Z",
+  "base": "http://127.0.0.1:3010",
+  "flag": "OFF (UNIVERSAL_PEOPLE=0)",
+  "passCount": 7,
+  "failCount": 0,
+  "rows": [
+    {
+      "id": "FLAG-OFF-AUTH-API-GET",
+      "status": 404,
+      "expected": 404,
+      "pass": true,
+      "body": "{\"ok\":false,\"error\":\"Not found\"}"
+    },
+    {
+      "id": "FLAG-OFF-AUTH-API-POST",
+      "status": 404,
+      "expected": 404,
+      "pass": true,
+      "body": "{\"ok\":false,\"error\":\"Not found\"}"
+    },
+    {
+      "id": "FLAG-OFF-AUTH-API-MERGE-GET",
+      "status": 404,
+      "expected": 404,
+      "pass": true,
+      "body": "{\"ok\":false,\"error\":\"Not found\"}"
+    },
+    {
+      "id": "FLAG-OFF-AUTH-API-IMPORT-GET",
+      "status": 404,
+      "expected": 404,
+      "pass": true,
+      "body": "{\"ok\":false,\"error\":\"Not found\"}"
+    },
+    {
+      "id": "FLAG-OFF-AUTH-API-EXPORT",
+      "status": 404,
+      "expected": 404,
+      "pass": true,
+      "body": "{\"ok\":false,\"error\":\"Not found\"}"
+    },
+    {
+      "id": "FLAG-OFF-AUTH-PAGE",
+      "status": 200,
+      "expected": "404 or legal gate without People shell (never Directory for portal)",
+      "pass": true,
+      "body": "<!DOCTYPE html><html lang=\"en\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><link rel=\"stylesheet\" href=\"/_next/static/chunks/app_globals_0yg4wg8.c",
+      "notes": {
+        "isPeopleShell": false,
+        "is404": true
+      }
+    },
+    {
+      "id": "FLAG-OFF-CTP-UNCHANGED",
+      "status": 200,
+      "expected": "not 404 from People (307/200/legal gate ok)",
+      "pass": true,
+      "body": "<!DOCTYPE html><html lang=\"en\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-s"
+    }
+  ]
+}

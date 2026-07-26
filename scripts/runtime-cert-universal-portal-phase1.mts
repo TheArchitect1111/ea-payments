@@ -567,7 +567,7 @@ const EXEC_MODULES = new Set([
       p.extensions?.notifications?.enabled !== true,
   );
   const mapOk =
-    UNIVERSAL_TO_MODULES.people.length === 0 && UNIVERSAL_TO_MODULES.tasks.length === 0;
+    UNIVERSAL_TO_MODULES.people.includes('people') && UNIVERSAL_TO_MODULES.tasks.length === 0;
   const navNever = packs.every((p) => {
     const people = p.nav.find((n) => n.universalCapabilityId === 'people');
     const tasks = p.nav.find((n) => n.universalCapabilityId === 'tasks');

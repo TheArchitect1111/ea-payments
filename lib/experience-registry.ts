@@ -69,6 +69,7 @@ export type CapabilityId =
   | 'ask-advisor'
   | 'your-build'
   | 'member-experience'
+  | 'people-directory'
   | 'relationship-capture'
   | 'documents'
   | 'learning'
@@ -372,6 +373,23 @@ export const CAPABILITY_REGISTRY: CapabilityDefinition[] = [
     orbPolicy: 'introduce',
     routePatterns: ['/member'],
     osLifecycle: 'communicate',
+  },
+  {
+    id: 'people-directory',
+    moduleId: 'people',
+    customerGoal: 'Find people and relationships in this organization',
+    plainLanguage: 'People',
+    eaCapability: 'People & Relationships',
+    displayLabel: 'People',
+    disclosureLevel: 'L2',
+    navGroup: 'operations',
+    showInSidebar: true,
+    showInPillNav: false,
+    dashboardZone: 'none',
+    showOnDashboardHub: false,
+    orbPolicy: 'ignore',
+    routePatterns: ['/people'],
+    osLifecycle: 'organize',
   },
   {
     id: 'landing-pages',

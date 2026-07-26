@@ -1,0 +1,368 @@
+{
+  "generatedAt": "2026-07-26T12:49:17.378Z",
+  "harness": "scripts/runtime-cert-people-phase2a.mts",
+  "syntheticOrgs": {
+    "ORG_A": "cert_org_alpha",
+    "ORG_B": "cert_org_beta"
+  },
+  "slugs": [
+    "demo-client",
+    "other-org-demo"
+  ],
+  "roles": [
+    "guest",
+    "staff",
+    "owner",
+    "parent_guardian"
+  ],
+  "flagStates": [
+    "OFF",
+    "ON"
+  ],
+  "http": {
+    "base": "http://127.0.0.1:3010",
+    "serverUp": true,
+    "results": [
+      {
+        "route": "/portal/demo-client/people",
+        "flag": "OFF",
+        "status": 307,
+        "note": "redirect"
+      },
+      {
+        "route": "/api/portal/demo-client/people",
+        "flag": "OFF",
+        "status": 404,
+        "note": "ok"
+      },
+      {
+        "route": "/portal/demo-client/people",
+        "flag": "ON",
+        "status": 307,
+        "note": "redirect"
+      },
+      {
+        "route": "/api/portal/demo-client/people",
+        "flag": "ON",
+        "status": 404,
+        "note": "ok"
+      },
+      {
+        "route": "/portal/login",
+        "flag": "ON",
+        "status": 200,
+        "note": "ok"
+      }
+    ]
+  },
+  "passCount": 25,
+  "failCount": 0,
+  "rows": [
+    {
+      "id": "FLAG-OFF-ENABLED",
+      "routes": [
+        "UNIVERSAL_PEOPLE"
+      ],
+      "flag": "OFF",
+      "roles": "N/A",
+      "orgs": "N/A",
+      "expected": "isUniversalPeopleEnabled() === false",
+      "actual": "enabled=false",
+      "pass": true
+    },
+    {
+      "id": "FLAG-OFF-ENSURE-NOOP",
+      "routes": [
+        "ensurePersonForClientRecord"
+      ],
+      "flag": "OFF",
+      "roles": "system",
+      "orgs": "cert_org_alpha",
+      "expected": "ensure returns null; no person written",
+      "actual": "noop",
+      "pass": true
+    },
+    {
+      "id": "FLAG-OFF-ACL-404",
+      "routes": [
+        "assertPeopleAccess"
+      ],
+      "flag": "OFF",
+      "roles": "owner",
+      "orgs": "cert_org_alpha",
+      "expected": "ACL returns not_found when flag OFF",
+      "actual": "code=not_found",
+      "pass": true
+    },
+    {
+      "id": "FLAG-OFF-CX-UNCHANGED",
+      "routes": [
+        "/portal/demo-client/ctp/*"
+      ],
+      "flag": "OFF",
+      "roles": "client",
+      "orgs": "demo-client",
+      "expected": "CX five destinations unchanged",
+      "actual": "progress,documents,messages,support,journey",
+      "pass": true
+    },
+    {
+      "id": "FLAG-OFF-PHASE1-MAP",
+      "routes": [
+        "UNIVERSAL_TO_MODULES"
+      ],
+      "flag": "N/A",
+      "roles": "N/A",
+      "orgs": "N/A",
+      "expected": "people maps to module; tasks empty",
+      "actual": "people=people",
+      "pass": true
+    },
+    {
+      "id": "FLAG-ON-ENABLED",
+      "routes": [
+        "UNIVERSAL_PEOPLE"
+      ],
+      "flag": "ON",
+      "roles": "N/A",
+      "orgs": "N/A",
+      "expected": "enabled true",
+      "actual": "enabled=true",
+      "pass": true
+    },
+    {
+      "id": "TENANT-FROM-SLUG",
+      "routes": [
+        "resolvePeopleTenantFromSlug"
+      ],
+      "flag": "ON",
+      "roles": "N/A",
+      "orgs": "demo-client→cert_org_alpha",
+      "expected": "org from slug map only",
+      "actual": "cert_org_alpha",
+      "pass": true
+    },
+    {
+      "id": "BODY-ORG-IGNORED",
+      "routes": [
+        "POST /api/portal/{slug}/people"
+      ],
+      "flag": "ON",
+      "roles": "staff",
+      "orgs": "cert_org_alpha",
+      "expected": "body organizationId stripped; person stays session org",
+      "actual": "cert_org_alpha",
+      "pass": true
+    },
+    {
+      "id": "CROSS-ORG-READ-WRITE-MERGE",
+      "routes": [
+        "assertPeopleAccess",
+        "mergePersons"
+      ],
+      "flag": "ON",
+      "roles": "owner",
+      "orgs": "cert_org_alpha vs cert_org_beta",
+      "expected": "cross-org read/merge fail",
+      "actual": "readFail=true; mergeFail=true",
+      "pass": true
+    },
+    {
+      "id": "SAME-EMAIL-MULTI-ORG",
+      "routes": [
+        "createPerson"
+      ],
+      "flag": "ON",
+      "roles": "staff",
+      "orgs": "cert_org_alpha,cert_org_beta",
+      "expected": "same email allowed across orgs",
+      "actual": "person_71683697c1e94d26|person_caa7e2270d8b4ede",
+      "pass": true
+    },
+    {
+      "id": "DUP-EMAIL-WITHIN-ORG",
+      "routes": [
+        "createPerson"
+      ],
+      "flag": "ON",
+      "roles": "staff",
+      "orgs": "cert_org_alpha",
+      "expected": "duplicate email within org rejected",
+      "actual": "rejected",
+      "pass": true
+    },
+    {
+      "id": "GUARDIAN-SUBJECT-SPECIFIC",
+      "routes": [
+        "assertPeopleAccess guardian"
+      ],
+      "flag": "ON",
+      "roles": "guest+parent_guardian",
+      "orgs": "cert_org_alpha",
+      "expected": "guardian of X only; Y denied",
+      "actual": "x=true;y=false",
+      "pass": true
+    },
+    {
+      "id": "GUARDIAN-EXPIRED",
+      "routes": [
+        "assertPeopleAccess"
+      ],
+      "flag": "ON",
+      "roles": "guest",
+      "orgs": "cert_org_alpha",
+      "expected": "expired edge fails",
+      "actual": "denied",
+      "pass": true
+    },
+    {
+      "id": "MAJORITY-AT-ACCESS",
+      "routes": [
+        "assertPeopleAccess"
+      ],
+      "flag": "ON",
+      "roles": "guest",
+      "orgs": "cert_org_alpha",
+      "expected": "adult DOB ends guardian",
+      "actual": "denied",
+      "pass": true
+    },
+    {
+      "id": "ARCHIVED-RESTRICT",
+      "routes": [
+        "GET person"
+      ],
+      "flag": "ON",
+      "roles": "staff vs owner",
+      "orgs": "cert_org_alpha",
+      "expected": "staff not_found; owner ok",
+      "actual": "staff=false;owner=true",
+      "pass": true
+    },
+    {
+      "id": "IMPORT-NO-PLATFORM-ROLE",
+      "routes": [
+        "POST /people/import"
+      ],
+      "flag": "ON",
+      "roles": "staff/owner",
+      "orgs": "cert_org_alpha",
+      "expected": "PlatformRole / org_leader as staff rejected",
+      "actual": "import caps ok",
+      "pass": true
+    },
+    {
+      "id": "EXPORT-REDACTION",
+      "routes": [
+        "GET /people/export"
+      ],
+      "flag": "ON",
+      "roles": "staff viewer",
+      "orgs": "cert_org_alpha",
+      "expected": "DOB absent for staff viewer relation",
+      "actual": "dob redacted",
+      "pass": true
+    },
+    {
+      "id": "MIGRATION-IDEMPOTENT",
+      "routes": [
+        "migrateClientRecordToPerson"
+      ],
+      "flag": "ON",
+      "roles": "system",
+      "orgs": "cert_org_alpha",
+      "expected": "retry same person; program links preserved",
+      "actual": "person_1ea683d356b34766",
+      "pass": true
+    },
+    {
+      "id": "PROVISION-IDEMPOTENT",
+      "routes": [
+        "ensurePersonForClientRecord"
+      ],
+      "flag": "ON",
+      "roles": "system",
+      "orgs": "cert_org_alpha",
+      "expected": "retries return same id",
+      "actual": "person_62803e19dee54ba9",
+      "pass": true
+    },
+    {
+      "id": "AUDIT-ON-MUTATION",
+      "routes": [
+        "appendPeopleAudit"
+      ],
+      "flag": "ON",
+      "roles": "staff",
+      "orgs": "cert_org_alpha",
+      "expected": "create audit event present",
+      "actual": "audit=3",
+      "pass": true
+    },
+    {
+      "id": "OPENFGA-NON-AUTH",
+      "routes": [
+        "acl.ts",
+        "authz-port.ts"
+      ],
+      "flag": "N/A",
+      "roles": "N/A",
+      "orgs": "N/A",
+      "expected": "projector non-authoritative; acl has no projector import",
+      "actual": "stub only",
+      "pass": true
+    },
+    {
+      "id": "NO-TASKS-NOVU-RJSF",
+      "routes": [
+        "lib/people"
+      ],
+      "flag": "N/A",
+      "roles": "N/A",
+      "orgs": "N/A",
+      "expected": "no Tasks/Novu/RJSF runtime in people module",
+      "actual": "clean",
+      "pass": true
+    },
+    {
+      "id": "ROLLBACK-RETAIN",
+      "routes": [
+        "UNIVERSAL_PEOPLE OFF after write"
+      ],
+      "flag": "OFF",
+      "roles": "owner",
+      "orgs": "cert_org_alpha",
+      "expected": "data retained; ACL denies",
+      "actual": "retained+denied",
+      "pass": true
+    },
+    {
+      "id": "HTTP-FLAG-OFF-ROUTES",
+      "routes": [
+        "/portal/demo-client/people",
+        "/api/portal/demo-client/people"
+      ],
+      "flag": "OFF",
+      "roles": "unauthenticated",
+      "orgs": "demo-client",
+      "expected": "404 (or auth redirect then 404); never 200 People payload when OFF",
+      "actual": "page=307;api=404",
+      "http": "page=307; api=404",
+      "pass": true
+    },
+    {
+      "id": "HTTP-FLAG-ON-ROUTES",
+      "routes": [
+        "/portal/demo-client/people",
+        "/api/portal/demo-client/people"
+      ],
+      "flag": "ON",
+      "roles": "unauthenticated",
+      "orgs": "demo-client",
+      "expected": "auth gate (401/307) or page render — not silent 500",
+      "actual": "page=307;api=404",
+      "http": "page=307; api=404",
+      "pass": true
+    }
+  ]
+}

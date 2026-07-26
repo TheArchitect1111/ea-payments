@@ -21,6 +21,7 @@ export const MODULE_IDS = [
   'billing',
   'ctp',
   'member',
+  'people',
 ] as const;
 
 export type ModuleId = (typeof MODULE_IDS)[number];
@@ -192,6 +193,15 @@ const TECHNICAL_MODULE_REGISTRY: TechnicalModuleDefinition[] = [
     pathSegment: 'member',
   },
   {
+    id: 'people',
+    name: 'People',
+    tag: 'People',
+    title: 'People & relationships',
+    description: 'Directory of people, households, and relationships for this organization.',
+    requiredRole: 'staff',
+    pathSegment: 'people',
+  },
+  {
     id: 'landing',
     name: 'Landing Pages',
     tag: 'Landing Pages',
@@ -263,6 +273,7 @@ export const TENANT_MODULE_PRESETS: Record<string, ModuleId[]> = {
     'events',
     'resources',
     'ask',
+    'people',
   ],
   'family-hub': [
     'dashboard',
