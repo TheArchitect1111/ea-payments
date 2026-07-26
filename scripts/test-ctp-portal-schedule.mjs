@@ -18,6 +18,7 @@ const calendlyPath = join(root, 'lib/ctp-calendly.ts');
 const viewPath = join(root, 'lib/ctp-schedule-view.ts');
 const pagePath = join(root, 'app/portal/[slug]/ctp/schedule/page.tsx');
 const reviewPath = join(root, 'app/portal/[slug]/ctp/review/page.tsx');
+const reviewExperiencePath = join(root, 'app/portal/components/OpportunityReviewExperience.tsx');
 const overviewViewPath = join(root, 'lib/ctp-overview-view.ts');
 const progressPath = join(root, 'app/portal/[slug]/ctp/progress/page.tsx');
 const adminPath = join(root, 'app/admin/ctp/CtpSubmissionsClient.tsx');
@@ -27,6 +28,7 @@ for (const [path, label] of [
   [viewPath, 'ctp-schedule-view.ts'],
   [pagePath, 'schedule page'],
   [reviewPath, 'review page'],
+  [reviewExperiencePath, 'review experience'],
   [overviewViewPath, 'portal overview view'],
   [progressPath, 'portal progress page'],
   [adminPath, 'admin CTP client'],
@@ -38,6 +40,7 @@ const calendly = readFileSync(calendlyPath, 'utf8');
 const view = readFileSync(viewPath, 'utf8');
 const page = readFileSync(pagePath, 'utf8');
 const review = readFileSync(reviewPath, 'utf8');
+const reviewExperience = readFileSync(reviewExperiencePath, 'utf8');
 const overviewView = readFileSync(overviewViewPath, 'utf8');
 const progress = readFileSync(progressPath, 'utf8');
 const admin = readFileSync(adminPath, 'utf8');
@@ -48,7 +51,12 @@ assert(view.includes('reviewScheduledAt'), 'Must surface reviewScheduledAt');
 assert(view.includes('ctpCalendlyUrl'), 'Must use shared Calendly helper');
 assert(page.includes('redirect'), 'Schedule page must redirect to canonical review');
 assert(page.includes('opportunityReviewPath'), 'Schedule redirect must use route helper');
-assert(review.includes('Schedule My Opportunity Review') || review.includes('ctaLabel'), 'Review page must expose booking CTA');
+assert(
+  review.includes('buildCtpOpportunityReviewView') &&
+    reviewExperience.includes('ctaLabel') &&
+    reviewExperience.includes('calendlyHref'),
+  'Review page must expose booking CTA',
+);
 assert(review.includes('requirePortalModule'), 'Review page must require ctp module');
 assert(overviewView.includes('/ctp/schedule'), 'Overview must link to schedule (legacy alias)');
 assert(progress.includes('reviewScheduledAt'), 'Progress must show scheduled review when present');

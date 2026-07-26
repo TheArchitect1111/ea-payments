@@ -66,7 +66,7 @@ export default async function PortalCtpDocumentsPage({
             color: 'rgba(216,173,61,0.85)',
           }}
         >
-          Prepared for you
+          Generated deliverables
         </p>
         <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'grid', gap: '0.75rem' }}>
           {view.deliverables.map((doc) => (

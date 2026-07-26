@@ -71,7 +71,7 @@ export function resolveCtpEmailPortalUrl(model: CtpWelcomeEmailModel): string {
   const direct = model.portalUrl?.trim();
   if (direct) {
     // Rewrite www/cc → apex so clients never land on the CRA marketing site.
-    let url = direct
+    const url = direct
       .replace(/^https?:\/\/www\.efficiencyarchitects\.online/i, 'https://efficiencyarchitects.online')
       .replace(/^https?:\/\/cc\.efficiencyarchitects\.online/i, 'https://efficiencyarchitects.online');
     // Bare /ctp on apex redirects to public CTP intake — never use as portal CTA.
@@ -83,33 +83,6 @@ export function resolveCtpEmailPortalUrl(model: CtpWelcomeEmailModel): string {
     return url;
   }
   return publicPortalLoginUrl();
-}
-
-function noticedRowsHtml(): string {
-  const rows: Array<[string, string]> = [
-    ['First impressions could be stronger.', 'Create greater confidence with visitors and potential customers.'],
-    ['Your story could be communicated more clearly.', 'Help people quickly understand your value and what makes your organization unique.'],
-    ['Customer interactions could be simplified.', 'Make it easier for people to contact you, schedule appointments, or become customers.'],
-    ['Everyday work could become more organized.', 'Reduce unnecessary administrative effort so your team can focus on what matters most.'],
-  ];
-  return rows
-    .map(([noticed, why]) => `<tr><td style="${td}">${esc(noticed)}</td><td style="${td}">${esc(why)}</td></tr>`)
-    .join('');
-}
-
-function impactRowsHtml(model: CtpWelcomeEmailModel): string {
-  const low = Math.max(8000, Math.round(model.opportunityLow * 0.25));
-  const mid = Math.max(10000, Math.round(model.opportunityLow * 0.35));
-  const high = Math.max(12000, Math.round(model.opportunityHigh * 0.4));
-  const rows: Array<[string, string]> = [
-    ['Customer Experience', `${moneyRange(mid, Math.round(mid * 2.5))} annually`],
-    ['Business Operations', `${moneyRange(low, Math.round(low * 2.5))} annually`],
-    ['Administrative Time Savings', `${Math.max(3, Math.round(model.weeklyTimeRecovery * 0.5))}-${Math.max(8, model.weeklyTimeRecovery)} hours each week`],
-    ['Growth Opportunities', `${moneyRange(high, Math.round(high * 2.8))} annually`],
-  ];
-  return rows
-    .map(([label, impact]) => `<tr><td style="${td}">${esc(label)}</td><td style="${tdRight}"><strong>${esc(impact)}</strong></td></tr>`)
-    .join('');
 }
 
 function beginRowsHtml(): string {
@@ -124,6 +97,19 @@ function beginRowsHtml(): string {
     .join('');
 }
 
+function healthRowsHtml(model: CtpWelcomeEmailModel): string {
+  const rows = model.categoryScores ?? [];
+  if (!rows.length) {
+    return `<tr><td style="${td}">Initial review</td><td style="${tdRight}"><strong>Complete</strong></td></tr>`;
+  }
+  return rows
+    .map(
+      ({ label, score }) =>
+        `<tr><td style="${td}">${esc(label)}</td><td style="${tdRight}"><strong>${Math.round(score)}/100</strong></td></tr>`,
+    )
+    .join('');
+}
+
 export function buildOpportunityExperienceEmail(model: CtpWelcomeEmailModel): OpportunityConfirmationEmail {
   const first = esc(plain(model.firstName));
   const portalUrl = resolveCtpEmailPortalUrl(model);
@@ -134,66 +120,62 @@ export function buildOpportunityExperienceEmail(model: CtpWelcomeEmailModel): Op
 
   const bodyHtml = plain(`
     <p style="${p}">Hello ${first},</p>
-    <p style="${p}">Thank you for taking the time to share information about your organization through the Consider The Possibilities™ questionnaire.</p>
-    <p style="${p}">We've started getting to know your business and have completed an initial review based on what you shared.</p>
-    <p style="${p}">Your personalized portal is now ready and contains our first observations, recommendations, and next steps.</p>
+    <p style="${p}">Thank you for sharing information about your organization through Consider The Possibilities™.</p>
+    <p style="${p}">We've completed your initial review and prepared a private Opportunity Dashboard with our first observations, recommendations, and next steps.</p>
 
-    <p style="${section}">What We Learned</p>
-    <p style="${p}">As we reviewed what you shared, a few opportunities began to stand out.</p>
+    <p style="${section}">Project Status</p>
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="${tableWrap}">
-      <tr>
-        <th style="${th}">What We Noticed</th>
-        <th style="${th}">Why It Matters</th>
-      </tr>
-      ${noticedRowsHtml()}
+      <tr><td style="${td}">Assessment Received</td><td style="${tdRight}"><strong>Complete</strong></td></tr>
+      <tr><td style="${td}">Initial Review</td><td style="${tdRight}"><strong>Complete</strong></td></tr>
+      <tr><td style="${td}">Opportunity Dashboard Ready</td><td style="${tdRight}"><strong>Ready</strong></td></tr>
     </table>
 
-    <p style="${section}">What This Could Mean</p>
-    <p style="${p}">Small improvements in how your organization communicates, serves customers, and manages daily operations often create meaningful long-term results.</p>
+    <p style="${section}">Executive Snapshot</p>
+    <p style="${subhead}">Overall Readiness Score</p>
+    <p style="${p}"><strong>${Math.round(model.capacityScore)}/100 · ${esc(model.scoreBand)}</strong></p>
+    <p style="${subhead}">Opportunity Rating</p>
+    <p style="${p}"><strong>${esc(model.scoreBand)}</strong></p>
+    <p style="${subhead}">Opportunity Summary</p>
+    <p style="${p}">${esc(model.opportunitySummary || `Our initial review identified meaningful opportunities for ${model.businessName}.`)}</p>
+
+    <p style="${section}">Your Digital Foundation</p>
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="${tableWrap}">
       <tr>
-        <th style="${th}">Opportunity</th>
-        <th style="${thRight}">Estimated Impact</th>
+        <th style="${th}">Area</th>
+        <th style="${thRight}">Current Score</th>
       </tr>
-      ${impactRowsHtml(model)}
+      ${healthRowsHtml(model)}
     </table>
-    <p style="${subhead}">Estimated Annual Opportunity</p>
-    <p style="${p}"><strong>${esc(moneyRange(annualLow, annualHigh))}+</strong></p>
+    <p style="${p}">Why It Matters: a clear, credible digital foundation helps people understand your value, trust your organization, and take the next step.</p>
 
-    <p style="${section}">Here's Where We'd Begin</p>
-    <p style="${p}">Based on what we've learned so far, these are the areas we'd recommend focusing on first.</p>
+    <p style="${section}">Estimated Project Scope</p>
+    <p style="${p}">These are the four areas we would begin with, subject to refinement during discovery.</p>
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="${tableWrap}">
       <tr>
         <th style="${th}">Recommended Solution</th>
-        <th style="${thRight}">Estimated Build Time</th>
+        <th style="${thRight}">Estimated Effort</th>
       </tr>
       ${beginRowsHtml()}
     </table>
-    <p style="${subhead}">Estimated Project Effort</p>
+    <p style="${subhead}">Total Estimated Effort</p>
     <p style="${p}"><strong>28-50 Hours</strong></p>
-    <p style="${p}">Every organization is different. Some projects require a streamlined website and portal, while others include additional functionality, custom workflows, or specialized integrations. The estimated effort above reflects the size and complexity of your project.</p>
-    <p style="${subhead}">Estimated Project Investment</p>
-    <p style="${p}"><strong>Most organizations invest between ${esc(moneyRange(investLow, investHigh))}.</strong></p>
-    <p style="${p}">The final investment depends on the size and complexity of your project. As we continue learning about your organization through your personalized portal, we'll refine the solution and provide a clear proposal before any work begins.</p>
+    <p style="${p}">Every organization is different. The estimate reflects the anticipated size and complexity of your project and will be refined before work begins.</p>
 
-    <p style="${section}">Continue the Conversation</p>
-    <p style="${p}">We've only scratched the surface.</p>
-    <p style="${p}">Your personalized portal is where we'll continue learning about your organization so every recommendation becomes more tailored to your goals.</p>
-    <ul style="margin:0 0 18px;padding:0 0 0 20px;font-size:15px;color:#1A1A2E;line-height:1.8;">
-      <li>Review our observations</li>
-      <li>Share additional information</li>
-      <li>Upload documents and branding</li>
-      <li>Track project progress</li>
-      <li>Communicate directly with our team</li>
-    </ul>
+    <p style="${section}">Typical Investment</p>
+    <p style="${p}"><strong>Nonprofit Organizations: Starting at $997</strong><br/><strong>Other Organizations: Starting at $1,497</strong></p>
+    <p style="${p}">Most projects fall between ${esc(moneyRange(investLow, investHigh))}, depending on size and complexity. You will receive a Custom Proposal before making any commitment.</p>
+
+    <p style="${section}">Estimated Opportunity</p>
+    <p style="${p}">The potential annual opportunity identified in this initial review is <strong>${esc(moneyRange(annualLow, annualHigh))}+</strong>.</p>
+    <p style="${p}">Open your dashboard to review the complete Project Snapshot and continue with one clear next step.</p>
     <p style="margin:18px 0 0;font-size:13px;color:#555;">Questions? Reply to this email or reach us at <a href="mailto:${esc(model.supportEmail)}" style="color:#1B2B4D;">${esc(model.supportEmail)}</a>.</p>
   `);
 
   const result: OpportunityConfirmationEmail = {
-    subject: plain(`We've started getting to know your organization`),
-    title: plain(`Thank You`),
+    subject: plain(`Your Opportunity Dashboard is ready`),
+    title: plain(`Let's Build Something You'll Be Proud To Share.`),
     eyebrow: 'Consider The Possibilities™',
-    ctaLabel: 'Open My Personalized Portal',
+    ctaLabel: 'VIEW MY OPPORTUNITY DASHBOARD',
     ctaUrl: portalUrl,
     bodyHtml,
   };

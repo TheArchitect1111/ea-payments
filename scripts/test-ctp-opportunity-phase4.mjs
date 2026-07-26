@@ -21,6 +21,7 @@ const viewPath = join(root, 'lib/ctp-opportunity-view.ts');
 const scheduleViewPath = join(root, 'lib/ctp-schedule-view.ts');
 const routesPath = join(root, 'lib/ctp-opportunity-routes.ts');
 const dashboardPath = join(root, 'app/portal/components/OpportunityDashboard.tsx');
+const reviewExperiencePath = join(root, 'app/portal/components/OpportunityReviewExperience.tsx');
 
 for (const [path, label] of [
   [calendlyPath, 'ctp-calendly'],
@@ -29,6 +30,7 @@ for (const [path, label] of [
   [viewPath, 'ctp-opportunity-view'],
   [scheduleViewPath, 'ctp-schedule-view'],
   [routesPath, 'ctp-opportunity-routes'],
+  [reviewExperiencePath, 'OpportunityReviewExperience'],
 ]) {
   assert(existsSync(path), `Missing ${label}`);
 }
@@ -40,6 +42,8 @@ const view = readFileSync(viewPath, 'utf8');
 const scheduleView = readFileSync(scheduleViewPath, 'utf8');
 const routes = readFileSync(routesPath, 'utf8');
 const dashboard = readFileSync(dashboardPath, 'utf8');
+const reviewExperience = readFileSync(reviewExperiencePath, 'utf8');
+const reviewSurface = `${reviewPage}\n${reviewExperience}`;
 
 // Single Calendly source
 assert(calendly.includes('ctpCalendlyUrl'), 'Must export ctpCalendlyUrl');
@@ -50,12 +54,12 @@ assert(!view.includes('DEFAULT_CALENDLY'), 'No duplicate Calendly constant in op
 
 // Review page — executive experience, not sales call
 assert(reviewPage.includes('buildCtpOpportunityReviewView'), 'Review page uses review view builder');
-assert(reviewPage.includes('not a sales call'), 'Must set guided-review expectation');
-assert(reviewPage.includes('Schedule My Opportunity Review') || reviewPage.includes('ctaLabel'), 'Calendly CTA present');
-assert(reviewPage.includes('calendlyUrl'), 'Must link to Calendly');
-assert(reviewPage.includes('noopener noreferrer'), 'External Calendly link must be safe');
-assert(reviewPage.includes('oe-report'), 'Must use Opportunity Experience styling');
-assert(reviewPage.includes('During our Opportunity Review we will'), 'Must show agenda');
+assert(reviewSurface.toLowerCase().includes('not a sales'), 'Must set guided-review expectation');
+assert(reviewSurface.includes('ctaLabel'), 'Calendly CTA present');
+assert(reviewSurface.includes('calendlyUrl'), 'Must link to Calendly');
+assert(reviewSurface.includes('noopener noreferrer'), 'External Calendly link must be safe');
+assert(reviewSurface.includes('ore'), 'Must use Opportunity Review Experience styling');
+assert(reviewSurface.includes("what we&apos;ll do together"), 'Must show guided-review agenda');
 
 // View model composes schedule status
 assert(view.includes('buildCtpScheduleView'), 'Review view must reuse schedule status copy');
@@ -77,7 +81,7 @@ assert(dashboard.includes('reviewHref'), 'Dashboard must link to review');
 const forbidden = ['strategy session', 'sales call', 'CRM', 'Book strategy'];
 for (const term of forbidden) {
   if (term === 'sales call') continue; // allowed in "not a sales call"
-  assert(!reviewPage.toLowerCase().includes(term.toLowerCase()), `Review page must not include: ${term}`);
+  assert(!reviewSurface.toLowerCase().includes(term.toLowerCase()), `Review page must not include: ${term}`);
 }
 
 if (failures.length) {

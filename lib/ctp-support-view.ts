@@ -164,7 +164,7 @@ export function buildCtpSupportView(
       id: 'message',
       title: 'Contact your guide',
       detail: 'Email a question — we already know your stage and next step.',
-      href: `/portal/${slug}/ctp/messages`,
+      href: `/portal/${slug}/updates/new`,
     });
     actions.push({
       id: 'documents',
@@ -177,7 +177,7 @@ export function buildCtpSupportView(
       id: 'message',
       title: 'Ask a question anytime',
       detail: 'Optional — only if something comes up. No action is required.',
-      href: `/portal/${slug}/ctp/messages`,
+      href: `/portal/${slug}/updates/new`,
     });
   }
 

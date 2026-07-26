@@ -179,13 +179,6 @@ function potentialFromStars(stars: number): string {
   return 'Emerging Growth Potential';
 }
 
-function timeGreeting(now = new Date()): string {
-  const hour = now.getHours();
-  if (hour < 12) return 'Good morning';
-  if (hour < 17) return 'Good afternoon';
-  return 'Good evening';
-}
-
 function slugify(text: string): string {
   return text
     .toLowerCase()
@@ -657,10 +650,10 @@ export function buildCtpOpportunityDashboardView(
     foundation: buildFoundation(submission),
     projectPreview: buildProjectPreview(submission),
     investment: resolveInvestment(submission),
-    reviewHref: guide.nbaHref || designStudioPath(slug),
+    reviewHref: opportunityReviewPath(slug),
     primaryCtaLabel: guide.nothingRequired
-      ? 'Open Your Project'
-      : guide.nbaLabel || 'Continue Your Project',
+      ? 'Review My Opportunity Plan'
+      : guide.nbaLabel || 'Review My Opportunity Plan',
     utilities,
     guide,
   };

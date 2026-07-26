@@ -39,8 +39,8 @@ export default async function PortalCtpSupportPage({
       slug={slug}
       active="ctp"
       clientNavActive="support"
-      kicker="Help"
-      title="Help"
+      kicker="Messages & Support"
+      title="Messages & Support"
       lede={CX_EMOTION.help.lede}
     >
       <div className="cex-concierge">

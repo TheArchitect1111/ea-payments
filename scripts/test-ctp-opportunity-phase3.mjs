@@ -15,16 +15,18 @@ function assert(condition, message) {
 }
 
 const pagePath = join(root, 'app/portal/[slug]/ctp/page.tsx');
-const dashPath = join(root, 'app/portal/components/OpportunityDashboard.tsx');
+const experiencePath = join(root, 'app/portal/components/ClientExperience.tsx');
 const cssPath = join(root, 'app/portal/components/opportunity-experience.css');
+const experienceCssPath = join(root, 'app/portal/components/client-experience.css');
 const viewPath = join(root, 'lib/ctp-opportunity-view.ts');
 const detailPath = join(root, 'app/portal/[slug]/ctp/opportunities/[opportunityId]/page.tsx');
 const routesPath = join(root, 'lib/ctp-opportunity-routes.ts');
 
 for (const [path, label] of [
   [pagePath, 'ctp dashboard page'],
-  [dashPath, 'OpportunityDashboard'],
+  [experiencePath, 'ClientExperience'],
   [cssPath, 'opportunity-experience.css'],
+  [experienceCssPath, 'client-experience.css'],
   [viewPath, 'ctp-opportunity-view'],
   [detailPath, 'opportunity detail page'],
   [routesPath, 'ctp-opportunity-routes'],
@@ -33,52 +35,47 @@ for (const [path, label] of [
 }
 
 const page = readFileSync(pagePath, 'utf8');
-const dash = readFileSync(dashPath, 'utf8');
-const css = readFileSync(cssPath, 'utf8');
+const experience = readFileSync(experiencePath, 'utf8');
+const experienceCss = readFileSync(experienceCssPath, 'utf8');
 const view = readFileSync(viewPath, 'utf8');
 const detail = readFileSync(detailPath, 'utf8');
 
 // Page wiring
-assert(page.includes('OpportunityDashboard'), 'CTP page must render dashboard');
+assert(page.includes('ClientExperience'), 'CTP page must render the canonical Client Experience');
 assert(page.includes('buildCtpOpportunityDashboardView'), 'Must build view from submission');
 assert(!page.includes('buildCtpOverviewView'), 'Must not use CRM overview');
-assert(page.includes('Opportunity Experience'), 'Must use Opportunity Experience chrome');
+assert(page.includes('presentation="client"'), 'Must use client presentation chrome');
 
-// Dashboard sections (prompt)
+// Canonical cinematic Client Experience scenes.
 const sections = [
-  'Executive Snapshot',
-  'Overall Readiness',
-  'Opportunity Rating',
-  'Progress Tracker',
-  'Opportunity Summary',
-  'Top Three Opportunities',
-  'Estimated Impact',
-  'Business Health',
-  'Benchmarks',
-  'Coming soon',
-  'Recommended Digital Foundation',
-  'Project Preview',
-  'Estimated Investment',
-  'Walk Me Through My Recommendations',
+  'Welcome',
+  'Imagine',
+  'What we noticed',
+  'Where we begin',
+  'Your project journey',
+  'What happens next',
+  'Support anytime',
 ];
 for (const s of sections) {
-  assert(dash.includes(s), `Dashboard missing section/copy: ${s}`);
+  assert(experience.includes(s), `Client Experience missing scene/copy: ${s}`);
 }
-assert(dash.includes('primaryCtaLabel'), 'Primary CTA from view model');
+assert(experience.includes('primaryCtaLabel'), 'Primary CTA from view model');
 assert(view.includes('Review My Opportunity Plan'), 'View model defines primary CTA label');
 
 // UX rules
-assert(dash.includes('oe-report'), 'Light executive report shell');
-assert(dash.includes('role="progressbar"'), 'Progress must be accessible');
-assert(dash.includes('aria-labelledby'), 'Sections must have accessible labels');
-assert(dash.includes('🥇'), 'Top opportunities use medal ranks');
-assert(dash.includes('reviewHref'), 'Primary CTA targets review');
-assert(dash.includes('showDesignStudio'), 'Design Studio is conditional secondary');
+assert(experience.includes('cex-stage'), 'Cinematic Client Experience shell');
+assert(experience.includes('aria-current'), 'Scene progress must be accessible');
+assert(experience.includes('aria-labelledby'), 'Scenes must have accessible labels');
+assert(experience.includes('view.guide?.nbaHref'), 'Primary CTA must follow the guide engine');
+assert(experience.includes('BrandOnboardingPaths'), 'Brand onboarding remains part of the experience');
+assert(experience.includes('/ctp/messages'), 'Messages must remain available');
+assert(experience.includes('/ctp/documents'), 'Documents must remain available');
+assert(experience.includes('/ctp/support'), 'Support must remain available');
 
 // Forbidden dashboard jargon (user-facing strings in component)
 const forbidden = ['Automation', 'Workflow', 'CMS', 'API', 'Infrastructure', 'Deployment', 'CRM'];
 for (const term of forbidden) {
-  assert(!dash.includes(term), `Dashboard must not show: ${term}`);
+  assert(!experience.includes(term), `Client Experience must not show: ${term}`);
 }
 
 // View model
@@ -94,9 +91,9 @@ assert(detail.includes('What We Noticed'), 'Detail page required for card drill-
 assert(detail.includes('Why It Matters'), 'Detail page must explain impact');
 
 // Responsive
-assert(css.includes('clamp('), 'Typography must be responsive');
-assert(css.includes('grid-template-columns'), 'Layout must use responsive grids');
-assert(css.includes('@media'), 'Mobile breakpoints required');
+assert(experienceCss.includes('clamp('), 'Typography must be responsive');
+assert(experienceCss.includes('grid-template-columns'), 'Layout must use responsive grids');
+assert(experienceCss.includes('@media'), 'Mobile breakpoints required');
 
 if (failures.length) {
   console.error('Phase 3 Opportunity Dashboard FAILED:');

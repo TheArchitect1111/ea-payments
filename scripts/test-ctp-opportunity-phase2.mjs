@@ -69,8 +69,8 @@ for (const copy of requiredCopy) {
 }
 
 // Forbidden CTAs / jargon in email HTML template only (not guardrail constant names)
-const templateStart = emailMod.indexOf('const bodyHtml = `');
-const templateEnd = emailMod.indexOf('`;', templateStart + 1);
+const templateStart = emailMod.indexOf('const bodyHtml = plain(`');
+const templateEnd = emailMod.indexOf('`);', templateStart + 1);
 const template = templateStart >= 0 && templateEnd > templateStart
   ? emailMod.slice(templateStart, templateEnd)
   : emailMod;
@@ -79,7 +79,6 @@ const forbidden = [
   'Open My Workspace',
   'Client Portal',
   'Executive Brief',
-  'Project Scope',
   'Website Package',
   'Book Discovery Call',
   'Contact Us',

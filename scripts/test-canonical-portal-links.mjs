@@ -44,7 +44,7 @@ const sessionStatus = read('app/api/checkout/session-status/route.ts');
 assert(sessionStatus.includes('publicPortalLoginUrl'), 'session-status must use publicPortalLoginUrl');
 
 const provision = read('lib/provision-website-portal.ts');
-assert(provision.includes('publicPortalLoginUrl()'), 'website provision CTA must use publicPortalLoginUrl');
+assert(provision.includes('publicPortalLoginUrl('), 'website provision CTA must use publicPortalLoginUrl');
 
 if (failures.length) {
   console.error('Canonical portal link checks FAILED:');

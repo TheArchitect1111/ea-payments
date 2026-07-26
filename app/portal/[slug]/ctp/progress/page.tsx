@@ -79,6 +79,61 @@ export default async function PortalCtpStatusPage({
             </p>
           ) : null}
           <p className="guide-progress-eta">{guide.confidenceMessage}</p>
+          <div
+            role="progressbar"
+            aria-label="Project completion"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={statusView.percentComplete}
+            style={{ marginTop: '1rem' }}
+          >
+            <p className="guide-progress-eta" style={{ marginBottom: '0.4rem' }}>
+              <strong>{statusView.percentComplete}% complete</strong>
+            </p>
+            <div
+              style={{
+                height: 8,
+                borderRadius: 999,
+                background: 'rgba(255,255,255,0.12)',
+                overflow: 'hidden',
+              }}
+            >
+              <div
+                className="ctpPulse"
+                style={{
+                  width: `${statusView.percentComplete}%`,
+                  height: '100%',
+                  borderRadius: 999,
+                  background: 'linear-gradient(90deg, #d8ad3d, #f2d987)',
+                }}
+              />
+            </div>
+          </div>
+          {typeof statusView.digitalScore === 'number' ||
+          typeof statusView.socialScore === 'number' ||
+          typeof statusView.gbpScore === 'number' ? (
+            <p className="guide-progress-eta">
+              <strong>Digital foundation:</strong>{' '}
+              {typeof statusView.digitalScore === 'number'
+                ? `Overall ${statusView.digitalScore}/100`
+                : null}
+              {typeof statusView.socialScore === 'number'
+                ? ` · Social ${statusView.socialScore}/100`
+                : null}
+              {typeof statusView.gbpScore === 'number'
+                ? ` · Google Business Profile ${statusView.gbpScore}/100`
+                : null}
+            </p>
+          ) : null}
+          {statusView.reviewScheduledAt ? (
+            <p className="guide-progress-eta">
+              <strong>Opportunity Review scheduled:</strong>{' '}
+              {new Date(statusView.reviewScheduledAt).toLocaleString('en-US', {
+                dateStyle: 'medium',
+                timeStyle: 'short',
+              })}
+            </p>
+          ) : null}
         </section>
 
         <section className="guide-progress-nba" aria-labelledby="guide-nba-heading">
@@ -169,6 +224,19 @@ export default async function PortalCtpStatusPage({
           </h2>
           <div className="guide-progress-panel">
             <p>{guide.behindTheScenes}</p>
+            {statusView.productionArtifacts?.length ? (
+              <>
+                <p>
+                  <strong>AI production:</strong>{' '}
+                  {statusView.productionHeadline || 'Your production package is ready.'}
+                </p>
+                <ul>
+                  {statusView.productionArtifacts.map((artifact) => (
+                    <li key={artifact.id}>{artifact.title}</li>
+                  ))}
+                </ul>
+              </>
+            ) : null}
           </div>
         </section>
 
@@ -228,8 +296,9 @@ export default async function PortalCtpStatusPage({
           <section
             id="design-studio"
             className="guide-progress-section"
-            aria-label="Design"
+            aria-label="Design Studio"
           >
+            <h2 className="guide-progress-section-title">Design Studio</h2>
             <PortalCtpDesignStudioForm
               slug={slug}
               designStudio={statusView.designStudio}

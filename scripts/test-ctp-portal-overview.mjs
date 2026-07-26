@@ -17,6 +17,7 @@ function assert(condition, message) {
 const pagePath = join(root, 'app/portal/[slug]/ctp/page.tsx');
 const viewPath = join(root, 'lib/ctp-opportunity-view.ts');
 const dashPath = join(root, 'app/portal/components/OpportunityDashboard.tsx');
+const experiencePath = join(root, 'app/portal/components/ClientExperience.tsx');
 const reviewPath = join(root, 'app/portal/[slug]/ctp/review/page.tsx');
 const detailPath = join(root, 'app/portal/[slug]/ctp/opportunities/[opportunityId]/page.tsx');
 const progressPath = join(root, 'app/portal/[slug]/ctp/progress/page.tsx');
@@ -25,6 +26,7 @@ for (const [path, label] of [
   [pagePath, 'ctp page'],
   [viewPath, 'opportunity view'],
   [dashPath, 'OpportunityDashboard'],
+  [experiencePath, 'ClientExperience'],
   [reviewPath, 'review page'],
   [detailPath, 'detail page'],
   [progressPath, 'progress / Design Studio'],
@@ -34,16 +36,16 @@ for (const [path, label] of [
 
 const page = readFileSync(pagePath, 'utf8');
 const view = readFileSync(viewPath, 'utf8');
-const dash = readFileSync(dashPath, 'utf8');
+const experience = readFileSync(experiencePath, 'utf8');
 const review = readFileSync(reviewPath, 'utf8');
 
-assert(page.includes('OpportunityDashboard'), 'Landing must render Opportunity Dashboard');
+assert(page.includes('ClientExperience'), 'Landing must render Client Experience');
 assert(page.includes('buildCtpOpportunityDashboardView'), 'Landing must use opportunity view');
 assert(!page.includes('buildCtpOverviewView'), 'Landing must not use CRM overview cards');
-assert(view.includes('Executive Snapshot') || dash.includes('Executive Snapshot'), 'Must show executive snapshot');
-assert(dash.includes('Business Health') || view.includes('healthAreas'), 'Must include business health');
-assert(dash.includes('Project Preview'), 'Must include project preview');
-assert(dash.includes('Estimated Investment'), 'Must include investment section');
+assert(experience.includes('What we noticed'), 'Must show initial findings');
+assert(experience.includes('view.learnedCards'), 'Must render personalized insight cards');
+assert(experience.includes('BrandOnboardingPaths'), 'Must include guided project definition');
+assert(experience.includes('estimatedProjectInvestment'), 'Must include investment section');
 assert(
   review.includes('Schedule My Opportunity Review') ||
     review.includes('ctaLabel') ||
