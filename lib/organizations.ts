@@ -1,3 +1,5 @@
+import { saveStudioRecord, loadStudioRecord } from '@/lib/creative-studio/persistence';
+import { filterExistingOrganizationFields } from '@/lib/organization-field-schema';
 import {
   ORGANIZATIONS_TABLE,
   escapeAirtableString,
@@ -70,7 +72,10 @@ export async function getOrganizationById(orgId: string): Promise<Organization |
     `RECORD_ID()='${orgId.replace(/'/g, "\\'")}'`,
     1,
   );
-  return records[0] ? mapOrganization(records[0]) : null;
+  if (!records[0]) return null;
+  const org = mapOrganization(records[0]);
+  const overlay = await loadOrganizationWorkspaceOverlay(orgId);
+  return applyWorkspaceOverlay(org, overlay);
 }
 
 /** List Organizations from Airtable for admin pickers (Entitlements, Org workspace). */
@@ -264,18 +269,66 @@ export async function updateOrganizationBilling(
 }
 
 
+export type OrganizationWorkspaceConfigInput = {
+  platformClientId?: string;
+  themeId?: string;
+  personalityId?: string;
+  workspaceName?: string;
+  logo?: string;
+  brandColors?: string;
+  industryPackId?: string;
+};
+
+/** Durable overlay when Organizations Airtable lacks Theme Id / workspace columns. */
+export async function saveOrganizationWorkspaceOverlay(
+  orgId: string,
+  input: OrganizationWorkspaceConfigInput,
+): Promise<void> {
+  const prior =
+    (await loadStudioRecord<OrganizationWorkspaceConfigInput>('brand', `org-workspace-${orgId}`)) ||
+    {};
+  await saveStudioRecord({
+    recordType: 'brand',
+    id: `org-workspace-${orgId}`,
+    organizationId: orgId,
+    title: `Organization workspace — ${orgId}`,
+    payload: {
+      ...prior,
+      ...Object.fromEntries(
+        Object.entries(input).filter(([, v]) => v !== undefined && v !== null && String(v).length > 0),
+      ),
+      updatedAt: new Date().toISOString(),
+    },
+  });
+}
+
+export async function loadOrganizationWorkspaceOverlay(
+  orgId: string,
+): Promise<OrganizationWorkspaceConfigInput | null> {
+  return loadStudioRecord<OrganizationWorkspaceConfigInput>('brand', `org-workspace-${orgId}`);
+}
+
+function applyWorkspaceOverlay(
+  org: Organization,
+  overlay: OrganizationWorkspaceConfigInput | null | undefined,
+): Organization {
+  if (!overlay) return org;
+  return {
+    ...org,
+    themeId: org.themeId || overlay.themeId,
+    personalityId: org.personalityId || overlay.personalityId,
+    workspaceName: org.workspaceName || overlay.workspaceName,
+    logo: org.logo || overlay.logo,
+    brandColors: org.brandColors || overlay.brandColors,
+    platformClientId: org.platformClientId || overlay.platformClientId,
+    industryPackId: org.industryPackId || overlay.industryPackId,
+  };
+}
+
 /** Optional workspace identity fields on Organizations (Airtable Title Case columns). */
 export async function updateOrganizationWorkspaceConfig(
   orgId: string,
-  input: {
-    platformClientId?: string;
-    themeId?: string;
-    personalityId?: string;
-    workspaceName?: string;
-    logo?: string;
-    brandColors?: string;
-    industryPackId?: string;
-  },
+  input: OrganizationWorkspaceConfigInput,
 ): Promise<Organization | null> {
   if (!platformStoreConfigured() || orgId.startsWith('org_')) return null;
 
@@ -288,8 +341,28 @@ export async function updateOrganizationWorkspaceConfig(
   if (input.brandColors !== undefined) fields['Brand Colors'] = input.brandColors;
   if (input.industryPackId !== undefined) fields['Industry Pack Id'] = input.industryPackId;
 
-  if (Object.keys(fields).length === 0) return getOrganizationById(orgId);
+  // Always persist overlay so theme/workspace survive thin Organizations schemas.
+  await saveOrganizationWorkspaceOverlay(orgId, input);
 
-  const updated = await platformUpdate(ORGANIZATIONS_TABLE, orgId, fields);
-  return updated ? mapOrganization(updated) : null;
+  if (Object.keys(fields).length === 0) {
+    const org = await getOrganizationById(orgId);
+    return org ? applyWorkspaceOverlay(org, input) : null;
+  }
+
+  const { fields: writable, skipped } = await filterExistingOrganizationFields(fields);
+  if (skipped.length) {
+    console.warn(
+      '[organizations] skipping Organizations columns not present in Airtable:',
+      skipped.join(', '),
+    );
+  }
+
+  if (Object.keys(writable).length === 0) {
+    const org = await getOrganizationById(orgId);
+    return org ? applyWorkspaceOverlay(org, input) : null;
+  }
+
+  const updated = await platformUpdate(ORGANIZATIONS_TABLE, orgId, writable);
+  const org = updated ? mapOrganization(updated) : await getOrganizationById(orgId);
+  return org ? applyWorkspaceOverlay(org, input) : null;
 }
