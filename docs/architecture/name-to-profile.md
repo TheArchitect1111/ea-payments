@@ -38,6 +38,9 @@ Launch Amanda Catherine — entrepreneur, radio personality, influencer
    - asset permissions and publishing safeguards.
 7. Website production embeds that direction in the `website_site` artifact so
    later rendering and review retain the intended visual language.
+8. Production emits three distinct, preview-ready `experience_concepts` covering
+   both website and portal. The Factory recommends one concept automatically,
+   while retaining all three for a client presentation and selection gate.
 
 ## Safety
 
