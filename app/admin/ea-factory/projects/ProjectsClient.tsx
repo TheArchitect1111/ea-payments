@@ -273,6 +273,12 @@ export default function ProjectsClient({ initialProjects }: { initialProjects: P
                         Concept Pack
                       </Link>
                       <Link
+                        href={`/admin/ea-factory/concepts/${encodeURIComponent(project.id)}`}
+                        className="text-xs font-semibold text-[#1B2B4D] underline"
+                      >
+                        Concept previews
+                      </Link>
+                      <Link
                         href={`/admin/ea-factory/experience-director?projectId=${encodeURIComponent(project.id)}`}
                         className="text-xs font-semibold text-[#1B2B4D] underline"
                       >
