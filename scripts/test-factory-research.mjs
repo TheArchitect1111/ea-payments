@@ -474,8 +474,8 @@ const {
   assert(runProviders.includes('brandingProvider'), 'runner includes branding');
   assert(runProviders.includes('prospectProfileProvider'), 'runner includes prospect profile');
   assert(
-    readFileSync(paths.profileProvider, 'utf8').includes('BRAVE_SEARCH_API_KEY'),
-    'profile provider declares search credential',
+    readFileSync(paths.profileProvider, 'utf8').includes('OPENAI_API_KEY'),
+    'profile provider reuses EA OpenAI credential',
   );
   assert(existsSync(paths.profilePure), 'pure prospect profile module exists');
   assert(docs.includes('ArtifactService'), 'docs cover ArtifactService');
