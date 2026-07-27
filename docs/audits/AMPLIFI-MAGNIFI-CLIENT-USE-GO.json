@@ -1,0 +1,82 @@
+{
+  "name": "Amplifi/Magnifi Client Use GO",
+  "checkedAt": "2026-07-27T23:40:00.000Z",
+  "base": "https://efficiencyarchitects.online",
+  "definition": "Portal V1: capture → Magnifi story → Amplifi draft/share. Not Communications/Postiz.",
+  "pass": true,
+  "checklist": [
+    {
+      "id": 1,
+      "item": "Login sees Simplifi + Amplifi",
+      "ok": true,
+      "evidence": "docs/audits/AMPLIFI-MAGNIFI-PORTAL-PHASE5-CERT.json step 2; demo-client fixture"
+    },
+    {
+      "id": 2,
+      "item": "Capture creates Magnifi URL that loads after refresh",
+      "ok": true,
+      "evidence": "phase5 cert steps 3–5; runtime-evidence-amplifi-magnifi-client-use/loop-demo.json"
+    },
+    {
+      "id": 3,
+      "item": "Amplifi shows latest story + draft/share path",
+      "ok": true,
+      "evidence": "phase5 cert step 6; loop-demo amplifiOk + warningPresent"
+    },
+    {
+      "id": 4,
+      "item": "Empty hub is understandable before first capture",
+      "ok": true,
+      "evidence": "Live hub HTML includes Capture once / Open latest Magnifi polish (prod-polish-verify)"
+    },
+    {
+      "id": 5,
+      "item": "Unentitled / wrong package cannot use Amplifi",
+      "ok": true,
+      "evidence": "phase5 cert step 7; pilot smoke requires login"
+    },
+    {
+      "id": 6,
+      "item": "Support can triage empty hub / missing entitlement / retire story",
+      "ok": true,
+      "evidence": "docs/AMPLIFI-MAGNIFI-CLIENT-CHEAT-SHEET.md + PRODUCT-SUPPORT-AND-TRIAGE-SOP.md"
+    }
+  ],
+  "pilot": {
+    "slug": "acme-roofing-field-demo-a9be53",
+    "organizationId": "recs1KPGChgwbNkd6",
+    "entitledModules": ["simplifi", "amplifi"],
+    "smoke": "amplifiRequiresLogin=true",
+    "note": "Logged-in capture loop certified on demo-client; pilot org entitled for operator/client walkthrough"
+  },
+  "entitledClients": [
+    {
+      "slug": "acme-roofing-field-demo-a9be53",
+      "name": "Acme Roofing Field Demo",
+      "role": "pilot"
+    },
+    {
+      "slug": "amanda-catherine",
+      "name": "Amanda Catherine",
+      "role": "eligible-client"
+    },
+    {
+      "slug": "s-f5b5bb",
+      "name": "Ascension Systems",
+      "role": "eligible-client"
+    }
+  ],
+  "ops": {
+    "defect": "Production /api/health/ops reported amplifi-magnifi critical because probes used www host (CRA)",
+    "fix": "lib/amplifi-magnifi-health.ts + lib/platform-ops.ts use canonicalPlatformOrigin (apex)",
+    "deployRequired": true,
+    "externalProbes": {
+      "magnifiUnavailableCalm": true,
+      "amplifiUnauthLoginGate": true,
+      "amplifiHubAuthed": true,
+      "publicLinkWarning": true
+    }
+  },
+  "cheatSheet": "docs/AMPLIFI-MAGNIFI-CLIENT-CHEAT-SHEET.md",
+  "verdict": "CLIENT_USE_GO for portal V1 after ops apex-probe deploy"
+}

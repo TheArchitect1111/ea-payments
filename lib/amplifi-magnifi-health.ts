@@ -1,4 +1,4 @@
-import { EA_PLATFORM_URL } from '@/lib/platform-urls';
+import { canonicalPlatformOrigin } from '@/lib/platform-urls';
 import { resolveConsiderExperience } from '@/lib/consider-resolve';
 
 export type AmplifiMagnifiProbeResult = {
@@ -31,7 +31,8 @@ export type AmplifiMagnifiProbeResult = {
 };
 
 function platformBase(): string {
-  return (process.env.NEXT_PUBLIC_BASE_URL ?? EA_PLATFORM_URL).replace(/\/$/, '');
+  // www is the CRA marketing host — Amplifi/Magnifi live on apex.
+  return canonicalPlatformOrigin();
 }
 
 async function fetchManual(path: string, init?: RequestInit) {

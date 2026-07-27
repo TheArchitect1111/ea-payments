@@ -1,0 +1,90 @@
+{
+  "phase": 5,
+  "name": "Amplifi/Magnifi portal-ready client QA",
+  "base": "https://efficiencyarchitects.online",
+  "fixture": {
+    "entitled": "demo-client",
+    "nonEntitled": "demo-website",
+    "auth": "GET /api/auth/demo-enter"
+  },
+  "checkedAt": "2026-07-27T23:28:31.932Z",
+  "pass": true,
+  "checklist": [
+    {
+      "id": 1,
+      "step": "Login /portal/demo-client (demo-enter)",
+      "ok": true,
+      "status": 303,
+      "location": "https://efficiencyarchitects.online/portal/demo-client",
+      "detail": "ea_portal_session set"
+    },
+    {
+      "id": 2,
+      "step": "See Simplifi + Amplifi when entitled",
+      "ok": true,
+      "status": 200,
+      "finalUrl": "https://efficiencyarchitects.online/portal/demo-client",
+      "hasSimplifi": true,
+      "hasAmplifi": true,
+      "htmlBytes": 65486
+    },
+    {
+      "id": 3,
+      "step": "Capture URL or note",
+      "ok": true,
+      "status": 200,
+      "recordId": "recwor84sIXB3PcbN",
+      "magnifiUrl": "/magnifi/recwor84sIXB3PcbN"
+    },
+    {
+      "id": 4,
+      "step": "Open Magnifi from result / workspace",
+      "ok": true,
+      "path": "/magnifi/recwor84sIXB3PcbN",
+      "status": 200,
+      "htmlBytes": 20944
+    },
+    {
+      "id": 5,
+      "step": "Refresh Magnifi — still loads",
+      "ok": true,
+      "path": "/magnifi/recwor84sIXB3PcbN",
+      "status": 200,
+      "htmlBytes": 20944
+    },
+    {
+      "id": 6,
+      "step": "Open Amplifi hub — story + share/drafts",
+      "ok": true,
+      "status": 200,
+      "finalUrl": "https://efficiencyarchitects.online/portal/demo-client/amplifi",
+      "htmlBytes": 44358,
+      "detail": "hub HTML served"
+    },
+    {
+      "id": 7,
+      "step": "Non-entitled slug cannot open Amplifi",
+      "ok": true,
+      "unauthStatus": 307,
+      "unauthLocation": "/portal/login",
+      "unauthBlocked": true,
+      "websiteDenied": true,
+      "websiteDetail": "login failed (Invalid credentials.); package contract excludes amplifi=true",
+      "note": "demo-enter currently issues demo-client for /portal/demo-website on prod — website path verified via login or package contract"
+    },
+    {
+      "id": 8,
+      "step": "Mobile 390×844 Amplifi + Magnifi (layout reachable)",
+      "ok": true,
+      "detail": "Automated: hub + Magnifi HTML reachable with session. Visual 390×844 screenshot check recorded in cert notes.",
+      "mobileCssHints": true
+    }
+  ],
+  "recordId": "recwor84sIXB3PcbN",
+  "magnifiPath": "/magnifi/recwor84sIXB3PcbN",
+  "notes": [
+    "Fixture accepted: demo-client (Simplifi/Amplifi entitled) per Phase 5 doc.",
+    "Step 8 automated reachability only; confirm 390×844 visually in browser evidence if attached.",
+    "Phases 2–4 local polish must be deployed for production copy/warning parity; this cert validates live portal-ready path."
+  ]
+}

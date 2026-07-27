@@ -1,0 +1,47 @@
+{
+  "checkedAt": "2026-07-27T23:35:40.385Z",
+  "org": {
+    "id": "recLnZ8GyLiPJ2cuL",
+    "name": "Amanda Catherine",
+    "slug": "amanda-catherine",
+    "status": "Active"
+  },
+  "results": [
+    {
+      "action": "created",
+      "moduleId": "simplifi"
+    },
+    {
+      "action": "created",
+      "moduleId": "amplifi"
+    }
+  ],
+  "entitlements": [
+    {
+      "id": "recCSEjdI7yKeT6dk",
+      "moduleId": "simplifi",
+      "status": "active",
+      "source": "manual"
+    },
+    {
+      "id": "recEjjFK3LCOcYaLJ",
+      "moduleId": "amplifi",
+      "status": "active",
+      "source": "manual"
+    }
+  ],
+  "activeSimplifiAmplifi": [
+    {
+      "id": "recCSEjdI7yKeT6dk",
+      "moduleId": "simplifi",
+      "status": "active",
+      "source": "manual"
+    },
+    {
+      "id": "recEjjFK3LCOcYaLJ",
+      "moduleId": "amplifi",
+      "status": "active",
+      "source": "manual"
+    }
+  ]
+}
