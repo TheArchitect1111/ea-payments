@@ -215,6 +215,8 @@ export async function publishSelectedFactoryConcept(input: {
   }
 
   let portalSlug = resolvePortalSlug(project, input.portalSlug || previews?.portalSlug);
+  /** Intended public slug before provision may rewrite (e.g. Amanda email → hashed slug). */
+  const intendedPortalSlug = portalSlug;
   const creative = readCreativeDirection(context);
   const concept =
     (conceptData.concepts || []).find((c) => c.id === selectedConceptId) ||
@@ -347,14 +349,18 @@ export async function publishSelectedFactoryConcept(input: {
     portalLoginUrl: portalLoginHref,
     portalHomeUrl: publicPortalUrl(portalSlug),
     portalCtpUrl: publicPortalUrl(portalSlug, 'ctp'),
-    publicSiteQuarantined: isSiteQuarantined(portalSlug),
+    publicSiteQuarantined:
+      isSiteQuarantined(portalSlug) || isSiteQuarantined(intendedPortalSlug),
     chassisModules: WIRED_CHASSIS_MODULES,
     memberHomeSaved,
     themeId: draft.themeId,
     loginCtaPresent: puckHasPortalLoginCta(draft.puckData, portalLoginHref),
   };
 
-  const quarantined = isSiteQuarantined(portalSlug);
+  // Hold public publish when either the provisioned slug OR the intended
+  // Amanda/golden-path slug is quarantined (fulfill may rewrite slug).
+  const quarantined =
+    isSiteQuarantined(portalSlug) || isSiteQuarantined(intendedPortalSlug);
   if (quarantined) {
     return {
       ok: true,
@@ -363,7 +369,10 @@ export async function publishSelectedFactoryConcept(input: {
       selectedConceptId,
       websiteStatus: 'draft_only',
       portal: portalResult,
-      surfaces: surfacesBase,
+      surfaces: {
+        ...surfacesBase,
+        publicSiteQuarantined: true,
+      },
       website: {
         ok: true,
         pageId: draftPageId,

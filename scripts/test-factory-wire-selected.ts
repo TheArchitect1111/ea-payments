@@ -43,7 +43,9 @@ assert.match(wireSrc, /chassisModules/);
 assert.match(wireSrc, /No concept selected/);
 assert.match(wireSrc, /selectionStatus/);
 assert.match(wireSrc, /amanda-catherine/);
-assert.match(wireSrc, /EA_AMANDA_SITE_LIVE/);
+assert.match(wireSrc, /intendedPortalSlug/);
+assert.match(quarantineSrc, /amanda-catherine-/);
+assert.match(quarantineSrc, /isAmandaFamilySlug|startsWith\('amanda-catherine-'\)/);
 
 // Quarantined path must short-circuit before live provision call (ignore import)
 const draftOnlyIdx = wireSrc.indexOf("websiteStatus: 'draft_only'");
