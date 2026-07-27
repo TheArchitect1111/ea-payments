@@ -56,6 +56,7 @@ function baseWorkOrder(projectId = 'proj-prod-1') {
     summary: 'Build site',
     priority: 'high',
     status: 'ready',
+    createdAt: '2026-07-18T22:00:00.000Z',
     acceptanceCriteria: ['Sitemap implemented'],
     provenance: {
       capabilityId: 'planning',
