@@ -126,7 +126,8 @@ function researchFixture(projectId = 'proj-disc-1') {
 {
   assert(DISCOVERY_ARTIFACT_KINDS.length === 10, '10 discovery artifact kinds');
   assert(DERIVE_KINDS.length === 10, 'derive exports 10 kinds');
-  assert(RESEARCH_ARTIFACT_KINDS.length === 5, '5 research kinds preserved');
+  assert(RESEARCH_ARTIFACT_KINDS.length === 6, '6 research kinds including prospect profile');
+  assert(RESEARCH_ARTIFACT_KINDS.includes('prospect_profile'), 'prospect profile research kind');
 
   const rec = createRecommendation({
     id: 'rec-1',

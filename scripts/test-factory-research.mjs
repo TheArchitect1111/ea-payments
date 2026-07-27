@@ -18,6 +18,9 @@ const artifactMod = await import(pathToFileURL(join(root, 'lib/factory-artifact.
 const contextMod = await import(pathToFileURL(join(root, 'lib/factory-project-context.mjs')).href);
 const extractMod = await import(pathToFileURL(join(root, 'lib/factory-research/website-extract.mjs')).href);
 const providersMod = await import(pathToFileURL(join(root, 'lib/factory-research/providers.mjs')).href);
+const profileMod = await import(
+  pathToFileURL(join(root, 'lib/factory-research/prospect-profile.mjs')).href
+);
 
 const {
   ARTIFACT_SCHEMA_VERSION,
@@ -51,6 +54,90 @@ const {
   providerCanCollect,
   resolveResearchUrl,
 } = providersMod;
+const {
+  classifyPublicSource,
+  scoreIdentityCandidate,
+  rankIdentityCandidates,
+  identityVerdict,
+  extractPublicAssets,
+  buildProspectProfileData,
+} = profileMod;
+
+// --- Unit: name-to-profile identity, evidence, citations, assets ---
+{
+  const candidates = [
+    {
+      title: 'Amanda Catherine | Creator and Radio Host',
+      url: 'https://amandacatherine.example',
+      description: 'Amanda Catherine is an entrepreneur, radio personality, and community connector.',
+    },
+    {
+      title: 'Amanda Catherine on Instagram',
+      url: 'https://instagram.com/amandacatherine',
+      description: 'Creator and entrepreneur.',
+    },
+    {
+      title: 'Amanda Smith',
+      url: 'https://unrelated.example/amanda',
+      description: 'Unrelated attorney.',
+    },
+  ];
+  assert(classifyPublicSource(candidates[1].url) === 'social', 'classify social source');
+  const scored = scoreIdentityCandidate(candidates[0], {
+    name: 'Amanda Catherine',
+    context: 'radio personality entrepreneur',
+  });
+  assert(scored.identityScore >= 0.7, 'strong identity candidate score');
+  const ranked = rankIdentityCandidates(candidates, {
+    name: 'Amanda Catherine',
+    context: 'radio personality entrepreneur',
+  });
+  assert(ranked[0].url === candidates[0].url, 'identity candidates ranked');
+  assert(identityVerdict(ranked).status === 'resolved', 'identity verdict resolved');
+
+  const assets = extractPublicAssets(
+    [{
+      url: candidates[0].url,
+      ogImage: 'https://amandacatherine.example/portrait.jpg',
+      imageUrls: ['https://amandacatherine.example/logo.png'],
+    }],
+    ranked,
+  );
+  assert(assets.some((asset) => asset.type === 'image'), 'public image inventoried');
+  assert(
+    assets.every((asset) => Boolean(asset.usageStatus)),
+    'public assets carry permission status',
+  );
+
+  const profile = buildProspectProfileData({
+    name: 'Amanda Catherine',
+    context: 'radio personality entrepreneur',
+    candidates,
+    pages: [{
+      url: candidates[0].url,
+      title: candidates[0].title,
+      description: candidates[0].description,
+      ogImage: 'https://amandacatherine.example/portrait.jpg',
+    }],
+    searchConfigured: true,
+  });
+  assert(profile.identity.status === 'resolved', 'profile resolves identity');
+  assert(profile.citations.length >= 2, 'profile retains citations');
+  assert(profile.evidence.length >= 1, 'profile retains evidence');
+  assert(profile.assetInventory.length >= 1, 'profile retains asset inventory');
+  assert(profile.publishingSafety.automaticProductionPublishAllowed === false, 'profile is preview-safe');
+}
+
+{
+  const profile = buildProspectProfileData({
+    name: 'Unknown Prospect',
+    candidates: [],
+    pages: [],
+    searchConfigured: false,
+  });
+  assert(profile.identity.status === 'search_not_configured', 'missing search key is explicit');
+  assert(profile.coverage.searchConfigured === false, 'coverage reports search configuration');
+}
 
 // --- Unit: ProjectContext v2 artifacts ---
 {
@@ -183,6 +270,7 @@ const {
   assert(planDocumentArtifacts(ctx).some((d) => d.data.type === 'pdf'), 'document plans pdf');
   assert(planBrandingArtifacts(ctx).some((d) => d.data.assetType === 'image'), 'branding plans image');
   assert(planBrandingArtifacts(ctx).some((d) => d.data.faviconGuess), 'branding plans favicon guess');
+  assert(artifactMod.RESEARCH_ARTIFACT_KINDS.includes('prospect_profile'), 'prospect profile artifact supported');
 }
 
 // --- Integration: URL launch → artifact collection on context ---
@@ -361,6 +449,8 @@ const {
     artifactTs: join(root, 'lib/factory-artifact.ts'),
     researchCap: join(root, 'lib/factory-capabilities/research-capability.ts'),
     runProviders: join(root, 'lib/factory-research/run-providers.ts'),
+    profileProvider: join(root, 'lib/factory-research/prospect-profile-provider.ts'),
+    profilePure: join(root, 'lib/factory-research/prospect-profile.mjs'),
     websiteProvider: join(root, 'lib/factory-research/website-provider.ts'),
     docs: join(root, 'docs/architecture/research-capability.md'),
     orchestrator: join(root, 'lib/factory-orchestrator.ts'),
@@ -382,6 +472,12 @@ const {
   assert(runProviders.includes('websiteProvider'), 'runner includes website');
   assert(runProviders.includes('documentProvider'), 'runner includes document');
   assert(runProviders.includes('brandingProvider'), 'runner includes branding');
+  assert(runProviders.includes('prospectProfileProvider'), 'runner includes prospect profile');
+  assert(
+    readFileSync(paths.profileProvider, 'utf8').includes('OPENAI_API_KEY'),
+    'profile provider reuses EA OpenAI credential',
+  );
+  assert(existsSync(paths.profilePure), 'pure prospect profile module exists');
   assert(docs.includes('ArtifactService'), 'docs cover ArtifactService');
   assert(docs.includes('Orchestrator + Capability Registry dispatch mechanics unchanged'), 'docs note unchanged dispatch');
 }

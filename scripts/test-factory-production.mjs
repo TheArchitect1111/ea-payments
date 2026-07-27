@@ -56,6 +56,7 @@ function baseWorkOrder(projectId = 'proj-prod-1') {
     summary: 'Build site',
     priority: 'high',
     status: 'ready',
+    createdAt: '2026-07-18T22:00:00.000Z',
     acceptanceCriteria: ['Sitemap implemented'],
     provenance: {
       capabilityId: 'planning',
@@ -95,12 +96,21 @@ function planningArtifacts(projectId) {
     }),
     mk('navigation_tree', { primary: [{ label: 'Home', href: '/' }] }),
     mk('information_architecture', { sections: [{ id: 'home', label: 'Home' }] }),
+    mk('creative_direction', {
+      story: { sentence: 'BGCA helps young people build great futures.' },
+      visualDirection: { style: 'editorial, cinematic, human' },
+      portalContinuity: { purpose: 'Continue the public story' },
+    }),
   ];
 }
 
 // --- Unit: models ---
 {
   assert(PRODUCTION_ARTIFACT_KINDS.includes('website_site'), 'production kinds include website_site');
+  assert(
+    PRODUCTION_ARTIFACT_KINDS.includes('experience_concepts'),
+    'production kinds include experience_concepts',
+  );
   const d = createDeliverable({
     id: createDeliverableId('website', 'x'),
     projectId: 'p1',
@@ -181,8 +191,19 @@ function planningArtifacts(projectId) {
   assert(result.ok === true, 'website builder ok');
   assert(result.websiteArtifact?.kind === 'website_site', 'produces website_site');
   assert(result.websiteArtifact?.data?.pageCount === 3, 'pages from sitemap');
+  assert(
+    result.websiteArtifact?.data?.creativeDirection?.visualDirection?.style.includes('editorial'),
+    'creative direction reaches website artifact',
+  );
+  const concepts = result.drafts.find((draft) => draft.kind === 'experience_concepts');
+  assert(concepts?.data?.concepts?.length === 3, 'three experience concepts generated');
+  assert(Boolean(concepts?.data?.recommendedConceptId), 'system recommends a concept');
+  assert(
+    concepts?.data?.concepts?.every((concept) => concept.website && concept.portal),
+    'each concept covers website and portal',
+  );
   assert(result.deliverable?.type === 'website', 'deliverable website');
-  assert(result.reviewGates?.length === 2, 'two review gates');
+  assert(result.reviewGates?.length === 3, 'three review gates');
   assert(result.completedWorkOrder?.status === 'complete', 'marks work order complete');
   assert(result.completedWorkOrder?.provenance?.capabilityId === 'planning', 'WO contract capabilityId preserved');
   assert(result.drafts.some((d) => d.kind === 'work_order'), 'completion draft included');
@@ -350,7 +371,7 @@ function planningArtifacts(projectId) {
       buildersRun: 1,
       websiteArtifactsCreated: 1,
       deliverablesCreated: 1,
-      reviewGatesCreated: 2,
+      reviewGatesCreated: 3,
     },
     builderRuns: [{ builderId: 'website', ok: true }],
   });
@@ -366,8 +387,9 @@ function planningArtifacts(projectId) {
 
   assert(ctx.pipelineStatus === 'BUILDING', 'status BUILDING');
   assert(ctx.artifacts.some((a) => a.kind === 'website_site'), 'has website_site');
+  assert(ctx.artifacts.some((a) => a.kind === 'experience_concepts'), 'has experience concepts');
   assert(listDeliverablesFromArtifacts(ctx.artifacts).length === 1, 'has deliverable');
-  assert(listReviewGatesFromArtifacts(ctx.artifacts).length === 2, 'has review gates');
+  assert(listReviewGatesFromArtifacts(ctx.artifacts).length === 3, 'has review gates');
   assert(listPendingWorkOrders(ctx.artifacts, 'website').length === 0, 'website WO complete');
   assert(listWorkOrdersFromArtifacts(ctx.artifacts).find((w) => w.type === 'website')?.status === 'complete', 'website complete');
   assert(progress.percentComplete === 100, 'website in-scope 100%');

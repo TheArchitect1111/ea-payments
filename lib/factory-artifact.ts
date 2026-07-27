@@ -52,6 +52,7 @@ export {
 export type ResearchArtifactKind =
   | 'website'
   | 'organization'
+  | 'prospect_profile'
   | 'document'
   | 'branding'
   | 'metadata';
@@ -76,6 +77,7 @@ export type PlanningArtifactKind =
   | 'portal_blueprint'
   | 'learning_architecture'
   | 'content_strategy'
+  | 'creative_direction'
   | 'deliverables_matrix'
   | 'production_plan'
   | 'milestone_plan'
@@ -84,6 +86,7 @@ export type PlanningArtifactKind =
 
 export type ProductionArtifactKind =
   | 'website_site'
+  | 'experience_concepts'
   | 'deliverable'
   | 'review_gate'
   | 'production_progress';
