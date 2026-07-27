@@ -19,8 +19,9 @@ type Check = {
 /**
  * Read-only production People probe.
  *
- * Public callers receive only `{ ok, status }`. Authenticated EA administrators
- * receive the individual checks. The probe never creates or changes records.
+ * Public callers receive only readiness plus a non-sensitive blocker ID.
+ * Authenticated EA administrators receive the individual checks. The probe
+ * never creates or changes records.
  */
 export async function GET(req: NextRequest) {
   const checks: Check[] = [];
@@ -53,7 +54,8 @@ export async function GET(req: NextRequest) {
   }
 
   const ok = checks.length === 3 && checks.every((check) => check.ok);
-  const summary = { ok, status: ok ? 'ready' : 'blocked' };
+  const blocker = checks.find((check) => !check.ok)?.id ?? null;
+  const summary = { ok, status: ok ? 'ready' : 'blocked', blocker };
   const auth = await requireAdminSessionFromRequest(req);
 
   return NextResponse.json(auth.ok ? { ...summary, mode: 'read_only', checks } : summary, {
