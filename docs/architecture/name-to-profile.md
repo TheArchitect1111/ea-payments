@@ -28,6 +28,16 @@ Launch Amanda Catherine — entrepreneur, radio personality, influencer
    - publishing-safety rules.
 5. Discovery carries the identity, citations, evidence, and assets into the
    `organization_profile` and `content_inventory` artifacts.
+6. Planning converts the evidence-backed profile into a `creative_direction`
+   artifact shared by the public website and portal. It includes:
+   - the client-specific story and audience;
+   - homepage story beats;
+   - photography, typography, composition, and motion direction;
+   - portal continuity rules;
+   - anti-patterns that block generic AI/SaaS layouts;
+   - asset permissions and publishing safeguards.
+7. Website production embeds that direction in the `website_site` artifact so
+   later rendering and review retain the intended visual language.
 
 ## Safety
 
