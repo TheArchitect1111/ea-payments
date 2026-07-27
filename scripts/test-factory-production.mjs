@@ -96,6 +96,11 @@ function planningArtifacts(projectId) {
     }),
     mk('navigation_tree', { primary: [{ label: 'Home', href: '/' }] }),
     mk('information_architecture', { sections: [{ id: 'home', label: 'Home' }] }),
+    mk('creative_direction', {
+      story: { sentence: 'BGCA helps young people build great futures.' },
+      visualDirection: { style: 'editorial, cinematic, human' },
+      portalContinuity: { purpose: 'Continue the public story' },
+    }),
   ];
 }
 
@@ -182,6 +187,10 @@ function planningArtifacts(projectId) {
   assert(result.ok === true, 'website builder ok');
   assert(result.websiteArtifact?.kind === 'website_site', 'produces website_site');
   assert(result.websiteArtifact?.data?.pageCount === 3, 'pages from sitemap');
+  assert(
+    result.websiteArtifact?.data?.creativeDirection?.visualDirection?.style.includes('editorial'),
+    'creative direction reaches website artifact',
+  );
   assert(result.deliverable?.type === 'website', 'deliverable website');
   assert(result.reviewGates?.length === 2, 'two review gates');
   assert(result.completedWorkOrder?.status === 'complete', 'marks work order complete');
