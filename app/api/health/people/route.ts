@@ -71,6 +71,12 @@ export async function GET(req: NextRequest) {
 
     if (gatewayOk) {
       const schema = await peopleRest('');
+      if (!schema.ok) {
+        console.warn('people_health_authorization_failure', {
+          status: schema.status ?? null,
+          detail: schema.error,
+        });
+      }
       checks.push({
         id: 'people_app_jwt',
         ok: schema.ok,
