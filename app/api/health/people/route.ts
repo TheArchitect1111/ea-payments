@@ -86,7 +86,7 @@ export async function GET(req: NextRequest) {
 
       if (schema.ok) {
         const rpc = await peopleRpc<unknown>('get_person', {
-          p_person_id: '00000000-0000-0000-0000-000000000000',
+          p_person_key: 'people-health-nonexistent',
         });
         checks.push({
           id: 'people_app_rpc',
