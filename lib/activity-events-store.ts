@@ -19,8 +19,20 @@ function baseId(): string | undefined {
   return process.env.AIRTABLE_PAYMENTS_BASE_ID;
 }
 
+/**
+ * The app historically uses AIRTABLE_API_KEY while portal-chassis reads
+ * AIRTABLE_PAT. Keep both names compatible without duplicating a production
+ * secret or requiring a second Airtable credential.
+ */
 function airtableConfigured(): boolean {
-  return Boolean(baseId() && (process.env.AIRTABLE_API_KEY ?? process.env.AIRTABLE_PAT));
+  const credential = process.env.AIRTABLE_PAT ?? process.env.AIRTABLE_API_KEY;
+  if (!baseId() || !credential) return false;
+
+  if (!process.env.AIRTABLE_PAT) {
+    process.env.AIRTABLE_PAT = credential;
+  }
+
+  return true;
 }
 
 export async function listPlatformActivityEvents(
