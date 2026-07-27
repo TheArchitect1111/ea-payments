@@ -17,6 +17,20 @@ type Check = {
   detail: string;
 };
 
+function classifyFailure(detail: string): string {
+  const value = detail.toLowerCase();
+  if (value.includes('expired') || value.includes('exp claim')) return 'expired';
+  if (value.includes('signature') || value.includes('invalid jwt') || value.includes('token is invalid')) {
+    return 'invalid_signature';
+  }
+  if (value.includes('claim') || value.includes('subject') || value.includes('audience')) {
+    return 'invalid_claims';
+  }
+  if (value.includes('role')) return 'role_rejected';
+  if (value.includes('permission') || value.includes('privilege')) return 'permission_denied';
+  return 'authorization_rejected';
+}
+
 /**
  * Read-only production People probe.
  *
@@ -86,6 +100,7 @@ export async function GET(req: NextRequest) {
     status: ok ? 'ready' : 'blocked',
     blocker: failed?.id ?? null,
     blockerStatus: failed?.status ?? null,
+    blockerReason: failed ? classifyFailure(failed.detail) : null,
   };
   const auth = await requireAdminSessionFromRequest(req);
 
