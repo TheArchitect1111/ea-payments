@@ -1,0 +1,59 @@
+﻿{
+    "probes":  [
+                   {
+                       "status":  404,
+                       "method":  "GET",
+                       "url":  "https://efficiencyarchitects.online/sites/amanda-catherine"
+                   },
+                   {
+                       "status":  200,
+                       "method":  "GET",
+                       "url":  "https://efficiencyarchitects.online/portal/login"
+                   },
+                   {
+                       "status":  307,
+                       "method":  "GET",
+                       "url":  "https://efficiencyarchitects.online/admin/ea-factory/projects"
+                   },
+                   {
+                       "status":  401,
+                       "method":  "GET",
+                       "url":  "https://efficiencyarchitects.online/api/admin/factory/concept-previews"
+                   },
+                   {
+                       "status":  404,
+                       "method":  "GET",
+                       "url":  "https://efficiencyarchitects.online/preview/factory/probe/probe"
+                   },
+                   {
+                       "status":  401,
+                       "method":  "POST",
+                       "url":  "https://efficiencyarchitects.online/api/admin/factory/concept-previews"
+                   },
+                   {
+                       "status":  401,
+                       "method":  "POST",
+                       "url":  "https://efficiencyarchitects.online/api/admin/factory/publish-selected-concept"
+                   },
+                   {
+                       "status":  401,
+                       "method":  "POST",
+                       "url":  "https://efficiencyarchitects.online/api/admin/factory/select-concept"
+                   }
+               ],
+    "localTests":  {
+                       "test:factory-concept-previews":  "PASS",
+                       "test:amanda-editorial-theme":  "PASS",
+                       "test:factory-wire-selected":  "PASS"
+                   },
+    "mergeCommit":  "e43c4c88c592ad8f73c8900549acdce717c765b0",
+    "productionDeploySha":  "e43c4c8",
+    "amandaSiteLiveEnv":  "NOT_SET (quarantine held)",
+    "notes":  [
+                  "Unauthenticated admin POSTs must deny before mutation",
+                  "/sites/amanda-catherine must remain unavailable while quarantined",
+                  "Live wire + ED Approved + EA_AMANDA_SITE_LIVE=1 require operator admin session"
+              ],
+    "pr":  210,
+    "generatedAt":  "2026-07-27T19:48:47.9879649Z"
+}
