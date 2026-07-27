@@ -1,0 +1,95 @@
+{
+  "checkedAt": "2026-07-27T23:34:47.338Z",
+  "org": {
+    "id": "recs1KPGChgwbNkd6",
+    "name": "Acme Roofing Field Demo",
+    "slug": "acme-roofing-field-demo-a9be53",
+    "status": "Active"
+  },
+  "results": [
+    {
+      "action": "created",
+      "moduleId": "simplifi"
+    },
+    {
+      "action": "created",
+      "moduleId": "amplifi"
+    }
+  ],
+  "entitlements": [
+    {
+      "id": "rec6WhBbGkiDsfiux",
+      "moduleId": "ask",
+      "status": "active",
+      "source": "package"
+    },
+    {
+      "id": "recEv6djYtXDute7R",
+      "moduleId": "update-hub",
+      "status": "active",
+      "source": "package"
+    },
+    {
+      "id": "recH5HbfK7SWld2Tp",
+      "moduleId": "training",
+      "status": "active",
+      "source": "package"
+    },
+    {
+      "id": "recKHDEnzTaQjQPFm",
+      "moduleId": "resources",
+      "status": "active",
+      "source": "package"
+    },
+    {
+      "id": "recNNEFdDZOUlsdVa",
+      "moduleId": "amplifi",
+      "status": "active",
+      "source": "manual"
+    },
+    {
+      "id": "recOYLHzaZVcnS1Y5",
+      "moduleId": "documents",
+      "status": "active",
+      "source": "package"
+    },
+    {
+      "id": "recSprnlyFe1CKbRg",
+      "moduleId": "connect",
+      "status": "active",
+      "source": "package"
+    },
+    {
+      "id": "recboGQZapkUwiMMG",
+      "moduleId": "messaging",
+      "status": "active",
+      "source": "package"
+    },
+    {
+      "id": "receVbLmwXqtyh1qc",
+      "moduleId": "dashboard",
+      "status": "active",
+      "source": "package"
+    },
+    {
+      "id": "rech5px9IrIKKpNTc",
+      "moduleId": "simplifi",
+      "status": "active",
+      "source": "manual"
+    }
+  ],
+  "activeSimplifiAmplifi": [
+    {
+      "id": "recNNEFdDZOUlsdVa",
+      "moduleId": "amplifi",
+      "status": "active",
+      "source": "manual"
+    },
+    {
+      "id": "rech5px9IrIKKpNTc",
+      "moduleId": "simplifi",
+      "status": "active",
+      "source": "manual"
+    }
+  ]
+}

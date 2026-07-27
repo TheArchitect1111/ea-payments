@@ -34,6 +34,7 @@ const sop = read('docs/PRODUCT-SUPPORT-AND-TRIAGE-SOP.md');
 const buildDoc = read('docs/AMPLIFI-MAGNIFI-PORTAL-READY-BUILD.md');
 
 assert(health.includes('probeAmplifiMagnifiPortalReady'), 'amplifi-magnifi health probe exported');
+assert(health.includes('canonicalPlatformOrigin'), 'probe uses apex host (not www CRA)');
 assert(health.includes('amplifiUnauth'), 'probe covers Amplifi unauth gate');
 assert(health.includes('amplifiAuthed'), 'probe covers Amplifi authed hub');
 assert(health.includes('magnifiSample'), 'probe covers Magnifi sample');

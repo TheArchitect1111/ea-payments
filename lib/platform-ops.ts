@@ -7,7 +7,7 @@ import {
 import { productionSecretIssues } from '@/lib/integration-env';
 import { buildLaunchCommandCenterReport, type LaunchCommandCenterReport } from '@/lib/launch-command-center';
 import { monitoringConfigured } from '@/lib/monitoring';
-import { EA_PLATFORM_URL } from '@/lib/platform-urls';
+import { EA_PLATFORM_URL, canonicalPlatformOrigin } from '@/lib/platform-urls';
 
 export type OpsSubsystemStatus = 'healthy' | 'degraded' | 'critical' | 'unknown' | 'not_configured';
 
@@ -189,7 +189,7 @@ export async function buildPlatformOpsReport(options?: {
     });
   }
 
-  const platformUrl = EA_PLATFORM_URL.replace(/\/$/, '');
+  const platformUrl = canonicalPlatformOrigin(EA_PLATFORM_URL);
   const monitoringDegraded =
     !launchReport.readiness.monitoringReady || !launchReport.readiness.resilienceReady || secretIssues.length > 0;
 

@@ -1,0 +1,71 @@
+{
+  "checkedAt": "2026-07-27T23:35:42.340Z",
+  "org": {
+    "id": "recaNRO0yVBwakTd8",
+    "name": "Ascension Systems",
+    "slug": "s-f5b5bb",
+    "status": "active"
+  },
+  "results": [
+    {
+      "action": "created",
+      "moduleId": "simplifi"
+    },
+    {
+      "action": "created",
+      "moduleId": "amplifi"
+    }
+  ],
+  "entitlements": [
+    {
+      "id": "rec0Z8lmq9w4hf24a",
+      "moduleId": "simplifi",
+      "status": "active",
+      "source": "manual"
+    },
+    {
+      "id": "recIiK8M3QW67KV0z",
+      "moduleId": "pulse",
+      "status": "active",
+      "source": "package"
+    },
+    {
+      "id": "recU4R5m08T1PquKT",
+      "moduleId": "amplifi",
+      "status": "active",
+      "source": "manual"
+    },
+    {
+      "id": "recVAWbUokEhMj4v3",
+      "moduleId": "ask",
+      "status": "active",
+      "source": "package"
+    },
+    {
+      "id": "recZ2BKAK9j5klFVh",
+      "moduleId": "dashboard",
+      "status": "active",
+      "source": "package"
+    },
+    {
+      "id": "recfo7lW4nHmEGWu9",
+      "moduleId": "update-hub",
+      "status": "active",
+      "source": "package"
+    }
+  ],
+  "activeSimplifiAmplifi": [
+    {
+      "id": "rec0Z8lmq9w4hf24a",
+      "moduleId": "simplifi",
+      "status": "active",
+      "source": "manual"
+    },
+    {
+      "id": "recU4R5m08T1PquKT",
+      "moduleId": "amplifi",
+      "status": "active",
+      "source": "manual"
+    }
+  ]
+}
