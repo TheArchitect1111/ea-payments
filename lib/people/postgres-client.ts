@@ -1,12 +1,34 @@
 /**
  * People Postgres / PostgREST client (Phase 2C).
  *
- * Uses a Supabase API key for gateway access plus PEOPLE_SUPABASE_KEY as the
- * people_app bearer JWT. Never uses the shared Simplifi service_role for DML (INV-29).
+ * Uses a Supabase API key for gateway access plus a short-lived people_app
+ * bearer JWT. Never uses the shared Simplifi service_role for DML (INV-29).
  */
+import { createHmac } from 'node:crypto';
+
 import { peopleUnavailable } from '@/lib/people/errors';
 
 export type PeopleDbConfig = { url: string; apiKey: string; accessToken: string };
+
+function base64url(value: string): string {
+  return Buffer.from(value, 'utf8').toString('base64url');
+}
+
+function mintPeopleAppJwt(secret: string): string {
+  const now = Math.floor(Date.now() / 1000);
+  const header = base64url(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
+  const payload = base64url(
+    JSON.stringify({
+      role: 'people_app',
+      iss: 'supabase',
+      iat: now - 30,
+      exp: now + 5 * 60,
+    }),
+  );
+  const unsigned = `${header}.${payload}`;
+  const signature = createHmac('sha256', secret).update(unsigned).digest('base64url');
+  return `${unsigned}.${signature}`;
+}
 
 export function peopleDbConfig(): PeopleDbConfig | null {
   const url = (
@@ -20,10 +42,12 @@ export function peopleDbConfig(): PeopleDbConfig | null {
     process.env.PEOPLE_SUPABASE_API_KEY?.trim() ||
     process.env.PEOPLE_SUPABASE_ANON_KEY?.trim() ||
     '';
-  const accessToken =
-    process.env.PEOPLE_SUPABASE_KEY?.trim() ||
-    process.env.PEOPLE_SUPABASE_APP_KEY?.trim() ||
-    '';
+  const jwtSecret = process.env.PEOPLE_SUPABASE_JWT_SECRET?.trim() || '';
+  const accessToken = jwtSecret
+    ? mintPeopleAppJwt(jwtSecret)
+    : process.env.PEOPLE_SUPABASE_KEY?.trim() ||
+      process.env.PEOPLE_SUPABASE_APP_KEY?.trim() ||
+      '';
   if (!url || !apiKey || !accessToken) return null;
   return { url, apiKey, accessToken };
 }
@@ -101,7 +125,7 @@ export async function peopleRpc<T = unknown>(
 export function assertPeoplePostgresReady(): void {
   if (!isPeoplePostgresConfigured()) {
     throw peopleUnavailable(
-      'People persistence enabled without PEOPLE_SUPABASE_URL / PEOPLE_SUPABASE_API_KEY / PEOPLE_SUPABASE_KEY',
+      'People persistence enabled without PEOPLE_SUPABASE_URL / PEOPLE_SUPABASE_API_KEY / People JWT credentials',
     );
   }
 }
