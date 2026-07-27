@@ -1,7 +1,8 @@
 # Name-to-Experience Phase 2 — Cert report
 
 **Date:** 2026-07-27  
-**Branch:** `feat/name-to-experience-phase-2`  
+**Merged:** [PR #210](https://github.com/TheArchitect1111/ea-payments/pull/210) → `master` @ `e43c4c88`  
+**Production deploy:** `e43c4c8` (2026-07-27T19:46:11Z)  
 **Golden path:** Amanda Catherine  
 **Launch impact:** Unblocks name → real website/portal previews → gated provision.
 
@@ -12,7 +13,7 @@
 | 2A | Branch from `origin/master` @ PR #209 merge (`b9425216`); Steps 1–4 artifacts present |
 | 2B | `concept → OrganizationStoryInput` adapter + `composeDirectedWebsite` previews |
 | 2C | Selected concept → portal provision + `publishWebsiteThroughDirectorGate` |
-| 2D | Cert checklist + Amanda public site remains gated until `EA_AMANDA_SITE_LIVE=1` |
+| 2D | Automated prod probes PASS; **operator admin path still open before unquarantine** |
 
 ## Artifacts / surfaces
 
@@ -23,6 +24,7 @@
 - Website preview: `/preview/factory/[projectId]/[conceptId]`
 - Portal preview: `/preview/factory/[projectId]/[conceptId]/portal`
 - APIs: `/api/admin/factory/concept-previews`, `select-concept`, `publish-selected-concept`
+- Evidence: `docs/audits/runtime-evidence-name-to-experience-phase2d/`
 
 ## Functional checklist
 
@@ -34,6 +36,10 @@
 - [x] Session 3 wire contract: `npm run test:factory-wire-selected` PASS
 - [x] Automatic production publishing remains off until selection + ED Approved
 - [x] Amanda `/sites/amanda-catherine` stays quarantined unless `EA_AMANDA_SITE_LIVE=1`
+- [x] Production deploy of PR #210 live (`e43c4c8`); Phase 2 APIs present (unauth → 401, not 404)
+- [x] Prod probe: `/sites/amanda-catherine` → **404** (quarantine held)
+- [x] Prod probe: `/portal/login` → **200**
+- [x] Prod probe: unauthenticated wire/select/preview APIs → **401**
 - [ ] Production smoke: Factory launch Amanda → artifacts `prospect_profile`, `creative_direction`, `experience_concepts` with `selectionStatus: awaiting_review` (requires live `OPENAI_API_KEY` + admin session)
 - [ ] Experience Director review status **Approved** on selected composed blueprint
 - [ ] Live wire via admin: surfaces checklist (login, CTP, draft, chassis) returns for Amanda project
@@ -44,10 +50,28 @@
 ## Security checklist
 
 - [x] No secrets in client preview routes
-- [x] Quarantine enforced by default for Amanda public site
+- [x] Quarantine enforced by default for Amanda public site (**prod 404 confirmed**)
 - [x] Publish gate denies non-Approved director reviews
 - [x] Concept selection does not publish
+- [x] Unauthenticated admin mutation routes deny (**401**)
 - [x] CPR look/feel untouched; Experience Director v1 not extended
+
+## Session 4 — Certify and launch (status)
+
+**Automated:** PARTIAL_PASS (see `runtime-evidence-name-to-experience-phase2d/cert-summary.json`).
+
+**Do not set `EA_AMANDA_SITE_LIVE=1` yet** — operator steps below must pass first.
+
+### Operator checklist (admin session required)
+
+1. Admin → EA Factory → Amanda project (or Launch Amanda Catherine)
+2. `/admin/ea-factory/concepts/{projectId}` → **Generate real previews** → **Select** concept
+3. Experience Director → **Approved**
+4. **Wire selected experience** → confirm surfaces (login, CTP, draft, chassis, quarantine=true)
+5. Smoke portal login + chassis nav (+ mobile viewport)
+6. Share client preview links from admin-auth only
+7. Only then: Vercel Production env `EA_AMANDA_SITE_LIVE=1` → redeploy → re-wire → confirm `/sites/amanda-catherine` live
+8. Record ED scores + final SHA in this folder
 
 ## Unquarantine / deploy Amanda (controlled)
 
@@ -63,7 +87,7 @@
 
 ## Session 3 — Wire selected experience (operator checklist)
 
-**Code status:** Wire path is implemented in this branch (not yet merged to production).
+**Code status:** Merged via PR #210; live on production deploy `e43c4c8`.
 
 | Surface | Path / action |
 |---------|----------------|
@@ -86,7 +110,7 @@
 4. Click **Wire selected experience** (or POST the API with admin cookie)
 5. Confirm surfaces checklist: portal login, CTP, draft preview, chassis modules, quarantine = true
 6. Smoke portal login + chassis nav on the returned slug
-7. Leave `EA_AMANDA_SITE_LIVE` unset until Step 4 (certify) completes
+7. Leave `EA_AMANDA_SITE_LIVE` unset until operator checklist above completes
 
 **Contract test:** `npm run test:factory-wire-selected`
 
@@ -95,6 +119,7 @@
 ```bash
 npm run test:factory-concept-previews
 npm run test:factory-wire-selected
+npm run test:amanda-editorial-theme
 npm run test:factory-production
 ```
 

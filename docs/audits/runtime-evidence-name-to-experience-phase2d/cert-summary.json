@@ -1,0 +1,31 @@
+{
+  "phase": "2D",
+  "name": "Name-to-Experience Phase 2 — Certify and launch",
+  "generatedAt": "2026-07-27T19:48:47Z",
+  "productionDeploySha": "e43c4c8",
+  "mergeCommit": "e43c4c88c592ad8f73c8900549acdce717c765b0",
+  "pr": 210,
+  "verdict": "PARTIAL_PASS — automated security/quarantine gates green; operator admin path still required before unquarantine",
+  "localTests": {
+    "test:factory-wire-selected": "PASS",
+    "test:factory-concept-previews": "PASS",
+    "test:amanda-editorial-theme": "PASS"
+  },
+  "httpProbes": {
+    "sites/amanda-catherine": { "expect": 404, "actual": 404, "pass": true, "note": "quarantine held" },
+    "portal/login": { "expect": 200, "actual": 200, "pass": true },
+    "admin/ea-factory/projects": { "expect": "3xx auth redirect", "actual": 307, "pass": true },
+    "api concept-previews GET unauth": { "expect": 401, "actual": 401, "pass": true },
+    "api concept-previews POST unauth": { "expect": 401, "actual": 401, "pass": true },
+    "api publish-selected-concept POST unauth": { "expect": 401, "actual": 401, "pass": true },
+    "api select-concept POST unauth": { "expect": 401, "actual": 401, "pass": true }
+  },
+  "amandaSiteLiveEnv": "NOT_SET — do not enable until operator checklist complete",
+  "blockedOnOperator": [
+    "Admin Factory launch / select concept for Amanda",
+    "Experience Director Approved on selected composed blueprint",
+    "Live Wire selected experience + surfaces checklist",
+    "Portal login + chassis nav + mobile smoke on activated tenant",
+    "Set EA_AMANDA_SITE_LIVE=1 then re-wire for public /sites go-live"
+  ]
+}
