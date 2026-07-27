@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAdminSessionFromRequest } from '@/lib/admin-session-guard';
 import {
   isPeoplePostgresConfigured,
+  peopleDbConfig,
   peopleRest,
   peopleRpc,
 } from '@/lib/people/postgres-client';
@@ -34,26 +35,51 @@ export async function GET(req: NextRequest) {
   });
 
   if (configured) {
-    const schema = await peopleRest('');
+    const cfg = peopleDbConfig()!;
+    let gatewayStatus: number | undefined;
+    let gatewayOk = false;
+    try {
+      const gateway = await fetch(`${cfg.url}/auth/v1/settings`, {
+        headers: { apikey: cfg.apiKey },
+        cache: 'no-store',
+      });
+      gatewayStatus = gateway.status;
+      gatewayOk = gateway.ok;
+    } catch {
+      gatewayStatus = undefined;
+    }
     checks.push({
-      id: 'people_schema',
-      ok: schema.ok,
-      status: schema.ok ? 200 : schema.status,
-      detail: schema.ok ? 'People Data API reachable' : schema.error,
+      id: 'gateway_api_key',
+      ok: gatewayOk,
+      status: gatewayStatus,
+      detail: gatewayOk ? 'Supabase gateway API key accepted' : 'Supabase gateway API key rejected',
     });
 
-    const rpc = await peopleRpc<unknown>('get_person', {
-      p_person_id: '00000000-0000-0000-0000-000000000000',
-    });
-    checks.push({
-      id: 'people_app_rpc',
-      ok: rpc.ok,
-      status: rpc.ok ? 200 : rpc.status,
-      detail: rpc.ok ? 'people_app read RPC reachable' : rpc.error,
-    });
+    if (gatewayOk) {
+      const schema = await peopleRest('');
+      checks.push({
+        id: 'people_app_jwt',
+        ok: schema.ok,
+        status: schema.ok ? 200 : schema.status,
+        detail: schema.ok ? 'People Data API bearer accepted' : schema.error,
+      });
+
+      if (schema.ok) {
+        const rpc = await peopleRpc<unknown>('get_person', {
+          p_person_id: '00000000-0000-0000-0000-000000000000',
+        });
+        checks.push({
+          id: 'people_app_rpc',
+          ok: rpc.ok,
+          status: rpc.ok ? 200 : rpc.status,
+          detail: rpc.ok ? 'people_app read RPC reachable' : rpc.error,
+        });
+      }
+    }
   }
 
-  const ok = checks.length === 3 && checks.every((check) => check.ok);
+  const required = ['configuration', 'gateway_api_key', 'people_app_jwt', 'people_app_rpc'];
+  const ok = required.every((id) => checks.some((check) => check.id === id && check.ok));
   const failed = checks.find((check) => !check.ok);
   const summary = {
     ok,
