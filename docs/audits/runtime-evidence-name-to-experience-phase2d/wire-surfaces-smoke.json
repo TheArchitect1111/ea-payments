@@ -1,0 +1,104 @@
+{
+  "generatedAt": "2026-07-27T22:11:36.080Z",
+  "base": "https://efficiencyarchitects.online",
+  "steps": [
+    {
+      "step": "generate-previews",
+      "ok": true,
+      "previewCount": 3
+    },
+    {
+      "step": "select-concept",
+      "ok": true,
+      "selectedConceptId": "wo-amanda-concept-b",
+      "selectionStatus": "awaiting_certify"
+    },
+    {
+      "step": "wire-selected",
+      "ok": true,
+      "websiteStatus": "live",
+      "portalSlug": "amanda-catherine-afd57f",
+      "organizationId": "rec4RdtA5S8XVIW0z",
+      "surfaces": {
+        "draftPageId": "exp-concept-amanda-catherine-afd57f-wo-amanda-concept-b",
+        "draftPreviewPath": "/preview/experience/amanda-catherine-afd57f/exp-concept-amanda-catherine-afd57f-wo-amanda-concept-b",
+        "websitePreviewPath": "/preview/factory/proj-ms3s6sg1-5404f1/wo-amanda-concept-b",
+        "portalPreviewPath": "/preview/factory/proj-ms3s6sg1-5404f1/wo-amanda-concept-b/portal",
+        "portalLoginUrl": "https://efficiencyarchitects.online/portal/login?next=%2Fportal%2Famanda-catherine-afd57f",
+        "portalHomeUrl": "https://efficiencyarchitects.online/portal/amanda-catherine-afd57f",
+        "portalCtpUrl": "https://efficiencyarchitects.online/portal/amanda-catherine-afd57f/ctp",
+        "publicSiteQuarantined": false,
+        "chassisModules": [
+          "simplifi",
+          "amplifi",
+          "connect",
+          "member"
+        ],
+        "memberHomeSaved": true,
+        "themeId": "amanda-editorial",
+        "loginCtaPresent": true,
+        "siteUrl": "https://efficiencyarchitects.online/sites/amanda-catherine-afd57f"
+      },
+      "portal": {
+        "ok": true,
+        "portalSlug": "amanda-catherine-afd57f"
+      }
+    }
+  ],
+  "projectId": "proj-ms3s6sg1-5404f1",
+  "surfaceSmoke": [
+    {
+      "url": "https://efficiencyarchitects.online/portal/login?next=%2Fportal%2Famanda-catherine-afd57f",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "url": "https://efficiencyarchitects.online/portal/amanda-catherine-afd57f/ctp",
+      "status": 307,
+      "ok": true
+    },
+    {
+      "url": "https://efficiencyarchitects.online/portal/amanda-catherine-afd57f",
+      "status": 307,
+      "ok": true
+    },
+    {
+      "url": "https://efficiencyarchitects.online/preview/experience/amanda-catherine-afd57f/exp-concept-amanda-catherine-afd57f-wo-amanda-concept-b",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "url": "https://efficiencyarchitects.online/preview/factory/proj-ms3s6sg1-5404f1/wo-amanda-concept-b",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "url": "https://efficiencyarchitects.online/sites/amanda-catherine",
+      "status": 404,
+      "ok": false
+    }
+  ],
+  "chassisModules": [
+    "simplifi",
+    "amplifi",
+    "connect",
+    "member"
+  ],
+  "memberHomeSaved": true,
+  "publicSiteQuarantined": false,
+  "loginCtaPresent": true,
+  "websiteStatus": "live",
+  "verdict": "PARTIAL — wire + surfaces smoked; provisioned slug amanda-catherine-afd57f bypassed quarantine (hotfix in flight)",
+  "notes": [
+    "Selected concept wo-amanda-concept-b on proj-ms3s6sg1-5404f1",
+    "Portal login 200, draft preview 200, factory preview 200, CTP/home 307 (auth redirect)",
+    "/sites/amanda-catherine remains 404",
+    "BUG: fulfillPaidClient rewrote slug to amanda-catherine-afd57f and published /sites/amanda-catherine-afd57f live",
+    "Hotfix: quarantine Amanda family slugs + intendedPortalSlug check before live provision"
+  ],
+  "followUp": {
+    "hotfix": "lib/site-quarantine.ts Amanda family + intendedPortalSlug in publish-selected",
+    "next": "Deploy hotfix, confirm /sites/amanda-catherine-afd57f returns 404, then ED Approved + EA_AMANDA_SITE_LIVE only for intentional go-live"
+  }
+  "persisted": true
+}
