@@ -1,12 +1,12 @@
 /**
  * People Postgres / PostgREST client (Phase 2C).
  *
- * Uses PEOPLE_SUPABASE_URL + PEOPLE_SUPABASE_KEY (people_app), never the shared
- * Simplifi service_role key for DML (INV-29). No new npm packages.
+ * Uses a Supabase API key for gateway access plus PEOPLE_SUPABASE_KEY as the
+ * people_app bearer JWT. Never uses the shared Simplifi service_role for DML (INV-29).
  */
 import { peopleUnavailable } from '@/lib/people/errors';
 
-export type PeopleDbConfig = { url: string; key: string };
+export type PeopleDbConfig = { url: string; apiKey: string; accessToken: string };
 
 export function peopleDbConfig(): PeopleDbConfig | null {
   const url = (
@@ -14,13 +14,18 @@ export function peopleDbConfig(): PeopleDbConfig | null {
     process.env.SUPABASE_URL?.trim() ||
     ''
   ).replace(/\/$/, '');
-  // Prefer People-specific key; never require shared service_role for People SoR.
-  const key =
+  // Supabase requires an API key for the gateway and a separate JWT for the
+  // database role. The people_app JWT must never be reused as the apikey.
+  const apiKey =
+    process.env.PEOPLE_SUPABASE_API_KEY?.trim() ||
+    process.env.PEOPLE_SUPABASE_ANON_KEY?.trim() ||
+    '';
+  const accessToken =
     process.env.PEOPLE_SUPABASE_KEY?.trim() ||
     process.env.PEOPLE_SUPABASE_APP_KEY?.trim() ||
     '';
-  if (!url || !key) return null;
-  return { url, key };
+  if (!url || !apiKey || !accessToken) return null;
+  return { url, apiKey, accessToken };
 }
 
 export function isPeoplePostgresConfigured(): boolean {
@@ -37,8 +42,8 @@ export async function peopleRest<T = unknown>(
   }
 
   const headers = new Headers(init.headers);
-  headers.set('apikey', cfg.key);
-  headers.set('Authorization', `Bearer ${cfg.key}`);
+  headers.set('apikey', cfg.apiKey);
+  headers.set('Authorization', `Bearer ${cfg.accessToken}`);
   headers.set('Content-Type', 'application/json');
   // PostgREST profile for dedicated `people` schema (must be exposed in API settings).
   headers.set('Accept-Profile', 'people');
@@ -96,7 +101,7 @@ export async function peopleRpc<T = unknown>(
 export function assertPeoplePostgresReady(): void {
   if (!isPeoplePostgresConfigured()) {
     throw peopleUnavailable(
-      'People persistence enabled without PEOPLE_SUPABASE_URL / PEOPLE_SUPABASE_KEY',
+      'People persistence enabled without PEOPLE_SUPABASE_URL / PEOPLE_SUPABASE_API_KEY / PEOPLE_SUPABASE_KEY',
     );
   }
 }
