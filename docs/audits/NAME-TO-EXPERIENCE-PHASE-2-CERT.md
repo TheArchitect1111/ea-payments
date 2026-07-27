@@ -13,7 +13,7 @@
 | 2A | Branch from `origin/master` @ PR #209 merge (`b9425216`); Steps 1–4 artifacts present |
 | 2B | `concept → OrganizationStoryInput` adapter + `composeDirectedWebsite` previews |
 | 2C | Selected concept → portal provision + `publishWebsiteThroughDirectorGate` |
-| 2D | Automated prod probes PASS; **operator admin path still open before unquarantine** |
+| 2D | ED **Approved** (overall 85); wire + quarantine held; logged-in chassis walkthrough still needs operator portal OTP |
 
 ## Artifacts / surfaces
 
@@ -40,12 +40,15 @@
 - [x] Prod probe: `/sites/amanda-catherine` → **404** (quarantine held)
 - [x] Prod probe: `/portal/login` → **200**
 - [x] Prod probe: unauthenticated wire/select/preview APIs → **401**
-- [ ] Production smoke: Factory launch Amanda → artifacts `prospect_profile`, `creative_direction`, `experience_concepts` with `selectionStatus: awaiting_review` (requires live `OPENAI_API_KEY` + admin session)
-- [ ] Experience Director review status **Approved** on selected composed blueprint
-- [ ] Live wire via admin: surfaces checklist (login, CTP, draft, chassis) returns for Amanda project
-- [ ] Portal login + chassis nav + mobile viewport smoke on activated tenant
+- [x] Live wire + surfaces smoke (`proj-ms3s6sg1-5404f1` / `wo-amanda-concept-b` / portal `amanda-catherine-afd57f`)
+- [x] Quarantine family hotfix (PR #212) — hashed Amanda `/sites` also 404
+- [x] Experience Director **Approved** (overall **85**, canPublish true) — evidence `ed-approve-portal-smoke.json`
+- [x] Portal chassis routes exist and gate to login (307 → `/portal/login`) while unauthenticated
+- [ ] Production smoke: Factory launch Amanda → full research artifacts via OpenAI (optional; seeded path used for cert)
+- [ ] Logged-in portal chassis walkthrough (OTP) — local portal HMAC secret ≠ production
 - [ ] Apply/contact form smoke when present on composed site
 - [ ] Client preview links shared from admin-authenticated sessions only
+- [ ] Set `EA_AMANDA_SITE_LIVE=1` only after logged-in walkthrough
 
 ## Security checklist
 
@@ -58,20 +61,26 @@
 
 ## Session 4 — Certify and launch (status)
 
-**Automated:** PARTIAL_PASS (see `runtime-evidence-name-to-experience-phase2d/cert-summary.json`).
+**Automated:** `PASS_ED_APPROVED_QUARANTINE_HELD`  
+Evidence: `runtime-evidence-name-to-experience-phase2d/ed-approve-portal-smoke.json`
 
-**Do not set `EA_AMANDA_SITE_LIVE=1` yet** — operator steps below must pass first.
+| Check | Result |
+|-------|--------|
+| Experience Director | **Approved** · overall **85** · canPublish true |
+| Project | `proj-ms3s6sg1-5404f1` · concept `wo-amanda-concept-b` |
+| Portal slug | `amanda-catherine-afd57f` |
+| Public sites | `/sites/amanda-catherine*` → **404** (held) |
+| Unauth chassis | home/CTP/updates/resources/ask → **307** login |
+| Logged-in chassis | Blocked — production portal HMAC ≠ local secret (need OTP login) |
 
-### Operator checklist (admin session required)
+**Do not set `EA_AMANDA_SITE_LIVE=1` yet** — complete logged-in portal walkthrough first.
 
-1. Admin → EA Factory → Amanda project (or Launch Amanda Catherine)
-2. `/admin/ea-factory/concepts/{projectId}` → **Generate real previews** → **Select** concept
-3. Experience Director → **Approved**
-4. **Wire selected experience** → confirm surfaces (login, CTP, draft, chassis, quarantine=true)
-5. Smoke portal login + chassis nav (+ mobile viewport)
-6. Share client preview links from admin-auth only
-7. Only then: Vercel Production env `EA_AMANDA_SITE_LIVE=1` → redeploy → re-wire → confirm `/sites/amanda-catherine` live
-8. Record ED scores + final SHA in this folder
+### Operator checklist (remaining)
+
+1. Portal OTP login as Amanda tenant → smoke chassis nav + mobile
+2. Share client preview links from admin-auth only
+3. Then: Vercel Production `EA_AMANDA_SITE_LIVE=1` → redeploy → confirm `/sites/amanda-catherine*` live
+4. Record final SHA + ED scores in this folder
 
 ## Unquarantine / deploy Amanda (controlled)
 

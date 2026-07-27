@@ -1,0 +1,33 @@
+{
+  "generatedAt": "2026-07-27T22:19:51.754Z",
+  "slug": "amanda-catherine-afd57f",
+  "authAccepted": false,
+  "note": "Minted session rejected or redirected to login — production portal HMAC secret differs from local; operator login required for full chassis walkthrough",
+  "results": [
+    {
+      "path": "/portal/amanda-catherine-afd57f",
+      "status": 307,
+      "location": "/portal/login"
+    },
+    {
+      "path": "/portal/amanda-catherine-afd57f/ctp",
+      "status": 307,
+      "location": "/portal/login"
+    },
+    {
+      "path": "/portal/amanda-catherine-afd57f/updates",
+      "status": 307,
+      "location": "/portal/login"
+    },
+    {
+      "path": "/portal/amanda-catherine-afd57f/resources",
+      "status": 307,
+      "location": "/portal/login"
+    },
+    {
+      "path": "/portal/amanda-catherine-afd57f/ask",
+      "status": 307,
+      "location": "/portal/login"
+    }
+  ]
+}

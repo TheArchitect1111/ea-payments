@@ -1,0 +1,72 @@
+{
+  "generatedAt": "2026-07-27T22:18:50.222Z",
+  "projectId": "proj-ms3s6sg1-5404f1",
+  "portalSlug": "amanda-catherine-afd57f",
+  "steps": [
+    {
+      "step": "ensure-website-site",
+      "ok": true
+    },
+    {
+      "step": "experience-director",
+      "ok": true,
+      "approvalStatus": "Approved",
+      "scores": {
+        "story": 88,
+        "visual": 84,
+        "originality": 86,
+        "executiveExperience": 82,
+        "wow": 85,
+        "overall": 85
+      },
+      "canPublish": true,
+      "requiredImprovements": [],
+      "industry": "Personal Brand, Education, Wellness, and Speaking"
+    }
+  ],
+  "portalChassisSmoke": [
+    {
+      "url": "https://efficiencyarchitects.online/portal/login?next=%2Fportal%2Famanda-catherine-afd57f",
+      "status": 200,
+      "location": null
+    },
+    {
+      "url": "https://efficiencyarchitects.online/portal/amanda-catherine-afd57f",
+      "status": 307,
+      "location": "/portal/login"
+    },
+    {
+      "url": "https://efficiencyarchitects.online/portal/amanda-catherine-afd57f/ctp",
+      "status": 307,
+      "location": "/portal/login"
+    },
+    {
+      "url": "https://efficiencyarchitects.online/portal/amanda-catherine-afd57f/updates",
+      "status": 307,
+      "location": "/portal/login"
+    },
+    {
+      "url": "https://efficiencyarchitects.online/portal/amanda-catherine-afd57f/resources",
+      "status": 307,
+      "location": "/portal/login"
+    },
+    {
+      "url": "https://efficiencyarchitects.online/portal/amanda-catherine-afd57f/ask",
+      "status": 307,
+      "location": "/portal/login"
+    },
+    {
+      "url": "https://efficiencyarchitects.online/sites/amanda-catherine",
+      "status": 404,
+      "location": null
+    },
+    {
+      "url": "https://efficiencyarchitects.online/sites/amanda-catherine-afd57f",
+      "status": 404,
+      "location": null
+    }
+  ],
+  "verdict": "PASS_ED_APPROVED_QUARANTINE_HELD",
+  "holdLiveFlag": true,
+  "next": "Operator may set EA_AMANDA_SITE_LIVE=1 after logged-in chassis walkthrough"
+}
