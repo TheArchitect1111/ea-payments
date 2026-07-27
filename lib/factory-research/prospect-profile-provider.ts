@@ -1,6 +1,7 @@
 /**
  * Prospect Profile provider — name/context → ranked public identity evidence.
- * Uses Brave Search when configured and emits a safe incomplete profile otherwise.
+ * Uses the existing EA OpenAI Responses API web-search capability and emits a
+ * safe incomplete profile when the shared AI gateway credential is unavailable.
  */
 import { provenanceFromContext, type ArtifactDraft } from '@/lib/factory-artifact';
 import { resolveResearchUrl } from '@/lib/factory-research/providers.mjs';
@@ -36,33 +37,58 @@ export type PublicSearch = (query: string) => Promise<SearchCandidate[]>;
 const MAX_PROFILE_PAGES = 5;
 const MAX_HTML_BYTES = 512_000;
 
-async function braveSearch(query: string): Promise<SearchCandidate[]> {
-  const key = process.env.BRAVE_SEARCH_API_KEY?.trim();
+type ResponsesPayload = {
+  output?: Array<{
+    type?: string;
+    content?: Array<{
+      type?: string;
+      text?: string;
+      annotations?: Array<{ url?: string; title?: string }>;
+    }>;
+  }>;
+};
+
+async function openAiWebSearch(query: string): Promise<SearchCandidate[]> {
+  const key = process.env.OPENAI_API_KEY?.trim();
   if (!key) return [];
-  const endpoint = new URL('https://api.search.brave.com/res/v1/web/search');
-  endpoint.searchParams.set('q', query);
-  endpoint.searchParams.set('count', '12');
-  endpoint.searchParams.set('safesearch', 'moderate');
-  const response = await fetch(endpoint, {
+  const response = await fetch('https://api.openai.com/v1/responses', {
+    method: 'POST',
     headers: {
-      Accept: 'application/json',
-      'X-Subscription-Token': key,
+      Authorization: `Bearer ${key}`,
+      'Content-Type': 'application/json',
     },
-    signal: AbortSignal.timeout(15_000),
+    body: JSON.stringify({
+      model: process.env.FACTORY_RESEARCH_MODEL?.trim() || 'gpt-5.6',
+      tools: [{ type: 'web_search' }],
+      input: [
+        'Find the correct public identity for this prospect.',
+        'Search for official websites, public professional profiles, interviews, press, events, and media.',
+        'Do not infer private facts. Do not treat another person with the same name as a match.',
+        'Answer briefly and cite every public source used.',
+        `Prospect query: ${query}`,
+      ].join('\n'),
+    }),
+    signal: AbortSignal.timeout(45_000),
   });
-  if (!response.ok) throw new Error(`Brave Search failed with ${response.status}`);
-  const body = (await response.json()) as {
-    web?: { results?: Array<{ title?: string; url?: string; description?: string }> };
-  };
-  return (body.web?.results || [])
-    .filter((item): item is { title?: string; url: string; description?: string } =>
-      Boolean(item.url),
-    )
-    .map((item) => ({
-      title: item.title,
-      url: item.url,
-      description: item.description,
-    }));
+  if (!response.ok) throw new Error(`OpenAI web search failed with ${response.status}`);
+  const body = (await response.json()) as ResponsesPayload;
+  const candidates: SearchCandidate[] = [];
+  const seen = new Set<string>();
+  for (const output of body.output || []) {
+    for (const content of output.content || []) {
+      for (const annotation of content.annotations || []) {
+        const url = annotation.url?.trim();
+        if (!url || seen.has(url)) continue;
+        seen.add(url);
+        candidates.push({
+          title: annotation.title,
+          url,
+          description: content.text?.slice(0, 700),
+        });
+      }
+    }
+  }
+  return candidates.slice(0, 12);
 }
 
 async function fetchPublicPage(url: string) {
@@ -106,10 +132,10 @@ async function fetchPublicPage(url: string) {
   };
 }
 
-let activeSearch: PublicSearch = braveSearch;
+let activeSearch: PublicSearch = openAiWebSearch;
 
 export function setProspectPublicSearch(search: PublicSearch | null) {
-  activeSearch = search || braveSearch;
+  activeSearch = search || openAiWebSearch;
 }
 
 function prospectContext(context: ProjectContext) {
@@ -130,7 +156,7 @@ export function createProspectProfileProvider(search?: PublicSearch): ResearchPr
       const name = context.seed.client.trim();
       const knownUrl = resolveResearchUrl(context);
       const detail = prospectContext(context);
-      const searchConfigured = Boolean(search || process.env.BRAVE_SEARCH_API_KEY?.trim());
+      const searchConfigured = Boolean(search || process.env.OPENAI_API_KEY?.trim());
       const query = [name, context.seed.industry, detail].filter(Boolean).join(' ').slice(0, 500);
 
       let candidates: SearchCandidate[] = [];
