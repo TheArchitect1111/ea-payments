@@ -64,6 +64,7 @@ export type PublishFactoryWebsiteResult = WebsitePortalProvisionResult & {
 
 /**
  * Load OIB/concept brand from a Factory project and publish via the unified Director gate.
+ * When a Factory concept has been selected, prefer that concept's directed story input.
  */
 export async function publishFactoryWebsite(input: {
   projectId: string;
@@ -76,18 +77,67 @@ export async function publishFactoryWebsite(input: {
     return { ok: false, error: 'Factory project not found.' };
   }
 
+  const { projectContextFromProject } = await import('@/lib/factory-project-context');
+  const {
+    getConceptPreviewDraft,
+    listConceptPreviewsFromContext,
+    readCreativeDirection,
+    readExperienceConceptsArtifact,
+  } = await import('@/lib/factory-concept-previews');
+  const { conceptToOrganizationStoryInput } = await import('@/lib/factory-concept-to-director');
+
+  const context = projectContextFromProject(project);
+  const conceptsArt = readExperienceConceptsArtifact(context);
+  const conceptData = (conceptsArt?.data || {}) as {
+    selectedConceptId?: string | null;
+    selectionStatus?: string;
+    concepts?: Array<{ id: string; name: string; rationale?: string; story?: unknown }>;
+  };
+  const selectedId = conceptData.selectedConceptId?.trim();
+  const selectionReady =
+    Boolean(selectedId) &&
+    Boolean(conceptData.selectionStatus) &&
+    conceptData.selectionStatus !== 'awaiting_review';
+
   const pack = await buildFactoryConceptPackAsync(project);
   const brand = pack.opportunityBrief?.brand;
-  const businessName =
+  let businessName =
     pack.opportunityBrief?.organization?.trim() ||
     pack.clientName?.trim() ||
     project.client.trim() ||
     'Client';
-  const headline = brand?.headline?.trim() || pack.landing?.headline?.trim() || businessName;
-  const subhead = brand?.subhead?.trim() || pack.landing?.subhead?.trim() || undefined;
-  const primaryColor = brand?.primary?.trim() || '#1B2B4D';
-  const accentColor = brand?.accent?.trim() || '#C9A844';
-  const ctaLabel = brand?.cta?.trim() || pack.landing?.cta?.trim() || 'Get started';
+  let headline = brand?.headline?.trim() || pack.landing?.headline?.trim() || businessName;
+  let subhead = brand?.subhead?.trim() || pack.landing?.subhead?.trim() || undefined;
+  let primaryColor = brand?.primary?.trim() || '#1B2B4D';
+  let accentColor = brand?.accent?.trim() || '#C9A844';
+  let ctaLabel = brand?.cta?.trim() || pack.landing?.cta?.trim() || 'Get started';
+  let themeId = input.themeId;
+  let directedStory: ReturnType<typeof conceptToOrganizationStoryInput> | null = null;
+
+  if (selectionReady && selectedId) {
+    const creative = readCreativeDirection(context);
+    const concept =
+      (conceptData.concepts || []).find((c) => c.id === selectedId) ||
+      ({ id: selectedId, name: selectedId } as { id: string; name: string });
+    const draft =
+      getConceptPreviewDraft(context, selectedId) ||
+      listConceptPreviewsFromContext(context)?.previews.find((p) => p.conceptId === selectedId);
+    const slugHint =
+      input.portalSlug ||
+      (project.client.toLowerCase().includes('amanda') ? 'amanda-catherine' : undefined);
+    directedStory = conceptToOrganizationStoryInput({
+      concept: concept as never,
+      creativeDirection: creative,
+      portalSlug: slugHint,
+    });
+    businessName = directedStory.organizationName || businessName;
+    headline = directedStory.brandHeadline || headline;
+    subhead = directedStory.brandSubhead || subhead;
+    primaryColor = directedStory.primaryColor || draft?.primaryColor || primaryColor;
+    accentColor = directedStory.accentColor || draft?.accentColor || accentColor;
+    ctaLabel = directedStory.brandCta || ctaLabel;
+    themeId = themeId || draft?.themeId;
+  }
 
   const gate = assertWebsitePublishGate({
     businessName,
@@ -103,7 +153,22 @@ export async function publishFactoryWebsite(input: {
     };
   }
 
-  const portalSlug = portalSlugFromFactoryProject(project, input.portalSlug);
+  const portalSlug =
+    project.client.toLowerCase().includes('amanda') && !input.portalSlug
+      ? 'amanda-catherine'
+      : portalSlugFromFactoryProject(project, input.portalSlug);
+
+  const { isSiteQuarantined } = await import('@/lib/site-quarantine');
+  if (isSiteQuarantined(portalSlug)) {
+    return {
+      ok: false,
+      error:
+        'Public site is quarantined. Use concept preview + selected-concept wire; set EA_AMANDA_SITE_LIVE=1 only after Phase 2D cert.',
+      portalSlug,
+      gate,
+    };
+  }
+
   const { orgId } = await ensureOrganizationForPortal({
     portalSlug,
     name: businessName,
@@ -132,29 +197,33 @@ export async function publishFactoryWebsite(input: {
     ctaLabel,
     primaryColor,
     accentColor,
-    industry: brief?.industry || project.industry,
+    industry: directedStory?.industry || brief?.industry || project.industry,
     logoUrl: brand?.logoUrl,
-    themeId: input.themeId,
-    aboutBody: brief?.whoTheyAre || brief?.website?.purpose,
+    themeId,
+    aboutBody: directedStory?.whoTheyAre || brief?.whoTheyAre || brief?.website?.purpose,
     existingWebsiteUrl: project.url,
     force: input.force !== false,
-    whoTheyAre: brief?.whoTheyAre,
-    mission: brief?.website?.purpose || brief?.whoTheyAre,
-    story: brief?.story,
-    whyTheyExist: brief?.website?.purpose || brief?.whoTheyAre,
-    whoTheyHelp: brief?.primaryAudience,
-    whyItMatters: hidden?.businessImpact || brief?.story,
-    whatChanges: hidden?.possibleFuture || brief?.recommendedStartingPoint,
-    primaryAudience: brief?.primaryAudience,
-    differentiators: (brief?.whatWeLearned || []).slice(0, 4),
-    member: brief?.member
-      ? {
-          purpose: brief.member.purpose,
-          whereYouAre: brief.member.talkingPoint || brief.member.purpose,
-          whatNext: brief.nextSteps?.immediate,
-          whatSuccessLooksLike: brief.member.businessValue,
-        }
-      : undefined,
+    whoTheyAre: directedStory?.whoTheyAre || brief?.whoTheyAre,
+    mission: directedStory?.mission || brief?.website?.purpose || brief?.whoTheyAre,
+    story: directedStory?.story || brief?.story,
+    whyTheyExist: directedStory?.whyTheyExist || brief?.website?.purpose || brief?.whoTheyAre,
+    whoTheyHelp: directedStory?.whoTheyHelp || brief?.primaryAudience,
+    whyItMatters: directedStory?.whyItMatters || hidden?.businessImpact || brief?.story,
+    whatChanges: directedStory?.whatChanges || hidden?.possibleFuture || brief?.recommendedStartingPoint,
+    primaryAudience: directedStory?.primaryAudience || brief?.primaryAudience,
+    differentiators:
+      directedStory?.differentiators || (brief?.whatWeLearned || []).slice(0, 4),
+    brandVoice: directedStory?.brandVoice,
+    member: directedStory?.member
+      ? directedStory.member
+      : brief?.member
+        ? {
+            purpose: brief.member.purpose,
+            whereYouAre: brief.member.talkingPoint || brief.member.purpose,
+            whatNext: brief.nextSteps?.immediate,
+            whatSuccessLooksLike: brief.member.businessValue,
+          }
+        : undefined,
   });
 
   if (result.ok && pack.opportunityBrief?.member) {

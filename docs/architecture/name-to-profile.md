@@ -41,6 +41,15 @@ Launch Amanda Catherine — entrepreneur, radio personality, influencer
 8. Production emits three distinct, preview-ready `experience_concepts` covering
    both website and portal. The Factory recommends one concept automatically,
    while retaining all three for a client presentation and selection gate.
+9. Phase 2 composes each concept through Website Director + Layout Composer into
+   real HTML/Puck drafts (`/preview/factory/{projectId}/{conceptId}`) and a portal
+   shell preview. Admin selects a concept; publish still requires Experience
+   Director **Approved** and does not auto-publish. Amanda public site stays
+   quarantined until `EA_AMANDA_SITE_LIVE=1` after cert.
+10. Session 3 wire (`publishSelectedFactoryConcept`) provisions portal chassis +
+    member home + draft Experience page for the selected concept. While
+    quarantined, website status is `draft_only` (no public `/sites`). Live site
+    provision reuses the Experience Director publish gate only after unquarantine.
 
 ## Safety
 
