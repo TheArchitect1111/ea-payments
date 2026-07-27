@@ -15,7 +15,8 @@ Launch Amanda Catherine — entrepreneur, radio personality, influencer
 
 ## Research flow
 
-1. `prospect-profile` searches the public web when `BRAVE_SEARCH_API_KEY` is set.
+1. `prospect-profile` uses OpenAI Responses API web search through the existing
+   EA `OPENAI_API_KEY`.
 2. Search candidates are scored against the submitted name and context.
 3. The leading public pages are fetched for page and image signals.
 4. A `prospect_profile` research artifact stores:
@@ -39,8 +40,10 @@ Launch Amanda Catherine — entrepreneur, radio personality, influencer
 
 ## Production configuration
 
-Set `BRAVE_SEARCH_API_KEY` in the server environment. Never expose this value to
-the browser or include it in a launch request.
+No separate search account is required. The provider reuses the server-side
+`OPENAI_API_KEY` already used by the EA AI Gateway. Never expose this value to
+the browser or include it in a launch request. `FACTORY_RESEARCH_MODEL` may
+override the default web-search model when required.
 
 ## Verification
 
