@@ -86,6 +86,7 @@ export type PlanningArtifactKind =
 
 export type ProductionArtifactKind =
   | 'website_site'
+  | 'experience_concepts'
   | 'deliverable'
   | 'review_gate'
   | 'production_progress';
