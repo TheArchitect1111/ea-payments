@@ -77,6 +77,7 @@ export type PlanningArtifactKind =
   | 'portal_blueprint'
   | 'learning_architecture'
   | 'content_strategy'
+  | 'creative_direction'
   | 'deliverables_matrix'
   | 'production_plan'
   | 'milestone_plan'
