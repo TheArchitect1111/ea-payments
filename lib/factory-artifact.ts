@@ -52,6 +52,7 @@ export {
 export type ResearchArtifactKind =
   | 'website'
   | 'organization'
+  | 'prospect_profile'
   | 'document'
   | 'branding'
   | 'metadata';
