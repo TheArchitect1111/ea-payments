@@ -128,7 +128,11 @@ function discoveryFixture(projectId = 'proj-plan-1') {
   });
   const validated = validatePlanningBundle(bundle);
   assert(validated.ok, `bundle valid: ${validated.errors.join('; ')}`);
-  assert(bundle.drafts.length === PLANNING_DOCUMENT_KINDS.length, '11 planning document kinds');
+  assert(bundle.drafts.length === PLANNING_DOCUMENT_KINDS.length, 'all planning document kinds');
+  const creative = bundle.drafts.find((draft) => draft.kind === 'creative_direction');
+  assert(Boolean(creative), 'creative direction generated');
+  assert(creative?.data?.homepageStoryBeats?.length === 6, 'homepage story sequence generated');
+  assert(creative?.data?.antiPatterns?.includes('generic card grids'), 'generic layout blocked');
   assert(bundle.workOrders.length >= 6, 'emits multiple WorkOrders');
   assert(validateWorkOrderLineage(bundle.workOrders).ok, 'work order lineage ok');
 
@@ -245,7 +249,10 @@ function discoveryFixture(projectId = 'proj-plan-1') {
     at,
   );
 
-  assert(listPlanningArtifacts(ctx.artifacts).length === 11, '11 planning document artifacts');
+  assert(
+    listPlanningArtifacts(ctx.artifacts).length === PLANNING_DOCUMENT_KINDS.length,
+    'all planning document artifacts',
+  );
   assert(listWorkOrderArtifacts(ctx.artifacts).length === bundle.workOrders.length, 'work_order artifacts present');
   assert(listWorkOrdersFromArtifacts(ctx.artifacts).length === bundle.workOrders.length, 'WorkOrders recoverable');
   assert(ctx.pipelineStatus === 'PLANNING', 'status PLANNING');
