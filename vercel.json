@@ -1,5 +1,10 @@
 {
   "version": 2,
+  "env": {
+    "UNIVERSAL_PEOPLE": "1",
+    "UNIVERSAL_PEOPLE_PERSIST": "1",
+    "UNIVERSAL_PEOPLE_MIGRATE_CLIENTS": "0"
+  },
   "builds": [
     {
       "src": "package.json",
