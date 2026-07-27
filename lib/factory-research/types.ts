@@ -4,6 +4,7 @@ import type { ProjectContext } from '@/lib/factory-project-context';
 export type ResearchProviderId =
   | 'website'
   | 'organization'
+  | 'prospect-profile'
   | 'document'
   | 'branding'
   | 'metadata';
