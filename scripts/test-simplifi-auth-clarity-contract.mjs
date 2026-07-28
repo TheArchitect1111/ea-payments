@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 /**
  * Contract: Simplifi auth clarity (Bar A pass 3).
- * - demo-enter supports optional ?next= but defaults to CTP (canonical rule).
+ * - demo-enter supports optional ?next= but defaults to Client Experience Guide Progress.
+ * - ?next=/simplifi/... still routes to Simplifi demo-client.
  * - Simplifi login explains magic-link vs portal password.
  * Run: node scripts/test-simplifi-auth-clarity-contract.mjs
  */
@@ -19,8 +20,9 @@ function assert(condition, message) {
 
 const demo = readFileSync(join(root, 'app/api/auth/demo-enter/route.ts'), 'utf8');
 assert(demo.includes('safeDemoNext'), 'demo-enter must guard next param');
-assert(demo.includes('/portal/demo-client/ctp'), 'demo-enter default must stay CTP');
-assert(demo.includes('/portal/demo-client/ctp/progress'), 'demo-enter default lands on Guide Progress');
+assert(demo.includes('designStudioPath'), 'demo-enter default must use Guide Progress path helper');
+assert(demo.includes('ensureDemoWebsitePortal'), 'demo-enter default must open Website + Portal demo');
+assert(demo.includes('wantsSimplifiDemo'), 'demo-enter must keep Simplifi next routing');
 assert(demo.includes('searchParams.get(\'next\')'), 'demo-enter must read ?next=');
 assert(demo.includes("raw.startsWith('//')"), 'demo-enter must reject protocol-relative next');
 assert(demo.includes('NextRequest'), 'demo-enter GET must accept request for query params');
