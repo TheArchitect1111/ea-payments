@@ -29,6 +29,14 @@ function wantsSimplifiDemo(raw: string | null): boolean {
   return false;
 }
 
+/** Only same-origin relative paths are honored. */
+function safeDemoNext(raw: string | null, fallback: string): string {
+  if (!raw || !raw.startsWith('/') || raw.startsWith('//')) {
+    return fallback;
+  }
+  return raw;
+}
+
 /**
  * One-click demo entry.
  * Default → Website + Portal Client Experience (Guide Progress).
@@ -41,10 +49,7 @@ export async function GET(req: NextRequest) {
   try {
     if (wantsSimplifiDemo(rawNext)) {
       const demo = getDemoCredentials();
-      const next =
-        rawNext && rawNext.startsWith('/') && !rawNext.startsWith('//')
-          ? rawNext
-          : `/portal/${demo.slug}`;
+      const next = safeDemoNext(rawNext, `/portal/${demo.slug}`);
 
       const provision = await ensureDemoClient();
       if (!provision.ok) {
@@ -86,10 +91,7 @@ export async function GET(req: NextRequest) {
 
     // Client Experience — Website + Portal Guide Progress
     const demo = getDemoWebsitePortalCredentials();
-    const next =
-      rawNext && rawNext.startsWith('/') && !rawNext.startsWith('//')
-        ? rawNext
-        : designStudioPath(demo.slug);
+    const next = safeDemoNext(rawNext, designStudioPath(demo.slug));
 
     const provision = await ensureDemoWebsitePortal();
     if (!provision.ok) {

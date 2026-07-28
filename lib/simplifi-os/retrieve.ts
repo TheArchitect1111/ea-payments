@@ -214,7 +214,7 @@ export async function answerSemanticAsk(input: {
 
   let mode: SemanticAskResult['mode'] = 'keyword';
   let evidenceObjects: SimplifiObject[] = [];
-  let similarities = new Map<string, number>();
+  const similarities = new Map<string, number>();
 
   if (isSimplifiSemanticAskEnabled() && isSimplifiOsConfigured()) {
     try {
