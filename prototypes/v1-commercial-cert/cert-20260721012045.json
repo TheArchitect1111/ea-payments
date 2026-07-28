@@ -1,0 +1,259 @@
+{
+  "title": "Portal Engine V1 Commercial Certification",
+  "product": "Efficiency Architects — Website + Guided Project Experience",
+  "at": "2026-07-21T01:20:49.312Z",
+  "verdict": "GO WITH CONDITIONS",
+  "identity": {
+    "testEmail": "cert.v1.20260721012045.0f4484@mailinator.com",
+    "businessName": "V1 Cert 20260721012045 0f4484",
+    "base": "https://efficiencyarchitects.online",
+    "checkoutMode": "live",
+    "localStripeMode": "missing"
+  },
+  "counts": {
+    "pass": 16,
+    "fail": 2,
+    "warn": 0,
+    "blocked": 7,
+    "total": 25,
+    "blockingOpen": 8
+  },
+  "blockingOpen": [
+    "commerce.payment_complete",
+    "commerce.webhook_fulfill",
+    "commerce.org_durable",
+    "commerce.website_published",
+    "commerce.portal_ready",
+    "commerce.guide_init",
+    "commerce.confirmation_emails",
+    "local.stripe_test_key"
+  ],
+  "items": [
+    {
+      "id": "prod.env",
+      "area": "Production",
+      "status": "PASS",
+      "evidence": "{\"airtable\":true,\"onboardingWebhook\":true,\"esignWebhook\":true,\"contentWebhook\":true,\"resend\":true,\"resendFrom\":true,\"stripe\":true,\"stripeWebhookSecret\":true}",
+      "verify": "GET /api/health/launch",
+      "blocking": true,
+      "owner": "Platform"
+    },
+    {
+      "id": "prod.publish_gate_code",
+      "area": "Production",
+      "status": "PASS",
+      "evidence": "lib/website-publish-gate.ts present locally",
+      "verify": "git + code inspection",
+      "blocking": true,
+      "owner": "Engineering"
+    },
+    {
+      "id": "prod.org_fail_closed",
+      "area": "Organization",
+      "status": "PASS",
+      "evidence": "ensureOrganizationForPortal rejects synthetic IDs in production",
+      "verify": "code inspection",
+      "blocking": true,
+      "owner": "Engineering"
+    },
+    {
+      "id": "prod.fulfill_fail_closed",
+      "area": "Provisioning",
+      "status": "PASS",
+      "evidence": "fulfillPaidClient fails closed on org/site/Guide bind errors",
+      "verify": "code inspection",
+      "blocking": true,
+      "owner": "Engineering"
+    },
+    {
+      "id": "prod.slug_login",
+      "area": "Continuity",
+      "status": "PASS",
+      "evidence": "publicPortalLoginUrl(slug) deep-links to Guide Progress",
+      "verify": "code inspection",
+      "blocking": true,
+      "owner": "Engineering"
+    },
+    {
+      "id": "commerce.buy",
+      "area": "Commercial",
+      "status": "PASS",
+      "evidence": "HTTP 200; offerCopy=true",
+      "verify": "GET /buy",
+      "blocking": true,
+      "owner": "Sales"
+    },
+    {
+      "id": "commerce.checkout_session",
+      "area": "Commercial",
+      "status": "PASS",
+      "evidence": "HTTP 200; stripeMode=live; sessionUrl=true",
+      "verify": "POST /api/checkout website_portal_starter",
+      "blocking": true,
+      "owner": "Engineering"
+    },
+    {
+      "id": "commerce.payment_complete",
+      "area": "Commercial",
+      "status": "BLOCKED",
+      "evidence": "Production Stripe is LIVE (cs_live). Automated cert will not charge $2,497. Requires sk_test CERT environment.",
+      "verify": "Stripe TEST checkout + payment_intent confirm",
+      "blocking": true,
+      "owner": "Founder / Platform"
+    },
+    {
+      "id": "commerce.webhook_fulfill",
+      "area": "Provisioning",
+      "status": "BLOCKED",
+      "evidence": "Depends on payment_complete",
+      "verify": "Stripe webhook checkout.session.completed → fulfillPaidClient",
+      "blocking": true,
+      "owner": "Engineering"
+    },
+    {
+      "id": "commerce.org_durable",
+      "area": "Organization",
+      "status": "BLOCKED",
+      "evidence": "Depends on webhook fulfill; code now rejects org_* in production",
+      "verify": "Inspect Organizations row id after fulfill (must not start with org_)",
+      "blocking": true,
+      "owner": "Engineering"
+    },
+    {
+      "id": "commerce.website_published",
+      "area": "Website",
+      "status": "BLOCKED",
+      "evidence": "Depends on webhook fulfill + Director gate ≥80",
+      "verify": "GET siteUrl from fulfill; ED Approved",
+      "blocking": true,
+      "owner": "Engineering"
+    },
+    {
+      "id": "commerce.portal_ready",
+      "area": "Portal",
+      "status": "BLOCKED",
+      "evidence": "Depends on webhook fulfill",
+      "verify": "Portal slug + credentials in welcome email",
+      "blocking": true,
+      "owner": "Engineering"
+    },
+    {
+      "id": "commerce.guide_init",
+      "area": "Guide",
+      "status": "BLOCKED",
+      "evidence": "Depends on CTP workspace bind after website provision",
+      "verify": "Authenticated GET /portal/{slug}/ctp/progress",
+      "blocking": true,
+      "owner": "Engineering"
+    },
+    {
+      "id": "commerce.confirmation_emails",
+      "area": "Email",
+      "status": "BLOCKED",
+      "evidence": "Depends on webhook + Resend",
+      "verify": "Inbox: welcome + payment confirmation with Guide-aligned CTAs",
+      "blocking": true,
+      "owner": "Ops"
+    },
+    {
+      "id": "auth.login_surface",
+      "area": "Authentication",
+      "status": "PASS",
+      "evidence": "HTTP 200",
+      "verify": "GET /portal/login",
+      "blocking": true,
+      "owner": "Engineering"
+    },
+    {
+      "id": "auth.demo_enter",
+      "area": "Authentication",
+      "status": "PASS",
+      "evidence": "HTTP 303; location=https://efficiencyarchitects.online/portal/demo-client/ctp/progress",
+      "verify": "GET /api/auth/demo-enter (manual redirect)",
+      "blocking": false,
+      "owner": "Engineering"
+    },
+    {
+      "id": "auth.unauthorized_route",
+      "area": "Authentication",
+      "status": "PASS",
+      "evidence": "HTTP 307; location=/portal/login",
+      "verify": "GET protected Guide Progress without session",
+      "blocking": true,
+      "owner": "Engineering"
+    },
+    {
+      "id": "honesty.contact_nav",
+      "area": "Honesty",
+      "status": "PASS",
+      "evidence": "CX nav uses Contact not Messages",
+      "verify": "code inspection",
+      "blocking": true,
+      "owner": "Product"
+    },
+    {
+      "id": "honesty.update_hub_copy",
+      "area": "Honesty",
+      "status": "PASS",
+      "evidence": "Update Hub scoped as curated Project Updates",
+      "verify": "code inspection",
+      "blocking": true,
+      "owner": "Product"
+    },
+    {
+      "id": "honesty.journey_ssot",
+      "area": "Guide",
+      "status": "PASS",
+      "evidence": "Journey steps derived from guideStage SSOT",
+      "verify": "code inspection",
+      "blocking": true,
+      "owner": "Engineering"
+    },
+    {
+      "id": "support.email_configured",
+      "area": "Support",
+      "status": "PASS",
+      "evidence": "Default support email freedom@efficiencyarchitects.online",
+      "verify": "mailto actions in Help/Contact",
+      "blocking": true,
+      "owner": "Ops"
+    },
+    {
+      "id": "email.welcome_cta",
+      "area": "Email",
+      "status": "PASS",
+      "evidence": "Welcome/portal CTAs present in email templates",
+      "verify": "Static template review",
+      "blocking": false,
+      "owner": "Ops"
+    },
+    {
+      "id": "ops.idempotency_code",
+      "area": "Operational",
+      "status": "PASS",
+      "evidence": "Stripe webhook handler present for completed sessions",
+      "verify": "code inspection",
+      "blocking": true,
+      "owner": "Engineering"
+    },
+    {
+      "id": "local.stripe_test_key",
+      "area": "Commercial",
+      "status": "FAIL",
+      "evidence": "Local STRIPE_SECRET_KEY mode=missing",
+      "verify": "scripts/_cert-env-probe.mjs",
+      "blocking": true,
+      "owner": "Platform"
+    },
+    {
+      "id": "local.resend",
+      "area": "Email",
+      "status": "FAIL",
+      "evidence": "Local RESEND_API_KEY for inbox proof",
+      "verify": ".env.local",
+      "blocking": false,
+      "owner": "Platform"
+    }
+  ],
+  "fingerprint": "0632bb4acfa85096"
+}

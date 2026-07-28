@@ -35,7 +35,7 @@ export async function notifyUpdateHubAudience(input: {
 <p style="font-size:12px;text-transform:uppercase;letter-spacing:0.08em;color:#8a7350;">${escHtml(channelLabel)} · ${escHtml(input.organizationName)}</p>
 <h1 style="font-size:20px;">${escHtml(input.title)}</h1>
 ${input.summary ? `<p style="line-height:1.6;">${escHtml(input.summary)}</p>` : ''}
-${href ? `<p><a href="${escHtml(href)}" style="color:#1a2332;font-weight:bold;">Open in portal</a></p>` : ''}
+${href ? `<p><a href="${escHtml(href)}" style="color:#1a2332;font-weight:bold;">Open Your Project</a></p>` : ''}
 </body></html>`;
 
   try {

@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Boys &amp; Girls Clubs of America — America Needs Club Kids</title>
+    <meta
+      name="description"
+      content="When kids have a Club, they thrive — and so does the country that raises them."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Source+Sans+3:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --blue: #0033a0;
+        --blue-deep: #001f63;
+        --orange: #e87722;
+        --paper: #f6f1e8;
+        --ink: #14181f;
+        --muted: rgba(20, 24, 31, 0.72);
+        --white: #ffffff;
+        --max: 1120px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        color: var(--ink);
+        background: var(--paper);
+        font-family: 'Source Sans 3', Georgia, sans-serif;
+        font-size: 1.125rem;
+        line-height: 1.55;
+      }
+
+      img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      a {
+        color: inherit;
+      }
+
+      .site-nav {
+        position: absolute;
+        z-index: 5;
+        top: 0;
+        left: 0;
+        right: 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.25rem 1.5rem;
+        color: var(--white);
+      }
+
+      .site-nav .brand {
+        font-family: 'Fraunces', Georgia, serif;
+        font-weight: 700;
+        font-size: 1.05rem;
+        letter-spacing: 0.01em;
+      }
+
+      .site-nav a.nav-cta {
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 0.95rem;
+        border-bottom: 2px solid var(--orange);
+        padding-bottom: 0.15rem;
+      }
+
+      /* Scene 1 — Human story */
+      .scene-human {
+        position: relative;
+        min-height: 100vh;
+        min-height: 100dvh;
+        color: var(--white);
+        overflow: hidden;
+      }
+
+      .scene-human .media {
+        position: absolute;
+        inset: 0;
+      }
+
+      .scene-human .media::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background:
+          linear-gradient(180deg, rgba(0, 31, 99, 0.35) 0%, rgba(0, 31, 99, 0.2) 40%, rgba(0, 20, 60, 0.78) 100%);
+      }
+
+      .scene-human .copy {
+        position: relative;
+        z-index: 2;
+        min-height: 100vh;
+        min-height: 100dvh;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        padding: 5.5rem 1.5rem 3.5rem;
+        max-width: var(--max);
+        margin: 0 auto;
+        opacity: 0;
+        transform: translateY(18px);
+        animation: threshold-in 1.1s ease forwards 0.2s;
+      }
+
+      .scene-human .brand-signal {
+        font-family: 'Fraunces', Georgia, serif;
+        font-size: clamp(2.6rem, 7vw, 5.25rem);
+        font-weight: 700;
+        line-height: 0.98;
+        letter-spacing: -0.02em;
+        max-width: 14ch;
+        margin: 0 0 1rem;
+      }
+
+      .scene-human .lede {
+        max-width: 34ch;
+        font-size: clamp(1.1rem, 2.2vw, 1.35rem);
+        margin: 0 0 1.75rem;
+        color: rgba(255, 255, 255, 0.92);
+      }
+
+      .btn-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.85rem 1.25rem;
+        align-items: center;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 1rem;
+        padding: 0.85rem 1.35rem;
+        border-radius: 2px;
+        transition: transform 0.2s ease, background 0.2s ease;
+      }
+
+      .btn:hover {
+        transform: translateY(-1px);
+      }
+
+      .btn-primary {
+        background: var(--orange);
+        color: var(--white);
+      }
+
+      .btn-ghost {
+        color: var(--white);
+        border-bottom: 2px solid rgba(255, 255, 255, 0.55);
+        padding: 0.85rem 0;
+        border-radius: 0;
+      }
+
+      /* Scene 2 — Current reality */
+      .scene-reality {
+        background: var(--blue-deep);
+        color: var(--white);
+        padding: clamp(4rem, 10vw, 7rem) 1.5rem;
+      }
+
+      .scene-reality .inner {
+        max-width: var(--max);
+        margin: 0 auto;
+        display: grid;
+        gap: 2rem;
+      }
+
+      @media (min-width: 840px) {
+        .scene-reality .inner {
+          grid-template-columns: 1.1fr 0.9fr;
+          align-items: end;
+          gap: 4rem;
+        }
+      }
+
+      .eyebrow {
+        font-size: 0.8rem;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--orange);
+        margin: 0 0 1rem;
+      }
+
+      .scene-reality h2 {
+        font-family: 'Fraunces', Georgia, serif;
+        font-size: clamp(2rem, 4.5vw, 3.25rem);
+        line-height: 1.1;
+        margin: 0 0 1rem;
+        font-weight: 700;
+      }
+
+      .scene-reality p {
+        margin: 0;
+        max-width: 36ch;
+        color: rgba(255, 255, 255, 0.86);
+      }
+
+      .stat-block {
+        border-left: 3px solid var(--orange);
+        padding-left: 1.25rem;
+      }
+
+      .stat-block .num {
+        font-family: 'Fraunces', Georgia, serif;
+        font-size: clamp(3.5rem, 8vw, 5.5rem);
+        font-weight: 700;
+        line-height: 1;
+        letter-spacing: -0.03em;
+      }
+
+      .stat-block .cap {
+        margin-top: 0.75rem;
+        font-size: 1.05rem;
+        color: rgba(255, 255, 255, 0.88);
+        max-width: 28ch;
+      }
+
+      /* Scene 3 — Mission */
+      .scene-mission {
+        position: relative;
+        min-height: 85vh;
+        color: var(--white);
+        display: grid;
+        place-items: center;
+        text-align: center;
+        padding: 5rem 1.5rem;
+        overflow: hidden;
+      }
+
+      .scene-mission .media {
+        position: absolute;
+        inset: 0;
+      }
+
+      .scene-mission .media::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 31, 99, 0.62);
+      }
+
+      .scene-mission .copy {
+        position: relative;
+        z-index: 2;
+        max-width: 18ch;
+      }
+
+      .scene-mission h2 {
+        font-family: 'Fraunces', Georgia, serif;
+        font-size: clamp(2.8rem, 7vw, 5rem);
+        line-height: 1.02;
+        margin: 0 0 1.25rem;
+        font-weight: 700;
+      }
+
+      .scene-mission p {
+        margin: 0 auto;
+        max-width: 34ch;
+        font-size: 1.2rem;
+        color: rgba(255, 255, 255, 0.92);
+      }
+
+      /* Scene 4 — Transformation */
+      .scene-transform {
+        padding: clamp(4rem, 9vw, 6.5rem) 1.5rem;
+        background: var(--paper);
+      }
+
+      .scene-transform .inner {
+        max-width: var(--max);
+        margin: 0 auto;
+      }
+
+      .scene-transform h2 {
+        font-family: 'Fraunces', Georgia, serif;
+        font-size: clamp(2rem, 4vw, 3rem);
+        max-width: 18ch;
+        margin: 0 0 2.5rem;
+        line-height: 1.1;
+      }
+
+      .split {
+        display: grid;
+        gap: 0;
+        border-top: 1px solid rgba(20, 24, 31, 0.15);
+      }
+
+      @media (min-width: 800px) {
+        .split {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+
+      .split article {
+        padding: 2rem 0;
+      }
+
+      @media (min-width: 800px) {
+        .split article:first-child {
+          padding-right: 2.5rem;
+          border-right: 1px solid rgba(20, 24, 31, 0.15);
+        }
+
+        .split article:last-child {
+          padding-left: 2.5rem;
+        }
+      }
+
+      .split .label {
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--blue);
+        margin: 0 0 0.75rem;
+      }
+
+      .split h3 {
+        font-family: 'Fraunces', Georgia, serif;
+        font-size: 1.65rem;
+        margin: 0 0 0.75rem;
+        line-height: 1.15;
+      }
+
+      .split p {
+        margin: 0;
+        color: var(--muted);
+        max-width: 32ch;
+      }
+
+      /* Scene 5 — Impact */
+      .scene-impact {
+        background: var(--white);
+        padding: clamp(4rem, 9vw, 6.5rem) 1.5rem;
+      }
+
+      .scene-impact .inner {
+        max-width: var(--max);
+        margin: 0 auto;
+      }
+
+      .scene-impact h2 {
+        font-family: 'Fraunces', Georgia, serif;
+        font-size: clamp(2rem, 4vw, 2.85rem);
+        margin: 0 0 0.75rem;
+        max-width: 20ch;
+      }
+
+      .scene-impact .intro {
+        margin: 0 0 3rem;
+        color: var(--muted);
+        max-width: 42ch;
+      }
+
+      .outcomes {
+        display: grid;
+        gap: 2.5rem 3rem;
+      }
+
+      @media (min-width: 760px) {
+        .outcomes {
+          grid-template-columns: repeat(3, 1fr);
+        }
+      }
+
+      .outcomes figure {
+        margin: 0;
+        opacity: 0;
+        transform: translateY(16px);
+      }
+
+      .outcomes figure.is-in {
+        animation: rise-in 0.85s ease forwards;
+      }
+
+      .outcomes .num {
+        font-family: 'Fraunces', Georgia, serif;
+        font-size: clamp(2.75rem, 5vw, 3.75rem);
+        font-weight: 700;
+        color: var(--blue);
+        line-height: 1;
+        letter-spacing: -0.03em;
+      }
+
+      .outcomes figcaption {
+        margin-top: 0.85rem;
+        color: var(--muted);
+        font-size: 1.02rem;
+        max-width: 24ch;
+      }
+
+      .source {
+        margin: 2.5rem 0 0;
+        font-size: 0.85rem;
+        color: rgba(20, 24, 31, 0.5);
+      }
+
+      /* Scene 6 — Invitation */
+      .scene-invite {
+        background: var(--blue);
+        color: var(--white);
+        padding: clamp(4.5rem, 10vw, 7rem) 1.5rem;
+        text-align: center;
+      }
+
+      .scene-invite .inner {
+        max-width: 34rem;
+        margin: 0 auto;
+        opacity: 0;
+        transform: translateY(12px);
+      }
+
+      .scene-invite .inner.is-in {
+        animation: settle-in 0.9s ease forwards;
+      }
+
+      .scene-invite h2 {
+        font-family: 'Fraunces', Georgia, serif;
+        font-size: clamp(2.2rem, 5vw, 3.4rem);
+        margin: 0 0 1rem;
+        line-height: 1.08;
+      }
+
+      .scene-invite p {
+        margin: 0 auto 2rem;
+        color: rgba(255, 255, 255, 0.9);
+        max-width: 36ch;
+      }
+
+      .scene-invite .btn-row {
+        justify-content: center;
+      }
+
+      .site-footer {
+        background: var(--blue-deep);
+        color: rgba(255, 255, 255, 0.7);
+        padding: 1.5rem;
+        text-align: center;
+        font-size: 0.9rem;
+      }
+
+      .site-footer strong {
+        color: var(--white);
+        font-weight: 600;
+      }
+
+      .prototype-tag {
+        position: fixed;
+        bottom: 0.75rem;
+        right: 0.75rem;
+        z-index: 20;
+        background: rgba(20, 24, 31, 0.88);
+        color: #fff;
+        font-size: 0.7rem;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        padding: 0.4rem 0.65rem;
+        border-radius: 2px;
+      }
+
+      @keyframes threshold-in {
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes rise-in {
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes settle-in {
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation: none !important;
+          transition: none !important;
+        }
+
+        .scene-human .copy,
+        .outcomes figure,
+        .scene-invite .inner {
+          opacity: 1;
+          transform: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="prototype-tag">Website Director · Golden Path</div>
+
+    <header class="site-nav">
+      <div class="brand">Boys &amp; Girls Clubs of America</div>
+      <a class="nav-cta" href="#invite">Find a Club</a>
+    </header>
+
+    <!-- Human story -->
+    <section class="scene-human" aria-label="Human story">
+      <div class="media" aria-hidden="true">
+        <img
+          src="https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=2000&q=80"
+          alt=""
+          width="2000"
+          height="1333"
+        />
+      </div>
+      <div class="copy">
+        <h1 class="brand-signal">America Needs Club Kids</h1>
+        <p class="lede">
+          Tomorrow’s leaders are growing up right now — in Boys &amp; Girls Clubs. Give them a
+          door that opens after school.
+        </p>
+        <div class="btn-row">
+          <a class="btn btn-primary" href="#invite">Find a Club Near You</a>
+          <a class="btn btn-ghost" href="#reality">See why it matters</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Current reality -->
+    <section class="scene-reality" id="reality" aria-label="Current reality">
+      <div class="inner">
+        <div>
+          <p class="eyebrow">After the bell</p>
+          <h2>Millions of kids face empty afternoons.</h2>
+          <p>
+            When school ends, too many young people are alone — without a safe place, a caring
+            adult, or a reason to believe someone is counting on them.
+          </p>
+        </div>
+        <div class="stat-block">
+          <div class="num">7.7M</div>
+          <p class="cap">
+            kids and teens are alone and unsupervised after school — while nearly 25 million lack
+            access to after-school programs.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Mission -->
+    <section class="scene-mission" aria-label="Mission">
+      <div class="media" aria-hidden="true">
+        <img
+          src="https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=2000&q=80"
+          alt=""
+          width="2000"
+          height="1333"
+        />
+      </div>
+      <div class="copy">
+        <h2>Clubs get kids future ready.</h2>
+        <p>
+          Boys &amp; Girls Clubs exist so every young person who walks through the door has a
+          chance to thrive, lead, and shape the America that is coming.
+        </p>
+      </div>
+    </section>
+
+    <!-- Transformation -->
+    <section class="scene-transform" aria-label="Transformation">
+      <div class="inner">
+        <h2>From alone after school to known by name.</h2>
+        <div class="split">
+          <article>
+            <p class="label">Without a Club</p>
+            <h3>Unsupervised hours. Quiet risk.</h3>
+            <p>
+              Afternoons stretch with nowhere to go — and no one asking what you want to become.
+            </p>
+          </article>
+          <article>
+            <p class="label">With a Club</p>
+            <h3>Belonging. Mentors. A path forward.</h3>
+            <p>
+              Kids find peers, caring adults, and the confidence to graduate, volunteer, and stand
+              up for what is right.
+            </p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Impact -->
+    <section class="scene-impact" aria-label="Impact">
+      <div class="inner">
+        <h2>We’re making a difference — in numbers that belong to kids.</h2>
+        <p class="intro">
+          According to BGCA youth outcome data from regularly attending Club members.
+        </p>
+        <div class="outcomes" id="outcomes">
+          <figure>
+            <div class="num">92%</div>
+            <figcaption>of Club teens expect to graduate from high school.</figcaption>
+          </figure>
+          <figure>
+            <div class="num">81%</div>
+            <figcaption>have plans to complete some kind of post-secondary education.</figcaption>
+          </figure>
+          <figure>
+            <div class="num">86%</div>
+            <figcaption>said they can stand up for what is right.</figcaption>
+          </figure>
+        </div>
+        <p class="source">Source: Boys &amp; Girls Clubs of America youth outcome data · bgca.org</p>
+      </div>
+    </section>
+
+    <!-- Invitation -->
+    <section class="scene-invite" id="invite" aria-label="Invitation">
+      <div class="inner" id="invite-inner">
+        <h2>Open the door for a Club Kid.</h2>
+        <p>
+          Find a Club near you — or send encouragement to a young person who needs to know the
+          country is counting on them.
+        </p>
+        <div class="btn-row">
+          <a class="btn btn-primary" href="https://www.bgca.org/get-involved/find-a-club/"
+            >Find a Club Near You</a
+          >
+          <a class="btn btn-ghost" href="https://www.bgca.org/ways-to-give/">More ways to give</a>
+        </div>
+      </div>
+    </section>
+
+    <footer class="site-footer">
+      <strong>Boys &amp; Girls Clubs of America</strong>
+      · Golden Path prototype directed by Website Director pipeline · Not the live production site
+    </footer>
+
+    <script>
+      (function () {
+        var outcomes = document.getElementById('outcomes');
+        var invite = document.getElementById('invite-inner');
+        if (!outcomes || !('IntersectionObserver' in window)) {
+          if (outcomes) {
+            Array.prototype.forEach.call(outcomes.querySelectorAll('figure'), function (el, i) {
+              el.classList.add('is-in');
+              el.style.animationDelay = i * 0.12 + 's';
+            });
+          }
+          if (invite) invite.classList.add('is-in');
+          return;
+        }
+        var io = new IntersectionObserver(
+          function (entries) {
+            entries.forEach(function (entry) {
+              if (!entry.isIntersecting) return;
+              if (entry.target.id === 'outcomes') {
+                Array.prototype.forEach.call(
+                  entry.target.querySelectorAll('figure'),
+                  function (el, i) {
+                    el.style.animationDelay = i * 0.12 + 's';
+                    el.classList.add('is-in');
+                  },
+                );
+              }
+              if (entry.target.id === 'invite-inner') {
+                entry.target.classList.add('is-in');
+              }
+              io.unobserve(entry.target);
+            });
+          },
+          { threshold: 0.35 },
+        );
+        io.observe(outcomes);
+        if (invite) io.observe(invite);
+      })();
+    </script>
+  </body>
+</html>

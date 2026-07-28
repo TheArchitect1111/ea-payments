@@ -1,5 +1,6 @@
 ﻿import Link from 'next/link';
 import type { CtpOpportunityDashboardView } from '@/lib/ctp-opportunity-view';
+import { CX_EMOTION } from '@/lib/ctp-emotional-copy';
 import { NAVY, GOLD } from '@/lib/design-system';
 import './opportunity-experience.css';
 
@@ -19,7 +20,7 @@ export default function OpportunityDashboard({ view }: { view: CtpOpportunityDas
 
       <section className="oe-section" aria-labelledby="oe-snapshot">
         <h3 id="oe-snapshot" className="oe-section-title">
-          Executive Snapshot
+          {CX_EMOTION.journey.snapshotTitle}
         </h3>
         <div className="oe-snapshot-list">
           <div className="oe-snapshot-row">
@@ -154,18 +155,15 @@ export default function OpportunityDashboard({ view }: { view: CtpOpportunityDas
 
       <section className="oe-section" aria-labelledby="oe-comm">
         <h3 id="oe-comm" className="oe-section-title">
-          Communication Center
+          {CX_EMOTION.journey.contactSectionTitle}
         </h3>
-        <p className="oe-section-lede">
-          One place for questions, messages, file uploads, project updates, and recommendations.
-          Everything stays here - no email chains.
-        </p>
+        <p className="oe-section-lede">{CX_EMOTION.journey.contactSectionLede}</p>
         <div className="oe-comm-actions">
           <Link href={view.messagingHref} className="oe-cta-primary" style={{ backgroundColor: GOLD, color: NAVY }}>
-            Message your advisor
+            {CX_EMOTION.journey.messageCta}
           </Link>
           <Link href={view.communicationHref} className="oe-comm-link">
-            Open messages &amp; support
+            {CX_EMOTION.journey.openContactCta}
           </Link>
           <Link href={view.reviewHref} className="oe-comm-link">
             Schedule a conversation

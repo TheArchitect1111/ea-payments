@@ -3,6 +3,7 @@
  * Keep language continuous across confirmation email and branded portal home.
  */
 import type { CtpSubmission } from '@/lib/ctp-submissions';
+import { GUIDE_LIFECYCLE_STAGES } from '@/lib/ctp-guide-stage-engine';
 
 export type ConsultingLearnedCard = {
   id: string;
@@ -89,7 +90,7 @@ export function consultingBeginCards(): ConsultingBeginCard[] {
     {
       id: 'portal',
       title: 'Client Experience Portal',
-      purpose: 'A private place for progress, documents, updates, and ongoing collaboration.',
+      purpose: 'A private guided project experience for progress, documents, and updates.',
       estimatedBuildTime: '8-14 hrs',
     },
     {
@@ -166,37 +167,15 @@ export function consultingTimeline(submission: CtpSubmission): string {
   );
 }
 
+/** Journey steps = Guide lifecycle stages (Project State Engine SSOT). */
 export function consultingJourneySteps(submission: CtpSubmission): ConsultingJourneyStep[] {
-  const discoveryActive =
-    submission.workspaceStatus === 'Active' ||
-    submission.workspaceStatus === 'Provisioning' ||
-    submission.studioStatus === 'In Progress';
-  const proposalReady =
-    submission.status === 'Ready For Review' || submission.studioStatus === 'Ready For Review';
-  const completed = submission.status === 'Completed';
+  const current = submission.guideStage ?? 'Welcome';
+  const idx = GUIDE_LIFECYCLE_STAGES.indexOf(current);
+  const activeIdx = idx >= 0 ? idx : 0;
 
-  const mark = (complete: boolean, active: boolean): ConsultingJourneyStep['state'] => {
-    if (complete) return 'complete';
-    if (active) return 'active';
-    return 'pending';
-  };
-
-  return [
-    { id: 'questionnaire', label: 'Questionnaire Received', state: 'complete' },
-    { id: 'review', label: 'Initial Review', state: 'complete' },
-    {
-      id: 'discovery',
-      label: 'Discovery',
-      state: mark(proposalReady || completed, discoveryActive && !proposalReady && !completed),
-    },
-    {
-      id: 'proposal',
-      label: 'Proposal',
-      state: mark(completed, proposalReady && !completed),
-    },
-    { id: 'approval', label: 'Approval', state: mark(completed, false) },
-    { id: 'design', label: 'Design', state: mark(completed, false) },
-    { id: 'development', label: 'Development', state: mark(completed, false) },
-    { id: 'launch', label: 'Launch', state: mark(completed, false) },
-  ];
+  return GUIDE_LIFECYCLE_STAGES.map((stage, i) => ({
+    id: stage.toLowerCase(),
+    label: stage,
+    state: i < activeIdx ? 'complete' : i === activeIdx ? 'active' : 'pending',
+  }));
 }

@@ -22,7 +22,7 @@ const DEFAULT_FORM: Pick<
   buttonLabel: 'Email me a login code',
   sentMessage: 'Check your email — your login code is on the way.',
   sentDetail:
-    'Open the newest email and enter the 6-digit code on this page. No email? That address is not on a portal record yet.',
+    'Open the newest email and enter the 6-digit code on this page. No email? Double-check the address from your welcome message.',
   sendAnotherLabel: 'Send another code',
   emailPlaceholder: 'you@company.com',
 };
@@ -43,13 +43,15 @@ export const REALM_LOGIN_COPY: Record<MagicLinkRealm, RealmLoginCopy> = {
     emailPlaceholder: 'you@company.com',
   },
   portal: {
-    eyebrow: 'Client Portal',
-    pageTitle: 'Welcome to your portal',
+    eyebrow: 'Client Experience',
+    pageTitle: 'Your Client Experience',
     pageSubtitle:
-      'Sign in to open your CTP workspace — overview, progress, recommendations, and documents.',
-    cardTitle: 'Portal sign in',
-    sentTitle: 'Portal sign in',
+      'Sign in to open your project — where it stands, what we’re doing, and what happens next.',
+    cardTitle: 'Sign in',
+    sentTitle: 'Sign in',
     ...DEFAULT_FORM,
+    buttonLabel: 'Send my sign-in code',
+    sentMessage: 'Your code is on its way — check the newest email.',
   },
   admin: {
     pageTitle: 'Admin sign in',
@@ -86,7 +88,7 @@ export function magicLinkErrorMessage(
       if (realm === 'admin') {
         return 'Admin login is not configured. Set ADMIN_SESSION_SECRET on Vercel Production.';
       }
-      return 'Login is not configured. Contact support.';
+      return 'Login is not configured. Contact your guide or email freedom@efficiencyarchitects.online.';
     default:
       return null;
   }

@@ -1,0 +1,56 @@
+{
+  "generatedAt": "2026-07-23T21:15:00.000Z",
+  "tenant": "ea-portal-cert-test",
+  "authAttempts": [
+    {
+      "method": "password_login_ui",
+      "url": "https://efficiencyarchitects.online/portal/login?next=%2Fportal%2Fea-portal-cert-test%2Fctp%2Fprogress",
+      "result": "Failed",
+      "detail": "POST /api/portal/login returned 200 requires2fa=true with pendingToken; UI alert: This account still requires an email code. Use the code form above, or use demo credentials.",
+      "maskedEmail": "ea*****************@efficiencyarchitects.online",
+      "credentialsValidated": true,
+      "emailCodeAvailableToAgent": false
+    },
+    {
+      "method": "minted_session_cookie_from_env_local",
+      "result": "Failed",
+      "detail": "All authenticated GET routes returned 307 Location=/portal/login — local ADMIN_SESSION_SECRET does not match production middleware.",
+      "routesSampled": [
+        "/portal/ea-portal-cert-test/ctp/progress",
+        "/portal/ea-portal-cert-test/ctp",
+        "/portal/ea-portal-cert-test/ctp/documents",
+        "/portal/ea-portal-cert-test/ctp/messages",
+        "/portal/ea-portal-cert-test/ctp/support",
+        "/portal/ea-portal-cert-test/documents",
+        "/portal/ea-portal-cert-test/messaging",
+        "/portal/ea-portal-cert-test/ask",
+        "/portal/ea-portal-cert-test"
+      ]
+    },
+    {
+      "method": "vercel_env_pull_production",
+      "result": "Blocked",
+      "detail": ".env.production.pull created but ADMIN_SESSION_SECRET and SESSION_SECRET have valueLen 0 (empty). Cannot mint production-valid session."
+    },
+    {
+      "method": "playwright_cookie_injection",
+      "result": "Blocked",
+      "detail": "Playwright Chromium executable missing in environment; aborted after HTTP probes with invalid cookie."
+    }
+  ],
+  "synthesizedRecords": {
+    "organizations": null,
+    "entitlements": null,
+    "memberships": null,
+    "note": "First-login org/entitlement synthesis did not run because an authenticated session was never established."
+  },
+  "desktopMobile": {
+    "desktopAuthenticated": "Blocked",
+    "mobile390x844Authenticated": "Blocked"
+  },
+  "stillRequired": [
+    "6-digit portal 2FA code from inbox ea-portal-cert-test@efficiencyarchitects.online (or disable 2FA for this cert email only)",
+    "OR non-empty production ADMIN_SESSION_SECRET available to the agent for session mint (vercel pull returned empty)",
+    "OR admin:manage session + /api/admin/show/enter?slug=ea-portal-cert-test"
+  ]
+}

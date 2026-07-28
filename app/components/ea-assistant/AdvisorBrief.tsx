@@ -2,8 +2,8 @@
 
 import Link from 'next/link';
 import type { EAGuideAction } from '@/lib/ea-guide';
-import { ASSISTANT_LABELS } from '@/lib/assistant/constants';
 import type { AdvisorBriefModel } from '@/lib/assistant/types';
+import { useAssistantLabels } from './assistant-labels';
 
 type AdvisorBriefProps = {
   brief: AdvisorBriefModel;
@@ -13,15 +13,16 @@ type AdvisorBriefProps = {
 };
 
 export default function AdvisorBrief({ brief, onAction, onGetGuidance, onViewDetails }: AdvisorBriefProps) {
+  const labels = useAssistantLabels();
   return (
     <div className="ea-assistant-brief">
       <div className="ea-assistant-section">
-        <p className="ea-assistant-section-label">Situation</p>
+        <p className="ea-assistant-section-label">Where you are</p>
         <p>{brief.situation}</p>
       </div>
 
       <div className="ea-assistant-section">
-        <p className="ea-assistant-section-label">Recommendation</p>
+        <p className="ea-assistant-section-label">What we suggest</p>
         <strong>{brief.recommendation}</strong>
         <p>{brief.recommendationDetail}</p>
       </div>
@@ -46,10 +47,10 @@ export default function AdvisorBrief({ brief, onAction, onGetGuidance, onViewDet
 
       <div className="ea-assistant-footer" style={{ borderTop: 0, padding: '16px 0 0' }}>
         <button type="button" className="ea-assistant-btn ea-assistant-btn-primary" onClick={onGetGuidance}>
-          {ASSISTANT_LABELS.getGuidance}
+          {labels.getGuidance}
         </button>
         <button type="button" className="ea-assistant-btn ea-assistant-btn-muted" onClick={onViewDetails}>
-          {ASSISTANT_LABELS.viewDetails}
+          {labels.viewDetails}
         </button>
       </div>
     </div>

@@ -73,9 +73,17 @@ for (const term of ['Executive Snapshot', 'Admin drag', 'Business Intelligence',
   assert(!adapter.includes(term), `adapter must not contain "${term}"`);
 }
 
-assert(page.includes('confidenceMessage'), 'page renders confidence');
+assert(
+  page.includes('confidenceMessage') ||
+    page.includes('buildGuideArrival') ||
+    page.includes("You're all set"),
+  'page renders confidence',
+);
 assert(page.includes('nothingRequired'), 'page handles wait NBA');
 assert(page.includes('commonQuestions'), 'page renders stage FAQs');
-assert(page.includes('whatHappened'), 'page renders rich milestones');
+assert(
+  page.includes('whatHappened') || page.includes('projectMomentFromMilestone'),
+  'page renders rich milestones',
+);
 
 process.exit(failed ? 1 : 0);

@@ -1,0 +1,43 @@
+{
+  "title": "TEST Commercial Money-Loop Certification",
+  "product": "Efficiency Architects — Website + Guided Project Experience",
+  "at": "2026-07-21T01:42:59.629Z",
+  "startTime": "2026-07-21T01:42:59.618Z",
+  "completionTime": "2026-07-21T01:42:59.629Z",
+  "durationMs": 11,
+  "verdict": "NO GO",
+  "identity": {
+    "testEmail": "cert.test.20260721014259.2d5ad8@mailinator.com",
+    "clientName": "TEST Cert 20260721014259",
+    "organization": "TEST Cert 20260721014259 Org",
+    "stamp": "20260721014259"
+  },
+  "stages": [
+    {
+      "stage": "0.env_validation",
+      "status": "FAIL",
+      "at": "2026-07-21T01:42:59.626Z",
+      "ms": 8,
+      "detail": {
+        "errors": [
+          "STRIPE_SECRET_KEY missing — add sk_test_… to .env.test.local",
+          "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY missing — add pk_test_…",
+          "RESEND_API_KEY missing — required for welcome email proof"
+        ],
+        "warnings": [
+          "AIRTABLE_PLATFORM_BASE_ID unset — durable Organizations may fail (fail-closed is correct)."
+        ],
+        "stripeMode": "placeholder",
+        "missing": [
+          "STRIPE_SECRET_KEY=PLACEHOLDER",
+          "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=PLACEHOLDER",
+          "STRIPE_PRICE_WEBSITE_PORTAL_STARTER=MISSING",
+          "RESEND_API_KEY=PLACEHOLDER",
+          "AIRTABLE_PAYMENTS_BASE_ID=MISSING",
+          "AIRTABLE_PLATFORM_BASE_ID=MISSING"
+        ]
+      }
+    }
+  ],
+  "fingerprint": "c8fd010163e0a6e0"
+}

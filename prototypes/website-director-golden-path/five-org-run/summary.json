@@ -1,0 +1,231 @@
+{
+  "results": [
+    {
+      "slug": "bgca",
+      "organizationName": "Boys & Girls Clubs of America",
+      "primaryArchetype": "The Community Builder",
+      "blend": [
+        {
+          "archetype": "The Community Builder",
+          "weight": 0.56
+        },
+        {
+          "archetype": "The Protector",
+          "weight": 0.22
+        },
+        {
+          "archetype": "The Advocate",
+          "weight": 0.22
+        }
+      ],
+      "sceneOrder": [
+        "human_story",
+        "mission",
+        "impact",
+        "proof",
+        "invitation"
+      ],
+      "compositionSignature": "human_story:human_threshold_bleed|mission:mission_plane_full|impact:impact_editorial_figures|proof:proof_trust_statement|invitation:invitation_belonging",
+      "blockTypes": [
+        "EAHero",
+        "EATextSection",
+        "EAMetrics",
+        "EATextSection",
+        "EACtaBand"
+      ],
+      "experienceDirector": {
+        "approvalStatus": "Approved",
+        "overall": 85,
+        "scores": {
+          "story": 88,
+          "visual": 84,
+          "originality": 86,
+          "executiveExperience": 82,
+          "wow": 85,
+          "overall": 85
+        }
+      }
+    },
+    {
+      "slug": "oak-restorations",
+      "organizationName": "Oak Street Restorations",
+      "primaryArchetype": "The Restorer",
+      "blend": [
+        {
+          "archetype": "The Restorer",
+          "weight": 0.56
+        },
+        {
+          "archetype": "The Challenger",
+          "weight": 0.22
+        },
+        {
+          "archetype": "The Legacy Organization",
+          "weight": 0.22
+        }
+      ],
+      "sceneOrder": [
+        "current_reality",
+        "mission",
+        "transformation",
+        "proof",
+        "invitation"
+      ],
+      "compositionSignature": "current_reality:reality_documentary_stat|mission:mission_legacy_quiet|transformation:transform_split_editorial|proof:proof_trust_statement|invitation:invitation_commission",
+      "blockTypes": [
+        "EATextSection",
+        "EATextSection",
+        "EASplitNarrative",
+        "EATextSection",
+        "EACtaBand"
+      ],
+      "experienceDirector": {
+        "approvalStatus": "Approved",
+        "overall": 85,
+        "scores": {
+          "story": 88,
+          "visual": 84,
+          "originality": 86,
+          "executiveExperience": 82,
+          "wow": 85,
+          "overall": 85
+        }
+      }
+    },
+    {
+      "slug": "harbor-shield",
+      "organizationName": "Harbor Shield Mutual",
+      "primaryArchetype": "The Protector",
+      "blend": [
+        {
+          "archetype": "The Protector",
+          "weight": 0.42
+        },
+        {
+          "archetype": "The Guide",
+          "weight": 0.29
+        },
+        {
+          "archetype": "The Caregiver",
+          "weight": 0.29
+        }
+      ],
+      "sceneOrder": [
+        "mission",
+        "proof",
+        "process",
+        "human_story",
+        "invitation"
+      ],
+      "compositionSignature": "mission:mission_legacy_quiet|proof:proof_trust_statement|process:process_sparse_steps|human_story:human_companion_centered|invitation:invitation_protect",
+      "blockTypes": [
+        "EATextSection",
+        "EATextSection",
+        "EATextSection",
+        "EAHero",
+        "EACtaBand"
+      ],
+      "experienceDirector": {
+        "approvalStatus": "Approved",
+        "overall": 85,
+        "scores": {
+          "story": 88,
+          "visual": 84,
+          "originality": 86,
+          "executiveExperience": 82,
+          "wow": 85,
+          "overall": 85
+        }
+      }
+    },
+    {
+      "slug": "northline-guide",
+      "organizationName": "Northline Coaching",
+      "primaryArchetype": "The Guide",
+      "blend": [
+        {
+          "archetype": "The Guide",
+          "weight": 0.82
+        },
+        {
+          "archetype": "The Restorer",
+          "weight": 0.18
+        }
+      ],
+      "sceneOrder": [
+        "human_story",
+        "mission",
+        "transformation",
+        "process",
+        "invitation"
+      ],
+      "compositionSignature": "human_story:human_companion_centered|mission:mission_plane_full|transformation:transform_split_editorial|process:process_sparse_steps|invitation:invitation_belonging",
+      "blockTypes": [
+        "EAHero",
+        "EATextSection",
+        "EASplitNarrative",
+        "EATextSection",
+        "EACtaBand"
+      ],
+      "experienceDirector": {
+        "approvalStatus": "Approved",
+        "overall": 85,
+        "scores": {
+          "story": 88,
+          "visual": 84,
+          "originality": 86,
+          "executiveExperience": 82,
+          "wow": 85,
+          "overall": 85
+        }
+      }
+    },
+    {
+      "slug": "river-atelier",
+      "organizationName": "River Atelier",
+      "primaryArchetype": "The Craftsman",
+      "blend": [
+        {
+          "archetype": "The Craftsman",
+          "weight": 0.56
+        },
+        {
+          "archetype": "The Legacy Organization",
+          "weight": 0.22
+        },
+        {
+          "archetype": "The Caregiver",
+          "weight": 0.22
+        }
+      ],
+      "sceneOrder": [
+        "mission",
+        "process",
+        "proof",
+        "human_story",
+        "invitation"
+      ],
+      "compositionSignature": "mission:mission_legacy_quiet|process:process_sparse_steps|proof:proof_trust_statement|human_story:human_craft_detail|invitation:invitation_commission",
+      "blockTypes": [
+        "EATextSection",
+        "EATextSection",
+        "EATextSection",
+        "EAHero",
+        "EACtaBand"
+      ],
+      "experienceDirector": {
+        "approvalStatus": "Approved",
+        "overall": 85,
+        "scores": {
+          "story": 88,
+          "visual": 84,
+          "originality": 86,
+          "executiveExperience": 82,
+          "wow": 85,
+          "overall": 85
+        }
+      }
+    }
+  ],
+  "failures": []
+}

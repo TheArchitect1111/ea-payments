@@ -1,10 +1,10 @@
 'use client';
 
 import { FormEvent, useState } from 'react';
-import { ASSISTANT_LABELS } from '@/lib/assistant/constants';
 import { getSuggestedPrompts } from '@/lib/assistant/prompts';
 import type { GuidanceMessage } from '@/lib/assistant/types';
 import type { GuidePageContext } from '@/lib/ea-guide-types';
+import { useAssistantLabels } from './assistant-labels';
 
 type GetGuidanceFlowProps = {
   pageContext: GuidePageContext;
@@ -19,6 +19,7 @@ export default function GetGuidanceFlow({
   onAsk,
   messages,
 }: GetGuidanceFlowProps) {
+  const labels = useAssistantLabels();
   const [question, setQuestion] = useState('');
   const [loading, setLoading] = useState(false);
   const prompts = getSuggestedPrompts(pageContext.portalType, pageContext.workflow);
@@ -63,7 +64,7 @@ export default function GetGuidanceFlow({
                 </ul>
               ) : null}
               {message.role === 'assistant' && message.suggestEscalation ? (
-                <p className="ea-assistant-escalation">{ASSISTANT_LABELS.escalationHint}</p>
+                <p className="ea-assistant-escalation">{labels.escalationHint}</p>
               ) : null}
             </div>
           ))
@@ -87,25 +88,25 @@ export default function GetGuidanceFlow({
 
       <form className="ea-assistant-form" onSubmit={handleSubmit}>
         <label htmlFor="ea-assistant-question" className="sr-only">
-          {ASSISTANT_LABELS.askPlaceholder}
+          {labels.askPlaceholder}
         </label>
         <input
           id="ea-assistant-question"
           className="ea-assistant-input"
           value={question}
           onChange={(event) => setQuestion(event.target.value)}
-          placeholder={ASSISTANT_LABELS.askPlaceholder}
+          placeholder={labels.askPlaceholder}
           disabled={loading}
           autoComplete="off"
         />
         <button type="submit" className="ea-assistant-btn ea-assistant-btn-primary" disabled={loading || !question.trim()}>
-          {ASSISTANT_LABELS.send}
+          {labels.send}
         </button>
       </form>
 
       <div className="ea-assistant-footer" style={{ borderTop: 0, padding: '8px 0 0' }}>
         <button type="button" className="ea-assistant-btn ea-assistant-btn-muted" onClick={onBack}>
-          {ASSISTANT_LABELS.backToBrief}
+          {labels.backToBrief}
         </button>
       </div>
     </div>

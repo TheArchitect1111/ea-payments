@@ -1,0 +1,80 @@
+{
+  "kind": "website_site",
+  "builderId": "layout-composer",
+  "stub": false,
+  "organizationName": "Boys & Girls Clubs of America",
+  "organization": {
+    "name": "Boys & Girls Clubs of America",
+    "industry": "Youth development"
+  },
+  "brand": {
+    "voice": "The Community Builder — Belonging — I have a place here — with safety tint",
+    "headline": "America Needs Club Kids",
+    "primary": "#0033A0",
+    "accent": "#E87722"
+  },
+  "experience": {
+    "emotionalTone": "Belonging — I have a place here — with safety tint",
+    "brandPersonality": "The Community Builder · 56% The Community Builder / 22% The Protector / 22% The Advocate",
+    "visualDna": "Groups, circles, shared tables",
+    "creativeDirectionId": "sc-db0a0e80e7e4",
+    "storyClassificationId": "sc-db0a0e80e7e4",
+    "compositionSignature": "human_story:human_threshold_bleed|mission:mission_plane_full|impact:impact_editorial_figures|proof:proof_trust_statement|invitation:invitation_belonging"
+  },
+  "story": {
+    "whoTheyAre": "A national movement of local Clubs that keep kids future-ready when the school day ends — safe places, caring adults, and peers who believe in them.",
+    "whyTheyExist": "Millions of kids lack supervised enriching after-school time. Clubs close that gap with belonging.",
+    "whoTheyHelp": "Kids and teens who need a Club after school",
+    "whyItMatters": "7.7 million kids are alone after school while nearly 25 million lack after-school access.",
+    "whatChanges": "Kids move from unsupervised hours to belonging, leadership, and plans after high school."
+  },
+  "portal": {
+    "memberHome": {
+      "whereYouAre": "Connected to Boys & Girls Clubs of America — the work that keeps your story moving.",
+      "whatNext": "Continue with the next guided step in your portal workspace.",
+      "purpose": "Ensure every young person who enters a Club has the opportunity to thrive, lead, and shape America tomorrow.",
+      "whatSuccessLooksLike": "Kids move from unsupervised hours to belonging, leadership, and plans after high school."
+    }
+  },
+  "pages": [
+    {
+      "path": "/",
+      "title": "Home",
+      "order": 1,
+      "sections": [
+        {
+          "id": "human_story-1",
+          "role": "human_story",
+          "compositionId": "human_threshold_bleed",
+          "label": "Who these people are and who they serve"
+        },
+        {
+          "id": "mission-2",
+          "role": "mission",
+          "compositionId": "mission_plane_full",
+          "label": "Why they exist"
+        },
+        {
+          "id": "impact-3",
+          "role": "impact",
+          "compositionId": "impact_editorial_figures",
+          "label": "Outcomes that matter"
+        },
+        {
+          "id": "proof-4",
+          "role": "proof",
+          "compositionId": "proof_trust_statement",
+          "label": "Why trust them"
+        },
+        {
+          "id": "invitation-5",
+          "role": "invitation",
+          "compositionId": "invitation_belonging",
+          "label": "What to do next"
+        }
+      ]
+    }
+  ],
+  "pageCount": 1,
+  "note": "Directed Layout Composer output — scene compositions, no feature-card SaaS roles"
+}

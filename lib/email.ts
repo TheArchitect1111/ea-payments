@@ -97,7 +97,7 @@ function buildWelcomeHtml(params: {
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:24px 0;">
         <tr>
           <td style="background-color:#F0F2F5;border-left:4px solid #C9A844;padding:20px 24px;">
-            <p style="margin:0 0 8px;font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#1B2B4D;">Next Steps</p>
+            <p style="margin:0 0 8px;font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#1B2B4D;">What happens next</p>
             <p style="margin:0;font-size:14px;color:#1A1A2E;line-height:1.7;">${escHtml(nextSteps)}</p>
           </td>
         </tr>
@@ -105,12 +105,12 @@ function buildWelcomeHtml(params: {
 
       <!-- PORTAL CTA -->
       <p style="margin:28px 0 12px;font-size:15px;color:#1A1A2E;line-height:1.7;">
-        When your client portal is ready, you can access it here:
+        When your Client Experience is ready, open Your Project here:
       </p>
       <table role="presentation" cellpadding="0" cellspacing="0">
         <tr>
           <td style="background-color:#1B2B4D;border-radius:2px;">
-            <a href="${escHtml(portalLoginUrl)}" target="_blank" style="display:inline-block;padding:13px 30px;color:#FFFFFF;text-decoration:none;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;">Access Your Portal</a>
+            <a href="${escHtml(portalLoginUrl)}" target="_blank" style="display:inline-block;padding:13px 30px;color:#FFFFFF;text-decoration:none;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;">Open Your Project</a>
           </td>
         </tr>
       </table>
@@ -295,14 +295,14 @@ export async function sendWelcomeEmail(
       : '';
     const magicBlock = data.magicLoginUrl
       ? `<div style="background-color:#F8F6F2;border-left:4px solid #C9A844;padding:18px 20px;margin-bottom:22px;">
-      <p style="margin:0 0 8px;font-size:12px;font-weight:700;color:#1B2B4D;">One-Click Portal Login</p>
-      <p style="margin:0;font-size:13px;color:#555;line-height:1.7;">Use this secure link to open your portal (valid for 48 hours):</p>
-      <p style="margin:12px 0 0;"><a href="${escHtml(data.magicLoginUrl)}" style="color:#1B2B4D;font-weight:700;text-decoration:underline;">Sign in to my portal</a></p>
+      <p style="margin:0 0 8px;font-size:12px;font-weight:700;color:#1B2B4D;">One-Click Project Login</p>
+      <p style="margin:0;font-size:13px;color:#555;line-height:1.7;">Use this secure link to open Your Project (valid for 48 hours):</p>
+      <p style="margin:12px 0 0;"><a href="${escHtml(data.magicLoginUrl)}" style="color:#1B2B4D;font-weight:700;text-decoration:underline;">Open Your Project</a></p>
     </div>`
       : '';
     const bodyHtml = `
     <p style="margin:0 0 16px;font-size:15px;color:#1A1A2E;line-height:1.7;">You are live, ${escHtml(firstName)}.</p>
-    <p style="margin:0 0 22px;font-size:15px;color:#1A1A2E;line-height:1.7;">Your <strong>${escHtml(data.packageName)}</strong> website and client portal are ready now — no waiting for a build queue.</p>
+    <p style="margin:0 0 22px;font-size:15px;color:#1A1A2E;line-height:1.7;">Your <strong>${escHtml(data.packageName)}</strong> website and guided project experience are ready now — no waiting for a build queue.</p>
     ${siteBlock}
     ${magicBlock}
     <div style="background-color:#F8F6F2;border-left:4px solid #C9A844;padding:18px 20px;margin-bottom:22px;">
@@ -318,14 +318,14 @@ export async function sendWelcomeEmail(
 
     const ctaUrl = data.magicLoginUrl || data.siteUrl || data.portalLoginUrl;
     const ctaLabel = data.magicLoginUrl
-      ? 'Sign In To Portal'
+      ? 'Open Your Project'
       : data.siteUrl
         ? 'Open My Website'
-        : 'Access My Portal';
+        : 'Open Your Project';
 
     return resendEmail(
       data.email,
-      `You are live, ${firstName}. Your website and portal are ready.`,
+      `You are live, ${firstName}. Your website and project experience are ready.`,
       baseEmailShell({
         title: 'You Are Live',
         eyebrow: platformName,
@@ -356,9 +356,9 @@ export async function sendWelcomeEmail(
       <li>No surprises before anything launches.</li>
     </ul>
     <div style="background-color:#F8F6F2;border-left:4px solid #C9A844;padding:18px 20px;">
-      <p style="margin:0 0 8px;font-size:12px;font-weight:700;color:#1B2B4D;">Portal Access</p>
+      <p style="margin:0 0 8px;font-size:12px;font-weight:700;color:#1B2B4D;">Your Project</p>
       <p style="margin:0;font-size:13px;color:#555;line-height:1.7;">${escHtml(tempCredentials)}</p>
-      <p style="margin:10px 0 0;font-size:12px;color:#777;">This is a temporary password. You will be prompted to create a new one on your first login.</p>
+      <p style="margin:10px 0 0;font-size:12px;color:#777;">This is a temporary password. You will be prompted to create a new one on your first sign-in.</p>
     </div>
     <p style="margin:22px 0 0;font-size:13px;color:#555;line-height:1.7;">Questions? Reply to this email or reach us at <a href="mailto:${escHtml(supportEmail)}" style="color:#1B2B4D;text-decoration:underline;">${escHtml(supportEmail)}</a>.</p>`;
 
@@ -369,7 +369,7 @@ export async function sendWelcomeEmail(
       title: 'You Are In',
       eyebrow: platformName,
       bodyHtml,
-      ctaLabel: 'Access My Portal',
+      ctaLabel: 'Open Your Project',
       ctaUrl: data.portalLoginUrl,
     })
   );
@@ -886,16 +886,16 @@ export async function sendContentRequestConfirmation(data: {
       <tr><td style="padding:12px 16px;font-size:12px;font-weight:700;color:#555;">Type</td><td style="padding:12px 16px;font-size:14px;color:#1A1A2E;">${escHtml(data.requestType)}</td></tr>
       <tr><td style="padding:12px 16px;font-size:12px;font-weight:700;color:#555;">Title</td><td style="padding:12px 16px;font-size:14px;color:#1A1A2E;">${escHtml(data.title)}</td></tr>
     </table>
-    <p style="margin:0;font-size:14px;color:#555;line-height:1.7;">We will review it and keep the status updated inside your portal.</p>`;
+    <p style="margin:0;font-size:14px;color:#555;line-height:1.7;">We’ll review it and keep status clear in Your Project.</p>`;
 
   return resendEmail(
     data.email,
     `Your update request was received`,
     baseEmailShell({
-      title: 'Update Request Received',
-      eyebrow: 'Content Command Center',
+      title: 'We have your update',
+      eyebrow: 'Client Experience',
       bodyHtml,
-      ctaLabel: 'Log In And Explore',
+      ctaLabel: 'Open Your Project',
       ctaUrl: data.portalUrl,
     })
   );
@@ -909,17 +909,17 @@ export async function sendUpdatePublishedEmail(data: {
 }): Promise<{ ok: boolean; error?: string }> {
   const bodyHtml = `
     <p style="margin:0 0 16px;font-size:15px;color:#1A1A2E;line-height:1.7;">Hi ${escHtml(data.clientName.split(' ')[0] || data.clientName)},</p>
-    <p style="margin:0 0 18px;font-size:15px;color:#1A1A2E;line-height:1.7;">Your update <strong>${escHtml(data.title)}</strong> is now published in Update Hub™.</p>
-    <p style="margin:0;font-size:14px;color:#555;line-height:1.7;">Open your portal to view the live feed.</p>`;
+    <p style="margin:0 0 18px;font-size:15px;color:#1A1A2E;line-height:1.7;">Your update <strong>${escHtml(data.title)}</strong> is now published in your portal.</p>
+    <p style="margin:0;font-size:14px;color:#555;line-height:1.7;">Open Your Project to see it live.</p>`;
 
   return resendEmail(
     data.email,
     `Update published: ${data.title}`,
     baseEmailShell({
       title: 'Update Published',
-      eyebrow: 'Update Hub™',
+      eyebrow: 'Your Project',
       bodyHtml,
-      ctaLabel: 'View published updates',
+      ctaLabel: 'Open Your Project',
       ctaUrl: data.portalUrl,
     }),
   );
@@ -941,7 +941,7 @@ export async function sendEnhancementRequestConfirmation(data: {
       title: 'Enhancement Request Received',
       eyebrow: 'Next Step',
       bodyHtml,
-      ctaLabel: 'Access My Portal',
+      ctaLabel: 'Open Your Project',
       ctaUrl: data.portalUrl,
     })
   );
@@ -978,7 +978,7 @@ export async function sendPaymentConfirmationEmail(data: {
   ];
   const bodyHtml = `
     <p style="margin:0 0 16px;font-size:15px;color:#1A1A2E;line-height:1.7;">Hi ${escHtml(firstName)},</p>
-    <p style="margin:0 0 18px;font-size:15px;color:#1A1A2E;line-height:1.7;">Your payment was received. Your EA workflow is moving into onboarding now.</p>
+    <p style="margin:0 0 18px;font-size:15px;color:#1A1A2E;line-height:1.7;">Your payment was received. We’re beginning your guided next steps now.</p>
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #E4E4E4;margin:22px 0;">
       ${rows.map(([label, value]) => `<tr><td style="padding:12px 16px;font-size:12px;font-weight:700;color:#555;">${escHtml(label)}</td><td style="padding:12px 16px;font-size:14px;color:#1A1A2E;">${escHtml(value)}</td></tr>`).join('')}
     </table>
@@ -989,9 +989,9 @@ export async function sendPaymentConfirmationEmail(data: {
     `Payment confirmed for ${data.packageName}`,
     baseEmailShell({
       title: 'Payment Confirmed',
-      eyebrow: 'Commercial Workflow',
+      eyebrow: 'Client Experience',
       bodyHtml,
-      ctaLabel: 'Open My Portal',
+      ctaLabel: 'Open Your Project',
       ctaUrl: data.portalUrl,
     })
   );
@@ -1011,12 +1011,12 @@ export async function sendPortalInvitationEmail(data: {
 
   return resendEmail(
     data.email,
-    'Your EA client portal is ready',
+    'Your Client Experience is ready',
     baseEmailShell({
-      title: 'Portal Invitation',
+      title: 'You’re expected',
       eyebrow: 'Client Experience',
       bodyHtml,
-      ctaLabel: 'Open Client Experience',
+      ctaLabel: 'Open Your Project',
       ctaUrl: data.portalUrl,
     })
   );
@@ -1054,17 +1054,17 @@ export async function sendOnboardingEmail(data: {
   const firstName = firstNameOf(data.clientName);
   const bodyHtml = `
     <p style="margin:0 0 16px;font-size:15px;color:#1A1A2E;line-height:1.7;">Hi ${escHtml(firstName)},</p>
-    <p style="margin:0 0 18px;font-size:15px;color:#1A1A2E;line-height:1.7;">Onboarding has started. Your current next step is: <strong>${escHtml(data.nextStep ?? 'open your portal and review the first guidance item')}</strong>.</p>
-    <p style="margin:0;font-size:14px;color:#555;line-height:1.7;">We will keep your portal updated as work moves from onboarding into delivery.</p>`;
+    <p style="margin:0 0 18px;font-size:15px;color:#1A1A2E;line-height:1.7;">We’ve begun — here’s your next calm step: <strong>${escHtml(data.nextStep ?? 'open Your Project and review the first guidance item')}</strong>.</p>
+    <p style="margin:0;font-size:14px;color:#555;line-height:1.7;">We’ll keep Your Project updated as work moves forward.</p>`;
 
   return resendEmail(
     data.email,
     'Your EA onboarding has started',
     baseEmailShell({
       title: 'Onboarding Started',
-      eyebrow: 'Customer Success',
+      eyebrow: 'Your Project',
       bodyHtml,
-      ctaLabel: 'Open My Portal',
+      ctaLabel: 'Open Your Project',
       ctaUrl: data.portalUrl,
     })
   );
@@ -1113,7 +1113,7 @@ export async function sendCtpReviewReminderEmail(data: {
       is scheduled for <strong>${escHtml(whenLabel)}</strong>.
     </p>
     <p style="margin:0;font-size:14px;color:#555;line-height:1.7;">
-      Open your Opportunity Dashboard beforehand to review discoveries and prepare questions.
+      Glance at Your Project beforehand — discoveries and questions, calmly in one place.
     </p>`;
 
   return resendEmail(
@@ -1139,16 +1139,16 @@ export async function sendCompletionEmail(data: {
   const bodyHtml = `
     <p style="margin:0 0 16px;font-size:15px;color:#1A1A2E;line-height:1.7;">Hi ${escHtml(firstName)},</p>
     <p style="margin:0 0 18px;font-size:15px;color:#1A1A2E;line-height:1.7;">This milestone is complete: <strong>${escHtml(data.outcome)}</strong>.</p>
-    <p style="margin:0;font-size:14px;color:#555;line-height:1.7;">Open your portal for the current status and next recommendation.</p>`;
+    <p style="margin:0;font-size:14px;color:#555;line-height:1.7;">Everything that matters for this milestone is in Your Project.</p>`;
 
   return resendEmail(
     data.email,
     `Completed: ${data.outcome}`,
     baseEmailShell({
       title: 'Milestone Complete',
-      eyebrow: 'Customer Success',
+      eyebrow: 'Your Project',
       bodyHtml,
-      ctaLabel: 'View Progress',
+      ctaLabel: 'Open Your Project',
       ctaUrl: data.portalUrl,
     })
   );
@@ -1194,9 +1194,9 @@ export async function sendRenewalReminderEmail(data: {
     'Your EA renewal review is coming up',
     baseEmailShell({
       title: 'Renewal Review',
-      eyebrow: 'Customer Success',
+      eyebrow: 'Your Project',
       bodyHtml,
-      ctaLabel: 'Open My Portal',
+      ctaLabel: 'Open Your Project',
       ctaUrl: data.portalUrl,
     })
   );
@@ -1212,7 +1212,7 @@ export async function sendUpsellEmail(data: {
   const bodyHtml = `
     <p style="margin:0 0 16px;font-size:15px;color:#1A1A2E;line-height:1.7;">Hi ${escHtml(firstName)},</p>
     <p style="margin:0 0 18px;font-size:15px;color:#1A1A2E;line-height:1.7;">Based on the work already underway, the next opportunity we recommend reviewing is: <strong>${escHtml(data.recommendation)}</strong>.</p>
-    <p style="margin:0;font-size:14px;color:#555;line-height:1.7;">Open your portal to review context before deciding.</p>`;
+    <p style="margin:0;font-size:14px;color:#555;line-height:1.7;">Open Your Project to review context before deciding.</p>`;
 
   return resendEmail(
     data.email,

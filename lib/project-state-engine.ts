@@ -26,7 +26,10 @@ export type ProjectEvidenceKind =
   | 'design.complete'
   | 'build.ready_for_review'
   | 'review.approved'
-  | 'project.launched';
+  | 'project.launched'
+  /** Legal milestones — recorded for journey reflection; do not replace payment gate. */
+  | 'msa.signed'
+  | 'sow.signed';
 
 export type ProjectEvidenceState = {
   flags: Partial<Record<ProjectEvidenceKind, true>>;

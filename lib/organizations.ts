@@ -211,12 +211,18 @@ export async function ensureOrganizationForPortal(input: {
     if (created) {
       return { orgId: created.id, org: created };
     }
+
+    if (!allowSyntheticOrganizationFallback()) {
+      throw new Error(
+        `Failed to create durable organization for portal "${input.portalSlug}". Synthetic org_* IDs are not allowed in production.`,
+      );
+    }
   } catch (err) {
     console.error('ensureOrganizationForPortal failed:', err);
     if (!allowSyntheticOrganizationFallback()) throw err;
   }
 
-  // Soft fallback: website publish requires a durable org later; portal + CTP can continue.
+  // Dev-only soft fallback. Production never reaches here with a synthetic id.
   return { orgId: fallbackId, org: null };
 }
 

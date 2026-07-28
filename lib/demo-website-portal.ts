@@ -109,33 +109,83 @@ export async function ensureDemoWebsitePortal(): Promise<{
       'Payment Received At': new Date().toISOString(),
     };
 
-    let recordId = data.records?.[0]?.id;
-    if (recordId) {
-      const res = await fetch(
-        `https://api.airtable.com/v0/${BASE_ID}/${encodeURIComponent(TABLE)}/${recordId}`,
-        {
-          method: 'PATCH',
-          headers: authHeaders(),
-          body: JSON.stringify({ fields, typecast: true }),
-        },
-      );
-      if (!res.ok) {
-        if (process.env.NODE_ENV === 'development') return seedMemoryFixture();
-        return { ok: false, error: 'Could not refresh Website + Portal demo client.' };
+    async function writeDemoFields(
+      payload: Record<string, unknown>,
+      existingId?: string,
+    ): Promise<{ ok: boolean; recordId?: string; detail?: string }> {
+      if (existingId) {
+        const res = await fetch(
+          `https://api.airtable.com/v0/${BASE_ID}/${encodeURIComponent(TABLE)}/${existingId}`,
+          {
+            method: 'PATCH',
+            headers: authHeaders(),
+            body: JSON.stringify({ fields: payload, typecast: true }),
+          },
+        );
+        if (!res.ok) return { ok: false, detail: await res.text() };
+        return { ok: true, recordId: existingId };
       }
-    } else {
       const res = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${encodeURIComponent(TABLE)}`, {
         method: 'POST',
         headers: authHeaders(),
-        body: JSON.stringify({ records: [{ fields }], typecast: true }),
+        body: JSON.stringify({ records: [{ fields: payload }], typecast: true }),
       });
-      if (!res.ok) {
-        if (process.env.NODE_ENV === 'development') return seedMemoryFixture();
-        return { ok: false, error: 'Could not create Website + Portal demo client.' };
-      }
+      if (!res.ok) return { ok: false, detail: await res.text() };
       const created = (await res.json()) as { records?: { id: string }[] };
-      recordId = created.records?.[0]?.id;
+      return { ok: true, recordId: created.records?.[0]?.id };
     }
+
+    let recordId = data.records?.[0]?.id;
+    let write = await writeDemoFields(fields, recordId);
+
+    // Optional columns — retry without fields Airtable may not have yet.
+    if (!write.ok && write.detail) {
+      const optionalKeys = [
+        'Commerce Offer Id',
+        'Payment Received At',
+        'Organization',
+        'Amount Paid',
+        'Stripe Transaction ID',
+        'Password Changed',
+        'Onboarding Status',
+        'Portal Username',
+      ] as const;
+      let trimmed: Record<string, unknown> = { ...fields };
+      for (const key of optionalKeys) {
+        if (
+          trimmed[key] !== undefined &&
+          new RegExp(key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i').test(write.detail)
+        ) {
+          const { [key]: _omit, ...rest } = trimmed;
+          trimmed = rest;
+          console.warn(`[demo-website-portal] retrying without optional field: ${key}`);
+          write = await writeDemoFields(trimmed, recordId);
+          if (write.ok) break;
+        }
+      }
+      // Progressive strip of common optional gaps when Airtable error text is opaque.
+      if (!write.ok) {
+        for (const key of optionalKeys) {
+          if (!(key in trimmed)) continue;
+          const { [key]: _omit, ...rest } = trimmed;
+          trimmed = rest;
+          write = await writeDemoFields(trimmed, recordId);
+          if (write.ok) break;
+        }
+      }
+    }
+
+    if (!write.ok) {
+      console.error('[demo-website-portal] Airtable write failed:', write.detail);
+      if (process.env.NODE_ENV === 'development') return seedMemoryFixture();
+      return {
+        ok: false,
+        error: recordId
+          ? 'Could not refresh Website + Portal demo client.'
+          : 'Could not create Website + Portal demo client.',
+      };
+    }
+    recordId = write.recordId;
 
     if (!recordId) {
       if (process.env.NODE_ENV === 'development') return seedMemoryFixture();

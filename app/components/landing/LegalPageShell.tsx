@@ -20,6 +20,12 @@ export default function LegalPageShell({
         <Link href="/contact" className="pl-nav-link">
           Contact
         </Link>
+        <Link href="/trust" className="pl-nav-link">
+          Trust
+        </Link>
+        <Link href="/legal/privacy" className="pl-nav-link">
+          Privacy
+        </Link>
       </header>
       <article className="pl-legal-shell">
         {kicker ? <p className="pl-kicker">{kicker}</p> : null}

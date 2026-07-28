@@ -30,6 +30,7 @@ const MODULE_NAV_ICONS: Partial<Record<ModuleId, PortalNavIconName>> = {
   ask: 'ask',
   ctp: 'grid',
   member: 'grid',
+  people: 'resources',
   landing: 'grid',
   billing: 'documents',
 };

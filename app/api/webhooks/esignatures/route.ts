@@ -1,6 +1,16 @@
 import { NextRequest } from 'next/server';
 import { getEsignaturesTemplateConfig } from '@/lib/esignatures-config';
 import { fireEsignWebhook } from '@/lib/make-webhooks';
+import {
+  normalizeEsignWebhookPayload,
+  verifyEsignWebhookAuthenticity,
+} from '@/lib/trust-engine/esign-webhook-adapter';
+import {
+  recordMsaSent,
+  recordMsaSigned,
+  recordSowGenerated,
+  recordSowSigned,
+} from '@/lib/trust-engine/governance';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,11 +31,18 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  const rawBody = await req.text();
   let body: Record<string, unknown>;
   try {
-    body = (await req.json()) as Record<string, unknown>;
+    body = JSON.parse(rawBody) as Record<string, unknown>;
   } catch {
     return new Response('Invalid JSON.', { status: 400 });
+  }
+
+  const auth = verifyEsignWebhookAuthenticity({ headers: req.headers, rawBody });
+  if (!auth.ok) {
+    console.error('[esignatures] webhook authenticity failed:', auth.reason);
+    return Response.json({ received: false, error: auth.reason }, { status: 401 });
   }
 
   const cfg = getEsignaturesTemplateConfig();
@@ -38,5 +55,49 @@ export async function POST(req: NextRequest) {
     ...body,
   });
 
-  return Response.json({ received: true });
+  const normalized = normalizeEsignWebhookPayload(body, {
+    msaTemplateId: cfg.msaTemplateId,
+    sowTemplateId: cfg.sowTemplateId,
+  });
+
+  if (!normalized.valid || !normalized.kind) {
+    console.warn('[esignatures] incomplete payload — not marking signed', {
+      reason: normalized.reason,
+      status: normalized.status,
+      templateId: normalized.templateId,
+      clientId: normalized.clientId,
+    });
+    return Response.json({
+      received: true,
+      trustEngine: { applied: false, reason: normalized.reason },
+    });
+  }
+
+  try {
+    const clientId = normalized.clientId!;
+    const organizationId = normalized.organizationId!;
+    switch (normalized.kind) {
+      case 'msa.sent':
+        await recordMsaSent(clientId, organizationId);
+        break;
+      case 'msa.signed':
+        await recordMsaSigned(clientId, organizationId);
+        break;
+      case 'sow.sent':
+        await recordSowGenerated(clientId, organizationId);
+        break;
+      case 'sow.signed':
+        await recordSowSigned(clientId, organizationId);
+        break;
+      default:
+        break;
+    }
+  } catch (err) {
+    console.error('[esignatures] trust engine apply failed:', err);
+  }
+
+  return Response.json({
+    received: true,
+    trustEngine: { applied: true, kind: normalized.kind },
+  });
 }

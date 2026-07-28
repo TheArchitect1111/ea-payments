@@ -1,0 +1,188 @@
+{
+  "title": "Commercial Environment Audit",
+  "at": "2026-07-21T13:43:27.479Z",
+  "gate": {
+    "ok": false,
+    "errors": [
+      "STRIPE_SECRET_KEY missing — add sk_test_… to .env.test.local",
+      "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY missing — add pk_test_…",
+      "RESEND_API_KEY missing — required for welcome email proof"
+    ],
+    "warnings": [
+      "AIRTABLE_PLATFORM_BASE_ID unset — durable Organizations may fail (fail-closed is correct)."
+    ],
+    "stripeMode": "placeholder",
+    "baseUrl": "http://localhost:3000"
+  },
+  "rows": [
+    {
+      "variable": "STRIPE_SECRET_KEY",
+      "purpose": "Stripe API (checkout + webhook retrieve)",
+      "required": true,
+      "present": false,
+      "status": "PLACEHOLDER",
+      "mode": "placeholder",
+      "default": "",
+      "production": "sk_live_…",
+      "development": "optional",
+      "test": "sk_test_… REQUIRED",
+      "highlight": true
+    },
+    {
+      "variable": "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY",
+      "purpose": "Stripe.js / Checkout publishable key",
+      "required": true,
+      "present": false,
+      "status": "PLACEHOLDER",
+      "mode": "placeholder",
+      "default": "",
+      "production": "pk_live_…",
+      "development": "optional",
+      "test": "pk_test_… REQUIRED",
+      "highlight": true
+    },
+    {
+      "variable": "STRIPE_WEBHOOK_SECRET",
+      "purpose": "Verify Stripe webhook signatures",
+      "required": true,
+      "present": true,
+      "status": "SET:whsec",
+      "mode": "ok",
+      "default": "",
+      "production": "whsec_ live endpoint",
+      "development": "stripe listen",
+      "test": "whsec_ local or test endpoint REQUIRED",
+      "highlight": false
+    },
+    {
+      "variable": "STRIPE_PRICE_WEBSITE_PORTAL_STARTER",
+      "purpose": "Price ID for Website + Portal (optional if inline price)",
+      "required": false,
+      "present": false,
+      "status": "MISSING",
+      "mode": "missing",
+      "default": "inline price_data ($2,497)",
+      "production": "price_…",
+      "development": "optional",
+      "test": "optional (inline allowed)",
+      "highlight": true
+    },
+    {
+      "variable": "RESEND_API_KEY",
+      "purpose": "Send welcome / payment emails",
+      "required": true,
+      "present": false,
+      "status": "PLACEHOLDER",
+      "mode": "placeholder",
+      "default": "",
+      "production": "re_…",
+      "development": "re_…",
+      "test": "re_… REQUIRED",
+      "highlight": true
+    },
+    {
+      "variable": "RESEND_FROM_EMAIL",
+      "purpose": "From address for customer email",
+      "required": true,
+      "present": true,
+      "status": "SET:len31",
+      "mode": "ok",
+      "default": "",
+      "production": "EA <…@domain>",
+      "development": "onboarding@resend.dev ok",
+      "test": "must include @",
+      "highlight": false
+    },
+    {
+      "variable": "AIRTABLE_API_KEY",
+      "purpose": "Client records, orgs, CTP, sites",
+      "required": true,
+      "present": true,
+      "status": "SET:len82",
+      "mode": "ok",
+      "default": "",
+      "production": "pat/key",
+      "development": "pat/key",
+      "test": "same base as cert data",
+      "highlight": false
+    },
+    {
+      "variable": "AIRTABLE_PAYMENTS_BASE_ID",
+      "purpose": "Payments / client records base",
+      "required": false,
+      "present": false,
+      "status": "MISSING",
+      "mode": "missing",
+      "default": "appv0YoLIMY45fmDA",
+      "production": "set",
+      "development": "set",
+      "test": "set or default",
+      "highlight": true
+    },
+    {
+      "variable": "AIRTABLE_PLATFORM_BASE_ID",
+      "purpose": "Organizations / platform store",
+      "required": false,
+      "present": false,
+      "status": "MISSING",
+      "mode": "missing",
+      "default": "often same payments base",
+      "production": "set",
+      "development": "set",
+      "test": "required for durable orgs",
+      "highlight": true
+    },
+    {
+      "variable": "SESSION_SECRET",
+      "purpose": "Portal HMAC sessions",
+      "required": true,
+      "present": true,
+      "status": "SET:len35",
+      "mode": "ok",
+      "default": "",
+      "production": "set",
+      "development": "set",
+      "test": "set",
+      "highlight": false
+    },
+    {
+      "variable": "ADMIN_SESSION_SECRET",
+      "purpose": "Magic links + admin HMAC",
+      "required": true,
+      "present": true,
+      "status": "SET:len43",
+      "mode": "ok",
+      "default": "",
+      "production": "set",
+      "development": "set",
+      "test": "set",
+      "highlight": false
+    },
+    {
+      "variable": "NEXT_PUBLIC_BASE_URL",
+      "purpose": "Checkout success/cancel + email links",
+      "required": true,
+      "present": true,
+      "status": "SET:len21",
+      "mode": "ok",
+      "default": "http://localhost:3000",
+      "production": "https://efficiencyarchitects.online",
+      "development": "http://localhost:3000",
+      "test": "http://localhost:3000",
+      "highlight": false
+    },
+    {
+      "variable": "EA_COMMERCIAL_CERT_MODE",
+      "purpose": "Marks cert TEST run",
+      "required": true,
+      "present": true,
+      "status": "SET:len4",
+      "mode": "ok",
+      "default": "",
+      "production": "unset",
+      "development": "unset",
+      "test": "test",
+      "highlight": false
+    }
+  ]
+}

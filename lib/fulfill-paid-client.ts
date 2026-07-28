@@ -93,7 +93,11 @@ export async function fulfillPaidClient(
     }
 
     portalSlug = portalResult.slug;
-    if (portalResult.portalLoginUrl) portalLoginUrl = portalResult.portalLoginUrl;
+    if (portalSlug) {
+      portalLoginUrl = publicPortalLoginUrl(portalSlug);
+    } else if (portalResult.portalLoginUrl) {
+      portalLoginUrl = portalResult.portalLoginUrl;
+    }
     if (portalResult.username && portalResult.tempPassword) {
       tempCredentials = credentialsLine(portalResult.username, portalResult.tempPassword);
     }
@@ -146,6 +150,17 @@ export async function fulfillPaidClient(
       });
 
       if (input.provisionWebsite) {
+        if (!orgId || orgId.startsWith('org_')) {
+          return {
+            ok: false,
+            portalSlug,
+            portalLoginUrl,
+            tempCredentials,
+            orgId,
+            error:
+              'Website provision requires a durable organization. Platform store create failed — retry after Organizations is available.',
+          };
+        }
         const siteResult = await provisionWebsitePortalSite({
           portalSlug,
           businessName: input.clientName,
@@ -178,22 +193,25 @@ export async function fulfillPaidClient(
         }
 
         // Option A: bind standard CTP workspace to the portal already provisioned above.
-        try {
-          const workspace = await ensureCtpWorkspaceForWebsitePortal({
+        const workspace = await ensureCtpWorkspaceForWebsitePortal({
+          portalSlug,
+          email: input.email,
+          clientName: input.clientName,
+          organization: input.organization,
+          siteUrl,
+        });
+        if (!workspace.ok) {
+          const message = workspace.error || 'CTP / Guide workspace bind failed';
+          console.error('fulfillPaidClient CTP workspace bind failed:', message);
+          return {
+            ok: false,
             portalSlug,
-            email: input.email,
-            clientName: input.clientName,
-            organization: input.organization,
+            portalLoginUrl,
+            tempCredentials,
             siteUrl,
-          });
-          if (!workspace.ok) {
-            console.error(
-              'fulfillPaidClient CTP workspace bind failed:',
-              workspace.error || 'unknown',
-            );
-          }
-        } catch (err) {
-          console.error('fulfillPaidClient CTP workspace bind threw:', err);
+            orgId,
+            error: message,
+          };
         }
 
         const ctpLanding = designStudioPath(portalSlug);
@@ -213,9 +231,31 @@ export async function fulfillPaidClient(
             magicLoginUrl = `${origin}/api/auth/magic-link/verify?token=${encodeURIComponent(token)}`;
           }
         }
+      } else if (orgId?.startsWith('org_')) {
+        return {
+          ok: false,
+          portalSlug,
+          portalLoginUrl,
+          tempCredentials,
+          orgId,
+          error:
+            'Portal fulfillment requires a durable organization. Synthetic org_* IDs are not allowed.',
+        };
       }
     } catch (err) {
+      const message =
+        err instanceof Error ? err.message : 'fulfillPaidClient entitlement/site sync failed';
       console.error('fulfillPaidClient entitlement/site sync failed:', err);
+      return {
+        ok: false,
+        portalSlug,
+        portalLoginUrl,
+        tempCredentials,
+        siteUrl,
+        magicLoginUrl,
+        orgId,
+        error: message,
+      };
     }
 
     return {

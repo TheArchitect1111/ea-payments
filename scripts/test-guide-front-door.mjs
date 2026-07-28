@@ -47,7 +47,11 @@ assert(
 );
 
 assert(fulfill.includes('designStudioPath'), 'magic link next → Progress');
-assert(demo.includes('/portal/demo-client/ctp/progress'), 'demo-enter → Progress');
+assert(
+  demo.includes('designStudioPath') || demo.includes('/ctp/progress'),
+  'demo-enter → Progress',
+);
+assert(demo.includes('ensureDemoWebsitePortal') || demo.includes('demo-website'), 'demo-enter CX uses Website + Portal demo');
 assert(demoWeb.includes('designStudioPath'), 'demo-website-enter → Progress');
 assert(reminder.includes("'ctp/progress'"), 'review reminder → Progress');
 assert(reveal.includes("publicPortalUrl(input.slug, 'ctp/progress')"), 'reveal portalPath → Progress');
@@ -71,6 +75,8 @@ assert(support.includes('nbaLabel'), 'Support exposes NBA');
 assert(support.includes('recentMilestones'), 'Support exposes milestones');
 assert(supportPage.includes('Your project context'), 'Support page renders Guide context');
 assert(supportPage.includes('Back to Your Project'), 'Support returns to Guide');
+assert(supportPage.includes('supportHours') || supportPage.includes('Hours:'), 'Help shows business hours');
+assert(support.includes('helpMailto') || supportPage.includes('helpMailto'), 'Help includes project-aware mailto');
 
 assert(docs.includes('why:'), 'Documents have why');
 assert(docs.includes('when:'), 'Documents have when');

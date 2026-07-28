@@ -169,7 +169,10 @@ export default function ClientExperience({ view, slug, studio, themeId }: Props)
     {
       num: '03',
       label: 'What happens next',
-      copy: view.guide?.whatsNextCopy || view.guide?.behindTheScenes || 'Progress always shows what comes next.',
+      copy:
+        view.guide?.whatsNextCopy ||
+        view.guide?.behindTheScenes ||
+        'Your Project always shows what comes next.',
     },
   ];
 
@@ -178,8 +181,8 @@ export default function ClientExperience({ view, slug, studio, themeId }: Props)
       <div className="cex-grain" aria-hidden />
 
       <nav className="cex-escape" aria-label="Client shortcuts">
-        <Link href={`/portal/${slug}/ctp/progress`}>Progress</Link>
-        <Link href={`/portal/${slug}/ctp/support`}>Support</Link>
+        <Link href={`/portal/${slug}/ctp/progress`}>Your Project</Link>
+        <Link href={`/portal/${slug}/ctp/support`}>Help</Link>
       </nav>
 
       <nav className="cex-dots" aria-label="Experience scenes">
@@ -234,21 +237,8 @@ export default function ClientExperience({ view, slug, studio, themeId }: Props)
                 </h2>
                 <ul className="cex-imagine-list">
                   <li>More time for the people who matter most.</li>
-                  <li>The freedom to step away without everything stopping.</li>
-                  <li>Mornings that begin with purpose instead of putting out fires.</li>
-                  <li>
-                    Confidence that your business is moving forward, even when you&apos;re not
-                    watching every detail.
-                  </li>
-                  <li>
-                    Stronger relationships with customers because every interaction feels
-                    intentional.
-                  </li>
+                  <li>Confidence that your business keeps moving — even when you step away.</li>
                   <li>Space to think strategically instead of constantly reacting.</li>
-                  <li>
-                    More energy to invest in your family, your health, your community, and the life
-                    you&apos;re building.
-                  </li>
                 </ul>
                 <p className="cex-lede cex-imagine-close">
                   That is the future we&apos;re building together.
@@ -282,7 +272,6 @@ export default function ClientExperience({ view, slug, studio, themeId }: Props)
                       <p className="cex-insight-body">
                         {card.observation} {card.whyItMatters}
                       </p>
-                      <p className="cex-insight-impact">Potential impact: {card.potentialImpact}</p>
                     </div>
                   </article>
                 ))}
@@ -388,7 +377,7 @@ export default function ClientExperience({ view, slug, studio, themeId }: Props)
               <p className="cex-lede">
                 Where you are: <strong>{view.guide?.stage || view.currentStage || 'Welcome'}</strong>.{' '}
                 {view.guide?.confidenceMessage ||
-                  'Your Project (Progress) is the home base for everything ahead.'}
+                  'Your Project is the home base for everything ahead.'}
               </p>
               {view.guide?.headline ? (
                 <p className="cex-lede">
@@ -431,16 +420,16 @@ export default function ClientExperience({ view, slug, studio, themeId }: Props)
                   </Link>
                 )}
               </div>
-              <p className="cex-support-label">Support anytime</p>
+              <p className="cex-support-label">Help anytime</p>
               <ul className="cex-support-links">
                 <li>
-                  <Link href={`/portal/${slug}/ctp/messages`}>Messages</Link>
+                  <Link href={`/portal/${slug}/ctp/messages`}>Contact</Link>
                 </li>
                 <li>
                   <Link href={`/portal/${slug}/ctp/documents`}>Documents</Link>
                 </li>
                 <li>
-                  <Link href={`/portal/${slug}/ctp/support`}>Support</Link>
+                  <Link href={`/portal/${slug}/ctp/support`}>Help</Link>
                 </li>
               </ul>
             </section>

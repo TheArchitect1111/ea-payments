@@ -92,7 +92,7 @@ export default async function PortalCtpOpportunityDetailPage({
             Walk Me Through My Recommendations
           </Link>
           <p className="oe-cta-secondary">
-            <Link href={view.backHref}>← Back to Opportunity Dashboard</Link>
+            <Link href={view.backHref}>← Back to Journey</Link>
           </p>
         </section>
       </div>

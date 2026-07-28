@@ -1,0 +1,76 @@
+{
+  "root": {
+    "props": {
+      "title": "River Atelier",
+      "compositionSignature": "mission:mission_legacy_quiet|process:process_sparse_steps|proof:proof_trust_statement|human_story:human_craft_detail|invitation:invitation_commission",
+      "primaryArchetype": "The Craftsman",
+      "primaryColor": "#1A1714",
+      "accentColor": "#8B5E3C"
+    }
+  },
+  "content": [
+    {
+      "type": "EATextSection",
+      "props": {
+        "id": "mission-1",
+        "variant": "legacy",
+        "label": "Mission",
+        "title": "Commission work that will be lived with for decades.",
+        "body": "Commission work that will be lived with for decades.",
+        "accentValue": "",
+        "accentCaption": ""
+      }
+    },
+    {
+      "type": "EATextSection",
+      "props": {
+        "id": "process-2",
+        "variant": "process",
+        "label": "How",
+        "title": "How the work unfolds",
+        "body": "1. Bespoke joinery\n2. Process you can see\n3. Material-first design",
+        "accentValue": "",
+        "accentCaption": ""
+      }
+    },
+    {
+      "type": "EATextSection",
+      "props": {
+        "id": "proof-3",
+        "variant": "proof",
+        "label": "Trust",
+        "title": "Why people trust this work",
+        "body": "Bespoke joinery · Process you can see · Material-first design",
+        "accentValue": "",
+        "accentCaption": ""
+      }
+    },
+    {
+      "type": "EAHero",
+      "props": {
+        "id": "human-4",
+        "variant": "craft",
+        "eyebrow": "River Atelier",
+        "title": "Made with mastery",
+        "subtitle": "Commission furniture shaped by hand, wood, and patience.",
+        "ctaLabel": "Commission a piece",
+        "ctaHref": "#invite",
+        "imageUrl": ""
+      }
+    },
+    {
+      "type": "EACtaBand",
+      "props": {
+        "id": "invite-5",
+        "variant": "commission",
+        "title": "Commission a piece",
+        "body": "Commission furniture shaped by hand, wood, and patience.",
+        "primaryLabel": "Commission a piece",
+        "primaryHref": "/portal/login",
+        "secondaryLabel": "View this site",
+        "secondaryHref": "/sites/river-atelier"
+      }
+    }
+  ],
+  "zones": {}
+}

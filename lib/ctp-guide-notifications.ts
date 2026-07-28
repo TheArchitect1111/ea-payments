@@ -147,7 +147,7 @@ export function guideClientEmail(input: {
         <p style="margin:0 0 16px">${escapeHtml(body)}</p>
         <p style="margin:0 0 20px">${escapeHtml(input.notice.detail)}</p>
         <p style="margin:0">
-          <a href="${escapeAttr(input.progressHref)}" style="color:#8a6d1d">Open your project Progress</a>
+          <a href="${escapeAttr(input.progressHref)}" style="color:#8a6d1d">Open Your Project</a>
         </p>
       </div>
     `.trim(),

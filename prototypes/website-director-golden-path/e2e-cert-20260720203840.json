@@ -1,0 +1,166 @@
+{
+  "title": "Website + Portal End-to-End Production Certification",
+  "at": "2026-07-20T20:38:50.061Z",
+  "verdict": "NO-GO",
+  "identity": {
+    "testEmail": "cert.wp.20260720203840.947f4f@mailinator.com",
+    "businessName": "Cert WP 20260720203840 947f4f",
+    "clientSlugHint": "cert-wp-20260720203840-947f4f",
+    "base": "https://efficiencyarchitects.online"
+  },
+  "counts": {
+    "pass": 6,
+    "fail": 3,
+    "blocked": 9,
+    "total": 18
+  },
+  "stages": [
+    {
+      "stage": "cert.setup",
+      "status": "PASS",
+      "at": "2026-07-20T20:38:40.944Z",
+      "base": "https://efficiencyarchitects.online",
+      "testEmail": "cert.wp.20260720203840.947f4f@mailinator.com",
+      "businessName": "Cert WP 20260720203840 947f4f",
+      "clientSlugHint": "cert-wp-20260720203840-947f4f",
+      "note": "Fresh non-demo identity generated for this run"
+    },
+    {
+      "stage": "1.ctp_intake_surface",
+      "status": "PASS",
+      "at": "2026-07-20T20:38:41.636Z",
+      "url": "https://cc.efficiencyarchitects.online/ctp",
+      "httpStatus": 200,
+      "bytes": 943
+    },
+    {
+      "stage": "2.assessment_submit",
+      "status": "PASS",
+      "at": "2026-07-20T20:38:49.842Z",
+      "url": "https://efficiencyarchitects.online/api/assessment/submit",
+      "httpStatus": 200,
+      "responseKeys": [
+        "ok",
+        "proposalId",
+        "flow",
+        "clientType",
+        "clientTypeLabel"
+      ],
+      "proposalId": "PROP-E79CC707",
+      "submissionId": null,
+      "portalSlug": null,
+      "rawOk": true,
+      "error": null
+    },
+    {
+      "stage": "3.commercial_buy_surface",
+      "status": "PASS",
+      "at": "2026-07-20T20:38:50.060Z",
+      "url": "https://efficiencyarchitects.online/buy",
+      "httpStatus": 200,
+      "hasOfferCopy": true
+    },
+    {
+      "stage": "4.payment_confirmation",
+      "status": "BLOCKED",
+      "at": "2026-07-20T20:38:50.060Z",
+      "reason": "Local CERT environment missing STRIPE_SECRET_KEY / STRIPE_WEBHOOK_SECRET / STRIPE_PRICE_WEBSITE_PORTAL_STARTER; completing card checkout would require live Stripe test session + webhook delivery. Not simulated."
+    },
+    {
+      "stage": "5.client_provisioning",
+      "status": "BLOCKED",
+      "at": "2026-07-20T20:38:50.060Z",
+      "reason": "Depends on Stripe webhook → fulfillPaidClient after successful payment"
+    },
+    {
+      "stage": "6.ctp_workspace_binding",
+      "status": "BLOCKED",
+      "at": "2026-07-20T20:38:50.060Z",
+      "reason": "ensureCtpWorkspaceForWebsitePortal runs inside fulfillPaidClient after paid provision"
+    },
+    {
+      "stage": "7-9.story_classification_direction_compose",
+      "status": "PASS",
+      "at": "2026-07-20T20:38:50.060Z",
+      "reason": "composeDirectedWebsite wired in provision-website-portal; five-org offline run Approved ED 85 each; no EAFeatures",
+      "evidence": "prototypes/website-director-golden-path/five-org-run/summary.json"
+    },
+    {
+      "stage": "10.website_persistence",
+      "status": "BLOCKED",
+      "at": "2026-07-20T20:38:50.060Z",
+      "reason": "Requires paid fulfill → provisionWebsitePortalSite → Creative Studio; AIRTABLE_CREATIVE_STUDIO_TABLE unset locally; no paid client this run"
+    },
+    {
+      "stage": "11.portal_provisioning",
+      "status": "BLOCKED",
+      "at": "2026-07-20T20:38:50.060Z",
+      "reason": "Same paid fulfill gate"
+    },
+    {
+      "stage": "12.guide_initialization",
+      "status": "BLOCKED",
+      "at": "2026-07-20T20:38:50.061Z",
+      "reason": "Requires provisioned portal + CTP workspace"
+    },
+    {
+      "stage": "13.documents_support",
+      "status": "BLOCKED",
+      "at": "2026-07-20T20:38:50.061Z",
+      "reason": "Requires authenticated portal session on fresh client"
+    },
+    {
+      "stage": "14.experience_director_on_customer_publish",
+      "status": "FAIL",
+      "at": "2026-07-20T20:38:50.061Z",
+      "reason": "Customer Website+Portal auto-publish via fulfillPaidClient → provisionWebsitePortalSite does NOT call assertExperienceDirectorPublishGate. ED gate exists only on Factory publishFactoryWebsite. Certification requires Approved ≥80 before publish — structural miss.",
+      "evidence": "lib/fulfill-paid-client.ts provisions site without ED; lib/factory-publish-website.ts gates ED"
+    },
+    {
+      "stage": "15.website_publish_gate",
+      "status": "FAIL",
+      "at": "2026-07-20T20:38:50.061Z",
+      "reason": "Auto path publishes ExperiencePage status=published without ED Approved"
+    },
+    {
+      "stage": "16.magic_link_entry",
+      "status": "BLOCKED",
+      "at": "2026-07-20T20:38:50.061Z",
+      "reason": "Requires fulfillPaidClient + RESEND_API_KEY (MISSING locally) + ADMIN_SESSION_SECRET (present)"
+    },
+    {
+      "stage": "17.return_visit_state",
+      "status": "BLOCKED",
+      "at": "2026-07-20T20:38:50.061Z",
+      "reason": "No provisioned client session to restore"
+    },
+    {
+      "stage": "S.classification_cd_persisted",
+      "status": "FAIL",
+      "at": "2026-07-20T20:38:50.061Z",
+      "reason": "buildStarterWebsitePuckData discards director package except puckData; full Story Classification + Creative Direction objects are not saved to ExperiencePage / Airtable",
+      "evidence": "lib/provision-website-portal.ts uses only composeDirectedWebsite().puckData"
+    },
+    {
+      "stage": "S.compose_no_eafeatures",
+      "status": "PASS",
+      "at": "2026-07-20T20:38:50.061Z",
+      "reason": "Layout Composer forbids EAFeatures; five-org verification passed"
+    }
+  ],
+  "submitBody": {
+    "ok": true,
+    "proposalId": "PROP-E79CC707",
+    "flow": "ctp",
+    "clientType": "website",
+    "clientTypeLabel": "Website"
+  },
+  "reproduce": [
+    "node scripts/_cert-env-probe.mjs",
+    "npm run launch:preflight",
+    "node scripts/test-website-portal-starter.mjs",
+    "node scripts/test-fulfill-paid-client.mjs",
+    "npx --yes tsx scripts/test-layout-composer-five-orgs.ts",
+    "node scripts/run-website-portal-e2e-cert-probe.mjs"
+  ]
+}

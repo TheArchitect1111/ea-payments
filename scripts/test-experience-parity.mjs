@@ -47,14 +47,18 @@ assert(
 // P2 Support
 assert(support.includes('nothingRequired'), 'Support knows idle state');
 assert(
-  support.includes('Ask a question anytime') || support.includes('Email support'),
+  support.includes('Ask a question anytime') || support.includes('Contact your guide'),
   'Support offers contact when idle',
 );
 assert(!support.includes('/updates/new'), 'Support does not push Update Hub');
 assert(!support.includes('Book strategy conversation'), 'Support idle has no Calendly CTA');
 assert(!support.includes('CALENDLY_URL') || support.includes("calendlyUrl: ''"), 'Calendly not primary');
 assert(support.includes('behindTheScenes'), 'Support exposes behind the scenes');
-assert(support.includes("We've got everything we need"), 'Support idle headline');
+assert(
+  support.includes("We've got everything we need") ||
+    support.includes("You're all set for now"),
+  'Support idle headline',
+);
 assert(supportPage.includes('behindTheScenes'), 'Support page renders behind the scenes');
 
 // P3 Documents

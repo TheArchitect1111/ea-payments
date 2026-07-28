@@ -1,0 +1,78 @@
+{
+  "root": {
+    "props": {
+      "title": "Northline Coaching",
+      "compositionSignature": "human_story:human_companion_centered|mission:mission_plane_full|transformation:transform_split_editorial|process:process_sparse_steps|invitation:invitation_belonging",
+      "primaryArchetype": "The Guide",
+      "primaryColor": "#1B2B4D",
+      "accentColor": "#C9A844"
+    }
+  },
+  "content": [
+    {
+      "type": "EAHero",
+      "props": {
+        "id": "human-1",
+        "variant": "companion",
+        "eyebrow": "Northline Coaching",
+        "title": "You are not alone in the fog",
+        "subtitle": "Guided coaching that restores calm confidence.",
+        "ctaLabel": "Start a conversation",
+        "ctaHref": "#invite",
+        "imageUrl": ""
+      }
+    },
+    {
+      "type": "EATextSection",
+      "props": {
+        "id": "mission-2",
+        "variant": "mission-plane",
+        "label": "Mission",
+        "title": "Help leaders move from fog to a next step they trust.",
+        "body": "Help leaders move from fog to a next step they trust.",
+        "accentValue": "",
+        "accentCaption": ""
+      }
+    },
+    {
+      "type": "EASplitNarrative",
+      "props": {
+        "id": "transform-3",
+        "label": "Change",
+        "title": "From isolated overwhelm to calm clarity and a shared next move.",
+        "leftLabel": "Before",
+        "leftTitle": "Unresolved reality",
+        "leftBody": "When leaders freeze, organizations drift.",
+        "rightLabel": "After",
+        "rightTitle": "What becomes possible",
+        "rightBody": "From isolated overwhelm to calm clarity and a shared next move."
+      }
+    },
+    {
+      "type": "EATextSection",
+      "props": {
+        "id": "process-4",
+        "variant": "process",
+        "label": "How",
+        "title": "How the work unfolds",
+        "body": "1. Companion pacing\n2. Conversation over kits\n3. Clarity before intensity",
+        "accentValue": "",
+        "accentCaption": ""
+      }
+    },
+    {
+      "type": "EACtaBand",
+      "props": {
+        "id": "invite-5",
+        "variant": "belonging",
+        "title": "Start a conversation",
+        "body": "Guided coaching that restores calm confidence.",
+        "primaryLabel": "Start a conversation",
+        "primaryHref": "/portal/login",
+        "secondaryLabel": "View this site",
+        "secondaryHref": "/sites/northline-guide"
+      }
+    }
+  ],
+  "zones": {}
+}

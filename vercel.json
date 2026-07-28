@@ -8,6 +8,16 @@
   ],
   "redirects": [
     {
+      "source": "/privacy",
+      "destination": "/legal/privacy",
+      "permanent": true
+    },
+    {
+      "source": "/terms",
+      "destination": "/legal/terms",
+      "permanent": true
+    },
+    {
       "source": "/ctp-intake",
       "destination": "https://cc.efficiencyarchitects.online/ctp",
       "permanent": true
@@ -135,6 +145,10 @@
     {
       "path": "/api/cron/factory-queue",
       "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/cron/simplifi-intelligence",
+      "schedule": "15 5 * * *"
     }
   ]
 }

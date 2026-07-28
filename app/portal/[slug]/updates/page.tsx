@@ -7,6 +7,7 @@ import UpdateHubExperience from '@/app/portal/components/UpdateHubExperience';
 import UpdateHubFeed from '@/app/portal/components/UpdateHubFeed';
 import { getPublishedFeedItems, getPendingRequests } from '@/lib/update-hub-feed';
 import { UPDATE_HUB_CHANNEL_LABELS, UPDATE_HUB_CHANNELS } from '@/lib/update-hub-channels';
+import { redirectCtpClientFromExecutiveSurface } from '@/lib/ctp-executive-surface-redirect';
 import '../ea-portal.css';
 
 export const dynamic = 'force-dynamic';
@@ -18,6 +19,7 @@ function fmtDate(value?: string): string {
 
 export default async function UpdatesPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
+  await redirectCtpClientFromExecutiveSurface(slug, 'messages');
   const { client } = await requirePortalModule(slug, 'update-hub');
 
   const requests = await getContentRequestsForClient(client.id);
@@ -32,13 +34,13 @@ export default async function UpdatesPage({ params }: { params: Promise<{ slug: 
       <main className="ep-main">
         <PortalModuleChromeStrip />
         <div className="ep-welcome">
-          <p className="ep-welcome-label">Update Hub™</p>
-          <h1 className="ep-welcome-heading">Communications & Requests</h1>
+          <p className="ep-welcome-label">Project Updates</p>
+          <h1 className="ep-welcome-heading">Curated updates & requests</h1>
           <p className="ep-pulse-summary" style={{ marginTop: '0.75rem' }}>
             Channels:{' '}
-            {UPDATE_HUB_CHANNELS.map((ch) => UPDATE_HUB_CHANNEL_LABELS[ch]).join(' · ')}. Update Hub
-            is the communication backbone for members, staff, volunteers, stakeholders, and the
-            organization.
+            {UPDATE_HUB_CHANNELS.map((ch) => UPDATE_HUB_CHANNEL_LABELS[ch]).join(' · ')}. This is a
+            curated project update system — not email, Slack, or Basecamp. Use it for published
+            updates and structured requests your guide reviews.
           </p>
         </div>
 

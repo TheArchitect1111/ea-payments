@@ -43,7 +43,12 @@ interface AnalyzeResponse {
   considerUrl?: string;
   clientMessage?: string;
   workspaceUrl?: string;
+  opportunityUrl?: string;
   amplifiDraft?: AmplifiSocialDraft;
+  decisionPath?: string;
+  decisionConfidence?: number;
+  decisionRationale?: string;
+  nextAction?: string;
 }
 
 type SheetView = 'menu' | 'url' | 'upload' | 'processing' | 'result';
@@ -723,11 +728,21 @@ export default function SimplifiCaptureApp({
             <p className="sc-sheet-title">Nice capture</p>
             <CaptureSuccessPanel
               title={result.record.title ?? 'Opportunity'}
+              recordId={result.record.id}
+              loggedIn={loggedIn}
+              insight={{
+                opportunityScore: result.record.opportunityScore,
+                nextAction: result.nextAction ?? result.record.nextAction,
+                decisionPath: result.decisionPath,
+                decisionConfidence: result.decisionConfidence,
+                decisionRationale: result.decisionRationale,
+              }}
               links={{
                 magnifiUrl: result.magnifiUrl,
                 considerUrl: result.considerUrl,
                 guidanceUrl: result.guidanceUrl,
                 workspaceUrl: '/simplifi/workspace',
+                opportunityUrl: result.opportunityUrl ?? `/simplifi/opportunity/${result.record.id}`,
                 clientMessage: result.clientMessage,
               }}
               onClose={closeSheet}

@@ -1,0 +1,11 @@
+# Prevent ENOSPC / oversized CLI uploads (local mobile + marketing art).
+# Root node_modules / .next already covered by .gitignore.
+
+mobile
+marketing
+prototypes
+playwright-report
+test-results
+.cursor
+*.pem
+google-play-service-account.json

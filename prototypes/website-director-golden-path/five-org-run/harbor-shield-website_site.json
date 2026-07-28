@@ -1,0 +1,80 @@
+{
+  "kind": "website_site",
+  "builderId": "layout-composer",
+  "stub": false,
+  "organizationName": "Harbor Shield Mutual",
+  "organization": {
+    "name": "Harbor Shield Mutual",
+    "industry": "Insurance and risk protection"
+  },
+  "brand": {
+    "voice": "The Protector — Safety — we are watched over — with calm confidence tint",
+    "headline": "Protection that stays quiet until you need it",
+    "primary": "#0F1C2E",
+    "accent": "#C9A844"
+  },
+  "experience": {
+    "emotionalTone": "Safety — we are watched over — with calm confidence tint",
+    "brandPersonality": "The Protector · 42% The Protector / 29% The Guide / 29% The Caregiver",
+    "visualDna": "Stability, boundaries, quiet strength",
+    "creativeDirectionId": "sc-118a4ebe63a3",
+    "storyClassificationId": "sc-118a4ebe63a3",
+    "compositionSignature": "mission:mission_legacy_quiet|proof:proof_trust_statement|process:process_sparse_steps|human_story:human_companion_centered|invitation:invitation_protect"
+  },
+  "story": {
+    "whoTheyAre": "A mutual that protects what people have built — calmly, clearly, without fear theater.",
+    "whyTheyExist": "People lose sleep when coverage is confusing or absent.",
+    "whoTheyHelp": "Families and operators who need to know they are covered",
+    "whyItMatters": "One uncovered event can undo years of careful work.",
+    "whatChanges": "From anxious guesswork to clear protection and a known next step."
+  },
+  "portal": {
+    "memberHome": {
+      "whereYouAre": "Connected to Harbor Shield Mutual — the work that keeps your story moving.",
+      "whatNext": "Continue with the next guided step in your portal workspace.",
+      "purpose": "Keep households and shops secure when disruption arrives.",
+      "whatSuccessLooksLike": "From anxious guesswork to clear protection and a known next step."
+    }
+  },
+  "pages": [
+    {
+      "path": "/",
+      "title": "Home",
+      "order": 1,
+      "sections": [
+        {
+          "id": "mission-1",
+          "role": "mission",
+          "compositionId": "mission_legacy_quiet",
+          "label": "Why they exist"
+        },
+        {
+          "id": "proof-2",
+          "role": "proof",
+          "compositionId": "proof_trust_statement",
+          "label": "Why trust them"
+        },
+        {
+          "id": "process-3",
+          "role": "process",
+          "compositionId": "process_sparse_steps",
+          "label": "How they work"
+        },
+        {
+          "id": "human_story-4",
+          "role": "human_story",
+          "compositionId": "human_companion_centered",
+          "label": "Who these people are and who they serve"
+        },
+        {
+          "id": "invitation-5",
+          "role": "invitation",
+          "compositionId": "invitation_protect",
+          "label": "What to do next"
+        }
+      ]
+    }
+  ],
+  "pageCount": 1,
+  "note": "Directed Layout Composer output — scene compositions, no feature-card SaaS roles"
+}

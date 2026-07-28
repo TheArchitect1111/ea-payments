@@ -8,13 +8,13 @@ const projectRoot = path.dirname(fileURLToPath(import.meta.url));
 
 const nextConfig: NextConfig = {
   outputFileTracingRoot: projectRoot,
+  // Legal Pack Markdown is inlined via lib/legal/load-legal-source.ts (server-only).
   // Temporary: master currently has incomplete executive-shell modules blocking Vercel.
   // Keeps CTP welcome/portal email fixes deployable while those surfaces are restored.
   typescript: {
     ignoreBuildErrors: true,
   },
-  transpilePackages: [
-    '@ea/portal-chassis',
+  transpilePackages: [    '@ea/portal-chassis',
     '@ea/capability-registry',
     '@ea/module-engine',
     '@ea/theme-engine',

@@ -1,0 +1,166 @@
+{
+  "goldenPathId": "wd-gp-bgca-2026-07-20",
+  "organization": {
+    "name": "Boys & Girls Clubs of America",
+    "url": "https://www.bgca.org",
+    "slug": "bgca",
+    "source": "Factory Launch research fixture + live site crawl 2026-07-20"
+  },
+  "research": {
+    "collectedAt": "2026-07-20",
+    "signals": [
+      "America Needs Club Kids — national narrative",
+      "7.7 million kids unsupervised after school; ~25 million lack after-school access",
+      "Future-ready framing: leaders, scientists, change-makers growing up in Clubs",
+      "Youth of the Year / Alumni Hall of Fame — human proof over program catalogs",
+      "Outcome data: graduation expectation, post-secondary plans, volunteering, standing up for what is right",
+      "CTAs: Find a Club, Give, message a Club Kid — belonging and support, not SaaS signup"
+    ],
+    "servicesAreWeakSignal": "After-school programs are the vehicle; the story is belonging + future readiness for America’s kids"
+  },
+  "oib": {
+    "organization": "Boys & Girls Clubs of America",
+    "industry": "Youth development / after-school",
+    "industryFamily": "nonprofit-community",
+    "primaryAudience": "Parents, supporters, educators, and community leaders who care whether kids have a place after school",
+    "whoTheyAre": "A national movement of local Clubs that keep kids future-ready when the school day ends — safe places, caring adults, and peers who believe in them.",
+    "mission": "Ensure that every young person who enters a Club has the opportunity to thrive, lead, and shape America’s tomorrow.",
+    "story": "Tomorrow’s leaders are growing up right now — often alone after school. Boys & Girls Clubs open doors so Club Kids become the scientists, advocates, and neighbors the country needs.",
+    "whyTheyExist": "Millions of kids lack supervised, enriching after-school time. BGCA exists so no child has to face that gap alone.",
+    "whoTheyHelp": "Kids and teens who need a Club: a safe place, mentors, and a path to graduate, lead, and belong.",
+    "whyItMatters": "America’s future is decided in the hours after school — who is watching, who is teaching, who is believing.",
+    "whatChanges": "Kids move from unsupervised hours to belonging, from isolation to leadership, from uncertainty to plans after high school.",
+    "differentiators": [
+      "National scale with local Club belonging",
+      "Youth voice centered (Youth of the Year, alumni stories)",
+      "Outcome evidence tied to real Club participation",
+      "Invitation to community — Find a Club / support a Club Kid — not product trial"
+    ],
+    "brand": {
+      "primary": "#0033A0",
+      "accent": "#E87722",
+      "headline": "America Needs Club Kids",
+      "subhead": "When kids have a Club, they thrive — and so does the country that raises them.",
+      "cta": "Find a Club Near You",
+      "voice": "Warm, urgent about kids, hopeful without hype — community first, never corporate brochure."
+    },
+    "member": {
+      "persona": "Club member family / local supporter",
+      "whereYouAre": "Connected to the Club movement that keeps kids future-ready after school.",
+      "whatNext": "Find your nearest Club or deepen support for Club Kids this week.",
+      "purpose": "Give every kid a door that opens toward belonging and leadership.",
+      "whatSuccessLooksLike": "Kids known by name, supervised after school, expecting to graduate and lead."
+    }
+  },
+  "storyClassification": {
+    "classificationId": "sc-bgca-community-advocate-v1",
+    "status": "locked",
+    "confidence": 86,
+    "primaryArchetype": "The Community Builder",
+    "blend": [
+      { "archetype": "The Community Builder", "weight": 0.65 },
+      { "archetype": "The Advocate", "weight": 0.35 }
+    ],
+    "rationale": [
+      "Primary verbs are gather, belong, Club, together — Community Builder owns the emotional center.",
+      "National stakes language (America Needs Club Kids, unsupervised millions) is Advocate modulation, not Challenger protest.",
+      "Proof is people and belonging outcomes, not craft perfection (not Craftsman) or clinical care (not Caregiver).",
+      "Services (programs/STEM) are vehicles; story is a generation with a place after school."
+    ],
+    "rejectedArchetypes": [
+      "The Innovator",
+      "The Craftsman",
+      "The Legacy Organization",
+      "The Challenger"
+    ]
+  },
+  "storyLens": {
+    "mergedFrom": "65% Community Builder + 35% Advocate",
+    "primaryEmotionalOutcome": "Belonging first — “I have a place here” — with dignity that kids’ futures matter nationally",
+    "visualLanguage": "Groups, circles, shared tables; human focus with respectful portrait framing for Advocate tint",
+    "photographyStyle": "Many faces; gatherings; warm ambient light; real Club energy — no stock handshake diversity",
+    "narrativePacing": "Inclusive chorus; story of kids before ask; Current reality beat allowed by Advocate secondary",
+    "typographyPersonality": "Friendly, open display; clear urgent-but-humane body",
+    "motionPhilosophy": "Soft collective reveals; emphatic but not frantic",
+    "colorPersonality": "Deep Club blue as trust ground; warm orange accent for invitation — avoid cold tech SaaS blue grids",
+    "ctaPhilosophy": "Join us / find a Club / stand with Club Kids — belonging and support, not hard close",
+    "proofStrategy": "Member and alumni stories; Youth of the Year; outcome data only when true",
+    "preferredSceneOrder": [
+      "Human story",
+      "Current reality",
+      "Mission",
+      "Transformation",
+      "Impact",
+      "Invitation"
+    ],
+    "avoidedDesignPatterns": [
+      "Generic three-equal feature-card grids",
+      "Corporate soft-sell / SaaS dashboard chrome",
+      "Lone hero CEO worship",
+      "Empty slogan stock photography",
+      "Countdown urgency / fake scarcity"
+    ]
+  },
+  "creativeDirection": {
+    "status": "approved",
+    "storyInOneSentence": "America’s tomorrow is already sitting in Clubs after school — give every kid that door.",
+    "primaryEmotionalObjective": "Belonging that feels nationally urgent without becoming fear marketing",
+    "visualMetaphor": "An open Club door at golden hour — kids moving from empty afternoon streets into light and recognition",
+    "narrativeArc": "Face → gap → promise → change → evidence → invitation",
+    "photographyDirection": {
+      "subject": "Club Kids in real after-school moments; mentors beside, never above",
+      "light": "Warm late-day interior / golden exterior thresholds",
+      "crop": "Editorial, intimate groups; avoid brochure lineup",
+      "avoid": ["stock boardroom", "generic sports trophy cliché", "pity framing"]
+    },
+    "typographyPersonality": "Bold humanist display for belonging statements; highly readable sans for stakes and proof",
+    "motionPhilosophy": "Three motions only: door-threshold fade on Human; slow rise on Impact numbers; soft settle on Invitation",
+    "colorStrategy": {
+      "dominant": "#0033A0",
+      "accent": "#E87722",
+      "restraint": "Large fields of deep blue or warm paper; one accent per viewport; no rainbow pills"
+    },
+    "ctaPhilosophy": "Primary ask after Impact: Find a Club. Secondary: support a Club Kid. Never feature-grid CTAs.",
+    "antiPatterns": [
+      "EAHero → About → three feature cards → CTA",
+      "Portal product language on public homepage",
+      "Equal icon cards for STEM / sports / arts as the story"
+    ],
+    "swapTestPromise": "Without logo or name, still reads as a youth-belonging after-school movement fighting empty afternoons — not a generic nonprofit or SaaS."
+  },
+  "storyEngine": {
+    "questionsAnswered": [
+      { "q": "Who are these people?", "beat": "Human story — Club Kids and the adults who show up" },
+      { "q": "Why should I care?", "beat": "Current reality — unsupervised millions" },
+      { "q": "Why do they exist?", "beat": "Mission — America Needs Club Kids" },
+      { "q": "What changes?", "beat": "Transformation — from alone to future-ready" },
+      { "q": "Why trust them?", "beat": "Impact — published youth outcome data" },
+      { "q": "What should I do next?", "beat": "Invitation — Find a Club / stand with them" }
+    ]
+  },
+  "sceneSelection": {
+    "count": 6,
+    "order": [
+      { "scene": "Human story", "role": "human_story", "job": "Meet the kids the afternoon is for" },
+      { "scene": "Current reality", "role": "current_reality", "job": "Name the unsupervised gap without shame" },
+      { "scene": "Mission", "role": "mission", "job": "State why Clubs exist for America’s future" },
+      { "scene": "Transformation", "role": "transformation", "job": "Show alone → belonging → leadership" },
+      { "scene": "Impact", "role": "impact", "job": "True outcomes only" },
+      { "scene": "Invitation", "role": "invitation", "job": "Find a Club / support a Club Kid" }
+    ],
+    "omitted": ["Proof as separate scene (folded into Impact stories)", "Process", "Portal glimpse"]
+  },
+  "layoutComposer": {
+    "mode": "golden-path-execution",
+    "note": "Mapped scenes → editorial compositions. Did not call buildStarterWebsitePuckData. Did not emit EAFeatures×3.",
+    "output": "prototypes/website-director-golden-path/bgca/index.html",
+    "sceneToComposition": [
+      { "scene": "Human story", "composition": "Full-bleed threshold photography + brand-level belonging line" },
+      { "scene": "Current reality", "composition": "Documentary type block; single stark statistic" },
+      { "scene": "Mission", "composition": "Full-width mission plane; large type; no cards" },
+      { "scene": "Transformation", "composition": "Two-voice editorial split (before → after belonging)" },
+      { "scene": "Impact", "composition": "Sparse outcome figures as narrative, not metric strip chrome" },
+      { "scene": "Invitation", "composition": "Single clear ask + secondary support path" }
+    ]
+  }
+}

@@ -1,0 +1,235 @@
+{
+  "title": "Unified Publish Gate + Production Certification",
+  "at": "2026-07-20T20:52:43.597Z",
+  "verdict": "GO WITH CONDITIONS",
+  "identity": {
+    "testEmail": "cert.unified.20260720205231.dcfd9f@mailinator.com",
+    "businessName": "Cert Unified 20260720205231 dcfd9f",
+    "base": "https://efficiencyarchitects.online"
+  },
+  "counts": {
+    "pass": 7,
+    "fail": 1,
+    "blocked": 6,
+    "total": 16
+  },
+  "stages": [
+    {
+      "stage": "contracts.unified_publish_gate",
+      "status": "PASS",
+      "at": "2026-07-20T20:52:31.959Z"
+    },
+    {
+      "stage": "contracts.factory_publish",
+      "status": "PASS",
+      "at": "2026-07-20T20:52:32.289Z"
+    },
+    {
+      "stage": "contracts.website_portal_starter",
+      "status": "PASS",
+      "at": "2026-07-20T20:52:32.632Z"
+    },
+    {
+      "stage": "contracts.fulfill_paid_client",
+      "status": "PASS",
+      "at": "2026-07-20T20:52:32.850Z"
+    },
+    {
+      "stage": "infra.launch_env",
+      "status": "FAIL",
+      "at": "2026-07-20T20:52:32.852Z",
+      "blockers": [
+        "stripe_secret: STRIPE_SECRET_KEY",
+        "stripe_webhook: STRIPE_WEBHOOK_SECRET",
+        "stripe_price_website_portal: STRIPE_PRICE_WEBSITE_PORTAL_STARTER",
+        "stripe_publishable: NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY",
+        "resend: RESEND_API_KEY"
+      ],
+      "checks": [
+        {
+          "id": "airtable",
+          "ok": true
+        },
+        {
+          "id": "stripe_secret",
+          "ok": false
+        },
+        {
+          "id": "stripe_webhook",
+          "ok": false
+        },
+        {
+          "id": "stripe_price_website_portal",
+          "ok": false
+        },
+        {
+          "id": "stripe_publishable",
+          "ok": false
+        },
+        {
+          "id": "resend",
+          "ok": false
+        },
+        {
+          "id": "admin_session_secret",
+          "ok": true
+        },
+        {
+          "id": "session_secret",
+          "ok": true
+        }
+      ]
+    },
+    {
+      "stage": "surface.buy",
+      "status": 200,
+      "at": "2026-07-20T20:52:34.721Z",
+      "url": "https://efficiencyarchitects.online/buy"
+    },
+    {
+      "stage": "surface.launch_health",
+      "status": "full_launch_ready",
+      "at": "2026-07-20T20:52:35.919Z",
+      "http": 200
+    },
+    {
+      "stage": "journey.assessment_submit",
+      "status": "PASS",
+      "at": "2026-07-20T20:52:43.587Z",
+      "http": 200,
+      "keys": [
+        "ok",
+        "proposalId",
+        "flow",
+        "clientType",
+        "clientTypeLabel"
+      ]
+    },
+    {
+      "stage": "journey.payment_checkout",
+      "status": "BLOCKED",
+      "at": "2026-07-20T20:52:43.589Z",
+      "reason": "Missing env: stripe_secret: STRIPE_SECRET_KEY; stripe_webhook: STRIPE_WEBHOOK_SECRET; stripe_price_website_portal: STRIPE_PRICE_WEBSITE_PORTAL_STARTER; stripe_publishable: NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY; resend: RESEND_API_KEY"
+    },
+    {
+      "stage": "journey.webhook_fulfill",
+      "status": "BLOCKED",
+      "at": "2026-07-20T20:52:43.590Z",
+      "reason": "Depends on payment"
+    },
+    {
+      "stage": "journey.provision_publish_ed",
+      "status": "BLOCKED",
+      "at": "2026-07-20T20:52:43.590Z",
+      "reason": "Depends on payment webhook"
+    },
+    {
+      "stage": "journey.magic_link",
+      "status": "BLOCKED",
+      "at": "2026-07-20T20:52:43.590Z",
+      "reason": "Depends on fulfill + Resend"
+    },
+    {
+      "stage": "journey.return_visit",
+      "status": "BLOCKED",
+      "at": "2026-07-20T20:52:43.590Z",
+      "reason": "Depends on provisioned client"
+    },
+    {
+      "stage": "journey.idempotency_double_fulfill",
+      "status": "BLOCKED",
+      "at": "2026-07-20T20:52:43.590Z",
+      "reason": "Depends on payment"
+    },
+    {
+      "stage": "gate.customer_path_requires_ed",
+      "status": "PASS",
+      "at": "2026-07-20T20:52:43.596Z"
+    },
+    {
+      "stage": "gate.single_publisher",
+      "status": "PASS",
+      "at": "2026-07-20T20:52:43.596Z"
+    }
+  ],
+  "infra": {
+    "ok": false,
+    "checks": [
+      {
+        "id": "airtable",
+        "required": true,
+        "ok": true,
+        "detail": "AIRTABLE_API_KEY or AIRTABLE_PAT"
+      },
+      {
+        "id": "stripe_secret",
+        "required": true,
+        "ok": false,
+        "detail": "STRIPE_SECRET_KEY"
+      },
+      {
+        "id": "stripe_webhook",
+        "required": true,
+        "ok": false,
+        "detail": "STRIPE_WEBHOOK_SECRET"
+      },
+      {
+        "id": "stripe_price_website_portal",
+        "required": true,
+        "ok": false,
+        "detail": "STRIPE_PRICE_WEBSITE_PORTAL_STARTER"
+      },
+      {
+        "id": "stripe_publishable",
+        "required": true,
+        "ok": false,
+        "detail": "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY"
+      },
+      {
+        "id": "resend",
+        "required": true,
+        "ok": false,
+        "detail": "RESEND_API_KEY"
+      },
+      {
+        "id": "admin_session_secret",
+        "required": true,
+        "ok": true,
+        "detail": "ADMIN_SESSION_SECRET"
+      },
+      {
+        "id": "session_secret",
+        "required": true,
+        "ok": true,
+        "detail": "SESSION_SECRET"
+      }
+    ],
+    "blockers": [
+      "stripe_secret: STRIPE_SECRET_KEY",
+      "stripe_webhook: STRIPE_WEBHOOK_SECRET",
+      "stripe_price_website_portal: STRIPE_PRICE_WEBSITE_PORTAL_STARTER",
+      "stripe_publishable: NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY",
+      "resend: RESEND_API_KEY"
+    ]
+  },
+  "publishPath": "publishWebsiteThroughDirectorGate via provisionWebsitePortalSite",
+  "remainingBlockers": {
+    "P0": [
+      "Configure Stripe + Resend + webhook secrets in the cert runtime (or run cert against production with those secrets)",
+      "Complete one live paid Website + Portal journey without developer intervention"
+    ],
+    "P1": [
+      "CTP spine soft copy failures (preflight)",
+      "Mobile/desktop walkthrough on paid directed site"
+    ],
+    "P2": [
+      "Submit API should return durable portalSlug/proposalId for cert tracing"
+    ]
+  },
+  "reproduce": [
+    "node scripts/test-website-publish-gate.mjs",
+    "node scripts/test-factory-publish-website.mjs",
+    "node scripts/test-website-portal-starter.mjs",
+    "node scripts/run-unified-publish-cert.mjs"
+  ]
+}

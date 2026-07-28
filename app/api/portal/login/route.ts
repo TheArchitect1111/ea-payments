@@ -2,13 +2,23 @@ import { NextRequest, NextResponse } from 'next/server';
 import { validatePortalLogin, getClientByPortalSlug, updateClientEngagementScore } from '@/lib/airtable';
 import { ensureDemoConnectTenant } from '@/lib/connect-provision';
 import { ensureDemoClient, isDemoCredentialAttempt } from '@/lib/demo-client';
+import {
+  ensureDemoWebsitePortal,
+  getDemoWebsitePortalCredentials,
+} from '@/lib/demo-website-portal';
 import { begin2FA, is2FAEnabled } from '@/lib/ea-auth-2fa';
 import { signSession, makeSessionCookie } from '@/lib/ea-portal-auth';
 import { getClientSuccessProfile } from '@/lib/client-success';
 import { notifyPortal } from '@/lib/portal-notify';
 import { resolvePortalIdentity } from '@/lib/org-provision';
+import { resolvePortalPostLoginPath } from '@/lib/portal-post-login';
 
 export const dynamic = 'force-dynamic';
+
+function isDemoWebsiteCredentialAttempt(email: string, password: string): boolean {
+  const demo = getDemoWebsitePortalCredentials();
+  return email === demo.email && password === demo.password;
+}
 
 export async function POST(req: NextRequest) {
   let body: { email?: string; password?: string; next?: string };
@@ -27,6 +37,13 @@ export async function POST(req: NextRequest) {
   }
 
   let result = await validatePortalLogin(email, password);
+
+  if (!result.ok && isDemoWebsiteCredentialAttempt(email, password)) {
+    const provision = await ensureDemoWebsitePortal();
+    if (provision.ok) {
+      result = await validatePortalLogin(email, password);
+    }
+  }
 
   if (!result.ok && isDemoCredentialAttempt(email, password)) {
     const provision = await ensureDemoClient();
@@ -47,8 +64,13 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  const portalClient = await getClientByPortalSlug(result.slug);
+  const defaultNext = await resolvePortalPostLoginPath(result.slug, portalClient);
+  const skip2fa =
+    isDemoCredentialAttempt(email, password) || isDemoWebsiteCredentialAttempt(email, password);
+
   // Demo credentials skip email 2FA so portal can be opened when inbox delivery fails.
-  if (is2FAEnabled() && !isDemoCredentialAttempt(email, password)) {
+  if (is2FAEnabled() && !skip2fa) {
     try {
       const pending = await begin2FA({
         realm: 'portal',
@@ -56,7 +78,7 @@ export async function POST(req: NextRequest) {
         data: {
           slug: result.slug,
           recordId: result.recordId ?? '',
-          next: nextPath ?? `/portal/${result.slug}/ctp`,
+          next: nextPath ?? defaultNext,
         },
       });
       return NextResponse.json({
@@ -90,19 +112,18 @@ export async function POST(req: NextRequest) {
 
   if (result.recordId) {
     try {
-      const client = await getClientByPortalSlug(result.slug);
-      if (client) {
-        const profile = await getClientSuccessProfile(client);
+      if (portalClient) {
+        const profile = await getClientSuccessProfile(portalClient);
         const engagement = profile.scores.find((s) => s.id === 'engagement');
         if (engagement) await updateClientEngagementScore(result.recordId, engagement.value);
       }
       await notifyPortal({
         product: 'ea-platform',
         type: 'portal.login',
-        title: `Portal login — ${client?.clientName ?? result.slug}`,
-        detail: client?.email ?? result.slug,
+        title: `Portal login — ${portalClient?.clientName ?? result.slug}`,
+        detail: portalClient?.email ?? result.slug,
         priority: 'low',
-        href: `/portal/${result.slug}`,
+        href: defaultNext,
         tenantId: result.slug,
         objectId: result.recordId,
       });
@@ -111,7 +132,7 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  const destination = nextPath?.startsWith('/') ? nextPath : `/portal/${result.slug}/ctp`;
+  const destination = nextPath?.startsWith('/') ? nextPath : defaultNext;
   const res = NextResponse.json({ slug: result.slug, next: destination });
   res.cookies.set(makeSessionCookie(token));
   return res;

@@ -1,0 +1,76 @@
+{
+  "root": {
+    "props": {
+      "title": "Harbor Shield Mutual",
+      "compositionSignature": "mission:mission_legacy_quiet|proof:proof_trust_statement|process:process_sparse_steps|human_story:human_companion_centered|invitation:invitation_protect",
+      "primaryArchetype": "The Protector",
+      "primaryColor": "#0F1C2E",
+      "accentColor": "#C9A844"
+    }
+  },
+  "content": [
+    {
+      "type": "EATextSection",
+      "props": {
+        "id": "mission-1",
+        "variant": "legacy",
+        "label": "Mission",
+        "title": "Keep households and shops secure when disruption arrives.",
+        "body": "Keep households and shops secure when disruption arrives.",
+        "accentValue": "",
+        "accentCaption": ""
+      }
+    },
+    {
+      "type": "EATextSection",
+      "props": {
+        "id": "proof-2",
+        "variant": "proof",
+        "label": "Trust",
+        "title": "Why people trust this work",
+        "body": "Plain-language policies · Stewardship over scare tactics · Local claims care",
+        "accentValue": "",
+        "accentCaption": ""
+      }
+    },
+    {
+      "type": "EATextSection",
+      "props": {
+        "id": "process-3",
+        "variant": "process",
+        "label": "How",
+        "title": "How the work unfolds",
+        "body": "1. Plain-language policies\n2. Stewardship over scare tactics\n3. Local claims care",
+        "accentValue": "",
+        "accentCaption": ""
+      }
+    },
+    {
+      "type": "EAHero",
+      "props": {
+        "id": "human-4",
+        "variant": "companion",
+        "eyebrow": "Harbor Shield Mutual",
+        "title": "Protection that stays quiet until you need it",
+        "subtitle": "Coverage with clarity — so you can focus on what you are building.",
+        "ctaLabel": "Review your coverage",
+        "ctaHref": "#invite",
+        "imageUrl": ""
+      }
+    },
+    {
+      "type": "EACtaBand",
+      "props": {
+        "id": "invite-5",
+        "variant": "protect",
+        "title": "Review your coverage",
+        "body": "Coverage with clarity — so you can focus on what you are building.",
+        "primaryLabel": "Review your coverage",
+        "primaryHref": "/portal/login",
+        "secondaryLabel": "View this site",
+        "secondaryHref": "/sites/harbor-shield"
+      }
+    }
+  ],
+  "zones": {}
+}

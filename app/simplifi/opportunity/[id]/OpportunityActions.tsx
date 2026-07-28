@@ -196,14 +196,14 @@ export default function OpportunityActions({
               }
               const { decision, build } = data.intelligence;
               setIntel(
-                `${decision.recommendedPath} (${decision.confidenceScore}%) · ${build.buildPath} · ${build.overlayConfidence.overall}`,
+                `Decision: ${decision.recommendedPath} (${decision.confidenceScore}%) · ${build.buildPath} · overlay ${build.overlayConfidence.overall}`,
               );
               onOutcomeFlash?.('learning');
               emitOrbOutcomeFlash('learning');
             })
           }
         >
-          Intelligence
+          Decision Intelligence
         </button>
       </div>
     </section>

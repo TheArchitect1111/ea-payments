@@ -1,0 +1,19 @@
+{
+  "title": "Post-deploy launch certification status",
+  "at": "2026-07-20T22:13:26.965Z",
+  "verdict": "NO-GO",
+  "reason": "Unified publish gate deployed to production, but Stripe checkout is LIVE (cs_live). Stopped before payment per no-auto-live-charge policy. Commercial certification incomplete.",
+  "deployedCommitSha": "3420e5b21b8a53542e27106592e242b216abbea3",
+  "localHead": "3420e5b21b8a53542e27106592e242b216abbea3",
+  "deploymentUrl": "https://efficiencyarchitects.online",
+  "pr": "https://github.com/TheArchitect1111/ea-payments/pull/204",
+  "environment": {
+    "stripe": true,
+    "stripeWebhookSecret": true,
+    "resend": true,
+    "websitePortalAuto": true,
+    "launchStatus": "full_launch_ready",
+    "stripeCheckoutMode": "live"
+  },
+  "nextAction": "Authorize (A) Stripe TEST-mode cert environment, or (B) one explicit live $2,497 Website + Portal Starter payment."
+}

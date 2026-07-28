@@ -1,0 +1,80 @@
+{
+  "kind": "website_site",
+  "builderId": "layout-composer",
+  "stub": false,
+  "organizationName": "Northline Coaching",
+  "organization": {
+    "name": "Northline Coaching",
+    "industry": "Executive coaching"
+  },
+  "brand": {
+    "voice": "The Guide — Calm confidence — I am not alone — with relief tint",
+    "headline": "You are not alone in the fog",
+    "primary": "#1B2B4D",
+    "accent": "#C9A844"
+  },
+  "experience": {
+    "emotionalTone": "Calm confidence — I am not alone — with relief tint",
+    "brandPersonality": "The Guide · 82% The Guide / 18% The Restorer",
+    "visualDna": "Open paths, horizons, quiet authority",
+    "creativeDirectionId": "sc-ff9d1bfc8166",
+    "storyClassificationId": "sc-ff9d1bfc8166",
+    "compositionSignature": "human_story:human_companion_centered|mission:mission_plane_full|transformation:transform_split_editorial|process:process_sparse_steps|invitation:invitation_belonging"
+  },
+  "story": {
+    "whoTheyAre": "Guides who walk beside leaders until the path is clear again.",
+    "whyTheyExist": "High-capacity people get stuck alone with decisions that reshape teams.",
+    "whoTheyHelp": "Executives and founders in transition",
+    "whyItMatters": "When leaders freeze, organizations drift.",
+    "whatChanges": "From isolated overwhelm to calm clarity and a shared next move."
+  },
+  "portal": {
+    "memberHome": {
+      "whereYouAre": "Connected to Northline Coaching — the work that keeps your story moving.",
+      "whatNext": "Continue with the next guided step in your portal workspace.",
+      "purpose": "Help leaders move from fog to a next step they trust.",
+      "whatSuccessLooksLike": "From isolated overwhelm to calm clarity and a shared next move."
+    }
+  },
+  "pages": [
+    {
+      "path": "/",
+      "title": "Home",
+      "order": 1,
+      "sections": [
+        {
+          "id": "human_story-1",
+          "role": "human_story",
+          "compositionId": "human_companion_centered",
+          "label": "Who these people are and who they serve"
+        },
+        {
+          "id": "mission-2",
+          "role": "mission",
+          "compositionId": "mission_plane_full",
+          "label": "Why they exist"
+        },
+        {
+          "id": "transformation-3",
+          "role": "transformation",
+          "compositionId": "transform_split_editorial",
+          "label": "What changes because of them"
+        },
+        {
+          "id": "process-4",
+          "role": "process",
+          "compositionId": "process_sparse_steps",
+          "label": "How they work"
+        },
+        {
+          "id": "invitation-5",
+          "role": "invitation",
+          "compositionId": "invitation_belonging",
+          "label": "What to do next"
+        }
+      ]
+    }
+  ],
+  "pageCount": 1,
+  "note": "Directed Layout Composer output — scene compositions, no feature-card SaaS roles"
+}

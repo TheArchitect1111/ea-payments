@@ -2,11 +2,13 @@ import Link from 'next/link';
 import { NAVY, GOLD } from '@/lib/design-system';
 import { requirePortalModule } from '@/lib/modules/portal-modules';
 import { PortalSubpage } from '@/app/portal/components/PortalSubpage';
+import { redirectCtpClientFromExecutiveSurface } from '@/lib/ctp-executive-surface-redirect';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AskAdvisorPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
+  await redirectCtpClientFromExecutiveSurface(slug, 'support');
   await requirePortalModule(slug, 'ask');
 
   return (

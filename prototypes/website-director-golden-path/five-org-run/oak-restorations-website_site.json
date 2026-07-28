@@ -1,0 +1,80 @@
+{
+  "kind": "website_site",
+  "builderId": "layout-composer",
+  "stub": false,
+  "organizationName": "Oak Street Restorations",
+  "organization": {
+    "name": "Oak Street Restorations",
+    "industry": "Historic building restoration"
+  },
+  "brand": {
+    "voice": "The Restorer — Relief — this can be whole again — with courage tint",
+    "headline": "Restore what still matters",
+    "primary": "#3E2F24",
+    "accent": "#B08D57"
+  },
+  "experience": {
+    "emotionalTone": "Relief — this can be whole again — with courage tint",
+    "brandPersonality": "The Restorer · 56% The Restorer / 22% The Challenger / 22% The Legacy Organization",
+    "visualDna": "Before/after restraint; care for detail",
+    "creativeDirectionId": "sc-8bbd10238868",
+    "storyClassificationId": "sc-8bbd10238868",
+    "compositionSignature": "current_reality:reality_documentary_stat|mission:mission_legacy_quiet|transformation:transform_split_editorial|proof:proof_trust_statement|invitation:invitation_commission"
+  },
+  "story": {
+    "whoTheyAre": "Craftspeople who restore weathered buildings to dignity without erasing their history.",
+    "whyTheyExist": "Heritage buildings fail quietly until repair becomes impossible.",
+    "whoTheyHelp": "Property stewards who refuse to demolish what still has soul",
+    "whyItMatters": "Once a facade is gone, the street forgets who it was.",
+    "whatChanges": "From deferred decay to restored integrity people can inhabit again."
+  },
+  "portal": {
+    "memberHome": {
+      "whereYouAre": "Connected to Oak Street Restorations — the work that keeps your story moving.",
+      "whatNext": "Continue with the next guided step in your portal workspace.",
+      "purpose": "Bring damaged heritage structures back to whole, usable life.",
+      "whatSuccessLooksLike": "From deferred decay to restored integrity people can inhabit again."
+    }
+  },
+  "pages": [
+    {
+      "path": "/",
+      "title": "Home",
+      "order": 1,
+      "sections": [
+        {
+          "id": "current_reality-1",
+          "role": "current_reality",
+          "compositionId": "reality_documentary_stat",
+          "label": "Why it hurts now"
+        },
+        {
+          "id": "mission-2",
+          "role": "mission",
+          "compositionId": "mission_legacy_quiet",
+          "label": "Why they exist"
+        },
+        {
+          "id": "transformation-3",
+          "role": "transformation",
+          "compositionId": "transform_split_editorial",
+          "label": "What changes because of them"
+        },
+        {
+          "id": "proof-4",
+          "role": "proof",
+          "compositionId": "proof_trust_statement",
+          "label": "Why trust them"
+        },
+        {
+          "id": "invitation-5",
+          "role": "invitation",
+          "compositionId": "invitation_commission",
+          "label": "What to do next"
+        }
+      ]
+    }
+  ],
+  "pageCount": 1,
+  "note": "Directed Layout Composer output — scene compositions, no feature-card SaaS roles"
+}

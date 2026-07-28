@@ -1,0 +1,357 @@
+﻿{
+    "generatedAt":  "2026-07-23T20:31:05.1194617Z",
+    "method":  "GET",
+    "maximumRedirection":  0,
+    "notes":  "GET-only probes. No POST. No demo-enter.",
+    "probes":  [
+                   {
+                       "url":  "https://efficiencyarchitects.online/api/health/launch",
+                       "statusCode":  200,
+                       "location":  null,
+                       "contentType":  "application/json",
+                       "skipped":  false,
+                       "skipReason":  null,
+                       "jsonBodyPreview":  "{\"ok\":true,\"status\":\"full_launch_ready\"}",
+                       "jsonKeysOnlyOkAndStatus":  true,
+                       "jsonKeys":  [
+                                        "ok",
+                                        "status"
+                                    ],
+                       "error":  null
+                   },
+                   {
+                       "url":  "https://efficiencyarchitects.online/api/health/launch?expand=1",
+                       "statusCode":  200,
+                       "location":  null,
+                       "contentType":  "application/json",
+                       "skipped":  false,
+                       "skipReason":  null,
+                       "jsonBodyPreview":  "{\"ok\":true,\"status\":\"full_launch_ready\"}",
+                       "jsonKeysOnlyOkAndStatus":  true,
+                       "jsonKeys":  [
+                                        "ok",
+                                        "status"
+                                    ],
+                       "error":  null
+                   },
+                   {
+                       "url":  "https://efficiencyarchitects.online/api/health/launch?full=1",
+                       "statusCode":  200,
+                       "location":  null,
+                       "contentType":  "application/json",
+                       "skipped":  false,
+                       "skipReason":  null,
+                       "jsonBodyPreview":  "{\"ok\":true,\"status\":\"full_launch_ready\"}",
+                       "jsonKeysOnlyOkAndStatus":  true,
+                       "jsonKeys":  [
+                                        "ok",
+                                        "status"
+                                    ],
+                       "error":  null
+                   },
+                   {
+                       "url":  "https://efficiencyarchitects.online/api/health/launch?details=1",
+                       "statusCode":  200,
+                       "location":  null,
+                       "contentType":  "application/json",
+                       "skipped":  false,
+                       "skipReason":  null,
+                       "jsonBodyPreview":  "{\"ok\":true,\"status\":\"full_launch_ready\"}",
+                       "jsonKeysOnlyOkAndStatus":  true,
+                       "jsonKeys":  [
+                                        "ok",
+                                        "status"
+                                    ],
+                       "error":  null
+                   },
+                   {
+                       "url":  "https://efficiencyarchitects.online/launch",
+                       "statusCode":  307,
+                       "location":  "/admin/login?next=%2Flaunch",
+                       "contentType":  "text/plain",
+                       "skipped":  false,
+                       "skipReason":  null,
+                       "jsonBodyPreview":  null,
+                       "jsonKeysOnlyOkAndStatus":  null,
+                       "jsonKeys":  null,
+                       "error":  null
+                   },
+                   {
+                       "url":  "https://efficiencyarchitects.online/admin/master",
+                       "statusCode":  307,
+                       "location":  "/admin/login?next=%2Fadmin%2Fmaster",
+                       "contentType":  "text/plain",
+                       "skipped":  false,
+                       "skipReason":  null,
+                       "jsonBodyPreview":  null,
+                       "jsonKeysOnlyOkAndStatus":  null,
+                       "jsonKeys":  null,
+                       "error":  null
+                   },
+                   {
+                       "url":  "https://efficiencyarchitects.online/admin/delivery",
+                       "statusCode":  307,
+                       "location":  "/admin/login?next=%2Fadmin%2Fdelivery",
+                       "contentType":  "text/plain",
+                       "skipped":  false,
+                       "skipReason":  null,
+                       "jsonBodyPreview":  null,
+                       "jsonKeysOnlyOkAndStatus":  null,
+                       "jsonKeys":  null,
+                       "error":  null
+                   },
+                   {
+                       "url":  "https://efficiencyarchitects.online/admin/ctp",
+                       "statusCode":  307,
+                       "location":  "/admin/login?next=%2Fadmin%2Fctp",
+                       "contentType":  "text/plain",
+                       "skipped":  false,
+                       "skipReason":  null,
+                       "jsonBodyPreview":  null,
+                       "jsonKeysOnlyOkAndStatus":  null,
+                       "jsonKeys":  null,
+                       "error":  null
+                   },
+                   {
+                       "url":  "https://efficiencyarchitects.online/admin/content-requests",
+                       "statusCode":  307,
+                       "location":  "/admin/login?next=%2Fadmin%2Fcontent-requests",
+                       "contentType":  "text/plain",
+                       "skipped":  false,
+                       "skipReason":  null,
+                       "jsonBodyPreview":  null,
+                       "jsonKeysOnlyOkAndStatus":  null,
+                       "jsonKeys":  null,
+                       "error":  null
+                   },
+                   {
+                       "url":  "https://efficiencyarchitects.online/admin/simplifi",
+                       "statusCode":  307,
+                       "location":  "/admin/login?next=%2Fadmin%2Fsimplifi",
+                       "contentType":  "text/plain",
+                       "skipped":  false,
+                       "skipReason":  null,
+                       "jsonBodyPreview":  null,
+                       "jsonKeysOnlyOkAndStatus":  null,
+                       "jsonKeys":  null,
+                       "error":  null
+                   },
+                   {
+                       "url":  "https://efficiencyarchitects.online/admin/dashboard",
+                       "statusCode":  307,
+                       "location":  "/admin/login?next=%2Fadmin%2Fdashboard",
+                       "contentType":  "text/plain",
+                       "skipped":  false,
+                       "skipReason":  null,
+                       "jsonBodyPreview":  null,
+                       "jsonKeysOnlyOkAndStatus":  null,
+                       "jsonKeys":  null,
+                       "error":  null
+                   },
+                   {
+                       "url":  "https://efficiencyarchitects.online/factory",
+                       "statusCode":  404,
+                       "location":  null,
+                       "contentType":  null,
+                       "skipped":  true,
+                       "skipReason":  "404 as instructed",
+                       "jsonBodyPreview":  null,
+                       "jsonKeysOnlyOkAndStatus":  null,
+                       "jsonKeys":  null,
+                       "error":  null
+                   },
+                   {
+                       "url":  "https://efficiencyarchitects.online/admin/factory",
+                       "statusCode":  307,
+                       "location":  "/admin/login?next=%2Fadmin%2Ffactory",
+                       "contentType":  "text/plain",
+                       "skipped":  false,
+                       "skipReason":  null,
+                       "jsonBodyPreview":  null,
+                       "jsonKeysOnlyOkAndStatus":  null,
+                       "jsonKeys":  null,
+                       "error":  null
+                   },
+                   {
+                       "url":  "https://efficiencyarchitects.online/admin/ea-factory",
+                       "statusCode":  307,
+                       "location":  "/admin/login?next=%2Fadmin%2Fea-factory",
+                       "contentType":  "text/plain",
+                       "skipped":  false,
+                       "skipReason":  null,
+                       "jsonBodyPreview":  null,
+                       "jsonKeysOnlyOkAndStatus":  null,
+                       "jsonKeys":  null,
+                       "error":  null
+                   },
+                   {
+                       "url":  "https://efficiencyarchitects.online/admin/capability-marketplace",
+                       "statusCode":  307,
+                       "location":  "/admin/login?next=%2Fadmin%2Fcapability-marketplace",
+                       "contentType":  "text/plain",
+                       "skipped":  false,
+                       "skipReason":  null,
+                       "jsonBodyPreview":  null,
+                       "jsonKeysOnlyOkAndStatus":  null,
+                       "jsonKeys":  null,
+                       "error":  null
+                   },
+                   {
+                       "url":  "https://efficiencyarchitects.online/admin/ea-factory/repo-library",
+                       "statusCode":  307,
+                       "location":  "/admin/login?next=%2Fadmin%2Fea-factory%2Frepo-library",
+                       "contentType":  "text/plain",
+                       "skipped":  false,
+                       "skipReason":  null,
+                       "jsonBodyPreview":  null,
+                       "jsonKeysOnlyOkAndStatus":  null,
+                       "jsonKeys":  null,
+                       "error":  null
+                   },
+                   {
+                       "url":  "https://efficiencyarchitects.online/admin/login",
+                       "statusCode":  200,
+                       "location":  null,
+                       "contentType":  "text/html; charset=utf-8",
+                       "skipped":  false,
+                       "skipReason":  null,
+                       "jsonBodyPreview":  null,
+                       "jsonKeysOnlyOkAndStatus":  null,
+                       "jsonKeys":  null,
+                       "error":  null
+                   },
+                   {
+                       "url":  "https://efficiencyarchitects.online/portal/login",
+                       "statusCode":  200,
+                       "location":  null,
+                       "contentType":  "text/html; charset=utf-8",
+                       "skipped":  false,
+                       "skipReason":  null,
+                       "jsonBodyPreview":  null,
+                       "jsonKeysOnlyOkAndStatus":  null,
+                       "jsonKeys":  null,
+                       "error":  null
+                   },
+                   {
+                       "url":  "https://efficiencyarchitects.online/portal/demo-client",
+                       "statusCode":  307,
+                       "location":  "/portal/login",
+                       "contentType":  "text/plain",
+                       "skipped":  false,
+                       "skipReason":  null,
+                       "jsonBodyPreview":  null,
+                       "jsonKeysOnlyOkAndStatus":  null,
+                       "jsonKeys":  null,
+                       "error":  null
+                   },
+                   {
+                       "url":  "https://efficiencyarchitects.online/portal/demo-client/ctp",
+                       "statusCode":  307,
+                       "location":  "/portal/login",
+                       "contentType":  "text/plain",
+                       "skipped":  false,
+                       "skipReason":  null,
+                       "jsonBodyPreview":  null,
+                       "jsonKeysOnlyOkAndStatus":  null,
+                       "jsonKeys":  null,
+                       "error":  null
+                   },
+                   {
+                       "url":  "https://efficiencyarchitects.online/portal/demo-client/ctp/progress",
+                       "statusCode":  307,
+                       "location":  "/portal/login",
+                       "contentType":  "text/plain",
+                       "skipped":  false,
+                       "skipReason":  null,
+                       "jsonBodyPreview":  null,
+                       "jsonKeysOnlyOkAndStatus":  null,
+                       "jsonKeys":  null,
+                       "error":  null
+                   },
+                   {
+                       "url":  "https://efficiencyarchitects.online/portal/demo-client/ctp/messages",
+                       "statusCode":  307,
+                       "location":  "/portal/login",
+                       "contentType":  "text/plain",
+                       "skipped":  false,
+                       "skipReason":  null,
+                       "jsonBodyPreview":  null,
+                       "jsonKeysOnlyOkAndStatus":  null,
+                       "jsonKeys":  null,
+                       "error":  null
+                   },
+                   {
+                       "url":  "https://efficiencyarchitects.online/portal/demo-client/ctp/support",
+                       "statusCode":  307,
+                       "location":  "/portal/login",
+                       "contentType":  "text/plain",
+                       "skipped":  false,
+                       "skipReason":  null,
+                       "jsonBodyPreview":  null,
+                       "jsonKeysOnlyOkAndStatus":  null,
+                       "jsonKeys":  null,
+                       "error":  null
+                   },
+                   {
+                       "url":  "https://efficiencyarchitects.online/portal/demo-client/ctp/documents",
+                       "statusCode":  307,
+                       "location":  "/portal/login",
+                       "contentType":  "text/plain",
+                       "skipped":  false,
+                       "skipReason":  null,
+                       "jsonBodyPreview":  null,
+                       "jsonKeysOnlyOkAndStatus":  null,
+                       "jsonKeys":  null,
+                       "error":  null
+                   },
+                   {
+                       "url":  "https://efficiencyarchitects.online/trust",
+                       "statusCode":  404,
+                       "location":  null,
+                       "contentType":  null,
+                       "skipped":  false,
+                       "skipReason":  null,
+                       "jsonBodyPreview":  null,
+                       "jsonKeysOnlyOkAndStatus":  null,
+                       "jsonKeys":  null,
+                       "error":  null
+                   },
+                   {
+                       "url":  "https://ea-payments.vercel.app/api/health/launch",
+                       "statusCode":  200,
+                       "location":  null,
+                       "contentType":  "application/json",
+                       "skipped":  false,
+                       "skipReason":  null,
+                       "jsonBodyPreview":  "{\"ok\":true,\"status\":\"full_launch_ready\"}",
+                       "jsonKeysOnlyOkAndStatus":  true,
+                       "jsonKeys":  [
+                                        "ok",
+                                        "status"
+                                    ],
+                       "error":  null
+                   }
+               ],
+    "vercel":  {
+                   "productionDeploymentId":  "dpl_B1rHCpoxCNLjpyLLR74K4eBiXQVZ",
+                   "targetDeploymentId":  "dpl_B1rHCpoxCNLjpyLLR74K4eBiXQVZ",
+                   "targetDeploymentFound":  true,
+                   "url":  "ea-payments-gnf2ju05p-the-architects-projects-cc813778.vercel.app",
+                   "target":  "production",
+                   "readyState":  "READY",
+                   "gitSource":  null,
+                   "metaCommit":  null,
+                   "aliases":  [
+                                   "simplifi.ai",
+                                   "app.simplifi.ai",
+                                   "www.simplifi.ai",
+                                   "ea-payments.vercel.app",
+                                   "efficiencyarchitects.online",
+                                   "app.efficiencyarchitects.online",
+                                   "portal.efficiencyarchitects.online",
+                                   "ea-payments-the-architects-projects-cc813778.vercel.app",
+                                   "ea-payments-git-master-the-architects-projects-cc813778.vercel.app"
+                               ],
+                   "inspectNote":  "vercel inspect https://efficiencyarchitects.online --json"
+               }
+}

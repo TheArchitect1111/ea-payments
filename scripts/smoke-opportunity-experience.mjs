@@ -106,7 +106,7 @@ if (d.healthAreas.length < 4) failures.push('health');
 if (d.opportunities.length !== 3) failures.push('opps');
 if (!det) failures.push('detail');
 if (ctpWelcomeStudioPath() !== 'ctp') failures.push('path');
-if (email.ctaLabel !== 'VIEW MY OPPORTUNITY DASHBOARD') failures.push('cta');
+if (email.ctaLabel !== 'Open Your Project') failures.push('cta');
 if (!email.bodyHtml.includes('Your Digital Foundation')) failures.push('foundation');
 
 if (failures.length) {

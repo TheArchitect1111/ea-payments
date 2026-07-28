@@ -1,0 +1,201 @@
+{
+  "artifact": "people-phase2d-prod-preflight",
+  "phase": "2D",
+  "mode": "read_only",
+  "projectRef": "dwygvwnjjaennksddniu",
+  "apiUrl": "https://dwygvwnjjaennksddniu.supabase.co",
+  "at": "2026-07-27T02:11:06.299Z",
+  "verdict": "BLOCKED",
+  "checks": [
+    {
+      "id": "access_token",
+      "ok": true,
+      "detail": "present",
+      "blocking": true
+    },
+    {
+      "id": "exposed_schemas_people",
+      "ok": true,
+      "detail": "schemas=public,graphql_public,people",
+      "blocking": true
+    },
+    {
+      "id": "sql_inventory",
+      "ok": true,
+      "detail": "table_count=15",
+      "blocking": true
+    },
+    {
+      "id": "people_schema",
+      "ok": true,
+      "detail": "people_schema=true",
+      "blocking": true
+    },
+    {
+      "id": "tables_15",
+      "ok": true,
+      "detail": "count=15; missing=none",
+      "blocking": true
+    },
+    {
+      "id": "force_rls",
+      "ok": true,
+      "detail": "force_rls=15; rls_enabled=15",
+      "blocking": true
+    },
+    {
+      "id": "required_rpcs",
+      "ok": true,
+      "detail": "rpcs=ensure_person,get_person,merge_finalize,pre_request,update_person,upsert_relationship; missing=none",
+      "blocking": true
+    },
+    {
+      "id": "people_app_role",
+      "ok": true,
+      "detail": "exists=true; bypassrls=false",
+      "blocking": true
+    },
+    {
+      "id": "people_app_schema_usage",
+      "ok": false,
+      "detail": "usage_grants=0",
+      "blocking": true
+    },
+    {
+      "id": "service_role_sql_denial",
+      "ok": true,
+      "detail": "table_privs=0; routine_privs=0",
+      "blocking": true
+    },
+    {
+      "id": "migration_files_repo",
+      "ok": true,
+      "detail": "007_people_phase2c_schema.sql, 008_people_phase2c_postgrest_wiring.sql, 009_people_upsert_relationship.sql, 010_people_get_person.sql",
+      "blocking": true
+    },
+    {
+      "id": "migrations_007_010",
+      "ok": true,
+      "detail": "schema_truth_ok; recorded_versions=[\"007\",\"008\",\"009\",\"010\"]",
+      "blocking": true
+    },
+    {
+      "id": "pre_request_bound",
+      "ok": true,
+      "detail": "setting=session_preload_libraries=supautils, safeupdate,statement_timeout=8s,lock_timeout=8s,pgrst.db_pre_request=people.pre_request",
+      "blocking": false
+    },
+    {
+      "id": "service_role_key_fetched",
+      "ok": true,
+      "detail": "fingerprint=ed0f02b807eb",
+      "blocking": false
+    },
+    {
+      "id": "service_role_rest_denial",
+      "ok": true,
+      "detail": "status=403; body={\"code\":\"42501\",\"details\":null,\"hint\":null,\"message\":\"permission denied for schema people\"}",
+      "blocking": true
+    },
+    {
+      "id": "people_app_rest_probe",
+      "ok": false,
+      "detail": "status=401; body={\"message\":\"Invalid API key\",\"hint\":\"Double check your Supabase `anon` or `service_role` API key.\"}",
+      "blocking": true
+    },
+    {
+      "id": "people_app_rpc_get_person_readonly",
+      "ok": false,
+      "detail": "status=401; body={\"message\":\"Invalid API key\",\"hint\":\"Double check your Supabase `anon` or `service_role` API key.\"}",
+      "blocking": true
+    },
+    {
+      "id": "vercel_people_url_present",
+      "ok": true,
+      "detail": "PEOPLE_SUPABASE_URL listed",
+      "blocking": true
+    },
+    {
+      "id": "vercel_people_key_present",
+      "ok": true,
+      "detail": "PEOPLE_SUPABASE_KEY listed",
+      "blocking": true
+    },
+    {
+      "id": "vercel_universal_people_flags_off",
+      "ok": true,
+      "detail": "UNIVERSAL_PEOPLE* not listed on production",
+      "blocking": true
+    },
+    {
+      "id": "vercel_no_cert_memory_flags",
+      "ok": true,
+      "detail": "absent",
+      "blocking": true
+    },
+    {
+      "id": "code_no_airtable_adapter_select",
+      "ok": true,
+      "detail": "adapter never selects airtable",
+      "blocking": true
+    },
+    {
+      "id": "code_persist_uses_postgres",
+      "ok": true,
+      "detail": "Persist ON ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ postgres repository",
+      "blocking": true
+    },
+    {
+      "id": "code_migrate_flag_default_off",
+      "ok": true,
+      "detail": "migrate flag gated",
+      "blocking": true
+    },
+    {
+      "id": "code_backfill_gated",
+      "ok": true,
+      "detail": "backfill module exists and is flag-gated in callers",
+      "blocking": false
+    },
+    {
+      "id": "no_client_record_backfill_this_run",
+      "ok": true,
+      "detail": "preflight did not invoke migrate/backfill",
+      "blocking": true
+    },
+    {
+      "id": "no_production_data_writes_this_run",
+      "ok": true,
+      "detail": "preflight used SELECT/inventory + read REST only",
+      "blocking": true
+    }
+  ],
+  "blockers": [
+    {
+      "id": "people_app_schema_usage",
+      "detail": "usage_grants=0",
+      "action": null
+    },
+    {
+      "id": "people_app_rest_probe",
+      "detail": "status=401; body={\"message\":\"Invalid API key\",\"hint\":\"Double check your Supabase `anon` or `service_role` API key.\"}",
+      "action": "people_app JWT rejected ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â verify Exposed schemas + JWT secret match project"
+    },
+    {
+      "id": "people_app_rpc_get_person_readonly",
+      "detail": "status=401; body={\"message\":\"Invalid API key\",\"hint\":\"Double check your Supabase `anon` or `service_role` API key.\"}",
+      "action": null
+    }
+  ],
+  "enablementRequirements": [
+    "Owner approval to enable People on production (launch decision).",
+    "Confirm PITR / backups and monitoring on project dwygvwnjjaennksddniu.",
+    "Set UNIVERSAL_PEOPLE_PERSIST=1 on Vercel Production (Postgres SoR) before or with People ON (INV-20).",
+    "Set UNIVERSAL_PEOPLE=1 only after Persist ON + health check of people_app REST.",
+    "Keep UNIVERSAL_PEOPLE_MIGRATE_CLIENTS=0 until an explicit Client Record backfill runbook is executed.",
+    "Do not set PEOPLE_CERT_MEMORY or PEOPLE_SHARED_MEMORY on production.",
+    "Run controlled smoke (ensure_person / get_person) on a non-prod or disposable tenant before broad enablement.",
+    "Only then consider Client Record backfill under a separate change window."
+  ],
+  "evidenceDir": "docs/audits/runtime-evidence-people-phase2d-prod-preflight"
+}

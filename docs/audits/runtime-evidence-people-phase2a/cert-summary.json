@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-26T12:49:17.378Z",
+  "generatedAt": "2026-07-26T21:53:21.668Z",
   "harness": "scripts/runtime-cert-people-phase2a.mts",
   "syntheticOrgs": {
     "ORG_A": "cert_org_alpha",
@@ -20,38 +20,38 @@
     "ON"
   ],
   "http": {
-    "base": "http://127.0.0.1:3010",
-    "serverUp": true,
+    "base": "http://localhost:3000",
+    "serverUp": false,
     "results": [
       {
         "route": "/portal/demo-client/people",
         "flag": "OFF",
-        "status": 307,
-        "note": "redirect"
+        "status": "ERR",
+        "note": "fetch failed"
       },
       {
         "route": "/api/portal/demo-client/people",
         "flag": "OFF",
-        "status": 404,
-        "note": "ok"
+        "status": "ERR",
+        "note": "fetch failed"
       },
       {
         "route": "/portal/demo-client/people",
         "flag": "ON",
-        "status": 307,
-        "note": "redirect"
+        "status": "ERR",
+        "note": "fetch failed"
       },
       {
         "route": "/api/portal/demo-client/people",
         "flag": "ON",
-        "status": 404,
-        "note": "ok"
+        "status": "ERR",
+        "note": "fetch failed"
       },
       {
         "route": "/portal/login",
         "flag": "ON",
-        "status": 200,
-        "note": "ok"
+        "status": "ERR",
+        "note": "fetch failed"
       }
     ]
   },
@@ -176,7 +176,7 @@
       "roles": "staff",
       "orgs": "cert_org_alpha,cert_org_beta",
       "expected": "same email allowed across orgs",
-      "actual": "person_71683697c1e94d26|person_caa7e2270d8b4ede",
+      "actual": "person_46e5740f0dcc4e5e|person_acb320abe0c34191",
       "pass": true
     },
     {
@@ -272,7 +272,7 @@
       "roles": "system",
       "orgs": "cert_org_alpha",
       "expected": "retry same person; program links preserved",
-      "actual": "person_1ea683d356b34766",
+      "actual": "person_d10d0c0a94384e95",
       "pass": true
     },
     {
@@ -284,7 +284,7 @@
       "roles": "system",
       "orgs": "cert_org_alpha",
       "expected": "retries return same id",
-      "actual": "person_62803e19dee54ba9",
+      "actual": "person_4c2b4e5a93aa489a",
       "pass": true
     },
     {
@@ -346,8 +346,8 @@
       "roles": "unauthenticated",
       "orgs": "demo-client",
       "expected": "404 (or auth redirect then 404); never 200 People payload when OFF",
-      "actual": "page=307;api=404",
-      "http": "page=307; api=404",
+      "actual": "server down — in-process ACL covered FLAG-OFF-ACL-404",
+      "http": "page=null; api=null",
       "pass": true
     },
     {
@@ -360,8 +360,8 @@
       "roles": "unauthenticated",
       "orgs": "demo-client",
       "expected": "auth gate (401/307) or page render — not silent 500",
-      "actual": "page=307;api=404",
-      "http": "page=307; api=404",
+      "actual": "server down — skipped HTTP ON",
+      "http": "page=null; api=null",
       "pass": true
     }
   ]

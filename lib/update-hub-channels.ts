@@ -1,4 +1,4 @@
-/** Update Hub audience channels — communication backbone for the Portal OS. */
+/** Update Hub audience channels — curated project-update audiences (not chat). */
 export const UPDATE_HUB_CHANNELS = [
   'members',
   'staff',

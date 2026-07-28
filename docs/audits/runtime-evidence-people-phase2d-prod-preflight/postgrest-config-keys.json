@@ -1,0 +1,17 @@
+{
+  "status": 200,
+  "keys": [
+    "db_schema",
+    "max_rows",
+    "db_extra_search_path",
+    "db_pool",
+    "db_pool_acquisition_timeout",
+    "jwt_secret"
+  ],
+  "db_schema": "public,graphql_public,people",
+  "schemas": [
+    "public",
+    "graphql_public",
+    "people"
+  ]
+}

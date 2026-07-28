@@ -134,7 +134,7 @@ export default function OpportunityReviewExperience({ view, confirmedHref }: Pro
               {view.ctaLabel}
             </a>
             <Link className="ore-secondary" href={view.backHref}>
-              Continue Exploring My Dashboard
+              Continue in Your Project
             </Link>
           </div>
         </div>

@@ -1,0 +1,80 @@
+{
+  "kind": "website_site",
+  "builderId": "layout-composer",
+  "stub": false,
+  "organizationName": "River Atelier",
+  "organization": {
+    "name": "River Atelier",
+    "industry": "Custom furniture craft"
+  },
+  "brand": {
+    "voice": "The Craftsman — Respect — this was made with mastery — with continuity tint",
+    "headline": "Made with mastery",
+    "primary": "#1A1714",
+    "accent": "#8B5E3C"
+  },
+  "experience": {
+    "emotionalTone": "Respect — this was made with mastery — with continuity tint",
+    "brandPersonality": "The Craftsman · 56% The Craftsman / 22% The Legacy Organization / 22% The Caregiver",
+    "visualDna": "Material honesty; tool and texture",
+    "creativeDirectionId": "sc-f6d1431ffd76",
+    "storyClassificationId": "sc-f6d1431ffd76",
+    "compositionSignature": "mission:mission_legacy_quiet|process:process_sparse_steps|proof:proof_trust_statement|human_story:human_craft_detail|invitation:invitation_commission"
+  },
+  "story": {
+    "whoTheyAre": "Craftsmen who make furniture with material honesty and patient mastery.",
+    "whyTheyExist": "Disposable furniture teaches people to expect less from the made world.",
+    "whoTheyHelp": "People who want objects made with respect",
+    "whyItMatters": "Craft is how we keep beauty useful across generations.",
+    "whatChanges": "From generic fill to a piece that earns its place in a home."
+  },
+  "portal": {
+    "memberHome": {
+      "whereYouAre": "Connected to River Atelier — the work that keeps your story moving.",
+      "whatNext": "Continue with the next guided step in your portal workspace.",
+      "purpose": "Commission work that will be lived with for decades.",
+      "whatSuccessLooksLike": "From generic fill to a piece that earns its place in a home."
+    }
+  },
+  "pages": [
+    {
+      "path": "/",
+      "title": "Home",
+      "order": 1,
+      "sections": [
+        {
+          "id": "mission-1",
+          "role": "mission",
+          "compositionId": "mission_legacy_quiet",
+          "label": "Why they exist"
+        },
+        {
+          "id": "process-2",
+          "role": "process",
+          "compositionId": "process_sparse_steps",
+          "label": "How they work"
+        },
+        {
+          "id": "proof-3",
+          "role": "proof",
+          "compositionId": "proof_trust_statement",
+          "label": "Why trust them"
+        },
+        {
+          "id": "human_story-4",
+          "role": "human_story",
+          "compositionId": "human_craft_detail",
+          "label": "Who these people are and who they serve"
+        },
+        {
+          "id": "invitation-5",
+          "role": "invitation",
+          "compositionId": "invitation_commission",
+          "label": "What to do next"
+        }
+      ]
+    }
+  ],
+  "pageCount": 1,
+  "note": "Directed Layout Composer output — scene compositions, no feature-card SaaS roles"
+}

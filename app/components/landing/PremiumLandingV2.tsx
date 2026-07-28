@@ -261,8 +261,8 @@ export default function PremiumLandingV2() {
           <Link href="/simplifi">Simplifi</Link>
         </nav>
         <nav className="hx-footer-legal" aria-label="Legal">
-          <Link href="/privacy">Privacy Policy</Link>
-          <Link href="/terms">Terms of Service</Link>
+          <Link href="/legal/privacy">Privacy Policy</Link>
+          <Link href="/legal/terms">Terms of Service</Link>
           <Link href="/cookies">Cookie Policy</Link>
           <Link href="/accessibility">Accessibility</Link>
           <Link href="/disclaimer">Disclaimer</Link>

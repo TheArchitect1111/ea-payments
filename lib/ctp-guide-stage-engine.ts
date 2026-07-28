@@ -59,12 +59,12 @@ export const GUIDE_STAGE_DEFINITIONS: Record<GuideLifecycleStage, GuideStageDefi
     completionEvents: ['portal.provisioned', 'ctp.workspace.active'],
     documentsUnlocked: ['Your Project home'],
     celebration: {
-      title: 'Welcome Complete',
-      message: 'Your project home is open. We’re ready to learn your business.',
+      title: 'Your project home is open',
+      message: 'You’re expected. We’re already preparing what comes next.',
     },
     notification: {
       title: 'Your project home is ready',
-      detail: 'Open Progress anytime to see where things stand and what comes next.',
+      detail: 'Open Your Project anytime to see where things stand and what comes next.',
     },
   },
   Discovery: {
@@ -79,8 +79,8 @@ export const GUIDE_STAGE_DEFINITIONS: Record<GuideLifecycleStage, GuideStageDefi
     completionEvents: ['ctp.submitted', 'ctp.intake.analyzed', 'ctp.digital.audit'],
     documentsUnlocked: ['Discovery summary'],
     celebration: {
-      title: 'Discovery Complete',
-      message: 'We understand enough about your business to recommend a clear path.',
+      title: 'We’ve learned what matters',
+      message: 'We understand enough about your organization to recommend a clear path.',
     },
     notification: {
       title: 'Discovery is complete',
@@ -99,8 +99,8 @@ export const GUIDE_STAGE_DEFINITIONS: Record<GuideLifecycleStage, GuideStageDefi
     completionEvents: ['ctp.bi.ready', 'ctp.review.scheduled'],
     documentsUnlocked: ['Strategy priorities'],
     celebration: {
-      title: 'Strategy Complete',
-      message: 'Your priorities are clear — the plan can take shape.',
+      title: 'Your priorities are clear',
+      message: 'The plan can take shape with confidence.',
     },
     notification: {
       title: 'Your strategy is taking shape',
@@ -115,7 +115,7 @@ export const GUIDE_STAGE_DEFINITIONS: Record<GuideLifecycleStage, GuideStageDefi
     completionEvents: ['proposal.pending', 'proposal.completed'],
     documentsUnlocked: ['Your proposal'],
     celebration: {
-      title: 'Proposal Ready',
+      title: 'Your proposal is ready',
       message: 'Your plan and investment are ready to review when you are.',
     },
     notification: {
@@ -135,11 +135,11 @@ export const GUIDE_STAGE_DEFINITIONS: Record<GuideLifecycleStage, GuideStageDefi
     completionEvents: ['proposal.approved', 'ctp.studio.started'],
     documentsUnlocked: ['Agreement confirmation'],
     celebration: {
-      title: 'Proposal Approved',
-      message: 'You’re confirmed. We can begin Design with confidence.',
+      title: 'You’re confirmed — we can begin',
+      message: 'Thank you. Design starts with confidence on our side.',
     },
     notification: {
-      title: 'Your approval has been received',
+      title: 'You’re confirmed',
       detail: 'We’ve started designing your website. We’ll ask only for what unlocks first concepts.',
     },
   },
@@ -151,11 +151,11 @@ export const GUIDE_STAGE_DEFINITIONS: Record<GuideLifecycleStage, GuideStageDefi
     completionEvents: ['ctp.studio.input', 'ctp.studio.complete'],
     documentsUnlocked: ['Brand direction notes'],
     celebration: {
-      title: 'Design Complete',
+      title: 'Your creative direction is in place',
       message: 'Brand direction is clear enough for us to craft your presence.',
     },
     notification: {
-      title: 'Your project has moved into development',
+      title: 'Design is underway',
       detail: 'Your brand details are in — we’re assembling your website and portal.',
     },
   },
@@ -167,12 +167,12 @@ export const GUIDE_STAGE_DEFINITIONS: Record<GuideLifecycleStage, GuideStageDefi
     completionEvents: ['ctp.production.ready', 'ctp.website.live', 'ctp.studio.ready'],
     documentsUnlocked: ['Preview when ready'],
     celebration: {
-      title: 'Website Ready for Review',
+      title: 'A reviewable version is ready',
       message: 'A reviewable version of your presence is ready for your eye.',
     },
     notification: {
       title: 'Your website is ready for review',
-      detail: 'Please look closely and share clear feedback so we can refine with confidence.',
+      detail: 'Look closely when you can — clear feedback helps us refine with confidence.',
     },
   },
   Review: {
@@ -183,7 +183,7 @@ export const GUIDE_STAGE_DEFINITIONS: Record<GuideLifecycleStage, GuideStageDefi
     completionEvents: ['ctp.ready_for_review', 'ctp.revealed'],
     documentsUnlocked: ['Review checklist'],
     celebration: {
-      title: 'Review Complete',
+      title: 'Thanks — your review is in',
       message: 'Your feedback is in — refinements and launch checks come next.',
     },
     notification: {
@@ -199,12 +199,12 @@ export const GUIDE_STAGE_DEFINITIONS: Record<GuideLifecycleStage, GuideStageDefi
     completionEvents: ['ctp.revealed', 'ctp.website.live'],
     documentsUnlocked: ['Live website'],
     celebration: {
-      title: 'Project Launched',
+      title: 'Your project is live',
       message: 'Your presence is live. Take a moment — then we’ll stay with you in Care.',
     },
     notification: {
-      title: 'Your project is live',
-      detail: 'Open your website, share it, and tell us if anything needs a quick fix.',
+      title: 'You’re live',
+      detail: 'Open your website, share it, and tell us if anything needs a quiet fix.',
     },
   },
   Care: {
@@ -213,14 +213,14 @@ export const GUIDE_STAGE_DEFINITIONS: Record<GuideLifecycleStage, GuideStageDefi
     entryConditions: ['Launch complete with a live site'],
     exitConditions: ['Ongoing — Care remains available'],
     completionEvents: ['ctp.revealed'],
-    documentsUnlocked: ['Support & Messages'],
+    documentsUnlocked: ['Help & Contact'],
     celebration: {
-      title: 'Care Underway',
+      title: 'You’re in ongoing care',
       message: 'Launch is a beginning. We’re still with you for questions and next steps.',
     },
     notification: {
-      title: 'You’re in ongoing care',
-      detail: 'Use Support or Messages anytime — a real person on your team will respond.',
+      title: 'Care continues',
+      detail: 'Use Help or Contact anytime — a real person on your team will respond.',
     },
   },
 };
@@ -299,7 +299,7 @@ export function resolveGuideDocumentsAvailable(
   if (view.siteUrl) {
     docs.push({ label: 'Live website', href: view.siteUrl });
   }
-  if (done.Care || done.Launch) docs.push({ label: 'Support & Messages' });
+  if (done.Care || done.Launch) docs.push({ label: 'Help & Contact' });
 
   const seen = new Set<string>();
   return docs.filter((doc) => {

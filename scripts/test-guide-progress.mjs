@@ -23,6 +23,7 @@ function assert(cond, msg) {
 
 const page = read('app/portal/[slug]/ctp/progress/page.tsx');
 const adapter = read('lib/ctp-guide-progress.ts');
+const presentation = read('lib/ctp-guide-presentation.ts');
 
 const banned = [
   'Executive Snapshot',
@@ -56,10 +57,23 @@ assert(adapter.includes("'Care'"), 'adapter defines Care');
 
 assert(page.includes('buildGuideProgressView'), 'page uses Guide adapter');
 assert(page.includes('What you need to do'), 'page has NBA section');
+assert(page.includes("You're all set") || page.includes('You’re all set'), 'page reassures idle clients');
 assert(page.includes('What has already happened'), 'page has milestones');
 assert(page.includes('What is happening now'), 'page has behind-the-scenes');
 assert(page.includes('What happens next'), 'page has whats next');
 assert(page.includes('Where you are'), 'page has current stage');
+assert(page.includes('guide-progress-opening'), 'page has personal opening');
+assert(page.includes('guide-progress-status-sentence'), 'page has one status sentence');
+assert(page.includes('stageVisualFor'), 'page uses stage photography');
+assert(page.includes('buildGuideStorySoFar'), 'page uses Story So Far');
+assert(page.includes('guideOutcomeSentence'), 'page uses outcome-first sentence');
+assert(page.includes('buildGuideArrival'), 'page uses arrival continuity');
+assert(page.includes('experienceMode'), 'Design Studio uses experience framing');
+assert(page.includes('data-stage'), 'page sets stage atmosphere');
+assert(!page.includes('Also available'), 'supporting card wall removed');
 assert((page.match(/guide-progress-nba-cta/g) || []).length === 1, 'exactly one NBA CTA class');
+
+assert(presentation.includes('Previously') || presentation.includes('previously'), 'presentation builds Previously');
+assert(presentation.includes('buildGuideStorySoFar'), 'presentation exports Story So Far');
 
 process.exit(failed ? 1 : 0);

@@ -164,7 +164,11 @@ export default function PortalCtpDesignStudioForm({
         setError(data.error || 'Could not save Design Studio.');
         return;
       }
-      setSuccess('Saved. AI production will refresh with your inputs.');
+      setSuccess(
+        experienceMode
+          ? 'Shared with your guide. We’ll use this in your creative direction.'
+          : 'Saved. AI production will refresh with your inputs.',
+      );
       setAssets({});
       router.refresh();
     } catch {
@@ -189,7 +193,11 @@ export default function PortalCtpDesignStudioForm({
         setError(data.error || 'Could not mark Design Studio complete.');
         return;
       }
-      setSuccess('Marked complete. Our team has been notified — you can still add more later.');
+      setSuccess(
+        experienceMode
+          ? 'Thank you — your guide has been notified. You can keep adding materials anytime.'
+          : 'Marked complete. Our team has been notified — you can still add more later.',
+      );
       router.refresh();
     } catch {
       setError('Network error. Try again.');
@@ -199,182 +207,141 @@ export default function PortalCtpDesignStudioForm({
   }
 
   if (experienceMode) {
+    const stillOpen = designStudio.filter((item) => item.status !== 'ready').length;
+    const progressLine =
+      stillOpen === 0
+        ? 'We have everything we need for this round — add more anytime.'
+        : stillOpen === designStudio.length
+          ? 'Share what you have. We’ll shape the rest together.'
+          : `${readyCount} of ${designStudio.length} materials with us — the rest can wait.`;
+
     return (
-      <section className="cex-studio-form">
-        <p className="cex-studio-eyebrow">Your story</p>
-        <h3 className="cex-studio-heading">Brand details & materials</h3>
-        <p className="cex-studio-copy">
-          {readyCount}/{designStudio.length} pieces in place. Share what you have — we&apos;ll shape the
-          rest together.
-        </p>
+      <section className="cex-studio-form cex-studio-review">
+        <p className="cex-studio-eyebrow">Creative review</p>
+        <h3 className="cex-studio-heading">Help us design in your voice</h3>
+        <p className="cex-studio-copy">{progressLine}</p>
 
-        <div className="cex-studio-checklist">
-          {designStudio.map((item) => (
-            <div key={item.id} className="cex-studio-check">
-              <p className="cex-studio-check-status">
-                {item.status === 'ready' ? 'Ready' : 'Still open'}
-              </p>
-              <p className="cex-studio-check-label">{item.label}</p>
-              <p className="cex-studio-check-detail">{item.detail}</p>
-            </div>
-          ))}
-        </div>
-
-        <div style={{ display: 'grid', gap: '0.85rem' }}>
-          {FIELD_META.map((field) => (
-            <label key={field.id} style={{ display: 'grid', gap: '0.35rem' }}>
-              <span
-                style={{
-                  fontSize: '0.72rem',
-                  fontWeight: 800,
-                  letterSpacing: '0.12em',
-                  textTransform: 'uppercase',
-                }}
-              >
-                {field.experienceLabel}
-              </span>
-              {field.rows ? (
-                <textarea
-                  value={fields[field.id]}
-                  onChange={(event) =>
-                    setFields((current) => ({ ...current, [field.id]: event.target.value }))
-                  }
-                  rows={field.rows}
-                  placeholder={field.placeholder}
-                  style={{
-                    width: '100%',
-                    borderRadius: '0.65rem',
-                    padding: '0.75rem 0.85rem',
-                    fontSize: '0.9rem',
-                    lineHeight: 1.5,
-                    resize: 'vertical',
-                  }}
-                />
-              ) : (
-                <input
-                  value={fields[field.id]}
-                  onChange={(event) =>
-                    setFields((current) => ({ ...current, [field.id]: event.target.value }))
-                  }
-                  placeholder={field.placeholder}
-                  style={{
-                    width: '100%',
-                    borderRadius: '0.65rem',
-                    padding: '0.75rem 0.85rem',
-                    fontSize: '0.9rem',
-                  }}
-                />
-              )}
-            </label>
-          ))}
-        </div>
-
-        <div style={{ marginTop: '1.25rem', display: 'grid', gap: '0.75rem' }}>
-          <p className="cex-studio-eyebrow" style={{ margin: 0 }}>
-            Uploads
-          </p>
-          <div
-            style={{
-              display: 'grid',
-              gap: '0.75rem',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-            }}
-          >
-            {UPLOAD_TYPES.map((item) => (
-              <label
-                key={item.id}
-                className="cex-studio-upload"
-                style={{
-                  borderRadius: '0.75rem',
-                  padding: '0.85rem',
-                  cursor: 'pointer',
-                }}
-              >
-                <span style={{ display: 'block', marginBottom: '0.35rem' }}>{item.label}</span>
-                <span style={{ display: 'block', fontSize: '0.78rem' }}>
-                  {uploading === item.id
-                    ? 'Uploading…'
-                    : assets[item.id]
-                      ? assets[item.id]!.fileName
-                      : 'Choose file'}
-                </span>
-                <input
-                  type="file"
-                  accept={item.accept}
-                  style={{ display: 'none' }}
-                  disabled={Boolean(uploading) || busy}
-                  onChange={(event) => {
-                    const file = event.target.files?.[0];
-                    if (file) void uploadAsset(item.id, file);
-                    event.target.value = '';
-                  }}
-                />
+        <div className="cex-studio-chapter">
+          <h4 className="cex-studio-chapter-title">Colors, type &amp; voice</h4>
+          <div className="cex-studio-fields">
+            {FIELD_META.filter((field) =>
+              ['brand_colors', 'brand_fonts', 'brand_voice'].includes(field.id),
+            ).map((field) => (
+              <label key={field.id} className="cex-studio-field">
+                <span className="cex-studio-field-label">{field.experienceLabel}</span>
+                {field.rows ? (
+                  <textarea
+                    value={fields[field.id]}
+                    onChange={(event) =>
+                      setFields((current) => ({ ...current, [field.id]: event.target.value }))
+                    }
+                    rows={field.rows}
+                    placeholder={field.placeholder}
+                  />
+                ) : (
+                  <input
+                    value={fields[field.id]}
+                    onChange={(event) =>
+                      setFields((current) => ({ ...current, [field.id]: event.target.value }))
+                    }
+                    placeholder={field.placeholder}
+                  />
+                )}
               </label>
             ))}
           </div>
         </div>
 
-        <div
-          style={{
-            marginTop: '1.25rem',
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: '0.75rem',
-            alignItems: 'center',
-          }}
-        >
+        <div className="cex-studio-chapter">
+          <h4 className="cex-studio-chapter-title">What you offer &amp; references</h4>
+          <div className="cex-studio-fields">
+            {FIELD_META.filter((field) =>
+              ['offer_summary', 'competitors', 'inspiration'].includes(field.id),
+            ).map((field) => (
+              <label key={field.id} className="cex-studio-field">
+                <span className="cex-studio-field-label">{field.experienceLabel}</span>
+                {field.rows ? (
+                  <textarea
+                    value={fields[field.id]}
+                    onChange={(event) =>
+                      setFields((current) => ({ ...current, [field.id]: event.target.value }))
+                    }
+                    rows={field.rows}
+                    placeholder={field.placeholder}
+                  />
+                ) : (
+                  <input
+                    value={fields[field.id]}
+                    onChange={(event) =>
+                      setFields((current) => ({ ...current, [field.id]: event.target.value }))
+                    }
+                    placeholder={field.placeholder}
+                  />
+                )}
+              </label>
+            ))}
+          </div>
+        </div>
+
+        <div className="cex-studio-chapter">
+          <h4 className="cex-studio-chapter-title">Creative materials</h4>
+          <p className="cex-studio-copy cex-studio-copy-tight">
+            Logo, photography, and guidelines — whatever you already have.
+          </p>
+          <ul className="cex-studio-materials">
+            {UPLOAD_TYPES.map((item) => (
+              <li key={item.id}>
+                <label className="cex-studio-material">
+                  <span className="cex-studio-material-label">{item.label}</span>
+                  <span className="cex-studio-material-meta">
+                    {uploading === item.id
+                      ? 'Adding…'
+                      : assets[item.id]
+                        ? assets[item.id]!.fileName
+                        : 'Add a file'}
+                  </span>
+                  <input
+                    type="file"
+                    accept={item.accept}
+                    disabled={Boolean(uploading) || busy}
+                    onChange={(event) => {
+                      const file = event.target.files?.[0];
+                      if (file) void uploadAsset(item.id, file);
+                      event.target.value = '';
+                    }}
+                  />
+                </label>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="cex-studio-actions">
           <button
             type="button"
+            className="cex-studio-btn-primary"
             disabled={busy || completing || Boolean(uploading)}
             onClick={() => void save()}
-            style={{
-              border: 'none',
-              borderRadius: '9999px',
-              padding: '0.75rem 1.35rem',
-              fontSize: '0.82rem',
-              fontWeight: 800,
-              letterSpacing: '0.08em',
-              textTransform: 'uppercase',
-              backgroundColor: GOLD,
-              color: NAVY,
-              opacity: busy || completing || uploading ? 0.6 : 1,
-              cursor: busy || completing || uploading ? 'not-allowed' : 'pointer',
-            }}
           >
-            {busy ? 'Saving…' : 'Save progress'}
+            {busy ? 'Sharing…' : 'Share with your guide'}
           </button>
           <button
             type="button"
+            className="cex-studio-btn-secondary"
             disabled={busy || completing || Boolean(uploading) || alreadyComplete}
             onClick={() => void markComplete()}
-            style={{
-              border: `1px solid ${NAVY}`,
-              borderRadius: '9999px',
-              padding: '0.75rem 1.35rem',
-              fontSize: '0.82rem',
-              fontWeight: 800,
-              letterSpacing: '0.08em',
-              textTransform: 'uppercase',
-              background: 'transparent',
-              color: NAVY,
-              opacity: busy || completing || uploading || alreadyComplete ? 0.55 : 1,
-              cursor:
-                busy || completing || uploading || alreadyComplete ? 'not-allowed' : 'pointer',
-            }}
           >
             {alreadyComplete
-              ? 'Ready for review'
+              ? 'Shared for review'
               : completing
                 ? 'Notifying…'
-                : 'I\'m ready for review'}
+                : 'I’m ready for review'}
           </button>
-          {error ? <p style={{ margin: 0, color: '#a33', fontSize: '0.85rem' }}>{error}</p> : null}
-          {success ? (
-            <p style={{ margin: 0, color: '#2d6a4f', fontSize: '0.85rem' }}>{success}</p>
-          ) : null}
+          {error ? <p className="cex-studio-error">{error}</p> : null}
+          {success ? <p className="cex-studio-success">{success}</p> : null}
         </div>
-        <p style={{ margin: '0.85rem 0 0', fontSize: '0.82rem', color: 'var(--cex-muted, #5c6470)', lineHeight: 1.5 }}>
-          Save anytime. Tell us when you&apos;re ready for review — you can keep adding later.
+        <p className="cex-studio-footnote">
+          Share anytime. When you&apos;re ready for review, tell us — you can keep adding later.
         </p>
       </section>
     );

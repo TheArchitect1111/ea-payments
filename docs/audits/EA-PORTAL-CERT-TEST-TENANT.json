@@ -1,0 +1,81 @@
+{
+  "authAttemptAt": "2026-07-23T21:15:00.000Z",
+  "authResult": {
+    "passwordCredentialsAccepted": true,
+    "requires2fa": true,
+    "sessionEstablished": false,
+    "synthesizedOrganizationsId": null,
+    "synthesizedEntitlementsId": null
+  },
+  "purpose": "Pass 1 authenticated runtime — dedicated non-billable cert tenant",
+  "provisionedAt": "2026-07-23T20:57:22.636Z",
+  "provisionScript": "scripts/provision-ea-portal-cert-test.mjs",
+  "nonBillable": true,
+  "didNot": [
+    "stripe_charge",
+    "resend_email",
+    "sms",
+    "website_publish",
+    "demo-enter",
+    "alter_unrelated_clients"
+  ],
+  "identity": {
+    "clientName": "EA Portal Certification Test",
+    "organization": "EA Portal Certification Test",
+    "email": "ea-portal-cert-test@efficiencyarchitects.online",
+    "portalSlug": "ea-portal-cert-test",
+    "tempPassword": "EaPortalCert2026!",
+    "passwordChanged": false,
+    "packagePurchased": "Website + Portal Starter",
+    "commerceOfferId": "website_portal_starter",
+    "amountPaid": 0,
+    "stripeTransactionId": "cert_audit_non_billable_ea_portal",
+    "proposalId": "WPS-ea-portal-cert-test",
+    "assessmentId": "WPS-ASSESS-ea-portal-cert-test"
+  },
+  "records": {
+    "clientRecords": {
+      "table": "Client Records",
+      "baseId": "appv0YoLIMY45fmDA",
+      "recordId": "recNTuXCN3DQ5JsCD",
+      "created": true
+    },
+    "ctpSubmissions": {
+      "table": "CTP Submissions",
+      "baseId": "appv0YoLIMY45fmDA",
+      "airtableRecordId": "rect0iuhuGRllUa8e",
+      "submissionId": "ctp_cert_0c0d1f7d3dd7",
+      "created": true
+    },
+    "organizations": {
+      "table": "Organizations",
+      "baseId": "appv0YoLIMY45fmDA",
+      "recordId": null,
+      "created": false,
+      "skipped": true,
+      "error": "Airtable GET Organizations → 422: {\"error\":{\"type\":\"INVALID_FILTER_BY_FORMULA\",\"message\":\"The formula for filtering records is invalid: Unknown field names: portal slug\"}}"
+    },
+    "entitlements": {
+      "table": "Entitlements",
+      "baseId": "appv0YoLIMY45fmDA",
+      "recordId": null,
+      "created": false,
+      "skipped": true,
+      "error": null
+    }
+  },
+  "signIn": {
+    "portalLoginUrl": "https://efficiencyarchitects.online/portal/login?next=%2Fportal%2Fea-portal-cert-test%2Fctp%2Fprogress",
+    "passwordLoginAction": "Open portal login → \"Sign in with password instead\" → email + temp password. If production portal 2FA is enabled, this path sends a code email to the cert inbox (EA-owned). Prefer admin enter to avoid mail.",
+    "adminEnterUrl": "https://efficiencyarchitects.online/api/admin/show/enter?slug=ea-portal-cert-test",
+    "adminEnterRequires": "Existing admin session with admin:manage; no client email sent",
+    "postLoginHome": "https://efficiencyarchitects.online/portal/ea-portal-cert-test/ctp/progress",
+    "adminEnterLandsOn": "https://efficiencyarchitects.online/portal/ea-portal-cert-test/ctp"
+  },
+  "removalHints": [
+    "Delete Client Records row recNTuXCN3DQ5JsCD",
+    "Delete CTP Submissions row rect0iuhuGRllUa8e (Submission ID ctp_cert_0c0d1f7d3dd7)",
+    "No Organizations row to delete",
+    "No Entitlements row to delete"
+  ]
+}

@@ -809,6 +809,158 @@ a.cex-cta {
   font-weight: 500 !important;
 }
 
+/* Creative review framing (Client Experience) */
+.cex-studio-review {
+  margin-top: 1.5rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--cex-line, rgba(27, 43, 77, 0.12));
+}
+
+.cex-studio-review .cex-studio-heading {
+  font-family: var(--cex-font-display), Georgia, serif;
+  font-size: clamp(1.45rem, 3vw, 1.85rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.cex-studio-chapter {
+  margin: 1.75rem 0 0;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--cex-line, rgba(27, 43, 77, 0.1));
+}
+
+.cex-studio-chapter-title {
+  margin: 0 0 1rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--cex-muted, #5c6470);
+}
+
+.cex-studio-fields {
+  display: grid;
+  gap: 1.1rem;
+}
+
+.cex-studio-field {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.cex-studio-field-label {
+  font-size: 0.95rem !important;
+  font-weight: 650 !important;
+  letter-spacing: -0.01em !important;
+  text-transform: none !important;
+  color: var(--cex-navy, #1b2b4d) !important;
+}
+
+.cex-studio-field input,
+.cex-studio-field textarea {
+  width: 100%;
+  border-radius: 0.75rem;
+  padding: 0.85rem 0.95rem;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  resize: vertical;
+}
+
+.cex-studio-copy-tight {
+  margin: 0 0 1rem !important;
+  font-size: 0.92rem !important;
+}
+
+.cex-studio-materials {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--cex-line, rgba(27, 43, 77, 0.1));
+}
+
+.cex-studio-material {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.25rem 1rem;
+  align-items: baseline;
+  padding: 0.95rem 0.1rem;
+  border-bottom: 1px solid var(--cex-line, rgba(27, 43, 77, 0.1));
+  cursor: pointer;
+}
+
+.cex-studio-material input {
+  display: none;
+}
+
+.cex-studio-material-label {
+  font-weight: 700;
+  color: var(--cex-navy, #1b2b4d);
+}
+
+.cex-studio-material-meta {
+  grid-column: 1;
+  font-size: 0.85rem;
+  color: var(--cex-muted, #5c6470);
+}
+
+.cex-studio-actions {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.cex-studio-btn-primary,
+.cex-studio-btn-secondary {
+  min-height: 2.9rem;
+  padding: 0.75rem 1.4rem;
+  border-radius: 999px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+}
+
+.cex-studio-btn-primary {
+  border: none;
+  background: var(--cex-navy, #1b2b4d);
+  color: #fff;
+}
+
+.cex-studio-btn-primary:disabled,
+.cex-studio-btn-secondary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.cex-studio-btn-secondary {
+  border: 1px solid rgba(27, 43, 77, 0.22);
+  background: transparent;
+  color: var(--cex-navy, #1b2b4d);
+}
+
+.cex-studio-error {
+  margin: 0;
+  width: 100%;
+  color: #a33;
+  font-size: 0.88rem;
+}
+
+.cex-studio-success {
+  margin: 0;
+  width: 100%;
+  color: #2d6a4f;
+  font-size: 0.88rem;
+}
+
+.cex-studio-footnote {
+  margin: 0.9rem 0 0;
+  font-size: 0.85rem;
+  line-height: 1.55;
+  color: var(--cex-muted, #5c6470);
+}
+
 .cex-studio-wrap .ep-module-card p,
 .cex-studio-wrap .ep-module-card span,
 .cex-studio-wrap .ep-module-card h2 {

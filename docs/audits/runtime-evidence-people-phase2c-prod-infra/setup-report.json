@@ -1,0 +1,72 @@
+{
+  "artifact": "people-phase2c-prod-infra-setup",
+  "projectRef": "dwygvwnjjaennksddniu",
+  "projectNameExpected": "EA People Production",
+  "at": "2026-07-26T23:54:55.469Z",
+  "suitability": "dedicated_people_production_candidate",
+  "steps": [
+    {
+      "id": "token_present",
+      "ok": true,
+      "detail": "sbp token present in process env"
+    },
+    {
+      "id": "projects_list",
+      "ok": true,
+      "detail": "[\n  {\n    \"created_at\": \"2026-07-26T18:35:21.71201Z\",\n    \"database\": {\n      \"host\": \"db.dwygvwnjjaennksddniu.supabase.co\",\n      \"postgres_engine\": \"17\",\n      \"release_channel\": \"ga\",\n      \"version\": \"17.6.1.147\"\n    },\n    \"id\": \"dwygvwnjjaennksddniu\",\n    \"linked\": false,\n    \"name\": \"EA People Production\",\n    \"organization_id\": \"mogmquuqtfyrxorgsrzk\",\n    \"organization_slug\": \"mogmquuqtfyrxorgsrzk\",\n    \"ref\": \"dwygvwnjjaennksddniu\",\n    \"region\": \"ca-central-1\",\n    \"status\": \"ACTIVE_HEALTHY\"\n  },\n  {\n    \"created_at\": \"2026-05-11T20:47:03.455962Z\",\n    \"database\": {\n      \"host\": \"db.trpfqjdynlvvqboxnvba.supabase.co\",\n      \"postgres_engine\": \"17\",\n      \"release_channel\": \"ga\",\n      \"version\": \"17.6.1.121\"\n    },\n    \"id\": \"trpfqjdynlvvqboxnvba\",\n    \"linked\": false,\n    \"name\": \"TheArchitect1111's Project\",\n    \"organization_id\": \"mogmquuqtfyrxorgsrzk\",\n    \"organization_slug\": \"mogmquuqtfyrxorgsrzk\",\n    \"ref\": \"trpfqjdynlvvqboxnvba\",\n    \"region\": \"us-west-2\",\n    \"status\": \"INACTIVE\"\n  }\n]\n"
+    },
+    {
+      "id": "link",
+      "ok": true,
+      "detail": "Finished supabase link.\n"
+    },
+    {
+      "id": "db_push",
+      "ok": true,
+      "detail": "Finished supabase db push.\n"
+    },
+    {
+      "id": "sql_verify",
+      "ok": false,
+      "detail": "\u001b[31mno SQL provided via stdin\u001b[39m\nTry rerunning the command with --debug to troubleshoot the error.\n"
+    },
+    {
+      "id": "pre_request_bind",
+      "ok": false,
+      "detail": "Connecting to local database...\n\u001b[31mfailed to connect to postgres: effect/sql/SqlError: PgClient: Failed to connect\u001b[39m\nTry rerunning the command with --debug to troubleshoot the error.\n"
+    },
+    {
+      "id": "project_meta",
+      "ok": true,
+      "detail": "status=200"
+    },
+    {
+      "id": "postgrest_settings_probe",
+      "ok": true,
+      "detail": "status=200"
+    },
+    {
+      "id": "api_keys_list",
+      "ok": true,
+      "detail": "keys retrieved (not printed)"
+    },
+    {
+      "id": "auth_config",
+      "ok": false,
+      "detail": "auth config returned but jwt_secret field missing"
+    },
+    {
+      "id": "vercel_env",
+      "ok": false,
+      "detail": "skipped — no people_app jwt"
+    }
+  ],
+  "blockers": [
+    {
+      "id": "jwt_secret_field",
+      "action": "Set SUPABASE_JWT_SECRET from Dashboard → Settings → API → JWT Secret, then re-run",
+      "link": "https://supabase.com/dashboard/project/dwygvwnjjaennksddniu/settings/api"
+    }
+  ],
+  "flagsRemainOff": true
+}

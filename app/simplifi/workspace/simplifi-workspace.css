@@ -1801,3 +1801,47 @@ button.sw-claim-retry:disabled {
     grid-template-columns: 1fr;
   }
 }
+
+.sw-brief-intel {
+  margin: 1.25rem 0 1.75rem;
+}
+
+.sw-brief-intel-section {
+  margin-top: 1rem;
+}
+
+.sw-brief-intel-section h3 {
+  margin: 0 0 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 650;
+  color: #1b2b4d;
+}
+
+.sw-brief-intel-item {
+  margin-bottom: 0.75rem;
+}
+
+.sw-brief-intel-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.5rem;
+}
+
+.sw-brief-intel-btn {
+  appearance: none;
+  border: 1px solid rgba(27, 43, 77, 0.18);
+  background: #fff;
+  color: #1b2b4d;
+  font: inherit;
+  font-size: 0.75rem;
+  padding: 0.25rem 0.55rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.sw-brief-intel-btn:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+

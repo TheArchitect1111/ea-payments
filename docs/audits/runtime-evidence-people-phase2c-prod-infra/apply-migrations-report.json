@@ -1,0 +1,37 @@
+{
+  "ref": "dwygvwnjjaennksddniu",
+  "at": "2026-07-27T00:08:29.028Z",
+  "steps": [
+    {
+      "id": "link",
+      "ok": true,
+      "detail": "Finished supabase link.\n"
+    },
+    {
+      "id": "db_push",
+      "ok": false,
+      "detail": "\nConnecting to remote database...\nfailed to connect to postgres: failed to connect to `host=db.dwygvwnjjaennksddniu.supabase.co user=postgres database=postgres`: failed SASL auth (FATAL: password authentication failed for user \"postgres\" (SQLSTATE 28P01))\nConnect to your database by setting the env var correctly: SUPABASE_DB_PASSWORD\n"
+    },
+    {
+      "id": "007_people_phase2c_schema.sql",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "008_people_phase2c_postgrest_wiring.sql",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "009_people_upsert_relationship.sql",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "010_people_get_person.sql",
+      "ok": true,
+      "detail": ""
+    }
+  ],
+  "blockers": []
+}

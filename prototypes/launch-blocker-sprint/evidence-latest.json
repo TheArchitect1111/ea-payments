@@ -1,0 +1,107 @@
+{
+  "at": "2026-07-21T13:43:27.559Z",
+  "canonicalHost": "https://efficiencyarchitects.online",
+  "note": "www is not the EA platform API host; legal must resolve on apex.",
+  "legalApex": [
+    {
+      "url": "https://efficiencyarchitects.online/legal/privacy",
+      "status": 200,
+      "location": null,
+      "ms": 1971,
+      "ok": true
+    },
+    {
+      "url": "https://efficiencyarchitects.online/legal/terms",
+      "status": 200,
+      "location": null,
+      "ms": 473,
+      "ok": true
+    },
+    {
+      "url": "https://efficiencyarchitects.online/legal/eula",
+      "status": 200,
+      "location": null,
+      "ms": 168,
+      "ok": true
+    },
+    {
+      "url": "https://efficiencyarchitects.online/legal/ai-disclosure",
+      "status": 200,
+      "location": null,
+      "ms": 102,
+      "ok": true
+    },
+    {
+      "url": "https://efficiencyarchitects.online/legal/support",
+      "status": 200,
+      "location": null,
+      "ms": 209,
+      "ok": true
+    },
+    {
+      "url": "https://efficiencyarchitects.online/legal/cookies",
+      "status": 200,
+      "location": null,
+      "ms": 117,
+      "ok": true
+    }
+  ],
+  "legalApexAll200": true,
+  "redirects": [
+    {
+      "url": "https://efficiencyarchitects.online/privacy",
+      "status": 308,
+      "location": "/legal/privacy",
+      "ms": 94,
+      "ok": true
+    },
+    {
+      "url": "https://efficiencyarchitects.online/terms",
+      "status": 308,
+      "location": "/legal/terms",
+      "ms": 54,
+      "ok": true
+    }
+  ],
+  "legalWwwFalsePositive": [
+    {
+      "url": "https://www.efficiencyarchitects.online/legal/privacy",
+      "status": 200,
+      "location": null,
+      "ms": 759,
+      "ok": true
+    },
+    {
+      "url": "https://www.efficiencyarchitects.online/api/health/launch",
+      "status": 404,
+      "location": null,
+      "ms": 324,
+      "ok": false
+    }
+  ],
+  "health": {
+    "url": "https://efficiencyarchitects.online/api/health/launch",
+    "status": 200,
+    "location": null,
+    "ms": 440,
+    "ok": true
+  },
+  "healthStatus": "full_launch_ready",
+  "esignatures": {
+    "msaTemplateId": "",
+    "sowTemplateId": "",
+    "templatesReady": false,
+    "missing": [
+      "ESIGNATURES_MSA_TEMPLATE_ID",
+      "ESIGNATURES_SOW_TEMPLATE_ID"
+    ],
+    "callbackUrl": "https://efficiencyarchitects.online/api/webhooks/esignatures",
+    "makeEsignWebhookConfigured": true,
+    "contractDeliveryMode": "manual"
+  },
+  "moneyLoopEnv": {
+    "exitCode": 2,
+    "gate": "FAIL",
+    "tail": "!RESEND_API_KEY                          true       PLACEHOLDER    re_… REQUIRED\n RESEND_FROM_EMAIL                       true       SET:len31      must include @\n AIRTABLE_API_KEY                        true       SET:len82      same base as cert data\n!AIRTABLE_PAYMENTS_BASE_ID               false      MISSING        set or default\n!AIRTABLE_PLATFORM_BASE_ID               false      MISSING        required for durable orgs\n SESSION_SECRET                          true       SET:len35      set\n ADMIN_SESSION_SECRET                    true       SET:len43      set\n NEXT_PUBLIC_BASE_URL                    true       SET:len21      http://localhost:3000\n EA_COMMERCIAL_CERT_MODE                 true       SET:len4       test\n\nGate: FAIL — stop before checkout\nErrors:\n  - STRIPE_SECRET_KEY missing — add sk_test_… to .env.test.local\n  - NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY missing — add pk_test_…\n  - RESEND_API_KEY missing — required for welcome email proof\nWarnings:\n  - AIRTABLE_PLATFORM_BASE_ID unset — durable Organizations may fail (fail-closed is correct).\n\nWrote prototypes/v1-commercial-cert/env-audit.json\n"
+  }
+}

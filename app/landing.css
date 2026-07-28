@@ -716,6 +716,86 @@ html {
   color: var(--pl-ink);
 }
 
+.pl-legal-meta {
+  margin: 0 0 1.25rem;
+  font-size: 0.85rem;
+  color: var(--pl-muted);
+}
+
+.pl-legal-toc {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem 1rem;
+  margin: 0 0 1.75rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--pl-line);
+}
+
+.pl-legal-toc a {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--pl-muted);
+  text-decoration: none;
+}
+
+.pl-legal-toc a:hover,
+.pl-legal-toc a.is-active {
+  color: var(--pl-ink);
+  text-decoration: underline;
+}
+
+.pl-legal-markdown h2 {
+  margin: 32px 0 12px;
+  color: var(--pl-ink);
+  font-size: 1.2rem;
+}
+
+.pl-legal-markdown h3 {
+  margin: 24px 0 10px;
+  color: var(--pl-ink);
+  font-size: 1.05rem;
+}
+
+.pl-legal-markdown ul,
+.pl-legal-markdown ol {
+  padding-left: 1.2rem;
+  margin: 0.5rem 0 1rem;
+}
+
+.pl-legal-markdown table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+  font-size: 0.95rem;
+}
+
+.pl-legal-markdown th,
+.pl-legal-markdown td {
+  border: 1px solid var(--pl-line);
+  padding: 0.5rem 0.65rem;
+  text-align: left;
+}
+
+.pl-legal-print-hint {
+  margin-top: 2rem;
+  font-size: 0.8rem;
+  color: var(--pl-muted);
+}
+
+@media print {
+  .pl-nav,
+  .pl-legal-toc,
+  .pl-legal-back,
+  .pl-legal-print-hint {
+    display: none !important;
+  }
+
+  .pl-legal-shell {
+    max-width: none;
+    padding: 0;
+  }
+}
+
 .pl-legal-back {
   margin-top: 40px;
 }

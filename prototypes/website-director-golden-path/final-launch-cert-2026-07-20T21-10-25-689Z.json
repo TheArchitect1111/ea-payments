@@ -1,0 +1,32 @@
+{
+  "title": "FINAL LAUNCH CERTIFICATION",
+  "at": "2026-07-20T21:10:25.689Z",
+  "verdict": "NO-GO",
+  "commit": "341a191fe4a1038c78dea610fc9a000fa2eec55c",
+  "commitShort": "341a191f",
+  "environment": "https://efficiencyarchitects.online",
+  "gitStatus": "## launch/blocker-website-portal-ctp...origin/launch/blocker-website-portal-ctp\n M lib/experience-builder/experience-builder.css\n M lib/experience-builder/page-store.ts\n M lib/experience-builder/publish-page.ts\n M lib/experience-builder/puck-config.tsx\n M lib/experience-builder/types.ts\n M lib/factory-publish-website.ts\n M lib/fulfill-paid-client.ts\n M lib/provision-website-portal.ts\n M scripts/test-factory-publish-website.mjs\n M scripts/test-website-portal-starter.mjs\n M vendor/website-engine/src/puck-map.ts\n?? .launch-preflight.json\n?? lib/launch-publish-infra.ts\n?? lib/layout-composer/\n?? lib/website-director/\n?? lib/website-publish-gate.ts\n?? prototypes/\n?? scripts/_cert-env-probe.mjs\n?? scripts/run-final-launch-cert.mjs\n?? scripts/run-unified-publish-cert.mjs\n?? scripts/run-website-director-golden-path-ed.mjs\n?? scripts/run-website-portal-e2e-cert-probe.mjs\n?? scripts/test-layout-composer-five-orgs.mjs\n?? scripts/test-layout-composer-five-orgs.ts\n?? scripts/test-website-publish-gate.mjs",
+  "gateOnHead": false,
+  "productionEnv": {
+    "stripe": true,
+    "stripeWebhookSecret": true,
+    "resend": true,
+    "resendFrom": true,
+    "airtable": true,
+    "creativeStudio": true,
+    "websitePortalAuto": true
+  },
+  "checkoutProbe": {
+    "email": "cert.final.stop.1784581828986@mailinator.com",
+    "httpStatus": 200,
+    "stripeMode": "live",
+    "sessionUrlPresent": true
+  },
+  "stoppedAt": "Production Stripe is LIVE (cs_live). Automated certification cannot complete a real $2,497 charge without authorized payment. Test-mode cert environment required, or human completes live checkout.",
+  "failures": [
+    "Production Stripe is LIVE (cs_live). Automated certification cannot complete a real $2,497 charge without authorized payment. Test-mode cert environment required, or human completes live checkout.",
+    "Unified publish gate (lib/website-publish-gate.ts) is not on HEAD / not deployed — production fulfill would not enforce ED ≥80",
+    "STOP: Unified publish gate is not committed to HEAD. Production cannot certify ED-gated publish until gate is deployed."
+  ],
+  "note": "Certification stopped before payment — no live charge attempted."
+}

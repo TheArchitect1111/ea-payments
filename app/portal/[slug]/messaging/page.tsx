@@ -2,11 +2,14 @@ import Link from 'next/link';
 import { requirePortalModule } from '@/lib/modules/portal-modules';
 import { listPortalMessagingThreads } from '@/lib/portal-messaging-hub';
 import { PortalSubpage } from '@/app/portal/components/PortalSubpage';
+import { redirectCtpClientFromExecutiveSurface } from '@/lib/ctp-executive-surface-redirect';
+import { CX_EMOTION } from '@/lib/ctp-emotional-copy';
 
 export const dynamic = 'force-dynamic';
 
 export default async function MessagingPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
+  await redirectCtpClientFromExecutiveSurface(slug, 'messages');
   const { client } = await requirePortalModule(slug, 'messaging');
   const view = await listPortalMessagingThreads(slug, client);
 
@@ -14,25 +17,25 @@ export default async function MessagingPage({ params }: { params: Promise<{ slug
     <PortalSubpage
       slug={slug}
       active="messaging"
-      kicker="Communication"
-      title="Messaging center"
-      lede="Advisor conversations live in Update Hub — start a request here, then follow replies in your activity feed."
+      kicker="Guide contact"
+      title="Contact your guide"
+      lede={CX_EMOTION.contact.lede}
     >
       <ul className="ep-module-list">
         <li className="ep-module-card">
           <Link href={`/portal/${slug}/updates/new`} className="ep-module-card-title">
-            Send a message to your advisor
+            Submit a request
           </Link>
           <p className="ep-module-card-note">
-            Share context, questions, or files — routed to the Update Hub queue.
+            Share context, questions, or files — your guide reviews the queue.
           </p>
         </li>
         <li className="ep-module-card">
           <Link href={`/portal/${slug}/updates`} className="ep-module-card-title">
-            View activity &amp; replies
+            View project updates
           </Link>
           <p className="ep-module-card-note">
-            {view.pendingCount} open · {view.publishedCount} published in your feed.
+            {view.pendingCount} open · {view.publishedCount} published updates.
           </p>
         </li>
         <li className="ep-module-card">

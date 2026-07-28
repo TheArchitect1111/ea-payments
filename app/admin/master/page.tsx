@@ -118,8 +118,15 @@ export default async function MasterPortalPage() {
         decisions={decisions}
         lastUpdated={lastUpdated}
       />
-      <section className="mt-10">
-        <WebsitePortalOpsPanel />
+      <section className="mt-10" id="website-portal-ops">
+        <details className="border-t border-neutral-200 pt-6">
+          <summary className="cursor-pointer text-sm font-bold text-[#1B2B4D]">
+            Website + Portal ops (advanced)
+          </summary>
+          <div className="mt-4">
+            <WebsitePortalOpsPanel />
+          </div>
+        </details>
       </section>
     </main>
   );

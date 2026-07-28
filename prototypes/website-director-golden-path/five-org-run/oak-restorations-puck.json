@@ -1,0 +1,77 @@
+{
+  "root": {
+    "props": {
+      "title": "Oak Street Restorations",
+      "compositionSignature": "current_reality:reality_documentary_stat|mission:mission_legacy_quiet|transformation:transform_split_editorial|proof:proof_trust_statement|invitation:invitation_commission",
+      "primaryArchetype": "The Restorer",
+      "primaryColor": "#3E2F24",
+      "accentColor": "#B08D57"
+    }
+  },
+  "content": [
+    {
+      "type": "EATextSection",
+      "props": {
+        "id": "reality-1",
+        "variant": "documentary",
+        "label": "Now",
+        "title": "Once a facade is gone, the street forgets who it was.",
+        "body": "Once a facade is gone, the street forgets who it was.",
+        "accentValue": "Today",
+        "accentCaption": "Heritage buildings fail quietly until repair becomes impossible."
+      }
+    },
+    {
+      "type": "EATextSection",
+      "props": {
+        "id": "mission-2",
+        "variant": "legacy",
+        "label": "Mission",
+        "title": "Bring damaged heritage structures back to whole, usable life.",
+        "body": "Bring damaged heritage structures back to whole, usable life.",
+        "accentValue": "",
+        "accentCaption": ""
+      }
+    },
+    {
+      "type": "EASplitNarrative",
+      "props": {
+        "id": "transform-3",
+        "label": "Change",
+        "title": "From deferred decay to restored integrity people can inhabit again.",
+        "leftLabel": "Before",
+        "leftTitle": "Unresolved reality",
+        "leftBody": "Once a facade is gone, the street forgets who it was.",
+        "rightLabel": "After",
+        "rightTitle": "What becomes possible",
+        "rightBody": "From deferred decay to restored integrity people can inhabit again."
+      }
+    },
+    {
+      "type": "EATextSection",
+      "props": {
+        "id": "proof-4",
+        "variant": "proof",
+        "label": "Trust",
+        "title": "Why people trust this work",
+        "body": "Material-honest repair · Before/after with context · No shame for the past",
+        "accentValue": "",
+        "accentCaption": ""
+      }
+    },
+    {
+      "type": "EACtaBand",
+      "props": {
+        "id": "invite-5",
+        "variant": "commission",
+        "title": "Begin a restoration",
+        "body": "Careful repair for buildings that carry a town memory.",
+        "primaryLabel": "Begin a restoration",
+        "primaryHref": "/portal/login",
+        "secondaryLabel": "View this site",
+        "secondaryHref": "/sites/oak-restorations"
+      }
+    }
+  ],
+  "zones": {}
+}

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-26T11:45:13.229Z",
+  "generatedAt": "2026-07-26T12:56:18.561Z",
   "harness": "scripts/test-industry-pack-runtime-cert.mts",
   "demoFixtures": {
     "DEMO_SLUG": "demo-client",
@@ -258,8 +258,8 @@
         "sample-placeholder"
       ],
       "flagState": "N/A",
-      "expected": "No @rjsf/@novu imports under portal-universal; extensions disabled; people/tasks map empty",
-      "actual": "runtimeHits=0; allExtOff=true; peopleModulesEmpty=true; caps=10",
+      "expected": "No @rjsf/@novu imports under portal-universal; extensions disabled; tasks map empty; people maps to module",
+      "actual": "runtimeHits=0; allExtOff=true; peopleMapped=true; tasksEmpty=true; caps=10",
       "pass": true
     },
     {

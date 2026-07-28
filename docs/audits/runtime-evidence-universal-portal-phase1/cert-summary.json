@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-26T11:45:15.639Z",
+  "generatedAt": "2026-07-26T12:56:25.676Z",
   "demoSlug": "demo-client",
   "packIdsTested": [
     "ea-executive",
@@ -19,50 +19,50 @@
     "ON (1)"
   ],
   "http": {
-    "serverUp": false,
-    "base": "http://localhost:3000",
+    "serverUp": true,
+    "base": "http://127.0.0.1:3010",
     "results": [
       {
         "route": "/portal/login",
-        "status": "ERR",
-        "ok": false,
-        "note": "fetch failed"
+        "status": 200,
+        "ok": true,
+        "note": "ok"
       },
       {
         "route": "/portal/demo-client/ctp",
-        "status": "ERR",
-        "ok": false,
-        "note": "fetch failed"
+        "status": 307,
+        "ok": true,
+        "note": "redirect (likely auth gate)"
       },
       {
         "route": "/portal/demo-client/ctp/progress",
-        "status": "ERR",
-        "ok": false,
-        "note": "fetch failed"
+        "status": 307,
+        "ok": true,
+        "note": "redirect (likely auth gate)"
       },
       {
         "route": "/portal/demo-client/ctp/documents",
-        "status": "ERR",
-        "ok": false,
-        "note": "fetch failed"
+        "status": 307,
+        "ok": true,
+        "note": "redirect (likely auth gate)"
       },
       {
         "route": "/portal/demo-client/ctp/messages",
-        "status": "ERR",
-        "ok": false,
-        "note": "fetch failed"
+        "status": 307,
+        "ok": true,
+        "note": "redirect (likely auth gate)"
       },
       {
         "route": "/portal/demo-client/ctp/support",
-        "status": "ERR",
-        "ok": false,
-        "note": "fetch failed"
+        "status": 307,
+        "ok": true,
+        "note": "redirect (likely auth gate)"
       },
       {
         "route": "/portal/ea",
-        "status": "ERR",
-        "ok": false,
-        "note": "fetch failed"
+        "status": 307,
+        "ok": true,
+        "note": "redirect (likely auth gate)"
       }
     ],
     "flagAtProbe": "ON"
@@ -255,24 +255,12 @@
       "packIds": "N/A (auth gate)",
       "flag": "ON",
       "expected": "local routes respond 200 or auth redirect; no 500",
-      "actual": "server not reachable — skipped as CONDITION",
+      "actual": "/portal/login=200; /portal/demo-client/ctp=307; /portal/demo-client/ctp/progress=307; /portal/demo-client/ctp/documents=307; /portal/demo-client/ctp/messages=307; /portal/demo-client/ctp/support=307; /portal/ea=307",
       "pass": true,
       "errors": [],
       "evidence": "C:\\Users\\brick\\ea-launch-audit\\ea-payments\\docs\\audits\\runtime-evidence-universal-portal-phase1\\http-probes.json"
-    },
-    {
-      "id": "HTTP-SERVER-AVAILABILITY",
-      "routeOrSurface": "http://localhost:3000",
-      "roles": "N/A",
-      "packIds": "N/A",
-      "flag": "N/A",
-      "expected": "optional local Next server for UI screenshots",
-      "actual": "not running — browser/desktop-mobile visual checks deferred",
-      "pass": true,
-      "errors": [],
-      "evidence": "CONDITION: start npm run dev for visual re-check"
     }
   ],
-  "passCount": 18,
+  "passCount": 17,
   "failCount": 0
 }

@@ -1,0 +1,43 @@
+{
+  "people_schema": true,
+  "tables": [
+    "acl_grants",
+    "audit_events",
+    "consents",
+    "household_members",
+    "households",
+    "import_jobs",
+    "import_row_results",
+    "merge_jobs",
+    "migration_checkpoints",
+    "org_memberships",
+    "person_email_keys",
+    "person_external_keys",
+    "persons",
+    "program_links",
+    "relationships"
+  ],
+  "table_count": 15,
+  "force_rls": 15,
+  "rls_enabled": 15,
+  "people_app_role": true,
+  "people_app_bypassrls": false,
+  "rpcs": [
+    "ensure_person",
+    "get_person",
+    "merge_finalize",
+    "pre_request",
+    "update_person",
+    "upsert_relationship"
+  ],
+  "migration_versions": [
+    "007",
+    "008",
+    "009",
+    "010"
+  ],
+  "grants_people_app_schema": 0,
+  "service_role_table_privs": 0,
+  "service_role_routine_privs": 0,
+  "pre_request_setting": "session_preload_libraries=supautils, safeupdate,statement_timeout=8s,lock_timeout=8s,pgrst.db_pre_request=people.pre_request"
+}

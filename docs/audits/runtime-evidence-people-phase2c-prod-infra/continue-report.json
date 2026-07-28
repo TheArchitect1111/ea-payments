@@ -1,0 +1,49 @@
+{
+  "artifact": "people-phase2c-prod-infra-continue",
+  "projectRef": "dwygvwnjjaennksddniu",
+  "at": "2026-07-27T00:35:03.758Z",
+  "migrationsAppliedViaFallback": true,
+  "steps": [
+    {
+      "id": "sql_verify",
+      "ok": true,
+      "detail": "┌─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐\n│ json_build_object                                                                                                                                                                                           │\n├─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤\n│ {\"people_schema\" : true, \"table_count\" : 15, \"force_rls\" : 15, \"people_app_role\" : true, \"rpcs\" : [\"ensure_person\", \"get_person\", \"merge_finalize\", \"pre_request\", \"update_person\", \"upsert_relationship\"]} │\n└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘\n"
+    },
+    {
+      "id": "pre_request_bind",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "auth_config_fetch",
+      "ok": true,
+      "detail": "from SUPABASE_JWT_SECRET env"
+    },
+    {
+      "id": "mint_people_app_jwt",
+      "ok": true,
+      "detail": "role=people_app"
+    },
+    {
+      "id": "vercel_url",
+      "ok": true,
+      "detail": "https://dwygvwnjjaennksddniu.supabase.co"
+    },
+    {
+      "id": "vercel_key",
+      "ok": true,
+      "detail": "people_app jwt set"
+    },
+    {
+      "id": "flags_off",
+      "ok": true,
+      "detail": "UNIVERSAL_PEOPLE* not enabled on production"
+    },
+    {
+      "id": "expose_schema_reminder",
+      "ok": true,
+      "detail": "Confirm Exposed schemas includes people: https://supabase.com/dashboard/project/dwygvwnjjaennksddniu/settings/api"
+    }
+  ],
+  "blockers": []
+}

@@ -5,7 +5,6 @@ import { useEffect, useState } from 'react';
 import type { CaptureApiResponse } from '@/lib/capture-response';
 import { pollCaptureUntilReady } from '@/lib/capture-polling';
 import CaptureSuccessPanel from '@/app/components/CaptureSuccessPanel';
-import ActiveSavePanel from '@/app/components/ActiveSavePanel';
 import { clearProcessingCaptureId } from '@/lib/capture-upload-limits';
 
 export default function CaptureProcessingPanel({
@@ -72,19 +71,23 @@ export default function CaptureProcessingPanel({
   if (result?.record) {
     return (
       <div className={variant === 'capture' ? 'sc-processing-result' : 'space-y-3'}>
-        {showActiveSave && (
-          <ActiveSavePanel
-            recordId={result.record.id}
-            title={result.record.title ?? title ?? 'Opportunity'}
-          />
-        )}
         <CaptureSuccessPanel
           title={result.record.title ?? title ?? 'Opportunity'}
+          recordId={result.record.id}
+          loggedIn={showActiveSave}
+          insight={{
+            opportunityScore: result.record.opportunityScore,
+            nextAction: result.nextAction ?? result.record.nextAction,
+            decisionPath: result.decisionPath,
+            decisionConfidence: result.decisionConfidence,
+            decisionRationale: result.decisionRationale,
+          }}
           links={{
             magnifiUrl: result.magnifiUrl,
             considerUrl: result.considerUrl,
             guidanceUrl: result.guidanceUrl,
-            workspaceUrl: result.workspaceUrl,
+            workspaceUrl: result.workspaceUrl ?? workspaceHref,
+            opportunityUrl: result.opportunityUrl ?? `/simplifi/opportunity/${result.record.id}`,
             clientMessage: result.clientMessage,
           }}
           amplifiDraft={result.amplifiDraft}

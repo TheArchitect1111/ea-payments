@@ -5,6 +5,7 @@ import {
   findPublishedSitePage,
   siteUrlForSlug,
 } from '@/lib/provision-website-portal';
+import { redirectCtpClientFromExecutiveSurface } from '@/lib/ctp-executive-surface-redirect';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,6 +19,7 @@ const RESOURCES = [
 
 export default async function ResourcesPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
+  await redirectCtpClientFromExecutiveSurface(slug, 'progress');
   await requirePortalModule(slug, 'resources');
 
   let siteHref: string | null = null;

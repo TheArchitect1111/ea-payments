@@ -75,18 +75,18 @@ export function NotificationCenter({ slug }: { slug: string }) {
             aria-label="Close notifications"
             onClick={() => setOpen(false)}
           />
-          <div className="ea-notify-panel" role="dialog" aria-label="Notification center">
+          <div className="ea-notify-panel" role="dialog" aria-label="Updates">
             <div className="ea-notify-panel-head">
-              <p className="ea-notify-panel-title">Notifications</p>
+              <p className="ea-notify-panel-title">Updates</p>
               <button type="button" className="ea-notify-mark-read" onClick={() => void markAllRead()}>
-                Mark all read
+                Clear these
               </button>
             </div>
 
             {loading && notifications.length === 0 ? (
               <p className="ea-notify-empty">Loading…</p>
             ) : notifications.length === 0 ? (
-              <p className="ea-notify-empty">You&apos;re all caught up.</p>
+              <p className="ea-notify-empty">Nothing waiting — rest easy.</p>
             ) : (
               <ul className="ea-notify-list">
                 {notifications.map((item) => (
@@ -116,7 +116,7 @@ export function NotificationCenter({ slug }: { slug: string }) {
             )}
 
             <Link href={`/portal/${slug}/notifications`} className="ea-notify-view-all" onClick={() => setOpen(false)}>
-              View all activity
+              See everything
             </Link>
           </div>
         </>

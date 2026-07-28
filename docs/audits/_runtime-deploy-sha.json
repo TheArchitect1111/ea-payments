@@ -1,0 +1,6 @@
+{
+  "deploymentId": "dpl_B1rHCpoxCNLjpyLLR74K4eBiXQVZ",
+  "gitSha": "37577a328a2d55a6f098e61ecf40aba5cc934032",
+  "matchesTarget545c": false,
+  "note": "vercel inspect --json (id + hostname) confirmed deployment READY/production but omitted git meta; VERCEL_TOKEN absent from env. Build logs (vercel inspect --logs) show Cloning github.com/TheArchitect1111/ea-payments (Branch: master, Commit: 37577a3). Full SHA resolved via GitHub API. Parent of that commit is 545c6251bec86fc692ded933402cde3fb59797f8 — production is one commit later (docs: add EA experience audit pass 1), not 545c6251 itself."
+}

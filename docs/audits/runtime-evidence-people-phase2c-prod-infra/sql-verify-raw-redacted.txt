@@ -1,0 +1,2 @@
+[31mno SQL provided via stdin[39m
+Try rerunning the command with --debug to troubleshoot the error.

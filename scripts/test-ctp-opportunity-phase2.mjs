@@ -45,38 +45,28 @@ assert(emailMod.includes('buildOpportunityEmailModelFromSubmission'), 'Must expo
 assert(emailMod.includes('assertOpportunityEmailLanguage'), 'Must enforce language guardrails');
 assert(emailMod.includes('FORBIDDEN_EMAIL_TERMS'), 'Must define forbidden terms');
 
-// Stage One content (prompt)
+// Hospitality-first confirmation email (observations live in Your Project / Journey)
 const requiredCopy = [
-  "Let's Build Something You'll Be Proud To Share.",
-  'Project Status',
-  'Assessment Received',
-  'Opportunity Dashboard Ready',
-  'Project Snapshot',
-  'Overall Readiness Score',
-  'Opportunity Rating',
-  'Opportunity Summary',
-  'Your Digital Foundation',
-  'Why It Matters',
-  'Typical Investment',
-  'Nonprofit Organizations',
-  'Starting at $997',
-  'Starting at $1,497',
-  'Custom Proposal',
-  'VIEW MY OPPORTUNITY DASHBOARD',
+  "We've started getting to know your organization",
+  "You're expected",
+  'Your Project is ready',
+  'No homework. No rush.',
+  'Open Your Project',
+  'Consider The Possibilities',
 ];
 for (const copy of requiredCopy) {
   assert(emailMod.includes(copy), `Missing required copy: ${copy}`);
 }
 
-// Forbidden CTAs / jargon in email HTML template only (not guardrail constant names)
-const templateStart = emailMod.indexOf('const bodyHtml = `');
-const templateEnd = emailMod.indexOf('`;', templateStart + 1);
-const template = templateStart >= 0 && templateEnd > templateStart
-  ? emailMod.slice(templateStart, templateEnd)
-  : emailMod;
+// Forbidden CTAs / jargon in the hospitality email body (not the guardrail constant list)
+const bodyMatch = emailMod.match(/const bodyHtml = plain\(`([\s\S]*?)`\);/);
+const template = bodyMatch?.[1] || '';
+assert(template.length > 40, 'Email bodyHtml template must be present');
 const forbidden = [
   'Open Design Studio',
   'Open My Workspace',
+  'Estimated Annual Opportunity',
+  '28-50 Hours',
   'Client Portal',
   'Executive Brief',
   'Project Scope',

@@ -42,7 +42,7 @@ export default function PortalLoginPage() {
           {copy.eyebrow ? <p className="pl-eyebrow">{copy.eyebrow}</p> : null}
           <h1 className="pl-title">{copy.pageTitle}</h1>
           <p className="pl-lede">{copy.pageSubtitle}</p>
-          <p className="pl-portal-line">Sign in to your Client Experience portal</p>
+          <p className="pl-portal-line">Sign in to your Client Experience</p>
         </header>
 
         <div className="pl-hero" aria-hidden={false}>
@@ -73,7 +73,7 @@ export default function PortalLoginPage() {
               Partner sign in
             </Link>
           </p>
-          <p className="pl-tagline">Systems that transform businesses.</p>
+          <p className="pl-tagline">You’re expected. We’re already preparing what comes next.</p>
         </footer>
       </div>
     </div>

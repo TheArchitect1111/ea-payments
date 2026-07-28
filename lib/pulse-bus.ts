@@ -97,6 +97,14 @@ export type PulseEventType =
   | 'factory.project.created'
   | 'factory.project.queued'
   | 'factory.project.status'
+  | 'trust.legal.accepted'
+  | 'trust.legal.reacceptance_required'
+  | 'trust.legal.version_published'
+  | 'trust.msa.sent'
+  | 'trust.msa.signed'
+  | 'trust.sow.generated'
+  | 'trust.sow.signed'
+  | 'trust.support.updated'
   | 'event.registration.placed'
   | 'event.registration.confirmed';
 

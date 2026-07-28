@@ -3,7 +3,6 @@
 import { useRef, useState, useEffect } from 'react';
 import type { CaptureRecord } from '@/lib/capture-records';
 import CaptureSuccessPanel from '@/app/components/CaptureSuccessPanel';
-import ActiveSavePanel from '@/app/components/ActiveSavePanel';
 import CaptureProcessingPanel from '@/app/components/CaptureProcessingPanel';
 import EmptyStateGuide from '@/app/components/guided-first-success/EmptyStateGuide';
 import type { AmplifiSocialDraft } from '@/lib/amplifi-draft';
@@ -300,17 +299,23 @@ export default function SimplifiPortalWorkspace({
 
         {lastResult?.record && !processingId && (
           <div className="mt-4 border border-neutral-200 bg-neutral-50 p-4">
-            <ActiveSavePanel
-              recordId={lastResult.record.id}
-              title={lastResult.record.title}
-            />
             <CaptureSuccessPanel
               title={lastResult.record.title}
+              recordId={lastResult.record.id}
+              loggedIn
+              insight={{
+                opportunityScore: lastResult.record.opportunityScore,
+                nextAction: lastResult.nextAction ?? lastResult.record.nextAction,
+                decisionPath: lastResult.decisionPath,
+                decisionConfidence: lastResult.decisionConfidence,
+                decisionRationale: lastResult.decisionRationale,
+              }}
               links={{
                 magnifiUrl: lastResult.magnifiUrl,
                 considerUrl: lastResult.considerUrl,
                 guidanceUrl: lastResult.guidanceUrl,
                 workspaceUrl: `/portal/${slug}/simplifi`,
+                opportunityUrl: lastResult.opportunityUrl ?? `/simplifi/opportunity/${lastResult.record.id}`,
                 clientMessage: lastResult.clientMessage,
               }}
               amplifiDraft={lastResult.amplifiDraft}

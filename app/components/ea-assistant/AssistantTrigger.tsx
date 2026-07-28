@@ -1,6 +1,6 @@
 'use client';
 
-import { ASSISTANT_LABELS } from '@/lib/assistant/constants';
+import { useAssistantLabels } from './assistant-labels';
 
 type AssistantTriggerProps = {
   open: boolean;
@@ -9,6 +9,7 @@ type AssistantTriggerProps = {
 };
 
 export default function AssistantTrigger({ open, showBadge, onToggle }: AssistantTriggerProps) {
+  const labels = useAssistantLabels();
   return (
     <button
       type="button"
@@ -16,9 +17,9 @@ export default function AssistantTrigger({ open, showBadge, onToggle }: Assistan
       onClick={onToggle}
       aria-expanded={open}
       aria-haspopup="dialog"
-      aria-label={open ? ASSISTANT_LABELS.close : ASSISTANT_LABELS.trigger}
+      aria-label={open ? labels.close : labels.trigger}
     >
-      {ASSISTANT_LABELS.trigger}
+      {labels.trigger}
       {showBadge && !open ? <span className="ea-assistant-badge" aria-hidden="true" /> : null}
       {showBadge && !open ? <span className="sr-only">Attention needed</span> : null}
     </button>

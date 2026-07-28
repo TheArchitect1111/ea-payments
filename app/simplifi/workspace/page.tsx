@@ -17,6 +17,17 @@ const EMPTY_WORKSPACE: SimplifiWorkspaceData = {
     items: [],
     recommendedNext: { label: 'Capture something worth exploring', href: '/simplifi/capture' },
     completed: [],
+    intelligence: {
+      enabled: false,
+      sections: {
+        needsAttention: [],
+        momentum: [],
+        commitmentsAtRisk: [],
+        recommendedFollowUps: [],
+        emergingConnections: [],
+        nextBestActions: [],
+      },
+    },
   },
   memoryLibrary: [],
   actionCenter: { needsAttention: [], recommended: [], watchlist: [] },

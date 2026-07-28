@@ -1,0 +1,21 @@
+
+ name                                       value               environments                created    
+ PEOPLE_SUPABASE_KEY                        Encrypted           Production                  2h ago     
+ PEOPLE_SUPABASE_URL                        Encrypted           Production                  2h ago     
+ VERCEL_SUPPORT_LARGE_FUNCTIONS             Encrypted           Production                  5d ago     
+ EACP_CHATGPT_ACTION_KEY                    Encrypted           Production                  8d ago     
+ CRON_SECRET                                Encrypted           Production                  10d ago    
+ APP_ENV                                    Encrypted           Production                  10d ago    
+ NEXT_PUBLIC_GLITCHTIP_DSN                  Encrypted           Production                  10d ago    
+ UPTIME_MONITORING_URL                      Encrypted           Production                  15d ago    
+ LAUNCH_AUTO_APPROVE_PROPOSALS              Encrypted           Production                  18d ago    
+ ADMIN_EMAIL                                Encrypted           Production                  23d ago    
+ RESEND_FROM_EMAIL                          Encrypted           Production                  23d ago    
+ LAUNCH_SETUP_KEY                           Encrypted           Production                  23d ago    
+ CREATIVE_STUDIO_PORTAL_SLUG                Encrypted           Production                  23d ago    
+ CONTRACT_DELIVERY_MODE                     Encrypted           Production                  26d ago    
+ BACKUP_DESTINATION_URI                     Encrypted           Production                  26d ago    
+ EACP_AIRTABLE_PAYLOAD_FIELD                Encrypted           Production                  33d ago    
+ EACP_AIRTABLE_KEY_FIELD                    Encrypted           Production                  33d ago    
+ EACP_AIRTABLE_TABLE                        Encrypted           Production                  33d ago    
+ STRIPE_PRICE_LAUNCH_VE

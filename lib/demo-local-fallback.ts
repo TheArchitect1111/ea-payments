@@ -56,7 +56,14 @@ export function validateLocalDemoLogin(
   email: string,
   password: string,
 ): { ok: true; slug: string; recordId: string } | null {
-  if (!localDemoFallbackEnabled() || !isDemoCredentialAttempt(email, password)) {
+  if (!localDemoFallbackEnabled()) return null;
+
+  const website = getDemoWebsitePortalCredentials();
+  if (email === website.email && password === website.password) {
+    return { ok: true, slug: website.slug, recordId: 'local-demo-website' };
+  }
+
+  if (!isDemoCredentialAttempt(email, password)) {
     return null;
   }
 

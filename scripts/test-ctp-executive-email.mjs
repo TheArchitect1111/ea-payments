@@ -59,10 +59,10 @@ assert(
   email.includes('ctp-opportunity-email') || emailModule.includes('buildOpportunityExperienceEmail'),
   'Email must use Opportunity Experience builder',
 );
-assert(emailModule.includes('VIEW MY OPPORTUNITY DASHBOARD'), 'Email CTA must open Opportunity Dashboard');
-assert(emailModule.includes("Let's Build Something You'll Be Proud To Share"), 'Email hero headline required');
-assert(emailModule.includes('Your Digital Foundation'), 'Email must include Digital Foundation');
-assert(emailModule.includes('Typical Investment'), 'Email must include investment expectations');
+assert(emailModule.includes('Open Your Project'), 'Email CTA must open Your Project');
+assert(emailModule.includes("You're expected"), 'Email hospitality title required');
+assert(emailModule.includes('No homework'), 'Email must promise no homework');
+assert(!emailModule.includes('Estimated Annual Opportunity'), 'Must not lead with dollar grids in first email');
 assert(!emailModule.includes('Open My Design Studio'), 'Must not CTA to Design Studio');
 assert(!email.includes('View My Executive Brief'), 'Must not use Executive Brief CTA label');
 assert(!email.includes('Schedule Executive Strategy Session'), 'Must not use consultant strategy-session CTA');

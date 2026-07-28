@@ -1,0 +1,58 @@
+{
+  "appName": "Simplifi Orb",
+  "packageName": "com.efficiencyarchitects.simplifiorb",
+  "privacyPolicyUrl": "https://efficiencyarchitects.online/legal/privacy",
+  "accountDeletionUrl": "https://efficiencyarchitects.online/legal/account-deletion",
+  "termsUrl": "https://efficiencyarchitects.online/legal/terms",
+  "eulaUrl": "https://efficiencyarchitects.online/legal/eula",
+  "aiDisclosureUrl": "https://efficiencyarchitects.online/legal/ai-disclosure",
+  "supportPolicyUrl": "https://efficiencyarchitects.online/legal/support",
+  "supportEmail": "freedom@efficiencyarchitects.online",
+  "supportWebsite": "https://efficiencyarchitects.online",
+  "sourceOfTruth": "lib/trust-engine/google-play-data-safety.ts",
+  "dataCollected": [
+    {
+      "category": "Personal info",
+      "types": ["Name", "Email address", "User IDs"],
+      "purpose": ["App functionality", "Account management"],
+      "optional": false
+    },
+    {
+      "category": "App activity",
+      "types": ["App interactions", "In-app search history"],
+      "purpose": ["App functionality", "Analytics"],
+      "optional": false
+    },
+    {
+      "category": "Photos and videos",
+      "types": ["Photos"],
+      "purpose": ["App functionality"],
+      "optional": true
+    },
+    {
+      "category": "Device or other IDs",
+      "types": ["Device or other IDs"],
+      "purpose": ["App functionality", "Fraud prevention, security, and compliance"],
+      "optional": false
+    }
+  ],
+  "dataShared": [
+    {
+      "category": "Personal info",
+      "types": ["Email address"],
+      "purpose": ["App functionality"]
+    }
+  ],
+  "securityPractices": {
+    "dataEncryptedInTransit": true,
+    "usersCanRequestDeletion": true,
+    "committedToPlayFamiliesPolicy": false
+  },
+  "ads": false,
+  "notes": [
+    "Photos collected only when the user uses Capture.",
+    "Payment card data processed by Stripe on the web backend; not stored by Ascension Systems.",
+    "Account deletion: Settings → Delete account; web https://efficiencyarchitects.online/legal/account-deletion",
+    "Align Play Console Data Safety form with this object before production release."
+  ]
+}

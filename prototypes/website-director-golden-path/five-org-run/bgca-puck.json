@@ -1,0 +1,79 @@
+{
+  "root": {
+    "props": {
+      "title": "Boys & Girls Clubs of America",
+      "compositionSignature": "human_story:human_threshold_bleed|mission:mission_plane_full|impact:impact_editorial_figures|proof:proof_trust_statement|invitation:invitation_belonging",
+      "primaryArchetype": "The Community Builder",
+      "primaryColor": "#0033A0",
+      "accentColor": "#E87722"
+    }
+  },
+  "content": [
+    {
+      "type": "EAHero",
+      "props": {
+        "id": "human-1",
+        "variant": "threshold",
+        "eyebrow": "Boys & Girls Clubs of America",
+        "title": "America Needs Club Kids",
+        "subtitle": "When kids have a Club, they thrive — and so does the country.",
+        "ctaLabel": "Find a Club Near You",
+        "ctaHref": "#invite",
+        "imageUrl": ""
+      }
+    },
+    {
+      "type": "EATextSection",
+      "props": {
+        "id": "mission-2",
+        "variant": "mission-plane",
+        "label": "Mission",
+        "title": "Ensure every young person who enters a Club has the opportunity to thrive, lead, and shape America tomorrow.",
+        "body": "Ensure every young person who enters a Club has the opportunity to thrive, lead, and shape America tomorrow.",
+        "accentValue": "",
+        "accentCaption": ""
+      }
+    },
+    {
+      "type": "EAMetrics",
+      "props": {
+        "id": "impact-3",
+        "variant": "editorial",
+        "label": "Impact",
+        "title": "What changes in the real world",
+        "metricOneValue": "1",
+        "metricOneLabel": "Clear story visitors can feel",
+        "metricTwoValue": "1",
+        "metricTwoLabel": "Path that respects the audience",
+        "metricThreeValue": "1",
+        "metricThreeLabel": "Next step that is honest"
+      }
+    },
+    {
+      "type": "EATextSection",
+      "props": {
+        "id": "proof-4",
+        "variant": "proof",
+        "label": "Trust",
+        "title": "Why people trust this work",
+        "body": "Youth of the Year · Local Club belonging at national scale · Outcome evidence",
+        "accentValue": "",
+        "accentCaption": ""
+      }
+    },
+    {
+      "type": "EACtaBand",
+      "props": {
+        "id": "invite-5",
+        "variant": "belonging",
+        "title": "Find a Club Near You",
+        "body": "When kids have a Club, they thrive — and so does the country.",
+        "primaryLabel": "Find a Club Near You",
+        "primaryHref": "/portal/login",
+        "secondaryLabel": "View this site",
+        "secondaryHref": "/sites/bgca"
+      }
+    }
+  ],
+  "zones": {}
+}

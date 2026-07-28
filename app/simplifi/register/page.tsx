@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import RegisterForm from '@/components/auth/RegisterForm';
+import { SimplifiLegalGate } from './SimplifiLegalGate';
 import '../../portal/login/portal-login.css';
 import '../login/simplifi-auth.css';
 
@@ -18,9 +19,17 @@ export default function SimplifiRegisterPage() {
           </Link>
           <p className="pl-eyebrow">Early Access</p>
           <h1 className="pl-title">Request Simplifi access</h1>
-          <p className="pl-lede">Ask for a workspace, or start with the assessment if you are still mapping the right EA path.</p>
+          <p className="pl-lede">
+            Submit a request for Early Access. This does not create a live account until we approve
+            you. Already approved?{' '}
+            <Link href="/simplifi/login">Sign in</Link>
+            {' · '}
+            <Link href="/legal/privacy">Privacy Policy</Link>
+          </p>
         </header>
-        <RegisterForm realm="simplifi" />
+        <SimplifiLegalGate>
+          <RegisterForm realm="simplifi" />
+        </SimplifiLegalGate>
       </div>
     </div>
   );

@@ -1,0 +1,692 @@
+# EA Experience Audit — Pass 1 (Surface & Navigation Inventory)
+
+| Field | Value |
+|---|---|
+| **Pass** | 1 — Registry & inventory only |
+| **Audited git commit** | `545c6251bec86fc692ded933402cde3fb59797f8` |
+| **Commit subject** | `fix: secure launch health and simplify MCC navigation` |
+| **Audit date** | 2026-07-23 |
+| **Validation / correction** | 2026-07-23 — revalidated against `git show` / `git ls-tree` of `545c6251` only; prior draft mixed dirty worktree WIP and was rewritten |
+| **Runtime extension** | 2026-07-23 — public probes + cert-tenant password login attempt; authenticated CX still incomplete (portal 2FA); no Pass 2 |
+| **Cert tenant** | `ea-portal-cert-test` — inventory `docs/audits/EA-PORTAL-CERT-TEST-TENANT.json`; evidence `docs/audits/runtime-evidence-cert-2026-07-23/` |
+| **Scope** | Client portal (especially CTP Client Experience), help systems, Master Command Center (Operate / Build), `/launch` |
+| **Product code changed** | None |
+| **Recommendations implemented** | None |
+| **Pass 2** | Evaluation complete — `docs/audits/EA-EXPERIENCE-AUDIT-PASS-2.md` (no implementation) |
+
+### Source vs runtime (mandatory separation)
+
+| Verification class | Status |
+|---|---|
+| **Source verification** | Complete for registries below — claims pinned to tree of `545c6251` via `git ls-tree` / `git show` / `git grep` |
+| **Runtime verification** | **Partial** — public gates Verified; cert-tenant password credentials accepted then **Failed** at portal 2FA; authenticated CX chrome **Blocked** (no session). See §8 |
+
+### Commit fidelity rule
+
+This Pass 1 inventory describes **only** files present at `545c6251`. Uncommitted worktree WIP (relabeled CX nav, quiet Journey, Trust Center / LegalReacceptance, soft-redirect helper, FAQ rewrite, `CX_ASSISTANT_LABELS`, `/admin/legal`, etc.) is **out of scope** and must not be attributed to this SHA.
+
+---
+
+## 0. Coverage ledger (mandatory)
+
+### Statistics (at `545c6251`)
+
+| Metric | Count |
+|---|---:|
+| Portal page routes (`app/portal/**/page.tsx`, unique) | **37** |
+| Admin page routes (`app/admin/**/page.tsx`, unique) | **64** |
+| Portal API routes (`app/api/portal/**/route.ts`) | **34** |
+| Client Experience primary nav items (all equal weight) | **5** |
+| Client Experience secondary / quiet nav items | **0** (Journey is primary #1) |
+| MCC Operate sidebar items | **7** |
+| MCC Build sidebar items | **11** |
+| Executive module capabilities (`lib/experience-registry.ts`) | **17** |
+| Admin command registry entries (`ADMIN_COMMANDS`) | **34** |
+| Help / assistance entry points (client-facing, overlapping) | **6** |
+| Interactive chrome controls inventoried (§4) | **17** |
+| Hidden / incomplete / legacy / duplicate findings (§7) | **15** |
+| Surfaces in §1 registry (rows) | **73** |
+| Explicit portal page routes listed in §2.1 | **37** |
+| Explicit admin page routes listed in §2.2 | **64** |
+| Guided tour definitions | **2** |
+| Source-verified mandatory sections | **10 / 10** (incl. Blockers) |
+| Runtime checklist items (§8.2) | **32** |
+| Runtime — Verified at runtime | **12** |
+| Runtime — Blocked (credentials / policy / inbox) | **16** |
+| Runtime — Unreachable | **1** (`/trust` 404 — expected absent @ SHA) |
+| Runtime — Failed | **2** (password session establish via 2FA; local-secret cookie rejected by prod) |
+| Runtime — Partial | **1** (public portal login @ 390×844 emulation) |
+
+### Mandatory deliverable checklist
+
+| # | Deliverable | Section | Status |
+|---|---|---|---|
+| 1 | Full surface registry | §1 | Source complete @ `545c6251` |
+| 2 | Route registry | §2 | Source complete @ `545c6251` |
+| 3 | Navigation registry | §3 | Source complete @ `545c6251` |
+| 4 | Interactive-control inventory | §4 | Source complete @ `545c6251` |
+| 5 | Role and permission matrices | §5 | Source complete @ `545c6251` |
+| 6 | Help-system registry | §6 | Source complete @ `545c6251` |
+| 7 | Hidden / incomplete / legacy / duplicate registry | §7 | Source complete @ `545c6251` |
+| 8 | Runtime verification report | §8 | **Partial** — public Verified; cert password→2FA Failed; CX session Blocked |
+| 9 | Coverage ledger with statistics | §0 | Complete |
+| 10 | Blockers registry | §9 | Complete |
+
+### Scope boundaries (Pass 1)
+
+**In scope:** portal shells, CTP Client Experience, executive portal modules, MCC Operate/Build, `/launch`, portal help/assistant, middleware auth gates — as they exist at `545c6251`.
+
+**Out of scope for Pass 1:** implementing nav/help consolidation, Pass 2 scoring, Experience Director v1 revisits, authenticating into production, inventoring uncommitted WIP as if shipped.
+
+---
+
+## 1. Surface registry
+
+Legend: **type** = `page` | `shell` | `drawer` | `modal` | `float` | `bar` | `panel` | `content`
+
+### 1.1 Portal auth / public entry (6)
+
+| id | type | primary file | route | audience |
+|---|---|---|---|---|
+| portal-login | page | `app/portal/login/page.tsx` | `/portal/login` | public |
+| portal-sign-in | page | `app/portal/sign-in/page.tsx` | `/portal/sign-in` | public |
+| portal-sign-in-complete | page | `app/portal/sign-in/complete/page.tsx` | `/portal/sign-in/complete` | public |
+| portal-register | page | `app/portal/register/page.tsx` | `/portal/register` | public |
+| portal-forgot-password | page | `app/portal/forgot-password/page.tsx` | `/portal/forgot-password` | public |
+| portal-reset-password | page | `app/portal/reset-password/page.tsx` | `/portal/reset-password` | public |
+
+### 1.2 Portal shells / chrome (12)
+
+| id | type | primary file | route | audience |
+|---|---|---|---|---|
+| portal-route-layout | shell | `app/portal/[slug]/layout.tsx` | `/portal/[slug]/*` | client |
+| portal-shell | shell | `lib/chassis/PortalShell.tsx` | wraps workspace pages | client |
+| portal-layout | shell | `lib/chassis/PortalLayout.tsx` | shared chrome | client |
+| portal-sidebar | bar | `lib/chassis/PortalSidebar.tsx` | executive workspace | client |
+| portal-header | bar | `lib/chassis/PortalHeader.tsx` | executive workspace | client |
+| client-experience-nav | bar | `app/portal/components/ClientExperienceNav.tsx` | CTP-bound portals | client |
+| portal-subpage | shell | `app/portal/components/PortalSubpage.tsx` | shared subpage wrapper | client |
+| ea-assistant-portal | float | `app/components/ea-assistant/EAAssistant.tsx` | all `/portal/[slug]/*` via layout | client |
+| assistant-trigger | float | `app/components/ea-assistant/AssistantTrigger.tsx` | FAB-like | client |
+| assistant-panel | drawer | `app/components/ea-assistant/AssistantPanel.tsx` | assistant UI | client |
+| ctp-help-drawer | drawer | `app/portal/components/PortalCtpHelpDrawer.tsx` | CTP subpages (`active==='ctp'`) | client |
+| password-change-modal | modal | `app/portal/[slug]/PasswordChangeModal.tsx` | portal home when required | client |
+
+**Not present at `545c6251`:** `LegalReacceptanceShell`, `LegalReacceptanceGate`, Trust Center page.
+
+### 1.3 Executive portal pages (21)
+
+| id | type | primary file | route | audience |
+|---|---|---|---|---|
+| portal-home | page | `app/portal/[slug]/page.tsx` | `/portal/[slug]` | client |
+| portal-simplifi | page | `app/portal/[slug]/simplifi/page.tsx` | `/portal/[slug]/simplifi` | client |
+| portal-amplifi | page | `app/portal/[slug]/amplifi/page.tsx` | `/portal/[slug]/amplifi` | client |
+| portal-connect | page | `app/portal/[slug]/connect/page.tsx` | `/portal/[slug]/connect` | client |
+| portal-pulse | page | `app/portal/[slug]/pulse/page.tsx` | `/portal/[slug]/pulse` | client |
+| portal-updates | page | `app/portal/[slug]/updates/page.tsx` | `/portal/[slug]/updates` | client |
+| portal-updates-new | page | `app/portal/[slug]/updates/new/page.tsx` | `/portal/[slug]/updates/new` | client |
+| portal-updates-enhance | page | `app/portal/[slug]/updates/enhancement/page.tsx` | `/portal/[slug]/updates/enhancement` | client |
+| portal-documents | page | `app/portal/[slug]/documents/page.tsx` | `/portal/[slug]/documents` | client |
+| portal-events | page | `app/portal/[slug]/events/page.tsx` | `/portal/[slug]/events` | client |
+| portal-resources | page | `app/portal/[slug]/resources/page.tsx` | `/portal/[slug]/resources` | client |
+| portal-messaging | page | `app/portal/[slug]/messaging/page.tsx` | `/portal/[slug]/messaging` | client |
+| portal-learning | page | `app/portal/[slug]/learning/page.tsx` | `/portal/[slug]/learning` | client |
+| portal-ask | page | `app/portal/[slug]/ask/page.tsx` | `/portal/[slug]/ask` | client |
+| portal-notifications | page | `app/portal/[slug]/notifications/page.tsx` | `/portal/[slug]/notifications` | client |
+| portal-billing | page | `app/portal/[slug]/billing/page.tsx` | `/portal/[slug]/billing` | client |
+| portal-member | page | `app/portal/[slug]/member/page.tsx` | `/portal/[slug]/member` | client |
+| portal-landing | page | `app/portal/[slug]/landing/page.tsx` | `/portal/[slug]/landing` | client |
+| portal-experience-builder | page | `app/portal/[slug]/experience-builder/page.tsx` | `/portal/[slug]/experience-builder` | client |
+| portal-experience-builder-edit | page | `app/portal/[slug]/experience-builder/[pageId]/page.tsx` | `/portal/[slug]/experience-builder/[pageId]` | client |
+| portal-simplifi-workspace | shell | `app/portal/[slug]/simplifi/SimplifiPortalWorkspace.tsx` | embedded | client |
+
+### 1.4 CTP Client Experience surfaces (17)
+
+| id | type | primary file | route | audience |
+|---|---|---|---|---|
+| ctp-progress (Guide / Design Studio home) | page | `app/portal/[slug]/ctp/progress/page.tsx` | `/portal/[slug]/ctp/progress` | client |
+| ctp-journey | page | `app/portal/[slug]/ctp/page.tsx` | `/portal/[slug]/ctp` | client |
+| client-experience | shell | `app/portal/components/ClientExperience.tsx` | cinematic journey | client |
+| brand-onboarding-paths | panel | `app/portal/components/BrandOnboardingPaths.tsx` | inside Journey | client |
+| ctp-design-studio-form | panel | `app/portal/components/PortalCtpDesignStudioForm.tsx` | progress + journey | client |
+| ctp-asset-gallery | panel | `app/portal/components/PortalCtpAssetGallery.tsx` | documents/progress | client |
+| ctp-documents | page | `app/portal/[slug]/ctp/documents/page.tsx` | `/portal/[slug]/ctp/documents` | client |
+| ctp-messages | page | `app/portal/[slug]/ctp/messages/page.tsx` | `/portal/[slug]/ctp/messages` | client |
+| ctp-support | page | `app/portal/[slug]/ctp/support/page.tsx` | `/portal/[slug]/ctp/support` | client |
+| ctp-review | page | `app/portal/[slug]/ctp/review/page.tsx` | `/portal/[slug]/ctp/review` | client |
+| ctp-review-experience | panel | `app/portal/components/OpportunityReviewExperience.tsx` | review flow | client |
+| ctp-review-confirmed | page | `app/portal/[slug]/ctp/review/confirmed/page.tsx` | `/portal/[slug]/ctp/review/confirmed` | client |
+| ctp-opportunity-detail | page | `app/portal/[slug]/ctp/opportunities/[opportunityId]/page.tsx` | `/portal/[slug]/ctp/opportunities/[opportunityId]` | client |
+| ctp-schedule | page | `app/portal/[slug]/ctp/schedule/page.tsx` | redirects → review | client |
+| ctp-bi | page | `app/portal/[slug]/ctp/bi/page.tsx` | `/portal/[slug]/ctp/bi` | client (not in CX nav) |
+| ctp-recommendations | page | `app/portal/[slug]/ctp/recommendations/page.tsx` | `/portal/[slug]/ctp/recommendations` | client (not in CX nav) |
+| opportunity-dashboard-legacy | panel | `app/portal/components/OpportunityDashboard.tsx` | **orphaned — no page import** | — |
+
+### 1.5 Help / FAQ / Assistant (4)
+
+| id | type | primary file | route | audience |
+|---|---|---|---|---|
+| ctp-help-fab | float | `PortalCtpHelpDrawer` (`cex-help-fab`) | CTP pages via `PortalSubpage` | client |
+| ctp-faq-content | content | `lib/ctp-faq.ts` | drawer source | client |
+| ea-assistant | float+drawer | `app/components/ea-assistant/*` + `lib/assistant/*` | portal layout | client |
+| ask-page | page | `app/portal/[slug]/ask/page.tsx` | `/portal/[slug]/ask` | client |
+
+### 1.6 Admin MCC / Operate / Build (13)
+
+| id | type | primary file | route | audience |
+|---|---|---|---|---|
+| admin-layout | shell | `app/admin/layout.tsx` | `/admin/*` | admin |
+| admin-workspace-shell | shell | `app/admin/_components/AdminWorkspaceShell.tsx` | TailAdmin chrome | admin |
+| admin-shell-gate | shell | `app/admin/_components/AdminShellGate.tsx` | skips chrome on login | admin |
+| admin-chrome-tools | bar | `app/admin/_components/AdminChromeTools.tsx` | ⌘K / voice / navigator | admin |
+| universal-command-bar | modal | `app/admin/_components/UniversalCommandBar.tsx` | command palette | admin |
+| ea-navigator-shell-legacy | shell | `app/admin/_components/EANavigatorShell.tsx` | **not wired by layout** | — |
+| executive-home | page | `app/admin/master/page.tsx` | `/admin/master` | admin |
+| executive-shell-phase-one | panel | `app/admin/master/ExecutiveShellPhaseOne.tsx` | Mission Control home | admin |
+| website-portal-ops | panel | `app/admin/master/WebsitePortalOpsPanel.tsx` | `#website-portal-ops` | admin |
+| admin-guided-tour | modal | `app/admin/_components/GuidedTour.tsx` | `/admin` | admin |
+| admin-voice | float | `app/admin/_components/VoiceAssistant.tsx` | admin chrome | admin |
+| launch-command-center | page | `app/launch/page.tsx` | `/launch` | admin |
+| operate-build-sidebar | bar | `lib/platform/admin-workspace-chrome.ts` | chrome admin pages | admin |
+
+§1 row total: 6 + 12 + 21 + 17 + 4 + 13 = **73**.
+
+---
+
+## 2. Route registry
+
+### 2.1 Portal pages (37 @ `545c6251`)
+
+| path | file | auth (source) | purpose |
+|---|---|---|---|
+| `GET /portal/login` | `app/portal/login/page.tsx` | public | login |
+| `GET /portal/sign-in` | `app/portal/sign-in/page.tsx` | public | Clerk/sign-in |
+| `GET /portal/sign-in/complete` | `app/portal/sign-in/complete/page.tsx` | public | complete |
+| `GET /portal/register` | `app/portal/register/page.tsx` | public | register |
+| `GET /portal/forgot-password` | `app/portal/forgot-password/page.tsx` | public | reset request |
+| `GET /portal/reset-password` | `app/portal/reset-password/page.tsx` | public | reset |
+| `GET /portal/[slug]` | `app/portal/[slug]/page.tsx` | portal session + module | hub; CTP landing helper → progress |
+| `GET /portal/[slug]/ctp` | `app/portal/[slug]/ctp/page.tsx` | module `ctp` | Journey cinematic |
+| `GET /portal/[slug]/ctp/progress` | `app/portal/[slug]/ctp/progress/page.tsx` | module `ctp` | Guide / Design Studio (`designStudioPath`) |
+| `GET /portal/[slug]/ctp/documents` | `app/portal/[slug]/ctp/documents/page.tsx` | module `ctp` | documents |
+| `GET /portal/[slug]/ctp/messages` | `app/portal/[slug]/ctp/messages/page.tsx` | module `ctp` | Messages |
+| `GET /portal/[slug]/ctp/support` | `app/portal/[slug]/ctp/support/page.tsx` | module `ctp` | Support |
+| `GET /portal/[slug]/ctp/review` | `app/portal/[slug]/ctp/review/page.tsx` | module `ctp` | opportunity review |
+| `GET /portal/[slug]/ctp/review/confirmed` | `…/ctp/review/confirmed/page.tsx` | module `ctp` | confirmed |
+| `GET /portal/[slug]/ctp/opportunities/[opportunityId]` | `…/opportunities/[opportunityId]/page.tsx` | module `ctp` | detail |
+| `GET /portal/[slug]/ctp/schedule` | `…/ctp/schedule/page.tsx` | module `ctp` | **legacy redirect → review** |
+| `GET /portal/[slug]/ctp/bi` | `…/ctp/bi/page.tsx` | module `ctp` | BI (hidden from CX nav) |
+| `GET /portal/[slug]/ctp/recommendations` | `…/ctp/recommendations/page.tsx` | module `ctp` | recommendations (hidden) |
+| `GET /portal/[slug]/simplifi` | `…/simplifi/page.tsx` | module | Simplifi |
+| `GET /portal/[slug]/amplifi` | `…/amplifi/page.tsx` | module | Amplifi |
+| `GET /portal/[slug]/connect` | `…/connect/page.tsx` | module | Connect |
+| `GET /portal/[slug]/pulse` | `…/pulse/page.tsx` | module | Pulse |
+| `GET /portal/[slug]/updates` | `…/updates/page.tsx` | module | Update Hub |
+| `GET /portal/[slug]/updates/new` | `…/updates/new/page.tsx` | module | new request |
+| `GET /portal/[slug]/updates/enhancement` | `…/updates/enhancement/page.tsx` | module | enhancement |
+| `GET /portal/[slug]/documents` | `…/documents/page.tsx` | module | executive documents |
+| `GET /portal/[slug]/events` | `…/events/page.tsx` | module | events |
+| `GET /portal/[slug]/resources` | `…/resources/page.tsx` | module | resources |
+| `GET /portal/[slug]/messaging` | `…/messaging/page.tsx` | module | executive messaging |
+| `GET /portal/[slug]/learning` | `…/learning/page.tsx` | module | learning |
+| `GET /portal/[slug]/ask` | `…/ask/page.tsx` | module | Ask EA |
+| `GET /portal/[slug]/notifications` | `…/notifications/page.tsx` | module | notifications |
+| `GET /portal/[slug]/billing` | `…/billing/page.tsx` | module | billing |
+| `GET /portal/[slug]/member` | `…/member/page.tsx` | module | member |
+| `GET /portal/[slug]/landing` | `…/landing/page.tsx` | module | landing |
+| `GET /portal/[slug]/experience-builder` | `…/experience-builder/page.tsx` | module | experience builder |
+| `GET /portal/[slug]/experience-builder/[pageId]` | `…/experience-builder/[pageId]/page.tsx` | module | edit page |
+
+Canonical path helpers (`lib/ctp-opportunity-routes.ts` @ SHA): `designStudioPath` → `ctp/progress`; `opportunityDashboardPath` → `ctp`; `resolveCtpClientLandingPath` → progress.
+
+### 2.2 Admin pages (64 @ `545c6251`) — `/admin/legal` **absent**
+
+`/admin`, `/admin/academy`, `/admin/blueprints`, `/admin/capability-marketplace`, `/admin/commissions`, `/admin/connect`, `/admin/connect/tenants`, `/admin/content-requests`, `/admin/creative-studio`, `/admin/creative-studio/brand`, `/admin/creative-studio/campaigns/[id]`, `/admin/creative-studio/media`, `/admin/ctp`, `/admin/dashboard`, `/admin/delivery`, `/admin/digital-twin`, `/admin/ea-factory`, `/admin/ea-factory/ai-research-agent`, `/admin/ea-factory/approvals`, `/admin/ea-factory/chassis-deployment`, `/admin/ea-factory/codex-builder`, `/admin/ea-factory/experience-director`, `/admin/ea-factory/experience-director/calibration`, `/admin/ea-factory/experience-director/validation`, `/admin/ea-factory/launch`, `/admin/ea-factory/launches`, `/admin/ea-factory/launches/[id]`, `/admin/ea-factory/magnifi-integration`, `/admin/ea-factory/new-experience`, `/admin/ea-factory/project-generator`, `/admin/ea-factory/projects`, `/admin/ea-factory/protocol-center`, `/admin/ea-factory/protocols/[id]`, `/admin/ea-factory/quick-launch`, `/admin/ea-factory/repo-library`, `/admin/ea-factory/repos/[id]`, `/admin/ea-factory/simplifi-integration`, `/admin/ea-factory/skin-factory`, `/admin/ea-factory/skin-factory/briefs`, `/admin/ea-factory/skin-factory/briefs/[id]`, `/admin/ea-factory/skin-factory/briefs/[id]/export`, `/admin/ea-factory/skin-factory/new`, `/admin/ea-factory/training-transformations`, `/admin/ea-guide`, `/admin/enhancements`, `/admin/factory`, `/admin/forgot-password`, `/admin/foundation-library`, `/admin/knowledge-graph`, `/admin/login`, `/admin/master`, `/admin/opportunity-graph`, `/admin/partner-marketplace`, `/admin/proposals`, `/admin/protocol-center`, `/admin/register`, `/admin/reset-password`, `/admin/resource-radar`, `/admin/show`, `/admin/sign-in`, `/admin/sign-in/complete`, `/admin/simplifi`, `/admin/simplifi-audit`, `/admin/workspace-preview`.
+
+Auth: middleware requires admin session + `admin:access` except `PUBLIC_ADMIN_PATHS` (`middleware.ts`).
+
+### 2.3 Launch
+
+| path | file | auth | purpose |
+|---|---|---|---|
+| `GET /launch` | `app/launch/page.tsx` | admin cookie + `admin:access` | Launch readiness UI |
+
+**Not present at `545c6251`:** `GET /trust`, `app/trust/**`.
+
+### 2.4 Portal / help-related APIs (34 portal routes @ SHA)
+
+| path | file | auth (source) | purpose |
+|---|---|---|---|
+| `POST /api/portal/login` | `app/api/portal/login/route.ts` | public credentials | set portal session |
+| portal logout | `app/api/portal/logout/route.ts` | clear session | logout |
+| `GET /api/portal/ctp` | `app/api/portal/ctp/route.ts` | portal cookie guard | CTP status |
+| `POST /api/portal/ctp/studio` | `app/api/portal/ctp/studio/route.ts` | portal auth | design studio |
+| notifications | `app/api/portal/notifications/route.ts` | portal auth | notifications |
+| password | `app/api/portal/password/route.ts` | portal auth | password change |
+| content-requests (+ enhance) | `app/api/portal/content-requests/**` | portal auth | Update Hub |
+| captures (+ analyze/claim/…) | `app/api/portal/captures/**` | portal auth | captures |
+| connect helpers | `app/api/portal/connect/**` | portal auth | Connect packs/tasks |
+| experience-pages | `app/api/portal/experience-pages/**` | portal auth | builder |
+| modules / profile / register / clerk-bridge / enhancements / opportunities / simplifi watch-list / password-reset | matching `route.ts` files | portal guards | supporting APIs |
+| `POST /api/admin/captures` | `app/api/admin/captures/route.ts` | admin | capture |
+| `POST /api/admin/captures/analyze` | `app/api/admin/captures/analyze/route.ts` | admin | analyze |
+| `POST /api/admin/voice` | `app/api/admin/voice/route.ts` | admin | voice |
+| `POST /api/admin/intent` | `app/api/admin/intent/route.ts` | admin | intent |
+| `GET /api/admin/ctp/submissions` | `app/api/admin/ctp/submissions/route.ts` | admin | CTP desk |
+| `GET /api/admin/command-bar` | **no route file at SHA** | intended admin | UniversalCommandBar falls back |
+
+**Not present at `545c6251`:** `app/api/trust/**`.
+
+### 2.5 Middleware matchers (`middleware.ts` @ SHA)
+
+```
+'/', '/capture', '/app', '/simplifiorb', '/workspace', '/login', '/register',
+'/forgot-password', '/reset-password',
+'/portal/:slug', '/portal/:slug/:path*',
+'/admin/:path*', '/launch',
+'/:slug', '/:slug/:path*'
+```
+
+**`/trust` is not in the matcher.** Public portal auth paths: `/portal/login`, `/portal/sign-in`, `/portal/register`, `/portal/forgot-password`, `/portal/reset-password`. Public admin paths: `/admin/login`, `/admin/sign-in`, `/admin/register`, `/admin/forgot-password`, `/admin/reset-password`.
+
+---
+
+## 3. Navigation registry
+
+### 3.1 Client Experience — `lib/ctp-client-nav.ts` + `ClientExperienceNav.tsx` @ `545c6251`
+
+`buildClientExperienceNav(slug)` returns (exact order):
+
+| # | id | label | href helper | menu placement |
+|---|---|---|---|---|
+| 1 | journey | **Your Journey** | `opportunityDashboardPath` → `/portal/{slug}/ctp` | **primary** (first) |
+| 2 | progress | **Progress** | `designStudioPath` → `/portal/{slug}/ctp/progress` | **primary** |
+| 3 | documents | **Documents** | `ctp/documents` | **primary** |
+| 4 | messages | **Messages** | `ctp/messages` | **primary** |
+| 5 | support | **Support** | `ctp/support` | **primary** |
+
+Rendering (`ClientExperienceNav.tsx` @ SHA): **all five** use the same `cex-shell-link` class; **no** quiet/secondary split; **no** Account `<details>`; logout is a direct `Log out` link (`cex-shell-logout`) → `/api/portal/logout`.
+
+Shown when `shouldUseClientExperienceShell(slug)` (CTP submission bound).
+
+### 3.2 Static unused config — `lib/chassis/portal-nav-config.ts`
+
+`portalNavItems(slug)` defines Dashboard / Simplifi / Amplifi / Connect / Pulse / Update Hub + Documents / Events / Resources / Contact / Learning / Ask EA. **No runtime call sites found** at this SHA (superseded by module registry + PortalShell).
+
+### 3.3 Executive portal nav — modules + experience registry @ SHA
+
+| moduleId | displayLabel @ SHA | showInPillNav | requiredRole (`lib/modules/registry.ts`) |
+|---|---|---|---|
+| dashboard | Dashboard | true | guest |
+| pulse | Pulse | true | guest |
+| simplifi | Simplifi | true | staff |
+| amplifi | Amplifi | true | guest |
+| update-hub | **Updates** | true | guest |
+| connect | Connect | true | staff |
+| messaging | **Messaging** | false | guest |
+| documents | Document Hub™ | false | guest |
+| training | Training Hub™ | false | guest |
+| events | Event Hub™ | false | guest |
+| resources | Resource library | false | guest |
+| ask | Guide™ | false | guest |
+| discovery | Discovery | false | guest |
+| ctp | Consider the Possibilities | false | guest |
+| member | Member | false | guest |
+| landing | Landing Pages | false | owner |
+| billing | Billing | false | owner |
+
+### 3.4 MCC Operate / Build — `lib/admin-operating-mode.ts` + `lib/platform/admin-workspace-chrome.ts`
+
+Both groups always rendered. `readOperatingMode` / `writeOperatingMode` exist in `lib/admin-operating-mode.ts` but have **no other importers** at SHA.
+
+**Operate (`EXECUTIVE_NAV`) — 7**
+
+| label | href |
+|---|---|
+| Home | `/admin/master` |
+| Clients | `/admin/delivery` |
+| CTP | `/admin/ctp` |
+| Content | `/admin/content-requests` |
+| Opportunities | `/admin/simplifi` |
+| Pipeline | `/admin/dashboard` |
+| Factory | `/admin/factory` |
+
+**Build (`BUILDER_NAV`) — 11**
+
+| label | href |
+|---|---|
+| EA Factory | `/admin/ea-factory` |
+| Capabilities | `/admin/capability-marketplace` |
+| Workspace Preview | `/admin/workspace-preview` |
+| Protocols | `/admin/protocol-center` |
+| Repositories | `/admin/ea-factory/repo-library` |
+| Project Generator | `/admin/ea-factory/project-generator` |
+| Skin Factory | `/admin/ea-factory/skin-factory` |
+| Codex Builder | `/admin/ea-factory/codex-builder` |
+| Chassis Deploy | `/admin/ea-factory/chassis-deployment` |
+| Blueprints | `/admin/blueprints` |
+| EACP Launches | `/admin/ea-factory/launches` |
+
+**Account:** Sign Out → `/api/admin/logout`
+
+### 3.5 Executive Home primary actions — `ExecutiveShellPhaseOne.tsx` @ SHA
+
+| label | href | group |
+|---|---|---|
+| Clients | `/admin/delivery` | PRIMARY_ACTIONS |
+| Launch | `/admin/factory` | PRIMARY_ACTIONS |
+| Capabilities | `/admin/capability-marketplace` | MORE_WORKSPACES |
+| CTP | `/admin/ctp` | MORE_WORKSPACES |
+| Website + Portal ops | `/admin/master#website-portal-ops` | MORE_WORKSPACES |
+
+### 3.6 Command / navigator registries
+
+- `lib/admin-command-registry.ts` — **34** `ADMIN_COMMANDS` (Navigate / Create / Search / Capture), including deep links beyond Operate/Build.
+- `lib/executive-command-bar.ts` — `buildExecutiveCommandIndex()` merges orgs/capabilities/products/knowledge/experiences/ops/decisions + admin commands.
+- `AdminChromeTools` `NAVIGATOR_GOALS` — hardcoded goal list (delivery, CTP, commissions, MRI, Simplifi, Factory, launches, academy, …).
+
+---
+
+## 4. Interactive-control inventory
+
+| control | file | opens / does |
+|---|---|---|
+| Help FAB (`cex-help-fab`) | `app/portal/components/PortalCtpHelpDrawer.tsx` | FAQ drawer; `#faq` hash |
+| EA Assistant trigger | `AssistantTrigger.tsx` / `EAAssistant.tsx` | assistant panel; trigger label **`Help`** (`ASSISTANT_LABELS.trigger`; no `CX_ASSISTANT_LABELS` at SHA) |
+| Password change modal | `PasswordChangeModal.tsx` | force password update |
+| Brand onboarding path cards | `BrandOnboardingPaths.tsx` | path selection + studio nudge |
+| Journey scene Continue | `ClientExperience.tsx` | advances cinematic scenes |
+| Log out link | `ClientExperienceNav.tsx` | `/api/portal/logout` |
+| Portal header search focus | `PortalHeader.tsx` | focuses header search (not admin ⌘K) |
+| Universal Command Bar / ⌘K | `UniversalCommandBar.tsx` | command palette; capture + analyze modals |
+| Navigator button | `AdminChromeTools.tsx` | goal drawer |
+| Voice Assistant | `VoiceAssistant.tsx` | voice UI; can start tour |
+| Guided Tour | `GuidedTour.tsx` + `lib/guided-tours.ts` | `ea:start-tour` / `startGuidedTour()` |
+| Capture events | AdminChromeTools / command bar | `ea:open-capture`, `ea:open-analyze` |
+| Executive primary CTAs | `ExecutiveShellPhaseOne.tsx` | Clients / Factory / More |
+| Website + Portal ops `<details>` | `app/admin/master/page.tsx` | ops panel |
+| CTP Messages / Support contact CTAs | messages + support via `lib/ctp-support-view.ts` | human contact actions |
+| Ask page CTA | `ask/page.tsx` | → `/updates/new` |
+| Messaging “Submit a request” | `messaging/page.tsx` | → `/updates/new` |
+
+**17 controls.** Legal accept CTA **absent** at SHA (no reacceptance gate).
+
+---
+
+## 5. Role and permission matrices
+
+### 5.1 Platform roles & actions — `lib/rbac.ts`
+
+| Role | Rank |
+|---|---:|
+| owner | 60 |
+| admin | 50 |
+| manager | 40 |
+| staff | 30 |
+| viewer | 20 |
+| guest | 10 |
+
+| Action | Min role |
+|---|---|
+| `admin:access` | viewer |
+| `admin:manage` | admin |
+| `portal:read` | guest |
+| `portal:write` | staff |
+| `org:manage` | admin |
+| `billing:manage` | owner |
+
+### 5.2 Gate matrix (@ `545c6251`)
+
+| gate | mechanism | applies to |
+|---|---|---|
+| Portal middleware | `createSlugPortalMiddleware` + portal cookie/session; login `/portal/login` | `/portal/:slug*` except public auth paths |
+| Portal page module gate | `requirePortalModule(slug, moduleId)` | each portal page |
+| Portal API | `guardPortalApi` / `guardPortalApiCookie` → `requirePortalSession*` | `/api/portal/*` |
+| Portal org check | `hasRequiredOrganization` — production non-placeholder `orgId` | portal sessions |
+| Demo slugs | `demo-client`, `demo-website` special entitlements | demo |
+| Admin middleware | HMAC `ea_admin_session` + `can(role, 'admin:access')` | `/admin/*` except public auth |
+| Launch middleware | same admin cookie + `admin:access` | `/launch` |
+| Admin pages | often double-check `verifyAdminSession` | e.g. master, factory |
+| Admin API | `requireAdminSessionFromRequest` | `/api/admin/*` |
+
+**Not present at SHA:** portal `LegalReacceptanceShell` gate; `redirectCtpClientFromExecutiveSurface` / `lib/ctp-executive-surface-redirect.ts` (executive dual surfaces remain fully reachable for CX clients).
+
+**Roles in practice:** portal client (HMAC slug session), demo client, admin (platform roles via cookie). CTP is module + submission detection, not a separate RBAC role.
+
+---
+
+## 6. Help-system registry
+
+| entry point | files | trigger | content source | overlap |
+|---|---|---|---|---|
+| Support **page** | `app/portal/[slug]/ctp/support/page.tsx` + `lib/ctp-support-view.ts` | nav “Support” | stage-aware concierge + contact actions | overlaps Messages |
+| Messages **page** | `app/portal/[slug]/ctp/messages/page.tsx` | nav “Messages” | same `buildCtpSupportView`, filtered | near-duplicate of Support |
+| FAQ drawer | `PortalCtpHelpDrawer` + `lib/ctp-faq.ts` | FAB / `#faq` on CTP via `PortalSubpage` | 10 static FAQ items | third help surface |
+| EA Assistant | `app/portal/[slug]/layout.tsx` mounts `EAAssistant`; `lib/assistant/*` | floating trigger labeled **Help** on all portal slug routes | path briefs + live signals | fourth help channel; same word “Help” as FAQ FAB tone |
+| Ask EA | `ask/page.tsx` | executive (hidden pill) | Update Hub CTA | overlaps Messages/Support |
+| Messaging (exec) | `messaging/page.tsx` | executive | threads + request | duplicate contact concept |
+| Admin tour | `GuidedTour` + `lib/guided-tours.ts` | academy / command / voice | Mission Control / Academy | admin-only |
+| Admin Navigator / Voice / ⌘K | chrome tools | buttons / shortcuts | goals + command index | overlapping “how do I…” |
+| EA Guide | `/admin/ea-guide` | internal | escalations | ops |
+
+### 6.1 Proactive / confusion detection (source @ SHA)
+
+| Capability | Finding |
+|---|---|
+| Portal auto-open on confusion (failed upload, inactivity, error loops, etc.) | **Not found** as a general portal behavior |
+| Discovery signal hook | `applyDiscoverSignal` in `lib/assistant/brief.ts` — Discovery-oriented, not general portal confusion |
+| FAQ open triggers | User click or `#faq` only |
+| Assistant open | User click / tracked events; live signals update brief content but do not implement portal confusion gates |
+
+### 6.2 FAQ copy — stale / contradictory directions (`lib/ctp-faq.ts` @ SHA)
+
+Cited contradictions vs actual CX nav / routes:
+
+| FAQ id | Quoted guidance | Why inconsistent @ SHA |
+|---|---|---|
+| `where-start` | “Open Design Studio (**under Progress**).” | Progress is a nav item; “Design Studio” is not a separate nav label — workable but jargon-heavy |
+| `when-pay` | “**Pay now card on this Overview**” | No CX nav item named Overview |
+| `schedule` | “Use **Scheduling** in this workspace” | No Scheduling item in CX nav; `/ctp/schedule` redirects to review |
+| `stuck` | “use **Messages & Support**” | Messages and Support are **two** separate primary nav items |
+
+---
+
+## 7. Hidden / incomplete / legacy / duplicate registry
+
+| item | evidence @ `545c6251` |
+|---|---|
+| Operate/Build mode toggle dead | `readOperatingMode` / `writeOperatingMode` only defined in `lib/admin-operating-mode.ts`; chrome always shows both groups |
+| `portalNavItems` unused | `lib/chassis/portal-nav-config.ts` — no consumers |
+| `OpportunityDashboard.tsx` orphaned | no import sites |
+| `NotificationCenter.tsx` orphaned | `lib/chassis/NotificationCenter.tsx` — no import sites |
+| `EANavigatorShell` legacy | replaced by `AdminWorkspaceShell` + `AdminChromeTools` |
+| `/api/admin/command-bar` missing | command bar uses fallback actions |
+| CTP routes not in CX nav | `/ctp/bi`, `/ctp/recommendations`, `/ctp/review`, `/ctp/opportunities/*` |
+| `/ctp/schedule` legacy | redirect to review |
+| Messages vs Support pages | both use `buildCtpSupportView` |
+| FAQ FAB vs Assistant (both “Help”) | dual floats on CTP pages; assistant trigger = `Help` |
+| Ask / Messaging / Updates vs Messages/Support | parallel executive contact surfaces; **no** CX soft-redirect at SHA |
+| Build nav flat (11 peers) | advanced factory tools equal to Operate destinations |
+| Pill nav hides Messaging/Ask/CTP | `showInPillNav: false` |
+| Guided tours admin-only | `mission-control-v1`, `academy-v1` in `lib/guided-tours.ts` |
+| Progress is operational home but labeled Progress | nav id `progress` / label Progress; Journey is first primary |
+
+---
+
+## 8. Runtime verification report
+
+### 8.1 Production binding (2026-07-23)
+
+| Field | Value |
+|---|---|
+| Target source SHA | `545c6251bec86fc692ded933402cde3fb59797f8` |
+| Live production deployment | `dpl_B1rHCpoxCNLjpyLLR74K4eBiXQVZ` (READY) |
+| Live production git SHA | `37577a328a2d55a6f098e61ecf40aba5cc934032` |
+| SHA delta vs target | Parent of live SHA is `545c6251`; live commit is **docs-only** (`docs/audits/EA-EXPERIENCE-AUDIT-PASS-1.md` only) — **zero product file delta** (`docs/audits/_runtime-sha-delta.txt`) |
+| Product-runtime equivalence | **Treat live product behavior as `545c6251`** |
+| Probe artifact | `docs/audits/_runtime-probe-2026-07-23.json` |
+| Deploy SHA artifact | `docs/audits/_runtime-deploy-sha.json` |
+| Methods | GET-only HTTP (`MaximumRedirection 0`); browser navigate/snapshot/screenshot for public login pages; CDP `Emulation.setDeviceMetricsOverride` 390×844 |
+| Explicitly **not** used | Dirty worktree; `POST`/`PUT`/`PATCH`/`DELETE`; `/api/auth/demo-enter` (provisions); form submit; magic-link send; payments; publish; mutating APIs |
+
+Status vocabulary: **Verified at runtime** | **Blocked** | **Unreachable** | **Failed** | **Partial**
+
+### 8.2 Runtime checklist
+
+#### A. Public health & launch gate
+
+| ID | Check | Status | Evidence |
+|---|---|---|---|
+| R1 | `GET /api/health/launch` returns `{ok,status}` only | **Verified at runtime** | `{"ok":true,"status":"full_launch_ready"}` — keys only `ok`,`status` |
+| R2 | Expand attempts (`?expand=1`, `?full=1`, `?details=1`) stay minimal | **Verified at runtime** | Same body; no diagnostic expansion |
+| R3 | `ea-payments.vercel.app/api/health/launch` same contract | **Verified at runtime** | Same JSON |
+| R4 | Unauth `GET /launch` → admin login | **Verified at runtime** | 307 → `/admin/login?next=%2Flaunch`; browser lands on Admin sign in |
+| R5 | Auth admin full `/api/health/launch` diagnostic | **Blocked** | Needs production-valid admin session cookie **or** Bearer signed with **production** `ADMIN_SESSION_SECRET` (local secret ≠ prod) |
+| R6 | Auth `/launch` HTML command center | **Blocked** | Same as R5 — admin OTP email + code, role ≥ `viewer` with `admin:access` |
+
+#### B. Unauthenticated portal / admin gates
+
+| ID | Check | Status | Evidence |
+|---|---|---|---|
+| R7 | `/portal/login` serves Client Portal sign-in | **Verified at runtime** | 200; browser: email OTP + password fallback; CTP workspace copy |
+| R8 | `/admin/login` serves Master Portal sign-in | **Verified at runtime** | 200; browser: email OTP |
+| R9 | Unauth `/portal/demo-client` (+ `/ctp`, `/ctp/progress`, `/messages`, `/support`, `/documents`) | **Verified at runtime** | All 307 → `/portal/login` |
+| R10 | Unauth Operate destinations (`/admin/master`, `/delivery`, `/ctp`, `/content-requests`, `/simplifi`, `/dashboard`, `/factory`) | **Verified at runtime** | All 307 → `/admin/login?next=…` (not 404) |
+| R11 | Unauth Build destinations (`/admin/ea-factory`, `/capability-marketplace`, `/ea-factory/repo-library`) | **Verified at runtime** | All 307 → `/admin/login?next=…` |
+| R12 | `/trust` on production | **Unreachable** | **404** — consistent with absence at `545c6251` |
+
+#### C. Authenticated Client Experience (read-only) — cert tenant attempt
+
+| ID | Check | Status | Evidence |
+|---|---|---|---|
+| R13 | CX nav labels/order (Your Journey → Progress → Documents → Messages → Support) | **Blocked** | No authenticated HTML session established for `ea-portal-cert-test` |
+| R14 | Progress Guide home / next-best-action presentation | **Blocked** | Same |
+| R15 | Dual help: FAQ FAB + Assistant coexist | **Blocked** | Same |
+| R16 | FAQ stale copy in drawer (open/close only) | **Blocked** | Same |
+| R17 | Journey scene surface | **Blocked** | Same |
+| R18 | Executive dual-surface GETs (`/documents`, `/messaging`, `/ask`) | **Blocked** | Same — would be read-only GETs after auth |
+| R19 | Entitlement-filtered executive sidebar (non-CX tenant) | **Blocked** | Out of cert-tenant scope; still needs separate executive session |
+
+#### D. Authenticated administrator MCC (read-only)
+
+| ID | Check | Status | Evidence |
+|---|---|---|---|
+| R20 | Operate sidebar 7 items visible | **Blocked** | Needs admin OTP session (`admin:access`) |
+| R21 | Build sidebar 11 items visible | **Blocked** | Same |
+| R22 | Executive Home primary actions (Clients / Launch) | **Blocked** | Same — GET `/admin/master` only |
+| R23 | Command bar ⌘K / fallback vs full index | **Blocked** | Same |
+| R24 | Guided tour / voice / navigator chrome | **Blocked** | Same |
+
+#### E. Desktop / mobile presentation
+
+| ID | Check | Status | Evidence |
+|---|---|---|---|
+| R25 | Desktop portal login composition | **Verified at runtime** | Browser screenshot: Client Portal / welcome / OTP + password form |
+| R26 | Desktop admin login composition | **Verified at runtime** | Browser screenshot: Master Portal / Admin sign in |
+| R27 | Mobile viewport public portal login (390×844) | **Partial** | Prior emulation; authenticated mobile CX **not** reached |
+| R28 | Mobile authenticated CX dual-FAB / nav | **Blocked** | Needs established CX session |
+
+#### F. Cert-tenant auth completion (2026-07-23)
+
+| ID | Check | Status | Evidence |
+|---|---|---|---|
+| R29 | Password login accepts cert credentials | **Verified at runtime** | `POST /api/portal/login` → 200 `requires2fa: true`, `maskedEmail` for cert inbox; UI alert shown |
+| R30 | Complete password → portal session (pass 2FA) | **Failed** | Agent has no access to 6-digit code emailed to `ea-portal-cert-test@…`; session not set |
+| R31 | Minted cookie from `.env.local` accepted by prod | **Failed** | All CX GETs with cookie → **307** `/portal/login` (secret mismatch) |
+| R32 | First-login org / entitlement synthesis IDs | **Blocked** | Never ran — no session. Organizations/Entitlements remain null in tenant inventory |
+
+Evidence folder: `docs/audits/runtime-evidence-cert-2026-07-23/auth-attempt-summary.json`.
+
+### 8.3 Credentials / conditions still required (unresolved blockers)
+
+| Need | Exact requirement | Unlocks |
+|---|---|---|
+| **Portal 2FA code** | Provide the 6-digit code from inbox `ea-portal-cert-test@efficiencyarchitects.online` (already triggered by password attempt), **or** temporarily disable portal 2FA for this email only | R30 → then R13–R18, R28 |
+| **Production `ADMIN_SESSION_SECRET` (non-empty)** | `vercel env pull` returned **empty** `ADMIN_SESSION_SECRET` / `SESSION_SECRET`. Need a usable production secret (or agent-accessible secret store) to mint `ea_portal_session` without inbox | R30 alternate; R13–R18 |
+| **Admin enter path** | Admin email OTP with `admin:manage`, then open `/api/admin/show/enter?slug=ea-portal-cert-test` (no client email) | R13–R18, R28 (lands on `/ctp` first) |
+| **Portal executive session** | Non-CX entitled org cookie | R19 |
+| **Admin MCC session** | Admin role ≥ `viewer` + `admin:access` OTP | R5–R6, R20–R24 |
+
+### 8.4 Synthesized records (first login)
+
+| Record type | ID | Status |
+|---|---|---|
+| Organizations | — | **Not created** (login incomplete) |
+| Entitlements | — | **Not created** |
+| Memberships | — | **Not created** |
+
+Pre-existing provisioned IDs (unchanged): Client `recNTuXCN3DQ5JsCD`; CTP `rect0iuhuGRllUa8e` / `ctp_cert_0c0d1f7d3dd7`.
+
+### 8.5 Pass 1 runtime rule
+
+Source inspection is **not** substituted for authenticated CX runtime. Public gates remain Verified. Cert password credentials Verified as accepted. Session establishment **Failed** at 2FA. CX chrome checks remain **Blocked**.
+
+---
+
+## 9. Blockers
+
+Blockers for **launch-ready client experience certification** (inventory findings + verification gaps). Not an implementation plan.
+
+| ID | Blocker | Class | Evidence |
+|---|---|---|---|
+| B1 | Cert-tenant session not established (portal 2FA / empty prod secret pull) | Verification | §8.2 F; `auth-attempt-summary.json` |
+| B2 | CX primary home competition — Journey first, Progress second | Structural | `lib/ctp-client-nav.ts` order @ SHA (runtime confirm Blocked) |
+| B3 | Three+ competing help concepts (Support page, Messages page, FAQ FAB, Assistant “Help”) | Structural | §6 |
+| B4 | Stale FAQ directions (Overview, Scheduling, Messages & Support) | Content | `lib/ctp-faq.ts` @ SHA — §6.2 |
+| B5 | No portal confusion auto-assist triggers | Capability gap | §6.1 |
+| B6 | MCC Build exposes 11 peer destinations; operating-mode API unused | Structural | `BUILDER_NAV` + dead `readOperatingMode` |
+| B7 | Executive dual surfaces remain reachable for CX clients (no soft-redirect module) | Structural | soft-redirect file **absent** @ SHA |
+| B8 | Missing `/api/admin/command-bar` forces command-bar fallback | Incomplete | §2.4 / §7 |
+| B9 | Production deploy SHA ≠ target SHA (docs-only child `37577a3`) | Verification hygiene | §8.1 — product-equivalent |
+| B10 | First-login org/entitlement synthesis not yet observable | Verification | §8.4 |
+
+---
+
+## 10. Pass 1 structural observations (inventory only — not Pass 2)
+
+1. Canonical Guide route is `/ctp/progress` (`designStudioPath`), but CX nav labels it **Progress** and places **Your Journey** first.
+2. Help is multi-homed: Support + Messages + FAQ FAB + Assistant.
+3. FAQ text can increase confusion (§6.2).
+4. MCC Operate is a tight 7-item list; Build remains 11 peers.
+5. Orphaned components and missing command-bar API remain in tree.
+6. Trust/Legal/reacceptance surfaces are **not** in this commit (appear only in later WIP); production `/trust` **404** confirms.
+7. Public health + auth gates behave as designed on production (runtime Verified).
+8. Cert tenant password login works until portal email 2FA; without inbox or production HMAC secret, authenticated CX cannot be certified.
+
+---
+
+## 11. Validation log (deficiencies found in prior draft)
+
+| Deficiency | Severity | Correction |
+|---|---|---|
+| Inventory mixed dirty worktree WIP while claiming SHA `545c6251` | Critical | Rewrote all claims from `git` of that SHA only |
+| CX nav falsely listed as Your Project / Contact / Help with quiet Journey | Critical | Restored Your Journey → Progress → Documents → Messages → Support, all primary |
+| FAQ falsely described as aligned with new labels | Critical | Restored stale FAQ citations |
+| Trust Center, LegalReacceptance, `/api/trust/*`, `/admin/legal`, soft-redirects attributed to SHA | Critical | Removed — absent at SHA |
+| Portal page count 50 (actual 37); admin 65 w/ legal (actual 64); portal APIs 35 (actual 34) | High | Corrected counts + full route lists |
+| Experience labels “Project Updates” / “Contact” | Medium | Corrected to **Updates** / **Messaging** |
+| Assistant CX “Need a hand?” | Medium | Corrected — trigger is **Help**; no `CX_ASSISTANT_LABELS` |
+| Account `<details>` in CX nav | Medium | Corrected — direct Log out only |
+| Middleware `/trust` matcher | Medium | Removed — not in matcher |
+| Missing mandatory **Blockers** section | High | Added §9 |
+| Surface/control ledger internal inconsistency | Medium | Recalculated against corrected registries |
+| Sign-off claimed complete while commit-fidelity failed | Critical | Re-signed after correction |
+| Runtime section was placeholder-only | High | Extended §8 with production probes 2026-07-23 |
+| Cert auth incomplete at 2FA | High | Recorded R29–R32; no Pass 2 |
+
+---
+
+## 12. Sign-off
+
+| Item | Value |
+|---|---|
+| Pass 1 inventory deliverables | **Complete** (SHA-faithful registries + blockers + coverage ledger) |
+| Commit fidelity (source) | Claims match `545c6251bec86fc692ded933402cde3fb59797f8` |
+| Production product equivalence | Live `37577a3` = docs-only child of `545c6251` (product files identical) |
+| Runtime — public gates / health | **Complete** (Verified at runtime) |
+| Runtime — cert password credential acceptance | **Verified** (R29) |
+| Runtime — authenticated CX / MCC session | **Incomplete** (Failed at 2FA / Blocked — §8.3) |
+| Synthesized org/entitlement IDs | **None** (login incomplete) |
+| Report path | `docs/audits/EA-EXPERIENCE-AUDIT-PASS-1.md` |
+| Product changes this extension | None |
+| **Pass 2 started** | Yes — evaluation only; see `docs/audits/EA-EXPERIENCE-AUDIT-PASS-2.md` |

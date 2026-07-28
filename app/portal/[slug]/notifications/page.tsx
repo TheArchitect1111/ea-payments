@@ -3,6 +3,8 @@ import { redirect } from 'next/navigation';
 import { PortalSubpage } from '@/app/portal/components/PortalSubpage';
 import { requirePortalModule } from '@/lib/modules/portal-modules';
 import { listPortalNotifications } from '@/lib/notification-inbox';
+import { redirectCtpClientFromExecutiveSurface } from '@/lib/ctp-executive-surface-redirect';
+import { CX_EMOTION } from '@/lib/ctp-emotional-copy';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,6 +14,7 @@ export default async function PortalNotificationsPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
+  await redirectCtpClientFromExecutiveSurface(slug, 'progress');
   const { session } = await requirePortalModule(slug, 'dashboard');
   if (!session.email) {
     redirect('/portal/login');
@@ -28,13 +31,13 @@ export default async function PortalNotificationsPage({
       slug={slug}
       active="home"
       kicker="Activity"
-      title="Notification center"
-      lede="Recent activity across Pulse, Simplifi, billing, and your advisor updates."
+      title={CX_EMOTION.notifications.title}
+      lede={CX_EMOTION.notifications.lede}
     >
       <ul className="ep-module-list">
         {notifications.length === 0 ? (
           <li className="ep-module-card">
-            <p className="ep-module-card-note">No recent activity yet.</p>
+            <p className="ep-module-card-note">{CX_EMOTION.notifications.empty}</p>
           </li>
         ) : (
           notifications.map((item) => (

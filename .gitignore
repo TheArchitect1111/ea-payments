@@ -37,6 +37,10 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 
+# local-only Supabase CLI token handoff (never commit)
+.supabase-access-token
+.supabase-jwt-secret
+
 # vercel
 .vercel
 
@@ -45,3 +49,22 @@ yarn-error.log*
 next-env.d.ts
 
 .vercel
+
+# Trust Engine local persistence (acceptance / audit until Airtable wired)
+.data/
+
+.env.people.prod
+
+.launch-preflight.json
+
+.tmp-org-record.json
+
+tsc-out.txt
+
+docs/audits/_runtime-cert-session-cookie.txt
+
+docs/audits/_runtime-cert-session-meta.json
+
+scripts/*.bak
+
+scripts/*.before-management-api-fix

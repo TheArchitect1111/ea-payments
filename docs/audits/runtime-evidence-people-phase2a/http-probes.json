@@ -1,35 +1,35 @@
 {
-  "base": "http://127.0.0.1:3010",
+  "base": "http://localhost:3000",
   "httpResults": [
     {
       "route": "/portal/demo-client/people",
       "flag": "OFF",
-      "status": 307,
-      "note": "redirect"
+      "status": "ERR",
+      "note": "fetch failed"
     },
     {
       "route": "/api/portal/demo-client/people",
       "flag": "OFF",
-      "status": 404,
-      "note": "ok"
+      "status": "ERR",
+      "note": "fetch failed"
     },
     {
       "route": "/portal/demo-client/people",
       "flag": "ON",
-      "status": 307,
-      "note": "redirect"
+      "status": "ERR",
+      "note": "fetch failed"
     },
     {
       "route": "/api/portal/demo-client/people",
       "flag": "ON",
-      "status": 404,
-      "note": "ok"
+      "status": "ERR",
+      "note": "fetch failed"
     },
     {
       "route": "/portal/login",
       "flag": "ON",
-      "status": 200,
-      "note": "ok"
+      "status": "ERR",
+      "note": "fetch failed"
     }
   ]
 }

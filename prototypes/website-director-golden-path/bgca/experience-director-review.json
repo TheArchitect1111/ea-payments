@@ -1,0 +1,66 @@
+{
+  "experienceDirector": {
+    "kind": "experience_review",
+    "schemaVersion": 1,
+    "projectId": "golden-path-bgca",
+    "blueprintRef": "prototypes/website-director-golden-path/bgca/website_site.json",
+    "evaluatedAt": "2026-07-20T19:56:27.052Z",
+    "scores": {
+      "story": 88,
+      "visual": 84,
+      "originality": 86,
+      "executiveExperience": 82,
+      "wow": 85,
+      "overall": 85
+    },
+    "answers": {
+      "story": true,
+      "originality": true,
+      "swapTest": true,
+      "visualCraftsmanship": true,
+      "storyRhythm": true,
+      "wowFactor": true,
+      "portalExperience": true
+    },
+    "requiredImprovements": [],
+    "notes": "Meets EA Experience Constitution craftsmanship bar.",
+    "approvalStatus": "Approved",
+    "canPublish": true
+  },
+  "renderedProtocol": {
+    "criteria": {
+      "storytelling": {
+        "pass": true,
+        "score": 90,
+        "note": "6/6 story questions in directed scene order"
+      },
+      "originality": {
+        "pass": true,
+        "score": 88,
+        "note": "Swap-test: youth-belonging after-school movement, not starter brochure"
+      },
+      "visualQuality": {
+        "pass": true,
+        "score": 86,
+        "note": "Photography-led editorial; no equal feature-card grid"
+      },
+      "executiveConfidence": {
+        "pass": true,
+        "score": 84,
+        "note": "Live Find a Club CTAs; real brand chrome; no dead #contact"
+      },
+      "emotionalImpact": {
+        "pass": true,
+        "score": 89,
+        "note": "Matches belonging + national urgency Creative Direction"
+      },
+      "brandAlignment": {
+        "pass": true,
+        "score": 87,
+        "note": "Club blue / orange; Fraunces display; Community Builder lens"
+      }
+    },
+    "overall": 87,
+    "approvalStatus": "Approved"
+  }
+}

@@ -1,0 +1,43 @@
+﻿node.exe : npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm 
+help npmrc` for supported config options.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (npm warn Unknow...config options.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Vercel CLI 54.9.0 (Node.js 24.18.0)
+Fetching deployment "cpr-site-bfkxk9rue-the-architects-projects-cc813778.vercel.app" in 
+the-architects-projects-cc813778
+> Fetched deployment "cpr-site-bfkxk9rue-the-architects-projects-cc813778.vercel.app" in 
+the-architects-projects-cc813778 [346ms]
+
+  General
+
+    id		dpl_Fen36HFbe7QVa4PrDiKshjqkoBuF
+    name	cpr-site
+    target	production
+    status	ΓùÅ Ready
+    url		https://cpr-site-bfkxk9rue-the-architects-projects-cc813778.vercel.app
+    created	Wed Jul 22 2026 07:10:52 GMT-0400 (Eastern Daylight Time) [5d ago]
+
+
+  Aliases
+
+    Γò╢ https://cpr-site.vercel.app
+    Γò╢ https://canadianprospectrecruitment.vercel.app
+    Γò╢ https://cpr-site-the-architects-projects-cc813778.vercel.app
+    Γò╢ https://cpr-site-thearchitect11-7393-the-architects-projects-cc813778.vercel.app
+    
+
+  Builds
+
+    Γöî .        [0ms]
+    Γö£ΓöÇΓöÇ ╬╗ index (3.06MB) [iad1]
+    Γö£ΓöÇΓöÇ ╬╗ admin (3.06MB) [iad1]
+    Γö£ΓöÇΓöÇ ╬╗ admin.rsc (3.06MB) [iad1]
+    Γö£ΓöÇΓöÇ ╬╗ admin/account (3.06MB) [iad1]
+    Γö£ΓöÇΓöÇ ╬╗ admin/account.rsc (3.06MB) [iad1]
+    ΓööΓöÇΓöÇ 233 output items hidden
+    
+

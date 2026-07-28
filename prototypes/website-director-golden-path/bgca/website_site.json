@@ -1,0 +1,80 @@
+{
+  "kind": "website_site",
+  "builderId": "website-director-golden-path",
+  "stub": false,
+  "organizationName": "Boys & Girls Clubs of America",
+  "primaryUrl": "https://www.bgca.org",
+  "organization": {
+    "name": "Boys & Girls Clubs of America",
+    "industry": "Youth development"
+  },
+  "brand": {
+    "voice": "Warm, urgent about kids, hopeful without hype — community first.",
+    "headline": "America Needs Club Kids",
+    "primary": "#0033A0",
+    "accent": "#E87722"
+  },
+  "experience": {
+    "emotionalTone": "Belonging with national urgency for kids after school",
+    "brandPersonality": "Community Builder tempered by Advocate dignity",
+    "visualDna": "Open Club door at golden hour; faces before programs; editorial not SaaS",
+    "creativeDirectionId": "sc-bgca-community-advocate-v1",
+    "storyClassificationId": "sc-bgca-community-advocate-v1"
+  },
+  "story": {
+    "whoTheyAre": "A national movement of local Clubs that keep kids future-ready when the school day ends.",
+    "whyTheyExist": "Millions of kids lack supervised, enriching after-school time — Clubs close that gap with belonging.",
+    "whoTheyHelp": "Kids and teens who need a safe place, mentors, and a path to graduate and lead.",
+    "whyItMatters": "America’s future is decided in the hours after school — who is watching and who is believing.",
+    "whatChanges": "Kids move from unsupervised hours to belonging, leadership, and plans after high school."
+  },
+  "portal": {
+    "memberHome": {
+      "whereYouAre": "Connected to the Club movement that keeps kids future-ready after school.",
+      "whatNext": "Find your nearest Club or deepen support for Club Kids this week.",
+      "purpose": "Give every kid a door that opens toward belonging and leadership.",
+      "whatSuccessLooksLike": "Kids known by name, supervised after school, expecting to graduate and lead."
+    }
+  },
+  "pages": [
+    {
+      "path": "/",
+      "title": "Home",
+      "order": 1,
+      "sections": [
+        {
+          "id": "human-story",
+          "role": "human_story",
+          "label": "Human story — Club Kids at the threshold"
+        },
+        {
+          "id": "current-reality",
+          "role": "current_reality",
+          "label": "Current reality — unsupervised after school"
+        },
+        {
+          "id": "mission",
+          "role": "mission",
+          "label": "Mission — America Needs Club Kids"
+        },
+        {
+          "id": "transformation",
+          "role": "transformation",
+          "label": "Transformation — alone to future-ready"
+        },
+        {
+          "id": "impact",
+          "role": "impact",
+          "label": "Impact — youth outcomes"
+        },
+        {
+          "id": "invitation",
+          "role": "invitation",
+          "label": "Invitation — Find a Club"
+        }
+      ]
+    }
+  ],
+  "pageCount": 1,
+  "note": "Golden Path directed website_site — scene roles from Story Lens; no feature-card SaaS roles"
+}

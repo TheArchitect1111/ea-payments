@@ -1,0 +1,28 @@
+---
+description: Client Experience presentation is frozen — routing fixes only unless explicitly unfrozen
+globs:
+  - app/portal/**/ctp/**
+  - app/portal/components/guide-progress.css
+  - app/portal/components/client-experience*.css
+  - app/portal/components/ClientExperience*.tsx
+  - lib/ctp-guide-presentation.ts
+  - lib/ctp-stage-visuals.ts
+alwaysApply: false
+---
+
+# Client Experience — FROZEN (Jul 20, 2026)
+
+The Client Experience visual and editorial presentation is **frozen** at Launch Ready.
+
+Do **not** change Guide home composition, Story So Far, Design Studio framing, shell chrome, or concierge copy unless the user explicitly unfreezes this surface.
+
+Allowed without unfreeze:
+- Login / post-login / demo routing fixes
+- Auth session bugs
+- Contract repairs that preserve CX behavior
+- Guide intelligence / Project State / architecture (outside CX presentation)
+
+Not allowed without explicit unfreeze:
+- Visual redesign of Your Project, Messages, Documents, Help
+- New CX navigation or cards
+- Typography / photography / atmosphere experiments
