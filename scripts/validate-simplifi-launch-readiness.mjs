@@ -68,10 +68,10 @@ async function main() {
     captureSchemaOk = publicOk && fullLaunch;
     captureDetail = 'public-summary-fallback';
 
-    // Prefer authoritative Airtable meta when key is available.
-    if (env.AIRTABLE_API_KEY) {
+    // Prefer authoritative Airtable meta when key + base id are available.
+    if (env.AIRTABLE_API_KEY && env.AIRTABLE_PAYMENTS_BASE_ID) {
       try {
-        const baseId = env.AIRTABLE_PAYMENTS_BASE_ID || 'appv0YoLIMY45fmDA';
+        const baseId = String(env.AIRTABLE_PAYMENTS_BASE_ID).trim();
         const metaRes = await fetch(`https://api.airtable.com/v0/meta/bases/${baseId}/tables`, {
           headers: { Authorization: `Bearer ${env.AIRTABLE_API_KEY}` },
         });

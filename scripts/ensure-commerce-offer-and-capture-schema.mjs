@@ -26,9 +26,13 @@ if (existsSync(envPath)) {
 }
 
 const key = process.env.AIRTABLE_API_KEY;
-const BASE = process.env.AIRTABLE_PAYMENTS_BASE_ID?.trim() || 'appv0YoLIMY45fmDA';
+const BASE = process.env.AIRTABLE_PAYMENTS_BASE_ID?.trim();
 if (!key) {
   console.error('NO_KEY');
+  process.exit(1);
+}
+if (!BASE) {
+  console.error('NO_AIRTABLE_PAYMENTS_BASE_ID');
   process.exit(1);
 }
 
