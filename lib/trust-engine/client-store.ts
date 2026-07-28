@@ -28,7 +28,7 @@ import {
 const DATA_DIR = join(process.cwd(), '.data', 'trust-engine');
 const STORE_FILE = join(DATA_DIR, 'client-profiles.json');
 
-let profiles = new Map<string, ClientLegalProfile>();
+const profiles = new Map<string, ClientLegalProfile>();
 let hydrated = false;
 
 function ensureDir() {

@@ -11,7 +11,7 @@ type OverlayState = {
   upcoming: UpcomingLegalRelease[];
 };
 
-let state: OverlayState = { active: [], upcoming: [] };
+const state: OverlayState = { active: [], upcoming: [] };
 
 export function getEffectiveLegalDocument(
   docType: TrustLegalDocType,
