@@ -29,7 +29,10 @@ export type EAPortalTab =
   | 'ask'
   | 'ctp'
   | 'member'
-  | 'landing';
+  | 'landing'
+  | 'intake'
+  | 'applications'
+  | 'reports';
 
 type Props = {
   slug: string;
@@ -66,6 +69,9 @@ const FALLBACK_TITLES: Record<EAPortalTab, string> = {
   ctp: 'Your Project',
   member: 'Member Experience',
   landing: 'Landing Pages',
+  intake: 'Intake',
+  applications: 'Applications',
+  reports: 'Reports',
 };
 
 function titleFromNav(chrome: PortalWorkspaceChrome, active: EAPortalTab): string | undefined {
@@ -104,9 +110,9 @@ export async function PortalShell({
     headerList.get('x-invoke-path') ||
     headerList.get('next-url') ||
     '';
-  const clientNavItems = buildClientExperienceNav(slug);
+  const clientNavItems = await buildClientExperienceNav(slug);
   const clientNavActive =
-    clientNavActiveProp || resolveClientNavActive(pathname, slug);
+    clientNavActiveProp || (await resolveClientNavActive(pathname, slug));
 
   const clientTitle =
     clientNavItems.find((item) => item.id === clientNavActive)?.label ?? 'Your Project';

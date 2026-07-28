@@ -6,6 +6,12 @@ import { randomBytes } from 'node:crypto';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
+import {
+  listRegistrationsFromAirtable,
+  registrationKey,
+  upsertRegistrationToAirtable,
+} from '@/lib/events/event-hub-airtable';
+import { platformStoreConfigured } from '@/lib/platform-store';
 
 export type RegistrationPaymentStatus = 'placed' | 'paid' | 'canceled' | 'unknown';
 
@@ -82,9 +88,16 @@ export async function listRegistrationsForPortal(
   portalSlug: string,
   opts?: { email?: string },
 ): Promise<PortalEventRegistration[]> {
-  const store = await readStore();
   const slug = normalizeSlug(portalSlug);
   const email = opts?.email?.trim().toLowerCase();
+
+  if (platformStoreConfigured()) {
+    return listRegistrationsFromAirtable({ portalSlug: slug, email }).then((rows) =>
+      [...rows].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)),
+    );
+  }
+
+  const store = await readStore();
   return store.registrations
     .filter((row) => row.portalSlug === slug)
     .filter((row) => (email ? (row.email || '').toLowerCase() === email : true))
@@ -92,6 +105,12 @@ export async function listRegistrationsForPortal(
 }
 
 export async function listAllRegistrations(): Promise<PortalEventRegistration[]> {
+  if (platformStoreConfigured()) {
+    return listRegistrationsFromAirtable({ maxRecords: 500 }).then((rows) =>
+      [...rows].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)),
+    );
+  }
+
   const store = await readStore();
   return [...store.registrations].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
 }
@@ -108,10 +127,63 @@ export async function upsertRegistrationFromPretix(input: {
   eventStartsAt?: string;
   status: RegistrationPaymentStatus;
 }): Promise<PortalEventRegistration> {
-  const store = await readStore();
   const portalSlug = normalizeSlug(input.portalSlug);
   const orderCode = input.orderCode.trim() || 'unknown';
   const stamped = nowIso();
+
+  if (platformStoreConfigured()) {
+    const key = registrationKey({
+      portalSlug,
+      orderCode,
+      pretixEventSlug: input.pretixEventSlug,
+    });
+    const existing = (await listRegistrationsFromAirtable({ portalSlug, maxRecords: 500 })).find(
+      (row) =>
+        registrationKey({
+          portalSlug: row.portalSlug,
+          orderCode: row.orderCode,
+          pretixEventSlug: row.pretixEventSlug,
+        }) === key,
+    );
+
+    const next: PortalEventRegistration = existing
+      ? {
+          ...existing,
+          email: input.email?.trim() || existing.email,
+          eventTitle: input.eventTitle || existing.eventTitle,
+          pretixEventSlug: input.pretixEventSlug || existing.pretixEventSlug,
+          pretixOrganizerSlug: input.pretixOrganizerSlug || existing.pretixOrganizerSlug,
+          shopUrl: input.shopUrl || existing.shopUrl,
+          eventStartsAt: input.eventStartsAt || existing.eventStartsAt,
+          organizationId: input.organizationId || existing.organizationId,
+          status: input.status === 'unknown' ? existing.status : input.status,
+          paidAt: input.status === 'paid' ? stamped : existing.paidAt,
+          updatedAt: stamped,
+        }
+      : {
+          id: newId(),
+          portalSlug,
+          organizationId: input.organizationId,
+          orderCode,
+          email: input.email?.trim() || undefined,
+          eventTitle: input.eventTitle,
+          pretixEventSlug: input.pretixEventSlug,
+          pretixOrganizerSlug: input.pretixOrganizerSlug,
+          shopUrl: input.shopUrl,
+          eventStartsAt: input.eventStartsAt,
+          status: input.status,
+          placedAt: stamped,
+          paidAt: input.status === 'paid' ? stamped : undefined,
+          updatedAt: stamped,
+          remindersSent: {},
+        };
+
+    const saved = await upsertRegistrationToAirtable(next);
+    if (!saved) throw new Error('Could not persist registration to platform store.');
+    return saved;
+  }
+
+  const store = await readStore();
   const existingIndex = store.registrations.findIndex(
     (row) =>
       row.portalSlug === portalSlug &&
@@ -170,10 +242,23 @@ export async function markRegistrationReminderSent(
   id: string,
   kind: 't7' | 't1' | 'tday',
 ): Promise<PortalEventRegistration | null> {
+  const stamped = nowIso();
+
+  if (platformStoreConfigured()) {
+    const all = await listRegistrationsFromAirtable({ maxRecords: 500 });
+    const prev = all.find((row) => row.id === id);
+    if (!prev) return null;
+    const next: PortalEventRegistration = {
+      ...prev,
+      remindersSent: { ...(prev.remindersSent || {}), [kind]: stamped },
+      updatedAt: stamped,
+    };
+    return upsertRegistrationToAirtable(next);
+  }
+
   const store = await readStore();
   const index = store.registrations.findIndex((row) => row.id === id);
   if (index < 0) return null;
-  const stamped = nowIso();
   const prev = store.registrations[index];
   const next: PortalEventRegistration = {
     ...prev,

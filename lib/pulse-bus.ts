@@ -46,6 +46,7 @@ export type PulseEventType =
   | 'ctp.review.reminder_sent'
   | 'ctp.executive_email.resent'
   | 'apply.submitted'
+  | 'portal.form.submitted'
   | 'portal.login'
   | 'portal.provisioned'
   | 'proposal.pending'

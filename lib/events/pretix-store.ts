@@ -3,11 +3,18 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import {
+  findPretixEventInAirtable,
+  listPretixEventsFromAirtable,
+  markPretixEventDeletedInAirtable,
+  upsertPretixEventToAirtable,
+} from '@/lib/events/event-hub-airtable';
+import {
   isValidPretixShopUrl,
   type PortalPretixEvent,
   type PortalPretixEventStatus,
   type PretixIntegrationConfig,
 } from '@/lib/events/pretix-types';
+import { platformStoreConfigured } from '@/lib/platform-store';
 
 type StoreData = {
   version: number;
@@ -114,8 +121,19 @@ export async function listPretixEventsForPortal(
   portalSlug: string,
   opts?: { includeDrafts?: boolean },
 ): Promise<PortalPretixEvent[]> {
-  const store = await readStore();
   const slug = normalizeSlug(portalSlug);
+  if (platformStoreConfigured()) {
+    return listPretixEventsFromAirtable({
+      portalSlug: slug,
+      includeDrafts: opts?.includeDrafts,
+    }).then((events) =>
+      [...events].sort((a, b) =>
+        (b.startsAt || b.updatedAt).localeCompare(a.startsAt || a.updatedAt),
+      ),
+    );
+  }
+
+  const store = await readStore();
   return store.events
     .filter((event) => event.portalSlug === slug)
     .filter((event) => (opts?.includeDrafts ? true : event.status === 'published'))
@@ -123,6 +141,12 @@ export async function listPretixEventsForPortal(
 }
 
 export async function listAllPretixEvents(): Promise<PortalPretixEvent[]> {
+  if (platformStoreConfigured()) {
+    return listPretixEventsFromAirtable({ includeDrafts: true, maxRecords: 200 }).then((events) =>
+      [...events].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)),
+    );
+  }
+
   const store = await readStore();
   return [...store.events].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
 }
@@ -132,6 +156,14 @@ export async function findPretixEventByShopOrSlug(input: {
   pretixEventSlug?: string;
   portalSlug?: string;
 }): Promise<PortalPretixEvent | null> {
+  if (platformStoreConfigured()) {
+    return findPretixEventInAirtable({
+      shopUrl: input.shopUrl,
+      pretixEventSlug: input.pretixEventSlug,
+      portalSlug: input.portalSlug ? normalizeSlug(input.portalSlug) : undefined,
+    });
+  }
+
   const store = await readStore();
   const shop = input.shopUrl?.trim();
   const eventSlug = input.pretixEventSlug?.trim().toLowerCase();
@@ -189,6 +221,12 @@ export async function createPretixEvent(input: {
     createdBy: input.createdBy,
   };
 
+  if (platformStoreConfigured()) {
+    const saved = await upsertPretixEventToAirtable(event);
+    if (!saved) return { ok: false, error: 'Could not persist pretix event to platform store.' };
+    return { ok: true, event: saved };
+  }
+
   const store = await readStore();
   const next: StoreData = {
     version: store.version,
@@ -204,8 +242,19 @@ export async function updatePretixEventStatus(
   portalSlug: string,
   status: PortalPretixEventStatus,
 ): Promise<{ ok: true; event: PortalPretixEvent } | { ok: false; error: string }> {
-  const store = await readStore();
   const slug = normalizeSlug(portalSlug);
+  if (platformStoreConfigured()) {
+    const existing = (await listPretixEventsFromAirtable({ portalSlug: slug, includeDrafts: true }))
+      .find((event) => event.id === id);
+    if (!existing) return { ok: false, error: 'Event not found.' };
+    const stamped = nowIso();
+    const updated = { ...existing, status, updatedAt: stamped };
+    const saved = await upsertPretixEventToAirtable(updated);
+    if (!saved) return { ok: false, error: 'Could not update pretix event in platform store.' };
+    return { ok: true, event: saved };
+  }
+
+  const store = await readStore();
   const index = store.events.findIndex((event) => event.id === id && event.portalSlug === slug);
   if (index < 0) return { ok: false, error: 'Event not found.' };
   const stamped = nowIso();
@@ -220,8 +269,14 @@ export async function deletePretixEvent(
   id: string,
   portalSlug: string,
 ): Promise<{ ok: true } | { ok: false; error: string }> {
-  const store = await readStore();
   const slug = normalizeSlug(portalSlug);
+  if (platformStoreConfigured()) {
+    const deleted = await markPretixEventDeletedInAirtable(id, slug);
+    if (!deleted) return { ok: false, error: 'Event not found.' };
+    return { ok: true };
+  }
+
+  const store = await readStore();
   const nextEvents = store.events.filter((event) => !(event.id === id && event.portalSlug === slug));
   if (nextEvents.length === store.events.length) return { ok: false, error: 'Event not found.' };
   await writeStore({ version: store.version, updatedAt: nowIso(), events: nextEvents });

@@ -2,9 +2,11 @@ import type { IndustryPack, IndustryPackId } from '@/lib/portal-universal/indust
 import { assertValidIndustryPack } from '@/lib/portal-universal/validate-pack';
 import { EA_EXECUTIVE_PACK } from '@/lib/portal-universal/packs/ea-executive';
 import { CTP_CLIENT_PACK } from '@/lib/portal-universal/packs/ctp-client';
+import { REAL_ESTATE_PACK } from '@/lib/portal-universal/packs/real-estate';
+import { WEBSITE_PORTAL_PACK } from '@/lib/portal-universal/packs/website-portal';
 import { SAMPLE_PLACEHOLDER_PACK } from '@/lib/portal-universal/packs/sample-placeholder';
 
-const RAW_PACKS = [EA_EXECUTIVE_PACK, CTP_CLIENT_PACK, SAMPLE_PLACEHOLDER_PACK] as const;
+const RAW_PACKS = [EA_EXECUTIVE_PACK, CTP_CLIENT_PACK, WEBSITE_PORTAL_PACK, REAL_ESTATE_PACK, SAMPLE_PLACEHOLDER_PACK] as const;
 
 /** Validated registry — throws at module load if a pack is invalid. */
 export const INDUSTRY_PACK_REGISTRY: Record<IndustryPackId, IndustryPack> = Object.fromEntries(

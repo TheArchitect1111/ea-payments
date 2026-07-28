@@ -1,0 +1,65 @@
+{
+  "name": "CTP Money Loop Cert",
+  "checkedAt": "2026-07-28T11:15:00.000Z",
+  "definition": "Intake → proposal → Stripe pay → fulfill → portal CX → welcome email",
+  "pass": false,
+  "note": "Code contracts pass; live Stripe + Resend require ops",
+  "steps": [
+    {
+      "id": "intake",
+      "item": "Canonical CTP intake reachable",
+      "status": "pass",
+      "command": "node scripts/test-canonical-ctp-intake.mjs",
+      "url": "https://cc.efficiencyarchitects.online/ctp"
+    },
+    {
+      "id": "admin-close-sop",
+      "item": "Admin close SOP documented",
+      "status": "pass",
+      "evidence": "docs/CTP-SELLABLE-CLOSE-RUNBOOK.md + docs/CTP-CLOSE-SOP.md"
+    },
+    {
+      "id": "fulfill-contract",
+      "item": "fulfillPaidClient shared by Stripe + proposal paths",
+      "status": "pass",
+      "command": "node scripts/test-fulfill-paid-client.mjs"
+    },
+    {
+      "id": "launch-preflight",
+      "item": "Launch preflight gate",
+      "status": "pass",
+      "command": "npm run launch:preflight"
+    },
+    {
+      "id": "stripe-live-checkout",
+      "item": "Live proposal checkout + webhook fulfillment",
+      "status": "pending_ops",
+      "command": "Pay test proposal in staging/production Stripe mode",
+      "nextSteps": [
+        "Use /admin/ctp → Approve & send proposal",
+        "Complete Stripe checkout with test card",
+        "Confirm Client Record Paid + portal slug in Airtable"
+      ]
+    },
+    {
+      "id": "welcome-email",
+      "item": "Welcome email + magic link delivery",
+      "status": "pending_ops",
+      "command": "node scripts/test-factory-launch-email.mjs",
+      "nextSteps": [
+        "Verify Resend DNS for production domain",
+        "Confirm magicLoginUrl in welcome payload after paid fulfillment"
+      ]
+    },
+    {
+      "id": "portal-cx-five-nav",
+      "item": "Client sees five-nav CTP CX (no executive modules)",
+      "status": "pending_ops",
+      "nextSteps": [
+        "Log in as fulfilled client",
+        "Verify Your Project / Documents / Contact / Help / Journey",
+        "Confirm Pulse/Simplifi/Amplifi hidden unless entitled"
+      ]
+    }
+  ]
+}

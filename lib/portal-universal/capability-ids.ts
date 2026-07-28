@@ -28,10 +28,10 @@ export const UNIVERSAL_TO_MODULES: Record<UniversalCapabilityId, ModuleId[]> = {
   tasks: [],
   calendar: ['events'],
   documents: ['documents', 'ctp'],
-  programs: ['ctp', 'simplifi', 'connect', 'amplifi', 'member'],
+  programs: ['ctp', 'simplifi', 'connect', 'amplifi', 'member', 'intake', 'applications'],
   progress: ['pulse', 'ctp'],
   payments: ['billing'],
-  resources: ['resources', 'training', 'ask'],
+  resources: ['resources', 'training', 'ask', 'reports'],
 };
 
 export function isUniversalCapabilityId(value: string): value is UniversalCapabilityId {

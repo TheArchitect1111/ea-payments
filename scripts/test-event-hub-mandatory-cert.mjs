@@ -69,6 +69,16 @@ assert(registry.includes("'settings'"), 'module registry must include settings m
 const vercel = readFileSync(join(root, 'vercel.json'), 'utf8');
 assert(vercel.includes('event-registration-reminders'), 'vercel.json must schedule reminder cron');
 
+const pretixStore = readFileSync(join(root, 'lib/events/pretix-store.ts'), 'utf8');
+const registrationLedger = readFileSync(join(root, 'lib/events/registration-ledger.ts'), 'utf8');
+const eventHubAirtable = readFileSync(join(root, 'lib/events/event-hub-airtable.ts'), 'utf8');
+assert(pretixStore.includes('platformStoreConfigured'), 'pretix-store must gate on platformStoreConfigured');
+assert(pretixStore.includes('upsertPretixEventToAirtable'), 'pretix-store must upsert to Airtable');
+assert(registrationLedger.includes('upsertRegistrationToAirtable'), 'registration-ledger must upsert to Airtable');
+assert(eventHubAirtable.includes('Portal Pretix Events'), 'event-hub-airtable must define Portal Pretix Events table');
+assert(eventHubAirtable.includes('Registration Key'), 'event-hub-airtable must define Registration Key upsert');
+assert(eventHubAirtable.includes('registrationKey'), 'event-hub-airtable must export registrationKey helper');
+
 if (failures.length) {
   console.error('FAIL event-hub-mandatory-cert');
   for (const f of failures) console.error(' -', f);

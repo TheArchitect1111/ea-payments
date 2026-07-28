@@ -1,0 +1,75 @@
+{
+  "name": "Event Hub Client Use GO",
+  "checkedAt": "2026-07-28T11:15:00.000Z",
+  "base": "https://efficiencyarchitects.online",
+  "definition": "Portal Event Hub: Calendar + pretix Events + My registrations with durable Airtable ledger when platform store configured.",
+  "pass": true,
+  "checklist": [
+    {
+      "id": 1,
+      "item": "Event Hub tabs render (Calendar | Events | My registrations)",
+      "ok": true,
+      "evidence": "scripts/test-event-hub-mandatory-cert.mjs — events page tab labels + ep-hub-tabs"
+    },
+    {
+      "id": 2,
+      "item": "pretix events + registration ledger durable via Airtable when configured",
+      "ok": true,
+      "evidence": "lib/events/event-hub-airtable.ts + pretix-store.ts + registration-ledger.ts platformStoreConfigured hooks"
+    },
+    {
+      "id": 3,
+      "item": "Registration Key upsert pattern",
+      "ok": true,
+      "evidence": "Registration Key = {portalSlug}:{orderCode}:{pretixEventSlug||_}"
+    },
+    {
+      "id": 4,
+      "item": "Webhook upserts ledger + Pulse events",
+      "ok": true,
+      "evidence": "lib/events/pretix-webhook.ts upsertRegistrationFromPretix"
+    },
+    {
+      "id": 5,
+      "item": "T-7 / T-1 / event-day reminder cron wired",
+      "ok": true,
+      "evidence": "vercel.json event-registration-reminders + registration-reminders.ts"
+    },
+    {
+      "id": 6,
+      "item": "Launch Edition includes events entitlement",
+      "ok": true,
+      "evidence": "vendor/payments-contract/src/presets.ts LAUNCH_EDITION_MODULES includes events"
+    },
+    {
+      "id": 7,
+      "item": "Live pretix shop + webhook smoke",
+      "ok": false,
+      "opsRequired": true,
+      "nextSteps": [
+        "Create pretix Hosted organizer + event (credentials not in repo)",
+        "Set PRETIX_WEBHOOK_SECRET + PRETIX_WEBHOOK_USER on production",
+        "Run node scripts/ensure-event-hub-airtable-schema.mjs",
+        "Staff-publish shop URL in portal Event Hub",
+        "Place test order → confirm Portal Event Registrations row",
+        "curl dry-run reminders with CRON_SECRET"
+      ]
+    },
+    {
+      "id": 8,
+      "item": "Airtable schema bootstrapped in production base",
+      "ok": false,
+      "opsRequired": true,
+      "nextSteps": [
+        "node scripts/ensure-event-hub-airtable-schema.mjs",
+        "Verify Portal Pretix Events + Portal Event Registrations tables exist"
+      ]
+    }
+  ],
+  "scripts": [
+    "node scripts/test-event-hub-mandatory-cert.mjs",
+    "node scripts/test-pretix-event-hub-contract.mjs",
+    "node scripts/ensure-event-hub-airtable-schema.mjs"
+  ],
+  "verdict": "CLIENT_USE_GO for code + durability hooks; live pretix + Airtable bootstrap require ops"
+}

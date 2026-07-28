@@ -35,6 +35,8 @@ export type Organization = {
   workspaceName?: string;
   /** Optional IndustryPack id (Phase 1 Universal Portal) */
   industryPackId?: string;
+  /** Tenant booking embed URL for Event Hub calendar */
+  bookingUrl?: string;
 };
 
 function mapOrganization(record: AirtableRecord): Organization {
@@ -59,6 +61,7 @@ function mapOrganization(record: AirtableRecord): Organization {
     personalityId: f['Personality Id'] ? String(f['Personality Id']) : undefined,
     workspaceName: f['Workspace Name'] ? String(f['Workspace Name']) : undefined,
     industryPackId: f['Industry Pack Id'] ? String(f['Industry Pack Id']) : undefined,
+    bookingUrl: f['Booking Url'] ? String(f['Booking Url']) : undefined,
   };
 }
 
@@ -277,6 +280,7 @@ export type OrganizationWorkspaceConfigInput = {
   logo?: string;
   brandColors?: string;
   industryPackId?: string;
+  bookingUrl?: string;
 };
 
 /** Durable overlay when Organizations Airtable lacks Theme Id / workspace columns. */
@@ -322,6 +326,7 @@ function applyWorkspaceOverlay(
     brandColors: org.brandColors || overlay.brandColors,
     platformClientId: org.platformClientId || overlay.platformClientId,
     industryPackId: org.industryPackId || overlay.industryPackId,
+    bookingUrl: org.bookingUrl || overlay.bookingUrl,
   };
 }
 
@@ -340,6 +345,7 @@ export async function updateOrganizationWorkspaceConfig(
   if (input.logo !== undefined) fields['Logo'] = input.logo;
   if (input.brandColors !== undefined) fields['Brand Colors'] = input.brandColors;
   if (input.industryPackId !== undefined) fields['Industry Pack Id'] = input.industryPackId;
+  if (input.bookingUrl !== undefined) fields['Booking Url'] = input.bookingUrl;
 
   // Always persist overlay so theme/workspace survive thin Organizations schemas.
   await saveOrganizationWorkspaceOverlay(orgId, input);
