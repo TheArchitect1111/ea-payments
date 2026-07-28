@@ -1,93 +1,93 @@
 {
-  "checkedAt": "2026-07-28T00:04:21.254Z",
+  "checkedAt": "2026-07-28T00:04:14.522Z",
   "org": {
-    "id": "recs1KPGChgwbNkd6",
+    "id": "recNfTSuNbwBJpK1b",
     "name": "Acme Roofing Field Demo",
-    "slug": "acme-roofing-field-demo-a9be53",
+    "slug": "acme-roofing-field-demo-4aaadf",
     "status": "Active"
   },
   "results": [
     {
-      "action": "updated",
+      "action": "created",
       "moduleId": "simplifi"
     },
     {
-      "action": "updated",
+      "action": "created",
       "moduleId": "amplifi"
     }
   ],
   "entitlements": [
     {
-      "id": "rec6WhBbGkiDsfiux",
-      "moduleId": "ask",
-      "status": "active",
-      "source": "package"
-    },
-    {
-      "id": "recEv6djYtXDute7R",
+      "id": "rec4wRJZi9TNSKdDR",
       "moduleId": "update-hub",
       "status": "active",
       "source": "package"
     },
     {
-      "id": "recH5HbfK7SWld2Tp",
-      "moduleId": "training",
-      "status": "active",
-      "source": "package"
-    },
-    {
-      "id": "recKHDEnzTaQjQPFm",
-      "moduleId": "resources",
-      "status": "active",
-      "source": "package"
-    },
-    {
-      "id": "recNNEFdDZOUlsdVa",
-      "moduleId": "amplifi",
-      "status": "active",
-      "source": "manual"
-    },
-    {
-      "id": "recOYLHzaZVcnS1Y5",
-      "moduleId": "documents",
-      "status": "active",
-      "source": "package"
-    },
-    {
-      "id": "recSprnlyFe1CKbRg",
+      "id": "recTxslwdZ2uxF0aE",
       "moduleId": "connect",
       "status": "active",
       "source": "package"
     },
     {
-      "id": "recboGQZapkUwiMMG",
-      "moduleId": "messaging",
+      "id": "recUVEWubu5SRn186",
+      "moduleId": "ask",
       "status": "active",
       "source": "package"
     },
     {
-      "id": "receVbLmwXqtyh1qc",
+      "id": "rececTUs84rFbnCt2",
+      "moduleId": "simplifi",
+      "status": "active",
+      "source": "manual"
+    },
+    {
+      "id": "reclF9MNpLamqXPtj",
+      "moduleId": "documents",
+      "status": "active",
+      "source": "package"
+    },
+    {
+      "id": "recmXHI2wOX7lSD32",
+      "moduleId": "resources",
+      "status": "active",
+      "source": "package"
+    },
+    {
+      "id": "recnXdiuCrf6KDrml",
       "moduleId": "dashboard",
       "status": "active",
       "source": "package"
     },
     {
-      "id": "rech5px9IrIKKpNTc",
-      "moduleId": "simplifi",
+      "id": "recv6jYZc2gbj7v0S",
+      "moduleId": "training",
+      "status": "active",
+      "source": "package"
+    },
+    {
+      "id": "recvvQVcFOiYczYO1",
+      "moduleId": "messaging",
+      "status": "active",
+      "source": "package"
+    },
+    {
+      "id": "recwUyYB5vj3fnV3u",
+      "moduleId": "amplifi",
       "status": "active",
       "source": "manual"
     }
   ],
   "activeSimplifiAmplifi": [
     {
-      "id": "recNNEFdDZOUlsdVa",
-      "moduleId": "amplifi",
+      "id": "rececTUs84rFbnCt2",
+      "moduleId": "simplifi",
       "status": "active",
       "source": "manual"
     },
     {
-      "id": "rech5px9IrIKKpNTc",
-      "moduleId": "simplifi",
+      "id": "recwUyYB5vj3fnV3u",
+      "moduleId": "amplifi",
       "status": "active",
       "source": "manual"
     }
