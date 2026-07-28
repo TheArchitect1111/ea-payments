@@ -169,6 +169,27 @@ export const CAPABILITY_ID_MAP: IdMapRow[] = [
     category: 'Platform',
     notes: 'Portal branding and notification preferences',
   },
+  {
+    capabilityId: 'client-intake',
+    moduleId: 'intake',
+    experienceCapabilityId: 'client-intake',
+    category: 'Workflow',
+    notes: 'Portal Ops — client end-user intake form ledger',
+  },
+  {
+    capabilityId: 'applications',
+    moduleId: 'applications',
+    experienceCapabilityId: 'applications',
+    category: 'Workflow',
+    notes: 'Portal Ops — application queue with shared form ledger',
+  },
+  {
+    capabilityId: 'operations-reports',
+    moduleId: 'reports',
+    experienceCapabilityId: 'operations-reports',
+    category: 'Analytics',
+    notes: 'Portal Ops — curated Pulse / CTP BI / Documents gallery',
+  },
 
   // Workspace-only / vertical (no EA portal ModuleId yet)
   {

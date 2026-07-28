@@ -21,6 +21,9 @@ export const LAUNCH_EDITION_MODULES = [
   'events',
   'billing',
   'settings',
+  'intake',
+  'applications',
+  'reports',
 ] as const;
 
 export function ensureLaunchEditionModules(ids: string[]): string[] {
@@ -43,6 +46,7 @@ export const CAPACITY_MODULES = [
   ...EA_CLIENT_MODULES,
   'discovery',
   'ctp',
+  'reports',
 ] as const;
 
 export const IMPLEMENTATION_MODULES = ensureLaunchEditionModules([

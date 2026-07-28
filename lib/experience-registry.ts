@@ -78,7 +78,10 @@ export type CapabilityId =
   | 'billing'
   | 'settings'
   | 'guided-discovery'
-  | 'landing-pages';
+  | 'landing-pages'
+  | 'client-intake'
+  | 'applications'
+  | 'operations-reports';
 
 /** One row of the EA Capability Map™ — drives nav, dashboard metadata, and Orbie. */
 export interface CapabilityDefinition {
@@ -442,6 +445,57 @@ export const CAPABILITY_REGISTRY: CapabilityDefinition[] = [
     orbPolicy: 'ignore',
     routePatterns: ['/settings'],
     osLifecycle: 'act',
+  },
+  {
+    id: 'client-intake',
+    moduleId: 'intake',
+    customerGoal: 'Tell us what you need',
+    plainLanguage: 'Intake',
+    eaCapability: 'Client Intake',
+    displayLabel: 'Intake',
+    disclosureLevel: 'L1',
+    navGroup: 'operations',
+    showInSidebar: true,
+    showInPillNav: false,
+    dashboardZone: 'none',
+    showOnDashboardHub: false,
+    orbPolicy: 'route-to-activity',
+    routePatterns: ['/intake'],
+    osLifecycle: 'capture',
+  },
+  {
+    id: 'applications',
+    moduleId: 'applications',
+    customerGoal: 'Apply and track status',
+    plainLanguage: 'Applications',
+    eaCapability: 'Applications Queue',
+    displayLabel: 'Applications',
+    disclosureLevel: 'L1',
+    navGroup: 'growth',
+    showInSidebar: true,
+    showInPillNav: false,
+    dashboardZone: 'none',
+    showOnDashboardHub: false,
+    orbPolicy: 'route-to-activity',
+    routePatterns: ['/apply', '/applications'],
+    osLifecycle: 'convert',
+  },
+  {
+    id: 'operations-reports',
+    moduleId: 'reports',
+    customerGoal: 'Review curated insights',
+    plainLanguage: 'Reports',
+    eaCapability: 'Operations Reports',
+    displayLabel: 'Reports',
+    disclosureLevel: 'L2',
+    navGroup: 'operations',
+    showInSidebar: true,
+    showInPillNav: false,
+    dashboardZone: 'progress',
+    showOnDashboardHub: true,
+    orbPolicy: 'summarize',
+    routePatterns: ['/reports'],
+    osLifecycle: 'measure',
   },
 ];
 

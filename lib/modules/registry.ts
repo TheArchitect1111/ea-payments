@@ -23,6 +23,9 @@ export const MODULE_IDS = [
   'ctp',
   'member',
   'people',
+  'intake',
+  'applications',
+  'reports',
 ] as const;
 
 export type ModuleId = (typeof MODULE_IDS)[number];
@@ -229,6 +232,33 @@ const TECHNICAL_MODULE_REGISTRY: TechnicalModuleDefinition[] = [
     requiredRole: 'guest',
     pathSegment: 'settings',
   },
+  {
+    id: 'intake',
+    name: 'Intake',
+    tag: 'Intake',
+    title: 'Client intake',
+    description: 'Share goals and contact details so your team can respond quickly.',
+    requiredRole: 'guest',
+    pathSegment: 'intake',
+  },
+  {
+    id: 'applications',
+    name: 'Applications',
+    tag: 'Applications',
+    title: 'Apply & track',
+    description: 'Submit applications and track review status in one place.',
+    requiredRole: 'guest',
+    pathSegment: 'applications',
+  },
+  {
+    id: 'reports',
+    name: 'Reports',
+    tag: 'Reports',
+    title: 'Reports & insights',
+    description: 'Curated Pulse, CTP BI, and document reports for your organization.',
+    requiredRole: 'guest',
+    pathSegment: 'reports',
+  },
 ];
 
 function mergeModuleWithCapability(technical: TechnicalModuleDefinition): ModuleDefinition {
@@ -286,6 +316,9 @@ export const TENANT_MODULE_PRESETS: Record<string, ModuleId[]> = {
     'billing',
     'settings',
     'people',
+    'intake',
+    'applications',
+    'reports',
   ],
   'family-hub': [
     'dashboard',
@@ -302,7 +335,7 @@ export const TENANT_MODULE_PRESETS: Record<string, ModuleId[]> = {
 export const PACKAGE_MODULE_GRANTS: Record<string, ModuleId[]> = {
   Simplifi: ['simplifi', 'amplifi'],
   'Implementation Package': ['simplifi', 'amplifi', 'connect', 'member', 'events', 'billing', 'settings'],
-  'Website + Portal Starter': ['member', 'events', 'billing', 'settings'],
+  'Website + Portal Starter': ['member', 'events', 'billing', 'settings', 'intake', 'applications', 'reports'],
   'Capacity Assessment': ['dashboard', 'pulse', 'update-hub', 'documents', 'ask', 'discovery', 'ctp'],
   'Capacity Blueprint': ['dashboard', 'pulse', 'update-hub', 'documents', 'ask', 'discovery', 'ctp'],
   'Launch Verification': ['dashboard', 'pulse', 'update-hub', 'ask'],

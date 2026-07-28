@@ -1,5 +1,6 @@
 import type { Organization } from '@/lib/organizations';
 import type { IndustryPack, IndustryPackId } from '@/lib/portal-universal/industry-pack';
+import { orgHintsLookLikeRealEstate, inferIndustryPackFromCommerce } from '@/lib/portal-universal/infer-industry-pack';
 import {
   DEFAULT_INDUSTRY_PACK_ID,
   getIndustryPack,
@@ -13,6 +14,8 @@ export type ResolvePackForOrgInput = {
   preferClientExperience?: boolean;
   /** Optional explicit override (tests / env) */
   industryPackId?: string | null;
+  commerceOfferId?: string | null;
+  packagePurchased?: string | null;
 };
 
 function packFromEnvSlug(slug: string): IndustryPackId | undefined {
@@ -63,7 +66,26 @@ export function resolvePackForOrg(input: ResolvePackForOrgInput): IndustryPack {
   const fromLegacy = packByLegacyPlatformClientId(input.organization?.platformClientId);
   if (fromLegacy) return fromLegacy;
 
+  if (
+    orgHintsLookLikeRealEstate({
+      name: input.organization?.name,
+      platformClientId: input.organization?.platformClientId,
+      industry: input.organization?.industry,
+    })
+  ) {
+    const realEstate = getIndustryPack('real-estate');
+    if (realEstate) return realEstate;
+  }
+
   if (input.preferClientExperience) {
+    const fromCommerce = inferIndustryPackFromCommerce({
+      commerceOfferId: input.commerceOfferId,
+      packagePurchased: input.packagePurchased,
+    });
+    // website-portal pack when commerce offer is website_portal_starter (non–real-estate).
+    const websitePortal = tryId(fromCommerce);
+    if (websitePortal) return websitePortal;
+
     const ctp = getIndustryPack('ctp-client');
     if (ctp) return ctp;
   }

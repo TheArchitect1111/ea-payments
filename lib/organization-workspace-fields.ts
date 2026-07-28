@@ -14,6 +14,7 @@ export const ORGANIZATION_WORKSPACE_FIELDS = [
   'Client Record Id',
   'Mission',
   'Industry',
+  'Booking Url',
 ] as const;
 
 export type OrganizationWorkspaceField = (typeof ORGANIZATION_WORKSPACE_FIELDS)[number];

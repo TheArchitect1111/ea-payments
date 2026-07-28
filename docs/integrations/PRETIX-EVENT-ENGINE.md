@@ -17,7 +17,7 @@
 - Event Hub tabs: **Calendar** | **Events** | **My registrations** (single `events` entitlement)
 - Staff publish of pretix shop URLs per portal slug
 - Webhook → Pulse / portal notify (`event.registration.placed` | `event.registration.confirmed`)
-- Portal registration ledger (`.data/portal-event-registrations.json`) for My registrations
+- Portal registration ledger (Airtable **Portal Event Registrations** when configured; else `.data/portal-event-registrations.json`)
 - T-7 / T-1 / event-day reminders via cron (`event.registration.reminder`)
 
 ## Why not rebuild ticketing in EA
@@ -48,11 +48,40 @@ PRETIX_EVENTS_JSON='[{"portalSlug":"demo-client","title":"Summer Camp","shopUrl"
 | `PRETIX_EVENTS_JSON` | Optional seed list of portal events |
 | `PRETIX_ALLOW_INSECURE_WEBHOOK=1` | Non-production only — accept unsigned webhooks |
 | `CRON_SECRET` | Bearer for `/api/cron/event-registration-reminders` |
+| `AIRTABLE_PORTAL_PRETIX_EVENTS_TABLE` | Default `Portal Pretix Events` — durable pretix event catalog |
+| `AIRTABLE_PORTAL_EVENT_REGISTRATIONS_TABLE` | Default `Portal Event Registrations` — registration ledger |
+| `AIRTABLE_API_KEY` + platform base | Required for multi-instance durability via `platformStoreConfigured()` |
+
+## Durable store (Airtable)
+
+When `platformStoreConfigured()` is true, pretix events and registration rows persist to Airtable instead of local JSON:
+
+| Table | Upsert key | Notes |
+|---|---|---|
+| `Portal Pretix Events` | `Event ID` | Staff publish + webhook matching |
+| `Portal Event Registrations` | `Registration Key` | `{portalSlug}:{orderCode}:{pretixEventSlug\|\|_}` |
+
+**Bootstrap schema:**
+
+```bash
+node scripts/ensure-event-hub-airtable-schema.mjs
+```
+
+Local / unconfigured fallback remains `.data/portal-pretix-events.json` and `.data/portal-event-registrations.json` (memory on Vercel tmp).
+
+## Ops checklist
+
+1. Run `node scripts/ensure-event-hub-airtable-schema.mjs` once per base.
+2. Confirm `AIRTABLE_API_KEY` + platform base env on production.
+3. Create pretix event + copy shop URL.
+4. Staff publish in portal Event Hub (or upsert via admin tooling).
+5. Configure pretix webhook with Basic Auth secret.
+6. Place a test order → confirm row in **Portal Event Registrations**.
+7. Dry-run reminders cron (see below).
+8. Cert: `node scripts/test-event-hub-mandatory-cert.mjs`
 
 ## Architecture notes
 
-- Store: `.data/portal-pretix-events.json` locally; memory (+ tmp) on Vercel. Prefer `PRETIX_EVENTS_JSON` or future Airtable/platform-store for multi-instance durability.
-- Registration ledger: `.data/portal-event-registrations.json` — written only when a matched pretix event has `portalSlug`.
 - Fail closed: no events configured → Event Hub Calendar tab remains reviews/Calendly only (no empty pretix chrome).
 - Do **not** embed pretix admin UI in Amplifi or Mission Control.
 - Stripe remains for subscriptions; pretix handles event registration payments.

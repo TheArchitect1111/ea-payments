@@ -22,8 +22,13 @@ const MODULE_IDS = [
   'resources',
   'ask',
   'billing',
+  'settings',
   'ctp',
   'member',
+  'people',
+  'intake',
+  'applications',
+  'reports',
 ];
 
 const CAPABILITY_IDS = [
@@ -44,6 +49,11 @@ const CAPABILITY_IDS = [
   'billing',
   'guided-discovery',
   'landing-pages',
+  'settings',
+  'people-directory',
+  'client-intake',
+  'applications',
+  'operations-reports',
 ];
 
 const LIFECYCLE_PHASES = ['discover', 'engage', 'convert', 'prepare', 'experience', 'continue'];
@@ -60,8 +70,8 @@ function assert(condition, message) {
   if (!condition) failures.push(message);
 }
 
-assert(MODULE_IDS.length === 17, 'Module registry has 17 ids');
-assert(CAPABILITY_IDS.length === 17, 'Capability map has 17 portal capabilities');
+assert(MODULE_IDS.length === 22, 'Module registry has 22 ids');
+assert(CAPABILITY_IDS.length === 22, 'Capability map has 22 portal capabilities');
 assert(LIFECYCLE_PHASES.length === 6, 'Experience lifecycle has 6 phases');
 assert(EXPERIENCE_KINDS.length === 4, 'Experience catalog has 4 kinds');
 
@@ -83,6 +93,11 @@ const capabilityModulePairs = {
   billing: 'billing',
   'guided-discovery': 'discovery',
   'landing-pages': 'landing',
+  settings: 'settings',
+  'people-directory': 'people',
+  'client-intake': 'intake',
+  applications: 'applications',
+  'operations-reports': 'reports',
 };
 
 for (const [capId, modId] of Object.entries(capabilityModulePairs)) {

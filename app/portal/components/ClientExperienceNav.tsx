@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import type { ClientExperienceNavId, ClientExperienceNavItem } from '@/lib/ctp-client-nav';
+import { isQuietClientExperienceNavId } from '@/lib/ctp-client-nav';
 
 type Props = {
   items: ClientExperienceNavItem[];
@@ -16,8 +17,8 @@ export default function ClientExperienceNav({
   brandName = 'Efficiency Architects',
   logoutHref = '/api/portal/logout',
 }: Props) {
-  const primary = items.filter((item) => item.id !== 'journey');
-  const journey = items.find((item) => item.id === 'journey');
+  const primary = items.filter((item) => !isQuietClientExperienceNavId(item.id));
+  const quiet = items.find((item) => isQuietClientExperienceNavId(item.id));
 
   return (
     <header className="cex-shell-nav" role="banner">
@@ -42,15 +43,15 @@ export default function ClientExperienceNav({
               </Link>
             );
           })}
-          {journey ? (
+          {quiet ? (
             <Link
-              href={journey.href}
+              href={quiet.href}
               className={`cex-shell-link cex-shell-link-quiet${
-                active === 'journey' ? ' cex-shell-link-active' : ''
+                active === quiet.id ? ' cex-shell-link-active' : ''
               }`}
-              aria-current={active === 'journey' ? 'page' : undefined}
+              aria-current={active === quiet.id ? 'page' : undefined}
             >
-              {journey.label}
+              {quiet.label}
             </Link>
           ) : null}
         </nav>

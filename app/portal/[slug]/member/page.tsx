@@ -25,6 +25,10 @@ const TILE_HREF: Record<string, (slug: string) => string> = {
   pulse: (slug) => `/portal/${slug}/pulse`,
   connect: (slug) => `/portal/${slug}/connect`,
   ctp: (slug) => `/portal/${slug}/ctp`,
+  intake: (slug) => `/portal/${slug}/intake`,
+  applications: (slug) => `/portal/${slug}/applications`,
+  apply: (slug) => `/portal/${slug}/apply`,
+  reports: (slug) => `/portal/${slug}/reports`,
 };
 
 function tileHref(slug: string, tile: string): string {

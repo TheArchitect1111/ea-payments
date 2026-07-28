@@ -6,9 +6,13 @@ import {
 } from '@/lib/portal-event-hub';
 import { listRegistrationsForPortal } from '@/lib/events/registration-ledger';
 import { listPretixEventsForPortal } from '@/lib/events/pretix-store';
+import { findOrganizationByPortalSlug } from '@/lib/organizations';
+import { ctpCalendlyUrl } from '@/lib/ctp-calendly';
 import { normalizeRole, roleAtLeast } from '@/lib/rbac';
 import { PortalSubpage } from '@/app/portal/components/PortalSubpage';
 import PretixEventStaffPanel from './PretixEventStaffPanel';
+import BookingUrlPanel from './BookingUrlPanel';
+import BookingEmbed from './BookingEmbed';
 
 export const dynamic = 'force-dynamic';
 
@@ -94,6 +98,9 @@ export default async function EventsPage({
     slug,
     canManage ? undefined : sessionEmail ? { email: sessionEmail } : undefined,
   );
+  const org = await findOrganizationByPortalSlug(slug);
+  const bookingEmbedUrl =
+    org?.bookingUrl?.trim() || process.env.CALENDLY_URL?.trim() || ctpCalendlyUrl() || '';
 
   const tabs: { id: EventHubTab; label: string }[] = [
     { id: 'calendar', label: 'Calendar' },
@@ -126,7 +133,15 @@ export default async function EventsPage({
         ))}
       </nav>
 
-      {tab === 'calendar' ? <EventItemList items={calendar} /> : null}
+      {tab === 'calendar' ? (
+        <>
+          {canManage ? <BookingUrlPanel initialUrl={org?.bookingUrl || ''} /> : null}
+          {bookingEmbedUrl ? (
+            <BookingEmbed bookingUrl={bookingEmbedUrl} title="Book advisor time" />
+          ) : null}
+          <EventItemList items={calendar} />
+        </>
+      ) : null}
 
       {tab === 'events' ? (
         <>

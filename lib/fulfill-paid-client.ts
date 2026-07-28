@@ -5,7 +5,7 @@
 import type { AirtablePackage } from '@/lib/airtable';
 import type { PortalConfig } from '@/lib/catalog';
 import { createPortalAccess } from '@/lib/portal-access';
-import { ensureOrganizationForPortal } from '@/lib/organizations';
+import { ensureOrganizationForPortal, updateOrganizationWorkspaceConfig } from '@/lib/organizations';
 import { ensurePackageEntitlements } from '@/lib/modules/portal-modules';
 import { provisionConnectAfterCheckout } from '@/lib/connect-provision-hook';
 import { provisionWebsitePortalSite } from '@/lib/provision-website-portal';
@@ -18,6 +18,7 @@ import { publicPortalLoginUrl } from '@/lib/ctp-portal-host';
 import { designStudioPath } from '@/lib/ctp-opportunity-routes';
 import { ensureCtpWorkspaceForWebsitePortal } from '@/lib/ctp-website-portal-workspace';
 import { EA_PLATFORM_URL } from '@/lib/platform-urls';
+import { inferIndustryPackId, inferIndustryPackFromCommerce } from '@/lib/portal-universal/infer-industry-pack';
 
 export const DEFAULT_PORTAL_CONFIG: PortalConfig = {
   platform: 'efficiency-architects',
@@ -37,6 +38,8 @@ export type FulfillPaidClientInput = {
   tagline?: string;
   industry?: string;
   connectIndustry?: string | null;
+  /** Optional IndustryPack id — inferred from industry/name when omitted */
+  industryPackId?: string;
 };
 
 export type FulfillPaidClientResult = {
@@ -110,6 +113,25 @@ export async function fulfillPaidClient(
         organizationName: input.organization,
       });
       orgId = org.orgId;
+
+      const resolvedIndustryPackId =
+        input.industryPackId?.trim() ||
+        inferIndustryPackId(input.industry) ||
+        inferIndustryPackId(input.clientName) ||
+        inferIndustryPackId(input.organization) ||
+        inferIndustryPackFromCommerce({
+          commerceOfferId: input.commerceOfferId,
+          packagePurchased: input.packagePurchased,
+        });
+      if (resolvedIndustryPackId && orgId && !String(orgId).startsWith('org_')) {
+        try {
+          await updateOrganizationWorkspaceConfig(orgId, {
+            industryPackId: resolvedIndustryPackId,
+          });
+        } catch (packErr) {
+          console.error('fulfillPaidClient industryPackId persist failed (non-fatal):', packErr);
+        }
+      }
 
       await ensurePackageEntitlements({
         orgId,

@@ -2,8 +2,8 @@
  * Client Experience navigation — Website + Portal / CTP workspace only.
  * Never includes Executive Workspace modules (Pulse, Simplifi, Amplifi, etc.).
  *
- * When UNIVERSAL_NAV_PACKS is enabled, labels/order/hrefs come from the `ctp-client`
- * IndustryPack while preserving the same five destinations.
+ * When UNIVERSAL_NAV_PACKS is enabled, labels/order/hrefs come from the resolved
+ * IndustryPack while preserving pack-driven CX destinations.
  */
 import { getClientByPortalSlug } from '@/lib/airtable';
 import { getCtpSubmissionForPortal } from '@/lib/ctp-submissions';
@@ -12,15 +12,21 @@ import {
   opportunityDashboardPath,
   portalCtpPath,
 } from '@/lib/ctp-opportunity-routes';
+import { findOrganizationByPortalSlug } from '@/lib/organizations';
 import { isUniversalNavPacksEnabled } from '@/lib/portal-universal/flags';
+import type { IndustryNavItem, IndustryPackId } from '@/lib/portal-universal/industry-pack';
 import { getIndustryPack } from '@/lib/portal-universal/packs';
+import { resolvePackForOrg } from '@/lib/portal-universal/resolve-pack-for-org';
 
 export type ClientExperienceNavId =
   | 'journey'
+  | 'listings'
   | 'progress'
+  | 'pipeline'
   | 'documents'
   | 'messages'
-  | 'support';
+  | 'support'
+  | 'intake';
 
 export type ClientExperienceNavItem = {
   id: ClientExperienceNavId;
@@ -28,13 +34,26 @@ export type ClientExperienceNavItem = {
   href: string;
 };
 
-const CX_NAV_IDS: ClientExperienceNavId[] = [
+const LEGACY_CX_NAV_IDS: ClientExperienceNavId[] = [
   'progress',
   'documents',
   'messages',
   'support',
   'journey',
 ];
+
+const PACK_CX_NAV_IDS = new Set<string>([
+  'progress',
+  'pipeline',
+  'documents',
+  'messages',
+  'support',
+  'journey',
+  'listings',
+  'intake',
+]);
+
+const QUIET_NAV_IDS = new Set<ClientExperienceNavId>(['journey', 'listings']);
 
 function legacyClientExperienceNav(slug: string): ClientExperienceNavItem[] {
   return [
@@ -49,6 +68,7 @@ function legacyClientExperienceNav(slug: string): ClientExperienceNavItem[] {
 function defaultHrefForCxId(slug: string, id: ClientExperienceNavId): string {
   switch (id) {
     case 'progress':
+    case 'pipeline':
       return designStudioPath(slug);
     case 'documents':
       return portalCtpPath(slug, 'ctp/documents');
@@ -57,70 +77,119 @@ function defaultHrefForCxId(slug: string, id: ClientExperienceNavId): string {
     case 'support':
       return portalCtpPath(slug, 'ctp/support');
     case 'journey':
+    case 'listings':
       return opportunityDashboardPath(slug);
+    case 'intake':
+      return `/portal/${slug}/intake`;
   }
+}
+
+function resolveHref(slug: string, row: IndustryNavItem, id: ClientExperienceNavId): string {
+  if (row.hrefOverride?.includes('{slug}')) {
+    return row.hrefOverride.replaceAll('{slug}', slug.trim());
+  }
+  if (row.hrefOverride?.trim()) return row.hrefOverride.trim();
+  return defaultHrefForCxId(slug, id);
+}
+
+function packItemToNavItem(slug: string, row: IndustryNavItem): ClientExperienceNavItem | null {
+  if (!PACK_CX_NAV_IDS.has(row.id)) return null;
+  const id = row.id as ClientExperienceNavId;
+  return {
+    id,
+    label: row.label,
+    href: resolveHref(slug, row, id),
+  };
 }
 
 /**
  * Pack-driven CX nav — structural destinations only (no entitlement filter).
  * CTP shell already gates who sees Client Experience.
  */
-export function buildClientExperienceNavFromPack(slug: string): ClientExperienceNavItem[] {
-  const pack = getIndustryPack('ctp-client');
+export function buildClientExperienceNavFromPack(
+  slug: string,
+  packId?: IndustryPackId,
+): ClientExperienceNavItem[] {
+  const pack = getIndustryPack(packId || 'ctp-client');
   if (!pack?.useClientExperienceChrome) {
     return legacyClientExperienceNav(slug);
   }
 
-  const byId = new Map(
-    pack.nav
-      .filter((item) => (item.visibility?.kind || 'when_entitled') !== 'never')
-      .map((item) => [item.id, item]),
-  );
+  const visible = pack.nav
+    .filter((item) => (item.visibility?.kind || 'when_entitled') !== 'never')
+    .filter((item) => PACK_CX_NAV_IDS.has(item.id))
+    .sort((a, b) => a.order - b.order);
 
-  const items: ClientExperienceNavItem[] = [];
-  for (const id of CX_NAV_IDS) {
-    const row = byId.get(id);
-    const href = row?.hrefOverride?.includes('{slug}')
-      ? row.hrefOverride.replaceAll('{slug}', slug.trim())
-      : row?.hrefOverride?.trim() || defaultHrefForCxId(slug, id);
-    items.push({
-      id,
-      label: row?.label || legacyClientExperienceNav(slug).find((x) => x.id === id)!.label,
-      href,
-    });
+  if (visible.length === 0) {
+    return legacyClientExperienceNav(slug);
   }
 
-  items.sort((a, b) => {
-    const oa = byId.get(a.id)?.order ?? 0;
-    const ob = byId.get(b.id)?.order ?? 0;
-    return oa - ob;
-  });
+  const items: ClientExperienceNavItem[] = [];
+  for (const row of visible) {
+    const item = packItemToNavItem(slug, row);
+    if (item) items.push(item);
+  }
+
+  if (items.length === 0) {
+    const byId = new Map(pack.nav.map((item) => [item.id, item]));
+    for (const id of LEGACY_CX_NAV_IDS) {
+      const row = byId.get(id);
+      items.push({
+        id,
+        label: row?.label || legacyClientExperienceNav(slug).find((x) => x.id === id)!.label,
+        href: row ? resolveHref(slug, row, id) : defaultHrefForCxId(slug, id),
+      });
+    }
+  }
 
   return items;
 }
 
 /**
  * Primary destinations match the client mental model.
- * Journey stays reachable but is not a competing home.
+ * Journey / listings stay reachable but are not competing home links.
  */
-export function buildClientExperienceNav(slug: string): ClientExperienceNavItem[] {
-  if (isUniversalNavPacksEnabled()) {
-    return buildClientExperienceNavFromPack(slug);
+export async function buildClientExperienceNav(slug: string): Promise<ClientExperienceNavItem[]> {
+  if (!isUniversalNavPacksEnabled()) {
+    return legacyClientExperienceNav(slug);
   }
-  return legacyClientExperienceNav(slug);
+
+  const [org, client] = await Promise.all([
+    findOrganizationByPortalSlug(slug),
+    getClientByPortalSlug(slug),
+  ]);
+
+  const pack = resolvePackForOrg({
+    organization: org,
+    portalSlug: slug,
+    preferClientExperience: true,
+    industryPackId: org?.industryPackId,
+    commerceOfferId: client?.commerceOfferId,
+    packagePurchased: client?.packagePurchased,
+  });
+
+  return buildClientExperienceNavFromPack(slug, pack.id);
 }
 
-export function resolveClientNavActive(
+export function isQuietClientExperienceNavId(id: ClientExperienceNavId): boolean {
+  return QUIET_NAV_IDS.has(id);
+}
+
+export async function resolveClientNavActive(
   pathname: string | null | undefined,
   slug: string,
-): ClientExperienceNavId {
+): Promise<ClientExperienceNavId> {
   const path = (pathname || '').replace(/\/+$/, '') || '/';
-  const items = buildClientExperienceNav(slug);
+  const items = await buildClientExperienceNav(slug);
   const ordered = [...items].sort((a, b) => b.href.length - a.href.length);
   for (const item of ordered) {
     if (path === item.href || path.startsWith(`${item.href}/`)) return item.id;
   }
-  return 'progress';
+  return items.some((item) => item.id === 'progress')
+    ? 'progress'
+    : items.some((item) => item.id === 'pipeline')
+      ? 'pipeline'
+      : 'progress';
 }
 
 /**
