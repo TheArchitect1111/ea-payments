@@ -1,0 +1,9 @@
+{
+  "status": "document.signed",
+  "templateId": "tmpl_sow_test",
+  "signerEmail": "client@example.com",
+  "client_id": "portal_demo-client",
+  "orgId": "org_demo",
+  "signedAt": "2026-07-21T12:05:00.000Z",
+  "documentType": "Statement of Work"
+}

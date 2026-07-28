@@ -232,6 +232,8 @@ export const config = {
     '/portal/:slug/:path*',
     '/admin/:path*',
     '/launch',
+    '/legal/:path*',
+    '/trust',
     // Vanity portal host: portal.efficiencyarchitects.online/{client}
     '/:slug',
     '/:slug/:path*',

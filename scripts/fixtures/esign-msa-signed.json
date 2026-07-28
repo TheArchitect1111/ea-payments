@@ -1,0 +1,9 @@
+{
+  "status": "contract-signed",
+  "template_id": "tmpl_msa_test",
+  "signer_email": "client@example.com",
+  "clientId": "portal_demo-client",
+  "organizationId": "org_demo",
+  "signed_at": "2026-07-21T12:00:00.000Z",
+  "document_type": "MSA"
+}
