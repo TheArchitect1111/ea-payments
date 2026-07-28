@@ -261,7 +261,7 @@ export default function GlobalOrb({
   const viewAllHref =
     session.state === 'timeSensitive' ? '/simplifi/follow-ups' : '/simplifi/inbox';
 
-  const ask = (question?: string) => {
+  const ask = async (question?: string) => {
     const q = (question ?? askInput).trim();
     if (!q) return;
     setInteraction('thinking');
@@ -310,6 +310,32 @@ export default function GlobalOrb({
         setOpen(false);
         router.push(href);
         return;
+      }
+
+      try {
+        const res = await fetch('/api/simplifi/ask', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ question: q }),
+        });
+        if (res.ok) {
+          const data = (await res.json()) as {
+            answer?: string;
+            citations?: AskCitation[];
+          };
+          if (data.answer) {
+            setAskAnswer(data.answer);
+            setAskCitations(data.citations ?? []);
+            pushAskHistory({
+              question: q,
+              answer: data.answer,
+              citations: data.citations ?? [],
+            });
+            return;
+          }
+        }
+      } catch {
+        // keyword fallback
       }
 
       const detailed = answerConversationalAskDetailed(q, objects, actionCenter);

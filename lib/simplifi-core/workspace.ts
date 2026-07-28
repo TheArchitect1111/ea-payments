@@ -5,7 +5,6 @@ import { getPortalCaptures } from '@/lib/capture-records';
 import {
   captureToObject,
   sortInbox,
-  buildDailyBrief,
   type SimplifiObject,
 } from '@/lib/simplifi-objects';
 import { objectsToMemoryLibrary } from '@/lib/memory-assets';
@@ -13,11 +12,12 @@ import { buildActionCenter } from '@/lib/action-center';
 import { buildRelationshipClusters } from '@/lib/relationship-hints';
 import { isTerminalOutcome } from '@/lib/outcome-tracking';
 import { computePriorityScore } from '@/lib/priority-engine';
+import { buildMergedDailyBrief, type MergedDailyBrief } from '@/lib/simplifi-os';
 
 export interface SimplifiWorkspaceData {
   objects: SimplifiObject[];
   activeObjects: SimplifiObject[];
-  brief: ReturnType<typeof buildDailyBrief>;
+  brief: MergedDailyBrief;
   memoryLibrary: ReturnType<typeof objectsToMemoryLibrary>;
   actionCenter: ReturnType<typeof buildActionCenter>;
   relationships: ReturnType<typeof buildRelationshipClusters>;
@@ -38,10 +38,16 @@ export async function loadSimplifiWorkspace(
 
   const activeObjects = objects.filter((o) => !isTerminalOutcome(o.outcomeStatus));
 
+  const brief = await buildMergedDailyBrief({
+    objects,
+    firstName,
+    portalSlug,
+  });
+
   return {
     objects,
     activeObjects,
-    brief: buildDailyBrief(objects, firstName, portalSlug),
+    brief,
     memoryLibrary: objectsToMemoryLibrary(activeObjects),
     actionCenter: buildActionCenter(activeObjects),
     relationships: buildRelationshipClusters(activeObjects),

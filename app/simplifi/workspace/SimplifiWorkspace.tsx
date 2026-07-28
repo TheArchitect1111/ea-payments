@@ -6,7 +6,8 @@ import type { SimplifiObject } from '@/lib/simplifi-objects';
 import type { MemoryAsset } from '@/lib/memory-assets';
 import type { ActionCenterPayload } from '@/lib/action-center';
 import type { RelationshipCluster } from '@/lib/relationship-hints';
-import { priorityLevelLabel } from '@/lib/priority-engine';
+import { priorityLevelLabel, computePriorityScore } from '@/lib/priority-engine';
+import { formatDecisionPathLabel } from '@/lib/capture-success-flow';
 import {
   archiveCapture,
   fetchCaptureIntelligence,
@@ -26,7 +27,9 @@ import {
   readGuestCaptureIds,
 } from '@/lib/capture-upload-limits';
 import EmptyStateGuide from '@/app/components/guided-first-success/EmptyStateGuide';
+import type { BriefIntelItem, BriefIntelSectionKey } from '@/lib/simplifi-os';
 import ActionCenterPanel from './ActionCenterPanel';
+import BriefIntelligencePanel from './BriefIntelligencePanel';
 import './action-center-panel.css';
 
 interface BriefPayload {
@@ -40,6 +43,10 @@ interface BriefPayload {
   }[];
   recommendedNext: { label: string; href: string } | null;
   completed?: SimplifiObject[];
+  intelligence?: {
+    enabled: boolean;
+    sections: Record<BriefIntelSectionKey, BriefIntelItem[]>;
+  };
 }
 
 const AVATAR_PALETTE = ['#1B2B4D', '#3B82F6', '#C9A844', '#7C3AED', '#0F766E', '#B45309'];
@@ -203,10 +210,10 @@ export default function SimplifiWorkspace({
       }
       const { decision, build } = data.intelligence;
       setIntelligenceNote(
-        `Path: ${decision.recommendedPath} (${decision.confidenceScore}/100) · ${build.buildPath} · Overlay ${build.overlayConfidence.overall}`,
+        `Decision: ${formatDecisionPathLabel(decision.recommendedPath)} (${decision.confidenceScore}%) · ${build.buildPath} · Overlay ${build.overlayConfidence.overall}`,
       );
     } catch {
-      setIntelligenceNote('Could not load Build Intelligence.');
+      setIntelligenceNote('Could not load Decision Intelligence.');
     } finally {
       setIntelligenceLoading(false);
     }
@@ -287,6 +294,13 @@ export default function SimplifiWorkspace({
             </ul>
           )}
         </section>
+
+        {brief.intelligence ? (
+          <BriefIntelligencePanel
+            enabled={brief.intelligence.enabled}
+            sections={brief.intelligence.sections}
+          />
+        ) : null}
 
         <section className="sw-recent-opps" aria-label="Recent opportunities">
           <div className="sw-recent-head">
@@ -414,7 +428,8 @@ export default function SimplifiWorkspace({
 
       {relationships.length > 0 && (
         <section className="sw-relationships">
-          <h2>Connected patterns</h2>
+          <h2>Connections</h2>
+          <p className="sw-muted">Patterns across your captures — batch related follow-ups.</p>
           <ul className="sw-rel-list">
             {relationships.map((cluster) => (
               <li key={cluster.id} className="sw-rel-item">
@@ -504,6 +519,18 @@ export default function SimplifiWorkspace({
                           </p>
                         </div>
                       </div>
+                      {(() => {
+                        const whyNow = computePriorityScore(obj).reasons;
+                        if (!whyNow.length) return null;
+                        return (
+                          <div className="sw-guidance" style={{ marginTop: 10 }}>
+                            <div>
+                              <h4>Why now</h4>
+                              <p>{whyNow.join(' · ')}</p>
+                            </div>
+                          </div>
+                        );
+                      })()}
                       {intelligenceNote && open && <p className="sw-intelligence-note">{intelligenceNote}</p>}
                       <div className="sw-card-actions">
                         <Link href={`/simplifi/opportunity/${obj.id}`} className="sw-btn sw-btn-small">
@@ -523,7 +550,7 @@ export default function SimplifiWorkspace({
                               disabled={intelligenceLoading}
                               onClick={() => loadIntelligence(obj.id)}
                             >
-                              {intelligenceLoading ? 'Loading…' : 'Build Intelligence'}
+                              {intelligenceLoading ? 'Loading…' : 'Decision Intelligence'}
                             </button>
                             <button
                               type="button"

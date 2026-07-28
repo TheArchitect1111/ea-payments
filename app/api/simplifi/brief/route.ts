@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getClientByPortalSlug } from '@/lib/airtable';
 import { requirePortalSession } from '@/lib/auth/resolve-portal-session';
 import { loadSimplifiWorkspace } from '@/lib/simplifi-core';
+import { buildMergedDailyBrief } from '@/lib/simplifi-os';
 import { EA_PLATFORM_URL } from '@/lib/platform-urls';
 
 export const dynamic = 'force-dynamic';
@@ -16,11 +17,16 @@ export async function GET() {
   const client = await getClientByPortalSlug(session.slug);
   const firstName = client?.clientName?.split(' ')[0] ?? '';
   const workspace = await loadSimplifiWorkspace(session.slug, EA_PLATFORM_URL, firstName, 20);
+  const brief = await buildMergedDailyBrief({
+    objects: workspace.objects,
+    firstName,
+    portalSlug: session.slug,
+  });
 
   return NextResponse.json({
     ok: true,
     slug: session.slug,
-    brief: workspace.brief,
+    brief,
     actionCenter: workspace.actionCenter,
     activeCount: workspace.activeObjects.length,
     recentObjects: workspace.activeObjects.slice(0, 5).map((obj) => ({

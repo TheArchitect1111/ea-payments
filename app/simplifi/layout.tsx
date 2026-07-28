@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next';
+import { LegalReacceptanceShell } from '@/app/components/trust/LegalReacceptanceShell';
 
 export const metadata: Metadata = {
   title: {
@@ -20,5 +21,9 @@ export const viewport: Viewport = {
 };
 
 export default function SimplifiSectionLayout({ children }: { children: React.ReactNode }) {
-  return children;
+  return (
+    <LegalReacceptanceShell productId="simplifi" realm="simplifi">
+      {children}
+    </LegalReacceptanceShell>
+  );
 }
