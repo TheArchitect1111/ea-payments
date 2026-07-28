@@ -16,8 +16,8 @@ const CONFIG: Record<
     endpoint: '/api/admin/register',
   },
   portal: {
-    title: 'Request portal access',
-    lede: 'New clients can start with the Operational MRI™ assessment or request direct portal access.',
+    title: 'Ask to join your Client Experience',
+    lede: 'New clients can begin with Consider the Possibilities™ or leave a note — we’ll write you when you’re ready to begin.',
     endpoint: '/api/portal/register',
     assessmentLink: '/assessment',
   },
@@ -28,7 +28,7 @@ const CONFIG: Record<
   },
   simplifi: {
     title: 'Request Simplifi access',
-    lede: 'Request Simplifi access or start with the Operational MRI assessment if you are still choosing the right EA path.',
+    lede: 'Submit an Early Access request. You will get an email when your workspace is ready — this form does not create an instant account.',
     endpoint: '/api/portal/register',
     assessmentLink: '/assessment',
   },
@@ -79,9 +79,26 @@ export default function RegisterForm({ realm }: { realm: Realm }) {
       <AuthNav realm={realm} active="register" />
       <div className="pl-card">
         {success ? (
-          <p className="pl-success">
-            Request received. Our team will contact you at <strong>{email}</strong>.
-          </p>
+          <div className="pl-success">
+            <p>
+              We’ve received your note. We’ll reach out at <strong>{email}</strong> when you’re ready
+              to begin — this isn’t a live sign-in yet.
+            </p>
+            <p style={{ marginTop: '0.75rem' }}>
+              Next:{' '}
+              {realm === 'simplifi' ? (
+                <Link href="/simplifi/login">Sign in if already approved</Link>
+              ) : (
+                <Link href="/portal/login">Client Experience sign in</Link>
+              )}
+              {config.assessmentLink ? (
+                <>
+                  {' · '}
+                  <Link href={config.assessmentLink}>Start assessment</Link>
+                </>
+              ) : null}
+            </p>
+          </div>
         ) : (
           <form onSubmit={handleSubmit} className="pl-form">
             <label className="pl-label" htmlFor="name">
@@ -134,7 +151,7 @@ export default function RegisterForm({ realm }: { realm: Realm }) {
             />
 
             <button type="submit" className="pl-btn" disabled={loading}>
-              {loading ? 'Submitting…' : 'Submit request'}
+              {loading ? 'Sending…' : 'Send note'}
             </button>
 
             {error ? (

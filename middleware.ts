@@ -159,11 +159,24 @@ export async function middleware(request: NextRequest) {
 
   if (pathname.startsWith('/portal')) {
     if (isPublicPortalAuthPath(pathname)) {
-      return NextResponse.next();
+      const requestHeaders = new Headers(request.headers);
+      requestHeaders.set('x-pathname', pathname);
+      return NextResponse.next({ request: { headers: requestHeaders } });
     }
 
-    return (portalMiddleware as unknown as (req: NextRequest) => ReturnType<typeof portalMiddleware>)(request);
-
+    const portalResponse = await (portalMiddleware as unknown as (
+      req: NextRequest,
+    ) => Promise<Response> | Response)(request);
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.set('x-pathname', pathname);
+    if (portalResponse.status >= 300 && portalResponse.status < 400) {
+      return portalResponse;
+    }
+    const allowed = NextResponse.next({ request: { headers: requestHeaders } });
+    portalResponse.headers.forEach((value, key) => {
+      if (key.toLowerCase() === 'set-cookie') allowed.headers.append(key, value);
+    });
+    return allowed;
   }
 
   if (pathname.startsWith('/admin')) {
@@ -187,8 +200,6 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-
-
   if (pathname === '/launch' || pathname.startsWith('/launch/')) {
     const adminToken = request.cookies.get(EA_ADMIN_COOKIE)?.value;
     const adminSession = await parseAdminSessionEdge(adminToken);
@@ -211,7 +222,6 @@ export async function middleware(request: NextRequest) {
   return NextResponse.next({
     request: { headers: requestHeaders },
   });
-
 }
 
 
@@ -230,6 +240,8 @@ export const config = {
     '/reset-password',
     '/portal/:slug',
     '/portal/:slug/:path*',
+    '/simplifi',
+    '/simplifi/:path*',
     '/admin/:path*',
     '/launch',
     '/legal/:path*',
@@ -238,5 +250,4 @@ export const config = {
     '/:slug',
     '/:slug/:path*',
   ],
-
 };

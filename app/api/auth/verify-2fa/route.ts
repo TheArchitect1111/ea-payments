@@ -7,6 +7,7 @@ import { getClientSuccessProfile } from '@/lib/client-success';
 import { emitPulseEvent } from '@/lib/pulse-bus';
 import { makePartnerSessionCookie, signPartnerSession } from '@/lib/partner-session';
 import { resolveAdminIdentity, resolvePortalIdentity } from '@/lib/org-provision';
+import { resolvePortalPostLoginPath } from '@/lib/portal-post-login';
 
 export const dynamic = 'force-dynamic';
 
@@ -91,7 +92,10 @@ export async function POST(req: NextRequest) {
         }
       }
 
-      const destination = payload.data.next || `/portal/${slug}/ctp`;
+      const clientForLanding = await getClientByPortalSlug(slug);
+      const destination =
+        payload.data.next ||
+        (await resolvePortalPostLoginPath(slug, clientForLanding));
       const res = NextResponse.json({ ok: true, slug, next: destination });
       res.cookies.set(makeSessionCookie(token));
       return res;

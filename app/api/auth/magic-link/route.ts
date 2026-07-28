@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { findPortalClientByEmail } from '@/lib/airtable';
+import { findPortalClientByEmail, getClientByPortalSlug } from '@/lib/airtable';
 import { findAdminAccount } from '@/lib/ea-admin-users';
 import { begin2FA } from '@/lib/ea-auth-2fa';
 import { authSiteOrigin } from '@/lib/auth/site-origin';
 import { createMagicLinkToken, magicLinkConfigured, type MagicLinkRealm } from '@/lib/magic-link';
 import { sendAuthEmail } from '@/lib/ea-auth-email';
+import { resolvePortalPostLoginPath } from '@/lib/portal-post-login';
 
 export const dynamic = 'force-dynamic';
 
@@ -85,7 +86,7 @@ export async function POST(req: NextRequest) {
         mode: 'otp',
         pendingToken: started.pendingToken,
         maskedEmail: started.maskedEmail,
-        message: 'Check your email for a 6-digit code.',
+        message: 'Your code is on its way — check the newest email.',
       });
     } catch (err) {
       return NextResponse.json(
@@ -111,13 +112,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         {
           error:
-            'No portal account matches that email. Use the Email / Portal Username on the Client Record (or demo@efficiencyarchitects.online for the demo).',
+            'No account matches that email. Use the email from your welcome message (or demo@efficiencyarchitects.online for the demo).',
         },
         { status: 404 },
       );
     }
 
-    const defaultNext = `/portal/${client.slug}/ctp`;
+    const portalClient = await getClientByPortalSlug(client.slug);
+    const defaultNext = await resolvePortalPostLoginPath(client.slug, portalClient);
     try {
       const started = await begin2FA({
         realm: 'portal',
@@ -133,7 +135,7 @@ export async function POST(req: NextRequest) {
         mode: 'otp',
         pendingToken: started.pendingToken,
         maskedEmail: started.maskedEmail,
-        message: 'Check your email for a 6-digit code.',
+        message: 'Your code is on its way — check the newest email.',
       });
     } catch (err) {
       return NextResponse.json(
