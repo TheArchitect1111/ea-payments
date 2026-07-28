@@ -91,7 +91,7 @@ export async function ensureDemoWebsitePortal(): Promise<{
 
     const data = (await lookup.json()) as { records?: { id: string }[] };
 
-    const fields: Record<string, unknown> = {
+    const fields: Record<string, string | number | boolean> = {
       'Client Name': demo.clientName,
       Email: demo.email,
       Organization: demo.organization,
@@ -109,33 +109,61 @@ export async function ensureDemoWebsitePortal(): Promise<{
       'Payment Received At': new Date().toISOString(),
     };
 
-    let recordId = data.records?.[0]?.id;
-    if (recordId) {
-      const res = await fetch(
-        `https://api.airtable.com/v0/${BASE_ID}/${encodeURIComponent(TABLE)}/${recordId}`,
-        {
-          method: 'PATCH',
-          headers: authHeaders(),
-          body: JSON.stringify({ fields, typecast: true }),
-        },
-      );
-      if (!res.ok) {
-        if (process.env.NODE_ENV === 'development') return seedMemoryFixture();
-        return { ok: false, error: 'Could not refresh Website + Portal demo client.' };
+    async function writeFields(
+      payload: Record<string, string | number | boolean>,
+      existingId: string | undefined,
+    ): Promise<{ ok: boolean; recordId?: string; detail?: string }> {
+      if (existingId) {
+        const res = await fetch(
+          `https://api.airtable.com/v0/${BASE_ID}/${encodeURIComponent(TABLE)}/${existingId}`,
+          {
+            method: 'PATCH',
+            headers: authHeaders(),
+            body: JSON.stringify({ fields: payload, typecast: true }),
+          },
+        );
+        if (!res.ok) return { ok: false, detail: await res.text() };
+        return { ok: true, recordId: existingId };
       }
-    } else {
+
       const res = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${encodeURIComponent(TABLE)}`, {
         method: 'POST',
         headers: authHeaders(),
-        body: JSON.stringify({ records: [{ fields }], typecast: true }),
+        body: JSON.stringify({ records: [{ fields: payload }], typecast: true }),
       });
-      if (!res.ok) {
-        if (process.env.NODE_ENV === 'development') return seedMemoryFixture();
-        return { ok: false, error: 'Could not create Website + Portal demo client.' };
-      }
+      if (!res.ok) return { ok: false, detail: await res.text() };
       const created = (await res.json()) as { records?: { id: string }[] };
-      recordId = created.records?.[0]?.id;
+      return { ok: true, recordId: created.records?.[0]?.id };
     }
+
+    const existingId = data.records?.[0]?.id;
+    let write = await writeFields(fields, existingId);
+
+    // Optional column — same fail-open as createOrUpdateClientRecord.
+    if (
+      !write.ok &&
+      fields['Commerce Offer Id'] &&
+      /UNKNOWN_FIELD_NAME|Unknown field|Commerce Offer Id/i.test(write.detail || '')
+    ) {
+      const { 'Commerce Offer Id': _omit, ...withoutOffer } = fields;
+      console.warn(
+        '[demo-website-portal] Commerce Offer Id missing on Client Records — retrying without it.',
+      );
+      write = await writeFields(withoutOffer, existingId);
+    }
+
+    if (!write.ok) {
+      console.error('[demo-website-portal] Airtable write failed:', write.detail);
+      if (process.env.NODE_ENV === 'development') return seedMemoryFixture();
+      return {
+        ok: false,
+        error: existingId
+          ? 'Could not refresh Website + Portal demo client.'
+          : 'Could not create Website + Portal demo client.',
+      };
+    }
+
+    const recordId = write.recordId;
 
     if (!recordId) {
       if (process.env.NODE_ENV === 'development') return seedMemoryFixture();
