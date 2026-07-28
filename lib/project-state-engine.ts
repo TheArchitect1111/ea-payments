@@ -230,7 +230,7 @@ export function applyProjectEvidence(
 ): ProjectStateApplyResult {
   const previous = input.stage;
   let stage = input.stage;
-  let evidence = recordProjectEvidence(input.evidence, kinds, at);
+  const evidence = recordProjectEvidence(input.evidence, kinds, at);
   const newlyCompleted: GuideLifecycleStage[] = [];
   let celebration: { title: string; message: string } | undefined;
   let agreementPaidAt = input.agreementPaidAt;
