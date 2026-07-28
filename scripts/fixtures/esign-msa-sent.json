@@ -1,0 +1,7 @@
+{
+  "status": "contract-sent",
+  "template_id": "tmpl_msa_test",
+  "clientId": "portal_demo-client",
+  "organizationId": "org_demo",
+  "document_type": "MSA"
+}

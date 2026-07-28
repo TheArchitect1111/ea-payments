@@ -19,7 +19,8 @@ function assert(condition, message) {
 
 const demo = readFileSync(join(root, 'app/api/auth/demo-enter/route.ts'), 'utf8');
 assert(demo.includes('safeDemoNext'), 'demo-enter must guard next param');
-assert(demo.includes("'/portal/demo-client/ctp'"), 'demo-enter default must stay CTP');
+assert(demo.includes('/portal/demo-client/ctp'), 'demo-enter default must stay CTP');
+assert(demo.includes('/portal/demo-client/ctp/progress'), 'demo-enter default lands on Guide Progress');
 assert(demo.includes('searchParams.get(\'next\')'), 'demo-enter must read ?next=');
 assert(demo.includes("raw.startsWith('//')"), 'demo-enter must reject protocol-relative next');
 assert(demo.includes('NextRequest'), 'demo-enter GET must accept request for query params');

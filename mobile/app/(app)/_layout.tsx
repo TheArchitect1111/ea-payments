@@ -10,9 +10,19 @@ import { colors } from '../../src/theme';
 type TabIconName = ComponentProps<typeof Ionicons>['name'];
 
 function tabIcon(name: TabIconName, activeName: TabIconName = name) {
-  return ({ color, size, focused }: { color: string; size: number; focused: boolean }) => (
-    <Ionicons name={focused ? activeName : name} color={color} size={size} />
-  );
+  function TabBarIcon({
+    color,
+    size,
+    focused,
+  }: {
+    color: string;
+    size: number;
+    focused: boolean;
+  }) {
+    return <Ionicons name={focused ? activeName : name} color={color} size={size} />;
+  }
+  TabBarIcon.displayName = `TabBarIcon(${name})`;
+  return TabBarIcon;
 }
 
 export default function AppLayout() {

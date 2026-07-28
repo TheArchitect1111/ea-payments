@@ -13,6 +13,16 @@
   ],
   "redirects": [
     {
+      "source": "/privacy",
+      "destination": "/legal/privacy",
+      "permanent": true
+    },
+    {
+      "source": "/terms",
+      "destination": "/legal/terms",
+      "permanent": true
+    },
+    {
       "source": "/ctp-intake",
       "destination": "https://cc.efficiencyarchitects.online/ctp",
       "permanent": true

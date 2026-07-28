@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type ComponentProps } from 'react';
+import { useCallback, useEffect, useMemo, useState, type ComponentProps } from 'react';
 import {
   AccessibilityInfo,
   Animated,
@@ -50,9 +50,9 @@ export default function HomeScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const heroMotion = useRef(new Animated.Value(0)).current;
-  const briefMotion = useRef(new Animated.Value(0)).current;
-  const recentMotion = useRef(new Animated.Value(0)).current;
+  const heroMotion = useMemo(() => new Animated.Value(0), []);
+  const briefMotion = useMemo(() => new Animated.Value(0), []);
+  const recentMotion = useMemo(() => new Animated.Value(0), []);
 
   const load = useCallback(async () => {
     if (!token) return;

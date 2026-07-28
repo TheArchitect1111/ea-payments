@@ -45,7 +45,7 @@ const idMap = read('vendor/capability-registry/src/id-map.ts');
 assert(idMap.includes("moduleId: 'member'"), 'capability-registry id-map missing member');
 assert(idMap.includes("capabilityId: 'member-experience'"), 'id-map missing member-experience');
 
-const provision = read('lib/provision-website-portal.ts');
+const provision = read('lib/website-publish-gate.ts');
 assert(provision.includes('syncOrganizationPortalSkin'), 'provision must sync org portal skin');
 assert(provision.includes('updateOrganizationWorkspaceConfig'), 'skin sync must write Organizations');
 assert(provision.includes('ensureDefaultMemberHome'), 'provision must seed member home');

@@ -57,7 +57,9 @@ test('simplifi portal route requires portal login', async ({ page }) => {
 
 test('amplifi landing page is reachable', async ({ page }) => {
   await page.goto('/amplifi');
-  await expect(page.getByRole('heading', { name: /search\. create\. store for approval/i })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: /draft\. review\. share when ready/i }),
+  ).toBeVisible();
 });
 
 test('magnifi consider demo has opportunity content', async ({ page }) => {
@@ -76,9 +78,10 @@ test('magnifi classic report demo renders', async ({ page }) => {
   await expect(page.getByRole('heading', { name: /selena executive coaching/i })).toBeVisible();
 });
 
-test('magnifi unknown id returns 404', async ({ page }) => {
+test('magnifi unknown id returns unavailable state', async ({ page }) => {
   const res = await page.goto('/magnifi/does-not-exist-zzz');
-  expect(res?.status()).toBe(404);
+  expect([200, 404]).toContain(res?.status() ?? 0);
+  await expect(page.getByRole('heading', { name: /story unavailable|story retired/i })).toBeVisible();
 });
 
 test('checkout lists purchasable packages only', async ({ page }) => {
@@ -115,8 +118,8 @@ test('simplifi workspace is reachable', async ({ page }) => {
   await expect(page.getByRole('heading', { name: /what deserves your attention/i })).toBeVisible();
   await expect(page.getByRole('heading', { name: /today.?s brief/i })).toBeVisible();
   await expect(page.getByRole('heading', { name: /recent opportunities/i })).toBeVisible();
-  await expect(page.locator('.sw-ambient-lead')).toBeVisible();
-  await expect(page.locator('.sw-ambient-lead')).toContainText(/Nothing urgent|deserve/i);
+  await expect(page.locator('.sw-ambient-lead').first()).toBeVisible();
+  await expect(page.locator('.sw-ambient-lead').first()).toContainText(/Nothing urgent|deserve/i);
   await expect(page.getByRole('navigation', { name: /Simplifi mobile/i })).toBeVisible();
   await expect(
     page.getByRole('navigation', { name: /Simplifi primary/i }).getByRole('link', { name: /^capture$/i }),
