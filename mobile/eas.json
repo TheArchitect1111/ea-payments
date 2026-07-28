@@ -11,7 +11,7 @@
         "simulator": true
       },
       "env": {
-        "EXPO_PUBLIC_API_BASE_URL": "https://ea-payments.vercel.app"
+        "EXPO_PUBLIC_API_BASE_URL": "https://efficiencyarchitects.online"
       }
     },
     "preview": {
@@ -20,7 +20,7 @@
         "simulator": false
       },
       "env": {
-        "EXPO_PUBLIC_API_BASE_URL": "https://ea-payments.vercel.app"
+        "EXPO_PUBLIC_API_BASE_URL": "https://efficiencyarchitects.online"
       }
     },
     "testflight": {
@@ -30,14 +30,17 @@
         "simulator": false
       },
       "env": {
-        "EXPO_PUBLIC_API_BASE_URL": "https://ea-payments.vercel.app"
+        "EXPO_PUBLIC_API_BASE_URL": "https://efficiencyarchitects.online"
       }
     },
     "production": {
       "distribution": "store",
       "autoIncrement": true,
+      "android": {
+        "buildType": "app-bundle"
+      },
       "env": {
-        "EXPO_PUBLIC_API_BASE_URL": "https://ea-payments.vercel.app"
+        "EXPO_PUBLIC_API_BASE_URL": "https://efficiencyarchitects.online"
       }
     }
   },
@@ -46,7 +49,11 @@
       "ios": {}
     },
     "production": {
-      "ios": {}
+      "ios": {},
+      "android": {
+        "serviceAccountKeyPath": "./google-play-service-account.json",
+        "track": "internal"
+      }
     },
     "production-android": {
       "android": {

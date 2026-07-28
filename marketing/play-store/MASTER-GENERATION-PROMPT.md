@@ -1,0 +1,39 @@
+# Simplifi Orb — Master Generation Prompt
+
+Use this block as the **shared preamble** for every image.  
+Append exactly one SCENE block from `01`–`08`.
+
+**Do not generate in Cursor.** Paste into Midjourney / Flux / Ideogram / Firefly / Leonardo.  
+Typography and logo will be composited later in Figma — **leave clean top space; do not render readable text.**
+
+Target: portrait **9:16**, export **1240 × 2208**.
+
+---
+
+## Shared preamble (every image)
+
+```
+Create a cinematic editorial lifestyle photograph for Simplifi Orb Google Play Store marketing.
+
+This is NOT an app screenshot.
+This is NOT a UI mockup.
+
+Ultra photorealistic editorial photography worthy of an Apple keynote or a premium technology magazine. Luxury annual report aesthetic. Apple-inspired product campaign. Bright white environment. Soft natural lighting. Warm optimistic mood. Premium composition. Clean negative space. Minimal visual clutter. Shallow depth of field. High-end camera look. Authentic people. Diverse representation. No stock-photo poses.
+
+GOAL: Tell a human story. The technology should almost disappear. The person is always the hero. The viewer should immediately understand how Orbie made this person's life better.
+
+ORBIE — include naturally in the scene:
+Deep blue polished glass sphere; brilliant electric-blue glowing core; elegant thin golden energy ribbons orbiting the sphere; soft floating particles; premium reflections; NO face; NO eyes; NO mouth; never cartoonish; roughly the same visual size as other campaign images; quietly assists rather than dominates.
+
+BRANDING SPACE: Leave generous clean empty space at the TOP of the frame for a logo, headline, and subheadline that will be added later. Do NOT render any readable text, letters, logos, watermarks, or UI labels into the image.
+
+COLOR PALETTE: warm white, executive navy accents in environment, rich gold light accents, electric blue accents (especially Orbie core), natural skin tones, premium architectural interiors when applicable.
+
+NEVER: dashboards, software UI, giant phones, floating app windows, futuristic sci-fi, cyberpunk, dark backgrounds, corporate office clichés, stock photography look.
+
+OUTPUT: Portrait 9:16 composition, high-resolution, photorealistic, emotionally engaging, designed for Google Play Store.
+
+SCENE:
+```
+
+Then paste one scene paragraph from the files `01-introducing-orbie.txt` … `08-one-intelligent-workspace.txt` (the SCENE section at the bottom of each file).

@@ -13,7 +13,8 @@
     "build:dev:android": "eas build --profile development --platform android",
     "build:preview": "eas build --profile preview --platform all",
     "build:production:android": "eas build --profile production --platform android",
-    "submit:production:android": "eas submit --platform android --profile production --latest",
+    "submit:production:android": "eas submit --platform android --profile production-android --latest",
+    "submit:internal:android": "eas submit --platform android --profile production --latest",
     "build:testflight": "eas build --profile testflight --platform ios",
     "submit:testflight": "eas submit --platform ios --profile testflight --latest",
     "submit:production": "eas submit --platform ios --profile production --latest"

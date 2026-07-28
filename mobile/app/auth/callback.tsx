@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useAuth } from '../../src/auth/AuthContext';
 import { colors } from '../../src/theme';
@@ -25,14 +25,35 @@ export default function AuthCallbackScreen() {
   }, [magicToken, signInWithMagicToken]);
 
   return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.navy, padding: 24 }}>
+    <View
+      style={{
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: colors.navy,
+        padding: 24,
+      }}
+    >
       {!error ? (
         <>
           <ActivityIndicator color={colors.gold} />
           <Text style={{ color: colors.white, marginTop: 16 }}>Signing you in…</Text>
         </>
       ) : (
-        <Text style={{ color: '#FCA5A5', textAlign: 'center' }}>{error}</Text>
+        <>
+          <Text style={{ color: '#FCA5A5', textAlign: 'center', marginBottom: 20 }}>{error}</Text>
+          <Pressable
+            onPress={() => router.replace('/login')}
+            style={{
+              backgroundColor: colors.gold,
+              borderRadius: 999,
+              paddingVertical: 12,
+              paddingHorizontal: 24,
+            }}
+          >
+            <Text style={{ color: colors.navy, fontWeight: '800' }}>Back to login</Text>
+          </Pressable>
+        </>
       )}
     </View>
   );

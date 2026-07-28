@@ -1,5 +1,5 @@
-/** Canonical production API host for Simplifi mobile. Keep in sync with lib/auth/realm-login-copy usage on web. */
-export const CANONICAL_API_BASE_URL = 'https://ea-payments.vercel.app';
+/** Canonical production API host for Simplifi mobile (public apex). */
+export const CANONICAL_API_BASE_URL = 'https://efficiencyarchitects.online';
 
 export type RealmLoginCopy = {
   eyebrow?: string;
