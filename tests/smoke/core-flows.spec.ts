@@ -194,7 +194,8 @@ test('simplifi capture seeds share-target text and url', async ({ page }) => {
     '/simplifi/capture?title=Lead%20idea&text=Check%20https%3A%2F%2Fexample.com%2Fopp%20tomorrow',
   );
   // Share seeds render even when signed out (guest / sign-in wall).
-  await expect(page.getByRole('heading', { name: /ready to save what you shared/i })).toBeVisible();
+  // Assert seeds — not the H1 — guest auto-start can briefly show "Getting ready…".
+  await expect(page.getByRole('region', { name: /shared capture/i })).toBeVisible();
   await expect(page.getByPlaceholder('https://…')).toHaveValue('https://example.com/opp');
   await expect(page.getByLabel(/^capture notes$/i)).toHaveValue(/Lead idea/);
 });
