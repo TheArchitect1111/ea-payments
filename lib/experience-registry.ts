@@ -76,6 +76,7 @@ export type CapabilityId =
   | 'events'
   | 'resources'
   | 'billing'
+  | 'settings'
   | 'guided-discovery'
   | 'landing-pages';
 
@@ -423,6 +424,23 @@ export const CAPABILITY_REGISTRY: CapabilityDefinition[] = [
     showOnDashboardHub: true,
     orbPolicy: 'ignore',
     routePatterns: ['/billing'],
+    osLifecycle: 'act',
+  },
+  {
+    id: 'settings',
+    moduleId: 'settings',
+    customerGoal: 'Configure portal preferences',
+    plainLanguage: 'Settings',
+    eaCapability: 'Portal Settings',
+    displayLabel: 'Settings',
+    disclosureLevel: 'L2',
+    navGroup: 'platform',
+    showInSidebar: true,
+    showInPillNav: false,
+    dashboardZone: 'none',
+    showOnDashboardHub: false,
+    orbPolicy: 'ignore',
+    routePatterns: ['/settings'],
     osLifecycle: 'act',
   },
 ];

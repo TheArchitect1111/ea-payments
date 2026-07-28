@@ -44,6 +44,7 @@ export function portalNavItems(slug: string): { menu: PortalNavItem[]; others: P
       { id: 'messaging', label: 'Messages', href: `${base}/messaging`, icon: 'messaging' },
       { id: 'learning', label: 'Learning', href: `${base}/learning`, icon: 'learning' },
       { id: 'ask', label: 'Ask EA', href: `${base}/ask`, icon: 'ask' },
+      { id: 'settings', label: 'Settings', href: `${base}/settings`, icon: 'documents' },
     ],
   };
 }

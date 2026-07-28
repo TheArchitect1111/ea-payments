@@ -98,7 +98,8 @@ export type PulseEventType =
   | 'factory.project.queued'
   | 'factory.project.status'
   | 'event.registration.placed'
-  | 'event.registration.confirmed';
+  | 'event.registration.confirmed'
+  | 'event.registration.reminder';
 
 export interface PulseEvent {
   product: PulseProduct;

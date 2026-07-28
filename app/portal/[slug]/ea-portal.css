@@ -1396,6 +1396,37 @@ a.ep-sidebar-promo:hover {
   color: var(--ea-muted);
 }
 
+.ep-hub-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 20px;
+  padding: 0;
+}
+
+.ep-hub-tabs a {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--ea-border);
+  background: #fff;
+  color: var(--ea-navy);
+  font-size: 0.88rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.ep-hub-tabs a:hover {
+  border-color: var(--ea-navy);
+}
+
+.ep-hub-tabs a.ep-hub-tabs-active {
+  background: var(--ea-navy);
+  border-color: var(--ea-navy);
+  color: #fff;
+}
+
 /* personality dashboard rail */
 .ep-personality-rail {
   margin-bottom: 1.25rem;

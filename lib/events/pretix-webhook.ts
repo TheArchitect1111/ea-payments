@@ -1,5 +1,6 @@
 import { findPretixEventByShopOrSlug } from '@/lib/events/pretix-store';
 import type { PortalPretixEvent } from '@/lib/events/pretix-types';
+import { upsertRegistrationFromPretix } from '@/lib/events/registration-ledger';
 import { notifyPortal } from '@/lib/portal-notify';
 import { emitPulseEvent } from '@/lib/pulse-bus';
 import { sendInternalNotification } from '@/lib/email';
@@ -49,12 +50,18 @@ export function isPretixRegistrationAction(action: string): boolean {
   );
 }
 
+export function isPretixCancelAction(action: string): boolean {
+  return action.includes('cancel');
+}
+
 export async function handlePretixRegistrationWebhook(
   payload: PretixWebhookPayload,
   matched?: PortalPretixEvent | null,
 ): Promise<{ ok: boolean; detail: string }> {
   const action = extractAction(payload);
-  if (!isPretixRegistrationAction(action)) {
+  const paid = action.includes('paid');
+  const canceled = isPretixCancelAction(action);
+  if (!isPretixRegistrationAction(action) && !canceled) {
     return { ok: true, detail: `Ignored action: ${action || 'unknown'}` };
   }
 
@@ -70,8 +77,9 @@ export async function handlePretixRegistrationWebhook(
 
   const orderCode = extractOrderCode(payload) || 'unknown';
   const email = extractEmail(payload);
-  const paid = action.includes('paid');
-  const title = paid
+  const title = canceled
+    ? `Event registration canceled: ${event?.title || eventSlug || 'Event'}`
+    : paid
     ? `Event registration paid: ${event?.title || eventSlug || 'Event'}`
     : `Event registration placed: ${event?.title || eventSlug || 'Event'}`;
   const detail = [
@@ -82,6 +90,24 @@ export async function handlePretixRegistrationWebhook(
   ]
     .filter(Boolean)
     .join(' · ');
+
+  if (event?.portalSlug) {
+    await upsertRegistrationFromPretix({
+      portalSlug: event.portalSlug,
+      orderCode,
+      email,
+      eventTitle: event.title || eventSlug || 'Event',
+      pretixEventSlug: event.pretixEventSlug || eventSlug,
+      pretixOrganizerSlug: organizer,
+      shopUrl: event.shopUrl || shopUrl,
+      eventStartsAt: event.startsAt,
+      status: canceled ? 'canceled' : paid ? 'paid' : 'placed',
+    });
+  }
+
+  if (canceled) {
+    return { ok: true, detail: 'Registration canceled in ledger' };
+  }
 
   await notifyPortal({
     product: 'events',

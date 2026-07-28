@@ -13,10 +13,24 @@ export const EA_CLIENT_MODULES = [
   'ask',
 ] as const;
 
-export const SIMPLIFI_SUBSCRIPTION_MODULES = [
+/** Launch Edition mandatory core modules (Calendar + Events plan). */
+export const LAUNCH_EDITION_MODULES = [
+  'dashboard',
+  'update-hub',
+  'documents',
+  'events',
+  'billing',
+  'settings',
+] as const;
+
+export function ensureLaunchEditionModules(ids: string[]): string[] {
+  return [...new Set([...ids, ...LAUNCH_EDITION_MODULES])];
+}
+
+export const SIMPLIFI_SUBSCRIPTION_MODULES = ensureLaunchEditionModules([
   ...EA_CLIENT_MODULES,
   'billing',
-] as const;
+]) as readonly string[];
 
 export const LAUNCH_VERIFICATION_MODULES = [
   'dashboard',
@@ -31,16 +45,16 @@ export const CAPACITY_MODULES = [
   'ctp',
 ] as const;
 
-export const IMPLEMENTATION_MODULES = [
+export const IMPLEMENTATION_MODULES = ensureLaunchEditionModules([
   ...EA_CLIENT_MODULES,
   'connect',
   'member',
-] as const;
+]) as readonly string[];
 
 export const SIMPLIFI_ONE_TIME_MODULES = [...EA_CLIENT_MODULES] as const;
 
 /** Lean client portal modules for automated website + portal starter. */
-export const WEBSITE_PORTAL_MODULES = [
+export const WEBSITE_PORTAL_MODULES = ensureLaunchEditionModules([
   'dashboard',
   'landing',
   'pulse',
@@ -54,18 +68,18 @@ export const WEBSITE_PORTAL_MODULES = [
   'resources',
   'ask',
   'connect',
-] as const;
+]) as readonly string[];
 
-export const PLATFORM_MONTHLY_MODULES = [
+export const PLATFORM_MONTHLY_MODULES = ensureLaunchEditionModules([
   ...EA_CLIENT_MODULES,
   'billing',
-] as const;
+]) as readonly string[];
 
-export const PLATFORM_ANNUAL_MODULES = [
+export const PLATFORM_ANNUAL_MODULES = ensureLaunchEditionModules([
   ...EA_CLIENT_MODULES,
   'billing',
   'connect',
-] as const;
+]) as readonly string[];
 
 /** Coarse Airtable Package Purchased ? module entitlements (fallback path). */
 export const AIRTABLE_PACKAGE_MODULES: Record<string, readonly string[]> = {
@@ -75,6 +89,7 @@ export const AIRTABLE_PACKAGE_MODULES: Record<string, readonly string[]> = {
   'Capacity Assessment': CAPACITY_MODULES,
   'Capacity Blueprint': CAPACITY_MODULES,
   'Website + Portal Starter': WEBSITE_PORTAL_MODULES,
+  'Launch Edition': LAUNCH_EDITION_MODULES,
 };
 
 export const DEMO_MODULE_IDS = ['discovery', 'connect', 'landing'] as const;
