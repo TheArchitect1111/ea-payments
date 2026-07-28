@@ -9,17 +9,48 @@ import { getCtpSubmissionForPortal } from '@/lib/ctp-submissions';
 import { listConnectOrgs } from '@/lib/connect-store';
 import { listPretixEventsForPortal } from '@/lib/events/pretix-store';
 
+export type PortalEventSource = 'pretix' | 'ctp' | 'calendly' | 'connect' | 'hub';
+
 export type PortalEventItem = {
   id?: string;
   title: string;
   when: string;
   detail: string;
   href: string;
-  source: 'pretix' | 'ctp' | 'calendly' | 'connect' | 'hub';
+  source: PortalEventSource;
   external?: boolean;
   ctaLabel?: string;
   location?: string;
 };
+
+/** Appointments, deadlines, and availability — not pretix ticketed events. */
+export const CALENDAR_EVENT_SOURCES: readonly PortalEventSource[] = [
+  'ctp',
+  'calendly',
+  'connect',
+  'hub',
+];
+
+export function isCalendarEventItem(item: PortalEventItem): boolean {
+  return (CALENDAR_EVENT_SOURCES as readonly string[]).includes(item.source);
+}
+
+export function isTicketedEventItem(item: PortalEventItem): boolean {
+  return item.source === 'pretix';
+}
+
+export function partitionPortalEventItems(items: PortalEventItem[]): {
+  calendar: PortalEventItem[];
+  events: PortalEventItem[];
+} {
+  const calendar: PortalEventItem[] = [];
+  const events: PortalEventItem[] = [];
+  for (const item of items) {
+    if (isTicketedEventItem(item)) events.push(item);
+    else calendar.push(item);
+  }
+  return { calendar, events };
+}
 
 function formatEventWhen(startsAt?: string, endsAt?: string): string {
   if (!startsAt) return 'Open registration';

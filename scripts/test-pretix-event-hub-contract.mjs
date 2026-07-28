@@ -20,9 +20,12 @@ const files = [
   'lib/events/pretix-types.ts',
   'lib/events/pretix-store.ts',
   'lib/events/pretix-webhook.ts',
+  'lib/events/registration-ledger.ts',
+  'lib/events/registration-reminders.ts',
   'lib/portal-event-hub.ts',
   'app/api/portal/events/pretix/route.ts',
   'app/api/webhooks/pretix/route.ts',
+  'app/api/cron/event-registration-reminders/route.ts',
   'app/portal/[slug]/events/page.tsx',
   'app/portal/[slug]/events/PretixEventStaffPanel.tsx',
   'docs/integrations/PRETIX-EVENT-ENGINE.md',
@@ -45,12 +48,14 @@ assert(store.includes('listPretixEventsForPortal'), 'portal list helper required
 const webhook = readFileSync(join(root, 'lib/events/pretix-webhook.ts'), 'utf8');
 assert(webhook.includes('event.registration.confirmed'), 'confirmed Pulse type required');
 assert(webhook.includes('event.registration.placed'), 'placed Pulse type required');
+assert(webhook.includes('upsertRegistrationFromPretix'), 'webhook must upsert registration ledger');
 assert(webhook.includes('notifyPortal'), 'must notify portal');
 assert(webhook.includes('emitPulseEvent'), 'must emit Pulse');
 
 const hub = readFileSync(join(root, 'lib/portal-event-hub.ts'), 'utf8');
 assert(hub.includes("'pretix'"), 'hub must include pretix source');
 assert(hub.includes('listPretixEventsForPortal'), 'hub must list pretix events');
+assert(hub.includes('partitionPortalEventItems'), 'hub must partition calendar vs events');
 assert(hub.includes('ctaLabel'), 'Register CTA field required');
 
 const pulse = readFileSync(join(root, 'lib/pulse-bus.ts'), 'utf8');
@@ -63,6 +68,8 @@ assert(registry.includes('pretix'), 'module description should mention pretix');
 const page = readFileSync(join(root, 'app/portal/[slug]/events/page.tsx'), 'utf8');
 assert(page.includes('PretixEventStaffPanel'), 'staff panel on Event Hub');
 assert(page.includes('roleAtLeast'), 'staff gate required');
+assert(page.includes('My registrations'), 'My registrations tab required');
+assert(page.includes('?tab='), 'tab searchParams required');
 
 const route = readFileSync(join(root, 'app/api/webhooks/pretix/route.ts'), 'utf8');
 assert(route.includes('verifyPretixWebhookAuth'), 'webhook route must verify auth');

@@ -19,6 +19,7 @@ export const MODULE_IDS = [
   'resources',
   'ask',
   'billing',
+  'settings',
   'ctp',
   'member',
   'people',
@@ -219,6 +220,15 @@ const TECHNICAL_MODULE_REGISTRY: TechnicalModuleDefinition[] = [
     requiredRole: 'owner',
     pathSegment: 'billing',
   },
+  {
+    id: 'settings',
+    name: 'Settings',
+    tag: 'Settings',
+    title: 'Portal preferences',
+    description: 'Branding and notification preferences for your workspace.',
+    requiredRole: 'guest',
+    pathSegment: 'settings',
+  },
 ];
 
 function mergeModuleWithCapability(technical: TechnicalModuleDefinition): ModuleDefinition {
@@ -273,6 +283,8 @@ export const TENANT_MODULE_PRESETS: Record<string, ModuleId[]> = {
     'events',
     'resources',
     'ask',
+    'billing',
+    'settings',
     'people',
   ],
   'family-hub': [
@@ -289,8 +301,8 @@ export const TENANT_MODULE_PRESETS: Record<string, ModuleId[]> = {
 /** Package-based extras merged onto the ea-client preset. */
 export const PACKAGE_MODULE_GRANTS: Record<string, ModuleId[]> = {
   Simplifi: ['simplifi', 'amplifi'],
-  'Implementation Package': ['simplifi', 'amplifi', 'connect', 'member'],
-  'Website + Portal Starter': ['member', 'events'],
+  'Implementation Package': ['simplifi', 'amplifi', 'connect', 'member', 'events', 'billing', 'settings'],
+  'Website + Portal Starter': ['member', 'events', 'billing', 'settings'],
   'Capacity Assessment': ['dashboard', 'pulse', 'update-hub', 'documents', 'ask', 'discovery', 'ctp'],
   'Capacity Blueprint': ['dashboard', 'pulse', 'update-hub', 'documents', 'ask', 'discovery', 'ctp'],
   'Launch Verification': ['dashboard', 'pulse', 'update-hub', 'ask'],

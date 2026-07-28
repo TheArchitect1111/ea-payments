@@ -161,6 +161,14 @@ export const CAPABILITY_ID_MAP: IdMapRow[] = [
     category: 'Payments',
     notes: 'CPR payments (fee stages) and EA billing share this capability id after contract unify',
   },
+  {
+    capabilityId: 'settings',
+    moduleId: 'settings',
+    experienceCapabilityId: 'settings',
+    enableKey: 'settings',
+    category: 'Platform',
+    notes: 'Portal branding and notification preferences',
+  },
 
   // Workspace-only / vertical (no EA portal ModuleId yet)
   {
