@@ -53,6 +53,25 @@ async function seedWorkspace(): Promise<{ ok: boolean; error?: string }> {
   return { ok: true };
 }
 
+/** Soft deadline so Airtable/Pulse stalls cannot block demo-enter forever. */
+async function seedWorkspaceBounded(ms = 8_000): Promise<{ ok: boolean; error?: string }> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    const result = await Promise.race([
+      seedWorkspace(),
+      new Promise<{ ok: false; error: string }>((resolve) => {
+        timer = setTimeout(
+          () => resolve({ ok: false, error: `CTP workspace seed timed out after ${ms}ms.` }),
+          ms,
+        );
+      }),
+    ]);
+    return result;
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+
 async function seedMemoryFixture(): Promise<{ ok: boolean; error?: string; portalSlug?: string }> {
   seedDemoWebsiteMemoryClient();
   const workspace = await seedWorkspace();
@@ -189,9 +208,11 @@ export async function ensureDemoWebsitePortal(): Promise<{
       console.error('[demo-website-portal] org/entitlements failed:', err);
     }
 
-    const workspace = await seedWorkspace();
+    // Client record is enough for demo session. Workspace seed is best-effort —
+    // Guide Progress / CTP bind can catch up; never hang demo-enter on Pulse/Airtable stalls.
+    const workspace = await seedWorkspaceBounded();
     if (!workspace.ok) {
-      return { ok: false, error: workspace.error };
+      console.warn('[demo-website-portal] workspace seed skipped:', workspace.error);
     }
 
     return { ok: true, portalSlug: demo.slug };
