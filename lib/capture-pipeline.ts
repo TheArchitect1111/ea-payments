@@ -35,6 +35,7 @@ import {
   extractBusinessSignals,
   formatScoresLine,
 } from './simplifi-business-analysis';
+import { afterCaptureOsWrite } from '@/lib/simplifi-os';
 import {
   createCaptureRecord,
   getCaptureByIdentifier,
@@ -306,17 +307,36 @@ async function runCapturePipeline(
     record = withGuidance ?? record;
   }
 
+  const resultRecord = {
+    ...(record ?? {
+      id: recordId,
+      captureId: recordId,
+      title,
+      captureType: 'Opportunity' as const,
+      source,
+      priority: scores.priority,
+      status: finalStatus,
+      dateCaptured: '',
+    }),
+    status: finalStatus,
+    title: opportunity.businessName || title,
+    description: descriptionWithPayload,
+    considerSlug: opportunity.prospectSlug,
+    shareUrl: opportunity.shareUrl,
+    clientMessage: opportunity.clientMessage,
+  };
+
+  if (portalSlug) {
+    void afterCaptureOsWrite({
+      record: resultRecord,
+      portalSlug,
+      client: 'web',
+    });
+  }
+
   return {
     ok: true,
-    record: {
-      ...(record ?? { id: recordId, captureId: recordId, title, captureType: 'Opportunity', source, priority: scores.priority, status: finalStatus, dateCaptured: '' }),
-      status: finalStatus,
-      title: opportunity.businessName || title,
-      description: descriptionWithPayload,
-      considerSlug: opportunity.prospectSlug,
-      shareUrl: opportunity.shareUrl,
-      clientMessage: opportunity.clientMessage,
-    },
+    record: resultRecord,
     classification,
     scores,
     recommendations,

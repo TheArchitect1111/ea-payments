@@ -6,6 +6,8 @@ import { getCaptureByIdentifier } from '@/lib/capture-records';
 import { captureToObject } from '@/lib/simplifi-objects';
 import { computePriorityScore, priorityLevelLabel } from '@/lib/priority-engine';
 import { parseBlueprintSummary } from '@/lib/blueprint-summary';
+import { parseOpportunityPayload } from '@/lib/opportunity-experience';
+import { formatDecisionPathLabel } from '@/lib/capture-success-flow';
 import { EA_PLATFORM_URL } from '@/lib/platform-urls';
 import { loadOrbWorkspaceSlice } from '@/lib/orb';
 import SimplifiProductShell from '../../components/SimplifiProductShell';
@@ -36,6 +38,7 @@ export default async function OpportunityProfilePage({ params }: Props) {
   const obj = { ...base, priorityScore: ps.score, priorityLevel: ps.level };
   const guidanceUrl = `/simplifi/guidance/${capture.id}`;
   const blueprint = parseBlueprintSummary(capture.blueprintSummary || capture.analysisSummary);
+  const intelligence = parseOpportunityPayload(capture)?.intelligence;
 
   return (
     <SimplifiProductShell
@@ -67,6 +70,21 @@ export default async function OpportunityProfilePage({ params }: Props) {
           </div>
         </header>
 
+        {ps.reasons.length > 0 ? (
+          <section className="sw-brief-panel" aria-label="Why now">
+            <h2>Why now</h2>
+            <ul className="sw-event-list" style={{ marginTop: 8 }}>
+              {ps.reasons.map((reason) => (
+                <li key={reason}>
+                  <div>
+                    <p>{reason}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
+
         <section className="sw-brief-grid">
           <article className="sw-brief-panel">
             <h2>Why this matters</h2>
@@ -87,11 +105,54 @@ export default async function OpportunityProfilePage({ params }: Props) {
           </p>
         </article>
 
+        {intelligence ? (
+          <section className="sw-brief-panel" aria-label="Decision and Build Intelligence">
+            <h2>Decision Intelligence</h2>
+            <p className="sw-muted" style={{ marginBottom: 8 }}>
+              Computed when you captured this — how to pursue the opportunity.
+            </p>
+            <p>
+              <strong>{formatDecisionPathLabel(intelligence.decision.recommendedPath)}</strong>
+              {` · ${intelligence.decision.confidenceScore}% confidence · risk ${intelligence.decision.riskLevel}`}
+            </p>
+            <p style={{ marginTop: 8 }}>{intelligence.decision.pathRationale}</p>
+            {intelligence.decision.possibilityHighlights.length > 0 ? (
+              <ul className="sw-event-list" style={{ marginTop: 12 }}>
+                {intelligence.decision.possibilityHighlights.slice(0, 4).map((line) => (
+                  <li key={line}>
+                    <div>
+                      <p>{line}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+            <h3 style={{ margin: '16px 0 6px', fontSize: '1.05rem' }}>Build Intelligence</h3>
+            <p>
+              <strong>{intelligence.build.buildPath}</strong>
+              {` · overlay ${intelligence.build.overlayConfidence.overall}`}
+            </p>
+            {intelligence.build.recommendedStack?.length ? (
+              <p className="sw-muted" style={{ marginTop: 8 }}>
+                Stack: {intelligence.build.recommendedStack.slice(0, 5).join(' · ')}
+              </p>
+            ) : null}
+          </section>
+        ) : (
+          <section className="sw-brief-panel">
+            <h2>Decision Intelligence</h2>
+            <p className="sw-muted">
+              Not on this capture yet. Use Intelligence under Next moves after a fresh capture.
+            </p>
+          </section>
+        )}
+
         {(blueprint.meta.length > 0 || blueprint.sections.length > 0 || blueprint.roadmap.length > 0) && (
-          <section className="sw-brief-panel" aria-label="Blueprint stub">
+          <section className="sw-brief-panel" aria-label="Blueprint preview">
             <h2>Blueprint preview</h2>
             <p className="sw-muted">
-              Early outline from capture analysis — react to this in the field; full delivery plans come later.
+              Early outline from this capture — not a full delivery plan. Use guidance or return to
+              your Brief for the next step.
             </p>
             {blueprint.meta.length > 0 ? (
               <ul className="sw-event-list" style={{ marginTop: 12 }}>

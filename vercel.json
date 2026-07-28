@@ -150,6 +150,10 @@
     {
       "path": "/api/cron/factory-queue",
       "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/cron/simplifi-intelligence",
+      "schedule": "15 5 * * *"
     }
   ]
 }

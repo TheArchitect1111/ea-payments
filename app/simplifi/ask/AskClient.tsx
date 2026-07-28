@@ -51,7 +51,7 @@ export default function AskClient({
     setHistory(loadAskHistory());
   }, []);
 
-  const ask = (q: string) => {
+  const ask = async (q: string) => {
     const trimmed = q.trim();
     if (!trimmed) return;
     setQuestion(trimmed);
@@ -99,6 +99,38 @@ export default function AskClient({
       setMatches([]);
       router.push(href);
       return;
+    }
+
+    // Prefer server hybrid Ask when signed in; keyword fallback on failure.
+    if (loggedIn) {
+      try {
+        const res = await fetch('/api/simplifi/ask', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ question: trimmed }),
+        });
+        if (res.ok) {
+          const data = (await res.json()) as {
+            answer?: string;
+            citations?: AskCitation[];
+          };
+          if (data.answer) {
+            setAnswer(data.answer);
+            setCitations(data.citations ?? []);
+            setMatches(hits.slice(0, 5));
+            setHistory(
+              pushAskHistory({
+                question: trimmed,
+                answer: data.answer,
+                citations: data.citations ?? [],
+              }),
+            );
+            return;
+          }
+        }
+      } catch {
+        // fall through to keyword
+      }
     }
 
     const detailed = answerConversationalAskDetailed(trimmed, objects, actionCenter);

@@ -1,0 +1,590 @@
+{
+  "metadata": {
+    "harness": "simplifi-os-certification",
+    "harnessVersion": "1.0.0",
+    "timestamp": "2026-07-22T14:35:18.910Z",
+    "git": {
+      "sha": "3420e5b21b8a53542e27106592e242b216abbea3",
+      "short": "3420e5b2",
+      "branch": "master",
+      "dirty": true
+    },
+    "build": {
+      "name": "simplifi",
+      "version": "0.1.0",
+      "node": "v20.19.0"
+    },
+    "database": {
+      "migrationVersion": "006_simplifi_phase1_ask_intel.sql",
+      "migrations": [
+        "001_simplifi_objects.sql",
+        "002_simplifi_memory_events.sql",
+        "003_simplifi_embeddings_relationships.sql",
+        "004_simplifi_intelligence.sql",
+        "005_simplifi_sync_outbox.sql",
+        "006_simplifi_phase1_ask_intel.sql"
+      ]
+    },
+    "featureFlags": {
+      "SIMPLIFI_OS_WRITE": false,
+      "SIMPLIFI_EMBED": false,
+      "SIMPLIFI_SEMANTIC_ASK": false,
+      "SIMPLIFI_INTELLIGENCE": false,
+      "SIMPLIFI_BRIEF_INTEL": false,
+      "SIMPLIFI_OS_READ": false
+    },
+    "envPresence": {
+      "SUPABASE_URL": false,
+      "SUPABASE_SERVICE_ROLE_KEY": false,
+      "OPENAI_API_KEY": false,
+      "CRON_SECRET": false
+    },
+    "shadowMode": true
+  },
+  "scores": {
+    "overall": 99,
+    "bySubsystem": {
+      "functional": {
+        "score": 123,
+        "maxScore": 123,
+        "pct": 100,
+        "pass": 12,
+        "fail": 0,
+        "warning": 0,
+        "skip": 1,
+        "blockingFails": 0
+      },
+      "security": {
+        "score": 86,
+        "maxScore": 86,
+        "pct": 100,
+        "pass": 8,
+        "fail": 0,
+        "warning": 0,
+        "skip": 0,
+        "blockingFails": 0
+      },
+      "performance": {
+        "score": 63,
+        "maxScore": 63,
+        "pct": 100,
+        "pass": 7,
+        "fail": 0,
+        "warning": 0,
+        "skip": 1,
+        "blockingFails": 0
+      },
+      "reliability": {
+        "score": 80,
+        "maxScore": 80,
+        "pct": 100,
+        "pass": 8,
+        "fail": 0,
+        "warning": 0,
+        "skip": 0,
+        "blockingFails": 0
+      },
+      "intelligence": {
+        "score": 78,
+        "maxScore": 82,
+        "pct": 95.1,
+        "pass": 5,
+        "fail": 0,
+        "warning": 1,
+        "skip": 0,
+        "blockingFails": 0
+      }
+    },
+    "blockingFails": 0,
+    "warnings": 1,
+    "classification": "CERTIFIED"
+  },
+  "checks": [
+    {
+      "maxScore": 10,
+      "score": 10,
+      "blocking": true,
+      "evidence": "OK simplifi-os foundation contract",
+      "id": "func.contract.test-simplifi-os-foundation.mjs",
+      "subsystem": "functional",
+      "title": "Contract scripts/test-simplifi-os-foundation.mjs",
+      "status": "PASS",
+      "latencyMs": 83
+    },
+    {
+      "maxScore": 10,
+      "score": 10,
+      "blocking": true,
+      "evidence": "OK simplifi-os phase1 ask+intel contract\n{\n  \"files\": 12,\n  \"fingerprintDedupe\": 3\n}",
+      "id": "func.contract.test-simplifi-os-phase1-ask-intel.mjs",
+      "subsystem": "functional",
+      "title": "Contract scripts/test-simplifi-os-phase1-ask-intel.mjs",
+      "status": "PASS",
+      "latencyMs": 85
+    },
+    {
+      "maxScore": 10,
+      "score": 10,
+      "blocking": true,
+      "evidence": "OK simplifi-os phase1 runtime logic",
+      "id": "func.contract.test-simplifi-os-phase1-logic.mjs",
+      "subsystem": "functional",
+      "title": "Contract scripts/test-simplifi-os-phase1-logic.mjs",
+      "status": "PASS",
+      "latencyMs": 81
+    },
+    {
+      "maxScore": 10,
+      "score": 10,
+      "blocking": true,
+      "evidence": "All 9 required event types declared",
+      "id": "func.memory.vocabulary",
+      "subsystem": "functional",
+      "title": "Memory event vocabulary present",
+      "status": "PASS"
+    },
+    {
+      "maxScore": 10,
+      "score": 10,
+      "blocking": true,
+      "evidence": "capture-hook, retrieve, feedback call recordMemoryEvent",
+      "id": "func.memory.emit-sites",
+      "subsystem": "functional",
+      "title": "Memory events emitted from capture/ask/feedback",
+      "status": "PASS"
+    },
+    {
+      "maxScore": 5,
+      "score": 5,
+      "blocking": false,
+      "evidence": "OS write path emits capture.created then opportunity.created for the same correlation id — not a silent duplicate of the same event type",
+      "id": "func.memory.dual-write-pair",
+      "subsystem": "functional",
+      "title": "Capture finalize may emit capture+opportunity pair (documented)",
+      "status": "PASS"
+    },
+    {
+      "maxScore": 15,
+      "score": 15,
+      "blocking": false,
+      "evidence": "groundedOk=5/5 falseNeg~=0 halluc=0",
+      "id": "func.ask.keyword-accuracy",
+      "subsystem": "functional",
+      "title": "Keyword Ask fixture accuracy (shadow)",
+      "status": "PASS",
+      "metrics": {
+        "askAccuracy": 1,
+        "falseNeg": 0,
+        "halluc": 0
+      },
+      "latencyMs": 1
+    },
+    {
+      "maxScore": 10,
+      "score": 10,
+      "blocking": true,
+      "evidence": "Portal A cannot cite Portal B canary; Portal B can cite its own",
+      "id": "func.ask.isolation",
+      "subsystem": "functional",
+      "title": "Ask workspace isolation (fixture)",
+      "status": "PASS"
+    },
+    {
+      "maxScore": 10,
+      "score": 10,
+      "blocking": true,
+      "evidence": "SHA-256 stable; upsert skips unchanged ready rows",
+      "id": "func.embed.dedupe-hash",
+      "subsystem": "functional",
+      "title": "Embedding content-hash dedupe",
+      "status": "PASS"
+    },
+    {
+      "maxScore": 8,
+      "score": 8,
+      "blocking": true,
+      "evidence": "retry_count, embedding_version, source_text preserved",
+      "id": "func.embed.retry-version",
+      "subsystem": "functional",
+      "title": "Embedding retry + version fields",
+      "status": "PASS"
+    },
+    {
+      "maxScore": 15,
+      "score": 15,
+      "blocking": false,
+      "evidence": "findings=11 types=upcoming_deadline,duplicate_work,repeated_idea,inactive_client,momentum,pending_promise,relationship_gap,stalled_opportunity missing=none",
+      "id": "func.intel.detectors",
+      "subsystem": "functional",
+      "title": "Opportunity Intelligence detectors on golden fixtures",
+      "status": "PASS",
+      "latencyMs": 2,
+      "metrics": {
+        "findings": 11,
+        "missingTypes": 0
+      }
+    },
+    {
+      "maxScore": 10,
+      "score": 10,
+      "blocking": true,
+      "evidence": "buildMergedDailyBrief used by workspace loader; whyMatters present",
+      "id": "func.brief.merge",
+      "subsystem": "functional",
+      "title": "Daily Brief merge preserves base + sections",
+      "status": "PASS"
+    },
+    {
+      "maxScore": 10,
+      "score": 0,
+      "blocking": false,
+      "evidence": "Skipped in shadow (SIMPLIFI_SEMANTIC_ASK/Supabase/OpenAI not all active)",
+      "id": "func.ask.semantic-live",
+      "subsystem": "functional",
+      "title": "Live semantic Ask (pgvector + LLM)",
+      "status": "SKIP"
+    },
+    {
+      "maxScore": 12,
+      "score": 12,
+      "blocking": true,
+      "evidence": "requirePortalSession({ realm: simplifi })",
+      "id": "sec.ask.auth",
+      "subsystem": "security",
+      "title": "Ask requires Simplifi session",
+      "status": "PASS"
+    },
+    {
+      "maxScore": 12,
+      "score": 12,
+      "blocking": true,
+      "evidence": "Workspace loaded via session.slug",
+      "id": "sec.ask.slug-scope",
+      "subsystem": "security",
+      "title": "Ask scoped to session.slug (not body portal)",
+      "status": "PASS"
+    },
+    {
+      "maxScore": 12,
+      "score": 12,
+      "blocking": true,
+      "evidence": "match_simplifi_embeddings constrains portal_slug",
+      "id": "sec.rpc.portal-filter",
+      "subsystem": "security",
+      "title": "Vector RPC filters by match_portal",
+      "status": "PASS"
+    },
+    {
+      "maxScore": 10,
+      "score": 10,
+      "blocking": true,
+      "evidence": "PATCH/select filtered by session portal",
+      "id": "sec.feedback.portal",
+      "subsystem": "security",
+      "title": "Feedback re-checks portal_slug",
+      "status": "PASS"
+    },
+    {
+      "maxScore": 12,
+      "score": 12,
+      "blocking": true,
+      "evidence": "API routes do not reference service role env directly",
+      "id": "sec.service-role",
+      "subsystem": "security",
+      "title": "No service-role credentials in client routes",
+      "status": "PASS"
+    },
+    {
+      "maxScore": 10,
+      "score": 10,
+      "blocking": true,
+      "evidence": "Authorization Bearer CRON_SECRET",
+      "id": "sec.cron.auth",
+      "subsystem": "security",
+      "title": "Intelligence cron requires CRON_SECRET in production",
+      "status": "PASS"
+    },
+    {
+      "maxScore": 10,
+      "score": 10,
+      "blocking": true,
+      "evidence": "OS read remains opt-in via env only",
+      "id": "sec.flags.os-read-off",
+      "subsystem": "security",
+      "title": "SIMPLIFI_OS_READ not hard-enabled",
+      "status": "PASS"
+    },
+    {
+      "maxScore": 8,
+      "score": 8,
+      "blocking": false,
+      "evidence": "OS_READ=unset SEMANTIC_ASK=unset",
+      "id": "sec.flags.shadow-defaults",
+      "subsystem": "security",
+      "title": "Feature flags default off (shadow-safe)",
+      "status": "PASS"
+    },
+    {
+      "maxScore": 12,
+      "score": 12,
+      "blocking": true,
+      "evidence": "afterCaptureOsWrite fire-and-forget; enqueueEmbedding async",
+      "id": "perf.capture.nonblocking-embed",
+      "subsystem": "performance",
+      "title": "Capture does not block on embedding",
+      "status": "PASS"
+    },
+    {
+      "maxScore": 10,
+      "score": 10,
+      "blocking": false,
+      "evidence": "p50=0.12ms p95=0.70ms (n=50)",
+      "id": "perf.intel.detector-latency",
+      "subsystem": "performance",
+      "title": "Intelligence detector p95 latency (local)",
+      "status": "PASS",
+      "latencyMs": 1,
+      "metrics": {
+        "p50": 0.12429999999994834,
+        "p95": 0.7037000000000262
+      }
+    },
+    {
+      "maxScore": 8,
+      "score": 8,
+      "blocking": false,
+      "evidence": "p95=0.11ms — semantic/LLM budgets are 800ms/8s in retrieve.ts",
+      "id": "perf.ask.keyword-latency",
+      "subsystem": "performance",
+      "title": "Keyword Ask p95 latency (local)",
+      "status": "PASS",
+      "latencyMs": 0
+    },
+    {
+      "maxScore": 10,
+      "score": 10,
+      "blocking": false,
+      "evidence": "RETRIEVE_TIMEOUT_MS=800 LLM_TIMEOUT_MS=8000",
+      "id": "perf.ask.timeouts",
+      "subsystem": "performance",
+      "title": "Semantic retrieve + LLM timeouts configured",
+      "status": "PASS"
+    },
+    {
+      "maxScore": 8,
+      "score": 8,
+      "blocking": false,
+      "evidence": "0.03ms for 11 findings",
+      "id": "perf.brief.assemble",
+      "subsystem": "performance",
+      "title": "Brief section assembly latency (local)",
+      "status": "PASS",
+      "latencyMs": 0
+    },
+    {
+      "maxScore": 5,
+      "score": 5,
+      "blocking": false,
+      "evidence": "200 hashes in 1.34ms",
+      "id": "perf.embed.hash",
+      "subsystem": "performance",
+      "title": "Embedding content-hash throughput",
+      "status": "PASS",
+      "latencyMs": 1
+    },
+    {
+      "maxScore": 10,
+      "score": 10,
+      "blocking": true,
+      "evidence": "Business process in runIntelligenceWorkflow; cron only triggers",
+      "id": "perf.workflow.separation",
+      "subsystem": "performance",
+      "title": "Cron is thin; workflow holds durable process",
+      "status": "PASS"
+    },
+    {
+      "maxScore": 10,
+      "score": 0,
+      "blocking": false,
+      "evidence": "Shadow harness does not call OpenAI/Claude — measure in dogfood with flags on",
+      "id": "perf.live.llm-embed",
+      "subsystem": "performance",
+      "title": "Live LLM/embed latency (requires env)",
+      "status": "SKIP"
+    },
+    {
+      "maxScore": 10,
+      "score": 10,
+      "blocking": true,
+      "evidence": "failed rows retain retry_count for backfill",
+      "id": "rel.embed.retry",
+      "subsystem": "reliability",
+      "title": "Embedding failure increments retry_count",
+      "status": "PASS"
+    },
+    {
+      "maxScore": 12,
+      "score": 12,
+      "blocking": true,
+      "evidence": "Daily idempotency_key prevents duplicate runs",
+      "id": "rel.intel.idempotency",
+      "subsystem": "reliability",
+      "title": "Intelligence job idempotency key",
+      "status": "PASS"
+    },
+    {
+      "maxScore": 10,
+      "score": 10,
+      "blocking": true,
+      "evidence": "Duplicate findings suppressed at persistence layer",
+      "id": "rel.intel.fingerprint",
+      "subsystem": "reliability",
+      "title": "Intelligence upsert by fingerprint",
+      "status": "PASS"
+    },
+    {
+      "maxScore": 10,
+      "score": 10,
+      "blocking": true,
+      "evidence": "n=11 unique=true stable=true",
+      "id": "rel.intel.deterministic",
+      "subsystem": "reliability",
+      "title": "Detector output deterministic + unique fingerprints",
+      "status": "PASS"
+    },
+    {
+      "maxScore": 12,
+      "score": 12,
+      "blocking": true,
+      "evidence": "Workflow skips; brief disables intel; ask falls back to keyword",
+      "id": "rel.degrade.supabase",
+      "subsystem": "reliability",
+      "title": "Graceful degrade when Supabase unconfigured",
+      "status": "PASS"
+    },
+    {
+      "maxScore": 10,
+      "score": 10,
+      "blocking": true,
+      "evidence": "Semantic Ask gated; production path remains keyword",
+      "id": "rel.degrade.flags-off",
+      "subsystem": "reliability",
+      "title": "All OS capabilities fail closed when flags off",
+      "status": "PASS"
+    },
+    {
+      "maxScore": 8,
+      "score": 8,
+      "blocking": true,
+      "evidence": "open/complete/defer/dismiss/helpful/incorrect → memory event",
+      "id": "rel.feedback.memory",
+      "subsystem": "reliability",
+      "title": "Feedback actions persist Memory Events",
+      "status": "PASS"
+    },
+    {
+      "maxScore": 8,
+      "score": 8,
+      "blocking": true,
+      "evidence": "OS_READ unset/off",
+      "id": "rel.shadow.os-read",
+      "subsystem": "reliability",
+      "title": "Shadow certification refuses OS_READ=1",
+      "status": "PASS"
+    },
+    {
+      "maxScore": 20,
+      "score": 20,
+      "blocking": false,
+      "evidence": "tp=7 fp=0 fn=0 precision=1.00 recall=1.00 f1=1.00",
+      "id": "iq.detector.precision-recall",
+      "subsystem": "intelligence",
+      "title": "Detector precision/recall on golden labels",
+      "status": "PASS",
+      "metrics": {
+        "precision": 1,
+        "recall": 1,
+        "f1": 1,
+        "tp": 7,
+        "fp": 0,
+        "fn": 0
+      }
+    },
+    {
+      "maxScore": 12,
+      "score": 12,
+      "blocking": false,
+      "evidence": "evidenceRate=100% (11/11)",
+      "id": "iq.evidence.completeness",
+      "subsystem": "intelligence",
+      "title": "Recommendations include why + next + related objects",
+      "status": "PASS",
+      "metrics": {
+        "evidenceRate": 1
+      }
+    },
+    {
+      "maxScore": 10,
+      "score": 6,
+      "blocking": false,
+      "evidence": "dupRate=9.1%",
+      "id": "iq.dup.recommendations",
+      "subsystem": "intelligence",
+      "title": "Duplicate recommendation rate",
+      "status": "WARNING",
+      "metrics": {
+        "dupRate": 0.09090909090909091
+      }
+    },
+    {
+      "maxScore": 18,
+      "score": 18,
+      "blocking": false,
+      "evidence": "grounding=100% unsupportedOk=100% halluc=0%",
+      "id": "iq.ask.grounding",
+      "subsystem": "intelligence",
+      "title": "Ask grounding rate (keyword shadow)",
+      "status": "PASS",
+      "metrics": {
+        "groundingRate": 1,
+        "unsupportedRate": 1,
+        "hallucinationRate": 0
+      }
+    },
+    {
+      "maxScore": 12,
+      "score": 12,
+      "blocking": false,
+      "evidence": "2/2 unsupported prompts correctly refused",
+      "id": "iq.ask.unsupported",
+      "subsystem": "intelligence",
+      "title": "Unsupported-answer rate (refuse without evidence)",
+      "status": "PASS",
+      "metrics": {
+        "unsupportedRate": 1
+      }
+    },
+    {
+      "maxScore": 10,
+      "score": 10,
+      "blocking": true,
+      "evidence": "All detector types present in source",
+      "id": "iq.source.detector-coverage",
+      "subsystem": "intelligence",
+      "title": "Production detectors implement required types",
+      "status": "PASS"
+    }
+  ],
+  "recommendation": "READY FOR INTERNAL ACTIVATION (after dogfood flag enablement)",
+  "regression": {
+    "hasRegression": false,
+    "delta": 6,
+    "previous": {
+      "timestamp": "2026-07-22T14:34:14.153Z",
+      "overall": 93,
+      "classification": "NOT CERTIFIED",
+      "git": "3420e5b2"
+    }
+  },
+  "historyFile": "cert-20260722T143518-3420e5b2.json"
+}
