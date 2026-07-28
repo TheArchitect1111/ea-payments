@@ -38,10 +38,13 @@ function loadEnvFile(path) {
 const args = process.argv.slice(2);
 const envFileFlag = args.findIndex((a) => a === '--env-file');
 const envFilePath =
-  envFileFlag >= 0
+  envFileFlag >= 0 && args[envFileFlag + 1]
     ? args[envFileFlag + 1]
     : join(root, '.env.local');
-const filteredArgs = args.filter((_, i) => i !== envFileFlag && i !== envFileFlag + 1);
+const filteredArgs =
+  envFileFlag >= 0
+    ? args.filter((_, i) => i !== envFileFlag && i !== envFileFlag + 1)
+    : args;
 
 const env = { ...loadEnvFile(envFilePath), ...process.env };
 const key = env.AIRTABLE_API_KEY || env.AIRTABLE_PAT;

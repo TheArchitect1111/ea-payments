@@ -1,93 +1,93 @@
 {
-  "checkedAt": "2026-07-28T00:04:21.254Z",
+  "checkedAt": "2026-07-28T00:04:12.462Z",
   "org": {
-    "id": "recs1KPGChgwbNkd6",
+    "id": "recGOzAVsJmDnzR7u",
     "name": "Acme Roofing Field Demo",
-    "slug": "acme-roofing-field-demo-a9be53",
+    "slug": "acme-roofing-field-demo-73b9e6",
     "status": "Active"
   },
   "results": [
     {
-      "action": "updated",
+      "action": "created",
       "moduleId": "simplifi"
     },
     {
-      "action": "updated",
+      "action": "created",
       "moduleId": "amplifi"
     }
   ],
   "entitlements": [
     {
-      "id": "rec6WhBbGkiDsfiux",
-      "moduleId": "ask",
-      "status": "active",
-      "source": "package"
-    },
-    {
-      "id": "recEv6djYtXDute7R",
+      "id": "rec0QE6UIJRYutphP",
       "moduleId": "update-hub",
       "status": "active",
       "source": "package"
     },
     {
-      "id": "recH5HbfK7SWld2Tp",
-      "moduleId": "training",
-      "status": "active",
-      "source": "package"
-    },
-    {
-      "id": "recKHDEnzTaQjQPFm",
-      "moduleId": "resources",
-      "status": "active",
-      "source": "package"
-    },
-    {
-      "id": "recNNEFdDZOUlsdVa",
-      "moduleId": "amplifi",
-      "status": "active",
-      "source": "manual"
-    },
-    {
-      "id": "recOYLHzaZVcnS1Y5",
+      "id": "rec8IQdKNtRJA95gm",
       "moduleId": "documents",
       "status": "active",
       "source": "package"
     },
     {
-      "id": "recSprnlyFe1CKbRg",
-      "moduleId": "connect",
+      "id": "recI8BCpG9n0khXru",
+      "moduleId": "resources",
       "status": "active",
       "source": "package"
     },
     {
-      "id": "recboGQZapkUwiMMG",
+      "id": "recachyRxxqsNDrWA",
+      "moduleId": "simplifi",
+      "status": "active",
+      "source": "manual"
+    },
+    {
+      "id": "recge4GDmyHScgwQy",
       "moduleId": "messaging",
       "status": "active",
       "source": "package"
     },
     {
-      "id": "receVbLmwXqtyh1qc",
-      "moduleId": "dashboard",
-      "status": "active",
-      "source": "package"
-    },
-    {
-      "id": "rech5px9IrIKKpNTc",
-      "moduleId": "simplifi",
-      "status": "active",
-      "source": "manual"
-    }
-  ],
-  "activeSimplifiAmplifi": [
-    {
-      "id": "recNNEFdDZOUlsdVa",
+      "id": "recqOnxc0fKb1ggWy",
       "moduleId": "amplifi",
       "status": "active",
       "source": "manual"
     },
     {
-      "id": "rech5px9IrIKKpNTc",
+      "id": "recsGJSf67853l02s",
+      "moduleId": "ask",
+      "status": "active",
+      "source": "package"
+    },
+    {
+      "id": "rect06WobQ3YkPURZ",
+      "moduleId": "training",
+      "status": "active",
+      "source": "package"
+    },
+    {
+      "id": "rect15RJcwGU98Pc9",
+      "moduleId": "connect",
+      "status": "active",
+      "source": "package"
+    },
+    {
+      "id": "recxKkyxBtyKJZx24",
+      "moduleId": "dashboard",
+      "status": "active",
+      "source": "package"
+    }
+  ],
+  "activeSimplifiAmplifi": [
+    {
+      "id": "recachyRxxqsNDrWA",
       "moduleId": "simplifi",
+      "status": "active",
+      "source": "manual"
+    },
+    {
+      "id": "recqOnxc0fKb1ggWy",
+      "moduleId": "amplifi",
       "status": "active",
       "source": "manual"
     }
