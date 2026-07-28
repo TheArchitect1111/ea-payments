@@ -2,12 +2,16 @@
   "expo": {
     "name": "Simplifi Orb",
     "slug": "simplifi-mobile",
+    "owner": "efficiency-architects",
     "version": "0.1.0",
     "orientation": "portrait",
     "scheme": "simplifi",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
+    "icon": "./assets/icon.png",
     "splash": {
+      "image": "./assets/icon.png",
+      "resizeMode": "contain",
       "backgroundColor": "#1B2B4D"
     },
     "ios": {
@@ -20,10 +24,14 @@
     },
     "android": {
       "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#1B2B4D"
       },
       "package": "com.efficiencyarchitects.simplifiorb",
-      "permissions": ["RECORD_AUDIO"]
+      "versionCode": 1,
+      "permissions": [
+        "RECORD_AUDIO"
+      ]
     },
     "plugins": [
       "expo-router",
@@ -40,6 +48,13 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "apiBaseUrl": "https://efficiencyarchitects.online",
+      "eas": {
+        "projectId": "12870838-da3c-4900-a895-d6a7569e3e49"
+      },
+      "router": {}
     }
   }
 }

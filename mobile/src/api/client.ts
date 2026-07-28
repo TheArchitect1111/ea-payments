@@ -13,36 +13,60 @@ export function getApiBaseUrl(): string {
   );
 }
 
+const DEFAULT_TIMEOUT_MS = 45_000;
+
 export async function apiFetch<T>(
   path: string,
-  init: RequestInit & { token?: string | null } = {},
+  init: RequestInit & { token?: string | null; timeoutMs?: number } = {},
 ): Promise<ApiResult<T>> {
-  const { token, headers, ...rest } = init;
+  const { token, headers, timeoutMs = DEFAULT_TIMEOUT_MS, ...rest } = init;
   const url = path.startsWith('http') ? path : `${getApiBaseUrl()}${path}`;
-  const res = await fetch(url, {
-    ...rest,
-    headers: {
-      'Content-Type': 'application/json',
-      Accept: 'application/json',
-      'X-EA-Realm': 'simplifi',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...(headers ?? {}),
-    },
-  });
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
 
-  const contentType = res.headers.get('content-type') ?? '';
-  if (!contentType.includes('application/json')) {
+  try {
+    const res = await fetch(url, {
+      ...rest,
+      signal: controller.signal,
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        'X-EA-Realm': 'simplifi',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(headers ?? {}),
+      },
+    });
+
+    const contentType = res.headers.get('content-type') ?? '';
+    if (!contentType.includes('application/json')) {
+      return {
+        ok: false,
+        error: `Request failed (${res.status}). Please try again.`,
+      } as ApiResult<T>;
+    }
+
+    const data = (await res.json()) as ApiResult<T>;
+    if (!res.ok && !data.error) {
+      return { ...data, ok: false, error: `Request failed (${res.status})` };
+    }
+    return data;
+  } catch (err) {
+    const aborted = err instanceof Error && err.name === 'AbortError';
     return {
       ok: false,
-      error: `Request failed (${res.status}) at ${url}. The API may not be deployed yet — run the web backend locally and set EXPO_PUBLIC_API_BASE_URL in mobile/.env.`,
+      error: aborted ? 'Request timed out. Check your connection and try again.' : 'Network error. Try again.',
     } as ApiResult<T>;
+  } finally {
+    clearTimeout(timer);
   }
+}
 
-  const data = (await res.json()) as ApiResult<T>;
-  if (!res.ok && !data.error) {
-    return { ...data, ok: false, error: `Request failed (${res.status})` };
-  }
-  return data;
+export async function deleteAccount(token: string): Promise<ApiResult<{ mode?: string; message?: string }>> {
+  return apiFetch('/api/simplifi/account/delete', {
+    method: 'POST',
+    token,
+    body: JSON.stringify({ confirm: 'DELETE' }),
+  });
 }
 
 export async function requestMagicLink(email: string): Promise<ApiResult<{ message?: string }>> {
@@ -114,26 +138,39 @@ export async function analyzeCaptureFile(
   if (fields?.notes) form.append('notes', fields.notes);
 
   const url = `${getApiBaseUrl()}/api/portal/captures/analyze`;
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: {
-      Accept: 'application/json',
-      'X-EA-Realm': 'simplifi',
-      Authorization: `Bearer ${token}`,
-    },
-    body: form,
-  });
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), DEFAULT_TIMEOUT_MS);
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      signal: controller.signal,
+      headers: {
+        Accept: 'application/json',
+        'X-EA-Realm': 'simplifi',
+        Authorization: `Bearer ${token}`,
+      },
+      body: form,
+    });
 
-  const contentType = res.headers.get('content-type') ?? '';
-  if (!contentType.includes('application/json')) {
-    return { ok: false, error: `Upload failed (${res.status})` };
-  }
+    const contentType = res.headers.get('content-type') ?? '';
+    if (!contentType.includes('application/json')) {
+      return { ok: false, error: `Upload failed (${res.status})` };
+    }
 
-  const data = (await res.json()) as CaptureAnalyzeResponse;
-  if (!res.ok && !data.error) {
-    return { ...data, ok: false, error: `Upload failed (${res.status})` };
+    const data = (await res.json()) as CaptureAnalyzeResponse;
+    if (!res.ok && !data.error) {
+      return { ...data, ok: false, error: `Upload failed (${res.status})` };
+    }
+    return data;
+  } catch (err) {
+    const aborted = err instanceof Error && err.name === 'AbortError';
+    return {
+      ok: false,
+      error: aborted ? 'Upload timed out. Check your connection and try again.' : 'Network error. Try again.',
+    };
+  } finally {
+    clearTimeout(timer);
   }
-  return data;
 }
 
 export async function fetchCaptureStatus(

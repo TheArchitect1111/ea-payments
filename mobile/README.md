@@ -16,7 +16,7 @@ npm install
 npm start
 ```
 
-Set `EXPO_PUBLIC_API_BASE_URL` to your preview or production host (default: `https://ea-payments.vercel.app`).
+Set `EXPO_PUBLIC_API_BASE_URL` to your preview or production host (default: `https://efficiencyarchitects.online`).
 
 ## Sign in
 
@@ -80,39 +80,34 @@ npm run build:dev:ios      # dev client with native modules (voice, push)
 npm run build:preview      # internal distribution
 ```
 
-Set `EXPO_PUBLIC_API_BASE_URL` to your preview or production host (default: canonical `https://ea-payments.vercel.app` via `app.config.ts`).
+Set `EXPO_PUBLIC_API_BASE_URL` to your preview or production host (default: canonical `https://efficiencyarchitects.online` via `app.config.ts`).
 
 ## Google Play (Android)
+
+Full release runbook: **[GOOGLE-PLAY-RELEASE.md](./GOOGLE-PLAY-RELEASE.md)**.
 
 **Package name (required):** `com.efficiencyarchitects.simplifiorb` — set in `app.json` → `expo.android.package`.
 
 ### Wrong signing key
 
-Play Console expects your **upload certificate** fingerprint:
+Play Console upload certificate for package `com.efficiencyarchitects.simplifiorb`:
 
-`SHA1: 28:9D:26:30:12:2A:18:29:29:4A:6A:F0:FF:50:61:1A:05:B1:53:35`
+`SHA1: F7:5F:38:06:A3:CF:75:84:AA:92:35:B6:8E:80:A4:CD:4F:8C:00:1B`
 
-If your AAB shows a different SHA1 (e.g. `F7:5F:38:06:…`), it was signed with the wrong keystore — often a fresh EAS-generated key or a debug build.
+That keystore lives in EAS under `@efficiency-architects/simplifi-mobile` (sourced from the earlier `@thearchitect1111/simplifi-mobile` credentials for the same package). Do **not** let `eas init` / credentials generate a new Android keystore — a fresh key (e.g. `AC:14:85:A8:…`) will fail Play upload.
 
-**Fix:**
+**Fix if EAS drifts again:**
 
-1. Locate the **original** upload keystore (`.jks` / `.keystore`) used for the first Play upload of this app.
-2. Verify it matches Play’s expected cert:
-   ```bash
-   keytool -list -v -keystore your-upload-key.jks -alias your-alias
-   ```
-3. Register that keystore with EAS (from `mobile/`):
-   ```bash
-   eas credentials -p android
-   ```
-   Choose **production** → **Keystore** → **Upload existing keystore** (not “Generate new”).
-4. Rebuild and submit:
+1. Confirm EAS default Android keystore SHA1 matches `F7:5F:38:06:…` (`eas credentials -p android`).
+2. If not, **Upload existing** / re-assign the F7 keystore — never “Generate new”.
+3. Rebuild:
    ```bash
    npm run build:production:android
-   npm run submit:production:android
    ```
 
-If the original keystore is lost, use [Play Console → Setup → App signing → Request upload key reset](https://support.google.com/googleplay/android-developer/answer/9842756) (Google approval required).
+Note: SHA1 `28:9D:26:30:…` belongs to a different application id (`online.efficiencyarchitects.simplifiorb`), not this Play listing.
+
+If the F7 keystore is lost, use [Play Console → Setup → App signing → Request upload key reset](https://support.google.com/googleplay/android-developer/answer/9842756) (Google approval required).
 
 Never commit keystore files or passwords to git.
 
