@@ -300,6 +300,15 @@ const CTP_SUBMISSIONS_FIELD_DEFS: AirtableFieldDef[] = [
   { name: 'Updated At', type: 'dateTime', options: { dateFormat: { name: 'iso' }, timeFormat: { name: '24hour' }, timeZone: 'utc' } },
 ];
 
+const CLIENT_RECORDS_TABLE = 'Client Records';
+const CLIENT_RECORDS_FIELD_DEFS: AirtableFieldDef[] = [
+  {
+    name: 'Commerce Offer Id',
+    type: 'singleLineText',
+    description: 'Canonical commerce offer id (e.g. website_portal_starter)',
+  },
+];
+
 type TableMeta = { id: string; name: string; fields?: { name: string }[] };
 
 function authHeaders(key: string): Record<string, string> {
@@ -385,6 +394,7 @@ export type AirtableLaunchSetupResult = {
   proposal: { tableName: string; tableId: string; created: string[]; skipped: string[] };
   creativeStudio: { tableName: string; tableId: string; created: string[]; skipped: string[] };
   ctpSubmissions: { tableName: string; tableId: string; created: string[]; skipped: string[] };
+  clientRecords: { tableName: string; tableId: string; created: string[]; skipped: string[] };
   errors: string[];
 };
 
@@ -403,6 +413,7 @@ export async function ensureAirtableLaunchTables(): Promise<AirtableLaunchSetupR
       proposal: { tableName: PROPOSALS_TABLE_NAME, tableId: '', created: [], skipped: [] },
       creativeStudio: { tableName: CREATIVE_STUDIO_TABLE, tableId: '', created: [], skipped: [] },
       ctpSubmissions: { tableName: CTP_SUBMISSIONS_TABLE, tableId: '', created: [], skipped: [] },
+      clientRecords: { tableName: CLIENT_RECORDS_TABLE, tableId: '', created: [], skipped: [] },
       errors: ['AIRTABLE_API_KEY missing on server'],
     };
   }
@@ -464,6 +475,15 @@ export async function ensureAirtableLaunchTables(): Promise<AirtableLaunchSetupR
       CTP_SUBMISSIONS_FIELD_DEFS,
     );
 
+    const clientTables = await listTables(key);
+    const clientRecordsResult = await ensureTable(
+      key,
+      clientTables,
+      CLIENT_RECORDS_TABLE,
+      'Paid clients, portal credentials, and commerce offers',
+      CLIENT_RECORDS_FIELD_DEFS,
+    );
+
     const captureNames = new Set([
       ...(captureResult.table.fields ?? []).map((f) => f.name),
       ...captureResult.created,
@@ -488,6 +508,10 @@ export async function ensureAirtableLaunchTables(): Promise<AirtableLaunchSetupR
       ...(ctpSubmissionsResult.table.fields ?? []).map((f) => f.name),
       ...ctpSubmissionsResult.created,
     ]);
+    const clientRecordNames = new Set([
+      ...(clientRecordsResult.table.fields ?? []).map((f) => f.name),
+      ...clientRecordsResult.created,
+    ]);
 
     for (const field of CAPTURE_REQUIRED_FIELDS) {
       if (!captureNames.has(field)) errors.push(`Capture missing required field: ${field}`);
@@ -506,6 +530,11 @@ export async function ensureAirtableLaunchTables(): Promise<AirtableLaunchSetupR
     }
     for (const field of CTP_SUBMISSIONS_REQUIRED_FIELDS) {
       if (!ctpSubmissionNames.has(field)) errors.push(`CTP Submissions missing required field: ${field}`);
+    }
+    for (const field of CLIENT_RECORDS_FIELD_DEFS) {
+      if (!clientRecordNames.has(field.name)) {
+        errors.push(`Client Records missing required field: ${field.name}`);
+      }
     }
 
     return {
@@ -548,6 +577,12 @@ export async function ensureAirtableLaunchTables(): Promise<AirtableLaunchSetupR
         created: ctpSubmissionsResult.created,
         skipped: ctpSubmissionsResult.skipped,
       },
+      clientRecords: {
+        tableName: clientRecordsResult.table.name,
+        tableId: clientRecordsResult.table.id,
+        created: clientRecordsResult.created,
+        skipped: clientRecordsResult.skipped,
+      },
       errors,
     };
   } catch (err) {
@@ -562,6 +597,7 @@ export async function ensureAirtableLaunchTables(): Promise<AirtableLaunchSetupR
       proposal: { tableName: PROPOSALS_TABLE_NAME, tableId: '', created: [], skipped: [] },
       creativeStudio: { tableName: CREATIVE_STUDIO_TABLE, tableId: '', created: [], skipped: [] },
       ctpSubmissions: { tableName: CTP_SUBMISSIONS_TABLE, tableId: '', created: [], skipped: [] },
+      clientRecords: { tableName: CLIENT_RECORDS_TABLE, tableId: '', created: [], skipped: [] },
       errors: [message],
     };
   }

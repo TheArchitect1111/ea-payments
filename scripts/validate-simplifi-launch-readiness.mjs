@@ -50,12 +50,66 @@ async function main() {
   // 1. Health + Airtable + products.simplifi
   const healthRes = await fetchLaunchHealthDiagnostic(BASE, env);
   const health = healthRes.body;
+  const diagnosticExpanded = Boolean(health?.checks);
   record('health-endpoint', healthRes.res.ok, { status: healthRes.res.status });
-  record('products-simplifi', health?.checks?.products?.simplifi === true, {
-    detail: String(health?.checks?.products?.simplifi),
+
+  // Public summary is `{ ok, status }` only. Local ADMIN_SESSION_SECRET often ≠ prod,
+  // which previously false-failed products-simplifi / capture schema as "undefined".
+  // Prefer expanded diagnostic; else use public readiness + direct Airtable meta check.
+  let productsSimplifi = health?.checks?.products?.simplifi === true;
+  let captureSchemaOk = health?.checks?.airtableSchema?.capture?.ok === true;
+  let captureDetail = health?.checks?.airtableSchema?.capture?.tableName;
+
+  if (!diagnosticExpanded) {
+    const publicOk = health?.ok === true;
+    const fullLaunch = health?.status === 'full_launch_ready';
+    // Public ok already requires captureReady + demoClient + assessment path.
+    productsSimplifi = publicOk;
+    captureSchemaOk = publicOk && fullLaunch;
+    captureDetail = 'public-summary-fallback';
+
+    // Prefer authoritative Airtable meta when key is available.
+    if (env.AIRTABLE_API_KEY) {
+      try {
+        const baseId = env.AIRTABLE_PAYMENTS_BASE_ID || 'appv0YoLIMY45fmDA';
+        const metaRes = await fetch(`https://api.airtable.com/v0/meta/bases/${baseId}/tables`, {
+          headers: { Authorization: `Bearer ${env.AIRTABLE_API_KEY}` },
+        });
+        const meta = await metaRes.json().catch(() => ({}));
+        const capture = (meta.tables || []).find((t) => t.name === 'Capture Records');
+        const required = [
+          'Capture ID',
+          'Title',
+          'Description',
+          'Capture Type',
+          'Source',
+          'Priority',
+          'Status',
+          'Date Captured',
+          'Portal Slug',
+          'Prospect Status',
+        ];
+        const names = new Set((capture?.fields || []).map((f) => f.name));
+        const missing = required.filter((f) => !names.has(f));
+        captureSchemaOk = Boolean(capture) && missing.length === 0;
+        captureDetail = missing.length
+          ? `missing:${missing.join(',')}`
+          : capture?.name || 'Capture Records';
+        // products.simplifi = captureReady && demoClient — public ok implies both when full_launch_ready
+        productsSimplifi = captureSchemaOk && publicOk;
+      } catch (err) {
+        captureDetail = `meta-fallback-error:${err.message || err}`;
+      }
+    }
+  }
+
+  record('products-simplifi', productsSimplifi, {
+    detail: diagnosticExpanded
+      ? String(health?.checks?.products?.simplifi)
+      : `fallback:${productsSimplifi}`,
   });
-  record('airtable-capture-schema', health?.checks?.airtableSchema?.capture?.ok === true, {
-    detail: health?.checks?.airtableSchema?.capture?.tableName,
+  record('airtable-capture-schema', captureSchemaOk, {
+    detail: captureDetail,
   });
 
   // 2. Auth — portal login
