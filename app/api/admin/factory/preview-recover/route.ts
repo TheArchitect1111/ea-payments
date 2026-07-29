@@ -74,6 +74,48 @@ export async function POST(req: NextRequest) {
     await saveFactoryProject(updated);
   }
 
+  // Recover retries accumulate outputs/artifacts — prune before force pack so Airtable can save.
+  const current = (await getFactoryProject(projectId)) || before;
+  if (current.context) {
+    const keepArtifactKinds = new Set([
+      'website',
+      'branding',
+      'organization_profile',
+      'prospect_profile',
+      'programs',
+      'experience_concepts',
+      'creative_direction',
+      'subject_knowledge_pack',
+      'media_brand_pack',
+      'content_creative_pack',
+      'experience_manifest',
+    ]);
+    const artifacts = (current.context.artifacts || [])
+      .filter((a) => keepArtifactKinds.has(String(a.kind)))
+      .slice(-24);
+    const outputs = (current.context.outputs || []).slice(-24);
+    const pruned = {
+      ...current,
+      context: {
+        ...current.context,
+        artifacts,
+        outputs,
+        updatedAt: new Date().toISOString(),
+      },
+      updatedAt: new Date().toISOString(),
+    };
+    const savedPrune = await saveFactoryProject(pruned);
+    if (!savedPrune.ok) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error: `Could not prune project context before recover: ${savedPrune.error || 'save failed'}`,
+        },
+        { status: 500 },
+      );
+    }
+  }
+
   const result = await runPostBuildConceptPack(projectId, { force: true });
   const after = (await getFactoryProject(projectId)) || before;
   const review = await buildQuickLaunchReview(after, { verifyPreviews: true });
