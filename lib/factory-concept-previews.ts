@@ -274,8 +274,7 @@ export function slimConceptPreviewsPayload(
       themeId: p.themeId,
       primaryColor: p.primaryColor,
       accentColor: p.accentColor,
-      // Keep compact portal shell for list UIs; website puck is recomposed on read.
-      portalShell: p.portalShell,
+      // Portal shell recomposed on read — omit fat blobs for Airtable Payload JSON limits.
     })),
   };
 }
