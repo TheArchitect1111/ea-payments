@@ -32,6 +32,7 @@
     "verify:factory-launch": "node scripts/verify-factory-launch.mjs",
     "verify:os-taxonomy": "node scripts/verify-os-taxonomy.mjs",
     "test:factory-orchestrator": "node scripts/test-factory-orchestrator.mjs",
+    "test:universal-quick-launch": "node scripts/test-universal-quick-launch.mjs",
     "test:factory-project-context": "node scripts/test-factory-project-context.mjs",
     "test:factory-capability-registry": "node scripts/test-factory-capability-registry.mjs",
     "test:factory-research": "node scripts/test-factory-research.mjs",

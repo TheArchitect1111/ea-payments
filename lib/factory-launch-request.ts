@@ -33,12 +33,12 @@ function mimeToAttachmentType(mime: string): FactoryAttachmentMeta['type'] {
 async function attachmentFromFile(file: File): Promise<FactoryAttachmentMeta> {
   if (file.size > CTP_ASSET_MAX_BYTES) {
     throw new Error(
-      `Photo is too large. Keep it under ${Math.round(CTP_ASSET_MAX_BYTES / (1024 * 1024))}MB.`,
+      `File is too large. Keep it under ${Math.round(CTP_ASSET_MAX_BYTES / (1024 * 1024))}MB.`,
     );
   }
   const mimeType = file.type || 'application/octet-stream';
   if (!isAllowedCtpAssetMime(mimeType)) {
-    throw new Error('That file type is not supported. Use a photo (JPG/PNG) or PDF.');
+    throw new Error('That file type is not supported. Use a photo (JPG/PNG), PDF, or Word/PowerPoint.');
   }
 
   const bytes = Buffer.from(await file.arrayBuffer());
@@ -58,12 +58,29 @@ async function attachmentFromFile(file: File): Promise<FactoryAttachmentMeta> {
   };
 }
 
-export async function parseFactoryLaunchBody(
-  request: NextRequest,
-): Promise<{ ok: true; body: LaunchProjectInput } | { ok: false; error: string }> {
+function collectFiles(form: FormData): File[] {
+  const files: File[] = [];
+  for (const [key, value] of form.entries()) {
+    if (!(value instanceof File) || value.size <= 0) continue;
+    if (
+      key === 'image' ||
+      key === 'file' ||
+      key.startsWith('file') ||
+      key === 'attachment' ||
+      key === 'attachments'
+    ) {
+      files.push(value);
+    }
+  }
+  return files.slice(0, 6);
+}
+
+export type ParsedFactoryLaunch =
+  | { ok: true; body: LaunchProjectInput; forceNew?: boolean }
+  | { ok: false; error: string };
+
+export async function parseFactoryLaunchBody(request: NextRequest): Promise<ParsedFactoryLaunch> {
   const contentType = request.headers.get('content-type') || '';
-  // Prefer JSON when explicitly JSON. Otherwise treat as form (multipart / urlencoded).
-  // Do not require "multipart/form-data" substring — some runtimes omit or rewrite it.
   const preferJson = contentType.includes('application/json');
 
   if (!preferJson) {
@@ -71,26 +88,32 @@ export async function parseFactoryLaunchBody(
       const form = await request.formData();
       const command = String(form.get('command') ?? form.get('text') ?? '').trim();
       const notes = String(form.get('notes') ?? '').trim();
-      const file = form.get('image') ?? form.get('file');
-      const attachments: FactoryAttachmentMeta[] = [];
+      const client = String(form.get('client') ?? form.get('companyName') ?? '').trim();
+      const companyName = String(form.get('companyName') ?? '').trim();
+      const url = String(form.get('url') ?? form.get('website') ?? '').trim();
+      const goal = String(form.get('goal') ?? '').trim();
+      const deliverable = String(form.get('deliverable') ?? '').trim();
+      const industry = String(form.get('industry') ?? '').trim();
+      const forceNew =
+        String(form.get('forceNew') ?? '').trim() === '1' ||
+        String(form.get('forceNew') ?? '').toLowerCase() === 'true';
 
-      if (file instanceof File && file.size > 0) {
+      const attachments: FactoryAttachmentMeta[] = [];
+      for (const file of collectFiles(form)) {
         attachments.push(await attachmentFromFile(file));
       }
 
-      if (!command && attachments.length === 0) {
+      if (!command && !client && attachments.length === 0) {
         return {
           ok: false,
           error: 'Enter a website, company name, or notes — or add a photo.',
         };
       }
 
-      // Keep a neutral seed name — research vision renames to the real business.
       const resolvedCommand =
         command ||
-        (attachments.length
-          ? 'Launch Image capture'
-          : '');
+        (client ? `Launch ${client}` : '') ||
+        (attachments.length ? 'Launch Image capture' : '');
 
       if (!resolvedCommand) {
         return {
@@ -101,9 +124,17 @@ export async function parseFactoryLaunchBody(
 
       return {
         ok: true,
+        forceNew,
         body: {
           command: resolvedCommand,
           text: command || undefined,
+          client: client || undefined,
+          companyName: companyName || client || undefined,
+          url: url || undefined,
+          website: url || undefined,
+          goal: goal || undefined,
+          deliverable: deliverable || undefined,
+          industry: industry || undefined,
           notes:
             notes ||
             (attachments[0]?.name ? `Launch photo: ${attachments[0].name}` : undefined),
@@ -119,8 +150,10 @@ export async function parseFactoryLaunchBody(
   }
 
   try {
-    const body = (await request.json()) as LaunchProjectInput;
-    return { ok: true, body };
+    const body = (await request.json()) as LaunchProjectInput & { forceNew?: boolean | string };
+    const forceNew =
+      body.forceNew === true || body.forceNew === '1' || body.forceNew === 'true';
+    return { ok: true, forceNew, body };
   } catch {
     return { ok: false, error: 'Could not read launch details. Try again.' };
   }

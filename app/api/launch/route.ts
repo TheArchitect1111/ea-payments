@@ -2,16 +2,19 @@ import { NextRequest, NextResponse } from 'next/server';
 import { checkRateLimit } from '@/lib/ai/rate-limit';
 import { requireFactoryApiAccess } from '@/lib/factory-api-auth';
 import { parseFactoryLaunchBody } from '@/lib/factory-launch-request';
-import { createFactoryProject } from '@/lib/factory-project';
+import { createFactoryProject, resolveLaunchProjectInput } from '@/lib/factory-project';
+import { listFactoryProjects } from '@/lib/factory-project-store';
 import { launchFactoryProjectFlow } from '@/lib/factory-queue';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 export const maxDuration = 60;
 
+const DUPLICATE_WINDOW_MS = 24 * 60 * 60 * 1000;
+
 /**
  * EA Factory Launcher — accept launch request, create project, queue GenerateWorker.
- * JSON (ChatGPT) or multipart form (admin phone Launch page with optional photo).
+ * JSON (ChatGPT) or multipart form (admin phone Launch / Universal Quick Launch).
  */
 export async function POST(request: NextRequest) {
   const auth = await requireFactoryApiAccess(request);
@@ -29,6 +32,32 @@ export async function POST(request: NextRequest) {
   const parsed = await parseFactoryLaunchBody(request);
   if (!parsed.ok) {
     return NextResponse.json({ ok: false, error: parsed.error }, { status: 400 });
+  }
+
+  const resolved = resolveLaunchProjectInput(parsed.body);
+  if (resolved.input?.client && !parsed.forceNew) {
+    const recent = await listFactoryProjects();
+    const needle = resolved.input.client.trim().toLowerCase();
+    const cutoff = Date.now() - DUPLICATE_WINDOW_MS;
+    const existing = recent.find((project) => {
+      if (project.client.trim().toLowerCase() !== needle) return false;
+      const created = Date.parse(project.createdAt);
+      return Number.isFinite(created) && created >= cutoff;
+    });
+    if (existing) {
+      return NextResponse.json({
+        ok: true,
+        reused: true,
+        projectId: existing.id,
+        status: existing.pipelineStatus,
+        timestamp: existing.createdAt,
+        client: existing.client,
+        goal: existing.goal,
+        deliverable: existing.deliverable,
+        message:
+          'Recent project for this name already exists. Reusing it to prevent duplicate launches.',
+      });
+    }
   }
 
   const created = await createFactoryProject({
@@ -53,6 +82,7 @@ export async function POST(request: NextRequest) {
 
   return NextResponse.json({
     ok: true,
+    reused: false,
     projectId: project.id,
     status: project.pipelineStatus,
     timestamp: project.createdAt,
