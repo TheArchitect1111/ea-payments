@@ -6,11 +6,11 @@ import { PortalSidebar } from './PortalSidebar';
 import { PortalHeader } from './PortalHeader';
 import { PortalChromeProvider } from './PortalChromeContext';
 import type { EAPortalTab } from './PortalShell';
-import type { PortalSidebarNavGroup } from '@/lib/modules/portal-modules';
+import type { PortalSidebarNavGroup } from '@/lib/modules/portal-modules-shared';
 import type {
   ClientExperienceNavId,
   ClientExperienceNavItem,
-} from '@/lib/ctp-client-nav';
+} from '@/lib/ctp-client-nav-shared';
 import ClientExperienceNav from '@/app/portal/components/ClientExperienceNav';
 import '@/app/portal/components/client-experience-shell.css';
 

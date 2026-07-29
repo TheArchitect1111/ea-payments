@@ -167,6 +167,38 @@ export async function runFactoryOrchestrator(projectId: string): Promise<Factory
     const { scheduleFactoryGenerateJob } = await import('@/lib/factory-queue');
     scheduleFactoryGenerateJob(projectId);
   } else if (leftover) {
+    // After production reaches BUILDING with experience_concepts, run identity gate +
+    // concept previews once (idempotent). Never auto-publishes.
+    const idleProject = await getProject(projectId);
+    if (idleProject) {
+      const {
+        shouldRunPostBuildConceptPack,
+        runPostBuildConceptPack,
+      } = await import('@/lib/factory-post-build-concepts');
+      if (shouldRunPostBuildConceptPack(idleProject)) {
+        console.info('[factory-orchestrator] post-build concept pack', { projectId });
+        try {
+          const pack = await runPostBuildConceptPack(projectId);
+          if (!pack.ok && pack.blocked) {
+            console.info('[factory-orchestrator] identity gate blocked concepts', {
+              projectId,
+              error: pack.error,
+            });
+          } else if (!pack.ok) {
+            console.error('[factory-orchestrator] concept pack failed', projectId, pack.error);
+          } else {
+            console.info('[factory-orchestrator] concept pack', {
+              projectId,
+              skipped: pack.skipped,
+              reason: pack.reason,
+            });
+          }
+        } catch (err) {
+          console.error('[factory-orchestrator] concept pack threw', projectId, err);
+        }
+      }
+    }
+
     // No more automatic work — email once (done). Failures notify separately.
     try {
       const { notifyFactoryDone } = await import('@/lib/factory-notify');

@@ -3,7 +3,7 @@ import { getClientByPortalSlug } from '@/lib/airtable';
 import { verifySession, EA_PORTAL_COOKIE } from '@/lib/ea-portal-auth';
 import { NAVY, GOLD } from '@/lib/design-system';
 import PortalFormClient from '@/app/portal/[slug]/intake/IntakeFormClient';
-import '../[slug]/ea-portal.css';
+import '../ea-portal.css';
 
 export const dynamic = 'force-dynamic';
 

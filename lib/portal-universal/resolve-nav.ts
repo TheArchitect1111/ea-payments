@@ -18,7 +18,7 @@ import {
   portalNavIconForModule,
   type PortalNavIconName,
 } from '@/lib/chassis/portal-nav-mapping';
-import type { PortalSidebarNavGroup } from '@/lib/modules/portal-modules';
+import type { PortalSidebarNavGroup } from '@/lib/modules/portal-modules-shared';
 
 export type ResolveIndustryNavInput = {
   slug: string;

@@ -42,6 +42,8 @@
     "test:factory-planning": "node scripts/test-factory-planning.mjs",
     "test:factory-production": "node scripts/test-factory-production.mjs",
     "test:factory-concept-previews": "npx --yes tsx scripts/test-factory-concept-previews.ts",
+    "test:factory-identity-concept-pack": "node scripts/test-factory-identity-concept-pack.mjs && npx --yes tsx scripts/test-factory-identity-concept-pack.ts",
+    "test:uxg-three-subjects": "npx --yes tsx scripts/test-uxg-three-subjects.ts",
     "test:factory-wire-selected": "npx --yes tsx scripts/test-factory-wire-selected.ts",
     "test:capture-e2e": "node scripts/test-capture-e2e.mjs",
     "test:connect-mvp": "node scripts/test-connect-mvp.mjs",

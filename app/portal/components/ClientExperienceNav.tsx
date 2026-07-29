@@ -1,8 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import type { ClientExperienceNavId, ClientExperienceNavItem } from '@/lib/ctp-client-nav';
-import { isQuietClientExperienceNavId } from '@/lib/ctp-client-nav';
+import type { ClientExperienceNavId, ClientExperienceNavItem } from '@/lib/ctp-client-nav-shared';
+import { isQuietClientExperienceNavId } from '@/lib/ctp-client-nav-shared';
 
 type Props = {
   items: ClientExperienceNavItem[];

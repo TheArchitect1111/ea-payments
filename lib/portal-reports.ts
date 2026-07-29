@@ -1,5 +1,5 @@
 import type { PortalClientRecord } from '@/lib/airtable';
-import type { PortalModuleAccess } from '@/lib/modules/portal-modules';
+import type { PortalModuleAccess } from '@/lib/modules/portal-modules-shared';
 
 export type PortalReportArtifact = {
   title: string;

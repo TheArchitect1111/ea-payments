@@ -5,6 +5,7 @@ import { getClientByPortalSlug } from '@/lib/airtable';
 import { EA_PLATFORM_URL } from '@/lib/platform-urls';
 import { buildOrbUrls, EXTENSION_ORB_ACTIONS, SIMPLIFI_ORB_ACTIONS } from '@/lib/orb-sdk';
 import { signExtensionSession, verifyExtensionSession } from '@/lib/extension-session';
+import { createCaptureTenantToken } from '@/lib/capture-auth';
 import { randomUUID } from 'node:crypto';
 
 export const dynamic = 'force-dynamic';
@@ -28,6 +29,7 @@ export async function GET() {
     );
   }
 
+  const captureTenantToken = createCaptureTenantToken(session.slug);
   const verified = await verifyExtensionSession(extensionToken);
   const base = process.env.NEXT_PUBLIC_BASE_URL?.replace(/\/$/, '') ?? EA_PLATFORM_URL;
   const client = await getClientByPortalSlug(session.slug);
@@ -38,6 +40,7 @@ export async function GET() {
     ok: true,
     apiUrl: base,
     extensionToken,
+    captureTenantToken,
     tokenExpiresAt: verified?.exp ?? null,
     portalSlug: session.slug,
     notifyEmail: client?.email ?? (session.slug === demo.slug ? demo.email : undefined),

@@ -2,8 +2,10 @@
  * Dedicated Website + Portal demo fixture (not Simplifi demo-client).
  * Server-only ensure path — do not import from client bundles.
  */
+import 'server-only';
+
 import { ensureOrganizationForPortal } from '@/lib/organizations';
-import { ensurePackageEntitlements } from '@/lib/modules/portal-modules';
+import { ensurePackageEntitlements } from '@/lib/modules/ensure-package-entitlements';
 import { ensureCtpWorkspaceForWebsitePortal } from '@/lib/ctp-website-portal-workspace';
 import { getAirtableApiKey, isProductionDeploy } from '@/lib/integration-env';
 import {

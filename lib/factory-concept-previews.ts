@@ -81,6 +81,8 @@ export type ConceptPreviewsPayload = {
   recommendedConceptId: string | null;
   selectedConceptId: string | null;
   selectionStatus: string;
+  /** Ties this preview pack to a specific experience_concepts artifact for idempotency. */
+  sourceConceptsArtifactId?: string;
   previews: ConceptPreviewDraft[];
 };
 
@@ -241,7 +243,7 @@ export type GenerateConceptPreviewsResult =
  */
 export async function generateAndPersistConceptPreviews(
   projectId: string,
-  options?: { portalSlug?: string },
+  options?: { portalSlug?: string; sourceConceptsArtifactId?: string },
 ): Promise<GenerateConceptPreviewsResult> {
   const project = await getFactoryProject(projectId);
   if (!project) return { ok: false, error: 'Factory project not found.' };
@@ -287,6 +289,11 @@ export async function generateAndPersistConceptPreviews(
       error: err instanceof Error ? err.message : 'Concept preview compose failed.',
     };
   }
+
+  payload = {
+    ...payload,
+    sourceConceptsArtifactId: options?.sourceConceptsArtifactId || conceptsArt.id,
+  };
 
   const appended = await appendProjectContextOutput(projectId, {
     kind: 'production',

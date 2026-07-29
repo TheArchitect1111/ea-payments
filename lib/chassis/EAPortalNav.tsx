@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import type { EAPortalTab } from './PortalShell';
-import type { PortalNavTab } from '@/lib/modules/portal-modules';
+import type { PortalNavTab } from '@/lib/modules/portal-modules-shared';
 
 type Props = {
   slug: string;

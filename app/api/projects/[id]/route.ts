@@ -8,6 +8,7 @@ import {
   factoryIsTerminalFailure,
   factoryIsTerminalSuccess,
 } from '@/lib/factory-status-labels';
+import { buildLaunchConceptStatus } from '@/lib/factory-post-build-concepts';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -24,13 +25,25 @@ export async function GET(request: NextRequest, { params }: Params) {
     return NextResponse.json({ ok: false, error: 'Project not found.' }, { status: 404 });
   }
 
+  const launch = buildLaunchConceptStatus(project);
+  const pipelineInProgress = factoryIsInProgress(project.pipelineStatus);
+  const inProgress = launch.identityBlocked
+    ? false
+    : launch.conceptPackReady
+      ? false
+      : launch.inProgress || pipelineInProgress;
+  const ready =
+    launch.readyForConceptReview ||
+    (factoryIsTerminalSuccess(project.pipelineStatus) && launch.conceptPackReady);
+
   return NextResponse.json({
     ok: true,
     project,
-    statusLabel: factoryFriendlyLabel(project.pipelineStatus),
+    statusLabel: launch.statusLabel || factoryFriendlyLabel(project.pipelineStatus),
     stage: factoryFriendlyStage(project.pipelineStatus),
-    inProgress: factoryIsInProgress(project.pipelineStatus),
-    ready: factoryIsTerminalSuccess(project.pipelineStatus),
+    inProgress,
+    ready,
     failed: factoryIsTerminalFailure(project.pipelineStatus),
+    launch,
   });
 }

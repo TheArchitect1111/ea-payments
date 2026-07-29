@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { PortalNavIcon } from './PortalNavIcons';
 import { usePortalSidebar } from './PortalSidebarContext';
-import type { PortalSidebarNavGroup } from '@/lib/modules/portal-modules';
+import type { PortalSidebarNavGroup } from '@/lib/modules/portal-modules-shared';
 
 type Props = {
   slug: string;

@@ -2,7 +2,7 @@
  * Admin Mission Control chrome — same PortalLayout as client portals,
  * driven by the EA ClientConfig + admin nav groups.
  */
-import type { PortalSidebarNavGroup, PortalSidebarNavItem } from '@/lib/modules/portal-modules';
+import type { PortalSidebarNavGroup, PortalSidebarNavItem } from '@/lib/modules/portal-modules-shared';
 import type { PortalNavIconName } from '@/lib/chassis/portal-nav-mapping';
 import { BUILDER_NAV, EXECUTIVE_NAV } from '@/lib/admin-operating-mode';
 import { assembleWorkspaceForClient } from './workspace-bridge';

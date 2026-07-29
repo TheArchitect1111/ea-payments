@@ -4,6 +4,8 @@
  *
  * When UNIVERSAL_NAV_PACKS is enabled, labels/order/hrefs come from the resolved
  * IndustryPack while preserving pack-driven CX destinations.
+ *
+ * Client components must import types/helpers from `@/lib/ctp-client-nav-shared`.
  */
 import { getClientByPortalSlug } from '@/lib/airtable';
 import { getCtpSubmissionForPortal } from '@/lib/ctp-submissions';
@@ -17,22 +19,13 @@ import { isUniversalNavPacksEnabled } from '@/lib/portal-universal/flags';
 import type { IndustryNavItem, IndustryPackId } from '@/lib/portal-universal/industry-pack';
 import { getIndustryPack } from '@/lib/portal-universal/packs';
 import { resolvePackForOrg } from '@/lib/portal-universal/resolve-pack-for-org';
+import type {
+  ClientExperienceNavId,
+  ClientExperienceNavItem,
+} from '@/lib/ctp-client-nav-shared';
 
-export type ClientExperienceNavId =
-  | 'journey'
-  | 'listings'
-  | 'progress'
-  | 'pipeline'
-  | 'documents'
-  | 'messages'
-  | 'support'
-  | 'intake';
-
-export type ClientExperienceNavItem = {
-  id: ClientExperienceNavId;
-  label: string;
-  href: string;
-};
+export type { ClientExperienceNavId, ClientExperienceNavItem } from '@/lib/ctp-client-nav-shared';
+export { isQuietClientExperienceNavId } from '@/lib/ctp-client-nav-shared';
 
 const LEGACY_CX_NAV_IDS: ClientExperienceNavId[] = [
   'progress',
@@ -52,8 +45,6 @@ const PACK_CX_NAV_IDS = new Set<string>([
   'listings',
   'intake',
 ]);
-
-const QUIET_NAV_IDS = new Set<ClientExperienceNavId>(['journey', 'listings']);
 
 function legacyClientExperienceNav(slug: string): ClientExperienceNavItem[] {
   return [
@@ -169,10 +160,6 @@ export async function buildClientExperienceNav(slug: string): Promise<ClientExpe
   });
 
   return buildClientExperienceNavFromPack(slug, pack.id);
-}
-
-export function isQuietClientExperienceNavId(id: ClientExperienceNavId): boolean {
-  return QUIET_NAV_IDS.has(id);
 }
 
 export async function resolveClientNavActive(

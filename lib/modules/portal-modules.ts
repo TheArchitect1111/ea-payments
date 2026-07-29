@@ -1,3 +1,9 @@
+/**
+ * Server-only portal module access — cookies, session, RBAC, entitlements.
+ * Client components must import types/helpers from `@/lib/modules/portal-modules-shared`.
+ */
+import 'server-only';
+
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import type { PortalClientRecord } from '@/lib/airtable';
@@ -5,10 +11,9 @@ import { getClientByPortalSlug } from '@/lib/airtable';
 import {
   activeModuleIdsFromEntitlements,
   listEntitlementsForOrg,
-  syncPackageEntitlements,
 } from '@/lib/entitlements';
 import { resolveEntitlementPackageKey } from '@/lib/modules/entitlement-package-key';
-import type { ModuleDefinition, ModuleId, NavGroup } from '@/lib/modules/registry';
+import type { ModuleDefinition, ModuleId } from '@/lib/modules/registry';
 import {
   MODULE_REGISTRY,
   defaultModulesForPackage,
@@ -17,97 +22,47 @@ import {
 } from '@/lib/modules/registry';
 import { roleAtLeast, normalizeRole, type PlatformRole } from '@/lib/rbac';
 import {
-  portalActiveTabForModule,
-  portalNavIconForModule,
-  type PortalNavIconName,
-} from '@/lib/chassis/portal-nav-mapping';
-import {
   getCapabilityByModuleId,
   groupDashboardCapabilities,
   listCapabilitiesForModules,
-  type CapabilityContext,
-  type DashboardCapabilityGroup,
 } from '@/lib/experience-registry';
 import { getCtpSubmissionForPortal } from '@/lib/ctp-submissions';
 import { EA_PORTAL_COOKIE, verifySession, type EAPortalSession } from '@/lib/ea-portal-auth';
 import { syntheticOrgId } from '@/lib/platform-store';
 import { mapModuleIdsToCapabilityIds } from '@/lib/platform/capability-bootstrap';
+import {
+  ensurePackageEntitlements,
+  isDemoPortalSlug,
+} from '@/lib/modules/ensure-package-entitlements';
+import {
+  NAV_GROUP_LABELS,
+  NAV_GROUP_ORDER,
+  toPortalSidebarNavGroups,
+  type PortalHubModule,
+  type PortalModuleAccess,
+  type PortalNavTab,
+  type PortalSidebarNavGroup,
+  type ShellNavGroup,
+  type ShellNavItem,
+} from '@/lib/modules/portal-modules-shared';
 
-const DEMO_SLUGS = new Set(['demo-client', 'demo-website']);
-
-export function isDemoPortalSlug(slug: string): boolean {
-  return DEMO_SLUGS.has(slug);
-}
-
-export type PortalHubModule = {
-  href: string;
-  tag: string;
-  title: string;
-  description: string;
-  moduleId: ModuleId;
-  capabilityId: string;
-  variant?: 'pulse' | 'amplifi' | 'simplifi' | 'default';
-  demoOnly?: boolean;
+export {
+  ensurePackageEntitlements,
+  isDemoPortalSlug,
 };
 
-export type PortalNavTab = {
-  id: 'home' | 'pulse' | 'simplifi' | 'amplifi' | 'updates' | 'connect';
-  label: string;
-  href: string;
-};
-
-export type ShellNavItem = {
-  moduleId: ModuleId;
-  label: string;
-  href: string;
-  navGroup: NavGroup;
-};
-
-export type ShellNavGroup = {
-  id: NavGroup;
-  label: string;
-  items: ShellNavItem[];
-};
-
-export const NAV_GROUP_ORDER: NavGroup[] = ['core', 'growth', 'operations', 'platform'];
-
-export const NAV_GROUP_LABELS: Record<NavGroup, string> = {
-  core: 'Core',
-  growth: 'Growth',
-  operations: 'Operations',
-  platform: 'Platform',
-};
-
-export type PortalModuleAccess = {
-  orgId: string;
-  enabledModuleIds: Set<ModuleId>;
-  /** Canonical Capability Framework ids for entitled modules. */
-  platformCapabilityIds: string[];
-  hubModules: PortalHubModule[];
-  navTabs: PortalNavTab[];
-  shellNavGroups: ShellNavGroup[];
-  /** Capability Map rows for entitled modules (nav + Orbie + dashboard source). */
-  enabledCapabilities: CapabilityContext[];
-  /** Dashboard zone groupings derived from the capability registry. */
-  dashboardGroups: DashboardCapabilityGroup[];
-};
-
-/** Serializable sidebar nav â€” passed from server PortalShell to client PortalSidebar. */
-export type PortalSidebarNavItem = {
-  /** Module id or synthetic admin nav key (used as React key + active match). */
-  moduleId: ModuleId | string;
-  label: string;
-  href: string;
-  icon: PortalNavIconName;
-  activeTab: string;
-};
-
-export type PortalSidebarNavGroup = {
-  id: NavGroup;
-  label: string;
-  items: PortalSidebarNavItem[];
-};
-
+export {
+  NAV_GROUP_LABELS,
+  NAV_GROUP_ORDER,
+  toPortalSidebarNavGroups,
+  type PortalHubModule,
+  type PortalModuleAccess,
+  type PortalNavTab,
+  type PortalSidebarNavGroup,
+  type PortalSidebarNavItem,
+  type ShellNavGroup,
+  type ShellNavItem,
+} from '@/lib/modules/portal-modules-shared';
 
 function roleCanAccessModule(role: PlatformRole, module: ModuleDefinition): boolean {
   return roleAtLeast(role, module.requiredRole);
@@ -232,9 +187,7 @@ export async function resolvePortalModuleAccess(input: {
     ...group,
     capabilities: group.capabilities.map((capCtx) => {
       const mod = getModuleDefinition(capCtx.moduleId);
-      return mod
-        ? { ...capCtx, route: moduleHref(input.slug, mod) }
-        : capCtx;
+      return mod ? { ...capCtx, route: moduleHref(input.slug, mod) } : capCtx;
     }),
   }));
 
@@ -297,20 +250,6 @@ export async function applyCtpPortalModuleFilter(
   return omitModuleFromAccess(access, 'ctp');
 }
 
-export function toPortalSidebarNavGroups(groups: ShellNavGroup[]): PortalSidebarNavGroup[] {
-  return groups.map((group) => ({
-    id: group.id,
-    label: group.label,
-    items: group.items.map((item) => ({
-      moduleId: item.moduleId,
-      label: item.label,
-      href: item.href,
-      icon: portalNavIconForModule(item.moduleId),
-      activeTab: portalActiveTabForModule(item.moduleId),
-    })),
-  }));
-}
-
 /** Dynamic sidebar nav for the current portal session (entitlements + RBAC + CTP submission). */
 export async function resolvePortalSidebarNav(slug: string): Promise<PortalSidebarNavGroup[]> {
   const cookieStore = await cookies();
@@ -356,34 +295,6 @@ export async function isModuleEnabled(input: {
   if (!modDef) return false;
 
   return roleCanAccessModule(normalizeRole(input.role ?? 'guest'), modDef);
-}
-
-/** Ensure package entitlements are persisted when org tables exist. */
-export async function ensurePackageEntitlements(input: {
-  orgId: string;
-  packagePurchased: string;
-  commerceOfferId?: string;
-  slug: string;
-}): Promise<void> {
-  if (input.orgId.startsWith('org_')) return;
-
-  const packageKey = resolveEntitlementPackageKey(input);
-  const moduleIds = defaultModulesForPackage(packageKey, {
-    isDemo: isDemoPortalSlug(input.slug),
-  });
-  const desired = new Set(moduleIds);
-  const existing = await listEntitlementsForOrg(input.orgId);
-  const activePackage = new Set(
-    existing
-      .filter((e) => e.source === 'package' && (e.status === 'active' || e.status === 'trial'))
-      .map((e) => e.moduleId),
-  );
-  const alreadyMatched =
-    desired.size === activePackage.size && [...desired].every((id) => activePackage.has(id));
-
-  if (alreadyMatched) return;
-
-  await syncPackageEntitlements(input.orgId, moduleIds);
 }
 
 export async function getPortalModuleAccessForSlug(slug: string): Promise<PortalModuleAccess | null> {
