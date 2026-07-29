@@ -1,6 +1,6 @@
 import { NAVY, GOLD } from '@/lib/design-system';
 import Link from 'next/link';
-import AdminLogin from '../../../master/AdminLogin';
+import AdminLogin from '../../master/AdminLogin';
 import { hasAdminPageAccess } from '@/lib/admin-page-auth';
 import { getFactoryProject } from '@/lib/factory-project-store';
 import {
