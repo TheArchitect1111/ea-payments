@@ -138,8 +138,8 @@ function plainStageForProject(
   // Concepts exist but previews not durable/ready yet
   if (hasConceptsArtifact) {
     return {
-      stage: 'Checking the experience',
-      hint: 'Finishing website and portal drafts for review.',
+      stage: 'Checking website and portal previews',
+      hint: 'Confirming each sample is ready for review.',
     };
   }
   switch (project.pipelineStatus) {
@@ -169,13 +169,13 @@ function plainStageForProject(
     case 'BUILDING':
     case 'GENERATING':
       return {
-        stage: 'Building the concepts',
+        stage: 'Building three custom concepts',
         hint: 'Creating three distinct website and portal directions.',
       };
     default:
       return {
-        stage: 'Developing the creative direction',
-        hint: 'Preparing concepts for your review.',
+        stage: 'Checking website and portal previews',
+        hint: 'Confirming each sample is ready for review.',
       };
   }
 }
@@ -272,7 +272,7 @@ export function buildLaunchConceptStatus(project: FactoryProject): LaunchConcept
     inProgress = false;
     readyForConceptReview = true;
   } else if (conceptsId && !conceptPackReady) {
-    statusLabel = 'Checking the experience';
+    statusLabel = 'Checking website and portal previews';
     inProgress = !conceptPackFailed || shouldAllowAutoRetry(project, conceptsId);
     needsAutomaticNudge = shouldRunPostBuildConceptPack(project);
   } else if (

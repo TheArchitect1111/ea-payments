@@ -197,7 +197,7 @@ const beforePack = buildLaunchConceptStatus(baseProject());
 assert.equal(beforePack.conceptPackReady, false);
 assert.equal(beforePack.conceptUrls.length, 0);
 assert.equal(beforePack.needsAutomaticNudge, true);
-assert.equal(beforePack.plainLanguageStage, 'Checking the experience');
+assert.equal(beforePack.plainLanguageStage, 'Checking website and portal previews');
 assert.equal(shouldRunPostBuildConceptPack(baseProject()), true);
 assert.ok(Object.keys(beforePack.stageDurationsMs).length >= 1);
 

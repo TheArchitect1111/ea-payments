@@ -14,6 +14,7 @@ import {
   shouldRunPostBuildConceptPack,
   runPostBuildConceptPack,
 } from '@/lib/factory-post-build-concepts';
+import { buildQuickLaunchReview } from '@/lib/factory-quick-launch-review';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -23,6 +24,11 @@ type Params = { params: Promise<{ id: string }> };
 /** Soft rate-limit automatic pipeline nudges from status polls. */
 const lastNudgeAt = new Map<string, number>();
 const NUDGE_COOLDOWN_MS = 12_000;
+/** Avoid re-verifying preview renders on every poll. */
+const previewVerifyCache = new Map<
+  string,
+  Awaited<ReturnType<typeof buildQuickLaunchReview>>
+>();
 
 function maybeScheduleAutomaticNudge(
   projectId: string,
@@ -47,10 +53,32 @@ function maybeScheduleAutomaticNudge(
           extractUrlFromLaunchNotes,
           extractFirstUrlFromText,
         } = await import('@/lib/factory-url-normalize.mjs');
+        const { parseDistinguishingDetail, mergeDistinguishingDetail } = await import(
+          '@/lib/factory-identity-gate'
+        );
         const resolvedUrl =
           normalizeLaunchUrl(project.url) ||
           extractUrlFromLaunchNotes(project.notes) ||
           extractFirstUrlFromText(project.notes);
+        const existingDetail = parseDistinguishingDetail(project.notes);
+
+        // Clarification already on the record — resume concept pack without asking again.
+        if (existingDetail && existingDetail.length > 8 && !resolvedUrl) {
+          console.info('[projects-get] auto-resume with existing clarification', {
+            projectId,
+          });
+          const pack = await runPostBuildConceptPack(projectId, { force: true });
+          if (!pack.ok) {
+            console.error('[projects-get] clarification resume failed', {
+              projectId,
+              error: pack.error,
+            });
+          } else {
+            previewVerifyCache.delete(projectId);
+          }
+          return;
+        }
+
         if (!resolvedUrl) return;
 
         console.info('[projects-get] auto-heal identity with normalized URL', {
@@ -58,11 +86,10 @@ function maybeScheduleAutomaticNudge(
           url: resolvedUrl,
         });
         const { saveFactoryProject } = await import('@/lib/factory-project-store');
-        const { mergeDistinguishingDetail } = await import('@/lib/factory-identity-gate');
         const at = new Date().toISOString();
         const nextNotes = mergeDistinguishingDetail(
           project.notes,
-          project.client,
+          existingDetail || project.client,
           resolvedUrl,
         );
         await saveFactoryProject({
@@ -113,6 +140,8 @@ function maybeScheduleAutomaticNudge(
             error: pack.error,
             blocked: pack.blocked,
           });
+        } else {
+          previewVerifyCache.delete(projectId);
         }
       }
     } catch (err) {
@@ -149,6 +178,19 @@ export async function GET(request: NextRequest, { params }: Params) {
     Boolean(launch.identityBlocked),
   );
 
+  const forceRefresh = request.nextUrl.searchParams.get('refreshReview') === '1';
+  if (forceRefresh) previewVerifyCache.delete(project.id);
+
+  let review = previewVerifyCache.get(project.id);
+  if (!review) {
+    review = await buildQuickLaunchReview(project, {
+      verifyPreviews: Boolean(launch.conceptPackReady),
+    });
+    if (launch.conceptPackReady && review.conceptsReady) {
+      previewVerifyCache.set(project.id, review);
+    }
+  }
+
   return NextResponse.json({
     ok: true,
     project,
@@ -161,5 +203,6 @@ export async function GET(request: NextRequest, { params }: Params) {
     ready,
     failed: factoryIsTerminalFailure(project.pipelineStatus),
     launch,
+    review,
   });
 }
