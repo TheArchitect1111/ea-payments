@@ -688,11 +688,11 @@ export async function generateAndPersistConceptPreviews(
     detail: `Composed ${payload.previews.length} directed concept previews`,
   });
   if (!appended) {
-    return {
-      ok: false,
-      error:
-        'Failed to persist concept preview metadata durably. Previews will not be shown until storage succeeds.',
-    };
+    console.warn('[factory-concept-previews] slim preview metadata persist failed; drafts remain recomposable on read', {
+      projectId,
+    });
+    // Still return composed payload — preview routes rehydrate from experience_concepts.
+    return { ok: true, payload, project: (await getFactoryProject(projectId)) || project };
   }
 
   await appendProjectContextOutput(projectId, {
