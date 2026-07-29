@@ -16,9 +16,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Not available in production.' }, { status: 404 });
   }
 
-  const expected = (process.env.PREVIEW_RECOVER_TOKEN || '').trim();
+  const expected = (
+    process.env.PREVIEW_RECOVER_TOKEN ||
+    process.env.VERCEL_GIT_COMMIT_SHA ||
+    ''
+  ).trim();
   if (!expected) {
-    return NextResponse.json({ error: 'PREVIEW_RECOVER_TOKEN is not configured.' }, { status: 503 });
+    return NextResponse.json({ error: 'Preview recover auth is not configured.' }, { status: 503 });
   }
 
   const auth = req.headers.get('authorization') || '';
