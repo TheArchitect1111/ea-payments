@@ -89,7 +89,11 @@ export type ProductionArtifactKind =
   | 'experience_concepts'
   | 'deliverable'
   | 'review_gate'
-  | 'production_progress';
+  | 'production_progress'
+  | 'subject_knowledge_pack'
+  | 'media_brand_pack'
+  | 'content_creative_pack'
+  | 'experience_manifest';
 
 export type ExperienceDirectorArtifactKind = 'experience_review';
 

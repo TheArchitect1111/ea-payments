@@ -20,6 +20,7 @@ import {
 } from '@/lib/factory-content-package';
 import { evaluateConceptQualityGate } from '@/lib/factory-concept-quality-gate';
 import { findForbiddenPublicCopy } from '@/lib/factory-forbidden-copy.mjs';
+import { runExperienceCreationEngine } from '@/lib/experience-creation';
 import { getFactoryProject, type FactoryProject } from '@/lib/factory-project-store';
 
 export const POST_BUILD_CONCEPTS_WORKER = 'post-build-concepts';
@@ -436,6 +437,71 @@ export async function runPostBuildConceptPack(
         previews: existing,
         identity,
       };
+    }
+  }
+
+  // Experience Creation Engine — research packs + critic before template compose.
+  const ece = await runExperienceCreationEngine(projectId);
+  if (!ece.ok) {
+    await appendProjectContextOutput(projectId, {
+      kind: 'production',
+      worker: POST_BUILD_CONCEPTS_WORKER,
+      payload: {
+        ok: false,
+        error: ece.error,
+        sourceConceptsArtifactId: conceptsId,
+        experienceCreationBlocked: true,
+      },
+      detail: ece.error,
+    });
+    return {
+      ok: false,
+      blocked: false,
+      error: ece.error,
+      project: (await getFactoryProject(projectId)) || latest,
+      identity,
+      previews: null,
+    };
+  }
+
+  // Enrich experience_concepts in-memory stories from ECE manifests before compose.
+  const enrichedProject = (await getFactoryProject(projectId)) || latest;
+  if (enrichedProject.context && ece.bundle) {
+    const ctx = projectContextFromProject(enrichedProject);
+    const art = readExperienceConceptsArtifact(ctx);
+    if (art?.data && typeof art.data === 'object') {
+      const data = art.data as {
+        concepts?: Array<Record<string, unknown>>;
+        recommendedConceptId?: string | null;
+        selectedConceptId?: string | null;
+        selectionStatus?: string;
+      };
+      const concepts = Array.isArray(data.concepts) ? data.concepts : [];
+      const manifests = ece.bundle.manifests;
+      const content = ece.bundle.content;
+      for (let i = 0; i < concepts.length; i += 1) {
+        const manifest = manifests[i];
+        const premise = content.premises[i];
+        if (!manifest || !premise) continue;
+        concepts[i] = {
+          ...concepts[i],
+          name: premise.name,
+          organizationName: ece.bundle.knowledge.verifiedIdentity.name,
+          rationale: premise.whyThisFitsEvidence,
+          story: {
+            sentence: premise.heroSupporting,
+            audience: content.audience,
+            transformation: content.coreStory.slice(0, 280),
+            proofSignals: ece.bundle.knowledge.accomplishments.slice(0, 4),
+          },
+          portal: {
+            ...(typeof concepts[i]?.portal === 'object' ? (concepts[i].portal as object) : {}),
+            tone: content.portalPurpose,
+            composition: manifest.portalSkin.nextBestAction,
+          },
+        };
+      }
+      art.data = { ...data, concepts };
     }
   }
 

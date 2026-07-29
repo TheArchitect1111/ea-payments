@@ -17,6 +17,10 @@ import {
   type ContentPackage,
 } from '@/lib/factory-content-package';
 import { evaluateConceptQualityGate } from '@/lib/factory-concept-quality-gate';
+import {
+  readExperienceCreationBundleFromProject,
+  type ContentCreativePack,
+} from '@/lib/experience-creation';
 import { listArtifacts, type Artifact } from '@/lib/factory-artifact';
 import {
   appendProjectContextOutput,
@@ -32,6 +36,50 @@ import {
 import { composeDirectedWebsite, puckContainsFeatureCards } from '@/lib/layout-composer';
 
 export const CONCEPT_PREVIEWS_WORKER = 'concept-previews';
+
+function contentPackageFromCreativePack(
+  base: ContentPackage,
+  creative: ContentCreativePack,
+): ContentPackage {
+  const mapPremise = (index: number, key: keyof ContentPackage['lenses']) => {
+    const premise = creative.premises[index];
+    if (!premise) return base.lenses[key];
+    return {
+      ...base.lenses[key],
+      heroHeadline: premise.heroHeadline,
+      heroSupporting: premise.heroSupporting,
+      aboutTitle: creative.sectionHeadlines[0] || base.lenses[key].aboutTitle,
+      aboutBody: creative.biography,
+      sectionHeadlines: creative.sectionHeadlines,
+      sectionBodies: creative.sectionBodies,
+      ctaLabel: creative.callsToAction[0] || base.lenses[key].ctaLabel,
+      portalPurpose: creative.portalPurpose,
+    };
+  };
+  return {
+    ...base,
+    name: creative.subjectIdentity || base.name,
+    positioning: creative.positioning || base.positioning,
+    centralStory: creative.coreStory || base.centralStory,
+    biography: creative.biography || base.biography,
+    audience: creative.audience || base.audience,
+    claims: creative.claimToSourceMap.map((c) => ({
+      text: c.claim,
+      sourceUrl: c.sourceUrls[0],
+      status: 'verified' as const,
+    })),
+    lenses: {
+      cinematic: mapPremise(0, 'cinematic'),
+      editorial: mapPremise(1, 'editorial'),
+      intimate: mapPremise(2, 'intimate'),
+    },
+    quality: {
+      ...base.quality,
+      ready: creative.validation.ok && base.quality.ready,
+      missing: creative.validation.ok ? base.quality.missing : creative.validation.reasons,
+    },
+  };
+}
 
 function enrichConceptsFromContentPackage(
   concepts: FactoryExperienceConcept[],
@@ -327,12 +375,16 @@ export async function resolveConceptPreviewDraft(
       listConceptPreviewsFromContext(context)?.portalSlug || portalSlugForProject(project);
     const contentPackage =
       readContentPackageFromContext(context) || buildContentPackageFromProject(project);
+    const eceBundle = readExperienceCreationBundleFromProject(project);
     const composed = composeConceptPreviews({
       projectId,
       portalSlug,
       concepts,
       creativeDirection: readCreativeDirection(context),
-      contentPackage,
+      contentPackage: eceBundle?.content
+        ? contentPackageFromCreativePack(contentPackage, eceBundle.content)
+        : contentPackage,
+      heroImageUrl: eceBundle?.media.assets.find((a) => a.previewEligible)?.url,
       recommendedConceptId: data?.recommendedConceptId,
       selectedConceptId: data?.selectedConceptId,
       selectionStatus: data?.selectionStatus,
@@ -385,6 +437,7 @@ export function composeConceptPreviews(input: {
   concepts: FactoryExperienceConcept[];
   creativeDirection?: FactoryCreativeDirectionData | null;
   contentPackage?: ContentPackage | null;
+  heroImageUrl?: string;
   recommendedConceptId?: string | null;
   selectedConceptId?: string | null;
   selectionStatus?: string;
@@ -411,6 +464,7 @@ export function composeConceptPreviews(input: {
       portalLoginHref,
       sitePath,
       contentPackage: pack,
+      heroImageUrl: input.heroImageUrl,
     });
     const composed = composeDirectedWebsite({
       organization: fields.organization,
@@ -527,7 +581,11 @@ export async function generateAndPersistConceptPreviews(
     return { ok: false, error: 'experience_concepts artifact has no concepts.' };
   }
 
-  const contentPackage = buildContentPackageFromProject(project);
+  const contentPackageBase = buildContentPackageFromProject(project);
+  const eceBundle = readExperienceCreationBundleFromProject(project);
+  const contentPackage = eceBundle?.content
+    ? contentPackageFromCreativePack(contentPackageBase, eceBundle.content)
+    : contentPackageBase;
   await appendProjectContextOutput(projectId, {
     kind: 'production',
     worker: CONTENT_PACKAGE_WORKER,
@@ -548,6 +606,7 @@ export async function generateAndPersistConceptPreviews(
       concepts,
       creativeDirection,
       contentPackage,
+      heroImageUrl: eceBundle?.media.assets.find((a) => a.previewEligible)?.url,
       recommendedConceptId: data.recommendedConceptId,
       selectedConceptId: data.selectedConceptId,
       selectionStatus: data.selectionStatus,

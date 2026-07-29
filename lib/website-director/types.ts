@@ -130,6 +130,8 @@ export type OrganizationStoryInput = {
   accentColor?: string;
   portalLoginHref?: string;
   sitePath?: string;
+  /** Preview-eligible hero image (never auto-publish unlicensed assets). */
+  heroImageUrl?: string;
   member?: {
     whereYouAre?: string;
     whatNext?: string;

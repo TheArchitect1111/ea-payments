@@ -160,7 +160,9 @@ export function evaluateConceptQualityGate(input: {
       reasons.push('Need three distinct concepts.');
     }
     const signatures = new Set(
-      previews.previews.map((p) => p.compositionSignature || p.lens || p.conceptId),
+      previews.previews.map(
+        (p) => `${p.lens}:${p.compositionSignature || p.conceptId}`,
+      ),
     );
     if (signatures.size < Math.min(3, previews.previews.length)) {
       reasons.push('Concepts must be materially different in composition.');

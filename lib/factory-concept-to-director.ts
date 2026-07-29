@@ -72,6 +72,8 @@ export type ConceptToDirectorOptions = {
   sitePath?: string;
   /** Structured research→copy package; preferred over thin creative_direction. */
   contentPackage?: ContentPackage | null;
+  /** Preview-eligible hero image URL from media_brand_pack. */
+  heroImageUrl?: string;
 };
 
 const LENS_FLAVOR: Record<
@@ -251,22 +253,34 @@ export function conceptToOrganizationStoryInput(
   // Preview-safe path: never invent unpublished /sites/** links here.
   const sitePath = options.sitePath;
 
+  const hasEvidencePack = Boolean(pack?.biography || pack?.centralStory);
+  const whoTheyAre = hasEvidencePack
+    ? scrubForbiddenPublicCopy(pack?.biography) || `${organizationName} — ${sentence}`
+    : scrubForbiddenPublicCopy(
+        `${flavor.whoBias} ${pack?.biography || p?.whoTheyAre || `${organizationName} — ${sentence}`}`,
+      ) || `${organizationName} — ${sentence}`;
+  const mission = hasEvidencePack
+    ? scrubForbiddenPublicCopy(pack?.centralStory) ||
+      scrubForbiddenPublicCopy(pack?.positioning) ||
+      transformation
+    : scrubForbiddenPublicCopy(
+        `${flavor.missionBias} ${p?.mission || pack?.centralStory || transformation}`,
+      ) || transformation;
+  const storyText = hasEvidencePack
+    ? scrubForbiddenPublicCopy(
+        `${sentence} ${options.concept.rationale || ''}`.trim(),
+      ) || sentence
+    : scrubForbiddenPublicCopy(
+        `${flavor.storyBias} ${sentence} ${options.concept.rationale || ''}`,
+      ) || sentence;
+
   return {
     organizationName,
     industry: p?.industry,
     primaryAudience: audience,
-    whoTheyAre:
-      scrubForbiddenPublicCopy(
-        `${flavor.whoBias} ${pack?.biography || p?.whoTheyAre || `${organizationName} — ${sentence}`}`,
-      ) || `${organizationName} — ${sentence}`,
-    mission:
-      scrubForbiddenPublicCopy(
-        `${flavor.missionBias} ${p?.mission || pack?.centralStory || transformation}`,
-      ) || transformation,
-    story:
-      scrubForbiddenPublicCopy(
-        `${flavor.storyBias} ${sentence} ${options.concept.rationale || ''}`,
-      ) || sentence,
+    whoTheyAre,
+    mission,
+    story: storyText,
     whyTheyExist:
       scrubForbiddenPublicCopy(p?.whyTheyExist) ||
       scrubForbiddenPublicCopy(pack?.positioning) ||
@@ -296,6 +310,7 @@ export function conceptToOrganizationStoryInput(
     accentColor: flavor.colorShift.accent || p?.accentColor,
     portalLoginHref: options.portalLoginHref || p?.portalLoginHref,
     sitePath,
+    heroImageUrl: options.heroImageUrl,
     member: {
       whereYouAre: p?.member?.whereYouAre || flavor.memberWhere,
       whatNext: p?.member?.whatNext || flavor.memberNext,
