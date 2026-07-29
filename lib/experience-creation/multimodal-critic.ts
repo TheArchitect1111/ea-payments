@@ -1,10 +1,14 @@
 /**
  * Multimodal visual critic — Playwright screenshots + ECE packs → structured scores.
  * Heuristic-only critic may NOT certify production output.
+ * Uses provider-neutral vision adapter (OpenAI gateway preferred; Anthropic optional fallback).
  */
-import { describeScreenshotBase64 } from '@/lib/screenshot-vision';
 import { findForbiddenPublicCopy } from '@/lib/factory-forbidden-copy.mjs';
 import { evaluateExperienceCritic, type CriticResult } from '@/lib/experience-creation/critic';
+import {
+  critiqueScreenshotWithConfiguredProvider,
+  resolveVisionCriticProvider,
+} from '@/lib/experience-creation/vision-critic-provider';
 import type {
   ContentCreativePack,
   ExperienceManifest,
@@ -36,6 +40,7 @@ export type ViewportScreenshot = {
 
 export type MultimodalCriticResult = CriticResult & {
   mode: 'multimodal' | 'heuristic_only' | 'blocked_provider';
+  visionProvider?: string;
   viewportResults: Array<{
     viewport: string;
     surface: string;
@@ -49,7 +54,7 @@ export type MultimodalCriticResult = CriticResult & {
 
 const CRITIC_PROMPT = `You are the EA multimodal visual critic for premium website and portal experiences.
 Score 0-100 for: premiumQuality, subjectSpecificity, storytelling, originality, composition, typography, imageSelection, faceFocalCropping, responsiveBehavior, accessibility, websitePortalContinuity, conceptSimilarityRisk, placeholderLeakageRisk, linkIntegrity.
-Reject (list reasons) if you see: generic filler, repeated clarification text, fake metrics, internal instructions, empty media treatments, broken links, near-duplicate composition, poorly cropped faces/subjects.
+Reject (list reasons) if you see: generic filler, repeated clarification text, fake metrics, internal instructions, empty media treatments, broken links, near-duplicate composition, poorly cropped faces/subjects, corporate boxy design, weak website-to-portal continuity, mobile failures.
 Return ONLY JSON:
 {"scores":{...},"reject":true|false,"reasons":[],"repairInstructions":[]}`;
 
@@ -129,18 +134,21 @@ export async function evaluateMultimodalExperienceCritic(input: {
     };
   }
 
-  const apiKey = process.env.ANTHROPIC_API_KEY ?? process.env.CLAUDE_API_KEY;
-  if (!apiKey) {
+  const provider = resolveVisionCriticProvider();
+  if (!provider.ready) {
     return {
       ...heuristic,
       ok: false,
       mode: 'blocked_provider',
+      visionProvider: provider.id,
       reasons: [
         ...heuristic.reasons,
-        'BLOCKED_PROVIDER: ANTHROPIC_API_KEY missing — cannot run multimodal visual critic.',
+        `BLOCKED_PROVIDER: no vision-capable model configured (${provider.missing || 'missing credentials'}).`,
       ],
       viewportResults: [],
-      repairInstructions: ['Configure Anthropic vision credentials (value never logged).'],
+      repairInstructions: [
+        'Configure OPENAI_API_KEY for EA AI gateway vision (preferred), or ANTHROPIC_API_KEY as fallback.',
+      ],
     };
   }
 
@@ -149,22 +157,44 @@ export async function evaluateMultimodalExperienceCritic(input: {
   const reasons = [...heuristic.reasons];
   const scores = { ...heuristic.scores };
 
-  // Cap vision calls to keep cost bounded (sample one shot per surface×viewport band).
-  const sample = shots.slice(0, 8);
+  const sample = shots.slice(0, Math.min(shots.length, 72));
   for (const shot of sample) {
     const artifactContext = {
       subject: input.knowledge.verifiedIdentity.name,
-      premise: input.manifests.find((m) => m.premiseId.includes(shot.conceptId))?.premiseName,
-      biographyChars: input.content.biography.length,
-      mediaAssets: input.media.assets.length,
-      intentionalTypographyLed: input.media.intentionalTypographyLed,
+      knowledgeSummary: {
+        claims: input.knowledge.claims.length,
+        citations: input.knowledge.citations.length,
+        biographyChars: input.knowledge.biography.length,
+      },
+      mediaSummary: {
+        assets: input.media.assets.length,
+        typographyLed: input.media.intentionalTypographyLed,
+        usage: input.media.assets.map((a) => a.usageStatus || a.rightsStatus).slice(0, 8),
+      },
+      contentSummary: {
+        premises: input.content.premises.map((p) => p.name),
+        biographyChars: input.content.biography.length,
+      },
+      manifestPremise:
+        input.manifests.find(
+          (m) =>
+            m.premiseId.includes(shot.conceptId) ||
+            shot.conceptId.includes(m.premiseId.replace('premise-', '')),
+        )?.premiseName || null,
+      compositions: input.manifests.map((m) =>
+        m.pageStructure.map((s) => s.composition).join('→'),
+      ),
       viewport: `${shot.width}x${shot.height}`,
       conceptId: shot.conceptId,
       surface: shot.surface,
     };
-    const vision = await describeScreenshotBase64(shot.base64, 'image/png', {
-      prompt: `${CRITIC_PROMPT}\nContext JSON: ${JSON.stringify(artifactContext)}`,
-    });
+
+    const { text: vision } = await critiqueScreenshotWithConfiguredProvider(
+      shot.base64,
+      'image/png',
+      `${CRITIC_PROMPT}\nContext JSON: ${JSON.stringify(artifactContext)}`,
+    );
+
     if (!vision) {
       viewportResults.push({
         viewport: shot.viewport,
@@ -175,6 +205,7 @@ export async function evaluateMultimodalExperienceCritic(input: {
       reasons.push(`Vision critic failed for ${shot.surface}/${shot.viewport}.`);
       continue;
     }
+
     const parsed = parseVisionJson(vision);
     viewportResults.push({
       viewport: shot.viewport,
@@ -224,6 +255,7 @@ export async function evaluateMultimodalExperienceCritic(input: {
     reasons: uniqueReasons,
     repairHistory: repairInstructions,
     mode: 'multimodal',
+    visionProvider: provider.id,
     viewportResults,
     repairInstructions,
   };

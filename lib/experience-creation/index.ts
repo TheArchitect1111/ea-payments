@@ -24,6 +24,10 @@ export {
   isDeterministicCreativeAllowed,
 } from '@/lib/experience-creation/provider-readiness';
 export {
+  resolveVisionCriticProvider,
+  critiqueScreenshotWithConfiguredProvider,
+} from '@/lib/experience-creation/vision-critic-provider';
+export {
   OpenverseMediaProvider,
   searchOpenverseImages,
   normalizeOpenverseLicense,

@@ -1,10 +1,11 @@
 /**
  * Provider readiness for Experience Creation Engine.
  * Missing production credentials → BLOCKED_PROVIDER (never fake finished creative).
- * Vision critic missing → cannot certify GO, but pack build may still proceed when research+creative ready.
+ * Vision critic prefers EA OpenAI gateway; Anthropic is optional fallback only.
  */
 import { getAIGatewayConfig } from '@/lib/ai/config';
 import { isProductionDeploy } from '@/lib/integration-env';
+import { resolveVisionCriticProvider } from '@/lib/experience-creation/vision-critic-provider';
 
 export type ProviderStatusCode =
   | 'READY'
@@ -21,7 +22,7 @@ export type ProviderReadiness = {
   canCertify: boolean;
   research: { ready: boolean; provider: string; missing?: string };
   creative: { ready: boolean; provider: string; missing?: string };
-  visionCritic: { ready: boolean; provider: string; missing?: string };
+  visionCritic: { ready: boolean; provider: string; missing?: string; model?: string };
   openverse: { ready: boolean; provider: string; notes?: string };
   faceFocal: { ready: boolean; provider: string; notes?: string };
   reasons: string[];
@@ -33,12 +34,6 @@ function hasOpenAi(): boolean {
   return Boolean(process.env.OPENAI_API_KEY?.trim());
 }
 
-function hasAnthropicVision(): boolean {
-  return Boolean(
-    process.env.ANTHROPIC_API_KEY?.trim() || process.env.CLAUDE_API_KEY?.trim(),
-  );
-}
-
 export function assessExperienceProviderReadiness(options?: {
   allowDeterministicFixture?: boolean;
 }): ProviderReadiness {
@@ -48,7 +43,7 @@ export function assessExperienceProviderReadiness(options?: {
 
   const researchReady = hasOpenAi();
   const creativeReady = Boolean(getAIGatewayConfig().apiKey?.trim());
-  const visionReady = hasAnthropicVision();
+  const vision = resolveVisionCriticProvider();
   const faceEnabled = process.env.ECE_FACE_FOCAL_ENABLED === '1';
 
   const reasons: string[] = [];
@@ -62,11 +57,13 @@ export function assessExperienceProviderReadiness(options?: {
     reasons.push('Creative model provider unavailable — OPENAI_API_KEY is not configured.');
     hints.push('Set OPENAI_API_KEY so the Creative Director can run via the EA AI gateway.');
   }
-  if (!visionReady) {
+  if (!vision.ready) {
     reasons.push(
-      'Multimodal vision critic unavailable — ANTHROPIC_API_KEY is not configured (required for GO certification).',
+      'Multimodal vision critic unavailable — no vision-capable provider configured.',
     );
-    hints.push('Set ANTHROPIC_API_KEY (or CLAUDE_API_KEY) for screenshot-based visual criticism.');
+    hints.push(
+      'Set OPENAI_API_KEY (preferred via EA AI gateway) or ANTHROPIC_API_KEY as fallback for screenshot criticism.',
+    );
   }
   if (!faceEnabled) {
     hints.push(
@@ -75,7 +72,7 @@ export function assessExperienceProviderReadiness(options?: {
   }
 
   const canGeneratePacks = researchReady && creativeReady;
-  const canCertify = canGeneratePacks && visionReady;
+  const canCertify = canGeneratePacks && vision.ready;
 
   let status: ProviderStatusCode = 'READY';
   if (fixture) {
@@ -102,9 +99,10 @@ export function assessExperienceProviderReadiness(options?: {
       missing: creativeReady ? undefined : 'OPENAI_API_KEY',
     },
     visionCritic: {
-      ready: visionReady,
-      provider: 'anthropic-vision',
-      missing: visionReady ? undefined : 'ANTHROPIC_API_KEY',
+      ready: vision.ready,
+      provider: vision.id,
+      model: vision.model,
+      missing: vision.missing,
     },
     openverse: {
       ready: true,
