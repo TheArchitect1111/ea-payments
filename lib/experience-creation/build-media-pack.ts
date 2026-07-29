@@ -1,8 +1,18 @@
 /**
- * Build media_brand_pack — discover candidate media; never invent likeness rights.
+ * Build media_brand_pack — first-party discovery + Openverse supplement.
+ * Never invent likeness; never auto-publish unapproved media.
  */
 import { listArtifacts } from '@/lib/factory-artifact';
 import { createArtifactMeta, scoreCompleteness } from '@/lib/experience-creation/meta';
+import {
+  analyzeFacesWithMediaPipe,
+  focalPointFromAnalysis,
+} from '@/lib/experience-creation/face-focal';
+import {
+  OpenverseMediaProvider,
+  canPublishMediaAsset,
+  type DiscoveredMediaItem,
+} from '@/lib/experience-creation/openverse-provider';
 import type { MediaAsset, MediaBrandPack, SubjectKnowledgePack } from '@/lib/experience-creation/types';
 import type { FactoryProject } from '@/lib/factory-project-store';
 import { projectContextFromProject } from '@/lib/factory-project-context';
@@ -21,31 +31,90 @@ function assetId(index: number) {
   return `media-${index + 1}`;
 }
 
-function guessKind(url: string): MediaAsset['kind'] {
-  const u = url.toLowerCase();
+function guessKind(url: string, title?: string): MediaAsset['kind'] {
+  const u = `${url} ${title || ''}`.toLowerCase();
   if (/logo/.test(u)) return 'logo';
   if (/portrait|headshot|profile|face/.test(u)) return 'portrait';
-  if (/event|game|court/.test(u)) return 'event';
-  if (/product|shop/.test(u)) return 'product';
+  if (/group|team|crowd/.test(u)) return 'group';
+  if (/event|game|court|ceremony/.test(u)) return 'event';
+  if (/product|shop|botanical|plant/.test(u)) return 'product';
+  if (/city|building|landscape|location/.test(u)) return 'location';
   return 'other';
 }
 
 export function evaluateMediaGate(pack: MediaBrandPack): { ok: boolean; reasons: string[] } {
   const reasons: string[] = [];
-  const previewable = pack.assets.filter((a) => a.previewEligible);
+  const previewable = pack.assets.filter(
+    (a) => a.previewEligible && a.usageStatus !== 'rejected',
+  );
   if (!previewable.length && !pack.intentionalTypographyLed) {
-    reasons.push('Empty media plan — need preview-eligible assets or an approved typography-led direction.');
+    reasons.push(
+      'Empty media plan — need preview-eligible assets or an approved typography-led direction.',
+    );
   }
   if (pack.assets.some((a) => a.publicationEligible && a.rightsStatus === 'unknown')) {
     reasons.push('Publication eligibility cannot be granted for unknown-rights assets.');
   }
+  for (const asset of pack.assets) {
+    if (asset.publicationEligible) {
+      const gate = canPublishMediaAsset({
+        usageStatus: asset.usageStatus || 'discovered',
+        licenseClass: asset.licenseClass || 'unclear',
+        licenseVerified: Boolean(asset.licenseVerified),
+        publicationEligible: asset.publicationEligible,
+      });
+      if (!gate.ok) {
+        reasons.push(`${asset.id}: ${gate.reason}`);
+      }
+    }
+  }
   return { ok: reasons.length === 0, reasons };
 }
 
-export function buildMediaBrandPack(
+function discoveredToAsset(item: DiscoveredMediaItem, index: number): MediaAsset {
+  const previewEligible =
+    item.usageStatus === 'preview_only' ||
+    item.usageStatus === 'publication_candidate' ||
+    item.usageStatus === 'approved' ||
+    item.usageStatus === 'discovered';
+  return {
+    id: assetId(index),
+    url: item.thumbnailUrl || item.originalUrl,
+    kind: guessKind(item.originalUrl, item.title),
+    width: item.width ?? undefined,
+    height: item.height ?? undefined,
+    aspectRatio:
+      item.width && item.height ? `${item.width}:${item.height}` : undefined,
+    qualityScore: Math.round(item.relevanceScore * 100) / 100,
+    sourceUrl: item.originalUrl,
+    rightsStatus:
+      item.usageStatus === 'rejected'
+        ? 'blocked'
+        : item.usageStatus === 'approved'
+          ? 'approved'
+          : 'preview_only',
+    previewEligible: previewEligible && item.usageStatus !== 'rejected',
+    publicationEligible: false,
+    usageStatus: item.usageStatus,
+    title: item.title,
+    creator: item.creator,
+    license: item.license,
+    licenseUrl: item.licenseUrl,
+    licenseClass: item.licenseClass,
+    attribution: item.attribution,
+    mediaProvider: item.provider,
+    foreignIdentifier: item.foreignIdentifier,
+    licenseVerified: item.licenseVerified,
+    licenseVerificationNotes: item.licenseVerificationNotes,
+    rejectionReason: item.rejectionReason,
+  };
+}
+
+export async function buildMediaBrandPack(
   project: FactoryProject,
   knowledge: SubjectKnowledgePack,
-): MediaBrandPack {
+  options?: { skipOpenverse?: boolean; skipFaceFocal?: boolean },
+): Promise<MediaBrandPack> {
   const context = project.context ? projectContextFromProject(project) : null;
   const assets: MediaAsset[] = [];
   const colors: string[] = [];
@@ -53,21 +122,27 @@ export function buildMediaBrandPack(
   const inputArtifactIds = [...knowledge.inputArtifactIds];
   const seen = new Set<string>();
 
-  const addUrl = (url: string | undefined, sourceUrl: string) => {
+  const addUrl = (
+    url: string | undefined,
+    sourceUrl: string,
+    extra?: Partial<MediaAsset>,
+  ) => {
     if (!url || !/^https?:\/\//i.test(url)) return;
     const key = url.split('?')[0]!.toLowerCase();
     if (seen.has(key)) return;
     seen.add(key);
-    // Never auto-mark publication eligible.
     assets.push({
       id: assetId(assets.length),
       url,
-      kind: guessKind(url),
+      kind: guessKind(url, extra?.title),
       qualityScore: 0.55,
       sourceUrl,
       rightsStatus: 'preview_only',
       previewEligible: true,
       publicationEligible: false,
+      usageStatus: 'discovered',
+      mediaProvider: 'first-party',
+      ...extra,
     });
   };
 
@@ -76,10 +151,16 @@ export function buildMediaBrandPack(
     const websiteData = asRecord(website?.data) || {};
     const extracted = asRecord(websiteData.extracted) || {};
     const pageUrl = str(websiteData.url) || knowledge.officialWebsite || '';
-    addUrl(str(extracted.ogImage), pageUrl || 'website');
+    addUrl(str(extracted.ogImage), pageUrl || 'website', {
+      usageStatus: 'preview_only',
+      mediaProvider: 'official-site',
+    });
     const images = Array.isArray(extracted.images) ? extracted.images : [];
     for (const img of images.slice(0, 12)) {
-      addUrl(str(img) || str(asRecord(img)?.url), pageUrl || 'website');
+      addUrl(str(img) || str(asRecord(img)?.url), pageUrl || 'website', {
+        usageStatus: 'preview_only',
+        mediaProvider: 'official-site',
+      });
     }
 
     const branding = listArtifacts(context, 'branding').at(-1);
@@ -95,22 +176,90 @@ export function buildMediaBrandPack(
       : [];
     for (const item of inventory.slice(0, 20)) {
       const rec = asRecord(item);
-      addUrl(str(rec?.url) || str(item), str(rec?.sourceUrl) || knowledge.officialWebsite || 'prospect');
+      addUrl(str(rec?.url) || str(item), str(rec?.sourceUrl) || knowledge.officialWebsite || 'prospect', {
+        usageStatus: 'preview_only',
+        mediaProvider: 'prospect-inventory',
+      });
     }
   }
 
-  for (const media of knowledge.interviewsAndMedia.slice(0, 6)) {
-    // Pages themselves are media references, not image assets.
-    void media;
+  // Openverse supplement — thematic queries, never invent likeness of the subject.
+  if (!options?.skipOpenverse) {
+    try {
+      const theme =
+        knowledge.currentWork[0] ||
+        knowledge.professionalRoles.slice(0, 2).join(' ') ||
+        knowledge.accomplishments[0] ||
+        'documentary portrait environment';
+      const openverseHits = await OpenverseMediaProvider.search({
+        // Prefer org/location/theme over bare personal name (Openverse rarely indexes private individuals).
+        subject: knowledge.organizations[0] || knowledge.locations[0] || theme,
+        organization: knowledge.organizations[0],
+        location: knowledge.locations[0],
+        theme,
+        storyConcept: knowledge.biography.slice(0, 120),
+        pageSize: 10,
+      });
+      for (const hit of openverseHits) {
+        const key = hit.originalUrl.split('?')[0]!.toLowerCase();
+        if (seen.has(key)) continue;
+        seen.add(key);
+        assets.push(discoveredToAsset(hit, assets.length));
+      }
+      if (!openverseHits.length) {
+        warnings.push('Openverse returned no results for this subject query.');
+      } else if (openverseHits.every((h) => h.usageStatus === 'rejected')) {
+        warnings.push('Openverse hits were rejected as irrelevant or unsupported.');
+      }
+    } catch (err) {
+      warnings.push(
+        `Openverse discovery failed: ${err instanceof Error ? err.message : 'error'} — continuing with first-party media only (no stock substitution).`,
+      );
+    }
   }
 
-  if (!assets.length) {
+  // Face / focal analysis (async worker path; never in page render).
+  if (!options?.skipFaceFocal) {
+    for (const asset of assets) {
+      if (asset.usageStatus === 'rejected') continue;
+      const analysis = await analyzeFacesWithMediaPipe({ imageUrl: asset.url });
+      asset.focal = {
+        status: analysis.status,
+        provider: analysis.provider,
+        faceCount: analysis.faceCount,
+        photographType: analysis.photographType,
+        objectPosition: analysis.cropHints[0]?.objectPosition,
+        cropHints: analysis.cropHints.map((h) => ({
+          viewport: h.viewport,
+          objectPosition: h.objectPosition,
+          focalPoint: h.focalPoint,
+        })),
+        error: analysis.error,
+        analyzedAt: analysis.analyzedAt,
+      };
+      asset.facePresent = analysis.faceCount > 0;
+      asset.focalPoint = focalPointFromAnalysis(analysis);
+      if (analysis.photographType === 'portrait') asset.kind = 'portrait';
+      if (analysis.photographType === 'group') asset.kind = 'group';
+    }
+  }
+
+  // Assign preview-eligible assets to story sections intentionally.
+  const sectionSlots = ['hero', 'path', 'proof', 'organizations', 'current'];
+  let slot = 0;
+  for (const asset of assets) {
+    if (!asset.previewEligible || asset.usageStatus === 'rejected') continue;
+    asset.assignedSections = [sectionSlots[slot % sectionSlots.length]!];
+    slot += 1;
+  }
+
+  if (!assets.filter((a) => a.previewEligible).length) {
     warnings.push(
       'No preview-eligible images discovered. Concepts must be typography-led until subject-owned media is supplied.',
     );
   }
 
-  const intentionalTypographyLed = assets.length === 0;
+  const intentionalTypographyLed = assets.filter((a) => a.previewEligible).length === 0;
   const missingMediaRequests = intentionalTypographyLed
     ? [
         'Subject-owned portrait suitable for hero use',
@@ -122,9 +271,10 @@ export function buildMediaBrandPack(
       : [];
 
   const completeness = scoreCompleteness([
-    assets.length > 0,
+    assets.some((a) => a.previewEligible),
     assets.some((a) => a.kind === 'portrait' || a.kind === 'logo'),
     colors.length > 0,
+    assets.some((a) => a.attribution || a.mediaProvider === 'official-site'),
     !intentionalTypographyLed,
   ]);
 
@@ -134,8 +284,9 @@ export function buildMediaBrandPack(
       subjectIdentity: knowledge.verifiedIdentity.name,
       providerId: 'experience-creation-media',
       inputArtifactIds,
-      provenanceNotes: 'Discovered public media candidates — preview-only until rights approved',
-      confidence: assets.length ? 0.5 : 0.2,
+      provenanceNotes:
+        'First-party + Openverse candidates — preview-only until EA media-usage gate approval',
+      confidence: assets.length ? 0.55 : 0.2,
       completeness,
       warnings,
     }),
@@ -144,7 +295,7 @@ export function buildMediaBrandPack(
     colors: colors.length ? colors : ['#14110F', '#C4A574'],
     typographyClues: intentionalTypographyLed
       ? ['Editorial display typography carries the first viewport']
-      : ['Pair documentary imagery with restrained editorial type'],
+      : ['Pair documentary imagery with restrained editorial type; honor object-position focals'],
     brandPatterns: [],
     missingMediaRequests,
     intentionalTypographyLed,
@@ -153,4 +304,34 @@ export function buildMediaBrandPack(
   const gate = evaluateMediaGate(pack);
   pack.validation = { ok: gate.ok, reasons: gate.reasons };
   return pack;
+}
+
+/** Sync wrapper for fixture tests that skip network. */
+export function buildMediaBrandPackSync(
+  project: FactoryProject,
+  knowledge: SubjectKnowledgePack,
+): MediaBrandPack {
+  // Intentionally sync path without Openverse/face — used only by labeled fixtures.
+  const context = project.context ? projectContextFromProject(project) : null;
+  void context;
+  return {
+    ...createArtifactMeta({
+      projectId: project.id,
+      subjectIdentity: knowledge.verifiedIdentity.name,
+      providerId: 'experience-creation-media-fixture',
+      inputArtifactIds: [...knowledge.inputArtifactIds],
+      provenanceNotes: 'FIXTURE_ONLY media pack — no Openverse',
+      confidence: 0.2,
+      completeness: 0.2,
+      warnings: ['Fixture media pack'],
+    }),
+    kind: 'media_brand_pack',
+    assets: [],
+    colors: ['#14110F', '#C4A574'],
+    typographyClues: ['Editorial display typography carries the first viewport'],
+    brandPatterns: [],
+    missingMediaRequests: ['Subject-owned portrait suitable for hero use'],
+    intentionalTypographyLed: true,
+    validation: { ok: true, reasons: [] },
+  };
 }

@@ -1,6 +1,7 @@
 /**
  * Experience Creation Engine orchestrator.
  * Produces durable packs, manifests, critic result — then concept compose can consume them.
+ * Production missing providers → BLOCKED_PROVIDER (never fake finished creative).
  */
 import { createArtifactId, provenanceFromContext } from '@/lib/factory-artifact';
 import {
@@ -14,24 +15,94 @@ import { buildMediaBrandPack } from '@/lib/experience-creation/build-media-pack'
 import { buildContentCreativePack } from '@/lib/experience-creation/build-content-creative-pack';
 import { buildExperienceManifests } from '@/lib/experience-creation/build-experience-manifests';
 import { evaluateExperienceCritic } from '@/lib/experience-creation/critic';
+import { evaluateMultimodalExperienceCritic } from '@/lib/experience-creation/multimodal-critic';
+import { assessExperienceProviderReadiness } from '@/lib/experience-creation/provider-readiness';
 import type { ExperienceCreationBundle } from '@/lib/experience-creation/types';
 import { portalSlugFromClientLike } from '@/lib/experience-creation/portal-slug';
+import { isProductionDeploy } from '@/lib/integration-env';
 
 export const EXPERIENCE_CREATION_WORKER = 'experience-creation-engine';
 
 export type RunExperienceCreationResult =
   | { ok: true; bundle: ExperienceCreationBundle; project: FactoryProject }
-  | { ok: false; error: string; bundle?: ExperienceCreationBundle; project: FactoryProject | null };
+  | {
+      ok: false;
+      error: string;
+      blockedProvider?: boolean;
+      bundle?: ExperienceCreationBundle;
+      project: FactoryProject | null;
+    };
 
 export async function runExperienceCreationEngine(
   projectId: string,
+  options?: { allowDeterministicFixture?: boolean; requireMultimodalCritic?: boolean },
 ): Promise<RunExperienceCreationResult> {
   const project = await getFactoryProject(projectId);
   if (!project) return { ok: false, error: 'Factory project not found.', project: null };
 
+  const readiness = assessExperienceProviderReadiness({
+    allowDeterministicFixture: options?.allowDeterministicFixture,
+  });
+
+  if (!readiness.canGeneratePacks && !options?.allowDeterministicFixture) {
+    await appendProjectContextOutput(projectId, {
+      kind: 'production',
+      worker: EXPERIENCE_CREATION_WORKER,
+      payload: {
+        ok: false,
+        status: 'BLOCKED_PROVIDER',
+        readiness,
+        generatedAt: new Date().toISOString(),
+      },
+      detail: `BLOCKED_PROVIDER: ${readiness.reasons[0] || 'required providers unavailable'}`,
+    });
+  }
+
   const knowledge = await buildSubjectKnowledgePack(project);
-  const media = buildMediaBrandPack(project, knowledge);
-  const content = await buildContentCreativePack(knowledge, media);
+  if (
+    !options?.allowDeterministicFixture &&
+    !readiness.research.ready &&
+    isProductionDeploy()
+  ) {
+    return {
+      ok: false,
+      blockedProvider: true,
+      error: `BLOCKED_PROVIDER: ${readiness.reasons[0] || 'research provider unavailable'}`,
+      project,
+    };
+  }
+
+  const media = await buildMediaBrandPack(project, knowledge);
+  const content = await buildContentCreativePack(knowledge, media, {
+    allowDeterministicFixture: options?.allowDeterministicFixture,
+  });
+
+  if (!content.validation.ok && /BLOCKED_PROVIDER/i.test(content.validation.reasons.join(' '))) {
+    const portalSlug = portalSlugFromClientLike(project);
+    const manifests = buildExperienceManifests({
+      knowledge,
+      media,
+      content,
+      projectId,
+      returnToConceptsHref: `/admin/ea-factory/quick-launch?projectId=${encodeURIComponent(projectId)}`,
+      portalLoginHref: publicPortalLoginUrl(portalSlug),
+    });
+    const critic = {
+      ok: false,
+      scores: {},
+      reasons: content.validation.reasons,
+      repairHistory: [],
+    };
+    const bundle: ExperienceCreationBundle = { knowledge, media, content, manifests, critic };
+    await persistBundle(projectId, project, bundle, readiness);
+    return {
+      ok: false,
+      blockedProvider: true,
+      error: content.validation.reasons.join(' '),
+      bundle,
+      project,
+    };
+  }
 
   const portalSlug = portalSlugFromClientLike(project);
   const returnToConceptsHref = `/admin/ea-factory/quick-launch?projectId=${encodeURIComponent(projectId)}`;
@@ -46,60 +117,90 @@ export async function runExperienceCreationEngine(
     portalLoginHref,
   });
 
-  let critic = evaluateExperienceCritic({ knowledge, media, content, manifests });
+  const requireMm = Boolean(options?.requireMultimodalCritic);
+  let critic = requireMm
+    ? await evaluateMultimodalExperienceCritic({
+        knowledge,
+        media,
+        content,
+        manifests,
+        requireMultimodal: true,
+      })
+    : evaluateExperienceCritic({ knowledge, media, content, manifests });
+
+  // Structural packs may pass; certification GO still requires multimodal elsewhere.
+  if (!requireMm && isProductionDeploy() && !readiness.canCertify) {
+    critic = {
+      ...critic,
+      repairHistory: [
+        ...critic.repairHistory,
+        'Packs generated; multimodal certification still required before GO (vision provider or screenshots).',
+      ],
+    };
+  }
+
   const repairHistory = [...critic.repairHistory];
 
-  // One repair pass: if headlines collide or leakage, rebuild content deterministically.
   if (!critic.ok && critic.reasons.some((r) => /similar|leakage|Forbidden/i.test(r))) {
-    repairHistory.push('Repair pass: rebuilding content pack deterministically from evidence.');
+    repairHistory.push('Repair pass: rebuilding content pack from evidence via creative provider.');
     const repairedContent = await buildContentCreativePack(
       { ...knowledge, warnings: [...knowledge.warnings, 'repair-pass'] },
       media,
+      { allowDeterministicFixture: options?.allowDeterministicFixture },
     );
-    // Force distinct headlines from evidence
-    const facts = knowledge.claims.map((c) => c.text);
-    repairedContent.premises = repairedContent.premises.map((p, i) => ({
-      ...p,
-      heroHeadline:
-        i === 0
-          ? repairedContent.premises[0]!.heroHeadline
-          : i === 1
-            ? `A profile of ${knowledge.verifiedIdentity.name}`
-            : `Meet ${knowledge.verifiedIdentity.name}`,
-      heroSupporting: facts[i] || p.heroSupporting,
-    }));
-    manifests = buildExperienceManifests({
-      knowledge,
-      media,
-      content: repairedContent,
-      projectId,
-      returnToConceptsHref,
-      portalLoginHref,
-    });
-    critic = evaluateExperienceCritic({
-      knowledge,
-      media,
-      content: repairedContent,
-      manifests,
-    });
-    critic.repairHistory = repairHistory;
-    const bundle: ExperienceCreationBundle = {
-      knowledge,
-      media,
-      content: repairedContent,
-      manifests,
-      critic,
-    };
-    await persistBundle(projectId, project, bundle);
-    if (!critic.ok) {
-      return {
-        ok: false,
-        error: `Experience critic blocked concepts: ${critic.reasons.join(' ')}`,
-        bundle,
-        project,
+    if (repairedContent.validation.ok) {
+      const facts = knowledge.claims.map((c) => c.text);
+      repairedContent.premises = repairedContent.premises.map((p, i) => ({
+        ...p,
+        heroHeadline:
+          i === 0
+            ? repairedContent.premises[0]!.heroHeadline
+            : i === 1
+              ? `A profile of ${knowledge.verifiedIdentity.name}`
+              : `Meet ${knowledge.verifiedIdentity.name}`,
+        heroSupporting: facts[i] || p.heroSupporting,
+      }));
+      manifests = buildExperienceManifests({
+        knowledge,
+        media,
+        content: repairedContent,
+        projectId,
+        returnToConceptsHref,
+        portalLoginHref,
+      });
+      critic = requireMm
+        ? await evaluateMultimodalExperienceCritic({
+            knowledge,
+            media,
+            content: repairedContent,
+            manifests,
+            requireMultimodal: true,
+          })
+        : evaluateExperienceCritic({
+            knowledge,
+            media,
+            content: repairedContent,
+            manifests,
+          });
+      critic.repairHistory = repairHistory;
+      const bundle: ExperienceCreationBundle = {
+        knowledge,
+        media,
+        content: repairedContent,
+        manifests,
+        critic,
       };
+      await persistBundle(projectId, project, bundle, readiness);
+      if (!critic.ok) {
+        return {
+          ok: false,
+          error: `Experience critic blocked concepts: ${critic.reasons.join(' ')}`,
+          bundle,
+          project,
+        };
+      }
+      return { ok: true, bundle, project: (await getFactoryProject(projectId)) || project };
     }
-    return { ok: true, bundle, project: (await getFactoryProject(projectId)) || project };
   }
 
   const bundle: ExperienceCreationBundle = {
@@ -109,7 +210,17 @@ export async function runExperienceCreationEngine(
     manifests,
     critic: { ...critic, repairHistory },
   };
-  await persistBundle(projectId, project, bundle);
+  await persistBundle(projectId, project, bundle, readiness);
+
+  if (!readiness.canGeneratePacks && !options?.allowDeterministicFixture) {
+    return {
+      ok: false,
+      blockedProvider: true,
+      error: `BLOCKED_PROVIDER: ${readiness.reasons[0] || 'required providers unavailable'}`,
+      bundle,
+      project,
+    };
+  }
 
   if (!knowledge.validation.ok) {
     return {
@@ -135,11 +246,11 @@ async function persistBundle(
   projectId: string,
   project: FactoryProject,
   bundle: ExperienceCreationBundle,
+  readiness?: ReturnType<typeof assessExperienceProviderReadiness>,
 ) {
   const context = project.context ? projectContextFromProject(project) : null;
   const at = new Date().toISOString();
 
-  // Persist as ProjectContext outputs (durable) + appendable artifact drafts when context exists.
   await appendProjectContextOutput(projectId, {
     kind: 'production',
     worker: EXPERIENCE_CREATION_WORKER,
@@ -147,6 +258,7 @@ async function persistBundle(
       ok: bundle.critic.ok && bundle.knowledge.validation.ok,
       generatedAt: at,
       critic: bundle.critic,
+      readiness: readiness || null,
       knowledgeSummary: {
         facts: bundle.knowledge.claims.length,
         citations: bundle.knowledge.citations.length,
@@ -155,8 +267,13 @@ async function persistBundle(
       mediaSummary: {
         assets: bundle.media.assets.length,
         typographyLed: bundle.media.intentionalTypographyLed,
+        openverse: bundle.media.assets.filter((a) => a.mediaProvider === 'openverse').length,
+        rejected: bundle.media.assets.filter((a) => a.usageStatus === 'rejected').length,
       },
       premiseNames: bundle.manifests.map((m) => m.premiseName),
+      compositions: bundle.manifests.map((m) =>
+        m.pageStructure.map((s) => s.composition).join('→'),
+      ),
     },
     detail: bundle.critic.ok
       ? 'Experience Creation Engine packs ready'
@@ -189,7 +306,6 @@ async function persistBundle(
   });
 
   if (context) {
-    // Also stamp artifact kinds for Factory lineage when appendArtifacts path is available later.
     void createArtifactId;
     void provenanceFromContext;
   }

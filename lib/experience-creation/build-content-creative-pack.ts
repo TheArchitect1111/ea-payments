@@ -1,6 +1,6 @@
 /**
  * Content + Creative Director — knowledge pack → content_creative_pack + three premises.
- * Uses AI gateway when configured; otherwise builds evidence-only deterministic packs (no slogans).
+ * Production requires a working creative model. Deterministic packs are fixture-only.
  */
 import { runAIGateway, AIGatewayError } from '@/lib/ai/gateway';
 import { getAIGatewayConfig } from '@/lib/ai/config';
@@ -10,6 +10,10 @@ import {
   scrubForbiddenPublicCopy,
 } from '@/lib/factory-forbidden-copy.mjs';
 import { createArtifactMeta, scoreCompleteness } from '@/lib/experience-creation/meta';
+import {
+  assessExperienceProviderReadiness,
+  isDeterministicCreativeAllowed,
+} from '@/lib/experience-creation/provider-readiness';
 import type {
   ContentCreativePack,
   MediaBrandPack,
@@ -178,10 +182,38 @@ function deterministicPack(
 export async function buildContentCreativePack(
   knowledge: SubjectKnowledgePack,
   media: MediaBrandPack,
+  options?: { allowDeterministicFixture?: boolean },
 ): Promise<ContentCreativePack> {
   const config = getAIGatewayConfig();
+  const readiness = assessExperienceProviderReadiness({
+    allowDeterministicFixture: options?.allowDeterministicFixture,
+  });
+
   if (!config.apiKey) {
-    return deterministicPack(knowledge, media);
+    if (isDeterministicCreativeAllowed(options)) {
+      const pack = deterministicPack(knowledge, media);
+      pack.warnings.push('FIXTURE_ONLY: deterministic creative pack (tests).');
+      pack.provider = { id: 'experience-creation-content-fixture', notes: 'FIXTURE_ONLY' };
+      return pack;
+    }
+    const blocked = deterministicPack(knowledge, media);
+    blocked.warnings.push(
+      'BLOCKED_PROVIDER: creative model unavailable. Deterministic output is not finished work.',
+    );
+    blocked.provider = {
+      id: 'experience-creation-content',
+      notes: 'BLOCKED_PROVIDER',
+    };
+    blocked.provenanceNotes = `BLOCKED_PROVIDER — ${readiness.configurationHints[0] || 'configure OPENAI_API_KEY'}`;
+    blocked.validation = {
+      ok: false,
+      reasons: [
+        'BLOCKED_PROVIDER: creative model credentials missing — cannot certify content_creative_pack.',
+        ...readiness.reasons.filter((r) => /Creative|OPENAI/i.test(r)).slice(0, 2),
+      ],
+    };
+    blocked.confidence = 0;
+    return blocked;
   }
 
   try {
@@ -282,12 +314,27 @@ export async function buildContentCreativePack(
     };
     return merged;
   } catch (err) {
-    const base = deterministicPack(knowledge, media);
-    if (err instanceof AIGatewayError) {
-      base.warnings.push(`AI content path unavailable: ${err.message}`);
-    } else {
-      base.warnings.push('AI content path failed — using evidence-only deterministic pack.');
+    if (isDeterministicCreativeAllowed(options)) {
+      const base = deterministicPack(knowledge, media);
+      base.warnings.push('FIXTURE_ONLY fallback after AI error.');
+      return base;
     }
-    return base;
+    const blocked = deterministicPack(knowledge, media);
+    const msg =
+      err instanceof AIGatewayError
+        ? err.message
+        : err instanceof Error
+          ? err.message
+          : 'unknown error';
+    blocked.warnings.push(`BLOCKED_PROVIDER: creative path failed (${msg}).`);
+    blocked.provider = { id: 'experience-creation-content', notes: 'BLOCKED_PROVIDER' };
+    blocked.validation = {
+      ok: false,
+      reasons: [
+        'BLOCKED_PROVIDER: creative model call failed — deterministic pack is not finished work.',
+      ],
+    };
+    blocked.confidence = 0;
+    return blocked;
   }
 }

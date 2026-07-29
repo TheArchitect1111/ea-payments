@@ -82,6 +82,34 @@ export type SubjectKnowledgePack = ArtifactMeta & {
   claims: KnowledgeClaim[];
 };
 
+export type MediaUsageStatus =
+  | 'discovered'
+  | 'preview_only'
+  | 'publication_candidate'
+  | 'approved'
+  | 'rejected';
+
+export type MediaLicenseClass =
+  | 'public_domain'
+  | 'creative_commons'
+  | 'unclear'
+  | 'unsupported';
+
+export type MediaFocalAnalysis = {
+  status: 'complete' | 'pending' | 'blocked' | 'skipped_no_image' | 'failed';
+  provider: string;
+  faceCount: number;
+  photographType: 'portrait' | 'group' | 'no_people' | 'unknown';
+  objectPosition?: string;
+  cropHints?: Array<{
+    viewport: string;
+    objectPosition: string;
+    focalPoint: { x: number; y: number };
+  }>;
+  error?: string;
+  analyzedAt?: string;
+};
+
 export type MediaAsset = {
   id: string;
   url: string;
@@ -97,6 +125,23 @@ export type MediaAsset = {
   previewEligible: boolean;
   publicationEligible: boolean;
   duplicateGroupId?: string;
+  /** Openverse / discovery metadata */
+  usageStatus?: MediaUsageStatus;
+  title?: string;
+  creator?: string | null;
+  license?: string;
+  licenseUrl?: string | null;
+  licenseClass?: MediaLicenseClass;
+  attribution?: string;
+  mediaProvider?: string;
+  foreignIdentifier?: string;
+  licenseVerified?: boolean;
+  licenseVerificationNotes?: string;
+  rejectionReason?: string;
+  checksum?: string;
+  format?: string;
+  assignedSections?: string[];
+  focal?: MediaFocalAnalysis;
 };
 
 export type MediaBrandPack = ArtifactMeta & {
@@ -160,6 +205,8 @@ export type ExperienceManifest = ArtifactMeta & {
     headline: string;
     body: string;
     imageAssetId?: string;
+    /** CSS object-position from face/focal analysis */
+    objectPosition?: string;
     ctaLabel?: string;
   }>;
   layoutRules: string[];
