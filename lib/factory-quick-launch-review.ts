@@ -377,11 +377,17 @@ export async function buildQuickLaunchReview(
     previews,
   });
   const qualityBlocked = !quality.ok;
-  const advertiseConcepts = !qualityBlocked
-    ? verify
+  // Always surface preview cards when paths exist — quality reasons stay admin-only.
+  const advertiseConcepts = verify
+    ? verifiedCards.length
       ? verifiedCards
-      : cards.filter((c) => Boolean(previews?.previews?.length) || c.websiteVerified)
-    : [];
+      : cards.filter((c) => c.websitePreviewPath && c.portalPreviewPath)
+    : cards.filter(
+        (c) =>
+          Boolean(c.websitePreviewPath && c.portalPreviewPath) ||
+          Boolean(previews?.previews?.length) ||
+          c.websiteVerified,
+      );
 
   return {
     projectId: project.id,
