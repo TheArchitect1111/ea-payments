@@ -14,6 +14,12 @@ import {
   readExperienceConceptsArtifact,
   type ConceptPreviewsPayload,
 } from '@/lib/factory-concept-previews';
+import {
+  buildContentPackageFromProject,
+  readContentPackageFromContext,
+} from '@/lib/factory-content-package';
+import { evaluateConceptQualityGate } from '@/lib/factory-concept-quality-gate';
+import { findForbiddenPublicCopy } from '@/lib/factory-forbidden-copy.mjs';
 import { getFactoryProject, type FactoryProject } from '@/lib/factory-project-store';
 
 export const POST_BUILD_CONCEPTS_WORKER = 'post-build-concepts';
@@ -45,6 +51,8 @@ export type LaunchConceptStatus = {
   conceptPackReady: boolean;
   conceptPackFailed: boolean;
   conceptPackError: string | null;
+  qualityBlocked: boolean;
+  qualityReasons: string[];
   conceptUrls: Array<{
     conceptId: string;
     name: string;
@@ -76,9 +84,21 @@ function alreadyGeneratedForBuild(
   const existing = listConceptPreviewsFromContext(context);
   if (!existing?.previews?.length) return null;
   const tiedTo = String(existing.sourceConceptsArtifactId || '');
-  if (tiedTo && tiedTo === conceptsId) return existing;
-  if (!tiedTo) return existing;
-  return null;
+  if (tiedTo && tiedTo !== conceptsId) return null;
+  // Placeholder / forbidden copy must never count as a completed pack.
+  const forbidden = findForbiddenPublicCopy(existing.previews.map((p) => p.portalShell));
+  if (!forbidden.ok) return null;
+  const hasSitesLink = existing.previews.some(
+    (p) =>
+      JSON.stringify(p.portalShell || {}).includes('/sites/') ||
+      p.websitePreviewPath.includes('/sites/'),
+  );
+  if (hasSitesLink) return null;
+  const pack =
+    readContentPackageFromContext(context) || buildContentPackageFromProject(project);
+  const gate = evaluateConceptQualityGate({ contentPackage: pack, previews: existing });
+  if (!gate.ok) return null;
+  return existing;
 }
 
 function readLatestPostBuildOutput(
@@ -245,11 +265,29 @@ export function buildLaunchConceptStatus(project: FactoryProject): LaunchConcept
     }));
   }
 
+  const contentPackage = context
+    ? readContentPackageFromContext(context) || buildContentPackageFromProject(project)
+    : buildContentPackageFromProject(project);
+  const quality = evaluateConceptQualityGate({
+    contentPackage,
+    previews,
+  });
+  const qualityBlocked =
+    (Boolean(previews?.previews?.length) || packOk) && !quality.ok;
+  const qualityReasons = qualityBlocked ? quality.reasons : [];
+
   const conceptPackReady =
-    conceptUrls.length > 0 && (Boolean(previews?.previews?.length) || packOk);
-  const conceptPackFailed = Boolean(postBuild && postBuild.ok === false);
+    conceptUrls.length > 0 &&
+    (Boolean(previews?.previews?.length) || packOk) &&
+    !qualityBlocked;
+  const conceptPackFailed =
+    Boolean(postBuild && postBuild.ok === false) || qualityBlocked;
   const conceptPackError =
-    typeof postBuild?.error === 'string' ? postBuild.error : null;
+    qualityBlocked
+      ? qualityReasons.join(' ')
+      : typeof postBuild?.error === 'string'
+        ? postBuild.error
+        : null;
 
   const plain = plainStageForProject(
     project,
@@ -267,6 +305,11 @@ export function buildLaunchConceptStatus(project: FactoryProject): LaunchConcept
   } else if (identityBlocked) {
     inProgress = false;
     statusLabel = plain.stage;
+  } else if (qualityBlocked && conceptsId) {
+    statusLabel = 'Creating your research package';
+    inProgress = true;
+    needsAutomaticNudge = true;
+    readyForConceptReview = false;
   } else if (conceptPackReady) {
     statusLabel = 'Ready for review';
     inProgress = false;
@@ -297,13 +340,17 @@ export function buildLaunchConceptStatus(project: FactoryProject): LaunchConcept
     conceptPackReady,
     conceptPackFailed,
     conceptPackError,
+    qualityBlocked,
+    qualityReasons,
     conceptUrls: conceptPackReady ? conceptUrls : [],
     conceptsReviewPath: conceptPackReady
       ? `/admin/ea-factory/concepts/${encodeURIComponent(project.id)}`
       : null,
     statusLabel,
     plainLanguageStage: plain.stage,
-    progressHint: plain.hint,
+    progressHint: qualityBlocked
+      ? qualityReasons[0] || 'Need verified research before concept review.'
+      : plain.hint,
     inProgress,
     readyForConceptReview,
     needsAutomaticNudge,

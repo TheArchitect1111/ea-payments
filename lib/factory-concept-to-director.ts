@@ -5,6 +5,10 @@
  * One concept = one director lens. Does not extend Experience Director orchestration.
  */
 import { getExperienceLaunchPreset } from '@/lib/experience-launch-presets';
+import {
+  scrubForbiddenPublicCopy,
+} from '@/lib/factory-forbidden-copy.mjs';
+import type { ContentPackage } from '@/lib/factory-content-package';
 import type { OrganizationStoryInput } from '@/lib/website-director';
 
 export type ExperienceConceptLens = 'cinematic' | 'editorial' | 'intimate';
@@ -61,7 +65,13 @@ export type ConceptToDirectorOptions = {
   presetId?: string;
   portalSlug?: string;
   portalLoginHref?: string;
+  /**
+   * Public site path only when provisioned. For Factory previews, pass the
+   * Quick Launch return URL so CTAs never hit unpublished /sites/**.
+   */
   sitePath?: string;
+  /** Structured research→copy package; preferred over thin creative_direction. */
+  contentPackage?: ContentPackage | null;
 };
 
 const LENS_FLAVOR: Record<
@@ -162,32 +172,40 @@ export function conceptToOrganizationStoryInput(
   const flavor = LENS_FLAVOR[lens];
   const preset = pickPreset(options);
   const creative = options.creativeDirection;
+  const pack = options.contentPackage;
+  const lensCopy = pack?.lenses?.[lens];
   const story = options.concept.story || creative?.story || {};
   const p = preset?.provision;
 
   const organizationName =
-    creative?.organizationName?.trim() ||
-    options.concept.organizationName?.trim() ||
-    p?.organizationName?.trim() ||
-    p?.businessName?.trim() ||
+    scrubForbiddenPublicCopy(pack?.name) ||
+    scrubForbiddenPublicCopy(creative?.organizationName) ||
+    scrubForbiddenPublicCopy(options.concept.organizationName) ||
+    scrubForbiddenPublicCopy(p?.organizationName) ||
+    scrubForbiddenPublicCopy(p?.businessName) ||
     'Client';
 
   const audience =
-    story.audience?.trim() ||
-    p?.primaryAudience?.trim() ||
-    p?.whoTheyHelp?.trim() ||
+    scrubForbiddenPublicCopy(pack?.audience) ||
+    scrubForbiddenPublicCopy(story.audience) ||
+    scrubForbiddenPublicCopy(p?.primaryAudience) ||
+    scrubForbiddenPublicCopy(p?.whoTheyHelp) ||
     'People ready for a clear next step';
 
   const transformation =
-    story.transformation?.trim() ||
-    p?.whatChanges?.trim() ||
-    `Help ${audience} move from uncertainty to a clear next step.`;
+    scrubForbiddenPublicCopy(lensCopy?.aboutBody?.slice(0, 220)) ||
+    scrubForbiddenPublicCopy(story.transformation) ||
+    scrubForbiddenPublicCopy(p?.whatChanges) ||
+    scrubForbiddenPublicCopy(pack?.centralStory?.slice(0, 220)) ||
+    `Help ${audience} move with clarity and purpose.`;
 
   const sentence =
-    story.sentence?.trim() ||
-    p?.story?.trim() ||
-    p?.headline?.trim() ||
-    `${organizationName} helps ${audience} find purpose and momentum.`;
+    scrubForbiddenPublicCopy(lensCopy?.heroSupporting) ||
+    scrubForbiddenPublicCopy(story.sentence) ||
+    scrubForbiddenPublicCopy(pack?.positioning) ||
+    scrubForbiddenPublicCopy(p?.story) ||
+    scrubForbiddenPublicCopy(p?.headline) ||
+    `${organizationName} — ${scrubForbiddenPublicCopy(pack?.centralStory)?.slice(0, 120) || 'a researched public story.'}`;
 
   const websiteNotes = [
     options.concept.website?.composition,
@@ -203,49 +221,92 @@ export function conceptToOrganizationStoryInput(
   const differentiators = [
     ...(Array.isArray(p?.differentiators) ? p!.differentiators! : []),
     ...(Array.isArray(story.proofSignals) ? story.proofSignals.slice(0, 3) : []),
+    ...(pack?.accomplishments || []).slice(0, 3),
+    ...(pack?.claims || []).slice(0, 3).map((c) => c.text),
     options.concept.rationale,
     websiteNotes ? `Lens craft: ${websiteNotes.slice(0, 180)}` : null,
   ]
+    .map((item) => (typeof item === 'string' ? scrubForbiddenPublicCopy(item) : undefined))
     .filter((item): item is string => Boolean(item && String(item).trim()))
     .slice(0, 6);
 
   const beats = Array.isArray(creative?.homepageStoryBeats)
     ? creative!.homepageStoryBeats!
     : [];
+  void beats;
+
+  const brandHeadline =
+    scrubForbiddenPublicCopy(lensCopy?.heroHeadline) ||
+    scrubForbiddenPublicCopy(p?.headline) ||
+    organizationName;
+  const brandSubhead =
+    scrubForbiddenPublicCopy(lensCopy?.heroSupporting) ||
+    scrubForbiddenPublicCopy(p?.tagline) ||
+    sentence.slice(0, 160);
+  const brandCta =
+    scrubForbiddenPublicCopy(lensCopy?.ctaLabel) ||
+    scrubForbiddenPublicCopy(p?.ctaLabel) ||
+    'Begin';
+
+  // Preview-safe path: never invent unpublished /sites/** links here.
+  const sitePath = options.sitePath;
 
   return {
     organizationName,
     industry: p?.industry,
     primaryAudience: audience,
     whoTheyAre:
-      `${flavor.whoBias} ${p?.whoTheyAre || `${organizationName} — ${sentence}`}`.trim(),
-    mission: `${flavor.missionBias} ${p?.mission || transformation}`.trim(),
-    story: `${flavor.storyBias} ${sentence} ${options.concept.rationale || ''}`.trim(),
-    whyTheyExist: p?.whyTheyExist || story.sentence || p?.mission,
-    whoTheyHelp: p?.whoTheyHelp || audience,
+      scrubForbiddenPublicCopy(
+        `${flavor.whoBias} ${pack?.biography || p?.whoTheyAre || `${organizationName} — ${sentence}`}`,
+      ) || `${organizationName} — ${sentence}`,
+    mission:
+      scrubForbiddenPublicCopy(
+        `${flavor.missionBias} ${p?.mission || pack?.centralStory || transformation}`,
+      ) || transformation,
+    story:
+      scrubForbiddenPublicCopy(
+        `${flavor.storyBias} ${sentence} ${options.concept.rationale || ''}`,
+      ) || sentence,
+    whyTheyExist:
+      scrubForbiddenPublicCopy(p?.whyTheyExist) ||
+      scrubForbiddenPublicCopy(pack?.positioning) ||
+      scrubForbiddenPublicCopy(story.sentence) ||
+      scrubForbiddenPublicCopy(p?.mission) ||
+      sentence,
+    whoTheyHelp: scrubForbiddenPublicCopy(p?.whoTheyHelp) || audience,
     whyItMatters:
-      p?.whyItMatters ||
+      scrubForbiddenPublicCopy(p?.whyItMatters) ||
+      scrubForbiddenPublicCopy(pack?.claims?.[0]?.text) ||
       (Array.isArray(story.proofSignals) && story.proofSignals[0]
-        ? story.proofSignals[0]
-        : transformation),
-    whatChanges: p?.whatChanges || transformation,
-    differentiators: [flavor.differentiatorBias, ...differentiators].slice(0, 6),
-    brandHeadline: p?.headline?.trim() || organizationName,
-    brandSubhead: p?.tagline?.trim() || sentence.slice(0, 160),
-    brandCta: p?.ctaLabel?.trim() || 'Begin',
+        ? scrubForbiddenPublicCopy(story.proofSignals[0])
+        : undefined) ||
+      transformation,
+    whatChanges: scrubForbiddenPublicCopy(p?.whatChanges) || transformation,
+    differentiators: [flavor.differentiatorBias, ...differentiators]
+      .map((d) => scrubForbiddenPublicCopy(d) || d)
+      .filter(Boolean)
+      .slice(0, 6),
+    brandHeadline,
+    brandSubhead,
+    brandCta,
     brandVoice: [flavor.voice, p?.brandVoice, creative?.visualDirection?.style]
       .filter(Boolean)
       .join(' '),
     primaryColor: flavor.colorShift.primary || p?.primaryColor,
     accentColor: flavor.colorShift.accent || p?.accentColor,
     portalLoginHref: options.portalLoginHref || p?.portalLoginHref,
-    sitePath: options.sitePath || (options.portalSlug ? `/sites/${options.portalSlug}` : undefined),
+    sitePath,
     member: {
       whereYouAre: p?.member?.whereYouAre || flavor.memberWhere,
       whatNext: p?.member?.whatNext || flavor.memberNext,
-      purpose: p?.member?.purpose || transformation,
+      purpose:
+        scrubForbiddenPublicCopy(lensCopy?.portalPurpose) ||
+        scrubForbiddenPublicCopy(p?.member?.purpose) ||
+        scrubForbiddenPublicCopy(pack?.lenses?.[lens]?.portalPurpose) ||
+        transformation,
       whatSuccessLooksLike:
-        p?.member?.whatSuccessLooksLike || 'A clear next step and continuity from the public story.',
+        p?.member?.whatSuccessLooksLike ||
+        'A clear next step and continuity from the public story.',
     },
   };
 }

@@ -9,6 +9,11 @@ import {
   readExperienceConceptsArtifact,
   resolveConceptPreviewDraft,
 } from '@/lib/factory-concept-previews';
+import {
+  buildContentPackageFromProject,
+  readContentPackageFromContext,
+} from '@/lib/factory-content-package';
+import { evaluateConceptQualityGate } from '@/lib/factory-concept-quality-gate';
 import { buildFactoryEntityProfileSync } from '@/lib/factory-entity-profile';
 import { projectContextFromProject } from '@/lib/factory-project-context';
 import type { FactoryProject } from '@/lib/factory-project-store';
@@ -43,6 +48,8 @@ export type QuickLaunchReviewPayload = {
   client: string;
   packageReady: boolean;
   conceptsReady: boolean;
+  qualityBlocked: boolean;
+  qualityReasons: string[];
   selectedConceptId: string | null;
   recommendedConceptId: string | null;
   selectionStatus: string | null;
@@ -80,6 +87,22 @@ export async function buildQuickLaunchReview(
   const sections: QuickLaunchPackageSection[] = [];
 
   if (context) {
+    const contentPackage =
+      readContentPackageFromContext(context) || buildContentPackageFromProject(project);
+    pushSection(sections, {
+      id: 'content-package',
+      title: 'Content and copy package',
+      summary: contentPackage.positioning,
+      bullets: [
+        contentPackage.centralStory,
+        ...contentPackage.claims.slice(0, 5).map((c) => c.text),
+        contentPackage.mediaPlan.strategy,
+        ...contentPackage.mediaPlan.items.map(
+          (item) => `Media: ${item.label} (${item.status})`,
+        ),
+      ].filter(Boolean),
+    });
+
     const profile = buildFactoryEntityProfileSync(project);
     pushSection(sections, {
       id: 'verified-profile',
@@ -317,17 +340,31 @@ export async function buildQuickLaunchReview(
   }
 
   const verifiedCards = cards.filter((c) => c.websiteVerified && c.portalVerified);
+  const contentPackage = context
+    ? readContentPackageFromContext(context) || buildContentPackageFromProject(project)
+    : buildContentPackageFromProject(project);
+  const quality = evaluateConceptQualityGate({
+    contentPackage,
+    previews,
+  });
+  const qualityBlocked = !quality.ok;
+  const advertiseConcepts = !qualityBlocked
+    ? verify
+      ? verifiedCards
+      : cards.filter((c) => Boolean(previews?.previews?.length) || c.websiteVerified)
+    : [];
 
   return {
     projectId: project.id,
     client: project.client,
     packageReady: sections.length > 0,
-    conceptsReady: verifiedCards.length > 0,
+    conceptsReady: advertiseConcepts.length > 0,
+    qualityBlocked,
+    qualityReasons: quality.ok ? [] : quality.reasons,
     selectedConceptId,
     recommendedConceptId,
     selectionStatus,
     packageSections: sections,
-    // Only advertise verified concepts when verification ran; otherwise show cards once pack exists
-    concepts: verify ? verifiedCards : cards.filter((c) => Boolean(previews?.previews?.length) || c.websiteVerified),
+    concepts: advertiseConcepts,
   };
 }

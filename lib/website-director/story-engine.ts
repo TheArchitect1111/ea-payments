@@ -126,7 +126,8 @@ function copyForScene(
         metricThreeValue: '1',
         metricThreeLabel: 'Next step that is honest',
       };
-    case 'invitation':
+    case 'invitation': {
+      const isPublicSite = typeof site === 'string' && site.startsWith('/sites/');
       return {
         title: firstSentence(cta, 'Take the next step'),
         body:
@@ -135,9 +136,10 @@ function copyForScene(
           'When you are ready, begin with one clear action.',
         ctaLabel: cta || 'Begin',
         ctaHref: portal,
-        secondaryLabel: 'View this site',
-        secondaryHref: site,
+        secondaryLabel: isPublicSite ? 'View this site' : 'Return to concepts',
+        secondaryHref: isPublicSite ? site : site || '#concepts',
       };
+    }
     case 'portal_glimpse':
       return {
         label: 'Workspace',

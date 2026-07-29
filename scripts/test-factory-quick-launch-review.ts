@@ -184,9 +184,11 @@ const project = {
 async function main() {
   const review = await buildQuickLaunchReview(project, { verifyPreviews: false });
   assert.equal(review.packageReady, true);
+  assert.ok(review.packageSections.some((s) => s.id === 'content-package'));
   assert.ok(review.packageSections.some((s) => s.id === 'verified-profile'));
   assert.ok(review.packageSections.some((s) => s.id === 'creative-brief'));
   assert.ok(review.packageSections.some((s) => s.id === 'content-copy'));
+  assert.equal(review.qualityBlocked, false, review.qualityReasons.join('; '));
   assert.equal(review.concepts.length, 3);
   assert.equal(review.concepts[0]?.recommended, true);
   assert.notEqual(

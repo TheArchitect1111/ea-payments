@@ -120,6 +120,83 @@ for (const row of slimPreviews) {
   assert.ok(row.portalPreviewPath);
 }
 
+const contentPackagePayload = {
+  schemaVersion: 1,
+  generatedAt: '2026-07-29T12:02:00.000Z',
+  projectId: 'proj-durable-test',
+  name: 'Harbor Light Cooperative',
+  positioning: 'Member-owned fisheries with a clear next path.',
+  centralStory:
+    'Harbor Light Cooperative serves Great Lakes fishing communities with a clear member home.',
+  biography:
+    'Harbor Light Cooperative is a member-owned fishery cooperative serving Great Lakes fishing communities with seasonal harvests and a shared charter.',
+  milestones: ['Co-op charter established', 'Seasonal harvests coordinated'],
+  accomplishments: ['Member-owned fisheries', 'Clear next path for members'],
+  currentWork: ['One member home for outreach'],
+  organizations: ['Harbor Light Cooperative'],
+  audience: 'Great Lakes fishing communities',
+  callsToAction: ['Begin'],
+  mediaPlan: {
+    strategy: 'Temporary preview media until licensed assets are approved.',
+    items: [{ label: 'Harbor imagery', status: 'temporary_preview_media' }],
+  },
+  claims: [
+    { text: 'Member-owned fisheries with a clear next path.', status: 'admin_clarification' },
+    { text: 'Serves Great Lakes fishing communities.', status: 'admin_clarification' },
+    { text: 'Coordinates seasonal harvests under a co-op charter.', status: 'admin_clarification' },
+  ],
+  sources: [
+    { url: 'https://example.com/harbor-light' },
+    { url: 'https://example.com/harbor-about' },
+  ],
+  lenses: {
+    cinematic: {
+      heroHeadline: 'Harbor Light: a story still being written',
+      heroSupporting: 'Member-owned fisheries with a clear next path.',
+      aboutTitle: 'Who Harbor Light is',
+      aboutBody:
+        'Harbor Light Cooperative is a member-owned fishery cooperative serving Great Lakes fishing communities with seasonal harvests and a shared charter.',
+      sectionHeadlines: ['Path', 'Work', 'Proof', 'Next'],
+      sectionBodies: ['Co-op charter', 'Seasonal harvests', 'Member home', 'Next conversation'],
+      ctaLabel: 'Continue',
+      portalPurpose: 'Continue the public story inside the member workspace',
+    },
+    editorial: {
+      heroHeadline: 'A profile of Harbor Light Cooperative',
+      heroSupporting: 'Serves Great Lakes fishing communities.',
+      aboutTitle: 'Selected chapters',
+      aboutBody:
+        'Harbor Light Cooperative serves Great Lakes fishing communities with a clear member home.',
+      sectionHeadlines: ['Expertise', 'Orgs', 'Evidence', 'Now'],
+      sectionBodies: ['Fisheries', 'Harbor Light', 'Charter', 'Member home'],
+      ctaLabel: 'Read on',
+      portalPurpose: 'Private briefing continuity.',
+    },
+    intimate: {
+      heroHeadline: 'Meet Harbor Light',
+      heroSupporting: 'Coordinates seasonal harvests under a co-op charter.',
+      aboutTitle: 'A direct introduction',
+      aboutBody:
+        'Harbor Light Cooperative is a member-owned fishery cooperative serving Great Lakes fishing communities with seasonal harvests and a shared charter.',
+      sectionHeadlines: ['Matters', 'Feel', 'For', 'Begin'],
+      sectionBodies: ['Member path', 'Coastal calm', 'Fishing communities', 'One next step'],
+      ctaLabel: 'Start',
+      portalPurpose: 'Trusted companion workspace.',
+    },
+  },
+  quality: { factCount: 3, sourceCount: 2, ready: true, missing: [] },
+};
+
+function contentPackageOutput(id = 'out-content') {
+  return {
+    id,
+    kind: 'production' as const,
+    worker: 'content-package',
+    createdAt: '2026-07-29T12:02:00.000Z',
+    payload: contentPackagePayload,
+  };
+}
+
 function art(id: string, kind: string, data: Record<string, unknown>) {
   return {
     schemaVersion: 1 as const,
@@ -213,6 +290,7 @@ const afterPack = buildLaunchConceptStatus(
           createdAt: '2026-07-29T12:02:00.000Z',
           payload: slim,
         },
+        contentPackageOutput(),
         {
           id: 'out-pack',
           kind: 'production',
@@ -242,6 +320,7 @@ assert.equal(
             createdAt: '2026-07-29T12:02:00.000Z',
             payload: slim,
           },
+          contentPackageOutput(),
           {
             id: 'out-pack',
             kind: 'production',

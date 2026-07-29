@@ -33,6 +33,8 @@ type ConceptCard = {
 type ReviewPayload = {
   packageReady?: boolean;
   conceptsReady?: boolean;
+  qualityBlocked?: boolean;
+  qualityReasons?: string[];
   selectedConceptId?: string | null;
   recommendedConceptId?: string | null;
   selectionStatus?: string | null;
@@ -598,6 +600,13 @@ export default function QuickLaunchClient() {
               <p className="mt-2 text-xl font-black">{stage}</p>
               {clientName ? <p className="mt-1 font-semibold">{clientName}</p> : null}
               {progressHint ? <p className="mt-2 text-sm opacity-80">{progressHint}</p> : null}
+              {review?.qualityBlocked && (review.qualityReasons?.length || 0) > 0 ? (
+                <ul className="mt-3 list-disc space-y-1 pl-5 text-sm opacity-90">
+                  {review.qualityReasons!.slice(0, 6).map((reason) => (
+                    <li key={reason}>{reason}</li>
+                  ))}
+                </ul>
+              ) : null}
               {inProgress ? (
                 <p className="mt-2 text-xs opacity-70">Updating automatically. Stay on this page.</p>
               ) : null}

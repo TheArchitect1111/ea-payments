@@ -10,6 +10,13 @@ import {
   type FactoryCreativeDirectionData,
   type FactoryExperienceConcept,
 } from '@/lib/factory-concept-to-director';
+import {
+  buildContentPackageFromProject,
+  CONTENT_PACKAGE_WORKER,
+  readContentPackageFromContext,
+  type ContentPackage,
+} from '@/lib/factory-content-package';
+import { evaluateConceptQualityGate } from '@/lib/factory-concept-quality-gate';
 import { listArtifacts, type Artifact } from '@/lib/factory-artifact';
 import {
   appendProjectContextOutput,
@@ -25,6 +32,58 @@ import {
 import { composeDirectedWebsite, puckContainsFeatureCards } from '@/lib/layout-composer';
 
 export const CONCEPT_PREVIEWS_WORKER = 'concept-previews';
+
+function enrichConceptsFromContentPackage(
+  concepts: FactoryExperienceConcept[],
+  pack: ContentPackage,
+): FactoryExperienceConcept[] {
+  return concepts.map((concept) => {
+    const lens = detectConceptLens(concept);
+    const lensCopy = pack.lenses[lens];
+    return {
+      ...concept,
+      organizationName: pack.name,
+      story: {
+        sentence: lensCopy.heroSupporting,
+        audience: pack.audience,
+        transformation: lensCopy.aboutBody.slice(0, 280),
+        proofSignals: [
+          ...pack.accomplishments,
+          ...pack.milestones,
+          ...pack.claims.map((c) => c.text),
+        ].slice(0, 6),
+      },
+      portal: {
+        ...concept.portal,
+        tone: concept.portal?.tone || lensCopy.portalPurpose,
+      },
+    };
+  });
+}
+
+function creativeDirectionFromContentPackage(
+  pack: ContentPackage,
+  existing?: FactoryCreativeDirectionData | null,
+): FactoryCreativeDirectionData {
+  return {
+    organizationName: pack.name,
+    story: {
+      sentence: pack.positioning,
+      audience: pack.audience,
+      transformation: pack.centralStory.slice(0, 280),
+      proofSignals: pack.claims.map((c) => c.text).slice(0, 6),
+    },
+    homepageStoryBeats: pack.lenses.cinematic.sectionHeadlines,
+    portalContinuity: {
+      purpose: pack.lenses.cinematic.portalPurpose,
+      firstView: pack.lenses.cinematic.sectionHeadlines.slice(0, 3),
+    },
+    visualDirection: existing?.visualDirection,
+    antiPatterns: existing?.antiPatterns,
+    experiencePrinciples: existing?.experiencePrinciples,
+    publishingSafety: existing?.publishingSafety,
+  };
+}
 
 function portalSlugFromClient(project: FactoryProject, override?: string): string {
   if (override?.trim()) return override.trim().toLowerCase();
@@ -266,11 +325,14 @@ export async function resolveConceptPreviewDraft(
   try {
     const portalSlug =
       listConceptPreviewsFromContext(context)?.portalSlug || portalSlugForProject(project);
+    const contentPackage =
+      readContentPackageFromContext(context) || buildContentPackageFromProject(project);
     const composed = composeConceptPreviews({
       projectId,
       portalSlug,
       concepts,
       creativeDirection: readCreativeDirection(context),
+      contentPackage,
       recommendedConceptId: data?.recommendedConceptId,
       selectedConceptId: data?.selectedConceptId,
       selectionStatus: data?.selectionStatus,
@@ -322,6 +384,7 @@ export function composeConceptPreviews(input: {
   portalSlug: string;
   concepts: FactoryExperienceConcept[];
   creativeDirection?: FactoryCreativeDirectionData | null;
+  contentPackage?: ContentPackage | null;
   recommendedConceptId?: string | null;
   selectedConceptId?: string | null;
   selectionStatus?: string;
@@ -329,15 +392,25 @@ export function composeConceptPreviews(input: {
 }): ConceptPreviewsPayload {
   const at = input.generatedAt || new Date().toISOString();
   const portalLoginHref = publicPortalLoginUrl(input.portalSlug);
-  const sitePath = `/sites/${input.portalSlug}`;
+  // Never link Factory previews to unpublished /sites/** — return to Quick Launch review.
+  const returnToConceptsHref = `/admin/ea-factory/quick-launch?projectId=${encodeURIComponent(input.projectId)}`;
+  const sitePath = returnToConceptsHref;
+  const pack = input.contentPackage || null;
+  const concepts = pack
+    ? enrichConceptsFromContentPackage(input.concepts, pack)
+    : input.concepts;
+  const creativeDirection = pack
+    ? creativeDirectionFromContentPackage(pack, input.creativeDirection)
+    : input.creativeDirection;
 
-  const previews: ConceptPreviewDraft[] = input.concepts.map((concept) => {
+  const previews: ConceptPreviewDraft[] = concepts.map((concept) => {
     const fields = conceptToProvisionFields({
       concept,
-      creativeDirection: input.creativeDirection,
+      creativeDirection,
       portalSlug: input.portalSlug,
       portalLoginHref,
       sitePath,
+      contentPackage: pack,
     });
     const composed = composeDirectedWebsite({
       organization: fields.organization,
@@ -371,7 +444,9 @@ export function composeConceptPreviews(input: {
       } as Data['root'],
     };
 
-    const continuity = input.creativeDirection?.portalContinuity;
+    const continuity = creativeDirection?.portalContinuity;
+    const lens = fields.lens;
+    const lensPurpose = pack?.lenses?.[lens]?.portalPurpose;
 
     return {
       conceptId: concept.id,
@@ -390,7 +465,7 @@ export function composeConceptPreviews(input: {
         composition:
           concept.portal?.composition ||
           'Single next-best-action with narrative progress',
-        purpose: continuity?.purpose,
+        purpose: lensPurpose || continuity?.purpose,
         firstView: Array.isArray(continuity?.firstView) ? continuity!.firstView! : [],
         primaryColor: fields.primaryColor,
         accentColor: fields.accentColor,
@@ -452,6 +527,16 @@ export async function generateAndPersistConceptPreviews(
     return { ok: false, error: 'experience_concepts artifact has no concepts.' };
   }
 
+  const contentPackage = buildContentPackageFromProject(project);
+  await appendProjectContextOutput(projectId, {
+    kind: 'production',
+    worker: CONTENT_PACKAGE_WORKER,
+    payload: contentPackage,
+    detail: contentPackage.quality.ready
+      ? `Content package ready (${contentPackage.quality.factCount} facts)`
+      : `Content package incomplete: ${contentPackage.quality.missing.join('; ') || 'missing evidence'}`,
+  });
+
   const portalSlug = portalSlugForProject(project, options?.portalSlug);
   const creativeDirection = readCreativeDirection(context);
 
@@ -462,6 +547,7 @@ export async function generateAndPersistConceptPreviews(
       portalSlug,
       concepts,
       creativeDirection,
+      contentPackage,
       recommendedConceptId: data.recommendedConceptId,
       selectedConceptId: data.selectedConceptId,
       selectionStatus: data.selectionStatus,
@@ -470,6 +556,31 @@ export async function generateAndPersistConceptPreviews(
     return {
       ok: false,
       error: err instanceof Error ? err.message : 'Concept preview compose failed.',
+    };
+  }
+
+  const gate = evaluateConceptQualityGate({
+    contentPackage,
+    previews: payload,
+  });
+  if (!gate.ok) {
+    console.warn('[factory-concept-previews] quality gate blocked review', {
+      projectId,
+      reasons: gate.reasons,
+    });
+    await appendProjectContextOutput(projectId, {
+      kind: 'production',
+      worker: 'concept-quality-gate',
+      payload: {
+        ok: false,
+        reasons: gate.reasons,
+        evaluatedAt: new Date().toISOString(),
+      },
+      detail: `Concept quality gate blocked: ${gate.reasons[0] || 'incomplete'}`,
+    });
+    return {
+      ok: false,
+      error: `Concept quality gate blocked Ready for review: ${gate.reasons.join(' ')}`,
     };
   }
 
@@ -492,6 +603,17 @@ export async function generateAndPersistConceptPreviews(
         'Failed to persist concept preview metadata durably. Previews will not be shown until storage succeeds.',
     };
   }
+
+  await appendProjectContextOutput(projectId, {
+    kind: 'production',
+    worker: 'concept-quality-gate',
+    payload: {
+      ok: true,
+      reasons: [],
+      evaluatedAt: new Date().toISOString(),
+    },
+    detail: 'Concept quality gate passed',
+  });
 
   // Production: require Airtable durability before advertising preview URLs.
   const { airtableConfigured } = await import('@/lib/data/airtable-client');

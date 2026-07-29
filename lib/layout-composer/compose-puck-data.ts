@@ -176,8 +176,10 @@ function emitComposition(
           body: copy.body,
           primaryLabel: copy.ctaLabel || 'Join us',
           primaryHref: copy.ctaHref || hrefs.portal,
-          secondaryLabel: copy.secondaryLabel || 'View this site',
-          secondaryHref: copy.secondaryHref || hrefs.site,
+          secondaryLabel:
+            copy.secondaryLabel ||
+            (hrefs.site.startsWith('/sites/') ? 'View this site' : 'Return to concepts'),
+          secondaryHref: copy.secondaryHref || hrefs.site || '#concepts',
         },
       };
     case 'invitation_commission':
@@ -190,8 +192,10 @@ function emitComposition(
           body: copy.body,
           primaryLabel: copy.ctaLabel || 'Commission',
           primaryHref: copy.ctaHref || hrefs.portal,
-          secondaryLabel: copy.secondaryLabel || 'View this site',
-          secondaryHref: copy.secondaryHref || hrefs.site,
+          secondaryLabel:
+            copy.secondaryLabel ||
+            (hrefs.site.startsWith('/sites/') ? 'View this site' : 'Return to concepts'),
+          secondaryHref: copy.secondaryHref || hrefs.site || '#concepts',
         },
       };
     case 'invitation_protect':
@@ -204,8 +208,10 @@ function emitComposition(
           body: copy.body,
           primaryLabel: copy.ctaLabel || 'Get covered',
           primaryHref: copy.ctaHref || hrefs.portal,
-          secondaryLabel: copy.secondaryLabel || 'View this site',
-          secondaryHref: copy.secondaryHref || hrefs.site,
+          secondaryLabel:
+            copy.secondaryLabel ||
+            (hrefs.site.startsWith('/sites/') ? 'View this site' : 'Return to concepts'),
+          secondaryHref: copy.secondaryHref || hrefs.site || '#concepts',
         },
       };
     default:
