@@ -80,7 +80,7 @@ export type CareContinuumFields = {
 };
 
 const FORBIDDEN_PUBLIC =
-  /story still being written|continue the conversation|how the work unfolds|documentary photography|full-bleed|researched public|lens craft|asymmetric editorial|composition signature|creative direction/i;
+  /story still being written|continue the conversation|how the work unfolds|documentary photography|full-bleed|researched public|lens craft|asymmetric editorial|composition signature|creative direction|narrative is asking|quiet step the narrative/i;
 
 export function assertNoInternalCreativeCopy(blob: string) {
   if (FORBIDDEN_PUBLIC.test(blob)) {
@@ -182,7 +182,11 @@ export function mapOrganizationToCareContinuumFields(
   );
   const role = scrubForbiddenPublicCopy(organization.subjectRole);
   const brandHeadline = scrub(
-    organization.brandHeadline,
+    organization.brandHeadline &&
+      organization.brandHeadline !== organization.brandSubhead &&
+      organization.brandHeadline.length <= 90
+      ? organization.brandHeadline
+      : undefined,
     role
       ? `A trusted guide between hospital, home, and family`
       : `${subjectName} — care that meets people where they live`,
@@ -255,10 +259,9 @@ export function mapOrganizationToCareContinuumFields(
     ),
     journeyListenBody:
       'Understand the clinical situation, the home environment, and what matters most to the patient and family.',
-    journeyConnectBody: scrub(
-      organization.member?.whatNext,
+    journeyConnectBody:
+      scrubForbiddenPublicCopy(organization.journeyConnectBody) ||
       `Explain the relevant pathway and connect the household to intake—with clear expectations about what care can provide.`,
-    ),
     geographyTitle: scrub(
       organization.serviceGeographyTitle,
       organization.serviceGeography
@@ -420,7 +423,7 @@ export function composeCareContinuumEditorialPuck(fields: CareContinuumFields): 
       props: {
         id: id('split-clarity'),
         label: 'What changes',
-        title: 'From uncertainty to a workable plan',
+        title: 'From open questions to a workable plan',
         leftLabel: 'When families feel stuck',
         leftTitle: fields.uncertaintyTitle,
         leftBody: fields.uncertaintyBody,

@@ -37,7 +37,7 @@ function extractPathways(
     .filter(Boolean)
     .slice(0, 3)
     .map((text) => {
-      const parts = String(text).split(/[:—–-]/);
+      const parts = String(text).split(/[:—–]/);
       if (parts.length >= 2) {
         return { title: parts[0]!.trim().slice(0, 48), body: parts.slice(1).join('—').trim() };
       }

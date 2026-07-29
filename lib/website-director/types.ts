@@ -159,6 +159,8 @@ export type OrganizationStoryInput = {
   footerTagline?: string;
   footerAddress?: string;
   footerNote?: string;
+  /** Care continuum journey step-two body — public copy only. */
+  journeyConnectBody?: string;
   mediaSlots?: {
     hero?: {
       url: string;
