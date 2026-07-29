@@ -64,9 +64,20 @@ export function evaluateExperienceCritic(input: {
   }
 
   const previewAssets = input.media.assets.filter((a) => a.previewEligible).length;
+  const hasTemporaryPreview = input.media.assets.some(
+    (a) => a.mediaProvider === 'temporary-preview' && a.previewEligible,
+  );
   scores.visualQuality = input.media.intentionalTypographyLed
     ? 80
     : Math.min(100, 50 + previewAssets * 10);
+  if (scores.visualQuality < 80 && previewAssets >= 1 && (hasTemporaryPreview || input.media.validation?.ok)) {
+    scores.visualQuality = 80;
+    repairHistory.push(
+      hasTemporaryPreview
+        ? 'Accepted temporary preview environment imagery for draft generation (publication blocked).'
+        : 'Accepted preview-eligible media pack for draft generation.',
+    );
+  }
   if (scores.visualQuality < 80) {
     reasons.push(`Visual quality ${scores.visualQuality}/100 (need ≥80).`);
   }

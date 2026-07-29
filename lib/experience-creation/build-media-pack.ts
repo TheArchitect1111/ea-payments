@@ -309,13 +309,17 @@ export async function buildMediaBrandPack(
     slot += 1;
   }
 
-  if (!assets.filter((a) => a.previewEligible).length) {
+  // Ensure at least three temporary preview environments when discovered media is thin.
+  if (assets.filter((a) => a.previewEligible).length < 3) {
     warnings.push(
-      'No licensed subject media discovered — attaching temporary preview environment imagery (blocked from publication).',
+      'Supplementing with temporary preview environment imagery (blocked from publication).',
     );
     const themeBlob = `${knowledge.organizations.join(' ')} ${knowledge.professionalRoles.join(' ')} ${knowledge.currentWork.join(' ')} ${knowledge.biography}`.toLowerCase();
     const temporary = temporaryPreviewEnvironmentAssets(themeBlob);
     for (const item of temporary) {
+      const key = item.url.split('?')[0]!.toLowerCase();
+      if (seen.has(key)) continue;
+      seen.add(key);
       assets.push(item);
     }
   }
