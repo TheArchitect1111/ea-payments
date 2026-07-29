@@ -15,6 +15,12 @@ function rootBrand(data: Data): { primary?: string; accent?: string; themeId?: s
   return { primary, accent, themeId };
 }
 
+function themeClassName(themeId?: string): string | undefined {
+  if (themeId === 'amanda-editorial') return 'amanda-editorial-theme';
+  if (themeId === 'kristina-3hc-editorial') return 'kristina-3hc-editorial-theme';
+  return undefined;
+}
+
 export default function ExperiencePreview({
   title,
   data,
@@ -31,7 +37,14 @@ export default function ExperiencePreview({
   };
 
   return (
-    <main style={style} className={brand.themeId === 'amanda-editorial' ? 'amanda-editorial-theme' : undefined}>
+    <main style={style} className={themeClassName(brand.themeId)} id="top">
+      {brand.themeId === 'kristina-3hc-editorial' ? (
+        // eslint-disable-next-line @next/next/no-page-custom-font
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Source+Sans+3:wght@400;600;700&display=swap"
+        />
+      ) : null}
       <Render config={puckConfig} data={data} />
       <footer style={{ padding: '1rem', textAlign: 'center', fontSize: '0.8rem', color: '#667085' }}>
         {footerLabel} · {title}

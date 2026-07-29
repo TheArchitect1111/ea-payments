@@ -51,7 +51,7 @@ function deterministicPack(
       heroHeadline:
         knowledge.timeline[0]
           ? `From ${knowledge.timeline[0].label} to the work that still matters`
-          : `${name}: a story still being written`,
+          : `${name} — guiding people through the next care decision`,
       heroSupporting: facts[0] || positioning,
       sectionSequence: ['path', 'proof', 'organizations', 'current', 'invitation'],
       whyThisFitsEvidence: 'Uses timeline and accomplishments as documentary beats.',

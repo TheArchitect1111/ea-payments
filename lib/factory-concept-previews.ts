@@ -34,8 +34,16 @@ import {
   type FactoryProject,
 } from '@/lib/factory-project-store';
 import { composeDirectedWebsite, puckContainsFeatureCards } from '@/lib/layout-composer';
+import {
+  buildKristinaConceptAPortalShell,
+  buildKristinaConceptAPuckData,
+  isKristinaConceptA,
+  KRISTINA_MEDIA,
+} from '@/lib/factory-kristina-concept-a';
 
 export const CONCEPT_PREVIEWS_WORKER = 'concept-previews';
+
+const KRISTINA_CURATED_SIGNATURE = 'kristina-3hc-curated-v1';
 
 /** Temporary environment imagery — never a fabricated likeness; blocked from publication. */
 function temporaryHeroImageUrl(pack: ContentPackage | null | undefined): string {
@@ -328,6 +336,40 @@ export async function resolveConceptPreviewDraft(
 
   const context = projectContextFromProject(project);
   const existing = getConceptPreviewDraft(context, conceptId);
+  const clientName = project.client;
+
+  // Curated Concept A: always serve the healthcare storytelling page (never stale director output).
+  if (isKristinaConceptA(projectId, conceptId, clientName)) {
+    const returnHref = `/admin/ea-factory/quick-launch?projectId=${encodeURIComponent(projectId)}`;
+    const puckData = buildKristinaConceptAPuckData({ projectId, returnHref });
+    const portalShell = buildKristinaConceptAPortalShell(KRISTINA_MEDIA.hero);
+    const draft: ConceptPreviewDraft = {
+      conceptId,
+      name: existing?.name || 'Compassionate Continuum',
+      lens: 'cinematic',
+      recommended: existing?.recommended ?? true,
+      websitePreviewPath: `/preview/factory/${encodeURIComponent(projectId)}/${encodeURIComponent(conceptId)}`,
+      portalPreviewPath: `/preview/factory/${encodeURIComponent(projectId)}/${encodeURIComponent(conceptId)}/portal`,
+      compositionSignature: KRISTINA_CURATED_SIGNATURE,
+      themeId: portalShell.themeId,
+      primaryColor: portalShell.primaryColor,
+      accentColor: portalShell.accentColor,
+      puckData,
+      portalShell,
+      websiteSite: {
+        organizationName: 'Kristina Brickey',
+        brandHeadline: 'A trusted guide between hospital, home, and family',
+      },
+    };
+    return {
+      ok: true,
+      draft,
+      source: 'recomposed',
+      projectId,
+      conceptId,
+    };
+  }
+
   if (existing?.puckData && existing.portalShell) {
     return {
       ok: true,
@@ -477,6 +519,43 @@ export function composeConceptPreviews(input: {
     : input.creativeDirection;
 
   const previews: ConceptPreviewDraft[] = concepts.map((concept) => {
+    const clientName =
+      pack?.name || concept.organizationName || concept.name || '';
+
+    // Concept A only: curated Kristina × 3HC healthcare storytelling page.
+    // Bypasses Website Director / Layout Composer so internal lens craft never renders.
+    if (isKristinaConceptA(input.projectId, concept.id, clientName)) {
+      const curatedPuck = buildKristinaConceptAPuckData({
+        projectId: input.projectId,
+        returnHref: returnToConceptsHref,
+      });
+      const heroUrl = KRISTINA_MEDIA.hero;
+      const portalShell = buildKristinaConceptAPortalShell(heroUrl);
+      return {
+        conceptId: concept.id,
+        name: concept.name || 'Compassionate Continuum',
+        lens: 'cinematic' as const,
+        recommended: concept.id === input.recommendedConceptId,
+        websitePreviewPath: `/preview/factory/${encodeURIComponent(input.projectId)}/${encodeURIComponent(concept.id)}`,
+        portalPreviewPath: `/preview/factory/${encodeURIComponent(input.projectId)}/${encodeURIComponent(concept.id)}/portal`,
+        compositionSignature: KRISTINA_CURATED_SIGNATURE,
+        themeId: portalShell.themeId,
+        primaryColor: portalShell.primaryColor,
+        accentColor: portalShell.accentColor,
+        puckData: curatedPuck,
+        portalShell: {
+          ...portalShell,
+          heroImageUrl: heroUrl,
+        },
+        websiteSite: {
+          organizationName: 'Kristina Brickey',
+          brandHeadline: 'A trusted guide between hospital, home, and family',
+          brandSubhead:
+            'Clinical Liaison at 3HC — helping families understand home health and hospice pathways.',
+        },
+      };
+    }
+
     const fields = conceptToProvisionFields({
       concept,
       creativeDirection,

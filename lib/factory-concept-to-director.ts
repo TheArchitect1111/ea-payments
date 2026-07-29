@@ -296,14 +296,15 @@ export function conceptToOrganizationStoryInput(
         : undefined) ||
       transformation,
     whatChanges: scrubForbiddenPublicCopy(p?.whatChanges) || transformation,
-    differentiators: [flavor.differentiatorBias, ...differentiators]
-      .map((d) => scrubForbiddenPublicCopy(d) || d)
-      .filter(Boolean)
+    // Never inject LENS_FLAVOR.differentiatorBias (internal craft notes) into public copy.
+    differentiators: differentiators
+      .map((d) => scrubForbiddenPublicCopy(d))
+      .filter((d): d is string => Boolean(d))
       .slice(0, 6),
     brandHeadline,
     brandSubhead,
     brandCta,
-    brandVoice: [flavor.voice, p?.brandVoice, creative?.visualDirection?.style]
+    brandVoice: [flavor.voice, p?.brandVoice]
       .filter(Boolean)
       .join(' '),
     primaryColor: flavor.colorShift.primary || p?.primaryColor,
