@@ -296,8 +296,10 @@ export function buildContentPackageFromContext(
     ) ||
     (/efficiency architects|duke|basketball|coach/i.test(biography)
       ? 'Leaders, teams, and organizations seeking clarity, structure, and a trusted next step'
-      : /liaison|3hc|home\s*health|patient|care/i.test(`${biography} ${roleLine} ${orgLine}`)
-        ? 'Patients, families, and care partners navigating the next step in home health and clinical support'
+      : /liaison|hospice|home\s*health|palliative|patient|clinical\s*care|care\s*coord/i.test(
+            `${biography} ${roleLine} ${orgLine}`,
+          )
+        ? 'Patients, families, and care partners navigating the next step in clinical support'
         : 'People who want a clear next step with someone they can trust');
 
   const cinematic: ContentPackageLensCopy = {
@@ -310,7 +312,9 @@ export function buildContentPackageFromContext(
             ? `${name} — ${roleLine}`
             : `Guided next steps with ${name}`,
     heroSupporting:
-      factTexts.find((t) => /duke|captain|founder|charlotte|liaison|3hc|clinical/i.test(t)) ||
+      factTexts.find((t) =>
+        /duke|captain|founder|charlotte|liaison|hospice|home\s*health|clinical|palliative/i.test(t),
+      ) ||
       roleOrgFallback ||
       factTexts[0] ||
       positioning,
@@ -328,9 +332,9 @@ export function buildContentPackageFromContext(
         ? `${name}’s work connects through ${organizations.slice(0, 2).join(' and ')}.`
         : factTexts[2] || centralStory,
       accomplishments[0] || factTexts[3] || positioning,
-      currentWork[0] || 'Continue with one clear next conversation.',
+      currentWork[0] || 'Start with one clear next conversation.',
     ],
-    ctaLabel: 'Continue the conversation',
+    ctaLabel: 'Start a conversation',
     portalPurpose: 'A calm place to continue the relationship after the public story.',
   };
 
@@ -368,7 +372,9 @@ export function buildContentPackageFromContext(
     heroHeadline: roleLine ? `${name}, ${roleLine}` : `Meet ${name}`,
     heroSupporting:
       currentWork[0] ||
-      factTexts.find((t) => /charlotte|founder|efficiency|liaison|3hc|clinical/i.test(t)) ||
+      factTexts.find((t) =>
+        /charlotte|founder|efficiency|liaison|hospice|home\s*health|clinical|palliative/i.test(t),
+      ) ||
       roleOrgFallback ||
       factTexts[0] ||
       positioning,
@@ -385,11 +391,15 @@ export function buildContentPackageFromContext(
     portalPurpose: 'A trusted companion workspace for the relationship.',
   };
 
-  // Scrub lens copy
+  // Scrub lens copy (including CTAs — defaults must never ship forbidden slogans)
   for (const lens of [cinematic, editorial, intimate]) {
     lens.heroHeadline = scrubForbiddenPublicCopy(lens.heroHeadline) || `${name}`;
     lens.heroSupporting = scrubForbiddenPublicCopy(lens.heroSupporting) || positioning;
     lens.aboutBody = scrubForbiddenPublicCopy(lens.aboutBody) || biography;
+    lens.ctaLabel = scrubForbiddenPublicCopy(lens.ctaLabel) || 'Get started';
+    lens.portalPurpose =
+      scrubForbiddenPublicCopy(lens.portalPurpose) ||
+      'A private workspace that continues after the public story.';
     lens.sectionBodies = lens.sectionBodies
       .map((body) => scrubForbiddenPublicCopy(body) || '')
       .filter(Boolean);
@@ -433,7 +443,7 @@ export function buildContentPackageFromContext(
     currentWork,
     organizations,
     audience,
-    callsToAction: ['Continue the conversation', 'Explore the work', 'Begin'],
+    callsToAction: ['Start a conversation', 'Explore the work', 'Begin'],
     mediaPlan: {
       strategy:
         evidence.mode === 'role_org_draft'

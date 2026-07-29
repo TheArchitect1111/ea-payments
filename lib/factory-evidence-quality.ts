@@ -36,7 +36,7 @@ export function isEvidenceRelevantToSubject(
   const confused = CONFUSED_NEAR_NAMES[last] || [];
   for (const wrong of confused) {
     if (hay.includes(wrong) && !hay.includes(last)) return false;
-    // "Kristina Behringer" style — same first name, wrong surname
+    // Near-name collisions — same first name, wrong surname
     if (first && hay.includes(`${first} ${wrong}`)) return false;
   }
 

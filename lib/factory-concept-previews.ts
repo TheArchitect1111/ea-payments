@@ -34,21 +34,14 @@ import {
   type FactoryProject,
 } from '@/lib/factory-project-store';
 import { composeDirectedWebsite, puckContainsFeatureCards } from '@/lib/layout-composer';
-import {
-  buildKristinaConceptAPortalShell,
-  buildKristinaConceptAPuckData,
-  isKristinaConceptA,
-  KRISTINA_MEDIA,
-} from '@/lib/factory-kristina-concept-a';
+import { CARE_CONTINUUM_SIGNATURE } from '@/lib/layout-composer/grammars/care-continuum-editorial';
 
 export const CONCEPT_PREVIEWS_WORKER = 'concept-previews';
-
-const KRISTINA_CURATED_SIGNATURE = 'kristina-3hc-curated-v1';
 
 /** Temporary environment imagery — never a fabricated likeness; blocked from publication. */
 function temporaryHeroImageUrl(pack: ContentPackage | null | undefined): string {
   const blob = `${pack?.name || ''} ${(pack?.organizations || []).join(' ')} ${(pack?.currentWork || []).join(' ')} ${pack?.biography || ''} ${pack?.centralStory || ''}`.toLowerCase();
-  if (/liaison|3hc|home\s*health|hospital|patient|clinic|care|nurse/i.test(blob)) {
+  if (/liaison|3hc|home\s*health|hospital|patient|clinic|care|nurse|hospice/i.test(blob)) {
     return 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=1600&q=80';
   }
   return 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1600&q=80';
@@ -336,41 +329,21 @@ export async function resolveConceptPreviewDraft(
 
   const context = projectContextFromProject(project);
   const existing = getConceptPreviewDraft(context, conceptId);
-  const clientName = project.client;
+  const existingSig =
+    typeof (existing?.puckData?.root as { props?: { compositionSignature?: string } } | undefined)
+      ?.props?.compositionSignature === 'string'
+      ? (existing!.puckData!.root as { props: { compositionSignature: string } }).props
+          .compositionSignature
+      : existing?.compositionSignature || '';
+  // Prefer universal care-continuum grammar over any pre-grammar curated draft.
+  const needsCareRecompose =
+    Boolean(existingSig) &&
+    existingSig !== CARE_CONTINUUM_SIGNATURE &&
+    /hospice|home\s*health|clinical\s*liaison|care\s*coordination|palliative/i.test(
+      `${project.client} ${project.notes || ''} ${existing?.name || ''}`,
+    );
 
-  // Curated Concept A: always serve the healthcare storytelling page (never stale director output).
-  if (isKristinaConceptA(projectId, conceptId, clientName)) {
-    const returnHref = `/admin/ea-factory/quick-launch?projectId=${encodeURIComponent(projectId)}`;
-    const puckData = buildKristinaConceptAPuckData({ projectId, returnHref });
-    const portalShell = buildKristinaConceptAPortalShell(KRISTINA_MEDIA.hero);
-    const draft: ConceptPreviewDraft = {
-      conceptId,
-      name: existing?.name || 'Compassionate Continuum',
-      lens: 'cinematic',
-      recommended: existing?.recommended ?? true,
-      websitePreviewPath: `/preview/factory/${encodeURIComponent(projectId)}/${encodeURIComponent(conceptId)}`,
-      portalPreviewPath: `/preview/factory/${encodeURIComponent(projectId)}/${encodeURIComponent(conceptId)}/portal`,
-      compositionSignature: KRISTINA_CURATED_SIGNATURE,
-      themeId: portalShell.themeId,
-      primaryColor: portalShell.primaryColor,
-      accentColor: portalShell.accentColor,
-      puckData,
-      portalShell,
-      websiteSite: {
-        organizationName: 'Kristina Brickey',
-        brandHeadline: 'A trusted guide between hospital, home, and family',
-      },
-    };
-    return {
-      ok: true,
-      draft,
-      source: 'recomposed',
-      projectId,
-      conceptId,
-    };
-  }
-
-  if (existing?.puckData && existing.portalShell) {
+  if (existing?.puckData && existing.portalShell && !needsCareRecompose) {
     return {
       ok: true,
       draft: existing,
@@ -450,6 +423,7 @@ export async function resolveConceptPreviewDraft(
       recommendedConceptId: data?.recommendedConceptId,
       selectedConceptId: data?.selectedConceptId,
       selectionStatus: data?.selectionStatus,
+      projectNotes: project.notes,
     });
     const draft = composed.previews.find((p) => p.conceptId === conceptId);
     if (!draft?.puckData || !draft.portalShell) {
@@ -504,6 +478,7 @@ export function composeConceptPreviews(input: {
   selectedConceptId?: string | null;
   selectionStatus?: string;
   generatedAt?: string;
+  projectNotes?: string;
 }): ConceptPreviewsPayload {
   const at = input.generatedAt || new Date().toISOString();
   const portalLoginHref = publicPortalLoginUrl(input.portalSlug);
@@ -519,43 +494,6 @@ export function composeConceptPreviews(input: {
     : input.creativeDirection;
 
   const previews: ConceptPreviewDraft[] = concepts.map((concept) => {
-    const clientName =
-      pack?.name || concept.organizationName || concept.name || '';
-
-    // Concept A only: curated Kristina × 3HC healthcare storytelling page.
-    // Bypasses Website Director / Layout Composer so internal lens craft never renders.
-    if (isKristinaConceptA(input.projectId, concept.id, clientName)) {
-      const curatedPuck = buildKristinaConceptAPuckData({
-        projectId: input.projectId,
-        returnHref: returnToConceptsHref,
-      });
-      const heroUrl = KRISTINA_MEDIA.hero;
-      const portalShell = buildKristinaConceptAPortalShell(heroUrl);
-      return {
-        conceptId: concept.id,
-        name: concept.name || 'Compassionate Continuum',
-        lens: 'cinematic' as const,
-        recommended: concept.id === input.recommendedConceptId,
-        websitePreviewPath: `/preview/factory/${encodeURIComponent(input.projectId)}/${encodeURIComponent(concept.id)}`,
-        portalPreviewPath: `/preview/factory/${encodeURIComponent(input.projectId)}/${encodeURIComponent(concept.id)}/portal`,
-        compositionSignature: KRISTINA_CURATED_SIGNATURE,
-        themeId: portalShell.themeId,
-        primaryColor: portalShell.primaryColor,
-        accentColor: portalShell.accentColor,
-        puckData: curatedPuck,
-        portalShell: {
-          ...portalShell,
-          heroImageUrl: heroUrl,
-        },
-        websiteSite: {
-          organizationName: 'Kristina Brickey',
-          brandHeadline: 'A trusted guide between hospital, home, and family',
-          brandSubhead:
-            'Clinical Liaison at 3HC — helping families understand home health and hospice pathways.',
-        },
-      };
-    }
-
     const fields = conceptToProvisionFields({
       concept,
       creativeDirection,
@@ -564,6 +502,7 @@ export function composeConceptPreviews(input: {
       sitePath,
       contentPackage: pack,
       heroImageUrl: input.heroImageUrl,
+      projectNotes: input.projectNotes,
     });
     const composed = composeDirectedWebsite({
       organization: fields.organization,
@@ -571,35 +510,50 @@ export function composeConceptPreviews(input: {
       sitePath,
       primaryColor: fields.primaryColor,
       accentColor: fields.accentColor,
+      returnHref: returnToConceptsHref,
     });
 
-    if (puckContainsFeatureCards(composed.puckData)) {
+    const isCareContinuum =
+      composed.composed.compositionSignature === CARE_CONTINUUM_SIGNATURE;
+
+    if (!isCareContinuum && puckContainsFeatureCards(composed.puckData)) {
       throw new Error(
         `Concept ${concept.id} compose emitted EAFeatures (forbidden).`,
       );
     }
+
+    const rootProps = (composed.puckData.root as { props?: Record<string, unknown> } | undefined)
+      ?.props || {};
+    const themeId =
+      (typeof rootProps.themeId === 'string' && rootProps.themeId) || fields.themeId;
 
     const themedPuck: Data = {
       ...composed.puckData,
       root: {
         ...(composed.puckData.root || {}),
         props: {
-          ...((composed.puckData.root as { props?: Record<string, unknown> } | undefined)
-            ?.props || {}),
-          themeId: fields.themeId,
+          ...rootProps,
+          themeId,
           factoryConceptId: concept.id,
           factoryConceptName: concept.name,
           compositionSignature: composed.composed.compositionSignature,
           storyClassification: composed.director.classification,
-          creativeDirection: composed.director.creativeDirection,
+          // Never stamp director creativeDirection into public root for care continuum.
+          ...(isCareContinuum
+            ? { grammar: 'care-continuum-editorial' }
+            : {
+                creativeDirection: composed.director.creativeDirection,
+                websiteSite: composed.websiteSite,
+              }),
           websiteSite: composed.websiteSite,
         },
-      } as Data['root'],
+      } as unknown as Data['root'],
     };
 
     const continuity = creativeDirection?.portalContinuity;
     const lens = fields.lens;
     const lensPurpose = pack?.lenses?.[lens]?.portalPurpose;
+    const portalFromGrammar = composed.portalShellExtras;
 
     return {
       conceptId: concept.id,
@@ -609,27 +563,33 @@ export function composeConceptPreviews(input: {
       websitePreviewPath: `/preview/factory/${encodeURIComponent(input.projectId)}/${encodeURIComponent(concept.id)}`,
       portalPreviewPath: `/preview/factory/${encodeURIComponent(input.projectId)}/${encodeURIComponent(concept.id)}/portal`,
       compositionSignature: composed.composed.compositionSignature,
-      themeId: fields.themeId,
-      primaryColor: fields.primaryColor,
-      accentColor: fields.accentColor,
+      themeId,
+      primaryColor: portalFromGrammar?.primaryColor || fields.primaryColor,
+      accentColor: portalFromGrammar?.accentColor || fields.accentColor,
       puckData: themedPuck,
-      portalShell: {
-        tone: concept.portal?.tone || 'Calm executive continuity from the public story',
-        composition:
-          concept.portal?.composition ||
-          'Single next-best-action with narrative progress',
-        purpose: lensPurpose || continuity?.purpose,
-        firstView: Array.isArray(continuity?.firstView) ? continuity!.firstView! : [],
-        primaryColor: fields.primaryColor,
-        accentColor: fields.accentColor,
-        themeId: fields.themeId,
-        organizationName: fields.organization.organizationName,
-        brandHeadline: fields.organization.brandHeadline || fields.organization.organizationName,
-        brandSubhead: fields.organization.brandSubhead,
-        memberWhere: fields.organization.member?.whereYouAre,
-        memberNext: fields.organization.member?.whatNext,
-        heroImageUrl: input.heroImageUrl,
-      },
+      portalShell: portalFromGrammar
+        ? {
+            ...portalFromGrammar,
+            heroImageUrl: portalFromGrammar.heroImageUrl || input.heroImageUrl,
+          }
+        : {
+            tone: concept.portal?.tone || 'Calm executive continuity from the public story',
+            composition:
+              concept.portal?.composition ||
+              'Single next-best-action with narrative progress',
+            purpose: lensPurpose || continuity?.purpose,
+            firstView: Array.isArray(continuity?.firstView) ? continuity!.firstView! : [],
+            primaryColor: fields.primaryColor,
+            accentColor: fields.accentColor,
+            themeId,
+            organizationName: fields.organization.organizationName,
+            brandHeadline:
+              fields.organization.brandHeadline || fields.organization.organizationName,
+            brandSubhead: fields.organization.brandSubhead,
+            memberWhere: fields.organization.member?.whereYouAre,
+            memberNext: fields.organization.member?.whatNext,
+            heroImageUrl: input.heroImageUrl,
+          },
       websiteSite: composed.websiteSite,
     };
   });
@@ -681,7 +641,10 @@ export async function generateAndPersistConceptPreviews(
     return { ok: false, error: 'experience_concepts artifact has no concepts.' };
   }
 
-  const contentPackageBase = buildContentPackageFromProject(project);
+  // Prefer a ready pack already on context (research / seed) over rebuilding stubs.
+  const existingPack = readContentPackageFromContext(context);
+  const contentPackageBase =
+    existingPack?.quality?.ready ? existingPack : buildContentPackageFromProject(project);
   const eceBundle = readExperienceCreationBundleFromProject(project);
   const contentPackage = eceBundle?.content
     ? contentPackageFromCreativePack(contentPackageBase, eceBundle.content)
@@ -713,6 +676,7 @@ export async function generateAndPersistConceptPreviews(
       recommendedConceptId: data.recommendedConceptId,
       selectedConceptId: data.selectedConceptId,
       selectionStatus: data.selectionStatus,
+      projectNotes: project.notes,
     });
   } catch (err) {
     return {

@@ -645,8 +645,8 @@
   color: #9ec4c8;
 }
 
-/* —— Kristina × 3HC editorial theme —— */
-.kristina-3hc-editorial-theme {
+/* —— Premium care continuum editorial theme —— */
+.premium-care-editorial-theme {
   --ea-navy: #1b3a4b;
   --ea-gold: #7ba3a8;
   --ea-text: #14252f;
@@ -658,46 +658,208 @@
   color: var(--ea-text);
 }
 
-.kristina-3hc-editorial-theme .eb-block {
+.premium-care-editorial-theme .eb-block {
   font-family: 'Source Sans 3', 'Segoe UI', system-ui, sans-serif;
 }
 
-.kristina-3hc-editorial-theme .eb-hero-media img {
-  object-position: 68% 18%;
+.premium-care-editorial-theme .eb-hero-media img {
+  object-position: 65% 18%;
 }
 
-.kristina-3hc-editorial-theme .eb-hero {
+.premium-care-editorial-theme .eb-hero[data-focal='face-right'] .eb-hero-media img {
+  object-position: 70% 18%;
+}
+
+.premium-care-editorial-theme .eb-hero[data-focal='face-left'] .eb-hero-media img {
+  object-position: 30% 18%;
+}
+
+.premium-care-editorial-theme .eb-hero[data-focal='center'] .eb-hero-media img,
+.premium-care-editorial-theme .eb-hero[data-focal='environment'] .eb-hero-media img {
+  object-position: center 30%;
+}
+
+.premium-care-editorial-theme .eb-hero[data-focal='hands'] .eb-hero-media img {
+  object-position: center 55%;
+}
+
+/* Wide art direction: split plane so portrait is never edge-cropped */
+@media (min-width: 1440px) {
+  .premium-care-editorial-theme .eb-hero--threshold {
+    display: grid;
+    grid-template-columns: minmax(32rem, 0.92fr) minmax(0, 1.08fr);
+    align-items: stretch;
+    padding: 0;
+    min-height: min(86svh, 880px);
+  }
+
+  .premium-care-editorial-theme .eb-hero--threshold .eb-hero-media {
+    position: relative;
+    inset: auto;
+    order: 2;
+    min-height: 100%;
+  }
+
+  .premium-care-editorial-theme .eb-hero--threshold .eb-hero-media img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 20%;
+  }
+
+  .premium-care-editorial-theme .eb-hero--threshold .eb-hero-media::after {
+    background: linear-gradient(90deg, rgba(15, 36, 48, 0.28), transparent 40%);
+  }
+
+  .premium-care-editorial-theme .eb-hero--threshold .eb-hero-copy {
+    order: 1;
+    max-width: none;
+    margin: 0;
+    padding: clamp(5rem, 9vw, 8rem) clamp(2rem, 5vw, 4.75rem);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    background: #0f2430;
+  }
+
+  .premium-care-editorial-theme .eb-hero--threshold .eb-hero-title {
+    max-width: 11ch;
+  }
+}
+
+.premium-care-editorial-theme .eb-section-scale--lg .eb-section-title {
+  font-size: clamp(2.4rem, 4.6vw, 4rem);
+}
+
+.premium-care-editorial-theme .eb-section-scale--md .eb-section-title {
+  font-size: clamp(1.9rem, 3.4vw, 3rem);
+}
+
+.eb-overlap-scene {
+  position: relative;
+  min-height: clamp(420px, 58vw, 640px);
+  display: grid;
+  align-items: end;
+  overflow: hidden;
+  color: #fff;
+}
+
+.eb-overlap-scene-media {
+  position: absolute;
+  inset: 0;
+}
+
+.eb-overlap-scene-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.eb-overlap-scene::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, rgba(15, 36, 48, 0.92) 0%, rgba(15, 36, 48, 0.55) 46%, rgba(15, 36, 48, 0.15) 75%);
+}
+
+.eb-overlap-scene-copy {
+  position: relative;
+  z-index: 1;
+  max-width: 40rem;
+  padding: clamp(3rem, 8vw, 6rem) clamp(1.25rem, 5vw, 4.5rem);
+}
+
+.eb-overlap-scene .eb-section-title,
+.eb-overlap-scene .eb-section-body,
+.eb-overlap-scene .eb-section-label {
+  color: #fff;
+}
+
+.eb-overlap-scene-note {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  opacity: 0.8;
+  max-width: 34rem;
+}
+
+.eb-pathway-strip-grid {
+  display: grid;
+  gap: 1rem;
+  margin-top: 2rem;
+  grid-template-columns: 1.35fr 1fr 1fr;
+}
+
+.eb-pathway-card {
+  border-top: 2px solid #7ba3a8;
+  background: rgba(255, 255, 255, 0.72);
+  padding: 1.5rem 1.25rem 1.75rem;
+}
+
+.eb-pathway-card--lead {
+  background: #1b3a4b;
+  color: #fff;
+  border-top-color: #9ec4c8;
+  min-height: 100%;
+}
+
+.eb-pathway-card--lead .eb-pathway-title,
+.eb-pathway-card--lead .eb-pathway-body {
+  color: #fff;
+}
+
+.eb-pathway-title {
+  margin: 0 0 0.65rem;
+  font-family: 'Libre Baskerville', Georgia, serif;
+  font-size: 1.35rem;
+  font-weight: 400;
+}
+
+.eb-pathway-body {
+  margin: 0;
+  line-height: 1.65;
+  color: #2a3f4a;
+}
+
+@media (max-width: 900px) {
+  .eb-pathway-strip-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.premium-care-editorial-theme .eb-hero {
   min-height: min(88svh, 900px);
   padding: clamp(6rem, 12vw, 10rem) clamp(1.25rem, 6vw, 5.5rem) clamp(3rem, 6vw, 5rem);
   align-items: flex-end;
   background: #0f2430;
 }
 
-.kristina-3hc-editorial-theme .eb-hero-media::after {
+.premium-care-editorial-theme .eb-hero-media::after {
   background:
     linear-gradient(90deg, rgba(15, 36, 48, 0.92) 0%, rgba(15, 36, 48, 0.55) 42%, rgba(15, 36, 48, 0.18) 72%),
     linear-gradient(0deg, rgba(15, 36, 48, 0.78) 0%, transparent 48%);
 }
 
-.kristina-3hc-editorial-theme .eb-hero-copy {
+.premium-care-editorial-theme .eb-hero-copy {
   max-width: min(38rem, 92vw);
   margin: 0;
 }
 
-.kristina-3hc-editorial-theme .eb-hero-title,
-.kristina-3hc-editorial-theme .eb-section-title {
+.premium-care-editorial-theme .eb-hero-title,
+.premium-care-editorial-theme .eb-section-title {
   font-family: 'Libre Baskerville', 'Iowan Old Style', Georgia, serif;
   font-weight: 400;
   letter-spacing: -0.025em;
 }
 
-.kristina-3hc-editorial-theme .eb-hero-title {
+.premium-care-editorial-theme .eb-hero-title {
   font-size: clamp(2.4rem, 5.4vw, 4.6rem);
   line-height: 1.05;
   max-width: 14ch;
 }
 
-.kristina-3hc-editorial-theme .eb-hero-subtitle {
+.premium-care-editorial-theme .eb-hero-subtitle {
   margin: 1.25rem 0 1.75rem;
   max-width: 36rem;
   font-size: clamp(1.02rem, 1.5vw, 1.18rem);
@@ -705,62 +867,62 @@
   color: rgba(255, 255, 255, 0.9);
 }
 
-.kristina-3hc-editorial-theme .eb-hero-eyebrow,
-.kristina-3hc-editorial-theme .eb-section-label {
+.premium-care-editorial-theme .eb-hero-eyebrow,
+.premium-care-editorial-theme .eb-section-label {
   color: #9ec4c8;
   letter-spacing: 0.2em;
 }
 
-.kristina-3hc-editorial-theme .eb-btn {
+.premium-care-editorial-theme .eb-btn {
   border-radius: 999px;
   min-height: 48px;
   padding-inline: 1.4rem;
   letter-spacing: 0.04em;
 }
 
-.kristina-3hc-editorial-theme .eb-btn-primary {
+.premium-care-editorial-theme .eb-btn-primary {
   background: #7ba3a8;
   color: #0f2430;
 }
 
-.kristina-3hc-editorial-theme .eb-btn-secondary {
+.premium-care-editorial-theme .eb-btn-secondary {
   background: transparent;
   color: #fff;
   border: 1px solid rgba(255, 255, 255, 0.45);
 }
 
-.kristina-3hc-editorial-theme .eb-section {
+.premium-care-editorial-theme .eb-section {
   padding: clamp(3.5rem, 8vw, 7.5rem) clamp(1.25rem, 5vw, 4.5rem);
   background: transparent;
 }
 
-.kristina-3hc-editorial-theme .eb-section:nth-of-type(odd) {
+.premium-care-editorial-theme .eb-section:nth-of-type(odd) {
   background: rgba(255, 255, 255, 0.55);
 }
 
-.kristina-3hc-editorial-theme .eb-section-inner {
+.premium-care-editorial-theme .eb-section-inner {
   max-width: 1120px;
 }
 
-.kristina-3hc-editorial-theme .eb-section-title {
+.premium-care-editorial-theme .eb-section-title {
   font-size: clamp(2rem, 3.8vw, 3.4rem);
   line-height: 1.12;
   max-width: 18ch;
   color: var(--ea-navy);
 }
 
-.kristina-3hc-editorial-theme .eb-section-body {
+.premium-care-editorial-theme .eb-section-body {
   max-width: 42rem;
   font-size: 1.08rem;
   line-height: 1.75;
   color: #2a3f4a;
 }
 
-.kristina-3hc-editorial-theme .eb-features {
+.premium-care-editorial-theme .eb-features {
   gap: 1.25rem;
 }
 
-.kristina-3hc-editorial-theme .eb-feature-card {
+.premium-care-editorial-theme .eb-feature-card {
   border-radius: 0;
   border: 0;
   border-top: 2px solid #7ba3a8;
@@ -769,57 +931,57 @@
   padding: 1.5rem 1.25rem 1.75rem;
 }
 
-.kristina-3hc-editorial-theme .eb-split-grid {
+.premium-care-editorial-theme .eb-split-grid {
   display: grid;
   gap: clamp(1.5rem, 4vw, 3rem);
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   margin-top: 1.75rem;
 }
 
-.kristina-3hc-editorial-theme .eb-split-grid > div {
+.premium-care-editorial-theme .eb-split-grid > div {
   background: #fff;
   border: 1px solid var(--ea-border);
   padding: 1.75rem 1.5rem;
 }
 
-.kristina-3hc-editorial-theme .eb-cta-band {
+.premium-care-editorial-theme .eb-cta-band {
   background: #1b3a4b;
   text-align: left;
   padding: clamp(3.5rem, 8vw, 6.5rem) clamp(1.25rem, 6vw, 5rem);
 }
 
-.kristina-3hc-editorial-theme .eb-cta-band .eb-section-inner {
+.premium-care-editorial-theme .eb-cta-band .eb-section-inner {
   max-width: 720px;
 }
 
-.kristina-3hc-editorial-theme .eb-cta-band .eb-cta-row {
+.premium-care-editorial-theme .eb-cta-band .eb-cta-row {
   justify-content: flex-start;
 }
 
-.kristina-3hc-editorial-theme .eb-cta-band .eb-btn-primary {
+.premium-care-editorial-theme .eb-cta-band .eb-btn-primary {
   background: #9ec4c8;
   color: #0f2430;
 }
 
-.kristina-3hc-editorial-theme .eb-cta-band .eb-btn-secondary {
+.premium-care-editorial-theme .eb-cta-band .eb-btn-secondary {
   color: #fff;
   border-color: rgba(255, 255, 255, 0.4);
 }
 
 @media (max-width: 800px) {
-  .kristina-3hc-editorial-theme .eb-hero {
+  .premium-care-editorial-theme .eb-hero {
     min-height: 78svh;
     align-items: flex-end;
     padding: 18rem 1.15rem 2.5rem;
   }
 
-  .kristina-3hc-editorial-theme .eb-hero-media::after {
+  .premium-care-editorial-theme .eb-hero-media::after {
     background:
       linear-gradient(180deg, rgba(15, 36, 48, 0.15) 10%, rgba(15, 36, 48, 0.92) 68%),
       linear-gradient(90deg, rgba(15, 36, 48, 0.55), transparent 70%);
   }
 
-  .kristina-3hc-editorial-theme .eb-hero-title {
+  .premium-care-editorial-theme .eb-hero-title {
     max-width: none;
   }
 
@@ -829,8 +991,8 @@
 }
 
 @media (min-width: 1100px) {
-  .kristina-3hc-editorial-theme .eb-section--documentary .eb-section-inner,
-  .kristina-3hc-editorial-theme .eb-section--legacy .eb-section-inner {
+  .premium-care-editorial-theme .eb-section--documentary .eb-section-inner,
+  .premium-care-editorial-theme .eb-section--legacy .eb-section-inner {
     display: grid;
     grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
     gap: 3rem;

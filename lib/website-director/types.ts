@@ -138,6 +138,54 @@ export type OrganizationStoryInput = {
     purpose?: string;
     whatSuccessLooksLike?: string;
   };
+  /** Optional care-continuum editorial fields (from verified research — never creative direction). */
+  subjectRole?: string;
+  affiliatedOrganizationName?: string;
+  biographyPublic?: string;
+  roleExplainer?: string;
+  roleAttributionNote?: string;
+  pathwaysIntro?: string;
+  carePathways?: Array<{ title: string; body: string }>;
+  serviceGeography?: string;
+  serviceGeographyTitle?: string;
+  serviceGeographyBody?: string;
+  geographyAccent?: string;
+  geographyCaption?: string;
+  contactPhone?: string;
+  contactPhoneHref?: string;
+  organizationUrl?: string;
+  secondaryCtaLabel?: string;
+  ctaBody?: string;
+  footerTagline?: string;
+  footerAddress?: string;
+  footerNote?: string;
+  mediaSlots?: {
+    hero?: {
+      url: string;
+      caption?: string;
+      focal?: 'face-right' | 'face-left' | 'center' | 'hands' | 'environment';
+    };
+    clinician?: {
+      url: string;
+      caption?: string;
+      focal?: 'face-right' | 'face-left' | 'center' | 'hands' | 'environment';
+    };
+    homeCare?: {
+      url: string;
+      caption?: string;
+      focal?: 'face-right' | 'face-left' | 'center' | 'hands' | 'environment';
+    };
+    family?: {
+      url: string;
+      caption?: string;
+      focal?: 'face-right' | 'face-left' | 'center' | 'hands' | 'environment';
+    };
+    calm?: {
+      url: string;
+      caption?: string;
+      focal?: 'face-right' | 'face-left' | 'center' | 'hands' | 'environment';
+    };
+  };
 };
 
 export type WebsiteDirectorPackage = {

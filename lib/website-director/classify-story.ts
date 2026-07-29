@@ -81,8 +81,11 @@ const RULES: SignalRule[] = [
   },
   {
     archetype: 'The Caregiver',
-    patterns: [/\b(care|nurtur|heal|compassion|tend|wellness|patient)\b/i],
-    weight: 3,
+    patterns: [
+      /\b(care|nurtur|heal|compassion|tend|wellness|patient)\b/i,
+      /\b(hospice|home\s*health|home\s*care|palliative|clinical\s*liaison|care\s*coordination|skilled\s*nursing)\b/i,
+    ],
+    weight: 3.5,
   },
   {
     archetype: 'The Craftsman',

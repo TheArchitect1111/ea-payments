@@ -17,7 +17,7 @@ function rootBrand(data: Data): { primary?: string; accent?: string; themeId?: s
 
 function themeClassName(themeId?: string): string | undefined {
   if (themeId === 'amanda-editorial') return 'amanda-editorial-theme';
-  if (themeId === 'kristina-3hc-editorial') return 'kristina-3hc-editorial-theme';
+  if (themeId === 'premium-care-editorial') return 'premium-care-editorial-theme';
   return undefined;
 }
 

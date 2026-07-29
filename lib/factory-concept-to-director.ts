@@ -10,6 +10,12 @@ import {
 } from '@/lib/factory-forbidden-copy.mjs';
 import type { ContentPackage } from '@/lib/factory-content-package';
 import type { OrganizationStoryInput } from '@/lib/website-director';
+import { enrichOrganizationWithCareContinuumFields } from '@/lib/layout-composer/map-care-continuum-fields';
+import {
+  CARE_CONTINUUM_THEME_ID,
+  shouldUseCareContinuumEditorial,
+} from '@/lib/layout-composer/grammars/care-continuum-editorial';
+import { parseDistinguishingDetail } from '@/lib/factory-identity-gate';
 
 export type ExperienceConceptLens = 'cinematic' | 'editorial' | 'intimate';
 
@@ -74,6 +80,8 @@ export type ConceptToDirectorOptions = {
   contentPackage?: ContentPackage | null;
   /** Preview-eligible hero image URL from media_brand_pack. */
   heroImageUrl?: string;
+  /** Project notes (may include Distinguishing detail: …). */
+  projectNotes?: string;
 };
 
 const LENS_FLAVOR: Record<
@@ -209,16 +217,10 @@ export function conceptToOrganizationStoryInput(
     scrubForbiddenPublicCopy(p?.headline) ||
     `${organizationName} — ${scrubForbiddenPublicCopy(pack?.centralStory)?.slice(0, 120) || 'a researched public story.'}`;
 
-  const websiteNotes = [
-    options.concept.website?.composition,
-    options.concept.website?.imageBehavior,
-    options.concept.website?.typeBehavior,
-    options.concept.website?.motion,
-    creative?.visualDirection?.style,
-    creative?.visualDirection?.photography,
-  ]
-    .filter(Boolean)
-    .join(' · ');
+  const beats = Array.isArray(creative?.homepageStoryBeats)
+    ? creative!.homepageStoryBeats!
+    : [];
+  void beats;
 
   const differentiators = [
     ...(Array.isArray(p?.differentiators) ? p!.differentiators! : []),
@@ -226,16 +228,10 @@ export function conceptToOrganizationStoryInput(
     ...(pack?.accomplishments || []).slice(0, 3),
     ...(pack?.claims || []).slice(0, 3).map((c) => c.text),
     options.concept.rationale,
-    websiteNotes ? `Lens craft: ${websiteNotes.slice(0, 180)}` : null,
   ]
     .map((item) => (typeof item === 'string' ? scrubForbiddenPublicCopy(item) : undefined))
     .filter((item): item is string => Boolean(item && String(item).trim()))
     .slice(0, 6);
-
-  const beats = Array.isArray(creative?.homepageStoryBeats)
-    ? creative!.homepageStoryBeats!
-    : [];
-  void beats;
 
   const brandHeadline =
     scrubForbiddenPublicCopy(lensCopy?.heroHeadline) ||
@@ -274,7 +270,7 @@ export function conceptToOrganizationStoryInput(
         `${flavor.storyBias} ${sentence} ${options.concept.rationale || ''}`,
       ) || sentence;
 
-  return {
+  const base: OrganizationStoryInput = {
     organizationName,
     industry: p?.industry,
     primaryAudience: audience,
@@ -325,6 +321,17 @@ export function conceptToOrganizationStoryInput(
         'A clear next step and continuity from the public story.',
     },
   };
+
+  const distinguishing =
+    parseDistinguishingDetail(options.projectNotes || '') ||
+    parseDistinguishingDetail(pack?.biography || '') ||
+    undefined;
+
+  return enrichOrganizationWithCareContinuumFields(base, pack || null, {
+    distinguishingDetail: distinguishing || undefined,
+    heroImageUrl: options.heroImageUrl,
+    organizationUrl: pack?.sources?.find((s) => s.url)?.url,
+  });
 }
 
 /** Theme id for preview / publish continuity (editorial lens → amanda-editorial when Amanda). */
@@ -350,7 +357,9 @@ export function conceptToProvisionFields(
 } {
   const lens = detectConceptLens(options.concept);
   const organization = conceptToOrganizationStoryInput(options);
-  const themeId = themeIdForConceptLens(lens, options.portalSlug);
+  const themeId = shouldUseCareContinuumEditorial({ organization })
+    ? CARE_CONTINUUM_THEME_ID
+    : themeIdForConceptLens(lens, options.portalSlug);
   return {
     lens,
     organization,
