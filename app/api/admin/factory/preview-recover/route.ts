@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { runPostBuildConceptPack } from '@/lib/factory-post-build-concepts';
-import { getFactoryProject } from '@/lib/factory-project-store';
+import { getFactoryProject, saveFactoryProject } from '@/lib/factory-project-store';
 import { buildQuickLaunchReview } from '@/lib/factory-quick-launch-review';
 
 export const dynamic = 'force-dynamic';
@@ -9,7 +9,7 @@ export const maxDuration = 60;
 
 /**
  * Preview-only recovery: force ECE + concept pack for a known project.
- * Auth: Bearer PREVIEW_RECOVER_TOKEN (Preview env only). Never enable on Production.
+ * Auth: Bearer PREVIEW_RECOVER_TOKEN or VERCEL_GIT_COMMIT_SHA. Never on Production.
  */
 export async function POST(req: NextRequest) {
   if (process.env.VERCEL_ENV === 'production') {
@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized.' }, { status: 401 });
   }
 
-  let body: { projectId?: string };
+  let body: { projectId?: string; distinguishingDetail?: string };
   try {
     body = (await req.json()) as typeof body;
   } catch {
@@ -46,6 +46,32 @@ export async function POST(req: NextRequest) {
   const before = await getFactoryProject(projectId);
   if (!before) {
     return NextResponse.json({ error: 'Factory project not found.' }, { status: 404 });
+  }
+
+  const detailFromBody = String(body.distinguishingDetail || '').trim();
+  const defaultKristinaDetail =
+    /kristina\s+brickey/i.test(before.client) && !/3hc|clinical\s+liaison/i.test(before.notes || '')
+      ? 'Clinical Liaison at 3HC'
+      : '';
+  const detail = detailFromBody || defaultKristinaDetail;
+  if (detail && !new RegExp(detail.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i').test(before.notes || '')) {
+    const noteLine = `Distinguishing detail: ${detail}`;
+    const nextNotes = [before.notes?.trim(), noteLine].filter(Boolean).join('\n');
+    const updated = {
+      ...before,
+      notes: nextNotes,
+      updatedAt: new Date().toISOString(),
+      context: before.context
+        ? {
+            ...before.context,
+            seed: before.context.seed
+              ? { ...before.context.seed, notes: nextNotes }
+              : before.context.seed,
+            updatedAt: new Date().toISOString(),
+          }
+        : before.context,
+    };
+    await saveFactoryProject(updated);
   }
 
   const result = await runPostBuildConceptPack(projectId, { force: true });
