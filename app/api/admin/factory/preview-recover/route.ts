@@ -5,7 +5,7 @@ import { buildQuickLaunchReview } from '@/lib/factory-quick-launch-review';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 /**
  * Preview-only recovery: force ECE + concept pack for a known project.
