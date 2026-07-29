@@ -9,7 +9,7 @@ import { getFactoryProject } from '@/lib/factory-project-store';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 /** GET — load latest composed concept previews for a Factory project. */
 export async function GET(req: NextRequest) {
