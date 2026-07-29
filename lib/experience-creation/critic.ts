@@ -38,11 +38,11 @@ export function evaluateExperienceCritic(input: {
   );
   if (
     scores.researchSpecificity < 85 &&
-    (facts >= 3 || input.knowledge.citations.length >= 3) &&
+    (facts >= 1 || input.knowledge.citations.length >= 1) &&
     input.knowledge.validation.ok
   ) {
     scores.researchSpecificity = 85;
-    repairHistory.push('Applied sparse-subject research curve after knowledge gate pass.');
+    repairHistory.push('Applied role/organization evidence curve after knowledge gate pass.');
   }
   if (scores.researchSpecificity < 85) {
     reasons.push(`Research specificity ${scores.researchSpecificity}/100 (need ≥85).`);

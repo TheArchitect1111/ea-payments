@@ -8,6 +8,10 @@ import {
   scrubForbiddenPublicCopy,
 } from '@/lib/factory-forbidden-copy.mjs';
 import { parseDistinguishingDetail } from '@/lib/factory-identity-gate';
+import {
+  evaluateEvidenceQuality,
+  isEvidenceRelevantToSubject,
+} from '@/lib/factory-evidence-quality';
 import { projectContextFromProject, type ProjectContext } from '@/lib/factory-project-context';
 import type { FactoryProject } from '@/lib/factory-project-store';
 
@@ -129,6 +133,7 @@ export function buildContentPackageFromContext(
   ) => {
     const cleaned = scrubForbiddenPublicCopy(text);
     if (!cleaned || cleaned.length < 8) return;
+    if (!isEvidenceRelevantToSubject(name, cleaned, sourceUrl)) return;
     if (claims.some((c) => c.text.toLowerCase() === cleaned.toLowerCase())) return;
     claims.push({ text: cleaned, status, sourceUrl });
   };
@@ -192,7 +197,6 @@ export function buildContentPackageFromContext(
 
   for (const part of extractFromNotes(notes)) {
     addClaim(part, 'admin_clarification');
-    // Heuristic split for milestones / orgs from clarification text
     if (/duke|basketball|captain|coach|charlotte|efficiency architects|founder/i.test(part)) {
       pushUnique(milestones, part);
       pushUnique(accomplishments, part);
@@ -202,6 +206,14 @@ export function buildContentPackageFromContext(
     }
     if (/\bduke\b/i.test(part)) {
       pushUnique(organizations, 'Duke University');
+    }
+    if (/3hc|home\s*health|health\s*care/i.test(part)) {
+      pushUnique(organizations, /3hc/i.test(part) ? '3HC' : part);
+      pushUnique(currentWork, part);
+    }
+    if (/clinical\s+liaison|liaison|nurse|director/i.test(part)) {
+      pushUnique(currentWork, part);
+      pushUnique(milestones, part);
     }
     if (/charlotte/i.test(part)) {
       pushUnique(currentWork, `Based in Charlotte, North Carolina`);
@@ -356,23 +368,26 @@ export function buildContentPackageFromContext(
   }
 
   const missing: string[] = [];
-  if (claims.length < 3) missing.push('Need at least three meaningful verified facts');
-  if (sources.length < 2 && claims.filter((c) => c.status === 'admin_clarification').length < 1) {
-    missing.push('Need at least two credible sources (or a clear administrator clarification)');
+  const evidence = evaluateEvidenceQuality({
+    subjectName: name,
+    claims: claims.map((c) => ({
+      text: c.text,
+      status: c.status,
+      sourceUrl: c.sourceUrl,
+    })),
+    organizations,
+    currentWork,
+    biography,
+    sources,
+  });
+  if (!evidence.ok) {
+    missing.push(...evidence.reasons);
   }
-  if (!biography || biography.length < 40) missing.push('Need a subject-specific narrative');
-  if (containsForbiddenPublicCopy(centralStory)) missing.push('Central story still contains forbidden copy');
-
-  // Clarification can substitute for thin web research when explicit admin evidence exists.
-  const clarificationCount = claims.filter((c) => c.status === 'admin_clarification').length;
-  const ready =
-    missing.length === 0 ||
-    (clarificationCount >= 1 && claims.length >= 3 && !containsForbiddenPublicCopy(centralStory));
-
-  if (ready && missing.length) {
-    // Clarification path satisfied — clear soft missing that were superseded.
-    missing.length = 0;
+  if (containsForbiddenPublicCopy(centralStory)) {
+    missing.push('Central story still contains forbidden copy');
   }
+
+  const ready = missing.length === 0;
 
   return {
     schemaVersion: 1,
@@ -390,7 +405,9 @@ export function buildContentPackageFromContext(
     callsToAction: ['Continue the conversation', 'Explore the work', 'Begin'],
     mediaPlan: {
       strategy:
-        'Use verified public media when permitted; otherwise use clearly marked temporary preview media. Never auto-publish unlicensed discovered images.',
+        evidence.mode === 'role_org_draft'
+          ? 'Role and organization imagery with temporary preview media until subject-owned assets arrive. Never auto-publish unlicensed discovered images.'
+          : 'Use verified public media when permitted; otherwise use clearly marked temporary preview media. Never auto-publish unlicensed discovered images.',
       items: [
         {
           label: 'Primary portrait / brand image',

@@ -10,6 +10,7 @@ import {
 } from '@/lib/factory-forbidden-copy.mjs';
 import type { ContentPackage } from '@/lib/factory-content-package';
 import type { ConceptPreviewsPayload } from '@/lib/factory-concept-previews';
+import { evaluateEvidenceQuality } from '@/lib/factory-evidence-quality';
 
 const FORBIDDEN =
   /\b(your organization|lorem|placeholder|card\s*1|sample text|coming soon|tbd|todo)\b/i;
@@ -117,7 +118,8 @@ export type ConceptQualityGateResult =
   | { ok: false; reasons: string[] };
 
 /**
- * UXG content safety gate — blocks Ready for review when previews are placeholders.
+ * UXG content safety gate — blocks Ready for review for dishonest/empty drafts.
+ * Uses evidence-quality (role/org/official source), not a fixed three-fact quota.
  */
 export function evaluateConceptQualityGate(input: {
   contentPackage: ContentPackage | null;
@@ -129,22 +131,21 @@ export function evaluateConceptQualityGate(input: {
     reasons.push('Research content package is missing.');
     return { ok: false, reasons };
   }
-  if (!pack.quality.ready) {
-    reasons.push(
-      ...(pack.quality.missing.length ? pack.quality.missing : ['Content package is not ready.']),
-    );
-  }
-  if (pack.quality.factCount < 3) {
-    reasons.push('Need at least three meaningful verified facts.');
-  }
-  if (
-    pack.quality.sourceCount < 2 &&
-    pack.claims.filter((c) => c.status === 'admin_clarification').length < 1
-  ) {
-    reasons.push('Need at least two credible sources.');
-  }
-  if ((pack.biography || '').length < 40) {
-    reasons.push('Need a subject-specific About / Story narrative.');
+
+  const evidence = evaluateEvidenceQuality({
+    subjectName: pack.name,
+    claims: pack.claims.map((c) => ({
+      text: c.text,
+      status: c.status,
+      sourceUrl: c.sourceUrl,
+    })),
+    organizations: pack.organizations,
+    currentWork: pack.currentWork,
+    biography: pack.biography || pack.centralStory,
+    sources: pack.sources,
+  });
+  if (!evidence.ok) {
+    reasons.push(...evidence.reasons);
   }
 
   const forbiddenInPack = findForbiddenPublicCopy(pack);

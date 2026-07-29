@@ -22,6 +22,10 @@ import {
   containsForbiddenPublicCopy,
   scrubForbiddenPublicCopy,
 } from '@/lib/factory-forbidden-copy.mjs';
+import {
+  evaluateEvidenceQuality,
+  isEvidenceRelevantToSubject,
+} from '@/lib/factory-evidence-quality';
 
 function asRecord(value: unknown): Record<string, unknown> | null {
   return value && typeof value === 'object' && !Array.isArray(value)
@@ -48,44 +52,27 @@ export function evaluateKnowledgeGate(pack: SubjectKnowledgePack): {
   ok: boolean;
   reasons: string[];
 } {
-  const reasons: string[] = [];
-  const verified = pack.claims.filter((c) => c.status === 'verified' || c.status === 'supported_inference');
-  if (pack.verifiedIdentity.status !== 'resolved' && pack.verifiedIdentity.status !== 'incomplete') {
-    if (pack.verifiedIdentity.status === 'ambiguous') {
-      reasons.push('Multiple credible identities remain — clarification required.');
-    } else {
-      reasons.push('Subject identity is not confirmed.');
-    }
-  }
-  if (pack.citations.length < 3 && verified.length < 8) {
-    reasons.push('Need at least three credible sources or eight meaningful facts.');
-  }
-  if (verified.length < 8 && pack.claims.filter((c) => c.status !== 'unknown').length < 5) {
-    reasons.push('Research completeness below threshold for sparse-subject exception.');
-  }
-  if ((pack.biography || '').length < 80) {
-    reasons.push('Need a substantive biography or timeline narrative.');
-  }
-  if (!pack.currentWork.length && !pack.audiences.length) {
-    reasons.push('Need current-work or audience/purpose signal.');
-  }
-  if (!pack.claims.length) {
-    reasons.push('No structured claims extracted.');
-  }
-  // Sparse-subject exception: admin clarification + ≥3 claims can pass with warnings.
-  const clarificationHeavy =
-    pack.claims.filter((c) => c.sourceUrls.length === 0 && c.status === 'supported_inference')
-      .length >= 3;
-  if (reasons.length && clarificationHeavy && verified.length >= 3 && pack.biography.length >= 80) {
-    return {
-      ok: true,
-      reasons: [
-        'Passed under sparse-subject exception using administrator clarification + limited public evidence.',
-        ...reasons,
-      ],
-    };
-  }
-  return { ok: reasons.length === 0, reasons };
+  const evidence = evaluateEvidenceQuality({
+    subjectName: pack.verifiedIdentity.name,
+    identityStatus: pack.verifiedIdentity.status,
+    claims: pack.claims.map((c) => ({
+      text: c.text,
+      status: c.status,
+      sourceUrls: c.sourceUrls,
+    })),
+    organizations: pack.organizations,
+    professionalRoles: pack.professionalRoles,
+    currentWork: pack.currentWork,
+    biography: pack.biography,
+    sources: pack.citations.map((c) => ({ url: c.url })),
+    officialWebsite: pack.officialWebsite,
+  });
+  return {
+    ok: evidence.ok,
+    reasons: evidence.ok
+      ? evidence.reasons.filter((r) => /Limited personal/i.test(r))
+      : evidence.reasons,
+  };
 }
 
 export async function buildSubjectKnowledgePack(
@@ -263,11 +250,15 @@ export async function buildSubjectKnowledgePack(
     interviewsAndMedia.push({ title: page.title, url: page.url });
   }
 
-  // Deduplicate claims
+  // Deduplicate + subject-relevance filter (drop confused near-name hits).
   const deduped: KnowledgeClaim[] = [];
   for (const claim of claims) {
     if (deduped.some((c) => c.text.toLowerCase() === claim.text.toLowerCase())) continue;
     if (containsForbiddenPublicCopy(claim.text)) continue;
+    if (!isEvidenceRelevantToSubject(name, claim.text, claim.sourceUrls[0])) {
+      unsupportedClaims.push(`Rejected off-subject evidence: ${claim.text.slice(0, 120)}`);
+      continue;
+    }
     deduped.push(claim);
   }
 
