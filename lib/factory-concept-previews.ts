@@ -671,6 +671,16 @@ export async function generateAndPersistConceptPreviews(
   };
 
   const slim = slimConceptPreviewsPayload(payload);
+  // Cap context growth so Airtable Payload JSON stays within limits after recover retries.
+  const projectForPersist = await getFactoryProject(projectId);
+  if (projectForPersist?.context?.outputs && projectForPersist.context.outputs.length > 48) {
+    const kept = [...projectForPersist.context.outputs].slice(-40);
+    await saveFactoryProject({
+      ...projectForPersist,
+      context: { ...projectForPersist.context, outputs: kept, updatedAt: new Date().toISOString() },
+      updatedAt: new Date().toISOString(),
+    });
+  }
   const appended = await appendProjectContextOutput(projectId, {
     kind: 'production',
     worker: CONCEPT_PREVIEWS_WORKER,
