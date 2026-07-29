@@ -1,5 +1,4 @@
 import type { CSSProperties } from 'react';
-import Link from 'next/link';
 import { resolveConceptPreviewDraft } from '@/lib/factory-concept-previews';
 import '@/app/components/experience/themes/amanda-editorial/amanda-editorial.css';
 
@@ -97,7 +96,30 @@ export default async function FactoryConceptPortalPreviewPage({
       style={style}
       className={shell.themeId === 'amanda-editorial' ? 'amanda-editorial-theme' : undefined}
     >
-      <div style={{ maxWidth: 720, margin: '0 auto', padding: '3.5rem 1.5rem 4rem' }}>
+      {shell.heroImageUrl ? (
+        <div
+          style={{
+            width: '100%',
+            maxHeight: '42vh',
+            overflow: 'hidden',
+            position: 'relative',
+          }}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={shell.heroImageUrl}
+            alt=""
+            style={{
+              width: '100%',
+              height: '42vh',
+              objectFit: 'cover',
+              objectPosition: 'center 30%',
+              display: 'block',
+            }}
+          />
+        </div>
+      ) : null}
+      <div style={{ maxWidth: 720, margin: '0 auto', padding: '2.5rem 1.5rem 4rem' }}>
         <p
           style={{
             letterSpacing: '0.14em',
@@ -108,7 +130,7 @@ export default async function FactoryConceptPortalPreviewPage({
             fontFamily: 'system-ui, sans-serif',
           }}
         >
-          Portal preview · {draft.lens} · not production · {resolved.source}
+          Member home
         </p>
         <h1
           style={{
@@ -149,59 +171,40 @@ export default async function FactoryConceptPortalPreviewPage({
           <p style={{ fontSize: '1.05rem', lineHeight: 1.5 }}>{shell.memberNext}</p>
         </section>
 
-        <section style={{ marginBottom: '2rem' }}>
-          <h2 style={{ fontSize: '0.85rem', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-            Portal composition
-          </h2>
-          <p style={{ opacity: 0.9, lineHeight: 1.5 }}>{shell.composition}</p>
-          <p style={{ opacity: 0.75, lineHeight: 1.5, marginTop: '0.75rem' }}>{shell.tone}</p>
-          {shell.purpose ? (
-            <p style={{ opacity: 0.8, lineHeight: 1.5, marginTop: '0.75rem' }}>{shell.purpose}</p>
-          ) : null}
-        </section>
-
         {shell.firstView.length > 0 ? (
-          <ul
-            style={{
-              listStyle: 'none',
-              padding: 0,
-              margin: 0,
-              display: 'grid',
-              gap: '0.65rem',
-              fontFamily: 'system-ui, sans-serif',
-            }}
-          >
-            {shell.firstView.map((item) => (
-              <li
-                key={item}
-                style={{
-                  borderLeft: `3px solid ${shell.accentColor}`,
-                  padding: '0.55rem 0.85rem',
-                  background: 'rgba(255,255,255,0.04)',
-                }}
-              >
-                {item}
-              </li>
-            ))}
-          </ul>
+          <section style={{ marginBottom: '2rem' }}>
+            <h2 style={{ fontSize: '0.85rem', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+              Your workspace
+            </h2>
+            <ul
+              style={{
+                listStyle: 'none',
+                padding: 0,
+                margin: '0.75rem 0 0',
+                display: 'grid',
+                gap: '0.65rem',
+                fontFamily: 'system-ui, sans-serif',
+              }}
+            >
+              {shell.firstView.map((item) => (
+                <li
+                  key={item}
+                  style={{
+                    borderLeft: `3px solid ${shell.accentColor}`,
+                    padding: '0.55rem 0.85rem',
+                    background: 'rgba(255,255,255,0.04)',
+                  }}
+                >
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </section>
         ) : null}
 
-        <p
-          style={{
-            marginTop: '3rem',
-            fontSize: '0.78rem',
-            opacity: 0.55,
-            fontFamily: 'system-ui, sans-serif',
-          }}
-        >
-          Draft portal shell only — chassis login, forms, and modules activate after concept
-          selection + Experience Director Approved publish.
-        </p>
-        <p style={{ marginTop: '1rem', fontFamily: 'system-ui, sans-serif', fontSize: 12 }}>
-          <Link href={`/admin/ea-factory/concepts/${encodeURIComponent(projectId)}`} style={{ color: '#F7F1E8' }}>
-            Back to concept review
-          </Link>
-        </p>
+        {shell.purpose ? (
+          <p style={{ opacity: 0.8, lineHeight: 1.5, marginTop: '0.75rem' }}>{shell.purpose}</p>
+        ) : null}
       </div>
     </main>
   );

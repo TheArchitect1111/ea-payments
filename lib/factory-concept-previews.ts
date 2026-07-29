@@ -178,6 +178,7 @@ export type ConceptPortalShellPreview = {
   brandSubhead?: string;
   memberWhere?: string;
   memberNext?: string;
+  heroImageUrl?: string;
 };
 
 export type ConceptPreviewDraft = {
@@ -548,6 +549,7 @@ export function composeConceptPreviews(input: {
         brandSubhead: fields.organization.brandSubhead,
         memberWhere: fields.organization.member?.whereYouAre,
         memberNext: fields.organization.member?.whatNext,
+        heroImageUrl: input.heroImageUrl,
       },
       websiteSite: composed.websiteSite,
     };
