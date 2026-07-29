@@ -42,6 +42,62 @@ function guessKind(url: string, title?: string): MediaAsset['kind'] {
   return 'other';
 }
 
+/**
+ * High-quality temporary preview environments only — never a fabricated likeness.
+ * Always preview_only / publication blocked.
+ */
+function temporaryPreviewEnvironmentAssets(themeBlob: string): MediaAsset[] {
+  const care = /liaison|3hc|home\s*health|hospital|patient|clinic|care|nurse/i.test(themeBlob);
+  const picks = care
+    ? [
+        {
+          url: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=1600&q=80',
+          title: 'Temporary preview — calm clinical corridor light',
+        },
+        {
+          url: 'https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=1600&q=80',
+          title: 'Temporary preview — care team workspace atmosphere',
+        },
+        {
+          url: 'https://images.unsplash.com/photo-1584432810601-6c7f27d2362b?auto=format&fit=crop&w=1600&q=80',
+          title: 'Temporary preview — home-care quiet interior',
+        },
+      ]
+    : [
+        {
+          url: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1600&q=80',
+          title: 'Temporary preview — editorial workspace light',
+        },
+        {
+          url: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1600&q=80',
+          title: 'Temporary preview — collaborative table atmosphere',
+        },
+        {
+          url: 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&w=1600&q=80',
+          title: 'Temporary preview — focused craft desk',
+        },
+      ];
+
+  return picks.map((pick, index) => ({
+    id: `tmp-preview-${index + 1}`,
+    kind: 'location' as const,
+    url: pick.url,
+    originalUrl: pick.url,
+    title: pick.title,
+    sourcePageUrl: 'https://unsplash.com',
+    license: 'Unsplash License — temporary preview only',
+    licenseClass: 'cc0' as const,
+    licenseVerified: true,
+    attribution: 'Unsplash (temporary preview media)',
+    usageStatus: 'preview_only' as const,
+    rightsStatus: 'verified' as const,
+    previewEligible: true,
+    publicationEligible: false,
+    mediaProvider: 'temporary-preview',
+    assignedSections: [['hero', 'path', 'proof'][index] || 'current'],
+  }));
+}
+
 export function evaluateMediaGate(pack: MediaBrandPack): { ok: boolean; reasons: string[] } {
   const reasons: string[] = [];
   const previewable = pack.assets.filter(
@@ -255,8 +311,13 @@ export async function buildMediaBrandPack(
 
   if (!assets.filter((a) => a.previewEligible).length) {
     warnings.push(
-      'No preview-eligible images discovered. Concepts must be typography-led until subject-owned media is supplied.',
+      'No licensed subject media discovered — attaching temporary preview environment imagery (blocked from publication).',
     );
+    const themeBlob = `${knowledge.organizations.join(' ')} ${knowledge.professionalRoles.join(' ')} ${knowledge.currentWork.join(' ')} ${knowledge.biography}`.toLowerCase();
+    const temporary = temporaryPreviewEnvironmentAssets(themeBlob);
+    for (const item of temporary) {
+      assets.push(item);
+    }
   }
 
   const intentionalTypographyLed = assets.filter((a) => a.previewEligible).length === 0;

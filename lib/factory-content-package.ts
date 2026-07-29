@@ -241,20 +241,41 @@ export function buildContentPackageFromContext(
     if (/charlotte/i.test(detail)) {
       addClaim(`${name} works from Charlotte, North Carolina.`, 'admin_clarification');
     }
+    if (/clinical\s+liaison/i.test(detail)) {
+      addClaim(`${name} serves as a Clinical Liaison.`, 'admin_clarification');
+    }
+    if (/\b3hc\b/i.test(detail)) {
+      addClaim(`${name} is affiliated with 3HC.`, 'admin_clarification');
+      pushUnique(organizations, '3HC');
+    }
   }
 
   const factTexts = claims.map((c) => c.text);
+  const roleLine =
+    currentWork.find((w) => /liaison|nurse|director|founder|coach|clinician/i.test(w)) ||
+    factTexts.find((t) => /clinical\s+liaison|liaison|nurse|director|founder/i.test(t));
+  const orgLine = organizations[0] || (factTexts.find((t) => /\b3hc\b|hospital|home\s*health/i.test(t)) || '');
+  const roleOrgFallback = scrubForbiddenPublicCopy(
+    [roleLine && orgLine ? `${name} — ${roleLine} at ${orgLine}` : '', roleLine, orgLine && `${name} with ${orgLine}`]
+      .filter(Boolean)[0],
+  );
   const positioning =
     scrubForbiddenPublicCopy(
       organizations.length && milestones.length
         ? `${name} — ${milestones[0]}`
-        : factTexts[0],
-    ) || `${name} — a researched public profile built from verified evidence.`;
+        : factTexts[0] || roleOrgFallback,
+    ) ||
+    roleOrgFallback ||
+    `${name} — public profile drafted from verified role and organization signals.`;
   const centralStory =
     scrubForbiddenPublicCopy(
       [
-        factTexts[0],
-        organizations[0] ? `Organizations and chapters include ${organizations.slice(0, 2).join(' and ')}.` : '',
+        factTexts[0] || roleLine,
+        organizations[0]
+          ? roleLine
+            ? `${name} works with ${organizations.slice(0, 2).join(' and ')}.`
+            : `Organizations include ${organizations.slice(0, 2).join(' and ')}.`
+          : '',
         currentWork[0] || '',
       ]
         .filter(Boolean)
@@ -270,20 +291,27 @@ export function buildContentPackageFromContext(
     ) || centralStory;
   const audience =
     scrubForbiddenPublicCopy(
-      claims.find((c) => /audience|community|people|members|players|leaders/i.test(c.text))
+      claims.find((c) => /audience|community|people|members|players|leaders|patient|famil/i.test(c.text))
         ?.text,
     ) ||
     (/efficiency architects|duke|basketball|coach/i.test(biography)
       ? 'Leaders, teams, and organizations seeking clarity, structure, and a trusted next step'
-      : 'People who want a clear next step with someone they can trust');
+      : /liaison|3hc|home\s*health|patient|care/i.test(`${biography} ${roleLine} ${orgLine}`)
+        ? 'Patients, families, and care partners navigating the next step in home health and clinical support'
+        : 'People who want a clear next step with someone they can trust');
 
   const cinematic: ContentPackageLensCopy = {
     heroHeadline:
       milestones[0] && /duke|basketball|captain/i.test(milestones[0])
         ? `From the court to the work that still matters`
-        : `${name}: a story still being written`,
+        : roleLine && orgLine
+          ? `${name} · ${orgLine}`
+          : roleLine
+            ? `${name} — ${roleLine}`
+            : `Guided next steps with ${name}`,
     heroSupporting:
-      factTexts.find((t) => /duke|captain|founder|charlotte/i.test(t)) ||
+      factTexts.find((t) => /duke|captain|founder|charlotte|liaison|3hc|clinical/i.test(t)) ||
+      roleOrgFallback ||
       factTexts[0] ||
       positioning,
     aboutTitle: `Who ${name} is`,
@@ -310,8 +338,10 @@ export function buildContentPackageFromContext(
     heroHeadline:
       organizations.includes('Efficiency Architects')
         ? `${name}: athlete, founder, systems thinker`
-        : `A profile of ${name}`,
-    heroSupporting: factTexts[1] || factTexts[0] || positioning,
+        : roleLine && orgLine
+          ? `${roleLine} · ${orgLine}`
+          : `A profile of ${name}`,
+    heroSupporting: factTexts[1] || roleOrgFallback || factTexts[0] || positioning,
     aboutTitle: 'Selected chapters',
     aboutBody: centralStory,
     sectionHeadlines: [
@@ -335,10 +365,11 @@ export function buildContentPackageFromContext(
   };
 
   const intimate: ContentPackageLensCopy = {
-    heroHeadline: `Meet ${name}`,
+    heroHeadline: roleLine ? `${name}, ${roleLine}` : `Meet ${name}`,
     heroSupporting:
       currentWork[0] ||
-      factTexts.find((t) => /charlotte|founder|efficiency/i.test(t)) ||
+      factTexts.find((t) => /charlotte|founder|efficiency|liaison|3hc|clinical/i.test(t)) ||
+      roleOrgFallback ||
       factTexts[0] ||
       positioning,
     aboutTitle: 'A direct introduction',

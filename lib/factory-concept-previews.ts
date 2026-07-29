@@ -37,6 +37,22 @@ import { composeDirectedWebsite, puckContainsFeatureCards } from '@/lib/layout-c
 
 export const CONCEPT_PREVIEWS_WORKER = 'concept-previews';
 
+/** Temporary environment imagery — never a fabricated likeness; blocked from publication. */
+function temporaryHeroImageUrl(pack: ContentPackage | null | undefined): string {
+  const blob = `${pack?.name || ''} ${(pack?.organizations || []).join(' ')} ${(pack?.currentWork || []).join(' ')} ${pack?.biography || ''} ${pack?.centralStory || ''}`.toLowerCase();
+  if (/liaison|3hc|home\s*health|hospital|patient|clinic|care|nurse/i.test(blob)) {
+    return 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=1600&q=80';
+  }
+  return 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1600&q=80';
+}
+
+function resolveHeroImageUrl(
+  pack: ContentPackage | null | undefined,
+  eceUrl?: string,
+): string {
+  return eceUrl || temporaryHeroImageUrl(pack);
+}
+
 function contentPackageFromCreativePack(
   base: ContentPackage,
   creative: ContentCreativePack,
@@ -384,7 +400,10 @@ export async function resolveConceptPreviewDraft(
       contentPackage: eceBundle?.content
         ? contentPackageFromCreativePack(contentPackage, eceBundle.content)
         : contentPackage,
-      heroImageUrl: eceBundle?.media.assets.find((a) => a.previewEligible)?.url,
+      heroImageUrl: resolveHeroImageUrl(
+        contentPackage,
+        eceBundle?.media.assets.find((a) => a.previewEligible)?.url,
+      ),
       recommendedConceptId: data?.recommendedConceptId,
       selectedConceptId: data?.selectedConceptId,
       selectionStatus: data?.selectionStatus,
@@ -606,7 +625,10 @@ export async function generateAndPersistConceptPreviews(
       concepts,
       creativeDirection,
       contentPackage,
-      heroImageUrl: eceBundle?.media.assets.find((a) => a.previewEligible)?.url,
+      heroImageUrl: resolveHeroImageUrl(
+        contentPackage,
+        eceBundle?.media.assets.find((a) => a.previewEligible)?.url,
+      ),
       recommendedConceptId: data.recommendedConceptId,
       selectedConceptId: data.selectedConceptId,
       selectionStatus: data.selectionStatus,
