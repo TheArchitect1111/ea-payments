@@ -139,6 +139,8 @@ export type OrganizationStoryInput = {
     whatSuccessLooksLike?: string;
   };
   /** Optional care-continuum editorial fields (from verified research — never creative direction). */
+  /** True only when a verified/licensed subject portrait is approved for hero use. */
+  subjectPortraitVerified?: boolean;
   subjectRole?: string;
   affiliatedOrganizationName?: string;
   biographyPublic?: string;

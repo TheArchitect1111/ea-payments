@@ -136,7 +136,8 @@ export function enrichOrganizationWithCareContinuumFields(
     scrub(pack?.sources?.find((s) => s.url)?.url) ||
     base.organizationUrl;
 
-  const heroUrl = scrub(options?.heroImageUrl) || scrub(base.heroImageUrl);
+  // Temporary Preview media is environmental unless a verified/licensed subject portrait exists.
+  const subjectPortraitVerified = Boolean(base.subjectPortraitVerified);
 
   return {
     ...base,
@@ -163,16 +164,25 @@ export function enrichOrganizationWithCareContinuumFields(
     industry: base.industry || (role || pathways.length ? 'Home health and hospice care' : base.industry),
     primaryColor: base.primaryColor || '#1B3A4B',
     accentColor: base.accentColor || '#7BA3A8',
+    subjectPortraitVerified,
     mediaSlots: {
       hero: {
-        url: heroUrl || CARE_CONTINUUM_MEDIA_POOL.hero,
-        focal: 'face-right',
+        url: CARE_CONTINUUM_MEDIA_POOL.hero,
+        focal: 'environment',
       },
-      clinician: { url: CARE_CONTINUUM_MEDIA_POOL.clinician, focal: 'face-left' },
-      homeCare: { url: CARE_CONTINUUM_MEDIA_POOL.homeCare, focal: 'center' },
-      family: { url: CARE_CONTINUUM_MEDIA_POOL.family, focal: 'hands' },
+      clinician: { url: CARE_CONTINUUM_MEDIA_POOL.clinician, focal: 'environment' },
+      homeCare: { url: CARE_CONTINUUM_MEDIA_POOL.homeCare, focal: 'environment' },
+      family: { url: CARE_CONTINUUM_MEDIA_POOL.family, focal: 'environment' },
       calm: { url: CARE_CONTINUUM_MEDIA_POOL.calm, focal: 'environment' },
       ...base.mediaSlots,
+      ...(subjectPortraitVerified && (scrub(options?.heroImageUrl) || scrub(base.heroImageUrl))
+        ? {
+            hero: {
+              url: (scrub(options?.heroImageUrl) || scrub(base.heroImageUrl))!,
+              focal: 'face-right' as const,
+            },
+          }
+        : {}),
     },
   };
 }

@@ -41,8 +41,9 @@ export const CONCEPT_PREVIEWS_WORKER = 'concept-previews';
 /** Temporary environment imagery — never a fabricated likeness; blocked from publication. */
 function temporaryHeroImageUrl(pack: ContentPackage | null | undefined): string {
   const blob = `${pack?.name || ''} ${(pack?.organizations || []).join(' ')} ${(pack?.currentWork || []).join(' ')} ${pack?.biography || ''} ${pack?.centralStory || ''}`.toLowerCase();
-  if (/liaison|3hc|home\s*health|hospital|patient|clinic|care|nurse|hospice/i.test(blob)) {
-    return 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=1600&q=80';
+  if (/liaison|hospice|home\s*health|hospital|patient|clinic|care|nurse|palliative/i.test(blob)) {
+    // Environmental healthcare — never a stock face that could be mistaken for the subject.
+    return 'https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=2000&q=80';
   }
   return 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1600&q=80';
 }
@@ -51,6 +52,11 @@ function resolveHeroImageUrl(
   pack: ContentPackage | null | undefined,
   eceUrl?: string,
 ): string {
+  // Do not prefer ECE portrait candidates for healthcare until subject likeness is verified.
+  const blob = `${pack?.name || ''} ${(pack?.organizations || []).join(' ')} ${pack?.biography || ''}`.toLowerCase();
+  if (/liaison|hospice|home\s*health|palliative|clinical/i.test(blob)) {
+    return temporaryHeroImageUrl(pack);
+  }
   return eceUrl || temporaryHeroImageUrl(pack);
 }
 
@@ -335,13 +341,16 @@ export async function resolveConceptPreviewDraft(
       ? (existing!.puckData!.root as { props: { compositionSignature: string } }).props
           .compositionSignature
       : existing?.compositionSignature || '';
-  // Prefer universal care-continuum grammar over any pre-grammar curated draft.
+  // Healthcare: Concept A must be care-continuum; B/C must not collapse onto it.
+  const isHealthcare = /hospice|home\s*health|clinical\s*liaison|care\s*coordination|palliative/i.test(
+    `${project.client} ${project.notes || ''} ${existing?.name || ''}`,
+  );
+  const isConceptA = /concept-a\b/i.test(conceptId);
   const needsCareRecompose =
+    isHealthcare &&
     Boolean(existingSig) &&
-    existingSig !== CARE_CONTINUUM_SIGNATURE &&
-    /hospice|home\s*health|clinical\s*liaison|care\s*coordination|palliative/i.test(
-      `${project.client} ${project.notes || ''} ${existing?.name || ''}`,
-    );
+    ((isConceptA && existingSig !== CARE_CONTINUUM_SIGNATURE) ||
+      (!isConceptA && existingSig === CARE_CONTINUUM_SIGNATURE));
 
   if (existing?.puckData && existing.portalShell && !needsCareRecompose) {
     return {
@@ -511,6 +520,7 @@ export function composeConceptPreviews(input: {
       primaryColor: fields.primaryColor,
       accentColor: fields.accentColor,
       returnHref: returnToConceptsHref,
+      conceptLens: fields.lens,
     });
 
     const isCareContinuum =

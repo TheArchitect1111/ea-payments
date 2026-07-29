@@ -38,6 +38,8 @@ export function composeDirectedWebsite(input: {
   primaryColor?: string;
   accentColor?: string;
   returnHref?: string;
+  /** When set, care-continuum grammar applies only to the cinematic (Concept A) slot. */
+  conceptLens?: 'cinematic' | 'editorial' | 'intimate';
 }): {
   director: ReturnType<typeof runWebsiteDirector>;
   composed: ReturnType<typeof composeScenesFromDirection>;
@@ -53,7 +55,10 @@ export function composeDirectedWebsite(input: {
     accentColor: input.accentColor,
   });
 
+  const lens = input.conceptLens || 'cinematic';
+  // Care continuum is one concept grammar — not a collapse of all three healthcare concepts.
   if (
+    lens === 'cinematic' &&
     shouldUseCareContinuumEditorial({
       organization: input.organization,
       primaryArchetype: director.classification.primaryArchetype,
@@ -86,6 +91,7 @@ export function composeDirectedWebsite(input: {
     sitePath: input.sitePath,
     primaryColor: input.primaryColor,
     accentColor: input.accentColor,
+    conceptLens: lens,
   };
   const composed = composeScenesFromDirection(composerInput);
   const puckData = composePuckDataFromDirector(composerInput);

@@ -45,6 +45,8 @@ export type LayoutComposerInput = {
   sitePath: string;
   primaryColor?: string;
   accentColor?: string;
+  /** Concept lens — drives distinct composition grammar for A/B/C. */
+  conceptLens?: 'cinematic' | 'editorial' | 'intimate';
 };
 
 export type LayoutComposerResult = {

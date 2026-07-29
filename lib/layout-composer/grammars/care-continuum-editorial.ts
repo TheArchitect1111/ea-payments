@@ -9,18 +9,21 @@ import type { OrganizationStoryInput } from '@/lib/website-director';
 export const CARE_CONTINUUM_SIGNATURE = 'care-continuum-editorial-v1';
 export const CARE_CONTINUUM_THEME_ID = 'premium-care-editorial';
 
-/** Preview-approved healthcare imagery pool (no phones/laptops/generic offices). */
+/**
+ * Preview-approved environmental healthcare imagery (no subject-likeness portraits).
+ * Temporary Preview media only — never imply an unverified face is the researched subject.
+ */
 export const CARE_CONTINUUM_MEDIA_POOL = {
   hero:
-    'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=2000&q=80',
+    'https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=2000&q=80',
   clinician:
-    'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&w=1600&q=80',
+    'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=1600&q=80',
   homeCare:
-    'https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=1600&q=80',
+    'https://images.unsplash.com/photo-1584432810601-6c7f27d2362b?auto=format&fit=crop&w=1600&q=80',
   family:
-    'https://images.unsplash.com/photo-1584515933487-779824d29309?auto=format&fit=crop&w=1600&q=80',
+    'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=1600&q=80',
   calm:
-    'https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?auto=format&fit=crop&w=1600&q=80',
+    'https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&w=1600&q=80',
 } as const;
 
 export type CarePathway = {
@@ -153,11 +156,21 @@ function pathwayTriple(
   return [cleaned[0]!, cleaned[1]!, cleaned[2]!];
 }
 
+/** Reject stock faces that could be mistaken for the researched subject. */
+function looksLikeUnverifiedSubjectPortrait(url: string): boolean {
+  return /portrait|headshot|face|smiling|lab.?coat|doctor|nurse|clinician/i.test(url);
+}
+
 function mediaFrom(
   slot: CareMediaSlot | undefined,
   fallback: CareMediaSlot,
+  options?: { allowSubjectLikeness?: boolean },
 ): CareMediaSlot {
-  if (slot?.url && !/phone|laptop|office|unsplash\.com\/photo-1576091160399/i.test(slot.url)) {
+  if (
+    slot?.url &&
+    !/phone|laptop|office/i.test(slot.url) &&
+    (options?.allowSubjectLikeness || !looksLikeUnverifiedSubjectPortrait(slot.url))
+  ) {
     return {
       url: slot.url,
       caption: scrubForbiddenPublicCopy(slot.caption) || fallback.caption,
@@ -301,29 +314,34 @@ export function mapOrganizationToCareContinuumFields(
     primaryColor: organization.primaryColor || '#1B3A4B',
     accentColor: organization.accentColor || '#7BA3A8',
     media: {
-      hero: mediaFrom(organization.mediaSlots?.hero, {
-        url: CARE_CONTINUUM_MEDIA_POOL.hero,
-        caption: undefined,
-        focal: 'face-right',
-      }),
+      // Never treat stock faces as the researched subject unless explicitly verified.
+      hero: mediaFrom(
+        organization.mediaSlots?.hero,
+        {
+          url: CARE_CONTINUUM_MEDIA_POOL.hero,
+          caption: undefined,
+          focal: 'environment',
+        },
+        { allowSubjectLikeness: Boolean(organization.subjectPortraitVerified) },
+      ),
       clinician: mediaFrom(organization.mediaSlots?.clinician, {
         url: CARE_CONTINUUM_MEDIA_POOL.clinician,
-        caption: 'Clinician coordination that keeps families informed and grounded.',
-        focal: 'face-left',
+        caption: 'Care settings where coordination keeps families informed.',
+        focal: 'environment',
       }),
       homeCare: mediaFrom(organization.mediaSlots?.homeCare, {
         url: CARE_CONTINUUM_MEDIA_POOL.homeCare,
-        caption: 'Home health brings skilled support into the place people call home.',
-        focal: 'center',
+        caption: 'Home-based care meets people where they live.',
+        focal: 'environment',
       }),
       family: mediaFrom(organization.mediaSlots?.family, {
         url: CARE_CONTINUUM_MEDIA_POOL.family,
-        caption: 'Family support is part of care—not an afterthought.',
-        focal: 'hands',
+        caption: 'Environments of care — not unverified likenesses.',
+        focal: 'environment',
       }),
       calm: mediaFrom(organization.mediaSlots?.calm, {
         url: CARE_CONTINUUM_MEDIA_POOL.calm,
-        caption: 'Care that meets people where they live.',
+        caption: 'Calm clinical environments support clear next steps.',
         focal: 'environment',
       }),
     },

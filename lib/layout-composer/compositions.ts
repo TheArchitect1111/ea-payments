@@ -1,4 +1,8 @@
-import { STORY_ARCHETYPES, type NarrativeSceneRole } from '@/lib/website-director';
+import {
+  STORY_ARCHETYPES,
+  type NarrativeSceneRole,
+  type StoryArchetype,
+} from '@/lib/website-director';
 import type { CompositionId, CompositionTemplate } from './types';
 
 export const COMPOSITION_TEMPLATES: CompositionTemplate[] = [
@@ -132,14 +136,47 @@ const DEFAULT_BY_ROLE: Partial<Record<NarrativeSceneRole, CompositionId>> = {
   portal_glimpse: 'invitation_belonging',
 };
 
+/** Lens-biased picks so A/B/C are different grammars, not color shuffles. */
+const LENS_ROLE_BIAS: Partial<
+  Record<'cinematic' | 'editorial' | 'intimate', Partial<Record<NarrativeSceneRole, CompositionId>>>
+> = {
+  cinematic: {
+    human_story: 'human_threshold_bleed',
+    current_reality: 'reality_documentary_stat',
+    mission: 'mission_plane_full',
+    invitation: 'invitation_belonging',
+  },
+  editorial: {
+    human_story: 'human_craft_detail',
+    current_reality: 'reality_documentary_stat',
+    mission: 'mission_legacy_quiet',
+    transformation: 'transform_split_editorial',
+    invitation: 'invitation_commission',
+  },
+  intimate: {
+    human_story: 'human_companion_centered',
+    current_reality: 'reality_confrontational',
+    mission: 'mission_plane_full',
+    process: 'process_sparse_steps',
+    invitation: 'invitation_belonging',
+  },
+};
+
 export function selectCompositionForScene(input: {
   role: NarrativeSceneRole;
   primaryArchetype: StoryArchetype;
   antiPatterns: string[];
+  /** Experience concept lens — forces distinct composition grammar per concept. */
+  lens?: 'cinematic' | 'editorial' | 'intimate';
 }): CompositionId {
   const candidates = COMPOSITION_TEMPLATES.filter((t) => t.sceneRole === input.role);
   if (candidates.length === 0) {
     return DEFAULT_BY_ROLE[input.role] || 'mission_plane_full';
+  }
+
+  const lensPick = input.lens ? LENS_ROLE_BIAS[input.lens]?.[input.role] : undefined;
+  if (lensPick && candidates.some((c) => c.id === lensPick)) {
+    return lensPick;
   }
 
   const preferred = candidates.find((t) =>
