@@ -7,6 +7,13 @@ import {
 } from '@/lib/factory-post-build-concepts';
 import { getFactoryProject, saveFactoryProject } from '@/lib/factory-project-store';
 import { getProject } from '@/lib/factory-project';
+import {
+  extractFirstUrlFromText,
+  extractUrlFromLaunchNotes,
+  normalizeLaunchUrl,
+} from '@/lib/factory-url-normalize.mjs';
+import { scheduleFactoryGenerateJob } from '@/lib/factory-queue';
+import { setProjectContextStatus } from '@/lib/factory-project-context';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -17,7 +24,7 @@ type Params = { params: Promise<{ id: string }> };
 /**
  * Retry concept pack and/or resume after identity clarification.
  * Body: { force?: boolean, distinguishingDetail?: string, url?: string }
- * Does not relaunch the whole Factory pipeline and does not publish.
+ * Does not publish.
  */
 export async function POST(request: NextRequest, { params }: Params) {
   const auth = await requireFactoryApiAccess(request);
@@ -38,14 +45,27 @@ export async function POST(request: NextRequest, { params }: Params) {
   }
 
   const detail = String(body.distinguishingDetail || '').trim();
-  const url = String(body.url || '').trim();
-  if (detail || url) {
+  const urlFromBody = normalizeLaunchUrl(body.url);
+  const urlFromProject =
+    normalizeLaunchUrl(project.url) ||
+    extractUrlFromLaunchNotes(project.notes) ||
+    extractFirstUrlFromText(detail) ||
+    extractFirstUrlFromText(project.notes);
+  const resolvedUrl = urlFromBody || urlFromProject;
+
+  let shouldRerunResearch = false;
+  if (detail || resolvedUrl || urlFromBody) {
     const at = new Date().toISOString();
-    const nextNotes = mergeDistinguishingDetail(project.notes, detail || 'Clarified by administrator', url || undefined);
+    const nextNotes = mergeDistinguishingDetail(
+      project.notes,
+      detail || parseExistingDetail(project.notes) || project.client,
+      resolvedUrl || undefined,
+    );
+    const priorUrl = normalizeLaunchUrl(project.url) || normalizeLaunchUrl(project.context?.seed?.url);
     const next = {
       ...project,
       notes: nextNotes,
-      url: url || project.url,
+      url: resolvedUrl || project.url,
       updatedAt: at,
       activity: [
         ...(project.activity || []),
@@ -54,11 +74,22 @@ export async function POST(request: NextRequest, { params }: Params) {
           from: project.pipelineStatus,
           to: project.pipelineStatus,
           worker: 'identity-resume',
-          detail: detail
-            ? `Administrator added identifying detail for resume`
-            : `Administrator added URL for resume`,
+          detail: resolvedUrl
+            ? `Normalized official website ${resolvedUrl}`
+            : 'Administrator clarified subject',
         },
       ],
+      context: project.context
+        ? {
+            ...project.context,
+            seed: {
+              ...project.context.seed,
+              notes: nextNotes,
+              url: resolvedUrl || project.context.seed?.url,
+            },
+            updatedAt: at,
+          }
+        : project.context,
     };
     const saved = await saveFactoryProject(next);
     if (!saved.ok) {
@@ -68,10 +99,37 @@ export async function POST(request: NextRequest, { params }: Params) {
       );
     }
     project = next;
+    // Re-run research when we newly normalize a URL the pipeline never fetched.
+    shouldRerunResearch = Boolean(resolvedUrl && resolvedUrl !== priorUrl) || Boolean(resolvedUrl && body.force);
+  }
+
+  // Auto-heal stuck launches that already had a bare domain in notes/url.
+  if (!shouldRerunResearch && resolvedUrl && body.force !== false) {
+    const hasWebsite = (project.context?.artifacts || []).some((a) => a.kind === 'website');
+    if (!hasWebsite) {
+      shouldRerunResearch = true;
+    }
+  }
+
+  if (shouldRerunResearch && resolvedUrl) {
+    await setProjectContextStatus(
+      projectId,
+      'RESEARCHING',
+      'identity-resume',
+      `Researching normalized website ${resolvedUrl}`,
+    );
+    scheduleFactoryGenerateJob(projectId);
+    const latest = await getProject(projectId);
+    return NextResponse.json({
+      ok: true,
+      resumed: true,
+      reason: 'Official website normalized. Research restarted automatically.',
+      launch: latest ? buildLaunchConceptStatus(latest) : null,
+    });
   }
 
   const result = await runPostBuildConceptPack(projectId, {
-    force: Boolean(body.force) || Boolean(detail) || Boolean(url),
+    force: Boolean(body.force) || Boolean(detail) || Boolean(urlFromBody),
   });
   const latest = (await getProject(projectId)) || result.project;
   const launch = latest ? buildLaunchConceptStatus(latest) : null;
@@ -108,4 +166,10 @@ export async function POST(request: NextRequest, { params }: Params) {
         }
       : null,
   });
+}
+
+function parseExistingDetail(notes: string | undefined): string | undefined {
+  if (!notes) return undefined;
+  const match = notes.match(/Distinguishing detail:\s*(.+)/i);
+  return match?.[1]?.split('\n')[0]?.trim() || undefined;
 }

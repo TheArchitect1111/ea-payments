@@ -49,9 +49,14 @@ function createProjectId(): string {
   return `proj-${Date.now().toString(36)}-${crypto.randomBytes(3).toString('hex')}`;
 }
 
+import {
+  extractFirstUrlFromText,
+  extractUrlFromLaunchNotes,
+  normalizeLaunchUrl,
+} from '@/lib/factory-url-normalize.mjs';
+
 function extractUrl(text: string): string | undefined {
-  const match = text.match(/https?:\/\/[^\s]+/i);
-  return match?.[0]?.replace(/[),.]+$/, '');
+  return normalizeLaunchUrl(text) || extractFirstUrlFromText(text);
 }
 
 function extractClientFromLaunchCommand(command: string): string | undefined {
@@ -71,11 +76,15 @@ export function resolveLaunchProjectInput(body: LaunchProjectInput): {
 } {
   const commandInput = body.command ? parseEACPCommand(body.command) : {};
   const commandText = body.command?.trim() || '';
+  const notesBlob = [body.notes, commandInput.notes, body.text].filter(Boolean).join('\n');
   const url =
-    body.url?.trim() ||
-    body.website?.trim() ||
+    normalizeLaunchUrl(body.url) ||
+    normalizeLaunchUrl(body.website) ||
     (commandText ? extractUrl(commandText) : undefined) ||
-    (body.text ? extractUrl(body.text) : undefined);
+    (body.text ? extractUrl(body.text) : undefined) ||
+    extractUrlFromLaunchNotes(notesBlob) ||
+    extractFirstUrlFromText(body.client || '') ||
+    extractFirstUrlFromText(body.companyName || '');
 
   const clientFromLaunch = commandText ? extractClientFromLaunchCommand(commandText) : undefined;
   let clientFromUrl: string | undefined;

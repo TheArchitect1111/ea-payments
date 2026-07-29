@@ -13,6 +13,11 @@ import {
   type ProjectContext,
 } from '@/lib/factory-project-context';
 import type { FactoryProject } from '@/lib/factory-project-store';
+import {
+  extractFirstUrlFromText,
+  extractUrlFromLaunchNotes,
+  normalizeLaunchUrl,
+} from '@/lib/factory-url-normalize.mjs';
 
 export type IdentitySource = {
   url: string;
@@ -68,25 +73,28 @@ function collectSources(context: ProjectContext, project: FactoryProject): Ident
   const seen = new Set<string>();
 
   const push = (url: string | undefined, kind: string, collectedAt: string, label?: string) => {
-    if (!url || !/^https?:\/\//i.test(url)) return;
-    if (/\/api\/ctp\/assets\//i.test(url)) return;
-    const key = url.toLowerCase();
+    const normalized = normalizeLaunchUrl(url);
+    if (!normalized) return;
+    if (/\/api\/ctp\/assets\//i.test(normalized)) return;
+    const key = normalized.toLowerCase();
     if (seen.has(key)) return;
     seen.add(key);
-    sources.push({ url, kind, collectedAt, label });
+    sources.push({ url: normalized, kind, collectedAt, label });
   };
 
   for (const art of context.artifacts || []) {
     const data = asRecord(art.data) || {};
     push(str(data.url) || str(data.sourceUrl) || str(data.pageUrl), art.kind, art.createdAt, str(data.title));
     push(str(data.primaryUrl), art.kind, art.createdAt);
+    push(str(data.selectedUrl), art.kind, art.createdAt);
+    const identity = asRecord(data.identity);
+    push(str(identity?.selectedUrl), art.kind, art.createdAt);
     const provenance = asRecord(art.provenance);
     push(str(provenance?.sourceUrl), art.kind, art.createdAt);
     const extracted = asRecord(data.extracted);
     push(str(extracted?.canonicalUrl), art.kind, art.createdAt);
   }
 
-  // Research worker outputs may store citations without artifacts.
   for (const out of context.outputs || []) {
     if (out.kind !== 'research') continue;
     const payload = asRecord(out.payload) || {};
@@ -100,10 +108,21 @@ function collectSources(context: ProjectContext, project: FactoryProject): Ident
     }
   }
 
-  if (project.url) push(project.url, 'seed', project.createdAt || new Date().toISOString(), 'Launch URL');
-  if (context.seed?.url) {
-    push(context.seed.url, 'seed', context.createdAt || new Date().toISOString(), 'Seed URL');
-  }
+  const notes = project.notes || context.seed?.notes;
+  push(project.url, 'seed', project.createdAt || new Date().toISOString(), 'Official website');
+  push(context.seed?.url, 'seed', context.createdAt || new Date().toISOString(), 'Official website');
+  push(
+    extractUrlFromLaunchNotes(notes),
+    'seed-notes',
+    project.createdAt || new Date().toISOString(),
+    'From launch notes',
+  );
+  push(
+    extractFirstUrlFromText(parseDistinguishingDetail(notes)),
+    'seed-detail',
+    project.createdAt || new Date().toISOString(),
+    'From identifying detail',
+  );
 
   return sources;
 }
@@ -123,6 +142,7 @@ export function mergeDistinguishingDetail(
   extraUrl?: string,
 ): string {
   const clean = detail.trim();
+  const normalizedUrl = normalizeLaunchUrl(extraUrl);
   const base = (notes || '').trim();
   const without = base
     .split('\n')
@@ -130,9 +150,9 @@ export function mergeDistinguishingDetail(
     .join('\n')
     .trim();
   const parts = [
-    `Distinguishing detail: ${clean}`,
+    clean ? `Distinguishing detail: ${clean}` : null,
     without,
-    extraUrl?.trim() ? `Known website/social: ${extraUrl.trim()}` : null,
+    normalizedUrl ? `Known website/social: ${normalizedUrl}` : null,
     'Identity resume: administrator clarified subject',
   ].filter(Boolean);
   return parts.join('\n');
@@ -184,11 +204,10 @@ function extractCandidateNames(context: ProjectContext, client: string): string[
 function buildClaims(
   project: FactoryProject,
   sources: IdentitySource[],
-  profileConfidence: string,
 ): IdentityClaim[] {
   const claims: IdentityClaim[] = [];
   if (!project.context) {
-    return [{ text: 'Project context missing.', status: 'unknown' }];
+    return [{ text: 'We could not load this launch yet.', status: 'unknown' }];
   }
   const context = projectContextFromProject(project);
 
@@ -220,19 +239,22 @@ function buildClaims(
   const orgName = str(orgData.name) || str(orgData.legalName) || str(orgData.organizationName);
   if (orgName) {
     claims.push({
-      text: `Organization signal: ${orgName}`,
+      text: `Organization: ${orgName}`,
       status: 'verified',
       sourceUrl: str(orgData.url) || sources[0]?.url,
     });
   }
 
-  claims.push({
-    text: `Entity profile confidence: ${profileConfidence}`,
-    status: profileConfidence === 'thin' ? 'unknown' : 'inferred',
-  });
+  if (sources[0]?.url) {
+    claims.push({
+      text: `Official site: ${sources[0].url}`,
+      status: 'verified',
+      sourceUrl: sources[0].url,
+    });
+  }
 
   if (!claims.length) {
-    claims.push({ text: 'Identity evidence is incomplete.', status: 'unknown' });
+    claims.push({ text: 'Public evidence is still incomplete.', status: 'unknown' });
   }
 
   return claims;
@@ -250,10 +272,10 @@ export function evaluateIdentityGate(project: FactoryProject): IdentityGateResul
       confidence: 'thin',
       resolvedName: project.client,
       sources: [],
-      claims: [{ text: 'Project context missing.', status: 'unknown' }],
+      claims: [{ text: 'We could not load this launch yet.', status: 'unknown' }],
       candidates: [project.client],
-      reason: 'Project context is missing, so identity cannot be verified.',
-      resumeHint: 'Add a website URL or one more identifying detail, then resume.',
+      reason: 'This launch is not ready to verify yet.',
+      resumeHint: 'What city, profession, team, company, or organization is this connected to?',
     };
   }
 
@@ -262,14 +284,14 @@ export function evaluateIdentityGate(project: FactoryProject): IdentityGateResul
   const candidates = extractCandidateNames(context, project.client);
   const profile = buildFactoryEntityProfileSync(project);
   const bundle = collectEntitySignalBundle(project);
-  const claims = buildClaims(project, sources, profile.confidence);
+  const claims = buildClaims(project, sources);
 
   const ambiguousListed = candidates.filter(
     (name) => name.trim().toLowerCase() !== project.client.trim().toLowerCase(),
   );
 
   // Explicit multi-identity stop: 2+ alternate candidates without strong confirmation.
-  if (ambiguousListed.length >= 2 && !(sources.length >= 1 && detail)) {
+  if (ambiguousListed.length >= 2 && !(sources.length >= 1)) {
     return {
       ok: false,
       code: 'ambiguous',
@@ -277,13 +299,12 @@ export function evaluateIdentityGate(project: FactoryProject): IdentityGateResul
       resolvedName: project.client,
       sources,
       claims,
-      candidates: [project.client, ...ambiguousListed].slice(0, 6),
-      reason: `Multiple plausible identities remain (${ambiguousListed.slice(0, 3).join(', ')}). Concepts were not generated.`,
-      resumeHint: 'Add one clearer identifying detail (city, role, official site) and resume.',
+      candidates: [project.client, ...ambiguousListed].slice(0, 3),
+      reason: 'We found more than one possible match. Which one did you mean?',
+      resumeHint: 'Select the correct person or organization to continue.',
     };
   }
 
-  // Research output can mark identity ambiguous explicitly.
   for (const out of context.outputs || []) {
     const payload = asRecord(out.payload) || {};
     const identity = asRecord(payload.identity);
@@ -295,11 +316,11 @@ export function evaluateIdentityGate(project: FactoryProject): IdentityGateResul
         resolvedName: project.client,
         sources,
         claims,
-        candidates: [project.client, ...ambiguousListed].slice(0, 6),
+        candidates: [project.client, ...ambiguousListed].slice(0, 3),
         reason:
           str(identity.reason) ||
-          'Research left more than one plausible identity. Concepts were not generated.',
-        resumeHint: 'Provide one additional identifying detail and resume.',
+          'We found more than one possible match. Which one did you mean?',
+        resumeHint: 'Select the correct person or organization to continue.',
       };
     }
   }
@@ -309,65 +330,54 @@ export function evaluateIdentityGate(project: FactoryProject): IdentityGateResul
   const hasWebsiteSignal = Boolean(bundle.hasWebsite || bundle.websiteTitle);
   const hasBrandingSignal = Boolean(bundle.hasPhoto || bundle.visionSummary || bundle.whatTheyDo);
 
-  if (profile.confidence === 'thin' && !credibleSource && !hasDetail) {
+  // Official / discovered URL is enough — do not make the administrator re-do research.
+  if (credibleSource) {
+    const confidence: 'high' | 'medium' =
+      profile.confidence === 'high' || hasWebsiteSignal || hasBrandingSignal || hasDetail
+        ? 'high'
+        : 'medium';
     return {
-      ok: false,
-      code: 'thin_identity',
-      confidence: 'thin',
-      resolvedName: project.client,
+      ok: true,
+      confidence,
+      resolvedName: profile.name || project.client,
       sources,
       claims,
-      candidates: [project.client],
-      reason: 'Identity confidence is too thin to generate public concepts safely.',
-      resumeHint: 'Add one distinguishing detail and optionally a known URL, then resume.',
+      reason: 'Identity resolved from a credible public website or source.',
     };
   }
 
-  if (!credibleSource && !hasWebsiteSignal && !hasBrandingSignal && !hasDetail) {
+  if (hasWebsiteSignal || hasBrandingSignal) {
     return {
-      ok: false,
-      code: 'insufficient_evidence',
-      confidence: 'thin',
-      resolvedName: project.client,
+      ok: true,
+      confidence: 'medium',
+      resolvedName: profile.name || project.client,
       sources,
       claims,
-      candidates: [project.client, ...ambiguousListed].slice(0, 6),
-      reason:
-        'Research did not find a credible supporting source URL or usable website/branding signal for this name.',
-      resumeHint: 'Provide an official website or social URL (or a sharper distinguishing detail) and resume.',
+      reason: 'Identity resolved from researched website and brand signals.',
     };
   }
 
-  // Require at least one credible source OR (detail + research signal) for launch safety.
-  if (!credibleSource && !(hasDetail && (hasWebsiteSignal || hasBrandingSignal))) {
+  if (hasDetail) {
     return {
-      ok: false,
-      code: 'insufficient_evidence',
-      confidence: 'thin',
-      resolvedName: project.client,
+      ok: true,
+      confidence: 'medium',
+      resolvedName: profile.name || project.client,
       sources,
       claims,
-      candidates: [project.client],
-      reason: 'Need at least one credible source URL, or a distinguishing detail plus research signal.',
-      resumeHint: 'Add an official URL or one clearer identifying detail, then resume.',
+      reason: 'Identity proceeding with the clarifying detail you provided.',
     };
   }
-
-  const confidence: 'high' | 'medium' =
-    profile.confidence === 'high' || (credibleSource && (hasWebsiteSignal || hasDetail))
-      ? 'high'
-      : 'medium';
 
   return {
-    ok: true,
-    confidence,
-    resolvedName: profile.name || project.client,
+    ok: false,
+    code: 'thin_identity',
+    confidence: 'thin',
+    resolvedName: project.client,
     sources,
     claims,
-    reason:
-      confidence === 'high'
-        ? 'Identity resolved with at least one credible source and supporting research signals.'
-        : 'Identity resolved with enough evidence to proceed to concept review.',
+    candidates: [project.client],
+    reason: 'We could not confirm who this is from the name alone.',
+    resumeHint: 'What city, profession, team, company, or organization is this connected to?',
   };
 }
 

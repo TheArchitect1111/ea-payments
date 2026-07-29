@@ -125,20 +125,20 @@ function plainStageForProject(
   }
   if (identityBlocked) {
     return {
-      stage: 'Confirming identity',
-      hint: 'Add one clearer detail so we can continue safely.',
+      stage: 'Finding the right person or organization',
+      hint: 'We need one clearer match before concepts can be prepared.',
     };
   }
   if (launchReady) {
     return {
       stage: 'Ready for review',
-      hint: 'Three concepts are ready. Open any preview, then choose one.',
+      hint: 'Research package and concepts are ready. Choose a direction.',
     };
   }
   // Concepts exist but previews not durable/ready yet
   if (hasConceptsArtifact) {
     return {
-      stage: 'Preparing previews',
+      stage: 'Checking the experience',
       hint: 'Finishing website and portal drafts for review.',
     };
   }
@@ -148,34 +148,34 @@ function plainStageForProject(
     case 'INTAKE':
     case 'INTAKE_COMPLETE':
       return {
-        stage: 'Confirming identity',
+        stage: 'Finding the right person or organization',
         hint: 'Usually under a minute. Stay on this screen.',
       };
     case 'RESEARCHING':
       return {
-        stage: 'Gathering the story',
+        stage: 'Researching their story',
         hint: 'Usually 1–3 minutes depending on available sources.',
       };
     case 'DISCOVERING':
       return {
-        stage: 'Gathering the story',
-        hint: 'Finding opportunities and proof signals.',
+        stage: 'Gathering trusted information and media',
+        hint: 'Collecting proof signals, programs, and brand cues.',
       };
     case 'PLANNING':
       return {
-        stage: 'Developing the direction',
-        hint: 'Shaping creative direction and work orders.',
+        stage: 'Creating the research package',
+        hint: 'Shaping story strategy, creative brief, and content.',
       };
     case 'BUILDING':
     case 'GENERATING':
       return {
-        stage: 'Creating your concepts',
-        hint: 'Building three distinct directions.',
+        stage: 'Building the concepts',
+        hint: 'Creating three distinct website and portal directions.',
       };
     default:
       return {
-        stage: 'Preparing previews',
-        hint: 'Finishing website and portal drafts for review.',
+        stage: 'Developing the creative direction',
+        hint: 'Preparing concepts for your review.',
       };
   }
 }
@@ -266,13 +266,13 @@ export function buildLaunchConceptStatus(project: FactoryProject): LaunchConcept
     inProgress = false;
   } else if (identityBlocked) {
     inProgress = false;
-    statusLabel = 'Stopped — identity needs clarification';
+    statusLabel = plain.stage;
   } else if (conceptPackReady) {
     statusLabel = 'Ready for review';
     inProgress = false;
     readyForConceptReview = true;
   } else if (conceptsId && !conceptPackReady) {
-    statusLabel = 'Preparing previews';
+    statusLabel = 'Checking the experience';
     inProgress = !conceptPackFailed || shouldAllowAutoRetry(project, conceptsId);
     needsAutomaticNudge = shouldRunPostBuildConceptPack(project);
   } else if (

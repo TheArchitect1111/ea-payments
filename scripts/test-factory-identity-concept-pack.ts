@@ -124,7 +124,7 @@ const thin = evaluateIdentityGate(
 assert.equal(thin.ok, false);
 if (!thin.ok) {
   assert.ok(['thin_identity', 'insufficient_evidence'].includes(thin.code));
-  assert.match(thin.resumeHint, /detail|URL/i);
+  assert.match(thin.resumeHint, /city|profession|organization/i);
 }
 
 const ambiguous = evaluateIdentityGate(
@@ -156,7 +156,36 @@ const ambiguous = evaluateIdentityGate(
 assert.equal(ambiguous.ok, false);
 if (!ambiguous.ok) {
   assert.equal(ambiguous.code, 'ambiguous');
-  assert.match(ambiguous.reason, /Multiple plausible identities/i);
+  assert.match(ambiguous.reason, /Which one did you mean/i);
+}
+
+// Bare domain + detail in notes must pass (Brickey Botanicals class of failure).
+const brickey = evaluateIdentityGate(
+  baseProject({
+    client: 'Brickey Botanicals',
+    url: 'brickeybotanicals.com',
+    notes:
+      'Distinguishing detail: Brickey Botanicals at brickeybotanicals.com\nKnown website/social: brickeybotanicals.com\nSource: Universal Quick Launch',
+    context: baseContext({
+      seed: {
+        client: 'Brickey Botanicals',
+        goal: 'Website + Portal',
+        deliverable: 'Website + Portal',
+        notes:
+          'Distinguishing detail: Brickey Botanicals at brickeybotanicals.com\nKnown website/social: brickeybotanicals.com\nSource: Universal Quick Launch',
+        url: 'brickeybotanicals.com',
+        attachments: [],
+        source: 'admin',
+      },
+      artifacts: [art('art-concepts-1', 'experience_concepts', { concepts: [{ id: 'c1', name: 'A' }] })],
+      outputs: [],
+    }),
+  }),
+);
+assert.equal(brickey.ok, true);
+if (brickey.ok) {
+  assert.ok(brickey.sources.some((s) => /brickeybotanicals\.com/i.test(s.url)));
+  assert.match(brickey.sources[0]!.url, /^https:\/\//i);
 }
 
 const resumedNotes = mergeDistinguishingDetail(
@@ -247,6 +276,6 @@ const blocked = buildLaunchConceptStatus(
   }),
 );
 assert.equal(blocked.identityBlocked, true);
-assert.match(blocked.statusLabel, /identity/i);
+assert.match(blocked.statusLabel, /Finding the right person/i);
 
 console.log('test-factory-identity-concept-pack.ts: ok');

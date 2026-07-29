@@ -28,8 +28,9 @@ function maybeScheduleAutomaticNudge(
   projectId: string,
   needsNudge: boolean,
   pipelineInProgress: boolean,
+  identityBlocked: boolean,
 ): void {
-  if (!needsNudge) return;
+  if (!needsNudge && !identityBlocked) return;
   const now = Date.now();
   const prev = lastNudgeAt.get(projectId) || 0;
   if (now - prev < NUDGE_COOLDOWN_MS) return;
@@ -39,6 +40,59 @@ function maybeScheduleAutomaticNudge(
     try {
       const project = await getProject(projectId);
       if (!project) return;
+
+      if (identityBlocked) {
+        const {
+          normalizeLaunchUrl,
+          extractUrlFromLaunchNotes,
+          extractFirstUrlFromText,
+        } = await import('@/lib/factory-url-normalize.mjs');
+        const resolvedUrl =
+          normalizeLaunchUrl(project.url) ||
+          extractUrlFromLaunchNotes(project.notes) ||
+          extractFirstUrlFromText(project.notes);
+        if (!resolvedUrl) return;
+
+        console.info('[projects-get] auto-heal identity with normalized URL', {
+          projectId,
+          url: resolvedUrl,
+        });
+        const { saveFactoryProject } = await import('@/lib/factory-project-store');
+        const { mergeDistinguishingDetail } = await import('@/lib/factory-identity-gate');
+        const at = new Date().toISOString();
+        const nextNotes = mergeDistinguishingDetail(
+          project.notes,
+          project.client,
+          resolvedUrl,
+        );
+        await saveFactoryProject({
+          ...project,
+          url: resolvedUrl,
+          notes: nextNotes,
+          updatedAt: at,
+          context: project.context
+            ? {
+                ...project.context,
+                seed: {
+                  ...project.context.seed,
+                  url: resolvedUrl,
+                  notes: nextNotes,
+                },
+                updatedAt: at,
+              }
+            : project.context,
+        });
+        const { setProjectContextStatus } = await import('@/lib/factory-project-context');
+        const { scheduleFactoryGenerateJob } = await import('@/lib/factory-queue');
+        await setProjectContextStatus(
+          projectId,
+          'RESEARCHING',
+          'identity-auto-heal',
+          `Researching normalized website ${resolvedUrl}`,
+        );
+        scheduleFactoryGenerateJob(projectId);
+        return;
+      }
 
       if (pipelineInProgress || project.pipelineStatus !== 'BUILDING') {
         const { scheduleFactoryGenerateJob } = await import('@/lib/factory-queue');
@@ -90,8 +144,9 @@ export async function GET(request: NextRequest, { params }: Params) {
 
   maybeScheduleAutomaticNudge(
     project.id,
-    Boolean(launch.needsAutomaticNudge) && !launch.identityBlocked && !ready,
+    Boolean(launch.needsAutomaticNudge) && !ready,
     pipelineInProgress,
+    Boolean(launch.identityBlocked),
   );
 
   return NextResponse.json({

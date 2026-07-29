@@ -281,65 +281,66 @@ export default function FactoryLiveStatus({ projectId }: { projectId: string }) 
           <p className="text-sm font-semibold">
             {typeof identity?.reason === 'string'
               ? identity.reason
-              : 'We could not safely confirm the intended person or organization.'}
+              : 'We could not confirm who this is yet.'}
           </p>
-          {typeof identity?.resumeHint === 'string' ? (
-            <p className="text-xs opacity-80">{identity.resumeHint}</p>
-          ) : null}
           {Array.isArray(identity?.candidates) && identity.candidates.length > 1 ? (
-            <p className="text-xs">
-              Candidates seen: {identity.candidates.slice(0, 4).join(' · ')}
-            </p>
-          ) : null}
-          {Array.isArray(identity?.claims) && identity.claims.length ? (
-            <ul className="list-disc space-y-1 pl-4 text-xs opacity-90">
-              {identity.claims.slice(0, 4).map((claim) => (
-                <li key={claim.text}>
-                  {claim.status === 'verified'
-                    ? 'Verified'
-                    : claim.status === 'inferred'
-                      ? 'Inferred'
-                      : 'Unclear'}
-                  : {claim.text}
-                </li>
-              ))}
-            </ul>
-          ) : null}
-          <label className="block text-xs font-semibold">
-            One more identifying detail
-            <input
-              value={detail}
-              onChange={(e) => setDetail(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-amber-300 bg-white px-3 py-2 text-sm text-[#17130F]"
-              placeholder="City, role, company, or official site name"
-              disabled={busy}
-            />
-          </label>
-          <label className="block text-xs font-semibold">
-            Optional official URL
-            <input
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-amber-300 bg-white px-3 py-2 text-sm text-[#17130F]"
-              placeholder="https://"
-              inputMode="url"
-              disabled={busy}
-            />
-          </label>
-          <button
-            type="button"
-            disabled={busy || (!detail.trim() && !url.trim())}
-            onClick={() =>
-              void runConceptAction({
-                distinguishingDetail: detail.trim() || undefined,
-                url: url.trim() || undefined,
-                force: true,
-              })
-            }
-            className="w-full rounded-lg bg-[#17130F] px-4 py-3 text-xs font-bold uppercase tracking-[0.14em] text-white disabled:opacity-50"
-          >
-            {busy ? 'Resuming…' : 'Resume with this detail'}
-          </button>
+            <div className="space-y-2">
+              <p className="text-xs font-bold uppercase tracking-[0.14em] opacity-70">
+                Which one did you mean?
+              </p>
+              <ul className="space-y-2">
+                {identity.candidates.slice(0, 3).map((candidate) => (
+                  <li key={candidate}>
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() =>
+                        void runConceptAction({
+                          distinguishingDetail: candidate,
+                          force: true,
+                        })
+                      }
+                      className="w-full rounded-lg border border-amber-300 bg-white px-3 py-3 text-left text-sm font-semibold text-[#17130F]"
+                    >
+                      {candidate}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : (
+            <>
+              <p className="text-xs opacity-80">
+                {typeof identity?.resumeHint === 'string'
+                  ? identity.resumeHint
+                  : 'What city, profession, team, company, or organization is this connected to?'}
+              </p>
+              <label className="block text-xs font-semibold">
+                One clarifying detail
+                <input
+                  value={detail}
+                  onChange={(e) => setDetail(e.target.value)}
+                  className="mt-1 w-full rounded-lg border border-amber-300 bg-white px-3 py-2 text-sm text-[#17130F]"
+                  placeholder="City, role, company, or official site"
+                  disabled={busy}
+                />
+              </label>
+              <button
+                type="button"
+                disabled={busy || !detail.trim()}
+                onClick={() =>
+                  void runConceptAction({
+                    distinguishingDetail: detail.trim() || undefined,
+                    url: url.trim() || undefined,
+                    force: true,
+                  })
+                }
+                className="w-full rounded-lg bg-[#17130F] px-4 py-3 text-xs font-bold uppercase tracking-[0.14em] text-white disabled:opacity-50"
+              >
+                {busy ? 'Continuing…' : 'Continue'}
+              </button>
+            </>
+          )}
         </div>
       ) : null}
 
