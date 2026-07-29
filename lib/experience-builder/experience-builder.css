@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Source+Sans+3:wght@400;600;700&display=swap');
+
 .eb-block {
   font-family: var(--pc-font-body, 'Segoe UI', system-ui, sans-serif);
   color: var(--ea-text, #101828);
@@ -484,10 +486,26 @@
   max-width: 1240px;
   margin: 0 auto;
   padding: 0.85rem 1.25rem;
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, auto) minmax(0, 1fr) auto;
   align-items: center;
-  gap: 1.25rem;
-  justify-content: space-between;
+  gap: 1rem;
+}
+
+.eb-site-nav-links {
+  display: none;
+  gap: 0.85rem;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+  min-width: 0;
+}
+
+.eb-site-nav-links a {
+  color: var(--ea-navy, #1b3a4b);
+  text-decoration: none;
+  font-size: 0.82rem;
+  opacity: 0.82;
+  white-space: nowrap;
 }
 
 .eb-site-nav-brand {
@@ -508,19 +526,6 @@
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--ea-muted, #5f7380);
-}
-
-.eb-site-nav-links {
-  display: none;
-  gap: 1.1rem;
-  flex-wrap: wrap;
-}
-
-.eb-site-nav-links a {
-  color: var(--ea-navy, #1b3a4b);
-  text-decoration: none;
-  font-size: 0.88rem;
-  opacity: 0.82;
 }
 
 .eb-site-nav-links a:hover {
@@ -655,6 +660,10 @@
 
 .kristina-3hc-editorial-theme .eb-block {
   font-family: 'Source Sans 3', 'Segoe UI', system-ui, sans-serif;
+}
+
+.kristina-3hc-editorial-theme .eb-hero-media img {
+  object-position: 68% 18%;
 }
 
 .kristina-3hc-editorial-theme .eb-hero {

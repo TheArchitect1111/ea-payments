@@ -11,18 +11,18 @@ import type { Data } from '@measured/puck';
 export const KRISTINA_PROJECT_ID = 'proj-ms68dh4m-3daac7';
 export const KRISTINA_CONCEPT_A_ID = 'workorder-website-p1-concept-a';
 
-/** Preview-only healthcare imagery — home care / family / clinical coordination. No phones, laptops, offices. */
+/** Preview-only healthcare imagery — verified no phones/laptops; compassionate clinical + family care. */
 export const KRISTINA_MEDIA = {
   hero:
-    'https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?auto=format&fit=crop&w=2000&q=80',
+    'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=2000&q=80',
   family:
-    'https://images.unsplash.com/photo-1581579438747-1dc8d64bb2eb?auto=format&fit=crop&w=1600&q=80',
+    'https://images.unsplash.com/photo-1584515933487-779824d29309?auto=format&fit=crop&w=1600&q=80',
   clinician:
-    'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=1600&q=80',
+    'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&w=1600&q=80',
   homeCare:
-    'https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=1600&q=80',
+    'https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=1600&q=80',
   calmHome:
-    'https://images.unsplash.com/photo-1576765608866-5b51046452a7?auto=format&fit=crop&w=1600&q=80',
+    'https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?auto=format&fit=crop&w=1600&q=80&crop=faces',
 } as const;
 
 export type KristinaEvidenceRow = {
@@ -124,14 +124,14 @@ export function buildKristinaConceptAPuckData(input: {
       {
         type: 'EASiteNav',
         props: {
+          id: 'kristina-a-1',
           brand: 'Kristina Brickey',
           brandNote: 'Clinical Liaison · 3HC',
           links: [
             { label: 'About', href: '#about' },
-            { label: 'The liaison role', href: '#liaison' },
+            { label: 'Role', href: '#liaison' },
             { label: '3HC care', href: '#services' },
-            { label: 'Your journey', href: '#journey' },
-            { label: 'Eastern NC', href: '#region' },
+            { label: 'Journey', href: '#journey' },
             { label: 'Refer', href: '#refer' },
           ],
           ctaLabel: 'Call 3HC',
@@ -141,6 +141,7 @@ export function buildKristinaConceptAPuckData(input: {
       {
         type: 'EAHero',
         props: {
+          id: 'kristina-a-2',
           variant: 'threshold',
           eyebrow: '3HC Home Health & Hospice Care',
           title: 'A trusted guide between hospital, home, and family',
@@ -154,6 +155,7 @@ export function buildKristinaConceptAPuckData(input: {
       {
         type: 'EATextSection',
         props: {
+          id: 'kristina-a-3',
           variant: 'legacy',
           label: 'Introduction',
           title: 'Meet Kristina Brickey',
@@ -166,14 +168,16 @@ export function buildKristinaConceptAPuckData(input: {
       {
         type: 'EAImageBand',
         props: {
+          id: 'kristina-a-4',
           imageUrl: KRISTINA_MEDIA.clinician,
           caption: 'Clinician coordination that keeps families informed and grounded.',
-          objectPosition: 'center 25%',
+          objectPosition: 'center 20%',
         },
       },
       {
         type: 'EATextSection',
         props: {
+          id: 'kristina-a-5',
           variant: 'documentary',
           label: 'The liaison role',
           title: 'How a clinical liaison helps',
@@ -186,6 +190,7 @@ export function buildKristinaConceptAPuckData(input: {
       {
         type: 'EASplitNarrative',
         props: {
+          id: 'kristina-a-6',
           label: 'What changes',
           title: 'From uncertainty to a workable plan',
           leftLabel: 'When families feel stuck',
@@ -201,14 +206,16 @@ export function buildKristinaConceptAPuckData(input: {
       {
         type: 'EAImageBand',
         props: {
+          id: 'kristina-a-7',
           imageUrl: KRISTINA_MEDIA.homeCare,
           caption: 'Home health brings skilled support into the place people call home.',
-          objectPosition: 'center 40%',
+          objectPosition: 'center 25%',
         },
       },
       {
         type: 'EATextSection',
         props: {
+          id: 'kristina-a-8',
           variant: 'mission-plane',
           label: '3HC care pathways',
           title: 'Services offered by 3HC',
@@ -221,6 +228,7 @@ export function buildKristinaConceptAPuckData(input: {
       {
         type: 'EAFeatures',
         props: {
+          id: 'kristina-a-9',
           label: 'Pathways',
           title: 'Home health, hospice, and continuum support',
           featureOneTitle: 'Home Health Care',
@@ -237,14 +245,16 @@ export function buildKristinaConceptAPuckData(input: {
       {
         type: 'EAImageBand',
         props: {
+          id: 'kristina-a-10',
           imageUrl: KRISTINA_MEDIA.family,
           caption: 'Family support is part of care—not an afterthought.',
-          objectPosition: 'center 35%',
+          objectPosition: 'center 40%',
         },
       },
       {
         type: 'EATextSection',
         props: {
+          id: 'kristina-a-11',
           variant: 'proof',
           label: 'Patient & family journey',
           title: 'A compassionate path from question to care',
@@ -257,6 +267,7 @@ export function buildKristinaConceptAPuckData(input: {
       {
         type: 'EASplitNarrative',
         props: {
+          id: 'kristina-a-12',
           label: 'Journey',
           title: 'What families can expect',
           leftLabel: 'Step one',
@@ -272,14 +283,16 @@ export function buildKristinaConceptAPuckData(input: {
       {
         type: 'EAImageBand',
         props: {
+          id: 'kristina-a-13',
           imageUrl: KRISTINA_MEDIA.calmHome,
-          caption: 'Care that respects the quiet of home.',
-          objectPosition: 'center 45%',
+          caption: 'Care that meets people where they live.',
+          objectPosition: 'center 30%',
         },
       },
       {
         type: 'EATextSection',
         props: {
+          id: 'kristina-a-14',
           variant: 'legacy',
           label: 'Eastern North Carolina',
           title: 'Care rooted in the communities 3HC serves',
@@ -292,6 +305,7 @@ export function buildKristinaConceptAPuckData(input: {
       {
         type: 'EACtaBand',
         props: {
+          id: 'kristina-a-15',
           variant: 'belonging',
           title: 'Ready to talk about the next step?',
           body: 'For care questions and referrals, contact 3HC directly. Kristina’s liaison work exists to make that first conversation clearer—not to replace clinical intake.',
@@ -305,6 +319,7 @@ export function buildKristinaConceptAPuckData(input: {
       {
         type: 'EASiteFooter',
         props: {
+          id: 'kristina-a-16',
           brand: 'Kristina Brickey',
           tagline: 'Clinical Liaison supporting access to 3HC Home Health & Hospice Care',
           columns: [

@@ -49,7 +49,7 @@ const KRISTINA_CURATED_SIGNATURE = 'kristina-3hc-curated-v1';
 function temporaryHeroImageUrl(pack: ContentPackage | null | undefined): string {
   const blob = `${pack?.name || ''} ${(pack?.organizations || []).join(' ')} ${(pack?.currentWork || []).join(' ')} ${pack?.biography || ''} ${pack?.centralStory || ''}`.toLowerCase();
   if (/liaison|3hc|home\s*health|hospital|patient|clinic|care|nurse/i.test(blob)) {
-    return 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=1600&q=80';
+    return 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=1600&q=80';
   }
   return 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1600&q=80';
 }
