@@ -158,7 +158,7 @@ function recordId(projectId: string): string {
 
 export async function saveFactoryProject(
   project: FactoryProject,
-): Promise<{ ok: boolean; error?: string }> {
+): Promise<{ ok: boolean; persistedToAirtable?: boolean; error?: string }> {
   const result = await saveStudioRecord({
     recordType: 'media',
     id: recordId(project.id),
@@ -166,7 +166,27 @@ export async function saveFactoryProject(
     payload: project,
     title: `Factory Project — ${project.client}`,
   });
-  return { ok: result.ok, error: result.error };
+  return {
+    ok: result.ok,
+    persistedToAirtable: result.persistedToAirtable,
+    error: result.error,
+  };
+}
+
+/** Confirm Factory project exists in Airtable (not just instance memory). */
+export async function verifyFactoryProjectDurable(projectId: string): Promise<boolean> {
+  const { airtableConfigured } = await import('@/lib/data/airtable-client');
+  if (!airtableConfigured()) return false;
+  const {
+    clearStudioMemoryKey,
+    loadStudioRecordFromAirtable,
+  } = await import('@/lib/creative-studio/persistence');
+  clearStudioMemoryKey('media', recordId(projectId));
+  const fromAirtable = await loadStudioRecordFromAirtable<FactoryProject>(
+    'media',
+    recordId(projectId),
+  );
+  return Boolean(fromAirtable?.version === 1 && fromAirtable.id === projectId);
 }
 
 export async function getFactoryProject(id: string): Promise<FactoryProject | null> {

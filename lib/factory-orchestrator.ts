@@ -101,7 +101,16 @@ export async function orchestrateOnce(projectId: string): Promise<OrchestratorSt
     dependencies: capability.dependencies,
   });
 
+  const startedAt = Date.now();
   const result = await capability.execute(context);
+  const durationMs = Date.now() - startedAt;
+  console.info('[factory-orchestrator] capability duration', {
+    projectId,
+    capabilityId: capability.id,
+    ran: result.ran,
+    durationMs,
+    slow: durationMs > 90_000,
+  });
   if (result.project && result.ran) {
     await emitStatusPulse(result.project);
   }

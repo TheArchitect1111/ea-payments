@@ -221,7 +221,10 @@ const ready = buildLaunchConceptStatus(
 assert.equal(ready.conceptPackReady, true);
 assert.equal(ready.readyForConceptReview, true);
 assert.equal(ready.conceptUrls.length, 3);
-assert.match(ready.statusLabel, /concept review/i);
+assert.match(ready.statusLabel, /ready for review/i);
+assert.equal(ready.plainLanguageStage, 'Ready for review');
+assert.equal(ready.needsAutomaticNudge, false);
+assert.ok(ready.conceptsReviewPath);
 
 const blocked = buildLaunchConceptStatus(
   baseProject({

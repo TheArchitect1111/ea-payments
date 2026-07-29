@@ -49,7 +49,7 @@ export default function ConceptSelectionPage({
 
   const [wireSurfaces, setWireSurfaces] = useState<Record<string, unknown> | null>(null);
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (): Promise<Bundle | null> => {
     setError(null);
     const res = await fetch(
       `/api/admin/factory/concept-previews?projectId=${encodeURIComponent(projectId)}`,
@@ -58,43 +58,79 @@ export default function ConceptSelectionPage({
     const data = await readJson(res);
     if (!res.ok) {
       setError(String(data.error || 'Could not load concept previews.'));
-      return;
+      return null;
     }
     if (data.previews && typeof data.previews === 'object') {
-      setBundle(data.previews as Bundle);
-    } else {
-      setBundle(null);
+      const next = data.previews as Bundle;
+      setBundle(next);
+      return next;
     }
+    // Launch status may already expose durable preview URLs before list payload is warm.
+    const launch = data.launch as
+      | { conceptUrls?: PreviewRow[]; conceptPackReady?: boolean }
+      | undefined;
+    if (launch?.conceptPackReady && Array.isArray(launch.conceptUrls) && launch.conceptUrls.length) {
+      const next: Bundle = {
+        previews: launch.conceptUrls.map((c) => ({
+          conceptId: c.conceptId,
+          name: c.name,
+          lens: 'story',
+          recommended: false,
+          websitePreviewPath: c.websitePreviewPath,
+          portalPreviewPath: c.portalPreviewPath,
+        })),
+      };
+      setBundle(next);
+      return next;
+    }
+    setBundle(null);
+    return null;
   }, [projectId]);
 
-  useEffect(() => {
-    void load();
-  }, [load]);
-
-  async function generate() {
-    setBusy('generate');
-    setMessage(null);
-    setError(null);
-    try {
-      const res = await fetch('/api/admin/factory/concept-previews', {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ projectId }),
-      });
-      const data = await readJson(res);
-      if (!res.ok) {
-        setError(String(data.error || 'Generate failed.'));
-        return;
+  const generate = useCallback(
+    async (opts?: { force?: boolean; silent?: boolean }) => {
+      setBusy('generate');
+      if (!opts?.silent) {
+        setMessage(null);
+        setError(null);
       }
-      setMessage(
-        `Composed ${Array.isArray(data.previews) ? data.previews.length : 0} real previews.`,
-      );
-      await load();
-    } finally {
-      setBusy(null);
-    }
-  }
+      try {
+        const res = await fetch('/api/admin/factory/concept-previews', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ projectId, force: Boolean(opts?.force) }),
+        });
+        const data = await readJson(res);
+        if (!res.ok) {
+          if (!opts?.silent) setError(String(data.error || 'Generate failed.'));
+          return;
+        }
+        if (!opts?.silent) {
+          setMessage(
+            `Composed ${Array.isArray(data.previews) ? data.previews.length : 0} real previews.`,
+          );
+        }
+        await load();
+      } finally {
+        setBusy(null);
+      }
+    },
+    [projectId, load],
+  );
+
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      const existing = await load();
+      if (cancelled || existing?.previews?.length) return;
+      // Automatic: do not require "Generate real previews" as the primary path.
+      await generate({ silent: true });
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [load, generate]);
 
   async function selectConcept(conceptId: string) {
     setBusy(conceptId);
@@ -177,14 +213,6 @@ export default function ConceptSelectionPage({
       <div className="mb-6 flex flex-wrap items-center gap-3">
         <button
           type="button"
-          disabled={busy !== null}
-          onClick={() => void generate()}
-          className="rounded-full bg-[#1B2B4D] px-4 py-2 text-sm font-bold text-white disabled:opacity-50"
-        >
-          {busy === 'generate' ? 'Composing…' : 'Generate real previews'}
-        </button>
-        <button
-          type="button"
           disabled={busy !== null || !bundle?.selectedConceptId}
           onClick={() => void publishSelected()}
           className="rounded-full border border-[#1B2B4D] px-4 py-2 text-sm font-bold text-[#1B2B4D] disabled:opacity-50"
@@ -205,6 +233,22 @@ export default function ConceptSelectionPage({
           Back to projects
         </Link>
       </div>
+
+      <details className="mb-6 rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm">
+        <summary className="cursor-pointer font-semibold text-neutral-700">
+          Recovery options (not normally needed)
+        </summary>
+        <div className="mt-3">
+          <button
+            type="button"
+            disabled={busy !== null}
+            onClick={() => void generate({ force: true })}
+            className="rounded-full bg-[#1B2B4D] px-4 py-2 text-sm font-bold text-white disabled:opacity-50"
+          >
+            {busy === 'generate' ? 'Composing…' : 'Generate real previews'}
+          </button>
+        </div>
+      </details>
 
       {message ? <p className="mb-4 text-sm text-emerald-800">{message}</p> : null}
       {error ? <p className="mb-4 text-sm text-red-700">{error}</p> : null}

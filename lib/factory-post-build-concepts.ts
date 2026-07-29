@@ -53,8 +53,12 @@ export type LaunchConceptStatus = {
   }>;
   conceptsReviewPath: string | null;
   statusLabel: string;
+  plainLanguageStage: string;
+  progressHint: string;
   inProgress: boolean;
   readyForConceptReview: boolean;
+  needsAutomaticNudge: boolean;
+  stageDurationsMs: Record<string, number>;
 };
 
 function conceptsArtifactId(project: FactoryProject): string | null {
@@ -73,7 +77,6 @@ function alreadyGeneratedForBuild(
   if (!existing?.previews?.length) return null;
   const tiedTo = String(existing.sourceConceptsArtifactId || '');
   if (tiedTo && tiedTo === conceptsId) return existing;
-  // Legacy payloads without tie: treat as done if previews exist for current build.
   if (!tiedTo) return existing;
   return null;
 }
@@ -90,68 +93,103 @@ function readLatestPostBuildOutput(
     : null;
 }
 
-/**
- * Plain-language launch status for Quick Launch / project poll.
- */
-export function buildLaunchConceptStatus(project: FactoryProject): LaunchConceptStatus {
-  const conceptsId = conceptsArtifactId(project);
-  const context = project.context ? projectContextFromProject(project) : null;
-  const identityOut = readLatestIdentityGateOutput(context);
-  const identityBlocked = Boolean(identityOut && identityOut.ok === false);
-  const postBuild = readLatestPostBuildOutput(project);
-  const previews = context ? listConceptPreviewsFromContext(context) : null;
-  const conceptUrls =
-    previews?.previews.map((p) => ({
-      conceptId: p.conceptId,
-      name: p.name,
-      websitePreviewPath: p.websitePreviewPath,
-      portalPreviewPath: p.portalPreviewPath,
-    })) || [];
-  const conceptPackReady = conceptUrls.length > 0;
-  const conceptPackFailed = Boolean(postBuild && postBuild.ok === false);
-  const conceptPackError =
-    typeof postBuild?.error === 'string' ? postBuild.error : null;
-
-  let statusLabel = 'Working…';
-  let inProgress = true;
-  let readyForConceptReview = false;
-
-  if (project.pipelineStatus === 'FAILED' || project.pipelineStatus === 'CANCELLED') {
-    statusLabel = project.pipelineStatus === 'FAILED' ? 'Needs attention' : 'Cancelled';
-    inProgress = false;
-  } else if (identityBlocked) {
-    statusLabel = 'Stopped — identity needs clarification';
-    inProgress = false;
-  } else if (conceptPackReady) {
-    statusLabel = 'Ready for concept review';
-    inProgress = false;
-    readyForConceptReview = true;
-  } else if (conceptsId && !conceptPackReady) {
-    statusLabel = conceptPackFailed
-      ? 'Concept prep failed — you can retry'
-      : 'Preparing concept previews…';
-    inProgress = !conceptPackFailed;
-  } else if (project.pipelineStatus === 'BUILDING') {
-    statusLabel = 'Build complete — finishing concept pack…';
-    inProgress = true;
+function stageDurationsFromActivity(project: FactoryProject): Record<string, number> {
+  const durations: Record<string, number> = {};
+  const activity = [...(project.activity || [])].sort((a, b) => a.at.localeCompare(b.at));
+  for (let i = 0; i < activity.length - 1; i++) {
+    const cur = activity[i]!;
+    const next = activity[i + 1]!;
+    const start = Date.parse(cur.at);
+    const end = Date.parse(next.at);
+    if (!Number.isFinite(start) || !Number.isFinite(end) || end < start) continue;
+    const key = String(cur.to || cur.worker || 'step');
+    durations[key] = (durations[key] || 0) + (end - start);
   }
+  return durations;
+}
 
-  return {
-    hasExperienceConcepts: Boolean(conceptsId),
-    conceptsArtifactId: conceptsId,
-    identityBlocked,
-    identity: identityOut,
-    conceptPackReady,
-    conceptPackFailed,
-    conceptPackError,
-    conceptUrls,
-    conceptsReviewPath: conceptPackReady
-      ? `/admin/ea-factory/concepts/${encodeURIComponent(project.id)}`
-      : null,
-    statusLabel,
-    inProgress,
-    readyForConceptReview,
-  };
+function plainStageForProject(
+  project: FactoryProject,
+  launchReady: boolean,
+  identityBlocked: boolean,
+  hasConceptsArtifact: boolean,
+): { stage: string; hint: string } {
+  if (project.pipelineStatus === 'FAILED') {
+    return {
+      stage: 'Needs attention',
+      hint: 'Automatic recovery stopped. Open recovery options below.',
+    };
+  }
+  if (project.pipelineStatus === 'CANCELLED') {
+    return { stage: 'Cancelled', hint: 'This launch was cancelled.' };
+  }
+  if (identityBlocked) {
+    return {
+      stage: 'Confirming identity',
+      hint: 'Add one clearer detail so we can continue safely.',
+    };
+  }
+  if (launchReady) {
+    return {
+      stage: 'Ready for review',
+      hint: 'Three concepts are ready. Open any preview, then choose one.',
+    };
+  }
+  // Concepts exist but previews not durable/ready yet
+  if (hasConceptsArtifact) {
+    return {
+      stage: 'Preparing previews',
+      hint: 'Finishing website and portal drafts for review.',
+    };
+  }
+  switch (project.pipelineStatus) {
+    case 'CREATED':
+    case 'QUEUED':
+    case 'INTAKE':
+    case 'INTAKE_COMPLETE':
+      return {
+        stage: 'Confirming identity',
+        hint: 'Usually under a minute. Stay on this screen.',
+      };
+    case 'RESEARCHING':
+      return {
+        stage: 'Gathering the story',
+        hint: 'Usually 1–3 minutes depending on available sources.',
+      };
+    case 'DISCOVERING':
+      return {
+        stage: 'Gathering the story',
+        hint: 'Finding opportunities and proof signals.',
+      };
+    case 'PLANNING':
+      return {
+        stage: 'Developing the direction',
+        hint: 'Shaping creative direction and work orders.',
+      };
+    case 'BUILDING':
+    case 'GENERATING':
+      return {
+        stage: 'Creating your concepts',
+        hint: 'Building three distinct directions.',
+      };
+    default:
+      return {
+        stage: 'Preparing previews',
+        hint: 'Finishing website and portal drafts for review.',
+      };
+  }
+}
+
+function shouldAllowAutoRetry(project: FactoryProject, conceptsId: string): boolean {
+  const fails = [...(project.context?.outputs || [])].filter((o) => {
+    if (o.worker !== POST_BUILD_CONCEPTS_WORKER || o.kind !== 'production') return false;
+    const payload = o.payload as { ok?: boolean; sourceConceptsArtifactId?: string };
+    return (
+      payload?.ok === false &&
+      String(payload.sourceConceptsArtifactId || '') === conceptsId
+    );
+  });
+  return fails.length < 2;
 }
 
 /**
@@ -167,18 +205,110 @@ export function shouldRunPostBuildConceptPack(project: FactoryProject): boolean 
   const identityOut = readLatestIdentityGateOutput(
     project.context ? projectContextFromProject(project) : null,
   );
-  // If already blocked and no new detail, skip automatic retries (admin resume uses force).
   if (identityOut && identityOut.ok === false) return false;
-  const postBuild = readLatestPostBuildOutput(project);
-  // Do not auto-loop failed generations — admin retries via force.
-  if (
-    postBuild &&
-    postBuild.ok === false &&
-    String(postBuild.sourceConceptsArtifactId || '') === conceptsId
-  ) {
-    return false;
-  }
+  if (!shouldAllowAutoRetry(project, conceptsId)) return false;
   return true;
+}
+
+/**
+ * Plain-language launch status for Quick Launch / project poll.
+ */
+export function buildLaunchConceptStatus(project: FactoryProject): LaunchConceptStatus {
+  const conceptsId = conceptsArtifactId(project);
+  const context = project.context ? projectContextFromProject(project) : null;
+  const identityOut = readLatestIdentityGateOutput(context);
+  const identityBlocked = Boolean(identityOut && identityOut.ok === false);
+  const postBuild = readLatestPostBuildOutput(project);
+  const previews = context ? listConceptPreviewsFromContext(context) : null;
+
+  let conceptUrls =
+    previews?.previews.map((p) => ({
+      conceptId: p.conceptId,
+      name: p.name,
+      websitePreviewPath: p.websitePreviewPath,
+      portalPreviewPath: p.portalPreviewPath,
+    })) || [];
+
+  const packOk = Boolean(postBuild && postBuild.ok === true);
+  if (!conceptUrls.length && packOk && conceptsId && context) {
+    const art = readExperienceConceptsArtifact(context);
+    const concepts = Array.isArray(
+      (art?.data as { concepts?: { id: string; name?: string }[] })?.concepts,
+    )
+      ? (art!.data as { concepts: { id: string; name?: string }[] }).concepts
+      : [];
+    conceptUrls = concepts.map((c) => ({
+      conceptId: c.id,
+      name: c.name || c.id,
+      websitePreviewPath: `/preview/factory/${encodeURIComponent(project.id)}/${encodeURIComponent(c.id)}`,
+      portalPreviewPath: `/preview/factory/${encodeURIComponent(project.id)}/${encodeURIComponent(c.id)}/portal`,
+    }));
+  }
+
+  const conceptPackReady =
+    conceptUrls.length > 0 && (Boolean(previews?.previews?.length) || packOk);
+  const conceptPackFailed = Boolean(postBuild && postBuild.ok === false);
+  const conceptPackError =
+    typeof postBuild?.error === 'string' ? postBuild.error : null;
+
+  const plain = plainStageForProject(
+    project,
+    conceptPackReady,
+    identityBlocked,
+    Boolean(conceptsId),
+  );
+  let statusLabel = plain.stage;
+  let inProgress = true;
+  let readyForConceptReview = false;
+  let needsAutomaticNudge = false;
+
+  if (project.pipelineStatus === 'FAILED' || project.pipelineStatus === 'CANCELLED') {
+    inProgress = false;
+  } else if (identityBlocked) {
+    inProgress = false;
+    statusLabel = 'Stopped — identity needs clarification';
+  } else if (conceptPackReady) {
+    statusLabel = 'Ready for review';
+    inProgress = false;
+    readyForConceptReview = true;
+  } else if (conceptsId && !conceptPackReady) {
+    statusLabel = 'Preparing previews';
+    inProgress = !conceptPackFailed || shouldAllowAutoRetry(project, conceptsId);
+    needsAutomaticNudge = shouldRunPostBuildConceptPack(project);
+  } else if (
+    project.pipelineStatus === 'BUILDING' ||
+    project.pipelineStatus === 'QUEUED' ||
+    project.pipelineStatus === 'INTAKE' ||
+    project.pipelineStatus === 'INTAKE_COMPLETE' ||
+    project.pipelineStatus === 'RESEARCHING' ||
+    project.pipelineStatus === 'DISCOVERING' ||
+    project.pipelineStatus === 'PLANNING' ||
+    project.pipelineStatus === 'GENERATING'
+  ) {
+    inProgress = true;
+    needsAutomaticNudge = true;
+  }
+
+  return {
+    hasExperienceConcepts: Boolean(conceptsId),
+    conceptsArtifactId: conceptsId,
+    identityBlocked,
+    identity: identityOut,
+    conceptPackReady,
+    conceptPackFailed,
+    conceptPackError,
+    conceptUrls: conceptPackReady ? conceptUrls : [],
+    conceptsReviewPath: conceptPackReady
+      ? `/admin/ea-factory/concepts/${encodeURIComponent(project.id)}`
+      : null,
+    statusLabel,
+    plainLanguageStage: plain.stage,
+    progressHint: plain.hint,
+    inProgress,
+    readyForConceptReview,
+    needsAutomaticNudge,
+    stageDurationsMs: stageDurationsFromActivity(project),
+  };
 }
 
 /**

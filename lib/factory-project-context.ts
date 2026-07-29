@@ -207,7 +207,25 @@ export async function appendProjectContextOutput(
     intake: input.mirrorIntake ?? project.intake,
     updatedAt: at,
   };
-  await saveFactoryProject(next);
+  const saved = await saveFactoryProject(next);
+  if (!saved.ok) {
+    console.error('[factory-project-context] append save failed', {
+      projectId,
+      worker: input.worker,
+      error: saved.error,
+    });
+    return null;
+  }
+  const { airtableConfigured } = await import('@/lib/data/airtable-client');
+  const { isProductionDeploy } = await import('@/lib/integration-env');
+  if (isProductionDeploy() && airtableConfigured() && !saved.persistedToAirtable) {
+    console.error('[factory-project-context] append not durable in production', {
+      projectId,
+      worker: input.worker,
+      error: saved.error,
+    });
+    return null;
+  }
   return { context, project: next };
 }
 

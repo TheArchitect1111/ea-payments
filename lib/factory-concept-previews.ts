@@ -127,6 +127,189 @@ export function getConceptPreviewDraft(
   return bundle.previews.find((p) => p.conceptId === conceptId) || null;
 }
 
+/** Persistable preview rows — omit fat puck/websiteSite blobs (Airtable Payload JSON limits). */
+export function slimConceptPreviewsPayload(
+  payload: ConceptPreviewsPayload,
+): Record<string, unknown> {
+  return {
+    schemaVersion: payload.schemaVersion,
+    generatedAt: payload.generatedAt,
+    projectId: payload.projectId,
+    portalSlug: payload.portalSlug,
+    recommendedConceptId: payload.recommendedConceptId,
+    selectedConceptId: payload.selectedConceptId,
+    selectionStatus: payload.selectionStatus,
+    sourceConceptsArtifactId: payload.sourceConceptsArtifactId,
+    previews: payload.previews.map((p) => ({
+      conceptId: p.conceptId,
+      name: p.name,
+      lens: p.lens,
+      recommended: p.recommended,
+      websitePreviewPath: p.websitePreviewPath,
+      portalPreviewPath: p.portalPreviewPath,
+      compositionSignature: p.compositionSignature,
+      themeId: p.themeId,
+      primaryColor: p.primaryColor,
+      accentColor: p.accentColor,
+      // Keep compact portal shell for list UIs; website puck is recomposed on read.
+      portalShell: p.portalShell,
+    })),
+  };
+}
+
+/**
+ * Resolve a renderable concept draft for preview routes.
+ * Prefers persisted draft; recomposes from experience_concepts when puck/shell missing
+ * (cross-instance production durability).
+ */
+export async function resolveConceptPreviewDraft(
+  projectId: string,
+  conceptId: string,
+): Promise<
+  | {
+      ok: true;
+      draft: ConceptPreviewDraft;
+      source: 'persisted' | 'recomposed';
+      projectId: string;
+      conceptId: string;
+    }
+  | {
+      ok: false;
+      reason: string;
+      projectId: string;
+      conceptId: string;
+      hasProject: boolean;
+      hasConceptsArtifact: boolean;
+      conceptIds: string[];
+    }
+> {
+  const project = await getFactoryProject(projectId);
+  if (!project) {
+    console.error('[factory-concept-previews] preview lookup miss', {
+      projectId,
+      conceptId,
+      source: 'factory-project-store',
+      reason: 'project_not_found',
+    });
+    return {
+      ok: false,
+      reason: 'Factory project was not found in durable storage.',
+      projectId,
+      conceptId,
+      hasProject: false,
+      hasConceptsArtifact: false,
+      conceptIds: [],
+    };
+  }
+
+  const context = projectContextFromProject(project);
+  const existing = getConceptPreviewDraft(context, conceptId);
+  if (existing?.puckData && existing.portalShell) {
+    return {
+      ok: true,
+      draft: existing,
+      source: 'persisted',
+      projectId,
+      conceptId,
+    };
+  }
+
+  const conceptsArt = readExperienceConceptsArtifact(context);
+  const data = conceptsArt?.data as
+    | {
+        concepts?: FactoryExperienceConcept[];
+        recommendedConceptId?: string | null;
+        selectedConceptId?: string | null;
+        selectionStatus?: string;
+      }
+    | undefined;
+  const concepts = Array.isArray(data?.concepts) ? data!.concepts! : [];
+  const conceptIds = concepts.map((c) => c.id);
+  if (!conceptsArt || concepts.length === 0) {
+    console.error('[factory-concept-previews] preview lookup miss', {
+      projectId,
+      conceptId,
+      source: 'experience_concepts',
+      reason: 'concepts_artifact_missing',
+    });
+    return {
+      ok: false,
+      reason: 'Concept designs are not ready yet. Wait for concept generation to finish.',
+      projectId,
+      conceptId,
+      hasProject: true,
+      hasConceptsArtifact: false,
+      conceptIds,
+    };
+  }
+
+  const match = concepts.find((c) => c.id === conceptId);
+  if (!match) {
+    console.error('[factory-concept-previews] preview lookup miss', {
+      projectId,
+      conceptId,
+      source: 'experience_concepts',
+      reason: 'concept_id_not_in_artifact',
+      conceptIds,
+    });
+    return {
+      ok: false,
+      reason: `Concept "${conceptId}" is not in this project’s concept set.`,
+      projectId,
+      conceptId,
+      hasProject: true,
+      hasConceptsArtifact: true,
+      conceptIds,
+    };
+  }
+
+  try {
+    const portalSlug =
+      listConceptPreviewsFromContext(context)?.portalSlug || portalSlugForProject(project);
+    const composed = composeConceptPreviews({
+      projectId,
+      portalSlug,
+      concepts,
+      creativeDirection: readCreativeDirection(context),
+      recommendedConceptId: data?.recommendedConceptId,
+      selectedConceptId: data?.selectedConceptId,
+      selectionStatus: data?.selectionStatus,
+    });
+    const draft = composed.previews.find((p) => p.conceptId === conceptId);
+    if (!draft?.puckData || !draft.portalShell) {
+      throw new Error('Recompose did not produce a renderable draft.');
+    }
+    console.info('[factory-concept-previews] preview recomposed on read', {
+      projectId,
+      conceptId,
+      source: 'recomposed',
+    });
+    return {
+      ok: true,
+      draft,
+      source: 'recomposed',
+      projectId,
+      conceptId,
+    };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Concept preview recompose failed.';
+    console.error('[factory-concept-previews] preview recompose failed', {
+      projectId,
+      conceptId,
+      reason: message,
+    });
+    return {
+      ok: false,
+      reason: message,
+      projectId,
+      conceptId,
+      hasProject: true,
+      hasConceptsArtifact: true,
+      conceptIds,
+    };
+  }
+}
+
 function portalSlugForProject(project: FactoryProject, override?: string): string {
   return portalSlugFromClient(project, override);
 }
@@ -295,14 +478,49 @@ export async function generateAndPersistConceptPreviews(
     sourceConceptsArtifactId: options?.sourceConceptsArtifactId || conceptsArt.id,
   };
 
+  const slim = slimConceptPreviewsPayload(payload);
   const appended = await appendProjectContextOutput(projectId, {
     kind: 'production',
     worker: CONCEPT_PREVIEWS_WORKER,
-    payload: payload as unknown as Record<string, unknown>,
+    payload: slim,
     detail: `Composed ${payload.previews.length} directed concept previews`,
   });
   if (!appended) {
-    return { ok: false, error: 'Failed to persist concept previews on project context.' };
+    return {
+      ok: false,
+      error:
+        'Failed to persist concept preview metadata durably. Previews will not be shown until storage succeeds.',
+    };
+  }
+
+  // Production: require Airtable durability before advertising preview URLs.
+  const { airtableConfigured } = await import('@/lib/data/airtable-client');
+  const { isProductionDeploy } = await import('@/lib/integration-env');
+  if (isProductionDeploy() && airtableConfigured()) {
+    const { verifyFactoryProjectDurable } = await import('@/lib/factory-project-store');
+    const durable = await verifyFactoryProjectDurable(projectId);
+    if (!durable) {
+      console.error('[factory-concept-previews] durable verify failed after persist', {
+        projectId,
+      });
+      return {
+        ok: false,
+        error:
+          'Concept previews were generated but could not be verified in durable storage. Retry concept generation.',
+      };
+    }
+    // Confirm experience_concepts still readable after clearing memory.
+    const reloaded = await getFactoryProject(projectId);
+    const reloadedConcepts = reloaded?.context
+      ? readExperienceConceptsArtifact(projectContextFromProject(reloaded))
+      : null;
+    if (!reloadedConcepts) {
+      return {
+        ok: false,
+        error:
+          'Project reloaded without experience_concepts after save. Preview links withheld.',
+      };
+    }
   }
 
   return { ok: true, payload, project: appended.project };
