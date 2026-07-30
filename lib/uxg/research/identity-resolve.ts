@@ -151,7 +151,13 @@ function looksLikePersonName(subject: string, detail?: string): boolean {
   const tokens = subjectTokens(subject);
   if (tokens.length < 2 || tokens.length > 4) return false;
   const blob = `${subject} ${detail || ''}`.toLowerCase();
-  if (/\b(llc|inc|org|foundation|church|botanical|circle|academy|studio|agency)\b/.test(blob)) {
+  // Do not treat ".org"/".com" TLDs in URLs as organization keywords.
+  const withoutHosts = blob.replace(/\b[a-z0-9-]+(?:\.[a-z0-9-]+)+\b/gi, ' ');
+  if (
+    /\b(llc|inc|foundation|church|botanical|circle|academy|studio|agency|organization|non-?profit)\b/.test(
+      withoutHosts,
+    )
+  ) {
     return false;
   }
   return true;
