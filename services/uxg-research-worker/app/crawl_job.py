@@ -192,9 +192,11 @@ async def run_crawl_job(req: ResearchCrawlRequest) -> ResearchCrawlResult:
             errors.append({"url": url, "code": "robots_disallow", "message": "robots.txt disallows"})
             return
         last_err = None
+        # Give Playwright + httpx fallback enough time per seed (job budget still enforced).
+        page_timeout = max(45.0, min(90.0, timeout_sec / max(1, min(max_pages, 4))))
         for attempt in range(2):
             try:
-                title, html, md = await asyncio.wait_for(_crawl_page(url), timeout=timeout_sec / max(1, max_pages))
+                title, html, md = await asyncio.wait_for(_crawl_page(url), timeout=page_timeout)
                 pages_fetched += 1
                 extracted = extract_from_html(
                     html=html or md,
@@ -225,7 +227,12 @@ async def run_crawl_job(req: ResearchCrawlRequest) -> ResearchCrawlResult:
                 last_err = err
                 retries += 1
                 await asyncio.sleep(0.4)
-        err_msg = str(last_err) if last_err else "fetch failed"
+        if isinstance(last_err, asyncio.TimeoutError):
+            err_msg = f"page_timeout after {page_timeout:.0f}s"
+        else:
+            err_msg = str(last_err) if last_err else "fetch failed"
+            if not err_msg.strip():
+                err_msg = type(last_err).__name__ if last_err else "fetch failed"
         err_low = err_msg.lower()
         # Never bypass TLS — surface certificate failures explicitly.
         code = (
