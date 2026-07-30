@@ -8,3 +8,6 @@ services/uxg-research-worker/.venv/
 services/**/__pycache__/
 services/**/*.pyc
 
+
+services/uxg-research-worker/.venv312/
+
