@@ -10,6 +10,7 @@ import {
   type FactoryCreativeDirectionData,
   type FactoryExperienceConcept,
 } from '@/lib/factory-concept-to-director';
+import { parseDistinguishingDetail } from '@/lib/factory-identity-gate';
 import {
   buildContentPackageFromProject,
   CONTENT_PACKAGE_WORKER,
@@ -17,6 +18,7 @@ import {
   type ContentPackage,
 } from '@/lib/factory-content-package';
 import { evaluateConceptQualityGate } from '@/lib/factory-concept-quality-gate';
+import { findForbiddenPublicCopy } from '@/lib/factory-forbidden-copy.mjs';
 import {
   readExperienceCreationBundleFromProject,
   type ContentCreativePack,
@@ -35,6 +37,13 @@ import {
 } from '@/lib/factory-project-store';
 import { composeDirectedWebsite, puckContainsFeatureCards } from '@/lib/layout-composer';
 import { CARE_CONTINUUM_SIGNATURE } from '@/lib/layout-composer/grammars/care-continuum-editorial';
+import {
+  applyRepairedPortalShell,
+  applyRepairedPuckData,
+  buildPublicCopyBundle,
+  enforcePublicCopyQuality,
+} from '@/lib/uxg';
+import { buildStructuredEvidenceModel } from '@/lib/uxg/evidence-model';
 
 export const CONCEPT_PREVIEWS_WORKER = 'concept-previews';
 
@@ -42,8 +51,13 @@ export const CONCEPT_PREVIEWS_WORKER = 'concept-previews';
 function temporaryHeroImageUrl(pack: ContentPackage | null | undefined): string {
   const blob = `${pack?.name || ''} ${(pack?.organizations || []).join(' ')} ${(pack?.currentWork || []).join(' ')} ${pack?.biography || ''} ${pack?.centralStory || ''}`.toLowerCase();
   if (/liaison|hospice|home\s*health|hospital|patient|clinic|care|nurse|palliative/i.test(blob)) {
-    // Environmental healthcare — never a stock face that could be mistaken for the subject.
     return 'https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=2000&q=80';
+  }
+  if (/botanical|product|retail|shop|sku|collection|plant/i.test(blob)) {
+    return 'https://images.unsplash.com/photo-1466781783362-7c4d8f2d5c5f?auto=format&fit=crop&w=1600&q=80';
+  }
+  if (/nonprofit|ministry|circle|congregation|community|faith/i.test(blob)) {
+    return 'https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?auto=format&fit=crop&w=1600&q=80';
   }
   return 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1600&q=80';
 }
@@ -202,6 +216,12 @@ export type ConceptPreviewDraft = {
   puckData: Data;
   portalShell: ConceptPortalShellPreview;
   websiteSite: Record<string, unknown>;
+  copyQuality?: {
+    ok: boolean;
+    repaired: boolean;
+    issueCount: number;
+    examples: string[];
+  };
 };
 
 export type ConceptPreviewsPayload = {
@@ -565,6 +585,71 @@ export function composeConceptPreviews(input: {
     const lensPurpose = pack?.lenses?.[lens]?.portalPurpose;
     const portalFromGrammar = composed.portalShellExtras;
 
+    let portalShell: Record<string, unknown> = portalFromGrammar
+      ? {
+          ...portalFromGrammar,
+          heroImageUrl: portalFromGrammar.heroImageUrl || input.heroImageUrl,
+        }
+      : {
+          tone: 'Private continuity after the public introduction',
+          composition:
+            concept.portal?.composition ||
+            'Tools, progress, messages, and documents with one next action',
+          purpose:
+            lensPurpose ||
+            continuity?.purpose ||
+            `Private tools, progress, messages, and documents for ${fields.organization.organizationName} — not a restatement of the public page.`,
+          firstView: Array.isArray(continuity?.firstView)
+            ? continuity!.firstView!
+            : ['Messages', 'Progress', 'Resources', 'Documents', 'Next step'],
+          primaryColor: fields.primaryColor,
+          accentColor: fields.accentColor,
+          themeId,
+          organizationName: fields.organization.organizationName,
+          brandHeadline:
+            fields.organization.brandHeadline || fields.organization.organizationName,
+          brandSubhead:
+            lensPurpose ||
+            `Continue inside the private workspace — tools, progress, and documents.`,
+          memberWhere:
+            fields.organization.member?.whereYouAre ||
+            'You are inside the private continuation of this relationship.',
+          memberNext:
+            fields.organization.member?.whatNext ||
+            'Open tools, check progress, or send a message when ready.',
+          heroImageUrl: input.heroImageUrl,
+        };
+
+    // Ensure portal purpose never mirrors website hero/about verbatim.
+    if (
+      typeof portalShell.purpose === 'string' &&
+      typeof portalShell.brandSubhead === 'string' &&
+      portalShell.purpose === fields.organization.brandSubhead
+    ) {
+      portalShell = {
+        ...portalShell,
+        purpose: `Private tools, progress, messages, and documents that continue the relationship — not a restatement of the public page.`,
+      };
+    }
+
+    let puckData = themedPuck;
+    const evidence = buildStructuredEvidenceModel({
+      subjectIdentity: pack?.name || fields.organization.organizationName,
+      distinguishingDetail: parseDistinguishingDetail(input.projectNotes || '') || undefined,
+      organizations: pack?.organizations,
+      biography: pack?.biography,
+      claims: pack?.claims,
+      sources: pack?.sources,
+      currentWork: pack?.currentWork,
+      milestones: pack?.milestones,
+    });
+    const bundle = buildPublicCopyBundle({ puckData, portalShell });
+    const enforced = enforcePublicCopyQuality(bundle, evidence);
+    if (enforced.repaired) {
+      puckData = applyRepairedPuckData(puckData, enforced.bundle.fields);
+      portalShell = applyRepairedPortalShell(portalShell, enforced.bundle.fields);
+    }
+
     return {
       conceptId: concept.id,
       name: concept.name,
@@ -574,33 +659,17 @@ export function composeConceptPreviews(input: {
       portalPreviewPath: `/preview/factory/${encodeURIComponent(input.projectId)}/${encodeURIComponent(concept.id)}/portal`,
       compositionSignature: composed.composed.compositionSignature,
       themeId,
-      primaryColor: portalFromGrammar?.primaryColor || fields.primaryColor,
-      accentColor: portalFromGrammar?.accentColor || fields.accentColor,
-      puckData: themedPuck,
-      portalShell: portalFromGrammar
-        ? {
-            ...portalFromGrammar,
-            heroImageUrl: portalFromGrammar.heroImageUrl || input.heroImageUrl,
-          }
-        : {
-            tone: concept.portal?.tone || 'Calm executive continuity from the public story',
-            composition:
-              concept.portal?.composition ||
-              'Single next-best-action with narrative progress',
-            purpose: lensPurpose || continuity?.purpose,
-            firstView: Array.isArray(continuity?.firstView) ? continuity!.firstView! : [],
-            primaryColor: fields.primaryColor,
-            accentColor: fields.accentColor,
-            themeId,
-            organizationName: fields.organization.organizationName,
-            brandHeadline:
-              fields.organization.brandHeadline || fields.organization.organizationName,
-            brandSubhead: fields.organization.brandSubhead,
-            memberWhere: fields.organization.member?.whereYouAre,
-            memberNext: fields.organization.member?.whatNext,
-            heroImageUrl: input.heroImageUrl,
-          },
+      primaryColor: (portalShell.primaryColor as string) || fields.primaryColor,
+      accentColor: (portalShell.accentColor as string) || fields.accentColor,
+      puckData,
+      portalShell: portalShell as ConceptPortalShellPreview,
       websiteSite: composed.websiteSite,
+      copyQuality: {
+        ok: enforced.result.ok,
+        repaired: enforced.repaired,
+        issueCount: enforced.result.issues.length,
+        examples: enforced.examples,
+      },
     };
   });
 
@@ -652,9 +721,13 @@ export async function generateAndPersistConceptPreviews(
   }
 
   // Prefer a ready pack already on context (research / seed) over rebuilding stubs.
+  // Never keep a "ready" pack that still contains forbidden public slogans.
   const existingPack = readContentPackageFromContext(context);
-  const contentPackageBase =
-    existingPack?.quality?.ready ? existingPack : buildContentPackageFromProject(project);
+  const existingClean =
+    Boolean(existingPack?.quality?.ready) && findForbiddenPublicCopy(existingPack).ok;
+  const contentPackageBase = existingClean
+    ? existingPack!
+    : buildContentPackageFromProject(project);
   const eceBundle = readExperienceCreationBundleFromProject(project);
   const contentPackage = eceBundle?.content
     ? contentPackageFromCreativePack(contentPackageBase, eceBundle.content)

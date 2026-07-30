@@ -67,7 +67,7 @@ export type FactoryExperienceConcept = {
 export type ConceptToDirectorOptions = {
   concept: FactoryExperienceConcept;
   creativeDirection?: FactoryCreativeDirectionData | null;
-  /** Prefer Amanda golden-path preset when client matches / slug known. */
+  /** Optional launch preset id — never auto-selected by subject name. */
   presetId?: string;
   portalSlug?: string;
   portalLoginHref?: string;
@@ -102,8 +102,8 @@ const LENS_FLAVOR: Record<
     voice:
       'Documentary, human, cinematic — story before interface; lived proof over advertised claims.',
     colorShift: { primary: '#14110F', accent: '#C4A574' },
-    memberWhere: 'Your story is underway — here is where you stand.',
-    memberNext: 'Take the next quiet step the narrative is asking for.',
+    memberWhere: 'You are inside the private continuation of this relationship.',
+    memberNext: 'Open tools, check progress, or send a message when ready.',
     storyBias:
       'A cinematic documentary of belonging — America needs these lived human stories, advocacy with dignity, not a software pitch.',
     whoBias:
@@ -116,8 +116,8 @@ const LENS_FLAVOR: Record<
     voice:
       'Warm, elevated, editorial — publication-scale type, annotated evidence, journal continuity.',
     colorShift: { primary: '#17130F', accent: '#B9894D' },
-    memberWhere: 'Your briefing cover is ready.',
-    memberNext: 'Open the chapter that matches what you want to create next.',
+    memberWhere: 'You are inside the private continuation of this relationship.',
+    memberNext: 'Open the next workspace chapter when you are ready.',
     storyBias:
       'An editorial journal of craft and education — annotated evidence, magazine chapters, teach with clarity and legacy.',
     whoBias:
@@ -130,8 +130,8 @@ const LENS_FLAVOR: Record<
     voice:
       'Intimate, relationship-first, studio-warm — trust and personal invitation over software chrome.',
     colorShift: { primary: '#1A1512', accent: '#A67C52' },
-    memberWhere: 'Welcome back to your private studio.',
-    memberNext: 'One next step — then we walk it together.',
+    memberWhere: 'You are inside the private continuation of this relationship.',
+    memberNext: 'Open tools, check progress, or send a message when ready.',
     storyBias:
       'An intimate studio of care and craft — heal, nurture, guide beside you; handmade trust, not dashboard chrome.',
     whoBias:
@@ -158,17 +158,6 @@ export function detectConceptLens(concept: {
 
 function pickPreset(options: ConceptToDirectorOptions) {
   if (options.presetId) return getExperienceLaunchPreset(options.presetId);
-  const org = (
-    options.creativeDirection?.organizationName ||
-    options.concept.organizationName ||
-    ''
-  )
-    .trim()
-    .toLowerCase();
-  const slug = (options.portalSlug || '').trim().toLowerCase();
-  if (org.includes('amanda') || slug.includes('amanda')) {
-    return getExperienceLaunchPreset('amanda-catherine-editorial');
-  }
   return undefined;
 }
 
@@ -334,13 +323,13 @@ export function conceptToOrganizationStoryInput(
   });
 }
 
-/** Theme id for preview / publish continuity (editorial lens → amanda-editorial when Amanda). */
+/** Theme id for preview / publish continuity by lens (registry ids, not subject locks). */
 export function themeIdForConceptLens(
   lens: ExperienceConceptLens,
-  portalSlug?: string,
+  _portalSlug?: string,
 ): string {
-  const slug = (portalSlug || '').toLowerCase();
-  if (lens === 'editorial' || slug.includes('amanda')) {
+  void _portalSlug;
+  if (lens === 'editorial') {
     return 'amanda-editorial';
   }
   return 'ea-default-theme';

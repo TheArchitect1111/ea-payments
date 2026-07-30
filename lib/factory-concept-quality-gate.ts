@@ -185,6 +185,11 @@ export function evaluateConceptQualityGate(input: {
       if (!shellScan.ok) {
         reasons.push(`Portal shell contains forbidden copy: ${shellScan.matches[0]}`);
       }
+      if (preview.copyQuality && !preview.copyQuality.ok) {
+        reasons.push(
+          `Copy quality failed for ${preview.conceptId}: ${preview.copyQuality.examples[0] || 'unspecified'}`,
+        );
+      }
     }
   }
 

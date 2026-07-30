@@ -33,25 +33,37 @@ type PreviewRecoverBootstrap = {
 /**
  * Preview-only recovery: force concept pack for any projectId.
  * Optional `bootstrap` creates/updates a project from research payload (no subject hard-coding).
- * Auth: Bearer PREVIEW_RECOVER_TOKEN or VERCEL_GIT_COMMIT_SHA. Never on Production.
+ * Auth for non-admin callers: Bearer PREVIEW_RECOVER_TOKEN only.
+ * Admin session cookie (admin:access) is also accepted.
+ * Never on Production. No deployment-id / git-sha fallbacks.
  */
 export async function POST(req: NextRequest) {
   if (process.env.VERCEL_ENV === 'production') {
     return NextResponse.json({ error: 'Not available in production.' }, { status: 404 });
   }
 
-  const expected = (
-    process.env.PREVIEW_RECOVER_TOKEN ||
-    process.env.VERCEL_GIT_COMMIT_SHA ||
-    ''
-  ).trim();
-  if (!expected) {
-    return NextResponse.json({ error: 'Preview recover auth is not configured.' }, { status: 503 });
-  }
-
+  const recoverToken = (process.env.PREVIEW_RECOVER_TOKEN || '').trim();
   const auth = req.headers.get('authorization') || '';
   const bearer = auth.toLowerCase().startsWith('bearer ') ? auth.slice(7).trim() : '';
-  if (!bearer || bearer !== expected) {
+  const tokenOk = Boolean(recoverToken && bearer && bearer === recoverToken);
+
+  let adminOk = false;
+  if (!tokenOk) {
+    const { cookies } = await import('next/headers');
+    const { requireAdminAction } = await import('@/lib/admin-session-guard');
+    const { EA_ADMIN_COOKIE } = await import('@/lib/ea-admin-auth');
+    const cookieStore = await cookies();
+    const admin = requireAdminAction(cookieStore.get(EA_ADMIN_COOKIE)?.value, 'admin:access');
+    adminOk = admin.ok === true;
+  }
+
+  if (!tokenOk && !adminOk) {
+    if (!recoverToken) {
+      return NextResponse.json(
+        { error: 'Preview recover auth is not configured (PREVIEW_RECOVER_TOKEN).' },
+        { status: 503 },
+      );
+    }
     return NextResponse.json({ error: 'Unauthorized.' }, { status: 401 });
   }
 

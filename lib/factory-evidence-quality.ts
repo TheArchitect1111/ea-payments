@@ -4,7 +4,8 @@
  */
 
 const CONFUSED_NEAR_NAMES: Record<string, string[]> = {
-  brickey: ['behringer', 'burkey', 'brickley', 'brickeys'],
+  // Intentionally empty — near-name collisions are handled by surname matching below.
+  // Do not add subject-specific exception lists in the UXG evidence layer.
 };
 
 export function subjectNameTokens(subjectName: string): { first: string; last: string; full: string } {

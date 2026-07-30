@@ -109,7 +109,7 @@ function copyForScene(
     case 'process':
       return {
         label: 'How',
-        title: 'How the work unfolds',
+        title: 'How the work moves forward',
         body:
           input.differentiators?.length
             ? input.differentiators.slice(0, 3).map((d, i) => `${i + 1}. ${d}`).join('\n')

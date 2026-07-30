@@ -158,7 +158,7 @@ function emitComposition(
           variant: 'editorial',
           label: copy.label || 'Impact',
           title: copy.title,
-          metricOneValue: copy.metricOneValue || '—',
+          metricOneValue: copy.metricOneValue || '',
           metricOneLabel: copy.metricOneLabel || copy.body.slice(0, 80),
           metricTwoValue: copy.metricTwoValue || '',
           metricTwoLabel: copy.metricTwoLabel || '',

@@ -205,14 +205,21 @@ export function mapOrganizationToCareContinuumFields(
       : `${subjectName} — care that meets people where they live`,
   );
   const brandSubhead = scrub(
-    organization.brandSubhead,
-    role
-      ? `${subjectName} serves as ${role}${organizationName !== subjectName ? ` with ${organizationName}` : ''}—helping patients, families, and care partners understand how compassionate care can meet them where they live.`
-      : scrub(organization.story || organization.whoTheyAre, `${subjectName} helps people navigate care with clarity.`),
+    organization.brandSubhead &&
+      organization.brandSubhead !== organization.whoTheyAre &&
+      organization.brandSubhead !== organization.biographyPublic
+      ? organization.brandSubhead
+      : undefined,
+    role && organizationName !== subjectName
+      ? `Guidance for patients, families, and care partners navigating the next step with ${organizationName}.`
+      : scrub(
+          organization.story || organization.mission,
+          `${subjectName} helps people navigate care with clarity.`,
+        ),
   );
 
   const introduction = scrub(
-    organization.whoTheyAre || organization.biographyPublic || organization.story,
+    organization.biographyPublic || organization.whoTheyAre || organization.story,
     `${subjectName}${role ? ` serves as ${role}` : ''}${
       organizationName !== subjectName ? ` with ${organizationName}` : ''
     }. This work helps people navigate the moment when care needs to move from facility to home—or when a family needs clarity about what support is possible next.`,
@@ -244,11 +251,9 @@ export function mapOrganizationToCareContinuumFields(
     introduction,
     roleExplainerTitle: role ? 'How this role helps' : 'How care coordination helps',
     roleExplainerBody,
-    roleAttributionNote: organization.roleAttributionNote
-      ? scrubForbiddenPublicCopy(organization.roleAttributionNote)
-      : organizationName !== subjectName
-        ? `Organizational capabilities attributed to ${organizationName}, not as personal accomplishments.`
-        : undefined,
+    roleAttributionNote: organizationName !== subjectName
+      ? `Services described on this page are provided by ${organizationName}.`
+      : undefined,
     uncertaintyTitle: 'Too many options, too little clarity',
     uncertaintyBody: scrub(
       organization.whoTheyHelp,
@@ -262,7 +267,7 @@ export function mapOrganizationToCareContinuumFields(
     pathwaysIntro: scrub(
       organization.pathwaysIntro,
       organizationName !== subjectName
-        ? `These pathways belong to ${organizationName}. Liaison and coordination work helps people understand and access them—not claim them as personal accomplishments.`
+        ? `These pathways belong to ${organizationName}. Coordination helps people understand and access them.`
         : `These care pathways help households move from question to support.`,
     ),
     pathways: pathwayTriple(organization.carePathways, organizationName),
@@ -308,7 +313,9 @@ export function mapOrganizationToCareContinuumFields(
     footerAddress: scrubForbiddenPublicCopy(organization.footerAddress),
     footerNote: scrub(
       organization.footerNote,
-      'Preview draft — organizational facts attributed to the affiliated organization when present. Personal role stated only when verified.',
+      organizationName !== subjectName
+        ? `Services referenced on this page are provided by ${organizationName}.`
+        : 'A public introduction with a clear next step.',
     ),
     returnHref: options.returnHref,
     primaryColor: organization.primaryColor || '#1B3A4B',
@@ -336,7 +343,7 @@ export function mapOrganizationToCareContinuumFields(
       }),
       family: mediaFrom(organization.mediaSlots?.family, {
         url: CARE_CONTINUUM_MEDIA_POOL.family,
-        caption: 'Environments of care — not unverified likenesses.',
+        caption: 'Environments of care that support families and partners.',
         focal: 'environment',
       }),
       calm: mediaFrom(organization.mediaSlots?.calm, {
@@ -607,27 +614,28 @@ export function composeCareContinuumEditorialPuck(fields: CareContinuumFields): 
 
 export function buildCareContinuumPortalShell(fields: CareContinuumFields) {
   return {
-    tone: 'Calm, clinical, family-centered continuity from the public story',
-    composition: 'Member home with shared imagery and clear next referral action',
+    tone: 'Calm continuity from the public care story',
+    composition: 'Member home with tools, progress, messages, and documents',
     purpose:
-      'A private continuation for families and referring partners after learning about the care pathway.',
+      'A private workspace for tools, progress, messages, and documents after the public introduction — not a restatement of the website.',
     firstView: [
-      'Messages from your care team',
-      'Referral status',
+      'Messages',
+      'Progress',
       'Service guides',
-      'After-hours contacts',
-      'Family resources',
+      'Documents',
+      'Next step',
     ],
     primaryColor: fields.primaryColor,
     accentColor: fields.accentColor,
     themeId: CARE_CONTINUUM_THEME_ID,
     organizationName: fields.subjectName,
     brandHeadline: fields.subjectRole
-      ? `${fields.subjectRole} · ${fields.organizationName}`
-      : fields.brandHeadline,
-    brandSubhead: fields.brandSubhead.slice(0, 160),
-    memberWhere: 'You are reviewing a care pathway with trusted coordination context.',
-    memberNext: fields.primaryCtaLabel,
+      ? `${fields.subjectRole} workspace`
+      : `${fields.subjectName} workspace`,
+    brandSubhead:
+      'Continue inside the private workspace — tools, progress, and shared materials.',
+    memberWhere: 'You are inside the private continuation of this relationship.',
+    memberNext: 'Open tools, check progress, or send a message when ready.',
     heroImageUrl: fields.media.hero.url,
   };
 }
