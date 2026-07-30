@@ -164,7 +164,7 @@ export async function POST(req: NextRequest) {
     ['logo', 'favicon', 'app_icon'].includes(b.kind),
   );
   const brandColors = (crawl?.brandAssets || []).filter((b) => b.kind === 'color');
-  const brandFonts = (crawl?.brandAssets || []).filter((b) => b.kind === 'font');
+  const brandFonts = (crawl?.brandAssets || []).filter((b) => b.kind === 'font_family');
   const brandLanguage = (crawl?.brandAssets || []).filter((b) => b.kind === 'brand_language');
   const media = (crawl?.mediaAssets || []).filter((m) => !m.rejected);
   const docs = crawl?.documents || [];
@@ -225,7 +225,7 @@ export async function POST(req: NextRequest) {
         value: l.value,
         sourceUrl: l.sourceUrl,
         ownership: l.ownership,
-        licenseEvidence: l.licenseEvidence || null,
+        notes: l.notes || null,
       })),
       colors: brandColors.slice(0, 12).map((c) => c.value),
       fonts: brandFonts.slice(0, 8).map((f) => f.value),
