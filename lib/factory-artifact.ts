@@ -55,7 +55,8 @@ export type ResearchArtifactKind =
   | 'prospect_profile'
   | 'document'
   | 'branding'
-  | 'metadata';
+  | 'metadata'
+  | 'research_crawl_result';
 
 export type DiscoveryArtifactKind =
   | 'organization_profile'

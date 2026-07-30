@@ -172,6 +172,32 @@ export async function buildMediaBrandPack(
   options?: { skipOpenverse?: boolean; skipFaceFocal?: boolean },
 ): Promise<MediaBrandPack> {
   const context = project.context ? projectContextFromProject(project) : null;
+
+  if (context) {
+    const crawlMedia = listArtifacts(context, 'media_brand_pack').find((a) => {
+      const data = asRecord(a.data);
+      const provider = asRecord(data?.provider);
+      return str(provider?.id) === 'uxg-research-crawl';
+    });
+    if (crawlMedia?.data) {
+      return crawlMedia.data as unknown as MediaBrandPack;
+    }
+    const crawlOnly = listArtifacts(context, 'research_crawl_result').at(-1);
+    if (crawlOnly?.data && asRecord(crawlOnly.data)?.schemaVersion === 1) {
+      try {
+        const { mapCrawlToMediaBrandPack } = await import('@/lib/uxg/research/map-to-packs');
+        const { parseResearchCrawlResult } = await import('@/lib/uxg/research/schemas');
+        return mapCrawlToMediaBrandPack(
+          project,
+          parseResearchCrawlResult(crawlOnly.data),
+          knowledge,
+        );
+      } catch {
+        // Fall through to legacy path.
+      }
+    }
+  }
+
   const assets: MediaAsset[] = [];
   const colors: string[] = [];
   const warnings: string[] = [];

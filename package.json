@@ -7,7 +7,8 @@
     "dev:lan": "next dev --hostname 0.0.0.0",
     "build": "next build",
     "check:server-function-trace": "node scripts/check-server-function-trace-size.mjs",
-    "build:check-trace": "next build && node scripts/check-server-function-trace-size.mjs",
+    "build:check-trace": "next build && node scripts/check-server-function-trace-size.mjs && node scripts/check-uxg-research-not-in-trace.mjs",
+    "check:uxg-research-trace": "node scripts/check-uxg-research-not-in-trace.mjs",
     "start": "node scripts/start-production.mjs",
     "start:next": "next start",
     "lint": "eslint",
@@ -52,6 +53,10 @@
     "test:factory-quick-launch-one-page": "node scripts/test-factory-quick-launch-one-page.mjs",
     "test:production-quick-launch-previews": "npx --yes tsx scripts/test-production-quick-launch-previews.ts",
     "test:uxg-three-subjects": "npx --yes tsx scripts/test-uxg-three-subjects.ts",
+    "test:uxg-research-schemas": "npx --yes tsx scripts/test-uxg-research-schemas.ts",
+    "test:uxg-research-identity": "npx --yes tsx scripts/test-uxg-research-identity.ts",
+    "test:uxg-research-provider-selection": "npx --yes tsx scripts/test-uxg-research-provider-selection.ts",
+    "test:uxg-research-three-subjects": "npx --yes tsx scripts/test-uxg-research-three-subjects.ts",
     "test:factory-wire-selected": "npx --yes tsx scripts/test-factory-wire-selected.ts",
     "test:factory-content-quality-gate": "npx --yes tsx scripts/test-factory-content-quality-gate.ts",
     "test:factory-evidence-quality": "npx --yes tsx scripts/test-factory-evidence-quality.ts",
@@ -107,7 +112,8 @@
     "qrcode": "^1.5.4",
     "react": "19.2.4",
     "react-dom": "19.2.4",
-    "stripe": "^22.2.1"
+    "stripe": "^22.2.1",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@playwright/test": "^1.61.0",

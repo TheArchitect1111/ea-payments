@@ -19,6 +19,7 @@ const nextConfig: NextConfig = {
       './marketing/**',
       './docs/**',
       './scripts/**',
+      './services/**',
       './prototypes/**',
       './extension/**',
       './supabase/**',

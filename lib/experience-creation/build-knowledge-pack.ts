@@ -80,6 +80,28 @@ export async function buildSubjectKnowledgePack(
   adapter: ResearchProviderAdapter = createDefaultResearchAdapter(),
 ): Promise<SubjectKnowledgePack> {
   const context = project.context ? projectContextFromProject(project) : null;
+
+  // Prefer structured UXG crawl pack when present (Factory consumes packs, not raw crawl text).
+  if (context) {
+    const crawlKnowledge = listArtifacts(context, 'subject_knowledge_pack').find((a) => {
+      const provider = asRecord(asRecord(a.data)?.provider);
+      return str(provider?.id) === 'uxg-research-crawl';
+    });
+    if (crawlKnowledge?.data) {
+      return crawlKnowledge.data as unknown as SubjectKnowledgePack;
+    }
+    const crawlOnly = listArtifacts(context, 'research_crawl_result').at(-1);
+    if (crawlOnly?.data && asRecord(crawlOnly.data)?.schemaVersion === 1) {
+      try {
+        const { mapCrawlToKnowledgePack } = await import('@/lib/uxg/research/map-to-packs');
+        const { parseResearchCrawlResult } = await import('@/lib/uxg/research/schemas');
+        return mapCrawlToKnowledgePack(project, parseResearchCrawlResult(crawlOnly.data));
+      } catch {
+        // Fall through to legacy path.
+      }
+    }
+  }
+
   const name = project.client.trim();
   const detail = parseDistinguishingDetail(project.notes) || '';
   const inputArtifactIds: string[] = [];

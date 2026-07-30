@@ -87,7 +87,8 @@ export type MediaUsageStatus =
   | 'preview_only'
   | 'publication_candidate'
   | 'approved'
-  | 'rejected';
+  | 'rejected'
+  | 'user_supplied';
 
 export type MediaLicenseClass =
   | 'public_domain'

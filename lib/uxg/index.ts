@@ -24,3 +24,4 @@ export {
   applyRepairedPortalShell,
 } from '@/lib/uxg/collect-public-copy';
 export { buildLensCopyFromEvidence } from '@/lib/uxg/lens-copy-from-evidence';
+export * from '@/lib/uxg/research';

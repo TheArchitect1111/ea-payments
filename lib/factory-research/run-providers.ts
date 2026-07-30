@@ -8,6 +8,7 @@ import { documentProvider } from '@/lib/factory-research/document-provider';
 import { metadataProvider } from '@/lib/factory-research/metadata-provider';
 import { organizationProvider } from '@/lib/factory-research/organization-provider';
 import { prospectProfileProvider } from '@/lib/factory-research/prospect-profile-provider';
+import { uxgDeepCrawlProvider } from '@/lib/factory-research/uxg-deep-crawl-provider';
 import type { ProviderRunResult, ResearchProvider } from '@/lib/factory-research/types';
 import { websiteProvider } from '@/lib/factory-research/website-provider';
 import type { ProjectContext } from '@/lib/factory-project-context';
@@ -17,6 +18,7 @@ export const RESEARCH_PROVIDERS: ResearchProvider[] = [
   metadataProvider,
   organizationProvider,
   prospectProfileProvider,
+  uxgDeepCrawlProvider,
   websiteProvider,
   documentProvider,
   brandingProvider,

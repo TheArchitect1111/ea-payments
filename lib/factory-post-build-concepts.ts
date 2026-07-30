@@ -152,7 +152,7 @@ function plainStageForProject(
   }
   if (launchReady) {
     return {
-      stage: 'Ready for review',
+      stage: 'Ready to review',
       hint: 'Research package and concepts are ready. Choose a direction.',
     };
   }
@@ -174,23 +174,23 @@ function plainStageForProject(
       };
     case 'RESEARCHING':
       return {
-        stage: 'Researching their story',
+        stage: 'Researching',
         hint: 'Usually 1–3 minutes depending on available sources.',
       };
     case 'DISCOVERING':
       return {
-        stage: 'Gathering trusted information and media',
+        stage: 'Gathering brand and media',
         hint: 'Collecting proof signals, programs, and brand cues.',
       };
     case 'PLANNING':
       return {
-        stage: 'Creating the research package',
-        hint: 'Shaping story strategy, creative brief, and content.',
+        stage: 'Creating your samples',
+        hint: 'Shaping story strategy and three custom directions.',
       };
     case 'BUILDING':
     case 'GENERATING':
       return {
-        stage: 'Building three custom concepts',
+        stage: 'Creating your samples',
         hint: 'Creating three distinct website and portal directions.',
       };
     default:
@@ -312,7 +312,7 @@ export function buildLaunchConceptStatus(project: FactoryProject): LaunchConcept
     needsAutomaticNudge = true;
     readyForConceptReview = false;
   } else if (conceptPackReady) {
-    statusLabel = 'Ready for review';
+    statusLabel = 'Ready to review';
     inProgress = false;
     readyForConceptReview = true;
   } else if (conceptsId && !conceptPackReady) {
