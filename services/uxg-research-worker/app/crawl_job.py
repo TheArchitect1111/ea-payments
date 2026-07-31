@@ -83,7 +83,31 @@ def _robots_allowed(url: str, cache: dict[str, robotparser.RobotFileParser]) -> 
 
 
 async def _crawl_page(url: str) -> tuple[str, str, str]:
-    """Return title, html, markdown using Crawl4AI when available."""
+    """Return page content without forcing Chromium for ordinary HTML."""
+    browser_mode = (os.getenv("UXG_RESEARCH_BROWSER_MODE") or "auto").strip().lower()
+    if browser_mode != "always":
+        try:
+            import httpx
+
+            async with httpx.AsyncClient(
+                follow_redirects=True,
+                timeout=30.0,
+                headers={"User-Agent": "EA-UXGResearchBot/0.1"},
+            ) as client:
+                res = await client.get(url)
+                res.raise_for_status()
+                html = res.text
+                content_type = (res.headers.get("content-type") or "").lower()
+                if browser_mode == "never" or ("html" in content_type and len(html) >= 2000):
+                    log.info({"event": "page_fetch", "urlHost": _host(url), "engine": "httpx"})
+                    return "", html, ""
+        except Exception as light_error:
+            log.info({
+                "event": "page_fetch_light_failed",
+                "urlHost": _host(url),
+                "error": type(light_error).__name__,
+            })
+
     try:
         from crawl4ai import AsyncWebCrawler, BrowserConfig, CrawlerRunConfig
 
@@ -100,6 +124,7 @@ async def _crawl_page(url: str) -> tuple[str, str, str]:
             title = ""
             if result.metadata and isinstance(result.metadata, dict):
                 title = str(result.metadata.get("title") or "")
+            log.info({"event": "page_fetch", "urlHost": _host(url), "engine": "crawl4ai"})
             return title, html, md
     except Exception as primary:
         # Fallback: httpx fetch for CI/local without full browser

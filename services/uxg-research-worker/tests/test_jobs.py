@@ -1,7 +1,9 @@
 import asyncio
 import os
 import sys
+import tempfile
 import unittest
+from pathlib import Path
 from pathlib import Path
 from unittest.mock import AsyncMock, patch
 import httpx
@@ -28,7 +30,13 @@ def completed_result(job_id: str) -> ResearchCrawlResult:
 
 class AsyncJobTests(unittest.IsolatedAsyncioTestCase):
     async def asyncSetUp(self):
+        self.tempdir = tempfile.TemporaryDirectory()
+        main.job_store_dir = Path(self.tempdir.name)
         main.jobs.clear()
+        main.job_requests.clear()
+
+    async def asyncTearDown(self):
+        self.tempdir.cleanup()
 
     async def test_execute_job_records_stages_and_result(self):
         job_id = "job-unit"
@@ -93,6 +101,23 @@ class AsyncJobTests(unittest.IsolatedAsyncioTestCase):
                     "preparing",
                     [stage["name"] for stage in payload["result"]["job"]["stages"]],
                 )
+
+    async def test_completed_snapshot_restores_from_disk(self):
+        job_id = "job-restored"
+        now = main.now_iso()
+        main.jobs[job_id] = main.ResearchJobSnapshot(
+            jobId=job_id, status="succeeded", createdAt=now, updatedAt=now,
+            result=completed_result(job_id),
+        )
+        main.job_requests[job_id] = ResearchCrawlRequest(
+            subjectName="Test Subject", jobId=job_id
+        )
+        main.persist_job(job_id)
+        main.jobs.clear()
+        main.job_requests.clear()
+        await main.restore_jobs()
+        self.assertEqual(main.jobs[job_id].status, "succeeded")
+        self.assertEqual(main.job_requests[job_id].subjectName, "Test Subject")
 
 
 if __name__ == "__main__":

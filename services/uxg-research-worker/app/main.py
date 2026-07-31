@@ -2,10 +2,12 @@
 from __future__ import annotations
 
 import asyncio
+import json
 import logging
 import os
 import sys
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any
 from uuid import uuid4
 
@@ -29,11 +31,58 @@ log = logging.getLogger("uxg-research-worker")
 
 app = FastAPI(title="EA UXG Research Worker", version="0.1.0", docs_url=None, redoc_url=None)
 jobs: dict[str, ResearchJobSnapshot] = {}
+job_requests: dict[str, ResearchCrawlRequest] = {}
 job_lock = asyncio.Lock()
+job_store_dir = Path(os.getenv("UXG_RESEARCH_JOB_STORE_DIR") or "/tmp/uxg-research-jobs")
 
 
 def now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
+
+
+def persist_job(job_id: str) -> None:
+    snapshot = jobs.get(job_id)
+    request = job_requests.get(job_id)
+    if not snapshot or not request:
+        return
+    job_store_dir.mkdir(parents=True, exist_ok=True)
+    target = job_store_dir / f"{job_id}.json"
+    temporary = target.with_suffix(".tmp")
+    temporary.write_text(
+        json.dumps({
+            "snapshot": snapshot.model_dump(mode="json", exclude_none=True),
+            "request": request.model_dump(mode="json", exclude_none=True),
+        }),
+        encoding="utf-8",
+    )
+    temporary.replace(target)
+
+
+async def restore_jobs() -> None:
+    if not job_store_dir.exists():
+        return
+    resumed = 0
+    for path in job_store_dir.glob("*.json"):
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+            snapshot = ResearchJobSnapshot.model_validate(payload["snapshot"])
+            request = ResearchCrawlRequest.model_validate(payload["request"])
+            jobs[snapshot.jobId] = snapshot
+            job_requests[snapshot.jobId] = request
+            if snapshot.status in ("queued", "running"):
+                snapshot.status = "queued"
+                snapshot.updatedAt = now_iso()
+                persist_job(snapshot.jobId)
+                asyncio.create_task(execute_job(snapshot.jobId, request))
+                resumed += 1
+        except Exception:
+            log.exception({"event": "crawl_job_restore_failed", "path": path.name})
+    log.info({"event": "crawl_jobs_restored", "count": len(jobs), "resumed": resumed})
+
+
+@app.on_event("startup")
+async def on_startup() -> None:
+    await restore_jobs()
 
 
 async def update_stage(job_id: str, name: str, status: str, detail: str | None = None) -> None:
@@ -54,12 +103,14 @@ async def update_stage(job_id: str, name: str, status: str, detail: str | None =
                 start = datetime.fromisoformat(current.startedAt)
                 current.durationMs = (datetime.fromisoformat(now) - start).total_seconds() * 1000
         snapshot.updatedAt = now
+        persist_job(job_id)
 
 
 async def execute_job(job_id: str, body: ResearchCrawlRequest) -> None:
     async with job_lock:
         jobs[job_id].status = "running"
         jobs[job_id].updatedAt = now_iso()
+        persist_job(job_id)
     try:
         result = await run_crawl_job(
             body,
@@ -71,6 +122,7 @@ async def execute_job(job_id: str, body: ResearchCrawlRequest) -> None:
             snapshot.status = result.job.status
             snapshot.result = result
             snapshot.updatedAt = now_iso()
+            persist_job(job_id)
     except Exception as exc:
         await update_stage(job_id, "failed", "failed", type(exc).__name__)
         async with job_lock:
@@ -78,6 +130,7 @@ async def execute_job(job_id: str, body: ResearchCrawlRequest) -> None:
             snapshot.status = "failed"
             snapshot.error = f"{type(exc).__name__}: {exc}"[:500]
             snapshot.updatedAt = now_iso()
+            persist_job(job_id)
         log.exception({"event": "crawl_job_failed", "jobId": job_id})
 
 
@@ -135,6 +188,8 @@ async def create_job(
             accepted = ResearchJobAccepted(jobId=job_id, statusUrl=f"/v1/jobs/{job_id}")
             return JSONResponse(content=accepted.model_dump(mode="json"), status_code=200)
         jobs[job_id] = snapshot
+        job_requests[job_id] = body
+        persist_job(job_id)
     asyncio.create_task(execute_job(job_id, body))
     accepted = ResearchJobAccepted(jobId=job_id, statusUrl=f"/v1/jobs/{job_id}")
     log.info({"event": "crawl_job_queued", "jobId": job_id})
