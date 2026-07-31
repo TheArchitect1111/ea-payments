@@ -112,18 +112,42 @@ export async function postCrawlJob(
     const statusUrl = accepted.statusUrl.startsWith('http')
       ? accepted.statusUrl
       : `${config.baseUrl}${accepted.statusUrl}`;
+    let transientPollFailures = 0;
     while (Date.now() - started < config.timeoutMs) {
       const remaining = config.timeoutMs - (Date.now() - started);
-      const poll = await fetch(statusUrl, {
-        method: 'GET',
-        headers: authHeaders(config),
-        signal: AbortSignal.timeout(Math.max(1_000, Math.min(10_000, remaining))),
-      });
+      let poll: Response;
+      try {
+        poll = await fetch(statusUrl, {
+          method: 'GET',
+          headers: authHeaders(config),
+          signal: AbortSignal.timeout(Math.max(1_000, Math.min(10_000, remaining))),
+        });
+      } catch (error) {
+        transientPollFailures += 1;
+        console.warn('[uxg-research] transient job poll error', {
+          jobId: accepted.jobId,
+          attempt: transientPollFailures,
+          error: error instanceof Error ? error.message : 'network error',
+        });
+        await delay(Math.min(config.pollIntervalMs, Math.max(0, remaining)));
+        continue;
+      }
+      if ([502, 503, 504].includes(poll.status)) {
+        transientPollFailures += 1;
+        console.warn('[uxg-research] transient job status failure', {
+          status: poll.status,
+          jobId: accepted.jobId,
+          attempt: transientPollFailures,
+        });
+        await delay(Math.min(config.pollIntervalMs, Math.max(0, remaining)));
+        continue;
+      }
       if (!poll.ok) {
         console.error('[uxg-research] job status failed', { status: poll.status, jobId: accepted.jobId });
         return null;
       }
       const snapshot = (await poll.json()) as WorkerJobSnapshot;
+      transientPollFailures = 0;
       if (snapshot.status === 'succeeded' || snapshot.status === 'partial') {
         const parsed = parseResearchCrawlResult(snapshot.result);
         return {

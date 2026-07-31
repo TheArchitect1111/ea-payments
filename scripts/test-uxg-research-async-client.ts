@@ -54,6 +54,9 @@ async function successCase() {
       );
     }
     if (calls === 2) {
+      return new Response('temporary upstream failure', { status: 502 });
+    }
+    if (calls === 3) {
       return Response.json({ jobId: 'async-client-test', status: 'running', stages: [] });
     }
     return Response.json({
@@ -67,7 +70,7 @@ async function successCase() {
   assert.ok(completed);
   assert.equal(completed.job.status, 'succeeded');
   assert.equal(completed.job.stages?.[0]?.name, 'crawling');
-  assert.equal(calls, 3);
+  assert.equal(calls, 4);
 }
 
 async function timeoutCase() {
