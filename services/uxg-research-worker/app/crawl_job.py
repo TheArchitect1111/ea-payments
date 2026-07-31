@@ -379,7 +379,7 @@ async def run_crawl_job(
             durationMs=(time.time() - started) * 1000,
             errors=errors[:30],
             provider="crawl4ai",
-            workerVersion="0.1.0",
+            workerVersion="0.2.0",
         ),
         job=ResearchCrawlJobMeta(
             jobId=job_id,

@@ -109,7 +109,7 @@ class ResearchDiagnostics(BaseModel):
     durationMs: float = 0
     errors: list[dict[str, Any]] = Field(default_factory=list)
     provider: str = "crawl4ai"
-    workerVersion: Optional[str] = "0.1.0"
+    workerVersion: Optional[str] = "0.2.0"
 
 
 class ResearchCrawlJobMeta(BaseModel):

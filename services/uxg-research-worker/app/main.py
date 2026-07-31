@@ -29,7 +29,7 @@ logging.basicConfig(
 )
 log = logging.getLogger("uxg-research-worker")
 
-app = FastAPI(title="EA UXG Research Worker", version="0.1.0", docs_url=None, redoc_url=None)
+app = FastAPI(title="EA UXG Research Worker", version="0.2.0", docs_url=None, redoc_url=None)
 jobs: dict[str, ResearchJobSnapshot] = {}
 job_requests: dict[str, ResearchCrawlRequest] = {}
 job_lock = asyncio.Lock()
@@ -155,7 +155,7 @@ async def health() -> dict:
         "ok": True,
         "service": "uxg-research-worker",
         "authConfigured": token_set,
-        "version": "0.1.0",
+        "version": "0.2.0",
     }
 
 
