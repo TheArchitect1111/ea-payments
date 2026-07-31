@@ -13,6 +13,31 @@
     "mediaAssets": { "type": "array" },
     "documents": { "type": "array" },
     "diagnostics": { "type": "object" },
-    "job": { "type": "object" }
+    "job": {
+      "type": "object",
+      "required": ["jobId", "status", "startedAt", "attempt"],
+      "properties": {
+        "jobId": { "type": "string" },
+        "status": { "enum": ["queued", "running", "succeeded", "failed", "partial"] },
+        "startedAt": { "type": "string" },
+        "finishedAt": { "type": ["string", "null"] },
+        "attempt": { "type": "integer", "minimum": 1 },
+        "stages": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "status"],
+            "properties": {
+              "name": { "type": "string" },
+              "status": { "enum": ["pending", "running", "succeeded", "failed"] },
+              "startedAt": { "type": ["string", "null"] },
+              "finishedAt": { "type": ["string", "null"] },
+              "durationMs": { "type": ["number", "null"], "minimum": 0 },
+              "detail": { "type": ["string", "null"] }
+            }
+          }
+        }
+      }
+    }
   }
 }

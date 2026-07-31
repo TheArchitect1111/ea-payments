@@ -7,7 +7,7 @@ import logging
 import os
 import time
 from datetime import datetime, timezone
-from typing import Iterable
+from typing import Awaitable, Callable, Iterable
 from urllib.parse import urlparse
 from urllib import robotparser
 
@@ -131,13 +131,34 @@ def _guess_entity_type(subject: str, text_blob: str) -> str:
     return "unknown"
 
 
-async def run_crawl_job(req: ResearchCrawlRequest) -> ResearchCrawlResult:
+StageEmitter = Callable[[str, str, str | None], Awaitable[None]]
+
+
+async def run_crawl_job(
+    req: ResearchCrawlRequest,
+    emit_stage: StageEmitter | None = None,
+) -> ResearchCrawlResult:
     started = time.time()
     started_at = _now()
     job_id = req.jobId or f"job-{int(started * 1000)}"
     max_pages = min(int(os.getenv("UXG_RESEARCH_MAX_PAGES", req.maxPages)), 25)
     max_pages = min(max_pages, req.maxPages)
     timeout_sec = float(os.getenv("UXG_RESEARCH_JOB_TIMEOUT_SEC", "120"))
+
+    async def stage(name: str, status: str, detail: str | None = None) -> None:
+        if emit_stage:
+            await emit_stage(name, status, detail)
+        log.info({
+            "event": "crawl_stage",
+            "jobId": job_id,
+            "subjectHash": _subject_hash(req.subjectName),
+            "stage": name,
+            "status": status,
+            "detail": detail,
+            "elapsedMs": round((time.time() - started) * 1000, 1),
+        })
+
+    await stage("preparing", "running", "validating domains and crawl seeds")
 
     allow = set(d.lower().lstrip(".") for d in (req.allowDomains or []))
     block = set(DEFAULT_BLOCK) | set(d.lower().lstrip(".") for d in (req.blockDomains or []))
@@ -170,6 +191,8 @@ async def run_crawl_job(req: ResearchCrawlRequest) -> ResearchCrawlResult:
             h = _host(u)
             if h:
                 allow.add(h)
+
+    await stage("preparing", "succeeded", f"{len(seeds)} seed(s) accepted")
 
     log.info(
         {"event": "crawl_start", "jobId": job_id, "subjectHash": _subject_hash(req.subjectName), "seeds": len(seeds)}
@@ -257,6 +280,7 @@ async def run_crawl_job(req: ResearchCrawlRequest) -> ResearchCrawlResult:
             }
         )
 
+    await stage("crawling", "running", f"fetching up to {max_pages} page(s)")
     try:
         await asyncio.wait_for(
             asyncio.gather(*(fetch_one(u) for u in seeds)),
@@ -264,6 +288,13 @@ async def run_crawl_job(req: ResearchCrawlRequest) -> ResearchCrawlResult:
         )
     except asyncio.TimeoutError:
         errors.append({"code": "job_timeout", "message": f"exceeded {timeout_sec}s"})
+
+    await stage(
+        "crawling",
+        "succeeded" if pages_fetched else "failed",
+        f"pagesFetched={pages_fetched} errors={len(errors)}",
+    )
+    await stage("extracting", "running", "normalizing evidence, brand, media and documents")
 
     # Mark brand color consistency
     color_counts: dict[str, int] = {}
@@ -284,6 +315,13 @@ async def run_crawl_job(req: ResearchCrawlRequest) -> ResearchCrawlResult:
             continue
         seen_media.add(key)
         deduped_media.append(m)
+
+    await stage(
+        "extracting",
+        "succeeded",
+        f"evidence={len(evidence)} brand={len(brand_assets)} media={len(deduped_media)} documents={len(documents)}",
+    )
+    await stage("assembling", "running", "building versioned crawl result")
 
     blob = " ".join(text_blob_parts)
     entity = _guess_entity_type(req.subjectName, blob)
@@ -326,6 +364,7 @@ async def run_crawl_job(req: ResearchCrawlRequest) -> ResearchCrawlResult:
             attempt=1,
         ),
     )
+    await stage("assembling", "succeeded", f"status={status}")
     log.info(
         {
             "event": "crawl_done",

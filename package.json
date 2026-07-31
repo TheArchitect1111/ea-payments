@@ -53,9 +53,12 @@
     "test:factory-quick-launch-one-page": "node scripts/test-factory-quick-launch-one-page.mjs",
     "test:production-quick-launch-previews": "npx --yes tsx scripts/test-production-quick-launch-previews.ts",
     "test:uxg-three-subjects": "npx --yes tsx scripts/test-uxg-three-subjects.ts",
-    "test:uxg-research-schemas": "npx --yes tsx scripts/test-uxg-research-schemas.ts",
+    "test:uxg-research-schemas": "node --import tsx scripts/test-uxg-research-schemas.ts",
     "test:uxg-research-identity": "npx --yes tsx scripts/test-uxg-research-identity.ts",
-    "test:uxg-research-provider-selection": "npx --yes tsx scripts/test-uxg-research-provider-selection.ts",
+    "test:uxg-research-provider-selection": "node --import tsx scripts/test-uxg-research-provider-selection.ts",
+    "test:uxg-research-async-client": "node --import tsx scripts/test-uxg-research-async-client.ts",
+    "test:uxg-research-worker-jobs": "python -m unittest discover -s services/uxg-research-worker/tests -p 'test_*.py'",
+    "test:uxg-research-async": "npm run test:uxg-research-worker-jobs && npm run test:uxg-research-async-client && npm run test:uxg-research-schemas && npm run test:uxg-research-provider-selection",
     "test:uxg-research-three-subjects": "npx --yes tsx scripts/test-uxg-research-three-subjects.ts",
     "test:factory-wire-selected": "npx --yes tsx scripts/test-factory-wire-selected.ts",
     "test:factory-content-quality-gate": "npx --yes tsx scripts/test-factory-content-quality-gate.ts",
@@ -125,6 +128,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.9",
     "tailwindcss": "^4",
+    "tsx": "^4.23.1",
     "typescript": "^5"
   }
 }

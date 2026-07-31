@@ -13,6 +13,7 @@ export type WorkerClientConfig = {
   baseUrl: string;
   token: string;
   timeoutMs: number;
+  pollIntervalMs: number;
 };
 
 export function getWorkerClientConfig(): WorkerClientConfig | null {
@@ -20,11 +21,42 @@ export function getWorkerClientConfig(): WorkerClientConfig | null {
   const token = (process.env.UXG_RESEARCH_WORKER_TOKEN || '').trim();
   if (!baseUrl || !token) return null;
   const timeoutMs = Number(process.env.UXG_RESEARCH_JOB_TIMEOUT_MS || 180_000);
+  const pollIntervalMs = Number(process.env.UXG_RESEARCH_POLL_INTERVAL_MS || 2_000);
   return {
     baseUrl,
     token,
     timeoutMs: Number.isFinite(timeoutMs) && timeoutMs > 5_000 ? timeoutMs : 180_000,
+    pollIntervalMs:
+      Number.isFinite(pollIntervalMs) && pollIntervalMs >= 250 ? pollIntervalMs : 2_000,
   };
+}
+
+type WorkerJobAccepted = { jobId: string; status: 'queued'; statusUrl: string };
+type WorkerJobSnapshot = {
+  jobId: string;
+  status: 'queued' | 'running' | 'succeeded' | 'failed' | 'partial';
+  stages?: Array<{
+    name: string;
+    status: 'pending' | 'running' | 'succeeded' | 'failed';
+    startedAt?: string;
+    finishedAt?: string;
+    durationMs?: number;
+    detail?: string;
+  }>;
+  result?: unknown;
+  error?: string;
+};
+
+function authHeaders(config: WorkerClientConfig): Record<string, string> {
+  return {
+    Authorization: `Bearer ${config.token}`,
+    'Content-Type': 'application/json',
+    Accept: 'application/json',
+  };
+}
+
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 export async function workerHealthCheck(
@@ -48,16 +80,13 @@ export async function postCrawlJob(
 ): Promise<ResearchCrawlResult | null> {
   if (!config) return null;
   const body = parseResearchCrawlRequest(request);
+  const started = Date.now();
   try {
-    const res = await fetch(`${config.baseUrl}/v1/crawl`, {
+    const res = await fetch(`${config.baseUrl}/v1/jobs`, {
       method: 'POST',
-      headers: {
-        Authorization: `Bearer ${config.token}`,
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-      },
+      headers: authHeaders(config),
       body: JSON.stringify(body),
-      signal: AbortSignal.timeout(config.timeoutMs),
+      signal: AbortSignal.timeout(Math.min(config.timeoutMs, 15_000)),
     });
     if (res.status === 401 || res.status === 403) {
       console.error('[uxg-research] worker auth failed', { status: res.status });
@@ -74,8 +103,42 @@ export async function postCrawlJob(
       });
       return null;
     }
-    const json: unknown = await res.json();
-    return parseResearchCrawlResult(json);
+    const accepted = (await res.json()) as WorkerJobAccepted;
+    if (!accepted.jobId || !accepted.statusUrl) {
+      console.error('[uxg-research] worker returned invalid job acceptance');
+      return null;
+    }
+
+    const statusUrl = accepted.statusUrl.startsWith('http')
+      ? accepted.statusUrl
+      : `${config.baseUrl}${accepted.statusUrl}`;
+    while (Date.now() - started < config.timeoutMs) {
+      const remaining = config.timeoutMs - (Date.now() - started);
+      const poll = await fetch(statusUrl, {
+        method: 'GET',
+        headers: authHeaders(config),
+        signal: AbortSignal.timeout(Math.max(1_000, Math.min(10_000, remaining))),
+      });
+      if (!poll.ok) {
+        console.error('[uxg-research] job status failed', { status: poll.status, jobId: accepted.jobId });
+        return null;
+      }
+      const snapshot = (await poll.json()) as WorkerJobSnapshot;
+      if (snapshot.status === 'succeeded' || snapshot.status === 'partial') {
+        const parsed = parseResearchCrawlResult(snapshot.result);
+        return {
+          ...parsed,
+          job: { ...parsed.job, stages: snapshot.stages || parsed.job.stages || [] },
+        };
+      }
+      if (snapshot.status === 'failed') {
+        console.error('[uxg-research] job failed', { jobId: accepted.jobId, error: snapshot.error || 'failed' });
+        return null;
+      }
+      await delay(Math.min(config.pollIntervalMs, Math.max(0, remaining)));
+    }
+    console.warn('[uxg-research] job polling timed out', { jobId: accepted.jobId, timeoutMs: config.timeoutMs });
+    return null;
   } catch (err) {
     console.warn('[uxg-research] crawl request error', {
       error: err instanceof Error ? err.message : 'error',

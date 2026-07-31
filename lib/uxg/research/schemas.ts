@@ -213,6 +213,18 @@ export const ResearchCrawlJobMetaSchema = z.object({
   startedAt: z.string(),
   finishedAt: z.string().nullish(),
   attempt: z.number().int().min(1).default(1),
+  stages: z
+    .array(
+      z.object({
+        name: z.string(),
+        status: z.enum(['pending', 'running', 'succeeded', 'failed']),
+        startedAt: z.string().nullish(),
+        finishedAt: z.string().nullish(),
+        durationMs: z.number().min(0).nullish(),
+        detail: z.string().nullish(),
+      }),
+    )
+    .optional(),
 });
 
 export const ResearchCrawlResultSchema = z.object({

@@ -118,6 +118,7 @@ class ResearchCrawlJobMeta(BaseModel):
     startedAt: str
     finishedAt: Optional[str] = None
     attempt: int = 1
+    stages: list[dict[str, Any]] = Field(default_factory=list)
 
 
 class ResearchCrawlResult(BaseModel):
@@ -130,3 +131,28 @@ class ResearchCrawlResult(BaseModel):
     documents: list[DocumentAsset] = Field(default_factory=list)
     diagnostics: ResearchDiagnostics = Field(default_factory=ResearchDiagnostics)
     job: ResearchCrawlJobMeta
+
+
+class ResearchJobStage(BaseModel):
+    name: str
+    status: Literal["pending", "running", "succeeded", "failed"]
+    startedAt: Optional[str] = None
+    finishedAt: Optional[str] = None
+    durationMs: Optional[float] = None
+    detail: Optional[str] = None
+
+
+class ResearchJobAccepted(BaseModel):
+    jobId: str
+    status: Literal["queued"] = "queued"
+    statusUrl: str
+
+
+class ResearchJobSnapshot(BaseModel):
+    jobId: str
+    status: Literal["queued", "running", "succeeded", "failed", "partial"]
+    createdAt: str
+    updatedAt: str
+    stages: list[ResearchJobStage] = Field(default_factory=list)
+    result: Optional[ResearchCrawlResult] = None
+    error: Optional[str] = None
