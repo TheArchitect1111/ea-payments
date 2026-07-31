@@ -29,6 +29,13 @@ type EntitlementModule = {
 type EntitlementsResponse = {
   organizationId: string;
   modules: EntitlementModule[];
+  businessOptions: Array<{
+    id: string;
+    name: string;
+    description: string;
+    moduleIds: string[];
+    enabled: boolean;
+  }>;
   summary?: {
     moduleCount: number;
     enabledCount: number;
@@ -151,6 +158,46 @@ export default function EntitlementsPanel({ orgPresets }: { orgPresets: OrgPrese
       await load(activeOrgId);
     } catch {
       setError('Network error updating entitlement.');
+    } finally {
+      setSavingId(null);
+    }
+  }
+
+  async function toggleBusinessOption(optionId: string, enabled: boolean) {
+    if (!data?.writable) return;
+    setSavingId(`option:${optionId}`);
+    setError(null);
+    setMessage(null);
+    try {
+      const res = await fetch('/api/admin/entitlements', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          organizationId: activeOrgId,
+          action: 'set-business-option',
+          businessOptionId: optionId,
+          enabled,
+          source: 'manual',
+        }),
+      });
+      const json = (await res.json()) as {
+        ok?: boolean;
+        error?: string;
+        updatedCount?: number;
+        failedCount?: number;
+      };
+      if (!res.ok || json.ok === false) {
+        setError(
+          json.error ||
+            `Option update was incomplete (${json.failedCount ?? 0} module writes failed).`,
+        );
+        return;
+      }
+      setMessage(`${optionId} ${enabled ? 'enabled' : 'disabled'} for this portal.`);
+      await load(activeOrgId);
+    } catch {
+      setError('Network error updating business option.');
     } finally {
       setSavingId(null);
     }
@@ -326,6 +373,52 @@ export default function EntitlementsPanel({ orgPresets }: { orgPresets: OrgPrese
         {error && <p className="text-sm text-rose-700">{error}</p>}
         {message && <p className="text-sm text-green-800">{message}</p>}
       </div>
+
+      {!loading && data && (
+        <section className="space-y-3" aria-labelledby="business-options-heading">
+          <div>
+            <p className="text-[11px] font-bold uppercase tracking-wider" style={{ color: GOLD }}>
+              Optional business modules
+            </p>
+            <h3 id="business-options-heading" className="text-lg font-bold mt-1" style={{ color: NAVY }}>
+              Enable complete portal options
+            </h3>
+            <p className="text-sm text-neutral-500 mt-1">
+              Each option enables its required module entitlements for the selected organization.
+              Unselected options remain hidden from that portal.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {data.businessOptions.map((option) => (
+              <article key={option.id} className="bg-white border border-neutral-200 p-4 flex gap-3">
+                <div className="min-w-0 flex-1">
+                  <h4 className="font-bold" style={{ color: NAVY }}>{option.name}</h4>
+                  <p className="text-xs text-neutral-500 mt-1">{option.description}</p>
+                  <p className="text-[11px] font-mono text-neutral-400 mt-2">
+                    {option.moduleIds.join(' + ')}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  disabled={!data.writable || savingId === `option:${option.id}` || bulkBusy}
+                  onClick={() => void toggleBusinessOption(option.id, !option.enabled)}
+                  className={`shrink-0 self-start px-3 py-2 text-[11px] font-bold uppercase tracking-wider rounded border ${
+                    option.enabled
+                      ? 'bg-green-50 text-green-800 border-green-200'
+                      : 'bg-neutral-50 text-neutral-600 border-neutral-200'
+                  } disabled:opacity-50`}
+                >
+                  {savingId === `option:${option.id}`
+                    ? '...'
+                    : option.enabled
+                      ? 'Enabled'
+                      : 'Disabled'}
+                </button>
+              </article>
+            ))}
+          </div>
+        </section>
+      )}
 
       <div className="flex flex-wrap gap-3 items-end">
         <div>

@@ -15,6 +15,8 @@ export const ORGANIZATION_WORKSPACE_FIELDS = [
   'Mission',
   'Industry',
   'Booking Url',
+  'Nylas Grant Id',
+  'Nylas Calendar Id',
 ] as const;
 
 export type OrganizationWorkspaceField = (typeof ORGANIZATION_WORKSPACE_FIELDS)[number];
