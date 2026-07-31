@@ -18,6 +18,7 @@ const MODULE_IDS = [
   'discovery',
   'documents',
   'messaging',
+  'calendar',
   'events',
   'resources',
   'ask',
@@ -44,6 +45,7 @@ const CAPABILITY_IDS = [
   'relationship-capture',
   'documents',
   'learning',
+  'shared-calendar',
   'events',
   'resources',
   'billing',
@@ -70,8 +72,8 @@ function assert(condition, message) {
   if (!condition) failures.push(message);
 }
 
-assert(MODULE_IDS.length === 22, 'Module registry has 22 ids');
-assert(CAPABILITY_IDS.length === 22, 'Capability map has 22 portal capabilities');
+assert(MODULE_IDS.length === 23, 'Module registry has 23 ids');
+assert(CAPABILITY_IDS.length === 23, 'Capability map has 23 portal capabilities');
 assert(LIFECYCLE_PHASES.length === 6, 'Experience lifecycle has 6 phases');
 assert(EXPERIENCE_KINDS.length === 4, 'Experience catalog has 4 kinds');
 
@@ -88,6 +90,7 @@ const capabilityModulePairs = {
   'relationship-capture': 'connect',
   documents: 'documents',
   learning: 'training',
+  'shared-calendar': 'calendar',
   events: 'events',
   resources: 'resources',
   billing: 'billing',

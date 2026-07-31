@@ -112,8 +112,8 @@ export default async function EventsPage({
     <PortalSubpage
       slug={slug}
       active="events"
-      kicker="Event Hub™"
-      title="Event Hub"
+      kicker="Calendar & Event Hub™"
+      title="Calendar & shared scheduling"
       lede={
         hasPretix
           ? `Calendar, ticketed events, and your registrations — for ${client.organization || client.clientName}.`

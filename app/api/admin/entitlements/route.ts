@@ -16,6 +16,11 @@ import { MODULE_IDS, MODULE_REGISTRY } from '@/lib/modules/registry';
 import { platformStoreConfigured } from '@/lib/platform-store';
 import { isSyntheticOrganizationId } from '@/lib/tenant-context';
 import { getMapRowByModuleId } from '@ea/capability-registry';
+import {
+  BUSINESS_OPTION_CATALOG,
+  businessOptionEnabled,
+  getBusinessOption,
+} from '@/lib/modules/business-options';
 
 export const dynamic = 'force-dynamic';
 
@@ -78,6 +83,10 @@ export async function GET(req: NextRequest) {
     organizationId: orgId,
     entitlements,
     modules,
+    businessOptions: BUSINESS_OPTION_CATALOG.map((option) => ({
+      ...option,
+      enabled: businessOptionEnabled(option, activeModuleIdsFromEntitlements(entitlements)),
+    })),
     summary: {
       moduleCount: modules.length,
       enabledCount,
@@ -100,8 +109,16 @@ export async function POST(req: NextRequest) {
     organizationId?: string;
     moduleId?: string;
     moduleIds?: string[];
+    businessOptionId?: string;
     enabled?: boolean;
-    action?: 'set' | 'bulk-enable' | 'bulk-disable' | 'enable-all' | 'disable-all' | 'enable-mapped';
+    action?:
+      | 'set'
+      | 'set-business-option'
+      | 'bulk-enable'
+      | 'bulk-disable'
+      | 'enable-all'
+      | 'disable-all'
+      | 'enable-mapped';
     source?: 'manual' | 'package' | 'subscription' | 'trial';
   };
 
@@ -148,6 +165,30 @@ export async function POST(req: NextRequest) {
       );
     }
     return NextResponse.json({ ok: true, entitlement });
+  }
+
+  if (action === 'set-business-option') {
+    const option = getBusinessOption(body.businessOptionId?.trim() ?? '');
+    if (!option) {
+      return NextResponse.json({ error: 'Unknown businessOptionId.' }, { status: 400 });
+    }
+    const enabled = body.enabled !== false;
+    const result = await setModulesEnabledBulk(
+      organizationId,
+      [...option.moduleIds],
+      enabled,
+      source,
+    );
+    return NextResponse.json({
+      ok: result.failed.length === 0,
+      action,
+      businessOptionId: option.id,
+      enabled,
+      updated: result.ok,
+      failed: result.failed,
+      updatedCount: result.ok.length,
+      failedCount: result.failed.length,
+    });
   }
 
   let targetIds: ModuleId[] = [];

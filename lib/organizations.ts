@@ -37,6 +37,11 @@ export type Organization = {
   industryPackId?: string;
   /** Tenant booking embed URL for Event Hub calendar */
   bookingUrl?: string;
+  nylasGrantId?: string;
+  nylasCalendarId?: string;
+  /** Tenant-scoped Nylas connection. The API key remains server environment only. */
+  nylasGrantId?: string;
+  nylasCalendarId?: string;
 };
 
 function mapOrganization(record: AirtableRecord): Organization {
@@ -62,6 +67,8 @@ function mapOrganization(record: AirtableRecord): Organization {
     workspaceName: f['Workspace Name'] ? String(f['Workspace Name']) : undefined,
     industryPackId: f['Industry Pack Id'] ? String(f['Industry Pack Id']) : undefined,
     bookingUrl: f['Booking Url'] ? String(f['Booking Url']) : undefined,
+    nylasGrantId: f['Nylas Grant Id'] ? String(f['Nylas Grant Id']) : undefined,
+    nylasCalendarId: f['Nylas Calendar Id'] ? String(f['Nylas Calendar Id']) : undefined,
   };
 }
 
@@ -327,6 +334,8 @@ function applyWorkspaceOverlay(
     platformClientId: org.platformClientId || overlay.platformClientId,
     industryPackId: org.industryPackId || overlay.industryPackId,
     bookingUrl: org.bookingUrl || overlay.bookingUrl,
+    nylasGrantId: org.nylasGrantId || overlay.nylasGrantId,
+    nylasCalendarId: org.nylasCalendarId || overlay.nylasCalendarId,
   };
 }
 
@@ -346,6 +355,8 @@ export async function updateOrganizationWorkspaceConfig(
   if (input.brandColors !== undefined) fields['Brand Colors'] = input.brandColors;
   if (input.industryPackId !== undefined) fields['Industry Pack Id'] = input.industryPackId;
   if (input.bookingUrl !== undefined) fields['Booking Url'] = input.bookingUrl;
+  if (input.nylasGrantId !== undefined) fields['Nylas Grant Id'] = input.nylasGrantId;
+  if (input.nylasCalendarId !== undefined) fields['Nylas Calendar Id'] = input.nylasCalendarId;
 
   // Always persist overlay so theme/workspace survive thin Organizations schemas.
   await saveOrganizationWorkspaceOverlay(orgId, input);
