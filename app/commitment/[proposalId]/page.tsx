@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import { getProposalByProposalId } from '@/lib/airtable';
+import CommitmentCheckout from './CommitmentCheckout';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,11 +24,11 @@ function estimateTimeline(fee: number): string {
 }
 
 const steps = [
-  'Your investment is confirmed. The Blueprint work begins immediately.',
-  'We review your discovery conversation in detail and map your full solution.',
+  'Your investment is confirmed and your intelligent business system moves into production.',
+  'We translate your discovery conversation into the workflows, information, and experiences your organization needs.',
   'You receive a project timeline and milestone plan within 24 hours.',
-  'We build. You stay informed. Nothing launches without your approval.',
-  'You receive your completed system, full training, and portal access.',
+  'We build the connected public experience, private workspace, communications, documents, and operating workflows included in your plan.',
+  'You review each major milestone. Nothing launches without your approval, and your system can continue growing after launch.',
 ];
 
 export default async function CommitmentPage({
@@ -43,7 +44,7 @@ export default async function CommitmentPage({
   }
 
   const solutionLabel =
-    proposal.projectTypeLabel || proposal.recommendedProjectType || 'Custom Solution';
+    proposal.projectTypeLabel || proposal.recommendedProjectType || 'Intelligent Business System';
 
   return (
     <main className="min-h-screen" style={{ backgroundColor: CREAM }}>
@@ -52,13 +53,13 @@ export default async function CommitmentPage({
           <img src="/images/ea-logo.png" alt="Efficiency Architects" className="h-20 w-auto" />
           <div className="pb-12 pt-10">
             <p className="text-xs font-bold uppercase tracking-[0.28em]" style={{ color: GOLD }}>
-              Blueprint Confirmation
+              System Confirmation
             </p>
             <h1 className="mt-4 max-w-3xl text-4xl font-black uppercase tracking-wide sm:text-5xl" style={{ color: GOLD }}>
-              Here is how the conversation becomes the work.
+              Here is how the conversation becomes your intelligent system.
             </h1>
             <p className="mt-5 max-w-2xl text-base leading-8 text-blue-50">
-              This is a guided process. You will know what is happening, where the work is heading, and what needs your approval before anything goes live.
+              You are not simply purchasing a website and portal. You are commissioning a connected system designed to guide people, organize work, support communication, and help your organization operate more intelligently.
             </p>
           </div>
         </div>
@@ -85,7 +86,7 @@ export default async function CommitmentPage({
           </p>
           <dl className="mt-5 space-y-4">
             <div>
-              <dt className="text-xs font-bold uppercase tracking-wider text-neutral-400">Project Type</dt>
+              <dt className="text-xs font-bold uppercase tracking-wider text-neutral-400">System</dt>
               <dd className="mt-1 text-sm font-semibold" style={{ color: NAVY }}>{solutionLabel}</dd>
             </div>
             <div>
@@ -100,20 +101,11 @@ export default async function CommitmentPage({
 
           <div className="mt-6 border-t border-neutral-100 pt-5">
             <p className="text-sm font-semibold leading-7 text-neutral-700">
-              No surprises. Fixed investment. Your approval required at every stage.
+              Fixed investment. Clear milestones. Your approval is required at every major stage.
             </p>
           </div>
 
-          <form method="POST" action="/api/checkout/proposal" className="mt-6">
-            <input type="hidden" name="proposalId" value={proposal.proposalId} />
-            <button
-              type="submit"
-              className="w-full px-5 py-4 text-xs font-black uppercase tracking-[0.2em]"
-              style={{ backgroundColor: GOLD, color: NAVY }}
-            >
-              Let&apos;s Build The Blueprint
-            </button>
-          </form>
+          <CommitmentCheckout proposalId={proposal.proposalId} />
           <p className="mt-4 text-center text-xs text-neutral-400">Need more time? Save this page.</p>
         </aside>
       </section>
