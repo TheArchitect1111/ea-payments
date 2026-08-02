@@ -36,6 +36,9 @@ const FORBIDDEN_EMAIL_TERMS = [
   'Design Studio',
 ] as const;
 
+const STANDARD_INVESTMENT_LOW = 997;
+const STANDARD_INVESTMENT_HIGH = 7497;
+
 function esc(s: string): string {
   return s
     .replace(/&/g, '&amp;')
@@ -67,30 +70,33 @@ const p = `margin:0 0 14px;font-size:15px;color:#1A1A2E;line-height:1.75;`;
 const subhead = `margin:18px 0 8px;font-size:15px;font-weight:700;color:#1B2B4D;`;
 const tableWrap = `border:1px solid #E8E2D6;margin:0 0 18px;`;
 
+function conversationUrl(url: string): string {
+  if (/\/portal\/[^/?#]+\/ctp\/?(?:[?#].*)?$/i.test(url)) {
+    return url.replace(/\/ctp\/?(?=([?#]|$))/i, '/ctp/messages');
+  }
+  return url;
+}
+
 export function resolveCtpEmailPortalUrl(model: CtpWelcomeEmailModel): string {
   const direct = model.portalUrl?.trim();
   if (direct) {
-    // Rewrite www/cc → apex so clients never land on the CRA marketing site.
     const url = direct
       .replace(/^https?:\/\/www\.efficiencyarchitects\.online/i, 'https://efficiencyarchitects.online')
       .replace(/^https?:\/\/cc\.efficiencyarchitects\.online/i, 'https://efficiencyarchitects.online');
-    // Bare /ctp on apex redirects to public CTP intake — never use as portal CTA.
     if (/efficiencyarchitects\.online\/ctp\/?(\?|$)/i.test(url)) {
       return publicPortalLoginUrl();
     }
-    // Prefer branded portal paths; login is acceptable only as last resort.
-    if (url.includes('/portal/')) return url;
-    return url;
+    return conversationUrl(url);
   }
   return publicPortalLoginUrl();
 }
 
 function beginRowsHtml(): string {
   const rows: Array<[string, string]> = [
-    ['Story-Driven Website', '10-18 hrs'],
-    ['Client Management Portal', '8-14 hrs'],
-    ['Customer Engagement Tools', '4-8 hrs'],
-    ['Launch & Optimization', '6-10 hrs'],
+    ['Intelligent Public Experience', '10-18 hrs'],
+    ['Private Client and Team Workspace', '8-14 hrs'],
+    ['Connected Communication and Workflow Tools', '4-8 hrs'],
+    ['Launch, Training, and Optimization', '6-10 hrs'],
   ];
   return rows
     .map(([solution, hours]) => `<tr><td style="${td}">${esc(solution)}</td><td style="${tdRight}"><strong>${esc(hours)}</strong></td></tr>`)
@@ -115,19 +121,17 @@ export function buildOpportunityExperienceEmail(model: CtpWelcomeEmailModel): Op
   const portalUrl = resolveCtpEmailPortalUrl(model);
   const annualLow = Math.max(30000, model.opportunityLow || 30000);
   const annualHigh = Math.max(annualLow + 10000, model.opportunityHigh || 80000);
-  const investLow = model.investmentLow ?? 1497;
-  const investHigh = Math.max(investLow, model.investmentHigh ?? 4995);
 
   const bodyHtml = plain(`
     <p style="${p}">Hello ${first},</p>
     <p style="${p}">Thank you for sharing information about your organization through Consider The Possibilities™.</p>
-    <p style="${p}">We've completed your initial review and prepared a private Opportunity Dashboard with our first observations, recommendations, and next steps.</p>
+    <p style="${p}">We've completed your initial review and prepared a private workspace with our first observations, recommendations, and next steps.</p>
 
     <p style="${section}">Project Status</p>
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="${tableWrap}">
-      <tr><td style="${td}">Assessment Received</td><td style="${tdRight}"><strong>Complete</strong></td></tr>
+      <tr><td style="${td}">Questionnaire Received</td><td style="${tdRight}"><strong>Complete</strong></td></tr>
       <tr><td style="${td}">Initial Review</td><td style="${tdRight}"><strong>Complete</strong></td></tr>
-      <tr><td style="${td}">Opportunity Dashboard Ready</td><td style="${tdRight}"><strong>Ready</strong></td></tr>
+      <tr><td style="${td}">Private Workspace Ready</td><td style="${tdRight}"><strong>Ready</strong></td></tr>
     </table>
 
     <p style="${section}">Executive Snapshot</p>
@@ -138,7 +142,8 @@ export function buildOpportunityExperienceEmail(model: CtpWelcomeEmailModel): Op
     <p style="${subhead}">Opportunity Summary</p>
     <p style="${p}">${esc(model.opportunitySummary || `Our initial review identified meaningful opportunities for ${model.businessName}.`)}</p>
 
-    <p style="${section}">Your Digital Foundation</p>
+    <p style="${section}">Your Intelligent Business System</p>
+    <p style="${p}">This is not simply a website and portal. It is a connected system designed around how your organization attracts people, communicates, organizes information, manages work, delivers services, and grows.</p>
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="${tableWrap}">
       <tr>
         <th style="${th}">Area</th>
@@ -146,36 +151,38 @@ export function buildOpportunityExperienceEmail(model: CtpWelcomeEmailModel): Op
       </tr>
       ${healthRowsHtml(model)}
     </table>
-    <p style="${p}">Why It Matters: a clear, credible digital foundation helps people understand your value, trust your organization, and take the next step.</p>
+    <p style="${p}">The final system may include a story-driven public experience, a private workspace, connected forms and documents, communications, payments, workflows, reporting, and guided next steps based on your actual needs.</p>
 
     <p style="${section}">Estimated Project Scope</p>
     <p style="${p}">These are the four areas we would begin with, subject to refinement during discovery.</p>
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="${tableWrap}">
       <tr>
-        <th style="${th}">Recommended Solution</th>
+        <th style="${th}">Recommended System Layer</th>
         <th style="${thRight}">Estimated Effort</th>
       </tr>
       ${beginRowsHtml()}
     </table>
     <p style="${subhead}">Total Estimated Effort</p>
     <p style="${p}"><strong>28-50 Hours</strong></p>
-    <p style="${p}">Every organization is different. The estimate reflects the anticipated size and complexity of your project and will be refined before work begins.</p>
+    <p style="${p}">Every organization is different. The estimate reflects the anticipated size and complexity of your system and will be refined before work begins.</p>
 
     <p style="${section}">Typical Investment</p>
     <p style="${p}"><strong>Nonprofit Organizations: Starting at $997</strong><br/><strong>Other Organizations: Starting at $1,497</strong></p>
-    <p style="${p}">Most projects fall between ${esc(moneyRange(investLow, investHigh))}, depending on size and complexity. You will receive a Custom Proposal before making any commitment.</p>
+    <p style="${p}">Most projects fall between ${esc(moneyRange(STANDARD_INVESTMENT_LOW, STANDARD_INVESTMENT_HIGH))}, depending on scope, complexity, integrations, and custom requirements. You will receive a clear proposal before making any commitment.</p>
 
     <p style="${section}">Estimated Opportunity</p>
     <p style="${p}">The potential annual opportunity identified in this initial review is <strong>${esc(moneyRange(annualLow, annualHigh))}+</strong>.</p>
-    <p style="${p}">Open your dashboard to review the complete Project Snapshot and continue with one clear next step.</p>
+
+    <p style="${section}">Continue the Conversation</p>
+    <p style="${p}">Use the button below to sign in to your private workspace, review our observations, provide additional details, upload documents, and continue the same conversation with our team.</p>
     <p style="margin:18px 0 0;font-size:13px;color:#555;">Questions? Reply to this email or reach us at <a href="mailto:${esc(model.supportEmail)}" style="color:#1B2B4D;">${esc(model.supportEmail)}</a>.</p>
   `);
 
   const result: OpportunityConfirmationEmail = {
-    subject: plain(`Your Opportunity Dashboard is ready`),
-    title: plain(`Let's Build Something You'll Be Proud To Share.`),
+    subject: plain(`Your private EA workspace is ready`),
+    title: plain(`Your intelligent business system starts here.`),
     eyebrow: 'Consider The Possibilities™',
-    ctaLabel: 'VIEW MY OPPORTUNITY DASHBOARD',
+    ctaLabel: 'CONTINUE THE CONVERSATION',
     ctaUrl: portalUrl,
     bodyHtml,
   };
@@ -207,7 +214,9 @@ export function buildOpportunityEmailModelFromSubmission(
   const firstName = submission.contactName.split(' ')[0] || submission.contactName;
   const portalUrl =
     options.portalUrl?.trim() ||
-    (submission.portalSlug ? opportunityDashboardPublicUrl(submission.portalSlug) : undefined);
+    (submission.portalSlug
+      ? conversationUrl(opportunityDashboardPublicUrl(submission.portalSlug))
+      : undefined);
 
   return {
     firstName,
@@ -221,8 +230,8 @@ export function buildOpportunityEmailModelFromSubmission(
     projectTypeLabel: options.projectTypeLabel,
     recommendedFee: options.recommendedFee,
     timelineLabel: options.timelineLabel,
-    investmentLow: options.investmentLow,
-    investmentHigh: options.investmentHigh,
+    investmentLow: STANDARD_INVESTMENT_LOW,
+    investmentHigh: STANDARD_INVESTMENT_HIGH,
     scopePhases: options.scopePhases,
     portalUrl,
     proposalUrl: options.proposalUrl,
