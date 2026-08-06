@@ -1,6 +1,6 @@
 import { extractCampaignBrief } from './extract-brief';
 import { goalById } from './goals';
-import { generateCampaignPackage } from './generate-assets';
+import { generateCampaignPackage, GENERATION_VERSION } from './generate-assets';
 import { getBrandProfile } from './brand-store';
 import { listStudioRecords, loadStudioRecord, saveStudioRecord } from './persistence';
 import type {
@@ -71,15 +71,36 @@ export async function listCampaigns(organizationId = orgId()): Promise<CreativeC
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }
 
+async function ensureCurrentGeneration(campaign: CreativeCampaign): Promise<CreativeCampaign> {
+  if ((campaign.generationVersion ?? 0) >= GENERATION_VERSION) return campaign;
+
+  const brand = await getBrandProfile(campaign.organizationId);
+  const generated = await generateCampaignPackage({
+    id: campaign.id,
+    goalId: campaign.goalId,
+    goalLabel: campaign.goalLabel,
+    story: campaign.story,
+    brief: campaign.brief,
+    strategy: campaign.strategy,
+    organizationId: campaign.organizationId,
+    brand,
+  });
+  const upgraded: CreativeCampaign = {
+    ...campaign,
+    ...generated,
+    generationVersion: GENERATION_VERSION,
+    updatedAt: new Date().toISOString(),
+  };
+  await persistCampaign(upgraded);
+  return upgraded;
+}
+
 export async function getCampaign(id: string): Promise<CreativeCampaign | null> {
   const cached = campaigns.get(id);
-  if (cached) return cached;
+  if (cached) return ensureCurrentGeneration(cached);
 
   const loaded = await loadStudioRecord<CreativeCampaign>('campaign', id);
-  if (loaded) {
-    campaigns.set(id, loaded);
-    return loaded;
-  }
+  if (loaded) return ensureCurrentGeneration(loaded);
   return null;
 }
 
@@ -96,7 +117,7 @@ export async function createCampaign(input: {
   const brand = await getBrandProfile(organizationId);
   const id = newId();
   const now = new Date().toISOString();
-  const generated = generateCampaignPackage({
+  const generated = await generateCampaignPackage({
     id,
     goalId: input.goalId,
     goalLabel: goal.label,
@@ -120,6 +141,7 @@ export async function createCampaign(input: {
     createdAt: now,
     updatedAt: now,
     organizationId,
+    generationVersion: GENERATION_VERSION,
   };
 
   await persistCampaign(campaign);
