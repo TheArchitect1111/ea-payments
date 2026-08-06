@@ -53,7 +53,12 @@ function navToItems(
 /** Resolve TailAdmin workspace chrome for authenticated /admin surfaces. */
 export function resolveAdminWorkspaceChrome(): PortalWorkspaceChrome {
   const shell = assembleWorkspaceForClient('ea');
-  const cssVars = shell?.cssVars ?? {};
+  const cssVars = {
+    ...(shell?.cssVars ?? {}),
+    '--ep-sidebar-promo-background': '#f7e7a8',
+    '--ep-sidebar-promo-color': '#17284a',
+    '--ep-sidebar-promo-border': '#c9a844',
+  };
   const personality = shell?.personality;
   const theme = shell?.theme;
 

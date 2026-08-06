@@ -2,12 +2,11 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { CAMPAIGN_GOALS } from '@/lib/creative-studio/goals';
 import type {
   CampaignGoalId,
   CampaignStrategy,
-  CreativeCampaign,
   SocialPlatform,
 } from '@/lib/creative-studio/types';
 import { cacheCampaign } from './campaign-cache';
@@ -26,9 +25,9 @@ const DEFAULT_STRATEGY: CampaignStrategy = {
   objective: '',
   audience: '',
   platforms: ['facebook', 'instagram'],
-  tone: 'Clear, warm, and credible',
+  tone: 'Clear, warm, practical, and human',
   successMetric: 'Engagements',
-  contentPillars: ['Story', 'Proof', 'Invitation'],
+  contentPillars: ['What people are experiencing', 'Helpful guidance', 'Next step'],
 };
 
 export default function CreativeStudioClient() {
@@ -37,19 +36,9 @@ export default function CreativeStudioClient() {
   const [goalId, setGoalId] = useState<CampaignGoalId | null>(null);
   const [story, setStory] = useState('');
   const [strategy, setStrategy] = useState<CampaignStrategy>(DEFAULT_STRATEGY);
-  const [pillars, setPillars] = useState('Story, Proof, Invitation');
+  const [pillars, setPillars] = useState('What people are experiencing, Helpful guidance, Next step');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [campaigns, setCampaigns] = useState<CreativeCampaign[]>([]);
-
-  useEffect(() => {
-    void fetch('/api/creative-studio/campaigns')
-      .then((res) => res.json())
-      .then((data: { campaigns?: CreativeCampaign[] }) => {
-        if (data.campaigns) setCampaigns(data.campaigns);
-      })
-      .catch(() => undefined);
-  }, []);
 
   function togglePlatform(platform: SocialPlatform) {
     setStrategy((current) => ({
@@ -116,34 +105,17 @@ export default function CreativeStudioClient() {
           <Link href="/admin/creative-studio/media">Media</Link>
           <Link href="/admin/creative-studio/brand">Brand</Link>
         </nav>
-        <p className="cs-kicker">EA Creative Studio™</p>
-        <h1 className="cs-title">Build the campaign before the posts.</h1>
+        <p className="cs-kicker">Amplifi Campaign Builder™</p>
+        <h1 className="cs-title">Let’s shape your campaign together.</h1>
         <p className="cs-lede">
-          Define the objective, audience, platforms, dates, message pillars, and success measure. Amplifi then creates
-          a distinct package for each selected channel.
+          Tell Amplifi who you want to reach, what you want them to understand, and what you want them to do next.
+          Amplifi will use that direction to create campaign content for each place you choose.
         </p>
       </header>
 
-      {campaigns.length > 0 ? (
-        <section className="cs-section cs-recent">
-          <h2 className="cs-question">Recent campaigns</h2>
-          <ul className="cs-campaign-list">
-            {campaigns.slice(0, 8).map((campaign) => (
-              <li key={campaign.id}>
-                <Link href={`/admin/creative-studio/campaigns/${campaign.id}`}>
-                  <strong>{campaign.brief.title}</strong>
-                  <span>{campaign.goalLabel}</span>
-                  <span className="cs-campaign-meta">{campaign.completionPercent}% complete</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
-
       {step === 'goal' ? (
         <section className="cs-section">
-          <h2 className="cs-question">What should this campaign accomplish?</h2>
+          <h2 className="cs-question">What would you like this campaign to help people do?</h2>
           <div className="cs-goal-grid">
             {CAMPAIGN_GOALS.map((goal) => (
               <button
@@ -168,12 +140,12 @@ export default function CreativeStudioClient() {
       {step === 'story' ? (
         <section className="cs-section cs-panel">
           <button type="button" className="cs-back" onClick={() => setStep('goal')}>
-            ← Choose a different goal
+            ← Change the campaign goal
           </button>
-          <h2 className="cs-question">Campaign brief</h2>
+          <h2 className="cs-question">Guide Amplifi</h2>
 
           <label className="cs-field">
-            <span>Objective</span>
+            <span>What should this campaign help accomplish?</span>
             <input
               value={strategy.objective}
               onChange={(event) => setStrategy({ ...strategy, objective: event.target.value })}
@@ -182,7 +154,7 @@ export default function CreativeStudioClient() {
           </label>
 
           <label className="cs-field">
-            <span>Audience</span>
+            <span>Who are you trying to reach?</span>
             <input
               value={strategy.audience}
               onChange={(event) => setStrategy({ ...strategy, audience: event.target.value })}
@@ -191,19 +163,19 @@ export default function CreativeStudioClient() {
           </label>
 
           <label className="cs-field">
-            <span>Story and offer</span>
+            <span>What should people understand?</span>
             <textarea
               className="cs-story"
               rows={6}
               value={story}
               onChange={(event) => setStory(event.target.value)}
-              placeholder="Explain what is happening, why it matters, the offer, and the action people should take…"
+              placeholder="Describe what is happening, why it matters to them, and the next step you want to offer."
             />
           </label>
 
           <div className="cs-field-row">
             <label className="cs-field">
-              <span>Start date</span>
+              <span>When should it begin?</span>
               <input
                 type="date"
                 value={strategy.startDate ?? ''}
@@ -211,7 +183,7 @@ export default function CreativeStudioClient() {
               />
             </label>
             <label className="cs-field">
-              <span>End date</span>
+              <span>When should it end?</span>
               <input
                 type="date"
                 value={strategy.endDate ?? ''}
@@ -221,7 +193,7 @@ export default function CreativeStudioClient() {
           </div>
 
           <fieldset className="cs-field">
-            <span>Platforms</span>
+            <span>Where should it appear?</span>
             <div className="cs-platform-grid">
               {PLATFORM_LABELS.map((platform) => (
                 <label key={platform.id} className="cs-platform-option">
@@ -237,7 +209,7 @@ export default function CreativeStudioClient() {
           </fieldset>
 
           <label className="cs-field">
-            <span>Tone</span>
+            <span>How should it sound?</span>
             <input
               value={strategy.tone}
               onChange={(event) => setStrategy({ ...strategy, tone: event.target.value })}
@@ -245,13 +217,13 @@ export default function CreativeStudioClient() {
           </label>
 
           <label className="cs-field">
-            <span>Content pillars — separate with commas</span>
+            <span>What should the campaign talk about? Separate ideas with commas.</span>
             <input value={pillars} onChange={(event) => setPillars(event.target.value)} />
           </label>
 
           <div className="cs-field-row">
             <label className="cs-field">
-              <span>Success metric</span>
+              <span>How will you know it worked?</span>
               <input
                 value={strategy.successMetric}
                 onChange={(event) => setStrategy({ ...strategy, successMetric: event.target.value })}
@@ -259,7 +231,7 @@ export default function CreativeStudioClient() {
               />
             </label>
             <label className="cs-field">
-              <span>Target</span>
+              <span>What result are you aiming for?</span>
               <input
                 type="number"
                 min="1"
@@ -282,7 +254,7 @@ export default function CreativeStudioClient() {
             disabled={loading || story.trim().length < 12}
             onClick={() => void generateCampaign()}
           >
-            Build campaign package
+            Create my campaign
           </button>
         </section>
       ) : null}
