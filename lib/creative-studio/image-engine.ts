@@ -1,5 +1,3 @@
-import { createHash } from 'crypto';
-import { put } from '@vercel/blob';
 import type { BrandProfile, CampaignBrief, CampaignImageSuggestion, CampaignResearch, CampaignStrategy } from './types';
 
 type OpenverseImage = {
@@ -62,8 +60,7 @@ async function generateFallbackImage(input: {
   strategy: CampaignStrategy;
 }): Promise<CampaignImageSuggestion | null> {
   const apiKey = process.env.OPENAI_API_KEY?.trim();
-  const blobToken = process.env.BLOB_READ_WRITE_TOKEN?.trim();
-  if (!apiKey || !blobToken) return null;
+  if (!apiKey) return null;
   const prompt = [
     'Create one premium editorial campaign photograph with no text, logos, charts, UI, or watermarks.',
     `Organization: ${input.brand.organizationName}.`,
@@ -76,27 +73,26 @@ async function generateFallbackImage(input: {
   const response = await fetch('https://api.openai.com/v1/images/generations', {
     method: 'POST',
     headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ model: process.env.OPENAI_IMAGE_MODEL?.trim() || 'gpt-image-1', prompt, size: '1536x1024', quality: 'medium', n: 1 }),
+    body: JSON.stringify({
+      model: process.env.OPENAI_IMAGE_MODEL?.trim() || 'dall-e-3',
+      prompt,
+      size: '1792x1024',
+      quality: 'standard',
+      response_format: 'url',
+      n: 1,
+    }),
     signal: AbortSignal.timeout(90_000),
   });
   if (!response.ok) return null;
-  const data = await response.json() as { data?: Array<{ b64_json?: string; revised_prompt?: string }> };
-  const encoded = data.data?.[0]?.b64_json;
-  if (!encoded) return null;
-  const buffer = Buffer.from(encoded, 'base64');
-  const digest = createHash('sha256').update(buffer).digest('hex').slice(0, 16);
-  const blob = await put(`amplifi/generated/${digest}.png`, buffer, {
-    access: 'public',
-    contentType: 'image/png',
-    token: blobToken,
-    addRandomSuffix: false,
-  });
+  const data = await response.json() as { data?: Array<{ url?: string; revised_prompt?: string }> };
+  const generatedUrl = data.data?.[0]?.url;
+  if (!generatedUrl) return null;
   const checkedAt = new Date().toISOString();
   return {
-    id: `generated-${digest}`,
+    id: `generated-${Date.now().toString(36)}`,
     title: `${input.brief.title} campaign image`,
-    url: blob.url,
-    thumbnailUrl: blob.url,
+    url: generatedUrl,
+    thumbnailUrl: generatedUrl,
     source: 'generated',
     license: 'GENERATED',
     attribution: `Generated for ${input.brand.organizationName}`,
