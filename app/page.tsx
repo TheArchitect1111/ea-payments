@@ -1,6 +1,6 @@
-import PremiumLandingV2 from '@/app/components/landing/PremiumLandingV2';
-import './preview/home/home-experience.css';
+import LiveYourLifeExperience from '@/app/components/experience/LiveYourLifeExperience';
+import './live-your-life/live-your-life.css';
 
 export default function HomePage() {
-  return <PremiumLandingV2 />;
+  return <LiveYourLifeExperience />;
 }
