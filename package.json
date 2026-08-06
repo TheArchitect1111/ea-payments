@@ -75,7 +75,8 @@
     "warm:admin": "node scripts/warm-admin-routes.mjs",
     "mobile:install": "cd mobile && npm install",
     "mobile:start": "cd mobile && npm start",
-    "mobile:lint": "cd mobile && npm run lint"
+    "mobile:lint": "cd mobile && npm run lint",
+    "test:amplifi-guide-first": "node scripts/test-amplifi-guide-first.mjs"
   },
   "dependencies": {
     "@clerk/nextjs": "^7.5.9",

@@ -78,12 +78,58 @@ function cta(pack: OrganizationStrategyPack, brief: CampaignBrief): string {
   return url ? `${action}: ${url}` : action;
 }
 
+
+function eaGuideCopy(
+  type: CampaignContentType,
+  pack: OrganizationStrategyPack,
+  brief: CampaignBrief,
+): { facebook: string; instagram: string } {
+  const action = cta(pack, brief);
+  const hash = pack.hashtags.map((tag) => `#${tag}`).join(' ');
+  const copy: Record<CampaignContentType, { facebook: string; instagram: string }> = {
+    'problem-recognition': {
+      facebook: `Sometimes you know something could work better, even when you cannot quite name what needs to change.\n\nMaybe your website no longer feels like you. Maybe too much still depends on you. Or maybe the next step simply feels harder to see than it should.\n\nNoticing that feeling is often where a new possibility begins.`,
+      instagram: `Sometimes you can feel that something could work better before you can explain why.\n\nThe website no longer feels like you. Too much still depends on you. The next step feels harder to see.\n\nYou do not have to solve it today. Start by noticing it.\n\n${hash}`,
+    },
+    diagnostic: {
+      facebook: `A few questions to sit with:\n\nWhat feels harder than it should?\nWhat do people ask you to explain again and again?\nWhat part of your work no longer reflects where you are going?\nWhat would you make easier if you could begin with one thing?\n\nYou do not need every answer. One honest observation is enough to begin.`,
+      instagram: `A quiet check-in:\n\nWhat feels harder than it should?\nWhat keeps needing your attention?\nWhat no longer reflects where you are going?\nWhat would you love to make easier?\n\nOne honest observation is enough to begin.\n\n${hash}`,
+    },
+    'expert-video': {
+      facebook: `VIDEO SCRIPT\n\n“Sometimes the first step is not fixing anything. It is giving yourself enough room to notice what no longer fits—and to imagine what you would want the experience to feel like instead.”\n\nVisual direction: speak naturally to camera in a familiar workspace. Keep the moment quiet and personal.`,
+      instagram: `REEL SCRIPT\n\n“You do not have to know the whole answer. Start with one question: what would you want this to feel like instead?”\n\nOn-screen close: A clearer possibility can be a beginning.\n\n${hash}`,
+    },
+    'before-after': {
+      facebook: `Imagine moving from searching to knowing.\n\nFrom explaining the same thing again to giving people a clear place to begin.\n\nFrom carrying every detail yourself to having more room for the work and people that matter most.\n\nThe possibility is not about becoming a different business. It is about creating an experience that feels more like the one you intended.`,
+      instagram: `From searching → to knowing\nFrom repeating → to a clear place to begin\nFrom carrying everything → to having room for what matters\n\nWhat would you want the experience to feel like instead?\n\n${hash}`,
+    },
+    'objection-answer': {
+      facebook: `“I am not sure where to begin.”\n\nThat is completely understandable. You do not need a finished plan or the right words. Begin with the part that keeps catching your attention—the moment that feels confusing, repetitive, disconnected, or simply unlike the experience you want to create.`,
+      instagram: `“I do not know where to begin.”\n\nYou do not need a finished plan.\n\nBegin with the moment that keeps catching your attention. Then ask what you would want it to feel like instead.\n\n${hash}`,
+    },
+    'direct-invitation': {
+      facebook: `You may not need another answer today. You may simply need a place to step back and look at what is happening with fresh eyes.\n\nConsider the Possibilities™ is a short, guided experience that helps you notice what feels harder than it should and imagine what could become clearer, easier, or more aligned with where you are going.\n\n${action}`,
+      instagram: `What could become easier, clearer, or more possible?\n\nConsider the Possibilities™ gives you a quiet place to step back, notice what is happening, and imagine a better experience.\n\n${action}\n\n${hash}`,
+    },
+    'client-transformation': {
+      facebook: `A real story can show what becomes possible—but only when the person, details, and permission have been confirmed. This space is being held until an approved story is available.`,
+      instagram: `A meaningful story deserves accuracy, context, and permission. This space is waiting for an approved story.`,
+    },
+    proof: {
+      facebook: `Trust matters more than a dramatic claim. This space is reserved for a confirmed result or approved reflection that can be shared honestly and in context.`,
+      instagram: `Real experience. Confirmed details. Clear permission. This space is waiting for all three.`,
+    },
+  };
+  return copy[type];
+}
+
 function fallbackCopy(
   type: CampaignContentType,
   pack: OrganizationStrategyPack,
   brief: CampaignBrief,
   strategy: CampaignStrategy,
 ): { facebook: string; instagram: string } {
+  if (pack.id === 'efficiency-architects') return eaGuideCopy(type, pack, brief);
   const audience = strategy.audience || pack.defaultAudience;
   const action = cta(pack, brief);
   const organization = brief.organization || pack.displayName;
@@ -165,7 +211,7 @@ async function generateBeats(
         messages: [
           {
             role: 'system',
-            content: `You are Amplifi's Conversion Content Engine. Create platform-native content that earns attention, builds trust, gives practical help, and invites a qualified next step. Every post must have a distinct job. Never paraphrase the campaign brief, repeat a boilerplate description, fabricate proof, or make a prohibited claim. A reel must include a spoken script and visual direction. A carousel must include slide copy. Facebook and Instagram must not be identical. Use at most three relevant hashtags on Instagram and none on Facebook. Follow this strategy pack exactly: ${JSON.stringify(pack)}. Return JSON only: {"beats":[{"label":"...","facebook":"...","instagram":"..."}]}.`,
+            content: `You are Amplifi's brand-governed campaign writer. The organization's posture is: ${pack.posture}. Follow this narrative arc in order: ${pack.narrativeArc.join(' → ')}. Write platform-native content in ordinary, emotionally intelligent language. Every post must have a distinct purpose, but it must never sound like a consultant, agency, audit, diagnosis, or sales framework unless the strategy pack explicitly requires that posture. Never paraphrase the brief, repeat boilerplate, fabricate proof, or make a prohibited claim. Never use any prohibited-language phrase. A reel must include a natural spoken script and simple visual direction. A carousel must include slide copy. Facebook and Instagram must not be identical. Use at most the strategy pack's allowed hashtags on Instagram and none on Facebook. Before returning, silently apply every critic question and rewrite anything that fails. Strategy pack: ${JSON.stringify(pack)}. Return JSON only: {"beats":[{"label":"...","facebook":"...","instagram":"..."}]}.`,
           },
           {
             role: 'user',
@@ -200,11 +246,14 @@ function platformBody(platform: SocialPlatform, beat: CampaignBeat): string {
   return beat.instagram;
 }
 
-function quality(body: string, type: CampaignContentType): { score: number; issues: string[] } {
+function quality(body: string, type: CampaignContentType, pack: OrganizationStrategyPack): { score: number; issues: string[] } {
   const issues: string[] = [];
   if (body.length < 80) issues.push('Copy may be too thin to create value.');
-  if (/operational gaps|support growth|leverage|optimi[sz]e|digital transformation/i.test(body)) {
-    issues.push('Replace corporate filler with specific human language.');
+  const normalized = body.toLowerCase();
+  const prohibited = pack.prohibitedLanguage.filter((phrase) => normalized.includes(phrase.toLowerCase()));
+  if (prohibited.length) issues.push(`Prohibited brand language: ${prohibited.join(', ')}.`);
+  if (pack.id === 'efficiency-architects' && /\b(?:we fix|we solve|our solution|book a call|schedule a call|let us evaluate|we assess your)\b/i.test(body)) {
+    issues.push('EA copy sounds like a consultant or agency instead of a guide.');
   }
   if ((type === 'client-transformation' || type === 'proof') && !/verified|waiting|required/i.test(body)) {
     issues.push('Proof-based content must include verified source material.');
@@ -224,7 +273,7 @@ function buildAssets(
     for (const platform of strategy.platforms) {
       const blueprint = PLATFORM_BLUEPRINT[platform];
       const body = platformBody(platform, beat);
-      const review = quality(body, beat.contentType);
+      const review = quality(body, beat.contentType, pack);
       const proofRequired = beat.contentType === 'client-transformation' || beat.contentType === 'proof';
       assets.push({
         id: `asset-${platform}-day-${beat.dayOffset}`,
