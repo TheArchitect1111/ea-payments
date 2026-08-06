@@ -24,6 +24,7 @@ export async function publishCommunication(
       storyUrl: input.storyUrl,
       actorName,
       idempotencyKey: input.idempotencyKey,
+      media: input.media,
     });
     return {
       ok: amplifi.ok,
