@@ -15,8 +15,8 @@ assert.ok(research.includes("tools: [{ type: 'web_search' }]"), 'Web-search fall
 assert.ok(research.includes('supportedFacts'), 'Research does not preserve supported facts.');
 assert.ok(images.includes('api.openverse.org/v1/images'), 'Openverse image discovery is missing.');
 assert.ok(images.includes("'cc0,pdm'"), 'Image search is not restricted to public-domain candidates.');
-assert.ok(images.includes("gpt-image-1"), 'Generated-image fallback is missing.');
-assert.ok(images.includes("BLOB_READ_WRITE_TOKEN"), 'Generated images are not persisted.');
+assert.ok(images.includes("dall-e-3"), 'Generated-image fallback is missing.');
+assert.ok(images.includes("response_format: 'url'"), 'Generated-image delivery is not configured.');
 assert.ok(generator.includes('research?.sources.length'), 'Post generation is not grounded in research.');
 assert.ok(generator.includes('Use only supported facts.'), 'Unsupported-fact guardrail is missing.');
 assert.ok(dashboard.includes('What informed this campaign'), 'Research provenance is not visible.');
