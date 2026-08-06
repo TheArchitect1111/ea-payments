@@ -275,6 +275,67 @@ export default function CampaignDashboardClient({ campaignId }: { campaignId: st
         </section>
       ) : null}
 
+
+      {campaign.research ? (
+        <section className="cs-intelligence-panel">
+          <div className="cs-intelligence-head">
+            <div>
+              <p className="cs-kicker">Research used</p>
+              <h2>What informed this campaign</h2>
+            </div>
+            <span className={`cs-research-status cs-research-${campaign.research.status}`}>
+              {campaign.research.status}
+            </span>
+          </div>
+          {campaign.research.summary ? <p className="cs-research-summary">{campaign.research.summary}</p> : null}
+          {campaign.research.sources.length ? (
+            <div className="cs-source-grid">
+              {campaign.research.sources.map((source) => (
+                <article key={source.id} className="cs-source-card">
+                  <span>{source.domain}</span>
+                  <h3>{source.title}</h3>
+                  <p>{source.summary}</p>
+                  <a href={source.url} target="_blank" rel="noreferrer">Review source ↗</a>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <p className="cs-hint">No external facts were used. Copy is based only on the supplied brief and brand strategy.</p>
+          )}
+          {campaign.research.warnings.map((warning) => <p className="cs-hint" key={warning}>{warning}</p>)}
+        </section>
+      ) : null}
+
+      {campaign.imageSuggestions?.length ? (
+        <section className="cs-intelligence-panel">
+          <div className="cs-intelligence-head">
+            <div>
+              <p className="cs-kicker">Campaign images</p>
+              <h2>Images selected for the posts</h2>
+            </div>
+          </div>
+          <div className="cs-image-suggestion-grid">
+            {campaign.imageSuggestions.map((image) => (
+              <article key={image.id} className="cs-image-suggestion">
+                <img src={image.thumbnailUrl} alt={image.altText} />
+                <div>
+                  <strong>{image.title}</strong>
+                  <span>{image.source === 'generated' ? 'Generated for this campaign' : `${image.license} · ${image.creator || 'Creator not listed'}`}</span>
+                  <small>
+                    {image.rightsStatus === 'public-domain-candidate'
+                      ? 'Public-domain candidate — confirm the original source before publishing.'
+                      : image.rightsStatus === 'generated'
+                        ? 'Generated asset stored for this campaign.'
+                        : 'License review required before publishing.'}
+                  </small>
+                  {image.sourceUrl ? <a href={image.sourceUrl} target="_blank" rel="noreferrer">Verify image source ↗</a> : null}
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
       <section className="cs-asset-grid">
         {campaign.assets.map((asset) => (
           <article key={asset.id} className="cs-asset-card">
