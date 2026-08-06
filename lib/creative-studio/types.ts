@@ -96,6 +96,45 @@ export interface CampaignStrategy {
   contentPillars: string[];
 }
 
+export interface ResearchSource {
+  id: string;
+  title: string;
+  url: string;
+  domain: string;
+  publishedAt?: string;
+  accessedAt: string;
+  summary: string;
+  supportedFacts: string[];
+  confidence: 'high' | 'medium' | 'low';
+}
+
+export interface CampaignResearch {
+  status: 'complete' | 'partial' | 'unavailable';
+  query: string;
+  summary: string;
+  sources: ResearchSource[];
+  generatedAt: string;
+  warnings: string[];
+}
+
+export interface CampaignImageSuggestion {
+  id: string;
+  title: string;
+  url: string;
+  thumbnailUrl: string;
+  creator?: string;
+  creatorUrl?: string;
+  source: 'openverse' | 'generated';
+  sourceUrl?: string;
+  license: string;
+  licenseUrl?: string;
+  attribution: string;
+  altText: string;
+  query: string;
+  rightsStatus: 'public-domain-candidate' | 'license-review-required' | 'generated';
+  checkedAt: string;
+}
+
 export interface CampaignBrief {
   title: string;
   audience: string;
@@ -224,6 +263,8 @@ export interface CreativeCampaign {
   pausedAt?: string;
   pausedBy?: string;
   generationVersion?: number;
+  research?: CampaignResearch;
+  imageSuggestions?: CampaignImageSuggestion[];
 }
 
 export interface BrandProfile {
