@@ -32,6 +32,11 @@ import { buildDiscoveryRecommendations, type DiscoveryAnswers } from '@/lib/disc
 import { runCtpExecutiveSnapshot } from '@/lib/ctp-executive-snapshot-run';
 import type { CtpExecutiveScore } from '@/lib/ctp-executive-scoring';
 import { normalizeFactoryOpportunity } from '@/lib/factory-opportunities';
+import {
+  AMPLIFI_ATTRIBUTION_COOKIE,
+  readAttributionCookie,
+  recordCampaignActivity,
+} from '@/lib/creative-studio/campaign-analytics';
 
 function mapTeamSize(label: string): number {
   const map: Record<string, number> = {
@@ -627,7 +632,20 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    return NextResponse.json({
+    const attribution = readAttributionCookie(req.cookies.get(AMPLIFI_ATTRIBUTION_COOKIE)?.value);
+    if (attribution) {
+      try {
+        await recordCampaignActivity({
+          campaignId: attribution.campaignId,
+          assetId: attribution.assetId,
+          ctpComplete: true,
+        });
+      } catch (err) {
+        console.error('[assessment/submit] Amplifi attribution failed:', err);
+      }
+    }
+
+    const response = NextResponse.json({
       ok: true,
       proposalId,
       ...(isCtpFlow
@@ -638,6 +656,21 @@ export async function POST(req: NextRequest) {
           }
         : {}),
     });
+    if (attribution) {
+      response.cookies.set({
+        name: AMPLIFI_ATTRIBUTION_COOKIE,
+        value: '',
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 0,
+        ...(req.nextUrl.hostname.endsWith('efficiencyarchitects.online')
+          ? { domain: '.efficiencyarchitects.online' }
+          : {}),
+      });
+    }
+    return response;
   } catch (err) {
     console.error(
       'Assessment submit unhandled error:',
