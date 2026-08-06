@@ -26,7 +26,7 @@ export type CampaignAssetType =
   | 'qr-code'
   | 'calendar-event';
 
-export type CampaignAssetStatus = 'pending' | 'ready' | 'scheduled' | 'published' | 'draft';
+export type CampaignAssetStatus =\n  | 'pending'\n  | 'ready'\n  | 'scheduled'\n  | 'queued'\n  | 'published'\n  | 'failed'\n  | 'blocked'\n  | 'draft';
 
 export type AssetPreviewLayout =
   | 'banner'
