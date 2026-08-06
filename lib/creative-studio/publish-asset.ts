@@ -2,6 +2,7 @@ import { publishCommunication } from '@/lib/publishing';
 import { publishPlatformActivityEvent } from '@/lib/activity-events-store';
 import { getCampaign, saveCampaign } from './campaign-store';
 import { getMediaAsset } from './media-store';
+import { canPublishAsset } from './campaign-workflow';
 import { socialAssetRequiresMedia, validateMediaForAsset } from './media-validation';
 import type { CampaignAsset, CampaignAssetStatus, CreativeCampaign, PublishResult } from './types';
 
@@ -67,6 +68,21 @@ export async function publishCampaignAsset(input: {
         ok: true,
         ...asset.publishReceipt,
         detail: 'Already published; duplicate request was ignored.',
+      },
+    };
+  }
+
+  const publishGate = canPublishAsset(campaign, asset);
+  if (!publishGate.ok) {
+    return {
+      campaign,
+      result: {
+        ok: false,
+        mode: 'stub',
+        status: 'blocked',
+        detail: publishGate.error ?? 'Publishing is blocked.',
+        attemptedAt: new Date().toISOString(),
+        retryable: false,
       },
     };
   }
@@ -211,7 +227,7 @@ export async function publishAllCampaignAssets(input: {
 
   const publishable = campaign.assets.filter(
     (asset) =>
-      asset.status !== 'published' &&
+      (asset.status === 'approved' || asset.status === 'scheduled') &&
       (asset.publishDestination || asset.type.startsWith('social') || asset.type === 'portal-announcement'),
   );
 
