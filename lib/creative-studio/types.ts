@@ -103,7 +103,7 @@ export interface CampaignAsset {
   publishReceipt?: PublishReceipt;
 }
 
-export type MediaAssetKind = 'image' | 'logo' | 'document' | 'video';
+export interface MediaValidationResult {\n  valid: boolean;\n  checkedAt: string;\n  errors: string[];\n  warnings: string[];\n}\n\nexport type MediaAssetKind = 'image' | 'logo' | 'document' | 'video';
 
 export interface MediaAsset {
   id: string;
