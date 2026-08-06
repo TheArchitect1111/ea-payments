@@ -7,6 +7,11 @@ export const dynamic = 'force-dynamic';
 
 const KINDS: MediaAssetKind[] = ['image', 'logo', 'document', 'video'];
 
+function positiveNumber(value: unknown): number | undefined {
+  const number = Number(value);
+  return Number.isFinite(number) && number > 0 ? number : undefined;
+}
+
 export async function GET(req: NextRequest) {
   const auth = await guardAdminApi(req);
   if (!auth.ok) return adminApiUnauthorized(auth);
@@ -26,6 +31,13 @@ export async function POST(req: NextRequest) {
     label?: string;
     url?: string;
     mimeType?: string;
+    width?: number;
+    height?: number;
+    fileSizeBytes?: number;
+    altText?: string;
+    rightsConfirmed?: boolean;
+    rightsSource?: string;
+    publiclyReachable?: boolean;
     tags?: string[];
   };
   try {
@@ -35,17 +47,40 @@ export async function POST(req: NextRequest) {
   }
 
   const url = body.url?.trim();
-  if (!url) {
-    return NextResponse.json({ ok: false, error: 'Media URL is required.' }, { status: 400 });
+  if (!url || !url.startsWith('https://')) {
+    return NextResponse.json(
+      { ok: false, error: 'A public HTTPS media URL is required.' },
+      { status: 400 },
+    );
   }
 
   const kind = KINDS.includes(body.kind ?? 'image') ? (body.kind ?? 'image') : 'image';
+  if (kind === 'image' && !body.altText?.trim()) {
+    return NextResponse.json(
+      { ok: false, error: 'Alternative text is required for images.' },
+      { status: 400 },
+    );
+  }
+  if (!body.rightsConfirmed || !body.rightsSource?.trim()) {
+    return NextResponse.json(
+      { ok: false, error: 'Confirm usage rights and record the media source or owner.' },
+      { status: 400 },
+    );
+  }
+
   const asset = await saveMediaAsset({
     organizationId: body.organizationId,
     kind,
     label: body.label?.trim() || 'Untitled',
     url,
     mimeType: body.mimeType,
+    width: positiveNumber(body.width),
+    height: positiveNumber(body.height),
+    fileSizeBytes: positiveNumber(body.fileSizeBytes),
+    altText: body.altText,
+    rightsConfirmed: true,
+    rightsSource: body.rightsSource,
+    publiclyReachable: body.publiclyReachable !== false,
     tags: body.tags,
   });
 
