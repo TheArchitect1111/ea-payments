@@ -48,6 +48,8 @@ export async function POST(
           thumbnailUrl: media.kind === 'image' ? media.url : item.thumbnailUrl,
           status: mediaValidation.valid ? ('ready' as const) : ('blocked' as const),
           mediaValidation,
+          approval: { status: 'not-requested' as const },
+          schedule: undefined,
         }
       : item,
   );
