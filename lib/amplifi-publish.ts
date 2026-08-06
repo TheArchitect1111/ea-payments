@@ -9,6 +9,13 @@ export type AmplifiPublishInput = {
   storyUrl?: string;
   actorName: string;
   idempotencyKey?: string;
+  media?: {
+    url: string;
+    mimeType?: string;
+    altText?: string;
+    width?: number;
+    height?: number;
+  };
 };
 
 export type AmplifiPublishStatus = 'blocked' | 'queued' | 'published' | 'failed';
@@ -109,6 +116,7 @@ export async function publishToAmplifi(input: AmplifiPublishInput): Promise<Ampl
         storyUrl,
         amplifiUrl: portalUrl,
         actorName: input.actorName,
+        media: input.media,
         idempotencyKey,
         requestedAt: attemptedAt,
       }),
