@@ -414,6 +414,31 @@
   font-size: 0.95rem;
 }
 
+.cs-guidance-block {
+  margin-top: 0.5rem;
+  padding: 1.25rem;
+  border: 1px solid rgba(201, 168, 68, 0.45);
+  border-radius: 18px;
+  background: #fffaf0;
+}
+
+.cs-guidance-block .cs-kicker {
+  margin: 0 0 0.35rem;
+}
+
+.cs-guidance-block .cs-hint {
+  margin: 0 0 1rem;
+}
+
+.cs-next-step {
+  border-color: rgba(201, 168, 68, 0.55);
+  background: #fffaf0;
+}
+
+.cs-next-step h2 {
+  margin: 0.25rem 0 0.45rem;
+}
+
 .cs-field-row {
   display: grid;
   gap: 1rem;

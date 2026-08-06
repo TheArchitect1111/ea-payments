@@ -97,12 +97,15 @@ export async function researchCampaign(input: {
   brand: BrandProfile;
 }): Promise<CampaignResearch> {
   const now = new Date().toISOString();
+  const trustedSources = input.strategy.trustedSources ?? [];
   const query = [
     input.brand.organizationName,
     input.strategy.objective,
     input.strategy.audience,
+    input.strategy.researchFocus,
     input.strategy.contentPillars.join(' '),
     input.brief.title,
+    trustedSources.length ? `preferred sources ${trustedSources.join(' ')}` : '',
   ].filter(Boolean).join(' — ').slice(0, 700);
   const warnings: string[] = [];
 
@@ -122,6 +125,11 @@ export async function researchCampaign(input: {
         audience: input.strategy.audience,
         story: input.story,
         contentPillars: input.strategy.contentPillars,
+        researchFocus: input.strategy.researchFocus,
+        trustedSources,
+        sourceInstruction: trustedSources.length
+          ? 'Prioritize these sources when they support the requested topic. Use other authoritative sources only when needed.'
+          : 'Prefer primary and authoritative sources.',
       });
       hits = result.hits;
       summary = result.summary;

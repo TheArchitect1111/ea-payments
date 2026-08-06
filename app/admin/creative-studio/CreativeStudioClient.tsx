@@ -37,6 +37,7 @@ export default function CreativeStudioClient() {
   const [story, setStory] = useState('');
   const [strategy, setStrategy] = useState<CampaignStrategy>(DEFAULT_STRATEGY);
   const [pillars, setPillars] = useState('What people are experiencing, Helpful guidance, Next step');
+  const [trustedSources, setTrustedSources] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -74,6 +75,10 @@ export default function CreativeStudioClient() {
           strategy: {
             ...strategy,
             contentPillars: pillars.split(',').map((value) => value.trim()).filter(Boolean),
+            trustedSources: trustedSources
+              .split(/[\n,]/)
+              .map((value) => value.trim())
+              .filter(Boolean),
           },
         }),
       });
@@ -221,6 +226,32 @@ export default function CreativeStudioClient() {
             <input value={pillars} onChange={(event) => setPillars(event.target.value)} />
           </label>
 
+          <div className="cs-guidance-block">
+            <p className="cs-kicker">Help Amplifi find the right information</p>
+            <p className="cs-hint">
+              Tell Amplifi what to look for. It will check current sources, keep the supporting links, and use only
+              supported findings when it writes the posts.
+            </p>
+            <label className="cs-field">
+              <span>What information should Amplifi look for?</span>
+              <textarea
+                rows={4}
+                value={strategy.researchFocus ?? ''}
+                onChange={(event) => setStrategy({ ...strategy, researchFocus: event.target.value })}
+                placeholder="Look for recent statistics, common questions, local trends, new rules, upcoming events, or examples that matter to this audience."
+              />
+            </label>
+            <label className="cs-field">
+              <span>Are there sources you want Amplifi to use first? Add URLs or website names, separated by commas or new lines.</span>
+              <textarea
+                rows={3}
+                value={trustedSources}
+                onChange={(event) => setTrustedSources(event.target.value)}
+                placeholder="https://example.org/report, local chamber of commerce, industry association"
+              />
+            </label>
+          </div>
+
           <div className="cs-field-row">
             <label className="cs-field">
               <span>How will you know it worked?</span>
@@ -261,8 +292,8 @@ export default function CreativeStudioClient() {
 
       {step === 'generating' ? (
         <section className="cs-section cs-panel cs-loading">
-          <p className="cs-loading-title">Building your campaign package…</p>
-          <p className="cs-hint">Researching relevant information, checking sources, finding campaign images, and creating platform-specific posts.</p>
+          <p className="cs-loading-title">Amplifi is shaping your campaign…</p>
+          <p className="cs-hint">Checking the information you requested, reviewing sources, finding campaign images, and creating a different post for each platform.</p>
         </section>
       ) : null}
     </main>

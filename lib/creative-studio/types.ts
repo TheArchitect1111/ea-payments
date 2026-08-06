@@ -132,6 +132,8 @@ export interface CampaignStrategy {
   successMetric: string;
   successTarget?: number;
   contentPillars: string[];
+  researchFocus?: string;
+  trustedSources?: string[];
 }
 
 export interface ResearchSource {

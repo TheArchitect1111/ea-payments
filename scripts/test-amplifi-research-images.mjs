@@ -6,6 +6,7 @@ const research = fs.readFileSync('lib/creative-studio/research-engine.ts', 'utf8
 const images = fs.readFileSync('lib/creative-studio/image-engine.ts', 'utf8');
 const generator = fs.readFileSync('lib/creative-studio/generate-assets.ts', 'utf8');
 const dashboard = fs.readFileSync('app/admin/creative-studio/campaigns/[id]/CampaignDashboardClient.tsx', 'utf8');
+const builder = fs.readFileSync('app/admin/creative-studio/CreativeStudioClient.tsx', 'utf8');
 
 assert.ok(store.includes('researchCampaign('), 'Campaign build does not run research.');
 assert.ok(store.includes('createCampaignImages('), 'Campaign build does not run image selection.');
@@ -19,7 +20,11 @@ assert.ok(images.includes("dall-e-3"), 'Generated-image fallback is missing.');
 assert.ok(images.includes("response_format: 'url'"), 'Generated-image delivery is not configured.');
 assert.ok(generator.includes('research?.sources.length'), 'Post generation is not grounded in research.');
 assert.ok(generator.includes('Use only supported facts.'), 'Unsupported-fact guardrail is missing.');
-assert.ok(dashboard.includes('What informed this campaign'), 'Research provenance is not visible.');
+assert.ok(builder.includes('What information should Amplifi look for?'), 'Campaign research direction is not visible.');
+assert.ok(builder.includes('sources you want Amplifi to use first'), 'Trusted-source guidance is not visible.');
+assert.ok(research.includes('input.strategy.researchFocus'), 'Research focus is not included in the search query.');
+assert.ok(research.includes('trustedSources'), 'Preferred research sources are not passed to the research engine.');
+assert.ok(dashboard.includes('Information used to shape the posts'), 'Research provenance is not visible.');
 assert.ok(dashboard.includes('Verify image source'), 'Image rights verification is not visible.');
 
 console.log('Amplifi research and image pipeline contract passed.');

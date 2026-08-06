@@ -1,7 +1,9 @@
 import crypto from 'node:crypto';
 
 export const EA_ADMIN_COOKIE = 'ea_admin_session';
-const TTL_HOURS = 24;
+export const EA_ADMIN_SESSION_DAYS = 30;
+const TTL_MS = EA_ADMIN_SESSION_DAYS * 24 * 60 * 60 * 1000;
+const TTL_SECONDS = EA_ADMIN_SESSION_DAYS * 24 * 60 * 60;
 
 export type AdminSessionUser = {
   email: string;
@@ -31,9 +33,9 @@ export function signAdminSession(user?: AdminSessionUser): string {
         role: user.role,
         orgId: user.orgId,
         mfa: true,
-        exp: Date.now() + TTL_HOURS * 60 * 60 * 1000,
+        exp: Date.now() + TTL_MS,
       }
-    : { exp: Date.now() + TTL_HOURS * 60 * 60 * 1000 };
+    : { exp: Date.now() + TTL_MS };
 
   const encoded = Buffer.from(JSON.stringify(payload)).toString('base64url');
   const sig = signPayload(encoded);
@@ -87,6 +89,6 @@ export function makeAdminSessionCookie(token: string) {
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax' as const,
     path: '/',
-    maxAge: TTL_HOURS * 60 * 60,
+    maxAge: TTL_SECONDS,
   };
 }
