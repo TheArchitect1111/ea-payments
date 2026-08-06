@@ -205,3 +205,54 @@ export async function listStudioRecords<T>(
     return fromMemory;
   }
 }
+
+
+export async function listAllStudioRecords<T>(
+  recordType: 'campaign' | 'brand' | 'media' | 'experience',
+): Promise<T[]> {
+  const prefix = `${recordType}:`;
+  const fromMemory = [...studioMemory().entries()]
+    .filter(([key]) => key.startsWith(prefix))
+    .map(([, row]) => {
+      try {
+        return JSON.parse(row.payload) as T;
+      } catch {
+        return null;
+      }
+    })
+    .filter((row): row is T => row !== null);
+
+  if (!airtableConfigured()) return fromMemory;
+
+  try {
+    const formula = `{Record Type}='${RECORD_TYPE_LABEL[recordType]}'`;
+    const records = await airtableQuery(TABLE, {
+      filterByFormula: formula,
+      maxRecords: 100,
+      sortField: 'Updated At',
+      sortDirection: 'desc',
+    });
+    const rows = records
+      .map((record) => {
+        const raw = record.fields?.['Payload JSON'];
+        const recordKey = String(record.fields?.['Record Key'] ?? '');
+        if (typeof raw !== 'string' || !recordKey) return null;
+        studioMemory().set(recordKey, {
+          payload: raw,
+          organizationId: String(record.fields?.['Organization ID'] ?? 'ea'),
+          title: String(record.fields?.Title ?? ''),
+          updatedAt: String(record.fields?.['Updated At'] ?? ''),
+        });
+        try {
+          return JSON.parse(raw) as T;
+        } catch {
+          return null;
+        }
+      })
+      .filter((row): row is T => row !== null);
+    return rows.length ? rows : fromMemory;
+  } catch (err) {
+    console.error('[creative-studio] Airtable list-all failed:', err);
+    return fromMemory;
+  }
+}
