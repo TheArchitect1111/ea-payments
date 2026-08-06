@@ -1,6 +1,6 @@
-import { redirect } from 'next/navigation';
+import PremiumLandingV2 from '@/app/components/landing/PremiumLandingV2';
+import './preview/home/home-experience.css';
 
-/** Canonical CTP intake — never invent alternatives. */
 export default function HomePage() {
-  redirect('https://cc.efficiencyarchitects.online/ctp');
+  return <PremiumLandingV2 />;
 }
