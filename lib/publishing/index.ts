@@ -4,4 +4,5 @@ export type {
   PublishCommunicationInput,
   PublishMode,
   PublishOutcome,
+  PublishStatus,
 } from './types';
