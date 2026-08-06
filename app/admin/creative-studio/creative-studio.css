@@ -579,3 +579,76 @@
     linear-gradient(#fff 2px, transparent 2px) 0 0 / 12px 12px;
   opacity: 0.9;
 }
+
+
+.cs-platform-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.cs-platform-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 999px;
+  background: #fff;
+  padding: 0.55rem 0.85rem;
+  color: #1b2b4d;
+  font-size: 0.85rem;
+  font-weight: 750;
+}
+
+.cs-platform-option:has(input:checked) {
+  border-color: #c9a844;
+  background: #fff9e8;
+}
+
+.cs-strategy-card {
+  max-width: 72rem;
+  margin: 0 auto 1.5rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1px;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+  border-radius: 1rem;
+  background: #e5e7eb;
+}
+
+.cs-strategy-card > div {
+  display: grid;
+  gap: 0.35rem;
+  padding: 1rem 1.15rem;
+  background: #fff;
+}
+
+.cs-strategy-card span {
+  color: #6b7280;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.cs-strategy-card strong {
+  color: #1b2b4d;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.cs-strategy-wide {
+  grid-column: 1 / -1;
+}
+
+.cs-status-queued {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.cs-status-blocked,
+.cs-status-failed {
+  background: #fee2e2;
+  color: #991b1b;
+}
