@@ -1,6 +1,8 @@
 import { publishCommunication } from '@/lib/publishing';
 import { publishPlatformActivityEvent } from '@/lib/activity-events-store';
 import { getCampaign, saveCampaign } from './campaign-store';
+import { getMediaAsset } from './media-store';
+import { socialAssetRequiresMedia, validateMediaForAsset } from './media-validation';
 import type { CampaignAsset, CampaignAssetStatus, CreativeCampaign, PublishResult } from './types';
 
 import { resolvePortalSlugForOrg } from '@/lib/tenant-context';
@@ -69,11 +71,45 @@ export async function publishCampaignAsset(input: {
     };
   }
 
+  if (socialAssetRequiresMedia(asset)) {
+    const media = asset.mediaIds?.[0] ? await getMediaAsset(asset.mediaIds[0]) : null;
+    const mediaValidation = validateMediaForAsset(asset, media);
+    if (!mediaValidation.valid) {
+      const result: PublishResult = {
+        ok: false,
+        mode: 'stub',
+        status: 'blocked',
+        detail: mediaValidation.errors.join(' '),
+        attemptedAt: mediaValidation.checkedAt,
+        retryable: false,
+      };
+      const assets = campaign.assets.map((item) =>
+        item.id === asset.id
+          ? {
+              ...item,
+              status: 'blocked' as const,
+              mediaValidation,
+              publishReceipt: {
+                status: result.status,
+                mode: result.mode,
+                detail: result.detail,
+                attemptedAt: result.attemptedAt,
+                retryable: result.retryable,
+              },
+            }
+          : item,
+      );
+      const updated = await saveCampaign({ ...campaign, assets });
+      return { campaign: updated, result };
+    }
+  }
+
   const slug = resolvePortalSlugForOrg(campaign.organizationId);
   const actor = input.actorName ?? 'Creative Studio';
   const channel = resolvePublishChannel(asset);
   const requestType =
     asset.type === 'sms' ? 'SMS' : asset.type === 'email' ? 'Email Campaign' : asset.label;
+  const selectedMedia = asset.mediaIds?.[0] ? await getMediaAsset(asset.mediaIds[0]) : null;
 
   const outcome = await publishCommunication({
     channel,
@@ -85,6 +121,15 @@ export async function publishCampaignAsset(input: {
     storyUrl: asset.href,
     actorName: actor,
     idempotencyKey: idempotencyKey(campaign.id, asset.id),
+    media: selectedMedia
+      ? {
+          url: selectedMedia.url,
+          mimeType: selectedMedia.mimeType,
+          altText: selectedMedia.altText,
+          width: selectedMedia.width,
+          height: selectedMedia.height,
+        }
+      : undefined,
     source: { product: 'creative-studio', campaignId: campaign.id, assetId: asset.id },
   });
 
