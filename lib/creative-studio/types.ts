@@ -78,6 +78,10 @@ export interface OrganizationStrategyPack {
   prohibitedClaims: string[];
   proofRules: string[];
   hashtags: string[];
+  posture: string;
+  narrativeArc: string[];
+  prohibitedLanguage: string[];
+  criticQuestions: string[];
 }
 
 export interface CampaignStrategy {
