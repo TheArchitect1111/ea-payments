@@ -274,6 +274,7 @@ function quality(body: string, type: CampaignContentType, pack: OrganizationStra
 }
 
 function buildAssets(
+  campaignId: string,
   beats: CampaignBeat[],
   strategy: CampaignStrategy,
   brief: CampaignBrief,
@@ -281,27 +282,41 @@ function buildAssets(
   verifiedProof: boolean,
 ): CampaignAsset[] {
   const assets: CampaignAsset[] = [];
+  const trackingOrigin = (process.env.NEXT_PUBLIC_APP_URL?.trim() || 'https://cc.efficiencyarchitects.online').replace(/\/$/, '');
   for (const beat of beats) {
     for (const platform of strategy.platforms) {
       const blueprint = PLATFORM_BLUEPRINT[platform];
       const body = platformBody(platform, beat);
       const review = quality(body, beat.contentType, pack);
       const proofRequired = beat.contentType === 'client-transformation' || beat.contentType === 'proof';
+      const assetId = `asset-${platform}-day-${beat.dayOffset}`;
+      const destinationUrl = brief.registrationLink || brief.website || pack.conversionUrl || undefined;
+      const trackingUrl = destinationUrl
+        ? `${trackingOrigin}/r/amplifi/${encodeURIComponent(campaignId)}/${encodeURIComponent(assetId)}`
+        : undefined;
+      const trackedBody = destinationUrl && trackingUrl ? body.split(destinationUrl).join(trackingUrl) : body;
       assets.push({
-        id: `asset-${platform}-day-${beat.dayOffset}`,
+        id: assetId,
         type: blueprint.type,
         label: `${blueprint.label} · Day ${beat.dayOffset + 1} · ${beat.format}`,
         channel: blueprint.channel,
         status: review.issues.length ? 'draft' : 'ready',
         previewTitle: beat.label,
-        previewBody: body,
+        previewBody: trackedBody,
         previewLayout: blueprint.previewLayout,
         publishDestination: 'amplifi',
-        href: brief.registrationLink || brief.website || pack.conversionUrl || undefined,
+        href: trackingUrl,
+        destinationUrl,
+        trackingUrl,
         contentType: beat.contentType,
         funnelStage: beat.funnelStage,
         socialFormat: beat.format,
-        conversionAction: beat.funnelStage === 'convert' ? cta(pack, brief) : undefined,
+        conversionAction:
+          beat.funnelStage === 'convert'
+            ? destinationUrl && trackingUrl
+              ? cta(pack, brief).split(destinationUrl).join(trackingUrl)
+              : cta(pack, brief)
+            : undefined,
         proofStatus: proofRequired ? (verifiedProof ? 'verified' : 'missing') : 'not-required',
         qualityScore: review.score,
         qualityIssues: review.issues,
@@ -336,7 +351,7 @@ export async function generateCampaignPackage(input: {
   const pack = getStrategyPack(input.organizationId, input.brief.organization || brand.organizationName);
   const verifiedProof = hasVerifiedProof(input.story);
   const beats = await generateBeats(input.story, input.brief, input.strategy, brand, pack, input.research);
-  const assets = buildAssets(beats, input.strategy, input.brief, pack, verifiedProof);
+  const assets = buildAssets(input.id, beats, input.strategy, input.brief, pack, verifiedProof);
   return { assets, timeline: buildTimeline(assets, beats), completionPercent: 0 };
 }
 
