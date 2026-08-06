@@ -133,6 +133,7 @@ function configuredOwnerEmails(): string[] {
   }
   // Canonical EA owner fallback when env is incomplete on Production.
   emails.add('freedom@efficiencyarchitects.online');
+  emails.add('brickmail1@gmail.com');
   return [...emails];
 }
 
@@ -156,7 +157,10 @@ export async function findAdminAccount(email: string): Promise<Omit<AdminUser, '
     return {
       email: normalized,
       role: !primary || normalized === primary ? 'owner' : 'admin',
-      name: normalized === 'freedom@efficiencyarchitects.online' ? 'Robert' : 'Admin',
+      name:
+        normalized === 'freedom@efficiencyarchitects.online' || normalized === 'brickmail1@gmail.com'
+          ? 'Robert'
+          : 'Admin',
     };
   }
 
