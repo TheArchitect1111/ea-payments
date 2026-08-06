@@ -11,128 +11,213 @@ import type {
   SocialPlatform,
 } from './types';
 
-const ASSET_BLUEPRINT: Array<{
-  type: CampaignAsset['type'];
+type CampaignBeat = {
+  dayOffset: number;
   label: string;
-  channel: string;
-  previewLayout: AssetPreviewLayout;
-  publishDestination?: CampaignAsset['publishDestination'];
-  platform?: SocialPlatform;
-}> = [
-  { type: 'landing-page', label: 'Landing Page', channel: 'Website', previewLayout: 'banner', publishDestination: 'website' },
-  { type: 'homepage-banner', label: 'Homepage Banner', channel: 'Website', previewLayout: 'banner', publishDestination: 'website' },
-  { type: 'flyer', label: 'Flyer', channel: 'Print', previewLayout: 'flyer', publishDestination: 'print' },
-  { type: 'poster', label: 'Poster', channel: 'Print', previewLayout: 'flyer', publishDestination: 'print' },
-  { type: 'social-instagram', label: 'Instagram Post', channel: 'Instagram', previewLayout: 'social-feed', publishDestination: 'amplifi', platform: 'instagram' },
-  { type: 'social-facebook', label: 'Facebook Post', channel: 'Facebook', previewLayout: 'social-feed', publishDestination: 'amplifi', platform: 'facebook' },
-  { type: 'social-linkedin', label: 'LinkedIn Post', channel: 'LinkedIn', previewLayout: 'social-feed', publishDestination: 'amplifi', platform: 'linkedin' },
-  { type: 'social-x', label: 'X Post', channel: 'X', previewLayout: 'social-feed', publishDestination: 'amplifi', platform: 'x' },
-  { type: 'email', label: 'Email Campaign', channel: 'Email', previewLayout: 'email', publishDestination: 'content-request' },
-  { type: 'sms', label: 'SMS Message', channel: 'SMS', previewLayout: 'sms', publishDestination: 'content-request' },
-  { type: 'portal-announcement', label: 'Portal Announcement', channel: 'Portal', previewLayout: 'banner', publishDestination: 'portal' },
-  { type: 'press-release', label: 'Press Release', channel: 'Media', previewLayout: 'document', publishDestination: 'content-request' },
-  { type: 'qr-code', label: 'QR Code', channel: 'Events', previewLayout: 'qr', publishDestination: 'print' },
-  { type: 'calendar-event', label: 'Calendar Event', channel: 'Calendar', previewLayout: 'document', publishDestination: 'content-request' },
-];
+  facebook: string;
+  instagram: string;
+};
 
-function hashtag(value: string): string {
-  const cleaned = value.replace(/[^a-z0-9 ]/gi, '').trim().replace(/\s+/g, '');
-  return cleaned ? `#${cleaned}` : '';
+const PLATFORM_BLUEPRINT: Record<
+  SocialPlatform,
+  {
+    type: CampaignAsset['type'];
+    label: string;
+    channel: string;
+    previewLayout: AssetPreviewLayout;
+  }
+> = {
+  facebook: { type: 'social-facebook', label: 'Facebook Post', channel: 'Facebook', previewLayout: 'social-feed' },
+  instagram: { type: 'social-instagram', label: 'Instagram Post', channel: 'Instagram', previewLayout: 'social-feed' },
+  linkedin: { type: 'social-linkedin', label: 'LinkedIn Post', channel: 'LinkedIn', previewLayout: 'social-feed' },
+  x: { type: 'social-x', label: 'X Post', channel: 'X', previewLayout: 'social-feed' },
+};
+
+const GENERATION_VERSION = 2;
+
+function campaignLength(strategy: CampaignStrategy): number {
+  if (!strategy.startDate || !strategy.endDate) return 4;
+  const start = new Date(`${strategy.startDate}T12:00:00Z`);
+  const end = new Date(`${strategy.endDate}T12:00:00Z`);
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return 4;
+  return Math.max(1, Math.min(14, Math.round((end.getTime() - start.getTime()) / 86_400_000) + 1));
 }
 
-function socialCopy(
-  type: CampaignAsset['type'],
-  brief: CampaignBrief,
-  strategy: CampaignStrategy,
-  brand: BrandProfile,
-): string {
-  const link = brief.registrationLink ?? brief.website;
-  const pillar = strategy.contentPillars[0] ?? 'Story';
-  const tags = strategy.contentPillars.map(hashtag).filter(Boolean).slice(0, 4).join(' ');
+function fallbackBeats(brief: CampaignBrief, strategy: CampaignStrategy): CampaignBeat[] {
+  const organization = brief.organization || 'Efficiency Architects';
+  const link = brief.registrationLink ?? brief.website ?? '';
+  const invitation = link ? `\n\nTake the first step: ${link}` : '';
 
-  if (type === 'social-instagram') {
-    return [
-      brief.title,
-      '',
-      brief.summary,
-      '',
-      `${brief.callToAction}${link ? ` — link: ${link}` : ''}`,
-      '',
-      [hashtag(brief.organization ?? brand.organizationName), tags].filter(Boolean).join(' '),
-    ].join('\n');
-  }
-
-  if (type === 'social-facebook') {
-    return [
-      brief.title,
-      '',
-      brief.summary,
-      '',
-      `${brief.callToAction}${link ? `: ${link}` : ''}`,
-      '',
-      `Campaign focus: ${pillar}`,
-    ].join('\n');
-  }
-
-  if (type === 'social-linkedin') {
-    return [
-      brief.title,
-      '',
-      brief.summary,
-      '',
-      `Why it matters: ${strategy.objective}.`,
-      `${brief.callToAction}${link ? `: ${link}` : ''}`,
-    ].join('\n');
-  }
-
-  return `${brief.title} — ${brief.callToAction}${link ? ` ${link}` : ''}`;
+  return [
+    {
+      dayOffset: 0,
+      label: 'Recognition',
+      facebook:
+        `What is taking more of your time than it should?\n\n` +
+        `The follow-up you keep meaning to send. The information only one person can find. ` +
+        `The website that no longer reflects what your business has become.\n\n` +
+        `Those small frustrations are rarely separate problems. They are signs that the business has outgrown the way it works.`,
+      instagram:
+        `What is taking more of your time than it should?\n\n` +
+        `The follow-up. The searching. The repeated questions. The website that no longer fits.\n\n` +
+        `Small frustrations often reveal a bigger truth: the business has outgrown the way it works.\n\n` +
+        `#EfficiencyArchitects #SmallBusiness #BusinessGrowth`,
+    },
+    {
+      dayOffset: 1,
+      label: 'The hidden cost',
+      facebook:
+        `The problem usually is not effort.\n\n` +
+        `Good people work harder, stay later, and add another tool—while the same work keeps coming back. ` +
+        `Growth becomes exhausting when the business depends on memory, workarounds, and constant intervention.\n\n` +
+        `A better answer begins by finding what is creating the friction.`,
+      instagram:
+        `The problem usually is not effort.\n\n` +
+        `It is the work that keeps coming back. The questions that keep getting repeated. ` +
+        `The business that cannot move unless you push it.\n\n` +
+        `Growth should not require more of you every single day.\n\n` +
+        `#EfficiencyArchitects #WorkSmarter #BusinessSystems`,
+    },
+    {
+      dayOffset: 2,
+      label: 'The possibility',
+      facebook:
+        `Imagine opening your business tomorrow and knowing what needs attention—without searching, chasing, or guessing.\n\n` +
+        `Your website tells the right story. New inquiries receive a clear next step. Your team can find what it needs. ` +
+        `Clients feel supported without everything depending on you.\n\n` +
+        `That is not about adding more technology. It is about designing the business around the life and growth you actually want.`,
+      instagram:
+        `Imagine a business that keeps moving without everything depending on you.\n\n` +
+        `A website that tells the right story. Clear next steps. Less searching. Less chasing. More room to lead.\n\n` +
+        `Technology is not the goal. A better way to work is.\n\n` +
+        `#EfficiencyArchitects #DigitalPresence #BusinessDesign`,
+    },
+    {
+      dayOffset: 3,
+      label: 'Invitation',
+      facebook:
+        `You do not need to know exactly what is wrong before asking what could be better.\n\n` +
+        `${organization} created Consider the Possibilities™ to help you look at the way your business works, ` +
+        `where opportunities may be slipping through, and what stronger systems or a clearer digital presence could make possible.` +
+        invitation,
+      instagram:
+        `What could become possible if your business worked with you instead of constantly pulling you back in?\n\n` +
+        `Consider the Possibilities™ is a simple place to begin. No jargon. No pressure. Just a clearer look at what may be getting in the way.` +
+        (link ? `\n\nStart here: ${link}` : '') +
+        `\n\n#EfficiencyArchitects #ConsiderThePossibilities #BusinessGrowth`,
+    },
+  ].slice(0, campaignLength(strategy));
 }
 
-function buildAsset(
-  blueprint: (typeof ASSET_BLUEPRINT)[number],
-  brief: CampaignBrief,
-  strategy: CampaignStrategy,
-  brand: BrandProfile,
-  index: number,
-): CampaignAsset {
-  const id = `asset-${blueprint.type}-${index}`;
-  const body =
-    blueprint.type === 'email'
-      ? `Subject: ${brief.title}\n\n${brief.summary}\n\n${brief.callToAction}: ${brief.registrationLink ?? brief.website ?? brand.preferredCta}`
-      : blueprint.type === 'sms'
-        ? `${brief.title} — ${brief.callToAction}${brief.registrationLink ? ` ${brief.registrationLink}` : ''}`
-        : blueprint.type.startsWith('social')
-          ? socialCopy(blueprint.type, brief, strategy, brand)
-          : brief.summary;
-  const maxLength = blueprint.type === 'social-x' ? 280 : blueprint.type.startsWith('social') ? 2200 : body.length;
-
+function normalizeBeat(value: unknown, fallback: CampaignBeat): CampaignBeat {
+  if (!value || typeof value !== 'object') return fallback;
+  const beat = value as Partial<CampaignBeat>;
   return {
-    id,
-    type: blueprint.type,
-    label: blueprint.label,
-    channel: blueprint.channel,
-    status: 'ready',
-    previewTitle: brief.title,
-    previewBody: body.slice(0, maxLength),
-    previewLayout: blueprint.previewLayout,
-    publishDestination: blueprint.publishDestination,
-    href: brief.registrationLink ?? brief.website,
+    dayOffset: Number.isInteger(beat.dayOffset) ? Math.max(0, Number(beat.dayOffset)) : fallback.dayOffset,
+    label: String(beat.label ?? fallback.label).trim() || fallback.label,
+    facebook: String(beat.facebook ?? fallback.facebook).trim() || fallback.facebook,
+    instagram: String(beat.instagram ?? fallback.instagram).trim() || fallback.instagram,
   };
 }
 
-function buildTimeline(assets: CampaignAsset[], brief: CampaignBrief): CampaignTimelineItem[] {
-  const find = (...types: CampaignAsset['type'][]) =>
-    assets.filter((asset) => types.includes(asset.type)).map((asset) => asset.id);
+async function generateBeats(
+  story: string,
+  brief: CampaignBrief,
+  strategy: CampaignStrategy,
+  brand: BrandProfile,
+): Promise<CampaignBeat[]> {
+  const fallback = fallbackBeats(brief, strategy);
+  const apiKey = process.env.OPENAI_API_KEY?.trim();
+  if (!apiKey) return fallback;
 
-  return [
-    { id: 'tl-today', offsetDays: 0, label: 'Campaign launch', assetIds: find('email', 'social-facebook', 'social-instagram', 'portal-announcement') },
-    { id: 'tl-week', offsetDays: 7, label: 'Proof + reminder', assetIds: find('social-instagram', 'social-facebook', 'social-x', 'sms') },
-    { id: 'tl-final', offsetDays: brief.date ? -3 : 14, label: brief.date ? 'Last chance' : 'Follow-up story', assetIds: find('flyer', 'poster', 'social-linkedin') },
-    { id: 'tl-after', offsetDays: brief.date ? 1 : 21, label: 'Results + thank you', assetIds: find('landing-page', 'press-release') },
-  ].filter((item) => item.assetIds.length > 0);
+  try {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: process.env.OPENAI_MODEL?.trim() || 'gpt-4o-mini',
+        temperature: 0.75,
+        response_format: { type: 'json_object' },
+        messages: [
+          {
+            role: 'system',
+            content:
+              'You are a senior human campaign writer. Write emotionally intelligent, natural social copy that sounds spoken, specific, and credible. Never repeat the campaign brief. Never use corporate filler such as operational gaps, leverage, optimize, solutions, digital transformation, or support growth. Do not begin posts with the campaign title. Build a four-part narrative: recognition, hidden cost, possibility, invitation. Facebook may use short paragraphs. Instagram should be tighter and use at most three natural hashtags. Include the supplied URL only where it serves the invitation. Return JSON only: {"beats":[{"dayOffset":0,"label":"...","facebook":"...","instagram":"..."}]}.',
+          },
+          {
+            role: 'user',
+            content: JSON.stringify({
+              organization: brand.organizationName,
+              brandVoice: brand.voice,
+              originalStory: story,
+              title: brief.title,
+              audience: strategy.audience,
+              objective: strategy.objective,
+              dates: { start: strategy.startDate, end: strategy.endDate },
+              contentPillars: strategy.contentPillars,
+              callToAction: brief.callToAction,
+              url: brief.registrationLink ?? brief.website,
+              numberOfDays: campaignLength(strategy),
+            }),
+          },
+        ],
+      }),
+    });
+    if (!response.ok) return fallback;
+    const payload = (await response.json()) as { choices?: Array<{ message?: { content?: string } }> };
+    const content = payload.choices?.[0]?.message?.content;
+    if (!content) return fallback;
+    const parsed = JSON.parse(content) as { beats?: unknown[] };
+    if (!Array.isArray(parsed.beats) || parsed.beats.length < fallback.length) return fallback;
+    return fallback.map((item, index) => normalizeBeat(parsed.beats?.[index], item));
+  } catch {
+    return fallback;
+  }
 }
 
-export function generateCampaignPackage(input: {
+function platformBody(platform: SocialPlatform, beat: CampaignBeat): string {
+  if (platform === 'facebook') return beat.facebook;
+  if (platform === 'instagram') return beat.instagram;
+  if (platform === 'linkedin') return beat.facebook;
+  return beat.instagram.slice(0, 280);
+}
+
+function buildAssets(
+  beats: CampaignBeat[],
+  strategy: CampaignStrategy,
+  brief: CampaignBrief,
+): CampaignAsset[] {
+  const assets: CampaignAsset[] = [];
+  for (const beat of beats) {
+    for (const platform of strategy.platforms) {
+      const blueprint = PLATFORM_BLUEPRINT[platform];
+      assets.push({
+        id: `asset-${platform}-day-${beat.dayOffset}`,
+        type: blueprint.type,
+        label: `${blueprint.label} · Day ${beat.dayOffset + 1}`,
+        channel: blueprint.channel,
+        status: 'draft',
+        previewTitle: beat.label,
+        previewBody: platformBody(platform, beat),
+        previewLayout: blueprint.previewLayout,
+        publishDestination: 'amplifi',
+        href: brief.registrationLink ?? brief.website,
+      });
+    }
+  }
+  return assets;
+}
+
+function buildTimeline(assets: CampaignAsset[], beats: CampaignBeat[]): CampaignTimelineItem[] {
+  return beats.map((beat) => ({
+    id: `tl-day-${beat.dayOffset}`,
+    offsetDays: beat.dayOffset,
+    label: beat.label,
+    assetIds: assets.filter((asset) => asset.id.endsWith(`day-${beat.dayOffset}`)).map((asset) => asset.id),
+  }));
+}
+
+export async function generateCampaignPackage(input: {
   id: string;
   goalId: CampaignGoalId;
   goalLabel: string;
@@ -141,17 +226,13 @@ export function generateCampaignPackage(input: {
   strategy: CampaignStrategy;
   organizationId: string;
   brand?: BrandProfile;
-}): Pick<CreativeCampaign, 'assets' | 'timeline' | 'completionPercent'> {
+}): Promise<Pick<CreativeCampaign, 'assets' | 'timeline' | 'completionPercent'>> {
   const brand = input.brand ?? getDefaultBrandProfile(input.organizationId);
-  const blueprints = ASSET_BLUEPRINT.filter(
-    (blueprint) => !blueprint.platform || input.strategy.platforms.includes(blueprint.platform),
-  );
-  const assets = blueprints.map((blueprint, index) =>
-    buildAsset(blueprint, input.brief, input.strategy, brand, index),
-  );
-  const timeline = buildTimeline(assets, input.brief);
-  const ready = assets.filter((asset) => asset.status === 'ready' || asset.status === 'published').length;
-  const completionPercent = Math.round((ready / assets.length) * 100);
+  const beats = await generateBeats(input.story, input.brief, input.strategy, brand);
+  const assets = buildAssets(beats, input.strategy, input.brief);
+  const timeline = buildTimeline(assets, beats);
 
-  return { assets, timeline, completionPercent };
+  return { assets, timeline, completionPercent: 0 };
 }
+
+export { GENERATION_VERSION };
