@@ -212,6 +212,7 @@ export interface CampaignAsset {
   qualityScore?: number;
   qualityIssues?: string[];
   variantGroupId?: string;
+  suggestedImageId?: string;
 }
 
 export type MediaAssetKind = 'image' | 'logo' | 'document' | 'video';
