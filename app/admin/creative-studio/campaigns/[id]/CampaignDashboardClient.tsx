@@ -158,6 +158,35 @@ export default function CampaignDashboardClient({ campaignId }: { campaignId: st
         </div>
       </header>
 
+      {campaign.strategy ? (
+        <section className="cs-strategy-card">
+          <div>
+            <span>Objective</span>
+            <strong>{campaign.strategy.objective}</strong>
+          </div>
+          <div>
+            <span>Audience</span>
+            <strong>{campaign.strategy.audience}</strong>
+          </div>
+          <div>
+            <span>Platforms</span>
+            <strong>{campaign.strategy.platforms.join(', ')}</strong>
+          </div>
+          <div>
+            <span>Success</span>
+            <strong>
+              {campaign.strategy.successTarget
+                ? `${campaign.strategy.successTarget} ${campaign.strategy.successMetric}`
+                : campaign.strategy.successMetric}
+            </strong>
+          </div>
+          <div className="cs-strategy-wide">
+            <span>Content pillars</span>
+            <strong>{campaign.strategy.contentPillars.join(' · ')}</strong>
+          </div>
+        </section>
+      ) : null}
+
       <section className="cs-asset-grid">
         {campaign.assets.map((asset) => (
           <article key={asset.id} className="cs-asset-card">

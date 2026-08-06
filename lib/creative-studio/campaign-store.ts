@@ -3,10 +3,16 @@ import { goalById } from './goals';
 import { generateCampaignPackage } from './generate-assets';
 import { getBrandProfile } from './brand-store';
 import { listStudioRecords, loadStudioRecord, saveStudioRecord } from './persistence';
-import type { CampaignGoalId, CreativeCampaign } from './types';
+import type {
+  CampaignGoalId,
+  CampaignStrategy,
+  CreativeCampaign,
+  SocialPlatform,
+} from './types';
 
 const MEMORY_CAP = 100;
 const campaigns = new Map<string, CreativeCampaign>();
+const SOCIAL_PLATFORMS = new Set<SocialPlatform>(['facebook', 'instagram', 'linkedin', 'x']);
 
 function orgId(): string {
   return process.env.EA_INTERNAL_ORG_ID ?? 'ea';
@@ -14,6 +20,35 @@ function orgId(): string {
 
 function newId(): string {
   return `camp-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function cleanList(values: unknown, fallback: string[]): string[] {
+  if (!Array.isArray(values)) return fallback;
+  const cleaned = [...new Set(values.map(String).map((value) => value.trim()).filter(Boolean))];
+  return cleaned.length ? cleaned.slice(0, 6) : fallback;
+}
+
+function normalizeStrategy(
+  input: Partial<CampaignStrategy> | undefined,
+  fallbackAudience: string,
+  goalLabel: string,
+): CampaignStrategy {
+  const platforms = Array.isArray(input?.platforms)
+    ? input.platforms.filter((value): value is SocialPlatform => SOCIAL_PLATFORMS.has(value as SocialPlatform))
+    : [];
+  const successTarget = Number(input?.successTarget);
+
+  return {
+    objective: input?.objective?.trim() || goalLabel,
+    audience: input?.audience?.trim() || fallbackAudience,
+    startDate: input?.startDate?.trim() || undefined,
+    endDate: input?.endDate?.trim() || undefined,
+    platforms: platforms.length ? [...new Set(platforms)] : ['facebook', 'instagram'],
+    tone: input?.tone?.trim() || 'Clear, warm, and credible',
+    successMetric: input?.successMetric?.trim() || 'Engagements',
+    successTarget: Number.isFinite(successTarget) && successTarget > 0 ? successTarget : undefined,
+    contentPillars: cleanList(input?.contentPillars, ['Story', 'Proof', 'Invitation']),
+  };
 }
 
 async function persistCampaign(campaign: CreativeCampaign): Promise<void> {
@@ -29,12 +64,10 @@ async function persistCampaign(campaign: CreativeCampaign): Promise<void> {
 
 export async function listCampaigns(organizationId = orgId()): Promise<CreativeCampaign[]> {
   const fromStore = await listStudioRecords<CreativeCampaign>('campaign', organizationId);
-  for (const campaign of fromStore) {
-    campaigns.set(campaign.id, campaign);
-  }
+  for (const campaign of fromStore) campaigns.set(campaign.id, campaign);
 
   return [...campaigns.values()]
-    .filter((c) => c.organizationId === organizationId)
+    .filter((campaign) => campaign.organizationId === organizationId)
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }
 
@@ -54,9 +87,11 @@ export async function createCampaign(input: {
   goalId: CampaignGoalId;
   story: string;
   organizationId?: string;
+  strategy?: Partial<CampaignStrategy>;
 }): Promise<CreativeCampaign> {
   const goal = goalById(input.goalId);
   const brief = await extractCampaignBrief(input.story, input.goalId);
+  const strategy = normalizeStrategy(input.strategy, brief.audience, goal.label);
   const organizationId = input.organizationId ?? orgId();
   const brand = await getBrandProfile(organizationId);
   const id = newId();
@@ -67,6 +102,7 @@ export async function createCampaign(input: {
     goalLabel: goal.label,
     story: input.story.trim(),
     brief,
+    strategy,
     organizationId,
     brand,
   });
@@ -76,7 +112,8 @@ export async function createCampaign(input: {
     goalId: input.goalId,
     goalLabel: goal.label,
     story: input.story.trim(),
-    brief,
+    brief: { ...brief, audience: strategy.audience },
+    strategy,
     assets: generated.assets,
     timeline: generated.timeline,
     completionPercent: generated.completionPercent,
@@ -103,8 +140,10 @@ export async function updateAssetStatus(
   const campaign = await getCampaign(campaignId);
   if (!campaign) return null;
 
-  const assets = campaign.assets.map((a) => (a.id === assetId ? { ...a, status } : a));
-  const ready = assets.filter((a) => a.status === 'ready' || a.status === 'published' || a.status === 'scheduled').length;
+  const assets = campaign.assets.map((asset) => (asset.id === assetId ? { ...asset, status } : asset));
+  const ready = assets.filter((asset) =>
+    ['ready', 'scheduled', 'queued', 'published'].includes(asset.status),
+  ).length;
   const updated: CreativeCampaign = {
     ...campaign,
     assets,
