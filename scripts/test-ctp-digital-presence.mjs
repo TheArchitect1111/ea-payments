@@ -50,7 +50,7 @@ assert(run.includes('force'), 'Runner must support force re-run for admin desk')
 assert(submit.includes('auditDigitalPresence'), 'Submit must run digital audit');
 assert(submit.includes('discoveryAnswers'), 'Submit audit must pass discovery answers');
 assert(submit.includes('digitalPresenceAudit'), 'Submit must pass audit into email path');
-assert(email.includes('Your Digital Foundation'), 'Opportunity email must include digital foundation');
+assert(email.includes('Your Intelligent Business System'), 'Opportunity email must include intelligent business system');
 assert(email.includes('categoryScores'), 'Opportunity email must support category health scores');
 assert(submissions.includes('digitalPresenceAudit'), 'CTP submission must persist audit');
 

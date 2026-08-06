@@ -14,6 +14,7 @@ const requiredFiles = [
   'lib/agents/registry.ts',
   'lib/agents/orchestrator.ts',
   'lib/agents/research-agent.ts',
+  'lib/agents/specialist-agents.ts',
   'docs/ai-architecture.md',
   'docs/agent-framework.md',
   'docs/research-agent.md',
@@ -25,12 +26,22 @@ for (const file of requiredFiles) {
 
 const registry = readFileSync(join(root, 'lib/agents/registry.ts'), 'utf8');
 assert.match(registry, /registerAgent\(researchAgent\)/, 'Research agent should be registered');
+assert.match(registry, /specialistAgents\.forEach\(registerAgent\)/, 'Curated specialists should be registered');
 assert.match(registry, /matchAgents/, 'Registry should expose dynamic matching');
+assert.match(registry, /normalizeAgentName/, 'Registry should normalize selector aliases');
 assert.doesNotMatch(registry, /switch\s*\(/, 'Registry should not use switch statements');
 
 const orchestrator = readFileSync(join(root, 'lib/agents/orchestrator.ts'), 'utf8');
 assert.match(orchestrator, /matchAgents/, 'Orchestrator should use registry matching');
 assert.doesNotMatch(orchestrator, /switch\s*\(/, 'Orchestrator should not hardcode agent routing with switches');
+
+const specialists = readFileSync(join(root, 'lib/agents/specialist-agents.ts'), 'utf8');
+for (const name of ['seo', 'conversion', 'social-media', 'email-campaign', 'brand', 'accessibility', 'performance', 'security', 'analytics']) {
+  assert.match(specialists, new RegExp(`name: ['"]${name}['"]`), `${name} specialist should exist`);
+}
+
+const route = readFileSync(join(root, 'app/api/orchestrator/route.ts'), 'utf8');
+assert.match(route, /agents: listAgents\(\)/, 'Orchestrator metadata should expose agents for a selector');
 
 const orb = readFileSync(join(root, 'app/components/ea-guide/EAGuideOrb.tsx'), 'utf8');
 assert.match(orb, /\/api\/orchestrator/, 'Orb should communicate with orchestrator');
