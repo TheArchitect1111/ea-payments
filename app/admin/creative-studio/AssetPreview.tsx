@@ -55,6 +55,13 @@ export default function AssetPreview({ asset, brand }: AssetPreviewProps) {
               <span className="cs-preview-time">Just now</span>
             </div>
           </div>
+          {asset.thumbnailUrl ? (
+            <img
+              className="cs-preview-media"
+              src={asset.thumbnailUrl}
+              alt=""
+            />
+          ) : null}
           <p className="cs-preview-feed-copy">{asset.previewBody}</p>
         </>
       ) : null}
