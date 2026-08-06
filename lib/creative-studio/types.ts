@@ -52,6 +52,44 @@ export type AssetPreviewLayout =
 
 export type SocialPlatform = 'facebook' | 'instagram' | 'linkedin' | 'x';
 
+export type CampaignMetricEvent = 'link-click' | 'ctp-start' | 'ctp-complete';
+
+export interface CampaignMetricTotals {
+  linkClicks: number;
+  ctpStarts: number;
+  ctpCompletions: number;
+}
+
+export interface CampaignAssetMetrics extends CampaignMetricTotals {
+  assetId: string;
+  platform?: SocialPlatform;
+}
+
+export interface CampaignDailyMetrics extends CampaignMetricTotals {
+  date: string;
+}
+
+export interface CampaignPlatformMetrics {
+  platform: SocialPlatform;
+  source: 'not-connected' | 'manual' | 'connected';
+  impressions: number;
+  reach: number;
+  reactions: number;
+  comments: number;
+  shares: number;
+  saves: number;
+  videoViews: number;
+  updatedAt?: string;
+}
+
+export interface CampaignAnalytics {
+  totals: CampaignMetricTotals;
+  byAsset: CampaignAssetMetrics[];
+  daily: CampaignDailyMetrics[];
+  platformMetrics: CampaignPlatformMetrics[];
+  updatedAt: string;
+}
+
 export type FunnelStage = 'attract' | 'trust' | 'help' | 'convert';
 
 export type CampaignContentType =
@@ -196,6 +234,10 @@ export interface CampaignAsset {
   previewBody: string;
   previewLayout: AssetPreviewLayout;
   href?: string;
+  /** The original off-site destination before Amplifi adds first-party attribution. */
+  destinationUrl?: string;
+  /** The first-party URL used in published campaign copy. */
+  trackingUrl?: string;
   publishDestination?: 'amplifi' | 'portal' | 'content-request' | 'website' | 'print';
   mediaIds?: string[];
   thumbnailUrl?: string;
@@ -266,6 +308,7 @@ export interface CreativeCampaign {
   generationVersion?: number;
   research?: CampaignResearch;
   imageSuggestions?: CampaignImageSuggestion[];
+  analytics?: CampaignAnalytics;
 }
 
 export interface BrandProfile {
