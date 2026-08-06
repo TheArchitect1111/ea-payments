@@ -303,7 +303,7 @@ export default function CampaignDashboardClient({ campaignId }: { campaignId: st
         <h1 className="cs-title">{campaign.brief.title}</h1>
         <p className="cs-lede">{campaign.brief.summary}</p>
         <div className="cs-header-actions">
-          <span className="cs-progress-ring">Completion {campaign.completionPercent}%</span>
+          <span className="cs-progress-ring">Campaign readiness {campaign.completionPercent}%</span>
           {publishable > 0 && !campaign.paused ? (
             <button type="button" className="cs-secondary" disabled={publishAllBusy} onClick={() => void publishAll()}>
               {publishAllBusy ? 'Publishing…' : `Publish approved (${publishable})`}
@@ -324,19 +324,19 @@ export default function CampaignDashboardClient({ campaignId }: { campaignId: st
       {campaign.strategy ? (
         <section className="cs-strategy-card">
           <div>
-            <span>Objective</span>
+            <span>What this campaign should help accomplish</span>
             <strong>{campaign.strategy.objective}</strong>
           </div>
           <div>
-            <span>Audience</span>
+            <span>Who it is for</span>
             <strong>{campaign.strategy.audience}</strong>
           </div>
           <div>
-            <span>Platforms</span>
+            <span>Where it will appear</span>
             <strong>{campaign.strategy.platforms.join(', ')}</strong>
           </div>
           <div>
-            <span>Success</span>
+            <span>What a good result looks like</span>
             <strong>
               {campaign.strategy.successTarget
                 ? `${campaign.strategy.successTarget} ${campaign.strategy.successMetric}`
@@ -344,7 +344,7 @@ export default function CampaignDashboardClient({ campaignId }: { campaignId: st
             </strong>
           </div>
           <div className="cs-strategy-wide">
-            <span>Content pillars</span>
+            <span>What the campaign will talk about</span>
             <strong>{campaign.strategy.contentPillars.join(' · ')}</strong>
           </div>
         </section>
@@ -431,8 +431,8 @@ export default function CampaignDashboardClient({ campaignId }: { campaignId: st
         <section className="cs-intelligence-panel">
           <div className="cs-intelligence-head">
             <div>
-              <p className="cs-kicker">Research used</p>
-              <h2>What informed this campaign</h2>
+              <p className="cs-kicker">What Amplifi found</p>
+              <h2>Information used to shape the posts</h2>
             </div>
             <span className={`cs-research-status cs-research-${campaign.research.status}`}>
               {campaign.research.status}
@@ -446,12 +446,12 @@ export default function CampaignDashboardClient({ campaignId }: { campaignId: st
                   <span>{source.domain}</span>
                   <h3>{source.title}</h3>
                   <p>{source.summary}</p>
-                  <a href={source.url} target="_blank" rel="noreferrer">Review source ↗</a>
+                  <a href={source.url} target="_blank" rel="noreferrer">See the source ↗</a>
                 </article>
               ))}
             </div>
           ) : (
-            <p className="cs-hint">No external facts were used. Copy is based only on the supplied brief and brand strategy.</p>
+            <p className="cs-hint">Amplifi did not add outside facts. These posts are based only on the information and brand direction you supplied.</p>
           )}
           {campaign.research.warnings.map((warning) => <p className="cs-hint" key={warning}>{warning}</p>)}
         </section>
@@ -461,8 +461,8 @@ export default function CampaignDashboardClient({ campaignId }: { campaignId: st
         <section className="cs-intelligence-panel">
           <div className="cs-intelligence-head">
             <div>
-              <p className="cs-kicker">Campaign images</p>
-              <h2>Images selected for the posts</h2>
+              <p className="cs-kicker">Images for your campaign</p>
+              <h2>Visual options matched to the posts</h2>
             </div>
           </div>
           <div className="cs-image-suggestion-grid">
@@ -487,6 +487,15 @@ export default function CampaignDashboardClient({ campaignId }: { campaignId: st
         </section>
       ) : null}
 
+      <section className="cs-intelligence-panel cs-next-step">
+        <p className="cs-kicker">Your next step</p>
+        <h2>Look through each post and choose what happens next</h2>
+        <p className="cs-hint">
+          Choose “Check this post” when you are ready to make a decision. Then choose “Use this post” or send it
+          back for changes. Nothing publishes until you choose Publish now or schedule it.
+        </p>
+      </section>
+
       <section className="cs-asset-grid">
         {campaign.assets.map((asset) => (
           <article key={asset.id} className="cs-asset-card">
@@ -500,14 +509,14 @@ export default function CampaignDashboardClient({ campaignId }: { campaignId: st
               ) : null}
               {asset.type === 'social-facebook' || asset.type === 'social-instagram' ? (
                 <div className="cs-media-attach">
-                  <label htmlFor={`media-${asset.id}`}>Campaign media</label>
+                  <label htmlFor={`media-${asset.id}`}>Choose an image or video for this post</label>
                   <select
                     id={`media-${asset.id}`}
                     value={asset.mediaIds?.[0] ?? ''}
                     disabled={attaching === asset.id}
                     onChange={(event) => void attachMedia(asset.id, event.target.value)}
                   >
-                    <option value="">Select validated media…</option>
+                    <option value="">Choose media…</option>
                     {media
                       .filter((item) => item.kind === 'image' || item.kind === 'video')
                       .map((item) => (
@@ -523,7 +532,7 @@ export default function CampaignDashboardClient({ campaignId }: { campaignId: st
                         : asset.mediaValidation.errors.join(' ')}
                     </p>
                   ) : (
-                    <p className="cs-hint">Required before publishing.</p>
+                    <p className="cs-hint">Add media before this post can be published.</p>
                   )}
                 </div>
               ) : null}
@@ -535,7 +544,7 @@ export default function CampaignDashboardClient({ campaignId }: { campaignId: st
                     disabled={workflowBusy !== null}
                     onClick={() => void runWorkflow('submit-review', asset.id)}
                   >
-                    Submit for review
+                    Check this post
                   </button>
                 ) : null}
                 {asset.status === 'review' ? (
@@ -546,7 +555,7 @@ export default function CampaignDashboardClient({ campaignId }: { campaignId: st
                       disabled={workflowBusy !== null}
                       onClick={() => void runWorkflow('approve', asset.id)}
                     >
-                      Approve
+                      Use this post
                     </button>
                     <button
                       type="button"
@@ -554,7 +563,7 @@ export default function CampaignDashboardClient({ campaignId }: { campaignId: st
                       disabled={workflowBusy !== null}
                       onClick={() => void runWorkflow('reject', asset.id)}
                     >
-                      Return to draft
+                      Send back for changes
                     </button>
                   </>
                 ) : null}
@@ -617,7 +626,7 @@ export default function CampaignDashboardClient({ campaignId }: { campaignId: st
       </section>
 
       <section className="cs-timeline">
-        <h3>Smart campaign timeline</h3>
+        <h3>Your campaign timeline</h3>
         <ol>
           {campaign.timeline.map((item) => (
             <li key={item.id}>
@@ -630,7 +639,7 @@ export default function CampaignDashboardClient({ campaignId }: { campaignId: st
               </span>
               <div>
                 <strong>{item.label}</strong>
-                <p className="cs-hint">{item.assetIds.length} assets scheduled</p>
+                <p className="cs-hint">{item.assetIds.length} posts planned</p>
               </div>
             </li>
           ))}

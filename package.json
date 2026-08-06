@@ -78,7 +78,8 @@
     "mobile:lint": "cd mobile && npm run lint",
     "test:amplifi-guide-first": "node scripts/test-amplifi-guide-first.mjs",
     "test:amplifi-research-images": "node scripts/test-amplifi-research-images.mjs",
-    "test:amplifi-analytics": "node scripts/test-amplifi-analytics.mjs"
+    "test:amplifi-analytics": "node scripts/test-amplifi-analytics.mjs",
+    "test:admin-session-duration": "node scripts/test-admin-session-duration.mjs"
   },
   "dependencies": {
     "@clerk/nextjs": "^7.5.9",

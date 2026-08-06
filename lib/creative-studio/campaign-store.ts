@@ -51,6 +51,8 @@ function normalizeStrategy(
     successMetric: input?.successMetric?.trim() || 'Engagements',
     successTarget: Number.isFinite(successTarget) && successTarget > 0 ? successTarget : undefined,
     contentPillars: cleanList(input?.contentPillars, ['Story', 'Proof', 'Invitation']),
+    researchFocus: input?.researchFocus?.trim().slice(0, 1200) || undefined,
+    trustedSources: cleanList(input?.trustedSources, []).slice(0, 8),
   };
 }
 
