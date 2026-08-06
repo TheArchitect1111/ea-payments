@@ -3,6 +3,7 @@ import { resolveAIActor } from '@/lib/ai/auth';
 import { AIGatewayError } from '@/lib/ai/gateway';
 import type { AIRequestContext } from '@/lib/ai/types';
 import { runOrchestrator } from '@/lib/agents/orchestrator';
+import { listAgents } from '@/lib/agents/registry';
 import type { OrchestratorRequest } from '@/lib/agents/types';
 
 export const dynamic = 'force-dynamic';
@@ -52,7 +53,13 @@ export async function GET() {
   return NextResponse.json({
     ok: true,
     service: 'EA Orchestrator',
-    version: 'sprint-1',
+    version: 'sprint-2',
     entrypoint: '/api/orchestrator',
+    agents: listAgents().map((agent) => ({
+      name: agent.name,
+      description: agent.description,
+      capabilities: agent.capabilities,
+      status: agent.status(),
+    })),
   });
 }
