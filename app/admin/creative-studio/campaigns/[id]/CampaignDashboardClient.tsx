@@ -52,10 +52,7 @@ export default function CampaignDashboardClient({ campaignId }: { campaignId: st
 
   useEffect(() => {
     const cached = readCachedCampaign(campaignId);
-    if (cached) {
-      setCampaign(cached);
-      return;
-    }
+    if (cached) setCampaign(cached);
 
     void fetch(`/api/creative-studio/campaigns/${campaignId}`)
       .then((res) => res.json())
