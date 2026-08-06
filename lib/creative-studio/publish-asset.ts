@@ -1,7 +1,7 @@
 import { publishCommunication } from '@/lib/publishing';
 import { publishPlatformActivityEvent } from '@/lib/activity-events-store';
 import { getCampaign, saveCampaign } from './campaign-store';
-import type { CampaignAsset, CreativeCampaign, PublishResult } from './types';
+import type { CampaignAsset, CampaignAssetStatus, CreativeCampaign, PublishResult } from './types';
 
 import { resolvePortalSlugForOrg } from '@/lib/tenant-context';
 
@@ -24,6 +24,25 @@ function resolvePublishChannel(asset: CampaignAsset): Parameters<typeof publishC
   return 'manual';
 }
 
+function stubResult(detail: string): PublishResult {
+  return {
+    ok: false,
+    mode: 'stub',
+    status: 'failed',
+    detail,
+    attemptedAt: new Date().toISOString(),
+    retryable: false,
+  };
+}
+
+function assetStatus(result: PublishResult): CampaignAssetStatus {
+  return result.status;
+}
+
+function idempotencyKey(campaignId: string, assetId: string): string {
+  return `creative-studio:${campaignId}:${assetId}`;
+}
+
 export async function publishCampaignAsset(input: {
   campaignId: string;
   assetId: string;
@@ -31,12 +50,23 @@ export async function publishCampaignAsset(input: {
 }): Promise<{ campaign: CreativeCampaign | null; result: PublishResult }> {
   const campaign = await getCampaign(input.campaignId);
   if (!campaign) {
-    return { campaign: null, result: { ok: false, mode: 'stub', detail: 'Campaign not found.' } };
+    return { campaign: null, result: stubResult('Campaign not found.') };
   }
 
   const asset = campaign.assets.find((a) => a.id === input.assetId);
   if (!asset) {
-    return { campaign, result: { ok: false, mode: 'stub', detail: 'Asset not found.' } };
+    return { campaign, result: stubResult('Asset not found.') };
+  }
+
+  if (asset.status === 'published' && asset.publishReceipt?.externalId) {
+    return {
+      campaign,
+      result: {
+        ok: true,
+        ...asset.publishReceipt,
+        detail: 'Already published; duplicate request was ignored.',
+      },
+    };
   }
 
   const slug = resolvePortalSlugForOrg(campaign.organizationId);
@@ -54,41 +84,70 @@ export async function publishCampaignAsset(input: {
     requestType,
     storyUrl: asset.href,
     actorName: actor,
+    idempotencyKey: idempotencyKey(campaign.id, asset.id),
     source: { product: 'creative-studio', campaignId: campaign.id, assetId: asset.id },
   });
 
   const result: PublishResult = {
     ok: outcome.ok,
     mode: outcome.mode,
-    detail:
-      channel === 'manual'
-        ? `${asset.label} marked ready for ${assetChannel(asset)} delivery.`
-        : outcome.detail,
+    status: outcome.status,
+    detail: outcome.detail,
     href: outcome.href ?? asset.href,
+    externalId: outcome.externalId,
+    idempotencyKey: outcome.idempotencyKey,
+    attemptedAt: outcome.attemptedAt,
+    retryable: outcome.retryable,
   };
 
-  const assets = campaign.assets.map((a) =>
-    a.id === asset.id ? { ...a, status: result.ok ? ('published' as const) : a.status } : a,
+  const assets = campaign.assets.map((item) =>
+    item.id === asset.id
+      ? {
+          ...item,
+          status: assetStatus(result),
+          publishReceipt: {
+            status: result.status,
+            mode: result.mode,
+            detail: result.detail,
+            href: result.href,
+            externalId: result.externalId,
+            idempotencyKey: result.idempotencyKey,
+            attemptedAt: result.attemptedAt,
+            retryable: result.retryable,
+          },
+        }
+      : item,
   );
-  const ready = assets.filter((a) => a.status === 'ready' || a.status === 'published' || a.status === 'scheduled').length;
+  const complete = assets.filter((item) =>
+    ['ready', 'scheduled', 'queued', 'published'].includes(item.status),
+  ).length;
   const updated = await saveCampaign({
     ...campaign,
     assets,
-    completionPercent: Math.round((ready / assets.length) * 100),
+    completionPercent: Math.round((complete / assets.length) * 100),
   });
 
-  if (result.ok) {
-    await publishPlatformActivityEvent({
-      organizationId: campaign.organizationId,
-      module: 'update-hub',
-      eventType: 'creative-studio.publish',
-      title: `Published ${asset.label}`,
-      summary: `${campaign.brief.title} → ${asset.channel}`,
-      actionLabel: 'View campaign',
-      actionUrl: `/admin/creative-studio/campaigns/${campaign.id}`,
-      metadata: { actorName: actor, assetId: asset.id },
-    }).catch(() => undefined);
-  }
+  await publishPlatformActivityEvent({
+    organizationId: campaign.organizationId,
+    module: 'update-hub',
+    eventType: `creative-studio.publish.${result.status}`,
+    title:
+      result.status === 'published'
+        ? `Published ${asset.label}`
+        : result.status === 'queued'
+          ? `Queued ${asset.label}`
+          : `${asset.label} publishing ${result.status}`,
+    summary: `${campaign.brief.title} → ${asset.channel}: ${result.detail}`,
+    actionLabel: 'View campaign',
+    actionUrl: `/admin/creative-studio/campaigns/${campaign.id}`,
+    metadata: {
+      actorName: actor,
+      assetId: asset.id,
+      publishStatus: result.status,
+      externalId: result.externalId,
+      retryable: result.retryable,
+    },
+  }).catch(() => undefined);
 
   return { campaign: updated, result };
 }
@@ -106,7 +165,9 @@ export async function publishAllCampaignAssets(input: {
   }
 
   const publishable = campaign.assets.filter(
-    (a) => a.status !== 'published' && (a.publishDestination || a.type.startsWith('social') || a.type === 'portal-announcement'),
+    (asset) =>
+      asset.status !== 'published' &&
+      (asset.publishDestination || asset.type.startsWith('social') || asset.type === 'portal-announcement'),
   );
 
   const results: Array<{ assetId: string; label: string; result: PublishResult }> = [];

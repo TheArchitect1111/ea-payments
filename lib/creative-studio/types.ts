@@ -26,7 +26,15 @@ export type CampaignAssetType =
   | 'qr-code'
   | 'calendar-event';
 
-export type CampaignAssetStatus = 'pending' | 'ready' | 'scheduled' | 'published' | 'draft';
+export type CampaignAssetStatus =
+  | 'pending'
+  | 'ready'
+  | 'scheduled'
+  | 'queued'
+  | 'published'
+  | 'failed'
+  | 'blocked'
+  | 'draft';
 
 export type AssetPreviewLayout =
   | 'banner'
@@ -53,6 +61,17 @@ export interface CampaignBrief {
   missingFields: string[];
 }
 
+export interface PublishReceipt {
+  status: 'blocked' | 'queued' | 'published' | 'failed';
+  mode: 'webhook' | 'airtable' | 'manual' | 'stub';
+  detail: string;
+  attemptedAt: string;
+  retryable: boolean;
+  externalId?: string;
+  idempotencyKey?: string;
+  href?: string;
+}
+
 export interface CampaignAsset {
   id: string;
   type: CampaignAssetType;
@@ -67,6 +86,7 @@ export interface CampaignAsset {
   mediaIds?: string[];
   thumbnailUrl?: string;
   renderUrl?: string;
+  publishReceipt?: PublishReceipt;
 }
 
 export type MediaAssetKind = 'image' | 'logo' | 'document' | 'video';
@@ -83,11 +103,8 @@ export interface MediaAsset {
   updatedAt: string;
 }
 
-export interface PublishResult {
+export interface PublishResult extends PublishReceipt {
   ok: boolean;
-  mode: 'webhook' | 'airtable' | 'manual' | 'stub';
-  detail: string;
-  href?: string;
 }
 
 export interface CampaignTimelineItem {
