@@ -290,7 +290,7 @@ export default function CreativeStudioClient() {
       {step === 'generating' ? (
         <section className="cs-section cs-panel cs-loading">
           <p className="cs-loading-title">Building your campaign package…</p>
-          <p className="cs-hint">Creating platform-specific copy, timeline, and success framework.</p>
+          <p className="cs-hint">Researching relevant information, checking sources, finding campaign images, and creating platform-specific posts.</p>
         </section>
       ) : null}
     </main>
