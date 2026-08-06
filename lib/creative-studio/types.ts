@@ -38,6 +38,20 @@ export type AssetPreviewLayout =
   | 'document'
   | 'qr';
 
+export type SocialPlatform = 'facebook' | 'instagram' | 'linkedin' | 'x';
+
+export interface CampaignStrategy {
+  objective: string;
+  audience: string;
+  startDate?: string;
+  endDate?: string;
+  platforms: SocialPlatform[];
+  tone: string;
+  successMetric: string;
+  successTarget?: number;
+  contentPillars: string[];
+}
+
 export interface CampaignBrief {
   title: string;
   audience: string;
