@@ -76,7 +76,8 @@
     "mobile:install": "cd mobile && npm install",
     "mobile:start": "cd mobile && npm start",
     "mobile:lint": "cd mobile && npm run lint",
-    "test:amplifi-guide-first": "node scripts/test-amplifi-guide-first.mjs"
+    "test:amplifi-guide-first": "node scripts/test-amplifi-guide-first.mjs",
+    "test:amplifi-research-images": "node scripts/test-amplifi-research-images.mjs"
   },
   "dependencies": {
     "@clerk/nextjs": "^7.5.9",
