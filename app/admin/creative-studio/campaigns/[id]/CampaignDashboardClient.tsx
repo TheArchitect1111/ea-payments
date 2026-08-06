@@ -2,7 +2,15 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import type { BrandProfile, CreativeCampaign, MediaAsset, PublishResult } from '@/lib/creative-studio/types';
+import type {
+  BrandProfile,
+  CampaignAnalytics,
+  CampaignPlatformMetrics,
+  CreativeCampaign,
+  MediaAsset,
+  PublishResult,
+  SocialPlatform,
+} from '@/lib/creative-studio/types';
 import AssetPreview from '../../AssetPreview';
 import { cacheCampaign, readCachedCampaign } from '../../campaign-cache';
 import '../../creative-studio.css';
@@ -13,6 +21,19 @@ const DEFAULT_BRAND: Pick<BrandProfile, 'primaryColor' | 'secondaryColor' | 'org
   secondaryColor: '#C9A844',
   preferredCta: 'Learn more',
 };
+
+type Performance = {
+  impressions: number;
+  reach: number;
+  engagements: number;
+  clickThroughRate: number | null;
+  engagementRate: number | null;
+  ctpConversionRate: number | null;
+};
+
+function percent(value: number | null): string {
+  return value === null ? '—' : `${(value * 100).toFixed(1)}%`;
+}
 
 export default function CampaignDashboardClient({ campaignId }: { campaignId: string }) {
   const [campaign, setCampaign] = useState<CreativeCampaign | null>(null);
@@ -26,6 +47,10 @@ export default function CampaignDashboardClient({ campaignId }: { campaignId: st
   const [workflowBusy, setWorkflowBusy] = useState<string | null>(null);
   const [scheduleTimes, setScheduleTimes] = useState<Record<string, string>>({});
   const [timezone, setTimezone] = useState('America/New_York');
+  const [analytics, setAnalytics] = useState<CampaignAnalytics | null>(null);
+  const [performance, setPerformance] = useState<Performance | null>(null);
+  const [metricDrafts, setMetricDrafts] = useState<Partial<Record<SocialPlatform, CampaignPlatformMetrics>>>({});
+  const [savingMetrics, setSavingMetrics] = useState<SocialPlatform | null>(null);
 
   useEffect(() => {
     void fetch('/api/creative-studio/brand')
@@ -59,12 +84,26 @@ export default function CampaignDashboardClient({ campaignId }: { campaignId: st
       .then((data: { ok?: boolean; campaign?: CreativeCampaign; error?: string }) => {
         if (data.campaign) {
           setCampaign(data.campaign);
+          if (data.campaign.analytics) setAnalytics(data.campaign.analytics);
           cacheCampaign(data.campaign);
         } else {
           setError(data.error ?? 'Campaign not found.');
         }
       })
       .catch(() => setError('Could not load campaign.'));
+  }, [campaignId]);
+
+  useEffect(() => {
+    void fetch(`/api/creative-studio/campaigns/${campaignId}/analytics`)
+      .then((res) => res.json())
+      .then((data: { analytics?: CampaignAnalytics; performance?: Performance }) => {
+        if (data.analytics) {
+          setAnalytics(data.analytics);
+          setMetricDrafts(Object.fromEntries(data.analytics.platformMetrics.map((item) => [item.platform, item])));
+        }
+        if (data.performance) setPerformance(data.performance);
+      })
+      .catch(() => undefined);
   }, [campaignId]);
 
   async function runWorkflow(
@@ -195,6 +234,42 @@ export default function CampaignDashboardClient({ campaignId }: { campaignId: st
     }
   }
 
+  async function savePlatformMetrics(platform: SocialPlatform) {
+    setSavingMetrics(platform);
+    try {
+      const res = await fetch(`/api/creative-studio/campaigns/${campaignId}/analytics`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ platform, ...(metricDrafts[platform] ?? {}) }),
+      });
+      const data = (await res.json()) as { analytics?: CampaignAnalytics; performance?: Performance; error?: string };
+      if (data.analytics) setAnalytics(data.analytics);
+      if (data.performance) setPerformance(data.performance);
+      if (data.error) setError(data.error);
+    } finally {
+      setSavingMetrics(null);
+    }
+  }
+
+  function updateMetric(platform: SocialPlatform, field: keyof CampaignPlatformMetrics, value: string) {
+    setMetricDrafts((current) => ({
+      ...current,
+      [platform]: {
+        platform,
+        source: 'manual',
+        impressions: 0,
+        reach: 0,
+        reactions: 0,
+        comments: 0,
+        shares: 0,
+        saves: 0,
+        videoViews: 0,
+        ...(current[platform] ?? {}),
+        [field]: Math.max(0, Number(value) || 0),
+      },
+    }));
+  }
+
   if (error) {
     return (
       <main className="cs-page">
@@ -271,6 +346,82 @@ export default function CampaignDashboardClient({ campaignId }: { campaignId: st
           <div className="cs-strategy-wide">
             <span>Content pillars</span>
             <strong>{campaign.strategy.contentPillars.join(' · ')}</strong>
+          </div>
+        </section>
+      ) : null}
+
+      {analytics && performance ? (
+        <section className="cs-analytics-panel">
+          <div className="cs-intelligence-head">
+            <div>
+              <p className="cs-kicker">Campaign results</p>
+              <h2>What happened after people saw the campaign</h2>
+            </div>
+            <span className="cs-research-status cs-research-complete">First-party tracking active</span>
+          </div>
+          <div className="cs-metric-grid">
+            <div><strong>{performance.reach.toLocaleString()}</strong><span>Reach</span></div>
+            <div><strong>{performance.impressions.toLocaleString()}</strong><span>Impressions</span></div>
+            <div><strong>{performance.engagements.toLocaleString()}</strong><span>Engagements</span></div>
+            <div><strong>{analytics.totals.linkClicks.toLocaleString()}</strong><span>Tracked clicks</span></div>
+            <div><strong>{analytics.totals.ctpStarts.toLocaleString()}</strong><span>CTP visits</span></div>
+            <div><strong>{analytics.totals.ctpCompletions.toLocaleString()}</strong><span>CTP completions</span></div>
+            <div><strong>{percent(performance.clickThroughRate)}</strong><span>Click-through rate</span></div>
+            <div><strong>{percent(performance.ctpConversionRate)}</strong><span>Click-to-CTP conversion</span></div>
+          </div>
+          <p className="cs-hint">
+            Amplifi counts tracked link clicks and CTP completions automatically. Reach, impressions, and social
+            engagement require platform Insights; enter those totals below until a platform connection is active.
+          </p>
+          {analytics.byAsset.length ? (
+            <div className="cs-top-content">
+              <h3>Post performance</h3>
+              {[...analytics.byAsset]
+                .sort((a, b) => b.ctpCompletions - a.ctpCompletions || b.linkClicks - a.linkClicks)
+                .map((item) => {
+                  const asset = campaign.assets.find((candidate) => candidate.id === item.assetId);
+                  return (
+                    <div key={item.assetId}>
+                      <span>{asset?.label ?? item.assetId}</span>
+                      <strong>{item.linkClicks} clicks · {item.ctpCompletions} completed</strong>
+                    </div>
+                  );
+                })}
+            </div>
+          ) : null}
+          <div className="cs-platform-metrics">
+            {campaign.strategy.platforms.map((platform) => {
+              const values = metricDrafts[platform];
+              return (
+                <article key={platform}>
+                  <div className="cs-platform-metric-head">
+                    <h3>{platform}</h3>
+                    <span>{values?.source === 'connected' ? 'Connected' : values?.source === 'manual' ? 'Manual totals' : 'Insights not connected'}</span>
+                  </div>
+                  <div className="cs-metric-inputs">
+                    {(['impressions', 'reach', 'reactions', 'comments', 'shares', 'saves', 'videoViews'] as const).map((field) => (
+                      <label key={field}>
+                        <span>{field === 'videoViews' ? 'Video views' : field}</span>
+                        <input
+                          type="number"
+                          min="0"
+                          value={values?.[field] ?? 0}
+                          onChange={(event) => updateMetric(platform, field, event.target.value)}
+                        />
+                      </label>
+                    ))}
+                  </div>
+                  <button
+                    type="button"
+                    className="cs-secondary cs-small-btn"
+                    disabled={savingMetrics === platform}
+                    onClick={() => void savePlatformMetrics(platform)}
+                  >
+                    {savingMetrics === platform ? 'Saving…' : 'Save platform totals'}
+                  </button>
+                </article>
+              );
+            })}
           </div>
         </section>
       ) : null}
