@@ -109,6 +109,7 @@ export async function publishCampaignAsset(input: {
   const channel = resolvePublishChannel(asset);
   const requestType =
     asset.type === 'sms' ? 'SMS' : asset.type === 'email' ? 'Email Campaign' : asset.label;
+  const selectedMedia = asset.mediaIds?.[0] ? await getMediaAsset(asset.mediaIds[0]) : null;
 
   const outcome = await publishCommunication({
     channel,
@@ -120,6 +121,15 @@ export async function publishCampaignAsset(input: {
     storyUrl: asset.href,
     actorName: actor,
     idempotencyKey: idempotencyKey(campaign.id, asset.id),
+    media: selectedMedia
+      ? {
+          url: selectedMedia.url,
+          mimeType: selectedMedia.mimeType,
+          altText: selectedMedia.altText,
+          width: selectedMedia.width,
+          height: selectedMedia.height,
+        }
+      : undefined,
     source: { product: 'creative-studio', campaignId: campaign.id, assetId: asset.id },
   });
 
