@@ -43,8 +43,8 @@ function campaignLength(strategy: CampaignStrategy): number {
   return Math.max(1, Math.min(14, Math.round((end.getTime() - start.getTime()) / 86_400_000) + 1));
 }
 
-function fallbackBeats(brief: CampaignBrief, strategy: CampaignStrategy): CampaignBeat[] {
-  const organization = brief.organization || 'Efficiency Architects';
+function fallbackBeats(brief: CampaignBrief, strategy: CampaignStrategy, brand: BrandProfile): CampaignBeat[] {
+  const organization = brief.organization || brand.organizationName;
   const link = brief.registrationLink ?? brief.website ?? '';
   const invitation = link ? `\n\nTake the first step: ${link}` : '';
 
@@ -126,7 +126,7 @@ async function generateBeats(
   strategy: CampaignStrategy,
   brand: BrandProfile,
 ): Promise<CampaignBeat[]> {
-  const fallback = fallbackBeats(brief, strategy);
+  const fallback = fallbackBeats(brief, strategy, brand);
   const apiKey = process.env.OPENAI_API_KEY?.trim();
   if (!apiKey) return fallback;
 
