@@ -183,6 +183,7 @@ export interface CreativeCampaign {
   paused?: boolean;
   pausedAt?: string;
   pausedBy?: string;
+  generationVersion?: number;
 }
 
 export interface BrandProfile {
