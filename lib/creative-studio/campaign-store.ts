@@ -2,10 +2,13 @@ import { extractCampaignBrief } from './extract-brief';
 import { goalById } from './goals';
 import { generateCampaignPackage, GENERATION_VERSION } from './generate-assets';
 import { getBrandProfile } from './brand-store';
+import { createCampaignImages } from './image-engine';
+import { researchCampaign } from './research-engine';
 import { listStudioRecords, loadStudioRecord, saveStudioRecord } from './persistence';
 import type {
   CampaignGoalId,
   CampaignStrategy,
+  CampaignAsset,
   CreativeCampaign,
   SocialPlatform,
 } from './types';
@@ -51,6 +54,59 @@ function normalizeStrategy(
   };
 }
 
+function applySuggestedImages(
+  assets: CampaignAsset[],
+  suggestions: NonNullable<CreativeCampaign['imageSuggestions']>,
+): CampaignAsset[] {
+  if (!suggestions.length) return assets;
+  let socialIndex = 0;
+  return assets.map((asset) => {
+    if (asset.type !== 'social-facebook' && asset.type !== 'social-instagram' && asset.type !== 'social-linkedin' && asset.type !== 'social-x') {
+      return asset;
+    }
+    const suggestion = suggestions[socialIndex % suggestions.length];
+    socialIndex += 1;
+    return {
+      ...asset,
+      suggestedImageId: suggestion.id,
+      thumbnailUrl: suggestion.thumbnailUrl,
+    };
+  });
+}
+
+async function buildCampaignPackage(input: {
+  id: string;
+  goalId: CampaignGoalId;
+  goalLabel: string;
+  story: string;
+  brief: CreativeCampaign['brief'];
+  strategy: CampaignStrategy;
+  organizationId: string;
+  brand: Awaited<ReturnType<typeof getBrandProfile>>;
+}) {
+  const research = await researchCampaign({
+    story: input.story,
+    brief: input.brief,
+    strategy: input.strategy,
+    brand: input.brand,
+  });
+  const [generated, imageSuggestions] = await Promise.all([
+    generateCampaignPackage({ ...input, research }),
+    createCampaignImages({
+      brief: input.brief,
+      strategy: input.strategy,
+      brand: input.brand,
+      research,
+    }),
+  ]);
+  return {
+    ...generated,
+    assets: applySuggestedImages(generated.assets, imageSuggestions),
+    research,
+    imageSuggestions,
+  };
+}
+
 async function persistCampaign(campaign: CreativeCampaign): Promise<void> {
   campaigns.set(campaign.id, campaign);
   await saveStudioRecord({
@@ -75,7 +131,7 @@ async function ensureCurrentGeneration(campaign: CreativeCampaign): Promise<Crea
   if ((campaign.generationVersion ?? 0) >= GENERATION_VERSION) return campaign;
 
   const brand = await getBrandProfile(campaign.organizationId);
-  const generated = await generateCampaignPackage({
+  const generated = await buildCampaignPackage({
     id: campaign.id,
     goalId: campaign.goalId,
     goalLabel: campaign.goalLabel,
@@ -117,7 +173,7 @@ export async function createCampaign(input: {
   const brand = await getBrandProfile(organizationId);
   const id = newId();
   const now = new Date().toISOString();
-  const generated = await generateCampaignPackage({
+  const generated = await buildCampaignPackage({
     id,
     goalId: input.goalId,
     goalLabel: goal.label,
@@ -142,6 +198,8 @@ export async function createCampaign(input: {
     updatedAt: now,
     organizationId,
     generationVersion: GENERATION_VERSION,
+    research: generated.research,
+    imageSuggestions: generated.imageSuggestions,
   };
 
   await persistCampaign(campaign);
