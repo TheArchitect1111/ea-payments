@@ -52,6 +52,34 @@ export type AssetPreviewLayout =
 
 export type SocialPlatform = 'facebook' | 'instagram' | 'linkedin' | 'x';
 
+export type FunnelStage = 'attract' | 'trust' | 'help' | 'convert';
+
+export type CampaignContentType =
+  | 'problem-recognition'
+  | 'client-transformation'
+  | 'diagnostic'
+  | 'expert-video'
+  | 'before-after'
+  | 'proof'
+  | 'objection-answer'
+  | 'direct-invitation';
+
+export type SocialFormat = 'static' | 'carousel' | 'reel' | 'story' | 'text';
+
+export interface OrganizationStrategyPack {
+  id: string;
+  displayName: string;
+  aliases: string[];
+  defaultAudience: string;
+  primaryAction: string;
+  conversionUrl: string;
+  contentMix: Array<{ contentType: CampaignContentType; funnelStage: FunnelStage }>;
+  voiceRules: string[];
+  prohibitedClaims: string[];
+  proofRules: string[];
+  hashtags: string[];
+}
+
 export interface CampaignStrategy {
   objective: string;
   audience: string;
@@ -133,6 +161,14 @@ export interface CampaignAsset {
   mediaValidation?: MediaValidationResult;
   approval?: AssetApproval;
   schedule?: AssetSchedule;
+  contentType?: CampaignContentType;
+  funnelStage?: FunnelStage;
+  socialFormat?: SocialFormat;
+  conversionAction?: string;
+  proofStatus?: 'not-required' | 'verified' | 'missing';
+  qualityScore?: number;
+  qualityIssues?: string[];
+  variantGroupId?: string;
 }
 
 export type MediaAssetKind = 'image' | 'logo' | 'document' | 'video';
