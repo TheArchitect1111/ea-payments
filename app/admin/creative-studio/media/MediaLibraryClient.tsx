@@ -12,6 +12,13 @@ export default function MediaLibraryClient() {
   const [label, setLabel] = useState('');
   const [url, setUrl] = useState('');
   const [kind, setKind] = useState<MediaAssetKind>('image');
+  const [mimeType, setMimeType] = useState('image/jpeg');
+  const [width, setWidth] = useState('');
+  const [height, setHeight] = useState('');
+  const [fileSizeMb, setFileSizeMb] = useState('');
+  const [altText, setAltText] = useState('');
+  const [rightsSource, setRightsSource] = useState('');
+  const [rightsConfirmed, setRightsConfirmed] = useState(false);
   const [tags, setTags] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -31,8 +38,8 @@ export default function MediaLibraryClient() {
     void load();
   }, []);
 
-  async function addAsset(e: React.FormEvent) {
-    e.preventDefault();
+  async function addAsset(event: React.FormEvent) {
+    event.preventDefault();
     setSaving(true);
     setError('');
     setMessage('');
@@ -44,10 +51,15 @@ export default function MediaLibraryClient() {
         label,
         url,
         kind,
-        tags: tags
-          .split(',')
-          .map((t) => t.trim())
-          .filter(Boolean),
+        mimeType,
+        width: width ? Number(width) : undefined,
+        height: height ? Number(height) : undefined,
+        fileSizeBytes: fileSizeMb ? Math.round(Number(fileSizeMb) * 1024 * 1024) : undefined,
+        altText,
+        rightsConfirmed,
+        rightsSource,
+        publiclyReachable: true,
+        tags: tags.split(',').map((tag) => tag.trim()).filter(Boolean),
       }),
     });
     const data = (await res.json()) as { ok?: boolean; asset?: MediaAsset; error?: string };
@@ -58,11 +70,17 @@ export default function MediaLibraryClient() {
       return;
     }
 
-    setMedia((prev) => [data.asset!, ...prev]);
+    setMedia((current) => [data.asset!, ...current]);
     setLabel('');
     setUrl('');
+    setWidth('');
+    setHeight('');
+    setFileSizeMb('');
+    setAltText('');
+    setRightsSource('');
+    setRightsConfirmed(false);
     setTags('');
-    setMessage(`Added “${data.asset.label}” to your library.`);
+    setMessage(`Added “${data.asset.label}” as rights-cleared campaign media.`);
   }
 
   return (
@@ -74,39 +92,89 @@ export default function MediaLibraryClient() {
           <Link href="/admin/creative-studio/brand">Brand</Link>
         </nav>
         <p className="cs-kicker">EA Creative Studio™</p>
-        <h1 className="cs-title">Media Library</h1>
+        <h1 className="cs-title">Campaign Media</h1>
         <p className="cs-lede">
-          Store logos, images, and documents by URL — attach to campaigns and brand profiles as M3 rolls out.
+          Register durable public media with dimensions, accessibility text, and usage rights before attaching it to
+          Facebook or Instagram content.
         </p>
       </header>
 
       <section className="cs-section cs-panel">
-        <h2 className="cs-section-title">Add media</h2>
+        <h2 className="cs-section-title">Add campaign media</h2>
         <form className="cs-brand-form" onSubmit={addAsset}>
           <label className="cs-field">
             <span>Label</span>
-            <input value={label} onChange={(e) => setLabel(e.target.value)} placeholder="Spring gala hero" />
+            <input required value={label} onChange={(event) => setLabel(event.target.value)} placeholder="Fall campaign hero" />
           </label>
           <label className="cs-field">
-            <span>Public URL</span>
-            <input type="url" required value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://…" />
+            <span>Public HTTPS URL</span>
+            <input type="url" required value={url} onChange={(event) => setUrl(event.target.value)} placeholder="https://…" />
+          </label>
+          <div className="cs-field-row">
+            <label className="cs-field">
+              <span>Kind</span>
+              <select
+                value={kind}
+                onChange={(event) => {
+                  const next = event.target.value as MediaAssetKind;
+                  setKind(next);
+                  setMimeType(next === 'video' ? 'video/mp4' : 'image/jpeg');
+                }}
+              >
+                {KINDS.map((item) => <option key={item} value={item}>{item}</option>)}
+              </select>
+            </label>
+            <label className="cs-field">
+              <span>MIME type</span>
+              <input value={mimeType} onChange={(event) => setMimeType(event.target.value)} placeholder="image/jpeg" />
+            </label>
+          </div>
+          <div className="cs-field-row">
+            <label className="cs-field">
+              <span>Width in pixels</span>
+              <input type="number" min="1" value={width} onChange={(event) => setWidth(event.target.value)} />
+            </label>
+            <label className="cs-field">
+              <span>Height in pixels</span>
+              <input type="number" min="1" value={height} onChange={(event) => setHeight(event.target.value)} />
+            </label>
+            <label className="cs-field">
+              <span>File size in MB</span>
+              <input type="number" min="0" step="0.1" value={fileSizeMb} onChange={(event) => setFileSizeMb(event.target.value)} />
+            </label>
+          </div>
+          <label className="cs-field">
+            <span>Alternative text</span>
+            <textarea
+              required={kind === 'image'}
+              value={altText}
+              onChange={(event) => setAltText(event.target.value)}
+              placeholder="Describe what is visible and meaningful in the image."
+            />
           </label>
           <label className="cs-field">
-            <span>Kind</span>
-            <select value={kind} onChange={(e) => setKind(e.target.value as MediaAssetKind)}>
-              {KINDS.map((k) => (
-                <option key={k} value={k}>
-                  {k}
-                </option>
-              ))}
-            </select>
+            <span>Media owner or rights source</span>
+            <input
+              required
+              value={rightsSource}
+              onChange={(event) => setRightsSource(event.target.value)}
+              placeholder="EA-owned photo; photographer release dated…"
+            />
+          </label>
+          <label className="cs-rights-confirm">
+            <input
+              type="checkbox"
+              checked={rightsConfirmed}
+              onChange={(event) => setRightsConfirmed(event.target.checked)}
+            />
+            I confirm EA or the client has permission to publish this media.
           </label>
           <label className="cs-field">
-            <span>Tags (comma-separated)</span>
-            <input value={tags} onChange={(e) => setTags(e.target.value)} placeholder="event, 2026" />
+            <span>Tags — separate with commas</span>
+            <input value={tags} onChange={(event) => setTags(event.target.value)} placeholder="campaign, fall, registration" />
           </label>
-          <button type="submit" className="cs-publish-btn" disabled={saving}>
-            {saving ? 'Saving…' : 'Add to library'}
+          <button type="submit" className="cs-publish-btn" disabled={saving || !rightsConfirmed}>
+            {saving ? 'Validating…' : 'Add validated media'}
           </button>
         </form>
         {error ? <p className="cs-error">{error}</p> : null}
@@ -116,19 +184,22 @@ export default function MediaLibraryClient() {
       <section className="cs-section">
         <h2 className="cs-section-title">Library ({media.length})</h2>
         {media.length === 0 ? (
-          <p className="cs-lede">No media yet — add a URL above or set a logo on the Brand page.</p>
+          <p className="cs-lede">No campaign-ready media has been added.</p>
         ) : (
           <ul className="cs-campaign-list">
             {media.map((item) => (
               <li key={item.id} className="cs-campaign-card">
                 <p className="cs-campaign-card-title">{item.label}</p>
                 <p className="cs-campaign-card-meta">
-                  {item.kind} · {new Date(item.updatedAt).toLocaleDateString()}
+                  {item.kind}
+                  {item.width && item.height ? ` · ${item.width}×${item.height}` : ''}
+                  {item.rightsConfirmed ? ' · Rights confirmed' : ' · Rights missing'}
                 </p>
                 <a href={item.url} className="cs-campaign-card-title" target="_blank" rel="noreferrer">
                   {item.url}
                 </a>
-                {item.tags.length ? <p className="cs-campaign-card-note">Tags: {item.tags.join(', ')}</p> : null}
+                {item.altText ? <p className="cs-campaign-card-note">Alt text: {item.altText}</p> : null}
+                {item.rightsSource ? <p className="cs-campaign-card-note">Rights: {item.rightsSource}</p> : null}
               </li>
             ))}
           </ul>
