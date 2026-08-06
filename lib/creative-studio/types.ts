@@ -29,11 +29,15 @@ export type CampaignAssetType =
 export type CampaignAssetStatus =
   | 'pending'
   | 'ready'
+  | 'review'
+  | 'approved'
   | 'scheduled'
+  | 'publishing'
   | 'queued'
   | 'published'
   | 'failed'
   | 'blocked'
+  | 'cancelled'
   | 'draft';
 
 export type AssetPreviewLayout =
@@ -86,6 +90,24 @@ export interface PublishReceipt {
   href?: string;
 }
 
+export interface AssetApproval {
+  status: 'not-requested' | 'review' | 'approved' | 'rejected';
+  requestedAt?: string;
+  requestedBy?: string;
+  decidedAt?: string;
+  decidedBy?: string;
+  note?: string;
+}
+
+export interface AssetSchedule {
+  publishAt: string;
+  timezone: string;
+  scheduledAt: string;
+  scheduledBy: string;
+  cancelledAt?: string;
+  cancelledBy?: string;
+}
+
 export interface MediaValidationResult {
   valid: boolean;
   checkedAt: string;
@@ -109,6 +131,8 @@ export interface CampaignAsset {
   renderUrl?: string;
   publishReceipt?: PublishReceipt;
   mediaValidation?: MediaValidationResult;
+  approval?: AssetApproval;
+  schedule?: AssetSchedule;
 }
 
 export type MediaAssetKind = 'image' | 'logo' | 'document' | 'video';
@@ -156,6 +180,9 @@ export interface CreativeCampaign {
   createdAt: string;
   updatedAt: string;
   organizationId: string;
+  paused?: boolean;
+  pausedAt?: string;
+  pausedBy?: string;
 }
 
 export interface BrandProfile {

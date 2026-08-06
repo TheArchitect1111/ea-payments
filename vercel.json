@@ -158,6 +158,10 @@
     {
       "path": "/api/cron/simplifi-intelligence",
       "schedule": "15 5 * * *"
+    },
+    {
+      "path": "/api/cron/amplifi-publish",
+      "schedule": "*/5 * * * *"
     }
   ]
 }

@@ -23,6 +23,9 @@ export default function CampaignDashboardClient({ campaignId }: { campaignId: st
   const [publishAllBusy, setPublishAllBusy] = useState(false);
   const [media, setMedia] = useState<MediaAsset[]>([]);
   const [attaching, setAttaching] = useState<string | null>(null);
+  const [workflowBusy, setWorkflowBusy] = useState<string | null>(null);
+  const [scheduleTimes, setScheduleTimes] = useState<Record<string, string>>({});
+  const [timezone, setTimezone] = useState('America/New_York');
 
   useEffect(() => {
     void fetch('/api/creative-studio/brand')
@@ -66,6 +69,42 @@ export default function CampaignDashboardClient({ campaignId }: { campaignId: st
       })
       .catch(() => setError('Could not load campaign.'));
   }, [campaignId]);
+
+  async function runWorkflow(
+    action: 'submit-review' | 'approve' | 'reject' | 'schedule' | 'cancel-schedule' | 'pause-campaign' | 'resume-campaign',
+    assetId?: string,
+  ) {
+    const key = assetId ? `${action}:${assetId}` : action;
+    setWorkflowBusy(key);
+    try {
+      const localTime = assetId ? scheduleTimes[assetId] : undefined;
+      const publishAt = localTime ? new Date(localTime).toISOString() : undefined;
+      const res = await fetch(`/api/creative-studio/campaigns/${campaignId}/workflow`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action, assetId, publishAt, timezone }),
+      });
+      const data = (await res.json()) as { campaign?: CreativeCampaign; error?: string };
+      if (data.campaign) {
+        setCampaign(data.campaign);
+        cacheCampaign(data.campaign);
+      }
+      if (assetId) {
+        setPublishNotes((current) => ({
+          ...current,
+          [assetId]: data.error ?? `Workflow updated: ${action}.`,
+        }));
+      } else if (data.error) {
+        setError(data.error);
+      }
+    } catch {
+      if (assetId) {
+        setPublishNotes((current) => ({ ...current, [assetId]: 'Workflow update failed.' }));
+      }
+    } finally {
+      setWorkflowBusy(null);
+    }
+  }
 
   async function attachMedia(assetId: string, mediaId: string) {
     if (!mediaId) return;
@@ -178,7 +217,7 @@ export default function CampaignDashboardClient({ campaignId }: { campaignId: st
     );
   }
 
-  const unpublished = campaign.assets.filter((a) => a.status !== 'published').length;
+  const publishable = campaign.assets.filter((asset) => asset.status === 'approved').length;
 
   return (
     <main className="cs-page">
@@ -193,11 +232,20 @@ export default function CampaignDashboardClient({ campaignId }: { campaignId: st
         <p className="cs-lede">{campaign.brief.summary}</p>
         <div className="cs-header-actions">
           <span className="cs-progress-ring">Completion {campaign.completionPercent}%</span>
-          {unpublished > 0 ? (
+          {publishable > 0 && !campaign.paused ? (
             <button type="button" className="cs-secondary" disabled={publishAllBusy} onClick={() => void publishAll()}>
-              {publishAllBusy ? 'Publishing…' : `Publish all (${unpublished})`}
+              {publishAllBusy ? 'Publishing…' : `Publish approved (${publishable})`}
             </button>
           ) : null}
+          <button
+            type="button"
+            className="cs-secondary"
+            disabled={workflowBusy === 'pause-campaign' || workflowBusy === 'resume-campaign'}
+            onClick={() => void runWorkflow(campaign.paused ? 'resume-campaign' : 'pause-campaign')}
+          >
+            {campaign.paused ? 'Resume campaign' : 'Pause campaign'}
+          </button>
+          {campaign.paused ? <span className="cs-error">Publishing paused</span> : null}
         </div>
       </header>
 
@@ -270,16 +318,89 @@ export default function CampaignDashboardClient({ campaignId }: { campaignId: st
                   )}
                 </div>
               ) : null}
-              {asset.status !== 'published' && asset.publishDestination ? (
-                <button
-                  type="button"
-                  className="cs-publish-btn"
-                  disabled={publishing === asset.id}
-                  onClick={() => void publishAsset(asset.id)}
-                >
-                  {publishing === asset.id ? 'Publishing…' : 'Publish'}
-                </button>
-              ) : null}
+              <div className="cs-workflow-actions">
+                {['ready', 'blocked', 'draft'].includes(asset.status) ? (
+                  <button
+                    type="button"
+                    className="cs-publish-btn"
+                    disabled={workflowBusy !== null}
+                    onClick={() => void runWorkflow('submit-review', asset.id)}
+                  >
+                    Submit for review
+                  </button>
+                ) : null}
+                {asset.status === 'review' ? (
+                  <>
+                    <button
+                      type="button"
+                      className="cs-publish-btn"
+                      disabled={workflowBusy !== null}
+                      onClick={() => void runWorkflow('approve', asset.id)}
+                    >
+                      Approve
+                    </button>
+                    <button
+                      type="button"
+                      className="cs-secondary cs-small-btn"
+                      disabled={workflowBusy !== null}
+                      onClick={() => void runWorkflow('reject', asset.id)}
+                    >
+                      Return to draft
+                    </button>
+                  </>
+                ) : null}
+                {asset.status === 'approved' ? (
+                  <>
+                    <button
+                      type="button"
+                      className="cs-publish-btn"
+                      disabled={publishing === asset.id || campaign.paused}
+                      onClick={() => void publishAsset(asset.id)}
+                    >
+                      {publishing === asset.id ? 'Publishing…' : 'Publish now'}
+                    </button>
+                    <div className="cs-schedule-controls">
+                      <input
+                        type="datetime-local"
+                        value={scheduleTimes[asset.id] ?? ''}
+                        onChange={(event) =>
+                          setScheduleTimes((current) => ({ ...current, [asset.id]: event.target.value }))
+                        }
+                      />
+                      <select value={timezone} onChange={(event) => setTimezone(event.target.value)}>
+                        <option value="America/New_York">Eastern Time</option>
+                        <option value="America/Chicago">Central Time</option>
+                        <option value="America/Denver">Mountain Time</option>
+                        <option value="America/Los_Angeles">Pacific Time</option>
+                        <option value="America/Toronto">Toronto Time</option>
+                      </select>
+                      <button
+                        type="button"
+                        className="cs-secondary cs-small-btn"
+                        disabled={!scheduleTimes[asset.id] || workflowBusy !== null}
+                        onClick={() => void runWorkflow('schedule', asset.id)}
+                      >
+                        Schedule
+                      </button>
+                    </div>
+                  </>
+                ) : null}
+                {asset.status === 'scheduled' ? (
+                  <>
+                    <p className="cs-success">
+                      Scheduled {asset.schedule ? new Date(asset.schedule.publishAt).toLocaleString() : ''}
+                    </p>
+                    <button
+                      type="button"
+                      className="cs-secondary cs-small-btn"
+                      disabled={workflowBusy !== null}
+                      onClick={() => void runWorkflow('cancel-schedule', asset.id)}
+                    >
+                      Cancel schedule
+                    </button>
+                  </>
+                ) : null}
+              </div>
               {publishNotes[asset.id] ? <p className="cs-publish-note">{publishNotes[asset.id]}</p> : null}
             </div>
           </article>
