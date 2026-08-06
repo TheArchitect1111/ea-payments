@@ -33,5 +33,12 @@ export type PublishCommunicationInput = {
   actorName: string;
   contentRequestStatus?: string;
   idempotencyKey?: string;
+  media?: {
+    url: string;
+    mimeType?: string;
+    altText?: string;
+    width?: number;
+    height?: number;
+  };
   source?: { product: string; campaignId?: string; assetId?: string };
 };

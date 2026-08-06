@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import type { BrandProfile, CreativeCampaign, PublishResult } from '@/lib/creative-studio/types';
+import type { BrandProfile, CreativeCampaign, MediaAsset, PublishResult } from '@/lib/creative-studio/types';
 import AssetPreview from '../../AssetPreview';
 import { cacheCampaign, readCachedCampaign } from '../../campaign-cache';
 import '../../creative-studio.css';
@@ -21,6 +21,8 @@ export default function CampaignDashboardClient({ campaignId }: { campaignId: st
   const [publishNotes, setPublishNotes] = useState<Record<string, string>>({});
   const [publishing, setPublishing] = useState<string | null>(null);
   const [publishAllBusy, setPublishAllBusy] = useState(false);
+  const [media, setMedia] = useState<MediaAsset[]>([]);
+  const [attaching, setAttaching] = useState<string | null>(null);
 
   useEffect(() => {
     void fetch('/api/creative-studio/brand')
@@ -35,6 +37,13 @@ export default function CampaignDashboardClient({ campaignId }: { campaignId: st
           });
         }
       })
+      .catch(() => undefined);
+  }, []);
+
+  useEffect(() => {
+    void fetch('/api/creative-studio/media')
+      .then((res) => res.json())
+      .then((data: { media?: MediaAsset[] }) => setMedia(data.media ?? []))
       .catch(() => undefined);
   }, []);
 
@@ -57,6 +66,40 @@ export default function CampaignDashboardClient({ campaignId }: { campaignId: st
       })
       .catch(() => setError('Could not load campaign.'));
   }, [campaignId]);
+
+  async function attachMedia(assetId: string, mediaId: string) {
+    if (!mediaId) return;
+    setAttaching(assetId);
+    try {
+      const res = await fetch(`/api/creative-studio/campaigns/${campaignId}/media`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ assetId, mediaId }),
+      });
+      const data = (await res.json()) as {
+        campaign?: CreativeCampaign;
+        error?: string;
+        mediaValidation?: { valid: boolean; errors: string[]; warnings: string[] };
+      };
+      if (data.campaign) {
+        setCampaign(data.campaign);
+        cacheCampaign(data.campaign);
+      }
+      setPublishNotes((current) => ({
+        ...current,
+        [assetId]:
+          data.error ??
+          (data.mediaValidation?.valid
+            ? 'Media validated and attached.'
+            : data.mediaValidation?.errors.join(' ')) ??
+          'Media validation failed.',
+      }));
+    } catch {
+      setPublishNotes((current) => ({ ...current, [assetId]: 'Could not attach media.' }));
+    } finally {
+      setAttaching(null);
+    }
+  }
 
   async function publishAsset(assetId: string) {
     setPublishing(assetId);
@@ -197,6 +240,35 @@ export default function CampaignDashboardClient({ campaignId }: { campaignId: st
               <span className={`cs-status cs-status-${asset.status}`}>{asset.status}</span>
               {asset.publishDestination ? (
                 <p className="cs-hint cs-publish-dest">→ {asset.publishDestination}</p>
+              ) : null}
+              {asset.type === 'social-facebook' || asset.type === 'social-instagram' ? (
+                <div className="cs-media-attach">
+                  <label htmlFor={`media-${asset.id}`}>Campaign media</label>
+                  <select
+                    id={`media-${asset.id}`}
+                    value={asset.mediaIds?.[0] ?? ''}
+                    disabled={attaching === asset.id}
+                    onChange={(event) => void attachMedia(asset.id, event.target.value)}
+                  >
+                    <option value="">Select validated media…</option>
+                    {media
+                      .filter((item) => item.kind === 'image' || item.kind === 'video')
+                      .map((item) => (
+                        <option key={item.id} value={item.id}>
+                          {item.label}
+                        </option>
+                      ))}
+                  </select>
+                  {asset.mediaValidation ? (
+                    <p className={asset.mediaValidation.valid ? 'cs-success' : 'cs-error'}>
+                      {asset.mediaValidation.valid
+                        ? 'Media ready'
+                        : asset.mediaValidation.errors.join(' ')}
+                    </p>
+                  ) : (
+                    <p className="cs-hint">Required before publishing.</p>
+                  )}
+                </div>
               ) : null}
               {asset.status !== 'published' && asset.publishDestination ? (
                 <button

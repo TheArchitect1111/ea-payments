@@ -652,3 +652,47 @@
   background: #fee2e2;
   color: #991b1b;
 }
+
+
+.cs-rights-confirm {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  color: #1b2b4d;
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.cs-media-attach {
+  display: grid;
+  gap: 0.4rem;
+  margin-top: 0.85rem;
+}
+
+.cs-media-attach label {
+  color: #6b7280;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.cs-media-attach select {
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 0.55rem;
+  padding: 0.5rem 0.65rem;
+  background: #fff;
+  color: #1b2b4d;
+  font-size: 0.8rem;
+}
+
+.cs-preview-media {
+  display: block;
+  width: calc(100% + 2.5rem);
+  max-height: 240px;
+  margin: 0.75rem -1.25rem;
+  object-fit: cover;
+  background: rgba(255, 255, 255, 0.08);
+}

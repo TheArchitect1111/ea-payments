@@ -86,6 +86,13 @@ export interface PublishReceipt {
   href?: string;
 }
 
+export interface MediaValidationResult {
+  valid: boolean;
+  checkedAt: string;
+  errors: string[];
+  warnings: string[];
+}
+
 export interface CampaignAsset {
   id: string;
   type: CampaignAssetType;
@@ -101,6 +108,7 @@ export interface CampaignAsset {
   thumbnailUrl?: string;
   renderUrl?: string;
   publishReceipt?: PublishReceipt;
+  mediaValidation?: MediaValidationResult;
 }
 
 export type MediaAssetKind = 'image' | 'logo' | 'document' | 'video';
@@ -112,6 +120,13 @@ export interface MediaAsset {
   label: string;
   url: string;
   mimeType?: string;
+  width?: number;
+  height?: number;
+  fileSizeBytes?: number;
+  altText?: string;
+  rightsConfirmed?: boolean;
+  rightsSource?: string;
+  publiclyReachable?: boolean;
   tags: string[];
   createdAt: string;
   updatedAt: string;

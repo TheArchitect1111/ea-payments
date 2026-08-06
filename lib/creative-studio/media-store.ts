@@ -19,6 +19,13 @@ export async function saveMediaAsset(input: {
   label: string;
   url: string;
   mimeType?: string;
+  width?: number;
+  height?: number;
+  fileSizeBytes?: number;
+  altText?: string;
+  rightsConfirmed?: boolean;
+  rightsSource?: string;
+  publiclyReachable?: boolean;
   tags?: string[];
   id?: string;
 }): Promise<MediaAsset> {
@@ -33,7 +40,14 @@ export async function saveMediaAsset(input: {
     label: input.label.trim() || 'Untitled',
     url: input.url.trim(),
     mimeType: input.mimeType?.trim(),
-    tags: input.tags?.map((t) => t.trim()).filter(Boolean) ?? existing?.tags ?? [],
+    width: input.width,
+    height: input.height,
+    fileSizeBytes: input.fileSizeBytes,
+    altText: input.altText?.trim(),
+    rightsConfirmed: input.rightsConfirmed ?? existing?.rightsConfirmed ?? false,
+    rightsSource: input.rightsSource?.trim(),
+    publiclyReachable: input.publiclyReachable ?? true,
+    tags: input.tags?.map((tag) => tag.trim()).filter(Boolean) ?? existing?.tags ?? [],
     createdAt: existing?.createdAt ?? now,
     updatedAt: now,
   };
@@ -52,8 +66,6 @@ export async function saveMediaAsset(input: {
 export async function deleteMediaAsset(id: string, organizationId = DEFAULT_ORG): Promise<boolean> {
   const asset = await getMediaAsset(id);
   if (!asset || asset.organizationId !== organizationId) return false;
-  // Soft-delete by overwriting with empty list entry removal — memory-only delete
-  // Airtable rows remain until manual cleanup; mark with deleted tag for M3.1
   await saveMediaAsset({
     ...asset,
     id,
