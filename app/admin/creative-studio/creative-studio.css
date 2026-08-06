@@ -748,3 +748,77 @@
   background: #f3f4f6;
   color: #4b5563;
 }
+
+
+.cs-intelligence-panel {
+  margin: 24px 0;
+  padding: clamp(22px, 4vw, 36px);
+  border: 1px solid rgba(27, 43, 77, 0.14);
+  border-radius: 22px;
+  background: #fff;
+}
+.cs-intelligence-head {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 20px;
+}
+.cs-intelligence-head h2 { margin: 4px 0 0; font-size: clamp(1.4rem, 3vw, 2rem); }
+.cs-research-status {
+  padding: 7px 11px;
+  border-radius: 999px;
+  font-size: .72rem;
+  font-weight: 850;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+.cs-research-complete { background: #dcfce7; color: #166534; }
+.cs-research-partial { background: #fef3c7; color: #92400e; }
+.cs-research-unavailable { background: #f1f5f9; color: #475569; }
+.cs-research-summary { max-width: 78ch; color: #3f4652; line-height: 1.7; }
+.cs-source-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 14px;
+  margin-top: 20px;
+}
+.cs-source-card {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  padding: 18px;
+  border-radius: 16px;
+  background: #f7f5ef;
+}
+.cs-source-card > span { color: #766929; font-size: .72rem; font-weight: 800; text-transform: uppercase; }
+.cs-source-card h3 { margin: 0; font-size: 1rem; line-height: 1.35; }
+.cs-source-card p {
+  display: -webkit-box;
+  overflow: hidden;
+  margin: 0;
+  color: #5a606b;
+  font-size: .88rem;
+  line-height: 1.5;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 5;
+}
+.cs-source-card a, .cs-image-suggestion a { color: #1b2b4d; font-size: .82rem; font-weight: 800; }
+.cs-image-suggestion-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+}
+.cs-image-suggestion {
+  overflow: hidden;
+  border: 1px solid rgba(27, 43, 77, 0.12);
+  border-radius: 16px;
+  background: #f7f5ef;
+}
+.cs-image-suggestion img { display: block; width: 100%; aspect-ratio: 16 / 10; object-fit: cover; }
+.cs-image-suggestion > div { display: grid; gap: 7px; padding: 16px; }
+.cs-image-suggestion span, .cs-image-suggestion small { color: #5a606b; line-height: 1.4; }
+@media (max-width: 640px) {
+  .cs-intelligence-head { align-items: stretch; flex-direction: column; }
+  .cs-research-status { align-self: flex-start; }
+}

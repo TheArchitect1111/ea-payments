@@ -1,6 +1,6 @@
 import type { CampaignContentType, FunnelStage, OrganizationStrategyPack } from './types';
 
-export const CONVERSION_ENGINE_VERSION = 4;
+export const CONVERSION_ENGINE_VERSION = 5;
 
 const conversionMix: Array<{ contentType: CampaignContentType; funnelStage: FunnelStage }> = [
   { contentType: 'problem-recognition', funnelStage: 'attract' },

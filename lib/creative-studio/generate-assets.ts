@@ -7,6 +7,7 @@ import type {
   CampaignBrief,
   CampaignContentType,
   CampaignGoalId,
+  CampaignResearch,
   CampaignStrategy,
   CampaignTimelineItem,
   CreativeCampaign,
@@ -188,6 +189,7 @@ async function generateBeats(
   strategy: CampaignStrategy,
   brand: BrandProfile,
   pack: OrganizationStrategyPack,
+  research?: CampaignResearch,
 ): Promise<CampaignBeat[]> {
   const verifiedProof = hasVerifiedProof(story);
   const plan = selectConversionPlan(pack, campaignLength(strategy), verifiedProof);
@@ -223,6 +225,16 @@ async function generateBeats(
               strategy,
               verifiedProof,
               requiredPlan: plan,
+              research: research?.sources.length ? {
+                summary: research.summary,
+                sources: research.sources.map((source) => ({
+                  title: source.title,
+                  url: source.url,
+                  supportedFacts: source.supportedFacts,
+                  confidence: source.confidence,
+                })),
+                instruction: 'Use only supported facts. Do not cite or imply a fact that is absent from these records.',
+              } : undefined,
             }),
           },
         ],
@@ -318,11 +330,12 @@ export async function generateCampaignPackage(input: {
   strategy: CampaignStrategy;
   organizationId: string;
   brand?: BrandProfile;
+  research?: CampaignResearch;
 }): Promise<Pick<CreativeCampaign, 'assets' | 'timeline' | 'completionPercent'>> {
   const brand = input.brand ?? getDefaultBrandProfile(input.organizationId);
   const pack = getStrategyPack(input.organizationId, input.brief.organization || brand.organizationName);
   const verifiedProof = hasVerifiedProof(input.story);
-  const beats = await generateBeats(input.story, input.brief, input.strategy, brand, pack);
+  const beats = await generateBeats(input.story, input.brief, input.strategy, brand, pack, input.research);
   const assets = buildAssets(beats, input.strategy, input.brief, pack, verifiedProof);
   return { assets, timeline: buildTimeline(assets, beats), completionPercent: 0 };
 }
