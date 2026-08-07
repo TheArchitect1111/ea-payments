@@ -13,7 +13,11 @@ export function getAdminNotificationEmail(): string {
 }
 
 export function isProductionDeploy(): boolean {
-  return process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV === 'production';
+  // Vercel Preview sets NODE_ENV=production — trust VERCEL_ENV when present.
+  if (process.env.VERCEL_ENV) {
+    return process.env.VERCEL_ENV === 'production';
+  }
+  return process.env.NODE_ENV === 'production';
 }
 
 export function productionSecretIssues(): string[] {

@@ -325,6 +325,30 @@ export function evaluateIdentityGate(project: FactoryProject): IdentityGateResul
     }
   }
 
+  // Sticky pass: a prior successful identity-gate output for this subject remains valid.
+  const priorGate = readLatestSuccessfulIdentityGateOutput(context);
+  if (priorGate?.ok === true && str(priorGate.resolvedName)) {
+    return {
+      ok: true,
+      confidence:
+        priorGate.confidence === 'high' || priorGate.confidence === 'medium'
+          ? (priorGate.confidence as 'high' | 'medium')
+          : 'medium',
+      resolvedName: String(priorGate.resolvedName),
+      sources:
+        Array.isArray(priorGate.sources) && priorGate.sources.length
+          ? (priorGate.sources as IdentitySource[])
+          : sources,
+      claims:
+        Array.isArray(priorGate.claims) && priorGate.claims.length
+          ? (priorGate.claims as IdentityClaim[])
+          : claims,
+      reason:
+        str(priorGate.reason) ||
+        'Identity reused from a previously confirmed resolution for this project.',
+    };
+  }
+
   const credibleSource = sources.length >= 1;
   const hasDetail = Boolean(detail && detail.length > 3);
   const hasWebsiteSignal = Boolean(bundle.hasWebsite || bundle.websiteTitle);
@@ -379,6 +403,23 @@ export function evaluateIdentityGate(project: FactoryProject): IdentityGateResul
     reason: 'We could not confirm who this is from the name alone.',
     resumeHint: 'What city, profession, team, company, or organization is this connected to?',
   };
+}
+
+/** Latest successful identity-gate payload from ProjectContext outputs (if any). */
+export function readLatestSuccessfulIdentityGateOutput(
+  context: ProjectContext | null | undefined,
+): Record<string, unknown> | null {
+  if (!context?.outputs?.length) return null;
+  const rows = [...context.outputs]
+    .filter((o) => o.worker === 'identity-gate' && o.kind === 'research')
+    .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+  for (let i = rows.length - 1; i >= 0; i -= 1) {
+    const payload = rows[i]?.payload;
+    if (payload && typeof payload === 'object' && (payload as { ok?: boolean }).ok === true) {
+      return payload as Record<string, unknown>;
+    }
+  }
+  return null;
 }
 
 /** Latest identity-gate payload from ProjectContext outputs (if any). */

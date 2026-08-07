@@ -1,6 +1,10 @@
 /**
  * Platform package sync health — vendor presence + optional OS drift.
  * Source of truth: ea-operating-system. Consumers sync into vendor/.
+ *
+ * IMPORTANT: Never expose bare process.cwd() to file tracers. All fs paths use
+ * `turbopackIgnore` so NFT does not pull the entire repository into serverless
+ * function traces (see admin/capability-marketplace 530MB failure).
  */
 import { createHash } from 'node:crypto';
 import { existsSync, readFileSync } from 'node:fs';
@@ -36,26 +40,58 @@ export type PackageSyncRow = {
   ok: boolean;
 };
 
-function projectRoot(): string {
-  return process.cwd();
+/** Narrow vendor path — must not start from a bare cwd expression NFT can widen. */
+function vendorJoin(name: string, ...parts: string[]): string {
+  return join(/* turbopackIgnore: true */ process.cwd(), 'vendor', name, ...parts);
+}
+
+function osPackagesJoin(...parts: string[]): string {
+  return join(
+    /* turbopackIgnore: true */ process.cwd(),
+    '..',
+    '..',
+    'ea-operating-system',
+    'packages',
+    ...parts,
+  );
+}
+
+function osChassisJoin(...parts: string[]): string {
+  return join(
+    /* turbopackIgnore: true */ process.cwd(),
+    '..',
+    '..',
+    'ea-operating-system',
+    ...parts,
+  );
+}
+
+function osPackagesJoinAlt(...parts: string[]): string {
+  return join(
+    /* turbopackIgnore: true */ process.cwd(),
+    '..',
+    'ea-operating-system',
+    'packages',
+    ...parts,
+  );
+}
+
+function osChassisJoinAlt(...parts: string[]): string {
+  return join(/* turbopackIgnore: true */ process.cwd(), '..', 'ea-operating-system', ...parts);
 }
 
 function resolveOsPackagesRoot(): string | null {
-  const root = projectRoot();
-  const candidates = [
-    join(root, '../../ea-operating-system/packages'),
-    join(root, '../ea-operating-system/packages'),
-  ];
+  const candidates = [osPackagesJoin(), osPackagesJoinAlt()];
   return candidates.find((p) => existsSync(p)) ?? null;
 }
 
 function resolveOsChassisRoot(): string | null {
-  const root = projectRoot();
-  const candidates = [
-    join(root, '../../ea-operating-system'),
-    join(root, '../ea-operating-system'),
-  ];
-  return candidates.find((p) => existsSync(join(p, 'portal-core')) || existsSync(join(p, 'premium-chassis'))) ?? null;
+  const candidates = [osChassisJoin(), osChassisJoinAlt()];
+  return (
+    candidates.find(
+      (p) => existsSync(join(p, 'portal-core')) || existsSync(join(p, 'premium-chassis')),
+    ) ?? null
+  );
 }
 
 function readJsonVersion(pkgJsonPath: string): string | null {
@@ -101,30 +137,28 @@ function rowForPlatform(
   name: (typeof PLATFORM_VENDOR_PACKAGES)[number],
   osPackagesRoot: string | null,
 ): PackageSyncRow {
-  const vendorPath = join(projectRoot(), 'vendor', name);
   const present =
-    existsSync(join(vendorPath, 'package.json')) && existsSync(join(vendorPath, 'src'));
-  const vendorVersion = present ? readJsonVersion(join(vendorPath, 'package.json')) : null;
+    existsSync(vendorJoin(name, 'package.json')) && existsSync(vendorJoin(name, 'src'));
+  const vendorVersion = present ? readJsonVersion(vendorJoin(name, 'package.json')) : null;
 
   let osVersion: string | null = null;
   let versionMatch: boolean | null = null;
   let contentMatch: boolean | null = null;
 
   if (osPackagesRoot) {
-    const osPkg = join(osPackagesRoot, name);
-    osVersion = readJsonVersion(join(osPkg, 'package.json'));
+    const osPkgJson = join(osPackagesRoot, name, 'package.json');
+    osVersion = readJsonVersion(osPkgJson);
     if (vendorVersion && osVersion) versionMatch = vendorVersion === osVersion;
 
     const sentinel = PLATFORM_SENTINELS[name];
     if (sentinel) {
-      const vendorFp = fingerprintNormalized(join(vendorPath, sentinel));
-      const osFp = fingerprintNormalized(join(osPkg, sentinel));
+      const vendorFp = fingerprintNormalized(vendorJoin(name, ...sentinel.split('/')));
+      const osFp = fingerprintNormalized(join(osPackagesRoot, name, ...sentinel.split('/')));
       if (vendorFp && osFp) contentMatch = vendorFp === osFp;
     }
   }
 
-  const ok =
-    present && versionMatch !== false && contentMatch !== false;
+  const ok = present && versionMatch !== false && contentMatch !== false;
 
   const parts: string[] = [];
   if (!present) parts.push('missing vendor copy');
@@ -158,9 +192,8 @@ function rowForChassis(
   name: (typeof CHASSIS_VENDOR_PACKAGES)[number],
   osRoot: string | null,
 ): PackageSyncRow {
-  const vendorPath = join(projectRoot(), 'vendor', name);
-  const present = existsSync(join(vendorPath, 'package.json'));
-  const vendorVersion = present ? readJsonVersion(join(vendorPath, 'package.json')) : null;
+  const present = existsSync(vendorJoin(name, 'package.json'));
+  const vendorVersion = present ? readJsonVersion(vendorJoin(name, 'package.json')) : null;
 
   let osVersion: string | null = null;
   let versionMatch: boolean | null = null;
@@ -212,8 +245,7 @@ export function getPackageSyncHealth() {
   const missing = packages.filter((p) => !p.present).map((p) => p.name);
   const drifted = packages
     .filter(
-      (p) =>
-        p.present && (p.versionMatch === false || p.contentMatch === false),
+      (p) => p.present && (p.versionMatch === false || p.contentMatch === false),
     )
     .map((p) => p.name);
 

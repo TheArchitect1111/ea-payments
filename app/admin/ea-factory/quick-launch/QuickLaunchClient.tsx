@@ -175,6 +175,16 @@ export default function QuickLaunchClient() {
     window.history.replaceState({}, '', url.toString());
   }, []);
 
+  const friendlyStage = useCallback((raw: string, readyNow: boolean, failedNow: boolean, blockedNow: boolean) => {
+    if (failedNow) return 'Something went wrong';
+    if (blockedNow) return 'We need a quick clarification';
+    if (readyNow) return 'Ready to review';
+    const lower = (raw || '').toLowerCase();
+    if (/research|finding|identity|discover/i.test(lower)) return 'Researching';
+    if (/creat|build|preview|concept|check|package|sample/i.test(lower)) return 'Creating your samples';
+    return 'Researching';
+  }, []);
+
   const applyStatus = useCallback((data: {
     project?: { client?: string; error?: string };
     plainLanguageStage?: string;
@@ -187,18 +197,30 @@ export default function QuickLaunchClient() {
     review?: ReviewPayload;
   }) => {
     setClientName(data.project?.client || '');
+    const nextReady = Boolean(data.ready);
+    const nextFailed = Boolean(data.failed);
+    const nextBlocked = Boolean(data.launch?.identityBlocked);
     setStage(
-      data.plainLanguageStage ||
-        data.statusLabel ||
-        'Finding the right person or organization',
+      friendlyStage(
+        data.plainLanguageStage || data.statusLabel || '',
+        nextReady,
+        nextFailed,
+        nextBlocked,
+      ),
     );
-    setProgressHint(data.progressHint || '');
+    setProgressHint(
+      nextReady
+        ? 'Open the website and portal samples, then select one direction.'
+        : nextBlocked
+          ? ''
+          : 'This usually takes a few minutes. Stay on this page.',
+    );
     setInProgress(Boolean(data.inProgress));
-    setReady(Boolean(data.ready));
-    setFailed(Boolean(data.failed));
+    setReady(nextReady);
+    setFailed(nextFailed);
     setLaunch(data.launch || null);
     if (data.review) setReview(data.review);
-  }, []);
+  }, [friendlyStage]);
 
   useEffect(() => {
     if (!projectId) return;
@@ -445,7 +467,7 @@ export default function QuickLaunchClient() {
 
   const blocked = Boolean(launch?.identityBlocked);
   const concepts = (review?.concepts || []).filter(
-    (c) => c.websiteVerified && c.portalVerified,
+    (c) => c.websitePreviewPath && c.portalPreviewPath,
   );
   const sections = review?.packageSections || [];
   const selectedId = review?.selectedConceptId || null;
@@ -460,8 +482,8 @@ export default function QuickLaunchClient() {
           Drop in a name. We research and build.
         </h1>
         <p className="mt-3 text-sm leading-6 text-[#665F57]">
-          Enter who to build for. Watch progress, review the research package, and choose one of
-          three custom website and portal samples — all on this page.
+          Enter who to build for. We research, create three website samples with matching portals,
+          and bring you back here to choose a direction.
         </p>
 
         {!projectId ? (
@@ -600,13 +622,6 @@ export default function QuickLaunchClient() {
               <p className="mt-2 text-xl font-black">{stage}</p>
               {clientName ? <p className="mt-1 font-semibold">{clientName}</p> : null}
               {progressHint ? <p className="mt-2 text-sm opacity-80">{progressHint}</p> : null}
-              {review?.qualityBlocked && (review.qualityReasons?.length || 0) > 0 ? (
-                <ul className="mt-3 list-disc space-y-1 pl-5 text-sm opacity-90">
-                  {review.qualityReasons!.slice(0, 6).map((reason) => (
-                    <li key={reason}>{reason}</li>
-                  ))}
-                </ul>
-              ) : null}
               {inProgress ? (
                 <p className="mt-2 text-xs opacity-70">Updating automatically. Stay on this page.</p>
               ) : null}
@@ -659,43 +674,32 @@ export default function QuickLaunchClient() {
             ) : null}
 
             {sections.length > 0 ? (
-              <div className="space-y-3">
-                <h2 className="font-serif text-2xl">Research and creative package</h2>
-                {sections.map((section) => (
-                  <details
-                    key={section.id}
-                    className="rounded-xl border border-[#E6DCCE] bg-[#FBF8F3] px-4 py-3"
-                  >
-                    <summary className="cursor-pointer font-bold">{section.title}</summary>
-                    <p className="mt-2 text-sm leading-6 text-[#665F57]">{section.summary}</p>
-                    {section.bullets.length ? (
-                      <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-[#665F57]">
-                        {section.bullets.map((bullet) => (
-                          <li key={bullet}>{bullet}</li>
-                        ))}
-                      </ul>
-                    ) : null}
-                    {section.sourceUrl ? (
-                      <a
-                        href={section.sourceUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="mt-2 inline-block text-sm font-bold underline"
-                      >
-                        Open source
-                      </a>
-                    ) : null}
-                  </details>
-                ))}
-              </div>
+              <details className="rounded-xl border border-[#E6DCCE] bg-[#FBF8F3] px-4 py-3">
+                <summary className="cursor-pointer font-bold">View research</summary>
+                <div className="mt-3 space-y-3">
+                  {sections.map((section) => (
+                    <div key={section.id} className="border-t border-[#E6DCCE] pt-3 first:border-t-0 first:pt-0">
+                      <p className="text-sm font-bold text-[#17130F]">{section.title}</p>
+                      <p className="mt-1 text-sm leading-6 text-[#665F57]">{section.summary}</p>
+                      {section.bullets.length ? (
+                        <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-[#665F57]">
+                          {section.bullets.slice(0, 8).map((bullet) => (
+                            <li key={bullet}>{bullet}</li>
+                          ))}
+                        </ul>
+                      ) : null}
+                    </div>
+                  ))}
+                </div>
+              </details>
             ) : null}
 
             {concepts.length > 0 ? (
               <div className="space-y-4">
-                <h2 className="font-serif text-2xl">Three custom concepts</h2>
+                <h2 className="font-serif text-2xl">Three visual concepts</h2>
                 <p className="text-sm text-[#665F57]">
-                  Open the website and portal samples, then select one direction. Nothing publishes
-                  until you approve.
+                  Open each website and portal, then select one direction. Nothing publishes until you
+                  approve.
                 </p>
                 <div className="grid gap-4">
                   {concepts.map((concept) => (
@@ -732,7 +736,7 @@ export default function QuickLaunchClient() {
                             Website
                           </p>
                           <p className="mt-2 text-sm font-semibold text-white">
-                            {concept.compositionSignature || concept.lens}
+                            {concept.name}
                           </p>
                         </div>
                         <div
@@ -754,14 +758,14 @@ export default function QuickLaunchClient() {
                           onClick={() => openPreview(concept.websitePreviewPath)}
                           className="rounded-xl border border-[#17130F] px-4 py-3 text-sm font-bold"
                         >
-                          Open website preview
+                          View website
                         </button>
                         <button
                           type="button"
                           onClick={() => openPreview(concept.portalPreviewPath)}
                           className="rounded-xl border border-[#17130F] px-4 py-3 text-sm font-bold"
                         >
-                          Open portal preview
+                          View portal
                         </button>
                         <button
                           type="button"
@@ -773,7 +777,7 @@ export default function QuickLaunchClient() {
                             ? 'Selecting…'
                             : concept.selected
                               ? 'Selected'
-                              : 'Select this concept'}
+                              : 'Select this direction'}
                         </button>
                       </div>
                     </article>
@@ -836,6 +840,13 @@ export default function QuickLaunchClient() {
               </summary>
               <p className="mt-2 font-mono text-[11px] break-all">{projectId}</p>
               {launch?.conceptPackError ? <p className="mt-2">{launch.conceptPackError}</p> : null}
+              {review?.qualityBlocked && (review.qualityReasons?.length || 0) > 0 ? (
+                <ul className="mt-2 list-disc space-y-1 pl-5">
+                  {review.qualityReasons!.slice(0, 8).map((reason) => (
+                    <li key={reason}>{reason}</li>
+                  ))}
+                </ul>
+              ) : null}
               <p className="mt-2 text-xs">
                 Recovery tools stay here. The normal journey never needs them.
               </p>

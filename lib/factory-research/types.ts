@@ -7,7 +7,8 @@ export type ResearchProviderId =
   | 'prospect-profile'
   | 'document'
   | 'branding'
-  | 'metadata';
+  | 'metadata'
+  | 'uxg-deep-crawl';
 
 export type ResearchProvider = {
   id: ResearchProviderId;

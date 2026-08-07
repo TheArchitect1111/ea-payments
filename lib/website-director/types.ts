@@ -130,11 +130,65 @@ export type OrganizationStoryInput = {
   accentColor?: string;
   portalLoginHref?: string;
   sitePath?: string;
+  /** Preview-eligible hero image (never auto-publish unlicensed assets). */
+  heroImageUrl?: string;
   member?: {
     whereYouAre?: string;
     whatNext?: string;
     purpose?: string;
     whatSuccessLooksLike?: string;
+  };
+  /** Optional care-continuum editorial fields (from verified research — never creative direction). */
+  /** True only when a verified/licensed subject portrait is approved for hero use. */
+  subjectPortraitVerified?: boolean;
+  subjectRole?: string;
+  affiliatedOrganizationName?: string;
+  biographyPublic?: string;
+  roleExplainer?: string;
+  roleAttributionNote?: string;
+  pathwaysIntro?: string;
+  carePathways?: Array<{ title: string; body: string }>;
+  serviceGeography?: string;
+  serviceGeographyTitle?: string;
+  serviceGeographyBody?: string;
+  geographyAccent?: string;
+  geographyCaption?: string;
+  contactPhone?: string;
+  contactPhoneHref?: string;
+  organizationUrl?: string;
+  secondaryCtaLabel?: string;
+  ctaBody?: string;
+  footerTagline?: string;
+  footerAddress?: string;
+  footerNote?: string;
+  /** Care continuum journey step-two body — public copy only. */
+  journeyConnectBody?: string;
+  mediaSlots?: {
+    hero?: {
+      url: string;
+      caption?: string;
+      focal?: 'face-right' | 'face-left' | 'center' | 'hands' | 'environment';
+    };
+    clinician?: {
+      url: string;
+      caption?: string;
+      focal?: 'face-right' | 'face-left' | 'center' | 'hands' | 'environment';
+    };
+    homeCare?: {
+      url: string;
+      caption?: string;
+      focal?: 'face-right' | 'face-left' | 'center' | 'hands' | 'environment';
+    };
+    family?: {
+      url: string;
+      caption?: string;
+      focal?: 'face-right' | 'face-left' | 'center' | 'hands' | 'environment';
+    };
+    calm?: {
+      url: string;
+      caption?: string;
+      focal?: 'face-right' | 'face-left' | 'center' | 'hands' | 'environment';
+    };
   };
 };
 

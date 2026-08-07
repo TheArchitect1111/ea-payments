@@ -10,17 +10,20 @@ export function composeScenesFromDirection(input: LayoutComposerInput): LayoutCo
   const primary = director.creativeDirection.primaryArchetype;
   const antiPatterns = director.creativeDirection.antiPatterns;
 
+  const lens = input.conceptLens;
   const scenes: ComposedScene[] = director.scenes.map((scene) => ({
     role: scene.role,
     compositionId: selectCompositionForScene({
       role: scene.role,
       primaryArchetype: primary,
       antiPatterns,
+      lens,
     }),
     scene,
   }));
 
-  const compositionSignature = scenes.map((s) => `${s.role}:${s.compositionId}`).join('|');
+  const bodySig = scenes.map((s) => `${s.role}:${s.compositionId}`).join('|');
+  const compositionSignature = lens ? `${lens}|${bodySig}` : bodySig;
 
   return {
     scenes,

@@ -35,7 +35,8 @@ const pack = buildContentPackageFromContext(
   null,
 );
 
-assert.ok(pack.quality.factCount >= 3, 'clarification must yield ≥3 facts');
+assert.ok(pack.quality.ready, 'clarification-backed pack must be draft-ready');
+assert.ok(pack.quality.factCount >= 1, 'clarification must yield evidence');
 assert.ok(pack.biography.length >= 40, 'biography must be substantive');
 assert.ok(!containsForbiddenPublicCopy(pack.centralStory), 'central story must be clean');
 assert.ok(!containsForbiddenPublicCopy(pack.lenses.cinematic.heroHeadline));

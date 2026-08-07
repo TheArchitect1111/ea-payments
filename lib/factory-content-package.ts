@@ -8,8 +8,14 @@ import {
   scrubForbiddenPublicCopy,
 } from '@/lib/factory-forbidden-copy.mjs';
 import { parseDistinguishingDetail } from '@/lib/factory-identity-gate';
+import {
+  evaluateEvidenceQuality,
+  isEvidenceRelevantToSubject,
+} from '@/lib/factory-evidence-quality';
 import { projectContextFromProject, type ProjectContext } from '@/lib/factory-project-context';
 import type { FactoryProject } from '@/lib/factory-project-store';
+import { buildStructuredEvidenceModel } from '@/lib/uxg/evidence-model';
+import { buildLensCopyFromEvidence } from '@/lib/uxg/lens-copy-from-evidence';
 
 export const CONTENT_PACKAGE_WORKER = 'content-package';
 
@@ -77,6 +83,8 @@ function str(value: unknown): string | undefined {
 function pushUnique(list: string[], value: string | undefined) {
   const cleaned = scrubForbiddenPublicCopy(value);
   if (!cleaned) return;
+  // Reject multi-sentence / run-on captures mistaken for organization names.
+  if (cleaned.length > 64 || /[.!]/.test(cleaned)) return;
   if (list.some((item) => item.toLowerCase() === cleaned.toLowerCase())) return;
   list.push(cleaned);
 }
@@ -129,6 +137,7 @@ export function buildContentPackageFromContext(
   ) => {
     const cleaned = scrubForbiddenPublicCopy(text);
     if (!cleaned || cleaned.length < 8) return;
+    if (!isEvidenceRelevantToSubject(name, cleaned, sourceUrl)) return;
     if (claims.some((c) => c.text.toLowerCase() === cleaned.toLowerCase())) return;
     claims.push({ text: cleaned, status, sourceUrl });
   };
@@ -192,57 +201,100 @@ export function buildContentPackageFromContext(
 
   for (const part of extractFromNotes(notes)) {
     addClaim(part, 'admin_clarification');
-    // Heuristic split for milestones / orgs from clarification text
-    if (/duke|basketball|captain|coach|charlotte|efficiency architects|founder/i.test(part)) {
+    // Universal: capture "at/with/for OrgName" without subject-specific org lists.
+    const orgMatch = part.match(
+      /\b(?:at|with|for)\s+([A-Z][\w&.'-]{0,40}(?:\s+[A-Z0-9][\w&.'-]{0,40}){0,4})\b/,
+    );
+    if (orgMatch?.[1]) {
+      pushUnique(organizations, orgMatch[1].trim());
+    }
+    if (
+      /\b(liaison|director|founder|owner|pastor|minister|nurse|coordinator|clinician|manager|president|ceo|coach|captain)\b/i.test(
+        part,
+      )
+    ) {
+      pushUnique(currentWork, part);
+    }
+    if (/\b(since\s+\d{4}|founded|established|award|milestone)\b/i.test(part)) {
       pushUnique(milestones, part);
       pushUnique(accomplishments, part);
     }
-    if (/efficiency architects/i.test(part)) {
-      pushUnique(organizations, 'Efficiency Architects');
-    }
-    if (/\bduke\b/i.test(part)) {
-      pushUnique(organizations, 'Duke University');
-    }
-    if (/charlotte/i.test(part)) {
-      pushUnique(currentWork, `Based in Charlotte, North Carolina`);
-    }
-    if (/founder/i.test(part) && /efficiency architects/i.test(part)) {
-      pushUnique(currentWork, `Founder of Efficiency Architects`);
-    }
-    if (/basketball|captain|coach/i.test(part)) {
-      pushUnique(accomplishments, part);
+    if (/\b(based in|serves|county|region|headquarters)\b/i.test(part)) {
+      pushUnique(currentWork, part);
     }
   }
 
-  // Expand clarification into atomic claims when research is thin.
+  // Expand distinguishing detail into atomic role/org claims (generic grammar only).
   const detail = parseDistinguishingDetail(notes);
   if (detail) {
-    if (/duke/i.test(detail) && /basketball/i.test(detail)) {
-      addClaim(`${name} competed in basketball at Duke University.`, 'admin_clarification');
+    addClaim(detail, 'admin_clarification');
+    const clause = detail.split(/[.;]/)[0]?.trim() || detail;
+    const at = clause.match(/^(.+?)\s+at\s+(.+)$/i);
+    const withOrg = clause.match(/^(.+?)\s+with\s+(.+)$/i);
+    const ofOrg = clause.match(
+      /\b(founder|owner|director|president|ceo|captain|coach|minister|pastor)\s+of\s+(.+?)(?:\s+in\s+|\s*$)/i,
+    );
+    const parsed = at
+      ? { role: at[1]!.trim(), org: at[2]!.trim() }
+      : withOrg
+        ? { role: withOrg[1]!.trim(), org: withOrg[2]!.trim() }
+        : ofOrg
+          ? { role: ofOrg[1]!.trim(), org: ofOrg[2]!.trim() }
+          : null;
+    if (parsed?.role) {
+      addClaim(
+        parsed.org
+          ? `${name} serves as ${parsed.role} with ${parsed.org}.`
+          : `${name} serves as ${parsed.role}.`,
+        'admin_clarification',
+      );
+      pushUnique(currentWork, parsed.role);
+      if (parsed.org) pushUnique(organizations, parsed.org);
     }
-    if (/captain/i.test(detail)) {
-      addClaim(`${name} served as a team captain.`, 'admin_clarification');
-    }
-    if (/efficiency architects/i.test(detail) && /founder/i.test(detail)) {
-      addClaim(`${name} founded Efficiency Architects.`, 'admin_clarification');
-    }
-    if (/charlotte/i.test(detail)) {
-      addClaim(`${name} works from Charlotte, North Carolina.`, 'admin_clarification');
+    const inPlace = detail.match(/\bin\s+([A-Z][\w\s,]{2,60})(?:\.|$)/);
+    if (inPlace?.[1]) {
+      pushUnique(currentWork, `Based in ${inPlace[1].trim()}`);
+      addClaim(`${name} works from ${inPlace[1].trim()}.`, 'admin_clarification');
     }
   }
 
+  const evidenceModel = buildStructuredEvidenceModel({
+    subjectIdentity: name,
+    distinguishingDetail: detail || undefined,
+    organizations,
+    claims,
+    sources,
+    currentWork,
+    milestones,
+  });
+
   const factTexts = claims.map((c) => c.text);
+  const roleLine = evidenceModel.verifiedRole;
+  const orgLine = evidenceModel.verifiedOrganization || organizations[0] || '';
+  const roleOrgFallback = scrubForbiddenPublicCopy(
+    [
+      roleLine && orgLine ? `${name} — ${roleLine} at ${orgLine}` : '',
+      roleLine,
+      orgLine && `${name} with ${orgLine}`,
+    ].filter(Boolean)[0],
+  );
   const positioning =
     scrubForbiddenPublicCopy(
       organizations.length && milestones.length
         ? `${name} — ${milestones[0]}`
-        : factTexts[0],
-    ) || `${name} — a researched public profile built from verified evidence.`;
+        : factTexts[0] || roleOrgFallback,
+    ) ||
+    roleOrgFallback ||
+    `${name} — public profile drafted from verified role and organization signals.`;
   const centralStory =
     scrubForbiddenPublicCopy(
       [
-        factTexts[0],
-        organizations[0] ? `Organizations and chapters include ${organizations.slice(0, 2).join(' and ')}.` : '',
+        evidenceModel.subjectFacts[0]?.text || roleLine,
+        organizations[0]
+          ? roleLine
+            ? `${name} works with ${organizations.slice(0, 2).join(' and ')}.`
+            : `Organizations include ${organizations.slice(0, 2).join(' and ')}.`
+          : '',
         currentWork[0] || '',
       ]
         .filter(Boolean)
@@ -251,102 +303,41 @@ export function buildContentPackageFromContext(
   const biography =
     scrubForbiddenPublicCopy(
       [
-        ...factTexts.slice(0, 4),
+        ...evidenceModel.subjectFacts.slice(0, 3).map((c) => c.text),
+        ...factTexts.slice(0, 2),
         ...milestones.slice(0, 2),
-        ...currentWork.slice(0, 2),
-      ].join(' '),
+      ]
+        .filter(Boolean)
+        .join(' '),
     ) || centralStory;
   const audience =
     scrubForbiddenPublicCopy(
-      claims.find((c) => /audience|community|people|members|players|leaders/i.test(c.text))
+      claims.find((c) => /audience|community|people|members|players|leaders|patient|famil|customer/i.test(c.text))
         ?.text,
     ) ||
-    (/efficiency architects|duke|basketball|coach/i.test(biography)
-      ? 'Leaders, teams, and organizations seeking clarity, structure, and a trusted next step'
-      : 'People who want a clear next step with someone they can trust');
+    (/hospice|home\s*health|palliative|patient|clinical\s*care|care\s*coord|liaison/i.test(
+      `${biography} ${roleLine || ''} ${orgLine}`,
+    )
+      ? 'Patients, families, and care partners navigating the next step in clinical support'
+      : /product|botanical|retail|shop|sku|collection/i.test(`${biography} ${orgLine}`)
+        ? 'Customers looking for trusted products and a clear next purchase step'
+        : /nonprofit|ministry|circle|congregation|community\s+org/i.test(`${biography} ${orgLine}`)
+          ? 'Members and neighbors seeking belonging, resources, and a clear next step'
+          : 'People who want a clear next step with someone they can trust');
 
-  const cinematic: ContentPackageLensCopy = {
-    heroHeadline:
-      milestones[0] && /duke|basketball|captain/i.test(milestones[0])
-        ? `From the court to the work that still matters`
-        : `${name}: a story still being written`,
-    heroSupporting:
-      factTexts.find((t) => /duke|captain|founder|charlotte/i.test(t)) ||
-      factTexts[0] ||
-      positioning,
-    aboutTitle: `Who ${name} is`,
-    aboutBody: biography,
-    sectionHeadlines: [
-      'The path so far',
-      'What the work stands for',
-      'Proof in public',
-      'Where the story goes next',
-    ],
-    sectionBodies: [
-      milestones[0] || factTexts[1] || biography,
-      organizations[0]
-        ? `${name}’s work connects through ${organizations.slice(0, 2).join(' and ')}.`
-        : factTexts[2] || centralStory,
-      accomplishments[0] || factTexts[3] || positioning,
-      currentWork[0] || 'Continue with one clear next conversation.',
-    ],
-    ctaLabel: 'Continue the conversation',
-    portalPurpose: 'A calm place to continue the relationship after the public story.',
-  };
+  const cinematic = buildLensCopyFromEvidence(evidenceModel, 'cinematic');
+  const editorial = buildLensCopyFromEvidence(evidenceModel, 'editorial');
+  const intimate = buildLensCopyFromEvidence(evidenceModel, 'intimate');
 
-  const editorial: ContentPackageLensCopy = {
-    heroHeadline:
-      organizations.includes('Efficiency Architects')
-        ? `${name}: athlete, founder, systems thinker`
-        : `A profile of ${name}`,
-    heroSupporting: factTexts[1] || factTexts[0] || positioning,
-    aboutTitle: 'Selected chapters',
-    aboutBody: centralStory,
-    sectionHeadlines: [
-      'Expertise in context',
-      'Initiatives and organizations',
-      'Evidence and milestones',
-      'Current work',
-    ],
-    sectionBodies: [
-      biography,
-      organizations.length
-        ? organizations.join(' · ')
-        : factTexts[2] || positioning,
-      [...milestones, ...accomplishments].filter(Boolean).slice(0, 3).join(' ') ||
-        factTexts[3] ||
-        centralStory,
-      currentWork[0] || factTexts[1] || 'Work that is still unfolding.',
-    ],
-    ctaLabel: 'Read the next chapter',
-    portalPurpose: 'A private briefing space that continues the editorial story.',
-  };
-
-  const intimate: ContentPackageLensCopy = {
-    heroHeadline: `Meet ${name}`,
-    heroSupporting:
-      currentWork[0] ||
-      factTexts.find((t) => /charlotte|founder|efficiency/i.test(t)) ||
-      factTexts[0] ||
-      positioning,
-    aboutTitle: 'A direct introduction',
-    aboutBody: biography,
-    sectionHeadlines: ['What matters', 'How the work feels', 'Who this is for', 'Begin together'],
-    sectionBodies: [
-      centralStory,
-      factTexts[1] || accomplishments[0] || positioning,
-      audience,
-      'One honest next step — a conversation, not a dashboard.',
-    ],
-    ctaLabel: 'Start a conversation',
-    portalPurpose: 'A trusted companion workspace for the relationship.',
-  };
-
-  // Scrub lens copy
+  // Scrub lens copy (including CTAs — defaults must never ship forbidden slogans)
   for (const lens of [cinematic, editorial, intimate]) {
     lens.heroHeadline = scrubForbiddenPublicCopy(lens.heroHeadline) || `${name}`;
     lens.heroSupporting = scrubForbiddenPublicCopy(lens.heroSupporting) || positioning;
     lens.aboutBody = scrubForbiddenPublicCopy(lens.aboutBody) || biography;
+    lens.ctaLabel = scrubForbiddenPublicCopy(lens.ctaLabel) || 'Get started';
+    lens.portalPurpose =
+      scrubForbiddenPublicCopy(lens.portalPurpose) ||
+      'A private workspace that continues after the public story.';
     lens.sectionBodies = lens.sectionBodies
       .map((body) => scrubForbiddenPublicCopy(body) || '')
       .filter(Boolean);
@@ -356,23 +347,26 @@ export function buildContentPackageFromContext(
   }
 
   const missing: string[] = [];
-  if (claims.length < 3) missing.push('Need at least three meaningful verified facts');
-  if (sources.length < 2 && claims.filter((c) => c.status === 'admin_clarification').length < 1) {
-    missing.push('Need at least two credible sources (or a clear administrator clarification)');
+  const evidence = evaluateEvidenceQuality({
+    subjectName: name,
+    claims: claims.map((c) => ({
+      text: c.text,
+      status: c.status,
+      sourceUrl: c.sourceUrl,
+    })),
+    organizations,
+    currentWork,
+    biography,
+    sources,
+  });
+  if (!evidence.ok) {
+    missing.push(...evidence.reasons);
   }
-  if (!biography || biography.length < 40) missing.push('Need a subject-specific narrative');
-  if (containsForbiddenPublicCopy(centralStory)) missing.push('Central story still contains forbidden copy');
-
-  // Clarification can substitute for thin web research when explicit admin evidence exists.
-  const clarificationCount = claims.filter((c) => c.status === 'admin_clarification').length;
-  const ready =
-    missing.length === 0 ||
-    (clarificationCount >= 1 && claims.length >= 3 && !containsForbiddenPublicCopy(centralStory));
-
-  if (ready && missing.length) {
-    // Clarification path satisfied — clear soft missing that were superseded.
-    missing.length = 0;
+  if (containsForbiddenPublicCopy(centralStory)) {
+    missing.push('Central story still contains forbidden copy');
   }
+
+  const ready = missing.length === 0;
 
   return {
     schemaVersion: 1,
@@ -387,10 +381,12 @@ export function buildContentPackageFromContext(
     currentWork,
     organizations,
     audience,
-    callsToAction: ['Continue the conversation', 'Explore the work', 'Begin'],
+    callsToAction: ['Start a conversation', 'Explore the work', 'Begin'],
     mediaPlan: {
       strategy:
-        'Use verified public media when permitted; otherwise use clearly marked temporary preview media. Never auto-publish unlicensed discovered images.',
+        evidence.mode === 'role_org_draft'
+          ? 'Role and organization imagery with temporary preview media until subject-owned assets arrive. Never auto-publish unlicensed discovered images.'
+          : 'Use verified public media when permitted; otherwise use clearly marked temporary preview media. Never auto-publish unlicensed discovered images.',
       items: [
         {
           label: 'Primary portrait / brand image',

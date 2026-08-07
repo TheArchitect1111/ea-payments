@@ -53,6 +53,7 @@ function copyForScene(
         ctaLabel: cta,
         ctaHref: '#invite',
         label: 'People',
+        imageUrl: input.heroImageUrl || undefined,
       };
     case 'current_reality':
       return {
@@ -73,7 +74,7 @@ function copyForScene(
         label: 'Mission',
         title: firstSentence(
           input.mission || input.whyTheyExist,
-          `${brand} exists to change what happens next.`,
+          firstSentence(input.brandHeadline, brand),
         ),
         body:
           input.mission?.trim() ||
@@ -108,7 +109,7 @@ function copyForScene(
     case 'process':
       return {
         label: 'How',
-        title: 'How the work unfolds',
+        title: 'How the work moves forward',
         body:
           input.differentiators?.length
             ? input.differentiators.slice(0, 3).map((d, i) => `${i + 1}. ${d}`).join('\n')
@@ -119,12 +120,13 @@ function copyForScene(
         label: 'Impact',
         title: 'What changes in the real world',
         body: input.whatChanges?.trim() || classification.storyLens.proofStrategy,
-        metricOneValue: '1',
-        metricOneLabel: 'Clear story visitors can feel',
-        metricTwoValue: '1',
-        metricTwoLabel: 'Path that respects the audience',
-        metricThreeValue: '1',
-        metricThreeLabel: 'Next step that is honest',
+        // Never emit meaningless decorative statistics.
+        metricOneValue: '',
+        metricOneLabel: '',
+        metricTwoValue: '',
+        metricTwoLabel: '',
+        metricThreeValue: '',
+        metricThreeLabel: '',
       };
     case 'invitation': {
       const isPublicSite = typeof site === 'string' && site.startsWith('/sites/');

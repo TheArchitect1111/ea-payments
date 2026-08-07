@@ -86,6 +86,35 @@ export async function buildQuickLaunchReview(
   const context = project.context ? projectContextFromProject(project) : null;
   const sections: QuickLaunchPackageSection[] = [];
 
+  // Prefer ECE content package section when present
+  if (context) {
+    const eceContent = [...(project.context?.outputs || [])]
+      .filter((o) => o.worker === 'content-creative-pack')
+      .sort((a, b) => a.createdAt.localeCompare(b.createdAt))
+      .at(-1);
+    const ecePayload = asRecord(eceContent?.payload);
+    if (ecePayload) {
+      pushSection(sections, {
+        id: 'story-creative-package',
+        title: 'Story and creative package',
+        summary: str(ecePayload.positioning) || str(ecePayload.coreStory) || 'Creative package',
+        bullets: [
+          str(ecePayload.coreStory) || '',
+          str(ecePayload.biography) || '',
+          str(ecePayload.portalPurpose) || '',
+          ...(Array.isArray(ecePayload.premises)
+            ? ecePayload.premises.map((p) => {
+                const rec = asRecord(p);
+                return rec
+                  ? `${str(rec.name)}: ${str(rec.heroHeadline) || str(rec.narrativeLens) || ''}`
+                  : '';
+              })
+            : []),
+        ].filter(Boolean),
+      });
+    }
+  }
+
   if (context) {
     const contentPackage =
       readContentPackageFromContext(context) || buildContentPackageFromProject(project);
@@ -348,11 +377,17 @@ export async function buildQuickLaunchReview(
     previews,
   });
   const qualityBlocked = !quality.ok;
-  const advertiseConcepts = !qualityBlocked
-    ? verify
+  // Always surface preview cards when paths exist — quality reasons stay admin-only.
+  const advertiseConcepts = verify
+    ? verifiedCards.length
       ? verifiedCards
-      : cards.filter((c) => Boolean(previews?.previews?.length) || c.websiteVerified)
-    : [];
+      : cards.filter((c) => c.websitePreviewPath && c.portalPreviewPath)
+    : cards.filter(
+        (c) =>
+          Boolean(c.websitePreviewPath && c.portalPreviewPath) ||
+          Boolean(previews?.previews?.length) ||
+          c.websiteVerified,
+      );
 
   return {
     projectId: project.id,

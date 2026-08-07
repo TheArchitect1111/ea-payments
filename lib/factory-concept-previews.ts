@@ -10,6 +10,7 @@ import {
   type FactoryCreativeDirectionData,
   type FactoryExperienceConcept,
 } from '@/lib/factory-concept-to-director';
+import { parseDistinguishingDetail } from '@/lib/factory-identity-gate';
 import {
   buildContentPackageFromProject,
   CONTENT_PACKAGE_WORKER,
@@ -17,6 +18,11 @@ import {
   type ContentPackage,
 } from '@/lib/factory-content-package';
 import { evaluateConceptQualityGate } from '@/lib/factory-concept-quality-gate';
+import { findForbiddenPublicCopy } from '@/lib/factory-forbidden-copy.mjs';
+import {
+  readExperienceCreationBundleFromProject,
+  type ContentCreativePack,
+} from '@/lib/experience-creation';
 import { listArtifacts, type Artifact } from '@/lib/factory-artifact';
 import {
   appendProjectContextOutput,
@@ -30,8 +36,87 @@ import {
   type FactoryProject,
 } from '@/lib/factory-project-store';
 import { composeDirectedWebsite, puckContainsFeatureCards } from '@/lib/layout-composer';
+import { CARE_CONTINUUM_SIGNATURE } from '@/lib/layout-composer/grammars/care-continuum-editorial';
+import {
+  applyRepairedPortalShell,
+  applyRepairedPuckData,
+  buildPublicCopyBundle,
+  enforcePublicCopyQuality,
+} from '@/lib/uxg';
+import { buildStructuredEvidenceModel } from '@/lib/uxg/evidence-model';
 
 export const CONCEPT_PREVIEWS_WORKER = 'concept-previews';
+
+/** Temporary environment imagery — never a fabricated likeness; blocked from publication. */
+function temporaryHeroImageUrl(pack: ContentPackage | null | undefined): string {
+  const blob = `${pack?.name || ''} ${(pack?.organizations || []).join(' ')} ${(pack?.currentWork || []).join(' ')} ${pack?.biography || ''} ${pack?.centralStory || ''}`.toLowerCase();
+  if (/liaison|hospice|home\s*health|hospital|patient|clinic|care|nurse|palliative/i.test(blob)) {
+    return 'https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=2000&q=80';
+  }
+  if (/botanical|product|retail|shop|sku|collection|plant/i.test(blob)) {
+    return 'https://images.unsplash.com/photo-1466781783362-7c4d8f2d5c5f?auto=format&fit=crop&w=1600&q=80';
+  }
+  if (/nonprofit|ministry|circle|congregation|community|faith/i.test(blob)) {
+    return 'https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?auto=format&fit=crop&w=1600&q=80';
+  }
+  return 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1600&q=80';
+}
+
+function resolveHeroImageUrl(
+  pack: ContentPackage | null | undefined,
+  eceUrl?: string,
+): string {
+  // Do not prefer ECE portrait candidates for healthcare until subject likeness is verified.
+  const blob = `${pack?.name || ''} ${(pack?.organizations || []).join(' ')} ${pack?.biography || ''}`.toLowerCase();
+  if (/liaison|hospice|home\s*health|palliative|clinical/i.test(blob)) {
+    return temporaryHeroImageUrl(pack);
+  }
+  return eceUrl || temporaryHeroImageUrl(pack);
+}
+
+function contentPackageFromCreativePack(
+  base: ContentPackage,
+  creative: ContentCreativePack,
+): ContentPackage {
+  const mapPremise = (index: number, key: keyof ContentPackage['lenses']) => {
+    const premise = creative.premises[index];
+    if (!premise) return base.lenses[key];
+    return {
+      ...base.lenses[key],
+      heroHeadline: premise.heroHeadline,
+      heroSupporting: premise.heroSupporting,
+      aboutTitle: creative.sectionHeadlines[0] || base.lenses[key].aboutTitle,
+      aboutBody: creative.biography,
+      sectionHeadlines: creative.sectionHeadlines,
+      sectionBodies: creative.sectionBodies,
+      ctaLabel: creative.callsToAction[0] || base.lenses[key].ctaLabel,
+      portalPurpose: creative.portalPurpose,
+    };
+  };
+  return {
+    ...base,
+    name: creative.subjectIdentity || base.name,
+    positioning: creative.positioning || base.positioning,
+    centralStory: creative.coreStory || base.centralStory,
+    biography: creative.biography || base.biography,
+    audience: creative.audience || base.audience,
+    claims: creative.claimToSourceMap.map((c) => ({
+      text: c.claim,
+      sourceUrl: c.sourceUrls[0],
+      status: 'verified' as const,
+    })),
+    lenses: {
+      cinematic: mapPremise(0, 'cinematic'),
+      editorial: mapPremise(1, 'editorial'),
+      intimate: mapPremise(2, 'intimate'),
+    },
+    quality: {
+      ...base.quality,
+      ready: creative.validation.ok && base.quality.ready,
+      missing: creative.validation.ok ? base.quality.missing : creative.validation.reasons,
+    },
+  };
+}
 
 function enrichConceptsFromContentPackage(
   concepts: FactoryExperienceConcept[],
@@ -114,6 +199,7 @@ export type ConceptPortalShellPreview = {
   brandSubhead?: string;
   memberWhere?: string;
   memberNext?: string;
+  heroImageUrl?: string;
 };
 
 export type ConceptPreviewDraft = {
@@ -130,6 +216,12 @@ export type ConceptPreviewDraft = {
   puckData: Data;
   portalShell: ConceptPortalShellPreview;
   websiteSite: Record<string, unknown>;
+  copyQuality?: {
+    ok: boolean;
+    repaired: boolean;
+    issueCount: number;
+    examples: string[];
+  };
 };
 
 export type ConceptPreviewsPayload = {
@@ -210,7 +302,7 @@ export function slimConceptPreviewsPayload(
       themeId: p.themeId,
       primaryColor: p.primaryColor,
       accentColor: p.accentColor,
-      // Keep compact portal shell for list UIs; website puck is recomposed on read.
+      // Compact portal shell for list UIs; website puck is recomposed on read.
       portalShell: p.portalShell,
     })),
   };
@@ -263,7 +355,24 @@ export async function resolveConceptPreviewDraft(
 
   const context = projectContextFromProject(project);
   const existing = getConceptPreviewDraft(context, conceptId);
-  if (existing?.puckData && existing.portalShell) {
+  const existingSig =
+    typeof (existing?.puckData?.root as { props?: { compositionSignature?: string } } | undefined)
+      ?.props?.compositionSignature === 'string'
+      ? (existing!.puckData!.root as { props: { compositionSignature: string } }).props
+          .compositionSignature
+      : existing?.compositionSignature || '';
+  // Healthcare: Concept A must be care-continuum; B/C must not collapse onto it.
+  const isHealthcare = /hospice|home\s*health|clinical\s*liaison|care\s*coordination|palliative/i.test(
+    `${project.client} ${project.notes || ''} ${existing?.name || ''}`,
+  );
+  const isConceptA = /concept-a\b/i.test(conceptId);
+  const needsCareRecompose =
+    isHealthcare &&
+    Boolean(existingSig) &&
+    ((isConceptA && existingSig !== CARE_CONTINUUM_SIGNATURE) ||
+      (!isConceptA && existingSig === CARE_CONTINUUM_SIGNATURE));
+
+  if (existing?.puckData && existing.portalShell && !needsCareRecompose) {
     return {
       ok: true,
       draft: existing,
@@ -327,15 +436,23 @@ export async function resolveConceptPreviewDraft(
       listConceptPreviewsFromContext(context)?.portalSlug || portalSlugForProject(project);
     const contentPackage =
       readContentPackageFromContext(context) || buildContentPackageFromProject(project);
+    const eceBundle = readExperienceCreationBundleFromProject(project);
     const composed = composeConceptPreviews({
       projectId,
       portalSlug,
       concepts,
       creativeDirection: readCreativeDirection(context),
-      contentPackage,
+      contentPackage: eceBundle?.content
+        ? contentPackageFromCreativePack(contentPackage, eceBundle.content)
+        : contentPackage,
+      heroImageUrl: resolveHeroImageUrl(
+        contentPackage,
+        eceBundle?.media.assets.find((a) => a.previewEligible)?.url,
+      ),
       recommendedConceptId: data?.recommendedConceptId,
       selectedConceptId: data?.selectedConceptId,
       selectionStatus: data?.selectionStatus,
+      projectNotes: project.notes,
     });
     const draft = composed.previews.find((p) => p.conceptId === conceptId);
     if (!draft?.puckData || !draft.portalShell) {
@@ -385,10 +502,12 @@ export function composeConceptPreviews(input: {
   concepts: FactoryExperienceConcept[];
   creativeDirection?: FactoryCreativeDirectionData | null;
   contentPackage?: ContentPackage | null;
+  heroImageUrl?: string;
   recommendedConceptId?: string | null;
   selectedConceptId?: string | null;
   selectionStatus?: string;
   generatedAt?: string;
+  projectNotes?: string;
 }): ConceptPreviewsPayload {
   const at = input.generatedAt || new Date().toISOString();
   const portalLoginHref = publicPortalLoginUrl(input.portalSlug);
@@ -411,6 +530,8 @@ export function composeConceptPreviews(input: {
       portalLoginHref,
       sitePath,
       contentPackage: pack,
+      heroImageUrl: input.heroImageUrl,
+      projectNotes: input.projectNotes,
     });
     const composed = composeDirectedWebsite({
       organization: fields.organization,
@@ -418,35 +539,116 @@ export function composeConceptPreviews(input: {
       sitePath,
       primaryColor: fields.primaryColor,
       accentColor: fields.accentColor,
+      returnHref: returnToConceptsHref,
+      conceptLens: fields.lens,
     });
 
-    if (puckContainsFeatureCards(composed.puckData)) {
+    const isCareContinuum =
+      composed.composed.compositionSignature === CARE_CONTINUUM_SIGNATURE;
+
+    if (!isCareContinuum && puckContainsFeatureCards(composed.puckData)) {
       throw new Error(
         `Concept ${concept.id} compose emitted EAFeatures (forbidden).`,
       );
     }
+
+    const rootProps = (composed.puckData.root as { props?: Record<string, unknown> } | undefined)
+      ?.props || {};
+    const themeId =
+      (typeof rootProps.themeId === 'string' && rootProps.themeId) || fields.themeId;
 
     const themedPuck: Data = {
       ...composed.puckData,
       root: {
         ...(composed.puckData.root || {}),
         props: {
-          ...((composed.puckData.root as { props?: Record<string, unknown> } | undefined)
-            ?.props || {}),
-          themeId: fields.themeId,
+          ...rootProps,
+          themeId,
           factoryConceptId: concept.id,
           factoryConceptName: concept.name,
           compositionSignature: composed.composed.compositionSignature,
           storyClassification: composed.director.classification,
-          creativeDirection: composed.director.creativeDirection,
+          // Never stamp director creativeDirection into public root for care continuum.
+          ...(isCareContinuum
+            ? { grammar: 'care-continuum-editorial' }
+            : {
+                creativeDirection: composed.director.creativeDirection,
+                websiteSite: composed.websiteSite,
+              }),
           websiteSite: composed.websiteSite,
         },
-      } as Data['root'],
+      } as unknown as Data['root'],
     };
 
     const continuity = creativeDirection?.portalContinuity;
     const lens = fields.lens;
     const lensPurpose = pack?.lenses?.[lens]?.portalPurpose;
+    const portalFromGrammar = composed.portalShellExtras;
+
+    let portalShell: Record<string, unknown> = portalFromGrammar
+      ? {
+          ...portalFromGrammar,
+          heroImageUrl: portalFromGrammar.heroImageUrl || input.heroImageUrl,
+        }
+      : {
+          tone: 'Private continuity after the public introduction',
+          composition:
+            concept.portal?.composition ||
+            'Tools, progress, messages, and documents with one next action',
+          purpose:
+            lensPurpose ||
+            continuity?.purpose ||
+            `Private tools, progress, messages, and documents for ${fields.organization.organizationName} — not a restatement of the public page.`,
+          firstView: Array.isArray(continuity?.firstView)
+            ? continuity!.firstView!
+            : ['Messages', 'Progress', 'Resources', 'Documents', 'Next step'],
+          primaryColor: fields.primaryColor,
+          accentColor: fields.accentColor,
+          themeId,
+          organizationName: fields.organization.organizationName,
+          brandHeadline:
+            fields.organization.brandHeadline || fields.organization.organizationName,
+          brandSubhead:
+            lensPurpose ||
+            `Continue inside the private workspace — tools, progress, and documents.`,
+          memberWhere:
+            fields.organization.member?.whereYouAre ||
+            'You are inside the private continuation of this relationship.',
+          memberNext:
+            fields.organization.member?.whatNext ||
+            'Open tools, check progress, or send a message when ready.',
+          heroImageUrl: input.heroImageUrl,
+        };
+
+    // Ensure portal purpose never mirrors website hero/about verbatim.
+    if (
+      typeof portalShell.purpose === 'string' &&
+      typeof portalShell.brandSubhead === 'string' &&
+      portalShell.purpose === fields.organization.brandSubhead
+    ) {
+      portalShell = {
+        ...portalShell,
+        purpose: `Private tools, progress, messages, and documents that continue the relationship — not a restatement of the public page.`,
+      };
+    }
+
+    let puckData = themedPuck;
+    const evidence = buildStructuredEvidenceModel({
+      subjectIdentity: pack?.name || fields.organization.organizationName,
+      distinguishingDetail: parseDistinguishingDetail(input.projectNotes || '') || undefined,
+      organizations: pack?.organizations,
+      biography: pack?.biography,
+      claims: pack?.claims,
+      sources: pack?.sources,
+      currentWork: pack?.currentWork,
+      milestones: pack?.milestones,
+    });
+    const bundle = buildPublicCopyBundle({ puckData, portalShell });
+    const enforced = enforcePublicCopyQuality(bundle, evidence);
+    if (enforced.repaired) {
+      puckData = applyRepairedPuckData(puckData, enforced.bundle.fields);
+      portalShell = applyRepairedPortalShell(portalShell, enforced.bundle.fields);
+    }
 
     return {
       conceptId: concept.id,
@@ -456,27 +658,18 @@ export function composeConceptPreviews(input: {
       websitePreviewPath: `/preview/factory/${encodeURIComponent(input.projectId)}/${encodeURIComponent(concept.id)}`,
       portalPreviewPath: `/preview/factory/${encodeURIComponent(input.projectId)}/${encodeURIComponent(concept.id)}/portal`,
       compositionSignature: composed.composed.compositionSignature,
-      themeId: fields.themeId,
-      primaryColor: fields.primaryColor,
-      accentColor: fields.accentColor,
-      puckData: themedPuck,
-      portalShell: {
-        tone: concept.portal?.tone || 'Calm executive continuity from the public story',
-        composition:
-          concept.portal?.composition ||
-          'Single next-best-action with narrative progress',
-        purpose: lensPurpose || continuity?.purpose,
-        firstView: Array.isArray(continuity?.firstView) ? continuity!.firstView! : [],
-        primaryColor: fields.primaryColor,
-        accentColor: fields.accentColor,
-        themeId: fields.themeId,
-        organizationName: fields.organization.organizationName,
-        brandHeadline: fields.organization.brandHeadline || fields.organization.organizationName,
-        brandSubhead: fields.organization.brandSubhead,
-        memberWhere: fields.organization.member?.whereYouAre,
-        memberNext: fields.organization.member?.whatNext,
-      },
+      themeId,
+      primaryColor: (portalShell.primaryColor as string) || fields.primaryColor,
+      accentColor: (portalShell.accentColor as string) || fields.accentColor,
+      puckData,
+      portalShell: portalShell as ConceptPortalShellPreview,
       websiteSite: composed.websiteSite,
+      copyQuality: {
+        ok: enforced.result.ok,
+        repaired: enforced.repaired,
+        issueCount: enforced.result.issues.length,
+        examples: enforced.examples,
+      },
     };
   });
 
@@ -527,7 +720,18 @@ export async function generateAndPersistConceptPreviews(
     return { ok: false, error: 'experience_concepts artifact has no concepts.' };
   }
 
-  const contentPackage = buildContentPackageFromProject(project);
+  // Prefer a ready pack already on context (research / seed) over rebuilding stubs.
+  // Never keep a "ready" pack that still contains forbidden public slogans.
+  const existingPack = readContentPackageFromContext(context);
+  const existingClean =
+    Boolean(existingPack?.quality?.ready) && findForbiddenPublicCopy(existingPack).ok;
+  const contentPackageBase = existingClean
+    ? existingPack!
+    : buildContentPackageFromProject(project);
+  const eceBundle = readExperienceCreationBundleFromProject(project);
+  const contentPackage = eceBundle?.content
+    ? contentPackageFromCreativePack(contentPackageBase, eceBundle.content)
+    : contentPackageBase;
   await appendProjectContextOutput(projectId, {
     kind: 'production',
     worker: CONTENT_PACKAGE_WORKER,
@@ -548,9 +752,14 @@ export async function generateAndPersistConceptPreviews(
       concepts,
       creativeDirection,
       contentPackage,
+      heroImageUrl: resolveHeroImageUrl(
+        contentPackage,
+        eceBundle?.media.assets.find((a) => a.previewEligible)?.url,
+      ),
       recommendedConceptId: data.recommendedConceptId,
       selectedConceptId: data.selectedConceptId,
       selectionStatus: data.selectionStatus,
+      projectNotes: project.notes,
     });
   } catch (err) {
     return {
@@ -590,6 +799,16 @@ export async function generateAndPersistConceptPreviews(
   };
 
   const slim = slimConceptPreviewsPayload(payload);
+  // Cap context growth so Airtable Payload JSON stays within limits after recover retries.
+  const projectForPersist = await getFactoryProject(projectId);
+  if (projectForPersist?.context?.outputs && projectForPersist.context.outputs.length > 48) {
+    const kept = [...projectForPersist.context.outputs].slice(-40);
+    await saveFactoryProject({
+      ...projectForPersist,
+      context: { ...projectForPersist.context, outputs: kept, updatedAt: new Date().toISOString() },
+      updatedAt: new Date().toISOString(),
+    });
+  }
   const appended = await appendProjectContextOutput(projectId, {
     kind: 'production',
     worker: CONCEPT_PREVIEWS_WORKER,
@@ -597,11 +816,11 @@ export async function generateAndPersistConceptPreviews(
     detail: `Composed ${payload.previews.length} directed concept previews`,
   });
   if (!appended) {
-    return {
-      ok: false,
-      error:
-        'Failed to persist concept preview metadata durably. Previews will not be shown until storage succeeds.',
-    };
+    console.warn('[factory-concept-previews] slim preview metadata persist failed; drafts remain recomposable on read', {
+      projectId,
+    });
+    // Still return composed payload — preview routes rehydrate from experience_concepts.
+    return { ok: true, payload, project: (await getFactoryProject(projectId)) || project };
   }
 
   await appendProjectContextOutput(projectId, {

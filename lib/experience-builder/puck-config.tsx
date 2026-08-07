@@ -2,6 +2,13 @@ import type { Config } from '@measured/puck';
 import './experience-builder.css';
 
 export type ExperienceBuilderProps = {
+  EASiteNav: {
+    brand: string;
+    brandNote: string;
+    links: Array<{ label: string; href: string }>;
+    ctaLabel: string;
+    ctaHref: string;
+  };
   EAHero: {
     variant: string;
     eyebrow: string;
@@ -10,6 +17,13 @@ export type ExperienceBuilderProps = {
     ctaLabel: string;
     ctaHref: string;
     imageUrl: string;
+    focal: string;
+  };
+  EAImageBand: {
+    imageUrl: string;
+    caption: string;
+    objectPosition: string;
+    focal: string;
   };
   EATextSection: {
     variant: string;
@@ -18,6 +32,8 @@ export type ExperienceBuilderProps = {
     body: string;
     accentValue: string;
     accentCaption: string;
+    anchorId: string;
+    scale: string;
   };
   EASplitNarrative: {
     label: string;
@@ -28,6 +44,25 @@ export type ExperienceBuilderProps = {
     rightLabel: string;
     rightTitle: string;
     rightBody: string;
+  };
+  EAOverlapScene: {
+    label: string;
+    title: string;
+    body: string;
+    note: string;
+    imageUrl: string;
+    focal: string;
+    anchorId: string;
+  };
+  EAPathwayStrip: {
+    label: string;
+    title: string;
+    oneTitle: string;
+    oneBody: string;
+    twoTitle: string;
+    twoBody: string;
+    threeTitle: string;
+    threeBody: string;
   };
   EAFeatures: {
     label: string;
@@ -58,18 +93,102 @@ export type ExperienceBuilderProps = {
     primaryHref: string;
     secondaryLabel: string;
     secondaryHref: string;
+    anchorId: string;
+  };
+  EASiteFooter: {
+    brand: string;
+    tagline: string;
+    columns: Array<{ title: string; links: Array<{ label: string; href: string }> }>;
+    address: string;
+    note: string;
+    returnLabel: string;
+    returnHref: string;
   };
 };
 
 export const puckConfig: Config<ExperienceBuilderProps> = {
   categories: {
-    layout: { title: 'Layout', components: ['EAHero', 'EACtaBand', 'EASplitNarrative'] },
+    chrome: { title: 'Chrome', components: ['EASiteNav', 'EASiteFooter', 'EAImageBand'] },
+    layout: {
+      title: 'Layout',
+      components: ['EAHero', 'EACtaBand', 'EASplitNarrative', 'EAOverlapScene', 'EAPathwayStrip'],
+    },
     content: {
       title: 'Content',
       components: ['EATextSection', 'EAMetrics', 'EAFeatures'],
     },
   },
   components: {
+    EASiteNav: {
+      label: 'EA Site Nav',
+      fields: {
+        brand: { type: 'text', label: 'Brand' },
+        brandNote: { type: 'text', label: 'Brand note' },
+        links: { type: 'textarea', label: 'Links JSON' },
+        ctaLabel: { type: 'text', label: 'CTA label' },
+        ctaHref: { type: 'text', label: 'CTA href' },
+      },
+      defaultProps: {
+        brand: 'Brand',
+        brandNote: '',
+        links: [
+          { label: 'About', href: '#about' },
+          { label: 'Services', href: '#services' },
+        ],
+        ctaLabel: 'Contact',
+        ctaHref: '#refer',
+      },
+      render: ({ brand, brandNote, links, ctaLabel, ctaHref }) => {
+        const items = Array.isArray(links) ? links : [];
+        return (
+          <header className="eb-site-nav">
+            <div className="eb-site-nav-inner">
+              <div className="eb-site-nav-brand">
+                <a href="#top" className="eb-site-nav-name">
+                  {brand}
+                </a>
+                {brandNote ? <p className="eb-site-nav-note">{brandNote}</p> : null}
+              </div>
+              <nav className="eb-site-nav-links" aria-label="Primary">
+                {items.map((link) => (
+                  <a key={`${link.href}-${link.label}`} href={link.href}>
+                    {link.label}
+                  </a>
+                ))}
+              </nav>
+              <a className="eb-btn eb-btn-primary eb-site-nav-cta" href={ctaHref}>
+                {ctaLabel}
+              </a>
+            </div>
+          </header>
+        );
+      },
+    },
+    EAImageBand: {
+      label: 'EA Image Band',
+      fields: {
+        imageUrl: { type: 'text', label: 'Image URL' },
+        caption: { type: 'text', label: 'Caption' },
+        objectPosition: { type: 'text', label: 'Object position' },
+        focal: { type: 'text', label: 'Focal hint' },
+      },
+      defaultProps: {
+        imageUrl: '',
+        caption: '',
+        objectPosition: 'center center',
+        focal: 'center',
+      },
+      render: ({ imageUrl, caption, objectPosition, focal }) =>
+        imageUrl ? (
+          <figure className="eb-image-band" data-focal={focal || 'center'}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={imageUrl} alt="" style={{ objectPosition: objectPosition || 'center center' }} />
+            {caption ? <figcaption>{caption}</figcaption> : null}
+          </figure>
+        ) : (
+          <div className="eb-image-band eb-image-band--empty" aria-hidden />
+        ),
+    },
     EAHero: {
       label: 'EA Hero',
       fields: {
@@ -88,6 +207,7 @@ export const puckConfig: Config<ExperienceBuilderProps> = {
         ctaLabel: { type: 'text', label: 'CTA label' },
         ctaHref: { type: 'text', label: 'CTA link' },
         imageUrl: { type: 'text', label: 'Image URL' },
+        focal: { type: 'text', label: 'Focal hint' },
       },
       defaultProps: {
         variant: 'companion',
@@ -97,9 +217,13 @@ export const puckConfig: Config<ExperienceBuilderProps> = {
         ctaLabel: 'Begin discovery',
         ctaHref: '/assessment',
         imageUrl: '',
+        focal: 'face-right',
       },
-      render: ({ variant, eyebrow, title, subtitle, ctaLabel, ctaHref, imageUrl }) => (
-        <section className={`eb-block eb-hero eb-hero--${variant || 'companion'}`}>
+      render: ({ variant, eyebrow, title, subtitle, ctaLabel, ctaHref, imageUrl, focal }) => (
+        <section
+          className={`eb-block eb-hero eb-hero--${variant || 'companion'}`}
+          data-focal={focal || 'face-right'}
+        >
           {imageUrl ? (
             <div className="eb-hero-media" aria-hidden="true">
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -140,6 +264,8 @@ export const puckConfig: Config<ExperienceBuilderProps> = {
         body: { type: 'textarea', label: 'Body' },
         accentValue: { type: 'text', label: 'Accent value' },
         accentCaption: { type: 'textarea', label: 'Accent caption' },
+        anchorId: { type: 'text', label: 'Anchor id' },
+        scale: { type: 'text', label: 'Scale' },
       },
       defaultProps: {
         variant: 'default',
@@ -148,9 +274,14 @@ export const puckConfig: Config<ExperienceBuilderProps> = {
         body: 'Use plain language to explain the opportunity, the audience, and the outcome you are guiding people toward.',
         accentValue: '',
         accentCaption: '',
+        anchorId: '',
+        scale: 'md',
       },
-      render: ({ variant, label, title, body, accentValue, accentCaption }) => (
-        <section className={`eb-block eb-section eb-section--${variant || 'default'}`}>
+      render: ({ variant, label, title, body, accentValue, accentCaption, anchorId, scale }) => (
+        <section
+          id={anchorId || undefined}
+          className={`eb-block eb-section eb-section--${variant || 'default'} eb-section-scale--${scale || 'md'}`}
+        >
           <div className="eb-section-inner">
             {label ? <p className="eb-section-label">{label}</p> : null}
             <h2 className="eb-section-title">{title}</h2>
@@ -211,6 +342,92 @@ export const puckConfig: Config<ExperienceBuilderProps> = {
                 <p className="eb-split-label">{rightLabel}</p>
                 <h3 className="eb-split-title">{rightTitle}</h3>
                 <p className="eb-split-body">{rightBody}</p>
+              </article>
+            </div>
+          </div>
+        </section>
+      ),
+    },
+    EAOverlapScene: {
+      label: 'EA Overlap Scene',
+      fields: {
+        label: { type: 'text', label: 'Label' },
+        title: { type: 'text', label: 'Title' },
+        body: { type: 'textarea', label: 'Body' },
+        note: { type: 'textarea', label: 'Note' },
+        imageUrl: { type: 'text', label: 'Image URL' },
+        focal: { type: 'text', label: 'Focal' },
+        anchorId: { type: 'text', label: 'Anchor id' },
+      },
+      defaultProps: {
+        label: 'Role',
+        title: 'How care coordination helps',
+        body: '',
+        note: '',
+        imageUrl: '',
+        focal: 'center',
+        anchorId: 'role',
+      },
+      render: ({ label, title, body, note, imageUrl, focal, anchorId }) => (
+        <section
+          id={anchorId || undefined}
+          className="eb-block eb-overlap-scene"
+          data-focal={focal || 'center'}
+        >
+          {imageUrl ? (
+            <div className="eb-overlap-scene-media" aria-hidden="true">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={imageUrl} alt="" />
+            </div>
+          ) : null}
+          <div className="eb-overlap-scene-copy">
+            {label ? <p className="eb-section-label">{label}</p> : null}
+            <h2 className="eb-section-title">{title}</h2>
+            <p className="eb-section-body">{body}</p>
+            {note ? <p className="eb-overlap-scene-note">{note}</p> : null}
+          </div>
+        </section>
+      ),
+    },
+    EAPathwayStrip: {
+      label: 'EA Pathway Strip',
+      fields: {
+        label: { type: 'text', label: 'Label' },
+        title: { type: 'text', label: 'Title' },
+        oneTitle: { type: 'text', label: 'Pathway 1 title' },
+        oneBody: { type: 'textarea', label: 'Pathway 1 body' },
+        twoTitle: { type: 'text', label: 'Pathway 2 title' },
+        twoBody: { type: 'textarea', label: 'Pathway 2 body' },
+        threeTitle: { type: 'text', label: 'Pathway 3 title' },
+        threeBody: { type: 'textarea', label: 'Pathway 3 body' },
+      },
+      defaultProps: {
+        label: 'Pathways',
+        title: 'Care pathways',
+        oneTitle: '',
+        oneBody: '',
+        twoTitle: '',
+        twoBody: '',
+        threeTitle: '',
+        threeBody: '',
+      },
+      render: ({ label, title, oneTitle, oneBody, twoTitle, twoBody, threeTitle, threeBody }) => (
+        <section className="eb-block eb-section eb-pathway-strip">
+          <div className="eb-section-inner">
+            {label ? <p className="eb-section-label">{label}</p> : null}
+            <h2 className="eb-section-title">{title}</h2>
+            <div className="eb-pathway-strip-grid">
+              <article className="eb-pathway-card eb-pathway-card--lead">
+                <h3 className="eb-pathway-title">{oneTitle}</h3>
+                <p className="eb-pathway-body">{oneBody}</p>
+              </article>
+              <article className="eb-pathway-card">
+                <h3 className="eb-pathway-title">{twoTitle}</h3>
+                <p className="eb-pathway-body">{twoBody}</p>
+              </article>
+              <article className="eb-pathway-card">
+                <h3 className="eb-pathway-title">{threeTitle}</h3>
+                <p className="eb-pathway-body">{threeBody}</p>
               </article>
             </div>
           </div>
@@ -359,6 +576,7 @@ export const puckConfig: Config<ExperienceBuilderProps> = {
         primaryHref: { type: 'text', label: 'Primary link' },
         secondaryLabel: { type: 'text', label: 'Secondary label' },
         secondaryHref: { type: 'text', label: 'Secondary link' },
+        anchorId: { type: 'text', label: 'Anchor id' },
       },
       defaultProps: {
         variant: 'belonging',
@@ -368,6 +586,7 @@ export const puckConfig: Config<ExperienceBuilderProps> = {
         primaryHref: '/assessment',
         secondaryLabel: 'Contact EA',
         secondaryHref: '/contact',
+        anchorId: 'invite',
       },
       render: ({
         variant,
@@ -377,8 +596,12 @@ export const puckConfig: Config<ExperienceBuilderProps> = {
         primaryHref,
         secondaryLabel,
         secondaryHref,
+        anchorId,
       }) => (
-        <section className={`eb-block eb-cta-band eb-cta-band--${variant || 'belonging'}`} id="invite">
+        <section
+          className={`eb-block eb-cta-band eb-cta-band--${variant || 'belonging'}`}
+          id={anchorId || 'invite'}
+        >
           <div className="eb-section-inner">
             <h2 className="eb-section-title">{title}</h2>
             <p className="eb-section-body">{body}</p>
@@ -393,6 +616,61 @@ export const puckConfig: Config<ExperienceBuilderProps> = {
           </div>
         </section>
       ),
+    },
+    EASiteFooter: {
+      label: 'EA Site Footer',
+      fields: {
+        brand: { type: 'text', label: 'Brand' },
+        tagline: { type: 'textarea', label: 'Tagline' },
+        columns: { type: 'textarea', label: 'Columns JSON' },
+        address: { type: 'text', label: 'Address' },
+        note: { type: 'textarea', label: 'Note' },
+        returnLabel: { type: 'text', label: 'Return label' },
+        returnHref: { type: 'text', label: 'Return href' },
+      },
+      defaultProps: {
+        brand: 'Brand',
+        tagline: '',
+        columns: [],
+        address: '',
+        note: '',
+        returnLabel: 'Return',
+        returnHref: '/',
+      },
+      render: ({ brand, tagline, columns, address, note, returnLabel, returnHref }) => {
+        const cols = Array.isArray(columns) ? columns : [];
+        return (
+          <footer className="eb-site-footer">
+            <div className="eb-site-footer-inner">
+              <div className="eb-site-footer-brand">
+                <p className="eb-site-footer-name">{brand}</p>
+                {tagline ? <p className="eb-site-footer-tagline">{tagline}</p> : null}
+              </div>
+              <div className="eb-site-footer-columns">
+                {cols.map((col) => (
+                  <div key={col.title} className="eb-site-footer-col">
+                    <p className="eb-site-footer-col-title">{col.title}</p>
+                    <ul>
+                      {(col.links || []).map((link) => (
+                        <li key={`${col.title}-${link.label}`}>
+                          <a href={link.href}>{link.label}</a>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+              {address ? <p className="eb-site-footer-address">{address}</p> : null}
+              {note ? <p className="eb-site-footer-note">{note}</p> : null}
+              {returnHref ? (
+                <p className="eb-site-footer-return">
+                  <a href={returnHref}>{returnLabel || 'Return'}</a>
+                </p>
+              ) : null}
+            </div>
+          </footer>
+        );
+      },
     },
   },
 };
