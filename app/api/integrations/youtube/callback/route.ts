@@ -1,3 +1,4 @@
+import { createHash } from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
@@ -14,6 +15,10 @@ type GoogleTokenResponse = {
   error?: string;
   error_description?: string;
 };
+
+function tokenFingerprint(token: string): string {
+  return createHash('sha256').update(token).digest('hex').slice(0, 12);
+}
 
 export async function GET(req: NextRequest) {
   const url = new URL(req.url);
@@ -98,11 +103,39 @@ export async function GET(req: NextRequest) {
     );
   }
 
+  let refreshValidation: 'not-issued' | 'valid' | 'invalid' = 'not-issued';
+  let refreshValidationError: string | null = null;
+
+  if (tokens.refresh_token) {
+    const validationResponse = await fetch(GOOGLE_TOKEN_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        client_id: clientId,
+        client_secret: clientSecret,
+        refresh_token: tokens.refresh_token,
+        grant_type: 'refresh_token',
+      }),
+      cache: 'no-store',
+    });
+
+    const validation = (await validationResponse.json()) as GoogleTokenResponse;
+    refreshValidation = validationResponse.ok && Boolean(validation.access_token) ? 'valid' : 'invalid';
+    refreshValidationError =
+      refreshValidation === 'invalid'
+        ? [validation.error, validation.error_description].filter(Boolean).join(': ') || `HTTP ${validationResponse.status}`
+        : null;
+  }
+
   const response = NextResponse.json({
     ok: true,
     service: 'EA YouTube OAuth callback',
     status: tokens.refresh_token ? 'refresh-token-ready' : 'authorized-no-refresh-token',
     refreshToken: tokens.refresh_token ?? null,
+    refreshTokenFingerprint: tokens.refresh_token ? tokenFingerprint(tokens.refresh_token) : null,
+    refreshTokenLength: tokens.refresh_token?.length ?? null,
+    refreshValidation,
+    refreshValidationError,
     scope: tokens.scope ?? null,
     expiresIn: tokens.expires_in ?? null,
     next: tokens.refresh_token
