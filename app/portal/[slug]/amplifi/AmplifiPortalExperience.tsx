@@ -61,8 +61,8 @@ export default function AmplifiPortalExperience({
           </p>
           <h2 className="ea-amplifi-state-title">No Magnifi stories yet</h2>
           <p className="ea-amplifi-copy">
-            Capture an opportunity in Simplifi once. Amplifi will surface the Magnifi story here so you can open it,
-            draft share copy, and review before posting — nothing auto-publishes.
+            Capture an opportunity in Simplifi, or use Amplifi Search with a topic and date range to gather articles,
+            news, and videos — then draft and store posts for approval. Nothing auto-publishes.
           </p>
           <div className="ea-amplifi-cta-actions ea-amplifi-cta-actions-inline">
             <a
@@ -71,6 +71,9 @@ export default function AmplifiPortalExperience({
               style={{ backgroundColor: theme.ctaFrom, borderColor: theme.ctaFrom }}
             >
               Capture once to create your first story
+            </a>
+            <a href="/amplifi" className="ea-amplifi-btn ea-amplifi-btn-ink-outline">
+              Open Amplifi Search
             </a>
           </div>
         </section>
@@ -161,8 +164,16 @@ export default function AmplifiPortalExperience({
               <a href={experience.draftShareUrl ?? '/amplifi'} className="ea-amplifi-btn ea-amplifi-btn-secondary">
                 Review draft before posting
               </a>
+              <a href="/amplifi" className="ea-amplifi-btn ea-amplifi-btn-secondary">
+                Amplifi Search (topic + dates)
+              </a>
             </>
           )}
+          {!hasStories ? (
+            <a href="/amplifi" className="ea-amplifi-btn ea-amplifi-btn-secondary">
+              Amplifi Search (topic + dates)
+            </a>
+          ) : null}
           <a href={base} className="ea-amplifi-btn ea-amplifi-btn-secondary">
             Portal home
           </a>

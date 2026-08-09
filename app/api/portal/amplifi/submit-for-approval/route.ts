@@ -42,6 +42,19 @@ export async function POST(req: NextRequest) {
     linkedIn?: string;
     storyUrl?: string;
     captureId?: string;
+    research?: {
+      topic?: string;
+      dateFrom?: string;
+      dateTo?: string;
+      researchedAt?: string;
+      sources?: Array<{
+        title?: string;
+        url?: string;
+        kind?: string;
+        publishedAt?: string | null;
+      }>;
+      warnings?: string[];
+    };
   };
 
   const title = (body.title ?? '').trim();
@@ -52,12 +65,34 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false, error: 'Title and post caption are required.' }, { status: 400 });
   }
 
-  const additionalNotes = JSON.stringify({
-    source: 'amplifi',
-    storyUrl: storyUrl || undefined,
-    captureId: body.captureId?.trim() || undefined,
-    submittedAt: new Date().toISOString(),
-  });
+  const research = body.research;
+  const additionalNotes = research?.topic
+    ? JSON.stringify({
+        source: 'amplifi-topic-research',
+        topic: String(research.topic).trim(),
+        dateFrom: String(research.dateFrom || '').trim(),
+        dateTo: String(research.dateTo || '').trim(),
+        researchedAt: research.researchedAt || new Date().toISOString(),
+        sources: (research.sources || [])
+          .filter((s) => s?.url)
+          .slice(0, 12)
+          .map((s) => ({
+            title: String(s.title || s.url || ''),
+            url: String(s.url || ''),
+            kind: String(s.kind || 'other'),
+            publishedAt: s.publishedAt ?? null,
+          })),
+        warnings: (research.warnings || []).map(String).slice(0, 6),
+        storyUrl: storyUrl || undefined,
+        captureId: body.captureId?.trim() || undefined,
+        submittedAt: new Date().toISOString(),
+      })
+    : JSON.stringify({
+        source: 'amplifi',
+        storyUrl: storyUrl || undefined,
+        captureId: body.captureId?.trim() || undefined,
+        submittedAt: new Date().toISOString(),
+      });
 
   const result = await createContentRequest({
     clientRecordId: client.id,
