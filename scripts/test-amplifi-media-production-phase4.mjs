@@ -9,16 +9,16 @@ import { fileURLToPath } from 'node:url';
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 function read(rel) {
   const path = join(root, rel);
-  if (!existsSync(path)) throw new Error(\`Missing \${rel}\`);
+  if (!existsSync(path)) throw new Error(`Missing ${rel}`);
   return readFileSync(path, 'utf8');
 }
 let failed = 0;
 function assert(condition, message) {
   if (!condition) {
-    console.error(\`FAIL: \${message}\`);
+    console.error(`FAIL: ${message}`);
     failed += 1;
   } else {
-    console.log(\`PASS: \${message}\`);
+    console.log(`PASS: ${message}`);
   }
 }
 
@@ -32,7 +32,7 @@ const library = read('app/admin/creative-studio/media/MediaLibraryClient.tsx');
 const dashboard = read('app/admin/creative-studio/campaigns/[id]/CampaignDashboardClient.tsx');
 
 for (const field of ['width?: number', 'height?: number', 'altText?: string', 'rightsConfirmed?: boolean', 'rightsSource?: string']) {
-  assert(types.includes(field), \`media models \${field}\`);
+  assert(types.includes(field), `media models ${field}`);
 }
 assert(validation.includes('Media usage rights must be confirmed.'), 'validation requires media rights');
 assert(validation.includes('Image alternative text is required.'), 'validation requires alt text');

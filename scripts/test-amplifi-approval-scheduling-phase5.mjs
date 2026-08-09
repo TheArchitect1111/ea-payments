@@ -9,16 +9,16 @@ import { fileURLToPath } from 'node:url';
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 function read(rel) {
   const path = join(root, rel);
-  if (!existsSync(path)) throw new Error(\`Missing \${rel}\`);
+  if (!existsSync(path)) throw new Error(`Missing ${rel}`);
   return readFileSync(path, 'utf8');
 }
 let failed = 0;
 function assert(condition, message) {
   if (!condition) {
-    console.error(\`FAIL: \${message}\`);
+    console.error(`FAIL: ${message}`);
     failed += 1;
   } else {
-    console.log(\`PASS: \${message}\`);
+    console.log(`PASS: ${message}`);
   }
 }
 
@@ -31,7 +31,7 @@ const dashboard = read('app/admin/creative-studio/campaigns/[id]/CampaignDashboa
 const vercel = read('vercel.json');
 
 for (const status of ["'review'", "'approved'", "'scheduled'", "'publishing'", "'cancelled'"]) {
-  assert(types.includes(status), \`asset supports \${status}\`);
+  assert(types.includes(status), `asset supports ${status}`);
 }
 assert(types.includes('requestedBy?: string'), 'review request evidence is stored');
 assert(types.includes('decidedBy?: string'), 'approval evidence is stored');
