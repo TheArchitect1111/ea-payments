@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import type { ContentRequestRecord } from '@/lib/airtable';
 import { isSocialPostRequest } from '@/lib/amplifi-publish';
+import { parseAmplifiResearchNotes } from '@/lib/amplifi/topic-research';
 
 const STATUSES = [
   'Pending Review',
@@ -92,6 +93,9 @@ export default function ContentRequestsDashboard({ initialData }: { initialData:
             <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#C9A844]">Update Hub™ + Amplifi™</p>
             <h1 className="text-xl font-black uppercase tracking-wide">Publish Queue</h1>
             <p className="mt-1 text-sm text-blue-100">{queueCount} item(s) need action</p>
+            <p className="mt-2 max-w-xl text-xs text-blue-100/90">
+              Amplifi Search drafts include topic, date window, and source links for CPR and all portal tenants.
+            </p>
           </div>
           <nav className="flex gap-4 text-xs font-bold uppercase tracking-wider text-blue-100">
             <a href="/admin/master">Command Center</a>
@@ -124,6 +128,7 @@ export default function ContentRequestsDashboard({ initialData }: { initialData:
           )}
           {displayed.map((request) => {
             const social = isSocialPostRequest(request.requestType);
+            const research = parseAmplifiResearchNotes(request.additionalNotes);
             return (
               <article key={request.id} className="border border-neutral-200 bg-white p-5">
                 <div className="flex flex-wrap justify-between gap-3">
@@ -131,6 +136,7 @@ export default function ContentRequestsDashboard({ initialData }: { initialData:
                     <p className="text-xs font-bold uppercase tracking-wider text-[#C9A844]">
                       {request.organizationName}
                       {social ? ' · Amplifi social' : ''}
+                      {research ? ' · Topic research' : ''}
                     </p>
                     <h2 className="mt-1 text-lg font-black text-[#1B2B4D]">
                       {request.requestType}: {request.title}
@@ -138,6 +144,11 @@ export default function ContentRequestsDashboard({ initialData }: { initialData:
                     <p className="mt-1 text-sm text-neutral-500">
                       {request.submittedBy} · {request.dateSubmitted ?? 'No date'} · Priority: {request.priority}
                     </p>
+                    {research ? (
+                      <p className="mt-2 text-sm text-[#1B2B4D]">
+                        Amplifi Search: <strong>{research.topic}</strong> · {research.dateFrom} → {research.dateTo}
+                      </p>
+                    ) : null}
                     {social && request.videoLink ? (
                       <p className="mt-2 text-xs text-neutral-500">
                         Story:{' '}
@@ -163,6 +174,32 @@ export default function ContentRequestsDashboard({ initialData }: { initialData:
                     <p className="mt-2 whitespace-pre-wrap text-sm leading-7 text-neutral-700">
                       {request.content || request.description || 'No content provided.'}
                     </p>
+                    {research?.sources?.length ? (
+                      <div className="mt-4">
+                        <p className="text-xs font-bold uppercase tracking-wider text-neutral-400">
+                          Research sources
+                        </p>
+                        <ul className="mt-2 space-y-2 text-sm text-neutral-700">
+                          {research.sources.map((source) => (
+                            <li key={source.url}>
+                              <a
+                                href={source.url}
+                                className="font-semibold text-[#1B2B4D] underline"
+                                target="_blank"
+                                rel="noreferrer"
+                              >
+                                {source.title || source.url}
+                              </a>
+                              <span className="text-neutral-500">
+                                {' '}
+                                · {source.kind}
+                                {source.publishedAt ? ` · ${source.publishedAt}` : ''}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ) : null}
                   </div>
                   <div>
                     <p className="text-xs font-bold uppercase tracking-wider text-neutral-400">
