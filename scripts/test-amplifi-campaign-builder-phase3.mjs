@@ -9,16 +9,16 @@ import { fileURLToPath } from 'node:url';
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 function read(rel) {
   const path = join(root, rel);
-  if (!existsSync(path)) throw new Error(\`Missing \${rel}\`);
+  if (!existsSync(path)) throw new Error(`Missing ${rel}`);
   return readFileSync(path, 'utf8');
 }
 let failed = 0;
 function assert(condition, message) {
   if (!condition) {
-    console.error(\`FAIL: \${message}\`);
+    console.error(`FAIL: ${message}`);
     failed += 1;
   } else {
-    console.log(\`PASS: \${message}\`);
+    console.log(`PASS: ${message}`);
   }
 }
 
@@ -30,7 +30,7 @@ const builder = read('app/admin/creative-studio/CreativeStudioClient.tsx');
 const dashboard = read('app/admin/creative-studio/campaigns/[id]/CampaignDashboardClient.tsx');
 
 for (const field of ['objective', 'audience', 'platforms', 'tone', 'successMetric', 'contentPillars']) {
-  assert(types.includes(\`\${field}:\`), \`strategy models \${field}\`);
+  assert(types.includes(`${field}:`), `strategy models ${field}`);
 }
 assert(store.includes('normalizeStrategy'), 'campaign strategy is normalized server-side');
 assert(store.includes("['facebook', 'instagram']"), 'Facebook and Instagram are safe defaults');

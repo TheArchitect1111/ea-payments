@@ -1,5 +1,5 @@
 import { interpolate, useCurrentFrame } from 'remotion';
-import { GOLD, MUTED, WHITE } from '../palette';
+import { GOLD, WHITE } from '../palette';
 
 export function LowerThird({ kicker, headline }: { kicker?: string; headline?: string }) {
   const frame = useCurrentFrame();

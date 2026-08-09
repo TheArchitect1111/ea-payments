@@ -10,17 +10,17 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
 function read(rel) {
   const path = join(root, rel);
-  if (!existsSync(path)) throw new Error(\`Missing \${rel}\`);
+  if (!existsSync(path)) throw new Error(`Missing ${rel}`);
   return readFileSync(path, 'utf8');
 }
 
 let failed = 0;
 function assert(condition, message) {
   if (!condition) {
-    console.error(\`FAIL: \${message}\`);
+    console.error(`FAIL: ${message}`);
     failed += 1;
   } else {
-    console.log(\`PASS: \${message}\`);
+    console.log(`PASS: ${message}`);
   }
 }
 
@@ -47,6 +47,6 @@ assert(studioTypes.includes('publishReceipt?: PublishReceipt'), 'asset stores pu
 assert(publishAsset.includes("asset.status === 'published' && asset.publishReceipt?.externalId"), 'confirmed posts are duplicate protected');
 assert(publishAsset.includes('status: assetStatus(result)'), 'asset uses provider lifecycle status');
 assert(!publishAsset.includes("result.ok ? ('published' as const)"), 'webhook acceptance no longer means published');
-assert(publishAsset.includes('creative-studio.publish.\${result.status}'), 'audit event records exact status');
+assert(publishAsset.includes('creative-studio.publish.${result.status}'), 'audit event records exact status');
 
 process.exit(failed ? 1 : 0);

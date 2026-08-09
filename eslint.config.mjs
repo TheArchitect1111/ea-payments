@@ -23,6 +23,7 @@ const eslintConfig = defineConfig([
     "test-results/**",
     "playwright-report/**",
     "mobile/metro.config.js",
+    "video-factory/**",
   ]),
 ]);
 

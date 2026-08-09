@@ -114,16 +114,24 @@ function TimedScene({ scene }: { scene: VideoScene }) {
   );
 }
 
+function sceneStartFrames(project: VideoProject): number[] {
+  const starts: number[] = [];
+  let cursor = 0;
+  for (const scene of project.scenes) {
+    starts.push(cursor);
+    cursor += sceneDurationInFrames(scene, project.fps);
+  }
+  return starts;
+}
+
 export function EaEpisode({ project }: EaEpisodeProps) {
-  let from = 0;
+  const starts = sceneStartFrames(project);
   return (
     <AbsoluteFill style={{ background: '#0d1424' }}>
-      {project.scenes.map((scene) => {
+      {project.scenes.map((scene, index) => {
         const durationInFrames = sceneDurationInFrames(scene, project.fps);
-        const start = from;
-        from += durationInFrames;
         return (
-          <Sequence key={scene.id} from={start} durationInFrames={durationInFrames}>
+          <Sequence key={scene.id} from={starts[index] ?? 0} durationInFrames={durationInFrames}>
             <TimedScene scene={scene} />
           </Sequence>
         );
