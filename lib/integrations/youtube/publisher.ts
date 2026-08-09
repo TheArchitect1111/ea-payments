@@ -62,7 +62,8 @@ export async function getYouTubeAccessToken(): Promise<string> {
 
   const data = (await response.json()) as GoogleTokenResponse;
   if (!response.ok || !data.access_token) {
-    const detail = data.error_description || data.error || `HTTP ${response.status}`;
+    const pieces = [data.error, data.error_description].filter(Boolean);
+    const detail = pieces.length ? pieces.join(': ') : `HTTP ${response.status}`;
     throw new Error(`YouTube access-token refresh failed: ${detail}`);
   }
 
