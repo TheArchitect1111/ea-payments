@@ -1,0 +1,344 @@
+export const AMANDA_PORTAL_PACK_ID = 'amanda-catherine';
+
+export const AMANDA_PORTAL_AUDIENCES = [
+  'client',
+  'student-trainee',
+  'certified-practitioner',
+  'member-community-participant',
+  'media-guest',
+  'volunteer',
+  'vendor-partner',
+  'staff',
+  'admin',
+] as const;
+
+export type AmandaPortalAudience = (typeof AMANDA_PORTAL_AUDIENCES)[number];
+
+export const AMANDA_ROLE_DASHBOARDS: Record<
+  AmandaPortalAudience,
+  readonly string[]
+> = {
+  client: [
+    'appointments',
+    'forms-and-consents',
+    'preparation-and-aftercare',
+    'wellness-plan',
+    'packages-and-sessions',
+    'payments-and-receipts',
+    'messages',
+  ],
+  'student-trainee': [
+    'courses',
+    'training-calendar',
+    'assignments-and-assessments',
+    'document-upload',
+    'tuition-and-agreements',
+    'progress',
+    'certification',
+    'instructor-messages',
+  ],
+  'certified-practitioner': [
+    'protocols-and-templates',
+    'advanced-training',
+    'mentorship',
+    'certificates',
+    'practitioner-directory',
+    'referrals',
+    'professional-opportunities',
+    'product-ordering',
+  ],
+  'member-community-participant': [
+    'member-profile',
+    'member-resources',
+    'events',
+    'announcements',
+    'community-directory',
+    'groups-and-discussions',
+    'mentorship-and-collaboration',
+  ],
+  'media-guest': [
+    'media-application',
+    'package-and-payment',
+    'asset-upload',
+    'media-release',
+    'interview-schedule',
+    'production-status',
+    'media-delivery',
+    'launch-updates',
+  ],
+  volunteer: [
+    'volunteer-application',
+    'onboarding-forms',
+    'schedule-and-assignments',
+    'policies-and-training',
+    'coordinator-messages',
+    'participation-hours',
+  ],
+  'vendor-partner': [
+    'partner-application',
+    'required-documents',
+    'agreements',
+    'event-registration',
+    'invoices-and-payments',
+    'team-messages',
+  ],
+  staff: [
+    'assigned-work',
+    'appointments',
+    'applications',
+    'courses-and-certifications',
+    'memberships-and-events',
+    'messages-and-announcements',
+    'people-and-leads',
+    'reports',
+  ],
+  admin: [
+    'executive-overview',
+    'users-and-permissions',
+    'crm-and-lead-stages',
+    'appointments',
+    'applications-and-forms',
+    'payments-and-balances',
+    'courses-progress-and-certifications',
+    'memberships-events-and-media',
+    'automations-and-communications',
+    'reports-and-follow-ups',
+  ],
+};
+
+export const AMANDA_PORTAL_FORMS = [
+  {
+    id: 'client-intake-consent',
+    kind: 'intake',
+    audience: 'client',
+    title: 'Client intake and consent',
+    fields: ['service-interest', 'health-goals', 'relevant-history', 'communication-consent'],
+    uploads: ['referral-or-supporting-document'],
+  },
+  {
+    id: 'training-application',
+    kind: 'application',
+    audience: 'student-trainee',
+    title: 'Training and certification application',
+    fields: ['program', 'experience', 'training-format', 'preferred-dates', 'policy-agreement'],
+    uploads: ['identification', 'prerequisite-document'],
+  },
+  {
+    id: 'practitioner-directory-application',
+    kind: 'application',
+    audience: 'certified-practitioner',
+    title: 'Practitioner directory application',
+    fields: ['credentials', 'services', 'service-area', 'referral-interests'],
+    uploads: ['certificate', 'profile-photo', 'insurance-or-registration'],
+  },
+  {
+    id: 'membership-application',
+    kind: 'application',
+    audience: 'member-community-participant',
+    title: 'Community membership application',
+    fields: ['interests', 'skills', 'mentorship-goals', 'community-agreement'],
+    uploads: ['profile-photo'],
+  },
+  {
+    id: 'lifeline-media-guest',
+    kind: 'application',
+    audience: 'media-guest',
+    title: 'LIFELINE LIVE guest and media package application',
+    fields: ['package', 'biography', 'interview-topic', 'promotion-links', 'media-release-consent'],
+    uploads: ['headshot', 'book-music-or-brand-asset', 'media-release'],
+  },
+  {
+    id: 'volunteer-application',
+    kind: 'application',
+    audience: 'volunteer',
+    title: 'Volunteer application',
+    fields: ['interests', 'availability', 'experience', 'policy-agreement'],
+    uploads: ['resume-or-supporting-document'],
+  },
+  {
+    id: 'partner-vendor-application',
+    kind: 'application',
+    audience: 'vendor-partner',
+    title: 'Partner or vendor application',
+    fields: ['organization', 'partnership-type', 'proposal', 'event-interest'],
+    uploads: ['proposal-or-capability-document', 'insurance-or-agreement'],
+  },
+] as const;
+
+export const AMANDA_ONBOARDING_WORKFLOWS = {
+  client: ['confirmation', 'forms', 'booking', 'payment', 'preparation', 'portal-access'],
+  'student-trainee': ['confirmation', 'application-review', 'agreement', 'payment', 'course-access', 'training-schedule'],
+  'certified-practitioner': ['verification', 'profile-review', 'directory-access', 'resources', 'mentorship'],
+  'member-community-participant': ['confirmation', 'profile', 'membership', 'groups', 'events'],
+  'media-guest': ['confirmation', 'package-selection', 'payment', 'asset-review', 'release', 'interview-scheduling'],
+  volunteer: ['confirmation', 'review', 'forms', 'training', 'schedule'],
+  'vendor-partner': ['confirmation', 'review', 'agreement', 'invoice', 'workspace-access'],
+  staff: ['invitation', 'role-assignment', 'policies', 'workspace-training'],
+  admin: ['invitation', 'owner-approval', 'permissions', 'operations-dashboard'],
+} satisfies Record<AmandaPortalAudience, readonly string[]>;
+
+export const AMANDA_OFFERS = [
+  {
+    id: 'lifeline-artist-business-launch',
+    name: 'LIFELINE Artist Business Launch Package',
+    priceCad: 997,
+    audience: 'lifeline-guest',
+    includes: [
+      '30-minute featured interview with professional videography',
+      'Multi-platform distribution',
+      '8-12 professionally edited videos',
+      '3-5 professional brand photos',
+      '5-10 branded quote graphics',
+      'Business and launch strategy session',
+      'Preferred network referrals where appropriate',
+    ],
+  },
+  {
+    id: 'strategy-call',
+    name: 'Strategy Call',
+    priceCad: 250,
+    audience: 'strategy-client',
+    durationMinutes: 60,
+  },
+  {
+    id: 'strategy-90-day',
+    name: '90-Day Strategy Package',
+    priceCad: 2500,
+    audience: 'strategy-client',
+    durationDays: 90,
+  },
+  {
+    id: 'aesthetikine-reset-training',
+    name: 'AesthetiKine Nervous System Reset',
+    priceCad: 997,
+    audience: 'practitioner-trainee',
+    delivery: ['in-person', 'virtual'],
+  },
+  {
+    id: 'body-sculpt-practitioner-certification',
+    name: 'Body Sculpt Practitioner Certification',
+    priceCad: 2497,
+    audience: 'practitioner-trainee',
+    delivery: ['in-person'],
+  },
+  {
+    id: 'non-surgical-bbl-training',
+    name: 'Non-Surgical BBL Lift - 1-Day Practitioner Training',
+    priceCad: 1497,
+    audience: 'practitioner-trainee',
+    delivery: ['in-person', 'virtual'],
+  },
+  {
+    id: 'non-surgical-tummy-tuck-training',
+    name: 'Non-Surgical Tummy Tuck Sculpt with Fat Dissolving Injections',
+    priceCad: 2497,
+    audience: 'practitioner-trainee',
+    delivery: ['in-person'],
+    requiresAuthorizedMedicalProfessionalForInjections: true,
+  },
+] as const;
+
+export const AMANDA_MEMBERSHIPS = [
+  { id: 'wellness-membership', name: 'Wellness Membership', stripePriceEnvKey: 'STRIPE_PRICE_AMANDA_WELLNESS_MEMBERSHIP' },
+  { id: 'practitioner-mentorship', name: 'Practitioner Mentorship Membership', stripePriceEnvKey: 'STRIPE_PRICE_AMANDA_PRACTITIONER_MEMBERSHIP' },
+  { id: 'community-membership', name: 'Empower Art Community Membership', stripePriceEnvKey: 'STRIPE_PRICE_AMANDA_COMMUNITY_MEMBERSHIP' },
+] as const;
+
+export const AMANDA_SCHEDULING = {
+  bookingProvider: 'jane',
+  bookingUrlEnvKey: 'AMANDA_JANE_BOOKING_URL',
+  calendarProvider: 'nylas',
+  timeZone: 'America/Toronto',
+  appointmentReminderHours: [24, 2],
+  eventRegistrationProvider: 'pretix',
+  appointmentCategories: ['align', 'sculpt', 'glow', 'consultation', 'training', 'media-interview'],
+} as const;
+
+export const AMANDA_CRM_STAGES = [
+  'new',
+  'contacted',
+  'qualified',
+  'application-review',
+  'approved',
+  'payment-pending',
+  'active',
+  'follow-up',
+  'completed',
+] as const;
+
+export const AMANDA_ADMIN_REPORTS = [
+  'leads-by-source-and-stage',
+  'applications-and-outstanding-forms',
+  'appointments-and-no-shows',
+  'payments-and-outstanding-balances',
+  'revenue-by-service-and-program',
+  'student-progress-and-certificates',
+  'memberships-and-renewals',
+  'event-registrations',
+  'media-production-status',
+  'volunteer-schedules-and-hours',
+  'referrals-and-conversion-rates',
+] as const;
+
+export const ENTREPRENEURIAL_ARTIST_COURSE = {
+  id: 'entrepreneurial-artist',
+  title: 'The Entrepreneurial Artist',
+  source: 'youtube-playlist',
+  playlistUrl:
+    'https://youtube.com/playlist?list=PLqLATrmokZpRPh87Y0332JPJI1wtsBMIn&si=7wNAV8AG10ojBzQI',
+  totalLessons: 6,
+  lessonsPerWeek: 1,
+  releaseMode: 'fixed-days',
+  releaseDays: ['monday'],
+  releaseTime: '09:00',
+  timeZone: 'America/New_York',
+  releaseBatchSize: 1,
+  amazonBookUrl:
+    'https://www.amazon.ca/Entrepreneurial-Artist-Turning-God-Given-Impact/dp/B0F38N76H5',
+} as const;
+
+export const AMANDA_COURSES = [
+  {
+    id: 'entrepreneurial-artist',
+    title: 'The Entrepreneurial Artist',
+    audience: 'student-trainee',
+    certificateTitle: 'The Entrepreneurial Artist — Six-Week Program',
+    passingScore: 80,
+    practicalRequirements: ['completed-reflection', 'impact-and-income-plan'],
+    lessons: [
+      'Recognize Your God-Given Gifts',
+      'Clarify the People You Are Called to Serve',
+      'Shape Your Gift Into a Sustainable Offer',
+      'Tell Your Story With Confidence',
+      'Build Relationships and Create Opportunities',
+      'Put Your Impact and Income Plan Into Action',
+    ],
+  },
+  {
+    id: 'firm-foundation',
+    title: 'Firm Foundation',
+    audience: 'member-community-participant',
+    certificateTitle: 'Firm Foundation — Six-Week Mentorship Program',
+    passingScore: 80,
+    practicalRequirements: ['completed-reflection', 'personal-action-plan'],
+    lessons: [
+      'Purpose and Foundation',
+      'Identity and Gifts',
+      'Vision and Stewardship',
+      'Courage and Consistency',
+      'Community and Collaboration',
+      'Impact in Action',
+    ],
+  },
+] as const;
+
+export const LIFELINE_GUEST_WORKFLOW = [
+  'welcome',
+  'guest-information',
+  'asset-upload',
+  'media-consent',
+  'interview-scheduled',
+  'production',
+  'media-package-delivery',
+  'strategic-referrals',
+] as const;

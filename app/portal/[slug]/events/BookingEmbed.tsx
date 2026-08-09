@@ -6,10 +6,24 @@ type Props = {
 export default function BookingEmbed({ bookingUrl, title = 'Book time' }: Props) {
   const src = bookingUrl.trim();
   if (!src) return null;
+  let opensExternally = false;
+  try {
+    opensExternally = /(^|\.)janeapp\.(com|co)$/i.test(new URL(src).hostname);
+  } catch {
+    return null;
+  }
 
   return (
     <div className="ep-module-card" style={{ marginBottom: 24 }}>
       <p className="ep-module-card-title">{title}</p>
+      {opensExternally ? (
+        <>
+          <p className="ep-module-card-note">Jane opens securely in a new window to protect appointment and health information.</p>
+          <p style={{ marginTop: 16 }}>
+            <a className="ep-btn" href={src} target="_blank" rel="noreferrer">Open Jane booking ↗</a>
+          </p>
+        </>
+      ) : (
       <div
         style={{
           position: 'relative',
@@ -27,6 +41,7 @@ export default function BookingEmbed({ bookingUrl, title = 'Book time' }: Props)
           loading="lazy"
         />
       </div>
+      )}
     </div>
   );
 }

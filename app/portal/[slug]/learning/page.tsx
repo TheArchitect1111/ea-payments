@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { requirePortalModule } from '@/lib/modules/portal-modules';
 import { PortalSubpage } from '@/app/portal/components/PortalSubpage';
 import { listPublishedTrainingForTenant } from '@/lib/training-transformation-store';
+import AmandaLearningCenter from './AmandaLearningCenter';
 
 export const dynamic = 'force-dynamic';
 
@@ -36,6 +37,7 @@ export default async function LearningPage({ params }: { params: Promise<{ slug:
       title="Training & learning"
       lede="Guides, modules, and resources to support adoption — starting with the essentials below."
     >
+      {slug.toLowerCase().startsWith('amanda-catherine') ? <AmandaLearningCenter /> : null}
       {publishedTraining.length ? (
         <section className="mb-8">
           <h2 className="ep-section-title">Assigned training</h2>

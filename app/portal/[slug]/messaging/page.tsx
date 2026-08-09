@@ -9,19 +9,20 @@ export default async function MessagingPage({ params }: { params: Promise<{ slug
   const { slug } = await params;
   const { client } = await requirePortalModule(slug, 'messaging');
   const view = await listPortalMessagingThreads(slug, client);
+  const isAmanda = slug.toLowerCase().startsWith('amanda-catherine');
 
   return (
     <PortalSubpage
       slug={slug}
       active="messaging"
       kicker="Communication"
-      title="Messaging center"
-      lede="Advisor conversations live in Update Hub — start a request here, then follow replies in your activity feed."
+      title={isAmanda ? 'Messages & announcements' : 'Messaging center'}
+      lede={isAmanda ? 'Keep clients, students, practitioners, members, media guests, volunteers, partners, and staff informed from one place.' : 'Advisor conversations live in Update Hub — start a request here, then follow replies in your activity feed.'}
     >
       <ul className="ep-module-list">
         <li className="ep-module-card">
           <Link href={`/portal/${slug}/updates/new`} className="ep-module-card-title">
-            Send a message to your advisor
+            {isAmanda ? 'Send a message' : 'Send a message to your advisor'}
           </Link>
           <p className="ep-module-card-note">
             Share context, questions, or files — routed to the Update Hub queue.

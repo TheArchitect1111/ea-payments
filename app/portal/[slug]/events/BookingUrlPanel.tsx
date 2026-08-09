@@ -4,9 +4,10 @@ import { useState, type FormEvent } from 'react';
 
 type Props = {
   initialUrl?: string;
+  providerLabel?: string;
 };
 
-export default function BookingUrlPanel({ initialUrl = '' }: Props) {
+export default function BookingUrlPanel({ initialUrl = '', providerLabel = 'booking' }: Props) {
   const [url, setUrl] = useState(initialUrl);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -41,7 +42,7 @@ export default function BookingUrlPanel({ initialUrl = '' }: Props) {
     <form className="ep-module-card" onSubmit={onSave} style={{ marginBottom: 24 }}>
       <p className="ep-module-card-title">Advisor booking URL</p>
       <p className="ep-module-card-note">
-        Paste a Calendly or other booking page URL. Members see it embedded on the Calendar tab.
+        Paste the {providerLabel} booking-page URL. Members see it on the Calendar tab.
       </p>
       <label className="ep-form-field">
         <span>Booking URL</span>
@@ -50,7 +51,7 @@ export default function BookingUrlPanel({ initialUrl = '' }: Props) {
           type="url"
           value={url}
           onChange={(e) => setUrl(e.target.value)}
-          placeholder="https://calendly.com/your-team/intro"
+          placeholder={providerLabel === 'Jane' ? 'https://your-clinic.janeapp.com' : 'https://calendly.com/your-team/intro'}
         />
       </label>
       {error ? <p className="ep-module-card-note" style={{ color: '#b42318' }}>{error}</p> : null}

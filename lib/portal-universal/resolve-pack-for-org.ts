@@ -57,6 +57,11 @@ export function resolvePackForOrg(input: ResolvePackForOrgInput): IndustryPack {
   const fromExplicit = tryId(input.industryPackId);
   if (fromExplicit) return fromExplicit;
 
+  if (input.portalSlug.trim().toLowerCase().startsWith('amanda-catherine')) {
+    const amanda = getIndustryPack('amanda-catherine');
+    if (amanda) return amanda;
+  }
+
   const fromEnv = tryId(packFromEnvSlug(input.portalSlug));
   if (fromEnv) return fromEnv;
 
