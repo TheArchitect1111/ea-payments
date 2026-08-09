@@ -9,6 +9,7 @@ import {
 } from '@/lib/ctp-client-nav';
 import { designStudioPath } from '@/lib/ctp-opportunity-routes';
 import '../[slug]/ea-portal.css';
+import './amanda-mobile-fixes.css';
 
 export async function PortalSubpage({
   slug,
