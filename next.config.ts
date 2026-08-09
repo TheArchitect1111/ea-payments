@@ -13,6 +13,10 @@ const nextConfig: NextConfig = {
    * screenshots, docs, and other non-runtime trees. Bare process.cwd() fs
    * helpers historically caused NFT to attach ~500MB to admin routes.
    */
+  outputFileTracingIncludes: {
+    '/app/api/admin/video-factory/publish/**': ['./public/video-factory/**'],
+    './app/api/admin/video-factory/publish/**': ['./public/video-factory/**'],
+  },
   outputFileTracingExcludes: {
     '*': [
       './mobile/**',
@@ -34,6 +38,9 @@ const nextConfig: NextConfig = {
       './public/ea-athletics-experience/**',
       './public/images/**',
       './public/brand/**',
+      './video-factory/**',
+      '**/node_modules/remotion/**',
+      '**/node_modules/@remotion/**',
       '**/node_modules/playwright/**',
       '**/node_modules/playwright-core/**',
       '**/node_modules/@playwright/**',

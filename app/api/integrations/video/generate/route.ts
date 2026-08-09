@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateGeminiVideo, geminiVideoConfigured } from '@/lib/integrations/video/gemini';
+import { requireAdminSessionFromRequest } from '@/lib/admin-session-guard';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-function isAuthorized(req: NextRequest): boolean {
+async function isAuthorized(req: NextRequest): Promise<boolean> {
+  const admin = await requireAdminSessionFromRequest(req);
+  if (admin.ok) return true;
   const configuredSecret = process.env.YOUTUBE_PUBLISH_SECRET?.trim();
   if (!configuredSecret) return false;
   const supplied = req.headers.get('x-ea-youtube-publish-secret')?.trim();
@@ -16,15 +19,17 @@ export async function GET() {
     ok: true,
     service: 'EA Video Generator',
     provider: 'Gemini Omni Flash',
+    role: 'optional-premium',
     model: 'gemini-omni-flash-preview',
     status: geminiVideoConfigured() ? 'ready' : 'gemini-api-key-not-configured',
     output: 'video/mp4',
     aspectRatios: ['16:9', '9:16'],
+    note: 'Optional cinematic provider. Primary EA episodes render through Remotion.',
   });
 }
 
 export async function POST(req: NextRequest) {
-  if (!isAuthorized(req)) {
+  if (!(await isAuthorized(req))) {
     return NextResponse.json(
       { ok: false, service: 'EA Video Generator', status: 'unauthorized' },
       { status: 401 },

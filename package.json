@@ -95,7 +95,10 @@
     "test:amplifi-guide-first": "node scripts/test-amplifi-guide-first.mjs",
     "test:amplifi-research-images": "node scripts/test-amplifi-research-images.mjs",
     "test:amplifi-analytics": "node scripts/test-amplifi-analytics.mjs",
-    "test:admin-session-duration": "node scripts/test-admin-session-duration.mjs"
+    "test:admin-session-duration": "node scripts/test-admin-session-duration.mjs",
+    "video:studio": "remotion studio video-factory/remotion/index.ts",
+    "video:render": "node scripts/render-video-factory.mjs",
+    "test:video-factory": "npx --yes tsx scripts/test-video-factory-schema.ts"
   },
   "dependencies": {
     "@clerk/nextjs": "^7.5.9",
@@ -114,6 +117,9 @@
     "@fullcalendar/react": "^6.1.21",
     "@fullcalendar/timegrid": "^6.1.21",
     "@measured/puck": "^0.20.2",
+    "@remotion/bundler": "^4.0.507",
+    "@remotion/cli": "^4.0.507",
+    "@remotion/renderer": "^4.0.507",
     "@sentry/nextjs": "^10.59.0",
     "framer-motion": "^12.40.0",
     "gsap": "^3.15.0",
@@ -126,6 +132,7 @@
     "qrcode": "^1.5.4",
     "react": "19.2.4",
     "react-dom": "19.2.4",
+    "remotion": "^4.0.507",
     "stripe": "^22.2.1",
     "zod": "^3.25.76"
   },

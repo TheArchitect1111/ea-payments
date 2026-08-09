@@ -11,3 +11,7 @@ services/**/*.pyc
 
 services/uxg-research-worker/.venv312/
 
+# Remotion local scratch. Preview MP4s are committed under public/video-factory/.
+output/video-factory/
+video-factory/renders/
+
