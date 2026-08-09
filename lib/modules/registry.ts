@@ -91,7 +91,8 @@ const TECHNICAL_MODULE_REGISTRY: TechnicalModuleDefinition[] = [
     name: 'Amplifi™',
     tag: 'Amplifi™',
     title: 'Amplify & share',
-    description: 'Your amplification narrative, stats, and links to Magnifi experiences.',
+    description:
+      'Draft and review social posts from Magnifi captures or Amplifi Search (topic + date range → sources → approval). Nothing auto-publishes.',
     variant: 'amplifi',
     requiredRole: 'guest',
     pathSegment: 'amplifi',

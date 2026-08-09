@@ -59,7 +59,7 @@ export function getPlatformCprReadiness() {
     },
     migrationStatus: 'partial' as const,
     note:
-      'CPR runtime stays on cpr-site. Update Hub™ content-request parity and in-portal payments shipped on CPR main; full chassis migration not started.',
+      'CPR runtime stays on cpr-site. Amplifi Search (topic + date range → draft → approval) ships on EA chassis; entitle `amplifi` for CPR tenants. Update Hub™ content-request parity and in-portal payments shipped on CPR main; full chassis migration not started.',
   };
 }
 
