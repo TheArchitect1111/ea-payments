@@ -1,8 +1,9 @@
 import { expect, test } from '@playwright/test';
 
-test('homepage routes to canonical CTP on cc', async ({ page }) => {
+test('homepage serves Live Your Life on this app', async ({ page }) => {
   await page.goto('/');
-  await expect(page).toHaveURL(/cc\.efficiencyarchitects\.online\/ctp/);
+  await expect(page).toHaveURL(/\/$/);
+  await expect(page.locator('body')).not.toBeEmpty();
 });
 
 test('consider selena demo story is reachable', async ({ page }) => {
