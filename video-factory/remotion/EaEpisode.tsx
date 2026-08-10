@@ -1,7 +1,6 @@
 import { AbsoluteFill, Audio, Sequence, staticFile, useCurrentFrame } from 'remotion';
 import type { VideoProject, VideoScene } from '../../lib/video-factory/schema';
 import { sceneDurationInFrames } from '../../lib/video-factory/schema';
-import { narrationPublicRelativePath } from '../../lib/video-factory/narration';
 import { CaptionLayer } from './components/CaptionLayer';
 import { ChartScene } from './components/ChartScene';
 import { LowerThird } from './components/LowerThird';
@@ -12,6 +11,10 @@ import { GOLD, MUTED, WHITE } from './palette';
 export type EaEpisodeProps = {
   project: VideoProject;
 };
+
+function narrationAsset(projectId: string, sceneId: string): string {
+  return `video-factory/audio/${projectId}/${sceneId}.mp3`;
+}
 
 function SceneBody({ scene }: { scene: VideoScene }) {
   if (scene.type === 'title') {
@@ -93,9 +96,7 @@ function SceneBody({ scene }: { scene: VideoScene }) {
 
 function TimedScene({ projectId, scene }: { projectId: string; scene: VideoScene }) {
   const frame = useCurrentFrame();
-  const narrationAudio = scene.narration?.trim()
-    ? staticFile(narrationPublicRelativePath(projectId, scene.id))
-    : null;
+  const narrationAudio = scene.narration?.trim() ? staticFile(narrationAsset(projectId, scene.id)) : null;
 
   return (
     <SceneFrame>
