@@ -45,7 +45,7 @@ jobs:
         run: npm ci
 
       - name: Generate narration and render episode
-        run: npx tsx -e "import { getVideoProject } from './lib/video-factory/registry'; import { ensureProjectNarration } from './lib/video-factory/narration'; const p=getVideoProject('${{ inputs.project_id || 'wealthy-debt' }}'); if(!p) throw new Error('Unknown project'); await ensureProjectNarration(p,true);" && npm run video:render -- ${{ inputs.project_id || 'wealthy-debt' }}
+        run: npx tsx -e "import { getVideoProject } from './lib/video-factory/registry'; import { ensureProjectNarration } from './lib/video-factory/narration'; (async()=>{ const p=getVideoProject('${{ inputs.project_id || 'wealthy-debt' }}'); if(!p) throw new Error('Unknown project'); await ensureProjectNarration(p,true); })().catch((e)=>{ console.error(e); process.exit(1); });" && npm run video:render -- ${{ inputs.project_id || 'wealthy-debt' }}
 
       - name: Verify MP4 has audio
         run: |
