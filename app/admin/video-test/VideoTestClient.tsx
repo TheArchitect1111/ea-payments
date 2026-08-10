@@ -17,6 +17,10 @@ type Project = {
   durationSeconds: number;
 };
 
+function deployedPreviewUrl(projectId: string): string {
+  return `/video-factory/${projectId}.mp4`;
+}
+
 export default function VideoTestClient() {
   const [topic, setTopic] = useState('Why wealthy people use debt differently.');
   const [projectId, setProjectId] = useState('wealthy-debt');
@@ -26,7 +30,7 @@ export default function VideoTestClient() {
   const [title, setTitle] = useState('Why wealthy people use debt differently');
   const [description, setDescription] = useState('');
   const [busy, setBusy] = useState<'idle' | 'render' | 'publish'>('idle');
-  const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [videoUrl, setVideoUrl] = useState<string | null>(deployedPreviewUrl('wealthy-debt'));
   const [error, setError] = useState<string | null>(null);
   const [publishResult, setPublishResult] = useState<string | null>(null);
 
@@ -42,6 +46,7 @@ export default function VideoTestClient() {
             setProjectId(first.id);
             setTitle(first.title);
             setTopic(first.topic);
+            setVideoUrl(deployedPreviewUrl(first.id));
           }
         }
       })
@@ -58,7 +63,7 @@ export default function VideoTestClient() {
     setBusy('render');
     setError(null);
     setPublishResult(null);
-    if (videoUrl) URL.revokeObjectURL(videoUrl);
+    if (videoUrl?.startsWith('blob:')) URL.revokeObjectURL(videoUrl);
     setVideoUrl(null);
     try {
       if (engine === 'gemini') {
@@ -141,6 +146,7 @@ export default function VideoTestClient() {
         onChange={(e) => {
           const next = e.target.value;
           setProjectId(next);
+          setVideoUrl(deployedPreviewUrl(next));
           const match = projects.find((item) => item.id === next);
           if (match) {
             setTitle(match.title);
@@ -212,7 +218,7 @@ export default function VideoTestClient() {
       {videoUrl ? (
         <section style={{ marginTop: 28 }}>
           <h2>Preview</h2>
-          <video src={videoUrl} controls playsInline style={{ width: '100%', borderRadius: 16, background: '#000' }} />
+          <video src={videoUrl} controls playsInline preload="metadata" style={{ width: '100%', borderRadius: 16, background: '#000' }} />
           <label style={{ display: 'block', fontWeight: 700, margin: '20px 0 8px' }}>YouTube title</label>
           <input
             value={title}
