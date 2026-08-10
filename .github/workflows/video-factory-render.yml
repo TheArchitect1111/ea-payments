@@ -12,6 +12,11 @@ on:
       - fix/video-factory-narrated-production
     paths:
       - '.github/workflows/video-factory-render.yml'
+  pull_request:
+    branches:
+      - master
+    paths:
+      - '.github/workflows/video-factory-render.yml'
 
 permissions:
   contents: write
@@ -27,7 +32,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.ref_name }}
+          ref: ${{ github.head_ref || github.ref_name }}
 
       - uses: actions/setup-node@v4
         with:
@@ -61,6 +66,7 @@ jobs:
           ffprobe -v error -show_entries format=duration,size -show_streams "$FILE"
 
       - name: Commit narrated production asset
+        if: github.event_name != 'pull_request'
         run: |
           git config user.name "EA Video Factory"
           git config user.email "actions@users.noreply.github.com"
