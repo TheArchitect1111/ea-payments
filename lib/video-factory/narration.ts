@@ -57,7 +57,7 @@ async function synthesizeSpeech(text: string): Promise<Buffer> {
       voice: DEFAULT_TTS_VOICE,
       input: text,
       response_format: 'mp3',
-      instructions: 'Narrate as a calm, credible financial documentary host. Conversational, intelligent, measured, and never salesy.',
+      instructions: 'Perform this as sharp financial edu-tainment, not a consultant presentation. Sound curious, quick, conversational and slightly irreverent, with dry wit and a knowing smile. Land jokes and sarcastic lines naturally without becoming goofy. Vary pace and emphasis, use short dramatic pauses before reveals, and make important phrases feel discovered rather than announced. Think intelligent YouTube host telling a great story to a friend. Never sound corporate, salesy, preachy, stiff, or like a documentary voice-over.',
     }),
   });
 
