@@ -15,6 +15,8 @@ const requiredFiles = [
   'lib/agents/orchestrator.ts',
   'lib/agents/research-agent.ts',
   'lib/agents/specialist-agents.ts',
+  'lib/context-optimizer/index.ts',
+  'lib/agent-reliability/client.ts',
   'docs/ai-architecture.md',
   'docs/agent-framework.md',
   'docs/research-agent.md',
@@ -33,7 +35,15 @@ assert.doesNotMatch(registry, /switch\s*\(/, 'Registry should not use switch sta
 
 const orchestrator = readFileSync(join(root, 'lib/agents/orchestrator.ts'), 'utf8');
 assert.match(orchestrator, /matchAgents/, 'Orchestrator should use registry matching');
+assert.match(orchestrator, /optimizeContext/, 'Live orchestrator should optimize retrieved context before agent calls');
+assert.match(orchestrator, /verifyAgentCompletion/, 'Live orchestrator should verify completion evidence');
+assert.match(orchestrator, /orchestrator\.reliability/, 'Live orchestrator should log reliability results');
+assert.match(orchestrator, /__eaOptimizedContext/, 'Optimized context should be passed into agent execution');
 assert.doesNotMatch(orchestrator, /switch\s*\(/, 'Orchestrator should not hardcode agent routing with switches');
+
+const types = readFileSync(join(root, 'lib/agents/types.ts'), 'utf8');
+assert.match(types, /reliability:/, 'Orchestrator response should expose reliability metadata');
+assert.match(types, /reductionRatio/, 'Orchestrator response should expose context reduction metrics');
 
 const specialists = readFileSync(join(root, 'lib/agents/specialist-agents.ts'), 'utf8');
 for (const name of ['seo', 'conversion', 'social-media', 'email-campaign', 'brand', 'accessibility', 'performance', 'security', 'analytics']) {

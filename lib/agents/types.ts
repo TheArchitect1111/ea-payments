@@ -74,4 +74,19 @@ export interface OrchestratorResponse {
     sources: string[];
   };
   agents: Array<{ name: string; status: AgentStatus }>;
+  reliability: {
+    verified: boolean;
+    status: 'in_progress' | 'blocked' | 'finished';
+    missingGates: string[];
+    failedGates: string[];
+    nextAction: string;
+    context: {
+      inputChars: number;
+      outputChars: number;
+      reductionRatio: number;
+      selectedItems: number;
+      totalItems: number;
+      compressor: 'llmlingua' | 'heuristic';
+    };
+  };
 }
