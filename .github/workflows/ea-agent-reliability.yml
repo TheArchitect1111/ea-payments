@@ -1,0 +1,42 @@
+name: ea-agent-reliability
+
+on:
+  pull_request:
+    branches: [master]
+    paths:
+      - 'lib/context-optimizer/**'
+      - 'lib/agent-reliability/**'
+      - 'lib/video-factory/pipeline.ts'
+      - 'services/agent-reliability/**'
+      - 'scripts/test-context-optimizer.ts'
+      - 'scripts/test-agent-reliability.ts'
+      - '.github/workflows/ea-agent-reliability.yml'
+  workflow_dispatch:
+
+jobs:
+  contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Context optimizer contract
+        run: npx tsx scripts/test-context-optimizer.ts
+      - name: Agent reliability contract
+        run: npx tsx scripts/test-agent-reliability.ts
+
+  pydantic-service:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/agent-reliability
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt pytest
+      - run: pytest -q
