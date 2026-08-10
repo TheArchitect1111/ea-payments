@@ -8,6 +8,7 @@ import {
   publicRenderedVideoUrl,
   renderedVideoPath,
 } from './paths';
+import { ensureProjectNarration } from './narration';
 import { getVideoProject } from './registry';
 
 export type RenderedVideo = {
@@ -62,6 +63,11 @@ export async function renderVideoProject(projectId: string): Promise<RenderedVid
 
   await fs.mkdir(VIDEO_FACTORY_RENDERS_DIR, { recursive: true });
   await fs.mkdir(VIDEO_FACTORY_PUBLIC_DIR, { recursive: true });
+
+  // Money Behind It episodes must never silently fall back to caption-only output.
+  // Generate/cache a narration track for every narrated scene before Remotion starts.
+  await ensureProjectNarration(project);
+
   const output = renderedVideoPath(projectId);
 
   await new Promise<void>((resolve, reject) => {
