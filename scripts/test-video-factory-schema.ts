@@ -11,6 +11,7 @@ assert.equal(parsed.aspectRatio, '16:9');
 assert.equal(parsed.width, 1920);
 assert.equal(parsed.height, 1080);
 assert.ok(parsed.scenes.length >= 8, 'first episode needs a full scene plan');
+assert.ok(parsed.scenes.every((scene) => Boolean(scene.narration?.trim())), 'every episode scene must include narration');
 assert.ok(projectDurationInSeconds(parsed) >= 60, 'episode should be at least a minute');
 assert.equal(projectDurationInFrames(parsed), Math.round(projectDurationInSeconds(parsed) * parsed.fps));
 assert.match(parsed.description, /not individualized/i);
@@ -24,6 +25,17 @@ const episode = fs.readFileSync(path.join('video-factory', 'remotion', 'EaEpisod
 assert.match(episode, /CaptionLayer/);
 assert.match(episode, /ChartScene/);
 assert.match(episode, /SourceCitation/);
+assert.match(episode, /<Audio/);
+assert.match(episode, /video-factory\/audio/);
+
+const narration = fs.readFileSync(path.join('lib', 'video-factory', 'narration.ts'), 'utf8');
+assert.match(narration, /\/v1\/audio\/speech/);
+assert.match(narration, /gpt-4o-mini-tts/);
+assert.match(narration, /ensureProjectNarration/);
+assert.match(narration, /OPENAI_API_KEY is required/);
+
+const renderer = fs.readFileSync(path.join('lib', 'video-factory', 'render.ts'), 'utf8');
+assert.match(renderer, /ensureProjectNarration\(project\)/);
 
 const generateRoute = fs.readFileSync(path.join('app', 'api', 'integrations', 'video', 'generate', 'route.ts'), 'utf8');
 assert.match(generateRoute, /optional-premium|Gemini/);
@@ -66,6 +78,6 @@ const dims = probeAvc1(previewMp4);
 assert.equal(dims.width, 1920);
 assert.equal(dims.height, 1080);
 
-console.log('Video factory schema + integration contract passed.');
+console.log('Video factory schema + narration integration contract passed.');
 console.log(`wealthy-debt duration ${projectDurationInSeconds(parsed)}s / ${projectDurationInFrames(parsed)} frames`);
 console.log(`preview ${previewMp4} ${previewStat.size} bytes ${dims.width}x${dims.height}`);

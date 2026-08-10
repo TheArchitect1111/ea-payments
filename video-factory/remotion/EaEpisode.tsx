@@ -1,4 +1,4 @@
-import { AbsoluteFill, Sequence, useCurrentFrame } from 'remotion';
+import { AbsoluteFill, Audio, Sequence, staticFile, useCurrentFrame } from 'remotion';
 import type { VideoProject, VideoScene } from '../../lib/video-factory/schema';
 import { sceneDurationInFrames } from '../../lib/video-factory/schema';
 import { CaptionLayer } from './components/CaptionLayer';
@@ -11,6 +11,10 @@ import { GOLD, MUTED, WHITE } from './palette';
 export type EaEpisodeProps = {
   project: VideoProject;
 };
+
+function narrationAsset(projectId: string, sceneId: string): string {
+  return `video-factory/audio/${projectId}/${sceneId}.mp3`;
+}
 
 function SceneBody({ scene }: { scene: VideoScene }) {
   if (scene.type === 'title') {
@@ -90,10 +94,13 @@ function SceneBody({ scene }: { scene: VideoScene }) {
   );
 }
 
-function TimedScene({ scene }: { scene: VideoScene }) {
+function TimedScene({ projectId, scene }: { projectId: string; scene: VideoScene }) {
   const frame = useCurrentFrame();
+  const narrationAudio = scene.narration?.trim() ? staticFile(narrationAsset(projectId, scene.id)) : null;
+
   return (
     <SceneFrame>
+      {narrationAudio ? <Audio src={narrationAudio} volume={1} /> : null}
       <SceneBody scene={scene} />
       <CaptionLayer text={scene.narration} appearAt={scene.type === 'title' ? 18 : 10} />
       <div
@@ -108,7 +115,7 @@ function TimedScene({ scene }: { scene: VideoScene }) {
           opacity: frame > 4 ? 1 : 0,
         }}
       >
-        EA Video Factory
+        The Money Behind It
       </div>
     </SceneFrame>
   );
@@ -132,7 +139,7 @@ export function EaEpisode({ project }: EaEpisodeProps) {
         const durationInFrames = sceneDurationInFrames(scene, project.fps);
         return (
           <Sequence key={scene.id} from={starts[index] ?? 0} durationInFrames={durationInFrames}>
-            <TimedScene scene={scene} />
+            <TimedScene projectId={project.id} scene={scene} />
           </Sequence>
         );
       })}
