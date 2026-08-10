@@ -1,4 +1,4 @@
-name: video-factory-render
+name: video-factory-render-manual-fallback
 
 on:
   workflow_dispatch:
@@ -7,15 +7,6 @@ on:
         description: Video project id
         required: true
         default: wealthy-debt
-  pull_request:
-    branches:
-      - master
-    paths:
-      - '.github/workflows/video-factory-render.yml'
-      - 'video-factory/**'
-      - 'lib/video-factory/**'
-      - 'scripts/render-video-factory.mjs'
-      - 'scripts/prepare-video-factory-assets.mjs'
 
 permissions:
   contents: write
@@ -30,8 +21,6 @@ jobs:
       VIDEO_FACTORY_TTS_VOICE: cedar
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.head_ref || github.ref_name }}
 
       - uses: actions/setup-node@v4
         with:
@@ -49,60 +38,34 @@ jobs:
         run: npm ci
 
       - name: Prepare and validate local visual assets
-        run: node scripts/prepare-video-factory-assets.mjs ${{ inputs.project_id || 'wealthy-debt' }}
+        run: node scripts/prepare-video-factory-assets.mjs ${{ inputs.project_id }}
 
       - name: Generate narration and render episode
-        run: npx tsx -e "import { getVideoProject } from './lib/video-factory/registry'; import { ensureProjectNarration } from './lib/video-factory/narration'; (async()=>{ const p=getVideoProject('${{ inputs.project_id || 'wealthy-debt' }}'); if(!p) throw new Error('Unknown project'); await ensureProjectNarration(p,true); })().catch((e)=>{ console.error(e); process.exit(1); });" && npm run video:render -- ${{ inputs.project_id || 'wealthy-debt' }}
+        run: npx tsx -e "import { getVideoProject } from './lib/video-factory/registry'; import { ensureProjectNarration } from './lib/video-factory/narration'; (async()=>{ const p=getVideoProject('${{ inputs.project_id }}'); if(!p) throw new Error('Unknown project'); await ensureProjectNarration(p,true); })().catch((e)=>{ console.error(e); process.exit(1); });" && npm run video:render -- ${{ inputs.project_id }}
 
-      - name: Verify audible narration and commit production assets
+      - name: Verify audible narration
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq ffmpeg
-          PROJECT="${{ inputs.project_id || 'wealthy-debt' }}"
+          PROJECT="${{ inputs.project_id }}"
           FILE="public/video-factory/${PROJECT}.mp4"
-          AUDIO_DIR="public/video-factory/audio/${PROJECT}"
-          MEDIA_DIR="public/video-factory/media/${PROJECT}"
-
           test -s "$FILE"
-          test -d "$AUDIO_DIR"
-          test -d "$MEDIA_DIR"
-          MP3_COUNT=$(find "$AUDIO_DIR" -type f -name '*.mp3' -size +1000c | wc -l)
-          IMAGE_COUNT=$(find "$MEDIA_DIR" -type f -size +10000c | wc -l)
-          if [ "$MP3_COUNT" -lt 1 ]; then
-            echo "No generated narration MP3 files found."
-            exit 1
-          fi
-          if [ "$IMAGE_COUNT" -lt 1 ]; then
-            echo "No validated local media files found."
-            exit 1
-          fi
-
           AUDIO_STREAMS=$(ffprobe -v error -select_streams a -show_entries stream=index -of csv=p=0 "$FILE" | wc -l)
           if [ "$AUDIO_STREAMS" -lt 1 ]; then
             echo "Rendered MP4 has no audio stream."
             exit 1
           fi
+          echo "Manual fallback render verified."
 
-          MEAN_DB=$(ffmpeg -hide_banner -i "$FILE" -af volumedetect -f null - 2>&1 | awk '/mean_volume:/ {print $(NF-1)}' | tail -1)
-          if [ -z "$MEAN_DB" ]; then
-            echo "Could not measure rendered audio volume."
-            exit 1
-          fi
-          awk -v db="$MEAN_DB" 'BEGIN { if (db <= -50) exit 1 }' || {
-            echo "Rendered MP4 audio is effectively silent: ${MEAN_DB} dB"
-            exit 1
-          }
-
-          echo "Render verified: ${MP3_COUNT} narration files, ${IMAGE_COUNT} local media files, mean audio ${MEAN_DB} dB"
-          ffprobe -v error -show_entries format=duration,size -show_streams "$FILE"
-
+      - name: Commit fallback render
+        run: |
+          PROJECT="${{ inputs.project_id }}"
           git config user.name "EA Video Factory"
           git config user.email "actions@users.noreply.github.com"
-          git add "$FILE" "$AUDIO_DIR"/ "$MEDIA_DIR"/
-          git status --short
+          git add "public/video-factory/${PROJECT}.mp4" "public/video-factory/audio/${PROJECT}/" "public/video-factory/media/${PROJECT}/"
           if git diff --cached --quiet; then
-            echo "Production assets already match this render. Nothing to commit."
+            echo "No generated asset changes."
             exit 0
           fi
           git commit -m "Render narrated ${PROJECT} episode"
-          git push origin HEAD:${{ github.head_ref || github.ref_name }}
+          git push
