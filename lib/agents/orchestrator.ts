@@ -2,7 +2,7 @@ import { logAIEvent } from '@/lib/ai/logging';
 import type { AIRequestContext } from '@/lib/ai/types';
 import { verifyAgentCompletion } from '@/lib/agent-reliability/client';
 import { matchAgents } from '@/lib/agents/registry';
-import type { AgentExecutionResult, AgentFinding, OrchestratorRequest, OrchestratorResponse } from '@/lib/agents/types';
+import type { AgentExecutionResult, AgentFinding, AgentStatus, OrchestratorRequest, OrchestratorResponse } from '@/lib/agents/types';
 import { optimizeContext } from '@/lib/context-optimizer';
 
 function uniqueFindings(items: AgentFinding[]) {
@@ -39,6 +39,11 @@ function contextItems(context?: Record<string, unknown>) {
     priority: key.toLowerCase().includes('constraint') || key.toLowerCase().includes('acceptance') ? 10 : 0,
     text: typeof value === 'string' ? `${key}: ${value}` : `${key}: ${JSON.stringify(value)}`,
   }));
+}
+
+function readAgentStatus(agent: { status: unknown }): AgentStatus {
+  const value = typeof agent.status === 'function' ? agent.status() : agent.status;
+  return value === 'available' || value === 'disabled' || value === 'degraded' ? value : 'degraded';
 }
 
 export async function runOrchestrator(request: OrchestratorRequest, context: AIRequestContext): Promise<OrchestratorResponse> {
@@ -107,7 +112,7 @@ export async function runOrchestrator(request: OrchestratorRequest, context: AIR
     ok: true,
     requestId: context.requestId,
     response: mergeResults(results),
-    agents: selectedAgents.map((agent) => ({ name: agent.name, status: agent.status() })),
+    agents: selectedAgents.map((agent) => ({ name: agent.name, status: readAgentStatus(agent) })),
     reliability: {
       verified: reliability.verified,
       status: reliability.status,
