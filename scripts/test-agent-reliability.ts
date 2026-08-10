@@ -1,6 +1,6 @@
 import { strict as assert } from 'node:assert';
 import { verifyAgentCompletion } from '../lib/agent-reliability/client';
-import { nextVideoStage, requiredVideoCompletionGates, type VideoPipelineState } from '../lib/video-factory/pipeline';
+import { nextVideoStage, requiredVideoCompletionGates, type VideoPipelineState } from '../lib/production-pipeline/video-factory';
 
 async function main() {
   const incomplete: VideoPipelineState = {
