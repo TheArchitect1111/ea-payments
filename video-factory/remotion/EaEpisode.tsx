@@ -8,13 +8,14 @@ import { GOLD, MUTED, WHITE } from './palette';
 
 export type EaEpisodeProps = { project: VideoProject };
 function narrationAsset(projectId:string, sceneId:string){ return `video-factory/audio/${projectId}/${sceneId}.mp3`; }
+function mediaAsset(url:string){ return /^https?:\/\//i.test(url) ? url : staticFile(url.replace(/^\//,'')); }
 function BrandBug(){ return <div style={{position:'absolute',right:80,top:54,display:'flex',alignItems:'center',gap:12,zIndex:8}}><div style={{width:7,height:7,borderRadius:99,background:GOLD}}/><div style={{color:'rgba(247,244,238,.8)',letterSpacing:3,textTransform:'uppercase',fontSize:15,fontWeight:700}}>The Money Behind It</div></div>; }
 function Eyebrow({children}:{children?:string}){ return children ? <div style={{color:GOLD,letterSpacing:4,textTransform:'uppercase',fontSize:20,fontWeight:800,marginBottom:22}}>{children}</div> : null; }
 function Headline({children,size=76}:{children?:string,size?:number}){ return <div style={{fontFamily:'Georgia, Times New Roman, serif',fontSize:size,lineHeight:1.02,fontWeight:700,color:WHITE,letterSpacing:-2}}>{children}</div>; }
 function CinematicImage({scene}:{scene:VideoScene}){
  const frame=useCurrentFrame(); const zoom=interpolate(frame,[0,360],[1.02,1.12],{extrapolateRight:'clamp'}); const reveal=interpolate(frame,[0,18],[0,1],{extrapolateRight:'clamp'});
  return <AbsoluteFill>
-   <Img src={scene.mediaUrl!} style={{width:'100%',height:'100%',objectFit:'cover',transform:`scale(${zoom})`}}/>
+   <Img src={mediaAsset(scene.mediaUrl!)} style={{width:'100%',height:'100%',objectFit:'cover',transform:`scale(${zoom})`}}/>
    <AbsoluteFill style={{background:'linear-gradient(90deg,rgba(4,9,18,.94) 0%,rgba(4,9,18,.78) 40%,rgba(4,9,18,.24) 72%,rgba(4,9,18,.10) 100%)'}}/>
    <AbsoluteFill style={{background:'linear-gradient(0deg,rgba(4,9,18,.72) 0%,transparent 42%)'}}/>
    <div style={{position:'absolute',left:110,top:0,bottom:0,width:900,display:'flex',flexDirection:'column',justifyContent:'center',opacity:reveal,transform:`translateY(${(1-reveal)*34}px)`}}>
