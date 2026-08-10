@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { adminApiUnauthorized, guardAdminApi } from '@/lib/api/admin-route';
 import { ensurePublicPreview, renderVideoProject } from '@/lib/video-factory/render';
+import { publicRenderedVideoUrl } from '@/lib/video-factory/paths';
 import { listVideoEngines } from '@/lib/video-factory/providers';
 import { resolveNarrationProvider } from '@/lib/video-factory/narration';
 import { listVideoProjects, resolveVideoProject } from '@/lib/video-factory/registry';
@@ -9,6 +10,16 @@ import { projectDurationInSeconds } from '@/lib/video-factory/schema';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 export const maxDuration = 300;
+
+async function deployedPreviewExists(req: NextRequest, projectId: string): Promise<boolean> {
+  const previewUrl = new URL(publicRenderedVideoUrl(projectId), req.nextUrl.origin);
+  try {
+    const response = await fetch(previewUrl, { method: 'HEAD', cache: 'no-store' });
+    return response.ok;
+  } catch {
+    return false;
+  }
+}
 
 export async function GET(req: NextRequest) {
   const auth = await guardAdminApi(req);
@@ -55,8 +66,9 @@ export async function POST(req: NextRequest) {
   }
 
   const project = resolveVideoProject({ projectId: body.projectId, topic: body.topic });
+  const previewUrl = publicRenderedVideoUrl(project.id);
 
-  const payload = (previewUrl: string, cached: boolean, extra?: Record<string, unknown>) => ({
+  const payload = (url: string, cached: boolean, extra?: Record<string, unknown>) => ({
     ok: true,
     service: 'EA Video Factory',
     engine: 'remotion',
@@ -64,12 +76,16 @@ export async function POST(req: NextRequest) {
     projectId: project.id,
     title: project.title,
     description: project.description,
-    previewUrl,
+    previewUrl: url,
     durationSeconds: projectDurationInSeconds(project),
     ...extra,
   });
 
   try {
+    if (!body.force && (await deployedPreviewExists(req, project.id))) {
+      return NextResponse.json(payload(previewUrl, true, { source: 'deployed-public-asset' }));
+    }
+
     if (!body.force) {
       const cached = await ensurePublicPreview(project.id);
       if (cached) {
@@ -80,6 +96,15 @@ export async function POST(req: NextRequest) {
     const rendered = await renderVideoProject(project.id);
     return NextResponse.json(payload(rendered.previewUrl, false));
   } catch (error) {
+    if (await deployedPreviewExists(req, project.id)) {
+      return NextResponse.json(
+        payload(previewUrl, true, {
+          fallback: 'deployed-public-asset-after-render-error',
+          renderError: error instanceof Error ? error.message : 'Remotion render failed',
+        }),
+      );
+    }
+
     const cached = await ensurePublicPreview(project.id);
     if (cached) {
       return NextResponse.json(
