@@ -12,6 +12,9 @@ on:
       - master
     paths:
       - '.github/workflows/video-factory-render.yml'
+      - 'video-factory/**'
+      - 'lib/video-factory/**'
+      - 'scripts/render-video-factory.mjs'
 
 permissions:
   contents: write
