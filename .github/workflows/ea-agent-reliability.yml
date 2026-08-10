@@ -6,7 +6,7 @@ on:
     paths:
       - 'lib/context-optimizer/**'
       - 'lib/agent-reliability/**'
-      - 'lib/video-factory/pipeline.ts'
+      - 'lib/production-pipeline/**'
       - 'services/agent-reliability/**'
       - 'scripts/test-context-optimizer.ts'
       - 'scripts/test-agent-reliability.ts'
