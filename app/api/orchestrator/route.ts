@@ -4,7 +4,7 @@ import { AIGatewayError } from '@/lib/ai/gateway';
 import type { AIRequestContext } from '@/lib/ai/types';
 import { runOrchestrator } from '@/lib/agents/orchestrator';
 import { listAgents } from '@/lib/agents/registry';
-import type { OrchestratorRequest } from '@/lib/agents/types';
+import type { AgentStatus, OrchestratorRequest } from '@/lib/agents/types';
 
 export const dynamic = 'force-dynamic';
 
@@ -20,6 +20,11 @@ function routeError(error: unknown, id: string) {
     { ok: false, requestId: id, error: error instanceof Error ? error.message : 'Orchestrator request failed.', code: 'ORCHESTRATOR_ERROR' },
     { status: 500 },
   );
+}
+
+function readAgentStatus(agent: { status: unknown }): AgentStatus {
+  const value = typeof agent.status === 'function' ? agent.status() : agent.status;
+  return value === 'available' || value === 'disabled' || value === 'degraded' ? value : 'degraded';
 }
 
 export async function POST(req: NextRequest) {
@@ -59,7 +64,7 @@ export async function GET() {
       name: agent.name,
       description: agent.description,
       capabilities: agent.capabilities,
-      status: agent.status(),
+      status: readAgentStatus(agent),
     })),
   });
 }
