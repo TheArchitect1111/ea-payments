@@ -14,7 +14,10 @@ export async function GET(req: NextRequest, context: { params: Promise<{ provide
   if (!configured) return NextResponse.redirect(new URL(`/amplifi/workspace?connections=${value}-setup-required#connections`, req.url));
   const state = randomBytes(24).toString('base64url');
   const verifier = value === 'x' ? randomBytes(48).toString('base64url') : undefined;
-  const response = NextResponse.redirect(oauthStart(value, req.nextUrl.origin, state, verifier));
+  const oauthOrigin =
+    process.env.AMPLIFI_PUBLIC_ORIGIN?.trim() ||
+    (process.env.VERCEL_ENV === 'production' ? 'https://efficiencyarchitects.online' : req.nextUrl.origin);
+  const response = NextResponse.redirect(oauthStart(value, oauthOrigin, state, verifier));
   const payload = JSON.stringify({ state, verifier, digest: createHash('sha256').update(state).digest('hex') });
   response.cookies.set(`amplifi_oauth_${value}`, Buffer.from(payload).toString('base64url'), { httpOnly: true, secure: true, sameSite: 'lax', maxAge: 600, path: '/' });
   return response;
