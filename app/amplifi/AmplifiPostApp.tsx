@@ -46,6 +46,7 @@ type ResearchMeta = {
 type AmplifiPath = 'publish' | 'research' | 'smartchitecture';
 type ApprovedPost = { requestId?: string; title: string; caption: string; status: string; };
 type SocialConnection = { id: string; platform: string; name: string; picture?: string; };
+type NativeProviderStatus = { provider: 'meta' | 'linkedin' | 'tiktok' | 'x'; label: string; configured: boolean; accounts: SocialConnection[]; };
 
 type TopicWatch = {
   id: string;
@@ -109,6 +110,9 @@ export default function AmplifiPostApp({
   const [socialConnections, setSocialConnections] = useState<SocialConnection[]>([]);
   const [connectionsLoading, setConnectionsLoading] = useState(loggedIn);
   const [connectionsConfigured, setConnectionsConfigured] = useState(false);
+  const [providerStatuses, setProviderStatuses] = useState<NativeProviderStatus[]>([]);
+  const [publishingNow, setPublishingNow] = useState(false);
+  const [publishResult, setPublishResult] = useState('');
   const [captures, setCaptures] = useState<CaptureOption[]>([]);
   const [selectedCaptureId, setSelectedCaptureId] = useState(captureId ?? '');
   const [showAmplifiSearch, setShowAmplifiSearch] = useState(false);
@@ -141,9 +145,10 @@ export default function AmplifiPostApp({
     if (!loggedIn) { setConnectionsLoading(false); return; }
     setConnectionsLoading(true);
     try {
-      const res = await fetch('/api/portal/amplifi/connections', { cache: 'no-store' });
-      const data = (await res.json()) as { configured?: boolean; connections?: SocialConnection[] };
-      setConnectionsConfigured(Boolean(data.configured));
+      const res = await fetch('/api/portal/amplifi/native-connections', { cache: 'no-store' });
+      const data = (await res.json()) as { providers?: NativeProviderStatus[]; connections?: SocialConnection[] };
+      setProviderStatuses(data.providers ?? []);
+      setConnectionsConfigured(Boolean(data.providers?.some((provider) => provider.configured)));
       setSocialConnections(data.connections ?? []);
     } catch {
       setSocialConnections([]);
@@ -488,6 +493,23 @@ export default function AmplifiPostApp({
     finally { setTestingConnection(false); }
   };
 
+  const publishNow = async () => {
+    if (!draft) return;
+    setPublishingNow(true); setPublishResult('');
+    try {
+      const res = await fetch('/api/portal/amplifi/native-publish', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: draft.linkedIn }),
+      });
+      const data = (await res.json()) as { ok?: boolean; error?: string; results?: Array<{ ok: boolean; account: { platform: string }; error?: string }> };
+      if (!data.ok) { setPublishResult(data.error || data.results?.map((item) => `${item.account.platform}: ${item.error || 'failed'}`).join(' · ') || 'Publishing failed.'); return; }
+      const live = data.results?.filter((item) => item.ok).map((item) => item.account.platform).join(', ');
+      const skipped = data.results?.filter((item) => !item.ok).map((item) => `${item.account.platform}: ${item.error}`).join(' · ');
+      setPublishResult(`Published to ${live || 'connected channels'}.${skipped ? ` ${skipped}` : ''}`);
+    } catch { setPublishResult('Publishing could not be completed.'); }
+    finally { setPublishingNow(false); }
+  };
+
   const portalAmplifi = slug ? `/portal/${slug}/amplifi` : null;
   const campaignName = businessName.trim() || 'Your next campaign';
   const sourceCount = researchMeta?.sources.length ?? 0;
@@ -787,8 +809,9 @@ export default function AmplifiPostApp({
 
             <section className="af-panel af-approved-panel" id="approved-posts">
               <div className="af-section-heading"><div><span className="af-eyebrow">Approved posts</span><h3>{approvedPost ? 'Your post is saved and ready for the next step.' : 'Accepted posts will appear here.'}</h3></div>{approvedPost ? <span className="af-review-chip af-approved-chip">Accepted</span> : null}</div>
-              {approvedPost ? <div className="af-approved-card"><div><strong>{approvedPost.title}</strong><small>{approvedPost.status}{approvedPost.requestId ? ` · ${approvedPost.requestId}` : ''}</small></div><button type="button" className="af-secondary-button" disabled={testingConnection} onClick={() => void testPublishingConnection()}>{testingConnection ? 'Testing…' : 'Test publishing connection'}</button></div> : <p>Create a draft, review it and select “Accept post.” You will stay inside Amplifi.</p>}
+              {approvedPost ? <div className="af-approved-card"><div><strong>{approvedPost.title}</strong><small>{approvedPost.status}{approvedPost.requestId ? ` · ${approvedPost.requestId}` : ''}</small></div><div className="af-approved-actions"><button type="button" className="af-primary-button" disabled={publishingNow || !socialConnections.length} onClick={() => void publishNow()}>{publishingNow ? 'Publishing…' : socialConnections.length ? 'Publish now' : 'Connect accounts first'}</button><button type="button" className="af-secondary-button" disabled={testingConnection} onClick={() => void testPublishingConnection()}>{testingConnection ? 'Testing…' : 'Test publishing connection'}</button></div></div> : <p>Create a draft, review it and select “Accept post.” You will stay inside Amplifi.</p>}
               {connectionResult ? <p className="af-message af-message-success" role="status">{connectionResult}</p> : null}
+              {publishResult ? <p className={publishResult.startsWith('Published') ? 'af-message af-message-success' : 'af-message af-message-error'} role="status">{publishResult}</p> : null}
             </section>
             <section className="af-next-strip" id="calendar">
               <div><span className="af-strip-icon">✓</span><p><strong>Next step</strong><small>{approvedPost ? 'Post saved. Test the publishing connection or choose a publishing time.' : draft ? 'Review the draft and accept it.' : 'Choose a path and create the first draft.'}</small></p></div>
@@ -799,17 +822,27 @@ export default function AmplifiPostApp({
 
           <aside className="af-insights-column">
             <section className="af-panel af-connections-panel" id="connections">
-              <div className="af-section-heading"><div><span className="af-eyebrow">Social connections</span><h3>Publish where your audience already is.</h3></div></div>
-              <p>Connect through Postiz using official platform authorization. Amplifi never asks for your social-media passwords.</p>
+              <div className="af-section-heading"><div><span className="af-eyebrow">Social connections</span><h3>Connect directly to Amplifi.</h3></div></div>
+              <p>Use each platform’s official authorization. Amplifi never asks for or stores your social-media password.</p>
               <div className="af-platform-grid">
-                {['Facebook', 'Instagram', 'LinkedIn', 'X', 'TikTok'].map((platform) => {
-                  const connection = socialConnections.find((item) => item.platform.toLowerCase().includes(platform.toLowerCase()));
-                  return <div className={connection ? 'af-platform-card af-platform-connected' : 'af-platform-card'} key={platform}><span>{connection ? '✓' : '○'}</span><div><strong>{platform}</strong><small>{connection ? connection.name || 'Connected' : 'Not connected'}</small></div></div>;
+                {[
+                  { name: 'Facebook', provider: 'meta' as const },
+                  { name: 'Instagram', provider: 'meta' as const },
+                  { name: 'LinkedIn', provider: 'linkedin' as const },
+                  { name: 'TikTok', provider: 'tiktok' as const },
+                  { name: 'X', provider: 'x' as const },
+                ].map(({ name, provider }) => {
+                  const connection = socialConnections.find((item) => item.platform.toLowerCase() === name.toLowerCase());
+                  const status = providerStatuses.find((item) => item.provider === provider);
+                  return <div className={connection ? 'af-platform-card af-platform-connected' : 'af-platform-card'} key={name}>
+                    <span>{connection ? '✓' : '○'}</span>
+                    <div><strong>{name}</strong><small>{connection ? connection.name || 'Connected' : status?.configured ? 'Ready to connect' : 'Developer setup required'}</small></div>
+                    {status?.configured && !connection ? <a href={`/api/portal/amplifi/native-connections/${provider}/start`}>Connect</a> : null}
+                  </div>;
                 })}
               </div>
               {connectionsLoading ? <p className="af-connection-note">Checking connections…</p> : null}
-              {!connectionsLoading && !connectionsConfigured ? <p className="af-message af-message-error">The Postiz connector requires its OAuth credentials before client connections can open.</p> : null}
-              {connectionsConfigured ? <a className="af-primary-button af-connect-link" href="/api/portal/amplifi/connections/start">{socialConnections.length ? 'Manage social accounts' : 'Connect social accounts'}</a> : null}
+              {!connectionsLoading && !connectionsConfigured ? <p className="af-message af-message-error">EA’s platform credentials must be approved and added before client authorization can open.</p> : null}
               {socialConnections.length ? <button type="button" className="af-text-button" onClick={() => void loadConnections()}>Refresh connections</button> : null}
             </section>
             <div id="results">

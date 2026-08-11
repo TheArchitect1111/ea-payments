@@ -1360,7 +1360,7 @@ body {
 }
 
 
-/* Postiz-backed social connections */
+/* Native Amplifi social connections */
 .af-connections-panel { scroll-margin-top: 24px; }
 .af-connections-panel > p { color: #747083; line-height: 1.6; }
 .af-platform-grid { display: grid; gap: 10px; margin: 18px 0; }
@@ -1372,3 +1372,7 @@ body {
 .af-platform-connected > span { background: #24b979; color: #fff; }
 .af-connect-link { display: flex; align-items: center; justify-content: center; width: 100%; text-decoration: none; }
 .af-connection-note { font-weight: 700; }
+
+.af-platform-card > a { margin-left: auto; padding: 8px 12px; border-radius: 10px; background: #6b38e6; color: #fff; text-decoration: none; font-size: 13px; font-weight: 800; }
+.af-approved-actions { display: flex; align-items: center; gap: 10px; }
+@media (max-width: 720px) { .af-approved-actions { width: 100%; flex-direction: column; } .af-approved-actions button { width: 100%; } }
