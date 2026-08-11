@@ -9,6 +9,7 @@ export type AmplifiPublishInput = {
   storyUrl?: string;
   actorName: string;
   idempotencyKey?: string;
+  dryRun?: boolean;
   media?: {
     url: string;
     mimeType?: string;
@@ -119,6 +120,7 @@ export async function publishToAmplifi(input: AmplifiPublishInput): Promise<Ampl
         media: input.media,
         idempotencyKey,
         requestedAt: attemptedAt,
+        dryRun: input.dryRun === true,
       }),
     });
 
