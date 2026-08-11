@@ -144,7 +144,7 @@ export default async function AmplifiMarketingPage({
         <h2>Start with Amplifi. Make it yours.</h2>
         <p className="am-smart-intro">
           Add the capabilities that help your business. Skip the ones that do not. Smartchitecture lets Amplifi grow
-          around the way you work instead of forcing you into somebody else's setup.
+          around the way you work instead of forcing you into somebody else&apos;s setup.
         </p>
         <div className="am-smart-stack">
           <article className="am-smart-core"><span>AMPLIFI</span><p>Your foundation for creating, organizing, scheduling, and understanding your content.</p></article>
