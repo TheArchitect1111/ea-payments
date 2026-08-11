@@ -28,7 +28,8 @@ export {
   ensureLaunchEditionModules,
 } from './presets';
 
-export { COMMERCE_OFFERS } from './offers';
+export { COMMERCE_OFFERS } from './catalog';
+export { AMPLIFI_COMMERCE_OFFERS } from './amplifi-offers';
 
 export {
   getCommerceOffer,
