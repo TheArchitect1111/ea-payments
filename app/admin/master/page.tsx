@@ -11,12 +11,11 @@ import {
   getDecisionIntelligence,
   type DecisionIntelligenceBundle,
 } from '@/lib/executive-decision-intelligence';
-import { ExecutiveShellPhaseOne } from './ExecutiveShellPhaseOne';
+import { MasterCommandCenterLight } from './MasterCommandCenterLight';
 import WebsitePortalOpsPanel from './WebsitePortalOpsPanel';
 
 export const dynamic = 'force-dynamic';
 
-/** Quiet fallback when EI cannot load (e.g. Org360 schema). Compose-only — no new intelligence. */
 function emptyIntelligence(): ExecutiveIntelligenceBundle {
   const generatedAt = new Date().toISOString();
   return {
@@ -51,7 +50,6 @@ function emptyIntelligence(): ExecutiveIntelligenceBundle {
   };
 }
 
-/** Quiet fallback when DI cannot load. Queue falls back to Mission Control cards in the shell. */
 function emptyDecisions(): DecisionIntelligenceBundle {
   const generatedAt = new Date().toISOString();
   return {
@@ -110,17 +108,19 @@ export default async function MasterPortalPage() {
   });
 
   return (
-    <main className="mx-auto max-w-6xl px-6 py-10 sm:px-8">
-      <ExecutiveShellPhaseOne
-        mission={mission}
-        rhythm={rhythm}
-        intelligence={intelligence}
-        decisions={decisions}
-        lastUpdated={lastUpdated}
-      />
-      <section className="mt-10">
-        <WebsitePortalOpsPanel />
-      </section>
+    <main className="min-h-screen bg-[#F6F4EF] px-4 py-6 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-[1500px]">
+        <MasterCommandCenterLight
+          mission={mission}
+          rhythm={rhythm}
+          intelligence={intelligence}
+          decisions={decisions}
+          lastUpdated={lastUpdated}
+        />
+        <section className="mt-8 rounded-[24px] border border-[#E8E4DB] bg-white p-5 shadow-[0_14px_40px_rgba(50,45,35,0.05)] sm:p-6">
+          <WebsitePortalOpsPanel />
+        </section>
+      </div>
     </main>
   );
 }
