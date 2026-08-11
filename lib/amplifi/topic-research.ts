@@ -12,7 +12,7 @@ export type AmplifiResearchSource = {
   url: string;
   snippet: string;
   kind: AmplifiResearchSourceKind;
-  publishedAt?: string | null;
+  publishedAt?: string | null | undefined;
   provider: string;
   withinRange: boolean;
 };
@@ -292,7 +292,7 @@ export async function runAmplifiTopicResearch(
         withinRange: inRange(publishedAt, input.dateFrom, input.dateTo),
       } satisfies AmplifiResearchSource;
     })
-    .filter((s): s is AmplifiResearchSource => Boolean(s));
+    .filter((s): s is NonNullable<typeof s> => Boolean(s));
 
   const scrapeTop = Math.min(Math.max(input.scrapeTop ?? 3, 0), 5);
   if (scrapeTop > 0) {
