@@ -59,8 +59,9 @@ test('simplifi portal route requires portal login', async ({ page }) => {
 test('amplifi landing page is reachable', async ({ page }) => {
   await page.goto('/amplifi');
   await expect(
-    page.getByRole('heading', { name: /draft\. review\. share when ready/i }),
+    page.getByRole('heading', { name: /create work people actually want to stop and read/i }),
   ).toBeVisible();
+  await expect(page.getByText(/smart research/i).first()).toBeVisible();
 });
 
 test('magnifi consider demo has opportunity content', async ({ page }) => {

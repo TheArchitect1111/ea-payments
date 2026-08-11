@@ -53,6 +53,10 @@ function defaultDateRange(): { from: string; to: string } {
   };
 }
 
+function NavIcon({ children }: { children: string }) {
+  return <span className="af-nav-icon" aria-hidden="true">{children}</span>;
+}
+
 export default function AmplifiPostApp({
   loggedIn,
   slug,
@@ -241,12 +245,8 @@ export default function AmplifiPostApp({
         sources: research.sources,
         warnings: research.warnings || [],
       });
-      if (research.warnings?.length) {
-        setMessage(research.warnings[0] || '');
-      }
-      setSuccess(
-        `Found ${research.sources.length} source(s) for ${research.dateFrom} → ${research.dateTo}. Review the draft, then submit for approval.`,
-      );
+      if (research.warnings?.length) setMessage(research.warnings[0] || '');
+      setSuccess(`Found ${research.sources.length} source(s). Review the draft and send it to your approval queue.`);
     } catch {
       setMessage('Network error during Amplifi Search.');
     } finally {
@@ -293,9 +293,7 @@ export default function AmplifiPostApp({
         setMessage(data.error ?? 'Could not submit for approval.');
         return;
       }
-      setSuccess(
-        `Submitted for review (ID: ${data.requestId ?? 'saved'}). Nothing posts automatically — your team reviews in Update Hub before publishing.`,
-      );
+      setSuccess(`Added to review queue${data.requestId ? ` · ${data.requestId}` : ''}.`);
     } catch {
       setMessage('Network error. Try again.');
     } finally {
@@ -305,286 +303,212 @@ export default function AmplifiPostApp({
 
   const portalAmplifi = slug ? `/portal/${slug}/amplifi` : null;
   const updatesUrl = slug ? `/portal/${slug}/updates` : '/portal/login?next=%2Famplifi';
+  const campaignName = businessName.trim() || 'Your next campaign';
+  const sourceCount = researchMeta?.sources.length ?? 0;
 
   return (
-    <div className="af-app">
-      <header className="af-header">
-        <span className="af-brand">AMPLIFI™</span>
-        <div className="flex gap-4">
-          {loggedIn && portalAmplifi ? (
-            <Link href={portalAmplifi} className="af-header-link">
-              Portal hub
-            </Link>
-          ) : (
-            <Link href="/portal/login?next=%2Famplifi" className="af-header-link">
-              Sign in
-            </Link>
-          )}
-          <Link href="/amplifi/install" className="af-header-link">
-            Install
-          </Link>
+    <div className="af-shell">
+      <aside className="af-sidebar">
+        <Link href="/amplifi" className="af-logo" aria-label="Amplifi home">
+          <span className="af-logo-mark">A</span>
+          <span>amplifi</span>
+        </Link>
+
+        <nav className="af-nav" aria-label="Amplifi navigation">
+          <a className="af-nav-item af-nav-active" href="#campaign"><NavIcon>C</NavIcon><span>Campaign</span></a>
+          <a className="af-nav-item" href="#search"><NavIcon>S</NavIcon><span>Search</span><b className="af-nav-badge">Smart</b></a>
+          <a className="af-nav-item" href="#content"><NavIcon>✦</NavIcon><span>Content studio</span></a>
+          <a className="af-nav-item" href="#calendar"><NavIcon>31</NavIcon><span>Calendar</span></a>
+          <a className="af-nav-item" href="#results"><NavIcon>↗</NavIcon><span>Results</span></a>
+        </nav>
+
+        <div className="af-sidebar-spacer" />
+
+        <div className="af-copilot-card">
+          <span className="af-spark">✦</span>
+          <strong>Amplifi guide</strong>
+          <p>Research, shape and prepare content without losing the human voice.</p>
+          <button type="button" onClick={() => setShowAmplifiSearch(true)}>Start with research</button>
         </div>
-      </header>
 
-      <main className="af-main">
-        <section className="af-hero">
-          <p className="af-kicker">Review before posting</p>
-          <h1 className="af-title">Draft. Review. Share when ready.</h1>
-          <p className="af-lede">
-            Start from campaign captures, or optionally use Amplifi Search to gather articles, news, and videos in a
-            date window — then store drafts for approval. Amplifi does not auto-publish.{' '}
-            {MAGNIFI_PUBLIC_LINK_WARNING}
-          </p>
-        </section>
+        <div className="af-sidebar-footer">
+          <span className="af-mini-logo">A</span>
+          <span>© 2026 Efficiency Architects</span>
+        </div>
+      </aside>
 
-        {loggedIn && captures.length > 0 ? (
-          <section className="af-card">
-            <label className="af-label" htmlFor="af-capture">
-              1. Campaign posts (your captures)
-            </label>
-            <select
-              id="af-capture"
-              className="af-input"
-              value={selectedCaptureId}
-              onChange={(e) => pickCapture(e.target.value)}
-            >
-              <option value="">Select a capture…</option>
-              {captures.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.title}
-                  {c.businessName ? ` — ${c.businessName}` : ''}
-                </option>
-              ))}
-            </select>
-            <p className="af-note">
-              Or{' '}
-              <Link href="/capture" className="underline font-bold text-[#1B2B4D]">
-                capture new material
-              </Link>{' '}
-              with Simplifi first.
-            </p>
-          </section>
-        ) : null}
-
-        <section className="af-card">
-          <div className="af-search-head">
-            <div>
-              <p className="af-label" style={{ marginBottom: 4 }}>
-                Amplifi Search (optional)
-              </p>
-              <p className="af-note" style={{ marginTop: 0 }}>
-                Separate tool: topic + date range → public articles, news, and videos → draft for approval.
-              </p>
+      <main className="af-workspace">
+        <header className="af-topbar">
+          <div>
+            <div className="af-title-row">
+              <h1>{campaignName}</h1>
+              <span className="af-status-pill">Draft workspace</span>
             </div>
-            <button
-              type="button"
-              className="af-btn af-btn-outline"
-              onClick={() => setShowAmplifiSearch((v) => !v)}
-            >
-              {showAmplifiSearch ? 'Hide' : 'Open'}
-            </button>
+            <p>Build, research and review the next piece of your campaign.</p>
           </div>
+          <div className="af-top-actions">
+            {loggedIn && portalAmplifi ? <Link href={portalAmplifi} className="af-quiet-link">Portal hub</Link> : <Link href="/portal/login?next=%2Famplifi" className="af-quiet-link">Sign in</Link>}
+            <button type="button" className="af-create-button" onClick={() => document.getElementById('content')?.scrollIntoView({ behavior: 'smooth' })}>＋ Create new</button>
+          </div>
+        </header>
 
-          {showAmplifiSearch ? (
-            <div className="af-search-body">
-              <label className="af-label" htmlFor="af-topic">
-                Topic
-              </label>
-              <textarea
-                id="af-topic"
-                className="af-textarea"
-                value={topic}
-                onChange={(e) => setTopic(e.target.value)}
-                placeholder="e.g. Automation and how it impacts mid-size businesses"
-              />
-              <div className="af-date-row">
-                <div>
-                  <label className="af-label" htmlFor="af-from">
-                    From
-                  </label>
-                  <input
-                    id="af-from"
-                    type="date"
-                    className="af-input"
-                    value={dateFrom}
-                    onChange={(e) => setDateFrom(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <label className="af-label" htmlFor="af-to">
-                    To
-                  </label>
-                  <input
-                    id="af-to"
-                    type="date"
-                    className="af-input"
-                    value={dateTo}
-                    onChange={(e) => setDateTo(e.target.value)}
-                  />
-                </div>
+        <div className="af-tabs" id="campaign">
+          <a className="af-tab af-tab-active" href="#campaign">Overview</a>
+          <a className="af-tab" href="#content">Posts</a>
+          <a className="af-tab" href="#search">Research</a>
+          <a className="af-tab" href="#results">Results</a>
+        </div>
+
+        <div className="af-dashboard-grid">
+          <section className="af-primary-column">
+            <section className="af-panel af-intro-panel">
+              <div>
+                <span className="af-eyebrow">Campaign workspace</span>
+                <h2>Create work people actually want to stop and read.</h2>
+                <p>Start from an EA capture, a source link or fresh research. Amplifi keeps review and publishing controls visible at every step.</p>
               </div>
-              <button
-                type="button"
-                className="af-btn af-btn-primary"
-                disabled={researching || !loggedIn}
-                onClick={() => void runAmplifiSearch()}
-              >
-                {researching ? 'Searching…' : 'Search & draft posts'}
-              </button>
-              {!loggedIn ? (
-                <p className="af-note">
-                  <Link href="/portal/login?next=%2Famplifi" className="underline font-bold text-[#1B2B4D]">
-                    Sign in
-                  </Link>{' '}
-                  to run Amplifi Search.
-                </p>
+              <div className="af-intro-orb" aria-hidden="true">A</div>
+            </section>
+
+            {loggedIn && captures.length > 0 ? (
+              <section className="af-panel af-compact-panel">
+                <div className="af-section-heading">
+                  <div><span className="af-eyebrow">Campaign source</span><h3>Start from an existing capture</h3></div>
+                  <Link href="/capture" className="af-text-action">New capture</Link>
+                </div>
+                <select className="af-input" value={selectedCaptureId} onChange={(e) => pickCapture(e.target.value)}>
+                  <option value="">Select a capture…</option>
+                  {captures.map((capture) => <option key={capture.id} value={capture.id}>{capture.title}{capture.businessName ? ` · ${capture.businessName}` : ''}</option>)}
+                </select>
+              </section>
+            ) : null}
+
+            <section className="af-panel" id="search">
+              <div className="af-section-heading">
+                <div>
+                  <span className="af-eyebrow">Smart Research</span>
+                  <h3>Find a timely angle before you create.</h3>
+                  <p>Search public articles, news and videos inside a date range, then turn the useful findings into a draft.</p>
+                </div>
+                <button type="button" className="af-outline-button" onClick={() => setShowAmplifiSearch((value) => !value)}>{showAmplifiSearch ? 'Close research' : 'Open research'}</button>
+              </div>
+
+              {showAmplifiSearch ? (
+                <div className="af-research-form">
+                  <label className="af-field af-field-wide"><span>Topic</span><textarea value={topic} onChange={(e) => setTopic(e.target.value)} placeholder="What should Amplifi research?" /></label>
+                  <label className="af-field"><span>From</span><input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} /></label>
+                  <label className="af-field"><span>To</span><input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} /></label>
+                  <div className="af-field af-monitor-field"><span>Search mode</span><div className="af-mode-pills"><button type="button" className="af-mode-active">Search once</button><button type="button" disabled title="Recurring monitoring is next on the Amplifi roadmap">Monitor topic · coming next</button></div></div>
+                  <button type="button" className="af-primary-button af-research-submit" disabled={researching || !loggedIn} onClick={() => void runAmplifiSearch()}>{researching ? 'Researching…' : 'Search & create draft'}</button>
+                </div>
               ) : null}
-            </div>
-          ) : null}
-        </section>
 
-        {researchMeta?.sources?.length ? (
-          <section className="af-card">
-            <p className="af-label">Search results</p>
-            <p className="af-note">
-              {researchMeta.topic} · {researchMeta.dateFrom} → {researchMeta.dateTo}
-            </p>
-            <ul className="af-source-list">
-              {researchMeta.sources.map((source) => (
-                <li key={source.url}>
-                  <a href={source.url} target="_blank" rel="noreferrer">
-                    {source.title}
-                  </a>
-                  <span>
-                    {source.kind}
-                    {source.publishedAt ? ` · ${source.publishedAt}` : ' · date unconfirmed'}
-                  </span>
-                  {source.snippet ? <p>{source.snippet}</p> : null}
-                </li>
-              ))}
-            </ul>
-          </section>
-        ) : null}
+              {!loggedIn && showAmplifiSearch ? <p className="af-inline-note">Sign in to run Smart Research.</p> : null}
 
-        <section className="af-card">
-          <p className="af-label">Create / refine post</p>
-          <label className="af-label" htmlFor="af-name">
-            Post title
-          </label>
-          <input
-            id="af-name"
-            className="af-input"
-            value={businessName}
-            onChange={(e) => setBusinessName(e.target.value)}
-            placeholder="e.g. Automation impact for mid-size businesses"
-          />
-
-          <label className="af-label" htmlFor="af-url">
-            Primary source / story link
-          </label>
-          <input
-            id="af-url"
-            className="af-input"
-            value={storyUrl}
-            onChange={(e) => setStoryUrl(e.target.value)}
-            placeholder="https://…"
-          />
-
-          <label className="af-label" htmlFor="af-headline">
-            Hook (optional)
-          </label>
-          <textarea
-            id="af-headline"
-            className="af-textarea"
-            value={headline}
-            onChange={(e) => setHeadline(e.target.value)}
-            placeholder="Opening line for your social post"
-          />
-
-          <label className="af-label" htmlFor="af-win">
-            Quick win (optional)
-          </label>
-          <input
-            id="af-win"
-            className="af-input"
-            value={quickWin}
-            onChange={(e) => setQuickWin(e.target.value)}
-            placeholder="One insight worth sharing"
-          />
-
-          {message ? <p className="af-error">{message}</p> : null}
-          {success ? <p className="af-success">{success}</p> : null}
-
-          <div className="af-actions">
-            <button
-              type="button"
-              className="af-btn af-btn-primary"
-              disabled={loading}
-              onClick={() => generateDraft()}
-            >
-              {loading ? 'Loading…' : 'Generate from link'}
-            </button>
-            <button type="button" className="af-btn af-btn-outline" onClick={loadDemo}>
-              Try demo
-            </button>
-          </div>
-        </section>
-
-        {draft ? (
-          <section className="af-card">
-            <p className="af-kicker" style={{ color: '#c9a844' }}>
-              Review before posting
-            </p>
-            <p className="af-note" style={{ marginBottom: 12 }}>
-              Read the draft below. Submit for team approval, or copy/open a network yourself — Amplifi never posts for
-              you. {MAGNIFI_PUBLIC_LINK_WARNING}
-            </p>
-            <StoryDraftPanel draft={draft} />
-
-            <div className="af-actions" style={{ marginTop: 16 }}>
-              <button
-                type="button"
-                className="af-btn af-btn-secondary"
-                disabled={submitting || !loggedIn}
-                onClick={() => void submitForApproval()}
-              >
-                {submitting ? 'Submitting…' : 'Submit for approval'}
-              </button>
-              {loggedIn ? (
-                <Link href={updatesUrl} className="af-btn af-btn-outline">
-                  View Update Hub
-                </Link>
+              {researchMeta?.sources?.length ? (
+                <div className="af-source-grid">
+                  {researchMeta.sources.slice(0, 4).map((source) => (
+                    <a key={source.url} href={source.url} target="_blank" rel="noreferrer" className="af-source-card">
+                      <span>{source.kind}</span><strong>{source.title}</strong><p>{source.snippet}</p><small>{source.publishedAt || 'Date unconfirmed'}</small>
+                    </a>
+                  ))}
+                </div>
               ) : null}
-            </div>
+            </section>
 
-            <p className="af-label" style={{ marginTop: 20 }}>
-              Share manually (you post)
-            </p>
-            <div className="af-platforms">
-              <button
-                type="button"
-                className="af-platform"
-                onClick={() => openSocialShare('linkedin', draft, storyUrl.trim() || DEMO_STORY_URL)}
-              >
-                LinkedIn
-              </button>
-              <button
-                type="button"
-                className="af-platform"
-                onClick={() => openSocialShare('x', draft, storyUrl.trim() || DEMO_STORY_URL)}
-              >
-                X / Twitter
-              </button>
-              <button
-                type="button"
-                className="af-platform"
-                onClick={() => openSocialShare('facebook', draft, storyUrl.trim() || DEMO_STORY_URL)}
-              >
-                Facebook
-              </button>
-            </div>
+            <section className="af-panel" id="content">
+              <div className="af-section-heading">
+                <div><span className="af-eyebrow">Content studio</span><h3>Shape the post</h3><p>Keep the inputs simple. Amplifi turns the source and angle into usable social copy.</p></div>
+                <button type="button" className="af-text-action af-button-link" onClick={loadDemo}>Load demo</button>
+              </div>
+
+              <div className="af-editor-grid">
+                <label className="af-field"><span>Post title</span><input value={businessName} onChange={(e) => setBusinessName(e.target.value)} placeholder="Campaign or post title" /></label>
+                <label className="af-field"><span>Primary source</span><input value={storyUrl} onChange={(e) => setStoryUrl(e.target.value)} placeholder="https://…" /></label>
+                <label className="af-field af-field-wide"><span>Hook <small>optional</small></span><textarea value={headline} onChange={(e) => setHeadline(e.target.value)} placeholder="Opening thought that earns attention" /></label>
+                <label className="af-field af-field-wide"><span>Useful takeaway <small>optional</small></span><input value={quickWin} onChange={(e) => setQuickWin(e.target.value)} placeholder="One thing the reader should leave with" /></label>
+              </div>
+
+              {message ? <p className="af-message af-message-error">{message}</p> : null}
+              {success ? <p className="af-message af-message-success">{success}</p> : null}
+
+              <div className="af-action-row">
+                <button type="button" className="af-primary-button" disabled={loading} onClick={() => generateDraft()}>{loading ? 'Loading…' : draft ? 'Regenerate draft' : 'Generate draft'}</button>
+                <span>Nothing publishes from this screen without review.</span>
+              </div>
+            </section>
+
+            {draft ? (
+              <section className="af-panel af-draft-panel">
+                <div className="af-section-heading">
+                  <div><span className="af-eyebrow">Planned post</span><h3>Review the creative before it moves forward.</h3></div>
+                  <span className="af-review-chip">Needs review</span>
+                </div>
+
+                <div className="af-social-preview">
+                  <div className="af-social-preview-head"><span className="af-network-mark">in</span><div><strong>LinkedIn draft</strong><small>Preview</small></div></div>
+                  <div className="af-creative-card"><div className="af-creative-glow" /><span className="af-creative-brand">AMPLIFI</span><h4>{headline.trim() || businessName.trim() || 'A clearer story deserves a stronger next step.'}</h4><p>{quickWin.trim() || 'Turn useful insight into content your audience can act on.'}</p></div>
+                  <StoryDraftPanel draft={draft} />
+                </div>
+
+                <div className="af-review-actions">
+                  <button type="button" className="af-approve-button" disabled={submitting || !loggedIn} onClick={() => void submitForApproval()}>{submitting ? 'Sending…' : '✓ Accept & send to review'}</button>
+                  <button type="button" className="af-edit-button" onClick={() => document.getElementById('content')?.scrollIntoView({ behavior: 'smooth' })}>✎ Edit</button>
+                  <button type="button" className="af-reject-button" onClick={() => { setDraft(null); setSuccess('Draft removed. Your source and inputs are still here.'); }}>⊘ Reject</button>
+                </div>
+
+                <div className="af-manual-share">
+                  <span>Manual share</span>
+                  <button type="button" onClick={() => openSocialShare('linkedin', draft, storyUrl.trim() || DEMO_STORY_URL)}>LinkedIn</button>
+                  <button type="button" onClick={() => openSocialShare('facebook', draft, storyUrl.trim() || DEMO_STORY_URL)}>Facebook</button>
+                  <button type="button" onClick={() => openSocialShare('x', draft, storyUrl.trim() || DEMO_STORY_URL)}>X</button>
+                  {loggedIn ? <Link href={updatesUrl}>Review queue →</Link> : null}
+                </div>
+              </section>
+            ) : (
+              <section className="af-empty-creative"><span>✦</span><div><strong>Your creative preview will appear here.</strong><p>Add a source and generate a draft, or start with Smart Research.</p></div></section>
+            )}
+
+            <section className="af-next-strip" id="calendar">
+              <div><span className="af-strip-icon">✓</span><p><strong>Next step</strong><small>{draft ? 'Review the draft and move it into approval.' : 'Create the first draft.'}</small></p></div>
+              <div><span className="af-strip-icon">◷</span><p><strong>Optimal times</strong><small>Scheduling recommendations appear with approved campaign posts.</small></p></div>
+              <div><span className="af-strip-icon">⌕</span><p><strong>Smart Research</strong><small>{sourceCount ? `${sourceCount} source${sourceCount === 1 ? '' : 's'} found in this session.` : 'Research is ready when you need a fresh angle.'}</small></p></div>
+            </section>
           </section>
-        ) : null}
+
+          <aside className="af-insights-column" id="results">
+            <section className="af-panel af-performance-panel">
+              <div className="af-section-heading af-tight-heading"><div><span className="af-eyebrow">Campaign performance</span><h3>Results</h3></div><span className="af-live-dot">Live after publish</span></div>
+              <div className="af-metric-grid">
+                <div><span>Reach</span><strong>—</strong><small>Waiting for live data</small></div>
+                <div><span>Engagements</span><strong>—</strong><small>Waiting for live data</small></div>
+                <div><span>Link clicks</span><strong>—</strong><small>Tracked after publish</small></div>
+                <div><span>Conversions</span><strong>—</strong><small>Attributed when available</small></div>
+              </div>
+              <div className="af-chart-placeholder"><span /><span /><span /><span /><span /><span /><span /></div>
+              <p className="af-data-note">No vanity numbers. This panel stays empty until Amplifi has real campaign data to report.</p>
+            </section>
+
+            <section className="af-panel af-health-panel">
+              <span className="af-eyebrow">Campaign health</span>
+              <div className="af-health-title"><strong>{draft ? 'Creative ready for review' : 'Build in progress'}</strong><span>{draft ? '75%' : '35%'}</span></div>
+              <div className="af-health-track"><span style={{ width: draft ? '75%' : '35%' }} /></div>
+              <ul>
+                <li className={storyUrl ? 'is-ready' : ''}><span />Source connected</li>
+                <li className={researchMeta ? 'is-ready' : ''}><span />Research grounded</li>
+                <li className={draft ? 'is-ready' : ''}><span />Creative generated</li>
+                <li><span />Approval complete</li>
+              </ul>
+            </section>
+
+            <section className="af-panel af-rules-panel">
+              <span className="af-eyebrow">Publishing guardrail</span>
+              <h3>Human approval stays in the loop.</h3>
+              <p>{MAGNIFI_PUBLIC_LINK_WARNING}</p>
+              <Link href="/amplifi/install" className="af-text-action">Install Amplifi →</Link>
+            </section>
+          </aside>
+        </div>
       </main>
     </div>
   );
