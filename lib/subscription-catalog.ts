@@ -1,5 +1,5 @@
 /**
- * Subscription plans ? derived from @ea/payments-contract.
+ * Subscription plans — derived from @ea/payments-contract.
  */
 
 import type Stripe from 'stripe';
@@ -10,6 +10,8 @@ import { listCommerceOffers, type CommerceOffer } from '@ea/payments-contract';
 export type SubscriptionPlanId =
   | 'simplifi_monthly'
   | 'simplifi_annual'
+  | 'amplifi_social'
+  | 'amplifi_complete'
   | 'platform_monthly'
   | 'platform_annual';
 
@@ -42,9 +44,7 @@ function toSubscriptionPlan(offer: CommerceOffer): SubscriptionPlan | null {
     stripePriceEnvKey: offer.stripePriceEnvKey,
     allowInlineStripePrice: offer.allowInlineStripePrice,
     trialDays: offer.trialDays,
-    airtablePackageName: offer.airtablePackageName as
-      | 'Simplifi'
-      | 'Implementation Package',
+    airtablePackageName: offer.airtablePackageName as 'Simplifi' | 'Implementation Package',
     moduleIds: [...offer.moduleIds] as ModuleId[],
     portalConfig: offer.portalConfig,
   };

@@ -123,7 +123,7 @@ export async function POST(req: NextRequest) {
         },
       },
       metadata: commerceMeta,
-      success_url: `${baseUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}&type=subscription`,
+      success_url: `${baseUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}&type=subscription&plan=${encodeURIComponent(offer.id)}`,
       cancel_url: `${baseUrl}/checkout/cancel`,
     };
 

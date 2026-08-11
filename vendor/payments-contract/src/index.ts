@@ -12,6 +12,8 @@ export type {
 
 export {
   AIRTABLE_PACKAGE_MODULES,
+  AMPLIFI_COMPLETE_MODULES,
+  AMPLIFI_SOCIAL_MODULES,
   CAPACITY_MODULES,
   DEMO_MODULE_IDS,
   EA_CLIENT_MODULES,
@@ -26,7 +28,8 @@ export {
   ensureLaunchEditionModules,
 } from './presets';
 
-export { COMMERCE_OFFERS } from './offers';
+export { COMMERCE_OFFERS } from './catalog';
+export { AMPLIFI_COMMERCE_OFFERS } from './amplifi-offers';
 
 export {
   getCommerceOffer,

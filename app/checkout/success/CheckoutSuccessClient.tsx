@@ -19,6 +19,7 @@ type Props = {
   packageId?: string;
   fulfillment?: string;
   type?: string;
+  planId?: string;
 };
 
 export default function CheckoutSuccessClient({
@@ -26,8 +27,10 @@ export default function CheckoutSuccessClient({
   packageId,
   fulfillment,
   type,
+  planId,
 }: Props) {
   const isSubscription = type === 'subscription';
+  const isAmplifi = planId === 'amplifi_social' || planId === 'amplifi_complete';
   const presumedAuto =
     fulfillment === 'website-portal-auto' || packageId === 'website_portal_starter';
 
@@ -90,9 +93,11 @@ export default function CheckoutSuccessClient({
             ? ready
               ? 'You Are Live'
               : 'Provisioning Your Site'
-            : isSubscription
-              ? 'Subscription Started'
-              : 'Payment Received'}
+            : isAmplifi
+              ? 'Amplifi Is Ready'
+              : isSubscription
+                ? 'Subscription Started'
+                : 'Payment Received'}
         </h1>
 
         <p className="mt-4 text-sm leading-relaxed text-neutral-600">
@@ -102,16 +107,20 @@ export default function CheckoutSuccessClient({
               : polling
                 ? 'Payment received. Finishing your website and portal — this usually takes under a minute.'
                 : 'Payment received. Check your email for your live website link and portal login. Provisioning may still be finishing.'
-            : isSubscription
-              ? 'Your subscription is active. A confirmation receipt is on its way to your email.'
-              : 'Your payment has been processed successfully. A confirmation receipt is on its way to your email.'}
+            : isAmplifi
+              ? 'Your Amplifi subscription is active. Your organization is being provisioned and your brand setup is the next step.'
+              : isSubscription
+                ? 'Your subscription is active. A confirmation receipt is on its way to your email.'
+                : 'Your payment has been processed successfully. A confirmation receipt is on its way to your email.'}
         </p>
 
         {!isWebsitePortalAuto ? (
           <p className="mt-3 text-sm leading-relaxed text-neutral-600">
-            {isSubscription
-              ? 'Watch for your welcome email with portal access. Manage billing anytime from your portal after you sign in.'
-              : 'Your onboarding has been queued. Watch for your welcome email with portal access, next steps, and the first items needed to begin delivery.'}
+            {isAmplifi
+              ? 'Use the welcome email to sign in, then complete your brand profile so Amplifi can carry your audience, voice, objectives, and channel choices into every campaign.'
+              : isSubscription
+                ? 'Watch for your welcome email with portal access. Manage billing anytime from your portal after you sign in.'
+                : 'Your onboarding has been queued. Watch for your welcome email with portal access, next steps, and the first items needed to begin delivery.'}
           </p>
         ) : null}
 
@@ -132,16 +141,25 @@ export default function CheckoutSuccessClient({
               Open My Website
             </a>
           ) : null}
-          <Link
-            href={portalLoginUrl}
-            className={`inline-block px-8 py-3 text-xs font-bold uppercase tracking-widest ${
-              isWebsitePortalAuto && siteUrl
-                ? 'border border-neutral-300 bg-white text-neutral-800 hover:border-neutral-800'
-                : 'bg-neutral-950 text-white hover:bg-neutral-800'
-            }`}
-          >
-            Client Login
-          </Link>
+          {isAmplifi ? (
+            <Link
+              href="/amplifi/onboarding"
+              className="inline-block bg-neutral-950 px-8 py-3 text-xs font-bold uppercase tracking-widest text-white hover:bg-neutral-800"
+            >
+              Set Up Amplifi
+            </Link>
+          ) : (
+            <Link
+              href={portalLoginUrl}
+              className={`inline-block px-8 py-3 text-xs font-bold uppercase tracking-widest ${
+                isWebsitePortalAuto && siteUrl
+                  ? 'border border-neutral-300 bg-white text-neutral-800 hover:border-neutral-800'
+                  : 'bg-neutral-950 text-white hover:bg-neutral-800'
+              }`}
+            >
+              Client Login
+            </Link>
+          )}
         </div>
       </div>
     </main>

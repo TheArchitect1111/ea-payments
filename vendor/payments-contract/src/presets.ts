@@ -35,6 +35,23 @@ export const SIMPLIFI_SUBSCRIPTION_MODULES = ensureLaunchEditionModules([
   'billing',
 ]) as readonly string[];
 
+/** Lean commercial Amplifi workspace. */
+export const AMPLIFI_SOCIAL_MODULES = [
+  'dashboard',
+  'amplifi',
+  'billing',
+  'settings',
+] as const;
+
+/** Complete Amplifi keeps the same portal surface; Smartchitecture features are plan-gated inside Amplifi. */
+export const AMPLIFI_COMPLETE_MODULES = [
+  'dashboard',
+  'amplifi',
+  'billing',
+  'settings',
+  'reports',
+] as const;
+
 export const LAUNCH_VERIFICATION_MODULES = [
   'dashboard',
   'pulse',
@@ -85,10 +102,11 @@ export const PLATFORM_ANNUAL_MODULES = ensureLaunchEditionModules([
   'connect',
 ]) as readonly string[];
 
-/** Coarse Airtable Package Purchased ? module entitlements (fallback path). */
+/** Coarse Airtable Package Purchased → module entitlements (fallback path). */
 export const AIRTABLE_PACKAGE_MODULES: Record<string, readonly string[]> = {
   'Launch Verification': LAUNCH_VERIFICATION_MODULES,
   Simplifi: SIMPLIFI_ONE_TIME_MODULES,
+  Amplifi: AMPLIFI_SOCIAL_MODULES,
   'Implementation Package': IMPLEMENTATION_MODULES,
   'Capacity Assessment': CAPACITY_MODULES,
   'Capacity Blueprint': CAPACITY_MODULES,

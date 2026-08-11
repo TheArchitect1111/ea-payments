@@ -1,5 +1,5 @@
 import { moduleIdsToCapabilityIds } from '@ea/capability-registry';
-import { COMMERCE_OFFERS } from './offers';
+import { COMMERCE_OFFERS } from './catalog';
 import { getCommerceOffer } from './resolve';
 import type { CommerceOffer, EntitlementSnapshot } from './types';
 
