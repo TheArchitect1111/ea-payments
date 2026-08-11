@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 };
 
 const loop = [
-  ['01', 'Discover', 'Amplifi helps you research the subjects and signals that matter to your business.'],
+  ['01', 'Discover', 'Amplifi watches the subjects and signals that matter to your business.'],
   ['02', 'Understand', 'It separates useful opportunities from noise and connects them to your audience.'],
   ['03', 'Create', 'It turns those opportunities into content that sounds and feels like your business.'],
   ['04', 'Review', 'Accept it, edit it, or reject it. You decide how involved you want to be.'],
@@ -20,7 +20,7 @@ const loop = [
 
 const productViews = [
   ['Campaigns', 'See what is running, what is ready, and what needs your attention.'],
-  ['Smart Research', 'Research the subjects that matter and keep the useful sources with the work.'],
+  ['Smart Research', 'Keep watch on the subjects that matter and keep useful sources connected to the work.'],
   ['Content Studio', 'Review and refine what Amplifi creates before it moves.'],
   ['Calendar', 'Know what is planned to go out, where, and when.'],
   ['Results', 'See what people responded to and what deserves another look.'],
@@ -127,14 +127,14 @@ export default async function AmplifiMarketingPage({
 
       <section className="am-section am-research" id="smart-research">
         <p className="am-kicker">SMART RESEARCH</p>
-        <h2>Tell Amplifi what matters. Start with a focused search.</h2>
+        <h2>Tell Amplifi what matters. It can keep watching.</h2>
         <p>
-          Choose the subjects that matter to your business and run focused research when you need it. Amplifi keeps
-          sources with the work so useful discoveries can become content without losing where they came from.
+          Choose the subjects that matter to your business. Search once when you need an answer now, or keep watching
+          on a daily, weekly, or monthly cadence. Amplifi keeps source history and avoids treating the same link as a new discovery.
         </p>
         <div className="am-research-modes">
-          <article><span>SEARCH ONCE · AVAILABLE</span><h3>Need an answer now?</h3><p>Run a focused research sprint around a topic or opportunity.</p></article>
-          <article><span>KEEP WATCHING · COMING NEXT</span><h3>Want Amplifi to stay on it?</h3><p>Recurring monitoring with a chosen cadence is the next Smart Research capability being added.</p></article>
+          <article><span>SEARCH ONCE</span><h3>Need an answer now?</h3><p>Run a focused research sprint around a topic or opportunity.</p></article>
+          <article><span>KEEP WATCHING</span><h3>Want Amplifi to stay on it?</h3><p>Choose daily, weekly, or monthly monitoring and surface genuinely new developments.</p></article>
         </div>
         <p className="am-emphasis">The point is not more information. It is knowing when there is something worth acting on.</p>
       </section>
@@ -148,7 +148,7 @@ export default async function AmplifiMarketingPage({
         </p>
         <div className="am-smart-stack">
           <article className="am-smart-core"><span>AMPLIFI</span><p>Your foundation for creating, organizing, scheduling, and understanding your content.</p></article>
-          <article><span>+ SMART RESEARCH</span><p>Researches the subjects you care about and keeps the sources connected to the work.</p></article>
+          <article><span>+ SMART RESEARCH</span><p>Keeps watch on the subjects you care about and keeps the sources connected to the work.</p></article>
           <article><span>+ CONTENT ENGINE</span><p>Turns discoveries and ideas into more kinds of useful content.</p></article>
           <article><span>+ CAMPAIGN ARCHITECT</span><p>Give Amplifi a goal and it helps build the campaign around it.</p></article>
           <article><span>+ AUTOPILOT</span><p>Lets Amplifi handle more routine work inside rules you control as that capability is enabled.</p></article>
@@ -224,7 +224,7 @@ export default async function AmplifiMarketingPage({
       <section className="am-close">
         <p className="am-kicker">AMPLIFI</p>
         <h2>Stay present without living on social media.</h2>
-        <p>Let Amplifi research. Let Amplifi create. Choose how much it handles. Then get back to running your business.</p>
+        <p>Let Amplifi watch. Let Amplifi create. Choose how much it handles. Then get back to running your business.</p>
         <div className="am-hero-actions">
           <Link href="/amplifi/onboarding" className="am-primary">Start with Amplifi</Link>
           <Link href="/amplifi/workspace" className="am-secondary">See how Amplifi works</Link>
@@ -259,6 +259,7 @@ export default async function AmplifiMarketingPage({
               <Link href="/legal/privacy">Privacy Policy</Link>
               <Link href="/legal/terms">Terms of Service</Link>
               <Link href="/legal/cookies">Cookie Policy</Link>
+              <Link href="/legal/accessibility">Accessibility</Link>
               <Link href="/legal/ai-disclosure">AI & Data Disclosure</Link>
               <Link href="/legal/account-deletion">Account Deletion</Link>
             </nav>
