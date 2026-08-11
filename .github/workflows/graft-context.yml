@@ -1,0 +1,49 @@
+name: Graft Context Verification
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "AGENTS.md"
+      - ".gitignore"
+      - ".github/workflows/graft-context.yml"
+      - "**/*.js"
+      - "**/*.mjs"
+      - "**/*.cjs"
+      - "**/*.ts"
+      - "**/*.tsx"
+      - "**/*.py"
+
+permissions:
+  contents: read
+
+jobs:
+  graft-structural-context:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Build local structural graph
+        run: npx -y @nanonets/graft build .
+
+      - name: Verify graph is current
+        run: npx -y @nanonets/graft check .
+
+      - name: Verify generated graph is not tracked
+        shell: bash
+        run: |
+          if git ls-files --error-unmatch graft >/dev/null 2>&1; then
+            echo "graft/ must remain an untracked local cache"
+            exit 1
+          fi
+          git check-ignore -q graft || {
+            echo "graft/ is not ignored"
+            exit 1
+          }
