@@ -5,7 +5,7 @@ import AmplifiPostApp from '../AmplifiPostApp';
 import '../amplifi.css';
 
 export const metadata: Metadata = {
-  title: 'Amplifi Workspace — Review before publishing',
+  title: 'Amplifi Workspace â€” Review before publishing',
   description: 'Create, verify, approve, schedule, and publish campaign content in Amplifi.',
 };
 
