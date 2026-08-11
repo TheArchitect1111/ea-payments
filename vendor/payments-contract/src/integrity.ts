@@ -1,5 +1,5 @@
 import { moduleIdsToCapabilityIds } from '@ea/capability-registry';
-import { COMMERCE_OFFERS } from './offers';
+import { COMMERCE_OFFERS } from './catalog';
 import { AIRTABLE_PACKAGE_MODULES } from './presets';
 
 export function validateOffersIntegrity(): {
