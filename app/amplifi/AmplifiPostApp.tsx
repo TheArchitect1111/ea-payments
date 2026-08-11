@@ -43,6 +43,9 @@ type ResearchMeta = {
   warnings: string[];
 };
 
+type AmplifiPath = 'publish' | 'research' | 'smartchitecture';
+type ApprovedPost = { requestId?: string; title: string; caption: string; status: string; };
+
 type TopicWatch = {
   id: string;
   topic: string;
@@ -96,6 +99,12 @@ export default function AmplifiPostApp({
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState('');
   const [success, setSuccess] = useState('');
+  const [showWelcome, setShowWelcome] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
+  const [selectedPath, setSelectedPath] = useState<AmplifiPath | null>(null);
+  const [approvedPost, setApprovedPost] = useState<ApprovedPost | null>(null);
+  const [testingConnection, setTestingConnection] = useState(false);
+  const [connectionResult, setConnectionResult] = useState('');
   const [captures, setCaptures] = useState<CaptureOption[]>([]);
   const [selectedCaptureId, setSelectedCaptureId] = useState(captureId ?? '');
   const [showAmplifiSearch, setShowAmplifiSearch] = useState(false);
@@ -107,6 +116,22 @@ export default function AmplifiPostApp({
   const [watchCadence, setWatchCadence] = useState<'daily' | 'twice-weekly' | 'weekly'>('weekly');
   const [topicWatches, setTopicWatches] = useState<TopicWatch[]>([]);
   const [watchBusyId, setWatchBusyId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const savedPath = window.localStorage.getItem('amplifi:onboarding:path') as AmplifiPath | null;
+    if (savedPath === 'publish' || savedPath === 'research' || savedPath === 'smartchitecture') setSelectedPath(savedPath);
+    else setShowWelcome(true);
+  }, []);
+
+  const choosePath = (path: AmplifiPath) => {
+    setSelectedPath(path);
+    setShowWelcome(false);
+    window.localStorage.setItem('amplifi:onboarding:path', path);
+    window.setTimeout(() => {
+      const target = path === 'research' ? 'search' : path === 'smartchitecture' ? 'smartchitecture' : 'content';
+      document.getElementById(target)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 50);
+  };
 
   const generateDraft = useCallback(
     (input?: { businessName: string; storyUrl: string; headline?: string; quickWin?: string }) => {
@@ -416,7 +441,9 @@ export default function AmplifiPostApp({
         setMessage(data.error ?? 'Could not submit for approval.');
         return;
       }
-      setSuccess(`Added to review queue${data.requestId ? ` · ${data.requestId}` : ''}.`);
+      setApprovedPost({ requestId: data.requestId, title: businessName.trim() || 'Untitled post', caption: draft.linkedIn, status: 'Ready for publishing review' });
+      setSuccess('Post accepted. It is saved in Amplifi and ready for the publishing step.');
+      window.setTimeout(() => document.getElementById('approved-posts')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 50);
     } catch {
       setMessage('Network error. Try again.');
     } finally {
@@ -424,13 +451,55 @@ export default function AmplifiPostApp({
     }
   };
 
+  const testPublishingConnection = async () => {
+    if (!loggedIn) { setMessage('Sign in to test the publishing connection.'); return; }
+    setTestingConnection(true); setConnectionResult('');
+    try {
+      const res = await fetch('/api/portal/amplifi/test-publish', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: approvedPost?.title || businessName.trim() || 'Amplifi connection test' }),
+      });
+      const data = (await res.json()) as { ok?: boolean; error?: string };
+      setConnectionResult(data.ok
+        ? 'Connection confirmed. Amplifi reached the publishing workflow without creating a social post.'
+        : data.error || 'The publishing connection did not respond. No social post was created.');
+    } catch { setConnectionResult('The publishing connection could not be tested. No social post was created.'); }
+    finally { setTestingConnection(false); }
+  };
+
   const portalAmplifi = slug ? `/portal/${slug}/amplifi` : null;
-  const updatesUrl = slug ? `/portal/${slug}/updates` : '/portal/login?next=%2Famplifi%2Fworkspace';
   const campaignName = businessName.trim() || 'Your next campaign';
   const sourceCount = researchMeta?.sources.length ?? 0;
 
   return (
     <div className="af-shell">
+      {showWelcome ? (
+        <div className="af-modal-backdrop" role="presentation">
+          <section className="af-onboarding-modal" role="dialog" aria-modal="true" aria-labelledby="amplifi-welcome-title">
+            <span className="af-eyebrow">Welcome to Amplifi</span>
+            <h2 id="amplifi-welcome-title">How would you like Amplifi to help?</h2>
+            <p>Choose the outcome you want. Amplifi will take you directly to the right workspace.</p>
+            <div className="af-path-grid">
+              <button type="button" onClick={() => choosePath('publish')}><span>1</span><strong>I have content to publish</strong><small>Enter your post or ask Amplifi to write it, then review and publish to connected channels.</small></button>
+              <button type="button" onClick={() => choosePath('research')}><span>2</span><strong>Help me find something worth sharing</strong><small>Search the web for useful sources and turn the best findings into ready-to-review posts.</small></button>
+              <button type="button" onClick={() => choosePath('smartchitecture')}><span>3</span><strong>I have a business goal</strong><small>Use Smartchitecture™ to shape the audience, message, campaign, content and next actions.</small></button>
+            </div>
+            <button type="button" className="af-text-button" onClick={() => setShowWelcome(false)}>I’ll explore on my own</button>
+          </section>
+        </div>
+      ) : null}
+      {showHelp ? (
+        <div className="af-modal-backdrop" role="presentation" onMouseDown={() => setShowHelp(false)}>
+          <section className="af-help-drawer" role="dialog" aria-modal="true" aria-labelledby="amplifi-help-title" onMouseDown={(event) => event.stopPropagation()}>
+            <button type="button" className="af-close-button" aria-label="Close help" onClick={() => setShowHelp(false)}>×</button>
+            <span className="af-eyebrow">Amplifi guide</span><h2 id="amplifi-help-title">What would you like to do?</h2>
+            <button type="button" onClick={() => { setShowHelp(false); choosePath('publish'); }}><strong>Create or enter a post</strong><small>Start with your words, or let Amplifi generate the message.</small></button>
+            <button type="button" onClick={() => { setShowHelp(false); choosePath('research'); }}><strong>Research and create</strong><small>Find timely sources, choose an angle and generate a post.</small></button>
+            <button type="button" onClick={() => { setShowHelp(false); choosePath('smartchitecture'); }}><strong>Build from a business goal</strong><small>Turn an objective into a coordinated campaign.</small></button>
+            <div className="af-help-note"><strong>Your control is protected.</strong><p>Amplifi shows what happens next before anything is published.</p></div>
+          </section>
+        </div>
+      ) : null}
       <aside className="af-sidebar">
         <Link href="/amplifi/workspace" className="af-logo" aria-label="Amplifi workspace">
           <span className="af-logo-mark">A</span>
@@ -440,7 +509,7 @@ export default function AmplifiPostApp({
         <nav className="af-nav" aria-label="Amplifi navigation">
           <a className="af-nav-item af-nav-active" href="#campaign"><NavIcon>C</NavIcon><span>Campaign</span></a>
           <a className="af-nav-item" href="#search"><NavIcon>S</NavIcon><span>Search</span><b className="af-nav-badge">Smart</b></a>
-          <a className="af-nav-item" href="#content"><NavIcon>✦</NavIcon><span>Content studio</span></a>
+          <a className="af-nav-item" href="#content"><NavIcon>✦</NavIcon><span>Create content</span></a>
           <a className="af-nav-item" href="#calendar"><NavIcon>31</NavIcon><span>Calendar</span></a>
           <a className="af-nav-item" href="#results"><NavIcon>↗</NavIcon><span>Results</span></a>
         </nav>
@@ -449,9 +518,9 @@ export default function AmplifiPostApp({
 
         <div className="af-copilot-card">
           <span className="af-spark">✦</span>
-          <strong>Amplifi guide</strong>
-          <p>Research, shape and prepare content without losing the human voice.</p>
-          <button type="button" onClick={() => setShowAmplifiSearch(true)}>Start with research</button>
+          <strong>Need help?</strong>
+          <p>Tell Amplifi what you want to accomplish and it will take you to the right place.</p>
+          <button type="button" onClick={() => setShowHelp(true)}>Open guide</button>
         </div>
 
         <div className="af-sidebar-footer">
@@ -471,7 +540,8 @@ export default function AmplifiPostApp({
           </div>
           <div className="af-top-actions">
             {loggedIn && portalAmplifi ? <Link href={portalAmplifi} className="af-quiet-link">Portal hub</Link> : <Link href="/portal/login?next=%2Famplifi" className="af-quiet-link">Sign in</Link>}
-            <button type="button" className="af-create-button" onClick={() => document.getElementById('content')?.scrollIntoView({ behavior: 'smooth' })}>＋ Create new</button>
+            <button type="button" className="af-help-button" onClick={() => setShowHelp(true)}>Help</button>
+            <button type="button" className="af-create-button" onClick={() => choosePath('publish')}>＋ Create new</button>
           </div>
         </header>
 
@@ -484,6 +554,10 @@ export default function AmplifiPostApp({
 
         <div className="af-dashboard-grid">
           <section className="af-primary-column">
+            <section className="af-panel af-path-summary" aria-label="Amplifi starting option">
+              <div><span className="af-eyebrow">Your Amplifi path</span><h2>{selectedPath === 'research' ? 'Research, create and publish' : selectedPath === 'smartchitecture' ? 'Set the goal. Amplifi builds the campaign.' : 'Create and publish'}</h2></div>
+              <button type="button" className="af-secondary-button" onClick={() => setShowWelcome(true)}>Change path</button>
+            </section>
             <section className="af-panel af-intro-panel">
               <div>
                 <span className="af-eyebrow">Campaign workspace</span>
@@ -631,6 +705,11 @@ export default function AmplifiPostApp({
               ) : null}
             </section>
 
+            <section className="af-panel af-smartchitecture-panel" id="smartchitecture">
+              <div className="af-section-heading"><div><span className="af-eyebrow">Smartchitecture™</span><h3>Start with the business result—not a blank content box.</h3></div></div>
+              <p>Define the objective and Amplifi coordinates the audience, strategy, campaign structure, messages, calls to action and measures of success.</p>
+              <button type="button" className="af-secondary-button" onClick={() => document.getElementById('content')?.scrollIntoView({ behavior: 'smooth' })}>Build from my goal</button>
+            </section>
             <section className="af-panel" id="content">
               <div className="af-section-heading">
                 <div><span className="af-eyebrow">Content studio</span><h3>Shape the post</h3><p>Keep the inputs simple. Amplifi turns the source and angle into usable social copy.</p></div>
@@ -667,7 +746,7 @@ export default function AmplifiPostApp({
                 </div>
 
                 <div className="af-review-actions">
-                  <button type="button" className="af-approve-button" disabled={submitting || !loggedIn} onClick={() => void submitForApproval()}>{submitting ? 'Sending…' : '✓ Accept & send to review'}</button>
+                  <button type="button" className="af-approve-button" disabled={submitting || !loggedIn || Boolean(approvedPost)} onClick={() => void submitForApproval()}>{submitting ? 'Saving…' : approvedPost ? '✓ Accepted and saved' : '✓ Accept post'}</button>
                   <button type="button" className="af-edit-button" onClick={() => document.getElementById('content')?.scrollIntoView({ behavior: 'smooth' })}>✎ Edit</button>
                   <button type="button" className="af-reject-button" onClick={() => { setDraft(null); setSuccess('Draft removed. Your source and inputs are still here.'); }}>⊘ Reject</button>
                 </div>
@@ -677,15 +756,20 @@ export default function AmplifiPostApp({
                   <button type="button" onClick={() => openSocialShare('linkedin', draft, storyUrl.trim() || DEMO_STORY_URL)}>LinkedIn</button>
                   <button type="button" onClick={() => openSocialShare('facebook', draft, storyUrl.trim() || DEMO_STORY_URL)}>Facebook</button>
                   <button type="button" onClick={() => openSocialShare('x', draft, storyUrl.trim() || DEMO_STORY_URL)}>X</button>
-                  {loggedIn ? <Link href={updatesUrl}>Review queue →</Link> : null}
+                  {loggedIn ? <a href="#approved-posts">Approved posts →</a> : null}
                 </div>
               </section>
             ) : (
               <section className="af-empty-creative"><span>✦</span><div><strong>Your creative preview will appear here.</strong><p>Add a source and generate a draft, or start with Smart Research.</p></div></section>
             )}
 
+            <section className="af-panel af-approved-panel" id="approved-posts">
+              <div className="af-section-heading"><div><span className="af-eyebrow">Approved posts</span><h3>{approvedPost ? 'Your post is saved and ready for the next step.' : 'Accepted posts will appear here.'}</h3></div>{approvedPost ? <span className="af-review-chip af-approved-chip">Accepted</span> : null}</div>
+              {approvedPost ? <div className="af-approved-card"><div><strong>{approvedPost.title}</strong><small>{approvedPost.status}{approvedPost.requestId ? ` · ${approvedPost.requestId}` : ''}</small></div><button type="button" className="af-secondary-button" disabled={testingConnection} onClick={() => void testPublishingConnection()}>{testingConnection ? 'Testing…' : 'Test publishing connection'}</button></div> : <p>Create a draft, review it and select “Accept post.” You will stay inside Amplifi.</p>}
+              {connectionResult ? <p className="af-message af-message-success" role="status">{connectionResult}</p> : null}
+            </section>
             <section className="af-next-strip" id="calendar">
-              <div><span className="af-strip-icon">✓</span><p><strong>Next step</strong><small>{draft ? 'Review the draft and move it into approval.' : 'Create the first draft.'}</small></p></div>
+              <div><span className="af-strip-icon">✓</span><p><strong>Next step</strong><small>{approvedPost ? 'Post saved. Test the publishing connection or choose a publishing time.' : draft ? 'Review the draft and accept it.' : 'Choose a path and create the first draft.'}</small></p></div>
               <div><span className="af-strip-icon">◷</span><p><strong>Optimal times</strong><small>Scheduling recommendations appear with approved campaign posts.</small></p></div>
               <div><span className="af-strip-icon">⌕</span><p><strong>Smart Research</strong><small>{sourceCount ? `${sourceCount} source${sourceCount === 1 ? '' : 's'} found in this session.` : 'Research is ready when you need a fresh angle.'}</small></p></div>
             </section>
