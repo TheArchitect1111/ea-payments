@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { guardPortalApi, portalApiUnauthorized, portalTenant } from '@/lib/api/portal-route';
+import { getClientByPortalSlug } from '@/lib/airtable';
+import { isModuleEnabled } from '@/lib/modules/portal-modules';
 import { loadStudioRecord, saveStudioRecord } from '@/lib/creative-studio/persistence';
 
 export const dynamic = 'force-dynamic';
@@ -24,18 +26,48 @@ function clean(value: unknown, max = 600): string {
   return typeof value === 'string' ? value.trim().slice(0, max) : '';
 }
 
-export async function GET(req: NextRequest) {
+async function requireAmplifi(req: NextRequest) {
   const auth = await guardPortalApi(req, { realm: 'simplifi' });
-  if (!auth.ok) return portalApiUnauthorized(auth);
+  if (!auth.ok) return { response: portalApiUnauthorized(auth) } as const;
   const tenant = portalTenant(auth.session);
-  const profile = await loadStudioRecord<AmplifiBrandProfile>('brand', profileId(tenant.portalSlug));
+  const client = await getClientByPortalSlug(tenant.portalSlug);
+  if (!client) {
+    return {
+      response: NextResponse.json({ ok: false, error: 'Client not found.' }, { status: 404 }),
+    } as const;
+  }
+
+  const enabled = await isModuleEnabled({
+    orgId: tenant.organizationId,
+    slug: tenant.portalSlug,
+    moduleId: 'amplifi',
+    packagePurchased: client.packagePurchased,
+    role: auth.session.role,
+  });
+
+  if (!enabled && tenant.portalSlug !== 'demo-client') {
+    return {
+      response: NextResponse.json({ ok: false, error: 'Amplifi is not enabled for this account.' }, { status: 403 }),
+    } as const;
+  }
+
+  return { tenant } as const;
+}
+
+export async function GET(req: NextRequest) {
+  const access = await requireAmplifi(req);
+  if ('response' in access) return access.response;
+  const profile = await loadStudioRecord<AmplifiBrandProfile>(
+    'brand',
+    profileId(access.tenant.portalSlug),
+  );
   return NextResponse.json({ ok: true, profile });
 }
 
 export async function POST(req: NextRequest) {
-  const auth = await guardPortalApi(req, { realm: 'simplifi' });
-  if (!auth.ok) return portalApiUnauthorized(auth);
-  const tenant = portalTenant(auth.session);
+  const access = await requireAmplifi(req);
+  if ('response' in access) return access.response;
+  const tenant = access.tenant;
 
   let body: Record<string, unknown>;
   try {
