@@ -15,3 +15,5 @@ services/uxg-research-worker/.venv312/
 output/video-factory/
 video-factory/renders/
 
+# Graft local regenerable code graph
+graft/
