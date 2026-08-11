@@ -13,7 +13,7 @@ export type NativeAccount = {
 
 type ProviderConfig = { provider: NativeProvider; label: string; configured: boolean };
 
-const VERIFIED_META_APP_ID = '4328339527426550';
+const VERIFIED_META_APP_ID = '2139741059907065';
 
 function metaAppId(): string {
   const configured = process.env.META_APP_ID?.trim();
@@ -54,7 +54,7 @@ export function providerCookie(provider: NativeProvider): string {
 
 export function providerConfigs(): ProviderConfig[] {
   return [
-    { provider: 'meta', label: 'Facebook & Instagram', configured: Boolean(metaAppId() && process.env.META_APP_SECRET) },
+    { provider: 'meta', label: 'Facebook & Instagram', configured: Boolean(metaAppId() && process.env.META_APP_SECRET && process.env.META_CONFIG_ID) },
     { provider: 'linkedin', label: 'LinkedIn', configured: Boolean(process.env.LINKEDIN_CLIENT_ID && process.env.LINKEDIN_CLIENT_SECRET) },
     { provider: 'tiktok', label: 'TikTok', configured: Boolean(process.env.TIKTOK_CLIENT_KEY && process.env.TIKTOK_CLIENT_SECRET) },
     { provider: 'x', label: 'X', configured: Boolean(process.env.X_CLIENT_ID) },
@@ -70,9 +70,11 @@ export function oauthStart(provider: NativeProvider, origin: string, state: stri
   if (provider === 'meta') {
     const url = new URL('https://www.facebook.com/v26.0/dialog/oauth');
     url.search = new URLSearchParams({
-      client_id: metaAppId(), redirect_uri: redirectUri, state,
+      client_id: metaAppId(),
+      redirect_uri: redirectUri,
+      state,
       response_type: 'code',
-      scope: 'pages_show_list,pages_manage_posts,pages_read_engagement,instagram_basic,instagram_content_publish',
+      config_id: process.env.META_CONFIG_ID?.trim() || '',
     }).toString();
     return url.toString();
   }
