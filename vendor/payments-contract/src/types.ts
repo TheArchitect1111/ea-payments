@@ -4,6 +4,7 @@ export type AirtablePackageName =
   | 'Capacity Blueprint'
   | 'Implementation Package'
   | 'Simplifi'
+  | 'Amplifi'
   | 'Launch Verification';
 
 export type CommerceOfferKind = 'one_time' | 'subscription';
@@ -31,6 +32,7 @@ export type FulfillmentType =
   | 'blueprint'
   | 'implementation'
   | 'simplifi'
+  | 'amplifi'
   | 'launch-verification';
 
 /** Union of one-time PackageId + subscription plan ids. */
@@ -49,10 +51,12 @@ export type CommerceOfferId =
   | 'implementation_enterprise'
   | 'simplifi_monthly'
   | 'simplifi_annual'
+  | 'amplifi_social'
+  | 'amplifi_complete'
   | 'platform_monthly'
   | 'platform_annual';
 
-/** Canonical commerce offer ? single source for entitlements + checkout metadata. */
+/** Canonical commerce offer — single source for entitlements + checkout metadata. */
 export type CommerceOffer = {
   id: CommerceOfferId;
   kind: CommerceOfferKind;
