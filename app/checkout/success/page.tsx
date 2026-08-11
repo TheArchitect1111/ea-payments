@@ -8,9 +8,16 @@ export default async function CheckoutSuccessPage({
     package?: string;
     fulfillment?: string;
     session_id?: string;
+    plan?: string;
   }>;
 }) {
-  const { type, package: packageId, fulfillment, session_id: sessionId } = await searchParams;
+  const {
+    type,
+    package: packageId,
+    fulfillment,
+    session_id: sessionId,
+    plan,
+  } = await searchParams;
 
   return (
     <CheckoutSuccessClient
@@ -18,6 +25,7 @@ export default async function CheckoutSuccessPage({
       packageId={packageId}
       fulfillment={fulfillment}
       type={type}
+      planId={plan}
     />
   );
 }
