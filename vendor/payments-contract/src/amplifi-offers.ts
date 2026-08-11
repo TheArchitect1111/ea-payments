@@ -37,7 +37,9 @@ export const AMPLIFI_COMMERCE_OFFERS: CommerceOffer[] = [
     interval: 'month',
     priceCents: 12900,
     stripePriceEnvKey: 'STRIPE_PRICE_AMPLIFI_COMPLETE',
-    allowInlineStripePrice: true,
+    // Keep Complete out of self-serve checkout until its Smartchitecture features
+    // are production-certified. A configured Stripe Price can explicitly unlock it later.
+    allowInlineStripePrice: false,
     airtablePackageName: 'Implementation Package',
     moduleIds: [...AMPLIFI_COMPLETE_MODULES],
     portalConfig: EA_PORTAL,
