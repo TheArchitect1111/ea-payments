@@ -38,7 +38,7 @@ export type AmplifiException = {
   resolutionNote?: string;
 };
 
-/** Learning/adaptation record — one per campaign when analytics are available. */
+/** Learning/adaptation record - one per campaign when analytics are available. */
 export type CampaignLearningRecord = {
   id: string;
   campaignId: string;
