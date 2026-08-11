@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation';
 import './amplifi-site.css';
 
 export const metadata: Metadata = {
-  title: 'Amplifi � Keep your message moving',
+  title: 'Amplifi\u2122 \u2014 Keep your message moving',
   description:
     'Amplifi helps small teams move from idea to research, content, review, publishing, and learning without restarting every week.',
 };
@@ -114,7 +114,7 @@ export default async function AmplifiMarketingPage({
       </section>
 
       <section className="am-section am-smart">
-        <p className="am-kicker">SMARTCHITECTURE�</p>
+        <p className="am-kicker">SMARTCHITECTURE&#x2122;</p>
         <h2>The operating system behind Amplifi</h2>
         <p>
           Smartchitecture is the production loop that keeps momentum without turning your brand into generic automated
@@ -126,7 +126,21 @@ export default async function AmplifiMarketingPage({
           ))}
         </ul>
       </section>
+
+      <footer className="am-footer">
+        <div className="am-footer-inner">
+          <p className="am-footer-brand">Amplifi&#x2122; by Efficiency Architects</p>
+          <p className="am-footer-legal">
+            &copy; {new Date().getFullYear()} Ascension Systems LLC. All rights reserved.
+          </p>
+          <nav className="am-footer-links">
+            <Link href="/legal/privacy">Privacy Policy</Link>
+            <Link href="/legal/terms">Terms of Service</Link>
+            <Link href="/legal/cookies">Cookie Policy</Link>
+            <Link href="/contact">Contact</Link>
+          </nav>
+        </div>
+      </footer>
     </main>
   );
 }
-
