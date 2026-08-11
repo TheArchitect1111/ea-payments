@@ -1,5 +1,6 @@
 import { publishCommunication } from '@/lib/publishing';
 import { publishPlatformActivityEvent } from '@/lib/activity-events-store';
+import { raiseException } from './exception-queue';
 import { getCampaign, saveCampaign } from './campaign-store';
 import { getMediaAsset } from './media-store';
 import { canPublishAsset } from './campaign-workflow';
@@ -187,6 +188,22 @@ export async function publishCampaignAsset(input: {
     assets,
     completionPercent: Math.round((complete / assets.length) * 100),
   });
+
+  // Route publish failures and blocks to the Exception Queue
+  if (!result.ok && result.status !== 'queued') {
+    await raiseException({
+      organizationId: campaign.organizationId,
+      category: result.status === 'blocked' ? 'verification-failure' : 'publish-failure',
+      severity: 'warning',
+      summary: `${asset.label} could not publish`,
+      detail: result.detail,
+      campaignId: campaign.id,
+      assetId: asset.id,
+      campaignTitle: campaign.brief.title,
+      assetLabel: asset.label,
+      retryable: result.retryable,
+    }).catch(() => undefined);
+  }
 
   await publishPlatformActivityEvent({
     organizationId: campaign.organizationId,

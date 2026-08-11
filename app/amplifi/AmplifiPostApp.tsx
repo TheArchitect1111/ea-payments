@@ -43,6 +43,21 @@ type ResearchMeta = {
   warnings: string[];
 };
 
+type TopicWatch = {
+  id: string;
+  topic: string;
+  cadence: 'daily' | 'twice-weekly' | 'weekly';
+  status: 'active' | 'paused' | 'stopped';
+  timezone: string;
+  discoveries: Array<{
+    id: string;
+    at: string;
+    note: string;
+    newSourceCount: number;
+  }>;
+  lastRunAt?: string;
+};
+
 function defaultDateRange(): { from: string; to: string } {
   const to = new Date();
   const from = new Date(to);
@@ -88,6 +103,10 @@ export default function AmplifiPostApp({
   const [dateFrom, setDateFrom] = useState(defaults.from);
   const [dateTo, setDateTo] = useState(defaults.to);
   const [researchMeta, setResearchMeta] = useState<ResearchMeta | null>(null);
+  const [searchMode, setSearchMode] = useState<'once' | 'watch'>('once');
+  const [watchCadence, setWatchCadence] = useState<'daily' | 'twice-weekly' | 'weekly'>('weekly');
+  const [topicWatches, setTopicWatches] = useState<TopicWatch[]>([]);
+  const [watchBusyId, setWatchBusyId] = useState<string | null>(null);
 
   const generateDraft = useCallback(
     (input?: { businessName: string; storyUrl: string; headline?: string; quickWin?: string }) => {
@@ -118,6 +137,16 @@ export default function AmplifiPostApp({
       .then((res) => res.json())
       .then((data: { ok?: boolean; captures?: CaptureOption[] }) => {
         if (data.ok && data.captures) setCaptures(data.captures);
+      })
+      .catch(() => {});
+  }, [loggedIn]);
+
+  useEffect(() => {
+    if (!loggedIn) return;
+    fetch('/api/portal/amplifi/topic-research/watch')
+      .then((res) => res.json())
+      .then((data: { watches?: TopicWatch[] }) => {
+        if (Array.isArray(data.watches)) setTopicWatches(data.watches);
       })
       .catch(() => {});
   }, [loggedIn]);
@@ -254,6 +283,100 @@ export default function AmplifiPostApp({
     }
   };
 
+  const keepWatching = async () => {
+    if (!loggedIn) {
+      setMessage('Sign in to use Keep Watching.');
+      return;
+    }
+    if (!topic.trim()) {
+      setMessage('Enter a topic before enabling Keep Watching.');
+      return;
+    }
+    setResearching(true);
+    setMessage('');
+    setSuccess('');
+    try {
+      const res = await fetch('/api/portal/amplifi/topic-research/watch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create',
+          topic: topic.trim(),
+          cadence: watchCadence,
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'America/New_York',
+        }),
+      });
+      const data = (await res.json()) as { ok?: boolean; error?: string; watch?: TopicWatch };
+      if (!res.ok || !data.ok || !data.watch) {
+        setMessage(data.error ?? 'Could not enable Keep Watching.');
+        return;
+      }
+      setTopicWatches((current) => [data.watch!, ...current.filter((watch) => watch.id !== data.watch!.id)]);
+      setSuccess(`Keep Watching enabled (${watchCadence.replace('-', ' ')}).`);
+    } catch {
+      setMessage('Could not enable Keep Watching right now.');
+    } finally {
+      setResearching(false);
+    }
+  };
+
+  const updateWatch = async (
+    watchId: string,
+    action: 'pause' | 'resume' | 'stop' | 'run',
+  ) => {
+    setWatchBusyId(`${action}:${watchId}`);
+    try {
+      const res = await fetch('/api/portal/amplifi/topic-research/watch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action, watchId }),
+      });
+      const data = (await res.json()) as {
+        ok?: boolean;
+        error?: string;
+        watch?: TopicWatch;
+        research?: {
+          topic: string;
+          dateFrom: string;
+          dateTo: string;
+          researchedAt: string;
+          sources: ResearchSource[];
+          draft: AmplifiSocialDraft;
+          draftTitle: string;
+          warnings: string[];
+        };
+        newSources?: number;
+      };
+      if (!res.ok || !data.ok || !data.watch) {
+        setMessage(data.error ?? 'Watch update failed.');
+        return;
+      }
+      setTopicWatches((current) => current.map((watch) => (watch.id === watchId ? data.watch! : watch)));
+      if (action === 'run' && data.research) {
+        setDraft(data.research.draft);
+        setBusinessName(data.research.draftTitle || data.research.topic);
+        setStoryUrl(data.research.sources[0]?.url || '');
+        setResearchMeta({
+          topic: data.research.topic,
+          dateFrom: data.research.dateFrom,
+          dateTo: data.research.dateTo,
+          researchedAt: data.research.researchedAt,
+          sources: data.research.sources,
+          warnings: data.research.warnings || [],
+        });
+        setSuccess(
+          data.newSources
+            ? `Keep Watching found ${data.newSources} new source${data.newSources === 1 ? '' : 's'}.`
+            : 'No genuinely new sources this run.',
+        );
+      }
+    } catch {
+      setMessage('Watch update failed due to a network error.');
+    } finally {
+      setWatchBusyId(null);
+    }
+  };
+
   const submitForApproval = async () => {
     if (!loggedIn) {
       setMessage('Sign in to store posts for approval.');
@@ -302,14 +425,14 @@ export default function AmplifiPostApp({
   };
 
   const portalAmplifi = slug ? `/portal/${slug}/amplifi` : null;
-  const updatesUrl = slug ? `/portal/${slug}/updates` : '/portal/login?next=%2Famplifi';
+  const updatesUrl = slug ? `/portal/${slug}/updates` : '/portal/login?next=%2Famplifi%2Fworkspace';
   const campaignName = businessName.trim() || 'Your next campaign';
   const sourceCount = researchMeta?.sources.length ?? 0;
 
   return (
     <div className="af-shell">
       <aside className="af-sidebar">
-        <Link href="/amplifi" className="af-logo" aria-label="Amplifi home">
+        <Link href="/amplifi/workspace" className="af-logo" aria-label="Amplifi workspace">
           <span className="af-logo-mark">A</span>
           <span>amplifi</span>
         </Link>
@@ -398,8 +521,47 @@ export default function AmplifiPostApp({
                   <label className="af-field af-field-wide"><span>Topic</span><textarea value={topic} onChange={(e) => setTopic(e.target.value)} placeholder="What should Amplifi research?" /></label>
                   <label className="af-field"><span>From</span><input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} /></label>
                   <label className="af-field"><span>To</span><input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} /></label>
-                  <div className="af-field af-monitor-field"><span>Search mode</span><div className="af-mode-pills"><button type="button" className="af-mode-active">Search once</button><button type="button" disabled title="Recurring monitoring is next on the Amplifi roadmap">Monitor topic · coming next</button></div></div>
-                  <button type="button" className="af-primary-button af-research-submit" disabled={researching || !loggedIn} onClick={() => void runAmplifiSearch()}>{researching ? 'Researching…' : 'Search & create draft'}</button>
+                  <div className="af-field af-monitor-field">
+                    <span>Search mode</span>
+                    <div className="af-mode-pills">
+                      <button
+                        type="button"
+                        className={searchMode === 'once' ? 'af-mode-active' : ''}
+                        onClick={() => setSearchMode('once')}
+                      >
+                        Search once
+                      </button>
+                      <button
+                        type="button"
+                        className={searchMode === 'watch' ? 'af-mode-active' : ''}
+                        onClick={() => setSearchMode('watch')}
+                      >
+                        Keep watching
+                      </button>
+                    </div>
+                  </div>
+                  {searchMode === 'watch' ? (
+                    <label className="af-field">
+                      <span>Monitoring cadence</span>
+                      <select value={watchCadence} onChange={(e) => setWatchCadence(e.target.value as 'daily' | 'twice-weekly' | 'weekly')}>
+                        <option value="daily">Daily</option>
+                        <option value="twice-weekly">Twice weekly</option>
+                        <option value="weekly">Weekly</option>
+                      </select>
+                    </label>
+                  ) : null}
+                  <button
+                    type="button"
+                    className="af-primary-button af-research-submit"
+                    disabled={researching || !loggedIn}
+                    onClick={() => void (searchMode === 'watch' ? keepWatching() : runAmplifiSearch())}
+                  >
+                    {researching
+                      ? 'Working…'
+                      : searchMode === 'watch'
+                        ? 'Enable Keep Watching'
+                        : 'Search & create draft'}
+                  </button>
                 </div>
               ) : null}
 
@@ -411,6 +573,59 @@ export default function AmplifiPostApp({
                     <a key={source.url} href={source.url} target="_blank" rel="noreferrer" className="af-source-card">
                       <span>{source.kind}</span><strong>{source.title}</strong><p>{source.snippet}</p><small>{source.publishedAt || 'Date unconfirmed'}</small>
                     </a>
+                  ))}
+                </div>
+              ) : null}
+
+              {topicWatches.length ? (
+                <div className="af-watch-list">
+                  <h4>Keep Watching topics</h4>
+                  {topicWatches.map((watch) => (
+                    <div key={watch.id} className="af-watch-item">
+                      <div>
+                        <strong>{watch.topic}</strong>
+                        <p>
+                          {watch.cadence.replace('-', ' ')} · {watch.status}
+                          {watch.lastRunAt ? ` · last run ${new Date(watch.lastRunAt).toLocaleString()}` : ''}
+                        </p>
+                      </div>
+                      <div className="af-watch-actions">
+                        <button
+                          type="button"
+                          onClick={() => void updateWatch(watch.id, 'run')}
+                          disabled={watchBusyId === `run:${watch.id}`}
+                        >
+                          Run now
+                        </button>
+                        {watch.status === 'active' ? (
+                          <button
+                            type="button"
+                            onClick={() => void updateWatch(watch.id, 'pause')}
+                            disabled={watchBusyId === `pause:${watch.id}`}
+                          >
+                            Pause
+                          </button>
+                        ) : null}
+                        {watch.status === 'paused' ? (
+                          <button
+                            type="button"
+                            onClick={() => void updateWatch(watch.id, 'resume')}
+                            disabled={watchBusyId === `resume:${watch.id}`}
+                          >
+                            Resume
+                          </button>
+                        ) : null}
+                        {watch.status !== 'stopped' ? (
+                          <button
+                            type="button"
+                            onClick={() => void updateWatch(watch.id, 'stop')}
+                            disabled={watchBusyId === `stop:${watch.id}`}
+                          >
+                            Stop
+                          </button>
+                        ) : null}
+                      </div>
+                    </div>
                   ))}
                 </div>
               ) : null}
