@@ -16,7 +16,10 @@ export async function GET(req: NextRequest, context: { params: Promise<{ provide
   if (!validState) return NextResponse.json({ ok: false, error: 'Invalid OAuth state.' }, { status: 403 });
   if (url.searchParams.get('error') || !url.searchParams.get('code')) return NextResponse.redirect(new URL(`/amplifi/workspace?connections=${value}-denied#connections`, req.url));
   try {
-    const accounts = await exchangeProviderCode(value, url.searchParams.get('code') || '', req.nextUrl.origin, saved.verifier);
+    const oauthOrigin =
+      process.env.AMPLIFI_PUBLIC_ORIGIN?.trim() ||
+      (process.env.VERCEL_ENV === 'production' ? 'https://efficiencyarchitects.online' : req.nextUrl.origin);
+    const accounts = await exchangeProviderCode(value, url.searchParams.get('code') || '', oauthOrigin, saved.verifier);
     const response = NextResponse.redirect(new URL(`/amplifi/workspace?connections=${value}-connected#connections`, req.url));
     response.cookies.set(providerCookie(value), encryptAccounts(accounts), { httpOnly: true, secure: true, sameSite: 'lax', maxAge: 60 * 60 * 24 * 365, path: '/' });
     response.cookies.delete(`amplifi_oauth_${value}`);
