@@ -27,7 +27,7 @@ export type SubscriptionPlan = {
   stripePriceEnvKey: string;
   allowInlineStripePrice?: boolean;
   trialDays?: number;
-  airtablePackageName: 'Simplifi' | 'Amplifi' | 'Implementation Package';
+  airtablePackageName: 'Simplifi' | 'Implementation Package';
   moduleIds: ModuleId[];
   portalConfig?: PortalConfig;
 };
@@ -44,10 +44,7 @@ function toSubscriptionPlan(offer: CommerceOffer): SubscriptionPlan | null {
     stripePriceEnvKey: offer.stripePriceEnvKey,
     allowInlineStripePrice: offer.allowInlineStripePrice,
     trialDays: offer.trialDays,
-    airtablePackageName: offer.airtablePackageName as
-      | 'Simplifi'
-      | 'Amplifi'
-      | 'Implementation Package',
+    airtablePackageName: offer.airtablePackageName as 'Simplifi' | 'Implementation Package',
     moduleIds: [...offer.moduleIds] as ModuleId[],
     portalConfig: offer.portalConfig,
   };
