@@ -74,6 +74,7 @@ export function oauthStart(provider: NativeProvider, origin: string, state: stri
       redirect_uri: redirectUri,
       state,
       response_type: 'code',
+      override_default_response_type: 'true',
       config_id: process.env.META_CONFIG_ID?.trim() || '',
     }).toString();
     return url.toString();
