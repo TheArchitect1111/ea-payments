@@ -1358,3 +1358,17 @@ body {
   .af-path-summary, .af-approved-card { align-items: stretch; flex-direction: column; }
   .af-path-summary .af-secondary-button, .af-approved-card .af-secondary-button { width: 100%; }
 }
+
+
+/* Postiz-backed social connections */
+.af-connections-panel { scroll-margin-top: 24px; }
+.af-connections-panel > p { color: #747083; line-height: 1.6; }
+.af-platform-grid { display: grid; gap: 10px; margin: 18px 0; }
+.af-platform-card { display: flex; align-items: center; gap: 12px; padding: 13px 14px; border: 1px solid #e3deed; border-radius: 14px; background: #faf9fc; }
+.af-platform-card > span { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: #ece9f2; color: #858091; font-weight: 900; }
+.af-platform-card div { display: flex; flex-direction: column; gap: 2px; }
+.af-platform-card small { color: #858091; }
+.af-platform-connected { border-color: #bce8d1; background: #f0faf5; }
+.af-platform-connected > span { background: #24b979; color: #fff; }
+.af-connect-link { display: flex; align-items: center; justify-content: center; width: 100%; text-decoration: none; }
+.af-connection-note { font-weight: 700; }
