@@ -1,5 +1,5 @@
 import { moduleIdsToCapabilityIds } from '@ea/capability-registry';
-import { COMMERCE_OFFERS } from './offers';
+import { COMMERCE_OFFERS } from './catalog';
 import { AIRTABLE_PACKAGE_MODULES, DEMO_MODULE_IDS } from './presets';
 import type {
   AirtablePackageName,
@@ -34,7 +34,6 @@ export function resolveModuleEntitlements(
   if (fromAirtable) {
     const ids = new Set<string>([...fromAirtable]);
     if (options?.isDemo) DEMO_MODULE_IDS.forEach((id) => ids.add(id));
-    // Launch Verification stays narrow (matches legacy special-case)
     if (offerIdOrAirtablePackage === 'Launch Verification') {
       return [...AIRTABLE_PACKAGE_MODULES['Launch Verification']];
     }
