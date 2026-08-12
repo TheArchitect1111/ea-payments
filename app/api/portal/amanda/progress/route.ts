@@ -25,14 +25,17 @@ export async function POST(req: NextRequest) {
   const body = await req.json() as {
     courseId?: string;
     completedLessons?: string[];
-    assessmentScore?: number;
     practicalRequirements?: string[];
   };
   if (!body.courseId) return NextResponse.json({ error: 'courseId required.' }, { status: 400 });
-  const progress = await updateAmandaCourseProgress(tenant.portalSlug, auth.session.email, body.courseId, {
-    completedLessons: body.completedLessons,
-    assessmentScore: body.assessmentScore,
-    practicalRequirements: body.practicalRequirements,
-  });
-  return NextResponse.json({ ok: true, progress });
+  try {
+    const progress = await updateAmandaCourseProgress(tenant.portalSlug, auth.session.email, body.courseId, {
+      completedLessons: body.completedLessons,
+      practicalRequirements: body.practicalRequirements,
+    });
+    return NextResponse.json({ ok: true, progress });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unable to update course progress.';
+    return NextResponse.json({ error: message }, { status: 409 });
+  }
 }
