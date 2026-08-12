@@ -3,6 +3,7 @@ import Stripe from 'stripe';
 import { guardPortalApi, portalApiUnauthorized, portalTenant } from '@/lib/api/portal-route';
 import { AMANDA_MEMBERSHIPS, AMANDA_OFFERS } from '@/lib/amanda-catherine/config';
 import { getStripe } from '@/lib/stripe';
+import { listAmandaPayments } from '@/lib/amanda-catherine/payment-fulfillment';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,7 +15,7 @@ export async function GET(req: NextRequest) {
   const auth = await guardPortalApi(req);
   if (!auth.ok) return portalApiUnauthorized(auth);
   const tenant = portalTenant(auth.session);
-  if (!tenant.portalSlug.startsWith('amanda-catherine')) {
+  if (!tenant.portalSlug.startsWith('amanda-catherine') || !auth.session.email) {
     return NextResponse.json({ error: 'Amanda portal access required.' }, { status: 403 });
   }
   return NextResponse.json({
@@ -25,6 +26,7 @@ export async function GET(req: NextRequest) {
       available: Boolean(process.env[membership.stripePriceEnvKey]),
     })),
     financingUrl: process.env.AMANDA_FINANCING_URL || null,
+    payments: await listAmandaPayments(tenant.portalSlug, auth.session.email),
   });
 }
 
@@ -40,24 +42,32 @@ export async function POST(req: NextRequest) {
   }
   const body = await req.json() as { offerId?: string; membershipId?: string; paymentOption?: 'full' | 'deposit' };
   const membership = AMANDA_MEMBERSHIPS.find((item) => item.id === body.membershipId);
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+  const clientEmail = auth.session.email.trim().toLowerCase();
+
   if (membership) {
     const priceId = process.env[membership.stripePriceEnvKey];
     if (!priceId) return NextResponse.json({ error: 'This membership is not available yet.' }, { status: 409 });
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+    const metadata = {
+      portalSlug: tenant.portalSlug,
+      amandaMembershipId: membership.id,
+      clientEmail,
+    };
     const session = await getStripe().checkout.sessions.create({
       mode: 'subscription',
       payment_method_types: ['card'],
       allow_promotion_codes: true,
-      customer_email: auth.session.email,
+      customer_email: clientEmail,
       automatic_tax: { enabled: true },
       line_items: [{ price: priceId, quantity: 1 }],
-      metadata: { portalSlug: tenant.portalSlug, amandaMembershipId: membership.id },
-      subscription_data: { metadata: { portalSlug: tenant.portalSlug, amandaMembershipId: membership.id } },
-      success_url: `${baseUrl}/portal/${tenant.portalSlug}/billing?membership=active`,
+      metadata,
+      subscription_data: { metadata },
+      success_url: `${baseUrl}/portal/${tenant.portalSlug}/billing?membership=active&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${baseUrl}/portal/${tenant.portalSlug}/billing?payment=cancelled`,
     });
     return NextResponse.json({ url: session.url });
   }
+
   const offer = AMANDA_OFFERS.find((item) => item.id === body.offerId);
   if (!offer) return NextResponse.json({ error: 'Offer not found.' }, { status: 404 });
 
@@ -70,12 +80,11 @@ export async function POST(req: NextRequest) {
     amountCad = configured;
   }
 
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
   const sessionParams: Stripe.Checkout.SessionCreateParams = {
     mode: 'payment',
     payment_method_types: ['card'],
     allow_promotion_codes: true,
-    customer_email: auth.session.email,
+    customer_email: clientEmail,
     automatic_tax: { enabled: true },
     invoice_creation: { enabled: true },
     line_items: [{
@@ -92,11 +101,12 @@ export async function POST(req: NextRequest) {
     metadata: {
       portalSlug: tenant.portalSlug,
       amandaOfferId: offer.id,
+      clientEmail,
       paymentOption: body.paymentOption === 'deposit' ? 'deposit' : 'full',
       fullPriceCad: String(offer.priceCad),
       amountPaidCad: String(amountCad),
     },
-    success_url: `${baseUrl}/portal/${tenant.portalSlug}/billing?payment=success`,
+    success_url: `${baseUrl}/portal/${tenant.portalSlug}/billing?payment=success&session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${baseUrl}/portal/${tenant.portalSlug}/billing?payment=cancelled`,
   };
   const session = await getStripe().checkout.sessions.create(sessionParams);
