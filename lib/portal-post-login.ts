@@ -1,6 +1,7 @@
 /**
  * Post-login destination for portal sessions.
  * CTP / Website + Portal clients → Guide Progress (Client Experience).
+ * Amanda Catherine clients → audience-aware Amanda member home.
  * Everyone else → portal home (never a dead /ctp/progress bounce).
  */
 import { getCtpSubmissionForPortal } from '@/lib/ctp-submissions';
@@ -13,6 +14,10 @@ export async function resolvePortalPostLoginPath(
 ): Promise<string> {
   const clean = slug.trim();
   if (!clean) return '/portal/login';
+
+  if (clean.startsWith('amanda-catherine')) {
+    return `/portal/${clean}/member`;
+  }
 
   if (client?.commerceOfferId === 'website_portal_starter') {
     return designStudioPath(clean);
