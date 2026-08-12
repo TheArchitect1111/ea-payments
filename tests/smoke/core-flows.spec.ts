@@ -59,7 +59,7 @@ test('simplifi portal route requires portal login', async ({ page }) => {
 test('amplifi landing page is reachable', async ({ page }) => {
   await page.goto('/amplifi');
   await expect(
-    page.getByRole('heading', { name: /create work people actually want to stop and read/i }),
+    page.getByRole('heading', { name: /your business has something worth saying/i }),
   ).toBeVisible();
   await expect(page.getByText(/smart research/i).first()).toBeVisible();
 });
@@ -131,7 +131,6 @@ test('simplifi workspace is reachable', async ({ page }) => {
   await expect(orb).toBeVisible();
   await orb.click();
   await expect(page.getByRole('dialog', { name: /SIMPLIFI intelligence/i })).toBeVisible();
-  // Ambient opener (Step 3) — grounded greeting / attention copy on first expand.
   await expect(page.locator('.global-orb-ambient')).toBeVisible();
   await expect(page.locator('.global-orb-ambient')).toContainText(/Good morning|Nothing urgent|deserve/i);
   await expect(page.getByRole('button', { name: /^close$/i })).toBeFocused();
@@ -144,7 +143,6 @@ test('simplifi workspace is reachable', async ({ page }) => {
 
   await page.getByRole('textbox', { name: /Ask Simplifi/i }).fill('open capture');
   await page.getByRole('button', { name: /^ask$/i }).click();
-  // Capture is now a temporary session workspace over the Brief.
   await expect(page).toHaveURL(/\/simplifi\/workspace/);
   await expect(page.getByRole('dialog', { name: /capture workspace/i })).toBeVisible();
 });
@@ -162,12 +160,10 @@ test('simplifi orb ask opens inbox session workspace in place', async ({ page })
   await page.getByRole('textbox', { name: /Ask Simplifi/i }).fill('show my inbox');
   await page.getByRole('button', { name: /^ask$/i }).click();
 
-  // Inbox is now a temporary session workspace over the Brief, not a route change.
   await expect(page).toHaveURL(/\/simplifi\/workspace/);
   const session = page.getByRole('dialog', { name: /inbox workspace/i });
   await expect(session).toBeVisible();
 
-  // Dismiss returns to the Brief underneath.
   await page.getByRole('button', { name: /^done$/i }).click();
   await expect(session).toBeHidden();
   await expect(page.getByRole('heading', { name: /what deserves your attention/i })).toBeVisible();
@@ -179,7 +175,6 @@ test('simplifi orb outcome flash wiring is present on capture session', async ({
   await page.getByRole('textbox', { name: /Ask Simplifi/i }).fill('open capture');
   await page.getByRole('button', { name: /^ask$/i }).click();
   await expect(page.getByRole('dialog', { name: /capture workspace/i })).toBeVisible();
-  // Orb button remains mounted so outcome flashes can apply data-state.
   await expect(page.locator('.global-orb-btn')).toBeVisible();
 });
 
@@ -195,8 +190,6 @@ test('simplifi capture seeds share-target text and url', async ({ page }) => {
   await page.goto(
     '/simplifi/capture?title=Lead%20idea&text=Check%20https%3A%2F%2Fexample.com%2Fopp%20tomorrow',
   );
-  // Share seeds render even when signed out (guest / sign-in wall).
-  // Assert seeds — not the H1 — guest auto-start can briefly show "Getting ready…".
   await expect(page.getByRole('region', { name: /shared capture/i })).toBeVisible();
   await expect(page.getByPlaceholder('https://…')).toHaveValue('https://example.com/opp');
   await expect(page.getByLabel(/^capture notes$/i)).toHaveValue(/Lead idea/);
