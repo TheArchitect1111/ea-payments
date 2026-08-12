@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import type { CSSProperties } from 'react';
-import Link from 'next/link';
 import { resolveConceptPreviewDraft } from '@/lib/factory-concept-previews';
 import '@/app/components/experience/themes/amanda-editorial/amanda-editorial.css';
 
