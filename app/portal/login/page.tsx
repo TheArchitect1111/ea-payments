@@ -18,6 +18,69 @@ function safeNextPath(raw: string | null): string | undefined {
   return raw;
 }
 
+function isAmandaPortal(nextPath?: string) {
+  return Boolean(nextPath?.toLowerCase().startsWith('/portal/amanda-catherine'));
+}
+
+function AmandaLoginBrand() {
+  return (
+    <>
+      <header className="pl-header pl-header-amanda">
+        <div className="pl-amanda-mark" aria-label="Amanda Catherine">
+          <span>AC</span>
+        </div>
+        <p className="pl-eyebrow">Amanda Catherine Portal</p>
+        <h1 className="pl-title">Your Amanda Catherine Experience</h1>
+        <p className="pl-lede">
+          Sign in to review your programs, appointments, documents, payments, messages, and next steps.
+        </p>
+        <p className="pl-portal-line">Private portal review for Amanda Catherine</p>
+      </header>
+
+      <div className="pl-hero pl-amanda-hero" aria-label="Amanda Catherine portal areas">
+        <div className="pl-amanda-hero-overlay">
+          <p>AesthetiKine</p>
+          <p>LIFELINE</p>
+          <p>Training</p>
+          <p>Community</p>
+        </div>
+      </div>
+    </>
+  );
+}
+
+function DefaultLoginBrand() {
+  return (
+    <>
+      <header className="pl-header">
+        <Image
+          src="/ea-logo.png"
+          alt="Efficiency Architects"
+          width={200}
+          height={200}
+          className="pl-logo"
+          priority
+        />
+        {copy.eyebrow ? <p className="pl-eyebrow">{copy.eyebrow}</p> : null}
+        <h1 className="pl-title">{copy.pageTitle}</h1>
+        <p className="pl-lede">{copy.pageSubtitle}</p>
+        <p className="pl-portal-line">Sign in to your Client Experience</p>
+      </header>
+
+      <div className="pl-hero" aria-hidden={false}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          className="pl-hero-img"
+          src="/client-experience/welcome-possibility-strip.png"
+          alt="Welcoming collage of people living with ease and possibility"
+          width={1200}
+          height={640}
+        />
+      </div>
+    </>
+  );
+}
+
 function PortalLoginInner() {
   const searchParams = useSearchParams();
   const nextPath = safeNextPath(searchParams.get('next'));
@@ -26,56 +89,50 @@ function PortalLoginInner() {
   return <RealmLoginCard realm="portal" next={nextPath} error={error} showTitle={false} />;
 }
 
-export default function PortalLoginPage() {
-  return (
-    <div className="pl-page">
-      <div className="pl-shell">
-        <header className="pl-header">
-          <Image
-            src="/ea-logo.png"
-            alt="Efficiency Architects"
-            width={200}
-            height={200}
-            className="pl-logo"
-            priority
-          />
-          {copy.eyebrow ? <p className="pl-eyebrow">{copy.eyebrow}</p> : null}
-          <h1 className="pl-title">{copy.pageTitle}</h1>
-          <p className="pl-lede">{copy.pageSubtitle}</p>
-          <p className="pl-portal-line">Sign in to your Client Experience</p>
-        </header>
+function PortalLoginContent() {
+  const searchParams = useSearchParams();
+  const nextPath = safeNextPath(searchParams.get('next'));
+  const amanda = isAmandaPortal(nextPath);
 
-        <div className="pl-hero" aria-hidden={false}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            className="pl-hero-img"
-            src="/client-experience/welcome-possibility-strip.png"
-            alt="Welcoming collage of people living with ease and possibility"
-            width={1200}
-            height={640}
-          />
-        </div>
+  return (
+    <div className={`pl-page${amanda ? ' pl-page-amanda' : ''}`}>
+      <div className="pl-shell">
+        {amanda ? <AmandaLoginBrand /> : <DefaultLoginBrand />}
 
         <Suspense fallback={<div className="pl-card">Loading…</div>}>
           <PortalLoginInner />
         </Suspense>
 
         <footer className="pl-footer">
-          <p className="pl-footer-text">
-            Looking for Simplifi capture?{' '}
-            <Link href="/simplifi/login" className="pl-footer-link">
-              Simplifi sign in
-            </Link>
-          </p>
-          <p className="pl-footer-text">
-            Partner account?{' '}
-            <Link href="/partners/login" className="pl-footer-link">
-              Partner sign in
-            </Link>
-          </p>
-          <p className="pl-tagline">You’re expected. We’re already preparing what comes next.</p>
+          {amanda ? (
+            <p className="pl-tagline">Amanda Catherine portal access • Powered by Efficiency Architects</p>
+          ) : (
+            <>
+              <p className="pl-footer-text">
+                Looking for Simplifi capture?{' '}
+                <Link href="/simplifi/login" className="pl-footer-link">
+                  Simplifi sign in
+                </Link>
+              </p>
+              <p className="pl-footer-text">
+                Partner account?{' '}
+                <Link href="/partners/login" className="pl-footer-link">
+                  Partner sign in
+                </Link>
+              </p>
+              <p className="pl-tagline">You’re expected. We’re already preparing what comes next.</p>
+            </>
+          )}
         </footer>
       </div>
     </div>
+  );
+}
+
+export default function PortalLoginPage() {
+  return (
+    <Suspense fallback={<div className="pl-page"><div className="pl-card">Loading…</div></div>}>
+      <PortalLoginContent />
+    </Suspense>
   );
 }
