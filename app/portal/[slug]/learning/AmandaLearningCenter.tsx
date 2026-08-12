@@ -8,7 +8,14 @@ export default function AmandaLearningCenter() {
   const [courseId, setCourseId] = useState<string>(AMANDA_COURSES[0].id);
   const [progress, setProgress] = useState<AmandaCourseProgress | null>(null);
   const [error, setError] = useState('');
+  const [now, setNow] = useState(0);
   const course = AMANDA_COURSES.find((item) => item.id === courseId) || AMANDA_COURSES[0];
+
+  useEffect(() => {
+    setNow(Date.now());
+    const timer = window.setInterval(() => setNow(Date.now()), 60_000);
+    return () => window.clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     setError('');
@@ -34,7 +41,6 @@ export default function AmandaLearningCenter() {
 
   if (!progress) return <p className="ep-module-card-note">Loading your course progress…</p>;
   const percent = Math.round((progress.completedLessons.length / course.lessons.length) * 100);
-  const now = Date.now();
 
   return (
     <section className="ep-module-card">
@@ -50,7 +56,7 @@ export default function AmandaLearningCenter() {
       <ul className="ep-module-list">
         {course.lessons.map((lesson, index) => {
           const releaseAt = progress.lessonReleaseAt?.[lesson];
-          const released = Boolean(releaseAt && new Date(releaseAt).getTime() <= now);
+          const released = Boolean(now > 0 && releaseAt && new Date(releaseAt).getTime() <= now);
           return (
             <li key={lesson} className="ep-module-card">
               <label>
