@@ -32,7 +32,7 @@ export const AMANDA_CATHERINE_PACK: IndustryPack = {
       universalCapabilityId: 'home',
       label: 'Home',
       order: 10,
-      preferredModuleId: 'dashboard',
+      preferredModuleId: 'member',
     },
     {
       id: 'my-path',
