@@ -4,6 +4,7 @@ import type { PortalFormKind } from '@/lib/portal-forms/types';
 import { emitPulseEvent } from '@/lib/pulse-bus';
 import { notifyPortal } from '@/lib/portal-notify';
 import { syntheticOrgId } from '@/lib/platform-store';
+import { finalizeCtpAssetManifest, parseAssetUploads } from '@/lib/ctp-asset-store';
 
 export const dynamic = 'force-dynamic';
 
@@ -41,6 +42,15 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  const payload = body.payload ? { ...body.payload } : undefined;
+  const stagedUploads = parseAssetUploads(payload?.assetUploads);
+  if (payload && stagedUploads) {
+    payload.assetUploads = await finalizeCtpAssetManifest(
+      stagedUploads,
+      syntheticOrgId(slug),
+    );
+  }
+
   const submission = await createPortalFormSubmission({
     portalSlug: slug,
     kind,
@@ -48,7 +58,7 @@ export async function POST(req: NextRequest) {
     email,
     phone: body.phone,
     notes: body.notes,
-    payload: body.payload,
+    payload,
   });
 
   const pulseEvent = {
@@ -63,6 +73,12 @@ export async function POST(req: NextRequest) {
       kind,
       portalSlug: slug,
       status: submission.status,
+      ...(typeof payload?.formId === 'string' ? { formId: payload.formId } : {}),
+      ...(typeof payload?.audience === 'string' ? { audience: payload.audience } : {}),
+      ...(typeof payload?.onboardingStatus === 'string'
+        ? { onboardingStatus: payload.onboardingStatus }
+        : {}),
+      uploadedDocumentCount: stagedUploads ? Object.keys(stagedUploads).length : 0,
     },
   };
 

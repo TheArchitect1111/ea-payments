@@ -84,6 +84,10 @@ export async function listPortalEvents(
 ): Promise<PortalEventItem[]> {
   const items: PortalEventItem[] = [];
   let calendlyUrl = ctpCalendlyUrl();
+  const isAmanda = slug.trim().toLowerCase().startsWith('amanda-catherine');
+  if (isAmanda && process.env.AMANDA_JANE_BOOKING_URL?.trim()) {
+    calendlyUrl = process.env.AMANDA_JANE_BOOKING_URL.trim();
+  }
 
   try {
     const pretixEvents = await listPretixEventsForPortal(slug);
@@ -140,9 +144,11 @@ export async function listPortalEvents(
   }
 
   items.push({
-    title: 'Book a strategy session',
+    title: isAmanda ? 'Book an AesthetiKine appointment' : 'Book a strategy session',
     when: 'Open calendar',
-    detail: `Advisor time for ${client.organization || client.clientName}.`,
+    detail: isAmanda
+      ? 'Choose an ALIGN, SCULPT, GLOW, consultation, or training appointment in Jane.'
+      : `Advisor time for ${client.organization || client.clientName}.`,
     href: calendlyUrl,
     source: 'calendly',
     external: true,

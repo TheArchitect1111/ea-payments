@@ -99,8 +99,12 @@ export default async function EventsPage({
     canManage ? undefined : sessionEmail ? { email: sessionEmail } : undefined,
   );
   const org = await findOrganizationByPortalSlug(slug);
+  const isAmanda = slug.toLowerCase().startsWith('amanda-catherine');
   const bookingEmbedUrl =
-    org?.bookingUrl?.trim() || process.env.CALENDLY_URL?.trim() || ctpCalendlyUrl() || '';
+    org?.bookingUrl?.trim() ||
+    (isAmanda ? process.env.AMANDA_JANE_BOOKING_URL?.trim() : '') ||
+    process.env.CALENDLY_URL?.trim() ||
+    ctpCalendlyUrl() || '';
 
   const tabs: { id: EventHubTab; label: string }[] = [
     { id: 'calendar', label: 'Calendar' },
@@ -135,9 +139,15 @@ export default async function EventsPage({
 
       {tab === 'calendar' ? (
         <>
-          {canManage ? <BookingUrlPanel initialUrl={org?.bookingUrl || ''} /> : null}
+          {canManage ? <BookingUrlPanel initialUrl={org?.bookingUrl || ''} providerLabel={isAmanda ? 'Jane' : 'booking'} /> : null}
           {bookingEmbedUrl ? (
-            <BookingEmbed bookingUrl={bookingEmbedUrl} title="Book advisor time" />
+            <BookingEmbed bookingUrl={bookingEmbedUrl} title={isAmanda ? 'Book with AesthetiKine' : 'Book advisor time'} />
+          ) : isAmanda ? (
+            <div className="ep-module-card" style={{ marginBottom: 24 }}>
+              <p className="ep-module-card-title">Book with AesthetiKine</p>
+              <p className="ep-module-card-note">Jane online booking will open here after Amanda provides her booking-page link.</p>
+              <button className="ep-btn" disabled style={{ marginTop: 16 }}>Booking link coming after preview</button>
+            </div>
           ) : null}
           <EventItemList items={calendar} />
         </>

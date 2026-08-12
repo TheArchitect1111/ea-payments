@@ -1,0 +1,143 @@
+/* Amanda Catherine mobile portal corrections.
+   Presentation-only overrides scoped to the Amanda editorial workspace. */
+
+.ep-client-experience-shell[data-workspace-theme='amanda-editorial'] {
+  --amanda-ink: #17130f;
+  --amanda-muted: #665f57;
+  --amanda-gold: #b9894d;
+  --amanda-cream: #fffdf9;
+  --amanda-soft: #f7f1e8;
+  --amanda-navy: #23334d;
+}
+
+/* Generic portal cards were originally authored for a dark workspace.
+   Amanda uses a light editorial shell, so restore readable contrast here. */
+.ep-client-experience-shell[data-workspace-theme='amanda-editorial'] .ep-module-card {
+  background: rgba(255, 253, 249, 0.92) !important;
+  border-color: rgba(23, 19, 15, 0.14) !important;
+  color: var(--amanda-ink) !important;
+  box-shadow: 0 18px 42px rgba(42, 32, 20, 0.07);
+}
+
+.ep-client-experience-shell[data-workspace-theme='amanda-editorial'] .ep-module-card h1,
+.ep-client-experience-shell[data-workspace-theme='amanda-editorial'] .ep-module-card h2,
+.ep-client-experience-shell[data-workspace-theme='amanda-editorial'] .ep-module-card h3,
+.ep-client-experience-shell[data-workspace-theme='amanda-editorial'] .ep-module-card p,
+.ep-client-experience-shell[data-workspace-theme='amanda-editorial'] .ep-module-card li,
+.ep-client-experience-shell[data-workspace-theme='amanda-editorial'] .ep-module-card strong,
+.ep-client-experience-shell[data-workspace-theme='amanda-editorial'] .ep-module-card summary {
+  color: var(--amanda-ink) !important;
+}
+
+.ep-client-experience-shell[data-workspace-theme='amanda-editorial'] .ep-module-card-note {
+  color: var(--amanda-muted) !important;
+}
+
+.ep-client-experience-shell[data-workspace-theme='amanda-editorial'] .ep-module-card a:not([style*='background']) {
+  color: var(--amanda-navy) !important;
+}
+
+/* Progress / Your Project was also authored for a dark surface. */
+.ep-client-experience-shell[data-workspace-theme='amanda-editorial'] .guide-progress {
+  color: var(--amanda-ink);
+}
+
+.ep-client-experience-shell[data-workspace-theme='amanda-editorial'] .guide-progress-stage {
+  background: rgba(185, 137, 77, 0.10);
+  border-color: rgba(185, 137, 77, 0.42);
+}
+
+.ep-client-experience-shell[data-workspace-theme='amanda-editorial'] .guide-progress-stage-name,
+.ep-client-experience-shell[data-workspace-theme='amanda-editorial'] .guide-progress-stage-why,
+.ep-client-experience-shell[data-workspace-theme='amanda-editorial'] .guide-progress-eta,
+.ep-client-experience-shell[data-workspace-theme='amanda-editorial'] .guide-progress-section-title,
+.ep-client-experience-shell[data-workspace-theme='amanda-editorial'] .guide-progress-milestone summary,
+.ep-client-experience-shell[data-workspace-theme='amanda-editorial'] .guide-progress-milestone p,
+.ep-client-experience-shell[data-workspace-theme='amanda-editorial'] .guide-progress-panel p,
+.ep-client-experience-shell[data-workspace-theme='amanda-editorial'] .guide-progress-empty {
+  color: var(--amanda-ink);
+}
+
+.ep-client-experience-shell[data-workspace-theme='amanda-editorial'] .guide-progress-eta,
+.ep-client-experience-shell[data-workspace-theme='amanda-editorial'] .guide-progress-milestone p,
+.ep-client-experience-shell[data-workspace-theme='amanda-editorial'] .guide-progress-panel p,
+.ep-client-experience-shell[data-workspace-theme='amanda-editorial'] .guide-progress-empty {
+  color: var(--amanda-muted);
+}
+
+.ep-client-experience-shell[data-workspace-theme='amanda-editorial'] .guide-progress-nba {
+  background: var(--amanda-navy);
+  border-color: rgba(185, 137, 77, 0.72);
+}
+
+.ep-client-experience-shell[data-workspace-theme='amanda-editorial'] .guide-progress-nba-why,
+.ep-client-experience-shell[data-workspace-theme='amanda-editorial'] .guide-progress-nba-meta {
+  color: rgba(255,255,255,0.90);
+}
+
+.ep-client-experience-shell[data-workspace-theme='amanda-editorial'] .guide-progress-milestone,
+.ep-client-experience-shell[data-workspace-theme='amanda-editorial'] .guide-progress-panel {
+  background: rgba(255, 253, 249, 0.82);
+  border-color: rgba(23, 19, 15, 0.12);
+}
+
+.ep-client-experience-shell[data-workspace-theme='amanda-editorial'] .guide-progress-stage [role='progressbar'] > div {
+  background: rgba(23, 19, 15, 0.10) !important;
+}
+
+@media (max-width: 720px) {
+  .ep-client-experience-shell[data-workspace-theme='amanda-editorial'] .cex-shell-main > .ep-main {
+    padding: 2rem 1rem 6.5rem;
+  }
+
+  .ep-client-experience-shell[data-workspace-theme='amanda-editorial'] .ep-welcome {
+    margin-bottom: 1.5rem;
+  }
+
+  .ep-client-experience-shell[data-workspace-theme='amanda-editorial'] .ep-welcome-heading {
+    font-size: clamp(2rem, 10vw, 2.65rem);
+    line-height: 1.08;
+  }
+
+  .ep-client-experience-shell[data-workspace-theme='amanda-editorial'] .ep-lede {
+    font-size: 1rem;
+    line-height: 1.55;
+  }
+
+  .ep-client-experience-shell[data-workspace-theme='amanda-editorial'] .guide-progress-stage,
+  .ep-client-experience-shell[data-workspace-theme='amanda-editorial'] .guide-progress-nba,
+  .ep-client-experience-shell[data-workspace-theme='amanda-editorial'] .ep-module-card {
+    padding: 1.15rem !important;
+  }
+
+  .ep-client-experience-shell[data-workspace-theme='amanda-editorial'] .guide-progress-nba-cta {
+    width: 100%;
+    box-sizing: border-box;
+    text-align: center;
+    line-height: 1.25;
+  }
+
+  .ep-client-experience-shell[data-workspace-theme='amanda-editorial'] .cex-shell-nav {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 60;
+    box-shadow: 0 -8px 28px rgba(23, 19, 15, 0.08);
+  }
+
+  .ep-client-experience-shell[data-workspace-theme='amanda-editorial'] .cex-shell-nav-inner {
+    padding-bottom: calc(0.55rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  .ep-client-experience-shell[data-workspace-theme='amanda-editorial'] .cex-shell-link {
+    min-width: 0;
+    padding-inline: 0.45rem;
+    font-size: 0.78rem;
+  }
+
+  /* Keep floating assistance controls from covering bottom navigation/content. */
+  .ep-client-experience-shell[data-workspace-theme='amanda-editorial'] [style*='position: fixed'][style*='bottom'] {
+    bottom: 5.75rem !important;
+  }
+}
