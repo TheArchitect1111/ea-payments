@@ -7,6 +7,7 @@ import {
 } from '@/lib/portal-member-home';
 import { findOrganizationByPortalSlug } from '@/lib/organizations';
 import { moduleHref, getModuleDefinition } from '@/lib/modules/registry';
+import AmandaMemberHome from './AmandaMemberHome';
 
 export const dynamic = 'force-dynamic';
 
@@ -48,6 +49,25 @@ export default async function MemberHomePage({
 }) {
   const { slug } = await params;
   const { session, client } = await requirePortalModule(slug, 'member');
+
+  if (slug.startsWith('amanda-catherine')) {
+    const firstName = client.clientName?.split(' ')[0] || 'Member';
+    return (
+      <PortalSubpage
+        slug={slug}
+        active="member"
+        kicker="Amanda Catherine"
+        title={`Welcome, ${firstName}`}
+        lede="Your programs, appointments, files, payments, and next steps in one place."
+      >
+        <AmandaMemberHome
+          slug={slug}
+          email={session.email || client.email}
+          role={session.role}
+        />
+      </PortalSubpage>
+    );
+  }
 
   const org = await findOrganizationByPortalSlug(slug);
   const organizationId =
