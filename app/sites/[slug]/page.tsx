@@ -1,5 +1,8 @@
 import { notFound } from 'next/navigation';
 import ExperiencePreview from '@/app/preview/experience/[slug]/[pageId]/ExperiencePreview';
+import AmandaPublicAdditions, {
+  isAmandaPublicSiteSlug,
+} from '@/app/sites/[slug]/AmandaPublicAdditions';
 import { findPublishedSitePage, sitePathForSlug } from '@/lib/provision-website-portal';
 import { isSiteQuarantined } from '@/lib/site-quarantine';
 
@@ -35,5 +38,10 @@ export default async function PublicSitePage({
   const page = await findPublishedSitePage(slug);
   if (!page) notFound();
 
-  return <ExperiencePreview title={page.title} data={page.puckData} footerLabel="Live site" />;
+  return (
+    <>
+      <ExperiencePreview title={page.title} data={page.puckData} footerLabel="Live site" />
+      {isAmandaPublicSiteSlug(slug) ? <AmandaPublicAdditions /> : null}
+    </>
+  );
 }
