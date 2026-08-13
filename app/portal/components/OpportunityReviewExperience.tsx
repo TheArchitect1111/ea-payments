@@ -1,18 +1,7 @@
 import Link from 'next/link';
-import { Fraunces, Manrope } from 'next/font/google';
 import type { CtpOpportunityReviewView } from '@/lib/ctp-opportunity-view';
 import { withCalendlyRedirect } from '@/lib/ctp-calendly';
 import './opportunity-review-experience.css';
-
-const display = Fraunces({
-  subsets: ['latin'],
-  weight: ['500', '600', '700'],
-});
-
-const sans = Manrope({
-  subsets: ['latin'],
-  weight: ['500', '600', '700', '800'],
-});
 
 const BEFORE_PANELS = [
   {
@@ -102,13 +91,13 @@ type Props = {
 export default function OpportunityReviewExperience({ view, confirmedHref }: Props) {
   const calendlyHref = withCalendlyRedirect(view.calendlyUrl, confirmedHref);
   return (
-    <main className={`ore ${sans.className}`}>
+    <main className="ore">
       <div className="ore-grain" aria-hidden />
 
       <section className="ore-hero" aria-labelledby="ore-hero-title">
         <div className="ore-hero-copy">
           <p className="ore-kicker">Your Opportunity Review</p>
-          <h1 id="ore-hero-title" className={`ore-headline ${display.className}`}>
+          <h1 id="ore-hero-title" className="ore-headline">
             We&apos;ve Prepared Something Specifically For You
           </h1>
           <p className="ore-lede">
@@ -151,7 +140,7 @@ export default function OpportunityReviewExperience({ view, confirmedHref }: Pro
 
       <section className="ore-section" aria-labelledby="ore-before-title">
         <p className="ore-kicker">Before we meet</p>
-        <h2 id="ore-before-title" className={`ore-section-title ${display.className}`}>
+        <h2 id="ore-before-title" className="ore-section-title">
           What this conversation is for
         </h2>
         <div className="ore-panels">
@@ -161,7 +150,7 @@ export default function OpportunityReviewExperience({ view, confirmedHref }: Pro
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={panel.src} alt={panel.alt} width={800} height={600} />
               </div>
-              <h3 className={`ore-panel-title ${display.className}`}>{panel.title}</h3>
+              <h3 className="ore-panel-title">{panel.title}</h3>
               <p className="ore-panel-copy">{panel.copy}</p>
             </article>
           ))}
@@ -170,7 +159,7 @@ export default function OpportunityReviewExperience({ view, confirmedHref }: Pro
 
       <section className="ore-section ore-section-narrow" aria-labelledby="ore-together-title">
         <p className="ore-kicker">Here&apos;s what we&apos;ll do together</p>
-        <h2 id="ore-together-title" className={`ore-section-title ${display.className}`}>
+        <h2 id="ore-together-title" className="ore-section-title">
           A calm, structured review
         </h2>
         <ol className="ore-timeline">
@@ -178,7 +167,7 @@ export default function OpportunityReviewExperience({ view, confirmedHref }: Pro
             <li key={step.num} className="ore-timeline-item">
               <span className="ore-timeline-num">{step.num}</span>
               <div>
-                <h3 className={`ore-timeline-title ${display.className}`}>{step.title}</h3>
+                <h3 className="ore-timeline-title">{step.title}</h3>
                 <p className="ore-timeline-copy">{step.copy}</p>
               </div>
             </li>
@@ -188,13 +177,13 @@ export default function OpportunityReviewExperience({ view, confirmedHref }: Pro
 
       <section className="ore-section" aria-labelledby="ore-leave-title">
         <p className="ore-kicker">What you&apos;ll leave with</p>
-        <h2 id="ore-leave-title" className={`ore-section-title ${display.className}`}>
+        <h2 id="ore-leave-title" className="ore-section-title">
           Clarity you can act on
         </h2>
         <ul className="ore-leave">
           {LEAVE_WITH.map((item) => (
             <li key={item.title}>
-              <h3 className={`ore-leave-title ${display.className}`}>{item.title}</h3>
+              <h3 className="ore-leave-title">{item.title}</h3>
               <p className="ore-leave-copy">{item.copy}</p>
             </li>
           ))}
@@ -203,14 +192,14 @@ export default function OpportunityReviewExperience({ view, confirmedHref }: Pro
 
       <section className="ore-section" aria-labelledby="ore-journey-title">
         <p className="ore-kicker">Your journey continues</p>
-        <h2 id="ore-journey-title" className={`ore-section-title ${display.className}`}>
+        <h2 id="ore-journey-title" className="ore-section-title">
           Where you are now
         </h2>
         <ol className="ore-journey">
           {JOURNEY_STEPS.map((step) => (
             <li key={step.id} className="ore-journey-step" data-state={step.state}>
               <span className="ore-journey-dot" aria-hidden />
-              <span className={`ore-journey-label ${display.className}`}>{step.label}</span>
+              <span className="ore-journey-label">{step.label}</span>
             </li>
           ))}
         </ol>
@@ -227,7 +216,7 @@ export default function OpportunityReviewExperience({ view, confirmedHref }: Pro
           />
         </div>
         <div className="ore-final-copy">
-          <h2 id="ore-final-title" className={`ore-final-headline ${display.className}`}>
+          <h2 id="ore-final-title" className="ore-final-headline">
             We&apos;re Ready Whenever You Are
           </h2>
           <p className="ore-final-lede">

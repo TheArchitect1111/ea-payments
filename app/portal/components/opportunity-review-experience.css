@@ -9,6 +9,7 @@
   --ore-line: rgba(27, 43, 77, 0.12);
   position: relative;
   min-height: 100vh;
+  font-family: Manrope, "Avenir Next", Avenir, "Segoe UI", Helvetica, Arial, sans-serif;
   overflow-x: hidden;
   color: var(--ore-ink);
   background:
@@ -42,7 +43,12 @@
 
 .ore-headline,
 .ore-section-title,
+.ore-panel-title,
+.ore-timeline-title,
+.ore-leave-title,
+.ore-journey-label,
 .ore-final-headline {
+  font-family: Fraunces, Iowan Old Style, Baskerville, "Times New Roman", serif;
   margin: 0;
   color: var(--ore-navy);
   font-weight: 600;
