@@ -211,6 +211,12 @@ export function resolvePortalHostRewrite(
   }
 
   const rest = segments.slice(1).join('/');
+  // Amanda's vanity root is the role-aware business workspace, not the
+  // generic EA client project shell. Resolve it here so the first rewrite
+  // cannot cache or render the wrong experience.
+  if (first.startsWith('amanda-catherine') && !rest) {
+    return { rewritePath: `/portal/${first}/member` };
+  }
   const rewritePath = rest ? `/portal/${first}/${rest}` : `/portal/${first}`;
   return { rewritePath };
 }
