@@ -1,4 +1,4 @@
-import { createCipheriv, createDecipheriv, createHash, randomBytes } from 'node:crypto';
+import { createCipheriv, createDecipheriv, createHash, createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
 
 export type NativeProvider = 'meta' | 'linkedin' | 'tiktok' | 'x';
 export type NativeAccount = {
@@ -50,6 +50,41 @@ export function decryptAccounts(value?: string): NativeAccount[] {
 
 export function providerCookie(provider: NativeProvider): string {
   return `amplifi_social_${provider}`;
+}
+
+type OAuthStatePayload = {
+  provider: NativeProvider;
+  returnOrigin: string;
+  expiresAt: number;
+  nonce: string;
+};
+
+export function createOAuthState(provider: NativeProvider, returnOrigin: string): string {
+  const payload: OAuthStatePayload = {
+    provider,
+    returnOrigin,
+    expiresAt: Date.now() + 10 * 60 * 1000,
+    nonce: randomBytes(18).toString('base64url'),
+  };
+  const encoded = Buffer.from(JSON.stringify(payload)).toString('base64url');
+  const signature = createHmac('sha256', key()).update(encoded).digest('base64url');
+  return `${encoded}.${signature}`;
+}
+
+export function verifyOAuthState(state: string, provider: NativeProvider): OAuthStatePayload | null {
+  try {
+    const [encoded, signature] = state.split('.');
+    if (!encoded || !signature) return null;
+    const expected = createHmac('sha256', key()).update(encoded).digest();
+    const received = Buffer.from(signature, 'base64url');
+    if (received.length !== expected.length || !timingSafeEqual(received, expected)) return null;
+    const payload = JSON.parse(Buffer.from(encoded, 'base64url').toString('utf8')) as OAuthStatePayload;
+    if (payload.provider !== provider || payload.expiresAt < Date.now()) return null;
+    if (!new URL(payload.returnOrigin).hostname.endsWith('efficiencyarchitects.online')) return null;
+    return payload;
+  } catch {
+    return null;
+  }
 }
 
 export function providerConfigs(): ProviderConfig[] {
