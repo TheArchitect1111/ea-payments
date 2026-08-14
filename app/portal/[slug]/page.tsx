@@ -34,6 +34,12 @@ export default async function PortalPage({
   const { slug } = await params;
   const { client, session } = await requirePortalModule(slug, 'dashboard');
 
+  // Amanda's tenant has a role-aware business workspace. Never leave Amanda
+  // owners or members in the generic EA project-delivery shell.
+  if (slug.toLowerCase().startsWith('amanda-catherine')) {
+    redirect(`/portal/${slug}/member`);
+  }
+
   // CTP intake clients belong in the branded CTP workspace — not the Simplifi hub home.
   const ctpSubmission = await getCtpSubmissionForPortal({
     portalSlug: slug,
