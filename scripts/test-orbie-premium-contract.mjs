@@ -10,8 +10,9 @@ for (const action of ['Capture anything', 'Ask Simplifi', 'Add note', 'Quick act
   assert.ok(web.includes(action), `web Orbie missing ${action}`);
   assert.ok(native.includes(action), `native Orbie missing ${action}`);
 }
-assert.ok(web.includes('global-orb-orbit--one') && css.includes('.global-orb-orbit'), 'web Orbie missing gold energy orbit');
-assert.ok(css.includes('--orb-cyan'), 'web Orbie missing cyan visual token');
+assert.ok(web.includes('global-orb-filaments') && css.includes('.global-orb-plasma'), 'web Orbie missing electric plasma system');
+assert.ok(css.includes('#7cf5ff') && css.includes('#bd65ff'), 'web Orbie missing cyan-violet glass palette');
+assert.ok(native.includes('styles.plasmaCore') && native.includes('styles.filamentFive'), 'native Orbie missing plasma filaments');
 assert.ok(!web.includes('>\n        ORB\n'), 'legacy ORB wordmark must be removed');
 assert.ok(native.includes('accessibilityLabel="Orbie, Simplifi assistant"'), 'native accessibility label missing');
 assert.ok(layout.includes('<OrbieCompanion />'), 'native Orbie must appear on every authenticated screen');

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import type { ActionCenterPayload } from '@/lib/action-center';
@@ -402,15 +402,16 @@ export default function GlobalOrb({
     <>
       <span className="global-orb-visual">
         <span className="global-orb-halo" aria-hidden="true" />
-        <span className="global-orb-orbit global-orb-orbit--one" aria-hidden="true" />
-        <span className="global-orb-orbit global-orb-orbit--two" aria-hidden="true" />
-        <span className="global-orb-spark global-orb-spark--one" aria-hidden="true" />
-        <span className="global-orb-spark global-orb-spark--two" aria-hidden="true" />
         <span className="global-orb-rim" aria-hidden="true" />
         <span className="global-orb-shell" aria-hidden="true" />
         <span className="global-orb-core" aria-hidden="true">
           <span className="global-orb-liquid" />
-          <span className="global-orb-energy" />
+          <span className="global-orb-filaments">
+            {Array.from({ length: 12 }, (_, index) => (
+              <span key={index} style={{ '--filament': index } as CSSProperties} />
+            ))}
+          </span>
+          <span className="global-orb-plasma" />
         </span>
         {signalCount > 0 && !open ? (
           <span className="global-orb-signal" aria-hidden="true">
