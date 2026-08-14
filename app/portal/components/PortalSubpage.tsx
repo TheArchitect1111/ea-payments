@@ -20,6 +20,7 @@ export async function PortalSubpage({
   clientNavActive,
   hideWelcome = false,
   hideBackLink = false,
+  firstName,
   children,
 }: {
   slug: string;
@@ -31,6 +32,7 @@ export async function PortalSubpage({
   /** When true, the page owns the opening hierarchy (e.g. Guide home). */
   hideWelcome?: boolean;
   hideBackLink?: boolean;
+  firstName?: string;
   children: ReactNode;
 }) {
   const chrome = await resolvePortalWorkspaceChrome(slug);
@@ -42,6 +44,7 @@ export async function PortalSubpage({
       slug={slug}
       active={active}
       pageTitle={title}
+      firstName={firstName}
       chrome={chrome}
       presentation={clientShell ? 'client' : 'workspace'}
       clientNavActive={clientNavActive}

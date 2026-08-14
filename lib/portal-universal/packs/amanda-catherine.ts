@@ -138,8 +138,9 @@ export const AMANDA_CATHERINE_PACK: IndustryPack = {
   ],
   branding: {
     themeId: 'amanda-editorial',
-    workspaceName: 'Amanda Catherine Portal',
-    brandName: 'Amanda Catherine',
+    workspaceName: 'Studio Lab · By Amanda Catherine',
+    brandName: 'AesthetiKine',
+    logoSrc: '/amanda-catherine/aesthetikine-mark.svg',
     terminology: {
       members: 'Members',
       home: 'Home',

@@ -52,13 +52,18 @@ export default async function MemberHomePage({
 
   if (slug.startsWith('amanda-catherine')) {
     const firstName = client.clientName?.split(' ')[0] || 'Member';
+    const isAdministrator = session.role === 'admin' || session.role === 'owner';
     return (
       <PortalSubpage
         slug={slug}
         active="member"
         kicker="Amanda Catherine"
         title={`Welcome, ${firstName}`}
-        lede="Your programs, appointments, files, payments, and next steps in one place."
+        lede={isAdministrator
+          ? 'Your business, clients, programs, and next steps in one place.'
+          : 'Your programs, appointments, files, payments, and next steps in one place.'}
+        firstName={firstName}
+        hideBackLink={isAdministrator}
       >
         <AmandaMemberHome
           slug={slug}
