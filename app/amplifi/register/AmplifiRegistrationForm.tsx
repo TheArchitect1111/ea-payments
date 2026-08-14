@@ -41,15 +41,17 @@ export default function AmplifiRegistrationForm() {
   return (
     <form className="am-register-form" onSubmit={submit}>
       <div>
-        <p className="am-commerce-kicker">CREATE YOUR WORKSPACE</p>
-        <h2>Who should we prepare Amplifi for?</h2>
+        <p className="am-commerce-kicker">STEP 1 OF 2</p>
+        <h2>Who is Amplifi working with?</h2>
+        <p className="am-form-intro">We use this information to name your workspace and send your access.</p>
       </div>
       <label>Full name<input name="name" autoComplete="name" required /></label>
       <label>Business or organization<input name="organization" autoComplete="organization" required /></label>
       <label>Email address<input name="email" type="email" autoComplete="email" required /></label>
       <label>Phone number <span>optional</span><input name="phone" type="tel" autoComplete="tel" /></label>
       {error ? <p className="am-form-error" role="alert">{error}</p> : null}
-      <button type="submit" disabled={loading}>{loading ? 'Opening secure checkout...' : 'Continue to secure checkout'}</button>
+      <button type="submit" disabled={loading}>{loading ? 'Opening secure checkout...' : 'Continue to secure checkout →'}</button>
+      <div className="am-checkout-trust"><span>Secure payment</span><span>Cancel anytime</span><span>Guided setup</span></div>
       <small>By continuing, you agree to the <a href="/legal/terms">Terms of Service</a> and <a href="/legal/privacy">Privacy Policy</a>.</small>
     </form>
   );

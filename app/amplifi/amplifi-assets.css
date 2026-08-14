@@ -1,0 +1,7 @@
+.am-hero-visual {
+  background-image: linear-gradient(90deg, rgba(25, 31, 60, 0.02), rgba(25, 31, 60, 0.06)), url('/amplifi/hero-human-v2.jpg');
+}
+
+.am-register-image {
+  background-image: linear-gradient(0deg, rgba(16, 27, 51, 0.18), transparent), url('/amplifi/hero-human-v2.jpg');
+}
