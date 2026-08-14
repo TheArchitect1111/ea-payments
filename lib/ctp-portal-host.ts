@@ -44,6 +44,7 @@ export const PORTAL_HOST_RESERVED = new Set([
   'simplifi',
   'simplifiorb',
   'amplifi',
+  'amanda-business',
   'capture',
   'start',
   'try',
