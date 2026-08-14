@@ -6,10 +6,10 @@ export default function AmplifiBrand({ href = '/amplifi', light = false }: { hre
     <Link href={href} className={`am-brand${light ? ' am-brand-light' : ''}`} aria-label="Amplifi home">
       <Image
         className="am-brand-logo"
-        src={light ? '/amplifi/amplifi-logo-dark.png' : '/amplifi/amplifi-logo-horizontal.png'}
+        src="/amplifi/amplifi-logo-premium.png"
         alt="Amplifi by Efficiency Architects"
-        width={light ? 800 : 900}
-        height={light ? 559 : 259}
+        width={1973}
+        height={797}
         priority
       />
     </Link>
