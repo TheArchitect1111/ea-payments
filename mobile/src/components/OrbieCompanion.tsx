@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Animated, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
@@ -6,16 +6,18 @@ import { useRouter } from 'expo-router';
 import { colors } from '../theme';
 
 const ACTIONS = [
-  { label: 'Capture anything', detail: 'Save a link, photo, or idea', icon: 'add' as const, route: '/(app)/capture' as const },
-  { label: 'Ask Simplifi', detail: 'Get one clear answer', icon: 'sparkles' as const, route: '/(app)/workspace' as const },
-  { label: 'Add note', detail: 'Remember it for later', icon: 'create-outline' as const, route: '/(app)/capture' as const },
-  { label: 'Quick actions', detail: 'Review what needs attention', icon: 'flash-outline' as const, route: '/(app)/workspace' as const },
+  { label: 'Save with note', detail: 'Add context before saving', icon: 'create-outline' as const, route: '/(app)/capture' as const },
+  { label: 'Investigate', detail: 'Analyze what matters', icon: 'sparkles' as const, route: '/(app)/capture' as const },
+  { label: 'Ask Orbie', detail: 'Get one clear answer', icon: 'chatbubble-outline' as const, route: '/(app)/workspace' as const },
+  { label: 'Remind me', detail: 'Choose when it returns', icon: 'time-outline' as const, route: '/(app)/workspace' as const },
 ];
 
 export function OrbieCompanion() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [breathe] = useState(() => new Animated.Value(0));
+  const tapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastTapRef = useRef(0);
 
   useEffect(() => {
     const loop = Animated.loop(Animated.sequence([
@@ -26,9 +28,22 @@ export function OrbieCompanion() {
     return () => loop.stop();
   }, [breathe]);
 
-  const openMenu = () => {
-    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setOpen(true);
+  const handleTap = () => {
+    const now = Date.now();
+    if (now - lastTapRef.current < 320) {
+      if (tapTimerRef.current) clearTimeout(tapTimerRef.current);
+      tapTimerRef.current = null;
+      lastTapRef.current = 0;
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      setOpen(true);
+      return;
+    }
+    lastTapRef.current = now;
+    tapTimerRef.current = setTimeout(() => {
+      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      router.push('/(app)/capture');
+      tapTimerRef.current = null;
+    }, 320);
   };
 
   return (
@@ -37,10 +52,10 @@ export function OrbieCompanion() {
         style={styles.floatingButton}
         accessibilityRole="button"
         accessibilityLabel="Orbie, Simplifi assistant"
-        onPress={openMenu}
+        onPress={handleTap}
         onLongPress={() => {
           void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-          setOpen(true);
+          router.push('/(app)/workspace');
         }}
       >
         <Animated.View style={[styles.halo, {
@@ -64,8 +79,8 @@ export function OrbieCompanion() {
           <Pressable style={styles.panel} onPress={(event) => event.stopPropagation()}>
             <View style={styles.panelHandle} />
             <Text style={styles.eyebrow}>ORBiE · YOUR QUIET ADVANTAGE</Text>
-            <Text style={styles.title}>What would you like to do?</Text>
-            <Text style={styles.subtitle}>One clear action. No hunting through menus.</Text>
+            <Text style={styles.title}>Quick actions</Text>
+            <Text style={styles.subtitle}>Choose one and keep moving.</Text>
             <View style={styles.actionGrid}>
               {ACTIONS.map((action) => (
                 <Pressable
