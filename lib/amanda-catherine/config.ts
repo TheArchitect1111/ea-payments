@@ -1,5 +1,38 @@
 export const AMANDA_PORTAL_PACK_ID = 'amanda-catherine';
 
+export const AMANDA_PROFILE = {
+  name: 'Amanda Catherine',
+  credentials: ['Best-Selling Author', 'Mentor', 'Speaker'],
+  email: 'amanda@aesthetikine.com',
+  phone: '226-581-2003',
+  organizations: [
+    { name: 'AesthetiKine Studio Lab', role: 'Founder & Director', description: 'Kinesiology-Based Medical Aesthetics & Certification Programs', url: 'https://www.aesthetikine.com/' },
+    { name: 'Empower Art Collective', role: 'Founder & Director', description: 'Non-profit offering a free six-week online entrepreneurship course.', url: 'https://www.empowerartcollective.com/' },
+  ],
+  book: { title: 'The Entrepreneurial Artist', subtitle: 'Turning God-Given Gifts into Impact & Income', url: 'https://www.amazon.ca/dp/B0F38N76H5' },
+  socialHandles: ['@amandacatherinec', '@aesthetikine', '@empowerartcollective', '@lifelinetour'],
+} as const;
+
+export const AMANDA_EXTERNAL_SERVICES = {
+  janeBookingUrl: 'https://aesthetikine.janeapp.com/',
+  janeEmbedUrl: 'https://aesthetikine.janeapp.com/embed/book_online',
+  janeTreatmentAdminUrl: 'https://aesthetikine.janeapp.com/admin/treatments',
+  medicardFinancingUrl: 'https://apply.medicard.com/25595',
+  calendarAccounts: ['amanda@aesthetikine.com', 'amandacatherinec@gmail.com'],
+} as const;
+
+export const AMANDA_JANE_CATALOG = [
+  { id: 1, kind: 'treatment', name: 'Align & Analyze', priceCad: 74.98, booking: 'call' },
+  { id: 2, kind: 'treatment', name: 'AesthetiKine Reset', priceCad: 99, booking: 'call' },
+  { id: 3, kind: 'treatment', name: 'Body Sculpt 6 Week Transformation', priceCad: 1200, booking: 'call' },
+  { id: 5, kind: 'treatment', name: 'FACEFORM 3 Sessions', priceCad: 499, booking: 'call' },
+  { id: 7, kind: 'treatment', name: 'Brazilian Lymphatic Drainage Massage Columbian Wood Therapy', priceCad: 149, booking: 'online' },
+  { id: 8, kind: 'class', name: 'Body Sculpt Practitioner Training Program', priceCad: 2497, booking: 'call' },
+  { id: 9, kind: 'class', name: 'AesthetiKine Nervous System Reset Practitioner Training', priceCad: 997, booking: 'online' },
+  { id: 10, kind: 'class', name: 'AesthetiKine BootyLift Practitioner Training', priceCad: 1497, booking: 'call' },
+  { id: 11, kind: 'class', name: 'Wood Therapy Certification with Columbian Wood Therapy Kit', priceCad: 997, booking: 'online' },
+] as const;
+
 export const AMANDA_PORTAL_AUDIENCES = [
   'client',
   'student-trainee',
@@ -252,6 +285,7 @@ export const AMANDA_SCHEDULING = {
   appointmentReminderHours: [24, 2],
   eventRegistrationProvider: 'pretix',
   appointmentCategories: ['align', 'sculpt', 'glow', 'consultation', 'training', 'media-interview'],
+  calendarAccounts: AMANDA_EXTERNAL_SERVICES.calendarAccounts,
 } as const;
 
 export const AMANDA_CRM_STAGES = [

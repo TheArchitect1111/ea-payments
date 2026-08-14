@@ -1,4 +1,7 @@
-const JANE_BOOKING_URL = 'https://aesthetikine.janeapp.com/';
+import { AMANDA_EXTERNAL_SERVICES, AMANDA_JANE_CATALOG, AMANDA_PROFILE } from '@/lib/amanda-catherine/config';
+
+const JANE_BOOKING_URL = AMANDA_EXTERNAL_SERVICES.janeBookingUrl;
+const money = new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD' });
 
 const programs = [
   {
@@ -37,6 +40,39 @@ export function isAmandaPublicSiteSlug(slug: string): boolean {
 export default function AmandaPublicAdditions() {
   return (
     <div className="ak-public-additions">
+      <section className="ak-profile" aria-labelledby="ak-profile-title">
+        <p className="ak-kicker">Amanda Catherine</p>
+        <h2 id="ak-profile-title">Best-Selling Author. Mentor. Speaker.</h2>
+        <p className="ak-profile__lede">Founder and Director of AesthetiKine Studio Lab and Empower Art Collective, connecting wellness, practitioner education, entrepreneurship, and purpose.</p>
+        <div className="ak-profile__links">
+          {AMANDA_PROFILE.organizations.map((organization) => (
+            <a key={organization.name} href={organization.url} target="_blank" rel="noopener noreferrer"><strong>{organization.name}</strong><span>{organization.description}</span></a>
+          ))}
+          <a href={AMANDA_PROFILE.book.url} target="_blank" rel="noopener noreferrer"><strong>{AMANDA_PROFILE.book.title}</strong><span>{AMANDA_PROFILE.book.subtitle}</span></a>
+        </div>
+      </section>
+
+      <section className="ak-catalog" id="services" aria-labelledby="ak-catalog-title">
+        <div className="ak-catalog__heading">
+          <div><p className="ak-kicker">Current Jane catalog</p><h2 id="ak-catalog-title">Treatments and practitioner training.</h2></div>
+          <a className="ak-primary-link" href={JANE_BOOKING_URL} target="_blank" rel="noopener noreferrer">View availability <span aria-hidden="true">→</span></a>
+        </div>
+        <div className="ak-catalog__grid">
+          {AMANDA_JANE_CATALOG.map((item) => (
+            <article key={item.id} className="ak-catalog__item"><p>{item.kind === 'class' ? 'Practitioner training' : 'Treatment'}</p><h3>{item.name}</h3><strong>{money.format(item.priceCad)}</strong></article>
+          ))}
+        </div>
+        <p className="ak-catalog__note">Prices shown in Canadian dollars and synchronized from Amanda’s current public Jane catalog.</p>
+      </section>
+
+      <section className="ak-booking" id="book-online" aria-labelledby="ak-booking-title">
+        <div><p className="ak-kicker">Book online</p><h2 id="ak-booking-title">Choose your next appointment.</h2></div>
+        <iframe className="ak-booking__embed" src={AMANDA_EXTERNAL_SERVICES.janeEmbedUrl} title="Book an AesthetiKine appointment through Jane" loading="lazy" scrolling="no" />
+        <div className="ak-booking__actions">
+          <a className="ak-primary-link" href={JANE_BOOKING_URL} target="_blank" rel="noopener noreferrer">Open secure booking</a>
+          <a className="ak-financing-link" href={AMANDA_EXTERNAL_SERVICES.medicardFinancingUrl} target="_blank" rel="noopener noreferrer">Apply for Medicard financing</a>
+        </div>
+      </section>
       <section className="ak-academy" id="training-certification" aria-labelledby="ak-academy-title">
         <div className="ak-academy__intro">
           <p className="ak-kicker">AesthetiKine Academy</p>
@@ -97,6 +133,11 @@ export default function AmandaPublicAdditions() {
         </a>
       </section>
 
+      <footer className="ak-contact">
+        <div><strong>{AMANDA_PROFILE.name}</strong><span>{AMANDA_PROFILE.socialHandles.join(' · ')}</span></div>
+        <div><a href={`mailto:${AMANDA_PROFILE.email}`}>{AMANDA_PROFILE.email}</a><a href={`tel:+1${AMANDA_PROFILE.phone.replace(/\D/g, '')}`}>{AMANDA_PROFILE.phone}</a></div>
+      </footer>
+
       <style>{`
         .ak-public-additions {
           --ak-ink: #241b18;
@@ -112,6 +153,29 @@ export default function AmandaPublicAdditions() {
           margin: 0 auto;
           padding: clamp(72px, 9vw, 132px) clamp(22px, 6vw, 82px);
         }
+        .ak-profile, .ak-catalog, .ak-booking { max-width: 1240px; margin: 0 auto; padding: clamp(72px, 9vw, 132px) clamp(22px, 6vw, 82px); }
+        .ak-profile { text-align: center; }
+        .ak-profile h2, .ak-catalog h2, .ak-booking h2 { margin: 0 auto 24px; max-width: 980px; font-family: Georgia, "Times New Roman", serif; font-size: clamp(42px, 7vw, 82px); font-weight: 500; letter-spacing: -.045em; line-height: .98; }
+        .ak-profile__lede { max-width: 760px; margin: 0 auto 42px; color: #685d57; font-size: 20px; line-height: 1.65; }
+        .ak-profile__links { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; text-align: left; }
+        .ak-profile__links a { display: grid; gap: 10px; padding: 28px; color: inherit; border-top: 1px solid #dfcda9; text-decoration: none; }
+        .ak-profile__links span { color: #685d57; line-height: 1.5; }
+        .ak-catalog { max-width: none; background: var(--ak-cream); }
+        .ak-catalog__heading { display: flex; gap: 32px; align-items: end; justify-content: space-between; max-width: 1080px; margin: 0 auto 48px; }
+        .ak-catalog__heading h2 { margin: 0; font-size: clamp(38px, 6vw, 68px); }
+        .ak-catalog__grid { display: grid; grid-template-columns: repeat(3, 1fr); max-width: 1080px; margin: auto; border-top: 1px solid #d9c8b0; }
+        .ak-catalog__item { display: grid; align-content: space-between; min-height: 220px; padding: 28px; border-right: 1px solid #d9c8b0; border-bottom: 1px solid #d9c8b0; }
+        .ak-catalog__item:nth-child(3n) { border-right: 0; }
+        .ak-catalog__item p { margin: 0 0 24px; color: var(--ak-wine); font-size: 11px; font-weight: 800; letter-spacing: .15em; text-transform: uppercase; }
+        .ak-catalog__item h3 { margin: 0 0 24px; font-family: Georgia, "Times New Roman", serif; font-size: 25px; font-weight: 500; line-height: 1.15; }
+        .ak-catalog__note { max-width: 1080px; margin: 22px auto 0; color: #766a63; font-size: 13px; }
+        .ak-booking h2 { margin-left: 0; font-size: clamp(38px, 6vw, 68px); }
+        .ak-booking__embed { width: 100%; min-height: 640px; border: 1px solid #eadfce; background: #fff; }
+        .ak-booking__actions { display: flex; gap: 16px; align-items: center; margin-top: 22px; }
+        .ak-financing-link { color: var(--ak-wine); font-weight: 800; text-underline-offset: 5px; }
+        .ak-contact { display: flex; justify-content: space-between; gap: 28px; padding: 36px max(24px, calc((100vw - 1080px) / 2)); color: #fffaf3; background: #241b18; }
+        .ak-contact div { display: grid; gap: 8px; }
+        .ak-contact a { color: inherit; }
         .ak-academy__intro {
           max-width: 820px;
           margin-bottom: 54px;
@@ -291,6 +355,10 @@ export default function AmandaPublicAdditions() {
           box-shadow: 0 14px 35px rgba(113, 49, 72, .22);
         }
         @media (max-width: 780px) {
+          .ak-profile__links, .ak-catalog__grid { grid-template-columns: 1fr; }
+          .ak-catalog__item, .ak-catalog__item:nth-child(3n) { border-right: 0; }
+          .ak-catalog__heading, .ak-booking__actions, .ak-contact { align-items: flex-start; flex-direction: column; }
+          .ak-booking__embed { min-height: 720px; }
           .ak-programs { grid-template-columns: 1fr; }
           .ak-program { min-height: 0; }
           .ak-certificate { grid-template-columns: 1fr; }

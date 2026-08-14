@@ -1,4 +1,4 @@
-import { AMANDA_MEMBERSHIPS } from '@/lib/amanda-catherine/config';
+import { AMANDA_EXTERNAL_SERVICES, AMANDA_MEMBERSHIPS } from '@/lib/amanda-catherine/config';
 import { findOrganizationByPortalSlug } from '@/lib/organizations';
 
 export type AmandaReadinessCheck = {
@@ -42,18 +42,14 @@ export async function getAmandaLaunchReadiness(portalSlug: string) {
     {
       id: 'jane-booking',
       label: 'Jane booking handoff',
-      ready: Boolean(process.env.AMANDA_JANE_BOOKING_URL?.trim()),
-      detail: process.env.AMANDA_JANE_BOOKING_URL?.trim()
-        ? 'Amanda Jane booking URL configured.'
-        : 'Missing AMANDA_JANE_BOOKING_URL.',
+      ready: true,
+      detail: `Amanda Jane booking is configured at ${AMANDA_EXTERNAL_SERVICES.janeBookingUrl}.`,
     },
     {
       id: 'financing',
       label: 'Financing handoff',
-      ready: Boolean(process.env.AMANDA_FINANCING_URL?.trim()),
-      detail: process.env.AMANDA_FINANCING_URL?.trim()
-        ? 'Amanda financing URL configured.'
-        : 'Missing AMANDA_FINANCING_URL.',
+      ready: true,
+      detail: `Amanda Medicard financing is configured at ${AMANDA_EXTERNAL_SERVICES.medicardFinancingUrl}.`,
     },
     {
       id: 'nylas-api',
@@ -69,7 +65,7 @@ export async function getAmandaLaunchReadiness(portalSlug: string) {
       ready: Boolean(org?.nylasGrantId && org?.nylasCalendarId),
       detail: org?.nylasGrantId && org?.nylasCalendarId
         ? 'Amanda calendar grant and calendar ID are connected.'
-        : 'Amanda organization still needs a connected Google or Outlook calendar.',
+        : `Amanda organization still needs Google authorization for ${AMANDA_EXTERNAL_SERVICES.calendarAccounts.join(' and ')}.`,
     },
   ];
 
