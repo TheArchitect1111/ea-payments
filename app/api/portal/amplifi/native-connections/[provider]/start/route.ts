@@ -1,7 +1,7 @@
 import { createHash, randomBytes } from 'node:crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { guardPortalApi, portalApiUnauthorized } from '@/lib/api/portal-route';
-import { isNativeProvider, oauthStart, providerConfigs } from '@/lib/amplifi-native-social';
+import { createOAuthState, isNativeProvider, oauthStart, providerConfigs } from '@/lib/amplifi-native-social';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,7 +12,7 @@ export async function GET(req: NextRequest, context: { params: Promise<{ provide
   if (!isNativeProvider(value)) return NextResponse.json({ ok: false, error: 'Unsupported provider.' }, { status: 404 });
   const configured = providerConfigs().find((item) => item.provider === value)?.configured;
   if (!configured) return NextResponse.redirect(new URL(`/amplifi/workspace?connections=${value}-setup-required#connections`, req.url));
-  const state = randomBytes(24).toString('base64url');
+  const state = createOAuthState(value, req.nextUrl.origin);
   const verifier = value === 'x' ? randomBytes(48).toString('base64url') : undefined;
   const oauthOrigin =
     process.env.AMPLIFI_PUBLIC_ORIGIN?.trim() ||
