@@ -6,6 +6,7 @@ import { useAuth } from '../../src/auth/AuthContext';
 import { OfflineCaptureProvider } from '../../src/offline/OfflineCaptureContext';
 import { useRegisterPushNotifications } from '../../src/push/notifications';
 import { colors } from '../../src/theme';
+import { OrbieCompanion } from '../../src/components/OrbieCompanion';
 
 type TabIconName = ComponentProps<typeof Ionicons>['name'];
 
@@ -43,6 +44,7 @@ export default function AppLayout() {
 
   return (
     <OfflineCaptureProvider token={token}>
+      <View style={{ flex: 1 }}>
       <Tabs
       screenOptions={{
         headerStyle: { backgroundColor: colors.navy },
@@ -92,7 +94,9 @@ export default function AppLayout() {
           tabBarIcon: tabIcon('menu-outline', 'menu'),
         }}
       />
-    </Tabs>
+      </Tabs>
+      <OrbieCompanion />
+      </View>
     </OfflineCaptureProvider>
   );
 }

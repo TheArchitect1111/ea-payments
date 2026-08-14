@@ -105,6 +105,7 @@ export default function GlobalOrb({
   const [paused, setPaused] = useState(false);
   const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
+  const askInputRef = useRef<HTMLInputElement>(null);
   const panelRef = useRef<HTMLElement>(null);
   const ambientShownRef = useRef(false);
   const outcomeTimerRef = useRef<number | null>(null);
@@ -401,19 +402,21 @@ export default function GlobalOrb({
     <>
       <span className="global-orb-visual">
         <span className="global-orb-halo" aria-hidden="true" />
+        <span className="global-orb-orbit global-orb-orbit--one" aria-hidden="true" />
+        <span className="global-orb-orbit global-orb-orbit--two" aria-hidden="true" />
+        <span className="global-orb-spark global-orb-spark--one" aria-hidden="true" />
+        <span className="global-orb-spark global-orb-spark--two" aria-hidden="true" />
         <span className="global-orb-rim" aria-hidden="true" />
         <span className="global-orb-shell" aria-hidden="true" />
         <span className="global-orb-core" aria-hidden="true">
           <span className="global-orb-liquid" />
+          <span className="global-orb-energy" />
         </span>
         {signalCount > 0 && !open ? (
           <span className="global-orb-signal" aria-hidden="true">
             {signalCount}
           </span>
         ) : null}
-      </span>
-      <span className="global-orb-mark" aria-hidden="true">
-        ORB
       </span>
     </>
   );
@@ -452,6 +455,7 @@ export default function GlobalOrb({
                 </span>
               </span>
               <div>
+                <span className="global-orb-eyebrow">ORBiE · YOUR QUIET ADVANTAGE</span>
                 {showAmbientGreeting ? (
                   <h2>{session.summary}</h2>
                 ) : (
@@ -467,6 +471,21 @@ export default function GlobalOrb({
             </header>
 
             <div className="global-orb-panel-body">
+              <div className="global-orb-launchpad" aria-label="Orbie quick actions">
+                <button type="button" onClick={() => { setOpen(false); setSessionView({ kind: 'capture' }); }}>
+                  <span aria-hidden="true">＋</span><strong>Capture anything</strong><small>Save a link, image, or idea</small>
+                </button>
+                <button type="button" onClick={() => askInputRef.current?.focus()}>
+                  <span aria-hidden="true">✦</span><strong>Ask Simplifi</strong><small>Get one clear answer</small>
+                </button>
+                <button type="button" onClick={() => { setOpen(false); setSessionView({ kind: 'capture', draft: 'Note: ' }); }}>
+                  <span aria-hidden="true">⌁</span><strong>Add note</strong><small>Remember it for later</small>
+                </button>
+                <button type="button" onClick={() => { setOpen(false); setSessionView({ kind: 'inbox' }); }}>
+                  <span aria-hidden="true">⌘</span><strong>Quick actions</strong><small>Review what needs attention</small>
+                </button>
+              </div>
+
               {ambientOpener ? (
                 <div className="global-orb-ambient" aria-live="polite">
                   {ambientOpener.split('\n').map((line, i) => (
@@ -560,6 +579,7 @@ export default function GlobalOrb({
 
               <div className="global-orb-ask">
                 <input
+                  ref={askInputRef}
                   value={askInput}
                   onChange={(e) => setAskInput(e.target.value)}
                   onKeyDown={(e) => {
@@ -606,7 +626,7 @@ export default function GlobalOrb({
           aria-label={session.ariaLabel}
           aria-controls={panelId}
           aria-expanded="false"
-          title={session.ariaLabel}
+          title="Open Orbie"
           onClick={() => setOpen(true)}
         >
           {orbVisual}
