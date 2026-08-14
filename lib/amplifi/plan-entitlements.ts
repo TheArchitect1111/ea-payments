@@ -27,6 +27,11 @@ const COMPLETE_FEATURES: AmplifiFeature[] = [
   'autopilot',
 ];
 
+const INTELLIGENCE_FEATURES: AmplifiFeature[] = [
+  ...SOCIAL_FEATURES,
+  'smart-research',
+];
+
 export type AmplifiPlanSummary = {
   planId: string;
   displayName: string;
@@ -41,6 +46,15 @@ export type AmplifiPlanSummary = {
  */
 export function resolveAmplifiPlan(planId?: string | null): AmplifiPlanSummary {
   const normalized = (planId || '').trim().toLowerCase();
+
+  if (normalized === 'amplifi_intelligence') {
+    return {
+      planId: normalized,
+      displayName: 'Amplifi Intelligence',
+      features: [...INTELLIGENCE_FEATURES],
+      isComplete: false,
+    };
+  }
 
   if (
     normalized === 'amplifi_complete' ||

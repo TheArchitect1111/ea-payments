@@ -43,6 +43,12 @@ export const AMPLIFI_SOCIAL_MODULES = [
   'settings',
 ] as const;
 
+/** Intelligence adds research and reporting while preserving the focused workspace. */
+export const AMPLIFI_INTELLIGENCE_MODULES = [
+  ...AMPLIFI_SOCIAL_MODULES,
+  'reports',
+] as const;
+
 /** Complete Amplifi keeps the same portal surface; Smartchitecture features are plan-gated inside Amplifi. */
 export const AMPLIFI_COMPLETE_MODULES = [
   'dashboard',

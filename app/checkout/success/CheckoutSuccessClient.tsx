@@ -30,7 +30,10 @@ export default function CheckoutSuccessClient({
   planId,
 }: Props) {
   const isSubscription = type === 'subscription';
-  const isAmplifi = planId === 'amplifi_social' || planId === 'amplifi_complete';
+  const isAmplifi =
+    planId === 'amplifi_social' ||
+    planId === 'amplifi_intelligence' ||
+    planId === 'amplifi_complete';
   const presumedAuto =
     fulfillment === 'website-portal-auto' || packageId === 'website_portal_starter';
 
