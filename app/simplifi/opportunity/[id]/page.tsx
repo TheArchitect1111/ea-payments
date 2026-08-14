@@ -68,40 +68,29 @@ export default async function OpportunityProfilePage({ params }: Props) {
           </div>
         </header>
 
-        <section className="sw-brief-panel" aria-label="What this is">
-          <h2>What this is</h2>
-          <p>{evaluation.whatThisIs}</p>
-        </section>
+        <section className="sw-guided-evaluation" aria-label="Simplifi guidance">
+          <p className="sw-guide-kicker">Here&apos;s what Simplifi sees</p>
+          <h2>{evaluation.whatThisIs}</h2>
+          <p className="sw-guide-verdict">{evaluation.verdict}</p>
+          {evaluation.whyItMatters[0] ? <p className="sw-guide-reason">{evaluation.whyItMatters[0]}</p> : null}
 
-        <section className="sw-brief-panel" aria-label="Verdict">
-          <h2>Verdict</h2>
-          <p style={{ fontSize: '1.25rem', fontWeight: 800 }}>{evaluation.verdict}</p>
-        </section>
+          <div className="sw-guide-next">
+            <span>Your next step</span>
+            <strong>{evaluation.nextMove}</strong>
+            {obj.dueDate ? <small>Target date: {obj.dueDate}</small> : null}
+          </div>
 
-        <section className="sw-brief-panel" aria-label="Why it matters">
-          <h2>Why it matters</h2>
-          <ul className="sw-event-list" style={{ marginTop: 8 }}>
-            {evaluation.whyItMatters.map((reason) => (
-              <li key={reason}>
-                <div><p>{reason}</p></div>
-              </li>
-            ))}
-          </ul>
-        </section>
+          <div className="sw-guide-actions">
+            <Link href={guidanceUrl} className="sw-guide-primary">Show me what to do</Link>
+            <Link href="/simplifi/follow-ups" className="sw-guide-secondary">Remind me later</Link>
+          </div>
 
-        <section className="sw-brief-panel sw-recommend" aria-label="Your next move">
-          <h2>Your next move</h2>
-          <p className="sw-next-action"><strong>{evaluation.nextMove}</strong></p>
-          {obj.dueDate ? <p className="sw-muted">Target date: {obj.dueDate}</p> : null}
-        </section>
-
-        <section className="sw-brief-panel" aria-label="Next three steps">
-          <h2>Next three steps</h2>
-          <ol style={{ margin: '12px 0 0', paddingLeft: 24 }}>
-            {evaluation.nextSteps.map((step) => (
-              <li key={step} style={{ marginTop: 10, paddingLeft: 4 }}>{step}</li>
-            ))}
-          </ol>
+          <details className="sw-guide-steps">
+            <summary>See the three-step plan</summary>
+            <ol>
+              {evaluation.nextSteps.map((step) => <li key={step}>{step}</li>)}
+            </ol>
+          </details>
         </section>
 
         <details className="sw-brief-panel" aria-label="Detailed analysis">

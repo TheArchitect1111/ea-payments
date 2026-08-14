@@ -22,12 +22,15 @@ import {
 } from '@/lib/simplifi-ask';
 import { pushAskHistory } from '@/lib/simplifi/ask-session-history';
 import { explainRecommendation } from '@/lib/simplifi-guidance-system';
+import { analyzeCaptureUrl } from '@/lib/simplifi-client';
 import AskAnswerBody from './AskAnswerBody';
 import SessionWorkspace, { type SessionView } from './session/SessionWorkspace';
 import './global-orb.css';
 
 const OUTCOME_FLASH_MS = 1200;
 const SPEAKING_MS = 1600;
+const TAP_DELAY_MS = 260;
+const HOLD_DELAY_MS = 560;
 type SpeechRecognitionLike = {
   lang: string;
   continuous: boolean;
@@ -103,6 +106,7 @@ export default function GlobalOrb({
   const [dismissedIds, setDismissedIds] = useState<string[]>([]);
   const [sessionView, setSessionView] = useState<SessionView | null>(null);
   const [paused, setPaused] = useState(false);
+  const [captureNotice, setCaptureNotice] = useState('');
   const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const askInputRef = useRef<HTMLInputElement>(null);
@@ -110,6 +114,9 @@ export default function GlobalOrb({
   const ambientShownRef = useRef(false);
   const outcomeTimerRef = useRef<number | null>(null);
   const speakingTimerRef = useRef<number | null>(null);
+  const tapTimerRef = useRef<number | null>(null);
+  const holdTimerRef = useRef<number | null>(null);
+  const heldRef = useRef(false);
   const panelId = 'simplifi-orb-panel';
 
   useEffect(() => {
@@ -137,6 +144,8 @@ export default function GlobalOrb({
     () => () => {
       if (outcomeTimerRef.current != null) window.clearTimeout(outcomeTimerRef.current);
       if (speakingTimerRef.current != null) window.clearTimeout(speakingTimerRef.current);
+      if (tapTimerRef.current != null) window.clearTimeout(tapTimerRef.current);
+      if (holdTimerRef.current != null) window.clearTimeout(holdTimerRef.current);
     },
     [],
   );
@@ -381,6 +390,55 @@ export default function GlobalOrb({
     recognition.start();
   };
 
+  const captureCurrentPage = async (note?: string) => {
+    if (typeof window === 'undefined') return;
+    setCaptureNotice('Saving and analyzing…');
+    try {
+      const data = await analyzeCaptureUrl({
+        url: window.location.href,
+        title: document.title,
+        notes: note,
+      });
+      if (!data.ok) throw new Error(data.error || 'Capture failed');
+      setCaptureNotice('Saved and analyzed');
+      flashOutcome('success');
+    } catch {
+      setCaptureNotice('Could not save. Double tap for options.');
+    }
+    window.setTimeout(() => setCaptureNotice(''), 2200);
+  };
+
+  const handleOrbClick = () => {
+    if (heldRef.current) {
+      heldRef.current = false;
+      return;
+    }
+    if (tapTimerRef.current != null) window.clearTimeout(tapTimerRef.current);
+    tapTimerRef.current = window.setTimeout(() => {
+      tapTimerRef.current = null;
+      void captureCurrentPage();
+    }, TAP_DELAY_MS);
+  };
+
+  const handleOrbDoubleClick = () => {
+    if (tapTimerRef.current != null) window.clearTimeout(tapTimerRef.current);
+    tapTimerRef.current = null;
+    setOpen(true);
+  };
+
+  const beginHold = () => {
+    heldRef.current = false;
+    holdTimerRef.current = window.setTimeout(() => {
+      heldRef.current = true;
+      startVoice();
+    }, HOLD_DELAY_MS);
+  };
+
+  const endHold = () => {
+    if (holdTimerRef.current != null) window.clearTimeout(holdTimerRef.current);
+    holdTimerRef.current = null;
+  };
+
   const why = () => {
     if (!session.recommendation) return;
     setAskAnswer(
@@ -457,14 +515,8 @@ export default function GlobalOrb({
               </span>
               <div>
                 <span className="global-orb-eyebrow">ORBiE · YOUR QUIET ADVANTAGE</span>
-                {showAmbientGreeting ? (
-                  <h2>{session.summary}</h2>
-                ) : (
-                  <>
-                    <h2>{session.title}</h2>
-                    <p>{session.summary}</p>
-                  </>
-                )}
+                <h2>Quick actions</h2>
+                <p>Choose one and keep moving.</p>
               </div>
               <button ref={closeRef} type="button" className="global-orb-close" onClick={() => setOpen(false)}>
                 Close
@@ -473,17 +525,17 @@ export default function GlobalOrb({
 
             <div className="global-orb-panel-body">
               <div className="global-orb-launchpad" aria-label="Orbie quick actions">
-                <button type="button" onClick={() => { setOpen(false); setSessionView({ kind: 'capture' }); }}>
-                  <span aria-hidden="true">＋</span><strong>Capture anything</strong><small>Save a link, image, or idea</small>
+                <button type="button" onClick={() => { setOpen(false); setSessionView({ kind: 'capture', draft: typeof window === 'undefined' ? undefined : window.location.href }); }}>
+                  <span aria-hidden="true">＋</span><strong>Save with note</strong><small>Add context before saving</small>
+                </button>
+                <button type="button" onClick={() => { setOpen(false); void captureCurrentPage('Investigate this page and surface the clearest next step.'); }}>
+                  <span aria-hidden="true">✦</span><strong>Investigate</strong><small>Analyze what matters</small>
                 </button>
                 <button type="button" onClick={() => askInputRef.current?.focus()}>
-                  <span aria-hidden="true">✦</span><strong>Ask Simplifi</strong><small>Get one clear answer</small>
+                  <span aria-hidden="true">⌁</span><strong>Ask Orbie</strong><small>Get one clear answer</small>
                 </button>
-                <button type="button" onClick={() => { setOpen(false); setSessionView({ kind: 'capture', draft: 'Note: ' }); }}>
-                  <span aria-hidden="true">⌁</span><strong>Add note</strong><small>Remember it for later</small>
-                </button>
-                <button type="button" onClick={() => { setOpen(false); setSessionView({ kind: 'inbox' }); }}>
-                  <span aria-hidden="true">⌘</span><strong>Quick actions</strong><small>Review what needs attention</small>
+                <button type="button" onClick={() => { setOpen(false); setSessionView({ kind: 'followups' }); }}>
+                  <span aria-hidden="true">◷</span><strong>Remind me</strong><small>Choose when it returns</small>
                 </button>
               </div>
 
@@ -627,8 +679,13 @@ export default function GlobalOrb({
           aria-label={session.ariaLabel}
           aria-controls={panelId}
           aria-expanded="false"
-          title="Open Orbie"
-          onClick={() => setOpen(true)}
+          title="Tap to save · double tap for options · hold to speak"
+          onClick={handleOrbClick}
+          onDoubleClick={handleOrbDoubleClick}
+          onPointerDown={beginHold}
+          onPointerUp={endHold}
+          onPointerCancel={endHold}
+          onPointerLeave={endHold}
         >
           {orbVisual}
         </button>
@@ -646,6 +703,8 @@ export default function GlobalOrb({
           {orbVisual}
         </button>
       )}
+
+      {captureNotice ? <div className="global-orb-capture-notice" role="status">{captureNotice}</div> : null}
 
       {sessionView ? (
         <SessionWorkspace
