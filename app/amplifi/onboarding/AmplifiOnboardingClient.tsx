@@ -264,7 +264,7 @@ export default function AmplifiOnboardingClient({
               <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#aa7a1b]">Social connections</p>
               <h2 className="mt-2 text-xl font-semibold">Provider connection</h2>
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                Your selected channels are saved here. Direct Meta publishing remains gated until the production Meta provider connection is certified.
+                Your selected channels are saved here. Connect each approved social account to let Amplifi publish the posts you approve at the scheduled time.
               </p>
               <span className="mt-4 inline-flex rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-800">
                 Meta certification pending
