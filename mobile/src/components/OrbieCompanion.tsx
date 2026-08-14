@@ -47,12 +47,15 @@ export function OrbieCompanion() {
           opacity: breathe.interpolate({ inputRange: [0, 1], outputRange: [0.45, 0.85] }),
           transform: [{ scale: breathe.interpolate({ inputRange: [0, 1], outputRange: [1, 1.12] }) }],
         }]} />
-        <View style={styles.orbitOne} />
-        <View style={styles.orbitTwo} />
         <View style={styles.orbShell}>
           <View style={styles.orbHighlight} />
           <View style={styles.orbCore} />
-          <View style={styles.energyMark} />
+          <View style={styles.plasmaCore} />
+          <View style={[styles.filament, styles.filamentOne]} />
+          <View style={[styles.filament, styles.filamentTwo]} />
+          <View style={[styles.filament, styles.filamentThree]} />
+          <View style={[styles.filament, styles.filamentFour]} />
+          <View style={[styles.filament, styles.filamentFive]} />
         </View>
       </Pressable>
 
@@ -92,13 +95,17 @@ export function OrbieCompanion() {
 
 const styles = StyleSheet.create({
   floatingButton: { position: 'absolute', zIndex: 50, right: 16, bottom: 78, width: 76, height: 76, alignItems: 'center', justifyContent: 'center' },
-  halo: { position: 'absolute', width: 72, height: 72, borderRadius: 36, backgroundColor: 'rgba(69, 181, 255, 0.28)' },
-  orbShell: { width: 58, height: 58, borderRadius: 29, overflow: 'hidden', alignItems: 'center', justifyContent: 'center', backgroundColor: '#113B91', borderWidth: 1.5, borderColor: '#81E6FF', shadowColor: '#2F8FFF', shadowOpacity: 0.55, shadowRadius: 13, shadowOffset: { width: 0, height: 6 }, elevation: 12 },
+  halo: { position: 'absolute', width: 72, height: 72, borderRadius: 36, backgroundColor: 'rgba(89, 80, 255, 0.3)' },
+  orbShell: { width: 58, height: 58, borderRadius: 29, overflow: 'hidden', alignItems: 'center', justifyContent: 'center', backgroundColor: '#09062A', borderWidth: 1.5, borderColor: '#81F1FF', shadowColor: '#6256FF', shadowOpacity: 0.8, shadowRadius: 15, shadowOffset: { width: 0, height: 5 }, elevation: 14 },
   orbHighlight: { position: 'absolute', left: 9, top: 7, width: 22, height: 14, borderRadius: 11, backgroundColor: 'rgba(195, 247, 255, 0.75)', transform: [{ rotate: '-24deg' }] },
-  orbCore: { width: 38, height: 38, borderRadius: 19, backgroundColor: 'rgba(29, 83, 190, 0.72)', borderWidth: 1, borderColor: 'rgba(135, 104, 255, 0.75)' },
-  energyMark: { position: 'absolute', width: 12, height: 29, borderRadius: 8, borderLeftWidth: 2, borderRightWidth: 2, borderLeftColor: '#C7F7FF', borderRightColor: '#FFD578', transform: [{ rotate: '22deg' }] },
-  orbitOne: { position: 'absolute', zIndex: 2, width: 74, height: 25, borderRadius: 18, borderWidth: 1.4, borderColor: '#FFD36B', transform: [{ rotate: '-14deg' }] },
-  orbitTwo: { position: 'absolute', zIndex: 2, width: 68, height: 25, borderRadius: 18, borderWidth: 1, borderColor: 'rgba(255, 211, 107, 0.7)', transform: [{ rotate: '55deg' }] },
+  orbCore: { width: 48, height: 48, borderRadius: 24, backgroundColor: 'rgba(61, 36, 150, 0.72)', borderWidth: 1, borderColor: 'rgba(119, 232, 255, 0.62)' },
+  plasmaCore: { position: 'absolute', width: 12, height: 12, borderRadius: 6, backgroundColor: '#F9FFFF', shadowColor: '#71EFFF', shadowOpacity: 1, shadowRadius: 12, elevation: 8 },
+  filament: { position: 'absolute', width: 42, height: 2, borderRadius: 2, backgroundColor: '#BDF7FF', shadowColor: '#7B5CFF', shadowOpacity: 0.95, shadowRadius: 5, elevation: 4 },
+  filamentOne: { transform: [{ rotate: '8deg' }] },
+  filamentTwo: { transform: [{ rotate: '43deg' }] },
+  filamentThree: { transform: [{ rotate: '82deg' }] },
+  filamentFour: { transform: [{ rotate: '128deg' }] },
+  filamentFive: { transform: [{ rotate: '161deg' }] },
   scrim: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(8, 18, 48, 0.28)' },
   panel: { paddingHorizontal: 18, paddingTop: 10, paddingBottom: 28, borderTopLeftRadius: 30, borderTopRightRadius: 30, backgroundColor: '#F8FAFF', shadowColor: '#081230', shadowOpacity: 0.24, shadowRadius: 24, shadowOffset: { width: 0, height: -8 } },
   panelHandle: { alignSelf: 'center', width: 40, height: 4, borderRadius: 2, backgroundColor: '#CDD6E8', marginBottom: 18 },
