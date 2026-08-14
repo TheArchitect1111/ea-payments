@@ -152,7 +152,7 @@ export function buildAmplifiPortalExperience(
     'Amplifi helps you draft and share Magnifi stories. Nothing auto-posts — you review every draft before you (or your team) publish. Anyone with the link can view this story.';
 
   const emptyLede =
-    'Capture once in Simplifi to create a Magnifi story you can open, draft from, and share. Amplifi does not auto-post or run a content calendar.';
+    'Capture once in Simplifi to create a Magnifi story, then use Amplifi to prepare platform-specific posts, review them, place approved work on the calendar, and publish through connected social accounts.';
 
   if (mode === 'athlete') {
     return {
