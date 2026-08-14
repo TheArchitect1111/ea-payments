@@ -18,7 +18,21 @@ export async function GET(req: NextRequest, context: { params: Promise<{ provide
     process.env.AMPLIFI_PUBLIC_ORIGIN?.trim() ||
     (process.env.VERCEL_ENV === 'production' ? 'https://efficiencyarchitects.online' : req.nextUrl.origin);
   const response = NextResponse.redirect(oauthStart(value, oauthOrigin, state, verifier));
-  const payload = JSON.stringify({ state, verifier, digest: createHash('sha256').update(state).digest('hex') });
-  response.cookies.set(`amplifi_oauth_${value}`, Buffer.from(payload).toString('base64url'), { httpOnly: true, secure: true, sameSite: 'lax', maxAge: 600, path: '/' });
+  const payload = JSON.stringify({
+    state,
+    verifier,
+    digest: createHash('sha256').update(state).digest('hex'),
+    returnOrigin: req.nextUrl.origin,
+  });
+  response.cookies.set(`amplifi_oauth_${value}`, Buffer.from(payload).toString('base64url'), {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'lax',
+    maxAge: 600,
+    path: '/',
+    ...(req.nextUrl.hostname.endsWith('efficiencyarchitects.online')
+      ? { domain: '.efficiencyarchitects.online' }
+      : {}),
+  });
   return response;
 }
