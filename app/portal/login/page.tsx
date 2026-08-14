@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import RealmLoginCard from '@/components/auth/RealmLoginCard';
 import { getRealmLoginCopy, magicLinkErrorMessage } from '@/lib/auth/realm-login-copy';
+import amandaPhoto from '@/public/home/client-amanda-catherine.jpg';
 import './portal-login.css';
 
 const copy = getRealmLoginCopy('portal');
@@ -30,7 +31,7 @@ function AmandaLoginBrand() {
     <>
       <header className="pl-header pl-header-amanda">
         <Image
-          src="/home/client-amanda-catherine.jpg"
+          src={amandaPhoto}
           alt="Amanda Catherine"
           width={240}
           height={240}
