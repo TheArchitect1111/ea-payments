@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import { NextRequest, NextResponse } from 'next/server';
-import { encryptAccounts, exchangeProviderCode, isNativeProvider, providerCookie } from '@/lib/amplifi-native-social';
+import { encryptAccounts, exchangeProviderCode, isNativeProvider, providerCookie, verifyOAuthState } from '@/lib/amplifi-native-social';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,8 +12,11 @@ export async function GET(req: NextRequest, context: { params: Promise<{ provide
   const raw = req.cookies.get(`amplifi_oauth_${value}`)?.value;
   let saved: { state?: string; verifier?: string; digest?: string; returnOrigin?: string } = {};
   try { saved = JSON.parse(Buffer.from(raw || '', 'base64url').toString('utf8')) as typeof saved; } catch { saved = {}; }
-  const validState = Boolean(state && saved.state === state && saved.digest === createHash('sha256').update(state).digest('hex'));
+  const signedState = verifyOAuthState(state, value);
+  const cookieState = Boolean(state && saved.state === state && saved.digest === createHash('sha256').update(state).digest('hex'));
+  const validState = Boolean(signedState || cookieState);
   if (!validState) return NextResponse.json({ ok: false, error: 'Invalid OAuth state.' }, { status: 403 });
+  if (signedState) saved.returnOrigin = signedState.returnOrigin;
   if (url.searchParams.get('error') || !url.searchParams.get('code')) return NextResponse.redirect(new URL(`/amplifi/workspace?connections=${value}-denied#connections`, req.url));
   try {
     const oauthOrigin =
