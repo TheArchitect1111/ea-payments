@@ -19,22 +19,30 @@ function safeNextPath(raw: string | null): string | undefined {
 }
 
 function isAmandaPortal(nextPath?: string) {
-  return Boolean(nextPath?.toLowerCase().startsWith('/portal/amanda-catherine'));
+  const path = nextPath?.toLowerCase();
+  return Boolean(
+    path === '/amanda-business' || path?.startsWith('/portal/amanda-catherine'),
+  );
 }
 
 function AmandaLoginBrand() {
   return (
     <>
       <header className="pl-header pl-header-amanda">
-        <div className="pl-amanda-mark" aria-label="Amanda Catherine">
-          <span>AC</span>
-        </div>
-        <p className="pl-eyebrow">Amanda Catherine Portal</p>
-        <h1 className="pl-title">Your Amanda Catherine Experience</h1>
+        <Image
+          src="/home/client-amanda-catherine.jpg"
+          alt="Amanda Catherine"
+          width={240}
+          height={240}
+          className="pl-amanda-photo"
+          priority
+        />
+        <p className="pl-eyebrow">AesthetiKine Studio Lab</p>
+        <h1 className="pl-title">Amanda Catherine Business Portal</h1>
         <p className="pl-lede">
-          Sign in to review your programs, appointments, documents, payments, messages, and next steps.
+          Sign in to manage programs, appointments, applications, payments, communications, people, and reports.
         </p>
-        <p className="pl-portal-line">Private portal review for Amanda Catherine</p>
+        <p className="pl-portal-line">Private administrator access for Amanda Catherine</p>
       </header>
 
       <div className="pl-hero pl-amanda-hero" aria-label="Amanda Catherine portal areas">
