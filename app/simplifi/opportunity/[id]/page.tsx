@@ -4,12 +4,13 @@ import { notFound } from 'next/navigation';
 import { EA_PORTAL_COOKIE, verifySession } from '@/lib/ea-portal-auth';
 import { getCaptureByIdentifier } from '@/lib/capture-records';
 import { captureToObject } from '@/lib/simplifi-objects';
-import { computePriorityScore, priorityLevelLabel } from '@/lib/priority-engine';
+import { computePriorityScore } from '@/lib/priority-engine';
 import { parseBlueprintSummary } from '@/lib/blueprint-summary';
 import { parseOpportunityPayload } from '@/lib/opportunity-experience';
 import { formatDecisionPathLabel } from '@/lib/capture-success-flow';
 import { EA_PLATFORM_URL } from '@/lib/platform-urls';
 import { loadOrbWorkspaceSlice } from '@/lib/orb';
+import { buildEvaluationSummary } from '@/lib/evaluation-summary';
 import SimplifiProductShell from '../../components/SimplifiProductShell';
 import OpportunityActions from './OpportunityActions';
 import '../../workspace/simplifi-workspace.css';
@@ -39,6 +40,7 @@ export default async function OpportunityProfilePage({ params }: Props) {
   const guidanceUrl = `/simplifi/guidance/${capture.id}`;
   const blueprint = parseBlueprintSummary(capture.blueprintSummary || capture.analysisSummary);
   const intelligence = parseOpportunityPayload(capture)?.intelligence;
+  const evaluation = buildEvaluationSummary(obj, ps);
 
   return (
     <SimplifiProductShell
@@ -51,7 +53,7 @@ export default async function OpportunityProfilePage({ params }: Props) {
       entityId={obj.id}
     >
       <main className="sw-main">
-        <p className="sw-section-label">Opportunity profile</p>
+        <p className="sw-section-label">Clear evaluation</p>
         <header className="sw-priority-card">
           <div className="sw-priority-main">
             <div>
@@ -62,16 +64,51 @@ export default async function OpportunityProfilePage({ params }: Props) {
                 {obj.dateCaptured ? ` · captured ${obj.dateCaptured}` : ''}
               </p>
             </div>
-            <span>{obj.opportunityScore != null ? `${obj.opportunityScore}/100` : obj.priority}</span>
-          </div>
-          <div className="sw-card-footer">
-            <strong>{obj.nextAction}</strong>
-            {obj.priorityLevel ? <span>{priorityLevelLabel(obj.priorityLevel)}</span> : null}
+            <span>{evaluation.verdict}</span>
           </div>
         </header>
 
-        {ps.reasons.length > 0 ? (
-          <section className="sw-brief-panel" aria-label="Why now">
+        <section className="sw-brief-panel" aria-label="What this is">
+          <h2>What this is</h2>
+          <p>{evaluation.whatThisIs}</p>
+        </section>
+
+        <section className="sw-brief-panel" aria-label="Verdict">
+          <h2>Verdict</h2>
+          <p style={{ fontSize: '1.25rem', fontWeight: 800 }}>{evaluation.verdict}</p>
+        </section>
+
+        <section className="sw-brief-panel" aria-label="Why it matters">
+          <h2>Why it matters</h2>
+          <ul className="sw-event-list" style={{ marginTop: 8 }}>
+            {evaluation.whyItMatters.map((reason) => (
+              <li key={reason}>
+                <div><p>{reason}</p></div>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <section className="sw-brief-panel sw-recommend" aria-label="Your next move">
+          <h2>Your next move</h2>
+          <p className="sw-next-action"><strong>{evaluation.nextMove}</strong></p>
+          {obj.dueDate ? <p className="sw-muted">Target date: {obj.dueDate}</p> : null}
+        </section>
+
+        <section className="sw-brief-panel" aria-label="Next three steps">
+          <h2>Next three steps</h2>
+          <ol style={{ margin: '12px 0 0', paddingLeft: 24 }}>
+            {evaluation.nextSteps.map((step) => (
+              <li key={step} style={{ marginTop: 10, paddingLeft: 4 }}>{step}</li>
+            ))}
+          </ol>
+        </section>
+
+        <details className="sw-brief-panel" aria-label="Detailed analysis">
+          <summary style={{ cursor: 'pointer', fontWeight: 800 }}>View detailed analysis</summary>
+          <div style={{ marginTop: 18 }}>
+          {ps.reasons.length > 0 ? (
+          <section aria-label="Why now">
             <h2>Why now</h2>
             <ul className="sw-event-list" style={{ marginTop: 8 }}>
               {ps.reasons.map((reason) => (
@@ -85,18 +122,18 @@ export default async function OpportunityProfilePage({ params }: Props) {
           </section>
         ) : null}
 
-        <section className="sw-brief-grid">
-          <article className="sw-brief-panel">
+        <section className="sw-brief-grid" style={{ marginTop: 18 }}>
+          <article>
             <h2>Why this matters</h2>
             <p>{obj.whyThisMatters}</p>
           </article>
-          <article className="sw-brief-panel">
+          <article>
             <h2>What most people do</h2>
             <p>{obj.whatMostPeopleDo}</p>
           </article>
         </section>
 
-        <article className="sw-brief-panel sw-recommend">
+        <article style={{ marginTop: 18 }}>
           <h2>What we recommend</h2>
           <p>{obj.whatWeRecommend}</p>
           <p className="sw-next-action">
@@ -106,7 +143,7 @@ export default async function OpportunityProfilePage({ params }: Props) {
         </article>
 
         {intelligence ? (
-          <section className="sw-brief-panel" aria-label="Decision and Build Intelligence">
+          <section style={{ marginTop: 18 }} aria-label="Decision and Build Intelligence">
             <h2>Decision Intelligence</h2>
             <p className="sw-muted" style={{ marginBottom: 8 }}>
               Computed when you captured this — how to pursue the opportunity.
@@ -139,7 +176,7 @@ export default async function OpportunityProfilePage({ params }: Props) {
             ) : null}
           </section>
         ) : (
-          <section className="sw-brief-panel">
+          <section style={{ marginTop: 18 }}>
             <h2>Decision Intelligence</h2>
             <p className="sw-muted">
               Not on this capture yet. Use Intelligence under Next moves after a fresh capture.
@@ -148,7 +185,7 @@ export default async function OpportunityProfilePage({ params }: Props) {
         )}
 
         {(blueprint.meta.length > 0 || blueprint.sections.length > 0 || blueprint.roadmap.length > 0) && (
-          <section className="sw-brief-panel" aria-label="Blueprint preview">
+          <section style={{ marginTop: 18 }} aria-label="Blueprint preview">
             <h2>Blueprint preview</h2>
             <p className="sw-muted">
               Early outline from this capture — not a full delivery plan. Use guidance or return to
@@ -202,7 +239,7 @@ export default async function OpportunityProfilePage({ params }: Props) {
           </section>
         )}
 
-        <section className="sw-quick-actions" aria-label="Opportunity links">
+        <section className="sw-quick-actions" style={{ marginTop: 18 }} aria-label="Opportunity links">
           <Link href={guidanceUrl}>Guidance</Link>
           {obj.considerUrl ? <Link href={obj.considerUrl}>Magnifi</Link> : null}
           {obj.magnifiUrl ? <Link href={obj.magnifiUrl}>Story</Link> : null}
@@ -225,6 +262,9 @@ export default async function OpportunityProfilePage({ params }: Props) {
             to snooze, record outcomes, or archive.
           </p>
         )}
+          </div>
+        </details>
+
       </main>
     </SimplifiProductShell>
   );
