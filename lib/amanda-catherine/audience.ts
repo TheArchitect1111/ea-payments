@@ -13,15 +13,20 @@ const FORM_AUDIENCES = new Set<AmandaPortalAudience>([
   'vendor-partner',
 ]);
 
+const AMANDA_OWNER_EMAILS = new Set([
+  'amanda@aesthetikine.com',
+]);
+
 export async function resolveAmandaAudience(input: {
   portalSlug: string;
   email: string;
   role?: PlatformRole;
 }): Promise<AmandaPortalAudience> {
+  const email = input.email.trim().toLowerCase();
+  if (AMANDA_OWNER_EMAILS.has(email)) return 'admin';
   if (input.role === 'owner' || input.role === 'admin') return 'admin';
   if (input.role === 'staff' || input.role === 'manager') return 'staff';
 
-  const email = input.email.trim().toLowerCase();
   const [submissions, payments] = await Promise.all([
     listPortalFormSubmissions(input.portalSlug, { email }),
     listAmandaPayments(input.portalSlug, email),
