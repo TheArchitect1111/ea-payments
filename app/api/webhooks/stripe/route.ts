@@ -666,12 +666,19 @@ async function handleSubscriptionCheckoutCompleted(
   }
 
   try {
+    const amplifiOnboardingLoginUrl = `${(
+      process.env.NEXT_PUBLIC_BASE_URL ?? 'https://efficiencyarchitects.online'
+    ).replace(/\/$/, '')}/portal/login?next=${encodeURIComponent('/amplifi/onboarding')}`;
     await sendWelcomeEmail({
       clientName,
       email,
       packageName: plan.displayName,
-      portalLoginUrl,
+      portalLoginUrl: planId.startsWith('amplifi_') ? amplifiOnboardingLoginUrl : portalLoginUrl,
       tempCredentials,
+      nextSteps: planId.startsWith('amplifi_')
+        ? 'Sign in, complete the guided brand profile, connect your approved social channels, and create your first campaign.'
+        : undefined,
+      platformName: planId.startsWith('amplifi_') ? 'Amplifi by Efficiency Architects' : undefined,
     });
   } catch (err) {
     console.error('Subscription checkout: welcome email failed', session.id, err);

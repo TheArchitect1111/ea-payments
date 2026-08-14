@@ -118,6 +118,11 @@
   padding: 22px;
 }
 
+.am-start {
+  border-top: 1px solid #e5e1d6;
+  padding-top: 48px;
+}
+
 .am-footer {
   border-top: 1px solid #e5e1d6;
   margin-top: 40px;

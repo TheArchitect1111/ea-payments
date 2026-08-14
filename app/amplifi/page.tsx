@@ -51,8 +51,11 @@ export default async function AmplifiMarketingPage({
           anything worked. Amplifi keeps that work moving.
         </p>
         <div className="am-hero-actions">
-          <Link href="/amplifi/workspace" className="am-primary">
-            SEE AMPLIFI IN ACTION
+          <Link href="/amplifi/pricing" className="am-primary">
+            START FOR $29 A MONTH
+          </Link>
+          <Link href="/amplifi/workspace" className="am-secondary">
+            See Amplifi in action
           </Link>
           <Link href="/portal/login?next=%2Famplifi%2Fworkspace" className="am-secondary">
             Sign in to your workspace
@@ -125,6 +128,13 @@ export default async function AmplifiMarketingPage({
             <li key={item}>{item}</li>
           ))}
         </ul>
+      </section>
+
+      <section className="am-section am-start">
+        <p className="am-kicker">AMPLIFI SOCIAL</p>
+        <h2>One practical starting point. $29 a month.</h2>
+        <p>Shape the message, review it, schedule it, publish it, and see what happened without rebuilding the process every week.</p>
+        <Link href="/amplifi/pricing" className="am-primary">See what is included</Link>
       </section>
 
       <footer className="am-footer">
