@@ -70,6 +70,17 @@
   text-shadow: 0 3px 18px rgba(0, 0, 0, 0.35);
 }
 
+.pl-amanda-photo {
+  width: 132px;
+  height: 132px;
+  margin: 0 auto 18px;
+  border-radius: 999px;
+  object-fit: cover;
+  object-position: center 22%;
+  border: 3px solid rgba(255, 248, 238, 0.78);
+  box-shadow: 0 18px 48px rgba(24, 7, 12, 0.34);
+}
+
 .pl-hero {
   position: relative;
   width: 100%;
@@ -307,124 +318,3 @@
 
 .pl-link:hover {
   text-decoration: underline;
-}
-
-.pl-demo-hint {
-  margin: 14px 0 0;
-  padding: 10px 12px;
-  border-radius: 12px;
-  background: #f8fbff;
-  color: #4b5563;
-  font-size: 12px;
-  line-height: 1.5;
-}
-
-.pl-footer {
-  margin-top: 24px;
-  text-align: center;
-}
-
-.pl-footer-text {
-  font-size: 13px;
-  color: #6b7280;
-  margin: 0 0 8px;
-}
-
-.pl-footer-link {
-  color: #c9a844;
-  font-weight: 600;
-  text-decoration: none;
-}
-
-.pl-tagline {
-  margin: 0;
-  font-size: 10px;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: rgba(27, 43, 77, 0.4);
-}
-
-.pl-page-amanda .pl-tagline {
-  color: rgba(255, 248, 238, 0.72);
-}
-
-.pl-auth-nav {
-  display: flex;
-  gap: 8px;
-  justify-content: center;
-  margin-bottom: 20px;
-  flex-wrap: wrap;
-}
-
-.pl-auth-nav a {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  text-decoration: none;
-  color: #6b7280;
-  padding: 8px 12px;
-  border: 1px solid #e5e7eb;
-  border-radius: 999px;
-  background: #fff;
-}
-
-.pl-auth-nav a.is-active {
-  color: var(--ea-navy);
-  border-color: #c9a844;
-  background: #fffdf6;
-}
-
-.pl-2fa-note {
-  margin: 0 0 16px;
-  font-size: 14px;
-  line-height: 1.5;
-  color: #4b5563;
-}
-
-.pl-input-otp {
-  letter-spacing: 0.35em;
-  text-align: center;
-  font-size: 20px;
-  font-weight: 700;
-}
-
-.pl-success {
-  margin: 0 0 16px;
-  padding: 12px 14px;
-  border-radius: 8px;
-  background: #ecfdf5;
-  border: 1px solid #a7f3d0;
-  color: #065f46;
-  font-size: 14px;
-}
-
-.pl-divider {
-  margin: 24px 0;
-  border: 0;
-  border-top: 1px solid rgba(27, 43, 77, 0.12);
-}
-
-.pl-demo-block {
-  margin-top: 8px;
-}
-
-.pl-demo-compact {
-  margin-top: 0;
-}
-
-.pl-demo-eyebrow {
-  margin: 0 0 6px;
-  color: #c9a844;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
-}
-
-.pl-demo-lede {
-  margin: 0 0 14px;
-  font-size: 13px;
-  line-height: 1.5;
-  color: #4b5563;
-}
