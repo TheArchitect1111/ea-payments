@@ -52,6 +52,7 @@ export type CommerceOfferId =
   | 'simplifi_monthly'
   | 'simplifi_annual'
   | 'amplifi_social'
+  | 'amplifi_intelligence'
   | 'amplifi_complete'
   | 'platform_monthly'
   | 'platform_annual';

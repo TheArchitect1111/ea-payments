@@ -1,5 +1,9 @@
 import type { CommerceOffer } from './types';
-import { AMPLIFI_COMPLETE_MODULES, AMPLIFI_SOCIAL_MODULES } from './presets';
+import {
+  AMPLIFI_COMPLETE_MODULES,
+  AMPLIFI_INTELLIGENCE_MODULES,
+  AMPLIFI_SOCIAL_MODULES,
+} from './presets';
 
 const EA_PORTAL = {
   platform: 'efficiency-architects' as const,
@@ -28,6 +32,25 @@ export const AMPLIFI_COMMERCE_OFFERS: CommerceOffer[] = [
     intakePath: '/amplifi/onboarding',
   },
   {
+    id: 'amplifi_intelligence',
+    kind: 'subscription',
+    name: 'Amplifi Intelligence',
+    displayName: 'Amplifi Intelligence',
+    description:
+      'Everything in Amplifi Social plus Smart Research that watches selected subjects, finds useful opportunities, preserves sources, and prepares content directions and posts for review.',
+    interval: 'month',
+    priceCents: 5900,
+    stripePriceEnvKey: 'STRIPE_PRICE_AMPLIFI_INTELLIGENCE',
+    allowInlineStripePrice: true,
+    airtablePackageName: 'Implementation Package',
+    moduleIds: [...AMPLIFI_INTELLIGENCE_MODULES],
+    portalConfig: EA_PORTAL,
+    fulfillmentType: 'amplifi',
+    fulfillmentLabel: 'Provision Amplifi Intelligence and begin brand onboarding.',
+    reviewRequired: false,
+    intakePath: '/amplifi/onboarding',
+  },
+  {
     id: 'amplifi_complete',
     kind: 'subscription',
     name: 'Amplifi Complete',
@@ -37,9 +60,7 @@ export const AMPLIFI_COMMERCE_OFFERS: CommerceOffer[] = [
     interval: 'month',
     priceCents: 12900,
     stripePriceEnvKey: 'STRIPE_PRICE_AMPLIFI_COMPLETE',
-    // Keep Complete out of self-serve checkout until its Smartchitecture features
-    // are production-certified. A configured Stripe Price can explicitly unlock it later.
-    allowInlineStripePrice: false,
+    allowInlineStripePrice: true,
     airtablePackageName: 'Implementation Package',
     moduleIds: [...AMPLIFI_COMPLETE_MODULES],
     portalConfig: EA_PORTAL,

@@ -2,7 +2,9 @@
 
 import { FormEvent, useState } from 'react';
 
-export default function AmplifiRegistrationForm() {
+type AmplifiPlanId = 'amplifi_social' | 'amplifi_intelligence' | 'amplifi_complete';
+
+export default function AmplifiRegistrationForm({ planId }: { planId: AmplifiPlanId }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -21,7 +23,7 @@ export default function AmplifiRegistrationForm() {
           organization: String(form.get('organization') || ''),
           email: String(form.get('email') || ''),
           phone: String(form.get('phone') || ''),
-          planId: 'amplifi_social',
+          planId,
           referralSource: 'amplifi-pricing',
         }),
       });

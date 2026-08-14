@@ -15,12 +15,12 @@ const plans = [
     features: ['One brand workspace', 'Up to three social channels', 'AI-assisted posts and graphics', 'Brand voice profile', 'Content calendar and scheduling', 'Approve, edit, or reject', 'Direct publishing', 'Campaign results and tracked clicks'],
   },
   {
-    name: 'Intelligence', price: '$59', label: 'Help me find what matters', action: 'Talk through Intelligence', href: '/contact?subject=Amplifi%20Intelligence%20access', available: false,
+    name: 'Intelligence', price: '$59', label: 'Do the searching and creating for me', action: 'Begin with Intelligence', href: '/amplifi/register?plan=amplifi_intelligence', available: true,
     description: 'A guided step up when you want Amplifi to watch selected subjects, surface useful signals, and help you decide what deserves attention.',
     features: ['Everything in Social', 'Smart Research', 'Search once or keep watching', 'Source-backed content direction', 'Repeat-noise filtering', 'Research history and provenance', 'Opportunity alerts', 'Three watched subjects'],
   },
   {
-    name: 'Complete', price: '$129', label: 'Guide the whole content process', action: 'Talk through Complete', href: '/contact?subject=Amplifi%20Complete%20access', available: false,
+    name: 'Complete', price: '$129', label: 'Run the whole campaign with me', action: 'Begin with Complete', href: '/amplifi/register?plan=amplifi_complete', available: true,
     description: 'The complete guided path when you want research, campaign planning, creation, approval, publishing, and learning to work together.',
     features: ['Everything in Intelligence', 'Content Engine', 'Campaign Architect', 'Smartchitecture™ workflow', 'Approval and Autopilot rules', 'Exception Queue', 'Cross-channel campaign support', 'Learning Engine'],
   },
@@ -46,7 +46,7 @@ export default function AmplifiPricingPage() {
             <p className="am-plan-description">{plan.description}</p>
             <ul>{plan.features.map(feature => <li key={feature}>{feature}</li>)}</ul>
             <Link href={plan.href} className={`am-plan-button${plan.available ? ' am-plan-button-live' : ''}`}>{plan.action}<span>→</span></Link>
-            <small>{plan.available ? 'Available now. Secure checkout powered by Stripe.' : 'Guided launch access. We confirm fit before activation.'}</small>
+            <small>Available now. Secure checkout powered by Stripe.</small>
           </article>
         ))}
       </section>
