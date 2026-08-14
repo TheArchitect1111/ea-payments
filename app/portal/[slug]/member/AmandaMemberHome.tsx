@@ -116,6 +116,24 @@ export default async function AmandaMemberHome({
           <span aria-hidden>›</span>
         </Link>
 
+        <section className="ak-business-links" aria-labelledby="ak-business-links-title">
+          <div>
+            <p className="ak-business-links__eyebrow">Business links</p>
+            <h2 id="ak-business-links-title">Your public presence</h2>
+          </div>
+          <div className="ak-business-links__list">
+            <a href="https://www.aesthetikine.com/" target="_blank" rel="noopener noreferrer">AesthetiKine website <span aria-hidden>↗</span></a>
+            <a href="https://www.empowerartcollective.com/" target="_blank" rel="noopener noreferrer">Empower Art Collective <span aria-hidden>↗</span></a>
+            <a href="https://www.instagram.com/amandacatherinec/" target="_blank" rel="noopener noreferrer">Amanda Catherine Instagram <span aria-hidden>↗</span></a>
+            <a href="https://www.instagram.com/lifelinetour/" target="_blank" rel="noopener noreferrer">LIFELINE Tour Instagram <span aria-hidden>↗</span></a>
+            <a href="https://www.instagram.com/aesthetikine/" target="_blank" rel="noopener noreferrer">AesthetiKine Instagram <span aria-hidden>↗</span></a>
+            <a href="https://youtube.com/@empowerartcollective" target="_blank" rel="noopener noreferrer">Empower Art Collective YouTube <span aria-hidden>↗</span></a>
+          </div>
+          <div className="ak-business-links__finance">
+            <Image src="/amanda-catherine/amanda-medicard-qr.jpg" alt="Amanda’s Medicard by iFinance QR code" fill sizes="220px" />
+          </div>
+        </section>
+
         <details className="ak-admin-directory">
           <summary>All administrator tools</summary>
           <ul>

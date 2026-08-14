@@ -1,4 +1,64 @@
+import Image from 'next/image';
+
 const JANE_BOOKING_URL = 'https://aesthetikine.janeapp.com/';
+
+const signatureExperiences = [
+  {
+    title: 'Half-Day Therapeutic Wellness Experience',
+    duration: '2.5 hours',
+    price: '$395',
+    description:
+      'A curated wellness session combining functional therapy, facial rejuvenation, and lymphatic activation for a full-body reset.',
+  },
+  {
+    title: 'Full Day Luxury Wellness Reset Experience',
+    duration: '4–5 hours',
+    price: '$795',
+    description:
+      'Our signature immersive wellness journey designed to restore posture, circulation, skin vitality, and nervous-system balance.',
+    includes: [
+      'Align & Heal™ neuromuscular therapy',
+      'PostureCorrect™ mobility session',
+      'FaceForm™ sculpt facial',
+      'GlassGlow™ dermal therapy',
+      'BodySculpt™ lymphatic contouring',
+      'Oxygen infusion + LED rejuvenation',
+      'Guided breathwork session',
+      'Relaxation tea ritual',
+      'Personalized wellness roadmap',
+    ],
+  },
+] as const;
+
+const ivTherapies = [
+  ['Glow Drip™', 'Supports skin health and collagen production.'],
+  ['Stress Reset Drip™', 'Helps calm the nervous system and support recovery from stress.'],
+  ['Recovery & Performance Drip™', 'Supports muscle recovery and physical performance.'],
+  ['HairRestore Drip™', 'Provides nutrients that support scalp and follicular health.'],
+  ['Metabolic Sculpt Drip™', 'Supports energy, metabolism, and circulation.'],
+] as const;
+
+const memberships = [
+  {
+    title: 'Glow Membership',
+    price: '$149 / month',
+    description: 'One Glow Facial and Lymphatic Drainage session each month.',
+  },
+  {
+    title: 'Premium Wellness Membership',
+    price: '$349 / month',
+    description: 'IPL Glow Facial, Lymphatic Drainage, and a Wellness Glow IV Drip each month.',
+  },
+] as const;
+
+const socialLinks = [
+  ['Amanda Catherine on Instagram', 'https://www.instagram.com/amandacatherinec/'],
+  ['LIFELINE Tour on Instagram', 'https://www.instagram.com/lifelinetour/'],
+  ['AesthetiKine on Instagram', 'https://www.instagram.com/aesthetikine/'],
+  ['Empower Art Collective on YouTube', 'https://youtube.com/@empowerartcollective'],
+  ['AesthetiKine website', 'https://www.aesthetikine.com/'],
+  ['Empower Art Collective website', 'https://www.empowerartcollective.com/'],
+] as const;
 
 const programs = [
   {
@@ -37,6 +97,89 @@ export function isAmandaPublicSiteSlug(slug: string): boolean {
 export default function AmandaPublicAdditions() {
   return (
     <div className="ak-public-additions">
+      <section className="ak-signature" id="signature-wellness" aria-labelledby="ak-signature-title">
+        <div className="ak-section-heading">
+          <p className="ak-kicker">Signature wellness experiences</p>
+          <h2 id="ak-signature-title">Time set aside for your whole system.</h2>
+          <p>Thoughtfully sequenced care for restoration, circulation, mobility, skin vitality, and calm.</p>
+        </div>
+        <div className="ak-experience-grid">
+          {signatureExperiences.map((experience) => (
+            <article className="ak-experience" key={experience.title}>
+              <div className="ak-experience__meta"><span>{experience.duration}</span><strong>{experience.price}</strong></div>
+              <h3>{experience.title}</h3>
+              <p>{experience.description}</p>
+              {'includes' in experience ? (
+                <ul>{experience.includes.map((item) => <li key={item}>{item}</li>)}</ul>
+              ) : null}
+              <a href={JANE_BOOKING_URL} target="_blank" rel="noopener noreferrer">Book with Jane <span aria-hidden>→</span></a>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="ak-iv" id="iv-wellness" aria-labelledby="ak-iv-title">
+        <div className="ak-section-heading">
+          <p className="ak-kicker">IV wellness therapy</p>
+          <h2 id="ak-iv-title">Support designed around how you want to feel.</h2>
+        </div>
+        <div className="ak-iv-list">
+          {ivTherapies.map(([title, description]) => (
+            <article key={title}><h3>{title}</h3><p>{description}</p></article>
+          ))}
+        </div>
+        <p className="ak-clinical-note">IV services are provided only following appropriate screening and by an authorized medical professional.</p>
+      </section>
+
+      <section className="ak-memberships" id="memberships" aria-labelledby="ak-memberships-title">
+        <div className="ak-section-heading">
+          <p className="ak-kicker">Membership programs</p>
+          <h2 id="ak-memberships-title">Make wellness part of your rhythm.</h2>
+        </div>
+        <div className="ak-membership-grid">
+          {memberships.map((membership) => (
+            <article key={membership.title}>
+              <h3>{membership.title}</h3>
+              <strong>{membership.price}</strong>
+              <p>{membership.description}</p>
+              <a href={`mailto:amanda@aesthetikine.com?subject=${encodeURIComponent(membership.title)}`}>Ask about membership <span aria-hidden>→</span></a>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="ak-financing" id="financing" aria-labelledby="ak-financing-title">
+        <div>
+          <p className="ak-kicker">Flexible financing</p>
+          <h2 id="ak-financing-title">Beauty now. Pay later.</h2>
+          <p>Scan Amanda’s personal Medicard QR code to review financing through iFinance.</p>
+        </div>
+        <div className="ak-financing__image">
+          <Image src="/amanda-catherine/amanda-medicard-qr.jpg" alt="Amanda Catherine’s Medicard by iFinance QR code" fill sizes="(max-width: 780px) 92vw, 520px" />
+        </div>
+      </section>
+
+      <section className="ak-corporate" id="corporate-wellness" aria-labelledby="ak-corporate-title">
+        <div className="ak-corporate__copy">
+          <p className="ak-kicker">AesthetiKine Corporate Wellness</p>
+          <h2 id="ak-corporate-title">Healthier people. Stronger teams.</h2>
+          <p>Flexible onsite and virtual support built around four pillars: Align & Analyze, Onsite Wellness, Individual Care, and Leadership & Culture.</p>
+          <ul>
+            <li>Kinesiology assessments and personalized wellness foundations</li>
+            <li>Virtual sessions, Lunch & Learns, and immersive onsite visits</li>
+            <li>Individual employee care and progress support</li>
+            <li>Leadership wellness, resilience, and workplace culture</li>
+          </ul>
+          <a className="ak-primary-link" href="mailto:amanda@aesthetikine.com?subject=AesthetiKine%20Corporate%20Wellness">Request the corporate overview <span aria-hidden>→</span></a>
+        </div>
+        <div className="ak-corporate__pricing">
+          <p>Corporate Wellness Kickstart <strong>$997</strong></p>
+          <p>Monthly Wellness Partnership <strong>$1,497/month</strong></p>
+          <p>Quarterly Wellness Partnership <strong>$2,997</strong></p>
+          <p>Premium Workplace Partnership <strong>$2,997/month</strong></p>
+        </div>
+      </section>
+
       <section className="ak-academy" id="training-certification" aria-labelledby="ak-academy-title">
         <div className="ak-academy__intro">
           <p className="ak-kicker">AesthetiKine Academy</p>
@@ -82,6 +225,17 @@ export default function AmandaPublicAdditions() {
         </div>
       </section>
 
+      <section className="ak-connect" id="connect-with-amanda" aria-labelledby="ak-connect-title">
+        <div>
+          <p className="ak-kicker">Connect with Amanda</p>
+          <h2 id="ak-connect-title">Amanda Catherine</h2>
+          <p>National Sales Director · Visionary</p>
+        </div>
+        <div className="ak-connect__links">
+          {socialLinks.map(([label, href]) => <a key={label} href={href} target="_blank" rel="noopener noreferrer">{label}<span aria-hidden>↗</span></a>)}
+        </div>
+      </section>
+
       <section className="ak-intake" id="client-intake" aria-labelledby="ak-intake-title">
         <div>
           <p className="ak-kicker">Private by design</p>
@@ -112,6 +266,72 @@ export default function AmandaPublicAdditions() {
           margin: 0 auto;
           padding: clamp(72px, 9vw, 132px) clamp(22px, 6vw, 82px);
         }
+        .ak-signature,
+        .ak-iv,
+        .ak-memberships,
+        .ak-financing,
+        .ak-corporate,
+        .ak-connect {
+          max-width: 1240px;
+          margin: 0 auto;
+          padding: clamp(72px, 9vw, 132px) clamp(22px, 6vw, 82px);
+        }
+        .ak-section-heading { max-width: 850px; margin-bottom: 48px; }
+        .ak-section-heading h2,
+        .ak-financing h2,
+        .ak-corporate h2,
+        .ak-connect h2 {
+          margin: 0 0 18px;
+          font-family: Georgia, "Times New Roman", serif;
+          font-size: clamp(42px, 7vw, 78px);
+          font-weight: 500;
+          letter-spacing: -.045em;
+          line-height: .98;
+        }
+        .ak-section-heading > p:last-child,
+        .ak-financing > div > p:last-child,
+        .ak-corporate__copy > p,
+        .ak-connect > div > p:last-child { color: #685d57; font-size: clamp(17px, 2vw, 21px); line-height: 1.65; }
+        .ak-experience-grid { display: grid; grid-template-columns: .85fr 1.15fr; gap: 24px; }
+        .ak-experience { padding: clamp(28px, 4vw, 48px); border: 1px solid #eadfce; background: #fffdfa; }
+        .ak-experience:nth-child(2) { color: #fff9f1; background: linear-gradient(145deg, #713148, #321923); }
+        .ak-experience__meta { display: flex; justify-content: space-between; gap: 20px; margin-bottom: 40px; color: var(--ak-gold); text-transform: uppercase; letter-spacing: .08em; font-size: 12px; }
+        .ak-experience h3,
+        .ak-iv h3,
+        .ak-memberships h3 { margin: 0 0 16px; font-family: Georgia, "Times New Roman", serif; font-size: clamp(28px, 4vw, 43px); font-weight: 500; line-height: 1.05; }
+        .ak-experience > p { color: inherit; opacity: .78; line-height: 1.7; }
+        .ak-experience ul,
+        .ak-corporate ul { columns: 2; gap: 26px; padding: 0; list-style: none; }
+        .ak-experience li,
+        .ak-corporate li { break-inside: avoid; margin-bottom: 10px; padding-left: 18px; position: relative; line-height: 1.45; }
+        .ak-experience li::before,
+        .ak-corporate li::before { position: absolute; left: 0; content: "✦"; color: var(--ak-gold); }
+        .ak-experience a,
+        .ak-memberships a { display: inline-flex; gap: 10px; margin-top: 24px; color: inherit; font-weight: 800; text-underline-offset: 5px; }
+        .ak-iv { max-width: none; color: #f8f3e9; background: #3e4820; }
+        .ak-iv .ak-section-heading { max-width: 1080px; margin-inline: auto; }
+        .ak-iv .ak-kicker { color: #d5aa65; }
+        .ak-iv-list { display: grid; max-width: 1080px; margin: 0 auto; grid-template-columns: repeat(5, 1fr); border-top: 1px solid rgba(255,255,255,.24); }
+        .ak-iv-list article { padding: 26px 18px 10px; border-right: 1px solid rgba(255,255,255,.18); }
+        .ak-iv-list article:last-child { border-right: 0; }
+        .ak-iv h3 { font-size: 24px; }
+        .ak-iv-list p { color: rgba(255,255,255,.7); line-height: 1.55; }
+        .ak-clinical-note { max-width: 1080px; margin: 38px auto 0; color: rgba(255,255,255,.58); font-size: 13px; }
+        .ak-membership-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; padding: 1px; background: #dac9b8; }
+        .ak-membership-grid article { padding: clamp(34px, 5vw, 62px); background: #fffdf9; }
+        .ak-membership-grid strong { color: var(--ak-wine); font-size: 21px; }
+        .ak-membership-grid p { color: #685d57; line-height: 1.65; }
+        .ak-financing { display: grid; grid-template-columns: .82fr 1.18fr; gap: clamp(36px, 7vw, 90px); align-items: center; max-width: none; background: #f5f2f0; }
+        .ak-financing__image { position: relative; overflow: hidden; aspect-ratio: 1.493 / 1; border-radius: 20px; box-shadow: 0 24px 70px rgba(26,25,25,.18); }
+        .ak-financing__image img { object-fit: cover; object-position: center 17%; }
+        .ak-corporate { display: grid; grid-template-columns: 1.15fr .85fr; gap: 70px; align-items: end; }
+        .ak-corporate__copy > p { max-width: 690px; }
+        .ak-corporate__pricing { border-top: 1px solid #d8c7b4; }
+        .ak-corporate__pricing p { display: flex; justify-content: space-between; gap: 20px; margin: 0; padding: 22px 0; border-bottom: 1px solid #d8c7b4; }
+        .ak-corporate__pricing strong { color: var(--ak-wine); white-space: nowrap; }
+        .ak-connect { display: grid; grid-template-columns: .8fr 1.2fr; gap: 70px; background: #fffdf9; }
+        .ak-connect__links { border-top: 1px solid #e3d7cb; }
+        .ak-connect__links a { display: flex; justify-content: space-between; gap: 20px; padding: 17px 4px; border-bottom: 1px solid #e3d7cb; color: var(--ak-ink); text-decoration: none; }
         .ak-academy__intro {
           max-width: 820px;
           margin-bottom: 54px;
@@ -291,6 +511,15 @@ export default function AmandaPublicAdditions() {
           box-shadow: 0 14px 35px rgba(113, 49, 72, .22);
         }
         @media (max-width: 780px) {
+          .ak-experience-grid,
+          .ak-membership-grid,
+          .ak-financing,
+          .ak-corporate,
+          .ak-connect { grid-template-columns: 1fr; }
+          .ak-iv-list { grid-template-columns: 1fr; }
+          .ak-iv-list article { border-right: 0; border-bottom: 1px solid rgba(255,255,255,.18); }
+          .ak-experience ul,
+          .ak-corporate ul { columns: 1; }
           .ak-programs { grid-template-columns: 1fr; }
           .ak-program { min-height: 0; }
           .ak-certificate { grid-template-columns: 1fr; }

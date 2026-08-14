@@ -394,6 +394,61 @@
   border-top: 1px solid #e7e1da;
 }
 
+.ak-business-links {
+  display: grid;
+  grid-template-columns: .75fr 1fr 220px;
+  gap: 34px;
+  align-items: start;
+  margin-top: 24px;
+  padding: 30px;
+  border: 1px solid #e7e1da;
+  background: #fffefd;
+}
+
+.ak-business-links__eyebrow {
+  margin: 0 0 8px;
+  color: #a9783f;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+}
+
+.ak-business-links h2 {
+  margin: 0;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 2rem;
+  font-weight: 400;
+}
+
+.ak-business-links__list {
+  border-top: 1px solid #e7e1da;
+}
+
+.ak-business-links__list a {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 2px;
+  border-bottom: 1px solid #e7e1da;
+  color: #34312e;
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.ak-business-links__finance {
+  position: relative;
+  overflow: hidden;
+  width: 220px;
+  aspect-ratio: 1.493 / 1;
+  border-radius: 10px;
+}
+
+.ak-business-links__finance img {
+  object-fit: cover;
+  object-position: center 17%;
+}
+
 .ak-admin-directory summary {
   padding: 18px 2px;
   color: #735737;
@@ -431,6 +486,10 @@
 
   .ak-hero-brand {
     left: 65%;
+  }
+
+  .ak-business-links {
+    grid-template-columns: 1fr;
   }
 }
 
