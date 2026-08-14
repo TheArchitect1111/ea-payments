@@ -6,16 +6,23 @@ import './amplifi-site.css';
 import './amplifi-assets.css';
 
 export const metadata: Metadata = {
-  title: 'Amplifi | Guided content support for busy teams',
-  description: 'Amplifi guides small teams from the next useful idea to approved, published content without taking control away from them.',
+  title: 'Amplifi | Social content without the weekly restart',
+  description: 'Amplifi helps create, approve, schedule, publish, research, and improve social media content through one guided system.',
 };
 
-const loop = [
-  ['01', 'Notice', 'Start with what matters to your business right now.'],
-  ['02', 'Shape', 'Turn the idea into a clear message in your voice.'],
-  ['03', 'Review', 'Approve, edit, or reject before anything moves forward.'],
-  ['04', 'Share', 'Choose when and where the message should appear.'],
-  ['05', 'Learn', 'Use the response to guide what comes next.'],
+const workflow = [
+  ['01', 'Add what is happening', 'Start with an event, offer, update, link, photo, or idea.'],
+  ['02', 'Create the message', 'Amplifi prepares content using your audience, goals, and voice.'],
+  ['03', 'Adapt every channel', 'Receive versions prepared for Facebook, Instagram, and LinkedIn.'],
+  ['04', 'Review the work', 'Accept, edit, request a change, or reject every draft.'],
+  ['05', 'Schedule and publish', 'Choose the date and channels. Amplifi handles the approved follow-through.'],
+  ['06', 'Learn what connected', 'Use engagement and tracked clicks to improve what comes next.'],
+] as const;
+
+const plans = [
+  { name: 'Social', price: '$29', promise: 'You provide the idea. Amplifi creates and publishes the social media content.', detail: 'For organizations that know what they want to communicate but need help producing content consistently.', steps: ['Write posts in your brand voice', 'Create channel-specific versions', 'Prepare captions and graphics', 'Review, schedule, and publish', 'Track engagement and clicks'], action: 'Begin with Social', href: '/amplifi/register?plan=amplifi_social' },
+  { name: 'Intelligence', price: '$59', promise: 'Amplifi does the searching and creates the content for you.', detail: 'For organizations that cannot constantly search for new topics, developments, trends, and stories to share.', steps: ['Everything in Social', 'Search a topic when you need it', 'Keep watching up to three subjects', 'Verify sources and filter noise', 'Turn useful findings into ready-to-review posts'], action: 'Explore Intelligence', href: '/contact?subject=Amplifi%20Intelligence%20access' },
+  { name: 'Complete', price: '$129', promise: 'Give Amplifi the objective. It helps guide the complete campaign.', detail: 'For organizations that need coordinated campaigns instead of individual social media posts.', steps: ['Everything in Social and Intelligence', 'Plan the audience, message, and call to action', 'Create social, email, blog, graphic, and video concepts', 'Apply approval and automation rules', 'Learn across the complete campaign'], action: 'Explore Complete', href: '/contact?subject=Amplifi%20Complete%20access' },
 ] as const;
 
 export default async function AmplifiMarketingPage({ searchParams }: { searchParams: Promise<{ url?: string; title?: string; capture?: string }> }) {
@@ -28,84 +35,34 @@ export default async function AmplifiMarketingPage({ searchParams }: { searchPar
     redirect(`/amplifi/workspace${query.toString() ? `?${query.toString()}` : ''}`);
   }
 
-  return (
-    <main className="am-site">
-      <nav className="am-topbar">
-        <AmplifiBrand />
-        <div className="am-toplinks">
-          <a href="#how-it-works">How it works</a>
-          <Link href="/amplifi/pricing">Pricing</Link>
-          <Link href="/portal/login?next=%2Famplifi%2Fworkspace">Sign in</Link>
-        </div>
-      </nav>
+  return <main className="am-site am-v3">
+    <nav className="am-topbar"><AmplifiBrand /><div className="am-toplinks"><a href="#how">How it works</a><a href="#smartchitecture">Smartchitecture</a><a href="#plans">Plans</a><Link href="/portal/login?next=%2Famplifi%2Fworkspace">Sign in</Link></div></nav>
 
-      <section className="am-hero-v2">
-        <div className="am-hero-copy">
-          <p className="am-kicker">YOUR CONTENT GUIDE</p>
-          <h1>Stay present.<br /><em>Keep your time.</em></h1>
-          <p className="am-hero-lead">Tell Amplifi what matters. It helps you find the next useful story, shape it in your voice, and move it forward one clear step at a time.</p>
-          <div className="am-hero-actions">
-            <a href="#how-it-works" className="am-primary">See the guided path <span>→</span></a>
-            <Link href="/amplifi/pricing" className="am-text-link">Choose a starting point</Link>
-          </div>
-          <p className="am-proofline"><strong>You make the decisions.</strong> Amplifi prepares the next step and asks when your judgment is needed.</p>
-        </div>
-        <div className="am-hero-visual" aria-label="A business owner using Amplifi">
-          <div className="am-product-float">
-            <div className="am-product-bar"><span className="am-mini-mark">A</span><strong>Today in Amplifi</strong><span className="am-live-dot">Live</span></div>
-            <p className="am-product-label">READY FOR YOUR REVIEW</p>
-            <h3>3 posts built from one idea</h3>
-            <div className="am-channel-row"><span>f</span><span>◎</span><span>in</span><b>Brand voice matched</b></div>
-            <div className="am-product-actions"><span>Reject</span><span>Edit</span><strong>Approve</strong></div>
-          </div>
-        </div>
-      </section>
+    <section className="am3-hero">
+      <div className="am3-hero-copy"><p className="am3-eyebrow">YOUR GUIDED CONTENT SYSTEM</p><h1>Social media always needs <em>another post.</em></h1><h2>Amplifi helps carry the workload.</h2><p>Give Amplifi an update, announcement, event, offer, photo, or idea. It helps turn that information into finished content for your connected social channels.</p><div className="am3-actions"><a className="am3-button am3-button-dark" href="#demo">See Amplifi in action</a><a className="am3-button am3-button-quiet" href="#plans">Compare the three levels</a></div><small>You run the business. Amplifi helps keep your message moving.</small></div>
+      <div className="am3-hero-media" aria-label="Business owner using Amplifi on a laptop"><div className="am3-review-card"><div className="am3-review-top"><span className="am3-orb">A</span><b>Ready for your review</b><i>3 drafts</i></div><p>Community event announcement</p><div className="am3-channels"><span>Facebook</span><span>Instagram</span><span>LinkedIn</span></div><div className="am3-review-actions"><button>Change</button><button>Preview</button><button>Approve</button></div></div></div>
+    </section>
 
-      <section className="am-relief-band">
-        <p>You do not need another tool to manage.</p>
-        <h2>You need a clear next step and help carrying the work between decisions.</h2>
-      </section>
+    <section className="am3-problem"><p className="am3-eyebrow">THE CONTENT NEVER STOPS</p><h2>Creating one post is manageable.<br /><em>Creating something new every week is the problem.</em></h2><div className="am3-problem-line">{['Decide what to post', 'Write the message', 'Find the visual', 'Adapt each platform', 'Review', 'Schedule', 'Publish', 'Track', 'Start again'].map((item, index) => <span key={item}><b>{String(index + 1).padStart(2, '0')}</b>{item}</span>)}</div><p className="am3-centered-copy">Amplifi turns those disconnected tasks into one guided process.</p></section>
 
-      <section className="am-story-split">
-        <div className="am-story-photo"><span>Monday, 8:04 AM</span></div>
-        <div className="am-story-copy">
-          <p className="am-kicker">WHEN CONTENT KEEPS SLIPPING</p>
-          <h2>You are not short on ideas. You are short on uninterrupted time.</h2>
-          <p>Bring a goal, an update, a link, or a question. Amplifi helps you decide what is worth sharing, then guides the work from there.</p>
-          <blockquote>No blank page. No complicated setup. Just the next useful step.</blockquote>
-        </div>
-      </section>
+    <section className="am3-workflow" id="how"><header className="am3-section-head"><div><p className="am3-eyebrow">FROM UPDATE TO PUBLISHED POST</p><h2>Bring the information once.<br />Amplifi helps move it forward.</h2></div><p>Start with something already happening in your organization. Amplifi helps shape the message, create channel versions, organize the schedule, publish approved content, and track the response.</p></header><div className="am3-workflow-grid">{workflow.map(([number, title, body]) => <article key={title}><span>{number}</span><div><h3>{title}</h3><p>{body}</p></div></article>)}</div><div className="am3-flow-visual"><div><small>YOU ADD</small><b>Fall fundraiser</b><span>Date · Location · Goal · Registration link</span></div><strong>→</strong><div className="am3-flow-center"><small>AMPLIFI CREATES</small><b>9 coordinated posts</b><span>Facebook · Instagram · LinkedIn</span></div><strong>→</strong><div><small>YOU DECIDE</small><b>Approve the campaign</b><span>Edit · Schedule · Publish</span></div></div></section>
 
-      <section className="am-loop-v2" id="how-it-works">
-        <div className="am-section-heading">
-          <p className="am-kicker">A GUIDED PATH, BUILT IN</p>
-          <h2>Keep the process moving without giving up the decisions.</h2>
-        </div>
-        <div className="am-loop-line">
-          {loop.map(([number, title, body]) => <article key={title}><span>{number}</span><h3>{title}</h3><p>{body}</p></article>)}
-        </div>
-      </section>
+    <section className="am3-smart" id="smartchitecture"><div className="am3-smart-copy"><p className="am3-eyebrow">POWERED BY SMARTCHITECTURE</p><h2>Amplifi does more than generate posts.</h2><h3>It remembers how the work should get done.</h3><p>Smartchitecture connects your business context, brand voice, research, content, approvals, publishing rules, and performance history so every campaign does not begin from zero.</p><blockquote>The content changes. The knowledge behind it keeps growing.</blockquote></div><div className="am3-smart-map"><div className="am3-smart-core"><span>A</span><b>Smartchitecture</b><small>learns and guides</small></div>{['Your voice', 'Research', 'Creation', 'Approval', 'Publishing', 'Results'].map((item, index) => <div className={`am3-node am3-node-${index + 1}`} key={item}>{item}</div>)}</div></section>
 
-      <section className="am-outcome-stage">
-        <div className="am-outcome-copy">
-          <p className="am-kicker">WHAT AMPLIFI HELPS YOU DO</p>
-          <h2>Build a communication rhythm you can actually sustain.</h2>
-        </div>
-        <div className="am-outcome-list">
-          <p><strong>Choose the right story</strong><span>Start with the ideas and updates that matter most now.</span></p>
-          <p><strong>Keep your voice</strong><span>Review language shaped around the way your organization speaks.</span></p>
-          <p><strong>Set the boundaries</strong><span>Approve every step or let Amplifi carry only the work you choose.</span></p>
-          <p><strong>Know what comes next</strong><span>Use what worked to guide the next useful message.</span></p>
-        </div>
-      </section>
+    <section className="am3-plans" id="plans"><header className="am3-section-head"><div><p className="am3-eyebrow">THREE LEVELS OF SUPPORT</p><h2>Choose how much of the content process Amplifi should carry.</h2></div><p>Every level is guided by Smartchitecture. The difference is where Amplifi begins working and how far it carries the process.</p></header><div className="am3-plan-grid">{plans.map((plan, index) => <article className={index === 1 ? 'am3-plan am3-plan-featured' : 'am3-plan'} key={plan.name}>{index === 1 ? <span className="am3-plan-badge">SEARCHES AND CREATES FOR YOU</span> : null}<p>AMPLIFI {plan.name.toUpperCase()}</p><div className="am3-plan-title"><h3>{plan.name}</h3><span><b>{plan.price}</b>/month</span></div><h4>{plan.promise}</h4><p className="am3-plan-detail">{plan.detail}</p><ul>{plan.steps.map(step => <li key={step}>{step}</li>)}</ul><Link href={plan.href}>{plan.action}<span>→</span></Link></article>)}</div><div className="am3-plan-summary"><p><b>Social</b><span>You know what you want to say.</span></p><p><b>Intelligence</b><span>You need Amplifi to find what to say and create it.</span></p><p><b>Complete</b><span>You need Amplifi to guide the entire campaign.</span></p></div></section>
 
-      <section className="am-cta-stage">
-        <AmplifiBrand light />
-        <h2>Start with the level of guidance you need today.</h2>
-        <Link href="/amplifi/pricing" className="am-primary am-primary-light">Compare the three paths <span>→</span></Link>
-      </section>
+    <section className="am3-search"><div className="am3-search-copy"><p className="am3-eyebrow">AMPLIFI INTELLIGENCE</p><h2>Amplifi does the searching and creates the content for you.</h2><p>Choose the subjects, industries, competitors, community issues, or trends that matter to your audience. Amplifi finds useful developments, checks the sources, recommends an angle, and creates ready-to-review social posts.</p><div className="am3-search-modes"><p><b>Search once</b><span>Research a specific topic when you need ideas or context now.</span></p><p><b>Keep watching</b><span>Monitor up to three subjects and alert you when something useful changes.</span></p></div></div><div className="am3-research-ui"><div className="am3-ui-head"><span className="am3-orb">A</span><b>Smart Research</b><button>+ Watch a subject</button></div><div className="am3-subject"><span>WATCHING</span><b>Small business customer retention</b><small>8 useful updates found</small></div><div className="am3-finding"><div><span>NEW OPPORTUNITY</span><h3>Customers respond to behind-the-scenes service stories</h3><p>Three sources agree that transparent process content builds trust.</p><small>3 sources checked</small></div><button>Create posts from this →</button></div><div className="am3-source-row"><span>Source history preserved</span><span>Repeat noise filtered</span><span>Ready for review</span></div></div></section>
 
-      <footer className="am-footer-v2"><p>© {new Date().getFullYear()} Ascension Systems LLC</p><nav><Link href="/legal/privacy">Privacy</Link><Link href="/legal/terms">Terms</Link><Link href="/contact">Contact</Link></nav></footer>
-    </main>
-  );
+    <section className="am3-demo" id="demo"><header className="am3-demo-head"><p className="am3-eyebrow">SEE AMPLIFI AT WORK</p><h2>One event becomes a complete social media sequence.</h2><p>Enter the event details once. Amplifi creates the announcement, channel versions, reminders, deadline posts, day-of content, thank-you message, photo recap, and performance summary.</p></header><div className="am3-device-stage"><div className="am3-laptop"><div className="am3-laptop-camera"/><div className="am3-app-shell"><aside><span className="am3-orb">A</span>{['Home', 'Campaigns', 'Create', 'Smart Research', 'Calendar', 'Approvals', 'Publishing', 'Results'].map(item => <small className={item === 'Campaigns' ? 'active' : ''} key={item}>{item}</small>)}</aside><div className="am3-app-main"><div className="am3-app-heading"><div><small>ACTIVE CAMPAIGN</small><h3>Community Leadership Fundraiser</h3><p>Increase event awareness and registrations.</p></div><button>+ Create content</button></div><div className="am3-stats"><p><b>9</b><span>Posts created</span></p><p><b>6</b><span>Approved</span></p><p><b>3</b><span>Awaiting review</span></p><p><b>4</b><span>Scheduled</span></p></div><div className="am3-app-columns"><div className="am3-timeline"><b>Campaign timeline</b>{['Event announcement', 'Registration reminder', 'Featured speaker', 'Deadline reminder', 'Day-before reminder'].map((item, index) => <p key={item}><span>{index < 2 ? '✓' : String(index + 1)}</span>{item}<small>{index < 2 ? 'Approved' : 'Planned'}</small></p>)}</div><div className="am3-content-preview"><span>READY FOR REVIEW</span><h4>Facebook event announcement</h4><p>Join us for an evening of leadership, connection, and community impact...</p><div><button>Change</button><button>Preview</button><button>Approve</button></div></div></div></div></div><div className="am3-laptop-base"/></div><div className="am3-phone"><div className="am3-phone-speaker"/><div className="am3-phone-screen"><div className="am3-mobile-top"><span className="am3-orb">A</span><b>Amplifi</b><i>3</i></div><small>TODAY’S ACTIONS</small><h3>Community Leadership Fundraiser</h3><div className="am3-mobile-progress"><span>Campaign progress</span><b>6 of 9 posts approved</b><i><em/></i></div><div className="am3-mobile-card"><small>NEXT SCHEDULED</small><b>Registration reminder</b><span>Friday at 10:00 AM</span><p>Facebook · Instagram</p></div><button>Review post</button><button className="quiet">Edit schedule</button><nav><span>Home</span><span>Create</span><span>Calendar</span><span>Results</span></nav></div></div></div><div className="am3-demo-impact"><p><b>On your computer</b><span>See the complete campaign, review every message, and know exactly what happens next.</span></p><p><b>On your phone</b><span>Review, approve, schedule, and monitor the campaign from anywhere.</span></p></div></section>
+
+    <section className="am3-human-use"><div className="am3-human-photo am3-human-photo-laptop"/><div className="am3-human-copy"><p className="am3-eyebrow">AMPLIFI PREPARES. YOU DECIDE.</p><h2>Nothing should sound wrong or publish unexpectedly.</h2><p>Accept the content, edit the wording, replace the visual, request another version, change the platform, adjust the schedule, or reject the post.</p><blockquote>Smartchitecture applies the control level you choose and asks when your judgment is needed.</blockquote></div></section>
+    <section className="am3-human-use am3-human-use-reverse"><div className="am3-human-photo am3-human-photo-phone"/><div className="am3-human-copy"><p className="am3-eyebrow">WORK FROM WHERE YOU ARE</p><h2>Your content process does not have to wait for you to return to a desk.</h2><p>Review a draft, approve a reminder, adjust the schedule, or check campaign progress from your phone.</p><blockquote>Keep the work moving without giving social media your entire day.</blockquote></div></section>
+
+    <section className="am3-impact"><header><p className="am3-eyebrow">WHAT CHANGES</p><h2>Spend less time feeding social media and more time running your business.</h2></header><div>{[['Less creation pressure','Turn the work already happening into usable content.'],['Fewer blank-page moments','Begin with guided drafts instead of starting from nothing.'],['More consistency','Keep approved content moving through a visible calendar.'],['Less searching','Let Intelligence find relevant opportunities and create the posts.'],['Better coordination','Let Complete connect the whole campaign.'],['Stronger continuity','Let Smartchitecture preserve your voice, rules, and learning.']].map(([title, body]) => <article key={title}><h3>{title}</h3><p>{body}</p></article>)}</div></section>
+
+    <section className="am3-setup"><div><p className="am3-eyebrow">START WITH A REAL CAMPAIGN</p><h2>Amplifi guides you through the setup.</h2><p>You begin with useful work, not an empty dashboard.</p></div><ol><li><span>01</span>Tell Amplifi about your organization and audience.</li><li><span>02</span>Define your voice, goals, and preferences.</li><li><span>03</span>Connect your social media channels.</li><li><span>04</span>Choose the first event, offer, or update.</li><li><span>05</span>Review and schedule your first content sequence.</li></ol></section>
+
+    <section className="am3-close"><AmplifiBrand light/><h2>Social media will keep asking for more content.</h2><h3>You do not have to keep creating it alone.</h3><p>Amplifi helps create the posts, organize the schedule, publish approved content, and track the response. Intelligence can search and create for you. Complete can guide the entire campaign. Smartchitecture connects the process and helps it improve.</p><div className="am3-actions"><Link className="am3-button am3-button-light" href="/amplifi/pricing">Choose your Amplifi level</Link><a className="am3-button am3-button-outline" href="#demo">See the event campaign demo</a></div></section>
+    <footer className="am-footer-v2"><p>© {new Date().getFullYear()} Ascension Systems LLC</p><nav><Link href="/legal/privacy">Privacy</Link><Link href="/legal/terms">Terms</Link><Link href="/contact">Contact</Link></nav></footer>
+  </main>;
 }
