@@ -795,6 +795,31 @@
 .global-orb-launchpad strong { font-size: 13px; }
 .global-orb-launchpad small { margin-top: 3px; color: #68758d; font-size: 10px; line-height: 1.35; }
 
+.global-orb-panel .global-orb-ambient,
+.global-orb-panel .global-orb-findings,
+.global-orb-panel .global-orb-reco,
+.global-orb-panel > .global-orb-panel-body > .global-orb-answer:first-of-type {
+  display: none;
+}
+
+.global-orb-capture-notice {
+  position: fixed;
+  z-index: 110;
+  right: max(16px, env(safe-area-inset-right));
+  bottom: max(174px, calc(150px + env(safe-area-inset-bottom)));
+  max-width: min(280px, calc(100vw - 32px));
+  padding: 11px 15px;
+  border: 1px solid rgba(111, 227, 255, 0.4);
+  border-radius: 999px;
+  color: #fff;
+  background: linear-gradient(135deg, rgba(16, 23, 72, 0.96), rgba(55, 33, 132, 0.96));
+  box-shadow: 0 12px 36px rgba(24, 18, 91, 0.32), 0 0 20px rgba(100, 226, 255, 0.16);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  animation: global-orb-blossom 180ms ease-out;
+}
+
 @keyframes global-orb-premium-orbit {
   from { transform: rotate(-14deg) rotateZ(0deg); }
   to { transform: rotate(-14deg) rotateZ(360deg); }
