@@ -638,3 +638,186 @@
   text-decoration: underline;
   cursor: pointer;
 }
+
+/* Premium Orbie visual system — approved sapphire sphere + living gold energy. */
+.global-orb-root {
+  --orb-gold: #f5bd51;
+  --orb-gold-bright: #fff1b8;
+  --orb-cyan: #5ee7ff;
+  --orb-violet: #7657ff;
+  --orb-size: 68px;
+}
+
+.global-orb-btn {
+  min-width: 84px;
+  min-height: 84px;
+  padding: 8px;
+  filter: drop-shadow(0 10px 22px rgba(26, 52, 116, 0.28));
+}
+
+.global-orb-halo {
+  background: radial-gradient(circle, rgba(72, 210, 255, 0.5) 0%, rgba(88, 94, 255, 0.24) 42%, rgba(245, 189, 81, 0.16) 58%, transparent 74%);
+  opacity: 0.86;
+  animation-duration: 4s;
+}
+
+.global-orb-orbit {
+  position: absolute;
+  z-index: 4;
+  left: -13%;
+  top: 29%;
+  width: 126%;
+  height: 42%;
+  border: 1.7px solid rgba(255, 214, 122, 0.92);
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgba(255, 190, 70, 0.7), inset 0 0 5px rgba(255, 235, 180, 0.35);
+  transform: rotate(-14deg);
+  animation: global-orb-premium-orbit 6s linear infinite;
+  pointer-events: none;
+}
+
+.global-orb-orbit--two {
+  top: 24%;
+  transform: rotate(54deg) scaleX(0.84);
+  opacity: 0.72;
+  animation-duration: 8s;
+  animation-direction: reverse;
+}
+
+.global-orb-spark {
+  position: absolute;
+  z-index: 5;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #fff4c8;
+  box-shadow: 0 0 8px 2px rgba(255, 196, 74, 0.86);
+  animation: global-orb-premium-spark 3.2s ease-in-out infinite;
+}
+
+.global-orb-spark--one { left: 2%; top: 28%; }
+.global-orb-spark--two { right: 2%; bottom: 22%; animation-delay: -1.4s; }
+
+.global-orb-rim {
+  background: linear-gradient(145deg, rgba(180, 244, 255, 0.9), rgba(62, 129, 255, 0.76) 30%, rgba(98, 62, 212, 0.72) 68%, rgba(255, 220, 142, 0.66));
+}
+
+.global-orb-shell {
+  background:
+    radial-gradient(circle at 30% 20%, rgba(218, 250, 255, 0.96), rgba(79, 208, 255, 0.38) 12%, transparent 30%),
+    radial-gradient(circle at 70% 70%, rgba(128, 76, 255, 0.6), transparent 46%),
+    radial-gradient(circle at 48% 55%, #126dd6 0%, #173886 46%, #07132f 100%);
+  box-shadow: 0 3px 14px rgba(5, 20, 62, 0.5), 0 0 20px rgba(54, 167, 255, 0.3), inset 0 2px 5px rgba(255, 255, 255, 0.55), inset 0 -14px 26px rgba(2, 6, 24, 0.68);
+}
+
+.global-orb-core,
+.global-orb-panel-mini .global-orb-core {
+  inset: 12%;
+  background: radial-gradient(circle at 40% 34%, rgba(190, 249, 255, 0.72), rgba(43, 161, 255, 0.42) 22%, rgba(27, 69, 177, 0.5) 50%, rgba(14, 18, 72, 0.82));
+  box-shadow: 0 0 18px rgba(83, 219, 255, 0.56), inset 0 1px 7px rgba(255, 255, 255, 0.6), inset 0 -10px 18px rgba(21, 8, 72, 0.46);
+}
+
+.global-orb-energy {
+  position: absolute;
+  z-index: 2;
+  left: 36%;
+  top: 24%;
+  width: 28%;
+  height: 50%;
+  border-radius: 48% 56% 50% 45%;
+  border-left: 2px solid rgba(205, 250, 255, 0.92);
+  border-right: 2px solid rgba(255, 207, 105, 0.84);
+  transform: rotate(24deg);
+  filter: drop-shadow(0 0 5px rgba(102, 223, 255, 0.9));
+  animation: global-orb-premium-energy 4.2s ease-in-out infinite;
+}
+
+.global-orb-panel {
+  width: min(430px, calc(100vw - 24px));
+  max-height: min(72vh, 680px);
+  background: linear-gradient(155deg, rgba(255, 255, 255, 0.98), rgba(243, 247, 255, 0.96));
+  backdrop-filter: blur(24px);
+  border-color: rgba(79, 128, 233, 0.18);
+  box-shadow: 0 26px 70px rgba(14, 30, 74, 0.24), 0 0 40px rgba(72, 180, 255, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.5) inset;
+}
+
+.global-orb-eyebrow {
+  display: block;
+  margin-bottom: 5px;
+  color: #5b5ce2;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+}
+
+.global-orb-launchpad {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.global-orb-launchpad button {
+  min-height: 92px;
+  padding: 13px;
+  border: 1px solid rgba(60, 99, 190, 0.13);
+  border-radius: 18px;
+  background: linear-gradient(145deg, rgba(255,255,255,0.98), rgba(236,243,255,0.86));
+  color: var(--orb-navy);
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 8px 22px rgba(24, 54, 120, 0.07);
+  transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+}
+
+.global-orb-launchpad button:hover,
+.global-orb-launchpad button:focus-visible {
+  transform: translateY(-2px);
+  border-color: rgba(82, 104, 255, 0.38);
+  box-shadow: 0 12px 28px rgba(33, 72, 155, 0.13);
+  outline: none;
+}
+
+.global-orb-launchpad button > span {
+  display: inline-grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  margin-bottom: 9px;
+  border-radius: 10px;
+  color: #fff;
+  background: linear-gradient(135deg, #245fd1, #684eff);
+  box-shadow: 0 6px 14px rgba(73, 79, 226, 0.24);
+}
+
+.global-orb-launchpad strong,
+.global-orb-launchpad small { display: block; }
+.global-orb-launchpad strong { font-size: 13px; }
+.global-orb-launchpad small { margin-top: 3px; color: #68758d; font-size: 10px; line-height: 1.35; }
+
+@keyframes global-orb-premium-orbit {
+  from { transform: rotate(-14deg) rotateZ(0deg); }
+  to { transform: rotate(-14deg) rotateZ(360deg); }
+}
+
+@keyframes global-orb-premium-spark {
+  0%, 100% { transform: scale(0.7); opacity: 0.45; }
+  50% { transform: scale(1.5); opacity: 1; }
+}
+
+@keyframes global-orb-premium-energy {
+  0%, 100% { transform: rotate(24deg) scaleY(0.88); opacity: 0.65; }
+  50% { transform: rotate(8deg) scaleY(1.08); opacity: 1; }
+}
+
+@media (max-width: 720px) {
+  .global-orb-panel { max-height: min(70vh, 640px); }
+  .global-orb-launchpad { gap: 8px; }
+  .global-orb-launchpad button { min-height: 86px; padding: 11px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .global-orb-orbit,
+  .global-orb-spark,
+  .global-orb-energy { animation: none !important; }
+}
