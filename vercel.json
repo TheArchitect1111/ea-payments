@@ -140,6 +140,10 @@
       "schedule": "0 6 * * *"
     },
     {
+      "path": "/api/cron/project-status",
+      "schedule": "30 10 * * *"
+    },
+    {
       "path": "/api/cron/connect-sequence",
       "schedule": "0 14 * * *"
     },
