@@ -12,7 +12,7 @@ export async function GET(req: NextRequest, context: { params: Promise<{ provide
   if (!isNativeProvider(value)) return NextResponse.json({ ok: false, error: 'Unsupported provider.' }, { status: 404 });
   const configured = providerConfigs().find((item) => item.provider === value)?.configured;
   if (!configured) return NextResponse.redirect(new URL(`/amplifi/workspace?connections=${value}-setup-required#connections`, req.url));
-  const state = createOAuthState(value, req.nextUrl.origin);
+  const state = createOAuthState(value, req.nextUrl.origin, auth.session.slug);
   const verifier = value === 'x' ? randomBytes(48).toString('base64url') : undefined;
   const oauthOrigin =
     process.env.AMPLIFI_PUBLIC_ORIGIN?.trim() ||
