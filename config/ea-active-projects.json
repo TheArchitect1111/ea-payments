@@ -1,0 +1,22 @@
+{
+  "vercelTeamId": "team_s7mlAoJkDCQYaXiSC8nYDNIX",
+  "projects": [
+    { "id": "EA-PLATFORM", "name": "EA Ecosystem Platform", "githubRepo": "TheArchitect1111/ea-payments", "vercelProject": "ea-payments", "publicUrl": "https://efficiencyarchitects.online", "expectedText": ["Efficiency Architects"] },
+    { "id": "AMPLIFI", "name": "Amplifi by Efficiency Architects", "githubRepo": "TheArchitect1111/ea-payments", "vercelProject": "ea-payments", "publicUrl": "https://efficiencyarchitects.online/amplifi", "expectedText": ["Amplifi"] },
+    { "id": "SIMPLIFI", "name": "Simplifi by Efficiency Architects", "githubRepo": "TheArchitect1111/ea-payments", "vercelProject": "ea-payments", "publicUrl": "https://simplifi.ai", "expectedText": ["Simplifi"] },
+    { "id": "EA-IP", "name": "EA Operating System", "githubRepo": "TheArchitect1111/ea-operating-system", "vercelProject": null, "publicUrl": null, "expectedText": [], "repositoryOnly": true },
+    { "id": "EA-EXEC", "name": "EA Executive OS", "githubRepo": null, "vercelProject": "ea-wt-home", "publicUrl": "https://ea-wt-home.vercel.app", "expectedText": ["Efficiency Architects", "Executive"] },
+    { "id": "NSP", "name": "Next Steps Pro", "githubRepo": "TheArchitect1111/next-steps-pro", "vercelProject": "next-steps-pro", "publicUrl": "https://next-steps-pro.vercel.app", "expectedText": ["Next Steps", "Athlete"] },
+    { "id": "ETFM", "name": "Escaping the Financial Matrix", "githubRepo": "TheArchitect1111/ETFM-ASSESSMENT-", "vercelProject": "etfm-assessment", "publicUrl": "https://etfm-assessment.vercel.app", "expectedText": ["ETFM"], "knownConstraint": "Latest deployed source must be checked for CPR cross-project content." },
+    { "id": "MAGNIFI", "name": "Magnifi", "githubRepo": null, "vercelProject": "ea-magnifi", "publicUrl": "https://ea-magnifi.vercel.app", "expectedText": ["Magnifi"], "knownConstraint": "Owner must confirm whether the Selena consideration redirect is canonical." },
+    { "id": "EA-TRAIN", "name": "EA Training Transformation", "githubRepo": null, "vercelProject": "ea-training-transformation", "publicUrl": "https://ea-training-transformation.vercel.app", "expectedText": ["Training", "Transformation"] },
+    { "id": "EA-COMMS", "name": "EA Communications Chassis", "githubRepo": null, "vercelProject": "ea-communications-chassis", "publicUrl": "https://ea-communications-chassis.vercel.app", "expectedText": ["Communication"] },
+    { "id": "EA-BBALL", "name": "EA Basketball Program OS", "githubRepo": null, "vercelProject": "form-to-finish-executive-review", "publicUrl": "https://form-to-finish-executive-review.vercel.app", "expectedText": ["Basketball", "Form to Finish"] },
+    { "id": "AMANDA", "name": "Amanda Catherine", "githubRepo": null, "vercelProject": "amanda-catherine-preview", "publicUrl": "https://amanda-catherine-preview.vercel.app", "expectedText": ["Amanda Catherine"] },
+    { "id": "CPR", "name": "Canadian Prospect Recruitment", "githubRepo": "TheArchitect1111/cpr-site", "vercelProject": "cpr-site", "publicUrl": "https://www.cprglobalsports.com", "expectedText": ["CPR Global Prospects"] },
+    { "id": "MAGIC", "name": "Mississauga Magic", "githubRepo": "TheArchitect1111/cpr-site", "vercelProject": "cpr-site", "publicUrl": "https://mississaugamagic.com", "expectedText": ["Mississauga Magic"], "knownConstraint": "Owner must resolve whether WordPress or the CPR Vercel skin is canonical." },
+    { "id": "GSA", "name": "Gastonia-Shelby BrotherHub", "githubRepo": "TheArchitect1111/BrotherHub", "vercelProject": "brother-hub", "publicUrl": "https://brother-hub.vercel.app", "expectedText": ["BrotherHub", "Gastonia"] },
+    { "id": "RUMBALL", "name": "Bob Rumball", "githubRepo": null, "vercelProject": "bobrumball-experience-lab", "publicUrl": "https://bobrumball-experience-lab.vercel.app", "expectedText": ["Bob Rumball"] },
+    { "id": "MBI", "name": "Money Behind It", "githubRepo": "TheArchitect1111/ea-payments", "vercelProject": "ea-payments", "publicUrl": null, "expectedText": [], "knownConstraint": "Canonical public route or output location is not recorded." }
+  ]
+}
