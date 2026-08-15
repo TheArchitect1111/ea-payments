@@ -55,14 +55,16 @@ export function providerCookie(provider: NativeProvider): string {
 type OAuthStatePayload = {
   provider: NativeProvider;
   returnOrigin: string;
+  portalSlug: string;
   expiresAt: number;
   nonce: string;
 };
 
-export function createOAuthState(provider: NativeProvider, returnOrigin: string): string {
+export function createOAuthState(provider: NativeProvider, returnOrigin: string, portalSlug: string): string {
   const payload: OAuthStatePayload = {
     provider,
     returnOrigin,
+    portalSlug,
     expiresAt: Date.now() + 10 * 60 * 1000,
     nonce: randomBytes(18).toString('base64url'),
   };
@@ -79,7 +81,7 @@ export function verifyOAuthState(state: string, provider: NativeProvider): OAuth
     const received = Buffer.from(signature, 'base64url');
     if (received.length !== expected.length || !timingSafeEqual(received, expected)) return null;
     const payload = JSON.parse(Buffer.from(encoded, 'base64url').toString('utf8')) as OAuthStatePayload;
-    if (payload.provider !== provider || payload.expiresAt < Date.now()) return null;
+    if (payload.provider !== provider || payload.expiresAt < Date.now() || !payload.portalSlug) return null;
     if (!new URL(payload.returnOrigin).hostname.endsWith('efficiencyarchitects.online')) return null;
     return payload;
   } catch {

@@ -96,6 +96,7 @@
     "test:amplifi-research-images": "node scripts/test-amplifi-research-images.mjs",
     "test:amplifi-analytics": "node scripts/test-amplifi-analytics.mjs",
     "test:amplifi-commerce-launch": "node scripts/test-amplifi-commerce-launch.mjs",
+    "test:amplifi-durable-connections": "node scripts/test-amplifi-durable-connections.mjs",
     "test:admin-session-duration": "node scripts/test-admin-session-duration.mjs",
     "video:studio": "remotion studio video-factory/remotion/index.ts",
     "video:render": "node scripts/render-video-factory.mjs",
