@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "dev:lan": "next dev --hostname 0.0.0.0",
+    "prebuild": "remotion bundle video-factory/remotion/index.ts --out-dir .remotion",
     "build": "next build",
     "check:server-function-trace": "node scripts/check-server-function-trace-size.mjs",
     "build:check-trace": "next build && node scripts/check-server-function-trace-size.mjs && node scripts/check-uxg-research-not-in-trace.mjs",
@@ -122,7 +123,10 @@
     "@remotion/bundler": "^4.0.507",
     "@remotion/cli": "^4.0.507",
     "@remotion/renderer": "^4.0.507",
+    "@remotion/vercel": "^4.0.507",
     "@sentry/nextjs": "^10.59.0",
+    "@vercel/functions": "^3.4.1",
+    "@vercel/sandbox": "^1.6.0",
     "framer-motion": "^12.40.0",
     "gsap": "^3.15.0",
     "heic2any": "^0.0.4",

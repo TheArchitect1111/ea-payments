@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
+import {
+  addBundleToSandbox,
+  createSandbox,
+  renderMediaOnVercel,
+  uploadToVercelBlob,
+} from '@remotion/vercel';
 import { adminApiUnauthorized, guardAdminApi } from '@/lib/api/admin-route';
-import { ensurePublicPreview, renderVideoProject } from '@/lib/video-factory/render';
-import { publicRenderedVideoUrl } from '@/lib/video-factory/paths';
 import { listVideoEngines } from '@/lib/video-factory/providers';
 import { resolveNarrationProvider } from '@/lib/video-factory/narration';
 import { listVideoProjects, resolveVideoProject } from '@/lib/video-factory/registry';
@@ -11,15 +15,7 @@ export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 export const maxDuration = 300;
 
-async function deployedPreviewExists(req: NextRequest, projectId: string): Promise<boolean> {
-  const previewUrl = new URL(publicRenderedVideoUrl(projectId), req.nextUrl.origin);
-  try {
-    const response = await fetch(previewUrl, { method: 'HEAD', cache: 'no-store' });
-    return response.ok;
-  } catch {
-    return false;
-  }
-}
+const BUNDLE_DIR = '.remotion';
 
 export async function GET(req: NextRequest) {
   const auth = await guardAdminApi(req);
@@ -35,10 +31,11 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({
     ok: true,
     service: 'EA Video Factory',
-    primaryEngine: 'remotion',
+    primaryEngine: 'remotion-vercel-sandbox',
     engines: listVideoEngines(),
     narration: resolveNarrationProvider(),
     projects,
+    blobConfigured: Boolean(process.env.BLOB_READ_WRITE_TOKEN),
   });
 }
 
@@ -50,7 +47,6 @@ export async function POST(req: NextRequest) {
     projectId?: string;
     topic?: string;
     engine?: 'remotion' | 'gemini';
-    force?: boolean;
   };
 
   if (body.engine === 'gemini') {
@@ -59,71 +55,71 @@ export async function POST(req: NextRequest) {
         ok: false,
         service: 'EA Video Factory',
         status: 'use-optional-provider',
-        error: 'Gemini is optional. POST /api/integrations/video/generate with admin session is not used here; use engine=remotion or the Gemini generate route.',
+        error: 'Gemini is optional. Use the Remotion Vercel Sandbox engine for the primary Video Factory path.',
       },
       { status: 400 },
     );
   }
 
-  const project = resolveVideoProject({ projectId: body.projectId, topic: body.topic });
-  const previewUrl = publicRenderedVideoUrl(project.id);
+  const blobToken = process.env.BLOB_READ_WRITE_TOKEN;
+  if (!blobToken) {
+    return NextResponse.json(
+      {
+        ok: false,
+        service: 'EA Video Factory',
+        status: 'blob-not-configured',
+        error: 'BLOB_READ_WRITE_TOKEN is not configured. Attach a Vercel Blob store to the ea-payments project.',
+      },
+      { status: 503 },
+    );
+  }
 
-  const payload = (url: string, cached: boolean, extra?: Record<string, unknown>) => ({
-    ok: true,
-    service: 'EA Video Factory',
-    engine: 'remotion',
-    cached,
-    projectId: project.id,
-    title: project.title,
-    description: project.description,
-    previewUrl: url,
-    durationSeconds: projectDurationInSeconds(project),
-    ...extra,
-  });
+  const project = resolveVideoProject({ projectId: body.projectId, topic: body.topic });
+  const sandbox = await createSandbox({ timeout: maxDuration * 1000 });
 
   try {
-    if (!body.force && (await deployedPreviewExists(req, project.id))) {
-      return NextResponse.json(payload(previewUrl, true, { source: 'deployed-public-asset' }));
-    }
+    await addBundleToSandbox({ sandbox, bundleDir: BUNDLE_DIR });
 
-    if (!body.force) {
-      const cached = await ensurePublicPreview(project.id);
-      if (cached) {
-        return NextResponse.json(payload(cached.previewUrl, true));
-      }
-    }
+    const { sandboxFilePath, contentType } = await renderMediaOnVercel({
+      sandbox,
+      compositionId: project.id,
+      inputProps: {},
+    });
 
-    const rendered = await renderVideoProject(project.id);
-    return NextResponse.json(payload(rendered.previewUrl, false));
+    const uploaded = await uploadToVercelBlob({
+      sandbox,
+      sandboxFilePath,
+      contentType,
+      blobToken,
+      access: 'public',
+    });
+
+    return NextResponse.json({
+      ok: true,
+      service: 'EA Video Factory',
+      engine: 'remotion-vercel-sandbox',
+      cached: false,
+      projectId: project.id,
+      title: project.title,
+      description: project.description,
+      previewUrl: uploaded.url,
+      bytes: uploaded.size,
+      durationSeconds: projectDurationInSeconds(project),
+    });
   } catch (error) {
-    if (await deployedPreviewExists(req, project.id)) {
-      return NextResponse.json(
-        payload(previewUrl, true, {
-          fallback: 'deployed-public-asset-after-render-error',
-          renderError: error instanceof Error ? error.message : 'Remotion render failed',
-        }),
-      );
-    }
-
-    const cached = await ensurePublicPreview(project.id);
-    if (cached) {
-      return NextResponse.json(
-        payload(cached.previewUrl, true, {
-          fallback: 'cached-after-render-error',
-          renderError: error instanceof Error ? error.message : 'Remotion render failed',
-        }),
-      );
-    }
-
+    console.error('[video-factory/render] Vercel Sandbox render failed', error);
     return NextResponse.json(
       {
         ok: false,
         service: 'EA Video Factory',
         status: 'render-failed',
+        engine: 'remotion-vercel-sandbox',
         projectId: project.id,
-        error: error instanceof Error ? error.message : 'Remotion render failed',
+        error: error instanceof Error ? error.message : 'Vercel Sandbox render failed',
       },
       { status: 502 },
     );
+  } finally {
+    await sandbox.stop().catch(() => undefined);
   }
 }

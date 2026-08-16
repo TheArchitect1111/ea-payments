@@ -16,6 +16,8 @@ const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
     '/app/api/admin/video-factory/publish/**': ['./public/video-factory/**'],
     './app/api/admin/video-factory/publish/**': ['./public/video-factory/**'],
+    '/app/api/admin/video-factory/render/**': ['./.remotion/**/*'],
+    './app/api/admin/video-factory/render/**': ['./.remotion/**/*'],
   },
   outputFileTracingExcludes: {
     '*': [
@@ -67,7 +69,7 @@ const nextConfig: NextConfig = {
     '@ea/payments-contract',
   ],
   turbopack: {
-    // Avoid picking C:\Users\brick\package-lock.json when multiple lockfiles exist.
+    // Avoid picking C:\\Users\\brick\\package-lock.json when multiple lockfiles exist.
     root: path.join(__dirname),
   },
   async redirects() {
