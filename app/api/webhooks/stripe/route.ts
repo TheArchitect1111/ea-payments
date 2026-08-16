@@ -208,7 +208,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
 
   // Phase E: proposal-based payment. Branch early; Phase A logic is not run.
   if (meta.proposalId && meta.airtableRecordId) {
-    await handleProposalPayment(session, meta.proposalId, meta.airtableRecordId);
+    await handleProposalPayment(session, meta.proposalId, meta.airtableRecordId, meta.paymentStage === 'deposit' ? 'deposit' : 'final');
     return;
   }
 
@@ -791,7 +791,8 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice): Promise<void
 async function handleProposalPayment(
   session: Stripe.Checkout.Session,
   proposalId: string,
-  proposalRecordId: string
+  proposalRecordId: string,
+  paymentStage: 'deposit' | 'final'
 ): Promise<void> {
   // 1. Fetch the full Proposal record (with linked Assessment data).
   let proposal: ProposalWithAssessment | null = null;
@@ -813,36 +814,6 @@ async function handleProposalPayment(
       `handleProposalPayment [${proposalId}]: session ID mismatch.` +
         ` Stored: ${proposal.stripeSessionId}, received: ${session.id}. Proceeding.`
     );
-  }
-
-  // 3. Update Proposal status (critical, own try/catch).
-  try {
-    const statusResult = await updateProposal(proposalRecordId, {
-      status: 'Approved & Paid',
-    });
-    if (!statusResult.ok) {
-      console.error(
-        `handleProposalPayment [${proposalId}]: status update failed:`,
-        statusResult.error
-      );
-    }
-  } catch (err) {
-    console.error(`handleProposalPayment [${proposalId}]: status update threw:`, err);
-  }
-
-  // 4. Update Payment Status (best-effort; field may not exist yet in Airtable).
-  try {
-    const paymentStatusResult = await updateProposal(proposalRecordId, {
-      paymentStatus: 'Paid',
-    });
-    if (!paymentStatusResult.ok) {
-      console.error(
-        `handleProposalPayment [${proposalId}]: payment status update failed:`,
-        paymentStatusResult.error
-      );
-    }
-  } catch (err) {
-    console.error(`handleProposalPayment [${proposalId}]: payment status update threw:`, err);
   }
 
   // Derive values for the Client Record and email from the proposal (fallback to
@@ -868,6 +839,48 @@ async function handleProposalPayment(
     typeof session.payment_intent === 'string'
       ? session.payment_intent
       : (session.payment_intent as Stripe.PaymentIntent | null)?.id ?? session.id;
+
+  if (paymentStage === 'deposit') {
+    try {
+      await updateProposal(proposalRecordId, { paymentStatus: 'Deposit Paid' });
+    } catch (err) {
+      console.error(`handleProposalPayment [${proposalId}]: deposit status update failed:`, err);
+    }
+    await emitPulseEvent({
+      product: 'ea-platform',
+      type: 'payment.deposit_received',
+      title: `Project deposit received - ${businessName || clientName}`,
+      detail: `$${((session.amount_total ?? 25000) / 100).toLocaleString()} deposit - ${proposalId}`,
+      priority: 'high',
+      href: '/admin/ctp',
+      metadata: { proposalId, email, stripeSessionId: session.id },
+    });
+    await sendPaymentConfirmationSafely({
+      email,
+      clientName,
+      packageName: `${packageLabel} - Project Deposit`,
+      amountPaid: (session.amount_total ?? 25000) / 100,
+      paymentDate,
+      portalUrl: publicPortalLoginUrl(),
+      stripeTransactionId,
+      context: `proposal deposit ${proposalId}`,
+    });
+    return;
+  }
+
+  // Final payment is the only payment that marks the proposal paid and unlocks fulfillment.
+  try {
+    const statusResult = await updateProposal(proposalRecordId, { status: 'Approved & Paid' });
+    if (!statusResult.ok) console.error(`handleProposalPayment [${proposalId}]: status update failed:`, statusResult.error);
+  } catch (err) {
+    console.error(`handleProposalPayment [${proposalId}]: status update threw:`, err);
+  }
+  try {
+    const paymentStatusResult = await updateProposal(proposalRecordId, { paymentStatus: 'Paid' });
+    if (!paymentStatusResult.ok) console.error(`handleProposalPayment [${proposalId}]: payment status update failed:`, paymentStatusResult.error);
+  } catch (err) {
+    console.error(`handleProposalPayment [${proposalId}]: payment status update threw:`, err);
+  }
 
   // 5. Create a Client Record so the client can access the portal.
   const airtableResult = await createOrUpdateClientRecord({

@@ -33,10 +33,14 @@ const steps = [
 
 export default async function CommitmentPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ proposalId: string }>;
+  searchParams: Promise<{ stage?: string }>;
 }) {
   const { proposalId } = await params;
+  const { stage } = await searchParams;
+  const paymentStage: 'deposit' | 'final' = stage === 'final' ? 'final' : 'deposit';
   const proposal = await getProposalByProposalId(proposalId);
 
   if (!proposal || !VISIBLE_STATUSES.has(proposal.status)) {
@@ -90,8 +94,13 @@ export default async function CommitmentPage({
               <dd className="mt-1 text-sm font-semibold" style={{ color: NAVY }}>{solutionLabel}</dd>
             </div>
             <div>
-              <dt className="text-xs font-bold uppercase tracking-wider text-neutral-400">Investment</dt>
+              <dt className="text-xs font-bold uppercase tracking-wider text-neutral-400">Total project price</dt>
               <dd className="mt-1 text-2xl font-black" style={{ color: NAVY }}>{fmt(proposal.recommendedFee)}</dd>
+            </div>
+            <div>
+              <dt className="text-xs font-bold uppercase tracking-wider text-neutral-400">Due now</dt>
+              <dd className="mt-1 text-xl font-black" style={{ color: NAVY }}>{fmt(paymentStage === 'final' ? Math.max(0, proposal.recommendedFee - 250) : Math.min(250, proposal.recommendedFee))}</dd>
+              <dd className="mt-1 text-xs text-neutral-500">{paymentStage === 'final' ? 'Final balance before activation and full access' : 'Project deposit after consultation and approval'}</dd>
             </div>
             <div>
               <dt className="text-xs font-bold uppercase tracking-wider text-neutral-400">Estimated Timeline</dt>
@@ -105,7 +114,7 @@ export default async function CommitmentPage({
             </p>
           </div>
 
-          <CommitmentCheckout proposalId={proposal.proposalId} />
+          <CommitmentCheckout proposalId={proposal.proposalId} paymentStage={paymentStage} />
           <p className="mt-4 text-center text-xs text-neutral-400">Need more time? Save this page.</p>
         </aside>
       </section>

@@ -17,14 +17,17 @@ export async function POST(req: NextRequest): Promise<Response> {
 
   // Parse proposalId from either a form POST or a JSON body.
   let proposalId = '';
+  let paymentStage: 'deposit' | 'final' = 'deposit';
   try {
     const contentType = req.headers.get('content-type') ?? '';
     if (contentType.includes('application/json')) {
-      const json = (await req.json()) as { proposalId?: string };
+      const json = (await req.json()) as { proposalId?: string; paymentStage?: string };
       proposalId = json.proposalId?.trim() ?? '';
+      paymentStage = json.paymentStage === 'final' ? 'final' : 'deposit';
     } else {
       const formData = await req.formData();
       proposalId = ((formData.get('proposalId') as string | null) ?? '').trim();
+      paymentStage = formData.get('paymentStage') === 'final' ? 'final' : 'deposit';
     }
   } catch (err) {
     console.error('checkout/proposal: failed to parse request body:', err);
@@ -72,12 +75,18 @@ export async function POST(req: NextRequest): Promise<Response> {
   // Airtable Currency fields are stored as floating-point dollars.
   // Multiply by 100 and round to get Stripe unit_amount (integer cents).
   // Example: $4,997.00 -> 4997 * 100 = 499700 cents.
-  const unitAmount = Math.round(proposal.recommendedFee * 100);
+  const depositAmount = Math.min(250, proposal.recommendedFee);
+  const chargeAmount = paymentStage === 'final'
+    ? Math.max(0, proposal.recommendedFee - depositAmount)
+    : depositAmount;
+  const unitAmount = Math.round(chargeAmount * 100);
+  if (unitAmount <= 0) return errorRedirect('No remaining balance is due.');
 
   const productName =
     [proposal.projectTypeLabel || proposal.recommendedProjectType, proposal.businessName]
       .filter(Boolean)
       .join(' - ') || 'Efficiency Architects Engagement';
+  const paymentLabel = paymentStage === 'final' ? 'Final Balance' : 'Project Deposit';
 
   try {
     const stripe = getStripe();
@@ -92,7 +101,10 @@ export async function POST(req: NextRequest): Promise<Response> {
             currency: 'usd',
             unit_amount: unitAmount,
             product_data: {
-              name: productName,
+              name: `${productName} - ${paymentLabel}`,
+              description: paymentStage === 'final'
+                ? `Final balance due before activation and full administrator access. Total project price: $${proposal.recommendedFee.toLocaleString()}.`
+                : `Deposit toward a total project price of $${proposal.recommendedFee.toLocaleString()}.`,
             },
           },
         },
@@ -101,16 +113,18 @@ export async function POST(req: NextRequest): Promise<Response> {
       metadata: {
         proposalId: proposal.proposalId,
         airtableRecordId: proposal.id,
+        paymentStage,
+        projectTotal: String(proposal.recommendedFee),
       },
       success_url: guideReturnUrl,
       cancel_url: `${proposalUrl}?payment=cancelled`,
     };
 
-    // Recommend ACH for all proposal amounts (minimum tier is $1,497).
     sessionParams.custom_text = {
       after_submit: {
-        message:
-          'ACH bank transfer is available for this amount and carries lower processing fees. Select "US Bank Account" if available at checkout.',
+        message: paymentStage === 'final'
+          ? 'Thank you. Your final balance has been received. EA will complete activation and provide full access.'
+          : 'Thank you. Your deposit reserves the agreed development window. The final balance is due after review and before activation or full access.',
       },
     };
 

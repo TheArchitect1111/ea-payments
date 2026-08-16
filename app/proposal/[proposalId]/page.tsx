@@ -254,17 +254,17 @@ function ProposalContent({
             {!paid && (
               <div className="border p-8 text-center" style={{ backgroundColor: BLACK, borderColor: 'rgba(216,173,61,0.28)' }}>
                 <p className="mb-2 text-sm font-semibold text-white/80">
-                  Ready to build the Blueprint?
+                  Ready to reserve your development window?
                 </p>
                 <p className="mb-6 text-sm leading-relaxed text-white/60">
-                  Use the secure confirmation step to reserve the work and begin the guided implementation.
+                  Review the project, accept the terms, and pay the $250 deposit. The final balance is due after you review the completed portal and before activation or full administrator access.
                 </p>
                 <a
                   href={`/commitment/${encodeURIComponent(proposal.proposalId)}`}
                   className="block w-full rounded-full px-6 py-4 text-xs font-bold uppercase tracking-widest text-black transition-transform duration-300 hover:-translate-y-0.5"
                   style={{ background: `linear-gradient(135deg, ${GOLD_BRIGHT}, ${GOLD})` }}
                 >
-                  Let&apos;s Build Your Blueprint
+                  Review and Pay the Deposit
                 </a>
                 <p className="mt-4 text-xs text-neutral-400">
                   Questions before you decide? Email us at{' '}

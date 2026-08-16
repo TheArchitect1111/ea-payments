@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { LegalAcceptance } from '@/app/components/LegalAcceptance';
 import type { LegalAcceptanceRecord, TrustLegalDocType } from '@/lib/trust-engine/types';
 
-export default function CommitmentCheckout({ proposalId }: { proposalId: string }) {
+export default function CommitmentCheckout({ proposalId, paymentStage = 'deposit' }: { proposalId: string; paymentStage?: 'deposit' | 'final' }) {
   const [error, setError] = useState('');
 
   async function acceptAndPay(records: LegalAcceptanceRecord[]) {
@@ -35,6 +35,11 @@ export default function CommitmentCheckout({ proposalId }: { proposalId: string 
     input.name = 'proposalId';
     input.value = proposalId;
     form.appendChild(input);
+    const stage = document.createElement('input');
+    stage.type = 'hidden';
+    stage.name = 'paymentStage';
+    stage.value = paymentStage;
+    form.appendChild(stage);
     document.body.appendChild(form);
     form.submit();
   }
@@ -45,7 +50,7 @@ export default function CommitmentCheckout({ proposalId }: { proposalId: string 
         productId="portal_products"
         userId={`proposal-${proposalId}`}
         onAccepted={acceptAndPay}
-        continueLabel="Accept and continue to secure payment"
+        continueLabel={paymentStage === 'final' ? 'Pay final balance securely' : 'Pay $250 deposit securely'}
       />
       {error ? (
         <p className="mt-3 text-sm font-semibold text-red-700" role="alert">
@@ -53,7 +58,9 @@ export default function CommitmentCheckout({ proposalId }: { proposalId: string 
         </p>
       ) : null}
       <p className="mt-4 text-center text-xs text-neutral-400">
-        Your payment is not processed until you complete the secure checkout.
+        {paymentStage === 'final'
+          ? 'Full access and activation follow after the final balance clears.'
+          : 'The deposit reserves your development window. The final balance is due before activation and full access.'}
       </p>
     </div>
   );
