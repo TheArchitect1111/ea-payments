@@ -89,8 +89,18 @@ const PUBLIC_PORTAL_AUTH_PATHS = new Set([
   '/portal/reset-password',
 ]);
 
+const PUBLIC_PORTAL_EXPERIENCE_PATHS = new Set([
+  '/portal/amanda-catherine/enroll',
+]);
+
 function isPublicPortalAuthPath(pathname: string): boolean {
   return [...PUBLIC_PORTAL_AUTH_PATHS].some(
+    (path) => pathname === path || pathname.startsWith(`${path}/`),
+  );
+}
+
+function isPublicPortalExperiencePath(pathname: string): boolean {
+  return [...PUBLIC_PORTAL_EXPERIENCE_PATHS].some(
     (path) => pathname === path || pathname.startsWith(`${path}/`),
   );
 }
@@ -171,7 +181,7 @@ export async function middleware(request: NextRequest) {
 
 
   if (pathname.startsWith('/portal')) {
-    if (isPublicPortalAuthPath(pathname)) {
+    if (isPublicPortalAuthPath(pathname) || isPublicPortalExperiencePath(pathname)) {
       const requestHeaders = new Headers(request.headers);
       requestHeaders.set('x-pathname', pathname);
       return NextResponse.next({ request: { headers: requestHeaders } });
