@@ -318,7 +318,7 @@ export function assertCanonicalRegistry() {
     if (project.status === 'active' && project.missing.length) {
       throw new Error(`Active project ${project.id} has unresolved canonical fields.`);
     }
-    if (project.officialPortal?.includes('/portal/amanda')) {
+    if (project.officialPortal && /\/portal\/amanda(?:[/?#]|$)/.test(project.officialPortal)) {
       throw new Error('The invalid Amanda /portal/amanda route must never be canonical.');
     }
   }
