@@ -7,6 +7,7 @@ export const BUSINESS_OPTION_IDS = [
   'reports-dashboards',
   'people-directory',
   'training-learning',
+  'online-academy-student-portal',
   'resource-library',
   'event-registration-ticketing',
   'updates-change-requests',
@@ -65,6 +66,13 @@ export const BUSINESS_OPTION_CATALOG: readonly BusinessOptionDefinition[] = [
     name: 'Training & learning center',
     description: 'Deliver guides, lessons, and client learning materials.',
     moduleIds: ['training'],
+  },
+  {
+    id: 'online-academy-student-portal',
+    name: 'Online Academy + Student Portal',
+    description:
+      'Sell courses from a public CTA, create student access after payment, and manage lessons, resources, progress, certificates, students, and revenue.',
+    moduleIds: ['landing', 'training', 'resources', 'billing', 'people', 'applications', 'reports', 'settings'],
   },
   {
     id: 'resource-library',
