@@ -56,10 +56,17 @@ function reliableCampaign(input: {
   const linkLine = input.ctaUrl ? ` ${input.ctaUrl}` : '';
   const proof = input.proofPoint || `The right process can move ${input.audience} closer to ${input.result}.`;
   const pain = input.painQuestion || `How much time, money and capacity is being lost because the current process still depends on manual work?`;
+  const toneLead = input.tone === 'Provocative and challenging'
+    ? 'Here is the uncomfortable truth: '
+    : input.tone === 'Authoritative and premium'
+      ? 'Operationally, the issue is clear: '
+      : input.tone === 'Warm and human'
+        ? 'Your people deserve a better way to work. '
+        : '';
   const posts: CampaignPost[] = [
     {
       title: pain,
-      caption: `${pain}\n\nThe leak is rarely one dramatic failure. It is the repeated task, the delayed follow-up and the process everyone tolerates because “that is how we do it.” ${input.promotion} is built to change that.${detailLine}`,
+      caption: `${toneLead}${pain}\n\nThe leak is rarely one dramatic failure. It is the repeated task, the delayed follow-up and the process everyone tolerates because “that is how we do it.” ${input.promotion} is built to change that.${detailLine}`,
       callToAction: `${input.callToAction}${linkLine}`,
       imageDirection: `Bold branded question graphic using “${pain}” as the headline.`,
     },
