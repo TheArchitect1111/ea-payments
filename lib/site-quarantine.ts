@@ -6,7 +6,7 @@
 const QUARANTINED_SITE_SLUGS = new Set(['amanda-catherine']);
 
 function envFlagTrue(name: string): boolean {
-  const raw = (process.env[name] || (name === 'EA_AMANDA_SITE_LIVE' ? '1' : '')).trim().toLowerCase();
+  const raw = (process.env[name] || (name === 'EA_AMANDA_SITE_LIVE' ? '0' : '')).trim().toLowerCase();
   return raw === '1' || raw === 'true' || raw === 'yes';
 }
 
