@@ -19,6 +19,7 @@ const optionIds = [
   'reports-dashboards',
   'people-directory',
   'training-learning',
+  'online-academy-student-portal',
   'resource-library',
   'event-registration-ticketing',
   'updates-change-requests',
@@ -35,6 +36,8 @@ for (const optionId of optionIds) {
 assert.match(registry, /Calendar & Event Hub/);
 assert.match(registry, /EA Shared Calendar/);
 assert.match(catalog, /moduleIds: \['calendar'\]/);
+assert.match(catalog, /Online Academy \+ Student Portal/);
+assert.match(catalog, /create student access after payment/);
 assert.match(api, /set-business-option/);
 assert.match(api, /BUSINESS_OPTION_CATALOG/);
 assert.match(panel, /Enable complete portal options/);
