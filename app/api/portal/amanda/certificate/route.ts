@@ -5,6 +5,8 @@ import { guardPortalApi, portalApiUnauthorized, portalTenant } from '@/lib/api/p
 import { AMANDA_COURSES } from '@/lib/amanda-catherine/config';
 import { certificateEligible, getAmandaCourseProgress } from '@/lib/amanda-catherine/progress-store';
 import { listPortalFormSubmissions } from '@/lib/portal-forms/store';
+import { resolveAmandaAudience } from '@/lib/amanda-catherine/audience';
+import { audienceCanAccessCourse } from '@/lib/amanda-catherine/course-content';
 
 export const dynamic = 'force-dynamic';
 
@@ -48,6 +50,10 @@ export async function GET(req: NextRequest) {
   const courseId = req.nextUrl.searchParams.get('courseId') || '';
   const course = AMANDA_COURSES.find((item) => item.id === courseId);
   if (!tenant.portalSlug.startsWith('amanda-catherine') || !auth.session.email || !course) {
+    return NextResponse.json({ error: 'Certificate not found.' }, { status: 404 });
+  }
+  const audience = await resolveAmandaAudience({ portalSlug: tenant.portalSlug, email: auth.session.email, role: auth.session.role });
+  if (!audienceCanAccessCourse(audience, courseId)) {
     return NextResponse.json({ error: 'Certificate not found.' }, { status: 404 });
   }
 
