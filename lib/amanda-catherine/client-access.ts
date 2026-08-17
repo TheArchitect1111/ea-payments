@@ -19,6 +19,7 @@ type AmandaAccessProfile = {
   email: string;
   name: string;
   audience: AmandaPortalAudience;
+  courseIds: string[];
   updatedAt: string;
 };
 
@@ -29,6 +30,11 @@ function accessProfileId(portalSlug: string, email: string) {
 export async function getAmandaAssignedAudience(portalSlug: string, email: string) {
   const profile = await loadStudioRecord<AmandaAccessProfile>('experience', accessProfileId(portalSlug, email));
   return profile?.audience || null;
+}
+
+export async function getAmandaAssignedCourseIds(portalSlug: string, email: string) {
+  const profile = await loadStudioRecord<AmandaAccessProfile>('experience', accessProfileId(portalSlug, email));
+  return Array.isArray(profile?.courseIds) ? profile.courseIds : [];
 }
 
 function temporaryPassword() {
@@ -53,7 +59,7 @@ async function sendAmandaWelcome(input: {
   tempPassword: string;
   audience: AmandaPortalAudience;
 }) {
-  const loginUrl = `${canonicalPlatformOrigin()}/portal/login?next=%2Fportal%2F${AMANDA_PORTAL_SLUG}`;
+  const loginUrl = `${canonicalPlatformOrigin()}/portal/login?next=%2Fportal%2F${AMANDA_PORTAL_SLUG}%2Flearning`;
   const firstName = input.name.split(/\s+/)[0] || 'there';
   const safeFirstName = escapeHtml(firstName);
   const safeEmail = escapeHtml(input.email);
@@ -84,6 +90,7 @@ export async function provisionAmandaClientAccess(input: {
   audience: AmandaPortalAudience;
   amountPaidCad?: number;
   transactionId?: string;
+  courseIds?: string[];
 }) {
   const email = input.email.trim().toLowerCase();
   if (!email || !email.includes('@')) return { ok: false as const, error: 'A valid client email is required.' };
@@ -132,6 +139,8 @@ export async function provisionAmandaClientAccess(input: {
   if (!orgId.startsWith('org_') && !(await findMembership(email, orgId))) {
     await createMembership({ userEmail: email, organizationId: orgId, role: 'guest' });
   }
+  const existingProfile = await loadStudioRecord<AmandaAccessProfile>('experience', accessProfileId(AMANDA_PORTAL_SLUG, email));
+  const courseIds = [...new Set([...(existingProfile?.courseIds || []), ...(input.courseIds || [])])];
   await saveStudioRecord({
     recordType: 'experience',
     id: accessProfileId(AMANDA_PORTAL_SLUG, email),
@@ -142,6 +151,7 @@ export async function provisionAmandaClientAccess(input: {
       email,
       name,
       audience: input.audience,
+      courseIds,
       updatedAt: new Date().toISOString(),
     } satisfies AmandaAccessProfile,
   });
@@ -160,6 +170,6 @@ export async function provisionAmandaClientAccess(input: {
     created,
     welcomeSent,
     email,
-    loginUrl: `${canonicalPlatformOrigin()}/portal/login?next=%2Fportal%2F${AMANDA_PORTAL_SLUG}`,
+    loginUrl: `${canonicalPlatformOrigin()}/portal/login?next=%2Fportal%2F${AMANDA_PORTAL_SLUG}%2Flearning`,
   };
 }
