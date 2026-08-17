@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { requirePortalModule } from '@/lib/modules/portal-modules';
+import { getClientByEmail } from '@/lib/airtable';
 import { PortalSubpage } from '@/app/portal/components/PortalSubpage';
 import {
   resolvePortalMemberHome,
@@ -51,7 +52,8 @@ export default async function MemberHomePage({
   const { session, client } = await requirePortalModule(slug, 'member');
 
   if (slug.startsWith('amanda-catherine')) {
-    const firstName = client.clientName?.split(' ')[0] || 'Member';
+    const signedInClient = session.email ? await getClientByEmail(session.email) : null;
+    const firstName = signedInClient?.clientName?.split(' ')[0] || client.clientName?.split(' ')[0] || 'Member';
     const isAdministrator = session.role === 'admin' || session.role === 'owner';
     return (
       <PortalSubpage

@@ -14,6 +14,8 @@ export async function sendAuthEmail(input: {
   title: string;
   bodyHtml: string;
   text?: string;
+  brandLabel?: string;
+  brandColor?: string;
 }): Promise<{ ok: boolean; error?: string }> {
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.RESEND_FROM_EMAIL;
@@ -29,8 +31,8 @@ export async function sendAuthEmail(input: {
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f6f8;padding:24px 0;font-family:Arial,sans-serif;">
   <tr><td align="center">
     <table width="560" cellpadding="0" cellspacing="0" style="background:#fff;border:1px solid #e5e7eb;">
-      <tr><td style="background:#1B2B4D;padding:20px 28px;">
-        <p style="margin:0;color:#fff;font-size:12px;letter-spacing:2px;text-transform:uppercase;">Efficiency Architects</p>
+      <tr><td style="background:${escHtml(input.brandColor || '#1B2B4D')};padding:20px 28px;">
+        <p style="margin:0;color:#fff;font-size:12px;letter-spacing:2px;text-transform:uppercase;">${escHtml(input.brandLabel || 'Efficiency Architects')}</p>
         <h1 style="margin:8px 0 0;color:#fff;font-size:20px;">${escHtml(input.title)}</h1>
       </td></tr>
       <tr><td style="padding:28px;color:#334155;font-size:15px;line-height:1.6;">

@@ -319,7 +319,8 @@ export async function getClientByPortalSlug(slug: string): Promise<PortalClientR
 
   const safe = slug.replace(/'/g, "\\'");
   const formula = encodeURIComponent(`{Portal Slug}='${safe}'`);
-  const url = `https://api.airtable.com/v0/${BASE_ID}/${encodeURIComponent(TABLE)}?filterByFormula=${formula}&maxRecords=1`;
+  const isAmandaTenant = slug.toLowerCase().startsWith('amanda-catherine');
+  const url = `https://api.airtable.com/v0/${BASE_ID}/${encodeURIComponent(TABLE)}?filterByFormula=${formula}&maxRecords=${isAmandaTenant ? 100 : 1}`;
 
   try {
     const res = await fetch(url, { headers: authHeaders() });
@@ -328,7 +329,10 @@ export async function getClientByPortalSlug(slug: string): Promise<PortalClientR
     const data = (await res.json()) as {
       records?: { id: string; fields: Record<string, unknown> }[];
     };
-    const rec = data.records?.[0];
+    const ownerEmails = new Set(['amanda@aesthetikine.com', 'amandacatherinec@gmail.com']);
+    const rec = isAmandaTenant
+      ? data.records?.find((row) => ownerEmails.has(String(row.fields['Email'] || '').trim().toLowerCase())) || data.records?.[0]
+      : data.records?.[0];
     if (!rec) return null;
 
     const f = rec.fields;
