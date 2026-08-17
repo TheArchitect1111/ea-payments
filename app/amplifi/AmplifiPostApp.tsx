@@ -70,6 +70,7 @@ type TopicWatch = {
 
 type CampaignPost = { title: string; caption: string; callToAction: string; imageDirection: string };
 type GeneratedCampaign = { title: string; strategy: string; posts: CampaignPost[] };
+const CAMPAIGN_BRIEF_STORAGE_KEY = 'amplifi:create-for-me:brief';
 
 function defaultDateRange(): { from: string; to: string } {
   const to = new Date();
@@ -154,6 +155,29 @@ export default function AmplifiPostApp({
     const savedPath = window.localStorage.getItem('amplifi:onboarding:path') as AmplifiPath | null;
     if (savedPath === 'publish' || savedPath === 'research' || savedPath === 'smartchitecture') setSelectedPath(savedPath);
     else setShowWelcome(false);
+
+    const savedBrief = window.sessionStorage.getItem(CAMPAIGN_BRIEF_STORAGE_KEY);
+    if (savedBrief) {
+      try {
+        const brief = JSON.parse(savedBrief) as {
+          promotion?: string;
+          audience?: string;
+          result?: string;
+          callToAction?: string;
+          details?: string;
+        };
+        setPromotion(brief.promotion ?? '');
+        setCampaignAudience(brief.audience ?? '');
+        setCampaignResult(brief.result ?? '');
+        setCampaignCallToAction(brief.callToAction ?? '');
+        setCampaignDetails(brief.details ?? '');
+        setSelectedPath('smartchitecture');
+        setShowHome(false);
+        window.sessionStorage.removeItem(CAMPAIGN_BRIEF_STORAGE_KEY);
+      } catch {
+        window.sessionStorage.removeItem(CAMPAIGN_BRIEF_STORAGE_KEY);
+      }
+    }
   }, []);
 
   const choosePath = (path: AmplifiPath) => {
@@ -168,9 +192,19 @@ export default function AmplifiPostApp({
   };
 
   const createCampaignForMe = async () => {
-    if (!loggedIn) { setMessage('Sign in so Amplifi can create and save your campaign.'); return; }
     if (!promotion.trim() || !campaignAudience.trim() || !campaignResult.trim() || !campaignCallToAction.trim()) {
       setMessage('Complete the promotion, audience, result and call to action.');
+      return;
+    }
+    if (!loggedIn) {
+      window.sessionStorage.setItem(CAMPAIGN_BRIEF_STORAGE_KEY, JSON.stringify({
+        promotion: promotion.trim(),
+        audience: campaignAudience.trim(),
+        result: campaignResult.trim(),
+        callToAction: campaignCallToAction.trim(),
+        details: campaignDetails.trim(),
+      }));
+      window.location.assign('/portal/login?next=%2Famplifi%2Fworkspace');
       return;
     }
     setCampaignGenerating(true);
@@ -864,7 +898,7 @@ export default function AmplifiPostApp({
               </div>
               {message ? <p className="af-message af-message-error">{message}</p> : null}
               {success ? <p className="af-message af-message-success">{success}</p> : null}
-              <div className="af-action-row"><button type="button" className="af-primary-button" disabled={campaignGenerating || !loggedIn} onClick={() => void createCampaignForMe()}>{campaignGenerating ? 'Amplifi is creating…' : 'Create my 5-post campaign'}</button><span>Nothing publishes until you approve it.</span></div>
+              <div className="af-action-row"><button type="button" className="af-primary-button" disabled={campaignGenerating} onClick={() => void createCampaignForMe()}>{campaignGenerating ? 'Amplifi is creating…' : loggedIn ? 'Create my 5-post campaign' : 'Sign in & create my 5-post campaign'}</button><span>{loggedIn ? 'Nothing publishes until you approve it.' : 'Your brief will be saved while you sign in.'}</span></div>
               {generatedCampaign ? <div className="af-campaign-results"><h4>{generatedCampaign.title}</h4>{generatedCampaign.strategy ? <p>{generatedCampaign.strategy}</p> : null}{generatedCampaign.posts.map((post, index) => <article className="af-campaign-post" key={`${post.title}-${index}`}><span>POST {index + 1} OF 5</span><h4>{post.title}</h4><p>{post.caption}</p><strong>Call to action</strong><p>{post.callToAction}</p><strong>Image direction</strong><p>{post.imageDirection}</p></article>)}</div> : null}
             </section> : null}
             {selectedPath === 'publish' ? <section className="af-panel" id="content">
