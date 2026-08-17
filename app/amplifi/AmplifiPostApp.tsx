@@ -54,9 +54,11 @@ type NativeProviderStatus = { provider: 'meta' | 'linkedin' | 'tiktok' | 'x'; la
 type TopicWatch = {
   id: string;
   topic: string;
-  cadence: 'daily' | 'twice-weekly' | 'weekly';
+  cadence: 'twice-weekly' | 'weekly';
   status: 'active' | 'paused' | 'stopped';
   timezone: string;
+  endAt: string;
+  postsPerRun: 1 | 2 | 3;
   discoveries: Array<{
     id: string;
     at: string;
@@ -66,6 +68,9 @@ type TopicWatch = {
   lastRunAt?: string;
 };
 
+type CampaignPost = { title: string; caption: string; callToAction: string; imageDirection: string };
+type GeneratedCampaign = { title: string; strategy: string; posts: CampaignPost[] };
+
 function defaultDateRange(): { from: string; to: string } {
   const to = new Date();
   const from = new Date(to);
@@ -74,6 +79,12 @@ function defaultDateRange(): { from: string; to: string } {
     from: from.toISOString().slice(0, 10),
     to: to.toISOString().slice(0, 10),
   };
+}
+
+function defaultMonitorEndDate(): string {
+  const end = new Date();
+  end.setUTCMonth(end.getUTCMonth() + 1);
+  return end.toISOString().slice(0, 10);
 }
 
 function NavIcon({ children }: { children: string }) {
@@ -124,10 +135,20 @@ export default function AmplifiPostApp({
   const [dateFrom, setDateFrom] = useState(defaults.from);
   const [dateTo, setDateTo] = useState(defaults.to);
   const [researchMeta, setResearchMeta] = useState<ResearchMeta | null>(null);
+  const [researchDrafts, setResearchDrafts] = useState<AmplifiSocialDraft[]>([]);
   const [searchMode, setSearchMode] = useState<'once' | 'watch'>('once');
-  const [watchCadence, setWatchCadence] = useState<'daily' | 'twice-weekly' | 'weekly'>('weekly');
+  const [watchCadence, setWatchCadence] = useState<'twice-weekly' | 'weekly'>('weekly');
+  const [watchEndDate, setWatchEndDate] = useState(defaultMonitorEndDate);
+  const [postsPerSearch, setPostsPerSearch] = useState<1 | 2 | 3>(1);
   const [topicWatches, setTopicWatches] = useState<TopicWatch[]>([]);
   const [watchBusyId, setWatchBusyId] = useState<string | null>(null);
+  const [promotion, setPromotion] = useState('');
+  const [campaignAudience, setCampaignAudience] = useState('');
+  const [campaignResult, setCampaignResult] = useState('');
+  const [campaignCallToAction, setCampaignCallToAction] = useState('');
+  const [campaignDetails, setCampaignDetails] = useState('');
+  const [campaignGenerating, setCampaignGenerating] = useState(false);
+  const [generatedCampaign, setGeneratedCampaign] = useState<GeneratedCampaign | null>(null);
 
   useEffect(() => {
     const savedPath = window.localStorage.getItem('amplifi:onboarding:path') as AmplifiPath | null;
@@ -144,6 +165,42 @@ export default function AmplifiPostApp({
       const target = path === 'research' ? 'search' : path === 'smartchitecture' ? 'smartchitecture' : 'content';
       document.getElementById(target)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 50);
+  };
+
+  const createCampaignForMe = async () => {
+    if (!loggedIn) { setMessage('Sign in so Amplifi can create and save your campaign.'); return; }
+    if (!promotion.trim() || !campaignAudience.trim() || !campaignResult.trim() || !campaignCallToAction.trim()) {
+      setMessage('Complete the promotion, audience, result and call to action.');
+      return;
+    }
+    setCampaignGenerating(true);
+    setMessage('');
+    setSuccess('');
+    try {
+      const res = await fetch('/api/portal/amplifi/create-campaign', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          promotion: promotion.trim(),
+          audience: campaignAudience.trim(),
+          result: campaignResult.trim(),
+          callToAction: campaignCallToAction.trim(),
+          details: campaignDetails.trim(),
+        }),
+      });
+      const data = (await res.json()) as { ok?: boolean; error?: string; campaign?: GeneratedCampaign };
+      if (!res.ok || !data.ok || !data.campaign || data.campaign.posts.length !== 5) {
+        setMessage(data.error || 'Amplifi could not create all five campaign posts.');
+        return;
+      }
+      setGeneratedCampaign(data.campaign);
+      setBusinessName(data.campaign.title);
+      setSuccess('Amplifi created five coordinated posts. Review each one before approval.');
+    } catch {
+      setMessage('Amplifi could not create the campaign right now.');
+    } finally {
+      setCampaignGenerating(false);
+    }
   };
 
   const loadConnections = useCallback(async () => {
@@ -298,7 +355,7 @@ export default function AmplifiPostApp({
       const res = await fetch('/api/portal/amplifi/topic-research', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ topic: topic.trim(), dateFrom, dateTo }),
+        body: JSON.stringify({ topic: topic.trim(), dateFrom, dateTo, postCount: postsPerSearch }),
       });
       const data = (await res.json()) as {
         ok?: boolean;
@@ -310,6 +367,7 @@ export default function AmplifiPostApp({
           researchedAt: string;
           sources: ResearchSource[];
           draft: AmplifiSocialDraft;
+          drafts: AmplifiSocialDraft[];
           draftTitle: string;
           warnings: string[];
         };
@@ -320,6 +378,7 @@ export default function AmplifiPostApp({
       }
       const research = data.research;
       setDraft(research.draft);
+      setResearchDrafts(Array.isArray(research.drafts) ? research.drafts : [research.draft]);
       setBusinessName(research.draftTitle || topic.trim());
       setStoryUrl(research.sources[0]?.url || '');
       setResearchMeta({
@@ -331,7 +390,7 @@ export default function AmplifiPostApp({
         warnings: research.warnings || [],
       });
       if (research.warnings?.length) setMessage(research.warnings[0] || '');
-      setSuccess(`Found ${research.sources.length} source(s). Review the draft and send it to your approval queue.`);
+      setSuccess(`Found ${research.sources.length} source(s) and created ${postsPerSearch} post${postsPerSearch === 1 ? '' : 's'}. Review everything before approval.`);
     } catch {
       setMessage('Network error during Amplifi Search.');
     } finally {
@@ -360,6 +419,8 @@ export default function AmplifiPostApp({
           topic: topic.trim(),
           cadence: watchCadence,
           timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'America/New_York',
+          endAt: `${watchEndDate}T23:59:59.999Z`,
+          postsPerRun: postsPerSearch,
         }),
       });
       const data = (await res.json()) as { ok?: boolean; error?: string; watch?: TopicWatch };
@@ -368,7 +429,7 @@ export default function AmplifiPostApp({
         return;
       }
       setTopicWatches((current) => [data.watch!, ...current.filter((watch) => watch.id !== data.watch!.id)]);
-      setSuccess(`Keep Watching enabled (${watchCadence.replace('-', ' ')}).`);
+      setSuccess(`Automatic research enabled through ${watchEndDate}. Amplifi will create ${postsPerSearch} post${postsPerSearch === 1 ? '' : 's'} per search.`);
     } catch {
       setMessage('Could not enable Keep Watching right now.');
     } finally {
@@ -398,6 +459,7 @@ export default function AmplifiPostApp({
           researchedAt: string;
           sources: ResearchSource[];
           draft: AmplifiSocialDraft;
+          drafts: AmplifiSocialDraft[];
           draftTitle: string;
           warnings: string[];
         };
@@ -410,6 +472,7 @@ export default function AmplifiPostApp({
       setTopicWatches((current) => current.map((watch) => (watch.id === watchId ? data.watch! : watch)));
       if (action === 'run' && data.research) {
         setDraft(data.research.draft);
+        setResearchDrafts(Array.isArray(data.research.drafts) ? data.research.drafts : [data.research.draft]);
         setBusinessName(data.research.draftTitle || data.research.topic);
         setStoryUrl(data.research.sources[0]?.url || '');
         setResearchMeta({
@@ -549,9 +612,9 @@ export default function AmplifiPostApp({
             <h2 id="amplifi-welcome-title">How would you like Amplifi to help?</h2>
             <p>Choose the outcome you want. Amplifi will take you directly to the right workspace.</p>
             <div className="af-path-grid">
-              <button type="button" onClick={() => choosePath('publish')}><span>1</span><strong>I have content to publish</strong><small>Enter your post or ask Amplifi to write it, then review and publish to connected channels.</small></button>
-              <button type="button" onClick={() => choosePath('research')}><span>2</span><strong>Help me find something worth sharing</strong><small>Search the web for useful sources and turn the best findings into ready-to-review posts.</small></button>
-              <button type="button" onClick={() => choosePath('smartchitecture')}><span>3</span><strong>I have a business goal</strong><small>Use Smartchitecture™ to shape the audience, message, campaign, content and next actions.</small></button>
+              <button type="button" onClick={() => choosePath('publish')}><span>1</span><strong>I’ll create it</strong><small>Enter your information and build the post or campaign with Amplifi’s guidance.</small></button>
+              <button type="button" onClick={() => choosePath('smartchitecture')}><span>2</span><strong>Create it for me</strong><small>Give Amplifi a short brief and receive a complete five-post campaign.</small></button>
+              <button type="button" onClick={() => choosePath('research')}><span>3</span><strong>Research and create it</strong><small>Set a topic, timeframe, frequency and 1–3 posts per search. Automatic searches can continue for up to three months.</small></button>
             </div>
             <button type="button" className="af-text-button" onClick={() => setShowWelcome(false)}>I’ll explore on my own</button>
           </section>
@@ -649,7 +712,7 @@ export default function AmplifiPostApp({
               </section>
             ) : null}
 
-            <section className="af-panel" id="search">
+            {selectedPath === 'research' ? <section className="af-panel" id="search">
               <div className="af-section-heading">
                 <div>
                   <span className="af-eyebrow">Smart Research</span>
@@ -662,8 +725,8 @@ export default function AmplifiPostApp({
               {showAmplifiSearch ? (
                 <div className="af-research-form">
                   <label className="af-field af-field-wide"><span>Topic</span><textarea value={topic} onChange={(e) => setTopic(e.target.value)} placeholder="What should Amplifi research?" /></label>
-                  <label className="af-field"><span>From</span><input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} /></label>
-                  <label className="af-field"><span>To</span><input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} /></label>
+                  <label className="af-field"><span>Search content from</span><input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} /></label>
+                  <label className="af-field"><span>Search content through</span><input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} /></label>
                   <div className="af-field af-monitor-field">
                     <span>Search mode</span>
                     <div className="af-mode-pills">
@@ -684,15 +747,29 @@ export default function AmplifiPostApp({
                     </div>
                   </div>
                   {searchMode === 'watch' ? (
-                    <label className="af-field">
-                      <span>Monitoring cadence</span>
-                      <select value={watchCadence} onChange={(e) => setWatchCadence(e.target.value as 'daily' | 'twice-weekly' | 'weekly')}>
-                        <option value="daily">Daily</option>
-                        <option value="twice-weekly">Twice weekly</option>
-                        <option value="weekly">Weekly</option>
-                      </select>
-                    </label>
+                    <>
+                      <label className="af-field">
+                        <span>Automatic search frequency</span>
+                        <select value={watchCadence} onChange={(e) => setWatchCadence(e.target.value as 'twice-weekly' | 'weekly')}>
+                          <option value="weekly">Once weekly</option>
+                          <option value="twice-weekly">Twice weekly</option>
+                        </select>
+                      </label>
+                      <label className="af-field">
+                        <span>Keep searching through</span>
+                        <input type="date" value={watchEndDate} min={new Date().toISOString().slice(0, 10)} max={(() => { const max = new Date(); max.setMonth(max.getMonth() + 3); return max.toISOString().slice(0, 10); })()} onChange={(e) => setWatchEndDate(e.target.value)} />
+                        <small>Choose any end date up to three months from today.</small>
+                      </label>
+                    </>
                   ) : null}
+                  <label className="af-field">
+                    <span>Posts created per search</span>
+                    <select value={postsPerSearch} onChange={(e) => setPostsPerSearch(Number(e.target.value) as 1 | 2 | 3)}>
+                      <option value={1}>1 post</option>
+                      <option value={2}>2 posts</option>
+                      <option value={3}>3 posts</option>
+                    </select>
+                  </label>
                   <button
                     type="button"
                     className="af-primary-button af-research-submit"
@@ -719,6 +796,8 @@ export default function AmplifiPostApp({
                   ))}
                 </div>
               ) : null}
+
+              {researchDrafts.length ? <div className="af-campaign-results"><h4>{researchDrafts.length} research-based post{researchDrafts.length === 1 ? '' : 's'} created</h4>{researchDrafts.map((post, index) => <article className="af-campaign-post" key={`research-post-${index}`}><span>POST {index + 1} OF {researchDrafts.length}</span><p>{post.linkedIn}</p><small>{post.hashtags.join(' ')}</small></article>)}</div> : null}
 
               {topicWatches.length ? (
                 <div className="af-watch-list">
@@ -772,14 +851,23 @@ export default function AmplifiPostApp({
                   ))}
                 </div>
               ) : null}
-            </section>
+            </section> : null}
 
-            <section className="af-panel af-smartchitecture-panel" id="smartchitecture">
-              <div className="af-section-heading"><div><span className="af-eyebrow">Smartchitecture™</span><h3>Start with the business result—not a blank content box.</h3></div></div>
-              <p>Define the objective and Amplifi coordinates the audience, strategy, campaign structure, messages, calls to action and measures of success.</p>
-              <button type="button" className="af-secondary-button" onClick={() => document.getElementById('content')?.scrollIntoView({ behavior: 'smooth' })}>Build from my goal</button>
-            </section>
-            <section className="af-panel" id="content">
+            {selectedPath === 'smartchitecture' ? <section className="af-panel af-smartchitecture-panel" id="smartchitecture">
+              <div className="af-section-heading"><div><span className="af-eyebrow">Create it for me</span><h3>Tell Amplifi what the campaign needs to accomplish.</h3><p>Give Amplifi the brief—not the copy. Amplifi will create five coordinated posts.</p></div></div>
+              <div className="af-editor-grid">
+                <label className="af-field af-field-wide"><span>What are you promoting?</span><textarea value={promotion} onChange={(e) => setPromotion(e.target.value)} placeholder="Describe the service, event, offer or idea" /></label>
+                <label className="af-field"><span>Who should this campaign reach?</span><input value={campaignAudience} onChange={(e) => setCampaignAudience(e.target.value)} placeholder="Your intended audience" /></label>
+                <label className="af-field"><span>What result do you want?</span><input value={campaignResult} onChange={(e) => setCampaignResult(e.target.value)} placeholder="The campaign goal" /></label>
+                <label className="af-field"><span>What should people do next?</span><input value={campaignCallToAction} onChange={(e) => setCampaignCallToAction(e.target.value)} placeholder="Book, register, call, buy or learn more" /></label>
+                <label className="af-field"><span>Important dates and details</span><input value={campaignDetails} onChange={(e) => setCampaignDetails(e.target.value)} placeholder="Dates, link, pricing or requirements" /></label>
+              </div>
+              {message ? <p className="af-message af-message-error">{message}</p> : null}
+              {success ? <p className="af-message af-message-success">{success}</p> : null}
+              <div className="af-action-row"><button type="button" className="af-primary-button" disabled={campaignGenerating || !loggedIn} onClick={() => void createCampaignForMe()}>{campaignGenerating ? 'Amplifi is creating…' : 'Create my 5-post campaign'}</button><span>Nothing publishes until you approve it.</span></div>
+              {generatedCampaign ? <div className="af-campaign-results"><h4>{generatedCampaign.title}</h4>{generatedCampaign.strategy ? <p>{generatedCampaign.strategy}</p> : null}{generatedCampaign.posts.map((post, index) => <article className="af-campaign-post" key={`${post.title}-${index}`}><span>POST {index + 1} OF 5</span><h4>{post.title}</h4><p>{post.caption}</p><strong>Call to action</strong><p>{post.callToAction}</p><strong>Image direction</strong><p>{post.imageDirection}</p></article>)}</div> : null}
+            </section> : null}
+            {selectedPath === 'publish' ? <section className="af-panel" id="content">
               <div className="af-section-heading">
                 <div><span className="af-eyebrow">Content studio</span><h3>Shape the post</h3><p>Keep the inputs simple. Amplifi turns the source and angle into usable social copy.</p></div>
                 <button type="button" className="af-text-action af-button-link" onClick={loadDemo}>Load demo</button>
@@ -799,7 +887,7 @@ export default function AmplifiPostApp({
                 <button type="button" className="af-primary-button" disabled={loading} onClick={() => generateDraft()}>{loading ? 'Loading…' : draft ? 'Regenerate draft' : 'Generate draft'}</button>
                 <span>Nothing publishes from this screen without review.</span>
               </div>
-            </section>
+            </section> : null}
 
             {draft ? (
               <section className="af-panel af-draft-panel">
