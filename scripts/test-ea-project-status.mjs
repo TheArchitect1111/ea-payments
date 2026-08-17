@@ -21,7 +21,7 @@ globalThis.fetch = async (url) => {
     'https://ea-training-transformation.vercel.app': 'Training Transformation',
     'https://ea-communications-chassis.vercel.app': 'Communication',
     'https://form-to-finish-executive-review.vercel.app': 'Basketball Form to Finish',
-    'https://amanda-catherine-preview.vercel.app': 'Amanda Catherine',
+    'https://amandacatherine.ca': 'Amanda Catherine',
     'https://www.cprglobalsports.com': 'CPR Global Prospects',
     'https://mississaugamagic.com': 'Mississauga Magic',
     'https://brother-hub.vercel.app': 'BrotherHub Gastonia',
