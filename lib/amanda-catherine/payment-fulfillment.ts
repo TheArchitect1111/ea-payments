@@ -19,6 +19,7 @@ export type AmandaPaymentRecord = {
   stripeSessionId: string;
   kind: 'offer' | 'membership';
   offerId?: string;
+  courseId?: string;
   membershipId?: string;
   paymentOption?: 'full' | 'deposit';
   amountPaidCad: number;
@@ -88,6 +89,7 @@ export async function fulfillAmandaCheckout(
     stripeSessionId: session.id,
     kind: membership ? 'membership' : 'offer',
     offerId: offer?.id,
+    courseId: String(meta.amandaCourseId || ('courseId' in (offer || {}) ? (offer as { courseId?: string }).courseId || '' : '')) || undefined,
     membershipId: membership?.id,
     paymentOption:
       meta.paymentOption === 'deposit' || meta.paymentOption === 'full'
@@ -114,25 +116,24 @@ export async function fulfillAmandaCheckout(
   });
   if (!saved.ok) return { ok: false as const, error: saved.error || 'Payment record could not be saved.' };
 
-  if (!existing) {
-    const label = membership?.name ?? offer!.name;
-    const audience: AmandaPortalAudience = membership
-      ? 'member-community-participant'
-      : offer?.id === 'lifeline-artist-business-launch'
-        ? 'media-guest'
-        : offer?.id.includes('training') || offer?.id.includes('certification')
-          ? 'student-trainee'
-          : 'client';
-    const access = await provisionAmandaClientAccess({
-      email,
-      name: session.customer_details?.name || '',
-      audience,
-      amountPaidCad: record.amountPaidCad,
-      transactionId: stringId(session.payment_intent) || session.id,
-    });
-    if (!access.ok) {
-      console.error('[amanda-payment] client portal access provisioning failed', access.error);
-      await emitPulseEvent({
+  const audience: AmandaPortalAudience = membership
+    ? 'member-community-participant'
+    : offer?.id === 'lifeline-artist-business-launch'
+      ? 'media-guest'
+      : offer?.id.includes('training') || offer?.id.includes('certification')
+        ? 'student-trainee'
+        : 'client';
+  const access = await provisionAmandaClientAccess({
+    email,
+    name: session.customer_details?.name || String(meta.clientName || ''),
+    audience,
+    amountPaidCad: record.amountPaidCad,
+    transactionId: stringId(session.payment_intent) || session.id,
+    courseIds: record.courseId ? [record.courseId] : [],
+  });
+  if (!access.ok) {
+    console.error('[amanda-payment] client portal access provisioning failed', access.error);
+    await emitPulseEvent({
         product: 'ea-platform',
         type: 'fulfillment.review_required',
         title: 'Amanda client access needs attention',
@@ -141,8 +142,12 @@ export async function fulfillAmandaCheckout(
         href: `/portal/${portalSlug}/deliveries`,
         tenantId: portalSlug,
         objectId: id,
-      });
-    }
+    });
+    return { ok: false as const, error: access.error || 'Student access could not be provisioned.', paymentRecorded: true as const };
+  }
+
+  if (!existing) {
+    const label = membership?.name ?? offer!.name;
     try {
       await sendPaymentConfirmationEmail({
         email,
@@ -176,7 +181,7 @@ export async function fulfillAmandaCheckout(
     });
   }
 
-  return { ok: true as const, record };
+  return { ok: true as const, record, access };
 }
 
 export async function listAmandaPayments(portalSlug: string, email: string) {
