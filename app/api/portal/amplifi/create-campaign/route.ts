@@ -47,38 +47,45 @@ function reliableCampaign(input: {
   result: string;
   callToAction: string;
   details: string;
+  tone: string;
+  proofPoint: string;
+  painQuestion: string;
+  ctaUrl: string;
 }) {
-  const detailLine = input.details ? ` Important details: ${input.details}` : '';
+  const detailLine = input.details ? ` ${input.details}` : '';
+  const linkLine = input.ctaUrl ? ` ${input.ctaUrl}` : '';
+  const proof = input.proofPoint || `The right process can move ${input.audience} closer to ${input.result}.`;
+  const pain = input.painQuestion || `How much time, money and capacity is being lost because the current process still depends on manual work?`;
   const posts: CampaignPost[] = [
     {
-      title: `Introducing ${input.promotion}`,
-      caption: `${input.promotion} is designed for ${input.audience}. The goal is simple: ${input.result}.${detailLine}`,
-      callToAction: input.callToAction,
-      imageDirection: `A clear branded introduction to ${input.promotion} featuring the audience and primary benefit.`,
+      title: pain,
+      caption: `${pain}\n\nThe leak is rarely one dramatic failure. It is the repeated task, the delayed follow-up and the process everyone tolerates because “that is how we do it.” ${input.promotion} is built to change that.${detailLine}`,
+      callToAction: `${input.callToAction}${linkLine}`,
+      imageDirection: `Bold branded question graphic using “${pain}” as the headline.`,
     },
     {
-      title: `Why ${input.promotion} matters`,
-      caption: `${input.audience} should not have to settle for a complicated path forward. ${input.promotion} focuses attention on the result that matters: ${input.result}.`,
-      callToAction: input.callToAction,
-      imageDirection: `A benefit-focused visual showing the before-and-after experience for ${input.audience}.`,
+      title: 'The expensive process hiding in plain sight',
+      caption: `Manual work does not stay small. It compounds into missed opportunities, inconsistent service and people spending their best hours on work a system should handle. For ${input.audience}, that is not an inconvenience. It is an operating cost.`,
+      callToAction: `${input.callToAction}${linkLine}`,
+      imageDirection: 'A sharp time-money-resources graphic showing operational leakage without invented numbers.',
     },
     {
-      title: 'The value in one clear step',
-      caption: `The strongest solutions make the next step easier to understand. ${input.promotion} gives ${input.audience} a focused way to move toward ${input.result}.${detailLine}`,
-      callToAction: input.callToAction,
-      imageDirection: 'A premium proof-and-value graphic highlighting the central outcome without invented statistics.',
+      title: proof,
+      caption: `${proof}\n\nThat is what happens when the right process stops depending on memory, repetition and manual handoffs. The value is not “more technology.” The value is measurable capacity returned to the business.`,
+      callToAction: `${input.callToAction}${linkLine}`,
+      imageDirection: `A premium proof card centered on the exact verified result: “${proof}”.`,
     },
     {
-      title: `Your invitation to ${input.promotion}`,
-      caption: `If ${input.result} is the outcome you want, this is your invitation to learn more about ${input.promotion}. Everything begins with one clear next step.${detailLine}`,
-      callToAction: input.callToAction,
-      imageDirection: 'A warm invitation visual with the offer, relevant details and a prominent next step.',
+      title: 'What changed was the system',
+      caption: `The breakthrough was not asking people to work harder. It was removing the friction built into the process. ${input.promotion} helps create the structure required to reach ${input.result} with less waste and more control.`,
+      callToAction: `${input.callToAction}${linkLine}`,
+      imageDirection: 'A branded before-and-after process visual: manual friction on the left, clear automated flow on the right.',
     },
     {
-      title: 'Take the next step',
-      caption: `${input.promotion} is ready to help ${input.audience} move toward ${input.result}. Do not let the next opportunity pass without taking action.${detailLine}`,
-      callToAction: input.callToAction,
-      imageDirection: 'A decisive final call-to-action graphic with strong brand contrast and the destination clearly visible.',
+      title: 'Find the leak before it costs you another quarter',
+      caption: `${pain}\n\nFind out where your business is losing capacity and what to address first. ${input.callToAction}.${linkLine}`,
+      callToAction: `${input.callToAction}${linkLine}`,
+      imageDirection: `A decisive CTA graphic with “Find the leak” and the destination ${input.ctaUrl || 'clearly visible'}.`,
     },
   ];
   return {
@@ -98,6 +105,10 @@ export async function POST(req: NextRequest) {
     result?: string;
     callToAction?: string;
     details?: string;
+    tone?: string;
+    proofPoint?: string;
+    painQuestion?: string;
+    ctaUrl?: string;
   };
 
   const promotion = String(body.promotion || '').trim();
@@ -105,6 +116,10 @@ export async function POST(req: NextRequest) {
   const result = String(body.result || '').trim();
   const callToAction = String(body.callToAction || '').trim();
   const details = String(body.details || '').trim();
+  const tone = String(body.tone || 'Bold, direct and reality-based').trim();
+  const proofPoint = String(body.proofPoint || '').trim();
+  const painQuestion = String(body.painQuestion || '').trim();
+  const ctaUrl = String(body.ctaUrl || '').trim();
   if (!promotion || !audience || !result || !callToAction) {
     return NextResponse.json({ ok: false, error: 'Promotion, audience, result and call to action are required.' }, { status: 400 });
   }
@@ -117,7 +132,14 @@ export async function POST(req: NextRequest) {
     `Audience: ${audience}`,
     `Desired result: ${result}`,
     `Required call to action: ${callToAction}`,
+    `Call-to-action URL: ${ctaUrl || 'None provided.'}`,
+    `Tone: ${tone}`,
+    `Specific proof point: ${proofPoint || 'None provided; do not invent proof.'}`,
+    `Audience pain question: ${painQuestion || 'None provided.'}`,
     `Important dates and details: ${details || 'None provided; do not invent any.'}`,
+    'Use this five-post sequence: pattern interruption; real pain or cost; specific proof; what changed; direct invitation.',
+    'Write with adult authority, specificity and edge. Avoid generic phrases, filler and schoolbook language.',
+    'Include the CTA URL naturally in every post where a next step is appropriate.',
   ].join('\n');
 
   try {
@@ -154,7 +176,7 @@ export async function POST(req: NextRequest) {
     }
     return NextResponse.json({
       ok: true,
-      campaign: reliableCampaign({ promotion, audience, result, callToAction, details }),
+      campaign: reliableCampaign({ promotion, audience, result, callToAction, details, tone, proofPoint, painQuestion, ctaUrl }),
       fallback: true,
     });
   }
