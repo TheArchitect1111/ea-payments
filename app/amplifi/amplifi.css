@@ -1354,6 +1354,17 @@ body {
 .af-campaign-post h4 { margin: 8px 0; font-size: 18px; }
 .af-campaign-post p { margin: 7px 0 13px; white-space: pre-wrap; color: #5f5b6d; }
 .af-campaign-post strong { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; }
+.af-generated-post-image { min-height: 260px; margin: 14px 0 18px; padding: 28px; border-radius: 20px; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; color: #fff; background: linear-gradient(145deg,#11172e,#5130c8 62%,#8b5cf6); box-shadow: 0 18px 40px rgba(54,35,125,.2); }
+.af-generated-post-image small { font-size: 10px; font-weight: 900; letter-spacing: .2em; }
+.af-generated-post-image strong { max-width: 620px; font-size: clamp(25px,4vw,46px); line-height: 1.02; letter-spacing: -.045em; text-transform: none; }
+.af-generated-post-image em { align-self: flex-start; padding: 8px 12px; border: 1px solid rgba(255,255,255,.4); border-radius: 999px; font-size: 11px; font-style: normal; font-weight: 800; }
+.af-image-variant-1 { background: linear-gradient(145deg,#092d33,#087f75 58%,#3dd5c2); }
+.af-image-variant-2 { color: #151329; background: linear-gradient(145deg,#fff,#eadfff 58%,#c9b4ff); }
+.af-post-controls { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 8px; margin-top: 14px; }
+.af-post-controls button { min-height: 42px; border: 1px solid #d8cfee; border-radius: 11px; background: #fff; color: #4f2bb9; font-size: 11px; font-weight: 850; cursor: pointer; }
+.af-post-controls button.is-approved { border-color: #9bd8ba; background: #eaf9f1; color: #08764a; }
+.af-campaign-editor { display: grid; gap: 10px; }
+.af-campaign-editor textarea { min-height: 180px; }
 .af-field > small { margin-top: 6px; color: #777384; font-size: 11px; }
 .af-approved-panel { scroll-margin-top: 24px; }
 .af-approved-panel > p { color: #777384; }
@@ -1366,6 +1377,22 @@ body {
   .af-path-grid button { min-height: 0; }
   .af-path-summary, .af-approved-card { align-items: stretch; flex-direction: column; }
   .af-path-summary .af-secondary-button, .af-approved-card .af-secondary-button { width: 100%; }
+}
+
+@media (max-width: 640px) {
+  .af-create-for-me-workspace .af-topbar,
+  .af-create-for-me-workspace .af-tabs,
+  .af-create-for-me-workspace .af-path-summary,
+  .af-create-for-me-workspace .af-intro-panel,
+  .af-create-for-me-workspace .af-empty-creative,
+  .af-create-for-me-workspace .af-approved-panel,
+  .af-create-for-me-workspace .af-next-strip,
+  .af-create-for-me-workspace .af-insights-column { display: none; }
+  .af-create-for-me-workspace { padding-top: 18px; }
+  .af-smartchitecture-panel { padding: 18px; }
+  .af-generated-post-image { min-height: 220px; padding: 22px; }
+  .af-post-controls { grid-template-columns: 1fr 1fr; }
+  .af-post-controls button { min-height: 46px; }
 }
 
 
