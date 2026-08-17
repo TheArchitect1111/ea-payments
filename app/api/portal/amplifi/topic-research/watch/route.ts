@@ -12,7 +12,7 @@ import {
 export const dynamic = 'force-dynamic';
 export const maxDuration = 120;
 
-const CADENCES = new Set<WatchCadence>(['daily', 'twice-weekly', 'weekly']);
+const CADENCES = new Set<WatchCadence>(['twice-weekly', 'weekly']);
 
 export async function GET(req: NextRequest) {
   const auth = await guardPortalApi(req, { realm: 'simplifi' });
@@ -33,6 +33,8 @@ export async function POST(req: NextRequest) {
     topic?: string;
     cadence?: WatchCadence;
     timezone?: string;
+    endAt?: string;
+    postsPerRun?: number;
   };
 
   const action = body.action ?? 'create';
@@ -44,11 +46,22 @@ export async function POST(req: NextRequest) {
     }
     const cadence = body.cadence && CADENCES.has(body.cadence) ? body.cadence : 'weekly';
     const timezone = String(body.timezone ?? 'America/New_York').trim() || 'America/New_York';
+    const endAt = String(body.endAt || '').trim();
+    const endDate = new Date(endAt);
+    const now = new Date();
+    const maximumEnd = new Date(now);
+    maximumEnd.setUTCMonth(maximumEnd.getUTCMonth() + 3);
+    if (!endAt || Number.isNaN(endDate.getTime()) || endDate <= now || endAt.slice(0, 10) > maximumEnd.toISOString().slice(0, 10)) {
+      return NextResponse.json({ ok: false, error: 'Choose a monitoring end date within the next three months.' }, { status: 400 });
+    }
+    const postsPerRun = Math.min(3, Math.max(1, Math.trunc(Number(body.postsPerRun) || 1))) as 1 | 2 | 3;
     const watch = await upsertTopicWatch({
       organizationId: tenant.organizationId,
       topic,
       cadence,
       timezone,
+      endAt: endDate.toISOString(),
+      postsPerRun,
     });
     return NextResponse.json({ ok: true, watch });
   }

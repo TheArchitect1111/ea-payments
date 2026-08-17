@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  let body: { topic?: string; dateFrom?: string; dateTo?: string; maxSources?: number };
+  let body: { topic?: string; dateFrom?: string; dateTo?: string; maxSources?: number; postCount?: number };
   try {
     body = (await req.json()) as typeof body;
   } catch {
@@ -56,6 +56,7 @@ export async function POST(req: NextRequest) {
     const result = await runAmplifiTopicResearch({
       ...validated.value,
       maxSources: body.maxSources,
+      postCount: Math.min(3, Math.max(1, Math.trunc(Number(body.postCount) || 1))) as 1 | 2 | 3,
       scrapeTop: 3,
     });
     return NextResponse.json({ ok: true, research: result });
