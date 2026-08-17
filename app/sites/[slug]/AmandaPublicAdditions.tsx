@@ -1,6 +1,8 @@
 import Image from 'next/image';
 
 const JANE_BOOKING_URL = 'https://aesthetikine.janeapp.com/';
+const AMANDA_COURSE_LOGIN_URL = '/portal/login?next=%2Fportal%2Famanda-catherine%2Flearning';
+const AMANDA_ADMIN_LOGIN_URL = '/portal/login?next=%2Fportal%2Famanda-catherine%2Freports';
 
 const signatureExperiences = [
   {
@@ -188,6 +190,10 @@ export default function AmandaPublicAdditions() {
             Practitioner education created by Amanda Catherine Case, Registered Kinesiologist,
             for professionals who want thoughtful, anatomy-aware wellness and aesthetic training.
           </p>
+          <div className="ak-academy__actions">
+            <a className="ak-primary-link" href={AMANDA_COURSE_LOGIN_URL}>Open Courses &amp; Learning <span aria-hidden="true">→</span></a>
+            <a className="ak-text-link" href={AMANDA_ADMIN_LOGIN_URL}>Amanda administrator login <span aria-hidden="true">→</span></a>
+          </div>
         </div>
 
         <div className="ak-programs">
@@ -277,6 +283,7 @@ export default function AmandaPublicAdditions() {
           padding: clamp(72px, 9vw, 132px) clamp(22px, 6vw, 82px);
         }
         .ak-section-heading { max-width: 850px; margin-bottom: 48px; }
+        .ak-academy__actions { display:flex; flex-wrap:wrap; align-items:center; gap:18px; margin-top:28px; }
         .ak-section-heading h2,
         .ak-financing h2,
         .ak-corporate h2,
