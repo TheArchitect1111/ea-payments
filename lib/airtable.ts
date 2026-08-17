@@ -602,9 +602,20 @@ export async function findPortalClientByEmail(
     return { ok: false, error: 'Not configured.' };
   }
 
-  const safe = email.trim().toLowerCase().replace(/'/g, "\\'");
+  const normalized = email.trim().toLowerCase();
+  const amandaOwnerEmails = new Set([
+    'amanda@aesthetikine.com',
+    'amandacatherinec@gmail.com',
+  ]);
+  const lookupEmails = amandaOwnerEmails.has(normalized)
+    ? [...amandaOwnerEmails]
+    : [normalized];
+  const emailMatches = lookupEmails.flatMap((candidate) => {
+    const safe = candidate.replace(/'/g, "\\'");
+    return [`LOWER({Email})='${safe}'`, `LOWER({Portal Username})='${safe}'`];
+  });
   const formula = encodeURIComponent(
-    `OR(LOWER({Email})='${safe}', LOWER({Portal Username})='${safe}')`,
+    `OR(${emailMatches.join(',')})`,
   );
   const url = `https://api.airtable.com/v0/${BASE_ID}/${encodeURIComponent(TABLE)}?filterByFormula=${formula}&maxRecords=1`;
 
@@ -647,9 +658,20 @@ export async function validatePortalLogin(
     return { ok: false, error: 'Not configured.' };
   }
 
-  const safe = email.toLowerCase().replace(/'/g, "\\'");
+  const normalized = email.trim().toLowerCase();
+  const amandaOwnerEmails = new Set([
+    'amanda@aesthetikine.com',
+    'amandacatherinec@gmail.com',
+  ]);
+  const lookupEmails = amandaOwnerEmails.has(normalized)
+    ? [...amandaOwnerEmails]
+    : [normalized];
+  const emailMatches = lookupEmails.flatMap((candidate) => {
+    const safe = candidate.replace(/'/g, "\\'");
+    return [`LOWER({Email})='${safe}'`, `LOWER({Portal Username})='${safe}'`];
+  });
   const formula = encodeURIComponent(
-    `OR(LOWER({Email})='${safe}', LOWER({Portal Username})='${safe}')`,
+    `OR(${emailMatches.join(',')})`,
   );
   const url = `https://api.airtable.com/v0/${BASE_ID}/${encodeURIComponent(TABLE)}?filterByFormula=${formula}&maxRecords=1`;
 

@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
-const [engine, theme, preview, components, publishGate, portalChrome, portalLayout, factoryUi, launchPreset, quickLaunch, activationRoute, publicSite, quarantine, portalProvision, clientExperience, portalPack, amandaConfig, packRegistry, packResolver, liveWrapper] = await Promise.all([
+const [engine, theme, preview, components, publishGate, portalChrome, portalLayout, factoryUi, launchPreset, quickLaunch, activationRoute, publicSite, quarantine, portalProvision, clientExperience, portalPack, amandaConfig, packRegistry, packResolver, liveWrapper, amandaAudience, airtable, certificateRoute] = await Promise.all([
   read('vendor/theme-engine/src/index.ts'),
   read('vendor/theme-engine/src/themes/amanda-editorial/theme.ts'),
   read('app/preview/experience/[slug]/[pageId]/ExperiencePreview.tsx'),
@@ -23,6 +23,9 @@ const [engine, theme, preview, components, publishGate, portalChrome, portalLayo
   read('lib/portal-universal/packs/index.ts'),
   read('lib/portal-universal/resolve-pack-for-org.ts'),
   read('public/design-imports/amanda-catherine-jane-live.html'),
+  read('lib/amanda-catherine/audience.ts'),
+  read('lib/airtable.ts'),
+  read('app/api/portal/amanda/certificate/route.ts'),
 ]);
 
 assert.match(engine, /amandaEditorialTheme/);
@@ -93,6 +96,12 @@ assert.match(packRegistry, /AMANDA_CATHERINE_PACK/);
 assert.match(packResolver, /startsWith\('amanda-catherine'\)/);
 assert.match(liveWrapper, /\.\/amanda-catherine-live\/index\.html/);
 assert.doesNotMatch(liveWrapper, /amanda-catherine-2\.vercel\.app/);
+assert.match(amandaAudience, /amanda@aesthetikine\.com/);
+assert.match(amandaAudience, /amandacatherinec@gmail\.com/);
+assert.match(airtable, /amanda@aesthetikine\.com/);
+assert.match(airtable, /amandacatherinec@gmail\.com/);
+assert.match(certificateRoute, /aesthetikine-certificate-premium\.svg/);
+assert.match(certificateRoute, /certificateEligible\(progress\)/);
 assert.match(liveWrapper, /Strategic Connector &amp; Partnership Development/);
 assert.match(liveWrapper, /Explore a Partnership/);
 for (const component of [

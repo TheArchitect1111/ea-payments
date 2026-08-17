@@ -25,6 +25,7 @@
     "test:universal-business-options": "node scripts/test-universal-business-options.mjs",
     "test:portal-shared-calendar": "node scripts/test-portal-shared-calendar.mjs",
     "test:amanda-editorial-theme": "node scripts/test-amanda-editorial-theme.mjs",
+    "test:amanda-completion": "node scripts/test-amanda-completion.mjs",
     "sync-chassis": "node scripts/sync-portal-chassis.mjs",
     "sync-premium": "node scripts/sync-premium-chassis.mjs",
     "sync-landing": "node scripts/sync-landing-chassis.mjs",

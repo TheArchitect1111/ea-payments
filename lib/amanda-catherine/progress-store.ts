@@ -164,6 +164,8 @@ export async function updateAmandaCourseProgress(
   const current = await getAmandaCourseProgress(portalSlug, email, courseId);
   const course = AMANDA_COURSES.find((item) => item.id === courseId);
   if (!course) throw new Error('Amanda course not found.');
+  const courseLessons: readonly string[] = course.lessons;
+  const coursePracticalRequirements: readonly string[] = course.practicalRequirements;
 
   const requestedLessons = patch.completedLessons ?? current.completedLessons;
   const lockedCompletion = requestedLessons.find(
@@ -171,9 +173,9 @@ export async function updateAmandaCourseProgress(
   );
   if (lockedCompletion) throw new Error('That lesson has not been released yet.');
 
-  const completedLessons = requestedLessons.filter((lesson) => course.lessons.includes(lesson));
+  const completedLessons = requestedLessons.filter((lesson) => courseLessons.includes(lesson));
   const practicalRequirements = (patch.practicalRequirements ?? current.practicalRequirements).filter((requirement) =>
-    course.practicalRequirements.includes(requirement),
+    coursePracticalRequirements.includes(requirement),
   );
   const completionRequirementsMet =
     course.lessons.every((lesson) => completedLessons.includes(lesson)) &&
