@@ -38,6 +38,28 @@ export function audienceCanAccessCourse(audience: AmandaPortalAudience, courseId
   return coursesForAudience(audience).some((course) => course.id === courseId);
 }
 
+export function coursesForAccount(
+  audience: AmandaPortalAudience,
+  assignedCourseIds: readonly string[],
+  isAdmin = false,
+) {
+  if (isAdmin || audience === 'admin') return AMANDA_COURSES;
+  if (assignedCourseIds.length) {
+    const assigned = new Set(assignedCourseIds);
+    return AMANDA_COURSES.filter((course) => assigned.has(course.id));
+  }
+  return coursesForAudience(audience);
+}
+
+export function accountCanAccessCourse(
+  audience: AmandaPortalAudience,
+  assignedCourseIds: readonly string[],
+  courseId: string,
+  isAdmin = false,
+) {
+  return coursesForAccount(audience, assignedCourseIds, isAdmin).some((course) => course.id === courseId);
+}
+
 export async function getAmandaCourseContent(portalSlug: string, courseId: string) {
   const course = AMANDA_COURSES.find((item) => item.id === courseId);
   if (!course) throw new Error('Amanda course not found.');
