@@ -2,12 +2,15 @@ import Link from 'next/link';
 import { listPortalFormSubmissions } from '@/lib/portal-forms/store';
 import { listRegistrationsForPortal } from '@/lib/events/registration-ledger';
 import { listPretixEventsForPortal } from '@/lib/events/pretix-store';
+import { AMANDA_COURSES } from '@/lib/amanda-catherine/config';
+import { listAmandaCourseProgress } from '@/lib/amanda-catherine/progress-store';
 
 export default async function AmandaOperationsPanel({ slug }: { slug: string }) {
-  const [submissions, registrations, events] = await Promise.all([
+  const [submissions, registrations, events, courseProgress] = await Promise.all([
     listPortalFormSubmissions(slug),
     listRegistrationsForPortal(slug),
     listPretixEventsForPortal(slug, { includeDrafts: true }),
+    listAmandaCourseProgress(slug),
   ]);
   const applications = submissions.filter((item) => item.kind === 'application');
   const intakes = submissions.filter((item) => item.kind === 'intake');
@@ -27,6 +30,8 @@ export default async function AmandaOperationsPanel({ slug }: { slug: string }) 
     ['Membership requests', membershipApplications],
     ['Media projects', mediaProjects],
     ['Volunteer applicants', volunteerApplications],
+    ['Active course records', courseProgress.length],
+    ['Certificates earned', courseProgress.filter((item) => item.certificateIssuedAt).length],
   ] as const;
 
   return (
@@ -37,6 +42,43 @@ export default async function AmandaOperationsPanel({ slug }: { slug: string }) 
             <div className="ep-metric-body"><div><p className="ep-metric-label">{label}</p><p className="ep-metric-value">{value}</p></div></div>
           </div>
         ))}
+      </div>
+      <div className="ep-module-card" style={{ marginTop: 18 }}>
+        <p className="ep-module-card-title">Student learning progress</p>
+        <p className="ep-module-card-note">
+          Progress appears after a student opens an assigned course. Course recordings can be added later without removing this tracking.
+        </p>
+        {courseProgress.length === 0 ? (
+          <p className="ep-module-card-note" style={{ marginTop: 12 }}>No student course activity has been recorded yet.</p>
+        ) : (
+          <div style={{ overflowX: 'auto', marginTop: 14 }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 620 }}>
+              <thead>
+                <tr>
+                  <th style={{ textAlign: 'left', padding: '10px 8px' }}>Student</th>
+                  <th style={{ textAlign: 'left', padding: '10px 8px' }}>Course</th>
+                  <th style={{ textAlign: 'left', padding: '10px 8px' }}>Progress</th>
+                  <th style={{ textAlign: 'left', padding: '10px 8px' }}>Certificate</th>
+                </tr>
+              </thead>
+              <tbody>
+                {courseProgress.map((record) => {
+                  const course = AMANDA_COURSES.find((item) => item.id === record.courseId);
+                  const total = course?.lessons.length || 0;
+                  const percent = total ? Math.round((record.completedLessons.length / total) * 100) : 0;
+                  return (
+                    <tr key={`${record.email}:${record.courseId}`}>
+                      <td style={{ padding: '10px 8px', borderTop: '1px solid rgba(31,41,55,.12)' }}>{record.email}</td>
+                      <td style={{ padding: '10px 8px', borderTop: '1px solid rgba(31,41,55,.12)' }}>{course?.title || record.courseId}</td>
+                      <td style={{ padding: '10px 8px', borderTop: '1px solid rgba(31,41,55,.12)' }}>{percent}% ({record.completedLessons.length}/{total})</td>
+                      <td style={{ padding: '10px 8px', borderTop: '1px solid rgba(31,41,55,.12)' }}>{record.certificateIssuedAt ? 'Available' : 'Not yet eligible'}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
       <div className="ep-module-card" style={{ marginTop: 18 }}>
         <p className="ep-module-card-title">Operations queue</p>

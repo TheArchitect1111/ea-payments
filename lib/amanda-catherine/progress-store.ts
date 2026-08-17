@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import { AMANDA_COURSES } from '@/lib/amanda-catherine/config';
-import { loadStudioRecord, saveStudioRecord } from '@/lib/creative-studio/persistence';
+import { listStudioRecords, loadStudioRecord, saveStudioRecord } from '@/lib/creative-studio/persistence';
 import { syntheticOrgId } from '@/lib/platform-store';
 
 export type AmandaCourseProgress = {
@@ -143,6 +143,16 @@ export async function getAmandaCourseProgress(portalSlug: string, email: string,
     practicalRequirements: [],
     updatedAt: now,
   });
+}
+
+export async function listAmandaCourseProgress(portalSlug: string) {
+  const records = await listStudioRecords<AmandaCourseProgress>(
+    'experience',
+    syntheticOrgId(portalSlug),
+  );
+  return records
+    .filter((record) => record.portalSlug === portalSlug && record.courseId && record.email)
+    .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
 }
 
 export async function updateAmandaCourseProgress(

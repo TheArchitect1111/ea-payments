@@ -16,50 +16,51 @@ export function listReportArtifacts(
   access: PortalModuleAccess,
 ): PortalReportArtifact[] {
   const base = `/portal/${slug}`;
+  const isAmanda = slug.toLowerCase().startsWith('amanda-catherine');
   const artifacts: PortalReportArtifact[] = [];
 
   if (access.enabledModuleIds.has('pulse')) {
     artifacts.push({
-      title: 'Pulse™ health view',
+      title: isAmanda ? 'Portal and business status' : 'Pulse™ health view',
       href: `${base}/pulse`,
-      detail: 'Organization signals, bottlenecks, and what needs attention.',
+      detail: isAmanda ? 'See current activity, items needing attention, and operational signals.' : 'Organization signals, bottlenecks, and what needs attention.',
     });
   }
 
   if (access.enabledModuleIds.has('ctp')) {
     artifacts.push({
-      title: 'CTP progress & BI',
+      title: isAmanda ? 'Website and portal project progress' : 'CTP progress & BI',
       href: `${base}/ctp`,
-      detail: 'Project journey, studio progress, and transformation milestones.',
+      detail: isAmanda ? 'See completed work, current work, approvals, and upcoming milestones.' : 'Project journey, studio progress, and transformation milestones.',
     });
     artifacts.push({
-      title: 'Design studio',
+      title: isAmanda ? 'Website and design requests' : 'Design studio',
       href: `${base}/ctp/progress`,
-      detail: 'Live build status and review-ready deliverables.',
+      detail: isAmanda ? 'Review website or portal work and send feedback on items ready for approval.' : 'Live build status and review-ready deliverables.',
     });
   }
 
   if (access.enabledModuleIds.has('documents')) {
     artifacts.push({
-      title: 'Document vault',
+      title: isAmanda ? 'Files and documents' : 'Document vault',
       href: `${base}/documents`,
-      detail: 'Agreements, scorecards, and shared operational files.',
+      detail: isAmanda ? 'Open agreements, course materials, shared files, and completed deliverables.' : 'Agreements, scorecards, and shared operational files.',
     });
   }
 
   if (access.enabledModuleIds.has('update-hub')) {
     artifacts.push({
-      title: 'Activity timeline',
+      title: isAmanda ? 'Recent support activity' : 'Activity timeline',
       href: `${base}/updates`,
-      detail: 'Advisor updates, captures, and published activity.',
+      detail: isAmanda ? 'Follow technical-support requests, replies, and completed portal updates.' : 'Advisor updates, captures, and published activity.',
     });
   }
 
   if (access.enabledModuleIds.has('events')) {
     artifacts.push({
-      title: 'Event Hub registrations',
+      title: isAmanda ? 'Event registrations' : 'Event Hub registrations',
       href: `${base}/events?tab=registrations`,
-      detail: 'Ticketed events and registration history.',
+      detail: isAmanda ? 'See upcoming events, registered participants, and registration history.' : 'Ticketed events and registration history.',
     });
   }
 
