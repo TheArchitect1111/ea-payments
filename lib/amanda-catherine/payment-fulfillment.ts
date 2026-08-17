@@ -9,6 +9,8 @@ import {
 import { syntheticOrgId } from '@/lib/platform-store';
 import { emitPulseEvent } from '@/lib/pulse-bus';
 import { sendPaymentConfirmationEmail } from '@/lib/email';
+import { provisionAmandaClientAccess } from '@/lib/amanda-catherine/client-access';
+import type { AmandaPortalAudience } from '@/lib/amanda-catherine/config';
 
 export type AmandaPaymentRecord = {
   id: string;
@@ -114,6 +116,33 @@ export async function fulfillAmandaCheckout(
 
   if (!existing) {
     const label = membership?.name ?? offer!.name;
+    const audience: AmandaPortalAudience = membership
+      ? 'member-community-participant'
+      : offer?.id === 'lifeline-artist-business-launch'
+        ? 'media-guest'
+        : offer?.id.includes('training') || offer?.id.includes('certification')
+          ? 'student-trainee'
+          : 'client';
+    const access = await provisionAmandaClientAccess({
+      email,
+      name: session.customer_details?.name || '',
+      audience,
+      amountPaidCad: record.amountPaidCad,
+      transactionId: stringId(session.payment_intent) || session.id,
+    });
+    if (!access.ok) {
+      console.error('[amanda-payment] client portal access provisioning failed', access.error);
+      await emitPulseEvent({
+        product: 'ea-platform',
+        type: 'fulfillment.review_required',
+        title: 'Amanda client access needs attention',
+        detail: `${email} · ${access.error}`,
+        priority: 'high',
+        href: `/portal/${portalSlug}/deliveries`,
+        tenantId: portalSlug,
+        objectId: id,
+      });
+    }
     try {
       await sendPaymentConfirmationEmail({
         email,
