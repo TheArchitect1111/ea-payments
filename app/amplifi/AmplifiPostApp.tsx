@@ -72,6 +72,7 @@ type CampaignPost = { title: string; caption: string; callToAction: string; imag
 type GeneratedCampaign = { title: string; strategy: string; posts: CampaignPost[] };
 type CampaignTone = 'Bold and direct' | 'Provocative and challenging' | 'Authoritative and premium' | 'Warm and human';
 const CAMPAIGN_BRIEF_STORAGE_KEY = 'amplifi:create-for-me:brief';
+const CAMPAIGN_WORKSPACE_STORAGE_KEY = 'amplifi:campaign-workspace:v1';
 
 function defaultDateRange(): { from: string; to: string } {
   const to = new Date();
@@ -87,10 +88,6 @@ function defaultMonitorEndDate(): string {
   const end = new Date();
   end.setUTCMonth(end.getUTCMonth() + 1);
   return end.toISOString().slice(0, 10);
-}
-
-function NavIcon({ children }: { children: string }) {
-  return <span className="af-nav-icon" aria-hidden="true">{children}</span>;
 }
 
 export default function AmplifiPostApp({
@@ -132,7 +129,6 @@ export default function AmplifiPostApp({
   const [publishResult, setPublishResult] = useState('');
   const [captures, setCaptures] = useState<CaptureOption[]>([]);
   const [selectedCaptureId, setSelectedCaptureId] = useState(captureId ?? '');
-  const [showAmplifiSearch, setShowAmplifiSearch] = useState(false);
   const [topic, setTopic] = useState('');
   const [dateFrom, setDateFrom] = useState(defaults.from);
   const [dateTo, setDateTo] = useState(defaults.to);
@@ -158,6 +154,17 @@ export default function AmplifiPostApp({
   const [editingCampaignPost, setEditingCampaignPost] = useState<number | null>(null);
   const [approvedCampaignPosts, setApprovedCampaignPosts] = useState<number[]>([]);
   const [campaignImageVariants, setCampaignImageVariants] = useState<Record<number, number>>({});
+  const [showCampaignControls, setShowCampaignControls] = useState(false);
+  const [campaignToneStrength, setCampaignToneStrength] = useState('Strong');
+  const [campaignWordsUse, setCampaignWordsUse] = useState('');
+  const [campaignWordsAvoid, setCampaignWordsAvoid] = useState('');
+  const [campaignPlatforms, setCampaignPlatforms] = useState<string[]>(['Facebook', 'LinkedIn']);
+  const [campaignImageStyle, setCampaignImageStyle] = useState('Branded proof graphics');
+  const [campaignStartDate, setCampaignStartDate] = useState('');
+  const [saveBrandDefaults, setSaveBrandDefaults] = useState(false);
+  const [regenerationInstructions, setRegenerationInstructions] = useState<Record<number, string>>({});
+  const [campaignScheduleTimes, setCampaignScheduleTimes] = useState<Record<number, string>>({});
+  const [campaignScheduled, setCampaignScheduled] = useState(false);
 
   useEffect(() => {
     const savedPath = window.localStorage.getItem('amplifi:onboarding:path') as AmplifiPath | null;
@@ -194,7 +201,21 @@ export default function AmplifiPostApp({
         window.sessionStorage.removeItem(CAMPAIGN_BRIEF_STORAGE_KEY);
       }
     }
+    const savedWorkspace = window.localStorage.getItem(CAMPAIGN_WORKSPACE_STORAGE_KEY);
+    if (savedWorkspace) {
+      try {
+        const saved = JSON.parse(savedWorkspace) as { campaign?: GeneratedCampaign; approved?: number[]; schedule?: Record<number, string> };
+        setGeneratedCampaign(saved.campaign ?? null);
+        setApprovedCampaignPosts(saved.approved ?? []);
+        setCampaignScheduleTimes(saved.schedule ?? {});
+      } catch { window.localStorage.removeItem(CAMPAIGN_WORKSPACE_STORAGE_KEY); }
+    }
   }, []);
+
+  useEffect(() => {
+    if (!generatedCampaign) return;
+    window.localStorage.setItem(CAMPAIGN_WORKSPACE_STORAGE_KEY, JSON.stringify({ campaign: generatedCampaign, approved: approvedCampaignPosts, schedule: campaignScheduleTimes }));
+  }, [generatedCampaign, approvedCampaignPosts, campaignScheduleTimes]);
 
   const choosePath = (path: AmplifiPath) => {
     setShowHome(false);
@@ -244,6 +265,11 @@ export default function AmplifiPostApp({
           proofPoint: campaignProofPoint.trim(),
           painQuestion: campaignPainQuestion.trim(),
           ctaUrl: campaignCtaUrl.trim(),
+          toneStrength: campaignToneStrength,
+          wordsUse: campaignWordsUse.trim(),
+          wordsAvoid: campaignWordsAvoid.trim(),
+          platforms: campaignPlatforms,
+          imageStyle: campaignImageStyle,
         }),
       });
       const data = (await res.json()) as { ok?: boolean; error?: string; campaign?: GeneratedCampaign };
@@ -252,6 +278,7 @@ export default function AmplifiPostApp({
         return;
       }
       setGeneratedCampaign(data.campaign);
+      setApprovedCampaignPosts([]);
       setBusinessName(data.campaign.title);
       setSuccess('Amplifi created five coordinated posts. Review each one before approval.');
     } catch {
@@ -260,6 +287,8 @@ export default function AmplifiPostApp({
       setCampaignGenerating(false);
     }
   };
+
+  const toggleCampaignPlatform = (platform: string) => setCampaignPlatforms((current) => current.includes(platform) ? current.filter((item) => item !== platform) : [...current, platform]);
 
   const updateCampaignPost = (index: number, patch: Partial<CampaignPost>) => {
     setGeneratedCampaign((current) => current ? {
@@ -719,31 +748,10 @@ export default function AmplifiPostApp({
           <Image className="af-workspace-logo" src="/amplifi/amplifi-logo-premium.png" alt="Amplifi by Efficiency Architects" width={1973} height={797} priority />
         </Link>
 
-        <nav className="af-nav" aria-label="Amplifi navigation">
-          <a className="af-nav-item af-nav-active" href="#campaign"><NavIcon>C</NavIcon><span>Campaign</span></a>
-          <a className="af-nav-item" href="#search"><NavIcon>S</NavIcon><span>Search</span><b className="af-nav-badge">Smart</b></a>
-          <a className="af-nav-item" href="#content"><NavIcon>✦</NavIcon><span>Create content</span></a>
-          <a className="af-nav-item" href="#calendar"><NavIcon>31</NavIcon><span>Calendar</span></a>
-          <a className="af-nav-item" href="#connections"><NavIcon>＋</NavIcon><span>Connections</span></a>
-          <a className="af-nav-item" href="#results"><NavIcon>↗</NavIcon><span>Results</span></a>
-        </nav>
-
-        <div className="af-sidebar-spacer" />
-
-        <div className="af-copilot-card">
-          <span className="af-spark">✦</span>
-          <strong>Need help?</strong>
-          <p>Tell Amplifi what you want to accomplish and it will take you to the right place.</p>
-          <button type="button" onClick={() => setShowHelp(true)}>Open guide</button>
-        </div>
-
-        <div className="af-sidebar-footer">
-          <span className="af-mini-logo">A</span>
-          <span>© 2026 Efficiency Architects</span>
-        </div>
+        {!showHome ? <div className="af-campaign-context"><button type="button" onClick={() => setShowHome(true)}>← Back to campaigns</button><span>{selectedPath === 'research' ? 'Option 3 of 3' : selectedPath === 'smartchitecture' ? 'Option 2 of 3' : 'Option 1 of 3'}</span><strong>{selectedPath === 'smartchitecture' && generatedCampaign ? `${approvedCampaignPosts.length} of 5 approved` : selectedPath === 'research' ? 'Research & Create' : 'Create a post'}</strong></div> : null}
       </aside>
 
-      <main className={`af-workspace${selectedPath === 'smartchitecture' ? ' af-create-for-me-workspace' : ''}`}>
+      <main className={`af-workspace${selectedPath === 'smartchitecture' || selectedPath === 'research' ? ' af-guided-workspace' : ''}`}>
         <header className="af-topbar">
           <div>
             <div className="af-title-row">
@@ -797,16 +805,16 @@ export default function AmplifiPostApp({
             {selectedPath === 'research' ? <section className="af-panel" id="search">
               <div className="af-section-heading">
                 <div>
-                  <span className="af-eyebrow">Smart Research</span>
-                  <h3>Find a timely angle before you create.</h3>
-                  <p>Search public articles, news and videos inside a date range, then turn the useful findings into a draft.</p>
+                  <span className="af-eyebrow">Option 3 of 3 — Research &amp; Create</span>
+                  <h3>Tell Amplifi what to research and what the campaign must accomplish.</h3>
+                  <p>Amplifi searches timely public sources, identifies a useful angle and creates posts for your review.</p>
                 </div>
-                <button type="button" className="af-outline-button" onClick={() => setShowAmplifiSearch((value) => !value)}>{showAmplifiSearch ? 'Close research' : 'Open research'}</button>
               </div>
 
-              {showAmplifiSearch ? (
                 <div className="af-research-form">
                   <label className="af-field af-field-wide"><span>Topic</span><textarea value={topic} onChange={(e) => setTopic(e.target.value)} placeholder="What should Amplifi research?" /></label>
+                  <label className="af-field"><span>Campaign objective</span><input value={campaignResult} onChange={(e) => setCampaignResult(e.target.value)} placeholder="What should this campaign accomplish?" /></label>
+                  <label className="af-field"><span>Audience</span><input value={campaignAudience} onChange={(e) => setCampaignAudience(e.target.value)} placeholder="Who should this reach?" /></label>
                   <label className="af-field"><span>Search content from</span><input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} /></label>
                   <label className="af-field"><span>Search content through</span><input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} /></label>
                   <div className="af-field af-monitor-field">
@@ -852,6 +860,9 @@ export default function AmplifiPostApp({
                       <option value={3}>3 posts</option>
                     </select>
                   </label>
+                  <label className="af-field"><span>Tone</span><select value={campaignTone} onChange={(e) => setCampaignTone(e.target.value as CampaignTone)}><option>Bold and direct</option><option>Provocative and challenging</option><option>Authoritative and premium</option><option>Warm and human</option></select></label>
+                  <label className="af-field"><span>Call to action</span><input value={campaignCallToAction} onChange={(e) => setCampaignCallToAction(e.target.value)} placeholder="Take the CTP" /></label>
+                  <label className="af-field af-field-wide"><span>CTA link</span><input type="url" value={campaignCtaUrl} onChange={(e) => setCampaignCtaUrl(e.target.value)} placeholder="https://cc.efficiencyarchitects.online/ctp" /></label>
                   <button
                     type="button"
                     className="af-primary-button af-research-submit"
@@ -862,12 +873,11 @@ export default function AmplifiPostApp({
                       ? 'Working…'
                       : searchMode === 'watch'
                         ? 'Enable Keep Watching'
-                        : 'Search & create draft'}
+                        : 'Start research and create posts'}
                   </button>
                 </div>
-              ) : null}
 
-              {!loggedIn && showAmplifiSearch ? <p className="af-inline-note">Sign in to run Smart Research.</p> : null}
+              {!loggedIn ? <p className="af-inline-note">Sign in to start research and save the posts.</p> : null}
 
               {researchMeta?.sources?.length ? (
                 <div className="af-source-grid">
@@ -946,8 +956,18 @@ export default function AmplifiPostApp({
                 <label className="af-field af-field-wide"><span>Audience pain question</span><input value={campaignPainQuestion} onChange={(e) => setCampaignPainQuestion(e.target.value)} placeholder="Is your business leaking time, money and resources?" /></label>
                 <label className="af-field"><span>What should people do next?</span><input value={campaignCallToAction} onChange={(e) => setCampaignCallToAction(e.target.value)} placeholder="Take the CTP" /></label>
                 <label className="af-field"><span>CTA link</span><input type="url" value={campaignCtaUrl} onChange={(e) => setCampaignCtaUrl(e.target.value)} placeholder="https://cc.efficiencyarchitects.online/ctp" /></label>
-                <label className="af-field"><span>Important dates and details</span><input value={campaignDetails} onChange={(e) => setCampaignDetails(e.target.value)} placeholder="Dates, link, pricing or requirements" /></label>
               </div>
+              <button type="button" className="af-more-control" aria-expanded={showCampaignControls} onClick={() => setShowCampaignControls((value) => !value)}>More control <span>{showCampaignControls ? '−' : '+'}</span></button>
+              {showCampaignControls ? <div className="af-editor-grid af-advanced-controls">
+                <label className="af-field"><span>Tone strength</span><select value={campaignToneStrength} onChange={(e) => setCampaignToneStrength(e.target.value)}><option>Measured</option><option>Balanced</option><option>Strong</option></select></label>
+                <label className="af-field"><span>Image style</span><select value={campaignImageStyle} onChange={(e) => setCampaignImageStyle(e.target.value)}><option>Branded proof graphics</option><option>Bold text graphics</option><option>Clean photography</option><option>Minimal editorial</option></select></label>
+                <label className="af-field"><span>Words to use</span><input value={campaignWordsUse} onChange={(e) => setCampaignWordsUse(e.target.value)} placeholder="capacity, control, measurable" /></label>
+                <label className="af-field"><span>Words to avoid</span><input value={campaignWordsAvoid} onChange={(e) => setCampaignWordsAvoid(e.target.value)} placeholder="revolutionary, game-changing" /></label>
+                <fieldset className="af-field af-platform-choice"><legend>Platforms</legend>{['Facebook','Instagram','LinkedIn','X'].map((platform) => <label key={platform}><input type="checkbox" checked={campaignPlatforms.includes(platform)} onChange={() => toggleCampaignPlatform(platform)} /> {platform}</label>)}</fieldset>
+                <label className="af-field"><span>Campaign start date</span><input type="date" value={campaignStartDate} onChange={(e) => setCampaignStartDate(e.target.value)} /></label>
+                <label className="af-field af-field-wide"><span>Important dates and details</span><input value={campaignDetails} onChange={(e) => setCampaignDetails(e.target.value)} placeholder="Dates, pricing or requirements" /></label>
+                <label className="af-check-row af-field-wide"><input type="checkbox" checked={saveBrandDefaults} onChange={(e) => setSaveBrandDefaults(e.target.checked)} /> Save these as my brand defaults</label>
+              </div> : null}
               {message ? <p className="af-message af-message-error">{message}</p> : null}
               {success ? <p className="af-message af-message-success">{success}</p> : null}
               <div className="af-action-row"><button type="button" className="af-primary-button" disabled={campaignGenerating} onClick={() => void createCampaignForMe()}>{campaignGenerating ? 'Amplifi is creating…' : loggedIn ? 'Create my 5-post campaign' : 'Sign in & create my 5-post campaign'}</button><span>{loggedIn ? 'Nothing publishes until you approve it.' : 'Your brief will be saved while you sign in.'}</span></div>
@@ -958,9 +978,11 @@ export default function AmplifiPostApp({
                   <span>POST {index + 1} OF 5</span>
                   <div className={`af-generated-post-image af-image-variant-${imageVariant}`} role="img" aria-label={`Branded image for ${post.title}`}><small>AMPLIFI</small><strong>{index === 2 && campaignProofPoint.trim() ? campaignProofPoint : post.title}</strong><em>{campaignCtaUrl ? 'Take the next step' : campaignTone}</em></div>
                   {editingCampaignPost === index ? <div className="af-campaign-editor"><label className="af-field"><span>Headline</span><input value={post.title} onChange={(e) => updateCampaignPost(index, { title: e.target.value })} /></label><label className="af-field"><span>Post copy</span><textarea value={post.caption} onChange={(e) => updateCampaignPost(index, { caption: e.target.value })} /></label><label className="af-field"><span>Call to action</span><input value={post.callToAction} onChange={(e) => updateCampaignPost(index, { callToAction: e.target.value })} /></label></div> : <><h4>{post.title}</h4><p>{post.caption}</p><strong>Call to action</strong><p>{post.callToAction}</p></>}
-                  <div className="af-post-controls"><button type="button" onClick={() => setEditingCampaignPost(editingCampaignPost === index ? null : index)}>{editingCampaignPost === index ? 'Save edit' : 'Edit'}</button><button type="button" onClick={() => regenerateCampaignPost(index)}>Regenerate</button><button type="button" className={approved ? 'is-approved' : ''} onClick={() => setApprovedCampaignPosts((current) => approved ? current.filter((postIndex) => postIndex !== index) : [...current, index])}>{approved ? 'Approved' : 'Approve'}</button><button type="button" onClick={() => setCampaignImageVariants((current) => ({ ...current, [index]: (current[index] ?? 0) + 1 }))}>Replace image</button></div>
+                  <div className="af-platform-preview">Preview: {campaignPlatforms.join(' · ') || 'Choose a platform'}</div>
+                  <label className="af-regen-field"><span>Want a different version?</span><input value={regenerationInstructions[index] ?? ''} onChange={(e) => setRegenerationInstructions((current) => ({ ...current, [index]: e.target.value }))} placeholder="Make it sharper, shorter, or more specific…" /></label>
+                  <div className="af-post-controls"><button type="button" onClick={() => setEditingCampaignPost(editingCampaignPost === index ? null : index)}>{editingCampaignPost === index ? 'Save edit' : 'Edit'}</button><button type="button" onClick={() => regenerateCampaignPost(index)}>Regenerate with instructions</button><button type="button" className={approved ? 'is-approved' : ''} onClick={() => setApprovedCampaignPosts((current) => approved ? current.filter((postIndex) => postIndex !== index) : [...current, index])}>{approved ? 'Approved' : 'Approve'}</button><label className="af-upload-button">Upload image<input type="file" accept="image/*" onChange={(e) => { if (e.target.files?.[0]) setCampaignImageVariants((current) => ({ ...current, [index]: (current[index] ?? 0) + 1 })); }} /></label></div>
                 </article>;
-              })}</div> : null}
+              })}{approvedCampaignPosts.length === 5 ? <section className="af-schedule-panel" id="campaign-schedule"><span className="af-eyebrow">All 5 posts approved</span><h3>Review and schedule campaign</h3><p>Choose where and when each approved post should publish. Social connections appear here only when you are ready to schedule.</p><div className="af-schedule-list">{generatedCampaign.posts.map((post, index) => <label className="af-field" key={`schedule-${index}`}><span>Post {index + 1}: {post.title}</span><input type="datetime-local" value={campaignScheduleTimes[index] ?? ''} onChange={(e) => setCampaignScheduleTimes((current) => ({ ...current, [index]: e.target.value }))} /></label>)}</div><div className="af-schedule-platforms"><strong>Publish to</strong>{campaignPlatforms.map((platform) => <span key={platform}>{platform}</span>)}</div><a className="af-secondary-button af-connect-action" href="#connections">Review social connections</a><button type="button" className="af-primary-button" disabled={campaignPlatforms.length === 0 || Object.keys(campaignScheduleTimes).length < 5} onClick={() => setCampaignScheduled(true)}>{campaignScheduled ? 'Campaign schedule saved' : 'Save campaign schedule'}</button>{campaignScheduled ? <p className="af-message af-message-success">Schedule saved. Amplifi will use the authorized platform connections at publish time.</p> : null}</section> : null}</div> : null}
             </section> : null}
             {selectedPath === 'publish' ? <section className="af-panel" id="content">
               <div className="af-section-heading">
