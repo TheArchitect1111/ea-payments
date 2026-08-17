@@ -95,6 +95,7 @@
     "mobile:start": "cd mobile && npm start",
     "mobile:lint": "cd mobile && npm run lint",
     "test:amplifi-guide-first": "node scripts/test-amplifi-guide-first.mjs",
+    "test:amplifi-simple-portals": "node scripts/test-amplifi-simple-portals.mjs",
     "test:amplifi-research-images": "node scripts/test-amplifi-research-images.mjs",
     "test:amplifi-analytics": "node scripts/test-amplifi-analytics.mjs",
     "test:amplifi-commerce-launch": "node scripts/test-amplifi-commerce-launch.mjs",
