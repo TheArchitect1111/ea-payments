@@ -2,6 +2,9 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
+import AmplifiHome from './AmplifiHome';
+import './amplifi-home.css';
 import StoryDraftPanel from '@/app/components/StoryDraftPanel';
 import '@/app/components/story-draft-panel.css';
 import { buildAmplifiSocialDraft } from '@/lib/amplifi-draft';
@@ -102,6 +105,7 @@ export default function AmplifiPostApp({
   const [message, setMessage] = useState('');
   const [success, setSuccess] = useState('');
   const [showWelcome, setShowWelcome] = useState(false);
+  const [showHome, setShowHome] = useState(true);
   const [showHelp, setShowHelp] = useState(false);
   const [selectedPath, setSelectedPath] = useState<AmplifiPath | null>(null);
   const [approvedPost, setApprovedPost] = useState<ApprovedPost | null>(null);
@@ -128,10 +132,11 @@ export default function AmplifiPostApp({
   useEffect(() => {
     const savedPath = window.localStorage.getItem('amplifi:onboarding:path') as AmplifiPath | null;
     if (savedPath === 'publish' || savedPath === 'research' || savedPath === 'smartchitecture') setSelectedPath(savedPath);
-    else setShowWelcome(true);
+    else setShowWelcome(false);
   }, []);
 
   const choosePath = (path: AmplifiPath) => {
+    setShowHome(false);
     setSelectedPath(path);
     setShowWelcome(false);
     window.localStorage.setItem('amplifi:onboarding:path', path);
@@ -513,6 +518,27 @@ export default function AmplifiPostApp({
   const portalAmplifi = slug ? `/portal/${slug}/amplifi` : null;
   const campaignName = businessName.trim() || 'Your next campaign';
   const sourceCount = researchMeta?.sources.length ?? 0;
+  const connectedChannels = [...new Set(socialConnections.map((connection) => connection.platform))];
+
+  const openSection = (sectionId: string) => {
+    setShowHome(false);
+    window.setTimeout(() => {
+      document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 50);
+  };
+
+  if (showHome) {
+    return (
+      <AmplifiHome
+        ownerMode={slug === 'ea'}
+        loggedIn={loggedIn}
+        connectedChannels={connectedChannels}
+        approvedPostTitle={approvedPost?.title}
+        onChoosePath={choosePath}
+        onOpenSection={openSection}
+      />
+    );
+  }
 
   return (
     <div className="af-shell">
@@ -544,9 +570,8 @@ export default function AmplifiPostApp({
         </div>
       ) : null}
       <aside className="af-sidebar">
-        <Link href="/amplifi/workspace" className="af-logo" aria-label="Amplifi workspace">
-          <span className="af-logo-mark">A</span>
-          <span>amplifi</span>
+        <Link href="/amplifi/workspace" className="af-logo" aria-label="Amplifi workspace" onClick={(event) => { event.preventDefault(); setShowHome(true); }}>
+          <Image className="af-workspace-logo" src="/amplifi/amplifi-logo-premium.png" alt="Amplifi by Efficiency Architects" width={1973} height={797} priority />
         </Link>
 
         <nav className="af-nav" aria-label="Amplifi navigation">
