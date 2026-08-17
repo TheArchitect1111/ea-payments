@@ -3,6 +3,8 @@ import { requirePortalModule } from '@/lib/modules/portal-modules';
 import { PortalSubpage } from '@/app/portal/components/PortalSubpage';
 import { listPublishedTrainingForTenant } from '@/lib/training-transformation-store';
 import AmandaLearningCenter from './AmandaLearningCenter';
+import { roleAtLeast } from '@/lib/rbac';
+import { resolveAmandaAudience } from '@/lib/amanda-catherine/audience';
 
 export const dynamic = 'force-dynamic';
 
@@ -26,8 +28,12 @@ const LEARNING_LINKS = [
 
 export default async function LearningPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const { client } = await requirePortalModule(slug, 'training');
+  const { client, session } = await requirePortalModule(slug, 'training');
   const publishedTraining = await listPublishedTrainingForTenant(slug);
+  const isAmanda = slug.toLowerCase().startsWith('amanda-catherine');
+  const audience = isAmanda
+    ? await resolveAmandaAudience({ portalSlug: slug, email: session.email || client.email, role: session.role })
+    : null;
 
   return (
     <PortalSubpage
@@ -37,7 +43,7 @@ export default async function LearningPage({ params }: { params: Promise<{ slug:
       title="Training & learning"
       lede="Guides, modules, and resources to support adoption — starting with the essentials below."
     >
-      {slug.toLowerCase().startsWith('amanda-catherine') ? <AmandaLearningCenter /> : null}
+      {isAmanda && audience ? <AmandaLearningCenter audience={audience} isAdmin={Boolean(session.role && roleAtLeast(session.role, 'admin'))} /> : null}
       {publishedTraining.length ? (
         <section className="mb-8">
           <h2 className="ep-section-title">Assigned training</h2>
