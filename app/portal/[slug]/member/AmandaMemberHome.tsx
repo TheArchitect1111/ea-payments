@@ -122,6 +122,7 @@ export default async function AmandaMemberHome({
             <h2 id="ak-business-links-title">Your public presence</h2>
           </div>
           <div className="ak-business-links__list">
+            <a href="https://amandacatherine.ca/" target="_blank" rel="noopener noreferrer">AmandaCatherine.ca <span aria-hidden>↗</span></a>
             <a href="https://www.aesthetikine.com/" target="_blank" rel="noopener noreferrer">AesthetiKine website <span aria-hidden>↗</span></a>
             <a href="https://www.empowerartcollective.com/" target="_blank" rel="noopener noreferrer">Empower Art Collective <span aria-hidden>↗</span></a>
             <a href="https://www.instagram.com/amandacatherinec/" target="_blank" rel="noopener noreferrer">Amanda Catherine Instagram <span aria-hidden>↗</span></a>
