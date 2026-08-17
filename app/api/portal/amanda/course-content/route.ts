@@ -2,12 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { guardPortalApi, portalApiUnauthorized, portalTenant } from '@/lib/api/portal-route';
 import { resolveAmandaAudience } from '@/lib/amanda-catherine/audience';
 import {
-  audienceCanAccessCourse,
+  accountCanAccessCourse,
   getAmandaCourseContent,
   saveAmandaCourseContent,
   type AmandaLessonContent,
 } from '@/lib/amanda-catherine/course-content';
 import { roleAtLeast } from '@/lib/rbac';
+import { getAmandaAssignedCourseIds } from '@/lib/amanda-catherine/client-access';
 
 export const dynamic = 'force-dynamic';
 
@@ -24,7 +25,8 @@ export async function GET(req: NextRequest) {
     email: auth.session.email,
     role: auth.session.role,
   });
-  if (!audienceCanAccessCourse(audience, courseId)) {
+  const assignedCourseIds = await getAmandaAssignedCourseIds(tenant.portalSlug, auth.session.email);
+  if (!accountCanAccessCourse(audience, assignedCourseIds, courseId, Boolean(auth.session.role && roleAtLeast(auth.session.role, 'admin')))) {
     return NextResponse.json({ error: 'This course is not assigned to this account.' }, { status: 403 });
   }
   return NextResponse.json({ ok: true, content: await getAmandaCourseContent(tenant.portalSlug, courseId) });
