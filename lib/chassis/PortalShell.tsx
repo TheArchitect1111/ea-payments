@@ -23,6 +23,7 @@ export type EAPortalTab =
   | 'updates'
   | 'documents'
   | 'events'
+  | 'calendar'
   | 'resources'
   | 'messaging'
   | 'learning'
@@ -62,6 +63,7 @@ const FALLBACK_TITLES: Record<EAPortalTab, string> = {
   updates: 'Update Hub',
   documents: 'Documents',
   events: 'Events',
+  calendar: 'Calendar',
   resources: 'Resources',
   messaging: 'Messages',
   learning: 'Learning',

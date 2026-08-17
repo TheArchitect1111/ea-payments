@@ -15,6 +15,7 @@ const FORM_AUDIENCES = new Set<AmandaPortalAudience>([
 
 const AMANDA_OWNER_EMAILS = new Set([
   'amanda@aesthetikine.com',
+  'amandacatherinec@gmail.com',
 ]);
 
 export async function resolveAmandaAudience(input: {

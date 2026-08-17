@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1536" height="1024" viewBox="0 0 1536 1024">
+  <defs>
+    <filter id="paper" x="-10%" y="-10%" width="120%" height="120%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="3" seed="8" result="noise"/>
+      <feColorMatrix in="noise" type="saturate" values="0" result="gray"/>
+      <feComponentTransfer in="gray" result="faint"><feFuncA type="table" tableValues="0 0.055"/></feComponentTransfer>
+      <feBlend in="SourceGraphic" in2="faint" mode="multiply"/>
+    </filter>
+  </defs>
+  <rect width="1536" height="1024" fill="#f8f3e9" filter="url(#paper)"/>
+  <rect x="26" y="26" width="1484" height="972" fill="none" stroke="#a97834" stroke-width="6"/>
+  <rect x="42" y="42" width="1452" height="940" fill="none" stroke="#a97834" stroke-width="1.5"/>
+  <g fill="none" stroke="#a97834" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M42 105c35 0 63-28 63-63M42 91c27 0 49-22 49-49" stroke-width="2"/>
+    <path d="M55 78c3-18 12-28 27-35M62 63c-7-8-11-16-12-25M67 58c11 0 20 4 27 12" stroke-width="2"/>
+    <path d="M1494 105c-35 0-63-28-63-63M1494 91c-27 0-49-22-49-49" stroke-width="2"/>
+    <path d="M1481 78c-3-18-12-28-27-35M1474 63c7-8 11-16 12-25M1469 58c-11 0-20 4-27 12" stroke-width="2"/>
+    <path d="M42 919c35 0 63 28 63 63M42 933c27 0 49 22 49 49" stroke-width="2"/>
+    <path d="M1494 919c-35 0-63 28-63 63M1494 933c-27 0-49 22-49 49" stroke-width="2"/>
+  </g>
+  <g transform="translate(704 62)" fill="none" stroke="#a97834" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="64" cy="64" r="60" stroke-width="3"/>
+    <path d="M60 103C40 86 35 60 51 30c2 24 17 35 39 40-17 3-29 13-30 33Z" stroke-width="3"/>
+    <path d="M51 42c-9 5-15 12-19 21m23-8c-10 4-18 10-23 18m28-3c-10 4-16 9-20 17M80 35c11 5 17 13 19 25m-24-11c12 3 20 10 24 21m-26-7c11 3 18 10 21 20" stroke-width="2"/>
+  </g>
+  <text x="768" y="222" text-anchor="middle" font-family="Georgia,serif" font-size="30" letter-spacing="8" fill="#a97834">AESTHETIKINE ACADEMY</text>
+  <line x1="580" y1="246" x2="956" y2="246" stroke="#a97834" stroke-width="1.5"/>
+  <text x="768" y="340" text-anchor="middle" font-family="Georgia,serif" font-size="76" fill="#28231f">Certificate of Completion</text>
+  <text x="768" y="405" text-anchor="middle" font-family="Georgia,serif" font-size="24" letter-spacing="4" fill="#6e6256">THIS CERTIFIES THAT</text>
+  <line x1="548" y1="820" x2="738" y2="820" stroke="#50483f" stroke-width="1"/>
+  <line x1="798" y1="820" x2="988" y2="820" stroke="#50483f" stroke-width="1"/>
+  <text x="643" y="852" text-anchor="middle" font-family="Georgia,serif" font-size="18" fill="#5c534a">DATE</text>
+  <text x="893" y="852" text-anchor="middle" font-family="Georgia,serif" font-size="18" fill="#5c534a">AMANDA CATHERINE</text>
+  <text x="768" y="930" text-anchor="middle" font-family="Georgia,serif" font-size="19" letter-spacing="2" fill="#a97834">RESTORE · LEARN · CREATE</text>
+</svg>

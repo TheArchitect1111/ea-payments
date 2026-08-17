@@ -37,7 +37,7 @@ function wrapTitle(value: string, maxCharacters = 54) {
 }
 
 async function approvedCertificateArtwork() {
-  const image = await readFile(path.join(process.cwd(), 'public', 'amanda-catherine', 'aesthetikine-certificate-premium.png'));
+  const image = await readFile(path.join(process.cwd(), 'public', 'amanda-catherine', 'aesthetikine-certificate-premium.svg'));
   return image.toString('base64');
 }
 
@@ -77,7 +77,7 @@ export async function GET(req: NextRequest) {
     .join('');
 
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1536" height="1024" viewBox="0 0 1536 1024">
-    <image href="data:image/png;base64,${background}" width="1536" height="1024"/>
+    <image href="data:image/svg+xml;base64,${background}" width="1536" height="1024"/>
     <rect x="220" y="448" width="1096" height="303" rx="4" fill="#f8f3e9"/>
     <text x="768" y="478" text-anchor="middle" font-family="Georgia,serif" font-size="31" fill="#222222">${recipient}</text>
     <line x1="282" y1="490" x2="1254" y2="490" stroke="#50483f" stroke-width="1"/>
