@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { AMANDA_COURSES, type AmandaPortalAudience } from '@/lib/amanda-catherine/config';
+import { type AmandaPortalAudience } from '@/lib/amanda-catherine/config';
+import { coursesForAccount } from '@/lib/amanda-catherine/course-content';
 import type { AmandaCourseContent, AmandaLessonContent } from '@/lib/amanda-catherine/course-content';
 import type { AmandaCourseProgress } from '@/lib/amanda-catherine/progress-store';
 
@@ -23,8 +24,8 @@ function embedUrl(value: string) {
   return value.match(/\.(mp4|webm)(\?.*)?$/i) ? value : '';
 }
 
-export default function AmandaLearningCenter({ audience, isAdmin }: { audience: AmandaPortalAudience; isAdmin: boolean }) {
-  const courses = useMemo(() => isAdmin ? AMANDA_COURSES : AMANDA_COURSES.filter((course) => course.audience === audience), [audience, isAdmin]);
+export default function AmandaLearningCenter({ audience, assignedCourseIds, isAdmin }: { audience: AmandaPortalAudience; assignedCourseIds: string[]; isAdmin: boolean }) {
+  const courses = useMemo(() => coursesForAccount(audience, assignedCourseIds, isAdmin), [audience, assignedCourseIds, isAdmin]);
   const [courseId, setCourseId] = useState<string>(courses[0]?.id || '');
   const [progress, setProgress] = useState<AmandaCourseProgress | null>(null);
   const [content, setContent] = useState<AmandaCourseContent | null>(null);
