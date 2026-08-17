@@ -5,6 +5,7 @@ import { listPublishedTrainingForTenant } from '@/lib/training-transformation-st
 import AmandaLearningCenter from './AmandaLearningCenter';
 import { roleAtLeast } from '@/lib/rbac';
 import { resolveAmandaAudience } from '@/lib/amanda-catherine/audience';
+import { getAmandaAssignedCourseIds } from '@/lib/amanda-catherine/client-access';
 
 export const dynamic = 'force-dynamic';
 
@@ -34,6 +35,9 @@ export default async function LearningPage({ params }: { params: Promise<{ slug:
   const audience = isAmanda
     ? await resolveAmandaAudience({ portalSlug: slug, email: session.email || client.email, role: session.role })
     : null;
+  const assignedCourseIds = isAmanda && audience && audience !== 'admin'
+    ? await getAmandaAssignedCourseIds(slug, session.email || client.email)
+    : [];
 
   return (
     <PortalSubpage
@@ -43,7 +47,7 @@ export default async function LearningPage({ params }: { params: Promise<{ slug:
       title="Training & learning"
       lede="Guides, modules, and resources to support adoption — starting with the essentials below."
     >
-      {isAmanda && audience ? <AmandaLearningCenter audience={audience} isAdmin={Boolean(session.role && roleAtLeast(session.role, 'admin'))} /> : null}
+      {isAmanda && audience ? <AmandaLearningCenter audience={audience} assignedCourseIds={assignedCourseIds} isAdmin={Boolean(session.role && roleAtLeast(session.role, 'admin'))} /> : null}
       {publishedTraining.length ? (
         <section className="mb-8">
           <h2 className="ep-section-title">Assigned training</h2>
