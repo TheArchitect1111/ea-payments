@@ -70,6 +70,7 @@ type TopicWatch = {
 
 type CampaignPost = { title: string; caption: string; callToAction: string; imageDirection: string };
 type GeneratedCampaign = { title: string; strategy: string; posts: CampaignPost[] };
+type CampaignTone = 'Bold and direct' | 'Provocative and challenging' | 'Authoritative and premium' | 'Warm and human';
 const CAMPAIGN_BRIEF_STORAGE_KEY = 'amplifi:create-for-me:brief';
 
 function defaultDateRange(): { from: string; to: string } {
@@ -148,8 +149,15 @@ export default function AmplifiPostApp({
   const [campaignResult, setCampaignResult] = useState('');
   const [campaignCallToAction, setCampaignCallToAction] = useState('');
   const [campaignDetails, setCampaignDetails] = useState('');
+  const [campaignTone, setCampaignTone] = useState<CampaignTone>('Bold and direct');
+  const [campaignProofPoint, setCampaignProofPoint] = useState('');
+  const [campaignPainQuestion, setCampaignPainQuestion] = useState('');
+  const [campaignCtaUrl, setCampaignCtaUrl] = useState('');
   const [campaignGenerating, setCampaignGenerating] = useState(false);
   const [generatedCampaign, setGeneratedCampaign] = useState<GeneratedCampaign | null>(null);
+  const [editingCampaignPost, setEditingCampaignPost] = useState<number | null>(null);
+  const [approvedCampaignPosts, setApprovedCampaignPosts] = useState<number[]>([]);
+  const [campaignImageVariants, setCampaignImageVariants] = useState<Record<number, number>>({});
 
   useEffect(() => {
     const savedPath = window.localStorage.getItem('amplifi:onboarding:path') as AmplifiPath | null;
@@ -165,12 +173,20 @@ export default function AmplifiPostApp({
           result?: string;
           callToAction?: string;
           details?: string;
+          tone?: CampaignTone;
+          proofPoint?: string;
+          painQuestion?: string;
+          ctaUrl?: string;
         };
         setPromotion(brief.promotion ?? '');
         setCampaignAudience(brief.audience ?? '');
         setCampaignResult(brief.result ?? '');
         setCampaignCallToAction(brief.callToAction ?? '');
         setCampaignDetails(brief.details ?? '');
+        setCampaignTone(brief.tone ?? 'Bold and direct');
+        setCampaignProofPoint(brief.proofPoint ?? '');
+        setCampaignPainQuestion(brief.painQuestion ?? '');
+        setCampaignCtaUrl(brief.ctaUrl ?? '');
         setSelectedPath('smartchitecture');
         setShowHome(false);
         window.sessionStorage.removeItem(CAMPAIGN_BRIEF_STORAGE_KEY);
@@ -203,6 +219,10 @@ export default function AmplifiPostApp({
         result: campaignResult.trim(),
         callToAction: campaignCallToAction.trim(),
         details: campaignDetails.trim(),
+        tone: campaignTone,
+        proofPoint: campaignProofPoint.trim(),
+        painQuestion: campaignPainQuestion.trim(),
+        ctaUrl: campaignCtaUrl.trim(),
       }));
       window.location.assign('/portal/login?next=%2Famplifi%2Fworkspace');
       return;
@@ -220,6 +240,10 @@ export default function AmplifiPostApp({
           result: campaignResult.trim(),
           callToAction: campaignCallToAction.trim(),
           details: campaignDetails.trim(),
+          tone: campaignTone,
+          proofPoint: campaignProofPoint.trim(),
+          painQuestion: campaignPainQuestion.trim(),
+          ctaUrl: campaignCtaUrl.trim(),
         }),
       });
       const data = (await res.json()) as { ok?: boolean; error?: string; campaign?: GeneratedCampaign };
@@ -235,6 +259,29 @@ export default function AmplifiPostApp({
     } finally {
       setCampaignGenerating(false);
     }
+  };
+
+  const updateCampaignPost = (index: number, patch: Partial<CampaignPost>) => {
+    setGeneratedCampaign((current) => current ? {
+      ...current,
+      posts: current.posts.map((post, postIndex) => postIndex === index ? { ...post, ...patch } : post),
+    } : current);
+  };
+
+  const regenerateCampaignPost = (index: number) => {
+    if (!generatedCampaign) return;
+    const pain = campaignPainQuestion.trim() || 'Is your business leaking time, money and resources?';
+    const proof = campaignProofPoint.trim() || `The right system gives ${campaignAudience.trim() || 'your team'} capacity back.`;
+    const cta = `${campaignCallToAction.trim()}${campaignCtaUrl.trim() ? ` ${campaignCtaUrl.trim()}` : ''}`.trim();
+    const replacements: CampaignPost[] = [
+      { title: pain, caption: `${pain}\n\nThe cost is hiding inside repeated tasks, delayed follow-up and processes everyone has learned to tolerate. ${promotion.trim()} is built to expose that friction and remove it.`, callToAction: cta, imageDirection: `Bold question-led graphic: ${pain}` },
+      { title: 'Busy is not the same as efficient', caption: `Every manual handoff creates another place for time, money or opportunity to disappear. That is not a people problem. It is a system problem—and system problems can be redesigned.`, callToAction: cta, imageDirection: 'Time, money and resources shown as three visible operational leaks.' },
+      { title: proof, caption: `${proof}\n\nThat is the difference between adding another tool and fixing the process that is creating the loss. The result should be specific, measurable and felt by the people doing the work.`, callToAction: cta, imageDirection: `Proof-led result card featuring: ${proof}` },
+      { title: 'We did not ask the team to work harder', caption: `We changed the system. The repeated work moved into automation, the handoffs became visible and the team got capacity back for work that actually requires judgment.`, callToAction: cta, imageDirection: 'Before-and-after workflow graphic contrasting friction with a clean automated path.' },
+      { title: 'Find the leak', caption: `${pain}\n\nStop guessing. Identify where your business is losing capacity and what to address first. ${cta}`, callToAction: cta, imageDirection: 'High-contrast Find the leak CTA graphic with the destination link.' },
+    ];
+    updateCampaignPost(index, replacements[index] ?? replacements[0]);
+    setApprovedCampaignPosts((current) => current.filter((postIndex) => postIndex !== index));
   };
 
   const loadConnections = useCallback(async () => {
@@ -695,7 +742,7 @@ export default function AmplifiPostApp({
         </div>
       </aside>
 
-      <main className="af-workspace">
+      <main className={`af-workspace${selectedPath === 'smartchitecture' ? ' af-create-for-me-workspace' : ''}`}>
         <header className="af-topbar">
           <div>
             <div className="af-title-row">
@@ -893,13 +940,26 @@ export default function AmplifiPostApp({
                 <label className="af-field af-field-wide"><span>What are you promoting?</span><textarea value={promotion} onChange={(e) => setPromotion(e.target.value)} placeholder="Describe the service, event, offer or idea" /></label>
                 <label className="af-field"><span>Who should this campaign reach?</span><input value={campaignAudience} onChange={(e) => setCampaignAudience(e.target.value)} placeholder="Your intended audience" /></label>
                 <label className="af-field"><span>What result do you want?</span><input value={campaignResult} onChange={(e) => setCampaignResult(e.target.value)} placeholder="The campaign goal" /></label>
-                <label className="af-field"><span>What should people do next?</span><input value={campaignCallToAction} onChange={(e) => setCampaignCallToAction(e.target.value)} placeholder="Book, register, call, buy or learn more" /></label>
+                <label className="af-field"><span>Tone</span><select value={campaignTone} onChange={(e) => setCampaignTone(e.target.value as CampaignTone)}><option>Bold and direct</option><option>Provocative and challenging</option><option>Authoritative and premium</option><option>Warm and human</option></select></label>
+                <label className="af-field af-field-wide"><span>Verified proof or result</span><input value={campaignProofPoint} onChange={(e) => setCampaignProofPoint(e.target.value)} placeholder="We saved one client $17,000 by automating one process." /></label>
+                <label className="af-field af-field-wide"><span>Audience pain question</span><input value={campaignPainQuestion} onChange={(e) => setCampaignPainQuestion(e.target.value)} placeholder="Is your business leaking time, money and resources?" /></label>
+                <label className="af-field"><span>What should people do next?</span><input value={campaignCallToAction} onChange={(e) => setCampaignCallToAction(e.target.value)} placeholder="Take the CTP" /></label>
+                <label className="af-field"><span>CTA link</span><input type="url" value={campaignCtaUrl} onChange={(e) => setCampaignCtaUrl(e.target.value)} placeholder="https://cc.efficiencyarchitects.online/ctp" /></label>
                 <label className="af-field"><span>Important dates and details</span><input value={campaignDetails} onChange={(e) => setCampaignDetails(e.target.value)} placeholder="Dates, link, pricing or requirements" /></label>
               </div>
               {message ? <p className="af-message af-message-error">{message}</p> : null}
               {success ? <p className="af-message af-message-success">{success}</p> : null}
               <div className="af-action-row"><button type="button" className="af-primary-button" disabled={campaignGenerating} onClick={() => void createCampaignForMe()}>{campaignGenerating ? 'Amplifi is creating…' : loggedIn ? 'Create my 5-post campaign' : 'Sign in & create my 5-post campaign'}</button><span>{loggedIn ? 'Nothing publishes until you approve it.' : 'Your brief will be saved while you sign in.'}</span></div>
-              {generatedCampaign ? <div className="af-campaign-results"><h4>{generatedCampaign.title}</h4>{generatedCampaign.strategy ? <p>{generatedCampaign.strategy}</p> : null}{generatedCampaign.posts.map((post, index) => <article className="af-campaign-post" key={`${post.title}-${index}`}><span>POST {index + 1} OF 5</span><h4>{post.title}</h4><p>{post.caption}</p><strong>Call to action</strong><p>{post.callToAction}</p><strong>Image direction</strong><p>{post.imageDirection}</p></article>)}</div> : null}
+              {generatedCampaign ? <div className="af-campaign-results"><h4>{generatedCampaign.title}</h4>{generatedCampaign.strategy ? <p>{generatedCampaign.strategy}</p> : null}{generatedCampaign.posts.map((post, index) => {
+                const approved = approvedCampaignPosts.includes(index);
+                const imageVariant = (campaignImageVariants[index] ?? 0) % 3;
+                return <article className="af-campaign-post" key={`campaign-post-${index}`}>
+                  <span>POST {index + 1} OF 5</span>
+                  <div className={`af-generated-post-image af-image-variant-${imageVariant}`} role="img" aria-label={`Branded image for ${post.title}`}><small>AMPLIFI</small><strong>{index === 2 && campaignProofPoint.trim() ? campaignProofPoint : post.title}</strong><em>{campaignCtaUrl ? 'Take the next step' : campaignTone}</em></div>
+                  {editingCampaignPost === index ? <div className="af-campaign-editor"><label className="af-field"><span>Headline</span><input value={post.title} onChange={(e) => updateCampaignPost(index, { title: e.target.value })} /></label><label className="af-field"><span>Post copy</span><textarea value={post.caption} onChange={(e) => updateCampaignPost(index, { caption: e.target.value })} /></label><label className="af-field"><span>Call to action</span><input value={post.callToAction} onChange={(e) => updateCampaignPost(index, { callToAction: e.target.value })} /></label></div> : <><h4>{post.title}</h4><p>{post.caption}</p><strong>Call to action</strong><p>{post.callToAction}</p></>}
+                  <div className="af-post-controls"><button type="button" onClick={() => setEditingCampaignPost(editingCampaignPost === index ? null : index)}>{editingCampaignPost === index ? 'Save edit' : 'Edit'}</button><button type="button" onClick={() => regenerateCampaignPost(index)}>Regenerate</button><button type="button" className={approved ? 'is-approved' : ''} onClick={() => setApprovedCampaignPosts((current) => approved ? current.filter((postIndex) => postIndex !== index) : [...current, index])}>{approved ? 'Approved' : 'Approve'}</button><button type="button" onClick={() => setCampaignImageVariants((current) => ({ ...current, [index]: (current[index] ?? 0) + 1 }))}>Replace image</button></div>
+                </article>;
+              })}</div> : null}
             </section> : null}
             {selectedPath === 'publish' ? <section className="af-panel" id="content">
               <div className="af-section-heading">
