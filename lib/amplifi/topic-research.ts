@@ -23,6 +23,7 @@ export type AmplifiTopicResearchRequest = {
   dateTo: string; // YYYY-MM-DD
   maxSources?: number;
   scrapeTop?: number;
+  postCount?: 1 | 2 | 3;
 };
 
 export type AmplifiTopicResearchResult = {
@@ -31,6 +32,7 @@ export type AmplifiTopicResearchResult = {
   dateTo: string;
   sources: AmplifiResearchSource[];
   draft: AmplifiSocialDraft;
+  drafts: AmplifiSocialDraft[];
   draftTitle: string;
   warnings: string[];
   researchedAt: string;
@@ -87,6 +89,7 @@ type ModelPayload = {
   hashtags?: string[];
   draftTitle?: string;
   notes?: string;
+  posts?: Array<{ linkedIn?: string; shortCaption?: string; hashtags?: string[] }>;
 };
 
 async function runTopicWebResearch(input: AmplifiTopicResearchRequest): Promise<{
@@ -111,11 +114,13 @@ async function runTopicWebResearch(input: AmplifiTopicResearchRequest): Promise<
     '  "linkedIn": string,',
     '  "shortCaption": string,',
     '  "hashtags": string[],',
+    '  "posts": [{"linkedIn": string, "shortCaption": string, "hashtags": string[]}],',
     '  "notes": string',
     '}',
     `Topic: ${input.topic}`,
     `Date window (inclusive): ${input.dateFrom} to ${input.dateTo}`,
     `Max sources: ${maxSources}`,
+    `Create exactly ${input.postCount ?? 1} distinct, source-grounded social post(s) in posts.`,
     'Include at least 3 sources when the web has material in-range; otherwise return fewer and explain in notes.',
   ].join('\n');
 
@@ -329,12 +334,28 @@ export async function runAmplifiTopicResearch(
     warnings.push('Draft fields were completed with a grounded fallback template.');
   }
 
+  const requestedPostCount = Math.min(3, Math.max(1, input.postCount ?? 1));
+  const drafts = (payload.posts || []).slice(0, requestedPostCount).map((post) => ({
+    linkedIn: String(post.linkedIn || '').trim(),
+    shortCaption: String(post.shortCaption || '').trim(),
+    hashtags: Array.isArray(post.hashtags) ? post.hashtags.map(String).filter(Boolean).slice(0, 8) : [],
+  })).filter((post) => post.linkedIn && post.shortCaption);
+  if (!drafts.length) drafts.push(draft);
+  while (drafts.length < requestedPostCount) {
+    const number = drafts.length + 1;
+    drafts.push({
+      ...draft,
+      linkedIn: `Post ${number} of ${requestedPostCount}\n\n${draft.linkedIn}`,
+    });
+  }
+
   return {
     topic: input.topic,
     dateFrom: input.dateFrom,
     dateTo: input.dateTo,
     sources: preferred.slice(0, input.maxSources ?? 8),
     draft,
+    drafts,
     draftTitle: String(payload.draftTitle || input.topic).trim().slice(0, 120),
     warnings,
     researchedAt: new Date().toISOString(),
