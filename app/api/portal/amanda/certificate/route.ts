@@ -6,7 +6,9 @@ import { AMANDA_COURSES } from '@/lib/amanda-catherine/config';
 import { certificateEligible, getAmandaCourseProgress } from '@/lib/amanda-catherine/progress-store';
 import { listPortalFormSubmissions } from '@/lib/portal-forms/store';
 import { resolveAmandaAudience } from '@/lib/amanda-catherine/audience';
-import { audienceCanAccessCourse } from '@/lib/amanda-catherine/course-content';
+import { accountCanAccessCourse } from '@/lib/amanda-catherine/course-content';
+import { getAmandaAssignedCourseIds } from '@/lib/amanda-catherine/client-access';
+import { roleAtLeast } from '@/lib/rbac';
 
 export const dynamic = 'force-dynamic';
 
@@ -53,7 +55,8 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Certificate not found.' }, { status: 404 });
   }
   const audience = await resolveAmandaAudience({ portalSlug: tenant.portalSlug, email: auth.session.email, role: auth.session.role });
-  if (!audienceCanAccessCourse(audience, courseId)) {
+  const assignedCourseIds = await getAmandaAssignedCourseIds(tenant.portalSlug, auth.session.email);
+  if (!accountCanAccessCourse(audience, assignedCourseIds, courseId, Boolean(auth.session.role && roleAtLeast(auth.session.role, 'admin')))) {
     return NextResponse.json({ error: 'Certificate not found.' }, { status: 404 });
   }
 
