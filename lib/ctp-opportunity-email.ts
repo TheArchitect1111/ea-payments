@@ -106,7 +106,7 @@ function beginRowsHtml(): string {
 function healthRowsHtml(model: CtpWelcomeEmailModel): string {
   const rows = model.categoryScores ?? [];
   if (!rows.length) {
-    return `<tr><td style="${td}">Initial review</td><td style="${tdRight}"><strong>Complete</strong></td></tr>`;
+    return `<tr><td style="${td}">Digital presence scoring</td><td style="${tdRight}"><strong>Not enough information to score</strong></td></tr>`;
   }
   return rows
     .map(

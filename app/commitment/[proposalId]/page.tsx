@@ -1,6 +1,8 @@
 import { notFound } from 'next/navigation';
 import { getProposalByProposalId } from '@/lib/airtable';
 import CommitmentCheckout from './CommitmentCheckout';
+import { getCtpSubmissionByProposalId } from '@/lib/ctp-submissions';
+import { proposalDeposit } from '@/lib/proposal-deposit';
 
 export const dynamic = 'force-dynamic';
 
@@ -49,6 +51,8 @@ export default async function CommitmentPage({
 
   const solutionLabel =
     proposal.projectTypeLabel || proposal.recommendedProjectType || 'Intelligent Business System';
+  const ctpBound = await getCtpSubmissionByProposalId(proposalId).catch(() => null);
+  const depositAmount = proposalDeposit(proposal.recommendedFee, ctpBound?.discoveryAnswers);
 
   return (
     <main className="min-h-screen" style={{ backgroundColor: CREAM }}>
@@ -99,7 +103,7 @@ export default async function CommitmentPage({
             </div>
             <div>
               <dt className="text-xs font-bold uppercase tracking-wider text-neutral-400">Due now</dt>
-              <dd className="mt-1 text-xl font-black" style={{ color: NAVY }}>{fmt(paymentStage === 'final' ? Math.max(0, proposal.recommendedFee - 250) : Math.min(250, proposal.recommendedFee))}</dd>
+              <dd className="mt-1 text-xl font-black" style={{ color: NAVY }}>{fmt(paymentStage === 'final' ? Math.max(0, proposal.recommendedFee - depositAmount) : depositAmount)}</dd>
               <dd className="mt-1 text-xs text-neutral-500">{paymentStage === 'final' ? 'Final balance before activation and full access' : 'Project deposit after consultation and approval'}</dd>
             </div>
             <div>

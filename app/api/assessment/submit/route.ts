@@ -234,6 +234,13 @@ export async function POST(req: NextRequest) {
       portalRequired: scope.portalRequired,
       userCount: scope.userCount,
     });
+    const timingText = JSON.stringify(input.discoveryAnswers ?? '');
+    const priorityRate = /High Priority/i.test(timingText)
+      ? 0.25
+      : /Expedited/i.test(timingText)
+        ? 0.5
+        : 0;
+    const recommendedFee = Math.round(pricing.recommendedFee * (1 + priorityRate));
 
     const assessmentId = `ASSESS-${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
     const proposalId   = `PROP-${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
@@ -255,7 +262,7 @@ export async function POST(req: NextRequest) {
       opportunityLow:         analysis.opportunityLow,
       opportunityHigh:        analysis.opportunityHigh,
       rawFee:                 pricing.rawFee,
-      recommendedFee:         pricing.recommendedFee,
+      recommendedFee,
     });
 
     const assessmentResult = await createAssessmentRecord({
@@ -483,7 +490,7 @@ export async function POST(req: NextRequest) {
                   opportunityHigh: analysis.opportunityHigh,
                 },
                 projectTypeLabel: pricing.projectTypeLabel,
-                recommendedFee: pricing.recommendedFee,
+                recommendedFee,
                 operationalChallenges: challengeIds,
                 recommendations,
               });
@@ -507,7 +514,7 @@ export async function POST(req: NextRequest) {
                 ctpClassification.clientType === 'website_portal'
                   ? presenceProjectLabel
                   : pricing.projectTypeLabel,
-              recommendedFee: journeyInvestment?.high ?? pricing.recommendedFee,
+              recommendedFee: Math.round((journeyInvestment?.high ?? pricing.recommendedFee) * (1 + priorityRate)),
               investmentLow: journeyInvestment?.low,
               investmentHigh: journeyInvestment?.high,
               timelineLabel:
@@ -566,7 +573,7 @@ export async function POST(req: NextRequest) {
         recommendedProjectType: analysis.recommendedProjectType,
         projectTypeLabel:       pricing.projectTypeLabel,
         rawFee:                 pricing.rawFee,
-        recommendedFee:         pricing.recommendedFee,
+        recommendedFee,
         assessmentRecordId:     assessmentResult.recordId,
         proposalRecordId:       proposalResult.recordId,
       });
@@ -599,7 +606,7 @@ export async function POST(req: NextRequest) {
               opportunityLow: analysis.opportunityLow,
               opportunityHigh: analysis.opportunityHigh,
               projectTypeLabel: pricing.projectTypeLabel,
-              recommendedFee: pricing.recommendedFee,
+              recommendedFee,
               proposalId,
               clientTypeLabel: ctpClassification?.label,
             });
@@ -614,7 +621,7 @@ export async function POST(req: NextRequest) {
             opportunityLow: analysis.opportunityLow,
             opportunityHigh: analysis.opportunityHigh,
             projectTypeLabel: pricing.projectTypeLabel,
-            recommendedFee: pricing.recommendedFee,
+            recommendedFee,
             proposalId,
             clientTypeLabel: ctpClassification?.label,
           });

@@ -212,6 +212,7 @@ function resolveSummary(submission: CtpSubmission): string {
 }
 
 function mapHealthAreas(submission: CtpSubmission, slug: string): OpportunityHealthArea[] {
+  if (submission.digitalPresenceAudit?.mode === 'generic-baseline') return [];
   const scores = submission.digitalPresenceAudit?.scores;
   const areas: OpportunityHealthArea[] = [];
   const push = (id: string, label: string, value: number | null) => {

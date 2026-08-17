@@ -257,7 +257,7 @@ function ProposalContent({
                   Ready to reserve your development window?
                 </p>
                 <p className="mb-6 text-sm leading-relaxed text-white/60">
-                  Review the project, accept the terms, and pay the $250 deposit. The final balance is due after you review the completed portal and before activation or full administrator access.
+                  Review the project, accept the terms, and pay the required project deposit. The final balance is due after you review the completed portal and before activation or full administrator access.
                 </p>
                 <a
                   href={`/commitment/${encodeURIComponent(proposal.proposalId)}`}

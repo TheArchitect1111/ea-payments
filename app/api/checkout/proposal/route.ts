@@ -4,6 +4,7 @@ import { getStripe } from '@/lib/stripe';
 import { getProposalByProposalId, updateProposal } from '@/lib/airtable';
 import { getCtpSubmissionByProposalId } from '@/lib/ctp-submissions';
 import { designStudioPath } from '@/lib/ctp-opportunity-routes';
+import { proposalDeposit } from '@/lib/proposal-deposit';
 
 export const dynamic = 'force-dynamic';
 
@@ -75,7 +76,7 @@ export async function POST(req: NextRequest): Promise<Response> {
   // Airtable Currency fields are stored as floating-point dollars.
   // Multiply by 100 and round to get Stripe unit_amount (integer cents).
   // Example: $4,997.00 -> 4997 * 100 = 499700 cents.
-  const depositAmount = Math.min(250, proposal.recommendedFee);
+  const depositAmount = proposalDeposit(proposal.recommendedFee, ctpBound?.discoveryAnswers);
   const chargeAmount = paymentStage === 'final'
     ? Math.max(0, proposal.recommendedFee - depositAmount)
     : depositAmount;
