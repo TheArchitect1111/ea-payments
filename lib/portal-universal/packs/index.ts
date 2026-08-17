@@ -6,6 +6,7 @@ import { REAL_ESTATE_PACK } from '@/lib/portal-universal/packs/real-estate';
 import { WEBSITE_PORTAL_PACK } from '@/lib/portal-universal/packs/website-portal';
 import { SAMPLE_PLACEHOLDER_PACK } from '@/lib/portal-universal/packs/sample-placeholder';
 import { AMANDA_CATHERINE_PACK } from '@/lib/portal-universal/packs/amanda-catherine';
+import { ONLINE_ACADEMY_PACK } from '@/lib/portal-universal/packs/online-academy';
 
 const RAW_PACKS = [
   EA_EXECUTIVE_PACK,
@@ -14,6 +15,7 @@ const RAW_PACKS = [
   REAL_ESTATE_PACK,
   SAMPLE_PLACEHOLDER_PACK,
   AMANDA_CATHERINE_PACK,
+  ONLINE_ACADEMY_PACK,
 ] as const;
 
 /** Validated registry — throws at module load if a pack is invalid. */
