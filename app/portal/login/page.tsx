@@ -26,6 +26,42 @@ function isAmandaPortal(nextPath?: string) {
   );
 }
 
+function isAmandaLearningPortal(nextPath?: string) {
+  return nextPath?.toLowerCase().startsWith('/portal/amanda-catherine/learning') ?? false;
+}
+
+function AmandaLearningLoginBrand() {
+  return (
+    <>
+      <header className="pl-header pl-header-amanda">
+        <Image
+          src={amandaPhoto}
+          alt="Amanda Catherine"
+          width={240}
+          height={240}
+          className="pl-amanda-photo"
+          priority
+        />
+        <p className="pl-eyebrow">AesthetiKine Academy</p>
+        <h1 className="pl-title">Amanda Catherine Courses &amp; Learning</h1>
+        <p className="pl-lede">
+          Sign in with the email used for your enrollment to open your lessons, resources, progress, and certificates.
+        </p>
+        <p className="pl-portal-line">Secure student and practitioner learning access</p>
+      </header>
+
+      <div className="pl-hero pl-amanda-hero" aria-label="Amanda Catherine learning areas">
+        <div className="pl-amanda-hero-overlay">
+          <p>Courses</p>
+          <p>Video lessons</p>
+          <p>Resources</p>
+          <p>Progress</p>
+        </div>
+      </div>
+    </>
+  );
+}
+
 function AmandaLoginBrand() {
   return (
     <>
@@ -102,11 +138,12 @@ function PortalLoginContent() {
   const searchParams = useSearchParams();
   const nextPath = safeNextPath(searchParams.get('next'));
   const amanda = isAmandaPortal(nextPath);
+  const amandaLearning = isAmandaLearningPortal(nextPath);
 
   return (
     <div className={`pl-page${amanda ? ' pl-page-amanda' : ''}`}>
       <div className="pl-shell">
-        {amanda ? <AmandaLoginBrand /> : <DefaultLoginBrand />}
+        {amandaLearning ? <AmandaLearningLoginBrand /> : amanda ? <AmandaLoginBrand /> : <DefaultLoginBrand />}
 
         <Suspense fallback={<div className="pl-card">Loading…</div>}>
           <PortalLoginInner />
@@ -114,7 +151,9 @@ function PortalLoginContent() {
 
         <footer className="pl-footer">
           {amanda ? (
-            <p className="pl-tagline">Amanda Catherine portal access • Powered by Efficiency Architects</p>
+            <p className="pl-tagline">
+              {amandaLearning ? 'Amanda Catherine course access' : 'Amanda Catherine portal access'} • Powered by Efficiency Architects
+            </p>
           ) : (
             <>
               <p className="pl-footer-text">
