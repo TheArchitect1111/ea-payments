@@ -28,6 +28,9 @@ assert.doesNotMatch(app, /<option value="daily">/);
 
 assert.match(campaignRoute, /exactly five coordinated social posts/i);
 assert.match(campaignRoute, /parsed\.posts\.length !== 5/);
+assert.match(campaignRoute, /callClaudeText/);
+assert.match(campaignRoute, /reliableCampaign/);
+assert.doesNotMatch(campaignRoute, /AI provider request failed/);
 assert.match(research, /Create exactly \$\{input\.postCount \?\? 1\} distinct/);
 assert.match(watch, /postsPerRun: 1 \| 2 \| 3/);
 assert.match(watch, /endAt: string/);
