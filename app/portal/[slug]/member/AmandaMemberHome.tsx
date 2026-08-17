@@ -5,6 +5,7 @@ import { AMANDA_ROLE_DASHBOARDS } from '@/lib/amanda-catherine/config';
 import { resolveAmandaAudience } from '@/lib/amanda-catherine/audience';
 
 const DESTINATIONS: Array<[string[], string]> = [
+  [['private-deliveries', 'media-delivery', 'recording', 'finished-work'], 'deliveries'],
   [['course', 'training', 'assessment', 'progress', 'certif'], 'learning'],
   [['appointment', 'schedule'], 'calendar'],
   [['event'], 'events'],
@@ -30,6 +31,13 @@ function label(value: string) {
 }
 
 const ADMIN_SPOTLIGHTS = [
+  {
+    title: 'Client Delivery',
+    item: 'media-delivery',
+    summary: 'Recordings and finished work',
+    action: 'Deliver To Client',
+    icon: 'document',
+  },
   {
     title: 'Today',
     item: 'appointments',
