@@ -533,3 +533,13 @@
     gap: 22px;
   }
 }
+
+.af-workspace-logo {
+  width: 172px;
+  height: auto;
+  display: block;
+}
+
+@media (max-width: 720px) {
+  .af-workspace-logo { width: 136px; }
+}
