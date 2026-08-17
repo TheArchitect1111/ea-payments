@@ -1380,20 +1380,41 @@ body {
 }
 
 @media (max-width: 640px) {
-  .af-create-for-me-workspace .af-topbar,
-  .af-create-for-me-workspace .af-tabs,
-  .af-create-for-me-workspace .af-path-summary,
-  .af-create-for-me-workspace .af-intro-panel,
-  .af-create-for-me-workspace .af-empty-creative,
-  .af-create-for-me-workspace .af-approved-panel,
-  .af-create-for-me-workspace .af-next-strip,
-  .af-create-for-me-workspace .af-insights-column { display: none; }
-  .af-create-for-me-workspace { padding-top: 18px; }
+  .af-guided-workspace .af-topbar,
+  .af-guided-workspace .af-tabs,
+  .af-guided-workspace .af-path-summary,
+  .af-guided-workspace .af-intro-panel,
+  .af-guided-workspace .af-empty-creative,
+  .af-guided-workspace .af-approved-panel,
+  .af-guided-workspace .af-next-strip { display: none; }
+  .af-guided-workspace { padding-top: 18px; }
   .af-smartchitecture-panel { padding: 18px; }
   .af-generated-post-image { min-height: 220px; padding: 22px; }
   .af-post-controls { grid-template-columns: 1fr 1fr; }
   .af-post-controls button { min-height: 46px; }
 }
+
+.af-campaign-context { display: grid; gap: 8px; padding: 16px 8px; color: #5d5870; }
+.af-campaign-context button { padding: 0; border: 0; background: transparent; color: #5b2ed0; text-align: left; font-weight: 850; cursor: pointer; }
+.af-campaign-context span { margin-top: 8px; color: #736d80; font-size: 11px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }
+.af-campaign-context strong { color: #1e1b31; }
+.af-more-control { display: flex; justify-content: space-between; width: 100%; margin: 18px 0; padding: 15px 18px; border: 1px solid #dcd3f2; border-radius: 14px; background: #fff; color: #5128c3; font-weight: 850; cursor: pointer; }
+.af-advanced-controls { padding: 18px; border-radius: 16px; background: #f8f5ff; }
+.af-platform-choice { display: flex; flex-wrap: wrap; gap: 10px 16px; border: 0; padding: 0; }
+.af-platform-choice legend { width: 100%; margin-bottom: 8px; font-weight: 800; }
+.af-check-row { display: flex; gap: 9px; align-items: center; color: #3d374d; font-weight: 750; }
+.af-platform-preview { margin-top: 10px; color: #6a6578; font-size: 12px; font-weight: 800; }
+.af-regen-field { display: grid; gap: 7px; margin-top: 14px; }
+.af-regen-field span { font-size: 12px; font-weight: 800; }
+.af-regen-field input { min-height: 42px; padding: 0 12px; border: 1px solid #d8cfee; border-radius: 11px; }
+.af-upload-button { display: grid; place-items: center; min-height: 42px; border: 1px solid #d8cfee; border-radius: 11px; background: #fff; color: #4f2bb9; font-size: 11px; font-weight: 850; cursor: pointer; }
+.af-upload-button input { display: none; }
+.af-schedule-panel { margin-top: 24px; padding: 22px; border: 1px solid #bde7d0; border-radius: 18px; background: #f3fbf7; }
+.af-schedule-list { display: grid; gap: 10px; margin: 18px 0; }
+.af-schedule-platforms { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0; }
+.af-schedule-platforms strong { width: 100%; }
+.af-schedule-platforms span { padding: 6px 10px; border-radius: 999px; background: #e4dafc; color: #4e29b8; font-size: 12px; font-weight: 800; }
+.af-connect-action { display: inline-grid; place-items: center; margin: 0 10px 10px 0; text-decoration: none; }
 
 
 /* Native Amplifi social connections */
