@@ -42,6 +42,8 @@ assert.doesNotMatch(campaignRoute, /AI provider request failed/);
 assert.match(campaignRoute, /pattern interruption; real pain or cost; specific proof; what changed; direct invitation/);
 assert.match(campaignRoute, /painQuestion/);
 assert.match(campaignRoute, /proofPoint/);
+assert.match(campaignRoute, /Your people deserve a better way to work/);
+assert.match(app, /campaignTone === 'Provocative and challenging'/);
 assert.match(styles, /af-create-for-me-workspace \.af-path-summary/);
 assert.match(styles, /af-post-controls/);
 assert.match(research, /Create exactly \$\{input\.postCount \?\? 1\} distinct/);
