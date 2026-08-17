@@ -1342,10 +1342,19 @@ body {
 .af-path-summary, .af-approved-card { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
 .af-path-summary h2 { margin: 5px 0 0; font-size: clamp(22px, 3vw, 32px); }
 .af-secondary-button { min-height: 44px; padding: 0 18px; border: 1px solid #6f3dea; border-radius: 13px; background: #fff; color: #5329ca; font-weight: 800; cursor: pointer; }
-.af-smartchitecture-panel { background: linear-gradient(135deg, #19152e, #402078); color: #fff; }
-.af-smartchitecture-panel .af-eyebrow { color: #55e6d8; }
-.af-smartchitecture-panel p { max-width: 720px; color: #ddd5f3; line-height: 1.7; }
+.af-smartchitecture-panel { background: linear-gradient(145deg, #fff 30%, #f6f0ff); color: #19172f; }
+.af-smartchitecture-panel .af-eyebrow { color: #6632df; }
+.af-smartchitecture-panel p { max-width: 720px; color: #686478; line-height: 1.7; }
 .af-smartchitecture-panel .af-secondary-button { background: #fff; }
+.af-campaign-results { display: grid; gap: 14px; margin-top: 24px; }
+.af-campaign-results > h4 { margin: 0; font-size: 22px; }
+.af-campaign-results > p { margin: -6px 0 4px; }
+.af-campaign-post { padding: 18px; border: 1px solid #e1d9f5; border-radius: 16px; background: rgba(255,255,255,.92); color: #252238; }
+.af-campaign-post > span { color: #6c3bde; font-size: 11px; font-weight: 900; letter-spacing: .1em; }
+.af-campaign-post h4 { margin: 8px 0; font-size: 18px; }
+.af-campaign-post p { margin: 7px 0 13px; white-space: pre-wrap; color: #5f5b6d; }
+.af-campaign-post strong { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; }
+.af-field > small { margin-top: 6px; color: #777384; font-size: 11px; }
 .af-approved-panel { scroll-margin-top: 24px; }
 .af-approved-panel > p { color: #777384; }
 .af-approved-card { padding: 18px; border: 1px solid #cdebdc; border-radius: 16px; background: #f3fbf7; }
