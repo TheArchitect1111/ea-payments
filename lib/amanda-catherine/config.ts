@@ -19,6 +19,7 @@ export const AMANDA_ROLE_DASHBOARDS: Record<
   readonly string[]
 > = {
   client: [
+    'private-deliveries',
     'appointments',
     'forms-and-consents',
     'preparation-and-aftercare',
@@ -28,6 +29,7 @@ export const AMANDA_ROLE_DASHBOARDS: Record<
     'messages',
   ],
   'student-trainee': [
+    'private-deliveries',
     'courses',
     'training-calendar',
     'assignments-and-assessments',
@@ -38,6 +40,7 @@ export const AMANDA_ROLE_DASHBOARDS: Record<
     'instructor-messages',
   ],
   'certified-practitioner': [
+    'private-deliveries',
     'protocols-and-templates',
     'advanced-training',
     'mentorship',
@@ -48,6 +51,7 @@ export const AMANDA_ROLE_DASHBOARDS: Record<
     'product-ordering',
   ],
   'member-community-participant': [
+    'private-deliveries',
     'member-profile',
     'member-resources',
     'events',
@@ -57,6 +61,7 @@ export const AMANDA_ROLE_DASHBOARDS: Record<
     'mentorship-and-collaboration',
   ],
   'media-guest': [
+    'private-deliveries',
     'media-application',
     'package-and-payment',
     'asset-upload',
@@ -67,6 +72,7 @@ export const AMANDA_ROLE_DASHBOARDS: Record<
     'launch-updates',
   ],
   volunteer: [
+    'private-deliveries',
     'volunteer-application',
     'onboarding-forms',
     'schedule-and-assignments',
@@ -75,6 +81,7 @@ export const AMANDA_ROLE_DASHBOARDS: Record<
     'participation-hours',
   ],
   'vendor-partner': [
+    'private-deliveries',
     'partner-application',
     'required-documents',
     'agreements',
