@@ -1,7 +1,7 @@
 import { loadStudioRecord, saveStudioRecord } from '@/lib/creative-studio/persistence';
 import { runAmplifiTopicResearch, type AmplifiTopicResearchResult } from './topic-research';
 
-export type WatchCadence = 'daily' | 'twice-weekly' | 'weekly';
+export type WatchCadence = 'twice-weekly' | 'weekly';
 export type WatchStatus = 'active' | 'paused' | 'stopped';
 
 export type WatchDiscovery = {
@@ -19,6 +19,8 @@ export type AmplifiTopicWatch = {
   topic: string;
   cadence: WatchCadence;
   timezone: string;
+  endAt: string;
+  postsPerRun: 1 | 2 | 3;
   status: WatchStatus;
   createdAt: string;
   updatedAt: string;
@@ -63,6 +65,8 @@ export async function createTopicWatch(input: {
   topic: string;
   cadence: WatchCadence;
   timezone: string;
+  endAt: string;
+  postsPerRun: 1 | 2 | 3;
 }): Promise<AmplifiTopicWatch> {
   const watches = await loadWatches(input.organizationId);
   const now = new Date().toISOString();
@@ -72,6 +76,8 @@ export async function createTopicWatch(input: {
     topic: input.topic.trim(),
     cadence: input.cadence,
     timezone: input.timezone,
+    endAt: input.endAt,
+    postsPerRun: input.postsPerRun,
     status: 'active',
     createdAt: now,
     updatedAt: now,
@@ -85,7 +91,7 @@ export async function createTopicWatch(input: {
 export async function updateTopicWatch(
   organizationId: string,
   id: string,
-  patch: Partial<Pick<AmplifiTopicWatch, 'status' | 'cadence' | 'timezone'>>,
+  patch: Partial<Pick<AmplifiTopicWatch, 'status' | 'cadence' | 'timezone' | 'endAt' | 'postsPerRun'>>,
 ): Promise<AmplifiTopicWatch | null> {
   const watches = await loadWatches(organizationId);
   const index = watches.findIndex((w) => w.id === id);
@@ -101,7 +107,6 @@ export async function updateTopicWatch(
 }
 
 function cadenceDays(cadence: WatchCadence): number {
-  if (cadence === 'daily') return 1;
   if (cadence === 'twice-weekly') return 3;
   return 7;
 }
@@ -128,6 +133,7 @@ function normalizeUrl(url: string): string {
 
 function watchDue(watch: AmplifiTopicWatch, now = new Date()): boolean {
   if (watch.status !== 'active') return false;
+  if (watch.endAt && now.getTime() > new Date(watch.endAt).getTime()) return false;
   if (!watch.lastRunAt) return true;
   const elapsed = now.getTime() - new Date(watch.lastRunAt).getTime();
   return elapsed >= cadenceDays(watch.cadence) * 86_400_000;
@@ -143,6 +149,7 @@ export async function runTopicWatch(
     dateTo: range.to,
     maxSources: 8,
     scrapeTop: 3,
+    postCount: watch.postsPerRun || 1,
   });
   const known = new Set(watch.sourceHistory.map((row) => normalizeUrl(row.url)));
   const fresh = research.sources.filter((source) => !known.has(normalizeUrl(source.url)));
@@ -221,6 +228,8 @@ export async function upsertTopicWatch(input: {
   topic: string;
   cadence: WatchCadence;
   timezone: string;
+  endAt: string;
+  postsPerRun: 1 | 2 | 3;
 }) {
   const existing = (await loadWatches(input.organizationId)).find(
     (watch) => watch.topic.toLowerCase() === input.topic.trim().toLowerCase(),
@@ -231,6 +240,8 @@ export async function upsertTopicWatch(input: {
       status: 'active',
       cadence: input.cadence,
       timezone: input.timezone,
+      endAt: input.endAt,
+      postsPerRun: input.postsPerRun,
     })
   )!;
 }
