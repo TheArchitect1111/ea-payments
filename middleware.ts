@@ -117,6 +117,19 @@ export async function middleware(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname;
 
+  // Canonical client aliases must resolve before portal authentication or host rewrites.
+  // This prevents old or guessed slugs from rendering a different tenant shell.
+  if (pathname === '/portal/amanda') {
+    const target = request.nextUrl.clone();
+    target.pathname = '/portal/amanda-catherine';
+    return NextResponse.redirect(target, 308);
+  }
+  if (host?.split(':')[0].toLowerCase() === 'portal.efficiencyarchitects.online' && pathname === '/amanda') {
+    const target = request.nextUrl.clone();
+    target.pathname = '/amanda-catherine';
+    return NextResponse.redirect(target, 308);
+  }
+
   const portalHost = resolvePortalHostRewrite(host, pathname);
   if (portalHost) {
     if ('redirectPath' in portalHost) {

@@ -37,6 +37,18 @@ assert(
   'Pulse custom domain must deep-link portal pulse',
 );
 
+const middleware = read('middleware.ts');
+assert(
+  middleware.includes("pathname === '/portal/amanda'") &&
+    middleware.includes("target.pathname = '/portal/amanda-catherine'"),
+  'legacy Amanda portal route must redirect to the canonical Amanda Catherine slug before auth',
+);
+assert(
+  middleware.includes("pathname === '/amanda'") &&
+    middleware.includes("target.pathname = '/amanda-catherine'"),
+  'portal host Amanda alias must redirect to the canonical Amanda Catherine slug',
+);
+
 const tier2 = read('lib/launch-tier2.ts');
 assert(tier2.includes('publicPortalLoginUrl()'), 'tier2 sample payload must use publicPortalLoginUrl');
 
