@@ -7,6 +7,8 @@ type Course = {
   courseId: string;
   title: string;
   priceCad: number;
+  compareAtPriceCad?: number;
+  saleLabel?: string;
   delivery: string[];
 };
 
@@ -51,7 +53,21 @@ export default function AmandaEnrollmentForm({ courses }: { courses: Course[] })
                     <span className="block text-xl font-bold leading-tight">{course.title}</span>
                     <span className="mt-2 block text-sm font-semibold uppercase tracking-wider text-[#72562f]">{course.delivery.join(' + ')} training</span>
                   </span>
-                  <span className="font-serif text-2xl">${course.priceCad.toLocaleString('en-CA')}</span>
+                  <span className="text-right">
+                    {course.compareAtPriceCad ? (
+                      <span className="block text-sm font-semibold text-[#7b6b5e] line-through">
+                        Regular ${course.compareAtPriceCad.toLocaleString('en-CA')}
+                      </span>
+                    ) : null}
+                    {course.saleLabel ? (
+                      <span className="block text-xs font-black uppercase tracking-wider text-[#8b1229]">
+                        {course.saleLabel}
+                      </span>
+                    ) : null}
+                    <span className="block font-serif text-2xl">
+                      {course.compareAtPriceCad ? 'Sale ' : ''}${course.priceCad.toLocaleString('en-CA')}
+                    </span>
+                  </span>
                 </span>
               </label>
             );
