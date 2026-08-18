@@ -435,6 +435,17 @@ export default function AmplifiPostApp({
 
   useEffect(() => { void loadConnections(); }, [loadConnections]);
 
+  useEffect(() => {
+    const status = new URLSearchParams(window.location.search).get('connections');
+    if (!status) return;
+    setShowHome(false);
+    if (status.endsWith('-connected')) setConnectionResult('Social accounts connected. Amplifi is refreshing the available pages now.');
+    else if (status.endsWith('-state-expired')) setConnectionsError('The authorization session expired before Meta returned to Amplifi. Start the connection again.');
+    else if (status.endsWith('-denied')) setConnectionsError('Meta authorization was not completed. No connection was changed.');
+    else if (status.endsWith('-failed')) setConnectionsError('Meta returned to Amplifi, but the social accounts could not be saved.');
+    window.setTimeout(() => document.getElementById('connections')?.scrollIntoView({ block: 'start' }), 50);
+  }, []);
+
   const generateDraft = useCallback(
     (input?: { businessName: string; storyUrl: string; headline?: string; quickWin?: string }) => {
       const name = (input?.businessName ?? businessName).trim();

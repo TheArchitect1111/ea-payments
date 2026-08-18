@@ -8,6 +8,7 @@ const home = readFileSync(join(root, 'app/amplifi/AmplifiHome.tsx'), 'utf8');
 const watch = readFileSync(join(root, 'lib/amplifi/topic-watch.ts'), 'utf8');
 const watchRoute = readFileSync(join(root, 'app/api/portal/amplifi/topic-research/watch/route.ts'), 'utf8');
 const campaignRoute = readFileSync(join(root, 'app/api/portal/amplifi/create-campaign/route.ts'), 'utf8');
+const socialCallback = readFileSync(join(root, 'app/api/portal/amplifi/native-connections/[provider]/callback/route.ts'), 'utf8');
 const research = readFileSync(join(root, 'lib/amplifi/topic-research.ts'), 'utf8');
 const styles = readFileSync(join(root, 'app/amplifi/amplifi.css'), 'utf8');
 
@@ -27,6 +28,10 @@ assert.match(app, /CAMPAIGN_BRIEF_STORAGE_KEY/);
 assert.match(app, /next=%2Famplifi%2Fworkspace/);
 assert.doesNotMatch(app, /disabled=\{campaignGenerating \|\| !loggedIn\}/);
 assert.match(app, /Your saved connection status has not been changed/);
+assert.match(app, /authorization session expired before Meta returned to Amplifi/);
+assert.match(socialCallback, /auth\.session\.slug === signedState\.portalSlug/);
+assert.match(socialCallback, /state-expired#connections/);
+assert.doesNotMatch(socialCallback, /Invalid OAuth state/);
 assert.match(app, /Verified proof or result/);
 assert.match(app, /Audience pain question/);
 assert.match(app, /CTA link/);
