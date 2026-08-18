@@ -225,7 +225,9 @@ export const AMANDA_OFFERS = [
   {
     id: 'body-sculpt-practitioner-certification',
     name: 'Body Sculpt Practitioner Certification',
-    priceCad: 4997,
+    priceCad: 2497,
+    compareAtPriceCad: 4997,
+    saleLabel: 'Limited-time sale',
     audience: 'practitioner-trainee',
     courseId: 'body-sculpt-practitioner-certification',
     delivery: ['in-person'],
@@ -421,6 +423,8 @@ export const AMANDA_SELF_ENROLLMENT_COURSES = AMANDA_OFFERS.filter(
   courseId: offer.courseId,
   title: offer.name,
   priceCad: offer.priceCad,
+  compareAtPriceCad: 'compareAtPriceCad' in offer ? offer.compareAtPriceCad : undefined,
+  saleLabel: 'saleLabel' in offer ? offer.saleLabel : undefined,
   delivery: 'delivery' in offer ? offer.delivery : [],
 }));
 
