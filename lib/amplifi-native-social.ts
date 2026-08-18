@@ -159,13 +159,17 @@ export async function exchangeProviderCode(provider: NativeProvider, code: strin
     const userToken = String(token.access_token || '');
     const pages = await jsonFetch(`https://graph.facebook.com/v26.0/me/accounts?fields=id,name,access_token,instagram_business_account{id,username},connected_instagram_account{id,username}&access_token=${encodeURIComponent(userToken)}`);
     const rows = Array.isArray(pages.data) ? pages.data as Record<string, unknown>[] : [];
-    const accounts = rows.flatMap((page) => {
+    const accounts: NativeAccount[] = [];
+    for (const page of rows) {
       const pageToken = String(page.access_token || '');
-      const output: NativeAccount[] = [{ id: String(page.id), provider, platform: 'facebook', name: String(page.name || 'Facebook Page'), accessToken: pageToken }];
-      const instagram = (page.instagram_business_account || page.connected_instagram_account) as Record<string, unknown> | undefined;
-      if (instagram?.id) output.push({ id: String(instagram.id), provider, platform: 'instagram', name: String(instagram.username || page.name || 'Instagram'), accessToken: pageToken });
-      return output;
-    });
+      accounts.push({ id: String(page.id), provider, platform: 'facebook', name: String(page.name || 'Facebook Page'), accessToken: pageToken });
+      let instagram = (page.instagram_business_account || page.connected_instagram_account) as Record<string, unknown> | undefined;
+      if (!instagram?.id && page.id && pageToken) {
+        const pageDetails = await jsonFetch(`https://graph.facebook.com/v26.0/${encodeURIComponent(String(page.id))}?fields=instagram_business_account{id,username},connected_instagram_account{id,username}&access_token=${encodeURIComponent(pageToken)}`);
+        instagram = (pageDetails.instagram_business_account || pageDetails.connected_instagram_account) as Record<string, unknown> | undefined;
+      }
+      if (instagram?.id) accounts.push({ id: String(instagram.id), provider, platform: 'instagram', name: String(instagram.username || page.name || 'Instagram'), accessToken: pageToken });
+    }
     if (!accounts.length) {
       throw new Error('Meta did not return an eligible Facebook Page. Confirm Page access and the selected business assets.');
     }
