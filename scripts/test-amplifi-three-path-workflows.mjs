@@ -14,6 +14,9 @@ const styles = readFileSync(join(root, 'app/amplifi/amplifi.css'), 'utf8');
 assert.match(home, /I’ll create it/);
 assert.match(home, /complete five-post campaign/);
 assert.match(home, /up to three months/);
+assert.match(home, />Connections</);
+assert.match(home, /Manage connections →/);
+assert.match(home, /Connection status unavailable/);
 
 assert.match(app, /selectedPath === 'publish'/);
 assert.match(app, /selectedPath === 'smartchitecture'/);
@@ -23,6 +26,7 @@ assert.match(app, /Sign in & create my 5-post campaign/);
 assert.match(app, /CAMPAIGN_BRIEF_STORAGE_KEY/);
 assert.match(app, /next=%2Famplifi%2Fworkspace/);
 assert.doesNotMatch(app, /disabled=\{campaignGenerating \|\| !loggedIn\}/);
+assert.match(app, /Your saved connection status has not been changed/);
 assert.match(app, /Verified proof or result/);
 assert.match(app, /Audience pain question/);
 assert.match(app, /CTA link/);

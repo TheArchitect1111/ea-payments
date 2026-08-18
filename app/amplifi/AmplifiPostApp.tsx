@@ -143,6 +143,7 @@ export default function AmplifiPostApp({
   const [socialConnections, setSocialConnections] = useState<SocialConnection[]>([]);
   const [connectionsLoading, setConnectionsLoading] = useState(loggedIn);
   const [connectionsConfigured, setConnectionsConfigured] = useState(false);
+  const [connectionsError, setConnectionsError] = useState<string | null>(null);
   const [providerStatuses, setProviderStatuses] = useState<NativeProviderStatus[]>([]);
   const [publishingNow, setPublishingNow] = useState(false);
   const [publishResult, setPublishResult] = useState('');
@@ -417,14 +418,16 @@ export default function AmplifiPostApp({
   const loadConnections = useCallback(async () => {
     if (!loggedIn) { setConnectionsLoading(false); return; }
     setConnectionsLoading(true);
+    setConnectionsError(null);
     try {
       const res = await fetch('/api/portal/amplifi/native-connections', { cache: 'no-store' });
-      const data = (await res.json()) as { providers?: NativeProviderStatus[]; connections?: SocialConnection[] };
+      const data = (await res.json()) as { providers?: NativeProviderStatus[]; connections?: SocialConnection[]; error?: string };
+      if (!res.ok) throw new Error(data.error || 'Amplifi could not load social connections.');
       setProviderStatuses(data.providers ?? []);
       setConnectionsConfigured(Boolean(data.providers?.some((provider) => provider.configured)));
       setSocialConnections(data.connections ?? []);
-    } catch {
-      setSocialConnections([]);
+    } catch (error) {
+      setConnectionsError(error instanceof Error ? error.message : 'Amplifi could not load social connections.');
     } finally {
       setConnectionsLoading(false);
     }
@@ -807,6 +810,8 @@ export default function AmplifiPostApp({
         ownerMode={slug === 'ea'}
         loggedIn={loggedIn}
         connectedChannels={connectedChannels}
+        connectionsLoading={connectionsLoading}
+        connectionsError={connectionsError}
         approvedPostTitle={approvedPost?.title}
         onChoosePath={choosePath}
         onOpenSection={openSection}
@@ -1195,6 +1200,7 @@ export default function AmplifiPostApp({
                 })}
               </div>
               {connectionsLoading ? <p className="af-connection-note">Checking connections…</p> : null}
+              {!connectionsLoading && connectionsError ? <p className="af-message af-message-error" role="alert">{connectionsError} Your saved connection status has not been changed.</p> : null}
               {!connectionsLoading && !connectionsConfigured ? <p className="af-message af-message-error">EA’s platform credentials must be approved and added before client authorization can open.</p> : null}
               {socialConnections.length ? <button type="button" className="af-text-button" onClick={() => void loadConnections()}>Refresh connections</button> : null}
             </section>

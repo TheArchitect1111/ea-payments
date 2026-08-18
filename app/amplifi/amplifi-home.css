@@ -259,6 +259,8 @@
   align-items: center;
   gap: 9px;
 }
+.af-home-connections { width: 100%; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.af-manage-connections { margin-left: auto; color: #5b2ed0; font-size: 13px; font-weight: 850; white-space: nowrap; }
 
 .af-home-connections strong {
   margin-left: 6px;

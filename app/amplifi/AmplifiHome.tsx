@@ -8,6 +8,8 @@ type AmplifiHomeProps = {
   ownerMode: boolean;
   loggedIn: boolean;
   connectedChannels: string[];
+  connectionsLoading: boolean;
+  connectionsError?: string | null;
   approvedPostTitle?: string | null;
   onChoosePath: (path: AmplifiHomePath) => void;
   onOpenSection: (sectionId: string) => void;
@@ -64,15 +66,26 @@ function AmplifiLogo() {
   );
 }
 
-function ConnectionStatus({ channels }: { channels: string[] }) {
+function ConnectionStatus({
+  channels,
+  loading,
+  error,
+  onOpen,
+}: {
+  channels: string[];
+  loading: boolean;
+  error?: string | null;
+  onOpen: () => void;
+}) {
   const facebook = channels.some((channel) => channel.toLowerCase() === 'facebook');
   const instagram = channels.some((channel) => channel.toLowerCase() === 'instagram');
   return (
-    <div className="af-home-connections" aria-label="Connected social channels">
+    <button type="button" className="af-home-connections" aria-label="Manage social connections" onClick={onOpen}>
       <span className={facebook ? 'af-channel af-channel-on' : 'af-channel'} aria-label={facebook ? 'Facebook connected' : 'Facebook not connected'}>f</span>
       <span className={instagram ? 'af-channel af-channel-instagram af-channel-on' : 'af-channel af-channel-instagram'} aria-label={instagram ? 'Instagram connected' : 'Instagram not connected'}>◎</span>
-      <strong>{channels.length ? `${channels.length} channel${channels.length === 1 ? '' : 's'} connected` : 'Connect Facebook and Instagram'}</strong>
-    </div>
+      <strong>{loading ? 'Checking social connections…' : error ? 'Connection status unavailable' : channels.length ? `${channels.length} channel${channels.length === 1 ? '' : 's'} connected` : 'Connect social platforms'}</strong>
+      <span className="af-manage-connections">Manage connections →</span>
+    </button>
   );
 }
 
@@ -80,6 +93,8 @@ export default function AmplifiHome({
   ownerMode,
   loggedIn,
   connectedChannels,
+  connectionsLoading,
+  connectionsError,
   approvedPostTitle,
   onChoosePath,
   onOpenSection,
@@ -93,7 +108,7 @@ export default function AmplifiHome({
           <button type="button" onClick={() => onOpenSection(ownerMode ? 'approved-posts' : 'content')}>{ownerMode ? 'Approvals' : 'Campaigns'}</button>
           <button type="button" onClick={() => onOpenSection('calendar')}>Calendar</button>
           <button type="button" onClick={() => onOpenSection('results')}>Results</button>
-          <button type="button" onClick={() => onOpenSection(ownerMode ? 'connections' : 'search')}>{ownerMode ? 'Settings' : 'Help'}</button>
+          <button type="button" onClick={() => onOpenSection('connections')}>Connections</button>
         </nav>
         {ownerMode ? (
           <button type="button" className="af-home-primary af-new-campaign" onClick={() => onChoosePath('smartchitecture')}>＋ New campaign</button>
@@ -133,7 +148,7 @@ export default function AmplifiHome({
               <p>Reach, engagement and link clicks will use live campaign data—never placeholder numbers.</p>
               <button type="button" onClick={() => onOpenSection('results')}>Open results</button>
             </div>
-            <ConnectionStatus channels={connectedChannels} />
+            <ConnectionStatus channels={connectedChannels} loading={connectionsLoading} error={connectionsError} onOpen={() => onOpenSection('connections')} />
           </section>
         </main>
       ) : (
@@ -160,7 +175,7 @@ export default function AmplifiHome({
           </section>
 
           <footer className="af-client-footer">
-            <ConnectionStatus channels={connectedChannels} />
+            <ConnectionStatus channels={connectedChannels} loading={connectionsLoading} error={connectionsError} onOpen={() => onOpenSection('connections')} />
             <p>Nothing publishes until you approve it.</p>
           </footer>
         </main>
