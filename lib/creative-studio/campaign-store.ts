@@ -4,11 +4,13 @@ import { generateCampaignPackage, GENERATION_VERSION } from './generate-assets';
 import { getBrandProfile } from './brand-store';
 import { createCampaignImages } from './image-engine';
 import { researchCampaign } from './research-engine';
+import { architectureFallback, normalizeCampaignArchitecture } from './campaign-architecture';
 import { listStudioRecords, loadStudioRecord, saveStudioRecord } from './persistence';
 import type {
   CampaignGoalId,
   CampaignStrategy,
   CampaignAsset,
+  CampaignArchitecture,
   CreativeCampaign,
   SocialPlatform,
 } from './types';
@@ -109,24 +111,39 @@ async function buildCampaignPackage(input: {
   };
 }
 
-async function persistCampaign(campaign: CreativeCampaign): Promise<void> {
+async function persistCampaign(campaign: CreativeCampaign): Promise<{ persistedToAirtable: boolean; error?: string }> {
   campaigns.set(campaign.id, campaign);
-  await saveStudioRecord({
+  const result = await saveStudioRecord({
     recordType: 'campaign',
     id: campaign.id,
     organizationId: campaign.organizationId,
     payload: campaign,
     title: campaign.brief.title,
   });
+  return { persistedToAirtable: result.persistedToAirtable, error: result.error };
 }
 
 export async function listCampaigns(organizationId = orgId()): Promise<CreativeCampaign[]> {
   const fromStore = await listStudioRecords<CreativeCampaign>('campaign', organizationId);
-  for (const campaign of fromStore) campaigns.set(campaign.id, campaign);
+  for (const campaign of fromStore) campaigns.set(campaign.id, withCampaignArchitecture(campaign));
 
   return [...campaigns.values()]
     .filter((campaign) => campaign.organizationId === organizationId)
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+}
+
+function withCampaignArchitecture(campaign: CreativeCampaign): CreativeCampaign {
+  const fallback = architectureFallback({
+    title: campaign.brief.title,
+    strategy: campaign.strategy,
+    ctaLabel: campaign.brief.callToAction,
+    ctaUrl: campaign.brief.registrationLink || campaign.brief.website,
+  });
+  return {
+    ...campaign,
+    architecture: normalizeCampaignArchitecture(campaign.architecture, fallback),
+    analytics: campaign.analytics ? { ...campaign.analytics, byProduct: campaign.analytics.byProduct ?? [] } : undefined,
+  };
 }
 
 async function ensureCurrentGeneration(campaign: CreativeCampaign): Promise<CreativeCampaign> {
@@ -155,10 +172,10 @@ async function ensureCurrentGeneration(campaign: CreativeCampaign): Promise<Crea
 
 export async function getCampaign(id: string): Promise<CreativeCampaign | null> {
   const cached = campaigns.get(id);
-  if (cached) return ensureCurrentGeneration(cached);
+  if (cached) return ensureCurrentGeneration(withCampaignArchitecture(cached));
 
   const loaded = await loadStudioRecord<CreativeCampaign>('campaign', id);
-  if (loaded) return ensureCurrentGeneration(loaded);
+  if (loaded) return ensureCurrentGeneration(withCampaignArchitecture(loaded));
   return null;
 }
 
@@ -167,6 +184,7 @@ export async function createCampaign(input: {
   story: string;
   organizationId?: string;
   strategy?: Partial<CampaignStrategy>;
+  architecture?: Partial<CampaignArchitecture>;
 }): Promise<CreativeCampaign> {
   const goal = goalById(input.goalId);
   const brief = await extractCampaignBrief(input.story, input.goalId);
@@ -185,6 +203,14 @@ export async function createCampaign(input: {
     organizationId,
     brand,
   });
+  const architecture = normalizeCampaignArchitecture(input.architecture, {
+    title: brief.title,
+    objective: strategy.objective,
+    audience: strategy.audience,
+    platforms: strategy.platforms,
+    ctaLabel: brief.callToAction,
+    ctaUrl: brief.registrationLink || brief.website,
+  });
 
   const campaign: CreativeCampaign = {
     id,
@@ -193,6 +219,7 @@ export async function createCampaign(input: {
     story: input.story.trim(),
     brief: { ...brief, audience: strategy.audience },
     strategy,
+    architecture,
     assets: generated.assets,
     timeline: generated.timeline,
     completionPercent: generated.completionPercent,
@@ -240,4 +267,14 @@ export async function saveCampaign(campaign: CreativeCampaign): Promise<Creative
   const updated = { ...campaign, updatedAt: new Date().toISOString() };
   await persistCampaign(updated);
   return updated;
+}
+
+export async function saveCampaignDurably(campaign: CreativeCampaign): Promise<{
+  campaign: CreativeCampaign;
+  durable: boolean;
+  error?: string;
+}> {
+  const updated = { ...campaign, updatedAt: new Date().toISOString() };
+  const result = await persistCampaign(updated);
+  return { campaign: updated, durable: result.persistedToAirtable, error: result.error };
 }

@@ -3,6 +3,7 @@ import { adminApiUnauthorized, guardAdminApi } from '@/lib/api/admin-route';
 import { createCampaign, listCampaigns } from '@/lib/creative-studio/campaign-store';
 import type {
   CampaignGoalId,
+  CampaignArchitecture,
   CampaignStrategy,
   SocialPlatform,
 } from '@/lib/creative-studio/types';
@@ -39,6 +40,7 @@ export async function POST(req: NextRequest) {
     goalId?: string;
     story?: string;
     strategy?: Partial<CampaignStrategy>;
+    architecture?: Partial<CampaignArchitecture>;
   };
   try {
     body = (await req.json()) as typeof body;
@@ -84,6 +86,7 @@ export async function POST(req: NextRequest) {
     goalId,
     story,
     strategy: body.strategy ? { ...body.strategy, platforms } : undefined,
+    architecture: body.architecture,
   });
   return NextResponse.json({ ok: true, campaign });
 }

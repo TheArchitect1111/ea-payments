@@ -72,6 +72,7 @@ export function emptyCampaignAnalytics(platforms: SocialPlatform[] = []): Campai
   return {
     totals: { ...ZERO_TOTALS },
     byAsset: [],
+    byProduct: [],
     daily: [],
     platformMetrics: [...new Set(platforms)].map((platform) => ({
       platform,
@@ -112,6 +113,9 @@ export async function recordCampaignActivity(input: {
     platform: platformForAsset(asset),
     ...ZERO_TOTALS,
   };
+  let productMetrics = asset.productId
+    ? analytics.byProduct?.find((item) => item.productId === asset.productId) ?? { productId: asset.productId, ...ZERO_TOTALS }
+    : null;
   let dailyMetrics = analytics.daily.find((item) => item.date === date) ?? { date, ...ZERO_TOTALS };
 
   for (const [enabled, field] of [
@@ -122,6 +126,7 @@ export async function recordCampaignActivity(input: {
     if (!enabled) continue;
     totals = increment(totals, field);
     assetMetrics = increment(assetMetrics, field) as typeof assetMetrics;
+    if (productMetrics) productMetrics = increment(productMetrics, field) as typeof productMetrics;
     dailyMetrics = increment(dailyMetrics, field) as typeof dailyMetrics;
   }
 
@@ -129,6 +134,9 @@ export async function recordCampaignActivity(input: {
     ...analytics,
     totals,
     byAsset: [...analytics.byAsset.filter((item) => item.assetId !== input.assetId), assetMetrics],
+    byProduct: productMetrics
+      ? [...(analytics.byProduct ?? []).filter((item) => item.productId !== productMetrics!.productId), productMetrics]
+      : analytics.byProduct ?? [],
     daily: [...analytics.daily.filter((item) => item.date !== date), dailyMetrics].sort((a, b) => a.date.localeCompare(b.date)),
     updatedAt: new Date().toISOString(),
   };

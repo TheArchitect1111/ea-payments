@@ -36,6 +36,11 @@ export async function GET(
   destination.searchParams.set('utm_content', asset.id);
   destination.searchParams.set('amplifi_campaign', campaign.id);
   destination.searchParams.set('amplifi_asset', asset.id);
+  if (asset.productId) {
+    destination.searchParams.set('utm_term', asset.productId);
+    destination.searchParams.set('amplifi_product', asset.productId);
+  }
+  if (asset.launchWaveId) destination.searchParams.set('amplifi_wave', asset.launchWaveId);
   const isCtp = destination.hostname === 'cc.efficiencyarchitects.online' && destination.pathname.startsWith('/ctp');
 
   await recordCampaignActivity({

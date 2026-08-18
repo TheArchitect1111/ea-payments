@@ -17,6 +17,9 @@ import {
 } from '@/lib/amplifi-share-policy';
 import { DEMO_CONSIDER_SLUG } from '@/lib/demo-consider-selena';
 import { PUBLIC_LINKS } from '@/lib/marketing-urls';
+import type { CampaignArchitecture } from '@/lib/creative-studio/types';
+import PortfolioCampaignCommandCenter from './PortfolioCampaignCommandCenter';
+import { findPortfolioScheduleConflicts } from '@/lib/amplifi-campaign-command';
 
 const DEMO_STORY_URL = `${PUBLIC_LINKS.platform.replace(/\/$/, '')}/consider/${DEMO_CONSIDER_SLUG}`;
 
@@ -68,8 +71,24 @@ type TopicWatch = {
   lastRunAt?: string;
 };
 
-type CampaignPost = { title: string; caption: string; callToAction: string; imageDirection: string };
-type GeneratedCampaign = { title: string; strategy: string; posts: CampaignPost[] };
+type CampaignPost = { title: string; caption: string; callToAction: string; imageDirection: string; productId?: string; audienceId?: string; waveId?: string };
+type PromotionScope = 'single' | 'portfolio';
+type PortfolioProductInput = {
+  id: string;
+  name: string;
+  audience: string;
+  callToAction: string;
+  ctaUrl: string;
+};
+type GeneratedCampaign = {
+  id?: string;
+  durable?: boolean;
+  persistenceError?: string;
+  title: string;
+  strategy: string;
+  posts: CampaignPost[];
+  architecture?: CampaignArchitecture;
+};
 type CampaignTone = 'Bold and direct' | 'Provocative and challenging' | 'Authoritative and premium' | 'Warm and human';
 const CAMPAIGN_BRIEF_STORAGE_KEY = 'amplifi:create-for-me:brief';
 const CAMPAIGN_WORKSPACE_STORAGE_KEY = 'amplifi:campaign-workspace:v1';
@@ -141,6 +160,11 @@ export default function AmplifiPostApp({
   const [topicWatches, setTopicWatches] = useState<TopicWatch[]>([]);
   const [watchBusyId, setWatchBusyId] = useState<string | null>(null);
   const [promotion, setPromotion] = useState('');
+  const [promotionScope, setPromotionScope] = useState<PromotionScope>('single');
+  const [portfolioProducts, setPortfolioProducts] = useState<PortfolioProductInput[]>([
+    { id: 'product-1', name: '', audience: '', callToAction: '', ctaUrl: '' },
+    { id: 'product-2', name: '', audience: '', callToAction: '', ctaUrl: '' },
+  ]);
   const [campaignAudience, setCampaignAudience] = useState('');
   const [campaignResult, setCampaignResult] = useState('');
   const [campaignCallToAction, setCampaignCallToAction] = useState('');
@@ -166,6 +190,10 @@ export default function AmplifiPostApp({
   const [regenerationInstructions, setRegenerationInstructions] = useState<Record<number, string>>({});
   const [campaignScheduleTimes, setCampaignScheduleTimes] = useState<Record<number, string>>({});
   const [campaignScheduled, setCampaignScheduled] = useState(false);
+  const [campaignScheduleSaving, setCampaignScheduleSaving] = useState(false);
+  const portfolioScheduleConflicts = generatedCampaign?.architecture?.mode === 'portfolio'
+    ? findPortfolioScheduleConflicts(generatedCampaign.posts, campaignScheduleTimes, generatedCampaign.architecture)
+    : [];
 
   useEffect(() => {
     const savedPath = window.localStorage.getItem('amplifi:onboarding:path') as AmplifiPath | null;
@@ -185,6 +213,8 @@ export default function AmplifiPostApp({
           proofPoint?: string;
           painQuestion?: string;
           ctaUrl?: string;
+          promotionScope?: PromotionScope;
+          portfolioProducts?: PortfolioProductInput[];
         };
         setPromotion(brief.promotion ?? '');
         setCampaignAudience(brief.audience ?? '');
@@ -195,6 +225,10 @@ export default function AmplifiPostApp({
         setCampaignProofPoint(brief.proofPoint ?? '');
         setCampaignPainQuestion(brief.painQuestion ?? '');
         setCampaignCtaUrl(brief.ctaUrl ?? '');
+        setPromotionScope(brief.promotionScope === 'portfolio' ? 'portfolio' : 'single');
+        if (Array.isArray(brief.portfolioProducts) && brief.portfolioProducts.length >= 2) {
+          setPortfolioProducts(brief.portfolioProducts);
+        }
         setSelectedPath('smartchitecture');
         setShowHome(false);
         window.sessionStorage.removeItem(CAMPAIGN_BRIEF_STORAGE_KEY);
@@ -230,8 +264,14 @@ export default function AmplifiPostApp({
   };
 
   const createCampaignForMe = async () => {
-    if (!promotion.trim() || !campaignAudience.trim() || !campaignResult.trim() || !campaignCallToAction.trim()) {
-      setMessage('Complete the promotion, audience, result and call to action.');
+    const portfolioComplete = promotionScope === 'portfolio' && portfolioProducts.length >= 2 && portfolioProducts.every(
+      (product) => product.name.trim() && product.audience.trim() && product.callToAction.trim(),
+    );
+    const singleComplete = promotionScope === 'single' && campaignAudience.trim() && campaignCallToAction.trim();
+    if (!promotion.trim() || !campaignResult.trim() || (!singleComplete && !portfolioComplete)) {
+      setMessage(promotionScope === 'portfolio'
+        ? 'Add at least two products, including the audience and next action for each.'
+        : 'Complete the promotion, audience, result and call to action.');
       return;
     }
     if (!loggedIn) {
@@ -245,6 +285,8 @@ export default function AmplifiPostApp({
         proofPoint: campaignProofPoint.trim(),
         painQuestion: campaignPainQuestion.trim(),
         ctaUrl: campaignCtaUrl.trim(),
+        promotionScope,
+        portfolioProducts,
       }));
       window.location.assign('/portal/login?next=%2Famplifi%2Fworkspace');
       return;
@@ -266,11 +308,14 @@ export default function AmplifiPostApp({
           proofPoint: campaignProofPoint.trim(),
           painQuestion: campaignPainQuestion.trim(),
           ctaUrl: campaignCtaUrl.trim(),
+          promotionScope,
+          portfolioProducts: promotionScope === 'portfolio' ? portfolioProducts : undefined,
           toneStrength: campaignToneStrength,
           wordsUse: campaignWordsUse.trim(),
           wordsAvoid: campaignWordsAvoid.trim(),
           platforms: campaignPlatforms,
           imageStyle: campaignImageStyle,
+          startDate: campaignStartDate,
         }),
       });
       const data = (await res.json()) as { ok?: boolean; error?: string; campaign?: GeneratedCampaign };
@@ -281,7 +326,11 @@ export default function AmplifiPostApp({
       setGeneratedCampaign(data.campaign);
       setApprovedCampaignPosts([]);
       setBusinessName(data.campaign.title);
-      setSuccess('Amplifi created five coordinated posts. Review each one before approval.');
+      if (data.campaign.architecture?.mode === 'portfolio' && data.campaign.durable !== true) {
+        setMessage('The campaign was created, but durable server storage is not configured. Do not schedule it yet.');
+      } else {
+        setSuccess('Amplifi created five coordinated posts. Review each one before approval.');
+      }
     } catch {
       setMessage('Amplifi could not create the campaign right now.');
     } finally {
@@ -290,6 +339,48 @@ export default function AmplifiPostApp({
   };
 
   const toggleCampaignPlatform = (platform: string) => setCampaignPlatforms((current) => current.includes(platform) ? current.filter((item) => item !== platform) : [...current, platform]);
+
+  const saveCampaignSchedule = async () => {
+    if (generatedCampaign?.architecture?.mode !== 'portfolio') {
+      setCampaignScheduled(true);
+      return;
+    }
+    if (!generatedCampaign.id) {
+      setMessage('This portfolio campaign does not have a durable campaign record.');
+      return;
+    }
+    setCampaignScheduleSaving(true);
+    setMessage('');
+    try {
+      const response = await fetch(`/api/portal/amplifi/campaigns/${encodeURIComponent(generatedCampaign.id)}/schedule`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ schedule: campaignScheduleTimes, approvedPostIndexes: approvedCampaignPosts, timezone: 'America/New_York' }),
+      });
+      const data = (await response.json()) as { ok?: boolean; error?: string; conflicts?: string[] };
+      if (!response.ok || !data.ok) {
+        setMessage(data.conflicts?.join(' ') || data.error || 'The campaign schedule could not be saved.');
+        return;
+      }
+      setCampaignScheduled(true);
+      setSuccess('Campaign schedule saved to Amplifi.');
+    } catch {
+      setMessage('The campaign schedule could not reach Amplifi.');
+    } finally {
+      setCampaignScheduleSaving(false);
+    }
+  };
+
+  const updatePortfolioProduct = (id: string, patch: Partial<PortfolioProductInput>) => {
+    setPortfolioProducts((current) => current.map((product) => product.id === id ? { ...product, ...patch } : product));
+  };
+
+  const addPortfolioProduct = () => {
+    setPortfolioProducts((current) => [
+      ...current,
+      { id: `product-${Date.now().toString(36)}`, name: '', audience: '', callToAction: '', ctaUrl: '' },
+    ]);
+  };
 
   const updateCampaignPost = (index: number, patch: Partial<CampaignPost>) => {
     setGeneratedCampaign((current) => current ? {
@@ -300,9 +391,14 @@ export default function AmplifiPostApp({
 
   const regenerateCampaignPost = (index: number) => {
     if (!generatedCampaign) return;
+    const assignedPost = generatedCampaign.posts[index];
+    const assignedProduct = generatedCampaign.architecture?.products.find((product) => product.id === assignedPost?.productId);
+    const assignedAudience = generatedCampaign.architecture?.audiences.find((audience) => audience.id === assignedPost?.audienceId)?.name;
     const pain = campaignPainQuestion.trim() || 'Is your business leaking time, money and resources?';
-    const proof = campaignProofPoint.trim() || `The right system gives ${campaignAudience.trim() || 'your team'} capacity back.`;
-    const cta = `${campaignCallToAction.trim()}${campaignCtaUrl.trim() ? ` ${campaignCtaUrl.trim()}` : ''}`.trim();
+    const proof = campaignProofPoint.trim() || `The right system gives ${assignedAudience || campaignAudience.trim() || 'your team'} capacity back.`;
+    const cta = assignedProduct
+      ? `${assignedProduct.callToAction.label}${assignedProduct.callToAction.url ? ` ${assignedProduct.callToAction.url}` : ''}`.trim()
+      : `${campaignCallToAction.trim()}${campaignCtaUrl.trim() ? ` ${campaignCtaUrl.trim()}` : ''}`.trim();
     const toneLead = campaignTone === 'Provocative and challenging' ? 'Here is the uncomfortable truth: ' : campaignTone === 'Authoritative and premium' ? 'Operationally, the issue is clear: ' : campaignTone === 'Warm and human' ? 'Your people deserve a better way to work. ' : '';
     const requestedChange = regenerationInstructions[index]?.trim();
     const directionLead = requestedChange ? `${requestedChange.replace(/[.!?]+$/, '')}: ` : '';
@@ -951,16 +1047,36 @@ export default function AmplifiPostApp({
 
             {selectedPath === 'smartchitecture' ? <section className="af-panel af-smartchitecture-panel" id="smartchitecture">
               <div className="af-section-heading"><div><span className="af-eyebrow">Create it for me</span><h3>Tell Amplifi what the campaign needs to accomplish.</h3><p>Give Amplifi the brief—not the copy. Amplifi will create five coordinated posts.</p></div></div>
+              <fieldset className="af-promotion-scope">
+                <legend>What are you promoting?</legend>
+                <div>
+                  <button type="button" className={promotionScope === 'single' ? 'is-selected' : ''} aria-pressed={promotionScope === 'single'} onClick={() => setPromotionScope('single')}><strong>One product or service</strong><span>Use the simple campaign builder.</span></button>
+                  <button type="button" className={promotionScope === 'portfolio' ? 'is-selected' : ''} aria-pressed={promotionScope === 'portfolio'} onClick={() => setPromotionScope('portfolio')}><strong>Multiple products or services</strong><span>Coordinate them under one campaign.</span></button>
+                </div>
+              </fieldset>
               <div className="af-editor-grid">
-                <label className="af-field af-field-wide"><span>What are you promoting?</span><textarea value={promotion} onChange={(e) => setPromotion(e.target.value)} placeholder="Describe the service, event, offer or idea" /></label>
-                <label className="af-field"><span>Who should this campaign reach?</span><input value={campaignAudience} onChange={(e) => setCampaignAudience(e.target.value)} placeholder="Your intended audience" /></label>
+                <label className="af-field af-field-wide"><span>{promotionScope === 'portfolio' ? 'Master campaign name' : 'Describe what you are promoting'}</span><textarea value={promotion} onChange={(e) => setPromotion(e.target.value)} placeholder={promotionScope === 'portfolio' ? 'Example: See What EA Can Build' : 'Describe the service, event, offer or idea'} /></label>
+                {promotionScope === 'single' ? <label className="af-field"><span>Who should this campaign reach?</span><input value={campaignAudience} onChange={(e) => setCampaignAudience(e.target.value)} placeholder="Your intended audience" /></label> : null}
                 <label className="af-field"><span>What result do you want?</span><input value={campaignResult} onChange={(e) => setCampaignResult(e.target.value)} placeholder="The campaign goal" /></label>
                 <label className="af-field"><span>Tone</span><select value={campaignTone} onChange={(e) => setCampaignTone(e.target.value as CampaignTone)}><option>Bold and direct</option><option>Provocative and challenging</option><option>Authoritative and premium</option><option>Warm and human</option></select></label>
                 <label className="af-field af-field-wide"><span>Verified proof or result</span><input value={campaignProofPoint} onChange={(e) => setCampaignProofPoint(e.target.value)} placeholder="We saved one client $17,000 by automating one process." /></label>
                 <label className="af-field af-field-wide"><span>Audience pain question</span><input value={campaignPainQuestion} onChange={(e) => setCampaignPainQuestion(e.target.value)} placeholder="Is your business leaking time, money and resources?" /></label>
-                <label className="af-field"><span>What should people do next?</span><input value={campaignCallToAction} onChange={(e) => setCampaignCallToAction(e.target.value)} placeholder="Take the CTP" /></label>
-                <label className="af-field"><span>CTA link</span><input type="url" value={campaignCtaUrl} onChange={(e) => setCampaignCtaUrl(e.target.value)} placeholder="https://cc.efficiencyarchitects.online/ctp" /></label>
+                {promotionScope === 'single' ? <><label className="af-field"><span>What should people do next?</span><input value={campaignCallToAction} onChange={(e) => setCampaignCallToAction(e.target.value)} placeholder="Take the CTP" /></label>
+                <label className="af-field"><span>CTA link</span><input type="url" value={campaignCtaUrl} onChange={(e) => setCampaignCtaUrl(e.target.value)} placeholder="https://cc.efficiencyarchitects.online/ctp" /></label></> : null}
               </div>
+              {promotionScope === 'portfolio' ? <section className="af-portfolio-products" aria-label="Products in this campaign">
+                <div className="af-portfolio-heading"><div><span className="af-eyebrow">Campaign products</span><h4>Give each product its own audience and next step.</h4></div><span>{portfolioProducts.length} products</span></div>
+                {portfolioProducts.map((product, index) => <article key={product.id} className="af-product-brief">
+                  <div className="af-product-brief-head"><strong>Product {index + 1}</strong>{portfolioProducts.length > 2 ? <button type="button" onClick={() => setPortfolioProducts((current) => current.filter((item) => item.id !== product.id))}>Remove</button> : null}</div>
+                  <div className="af-editor-grid">
+                    <label className="af-field"><span>Product or service</span><input value={product.name} onChange={(e) => updatePortfolioProduct(product.id, { name: e.target.value })} placeholder="Website + client portal" /></label>
+                    <label className="af-field"><span>Audience</span><input value={product.audience} onChange={(e) => updatePortfolioProduct(product.id, { audience: e.target.value })} placeholder="Nonprofits and service businesses" /></label>
+                    <label className="af-field"><span>What should they do next?</span><input value={product.callToAction} onChange={(e) => updatePortfolioProduct(product.id, { callToAction: e.target.value })} placeholder="View the product demonstration" /></label>
+                    <label className="af-field"><span>CTA link <small>optional</small></span><input type="url" value={product.ctaUrl} onChange={(e) => updatePortfolioProduct(product.id, { ctaUrl: e.target.value })} placeholder="https://…" /></label>
+                  </div>
+                </article>)}
+                <button type="button" className="af-add-product" onClick={addPortfolioProduct}>＋ Add another product</button>
+              </section> : null}
               <button type="button" className="af-more-control" aria-expanded={showCampaignControls} onClick={() => setShowCampaignControls((value) => !value)}>More control <span>{showCampaignControls ? '−' : '+'}</span></button>
               {showCampaignControls ? <div className="af-editor-grid af-advanced-controls">
                 <label className="af-field"><span>Tone strength</span><select value={campaignToneStrength} onChange={(e) => setCampaignToneStrength(e.target.value)}><option>Measured</option><option>Balanced</option><option>Strong</option></select></label>
@@ -975,18 +1091,21 @@ export default function AmplifiPostApp({
               {message ? <p className="af-message af-message-error">{message}</p> : null}
               {success ? <p className="af-message af-message-success">{success}</p> : null}
               <div className="af-action-row"><button type="button" className="af-primary-button" disabled={campaignGenerating} onClick={() => void createCampaignForMe()}>{campaignGenerating ? 'Amplifi is creating…' : loggedIn ? 'Create my 5-post campaign' : 'Sign in & create my 5-post campaign'}</button><span>{loggedIn ? 'Nothing publishes until you approve it.' : 'Your brief will be saved while you sign in.'}</span></div>
-              {generatedCampaign ? <div className="af-campaign-results"><h4>{generatedCampaign.title}</h4>{generatedCampaign.strategy ? <p>{generatedCampaign.strategy}</p> : null}{generatedCampaign.posts.map((post, index) => {
+              {generatedCampaign ? <div className="af-campaign-results">{generatedCampaign.architecture?.mode === 'portfolio' ? <PortfolioCampaignCommandCenter campaignId={generatedCampaign.id} architecture={generatedCampaign.architecture} posts={generatedCampaign.posts} approvedPostIndexes={approvedCampaignPosts} schedule={campaignScheduleTimes} /> : null}<h4>{generatedCampaign.title}</h4>{generatedCampaign.strategy ? <p>{generatedCampaign.strategy}</p> : null}{generatedCampaign.posts.map((post, index) => {
                 const approved = approvedCampaignPosts.includes(index);
                 const imageVariant = (campaignImageVariants[index] ?? 0) % 3;
+                const assignedProduct = generatedCampaign.architecture?.products.find((product) => product.id === post.productId);
+                const assignedWave = generatedCampaign.architecture?.waves.find((wave) => wave.id === post.waveId);
                 return <article className="af-campaign-post" key={`campaign-post-${index}`}>
                   <span>POST {index + 1} OF 5</span>
+                  {assignedProduct ? <div className="af-post-assignment"><strong>{assignedProduct.name}</strong><small>{assignedWave?.name || 'Launch wave pending'}</small></div> : null}
                   {campaignUploadedImages[index] ? <img className="af-generated-post-image af-uploaded-post-image" src={campaignUploadedImages[index]} alt={`Uploaded visual for ${post.title}`} /> : <div className={`af-generated-post-image af-image-variant-${imageVariant}`} role="img" aria-label={`Branded image for ${post.title}`}><small>AMPLIFI</small><strong>{index === 2 && campaignProofPoint.trim() ? campaignProofPoint : post.title}</strong><em>{campaignCtaUrl ? 'Take the next step' : campaignTone}</em></div>}
                   {editingCampaignPost === index ? <div className="af-campaign-editor"><label className="af-field"><span>Headline</span><input value={post.title} onChange={(e) => updateCampaignPost(index, { title: e.target.value })} /></label><label className="af-field"><span>Post copy</span><textarea value={post.caption} onChange={(e) => updateCampaignPost(index, { caption: e.target.value })} /></label><label className="af-field"><span>Call to action</span><input value={post.callToAction} onChange={(e) => updateCampaignPost(index, { callToAction: e.target.value })} /></label></div> : <><h4>{post.title}</h4><p>{post.caption}</p><strong>Call to action</strong><p>{post.callToAction}</p></>}
                   <div className="af-platform-preview">Preview: {campaignPlatforms.join(' · ') || 'Choose a platform'}</div>
                   <label className="af-regen-field"><span>Want a different version?</span><input value={regenerationInstructions[index] ?? ''} onChange={(e) => setRegenerationInstructions((current) => ({ ...current, [index]: e.target.value }))} placeholder="Make it sharper, shorter, or more specific…" /></label>
                   <div className="af-post-controls"><button type="button" onClick={() => setEditingCampaignPost(editingCampaignPost === index ? null : index)}>{editingCampaignPost === index ? 'Save edit' : 'Edit'}</button><button type="button" onClick={() => regenerateCampaignPost(index)}>Regenerate with instructions</button><button type="button" className={approved ? 'is-approved' : ''} onClick={() => setApprovedCampaignPosts((current) => approved ? current.filter((postIndex) => postIndex !== index) : [...current, index])}>{approved ? 'Approved' : 'Approve'}</button><label className="af-upload-button">Upload image<input type="file" accept="image/*" onChange={(e) => { const file = e.target.files?.[0]; if (file) setCampaignUploadedImages((current) => ({ ...current, [index]: URL.createObjectURL(file) })); }} /></label></div>
                 </article>;
-              })}{approvedCampaignPosts.length === 5 ? <section className="af-schedule-panel" id="campaign-schedule"><span className="af-eyebrow">All 5 posts approved</span><h3>Review and schedule campaign</h3><p>Choose where and when each approved post should publish. Social connections appear here only when you are ready to schedule.</p><div className="af-schedule-list">{generatedCampaign.posts.map((post, index) => <label className="af-field" key={`schedule-${index}`}><span>Post {index + 1}: {post.title}</span><input type="datetime-local" value={campaignScheduleTimes[index] ?? ''} onChange={(e) => setCampaignScheduleTimes((current) => ({ ...current, [index]: e.target.value }))} /></label>)}</div><div className="af-schedule-platforms"><strong>Publish to</strong>{campaignPlatforms.map((platform) => <span key={platform}>{platform}</span>)}</div><a className="af-secondary-button af-connect-action" href="#connections">Review social connections</a><button type="button" className="af-primary-button" disabled={campaignPlatforms.length === 0 || Object.keys(campaignScheduleTimes).length < 5} onClick={() => setCampaignScheduled(true)}>{campaignScheduled ? 'Campaign schedule saved' : 'Save campaign schedule'}</button>{campaignScheduled ? <p className="af-message af-message-success">Schedule saved. Amplifi will use the authorized platform connections at publish time.</p> : null}</section> : null}</div> : null}
+              })}{approvedCampaignPosts.length === 5 ? <section className="af-schedule-panel" id="campaign-schedule"><span className="af-eyebrow">All 5 posts approved</span><h3>Review and schedule campaign</h3><p>Choose where and when each approved post should publish. Social connections appear here only when you are ready to schedule.</p><div className="af-schedule-list">{generatedCampaign.posts.map((post, index) => <label className="af-field" key={`schedule-${index}`}><span>Post {index + 1}: {post.title}</span><input type="datetime-local" value={campaignScheduleTimes[index] ?? ''} onChange={(e) => setCampaignScheduleTimes((current) => ({ ...current, [index]: e.target.value }))} /></label>)}</div>{portfolioScheduleConflicts.length ? <div className="af-schedule-conflicts" role="alert"><strong>Resolve schedule conflicts before saving.</strong>{portfolioScheduleConflicts.map((conflict) => <p key={conflict}>{conflict}</p>)}</div> : null}<div className="af-schedule-platforms"><strong>Publish to</strong>{campaignPlatforms.map((platform) => <span key={platform}>{platform}</span>)}</div><a className="af-secondary-button af-connect-action" href="#connections">Review social connections</a><button type="button" className="af-primary-button" disabled={campaignPlatforms.length === 0 || Object.keys(campaignScheduleTimes).length < 5 || portfolioScheduleConflicts.length > 0 || campaignScheduleSaving} onClick={() => void saveCampaignSchedule()}>{campaignScheduleSaving ? 'Saving schedule…' : campaignScheduled ? 'Campaign schedule saved' : 'Save campaign schedule'}</button>{campaignScheduled ? <p className="af-message af-message-success">Schedule saved. Publishing will proceed only after account and media checks pass.</p> : null}</section> : null}</div> : null}
             </section> : null}
             {selectedPath === 'publish' ? <section className="af-panel" id="content">
               <div className="af-section-heading">

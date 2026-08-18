@@ -65,6 +65,10 @@ export interface CampaignAssetMetrics extends CampaignMetricTotals {
   platform?: SocialPlatform;
 }
 
+export interface CampaignProductMetrics extends CampaignMetricTotals {
+  productId: string;
+}
+
 export interface CampaignDailyMetrics extends CampaignMetricTotals {
   date: string;
 }
@@ -85,6 +89,7 @@ export interface CampaignPlatformMetrics {
 export interface CampaignAnalytics {
   totals: CampaignMetricTotals;
   byAsset: CampaignAssetMetrics[];
+  byProduct: CampaignProductMetrics[];
   daily: CampaignDailyMetrics[];
   platformMetrics: CampaignPlatformMetrics[];
   updatedAt: string;
@@ -134,6 +139,58 @@ export interface CampaignStrategy {
   contentPillars: string[];
   researchFocus?: string;
   trustedSources?: string[];
+}
+
+export type CampaignArchitectureMode = 'single' | 'portfolio';
+
+export interface CampaignCallToAction {
+  label: string;
+  url?: string;
+  conversionGoal?: string;
+}
+
+export interface CampaignAudienceSegment {
+  id: string;
+  name: string;
+  need?: string;
+  channels: SocialPlatform[];
+}
+
+export interface CampaignProductTrack {
+  id: string;
+  name: string;
+  positioning?: string;
+  offer?: string;
+  audienceIds: string[];
+  callToAction: CampaignCallToAction;
+  status: 'planned' | 'active' | 'paused' | 'complete';
+}
+
+export interface CampaignLaunchWave {
+  id: string;
+  name: string;
+  sequence: number;
+  objective?: string;
+  startDate?: string;
+  endDate?: string;
+  productIds: string[];
+  audienceIds: string[];
+  status: 'planned' | 'active' | 'complete';
+}
+
+/**
+ * The campaign hierarchy used by Amplifi's orchestration layer. Standard campaigns
+ * receive a single-track architecture so existing creation and publishing flows
+ * remain unchanged; portfolio campaigns can coordinate multiple offers in waves.
+ */
+export interface CampaignArchitecture {
+  mode: CampaignArchitectureMode;
+  masterName: string;
+  masterObjective: string;
+  defaultCallToAction: CampaignCallToAction;
+  audiences: CampaignAudienceSegment[];
+  products: CampaignProductTrack[];
+  waves: CampaignLaunchWave[];
 }
 
 export interface ResearchSource {
@@ -257,6 +314,10 @@ export interface CampaignAsset {
   qualityIssues?: string[];
   variantGroupId?: string;
   suggestedImageId?: string;
+  productId?: string;
+  audienceId?: string;
+  launchWaveId?: string;
+  portfolioPostIndex?: number;
 }
 
 export type MediaAssetKind = 'image' | 'logo' | 'document' | 'video';
@@ -298,6 +359,7 @@ export interface CreativeCampaign {
   story: string;
   brief: CampaignBrief;
   strategy: CampaignStrategy;
+  architecture: CampaignArchitecture;
   assets: CampaignAsset[];
   timeline: CampaignTimelineItem[];
   completionPercent: number;
@@ -311,6 +373,8 @@ export interface CreativeCampaign {
   research?: CampaignResearch;
   imageSuggestions?: CampaignImageSuggestion[];
   analytics?: CampaignAnalytics;
+  portalSlug?: string;
+  source?: 'creative-studio' | 'amplifi-portal';
 }
 
 export interface BrandProfile {
