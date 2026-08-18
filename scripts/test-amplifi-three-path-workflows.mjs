@@ -36,6 +36,8 @@ assert.doesNotMatch(socialCallback, /Invalid OAuth state/);
 assert.match(nativeSocial, /pages_show_list,pages_read_engagement,pages_manage_posts,instagram_basic,instagram_content_publish,business_management/);
 assert.match(nativeSocial, /Meta did not return an eligible Facebook Page/);
 assert.match(app, /Meta authorized Amplifi but returned no eligible Facebook Page/);
+assert.match(app, /Meta may take up to 10 seconds to open the secure authorization screen/);
+assert.match(socialCallback, /Amplifi OAuth connection failed/);
 assert.match(app, /Verified proof or result/);
 assert.match(app, /Audience pain question/);
 assert.match(app, /CTA link/);

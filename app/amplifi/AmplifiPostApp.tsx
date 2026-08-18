@@ -1194,6 +1194,7 @@ export default function AmplifiPostApp({
             <section className="af-panel af-connections-panel" id="connections">
               <div className="af-section-heading"><div><span className="af-eyebrow">Social connections</span><h3>Connect directly to Amplifi.</h3></div></div>
               <p>Use each platform’s official authorization. Amplifi never asks for or stores your social-media password.</p>
+              <p className="af-connection-note">After you tap Connect, Meta may take up to 10 seconds to open the secure authorization screen.</p>
               <div className="af-platform-grid">
                 {[
                   { name: 'Facebook', provider: 'meta' as const },

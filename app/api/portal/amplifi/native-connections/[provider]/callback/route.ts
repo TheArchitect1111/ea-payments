@@ -20,16 +20,21 @@ export async function GET(req: NextRequest, context: { params: Promise<{ provide
   const sessionState = Boolean(signedState && auth.ok && auth.session.slug === signedState.portalSlug);
   const validState = Boolean(signedState && (cookieState || sessionState));
   if (!validState) {
+    console.warn('Amplifi OAuth callback rejected', { provider: value, reason: 'state-expired' });
     return NextResponse.redirect(new URL(`/amplifi/workspace?connections=${value}-state-expired#connections`, req.nextUrl.origin));
   }
   if (signedState) saved.returnOrigin = signedState.returnOrigin;
-  if (url.searchParams.get('error') || !url.searchParams.get('code')) return NextResponse.redirect(new URL(`/amplifi/workspace?connections=${value}-denied#connections`, req.url));
+  if (url.searchParams.get('error') || !url.searchParams.get('code')) {
+    console.warn('Amplifi OAuth callback rejected', { provider: value, reason: 'denied' });
+    return NextResponse.redirect(new URL(`/amplifi/workspace?connections=${value}-denied#connections`, req.url));
+  }
   try {
     const oauthOrigin =
       process.env.AMPLIFI_PUBLIC_ORIGIN?.trim() ||
       (process.env.VERCEL_ENV === 'production' ? 'https://efficiencyarchitects.online' : req.nextUrl.origin);
     const accounts = await exchangeProviderCode(value, url.searchParams.get('code') || '', oauthOrigin, saved.verifier);
     await saveAmplifiConnections(signedState!.portalSlug, value, accounts);
+    console.info('Amplifi OAuth connection saved', { provider: value, platforms: accounts.map((account) => account.platform) });
     let returnOrigin = req.nextUrl.origin;
     try {
       const candidate = new URL(saved.returnOrigin || '');
@@ -62,6 +67,7 @@ export async function GET(req: NextRequest, context: { params: Promise<{ provide
     return response;
   } catch (error) {
     const reason = error instanceof Error && error.message.includes('eligible Facebook Page') ? 'no-pages' : 'failed';
+    console.error('Amplifi OAuth connection failed', { provider: value, reason, message: error instanceof Error ? error.message : 'Unknown error' });
     return NextResponse.redirect(new URL(`/amplifi/workspace?connections=${value}-${reason}#connections`, req.url));
   }
 }
