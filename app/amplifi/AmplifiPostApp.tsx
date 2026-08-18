@@ -442,6 +442,7 @@ export default function AmplifiPostApp({
     if (status.endsWith('-connected')) setConnectionResult('Social accounts connected. Amplifi is refreshing the available pages now.');
     else if (status.endsWith('-state-expired')) setConnectionsError('The authorization session expired before Meta returned to Amplifi. Start the connection again.');
     else if (status.endsWith('-denied')) setConnectionsError('Meta authorization was not completed. No connection was changed.');
+    else if (status.endsWith('-no-pages')) setConnectionsError('Meta authorized Amplifi but returned no eligible Facebook Page. Confirm that the EA Page and linked Instagram account are selected in Meta.');
     else if (status.endsWith('-failed')) setConnectionsError('Meta returned to Amplifi, but the social accounts could not be saved.');
     window.setTimeout(() => document.getElementById('connections')?.scrollIntoView({ block: 'start' }), 50);
   }, []);

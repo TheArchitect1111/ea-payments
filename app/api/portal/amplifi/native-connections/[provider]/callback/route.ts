@@ -60,7 +60,8 @@ export async function GET(req: NextRequest, context: { params: Promise<{ provide
       ...sharedCookie,
     });
     return response;
-  } catch {
-    return NextResponse.redirect(new URL(`/amplifi/workspace?connections=${value}-failed#connections`, req.url));
+  } catch (error) {
+    const reason = error instanceof Error && error.message.includes('eligible Facebook Page') ? 'no-pages' : 'failed';
+    return NextResponse.redirect(new URL(`/amplifi/workspace?connections=${value}-${reason}#connections`, req.url));
   }
 }

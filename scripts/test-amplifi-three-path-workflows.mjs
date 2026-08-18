@@ -9,6 +9,7 @@ const watch = readFileSync(join(root, 'lib/amplifi/topic-watch.ts'), 'utf8');
 const watchRoute = readFileSync(join(root, 'app/api/portal/amplifi/topic-research/watch/route.ts'), 'utf8');
 const campaignRoute = readFileSync(join(root, 'app/api/portal/amplifi/create-campaign/route.ts'), 'utf8');
 const socialCallback = readFileSync(join(root, 'app/api/portal/amplifi/native-connections/[provider]/callback/route.ts'), 'utf8');
+const nativeSocial = readFileSync(join(root, 'lib/amplifi-native-social.ts'), 'utf8');
 const research = readFileSync(join(root, 'lib/amplifi/topic-research.ts'), 'utf8');
 const styles = readFileSync(join(root, 'app/amplifi/amplifi.css'), 'utf8');
 
@@ -32,6 +33,9 @@ assert.match(app, /authorization session expired before Meta returned to Amplifi
 assert.match(socialCallback, /auth\.session\.slug === signedState\.portalSlug/);
 assert.match(socialCallback, /state-expired#connections/);
 assert.doesNotMatch(socialCallback, /Invalid OAuth state/);
+assert.match(nativeSocial, /pages_show_list,pages_read_engagement,pages_manage_posts,instagram_basic,instagram_content_publish,business_management/);
+assert.match(nativeSocial, /Meta did not return an eligible Facebook Page/);
+assert.match(app, /Meta authorized Amplifi but returned no eligible Facebook Page/);
 assert.match(app, /Verified proof or result/);
 assert.match(app, /Audience pain question/);
 assert.match(app, /CTA link/);

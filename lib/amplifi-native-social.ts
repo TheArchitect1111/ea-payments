@@ -113,6 +113,7 @@ export function oauthStart(provider: NativeProvider, origin: string, state: stri
       response_type: 'code',
       override_default_response_type: 'true',
       config_id: process.env.META_CONFIG_ID?.trim() || '',
+      scope: 'pages_show_list,pages_read_engagement,pages_manage_posts,instagram_basic,instagram_content_publish,business_management',
     }).toString();
     return url.toString();
   }
@@ -158,13 +159,17 @@ export async function exchangeProviderCode(provider: NativeProvider, code: strin
     const userToken = String(token.access_token || '');
     const pages = await jsonFetch(`https://graph.facebook.com/v26.0/me/accounts?fields=id,name,access_token,instagram_business_account{id,username}&access_token=${encodeURIComponent(userToken)}`);
     const rows = Array.isArray(pages.data) ? pages.data as Record<string, unknown>[] : [];
-    return rows.flatMap((page) => {
+    const accounts = rows.flatMap((page) => {
       const pageToken = String(page.access_token || '');
       const output: NativeAccount[] = [{ id: String(page.id), provider, platform: 'facebook', name: String(page.name || 'Facebook Page'), accessToken: pageToken }];
       const instagram = page.instagram_business_account as Record<string, unknown> | undefined;
       if (instagram?.id) output.push({ id: String(instagram.id), provider, platform: 'instagram', name: String(instagram.username || page.name || 'Instagram'), accessToken: pageToken });
       return output;
     });
+    if (!accounts.length) {
+      throw new Error('Meta did not return an eligible Facebook Page. Confirm Page access and the selected business assets.');
+    }
+    return accounts;
   }
   if (provider === 'linkedin') {
     const body = new URLSearchParams({ grant_type: 'authorization_code', code, redirect_uri: redirectUri, client_id: process.env.LINKEDIN_CLIENT_ID || '', client_secret: process.env.LINKEDIN_CLIENT_SECRET || '' });
