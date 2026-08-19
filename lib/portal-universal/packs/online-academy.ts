@@ -6,7 +6,7 @@ import type { IndustryPack } from '@/lib/portal-universal/industry-pack';
  */
 export const ONLINE_ACADEMY_PACK: IndustryPack = {
   id: 'online-academy-student-portal',
-  version: '1.0.0',
+  version: '1.1.0',
   title: 'Online Academy + Student Portal',
   description:
     'Public course enrollment connected to a branded, role-aware learning portal and teacher operations dashboard.',
@@ -16,12 +16,15 @@ export const ONLINE_ACADEMY_PACK: IndustryPack = {
     'member',
     'landing',
     'training',
+    'calendar',
+    'documents',
     'resources',
     'billing',
     'people',
     'applications',
     'reports',
     'messaging',
+    'intake',
     'settings',
   ],
   useClientExperienceChrome: false,
@@ -46,6 +49,27 @@ export const ONLINE_ACADEMY_PACK: IndustryPack = {
       label: 'Resources',
       order: 30,
       preferredModuleId: 'resources',
+    },
+    {
+      id: 'training-calendar',
+      universalCapabilityId: 'calendar',
+      label: 'Training Calendar',
+      order: 35,
+      preferredModuleId: 'calendar',
+    },
+    {
+      id: 'assignments',
+      universalCapabilityId: 'documents',
+      label: 'Assignments & Uploads',
+      order: 37,
+      preferredModuleId: 'documents',
+    },
+    {
+      id: 'certificates',
+      universalCapabilityId: 'resources',
+      label: 'Progress & Certificates',
+      order: 39,
+      preferredModuleId: 'reports',
     },
     {
       id: 'messages',
@@ -118,6 +142,24 @@ export const ONLINE_ACADEMY_PACK: IndustryPack = {
         title: 'Course Enrollment',
         schemaRef: 'ea://academy/forms/course-enrollment/v1',
       },
+      {
+        id: 'academy-assignment-submission',
+        universalCapabilityId: 'documents',
+        title: 'Assignment and Practical Submission',
+        schemaRef: 'ea://academy/forms/assignment-submission/v1',
+      },
+      {
+        id: 'academy-practical-assessment',
+        universalCapabilityId: 'programs',
+        title: 'Practical Completion Assessment',
+        schemaRef: 'ea://academy/forms/practical-assessment/v1',
+      },
+      {
+        id: 'academy-practitioner-directory',
+        universalCapabilityId: 'people',
+        title: 'Certified Practitioner Directory Application',
+        schemaRef: 'ea://academy/forms/practitioner-directory/v1',
+      },
     ],
     workflowRefs: [
       {
@@ -143,6 +185,42 @@ export const ONLINE_ACADEMY_PACK: IndustryPack = {
         purpose: 'Track lesson completion and release the branded certificate when requirements are met.',
         providerHint: 'pulse',
         envKeyOrSlug: 'academy-progress-and-certificate',
+      },
+      {
+        id: 'academy-protected-course-materials',
+        purpose: 'Keep textbooks, protocols, forms, and course files private and available only to assigned students and administrators.',
+        providerHint: 'pulse',
+        envKeyOrSlug: 'academy-protected-course-materials',
+      },
+      {
+        id: 'academy-scheduled-lesson-release',
+        purpose: 'Release lessons and resources on the instructor-defined schedule while preserving administrator access.',
+        providerHint: 'cron',
+        envKeyOrSlug: 'academy-scheduled-lesson-release',
+      },
+      {
+        id: 'academy-assignment-and-practical-completion',
+        purpose: 'Collect assignments, document practical requirements, and include both in completion eligibility.',
+        providerHint: 'pulse',
+        envKeyOrSlug: 'academy-assignment-and-practical-completion',
+      },
+      {
+        id: 'academy-student-progress-alerts',
+        purpose: 'Notify instructors when students stall and remind learners about incomplete lessons or requirements.',
+        providerHint: 'pulse',
+        envKeyOrSlug: 'academy-student-progress-alerts',
+      },
+      {
+        id: 'academy-instructor-messaging',
+        purpose: 'Keep course questions, instructor responses, announcements, and learner support inside the academy.',
+        providerHint: 'pulse',
+        envKeyOrSlug: 'academy-instructor-messaging',
+      },
+      {
+        id: 'academy-practitioner-pathway',
+        purpose: 'Move eligible graduates into certificate access, practitioner verification, directory review, referrals, and advanced training.',
+        providerHint: 'pulse',
+        envKeyOrSlug: 'academy-practitioner-pathway',
       },
     ],
     nba: {
