@@ -5,6 +5,7 @@ import { type AmandaPortalAudience } from '@/lib/amanda-catherine/config';
 import { coursesForAccount } from '@/lib/amanda-catherine/course-content';
 import type { AmandaCourseContent, AmandaLessonContent } from '@/lib/amanda-catherine/course-content';
 import type { AmandaCourseProgress } from '@/lib/amanda-catherine/progress-store';
+import { resourcesForAmandaCourse } from '@/lib/amanda-catherine/course-resources';
 
 function embedUrl(value: string) {
   if (!value) return '';
@@ -80,6 +81,7 @@ export default function AmandaLearningCenter({ audience, assignedCourseIds, isAd
   const released = isAdmin || Boolean(now && releaseAt && new Date(releaseAt).getTime() <= now);
   const player = embedUrl(lesson.videoUrl);
   const directVideo = /\.(mp4|webm)(\?.*)?$/i.test(player);
+  const courseResources = resourcesForAmandaCourse(course.id);
 
   return <section className="ak-learning">
     <header className="ak-learning__header"><div><p className="ak-learning__eyebrow">My learning</p><h2>{course.title}</h2><p>Watch each lesson, complete the work, and track your path to certification.</p></div><label><span>Program</span><select value={courseId} onChange={(e) => { setError(''); setStatus(''); setSelected(0); setCourseId(e.target.value); }}>{courses.map((item) => <option key={item.id} value={item.id}>{item.title}</option>)}</select></label></header>
@@ -100,6 +102,10 @@ export default function AmandaLearningCenter({ audience, assignedCourseIds, isAd
         {isAdmin ? <div className="ak-learning__editor"><h4>Lesson setup</h4><label><span>Video link</span><input value={lesson.videoUrl} onChange={(e) => updateLesson({ videoUrl: e.target.value })} placeholder="YouTube, Vimeo, MP4 or WebM link" /></label><label><span>Lesson notes</span><textarea value={lesson.notes} onChange={(e) => updateLesson({ notes: e.target.value })} placeholder="Summary or directions" /></label><label><span>Resource link</span><input value={lesson.resourceUrl} onChange={(e) => updateLesson({ resourceUrl: e.target.value })} placeholder="Worksheet or supporting link" /></label><button className="ep-btn" type="button" onClick={() => void saveContent()}>Save course</button>{status ? <p>{status}</p> : null}</div> : null}
       </article>
     </div>
+    {courseResources.length ? <section className="ak-learning__materials" aria-labelledby="course-materials-heading">
+      <div><p className="ak-learning__eyebrow">Private course library</p><h3 id="course-materials-heading">Course materials</h3><p>Open or download the resources included with your certification program.</p></div>
+      <div className="ak-learning__material-grid">{courseResources.map((resource) => <article key={resource.id} className="ak-learning__material-card"><span>{resource.fileType}</span><h4>{resource.title}</h4><p>{resource.description}</p><a className="ep-btn ep-btn-secondary" href={`/api/portal/amanda/resources/${resource.id}`} target="_blank" rel="noopener noreferrer">{resource.fileType === 'PDF' ? 'Open resource' : 'Download resource'}</a></article>)}</div>
+    </section> : null}
     {!isAdmin ? <section className="ak-learning__requirements"><h3>Completion requirements</h3>{course.practicalRequirements.map((requirement) => <label key={requirement}><input type="checkbox" checked={progress.practicalRequirements.includes(requirement)} onChange={(e) => void saveProgress({ practicalRequirements: e.target.checked ? [...progress.practicalRequirements, requirement] : progress.practicalRequirements.filter((item) => item !== requirement) })} /><span>{requirement.replaceAll('-', ' ')}</span></label>)}<p>{progress.certificateIssuedAt ? `Certificate earned ${new Date(progress.certificateIssuedAt).toLocaleDateString()}.` : 'Your certificate unlocks after all lessons and completion requirements are finished.'}</p>{progress.certificateIssuedAt ? <a className="ep-btn" href={`/api/portal/amanda/certificate?courseId=${courseId}`}>Download certificate</a> : null}</section> : null}
   </section>;
 }
