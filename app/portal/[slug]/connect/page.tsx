@@ -7,6 +7,7 @@ import { requirePortalModule } from '@/lib/modules/portal-modules';
 import { roleAtLeast, normalizeRole } from '@/lib/rbac';
 import ConnectKitClient from './ConnectKitClient';
 import ConnectTaskBoard from './ConnectTaskBoard';
+import WarmIntroductionBuilder from './WarmIntroductionBuilder';
 import '../ea-portal.css';
 
 export const dynamic = 'force-dynamic';
@@ -50,6 +51,8 @@ export default async function PortalConnectKitPage({
           />
 
           <ConnectTaskBoard canManage={canManage} />
+
+          <WarmIntroductionBuilder canManage={canManage} />
 
           <p style={{ marginTop: 24, fontSize: 14, color: '#64748b' }}>
             Public capture:{' '}

@@ -26,6 +26,20 @@ Connect is a functioning multi-tenant relationship activation platform: auto-pro
 | 10 | Delivery verification logging |
 | 11 | Staff follow-up task board |
 | 12 | Production matrix run + failure report |
+| 13 | Warm Introduction Package generator for referral handoffs |
+
+## Warm Introduction Package
+
+Owners and staff can generate the complete referral handoff inside the Connect portal. The package uses approved EA outcome language and produces:
+
+- Context message for the mutual contact
+- Brief explanation for the prospect
+- Group introduction text or email
+- Robert's follow-up message
+- 30-second verbal introduction
+- Evaluation, website mockup, and operations portal links
+
+Terry Spicer's referral handoff is the approved language model: the mutual contact provides context and credibility, while Robert presents the evaluation, mockups, and Eva.
 
 ## Finish line
 
