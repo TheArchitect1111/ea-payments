@@ -71,8 +71,8 @@ export const BUSINESS_OPTION_CATALOG: readonly BusinessOptionDefinition[] = [
     id: 'online-academy-student-portal',
     name: 'Online Academy + Student Portal',
     description:
-      'Sell courses from a public CTA, create student access after payment, and manage lessons, resources, progress, certificates, students, and revenue.',
-    moduleIds: ['landing', 'training', 'resources', 'billing', 'people', 'applications', 'reports', 'settings'],
+      'Sell courses, create student access after payment, protect course files, schedule lessons, collect assignments, track practical requirements, issue certificates, and manage students, practitioners, communication, and revenue.',
+    moduleIds: ['landing', 'training', 'calendar', 'documents', 'resources', 'billing', 'people', 'intake', 'applications', 'reports', 'messaging', 'settings'],
   },
   {
     id: 'resource-library',
