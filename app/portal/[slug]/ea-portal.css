@@ -1495,6 +1495,28 @@ a.ep-sidebar-promo:hover {
 .ak-learning__requirements label { display:flex; gap:10px; align-items:center; text-transform:capitalize; }
 .ak-learning__error { padding:12px 15px; border-radius:12px; background:#fff1f0; color:#9f2d24; }
 .ak-learning-empty { padding:36px; border-radius:24px; background:#f4f1eb; text-align:center; }
+.ep-presence { display:grid; gap:18px; margin-top:28px; max-width:1040px; }
+.ep-presence__header { padding:28px; border-radius:26px; color:#fff; background:linear-gradient(135deg,#141414,#333); box-shadow:0 20px 55px rgba(0,0,0,.14); }
+.ep-presence__header h2 { margin:5px 0 8px; max-width:760px; font-size:clamp(1.7rem,4vw,2.7rem); line-height:1.08; }
+.ep-presence__header p:last-child { max-width:720px; color:rgba(255,255,255,.72); }
+.ep-presence__eyebrow { margin:0; color:#a9c5ff; font-size:.72rem; font-weight:900; letter-spacing:.14em; text-transform:uppercase; }
+.ep-presence__provider { display:grid; gap:20px; padding:clamp(22px,4vw,34px); border:1px solid rgba(20,20,20,.1); border-radius:26px; background:#fff; box-shadow:0 18px 50px rgba(22,31,29,.07); }
+.ep-presence__provider-heading { display:grid; grid-template-columns:auto 1fr auto; gap:14px; align-items:center; }
+.ep-presence__provider-heading h3 { margin:3px 0 0; color:#171717; font-size:1.7rem; }
+.ep-presence__mark { display:grid; place-items:center; width:48px; height:48px; border-radius:14px; background:#101010; color:#fff; font-size:1.2rem; font-weight:900; }
+.ep-presence__status { padding:7px 11px; border-radius:999px; background:#e7f4eb; color:#22623b; font-size:.75rem; font-weight:900; white-space:nowrap; }
+.ep-presence__summary { margin:0; max-width:780px; color:#59625f; font-size:1rem; line-height:1.65; }
+.ep-presence__columns { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; }
+.ep-presence__columns>div { padding:20px; border-radius:18px; background:#f7f7f5; }
+.ep-presence__columns h4 { margin:0 0 10px; color:#202927; }
+.ep-presence__columns ul,.ep-presence__checklist ol { display:grid; gap:8px; margin:0; padding-left:20px; color:#59625f; line-height:1.45; }
+.ep-presence__checklist { padding:18px 20px; border:1px solid rgba(20,20,20,.1); border-radius:18px; }
+.ep-presence__checklist summary { cursor:pointer; color:#202927; font-weight:900; }
+.ep-presence__checklist ol { margin-top:16px; }
+.ep-presence__checklist p { margin:16px 0 0; color:#59625f; }
+.ep-presence__actions { display:flex; gap:16px; align-items:center; }
+.ep-presence__actions p { margin:0; max-width:650px; color:#6a7471; font-size:.84rem; line-height:1.45; }
+@media (max-width:720px) { .ep-presence__provider-heading { grid-template-columns:auto 1fr; } .ep-presence__status { grid-column:1/-1; width:max-content; } .ep-presence__columns { grid-template-columns:1fr; } .ep-presence__actions { align-items:stretch; flex-direction:column; } }
 @media (max-width:780px) { .ak-learning__header { align-items:stretch; flex-direction:column; } .ak-learning__header label { min-width:0; } .ak-learning__workspace { grid-template-columns:1fr; } .ak-learning__lessons { grid-template-columns:repeat(6,minmax(165px,1fr)); overflow-x:auto; } .ak-learning__progress { grid-template-columns:auto 1fr; } .ak-learning__progress small { grid-column:1/-1; } }
 
 /* ── Modal ── */

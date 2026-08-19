@@ -10,6 +10,7 @@ Status labels: **observed** means verified in this repository; **proposed** requ
 | Intelligence | AI gateway, agents, EA Intelligence | actor/tenant scope + conversation ID | History must never use conversation ID alone. |
 | Data adapters | Airtable platform store, capture records, Pulse events | documented per service | Source strings are not a substitute for a tenant column. |
 | Delivery | GitHub repository and Vercel project named `ea-payments` | N/A | Renaming is deferred. |
+| Digital presence | Reusable provider manifest and portal-guided setup for Apple Business | portal slug + shared business profile | Guided setup is active; automated sync requires Apple partner/API approval. |
 
 ## Proposed north star
 

@@ -1,5 +1,6 @@
 import { PortalSubpage } from '@/app/portal/components/PortalSubpage';
 import { requirePortalModule } from '@/lib/modules/portal-modules';
+import { BusinessPresencePanel } from './BusinessPresencePanel';
 
 export const dynamic = 'force-dynamic';
 
@@ -34,6 +35,7 @@ export default async function PortalSettingsPage({
           release.
         </p>
       </div>
+      <BusinessPresencePanel />
     </PortalSubpage>
   );
 }
