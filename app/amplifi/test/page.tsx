@@ -8,5 +8,5 @@ export const metadata: Metadata = {
 };
 
 export default function AmplifiTestPage() {
-  redirect('/api/auth/demo-enter?next=/amplifi/workspace');
+  redirect('/api/amplifi/trial');
 }
