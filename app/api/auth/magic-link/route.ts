@@ -6,6 +6,7 @@ import { authSiteOrigin } from '@/lib/auth/site-origin';
 import { createMagicLinkToken, magicLinkConfigured, type MagicLinkRealm } from '@/lib/magic-link';
 import { sendAuthEmail } from '@/lib/ea-auth-email';
 import { resolvePortalPostLoginPath } from '@/lib/portal-post-login';
+import { invitedAmandaPortalIdentity } from '@/lib/amanda-catherine/invited-learners';
 
 export const dynamic = 'force-dynamic';
 
@@ -97,7 +98,7 @@ export async function POST(req: NextRequest) {
   }
 
   if (realm === 'portal') {
-    const client = await findPortalClientByEmail(email);
+    const client = invitedAmandaPortalIdentity(email) || await findPortalClientByEmail(email);
     if (!client.ok || !client.slug) {
       const missingAirtable = !process.env.AIRTABLE_API_KEY?.trim();
       if (process.env.NODE_ENV === 'development' && missingAirtable) {
