@@ -58,7 +58,6 @@ export async function POST(req: NextRequest) {
       payment_method_types: ['card'],
       allow_promotion_codes: true,
       customer_email: clientEmail,
-      automatic_tax: { enabled: true },
       line_items: [{ price: priceId, quantity: 1 }],
       metadata,
       subscription_data: { metadata },
@@ -85,7 +84,6 @@ export async function POST(req: NextRequest) {
     payment_method_types: ['card'],
     allow_promotion_codes: true,
     customer_email: clientEmail,
-    automatic_tax: { enabled: true },
     invoice_creation: { enabled: true },
     line_items: [{
       price_data: {
