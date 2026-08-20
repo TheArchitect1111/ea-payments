@@ -159,24 +159,51 @@ export default function AmplifiHome({
             <p>Choose how you want to begin. Amplifi will guide you through the rest.</p>
           </section>
 
-          <section className="af-home-paths" aria-label="Choose an Amplifi path">
-            {PATHS.map((path) => (
-              <article key={path.id} className="af-home-path">
-                <span className="af-path-number">{path.number}</span>
-                <span className="af-path-icon" aria-hidden="true">{path.icon}</span>
+          {connectionsLoading ? (
+            <section className="af-home-paths" aria-live="polite">
+              <article className="af-home-path">
+                <span className="af-path-number">01</span>
+                <span className="af-path-icon" aria-hidden="true">↻</span>
                 <div className="af-path-copy">
-                  <h2>{path.title}</h2>
-                  <p>{path.description}</p>
-                  <small>{path.example}</small>
+                  <h2>Checking your social accounts</h2>
+                  <p>Amplifi is confirming which accounts are connected before you begin.</p>
+                  <small>Your workspace stays separate from every other Amplifi user.</small>
                 </div>
-                <button type="button" onClick={() => onChoosePath(path.id)}>{path.button}<span>→</span></button>
               </article>
-            ))}
-          </section>
+            </section>
+          ) : connectedChannels.length === 0 ? (
+            <section className="af-home-paths" aria-label="Connect social accounts first">
+              <article className="af-home-path">
+                <span className="af-path-number">01</span>
+                <span className="af-path-icon" aria-hidden="true">＋</span>
+                <div className="af-path-copy">
+                  <h2>Connect your social accounts</h2>
+                  <p>Before choosing how Amplifi will create your content, securely connect the accounts you want Amplifi to use.</p>
+                  <small>Your accounts and content remain isolated inside your workspace.</small>
+                </div>
+                <button type="button" onClick={() => onOpenSection('connections')}>Connect accounts<span>→</span></button>
+              </article>
+            </section>
+          ) : (
+            <section className="af-home-paths" aria-label="Choose an Amplifi path">
+              {PATHS.map((path) => (
+                <article key={path.id} className="af-home-path">
+                  <span className="af-path-number">{path.number}</span>
+                  <span className="af-path-icon" aria-hidden="true">{path.icon}</span>
+                  <div className="af-path-copy">
+                    <h2>{path.title}</h2>
+                    <p>{path.description}</p>
+                    <small>{path.example}</small>
+                  </div>
+                  <button type="button" onClick={() => onChoosePath(path.id)}>{path.button}<span>→</span></button>
+                </article>
+              ))}
+            </section>
+          )}
 
           <footer className="af-client-footer">
             <ConnectionStatus channels={connectedChannels} loading={connectionsLoading} error={connectionsError} onOpen={() => onOpenSection('connections')} />
-            <p>Nothing publishes until you approve it.</p>
+            <p>{connectedChannels.length ? 'Nothing publishes until you approve it.' : 'Connect at least one account to unlock Options 1, 2 and 3.'}</p>
           </footer>
         </main>
       )}
