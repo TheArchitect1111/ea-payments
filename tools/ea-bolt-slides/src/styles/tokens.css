@@ -1,0 +1,62 @@
+/* ===================================================================
+   THEME TOKENS — edit ONLY this :root block to re-theme the whole deck.
+   The SAME token vocabulary as the `slides` (Slidev) and `webdeck` skills,
+   so a brand looks identical across all of them. The values below are a
+   "dark product" default — REPLACE them to match the brief or the brand.
+   =================================================================== */
+:root {
+  /* Surfaces */
+  --bg: #071526;
+  --bg-grad-1: rgba(207, 166, 87, 0.13);
+  --bg-grad-2: rgba(31, 67, 108, 0.16);
+  --surface: rgba(255, 255, 255, 0.045);
+  --surface-2: rgba(255, 255, 255, 0.07);
+
+  /* Ink */
+  --fg: #f8f5ed;
+  --fg-muted: #b7c0cc;
+  --fg-faint: #78879a;
+
+  /* Hairlines */
+  --hair: rgba(255, 255, 255, 0.1);
+  --hair-2: rgba(255, 255, 255, 0.06);
+
+  /* Accent — ONE accent. May be a 2–4 stop gradient within ~80° of hue. */
+  --primary: #cfa657;
+  --accent: linear-gradient(
+    115deg,
+    #f1d79a 0%,
+    #cfa657 52%,
+    #9b7435 100%
+  );
+  --accent-ink: #171006;
+
+  /* Radius */
+  --radius: 22px;
+  --radius-sm: 12px;
+  --radius-lg: 26px;
+
+  /* Depth */
+  --shadow: 0 50px 120px -50px rgba(0, 0, 0, 0.9);
+  --glow: 0 30px 80px -40px rgba(207, 166, 87, 0.5);
+
+  /* Type */
+  --font-head: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display',
+    sans-serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Text',
+    sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  /* Motion */
+  --dur: 0.4s;
+  --ease: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Atmosphere */
+  --grain: 0.035;
+  --vignette: rgba(0, 0, 0, 0.22);
+
+  /* Responsive gutter — fluid side / vertical padding */
+  --gutter: clamp(28px, 6vw, 120px);
+  --gutter-y: clamp(40px, 8vh, 96px);
+}

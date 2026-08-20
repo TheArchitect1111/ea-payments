@@ -1,0 +1,38 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "default_agent": "plan",
+  "share": "disabled",
+  "autoupdate": "notify",
+  "subagent_depth": 0,
+  "permission": {
+    "*": "ask",
+    "read": "allow",
+    "glob": "allow",
+    "grep": "allow",
+    "list": "allow",
+    "external_directory": "deny",
+    "edit": "ask",
+    "bash": {
+      "*": "ask",
+      "git status*": "allow",
+      "git diff*": "allow",
+      "rg *": "allow",
+      "rm *": "deny",
+      "git reset*": "deny",
+      "git clean*": "deny",
+      "git push*": "deny"
+    }
+  },
+  "command": {
+    "ea-review": {
+      "description": "Review one EA change without editing",
+      "agent": "plan",
+      "template": "Review only the files named in $ARGUMENTS. Read AGENTS.md first. Check tenant isolation, authorization, data exposure, responsive behavior, and regression risk. Do not edit files or run destructive commands. Return findings with exact file paths and the smallest safe verification command."
+    },
+    "ea-verify": {
+      "description": "Verify one completed EA change",
+      "agent": "build",
+      "template": "Verify the change described in $ARGUMENTS. Read AGENTS.md first. Inspect the relevant diff, run the smallest existing contract test, and report evidence. Do not expand scope, change unrelated files, publish, deploy, push, reset, clean, or delete anything."
+    }
+  }
+}

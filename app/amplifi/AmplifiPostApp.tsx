@@ -51,6 +51,14 @@ type ResearchMeta = {
 
 type AmplifiPath = 'publish' | 'research' | 'smartchitecture';
 type ApprovedPost = { requestId?: string; title: string; caption: string; status: string; };
+type VideoDraftTask = { taskId: string; state: 'processing' | 'complete' | 'failed'; progress: number; error?: string; previewUrl?: string };
+type VideoStoryboard = {
+  title: string;
+  openingHook: string;
+  closingAction: string;
+  totalDurationSeconds: number;
+  scenes: Array<{ number: number; purpose: string; narration: string; visualDirection: string; cameraDirection: string; onScreenText: string; durationSeconds: number }>;
+};
 type SocialConnection = { id: string; platform: string; name: string; picture?: string; };
 type NativeProviderStatus = { provider: 'meta' | 'linkedin' | 'tiktok' | 'x'; label: string; configured: boolean; accounts: SocialConnection[]; };
 
@@ -128,6 +136,13 @@ export default function AmplifiPostApp({
   const [headline, setHeadline] = useState('');
   const [quickWin, setQuickWin] = useState('');
   const [draft, setDraft] = useState<AmplifiSocialDraft | null>(null);
+  const [videoScript, setVideoScript] = useState('');
+  const [videoTask, setVideoTask] = useState<VideoDraftTask | null>(null);
+  const [videoAccepted, setVideoAccepted] = useState(false);
+  const [videoBusy, setVideoBusy] = useState(false);
+  const [referenceVideoUrl, setReferenceVideoUrl] = useState('');
+  const [storyboard, setStoryboard] = useState<VideoStoryboard | null>(null);
+  const [storyboardBusy, setStoryboardBusy] = useState(false);
   const [loading, setLoading] = useState(false);
   const [researching, setResearching] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -771,6 +786,62 @@ export default function AmplifiPostApp({
     }
   };
 
+  const createVideoDraft = async () => {
+    if (!loggedIn || !draft) { setMessage('Sign in and create a post draft first.'); return; }
+    const script = (videoScript || draft.shortCaption).trim();
+    setVideoBusy(true); setVideoAccepted(false); setMessage(''); setSuccess('');
+    try {
+      const response = await fetch('/api/portal/amplifi/video-draft', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ subject: businessName.trim() || headline.trim() || 'Amplifi video draft', script }),
+      });
+      const data = (await response.json()) as { ok?: boolean; error?: string; task?: VideoDraftTask };
+      if (!response.ok || !data.ok || !data.task) throw new Error(data.error || 'Video draft could not start.');
+      setVideoTask(data.task);
+      const poll = async (taskId: string) => {
+        const statusResponse = await fetch(`/api/portal/amplifi/video-draft?taskId=${encodeURIComponent(taskId)}`, { cache: 'no-store' });
+        const statusData = (await statusResponse.json()) as { ok?: boolean; error?: string; task?: VideoDraftTask };
+        if (!statusResponse.ok || !statusData.ok || !statusData.task) throw new Error(statusData.error || 'Video status check failed.');
+        setVideoTask(statusData.task);
+        if (statusData.task.state === 'processing') window.setTimeout(() => void poll(taskId), 3000);
+        else {
+          setVideoBusy(false);
+          if (statusData.task.state === 'complete') setSuccess('Vertical video draft is ready. Review it before accepting.');
+          else setMessage(statusData.task.error || 'Video generation failed.');
+        }
+      };
+      window.setTimeout(() => void poll(data.task.taskId).catch((error: unknown) => {
+        setVideoBusy(false); setMessage(error instanceof Error ? error.message : 'Video status check failed.');
+      }), 1000);
+    } catch (error) {
+      setVideoBusy(false); setMessage(error instanceof Error ? error.message : 'Video generation failed.');
+    }
+  };
+
+  const analyzeReferenceVideo = async () => {
+    if (!loggedIn || !draft) { setMessage('Sign in and create a post draft first.'); return; }
+    const transcript = (videoScript || draft.shortCaption).trim();
+    setStoryboardBusy(true); setMessage(''); setSuccess('');
+    try {
+      const response = await fetch('/api/portal/amplifi/video-storyboard', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: businessName.trim() || headline.trim() || 'Amplifi video reference',
+          sourceUrl: referenceVideoUrl.trim(),
+          transcript,
+        }),
+      });
+      const data = (await response.json()) as { ok?: boolean; error?: string; storyboard?: VideoStoryboard; generatedBy?: string };
+      if (!response.ok || !data.ok || !data.storyboard) throw new Error(data.error || 'Storyboard could not be created.');
+      setStoryboard(data.storyboard);
+      setSuccess(data.generatedBy === 'ai' ? 'Reference storyboard is ready for review.' : 'Structured storyboard is ready. Connect an AI provider for deeper analysis.');
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Storyboard creation failed.');
+    } finally {
+      setStoryboardBusy(false);
+    }
+  };
+
   const testPublishingConnection = async () => {
     if (!loggedIn) { setMessage('Sign in to test the publishing connection.'); return; }
     setTestingConnection(true); setConnectionResult('');
@@ -1164,6 +1235,20 @@ export default function AmplifiPostApp({
                   <button type="button" className="af-edit-button" onClick={() => document.getElementById('content')?.scrollIntoView({ behavior: 'smooth' })}>✎ Edit</button>
                   <button type="button" className="af-reject-button" onClick={() => { setDraft(null); setSuccess('Draft removed. Your source and inputs are still here.'); }}>⊘ Reject</button>
                 </div>
+
+                <section className="af-panel">
+                  <div className="af-section-heading"><div><span className="af-eyebrow">Video pilot</span><h3>Turn this approved direction into a vertical video draft.</h3><p>Test content only. Nothing publishes automatically.</p></div>{videoTask ? <span className="af-review-chip">{videoTask.state === 'complete' ? 'Needs review' : `${videoTask.progress}%`}</span> : null}</div>
+                  <div className="af-panel" style={{ marginBottom: 18 }}>
+                    <div className="af-section-heading"><div><span className="af-eyebrow">Reference analysis</span><h3>Reverse-engineer the structure—not someone else’s content.</h3><p>Add a public reference URL and paste its transcript below. Amplifi will create an original shot-by-shot plan without claiming to watch or copy the source video.</p></div></div>
+                    <label className="af-field af-field-wide" htmlFor="amplifi-reference-video"><span>Reference video URL</span><input id="amplifi-reference-video" type="url" value={referenceVideoUrl} onChange={(event) => setReferenceVideoUrl(event.target.value)} placeholder="https://…" /></label>
+                    <label className="af-field af-field-wide" htmlFor="amplifi-video-script"><span>Transcript or reviewed script</span><textarea id="amplifi-video-script" value={videoScript || draft.shortCaption} onChange={(event) => setVideoScript(event.target.value)} /></label>
+                    <button type="button" className="af-edit-button" disabled={storyboardBusy || !loggedIn} onClick={() => void analyzeReferenceVideo()}>{storyboardBusy ? 'Analyzing structure…' : 'Analyze reference video'}</button>
+                    {storyboard ? <div className="af-social-preview" style={{ marginTop: 16 }}><div className="af-section-heading"><div><span className="af-eyebrow">Shot-by-shot storyboard</span><h3>{storyboard.title}</h3><p>{storyboard.totalDurationSeconds} seconds · {storyboard.scenes.length} scenes</p></div></div><div style={{ display: 'grid', gap: 12 }}>{storyboard.scenes.map((scene) => <article key={scene.number} style={{ border: '1px solid rgba(27,43,77,.14)', padding: 16, borderRadius: 14 }}><strong>Scene {scene.number} · {scene.durationSeconds}s · {scene.purpose}</strong><p><b>Narration:</b> {scene.narration}</p><p><b>Visual:</b> {scene.visualDirection}</p><p><b>Camera:</b> {scene.cameraDirection}</p><p><b>On screen:</b> {scene.onScreenText}</p></article>)}</div></div> : null}
+                  </div>
+                  {!videoTask || videoTask.state === 'failed' ? <button type="button" className="af-primary-button" disabled={videoBusy || !loggedIn} onClick={() => void createVideoDraft()}>{videoBusy ? 'Creating vertical video…' : 'Create vertical video draft'}</button> : null}
+                  {videoTask?.state === 'processing' ? <p className="af-message af-message-success" role="status">Amplifi is creating the video draft. {videoTask.progress}% complete.</p> : null}
+                  {videoTask?.state === 'complete' && videoTask.previewUrl ? <div className="af-social-preview"><video controls playsInline src={videoTask.previewUrl} style={{ width: '100%', maxHeight: 640, background: '#111' }} /><div className="af-review-actions"><button type="button" className="af-approve-button" disabled={videoAccepted} onClick={() => { setVideoAccepted(true); setSuccess('Video draft accepted. It remains a draft and has not been published.'); }}>{videoAccepted ? '✓ Accepted' : '✓ Accept video'}</button><button type="button" className="af-edit-button" onClick={() => { setVideoAccepted(false); document.getElementById('amplifi-video-script')?.focus(); }}>✎ Edit script</button><button type="button" className="af-reject-button" onClick={() => { setVideoTask(null); setVideoAccepted(false); setSuccess('Video draft declined. The post and script remain available.'); }}>⊘ Decline</button></div></div> : null}
+                </section>
 
                 <div className="af-manual-share">
                   <span>Manual share</span>

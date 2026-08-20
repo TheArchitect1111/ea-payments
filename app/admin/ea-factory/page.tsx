@@ -124,7 +124,10 @@ export default async function EAFactoryPage({ searchParams }: PageProps) {
                 New Experience
               </Link>
               <Link href="/admin/ea-factory/training-transformations" className="rounded-full bg-[#111] px-4 py-2 text-xs font-black text-white">
-                Training Transformations
+                Hōnen
+              </Link>
+              <Link href="/admin/device-preview" className="rounded-full bg-white px-4 py-2 text-xs font-black text-[#1B2B4D] ring-1 ring-[#1B2B4D]">
+                Device Preview
               </Link>
               <Link
                 href="/admin/ea-factory/launch"

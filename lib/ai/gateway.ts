@@ -86,7 +86,7 @@ async function fetchWithRetry(url: string, init: RequestInit, retries: number, t
 
 export async function runAIGateway(request: AIGatewayRequest, context: AIRequestContext): Promise<AIGatewayResponse> {
   const config = getAIGatewayConfig();
-  if (!config.apiKey) throw new AIGatewayError('OPENAI_API_KEY is not configured.', 'AI_PROVIDER_NOT_CONFIGURED', 503);
+  if (!config.providers.length) throw new AIGatewayError('No AI gateway provider is configured.', 'AI_PROVIDER_NOT_CONFIGURED', 503);
 
   const limit = checkRateLimit(context.actor.id, config.rateLimitMaxRequests, config.rateLimitWindowMs);
   if (!limit.ok) throw new AIGatewayError('AI rate limit reached. Try again shortly.', 'AI_RATE_LIMITED', 429);
@@ -116,19 +116,33 @@ export async function runAIGateway(request: AIGatewayRequest, context: AIRequest
     },
   };
 
-  logAIEvent('ai.request', context, { model, promptVersion, stream: false });
-  const response = await fetchWithRetry(`${config.baseUrl}/responses`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${config.apiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(body),
-  }, config.retryCount, config.requestTimeoutMs);
+  let response: Response | null = null;
+  let provider: 'omniroute' | 'openai' | null = null;
+  const failures: string[] = [];
+  for (const candidate of config.providers) {
+    logAIEvent('ai.request', context, { model, promptVersion, stream: false, provider: candidate.id });
+    try {
+      const attempt = await fetchWithRetry(`${candidate.baseUrl}/responses`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${candidate.apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+      }, config.retryCount, config.requestTimeoutMs);
+      if (attempt.ok) {
+        response = attempt;
+        provider = candidate.id;
+        break;
+      }
+      failures.push(`${candidate.id}:${attempt.status}`);
+    } catch (error) {
+      failures.push(`${candidate.id}:${error instanceof Error ? error.message : 'request failed'}`);
+    }
+  }
 
-  if (!response.ok) {
-    const detail = await response.text();
-    throw new AIGatewayError(`AI provider request failed: ${detail.slice(0, 500)}`, 'AI_PROVIDER_ERROR', response.status);
+  if (!response || !provider) {
+    throw new AIGatewayError(`AI providers failed: ${failures.join(', ').slice(0, 500)}`, 'AI_PROVIDER_ERROR', 502);
   }
 
   const data = await response.json();
@@ -137,12 +151,12 @@ export async function runAIGateway(request: AIGatewayRequest, context: AIRequest
   saveHistory(request.conversationId, context, messages, text, config.maxHistoryMessages);
   trackAIUsage(context, model, usage);
 
-  return { ok: true, requestId: context.requestId, model, text, usage, promptVersion };
+  return { ok: true, requestId: context.requestId, provider, model, text, usage, promptVersion };
 }
 
 export async function streamAIGateway(request: AIGatewayRequest, context: AIRequestContext): Promise<Response> {
   const config = getAIGatewayConfig();
-  if (!config.apiKey) throw new AIGatewayError('OPENAI_API_KEY is not configured.', 'AI_PROVIDER_NOT_CONFIGURED', 503);
+  if (!config.providers.length) throw new AIGatewayError('No AI gateway provider is configured.', 'AI_PROVIDER_NOT_CONFIGURED', 503);
 
   const limit = checkRateLimit(context.actor.id, config.rateLimitMaxRequests, config.rateLimitWindowMs);
   if (!limit.ok) throw new AIGatewayError('AI rate limit reached. Try again shortly.', 'AI_RATE_LIMITED', 429);
@@ -153,25 +167,39 @@ export async function streamAIGateway(request: AIGatewayRequest, context: AIRequ
   const model = request.model ?? config.defaultModel;
   const inputMessages: AIMessage[] = [{ role: 'system', content: system }, ...messages];
 
-  logAIEvent('ai.request', context, { model, promptVersion, stream: true });
-  const response = await fetchWithRetry(`${config.baseUrl}/responses`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${config.apiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model,
-      input: openAIInput(inputMessages),
-      temperature: request.temperature ?? 0.2,
-      max_output_tokens: request.maxOutputTokens ?? 1200,
-      stream: true,
-    }),
-  }, config.retryCount, config.requestTimeoutMs);
+  let response: Response | null = null;
+  let provider: 'omniroute' | 'openai' | null = null;
+  const failures: string[] = [];
+  for (const candidate of config.providers) {
+    logAIEvent('ai.request', context, { model, promptVersion, stream: true, provider: candidate.id });
+    try {
+      const attempt = await fetchWithRetry(`${candidate.baseUrl}/responses`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${candidate.apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model,
+          input: openAIInput(inputMessages),
+          temperature: request.temperature ?? 0.2,
+          max_output_tokens: request.maxOutputTokens ?? 1200,
+          stream: true,
+        }),
+      }, config.retryCount, config.requestTimeoutMs);
+      if (attempt.ok && attempt.body) {
+        response = attempt;
+        provider = candidate.id;
+        break;
+      }
+      failures.push(`${candidate.id}:${attempt.status}`);
+    } catch (error) {
+      failures.push(`${candidate.id}:${error instanceof Error ? error.message : 'request failed'}`);
+    }
+  }
 
-  if (!response.ok || !response.body) {
-    const detail = await response.text();
-    throw new AIGatewayError(`AI provider stream failed: ${detail.slice(0, 500)}`, 'AI_PROVIDER_ERROR', response.status);
+  if (!response?.body || !provider) {
+    throw new AIGatewayError(`AI provider streams failed: ${failures.join(', ').slice(0, 500)}`, 'AI_PROVIDER_ERROR', 502);
   }
 
   return new Response(response.body, {
@@ -179,6 +207,7 @@ export async function streamAIGateway(request: AIGatewayRequest, context: AIRequ
       'Content-Type': 'text/event-stream; charset=utf-8',
       'Cache-Control': 'no-cache, no-transform',
       Connection: 'keep-alive',
+      'X-EA-AI-Provider': provider,
     },
   });
 }

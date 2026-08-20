@@ -18,12 +18,12 @@ export default async function TrainingTransformationsPage() {
           Back to EA Factory
         </Link>
         <section className="mt-6 border border-[#e8d9a8] bg-white p-6 shadow-sm">
-          <p className="text-xs font-black uppercase tracking-[0.28em] text-[#8a6a12]">EA Intelligence</p>
+          <p className="text-xs font-black uppercase tracking-[0.28em] text-[#8a6a12]">Efficiency Architects Learning Studio</p>
           <div className="mt-3 flex flex-wrap items-end justify-between gap-4">
             <div>
-              <h1 className="text-4xl font-black tracking-tight">Training Transformation Queue</h1>
+              <h1 className="text-4xl font-black tracking-tight">Hōnen</h1>
               <p className="mt-3 max-w-3xl text-sm leading-7 text-neutral-600">
-                Review generated lessons, quizzes, checklists, knowledge-base drafts, and manager summaries before publishing to Training Hub, Client Portal, and Pulse.
+                Turn approved documents, presentations, and transcripts into interactive course packages—then review every lesson before publishing to Training Hub, Client Portal, and Pulse.
               </p>
             </div>
             <Link href="/admin/ea-factory/new-experience" className="rounded-full bg-[#f2c94c] px-4 py-2 text-xs font-black uppercase tracking-wider text-black">
