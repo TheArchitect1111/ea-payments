@@ -143,10 +143,23 @@ export function oauthStart(provider: NativeProvider, origin: string, state: stri
   return url.toString();
 }
 
+function providerErrorMessage(payload: Record<string, unknown>): string {
+  const nested = payload.error;
+  if (nested && typeof nested === 'object') {
+    const detail = nested as Record<string, unknown>;
+    const message = String(detail.message || detail.error_user_msg || detail.error_user_title || 'Social authorization failed');
+    const code = detail.code ? ` code=${String(detail.code)}` : '';
+    const subcode = detail.error_subcode ? ` subcode=${String(detail.error_subcode)}` : '';
+    const type = detail.type ? ` type=${String(detail.type)}` : '';
+    return `${message}${type}${code}${subcode}`;
+  }
+  return String(payload.error_description || payload.message || nested || 'Social authorization failed');
+}
+
 async function jsonFetch(url: string, init?: RequestInit): Promise<Record<string, unknown>> {
   const response = await fetch(url, { ...init, cache: 'no-store' });
   const payload = (await response.json().catch(() => ({}))) as Record<string, unknown>;
-  if (!response.ok) throw new Error(String(payload.error_description || payload.message || payload.error || 'Social authorization failed'));
+  if (!response.ok) throw new Error(providerErrorMessage(payload));
   return payload;
 }
 
