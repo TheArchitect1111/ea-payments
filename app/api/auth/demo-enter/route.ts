@@ -25,6 +25,7 @@ function resolveEnterOrigin(req: NextRequest): string {
 function wantsSimplifiDemo(raw: string | null): boolean {
   if (!raw) return false;
   if (raw.startsWith('/simplifi')) return true;
+  if (raw.startsWith('/amplifi')) return true;
   if (raw.startsWith('/portal/demo-client') && !raw.includes('/ctp')) return true;
   return false;
 }
