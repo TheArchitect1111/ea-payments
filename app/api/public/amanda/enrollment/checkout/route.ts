@@ -49,7 +49,6 @@ export async function POST(req: NextRequest) {
     allow_promotion_codes: true,
     customer_email: email,
     billing_address_collection: 'auto',
-    automatic_tax: { enabled: true },
     invoice_creation: { enabled: true },
     line_items: [{
       price_data: {
