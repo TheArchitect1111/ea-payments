@@ -443,7 +443,18 @@
   }
 
   .af-home-header nav {
-    gap: 20px;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    width: 100%;
+    gap: 4px;
+    overflow-x: visible;
+  }
+
+  .af-home-header nav button {
+    min-width: 0;
+    padding-inline: 2px;
+    font-size: 11px;
+    text-align: center;
   }
 
   .af-client-home,
