@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { guardPortalApi } from '@/lib/api/portal-route';
-import { saveAmplifiConnections } from '@/lib/amplifi-connection-store';
+import { loadAmplifiConnections, saveAmplifiConnections } from '@/lib/amplifi-connection-store';
 import { encryptAccounts, exchangeProviderCode, isNativeProvider, providerCookie, verifyOAuthState } from '@/lib/amplifi-native-social';
 
 export const dynamic = 'force-dynamic';
@@ -34,7 +34,10 @@ export async function GET(req: NextRequest, context: { params: Promise<{ provide
       (process.env.VERCEL_ENV === 'production' ? 'https://efficiencyarchitects.online' : req.nextUrl.origin);
     const accounts = await exchangeProviderCode(value, url.searchParams.get('code') || '', oauthOrigin, saved.verifier);
     await saveAmplifiConnections(signedState!.portalSlug, value, accounts);
-    console.info('Amplifi OAuth connection saved', { provider: value, platforms: accounts.map((account) => account.platform) });
+    const connectionStatus = value === 'meta' && !accounts.some((account) => account.platform === 'instagram')
+      ? `${value}-instagram-missing`
+      : `${value}-connected`;
+    console.info('Amplifi OAuth connection saved', { provider: value, platforms: accounts.map((account) => account.platform), connectionStatus });
     let returnOrigin = req.nextUrl.origin;
     try {
       const candidate = new URL(saved.returnOrigin || '');
@@ -44,7 +47,7 @@ export async function GET(req: NextRequest, context: { params: Promise<{ provide
     } catch {
       // Use the verified callback origin.
     }
-    const response = NextResponse.redirect(new URL(`/amplifi/workspace?connections=${value}-connected#connections`, returnOrigin));
+    const response = NextResponse.redirect(new URL(`/amplifi/workspace?connections=${connectionStatus}#connections`, returnOrigin));
     const sharedCookie = req.nextUrl.hostname.endsWith('efficiencyarchitects.online')
       ? { domain: '.efficiencyarchitects.online' }
       : {};
@@ -66,8 +69,37 @@ export async function GET(req: NextRequest, context: { params: Promise<{ provide
     });
     return response;
   } catch (error) {
-    const reason = error instanceof Error && error.message.includes('eligible Facebook Page') ? 'no-pages' : 'failed';
-    console.error('Amplifi OAuth connection failed', { provider: value, reason, message: error instanceof Error ? error.message : 'Unknown error' });
+    const message = error instanceof Error ? error.message : 'Unknown error';
+
+    // Meta occasionally repeats the callback after the first request has already
+    // exchanged its single-use code. Treat that replay as success when the
+    // first request durably saved accounts for this tenant.
+    if (value === 'meta' && message.includes('subcode=36009')) {
+      try {
+        const accounts = await loadAmplifiConnections(signedState!.portalSlug, value);
+        if (accounts.length) {
+          const status = accounts.some((account) => account.platform === 'instagram')
+            ? `${value}-connected`
+            : `${value}-instagram-missing`;
+          console.info('Amplifi OAuth callback replay resolved from durable connections', {
+            provider: value,
+            platforms: accounts.map((account) => account.platform),
+            status,
+          });
+          return NextResponse.redirect(
+            new URL(`/amplifi/workspace?connections=${status}#connections`, req.nextUrl.origin),
+          );
+        }
+      } catch (loadError) {
+        console.error('Amplifi OAuth replay recovery failed', {
+          provider: value,
+          message: loadError instanceof Error ? loadError.message : 'Unknown error',
+        });
+      }
+    }
+
+    const reason = message.includes('eligible Facebook Page') ? 'no-pages' : 'failed';
+    console.error('Amplifi OAuth connection failed', { provider: value, reason, message });
     return NextResponse.redirect(new URL(`/amplifi/workspace?connections=${value}-${reason}#connections`, req.url));
   }
 }
