@@ -22,6 +22,8 @@ export type PortalSessionInput = {
   orgId?: string;
   role?: PlatformRole;
   email?: string;
+  /** Optional absolute expiry in milliseconds since Unix epoch. */
+  exp?: number;
 };
 
 /** Chassis treats VERCEL_ENV=production as prod even under `next dev`. Unset for local signing. */
@@ -51,7 +53,7 @@ export async function signSession(
           orgId: input.orgId,
           role: input.role,
           email: input.email,
-          exp: newSessionExpiry(),
+          exp: input.exp ?? newSessionExpiry(),
         };
 
   return withLocalDevSessionSecrets(() => signHmacSession(payload, EA_PORTAL_SESSION));
