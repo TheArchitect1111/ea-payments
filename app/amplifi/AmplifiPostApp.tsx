@@ -269,6 +269,14 @@ export default function AmplifiPostApp({
   }, [generatedCampaign, approvedCampaignPosts, campaignScheduleTimes]);
 
   const choosePath = (path: AmplifiPath) => {
+    if (!connectionsLoading && socialConnections.length === 0) {
+      setMessage('Connect at least one social account before choosing Options 1, 2 or 3.');
+      setShowHome(false);
+      window.setTimeout(() => {
+        document.getElementById('connections')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 50);
+      return;
+    }
     setShowHome(false);
     setSelectedPath(path);
     setShowWelcome(false);
