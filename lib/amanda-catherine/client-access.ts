@@ -11,6 +11,7 @@ import { canonicalPlatformOrigin } from '@/lib/platform-urls';
 import type { AmandaPortalAudience } from './config';
 import { loadStudioRecord, saveStudioRecord } from '@/lib/creative-studio/persistence';
 import { syntheticOrgId } from '@/lib/platform-store';
+import { invitedAmandaLearner } from './invited-learners';
 
 const AMANDA_PORTAL_SLUG = 'amanda-catherine';
 
@@ -29,12 +30,12 @@ function accessProfileId(portalSlug: string, email: string) {
 
 export async function getAmandaAssignedAudience(portalSlug: string, email: string) {
   const profile = await loadStudioRecord<AmandaAccessProfile>('experience', accessProfileId(portalSlug, email));
-  return profile?.audience || null;
+  return profile?.audience || invitedAmandaLearner(email)?.audience || null;
 }
 
 export async function getAmandaAssignedCourseIds(portalSlug: string, email: string) {
   const profile = await loadStudioRecord<AmandaAccessProfile>('experience', accessProfileId(portalSlug, email));
-  return Array.isArray(profile?.courseIds) ? profile.courseIds : [];
+  return Array.isArray(profile?.courseIds) ? profile.courseIds : [...(invitedAmandaLearner(email)?.courseIds || [])];
 }
 
 function temporaryPassword() {
