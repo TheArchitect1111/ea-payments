@@ -2,6 +2,7 @@ import type { PlatformRole } from '@/lib/rbac';
 import type { AmandaPortalAudience } from '@/lib/amanda-catherine/config';
 import { listAmandaPayments } from '@/lib/amanda-catherine/payment-fulfillment';
 import { listPortalFormSubmissions } from '@/lib/portal-forms/store';
+import { invitedAmandaLearner } from '@/lib/amanda-catherine/invited-learners';
 
 const FORM_AUDIENCES = new Set<AmandaPortalAudience>([
   'client',
@@ -27,6 +28,8 @@ export async function resolveAmandaAudience(input: {
   if (AMANDA_OWNER_EMAILS.has(email)) return 'admin';
   if (input.role === 'owner' || input.role === 'admin') return 'admin';
   if (input.role === 'staff' || input.role === 'manager') return 'staff';
+  const invited = invitedAmandaLearner(email);
+  if (invited) return invited.audience;
 
   const [submissions, payments] = await Promise.all([
     listPortalFormSubmissions(input.portalSlug, { email }),
