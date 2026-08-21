@@ -20,7 +20,15 @@ type CampaignPost = {
 };
 
 function cleanJson(text: string): string {
-  return text.replace(/^```json\s*/i, '').replace(/^```\s*/, '').replace(/```\s*$/, '').trim();
+  return text.replace(/^\`\`\`json\\s*/i, '').replace(/^\`\`\`\\s*/, '').replace(/\`\`\`\\s*$/, '').trim();
+}
+
+function cleanGeneratedText(value: unknown): string {
+  return String(value || '')
+    .replace(/[\\u2013\\u2014]/g, ',')
+    .replace(/\\s+,/g, ',')
+    .replace(/,\\s*,/g, ',')
+    .trim();
 }
 
 function parseCampaign(text: string): CampaignPost[] {
@@ -29,10 +37,10 @@ function parseCampaign(text: string): CampaignPost[] {
     throw new Error('Amplifi did not return the required five-post campaign.');
   }
   return parsed.posts.map((post) => ({
-    title: String(post.title || '').trim(),
-    caption: String(post.caption || '').trim(),
-    callToAction: String(post.callToAction || '').trim(),
-    imageDirection: String(post.imageDirection || '').trim(),
+    title: cleanGeneratedText(post.title),
+    caption: cleanGeneratedText(post.caption),
+    callToAction: cleanGeneratedText(post.callToAction),
+    imageDirection: cleanGeneratedText(post.imageDirection),
   })).filter((post) => post.title && post.caption && post.callToAction && post.imageDirection);
 }
 
@@ -41,8 +49,8 @@ function campaignFromText(text: string, promotion: string, architecture: Campaig
   const posts = parseCampaign(text);
   if (posts.length !== 5) throw new Error('Amplifi did not complete all five posts.');
   return {
-    title: String(parsed.campaignTitle || promotion).trim(),
-    strategy: String(parsed.strategy || '').trim(),
+    title: cleanGeneratedText(parsed.campaignTitle || promotion),
+    strategy: cleanGeneratedText(parsed.strategy),
     posts: assignPortfolioPosts(posts, architecture),
     architecture,
   };
@@ -73,7 +81,7 @@ function reliableCampaign(input: {
   const posts: CampaignPost[] = [
     {
       title: 'Busy is not the same as growing',
-      caption: `${toneLead}The work people accept as normal can quietly stand between them and the result they want. This campaign helps ${input.audience} recognize the cost of staying where they are—and see a more useful way forward.${detailLine}`,
+      caption: `${toneLead}The work people accept as normal can quietly stand between them and the result they want. This campaign helps ${input.audience} recognize the cost of staying where they are,and see a more useful way forward.${detailLine}`,
       callToAction: `${input.callToAction}${linkLine}`,
       imageDirection: 'A bold pattern-interrupt graphic that contrasts constant activity with meaningful progress.',
     },
@@ -86,7 +94,7 @@ function reliableCampaign(input: {
     {
       title: proof ? 'Results make the difference real' : 'A clearer path changes what is possible',
       caption: proof
-        ? `${proof}\n\nThat is more than a claim. It is a useful picture of what focused change can produce—and why the next improvement is worth exploring.`
+        ? `${proof}\n\nThat is more than a claim. It is a useful picture of what focused change can produce,and why the next improvement is worth exploring.`
         : `The goal is not change for its own sake. It is a clearer route to ${input.result}, supported by an approach people can understand and act on.`,
       callToAction: `${input.callToAction}${linkLine}`,
       imageDirection: proof
@@ -285,6 +293,7 @@ export async function POST(req: NextRequest) {
     'Do not echo, lightly rewrite or use the client input as the headline. Do not copy a phrase of five or more words from the brief except a proper name, verified fact, required CTA or URL.',
     'Build one memorable big idea across five posts. Give every post a different job: 1) attract attention, 2) expose or educate around the pain, 3) build trust with proof or useful insight, 4) answer an objection or make the solution easy to understand, 5) sell the next step.',
     'Each caption must add a fresh idea. Do not repeat a headline in its caption or repeat a point across posts.',
+    'Never use an em dash or en dash. Use a period, comma, colon or parentheses instead.',
     'Use emotional relevance, specificity, contrast, curiosity and benefit-led writing where appropriate. Make the audience feel understood, informed and ready to act without hype.',
     'Return: {"campaignTitle": string, "strategy": string, "posts": [{"title": string, "caption": string, "callToAction": string, "imageDirection": string}]}.',
     `What is being promoted: ${promotion}`,
@@ -313,7 +322,7 @@ export async function POST(req: NextRequest) {
       responseFormat: 'json',
       temperature: 0.65,
       maxOutputTokens: 3200,
-      system: 'You are Amplifi, a senior advertising creative director and conversion copywriter. Turn client facts into original campaign ideas that attract, inform, persuade and sell. Never mirror the brief, fabricate proof or use empty hype. Return valid JSON only.',
+      system: 'You are Amplifi, a senior advertising creative director and conversion copywriter. Turn client facts into original campaign ideas that attract, inform, persuade and sell. Never mirror the brief, fabricate proof, use empty hype, or use em dashes or en dashes. Return valid JSON only.',
       messages: [{
         role: 'user',
         content: prompt,
