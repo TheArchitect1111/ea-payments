@@ -62,8 +62,7 @@ function reliableCampaign(input: {
 }) {
   const detailLine = input.details ? ` ${input.details}` : '';
   const linkLine = input.ctaUrl ? ` ${input.ctaUrl}` : '';
-  const proof = input.proofPoint || `The right process can move ${input.audience} closer to ${input.result}.`;
-  const pain = input.painQuestion || `How much time, money and capacity is being lost because the current process still depends on manual work?`;
+  const proof = input.proofPoint || '';
   const toneLead = input.tone === 'Provocative and challenging'
     ? 'Take a closer look: '
     : input.tone === 'Authoritative and premium'
@@ -73,39 +72,43 @@ function reliableCampaign(input: {
         : '';
   const posts: CampaignPost[] = [
     {
-      title: pain,
-      caption: `${toneLead}Look at the repeated tasks, delayed follow-up and work your team keeps carrying by hand. ${input.promotion} can help you see what needs to change and choose a clear next step.${detailLine}`,
+      title: 'Busy is not the same as growing',
+      caption: `${toneLead}The work people accept as normal can quietly stand between them and the result they want. This campaign helps ${input.audience} recognize the cost of staying where they are—and see a more useful way forward.${detailLine}`,
       callToAction: `${input.callToAction}${linkLine}`,
-      imageDirection: `Bold branded question graphic using “${pain}” as the headline.`,
+      imageDirection: 'A bold pattern-interrupt graphic that contrasts constant activity with meaningful progress.',
     },
     {
-      title: 'The expensive process hiding in plain sight',
-      caption: `Small repeated tasks add up. They can slow follow-up, create uneven service and pull people away from the work that needs them most. Amplifi helps ${input.audience} recognize that pattern and see where to begin.`,
+      title: 'The hidden cost is what never gets done',
+      caption: `Every avoidable delay competes with service, follow-up and growth. The real question is not whether the current approach still works. It is what becomes possible when a better approach gives people room to move.`,
       callToAction: `${input.callToAction}${linkLine}`,
-      imageDirection: 'A sharp time-money-resources graphic showing operational leakage without invented numbers.',
+      imageDirection: 'An editorial visual showing important opportunities waiting behind a wall of repetitive work.',
     },
     {
-      title: proof,
-      caption: `This result shows what can happen when repeated work no longer depends on memory and manual handoffs. Use the example to help people understand what a better way of working could make possible for them.`,
+      title: proof ? 'Results make the difference real' : 'A clearer path changes what is possible',
+      caption: proof
+        ? `${proof}\n\nThat is more than a claim. It is a useful picture of what focused change can produce—and why the next improvement is worth exploring.`
+        : `The goal is not change for its own sake. It is a clearer route to ${input.result}, supported by an approach people can understand and act on.`,
       callToAction: `${input.callToAction}${linkLine}`,
-      imageDirection: `A premium proof card centered on the exact verified result: “${proof}”.`,
+      imageDirection: proof
+        ? 'A premium result card that pairs the verified outcome with a confident, original headline.'
+        : 'A clean destination-focused visual that makes the desired outcome feel attainable.',
     },
     {
-      title: 'What changed was the system',
-      caption: `The team did not need another demand to work harder. They needed a clearer way to move the work forward. ${input.promotion} guides people toward ${input.result} one practical step at a time.`,
+      title: 'Make the next step feel obvious',
+      caption: `People move when they can see themselves in the outcome and understand what happens next. ${input.promotion} connects the problem they already feel with a practical route toward ${input.result}.`,
       callToAction: `${input.callToAction}${linkLine}`,
-      imageDirection: 'A branded before-and-after process visual: manual friction on the left, clear automated flow on the right.',
+      imageDirection: 'A simple visual journey from a familiar obstacle to a clear, inviting next step.',
     },
     {
-      title: 'Find the leak before it costs you another quarter',
-      caption: `You do not have to solve everything at once. Start by seeing where time and effort are being lost, then choose what to address first. ${input.callToAction}.${linkLine}`,
+      title: 'Your next move starts here',
+      caption: `The strongest time to act is when the problem is clear and the better outcome is within reach. Take one useful step now and see what ${input.promotion} can make possible.${detailLine}`,
       callToAction: `${input.callToAction}${linkLine}`,
-      imageDirection: `A decisive CTA graphic with “Find the leak” and the destination ${input.ctaUrl || 'clearly visible'}.`,
+      imageDirection: 'A decisive call-to-action graphic with a clear focal point and enough space for the destination.',
     },
   ];
   return {
     title: input.promotion,
-    strategy: 'A five-part campaign moving from awareness and relevance through value, invitation and action.',
+    strategy: 'One creative idea told in five distinct steps: earn attention, reveal the cost, build belief, make the solution clear and invite action.',
     posts: assignPortfolioPosts(posts, input.architecture),
     architecture: input.architecture,
   };
@@ -172,6 +175,10 @@ export async function POST(req: NextRequest) {
     }>;
     startDate?: string;
     platforms?: unknown[];
+    toneStrength?: string;
+    wordsUse?: string;
+    wordsAvoid?: string;
+    imageStyle?: string;
   };
 
   const promotion = String(body.promotion || '').trim();
@@ -186,6 +193,13 @@ export async function POST(req: NextRequest) {
   const promotionScope = body.promotionScope === 'portfolio' ? 'portfolio' : 'single';
   const portfolioProducts = Array.isArray(body.portfolioProducts) ? body.portfolioProducts.slice(0, 30) : [];
   const startDate = String(body.startDate || '').trim();
+  const toneStrength = String(body.toneStrength || 'Balanced').trim();
+  const wordsUse = String(body.wordsUse || '').trim();
+  const wordsAvoid = String(body.wordsAvoid || '').trim();
+  const imageStyle = String(body.imageStyle || 'Branded proof graphics').trim();
+  const requestedPlatforms = Array.isArray(body.platforms)
+    ? body.platforms.map(String).map((item) => item.trim()).filter(Boolean).join(', ')
+    : '';
   if (promotionScope === 'portfolio' && (portfolioProducts.length < 2 || portfolioProducts.some((product) =>
     !String(product.name || '').trim() || !String(product.audience || '').trim() || !String(product.callToAction || '').trim()
   ))) {
@@ -266,7 +280,12 @@ export async function POST(req: NextRequest) {
     architecture.mode === 'portfolio'
       ? 'Create exactly five coordinated master-launch social posts that introduce a multi-product portfolio without collapsing the products into one generic offer.'
       : 'Create exactly five coordinated social posts as one campaign.',
-    'The five posts should progress through awareness, relevance, proof/value, invitation, and final call to action.',
+    'Act as the senior creative director and conversion copywriter at an excellent advertising agency.',
+    'Treat the brief below as raw strategy material, never as draft copy. Transform it into an original campaign concept, slogan-quality hooks and persuasive posts.',
+    'Do not echo, lightly rewrite or use the client input as the headline. Do not copy a phrase of five or more words from the brief except a proper name, verified fact, required CTA or URL.',
+    'Build one memorable big idea across five posts. Give every post a different job: 1) attract attention, 2) expose or educate around the pain, 3) build trust with proof or useful insight, 4) answer an objection or make the solution easy to understand, 5) sell the next step.',
+    'Each caption must add a fresh idea. Do not repeat a headline in its caption or repeat a point across posts.',
+    'Use emotional relevance, specificity, contrast, curiosity and benefit-led writing where appropriate. Make the audience feel understood, informed and ready to act without hype.',
     'Return: {"campaignTitle": string, "strategy": string, "posts": [{"title": string, "caption": string, "callToAction": string, "imageDirection": string}]}.',
     `What is being promoted: ${promotion}`,
     `Audience: ${resolvedAudience}`,
@@ -274,11 +293,15 @@ export async function POST(req: NextRequest) {
     `Required call to action: ${resolvedCallToAction}`,
     `Call-to-action URL: ${resolvedCtaUrl || 'Product-specific links are listed below.'}`,
     `Tone: ${tone}`,
+    `Tone strength: ${toneStrength}`,
+    `Platforms: ${requestedPlatforms || 'Facebook and Instagram'}`,
+    `Words the client likes: ${wordsUse || 'None specified.'}`,
+    `Words to avoid: ${wordsAvoid || 'None specified.'}`,
+    `Visual style: ${imageStyle}`,
     `Specific proof point: ${proofPoint || 'None provided; do not invent proof.'}`,
     `Audience pain question: ${painQuestion || 'None provided.'}`,
     `Important dates and details: ${details || 'None provided; do not invent any.'}`,
     portfolioPrompt,
-    'Use this five-post sequence: pattern interruption; real pain or cost; specific proof; what changed; direct invitation.',
     'Write like a trusted guide speaking directly to the reader. Use plain language, show what the reader can do next and avoid consultant terminology.',
     'Do not repeat the image headline as the opening sentence of the caption. The image says it once; the caption should add useful context.',
     'Avoid phrases such as operationally, capacity returned, leverage, optimize, transformation, friction and strategic.',
@@ -288,9 +311,9 @@ export async function POST(req: NextRequest) {
   try {
     const response = await runAIGateway({
       responseFormat: 'json',
-      temperature: 0.35,
+      temperature: 0.65,
       maxOutputTokens: 3200,
-      system: 'You are Amplifi, a social campaign creator. Produce specific, useful campaign copy without inventing facts. Return valid JSON only.',
+      system: 'You are Amplifi, a senior advertising creative director and conversion copywriter. Turn client facts into original campaign ideas that attract, inform, persuade and sell. Never mirror the brief, fabricate proof or use empty hype. Return valid JSON only.',
       messages: [{
         role: 'user',
         content: prompt,

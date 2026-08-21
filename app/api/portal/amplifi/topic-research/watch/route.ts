@@ -35,6 +35,11 @@ export async function POST(req: NextRequest) {
     timezone?: string;
     endAt?: string;
     postsPerRun?: number;
+    objective?: string;
+    audience?: string;
+    tone?: string;
+    callToAction?: string;
+    ctaUrl?: string;
   };
 
   const action = body.action ?? 'create';
@@ -62,6 +67,11 @@ export async function POST(req: NextRequest) {
       timezone,
       endAt: endDate.toISOString(),
       postsPerRun,
+      objective: String(body.objective || '').trim(),
+      audience: String(body.audience || '').trim(),
+      tone: String(body.tone || '').trim(),
+      callToAction: String(body.callToAction || '').trim(),
+      ctaUrl: String(body.ctaUrl || '').trim(),
     });
     return NextResponse.json({ ok: true, watch });
   }

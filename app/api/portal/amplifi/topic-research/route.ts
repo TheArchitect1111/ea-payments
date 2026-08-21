@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  let body: { topic?: string; dateFrom?: string; dateTo?: string; maxSources?: number; postCount?: number };
+  let body: { topic?: string; dateFrom?: string; dateTo?: string; maxSources?: number; postCount?: number; objective?: string; audience?: string; tone?: string; callToAction?: string; ctaUrl?: string };
   try {
     body = (await req.json()) as typeof body;
   } catch {
@@ -57,6 +57,11 @@ export async function POST(req: NextRequest) {
       ...validated.value,
       maxSources: body.maxSources,
       postCount: Math.min(3, Math.max(1, Math.trunc(Number(body.postCount) || 1))) as 1 | 2 | 3,
+      objective: String(body.objective || '').trim(),
+      audience: String(body.audience || '').trim(),
+      tone: String(body.tone || '').trim(),
+      callToAction: String(body.callToAction || '').trim(),
+      ctaUrl: String(body.ctaUrl || '').trim(),
       scrapeTop: 3,
     });
     return NextResponse.json({ ok: true, research: result });
