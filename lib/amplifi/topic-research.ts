@@ -1,5 +1,5 @@
 /**
- * Amplifi topic research — open-web gather for social drafts within a date window.
+ * Amplifi topic research , open-web gather for social drafts within a date window.
  * Reuses OpenAI web_search (+ optional Firecrawl scrape). Does not invent facts.
  */
 import { scrapeUrl } from '@/lib/firecrawl';
@@ -98,6 +98,14 @@ type ModelPayload = {
   posts?: Array<{ linkedIn?: string; shortCaption?: string; hashtags?: string[]; imageDirection?: string }>;
 };
 
+function cleanGeneratedText(value: unknown): string {
+  return String(value || '')
+    .replace(/[\u2013\u2014]/g, ',')
+    .replace(/\s+,/g, ',')
+    .replace(/,\s*,/g, ',')
+    .trim();
+}
+
 async function runTopicWebResearch(input: AmplifiTopicResearchRequest): Promise<{
   payload: ModelPayload;
   provider: string;
@@ -117,7 +125,8 @@ async function runTopicWebResearch(input: AmplifiTopicResearchRequest): Promise<
     'Do not echo the topic as the opening or merely list article titles. Synthesize the facts into a fresh point of view.',
     'Give every requested post a different job, in order: attract with a surprising angle; inform or reveal a pain point; build trust and invite a useful next step.',
     'Each post must make a distinct point and must not repeat wording, hooks or conclusions from another post.',
-    'Use plain, guided language—not consultant terminology, generic openings, interchangeable business fluff or unsupported hype.',
+    'Never use an em dash or en dash. Use a period, comma, colon or parentheses instead.',
+    'Use plain, guided language, not consultant terminology, generic openings, interchangeable business fluff or unsupported hype.',
     'Return ONLY JSON with this shape:',
     '{',
     '  "draftTitle": string,',
@@ -330,18 +339,18 @@ export async function runAmplifiTopicResearch(
     warnings.push('No public sources found for this topic and window.');
   } else if (!sources.some((s) => s.withinRange)) {
     warnings.push(
-      'No source had a confirmed publish date inside the window — drafts cite available material and mark uncertain dates.',
+      'No source had a confirmed publish date inside the window , drafts cite available material and mark uncertain dates.',
     );
   }
   if (payload.notes) warnings.push(String(payload.notes).slice(0, 300));
 
   const draft: AmplifiSocialDraft = {
-    linkedIn: String(payload.linkedIn || '').trim(),
-    shortCaption: String(payload.shortCaption || '').trim(),
+    linkedIn: cleanGeneratedText(payload.linkedIn),
+    shortCaption: cleanGeneratedText(payload.shortCaption),
     hashtags: Array.isArray(payload.hashtags)
       ? payload.hashtags.map((h) => String(h)).filter(Boolean).slice(0, 8)
       : [],
-    imageDirection: String(payload.imageDirection || '').trim(),
+    imageDirection: cleanGeneratedText(payload.imageDirection),
   };
   if (!draft.linkedIn || !draft.shortCaption) {
     const fallback = fallbackDraft(input.topic, preferred, input.dateFrom, input.dateTo);
@@ -354,10 +363,10 @@ export async function runAmplifiTopicResearch(
 
   const requestedPostCount = Math.min(3, Math.max(1, input.postCount ?? 1));
   const drafts: AmplifiSocialDraft[] = (payload.posts || []).slice(0, requestedPostCount).map((post) => ({
-    linkedIn: String(post.linkedIn || '').trim(),
-    shortCaption: String(post.shortCaption || '').trim(),
+    linkedIn: cleanGeneratedText(post.linkedIn),
+    shortCaption: cleanGeneratedText(post.shortCaption),
     hashtags: Array.isArray(post.hashtags) ? post.hashtags.map(String).filter(Boolean).slice(0, 8) : [],
-    imageDirection: String(post.imageDirection || '').trim() || 'An original editorial social graphic built around the post’s strongest idea.',
+    imageDirection: cleanGeneratedText(post.imageDirection) || 'An original editorial social graphic built around the post’s strongest idea.',
   })).filter((post) => post.linkedIn && post.shortCaption);
   if (!drafts.length) drafts.push(draft);
   while (drafts.length < requestedPostCount) {
@@ -389,7 +398,7 @@ export async function runAmplifiTopicResearch(
   const imageOrigin = (process.env.NEXT_PUBLIC_APP_URL?.trim() || process.env.NEXT_PUBLIC_BASE_URL?.trim() || 'https://efficiencyarchitects.online').replace(/\/$/, '');
   const draftsWithImages = drafts.map((post, index) => ({
     ...post,
-    imageUrl: `${imageOrigin}/api/amplifi/post-image?title=${encodeURIComponent(post.shortCaption)}&variant=${index % 3}`,
+    imageUrl: `${imageOrigin}/api/amplifi/post-image?title=${encodeURIComponent(post.shortCaption)}&variant=${index % 3}&v=2`,
   }));
 
   return {
@@ -399,7 +408,7 @@ export async function runAmplifiTopicResearch(
     sources: preferred.slice(0, input.maxSources ?? 8),
     draft: draftsWithImages[0] || draft,
     drafts: draftsWithImages,
-    draftTitle: String(payload.draftTitle || input.topic).trim().slice(0, 120),
+    draftTitle: cleanGeneratedText(payload.draftTitle || input.topic).slice(0, 120),
     warnings,
     researchedAt: new Date().toISOString(),
   };
