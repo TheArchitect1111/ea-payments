@@ -125,7 +125,7 @@ async function finalizeCampaign(input: {
   ).replace(/\/$/, '');
   const generated = {
     ...input.generated,
-    posts: generated.posts.map((post, index) => ({
+    posts: input.generated.posts.map((post, index) => ({
       ...post,
       imageUrl: `${imageOrigin}/api/amplifi/post-image?title=${encodeURIComponent(post.title)}&variant=${index % 3}`,
     })),
