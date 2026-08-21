@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { loadAmplifiConnections } from '@/lib/amplifi-connection-store';
 import { guardPortalApi, portalApiUnauthorized, portalTenant } from '@/lib/api/portal-route';
 import {
   listTopicWatches,
@@ -26,6 +27,13 @@ export async function POST(req: NextRequest) {
   const auth = await guardPortalApi(req, { realm: 'simplifi' });
   if (!auth.ok) return portalApiUnauthorized(auth);
   const tenant = portalTenant(auth.session);
+  const connections = await loadAmplifiConnections(auth.session.slug);
+  if (connections.length === 0) {
+    return NextResponse.json(
+      { ok: false, error: 'Connect at least one social account before scheduling research.' },
+      { status: 409 },
+    );
+  }
 
   const body = (await req.json().catch(() => ({}))) as {
     action?: 'create' | 'pause' | 'resume' | 'stop' | 'run';

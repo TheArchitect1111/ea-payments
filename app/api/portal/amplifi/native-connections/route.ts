@@ -10,8 +10,10 @@ export async function GET(req: NextRequest) {
   if (!auth.ok) return portalApiUnauthorized(auth);
   let connections = await loadAmplifiConnections(auth.session.slug);
 
-  // One-time migration for connections created before durable storage shipped.
-  for (const config of providerConfigs()) {
+  // Trial workspaces must never inherit provider cookies created by another tenant.
+  // Legacy migration remains available only to established workspaces.
+  const canMigrateLegacyCookies = !auth.session.slug.startsWith('amplifi-trial-');
+  for (const config of canMigrateLegacyCookies ? providerConfigs() : []) {
     if (connections.some((account) => account.provider === config.provider)) continue;
     const legacy = decryptAccounts(req.cookies.get(providerCookie(config.provider))?.value);
     if (!legacy.length) continue;

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { loadAmplifiConnections } from '@/lib/amplifi-connection-store';
 import { guardPortalApi, portalApiUnauthorized, portalTenant } from '@/lib/api/portal-route';
 import { getClientByPortalSlug } from '@/lib/airtable';
 import { isModuleEnabled } from '@/lib/modules/portal-modules';
@@ -19,6 +20,13 @@ export async function POST(req: NextRequest) {
   if (!auth.ok) return portalApiUnauthorized(auth);
   const tenant = portalTenant(auth.session);
   const session = auth.session;
+  const connections = await loadAmplifiConnections(auth.session.slug);
+  if (connections.length === 0) {
+    return NextResponse.json(
+      { ok: false, error: 'Connect at least one social account before starting research.' },
+      { status: 409 },
+    );
+  }
 
   const client = await getClientByPortalSlug(tenant.portalSlug);
   if (!client) {
