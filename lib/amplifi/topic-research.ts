@@ -398,7 +398,7 @@ export async function runAmplifiTopicResearch(
   const imageOrigin = (process.env.NEXT_PUBLIC_APP_URL?.trim() || process.env.NEXT_PUBLIC_BASE_URL?.trim() || 'https://efficiencyarchitects.online').replace(/\/$/, '');
   const draftsWithImages = drafts.map((post, index) => ({
     ...post,
-    imageUrl: `${imageOrigin}/api/amplifi/post-image?title=${encodeURIComponent(post.shortCaption)}&variant=${index % 3}`,
+    imageUrl: `${imageOrigin}/api/amplifi/post-image?title=${encodeURIComponent(post.shortCaption)}&variant=${index % 3}&v=2`,
   }));
 
   return {
