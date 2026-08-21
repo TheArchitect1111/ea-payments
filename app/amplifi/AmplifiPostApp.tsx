@@ -117,6 +117,19 @@ function defaultMonitorEndDate(): string {
   return end.toISOString().slice(0, 10);
 }
 
+function safePostImageUrl(imageUrl: string | undefined, title: string, variant: number): string {
+  const fallback = `/api/amplifi/post-image?title=${encodeURIComponent(title)}&variant=${variant % 3}&v=3`;
+  if (!imageUrl) return fallback;
+  if (imageUrl.startsWith('/api/amplifi/post-image')) return imageUrl.replace(/([?&])v=2(?:&|$)/, '$1v=3&').replace(/&$/, '');
+  try {
+    const parsed = new URL(imageUrl);
+    if (parsed.pathname === '/api/amplifi/post-image') return `${parsed.pathname}${parsed.search}`.replace(/([?&])v=2(?:&|$)/, '$1v=3&').replace(/&$/, '');
+  } catch {
+    return fallback;
+  }
+  return imageUrl;
+}
+
 export default function AmplifiPostApp({
   loggedIn,
   slug,
@@ -1117,7 +1130,7 @@ export default function AmplifiPostApp({
                 </div>
               ) : null}
 
-              {researchDrafts.length ? <div className="af-campaign-results"><h4>{researchDrafts.length} research-based post{researchDrafts.length === 1 ? '' : 's'} created</h4>{researchDrafts.map((post, index) => <article className="af-campaign-post" key={`research-post-${index}`}><span>POST {index + 1} OF {researchDrafts.length}</span>{post.imageUrl ? <img className="af-generated-post-image" src={post.imageUrl} alt={post.imageDirection || `Visual for research post ${index + 1}`} /> : null}<p>{post.linkedIn}</p><small>{post.hashtags.join(' ')}</small></article>)}</div> : null}
+              {researchDrafts.length ? <div className="af-campaign-results"><h4>{researchDrafts.length} research-based post{researchDrafts.length === 1 ? '' : 's'} created</h4>{researchDrafts.map((post, index) => <article className="af-campaign-post" key={`research-post-${index}`}><span>POST {index + 1} OF {researchDrafts.length}</span>{post.imageUrl ? <img className="af-generated-post-image" src={safePostImageUrl(post.imageUrl, post.shortCaption, index)} alt={post.imageDirection || `Visual for research post ${index + 1}`} /> : null}<p>{post.linkedIn}</p><small>{post.hashtags.join(' ')}</small></article>)}</div> : null}
 
               {topicWatches.length ? (
                 <div className="af-watch-list">
@@ -1227,7 +1240,7 @@ export default function AmplifiPostApp({
                 return <article className="af-campaign-post" key={`campaign-post-${index}`}>
                   <span>POST {index + 1} OF 5</span>
                   {assignedProduct ? <div className="af-post-assignment"><strong>{assignedProduct.name}</strong><small>{assignedWave?.name || 'Launch wave pending'}</small></div> : null}
-                  <img className="af-generated-post-image af-uploaded-post-image" src={campaignUploadedImages[index] || post.imageUrl || `/api/amplifi/post-image?title=${encodeURIComponent(post.title)}&variant=${imageVariant}`} alt={`Social graphic: ${post.title}`} />
+                  <img className="af-generated-post-image af-uploaded-post-image" src={campaignUploadedImages[index] || safePostImageUrl(post.imageUrl, post.title, imageVariant)} alt={`Social graphic: ${post.title}`} />
                   {editingCampaignPost === index ? <div className="af-campaign-editor"><label className="af-field"><span>Text on the graphic</span><input value={post.title} onChange={(e) => updateCampaignPost(index, { title: e.target.value, imageUrl: `/api/amplifi/post-image?title=${encodeURIComponent(e.target.value)}&variant=${imageVariant}` })} /></label><label className="af-field"><span>Caption</span><textarea value={post.caption} onChange={(e) => updateCampaignPost(index, { caption: e.target.value })} /></label><label className="af-field"><span>Next step</span><input value={post.callToAction} onChange={(e) => updateCampaignPost(index, { callToAction: e.target.value })} /></label></div> : <><p>{post.caption}</p><p className="af-post-call-to-action">{post.callToAction}</p></>}
                   <div className="af-platform-preview">This is how the image and caption will appear on: {campaignPlatforms.join(' · ') || 'Choose a platform'}</div>
                   <label className="af-regen-field"><span>Want a different version?</span><input value={regenerationInstructions[index] ?? ''} onChange={(e) => setRegenerationInstructions((current) => ({ ...current, [index]: e.target.value }))} placeholder="Make it sharper, shorter, or more specific…" /></label>

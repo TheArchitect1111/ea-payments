@@ -106,6 +106,16 @@ function cleanGeneratedText(value: unknown): string {
     .trim();
 }
 
+function shortenGeneratedText(value: unknown, maximum: number): string {
+  const text = cleanGeneratedText(value);
+  if (text.length <= maximum) return text;
+  const slice = text.slice(0, maximum + 1);
+  const sentenceEnd = Math.max(slice.lastIndexOf('. '), slice.lastIndexOf('! '), slice.lastIndexOf('? '));
+  if (sentenceEnd >= Math.floor(maximum * 0.55)) return slice.slice(0, sentenceEnd + 1).trim();
+  const wordEnd = slice.lastIndexOf(' ');
+  return `${slice.slice(0, wordEnd > 0 ? wordEnd : maximum).trim()}.`;
+}
+
 async function runTopicWebResearch(input: AmplifiTopicResearchRequest): Promise<{
   payload: ModelPayload;
   provider: string;
@@ -125,6 +135,7 @@ async function runTopicWebResearch(input: AmplifiTopicResearchRequest): Promise<
     'Do not echo the topic as the opening or merely list article titles. Synthesize the facts into a fresh point of view.',
     'Give every requested post a different job, in order: attract with a surprising angle; inform or reveal a pain point; build trust and invite a useful next step.',
     'Each post must make a distinct point and must not repeat wording, hooks or conclusions from another post.',
+    'Keep every social post between 35 and 55 words. Use short paragraphs and complete sentences.',
     'Never use an em dash or en dash. Use a period, comma, colon or parentheses instead.',
     'Use plain, guided language, not consultant terminology, generic openings, interchangeable business fluff or unsupported hype.',
     'Return ONLY JSON with this shape:',
@@ -363,8 +374,8 @@ export async function runAmplifiTopicResearch(
 
   const requestedPostCount = Math.min(3, Math.max(1, input.postCount ?? 1));
   const drafts: AmplifiSocialDraft[] = (payload.posts || []).slice(0, requestedPostCount).map((post) => ({
-    linkedIn: cleanGeneratedText(post.linkedIn),
-    shortCaption: cleanGeneratedText(post.shortCaption),
+    linkedIn: shortenGeneratedText(post.linkedIn, 320),
+    shortCaption: shortenGeneratedText(post.shortCaption, 180),
     hashtags: Array.isArray(post.hashtags) ? post.hashtags.map(String).filter(Boolean).slice(0, 8) : [],
     imageDirection: cleanGeneratedText(post.imageDirection) || 'An original editorial social graphic built around the post’s strongest idea.',
   })).filter((post) => post.linkedIn && post.shortCaption);
@@ -395,10 +406,9 @@ export async function runAmplifiTopicResearch(
     });
   }
 
-  const imageOrigin = (process.env.NEXT_PUBLIC_APP_URL?.trim() || process.env.NEXT_PUBLIC_BASE_URL?.trim() || 'https://efficiencyarchitects.online').replace(/\/$/, '');
   const draftsWithImages = drafts.map((post, index) => ({
     ...post,
-    imageUrl: `${imageOrigin}/api/amplifi/post-image?title=${encodeURIComponent(post.shortCaption)}&variant=${index % 3}&v=2`,
+    imageUrl: `/api/amplifi/post-image?title=${encodeURIComponent(post.shortCaption)}&variant=${index % 3}&v=3`,
   }));
 
   return {
