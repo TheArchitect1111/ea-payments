@@ -269,12 +269,13 @@ export default function AmplifiPostApp({
   }, [generatedCampaign, approvedCampaignPosts, campaignScheduleTimes]);
 
   const choosePath = (path: AmplifiPath) => {
-    if (!connectionsLoading && socialConnections.length === 0) {
-      setMessage('Connect at least one social account before choosing Options 1, 2 or 3.');
-      setShowHome(false);
-      window.setTimeout(() => {
-        document.getElementById('connections')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 50);
+    if (connectionsLoading || socialConnections.length === 0) {
+      setMessage(connectionsLoading
+        ? 'Amplifi is checking your social accounts. Choose an option after the connection check finishes.'
+        : 'Connect at least one social account before choosing Options 1, 2 or 3.');
+      setSelectedPath(null);
+      setShowWelcome(false);
+      setShowHome(true);
       return;
     }
     setShowHome(false);
@@ -457,6 +458,14 @@ export default function AmplifiPostApp({
   }, [loggedIn]);
 
   useEffect(() => { void loadConnections(); }, [loadConnections]);
+
+  useEffect(() => {
+    if (connectionsLoading || socialConnections.length > 0 || !selectedPath) return;
+    setSelectedPath(null);
+    setShowWelcome(false);
+    setShowHome(true);
+    setMessage('Your social connection is required before creating content.');
+  }, [connectionsLoading, selectedPath, socialConnections.length]);
 
   useEffect(() => {
     const status = new URLSearchParams(window.location.search).get('connections');
@@ -905,6 +914,13 @@ export default function AmplifiPostApp({
   const connectedChannels = [...new Set(socialConnections.map((connection) => connection.platform))];
 
   const openSection = (sectionId: string) => {
+    const requiresConnection = ['content', 'search', 'smartchitecture'].includes(sectionId);
+    if (requiresConnection && (connectionsLoading || socialConnections.length === 0)) {
+      setSelectedPath(null);
+      setMessage('Connect at least one social account before creating content.');
+      setShowHome(true);
+      return;
+    }
     setShowHome(false);
     window.setTimeout(() => {
       document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
