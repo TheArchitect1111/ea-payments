@@ -428,7 +428,7 @@ export default function AmplifiPostApp({
     const directionLead = requestedChange ? `${requestedChange.replace(/[.!?]+$/, '')}: ` : '';
     const replacements: CampaignPost[] = [
       { title: pain, caption: `${toneLead}${pain}\n\nThe cost is hiding inside repeated tasks, delayed follow-up and processes everyone has learned to tolerate. ${promotion.trim()} is built to expose that friction and remove it.`, callToAction: cta, imageDirection: `Bold question-led graphic: ${pain}` },
-      { title: 'Busy is not the same as efficient', caption: `Every manual handoff creates another place for time, money or opportunity to disappear. That is not a people problem. It is a system problem—and system problems can be redesigned.`, callToAction: cta, imageDirection: 'Time, money and resources shown as three visible operational leaks.' },
+      { title: 'Busy is not the same as efficient', caption: `Every manual handoff creates another place for time, money or opportunity to disappear. That is not a people problem. It is a system problem,and system problems can be redesigned.`, callToAction: cta, imageDirection: 'Time, money and resources shown as three visible operational leaks.' },
       { title: proof, caption: `${proof}\n\nThat is the difference between adding another tool and fixing the process that is creating the loss. The result should be specific, measurable and felt by the people doing the work.`, callToAction: cta, imageDirection: `Proof-led result card featuring: ${proof}` },
       { title: 'We did not ask the team to work harder', caption: `We changed the system. The repeated work moved into automation, the handoffs became visible and the team got capacity back for work that actually requires judgment.`, callToAction: cta, imageDirection: 'Before-and-after workflow graphic contrasting friction with a clean automated path.' },
       { title: 'Find the leak', caption: `${pain}\n\nStop guessing. Identify where your business is losing capacity and what to address first. ${cta}`, callToAction: cta, imageDirection: 'High-contrast Find the leak CTA graphic with the destination link.' },
@@ -1017,7 +1017,7 @@ export default function AmplifiPostApp({
             {selectedPath === 'research' ? <section className="af-panel" id="search">
               <div className="af-section-heading">
                 <div>
-                  <span className="af-eyebrow">Option 3 of 3 — Research &amp; Create</span>
+                  <span className="af-eyebrow">Option 3 of 3 , Research &amp; Create</span>
                   <h3>Tell Amplifi what to research and what the campaign must accomplish.</h3>
                   <p>Amplifi searches timely public sources, identifies a useful angle and creates posts for your review.</p>
                 </div>
@@ -1263,7 +1263,7 @@ export default function AmplifiPostApp({
                 <section className="af-panel">
                   <div className="af-section-heading"><div><span className="af-eyebrow">Video pilot</span><h3>Turn this approved direction into a vertical video draft.</h3><p>Test content only. Nothing publishes automatically.</p></div>{videoTask ? <span className="af-review-chip">{videoTask.state === 'complete' ? 'Needs review' : `${videoTask.progress}%`}</span> : null}</div>
                   <div className="af-panel" style={{ marginBottom: 18 }}>
-                    <div className="af-section-heading"><div><span className="af-eyebrow">Reference analysis</span><h3>Reverse-engineer the structure—not someone else’s content.</h3><p>Add a public reference URL and paste its transcript below. Amplifi will create an original shot-by-shot plan without claiming to watch or copy the source video.</p></div></div>
+                    <div className="af-section-heading"><div><span className="af-eyebrow">Reference analysis</span><h3>Reverse-engineer the structure,not someone else’s content.</h3><p>Add a public reference URL and paste its transcript below. Amplifi will create an original shot-by-shot plan without claiming to watch or copy the source video.</p></div></div>
                     <label className="af-field af-field-wide" htmlFor="amplifi-reference-video"><span>Reference video URL</span><input id="amplifi-reference-video" type="url" value={referenceVideoUrl} onChange={(event) => setReferenceVideoUrl(event.target.value)} placeholder="https://…" /></label>
                     <label className="af-field af-field-wide" htmlFor="amplifi-video-script"><span>Transcript or reviewed script</span><textarea id="amplifi-video-script" value={videoScript || draft.shortCaption} onChange={(event) => setVideoScript(event.target.value)} /></label>
                     <button type="button" className="af-edit-button" disabled={storyboardBusy || !loggedIn} onClick={() => void analyzeReferenceVideo()}>{storyboardBusy ? 'Analyzing structure…' : 'Analyze reference video'}</button>
@@ -1330,10 +1330,10 @@ export default function AmplifiPostApp({
             <section className="af-panel af-performance-panel">
               <div className="af-section-heading af-tight-heading"><div><span className="af-eyebrow">Campaign performance</span><h3>Results</h3></div><span className="af-live-dot">Live after publish</span></div>
               <div className="af-metric-grid">
-                <div><span>Reach</span><strong>—</strong><small>Waiting for live data</small></div>
-                <div><span>Engagements</span><strong>—</strong><small>Waiting for live data</small></div>
-                <div><span>Link clicks</span><strong>—</strong><small>Tracked after publish</small></div>
-                <div><span>Conversions</span><strong>—</strong><small>Attributed when available</small></div>
+                <div><span>Reach</span><strong>,</strong><small>Waiting for live data</small></div>
+                <div><span>Engagements</span><strong>,</strong><small>Waiting for live data</small></div>
+                <div><span>Link clicks</span><strong>,</strong><small>Tracked after publish</small></div>
+                <div><span>Conversions</span><strong>,</strong><small>Attributed when available</small></div>
               </div>
               <div className="af-chart-placeholder"><span /><span /><span /><span /><span /><span /><span /></div>
               <p className="af-data-note">No vanity numbers. This panel stays empty until Amplifi has real campaign data to report.</p>
