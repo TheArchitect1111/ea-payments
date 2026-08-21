@@ -26,10 +26,20 @@ function cleanJson(text: string): string {
 
 function cleanGeneratedText(value: unknown): string {
   return String(value || '')
-    .replace(/[\\u2013\\u2014]/g, ',')
+    .replace(/[\u2013\u2014]/g, ',')
     .replace(/\\s+,/g, ',')
     .replace(/,\\s*,/g, ',')
     .trim();
+}
+
+function shortenGeneratedText(value: unknown, maximum: number): string {
+  const text = cleanGeneratedText(value);
+  if (text.length <= maximum) return text;
+  const slice = text.slice(0, maximum + 1);
+  const sentenceEnd = Math.max(slice.lastIndexOf('. '), slice.lastIndexOf('! '), slice.lastIndexOf('? '));
+  if (sentenceEnd >= Math.floor(maximum * 0.55)) return slice.slice(0, sentenceEnd + 1).trim();
+  const wordEnd = slice.lastIndexOf(' ');
+  return `${slice.slice(0, wordEnd > 0 ? wordEnd : maximum).trim()}.`;
 }
 
 function parseCampaign(text: string): CampaignPost[] {
@@ -38,10 +48,10 @@ function parseCampaign(text: string): CampaignPost[] {
     throw new Error('Amplifi did not return the required five-post campaign.');
   }
   return parsed.posts.map((post) => ({
-    title: cleanGeneratedText(post.title),
-    caption: cleanGeneratedText(post.caption),
-    callToAction: cleanGeneratedText(post.callToAction),
-    imageDirection: cleanGeneratedText(post.imageDirection),
+    title: shortenGeneratedText(post.title, 70),
+    caption: shortenGeneratedText(post.caption, 320),
+    callToAction: shortenGeneratedText(post.callToAction, 110),
+    imageDirection: shortenGeneratedText(post.imageDirection, 220),
   })).filter((post) => post.title && post.caption && post.callToAction && post.imageDirection);
 }
 
@@ -50,8 +60,8 @@ function campaignFromText(text: string, promotion: string, architecture: Campaig
   const posts = parseCampaign(text);
   if (posts.length !== 5) throw new Error('Amplifi did not complete all five posts.');
   return {
-    title: cleanGeneratedText(parsed.campaignTitle || promotion),
-    strategy: cleanGeneratedText(parsed.strategy),
+    title: shortenGeneratedText(parsed.campaignTitle || promotion, 90),
+    strategy: shortenGeneratedText(parsed.strategy, 220),
     posts: assignPortfolioPosts(posts, architecture),
     architecture,
   };
@@ -104,13 +114,13 @@ function reliableCampaign(input: {
     },
     {
       title: 'Make the next step feel obvious',
-      caption: `People move when they can see themselves in the outcome and understand what happens next. ${input.promotion} connects the problem they already feel with a practical route toward ${input.result}.`,
+      caption: `People move when they can see themselves in the outcome and understand what happens next. the right system connects the problem they already feel with a practical route toward ${input.result}.`,
       callToAction: `${input.callToAction}${linkLine}`,
       imageDirection: 'A simple visual journey from a familiar obstacle to a clear, inviting next step.',
     },
     {
       title: 'Your next move starts here',
-      caption: `The strongest time to act is when the problem is clear and the better outcome is within reach. Take one useful step now and see what ${input.promotion} can make possible.${detailLine}`,
+      caption: `The strongest time to act is when the problem is clear and the better outcome is within reach. Take one useful step now and see what a better system can make possible.${detailLine}`,
       callToAction: `${input.callToAction}${linkLine}`,
       imageDirection: 'A decisive call-to-action graphic with a clear focal point and enough space for the destination.',
     },
@@ -130,16 +140,11 @@ async function finalizeCampaign(input: {
   tone: string;
   platforms: unknown;
 }) {
-  const imageOrigin = (
-    process.env.NEXT_PUBLIC_APP_URL?.trim() ||
-    process.env.NEXT_PUBLIC_BASE_URL?.trim() ||
-    'https://efficiencyarchitects.online'
-  ).replace(/\/$/, '');
   const generated = {
     ...input.generated,
     posts: input.generated.posts.map((post, index) => ({
       ...post,
-      imageUrl: `${imageOrigin}/api/amplifi/post-image?title=${encodeURIComponent(post.title)}&variant=${index % 3}&v=2`,
+      imageUrl: `/api/amplifi/post-image?title=${encodeURIComponent(post.title)}&variant=${index % 3}&v=3`,
     })),
   };
   if (generated.architecture.mode !== 'portfolio') return generated;
@@ -301,6 +306,7 @@ export async function POST(req: NextRequest) {
     'Do not echo, lightly rewrite or use the client input as the headline. Do not copy a phrase of five or more words from the brief except a proper name, verified fact, required CTA or URL.',
     'Build one memorable big idea across five posts. Give every post a different job: 1) attract attention, 2) expose or educate around the pain, 3) build trust with proof or useful insight, 4) answer an objection or make the solution easy to understand, 5) sell the next step.',
     'Each caption must add a fresh idea. Do not repeat a headline in its caption or repeat a point across posts.',
+    'Keep every caption between 35 and 55 words. Use short paragraphs and complete sentences.',
     'Never use an em dash or en dash. Use a period, comma, colon or parentheses instead.',
     'Use emotional relevance, specificity, contrast, curiosity and benefit-led writing where appropriate. Make the audience feel understood, informed and ready to act without hype.',
     'Return: {"campaignTitle": string, "strategy": string, "posts": [{"title": string, "caption": string, "callToAction": string, "imageDirection": string}]}.',
@@ -330,7 +336,7 @@ export async function POST(req: NextRequest) {
       responseFormat: 'json',
       temperature: 0.65,
       maxOutputTokens: 3200,
-      system: 'You are Amplifi, a senior advertising creative director and conversion copywriter. Turn client facts into original campaign ideas that attract, inform, persuade and sell. Never mirror the brief, fabricate proof, use empty hype, or use em dashes or en dashes. Return valid JSON only.',
+      system: 'You are Amplifi, a senior advertising creative director and conversion copywriter. Turn client facts into original campaign ideas that attract, inform, persuade and sell. Never mirror the brief, fabricate proof, use empty hype, or use em dashes or en dashes. Keep every caption concise, between 35 and 55 words. Return valid JSON only.',
       messages: [{
         role: 'user',
         content: prompt,
