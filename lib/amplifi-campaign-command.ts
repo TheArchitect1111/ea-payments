@@ -5,6 +5,7 @@ export type PortfolioCampaignPost = {
   caption: string;
   callToAction: string;
   imageDirection: string;
+  imageUrl?: string;
   productId?: string;
   audienceId?: string;
   waveId?: string;
