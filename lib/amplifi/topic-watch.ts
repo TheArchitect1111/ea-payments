@@ -21,6 +21,11 @@ export type AmplifiTopicWatch = {
   timezone: string;
   endAt: string;
   postsPerRun: 1 | 2 | 3;
+  objective?: string;
+  audience?: string;
+  tone?: string;
+  callToAction?: string;
+  ctaUrl?: string;
   status: WatchStatus;
   createdAt: string;
   updatedAt: string;
@@ -67,6 +72,11 @@ export async function createTopicWatch(input: {
   timezone: string;
   endAt: string;
   postsPerRun: 1 | 2 | 3;
+  objective?: string;
+  audience?: string;
+  tone?: string;
+  callToAction?: string;
+  ctaUrl?: string;
 }): Promise<AmplifiTopicWatch> {
   const watches = await loadWatches(input.organizationId);
   const now = new Date().toISOString();
@@ -78,6 +88,11 @@ export async function createTopicWatch(input: {
     timezone: input.timezone,
     endAt: input.endAt,
     postsPerRun: input.postsPerRun,
+    objective: input.objective,
+    audience: input.audience,
+    tone: input.tone,
+    callToAction: input.callToAction,
+    ctaUrl: input.ctaUrl,
     status: 'active',
     createdAt: now,
     updatedAt: now,
@@ -91,7 +106,7 @@ export async function createTopicWatch(input: {
 export async function updateTopicWatch(
   organizationId: string,
   id: string,
-  patch: Partial<Pick<AmplifiTopicWatch, 'status' | 'cadence' | 'timezone' | 'endAt' | 'postsPerRun'>>,
+  patch: Partial<Pick<AmplifiTopicWatch, 'status' | 'cadence' | 'timezone' | 'endAt' | 'postsPerRun' | 'objective' | 'audience' | 'tone' | 'callToAction' | 'ctaUrl'>>,
 ): Promise<AmplifiTopicWatch | null> {
   const watches = await loadWatches(organizationId);
   const index = watches.findIndex((w) => w.id === id);
@@ -150,6 +165,11 @@ export async function runTopicWatch(
     maxSources: 8,
     scrapeTop: 3,
     postCount: watch.postsPerRun || 1,
+    objective: watch.objective,
+    audience: watch.audience,
+    tone: watch.tone,
+    callToAction: watch.callToAction,
+    ctaUrl: watch.ctaUrl,
   });
   const known = new Set(watch.sourceHistory.map((row) => normalizeUrl(row.url)));
   const fresh = research.sources.filter((source) => !known.has(normalizeUrl(source.url)));
@@ -230,6 +250,11 @@ export async function upsertTopicWatch(input: {
   timezone: string;
   endAt: string;
   postsPerRun: 1 | 2 | 3;
+  objective?: string;
+  audience?: string;
+  tone?: string;
+  callToAction?: string;
+  ctaUrl?: string;
 }) {
   const existing = (await loadWatches(input.organizationId)).find(
     (watch) => watch.topic.toLowerCase() === input.topic.trim().toLowerCase(),
@@ -242,6 +267,11 @@ export async function upsertTopicWatch(input: {
       timezone: input.timezone,
       endAt: input.endAt,
       postsPerRun: input.postsPerRun,
+      objective: input.objective,
+      audience: input.audience,
+      tone: input.tone,
+      callToAction: input.callToAction,
+      ctaUrl: input.ctaUrl,
     })
   )!;
 }

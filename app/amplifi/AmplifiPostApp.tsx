@@ -605,7 +605,17 @@ export default function AmplifiPostApp({
       const res = await fetch('/api/portal/amplifi/topic-research', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ topic: topic.trim(), dateFrom, dateTo, postCount: postsPerSearch }),
+        body: JSON.stringify({
+          topic: topic.trim(),
+          dateFrom,
+          dateTo,
+          postCount: postsPerSearch,
+          objective: campaignResult.trim(),
+          audience: campaignAudience.trim(),
+          tone: campaignTone,
+          callToAction: campaignCallToAction.trim(),
+          ctaUrl: campaignCtaUrl.trim(),
+        }),
       });
       const data = (await res.json()) as {
         ok?: boolean;
@@ -671,6 +681,11 @@ export default function AmplifiPostApp({
           timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'America/New_York',
           endAt: `${watchEndDate}T23:59:59.999Z`,
           postsPerRun: postsPerSearch,
+          objective: campaignResult.trim(),
+          audience: campaignAudience.trim(),
+          tone: campaignTone,
+          callToAction: campaignCallToAction.trim(),
+          ctaUrl: campaignCtaUrl.trim(),
         }),
       });
       const data = (await res.json()) as { ok?: boolean; error?: string; watch?: TopicWatch };
@@ -1086,7 +1101,7 @@ export default function AmplifiPostApp({
                 </div>
               ) : null}
 
-              {researchDrafts.length ? <div className="af-campaign-results"><h4>{researchDrafts.length} research-based post{researchDrafts.length === 1 ? '' : 's'} created</h4>{researchDrafts.map((post, index) => <article className="af-campaign-post" key={`research-post-${index}`}><span>POST {index + 1} OF {researchDrafts.length}</span><p>{post.linkedIn}</p><small>{post.hashtags.join(' ')}</small></article>)}</div> : null}
+              {researchDrafts.length ? <div className="af-campaign-results"><h4>{researchDrafts.length} research-based post{researchDrafts.length === 1 ? '' : 's'} created</h4>{researchDrafts.map((post, index) => <article className="af-campaign-post" key={`research-post-${index}`}><span>POST {index + 1} OF {researchDrafts.length}</span>{post.imageUrl ? <img className="af-generated-post-image" src={post.imageUrl} alt={post.imageDirection || `Visual for research post ${index + 1}`} /> : null}<p>{post.linkedIn}</p><small>{post.hashtags.join(' ')}</small></article>)}</div> : null}
 
               {topicWatches.length ? (
                 <div className="af-watch-list">
@@ -1143,7 +1158,7 @@ export default function AmplifiPostApp({
             </section> : null}
 
             {selectedPath === 'smartchitecture' ? <section className="af-panel af-smartchitecture-panel" id="smartchitecture">
-              <div className="af-section-heading"><div><span className="af-eyebrow">Create it for me</span><h3>Tell Amplifi what the campaign needs to accomplish.</h3><p>Give Amplifi the brief—not the copy. Amplifi will create five coordinated posts.</p></div></div>
+              <div className="af-section-heading"><div><span className="af-eyebrow">Create it for me</span><h3>Give Amplifi the facts. It builds the campaign.</h3><p>Share the goal and audience. Amplifi turns them into an original campaign idea, hooks and five posts designed to attract, inform and sell.</p></div></div>
               <fieldset className="af-promotion-scope">
                 <legend>What are you promoting?</legend>
                 <div>

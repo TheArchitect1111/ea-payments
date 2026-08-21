@@ -24,6 +24,11 @@ export type AmplifiTopicResearchRequest = {
   maxSources?: number;
   scrapeTop?: number;
   postCount?: 1 | 2 | 3;
+  objective?: string;
+  audience?: string;
+  tone?: string;
+  callToAction?: string;
+  ctaUrl?: string;
 };
 
 export type AmplifiTopicResearchResult = {
@@ -89,7 +94,8 @@ type ModelPayload = {
   hashtags?: string[];
   draftTitle?: string;
   notes?: string;
-  posts?: Array<{ linkedIn?: string; shortCaption?: string; hashtags?: string[] }>;
+  imageDirection?: string;
+  posts?: Array<{ linkedIn?: string; shortCaption?: string; hashtags?: string[]; imageDirection?: string }>;
 };
 
 async function runTopicWebResearch(input: AmplifiTopicResearchRequest): Promise<{
@@ -105,8 +111,13 @@ async function runTopicWebResearch(input: AmplifiTopicResearchRequest): Promise<
     'Find public articles, news, and videos relevant to the topic within the date window.',
     'Prefer primary journalism, reputable trade press, and official reports.',
     'Do not invent URLs, titles, or dates. If a publish date is unknown, set publishedAt to null.',
-    'Reject generic openings and interchangeable business fluff when drafting posts.',
-    'Drafts must be specific to the topic and grounded in the sources you return.',
+    'After researching, act as a senior advertising creative director and conversion copywriter.',
+    'Treat the topic and sources as raw material, not copy to summarize or repeat.',
+    'Create original, source-grounded posts with slogan-quality hooks and persuasive angles that make the research useful to the audience.',
+    'Do not echo the topic as the opening or merely list article titles. Synthesize the facts into a fresh point of view.',
+    'Give every requested post a different job, in order: attract with a surprising angle; inform or reveal a pain point; build trust and invite a useful next step.',
+    'Each post must make a distinct point and must not repeat wording, hooks or conclusions from another post.',
+    'Use plain, guided language—not consultant terminology, generic openings, interchangeable business fluff or unsupported hype.',
     'Return ONLY JSON with this shape:',
     '{',
     '  "draftTitle": string,',
@@ -114,10 +125,16 @@ async function runTopicWebResearch(input: AmplifiTopicResearchRequest): Promise<
     '  "linkedIn": string,',
     '  "shortCaption": string,',
     '  "hashtags": string[],',
-    '  "posts": [{"linkedIn": string, "shortCaption": string, "hashtags": string[]}],',
+    '  "imageDirection": string,',
+    '  "posts": [{"linkedIn": string, "shortCaption": string, "hashtags": string[], "imageDirection": string}],',
     '  "notes": string',
     '}',
     `Topic: ${input.topic}`,
+    `Campaign objective: ${input.objective || 'Inform the audience and create useful interest.'}`,
+    `Audience: ${input.audience || 'People affected by this topic.'}`,
+    `Tone: ${input.tone || 'Clear, confident and human.'}`,
+    `Required next step: ${input.callToAction || 'Invite the reader to learn more.'}`,
+    `Next-step URL: ${input.ctaUrl || 'None provided.'}`,
     `Date window (inclusive): ${input.dateFrom} to ${input.dateTo}`,
     `Max sources: ${maxSources}`,
     `Create exactly ${input.postCount ?? 1} distinct, source-grounded social post(s) in posts.`,
@@ -226,29 +243,28 @@ async function enrichSource(
 function fallbackDraft(
   topic: string,
   sources: AmplifiResearchSource[],
-  dateFrom: string,
-  dateTo: string,
+  _dateFrom: string,
+  _dateTo: string,
 ): AmplifiSocialDraft {
   const top = sources.slice(0, 3);
-  const bullets = top
-    .map((s) => `• ${s.title}${s.publishedAt ? ` (${s.publishedAt})` : ''}`)
-    .join('\n');
   const firstUrl = top[0]?.url || '';
+  const sourceSignal = top[0]?.snippet || top[0]?.title || `Recent reporting about ${topic.trim()}`;
   const linkedIn = [
-    `What ${topic.trim()} means for operators right now (${dateFrom} → ${dateTo}):`,
+    'The headline is only the beginning.',
     '',
-    bullets || '• Fresh public reporting on this topic',
+    `${sourceSignal.replace(/\s+/g, ' ').trim().slice(0, 360)}`,
     '',
-    firstUrl ? `Worth a look: ${firstUrl}` : '',
+    `The useful question now: what should people notice, reconsider or do differently because of it? That is where information becomes an advantage.`,
     '',
-    'Drafted in Amplifi™ for review — not auto-published.',
+    firstUrl ? `Explore the source: ${firstUrl}` : '',
   ]
     .filter(Boolean)
     .join('\n');
   return {
     linkedIn,
-    shortCaption: `${topic.trim()}: key takeaways from recent coverage (${dateFrom}–${dateTo}).${firstUrl ? ` ${firstUrl}` : ''}`,
-    hashtags: ['#Amplifi', '#Business', '#Automation'].slice(0, 4),
+    shortCaption: `Do not stop at the headline. Turn fresh information into a smarter next move.${firstUrl ? ` ${firstUrl}` : ''}`,
+    hashtags: ['#Insights', '#WhatsNext', '#Amplifi'],
+    imageDirection: 'An editorial social graphic that turns the strongest research insight into one short visual idea.',
   };
 }
 
@@ -325,37 +341,64 @@ export async function runAmplifiTopicResearch(
     hashtags: Array.isArray(payload.hashtags)
       ? payload.hashtags.map((h) => String(h)).filter(Boolean).slice(0, 8)
       : [],
+    imageDirection: String(payload.imageDirection || '').trim(),
   };
   if (!draft.linkedIn || !draft.shortCaption) {
     const fallback = fallbackDraft(input.topic, preferred, input.dateFrom, input.dateTo);
     draft.linkedIn = draft.linkedIn || fallback.linkedIn;
     draft.shortCaption = draft.shortCaption || fallback.shortCaption;
     draft.hashtags = draft.hashtags.length ? draft.hashtags : fallback.hashtags;
+    draft.imageDirection = draft.imageDirection || fallback.imageDirection;
     warnings.push('Draft fields were completed with a grounded fallback template.');
   }
 
   const requestedPostCount = Math.min(3, Math.max(1, input.postCount ?? 1));
-  const drafts = (payload.posts || []).slice(0, requestedPostCount).map((post) => ({
+  const drafts: AmplifiSocialDraft[] = (payload.posts || []).slice(0, requestedPostCount).map((post) => ({
     linkedIn: String(post.linkedIn || '').trim(),
     shortCaption: String(post.shortCaption || '').trim(),
     hashtags: Array.isArray(post.hashtags) ? post.hashtags.map(String).filter(Boolean).slice(0, 8) : [],
+    imageDirection: String(post.imageDirection || '').trim() || 'An original editorial social graphic built around the post’s strongest idea.',
   })).filter((post) => post.linkedIn && post.shortCaption);
   if (!drafts.length) drafts.push(draft);
   while (drafts.length < requestedPostCount) {
     const number = drafts.length + 1;
+    const source = preferred[(number - 1) % Math.max(preferred.length, 1)];
+    const sourceUrl = source?.url || preferred[0]?.url || '';
+    const sourceIdea = (source?.snippet || source?.title || input.topic).replace(/\s+/g, ' ').trim().slice(0, 320);
+    const angle = number === 2
+      ? {
+          hook: 'The real risk is missing what the news changes.',
+          bridge: 'A useful update should do more than inform people. It should help them recognize a pressure, opportunity or decision that deserves attention now.',
+          caption: 'Fresh information matters most when it reveals what deserves attention next.',
+        }
+      : {
+          hook: 'Information becomes valuable when it changes the next move.',
+          bridge: 'The strongest response is not more commentary. It is a clear takeaway that helps people decide what to notice, question or do next.',
+          caption: 'Turn the latest signal into a clearer, more confident next step.',
+        };
     drafts.push({
-      ...draft,
-      linkedIn: `Post ${number} of ${requestedPostCount}\n\n${draft.linkedIn}`,
+      linkedIn: [angle.hook, '', sourceIdea, '', angle.bridge, '', sourceUrl ? `See the source: ${sourceUrl}` : ''].filter(Boolean).join('\n'),
+      shortCaption: `${angle.caption}${sourceUrl ? ` ${sourceUrl}` : ''}`,
+      hashtags: ['#Insights', '#WhatsNext', '#Amplifi'],
+      imageDirection: number === 2
+        ? 'A bold editorial graphic that visualizes the consequence of overlooking an important change.'
+        : 'A clear forward-motion graphic that turns the research signal into an inviting next step.',
     });
   }
+
+  const imageOrigin = (process.env.NEXT_PUBLIC_APP_URL?.trim() || process.env.NEXT_PUBLIC_BASE_URL?.trim() || 'https://efficiencyarchitects.online').replace(/\/$/, '');
+  const draftsWithImages = drafts.map((post, index) => ({
+    ...post,
+    imageUrl: `${imageOrigin}/api/amplifi/post-image?title=${encodeURIComponent(post.shortCaption)}&variant=${index % 3}`,
+  }));
 
   return {
     topic: input.topic,
     dateFrom: input.dateFrom,
     dateTo: input.dateTo,
     sources: preferred.slice(0, input.maxSources ?? 8),
-    draft,
-    drafts,
+    draft: draftsWithImages[0] || draft,
+    drafts: draftsWithImages,
     draftTitle: String(payload.draftTitle || input.topic).trim().slice(0, 120),
     warnings,
     researchedAt: new Date().toISOString(),

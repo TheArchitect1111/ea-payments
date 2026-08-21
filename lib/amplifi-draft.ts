@@ -8,4 +8,6 @@ export interface AmplifiSocialDraft {
   hashtags: string[];
   email?: string;
   sms?: string;
+  imageDirection?: string;
+  imageUrl?: string;
 }
