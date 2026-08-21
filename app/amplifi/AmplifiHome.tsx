@@ -185,8 +185,10 @@ export default function AmplifiHome({
               </article>
             </section>
           ) : (
-            <section className="af-home-paths" aria-label="Choose an Amplifi path">
-              {PATHS.map((path) => (
+            <>
+              <ConnectionStatus channels={connectedChannels} loading={false} error={connectionsError} onOpen={() => onOpenSection('connections')} />
+              <section className="af-home-paths" aria-label="Choose an Amplifi path">
+                {PATHS.map((path) => (
                 <article key={path.id} className="af-home-path">
                   <span className="af-path-number">{path.number}</span>
                   <span className="af-path-icon" aria-hidden="true">{path.icon}</span>
@@ -197,13 +199,13 @@ export default function AmplifiHome({
                   </div>
                   <button type="button" onClick={() => onChoosePath(path.id)}>{path.button}<span>→</span></button>
                 </article>
-              ))}
-            </section>
+                ))}
+              </section>
+            </>
           )}
 
           <footer className="af-client-footer">
-            <ConnectionStatus channels={connectedChannels} loading={connectionsLoading} error={connectionsError} onOpen={() => onOpenSection('connections')} />
-            <p>{connectedChannels.length ? 'Nothing publishes until you approve it.' : 'Connect at least one account to unlock Options 1, 2 and 3.'}</p>
+            <p>{connectedChannels.length ? 'Your account is connected. Nothing publishes until you approve it.' : 'Connect at least one account to unlock Options 1, 2 and 3.'}</p>
           </footer>
         </main>
       )}
