@@ -41,6 +41,8 @@ export async function persistAmplifiPortfolioCampaign(input: {
       previewTitle: post.title,
       previewBody: `${post.caption}\n\n${trackingUrl || post.callToAction}`.trim(),
       previewLayout: platform === 'instagram' ? 'social-feed' as const : 'social-feed' as const,
+      thumbnailUrl: post.imageUrl,
+      renderUrl: post.imageUrl,
       href: trackingUrl,
       destinationUrl,
       trackingUrl,

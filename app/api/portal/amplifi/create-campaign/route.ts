@@ -16,6 +16,7 @@ type CampaignPost = {
   caption: string;
   callToAction: string;
   imageDirection: string;
+  imageUrl?: string;
 };
 
 function cleanJson(text: string): string {
@@ -64,40 +65,40 @@ function reliableCampaign(input: {
   const proof = input.proofPoint || `The right process can move ${input.audience} closer to ${input.result}.`;
   const pain = input.painQuestion || `How much time, money and capacity is being lost because the current process still depends on manual work?`;
   const toneLead = input.tone === 'Provocative and challenging'
-    ? 'Here is the uncomfortable truth: '
+    ? 'Take a closer look: '
     : input.tone === 'Authoritative and premium'
-      ? 'Operationally, the issue is clear: '
+      ? 'Here is what to know: '
       : input.tone === 'Warm and human'
-        ? 'Your people deserve a better way to work. '
+        ? 'There is a simpler way forward. '
         : '';
   const posts: CampaignPost[] = [
     {
       title: pain,
-      caption: `${toneLead}${pain}\n\nThe leak is rarely one dramatic failure. It is the repeated task, the delayed follow-up and the process everyone tolerates because “that is how we do it.” ${input.promotion} is built to change that.${detailLine}`,
+      caption: `${toneLead}Look at the repeated tasks, delayed follow-up and work your team keeps carrying by hand. ${input.promotion} can help you see what needs to change and choose a clear next step.${detailLine}`,
       callToAction: `${input.callToAction}${linkLine}`,
       imageDirection: `Bold branded question graphic using “${pain}” as the headline.`,
     },
     {
       title: 'The expensive process hiding in plain sight',
-      caption: `Manual work does not stay small. It compounds into missed opportunities, inconsistent service and people spending their best hours on work a system should handle. For ${input.audience}, that is not an inconvenience. It is an operating cost.`,
+      caption: `Small repeated tasks add up. They can slow follow-up, create uneven service and pull people away from the work that needs them most. Amplifi helps ${input.audience} recognize that pattern and see where to begin.`,
       callToAction: `${input.callToAction}${linkLine}`,
       imageDirection: 'A sharp time-money-resources graphic showing operational leakage without invented numbers.',
     },
     {
       title: proof,
-      caption: `${proof}\n\nThat is what happens when the right process stops depending on memory, repetition and manual handoffs. The value is not “more technology.” The value is measurable capacity returned to the business.`,
+      caption: `This result shows what can happen when repeated work no longer depends on memory and manual handoffs. Use the example to help people understand what a better way of working could make possible for them.`,
       callToAction: `${input.callToAction}${linkLine}`,
       imageDirection: `A premium proof card centered on the exact verified result: “${proof}”.`,
     },
     {
       title: 'What changed was the system',
-      caption: `The breakthrough was not asking people to work harder. It was removing the friction built into the process. ${input.promotion} helps create the structure required to reach ${input.result} with less waste and more control.`,
+      caption: `The team did not need another demand to work harder. They needed a clearer way to move the work forward. ${input.promotion} guides people toward ${input.result} one practical step at a time.`,
       callToAction: `${input.callToAction}${linkLine}`,
       imageDirection: 'A branded before-and-after process visual: manual friction on the left, clear automated flow on the right.',
     },
     {
       title: 'Find the leak before it costs you another quarter',
-      caption: `${pain}\n\nFind out where your business is losing capacity and what to address first. ${input.callToAction}.${linkLine}`,
+      caption: `You do not have to solve everything at once. Start by seeing where time and effort are being lost, then choose what to address first. ${input.callToAction}.${linkLine}`,
       callToAction: `${input.callToAction}${linkLine}`,
       imageDirection: `A decisive CTA graphic with “Find the leak” and the destination ${input.ctaUrl || 'clearly visible'}.`,
     },
@@ -117,7 +118,19 @@ async function finalizeCampaign(input: {
   tone: string;
   platforms: unknown;
 }) {
-  if (input.generated.architecture.mode !== 'portfolio') return input.generated;
+  const imageOrigin = (
+    process.env.NEXT_PUBLIC_APP_URL?.trim() ||
+    process.env.NEXT_PUBLIC_BASE_URL?.trim() ||
+    'https://efficiencyarchitects.online'
+  ).replace(/\/$/, '');
+  const generated = {
+    ...input.generated,
+    posts: input.generated.posts.map((post, index) => ({
+      ...post,
+      imageUrl: `${imageOrigin}/api/amplifi/post-image?title=${encodeURIComponent(post.title)}&variant=${index % 3}`,
+    })),
+  };
+  if (generated.architecture.mode !== 'portfolio') return generated;
   const allowed = new Set<SocialPlatform>(['facebook', 'instagram', 'linkedin', 'x']);
   const platforms = Array.isArray(input.platforms)
     ? [...new Set(input.platforms.map((item) => String(item).toLowerCase()).filter((item): item is SocialPlatform => allowed.has(item as SocialPlatform)))]
@@ -125,14 +138,14 @@ async function finalizeCampaign(input: {
   const saved = await persistAmplifiPortfolioCampaign({
     organizationId: input.organizationId,
     portalSlug: input.portalSlug,
-    title: input.generated.title,
-    objective: input.generated.architecture.masterObjective,
+    title: generated.title,
+    objective: generated.architecture.masterObjective,
     tone: input.tone,
     platforms: platforms.length ? platforms : ['facebook', 'instagram'],
-    architecture: input.generated.architecture,
-    posts: input.generated.posts,
+    architecture: generated.architecture,
+    posts: generated.posts,
   });
-  return { ...input.generated, id: saved.campaign.id, durable: saved.durable, persistenceError: saved.error };
+  return { ...generated, id: saved.campaign.id, durable: saved.durable, persistenceError: saved.error };
 }
 
 export async function POST(req: NextRequest) {
@@ -266,7 +279,9 @@ export async function POST(req: NextRequest) {
     `Important dates and details: ${details || 'None provided; do not invent any.'}`,
     portfolioPrompt,
     'Use this five-post sequence: pattern interruption; real pain or cost; specific proof; what changed; direct invitation.',
-    'Write with adult authority, specificity and edge. Avoid generic phrases, filler and schoolbook language.',
+    'Write like a trusted guide speaking directly to the reader. Use plain language, show what the reader can do next and avoid consultant terminology.',
+    'Do not repeat the image headline as the opening sentence of the caption. The image says it once; the caption should add useful context.',
+    'Avoid phrases such as operationally, capacity returned, leverage, optimize, transformation, friction and strategic.',
     'Include the CTA URL naturally in every post where a next step is appropriate.',
   ].join('\n');
 
