@@ -138,7 +138,7 @@ async function finalizeCampaign(input: {
     ...input.generated,
     posts: input.generated.posts.map((post, index) => ({
       ...post,
-      imageUrl: `${imageOrigin}/api/amplifi/post-image?title=${encodeURIComponent(post.title)}&variant=${index % 3}`,
+      imageUrl: `${imageOrigin}/api/amplifi/post-image?title=${encodeURIComponent(post.title)}&variant=${index % 3}&v=2`,
     })),
   };
   if (generated.architecture.mode !== 'portfolio') return generated;
