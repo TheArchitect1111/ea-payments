@@ -1,5 +1,6 @@
 {
   "version": 2,
+  "ignoreCommand": "node scripts/vercel-ignore-work-branches.mjs",
   "env": {
     "UNIVERSAL_PEOPLE": "1",
     "UNIVERSAL_PEOPLE_PERSIST": "1",
