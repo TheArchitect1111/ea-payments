@@ -21,21 +21,17 @@ const URLS = {
 }
 
 const IMG = {
+  logo: '/joe-smith-logo.jpg',
   hero: 'https://static.wixstatic.com/media/05e74b_81b2e63768404aa19a849bcf2995bcf4~mv2.jpeg/v1/fill/w_1450%2Ch_1088%2Cq_90%2Cenc_avif%2Cquality_auto/05e74b_81b2e63768404aa19a849bcf2995bcf4~mv2.jpeg',
   kids: 'https://static.wixstatic.com/media/05e74b_eed83ab8d53143b5b13dd00bbfeb3f95~mv2.png/v1/fill/w_980%2Ch_1320%2Cal_c%2Cq_90%2Cusm_0.66_1.00_0.01%2Cenc_avif%2Cquality_auto/IMG_9286%20%281%29_heic.png',
   huddle: 'https://static.wixstatic.com/media/05e74b_16e89fd800ae4df68dab6531fdf18ab9~mv2.jpeg/v1/fill/w_1450%2Ch_1088%2Cq_90%2Cenc_avif%2Cquality_auto/05e74b_16e89fd800ae4df68dab6531fdf18ab9~mv2.jpeg',
   jr: 'https://static.wixstatic.com/media/05e74b_a4a3bd429ebe4e4a81bf6676e5835ddc~mv2.png/v1/fill/w_200%2Ch_50%2Cal_c%2Cq_85%2Cenc_avif%2Cquality_auto/JR%20NBA%20and%20WNBA.png',
 }
 
-function JoeLogo() {
+function JoeLogo({ large = false }) {
   return (
-    <span className="joeLogoLockup" aria-label="Joe Smith Basketball Academy logo">
-      <svg className="joeLogoSymbol" viewBox="0 0 120 110" role="img" aria-hidden="true">
-        <path d="M60 4 108 30v50L60 106 12 80V30Z" fill="#21a9e1" />
-        <path d="M60 4v102L12 80V30Z" fill="#111820" />
-        <path d="M28 34h22v42H38V50H28Zm42 0h22v14H79v8h13v22H70V64h12v-8H70Z" fill="#fff" />
-      </svg>
-      <span className="joeLogoWords"><strong>JOE SMITH</strong><small>BASKETBALL ACADEMY</small></span>
+    <span className={large ? 'joeLogoImageWrap large' : 'joeLogoImageWrap'}>
+      <img src={IMG.logo} alt="Joe Smith Basketball Academy logo" />
     </span>
   )
 }
@@ -120,7 +116,7 @@ export default function JoeSmithPage() {
       </section>
 
       <section className="joeLogoWall" aria-label="Joe Smith Basketball Academy brand mark">
-        <JoeLogo />
+        <JoeLogo large />
       </section>
 
       <footer><strong>Joe Smith Basketball Academy</strong><span>Player development. Coaching. Connection.</span></footer>
