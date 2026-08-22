@@ -21,10 +21,23 @@ const URLS = {
 }
 
 const IMG = {
-  hero: 'https://static.wixstatic.com/media/05e74b_eed83ab8d53143b5b13dd00bbfeb3f95~mv2.png/v1/fill/w_980%2Ch_1320%2Cal_c%2Cq_90%2Cusm_0.66_1.00_0.01%2Cenc_avif%2Cquality_auto/IMG_9286%20%281%29_heic.png',
-  coaching: 'https://static.wixstatic.com/media/05e74b_81b2e63768404aa19a849bcf2995bcf4~mv2.jpeg/v1/fill/w_1450%2Ch_1088%2Cq_90%2Cenc_avif%2Cquality_auto/05e74b_81b2e63768404aa19a849bcf2995bcf4~mv2.jpeg',
+  hero: 'https://static.wixstatic.com/media/05e74b_81b2e63768404aa19a849bcf2995bcf4~mv2.jpeg/v1/fill/w_1450%2Ch_1088%2Cq_90%2Cenc_avif%2Cquality_auto/05e74b_81b2e63768404aa19a849bcf2995bcf4~mv2.jpeg',
+  kids: 'https://static.wixstatic.com/media/05e74b_eed83ab8d53143b5b13dd00bbfeb3f95~mv2.png/v1/fill/w_980%2Ch_1320%2Cal_c%2Cq_90%2Cusm_0.66_1.00_0.01%2Cenc_avif%2Cquality_auto/IMG_9286%20%281%29_heic.png',
   huddle: 'https://static.wixstatic.com/media/05e74b_16e89fd800ae4df68dab6531fdf18ab9~mv2.jpeg/v1/fill/w_1450%2Ch_1088%2Cq_90%2Cenc_avif%2Cquality_auto/05e74b_16e89fd800ae4df68dab6531fdf18ab9~mv2.jpeg',
   jr: 'https://static.wixstatic.com/media/05e74b_a4a3bd429ebe4e4a81bf6676e5835ddc~mv2.png/v1/fill/w_200%2Ch_50%2Cal_c%2Cq_85%2Cenc_avif%2Cquality_auto/JR%20NBA%20and%20WNBA.png',
+}
+
+function JoeLogo() {
+  return (
+    <span className="joeLogoLockup" aria-label="Joe Smith Basketball Academy logo">
+      <svg className="joeLogoSymbol" viewBox="0 0 120 110" role="img" aria-hidden="true">
+        <path d="M60 4 108 30v50L60 106 12 80V30Z" fill="#21a9e1" />
+        <path d="M60 4v102L12 80V30Z" fill="#111820" />
+        <path d="M28 34h22v42H38V50H28Zm42 0h22v14H79v8h13v22H70V64h12v-8H70Z" fill="#fff" />
+      </svg>
+      <span className="joeLogoWords"><strong>JOE SMITH</strong><small>BASKETBALL ACADEMY</small></span>
+    </span>
+  )
 }
 
 export const metadata = {
@@ -37,8 +50,7 @@ export default function JoeSmithPage() {
     <main className="joeSite">
       <nav className="joeNav">
         <a className="joeBrand" href="#top" aria-label="Joe Smith Basketball Academy home">
-          <span className="joeMark"><i>J</i><b>S</b></span>
-          <span><strong>JOE SMITH</strong><small>BASKETBALL ACADEMY</small></span>
+          <JoeLogo />
         </a>
         <div className="joeNavActions">
           <a className="joePortal" href={URLS.portal}>Family Portal</a>
@@ -47,30 +59,22 @@ export default function JoeSmithPage() {
       </nav>
 
       <section className="joeHero" id="top">
-        <div className="joeHeroImage"><img src={IMG.hero} alt="Joe Smith connecting with young basketball players" /></div>
+        <div className="joeHeroImage"><img src={IMG.hero} alt="Joe Smith coaching a young basketball player one-on-one" /></div>
         <div className="joeHeroCopy">
           <p className="eyebrow">JOE SMITH BASKETBALL ACADEMY</p>
           <h1>Every player needs someone who sees what they can become.</h1>
           <p className="lead">Skills matter. So do confidence, discipline, leadership and the belief that another good rep can change what comes next.</p>
           <div className="heroActions">
             <a className="joeButton dark" href={URLS.book} target="_blank" rel="noreferrer">Book a class</a>
-            <a className="textLink" href="#classes">See every class</a>
           </div>
         </div>
-      </section>
-
-      <section className="joePromise">
-        <p className="eyebrow">PLAYER + COACH</p>
-        <h2>Getting better is personal.</h2>
-        <p>A coach notices the detail a player misses, asks for one more rep, and stays close enough for confidence to catch up with ability.</p>
-        <div className="joePromiseImage"><img src={IMG.coaching} alt="Joe Smith coaching a young player through a basketball drill" /></div>
       </section>
 
       <section className="joeClasses" id="classes">
         <div className="sectionIntro">
           <p className="eyebrow">PRACTICE WITH US</p>
           <h2>Choose what you want to get better at.</h2>
-          <p>No extra click. The academy's training options are right here.</p>
+          <p>The academy's training options are right here. No extra page and no extra click.</p>
         </div>
         <div className="classList">
           {CLASSES.map((name, index) => (
@@ -84,13 +88,20 @@ export default function JoeSmithPage() {
       </section>
 
       <section className="joeConnection">
-        <div className="connectionImage"><img src={IMG.huddle} alt="Joe Smith with young players gathered together on the court" /></div>
+        <div className="connectionImage"><img src={IMG.kids} alt="Joe Smith connecting with young players at the academy" /></div>
         <div className="connectionCopy">
-          <p className="eyebrow">MORE THAN A WORKOUT</p>
+          <p className="eyebrow">PLAYER + COACH</p>
           <h2>Players remember who believed in them.</h2>
-          <p>Joe's experience matters because he can pass it forward. The academy connects instruction, encouragement, standards and belonging so young players can grow on and off the court.</p>
+          <p>The work is personal. Joe sees the player, asks for another rep, celebrates progress and helps young athletes build confidence alongside skill.</p>
           <a className="textLink" href={URLS.about} target="_blank" rel="noreferrer">Joe's story →</a>
         </div>
+      </section>
+
+      <section className="joePromise">
+        <p className="eyebrow">GETTING BETTER TOGETHER</p>
+        <h2>One rep. One correction. One connection at a time.</h2>
+        <p>A coach notices the detail a player misses, stays close enough to teach it, and gives the player room to own the improvement.</p>
+        <div className="joePromiseImage"><img src={IMG.huddle} alt="Joe Smith with young players gathered together on the court" /></div>
       </section>
 
       <section className="joePartner">
@@ -108,8 +119,8 @@ export default function JoeSmithPage() {
         </div>
       </section>
 
-      <section className="joeLogoWall" aria-label="Joe Smith Basketball Academy logo">
-        <div className="joeLogoLarge"><span className="joeMark large"><i>J</i><b>S</b></span><strong>JOE SMITH</strong><small>BASKETBALL ACADEMY</small></div>
+      <section className="joeLogoWall" aria-label="Joe Smith Basketball Academy brand mark">
+        <JoeLogo />
       </section>
 
       <footer><strong>Joe Smith Basketball Academy</strong><span>Player development. Coaching. Connection.</span></footer>
