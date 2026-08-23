@@ -1,0 +1,30 @@
+.af-idea-box-path {
+  border-color: rgba(101, 52, 223, .28);
+  background: linear-gradient(135deg, rgba(255,255,255,.98), rgba(247,243,255,.98));
+}
+
+.af-idea-box-path .af-path-icon {
+  color: #4820ad;
+  background: linear-gradient(145deg, #eee6ff, #dfd0ff);
+}
+
+.af-path-link-button {
+  min-width: 156px;
+  min-height: 46px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  border-radius: 12px;
+  padding: 0 18px;
+  color: #fff;
+  background: linear-gradient(135deg, #7544ed, #5120c0);
+  box-shadow: 0 12px 25px rgba(82, 34, 190, .2);
+  font-size: 13px;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+@media (max-width: 720px) {
+  .af-path-link-button { width: 100%; }
+}

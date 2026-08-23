@@ -3,6 +3,7 @@ import { cookies } from 'next/headers';
 import { EA_PORTAL_COOKIE, verifySession } from '@/lib/ea-portal-auth';
 import AmplifiPostApp from '../AmplifiPostApp';
 import '../amplifi.css';
+import '../idea-box-home.css';
 
 export const metadata: Metadata = {
   title: 'Amplifi Workspace — Review before publishing',
