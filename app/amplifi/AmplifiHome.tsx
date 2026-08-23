@@ -26,7 +26,7 @@ const PATHS: Array<{
 }> = [
   {
     id: 'publish',
-    number: '01',
+    number: '02',
     icon: '✦',
     title: 'I’ll create it',
     description: 'Enter your title, source, hook, takeaway and content. Amplifi guides you as you build it.',
@@ -35,7 +35,7 @@ const PATHS: Array<{
   },
   {
     id: 'smartchitecture',
-    number: '02',
+    number: '03',
     icon: '•••',
     title: 'Create it for me',
     description: 'Share a short brief. Amplifi creates a complete five-post campaign for you.',
@@ -44,7 +44,7 @@ const PATHS: Array<{
   },
   {
     id: 'research',
-    number: '03',
+    number: '04',
     icon: '⌕',
     title: 'Research and create it',
     description: 'Set a topic and timeframe. Amplifi researches once or automatically for up to three months, then creates 1–3 posts per search.',
@@ -63,6 +63,21 @@ function AmplifiLogo() {
       height={797}
       priority
     />
+  );
+}
+
+function IdeaBoxPath() {
+  return (
+    <article className="af-home-path af-idea-box-path">
+      <span className="af-path-number">01</span>
+      <span className="af-path-icon" aria-hidden="true">▣</span>
+      <div className="af-path-copy">
+        <h2>Idea Box</h2>
+        <p>Don’t know what to post yet? Brain dump the thought, event, inspiration, image, file or link. Amplifi finds the opportunities inside it.</p>
+        <small>Brain dump · Save it · Find the opportunities · Build what works</small>
+      </div>
+      <a className="af-path-link-button" href="/amplifi/idea-box">Open Idea Box<span>→</span></a>
+    </article>
   );
 }
 
@@ -145,7 +160,7 @@ export default function AmplifiHome({
             <div>
               <span className="af-home-kicker">RESULTS</span>
               <h2>Performance appears after publishing.</h2>
-              <p>Reach, engagement and link clicks will use live campaign data—never placeholder numbers.</p>
+              <p>Reach, engagement and link clicks will use live campaign data, never placeholder numbers.</p>
               <button type="button" onClick={() => onOpenSection('results')}>Open results</button>
             </div>
             <ConnectionStatus channels={connectedChannels} loading={connectionsLoading} error={connectionsError} onOpen={() => onOpenSection('connections')} />
@@ -159,26 +174,30 @@ export default function AmplifiHome({
             <p>Choose how you want to begin. Amplifi will guide you through the rest.</p>
           </section>
 
+          <section className="af-home-paths" aria-label="Amplifi Idea Box">
+            <IdeaBoxPath />
+          </section>
+
           {connectionsLoading ? (
             <section className="af-home-paths" aria-live="polite">
               <article className="af-home-path">
-                <span className="af-path-number">01</span>
+                <span className="af-path-number">02</span>
                 <span className="af-path-icon" aria-hidden="true">↻</span>
                 <div className="af-path-copy">
                   <h2>Checking your social accounts</h2>
-                  <p>Amplifi is confirming which accounts are connected before you begin.</p>
-                  <small>Your workspace stays separate from every other Amplifi user.</small>
+                  <p>Amplifi is confirming which accounts are connected before you begin creating or publishing.</p>
+                  <small>Idea Box is available while Amplifi checks your accounts.</small>
                 </div>
               </article>
             </section>
           ) : connectedChannels.length === 0 ? (
-            <section className="af-home-paths" aria-label="Connect social accounts first">
+            <section className="af-home-paths" aria-label="Connect social accounts to create and publish">
               <article className="af-home-path">
-                <span className="af-path-number">01</span>
+                <span className="af-path-number">02</span>
                 <span className="af-path-icon" aria-hidden="true">＋</span>
                 <div className="af-path-copy">
                   <h2>Connect your social accounts</h2>
-                  <p>Before choosing how Amplifi will create your content, securely connect the accounts you want Amplifi to use.</p>
+                  <p>Idea Box is ready now. Connect the accounts you want Amplifi to use when you are ready to create, schedule or publish.</p>
                   <small>Your accounts and content remain isolated inside your workspace.</small>
                 </div>
                 <button type="button" onClick={() => onOpenSection('connections')}>Connect accounts<span>→</span></button>
@@ -189,23 +208,23 @@ export default function AmplifiHome({
               <ConnectionStatus channels={connectedChannels} loading={false} error={connectionsError} onOpen={() => onOpenSection('connections')} />
               <section className="af-home-paths" aria-label="Choose an Amplifi path">
                 {PATHS.map((path) => (
-                <article key={path.id} className="af-home-path">
-                  <span className="af-path-number">{path.number}</span>
-                  <span className="af-path-icon" aria-hidden="true">{path.icon}</span>
-                  <div className="af-path-copy">
-                    <h2>{path.title}</h2>
-                    <p>{path.description}</p>
-                    <small>{path.example}</small>
-                  </div>
-                  <button type="button" onClick={() => onChoosePath(path.id)}>{path.button}<span>→</span></button>
-                </article>
+                  <article key={path.id} className="af-home-path">
+                    <span className="af-path-number">{path.number}</span>
+                    <span className="af-path-icon" aria-hidden="true">{path.icon}</span>
+                    <div className="af-path-copy">
+                      <h2>{path.title}</h2>
+                      <p>{path.description}</p>
+                      <small>{path.example}</small>
+                    </div>
+                    <button type="button" onClick={() => onChoosePath(path.id)}>{path.button}<span>→</span></button>
+                  </article>
                 ))}
               </section>
             </>
           )}
 
           <footer className="af-client-footer">
-            <p>{connectedChannels.length ? 'Your account is connected. Nothing publishes until you approve it.' : 'Connect at least one account to unlock Options 1, 2 and 3.'}</p>
+            <p>{connectedChannels.length ? 'Idea Box and your publishing tools are ready. Nothing publishes until you approve it.' : 'Idea Box is always available. Connect at least one account to unlock creating, research, scheduling and publishing.'}</p>
           </footer>
         </main>
       )}
