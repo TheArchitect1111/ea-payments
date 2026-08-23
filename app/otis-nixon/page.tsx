@@ -5,7 +5,6 @@ const images = {
   legacyBar: '/otis-nixon/legacy-bar.jpg',
   speaker: 'https://lh3.googleusercontent.com/mJPi956c2tSHH0HdbnEjX4-IgXYn66uXpLWvkCf23Ca93xheO-KkxbGBBsvX6echg-YvF_3AnZiDLBmjJaqe54xKpChdYHt5OSAM',
   autograph: 'https://lh3.googleusercontent.com/bNq66xF5UsnNj_w1NxEajBWqwSIKgKDVvo4cGBCVu0MpSn9CqVkqNB31GVkNmScBYy7xFi1OPRumzVfFKMnNBBvGnMolFbcJJFY',
-  book: 'https://images-na.ssl-images-amazon.com/images/P/0615338844.01.LZZZZZZZ.jpg',
 };
 
 const opportunities = [
@@ -39,8 +38,8 @@ export default function OtisNixonPage(){
 
       <section id="story" className="statement"><p>He once made a living <em>stealing bases.</em> Now he gives away the lessons that helped him <em>reclaim his life.</em></p></section>
 
-      <section id="book" className="book-feature">
-        <div className="book-cover"><img src={images.book} alt="Keeping It Real by Otis Nixon book cover"/></div>
+      <section id="book" className="book-feature book-feature-safe">
+        <div className="book-visual"><div className="book-cover-art"><span>KEEPING IT REAL</span><small>BY OTIS NIXON</small><strong>A STORY ABOUT<br/>RESTORING LIVES</strong></div></div>
         <div className="book-copy"><p className="eyebrow">THE BOOK</p><h2>Keeping It Real</h2><h3>A story about restoring lives.</h3><p>Otis shares the baseball highs, personal battles, faith and rebuilding that shaped the man beyond the uniform.</p><div className="book-actions"><a className="black-pill" href="https://www.amazon.com/Keeping-Real-Otis-Nixon/dp/0615338844">Purchase the book</a><a className="text-link" href="https://www.otisnixonbaseball.com/contact-us/">Signed & bulk orders →</a></div></div>
       </section>
 
