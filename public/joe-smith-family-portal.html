@@ -1,0 +1,134 @@
+<!doctype html>
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Joe Smith Basketball Academy | Family Portal</title>
+<style>
+:root{--ink:#101419;--muted:#68737d;--blue:#2d82c7;--blue-soft:#eaf5fc;--line:#e5eaee;--soft:#f7f9fa;--white:#fff}
+*{box-sizing:border-box}
+body{margin:0;background:#fff;color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+a{color:inherit;text-decoration:none} img{display:block;max-width:100%}
+.shell{min-height:100vh;background:#fff}
+.top{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}
+.topin{width:min(1180px,calc(100% - 32px));height:72px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:18px}
+.logo{width:150px;height:48px;object-fit:contain;object-position:left center}
+.user{display:flex;align-items:center;gap:12px;font-size:14px;font-weight:800}
+.avatar{width:38px;height:38px;border-radius:50%;background:var(--blue-soft);display:grid;place-items:center;color:var(--blue)}
+.main{width:min(1180px,calc(100% - 32px));margin:auto;padding:42px 0 86px}
+.hero{display:grid;grid-template-columns:1.08fr .92fr;gap:28px;align-items:stretch}
+.hero-copy{padding:22px 0 28px}
+.kicker{font-size:12px;letter-spacing:.17em;font-weight:900;color:var(--blue);text-transform:uppercase;margin:0 0 14px}
+h1,h2,h3{letter-spacing:-.045em;margin:0}
+h1{font-size:clamp(44px,6vw,82px);line-height:.96;max-width:740px}
+.lead{font-size:20px;line-height:1.6;color:var(--muted);max-width:700px;margin-top:20px}
+.hero-photo{border-radius:32px;overflow:hidden;min-height:430px;background:#ddd}
+.hero-photo img{width:100%;height:100%;object-fit:cover}
+.next{margin-top:34px;padding:24px;border-radius:28px;background:linear-gradient(145deg,#eef8fe,#f9fbfc);border:1px solid #dceaf3;display:flex;justify-content:space-between;gap:22px;align-items:center}
+.next strong{font-size:24px;display:block;margin-bottom:6px}
+.next p{margin:0;color:var(--muted);line-height:1.5}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:0 18px;border-radius:999px;font-weight:900;font-size:14px}
+.btn.blue{background:var(--blue);color:#fff} .btn.light{background:#fff;border:1px solid var(--line)}
+.grid{display:grid;grid-template-columns:1.1fr .9fr;gap:28px;margin-top:34px}
+.card{border:1px solid var(--line);border-radius:30px;padding:28px;background:#fff}
+.card.soft{background:var(--soft)}
+.section-title{display:flex;justify-content:space-between;align-items:end;gap:18px;margin-bottom:22px}
+.section-title h2{font-size:clamp(34px,4vw,54px);line-height:1}
+.section-title span{font-size:13px;color:var(--muted);font-weight:700}
+.progress-item{padding:20px 0;border-bottom:1px solid var(--line)} .progress-item:last-child{border-bottom:0}
+.progress-row{display:flex;justify-content:space-between;gap:20px;align-items:center}
+.progress-row strong{font-size:18px} .progress-row small{color:var(--muted)}
+.bar{height:8px;background:#edf1f3;border-radius:99px;margin-top:12px;overflow:hidden} .bar i{display:block;height:100%;background:var(--blue);border-radius:99px}
+.schedule{display:grid;gap:14px}
+.session{display:grid;grid-template-columns:72px 1fr auto;gap:16px;align-items:center;padding:17px 0;border-bottom:1px solid var(--line)} .session:last-child{border-bottom:0}
+.date{width:64px;height:64px;border-radius:20px;background:var(--blue-soft);display:grid;place-items:center;text-align:center;color:#1d6698;font-weight:900;line-height:1.05}
+.session strong{display:block;font-size:17px} .session span{font-size:14px;color:var(--muted)}
+.status{font-size:12px;font-weight:900;color:#1d6698;background:var(--blue-soft);padding:7px 10px;border-radius:999px}
+.story{margin-top:34px;display:grid;grid-template-columns:.9fr 1.1fr;gap:28px;align-items:center;background:#f7f9fa;border-radius:32px;overflow:hidden}
+.story img{width:100%;height:100%;min-height:420px;object-fit:cover}
+.story-copy{padding:38px}
+.story-copy h2{font-size:clamp(38px,5vw,64px);line-height:.97}
+.story-copy p{color:var(--muted);font-size:18px;line-height:1.7}
+.tools{margin-top:34px;display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.tool{padding:24px;border-radius:26px;background:#fff;border:1px solid var(--line);min-height:170px}
+.tool h3{font-size:23px;margin-bottom:10px} .tool p{color:var(--muted);line-height:1.55;margin:0 0 18px}
+.footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);font-size:13px}
+@media(max-width:850px){
+ .hero,.grid,.story{grid-template-columns:1fr}
+ .hero-photo{min-height:360px}
+ .next{align-items:flex-start;flex-direction:column}
+ .tools{grid-template-columns:1fr}
+ .story img{min-height:330px}
+}
+@media(max-width:560px){
+ .topin,.main{width:min(100% - 24px,1180px)}
+ .topin{height:64px} .logo{width:122px;height:42px}
+ .main{padding-top:28px} h1{font-size:46px} .lead{font-size:18px}
+ .hero-photo{min-height:320px}
+ .card{padding:22px;border-radius:24px}
+ .section-title{display:block} .section-title span{display:block;margin-top:8px}
+ .session{grid-template-columns:58px 1fr} .status{grid-column:2;justify-self:start}
+ .date{width:54px;height:54px;border-radius:17px}
+ .story-copy{padding:28px 22px}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+<header class="top">
+<div class="topin">
+<img alt="Joe Smith Basketball Academy" class="logo" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2MjAgMTYwIiByb2xlPSJpbWciIGFyaWEtbGFiZWw9IkpvZSBTbWl0aCBCYXNrZXRiYWxsIEFjYWRlbXkiPgogIDxkZWZzPgogICAgPGxpbmVhckdyYWRpZW50IGlkPSJiIiB4MT0iMCIgeDI9IjEiPjxzdG9wIHN0b3AtY29sb3I9IiM3MmM5ZjQiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMxNjhlYzkiLz48L2xpbmVhckdyYWRpZW50PgogIDwvZGVmcz4KICA8cmVjdCB3aWR0aD0iNjIwIiBoZWlnaHQ9IjE2MCIgZmlsbD0id2hpdGUiLz4KICA8ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxNCAxMikiPgogICAgPHBhdGggZD0iTTcwIDAgMTI2IDMxdjY1TDcwIDEyOCAxNCA5NlYzMVoiIGZpbGw9IiMxMTE4MjAiLz4KICAgIDxwYXRoIGQ9Ik03MCAwIDEyNiAzMXYyMkw3MCAyMiAxNCA1M1YzMVoiIGZpbGw9InVybCgjYikiLz4KICAgIDxwYXRoIGQ9Ik0yOCA1OGgyNnY0MGMwIDggNCAxMiAxMiAxMmgxMlY4NUg2NlY2OGgzOHY0MmwtMzQgMTgtNDItMjRaIiBmaWxsPSJ3aGl0ZSIvPgogICAgPHBhdGggZD0iTTgyIDQ2aDI4bC0xNCAxOGgtMTRWNDZabTAgMzggMjggMC0xNCAxOEg4MloiIGZpbGw9InVybCgjYikiLz4KICA8L2c+CiAgPGcgZm9udC1mYW1pbHk9IkFyaWFsLCBIZWx2ZXRpY2EsIHNhbnMtc2VyaWYiIGZpbGw9IiMxMTE4MjAiPgogICAgPHRleHQgeD0iMTcwIiB5PSI2NyIgZm9udC1zaXplPSI0OCIgZm9udC13ZWlnaHQ9IjgwMCIgbGV0dGVyLXNwYWNpbmc9IjEiPkpPRSBTTUlUSDwvdGV4dD4KICAgIDx0ZXh0IHg9IjE3MiIgeT0iMTA1IiBmb250LXNpemU9IjIyIiBmb250LXdlaWdodD0iNzAwIiBsZXR0ZXItc3BhY2luZz0iNCIgZmlsbD0iIzJjOWZkNiI+QkFTS0VUQkFMTCBBQ0FERU1ZPC90ZXh0PgogIDwvZz4KPC9zdmc+Cg=="/>
+<div class="user"><span>Williams Family</span><div class="avatar">WF</div></div>
+</div>
+</header>
+<main class="main">
+<section class="hero">
+<div class="hero-copy">
+<p class="kicker">Welcome back</p>
+<h1>Your player’s journey continues here.</h1>
+<p class="lead">The website helped you discover Joe and choose the work. The portal keeps the relationship moving with training, progress, schedule, updates and the next best step in one place.</p>
+<div class="next">
+<div><strong>Next best action</strong><p>Confirm Saturday’s Ball Handling session and review this week’s focus.</p></div>
+<a class="btn blue" href="#schedule">Review session</a>
+</div>
+</div>
+<div class="hero-photo"><img alt="Joe Smith connected with young players" src="https://static.wixstatic.com/media/05e74b_955f19d9b4e540eb8a91ebcfb0426b8a~mv2.jpg/v1/fill/w_980%2Ch_1225%2Cal_c%2Cq_85%2Cusm_0.66_1.00_0.01%2Cenc_avif%2Cquality_auto/IMG_0982_JPG.jpg"/></div>
+</section>
+<section class="grid">
+<div class="card">
+<div class="section-title"><div><p class="kicker">Player development</p><h2>Progress you can see.</h2></div><span>Updated after each session</span></div>
+<div class="progress-item"><div class="progress-row"><strong>Ball handling control</strong><small>72%</small></div><div class="bar"><i style="width:72%"></i></div></div>
+<div class="progress-item"><div class="progress-row"><strong>Footwork &amp; balance</strong><small>64%</small></div><div class="bar"><i style="width:64%"></i></div></div>
+<div class="progress-item"><div class="progress-row"><strong>Decision-making</strong><small>58%</small></div><div class="bar"><i style="width:58%"></i></div></div>
+<div class="progress-item"><div class="progress-row"><strong>Confidence under pressure</strong><small>Growing</small></div><div class="bar"><i style="width:67%"></i></div></div>
+</div>
+<div class="card soft" id="schedule">
+<div class="section-title"><div><p class="kicker">Upcoming</p><h2>Your schedule.</h2></div></div>
+<div class="schedule">
+<div class="session"><div class="date">SAT<br/>24</div><div><strong>Ball Handling Fundamentals</strong><span>10:00 AM · Main Gym</span></div><span class="status">Confirmed</span></div>
+<div class="session"><div class="date">TUE<br/>27</div><div><strong>One-on-One Training</strong><span>6:30 PM · Court 2</span></div><span class="status">Upcoming</span></div>
+<div class="session"><div class="date">SAT<br/>31</div><div><strong>Shooting Fundamentals</strong><span>11:00 AM · Main Gym</span></div><span class="status">Upcoming</span></div>
+</div>
+</div>
+</section>
+<section class="story">
+<img alt="Joe Smith coaching a player" src="https://playersbio.com/wp-content/uploads/2022/05/Joe-Smith-in-the-Golden-State-Warriors-jersey-683x1024.jpg"/>
+<div class="story-copy">
+<p class="kicker">Coach’s note</p>
+<h2>One correction becomes confidence when the player owns it.</h2>
+<p>This week we’re staying with pace and body control. The goal is not more moves. It’s better balance, cleaner decisions and confidence getting to the next action.</p>
+<a class="btn light" href="#">View full training note</a>
+</div>
+</section>
+<section class="tools">
+<div class="tool"><p class="kicker">Messages</p><h3>Stay connected with the academy.</h3><p>Updates, reminders and coach communication without hunting through texts and email.</p><a class="btn light" href="#">Open messages</a></div>
+<div class="tool"><p class="kicker">Resources</p><h3>Keep the work going at home.</h3><p>Drills, training notes and academy resources matched to the player’s current focus.</p><a class="btn light" href="#">View resources</a></div>
+<div class="tool"><p class="kicker">Registration</p><h3>Everything your family has booked.</h3><p>Classes, events, confirmations and payment history in one clean record.</p><a class="btn light" href="#">View registrations</a></div>
+</section>
+<footer class="footer">Joe Smith Basketball Academy · Family Portal · Player development. Coaching. Connection.</footer>
+</main>
+</div>
+</body>
+</html>
