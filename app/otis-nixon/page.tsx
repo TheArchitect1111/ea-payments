@@ -1,11 +1,14 @@
 import './otis-nixon.css';
+import heroData from './hero-data';
+import bannerData from './banner-data';
+import bookData from './book-data';
 
 const images = {
-  hero: '/otis-nixon/otis-hero-site.webp',
-  legacyBar: '/otis-nixon/otis-banner-site.webp',
+  hero: `data:image/webp;base64,${heroData}`,
+  legacyBar: `data:image/webp;base64,${bannerData}`,
   speaker: 'https://lh3.googleusercontent.com/mJPi956c2tSHH0HdbnEjX4-IgXYn66uXpLWvkCf23Ca93xheO-KkxbGBBsvX6echg-YvF_3AnZiDLBmjJaqe54xKpChdYHt5OSAM',
   autograph: 'https://lh3.googleusercontent.com/bNq66xF5UsnNj_w1NxEajBWqwSIKgKDVvo4cGBCVu0MpSn9CqVkqNB31GVkNmScBYy7xFi1OPRumzVfFKMnNBBvGnMolFbcJJFY',
-  book: '/otis-nixon/otis-book-site.webp',
+  book: `data:image/webp;base64,${bookData}`,
 };
 
 const opportunities = [
