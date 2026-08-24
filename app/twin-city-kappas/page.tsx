@@ -6,45 +6,42 @@ const service='https://static.wixstatic.com/media/422737_7648b1738736474ebb12989
 const chapterLogo='https://static.wixstatic.com/media/422737_1deb9fb5ddcc41f696905e21582a40ee~mv2.png/v1/fill/w_280,h_220,al_c,q_90/422737_1deb9fb5ddcc41f696905e21582a40ee~mv2.png';
 const foundationLogo='https://static.wixstatic.com/media/422737_9b9ee26842e7461f945314b3ede3d27f~mv2.png/v1/fill/w_300,h_250,al_c,q_90/Kappa%20Foundation%20logo.png';
 
-const experiences=[
-  ['Brotherhood','Connection that lasts beyond the meeting.'],
-  ['Service','Visible work across Winston-Salem.'],
-  ['Youth','Mentoring the next generation of leaders.'],
-  ['Foundation','Scholarships and community investment.'],
-  ['Golf','Competition connected to impact.'],
+const pillars=[
+  ['Brotherhood','Stronger together.'],
+  ['Service','Serving our community.'],
+  ['Youth','Developing the next generation.'],
+  ['Foundation','Building a legacy of support.'],
 ];
 
 export default function TwinCityKappasPage(){return <main className="tc-site">
   <header className="tc-nav">
-    <a className="tc-brand" href="#top"><img src={chapterLogo} alt="Twin City Kappas crest"/><span><b>KAPPA ALPHA PSI®</b><small>Winston-Salem (NC) Alumni Chapter</small></span></a>
-    <nav><a href="#chapter">About</a><a href="#programs">Programs</a><a href="#foundation">Foundation</a><a href="#golf">Golf</a><a href="#impact">Impact</a><a href="/twin-city-kappas/portal" className="portal-link">BrotherHub</a></nav>
+    <a className="tc-brand" href="#top"><img src={chapterLogo} alt="Twin City Kappas crest"/><span><b>KAPPA ALPHA PSI®</b><small>TWIN CITY (WINSTON-SALEM) ALUMNI CHAPTER</small></span></a>
+    <nav><a href="#chapter">About</a><a href="#programs">Programs</a><a href="#foundation">Foundation</a><a href="#golf">Golf Tournament</a><a href="#impact">Impact</a><a href="#contact">Contact</a><a href="/twin-city-kappas/portal" className="portal-link">Member Portal</a></nav>
   </header>
 
   <section id="top" className="tc-hero">
     <img src={hero} alt="Twin City Kappas brothers in Winston-Salem"/>
-    <div className="tc-hero-copy"><p className="tc-kicker light">WINSTON-SALEM · SINCE 1950</p><h1>Achievement<br/>in every field<br/><em>of endeavor.</em></h1><p>Brotherhood, service, youth development and community investment, brought together in one modern chapter experience.</p><div className="tc-actions"><a className="tc-gold-pill" href="#chapter">Explore the chapter</a><a className="tc-ghost" href="#impact">See our impact</a></div></div>
-    <div className="tc-scroll">SCROLL <i>↓</i></div>
+    <div className="tc-hero-copy"><p className="tc-kicker light">WINSTON-SALEM · SINCE 1950</p><h1>Achievement.<br/>Brotherhood.<br/>Service.<br/><em>Since 1950.</em></h1><p>Dedicated to improving our community and developing the next generation of leaders.</p><div className="tc-actions"><a className="tc-wine-pill" href="#chapter">Explore our chapter</a><a className="tc-ghost" href="/twin-city-kappas/portal">Member Portal</a></div></div>
   </section>
 
-  <section id="chapter" className="tc-intro"><p className="tc-kicker">THE TWIN CITY EXPERIENCE</p><h2>A historic chapter should feel <em>alive</em>, not archived.</h2><p>The new site keeps the substance of the current chapter story while presenting it with the clarity, restraint and visual confidence of a premium digital experience.</p></section>
+  <section id="chapter" className="tc-section-title"><span>Achievement in Action</span></section>
 
-  <section id="programs" className="tc-experience-grid">
-    {experiences.map(([title,copy],i)=><article key={title} className={`exp exp-${i+1}`}><img src={i===4?golf:i===2?hero:service} alt=""/><div><span>0{i+1}</span><h3>{title}</h3><p>{copy}</p></div></article>)}
+  <section id="programs" className="tc-pillar-grid">
+    {pillars.map(([title,copy],i)=><article key={title}><img src={i===0||i===3?hero:service} alt=""/><div className="tc-card-overlay"><span className="tc-icon">{i===0?'◉':i===1?'✦':i===2?'◎':'◇'}</span><h3>{title}</h3><p>{copy}</p></div></article>)}
   </section>
 
-  <section id="golf" className="tc-golf-feature">
-    <div className="tc-golf-photo"><img src={golf} alt="Twin City Kappas golf tournament"/></div>
-    <div className="tc-golf-copy"><p className="tc-kicker light">REGIONAL MEETING GOLF TOURNAMENT</p><h2>From first registration to final report.</h2><p>The tournament becomes a connected experience instead of a collection of forms. Registration, foursomes, sponsors, payments, confirmations, check-in, results and reporting all feed BrotherHub.</p><div className="tc-golf-steps"><span>Register</span><i>→</i><span>Pay</span><i>→</i><span>Confirm</span><i>→</i><span>Manage</span><i>→</i><span>Report</span></div><a className="tc-light-pill" href="/twin-city-kappas/portal#golf">Open tournament workspace</a></div>
+  <section id="golf" className="tc-golf-band">
+    <div className="tc-golf-image"><img src={golf} alt="Twin City Kappas golf tournament"/></div>
+    <div className="tc-golf-copy"><p className="tc-kicker light">REGIONAL MEETING</p><h2>Golf Tournament</h2><p>Proceeds support youth programs, scholarships and community initiatives that change lives.</p><div className="tc-golf-options"><span><b>Register</b><small>Individual or foursome</small></span><span><b>Build a Foursome</b><small>Gather your team</small></span><span><b>Sponsor</b><small>Promote your business</small></span><span><b>Tournament Info</b><small>Course, schedule, prizes</small></span></div><a className="tc-gold-pill" href="/twin-city-kappas/portal#golf">Learn more & register</a></div>
   </section>
 
-  <section id="impact" className="tc-impact">
-    <div><p className="tc-kicker">IMPACT, MADE VISIBLE</p><h2>One chapter.<br/>One source of truth.</h2><p>BrotherHub will supply verified program, service, scholarship and event data so the public site can show current impact without inventing numbers.</p></div>
-    <div className="tc-impact-metrics"><div><b>1950</b><span>Chapter legacy</span></div><div><b>Live</b><span>Program reporting</span></div><div><b>1</b><span>Connected digital home</span></div><div><b>24/7</b><span>Member access</span></div></div>
+  <section id="impact" className="tc-impact-row">
+    <div className="tc-youth-block"><img src={hero} alt="Twin City Kappas youth mentoring"/><div><p className="tc-kicker">Developing the Next Generation</p><h2>Building tomorrow, together.</h2><p>Through Kappa League, mentoring, scholarship support and educational initiatives, we are preparing young men for success in life and leadership.</p><a href="#foundation">See our programs</a></div></div>
+    <div className="tc-impact-block"><p className="tc-kicker">Our Impact</p><div className="tc-impact-metrics"><span><b>1,200+</b><small>Youth served</small></span><span><b>$150K+</b><small>Scholarships awarded</small></span><span><b>4,500+</b><small>Service hours</small></span><span><b>900+</b><small>Families supported</small></span><span><b>$250K+</b><small>Community investment</small></span></div><p className="tc-impact-note">Impact figures shown as presentation placeholders until chapter-verified data is connected through BrotherHub.</p></div>
   </section>
 
-  <section id="foundation" className="tc-foundation"><div className="tc-foundation-logo"><img src={foundationLogo} alt="Kappa Foundation of Winston-Salem"/></div><div><p className="tc-kicker">KAPPA FOUNDATION OF WINSTON-SALEM</p><h2>Make the mission easier to see. And easier to support.</h2><p>Scholarships, mentoring, charitable programs and community investment deserve a clear destination inside the chapter experience.</p><a className="tc-wine-pill" href="https://www.twincitykappas.com/the-foundation">Explore the Foundation</a></div></section>
+  <section id="foundation" className="tc-digital-home"><img src={chapterLogo} alt="Twin City Kappas"/><div><p className="tc-kicker">One Chapter. One Digital Home.</p><h2>Stay connected. Get involved. Make an impact.</h2><p>News, events, programs, service, Foundation support and member operations all connect through one digital ecosystem.</p></div><div className="tc-home-actions"><span><b>Stay informed</b><small>News and announcements</small></span><span><b>Get involved</b><small>Committees and events</small></span><span><b>Make an impact</b><small>Time, talent and resources</small></span></div></section>
 
-  <section className="tc-digital-home"><img src={chapterLogo} alt=""/><div><p className="tc-kicker light">ONE CHAPTER. ONE DIGITAL HOME.</p><h2>The story outside.<br/>The operating system inside.</h2><p>Visitors experience the chapter. Brothers enter BrotherHub to run it.</p></div><a className="tc-light-pill" href="/twin-city-kappas/portal">Enter BrotherHub</a></section>
-
-  <footer><div className="tc-footer-brand"><img src={chapterLogo} alt="Twin City Kappas"/><span><b>KAPPA ALPHA PSI®</b><small>Winston-Salem (NC) Alumni Chapter</small></span></div><div>About · Programs · Foundation · Golf · Impact · Contact</div><small>© 2026 Twin City Kappas</small></footer>
+  <section id="contact" className="tc-footer-band"><div><img src={chapterLogo} alt="Twin City Kappas"/><span><b>KAPPA ALPHA PSI®</b><small>Twin City Alumni Chapter</small></span></div><div><b>Quick Links</b><small>About · Programs · Foundation · Golf · Events</small></div><div><b>Foundation</b><img className="tc-foundation-mini" src={foundationLogo} alt="Kappa Foundation"/></div><div><b>Member Access</b><a href="/twin-city-kappas/portal">Enter BrotherHub</a></div></section>
+  <footer>© 2026 Twin City Kappas · Winston-Salem (NC) Alumni Chapter</footer>
 </main>}
