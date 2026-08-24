@@ -1,45 +1,44 @@
 import './portal.css';
 
-const nav=[
-  ['home','Overview'],['actions','My Actions'],['calendar','Calendar'],['events','Events'],['golf','Golf Tournament'],['brothers','Brothers'],['committees','Committees'],['foundation','Foundation'],['programs','Programs'],['payments','Payments'],['documents','Documents'],['amplifi','Amplifi'],['reports','Reports']
-];
+const nav=['Dashboard','My Chapter','Calendar','Events','Golf Tournament','Brothers','Committees','Foundation','Programs','Payments','Documents','Communications','Amplifi','Reports','Settings'];
 const actions=[
-  ['HIGH','Golf','Confirm registration fields','Waiting on updated tournament information'],
-  ['TODAY','Foundation','Review sponsor follow-up list','2 conversations need an owner'],
-  ['TOMORROW','Programs','Approve Kappa League announcement','Ready for Amplifi once approved']
+  ['Golf','Confirm tournament registration fields','Today'],
+  ['Foundation','Review sponsor follow-up list','Today'],
+  ['Programs','Approve Kappa League announcement','Tomorrow'],
+  ['Membership','Review two pending updates','Fri']
 ];
+const docs=[['May Chapter Agenda','PDF · Updated May 8'],['Golf Tournament Brief','PDF · Draft'],['Kappa League Update','PDF · Updated May 5']];
 
 export default function TwinCityBrotherHub(){return <main className="tc-portal">
   <aside className="tc-side">
-    <div className="tc-side-brand"><span>ΚΑΨ</span><div><b>BROTHERHUB</b><small>Twin City Kappas</small></div></div>
-    <nav>{nav.map(([id,label])=>label==='Amplifi'?<a key={id} className="amplifi" href="/amplifi/workspace"><span>◈</span>{label}</a>:<a key={id} className={id==='home'?'active':''} href={id==='golf'?'#golf':'#home'}><span className="nav-dot"/>{label}</a>)}</nav>
-    <div className="tc-side-bottom"><span className="system-dot"/>All systems operating<small>Chapter workspace · responsive</small></div>
+    <div className="tc-side-brand"><div className="tc-crest">ΚΑΨ</div><div><b>BROTHERHUB</b><small>Twin City Kappas</small></div></div>
+    <nav>{nav.map(item=>item==='Amplifi'?<a key={item} href="/amplifi/workspace" className="amp-link">◈ <span>{item}</span></a>:<a key={item} href={item==='Dashboard'?'#home':item==='Golf Tournament'?'#golf':'#'} className={item==='Dashboard'?'active':''}><i>{item==='Dashboard'?'⌂':item==='Calendar'?'□':item==='Golf Tournament'?'⚑':item==='Brothers'?'◎':item==='Payments'?'$':item==='Documents'?'▤':item==='Reports'?'↗':'•'}</i><span>{item}</span></a>)}</nav>
+    <div className="tc-side-amplifi"><span className="amp-mark">A</span><b>AMPLIFI</b><small>Create, connect, communicate.</small><a href="/amplifi/workspace">Launch workspace</a></div>
   </aside>
 
-  <section className="tc-workspace" id="home">
-    <header className="tc-commandbar"><div><p>TWIN CITY KAPPAS</p><strong>BrotherHub</strong></div><div className="tc-command-actions"><button aria-label="Search">⌕</button><button aria-label="Notifications">○</button><div className="tc-user">RB</div></div></header>
+  <section className="tc-main" id="home">
+    <header className="tc-topbar"><div className="tc-search">⌕ <span>Search BrotherHub...</span></div><div className="tc-top-actions"><button>＋ Quick Action</button><span>◉</span><span>✉</span><div className="tc-user"><b>RB</b><span><strong>Brother Robert</strong><small>Chapter Leadership</small></span></div></div></header>
 
-    <div className="tc-workarea">
-      <section className="tc-overview-head"><div><p className="tc-kicker">MONDAY · CHAPTER OPERATIONS</p><h1>Good afternoon, Brother.</h1><p>Three things need your attention. Everything else is moving.</p></div><div className="tc-date"><span>Next meeting</span><b>MAY 18</b><small>3:00 PM · Winston-Salem</small></div></section>
+    <div className="tc-content">
+      <section className="tc-welcome"><div><p className="tc-kicker">TWIN CITY KAPPAS</p><h1>Welcome back, Brother.</h1><p>Here is what changed, what needs you, and what happens next.</p></div><a href="#golf">Open Golf Command Center</a></section>
 
-      <section className="tc-attention"><div className="tc-attention-label"><span>01</span><p>NEXT BEST ACTION</p></div><div className="tc-attention-copy"><h2>Finalize the regional meeting golf tournament setup.</h2><p>The structure is ready. Updated dates, pricing, sponsorships and registration details are the only pieces still needed.</p></div><a href="#golf">Open Golf Workspace ↗</a></section>
+      <section className="tc-kpis"><article><span>Next chapter meeting</span><b>May 18</b><small>3:00 PM · Kappas Center</small></article><article><span>My action items</span><b>4</b><small>2 due today</small></article><article><span>Dues status</span><b className="good">Paid</b><small>Current through 2026</small></article><article><span>Unread updates</span><b>2</b><small>Latest chapter notices</small></article></section>
 
-      <section className="tc-kpis"><div><span>Open actions</span><b>3</b><small>2 due today</small></div><div><span>Dues</span><b className="good">Current</b><small>Through 2026</small></div><div><span>Unread updates</span><b>2</b><small>Chapter notices</small></div><div><span>Golf setup</span><b>80%</b><small>Details pending</small></div></section>
+      <section className="tc-command-row">
+        <div id="golf" className="tc-golf-command"><div className="tc-golf-visual"><div><p>REGIONAL MEETING</p><h2>Golf Tournament</h2><span>Command Center</span></div><i>⛳</i></div><div className="tc-golf-stats"><div><b>Registration</b><span>Individual + foursome</span></div><div><b>Payments</b><span>Paid / pending</span></div><div><b>Sponsors</b><span>Packages + fulfillment</span></div><div><b>Event Day</b><span>Check-in + results</span></div></div><div className="tc-golf-progress"><span>Structure ready</span><b>Updated tournament details pending</b></div></div>
 
-      <section className="tc-ops-grid">
-        <div className="tc-queue" id="actions"><div className="tc-sectionbar"><div><p className="tc-kicker">ACTION QUEUE</p><h2>What needs a person.</h2></div><button>View all</button></div><div className="tc-table"><div className="tc-row tc-row-head"><span>Priority</span><span>Area</span><span>Action</span><span>Status</span></div>{actions.map(([priority,area,action,status])=><div className="tc-row" key={action}><span className={`priority ${priority.toLowerCase()}`}>{priority}</span><b>{area}</b><span>{action}</span><small>{status}</small></div>)}</div></div>
-
-        <aside className="tc-rail"><div><p className="tc-kicker">TODAY</p><h3>Chapter pulse</h3><dl><div><dt>Foundation</dt><dd>2 sponsor follow-ups</dd></div><div><dt>Programs</dt><dd>1 approval ready</dd></div><div><dt>Documents</dt><dd>May agenda added</dd></div></dl></div><div className="tc-amplifi-mini"><p className="tc-kicker light">AMPLIFI</p><h3>Turn activity into content.</h3><p>Idea Box, campaigns, approvals and publishing live in the existing Amplifi workspace.</p><a href="/amplifi/workspace">Open Amplifi ↗</a></div></aside>
+        <div className="tc-action-center"><div className="tc-panel-head"><h2>Action Center</h2><a href="#">View all</a></div>{actions.map(([area,task,due])=><div className="tc-action-row" key={task}><i/><div><small>{area}</small><b>{task}</b></div><span>{due}</span></div>)}</div>
       </section>
 
-      <section id="golf" className="tc-golf-ops">
-        <header><div><p className="tc-kicker light">REGIONAL MEETING · GOLF OPERATIONS</p><h2>Tournament command center.</h2><p>One operating view from first registration through final report.</p></div><div className="tc-mode"><span>SETUP MODE</span><b>Details pending</b></div></header>
-        <div className="tc-golf-toolbar"><button>Registrations</button><button>Foursomes</button><button>Sponsors</button><button>Payments</button><button>Check-in</button><button>Results</button></div>
-        <div className="tc-golf-columns"><div><span>REGISTRATION</span><b>Individual + foursome</b><p>Capture player information once and keep it attached to payment and team status.</p></div><div><span>SPONSORS</span><b>Package + fulfillment</b><p>Track sponsor level, logo, payment, signage and outstanding deliverables.</p></div><div><span>EVENT DAY</span><b>Check-in + assignments</b><p>See who has arrived, where they belong and what still needs attention.</p></div><div><span>REPORTING</span><b>Revenue + outcomes</b><p>Close the tournament with clean financial, sponsor and participation reporting.</p></div></div>
-        <div className="tc-golf-flow"><span>REGISTER</span><i>01</i><span>PAY</span><i>02</i><span>CONFIRM</span><i>03</i><span>ASSIGN</span><i>04</i><span>CHECK IN</span><i>05</i><span>REPORT</span></div>
+      <section className="tc-lower-grid">
+        <div className="tc-panel"><div className="tc-panel-head"><h2>Upcoming Events</h2><a href="#">Calendar</a></div><div className="tc-event"><b>18</b><span><strong>Chapter Meeting</strong><small>May 18 · 3:00 PM</small></span></div><div className="tc-event"><b>31</b><span><strong>Kappa League Banquet</strong><small>May 31 · 6:00 PM</small></span></div><div className="tc-event"><b>14</b><span><strong>Community Service Day</strong><small>June 14 · 8:00 AM</small></span></div></div>
+
+        <div className="tc-panel"><div className="tc-panel-head"><h2>Committee Activity</h2><a href="#">View all</a></div><div className="tc-committee"><i className="green"/><span><strong>Achievement</strong><small>Meeting on May 14</small></span></div><div className="tc-committee"><i className="green"/><span><strong>Finance</strong><small>Budget review in progress</small></span></div><div className="tc-committee"><i className="gold"/><span><strong>Membership</strong><small>3 applications pending</small></span></div><div className="tc-committee"><i className="green"/><span><strong>Programs</strong><small>Planning meeting May 20</small></span></div></div>
+
+        <div className="tc-panel"><div className="tc-panel-head"><h2>Recent Documents</h2><a href="#">View all</a></div>{docs.map(([name,meta])=><div className="tc-doc" key={name}><i>PDF</i><span><strong>{name}</strong><small>{meta}</small></span></div>)}</div>
       </section>
 
-      <section className="tc-bottom-ops"><div><p className="tc-kicker">RECENT ACTIVITY</p><h2>The chapter leaves a trail.</h2></div><div className="tc-activity"><div><time>2:14 PM</time><b>Foundation sponsor follow-up assigned</b><span>BrotherHub</span></div><div><time>1:42 PM</time><b>May agenda uploaded</b><span>Documents</span></div><div><time>12:18 PM</time><b>Kappa League announcement prepared</b><span>Programs</span></div><div><time>10:03 AM</time><b>Golf workspace structure updated</b><span>Golf</span></div></div></section>
+      <section className="tc-bottom-row"><div className="tc-calendar"><div className="tc-panel-head"><h2>Chapter Calendar</h2><a href="#">Full calendar</a></div><div className="tc-calendar-grid"><b>May 2026</b><div className="tc-days"><span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span>{Array.from({length:35},(_,i)=><i key={i} className={i===17?'today':''}>{i<3?'':i-2}</i>)}</div></div></div><div className="tc-quick"><div className="tc-panel-head"><h2>Quick Links</h2></div><div><a href="#">$<span>Pay Dues</span></a><a href="#">◎<span>Update Profile</span></a><a href="#">◉<span>Member Directory</span></a><a href="#">▤<span>Submit Document</span></a><a href="/amplifi/workspace">A<span>Open Amplifi</span></a></div></div></section>
     </div>
   </section>
 </main>}
