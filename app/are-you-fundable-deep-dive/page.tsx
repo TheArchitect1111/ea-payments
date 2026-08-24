@@ -1,4 +1,5 @@
 import React from 'react';
+import './style.css';
 
 const sections = [
   {n:'01',k:'THE FINDING',title:'The idea is stronger than the digital experience delivering it.',body:'“Are You Actually Fundable?” creates immediate tension. But the current experience asks visitors to learn about a consultation before they can experience the central promise: understanding how fundable they are, why, and what to do next.'},
