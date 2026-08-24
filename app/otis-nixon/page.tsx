@@ -1,11 +1,11 @@
 import './otis-nixon.css';
 
 const images = {
-  hero: '/otis-nixon/otis-hero-site.webp?v=20260824b',
-  legacyBar: '/otis-nixon/otis-banner-site.webp?v=20260824b',
+  hero: '/otis-nixon/approved-hero-20260824.webp',
+  legacyBar: '/otis-nixon/approved-collage-20260824.webp',
   speaker: 'https://lh3.googleusercontent.com/mJPi956c2tSHH0HdbnEjX4-IgXYn66uXpLWvkCf23Ca93xheO-KkxbGBBsvX6echg-YvF_3AnZiDLBmjJaqe54xKpChdYHt5OSAM',
   autograph: 'https://lh3.googleusercontent.com/bNq66xF5UsnNj_w1NxEajBWqwSIKgKDVvo4cGBCVu0MpSn9CqVkqNB31GVkNmScBYy7xFi1OPRumzVfFKMnNBBvGnMolFbcJJFY',
-  book: '/otis-nixon/otis-book-site.webp?v=20260824b',
+  book: '/otis-nixon/approved-book-20260824.webp',
 };
 
 const opportunities = [
@@ -27,7 +27,7 @@ export default function OtisNixonPage(){
       </header>
 
       <section id="top" className="hero-image-first">
-        <img src={images.hero} alt="Otis Nixon as player, speaker and minister" width="1000" height="667"/>
+        <img src={images.hero} alt="Otis Nixon as player, speaker and minister" width="799" height="533"/>
       </section>
 
       <section className="hero-copy">
@@ -40,7 +40,7 @@ export default function OtisNixonPage(){
       <section id="story" className="statement"><p>He once made a living <em>stealing bases.</em> Now he gives away the lessons that helped him <em>reclaim his life.</em></p></section>
 
       <section id="book" className="book-feature">
-        <div className="book-photo"><img src={images.book} alt="Keeping It Real by Otis Nixon book cover" width="650" height="1006"/></div>
+        <div className="book-photo"><img src={images.book} alt="Keeping It Real by Otis Nixon book cover" width="480" height="743"/></div>
         <div className="book-copy"><p className="eyebrow">THE BOOK</p><h2>Keeping It Real</h2><h3>A story about restoring lives.</h3><p>Otis shares the baseball highs, personal battles, faith and rebuilding that shaped the man beyond the uniform.</p><div className="book-actions"><a className="black-pill" href="https://www.amazon.com/Keeping-Real-Otis-Nixon/dp/0615338844">Purchase the book</a><a className="text-link" href="https://www.otisnixonbaseball.com/contact-us/">Signed & bulk orders →</a></div></div>
       </section>
 
@@ -49,7 +49,7 @@ export default function OtisNixonPage(){
         <div className="photo-story-copy"><p className="eyebrow">SPEAKING & APPEARANCES</p><h2>He has lived the message.</h2><p>Faith. Recovery. Perseverance. Baseball. Second chances. Otis brings a story audiences remember because it was lived before it was spoken.</p><a className="text-link" href="https://www.otisnixonbaseball.com/contact-us/">Invite Otis to your event →</a></div>
       </section>
 
-      <section className="legacy-bar"><img src={images.legacyBar} alt="Otis Nixon life and legacy collage" width="1200" height="480"/></section>
+      <section className="legacy-bar"><img src={images.legacyBar} alt="Otis Nixon life and legacy collage" width="900" height="360"/></section>
 
       <section id="work" className="work">
         <div className="section-head"><h2>WAYS TO<br/>WORK WITH OTIS</h2><p>One story. Multiple doors. Clear next steps without turning the page into a catalog.</p></div>
