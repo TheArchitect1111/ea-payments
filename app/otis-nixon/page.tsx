@@ -1,11 +1,11 @@
 import './otis-nixon.css';
 
 const images = {
-  hero: '/otis-nixon/hero.webp',
-  legacyBar: '/otis-nixon/banner.webp',
+  hero: '/otis-nixon/hero.webp?v=20260824a',
+  legacyBar: '/otis-nixon/banner.webp?v=20260824a',
   speaker: 'https://lh3.googleusercontent.com/mJPi956c2tSHH0HdbnEjX4-IgXYn66uXpLWvkCf23Ca93xheO-KkxbGBBsvX6echg-YvF_3AnZiDLBmjJaqe54xKpChdYHt5OSAM',
   autograph: 'https://lh3.googleusercontent.com/bNq66xF5UsnNj_w1NxEajBWqwSIKgKDVvo4cGBCVu0MpSn9CqVkqNB31GVkNmScBYy7xFi1OPRumzVfFKMnNBBvGnMolFbcJJFY',
-  book: '/otis-nixon/book.webp',
+  book: '/otis-nixon/book.webp?v=20260824a',
 };
 
 const opportunities = [
