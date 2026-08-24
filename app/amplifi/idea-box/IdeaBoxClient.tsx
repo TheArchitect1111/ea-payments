@@ -9,6 +9,17 @@ type Opportunity = {
   angle: string;
   reason: string;
   campaignBrief: string;
+  hook?: string;
+  callToAction?: string;
+  score?: number;
+  readiness?: 'ready' | 'needs-context';
+};
+
+type FlowSummary = {
+  find: string;
+  leverage: string;
+  optimize: string;
+  win: string;
 };
 
 type SavedDump = {
@@ -40,6 +51,7 @@ export default function IdeaBoxClient({ loggedIn }: { loggedIn: boolean }) {
   const [files, setFiles] = useState<File[]>([]);
   const [savedIdeas, setSavedIdeas] = useState<SavedDump[]>([]);
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
+  const [flowSummary, setFlowSummary] = useState<FlowSummary | null>(null);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
 
@@ -99,11 +111,17 @@ export default function IdeaBoxClient({ loggedIn }: { loggedIn: boolean }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(dump),
       });
-      const data = await response.json() as { ok?: boolean; error?: string; opportunities?: Opportunity[] };
+      const data = await response.json() as {
+        ok?: boolean;
+        error?: string;
+        opportunities?: Opportunity[];
+        flowSummary?: FlowSummary;
+      };
       if (!response.ok || !data.ok || !Array.isArray(data.opportunities)) {
         setMessage(data.error || 'Amplifi could not analyze this idea yet.');
         return;
       }
+      setFlowSummary(data.flowSummary || null);
       setOpportunities(data.opportunities);
     } catch {
       setMessage('Amplifi could not reach the Idea Box analyzer. Your brain dump is still saved.');
@@ -113,12 +131,18 @@ export default function IdeaBoxClient({ loggedIn }: { loggedIn: boolean }) {
   };
 
   const buildOpportunity = (item: Opportunity) => {
+    const flowNotes = [
+      item.hook ? `Recommended hook: ${item.hook}` : '',
+      item.reason ? `Why this works: ${item.reason}` : '',
+      item.readiness === 'needs-context' ? 'FLOW readiness: needs additional context before publishing.' : '',
+    ].filter(Boolean).join('\n');
+
     window.sessionStorage.setItem(CAMPAIGN_BRIEF_STORAGE_KEY, JSON.stringify({
       promotion: item.title,
       audience: '',
       result: item.angle,
-      callToAction: 'Learn more',
-      details: `${item.campaignBrief}\n\nSource material:\n${text.trim()}\n${links.join('\n')}`.trim(),
+      callToAction: item.callToAction || 'Learn more',
+      details: `${item.campaignBrief}${flowNotes ? `\n\nFLOW guidance:\n${flowNotes}` : ''}\n\nSource material:\n${text.trim()}\n${links.join('\n')}`.trim(),
       tone: 'Warm and human',
       proofPoint: '',
       painQuestion: '',
@@ -174,7 +198,7 @@ export default function IdeaBoxClient({ loggedIn }: { loggedIn: boolean }) {
 
           <div className="idea-actions">
             <button type="button" className="idea-save" onClick={() => { if (saveDump()) setMessage('Saved to your Idea Box.'); }}>Save for later</button>
-            <button type="button" className="idea-analyze" onClick={() => void analyze()} disabled={busy || !sourceCount}>{busy ? 'Finding opportunities…' : 'Find the opportunities →'}</button>
+            <button type="button" className="idea-analyze" onClick={() => void analyze()} disabled={busy || !sourceCount}>{busy ? 'Running FLOW…' : 'Find the opportunities →'}</button>
           </div>
         </div>
 
@@ -184,7 +208,7 @@ export default function IdeaBoxClient({ loggedIn }: { loggedIn: boolean }) {
           <p>Nothing has to become a post today. Keep feeding Amplifi raw material and come back when you need content.</p>
           <div className="idea-bank-list">
             {savedIdeas.slice(0, 5).map((idea) => (
-              <button type="button" key={idea.id} onClick={() => { setText(idea.text); setLinks(idea.links); setFiles([]); setOpportunities([]); }}>
+              <button type="button" key={idea.id} onClick={() => { setText(idea.text); setLinks(idea.links); setFiles([]); setFlowSummary(null); setOpportunities([]); }}>
                 <strong>{idea.text.slice(0, 72) || idea.links[0] || idea.files[0]?.name || 'Saved idea'}</strong>
                 <small>{new Date(idea.createdAt).toLocaleDateString()} · {idea.links.length + idea.files.length + (idea.text ? 1 : 0)} sources</small>
               </button>
@@ -196,14 +220,33 @@ export default function IdeaBoxClient({ loggedIn }: { loggedIn: boolean }) {
 
       {opportunities.length ? (
         <section className="idea-results">
-          <div className="idea-results-heading"><span>AMPLIFI FOUND {opportunities.length} OPPORTUNITIES</span><h2>This is bigger than one post.</h2><p>Choose what feels useful. Amplifi will carry the selected idea into the campaign builder.</p></div>
+          <div className="idea-results-heading">
+            <span>AMPLIFI FLOW FOUND {opportunities.length} OPPORTUNITIES</span>
+            <h2>This is bigger than one post.</h2>
+            <p>Amplifi finds the signal, sharpens the angle and ranks what is most useful to build next.</p>
+          </div>
+
+          {flowSummary ? (
+            <div className="idea-flow-summary" aria-label="FLOW analysis summary">
+              <div><strong>Find</strong><p>{flowSummary.find}</p></div>
+              <div><strong>Leverage</strong><p>{flowSummary.leverage}</p></div>
+              <div><strong>Optimize</strong><p>{flowSummary.optimize}</p></div>
+              <div><strong>Win</strong><p>{flowSummary.win}</p></div>
+            </div>
+          ) : null}
+
           <div className="idea-opportunities">
             {opportunities.map((item, index) => (
               <article key={`${item.title}-${index}`}>
-                <small>{String(index + 1).padStart(2, '0')} · {item.format}</small>
+                <small>
+                  {String(index + 1).padStart(2, '0')} · {item.format}
+                  {typeof item.score === 'number' ? ` · FLOW ${item.score}` : ''}
+                </small>
                 <h3>{item.title}</h3>
                 <p>{item.angle}</p>
+                {item.hook ? <p><strong>Hook:</strong> {item.hook}</p> : null}
                 <em>{item.reason}</em>
+                {item.readiness === 'needs-context' ? <small>Needs more context before publishing</small> : null}
                 <button type="button" onClick={() => buildOpportunity(item)}>Build this in Amplifi →</button>
               </article>
             ))}
