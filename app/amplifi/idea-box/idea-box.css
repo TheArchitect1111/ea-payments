@@ -43,6 +43,10 @@ body { margin: 0; background: #f6f6f3; color: #171717; }
 .idea-results { padding: 12px 5vw 80px; }
 .idea-results-heading { max-width: 760px; margin-bottom: 24px; }
 .idea-results-heading p { color: #666; font-size: 17px; line-height: 1.5; }
+.idea-flow-summary { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 12px; margin: 0 0 24px; }
+.idea-flow-summary > div { background: #111; color: #fff; border-radius: 18px; padding: 18px; min-height: 140px; }
+.idea-flow-summary strong { display: block; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; }
+.idea-flow-summary p { color: rgba(255,255,255,.78); line-height: 1.45; margin: 10px 0 0; }
 .idea-opportunities { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 16px; }
 .idea-opportunities article { background: #fff; border: 1px solid rgba(0,0,0,.08); border-radius: 22px; padding: 22px; display: flex; flex-direction: column; min-height: 300px; }
 .idea-opportunities article small { color: #777; font-weight: 800; letter-spacing: .06em; }
@@ -50,5 +54,5 @@ body { margin: 0; background: #f6f6f3; color: #171717; }
 .idea-opportunities article p { color: #444; line-height: 1.45; }
 .idea-opportunities article em { color: #777; font-style: normal; font-size: 14px; line-height: 1.45; margin-bottom: 20px; }
 .idea-opportunities article button { margin-top: auto; align-self: flex-start; }
-@media (max-width: 900px) { .idea-grid { grid-template-columns: 1fr; } .idea-opportunities { grid-template-columns: 1fr 1fr; } }
-@media (max-width: 620px) { .idea-header { height: 72px; padding-inline: 20px; } .idea-header img { width: 120px; } .idea-hero, .idea-grid, .idea-results { padding-left: 20px; padding-right: 20px; } .idea-hero { padding-top: 46px; } .idea-hero p { font-size: 17px; } .idea-composer, .idea-bank { padding: 20px; border-radius: 22px; } .idea-link-row, .idea-actions { flex-direction: column; align-items: stretch; } .idea-opportunities { grid-template-columns: 1fr; } }
+@media (max-width: 900px) { .idea-grid { grid-template-columns: 1fr; } .idea-flow-summary { grid-template-columns: 1fr 1fr; } .idea-opportunities { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 620px) { .idea-header { height: 72px; padding-inline: 20px; } .idea-header img { width: 120px; } .idea-hero, .idea-grid, .idea-results { padding-left: 20px; padding-right: 20px; } .idea-hero { padding-top: 46px; } .idea-hero p { font-size: 17px; } .idea-composer, .idea-bank { padding: 20px; border-radius: 22px; } .idea-link-row, .idea-actions { flex-direction: column; align-items: stretch; } .idea-flow-summary, .idea-opportunities { grid-template-columns: 1fr; } }
