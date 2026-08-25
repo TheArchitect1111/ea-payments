@@ -4,6 +4,7 @@ import { presentationAgent } from '@/lib/agents/presentation-agent';
 import { platformGuardianAgent } from '@/lib/agents/platform-guardian-agent';
 import { openDesignAgent } from '@/lib/agents/open-design-agent';
 import { amplifiContentDirectorAgent } from '@/lib/agents/amplifi-content-director-agent';
+import { eaOperationsArchitectAgent } from '@/lib/agents/ea-operations-architect-agent';
 import { specialistAgents } from '@/lib/agents/specialist-agents';
 import type { EAAgent } from '@/lib/agents/types';
 
@@ -43,6 +44,7 @@ registerAgent(presentationAgent);
 registerAgent(platformGuardianAgent);
 registerAgent(openDesignAgent);
 registerAgent(amplifiContentDirectorAgent);
+registerAgent(eaOperationsArchitectAgent);
 specialistAgents.forEach(registerAgent);
 
 const AGENT_ALIASES: Record<string, string> = {
@@ -53,6 +55,11 @@ const AGENT_ALIASES: Record<string, string> = {
   'amplifi-director': 'amplifi-content-director',
   'content-director': 'amplifi-content-director',
   'amplifi-content-director-agent': 'amplifi-content-director',
+  'operations': 'ea-operations-architect',
+  'operations-architect': 'ea-operations-architect',
+  'operational-architect': 'ea-operations-architect',
+  'ea-operations': 'ea-operations-architect',
+  'ea-operations-architect-agent': 'ea-operations-architect',
   'email': 'email-campaign',
   'email-campaign-strategist': 'email-campaign',
   'brand-strategist': 'brand',

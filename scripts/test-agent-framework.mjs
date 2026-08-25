@@ -15,6 +15,7 @@ const requiredFiles = [
   'lib/agents/orchestrator.ts',
   'lib/agents/research-agent.ts',
   'lib/agents/amplifi-content-director-agent.ts',
+  'lib/agents/ea-operations-architect-agent.ts',
   'lib/agents/specialist-agents.ts',
   'lib/context-optimizer/index.ts',
   'lib/agent-reliability/client.ts',
@@ -30,6 +31,7 @@ for (const file of requiredFiles) {
 const registry = readFileSync(join(root, 'lib/agents/registry.ts'), 'utf8');
 assert.match(registry, /registerAgent\(researchAgent\)/, 'Research agent should be registered');
 assert.match(registry, /registerAgent\(amplifiContentDirectorAgent\)/, 'Amplifi Content Director should be registered');
+assert.match(registry, /registerAgent\(eaOperationsArchitectAgent\)/, 'EA Operations Architect should be registered');
 assert.match(registry, /specialistAgents\.forEach\(registerAgent\)/, 'Curated specialists should be registered');
 assert.match(registry, /matchAgents/, 'Registry should expose dynamic matching');
 assert.match(registry, /normalizeAgentName/, 'Registry should normalize selector aliases');
@@ -50,6 +52,11 @@ assert.match(types, /reductionRatio/, 'Orchestrator response should expose conte
 const amplifiDirector = readFileSync(join(root, 'lib/agents/amplifi-content-director-agent.ts'), 'utf8');
 assert.match(amplifiDirector, /name:\s*['"]amplifi-content-director['"]/, 'Amplifi Content Director should expose the expected agent name');
 assert.match(amplifiDirector, /Never publish, send, schedule, delete/, 'Amplifi Content Director should preserve the approval boundary');
+
+const operationsArchitect = readFileSync(join(root, 'lib/agents/ea-operations-architect-agent.ts'), 'utf8');
+assert.match(operationsArchitect, /name:\s*['"]ea-operations-architect['"]/, 'EA Operations Architect should expose the expected agent name');
+assert.match(operationsArchitect, /what should be improved next/i, 'EA Operations Architect should focus on next best operational action');
+assert.match(operationsArchitect, /require explicit human approval/i, 'EA Operations Architect should preserve consequential-action approval gates');
 
 const ideaBoxRoute = readFileSync(join(root, 'app/api/portal/amplifi/idea-box/route.ts'), 'utf8');
 assert.match(ideaBoxRoute, /getAgent\(['"]amplifi-content-director['"]\)/, 'Idea Box should use Amplifi Content Director');
