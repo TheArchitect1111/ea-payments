@@ -3,6 +3,7 @@ import type { AIRequestContext } from '@/lib/ai/types';
 import { verifyAgentCompletion } from '@/lib/agent-reliability/client';
 import { matchAgents } from '@/lib/agents/registry';
 import type { AgentExecutionResult, AgentFinding, AgentStatus, OrchestratorRequest, OrchestratorResponse } from '@/lib/agents/types';
+import { clientContextForAgents, resolveClientContext } from '@/lib/client-context';
 import { optimizeContext } from '@/lib/context-optimizer';
 
 function uniqueFindings(items: AgentFinding[]) {
@@ -35,8 +36,8 @@ function contextItems(context?: Record<string, unknown>) {
   if (!context) return [];
   return Object.entries(context).map(([key, value]) => ({
     id: key,
-    source: 'orchestrator-context',
-    priority: key.toLowerCase().includes('constraint') || key.toLowerCase().includes('acceptance') ? 10 : 0,
+    source: key === '__eaClientContext' ? 'canonical-client-context' : 'orchestrator-context',
+    priority: key === '__eaClientContext' || key.toLowerCase().includes('constraint') || key.toLowerCase().includes('acceptance') ? 10 : 0,
     text: typeof value === 'string' ? `${key}: ${value}` : `${key}: ${JSON.stringify(value)}`,
   }));
 }
@@ -51,21 +52,35 @@ export async function runOrchestrator(request: OrchestratorRequest, context: AIR
   if (!message) throw new Error('Orchestrator requires a message.');
 
   const selectedAgents = matchAgents(`${request.intent ?? ''} ${message}`, request.requestedAgents).slice(0, request.maxAgents ?? 2);
-  logAIEvent('orchestrator.dispatch', context, { agents: selectedAgents.map((agent) => agent.name) });
+  const resolvedClientContext = await resolveClientContext(request.context);
+  const enrichedContext: Record<string, unknown> = {
+    ...(request.context ?? {}),
+    ...(resolvedClientContext ? clientContextForAgents(resolvedClientContext) : {}),
+    ...(resolvedClientContext ? { __eaClientContext: resolvedClientContext } : {}),
+  };
+
+  logAIEvent('orchestrator.dispatch', context, {
+    agents: selectedAgents.map((agent) => agent.name),
+    clientId: resolvedClientContext?.profile.clientId,
+    clientContextLoaded: Boolean(resolvedClientContext),
+  });
 
   const optimized = await optimizeContext({
     query: `${request.intent ?? ''} ${message}`,
-    items: contextItems(request.context),
+    items: contextItems(enrichedContext),
     taskState: {
       goal: message,
-      constraints: ['Do not claim completion without verified execution evidence.'],
+      constraints: [
+        'Do not claim completion without verified execution evidence.',
+        'Treat canonical client approval rules as hard constraints.',
+      ],
     },
-    maxItems: 12,
-    maxChars: 12_000,
+    maxItems: 16,
+    maxChars: 16_000,
   });
 
   const agentContext: Record<string, unknown> = {
-    ...(request.context ?? {}),
+    ...enrichedContext,
     __eaOptimizedContext: optimized.context,
     __eaContextStats: optimized.stats,
   };
@@ -106,6 +121,7 @@ export async function runOrchestrator(request: OrchestratorRequest, context: AIR
     missingGates: reliability.missing_gates,
     failedGates: reliability.failed_gates,
     contextReductionRatio: optimized.stats.reductionRatio,
+    clientContextLoaded: Boolean(resolvedClientContext),
   });
 
   return {
