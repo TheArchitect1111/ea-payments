@@ -59,9 +59,9 @@ test('simplifi portal route requires portal login', async ({ page }) => {
 test('amplifi landing page is reachable', async ({ page }) => {
   await page.goto('/amplifi');
   await expect(
-    page.getByRole('heading', { name: /your business has something worth saying/i }),
+    page.getByRole('heading', { name: /what would you like amplifi to do/i }),
   ).toBeVisible();
-  await expect(page.getByText(/smart research/i).first()).toBeVisible();
+  await expect(page.getByRole('heading', { name: /^idea box$/i })).toBeVisible();
 });
 
 test('magnifi consider demo has opportunity content', async ({ page }) => {
@@ -129,7 +129,7 @@ test('simplifi workspace is reachable', async ({ page }) => {
 
   const orb = page.getByRole('button', { name: /SIMPLIFI Orb/i });
   await expect(orb).toBeVisible();
-  await orb.click();
+  await orb.dblclick();
   await expect(page.getByRole('dialog', { name: /SIMPLIFI intelligence/i })).toBeVisible();
   await expect(page.locator('.global-orb-ambient')).toBeVisible();
   await expect(page.locator('.global-orb-ambient')).toContainText(/Good morning|Nothing urgent|deserve/i);
@@ -156,7 +156,7 @@ test('simplifiorb entry redirects to Brief', async ({ page }) => {
 
 test('simplifi orb ask opens inbox session workspace in place', async ({ page }) => {
   await page.goto('/simplifi/workspace');
-  await page.getByRole('button', { name: /SIMPLIFI Orb/i }).click();
+  await page.getByRole('button', { name: /SIMPLIFI Orb/i }).dblclick();
   await page.getByRole('textbox', { name: /Ask Simplifi/i }).fill('show my inbox');
   await page.getByRole('button', { name: /^ask$/i }).click();
 
@@ -171,7 +171,7 @@ test('simplifi orb ask opens inbox session workspace in place', async ({ page })
 
 test('simplifi orb outcome flash wiring is present on capture session', async ({ page }) => {
   await page.goto('/simplifi/workspace');
-  await page.getByRole('button', { name: /SIMPLIFI Orb/i }).click();
+  await page.getByRole('button', { name: /SIMPLIFI Orb/i }).dblclick();
   await page.getByRole('textbox', { name: /Ask Simplifi/i }).fill('open capture');
   await page.getByRole('button', { name: /^ask$/i }).click();
   await expect(page.getByRole('dialog', { name: /capture workspace/i })).toBeVisible();
