@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { guardPortalApi, portalApiUnauthorized, portalTenant } from '@/lib/api/portal-route';
-import { runAIGateway } from '@/lib/ai/gateway';
+import { getAgent } from '@/lib/agents/registry';
+import type { AIRequestContext } from '@/lib/ai/types';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 90;
@@ -23,10 +24,6 @@ type Opportunity = {
   score: number;
   readiness: 'ready' | 'needs-context';
 };
-
-function cleanJson(text: string) {
-  return text.replace(/^```json\s*/i, '').replace(/^```\s*/, '').replace(/```\s*$/, '').trim();
-}
 
 function clampScore(value: unknown) {
   const score = Number(value);
@@ -96,7 +93,7 @@ export async function POST(req: NextRequest) {
   }
 
   const prompt = [
-    'The user has given Amplifi a raw brain dump. Analyze it using the FLOW method before proposing content.',
+    'Analyze this raw Amplifi brain dump using the FLOW method before proposing content.',
     '',
     'FLOW method:',
     'FIND: identify the strongest themes, audience needs, questions, tensions, useful facts, proof already present, and important missing context. Do not claim external trends unless the supplied material supports them.',
@@ -104,7 +101,7 @@ export async function POST(req: NextRequest) {
     'OPTIMIZE: improve each idea so it has one clear job, a strong hook, distinct audience takeaway, no repetition, no unsupported hype, and a useful next step.',
     'WIN: rank the best opportunities by usefulness, specificity, source support, audience value, and readiness to build now.',
     '',
-    'Do not assume they want a single social post. Consider announcements, carousels, short videos, stories, event sequences, campaigns, testimonials, educational posts, countdowns, behind-the-scenes content, email/social combinations, recurring series, and repurposing when supported by the material.',
+    'Do not assume the user wants a single social post. Consider announcements, carousels, short videos, stories, event sequences, campaigns, testimonials, educational posts, countdowns, behind-the-scenes content, email/social combinations, recurring series, and repurposing when supported by the material.',
     'Return 5 to 7 distinct opportunities. Do not fabricate dates, attendance, revenue, customer results, quotes, testimonials, trends, or other proof.',
     'Every opportunity must be meaningfully different from the others.',
     'For each opportunity return: title, format, angle, reason, campaignBrief, hook, callToAction, score, readiness.',
@@ -113,21 +110,15 @@ export async function POST(req: NextRequest) {
     'Never use em dashes or en dashes.',
     'Return valid JSON only in this shape:',
     '{"flowSummary":{"find":"","leverage":"","optimize":"","win":""},"opportunities":[{"title":"","format":"","angle":"","reason":"","campaignBrief":"","hook":"","callToAction":"","score":0,"readiness":"ready"}]}',
-    `Organization: ${tenant.portalSlug}`,
     `Brain dump text:\n${text || 'None supplied.'}`,
     `Links:\n${links.length ? links.join('\n') : 'None supplied.'}`,
     `Attached assets:\n${files.length ? files.map((file) => `${file.name} (${file.type || 'file'})`).join('\n') : 'None supplied.'}`,
   ].join('\n\n');
 
   try {
-    const response = await runAIGateway({
-      responseFormat: 'json',
-      temperature: 0.45,
-      maxOutputTokens: 3200,
-      system: 'You are Amplifi FLOW, a senior content strategist. Use Find, Leverage, Optimize, Win to turn messy raw material into ranked, specific, source-grounded content opportunities. Never invent facts. Return JSON only.',
-      messages: [{ role: 'user', content: prompt }],
-      metadata: { product: 'amplifi', workflow: 'idea-box-flow' },
-    }, {
+    const agent = getAgent('amplifi-content-director');
+    if (!agent) throw new Error('Amplifi Content Director is not registered.');
+    const requestContext: AIRequestContext = {
       requestId: crypto.randomUUID(),
       actor: {
         id: auth.session.sub || auth.session.email || tenant.organizationId,
@@ -137,9 +128,19 @@ export async function POST(req: NextRequest) {
         role: auth.session.role,
       },
       route: '/api/portal/amplifi/idea-box',
-    });
+      metadata: { product: 'amplifi', workflow: 'idea-box-flow', agent: agent.name },
+    };
+    const result = await agent.execute({
+      intent: 'amplifi idea box content opportunities',
+      query: prompt,
+      context: {
+        organization: tenant.portalSlug,
+        workflow: 'idea-box-flow',
+        approvalGate: 'Review required before anything can be published.',
+      },
+    }, requestContext);
 
-    const parsed = JSON.parse(cleanJson(response.text)) as {
+    const parsed = (result.raw ?? {}) as {
       flowSummary?: unknown;
       opportunities?: unknown[];
     };
@@ -158,6 +159,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       ok: true,
       method: 'FLOW',
+      agent: agent.name,
       flowSummary,
       opportunities,
     });
@@ -224,6 +226,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       ok: true,
       method: 'FLOW',
+      agent: 'fallback',
       flowSummary: {
         find: 'Amplifi found the strongest usable signal in the supplied material.',
         leverage: 'Amplifi identified multiple ways to turn the source into useful content.',

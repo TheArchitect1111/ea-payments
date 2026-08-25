@@ -11,6 +11,22 @@ const eslintConfig = defineConfig([
       '@next/next/no-html-link-for-pages': 'warn',
     },
   },
+  {
+    files: [
+      'tools/ea-bolt-slides/src/deck/Annotator.tsx',
+      'tools/ea-bolt-slides/src/deck/Deck.tsx',
+    ],
+    rules: {
+      'react-hooks/immutability': 'off',
+      'react-hooks/refs': 'off',
+    },
+  },
+  {
+    files: ['app/consider/joe-smith/page.tsx'],
+    rules: {
+      'react/no-unescaped-entities': 'off',
+    },
+  },
   // Override default ignores of eslint-config-next.
   globalIgnores([
     // Default ignores of eslint-config-next:

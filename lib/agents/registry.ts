@@ -3,6 +3,7 @@ import { intakeAgent } from '@/lib/agents/intake-agent';
 import { presentationAgent } from '@/lib/agents/presentation-agent';
 import { platformGuardianAgent } from '@/lib/agents/platform-guardian-agent';
 import { openDesignAgent } from '@/lib/agents/open-design-agent';
+import { amplifiContentDirectorAgent } from '@/lib/agents/amplifi-content-director-agent';
 import { specialistAgents } from '@/lib/agents/specialist-agents';
 import type { EAAgent } from '@/lib/agents/types';
 
@@ -41,6 +42,7 @@ registerAgent(intakeAgent);
 registerAgent(presentationAgent);
 registerAgent(platformGuardianAgent);
 registerAgent(openDesignAgent);
+registerAgent(amplifiContentDirectorAgent);
 specialistAgents.forEach(registerAgent);
 
 const AGENT_ALIASES: Record<string, string> = {
@@ -48,6 +50,9 @@ const AGENT_ALIASES: Record<string, string> = {
   'conversion-strategist': 'conversion',
   'social': 'social-media',
   'social-media-strategist': 'social-media',
+  'amplifi-director': 'amplifi-content-director',
+  'content-director': 'amplifi-content-director',
+  'amplifi-content-director-agent': 'amplifi-content-director',
   'email': 'email-campaign',
   'email-campaign-strategist': 'email-campaign',
   'brand-strategist': 'brand',
