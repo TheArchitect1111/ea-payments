@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { loadAmplifiConnections } from '@/lib/amplifi-connection-store';
 import { guardPortalApi, portalApiUnauthorized, portalTenant } from '@/lib/api/portal-route';
-import { runAIGateway } from '@/lib/ai/gateway';
 import { callClaudeText } from '@/lib/ai';
+import type { AIRequestContext } from '@/lib/ai/types';
+import { getAgent } from '@/lib/agents/registry';
 import { normalizeCampaignArchitecture } from '@/lib/creative-studio/campaign-architecture';
 import type { CampaignArchitecture } from '@/lib/creative-studio/types';
 import { assignPortfolioPosts } from '@/lib/amplifi-campaign-command';
@@ -21,14 +22,14 @@ type CampaignPost = {
 };
 
 function cleanJson(text: string): string {
-  return text.replace(/^\`\`\`json\\s*/i, '').replace(/^\`\`\`\\s*/, '').replace(/\`\`\`\\s*$/, '').trim();
+  return text.replace(/^```json\s*/i, '').replace(/^```\s*/, '').replace(/```\s*$/, '').trim();
 }
 
 function cleanGeneratedText(value: unknown): string {
   return String(value || '')
     .replace(/[\u2013\u2014]/g, ',')
-    .replace(/\\s+,/g, ',')
-    .replace(/,\\s*,/g, ',')
+    .replace(/\s+,/g, ',')
+    .replace(/,\s*,/g, ',')
     .trim();
 }
 
@@ -98,7 +99,7 @@ function reliableCampaign(input: {
     },
     {
       title: 'The hidden cost is what never gets done',
-      caption: `Every avoidable delay competes with service, follow-up and growth. The real question is not whether the current approach still works. It is what becomes possible when a better approach gives people room to move.`,
+      caption: 'Every avoidable delay competes with service, follow-up and growth. The real question is not whether the current approach still works. It is what becomes possible when a better approach gives people room to move.',
       callToAction: `${input.callToAction}${linkLine}`,
       imageDirection: 'An editorial visual showing important opportunities waiting behind a wall of repetitive work.',
     },
@@ -332,17 +333,9 @@ export async function POST(req: NextRequest) {
   ].join('\n');
 
   try {
-    const response = await runAIGateway({
-      responseFormat: 'json',
-      temperature: 0.65,
-      maxOutputTokens: 3200,
-      system: 'You are Amplifi, a senior advertising creative director and conversion copywriter. Turn client facts into original campaign ideas that attract, inform, persuade and sell. Never mirror the brief, fabricate proof, use empty hype, or use em dashes or en dashes. Keep every caption concise, between 35 and 55 words. Return valid JSON only.',
-      messages: [{
-        role: 'user',
-        content: prompt,
-      }],
-      metadata: { product: 'amplifi', workflow: 'create-for-me' },
-    }, {
+    const agent = getAgent('amplifi-content-director');
+    if (!agent) throw new Error('Amplifi Content Director is not registered.');
+    const requestContext: AIRequestContext = {
       requestId: crypto.randomUUID(),
       actor: {
         id: auth.session.sub || auth.session.email || tenant.organizationId,
@@ -352,15 +345,26 @@ export async function POST(req: NextRequest) {
         role: auth.session.role,
       },
       route: '/api/portal/amplifi/create-campaign',
-    });
+      metadata: { product: 'amplifi', workflow: 'create-for-me', agent: agent.name },
+    };
+    const agentResult = await agent.execute({
+      intent: 'amplifi campaign creation',
+      query: prompt,
+      context: {
+        organization: tenant.portalSlug,
+        workflow: 'create-for-me',
+        connectedPlatforms: requestedPlatforms || 'Facebook and Instagram',
+        approvalGate: 'Campaign must remain review-ready and cannot auto-publish.',
+      },
+    }, requestContext);
     const campaign = await finalizeCampaign({
-      generated: campaignFromText(response.text, promotion, architecture),
+      generated: campaignFromText(JSON.stringify(agentResult.raw), promotion, architecture),
       organizationId: tenant.organizationId,
       portalSlug: tenant.portalSlug,
       tone,
       platforms: body.platforms,
     });
-    return NextResponse.json({ ok: true, campaign });
+    return NextResponse.json({ ok: true, campaign, agent: agent.name });
   } catch {
     const claudeText = await callClaudeText(prompt, { maxTokens: 3200 });
     if (claudeText) {
@@ -372,7 +376,7 @@ export async function POST(req: NextRequest) {
           tone,
           platforms: body.platforms,
         });
-        return NextResponse.json({ ok: true, campaign });
+        return NextResponse.json({ ok: true, campaign, agent: 'fallback-claude' });
       } catch {
         // Continue to the reliable local campaign builder.
       }
@@ -398,6 +402,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       ok: true,
       campaign,
+      agent: 'fallback-local',
       fallback: true,
     });
   }
