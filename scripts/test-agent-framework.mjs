@@ -14,6 +14,7 @@ const requiredFiles = [
   'lib/agents/registry.ts',
   'lib/agents/orchestrator.ts',
   'lib/agents/research-agent.ts',
+  'lib/agents/amplifi-content-director-agent.ts',
   'lib/agents/specialist-agents.ts',
   'lib/context-optimizer/index.ts',
   'lib/agent-reliability/client.ts',
@@ -28,6 +29,7 @@ for (const file of requiredFiles) {
 
 const registry = readFileSync(join(root, 'lib/agents/registry.ts'), 'utf8');
 assert.match(registry, /registerAgent\(researchAgent\)/, 'Research agent should be registered');
+assert.match(registry, /registerAgent\(amplifiContentDirectorAgent\)/, 'Amplifi Content Director should be registered');
 assert.match(registry, /specialistAgents\.forEach\(registerAgent\)/, 'Curated specialists should be registered');
 assert.match(registry, /matchAgents/, 'Registry should expose dynamic matching');
 assert.match(registry, /normalizeAgentName/, 'Registry should normalize selector aliases');
@@ -44,6 +46,16 @@ assert.doesNotMatch(orchestrator, /switch\s*\(/, 'Orchestrator should not hardco
 const types = readFileSync(join(root, 'lib/agents/types.ts'), 'utf8');
 assert.match(types, /reliability:/, 'Orchestrator response should expose reliability metadata');
 assert.match(types, /reductionRatio/, 'Orchestrator response should expose context reduction metrics');
+
+const amplifiDirector = readFileSync(join(root, 'lib/agents/amplifi-content-director-agent.ts'), 'utf8');
+assert.match(amplifiDirector, /name:\s*['"]amplifi-content-director['"]/, 'Amplifi Content Director should expose the expected agent name');
+assert.match(amplifiDirector, /Never publish, send, schedule, delete/, 'Amplifi Content Director should preserve the approval boundary');
+
+const ideaBoxRoute = readFileSync(join(root, 'app/api/portal/amplifi/idea-box/route.ts'), 'utf8');
+assert.match(ideaBoxRoute, /getAgent\(['"]amplifi-content-director['"]\)/, 'Idea Box should use Amplifi Content Director');
+
+const campaignRoute = readFileSync(join(root, 'app/api/portal/amplifi/create-campaign/route.ts'), 'utf8');
+assert.match(campaignRoute, /getAgent\(['"]amplifi-content-director['"]\)/, 'Campaign creation should use Amplifi Content Director');
 
 const specialists = readFileSync(join(root, 'lib/agents/specialist-agents.ts'), 'utf8');
 for (const name of ['seo', 'conversion', 'social-media', 'email-campaign', 'brand', 'accessibility', 'performance', 'security', 'analytics']) {
