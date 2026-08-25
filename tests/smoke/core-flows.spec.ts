@@ -59,9 +59,9 @@ test('simplifi portal route requires portal login', async ({ page }) => {
 test('amplifi landing page is reachable', async ({ page }) => {
   await page.goto('/amplifi');
   await expect(
-    page.getByRole('heading', { name: /what would you like amplifi to do/i }),
+    page.getByRole('heading', { name: /social media always needs another post/i }),
   ).toBeVisible();
-  await expect(page.getByRole('heading', { name: /^idea box$/i })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /tell amplifi about the event once/i })).toBeVisible();
 });
 
 test('magnifi consider demo has opportunity content', async ({ page }) => {
@@ -131,8 +131,8 @@ test('simplifi workspace is reachable', async ({ page }) => {
   await expect(orb).toBeVisible();
   await orb.dblclick();
   await expect(page.getByRole('dialog', { name: /SIMPLIFI intelligence/i })).toBeVisible();
-  await expect(page.locator('.global-orb-ambient')).toBeVisible();
-  await expect(page.locator('.global-orb-ambient')).toContainText(/Good morning|Nothing urgent|deserve/i);
+  await expect(page.getByRole('heading', { name: /quick actions/i })).toBeVisible();
+  await expect(page.getByRole('button', { name: /ask orbie/i })).toBeVisible();
   await expect(page.getByRole('button', { name: /^close$/i })).toBeFocused();
   await page.keyboard.press('Shift+Tab');
   expect(
