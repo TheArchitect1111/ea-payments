@@ -45,14 +45,16 @@ export default async function CommitmentPage({
   const paymentStage: 'deposit' | 'final' = stage === 'final' ? 'final' : 'deposit';
   const proposal = await getProposalByProposalId(proposalId);
 
-  if (!proposal || !VISIBLE_STATUSES.has(proposal.status)) {
-    notFound();
-  }
+  if (!proposal || !VISIBLE_STATUSES.has(proposal.status)) notFound();
 
   const solutionLabel =
     proposal.projectTypeLabel || proposal.recommendedProjectType || 'Intelligent Business System';
   const ctpBound = await getCtpSubmissionByProposalId(proposalId).catch(() => null);
-  const depositAmount = proposalDeposit(proposal.recommendedFee, ctpBound?.discoveryAnswers);
+  const standardDeposit = proposalDeposit(proposal.recommendedFee, ctpBound?.discoveryAnswers);
+  const depositAmount = proposal.recommendedProjectType === 'Quick Quote'
+    ? Math.min(Math.max(proposal.rawFee || standardDeposit, 0), proposal.recommendedFee)
+    : standardDeposit;
+  const isQuickQuote = proposal.recommendedProjectType === 'Quick Quote';
 
   return (
     <main className="min-h-screen" style={{ backgroundColor: CREAM }}>
@@ -61,13 +63,15 @@ export default async function CommitmentPage({
           <img src="/images/ea-logo.png" alt="Efficiency Architects" className="h-20 w-auto" />
           <div className="pb-12 pt-10">
             <p className="text-xs font-bold uppercase tracking-[0.28em]" style={{ color: GOLD }}>
-              System Confirmation
+              {isQuickQuote ? 'Project Agreement' : 'System Confirmation'}
             </p>
             <h1 className="mt-4 max-w-3xl text-4xl font-black uppercase tracking-wide sm:text-5xl" style={{ color: GOLD }}>
-              Here is how the conversation becomes your intelligent system.
+              {isQuickQuote ? 'Review the agreement and secure your project.' : 'Here is how the conversation becomes your intelligent system.'}
             </h1>
             <p className="mt-5 max-w-2xl text-base leading-8 text-blue-50">
-              You are not simply purchasing a website and portal. You are commissioning a connected system designed to guide people, organize work, support communication, and help your organization operate more intelligently.
+              {isQuickQuote
+                ? 'Confirm the project scope, review the legal terms, and complete the required deposit to begin.'
+                : 'You are not simply purchasing a website and portal. You are commissioning a connected system designed to guide people, organize work, support communication, and help your organization operate more intelligently.'}
             </p>
           </div>
         </div>
@@ -75,12 +79,18 @@ export default async function CommitmentPage({
 
       <section className="mx-auto grid max-w-4xl gap-6 px-6 py-12 lg:grid-cols-[1.4fr_0.8fr]">
         <div className="space-y-3">
+          {isQuickQuote && proposal.scopeSummary ? (
+            <div className="mb-5 border border-neutral-200 bg-white p-6">
+              <p className="text-xs font-bold uppercase tracking-[0.2em]" style={{ color: GOLD }}>Agreed Project Scope</p>
+              <div className="mt-4 whitespace-pre-line text-sm leading-7 text-neutral-700">{proposal.scopeSummary}</div>
+              <p className="mt-5 border-t border-neutral-100 pt-4 text-xs leading-5 text-neutral-500">
+                By continuing, you confirm that this scope and the project investment shown here accurately reflect the work being commissioned.
+              </p>
+            </div>
+          ) : null}
           {steps.map((step, index) => (
             <div key={step} className="flex gap-4 border border-neutral-200 bg-white p-5">
-              <div
-                className="flex h-10 w-10 shrink-0 items-center justify-center text-sm font-black"
-                style={{ backgroundColor: GOLD, color: NAVY }}
-              >
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center text-sm font-black" style={{ backgroundColor: GOLD, color: NAVY }}>
                 {index + 1}
               </div>
               <p className="pt-2 text-sm font-semibold leading-6 text-neutral-800">{step}</p>
@@ -89,9 +99,7 @@ export default async function CommitmentPage({
         </div>
 
         <aside className="border border-neutral-200 bg-white p-6">
-          <p className="text-xs font-bold uppercase tracking-[0.22em]" style={{ color: GOLD }}>
-            Project Details
-          </p>
+          <p className="text-xs font-bold uppercase tracking-[0.22em]" style={{ color: GOLD }}>Project Details</p>
           <dl className="mt-5 space-y-4">
             <div>
               <dt className="text-xs font-bold uppercase tracking-wider text-neutral-400">System</dt>
@@ -104,21 +112,19 @@ export default async function CommitmentPage({
             <div>
               <dt className="text-xs font-bold uppercase tracking-wider text-neutral-400">Due now</dt>
               <dd className="mt-1 text-xl font-black" style={{ color: NAVY }}>{fmt(paymentStage === 'final' ? Math.max(0, proposal.recommendedFee - depositAmount) : depositAmount)}</dd>
-              <dd className="mt-1 text-xs text-neutral-500">{paymentStage === 'final' ? 'Final balance before activation and full access' : 'Project deposit after consultation and approval'}</dd>
+              <dd className="mt-1 text-xs text-neutral-500">{paymentStage === 'final' ? 'Final balance before activation and full access' : 'Project deposit after agreement acceptance'}</dd>
             </div>
             <div>
               <dt className="text-xs font-bold uppercase tracking-wider text-neutral-400">Estimated Timeline</dt>
-              <dd className="mt-1 text-sm font-semibold" style={{ color: NAVY }}>{estimateTimeline(proposal.recommendedFee)}</dd>
+              <dd className="mt-1 text-sm font-semibold" style={{ color: NAVY }}>{isQuickQuote ? 'As stated in the agreed scope' : estimateTimeline(proposal.recommendedFee)}</dd>
             </div>
           </dl>
 
           <div className="mt-6 border-t border-neutral-100 pt-5">
-            <p className="text-sm font-semibold leading-7 text-neutral-700">
-              Fixed investment. Clear milestones. Your approval is required at every major stage.
-            </p>
+            <p className="text-sm font-semibold leading-7 text-neutral-700">Fixed investment. Clear milestones. Your approval is required at every major stage.</p>
           </div>
 
-          <CommitmentCheckout proposalId={proposal.proposalId} paymentStage={paymentStage} />
+          <CommitmentCheckout proposalId={proposal.proposalId} paymentStage={paymentStage} depositAmount={depositAmount} />
           <p className="mt-4 text-center text-xs text-neutral-400">Need more time? Save this page.</p>
         </aside>
       </section>

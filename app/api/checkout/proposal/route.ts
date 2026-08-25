@@ -8,15 +8,11 @@ import { proposalDeposit } from '@/lib/proposal-deposit';
 
 export const dynamic = 'force-dynamic';
 
-// Statuses that are eligible for checkout. "Approved & Paid" is excluded
-// so re-submitting the form after a successful payment does not create a
-// second session.
 const CHECKOUT_STATUSES = new Set(['Approved', 'Sent']);
 
 export async function POST(req: NextRequest): Promise<Response> {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? 'http://localhost:3000';
 
-  // Parse proposalId from either a form POST or a JSON body.
   let proposalId = '';
   let paymentStage: 'deposit' | 'final' = 'deposit';
   try {
@@ -35,7 +31,6 @@ export async function POST(req: NextRequest): Promise<Response> {
   }
 
   if (!proposalId) {
-    // No proposal ID at all; redirect to a safe page.
     return NextResponse.redirect(`${baseUrl}/?payment=error`, { status: 303 });
   }
 
@@ -61,22 +56,18 @@ export async function POST(req: NextRequest): Promise<Response> {
     return errorRedirect(`getProposalByProposalId threw: ${err instanceof Error ? err.message : String(err)}`);
   }
 
-  if (!proposal) {
-    return errorRedirect('Proposal not found in Airtable.');
-  }
-
+  if (!proposal) return errorRedirect('Proposal not found in Airtable.');
   if (!CHECKOUT_STATUSES.has(proposal.status)) {
     return errorRedirect(`Proposal status "${proposal.status}" is not eligible for checkout.`);
   }
-
   if (!proposal.recommendedFee || proposal.recommendedFee <= 0) {
     return errorRedirect('Proposal has no valid recommended fee.');
   }
 
-  // Airtable Currency fields are stored as floating-point dollars.
-  // Multiply by 100 and round to get Stripe unit_amount (integer cents).
-  // Example: $4,997.00 -> 4997 * 100 = 499700 cents.
-  const depositAmount = proposalDeposit(proposal.recommendedFee, ctpBound?.discoveryAnswers);
+  const standardDeposit = proposalDeposit(proposal.recommendedFee, ctpBound?.discoveryAnswers);
+  const depositAmount = proposal.recommendedProjectType === 'Quick Quote'
+    ? Math.min(Math.max(proposal.rawFee || standardDeposit, 0), proposal.recommendedFee)
+    : standardDeposit;
   const chargeAmount = paymentStage === 'final'
     ? Math.max(0, proposal.recommendedFee - depositAmount)
     : depositAmount;
@@ -91,31 +82,29 @@ export async function POST(req: NextRequest): Promise<Response> {
 
   try {
     const stripe = getStripe();
-
     const sessionParams: Stripe.Checkout.SessionCreateParams = {
       mode: 'payment',
       payment_method_types: ['card', 'us_bank_account'],
-      line_items: [
-        {
-          quantity: 1,
-          price_data: {
-            currency: 'usd',
-            unit_amount: unitAmount,
-            product_data: {
-              name: `${productName} - ${paymentLabel}`,
-              description: paymentStage === 'final'
-                ? `Final balance due before activation and full administrator access. Total project price: $${proposal.recommendedFee.toLocaleString()}.`
-                : `Deposit toward a total project price of $${proposal.recommendedFee.toLocaleString()}.`,
-            },
+      line_items: [{
+        quantity: 1,
+        price_data: {
+          currency: 'usd',
+          unit_amount: unitAmount,
+          product_data: {
+            name: `${productName} - ${paymentLabel}`,
+            description: paymentStage === 'final'
+              ? `Final balance due before activation and full administrator access. Total project price: $${proposal.recommendedFee.toLocaleString()}.`
+              : `Deposit toward a total project price of $${proposal.recommendedFee.toLocaleString()}.`,
           },
         },
-      ],
+      }],
       customer_email: proposal.email || undefined,
       metadata: {
         proposalId: proposal.proposalId,
         airtableRecordId: proposal.id,
         paymentStage,
         projectTotal: String(proposal.recommendedFee),
+        quickQuote: proposal.recommendedProjectType === 'Quick Quote' ? 'true' : 'false',
       },
       success_url: guideReturnUrl,
       cancel_url: `${proposalUrl}?payment=cancelled`,
@@ -129,19 +118,11 @@ export async function POST(req: NextRequest): Promise<Response> {
       },
     };
 
-    // Enable invoice creation for amounts above $2,500.
-    if (unitAmount > 250000) {
-      sessionParams.invoice_creation = { enabled: true };
-    }
+    if (unitAmount > 250000) sessionParams.invoice_creation = { enabled: true };
 
     const session = await stripe.checkout.sessions.create(sessionParams);
+    if (!session.url) return errorRedirect('Stripe returned a session with no URL.');
 
-    if (!session.url) {
-      return errorRedirect('Stripe returned a session with no URL.');
-    }
-
-    // Best-effort: save the session ID on the proposal so E9 can match it.
-    // A failure here does not abort the checkout.
     try {
       await updateProposal(proposal.id, { stripeSessionId: session.id });
     } catch (err) {

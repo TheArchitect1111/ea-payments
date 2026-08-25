@@ -4,7 +4,23 @@ import { useState } from 'react';
 import { LegalAcceptance } from '@/app/components/LegalAcceptance';
 import type { LegalAcceptanceRecord, TrustLegalDocType } from '@/lib/trust-engine/types';
 
-export default function CommitmentCheckout({ proposalId, paymentStage = 'deposit' }: { proposalId: string; paymentStage?: 'deposit' | 'final' }) {
+function fmt(value: number) {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 0,
+  }).format(value);
+}
+
+export default function CommitmentCheckout({
+  proposalId,
+  paymentStage = 'deposit',
+  depositAmount = 500,
+}: {
+  proposalId: string;
+  paymentStage?: 'deposit' | 'final';
+  depositAmount?: number;
+}) {
   const [error, setError] = useState('');
 
   async function acceptAndPay(records: LegalAcceptanceRecord[]) {
@@ -50,17 +66,13 @@ export default function CommitmentCheckout({ proposalId, paymentStage = 'deposit
         productId="portal_products"
         userId={`proposal-${proposalId}`}
         onAccepted={acceptAndPay}
-        continueLabel={paymentStage === 'final' ? 'Pay final balance securely' : 'Pay $250 deposit securely'}
+        continueLabel={paymentStage === 'final' ? 'Pay final balance securely' : `Accept & pay ${fmt(depositAmount)} deposit`}
       />
-      {error ? (
-        <p className="mt-3 text-sm font-semibold text-red-700" role="alert">
-          {error}
-        </p>
-      ) : null}
+      {error ? <p className="mt-3 text-sm font-semibold text-red-700" role="alert">{error}</p> : null}
       <p className="mt-4 text-center text-xs text-neutral-400">
         {paymentStage === 'final'
           ? 'Full access and activation follow after the final balance clears.'
-          : 'The deposit reserves your development window. The final balance is due before activation and full access.'}
+          : 'Your acceptance is recorded before secure checkout opens. The final balance is due before activation and full access.'}
       </p>
     </div>
   );
