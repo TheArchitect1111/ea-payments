@@ -8,7 +8,7 @@ const docs=[['May Chapter Agenda','PDF · Uploaded recently'],['Golf Tournament 
 export default function TwinCityBrotherHub(){return <main className="tc-portal-shell">
   <aside className="tc-leftnav">
     <div className="tc-logo-row"><img src={chapterLogo} alt="Twin City Kappas crest"/><div><b>BROTHERHUB</b><small>TWIN CITY KAPPAS</small></div></div>
-    <nav>{nav.map(([icon,label])=>label==='Amplifi'?<a key={label} href="/amplifi/workspace" className="amp"><i>{icon}</i><span>{label}</span></a>:<a key={label} href={label==='Home'?'#home':label==='Golf Tournament'?'#golf':'#'} className={label==='Home'?'active':''}><i>{icon}</i><span>{label}</span></a>)}</nav>
+    <nav>{nav.map(([icon,label])=>label==='Amplifi'?<a key={label} href="/amplifi/workspace" className="amp"><i>{icon}</i><span>{label}</span></a>:<a key={label} href={label==='Home'?'#home':label==='Golf Tournament'?'/twin-city-kappas/portal/golf':'#'} className={label==='Home'?'active':''}><i>{icon}</i><span>{label}</span></a>)}</nav>
   </aside>
 
   <section className="tc-app" id="home">
@@ -25,7 +25,7 @@ export default function TwinCityBrotherHub(){return <main className="tc-portal-s
       </section>
 
       <section className="tc-main-grid">
-        <div id="golf" className="tc-golf-card"><div className="tc-golf-hero"><div><p>REGIONAL MEETING</p><h2>GOLF TOURNAMENT</h2><span>Tournament Status Overview</span></div><div className="golfball">●</div></div><div className="tc-golf-numbers"><div><small>Registrations</small><b>48</b><span>of 120 Golfers</span></div><div><small>Foursomes</small><b>12</b><span>of 30 Teams</span></div><div><small>Sponsors</small><b>9</b><span>Committed</span></div><div><small>Revenue</small><b>$6,240</b><span>of Goal</span></div></div><div className="tc-golf-footer"><div className="progress"><i/><span>52% to Goal</span></div><a href="#">VIEW GOLF DASHBOARD</a></div></div>
+        <div id="golf" className="tc-golf-card"><div className="tc-golf-hero"><div><p>REGIONAL MEETING</p><h2>GOLF TOURNAMENT</h2><span>Tournament Status Overview</span></div><div className="golfball">●</div></div><div className="tc-golf-numbers"><div><small>Registrations</small><b>48</b><span>of 120 Golfers</span></div><div><small>Foursomes</small><b>12</b><span>of 30 Teams</span></div><div><small>Sponsors</small><b>9</b><span>Committed</span></div><div><small>Revenue</small><b>$6,240</b><span>of Goal</span></div></div><div className="tc-golf-footer"><div className="progress"><i/><span>52% to Goal</span></div><a href="/twin-city-kappas/portal/golf">VIEW GOLF DASHBOARD</a></div></div>
 
         <div className="tc-announcements"><div className="panel-title"><h3>Announcements</h3><a href="#">View All ›</a></div>{announcements.map(([t,c])=><div className="announce" key={t}><b>{t}</b><p>{c}</p></div>)}</div>
       </section>
