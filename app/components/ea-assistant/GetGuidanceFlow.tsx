@@ -11,6 +11,7 @@ type GetGuidanceFlowProps = {
   onBack: () => void;
   onAsk: (question: string) => Promise<GuidanceMessage>;
   messages: GuidanceMessage[];
+  quickPrompts?: readonly string[];
 };
 
 export default function GetGuidanceFlow({
@@ -18,10 +19,13 @@ export default function GetGuidanceFlow({
   onBack,
   onAsk,
   messages,
+  quickPrompts,
 }: GetGuidanceFlowProps) {
   const [question, setQuestion] = useState('');
   const [loading, setLoading] = useState(false);
-  const prompts = getSuggestedPrompts(pageContext.portalType, pageContext.workflow);
+  const prompts = quickPrompts?.length
+    ? [...quickPrompts]
+    : getSuggestedPrompts(pageContext.portalType, pageContext.workflow);
 
   async function submitQuestion(value: string) {
     const trimmed = value.trim();
@@ -44,7 +48,7 @@ export default function GetGuidanceFlow({
     <div className="ea-assistant-guidance">
       <div className="ea-assistant-messages" aria-live="polite" aria-relevant="additions">
         {messages.length === 0 ? (
-          <p className="ea-assistant-loading">Choose a prompt or ask your own question about this page.</p>
+          <p className="ea-assistant-loading">Choose an option or tell Eva what you are trying to accomplish.</p>
         ) : (
           messages.map((message) => (
             <div
@@ -52,8 +56,19 @@ export default function GetGuidanceFlow({
               className={`ea-assistant-message ea-assistant-message-${message.role}`}
             >
               <p>{message.content}</p>
-              {message.role === 'assistant' && message.confidence ? (
+              {message.role === 'assistant' && message.outcome ? (
+                <span className="ea-assistant-confidence">{message.outcome}</span>
+              ) : message.role === 'assistant' && message.confidence ? (
                 <span className="ea-assistant-confidence">{message.confidence} confidence</span>
+              ) : null}
+              {message.role === 'assistant' && message.actions?.length ? (
+                <div className="ea-assistant-prompts" role="group" aria-label="Eva actions">
+                  {message.actions.map((action) => (
+                    <a key={action.href} className="ea-assistant-prompt" href={action.href}>
+                      {action.label}
+                    </a>
+                  ))}
+                </div>
               ) : null}
               {message.role === 'assistant' && message.nextSteps?.length ? (
                 <ul className="ea-assistant-next-steps">
@@ -62,13 +77,16 @@ export default function GetGuidanceFlow({
                   ))}
                 </ul>
               ) : null}
+              {message.role === 'assistant' && message.agents?.length ? (
+                <p className="ea-assistant-loading">Specialists used: {message.agents.join(', ')}</p>
+              ) : null}
               {message.role === 'assistant' && message.suggestEscalation ? (
                 <p className="ea-assistant-escalation">{ASSISTANT_LABELS.escalationHint}</p>
               ) : null}
             </div>
           ))
         )}
-        {loading ? <p className="ea-assistant-loading">Looking that up…</p> : null}
+        {loading ? <p className="ea-assistant-loading">Eva is checking this…</p> : null}
       </div>
 
       <div className="ea-assistant-prompts" role="group" aria-label="Suggested questions">
@@ -94,7 +112,7 @@ export default function GetGuidanceFlow({
           className="ea-assistant-input"
           value={question}
           onChange={(event) => setQuestion(event.target.value)}
-          placeholder={ASSISTANT_LABELS.askPlaceholder}
+          placeholder="Tell Eva what you want to do…"
           disabled={loading}
           autoComplete="off"
         />

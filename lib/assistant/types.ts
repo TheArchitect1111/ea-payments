@@ -1,5 +1,6 @@
 import type { EAGuideAction } from '@/lib/ea-guide';
 import type { GuidePageContext } from '@/lib/ea-guide-types';
+import type { EvaOutcomeStatus, EvaPortalAction } from '@/lib/eva-portal-guide';
 
 export type AssistantSurface = 'portal' | 'discover' | 'admin';
 
@@ -36,6 +37,9 @@ export interface GuidanceMessage {
   confidence?: 'high' | 'medium' | 'low';
   nextSteps?: string[];
   suggestEscalation?: boolean;
+  outcome?: EvaOutcomeStatus;
+  actions?: EvaPortalAction[];
+  agents?: string[];
 }
 
 export interface DiscoverSignal {
@@ -57,4 +61,7 @@ export interface AskGuideResponse {
   confidence: 'high' | 'medium' | 'low';
   suggestEscalation: boolean;
   context: GuidePageContext;
+  outcome?: EvaOutcomeStatus;
+  actions?: EvaPortalAction[];
+  agents?: string[];
 }

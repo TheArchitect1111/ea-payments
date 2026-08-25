@@ -15,6 +15,7 @@ import type {
   GuidanceMessage,
 } from '@/lib/assistant/types';
 import { EA_GUIDE_USER_KEY } from '@/lib/ea-guide-types';
+import { EVA_PORTAL_QUICK_ACTIONS } from '@/lib/eva-portal-guide';
 import AdvisorBrief from './AdvisorBrief';
 import AssistantDetails from './AssistantDetails';
 import AssistantPanel from './AssistantPanel';
@@ -86,13 +87,10 @@ export default function EAAssistant({ surface, workspaceAiContext }: EAAssistant
       if (!slug || ['login', 'register', 'forgot-password', 'reset-password'].includes(slug)) return;
       if (pathname.includes('/updates')) return;
 
-      // Client Experience — never push Simplifi capture language (path or shell).
-      // Prefer trusted shell marker (slug-matched) over collapsing detection to /ctp only.
       const clientShell = typeof document !== 'undefined'
         ? document.querySelector('[data-ea-experience="client"]')
         : null;
       const shellSlug = clientShell?.getAttribute('data-portal-slug') || '';
-      // Tenant isolation: shell marker counts only when it matches this portal slug.
       const clientShellTrusted = Boolean(clientShell) && shellSlug === slug;
       const onCtpPath = pathname.includes('/ctp/') || pathname.endsWith('/ctp');
       if (onCtpPath || clientShellTrusted) {
@@ -143,12 +141,7 @@ export default function EAAssistant({ surface, workspaceAiContext }: EAAssistant
       updateDiscoverContext(event);
       setOpen(true);
       setLevel('brief');
-      trackAssistantEvent({
-        event: 'assistant.opened',
-        surface,
-        pathname,
-        userId,
-      });
+      trackAssistantEvent({ event: 'assistant.opened', surface, pathname, userId });
     }
 
     window.addEventListener('ea-guide:discover-context', updateDiscoverContext);
@@ -180,10 +173,7 @@ export default function EAAssistant({ surface, workspaceAiContext }: EAAssistant
 
   const handleClose = useCallback(() => {
     trackAssistantEvent({
-      event: 'assistant.closed',
-      surface,
-      pathname,
-      userId,
+      event: 'assistant.closed', surface, pathname, userId,
       organizationId: brief.pageContext.organizationId,
     });
     setOpen(false);
@@ -193,87 +183,48 @@ export default function EAAssistant({ surface, workspaceAiContext }: EAAssistant
   const handleToggle = useCallback(() => {
     setOpen((value) => {
       const next = !value;
-      if (next) {
-        trackAssistantEvent({
-          event: 'assistant.opened',
-          surface,
-          pathname,
-          userId,
-          organizationId: brief.pageContext.organizationId,
-        });
-      } else {
-        trackAssistantEvent({
-          event: 'assistant.closed',
-          surface,
-          pathname,
-          userId,
-          organizationId: brief.pageContext.organizationId,
-        });
-        setLevel('brief');
-      }
+      trackAssistantEvent({
+        event: next ? 'assistant.opened' : 'assistant.closed', surface, pathname, userId,
+        organizationId: brief.pageContext.organizationId,
+      });
+      if (!next) setLevel('brief');
       return next;
     });
   }, [brief.pageContext.organizationId, pathname, surface, userId]);
 
   const handleAction = useCallback((action: EAGuideAction) => {
     trackAssistantEvent({
-      event: 'assistant.action_clicked',
-      surface,
-      pathname,
-      userId,
-      organizationId: brief.pageContext.organizationId,
-      actionId: action.id,
+      event: 'assistant.action_clicked', surface, pathname, userId,
+      organizationId: brief.pageContext.organizationId, actionId: action.id,
     });
     if (action.kind === 'event' && action.eventName) {
-      window.dispatchEvent(
-        new CustomEvent(action.eventName, { detail: { source: 'ea-assistant', context: brief.contextId } }),
-      );
+      window.dispatchEvent(new CustomEvent(action.eventName, { detail: { source: 'ea-assistant', context: brief.contextId } }));
       return;
     }
     if (action.kind === 'memory') {
-      window.dispatchEvent(
-        new CustomEvent('ea-assistant:memory', { detail: { label: action.label, context: brief.contextId } }),
-      );
+      window.dispatchEvent(new CustomEvent('ea-assistant:memory', { detail: { label: action.label, context: brief.contextId } }));
     }
   }, [brief.contextId, brief.pageContext.organizationId, pathname, surface, userId]);
 
   const handleAsk = useCallback(async (question: string): Promise<GuidanceMessage> => {
     trackAssistantEvent({
-      event: 'assistant.question_submitted',
-      surface,
-      pathname,
-      userId,
-      organizationId: brief.pageContext.organizationId,
-      questionLength: question.length,
+      event: 'assistant.question_submitted', surface, pathname, userId,
+      organizationId: brief.pageContext.organizationId, questionLength: question.length,
     });
 
-    const userMessage: GuidanceMessage = {
-      id: `user-${Date.now()}`,
-      role: 'user',
-      content: question,
-    };
+    const userMessage: GuidanceMessage = { id: `user-${Date.now()}`, role: 'user', content: question };
     setMessages((prev) => [...prev, userMessage]);
 
     try {
       const response = await fetch('/api/ea-guide/ask', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          question,
-          pathname,
-          userId,
-          organizationId: brief.pageContext.organizationId,
-        }),
+        body: JSON.stringify({ question, pathname, userId, organizationId: brief.pageContext.organizationId }),
       });
-
-      if (!response.ok) {
-        throw new Error(`Ask failed with status ${response.status}`);
-      }
+      if (!response.ok) throw new Error(`Ask failed with status ${response.status}`);
 
       const payload = (await response.json()) as AskGuideResponse;
-      if (!payload.answer?.trim()) {
-        throw new Error('Empty answer');
-      }
+      if (!payload.answer?.trim()) throw new Error('Empty answer');
 
       const assistantMessage: GuidanceMessage = {
         id: `assistant-${Date.now()}`,
@@ -282,15 +233,14 @@ export default function EAAssistant({ surface, workspaceAiContext }: EAAssistant
         confidence: payload.confidence,
         nextSteps: payload.nextSteps,
         suggestEscalation: payload.suggestEscalation,
+        outcome: payload.outcome,
+        actions: payload.actions,
+        agents: payload.agents,
       };
       setMessages((prev) => [...prev, assistantMessage]);
       trackAssistantEvent({
-        event: 'assistant.ask_success',
-        surface,
-        pathname,
-        userId,
-        organizationId: brief.pageContext.organizationId,
-        questionLength: question.length,
+        event: 'assistant.ask_success', surface, pathname, userId,
+        organizationId: brief.pageContext.organizationId, questionLength: question.length,
       });
       return assistantMessage;
     } catch (error) {
@@ -298,20 +248,15 @@ export default function EAAssistant({ surface, workspaceAiContext }: EAAssistant
       const assistantMessage: GuidanceMessage = {
         id: `assistant-${Date.now()}`,
         role: 'assistant',
-        content:
-          liveSignals?.kind === 'portal' && liveSignals.experienceMode === 'ctp'
-            ? CX_ASSISTANT_LABELS.askFailure
-            : ASSISTANT_LABELS.askFailure,
+        content: liveSignals?.kind === 'portal' && liveSignals.experienceMode === 'ctp'
+          ? CX_ASSISTANT_LABELS.askFailure
+          : ASSISTANT_LABELS.askFailure,
+        outcome: surface === 'portal' ? 'Needs EA support' : undefined,
       };
       setMessages((prev) => [...prev, assistantMessage]);
       trackAssistantEvent({
-        event: 'assistant.ask_failure',
-        surface,
-        pathname,
-        userId,
-        organizationId: brief.pageContext.organizationId,
-        questionLength: question.length,
-        error: message,
+        event: 'assistant.ask_failure', surface, pathname, userId,
+        organizationId: brief.pageContext.organizationId, questionLength: question.length, error: message,
       });
       return assistantMessage;
     }
@@ -319,39 +264,28 @@ export default function EAAssistant({ surface, workspaceAiContext }: EAAssistant
 
   if (hideOnSimplifi) return null;
 
-  const isCtpExperience =
-    liveSignals?.kind === 'portal' && liveSignals.experienceMode === 'ctp';
+  const isCtpExperience = liveSignals?.kind === 'portal' && liveSignals.experienceMode === 'ctp';
   const labels = isCtpExperience ? CX_ASSISTANT_LABELS : ASSISTANT_LABELS;
-  const eyebrow =
-    isCtpExperience && surface === 'portal' ? CX_SURFACE_EYEBROW : SURFACE_EYEBROW[surface];
+  const eyebrow = surface === 'portal'
+    ? 'EVA · YOUR DIGITAL ASSISTANT'
+    : isCtpExperience ? CX_SURFACE_EYEBROW : SURFACE_EYEBROW[surface];
 
-  const panelTitle =
-    level === 'guidance'
-      ? labels.getGuidance
-      : level === 'details'
-        ? labels.viewDetails
-        : labels.briefTitle;
+  const panelTitle = level === 'guidance'
+    ? surface === 'portal' ? 'How can I help?' : labels.getGuidance
+    : level === 'details' ? labels.viewDetails
+    : surface === 'portal' ? 'Eva' : labels.briefTitle;
 
   return (
     <AssistantLabelsProvider labels={labels}>
-      <div className="ea-assistant-root" data-ea-assistant={surface}>
-        <AssistantPanel
-          open={open}
-          title={panelTitle}
-          eyebrow={eyebrow}
-          subtitle={brief.greeting}
-          onClose={handleClose}
-        >
+      <div className="ea-assistant-root" data-ea-assistant={surface} data-eva-portal-guide={surface === 'portal' ? 'true' : undefined}>
+        <AssistantPanel open={open} title={panelTitle} eyebrow={eyebrow} subtitle={brief.greeting} onClose={handleClose}>
           {level === 'brief' ? (
             <AdvisorBrief
               brief={brief}
               onAction={handleAction}
               onGetGuidance={() => {
                 trackAssistantEvent({
-                  event: 'assistant.guidance_selected',
-                  surface,
-                  pathname,
-                  userId,
+                  event: 'assistant.guidance_selected', surface, pathname, userId,
                   organizationId: brief.pageContext.organizationId,
                 });
                 setLevel('guidance');
@@ -365,13 +299,11 @@ export default function EAAssistant({ surface, workspaceAiContext }: EAAssistant
               messages={messages}
               onBack={() => setLevel('brief')}
               onAsk={handleAsk}
+              quickPrompts={surface === 'portal' ? EVA_PORTAL_QUICK_ACTIONS : undefined}
             />
           ) : null}
-          {level === 'details' ? (
-            <AssistantDetails details={brief.details} onBack={() => setLevel('brief')} />
-          ) : null}
+          {level === 'details' ? <AssistantDetails details={brief.details} onBack={() => setLevel('brief')} /> : null}
         </AssistantPanel>
-
         <AssistantTrigger open={open} showBadge={showBadge} onToggle={handleToggle} />
       </div>
     </AssistantLabelsProvider>
