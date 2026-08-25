@@ -1,95 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server';
-import Stripe from 'stripe';
 import { getStripe } from '@/lib/stripe';
 import { getProposalByProposalId } from '@/lib/airtable';
 import { proposalDeposit } from '@/lib/proposal-deposit';
 
 export const dynamic = 'force-dynamic';
+function money(cents:number){return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(cents/100)}
+function dollars(value:number){return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',minimumFractionDigits:0}).format(value)}
+function esc(value:string){return value.replace(/[&<>'"]/g,(char)=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'})[char]||char)}
 
-function money(cents: number) {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(cents / 100);
-}
-
-function dollars(value: number) {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0 }).format(value);
-}
-
-function esc(value: string) {
-  return value.replace(/[&<>'"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[char] || char);
-}
-
-export async function POST(req: NextRequest) {
-  try {
-    const { sessionId, proposalId } = (await req.json()) as { sessionId?: string; proposalId?: string };
-    if (!sessionId || !proposalId) return NextResponse.json({ ok: false, error: 'Missing payment reference.' }, { status: 400 });
-    if (!process.env.RESEND_API_KEY || !process.env.RESEND_FROM_EMAIL) {
-      return NextResponse.json({ ok: false, error: 'Payment email service is not configured.' }, { status: 503 });
-    }
-
-    const stripe = getStripe();
-    const session = await stripe.checkout.sessions.retrieve(sessionId, { expand: ['payment_intent.latest_charge'] });
-    if (session.payment_status !== 'paid') return NextResponse.json({ ok: false, error: 'Payment is not confirmed.' }, { status: 409 });
-    if (session.metadata?.proposalId !== proposalId || session.metadata?.quickQuote !== 'true') {
-      return NextResponse.json({ ok: false, error: 'Payment reference does not match this project.' }, { status: 403 });
-    }
-
-    if (session.metadata?.confirmationEmailSent === 'true') return NextResponse.json({ ok: true, alreadySent: true });
-
-    const proposal = await getProposalByProposalId(proposalId);
-    if (!proposal || proposal.recommendedProjectType !== 'Quick Quote') return NextResponse.json({ ok: false, error: 'Project not found.' }, { status: 404 });
-
-    const to = session.customer_details?.email || session.customer_email || proposal.email;
-    if (!to) return NextResponse.json({ ok: false, error: 'No client email is available for this project.' }, { status: 422 });
-
-    const paymentStage = session.metadata?.paymentStage === 'final' ? 'final' : 'deposit';
-    const standardDeposit = proposalDeposit(proposal.recommendedFee);
-    const deposit = Math.min(Math.max(proposal.rawFee || standardDeposit, 0), proposal.recommendedFee);
-    const paidCents = session.amount_total ?? Math.round((paymentStage === 'final' ? proposal.recommendedFee - deposit : deposit) * 100);
-    const balance = paymentStage === 'final' ? 0 : Math.max(0, proposal.recommendedFee - deposit);
-    const paymentDate = new Date(session.created * 1000).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-
-    let receiptUrl = '';
-    const intent = session.payment_intent;
-    if (intent && typeof intent !== 'string') {
-      const latestCharge = intent.latest_charge;
-      if (latestCharge && typeof latestCharge !== 'string') receiptUrl = latestCharge.receipt_url || '';
-    }
-
-    const firstName = esc((proposal.contactName || '').trim().split(/\s+/)[0] || 'there');
-    const business = esc(proposal.businessName || 'your organization');
-    const project = esc(proposal.projectTypeLabel || 'EA project');
-    const reference = esc(session.payment_intent && typeof session.payment_intent === 'string' ? session.payment_intent : session.id);
-    const receiptButton = receiptUrl
-      ? `<a href="${esc(receiptUrl)}" style="display:inline-block;margin-top:18px;padding:12px 20px;border-radius:999px;background:#17233B;color:#fff;text-decoration:none;font-size:13px;font-weight:700;">View Stripe receipt</a>`
-      : '';
-
-    const html = `<!doctype html><html><body style="margin:0;background:#F5F2EA;font-family:Arial,Helvetica,sans-serif;color:#182238;"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#F5F2EA;padding:28px 12px;"><tr><td align="center"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:640px;background:#FFFEFB;border:1px solid #E1DCCE;border-radius:24px;overflow:hidden;"><tr><td style="padding:30px 34px 22px;"><div style="font-size:12px;font-weight:800;letter-spacing:2px;color:#17233B;">EA · EFFICIENCY ARCHITECTS</div><div style="margin-top:34px;font-size:11px;font-weight:800;letter-spacing:2px;color:#C9A844;text-transform:uppercase;">Payment confirmed</div><h1 style="margin:10px 0 0;font-size:34px;line-height:1.08;letter-spacing:-1px;color:#17233B;">Thank you, ${firstName}. Your project is secured.</h1><p style="margin:18px 0 0;font-size:15px;line-height:1.7;color:#646464;">We received your ${paymentStage === 'final' ? 'final payment' : 'project deposit'} for <strong style="color:#17233B;">${business}</strong>. This email is your payment confirmation and receipt summary, along with what happens next.</p></td></tr><tr><td style="padding:0 34px 28px;"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#FAF8F3;border:1px solid #E7E1D5;border-radius:18px;"><tr><td style="padding:22px;"><div style="font-size:10px;font-weight:800;letter-spacing:1.7px;color:#9A958C;text-transform:uppercase;">Payment receipt</div><table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin-top:14px;font-size:14px;"><tr><td style="padding:8px 0;color:#777;">Project</td><td align="right" style="padding:8px 0;font-weight:700;color:#17233B;">${project}</td></tr><tr><td style="padding:8px 0;color:#777;">Amount paid</td><td align="right" style="padding:8px 0;font-size:20px;font-weight:800;color:#C9A844;">${money(paidCents)}</td></tr><tr><td style="padding:8px 0;color:#777;">Total project</td><td align="right" style="padding:8px 0;font-weight:700;color:#17233B;">${dollars(proposal.recommendedFee)}</td></tr><tr><td style="padding:8px 0;color:#777;">Remaining balance</td><td align="right" style="padding:8px 0;font-weight:700;color:#17233B;">${dollars(balance)}</td></tr><tr><td style="padding:8px 0;color:#777;">Payment date</td><td align="right" style="padding:8px 0;font-weight:700;color:#17233B;">${paymentDate}</td></tr><tr><td style="padding:8px 0;color:#777;">Reference</td><td align="right" style="padding:8px 0;font-size:11px;color:#777;">${reference}</td></tr></table>${receiptButton}</td></tr></table></td></tr><tr><td style="padding:0 34px 30px;"><div style="font-size:10px;font-weight:800;letter-spacing:1.7px;color:#C9A844;text-transform:uppercase;">What happens next</div><h2 style="margin:8px 0 18px;font-size:22px;color:#17233B;">We move from payment into project setup.</h2><table role="presentation" width="100%" cellspacing="0" cellpadding="0"><tr><td valign="top" style="width:30px;padding:7px 0;font-weight:800;color:#C9A844;">01</td><td style="padding:7px 0 7px 8px;font-size:14px;line-height:1.55;color:#555;"><strong style="color:#17233B;">Project setup.</strong> We organize the information, access, and assets needed for the build.</td></tr><tr><td valign="top" style="width:30px;padding:7px 0;font-weight:800;color:#C9A844;">02</td><td style="padding:7px 0 7px 8px;font-size:14px;line-height:1.55;color:#555;"><strong style="color:#17233B;">Remaining items.</strong> We will guide you through anything still needed, rather than sending you a generic checklist.</td></tr><tr><td valign="top" style="width:30px;padding:7px 0;font-weight:800;color:#C9A844;">03</td><td style="padding:7px 0 7px 8px;font-size:14px;line-height:1.55;color:#555;"><strong style="color:#17233B;">Discovery confirmation.</strong> We confirm priorities, content, and the intended client journey.</td></tr><tr><td valign="top" style="width:30px;padding:7px 0;font-weight:800;color:#C9A844;">04</td><td style="padding:7px 0 7px 8px;font-size:14px;line-height:1.55;color:#555;"><strong style="color:#17233B;">Production begins.</strong> Your project moves into the agreed 2–4 week target timeline.</td></tr></table></td></tr><tr><td style="padding:22px 34px;border-top:1px solid #E8E3D9;font-size:11px;line-height:1.6;color:#999;">Efficiency Architects · Questions? Reply to this email or contact ${esc(process.env.SUPPORT_EMAIL || 'freedom@efficiencyarchitects.online')}.</td></tr></table></td></tr></table></body></html>`;
-
-    const resend = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        from: `Efficiency Architects <${process.env.RESEND_FROM_EMAIL}>`,
-        to: [to],
-        subject: `Payment confirmed — ${proposal.businessName} project`,
-        html,
-        reply_to: process.env.SUPPORT_EMAIL || process.env.ADMIN_NOTIFICATION_EMAIL || undefined,
-      }),
-    });
-
-    if (!resend.ok) {
-      const detail = await resend.text();
-      console.error('quick quote payment confirmation email failed:', detail);
-      return NextResponse.json({ ok: false, error: 'Payment confirmed, but the confirmation email could not be sent.' }, { status: 502 });
-    }
-
-    await stripe.checkout.sessions.update(session.id, {
-      metadata: { ...session.metadata, confirmationEmailSent: 'true' },
-    });
-
-    return NextResponse.json({ ok: true });
-  } catch (error) {
-    console.error('quick quote payment confirmation error:', error);
-    return NextResponse.json({ ok: false, error: 'Unable to complete payment confirmation.' }, { status: 500 });
-  }
-}
+export async function POST(req:NextRequest){try{
+ const {sessionId,proposalId}=(await req.json()) as {sessionId?:string;proposalId?:string};
+ if(!sessionId||!proposalId)return NextResponse.json({ok:false,error:'Missing payment reference.'},{status:400});
+ if(!process.env.RESEND_API_KEY||!process.env.RESEND_FROM_EMAIL)return NextResponse.json({ok:false,error:'Payment email service is not configured.'},{status:503});
+ const stripe=getStripe();const session=await stripe.checkout.sessions.retrieve(sessionId,{expand:['payment_intent.latest_charge']});
+ if(session.payment_status!=='paid')return NextResponse.json({ok:false,error:'Payment is not confirmed.'},{status:409});
+ if(session.metadata?.proposalId!==proposalId||session.metadata?.quickQuote!=='true')return NextResponse.json({ok:false,error:'Payment reference does not match this project.'},{status:403});
+ if(session.metadata?.confirmationEmailSent==='true')return NextResponse.json({ok:true,alreadySent:true});
+ const proposal=await getProposalByProposalId(proposalId);if(!proposal||proposal.recommendedProjectType!=='Quick Quote')return NextResponse.json({ok:false,error:'Project not found.'},{status:404});
+ const to=session.customer_details?.email||session.customer_email||proposal.email;if(!to)return NextResponse.json({ok:false,error:'No client email is available for this project.'},{status:422});
+ const paymentStage=session.metadata?.paymentStage==='final'?'final':'deposit';const standardDeposit=proposalDeposit(proposal.recommendedFee);const deposit=Math.min(Math.max(proposal.rawFee||standardDeposit,0),proposal.recommendedFee);const paidCents=session.amount_total??Math.round((paymentStage==='final'?proposal.recommendedFee-deposit:deposit)*100);const balance=paymentStage==='final'?0:Math.max(0,proposal.recommendedFee-deposit);const paymentDate=new Date(session.created*1000).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+ let receiptUrl='';const intent=session.payment_intent;if(intent&&typeof intent!=='string'){const latestCharge=intent.latest_charge;if(latestCharge&&typeof latestCharge!=='string')receiptUrl=latestCharge.receipt_url||'';}
+ const firstName=esc((proposal.contactName||'').trim().split(/\s+/)[0]||'there');const business=esc(proposal.businessName||'your organization');const project=esc(proposal.projectTypeLabel||'EA project');const reference=esc(session.payment_intent&&typeof session.payment_intent==='string'?session.payment_intent:session.id);const receiptButton=receiptUrl?`<a href="${esc(receiptUrl)}" style="display:inline-block;margin-top:18px;padding:12px 20px;border-radius:999px;background:#17233B;color:#fff;text-decoration:none;font-size:13px;font-weight:700;">View Stripe receipt</a>`:'';
+ const html=`<!doctype html><html><body style="margin:0;background:#F5F2EA;font-family:Arial,Helvetica,sans-serif;color:#182238;"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#F5F2EA;padding:28px 12px;"><tr><td align="center"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:640px;background:#FFFEFB;border:1px solid #E1DCCE;border-radius:24px;overflow:hidden;"><tr><td style="padding:30px 34px 22px;"><div style="font-size:12px;font-weight:800;letter-spacing:2px;color:#17233B;">EA · EFFICIENCY ARCHITECTS</div><div style="margin-top:34px;font-size:11px;font-weight:800;letter-spacing:2px;color:#C9A844;text-transform:uppercase;">Payment confirmed</div><h1 style="margin:10px 0 0;font-size:34px;line-height:1.08;letter-spacing:-1px;color:#17233B;">Thank you, ${firstName}. Your project is secured.</h1><p style="margin:18px 0 0;font-size:15px;line-height:1.7;color:#646464;">We received your ${paymentStage==='final'?'final payment':'project deposit'} for <strong style="color:#17233B;">${business}</strong>. This email is your payment confirmation and receipt summary, along with what happens next.</p></td></tr><tr><td style="padding:0 34px 28px;"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#FAF8F3;border:1px solid #E7E1D5;border-radius:18px;"><tr><td style="padding:22px;"><div style="font-size:10px;font-weight:800;letter-spacing:1.7px;color:#9A958C;text-transform:uppercase;">Payment receipt</div><table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin-top:14px;font-size:14px;"><tr><td style="padding:8px 0;color:#777;">Project</td><td align="right" style="padding:8px 0;font-weight:700;color:#17233B;">${project}</td></tr><tr><td style="padding:8px 0;color:#777;">Amount paid</td><td align="right" style="padding:8px 0;font-size:20px;font-weight:800;color:#C9A844;">${money(paidCents)}</td></tr><tr><td style="padding:8px 0;color:#777;">Total project</td><td align="right" style="padding:8px 0;font-weight:700;color:#17233B;">${dollars(proposal.recommendedFee)}</td></tr><tr><td style="padding:8px 0;color:#777;">Remaining balance</td><td align="right" style="padding:8px 0;font-weight:700;color:#17233B;">${dollars(balance)}</td></tr><tr><td style="padding:8px 0;color:#777;">Payment date</td><td align="right" style="padding:8px 0;font-weight:700;color:#17233B;">${paymentDate}</td></tr><tr><td style="padding:8px 0;color:#777;">Reference</td><td align="right" style="padding:8px 0;font-size:11px;color:#777;">${reference}</td></tr></table>${receiptButton}</td></tr></table></td></tr><tr><td style="padding:0 34px 28px;"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#17233B;border-radius:20px;"><tr><td style="padding:24px;"><div style="display:inline-block;padding:7px 11px;border-radius:999px;background:#C9A844;color:#17233B;font-size:10px;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;">Meet Eva</div><h2 style="margin:15px 0 8px;font-size:24px;line-height:1.15;color:#fff;">Your digital assistant is here to help guide the experience.</h2><p style="margin:0;font-size:14px;line-height:1.7;color:#C9CFDA;">Eva is part of the Efficiency Architects experience. She helps make the process easier to navigate by guiding you through onboarding, helping surface what is needed next, supporting project updates and requests, and ultimately becoming part of the intelligent system we are building with you.</p><p style="margin:16px 0 0;font-size:13px;line-height:1.6;color:#C9A844;font-weight:700;">You do not need to learn a new system. Eva helps guide you through it.</p></td></tr></table></td></tr><tr><td style="padding:0 34px 30px;"><div style="font-size:10px;font-weight:800;letter-spacing:1.7px;color:#C9A844;text-transform:uppercase;">What happens next</div><h2 style="margin:8px 0 18px;font-size:22px;color:#17233B;">We move from payment into project setup.</h2><table role="presentation" width="100%" cellspacing="0" cellpadding="0"><tr><td valign="top" style="width:30px;padding:7px 0;font-weight:800;color:#C9A844;">01</td><td style="padding:7px 0 7px 8px;font-size:14px;line-height:1.55;color:#555;"><strong style="color:#17233B;">Project setup.</strong> We organize the information, access, and assets needed for the build.</td></tr><tr><td valign="top" style="width:30px;padding:7px 0;font-weight:800;color:#C9A844;">02</td><td style="padding:7px 0 7px 8px;font-size:14px;line-height:1.55;color:#555;"><strong style="color:#17233B;">Remaining items.</strong> Eva and the EA team will guide you through anything still needed, rather than sending you a generic checklist.</td></tr><tr><td valign="top" style="width:30px;padding:7px 0;font-weight:800;color:#C9A844;">03</td><td style="padding:7px 0 7px 8px;font-size:14px;line-height:1.55;color:#555;"><strong style="color:#17233B;">Discovery confirmation.</strong> We confirm priorities, content, and the intended client journey.</td></tr><tr><td valign="top" style="width:30px;padding:7px 0;font-weight:800;color:#C9A844;">04</td><td style="padding:7px 0 7px 8px;font-size:14px;line-height:1.55;color:#555;"><strong style="color:#17233B;">Production begins.</strong> Your project moves into the agreed 2–4 week target timeline.</td></tr></table></td></tr><tr><td style="padding:22px 34px;border-top:1px solid #E8E3D9;font-size:11px;line-height:1.6;color:#999;">Efficiency Architects · Questions? Reply to this email or contact ${esc(process.env.SUPPORT_EMAIL||'freedom@efficiencyarchitects.online')}.</td></tr></table></td></tr></table></body></html>`;
+ const resend=await fetch('https://api.resend.com/emails',{method:'POST',headers:{Authorization:`Bearer ${process.env.RESEND_API_KEY}`,'Content-Type':'application/json'},body:JSON.stringify({from:`Efficiency Architects <${process.env.RESEND_FROM_EMAIL}>`,to:[to],subject:`Payment confirmed — ${proposal.businessName} project`,html,reply_to:process.env.SUPPORT_EMAIL||process.env.ADMIN_NOTIFICATION_EMAIL||undefined})});
+ if(!resend.ok){const detail=await resend.text();console.error('quick quote payment confirmation email failed:',detail);return NextResponse.json({ok:false,error:'Payment confirmed, but the confirmation email could not be sent.'},{status:502});}
+ await stripe.checkout.sessions.update(session.id,{metadata:{...session.metadata,confirmationEmailSent:'true'}});return NextResponse.json({ok:true});
+}catch(error){console.error('quick quote payment confirmation error:',error);return NextResponse.json({ok:false,error:'Unable to complete payment confirmation.'},{status:500});}}
