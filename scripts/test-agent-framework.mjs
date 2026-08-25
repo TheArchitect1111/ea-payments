@@ -7,6 +7,7 @@ const requiredFiles = [
   'app/api/ai/route.ts',
   'app/api/orchestrator/route.ts',
   'app/api/agents/research/route.ts',
+  'app/api/admin/client-context/route.ts',
   'lib/ai/gateway.ts',
   'lib/ai/config.ts',
   'lib/ai/security.ts',
@@ -17,6 +18,7 @@ const requiredFiles = [
   'lib/agents/amplifi-content-director-agent.ts',
   'lib/agents/ea-operations-architect-agent.ts',
   'lib/agents/specialist-agents.ts',
+  'lib/client-context.ts',
   'lib/context-optimizer/index.ts',
   'lib/agent-reliability/client.ts',
   'docs/ai-architecture.md',
@@ -43,7 +45,17 @@ assert.match(orchestrator, /optimizeContext/, 'Live orchestrator should optimize
 assert.match(orchestrator, /verifyAgentCompletion/, 'Live orchestrator should verify completion evidence');
 assert.match(orchestrator, /orchestrator\.reliability/, 'Live orchestrator should log reliability results');
 assert.match(orchestrator, /__eaOptimizedContext/, 'Optimized context should be passed into agent execution');
+assert.match(orchestrator, /resolveClientContext/, 'Orchestrator should resolve canonical client context');
+assert.match(orchestrator, /__eaClientContext/, 'Canonical client context should be passed into agent execution');
+assert.match(orchestrator, /approval rules as hard constraints/i, 'Client approval rules should be treated as hard constraints');
 assert.doesNotMatch(orchestrator, /switch\s*\(/, 'Orchestrator should not hardcode agent routing with switches');
+
+const clientContext = readFileSync(join(root, 'lib/client-context.ts'), 'utf8');
+assert.match(clientContext, /approvalRules/, 'Client Context should carry approval rules');
+assert.match(clientContext, /listFactoryProjects/, 'Client Context should aggregate Factory project history');
+assert.match(clientContext, /brandVoice/, 'Client Context should carry brand voice');
+assert.match(clientContext, /offers/, 'Client Context should carry offers');
+assert.match(clientContext, /goals/, 'Client Context should carry goals');
 
 const types = readFileSync(join(root, 'lib/agents/types.ts'), 'utf8');
 assert.match(types, /reliability:/, 'Orchestrator response should expose reliability metadata');
