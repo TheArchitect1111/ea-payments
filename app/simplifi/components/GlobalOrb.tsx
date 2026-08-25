@@ -477,6 +477,7 @@ export default function GlobalOrb({
           </span>
         ) : null}
       </span>
+      <span className="global-orb-mark" aria-hidden="true">ORBiE</span>
     </>
   );
 
