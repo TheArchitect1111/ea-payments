@@ -68,7 +68,7 @@ export function currentPortalModule(pathname: string): { id: string; label: stri
   const rest = pathname.slice(`/portal/${slug}`.length).split('/').filter(Boolean);
   const moduleId = rest[0] ?? 'home';
   if (moduleId === 'home') return { id: 'home', label: 'Home' };
-  const found = MODULES.find((module) => module.id === moduleId);
+  const found = MODULES.find((portalModule) => portalModule.id === moduleId);
   return found ? { id: found.id, label: found.label } : { id: moduleId, label: humanize(moduleId) };
 }
 
@@ -81,16 +81,16 @@ function humanize(value: string) {
 }
 
 export function safePortalHref(portalSlug: string, moduleId: string) {
-  const module = MODULES.find((item) => item.id === moduleId);
-  if (!module) return null;
-  return `/portal/${encodeURIComponent(portalSlug)}/${module.id}`;
+  const portalModule = MODULES.find((item) => item.id === moduleId);
+  if (!portalModule) return null;
+  return `/portal/${encodeURIComponent(portalSlug)}/${portalModule.id}`;
 }
 
 export function resolvePortalDestination(question: string, pathname: string): EvaPortalAction | undefined {
   const portalSlug = portalSlugFromPath(pathname);
   if (!portalSlug) return undefined;
   const normalized = question.toLowerCase();
-  const target = MODULES.find((module) => module.keywords.some((keyword) => normalized.includes(keyword)));
+  const target = MODULES.find((portalModule) => portalModule.keywords.some((keyword) => normalized.includes(keyword)));
   if (!target) return undefined;
   const href = safePortalHref(portalSlug, target.id);
   if (!href || pathname === href || pathname.startsWith(`${href}/`)) return undefined;
