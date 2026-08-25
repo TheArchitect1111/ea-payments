@@ -35,6 +35,10 @@ export const openDesignAgent: EAAgent = {
     { id: 'pulse-emit', description: 'Emit Open Design pipeline Pulse events' },
   ],
 
+  status() {
+    return 'available';
+  },
+
   async execute(input: AgentExecutionInput): Promise<AgentExecutionResult> {
     const ctx = input.context ?? {};
     const intel: ExecutiveIntelligenceInput = {
