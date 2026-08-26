@@ -5,6 +5,7 @@ import { AMANDA_MEMBERSHIPS, AMANDA_OFFERS } from '@/lib/amanda-catherine/config
 import { getStripe } from '@/lib/stripe';
 import { listAmandaPayments } from '@/lib/amanda-catherine/payment-fulfillment';
 import { roleAtLeast, normalizeRole } from '@/lib/rbac';
+import { getClientByPortalSlug } from '@/lib/airtable';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,8 +13,11 @@ function depositEnvKey(offerId: string) {
   return `AMANDA_DEPOSIT_${offerId.replaceAll('-', '_').toUpperCase()}_CAD`;
 }
 
-function canUseTestCheckout(role?: string) {
-  return roleAtLeast(normalizeRole(role), 'admin');
+async function canUseTestCheckout(role: string | undefined, portalSlug: string, sessionEmail: string) {
+  if (roleAtLeast(normalizeRole(role), 'admin')) return true;
+  const client = await getClientByPortalSlug(portalSlug);
+  const ownerEmail = String(client?.email || '').trim().toLowerCase();
+  return Boolean(ownerEmail && ownerEmail === sessionEmail.trim().toLowerCase());
 }
 
 export async function GET(req: NextRequest) {
@@ -30,7 +34,7 @@ export async function GET(req: NextRequest) {
       name: membership.name,
       available: Boolean(process.env[membership.stripePriceEnvKey]),
     })),
-    testCheckoutAllowed: canUseTestCheckout(auth.session.role),
+    testCheckoutAllowed: await canUseTestCheckout(auth.session.role, tenant.portalSlug, auth.session.email),
     financingUrl: process.env.AMANDA_FINANCING_URL || null,
     payments: await listAmandaPayments(tenant.portalSlug, auth.session.email),
   });
@@ -77,7 +81,7 @@ export async function POST(req: NextRequest) {
   if (!offer) return NextResponse.json({ error: 'Offer not found.' }, { status: 404 });
 
   const isTest = body.paymentOption === 'test';
-  if (isTest && !canUseTestCheckout(auth.session.role)) {
+  if (isTest && !(await canUseTestCheckout(auth.session.role, tenant.portalSlug, clientEmail))) {
     return NextResponse.json({ error: 'Private test checkout is restricted to Amanda administrators.' }, { status: 403 });
   }
 
