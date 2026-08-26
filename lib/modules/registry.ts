@@ -31,6 +31,9 @@ export const MODULE_IDS = [
 
 export type ModuleId = (typeof MODULE_IDS)[number];
 
+/** Modules that are part of the chassis itself and should exist in every portal. */
+export const CHASSIS_STANDARD_MODULE_IDS: ModuleId[] = ['dashboard', 'update-hub'];
+
 export type NavGroup = 'core' | 'growth' | 'operations' | 'platform';
 
 export type ModuleDefinition = {
@@ -358,6 +361,10 @@ export const DEMO_MODULE_IDS: ModuleId[] = [
   'landing',
 ];
 
+function withChassisStandardModules(moduleIds: ModuleId[]): ModuleId[] {
+  return [...new Set<ModuleId>([...CHASSIS_STANDARD_MODULE_IDS, ...moduleIds])];
+}
+
 export function defaultModulesForPackage(
   packagePurchased: string,
   options?: { isDemo?: boolean; tenantPreset?: string },
@@ -371,9 +378,9 @@ export function defaultModulesForPackage(
     if (options?.tenantPreset && options.tenantPreset !== 'ea-client') {
       const preset =
         TENANT_MODULE_PRESETS[options.tenantPreset] ?? TENANT_MODULE_PRESETS['ea-client'];
-      return [...new Set<ModuleId>([...preset, ...fromContract])];
+      return withChassisStandardModules([...preset, ...fromContract]);
     }
-    return fromContract;
+    return withChassisStandardModules(fromContract);
   }
 
   // Legacy fallback if package name is unknown to the contract.
@@ -386,7 +393,9 @@ export function defaultModulesForPackage(
     DEMO_MODULE_IDS.forEach((id) => ids.add(id));
   }
   if (packagePurchased === 'Launch Verification') {
-    return PACKAGE_MODULE_GRANTS['Launch Verification'] ?? ['dashboard', 'pulse', 'update-hub', 'ask'];
+    return withChassisStandardModules(
+      PACKAGE_MODULE_GRANTS['Launch Verification'] ?? ['dashboard', 'pulse', 'update-hub', 'ask'],
+    );
   }
-  return [...ids];
+  return withChassisStandardModules([...ids]);
 }
