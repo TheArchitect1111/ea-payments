@@ -15,6 +15,7 @@ import {
 import { resolveEntitlementPackageKey } from '@/lib/modules/entitlement-package-key';
 import type { ModuleDefinition, ModuleId } from '@/lib/modules/registry';
 import {
+  CHASSIS_STANDARD_MODULE_IDS,
   MODULE_REGISTRY,
   defaultModulesForPackage,
   getModuleDefinition,
@@ -81,6 +82,10 @@ function toHubModule(slug: string, module: ModuleDefinition, capabilityId: strin
   };
 }
 
+function withChassisStandardModules(moduleIds: Iterable<ModuleId>): Set<ModuleId> {
+  return new Set<ModuleId>([...CHASSIS_STANDARD_MODULE_IDS, ...moduleIds]);
+}
+
 export async function resolveEnabledModuleIds(input: {
   orgId?: string;
   slug: string;
@@ -93,15 +98,15 @@ export async function resolveEnabledModuleIds(input: {
 
   const stored = await listEntitlementsForOrg(orgId);
   if (stored.length > 0) {
-    return activeModuleIdsFromEntitlements(stored);
+    return withChassisStandardModules(activeModuleIdsFromEntitlements(stored));
   }
 
   if (process.env.NODE_ENV === 'production' && !isDemo) {
-    return new Set<ModuleId>();
+    return withChassisStandardModules([]);
   }
 
   const packageKey = resolveEntitlementPackageKey(input);
-  return new Set(
+  return withChassisStandardModules(
     defaultModulesForPackage(packageKey, {
       isDemo,
       tenantPreset: 'ea-client',
