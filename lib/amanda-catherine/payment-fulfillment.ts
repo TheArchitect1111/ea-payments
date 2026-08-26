@@ -21,7 +21,7 @@ export type AmandaPaymentRecord = {
   offerId?: string;
   courseId?: string;
   membershipId?: string;
-  paymentOption?: 'full' | 'deposit';
+  paymentOption?: 'full' | 'deposit' | 'test';
   amountPaidCad: number;
   currency: string;
   paymentStatus: string;
@@ -92,7 +92,7 @@ export async function fulfillAmandaCheckout(
     courseId: String(meta.amandaCourseId || ('courseId' in (offer || {}) ? (offer as { courseId?: string }).courseId || '' : '')) || undefined,
     membershipId: membership?.id,
     paymentOption:
-      meta.paymentOption === 'deposit' || meta.paymentOption === 'full'
+      meta.paymentOption === 'deposit' || meta.paymentOption === 'full' || meta.paymentOption === 'test'
         ? meta.paymentOption
         : undefined,
     amountPaidCad: (session.amount_total ?? 0) / 100,
@@ -111,7 +111,7 @@ export async function fulfillAmandaCheckout(
     organizationId: syntheticOrgId(portalSlug),
     title: membership
       ? `Amanda membership payment: ${membership.name}`
-      : `Amanda offer payment: ${offer!.name}`,
+      : `Amanda offer payment: ${offer!.name}${record.paymentOption === 'test' ? ' [PRIVATE TEST]' : ''}`,
     payload: record,
   });
   if (!saved.ok) return { ok: false as const, error: saved.error || 'Payment record could not be saved.' };
@@ -152,7 +152,7 @@ export async function fulfillAmandaCheckout(
       await sendPaymentConfirmationEmail({
         email,
         clientName: email,
-        packageName: label,
+        packageName: record.paymentOption === 'test' ? `${label} — Private Test` : label,
         amountPaid: record.amountPaidCad,
         paymentDate: now.slice(0, 10),
         portalUrl: `/portal/${portalSlug}/billing`,
@@ -164,9 +164,13 @@ export async function fulfillAmandaCheckout(
     await emitPulseEvent({
       product: 'ea-platform',
       type: membership ? 'subscription.started' : 'payment.received',
-      title: membership ? `Amanda membership active — ${label}` : `Amanda payment received — ${label}`,
+      title: membership
+        ? `Amanda membership active — ${label}`
+        : record.paymentOption === 'test'
+          ? `Amanda private test payment — ${label}`
+          : `Amanda payment received — ${label}`,
       detail: `CAD $${record.amountPaidCad.toFixed(2)} · ${email}`,
-      priority: 'high',
+      priority: record.paymentOption === 'test' ? 'normal' : 'high',
       href: `/portal/${portalSlug}/billing`,
       tenantId: portalSlug,
       objectId: id,
@@ -177,6 +181,7 @@ export async function fulfillAmandaCheckout(
         offerId: offer?.id || '',
         membershipId: membership?.id || '',
         paymentOption: record.paymentOption || '',
+        privateTestCheckout: record.paymentOption === 'test' ? 'true' : 'false',
       },
     });
   }
