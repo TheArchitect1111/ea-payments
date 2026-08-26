@@ -5,6 +5,7 @@ import { AMANDA_ROLE_DASHBOARDS } from '@/lib/amanda-catherine/config';
 import { resolveAmandaAudience } from '@/lib/amanda-catherine/audience';
 
 const DESTINATIONS: Array<[string[], string]> = [
+  [['update-hub', 'website-update', 'site-update'], 'updates'],
   [['private-deliveries', 'media-delivery', 'recording', 'finished-work'], 'deliveries'],
   [['course', 'training', 'assessment', 'progress', 'certif'], 'learning'],
   [['appointment', 'schedule'], 'calendar'],
@@ -31,6 +32,13 @@ function label(value: string) {
 }
 
 const ADMIN_SPOTLIGHTS = [
+  {
+    title: 'Website Updates',
+    item: 'update-hub',
+    summary: 'Photos, videos, links, copy, events, and page changes',
+    action: 'Open Update Hub',
+    icon: 'document',
+  },
   {
     title: 'Client Delivery',
     item: 'media-delivery',
@@ -146,6 +154,9 @@ export default async function AmandaMemberHome({
         <details className="ak-admin-directory">
           <summary>All administrator tools</summary>
           <ul>
+            <li>
+              <Link href={`/portal/${slug}/updates`}>Update Hub<span aria-hidden>›</span></Link>
+            </li>
             {items.map((item) => (
               <li key={item}>
                 <Link href={hrefFor(slug, item)}>{label(item)}<span aria-hidden>›</span></Link>
