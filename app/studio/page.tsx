@@ -19,7 +19,7 @@ export default function StudioPage() {
       `}</style>
       <section className="studio-sans min-h-[94vh] flex flex-col px-6 md:px-12 lg:px-20 pt-8 pb-10">
         <nav className="flex items-center justify-between text-[11px] tracking-[.22em] font-semibold uppercase">
-          <span>Efficiency Architects</span><span className="text-black/45">Creative Studio</span>
+          <span>Efficiency Architects</span><div className="flex items-center gap-6"><span className="text-black/45">Creative Studio</span><Link href="/studio/create" className="normal-case tracking-normal text-xs border border-black/20 rounded-full px-4 py-2">Create →</Link></div>
         </nav>
         <div className="flex-1 flex flex-col justify-center max-w-[1500px] w-full mx-auto py-20">
           <p className="text-xs md:text-sm tracking-[.3em] uppercase mb-9 text-black/50">You noticed the work.</p>
@@ -45,9 +45,9 @@ export default function StudioPage() {
               </div>
             </div>
             <div className="pb-4">
-              <p className="studio-sans text-xs tracking-[.25em] uppercase text-[#c6a15b] mb-6">Event Creative</p>
-              <h2 className="studio-serif display">Not a flyer.<br/><span className="italic">An entrance.</span></h2>
-              <p className="studio-sans mt-9 text-lg leading-relaxed text-white/55 max-w-lg">The first touchpoint should carry the same energy as the experience itself. We build event creative to stop the scroll, start conversations and make the organization behind it unforgettable.</p>
+              <p className="studio-sans text-xs tracking-[.25em] uppercase text-[#c6a15b] mb-6">Flagship Creative System</p>
+              <h2 className="studio-serif display">Not one deliverable.<br/><span className="italic">One experience.</span></h2>
+              <p className="studio-sans mt-9 text-lg leading-relaxed text-white/55 max-w-lg">Twin City connects event creative, a public website and BrotherHub portal into one visual and operational system. The flyer gets attention. The website earns trust. The portal makes the chapter easier to run.</p>
             </div>
           </div>
         </div>
@@ -73,12 +73,12 @@ export default function StudioPage() {
       <section className="bg-[#ded4c1] px-6 md:px-12 lg:px-20 py-28 md:py-44">
         <div className="max-w-[1500px] mx-auto grid lg:grid-cols-2 gap-16 items-end">
           <div><p className="studio-sans text-xs tracking-[.3em] uppercase text-black/45 mb-10">The difference</p><h2 className="studio-serif display">Creative on top.<br/><span className="italic">Smartchitecture™ underneath.</span></h2></div>
-          <p className="studio-sans text-lg md:text-xl leading-relaxed text-black/60 max-w-xl lg:justify-self-end">We do not stop when something looks beautiful. We connect the experience to the next action, the next conversation and the systems that make the business work.</p>
+          <p className="studio-sans text-lg md:text-xl leading-relaxed text-black/60 max-w-xl lg:justify-self-end">We do not stop when something looks beautiful. We connect the experience to the next action, the next conversation and the systems that make the organization work.</p>
         </div>
       </section>
 
       <section className="studio-sans bg-[#f7f6f2] px-6 md:px-12 lg:px-20 py-28 md:py-44 text-center">
-        <div className="max-w-5xl mx-auto"><p className="text-xs tracking-[.3em] uppercase text-black/45 mb-10">Have something worth noticing?</p><h2 className="studio-serif display">Let’s make people<br/><span className="italic">ask who created it.</span></h2><Link href="/contact" className="inline-flex mt-14 rounded-full bg-black text-white px-9 py-4 text-sm font-semibold hover:scale-[1.03] transition-transform">Start a Project →</Link></div>
+        <div className="max-w-5xl mx-auto"><p className="text-xs tracking-[.3em] uppercase text-black/45 mb-10">Have something worth noticing?</p><h2 className="studio-serif display">Let’s make people<br/><span className="italic">ask who created it.</span></h2><Link href="/studio/create" className="inline-flex mt-14 rounded-full bg-black text-white px-9 py-4 text-sm font-semibold hover:scale-[1.03] transition-transform">Launch a Studio Project →</Link></div>
       </section>
       <footer className="studio-sans px-6 md:px-12 lg:px-20 py-8 border-t border-black/10 flex flex-col md:flex-row gap-3 justify-between text-[10px] tracking-[.18em] uppercase text-black/45"><span>Efficiency Architects · Creative Studio</span><span>Designed with intention. Built with intelligence.</span></footer>
     </main>
