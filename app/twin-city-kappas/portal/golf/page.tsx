@@ -11,10 +11,10 @@ export default function TwinCityGolfManager(){return <main className="tc-portal-
   </aside>
 
   <section className="tc-app">
-    <header className="tc-appbar"><a className="golf-back" href="/twin-city-kappas/portal">← Portal Home</a><div className="tc-app-actions"><span>♧</span><span>✉</span><div className="tc-person"><div className="avatar">TC</div><div><strong>Twin City</strong><small>Chapter Portal</small></div><i>⌄</i></div></div></header>
+    <header className="tc-appbar"><a className="golf-back" href="/twin-city-kappas/portal">← Portal Home</a><div className="tc-app-actions"><a href="/twin-city-kappas/golf">Public Event Page</a><div className="tc-person"><div className="avatar">TC</div><div><strong>Twin City</strong><small>Chapter Portal</small></div></div></div></header>
 
     <div className="tc-workspace golf-workspace">
-      <section className="golf-title"><div><p>KAPPA PROVINCIAL MEETING · WINSTON-SALEM</p><h1>Golf Tournament Manager</h1><span>March 12 · 8:00 AM · Winston Lake Golf Course · $85 per golfer · 2-man teams</span></div><div className="golf-title-actions"><a href="#registrations">Registration Setup</a><a href="#checkin">Event Day</a></div></section>
+      <section className="golf-title"><div><p>KAPPA PROVINCIAL MEETING · WINSTON-SALEM</p><h1>Golf Tournament Manager</h1><span>March 12 · 8:00 AM · Winston Lake Golf Course · $85 per golfer · 2-man teams</span></div><div className="golf-title-actions"><a href="/twin-city-kappas/golf">Public Page</a><a href="/twin-city-kappas/golf/flyer">Open Flyer</a></div></section>
 
       <section className="golf-kpis">
         <article><small>Working Date</small><b>Mar 12</b><span>final confirmation pending</span></article>
@@ -27,7 +27,7 @@ export default function TwinCityGolfManager(){return <main className="tc-portal-
       <section className="golf-command-grid">
         <article className="golf-panel"><div className="golf-panel-head"><div><small>TOURNAMENT CONTROL</small><h2>Current event brief</h2></div><span className="status-live">PLANNING</span></div><div className="event-details"><div><small>Date</small><b>March 12</b></div><div><small>Venue</small><b>Winston Lake Golf Course</b></div><div><small>Start</small><b>8:00 AM</b></div><div><small>Format</small><b>2-man teams</b></div></div><div className="goalbar"><span>Held in conjunction with the Kappa Provincial Meeting in Winston-Salem.</span></div></article>
 
-        <article className="golf-panel"><div className="golf-panel-head"><div><small>NEXT BEST ACTIONS</small><h2>Action Center</h2></div></div><div className="action-row"><b>1</b><span><strong>Confirm March 12 as the final date</strong><small>The portal is treating March 12 as the working date.</small></span></div><div className="action-row"><b>2</b><span><strong>Connect registration and payment flow</strong><small>Set the live player fee at $85 per individual.</small></span></div><div className="action-row"><b>3</b><span><strong>Publish the event creative package</strong><small>Flyer, landing experience and QR path should share one visual system.</small></span></div></article>
+        <article className="golf-panel"><div className="golf-panel-head"><div><small>NEXT BEST ACTIONS</small><h2>Action Center</h2></div></div><div className="action-row"><b>1</b><span><strong>Confirm March 12 as the final date</strong><small>The portal is treating March 12 as the working date.</small></span></div><div className="action-row"><b>2</b><span><strong>Connect registration and payment flow</strong><small>Set the live player fee at $85 per individual.</small></span></div><div className="action-row"><b>3</b><span><strong>Creative package ready</strong><small>Public event page, print-ready flyer and QR journey are connected.</small></span></div></article>
       </section>
 
       <section className="golf-tabs"><a href="#registrations">Registrations</a><a href="#teams">2-Man Teams</a><a href="#sponsors">Sponsors</a><a href="#checkin">Check-In</a><a href="#payments">Payments</a><a href="#reports">Reports</a></section>
