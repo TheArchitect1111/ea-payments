@@ -12,7 +12,7 @@ type Course = {
   delivery: string[];
 };
 
-export default function AmandaEnrollmentForm({ courses }: { courses: Course[] }) {
+export default function AmandaEnrollmentForm({ courses, testMode = false }: { courses: Course[]; testMode?: boolean }) {
   const [offerId, setOfferId] = useState(courses[0]?.offerId || '');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -27,7 +27,7 @@ export default function AmandaEnrollmentForm({ courses }: { courses: Course[] })
       const response = await fetch('/api/public/amanda/enrollment/checkout', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ offerId, name, email }),
+        body: JSON.stringify({ offerId, name, email, testMode }),
       });
       const data = (await response.json().catch(() => ({}))) as { url?: string; error?: string };
       if (!response.ok || !data.url) throw new Error(data.error || 'Secure checkout could not be opened.');
@@ -42,6 +42,11 @@ export default function AmandaEnrollmentForm({ courses }: { courses: Course[] })
     <form onSubmit={submit} className="grid gap-9 lg:grid-cols-[1.2fr_0.8fr] lg:items-start">
       <fieldset>
         <legend className="font-serif text-3xl">1. Select your course</legend>
+        {testMode ? (
+          <p className="mt-3 rounded-xl border border-[#8b1229]/25 bg-[#fff7f8] px-4 py-3 text-sm font-bold text-[#8b1229]">
+            TEST MODE · Every course below checks out at CAD $1.00. Retail pricing is unchanged.
+          </p>
+        ) : null}
         <div className="mt-5 grid gap-4">
           {courses.map((course) => {
             const selected = offerId === course.offerId;
@@ -50,23 +55,33 @@ export default function AmandaEnrollmentForm({ courses }: { courses: Course[] })
                 <span className="flex items-start gap-4">
                   <input className="mt-1 h-5 w-5 accent-[#8a5d2e]" type="radio" name="offerId" value={course.offerId} checked={selected} onChange={() => setOfferId(course.offerId)} />
                   <span className="flex-1">
-                    <span className="block text-xl font-bold leading-tight">{course.title}</span>
+                    <span className="block text-xl font-bold leading-tight">{course.title}{testMode ? ' — TEST' : ''}</span>
                     <span className="mt-2 block text-sm font-semibold uppercase tracking-wider text-[#72562f]">{course.delivery.join(' + ')} training</span>
                   </span>
                   <span className="text-right">
-                    {course.compareAtPriceCad ? (
-                      <span className="block text-sm font-semibold text-[#7b6b5e] line-through">
-                        Regular ${course.compareAtPriceCad.toLocaleString('en-CA')}
-                      </span>
-                    ) : null}
-                    {course.saleLabel ? (
-                      <span className="block text-xs font-black uppercase tracking-wider text-[#8b1229]">
-                        {course.saleLabel}
-                      </span>
-                    ) : null}
-                    <span className="block font-serif text-2xl">
-                      {course.compareAtPriceCad ? 'Sale ' : ''}${course.priceCad.toLocaleString('en-CA')}
-                    </span>
+                    {testMode ? (
+                      <>
+                        <span className="block text-sm font-semibold text-[#7b6b5e] line-through">Retail ${course.priceCad.toLocaleString('en-CA')}</span>
+                        <span className="block text-xs font-black uppercase tracking-wider text-[#8b1229]">Process test</span>
+                        <span className="block font-serif text-2xl">$1</span>
+                      </>
+                    ) : (
+                      <>
+                        {course.compareAtPriceCad ? (
+                          <span className="block text-sm font-semibold text-[#7b6b5e] line-through">
+                            Regular ${course.compareAtPriceCad.toLocaleString('en-CA')}
+                          </span>
+                        ) : null}
+                        {course.saleLabel ? (
+                          <span className="block text-xs font-black uppercase tracking-wider text-[#8b1229]">
+                            {course.saleLabel}
+                          </span>
+                        ) : null}
+                        <span className="block font-serif text-2xl">
+                          {course.compareAtPriceCad ? 'Sale ' : ''}${course.priceCad.toLocaleString('en-CA')}
+                        </span>
+                      </>
+                    )}
                   </span>
                 </span>
               </label>
@@ -83,7 +98,7 @@ export default function AmandaEnrollmentForm({ courses }: { courses: Course[] })
         <input id="enrollment-email" name="email" type="email" inputMode="email" autoComplete="email" required maxLength={254} value={email} onChange={(event) => setEmail(event.target.value)} className="mt-2 min-h-12 w-full rounded-xl border border-white/30 bg-white px-4 text-[#17130f]" />
         {error ? <p role="alert" className="mt-4 rounded-xl bg-white p-3 font-semibold text-[#8b1229]">{error}</p> : null}
         <button type="submit" disabled={submitting || !offerId} className="mt-6 min-h-14 w-full rounded-full bg-[#c39851] px-5 text-lg font-black text-[#17130f] disabled:cursor-wait disabled:opacity-60">
-          {submitting ? 'Opening secure checkout…' : 'Continue to secure checkout'}
+          {submitting ? 'Opening secure checkout…' : testMode ? 'Continue to $1 test checkout' : 'Continue to secure checkout'}
         </button>
         <p className="mt-4 text-center text-xs leading-5 text-[#f1dfe3]">Payment is processed securely by Stripe. Your course access is created after payment is confirmed.</p>
       </div>
