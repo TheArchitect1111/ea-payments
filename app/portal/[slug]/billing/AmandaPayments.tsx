@@ -11,6 +11,7 @@ export default function AmandaPayments({ email }: { email: string }) {
   const [options, setOptions] = useState<{
     deposits: Record<string, number>;
     memberships: Array<{ id: string; name: string; available: boolean }>;
+    testCheckoutAllowed?: boolean;
     financingUrl?: string | null;
     payments?: AmandaPaymentRecord[];
   }>({ deposits: {}, memberships: [], payments: [] });
@@ -43,7 +44,7 @@ export default function AmandaPayments({ email }: { email: string }) {
     })();
   }, []);
 
-  async function checkout(offerId: string, paymentOption: 'full' | 'deposit') {
+  async function checkout(offerId: string, paymentOption: 'full' | 'deposit' | 'test') {
     setBusy(`${offerId}:${paymentOption}`);
     setError('');
     try {
@@ -87,6 +88,12 @@ export default function AmandaPayments({ email }: { email: string }) {
   return (
     <section>
       <p className="ep-module-card-note" style={{ marginBottom: 16 }}>Receipts are sent to {email} after successful payment.</p>
+      {options.testCheckoutAllowed ? (
+        <div className="ep-module-card" style={{ marginBottom: 18, border: '1px solid #d9b76d' }}>
+          <p className="ep-module-card-title">Private workflow testing</p>
+          <p className="ep-module-card-note">Administrator-only. Use the CAD $1 test button on any offer below to test checkout, receipt, portal access, and fulfillment without changing the public price.</p>
+        </div>
+      ) : null}
       {verified ? <p className="ep-module-card-note">Payment verified with Stripe and recorded in your portal.</p> : null}
       {error ? <p className="ep-module-card-note" style={{ color: '#b42318' }}>{error}</p> : null}
       <ul className="ep-module-list">
@@ -101,6 +108,11 @@ export default function AmandaPayments({ email }: { email: string }) {
               {options.deposits[offer.id] > 0 ? (
                 <button className="ep-btn ep-btn-secondary" disabled={Boolean(busy)} onClick={() => void checkout(offer.id, 'deposit')}>
                   {busy === `${offer.id}:deposit` ? 'Opening…' : `Pay CAD $${options.deposits[offer.id].toLocaleString()} deposit`}
+                </button>
+              ) : null}
+              {options.testCheckoutAllowed ? (
+                <button className="ep-btn ep-btn-secondary" disabled={Boolean(busy)} onClick={() => void checkout(offer.id, 'test')}>
+                  {busy === `${offer.id}:test` ? 'Opening…' : 'Test this offer — CAD $1'}
                 </button>
               ) : null}
             </div>
@@ -129,7 +141,7 @@ export default function AmandaPayments({ email }: { email: string }) {
                 <strong>CAD ${payment.amountPaidCad.toFixed(2)}</strong>{' '}
                 <span className="ep-module-card-note">
                   {payment.kind === 'membership' ? payment.membershipId : payment.offerId}
-                  {payment.paymentOption === 'deposit' ? ' · deposit' : ''}
+                  {payment.paymentOption === 'deposit' ? ' · deposit' : payment.paymentOption === 'test' ? ' · private test' : ''}
                   {payment.subscriptionStatus ? ` · ${payment.subscriptionStatus}` : ''}
                   {' · '}{new Date(payment.recordedAt).toLocaleDateString()}
                 </span>
