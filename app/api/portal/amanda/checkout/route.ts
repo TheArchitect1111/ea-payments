@@ -4,11 +4,16 @@ import { guardPortalApi, portalApiUnauthorized, portalTenant } from '@/lib/api/p
 import { AMANDA_MEMBERSHIPS, AMANDA_OFFERS } from '@/lib/amanda-catherine/config';
 import { getStripe } from '@/lib/stripe';
 import { listAmandaPayments } from '@/lib/amanda-catherine/payment-fulfillment';
+import { roleAtLeast, normalizeRole } from '@/lib/rbac';
 
 export const dynamic = 'force-dynamic';
 
 function depositEnvKey(offerId: string) {
   return `AMANDA_DEPOSIT_${offerId.replaceAll('-', '_').toUpperCase()}_CAD`;
+}
+
+function canUseTestCheckout(role?: string) {
+  return roleAtLeast(normalizeRole(role), 'admin');
 }
 
 export async function GET(req: NextRequest) {
@@ -25,6 +30,7 @@ export async function GET(req: NextRequest) {
       name: membership.name,
       available: Boolean(process.env[membership.stripePriceEnvKey]),
     })),
+    testCheckoutAllowed: canUseTestCheckout(auth.session.role),
     financingUrl: process.env.AMANDA_FINANCING_URL || null,
     payments: await listAmandaPayments(tenant.portalSlug, auth.session.email),
   });
@@ -40,7 +46,7 @@ export async function POST(req: NextRequest) {
   if (!process.env.STRIPE_SECRET_KEY) {
     return NextResponse.json({ error: 'Secure payments are not configured yet.' }, { status: 503 });
   }
-  const body = await req.json() as { offerId?: string; membershipId?: string; paymentOption?: 'full' | 'deposit' };
+  const body = await req.json() as { offerId?: string; membershipId?: string; paymentOption?: 'full' | 'deposit' | 'test' };
   const membership = AMANDA_MEMBERSHIPS.find((item) => item.id === body.membershipId);
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
   const clientEmail = auth.session.email.trim().toLowerCase();
@@ -70,7 +76,12 @@ export async function POST(req: NextRequest) {
   const offer = AMANDA_OFFERS.find((item) => item.id === body.offerId);
   if (!offer) return NextResponse.json({ error: 'Offer not found.' }, { status: 404 });
 
-  let amountCad: number = offer.priceCad;
+  const isTest = body.paymentOption === 'test';
+  if (isTest && !canUseTestCheckout(auth.session.role)) {
+    return NextResponse.json({ error: 'Private test checkout is restricted to Amanda administrators.' }, { status: 403 });
+  }
+
+  let amountCad: number = isTest ? 1 : offer.priceCad;
   if (body.paymentOption === 'deposit') {
     const configured = Number(process.env[depositEnvKey(offer.id)] || 0);
     if (!Number.isFinite(configured) || configured <= 0 || configured >= offer.priceCad) {
@@ -79,10 +90,11 @@ export async function POST(req: NextRequest) {
     amountCad = configured;
   }
 
+  const paymentLabel = isTest ? ' — PRIVATE $1 TEST' : body.paymentOption === 'deposit' ? ' — Deposit' : '';
   const sessionParams: Stripe.Checkout.SessionCreateParams = {
     mode: 'payment',
     payment_method_types: ['card'],
-    allow_promotion_codes: true,
+    allow_promotion_codes: !isTest,
     customer_email: clientEmail,
     invoice_creation: { enabled: true },
     line_items: [{
@@ -90,8 +102,12 @@ export async function POST(req: NextRequest) {
         currency: 'cad',
         unit_amount: Math.round(amountCad * 100),
         product_data: {
-          name: `${offer.name}${body.paymentOption === 'deposit' ? ' — Deposit' : ''}`,
-          description: body.paymentOption === 'deposit' ? `Deposit toward CAD $${offer.priceCad}` : undefined,
+          name: `${offer.name}${paymentLabel}`,
+          description: isTest
+            ? `Private Amanda Catherine workflow test. Normal price CAD $${offer.priceCad}.`
+            : body.paymentOption === 'deposit'
+              ? `Deposit toward CAD $${offer.priceCad}`
+              : undefined,
         },
       },
       quantity: 1,
@@ -100,9 +116,10 @@ export async function POST(req: NextRequest) {
       portalSlug: tenant.portalSlug,
       amandaOfferId: offer.id,
       clientEmail,
-      paymentOption: body.paymentOption === 'deposit' ? 'deposit' : 'full',
+      paymentOption: isTest ? 'test' : body.paymentOption === 'deposit' ? 'deposit' : 'full',
       fullPriceCad: String(offer.priceCad),
       amountPaidCad: String(amountCad),
+      privateTestCheckout: isTest ? 'true' : 'false',
     },
     success_url: `${baseUrl}/portal/${tenant.portalSlug}/billing?payment=success&session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${baseUrl}/portal/${tenant.portalSlug}/billing?payment=cancelled`,
