@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getStripe } from '@/lib/stripe';
 import { fulfillAmandaCheckout } from '@/lib/amanda-catherine/payment-fulfillment';
+import { notifyAmandaOwnerOfEnrollment } from '@/lib/amanda-catherine/owner-payment-notification';
 
 export const dynamic = 'force-dynamic';
 
@@ -26,6 +27,12 @@ export async function POST(req: NextRequest) {
     if (!result.ok) {
       return NextResponse.json({ error: result.error, paymentRecorded: result.paymentRecorded || false }, { status: 409 });
     }
+
+    const ownerNotice = await notifyAmandaOwnerOfEnrollment(session);
+    if (!ownerNotice.ok) {
+      console.error('[amanda-enrollment] owner notification failed', ownerNotice.error);
+    }
+
     return NextResponse.json({
       ok: true,
       email: result.record.email,

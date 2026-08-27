@@ -36,6 +36,8 @@ import { ensurePackageEntitlements } from '@/lib/modules/portal-modules';
 import { provisionConnectAfterCheckout } from '@/lib/connect-provision-hook';
 import { publicPortalLoginUrl } from '@/lib/ctp-portal-host';
 import { CANONICAL_CTP_INTAKE_URL } from '@/lib/platform-urls';
+import { fulfillAmandaCheckout, isAmandaCheckoutSession } from '@/lib/amanda-catherine/payment-fulfillment';
+import { notifyAmandaOwnerOfEnrollment } from '@/lib/amanda-catherine/owner-payment-notification';
 
 export const dynamic = 'force-dynamic';
 
@@ -195,6 +197,19 @@ export async function POST(req: NextRequest) {
 
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promise<void> {
   const meta = session.metadata ?? {};
+
+  if (isAmandaCheckoutSession(session)) {
+    const result = await fulfillAmandaCheckout(session, 'webhook');
+    if (!result.ok) {
+      console.error('[amanda-payment] webhook fulfillment failed', session.id, result.error);
+      return;
+    }
+    const ownerNotice = await notifyAmandaOwnerOfEnrollment(session);
+    if (!ownerNotice.ok) {
+      console.error('[amanda-payment] owner notification failed', session.id, ownerNotice.error);
+    }
+    return;
+  }
 
   if (meta.checkoutType === 'subscription' || session.mode === 'subscription') {
     await handleSubscriptionCheckoutCompleted(session);
