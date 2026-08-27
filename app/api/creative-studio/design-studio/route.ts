@@ -14,8 +14,12 @@ const ALLOWED_ORIGINS = new Set([
   'https://cc.efficiencyarchitects.online',
 ]);
 
-function organizationIdFrom(req: NextRequest, userOrgId?: string): string {
+function organizationIdFrom(userOrgId?: string): string {
   return userOrgId || process.env.EA_INTERNAL_ORG_ID || 'ea';
+}
+
+function recordIdFor(organizationId: string): string {
+  return `${organizationId}:${RECORD_ID}`;
 }
 
 function corsHeaders(req: NextRequest): HeadersInit {
@@ -30,11 +34,14 @@ function corsHeaders(req: NextRequest): HeadersInit {
   };
 }
 
-function json(req: NextRequest, body: unknown, init?: ResponseInit) {
-  const response = NextResponse.json(body, init);
+function applyCors(req: NextRequest, response: NextResponse): NextResponse {
   const headers = corsHeaders(req);
   for (const [key, value] of Object.entries(headers)) response.headers.set(key, String(value));
   return response;
+}
+
+function json(req: NextRequest, body: unknown, init?: ResponseInit) {
+  return applyCors(req, NextResponse.json(body, init));
 }
 
 export async function OPTIONS(req: NextRequest) {
@@ -47,27 +54,18 @@ export async function OPTIONS(req: NextRequest) {
 
 export async function GET(req: NextRequest) {
   const auth = await guardAdminApi(req);
-  if (!auth.ok) {
-    const response = adminApiUnauthorized(auth);
-    const headers = corsHeaders(req);
-    for (const [key, value] of Object.entries(headers)) response.headers.set(key, String(value));
-    return response;
-  }
+  if (!auth.ok) return applyCors(req, adminApiUnauthorized(auth));
 
-  const organizationId = organizationIdFrom(req, auth.user.orgId);
-  const stored = await loadStudioRecordFromAirtable<{ records?: unknown }>('experience', RECORD_ID);
+  const organizationId = organizationIdFrom(auth.user.orgId);
+  const recordId = recordIdFor(organizationId);
+  const stored = await loadStudioRecordFromAirtable<{ records?: unknown }>('experience', recordId);
   const records = Array.isArray(stored?.records) ? stored.records : [];
   return json(req, { ok: true, records, organizationId });
 }
 
 export async function PUT(req: NextRequest) {
   const auth = await guardAdminApi(req);
-  if (!auth.ok) {
-    const response = adminApiUnauthorized(auth);
-    const headers = corsHeaders(req);
-    for (const [key, value] of Object.entries(headers)) response.headers.set(key, String(value));
-    return response;
-  }
+  if (!auth.ok) return applyCors(req, adminApiUnauthorized(auth));
 
   let body: { records?: unknown };
   try {
@@ -80,10 +78,11 @@ export async function PUT(req: NextRequest) {
     return json(req, { ok: false, error: 'records must be an array.' }, { status: 400 });
   }
 
-  const organizationId = organizationIdFrom(req, auth.user.orgId);
+  const organizationId = organizationIdFrom(auth.user.orgId);
+  const recordId = recordIdFor(organizationId);
   const result = await saveStudioRecord({
     recordType: 'experience',
-    id: RECORD_ID,
+    id: recordId,
     organizationId,
     title: 'EA Design Studio Production Records',
     payload: { records: body.records },
@@ -97,7 +96,7 @@ export async function PUT(req: NextRequest) {
     );
   }
 
-  const durable = await loadStudioRecordFromAirtable<{ records?: unknown }>('experience', RECORD_ID);
+  const durable = await loadStudioRecordFromAirtable<{ records?: unknown }>('experience', recordId);
   const records = Array.isArray(durable?.records) ? durable.records : [];
   return json(req, { ok: true, records, organizationId });
 }
