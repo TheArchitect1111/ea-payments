@@ -57,14 +57,27 @@ function escapeHtml(value: string) {
 async function sendAmandaWelcome(input: {
   email: string;
   name: string;
-  tempPassword: string;
+  tempPassword?: string;
   audience: AmandaPortalAudience;
 }) {
   const loginUrl = `${canonicalPlatformOrigin()}/portal/login?next=%2Fportal%2F${AMANDA_PORTAL_SLUG}%2Flearning`;
   const firstName = input.name.split(/\s+/)[0] || 'there';
   const safeFirstName = escapeHtml(firstName);
   const safeEmail = escapeHtml(input.email);
-  const safePassword = escapeHtml(input.tempPassword);
+  const safePassword = input.tempPassword ? escapeHtml(input.tempPassword) : '';
+  const credentialHtml = input.tempPassword
+    ? `<div style="padding:18px;background:#f7f1e8;border-left:4px solid #b9894d;margin:20px 0;">
+        <p style="margin:0 0 8px;"><strong>Email:</strong> ${safeEmail}</p>
+        <p style="margin:0;"><strong>Temporary password:</strong> ${safePassword}</p>
+      </div>`
+    : `<div style="padding:18px;background:#f7f1e8;border-left:4px solid #b9894d;margin:20px 0;">
+        <p style="margin:0 0 8px;"><strong>Email:</strong> ${safeEmail}</p>
+        <p style="margin:0;">Use the secure email code sent when you sign in. Your existing portal account remains unchanged.</p>
+      </div>`;
+  const text = input.tempPassword
+    ? `Your Amanda Catherine portal is ready. Sign in at ${loginUrl} with ${input.email} and temporary password ${input.tempPassword}.`
+    : `Your Amanda Catherine course access is ready. Sign in at ${loginUrl} with ${input.email} and use the secure code sent to your email.`;
+
   return sendAuthEmail({
     to: input.email,
     subject: 'Your Amanda Catherine private portal is ready',
@@ -72,14 +85,11 @@ async function sendAmandaWelcome(input: {
     bodyHtml: `
       <p>Hi ${safeFirstName},</p>
       <p>Your private Amanda Catherine portal is ready. This is where you will receive the recordings, files, program materials, and next steps assigned specifically to you.</p>
-      <div style="padding:18px;background:#f7f1e8;border-left:4px solid #b9894d;margin:20px 0;">
-        <p style="margin:0 0 8px;"><strong>Email:</strong> ${safeEmail}</p>
-        <p style="margin:0;"><strong>Temporary password:</strong> ${safePassword}</p>
-      </div>
+      ${credentialHtml}
       <p><a href="${loginUrl}" style="display:inline-block;padding:12px 20px;background:#23334d;color:#fff;text-decoration:none;border-radius:8px;">Open my private portal</a></p>
-      <p>For your protection, change the temporary password after your first sign-in. Only content assigned to your email address will appear in your portal.</p>
+      <p>Only content assigned to your email address will appear in your portal.</p>
     `,
-    text: `Your Amanda Catherine portal is ready. Sign in at ${loginUrl} with ${input.email} and temporary password ${input.tempPassword}.`,
+    text,
     brandLabel: 'Amanda Catherine · AesthetiKine',
     brandColor: '#23334d',
   });
@@ -97,10 +107,7 @@ export async function provisionAmandaClientAccess(input: {
   if (!email || !email.includes('@')) return { ok: false as const, error: 'A valid client email is required.' };
   const name = displayName(input.name || '', email);
   let record = await getClientByEmail(email);
-
-  if (record?.portalSlug && record.portalSlug !== AMANDA_PORTAL_SLUG) {
-    return { ok: false as const, error: 'This email already belongs to a different portal.' };
-  }
+  const belongsToAnotherPortal = Boolean(record?.portalSlug && record.portalSlug !== AMANDA_PORTAL_SLUG);
 
   let created = false;
   if (!record) {
@@ -124,7 +131,7 @@ export async function provisionAmandaClientAccess(input: {
   }
 
   let tempPassword = record.tempPassword || '';
-  const needsCredentials = !record.portalSlug || (!record.passwordChanged && !record.tempPassword);
+  const needsCredentials = !belongsToAnotherPortal && (!record.portalSlug || (!record.passwordChanged && !record.tempPassword));
   if (needsCredentials) {
     tempPassword = temporaryPassword();
     const credentials = await setPortalCredentials(record.id, AMANDA_PORTAL_SLUG, tempPassword, email);
@@ -140,8 +147,11 @@ export async function provisionAmandaClientAccess(input: {
   if (!orgId.startsWith('org_') && !(await findMembership(email, orgId))) {
     await createMembership({ userEmail: email, organizationId: orgId, role: 'guest' });
   }
+
   const existingProfile = await loadStudioRecord<AmandaAccessProfile>('experience', accessProfileId(AMANDA_PORTAL_SLUG, email));
-  const courseIds = [...new Set([...(existingProfile?.courseIds || []), ...(input.courseIds || [])])];
+  const priorCourseIds = existingProfile?.courseIds || [];
+  const courseIds = [...new Set([...priorCourseIds, ...(input.courseIds || [])])];
+  const accessChanged = !existingProfile || courseIds.some((courseId) => !priorCourseIds.includes(courseId));
   await saveStudioRecord({
     recordType: 'experience',
     id: accessProfileId(AMANDA_PORTAL_SLUG, email),
@@ -158,8 +168,13 @@ export async function provisionAmandaClientAccess(input: {
   });
 
   let welcomeSent = false;
-  if (created && tempPassword) {
-    const welcome = await sendAmandaWelcome({ email, name, tempPassword, audience: input.audience });
+  if ((created || accessChanged) && (tempPassword || belongsToAnotherPortal)) {
+    const welcome = await sendAmandaWelcome({
+      email,
+      name,
+      tempPassword: belongsToAnotherPortal ? undefined : tempPassword,
+      audience: input.audience,
+    });
     welcomeSent = welcome.ok;
     if (!welcome.ok) {
       return { ok: false as const, error: welcome.error || 'Access was created, but the welcome email could not be sent.', accessCreated: true };
@@ -168,7 +183,7 @@ export async function provisionAmandaClientAccess(input: {
 
   return {
     ok: true as const,
-    created,
+    created: created || accessChanged,
     welcomeSent,
     email,
     loginUrl: `${canonicalPlatformOrigin()}/portal/login?next=%2Fportal%2F${AMANDA_PORTAL_SLUG}%2Flearning`,
