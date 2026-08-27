@@ -33,6 +33,9 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Verify Design Studio registry contract
+        run: node scripts/test-design-studio-registry-contract.mjs
+
       - name: Verify Simplifi Orb and monitoring contracts
         run: npm run test:simplifi-hardening
 
