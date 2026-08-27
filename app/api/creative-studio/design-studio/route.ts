@@ -9,6 +9,7 @@ export const dynamic = 'force-dynamic';
 
 const RECORD_ID = 'design-studio-production-records-v1';
 const ALLOWED_ORIGINS = new Set([
+  'https://efficiencyarchitects.online',
   'https://cc.efficiencyarchitects.online',
   'https://www.efficiencyarchitects.online',
   'https://efficiency-architects.vercel.app',
@@ -37,6 +38,10 @@ function organizationId(user: { orgId?: string }): string | null {
   return value || null;
 }
 
+function recordIdFor(orgId: string): string {
+  return `${orgId}:${RECORD_ID}`;
+}
+
 export async function OPTIONS(req: NextRequest) {
   const origin = req.headers.get('origin') ?? '';
   if (!ALLOWED_ORIGINS.has(origin)) return new NextResponse(null, { status: 403 });
@@ -54,7 +59,8 @@ export async function GET(req: NextRequest) {
   const orgId = organizationId(auth.user);
   if (!orgId) return json(req, { ok: false, error: 'Admin organization identity is not configured.' }, { status: 503 });
 
-  const stored = await loadStudioRecordFromAirtable<{ records?: unknown }>('experience', RECORD_ID);
+  const recordId = recordIdFor(orgId);
+  const stored = await loadStudioRecordFromAirtable<{ records?: unknown }>('experience', recordId);
   const records = Array.isArray(stored?.records) ? stored.records : [];
   return json(req, { ok: true, records, source: 'airtable', organizationId: orgId });
 }
@@ -80,20 +86,21 @@ export async function PUT(req: NextRequest) {
     return json(req, { ok: false, error: 'records must be an array.' }, { status: 400 });
   }
 
+  const recordId = recordIdFor(orgId);
   const result = await saveStudioRecord({
     recordType: 'experience',
-    id: RECORD_ID,
+    id: recordId,
     organizationId: orgId,
     title: 'EA Design Studio Production Records',
     payload: { records: body.records },
   });
-  if (!result.persistedToAirtable) {
+  if (!result.ok || !result.persistedToAirtable) {
     return json(req, { ok: false, error: result.error || 'Durable Airtable save failed.' }, { status: 503 });
   }
 
-  const verified = await loadStudioRecordFromAirtable<{ records?: unknown }>('experience', RECORD_ID);
+  const verified = await loadStudioRecordFromAirtable<{ records?: unknown }>('experience', recordId);
   if (!Array.isArray(verified?.records)) {
     return json(req, { ok: false, error: 'Durable write verification failed.' }, { status: 503 });
   }
-  return json(req, { ok: true, records: verified.records, source: 'airtable' });
+  return json(req, { ok: true, records: verified.records, source: 'airtable', organizationId: orgId });
 }
