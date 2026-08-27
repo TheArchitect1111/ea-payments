@@ -7,6 +7,7 @@ import { createMagicLinkToken, magicLinkConfigured, type MagicLinkRealm } from '
 import { sendAuthEmail } from '@/lib/ea-auth-email';
 import { resolvePortalPostLoginPath } from '@/lib/portal-post-login';
 import { invitedAmandaPortalIdentity } from '@/lib/amanda-catherine/invited-learners';
+import { getAmandaAssignedAudience } from '@/lib/amanda-catherine/client-access';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,6 +33,10 @@ function safeNextPath(raw: string | undefined, realm: MagicLinkRealm): string | 
     return undefined;
   }
   return raw;
+}
+
+function isAmandaLearningTarget(next?: string) {
+  return next?.toLowerCase().startsWith('/portal/amanda-catherine/learning') ?? false;
 }
 
 /**
@@ -98,7 +103,12 @@ export async function POST(req: NextRequest) {
   }
 
   if (realm === 'portal') {
-    const client = invitedAmandaPortalIdentity(email) || await findPortalClientByEmail(email);
+    const assignedAmandaAccess = isAmandaLearningTarget(next)
+      ? await getAmandaAssignedAudience('amanda-catherine', email)
+      : null;
+    const client = assignedAmandaAccess
+      ? { ok: true as const, slug: 'amanda-catherine', recordId: '' }
+      : invitedAmandaPortalIdentity(email) || await findPortalClientByEmail(email);
     if (!client.ok || !client.slug) {
       const missingAirtable = !process.env.AIRTABLE_API_KEY?.trim();
       if (process.env.NODE_ENV === 'development' && missingAirtable) {
