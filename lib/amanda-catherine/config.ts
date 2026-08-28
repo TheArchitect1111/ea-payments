@@ -230,7 +230,7 @@ export const AMANDA_OFFERS = [
     saleLabel: 'Limited-time sale',
     audience: 'practitioner-trainee',
     courseId: 'body-sculpt-practitioner-certification',
-    delivery: ['in-person'],
+    delivery: ['in-person', 'virtual'],
   },
   {
     id: 'non-surgical-bbl-training',
