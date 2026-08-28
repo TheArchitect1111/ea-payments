@@ -8,8 +8,13 @@ import { emitPulseEvent } from '@/lib/pulse-bus';
 import { makePartnerSessionCookie, signPartnerSession } from '@/lib/partner-session';
 import { resolveAdminIdentity, resolvePortalIdentity } from '@/lib/org-provision';
 import { resolvePortalPostLoginPath } from '@/lib/portal-post-login';
+import { getAmandaAssignedAudience } from '@/lib/amanda-catherine/client-access';
 
 export const dynamic = 'force-dynamic';
+
+function isAmandaLearningTarget(next?: string) {
+  return next?.toLowerCase().startsWith('/portal/amanda-catherine/learning') ?? false;
+}
 
 export async function POST(req: NextRequest) {
   let body: { pendingToken?: string; code?: string };
@@ -51,8 +56,18 @@ export async function POST(req: NextRequest) {
     }
 
     if (payload.realm === 'portal') {
-      const slug = payload.data.slug;
-      if (!slug) return NextResponse.json({ error: 'Invalid session.' }, { status: 400 });
+      const originalSlug = payload.data.slug;
+      if (!originalSlug) return NextResponse.json({ error: 'Invalid session.' }, { status: 400 });
+
+      // Normalize Amanda course access at verification time too. This makes OTP
+      // login resilient to an older EA portal identity or a pending token that
+      // was issued before Amanda access was provisioned. Without this, the
+      // browser can authenticate successfully but receive a session for the old
+      // tenant, then bounce between that tenant and Amanda's learning route.
+      const assignedAmandaAccess = isAmandaLearningTarget(payload.data.next)
+        ? await getAmandaAssignedAudience('amanda-catherine', payload.email)
+        : null;
+      const slug = assignedAmandaAccess ? 'amanda-catherine' : originalSlug;
 
       const identity = await resolvePortalIdentity({
         email: payload.email,
