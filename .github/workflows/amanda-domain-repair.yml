@@ -47,3 +47,6 @@ jobs:
             exit 1
           fi
           echo 'Amanda production domain is serving the promoted site directly.'
+
+      - name: Repair result
+        run: echo "Amanda production-domain repair workflow finished."
