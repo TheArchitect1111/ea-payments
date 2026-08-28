@@ -49,6 +49,7 @@ export async function POST(req: NextRequest) {
     clientName: name,
     enrollmentFlow: 'public-course-v1',
     testMode: testMode ? 'true' : 'false',
+    paymentOption: testMode ? 'test' : 'full',
     retailPriceCad: String(offer.priceCad),
   };
   const sessionParams: Stripe.Checkout.SessionCreateParams = {
