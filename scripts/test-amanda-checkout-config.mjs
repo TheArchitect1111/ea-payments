@@ -39,6 +39,17 @@ assert.equal(
   true,
   'Amanda public enrollment must retain its verification flow identity',
 );
+assert.equal(
+  publicCheckout.includes('regularPriceCad: String(regularPriceCad)') &&
+    publicCheckout.includes('currentPriceCad: String(offer.priceCad)'),
+  true,
+  'Amanda Stripe metadata must distinguish regular pricing from the current course price',
+);
+assert.equal(
+  publicCheckout.includes("Regular CAD $") && publicCheckout.includes("Current CAD $"),
+  true,
+  'Amanda Stripe test description must distinguish regular and current sale pricing',
+);
 
 const enrollmentForm = await readFile(
   new URL('../app/portal/amanda-catherine/enroll/AmandaEnrollmentForm.tsx', import.meta.url),
@@ -53,6 +64,24 @@ assert.equal(
   enrollmentForm.includes("{course.compareAtPriceCad ? 'Current' : 'Retail'}"),
   true,
   'Amanda $1 test screen must not mislabel a sale price as the regular retail price',
+);
+
+const amandaConfig = await readFile(
+  new URL('../lib/amanda-catherine/config.ts', import.meta.url),
+  'utf8',
+);
+const bodySculptBlock = amandaConfig.match(
+  /id: 'body-sculpt-practitioner-certification'[\s\S]*?\n  },/,
+)?.[0] || '';
+assert.equal(
+  bodySculptBlock.includes("delivery: ['in-person', 'virtual']"),
+  true,
+  'Body Sculpt Practitioner Certification must retain both official delivery pathways: in-person and virtual',
+);
+assert.equal(
+  bodySculptBlock.includes('priceCad: 2497') && bodySculptBlock.includes('compareAtPriceCad: 4997'),
+  true,
+  'Body Sculpt must retain the current CAD $2,497 price and CAD $4,997 regular price relationship',
 );
 
 console.log('Amanda checkout configuration tests passed.');
