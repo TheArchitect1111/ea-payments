@@ -1,0 +1,49 @@
+name: Amanda Production Domain Repair
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/amanda-domain-repair.yml'
+
+jobs:
+  promote-known-good-site:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: team_s7mlAoJkDCQYaXiSC8nYDNIX
+      VERCEL_PROJECT_ID: prj_x53IeeX3G9inkYUg87NJTHaXT9nw
+      VERCEL_SCOPE: the-architects-projects-cc813778
+      TARGET_DEPLOYMENT: amanda-catherine-4-pbkipaetz-the-architects-projects-cc813778.vercel.app
+    steps:
+      - name: Confirm deployment credential exists
+        id: auth
+        shell: bash
+        run: |
+          if [ -n "$VERCEL_TOKEN" ]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+            echo "Vercel deployment credential is available."
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "Vercel deployment credential is not configured in this repository."
+          fi
+
+      - name: Promote known-good Amanda deployment
+        if: steps.auth.outputs.available == 'true'
+        run: npx --yes vercel@latest promote "$TARGET_DEPLOYMENT" --yes --token="$VERCEL_TOKEN" --scope="$VERCEL_SCOPE"
+
+      - name: Verify production domain no longer uses share-token wrapper
+        if: steps.auth.outputs.available == 'true'
+        shell: bash
+        run: |
+          BODY="$(curl -fsSL --max-redirs 5 https://www.amandacatherine.ca/)"
+          if printf '%s' "$BODY" | grep -q '_vercel_share='; then
+            echo 'Amanda production domain still contains a Vercel share-token wrapper.' >&2
+            exit 1
+          fi
+          if ! printf '%s' "$BODY" | grep -qi 'Amanda Catherine'; then
+            echo 'Amanda production domain did not return the expected site content.' >&2
+            exit 1
+          fi
+          echo 'Amanda production domain is serving the promoted site directly.'
