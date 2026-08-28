@@ -44,7 +44,7 @@ export default function AmandaEnrollmentForm({ courses, testMode = false }: { co
         <legend className="font-serif text-3xl">1. Select your course</legend>
         {testMode ? (
           <p className="mt-3 rounded-xl border border-[#8b1229]/25 bg-[#fff7f8] px-4 py-3 text-sm font-bold text-[#8b1229]">
-            TEST MODE · Every course below checks out at CAD $1.00. Retail pricing is unchanged.
+            TEST MODE · Every course below checks out at CAD $1.00. Regular and current course pricing remain unchanged.
           </p>
         ) : null}
         <div className="mt-5 grid gap-4">
@@ -61,7 +61,11 @@ export default function AmandaEnrollmentForm({ courses, testMode = false }: { co
                   <span className="text-right">
                     {testMode ? (
                       <>
-                        <span className="block text-sm font-semibold text-[#7b6b5e] line-through">Retail ${course.priceCad.toLocaleString('en-CA')}</span>
+                        {course.compareAtPriceCad ? (
+                          <span className="block text-xs font-semibold text-[#7b6b5e] line-through">Regular ${course.compareAtPriceCad.toLocaleString('en-CA')}</span>
+                        ) : null}
+                        <span className="block text-sm font-semibold text-[#7b6b5e]">{course.compareAtPriceCad ? 'Current' : 'Retail'} ${course.priceCad.toLocaleString('en-CA')}</span>
+                        {course.saleLabel ? <span className="block text-xs font-black uppercase tracking-wider text-[#8b1229]">{course.saleLabel}</span> : null}
                         <span className="block text-xs font-black uppercase tracking-wider text-[#8b1229]">Process test</span>
                         <span className="block font-serif text-2xl">$1</span>
                       </>
