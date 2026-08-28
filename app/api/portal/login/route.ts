@@ -12,12 +12,17 @@ import { getClientSuccessProfile } from '@/lib/client-success';
 import { notifyPortal } from '@/lib/portal-notify';
 import { resolvePortalIdentity } from '@/lib/org-provision';
 import { resolvePortalPostLoginPath } from '@/lib/portal-post-login';
+import { getAmandaAssignedAudience } from '@/lib/amanda-catherine/client-access';
 
 export const dynamic = 'force-dynamic';
 
 function isDemoWebsiteCredentialAttempt(email: string, password: string): boolean {
   const demo = getDemoWebsitePortalCredentials();
   return email === demo.email && password === demo.password;
+}
+
+function isAmandaLearningTarget(next?: string) {
+  return next?.toLowerCase().startsWith('/portal/amanda-catherine/learning') ?? false;
 }
 
 export async function POST(req: NextRequest) {
@@ -64,8 +69,18 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  const portalClient = await getClientByPortalSlug(result.slug);
-  const defaultNext = await resolvePortalPostLoginPath(result.slug, portalClient);
+  // A paid Amanda learner can already have an older EA portal record with a
+  // personalized slug. When they arrive from the Amanda course link, keep the
+  // authenticated identity but issue the session for the canonical Amanda
+  // learning tenant. Without this normalization the portal middleware sends
+  // the browser back to the older slug instead of opening the course.
+  const assignedAmandaAccess = isAmandaLearningTarget(nextPath)
+    ? await getAmandaAssignedAudience('amanda-catherine', email)
+    : null;
+  const sessionSlug = assignedAmandaAccess ? 'amanda-catherine' : result.slug;
+
+  const portalClient = await getClientByPortalSlug(sessionSlug);
+  const defaultNext = await resolvePortalPostLoginPath(sessionSlug, portalClient);
   const skip2fa =
     isDemoCredentialAttempt(email, password) || isDemoWebsiteCredentialAttempt(email, password);
 
@@ -76,7 +91,7 @@ export async function POST(req: NextRequest) {
         realm: 'portal',
         email,
         data: {
-          slug: result.slug,
+          slug: sessionSlug,
           recordId: result.recordId ?? '',
           next: nextPath ?? defaultNext,
         },
@@ -96,12 +111,12 @@ export async function POST(req: NextRequest) {
 
   const identity = await resolvePortalIdentity({
     email,
-    slug: result.slug,
+    slug: sessionSlug,
     clientRecordId: result.recordId,
   });
 
   const token = await signSession({
-    slug: result.slug,
+    slug: sessionSlug,
     orgId: identity.orgId,
     role: identity.role,
     email: identity.email,
@@ -120,11 +135,11 @@ export async function POST(req: NextRequest) {
       await notifyPortal({
         product: 'ea-platform',
         type: 'portal.login',
-        title: `Portal login — ${portalClient?.clientName ?? result.slug}`,
-        detail: portalClient?.email ?? result.slug,
+        title: `Portal login — ${portalClient?.clientName ?? sessionSlug}`,
+        detail: portalClient?.email ?? sessionSlug,
         priority: 'low',
         href: defaultNext,
-        tenantId: result.slug,
+        tenantId: sessionSlug,
         objectId: result.recordId,
       });
     } catch (err) {
@@ -133,7 +148,7 @@ export async function POST(req: NextRequest) {
   }
 
   const destination = nextPath?.startsWith('/') ? nextPath : defaultNext;
-  const res = NextResponse.json({ slug: result.slug, next: destination });
+  const res = NextResponse.json({ slug: sessionSlug, next: destination });
   res.cookies.set(makeSessionCookie(token));
   return res;
 }
