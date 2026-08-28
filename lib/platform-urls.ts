@@ -20,16 +20,31 @@ export const EA_APEX_URL = 'https://efficiencyarchitects.online';
 export const CANONICAL_CTP_INTAKE_URL = 'https://cc.efficiencyarchitects.online/ctp';
 
 /**
- * Force portal/email/API public origins onto the apex host.
+ * Force portal/email/API public origins onto a valid production host.
  * www.efficiencyarchitects.online is the CRA marketing site (Visibility Scorecard).
+ * Invalid or relative environment values such as "portal" must never leak into
+ * customer-facing links.
  */
 export function canonicalPlatformOrigin(raw?: string | null): string {
   const fallback = EA_APEX_URL;
-  const base = String(raw || process.env.NEXT_PUBLIC_BASE_URL || process.env.EA_PLATFORM_URL || fallback)
+  const candidate = String(raw || process.env.NEXT_PUBLIC_BASE_URL || process.env.EA_PLATFORM_URL || fallback)
     .trim()
     .replace(/\/$/, '');
-  if (!base) return fallback;
-  return base
-    .replace(/^https?:\/\/www\.efficiencyarchitects\.online/i, EA_APEX_URL)
-    .replace(/^https?:\/\/cc\.efficiencyarchitects\.online/i, EA_APEX_URL);
+
+  if (!candidate) return fallback;
+
+  let parsed: URL;
+  try {
+    parsed = new URL(candidate);
+  } catch {
+    return fallback;
+  }
+
+  if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') return fallback;
+
+  const normalized = `${parsed.protocol}//${parsed.host}`;
+  if (/^https?:\/\/www\.efficiencyarchitects\.online$/i.test(normalized)) return EA_APEX_URL;
+  if (/^https?:\/\/cc\.efficiencyarchitects\.online$/i.test(normalized)) return EA_APEX_URL;
+
+  return normalized;
 }
