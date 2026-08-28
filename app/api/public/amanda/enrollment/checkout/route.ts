@@ -41,6 +41,7 @@ export async function POST(req: NextRequest) {
   }
 
   const origin = canonicalPlatformOrigin();
+  const regularPriceCad = offer.compareAtPriceCad ?? offer.priceCad;
   const metadata = {
     portalSlug: 'amanda-catherine',
     amandaOfferId: offer.offerId,
@@ -50,8 +51,13 @@ export async function POST(req: NextRequest) {
     enrollmentFlow: 'public-course-v1',
     testMode: testMode ? 'true' : 'false',
     paymentOption: testMode ? 'test' : 'full',
-    retailPriceCad: String(offer.priceCad),
+    currentPriceCad: String(offer.priceCad),
+    regularPriceCad: String(regularPriceCad),
+    retailPriceCad: String(regularPriceCad),
   };
+  const priceContext = offer.compareAtPriceCad
+    ? `Regular CAD $${regularPriceCad.toLocaleString('en-CA')} · Current CAD $${offer.priceCad.toLocaleString('en-CA')}`
+    : `Retail CAD $${offer.priceCad.toLocaleString('en-CA')}`;
   const sessionParams: Stripe.Checkout.SessionCreateParams = {
     mode: 'payment',
     payment_method_types: ['card'],
@@ -66,7 +72,7 @@ export async function POST(req: NextRequest) {
         product_data: {
           name: testMode ? `${offer.title} — $1 TEST` : offer.title,
           description: testMode
-            ? `Amanda Catherine process test · Retail CAD $${offer.priceCad.toLocaleString('en-CA')} · ${offer.delivery.join(' or ')}`
+            ? `Amanda Catherine process test · ${priceContext} · ${offer.delivery.join(' or ')}`
             : `Amanda Catherine course enrollment · ${offer.delivery.join(' or ')}`,
         },
       },
