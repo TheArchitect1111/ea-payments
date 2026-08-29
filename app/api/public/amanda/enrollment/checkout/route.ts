@@ -30,12 +30,10 @@ export async function POST(req: NextRequest) {
     offerId?: string;
     name?: string;
     email?: string;
-    testMode?: boolean;
   };
   const offer = AMANDA_SELF_ENROLLMENT_COURSES.find((item) => item.offerId === String(body.offerId || ''));
   const name = String(body.name || '').trim().slice(0, 120);
   const email = String(body.email || '').trim().toLowerCase().slice(0, 254);
-  const testMode = body.testMode === true;
   if (!offer || name.length < 2 || !/^\S+@\S+\.\S+$/.test(email)) {
     return NextResponse.json({ error: 'Choose a course and enter a valid name and email.' }, { status: 400 });
   }
@@ -49,31 +47,25 @@ export async function POST(req: NextRequest) {
     clientEmail: email,
     clientName: name,
     enrollmentFlow: 'public-course-v1',
-    testMode: testMode ? 'true' : 'false',
-    paymentOption: testMode ? 'test' : 'full',
+    paymentOption: 'full-or-promotion',
     currentPriceCad: String(offer.priceCad),
     regularPriceCad: String(regularPriceCad),
     retailPriceCad: String(regularPriceCad),
   };
-  const priceContext = offer.compareAtPriceCad
-    ? `Regular CAD $${regularPriceCad.toLocaleString('en-CA')} · Current CAD $${offer.priceCad.toLocaleString('en-CA')}`
-    : `Retail CAD $${offer.priceCad.toLocaleString('en-CA')}`;
   const sessionParams: Stripe.Checkout.SessionCreateParams = {
     mode: 'payment',
     payment_method_types: ['card'],
-    allow_promotion_codes: !testMode,
+    allow_promotion_codes: true,
     customer_email: email,
     billing_address_collection: 'auto',
     invoice_creation: { enabled: true },
     line_items: [{
       price_data: {
         currency: 'cad',
-        unit_amount: testMode ? 100 : Math.round(offer.priceCad * 100),
+        unit_amount: Math.round(offer.priceCad * 100),
         product_data: {
-          name: testMode ? `${offer.title} — $1 TEST` : offer.title,
-          description: testMode
-            ? `Amanda Catherine process test · ${priceContext} · ${offer.delivery.join(' or ')}`
-            : `Amanda Catherine course enrollment · ${offer.delivery.join(' or ')}`,
+          name: offer.title,
+          description: `Amanda Catherine course enrollment · ${offer.delivery.join(' or ')}`,
         },
       },
       quantity: 1,
@@ -81,7 +73,7 @@ export async function POST(req: NextRequest) {
     metadata,
     payment_intent_data: { metadata },
     success_url: `${origin}/portal/amanda-catherine/enroll/success?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${origin}/portal/amanda-catherine/enroll${testMode ? '?test=1&payment=cancelled' : '?payment=cancelled'}`,
+    cancel_url: `${origin}/portal/amanda-catherine/enroll?payment=cancelled`,
   };
 
   try {
