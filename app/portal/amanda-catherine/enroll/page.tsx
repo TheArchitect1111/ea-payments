@@ -10,24 +10,19 @@ export const metadata = {
 export default async function AmandaEnrollmentPage({
   searchParams,
 }: {
-  searchParams: Promise<{ payment?: string; test?: string }>;
+  searchParams: Promise<{ payment?: string }>;
 }) {
-  const { payment, test } = await searchParams;
-  // Pre-launch: the client-facing enrollment experience defaults to the $1 workflow test.
-  // Use ?test=0 only when the full-price flow needs to be inspected before launch.
-  const testMode = test !== '0';
+  const { payment } = await searchParams;
   return (
     <main className="min-h-screen bg-[#f7f1e8] text-[#17130f]">
       <section className="bg-[#102018] px-5 py-12 text-[#fffaf2] sm:py-16">
         <div className="mx-auto max-w-5xl">
           <p className="text-sm font-bold uppercase tracking-[0.3em] text-[#c39851]">AesthetiKine Academy</p>
           <h1 className="mt-4 max-w-3xl font-serif text-5xl leading-[0.95] sm:text-7xl">
-            {testMode ? 'Test the client experience for $1.' : 'Choose your course. Begin your training.'}
+            Choose your course. Begin your training.
           </h1>
           <p className="mt-6 max-w-2xl text-lg leading-8 text-[#eee5d8]">
-            {testMode
-              ? 'Choose any course below. You will go through the same checkout and post-purchase experience as a client, but Stripe will charge only CAD $1.00.'
-              : 'Select your program, complete secure checkout, and receive your private learning access automatically.'}
+            Select your program, complete secure checkout, and receive your private learning access automatically. If you have a promotion code, you can apply it securely at checkout.
           </p>
         </div>
       </section>
@@ -38,7 +33,6 @@ export default async function AmandaEnrollmentPage({
           </div>
         ) : null}
         <AmandaEnrollmentForm
-          testMode={testMode}
           courses={AMANDA_SELF_ENROLLMENT_COURSES.map((course) => ({ ...course, delivery: [...course.delivery] }))}
         />
         <section className="mt-10 grid gap-4 rounded-3xl border border-[#d8c8b0] bg-white p-6 sm:grid-cols-2 sm:p-8" aria-labelledby="amanda-enrollment-resources">
