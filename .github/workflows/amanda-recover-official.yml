@@ -47,3 +47,5 @@ jobs:
           name: amanda-official-candidates
           path: recovered/
           retention-days: 1
+
+# Recovery-only workflow. Remove after the official source is secured.
