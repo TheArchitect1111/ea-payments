@@ -2,80 +2,28 @@ import { getAmandaSiteContent } from '@/lib/amanda-catherine/site-content';
 
 export const dynamic = 'force-dynamic';
 
-function Media({ imageUrl, videoUrl, alt }: { imageUrl?: string; videoUrl?: string; alt: string }) {
-  if (videoUrl) {
-    return <video className="ac-media" src={videoUrl} poster={imageUrl || undefined} controls playsInline preload="metadata" />;
-  }
-  return imageUrl ? <img className="ac-media" src={imageUrl} alt={alt} /> : null;
+function HeroMedia({ imageUrl, videoUrl }: { imageUrl: string; videoUrl: string }) {
+  if (videoUrl) return <video className="hero-media" src={videoUrl} poster={imageUrl || undefined} autoPlay muted loop playsInline preload="metadata" />;
+  if (imageUrl) return <img className="hero-media" src={imageUrl} alt="Amanda Catherine" />;
+  return null;
 }
 
 export default async function AmandaCatherinePublicPage() {
   const site = await getAmandaSiteContent();
   return (
-    <div className="ac-site" id="top">
+    <div className="ac" id="top">
       <style dangerouslySetInnerHTML={{ __html: `
-        :root{--ac-ink:#17221c;--ac-sage:#556a5c;--ac-cream:#f4f0e8;--ac-gold:#b18b49;--ac-line:#ded8cd;--ac-muted:#606a62}.ac-site{margin:-8px;background:#fff;color:var(--ac-ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.55}.ac-wrap{width:min(1180px,calc(100% - 40px));margin:0 auto}.ac-nav{position:sticky;top:0;z-index:20;border-bottom:1px solid rgba(222,216,205,.8);background:rgba(255,255,255,.94);backdrop-filter:blur(16px)}.ac-nav-in{display:flex;align-items:center;justify-content:space-between;gap:24px;min-height:72px}.ac-brand{font-family:Georgia,serif;font-size:22px}.ac-links{display:flex;gap:22px}.ac-links a,.ac-btn{text-decoration:none;color:inherit}.ac-links a{font-size:13px;font-weight:750}.ac-btn{display:inline-flex;align-items:center;justify-content:center;padding:12px 18px;border:1px solid var(--ac-ink);font-size:13px;font-weight:800}.ac-btn-fill{background:var(--ac-ink);color:#fff}.ac-hero{position:relative;min-height:720px;display:grid;align-items:end;overflow:hidden;background:#17221c;color:#fff}.ac-hero-media{position:absolute;inset:0}.ac-hero-media .ac-media{width:100%;height:100%;object-fit:cover;filter:saturate(.8) brightness(.56)}.ac-hero-media:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(9,17,12,.86),rgba(9,17,12,.25) 62%,rgba(9,17,12,.3))}.ac-hero-copy{position:relative;z-index:2;padding:170px 0 86px;max-width:760px}.ac-eyebrow{margin:0 0 16px;color:var(--ac-gold);font-size:12px;font-weight:900;letter-spacing:.16em;text-transform:uppercase}.ac-hero h1,.ac-section h2{font-family:Georgia,serif;font-weight:500;line-height:1.02}.ac-hero h1{margin:0;font-size:clamp(54px,8vw,100px);letter-spacing:-.045em}.ac-hero p{max-width:680px;font-size:19px;color:rgba(255,255,255,.86)}.ac-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:30px}.ac-hero .ac-btn:not(.ac-btn-fill){border-color:rgba(255,255,255,.6);color:#fff}.ac-section{padding:100px 0}.ac-section h2{margin:0 0 22px;font-size:clamp(42px,6vw,72px);letter-spacing:-.035em}.ac-section p{color:var(--ac-muted);font-size:17px}.ac-intro{text-align:center;background:var(--ac-cream)}.ac-intro .ac-wrap{max-width:900px}.ac-grid{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center}.ac-media{display:block;width:100%;max-height:680px;object-fit:cover}.ac-copy{max-width:650px}.ac-facts{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:28px}.ac-fact{padding:20px;background:var(--ac-cream)}.ac-fact strong{display:block;font-family:Georgia,serif;font-size:28px;color:var(--ac-gold)}.ac-pathways{background:#fff}.ac-path-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:40px}.ac-path{min-height:320px;padding:34px;background:var(--ac-cream);display:flex;flex-direction:column;justify-content:flex-end}.ac-path h3{font-family:Georgia,serif;font-size:38px;margin:0 0 12px}.ac-path p{margin:0}.ac-band{background:var(--ac-sage);color:#fff}.ac-band p{color:rgba(255,255,255,.82)}.ac-band .ac-eyebrow{color:#e1cfa8}.ac-alt{background:var(--ac-cream)}.ac-contact{background:var(--ac-ink);color:#fff}.ac-contact p{color:rgba(255,255,255,.75)}.ac-contact-grid{display:grid;grid-template-columns:1.4fr .6fr;gap:60px}.ac-contact-list{display:grid;gap:14px}.ac-contact-list a{color:#fff}.ac-footer{padding:32px 0;background:#101713;color:rgba(255,255,255,.7);font-size:13px}.ac-footer-in{display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap}.ac-footer strong{color:#fff}.ac-note{max-width:760px}.ac-updated{font-size:11px;opacity:.7}@media(max-width:850px){.ac-links{display:none}.ac-grid,.ac-contact-grid{grid-template-columns:1fr}.ac-path-grid{grid-template-columns:1fr}.ac-facts{grid-template-columns:1fr}.ac-section{padding:72px 0}.ac-hero{min-height:650px}.ac-hero-copy{padding:130px 0 60px}.ac-nav-in{min-height:64px}.ac-brand{font-size:19px}}
+:root{--ink:#17211c;--cream:#f6f0e6;--paper:#fffdf8;--gold:#b48a49;--line:#ddd7cb;--muted:#667069}.ac{margin:-8px;font:16px/1.6 Arial,sans-serif;color:var(--ink);background:var(--paper)}.ac *{box-sizing:border-box}.ac h1,.ac h2,.ac h3{font-family:Georgia,serif;font-weight:500;line-height:1.06;margin:0 0 18px}.ac a{color:inherit}.wrap{width:min(1120px,92vw);margin:auto}.ac nav{position:sticky;top:0;z-index:9;background:#17211cf5;color:#fff}.bar{min-height:70px;display:flex;align-items:center;justify-content:space-between}.brand{font:24px Georgia,serif}.links{display:flex;gap:20px;font-size:12px;text-transform:uppercase;letter-spacing:.1em}.hero{position:relative;min-height:72vh;display:grid;align-items:center;color:#fff;overflow:hidden;background:radial-gradient(circle at 80% 20%,#748776 0,#455747 26%,#17211c 68%)}.hero-media{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.48}.hero:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#17211cd9,#17211c40)}.hero .wrap{position:relative;z-index:2}.hero h1{font-size:clamp(54px,8vw,100px);white-space:pre-line}.hero p{max-width:700px;font-size:21px;color:#ffffffd8}.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.2em;font-weight:700;color:var(--gold);margin-bottom:18px}.btn{display:inline-block;padding:13px 19px;margin:8px 8px 0 0;border:1px solid currentColor;text-decoration:none;text-transform:uppercase;letter-spacing:.09em;font-size:11px;font-weight:bold}.fill{background:var(--gold);border-color:var(--gold);color:#fff}.ac section{padding:82px 0}.intro{text-align:center;background:var(--cream)}.title,.intro h2{font-size:clamp(40px,5vw,66px)}.intro p{max-width:780px;margin:20px auto;color:var(--muted);font-size:19px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:56px}.panel{padding:30px;border:1px solid var(--line);background:#fff}.facts,.programs,.cards{display:grid;gap:14px}.facts{grid-template-columns:1fr 1fr}.fact,.program{padding:16px;border-top:1px solid var(--line)}.fact b,.program span{color:var(--gold)}.dark{background:var(--ink);color:#fff}.cards{grid-template-columns:repeat(3,1fr)}.card{padding:28px;border:1px solid #ffffff33}.learn{background:#eef1eb}.program{display:grid;grid-template-columns:1fr auto;gap:8px}.program small{grid-column:1/-1;color:var(--muted)}.create{background:var(--cream)}.section-media{width:100%;max-height:520px;object-fit:cover;margin-top:24px}footer{background:var(--ink);color:#fff;padding:42px 0}@media(max-width:760px){.links{display:none}.grid2,.cards,.facts{grid-template-columns:1fr}.ac section{padding:62px 0}}
       ` }} />
-
-      <nav className="ac-nav">
-        <div className="ac-wrap ac-nav-in">
-          <a href="#top" className="ac-brand">Amanda Catherine</a>
-          <div className="ac-links">
-            <a href="#about">Meet Amanda</a><a href="#restore">Restore</a><a href="#learn">Learn</a><a href="#create">Create</a><a href="#contact">Contact</a>
-          </div>
-          <a className="ac-btn ac-btn-fill" href={site.contact.bookingUrl} target="_blank" rel="noreferrer">Begin</a>
-        </div>
-      </nav>
-
-      <header className="ac-hero">
-        <div className="ac-hero-media"><Media imageUrl={site.hero.imageUrl} videoUrl={site.hero.videoUrl} alt="Amanda Catherine" /></div>
-        <div className="ac-wrap ac-hero-copy">
-          <p className="ac-eyebrow">{site.hero.eyebrow}</p>
-          <h1>{site.hero.title}</h1>
-          <p>{site.hero.subtitle}</p>
-          <div className="ac-actions">
-            <a className="ac-btn ac-btn-fill" href={site.hero.primaryHref}>{site.hero.primaryLabel}</a>
-            <a className="ac-btn" href={site.hero.secondaryHref}>{site.hero.secondaryLabel}</a>
-          </div>
-        </div>
-      </header>
-
-      <section className="ac-section ac-intro">
-        <div className="ac-wrap">
-          <p className="ac-eyebrow">{site.intro.eyebrow}</p><h2>{site.intro.title}</h2><p>{site.intro.body}</p>
-        </div>
-      </section>
-
-      <section className="ac-section" id="about">
-        <div className="ac-wrap ac-grid">
-          <Media imageUrl={site.about.imageUrl} alt="Amanda Catherine" />
-          <div className="ac-copy">
-            <p className="ac-eyebrow">Meet Amanda</p><h2>{site.about.title}</h2><p>{site.about.body}</p><p>{site.about.secondaryBody}</p>
-            <div className="ac-facts">{site.about.facts.map((fact) => <div className="ac-fact" key={fact.value}><strong>{fact.value}</strong><span>{fact.label}</span></div>)}</div>
-          </div>
-        </div>
-      </section>
-
-      <section className="ac-section ac-pathways" id="pathways">
-        <div className="ac-wrap"><p className="ac-eyebrow">Restore · Learn · Create</p><h2>{site.pathways.title}</h2><p>{site.pathways.body}</p>
-          <div className="ac-path-grid">
-            <article className="ac-path"><h3>Restore</h3><p>{site.pathways.restoreBody}</p></article>
-            <article className="ac-path"><h3>Learn</h3><p>{site.pathways.learnBody}</p></article>
-            <article className="ac-path"><h3>Create</h3><p>{site.pathways.createBody}</p></article>
-          </div>
-        </div>
-      </section>
-
-      <section className="ac-section ac-band" id="restore"><div className="ac-wrap ac-grid"><div className="ac-copy"><p className="ac-eyebrow">Restore</p><h2>{site.restore.title}</h2><p>{site.restore.body}</p><a className="ac-btn" href={site.contact.bookingUrl} target="_blank" rel="noreferrer">Book care</a></div><Media imageUrl={site.restore.imageUrl} alt="AesthetiKine care" /></div></section>
-      <section className="ac-section ac-alt" id="learn"><div className="ac-wrap ac-grid"><Media imageUrl={site.learn.imageUrl} alt="Amanda Catherine training" /><div className="ac-copy"><p className="ac-eyebrow">Learn</p><h2>{site.learn.title}</h2><p>{site.learn.body}</p></div></div></section>
-      <section className="ac-section" id="create"><div className="ac-wrap ac-grid"><div className="ac-copy"><p className="ac-eyebrow">Create</p><h2>{site.create.title}</h2><p>{site.create.body}</p></div><Media imageUrl={site.create.imageUrl} alt="Amanda Catherine creative leadership" /></div></section>
-      <section className="ac-section ac-alt"><div className="ac-wrap ac-grid"><Media imageUrl={site.impact.imageUrl} alt="Amanda Catherine speaking and media" /><div className="ac-copy"><p className="ac-eyebrow">Speaking · Media · Community</p><h2>{site.impact.title}</h2><p>{site.impact.body}</p></div></div></section>
-
-      <section className="ac-section ac-contact" id="contact">
-        <div className="ac-wrap ac-contact-grid"><div><p className="ac-eyebrow">Contact</p><h2>{site.contact.title}</h2><p>{site.contact.body}</p></div><div className="ac-contact-list"><a href={`mailto:${site.contact.email}`}>{site.contact.email}</a><a href={`tel:${site.contact.phone}`}>{site.contact.phone}</a><a href={site.contact.bookingUrl} target="_blank" rel="noreferrer">Book online ↗</a></div></div>
-      </section>
-
-      <footer className="ac-footer"><div className="ac-wrap ac-footer-in"><div><strong>Amanda Catherine</strong><div>{site.footer.tagline}</div><div className="ac-updated">Updated {new Date(site.updatedAt).toLocaleDateString('en-CA')}</div></div><div className="ac-note">{site.footer.note}</div></div></footer>
+      <nav><div className="wrap bar"><div className="brand">Amanda Catherine</div><div className="links"><a href="#restore">Restore</a><a href="#learn">Learn</a><a href="#create">Create</a><a href="#contact">Contact</a></div></div></nav>
+      <header className="hero"><HeroMedia imageUrl={site.hero.imageUrl} videoUrl={site.hero.videoUrl} /><div className="wrap"><div className="eyebrow">{site.hero.eyebrow}</div><h1>{site.hero.title}</h1><p>{site.hero.subtitle}</p><a className="btn fill" href={site.hero.primaryHref}>{site.hero.primaryLabel}</a><a className="btn" href={site.hero.secondaryHref}>{site.hero.secondaryLabel}</a></div></header>
+      <section className="intro"><div className="wrap"><div className="eyebrow">{site.intro.eyebrow}</div><h2>{site.intro.title}</h2><p>{site.intro.body}</p></div></section>
+      <section id="restore"><div className="wrap grid2"><div><div className="eyebrow">{site.restore.eyebrow}</div><h2 className="title">{site.restore.title}</h2><p>{site.restore.body}</p><a className="btn fill" href={site.restore.bookingUrl}>Book an appointment</a>{site.restore.imageUrl ? <img className="section-media" src={site.restore.imageUrl} alt="AesthetiKine" /> : null}</div><div className="panel"><h3>{site.restore.clinicName}</h3><p>{site.restore.clinicSubtitle}</p><div className="facts"><div className="fact"><b>Clinic</b><br />{site.restore.address}</div><div className="fact"><b>Phone</b><br />{site.restore.phone}</div><div className="fact"><b>Email</b><br />{site.restore.email}</div><div className="fact"><b>Booking</b><br />Jane App</div></div></div></div></section>
+      <section className="dark"><div className="wrap"><div className="eyebrow">{site.pathways.eyebrow}</div><h2 className="title">{site.pathways.title}</h2><div className="cards"><div className="card"><h3>Restore</h3><p>{site.pathways.restoreBody}</p></div><div className="card"><h3>Learn</h3><p>{site.pathways.learnBody}</p></div><div className="card"><h3>Create</h3><p>{site.pathways.createBody}</p></div></div></div></section>
+      <section className="learn" id="learn"><div className="wrap grid2"><div><div className="eyebrow">{site.learn.eyebrow}</div><h2 className="title">{site.learn.title}</h2><p>{site.learn.body}</p><a className="btn fill" href={site.learn.ctaHref}>{site.learn.ctaLabel}</a>{site.learn.imageUrl ? <img className="section-media" src={site.learn.imageUrl} alt="Amanda Catherine training" /> : null}</div><div className="programs">{site.learn.programs.map((p) => <div className="program" key={p.title}><b>{p.title}</b><span>{p.price}</span>{p.description ? <small>{p.description}</small> : null}</div>)}</div></div></section>
+      <section className="create" id="create"><div className="wrap"><div className="eyebrow">{site.create.eyebrow}</div><h2 className="title">{site.create.title}</h2>{site.create.body ? <p>{site.create.body}</p> : null}<div className="cards">{site.create.cards.map((card) => <div className="panel" key={card.title}><h3>{card.title}</h3><p>{card.body}</p></div>)}</div>{site.create.imageUrl ? <img className="section-media" src={site.create.imageUrl} alt="Amanda Catherine creative work" /> : null}</div></section>
+      <section id="contact"><div className="wrap grid2"><div><div className="eyebrow">{site.contact.eyebrow}</div><h2 className="title">{site.contact.title}</h2><p>{site.contact.body}</p><a className="btn fill" href={`mailto:${site.contact.email}`}>Email Amanda</a><a className="btn" href={`tel:${site.contact.phone.replace(/[^+\d]/g,'')}`}>Call {site.contact.phone}</a></div><div className="panel"><b>Clinic</b><p>{site.contact.address}</p><b>Hours</b><p>{site.contact.hours}</p><b>Course enrollment</b><p><a href={site.contact.enrollUrl}>Amanda Catherine enrollment portal</a></p></div></div></section>
+      <footer><div className="wrap"><b>{site.footer.tagline}</b><br />{site.footer.note}<br /><br />© 2026 Amanda Catherine</div></footer>
     </div>
   );
 }
