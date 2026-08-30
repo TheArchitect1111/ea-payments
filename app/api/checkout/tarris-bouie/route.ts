@@ -1,24 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getStripe } from '@/lib/stripe';
-import { tarrisContractStoreReadiness } from '@/lib/tarris-contract-payment';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
-  const store = await tarrisContractStoreReadiness();
+  const stripeConfigured = Boolean(process.env.STRIPE_SECRET_KEY);
   return NextResponse.json({
-    ok: Boolean(process.env.STRIPE_SECRET_KEY) && store.ok,
-    stripeConfigured: Boolean(process.env.STRIPE_SECRET_KEY),
-    contractStoreReady: store.ok,
-    detail: store.detail || null,
-  }, { status: Boolean(process.env.STRIPE_SECRET_KEY) && store.ok ? 200 : 503 });
+    ok: stripeConfigured,
+    stripeConfigured,
+    paymentVerification: 'stripe-server-api',
+    contractArchive: 'efficiency-architects-service',
+  }, { status: stripeConfigured ? 200 : 503, headers: { 'Cache-Control': 'no-store' } });
 }
 
 export async function POST(req: NextRequest) {
   try {
     if (!process.env.STRIPE_SECRET_KEY) return NextResponse.json({ error: 'Stripe is not configured.' }, { status: 503 });
-    const store = await tarrisContractStoreReadiness();
-    if (!store.ok) return NextResponse.json({ error: 'EA contract payment archive is not ready.', detail: store.detail }, { status: 503 });
 
     const body = await req.json().catch(() => ({}));
     const email = String(body?.email || 'tarrisb73@yahoo.com').trim().toLowerCase();
