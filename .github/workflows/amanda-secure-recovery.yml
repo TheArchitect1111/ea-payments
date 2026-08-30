@@ -32,8 +32,7 @@ jobs:
         run: |
           set -e
           for i in $(seq 1 90); do
-            git fetch origin master --quiet
-            git show origin/master:.github/amanda-recovery-cipher.txt > /tmp/cipher.txt 2>/dev/null || true
+            curl -fsSL "https://raw.githubusercontent.com/TheArchitect1111/ea-payments/master/.github/amanda-recovery-cipher.txt?ts=$(date +%s)" -o /tmp/cipher.txt 2>/dev/null || true
             if grep -q "^RUN_ID:$RUN_ID$" /tmp/cipher.txt 2>/dev/null; then
               tail -n +2 /tmp/cipher.txt | base64 -d > /tmp/cipher.bin
               openssl pkeyutl -decrypt -inkey /tmp/private.pem -in /tmp/cipher.bin -out /tmp/share-url.txt -pkeyopt rsa_padding_mode:oaep -pkeyopt rsa_oaep_md:sha256
