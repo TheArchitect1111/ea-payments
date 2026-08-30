@@ -1,12 +1,13 @@
-import { redirect } from 'next/navigation';
 import { getContentRequestsForClient } from '@/lib/airtable';
 import { PortalShell, NAVY, GOLD } from '@/lib/chassis/PortalShell';
 import { PortalModuleChromeStrip } from '@/lib/chassis/PortalChromeContext';
 import { requirePortalModule } from '@/lib/modules/portal-modules';
 import UpdateHubExperience from '@/app/portal/components/UpdateHubExperience';
 import UpdateHubFeed from '@/app/portal/components/UpdateHubFeed';
+import AmandaSiteUpdateHub from '@/app/portal/components/AmandaSiteUpdateHub';
 import { getPublishedFeedItems, getPendingRequests } from '@/lib/update-hub-feed';
 import { UPDATE_HUB_CHANNEL_LABELS, UPDATE_HUB_CHANNELS } from '@/lib/update-hub-channels';
+import { getAmandaSiteContent } from '@/lib/amanda-catherine/site-content';
 import '../ea-portal.css';
 
 export const dynamic = 'force-dynamic';
@@ -19,6 +20,18 @@ function fmtDate(value?: string): string {
 export default async function UpdatesPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const { client } = await requirePortalModule(slug, 'update-hub');
+
+  if (slug.toLowerCase().startsWith('amanda-catherine')) {
+    const content = await getAmandaSiteContent();
+    return (
+      <PortalShell slug={slug} active="updates">
+        <main className="ep-main">
+          <PortalModuleChromeStrip />
+          <AmandaSiteUpdateHub slug={slug} initialContent={content} />
+        </main>
+      </PortalShell>
+    );
+  }
 
   const requests = await getContentRequestsForClient(client.id);
   const publishedFeed = getPublishedFeedItems(requests);
@@ -59,7 +72,6 @@ export default async function UpdatesPage({ params }: { params: Promise<{ slug: 
         </div>
 
         <UpdateHubFeed items={publishedFeed} organizationName={client.organization ?? client.clientName} />
-
         <UpdateHubExperience slug={slug} requestCount={requests.length} />
 
         <div className="mt-2 flex flex-wrap gap-3">
@@ -80,8 +92,8 @@ export default async function UpdatesPage({ params }: { params: Promise<{ slug: 
         </div>
 
         {pendingRequests.length > 0 && (
-        <div className="ep-card mt-6">
-          <p className="ep-card-title">Your requests in progress</p>
+          <div className="ep-card mt-6">
+            <p className="ep-card-title">Your requests in progress</p>
             <div className="overflow-x-auto">
               <table className="ep-info-table w-full min-w-[720px] text-left text-sm">
                 <thead>
@@ -110,7 +122,7 @@ export default async function UpdatesPage({ params }: { params: Promise<{ slug: 
                 </tbody>
               </table>
             </div>
-        </div>
+          </div>
         )}
       </main>
     </PortalShell>
