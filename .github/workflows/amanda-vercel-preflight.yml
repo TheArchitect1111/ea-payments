@@ -1,0 +1,27 @@
+name: Amanda Vercel preflight
+on:
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/amanda-vercel-preflight.yml'
+  workflow_dispatch:
+
+jobs:
+  verify-vercel-write-path:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Vercel credential
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          if [ -z "$VERCEL_TOKEN" ]; then
+            echo "VERCEL_TOKEN_MISSING"
+            exit 42
+          fi
+          echo "VERCEL_TOKEN_PRESENT"
+      - name: Verify official Amanda project access
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          npx --yes vercel@latest api GET '/v9/projects/prj_x53IeeX3G9inkYUg87NJTHaXT9nw?teamId=team_s7mlAoJkDCQYaXiSC8nYDNIX' --token "$VERCEL_TOKEN" > /tmp/project.json
+          node -e "const p=require('/tmp/project.json'); if(p.id!=='prj_x53IeeX3G9inkYUg87NJTHaXT9nw') process.exit(43); console.log('OFFICIAL_AMANDA_PROJECT_ACCESS_OK')"
