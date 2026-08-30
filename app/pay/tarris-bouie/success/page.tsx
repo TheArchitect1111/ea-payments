@@ -1,6 +1,3 @@
-import { getStripe } from '@/lib/stripe';
-import { syncTarrisContractPayment } from '@/lib/tarris-contract-payment';
-
 export const dynamic = 'force-dynamic';
 
 export default async function TarrisPaymentSuccess({ searchParams }: { searchParams: Promise<{ session_id?: string }> }) {
@@ -8,17 +5,19 @@ export default async function TarrisPaymentSuccess({ searchParams }: { searchPar
   let paid = false;
   let message = 'We could not verify this payment. Please contact Efficiency Architects.';
 
-  if (sessionId && process.env.STRIPE_SECRET_KEY) {
+  if (sessionId) {
     try {
-      const stripe = getStripe();
-      const session = await stripe.checkout.sessions.retrieve(sessionId);
-      const result = await syncTarrisContractPayment(session);
-      paid = result.ok;
+      const response = await fetch(
+        `https://efficiency-architects.vercel.app/api/contracts/verify-tarris-payment?session_id=${encodeURIComponent(sessionId)}`,
+        { cache: 'no-store', headers: { Accept: 'application/json' } },
+      );
+      const result = await response.json().catch(() => ({}));
+      paid = response.ok && result?.ok === true && result?.status === 'PAID_AND_ARCHIVED';
       message = paid
         ? 'Your $500 project deposit has been verified and recorded. Your agreement and payment are now connected in the Efficiency Architects system.'
-        : (result.error || message);
+        : (result?.error || message);
     } catch (error) {
-      console.error('[tarris-payment] success verification failed', error);
+      console.error('[tarris-payment] contract archive verification failed', error);
     }
   }
 
