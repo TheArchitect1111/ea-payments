@@ -61,3 +61,5 @@ jobs:
           name: amanda-secure-recovered-candidate
           path: recovered/
           retention-days: 1
+
+# Recovery pass 4: latest pre-regression official deployment.
