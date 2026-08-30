@@ -10,18 +10,13 @@ export default function TarrisBouieDepositPage() {
     setLoading(true);
     setError('');
     try {
-      const res = await fetch('/api/checkout', {
+      const res = await fetch('/api/checkout/tarris-bouie', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: 'Tarris Bouie',
-          email: 'tarrisb73@yahoo.com',
-          packageId: 'tarris_bouie_deposit',
-          organization: 'Tarris Bouie',
-        }),
+        body: JSON.stringify({ email: 'tarrisb73@yahoo.com' }),
       });
       const data = await res.json();
-      if (!res.ok || !data.url) throw new Error(data.error || 'Unable to open secure payment.');
+      if (!res.ok || !data.url) throw new Error(data.error || data.detail || 'Unable to open secure payment.');
       window.location.href = data.url;
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Unable to open secure payment.');
@@ -43,7 +38,7 @@ export default function TarrisBouieDepositPage() {
           {loading ? 'Opening secure payment…' : 'Pay $500 Deposit'}
         </button>
         {error ? <p className="mt-4 text-sm text-red-700">{error}</p> : null}
-        <p className="mt-5 text-xs text-neutral-400">Secure payment processing by Stripe.</p>
+        <p className="mt-5 text-xs text-neutral-400">Secure payment processing by Stripe. Successful payment is verified server-side and recorded against this agreement.</p>
       </section>
     </main>
   );
