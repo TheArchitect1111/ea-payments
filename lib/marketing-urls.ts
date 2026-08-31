@@ -47,6 +47,8 @@ export const CUSTOM_DOMAIN_MAP: Record<string, string> = {
   'amplify.efficiencyarchitects.online': '/amplifi',
   'story.efficiencyarchitects.online': '/story/selena',
   'pulse.efficiencyarchitects.online': '/portal/login?next=/portal/demo-client/pulse',
+  'amandacatherine.ca': '/amanda-catherine',
+  'www.amandacatherine.ca': '/amanda-catherine',
   // Portal vanity root is handled by lib/ctp-portal-host (rewrite /{slug} → /portal/{slug}).
 };
 
