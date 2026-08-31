@@ -28,6 +28,7 @@
     "test:amanda-completion": "node scripts/test-amanda-completion.mjs",
     "test:amanda-client-delivery": "node scripts/test-amanda-client-delivery-phase1.mjs",
     "test:amanda-checkout": "node scripts/test-amanda-checkout-config.mjs",
+    "test:amanda-learning-handoff": "node scripts/test-amanda-learning-handoff.mjs",
     "test:canonical-registry": "npx --yes tsx scripts/test-canonical-project-registry.ts",
     "sync-chassis": "node scripts/sync-portal-chassis.mjs",
     "sync-premium": "node scripts/sync-premium-chassis.mjs",

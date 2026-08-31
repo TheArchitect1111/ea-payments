@@ -35,6 +35,7 @@ import {
   ensurePackageEntitlements,
   isDemoPortalSlug,
 } from '@/lib/modules/ensure-package-entitlements';
+import { hasAmandaLearningAccess } from '@/lib/amanda-catherine/client-access';
 import {
   NAV_GROUP_LABELS,
   NAV_GROUP_ORDER,
@@ -358,6 +359,16 @@ export async function requirePortalModule(
   });
 
   if (!access.enabledModuleIds.has(moduleId)) {
+    // Course assignment is the learner-level authorization source. Do not send
+    // a paid Amanda learner back to the portal home while org entitlements lag.
+    if (
+      moduleId === 'training' &&
+      slug.toLowerCase().startsWith('amanda-catherine') &&
+      session.email &&
+      await hasAmandaLearningAccess(slug, session.email)
+    ) {
+      return { session, client, access };
+    }
     // CTP intake clients still reach their branded workspace if entitlements lag.
     if (moduleId === 'ctp') {
       const submission = await getCtpSubmissionForPortal({

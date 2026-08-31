@@ -1,5 +1,7 @@
-import { redirect } from 'next/navigation';
+import LearningPage from '../../[slug]/learning/page';
 
-export default function AmandaLearningRedirect() {
-  redirect('/portal/amanda-catherine');
+export const dynamic = 'force-dynamic';
+
+export default function AmandaLearningPage() {
+  return <LearningPage params={Promise.resolve({ slug: 'amanda-catherine' })} />;
 }

@@ -12,30 +12,52 @@ import type { AmandaPortalAudience } from './config';
 import { loadStudioRecord, saveStudioRecord } from '@/lib/creative-studio/persistence';
 import { syntheticOrgId } from '@/lib/platform-store';
 import { invitedAmandaLearner } from './invited-learners';
+import { z } from 'zod';
 
 const AMANDA_PORTAL_SLUG = 'amanda-catherine';
 
-type AmandaAccessProfile = {
-  portalSlug: string;
-  email: string;
-  name: string;
-  audience: AmandaPortalAudience;
-  courseIds: string[];
-  updatedAt: string;
-};
+const AmandaAccessProfileSchema = z.object({
+  portalSlug: z.string().min(1),
+  email: z.string().email(),
+  name: z.string().min(1),
+  audience: z.enum([
+    'client',
+    'student-trainee',
+    'certified-practitioner',
+    'member-community-participant',
+    'media-guest',
+    'volunteer',
+    'vendor-partner',
+    'staff',
+    'admin',
+  ]),
+  courseIds: z.array(z.string().min(1)),
+  updatedAt: z.string().min(1),
+});
+
+type AmandaAccessProfile = z.infer<typeof AmandaAccessProfileSchema>;
 
 function accessProfileId(portalSlug: string, email: string) {
   return `amanda-access-${crypto.createHash('sha256').update(`${portalSlug}:${email.toLowerCase()}`).digest('hex').slice(0, 24)}`;
 }
 
 export async function getAmandaAssignedAudience(portalSlug: string, email: string) {
-  const profile = await loadStudioRecord<AmandaAccessProfile>('experience', accessProfileId(portalSlug, email));
-  return profile?.audience || invitedAmandaLearner(email)?.audience || null;
+  const stored = await loadStudioRecord<unknown>('experience', accessProfileId(portalSlug, email));
+  const profile = AmandaAccessProfileSchema.safeParse(stored);
+  return (profile.success ? profile.data.audience : null) || invitedAmandaLearner(email)?.audience || null;
 }
 
 export async function getAmandaAssignedCourseIds(portalSlug: string, email: string) {
-  const profile = await loadStudioRecord<AmandaAccessProfile>('experience', accessProfileId(portalSlug, email));
-  return Array.isArray(profile?.courseIds) ? profile.courseIds : [...(invitedAmandaLearner(email)?.courseIds || [])];
+  const stored = await loadStudioRecord<unknown>('experience', accessProfileId(portalSlug, email));
+  const profile = AmandaAccessProfileSchema.safeParse(stored);
+  return profile.success ? profile.data.courseIds : [...(invitedAmandaLearner(email)?.courseIds || [])];
+}
+
+/** Paid or explicitly invited learners may open Amanda's training surface even
+ * while tenant-wide module entitlements are still being synchronized. */
+export async function hasAmandaLearningAccess(portalSlug: string, email: string) {
+  if (!portalSlug.toLowerCase().startsWith(AMANDA_PORTAL_SLUG) || !email.trim()) return false;
+  return (await getAmandaAssignedCourseIds(portalSlug, email)).length > 0;
 }
 
 function temporaryPassword() {
@@ -148,11 +170,13 @@ export async function provisionAmandaClientAccess(input: {
     await createMembership({ userEmail: email, organizationId: orgId, role: 'guest' });
   }
 
-  const existingProfile = await loadStudioRecord<AmandaAccessProfile>('experience', accessProfileId(AMANDA_PORTAL_SLUG, email));
+  const existingStoredProfile = await loadStudioRecord<unknown>('experience', accessProfileId(AMANDA_PORTAL_SLUG, email));
+  const existingProfileResult = AmandaAccessProfileSchema.safeParse(existingStoredProfile);
+  const existingProfile = existingProfileResult.success ? existingProfileResult.data : null;
   const priorCourseIds = existingProfile?.courseIds || [];
   const courseIds = [...new Set([...priorCourseIds, ...(input.courseIds || [])])];
   const accessChanged = !existingProfile || courseIds.some((courseId) => !priorCourseIds.includes(courseId));
-  await saveStudioRecord({
+  const profileSave = await saveStudioRecord({
     recordType: 'experience',
     id: accessProfileId(AMANDA_PORTAL_SLUG, email),
     organizationId: syntheticOrgId(AMANDA_PORTAL_SLUG),
@@ -166,6 +190,9 @@ export async function provisionAmandaClientAccess(input: {
       updatedAt: new Date().toISOString(),
     } satisfies AmandaAccessProfile,
   });
+  if (!profileSave.ok) {
+    return { ok: false as const, error: profileSave.error || 'Course assignment could not be saved.' };
+  }
 
   let welcomeSent = false;
   if ((created || accessChanged) && (tempPassword || belongsToAnotherPortal)) {
