@@ -1,9 +1,5 @@
-'use client';
-
-import { Suspense } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
 import RealmLoginCard from '@/components/auth/RealmLoginCard';
 import { getRealmLoginCopy, magicLinkErrorMessage } from '@/lib/auth/realm-login-copy';
 import amandaPhoto from '@/public/home/client-amanda-catherine.jpg';
@@ -11,12 +7,18 @@ import './portal-login.css';
 
 const copy = getRealmLoginCopy('portal');
 
+type SearchParams = Promise<Record<string, string | string[] | undefined>>;
+
 /** Only honor same-origin relative next paths; otherwise let the auth exchange pick the client hub. */
 function safeNextPath(raw: string | null): string | undefined {
   if (!raw || !raw.startsWith('/') || raw.startsWith('//')) return undefined;
   // Never send portal-realm logins into the Simplifi product shell by default.
   if (raw === '/simplifi/capture' || raw.startsWith('/simplifi/')) return undefined;
   return raw;
+}
+
+function single(value: string | string[] | undefined): string | null {
+  return Array.isArray(value) ? value[0] ?? null : value ?? null;
 }
 
 function isAmandaPortal(nextPath?: string) {
@@ -126,17 +128,10 @@ function DefaultLoginBrand() {
   );
 }
 
-function PortalLoginInner() {
-  const searchParams = useSearchParams();
-  const nextPath = safeNextPath(searchParams.get('next'));
-  const error = magicLinkErrorMessage('portal', searchParams.get('error'));
-
-  return <RealmLoginCard realm="portal" next={nextPath} error={error} showTitle={false} />;
-}
-
-function PortalLoginContent() {
-  const searchParams = useSearchParams();
-  const nextPath = safeNextPath(searchParams.get('next'));
+export default async function PortalLoginPage({ searchParams }: { searchParams: SearchParams }) {
+  const params = await searchParams;
+  const nextPath = safeNextPath(single(params.next));
+  const error = magicLinkErrorMessage('portal', single(params.error));
   const amanda = isAmandaPortal(nextPath);
   const amandaLearning = isAmandaLearningPortal(nextPath);
 
@@ -145,9 +140,7 @@ function PortalLoginContent() {
       <div className="pl-shell">
         {amandaLearning ? <AmandaLearningLoginBrand /> : amanda ? <AmandaLoginBrand /> : <DefaultLoginBrand />}
 
-        <Suspense fallback={<div className="pl-card">Loading…</div>}>
-          <PortalLoginInner />
-        </Suspense>
+        <RealmLoginCard realm="portal" next={nextPath} error={error} showTitle={false} />
 
         <footer className="pl-footer">
           {amanda ? (
@@ -174,13 +167,5 @@ function PortalLoginContent() {
         </footer>
       </div>
     </div>
-  );
-}
-
-export default function PortalLoginPage() {
-  return (
-    <Suspense fallback={<div className="pl-page"><div className="pl-card">Loading…</div></div>}>
-      <PortalLoginContent />
-    </Suspense>
   );
 }
