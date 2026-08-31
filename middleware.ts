@@ -193,6 +193,14 @@ export async function middleware(request: NextRequest) {
     const requestHeaders = new Headers(request.headers);
     requestHeaders.set('x-pathname', pathname);
     if (portalResponse.status >= 300 && portalResponse.status < 400) {
+      const location = portalResponse.headers.get('location');
+      if (location) {
+        const login = new URL(location, request.url);
+        if (login.pathname === '/portal/login' && !login.searchParams.has('next')) {
+          login.searchParams.set('next', `${pathname}${request.nextUrl.search}`);
+          return NextResponse.redirect(login, portalResponse.status);
+        }
+      }
       return portalResponse;
     }
     const allowed = NextResponse.next({ request: { headers: requestHeaders } });
