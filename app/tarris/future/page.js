@@ -11,7 +11,7 @@ export default function TarrisAgreementPage() {
       </header>
       <iframe
         title="Tarris Bouie Client Services Agreement"
-        src="/api/contracts/tarris"
+        src="/contracts/Tarris_Bouie_Client_Services_Agreement_OFFICIAL.pdf"
         style={{ display: 'block', width: '100%', height: 'calc(100vh - 58px)', border: 0, background: '#fff' }}
       />
     </main>
