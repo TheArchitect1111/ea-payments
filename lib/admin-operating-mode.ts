@@ -6,6 +6,7 @@ export const EA_OPERATING_MODE_KEY = 'ea_operating_mode';
 export const EXECUTIVE_NAV = [
   { href: '/admin/master', label: 'Home' },
   { href: '/admin/delivery', label: 'Clients' },
+  { href: '/admin/file-cabinet/share', label: 'File Cabinet' },
   { href: '/admin/ctp', label: 'CTP' },
   { href: '/admin/content-requests', label: 'Content' },
   { href: '/admin/simplifi', label: 'Opportunities' },
