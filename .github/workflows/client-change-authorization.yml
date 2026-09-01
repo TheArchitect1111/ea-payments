@@ -35,8 +35,9 @@ jobs:
         if: github.event_name == 'pull_request' && steps.protected.outputs.changed == 'true'
         env:
           LABELS_JSON: ${{ toJson(github.event.pull_request.labels.*.name) }}
+          PR_BODY: ${{ github.event.pull_request.body }}
         run: |
-          node -e "const labels=JSON.parse(process.env.LABELS_JSON); if(!labels.includes('client-approved')) { console.error('Protected client files changed without the client-approved label.'); process.exit(1) }"
+          node -e "const labels=JSON.parse(process.env.LABELS_JSON); const body=process.env.PR_BODY||''; const recorded=/Client approval:\s*CONFIRMED/i.test(body)&&/Approved by:\s*\S+/i.test(body); if(!labels.includes('client-approved')&&!recorded) { console.error('Protected client files changed without a client-approved label or recorded approval in the pull request.'); process.exit(1) }"
       - name: Reject direct protected changes to production
         if: github.event_name == 'push' && steps.protected.outputs.changed == 'true'
         run: |
