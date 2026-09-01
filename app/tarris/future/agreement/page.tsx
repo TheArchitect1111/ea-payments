@@ -35,12 +35,12 @@ export default function TarrisAgreementPage() {
 
         <section className="px-7 py-10 sm:px-12">
           <p className="text-xs font-bold uppercase tracking-[0.22em] text-[#aa8122]">A note from Efficiency Architects</p>
-          <h2 className="mt-3 text-3xl font-semibold tracking-[-0.03em]">Tarris, we're excited about what's ahead</h2>
+          <h2 className="mt-3 text-3xl font-semibold tracking-[-0.03em]">Tarris, we&apos;re excited about what&apos;s ahead</h2>
           <div className="mt-5 space-y-4 text-sm leading-7 text-neutral-600">
             <p>Thank you for trusting Efficiency Architects to help build the next phase of your digital presence. This project is about much more than creating a great website. Tarris is entering an important stage where basketball, personal brand, business opportunities, partnerships, and his long-term future can begin working together.</p>
-            <p>Our goal is to build the digital foundation that supports that growth. We are creating a platform that can tell Tarris's story professionally, showcase who he is beyond the court, make it easier for people and organizations to connect with him, and provide the systems needed to manage opportunities as they develop.</p>
+            <p>Our goal is to build the digital foundation that supports that growth. We are creating a platform that can tell Tarris&apos;s story professionally, showcase who he is beyond the court, make it easier for people and organizations to connect with him, and provide the systems needed to manage opportunities as they develop.</p>
             <p>Most importantly, we are building with the future in mind. The platform should be able to grow alongside Tarris, from his college career to NIL and partnership opportunities, community initiatives, professional opportunities, and whatever comes next.</p>
-            <p>We're excited to help build that foundation and grateful for the opportunity to be part of the journey.</p>
+            <p>We&apos;re excited to help build that foundation and grateful for the opportunity to be part of the journey.</p>
             <p className="font-semibold text-neutral-900">Robert Brickey<br/>Efficiency Architects</p>
           </div>
         </section>
