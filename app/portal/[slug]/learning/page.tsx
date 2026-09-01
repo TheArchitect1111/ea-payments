@@ -38,6 +38,9 @@ export default async function LearningPage({ params }: { params: Promise<{ slug:
   const assignedCourseIds = isAmanda && audience && audience !== 'admin'
     ? await getAmandaAssignedCourseIds(slug, session.email || client.email)
     : [];
+  const canAdministerAmandaLearning = Boolean(
+    isAmanda && audience === 'admin' || (session.role && roleAtLeast(session.role, 'admin')),
+  );
 
   return (
     <PortalSubpage
@@ -47,7 +50,7 @@ export default async function LearningPage({ params }: { params: Promise<{ slug:
       title="Training & learning"
       lede="Guides, modules, and resources to support adoption — starting with the essentials below."
     >
-      {isAmanda && audience ? <AmandaLearningCenter audience={audience} assignedCourseIds={assignedCourseIds} isAdmin={Boolean(session.role && roleAtLeast(session.role, 'admin'))} /> : null}
+      {isAmanda && audience ? <AmandaLearningCenter audience={audience} assignedCourseIds={assignedCourseIds} isAdmin={canAdministerAmandaLearning} /> : null}
       {publishedTraining.length ? (
         <section className="mb-8">
           <h2 className="ep-section-title">Assigned training</h2>
