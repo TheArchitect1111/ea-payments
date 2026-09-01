@@ -12,11 +12,27 @@
     { "id": "EA-TRAIN", "name": "EA Training Transformation", "githubRepo": null, "vercelProject": "ea-training-transformation", "publicUrl": "https://ea-training-transformation.vercel.app", "expectedText": ["Training", "Transformation"] },
     { "id": "EA-COMMS", "name": "EA Communications Chassis", "githubRepo": null, "vercelProject": "ea-communications-chassis", "publicUrl": "https://ea-communications-chassis.vercel.app", "expectedText": ["Communication"] },
     { "id": "EA-BBALL", "name": "EA Basketball Program OS", "githubRepo": null, "vercelProject": "form-to-finish-executive-review", "publicUrl": "https://form-to-finish-executive-review.vercel.app", "expectedText": ["Basketball", "Form to Finish"] },
-    { "id": "AMANDA", "name": "Amanda Catherine", "githubRepo": "TheArchitect1111/ea-payments", "vercelProject": "amanda-catherine-preview", "publicUrl": "https://amandacatherine.ca", "expectedText": ["Amanda Catherine"] },
-    { "id": "CPR", "name": "Canadian Prospect Recruitment", "githubRepo": "TheArchitect1111/cpr-site", "vercelProject": "cpr-site", "publicUrl": "https://www.cprglobalsports.com", "expectedText": ["CPR Global Prospects"] },
-    { "id": "MAGIC", "name": "Mississauga Magic", "githubRepo": "TheArchitect1111/cpr-site", "vercelProject": "cpr-site", "publicUrl": "https://mississaugamagic.com", "expectedText": ["Mississauga Magic"], "knownConstraint": "Owner must resolve whether WordPress or the CPR Vercel skin is canonical." },
-    { "id": "GSA", "name": "Gastonia-Shelby BrotherHub", "githubRepo": "TheArchitect1111/BrotherHub", "vercelProject": "brother-hub", "publicUrl": "https://brother-hub.vercel.app", "expectedText": ["BrotherHub", "Gastonia"] },
-    { "id": "RUMBALL", "name": "Bob Rumball", "githubRepo": null, "vercelProject": "bobrumball-experience-lab", "publicUrl": "https://bobrumball-experience-lab.vercel.app", "expectedText": ["Bob Rumball"] },
+    {
+      "id": "AMANDA",
+      "name": "Amanda Catherine",
+      "githubRepo": "TheArchitect1111/ea-payments",
+      "vercelProject": "amanda-catherine-preview",
+      "publicUrl": "https://amandacatherine.ca",
+      "expectedText": ["Amanda Catherine", "Return to alignment", "Restore", "Learn", "Create"],
+      "allowedFinalHosts": ["amandacatherine.ca"],
+      "expectedAssets": [
+        { "path": "/amanda-catherine/amanda-catherine-founder.webp", "contentType": "image/webp", "minBytes": 50000 },
+        { "path": "/amanda-catherine/amanda-catherine-faith.webp", "contentType": "image/webp", "minBytes": 50000 },
+        { "path": "/amanda-catherine/amanda-catherine-treatment.webp", "contentType": "image/webp", "minBytes": 50000 },
+        { "path": "/amanda-catherine/amanda-catherine-training.webp", "contentType": "image/webp", "minBytes": 50000 },
+        { "path": "/amanda-catherine/amanda-catherine-entrepreneurial-artist.webp", "contentType": "image/webp", "minBytes": 50000 },
+        { "path": "/amanda-catherine/amanda-catherine-impact.webp", "contentType": "image/webp", "minBytes": 50000 }
+      ]
+    },
+    { "id": "CPR", "name": "Canadian Prospect Recruitment", "githubRepo": "TheArchitect1111/cpr-site", "vercelProject": "cpr-site", "publicUrl": "https://www.cprglobalsports.com", "expectedText": ["CPR Global Prospects"], "allowedFinalHosts": ["www.cprglobalsports.com", "cprglobalsports.com"] },
+    { "id": "MAGIC", "name": "Mississauga Magic", "githubRepo": "TheArchitect1111/cpr-site", "vercelProject": "cpr-site", "publicUrl": "https://mississaugamagic.com", "expectedText": ["Mississauga Magic"], "allowedFinalHosts": ["mississaugamagic.com", "www.mississaugamagic.com"], "knownConstraint": "Owner must resolve whether WordPress or the CPR Vercel skin is canonical." },
+    { "id": "GSA", "name": "Gastonia-Shelby BrotherHub", "githubRepo": "TheArchitect1111/BrotherHub", "vercelProject": "brother-hub", "publicUrl": "https://brother-hub.vercel.app", "expectedText": ["BrotherHub", "Gastonia"], "allowedFinalHosts": ["brother-hub.vercel.app"] },
+    { "id": "RUMBALL", "name": "Bob Rumball", "githubRepo": null, "vercelProject": "bobrumball-experience-lab", "publicUrl": "https://bobrumball-experience-lab.vercel.app", "expectedText": ["Bob Rumball"], "allowedFinalHosts": ["bobrumball-experience-lab.vercel.app"] },
     { "id": "MBI", "name": "Money Behind It", "githubRepo": "TheArchitect1111/ea-payments", "vercelProject": "ea-payments", "publicUrl": null, "expectedText": [], "knownConstraint": "Canonical public route or output location is not recorded." }
   ]
 }
