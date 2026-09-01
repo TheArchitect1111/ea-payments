@@ -1,0 +1,66 @@
+name: Amanda Image Dedupe Fix
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/amanda-image-dedupe-fix.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+
+      - name: Lock Amanda Learn and Impact to distinct approved assets
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('app/amanda-catherine/page.tsx')
+          s = p.read_text()
+          replacements = {
+            "learn: '/amanda-catherine/amanda-catherine-training.webp',": "learn: '/amanda-catherine/aesthetikine-certificate-premium.png',",
+            "impact: '/amanda-catherine/amanda-catherine-impact.webp',": "impact: '/amanda-catherine/amanda-catherine-training.webp',",
+            "<Media imageUrl={restoredImage(site.learn.imageUrl, approvedImages.learn)} alt=\"Amanda Catherine practitioner training\" />": "<Media imageUrl={approvedImages.learn} alt=\"Amanda Catherine practitioner training\" />",
+            "<Media imageUrl={restoredImage(site.impact.imageUrl, approvedImages.impact)} alt=\"Amanda Catherine speaking\" />": "<Media imageUrl={approvedImages.impact} alt=\"Amanda Catherine speaking\" />",
+          }
+          for old, new in replacements.items():
+            if old not in s:
+              print(f'Expected source not found: {old}')
+            s = s.replace(old, new)
+          p.write_text(s)
+          PY
+
+      - name: Verify no approved image aliases are duplicated
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          s = Path('app/amanda-catherine/page.tsx').read_text()
+          block = s.split('const approvedImages = {',1)[1].split('} as const;',1)[0]
+          values = re.findall(r"'(/amanda-catherine/[^']+)'", block)
+          if len(values) != len(set(values)):
+            raise SystemExit(f'Duplicate approved image paths remain: {values}')
+          print('Amanda approved image paths are unique:', values)
+          PY
+
+      - name: Commit repair
+        shell: bash
+        run: |
+          git config user.name 'EA Production Guard'
+          git config user.email 'actions@users.noreply.github.com'
+          git add app/amanda-catherine/page.tsx
+          if git diff --cached --quiet; then
+            echo 'No repair commit required.'
+            exit 0
+          fi
+          git commit -m 'fix: deduplicate Amanda approved production imagery'
+          git push origin HEAD:master
