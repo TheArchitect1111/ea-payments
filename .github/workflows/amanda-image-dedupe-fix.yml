@@ -29,16 +29,14 @@ jobs:
             "learn: '/amanda-catherine/amanda-catherine-training.webp',": "learn: '/amanda-catherine/aesthetikine-certificate-premium.png',",
             "impact: '/amanda-catherine/amanda-catherine-impact.webp',": "impact: '/amanda-catherine/amanda-catherine-training.webp',",
             "<Media imageUrl={restoredImage(site.learn.imageUrl, approvedImages.learn)} alt=\"Amanda Catherine practitioner training\" />": "<Media imageUrl={approvedImages.learn} alt=\"Amanda Catherine practitioner training\" />",
-            "<Media imageUrl={restoredImage(site.impact.imageUrl, approvedImages.impact)} alt=\"Amanda Catherine speaking\" />": "<Media imageUrl={approvedImages.impact} alt=\"Amanda Catherine speaking\" />",
+            "<Media imageUrl={restoredImage(site.impact.imageUrl, approvedImages.impact)} alt=\"Amanda Catherine speaking and media\" />": "<Media imageUrl={approvedImages.impact} alt=\"Amanda Catherine speaking and media\" />",
           }
           for old, new in replacements.items():
-            if old not in s:
-              print(f'Expected source not found: {old}')
             s = s.replace(old, new)
           p.write_text(s)
           PY
 
-      - name: Verify no approved image aliases are duplicated
+      - name: Verify approved image paths and locked slots
         shell: bash
         run: |
           python - <<'PY'
@@ -49,7 +47,11 @@ jobs:
           values = re.findall(r"'(/amanda-catherine/[^']+)'", block)
           if len(values) != len(set(values)):
             raise SystemExit(f'Duplicate approved image paths remain: {values}')
-          print('Amanda approved image paths are unique:', values)
+          if 'restoredImage(site.learn.imageUrl, approvedImages.learn)' in s:
+            raise SystemExit('Learn slot is still dynamically overridable')
+          if 'restoredImage(site.impact.imageUrl, approvedImages.impact)' in s:
+            raise SystemExit('Impact slot is still dynamically overridable')
+          print('Amanda approved visual slots are unique and locked.')
           PY
 
       - name: Commit repair
@@ -62,5 +64,5 @@ jobs:
             echo 'No repair commit required.'
             exit 0
           fi
-          git commit -m 'fix: deduplicate Amanda approved production imagery'
+          git commit -m 'fix: lock Amanda distinct approved production imagery'
           git push origin HEAD:master
