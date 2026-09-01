@@ -1,0 +1,68 @@
+name: Amanda Install Approved Body Sculpt Asset
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/amanda-publish-body-sculpt-runner.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  install:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+
+      - name: Decode and verify approved asset
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p public/amanda-catherine
+          base64 -d .github/workflows/amanda-publish-body-sculpt-intensive.yml > public/amanda-catherine/body-sculpt-intensive-2026-09-01.webp
+          echo 'af2153bc1765c70108a5b4d9e9f982ac4509b971478252ff1bffa10bec67a88a  public/amanda-catherine/body-sculpt-intensive-2026-09-01.webp' | sha256sum -c -
+
+      - name: Put the approved graphic in the Learn slot
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('app/amanda-catherine/page.tsx')
+          s = p.read_text()
+          old = "learn: '/amanda-catherine/aesthetikine-certificate-premium.png',"
+          new = "learn: '/amanda-catherine/body-sculpt-intensive-2026-09-01.webp',"
+          if old not in s and new not in s:
+              raise SystemExit('Amanda Learn image mapping was not found')
+          s = s.replace(old, new)
+          p.write_text(s)
+          PY
+
+      - name: Remove temporary encoded payload and verify image map
+        shell: bash
+        run: |
+          rm .github/workflows/amanda-publish-body-sculpt-intensive.yml
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          s = Path('app/amanda-catherine/page.tsx').read_text()
+          block = s.split('const approvedImages = {',1)[1].split('} as const;',1)[0]
+          values = re.findall(r"'(/amanda-catherine/[^']+)'", block)
+          if len(values) != len(set(values)):
+              raise SystemExit(f'Duplicate approved image paths remain: {values}')
+          if "learn: '/amanda-catherine/body-sculpt-intensive-2026-09-01.webp'," not in s:
+              raise SystemExit('Approved Body Sculpt asset is not mapped to Learn')
+          print('Amanda image map is unique and Body Sculpt Intensive is locked to Learn.')
+          PY
+
+      - name: Commit approved production image
+        shell: bash
+        run: |
+          git config user.name 'EA Production Guard'
+          git config user.email 'actions@users.noreply.github.com'
+          git add app/amanda-catherine/page.tsx public/amanda-catherine/body-sculpt-intensive-2026-09-01.webp .github/workflows/amanda-publish-body-sculpt-intensive.yml
+          git commit -m 'fix: publish Amanda approved Body Sculpt Intensive image'
+          git push origin HEAD:master
