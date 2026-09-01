@@ -20,14 +20,24 @@ const publicCheckout = await readFile(
   'utf8',
 );
 assert.equal(
-  publicCheckout.includes("paymentOption: testMode ? 'test' : 'full'"),
+  publicCheckout.includes("paymentOption: 'full-or-promotion'"),
   true,
-  'Amanda public enrollment must propagate paymentOption=test for the CAD $1 process checkout',
+  'Amanda public enrollment must identify the approved full-price or promotion-code checkout flow',
 );
 assert.equal(
-  publicCheckout.includes('unit_amount: testMode ? 100 : Math.round(offer.priceCad * 100)'),
+  publicCheckout.includes('allow_promotion_codes: true'),
   true,
-  'Amanda process-test checkout must charge exactly CAD $1.00 while preserving full-price logic',
+  'Amanda public enrollment must allow approved Stripe promotion codes',
+);
+assert.equal(
+  publicCheckout.includes('unit_amount: Math.round(offer.priceCad * 100)'),
+  true,
+  'Amanda public enrollment must charge the configured course price before any approved promotion code',
+);
+assert.equal(
+  publicCheckout.includes('testMode'),
+  false,
+  'Amanda public enrollment must not expose the retired CAD $1 process-test mode',
 );
 assert.equal(
   publicCheckout.includes("portalSlug: 'amanda-catherine'"),
@@ -45,11 +55,6 @@ assert.equal(
   true,
   'Amanda Stripe metadata must distinguish regular pricing from the current course price',
 );
-assert.equal(
-  publicCheckout.includes("Regular CAD $") && publicCheckout.includes("Current CAD $"),
-  true,
-  'Amanda Stripe test description must distinguish regular and current sale pricing',
-);
 
 const enrollmentForm = await readFile(
   new URL('../app/portal/amanda-catherine/enroll/AmandaEnrollmentForm.tsx', import.meta.url),
@@ -61,9 +66,9 @@ assert.equal(
   'Amanda enrollment must distinguish the regular price from a current sale price',
 );
 assert.equal(
-  enrollmentForm.includes("{course.compareAtPriceCad ? 'Current' : 'Retail'}"),
+  enrollmentForm.includes("course.compareAtPriceCad ? 'Sale ' : ''"),
   true,
-  'Amanda $1 test screen must not mislabel a sale price as the regular retail price',
+  'Amanda enrollment must clearly label a discounted configured price as a sale price',
 );
 
 const amandaConfig = await readFile(
