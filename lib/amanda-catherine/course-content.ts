@@ -21,6 +21,10 @@ function contentId(portalSlug: string, courseId: string) {
   return `amanda-course-${createHash('sha256').update(`${portalSlug}:${courseId}`).digest('hex').slice(0, 24)}`;
 }
 
+function backupContentId(portalSlug: string, courseId: string) {
+  return `${contentId(portalSlug, courseId)}-backup`;
+}
+
 function cleanUrl(value: string) {
   const trimmed = value.trim();
   if (!trimmed) return '';
@@ -60,11 +64,37 @@ export function accountCanAccessCourse(
   return coursesForAccount(audience, assignedCourseIds, isAdmin).some((course) => course.id === courseId);
 }
 
+async function persistCourseRecord(
+  portalSlug: string,
+  courseId: string,
+  courseTitle: string,
+  content: AmandaCourseContent,
+  id: string,
+  titleSuffix = '',
+) {
+  const result = await saveStudioRecord({
+    recordType: 'experience',
+    id,
+    organizationId: syntheticOrgId(portalSlug),
+    title: `Amanda course content${titleSuffix}: ${courseTitle}`,
+    payload: content,
+  });
+  if (!result.ok) throw new Error(result.error || 'Course content could not be saved.');
+}
+
 export async function getAmandaCourseContent(portalSlug: string, courseId: string) {
   const course = AMANDA_COURSES.find((item) => item.id === courseId);
   if (!course) throw new Error('Amanda course not found.');
-  const saved = await loadStudioRecord<AmandaCourseContent>('experience', contentId(portalSlug, courseId));
+  const id = contentId(portalSlug, courseId);
+  const saved = await loadStudioRecord<AmandaCourseContent>('experience', id);
   if (saved) return saved;
+
+  const backup = await loadStudioRecord<AmandaCourseContent>('experience', backupContentId(portalSlug, courseId));
+  if (backup) {
+    await persistCourseRecord(portalSlug, courseId, course.title, backup, id, ' (recovered)');
+    return backup;
+  }
+
   return {
     portalSlug,
     courseId,
@@ -95,13 +125,13 @@ export async function saveAmandaCourseContent(
     }),
     updatedAt: new Date().toISOString(),
   };
-  const result = await saveStudioRecord({
-    recordType: 'experience',
-    id: contentId(portalSlug, courseId),
-    organizationId: syntheticOrgId(portalSlug),
-    title: `Amanda course content: ${course.title}`,
-    payload: content,
-  });
-  if (!result.ok) throw new Error(result.error || 'Course content could not be saved.');
-  return content;
+
+  await persistCourseRecord(portalSlug, courseId, course.title, content, contentId(portalSlug, courseId));
+  await persistCourseRecord(portalSlug, courseId, course.title, content, backupContentId(portalSlug, courseId), ' backup');
+
+  const verified = await loadStudioRecord<AmandaCourseContent>('experience', contentId(portalSlug, courseId));
+  if (!verified || verified.updatedAt !== content.updatedAt) {
+    throw new Error('Course content save could not be verified. Please try again.');
+  }
+  return verified;
 }
