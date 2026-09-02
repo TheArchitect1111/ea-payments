@@ -1,0 +1,99 @@
+.hero {
+  background-color: #18221c !important;
+  background-image: linear-gradient(90deg, rgba(8,16,11,.88), rgba(8,16,11,.28) 65%, rgba(8,16,11,.34)), url('https://ea-payments.vercel.app/amanda-catherine/amanda-catherine-founder.webp') !important;
+  background-size: cover !important;
+  background-position: center center !important;
+  background-repeat: no-repeat !important;
+}
+
+.heroMedia {
+  display: block !important;
+  opacity: 1 !important;
+}
+
+.heroMedia .ac-media {
+  display: block !important;
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-height: none !important;
+  object-fit: cover !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  filter: none !important;
+  -webkit-filter: none !important;
+}
+
+.heroMedia::after {
+  background: linear-gradient(90deg, rgba(8,16,11,.88), rgba(8,16,11,.28) 65%, rgba(8,16,11,.34)) !important;
+  pointer-events: none !important;
+}
+
+.heroCopy,
+.heroCopy p,
+.heroCopy h1,
+.heroCopy h1 *,
+.heroCopy .actions,
+.heroCopy .actions a {
+  opacity: 1 !important;
+  visibility: visible !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+.heroCopy p,
+.heroCopy h1,
+.heroCopy h1 *,
+.heroCopy .actions {
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+.heroCopy h1 {
+  color: #fff !important;
+}
+
+.heroCopy > p:not(.eyebrow) {
+  color: rgba(255,255,255,.88) !important;
+}
+
+.heroCopy .eyebrow {
+  color: #ead8ae !important;
+}
+
+.heroCopy .btn {
+  color: #fff !important;
+  border-color: #fff !important;
+}
+
+.heroCopy .btn.fill {
+  background: #fff !important;
+  background-color: #fff !important;
+  color: #18221c !important;
+  -webkit-text-fill-color: #18221c !important;
+}
+
+@media (max-width: 620px) {
+  .hero {
+    min-height: 640px !important;
+    background-position: 58% center !important;
+  }
+
+  .heroCopy {
+    padding: 112px 0 48px !important;
+    max-width: 100% !important;
+  }
+
+  .heroCopy h1 {
+    font-size: clamp(46px, 13vw, 64px) !important;
+    line-height: .98 !important;
+    letter-spacing: -.04em !important;
+  }
+
+  .heroCopy > p:not(.eyebrow) {
+    font-size: 17px !important;
+    line-height: 1.55 !important;
+  }
+}
