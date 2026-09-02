@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
+import './mobile-render-fix.css';
 
 export const metadata: Metadata = {
   title: 'Amanda Catherine | Restore · Learn · Create',
