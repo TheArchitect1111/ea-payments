@@ -1,0 +1,36 @@
+name: Amanda Restore Aug 29 Known-Good
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/amanda-restore-aug29.yml'
+  workflow_dispatch:
+
+jobs:
+  restore:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_SCOPE: the-architects-projects-cc813778
+      TARGET_DEPLOYMENT: amanda-catherine-4-npw5foeyf-the-architects-projects-cc813778.vercel.app
+    steps:
+      - name: Confirm Vercel credential
+        run: test -n "$VERCEL_TOKEN"
+
+      - name: Promote August 29 known-good Amanda deployment
+        run: npx --yes vercel@latest promote "$TARGET_DEPLOYMENT" --yes --token="$VERCEL_TOKEN" --scope="$VERCEL_SCOPE"
+
+      - name: Verify Amanda public domain
+        shell: bash
+        run: |
+          set -e
+          sleep 5
+          BODY="$(curl -fsSL --max-redirs 5 https://amandacatherine.ca/)"
+          printf '%s' "$BODY" | grep -qi 'Amanda Catherine'
+          if printf '%s' "$BODY" | grep -q '_vercel_share='; then
+            echo 'Public domain still contains Vercel share wrapper.' >&2
+            exit 1
+          fi
+          echo 'Amanda August 29 production restored.'
