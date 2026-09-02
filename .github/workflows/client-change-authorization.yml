@@ -1,0 +1,45 @@
+name: Client change authorization
+
+on:
+  pull_request:
+    branches: [master]
+  push:
+    branches: [master]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  authorization:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Detect protected client changes
+        id: protected
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          git diff --name-only "$BASE_SHA" "$HEAD_SHA" > /tmp/changed-files.txt
+          if grep -Eq '^(app/amanda-catherine/|public/amanda-catherine/|lib/amanda-catherine/|lib/portal-universal/packs/|config/ea-active-projects\.json)' /tmp/changed-files.txt; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Require recorded client approval
+        if: github.event_name == 'pull_request' && steps.protected.outputs.changed == 'true'
+        env:
+          LABELS_JSON: ${{ toJson(github.event.pull_request.labels.*.name) }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          node -e "const labels=JSON.parse(process.env.LABELS_JSON); const body=process.env.PR_BODY||''; const recorded=/Client approval:\s*CONFIRMED/i.test(body)&&/Approved by:\s*\S+/i.test(body); if(!labels.includes('client-approved')&&!recorded) { console.error('Protected client files changed without a client-approved label or recorded approval in the pull request.'); process.exit(1) }"
+      - name: Reject direct protected changes to production
+        if: github.event_name == 'push' && steps.protected.outputs.changed == 'true'
+        run: |
+          echo "Protected client files were pushed directly to master. Production client changes must use a reviewed pull request with the client-approved label."
+          exit 1
