@@ -1,0 +1,39 @@
+{
+  "component": "ea-lms-provider",
+  "provider": "Moodle",
+  "type": "open-source-lms",
+  "status": "chassis-option",
+  "defaultFor": ["coaches", "educators", "consultants", "training-programs", "small-to-mid-size-academies"],
+  "architecture": {
+    "publicSite": "client-owned-experience",
+    "portal": "ea-client-portal",
+    "learningEngine": "moodle",
+    "integrationPattern": "adapter",
+    "deployment": "self-hosted"
+  },
+  "capabilities": [
+    "course-authoring",
+    "modules-and-lessons",
+    "video-and-downloads",
+    "assignments",
+    "quizzes-and-assessments",
+    "progress-and-completion-tracking",
+    "certificates",
+    "discussion-and-messaging",
+    "cohort-management",
+    "learner-management"
+  ],
+  "requiredIntegration": [
+    "runtime-url",
+    "api-credentials",
+    "course-mapping",
+    "payment-to-entitlement-sync",
+    "user-provisioning",
+    "sso-or-session-handoff",
+    "completion-sync",
+    "health-monitoring",
+    "backup-and-restore",
+    "ea-client-site-guard"
+  ],
+  "releaseGate": "Never represent Moodle as live for a client until the runtime and adapter are configured and payment -> enrollment -> entitlement -> login -> course -> progress are verified end to end."
+}
