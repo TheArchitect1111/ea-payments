@@ -2,6 +2,7 @@ import { get } from '@vercel/blob';
 import { NextRequest, NextResponse } from 'next/server';
 import { getClientByPortalSlug } from '@/lib/airtable';
 import { EA_PORTAL_COOKIE, signSession, verifySession } from '@/lib/ea-portal-auth';
+import { resolvePortalIdentity } from '@/lib/org-provision';
 import { AMANDA_OWNER_PATH, AMANDA_PORTAL_SLUG } from '@/lib/amanda-catherine/constants';
 import { AMANDA_COURSES, ENTREPRENEURIAL_ARTIST_COURSE } from '@/lib/amanda-catherine/config';
 import { getAmandaCourseContent } from '@/lib/amanda-catherine/course-content';
@@ -44,6 +45,7 @@ const RECOVERED_VIDEO_CANDIDATES = [
 export async function GET(req: NextRequest) {
   const checks = {
     clientRecord: false,
+    canonicalIdentity: false,
     sessionSigning: false,
     sessionVerification: false,
     canonicalSlug: false,
@@ -70,10 +72,22 @@ export async function GET(req: NextRequest) {
       ENTREPRENEURIAL_ARTIST_COURSE.totalLessons === 6,
     );
 
+    if (!client) {
+      return NextResponse.json({ ok: false, checks, menuRoutes, courseResourceRoutes, courseInventory, materialInventory, recoveredVideoInventory }, { status: 503 });
+    }
+
+    const identity = await resolvePortalIdentity({
+      email: client.email,
+      slug: AMANDA_PORTAL_SLUG,
+      clientRecordId: client.id,
+    });
+    checks.canonicalIdentity = Boolean(identity.orgId && identity.role && identity.email);
+
     const token = await signSession({
       slug: AMANDA_PORTAL_SLUG,
-      role: 'owner',
-      email: 'amanda-login-canary@efficiencyarchitects.online',
+      orgId: identity.orgId,
+      role: identity.role,
+      email: identity.email,
     });
     checks.sessionSigning = Boolean(token);
 
@@ -81,7 +95,7 @@ export async function GET(req: NextRequest) {
     checks.sessionVerification = Boolean(session);
     checks.canonicalSlug = session?.slug === AMANDA_PORTAL_SLUG;
 
-    if (token && checks.clientRecord && checks.canonicalSlug) {
+    if (token && checks.canonicalIdentity && checks.canonicalSlug) {
       const [ownerResponse, portalHomeResponse, memberResponse] = await Promise.all([
         authenticatedResponse(req.nextUrl.origin, AMANDA_OWNER_PATH, token),
         authenticatedResponse(req.nextUrl.origin, `/portal/${AMANDA_PORTAL_SLUG}`, token),
