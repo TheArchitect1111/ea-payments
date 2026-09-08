@@ -5,14 +5,13 @@ import { AMANDA_OWNER_PATH, AMANDA_PORTAL_SLUG } from '@/lib/amanda-catherine/co
 
 export const dynamic = 'force-dynamic';
 
-async function authenticatedStatus(origin: string, path: string, token: string) {
-  const response = await fetch(`${origin}${path}`, {
+async function authenticatedResponse(origin: string, path: string, token: string) {
+  return fetch(`${origin}${path}`, {
     method: 'GET',
     headers: { cookie: `${EA_PORTAL_COOKIE}=${token}` },
     redirect: 'manual',
     cache: 'no-store',
   });
-  return response.status;
 }
 
 export async function GET(req: NextRequest) {
@@ -24,6 +23,7 @@ export async function GET(req: NextRequest) {
     authenticatedOwnerRoute: false,
     authenticatedPortalHome: false,
     authenticatedMemberRoute: false,
+    premiumOwnerDashboard: false,
   };
 
   try {
@@ -42,14 +42,23 @@ export async function GET(req: NextRequest) {
     checks.canonicalSlug = session?.slug === AMANDA_PORTAL_SLUG;
 
     if (token && checks.clientRecord && checks.canonicalSlug) {
-      const [ownerStatus, portalHomeStatus, memberStatus] = await Promise.all([
-        authenticatedStatus(req.nextUrl.origin, AMANDA_OWNER_PATH, token),
-        authenticatedStatus(req.nextUrl.origin, `/portal/${AMANDA_PORTAL_SLUG}`, token),
-        authenticatedStatus(req.nextUrl.origin, `/portal/${AMANDA_PORTAL_SLUG}/member`, token),
+      const [ownerResponse, portalHomeResponse, memberResponse] = await Promise.all([
+        authenticatedResponse(req.nextUrl.origin, AMANDA_OWNER_PATH, token),
+        authenticatedResponse(req.nextUrl.origin, `/portal/${AMANDA_PORTAL_SLUG}`, token),
+        authenticatedResponse(req.nextUrl.origin, `/portal/${AMANDA_PORTAL_SLUG}/member`, token),
       ]);
-      checks.authenticatedOwnerRoute = ownerStatus === 200;
-      checks.authenticatedPortalHome = portalHomeStatus === 200;
-      checks.authenticatedMemberRoute = memberStatus === 200;
+      checks.authenticatedOwnerRoute = ownerResponse.status === 200;
+      checks.authenticatedPortalHome = portalHomeResponse.status === 200;
+      checks.authenticatedMemberRoute = memberResponse.status === 200;
+
+      if (portalHomeResponse.status === 200) {
+        const body = await portalHomeResponse.text();
+        checks.premiumOwnerDashboard =
+          body.includes('Owner portal') &&
+          body.includes('Quick Actions') &&
+          body.includes('Ask Eva') &&
+          body.includes('Business Overview');
+      }
     }
 
     const ok = Object.values(checks).every(Boolean);
