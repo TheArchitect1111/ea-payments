@@ -11,5 +11,6 @@
 | Pulse/events | `lib/pulse*`, API routes | tenant ID | Airtable | observed |
 | Billing | `app/api/billing`, Stripe webhooks | persisted organization ID | Stripe + platform store | observed |
 | Business presence | `lib/business-presence.ts`, portal Settings | portal slug; shared business profile contract | provider-managed until partner API approval | Apple Business guided setup observed; automated sync disabled |
+| Creative Foundry | `lib/creative-foundry`, `video-factory/remotion`, existing EA visual workflows | brand/tenant ID carried by creative brief and asset records | provider/object storage through consuming product | shared production contracts + QA gate added; external render providers are capability-gated |
 
 Unknown external repositories are not asserted here. Add a service only after verifying its path, remote, owner, deployment, and data boundary.
