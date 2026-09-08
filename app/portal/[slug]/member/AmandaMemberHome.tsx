@@ -3,6 +3,7 @@ import Link from 'next/link';
 import type { PlatformRole } from '@/lib/rbac';
 import { AMANDA_ROLE_DASHBOARDS } from '@/lib/amanda-catherine/config';
 import { resolveAmandaAudience } from '@/lib/amanda-catherine/audience';
+import styles from './AmandaOwnerDashboard.module.css';
 
 const DESTINATIONS: Array<[string[], string]> = [
   [['update-hub', 'website-update', 'site-update'], 'updates'],
@@ -31,53 +32,39 @@ function label(value: string) {
     .join(' ');
 }
 
-const ADMIN_SPOTLIGHTS = [
-  {
-    title: 'Website Updates',
-    item: 'update-hub',
-    summary: 'Photos, videos, links, copy, events, and page changes',
-    action: 'Open Update Hub',
-    icon: 'document',
-  },
-  {
-    title: 'Client Delivery',
-    item: 'media-delivery',
-    summary: 'Recordings and finished work',
-    action: 'Deliver To Client',
-    icon: 'document',
-  },
-  {
-    title: 'Today',
-    item: 'appointments',
-    summary: 'Appointments and calendar',
-    action: 'View Calendar',
-    icon: 'calendar',
-  },
-  {
-    title: 'Client Activity',
-    item: 'applications-and-forms',
-    summary: 'Applications and forms',
-    action: 'Review Applications',
-    icon: 'document',
-  },
-  {
-    title: 'Business Overview',
-    item: 'reports-and-follow-ups',
-    summary: 'Reports and follow-ups',
-    action: 'Open Reports',
-    icon: 'chart',
-  },
+const NAV_ITEMS = [
+  ['⌂', 'Dashboard', ''],
+  ['✎', 'Update Hub', 'updates'],
+  ['▣', 'Appointments', 'calendar'],
+  ['♙', 'Clients', 'people'],
+  ['◇', 'Programs & Courses', 'learning'],
+  ['□', 'Documents', 'documents'],
+  ['◉', 'Marketing', 'amplifi'],
+  ['▥', 'Reports', 'reports'],
+  ['✦', 'Eva', 'ask'],
+  ['⚙', 'Settings', 'settings'],
 ] as const;
 
-function SpotlightIcon({ name }: { name: (typeof ADMIN_SPOTLIGHTS)[number]['icon'] }) {
-  if (name === 'calendar') {
-    return <svg viewBox="0 0 24 24" aria-hidden><path d="M6 3v3m12-3v3M4 9h16M5 5h14a1 1 0 0 1 1 1v14H4V6a1 1 0 0 1 1-1Z" /></svg>;
-  }
-  if (name === 'document') {
-    return <svg viewBox="0 0 24 24" aria-hidden><path d="M7 3h7l4 4v14H7V3Zm7 0v5h5M10 12h5m-5 4h5" /></svg>;
-  }
-  return <svg viewBox="0 0 24 24" aria-hidden><path d="M4 19V9m6 10V5m6 14v-7m4 7H2" /></svg>;
-}
+const QUICK_ACTIONS = [
+  ['✎', 'Update Hub', 'Request changes, add content, or share files.', 'updates'],
+  ['▣', 'Appointments', 'Open scheduling and calendar tools.', 'calendar'],
+  ['♙', 'Clients', 'Review people, applications, and follow-up.', 'people'],
+  ['◇', 'Programs', 'Manage courses, training, and certifications.', 'learning'],
+] as const;
+
+const OVERVIEW = [
+  ['♙', 'Clients', 'Open live client workspace', 'people'],
+  ['▣', 'Appointments', 'Open live calendar', 'calendar'],
+  ['◇', 'Programs', 'Open learning workspace', 'learning'],
+  ['▥', 'Reports', 'Open business reporting', 'reports'],
+] as const;
+
+const TOOLS = [
+  ['□', 'Documents', 'Contracts, forms, resources', 'documents'],
+  ['◉', 'Marketing', 'Social, media, email and content', 'amplifi'],
+  ['▥', 'Reports', 'Insights and follow-up', 'reports'],
+  ['✦', 'Eva', 'Get help, answers and next actions', 'ask'],
+] as const;
 
 export default async function AmandaMemberHome({
   slug,
@@ -94,76 +81,169 @@ export default async function AmandaMemberHome({
 
   if (isAdmin) {
     return (
-      <section className="ak-admin-home" aria-label="Amanda Catherine administrator dashboard">
-        <div className="ak-hero">
-          <Image
-            src="/amanda-catherine/aesthetikine-studio-hero.jpg"
-            alt="AesthetiKine Studio Lab reception"
-            fill
-            priority
-            sizes="(min-width: 1024px) calc(100vw - 310px), 100vw"
-          />
-          <div className="ak-hero-brand" aria-hidden>
-            <span className="ak-hero-mark">AC</span>
-            <strong>AesthetiKine</strong>
-            <span>STUDIO LAB</span>
-            <small>BY AMANDA CATHERINE</small>
-          </div>
-        </div>
+      <section className={styles.shell} aria-label="Amanda Catherine owner portal">
+        <aside className={styles.sidebar}>
+          <a href="https://amandacatherine.ca/" className={styles.brand} target="_blank" rel="noopener noreferrer">
+            <span className={styles.brandMark}>AC</span>
+            <span className={styles.brandText}>
+              <strong>AesthetiKine</strong>
+              <span>STUDIO LAB · AMANDA CATHERINE</span>
+            </span>
+          </a>
 
-        <div className="ak-spotlight-grid">
-          {ADMIN_SPOTLIGHTS.map((spotlight) => (
-            <article key={spotlight.title} className="ak-spotlight-column">
-              <h2>{spotlight.title}</h2>
-              <div className="ak-spotlight-card">
-                <span className="ak-spotlight-icon"><SpotlightIcon name={spotlight.icon} /></span>
-                <strong>{spotlight.summary}</strong>
-                <Link href={hrefFor(slug, spotlight.item)}>
-                  {spotlight.action}<span aria-hidden>›</span>
-                </Link>
-              </div>
-            </article>
-          ))}
-        </div>
-
-        <Link href={`/portal/${slug}/messaging`} className="ak-attention-strip">
-          <span className="ak-attention-icon" aria-hidden>✉</span>
-          <span><strong>Messages and communications</strong><small>Open your inbox and automated communications.</small></span>
-          <span aria-hidden>›</span>
-        </Link>
-
-        <section className="ak-business-links" aria-labelledby="ak-business-links-title">
-          <div>
-            <p className="ak-business-links__eyebrow">Business links</p>
-            <h2 id="ak-business-links-title">Your public presence</h2>
-          </div>
-          <div className="ak-business-links__list">
-            <a href="https://amandacatherine.ca/" target="_blank" rel="noopener noreferrer">AmandaCatherine.ca <span aria-hidden>↗</span></a>
-            <a href="https://www.aesthetikine.com/" target="_blank" rel="noopener noreferrer">AesthetiKine website <span aria-hidden>↗</span></a>
-            <a href="https://www.empowerartcollective.com/" target="_blank" rel="noopener noreferrer">Empower Art Collective <span aria-hidden>↗</span></a>
-            <a href="https://www.instagram.com/amandacatherinec/" target="_blank" rel="noopener noreferrer">Amanda Catherine Instagram <span aria-hidden>↗</span></a>
-            <a href="https://www.instagram.com/lifelinetour/" target="_blank" rel="noopener noreferrer">LIFELINE Tour Instagram <span aria-hidden>↗</span></a>
-            <a href="https://www.instagram.com/aesthetikine/" target="_blank" rel="noopener noreferrer">AesthetiKine Instagram <span aria-hidden>↗</span></a>
-            <a href="https://youtube.com/@empowerartcollective" target="_blank" rel="noopener noreferrer">Empower Art Collective YouTube <span aria-hidden>↗</span></a>
-          </div>
-          <div className="ak-business-links__finance">
-            <Image src="/amanda-catherine/amanda-medicard-qr.jpg" alt="Amanda’s Medicard by iFinance QR code" fill sizes="220px" />
-          </div>
-        </section>
-
-        <details className="ak-admin-directory">
-          <summary>All administrator tools</summary>
-          <ul>
-            <li>
-              <Link href={`/portal/${slug}/updates`}>Update Hub<span aria-hidden>›</span></Link>
-            </li>
-            {items.map((item) => (
-              <li key={item}>
-                <Link href={hrefFor(slug, item)}>{label(item)}<span aria-hidden>›</span></Link>
-              </li>
+          <nav className={styles.nav} aria-label="Amanda owner navigation">
+            {NAV_ITEMS.map(([icon, title, route], index) => (
+              <Link
+                key={title}
+                href={route ? `/portal/${slug}/${route}` : `/portal/${slug}`}
+                className={`${styles.navLink} ${index === 0 ? styles.navActive : ''}`}
+              >
+                <span className={styles.navIcon} aria-hidden>{icon}</span>
+                <span>{title}</span>
+                {title === 'Eva' ? <span className={styles.evaBadge}>New</span> : null}
+              </Link>
             ))}
-          </ul>
-        </details>
+          </nav>
+
+          <div className={styles.sidebarQuote}>
+            “Healthy movement creates a stronger, brighter you.”
+            <small>AMANDA CATHERINE</small>
+          </div>
+        </aside>
+
+        <div className={styles.main}>
+          <header className={styles.topbar}>
+            <div className={styles.motto}>Move Better · Look Better · Live Better</div>
+            <div className={styles.account}>
+              <span className={styles.accountAvatar}>AC</span>
+              <span>
+                <strong>Amanda Catherine</strong>
+                <span>Owner</span>
+              </span>
+            </div>
+          </header>
+
+          <section className={styles.hero}>
+            <div className={styles.heroCopy}>
+              <p className={styles.eyebrow}>Owner portal</p>
+              <h1>Welcome, Amanda</h1>
+              <p className={styles.heroLead}>Your business, clients, programs, content, and next steps in one place.</p>
+              <div className={styles.heroActions}>
+                <a className={styles.primary} href="https://amandacatherine.ca/" target="_blank" rel="noopener noreferrer">View Website ↗</a>
+                <Link className={styles.secondary} href={`/portal/${slug}/updates`}>Open Update Hub</Link>
+                <Link className={styles.secondary} href={`/portal/${slug}/ask`}>✦ Ask Eva</Link>
+              </div>
+            </div>
+            <div className={styles.heroMedia}>
+              <Image
+                src="/amanda-catherine/aesthetikine-studio-hero.jpg"
+                alt="AesthetiKine Studio Lab"
+                fill
+                priority
+                sizes="(max-width: 760px) 100vw, 45vw"
+              />
+            </div>
+          </section>
+
+          <div className={styles.content}>
+            <section>
+              <h2 className={styles.sectionTitle}>Quick Actions</h2>
+              <div className={styles.quickGrid}>
+                {QUICK_ACTIONS.map(([icon, title, copy, route]) => (
+                  <Link key={title} href={`/portal/${slug}/${route}`} className={`${styles.card} ${styles.quickCard}`}>
+                    <span className={styles.cardIcon} aria-hidden>{icon}</span>
+                    <strong>{title}</strong>
+                    <p>{copy}</p>
+                    <span className={styles.arrow} aria-hidden>→</span>
+                  </Link>
+                ))}
+              </div>
+            </section>
+
+            <section className={styles.twoCol}>
+              <article className={`${styles.card} ${styles.brandCard}`}>
+                <h3>AesthetiKine Studio Lab</h3>
+                <p>Your brand. Your mission. A stronger, healthier you.</p>
+                <div className={styles.brandCardImage}>
+                  <Image src="/amanda-catherine/aesthetikine-studio-hero.jpg" alt="AesthetiKine Studio Lab reception" fill sizes="(max-width: 760px) 100vw, 50vw" />
+                </div>
+                <p className={styles.brandQuote}>“Empowering movement. Transforming lives.”</p>
+              </article>
+
+              <div className={styles.sideStack}>
+                <article className={`${styles.card} ${styles.sidePanel}`}>
+                  <h3>Today</h3>
+                  <div className={styles.actionList}>
+                    <Link className={styles.actionRow} href={`/portal/${slug}/calendar`}>
+                      <span><strong>Appointments and calendar</strong><span>View the live schedule</span></span><b>→</b>
+                    </Link>
+                    <Link className={styles.actionRow} href={`/portal/${slug}/messaging`}>
+                      <span><strong>Messages</strong><span>Open client and team communications</span></span><b>→</b>
+                    </Link>
+                  </div>
+                </article>
+
+                <article className={`${styles.card} ${styles.sidePanel}`}>
+                  <h3>Recent Activity</h3>
+                  <div className={styles.actionList}>
+                    <Link className={styles.actionRow} href={`/portal/${slug}/intake`}>
+                      <span><strong>Applications and forms</strong><span>Review incoming client activity</span></span><b>→</b>
+                    </Link>
+                    <Link className={styles.actionRow} href={`/portal/${slug}/deliveries`}>
+                      <span><strong>Client delivery</strong><span>Recordings and finished work</span></span><b>→</b>
+                    </Link>
+                  </div>
+                </article>
+              </div>
+            </section>
+
+            <section>
+              <h2 className={styles.sectionTitle}>Business Overview</h2>
+              <div className={styles.overviewGrid}>
+                {OVERVIEW.map(([icon, title, copy, route]) => (
+                  <Link key={title} href={`/portal/${slug}/${route}`} className={`${styles.card} ${styles.overviewCard}`}>
+                    <span className={styles.cardIcon} aria-hidden>{icon}</span>
+                    <strong>{title}</strong>
+                    <span>{copy}</span>
+                  </Link>
+                ))}
+              </div>
+            </section>
+
+            <section className={styles.bottomGrid}>
+              <article className={`${styles.card} ${styles.toolPanel}`}>
+                <h3>Tools & Resources</h3>
+                <div className={styles.toolGrid}>
+                  {TOOLS.map(([icon, title, copy, route]) => (
+                    <Link key={title} href={`/portal/${slug}/${route}`} className={styles.tool}>
+                      <span className={styles.cardIcon} aria-hidden>{icon}</span>
+                      <strong>{title}</strong>
+                      <span>{copy}</span>
+                      <b>→</b>
+                    </Link>
+                  ))}
+                </div>
+              </article>
+
+              <article className={`${styles.card} ${styles.publicPanel}`}>
+                <p>A STRONGER YOU<br />CHANGES EVERYTHING.</p>
+                <a href="https://amandacatherine.ca/" target="_blank" rel="noopener noreferrer">View your public presence ↗</a>
+              </article>
+            </section>
+          </div>
+
+          <footer className={styles.footer}>
+            <strong>AesthetiKine Studio Lab · by Amanda Catherine</strong>
+            <span>Owner workspace powered by Efficiency Architects</span>
+          </footer>
+
+          <nav className={styles.mobileNav} aria-label="Amanda mobile navigation">
+            <Link href={`/portal/${slug}`}><b>⌂</b><span>Home</span></Link>
+            <Link href={`/portal/${slug}/updates`}><b>✎</b><span>Updates</span></Link>
+            <Link href={`/portal/${slug}/ask`}><b>✦</b><span>Eva</span></Link>
+            <Link href={`/portal/${slug}/settings`}><b>⚙</b><span>More</span></Link>
+          </nav>
+        </div>
       </section>
     );
   }
