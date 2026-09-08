@@ -1,4 +1,3 @@
-import { PortalShell } from '@/lib/chassis/PortalShell';
 import { requirePortalModule } from '@/lib/modules/portal-modules';
 import { PortalSubpage } from '@/app/portal/components/PortalSubpage';
 import AmandaMemberHome from '@/app/portal/[slug]/member/AmandaMemberHome';
@@ -12,22 +11,18 @@ export default async function AmandaCatherinePortalPage() {
   const firstName = client.clientName?.split(' ')[0] || 'Amanda';
   const isAdministrator = session.role === 'admin' || session.role === 'owner';
 
+  // The owner dashboard already owns its complete branded shell, including
+  // navigation, header, hero, dashboard cards, footer and responsive mobile
+  // navigation. Wrapping it in the shared PortalShell creates a second shell
+  // around the approved Amanda experience and is the reason production did
+  // not visually match the approved design.
   if (isAdministrator) {
     return (
-      <PortalShell
+      <AmandaMemberHome
         slug={SLUG}
-        active="home"
-        firstName={firstName}
-        pageTitle={`Welcome, ${firstName}`}
-        presentation="experience"
-        forceWorkspace
-      >
-        <AmandaMemberHome
-          slug={SLUG}
-          email={session.email || client.email}
-          role={session.role}
-        />
-      </PortalShell>
+        email={session.email || client.email}
+        role={session.role}
+      />
     );
   }
 
