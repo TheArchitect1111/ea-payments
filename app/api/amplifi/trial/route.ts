@@ -6,13 +6,14 @@ export const dynamic = 'force-dynamic';
 const TRIAL_LENGTH_DAYS = 10;
 const TRIAL_LENGTH_MS = TRIAL_LENGTH_DAYS * 24 * 60 * 60 * 1000;
 
-/**
- * Creates an isolated Amplifi tenant for each tester.
- *
- * This deliberately does not reuse the shared demo-client tenant: social
- * connections are stored by portal slug, so a unique slug prevents one
- * tester from seeing another organization's accounts or content.
- */
+function safeNext(req: NextRequest) {
+  const requested = req.nextUrl.searchParams.get('next') || '';
+  if (!requested.startsWith('/') || requested.startsWith('//')) return '/amplifi/workspace?trial=started';
+  const allowed = ['/amplifi/create', '/amplifi/workspace', '/amplifi/performance'];
+  return allowed.some(prefix => requested.startsWith(prefix)) ? requested : '/amplifi/workspace?trial=started';
+}
+
+/** Creates an isolated Amplifi tenant for each tester. */
 export async function GET(req: NextRequest) {
   const trialId = crypto.randomUUID();
   const slug = `amplifi-trial-${trialId}`;
@@ -25,15 +26,11 @@ export async function GET(req: NextRequest) {
     exp: expiresAt,
   });
 
-  if (!token) {
-    return NextResponse.redirect(new URL('/portal/login?error=config', req.nextUrl.origin), 303);
-  }
+  if (!token) return NextResponse.redirect(new URL('/portal/login?error=config', req.nextUrl.origin), 303);
 
-  const target = new URL('/amplifi/workspace?trial=started', req.nextUrl.origin);
+  const target = new URL(safeNext(req), req.nextUrl.origin);
+  if (!target.searchParams.has('trial')) target.searchParams.set('trial', 'started');
   const response = NextResponse.redirect(target, 303);
-  response.cookies.set({
-    ...makeSessionCookie(token),
-    maxAge: Math.floor(TRIAL_LENGTH_MS / 1000),
-  });
+  response.cookies.set({ ...makeSessionCookie(token), maxAge: Math.floor(TRIAL_LENGTH_MS / 1000) });
   return response;
 }
