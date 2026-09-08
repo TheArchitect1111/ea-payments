@@ -12,6 +12,12 @@ function safeHex(value: string | null, fallback: string) {
 function escapeXml(value: string) {
   return value.replace(/[&<>"']/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&apos;' }[character] || character));
 }
+function safeImageHref(value: string | null) {
+  const candidate = String(value || '').trim();
+  if (!candidate) return '';
+  if (candidate.startsWith('/')) return escapeXml(candidate);
+  try { const url = new URL(candidate); return url.protocol === 'https:' ? escapeXml(candidate) : ''; } catch { return ''; }
+}
 function wrap(text: string, max: number, linesMax: number) {
   const words = text.split(/\s+/).filter(Boolean); const lines: string[] = []; let line = '';
   for (const word of words) { const next = line ? `${line} ${word}` : word; if (next.length > max && line) { lines.push(line); line = word; if (lines.length >= linesMax - 1) break; } else line = next; }
@@ -24,6 +30,8 @@ function textLines(lines: string[], x: number, y: number, size: number, lineHeig
 export async function GET(req: NextRequest) {
   const format = clean(req.nextUrl.searchParams.get('format'), 'square', 20);
   const layout = clean(req.nextUrl.searchParams.get('layout'), 'editorial-hero', 40);
+  const visual = clean(req.nextUrl.searchParams.get('visual'), '', 240);
+  const imageHref = safeImageHref(req.nextUrl.searchParams.get('image'));
   const portrait = format === 'portrait' || format === 'carousel'; const story = format === 'story'; const landscape = format === 'landscape';
   const width = landscape ? 1200 : 1080; const height = story ? 1920 : portrait ? 1350 : landscape ? 630 : 1080;
   const title = clean(req.nextUrl.searchParams.get('title'), 'Your next message', 100);
@@ -36,12 +44,29 @@ export async function GET(req: NextRequest) {
   const titleLines = wrap(title, landscape ? 31 : 23, 4); const subLines = subhead ? wrap(subhead, landscape ? 58 : 42, 3) : [];
   const pad = landscape ? 68 : 78;
   const ctaWidth = Math.max(180, Math.min(520, 70 + cta.length * 15));
-  const brandMark = `<text x="${pad}" y="${pad + 18}" fill="${accent}" fill-opacity=".78" font-family="Arial, Helvetica, sans-serif" font-size="23" font-weight="700" letter-spacing="4">${escapeXml(brand.toUpperCase())}</text>`;
-  const footer = `<text x="${pad}" y="${height - 58}" fill="${accent}" fill-opacity=".48" font-family="Arial, Helvetica, sans-serif" font-size="19">${escapeXml(objective)}</text>`;
+  const brandMark = `<text x="${pad}" y="${pad + 18}" fill="${accent}" fill-opacity=".9" font-family="Arial, Helvetica, sans-serif" font-size="23" font-weight="700" letter-spacing="4">${escapeXml(brand.toUpperCase())}</text>`;
+  const footer = `<text x="${pad}" y="${height - 58}" fill="${accent}" fill-opacity=".6" font-family="Arial, Helvetica, sans-serif" font-size="19">${escapeXml(objective)}</text>`;
   const ctaSvg = cta ? `<rect x="${width - ctaWidth - pad}" y="${height - 106}" width="${ctaWidth}" height="58" rx="29" fill="${accent}"/><text x="${width - ctaWidth / 2 - pad}" y="${height - 69}" text-anchor="middle" fill="${primary}" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="700">${escapeXml(cta)}</text>` : '';
+  const photo = imageHref ? `<image href="${imageHref}" x="0" y="0" width="${width}" height="${height}" preserveAspectRatio="xMidYMid slice"/><rect width="${width}" height="${height}" fill="${primary}" fill-opacity=".16"/><defs><linearGradient id="shade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${primary}" stop-opacity=".08"/><stop offset=".55" stop-color="${primary}" stop-opacity=".2"/><stop offset="1" stop-color="${primary}" stop-opacity=".9"/></linearGradient></defs><rect width="${width}" height="${height}" fill="url(#shade)"/>` : '';
 
   let body = '';
-  if (layout === 'quote-minimal') {
+  if (imageHref && ['cinematic-lifestyle','documentary-moment','editorial-hero','conversion-hero','product-detail-story'].includes(layout)) {
+    const size = story ? 86 : portrait ? 70 : landscape ? 62 : 72;
+    const start = landscape ? height * .46 : height * .64;
+    body = `${photo}${textLines(titleLines,pad,start,size,Math.round(size*1.06),accent,800)}${subLines.length?textLines(subLines,pad,start+titleLines.length*Math.round(size*1.06)+34,27,38,accent,400):''}`;
+  } else if (layout === 'bold-editorial') {
+    const size = story ? 96 : portrait ? 80 : 82;
+    body = `<rect width="${width}" height="${height}" fill="${accent}"/><rect x="${width*.69}" width="${width*.31}" height="${height}" fill="${primary}"/><circle cx="${width*.78}" cy="${height*.18}" r="${Math.min(width,height)*.11}" fill="none" stroke="${accent}" stroke-width="10"/>${textLines(titleLines,pad,height*.34,size,Math.round(size*1.02),primary,900)}${subLines.length?textLines(subLines,pad,height*.72,29,40,primary,500):''}`;
+  } else if (layout === 'documentary-moment') {
+    const size = story ? 80 : portrait ? 66 : 68;
+    body = `<rect width="${width}" height="${height}" fill="${primary}"/><rect x="${pad}" y="${height*.15}" width="${width-pad*2}" height="${height*.45}" rx="26" fill="${accent}" fill-opacity=".055"/><text x="${pad}" y="${height*.69}" fill="${accent}" fill-opacity=".46" font-family="Arial" font-size="18" letter-spacing="4">REAL MOMENT · REAL CONTEXT</text>${textLines(titleLines,pad,height*.78,size,Math.round(size*1.05),accent,800)}`;
+  } else if (layout === 'conversion-hero') {
+    const size = story ? 88 : portrait ? 72 : 74;
+    body = `<defs><linearGradient id="cv" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${primary}"/><stop offset="1" stop-color="${accent}" stop-opacity=".12"/></linearGradient></defs><rect width="${width}" height="${height}" fill="url(#cv)"/><rect x="${pad}" y="${height*.18}" width="${width-pad*2}" height="${height*.5}" rx="48" fill="none" stroke="${accent}" stroke-opacity=".18" stroke-width="2"/>${textLines(titleLines,pad+48,height*.37,size,Math.round(size*1.06),accent,850)}${subLines.length?textLines(subLines,pad+48,height*.63,29,40,accent,400):''}`;
+  } else if (layout === 'product-detail-story') {
+    const size = story ? 84 : portrait ? 68 : 70;
+    body = `<rect width="${width}" height="${height}" fill="${primary}"/><circle cx="${width*.74}" cy="${height*.33}" r="${Math.min(width,height)*.22}" fill="${accent}" fill-opacity=".06"/><line x1="${pad}" y1="${height*.58}" x2="${width-pad}" y2="${height*.58}" stroke="${accent}" stroke-opacity=".2"/>${textLines(titleLines,pad,height*.73,size,Math.round(size*1.05),accent,850)}${subLines.length?textLines(subLines,pad,height*.9,26,36,accent,400):''}`;
+  } else if (layout === 'quote-minimal') {
     const size = story ? 80 : portrait ? 68 : 72;
     body = `<rect width="${width}" height="${height}" fill="${primary}"/><circle cx="${width * .82}" cy="${height * .18}" r="${Math.min(width,height)*.28}" fill="${accent}" fill-opacity=".055"/><text x="${pad}" y="${height*.25}" fill="${accent}" fill-opacity=".32" font-size="150" font-family="Georgia,serif">“</text>${textLines(titleLines,pad,height*.42,size,Math.round(size*1.14),accent,500)}${subLines.length?textLines(subLines,pad,height*.68,28,40,accent,400):''}`;
   } else if (layout === 'promotion-offer') {
@@ -62,6 +87,7 @@ export async function GET(req: NextRequest) {
     body = `<defs><radialGradient id="r" cx="82%" cy="10%" r="80%"><stop offset="0" stop-color="${accent}" stop-opacity=".11"/><stop offset="1" stop-color="${primary}" stop-opacity="0"/></radialGradient></defs><rect width="${width}" height="${height}" fill="${primary}"/><rect width="${width}" height="${height}" fill="url(#r)"/><circle cx="${width-90}" cy="90" r="180" fill="${accent}" fill-opacity=".035"/>${textLines(titleLines,pad,start,size,Math.round(size*1.06),accent,800)}${subLines.length?textLines(subLines,pad,start+titleLines.length*Math.round(size*1.06)+42,29,40,accent,400):''}`;
   }
 
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-label="${escapeXml(title)}">${body}${brandMark}${footer}${ctaSvg}<text x="${width-pad}" y="${pad+18}" text-anchor="end" fill="${accent}" fill-opacity=".26" font-family="Arial,Helvetica,sans-serif" font-size="15" letter-spacing="3">AMPLIFI CREATIVE FOUNDRY</text></svg>`;
-  return new NextResponse(svg,{headers:{'Content-Type':'image/svg+xml; charset=utf-8','Cache-Control':'public, max-age=3600, stale-while-revalidate=86400','X-EA-Creative-Foundry':'v2','X-EA-Design-Family':layout,'X-Content-Type-Options':'nosniff'}});
+  const visualHint = visual ? `<metadata>${escapeXml(visual)}</metadata>` : '';
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-label="${escapeXml(title)}">${visualHint}${body}${brandMark}${footer}${ctaSvg}<text x="${width-pad}" y="${pad+18}" text-anchor="end" fill="${accent}" fill-opacity=".3" font-family="Arial,Helvetica,sans-serif" font-size="15" letter-spacing="3">AMPLIFI PREMIUM</text></svg>`;
+  return new NextResponse(svg,{headers:{'Content-Type':'image/svg+xml; charset=utf-8','Cache-Control':'public, max-age=3600, stale-while-revalidate=86400','X-EA-Creative-Foundry':'premium-v3','X-EA-Design-Family':layout,'X-EA-Visual-Direction':visual.slice(0,120),'X-Content-Type-Options':'nosniff'}});
 }
