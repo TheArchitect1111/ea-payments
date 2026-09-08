@@ -39,7 +39,7 @@ export async function GET(
     return NextResponse.json({ error: 'Course file is unavailable.' }, { status: 404 });
   }
 
-  const disposition = resource.fileType === 'PDF' ? 'inline' : 'attachment';
+  const disposition = resource.fileType === 'DOCX' ? 'attachment' : 'inline';
   return new NextResponse(result.stream, {
     headers: {
       'Content-Type': result.blob.contentType,
