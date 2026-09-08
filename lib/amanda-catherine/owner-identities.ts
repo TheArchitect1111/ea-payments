@@ -1,6 +1,5 @@
 import { createHash } from 'node:crypto';
-
-const AMANDA_PORTAL_SLUG = 'amanda-catherine';
+import { AMANDA_PORTAL_SLUG } from './constants';
 
 // Permanent owner identities are stored only as one-way email fingerprints.
 const OWNER_EMAIL_FINGERPRINTS = new Set([
