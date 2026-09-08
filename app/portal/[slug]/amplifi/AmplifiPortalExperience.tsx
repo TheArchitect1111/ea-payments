@@ -11,6 +11,7 @@ export default function AmplifiPortalExperience({
 }) {
   const base = `/portal/${slug}`;
   const simplifiHref = `${base}/simplifi`;
+  const socialConnectHref = `/api/portal/amplifi/publishing-gateway/connect?return=${encodeURIComponent(`${base}/amplifi`)}`;
   const { theme } = experience;
   const hasStories = experience.captureCount > 0 && Boolean(experience.magnifiUrl);
 
@@ -62,7 +63,8 @@ export default function AmplifiPortalExperience({
           <h2 className="ea-amplifi-state-title">No Magnifi stories yet</h2>
           <p className="ea-amplifi-copy">
             Capture an opportunity in Simplifi, or use Amplifi Search with a topic and date range to gather articles,
-            news, and videos — then draft and store posts for approval. Nothing auto-publishes.
+            news, and videos — then draft and store posts for approval. A social connection is only required when you
+            are ready to publish.
           </p>
           <div className="ea-amplifi-cta-actions ea-amplifi-cta-actions-inline">
             <a
@@ -144,11 +146,13 @@ export default function AmplifiPortalExperience({
         <p>{experience.ctaLine}</p>
         <p className="ea-amplifi-disclaimer">{experience.shareDisclaimer}</p>
         <div className="ea-amplifi-cta-actions">
+          <a href={socialConnectHref} className="ea-amplifi-btn ea-amplifi-btn-primary" style={{ color: theme.ctaFrom }}>
+            Connect social accounts
+          </a>
           {!hasStories ? (
             <a
               href={simplifiHref}
-              className="ea-amplifi-btn ea-amplifi-btn-primary"
-              style={{ color: theme.ctaFrom }}
+              className="ea-amplifi-btn ea-amplifi-btn-secondary"
             >
               Capture once to create your first story
             </a>
@@ -156,8 +160,7 @@ export default function AmplifiPortalExperience({
             <>
               <a
                 href={experience.magnifiUrl}
-                className="ea-amplifi-btn ea-amplifi-btn-primary"
-                style={{ color: theme.ctaFrom }}
+                className="ea-amplifi-btn ea-amplifi-btn-secondary"
               >
                 Open latest Magnifi story
               </a>
