@@ -1,5 +1,6 @@
 import { getDesignFamiliesForFormat } from "./design-library";
 import { getCreativeProviderRegistry } from "./provider-registry";
+import { buildPremiumVisualPlan, assertPremiumVisualProviderReadiness, type PremiumVisualPlan } from "./premium-visual";
 import type {
   CreativeBrief,
   CreativeProviderCapability,
@@ -11,8 +12,10 @@ export interface CreativeProductionPlan {
   briefId: string;
   specification: CreativeSpecification;
   providers: Partial<Record<CreativeProviderKind, CreativeProviderCapability>>;
+  premiumVisual: PremiumVisualPlan;
   qaRequired: true;
   regenerateOnFailure: true;
+  approvalBlockedUntilQAPass: true;
 }
 
 function pickProvider(kind: CreativeProviderKind) {
@@ -48,11 +51,16 @@ export function buildCreativeProductionPlan(
     throw new Error("Creative specification does not belong to supplied brief");
   }
 
+  const premiumVisual = buildPremiumVisualPlan(brief, specification);
+  assertPremiumVisualProviderReadiness(premiumVisual);
+
   return {
     briefId: brief.id,
     specification,
     providers,
+    premiumVisual,
     qaRequired: true,
     regenerateOnFailure: true,
+    approvalBlockedUntilQAPass: true,
   };
 }
