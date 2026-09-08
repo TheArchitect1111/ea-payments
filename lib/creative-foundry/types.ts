@@ -22,6 +22,7 @@ export type CreativeProviderKind =
 
 export type CreativeProviderId =
   | "ea-visual-foundry"
+  | "openai-image"
   | "comfyui"
   | "stability"
   | "satori-resvg"
