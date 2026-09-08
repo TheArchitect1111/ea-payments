@@ -26,6 +26,13 @@ export type AmplifiVideoScene = {
 
 const ROLES: AmplifiCarouselSlide['role'][] = ['hook', 'problem', 'proof', 'clarity', 'action'];
 const LAYOUTS = ['editorial-hero', 'editorial-split', 'story-proof', 'promotion-offer', 'editorial-hero'];
+const DEFAULT_VISUALS = [
+  'Premium editorial hero composition with one dominant focal point and restrained typography.',
+  'Emotion-led split composition that makes the audience problem immediately recognizable.',
+  'Proof-focused editorial composition with strong hierarchy and visual credibility.',
+  'Clean promotional composition with clear benefit hierarchy and an unmistakable next step.',
+  'Decisive closing composition with generous negative space and a focused call to action.',
+];
 
 function creativeImageUrl(post: PremiumCampaignPost, index: number, format: 'carousel' | 'story') {
   const params = new URLSearchParams({
@@ -36,9 +43,29 @@ function creativeImageUrl(post: PremiumCampaignPost, index: number, format: 'car
     brand: 'Amplifi Campaign',
     layout: LAYOUTS[index] || 'editorial-hero',
     format,
-    v: '5',
+    v: '6',
   });
   return `/api/amplifi/post-image?${params.toString()}`;
+}
+
+function normalizeSentence(value: string, fallback: string) {
+  const text = String(value || '').replace(/\s+/g, ' ').trim();
+  return text || fallback;
+}
+
+export function repairAmplifiPremiumPosts(posts: PremiumCampaignPost[]) {
+  return posts.slice(0, 5).map((post, index) => {
+    let title = normalizeSentence(post.title, `Campaign idea ${index + 1}`).slice(0, 90);
+    if (title.length < 8) title = `${title} that matters`.slice(0, 90);
+    let caption = normalizeSentence(post.caption, 'A clear message that connects the audience to the next useful action.').slice(0, 600);
+    if (caption.length < 40) caption = `${caption} Amplifi keeps the message specific, useful and connected to the campaign objective.`.slice(0, 600);
+    const callToAction = normalizeSentence(post.callToAction, 'Learn more').slice(0, 110);
+    const imageDirection = normalizeSentence(post.imageDirection, DEFAULT_VISUALS[index] || DEFAULT_VISUALS[0]).slice(0, 260);
+    return { ...post, title, caption, callToAction, imageDirection };
+  }).map((post, index, all) => {
+    const duplicate = all.findIndex((candidate) => candidate.title.toLowerCase() === post.title.toLowerCase()) !== index;
+    return duplicate ? { ...post, title: `${post.title} · ${index + 1}`.slice(0, 90) } : post;
+  });
 }
 
 export function buildAmplifiCarousel(posts: PremiumCampaignPost[]): AmplifiCarouselSlide[] {
@@ -91,10 +118,15 @@ export function scoreAmplifiPremiumPackage(posts: PremiumCampaignPost[]) {
 }
 
 export function buildAmplifiPremiumPackage(posts: PremiumCampaignPost[]) {
+  const initial = scoreAmplifiPremiumPackage(posts);
+  const repaired = initial.passed ? posts.slice(0, 5) : repairAmplifiPremiumPosts(posts);
+  const finalQa = scoreAmplifiPremiumPackage(repaired);
   return {
-    graphics: posts.slice(0, 5).map((post, index) => ({ ...post, imageUrl: post.imageUrl || creativeImageUrl(post, index, 'carousel') })),
-    carousel: buildAmplifiCarousel(posts),
-    shortVideo: buildAmplifiShortVideo(posts),
-    qa: scoreAmplifiPremiumPackage(posts),
+    graphics: repaired.map((post, index) => ({ ...post, imageUrl: post.imageUrl || creativeImageUrl(post, index, 'carousel') })),
+    carousel: buildAmplifiCarousel(repaired),
+    shortVideo: buildAmplifiShortVideo(repaired),
+    qa: finalQa,
+    regenerated: !initial.passed,
+    initialQa: initial,
   };
 }
