@@ -1,84 +1,69 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
+import { renderSocialCard, type CreativeBrief, type CreativeFormat, type CreativeSpecification } from '@/lib/creative-foundry';
 
 export const dynamic = 'force-dynamic';
 
-const COLORS = [
-  ['#14213d', '#6d28d9'],
-  ['#073b4c', '#0ea5a4'],
-  ['#3b0764', '#c026d3'],
-] as const;
-
-function cleanTitle(value: string | null): string {
-  return String(value || 'Your next message')
-    .replace(/[\u2013\u2014]/g, ',')
-    .replace(/\s+/g, ' ')
-    .trim()
-    .slice(0, 150);
+function clean(value: string | null, fallback: string, max = 220) {
+  return String(value || fallback).replace(/[\u2013\u2014]/g, ',').replace(/\s+/g, ' ').trim().slice(0, max);
 }
 
-function escapeXml(value: string): string {
-  return value.replace(/[&<>"']/g, (character) => ({
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&apos;',
-  }[character] || character));
+function safeHex(value: string | null, fallback: string) {
+  const candidate = String(value || '').trim();
+  return /^#([0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i.test(candidate) ? candidate : fallback;
 }
 
-function titleLines(title: string): string[] {
-  const words = title.split(' ');
-  const lines: string[] = [];
-  let line = '';
-  for (const word of words) {
-    const candidate = line ? `${line} ${word}` : word;
-    if (candidate.length > 25 && line) {
-      lines.push(line);
-      line = word;
-    } else {
-      line = candidate;
-    }
-  }
-  if (line) lines.push(line);
-  return lines.slice(0, 4);
+function normalizeFormat(value: string | null): CreativeFormat {
+  return value === 'portrait' || value === 'story' || value === 'landscape' ? value : 'square';
+}
+
+function dimensions(format: CreativeFormat) {
+  if (format === 'portrait') return { width: 1080, height: 1350, ratio: '4:5' };
+  if (format === 'story') return { width: 1080, height: 1920, ratio: '9:16' };
+  if (format === 'landscape') return { width: 1200, height: 630, ratio: '1.91:1' };
+  return { width: 1080, height: 1080, ratio: '1:1' };
 }
 
 export async function GET(req: NextRequest) {
-  const title = cleanTitle(req.nextUrl.searchParams.get('title'));
-  const rawVariant = Number(req.nextUrl.searchParams.get('variant') || 0);
-  const variant = Number.isFinite(rawVariant) ? Math.abs(Math.trunc(rawVariant)) % COLORS.length : 0;
-  const [start, end] = COLORS[variant];
-  const lines = titleLines(title);
-  const fontSize = title.length > 85 ? 58 : title.length > 55 ? 68 : 82;
-  const lineHeight = Math.round(fontSize * 1.12);
-  const firstY = 540 - ((lines.length - 1) * lineHeight) / 2;
-  const text = lines
-    .map((line, index) => `<text x="88" y="${firstY + (index * lineHeight)}" fill="#ffffff" font-family="Arial, sans-serif" font-size="${fontSize}" font-weight="800">${escapeXml(line)}</text>`)
-    .join('');
+  const format = normalizeFormat(req.nextUrl.searchParams.get('format'));
+  const size = dimensions(format);
+  const title = clean(req.nextUrl.searchParams.get('title'), 'Your next message', 100);
+  const subhead = clean(req.nextUrl.searchParams.get('subhead'), '', 160);
+  const objective = clean(req.nextUrl.searchParams.get('objective'), 'Move the audience toward the next useful action.', 120);
+  const brandName = clean(req.nextUrl.searchParams.get('brand'), 'Amplifi', 60);
+  const cta = clean(req.nextUrl.searchParams.get('cta'), '', 70);
+  const layout = clean(req.nextUrl.searchParams.get('layout'), 'editorial-hero', 50);
 
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1080" viewBox="0 0 1080 1080" role="img" aria-label="${escapeXml(title)}">
-    <defs>
-      <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0%" stop-color="${start}"/>
-        <stop offset="100%" stop-color="${end}"/>
-      </linearGradient>
-    </defs>
-    <rect width="1080" height="1080" fill="url(#background)"/>
-    <rect x="88" y="82" width="66" height="66" rx="18" fill="#ffffff" fill-opacity=".16"/>
-    <text x="111" y="131" fill="#ffffff" font-family="Arial, sans-serif" font-size="38" font-weight="800">A</text>
-    <text x="180" y="112" fill="#ffffff" font-family="Arial, sans-serif" font-size="30" font-weight="800" letter-spacing="6">AMPLIFI</text>
-    <text x="180" y="143" fill="#ffffff" fill-opacity=".82" font-family="Arial, sans-serif" font-size="17" letter-spacing="4">BY EFFICIENCY ARCHITECTS</text>
-    ${text}
-    <rect x="88" y="965" width="140" height="9" rx="5" fill="#ffffff" fill-opacity=".9"/>
-  </svg>`;
-
-  return new NextResponse(svg, {
-    status: 200,
-    headers: {
-      'Content-Type': 'image/svg+xml; charset=utf-8',
-      'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400',
-      'Content-Disposition': 'inline; filename="amplifi-post.svg"',
-      'X-Content-Type-Options': 'nosniff',
+  const brief: CreativeBrief = {
+    id: `amplifi-render-${Date.now().toString(36)}`,
+    brand: {
+      brandId: 'amplifi-runtime',
+      name: brandName,
+      primaryColor: safeHex(req.nextUrl.searchParams.get('primary'), '#0b0b0c'),
+      accentColor: safeHex(req.nextUrl.searchParams.get('accent'), '#ffffff'),
     },
-  });
+    objective,
+    audience: 'Campaign audience',
+    message: title,
+    callToAction: cta || undefined,
+  };
+
+  const spec: CreativeSpecification = {
+    id: `${brief.id}-card`,
+    briefId: brief.id,
+    format,
+    sourceKind: 'graphic-only',
+    headline: title,
+    subhead: subhead || undefined,
+    callToAction: cta || undefined,
+    visualDirection: 'Deterministic premium social graphic rendered by the shared EA Creative Foundry.',
+    layoutFamily: layout,
+    aspectRatio: size.ratio,
+    width: size.width,
+    height: size.height,
+  };
+
+  const response = renderSocialCard(brief, spec);
+  response.headers.set('Cache-Control', 'public, max-age=3600, stale-while-revalidate=86400');
+  response.headers.set('X-EA-Creative-Foundry', 'v1');
+  return response;
 }
