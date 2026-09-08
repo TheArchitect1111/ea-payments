@@ -17,6 +17,9 @@ export type AmandaCourseContent = {
   updatedAt: string;
 };
 
+const AMANDA_CANONICAL_PORTAL_SLUG = 'amanda-catherine';
+const AMANDA_LEGACY_PORTAL_SLUGS = ['amanda-catherine-afd57f'] as const;
+
 function contentId(portalSlug: string, courseId: string) {
   return `amanda-course-${createHash('sha256').update(`${portalSlug}:${courseId}`).digest('hex').slice(0, 24)}`;
 }
@@ -82,6 +85,16 @@ async function persistCourseRecord(
   if (!result.ok) throw new Error(result.error || 'Course content could not be saved.');
 }
 
+async function recoverLegacyCourseContent(courseId: string) {
+  for (const legacySlug of AMANDA_LEGACY_PORTAL_SLUGS) {
+    const primary = await loadStudioRecord<AmandaCourseContent>('experience', contentId(legacySlug, courseId));
+    if (primary) return primary;
+    const backup = await loadStudioRecord<AmandaCourseContent>('experience', backupContentId(legacySlug, courseId));
+    if (backup) return backup;
+  }
+  return null;
+}
+
 export async function getAmandaCourseContent(portalSlug: string, courseId: string) {
   const course = AMANDA_COURSES.find((item) => item.id === courseId);
   if (!course) throw new Error('Amanda course not found.');
@@ -93,6 +106,21 @@ export async function getAmandaCourseContent(portalSlug: string, courseId: strin
   if (backup) {
     await persistCourseRecord(portalSlug, courseId, course.title, backup, id, ' (recovered)');
     return backup;
+  }
+
+  if (portalSlug === AMANDA_CANONICAL_PORTAL_SLUG) {
+    const legacy = await recoverLegacyCourseContent(courseId);
+    if (legacy) {
+      const recovered: AmandaCourseContent = {
+        ...legacy,
+        portalSlug: AMANDA_CANONICAL_PORTAL_SLUG,
+        courseId,
+        updatedAt: new Date().toISOString(),
+      };
+      await persistCourseRecord(AMANDA_CANONICAL_PORTAL_SLUG, courseId, course.title, recovered, contentId(AMANDA_CANONICAL_PORTAL_SLUG, courseId), ' (legacy migrated)');
+      await persistCourseRecord(AMANDA_CANONICAL_PORTAL_SLUG, courseId, course.title, recovered, backupContentId(AMANDA_CANONICAL_PORTAL_SLUG, courseId), ' backup');
+      return recovered;
+    }
   }
 
   return {
@@ -110,9 +138,10 @@ export async function saveAmandaCourseContent(
 ) {
   const course = AMANDA_COURSES.find((item) => item.id === courseId);
   if (!course) throw new Error('Amanda course not found.');
+  const canonicalSlug = portalSlug.startsWith('amanda-catherine') ? AMANDA_CANONICAL_PORTAL_SLUG : portalSlug;
   const byTitle = new Map(lessons.map((lesson) => [lesson.title, lesson]));
   const content: AmandaCourseContent = {
-    portalSlug,
+    portalSlug: canonicalSlug,
     courseId,
     lessons: course.lessons.map((title) => {
       const lesson = byTitle.get(title);
@@ -126,10 +155,10 @@ export async function saveAmandaCourseContent(
     updatedAt: new Date().toISOString(),
   };
 
-  await persistCourseRecord(portalSlug, courseId, course.title, content, contentId(portalSlug, courseId));
-  await persistCourseRecord(portalSlug, courseId, course.title, content, backupContentId(portalSlug, courseId), ' backup');
+  await persistCourseRecord(canonicalSlug, courseId, course.title, content, contentId(canonicalSlug, courseId));
+  await persistCourseRecord(canonicalSlug, courseId, course.title, content, backupContentId(canonicalSlug, courseId), ' backup');
 
-  const verified = await loadStudioRecord<AmandaCourseContent>('experience', contentId(portalSlug, courseId));
+  const verified = await loadStudioRecord<AmandaCourseContent>('experience', contentId(canonicalSlug, courseId));
   if (!verified || verified.updatedAt !== content.updatedAt) {
     throw new Error('Course content save could not be verified. Please try again.');
   }
