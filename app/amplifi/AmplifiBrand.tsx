@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
+import './amplifi-refine.css';
 
 export default function AmplifiBrand({ href = '/amplifi', light = false }: { href?: string; light?: boolean }) {
   return (
