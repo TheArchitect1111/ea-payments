@@ -3,31 +3,107 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import AmplifiBrand from './AmplifiBrand';
-import AmplifiDemo from './AmplifiDemo';
-import './amplifi-site.css';
-import './amplifi-revision.css';
+import './amplifi-v3.css';
 
-export const metadata: Metadata = { title: 'Amplifi | Turn what is happening into content that moves', description: 'Amplifi turns your goals, events, ideas and opportunities into premium posts, series and campaigns through one guided system.' };
+export const metadata: Metadata = {
+  title: 'Amplifi | Give Amplifi the goal. Get the campaign.',
+  description: 'Amplifi turns a business goal into strategy, premium creative, coordinated content, publishing and performance intelligence.'
+};
 
 const plans = [
- {level:'01',name:'Starter',price:'Free',cue:'See what Amplifi can create for you.',promise:'Give Amplifi a real goal and receive a finished sample campaign before deciding what comes next.',features:['Guided campaign brief','Premium sample campaign','Finished graphic direction','Smartchitecture brand foundation','No social account connection required'],href:'/amplifi/create?mode=campaign',action:'Create my sample'},
- {level:'02',name:'Social',price:'$29',cue:'You provide what is happening.',promise:'Amplifi turns your updates, offers and ideas into polished posts, series and campaigns.',features:['Up to 30 posts each month','Up to 4 coordinated series','Up to 4 campaigns','Graphics and short-form video','Review, approval, scheduling and publishing'],href:'/amplifi/register?plan=amplifi_social',action:'Begin with Social'},
- {level:'03',name:'Intelligence',price:'$59',cue:'Amplifi finds reasons to communicate.',promise:'Research and monitoring join the creative system so timely opportunities can become content.',features:['Everything in Social','Up to 60 posts each month','Monitor up to three subjects','Verified research and opportunity discovery','Up to 8 series and 8 campaigns'],href:'/contact?subject=Amplifi%20Intelligence%20access',action:'Explore Intelligence'},
- {level:'04',name:'Complete',price:'$129',cue:'Amplifi helps run the content operation.',promise:'Research, creative, multi-channel campaigns, approvals, publishing and learning work together.',features:['Everything in Intelligence','Unlimited posts, series and campaigns','Monitor up to ten subjects','Social, email and blog campaign planning','Smartchitecture learning across the operation'],href:'/contact?subject=Amplifi%20Complete%20access',action:'Explore Complete'}
+  {name:'Starter',price:'Free',tag:'See the work first',copy:'Build a real sample campaign around your business before you decide what comes next.',features:['Guided campaign brief','Sample campaign','Premium graphic direction','No social connection required'],href:'/amplifi/create?mode=campaign',cta:'Create my sample'},
+  {name:'Social',price:'$29',tag:'Create consistently',copy:'Turn what is already happening in your business into polished posts, series and campaigns.',features:['30 posts each month','4 series','4 campaigns','Graphics + short-form video','Approval, scheduling and publishing'],href:'/amplifi/register?plan=amplifi_social',cta:'Start Social'},
+  {name:'Intelligence',price:'$59',tag:'Find the story',copy:'Add research and monitoring so Amplifi can surface timely reasons to communicate.',features:['Everything in Social','60 posts','8 series + 8 campaigns','Research + opportunity monitoring','3 watched subjects'],href:'/amplifi/register?plan=amplifi_intelligence',cta:'Start Intelligence'},
+  {name:'Complete',price:'$129',tag:'Run the operation',copy:'Research, creative, campaigns, publishing and learning work together as one content system.',features:['Everything in Intelligence','Unlimited posts, series and campaigns','10 watched subjects','Social, email + blog planning','Complete learning loop'],href:'/amplifi/register?plan=amplifi_complete',cta:'Start Complete'}
+] as const;
+
+const modes = [
+  {name:'Post',eyebrow:'ONE MOMENT',copy:'An announcement, offer, observation or timely idea becomes a finished piece with copy and creative.',href:'/amplifi/create?mode=post'},
+  {name:'Series',eyebrow:'ONE IDEA, REPEATED WELL',copy:'Build coordinated thoughts, poems, tips, lessons, stories or recurring content without losing visual continuity.',href:'/amplifi/create?mode=series'},
+  {name:'Campaign',eyebrow:'ONE GOAL, MANY MOVES',copy:'Amplifi connects strategy, creative, sequence, CTA and performance around one measurable objective.',href:'/amplifi/create?mode=campaign'}
 ] as const;
 
 export default async function AmplifiMarketingPage({searchParams}:{searchParams:Promise<{url?:string;title?:string;capture?:string}>}) {
- const params=await searchParams;
- if(params.url||params.title||params.capture){const query=new URLSearchParams();if(params.url)query.set('url',params.url);if(params.title)query.set('title',params.title);if(params.capture)query.set('capture',params.capture);redirect(`/amplifi/workspace${query.toString()?`?${query.toString()}`:''}`)}
- return <main className="amp-page">
-  <nav className="amp-nav"><AmplifiBrand/><div><a href="#proof">Try Amplifi</a><a href="#how">How it works</a><a href="#plans">Plans</a><Link href="/portal/login?next=%2Famplifi%2Fworkspace">Sign in</Link></div></nav>
-  <section className="amp-hero"><div className="amp-hero-copy"><p className="amp-kicker">YOUR GUIDED MARKETING SYSTEM</p><h1>You know where you want to go.<br/><em>Amplifi helps you show people why it matters.</em></h1><p className="amp-lead">Tell Amplifi what you are trying to accomplish. It turns that goal into premium posts, graphics, series and campaigns built around your audience and your business.</p><div className="amp-actions"><a className="amp-btn amp-btn-primary" href="#proof">Create my sample campaign</a><a className="amp-text-link" href="#how">See how Amplifi works <span>↗</span></a></div></div><div className="amp-hero-visual"><Image src="/amplifi/amplifi-person-laptop-v2.jpg" alt="A business owner building a campaign with Amplifi" width={1672} height={941} priority/><div className="amp-live-review"><span className="amp-mini-mark">A</span><div><small>CAMPAIGN READY</small><strong>Your goal became a creative plan.</strong><p>Strategy · Copy · Graphics · Next steps</p></div><button>Review</button></div></div></section>
-  <section className="amp-pressure"><div className="amp-pressure-layout"><div className="amp-pressure-head"><p className="amp-kicker">THE REAL PROBLEM</p><h2>Marketing is not another caption.<br/><em>It is connecting what you want with what people need to see.</em></h2><p>A barber may want more appointments. A nonprofit may need registrations. A consultant may need authority. Amplifi starts with the outcome, not a blank text box.</p></div><div className="amp-pressure-photo"><Image src="/home/ch2-invisible-work.jpg" alt="A business owner balancing daily work and marketing" width={1200} height={800}/></div></div><p className="amp-pivot">One guided brief becomes a strategy, creative direction and finished content system.</p></section>
-  <section className="amp-campaign-proof" id="proof"><header className="amp-campaign-intro"><div><p className="amp-kicker">INSTANT PROOF</p><h2>Do not take our word for it.<br/>Give Amplifi a real goal.</h2></div><div className="amp-create-prompt"><p>Answer a short guided set of questions. Amplifi uses your answers to build a sample campaign around your actual business, audience and objective.</p><Link className="amp-btn amp-btn-primary" href="/amplifi/create?mode=campaign">Create my campaign</Link></div></header><div className="amp-campaign-board"><aside><span>YOUR INPUT</span><h3>What are you trying to accomplish?</h3><dl><div><dt>Business</dt><dd>What you do</dd></div><div><dt>Goal</dt><dd>The result you want</dd></div><div><dt>Audience</dt><dd>Who needs to care</dd></div><div><dt>Offer</dt><dd>What they can do next</dd></div><div><dt>Proof</dt><dd>Why they should believe you</dd></div></dl><strong>A few useful answers in.</strong></aside><div className="amp-post-stream"><div className="amp-stream-head"><div><span>AMPLIFI OUTPUT</span><h3>A campaign you can actually evaluate.</h3></div><p>Not a generic AI paragraph. Amplifi builds the campaign concept, messaging, visual direction, individual posts and recommended next action.</p></div><div className="amp-platform-posts"><article><span>01</span><h4>Campaign idea</h4><p>The central creative idea that connects the business goal to the audience.</p></article><article><span>02</span><h4>Premium creative</h4><p>Graphic and image direction designed to make the message feel intentional, not templated.</p></article><article><span>03</span><h4>Post sequence</h4><p>Individual pieces that work together instead of unrelated captions.</p></article><article><span>04</span><h4>Next opportunity</h4><p>When the goal exposes an operational gap, Amplifi can surface it without pretending marketing alone solves everything.</p></article></div></div></div></section>
-  <section className="amp-intelligence" id="how"><div className="amp-intro"><p className="amp-kicker">POST · SERIES · CAMPAIGN</p><h2>Create one thing.<br/><em>Or build a system around an idea.</em></h2><p><strong>Post</strong> creates a focused piece. <strong>Series</strong> creates coordinated recurring content such as tips, poems, thoughts, education or stories. <strong>Campaign</strong> connects multiple pieces to one objective.</p><p>Every mode uses the same Smartchitecture foundation so your voice, audience, goals, restrictions and learning stay connected.</p></div><div className="amp-intelligence-stage"><div className="amp-signal amp-signal-left"><span>YOU PROVIDE</span><b>Your goal</b><b>Your audience</b><b>Your offer</b><b>Your proof</b><b>Your context</b></div><div className="amp-smart-core"><Image src="/amplifi/amplifi-logo-premium.png" alt="Amplifi by Efficiency Architects" width={1973} height={797}/><p>Amplifi decides how strategy, copy, design, imagery and format should work together.</p></div><div className="amp-signal amp-signal-right"><span>AMPLIFI BUILDS</span><b>Strategy</b><b>Copy</b><b>Graphics</b><b>Series</b><b>Campaigns</b></div></div></section>
-  <section className="amp-research"><div className="amp-research-copy"><p className="amp-kicker">BEYOND MARKETING</p><h2>Sometimes the campaign reveals the real opportunity.</h2><p>If a business wants more appointments but customers still have to call during business hours, the problem may not be content alone. Amplifi can surface the operational opportunity and connect it to the broader Efficiency Architects workflow.</p><dl><div><dt>Amplifi's job</dt><dd>Create better communication and help generate measurable attention, action and learning.</dd></div><div><dt>What Amplifi does not promise</dt><dd>Guaranteed revenue, followers, sales or business outcomes that depend on pricing, service, operations, competition and other factors outside the campaign.</dd></div></dl></div><div className="amp-research-screen"><div className="amp-screen-bar"><span className="amp-mini-mark">A</span><b>Opportunity detected</b></div><div className="amp-finding"><span>CAMPAIGN + OPERATIONS</span><h3>Your marketing goal may expose a system worth improving.</h3><p>Amplifi can recommend the next operational question instead of making a claim the campaign cannot honestly guarantee.</p></div></div></section>
-  <section className="amp-plans" id="plans"><header><p className="amp-kicker">FOUR LEVELS</p><h2>Start by seeing the work. Grow into the amount of system you need.</h2></header><div className="amp-plan-journey">{plans.map((plan,index)=><article className={index===1?'is-featured':''} key={plan.name}><div className="amp-plan-index"><span>{plan.level}</span><i/></div><div className="amp-plan-main"><p>{plan.cue}</p><h3>{plan.name}</h3><h4>{plan.promise}</h4><ul>{plan.features.map(feature=><li key={feature}>{feature}</li>)}</ul></div><div className="amp-plan-price"><strong>{plan.price}</strong>{plan.price!=='Free'&&<small>per month</small>}<Link href={plan.href}>{plan.action} <span>↗</span></Link></div></article>)}</div></section>
-  <AmplifiDemo/>
-  <section className="amp-posting-promise"><p className="amp-kicker">YOU KEEP CONTROL</p><h2>Create. Review. Approve. Then publish.</h2><p>Amplifi can create useful work without requiring social developer accounts. Account connections become relevant when you want Amplifi to publish approved content for you.</p><Link className="amp-btn amp-btn-primary" href="/amplifi/create?mode=campaign">Build my sample campaign</Link></section>
- </main>;
+  const params = await searchParams;
+  if(params.url||params.title||params.capture){
+    const query=new URLSearchParams();
+    if(params.url)query.set('url',params.url);
+    if(params.title)query.set('title',params.title);
+    if(params.capture)query.set('capture',params.capture);
+    redirect(`/amplifi/workspace${query.toString()?`?${query.toString()}`:''}`);
+  }
+
+  return <main className="ampx-page">
+    <nav className="ampx-nav">
+      <AmplifiBrand />
+      <div className="ampx-navlinks"><a href="#proof">Try it</a><a href="#create">Create</a><a href="#plans">Plans</a><Link href="/portal/login?next=%2Famplifi%2Fworkspace">Sign in</Link></div>
+    </nav>
+
+    <section className="ampx-hero">
+      <div className="ampx-hero-copy">
+        <span className="ampx-kicker">YOUR MARKETING OPERATING SYSTEM</span>
+        <h1>Give Amplifi<br/>the goal.<br/><em>Get the campaign.</em></h1>
+        <p>You already know what you want your business to accomplish. Amplifi turns that goal into strategy, copy, graphics, coordinated content, publishing and the next useful move.</p>
+        <div className="ampx-hero-actions"><Link className="ampx-primary" href="/amplifi/create?mode=campaign">Create my sample campaign</Link><a className="ampx-secondary" href="#proof">See what you get</a></div>
+        <small>No developer accounts required to create. Connect channels only when you are ready to publish.</small>
+      </div>
+      <div className="ampx-hero-media">
+        <Image src="/amplifi/amplifi-person-laptop-v2.jpg" alt="Business owner using Amplifi to plan a campaign" fill priority sizes="(max-width: 900px) 100vw, 50vw"/>
+        <div className="ampx-floating-card"><span>AMPLIFI</span><strong>Fill Tuesday afternoons.</strong><p>Strategy ready · 5 posts · Carousel · Video plan</p><b>Campaign ready</b></div>
+      </div>
+    </section>
+
+    <section className="ampx-human-strip">
+      <div className="ampx-human-copy"><span className="ampx-kicker">BUILT AROUND REAL GOALS</span><h2>More appointments. More registrations. More attention. More momentum.</h2><p>Amplifi starts with the thing the business is actually trying to change, then builds the communication system around it.</p></div>
+      <div className="ampx-mosaic">
+        <div className="ampx-img tall"><Image src="/home/ch7-consultant.jpg" alt="Consultant working with clients" fill sizes="33vw"/></div>
+        <div className="ampx-img"><Image src="/home/ch7-healthcare.jpg" alt="Healthcare professional serving people" fill sizes="33vw"/></div>
+        <div className="ampx-img"><Image src="/home/ch7-school.jpg" alt="Education and community work" fill sizes="33vw"/></div>
+      </div>
+    </section>
+
+    <section className="ampx-proof" id="proof">
+      <div className="ampx-proof-head"><span className="ampx-kicker">INSTANT PROOF</span><h2>Do not buy the promise.<br/><em>See the work.</em></h2><p>Answer a short guided set of questions. Amplifi builds a real campaign preview around your business and emails you a link so you can come back to it.</p></div>
+      <div className="ampx-proof-stage">
+        <div className="ampx-brief-card"><span>01 · YOUR BRIEF</span><h3>What are you trying to accomplish?</h3><div className="ampx-answer">Increase appointments</div><div className="ampx-answer">Busy professionals within 10 miles</div><div className="ampx-answer">Book midweek online</div><div className="ampx-answer">Fast booking + clear availability</div><Link href="/amplifi/create?mode=campaign">Build mine →</Link></div>
+        <div className="ampx-output-card">
+          <div className="ampx-output-top"><span>02 · AMPLIFI BUILDS</span><strong>Own Your Week</strong><p>A coordinated campaign built to turn midweek availability into a reason to act now.</p></div>
+          <div className="ampx-output-grid">
+            <article><b>01</b><h4>Campaign idea</h4><p>One sharp positioning concept.</p></article>
+            <article><b>02</b><h4>Creative system</h4><p>Graphics, imagery and visual direction.</p></article>
+            <article><b>03</b><h4>Post sequence</h4><p>Connected pieces, not random captions.</p></article>
+            <article><b>04</b><h4>Next move</h4><p>What the data or workflow says to do next.</p></article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section className="ampx-create" id="create">
+      <div className="ampx-create-head"><span className="ampx-kicker">THREE WAYS TO CREATE</span><h2>One post.<br/>A recurring idea.<br/><em>Or the whole campaign.</em></h2></div>
+      <div className="ampx-mode-grid">{modes.map((mode,index)=><Link href={mode.href} className="ampx-mode" key={mode.name}><span>0{index+1}</span><small>{mode.eyebrow}</small><h3>{mode.name}</h3><p>{mode.copy}</p><b>Create {mode.name.toLowerCase()} →</b></Link>)}</div>
+    </section>
+
+    <section className="ampx-system">
+      <div className="ampx-system-image"><Image src="/amplifi/amplifi-person-phone-v2.jpg" alt="Entrepreneur reviewing Amplifi work on a phone" fill sizes="(max-width: 900px) 100vw, 45vw"/></div>
+      <div className="ampx-system-copy"><span className="ampx-kicker">NOT JUST CONTENT</span><h2>Amplifi creates.<br/>Measures.<br/><em>Then diagnoses.</em></h2><p>A campaign is only useful if you can understand what happened. Amplifi can turn impressions, clicks and conversions into a plain-English diagnosis and a recommended next move.</p><div className="ampx-loop"><span>Goal</span><i>→</i><span>Create</span><i>→</i><span>Publish</span><i>→</i><span>Measure</span><i>→</i><span>Diagnose</span></div><Link href="/amplifi/performance">See Performance Intelligence →</Link></div>
+    </section>
+
+    <section className="ampx-growth">
+      <div><span className="ampx-kicker">WHEN MARKETING IS NOT THE BOTTLENECK</span><h2>Sometimes the campaign reveals the system that needs fixing.</h2></div>
+      <div className="ampx-growth-card"><span>OPPORTUNITY DETECTED</span><strong>Your campaign is getting clicks.</strong><p>But customers still have to call to book. Amplifi can flag the friction and surface a Growth System recommendation such as online reservations, CRM, follow-up automation, intake, payments or a client portal.</p><b>Marketing finds the demand. Better systems help capture it.</b></div>
+    </section>
+
+    <section className="ampx-plans" id="plans">
+      <div className="ampx-plans-head"><span className="ampx-kicker">FOUR LEVELS</span><h2>Start by seeing the work.<br/><em>Grow into the system you need.</em></h2></div>
+      <div className="ampx-plan-grid">{plans.map((plan,index)=><article className={`ampx-plan ${index===1?'featured':''}`} key={plan.name}>{index===1?<span className="ampx-plan-badge">BEST PLACE TO START</span>:null}<small>{plan.tag}</small><h3>{plan.name}</h3><div className="ampx-price">{plan.price}{plan.price!=='Free'?<span>/mo</span>:null}</div><p>{plan.copy}</p><ul>{plan.features.map(feature=><li key={feature}>{feature}</li>)}</ul><Link href={plan.href}>{plan.cta} →</Link></article>)}</div>
+    </section>
+
+    <section className="ampx-final">
+      <span className="ampx-kicker">ONE BRIEF. EVERYWHERE.</span>
+      <h2>You have a business to run.<br/><em>Marketing should not become another one.</em></h2>
+      <p>Tell Amplifi what you want to happen.</p>
+      <Link className="ampx-primary" href="/amplifi/create?mode=campaign">Create my sample campaign</Link>
+      <small>Nothing publishes until you approve it.</small>
+    </section>
+  </main>;
 }
