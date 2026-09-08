@@ -1,5 +1,5 @@
-import { loadAmplifiConnections } from '@/lib/amplifi-connection-store';
-import { publishNative } from '@/lib/amplifi-native-social';
+import { loadAmplifiConnections, saveAmplifiConnections } from '@/lib/amplifi-connection-store';
+import { publishNative, type NativeAccount, type NativeProvider } from '@/lib/amplifi-native-social';
 
 export type AmplifiPublishTarget = 'facebook' | 'instagram' | 'linkedin' | 'tiktok' | 'x';
 export type AmplifiPublishResult = {
@@ -10,6 +10,8 @@ export type AmplifiPublishResult = {
   error?: string;
   details?: unknown;
 };
+
+const GATEWAY_PROVIDER = 'gateway';
 
 function ayrshareApiKey(): string {
   return process.env.AYRSHARE_API_KEY?.trim() || '';
@@ -23,7 +25,7 @@ function profileKeyEnvName(portalSlug: string): string {
   return `AYRSHARE_PROFILE_KEY_${portalSlug.toUpperCase().replace(/[^A-Z0-9]+/g, '_')}`;
 }
 
-export function getAyrshareProfileKey(portalSlug: string): string {
+function envProfileKey(portalSlug: string): string {
   const mapped = process.env.AYRSHARE_PROFILE_KEYS_JSON?.trim();
   if (mapped) {
     try {
@@ -31,15 +33,68 @@ export function getAyrshareProfileKey(portalSlug: string): string {
       const key = parsed[portalSlug]?.trim();
       if (key) return key;
     } catch {
-      // Ignore malformed optional mapping and continue to per-tenant env lookup.
+      // Optional mapping only. Fall through to per-tenant env lookup.
     }
   }
   return process.env[profileKeyEnvName(portalSlug)]?.trim() || '';
 }
 
-async function ayrshareRequest(path: string, portalSlug: string, init?: RequestInit): Promise<Record<string, unknown>> {
+async function storedGatewayProfileKey(portalSlug: string): Promise<string> {
+  try {
+    const accounts = await loadAmplifiConnections(portalSlug, GATEWAY_PROVIDER as NativeProvider);
+    const gateway = accounts.find((account) => (account as NativeAccount & { provider: string }).provider === GATEWAY_PROVIDER);
+    return gateway?.accessToken?.trim() || '';
+  } catch {
+    return '';
+  }
+}
+
+async function persistGatewayProfileKey(portalSlug: string, profileKey: string): Promise<void> {
+  const record = {
+    id: `ayrshare:${portalSlug}`,
+    provider: GATEWAY_PROVIDER,
+    platform: 'x',
+    name: 'Amplifi Publishing Gateway',
+    accessToken: profileKey,
+  } as unknown as NativeAccount;
+  await saveAmplifiConnections(portalSlug, GATEWAY_PROVIDER as NativeProvider, [record]);
+}
+
+async function createAyrshareProfile(portalSlug: string): Promise<string> {
   const apiKey = ayrshareApiKey();
-  const profileKey = getAyrshareProfileKey(portalSlug);
+  if (!apiKey) return '';
+  const response = await fetch('https://api.ayrshare.com/api/profiles', {
+    method: 'POST',
+    cache: 'no-store',
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ profileName: `ea-${portalSlug}`.slice(0, 80) }),
+  });
+  const payload = (await response.json().catch(() => ({}))) as Record<string, unknown>;
+  if (!response.ok) {
+    const message = String(payload.message || payload.error || payload.details || 'Could not provision the social publishing profile.');
+    throw new Error(message);
+  }
+  const profileKey = String(payload.profileKey || payload.profile_key || payload.key || '').trim();
+  if (!profileKey) throw new Error('Publishing gateway profile was created without a profile key.');
+  await persistGatewayProfileKey(portalSlug, profileKey);
+  return profileKey;
+}
+
+export async function getAyrshareProfileKey(portalSlug: string, provision = false): Promise<string> {
+  const fromEnv = envProfileKey(portalSlug);
+  if (fromEnv) return fromEnv;
+  const stored = await storedGatewayProfileKey(portalSlug);
+  if (stored) return stored;
+  if (!provision || !isAyrshareConfigured()) return '';
+  return createAyrshareProfile(portalSlug);
+}
+
+async function ayrshareRequest(path: string, portalSlug: string, init?: RequestInit, provision = true): Promise<Record<string, unknown>> {
+  const apiKey = ayrshareApiKey();
+  const profileKey = await getAyrshareProfileKey(portalSlug, provision);
   if (!apiKey) throw new Error('Amplifi publishing gateway is not configured.');
   if (!profileKey) throw new Error('This portal does not have a publishing profile yet.');
 
@@ -62,9 +117,11 @@ async function ayrshareRequest(path: string, portalSlug: string, init?: RequestI
 }
 
 export async function getGatewayConnections(portalSlug: string): Promise<string[]> {
-  if (!isAyrshareConfigured() || !getAyrshareProfileKey(portalSlug)) return [];
+  if (!isAyrshareConfigured()) return [];
+  const profileKey = await getAyrshareProfileKey(portalSlug, false);
+  if (!profileKey) return [];
   try {
-    const data = await ayrshareRequest('/api/user', portalSlug, { method: 'GET' });
+    const data = await ayrshareRequest('/api/user', portalSlug, { method: 'GET' }, false);
     const connected = data.connected;
     if (Array.isArray(connected)) return connected.map(String);
     if (connected && typeof connected === 'object') {
@@ -79,11 +136,12 @@ export async function getGatewayConnections(portalSlug: string): Promise<string[
 }
 
 export async function createGatewayConnectUrl(portalSlug: string, redirectUrl: string): Promise<string> {
+  const profileKey = await getAyrshareProfileKey(portalSlug, true);
   const data = await ayrshareRequest('/api/connect', portalSlug, {
     method: 'POST',
-    body: JSON.stringify({ profileKey: getAyrshareProfileKey(portalSlug), redirectUrl }),
+    body: JSON.stringify({ profileKey, redirectUrl }),
   });
-  const url = String(data.url || '');
+  const url = String(data.url || '').trim();
   if (!url) throw new Error('Publishing gateway did not return a connection URL.');
   return url;
 }
@@ -96,7 +154,8 @@ export async function publishThroughGateway(input: {
   scheduleDate?: string;
 }): Promise<AmplifiPublishResult[]> {
   const { portalSlug, text, mediaUrl, platforms, scheduleDate } = input;
-  if (isAyrshareConfigured() && getAyrshareProfileKey(portalSlug)) {
+  const profileKey = isAyrshareConfigured() ? await getAyrshareProfileKey(portalSlug, false) : '';
+  if (profileKey) {
     try {
       const connected = await getGatewayConnections(portalSlug);
       const requested = platforms?.length ? platforms : connected as AmplifiPublishTarget[];
@@ -111,7 +170,7 @@ export async function publishThroughGateway(input: {
           ...(mediaUrl ? { mediaUrls: [mediaUrl] } : {}),
           ...(scheduleDate ? { scheduleDate } : {}),
         }),
-      });
+      }, false);
       const postIds = Array.isArray(payload.postIds) ? payload.postIds as Array<Record<string, unknown>> : [];
       if (postIds.length) {
         return postIds.map((item) => ({
@@ -134,7 +193,9 @@ export async function publishThroughGateway(input: {
     }
   }
 
-  const nativeAccounts = await loadAmplifiConnections(portalSlug);
+  const nativeAccounts = (await loadAmplifiConnections(portalSlug)).filter(
+    (account) => (account as NativeAccount & { provider: string }).provider !== GATEWAY_PROVIDER,
+  );
   if (!nativeAccounts.length) {
     return [{ ok: false, provider: 'native', error: 'Connect at least one social account before publishing.' }];
   }
