@@ -8,11 +8,9 @@ import { EA_PORTAL_COOKIE, verifySession } from '@/lib/ea-portal-auth';
 import { PortalShell } from '@/lib/chassis/PortalShell';
 import { PortalModuleChromeStrip } from '@/lib/chassis/PortalChromeContext';
 import { resolvePortalWorkspaceChrome } from '@/lib/platform/portal-workspace';
+import { AMANDA_OWNER_PATH, AMANDA_PORTAL_SLUG } from '@/lib/amanda-catherine/constants';
 
 export const dynamic = 'force-dynamic';
-
-const AMANDA_PORTAL_SLUG = 'amanda-catherine-afd57f';
-const AMANDA_OWNER_PATH = '/amanda-business';
 
 export default async function AmandaBusinessPortalPage() {
   const cookieStore = await cookies();
