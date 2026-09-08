@@ -46,9 +46,15 @@ type Props = {
    * `workspace` = Executive sidebar.
    * `experience` = full-bleed cinematic (no chrome).
    * `client` = Client Experience nav shell.
-   * CTP-bound portals coerce to `client` so Executive nav never appears.
+   * CTP-bound portals normally coerce to `client` so Executive nav never appears.
    */
   presentation?: 'workspace' | 'experience' | 'client';
+  /**
+   * Owner/admin experiences can explicitly bypass a linked CTP client shell.
+   * This is used for Amanda Catherine's operating dashboard so the business owner
+   * never lands in the project-delivery navigation intended for clients.
+   */
+  forceWorkspace?: boolean;
   /** Override active Client Experience nav item when known. */
   clientNavActive?: ClientExperienceNavId;
   children: ReactNode;
@@ -95,11 +101,12 @@ export async function PortalShell({
   pageTitle,
   chrome: chromeProp,
   presentation = 'workspace',
+  forceWorkspace = false,
   clientNavActive: clientNavActiveProp,
   children,
 }: Props) {
   const chrome = chromeProp ?? (await resolvePortalWorkspaceChrome(slug));
-  const useClientShell = await shouldUseClientExperienceShell(slug);
+  const useClientShell = forceWorkspace ? false : await shouldUseClientExperienceShell(slug);
   const effectivePresentation = useClientShell
     ? 'client'
     : presentation === 'experience'
