@@ -14,6 +14,19 @@ async function authenticatedResponse(origin: string, path: string, token: string
   });
 }
 
+const OWNER_MENU_ROUTES = {
+  dashboard: '',
+  updateHub: 'updates',
+  appointments: 'calendar',
+  clients: 'people',
+  programsCourses: 'learning',
+  documents: 'documents',
+  marketing: 'amplifi',
+  reports: 'reports',
+  eva: 'ask',
+  settings: 'settings',
+} as const;
+
 export async function GET(req: NextRequest) {
   const checks = {
     clientRecord: false,
@@ -24,7 +37,10 @@ export async function GET(req: NextRequest) {
     authenticatedPortalHome: false,
     authenticatedMemberRoute: false,
     premiumOwnerDashboard: false,
+    allMenuRoutes: false,
   };
+
+  const menuRoutes: Record<string, { path: string; status: number; ok: boolean; redirect: string | null }> = {};
 
   try {
     const client = await getClientByPortalSlug(AMANDA_PORTAL_SLUG);
@@ -59,11 +75,27 @@ export async function GET(req: NextRequest) {
           body.includes('Ask Eva') &&
           body.includes('Business Overview');
       }
+
+      const menuResults = await Promise.all(
+        Object.entries(OWNER_MENU_ROUTES).map(async ([key, route]) => {
+          const path = route ? `/portal/${AMANDA_PORTAL_SLUG}/${route}` : `/portal/${AMANDA_PORTAL_SLUG}`;
+          const response = await authenticatedResponse(req.nextUrl.origin, path, token);
+          return [key, {
+            path,
+            status: response.status,
+            ok: response.status === 200,
+            redirect: response.headers.get('location'),
+          }] as const;
+        }),
+      );
+
+      for (const [key, result] of menuResults) menuRoutes[key] = result;
+      checks.allMenuRoutes = menuResults.every(([, result]) => result.ok && !result.redirect);
     }
 
     const ok = Object.values(checks).every(Boolean);
-    return NextResponse.json({ ok, checks }, { status: ok ? 200 : 503 });
+    return NextResponse.json({ ok, checks, menuRoutes }, { status: ok ? 200 : 503 });
   } catch {
-    return NextResponse.json({ ok: false, checks }, { status: 503 });
+    return NextResponse.json({ ok: false, checks, menuRoutes }, { status: 503 });
   }
 }
