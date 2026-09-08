@@ -28,7 +28,7 @@ jobs:
           test "$CODE" = '200'
           test "$(wc -c < "$BODY")" -gt 500
 
-      - name: Verify Amanda authenticated portal path
+      - name: Verify Amanda authenticated portal path and every owner menu route
         shell: bash
         run: |
           set -euo pipefail
@@ -40,6 +40,7 @@ jobs:
           grep -q '"authenticatedPortalHome":true' "$BODY"
           grep -q '"authenticatedMemberRoute":true' "$BODY"
           grep -q '"premiumOwnerDashboard":true' "$BODY"
+          grep -q '"allMenuRoutes":true' "$BODY"
 
       - name: Verify Amanda public and login routes
         shell: bash
@@ -61,7 +62,7 @@ jobs:
         with:
           script: |
             const title='[Production Guard] EA client access failure detected';
-            const body=`Production guard failed at ${new Date().toISOString()}. This guard includes Amanda Catherine public availability, authenticated owner, canonical-home, member-route, and premium owner-dashboard checks. Run: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const body=`Production guard failed at ${new Date().toISOString()}. This guard includes Amanda Catherine public availability, authenticated owner, canonical-home, member-route, premium owner-dashboard, and every owner menu destination. Run: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
             const {data:issues}=await github.rest.issues.listForRepo({owner:context.repo.owner,repo:context.repo.repo,state:'open',per_page:100});
             const existing=issues.find(i=>i.title===title);
             if(existing) await github.rest.issues.createComment({owner:context.repo.owner,repo:context.repo.repo,issue_number:existing.number,body});
