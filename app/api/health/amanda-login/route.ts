@@ -1,7 +1,11 @@
+import { get } from '@vercel/blob';
 import { NextRequest, NextResponse } from 'next/server';
 import { getClientByPortalSlug } from '@/lib/airtable';
 import { EA_PORTAL_COOKIE, signSession, verifySession } from '@/lib/ea-portal-auth';
 import { AMANDA_OWNER_PATH, AMANDA_PORTAL_SLUG } from '@/lib/amanda-catherine/constants';
+import { AMANDA_COURSES } from '@/lib/amanda-catherine/config';
+import { getAmandaCourseContent } from '@/lib/amanda-catherine/course-content';
+import { AMANDA_COURSE_RESOURCES } from '@/lib/amanda-catherine/course-resources';
 
 export const dynamic = 'force-dynamic';
 
@@ -41,6 +45,8 @@ export async function GET(req: NextRequest) {
   };
 
   const menuRoutes: Record<string, { path: string; status: number; ok: boolean; redirect: string | null }> = {};
+  const courseInventory: Record<string, { lessons: number; videos: number; lessonResources: number }> = {};
+  const materialInventory: Record<string, { pathname: string; available: boolean; statusCode: number | null }> = {};
 
   try {
     const client = await getClientByPortalSlug(AMANDA_PORTAL_SLUG);
@@ -93,9 +99,31 @@ export async function GET(req: NextRequest) {
       checks.allMenuRoutes = menuResults.every(([, result]) => result.ok && !result.redirect);
     }
 
+    await Promise.all(AMANDA_COURSES.map(async (course) => {
+      const content = await getAmandaCourseContent(AMANDA_PORTAL_SLUG, course.id);
+      courseInventory[course.id] = {
+        lessons: content.lessons.length,
+        videos: content.lessons.filter((lesson) => Boolean(lesson.videoUrl)).length,
+        lessonResources: content.lessons.filter((lesson) => Boolean(lesson.resourceUrl)).length,
+      };
+    }));
+
+    await Promise.all(AMANDA_COURSE_RESOURCES.map(async (resource) => {
+      try {
+        const result = await get(resource.pathname, { access: 'private' });
+        materialInventory[resource.id] = {
+          pathname: resource.pathname,
+          available: Boolean(result && result.statusCode === 200),
+          statusCode: result?.statusCode ?? null,
+        };
+      } catch {
+        materialInventory[resource.id] = { pathname: resource.pathname, available: false, statusCode: null };
+      }
+    }));
+
     const ok = Object.values(checks).every(Boolean);
-    return NextResponse.json({ ok, checks, menuRoutes }, { status: ok ? 200 : 503 });
+    return NextResponse.json({ ok, checks, menuRoutes, courseInventory, materialInventory }, { status: ok ? 200 : 503 });
   } catch {
-    return NextResponse.json({ ok: false, checks, menuRoutes }, { status: 503 });
+    return NextResponse.json({ ok: false, checks, menuRoutes, courseInventory, materialInventory }, { status: 503 });
   }
 }
