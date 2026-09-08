@@ -9,22 +9,6 @@ export type AmandaCourseResource = {
 
 export const AMANDA_COURSE_RESOURCES: readonly AmandaCourseResource[] = [
   {
-    id: 'reset-training-manual',
-    courseId: 'aesthetikine-reset-training',
-    title: 'Nervous System Reset Training Manual',
-    description: 'Core practitioner manual for the AesthetiKine Reset 1-Day Intensive.',
-    pathname: 'AesthetiKine 1-Day Nervous System Reset Manual.pdf',
-    fileType: 'PDF',
-  },
-  {
-    id: 'body-sculpt-certification-overview',
-    courseId: 'body-sculpt-practitioner-certification',
-    title: 'Body Sculpt Certification Overview',
-    description: 'Program overview for the two-day kinesiology-led Body Sculpt certification.',
-    pathname: 'AesthetiKine_Body_Sculpt_Certification_Overview.pdf',
-    fileType: 'PDF',
-  },
-  {
     id: 'body-sculpt-textbook',
     courseId: 'body-sculpt-practitioner-certification',
     title: 'Body Sculpt Textbook',
