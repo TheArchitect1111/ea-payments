@@ -1,5 +1,6 @@
-import { loadAmplifiConnections, saveAmplifiConnections } from '@/lib/amplifi-connection-store';
-import { publishNative, type NativeAccount, type NativeProvider } from '@/lib/amplifi-native-social';
+import { loadAmplifiConnections } from '@/lib/amplifi-connection-store';
+import { loadGatewayProfileKey, saveGatewayProfileKey } from '@/lib/amplifi-gateway-profile-store';
+import { publishNative, type NativeAccount } from '@/lib/amplifi-native-social';
 
 export type AmplifiPublishTarget = 'facebook' | 'instagram' | 'linkedin' | 'tiktok' | 'x';
 export type AmplifiPublishResult = {
@@ -39,27 +40,6 @@ function envProfileKey(portalSlug: string): string {
   return process.env[profileKeyEnvName(portalSlug)]?.trim() || '';
 }
 
-async function storedGatewayProfileKey(portalSlug: string): Promise<string> {
-  try {
-    const accounts = await loadAmplifiConnections(portalSlug, GATEWAY_PROVIDER as NativeProvider);
-    const gateway = accounts.find((account) => (account as NativeAccount & { provider: string }).provider === GATEWAY_PROVIDER);
-    return gateway?.accessToken?.trim() || '';
-  } catch {
-    return '';
-  }
-}
-
-async function persistGatewayProfileKey(portalSlug: string, profileKey: string): Promise<void> {
-  const record = {
-    id: `ayrshare:${portalSlug}`,
-    provider: GATEWAY_PROVIDER,
-    platform: 'x',
-    name: 'Amplifi Publishing Gateway',
-    accessToken: profileKey,
-  } as unknown as NativeAccount;
-  await saveAmplifiConnections(portalSlug, GATEWAY_PROVIDER as NativeProvider, [record]);
-}
-
 async function createAyrshareProfile(portalSlug: string): Promise<string> {
   const apiKey = ayrshareApiKey();
   if (!apiKey) return '';
@@ -79,14 +59,19 @@ async function createAyrshareProfile(portalSlug: string): Promise<string> {
   }
   const profileKey = String(payload.profileKey || payload.profile_key || payload.key || '').trim();
   if (!profileKey) throw new Error('Publishing gateway profile was created without a profile key.');
-  await persistGatewayProfileKey(portalSlug, profileKey);
+  await saveGatewayProfileKey(portalSlug, profileKey);
   return profileKey;
 }
 
 export async function getAyrshareProfileKey(portalSlug: string, provision = false): Promise<string> {
   const fromEnv = envProfileKey(portalSlug);
   if (fromEnv) return fromEnv;
-  const stored = await storedGatewayProfileKey(portalSlug);
+  let stored = '';
+  try {
+    stored = await loadGatewayProfileKey(portalSlug);
+  } catch {
+    stored = '';
+  }
   if (stored) return stored;
   if (!provision || !isAyrshareConfigured()) return '';
   return createAyrshareProfile(portalSlug);
