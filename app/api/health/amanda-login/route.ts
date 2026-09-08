@@ -31,6 +31,16 @@ const OWNER_MENU_ROUTES = {
   settings: 'settings',
 } as const;
 
+const RECOVERED_VIDEO_CANDIDATES = [
+  'Amanda-Catherine-Video-01.mp4',
+  'Amanda-Catherine-Video-02.mp4',
+  'Amanda-Catherine-Video-03.mp4',
+  'VID-20260821-WA0006.mp4',
+  'VID-20260821-WA0007.mp4',
+  'VID-20260821-WA0008.mp4',
+  'VID-20260821-WA0009.mp4',
+] as const;
+
 export async function GET(req: NextRequest) {
   const checks = {
     clientRecord: false,
@@ -47,6 +57,7 @@ export async function GET(req: NextRequest) {
   const menuRoutes: Record<string, { path: string; status: number; ok: boolean; redirect: string | null }> = {};
   const courseInventory: Record<string, { lessons: number; videos: number; lessonResources: number }> = {};
   const materialInventory: Record<string, { pathname: string; available: boolean; statusCode: number | null }> = {};
+  const recoveredVideoInventory: Record<string, { available: boolean; statusCode: number | null }> = {};
 
   try {
     const client = await getClientByPortalSlug(AMANDA_PORTAL_SLUG);
@@ -121,9 +132,21 @@ export async function GET(req: NextRequest) {
       }
     }));
 
+    await Promise.all(RECOVERED_VIDEO_CANDIDATES.map(async (pathname) => {
+      try {
+        const result = await get(pathname, { access: 'private' });
+        recoveredVideoInventory[pathname] = {
+          available: Boolean(result && result.statusCode === 200),
+          statusCode: result?.statusCode ?? null,
+        };
+      } catch {
+        recoveredVideoInventory[pathname] = { available: false, statusCode: null };
+      }
+    }));
+
     const ok = Object.values(checks).every(Boolean);
-    return NextResponse.json({ ok, checks, menuRoutes, courseInventory, materialInventory }, { status: ok ? 200 : 503 });
+    return NextResponse.json({ ok, checks, menuRoutes, courseInventory, materialInventory, recoveredVideoInventory }, { status: ok ? 200 : 503 });
   } catch {
-    return NextResponse.json({ ok: false, checks, menuRoutes, courseInventory, materialInventory }, { status: 503 });
+    return NextResponse.json({ ok: false, checks, menuRoutes, courseInventory, materialInventory, recoveredVideoInventory }, { status: 503 });
   }
 }
