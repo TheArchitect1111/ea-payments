@@ -8,6 +8,7 @@ import { sendAuthEmail } from '@/lib/ea-auth-email';
 import { resolvePortalPostLoginPath } from '@/lib/portal-post-login';
 import { invitedAmandaPortalIdentity } from '@/lib/amanda-catherine/invited-learners';
 import { getAmandaAssignedAudience } from '@/lib/amanda-catherine/client-access';
+import { amandaOwnerPortalIdentity } from '@/lib/amanda-catherine/owner-identities';
 
 export const dynamic = 'force-dynamic';
 
@@ -103,12 +104,13 @@ export async function POST(req: NextRequest) {
   }
 
   if (realm === 'portal') {
+    const ownerIdentity = amandaOwnerPortalIdentity(email);
     const assignedAmandaAccess = isAmandaLearningTarget(next)
       ? await getAmandaAssignedAudience('amanda-catherine', email)
       : null;
-    const client = assignedAmandaAccess
+    const client = ownerIdentity || (assignedAmandaAccess
       ? { ok: true as const, slug: 'amanda-catherine', recordId: '' }
-      : invitedAmandaPortalIdentity(email) || await findPortalClientByEmail(email);
+      : invitedAmandaPortalIdentity(email) || await findPortalClientByEmail(email));
     if (!client.ok || !client.slug) {
       const missingAirtable = !process.env.AIRTABLE_API_KEY?.trim();
       if (process.env.NODE_ENV === 'development' && missingAirtable) {
@@ -129,8 +131,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const portalClient = await getClientByPortalSlug(client.slug);
-    const defaultNext = await resolvePortalPostLoginPath(client.slug, portalClient);
+    const portalClient = ownerIdentity ? null : await getClientByPortalSlug(client.slug);
+    const defaultNext = ownerIdentity
+      ? '/amanda-business'
+      : await resolvePortalPostLoginPath(client.slug, portalClient);
     try {
       const started = await begin2FA({
         realm: 'portal',
