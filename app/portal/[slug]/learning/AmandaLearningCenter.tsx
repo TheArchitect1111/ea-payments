@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { type AmandaPortalAudience } from '@/lib/amanda-catherine/config';
+import { ENTREPRENEURIAL_ARTIST_COURSE, type AmandaPortalAudience } from '@/lib/amanda-catherine/config';
 import { coursesForAccount } from '@/lib/amanda-catherine/course-content';
 import type { AmandaCourseContent, AmandaLessonContent } from '@/lib/amanda-catherine/course-content';
 import type { AmandaCourseProgress } from '@/lib/amanda-catherine/progress-store';
@@ -14,6 +14,8 @@ function embedUrl(value: string) {
     if (url.hostname.includes('youtube.com')) {
       const id = url.searchParams.get('v');
       if (id) return `https://www.youtube-nocookie.com/embed/${id}`;
+      const list = url.searchParams.get('list');
+      if (list) return `https://www.youtube-nocookie.com/embed/videoseries?list=${encodeURIComponent(list)}`;
       if (url.pathname.startsWith('/embed/')) return value;
     }
     if (url.hostname === 'youtu.be') return `https://www.youtube-nocookie.com/embed/${url.pathname.slice(1)}`;
@@ -82,11 +84,13 @@ export default function AmandaLearningCenter({ audience, assignedCourseIds, isAd
   const player = embedUrl(lesson.videoUrl);
   const directVideo = /\.(mp4|webm)(\?.*)?$/i.test(player);
   const courseResources = resourcesForAmandaCourse(course.id);
+  const officialPlaylist = course.id === ENTREPRENEURIAL_ARTIST_COURSE.id ? embedUrl(ENTREPRENEURIAL_ARTIST_COURSE.playlistUrl) : '';
 
   return <section className="ak-learning">
     <header className="ak-learning__header"><div><p className="ak-learning__eyebrow">My learning</p><h2>{course.title}</h2><p>Watch each lesson, complete the work, and track your path to certification.</p></div><label><span>Program</span><select value={courseId} onChange={(e) => { setError(''); setStatus(''); setSelected(0); setCourseId(e.target.value); }}>{courses.map((item) => <option key={item.id} value={item.id}>{item.title}</option>)}</select></label></header>
     <div className="ak-learning__progress"><strong>{percent}% complete</strong><div className="ak-learning__track"><span style={{ width: `${percent}%` }} /></div><small>{progress.completedLessons.length} of {course.lessons.length} lessons complete</small></div>
     {error ? <p className="ak-learning__error" role="alert">{error}</p> : null}
+    {officialPlaylist ? <section className="ak-learning__materials" aria-labelledby="official-course-video-library"><div><p className="ak-learning__eyebrow">Official course videos</p><h3 id="official-course-video-library">The Entrepreneurial Artist video library</h3><p>The original six-part course playlist is restored here as the official video source.</p></div><div className="ak-learning__video"><iframe src={officialPlaylist} title="The Entrepreneurial Artist official course playlist" allow="accelerometer; autoplay; encrypted-media; picture-in-picture" allowFullScreen /></div></section> : null}
     <div className="ak-learning__workspace">
       <nav className="ak-learning__lessons" aria-label="Course lessons">{content.lessons.map((item, index) => {
         const release = progress.lessonReleaseAt?.[item.title];
