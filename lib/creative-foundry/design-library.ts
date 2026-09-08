@@ -5,7 +5,9 @@ export type DesignFamilyCategory =
   | "event"
   | "product"
   | "education"
-  | "storytelling";
+  | "storytelling"
+  | "documentary"
+  | "cinematic";
 
 export interface DesignFamily {
   id: string;
@@ -34,11 +36,43 @@ export const CREATIVE_DESIGN_LIBRARY: DesignFamily[] = [
     premium: true,
   },
   {
+    id: "bold-editorial",
+    name: "Bold Editorial",
+    category: "editorial",
+    formats: ["portrait", "square", "story", "landscape"],
+    description: "High-concept typography with disciplined hierarchy, asymmetric composition and deliberate negative space.",
+    premium: true,
+  },
+  {
+    id: "cinematic-lifestyle",
+    name: "Cinematic Lifestyle",
+    category: "cinematic",
+    formats: ["portrait", "square", "story", "landscape", "short-video"],
+    description: "Emotion-first real-world scene with cinematic lighting, depth, believable people and restrained copy.",
+    premium: true,
+  },
+  {
+    id: "documentary-moment",
+    name: "Documentary Moment",
+    category: "documentary",
+    formats: ["portrait", "square", "story", "landscape", "short-video"],
+    description: "Observed human moment with candid body language, environmental context and minimal promotional styling.",
+    premium: true,
+  },
+  {
     id: "promotion-offer",
     name: "Offer Focus",
     category: "promotion",
     formats: ["portrait", "square", "story"],
     description: "Clear offer hierarchy with supporting image and unmistakable CTA.",
+    premium: true,
+  },
+  {
+    id: "conversion-hero",
+    name: "Conversion Hero",
+    category: "promotion",
+    formats: ["portrait", "square", "story", "landscape"],
+    description: "Premium hero visual with one benefit, one action and enough restraint to avoid coupon-template aesthetics.",
     premium: true,
   },
   {
@@ -66,11 +100,27 @@ export const CREATIVE_DESIGN_LIBRARY: DesignFamily[] = [
     premium: true,
   },
   {
+    id: "product-detail-story",
+    name: "Product Detail Story",
+    category: "product",
+    formats: ["portrait", "square", "story", "carousel"],
+    description: "Tactile detail, real materials, close crop and editorial sequencing that makes the product or service feel considered rather than catalog-like.",
+    premium: true,
+  },
+  {
     id: "education-carousel",
     name: "Teach in Slides",
     category: "education",
     formats: ["carousel"],
     description: "Hook, insight, explanation, evidence and CTA narrative for educational carousels.",
+    premium: true,
+  },
+  {
+    id: "editorial-carousel",
+    name: "Editorial Carousel",
+    category: "education",
+    formats: ["carousel"],
+    description: "Magazine-like multi-frame narrative with varied pacing, strong visual hierarchy and one coherent art direction.",
     premium: true,
   },
   {
