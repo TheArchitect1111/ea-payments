@@ -359,6 +359,16 @@ export async function requirePortalModule(
   });
 
   if (!access.enabledModuleIds.has(moduleId)) {
+    // Amanda's owner/admin must always be able to administer the learning center.
+    // This prevents the owner menu from silently failing while tenant entitlements lag.
+    if (
+      moduleId === 'training' &&
+      slug.toLowerCase().startsWith('amanda-catherine') &&
+      session.role &&
+      roleAtLeast(session.role, 'admin')
+    ) {
+      return { session, client, access };
+    }
     // Course assignment is the learner-level authorization source. Do not send
     // a paid Amanda learner back to the portal home while org entitlements lag.
     if (
