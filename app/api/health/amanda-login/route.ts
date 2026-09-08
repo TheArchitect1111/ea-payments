@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getClientByPortalSlug } from '@/lib/airtable';
 import { EA_PORTAL_COOKIE, signSession, verifySession } from '@/lib/ea-portal-auth';
 import { AMANDA_OWNER_PATH, AMANDA_PORTAL_SLUG } from '@/lib/amanda-catherine/constants';
-import { AMANDA_COURSES } from '@/lib/amanda-catherine/config';
+import { AMANDA_COURSES, ENTREPRENEURIAL_ARTIST_COURSE } from '@/lib/amanda-catherine/config';
 import { getAmandaCourseContent } from '@/lib/amanda-catherine/course-content';
 import { AMANDA_COURSE_RESOURCES } from '@/lib/amanda-catherine/course-resources';
 
@@ -52,9 +52,12 @@ export async function GET(req: NextRequest) {
     authenticatedMemberRoute: false,
     premiumOwnerDashboard: false,
     allMenuRoutes: false,
+    allCourseResourceRoutes: false,
+    entrepreneurialArtistPlaylistConfigured: false,
   };
 
   const menuRoutes: Record<string, { path: string; status: number; ok: boolean; redirect: string | null }> = {};
+  const courseResourceRoutes: Record<string, { path: string; status: number; ok: boolean }> = {};
   const courseInventory: Record<string, { lessons: number; videos: number; lessonResources: number }> = {};
   const materialInventory: Record<string, { pathname: string; available: boolean; statusCode: number | null }> = {};
   const recoveredVideoInventory: Record<string, { available: boolean; statusCode: number | null }> = {};
@@ -62,6 +65,10 @@ export async function GET(req: NextRequest) {
   try {
     const client = await getClientByPortalSlug(AMANDA_PORTAL_SLUG);
     checks.clientRecord = Boolean(client);
+    checks.entrepreneurialArtistPlaylistConfigured = Boolean(
+      ENTREPRENEURIAL_ARTIST_COURSE.playlistUrl &&
+      ENTREPRENEURIAL_ARTIST_COURSE.totalLessons === 6,
+    );
 
     const token = await signSession({
       slug: AMANDA_PORTAL_SLUG,
@@ -108,6 +115,16 @@ export async function GET(req: NextRequest) {
 
       for (const [key, result] of menuResults) menuRoutes[key] = result;
       checks.allMenuRoutes = menuResults.every(([, result]) => result.ok && !result.redirect);
+
+      const resourceResults = await Promise.all(
+        AMANDA_COURSE_RESOURCES.map(async (resource) => {
+          const path = `/api/portal/amanda/resources/${resource.id}`;
+          const response = await authenticatedResponse(req.nextUrl.origin, path, token);
+          return [resource.id, { path, status: response.status, ok: response.status === 200 }] as const;
+        }),
+      );
+      for (const [key, result] of resourceResults) courseResourceRoutes[key] = result;
+      checks.allCourseResourceRoutes = resourceResults.length > 0 && resourceResults.every(([, result]) => result.ok);
     }
 
     await Promise.all(AMANDA_COURSES.map(async (course) => {
@@ -145,8 +162,8 @@ export async function GET(req: NextRequest) {
     }));
 
     const ok = Object.values(checks).every(Boolean);
-    return NextResponse.json({ ok, checks, menuRoutes, courseInventory, materialInventory, recoveredVideoInventory }, { status: ok ? 200 : 503 });
+    return NextResponse.json({ ok, checks, menuRoutes, courseResourceRoutes, courseInventory, materialInventory, recoveredVideoInventory }, { status: ok ? 200 : 503 });
   } catch {
-    return NextResponse.json({ ok: false, checks, menuRoutes, courseInventory, materialInventory, recoveredVideoInventory }, { status: 503 });
+    return NextResponse.json({ ok: false, checks, menuRoutes, courseResourceRoutes, courseInventory, materialInventory, recoveredVideoInventory }, { status: 503 });
   }
 }
