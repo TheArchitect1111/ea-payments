@@ -26,8 +26,12 @@ export async function GET(req: NextRequest) {
     const accounts = connections.filter((account) => account.provider === config.provider);
     return { ...config, accounts: accounts.map(({ accessToken: _accessToken, refreshToken: _refreshToken, ...account }) => account) };
   });
+  const nativeAccounts = providers.flatMap((item) => item.accounts);
 
   const gatewayPlatforms = await getGatewayConnections(auth.session.slug);
+  const gatewayProfileKey = isAyrshareConfigured()
+    ? await getAyrshareProfileKey(auth.session.slug, false)
+    : '';
   const gatewayAccounts = gatewayPlatforms.map((platform) => ({
     id: `gateway:${platform}`,
     platform,
@@ -35,11 +39,11 @@ export async function GET(req: NextRequest) {
     provider: 'gateway',
   }));
 
-  // Amplifi creation, research, approvals, and calendar work must remain available
-  // even when no publishing account has been connected yet. The workspace entry is
-  // intentionally non-publishable; the publish endpoint still requires a real account.
-  const usableConnections = gatewayAccounts.length || connections.length
-    ? [...gatewayAccounts, ...providers.flatMap((item) => item.accounts)]
+  // Amplifi creation, research, approvals, and calendar work remain available
+  // without a publishing connection. This workspace entry is deliberately not
+  // publishable; the publish endpoint still requires a real connected account.
+  const usableConnections = gatewayAccounts.length || nativeAccounts.length
+    ? [...gatewayAccounts, ...nativeAccounts]
     : [{ id: 'amplifi-draft-mode', platform: 'amplifi', name: 'Draft & approval mode', provider: 'workspace' }];
 
   return NextResponse.json({
@@ -47,9 +51,10 @@ export async function GET(req: NextRequest) {
     providers,
     connections: usableConnections,
     publishing: {
-      gateway: isAyrshareConfigured() && Boolean(getAyrshareProfileKey(auth.session.slug)),
+      gateway: Boolean(gatewayProfileKey),
+      gatewayAvailable: isAyrshareConfigured(),
       connectedPlatforms: gatewayPlatforms,
-      mode: gatewayPlatforms.length ? 'gateway' : connections.length ? 'native' : 'draft',
+      mode: gatewayPlatforms.length ? 'gateway' : nativeAccounts.length ? 'native' : 'draft',
     },
   });
 }
