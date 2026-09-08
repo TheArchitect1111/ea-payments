@@ -4,7 +4,7 @@ export type AmandaCourseResource = {
   title: string;
   description: string;
   pathname: string;
-  fileType: 'PDF' | 'DOCX';
+  fileType: 'PDF' | 'DOCX' | 'VIDEO';
 };
 
 export const AMANDA_COURSE_RESOURCES: readonly AmandaCourseResource[] = [
@@ -71,6 +71,14 @@ export const AMANDA_COURSE_RESOURCES: readonly AmandaCourseResource[] = [
     description: 'Supporting exercises clients can complete between sessions.',
     pathname: 'AesthetiKine_Recommended_Home_Exercises.pdf',
     fileType: 'PDF',
+  },
+  {
+    id: 'body-sculpt-video-demo',
+    courseId: 'body-sculpt-practitioner-certification',
+    title: 'Body Sculpt Video Demo',
+    description: 'Amanda’s Body Sculpt demonstration video from the recovered course library.',
+    pathname: 'Body Sculpt Video Demo.mov',
+    fileType: 'VIDEO',
   },
 ] as const;
 
