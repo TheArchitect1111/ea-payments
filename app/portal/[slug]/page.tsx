@@ -7,6 +7,8 @@ import { PortalShell, NAVY } from '@/lib/chassis/PortalShell';
 import { requirePortalModule } from '@/lib/modules/portal-modules';
 import EAPortalHubCards from '@/app/portal/components/EAPortalHubCards';
 import PortalHomeExperience from '@/app/portal/components/PortalHomeExperience';
+import { PortalSubpage } from '@/app/portal/components/PortalSubpage';
+import AmandaMemberHome from '@/app/portal/[slug]/member/AmandaMemberHome';
 import {
   PortalPersonalityRail,
   orderDashboardSections,
@@ -34,10 +36,33 @@ export default async function PortalPage({
   const { slug } = await params;
   const { client, session } = await requirePortalModule(slug, 'dashboard');
 
-  // Amanda's tenant has a role-aware business workspace. Never leave Amanda
-  // owners or members in the generic EA project-delivery shell.
+  // Amanda's canonical portal home renders directly here. Do not redirect this
+  // route to /member: Client Experience navigation points back to this route,
+  // and redirecting it creates a browser prefetch/render loop.
   if (slug.toLowerCase().startsWith('amanda-catherine')) {
-    redirect(`/portal/${slug}/member`);
+    const firstName = client.clientName?.split(' ')[0] || 'Amanda';
+    const isAdministrator = session.role === 'admin' || session.role === 'owner';
+    return (
+      <PortalSubpage
+        slug={slug}
+        active="member"
+        kicker="Amanda Catherine"
+        title={`Welcome, ${firstName}`}
+        lede={
+          isAdministrator
+            ? 'Your business, clients, programs, and next steps in one place.'
+            : 'Your programs, appointments, files, payments, and next steps in one place.'
+        }
+        firstName={firstName}
+        hideBackLink={isAdministrator}
+      >
+        <AmandaMemberHome
+          slug={slug}
+          email={session.email || client.email}
+          role={session.role}
+        />
+      </PortalSubpage>
+    );
   }
 
   // CTP intake clients belong in the branded CTP workspace — not the Simplifi hub home.
