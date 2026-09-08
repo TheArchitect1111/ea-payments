@@ -5,6 +5,16 @@ import { AMANDA_OWNER_PATH, AMANDA_PORTAL_SLUG } from '@/lib/amanda-catherine/co
 
 export const dynamic = 'force-dynamic';
 
+async function authenticatedStatus(origin: string, path: string, token: string) {
+  const response = await fetch(`${origin}${path}`, {
+    method: 'GET',
+    headers: { cookie: `${EA_PORTAL_COOKIE}=${token}` },
+    redirect: 'manual',
+    cache: 'no-store',
+  });
+  return response.status;
+}
+
 export async function GET(req: NextRequest) {
   const checks = {
     clientRecord: false,
@@ -12,6 +22,8 @@ export async function GET(req: NextRequest) {
     sessionVerification: false,
     canonicalSlug: false,
     authenticatedOwnerRoute: false,
+    authenticatedPortalHome: false,
+    authenticatedMemberRoute: false,
   };
 
   try {
@@ -30,13 +42,14 @@ export async function GET(req: NextRequest) {
     checks.canonicalSlug = session?.slug === AMANDA_PORTAL_SLUG;
 
     if (token && checks.clientRecord && checks.canonicalSlug) {
-      const ownerResponse = await fetch(`${req.nextUrl.origin}${AMANDA_OWNER_PATH}`, {
-        method: 'GET',
-        headers: { cookie: `${EA_PORTAL_COOKIE}=${token}` },
-        redirect: 'manual',
-        cache: 'no-store',
-      });
-      checks.authenticatedOwnerRoute = ownerResponse.status === 200;
+      const [ownerStatus, portalHomeStatus, memberStatus] = await Promise.all([
+        authenticatedStatus(req.nextUrl.origin, AMANDA_OWNER_PATH, token),
+        authenticatedStatus(req.nextUrl.origin, `/portal/${AMANDA_PORTAL_SLUG}`, token),
+        authenticatedStatus(req.nextUrl.origin, `/portal/${AMANDA_PORTAL_SLUG}/member`, token),
+      ]);
+      checks.authenticatedOwnerRoute = ownerStatus === 200;
+      checks.authenticatedPortalHome = portalHomeStatus === 200;
+      checks.authenticatedMemberRoute = memberStatus === 200;
     }
 
     const ok = Object.values(checks).every(Boolean);
