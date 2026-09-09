@@ -26,7 +26,7 @@ for (const key of required) {
 }
 if (manifest.status !== 'PASS') fail(`manifest status is ${manifest.status}`);
 
-const requiredGates = ['build','assets','functional','desktopVisual','mobileVisual','creativeCritic'];
+const requiredGates = ['sourceIdentity','build','assets','functional','desktopVisual','mobileVisual','creativeCritic'];
 for (const gate of requiredGates) {
   if (manifest.gates?.[gate]?.status !== 'PASS') fail(`${gate} gate did not PASS`);
   if (!manifest.gates?.[gate]?.proof) fail(`${gate} gate has no proof`);
