@@ -1,3 +1,4 @@
+import { headers } from 'next/headers';
 import { getAIGatewayConfig, type AIProviderConfig } from '@/lib/ai/config';
 import { logAIEvent, trackAIUsage } from '@/lib/ai/logging';
 import { checkRateLimit } from '@/lib/ai/rate-limit';
@@ -99,6 +100,17 @@ async function fetchWithRetry(url: string, init: RequestInit, retries: number, t
   throw lastError instanceof Error ? lastError : new Error('AI request failed.');
 }
 
+async function resolveProviderApiKey(candidate: AIProviderConfig): Promise<string> {
+  if (candidate.apiKey) return candidate.apiKey;
+  if (candidate.id !== 'gateway') return '';
+  try {
+    const requestHeaders = await headers();
+    return requestHeaders.get('x-vercel-oidc-token') ?? '';
+  } catch {
+    return '';
+  }
+}
+
 function directModel(model: string): string {
   return model.startsWith('openai/') ? model.slice('openai/'.length) : model;
 }
@@ -177,6 +189,12 @@ export async function runAIGateway(request: AIGatewayRequest, context: AIRequest
   const failures: string[] = [];
 
   for (const candidate of config.providers) {
+    const apiKey = await resolveProviderApiKey(candidate);
+    if (!apiKey) {
+      failures.push(`${candidate.id}:credential-unavailable`);
+      logAIEvent('ai.provider_failover', context, { provider: candidate.id, reason: 'credential-unavailable' });
+      continue;
+    }
     const body = requestBodyForProvider(candidate, request, requestedModel, config.gatewayModels, inputMessages, context, promptVersion);
     attemptedModel = String(body.model);
     logAIEvent('ai.request', context, {
@@ -190,7 +208,7 @@ export async function runAIGateway(request: AIGatewayRequest, context: AIRequest
       const attempt = await fetchWithRetry(`${candidate.baseUrl}/responses`, {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${candidate.apiKey}`,
+          Authorization: `Bearer ${apiKey}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(body),
@@ -242,6 +260,12 @@ export async function streamAIGateway(request: AIGatewayRequest, context: AIRequ
   const failures: string[] = [];
 
   for (const candidate of config.providers) {
+    const apiKey = await resolveProviderApiKey(candidate);
+    if (!apiKey) {
+      failures.push(`${candidate.id}:credential-unavailable`);
+      logAIEvent('ai.provider_failover', context, { provider: candidate.id, reason: 'credential-unavailable' });
+      continue;
+    }
     const body = requestBodyForProvider(candidate, request, requestedModel, config.gatewayModels, inputMessages, context, promptVersion, true);
     attemptedModel = String(body.model);
     logAIEvent('ai.request', context, {
@@ -255,7 +279,7 @@ export async function streamAIGateway(request: AIGatewayRequest, context: AIRequ
       const attempt = await fetchWithRetry(`${candidate.baseUrl}/responses`, {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${candidate.apiKey}`,
+          Authorization: `Bearer ${apiKey}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(body),
