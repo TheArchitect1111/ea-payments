@@ -6,6 +6,11 @@ import { premiumJury } from '@/lib/amplifi-premium-intelligence';
 export const dynamic='force-dynamic';
 export const maxDuration=300;
 
+type CampaignPost={title:string;caption:string;callToAction:string;imageDirection:string};
+type Campaign={id?:string;campaignTitle?:string;strategy?:string;posts:CampaignPost[]};
+type JuryVerdict=ReturnType<typeof premiumJury>;
+type ProofResult={id:string;brand:string;business?:string;goal?:string;campaignTitle?:string;strategy?:string;posts?:CampaignPost[];jury?:JuryVerdict[];copyPassed?:boolean;imageUrl?:string|null;imagePassed?:boolean;passed:boolean;error?:string};
+
 const scenarios=[
  {id:'restaurant',brand:'Ember Table',business:'chef-driven neighborhood restaurant',audience:'local professionals and couples',goal:'fill slower Tuesday dinner service',voice:['warm','witty','confident'],visual:'cinematic plated dinner, open kitchen energy, real guests, rich evening light'},
  {id:'barber',brand:'Northline Barber Co.',business:'premium neighborhood barbershop',audience:'busy professional men',goal:'increase weekday bookings',voice:['sharp','direct','stylish'],visual:'premium documentary barbershop moment, precise fade, mirror reflections, tactile tools, natural skin texture'},
@@ -17,7 +22,7 @@ const scenarios=[
  {id:'fitness',brand:'Forge Method',business:'small-group strength studio',audience:'busy adults over 35',goal:'increase trial-session bookings',voice:['energetic','smart','non-bro'],visual:'documentary strength training, coach cueing a real client, premium contrast, authentic effort, no fitness-model posing'},
  {id:'bakery',brand:'Sunday Crumb',business:'artisan bakery',audience:'local food lovers and gift buyers',goal:'increase weekend preorders',voice:['playful','sensory','charming'],visual:'macro pastry detail, baker hands finishing product, warm window light, premium food editorial styling'},
  {id:'consultant',brand:'Signal North',business:'operations consultancy for small businesses',audience:'owners of growing service businesses',goal:'generate discovery calls',voice:['smart','provocative','plainspoken'],visual:'editorial founder-work scene, process notes, real operational context, modern restrained composition'}
-];
+] as const;
 const sleep=(ms:number)=>new Promise(resolve=>setTimeout(resolve,ms));
 
 async function generateImage(prompt:string){
@@ -33,29 +38,30 @@ async function generateImage(prompt:string){
  return null;
 }
 
-async function generateScenario(scenario:(typeof scenarios)[number]){
+async function generateScenario(scenario:(typeof scenarios)[number]):Promise<ProofResult>{
  const agent=getAgent('amplifi-content-director');
  if(!agent)return {id:scenario.id,brand:scenario.brand,passed:false,error:'agent-unavailable'};
  const prompt=`Create ONE premium five-piece social campaign for this business. Return JSON only as {"id":"${scenario.id}","campaignTitle":string,"strategy":string,"posts":[{"title":string,"caption":string,"callToAction":string,"imageDirection":string}]}. Exactly five posts. Do not write generic AI copy. Every post must be specific to this business, audience and goal. Use sharp human observations, concrete language, memorable but natural headlines, and no invented claims or statistics.\nBrand: ${scenario.brand}\nBusiness: ${scenario.business}\nAudience: ${scenario.audience}\nGoal: ${scenario.goal}\nVoice: ${scenario.voice.join(', ')}\nVisual standard: ${scenario.visual}`;
- let campaign:any;
+ let campaign:Campaign|undefined;
  for(let attempt=0;attempt<4;attempt++){
   const ctx:AIRequestContext={requestId:crypto.randomUUID(),actor:{id:`proof-${scenario.id}-${attempt}`,type:'system',role:'proof-run'},route:'/api/amplifi/proof-run',metadata:{product:'amplifi',workflow:'premium-proof-run',scenario:scenario.id,attempt}};
-  try{const result=await agent.execute({intent:'single business premium proof run',query:prompt,context:{brand:scenario.brand,business:scenario.business,audience:scenario.audience,goal:scenario.goal}},ctx);campaign=result.raw;break;}catch(error){console.error('Amplifi proof text generation failed',scenario.id,attempt,error);if(attempt<3)await sleep(10000*(attempt+1));}
+  try{const result=await agent.execute({intent:'single business premium proof run',query:prompt,context:{brand:scenario.brand,business:scenario.business,audience:scenario.audience,goal:scenario.goal}},ctx);campaign=result.raw as Campaign;break;}catch(error){console.error('Amplifi proof text generation failed',scenario.id,attempt,error);if(attempt<3)await sleep(10000*(attempt+1));}
  }
  if(!campaign)return {id:scenario.id,brand:scenario.brand,passed:false,error:'text-generation-failed'};
  if(!Array.isArray(campaign.posts)||campaign.posts.length!==5)return {id:scenario.id,brand:scenario.brand,passed:false,error:'missing-five-post-campaign'};
  const brandTerms=[scenario.brand,scenario.business,...scenario.voice];
- const jury=campaign.posts.map((p:any)=>premiumJury(`${p.title}\n${p.caption}`,{brandTerms,platform:'instagram'}));
+ const jury=campaign.posts.map((post)=>premiumJury(`${post.title}\n${post.caption}`,{brandTerms,platform:'instagram'}));
  const hero=campaign.posts[0];
  const imagePrompt=`Create a premium editorial social campaign photograph with no text, logo, watermark, UI or border. Brand context: ${scenario.brand}, ${scenario.business}. Audience: ${scenario.audience}. Business goal: ${scenario.goal}. Creative concept: ${hero.imageDirection||scenario.visual}. Style: ${scenario.visual}. Avoid generic corporate stock-photo staging. Natural anatomy, realistic hands and faces, believable materials, art-directed composition, premium commercial photography.`;
  const imageUrl=await generateImage(imagePrompt);
- return {id:scenario.id,brand:scenario.brand,business:scenario.business,goal:scenario.goal,campaignTitle:campaign.campaignTitle,strategy:campaign.strategy,posts:campaign.posts,jury,copyPassed:jury.every((j:any)=>j.passed),imageUrl,imagePassed:Boolean(imageUrl),passed:jury.every((j:any)=>j.passed)&&Boolean(imageUrl)};
+ const copyPassed=jury.every((verdict)=>verdict.passed);
+ return {id:scenario.id,brand:scenario.brand,business:scenario.business,goal:scenario.goal,campaignTitle:campaign.campaignTitle,strategy:campaign.strategy,posts:campaign.posts,jury,copyPassed,imageUrl,imagePassed:Boolean(imageUrl),passed:copyPassed&&Boolean(imageUrl)};
 }
 
 export async function GET(req:NextRequest){
  const requested=req.nextUrl.searchParams.get('id');
  const selected=requested?scenarios.filter(s=>s.id===requested):scenarios.slice(0,1);
  if(requested&&!selected.length)return NextResponse.json({ok:false,error:'unknown-scenario'},{status:404});
- const results=[]; for(const scenario of selected)results.push(await generateScenario(scenario));
- return NextResponse.json({ok:true,generatedAt:new Date().toISOString(),scenarioCount:results.length,passed:results.filter((r:any)=>r.passed).length,copyPassed:results.filter((r:any)=>r.copyPassed).length,imagePassed:results.filter((r:any)=>r.imagePassed).length,results});
+ const results:ProofResult[]=[]; for(const scenario of selected)results.push(await generateScenario(scenario));
+ return NextResponse.json({ok:true,generatedAt:new Date().toISOString(),scenarioCount:results.length,passed:results.filter((result)=>result.passed).length,copyPassed:results.filter((result)=>result.copyPassed).length,imagePassed:results.filter((result)=>result.imagePassed).length,results});
 }
