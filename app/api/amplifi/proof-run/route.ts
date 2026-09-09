@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getAgent } from '@/lib/agents/registry';
 import type { AIRequestContext } from '@/lib/ai/types';
 import { premiumJury } from '@/lib/amplifi-premium-intelligence';
@@ -18,24 +18,32 @@ const scenarios=[
  {id:'bakery',brand:'Sunday Crumb',business:'artisan bakery',audience:'local food lovers and gift buyers',goal:'increase weekend preorders',voice:['playful','sensory','charming'],visual:'macro pastry detail, baker hands finishing product, warm window light, premium food editorial styling'},
  {id:'consultant',brand:'Signal North',business:'operations consultancy for small businesses',audience:'owners of growing service businesses',goal:'generate discovery calls',voice:['smart','provocative','plainspoken'],visual:'editorial founder-work scene, process notes, real operational context, modern restrained composition'}
 ];
+const sleep=(ms:number)=>new Promise(resolve=>setTimeout(resolve,ms));
 
 async function generateImage(prompt:string){
  const key=process.env.OPENAI_API_KEY?.trim();
  if(!key)return null;
- const response=await fetch('https://api.openai.com/v1/images/generations',{method:'POST',headers:{Authorization:`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:process.env.OPENAI_IMAGE_MODEL?.trim()||'dall-e-3',prompt,size:'1792x1024',quality:'standard',response_format:'url',n:1}),signal:AbortSignal.timeout(120000)});
- if(!response.ok){console.error('Amplifi proof image generation failed',response.status,await response.text());return null;}
- const data=await response.json() as {data?:Array<{url?:string;revised_prompt?:string}>};
- return data.data?.[0]?.url||null;
+ for(let attempt=0;attempt<4;attempt++){
+  const response=await fetch('https://api.openai.com/v1/images/generations',{method:'POST',headers:{Authorization:`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:process.env.OPENAI_IMAGE_MODEL?.trim()||'dall-e-3',prompt,size:'1792x1024',quality:'standard',response_format:'url',n:1}),signal:AbortSignal.timeout(120000)});
+  if(response.ok){const data=await response.json() as {data?:Array<{url?:string}>};return data.data?.[0]?.url||null;}
+  const detail=await response.text(); console.error('Amplifi proof image generation failed',response.status,detail);
+  if(response.status!==429||attempt===3)return null;
+  await sleep(10000*(attempt+1));
+ }
+ return null;
 }
 
 async function generateScenario(scenario:(typeof scenarios)[number]){
  const agent=getAgent('amplifi-content-director');
  if(!agent)return {id:scenario.id,brand:scenario.brand,passed:false,error:'agent-unavailable'};
  const prompt=`Create ONE premium five-piece social campaign for this business. Return JSON only as {"id":"${scenario.id}","campaignTitle":string,"strategy":string,"posts":[{"title":string,"caption":string,"callToAction":string,"imageDirection":string}]}. Exactly five posts. Do not write generic AI copy. Every post must be specific to this business, audience and goal. Use sharp human observations, concrete language, memorable but natural headlines, and no invented claims or statistics.\nBrand: ${scenario.brand}\nBusiness: ${scenario.business}\nAudience: ${scenario.audience}\nGoal: ${scenario.goal}\nVoice: ${scenario.voice.join(', ')}\nVisual standard: ${scenario.visual}`;
- const ctx:AIRequestContext={requestId:crypto.randomUUID(),actor:{id:`proof-${scenario.id}`,type:'system',role:'proof-run'},route:'/api/amplifi/proof-run',metadata:{product:'amplifi',workflow:'premium-proof-run',scenario:scenario.id}};
  let campaign:any;
- try{const result=await agent.execute({intent:'single business premium proof run',query:prompt,context:{brand:scenario.brand,business:scenario.business,audience:scenario.audience,goal:scenario.goal}},ctx);campaign=result.raw;}catch(error){console.error('Amplifi proof text generation failed',scenario.id,error);return {id:scenario.id,brand:scenario.brand,passed:false,error:'text-generation-failed'};}
- if(!campaign||!Array.isArray(campaign.posts)||campaign.posts.length!==5)return {id:scenario.id,brand:scenario.brand,passed:false,error:'missing-five-post-campaign'};
+ for(let attempt=0;attempt<4;attempt++){
+  const ctx:AIRequestContext={requestId:crypto.randomUUID(),actor:{id:`proof-${scenario.id}-${attempt}`,type:'system',role:'proof-run'},route:'/api/amplifi/proof-run',metadata:{product:'amplifi',workflow:'premium-proof-run',scenario:scenario.id,attempt}};
+  try{const result=await agent.execute({intent:'single business premium proof run',query:prompt,context:{brand:scenario.brand,business:scenario.business,audience:scenario.audience,goal:scenario.goal}},ctx);campaign=result.raw;break;}catch(error){console.error('Amplifi proof text generation failed',scenario.id,attempt,error);if(attempt<3)await sleep(10000*(attempt+1));}
+ }
+ if(!campaign)return {id:scenario.id,brand:scenario.brand,passed:false,error:'text-generation-failed'};
+ if(!Array.isArray(campaign.posts)||campaign.posts.length!==5)return {id:scenario.id,brand:scenario.brand,passed:false,error:'missing-five-post-campaign'};
  const brandTerms=[scenario.brand,scenario.business,...scenario.voice];
  const jury=campaign.posts.map((p:any)=>premiumJury(`${p.title}\n${p.caption}`,{brandTerms,platform:'instagram'}));
  const hero=campaign.posts[0];
@@ -44,13 +52,10 @@ async function generateScenario(scenario:(typeof scenarios)[number]){
  return {id:scenario.id,brand:scenario.brand,business:scenario.business,goal:scenario.goal,campaignTitle:campaign.campaignTitle,strategy:campaign.strategy,posts:campaign.posts,jury,copyPassed:jury.every((j:any)=>j.passed),imageUrl,imagePassed:Boolean(imageUrl),passed:jury.every((j:any)=>j.passed)&&Boolean(imageUrl)};
 }
 
-async function mapWithConcurrency<T,R>(items:T[],limit:number,fn:(item:T)=>Promise<R>){
- const out:R[]=[]; let next=0;
- async function worker(){while(true){const i=next++;if(i>=items.length)return;out[i]=await fn(items[i]);}}
- await Promise.all(Array.from({length:Math.min(limit,items.length)},()=>worker())); return out;
-}
-
-export async function GET(){
- const results=await mapWithConcurrency(scenarios,2,generateScenario);
+export async function GET(req:NextRequest){
+ const requested=req.nextUrl.searchParams.get('id');
+ const selected=requested?scenarios.filter(s=>s.id===requested):scenarios.slice(0,1);
+ if(requested&&!selected.length)return NextResponse.json({ok:false,error:'unknown-scenario'},{status:404});
+ const results=[]; for(const scenario of selected)results.push(await generateScenario(scenario));
  return NextResponse.json({ok:true,generatedAt:new Date().toISOString(),scenarioCount:results.length,passed:results.filter((r:any)=>r.passed).length,copyPassed:results.filter((r:any)=>r.copyPassed).length,imagePassed:results.filter((r:any)=>r.imagePassed).length,results});
 }
