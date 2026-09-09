@@ -6,6 +6,7 @@ import { openDesignAgent } from '@/lib/agents/open-design-agent';
 import { amplifiContentDirectorAgent } from '@/lib/agents/amplifi-content-director-agent';
 import { eaOperationsArchitectAgent } from '@/lib/agents/ea-operations-architect-agent';
 import { specialistAgents } from '@/lib/agents/specialist-agents';
+import { creativeBrainAgents } from '@/lib/agents/creative-brain-agents';
 import type { EAAgent } from '@/lib/agents/types';
 
 const agents = new Map<string, EAAgent>();
@@ -46,6 +47,7 @@ registerAgent(openDesignAgent);
 registerAgent(amplifiContentDirectorAgent);
 registerAgent(eaOperationsArchitectAgent);
 specialistAgents.forEach(registerAgent);
+creativeBrainAgents.forEach(registerAgent);
 
 const AGENT_ALIASES: Record<string, string> = {
   'seo-strategist': 'seo',
@@ -67,6 +69,22 @@ const AGENT_ALIASES: Record<string, string> = {
   'performance-engineer': 'performance',
   'security-reviewer': 'security',
   'analytics-specialist': 'analytics',
+  'marketing-brain': 'behavioral-marketing',
+  'marketing-agent': 'behavioral-marketing',
+  'behavioral-marketing-agent': 'behavioral-marketing',
+  'story': 'story-architect',
+  'story-agent': 'story-architect',
+  'language': 'language-director',
+  'language-agent': 'language-director',
+  'copy-director': 'language-director',
+  'visual': 'visual-director',
+  'visual-agent': 'visual-director',
+  'art-director': 'visual-director',
+  'demo-agent': 'product-demonstration',
+  'product-demo': 'product-demonstration',
+  'critic': 'creative-critic',
+  'qa-critic': 'creative-critic',
+  'creative-qa': 'creative-critic',
 };
 
 function normalizeAgentName(name: string) {
