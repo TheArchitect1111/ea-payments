@@ -2,41 +2,96 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import AmplifiBrand from './AmplifiBrand';
-import './amplifi-v3.css';
-import './amplifi-story-upgrade.css';
-import './brain-redesign.css';
+import './brain-demo.css';
 
-export const metadata:Metadata={title:'Amplifi | Focus on your craft.',description:'Amplifi is the social media intelligence system that learns your business, researches opportunities, builds coordinated campaigns, and adapts from results.'};
+export const metadata: Metadata = {
+  title: 'Amplifi | Social media intelligence that does the work',
+  description: 'See how Amplifi turns a business objective into research, campaign strategy, finished social posts, approval, learning and the next smarter move.'
+};
+
 const preview='/api/amplifi/trial?next=%2Famplifi%2Fcreate%3Fmode%3Dcampaign';
-const loop=['OBJECTIVE','RESEARCH','CREATE','VERIFY','SCHEDULE','PUBLISH','MEASURE','LEARN','ADAPT'];
-const learn=['Audience','Offers','Voice','Approved ideas','Hooks','Formats','CTAs','Timing'];
 
-export default function Page(){return <main className="brain-page">
-<nav className="brain-nav"><AmplifiBrand/><div><Link href="/amplifi/pricing">Plans</Link><Link href="/portal/login?next=%2Famplifi%2Fworkspace">Sign in</Link></div></nav>
+const searchResults=[
+  {tag:'LOCAL SIGNAL',title:'Midweek appointment availability',why:'Your Tuesday and Wednesday capacity is underused.',angle:'Turn convenience into the campaign, not a discount.'},
+  {tag:'CUSTOMER QUESTION',title:'When is the easiest time to book?',why:'Prospects are deciding when to fit the service into a busy week.',angle:'Make weekday flexibility the useful answer.'},
+  {tag:'SEASONAL MOMENT',title:'Back-to-routine week',why:'People are rebuilding schedules after summer travel and school starts.',angle:'Position a midweek appointment as the easier reset.'}
+];
 
-<section className="brain-hero"><Image src="/home/build-hero.jpg" alt="Business owner focused on the work that matters" fill priority sizes="100vw"/><div className="brain-hero-shade"/><div className="brain-hero-copy"><span>AMPLIFI · SOCIAL MEDIA INTELLIGENCE</span><h1>Your business has a job.<br/><em>So should every post.</em></h1><p>You tell Amplifi what you need to accomplish. It learns your business, finds the opportunities, builds the campaign, checks the work and brings it to you ready for review.</p><a href={preview}>BUILD MY FREE CAMPAIGN →</a><small>Three answers. A real campaign. No payment required to start.</small></div></section>
+const posts=[
+  {job:'ATTENTION',image:'/home/ch7-consultant.jpg',headline:'Your weekend should not start with one more errand.',caption:'If the week is already full, your appointment does not have to compete with Saturday. We opened quieter midweek times for people who want to get it handled before the weekend starts.',why:'Interrupts the habit of waiting until Saturday.'},
+  {job:'TRUST',image:'/home/ch7-healthcare.jpg',headline:'The easier appointment is the one that fits your life.',caption:'Good service is not only the result. It is making the experience easier to fit around work, family and everything else already on your calendar.',why:'Builds preference around convenience, not price.'},
+  {job:'ACTION',image:'/home/ch1-why-start.jpg',headline:'Tuesday + Wednesday openings are live.',caption:'If you have been saying “I need to get that done this week,” this is your window. Choose a midweek time before the weekend rush begins.',why:'Turns campaign interest into a clear next step.'}
+];
 
-<section className="brain-recognition"><div className="recognition-copy"><span>THE PROBLEM IS NOT CONTENT</span><h2>Social media keeps asking you to make decisions you did not open your business to make.</h2><p>What should I post? What matters today? Is this worth saying? What image works? Which platform? When should it go out? Did it work?</p><strong>Posting is the visible part. The real workload is everything behind it.</strong></div><div className="recognition-image"><Image src="/home/coach-parent.jpg" alt="Professional giving attention to a customer" fill sizes="50vw"/><div className="decision-stack"><i>WHAT SHOULD I SAY?</i><i>WHAT IS WORTH TALKING ABOUT?</i><i>WILL THIS HELP THE BUSINESS?</i><i>DID IT WORK?</i></div></div></section>
+export default function Page(){return <main className="demo-page">
+  <nav className="demo-nav"><AmplifiBrand/><div><Link href="/amplifi/pricing">Plans</Link><Link href="/portal/login?next=%2Famplifi%2Fworkspace">Sign in</Link></div></nav>
 
-<section className="brain-break"><span>THE AMPLIFI DIFFERENCE</span><h2>Do not tell Amplifi what to post.</h2><h3>Tell it what you need to happen.</h3><div className="objective-demo"><small>YOUR OBJECTIVE</small><blockquote>“I need more weekday appointments.”</blockquote><div className="objective-arrow">↓</div><div className="architecture-card"><b>SMARTCHITECTURE</b><p>Turns the business objective into audience, message, campaign angle, content jobs, CTA and approval plan before content is created.</p><div><span>Audience tension</span><strong>Weekend demand is crowded</strong></div><div><span>Campaign angle</span><strong>Own the middle of the week</strong></div><div><span>Content jobs</span><strong>Attention · Trust · Action</strong></div></div></div></section>
+  <section className="demo-hero">
+    <Image src="/home/build-hero.jpg" alt="Business owner focused on their work" fill priority sizes="100vw"/>
+    <div className="demo-shade"/>
+    <div className="demo-hero-copy">
+      <span>AMPLIFI · SOCIAL MEDIA INTELLIGENCE</span>
+      <h1>Tell Amplifi the business problem.<br/><em>It builds the social media.</em></h1>
+      <p>No blank content calendar. No “what should I post?” loop. Amplifi researches the opportunity, builds a campaign, creates the posts and brings the work to you for approval.</p>
+      <a href={preview}>BUILD MY FREE CAMPAIGN →</a>
+      <small>Three answers. A real campaign reveal. No payment required to start.</small>
+    </div>
+  </section>
 
-<section className="brain-system"><div className="system-head"><span>NOT A POST GENERATOR</span><h2>A campaign engine that keeps moving.</h2><p>Amplifi coordinates the work around the post, not just the words inside it.</p></div><div className="loop-track">{loop.map((x,i)=><div key={x} className={i===0?'loop-node hot':'loop-node'}><b>{String(i+1).padStart(2,'0')}</b><span>{x}</span></div>)}</div><p className="loop-caption">The goal is not more content. The goal is a smarter next move.</p></section>
+  <section className="demo-problem">
+    <div><span>WHY THIS IS DIFFERENT</span><h2>Most tools give you tools.<br/>Amplifi gives you work.</h2><p>Instead of opening another dashboard and deciding what to create, you start with the outcome you need.</p></div>
+    <div className="problem-stack"><i>WHAT SHOULD I POST?</i><i>WHAT IS WORTH TALKING ABOUT?</i><i>WHAT IMAGE SHOULD I USE?</i><i>WHEN SHOULD IT GO OUT?</i><i>DID IT WORK?</i><strong>Amplifi handles the questions behind the post.</strong></div>
+  </section>
 
-<section className="brain-proof"><div className="proof-head"><span>ONE OBJECTIVE · THREE DIFFERENT JOBS</span><h2>This is what a campaign looks like.</h2><p>Not five rewrites of the same caption. Different pieces designed to move the audience differently.</p></div><div className="proof-grid">
-<article><div className="proof-image"><Image src="/home/ch7-consultant.jpg" alt="Attention post example" fill sizes="33vw"/><span>ATTENTION</span><h3>Tuesday is not the day to disappear.</h3></div><div className="proof-copy"><b>JOB · INTERRUPT THE PATTERN</b><p>The weekend rush gets all the attention. The smarter move may be taking care of yourself before everyone else starts looking for the same appointment.</p><small>AMPLIFI CHOSE THIS ANGLE TO CREATE RELEVANCE WITHOUT FAKE URGENCY.</small></div></article>
-<article className="proof-feature"><div className="proof-image"><Image src="/home/ch7-healthcare.jpg" alt="Trust post example" fill sizes="33vw"/><span>TRUST</span><h3>Your week should work around your life.</h3></div><div className="proof-copy"><b>JOB · MAKE THE BRAND USEFUL</b><p>A good service is not only the result. It is also making the experience fit the life your customer is already trying to manage.</p><small>AMPLIFI CHOSE CUSTOMER REALITY OVER A GENERIC PROMOTION.</small></div></article>
-<article><div className="proof-image"><Image src="/home/ch7-school.jpg" alt="Action post example" fill sizes="33vw"/><span>ACTION</span><h3>Two quieter days. One easier decision.</h3></div><div className="proof-copy"><b>JOB · CONVERT INTENT</b><p>Tuesday and Wednesday appointments are open. If you have been saying “I need to get in this week,” this is your window.</p><small>CTA · BOOK A WEEKDAY APPOINTMENT →</small></div></article>
-</div></section>
+  <section className="demo-goal">
+    <span>1 · START WITH THE GOAL</span>
+    <div className="goal-card"><small>BUSINESS OBJECTIVE</small><blockquote>“I need more weekday appointments.”</blockquote><div className="goal-meta"><b>Audience</b><span>Busy working professionals</span><b>Desired action</b><span>Book Tuesday or Wednesday</span></div></div>
+    <div className="goal-arrow">↓</div>
+    <div className="smart-card"><div className="smart-icon">✦</div><div><small>SMARTCHITECTURE</small><h3>Build the campaign before writing the posts.</h3><p>Amplifi translates the objective into audience tension, campaign angle, content jobs, CTA and visual direction.</p></div></div>
+  </section>
 
-<section className="brain-two-paths"><div className="path search-path"><span>NO IDEA?</span><h2>Amplifi can go looking.</h2><p>Search + Build researches relevant topics and opportunities, explains why they matter to your audience, then turns the strongest angle into campaign-ready work.</p><div className="search-demo"><small>SEARCH + BUILD</small><strong>Find something my customers should care about this week.</strong><div>FOUND → WHY IT MATTERS → AMPLIFI ANGLE → BUILD</div></div></div><div className="path idea-path"><span>HAVE AN IDEA?</span><h2>Do not turn it into another task.</h2><p>Drop the thought, photo, voice note, link, screenshot or document into Idea Box. Amplifi finds the usable opportunity inside it.</p><div className="idea-icons"><i>💭</i><i>📷</i><i>🎙</i><i>🔗</i><i>📄</i></div><strong>Either way, you do not start from a blank post box.</strong></div></section>
+  <section className="demo-search">
+    <div className="section-title"><span>2 · SEARCH + BUILD</span><h2>Amplifi can go looking for the opportunity.</h2><p>This is what the research step should feel like, not a paragraph explaining that research exists.</p></div>
+    <div className="search-window">
+      <div className="search-top"><div className="search-logo">⌕</div><div><small>WHAT SHOULD AMPLIFI LOOK FOR?</small><strong>Find something my customers should care about this week.</strong></div><button>Search + Build</button></div>
+      <div className="search-results">{searchResults.map((r,i)=><article key={r.title}><div className="result-num">0{i+1}</div><div><small>{r.tag}</small><h3>{r.title}</h3><p><b>Why it matters:</b> {r.why}</p><p><b>Amplifi angle:</b> {r.angle}</p></div></article>)}</div>
+      <div className="recommendation"><span>AMPLIFI RECOMMENDS</span><strong>MIDWEEK MADE EASY</strong><p>A three-post campaign that reframes weekday availability as convenience, then turns attention into bookings.</p><button>Build campaign →</button></div>
+    </div>
+  </section>
 
-<section className="brain-memory"><div className="memory-story"><span>AMPLIFI LEARNS</span><h2>The second campaign should know more than the first.</h2><p>Amplifi carries useful, tenant-specific context forward so recommendations become more specific instead of repeatedly asking you to explain the business.</p><div className="learn-chips">{learn.map(x=><span key={x}>{x} ✓</span>)}</div><small>Learning is evidence-based. Amplifi does not pretend to know what it has not learned and should not overfit tiny samples.</small></div><div className="memory-panel"><small>BUSINESS MEMORY</small><h3>Brick & Blade</h3><p><b>Objective:</b> Fill weekday appointments</p><p><b>Voice:</b> Direct · confident · useful</p><p><b>Audience:</b> Nearby working professionals</p><p><b>Approved pattern:</b> Customer reality before promotion</p><p><b>Next test:</b> Midweek convenience angle</p><div>READY FOR THE NEXT CAMPAIGN →</div></div></section>
+  <section className="demo-posts">
+    <div className="section-title light"><span>3 · REAL CAMPAIGN OUTPUT</span><h2>One objective. Three posts with three different jobs.</h2><p>These are finished social-post examples, not abstract feature cards.</p></div>
+    <div className="post-grid">{posts.map((p,i)=><article className="social-post" key={p.job}>
+      <div className="social-chrome"><div className="avatar">A</div><div><b>Acme Service Co.</b><small>Sponsored example · Instagram</small></div><span>•••</span></div>
+      <div className="social-image"><Image src={p.image} alt={`${p.job} campaign post example`} fill sizes="33vw"/><div className="social-overlay"><small>{p.job}</small><h3>{p.headline}</h3></div></div>
+      <div className="social-actions"><span>♡</span><span>◯</span><span>↗</span><span className="save">⌑</span></div>
+      <div className="social-caption"><p>{p.caption}</p><b>{i===2?'BOOK A MIDWEEK APPOINTMENT →':'Learn more →'}</b></div>
+      <div className="amplifi-note"><small>WHY AMPLIFI BUILT THIS</small><p>{p.why}</p></div>
+    </article>)}</div>
+  </section>
 
-<section className="brain-eva"><div className="eva-stage"><div className="eva-mark">E</div><div className="eva-message"><small>EVA</small><h3>Your weekday campaign is ready.</h3><p>Smartchitecture built the strategy. Amplifi created and checked three pieces. I can walk you through why each one exists.</p><div><button>Approve</button><button>Edit</button><button>Skip</button></div></div></div><div className="eva-story"><span>EVA</span><h2>You should not need to manage the machine.</h2><p>Smartchitecture is the connected intelligence behind the work. Eva is the guide in front of it. She brings forward what needs your attention, explains the reasoning and keeps you in control.</p><strong>Amplifi works. Eva brings you the decision.</strong></div></section>
+  <section className="demo-idea">
+    <div className="idea-left"><span>4 · IDEA BOX</span><h2>Already have something? Drop it in.</h2><p>A thought, photo, voice note, link, screenshot or document should become raw material, not another task.</p><div className="dropbox"><div className="upload-icon">＋</div><strong>Drop an idea or asset</strong><small>Photo · Voice note · Link · Screenshot · Document</small></div></div>
+    <div className="idea-flow"><div className="asset-card"><span>📷</span><div><small>NEW ASSET</small><b>Customer transformation photo</b></div></div><div className="flow-arrow">↓</div><div className="idea-result"><small>AMPLIFI FOUND THE STORY</small><h3>Turn this into a trust post.</h3><p>Use the transformation as proof, explain the customer problem in plain language and end with one natural next step.</p><button>Build this post →</button></div></div>
+  </section>
 
-<section className="brain-free"><div className="free-copy"><span>DO NOT TAKE OUR WORD FOR IT</span><h2>Give Amplifi a business problem.</h2><p>Answer three questions. Amplifi turns the objective into strategy and reveals the campaign on the same page.</p><ol><li><b>01</b>What do you do?</li><li><b>02</b>What are you trying to accomplish?</li><li><b>03</b>What should people do next?</li></ol><a href={preview}>BUILD MY FREE CAMPAIGN →</a><small>No payment. No social connection required to start.</small></div><div className="campaign-reveal"><small>YOUR CAMPAIGN REVEAL</small><h3>Not a blank dashboard.</h3><div><span>Business objective understood ✓</span><span>Smartchitecture strategy ✓</span><span>Campaign angle ✓</span><span>3 coordinated posts ✓</span><span>Visual direction ✓</span><span>CTA ✓</span><span>Eva review ready ✓</span></div><strong>YOUR CAMPAIGN APPEARS HERE.</strong></div></section>
+  <section className="demo-eva">
+    <div className="eva-copy"><span>5 · EVA BRINGS YOU THE DECISION</span><h2>You should not have to manage the machine.</h2><p>Smartchitecture handles the connected intelligence. Eva surfaces what needs your attention and explains why.</p></div>
+    <div className="eva-phone"><div className="eva-head"><div>E</div><span><b>Eva</b><small>Amplifi guide</small></span></div><div className="eva-bubble"><p>Your <b>Midweek Made Easy</b> campaign is ready.</p><ul><li>3 posts created ✓</li><li>Visual direction applied ✓</li><li>CTA checked ✓</li><li>Ready for your review ✓</li></ul><small>Post 1 should lead because it gives people a reason to reconsider Saturday before asking them to book.</small></div><div className="eva-buttons"><button>Approve campaign</button><button>Edit</button><button>Skip</button></div></div>
+  </section>
 
-<section className="brain-close"><Image src="/home/build-hero.jpg" alt="Business owner focused on their craft" fill sizes="100vw"/><div className="brain-close-shade"/><div><span>AMPLIFI</span><h2>Your social media can keep moving without becoming your second job.</h2><h3>Focus on your craft.<br/>Let Amplifi handle the social media.</h3><a href={preview}>TRY AMPLIFI FREE →</a></div></section>
+  <section className="demo-learn">
+    <div className="section-title"><span>6 · LEARN + ADAPT</span><h2>The next campaign should know more than the first.</h2></div>
+    <div className="learn-grid"><div className="metric-card"><small>CAMPAIGN RESULT</small><strong>+31%</strong><p>weekday booking clicks</p></div><div className="metric-card"><small>BEST RESPONSE</small><strong>11:42 AM</strong><p>Wednesday lunch window</p></div><div className="metric-card"><small>TOP MESSAGE</small><strong>Convenience</strong><p>outperformed discount language</p></div></div>
+    <div className="learn-panel"><div><small>AMPLIFI LEARNED</small><p>✓ Convenience angle resonated</p><p>✓ Midweek CTA earned more clicks</p><p>✓ Customer-reality language beat promotional copy</p></div><div className="next-arrow">→</div><div><small>NEXT CAMPAIGN ADAPTS</small><p>Lead with convenience again</p><p>Test Wednesday lunch timing</p><p>Use proof before promotion</p></div></div>
+  </section>
 
-<footer className="brain-footer"><AmplifiBrand/><nav><Link href="/amplifi/terms">Terms</Link><Link href="/amplifi/privacy">Privacy</Link><Link href="/amplifi/acceptable-use">Acceptable Use</Link><Link href="/trust">Trust Center</Link></nav><p>Amplifi assists with content strategy and creation. You remain responsible for review, accuracy, rights and publication decisions. Nothing publishes without your approval.</p><small>© 2026 Ascension Systems LLC · Efficiency Architects · Amplifi</small></footer>
+  <section className="demo-free">
+    <div><span>TRY THE PRODUCT STORY YOURSELF</span><h2>Give Amplifi three answers.<br/>Get something real back.</h2><ol><li><b>01</b> What do you do?</li><li><b>02</b> What are you trying to accomplish?</li><li><b>03</b> What should people do next?</li></ol><a href={preview}>BUILD MY FREE CAMPAIGN →</a><small>No payment. No social connection required to start.</small></div>
+    <div className="reveal-card"><small>YOUR CAMPAIGN REVEAL</small><h3>What appears next</h3><div className="reveal-row"><span>✓</span><b>Objective understood</b></div><div className="reveal-row"><span>✓</span><b>Smartchitecture strategy</b></div><div className="reveal-row"><span>✓</span><b>Research opportunity</b></div><div className="reveal-row"><span>✓</span><b>3 coordinated posts</b></div><div className="reveal-row"><span>✓</span><b>Visual direction + CTA</b></div><div className="reveal-row"><span>✓</span><b>Eva review ready</b></div></div>
+  </section>
+
+  <section className="demo-close"><Image src="/home/build-hero.jpg" alt="Business owner focused on their craft" fill sizes="100vw"/><div className="demo-shade"/><div><span>AMPLIFI</span><h2>Focus on your craft.<br/><em>Let Amplifi handle the social media.</em></h2><a href={preview}>TRY AMPLIFI FREE →</a></div></section>
+
+  <footer className="demo-footer"><AmplifiBrand/><nav><Link href="/amplifi/terms">Terms</Link><Link href="/amplifi/privacy">Privacy</Link><Link href="/amplifi/acceptable-use">Acceptable Use</Link><Link href="/trust">Trust Center</Link></nav><p>Amplifi assists with content strategy and creation. You remain responsible for review, accuracy, rights and publication decisions. Nothing publishes without your approval.</p><small>© 2026 Ascension Systems LLC · Efficiency Architects · Amplifi</small></footer>
 </main>}
