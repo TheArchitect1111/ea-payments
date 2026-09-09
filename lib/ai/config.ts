@@ -57,9 +57,12 @@ export function getAIGatewayConfig(): AIGatewayConfig {
     baseUrl: (process.env.OMNIROUTE_BASE_URL ?? '').replace(/\/$/, ''),
   };
 
-  // Prefer the multi-provider gateway first. Existing provider keys remain as lower-level
-  // fallbacks so an AI Gateway auth/configuration problem does not become a new SPOF.
-  const providers = [gateway, omniRoute, openAI].filter((provider) => provider.apiKey && provider.baseUrl);
+  // Prefer the multi-provider gateway first. On Vercel, its OIDC token is attached to
+  // the function request rather than guaranteed as a normal process environment value.
+  const providers = [gateway, omniRoute, openAI].filter((provider) => {
+    if (provider.id === 'gateway') return Boolean(provider.baseUrl && (provider.apiKey || process.env.VERCEL));
+    return Boolean(provider.apiKey && provider.baseUrl);
+  });
 
   return {
     provider: 'openai',
