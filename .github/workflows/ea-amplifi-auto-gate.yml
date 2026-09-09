@@ -1,0 +1,91 @@
+name: EA Amplifi Auto Gate
+
+on:
+  deployment_status:
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: ea-amplifi-production-promotion
+  cancel-in-progress: false
+
+jobs:
+  gate-and-promote:
+    if: >-
+      github.event.deployment_status.state == 'success' &&
+      github.event.deployment.ref == 'release/amplifi-images-gated'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout exact deployed source
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.deployment.sha }}
+          fetch-depth: 0
+
+      - name: Require explicit production candidate commit
+        shell: bash
+        run: |
+          git log -1 --pretty=%B | grep -q '^\[EA-CANDIDATE\] Amplifi images ready for gated production$' || {
+            echo 'Not the final Amplifi candidate. No promotion.'
+            exit 78
+          }
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build gate
+        run: npm run build
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run exact-source visual gates
+        env:
+          EA_PREVIEW_URL: ${{ github.event.deployment_status.environment_url || github.event.deployment_status.target_url }}
+          EA_GATE_PATH: /amplifi
+          EA_SOURCE_COMMIT: ${{ github.event.deployment.sha }}
+          EA_MIN_VISUALS: '2'
+          EA_GATE_OUTPUT: artifacts/ea-gate
+          VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+        run: node scripts/ea-preview-gate.mjs
+
+      - name: Upload immutable proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ea-amplifi-gate-${{ github.event.deployment.sha }}
+          path: artifacts/ea-gate
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Verify master is ancestor of candidate
+        shell: bash
+        run: |
+          git fetch origin master
+          git merge-base --is-ancestor origin/master HEAD || {
+            echo 'BLOCKED: candidate no longer contains current master.'
+            exit 1
+          }
+
+      - name: Create manifest-only promotion commit
+        shell: bash
+        run: |
+          mkdir -p .ea/gates
+          cp artifacts/ea-gate/gate-result.json .ea/gates/latest.json
+          test "$(node -p "require('./.ea/gates/latest.json').status")" = 'PASS'
+          git config user.name 'EA Production Gate'
+          git config user.email 'ea-production-gate@users.noreply.github.com'
+          git add .ea/gates/latest.json
+          test "$(git diff --cached --name-only | wc -l | tr -d ' ')" = '1'
+          git diff --cached --name-only | grep -qx '.ea/gates/latest.json'
+          git commit -m "[EA-GATED] Promote Amplifi images ${{ github.event.deployment.sha }}"
+          git push origin HEAD:master
