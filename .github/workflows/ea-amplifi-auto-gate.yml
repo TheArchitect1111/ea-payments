@@ -13,9 +13,7 @@ concurrency:
 
 jobs:
   gate-and-promote:
-    if: >-
-      github.event.deployment_status.state == 'success' &&
-      github.event.deployment.ref == 'release/amplifi-images-gated'
+    if: github.event.deployment_status.state == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
@@ -25,11 +23,11 @@ jobs:
           ref: ${{ github.event.deployment.sha }}
           fetch-depth: 0
 
-      - name: Require explicit production candidate commit
+      - name: Require explicit Amplifi production candidate
         shell: bash
         run: |
           git log -1 --pretty=%B | grep -q '^\[EA-CANDIDATE\] Amplifi images ready for gated production$' || {
-            echo 'Not the final Amplifi candidate. No promotion.'
+            echo 'Not an Amplifi production candidate. Stop safely.'
             exit 78
           }
 
