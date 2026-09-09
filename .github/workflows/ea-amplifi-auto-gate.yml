@@ -51,7 +51,7 @@ jobs:
           EA_PREVIEW_URL: ${{ github.event.deployment_status.environment_url || github.event.deployment_status.target_url }}
           EA_GATE_PATH: /amplifi
           EA_SOURCE_COMMIT: ${{ github.event.deployment.sha }}
-          EA_MIN_VISUALS: '2'
+          EA_MIN_VISUALS: '11'
           EA_GATE_OUTPUT: artifacts/ea-gate
           VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
         run: node scripts/ea-preview-gate.mjs
@@ -74,7 +74,7 @@ jobs:
             exit 1
           }
 
-      - name: Create manifest-only promotion commit
+      - name: Create manifest-only production promotion commit
         shell: bash
         run: |
           mkdir -p .ea/gates
