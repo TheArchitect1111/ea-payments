@@ -1,8 +1,9 @@
 import { logAIEvent } from '@/lib/ai/logging';
 import type { AIRequestContext } from '@/lib/ai/types';
 import { verifyAgentCompletion } from '@/lib/agent-reliability/client';
-import { matchAgents } from '@/lib/agents/registry';
-import type { AgentExecutionResult, AgentFinding, AgentStatus, OrchestratorRequest, OrchestratorResponse } from '@/lib/agents/types';
+import { getAgent, matchAgents } from '@/lib/agents/registry';
+import { creativeBrainAgentNames } from '@/lib/agents/creative-brain-agents';
+import type { AgentExecutionResult, AgentFinding, AgentStatus, EAAgent, OrchestratorRequest, OrchestratorResponse } from '@/lib/agents/types';
 import { clientContextForAgents, resolveClientContext } from '@/lib/client-context';
 import { optimizeContext } from '@/lib/context-optimizer';
 
@@ -47,11 +48,68 @@ function readAgentStatus(agent: { status: unknown }): AgentStatus {
   return value === 'available' || value === 'disabled' || value === 'degraded' ? value : 'degraded';
 }
 
+function isRunTheBrain(message: string, intent?: string) {
+  return /\brun\s+the\s+brain\b/i.test(`${intent ?? ''} ${message}`);
+}
+
+function brainAgents(): EAAgent[] {
+  return creativeBrainAgentNames
+    .map((name) => getAgent(name))
+    .filter((agent): agent is EAAgent => Boolean(agent));
+}
+
+async function runBrainSequentially(
+  selectedAgents: EAAgent[],
+  request: OrchestratorRequest,
+  message: string,
+  baseContext: Record<string, unknown>,
+  context: AIRequestContext,
+) {
+  const results: AgentExecutionResult[] = [];
+  const settled: PromiseSettledResult<AgentExecutionResult>[] = [];
+
+  for (const agent of selectedAgents) {
+    const prior = results.map((result) => ({
+      agent: result.agent,
+      summary: result.summary,
+      keyFindings: result.keyFindings,
+      opportunities: result.opportunities,
+      risks: result.risks,
+      recommendedNextSteps: result.recommendedNextSteps,
+      confidence: result.confidence,
+    }));
+    try {
+      const value = await agent.execute({
+        intent: request.intent ?? 'run-the-brain',
+        query: message,
+        context: {
+          ...baseContext,
+          __eaBrainMode: true,
+          __eaBrainStage: agent.name,
+          __eaBrainPriorResults: prior,
+        },
+        conversationId: request.conversationId,
+      }, context);
+      results.push(value);
+      settled.push({ status: 'fulfilled', value });
+    } catch (reason) {
+      settled.push({ status: 'rejected', reason });
+      break;
+    }
+  }
+
+  return { results, settled };
+}
+
 export async function runOrchestrator(request: OrchestratorRequest, context: AIRequestContext): Promise<OrchestratorResponse> {
   const message = request.message?.trim();
   if (!message) throw new Error('Orchestrator requires a message.');
 
-  const selectedAgents = matchAgents(`${request.intent ?? ''} ${message}`, request.requestedAgents).slice(0, request.maxAgents ?? 2);
+  const brainMode = isRunTheBrain(message, request.intent);
+  const selectedAgents = brainMode
+    ? brainAgents()
+    : matchAgents(`${request.intent ?? ''} ${message}`, request.requestedAgents).slice(0, request.maxAgents ?? 2);
+
   const resolvedClientContext = await resolveClientContext(request.context);
   const enrichedContext: Record<string, unknown> = {
     ...(request.context ?? {}),
@@ -61,6 +119,7 @@ export async function runOrchestrator(request: OrchestratorRequest, context: AIR
 
   logAIEvent('orchestrator.dispatch', context, {
     agents: selectedAgents.map((agent) => agent.name),
+    brainMode,
     clientId: resolvedClientContext?.profile.clientId,
     clientContextLoaded: Boolean(resolvedClientContext),
   });
@@ -73,6 +132,12 @@ export async function runOrchestrator(request: OrchestratorRequest, context: AIR
       constraints: [
         'Do not claim completion without verified execution evidence.',
         'Treat canonical client approval rules as hard constraints.',
+        ...(brainMode ? [
+          'Guide, do not lecture.',
+          'Reject generic language and incoherent visual direction.',
+          'Demonstrate important claims instead of merely describing them.',
+          'Creative QA must be allowed to block weak work.',
+        ] : []),
       ],
     },
     maxItems: 16,
@@ -85,16 +150,24 @@ export async function runOrchestrator(request: OrchestratorRequest, context: AIR
     __eaContextStats: optimized.stats,
   };
 
-  const settled = await Promise.allSettled(selectedAgents.map((agent) => agent.execute({
-    intent: request.intent ?? 'general',
-    query: message,
-    context: agentContext,
-    conversationId: request.conversationId,
-  }, context)));
+  let results: AgentExecutionResult[] = [];
+  let settled: PromiseSettledResult<AgentExecutionResult>[] = [];
 
-  const results = settled
-    .filter((item): item is PromiseFulfilledResult<AgentExecutionResult> => item.status === 'fulfilled')
-    .map((item) => item.value);
+  if (brainMode) {
+    const brainRun = await runBrainSequentially(selectedAgents, request, message, agentContext, context);
+    results = brainRun.results;
+    settled = brainRun.settled;
+  } else {
+    settled = await Promise.allSettled(selectedAgents.map((agent) => agent.execute({
+      intent: request.intent ?? 'general',
+      query: message,
+      context: agentContext,
+      conversationId: request.conversationId,
+    }, context)));
+    results = settled
+      .filter((item): item is PromiseFulfilledResult<AgentExecutionResult> => item.status === 'fulfilled')
+      .map((item) => item.value);
+  }
 
   const failures = settled.filter((item) => item.status === 'rejected');
   if (!results.length && failures.length) {
@@ -105,7 +178,7 @@ export async function runOrchestrator(request: OrchestratorRequest, context: AIR
   const evidence = selectedAgents.map((agent, index) => ({
     name: `agent:${agent.name}`,
     passed: settled[index]?.status === 'fulfilled',
-    detail: settled[index]?.status === 'fulfilled' ? 'Agent execution returned a result.' : 'Agent execution failed.',
+    detail: settled[index]?.status === 'fulfilled' ? 'Agent execution returned a result.' : 'Agent execution failed or was not reached.',
   }));
 
   const reliability = await verifyAgentCompletion({
@@ -118,6 +191,7 @@ export async function runOrchestrator(request: OrchestratorRequest, context: AIR
 
   logAIEvent('orchestrator.reliability', context, {
     verified: reliability.verified,
+    brainMode,
     missingGates: reliability.missing_gates,
     failedGates: reliability.failed_gates,
     contextReductionRatio: optimized.stats.reductionRatio,
