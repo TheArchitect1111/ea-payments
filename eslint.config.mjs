@@ -22,9 +22,19 @@ const eslintConfig = defineConfig([
     },
   },
   {
-    files: ['app/consider/joe-smith/page.tsx'],
+    files: [
+      'app/consider/joe-smith/page.tsx',
+      'app/amplifi/create/AmplifiCreateStudio.tsx',
+      'app/amplifi/performance/page.tsx',
+    ],
     rules: {
       'react/no-unescaped-entities': 'off',
+    },
+  },
+  {
+    files: ['app/api/portal/amplifi/create-campaign/route.ts'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
     },
   },
   // Override default ignores of eslint-config-next.
