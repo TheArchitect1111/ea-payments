@@ -1,0 +1,7 @@
+# Production client experiences require owner review.
+/app/amanda-catherine/ @TheArchitect1111
+/public/amanda-catherine/ @TheArchitect1111
+/lib/amanda-catherine/ @TheArchitect1111
+/lib/portal-universal/packs/ @TheArchitect1111
+/config/ea-active-projects.json @TheArchitect1111
+/.github/workflows/ea-project-status.yml @TheArchitect1111

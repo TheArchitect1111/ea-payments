@@ -56,9 +56,9 @@ const buy = readFileSync(buyPath, 'utf8');
 const magic = readFileSync(magicPath, 'utf8');
 const email = readFileSync(emailPath, 'utf8');
 
-assert(offers.includes("id: 'website_portal_starter'"), 'Offer website_portal_starter missing');
-assert(offers.includes("fulfillmentType: 'website-portal-auto'"), 'Offer missing website-portal-auto fulfillment');
-assert(offers.includes('reviewRequired: false'), 'website_portal_starter must set reviewRequired: false');
+assert(/id\s*:\s*['"]website_portal_starter['"]/.test(offers), 'Offer website_portal_starter missing');
+assert(/fulfillmentType\s*:\s*['"]website-portal-auto['"]/.test(offers), 'Offer missing website-portal-auto fulfillment');
+assert(/reviewRequired\s*:\s*false/.test(offers), 'website_portal_starter must set reviewRequired: false');
 assert(offers.includes('WEBSITE_PORTAL_MODULES'), 'Offer must use WEBSITE_PORTAL_MODULES');
 assert(offers.includes('allowInlineStripePrice: true'), 'Offer should allow inline Stripe price for launch');
 

@@ -2,11 +2,12 @@ name: EA project status
 
 on:
   schedule:
-    - cron: '15 10 * * *'
+    - cron: '*/15 * * * *'
   workflow_dispatch:
 
 permissions:
   contents: read
+  issues: write
 
 jobs:
   verify-active-projects:
@@ -16,7 +17,7 @@ jobs:
       EA_STATUS_GITHUB_TOKEN: ${{ secrets.EA_STATUS_GITHUB_TOKEN || github.token }}
       EA_STATUS_VERCEL_TOKEN: ${{ secrets.EA_STATUS_VERCEL_TOKEN }}
       EA_STATUS_VERCEL_TEAM_ID: ${{ vars.EA_STATUS_VERCEL_TEAM_ID }}
-      EA_STATUS_FAIL_ON_CRITICAL: 'false'
+      EA_STATUS_FAIL_ON_CRITICAL: 'true'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -24,11 +25,51 @@ jobs:
           node-version: 22
       - name: Verify registry contracts
         run: node scripts/test-ea-project-status.mjs
-      - name: Check GitHub, Vercel and public status
+      - name: Check GitHub, Vercel, public pages and images
+        id: health
         run: node scripts/run-ea-project-status.mjs
       - name: Preserve status report
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: ea-project-status-${{ github.run_id }}
           path: artifacts/project-status/
           retention-days: 30
+      - name: Open or update incident
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const title = '🚨 Client site health incident';
+            const body = fs.existsSync('artifacts/project-status/latest.md')
+              ? fs.readFileSync('artifacts/project-status/latest.md', 'utf8')
+              : 'The client-site health workflow failed before a report was produced.';
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'client-site-incident'
+            });
+            const existing = issues.find((issue) => issue.title === title);
+            if (existing) {
+              await github.rest.issues.createComment({ owner: context.repo.owner, repo: context.repo.repo, issue_number: existing.number, body });
+            } else {
+              await github.rest.issues.create({ owner: context.repo.owner, repo: context.repo.repo, title, body, labels: ['client-site-incident'] });
+            }
+      - name: Close resolved incident
+        if: success()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = '🚨 Client site health incident';
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'client-site-incident'
+            });
+            for (const issue of issues.filter((item) => item.title === title)) {
+              await github.rest.issues.createComment({ owner: context.repo.owner, repo: context.repo.repo, issue_number: issue.number, body: 'All monitored client sites have returned to a healthy state.' });
+              await github.rest.issues.update({ owner: context.repo.owner, repo: context.repo.repo, issue_number: issue.number, state: 'closed' });
+            }
