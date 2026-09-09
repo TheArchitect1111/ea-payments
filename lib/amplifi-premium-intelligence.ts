@@ -25,7 +25,7 @@ export function scorePremiumWriting(text:string,brandTerms:string[]=[],platform=
  const platformFit=clamp(platform==='x'?(t.length<=280?9:5):platform==='linkedin'?(words.length<=180?8.7:6.5):(words.length<=120?8.8:7));
  const payForIt=clamp(specificity*.22+originality*.2+voice*.13+clarity*.13+stopPower*.18+platformFit*.14-genericHits*.5);
  const overall=clamp(specificity*.18+originality*.18+voice*.13+clarity*.14+stopPower*.17+platformFit*.1+payForIt*.1);
- if(originality<7.5)violations.push('originality-below-premium'); if(specificity<7.5)violations.push('not-specific-enough'); if(payForIt<8.2)violations.push('pay-for-it-failed');
+ if(originality<7.5)violations.push('originality-below-premium'); if(specificity<7.5)violations.push('not-specific-enough'); if(payForIt<8.5)violations.push('pay-for-it-failed');
  return{specificity,originality,voice,clarity,stopPower,platformFit,payForIt,overall,violations};
 }
 
@@ -48,7 +48,7 @@ export function buildPremiumIdeaTournament(input:{goal:string;audience:string;br
 }
 
 export function premiumJury(text:string,opts:{brandTerms?:string[];platform?:string;threshold?:number}={}){
- const threshold=opts.threshold??8.2; const score=scorePremiumWriting(text,opts.brandTerms||[],opts.platform||'instagram');
+ const threshold=opts.threshold??8.5; const score=scorePremiumWriting(text,opts.brandTerms||[],opts.platform||'instagram');
  const jurors={creativeDirector:avg([score.originality,score.stopPower,score.payForIt]),brandEditor:avg([score.specificity,score.voice,score.clarity]),socialEditor:avg([score.stopPower,score.platformFit,score.clarity])};
  const hardFail=score.originality<7.5||score.specificity<7.5||score.payForIt<threshold||Object.values(jurors).some(x=>x<7.5);
  return{passed:!hardFail&&score.overall>=threshold,threshold,score,jurors,verdict:hardFail?'regenerate':'approval-eligible'};
