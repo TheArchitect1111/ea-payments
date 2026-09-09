@@ -14,6 +14,7 @@ if (!sourceCommit) throw new Error('EA_SOURCE_COMMIT is required');
 mkdirSync(outDir, { recursive: true });
 
 const target = new URL(routePath, previewUrl).toString();
+const buildInfoUrl = new URL('/api/ops/build-info', previewUrl).toString();
 const results = {
   sourceCommit,
   previewUrl,
@@ -21,6 +22,7 @@ const results = {
   completedAt: new Date().toISOString(),
   status: 'FAIL',
   gates: {
+    sourceIdentity: { status: 'FAIL', proof: '' },
     build: { status: 'PASS', proof: `source:${sourceCommit}` },
     assets: { status: 'FAIL', proof: '' },
     functional: { status: 'FAIL', proof: '' },
@@ -33,6 +35,23 @@ const results = {
 
 function sha256(file) {
   return createHash('sha256').update(readFileSync(file)).digest('hex');
+}
+
+let buildInfo = null;
+try {
+  const r = await fetch(buildInfoUrl, { cache: 'no-store' });
+  if (r.ok) buildInfo = await r.json();
+} catch {}
+const sourceIdentityPass = Boolean(buildInfo?.commitSha && buildInfo.commitSha === sourceCommit);
+results.details.buildInfo = buildInfo;
+results.gates.sourceIdentity = {
+  status: sourceIdentityPass ? 'PASS' : 'FAIL',
+  proof: buildInfo?.commitSha ? `preview:${buildInfo.commitSha}` : 'preview-build-identity-unavailable',
+};
+if (!sourceIdentityPass) {
+  writeFileSync(path.join(outDir, 'gate-result.json'), JSON.stringify(results, null, 2));
+  console.error(`Preview source mismatch. Expected ${sourceCommit}, received ${buildInfo?.commitSha || 'none'}.`);
+  process.exit(1);
 }
 
 async function inspectViewport(browser, name, viewport, isMobile = false) {
@@ -150,9 +169,6 @@ const assetsPass = all.every((r) => r.brokenImgs.length === 0 && r.brokenBackgro
 const desktopPass = desktop.overflow <= 2 && desktop.consoleErrors.length === 0 && desktop.failedRequests.length === 0 && desktop.scrollHeight > desktop.viewport.height;
 const mobilePass = mobile.overflow <= 2 && mobile.consoleErrors.length === 0 && mobile.failedRequests.length === 0 && mobile.scrollHeight > mobile.viewport.height;
 
-// Creative Critic is deliberately independent from the builder. This deterministic critic
-// refuses obviously incomplete visual experiences. A future AI critic can add stricter scoring
-// without weakening these hard rules.
 const criticReasons = [];
 if (!assetsPass) criticReasons.push('visual assets failed');
 if (!desktopPass) criticReasons.push('desktop visual gate failed');
