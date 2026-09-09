@@ -37,7 +37,7 @@ export interface AIGatewayRequest {
 export interface AIGatewayResponse {
   ok: true;
   requestId: string;
-  provider: 'omniroute' | 'openai';
+  provider: 'gateway' | 'omniroute' | 'openai';
   model: string;
   text: string;
   usage: AIUsage;
