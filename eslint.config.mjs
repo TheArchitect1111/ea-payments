@@ -40,9 +40,6 @@ const eslintConfig = defineConfig([
     "playwright-report/**",
     "mobile/metro.config.js",
     "video-factory/**",
-    // Temporary Stage 3 Amplifi proof-only files. These are removed after verification.
-    "app/api/amplifi/proof-run/route.ts",
-    "scripts/test-amplifi-premium-proof.ts",
   ]),
 ]);
 
