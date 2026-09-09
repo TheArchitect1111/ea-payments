@@ -8,16 +8,24 @@ const routePath = process.env.EA_GATE_PATH || '/';
 const sourceCommit = process.env.EA_SOURCE_COMMIT || '';
 const minVisuals = Number(process.env.EA_MIN_VISUALS || 1);
 const outDir = path.resolve(process.env.EA_GATE_OUTPUT || 'artifacts/ea-gate');
+const bypassSecret = process.env.VERCEL_AUTOMATION_BYPASS_SECRET || '';
+const bypassHeaders = bypassSecret ? {
+  'x-vercel-protection-bypass': bypassSecret,
+  'x-vercel-set-bypass-cookie': 'true',
+} : {};
 
 if (!previewUrl) throw new Error('EA_PREVIEW_URL is required');
 if (!sourceCommit) throw new Error('EA_SOURCE_COMMIT is required');
 mkdirSync(outDir, { recursive: true });
 
-const target = new URL(routePath, previewUrl).toString();
-const buildInfoUrl = new URL('/api/ops/build-info', previewUrl).toString();
+const cleanPreview = new URL(previewUrl);
+cleanPreview.search = '';
+cleanPreview.hash = '';
+const target = new URL(routePath, cleanPreview).toString();
+const buildInfoUrl = new URL('/api/ops/build-info', cleanPreview).toString();
 const results = {
   sourceCommit,
-  previewUrl,
+  previewUrl: cleanPreview.toString(),
   target,
   completedAt: new Date().toISOString(),
   status: 'FAIL',
@@ -39,7 +47,7 @@ function sha256(file) {
 
 let buildInfo = null;
 try {
-  const r = await fetch(buildInfoUrl, { cache: 'no-store' });
+  const r = await fetch(buildInfoUrl, { cache: 'no-store', headers: bypassHeaders });
   if (r.ok) buildInfo = await r.json();
 } catch {}
 const sourceIdentityPass = Boolean(buildInfo?.commitSha && buildInfo.commitSha === sourceCommit);
@@ -50,12 +58,12 @@ results.gates.sourceIdentity = {
 };
 if (!sourceIdentityPass) {
   writeFileSync(path.join(outDir, 'gate-result.json'), JSON.stringify(results, null, 2));
-  console.error(`Preview source mismatch. Expected ${sourceCommit}, received ${buildInfo?.commitSha || 'none'}.`);
+  console.error(`Preview source mismatch or protected preview is inaccessible. Expected ${sourceCommit}, received ${buildInfo?.commitSha || 'none'}.`);
   process.exit(1);
 }
 
 async function inspectViewport(browser, name, viewport, isMobile = false) {
-  const context = await browser.newContext({ viewport, isMobile, deviceScaleFactor: 1 });
+  const context = await browser.newContext({ viewport, isMobile, deviceScaleFactor: 1, extraHTTPHeaders: bypassHeaders });
   const page = await context.newPage();
   const consoleErrors = [];
   const pageErrors = [];
@@ -79,7 +87,6 @@ async function inspectViewport(browser, name, viewport, isMobile = false) {
       const r = el.getBoundingClientRect();
       return s.display !== 'none' && s.visibility !== 'hidden' && Number(s.opacity) !== 0 && r.width > 2 && r.height > 2;
     };
-
     const imgs = [...document.images].filter(visible).map((img) => ({
       src: img.currentSrc || img.src,
       complete: img.complete,
@@ -88,7 +95,6 @@ async function inspectViewport(browser, name, viewport, isMobile = false) {
       width: img.getBoundingClientRect().width,
       height: img.getBoundingClientRect().height,
     }));
-
     const bgUrls = [];
     for (const el of [...document.querySelectorAll('*')]) {
       if (!visible(el)) continue;
@@ -108,7 +114,6 @@ async function inspectViewport(browser, name, viewport, isMobile = false) {
         bgChecks.push({ url, ok: false, status: 0, type: String(err) });
       }
     }
-
     const root = document.documentElement;
     return {
       title: document.title,
@@ -131,23 +136,10 @@ async function inspectViewport(browser, name, viewport, isMobile = false) {
   const renderedVisuals = dom.imgs.length + dom.bgChecks.length;
   const overflow = Math.max(0, dom.scrollWidth - dom.clientWidth);
   const status = response?.status() || 0;
-
   return {
-    name,
-    httpStatus: status,
-    screenshot,
-    screenshotSha256: sha256(screenshot),
-    consoleErrors,
-    pageErrors,
-    failedRequests,
-    badImageResponses,
-    brokenImgs,
-    brokenBackgrounds,
-    renderedVisuals,
-    overflow,
-    bodyTextLength: dom.bodyTextLength,
-    scrollHeight: dom.scrollHeight,
-    viewport,
+    name, httpStatus: status, screenshot, screenshotSha256: sha256(screenshot), consoleErrors,
+    pageErrors, failedRequests, badImageResponses, brokenImgs, brokenBackgrounds, renderedVisuals,
+    overflow, bodyTextLength: dom.bodyTextLength, scrollHeight: dom.scrollHeight, viewport,
   };
 }
 
@@ -159,7 +151,6 @@ try {
 } finally {
   await browser.close();
 }
-
 results.details.desktop = desktop;
 results.details.mobile = mobile;
 
@@ -182,7 +173,6 @@ results.gates.functional = { status: functionalPass ? 'PASS' : 'FAIL', proof: `d
 results.gates.desktopVisual = { status: desktopPass ? 'PASS' : 'FAIL', proof: `sha256:${desktop.screenshotSha256}` };
 results.gates.mobileVisual = { status: mobilePass ? 'PASS' : 'FAIL', proof: `sha256:${mobile.screenshotSha256}` };
 results.gates.creativeCritic = { status: criticPass ? 'PASS' : 'FAIL', proof: criticPass ? 'objective-visual-critic:v1' : criticReasons.join('; ') };
-
 results.status = Object.values(results.gates).every((g) => g.status === 'PASS') ? 'PASS' : 'FAIL';
 writeFileSync(path.join(outDir, 'gate-result.json'), JSON.stringify(results, null, 2));
 console.log(JSON.stringify(results, null, 2));
