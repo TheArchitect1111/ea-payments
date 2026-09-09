@@ -22,18 +22,28 @@ export interface AIProviderConfig {
 }
 
 export function getAIGatewayConfig(): AIGatewayConfig {
-  const defaultModel = process.env.AI_MODEL_DEFAULT ?? 'gpt-4.1-mini';
+  const vercelOidc = process.env.VERCEL_OIDC_TOKEN ?? '';
+  const useVercelGateway = Boolean(vercelOidc);
+  const defaultModel = process.env.AI_MODEL_DEFAULT ?? (useVercelGateway ? 'openai/gpt-5.6-sol' : 'gpt-4.1-mini');
   const openAI: AIProviderConfig = {
     id: 'openai',
     apiKey: process.env.OPENAI_API_KEY ?? '',
     baseUrl: process.env.OPENAI_BASE_URL ?? 'https://api.openai.com/v1',
   };
-  const omniRoute: AIProviderConfig = {
+  const configuredOmniRoute: AIProviderConfig = {
     id: 'omniroute',
     apiKey: process.env.OMNIROUTE_API_KEY ?? '',
     baseUrl: (process.env.OMNIROUTE_BASE_URL ?? '').replace(/\/$/, ''),
   };
-  const providers = [omniRoute, openAI].filter((provider) => provider.apiKey && provider.baseUrl);
+  const vercelGateway: AIProviderConfig = {
+    id: 'omniroute',
+    apiKey: vercelOidc,
+    baseUrl: 'https://ai-gateway.vercel.sh/v1',
+  };
+  const primaryRoute = configuredOmniRoute.apiKey && configuredOmniRoute.baseUrl
+    ? configuredOmniRoute
+    : vercelGateway;
+  const providers = [primaryRoute, openAI].filter((provider) => provider.apiKey && provider.baseUrl);
   return {
     provider: 'openai',
     apiKey: openAI.apiKey,
