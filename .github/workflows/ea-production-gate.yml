@@ -68,6 +68,7 @@ jobs:
           EA_SOURCE_COMMIT: ${{ github.sha }}
           EA_MIN_VISUALS: ${{ inputs.min_visuals }}
           EA_GATE_OUTPUT: artifacts/ea-gate
+          VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
         run: node scripts/ea-preview-gate.mjs
 
       - name: Upload immutable gate proof
