@@ -111,6 +111,17 @@ async function resolveProviderApiKey(candidate: AIProviderConfig): Promise<strin
   }
 }
 
+async function rejectionDetail(response: Response): Promise<string> {
+  try {
+    const raw = (await response.clone().text()).replace(/\s+/g, ' ').trim();
+    // Provider rejection bodies should never include our bearer credential, but keep
+    // diagnostic logging deliberately short and strip JWT-looking values defensively.
+    return raw.replace(/eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/g, '[redacted-token]').slice(0, 280);
+  } catch {
+    return '';
+  }
+}
+
 function directModel(model: string): string {
   return model.startsWith('openai/') ? model.slice('openai/'.length) : model;
 }
@@ -218,8 +229,9 @@ export async function runAIGateway(request: AIGatewayRequest, context: AIRequest
         provider = candidate.id;
         break;
       }
-      failures.push(`${candidate.id}:${attemptedModel}:${attempt.status}`);
-      logAIEvent('ai.provider_failover', context, { provider: candidate.id, model: attemptedModel, status: attempt.status });
+      const detail = await rejectionDetail(attempt);
+      failures.push(`${candidate.id}:${attemptedModel}:${attempt.status}${detail ? `:${detail}` : ''}`);
+      logAIEvent('ai.provider_failover', context, { provider: candidate.id, model: attemptedModel, status: attempt.status, detail });
     } catch (error) {
       failures.push(`${candidate.id}:${attemptedModel}:${error instanceof Error ? error.message : 'request failed'}`);
       logAIEvent('ai.provider_failover', context, { provider: candidate.id, model: attemptedModel, error: error instanceof Error ? error.message : 'request failed' });
@@ -227,7 +239,7 @@ export async function runAIGateway(request: AIGatewayRequest, context: AIRequest
   }
 
   if (!response || !provider) {
-    throw new AIGatewayError(`AI providers failed: ${failures.join(', ').slice(0, 700)}`, 'AI_PROVIDER_ERROR', 502);
+    throw new AIGatewayError(`AI providers failed: ${failures.join(', ').slice(0, 900)}`, 'AI_PROVIDER_ERROR', 502);
   }
 
   const data = await response.json();
@@ -289,8 +301,9 @@ export async function streamAIGateway(request: AIGatewayRequest, context: AIRequ
         provider = candidate.id;
         break;
       }
-      failures.push(`${candidate.id}:${attemptedModel}:${attempt.status}`);
-      logAIEvent('ai.provider_failover', context, { provider: candidate.id, model: attemptedModel, status: attempt.status });
+      const detail = await rejectionDetail(attempt);
+      failures.push(`${candidate.id}:${attemptedModel}:${attempt.status}${detail ? `:${detail}` : ''}`);
+      logAIEvent('ai.provider_failover', context, { provider: candidate.id, model: attemptedModel, status: attempt.status, detail });
     } catch (error) {
       failures.push(`${candidate.id}:${attemptedModel}:${error instanceof Error ? error.message : 'request failed'}`);
       logAIEvent('ai.provider_failover', context, { provider: candidate.id, model: attemptedModel, error: error instanceof Error ? error.message : 'request failed' });
@@ -298,7 +311,7 @@ export async function streamAIGateway(request: AIGatewayRequest, context: AIRequ
   }
 
   if (!response?.body || !provider) {
-    throw new AIGatewayError(`AI provider streams failed: ${failures.join(', ').slice(0, 700)}`, 'AI_PROVIDER_ERROR', 502);
+    throw new AIGatewayError(`AI provider streams failed: ${failures.join(', ').slice(0, 900)}`, 'AI_PROVIDER_ERROR', 502);
   }
 
   return new Response(response.body, {
