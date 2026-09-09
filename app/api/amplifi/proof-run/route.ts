@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { callClaudeText } from '@/lib/ai';
 import { getAgent } from '@/lib/agents/registry';
 import type { AIRequestContext } from '@/lib/ai/types';
 import { premiumJury } from '@/lib/amplifi-premium-intelligence';
@@ -20,43 +19,38 @@ const scenarios=[
  {id:'consultant',brand:'Signal North',business:'operations consultancy for small businesses',audience:'owners of growing service businesses',goal:'generate discovery calls',voice:['smart','provocative','plainspoken'],visual:'editorial founder-work scene, process notes, real operational context, modern restrained composition'}
 ];
 
-function cleanJson(text:string){return text.replace(/^```json\s*/i,'').replace(/^```\s*/,'').replace(/```\s*$/,'').trim()}
 async function generateImage(prompt:string){
  const key=process.env.OPENAI_API_KEY?.trim();
  if(!key)return null;
  const response=await fetch('https://api.openai.com/v1/images/generations',{method:'POST',headers:{Authorization:`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:process.env.OPENAI_IMAGE_MODEL?.trim()||'dall-e-3',prompt,size:'1792x1024',quality:'standard',response_format:'url',n:1}),signal:AbortSignal.timeout(120000)});
- if(!response.ok)return null;
+ if(!response.ok){console.error('Amplifi proof image generation failed',response.status,await response.text());return null;}
  const data=await response.json() as {data?:Array<{url?:string;revised_prompt?:string}>};
  return data.data?.[0]?.url||null;
 }
 
-async function generateCampaignBatch(prompt:string){
+async function generateScenario(scenario:(typeof scenarios)[number]){
  const agent=getAgent('amplifi-content-director');
- if(agent){
-   const ctx:AIRequestContext={requestId:crypto.randomUUID(),actor:{id:'amplifi-proof-run',type:'system',role:'proof-run'},route:'/api/amplifi/proof-run',metadata:{product:'amplifi',workflow:'premium-proof-run'}};
-   try{
-     const result=await agent.execute({intent:'premium multi-business proof run',query:prompt,context:{scope:'10-business premium proof run'}},ctx);
-     return JSON.stringify(result.raw);
-   }catch{}
- }
- return callClaudeText(prompt,{maxTokens:10000});
+ if(!agent)return {id:scenario.id,brand:scenario.brand,passed:false,error:'agent-unavailable'};
+ const prompt=`Create ONE premium five-piece social campaign for this business. Return JSON only as {"id":"${scenario.id}","campaignTitle":string,"strategy":string,"posts":[{"title":string,"caption":string,"callToAction":string,"imageDirection":string}]}. Exactly five posts. Do not write generic AI copy. Every post must be specific to this business, audience and goal. Use sharp human observations, concrete language, memorable but natural headlines, and no invented claims or statistics.\nBrand: ${scenario.brand}\nBusiness: ${scenario.business}\nAudience: ${scenario.audience}\nGoal: ${scenario.goal}\nVoice: ${scenario.voice.join(', ')}\nVisual standard: ${scenario.visual}`;
+ const ctx:AIRequestContext={requestId:crypto.randomUUID(),actor:{id:`proof-${scenario.id}`,type:'system',role:'proof-run'},route:'/api/amplifi/proof-run',metadata:{product:'amplifi',workflow:'premium-proof-run',scenario:scenario.id}};
+ let campaign:any;
+ try{const result=await agent.execute({intent:'single business premium proof run',query:prompt,context:{brand:scenario.brand,business:scenario.business,audience:scenario.audience,goal:scenario.goal}},ctx);campaign=result.raw;}catch(error){console.error('Amplifi proof text generation failed',scenario.id,error);return {id:scenario.id,brand:scenario.brand,passed:false,error:'text-generation-failed'};}
+ if(!campaign||!Array.isArray(campaign.posts)||campaign.posts.length!==5)return {id:scenario.id,brand:scenario.brand,passed:false,error:'missing-five-post-campaign'};
+ const brandTerms=[scenario.brand,scenario.business,...scenario.voice];
+ const jury=campaign.posts.map((p:any)=>premiumJury(`${p.title}\n${p.caption}`,{brandTerms,platform:'instagram'}));
+ const hero=campaign.posts[0];
+ const imagePrompt=`Create a premium editorial social campaign photograph with no text, logo, watermark, UI or border. Brand context: ${scenario.brand}, ${scenario.business}. Audience: ${scenario.audience}. Business goal: ${scenario.goal}. Creative concept: ${hero.imageDirection||scenario.visual}. Style: ${scenario.visual}. Avoid generic corporate stock-photo staging. Natural anatomy, realistic hands and faces, believable materials, art-directed composition, premium commercial photography.`;
+ const imageUrl=await generateImage(imagePrompt);
+ return {id:scenario.id,brand:scenario.brand,business:scenario.business,goal:scenario.goal,campaignTitle:campaign.campaignTitle,strategy:campaign.strategy,posts:campaign.posts,jury,copyPassed:jury.every((j:any)=>j.passed),imageUrl,imagePassed:Boolean(imageUrl),passed:jury.every((j:any)=>j.passed)&&Boolean(imageUrl)};
+}
+
+async function mapWithConcurrency<T,R>(items:T[],limit:number,fn:(item:T)=>Promise<R>){
+ const out:R[]=[]; let next=0;
+ async function worker(){while(true){const i=next++;if(i>=items.length)return;out[i]=await fn(items[i]);}}
+ await Promise.all(Array.from({length:Math.min(limit,items.length)},()=>worker())); return out;
 }
 
 export async function GET(){
- const prompt=`You are Amplifi's senior social creative director. Create premium, publishable social campaign concepts for TEN very different businesses. Do not write generic AI copy. Each campaign must feel specific enough that it could not be pasted onto another business. Use sharp human observations, memorable but natural headlines, concrete language, and no invented claims or statistics. Return JSON only as {"campaigns":[{"id":string,"campaignTitle":string,"strategy":string,"posts":[{"title":string,"caption":string,"callToAction":string,"imageDirection":string}]}]}. Exactly five posts per campaign.\n\nSCENARIOS:\n${scenarios.map(s=>`${s.id}: Brand ${s.brand}; ${s.business}; audience ${s.audience}; goal ${s.goal}; voice ${s.voice.join(', ')}; visual direction ${s.visual}.`).join('\n')}`;
- const text=await generateCampaignBatch(prompt);
- if(!text)return NextResponse.json({ok:false,error:'text-generation-unavailable'},{status:503});
- let parsed:any; try{parsed=JSON.parse(cleanJson(text))}catch{return NextResponse.json({ok:false,error:'invalid-generation-json',sample:text.slice(0,500)},{status:502})}
- const campaigns=Array.isArray(parsed.campaigns)?parsed.campaigns:[];
- const results=await Promise.all(scenarios.map(async scenario=>{
-   const campaign=campaigns.find((c:any)=>c.id===scenario.id);
-   if(!campaign||!Array.isArray(campaign.posts)||campaign.posts.length!==5)return {id:scenario.id,brand:scenario.brand,passed:false,error:'missing-five-post-campaign'};
-   const brandTerms=[scenario.brand,scenario.business,...scenario.voice];
-   const jury=campaign.posts.map((p:any)=>premiumJury(`${p.title}\n${p.caption}`,{brandTerms,platform:'instagram'}));
-   const hero=campaign.posts[0];
-   const imagePrompt=`Create a premium editorial social campaign photograph with no text, logo, watermark, UI or border. Brand context: ${scenario.brand}, ${scenario.business}. Audience: ${scenario.audience}. Business goal: ${scenario.goal}. Creative concept: ${hero.imageDirection||scenario.visual}. Style: ${scenario.visual}. Avoid generic corporate stock-photo staging. Natural anatomy, realistic hands and faces, believable materials, art-directed composition, premium commercial photography.`;
-   const imageUrl=await generateImage(imagePrompt);
-   return {id:scenario.id,brand:scenario.brand,business:scenario.business,goal:scenario.goal,campaignTitle:campaign.campaignTitle,strategy:campaign.strategy,posts:campaign.posts,jury,copyPassed:jury.every((j:any)=>j.passed),imageUrl,imagePassed:Boolean(imageUrl),passed:jury.every((j:any)=>j.passed)&&Boolean(imageUrl)};
- }));
- return NextResponse.json({ok:true,generatedAt:new Date().toISOString(),scenarioCount:results.length,passed:results.filter((r:any)=>r.passed).length,results});
+ const results=await mapWithConcurrency(scenarios,2,generateScenario);
+ return NextResponse.json({ok:true,generatedAt:new Date().toISOString(),scenarioCount:results.length,passed:results.filter((r:any)=>r.passed).length,copyPassed:results.filter((r:any)=>r.copyPassed).length,imagePassed:results.filter((r:any)=>r.imagePassed).length,results});
 }
