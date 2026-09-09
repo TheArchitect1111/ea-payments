@@ -1,0 +1,103 @@
+name: EA Production Gate
+
+on:
+  workflow_dispatch:
+    inputs:
+      preview_url:
+        description: Exact Vercel preview URL for the current master SHA
+        required: true
+        type: string
+      route_path:
+        description: Route to visually and functionally verify
+        required: true
+        default: /amplifi
+        type: string
+      min_visuals:
+        description: Minimum number of visible image/background assets required
+        required: true
+        default: '2'
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ea-production-promotion
+  cancel-in-progress: false
+
+jobs:
+  gate-and-promote:
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout exact source commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 2
+
+      - name: Verify master has not moved
+        shell: bash
+        run: |
+          git fetch origin master
+          test "$(git rev-parse origin/master)" = "${GITHUB_SHA}" || {
+            echo "BLOCKED: master moved after this gate run started. Re-run against the new SHA."
+            exit 1
+          }
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build gate
+        run: npm run build
+
+      - name: Install Chromium for visual gates
+        run: npx playwright install --with-deps chromium
+
+      - name: Preview, asset, functional, desktop, mobile and critic gates
+        env:
+          EA_PREVIEW_URL: ${{ inputs.preview_url }}
+          EA_GATE_PATH: ${{ inputs.route_path }}
+          EA_SOURCE_COMMIT: ${{ github.sha }}
+          EA_MIN_VISUALS: ${{ inputs.min_visuals }}
+          EA_GATE_OUTPUT: artifacts/ea-gate
+        run: node scripts/ea-preview-gate.mjs
+
+      - name: Upload immutable gate proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ea-production-gate-${{ github.sha }}
+          path: artifacts/ea-gate
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Re-verify source has not moved
+        shell: bash
+        run: |
+          git fetch origin master
+          test "$(git rev-parse origin/master)" = "${GITHUB_SHA}" || {
+            echo "BLOCKED: source changed during QA. Proof is stale."
+            exit 1
+          }
+
+      - name: Create manifest-only production promotion commit
+        shell: bash
+        run: |
+          mkdir -p .ea/gates
+          cp artifacts/ea-gate/gate-result.json .ea/gates/latest.json
+          test "$(node -p "require('./.ea/gates/latest.json').status")" = "PASS"
+          git config user.name "EA Production Gate"
+          git config user.email "ea-production-gate@users.noreply.github.com"
+          git add .ea/gates/latest.json
+          git diff --cached --name-only | grep -qx '.ea/gates/latest.json'
+          test "$(git diff --cached --name-only | wc -l | tr -d ' ')" = "1"
+          git commit -m "[EA-GATED] Promote verified ${GITHUB_SHA} to production"
+          git push origin HEAD:master
