@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { callClaudeText } from '@/lib/ai';
+import { getAgent } from '@/lib/agents/registry';
+import type { AIRequestContext } from '@/lib/ai/types';
 import { premiumJury } from '@/lib/amplifi-premium-intelligence';
 
 export const dynamic='force-dynamic';
@@ -28,9 +30,21 @@ async function generateImage(prompt:string){
  return data.data?.[0]?.url||null;
 }
 
+async function generateCampaignBatch(prompt:string){
+ const agent=getAgent('amplifi-content-director');
+ if(agent){
+   const ctx:AIRequestContext={requestId:crypto.randomUUID(),actor:{id:'amplifi-proof-run',type:'system',role:'proof-run'},route:'/api/amplifi/proof-run',metadata:{product:'amplifi',workflow:'premium-proof-run'}};
+   try{
+     const result=await agent.execute({intent:'premium multi-business proof run',query:prompt,context:{scope:'10-business premium proof run'}},ctx);
+     return JSON.stringify(result.raw);
+   }catch{}
+ }
+ return callClaudeText(prompt,{maxTokens:10000});
+}
+
 export async function GET(){
  const prompt=`You are Amplifi's senior social creative director. Create premium, publishable social campaign concepts for TEN very different businesses. Do not write generic AI copy. Each campaign must feel specific enough that it could not be pasted onto another business. Use sharp human observations, memorable but natural headlines, concrete language, and no invented claims or statistics. Return JSON only as {"campaigns":[{"id":string,"campaignTitle":string,"strategy":string,"posts":[{"title":string,"caption":string,"callToAction":string,"imageDirection":string}]}]}. Exactly five posts per campaign.\n\nSCENARIOS:\n${scenarios.map(s=>`${s.id}: Brand ${s.brand}; ${s.business}; audience ${s.audience}; goal ${s.goal}; voice ${s.voice.join(', ')}; visual direction ${s.visual}.`).join('\n')}`;
- const text=await callClaudeText(prompt,{maxTokens:10000});
+ const text=await generateCampaignBatch(prompt);
  if(!text)return NextResponse.json({ok:false,error:'text-generation-unavailable'},{status:503});
  let parsed:any; try{parsed=JSON.parse(cleanJson(text))}catch{return NextResponse.json({ok:false,error:'invalid-generation-json',sample:text.slice(0,500)},{status:502})}
  const campaigns=Array.isArray(parsed.campaigns)?parsed.campaigns:[];
