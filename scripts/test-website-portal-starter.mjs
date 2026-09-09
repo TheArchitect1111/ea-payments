@@ -56,11 +56,13 @@ const buy = readFileSync(buyPath, 'utf8');
 const magic = readFileSync(magicPath, 'utf8');
 const email = readFileSync(emailPath, 'utf8');
 
-assert(offers.includes("id: 'website_portal_starter'"), 'Offer website_portal_starter missing');
-assert(offers.includes("fulfillmentType: 'website-portal-auto'"), 'Offer missing website-portal-auto fulfillment');
-assert(offers.includes('reviewRequired: false'), 'website_portal_starter must set reviewRequired: false');
-assert(offers.includes('WEBSITE_PORTAL_MODULES'), 'Offer must use WEBSITE_PORTAL_MODULES');
-assert(offers.includes('allowInlineStripePrice: true'), 'Offer should allow inline Stripe price for launch');
+const starterOfferMatch = offers.match(/\{\s*id\s*:\s*['"]website_portal_starter['"][\s\S]*?\},/);
+const starterOffer = starterOfferMatch?.[0] ?? '';
+assert(Boolean(starterOffer), 'Offer website_portal_starter missing');
+assert(/\bfulfillmentType\s*:\s*['"]website-portal-auto['"]/.test(starterOffer), 'Offer missing website-portal-auto fulfillment');
+assert(/\breviewRequired\s*:\s*false\b/.test(starterOffer), 'website_portal_starter must set reviewRequired: false');
+assert(starterOffer.includes('WEBSITE_PORTAL_MODULES'), 'Offer must use WEBSITE_PORTAL_MODULES');
+assert(/\ballowInlineStripePrice\s*:\s*true\b/.test(starterOffer), 'Offer should allow inline Stripe price for launch');
 
 assert(presets.includes('WEBSITE_PORTAL_MODULES'), 'WEBSITE_PORTAL_MODULES preset missing');
 assert(types.includes("'website_portal_starter'"), 'CommerceOfferId missing website_portal_starter');
