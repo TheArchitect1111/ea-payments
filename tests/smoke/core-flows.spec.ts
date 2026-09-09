@@ -58,10 +58,9 @@ test('simplifi portal route requires portal login', async ({ page }) => {
 
 test('amplifi landing page is reachable', async ({ page }) => {
   await page.goto('/amplifi');
-  await expect(
-    page.getByRole('heading', { name: /social media always needs another post/i }),
-  ).toBeVisible();
-  await expect(page.getByRole('heading', { name: /tell amplifi about the event once/i })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /focus on your craft/i })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /smartchitecture \+ eva/i })).toBeVisible();
+  await expect(page.getByRole('link', { name: /try amplifi free/i }).first()).toBeVisible();
 });
 
 test('magnifi consider demo has opportunity content', async ({ page }) => {
