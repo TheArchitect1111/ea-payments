@@ -66,6 +66,8 @@ function saveHistory(conversationId: string | undefined, context: AIRequestConte
   conversationHistory.set(key, [...messages, assistantMessage].slice(-maxHistoryMessages));
 }
 
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 async function fetchWithRetry(url: string, init: RequestInit, retries: number, timeoutMs: number) {
   let lastError: unknown;
   for (let attempt = 0; attempt <= retries; attempt += 1) {
@@ -74,11 +76,19 @@ async function fetchWithRetry(url: string, init: RequestInit, retries: number, t
     try {
       const response = await fetch(url, { ...init, signal: controller.signal });
       clearTimeout(timeout);
-      if (response.ok || response.status < 500 || attempt === retries) return response;
+      if (response.ok) return response;
+      const retryable = response.status === 408 || response.status === 409 || response.status === 429 || response.status >= 500;
+      if (!retryable || attempt === retries) return response;
+      const retryAfter = Number(response.headers.get('retry-after'));
+      const waitMs = Number.isFinite(retryAfter) && retryAfter > 0
+        ? Math.min(30_000, retryAfter * 1000)
+        : Math.min(15_000, 1500 * (2 ** attempt));
+      await delay(waitMs);
     } catch (err) {
       clearTimeout(timeout);
       lastError = err;
       if (attempt === retries) throw err;
+      await delay(Math.min(15_000, 1500 * (2 ** attempt)));
     }
   }
   throw lastError instanceof Error ? lastError : new Error('AI request failed.');
