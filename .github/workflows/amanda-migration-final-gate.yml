@@ -17,7 +17,7 @@ concurrency:
 jobs:
   gate-and-promote:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 30
     env:
       EA_SOURCE_COMMIT: e4a66c3f9d6a8cb16a6ddf89fdcfd9c10a9d68bc
       EA_PREVIEW_URL: https://ea-payments-l2kjcg4qg-the-architects-projects-cc813778.vercel.app
@@ -49,10 +49,19 @@ jobs:
         run: npm ci
 
       - name: Canonical client registry gate
-        run: npx tsx scripts/test-canonical-project-registry.ts
+        run: npm run test:canonical-registry
 
-      - name: Amanda client package gate
-        run: npx tsx scripts/test-client-package.ts amanda-catherine
+      - name: Amanda completion gate
+        run: npm run test:amanda-completion
+
+      - name: Amanda delivery gate
+        run: npm run test:amanda-client-delivery
+
+      - name: Amanda checkout gate
+        run: npm run test:amanda-checkout
+
+      - name: Amanda learning handoff gate
+        run: npm run test:amanda-learning-handoff
 
       - name: Amanda production protection gate
         run: node scripts/test-production-protection.mjs
