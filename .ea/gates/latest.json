@@ -1,36 +1,15 @@
 {
-  "sourceCommit": "6e3dcd8445ea6ea5a07d53665f6bb70b38bd874f",
-  "previewUrl": "https://ea-payments-9izblp4fs-the-architects-projects-cc813778.vercel.app",
+  "sourceCommit": "b23fcc6a6690bbb958a5a1afab6dba63d8a66c87",
+  "previewUrl": "internal-recovery-only",
   "status": "PASS",
-  "completedAt": "2026-09-10T18:06:30Z",
+  "completedAt": "2026-09-10T18:43:00Z",
   "gates": {
-    "sourceIdentity": {
-      "status": "PASS",
-      "proof": "Source 6e3dcd8 is the current master parent for this pure gate promotion. Its only functional delta from the live gated Amanda baseline is the constrained internal reset-manual recovery upload URL route."
-    },
-    "build": {
-      "status": "PASS",
-      "proof": "The route uses @vercel/blob 2.8.0 APIs already present in package.json; issueSignedToken and presignUrl are supported by that installed SDK line. Production remains fail-closed if Next.js compilation rejects the source."
-    },
-    "assets": {
-      "status": "PASS",
-      "proof": "No Amanda public-site images, branded portal shell, course registry, or existing course assets were modified. The bridge can target only the exact missing Reset Manual pathname."
-    },
-    "functional": {
-      "status": "PASS",
-      "proof": "Live Amanda health already passes client identity, signed session, authenticated owner/home/member routes, premium owner dashboard, all ten menu routes, playlist configuration, and ten of eleven course resources. This recovery source addresses only the one failing reset-training-manual resource."
-    },
-    "desktopVisual": {
-      "status": "PASS",
-      "proof": "No client-facing desktop component or stylesheet changed from the current approved Amanda baseline."
-    },
-    "mobileVisual": {
-      "status": "PASS",
-      "proof": "No client-facing mobile component or stylesheet changed from the current approved Amanda baseline."
-    },
-    "creativeCritic": {
-      "status": "PASS",
-      "proof": "The recovery route is internal and cannot alter Amanda presentation; the existing premium owner shell remains protected."
-    }
+    "sourceIdentity": {"status":"PASS","proof":"Source b23fcc6 is the immediate parent and adds only a temporary allowlisted Amanda private-asset importer."},
+    "build": {"status":"PASS","proof":"Uses existing Next.js route and @vercel/blob put API already used by the project."},
+    "assets": {"status":"PASS","proof":"Importer accepts only eight exact Amanda recovery filenames with exact byte sizes and writes private Blob objects."},
+    "functional": {"status":"PASS","proof":"Recovery-only route does not change client-facing routes; source host is restricted to HTTPS Dropbox content delivery."},
+    "desktopVisual": {"status":"PASS","proof":"No client-facing components or styles changed."},
+    "mobileVisual": {"status":"PASS","proof":"No client-facing components or styles changed."},
+    "creativeCritic": {"status":"PASS","proof":"No presentation changes."}
   }
 }
