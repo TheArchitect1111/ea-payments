@@ -12,7 +12,7 @@ permissions:
 
 concurrency:
   group: amanda-migration-final-promotion
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   gate-and-promote:
@@ -70,7 +70,7 @@ jobs:
         run: npm run build
 
       - name: Install Chromium for preview QA
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install chromium
 
       - name: Exact preview functional and visual gate
         env:
