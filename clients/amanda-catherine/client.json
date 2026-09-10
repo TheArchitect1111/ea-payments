@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "id": "amanda-catherine",
+  "name": "Amanda Catherine",
+  "status": "production",
+  "canonical": {
+    "sourceRepository": "TheArchitect1111/ea-payments",
+    "sourceBranch": "master",
+    "packagePath": "clients/amanda-catherine",
+    "publicSiteRoute": "/amanda-catherine",
+    "publicDomain": "https://amandacatherine.ca",
+    "portalRoute": "/portal/amanda-catherine",
+    "portalDomain": "https://efficiencyarchitects.online/portal/amanda-catherine",
+    "publicShellProject": "amanda-catherine-4",
+    "applicationProject": "ea-payments"
+  },
+  "assets": {
+    "publicAssetDirectory": "public/amanda-catherine",
+    "privateCourseAssetRegistry": "lib/amanda-catherine/course-resources.ts",
+    "privateStorage": "vercel-blob",
+    "index": "clients/amanda-catherine/assets.json"
+  },
+  "experience": {
+    "site": "app/amanda-catherine",
+    "portal": "app/portal/amanda-catherine",
+    "ownerDashboard": "app/portal/[slug]/member/AmandaMemberHome.tsx",
+    "ownerStyles": "app/portal/[slug]/member/AmandaOwnerDashboard.module.css",
+    "theme": "app/components/experience/themes/amanda-editorial"
+  },
+  "protection": {
+    "profile": "config/production-protection.json#amanda-catherine",
+    "healthEndpoint": "/api/health/amanda-login",
+    "requiredGate": "EA Client Protection Gate"
+  },
+  "legacy": {
+    "invalidPortalRoutes": ["/portal/amanda"],
+    "retiredVercelProjects": [
+      "amanda-catherine-preview",
+      "amanda-catherine-3",
+      "amanda-catherine"
+    ],
+    "rule": "Retired projects may retain historical Vercel URLs but must never own Amanda custom domains or be treated as canonical."
+  }
+}
