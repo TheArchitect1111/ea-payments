@@ -1,10 +1,10 @@
 import type { VideoProject } from '../schema';
 
 const media = {
-  financeSkyline: 'https://images.unsplash.com/photo-C55M3wxaoB0?auto=format&fit=crop&w=1920&q=85',
-  apartments: 'https://images.unsplash.com/photo-qcs3xGCKC6s?auto=format&fit=crop&w=1920&q=85',
-  charlotte: 'https://images.unsplash.com/photo-9Dv4dDQVfU4?auto=format&fit=crop&w=1920&q=85',
-  manhattan: 'https://images.unsplash.com/photo-u64sw37eHZY?auto=format&fit=crop&w=1920&q=85',
+  financeSkyline: 'https://images.pexels.com/photos/5058118/pexels-photo-5058118.jpeg?cs=srgb&dl=pexels-maxavans-5058118.jpg&fm=jpg',
+  apartments: 'https://images.pexels.com/photos/5502228/pexels-photo-5502228.jpeg?cs=srgb&dl=pexels-curtis-adams-1694007-5502228.jpg&fm=jpg',
+  charlotte: 'https://images.pexels.com/photos/8837580/pexels-photo-8837580.jpeg?cs=srgb&dl=pexels-ai25studio-8837580.jpg&fm=jpg',
+  manhattan: 'https://images.pexels.com/photos/5058118/pexels-photo-5058118.jpeg?cs=srgb&dl=pexels-maxavans-5058118.jpg&fm=jpg',
 };
 
 export const wealthyDebtProject: VideoProject = {
