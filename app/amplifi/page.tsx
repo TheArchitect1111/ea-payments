@@ -23,8 +23,24 @@ const steps = [
   ['07', 'LEARN', 'Amplifi learns from results and improves the next campaign.']
 ];
 
+const sceneAssets: Record<string,string> = {
+  hero: '/amplifi/hero-human-v2.jpg?v=2',
+  problem: '/amplifi/amplifi-person-phone-v2.jpg?v=2',
+  audiences: '/amplifi/amplifi-audiences.svg?v=2',
+  search: '/amplifi/amplifi-smart-search.svg?v=2',
+  smart: '/amplifi/amplifi-smartchitecture.svg?v=2',
+  idea: '/amplifi/amplifi-idea-box.svg?v=2',
+  eva: '/amplifi/amplifi-eva-control.svg?v=2',
+  performance: '/amplifi/amplifi-performance.svg?v=2',
+  closing: '/amplifi/amplifi-person-laptop-v2.jpg?v=2'
+};
+
 function Scene({ name, label }: { name: string; label: string }) {
-  return <div className={`amp-scene amp-scene-${name}`} role="img" aria-label={label}/>;
+  return <div className={`amp-scene amp-scene-${name}`} role="img" aria-label={label}><img className="amp-scene-img" src={sceneAssets[name]} alt="" aria-hidden="true"/></div>;
+}
+
+function BarberVisual({ className, label }: { className: string; label: string }) {
+  return <div className={`amp-barber-crop ${className}`} role="img" aria-label={label}><img className="amp-scene-img" src="/amplifi/amplifi-barber-showcase.jpg?v=2" alt="" aria-hidden="true"/></div>;
 }
 
 export default function Page() {
@@ -36,10 +52,10 @@ export default function Page() {
     <section className="amp-pressure"><div className="amp-pressure-copy"><span className="amp-kicker dark">THE REAL PROBLEM</span><h2>You have a business to run. Social media keeps asking for your attention.</h2><p>Ideas. Trends. Photos. Captions. Scheduling. Comments. Results. The work never arrives as one task. It arrives as a hundred tiny interruptions.</p><strong>Amplifi takes that loop off your desk.</strong></div><div className="amp-wide-visual"><Scene name="problem" label="Business owner overwhelmed by the many tasks required to manage social media"/></div><div className="amp-audience-visual"><Scene name="audiences" label="Four Amplifi audiences: barber, creator, small business owner, coach or consultant"/><div className="amp-audience">{audience.map(item=><span key={item}>{item}</span>)}</div></div></section>
 
     <section className="amp-motion"><div className="amp-motion-head"><span className="amp-kicker">SEE IT WORK</span><h2>Follow one business from objective to finished campaign.</h2><p>Brick & Blade is our demonstration barbershop. Tuesdays and Wednesdays are quiet. Saturdays are packed. Amplifi starts with the business goal, not with “What should we post?”</p></div>
-      <div className="amp-objective amp-objective-barber"><div className="amp-barber-crop amp-barber-objective" role="img" aria-label="Brick and Blade barbershop campaign showcase"/><div className="amp-objective-copy"><small>THE OBJECTIVE</small><h3>Fill more midweek appointments without discounting the service.</h3><p>That objective becomes the north star. Every search, angle, visual and post has to help move the same business outcome.</p></div></div>
+      <div className="amp-objective amp-objective-barber"><BarberVisual className="amp-barber-objective" label="Brick and Blade barbershop campaign showcase"/><div className="amp-objective-copy"><small>THE OBJECTIVE</small><h3>Fill more midweek appointments without discounting the service.</h3><p>That objective becomes the north star. Every search, angle, visual and post has to help move the same business outcome.</p></div></div>
       <div className="amp-search-story"><div className="amp-search-copy"><span className="amp-kicker dark">SMART SEARCH</span><h3>Amplifi finds the reason to talk about it now.</h3><p>It looks for timely context, audience behavior and relevant opportunities, then connects the strongest signal back to the objective.</p></div><Scene name="search" label="Amplifi smart search finding barber content trends and opportunities"/></div>
       <div className="amp-signal-grid"><article><small>SEARCH</small><b>School-year routines are back.</b><p>Weekends are getting crowded with errands, activities and haircuts.</p></article><div className="amp-signal-line">→</div><article><small>CONNECT</small><b>Saturday is already the busiest day.</b><p>Midweek availability can be positioned as time the customer gets back.</p></article><div className="amp-signal-line">→</div><article className="amp-signal-highlight"><small>BUILD</small><b>Give Saturday Back.</b><p>Handle the haircut Tuesday or Wednesday before the weekend rush begins.</p></article></div>
-      <div className="amp-proof amp-proof-barber"><div className="amp-proof-copy"><span className="amp-kicker dark">THE ACTUAL CAMPAIGN PROOF</span><h3>Now show the work, not another promise.</h3><p>The earlier Brick & Blade visuals become the proof thread: campaign concept, coordinated social posts and the finished strategy shown together as one real example.</p><div className="amp-proof-tags"><span>RECOGNITION</span><span>REFRAME</span><span>CONVERSION</span></div></div><div className="amp-barber-crop amp-barber-campaign" role="img" aria-label="Previously created Brick and Blade Amplifi campaign posts"/></div>
+      <div className="amp-proof amp-proof-barber"><div className="amp-proof-copy"><span className="amp-kicker dark">THE ACTUAL CAMPAIGN PROOF</span><h3>Now show the work, not another promise.</h3><p>The earlier Brick & Blade visuals become the proof thread: campaign concept, coordinated social posts and the finished strategy shown together as one real example.</p><div className="amp-proof-tags"><span>RECOGNITION</span><span>REFRAME</span><span>CONVERSION</span></div></div><BarberVisual className="amp-barber-campaign" label="Previously created Brick and Blade Amplifi campaign posts"/></div>
     </section>
 
     <section className="amp-system"><div className="amp-system-head"><span className="amp-kicker">SMARTCHITECTURE</span><h2>You can see the entire path from goal to growth.</h2></div><div className="amp-system-visual"><Scene name="smart" label="Amplifi Smartchitecture visual process from goal through search, build, review, approval, publish and learn"/></div><div className="amp-track amp-track-seven">{steps.map(([n,who,text])=><div className="amp-track-step" key={n}><i>{n}</i><small>{who}</small><b>{text}</b></div>)}</div></section>
