@@ -4,6 +4,7 @@ import AmplifiBrand from './AmplifiBrand';
 import './amplifi-brain-v4.css';
 import './amplifi-proof.css';
 import './amplifi-image-brain.css';
+import './amplifi-visual-fix.css';
 
 export const metadata: Metadata = {
   title: 'Amplifi | Focus on your craft.',
