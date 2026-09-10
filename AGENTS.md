@@ -50,3 +50,17 @@ Never report DONE merely because code was edited, committed, merged, built, or r
 
 See `SPEC-KIT-INTEGRATION.md` for the repository workflow and bootstrap details.
 <!-- SPEC-KIT:END -->
+
+<!-- SCRAPLING:START -->
+## EA Scrapling production inspection
+
+For production checks covered by `config/ea-scrapling-manifest.json`, use the pinned Scrapling inspector as an additional verification layer.
+
+- The inspector is read-only against production surfaces.
+- Direct selector matches refresh adaptive element memory; broken selectors may be relocated from saved element properties.
+- Missing required elements/text, response regressions, image-count failures, and excessive repeated image sources are verification failures.
+- Scrapling evidence complements Playwright, CI, health checks, and the EA Production Gate; it does not replace them or authorize deployment.
+- When a Scrapling rule tied to the active specification fails, the work cannot be called VERIFIED or DONE until corrected and rechecked.
+
+See `SCRAPLING-INTEGRATION.md` for the operational contract.
+<!-- SCRAPLING:END -->

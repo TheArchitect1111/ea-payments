@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "targets": [
+    {
+      "name": "EA public home",
+      "url": "https://efficiencyarchitects.online/",
+      "min_bytes": 500,
+      "selectors": [
+        {"id": "ea-body", "css": "body"},
+        {"id": "ea-main-heading", "css": "h1"}
+      ],
+      "min_images": 0,
+      "max_duplicate_src_count": 4
+    },
+    {
+      "name": "Amanda Catherine public home",
+      "url": "https://amandacatherine.ca/",
+      "min_bytes": 500,
+      "selectors": [
+        {"id": "amanda-body", "css": "body"}
+      ],
+      "min_images": 0,
+      "max_duplicate_src_count": 4
+    }
+  ]
+}

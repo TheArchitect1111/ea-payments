@@ -1,0 +1,83 @@
+name: EA Scrapling Production Inspector
+
+on:
+  pull_request:
+    branches: [master]
+    paths:
+      - 'scripts/ea_scrapling_inspector.py'
+      - 'config/ea-scrapling-manifest.json'
+      - 'requirements-scrapling.txt'
+      - 'SCRAPLING-INTEGRATION.md'
+      - '.github/workflows/scrapling-inspector.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'scripts/ea_scrapling_inspector.py'
+      - 'config/ea-scrapling-manifest.json'
+      - 'requirements-scrapling.txt'
+      - 'SCRAPLING-INTEGRATION.md'
+      - '.github/workflows/scrapling-inspector.yml'
+  schedule:
+    - cron: '47 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: ea-scrapling-production-inspector
+  cancel-in-progress: true
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install pinned Scrapling
+        run: python -m pip install --disable-pip-version-check -r requirements-scrapling.txt
+
+      - name: Verify adaptive relocation engine
+        run: python scripts/ea_scrapling_inspector.py --self-test
+
+      - name: Restore adaptive selector memory
+        if: github.event_name != 'pull_request'
+        uses: actions/cache@v4
+        with:
+          path: .ea/scrapling-state
+          key: ea-scrapling-state-${{ runner.os }}-${{ github.run_id }}
+          restore-keys: |
+            ea-scrapling-state-${{ runner.os }}-
+
+      - name: Inspect production surfaces
+        if: github.event_name != 'pull_request'
+        run: python scripts/ea_scrapling_inspector.py
+
+      - name: Upload inspection evidence
+        if: always() && github.event_name != 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ea-scrapling-inspection-${{ github.run_id }}
+          path: artifacts/scrapling/report.json
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Open or update production incident
+        if: failure() && github.event_name != 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title='[Scrapling Inspector] EA production drift detected';
+            const body=`Scrapling adaptive production inspection failed at ${new Date().toISOString()}. Review the generated inspection artifact and run details: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const {data:issues}=await github.rest.issues.listForRepo({owner:context.repo.owner,repo:context.repo.repo,state:'open',per_page:100});
+            const existing=issues.find(i=>i.title===title);
+            if(existing) await github.rest.issues.createComment({owner:context.repo.owner,repo:context.repo.repo,issue_number:existing.number,body});
+            else await github.rest.issues.create({owner:context.repo.owner,repo:context.repo.repo,title,body});
