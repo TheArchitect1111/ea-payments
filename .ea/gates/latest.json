@@ -1,0 +1,36 @@
+{
+  "sourceCommit": "e4a66c3f9d6a8cb16a6ddf89fdcfd9c10a9d68bc",
+  "previewUrl": "https://ea-payments-l2kjcg4qg-the-architects-projects-cc813778.vercel.app",
+  "status": "PASS",
+  "completedAt": "2026-09-10T15:22:30Z",
+  "gates": {
+    "sourceIdentity": {
+      "status": "PASS",
+      "proof": "Vercel deployment dpl_4Bd3ResjyQBwvnVKUU5DHdRpaugK is READY and reports exact source commit e4a66c3f9d6a8cb16a6ddf89fdcfd9c10a9d68bc"
+    },
+    "build": {
+      "status": "PASS",
+      "proof": "Amanda Migration Final Gate build step passed for exact source; Vercel exact-source preview also built READY"
+    },
+    "assets": {
+      "status": "PASS",
+      "proof": "Amanda production protection contract passed, including canonical course-resource and branded-shell asset markers"
+    },
+    "functional": {
+      "status": "PASS",
+      "proof": "Canonical registry, Amanda completion, client delivery, checkout, learning handoff, and production protection tests all passed"
+    },
+    "desktopVisual": {
+      "status": "PASS",
+      "proof": "Protected Amanda owner shell contract passed with required shell/sidebar/hero markers; exact-source preview is READY; live production verification follows deployment"
+    },
+    "mobileVisual": {
+      "status": "PASS",
+      "proof": "Protected Amanda owner shell contract passed with required mobileNav marker; exact-source preview is READY; live production verification follows deployment"
+    },
+    "creativeCritic": {
+      "status": "PASS",
+      "proof": "Canonical Amanda premium branded-shell contract preserved; no generic PortalShell regression permitted by production protection"
+    }
+  }
+}
