@@ -9,6 +9,14 @@ on:
       - 'requirements-scrapling.txt'
       - 'SCRAPLING-INTEGRATION.md'
       - '.github/workflows/scrapling-inspector.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'scripts/ea_scrapling_inspector.py'
+      - 'config/ea-scrapling-manifest.json'
+      - 'requirements-scrapling.txt'
+      - 'SCRAPLING-INTEGRATION.md'
+      - '.github/workflows/scrapling-inspector.yml'
   schedule:
     - cron: '47 * * * *'
   workflow_dispatch:
