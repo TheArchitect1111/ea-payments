@@ -1,0 +1,42 @@
+name: EA Client Protection Gate
+
+on:
+  pull_request:
+    paths:
+      - 'app/portal/**'
+      - 'app/api/health/**'
+      - 'lib/amanda-catherine/**'
+      - 'lib/platform-guardian.ts'
+      - 'config/production-protection.json'
+      - 'scripts/test-production-protection.mjs'
+      - '.github/workflows/**'
+  push:
+    branches: [master]
+    paths:
+      - 'app/portal/**'
+      - 'app/api/health/**'
+      - 'lib/amanda-catherine/**'
+      - 'lib/platform-guardian.ts'
+      - 'config/production-protection.json'
+      - 'scripts/test-production-protection.mjs'
+      - '.github/workflows/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ea-client-protection-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  protection-contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Verify protected client contracts
+        run: node scripts/test-production-protection.mjs
