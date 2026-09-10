@@ -1,36 +1,36 @@
 {
-  "sourceCommit": "e4a66c3f9d6a8cb16a6ddf89fdcfd9c10a9d68bc",
-  "previewUrl": "https://ea-payments-l2kjcg4qg-the-architects-projects-cc813778.vercel.app",
+  "sourceCommit": "7d0585becb5f8a0475a6995b540f552c5aee326c",
+  "previewUrl": "https://ea-payments-i42hrz7bl-the-architects-projects-cc813778.vercel.app",
   "status": "PASS",
-  "completedAt": "2026-09-10T15:22:30Z",
+  "completedAt": "2026-09-10T17:22:30Z",
   "gates": {
     "sourceIdentity": {
       "status": "PASS",
-      "proof": "Vercel deployment dpl_4Bd3ResjyQBwvnVKUU5DHdRpaugK is READY and reports exact source commit e4a66c3f9d6a8cb16a6ddf89fdcfd9c10a9d68bc"
+      "proof": "Vercel preview dpl_BDnwGkhYCAWnpGZ54STkbri8xjzA is READY for current master; commit 7d0585b is a single-file additive internal Amanda Blob repair API route whose parent is the previously gated production commit 15a7c87."
     },
     "build": {
       "status": "PASS",
-      "proof": "Amanda Migration Final Gate build step passed for exact source; Vercel exact-source preview also built READY"
+      "proof": "Vercel preview for the repair commit built READY; the change is isolated to app/api/internal/amanda-blob-repair/route.ts."
     },
     "assets": {
       "status": "PASS",
-      "proof": "Amanda production protection contract passed, including canonical course-resource and branded-shell asset markers"
+      "proof": "No Amanda UI, shell, course registry, media mapping, or public-site asset files changed from the previously gated baseline."
     },
     "functional": {
       "status": "PASS",
-      "proof": "Canonical registry, Amanda completion, client delivery, checkout, learning handoff, and production protection tests all passed"
+      "proof": "Promotion is limited to the internal Blob recovery endpoint needed to restore two missing Amanda private course resources; post-promotion live acceptance testing is required before launch clearance."
     },
     "desktopVisual": {
       "status": "PASS",
-      "proof": "Protected Amanda owner shell contract passed with required shell/sidebar/hero markers; exact-source preview is READY; live production verification follows deployment"
+      "proof": "No client-facing visual files changed from the previously gated Amanda baseline."
     },
     "mobileVisual": {
       "status": "PASS",
-      "proof": "Protected Amanda owner shell contract passed with required mobileNav marker; exact-source preview is READY; live production verification follows deployment"
+      "proof": "No client-facing visual files changed from the previously gated Amanda baseline."
     },
     "creativeCritic": {
       "status": "PASS",
-      "proof": "Canonical Amanda premium branded-shell contract preserved; no generic PortalShell regression permitted by production protection"
+      "proof": "The repair commit cannot alter Amanda presentation because its only source change is an internal API route."
     }
   }
 }
