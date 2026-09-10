@@ -1,0 +1,81 @@
+{
+  "version": 1,
+  "clients": [
+    {
+      "id": "amanda-catherine",
+      "name": "Amanda Catherine",
+      "publicUrls": [
+        "https://amandacatherine.ca/",
+        "https://www.amandacatherine.ca/"
+      ],
+      "platformRoutes": [
+        "/portal/amanda-catherine/enroll",
+        "/portal/login?next=/amanda-business"
+      ],
+      "healthEndpoint": "/api/health/amanda-login",
+      "requiredHealthChecks": [
+        "authenticatedOwnerRoute",
+        "authenticatedPortalHome",
+        "authenticatedMemberRoute",
+        "premiumOwnerDashboard",
+        "allMenuRoutes",
+        "allCourseResourceRoutes",
+        "entrepreneurialArtistPlaylistConfigured"
+      ],
+      "requiredOwnerMarkers": [
+        "Owner portal",
+        "Quick Actions",
+        "Ask Eva",
+        "Business Overview"
+      ],
+      "protectedSourceFiles": [
+        "app/portal/amanda-catherine/page.tsx",
+        "app/portal/[slug]/member/AmandaMemberHome.tsx",
+        "app/portal/[slug]/member/AmandaOwnerDashboard.module.css",
+        "lib/amanda-catherine/course-resources.ts"
+      ],
+      "sourceContracts": [
+        {
+          "path": "app/portal/amanda-catherine/page.tsx",
+          "mustContain": [
+            "if (isAdministrator)",
+            "<AmandaMemberHome",
+            "premium branded shell"
+          ],
+          "mustNotContain": [
+            "<PortalShell"
+          ]
+        },
+        {
+          "path": "app/portal/[slug]/member/AmandaMemberHome.tsx",
+          "mustContain": [
+            "styles.shell",
+            "Owner portal",
+            "Quick Actions",
+            "Ask Eva",
+            "Business Overview",
+            "aesthetikine-studio-hero.jpg"
+          ]
+        },
+        {
+          "path": "app/portal/[slug]/member/AmandaOwnerDashboard.module.css",
+          "mustContain": [
+            ".shell",
+            ".sidebar",
+            ".hero",
+            ".mobileNav"
+          ]
+        },
+        {
+          "path": "lib/amanda-catherine/course-resources.ts",
+          "mustContain": [
+            "reset-training-manual",
+            "body-sculpt-certification-overview",
+            "body-sculpt-textbook",
+            "body-sculpt-video-demo"
+          ]
+        }
+      ]
+    }
+  ]
+}
