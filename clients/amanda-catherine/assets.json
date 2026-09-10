@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "clientId": "amanda-catherine",
+  "policy": "This file is the authoritative Amanda asset map. Do not create additional Amanda asset roots. Public presentation assets belong under public/amanda-catherine. Private paid-course files remain in Vercel Blob and must be referenced only through lib/amanda-catherine/course-resources.ts.",
+  "public": {
+    "root": "public/amanda-catherine",
+    "purpose": "website, portal presentation, brand marks, approved imagery and non-private media"
+  },
+  "privateCourseMaterials": {
+    "storage": "vercel-blob",
+    "registry": "lib/amanda-catherine/course-resources.ts",
+    "accessRoute": "/api/portal/amanda/resources/[resourceId]",
+    "purpose": "authenticated course documents and video"
+  },
+  "rules": [
+    "No Amanda public image may be added outside public/amanda-catherine.",
+    "No private course document or paid-course video may be copied into public/.",
+    "Every private course asset must have exactly one resource-registry entry.",
+    "Legacy Amanda asset folders are non-canonical and must not be referenced by production code.",
+    "The client package at clients/amanda-catherine is the single lookup point for Amanda ownership and storage locations."
+  ]
+}
