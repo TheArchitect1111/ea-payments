@@ -55,6 +55,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Client protection contract gate
+        run: node scripts/test-production-protection.mjs
+
       - name: Build gate
         run: npm run build
 
