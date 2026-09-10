@@ -1,12 +1,10 @@
-.amp-scene{background-repeat:no-repeat!important;background-size:cover!important;background-position:center!important;background-color:#07111f}
-.amp-scene-hero{background-image:url('/amplifi/hero-human-v2.jpg')!important;background-position:center 35%!important}
-.amp-scene-problem{background-image:url('/amplifi/amplifi-person-phone-v2.jpg')!important;background-position:center 32%!important}
-.amp-scene-audiences{background-image:url('/amplifi/amplifi-audiences.svg')!important}
-.amp-scene-search{background-image:url('/amplifi/amplifi-smart-search.svg')!important}
-.amp-scene-smart{background-image:url('/amplifi/amplifi-smartchitecture.svg')!important}
-.amp-scene-idea{background-image:url('/amplifi/amplifi-idea-box.svg')!important}
-.amp-scene-eva{background-image:url('/amplifi/amplifi-eva-control.svg')!important}
-.amp-scene-performance{background-image:url('/amplifi/amplifi-performance.svg')!important}
-.amp-scene-closing{background-image:url('/amplifi/amplifi-person-laptop-v2.jpg')!important;background-position:center 40%!important}
+.amp-scene,.amp-barber-crop{position:relative;background-image:none!important;background-color:#07111f;overflow:hidden}
+.amp-scene-img{display:block;width:100%;height:100%;object-fit:cover;object-position:center}
+.amp-scene-hero .amp-scene-img{object-position:center 35%}
+.amp-scene-problem .amp-scene-img{object-position:center 32%}
+.amp-scene-closing .amp-scene-img{object-position:center 40%}
+.amp-scene-audiences .amp-scene-img,.amp-scene-search .amp-scene-img,.amp-scene-smart .amp-scene-img,.amp-scene-idea .amp-scene-img,.amp-scene-eva .amp-scene-img,.amp-scene-performance .amp-scene-img{object-fit:cover;object-position:center}
+.amp-barber-objective .amp-scene-img{object-position:center 8%}
+.amp-barber-campaign .amp-scene-img{object-position:center 58%}
 .amp-hero-new>.amp-scene,.amp-close-new>.amp-scene{background-size:cover!important}
-@media(max-width:700px){.amp-scene-hero{background-position:center 28%!important}.amp-scene-problem{background-position:center 25%!important}.amp-scene-closing{background-position:center 35%!important}}
+@media(max-width:700px){.amp-scene-hero .amp-scene-img{object-position:center 28%}.amp-scene-problem .amp-scene-img{object-position:center 25%}.amp-scene-closing .amp-scene-img{object-position:center 35%}}
