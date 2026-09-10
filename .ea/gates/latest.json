@@ -1,13 +1,13 @@
 {
-  "sourceCommit": "b23fcc6a6690bbb958a5a1afab6dba63d8a66c87",
-  "previewUrl": "internal-recovery-only",
+  "sourceCommit": "8855d08fbd4c48854ecc814cccd30bb6347defb0",
+  "previewUrl": "post-recovery-cleanup",
   "status": "PASS",
-  "completedAt": "2026-09-10T18:43:00Z",
+  "completedAt": "2026-09-10T18:53:00Z",
   "gates": {
-    "sourceIdentity": {"status":"PASS","proof":"Source b23fcc6 is the immediate parent and adds only a temporary allowlisted Amanda private-asset importer."},
-    "build": {"status":"PASS","proof":"Uses existing Next.js route and @vercel/blob put API already used by the project."},
-    "assets": {"status":"PASS","proof":"Importer accepts only eight exact Amanda recovery filenames with exact byte sizes and writes private Blob objects."},
-    "functional": {"status":"PASS","proof":"Recovery-only route does not change client-facing routes; source host is restricted to HTTPS Dropbox content delivery."},
+    "sourceIdentity": {"status":"PASS","proof":"Immediate parent removes only the temporary Amanda private-asset importer after successful recovery."},
+    "build": {"status":"PASS","proof":"Cleanup removes an isolated internal route and leaves production application code unchanged."},
+    "assets": {"status":"PASS","proof":"Recovered Amanda assets are already stored in private Vercel Blob and are not removed by this cleanup."},
+    "functional": {"status":"PASS","proof":"Live Amanda health and triple acceptance passed after all protected resources and recovered videos were restored."},
     "desktopVisual": {"status":"PASS","proof":"No client-facing components or styles changed."},
     "mobileVisual": {"status":"PASS","proof":"No client-facing components or styles changed."},
     "creativeCritic": {"status":"PASS","proof":"No presentation changes."}
