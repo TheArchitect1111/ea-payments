@@ -1,0 +1,12 @@
+.amp-scene{background-repeat:no-repeat!important;background-size:cover!important;background-position:center!important;background-color:#07111f}
+.amp-scene-hero{background-image:url('/amplifi/hero-human-v2.jpg')!important;background-position:center 35%!important}
+.amp-scene-problem{background-image:url('/amplifi/amplifi-person-phone-v2.jpg')!important;background-position:center 32%!important}
+.amp-scene-audiences{background-image:url('/amplifi/amplifi-audiences.svg')!important}
+.amp-scene-search{background-image:url('/amplifi/amplifi-smart-search.svg')!important}
+.amp-scene-smart{background-image:url('/amplifi/amplifi-smartchitecture.svg')!important}
+.amp-scene-idea{background-image:url('/amplifi/amplifi-idea-box.svg')!important}
+.amp-scene-eva{background-image:url('/amplifi/amplifi-eva-control.svg')!important}
+.amp-scene-performance{background-image:url('/amplifi/amplifi-performance.svg')!important}
+.amp-scene-closing{background-image:url('/amplifi/amplifi-person-laptop-v2.jpg')!important;background-position:center 40%!important}
+.amp-hero-new>.amp-scene,.amp-close-new>.amp-scene{background-size:cover!important}
+@media(max-width:700px){.amp-scene-hero{background-position:center 28%!important}.amp-scene-problem{background-position:center 25%!important}.amp-scene-closing{background-position:center 35%!important}}
