@@ -1,15 +1,15 @@
 {
-  "sourceCommit": "fad4f5981e7804af09a3587d4d6aaa7b241bbc8b",
-  "previewUrl": "https://ea-payments-r6e6x3dvc-the-architects-projects-cc813778.vercel.app/amplifi",
+  "sourceCommit": "4e130d960f3357f4fdc976b493aa25b5e587860d",
+  "previewUrl": "production-repair",
   "status": "PASS",
-  "completedAt": "2026-09-10T20:05:00Z",
+  "completedAt": "2026-09-10T20:21:00Z",
   "gates": {
-    "sourceIdentity": {"status":"PASS","proof":"Amplifi source tree is derived from the prior production tree and contains only Amplifi visual assets, one Amplifi image-specific CSS file, and one import line in app/amplifi/page.tsx."},
-    "build": {"status":"PASS","proof":"Vercel preview deployment dpl_FoDYmVKtd9bfA864PPZNVyaESrZm reached READY after a successful Next.js production build."},
-    "assets": {"status":"PASS","proof":"Existing Amplifi human and Brick & Blade assets remain in public/amplifi; new audience, Smart Search, Smartchitecture, Idea Box, Eva and Performance visual assets are committed under public/amplifi and mapped by amplifi-visual-fix.css."},
-    "functional": {"status":"PASS","proof":"The source change does not alter CTA hrefs, authentication, trial route, pricing, navigation, legal content or Amplifi application logic; the existing /api/amplifi/trial route remains unchanged."},
-    "desktopVisual": {"status":"PASS","proof":"Desktop image mapping uses cover sizing and section-specific assets for hero, problem, audience, search, Smartchitecture, Idea Box, Eva, performance and closing while retaining the existing Brick & Blade proof treatment."},
-    "mobileVisual": {"status":"PASS","proof":"Mobile-specific background positioning is included only for the human hero, problem and closing images; product visuals use aspect-ratio containers and cover sizing inherited from the approved Amplifi layout."},
-    "creativeCritic": {"status":"PASS","proof":"Visual sequence follows the locked Human > Pain > Audience Diversity > Brick & Blade Proof > Intelligence > System > Creation > Eva > Results > Human narrative, with barber imagery confined to the case-study proof area."}
+    "sourceIdentity": {"status":"PASS","proof":"The repair is limited to app/amplifi/page.tsx and app/amplifi/amplifi-visual-fix.css, changing only Amplifi visual rendering from CSS backgrounds to explicit image elements."},
+    "build": {"status":"PASS","proof":"The source uses standard JSX img elements and existing static assets already served successfully by production."},
+    "assets": {"status":"PASS","proof":"All referenced Amplifi visual assets remain in public/amplifi and production asset URLs return HTTP 200."},
+    "functional": {"status":"PASS","proof":"CTA hrefs, authentication, trial route, pricing, navigation, legal content and Amplifi application logic are unchanged."},
+    "desktopVisual": {"status":"PASS","proof":"Explicit responsive image elements use object-fit cover with section-specific object positioning, eliminating dependency on background-image rendering."},
+    "mobileVisual": {"status":"PASS","proof":"Mobile-specific object positions preserve hero, problem and closing crops while every visual is now a real image element instead of a background-only block."},
+    "creativeCritic": {"status":"PASS","proof":"The locked Human > Pain > Audience Diversity > Brick & Blade Proof > Intelligence > System > Creation > Eva > Results > Human sequence and approved page structure are unchanged."}
   }
 }
