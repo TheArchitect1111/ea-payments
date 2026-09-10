@@ -1,0 +1,102 @@
+name: Amanda Migration Final Gate
+
+on:
+  push:
+    branches:
+      - verify/production-protection-exact
+    paths:
+      - '.github/workflows/amanda-migration-final-gate.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: amanda-migration-final-promotion
+  cancel-in-progress: false
+
+jobs:
+  gate-and-promote:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      EA_SOURCE_COMMIT: e4a66c3f9d6a8cb16a6ddf89fdcfd9c10a9d68bc
+      EA_PREVIEW_URL: https://ea-payments-l2kjcg4qg-the-architects-projects-cc813778.vercel.app
+      EA_GATE_PATH: /portal/amanda-catherine/enroll
+      EA_MIN_VISUALS: '1'
+    steps:
+      - name: Checkout exact migration source
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.EA_SOURCE_COMMIT }}
+          fetch-depth: 2
+
+      - name: Verify master still equals migration source
+        shell: bash
+        run: |
+          git fetch origin master
+          test "$(git rev-parse origin/master)" = "${EA_SOURCE_COMMIT}" || {
+            echo "BLOCKED: master moved. Amanda migration proof is stale."
+            exit 1
+          }
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Canonical client registry gate
+        run: npx tsx scripts/test-canonical-project-registry.ts
+
+      - name: Amanda client package gate
+        run: npx tsx scripts/test-client-package.ts amanda-catherine
+
+      - name: Amanda production protection gate
+        run: node scripts/test-production-protection.mjs
+
+      - name: Build gate
+        run: npm run build
+
+      - name: Install Chromium for preview QA
+        run: npx playwright install --with-deps chromium
+
+      - name: Exact preview functional and visual gate
+        env:
+          EA_GATE_OUTPUT: artifacts/amanda-migration-gate
+          VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+        run: node scripts/ea-preview-gate.mjs
+
+      - name: Upload Amanda migration proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: amanda-migration-final-${{ env.EA_SOURCE_COMMIT }}
+          path: artifacts/amanda-migration-gate
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Re-verify source has not moved
+        shell: bash
+        run: |
+          git fetch origin master
+          test "$(git rev-parse origin/master)" = "${EA_SOURCE_COMMIT}" || {
+            echo "BLOCKED: master changed during Amanda QA."
+            exit 1
+          }
+
+      - name: Promote verified Amanda migration
+        shell: bash
+        run: |
+          mkdir -p .ea/gates
+          cp artifacts/amanda-migration-gate/gate-result.json .ea/gates/latest.json
+          test "$(node -p "require('./.ea/gates/latest.json').status")" = "PASS"
+          git config user.name "EA Production Gate"
+          git config user.email "ea-production-gate@users.noreply.github.com"
+          git add .ea/gates/latest.json
+          git diff --cached --name-only | grep -qx '.ea/gates/latest.json'
+          test "$(git diff --cached --name-only | wc -l | tr -d ' ')" = "1"
+          git commit -m "[EA-GATED] Promote verified Amanda migration ${EA_SOURCE_COMMIT}"
+          git push origin HEAD:master
