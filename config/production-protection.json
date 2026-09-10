@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "clients": [
     {
       "id": "amanda-catherine",
@@ -9,8 +9,10 @@
         "https://www.amandacatherine.ca/"
       ],
       "platformRoutes": [
+        "/portal/amanda-catherine",
         "/portal/amanda-catherine/enroll",
-        "/portal/login?next=/amanda-business"
+        "/portal/amanda-catherine/learning",
+        "/portal/login?next=/portal/amanda-catherine"
       ],
       "healthEndpoint": "/api/health/amanda-login",
       "requiredHealthChecks": [
@@ -29,12 +31,57 @@
         "Business Overview"
       ],
       "protectedSourceFiles": [
+        "clients/amanda-catherine/client.json",
+        "clients/amanda-catherine/assets.json",
+        "lib/canonical-project-registry.ts",
+        "app/portal/amanda/page.tsx",
         "app/portal/amanda-catherine/page.tsx",
         "app/portal/[slug]/member/AmandaMemberHome.tsx",
         "app/portal/[slug]/member/AmandaOwnerDashboard.module.css",
         "lib/amanda-catherine/course-resources.ts"
       ],
       "sourceContracts": [
+        {
+          "path": "clients/amanda-catherine/client.json",
+          "mustContain": [
+            "TheArchitect1111/ea-payments",
+            "clients/amanda-catherine",
+            "https://amandacatherine.ca",
+            "/portal/amanda-catherine",
+            "amanda-catherine-4",
+            "ea-payments",
+            "amanda-catherine-preview",
+            "retiredVercelProjects"
+          ]
+        },
+        {
+          "path": "clients/amanda-catherine/assets.json",
+          "mustContain": [
+            "public/amanda-catherine",
+            "lib/amanda-catherine/course-resources.ts",
+            "vercel-blob",
+            "authoritative Amanda asset map"
+          ]
+        },
+        {
+          "path": "lib/canonical-project-registry.ts",
+          "mustContain": [
+            "clients/amanda-catherine",
+            "amanda-catherine-4",
+            "The only portal is /portal/amanda-catherine",
+            "retired historical Vercel projects"
+          ],
+          "mustNotContain": [
+            "vercelProjects: ['amanda-catherine-preview', 'ea-payments']",
+            "The website and portal are separate production surfaces"
+          ]
+        },
+        {
+          "path": "app/portal/amanda/page.tsx",
+          "mustContain": [
+            "redirect('/portal/amanda-catherine')"
+          ]
+        },
         {
           "path": "app/portal/amanda-catherine/page.tsx",
           "mustContain": [
