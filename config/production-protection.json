@@ -40,7 +40,7 @@
           "mustContain": [
             "if (isAdministrator)",
             "<AmandaMemberHome",
-            "premium branded shell"
+            "complete branded shell"
           ],
           "mustNotContain": [
             "<PortalShell"
