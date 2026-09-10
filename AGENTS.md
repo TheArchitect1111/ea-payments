@@ -24,3 +24,29 @@ Use the structural layer first, then open only the source files required to veri
 
 Do not require the optional LLM-enriched `--deep` graph for ordinary work. Use the deterministic local graph by default to avoid unnecessary model cost.
 <!-- GRAFT:END -->
+
+<!-- SPEC-KIT:START -->
+## EA Spec Kit governance
+
+This repository uses GitHub Spec Kit conventions as the governance and convergence layer for production-impacting work. The pinned compatibility target is Spec Kit v1.0.5.
+
+Before a material implementation:
+
+1. Read `.specify/memory/constitution.md` and treat it as mandatory.
+2. Identify the authoritative project/client source of truth.
+3. Define observable acceptance criteria, protected invariants, rollback conditions, and production verification before changing production behavior.
+4. Use `.specify/templates/spec-template.md`, `.specify/templates/plan-template.md`, and `.specify/templates/tasks-template.md` when creating Spec Kit artifacts.
+5. Use Graft for repository context and blast radius, then implement the smallest safe change.
+6. Run the repository's existing CI and EA production gates relevant to the change.
+7. Converge: if deployed behavior fails any acceptance criterion, append corrective work and continue implementation + verification when a safe path exists.
+
+Completion vocabulary is strict:
+- IMPLEMENTED means source work is complete.
+- DEPLOYED means the intended commit is available on the target environment.
+- VERIFIED means production evidence satisfies every applicable acceptance criterion.
+- DONE requires VERIFIED plus no unresolved blocking regression.
+
+Never report DONE merely because code was edited, committed, merged, built, or returned HTTP 200.
+
+See `SPEC-KIT-INTEGRATION.md` for the repository workflow and bootstrap details.
+<!-- SPEC-KIT:END -->

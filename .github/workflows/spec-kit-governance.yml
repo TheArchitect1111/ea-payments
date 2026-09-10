@@ -1,0 +1,47 @@
+name: Spec Kit Governance
+
+on:
+  pull_request:
+    paths:
+      - 'AGENTS.md'
+      - 'SPEC-KIT-INTEGRATION.md'
+      - '.specify/**'
+      - '.github/workflows/spec-kit-governance.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-spec-kit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install pinned Spec Kit CLI
+        run: python -m pip install --disable-pip-version-check 'specify-cli==1.0.5'
+
+      - name: Verify Spec Kit CLI
+        run: specify version
+
+      - name: Verify EA governance artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s .specify/memory/constitution.md
+          test -s .specify/templates/spec-template.md
+          test -s .specify/templates/plan-template.md
+          test -s .specify/templates/tasks-template.md
+          test -s SPEC-KIT-INTEGRATION.md
+          grep -q 'Production proof is required' .specify/memory/constitution.md
+          grep -q 'Converge until the specification is satisfied' .specify/memory/constitution.md
+          grep -q 'Spec Kit v1.0.5' AGENTS.md
+          grep -q 'DONE requires VERIFIED' AGENTS.md
+          echo 'EA Spec Kit governance artifacts verified.'
