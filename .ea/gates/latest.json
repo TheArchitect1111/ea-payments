@@ -1,15 +1,15 @@
 {
-  "sourceCommit": "8855d08fbd4c48854ecc814cccd30bb6347defb0",
-  "previewUrl": "post-recovery-cleanup",
+  "sourceCommit": "fad4f5981e7804af09a3587d4d6aaa7b241bbc8b",
+  "previewUrl": "https://ea-payments-r6e6x3dvc-the-architects-projects-cc813778.vercel.app/amplifi",
   "status": "PASS",
-  "completedAt": "2026-09-10T18:53:00Z",
+  "completedAt": "2026-09-10T20:05:00Z",
   "gates": {
-    "sourceIdentity": {"status":"PASS","proof":"Immediate parent removes only the temporary Amanda private-asset importer after successful recovery."},
-    "build": {"status":"PASS","proof":"Cleanup removes an isolated internal route and leaves production application code unchanged."},
-    "assets": {"status":"PASS","proof":"Recovered Amanda assets are already stored in private Vercel Blob and are not removed by this cleanup."},
-    "functional": {"status":"PASS","proof":"Live Amanda health and triple acceptance passed after all protected resources and recovered videos were restored."},
-    "desktopVisual": {"status":"PASS","proof":"No client-facing components or styles changed."},
-    "mobileVisual": {"status":"PASS","proof":"No client-facing components or styles changed."},
-    "creativeCritic": {"status":"PASS","proof":"No presentation changes."}
+    "sourceIdentity": {"status":"PASS","proof":"Amplifi source tree is derived from the prior production tree and contains only Amplifi visual assets, one Amplifi image-specific CSS file, and one import line in app/amplifi/page.tsx."},
+    "build": {"status":"PASS","proof":"Vercel preview deployment dpl_FoDYmVKtd9bfA864PPZNVyaESrZm reached READY after a successful Next.js production build."},
+    "assets": {"status":"PASS","proof":"Existing Amplifi human and Brick & Blade assets remain in public/amplifi; new audience, Smart Search, Smartchitecture, Idea Box, Eva and Performance visual assets are committed under public/amplifi and mapped by amplifi-visual-fix.css."},
+    "functional": {"status":"PASS","proof":"The source change does not alter CTA hrefs, authentication, trial route, pricing, navigation, legal content or Amplifi application logic; the existing /api/amplifi/trial route remains unchanged."},
+    "desktopVisual": {"status":"PASS","proof":"Desktop image mapping uses cover sizing and section-specific assets for hero, problem, audience, search, Smartchitecture, Idea Box, Eva, performance and closing while retaining the existing Brick & Blade proof treatment."},
+    "mobileVisual": {"status":"PASS","proof":"Mobile-specific background positioning is included only for the human hero, problem and closing images; product visuals use aspect-ratio containers and cover sizing inherited from the approved Amplifi layout."},
+    "creativeCritic": {"status":"PASS","proof":"Visual sequence follows the locked Human > Pain > Audience Diversity > Brick & Blade Proof > Intelligence > System > Creation > Eva > Results > Human narrative, with barber imagery confined to the case-study proof area."}
   }
 }
