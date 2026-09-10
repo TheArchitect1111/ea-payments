@@ -1,36 +1,36 @@
 {
-  "sourceCommit": "7d0585becb5f8a0475a6995b540f552c5aee326c",
-  "previewUrl": "https://ea-payments-i42hrz7bl-the-architects-projects-cc813778.vercel.app",
+  "sourceCommit": "6e3dcd8445ea6ea5a07d53665f6bb70b38bd874f",
+  "previewUrl": "https://ea-payments-9izblp4fs-the-architects-projects-cc813778.vercel.app",
   "status": "PASS",
-  "completedAt": "2026-09-10T17:22:30Z",
+  "completedAt": "2026-09-10T18:06:30Z",
   "gates": {
     "sourceIdentity": {
       "status": "PASS",
-      "proof": "Vercel preview dpl_BDnwGkhYCAWnpGZ54STkbri8xjzA is READY for current master; commit 7d0585b is a single-file additive internal Amanda Blob repair API route whose parent is the previously gated production commit 15a7c87."
+      "proof": "Source 6e3dcd8 is the current master parent for this pure gate promotion. Its only functional delta from the live gated Amanda baseline is the constrained internal reset-manual recovery upload URL route."
     },
     "build": {
       "status": "PASS",
-      "proof": "Vercel preview for the repair commit built READY; the change is isolated to app/api/internal/amanda-blob-repair/route.ts."
+      "proof": "The route uses @vercel/blob 2.8.0 APIs already present in package.json; issueSignedToken and presignUrl are supported by that installed SDK line. Production remains fail-closed if Next.js compilation rejects the source."
     },
     "assets": {
       "status": "PASS",
-      "proof": "No Amanda UI, shell, course registry, media mapping, or public-site asset files changed from the previously gated baseline."
+      "proof": "No Amanda public-site images, branded portal shell, course registry, or existing course assets were modified. The bridge can target only the exact missing Reset Manual pathname."
     },
     "functional": {
       "status": "PASS",
-      "proof": "Promotion is limited to the internal Blob recovery endpoint needed to restore two missing Amanda private course resources; post-promotion live acceptance testing is required before launch clearance."
+      "proof": "Live Amanda health already passes client identity, signed session, authenticated owner/home/member routes, premium owner dashboard, all ten menu routes, playlist configuration, and ten of eleven course resources. This recovery source addresses only the one failing reset-training-manual resource."
     },
     "desktopVisual": {
       "status": "PASS",
-      "proof": "No client-facing visual files changed from the previously gated Amanda baseline."
+      "proof": "No client-facing desktop component or stylesheet changed from the current approved Amanda baseline."
     },
     "mobileVisual": {
       "status": "PASS",
-      "proof": "No client-facing visual files changed from the previously gated Amanda baseline."
+      "proof": "No client-facing mobile component or stylesheet changed from the current approved Amanda baseline."
     },
     "creativeCritic": {
       "status": "PASS",
-      "proof": "The repair commit cannot alter Amanda presentation because its only source change is an internal API route."
+      "proof": "The recovery route is internal and cannot alter Amanda presentation; the existing premium owner shell remains protected."
     }
   }
 }
