@@ -1,36 +1,36 @@
 {
-  "sourceCommit": "28fe765c98c533722f61a267367524ff144dee6d",
-  "previewUrl": "https://ea-payments-pl7ubklk4-the-architects-projects-cc813778.vercel.app",
+  "sourceCommit": "4676ed5cf13868a8d8a35051ea458ee775a599d3",
+  "previewUrl": "https://ea-payments-51lexqzhm-the-architects-projects-cc813778.vercel.app",
   "status": "PASS",
-  "completedAt": "2026-09-11T19:12:00.000Z",
+  "completedAt": "2026-09-11T19:36:00.000Z",
   "gates": {
     "sourceIdentity": {
       "status": "PASS",
-      "proof": "merged-source:28fe765c98c533722f61a267367524ff144dee6d; preview-source:bd3fb27ea281b35abf1d2b6fdde275542396afdf; git-compare:0-files-tree-equivalent"
+      "proof": "merged-source:4676ed5cf13868a8d8a35051ea458ee775a599d3; preview-source:8e46c00a83a9268cb352e7f4c5607af61572a1b6; git-compare:0-files-tree-equivalent"
     },
     "build": {
       "status": "PASS",
-      "proof": "CI run 34637195824 success; Graft Context run 34637195760 success; EA Client Protection Gate run 34637195775 success; Vercel preview READY"
+      "proof": "CI run 34639216172 success; Graft Context run 34639216141 success; EA Client Protection Gate run 34639216302 success; Vercel preview dpl_rbAciTNYv6Ecgqzd6V6S6wuKQfcP READY"
     },
     "assets": {
       "status": "PASS",
-      "proof": "Run 1 changes are recovery/API/operations logic only; no client presentation assets changed; full deploy smoke passed"
+      "proof": "Live customer recovery journeys passed for EA, Amplifi, Amanda public, Amanda portal entry, and CPR with load-aware broken-image detection and HTTP image failure detection"
     },
     "functional": {
       "status": "PASS",
-      "proof": "Recovery Orchestrator safety contract passed in CI: deterministic repair mapping, provider/unknown escalation, missing-authority block, shared-platform escalation, rollback and automation-permission fail-closed behavior"
+      "proof": "Recovery Monitoring contract passed 12/12; five-minute synthetic monitor feeds Run 1 Recovery Orchestrator in dry-run mode; signed external monitoring signal bridge installed; hourly Playwright journey proof installed"
     },
     "desktopVisual": {
       "status": "PASS",
-      "proof": "No client presentation-layer files changed; full Playwright deploy smoke passed"
+      "proof": "No presentation-layer files changed; live 1440px browser journeys passed across five production targets"
     },
     "mobileVisual": {
       "status": "PASS",
-      "proof": "No client presentation-layer files changed; full Playwright deploy smoke passed"
+      "proof": "No presentation-layer files changed; existing full deploy smoke and client protection gates passed"
     },
     "creativeCritic": {
       "status": "PASS",
-      "proof": "Run 1 is recovery/governance infrastructure; no creative visual delta"
+      "proof": "Run 2 is monitoring/recovery infrastructure; no creative presentation delta"
     }
   }
 }
