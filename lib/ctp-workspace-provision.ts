@@ -8,6 +8,10 @@ import { scheduleCtpProductionProvision } from '@/lib/ctp-production-provision';
 import { scheduleCtpProduction } from '@/lib/ctp-production-run';
 import { publicPortalLoginUrl, publicPortalUrl } from '@/lib/ctp-portal-host';
 import {
+  registerCtpCreatedControlPlane,
+  registerCtpWorkspaceControlPlane,
+} from '@/lib/control-plane-bridge';
+import {
   opportunityDashboardPublicUrl,
 } from '@/lib/ctp-opportunity-routes';
 import { sendCtpExecutiveEmailForSubmission } from '@/lib/ctp-executive-email-send';
@@ -65,7 +69,20 @@ async function emitWorkspacePulse(
 async function markWorkspaceActive(
   submission: CtpSubmission,
   portalSlug: string,
-): Promise<void> {
+): Promise<{ ok: boolean; error?: string }> {
+  const portalUrl = publicPortalUrl(portalSlug);
+  const bridge = await registerCtpWorkspaceControlPlane(submission, portalUrl);
+  if (!bridge.ok) {
+    await updateCtpSubmission(submission.id, { workspaceStatus: 'Failed' });
+    await emitWorkspacePulse(
+      submission,
+      'ctp.workspace.failed',
+      `Control Plane registration failed before workspace activation: ${bridge.error || 'unknown error'}`,
+      'critical',
+    );
+    return { ok: false, error: bridge.error || 'Control Plane registration failed.' };
+  }
+
   await updateCtpSubmission(submission.id, {
     portalSlug,
     workspaceStatus: 'Active',
@@ -74,7 +91,7 @@ async function markWorkspaceActive(
   await emitWorkspacePulse(
     { ...submission, portalSlug },
     'ctp.workspace.active',
-    `Portal ready at ${publicPortalUrl(portalSlug)}`,
+    `Portal ready at ${portalUrl}`,
   );
 
   try {
@@ -89,6 +106,7 @@ async function markWorkspaceActive(
   // Production provision includes website + TenantClientConfig persistence + site↔portal relink.
   scheduleCtpProductionProvision(submission.id);
   scheduleCtpProduction(submission.id);
+  return { ok: true };
 }
 
 export async function runCtpWorkspaceProvision(
@@ -100,6 +118,19 @@ export async function runCtpWorkspaceProvision(
   }
 
   if (submission.workspaceStatus === 'Active') {
+    if (!submission.portalSlug) {
+      return { ok: false, error: 'Active workspace is missing its portal slug.' };
+    }
+    const bridge = await registerCtpWorkspaceControlPlane(
+      submission,
+      publicPortalUrl(submission.portalSlug),
+    );
+    if (!bridge.ok) {
+      return {
+        ok: false,
+        error: `Active workspace is not registered in the EA Control Plane: ${bridge.error || 'unknown error'}`,
+      };
+    }
     return { ok: true, portalSlug: submission.portalSlug };
   }
 
@@ -109,6 +140,21 @@ export async function runCtpWorkspaceProvision(
 
   if (submission.workspaceStatus !== 'Pending' && submission.workspaceStatus !== 'Failed') {
     return { ok: false, error: `Cannot provision from workspace status ${submission.workspaceStatus}.` };
+  }
+
+  const registration = await registerCtpCreatedControlPlane(submission);
+  if (!registration.ok) {
+    await updateCtpSubmission(submissionId, { workspaceStatus: 'Failed' });
+    await emitWorkspacePulse(
+      submission,
+      'ctp.workspace.failed',
+      `Control Plane identity registration failed: ${registration.error || 'unknown error'}`,
+      'critical',
+    );
+    return {
+      ok: false,
+      error: `Control Plane identity registration required before provisioning: ${registration.error || 'unknown error'}`,
+    };
   }
 
   let client = await getClientByEmail(submission.email);
@@ -137,7 +183,8 @@ export async function runCtpWorkspaceProvision(
   }
 
   if (client.portalSlug && client.portalAccessStatus === 'Active') {
-    await markWorkspaceActive(submission, client.portalSlug);
+    const activated = await markWorkspaceActive(submission, client.portalSlug);
+    if (!activated.ok) return { ok: false, error: activated.error };
     return { ok: true, portalSlug: client.portalSlug };
   }
 
@@ -207,7 +254,8 @@ export async function runCtpWorkspaceProvision(
     }
   }
 
-  await markWorkspaceActive(submission, slug);
+  const activated = await markWorkspaceActive(submission, slug);
+  if (!activated.ok) return { ok: false, error: activated.error };
   return { ok: true, portalSlug: slug };
 }
 

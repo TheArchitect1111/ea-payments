@@ -5,6 +5,7 @@
 import crypto from 'node:crypto';
 import { parseEACPCommand, type EACPLaunchInput } from '@/lib/eacp-launch';
 import { createProjectContext as createProjectContextPure } from '@/lib/factory-project-context.mjs';
+import { registerFactoryProjectControlPlane } from '@/lib/control-plane-bridge';
 import {
   getFactoryProject,
   listFactoryProjects,
@@ -207,6 +208,38 @@ export async function createFactoryProject(
         'Could not save the project. Check Creative Studio / Airtable, then try Launch again.',
     };
   }
+
+  const bridge = await registerFactoryProjectControlPlane(project);
+  if (!bridge.ok) {
+    const failedAt = new Date().toISOString();
+    const failed: FactoryProject = {
+      ...project,
+      pipelineStatus: 'FAILED',
+      updatedAt: failedAt,
+      error: `Control Plane registration failed: ${bridge.error || 'unknown error'}`,
+      context: project.context
+        ? { ...project.context, pipelineStatus: 'FAILED', updatedAt: failedAt }
+        : project.context,
+      activity: [
+        ...project.activity,
+        {
+          at: failedAt,
+          from: 'CREATED',
+          to: 'FAILED',
+          worker: 'control-plane-bridge',
+          detail: bridge.error || 'Control Plane registration failed',
+        },
+      ].slice(-100),
+    };
+    await saveFactoryProject(failed);
+    return {
+      ok: false,
+      missing: ['control-plane'],
+      correction:
+        'Project was preserved but not queued because EA could not register its canonical Control Plane identity. Resolve the Control Plane connection and retry.',
+    };
+  }
+
   return { ok: true, project };
 }
 
