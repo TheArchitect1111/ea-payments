@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdminActionFromRequest } from '@/lib/admin-session-guard';
 import { publishSelectedFactoryConcept } from '@/lib/factory-publish-selected-concept';
+import { getFactoryProject } from '@/lib/factory-project-store';
+import { registerFactoryWiredControlPlane } from '@/lib/control-plane-bridge';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -31,6 +33,11 @@ export async function POST(req: NextRequest) {
   const projectId = String(body.projectId || '').trim();
   if (!projectId) {
     return NextResponse.json({ error: 'projectId is required.' }, { status: 400 });
+  }
+
+  const project = await getFactoryProject(projectId);
+  if (!project) {
+    return NextResponse.json({ error: 'Factory project not found.' }, { status: 404 });
   }
 
   const result = await publishSelectedFactoryConcept({
@@ -64,6 +71,31 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  const bridge = await registerFactoryWiredControlPlane({
+    project,
+    portalUrl: result.surfaces?.portalHomeUrl,
+    productionUrl: result.website?.siteUrl || result.surfaces?.siteUrl,
+    websiteStatus: result.websiteStatus,
+  });
+  if (!bridge.ok) {
+    return NextResponse.json(
+      {
+        error:
+          'Factory surfaces were wired, but EA refused to declare the operation complete because Control Plane acceptance registration failed.',
+        correction:
+          'Preserve the wired surfaces. Resolve Control Plane registration, then rerun verification before public promotion.',
+        projectId,
+        portalSlug: result.portalSlug,
+        websiteStatus: result.websiteStatus,
+        website: result.website,
+        portal: result.portal,
+        surfaces: result.surfaces,
+        controlPlaneError: bridge.error,
+      },
+      { status: 503 },
+    );
+  }
+
   return NextResponse.json({
     ok: true,
     projectId,
@@ -76,5 +108,10 @@ export async function POST(req: NextRequest) {
     portal: result.portal,
     surfaces: result.surfaces,
     directorReview: result.directorReview,
+    controlPlane: {
+      manifestRecordId: bridge.manifestRecordId,
+      governanceRecordId: bridge.governanceRecordId,
+      acceptanceRecordId: bridge.acceptanceRecordId,
+    },
   });
 }
