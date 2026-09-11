@@ -104,17 +104,24 @@ async function caseExecutionFlagFailsClosed() {
   else process.env.EA_RECOVERY_EXECUTION_ENABLED = previous;
 }
 
-const previous = process.env.EA_RECOVERY_EXECUTION_ENABLED;
-process.env.EA_RECOVERY_EXECUTION_ENABLED = 'true';
-try {
-  await caseSuccessfulRepair();
-  await caseFailedRepairRollsBack();
-  await caseRollbackFailureRemainsUnhealthy();
-  await caseProviderEscalates();
-  await caseSharedPlatformFailsClosed();
-  await caseExecutionFlagFailsClosed();
-  console.log('Recovery Orchestrator Run 3 certification: PASS');
-} finally {
-  if (previous === undefined) delete process.env.EA_RECOVERY_EXECUTION_ENABLED;
-  else process.env.EA_RECOVERY_EXECUTION_ENABLED = previous;
+async function main() {
+  const previous = process.env.EA_RECOVERY_EXECUTION_ENABLED;
+  process.env.EA_RECOVERY_EXECUTION_ENABLED = 'true';
+  try {
+    await caseSuccessfulRepair();
+    await caseFailedRepairRollsBack();
+    await caseRollbackFailureRemainsUnhealthy();
+    await caseProviderEscalates();
+    await caseSharedPlatformFailsClosed();
+    await caseExecutionFlagFailsClosed();
+    console.log('Recovery Orchestrator Run 3 certification: PASS');
+  } finally {
+    if (previous === undefined) delete process.env.EA_RECOVERY_EXECUTION_ENABLED;
+    else process.env.EA_RECOVERY_EXECUTION_ENABLED = previous;
+  }
 }
+
+main().catch((error) => {
+  console.error(error);
+  process.exit(1);
+});
