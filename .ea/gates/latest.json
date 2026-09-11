@@ -1,15 +1,36 @@
 {
-  "sourceCommit": "4e130d960f3357f4fdc976b493aa25b5e587860d",
-  "previewUrl": "production-repair",
+  "sourceCommit": "836e25433a33424a2ecb6eca975a9d2c3847679c",
+  "previewUrl": "https://ea-payments-r12lrlv91-the-architects-projects-cc813778.vercel.app",
   "status": "PASS",
-  "completedAt": "2026-09-10T20:21:00Z",
+  "completedAt": "2026-09-11T14:22:49.466Z",
   "gates": {
-    "sourceIdentity": {"status":"PASS","proof":"The repair is limited to app/amplifi/page.tsx and app/amplifi/amplifi-visual-fix.css, changing only Amplifi visual rendering from CSS backgrounds to explicit image elements."},
-    "build": {"status":"PASS","proof":"The source uses standard JSX img elements and existing static assets already served successfully by production."},
-    "assets": {"status":"PASS","proof":"All referenced Amplifi visual assets remain in public/amplifi and production asset URLs return HTTP 200."},
-    "functional": {"status":"PASS","proof":"CTA hrefs, authentication, trial route, pricing, navigation, legal content and Amplifi application logic are unchanged."},
-    "desktopVisual": {"status":"PASS","proof":"Explicit responsive image elements use object-fit cover with section-specific object positioning, eliminating dependency on background-image rendering."},
-    "mobileVisual": {"status":"PASS","proof":"Mobile-specific object positions preserve hero, problem and closing crops while every visual is now a real image element instead of a background-only block."},
-    "creativeCritic": {"status":"PASS","proof":"The locked Human > Pain > Audience Diversity > Brick & Blade Proof > Intelligence > System > Creation > Eva > Results > Human sequence and approved page structure are unchanged."}
+    "sourceIdentity": {
+      "status": "PASS",
+      "proof": "836e25433a33424a2ecb6eca975a9d2c3847679c,836e25433a33424a2ecb6eca975a9d2c3847679c"
+    },
+    "build": {
+      "status": "PASS",
+      "proof": "vercel-ready-source:836e25433a33424a2ecb6eca975a9d2c3847679c"
+    },
+    "assets": {
+      "status": "PASS",
+      "proof": "desktop:13 mobile:13"
+    },
+    "functional": {
+      "status": "PASS",
+      "proof": "desktop:200 mobile:200"
+    },
+    "desktopVisual": {
+      "status": "PASS",
+      "proof": "sha256:632d254f44caf9367bfe3f5f85270e7320c91b28ff947b68b9c47ce01d6a3b24"
+    },
+    "mobileVisual": {
+      "status": "PASS",
+      "proof": "sha256:84ccf1c295a2c722523d7bb8c6c59bafa2d8b37676fc2c0da0d894d072717e4d"
+    },
+    "creativeCritic": {
+      "status": "PASS",
+      "proof": "objective-visual-critic:v1"
+    }
   }
 }
