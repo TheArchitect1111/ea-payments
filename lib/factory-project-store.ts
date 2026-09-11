@@ -80,6 +80,50 @@ export type FactoryActivity = {
   detail?: string;
 };
 
+export type FactoryFulfillmentRecord = {
+  version: 1;
+  status: 'verified' | 'review_required' | 'blocked';
+  projectId: string;
+  client: string;
+  fileCabinet: {
+    canonicalPath: string;
+    templatePath: string;
+    handoffReady: boolean;
+  };
+  site: {
+    status: 'live' | 'draft_only' | 'skipped' | 'blocked';
+    url?: string;
+    previewPath?: string;
+  };
+  portal: {
+    status: 'provisioned' | 'skipped' | 'blocked';
+    url?: string;
+    loginUrl?: string;
+    slug?: string;
+    organizationId?: string;
+    accessProvisioned: boolean;
+  };
+  controlPlane: {
+    verified: boolean;
+    manifestRecordId?: string;
+    governanceRecordId?: string;
+    acceptanceRecordId?: string;
+  };
+  qa: {
+    verified: boolean;
+    directorGateVerified: boolean;
+    loginCtaPresent: boolean;
+    memberHomeSaved: boolean;
+  };
+  monitoring: {
+    registered: boolean;
+    targets: Array<{ target: string; url: string; route?: string }>;
+  };
+  blockers: string[];
+  completedAt?: string;
+  updatedAt: string;
+};
+
 /** Persisted ProjectContext blob (see lib/factory-project-context.ts). */
 export type FactoryProjectContextBlob = {
   schemaVersion: number;
@@ -137,6 +181,8 @@ export type FactoryProject = {
   context?: FactoryProjectContextBlob;
   /** Compat mirror of latest intake output payload. */
   intake?: FactoryIntakeRecord;
+  /** Scale Run 1: one authoritative completion packet for the client system. */
+  fulfillment?: FactoryFulfillmentRecord;
   error?: string;
   createdAt: string;
   updatedAt: string;
