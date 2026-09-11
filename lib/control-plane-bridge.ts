@@ -15,6 +15,15 @@ export type ControlPlaneBridgeResult = {
   acceptanceRecordId?: string;
 };
 
+export type ControlPlaneReleaseState = {
+  ok: boolean;
+  ready: boolean;
+  error?: string;
+  reasons: string[];
+  manifestRecordId?: string;
+  governanceRecordId?: string;
+};
+
 type CpRecord = {
   id: string;
   fields: Record<string, unknown>;
@@ -125,6 +134,11 @@ function appendEvidence(existing: unknown, addition: string): string {
 function preferExisting(existing: unknown, proposed: unknown): unknown {
   if (existing !== undefined && existing !== null && String(existing).trim() !== '') return existing;
   return proposed;
+}
+
+function fieldText(record: CpRecord | null, field: string): string {
+  const raw = record?.fields[field];
+  return typeof raw === 'string' ? raw.trim() : '';
 }
 
 async function upsertManifest(input: BridgeInput): Promise<CpRecord> {
@@ -258,6 +272,65 @@ async function register(input: BridgeInput): Promise<ControlPlaneBridgeResult> {
     }
     console.error('[control-plane-bridge] fail-closed', message);
     return { ok: false, error: message };
+  }
+}
+
+export async function getControlPlaneReleaseState(name: string): Promise<ControlPlaneReleaseState> {
+  if (!apiKey()) {
+    const error = 'Control Plane release check cannot run because AIRTABLE_API_KEY/AIRTABLE_PAT is missing.';
+    return enforced()
+      ? { ok: false, ready: false, error, reasons: [error] }
+      : { ok: true, ready: false, error: `Non-production warning: ${error}`, reasons: [error] };
+  }
+
+  try {
+    const manifest = await findByPrimary('Universal Manifest', 'Manifest Name', name.trim());
+    const governance = await findByPrimary('Release Governance', 'System / Release Target', name.trim());
+    const reasons: string[] = [];
+
+    if (!manifest) reasons.push('Universal Manifest identity is missing.');
+    if (!governance) reasons.push('Release Governance record is missing.');
+
+    if (manifest) {
+      const infrastructure = fieldText(manifest, 'Infrastructure State');
+      if (infrastructure !== 'Resolved') {
+        reasons.push(`Infrastructure State is ${infrastructure || 'unset'}, not Resolved.`);
+      }
+      const approval = fieldText(manifest, 'Approval State');
+      if (approval !== 'Current Approved' && approval !== 'Verified') {
+        reasons.push(`Approval State is ${approval || 'unset'}, not Current Approved/Verified.`);
+      }
+    }
+
+    if (governance) {
+      const authorization = fieldText(governance, 'Change Authorization');
+      const baseline = fieldText(governance, 'Approved Baseline');
+      const rollback = fieldText(governance, 'Rollback Target');
+      const build = fieldText(governance, 'CI / Build Gate');
+      const monitoring = fieldText(governance, 'Monitoring Gate');
+      const readiness = fieldText(governance, 'Release Readiness');
+
+      if (authorization !== 'Approved') reasons.push(`Change Authorization is ${authorization || 'unset'}, not Approved.`);
+      if (baseline !== 'Verified') reasons.push(`Approved Baseline is ${baseline || 'unset'}, not Verified.`);
+      if (rollback !== 'Known') reasons.push(`Rollback Target is ${rollback || 'unset'}, not Known.`);
+      if (build !== 'Verified') reasons.push(`CI / Build Gate is ${build || 'unset'}, not Verified.`);
+      if (monitoring !== 'Verified') reasons.push(`Monitoring Gate is ${monitoring || 'unset'}, not Verified.`);
+      if (readiness !== 'Ready') reasons.push(`Release Readiness is ${readiness || 'unset'}, not Ready.`);
+    }
+
+    return {
+      ok: true,
+      ready: reasons.length === 0,
+      reasons,
+      manifestRecordId: manifest?.id,
+      governanceRecordId: governance?.id,
+    };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown Control Plane release-check error.';
+    if (!enforced()) {
+      return { ok: true, ready: false, error: `Non-production warning: ${message}`, reasons: [message] };
+    }
+    return { ok: false, ready: false, error: message, reasons: [message] };
   }
 }
 
