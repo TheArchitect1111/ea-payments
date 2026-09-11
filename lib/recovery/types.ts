@@ -36,4 +36,17 @@ export type RecoveryAuthority = {
 export type RecoveryDecision = { disposition: RecoveryDisposition; action?: RecoveryActionId; reasons: string[]; authority: RecoveryAuthority | null; safeToMutate: boolean };
 export type RecoveryVerification = { ok: boolean; status?: number; route?: string; detail: string };
 export type RecoveryExecution = { attempted: boolean; mutated: boolean; action?: RecoveryActionId; detail: string };
-export type RecoveryOutcome = { runId: string; mode: RecoveryRunMode; signal: RecoverySignal; decision: RecoveryDecision; execution: RecoveryExecution; verification: RecoveryVerification; evidenceRecorded: boolean; startedAt: string; completedAt: string };
+export type RecoveryOutcome = {
+  runId: string;
+  mode: RecoveryRunMode;
+  signal: RecoverySignal;
+  decision: RecoveryDecision;
+  execution: RecoveryExecution;
+  repairVerification?: RecoveryVerification;
+  rollback?: RecoveryExecution;
+  rollbackVerification?: RecoveryVerification;
+  verification: RecoveryVerification;
+  evidenceRecorded: boolean;
+  startedAt: string;
+  completedAt: string;
+};
