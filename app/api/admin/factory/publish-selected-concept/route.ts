@@ -2,7 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAdminActionFromRequest } from '@/lib/admin-session-guard';
 import { publishSelectedFactoryConcept } from '@/lib/factory-publish-selected-concept';
 import { getFactoryProject } from '@/lib/factory-project-store';
-import { registerFactoryWiredControlPlane } from '@/lib/control-plane-bridge';
+import {
+  getControlPlaneReleaseState,
+  registerFactoryWiredControlPlane,
+} from '@/lib/control-plane-bridge';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -10,6 +13,7 @@ export const maxDuration = 60;
 
 /**
  * POST — Session 3 wire: selected concept → portal chassis + draft site (+ live if ED + unquarantined).
+ * Run 9 adds a fail-closed Control Plane release check before any public-capable wiring.
  */
 export async function POST(req: NextRequest) {
   const auth = await requireAdminActionFromRequest(req, 'admin:manage');
@@ -38,6 +42,27 @@ export async function POST(req: NextRequest) {
   const project = await getFactoryProject(projectId);
   if (!project) {
     return NextResponse.json({ error: 'Factory project not found.' }, { status: 404 });
+  }
+
+  const releaseState = await getControlPlaneReleaseState(project.client);
+  if (!releaseState.ok || !releaseState.ready) {
+    return NextResponse.json(
+      {
+        error: 'Control Plane release gates are not ready for this client.',
+        correction:
+          'The selected concept and project remain preserved. Resolve the listed Control Plane gates before wiring or public promotion.',
+        projectId,
+        client: project.client,
+        controlPlane: {
+          ready: false,
+          reasons: releaseState.reasons,
+          error: releaseState.error,
+          manifestRecordId: releaseState.manifestRecordId,
+          governanceRecordId: releaseState.governanceRecordId,
+        },
+      },
+      { status: releaseState.ok ? 409 : 503 },
+    );
   }
 
   const result = await publishSelectedFactoryConcept({
@@ -109,6 +134,7 @@ export async function POST(req: NextRequest) {
     surfaces: result.surfaces,
     directorReview: result.directorReview,
     controlPlane: {
+      ready: true,
       manifestRecordId: bridge.manifestRecordId,
       governanceRecordId: bridge.governanceRecordId,
       acceptanceRecordId: bridge.acceptanceRecordId,
