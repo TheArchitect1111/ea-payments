@@ -73,11 +73,13 @@ export async function recordRecoveryEvidence(outcome: RecoveryOutcome): Promise<
   if (!apiKey()) return false;
   try {
     const primary = `Recovery ${outcome.runId}`;
+    const rollbackLine = outcome.rollback ? `Rollback: ${outcome.rollback.detail}` : 'Rollback: not required';
+    const rollbackVerificationLine = outcome.rollbackVerification ? `Rollback verification: ${outcome.rollbackVerification.detail}` : 'Rollback verification: not required';
     await writeEvidence({
       'Evidence Record': primary,
-      'Evidence Type': outcome.decision.disposition === 'auto_repair' ? 'Fallback' : 'Owner Handoff',
+      'Evidence Type': outcome.rollback?.attempted ? 'Rollback' : outcome.decision.disposition === 'auto_repair' ? 'Fallback' : 'Owner Handoff',
       'System / Target': outcome.signal.target,
-      'Policy Decision': outcome.decision.disposition === 'auto_repair' ? 'Rollback' : 'Escalate',
+      'Policy Decision': outcome.rollback?.attempted ? 'Rollback' : outcome.decision.disposition === 'auto_repair' ? 'Allow' : 'Escalate',
       'Owner': 'EA Operations',
       'Source Evidence': [
         `Failure class: ${outcome.signal.failureClass}`,
@@ -87,11 +89,14 @@ export async function recordRecoveryEvidence(outcome: RecoveryOutcome): Promise<
         `Decision: ${outcome.decision.disposition}`,
         `Action: ${outcome.decision.action ?? 'none'}`,
         `Execution: ${outcome.execution.detail}`,
-        `Verification: ${outcome.verification.detail}`,
+        `Repair verification: ${outcome.repairVerification?.detail ?? outcome.verification.detail}`,
+        rollbackLine,
+        rollbackVerificationLine,
+        `Final verification: ${outcome.verification.detail}`,
       ].join('\n'),
       'Outcome': outcome.verification.ok && outcome.decision.disposition === 'auto_repair' ? 'Verified' : 'Conditional',
       'Evidence Date': outcome.completedAt,
-      'Audit Notes': `Recovery Orchestrator Run 1. ${outcome.decision.reasons.join(' | ')}`,
+      'Audit Notes': `Recovery Orchestrator certified loop. ${outcome.decision.reasons.join(' | ')}`,
       'Run 7 Verified': true,
     });
     return true;

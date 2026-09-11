@@ -36,6 +36,9 @@ jobs:
       - name: Verify Recovery Orchestrator safety contract
         run: npx tsx scripts/test-recovery-orchestrator.ts
 
+      - name: Certify Recovery Orchestrator self-healing loop
+        run: npx tsx scripts/test-recovery-certification.ts
+
       - name: Verify Recovery Monitoring contract
         run: node scripts/test-recovery-monitoring-contract.mjs
 
