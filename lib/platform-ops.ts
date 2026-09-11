@@ -9,6 +9,7 @@ import { productionSecretIssues } from '@/lib/integration-env';
 import { buildLaunchCommandCenterReport, type LaunchCommandCenterReport } from '@/lib/launch-command-center';
 import { monitoringConfigured } from '@/lib/monitoring';
 import { EA_PLATFORM_URL, canonicalPlatformOrigin } from '@/lib/platform-urls';
+import { recoveryOrchestratorStatus } from '@/lib/recovery/orchestrator';
 
 export type OpsSubsystemStatus = 'healthy' | 'degraded' | 'critical' | 'unknown' | 'not_configured';
 
@@ -30,6 +31,7 @@ export type PlatformOpsReport = {
   subsystems: PlatformOpsSubsystem[];
   agents: AgentHealth[];
   ai: ReturnType<typeof buildAIProviderHealthReport>;
+  recovery: ReturnType<typeof recoveryOrchestratorStatus>;
   monitoring: {
     sentryConfigured: boolean;
     glitchtipConfigured?: boolean;
@@ -98,6 +100,7 @@ export async function buildPlatformOpsReport(options?: { probeRoutes?: boolean; 
   const probeRoutes = options?.probeRoutes ?? process.env.PLATFORM_OPS_PROBE_ROUTES === 'true';
   const verifyBackup = options?.verifyBackup ?? true;
   const ai = buildAIProviderHealthReport();
+  const recovery = recoveryOrchestratorStatus();
 
   const [launchReport, backup, rawAgentHealth, amplifiMagnifi] = await Promise.all([
     buildLaunchCommandCenterReport(),
@@ -106,9 +109,6 @@ export async function buildPlatformOpsReport(options?: { probeRoutes?: boolean; 
     probeAmplifiMagnifiPortalReady(),
   ]);
 
-  // Older agents checked only OPENAI_API_KEY. Normalize the Command Center to the
-  // actual central gateway contract: any configured provider path makes AI-capable
-  // agents available. Individual execution still fails closed in runAIGateway.
   const agentHealth = rawAgentHealth.map((agent) => ai.available && agent.status === 'degraded'
     ? { ...agent, status: 'available' as const, details: `Central AI provider chain available. ${ai.summary}` }
     : agent);
@@ -121,6 +121,12 @@ export async function buildPlatformOpsReport(options?: { probeRoutes?: boolean; 
       name: 'AI provider chain',
       status: ai.available ? 'healthy' : 'critical',
       message: ai.available ? ai.summary : 'No usable AI provider path is configured.',
+    },
+    {
+      id: 'recovery',
+      name: 'Recovery Orchestrator',
+      status: recovery.installed ? 'healthy' : 'critical',
+      message: recovery.note,
     },
     amplifiMagnifiSubsystem(amplifiMagnifi),
   ];
@@ -146,6 +152,7 @@ export async function buildPlatformOpsReport(options?: { probeRoutes?: boolean; 
     subsystems,
     agents: agentHealth,
     ai,
+    recovery,
     monitoring: {
       sentryConfigured: monitoringConfigured(),
       glitchtipConfigured: monitoringConfigured(),
