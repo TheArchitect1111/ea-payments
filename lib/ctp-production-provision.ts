@@ -6,8 +6,8 @@
  * Requires portalSlug already on the submission.
  *
  * Flow:
- *   portalSlug known → website (if required) → TenantClientConfig
- *   → Control Plane registration → persist config → Pulse ready
+ *   portalSlug known → Control Plane release check → website (if required)
+ *   → TenantClientConfig → Control Plane acceptance → persist config → Pulse ready
  */
 import {
   buildTenantClientConfigFromCtp,
@@ -21,7 +21,10 @@ import {
 } from '@/lib/ctp-submissions';
 import { provisionWebsitePortalSite } from '@/lib/provision-website-portal';
 import { publicPortalUrl } from '@/lib/ctp-portal-host';
-import { registerCtpProductionControlPlane } from '@/lib/control-plane-bridge';
+import {
+  getControlPlaneReleaseState,
+  registerCtpProductionControlPlane,
+} from '@/lib/control-plane-bridge';
 import { emitPulseEvent } from '@/lib/pulse-bus';
 
 export type CtpProductionProvisionResult = {
@@ -48,6 +51,26 @@ async function persistTenantConfig(
   });
 }
 
+async function emitControlPlaneBlocked(
+  submission: CtpSubmission,
+  portalSlug: string,
+  detail: string,
+): Promise<void> {
+  await emitPulseEvent({
+    product: 'ea-platform',
+    type: 'ctp.production.blocked',
+    title: `CTP production blocked — ${submission.businessName}`,
+    detail,
+    priority: 'critical',
+    href: '/admin/operations',
+    objectId: submission.id,
+    metadata: {
+      ctpSubmissionId: submission.id,
+      portalSlug,
+    },
+  });
+}
+
 /**
  * Production provision from a CTP submission that already has a portalSlug.
  * Idempotent: safe to call when website/site already exist.
@@ -63,6 +86,20 @@ export async function runCtpProductionProvision(
   const portalSlug = submission.portalSlug?.trim().toLowerCase();
   if (!portalSlug) {
     return { ok: false, error: 'No portal slug' };
+  }
+
+  const releaseName = submission.businessName.trim() || submission.contactName.trim();
+  const releaseState = await getControlPlaneReleaseState(releaseName);
+  if (!releaseState.ok || !releaseState.ready) {
+    const detail = releaseState.reasons.length
+      ? releaseState.reasons.join(' | ')
+      : releaseState.error || 'Control Plane release readiness is unresolved.';
+    await emitControlPlaneBlocked(submission, portalSlug, detail);
+    return {
+      ok: false,
+      portalSlug,
+      error: `Control Plane release gates are not ready: ${detail}`,
+    };
   }
 
   let siteUrl: string | undefined;
@@ -114,20 +151,11 @@ export async function runCtpProductionProvision(
     productionUrl: siteUrl || config.website.siteUrl || undefined,
   });
   if (!bridge.ok) {
-    await emitPulseEvent({
-      product: 'ea-platform',
-      type: 'ctp.production.blocked',
-      title: `CTP production blocked — ${config.organization.name}`,
-      detail: `Control Plane acceptance registration failed: ${bridge.error || 'unknown error'}`,
-      priority: 'critical',
-      href: '/admin/operations',
-      objectId: submissionId,
-      metadata: {
-        ctpSubmissionId: submissionId,
-        portalSlug,
-        siteUrl: siteUrl ?? '',
-      },
-    });
+    await emitControlPlaneBlocked(
+      fresh,
+      portalSlug,
+      `Control Plane acceptance registration failed: ${bridge.error || 'unknown error'}`,
+    );
     return {
       ok: false,
       portalSlug,
