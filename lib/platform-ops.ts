@@ -1,5 +1,6 @@
 import { listAgents } from '@/lib/agents/registry';
 import type { AgentHealth } from '@/lib/agents/types';
+import { buildAIProviderHealthReport } from '@/lib/ai/provider-health';
 import {
   amplifiMagnifiSubsystem,
   probeAmplifiMagnifiPortalReady,
@@ -28,6 +29,7 @@ export type PlatformOpsReport = {
   recommendedNextAction: string;
   subsystems: PlatformOpsSubsystem[];
   agents: AgentHealth[];
+  ai: ReturnType<typeof buildAIProviderHealthReport>;
   monitoring: {
     sentryConfigured: boolean;
     glitchtipConfigured?: boolean;
@@ -72,131 +74,66 @@ export async function verifyBackupDestination(): Promise<{
   message: string;
 }> {
   const uri = process.env.BACKUP_DESTINATION_URI?.trim();
-  if (!uri) {
-    return {
-      configured: false,
-      reachable: null,
-      message: 'BACKUP_DESTINATION_URI is not set.',
-    };
-  }
-
-  if (!/^https?:\/\//i.test(uri)) {
-    return {
-      configured: true,
-      reachable: null,
-      message: 'BACKUP_DESTINATION_URI is set (non-HTTP scheme ΓÇö manual verification required).',
-    };
-  }
-
+  if (!uri) return { configured: false, reachable: null, message: 'BACKUP_DESTINATION_URI is not set.' };
+  if (!/^https?:\/\//i.test(uri)) return { configured: true, reachable: null, message: 'BACKUP_DESTINATION_URI is set (non-HTTP scheme — manual verification required).' };
   try {
     const res = await fetch(uri, { method: 'HEAD', signal: AbortSignal.timeout(10_000) });
-    if (res.ok || res.status === 405 || res.status === 403) {
-      return {
-        configured: true,
-        reachable: true,
-        message: `Backup destination responded HTTP ${res.status}.`,
-      };
-    }
-    return {
-      configured: true,
-      reachable: false,
-      message: `Backup destination returned HTTP ${res.status}.`,
-    };
+    if (res.ok || res.status === 405 || res.status === 403) return { configured: true, reachable: true, message: `Backup destination responded HTTP ${res.status}.` };
+    return { configured: true, reachable: false, message: `Backup destination returned HTTP ${res.status}.` };
   } catch (err) {
-    return {
-      configured: true,
-      reachable: false,
-      message: `Backup destination unreachable: ${err instanceof Error ? err.message : 'network error'}.`,
-    };
+    return { configured: true, reachable: false, message: `Backup destination unreachable: ${err instanceof Error ? err.message : 'network error'}.` };
   }
 }
 
 function subsystemFromLaunch(report: LaunchCommandCenterReport): PlatformOpsSubsystem[] {
-  const items: PlatformOpsSubsystem[] = [
-    {
-      id: 'revenue',
-      name: 'Revenue',
-      status: report.readiness.revenueReady ? 'healthy' : 'critical',
-      message: report.readiness.revenueReady
-        ? 'Stripe, Airtable, and Resend revenue path ready.'
-        : `Missing: ${report.readiness.missing.revenue.missing.join(', ') || 'revenue checks'}`,
-    },
-    {
-      id: 'delivery',
-      name: 'Delivery',
-      status: report.readiness.deliveryReady ? 'healthy' : 'critical',
-      message: report.readiness.deliveryReady
-        ? 'Onboarding webhooks and Airtable schemas ready.'
-        : `Missing: ${report.readiness.missing.delivery.missing.join(', ') || 'delivery checks'}`,
-    },
-    {
-      id: 'monitoring',
-      name: 'Monitoring',
-      status: report.readiness.monitoringReady ? 'healthy' : 'degraded',
-      message: report.readiness.monitoringReady
-        ? 'Sentry and uptime dashboard configured.'
-        : `Missing: ${report.readiness.missing.monitoring.missing.join(', ') || 'monitoring checks'}`,
-    },
-    {
-      id: 'resilience',
-      name: 'Resilience',
-      status: report.readiness.resilienceReady ? 'healthy' : 'degraded',
-      message: report.readiness.resilienceReady
-        ? 'Backup destination configured.'
-        : `Missing: ${report.readiness.missing.resilience.missing.join(', ') || 'BACKUP_DESTINATION_URI'}`,
-    },
+  return [
+    { id: 'revenue', name: 'Revenue', status: report.readiness.revenueReady ? 'healthy' : 'critical', message: report.readiness.revenueReady ? 'Stripe, Airtable, and Resend revenue path ready.' : `Missing: ${report.readiness.missing.revenue.missing.join(', ') || 'revenue checks'}` },
+    { id: 'delivery', name: 'Delivery', status: report.readiness.deliveryReady ? 'healthy' : 'critical', message: report.readiness.deliveryReady ? 'Onboarding webhooks and Airtable schemas ready.' : `Missing: ${report.readiness.missing.delivery.missing.join(', ') || 'delivery checks'}` },
+    { id: 'monitoring', name: 'Monitoring', status: report.readiness.monitoringReady ? 'healthy' : 'degraded', message: report.readiness.monitoringReady ? 'Sentry and uptime dashboard configured.' : `Missing: ${report.readiness.missing.monitoring.missing.join(', ') || 'monitoring checks'}` },
+    { id: 'resilience', name: 'Resilience', status: report.readiness.resilienceReady ? 'healthy' : 'degraded', message: report.readiness.resilienceReady ? 'Backup destination configured.' : `Missing: ${report.readiness.missing.resilience.missing.join(', ') || 'BACKUP_DESTINATION_URI'}` },
   ];
-
-  return items;
 }
 
-export async function buildPlatformOpsReport(options?: {
-  probeRoutes?: boolean;
-  verifyBackup?: boolean;
-}): Promise<PlatformOpsReport> {
+export async function buildPlatformOpsReport(options?: { probeRoutes?: boolean; verifyBackup?: boolean }): Promise<PlatformOpsReport> {
   const probeRoutes = options?.probeRoutes ?? process.env.PLATFORM_OPS_PROBE_ROUTES === 'true';
   const verifyBackup = options?.verifyBackup ?? true;
+  const ai = buildAIProviderHealthReport();
 
-  const [launchReport, backup, agentHealth, amplifiMagnifi] = await Promise.all([
+  const [launchReport, backup, rawAgentHealth, amplifiMagnifi] = await Promise.all([
     buildLaunchCommandCenterReport(),
     verifyBackup ? verifyBackupDestination() : Promise.resolve(null),
     Promise.all(listAgents().map((agent) => agent.health())),
     probeAmplifiMagnifiPortalReady(),
   ]);
 
+  // Older agents checked only OPENAI_API_KEY. Normalize the Command Center to the
+  // actual central gateway contract: any configured provider path makes AI-capable
+  // agents available. Individual execution still fails closed in runAIGateway.
+  const agentHealth = rawAgentHealth.map((agent) => ai.available && agent.status === 'degraded'
+    ? { ...agent, status: 'available' as const, details: `Central AI provider chain available. ${ai.summary}` }
+    : agent);
+
   const secretIssues = productionSecretIssues();
-  const subsystems = [
+  const subsystems: PlatformOpsSubsystem[] = [
     ...subsystemFromLaunch(launchReport),
+    {
+      id: 'ai',
+      name: 'AI provider chain',
+      status: ai.available ? 'healthy' : 'critical',
+      message: ai.available ? ai.summary : 'No usable AI provider path is configured.',
+    },
     amplifiMagnifiSubsystem(amplifiMagnifi),
   ];
 
   if (probeRoutes) {
-    const routeResults = await Promise.all(
-      CRITICAL_ROUTE_PATHS.map(async (path) => {
-        const result = await probeRoute(path);
-        return { path, ...result };
-      }),
-    );
+    const routeResults = await Promise.all(CRITICAL_ROUTE_PATHS.map(async (path) => ({ path, ...(await probeRoute(path)) })));
     const failed = routeResults.filter((r) => !r.ok);
-    subsystems.push({
-      id: 'routes',
-      name: 'Critical routes',
-      status: failed.length === 0 ? 'healthy' : failed.some((f) => f.status === 0) ? 'critical' : 'degraded',
-      message:
-        failed.length === 0
-          ? `All ${routeResults.length} critical routes responded OK.`
-          : `Failed: ${failed.map((f) => `${f.path} (${f.status || 'timeout'})`).join(', ')}`,
-    });
+    subsystems.push({ id: 'routes', name: 'Critical routes', status: failed.length === 0 ? 'healthy' : failed.some((f) => f.status === 0) ? 'critical' : 'degraded', message: failed.length === 0 ? `All ${routeResults.length} critical routes responded OK.` : `Failed: ${failed.map((f) => `${f.path} (${f.status || 'timeout'})`).join(', ')}` });
   }
 
   const platformUrl = canonicalPlatformOrigin(EA_PLATFORM_URL);
-  const monitoringDegraded =
-    !launchReport.readiness.monitoringReady || !launchReport.readiness.resilienceReady || secretIssues.length > 0;
-
-  const ok =
-    launchReport.launchBlockers === 0 &&
-    !monitoringDegraded &&
-    (backup?.reachable !== false);
+  const monitoringDegraded = !launchReport.readiness.monitoringReady || !launchReport.readiness.resilienceReady || secretIssues.length > 0;
+  const ok = launchReport.launchBlockers === 0 && !monitoringDegraded && backup?.reachable !== false && ai.available;
 
   return {
     generatedAt: new Date().toISOString(),
@@ -205,15 +142,14 @@ export async function buildPlatformOpsReport(options?: {
     launchStatus: launchReport.status,
     readinessScore: launchReport.readinessScore,
     launchBlockers: launchReport.launchBlockers,
-    recommendedNextAction: launchReport.recommendedNextAction,
+    recommendedNextAction: !ai.available ? 'Configure at least one AI provider path before enabling autonomous AI actions.' : launchReport.recommendedNextAction,
     subsystems,
     agents: agentHealth,
+    ai,
     monitoring: {
       sentryConfigured: monitoringConfigured(),
       glitchtipConfigured: monitoringConfigured(),
-      uptimeDashboardConfigured: Boolean(
-        process.env.UPTIME_KUMA_DASHBOARD_URL?.trim() || process.env.UPTIME_MONITORING_URL?.trim(),
-      ),
+      uptimeDashboardConfigured: Boolean(process.env.UPTIME_KUMA_DASHBOARD_URL?.trim() || process.env.UPTIME_MONITORING_URL?.trim()),
       backupDestinationConfigured: backup?.configured ?? Boolean(process.env.BACKUP_DESTINATION_URI?.trim()),
       backupDestinationReachable: backup?.reachable ?? null,
       productionSecretIssues: secretIssues,
