@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdminActionFromRequest } from '@/lib/admin-session-guard';
 import { publishSelectedFactoryConcept } from '@/lib/factory-publish-selected-concept';
+import { persistFactoryFulfillment } from '@/lib/factory-fulfillment';
 import { getFactoryProject } from '@/lib/factory-project-store';
 import {
   getControlPlaneReleaseState,
@@ -12,8 +13,9 @@ export const runtime = 'nodejs';
 export const maxDuration = 60;
 
 /**
- * POST — Session 3 wire: selected concept → portal chassis + draft site (+ live if ED + unquarantined).
- * Run 9 adds a fail-closed Control Plane release check before any public-capable wiring.
+ * POST — selected concept → portal chassis + website + Control Plane + fulfillment proof.
+ * Fail closed before public-capable wiring, and never mark a client COMPLETE without
+ * one persisted Factory fulfillment record.
  */
 export async function POST(req: NextRequest) {
   const auth = await requireAdminActionFromRequest(req, 'admin:manage');
@@ -121,6 +123,42 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  let fulfillment;
+  try {
+    fulfillment = await persistFactoryFulfillment({
+      projectId,
+      websiteStatus: result.websiteStatus,
+      websiteUrl: result.website?.siteUrl || result.surfaces?.siteUrl,
+      previewPath: result.website?.previewPath || result.surfaces?.draftPreviewPath,
+      portalSlug: result.portalSlug,
+      organizationId: result.organizationId,
+      portalUrl: result.surfaces?.portalHomeUrl,
+      portalLoginUrl: result.surfaces?.portalLoginUrl,
+      portalProvisioned: Boolean(result.portal?.ok && result.portal?.portalSlug && result.portal?.orgId),
+      loginCtaPresent: Boolean(result.surfaces?.loginCtaPresent),
+      memberHomeSaved: Boolean(result.surfaces?.memberHomeSaved),
+      directorGateVerified: result.websiteStatus === 'live' ? Boolean(result.directorGate?.ok) : true,
+      controlPlane: {
+        verified: true,
+        manifestRecordId: bridge.manifestRecordId,
+        governanceRecordId: bridge.governanceRecordId,
+        acceptanceRecordId: bridge.acceptanceRecordId,
+      },
+    });
+  } catch (error) {
+    return NextResponse.json(
+      {
+        error: 'Client surfaces were wired, but EA refused to mark the Factory project complete because fulfillment proof could not be persisted.',
+        correction: 'Preserve the wired surfaces. Rerun fulfillment verification before delivery.',
+        projectId,
+        portalSlug: result.portalSlug,
+        websiteStatus: result.websiteStatus,
+        detail: error instanceof Error ? error.message : 'Unknown fulfillment persistence error.',
+      },
+      { status: 503 },
+    );
+  }
+
   return NextResponse.json({
     ok: true,
     projectId,
@@ -133,6 +171,7 @@ export async function POST(req: NextRequest) {
     portal: result.portal,
     surfaces: result.surfaces,
     directorReview: result.directorReview,
+    fulfillment,
     controlPlane: {
       ready: true,
       manifestRecordId: bridge.manifestRecordId,
