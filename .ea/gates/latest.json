@@ -1,36 +1,36 @@
 {
-  "sourceCommit": "4676ed5cf13868a8d8a35051ea458ee775a599d3",
-  "previewUrl": "https://ea-payments-51lexqzhm-the-architects-projects-cc813778.vercel.app",
+  "sourceCommit": "0b6366b697c674f130f7088a9828f78bf4df6691",
+  "previewUrl": "https://ea-payments-mxtsotond-the-architects-projects-cc813778.vercel.app",
   "status": "PASS",
-  "completedAt": "2026-09-11T19:36:00.000Z",
+  "completedAt": "2026-09-11T19:52:00.000Z",
   "gates": {
     "sourceIdentity": {
       "status": "PASS",
-      "proof": "merged-source:4676ed5cf13868a8d8a35051ea458ee775a599d3; preview-source:8e46c00a83a9268cb352e7f4c5607af61572a1b6; git-compare:0-files-tree-equivalent"
+      "proof": "merged-source:0b6366b697c674f130f7088a9828f78bf4df6691; preview-source:770b6225551f3db78e796d4de82c1dfd1f80df22; git-compare:0-files-tree-equivalent"
     },
     "build": {
       "status": "PASS",
-      "proof": "CI run 34639216172 success; Graft Context run 34639216141 success; EA Client Protection Gate run 34639216302 success; Vercel preview dpl_rbAciTNYv6Ecgqzd6V6S6wuKQfcP READY"
+      "proof": "CI run 34641004725 success; Graft Context run 34641004630 success; EA Client Protection Gate run 34641004671 success; Vercel preview dpl_G4HF6v2mNTAg8t8EgAXDc65DwxEh READY"
     },
     "assets": {
       "status": "PASS",
-      "proof": "Live customer recovery journeys passed for EA, Amplifi, Amanda public, Amanda portal entry, and CPR with load-aware broken-image detection and HTTP image failure detection"
+      "proof": "No client presentation assets changed; existing live customer journey suite passed across EA, Amplifi, Amanda public, Amanda portal entry, and CPR"
     },
     "functional": {
       "status": "PASS",
-      "proof": "Recovery Monitoring contract passed 12/12; five-minute synthetic monitor feeds Run 1 Recovery Orchestrator in dry-run mode; signed external monitoring signal bridge installed; hourly Playwright journey proof installed"
+      "proof": "Run 3 self-healing certification passed: successful isolated repair; failed repair triggers known rollback and re-verification; failed rollback remains unhealthy; provider failures escalate; shared-platform mutation fails closed; disabled execution flag prevents mutation"
     },
     "desktopVisual": {
       "status": "PASS",
-      "proof": "No presentation-layer files changed; live 1440px browser journeys passed across five production targets"
+      "proof": "No presentation-layer delta; full deploy smoke and live customer journeys passed"
     },
     "mobileVisual": {
       "status": "PASS",
-      "proof": "No presentation-layer files changed; existing full deploy smoke and client protection gates passed"
+      "proof": "No presentation-layer delta; existing full deploy smoke and client protection gates passed"
     },
     "creativeCritic": {
       "status": "PASS",
-      "proof": "Run 2 is monitoring/recovery infrastructure; no creative presentation delta"
+      "proof": "Run 3 is recovery certification infrastructure; no creative presentation delta"
     }
   }
 }
