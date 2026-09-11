@@ -1,3 +1,4 @@
+import { gunzipSync, gzipSync } from 'node:zlib';
 import {
   airtableConfigured,
   airtableQuery,
@@ -6,6 +7,8 @@ import {
 } from '@/lib/data/airtable-client';
 
 const TABLE = process.env.AIRTABLE_CREATIVE_STUDIO_TABLE ?? 'Creative Studio';
+const COMPRESSED_PREFIX = 'ea:gzip-base64:';
+const COMPRESS_THRESHOLD = 60_000;
 
 type MemoryRow = {
   payload: string;
@@ -23,6 +26,18 @@ function studioMemory(): Map<string, MemoryRow> {
     globalForStudio.__eaCreativeStudioMemory = new Map();
   }
   return globalForStudio.__eaCreativeStudioMemory;
+}
+
+function encodePayload(value: unknown): string {
+  const json = JSON.stringify(value);
+  if (json.length < COMPRESS_THRESHOLD) return json;
+  return `${COMPRESSED_PREFIX}${gzipSync(Buffer.from(json, 'utf8')).toString('base64')}`;
+}
+
+function decodePayload<T>(payload: string): T {
+  if (!payload.startsWith(COMPRESSED_PREFIX)) return JSON.parse(payload) as T;
+  const compressed = Buffer.from(payload.slice(COMPRESSED_PREFIX.length), 'base64');
+  return JSON.parse(gunzipSync(compressed).toString('utf8')) as T;
 }
 
 export function studioRecordKey(recordType: 'campaign' | 'brand' | 'media' | 'experience', id: string): string {
@@ -59,7 +74,7 @@ export async function saveStudioRecord(input: {
 }): Promise<SaveStudioRecordResult> {
   const key = studioRecordKey(input.recordType, input.id);
   const updatedAt = new Date().toISOString();
-  const payload = JSON.stringify(input.payload);
+  const payload = encodePayload(input.payload);
   studioMemory().set(key, {
     payload,
     organizationId: input.organizationId,
@@ -110,7 +125,7 @@ export async function loadStudioRecordFromAirtable<T>(
     const records = await airtableQuery(TABLE, { filterByFormula: formula, maxRecords: 1 });
     const raw = records[0]?.fields?.['Payload JSON'];
     if (typeof raw !== 'string' || !raw.trim()) return null;
-    return JSON.parse(raw) as T;
+    return decodePayload<T>(raw);
   } catch (err) {
     console.error('[creative-studio] Airtable durable load failed:', err);
     return null;
@@ -125,7 +140,7 @@ export async function loadStudioRecord<T>(
   const cached = studioMemory().get(key);
   if (cached) {
     try {
-      return JSON.parse(cached.payload) as T;
+      return decodePayload<T>(cached.payload);
     } catch {
       return null;
     }
@@ -139,7 +154,7 @@ export async function loadStudioRecord<T>(
     const raw = records[0]?.fields?.['Payload JSON'];
     if (typeof raw !== 'string' || !raw.trim()) return null;
 
-    const parsed = JSON.parse(raw) as T;
+    const parsed = decodePayload<T>(raw);
     studioMemory().set(key, {
       payload: raw,
       organizationId: String(records[0]?.fields?.['Organization ID'] ?? 'ea'),
@@ -162,7 +177,7 @@ export async function listStudioRecords<T>(
     .filter(([key, row]) => key.startsWith(prefix) && row.organizationId === organizationId)
     .map(([, row]) => {
       try {
-        return JSON.parse(row.payload) as T;
+        return decodePayload<T>(row.payload);
       } catch {
         return null;
       }
@@ -192,7 +207,7 @@ export async function listStudioRecords<T>(
           updatedAt: String(record.fields?.['Updated At'] ?? ''),
         });
         try {
-          return JSON.parse(raw) as T;
+          return decodePayload<T>(raw);
         } catch {
           return null;
         }
@@ -206,7 +221,6 @@ export async function listStudioRecords<T>(
   }
 }
 
-
 export async function listAllStudioRecords<T>(
   recordType: 'campaign' | 'brand' | 'media' | 'experience',
 ): Promise<T[]> {
@@ -215,7 +229,7 @@ export async function listAllStudioRecords<T>(
     .filter(([key]) => key.startsWith(prefix))
     .map(([, row]) => {
       try {
-        return JSON.parse(row.payload) as T;
+        return decodePayload<T>(row.payload);
       } catch {
         return null;
       }
@@ -244,7 +258,7 @@ export async function listAllStudioRecords<T>(
           updatedAt: String(record.fields?.['Updated At'] ?? ''),
         });
         try {
-          return JSON.parse(raw) as T;
+          return decodePayload<T>(raw);
         } catch {
           return null;
         }

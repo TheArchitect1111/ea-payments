@@ -1,4 +1,4 @@
-import { get } from '@vercel/blob';
+import { issueSignedToken, presignUrl } from '@vercel/blob';
 import { type NextRequest, NextResponse } from 'next/server';
 import { guardPortalApi, portalApiUnauthorized, portalTenant } from '@/lib/api/portal-route';
 import { resolveAmandaAudience } from '@/lib/amanda-catherine/audience';
@@ -34,18 +34,25 @@ export async function GET(
     return NextResponse.json({ error: 'This course is not assigned to this account.' }, { status: 403 });
   }
 
-  const result = await get(resource.pathname, { access: 'private' });
-  if (!result || result.statusCode !== 200) {
-    return NextResponse.json({ error: 'Course file is unavailable.' }, { status: 404 });
+  try {
+    const validUntil = Date.now() + 5 * 60 * 1000;
+    const token = await issueSignedToken({
+      pathname: resource.pathname,
+      operations: ['get'],
+      validUntil,
+    });
+    const { presignedUrl } = await presignUrl(token, {
+      pathname: resource.pathname,
+      operation: 'get',
+      validUntil,
+      useCache: true,
+    });
+    return NextResponse.redirect(presignedUrl, 307);
+  } catch (error) {
+    console.error('[amanda-resource] signed URL creation failed', {
+      resourceId,
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return NextResponse.json({ error: 'Course file is temporarily unavailable.' }, { status: 503 });
   }
-
-  const disposition = resource.fileType === 'DOCX' ? 'attachment' : 'inline';
-  return new NextResponse(result.stream, {
-    headers: {
-      'Content-Type': result.blob.contentType,
-      'Content-Disposition': `${disposition}; filename="${resource.pathname.replaceAll('"', '')}"`,
-      'Cache-Control': 'private, no-store',
-      'X-Content-Type-Options': 'nosniff',
-    },
-  });
 }

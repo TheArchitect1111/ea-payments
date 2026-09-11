@@ -59,7 +59,8 @@ test('simplifi portal route requires portal login', async ({ page }) => {
 test('amplifi landing page is reachable', async ({ page }) => {
   await page.goto('/amplifi');
   await expect(page.getByRole('heading', { level: 1, name: /focus on your craft/i })).toBeVisible();
-  await expect(page.getByRole('heading', { name: /smartchitecture \+ eva/i })).toBeVisible();
+  await expect(page.getByText(/^SMARTCHITECTURE$/i).first()).toBeVisible();
+  await expect(page.getByRole('heading', { name: /your campaign control room has a guide/i })).toBeVisible();
   await expect(page.getByRole('link', { name: /try amplifi free/i }).first()).toBeVisible();
 });
 
