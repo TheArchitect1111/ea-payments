@@ -36,6 +36,9 @@ jobs:
       - name: Verify Recovery Orchestrator safety contract
         run: npx tsx scripts/test-recovery-orchestrator.ts
 
+      - name: Verify Recovery Monitoring contract
+        run: node scripts/test-recovery-monitoring-contract.mjs
+
       - name: Verify Amanda checkout and pricing contract
         run: npm run test:amanda-checkout
 
@@ -49,3 +52,6 @@ jobs:
         run: |
           npx playwright install --with-deps chromium
           npm run verify:deploy
+
+      - name: Verify live customer recovery journeys
+        run: node scripts/test-recovery-journeys.mjs
