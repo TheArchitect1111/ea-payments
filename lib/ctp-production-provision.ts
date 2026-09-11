@@ -7,7 +7,7 @@
  *
  * Flow:
  *   portalSlug known → website (if required) → TenantClientConfig
- *   → persist config → connect site↔portal links → Pulse ready
+ *   → Control Plane registration → persist config → Pulse ready
  */
 import {
   buildTenantClientConfigFromCtp,
@@ -21,6 +21,7 @@ import {
 } from '@/lib/ctp-submissions';
 import { provisionWebsitePortalSite } from '@/lib/provision-website-portal';
 import { publicPortalUrl } from '@/lib/ctp-portal-host';
+import { registerCtpProductionControlPlane } from '@/lib/control-plane-bridge';
 import { emitPulseEvent } from '@/lib/pulse-bus';
 
 export type CtpProductionProvisionResult = {
@@ -105,6 +106,35 @@ export async function runCtpProductionProvision(
         website: { ...config.website, siteUrl: siteResult.siteUrl, required: true },
       };
     }
+  }
+
+  const bridge = await registerCtpProductionControlPlane({
+    submission: fresh,
+    portalUrl: config.workspace.portalUrl,
+    productionUrl: siteUrl || config.website.siteUrl || undefined,
+  });
+  if (!bridge.ok) {
+    await emitPulseEvent({
+      product: 'ea-platform',
+      type: 'ctp.production.blocked',
+      title: `CTP production blocked — ${config.organization.name}`,
+      detail: `Control Plane acceptance registration failed: ${bridge.error || 'unknown error'}`,
+      priority: 'critical',
+      href: '/admin/operations',
+      objectId: submissionId,
+      metadata: {
+        ctpSubmissionId: submissionId,
+        portalSlug,
+        siteUrl: siteUrl ?? '',
+      },
+    });
+    return {
+      ok: false,
+      portalSlug,
+      siteUrl,
+      config,
+      error: `Control Plane acceptance registration required before production-ready status: ${bridge.error || 'unknown error'}`,
+    };
   }
 
   await persistTenantConfig(fresh, config);
