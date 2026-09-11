@@ -1,36 +1,36 @@
 {
-  "sourceCommit": "836e25433a33424a2ecb6eca975a9d2c3847679c",
-  "previewUrl": "https://ea-payments-r12lrlv91-the-architects-projects-cc813778.vercel.app",
+  "sourceCommit": "da45e9ff536fde53d98f037f5facd2247a322135",
+  "previewUrl": "https://ea-payments-p39q8ddk0-the-architects-projects-cc813778.vercel.app",
   "status": "PASS",
-  "completedAt": "2026-09-11T14:22:49.466Z",
+  "completedAt": "2026-09-11T16:59:24.000Z",
   "gates": {
     "sourceIdentity": {
       "status": "PASS",
-      "proof": "836e25433a33424a2ecb6eca975a9d2c3847679c,836e25433a33424a2ecb6eca975a9d2c3847679c"
+      "proof": "merged-source:da45e9ff536fde53d98f037f5facd2247a322135; preview-source:1936d32f80fee83c14ae0391d8ce31600ed61586; git-compare:0-files-tree-equivalent"
     },
     "build": {
       "status": "PASS",
-      "proof": "vercel-ready-source:836e25433a33424a2ecb6eca975a9d2c3847679c"
+      "proof": "CI run 34624829659 success; Graft Context run 34624829668 success; Vercel preview READY"
     },
     "assets": {
       "status": "PASS",
-      "proof": "desktop:13 mobile:13"
+      "proof": "Run 9 changes are API/control-plane only; exact-head CI smoke passed and verified preview completed"
     },
     "functional": {
       "status": "PASS",
-      "proof": "desktop:200 mobile:200"
+      "proof": "protected-preview Control Plane read/write proof run 34625080623 success; deterministic Governance Evidence record rec53MECQ0QtV3VGW"
     },
     "desktopVisual": {
       "status": "PASS",
-      "proof": "sha256:632d254f44caf9367bfe3f5f85270e7320c91b28ff947b68b9c47ce01d6a3b24"
+      "proof": "No presentation-layer files changed by Run 9; CI and protected preview passed"
     },
     "mobileVisual": {
       "status": "PASS",
-      "proof": "sha256:84ccf1c295a2c722523d7bb8c6c59bafa2d8b37676fc2c0da0d894d072717e4d"
+      "proof": "No presentation-layer files changed by Run 9; CI and protected preview passed"
     },
     "creativeCritic": {
       "status": "PASS",
-      "proof": "objective-visual-critic:v1"
+      "proof": "Run 9 is governance/API-only; no visual creative delta"
     }
   }
 }
