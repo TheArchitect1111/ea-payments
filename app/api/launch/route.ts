@@ -5,6 +5,7 @@ import { parseFactoryLaunchBody } from '@/lib/factory-launch-request';
 import { createFactoryProject, resolveLaunchProjectInput } from '@/lib/factory-project';
 import { listFactoryProjects } from '@/lib/factory-project-store';
 import { launchFactoryProjectFlow } from '@/lib/factory-queue';
+import { registerFactoryProjectControlPlane } from '@/lib/control-plane-bridge';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -45,6 +46,18 @@ export async function POST(request: NextRequest) {
       return Number.isFinite(created) && created >= cutoff;
     });
     if (existing) {
+      const bridge = await registerFactoryProjectControlPlane(existing);
+      if (!bridge.ok) {
+        return NextResponse.json(
+          {
+            ok: false,
+            error: 'Control Plane registration failed for the existing Factory project.',
+            correction:
+              'Nothing was duplicated or promoted. Resolve the canonical Control Plane registration, then retry.',
+          },
+          { status: 503 },
+        );
+      }
       return NextResponse.json({
         ok: true,
         reused: true,
@@ -66,14 +79,17 @@ export async function POST(request: NextRequest) {
   });
 
   if (!created.ok) {
+    const controlPlaneFailure = created.missing.includes('control-plane');
     return NextResponse.json(
       {
         ok: false,
-        error: 'Missing required launch fields.',
+        error: controlPlaneFailure
+          ? 'Control Plane registration required before Factory execution.'
+          : 'Missing required launch fields.',
         missing: created.missing,
         correction: created.correction,
       },
-      { status: 400 },
+      { status: controlPlaneFailure ? 503 : 400 },
     );
   }
 
