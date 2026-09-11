@@ -13,164 +13,47 @@
     }
   ],
   "redirects": [
-    {
-      "source": "/privacy",
-      "destination": "/legal/privacy",
-      "permanent": true
-    },
-    {
-      "source": "/terms",
-      "destination": "/legal/terms",
-      "permanent": true
-    },
-    {
-      "source": "/ctp-intake",
-      "destination": "https://cc.efficiencyarchitects.online/ctp",
-      "permanent": true
-    },
-    {
-      "source": "/ctp-intake/:path*",
-      "destination": "https://cc.efficiencyarchitects.online/ctp",
-      "permanent": true
-    },
-    {
-      "source": "/ctp",
-      "destination": "https://cc.efficiencyarchitects.online/ctp",
-      "permanent": false
-    },
-    {
-      "source": "/assessment",
-      "destination": "https://cc.efficiencyarchitects.online/ctp",
-      "permanent": false
-    },
-    {
-      "source": "/go",
-      "destination": "/start",
-      "permanent": false
-    },
-    {
-      "source": "/partner-portal",
-      "destination": "/partners/login",
-      "permanent": true
-    },
-    {
-      "source": "/partner-portal/:path*",
-      "destination": "/partners/login",
-      "permanent": true
-    },
-    {
-      "source": "/capture",
-      "destination": "/simplifi/capture",
-      "permanent": false
-    },
-    {
-      "source": "/amplify",
-      "destination": "/amplifi",
-      "permanent": false
-    },
-    {
-      "source": "/story/:slug",
-      "destination": "/consider/:slug",
-      "permanent": false
-    },
-    {
-      "source": "/sign-in",
-      "destination": "/portal/login",
-      "permanent": false
-    },
-    {
-      "source": "/products/simplifi",
-      "destination": "/simplifi/capture",
-      "permanent": false
-    },
-    {
-      "source": "/products/magnifi",
-      "destination": "/story/selena",
-      "permanent": false
-    },
-    {
-      "source": "/products/amplifi",
-      "destination": "/amplify",
-      "permanent": false
-    },
-    {
-      "source": "/products/pulse",
-      "destination": "/sign-in?next=/portal/demo-client/pulse",
-      "permanent": false
-    },
-    {
-      "source": "/magnifi",
-      "destination": "/story/selena",
-      "permanent": false
-    },
-    {
-      "source": "/amplifi/share",
-      "destination": "/amplifi",
-      "permanent": false
-    },
-    {
-      "source": "/app",
-      "destination": "/simplifi/workspace",
-      "permanent": false
-    },
-    {
-      "source": "/experience",
-      "destination": "/possibilities",
-      "permanent": true
-    },
-    {
-      "source": "/what-is-ea",
-      "destination": "/possibilities",
-      "permanent": true
-    }
+    { "source": "/privacy", "destination": "/legal/privacy", "permanent": true },
+    { "source": "/terms", "destination": "/legal/terms", "permanent": true },
+    { "source": "/ctp-intake", "destination": "https://cc.efficiencyarchitects.online/ctp", "permanent": true },
+    { "source": "/ctp-intake/:path*", "destination": "https://cc.efficiencyarchitects.online/ctp", "permanent": true },
+    { "source": "/ctp", "destination": "https://cc.efficiencyarchitects.online/ctp", "permanent": false },
+    { "source": "/assessment", "destination": "https://cc.efficiencyarchitects.online/ctp", "permanent": false },
+    { "source": "/go", "destination": "/start", "permanent": false },
+    { "source": "/partner-portal", "destination": "/partners/login", "permanent": true },
+    { "source": "/partner-portal/:path*", "destination": "/partners/login", "permanent": true },
+    { "source": "/capture", "destination": "/simplifi/capture", "permanent": false },
+    { "source": "/amplify", "destination": "/amplifi", "permanent": false },
+    { "source": "/story/:slug", "destination": "/consider/:slug", "permanent": false },
+    { "source": "/sign-in", "destination": "/portal/login", "permanent": false },
+    { "source": "/products/simplifi", "destination": "/simplifi/capture", "permanent": false },
+    { "source": "/products/magnifi", "destination": "/story/selena", "permanent": false },
+    { "source": "/products/amplifi", "destination": "/amplify", "permanent": false },
+    { "source": "/products/pulse", "destination": "/sign-in?next=/portal/demo-client/pulse", "permanent": false },
+    { "source": "/magnifi", "destination": "/story/selena", "permanent": false },
+    { "source": "/amplifi/share", "destination": "/amplifi", "permanent": false },
+    { "source": "/app", "destination": "/simplifi/workspace", "permanent": false },
+    { "source": "/experience", "destination": "/possibilities", "permanent": true },
+    { "source": "/what-is-ea", "destination": "/possibilities", "permanent": true }
   ],
   "headers": [
     {
       "source": "/(.*)",
       "headers": [
-        {
-          "key": "X-EA-Platform",
-          "value": "ea-platform"
-        }
+        { "key": "X-EA-Platform", "value": "ea-platform" }
       ]
     }
   ],
   "crons": [
-    {
-      "path": "/api/cron/platform-guardian",
-      "schedule": "0 6 * * *"
-    },
-    {
-      "path": "/api/cron/project-status",
-      "schedule": "30 10 * * *"
-    },
-    {
-      "path": "/api/cron/connect-sequence",
-      "schedule": "0 14 * * *"
-    },
-    {
-      "path": "/api/cron/ctp-review-reminders",
-      "schedule": "0 * * * *"
-    },
-    {
-      "path": "/api/cron/event-registration-reminders",
-      "schedule": "0 * * * *"
-    },
-    {
-      "path": "/api/cron/factory-queue",
-      "schedule": "*/5 * * * *"
-    },
-    {
-      "path": "/api/cron/simplifi-intelligence",
-      "schedule": "15 5 * * *"
-    },
-    {
-      "path": "/api/cron/amplifi-publish",
-      "schedule": "*/5 * * * *"
-    },
-    {
-      "path": "/api/cron/amplifi-watch",
-      "schedule": "0 8,14,20 * * *"
-    }
+    { "path": "/api/cron/recovery-monitor", "schedule": "*/5 * * * *" },
+    { "path": "/api/cron/platform-guardian", "schedule": "0 6 * * *" },
+    { "path": "/api/cron/project-status", "schedule": "30 10 * * *" },
+    { "path": "/api/cron/connect-sequence", "schedule": "0 14 * * *" },
+    { "path": "/api/cron/ctp-review-reminders", "schedule": "0 * * * *" },
+    { "path": "/api/cron/event-registration-reminders", "schedule": "0 * * * *" },
+    { "path": "/api/cron/factory-queue", "schedule": "*/5 * * * *" },
+    { "path": "/api/cron/simplifi-intelligence", "schedule": "15 5 * * *" },
+    { "path": "/api/cron/amplifi-publish", "schedule": "*/5 * * * *" },
+    { "path": "/api/cron/amplifi-watch", "schedule": "0 8,14,20 * * *" }
   ]
 }
