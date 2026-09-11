@@ -16,7 +16,7 @@ const DEFAULT_TARGETS: RecoveryMonitorTarget[] = [
   { target: 'Canadian Prospect Recruitment', url: 'https://canadianprospectrecruitment.vercel.app/' },
 ];
 
-function configuredTargets(): RecoveryMonitorTarget[] {
+function configuredStaticTargets(): RecoveryMonitorTarget[] {
   const raw = process.env.EA_RECOVERY_MONITOR_TARGETS_JSON?.trim();
   if (!raw) return DEFAULT_TARGETS;
   try {
@@ -27,6 +27,23 @@ function configuredTargets(): RecoveryMonitorTarget[] {
   }
 }
 
+async function configuredTargets(): Promise<RecoveryMonitorTarget[]> {
+  const staticTargets = configuredStaticTargets();
+  let factoryTargets: RecoveryMonitorTarget[] = [];
+  try {
+    const { listFactoryMonitoringTargets } = await import('@/lib/factory-fulfillment');
+    factoryTargets = await listFactoryMonitoringTargets();
+  } catch (error) {
+    console.warn('[recovery-monitor] could not load Factory fulfillment targets:', error);
+  }
+  const seen = new Set<string>();
+  return [...staticTargets, ...factoryTargets].filter((target) => {
+    if (!target.url || seen.has(target.url)) return false;
+    seen.add(target.url);
+    return true;
+  });
+}
+
 export async function probeRecoveryTarget(target: RecoveryMonitorTarget): Promise<RecoverySignal | null> {
   try {
     const res = await fetch(target.url, {
@@ -34,7 +51,7 @@ export async function probeRecoveryTarget(target: RecoveryMonitorTarget): Promis
       redirect: 'follow',
       cache: 'no-store',
       signal: AbortSignal.timeout(15_000),
-      headers: { 'user-agent': 'EA-Recovery-Monitor/2' },
+      headers: { 'user-agent': 'EA-Recovery-Monitor/3' },
     });
     const body = target.expectText ? await res.text() : '';
     if (!res.ok) {
@@ -82,7 +99,7 @@ export async function runRecoveryMonitoringCycle(): Promise<{
   failures: number;
   outcomes: RecoveryOutcome[];
 }> {
-  const targets = configuredTargets();
+  const targets = await configuredTargets();
   const signals = (await Promise.all(targets.map(probeRecoveryTarget))).filter((signal): signal is RecoverySignal => Boolean(signal));
   const outcomes: RecoveryOutcome[] = [];
   for (const signal of signals) {
@@ -91,11 +108,13 @@ export async function runRecoveryMonitoringCycle(): Promise<{
   return { ok: signals.length === 0, checked: targets.length, failures: signals.length, outcomes };
 }
 
-export function recoveryMonitoringStatus() {
+export async function recoveryMonitoringStatus() {
+  const targets = await configuredTargets();
   return {
     installed: true,
     cadence: '5 minutes',
-    configuredTargets: configuredTargets().length,
+    configuredTargets: targets.length,
+    factoryTargets: Math.max(0, targets.length - configuredStaticTargets().length),
     errorMonitoringConfigured: Boolean(
       process.env.NEXT_PUBLIC_GLITCHTIP_DSN?.trim() || process.env.GLITCHTIP_DSN?.trim() || process.env.NEXT_PUBLIC_SENTRY_DSN?.trim() || process.env.SENTRY_DSN?.trim(),
     ),
