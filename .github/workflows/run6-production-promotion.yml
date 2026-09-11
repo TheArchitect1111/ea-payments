@@ -1,0 +1,101 @@
+name: Run 6 Production Promotion
+
+on:
+  push:
+    branches:
+      - gate/run6-production-20260911
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ea-production-promotion
+  cancel-in-progress: false
+
+env:
+  EA_RUN6_SOURCE_SHA: 366666604410bcda86d74b68801e266d663e94af
+  EA_RUN6_PREVIEW_URL: https://ea-payments-fbx5pjxnx-the-architects-projects-cc813778.vercel.app
+
+jobs:
+  gate-and-promote:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact master source
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.EA_RUN6_SOURCE_SHA }}
+          fetch-depth: 2
+
+      - name: Verify master is still the approved source
+        shell: bash
+        run: |
+          git fetch origin master
+          test "$(git rev-parse origin/master)" = "${EA_RUN6_SOURCE_SHA}" || {
+            echo "BLOCKED: master moved after Run 6 verification."
+            exit 1
+          }
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Client protection contract gate
+        run: node scripts/test-production-protection.mjs
+
+      - name: Build gate
+        run: npm run build
+
+      - name: Install Chromium for visual gates
+        run: npx playwright install --with-deps chromium
+
+      - name: Exact-preview functional and visual gate
+        env:
+          EA_PREVIEW_URL: ${{ env.EA_RUN6_PREVIEW_URL }}
+          EA_GATE_PATH: /amplifi
+          EA_SOURCE_COMMIT: ${{ env.EA_RUN6_SOURCE_SHA }}
+          EA_MIN_VISUALS: '2'
+          EA_GATE_OUTPUT: artifacts/ea-gate
+          VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+        run: node scripts/ea-preview-gate.mjs
+
+      - name: Upload immutable gate proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ea-run6-production-gate-${{ env.EA_RUN6_SOURCE_SHA }}
+          path: artifacts/ea-gate
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Re-verify source has not moved
+        shell: bash
+        run: |
+          git fetch origin master
+          test "$(git rev-parse origin/master)" = "${EA_RUN6_SOURCE_SHA}" || {
+            echo "BLOCKED: master changed during Run 6 QA."
+            exit 1
+          }
+
+      - name: Promote gate proof only
+        shell: bash
+        run: |
+          cp artifacts/ea-gate/gate-result.json /tmp/ea-run6-gate-result.json
+          git fetch origin master
+          git checkout -B run6-promote origin/master
+          mkdir -p .ea/gates
+          cp /tmp/ea-run6-gate-result.json .ea/gates/latest.json
+          test "$(node -p "require('./.ea/gates/latest.json').status")" = "PASS"
+          test "$(node -p "require('./.ea/gates/latest.json').sourceCommit")" = "${EA_RUN6_SOURCE_SHA}"
+          git config user.name "EA Production Gate"
+          git config user.email "ea-production-gate@users.noreply.github.com"
+          git add .ea/gates/latest.json
+          git diff --cached --name-only | grep -qx '.ea/gates/latest.json'
+          test "$(git diff --cached --name-only | wc -l | tr -d ' ')" = "1"
+          git commit -m "[EA-GATED] Promote Run 6 verified ${EA_RUN6_SOURCE_SHA} to production"
+          git push origin HEAD:master
