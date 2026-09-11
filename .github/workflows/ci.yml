@@ -33,6 +33,9 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Verify Recovery Orchestrator safety contract
+        run: npx tsx scripts/test-recovery-orchestrator.ts
+
       - name: Verify Amanda checkout and pricing contract
         run: npm run test:amanda-checkout
 
