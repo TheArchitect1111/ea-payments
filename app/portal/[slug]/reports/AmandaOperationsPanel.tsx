@@ -6,12 +6,18 @@ import { AMANDA_COURSES } from '@/lib/amanda-catherine/config';
 import { listAmandaCourseProgress } from '@/lib/amanda-catherine/progress-store';
 
 export default async function AmandaOperationsPanel({ slug }: { slug: string }) {
-  const [submissions, registrations, events, courseProgress] = await Promise.all([
+  const [submissionResult, registrationResult, eventResult, progressResult] = await Promise.all([
     listPortalFormSubmissions(slug),
     listRegistrationsForPortal(slug),
     listPretixEventsForPortal(slug, { includeDrafts: true }),
     listAmandaCourseProgress(slug),
   ]);
+
+  const submissions = Array.isArray(submissionResult) ? submissionResult : [];
+  const registrations = Array.isArray(registrationResult) ? registrationResult : [];
+  const events = Array.isArray(eventResult) ? eventResult : [];
+  const courseProgress = Array.isArray(progressResult) ? progressResult : [];
+
   const applications = submissions.filter((item) => item.kind === 'application');
   const intakes = submissions.filter((item) => item.kind === 'intake');
   const awaitingReview = submissions.filter((item) => item.status === 'submitted').length;
@@ -64,13 +70,15 @@ export default async function AmandaOperationsPanel({ slug }: { slug: string }) 
               <tbody>
                 {courseProgress.map((record) => {
                   const course = AMANDA_COURSES.find((item) => item.id === record.courseId);
-                  const total = course?.lessons.length || 0;
-                  const percent = total ? Math.round((record.completedLessons.length / total) * 100) : 0;
+                  const lessons = Array.isArray(course?.lessons) ? course.lessons : [];
+                  const completedLessons = Array.isArray(record.completedLessons) ? record.completedLessons : [];
+                  const total = lessons.length;
+                  const percent = total ? Math.round((completedLessons.length / total) * 100) : 0;
                   return (
                     <tr key={`${record.email}:${record.courseId}`}>
                       <td style={{ padding: '10px 8px', borderTop: '1px solid rgba(31,41,55,.12)' }}>{record.email}</td>
                       <td style={{ padding: '10px 8px', borderTop: '1px solid rgba(31,41,55,.12)' }}>{course?.title || record.courseId}</td>
-                      <td style={{ padding: '10px 8px', borderTop: '1px solid rgba(31,41,55,.12)' }}>{percent}% ({record.completedLessons.length}/{total})</td>
+                      <td style={{ padding: '10px 8px', borderTop: '1px solid rgba(31,41,55,.12)' }}>{percent}% ({completedLessons.length}/{total})</td>
                       <td style={{ padding: '10px 8px', borderTop: '1px solid rgba(31,41,55,.12)' }}>{record.certificateIssuedAt ? 'Available' : 'Not yet eligible'}</td>
                     </tr>
                   );
