@@ -3,8 +3,10 @@ import { cookies } from 'next/headers';
 import { EA_ADMIN_COOKIE, verifyAdminSession } from '@/lib/ea-admin-auth';
 import { redirectToAdminLogin } from '@/lib/admin-redirect';
 import { getOperationsCommandCenter, type OperationsHealth } from '@/lib/operations-command-center';
+import { buildPlatformOpsReport } from '@/lib/platform-ops';
 
 export const dynamic = 'force-dynamic';
+export const maxDuration = 60;
 
 const HEALTH_UI: Record<OperationsHealth, { label: string; dot: string; bg: string; border: string; text: string }> = {
   healthy: { label: 'Healthy', dot: '🟢', bg: '#EEF8F0', border: '#B9DFC2', text: '#185C2A' },
@@ -12,12 +14,24 @@ const HEALTH_UI: Record<OperationsHealth, { label: string; dot: string; bg: stri
   'action-required': { label: 'Action Required', dot: '🔴', bg: '#FFF0ED', border: '#E7B5AA', text: '#842D20' },
 };
 
+const SUBSYSTEM_STYLE: Record<string, { dot: string; bg: string; text: string }> = {
+  healthy: { dot: '🟢', bg: '#EEF8F0', text: '#185C2A' },
+  degraded: { dot: '🟡', bg: '#FFF8E6', text: '#72520A' },
+  critical: { dot: '🔴', bg: '#FFF0ED', text: '#842D20' },
+  unknown: { dot: '⚪', bg: '#F3F1EC', text: '#625F56' },
+  not_configured: { dot: '🟡', bg: '#FFF8E6', text: '#72520A' },
+};
+
 export default async function OperationsCommandCenterPage() {
   const cookieStore = await cookies();
   const token = cookieStore.get(EA_ADMIN_COOKIE)?.value;
   if (!verifyAdminSession(token)) redirectToAdminLogin('/admin/operations');
 
-  const records = await getOperationsCommandCenter();
+  const [records, platform] = await Promise.all([
+    getOperationsCommandCenter(),
+    buildPlatformOpsReport({ probeRoutes: true, verifyBackup: true }).catch(() => null),
+  ]);
+
   const totals = records.reduce(
     (acc, record) => {
       acc[record.health] += 1;
@@ -36,7 +50,7 @@ export default async function OperationsCommandCenterPage() {
               <p className="m-0 text-xs font-extrabold uppercase tracking-[0.18em] text-[#80651D]">Efficiency Architects · Operations</p>
               <h1 className="mt-3 font-serif text-4xl font-semibold tracking-[-0.03em] sm:text-6xl">Command Center</h1>
               <p className="mt-4 max-w-3xl text-base leading-7 text-[#625F56] sm:text-lg">
-                What is healthy, what needs attention, and what requires action. Live public-route checks are combined with canonical ownership and Control Plane readiness. Missing information is never guessed.
+                What is healthy, what needs attention, and what requires action. Live routes, platform readiness, monitoring, backups, agents, canonical ownership and Control Plane readiness are checked without guessing missing information.
               </p>
             </div>
             <div className="flex flex-wrap gap-2 text-sm font-semibold">
@@ -57,8 +71,53 @@ export default async function OperationsCommandCenterPage() {
               );
             })}
           </div>
-          <p className="mb-0 mt-4 text-xs text-[#898378]">Last refreshed: {checkedAt}. Refresh this page to rerun current public-route checks.</p>
+          <p className="mb-0 mt-4 text-xs text-[#898378]">Last refreshed: {checkedAt}. Refresh this page to rerun current health checks.</p>
         </header>
+
+        <section className="mt-6 rounded-[26px] border border-[#E5E0D5] bg-white p-5 shadow-[0_12px_34px_rgba(50,45,35,0.045)] sm:p-6">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <p className="m-0 text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#80651D]">Platform health engine</p>
+              <h2 className="mt-1 font-serif text-3xl font-semibold">EA infrastructure</h2>
+            </div>
+            <div className={`rounded-full px-4 py-2 text-sm font-extrabold ${platform?.ok ? 'bg-[#EEF8F0] text-[#185C2A]' : 'bg-[#FFF0ED] text-[#842D20]'}`}>
+              {platform?.ok ? '🟢 Platform ready' : platform ? '🔴 Platform needs action' : '🟡 Health engine unavailable'}
+            </div>
+          </div>
+
+          {platform ? (
+            <>
+              <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="rounded-[18px] bg-[#F8F6F1] p-4"><p className="m-0 text-[11px] font-extrabold uppercase tracking-wider text-[#888176]">Readiness</p><p className="mt-1 text-2xl font-black">{platform.readinessScore}%</p></div>
+                <div className="rounded-[18px] bg-[#F8F6F1] p-4"><p className="m-0 text-[11px] font-extrabold uppercase tracking-wider text-[#888176]">Launch blockers</p><p className="mt-1 text-2xl font-black">{platform.launchBlockers}</p></div>
+                <div className="rounded-[18px] bg-[#F8F6F1] p-4"><p className="m-0 text-[11px] font-extrabold uppercase tracking-wider text-[#888176]">Agents</p><p className="mt-1 text-2xl font-black">{platform.agents.length}</p></div>
+                <div className="rounded-[18px] bg-[#F8F6F1] p-4"><p className="m-0 text-[11px] font-extrabold uppercase tracking-wider text-[#888176]">Secret issues</p><p className="mt-1 text-2xl font-black">{platform.monitoring.productionSecretIssues.length}</p></div>
+              </div>
+
+              <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                {platform.subsystems.map((subsystem) => {
+                  const style = SUBSYSTEM_STYLE[subsystem.status] ?? SUBSYSTEM_STYLE.unknown;
+                  return (
+                    <div key={subsystem.id} className="rounded-[18px] p-4" style={{ background: style.bg, color: style.text }}>
+                      <p className="m-0 text-sm font-extrabold">{style.dot} {subsystem.name}</p>
+                      <p className="mb-0 mt-2 text-sm leading-6">{subsystem.message}</p>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                <div className="rounded-[16px] border border-[#E5E0D5] p-4"><strong>Sentry / GlitchTip</strong><p className="mb-0 mt-1 text-sm text-[#625F56]">{platform.monitoring.sentryConfigured ? 'Configured' : 'Not configured'}</p></div>
+                <div className="rounded-[16px] border border-[#E5E0D5] p-4"><strong>Uptime monitoring</strong><p className="mb-0 mt-1 text-sm text-[#625F56]">{platform.monitoring.uptimeDashboardConfigured ? 'Configured' : 'Not configured'}</p></div>
+                <div className="rounded-[16px] border border-[#E5E0D5] p-4"><strong>Backup destination</strong><p className="mb-0 mt-1 text-sm text-[#625F56]">{platform.monitoring.backupDestinationConfigured ? (platform.monitoring.backupDestinationReachable === false ? 'Configured · unreachable' : 'Configured') : 'Not configured'}</p></div>
+              </div>
+
+              {platform.recommendedNextAction && <div className="mt-4 rounded-[16px] bg-[#F3F0E7] p-4 text-sm"><strong>Platform next action:</strong> {platform.recommendedNextAction}</div>}
+            </>
+          ) : (
+            <div className="mt-5 rounded-[16px] bg-[#FFF8E6] p-4 text-[#72520A]">The platform health engine did not return a report. Client-level health remains visible below, and this state requires investigation.</div>
+          )}
+        </section>
 
         <section className="mt-6 grid gap-4 lg:grid-cols-2">
           {records
