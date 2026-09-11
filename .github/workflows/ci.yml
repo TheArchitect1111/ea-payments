@@ -42,6 +42,9 @@ jobs:
       - name: Verify Recovery Monitoring contract
         run: node scripts/test-recovery-monitoring-contract.mjs
 
+      - name: Verify Client Factory fulfillment contract
+        run: npx tsx scripts/test-factory-fulfillment.ts
+
       - name: Verify Amanda checkout and pricing contract
         run: npm run test:amanda-checkout
 
