@@ -4,6 +4,7 @@
  */
 
 const BASE_URL = 'https://api.airtable.com/v0';
+const AIRTABLE_RETRY_LIMIT = 3;
 
 export const AIRTABLE_BASE_ID =
   process.env.AIRTABLE_PAYMENTS_BASE_ID?.trim() || 'appv0YoLIMY45fmDA';
@@ -26,6 +27,25 @@ export function airtableAuthHeaders(): Record<string, string> {
     Authorization: `Bearer ${key}`,
     'Content-Type': 'application/json',
   };
+}
+
+function retryDelayMs(response: Response, attempt: number): number {
+  const retryAfter = Number(response.headers.get('retry-after'));
+  if (Number.isFinite(retryAfter) && retryAfter > 0) return Math.min(retryAfter * 1000, 5000);
+  return Math.min(250 * 2 ** attempt, 2000);
+}
+
+async function airtableFetch(url: string, init: RequestInit): Promise<Response> {
+  let lastResponse: Response | null = null;
+  for (let attempt = 0; attempt < AIRTABLE_RETRY_LIMIT; attempt += 1) {
+    const response = await fetch(url, init);
+    lastResponse = response;
+    if (response.status !== 429 && response.status < 500) return response;
+    if (attempt === AIRTABLE_RETRY_LIMIT - 1) return response;
+    await new Promise((resolve) => setTimeout(resolve, retryDelayMs(response, attempt)));
+  }
+  if (!lastResponse) throw new Error('Airtable request did not execute.');
+  return lastResponse;
 }
 
 /** Escape single quotes for Airtable filterByFormula string literals. */
@@ -54,7 +74,7 @@ export async function airtableQuery(
     url.searchParams.set('sort[0][direction]', options.sortDirection ?? 'desc');
   }
 
-  const res = await fetch(url.toString(), {
+  const res = await airtableFetch(url.toString(), {
     headers: airtableAuthHeaders(),
     cache: 'no-store',
   });
@@ -76,7 +96,7 @@ export async function airtableCreate(
   fields: Record<string, unknown>,
   typecast = false,
 ): Promise<AirtableRecord | null> {
-  const res = await fetch(`${BASE_URL}/${AIRTABLE_BASE_ID}/${encodeURIComponent(table)}`, {
+  const res = await airtableFetch(`${BASE_URL}/${AIRTABLE_BASE_ID}/${encodeURIComponent(table)}`, {
     method: 'POST',
     headers: airtableAuthHeaders(),
     body: JSON.stringify({ records: [{ fields }], typecast }),
@@ -97,7 +117,7 @@ export async function airtableUpdate(
   fields: Record<string, unknown>,
   typecast = false,
 ): Promise<AirtableRecord | null> {
-  const res = await fetch(
+  const res = await airtableFetch(
     `${BASE_URL}/${AIRTABLE_BASE_ID}/${encodeURIComponent(table)}/${recordId}`,
     {
       method: 'PATCH',
