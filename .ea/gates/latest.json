@@ -1,36 +1,36 @@
 {
-  "sourceCommit": "da45e9ff536fde53d98f037f5facd2247a322135",
-  "previewUrl": "https://ea-payments-p39q8ddk0-the-architects-projects-cc813778.vercel.app",
+  "sourceCommit": "28fe765c98c533722f61a267367524ff144dee6d",
+  "previewUrl": "https://ea-payments-pl7ubklk4-the-architects-projects-cc813778.vercel.app",
   "status": "PASS",
-  "completedAt": "2026-09-11T16:59:24.000Z",
+  "completedAt": "2026-09-11T19:12:00.000Z",
   "gates": {
     "sourceIdentity": {
       "status": "PASS",
-      "proof": "merged-source:da45e9ff536fde53d98f037f5facd2247a322135; preview-source:1936d32f80fee83c14ae0391d8ce31600ed61586; git-compare:0-files-tree-equivalent"
+      "proof": "merged-source:28fe765c98c533722f61a267367524ff144dee6d; preview-source:bd3fb27ea281b35abf1d2b6fdde275542396afdf; git-compare:0-files-tree-equivalent"
     },
     "build": {
       "status": "PASS",
-      "proof": "CI run 34624829659 success; Graft Context run 34624829668 success; Vercel preview READY"
+      "proof": "CI run 34637195824 success; Graft Context run 34637195760 success; EA Client Protection Gate run 34637195775 success; Vercel preview READY"
     },
     "assets": {
       "status": "PASS",
-      "proof": "Run 9 changes are API/control-plane only; exact-head CI smoke passed and verified preview completed"
+      "proof": "Run 1 changes are recovery/API/operations logic only; no client presentation assets changed; full deploy smoke passed"
     },
     "functional": {
       "status": "PASS",
-      "proof": "protected-preview Control Plane read/write proof run 34625080623 success; deterministic Governance Evidence record rec53MECQ0QtV3VGW"
+      "proof": "Recovery Orchestrator safety contract passed in CI: deterministic repair mapping, provider/unknown escalation, missing-authority block, shared-platform escalation, rollback and automation-permission fail-closed behavior"
     },
     "desktopVisual": {
       "status": "PASS",
-      "proof": "No presentation-layer files changed by Run 9; CI and protected preview passed"
+      "proof": "No client presentation-layer files changed; full Playwright deploy smoke passed"
     },
     "mobileVisual": {
       "status": "PASS",
-      "proof": "No presentation-layer files changed by Run 9; CI and protected preview passed"
+      "proof": "No client presentation-layer files changed; full Playwright deploy smoke passed"
     },
     "creativeCritic": {
       "status": "PASS",
-      "proof": "Run 9 is governance/API-only; no visual creative delta"
+      "proof": "Run 1 is recovery/governance infrastructure; no creative visual delta"
     }
   }
 }
