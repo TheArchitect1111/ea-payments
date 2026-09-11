@@ -18,11 +18,23 @@ const REQUIRED_CHECKS = [
   'entrepreneurialArtistPlaylistConfigured',
 ] as const;
 
+type AmandaHealthPayload = {
+  ok?: boolean;
+  checks?: Record<string, boolean>;
+  menuRoutes?: unknown;
+  courseResourceRoutes?: unknown;
+  materialInventory?: unknown;
+};
+
 async function runHealth(origin: string) {
   const response = await fetch(`${origin}/api/health/amanda-login`, { cache: 'no-store' });
-  let body: any = null;
-  try { body = await response.json(); } catch { body = null; }
-  const checks = body?.checks || {};
+  let body: AmandaHealthPayload | null = null;
+  try {
+    body = (await response.json()) as AmandaHealthPayload;
+  } catch {
+    body = null;
+  }
+  const checks = body?.checks ?? {};
   const passed = response.status === 200 && body?.ok === true && REQUIRED_CHECKS.every((key) => checks[key] === true);
   return { passed, status: response.status, body };
 }
