@@ -40,7 +40,7 @@ function Scene({ name, label }: { name: string; label: string }) {
 }
 
 function BarberVisual({ className, label }: { className: string; label: string }) {
-  return <div className={`amp-barber-crop ${className}`} role="img" aria-label={label}><img className="amp-scene-img" src="/amplifi/amplifi-barber-showcase.jpg?v=2" alt="" aria-hidden="true"/></div>;
+  return <div className={`amp-barber-crop ${className}`} role="img" aria-label={label}><img className="amp-scene-img" src="/amplifi/amplifi-barber-showcase.svg?v=3" alt="" aria-hidden="true"/></div>;
 }
 
 export default function Page() {
