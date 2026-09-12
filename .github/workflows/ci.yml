@@ -50,6 +50,10 @@ jobs:
         run: node scripts/test-factory-run1-mass-builders.mjs
       - name: Certify Factory Run 2 torture, recovery, and tenant isolation
         run: node scripts/test-factory-run2-torture-certification.mjs
+      - name: Certify Factory Run 3 scale envelope
+        run: node scripts/test-factory-run3-scale-envelope.mjs
+      - name: Certify Factory Run 4 final mass-production acceptance
+        run: node scripts/test-factory-run4-final-acceptance.mjs
       - name: Verify EA System Registry contract
         run: node scripts/test-system-registry.mjs
       - name: Verify EA Control Plane reconciliation contract
