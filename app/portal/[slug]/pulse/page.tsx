@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { getClientSuccessProfile } from '@/lib/client-success';
 import { PortalShell, NAVY, GOLD } from '@/lib/chassis/PortalShell';
 import { PortalModuleChromeStrip } from '@/lib/chassis/PortalChromeContext';
+import { getEASystemRegistry, getEASystemRegistrySummary } from '@/lib/control-plane/system-registry';
 import { requirePortalModule } from '@/lib/modules/portal-modules';
 import { getTenantPulseMeasure } from '@/lib/portal-pulse-measure';
 import OpportunitiesPanel from './OpportunitiesPanel';
@@ -18,6 +19,51 @@ function ScoreRing({ value, max }: { value: number; max: number }) {
   );
 }
 
+function ControlPlaneRegistryPanel() {
+  const registry = getEASystemRegistry();
+  const summary = getEASystemRegistrySummary();
+  const attention = registry.entities.filter((entity) => entity.lifecycle === 'attention');
+
+  return (
+    <div className="ep-card">
+      <p className="ep-card-title">EA Control Plane</p>
+      <p className="ep-placeholder-text">
+        Canonical desired state · {summary.total} systems · {summary.active} active · {summary.attention} attention · {summary.repositoryOnly} repository-only
+      </p>
+      <div className="ep-pulse-grid" style={{ marginTop: 16 }}>
+        <div className="ep-card ep-pulse-score-card">
+          <p className="ep-card-title">Verified</p>
+          <p className="ep-pulse-score-number" style={{ color: NAVY }}>{summary.verified}</p>
+          <p className="ep-pulse-score-detail">Machine-verified ownership records</p>
+        </div>
+        <div className="ep-card ep-pulse-score-card">
+          <p className="ep-card-title">Needs attention</p>
+          <p className="ep-pulse-score-number" style={{ color: NAVY }}>{summary.attention}</p>
+          <p className="ep-pulse-score-detail">Ownership or deployment facts still unresolved</p>
+        </div>
+        <div className="ep-card ep-pulse-score-card">
+          <p className="ep-card-title">Canonical repos</p>
+          <p className="ep-pulse-score-number" style={{ color: NAVY }}>{summary.withCanonicalRepo}</p>
+          <p className="ep-pulse-score-detail">Systems with a verified source repository recorded</p>
+        </div>
+      </div>
+      {attention.length > 0 ? (
+        <ul className="ep-pulse-list" style={{ marginTop: 16 }}>
+          {attention.slice(0, 8).map((entity) => (
+            <li key={entity.id}>
+              <strong>{entity.name}</strong> · {entity.verification === 'verified' ? 'ownership verified; remaining fields need attention' : 'canonical ownership needs reconciliation'}
+            </li>
+          ))}
+          {attention.length > 8 ? <li>+ {attention.length - 8} additional attention records in the registry</li> : null}
+        </ul>
+      ) : null}
+      <p className="ep-pulse-score-detail" style={{ marginTop: 14 }}>
+        Desired state: {registry.authority.desiredState} · Runtime projection: {registry.authority.operationalProjection}
+      </p>
+    </div>
+  );
+}
+
 export default async function PulsePage({
   params,
 }: {
@@ -28,6 +74,7 @@ export default async function PulsePage({
   const profile = await getClientSuccessProfile(client);
   const measure = getTenantPulseMeasure(slug);
   const firstName = client.clientName.split(' ')[0] ?? client.clientName;
+  const isEAControlPlane = slug.toLowerCase() === 'ea';
 
   return (
     <PortalShell slug={slug} active="pulse" firstName={firstName}>
@@ -38,6 +85,8 @@ export default async function PulsePage({
           <h1 className="ep-welcome-heading">Your Progress, {firstName}</h1>
           <p className="ep-pulse-summary">{profile.summary}</p>
         </div>
+
+        {isEAControlPlane ? <ControlPlaneRegistryPanel /> : null}
 
         <div className="ep-card ep-pulse-health">
           <p className="ep-card-title">Operational Health</p>
