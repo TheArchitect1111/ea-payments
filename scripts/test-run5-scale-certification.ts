@@ -119,8 +119,8 @@ function certifyRecoveryAndReleaseContracts() {
   assert.match(release, /gate|release|rollback/i);
 
   const backup = read('scripts/backup-verify.mjs');
-  assert.match(backup, /backup/i);
-  assert.match(backup, /restore|runbook|download/i);
+  assert.match(backup, /BACKUP_DESTINATION_URI/);
+  assert.match(backup, /HEAD|destination responded|manual verification/i);
 }
 
 function certifyCleanRoomRestoreModel() {
@@ -173,6 +173,7 @@ async function main() {
     retryBudgetAndCircuitBreaker: 'PASS',
     tenantIsolationContracts: 'PASS',
     rollbackAndReleaseContracts: 'PASS',
+    backupDestinationContract: 'PASS',
     deletedAssetAndCorruptConfigDetection: 'PASS',
     cleanRoomRestoreModel: 'PASS',
     productionDatabaseTouched: false,
