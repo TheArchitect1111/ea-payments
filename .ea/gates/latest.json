@@ -1,10 +1,10 @@
 {
-  "sourceCommit": "63f77d1c801082039657471c2cc763a899e2a2a5",
+  "sourceCommit": "f67b57bdb9ec49e2a2a6273c30afe90f471900c6",
   "previewUrl": "https://ea-payments-q5l64jcre-the-architects-projects-cc813778.vercel.app",
   "status": "PASS",
   "completedAt": "2026-09-12T09:39:28.000Z",
   "gates": {
-    "sourceIdentity": { "status": "PASS", "proof": "PR #367 head 64d71b615c9d80db59a32d2faccd38cb8d4d0fb7 passed full CI and preview; merge commit 63f77d1c801082039657471c2cc763a899e2a2a5 contains the accepted Run 3 tree." },
+    "sourceIdentity": { "status": "PASS", "proof": "Run 3 code was accepted at PR #367 head 64d71b615c9d80db59a32d2faccd38cb8d4d0fb7 and merge 63f77d1c801082039657471c2cc763a899e2a2a5. Subsequent master commits changed only the gate manifest; production parent f67b57bdb9ec49e2a2a6273c30afe90f471900c6 contains the accepted Run 3 code tree." },
     "build": { "status": "PASS", "proof": "CI run 34686278506 completed successfully including lint, build, browser smoke, and recovery journeys; preview dpl_GkTNBFdkmAkmXuwoCzzBKamjCgAw READY." },
     "assets": { "status": "PASS", "proof": "Run 3 adds control-plane reconciliation infrastructure only; no client presentation assets changed." },
     "functional": { "status": "PASS", "proof": "Control-plane reconciliation contract plus existing registry, tenant, release, recovery, Factory, Amanda, Design Studio, Simplifi, deploy smoke, and live recovery checks passed." },
