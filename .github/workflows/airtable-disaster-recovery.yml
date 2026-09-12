@@ -1,0 +1,80 @@
+name: EA Airtable Disaster Recovery
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 5 * * *'
+
+permissions:
+  contents: read
+
+env:
+  AIRTABLE_API_KEY: ${{ secrets.AIRTABLE_API_KEY }}
+  AIRTABLE_PAT: ${{ secrets.AIRTABLE_PAT }}
+  AIRTABLE_PAYMENTS_BASE_ID: appv0YoLIMY45fmDA
+  EA_RECOVERY_EXPORT_DIR: .recovery/airtable
+
+jobs:
+  export-and-restore-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Verify recovery credential is available
+        shell: bash
+        run: |
+          if [ -z "${AIRTABLE_API_KEY}" ] && [ -z "${AIRTABLE_PAT}" ]; then
+            echo "BLOCKED: configure AIRTABLE_API_KEY or AIRTABLE_PAT as a GitHub Actions secret."
+            exit 1
+          fi
+
+      - name: Export complete Airtable recovery package
+        run: node scripts/export-airtable-recovery.mjs
+
+      - name: Restore into provider-neutral SQLite
+        run: python3 scripts/restore-airtable-recovery.py .recovery/airtable .recovery/ea-recovery.sqlite
+
+      - name: Write recovery proof summary
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json, sqlite3, hashlib, pathlib, datetime
+          root = pathlib.Path('.recovery/airtable')
+          manifest = json.loads((root/'manifest.json').read_text())
+          db = sqlite3.connect('.recovery/ea-recovery.sqlite')
+          integrity = db.execute('PRAGMA integrity_check').fetchone()[0]
+          proof = {
+            'status': 'PASS' if integrity == 'ok' else 'FAIL',
+            'verifiedAt': datetime.datetime.now(datetime.timezone.utc).isoformat(),
+            'format': manifest['format'],
+            'baseId': manifest['baseId'],
+            'generatedAt': manifest['generatedAt'],
+            'tableCount': manifest['tableCount'],
+            'recordCount': manifest['recordCount'],
+            'sqliteIntegrity': integrity,
+            'manifestSha256': hashlib.sha256((root/'manifest.json').read_bytes()).hexdigest(),
+            'sourceCommit': '${{ github.sha }}'
+          }
+          pathlib.Path('.recovery/recovery-proof.json').write_text(json.dumps(proof, indent=2))
+          print(json.dumps(proof, indent=2))
+          if proof['status'] != 'PASS':
+              raise SystemExit(1)
+          PY
+
+      - name: Upload encrypted-at-rest GitHub recovery artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ea-airtable-recovery-${{ github.run_id }}
+          path: |
+            .recovery/airtable/
+            .recovery/ea-recovery.sqlite
+            .recovery/recovery-proof.json
+          if-no-files-found: error
+          retention-days: 30
