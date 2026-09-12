@@ -1,0 +1,78 @@
+{
+  "version": 1,
+  "name": "EA Capability Standard",
+  "principles": [
+    "reuse-before-build",
+    "configure-before-customize",
+    "integrate-before-reinvent",
+    "fail-closed-on-license-or-cost-uncertainty"
+  ],
+  "requiredContractFields": [
+    "id",
+    "name",
+    "class",
+    "version",
+    "ui",
+    "routes",
+    "navigation",
+    "data",
+    "permissions",
+    "dependencies",
+    "integrations",
+    "provisioning",
+    "healthCheck",
+    "tests",
+    "rollback",
+    "costLicense"
+  ],
+  "classes": {
+    "core": {
+      "description": "Capabilities expected in every standard EA portal.",
+      "target": ["dashboard", "amplifi", "update-hub"]
+    },
+    "business": {
+      "description": "Selectable reusable business capabilities.",
+      "target": ["events", "calendar", "billing", "documents", "training", "messaging", "people", "intake", "applications", "reports"]
+    },
+    "specialized": {
+      "description": "Vertical-specific capabilities assembled only when the client recipe requires them.",
+      "target": []
+    }
+  },
+  "openSourceAcceptanceGate": {
+    "policy": "No component may become an EA chassis dependency when required production functionality forces a paid subscription, paid account, per-client license, per-user license, or mandatory usage fee.",
+    "allowControlledInfrastructureCost": true,
+    "requirements": [
+      "self-hostable-without-vendor-cloud-account",
+      "commercial-use-permitted",
+      "clients-do-not-need-paid-vendor-accounts",
+      "no-mandatory-per-client-or-per-user-fee",
+      "no-unacceptable-copyleft-obligation-on-proprietary-EA-code",
+      "production-critical-features-available-without-paid-license"
+    ],
+    "decisionStates": ["approved", "isolated", "rejected", "review-required"],
+    "defaultOnUncertainty": "review-required"
+  },
+  "candidateDecisions": {
+    "pretix": {
+      "decision": "review-required",
+      "reason": "Self-hosted core is available, but AGPL plus additional terms require explicit review for EA-managed third-party/client event use before expanding dependency."
+    },
+    "documenso": {
+      "decision": "isolated",
+      "reason": "Community Edition is self-hostable and API-only SaaS use can fit Community terms, but proprietary source modifications or enterprise-only features can require commercial licensing. Keep behind an API boundary and do not fork into EA proprietary code."
+    },
+    "novu": {
+      "decision": "review-required",
+      "reason": "MIT open core exists for community self-hosting, but some capabilities are commercial/cloud-only. Approve only after the exact EA notification feature set is mapped to community functionality."
+    },
+    "unleash": {
+      "decision": "review-required",
+      "reason": "Self-hosting is available, but current source licensing changed to AGPLv3 while official open-source Docker images retain Apache terms. Do not embed or modify until the deployment boundary is fixed."
+    },
+    "formbricks": {
+      "decision": "rejected",
+      "reason": "Not selected for embedded EA Forms capability because the previously reviewed white-label/editor terms conflict with the desired reusable EA product model."
+    }
+  }
+}
