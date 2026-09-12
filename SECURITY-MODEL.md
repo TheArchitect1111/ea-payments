@@ -9,6 +9,7 @@
 5. Client-supplied tenant IDs must be ignored or checked against the authenticated session.
 6. AI conversation history is keyed by actor/tenant scope and conversation ID.
 7. Portal capture reads require exact tenant source matching; prefix collisions are rejected.
+8. Plaintext passwords must never be stored in Client Records or any EA operational table. Authentication credentials must use non-recoverable provider/session flows or one-way hashes where legacy compatibility still requires them.
 
 ## Tenant key contract
 
@@ -17,9 +18,9 @@
 - `actorId`: authenticated user/service identity.
 - `conversationId`: unique only within an actor/tenant scope.
 
-## Newly observed credential risk
+## Credential remediation status
 
-Client Records contains plaintext temporary-password values. Values were not copied into repository artifacts or chat. Removal, forced rotation, and replacement with a non-recoverable onboarding flow require a separate approved security change.
+Run 0 verified the legacy `Temp Password` field in Client Records and removed the remaining populated plaintext value. The field is now marked deprecated in Airtable and must remain blank. Future onboarding must not write recoverable passwords to operational data stores.
 
 ## Known residual risks
 
