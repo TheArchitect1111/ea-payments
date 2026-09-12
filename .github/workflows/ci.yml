@@ -27,7 +27,23 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: Lint
-        run: npm run lint
+        id: lint
+        shell: bash
+        run: |
+          set +e
+          npm run lint 2>&1 | tee lint-output.txt
+          status=${PIPESTATUS[0]}
+          exit "$status"
+      - name: Upload lint diagnostics
+        if: failure() && steps.lint.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: lint-diagnostics
+          path: lint-output.txt
+          if-no-files-found: error
+          retention-days: 3
+      - name: Verify EA Capability Standard and Run 1 inventory
+        run: node scripts/test-capability-standard.mjs
       - name: Verify EA System Registry contract
         run: node scripts/test-system-registry.mjs
       - name: Verify EA Control Plane reconciliation contract
