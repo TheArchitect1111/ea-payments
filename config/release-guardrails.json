@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "policy": "EA Green requires machine evidence, not deployment readiness alone.",
+  "requiredGates": [
+    "system-registry",
+    "production-protection",
+    "tenant-safety",
+    "release-guardrails",
+    "recovery",
+    "factory-fulfillment",
+    "customer-journey-smoke"
+  ],
+  "invariants": {
+    "failClosedAuthorization": true,
+    "persistedTenantIdentity": true,
+    "tenantIsolationRequired": true,
+    "protectedAssetsRequired": true,
+    "authenticatedRoutesMustRedirect": true,
+    "productionPromotionRequiresApprovedManifest": true,
+    "killSwitchesMustDefaultSafe": true
+  },
+  "killSwitches": [
+    {
+      "id": "amplifi-generation",
+      "environmentVariable": "EA_KILL_AMPLIFI_GENERATION",
+      "safeDefault": false,
+      "scope": "capability"
+    },
+    {
+      "id": "factory-execution",
+      "environmentVariable": "EA_KILL_FACTORY_EXECUTION",
+      "safeDefault": false,
+      "scope": "capability"
+    },
+    {
+      "id": "client-updates-autoexecute",
+      "environmentVariable": "EA_KILL_CLIENT_UPDATES_AUTOEXECUTE",
+      "safeDefault": true,
+      "scope": "capability"
+    }
+  ]
+}
