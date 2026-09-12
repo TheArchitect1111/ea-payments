@@ -1,0 +1,29 @@
+name: EA Modular Assembly Run 6
+
+on:
+  pull_request:
+    branches: [master]
+  push:
+    branches: [master]
+
+jobs:
+  certify-run6:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Verify Run 2 fail-closed Assembly Engine
+        run: npx tsx scripts/test-modular-assembly-run2.ts
+      - name: Verify Run 3 Client Factory boundary
+        run: npx tsx scripts/test-modular-assembly-run3.ts
+      - name: Verify Run 4 Starter certification
+        run: npx tsx scripts/test-modular-assembly-run4.ts
+      - name: Verify Run 5 durable assembly evidence
+        run: npx tsx scripts/test-modular-assembly-run5.ts
+      - name: Certify Run 6 capability wave
+        run: npx tsx scripts/test-modular-assembly-run6.ts
