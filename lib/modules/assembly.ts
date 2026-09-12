@@ -1,4 +1,5 @@
 import capabilityInventory from '@/config/capability-inventory.json';
+import capabilityCertifications from '@/config/capability-certifications.json';
 import {
   CHASSIS_STANDARD_MODULE_IDS,
   MODULE_IDS,
@@ -12,6 +13,12 @@ type InventoryCapability = {
   class: 'core' | 'business' | 'specialized';
   assemblyStatus: AssemblyStatus;
   costLicense?: { decision?: string };
+};
+
+type CapabilityCertification = {
+  id: string;
+  assemblyStatus: 'certified';
+  costLicenseDecision: 'approved';
 };
 
 export type AssemblyRejection = {
@@ -30,14 +37,31 @@ export type AssemblyPlan = {
 const INVENTORY_BY_ID = new Map(
   (capabilityInventory.modules as InventoryCapability[]).map((capability) => [capability.id, capability]),
 );
+const CERTIFICATION_BY_ID = new Map(
+  (capabilityCertifications.certifications as CapabilityCertification[]).map((certification) => [
+    certification.id,
+    certification,
+  ]),
+);
 const KNOWN_MODULE_IDS = new Set<string>(MODULE_IDS);
 
-function isCertifiedForAssembly(id: ModuleId): boolean {
+function effectiveAssemblyState(id: ModuleId): {
+  status?: AssemblyStatus;
+  costLicenseDecision?: string;
+} {
+  const certification = CERTIFICATION_BY_ID.get(id);
+  if (certification) {
+    return {
+      status: certification.assemblyStatus,
+      costLicenseDecision: certification.costLicenseDecision,
+    };
+  }
+
   const capability = INVENTORY_BY_ID.get(id);
-  return (
-    capability?.assemblyStatus === 'certified' &&
-    capability.costLicense?.decision === 'approved'
-  );
+  return {
+    status: capability?.assemblyStatus,
+    costLicenseDecision: capability?.costLicense?.decision,
+  };
 }
 
 /**
@@ -57,22 +81,14 @@ export function createAssemblyPlan(requestedIds: readonly string[]): AssemblyPla
     }
 
     const moduleId = id as ModuleId;
-    const capability = INVENTORY_BY_ID.get(moduleId);
-    if (capability?.assemblyStatus !== 'certified') {
-      rejected.push({
-        id,
-        reason: 'not-certified',
-        status: capability?.assemblyStatus,
-      });
+    const state = effectiveAssemblyState(moduleId);
+    if (state.status !== 'certified') {
+      rejected.push({ id, reason: 'not-certified', status: state.status });
       continue;
     }
 
-    if (capability.costLicense?.decision !== 'approved') {
-      rejected.push({
-        id,
-        reason: 'cost-license-not-approved',
-        status: capability.assemblyStatus,
-      });
+    if (state.costLicenseDecision !== 'approved') {
+      rejected.push({ id, reason: 'cost-license-not-approved', status: state.status });
       continue;
     }
 
