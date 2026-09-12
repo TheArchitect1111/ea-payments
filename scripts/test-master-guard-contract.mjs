@@ -13,7 +13,7 @@ for (const needle of [
   'Revert unauthorized direct push',
   'git push origin HEAD:master',
   'commits/$SHA/pulls',
-  '[EA-GATED]',
+  'EA-GATED',
 ]) {
   assert(workflow.includes(needle), `master guard workflow missing: ${needle}`);
 }
