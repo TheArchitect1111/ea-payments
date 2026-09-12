@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { buildAssemblyEvidenceReceipt } from '../lib/modules/assembly-evidence';
 import { requireClientFactoryAssembly } from '../lib/modules/client-factory-assembly';
 
@@ -41,7 +42,7 @@ const changed = buildAssemblyEvidenceReceipt({
 });
 assert.notEqual(changed.fingerprint, receiptA.fingerprint, 'material assembly changes must change the fingerprint');
 
-const foundationSource = await import('node:fs').then(({ readFileSync }) => readFileSync('lib/tenant-foundation.ts', 'utf8'));
+const foundationSource = readFileSync('lib/tenant-foundation.ts', 'utf8');
 assert.match(foundationSource, /Website \+ Portal Starter' \? 'certified' : 'legacy'/);
 assert.match(foundationSource, /persistAssemblyEvidenceReceipt/);
 assert.match(foundationSource, /if \(assemblyMode === 'certified'\) throw err/);
