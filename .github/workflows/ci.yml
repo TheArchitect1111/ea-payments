@@ -50,6 +50,10 @@ jobs:
         run: npx tsx scripts/test-modular-assembly-run3.ts
       - name: Certify EA Modular Assembly Run 4 Starter package
         run: npx tsx scripts/test-modular-assembly-run4.ts
+      - name: Verify EA Modular Assembly Run 5 durable evidence
+        run: npx tsx scripts/test-modular-assembly-run5.ts
+      - name: Certify EA Modular Assembly Run 6 capability wave
+        run: npx tsx scripts/test-modular-assembly-run6.ts
       - name: Verify EA System Registry contract
         run: node scripts/test-system-registry.mjs
       - name: Verify EA Control Plane reconciliation contract
