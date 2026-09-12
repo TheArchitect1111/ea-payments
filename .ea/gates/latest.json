@@ -1,15 +1,15 @@
 {
-  "sourceCommit": "acadde1e4bc1bb0e7c8cfe96ba3ece732b6f5ed4",
-  "previewUrl": "https://ea-payments-o1k71ebxr-the-architects-projects-cc813778.vercel.app",
+  "sourceCommit": "df5edada4f3ee6b4dc149f5ca6a729c6a4181204",
+  "previewUrl": "https://ea-payments-6to6vo6e1-the-architects-projects-cc813778.vercel.app",
   "status": "PASS",
-  "completedAt": "2026-09-12T09:50:38.000Z",
+  "completedAt": "2026-09-12T09:58:00.000Z",
   "gates": {
-    "sourceIdentity": { "status": "PASS", "proof": "PR #368 head 0af0c1577cd59765d6b11369e1da55ecf6d26f71 passed required checks and was merged as acadde1e4bc1bb0e7c8cfe96ba3ece732b6f5ed4." },
-    "build": { "status": "PASS", "proof": "CI run 34686751665 passed lint, Run 4 reliability certification, full build, browser smoke, and live recovery journeys; preview dpl_DovaybzuWuSdzRf5yuyduVwnqv83 READY." },
-    "assets": { "status": "PASS", "proof": "Run 4 changes execution and reliability infrastructure only; no client presentation assets changed." },
-    "functional": { "status": "PASS", "proof": "System Registry, Control Plane reconciliation, Run 4 reliability, production protection, tenant isolation, release guardrails, recovery, Factory fulfillment, Amanda checkout, Design Studio, Simplifi, browser smoke, and live recovery journeys all passed." },
+    "sourceIdentity": { "status": "PASS", "proof": "PR #369 head 3be166bd461adb58de5099b3867f53327896de73 passed the full required suite and was merged as df5edada4f3ee6b4dc149f5ca6a729c6a4181204." },
+    "build": { "status": "PASS", "proof": "CI run 34687078609 passed lint, Run 4 reliability certification, full build/browser smoke, and live recovery journeys; preview dpl_zZ41XKEV1DZy4853Q2YcdrqbynqQ READY." },
+    "assets": { "status": "PASS", "proof": "Completion patch changes Factory reliability behavior only; no client presentation assets changed." },
+    "functional": { "status": "PASS", "proof": "Transient Factory jobs that were moved to FAILED can now be restored to their prior orchestrator-owned state, retried within budget, or dead-lettered when exhausted; all existing release, recovery, tenant, Factory, and customer-journey checks passed." },
     "desktopVisual": { "status": "PASS", "proof": "No client-facing presentation delta; browser smoke passed." },
     "mobileVisual": { "status": "PASS", "proof": "No client-facing mobile presentation delta; recovery journeys passed." },
-    "creativeCritic": { "status": "PASS", "proof": "Run 4 contains no creative, brand, copy, or presentation changes." }
+    "creativeCritic": { "status": "PASS", "proof": "No creative, brand, copy, or presentation changes." }
   }
 }
