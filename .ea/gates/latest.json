@@ -1,15 +1,15 @@
 {
-  "sourceCommit": "c6c5285986ce40fa359459ac2929e5b83e53d674",
-  "previewUrl": "https://ea-payments-g398v40qm-the-architects-projects-cc813778.vercel.app",
+  "sourceCommit": "00602c1beeee0c8223735e9701e8ce384dfc6674",
+  "previewUrl": "https://ea-payments-3i0kae5e1-the-architects-projects-cc813778.vercel.app",
   "status": "PASS",
-  "completedAt": "2026-09-12T21:49:00.000Z",
+  "completedAt": "2026-09-12T22:40:00.000Z",
   "gates": {
-    "sourceIdentity": { "status": "PASS", "proof": "Factory Run 0 was developed on feat/factory-run0-autonomous-completion-20260912, reviewed through PR #381, and squash-merged to authoritative master as c6c5285986ce40fa359459ac2929e5b83e53d674." },
-    "build": { "status": "PASS", "proof": "PR #381 preview deployment dpl_7xtR2T7SPN2ouVeTDQmzjfx4f3Nv reached READY. CI run 34720878725 passed the full deploy build, resolver checks, and browser smoke." },
-    "assets": { "status": "PASS", "proof": "Run 0 changes Factory orchestration/capabilities, review-gate semantics, tests, CI, and architecture documentation only. No client presentation assets were changed." },
-    "functional": { "status": "PASS", "proof": "CI run 34720878725 passed the new Factory Run 0 autonomous completion certification plus existing Factory fulfillment, capability standards, Modular Assembly Runs 2-6, Control Plane, security, tenant isolation, release guardrails, recovery, Amanda checkout, Design Studio, Simplifi, browser smoke, and live customer recovery journeys." },
-    "desktopVisual": { "status": "PASS", "proof": "No client-facing desktop presentation delta. Full browser smoke passed on PR #381." },
+    "sourceIdentity": { "status": "PASS", "proof": "Factory Run 1 was developed on feat/factory-run1-mass-builders-20260912, reviewed through PR #383, and squash-merged to authoritative master as 00602c1beeee0c8223735e9701e8ce384dfc6674." },
+    "build": { "status": "PASS", "proof": "PR #383 Vercel preview dpl_AyAnWL1w7xGW8EedjtsdtjXEwZ2m reached READY. CI run 34721692414 completed successfully, including lint, dedicated Factory Run 1 certification, production build, resolver/browser smoke, and live customer recovery journeys." },
+    "assets": { "status": "PASS", "proof": "Run 1 changes Factory builder/orchestration contracts, QA validation, tests, CI, and architecture documentation only. No protected client presentation assets were changed." },
+    "functional": { "status": "PASS", "proof": "PR #383 CI, EA Client Protection Gate, EA Modular Assembly Run 6, and Graft Context Verification all passed. PortalBuilder, LearningBuilder, KnowledgeBuilder, and ReportBuilder are registered through the existing ProductionController and inherit mandatory execution contracts." },
+    "desktopVisual": { "status": "PASS", "proof": "No client-facing desktop presentation delta. Full browser smoke passed on PR #383." },
     "mobileVisual": { "status": "PASS", "proof": "No client-facing mobile presentation delta. Existing responsive/browser and recovery checks remained green." },
-    "creativeCritic": { "status": "PASS", "proof": "Run 0 does not auto-approve subjective creative work. The experience-concept gate remains human-reviewed, and Run 0 performs no external production auto-publication." }
+    "creativeCritic": { "status": "PASS", "proof": "Run 1 preserves human subjective creative approval and does not introduce external automatic publication. Structural builder gates may be auto-verified only from complete lineage evidence." }
   }
 }
