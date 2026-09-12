@@ -1,36 +1,15 @@
 {
-  "sourceCommit": "b34421fdffd9c9e7671dfdd6d57a66b603a78269",
-  "previewUrl": "https://ea-payments-mgc0wrvpv-the-architects-projects-cc813778.vercel.app",
+  "sourceCommit": "64d71b615c9d80db59a32d2faccd38cb8d4d0fb7",
+  "previewUrl": "https://ea-payments-q5l64jcre-the-architects-projects-cc813778.vercel.app",
   "status": "PASS",
-  "completedAt": "2026-09-12T09:31:55.000Z",
+  "completedAt": "2026-09-12T09:39:28.000Z",
   "gates": {
-    "sourceIdentity": {
-      "status": "PASS",
-      "proof": "merged-source:b34421fdffd9c9e7671dfdd6d57a66b603a78269; preview-source:30640237134e611e47f6a1dc3a9677d24ede3932; git-compare:0-files-tree-equivalent"
-    },
-    "build": {
-      "status": "PASS",
-      "proof": "CI run 34685906405 success; Graft Context run 34685906394 success; EA Client Protection Gate run 34685906396 success; Vercel preview dpl_64QDFoMFsj3VCj84J5TY4m32BJoK READY"
-    },
-    "assets": {
-      "status": "PASS",
-      "proof": "Run 2 changed release policy and verification infrastructure only; no client presentation assets changed; generalized production protection and browser smoke passed."
-    },
-    "functional": {
-      "status": "PASS",
-      "proof": "EA System Registry, production protection, focused tenant release safety, release guardrails, recovery orchestrator, recovery monitoring, Factory fulfillment, Amanda checkout, Design Studio, Simplifi hardening, deploy smoke, and live recovery journeys all passed in CI run 34685906405."
-    },
-    "desktopVisual": {
-      "status": "PASS",
-      "proof": "No client-facing presentation delta in Run 2; full browser smoke passed against the release source."
-    },
-    "mobileVisual": {
-      "status": "PASS",
-      "proof": "No client-facing mobile presentation delta in Run 2; responsive customer-journey smoke remained green."
-    },
-    "creativeCritic": {
-      "status": "PASS",
-      "proof": "Run 2 is reliability and release-governance infrastructure only; no creative, brand, copy, or client presentation changes were made."
-    }
+    "sourceIdentity": { "status": "PASS", "proof": "PR #367 head 64d71b615c9d80db59a32d2faccd38cb8d4d0fb7; merged as 63f77d1c801082039657471c2cc763a899e2a2a5; preview deployment dpl_GkTNBFdkmAkmXuwoCzzBKamjCgAw READY." },
+    "build": { "status": "PASS", "proof": "CI run 34686278506 completed successfully including lint, build, browser smoke, and recovery journeys." },
+    "assets": { "status": "PASS", "proof": "Run 3 adds control-plane reconciliation infrastructure only; no client presentation assets changed." },
+    "functional": { "status": "PASS", "proof": "Control-plane reconciliation contract plus existing registry, tenant, release, recovery, Factory, Amanda, Design Studio, Simplifi, deploy smoke, and live recovery checks passed." },
+    "desktopVisual": { "status": "PASS", "proof": "No client-facing presentation delta; browser smoke passed." },
+    "mobileVisual": { "status": "PASS", "proof": "No client-facing mobile presentation delta; customer journey checks passed." },
+    "creativeCritic": { "status": "PASS", "proof": "Run 3 contains no creative, brand, copy, or presentation changes." }
   }
 }
