@@ -2,54 +2,21 @@
   "version": 1,
   "run": 4,
   "certifications": [
-    {
-      "id": "intake",
-      "assemblyStatus": "certified",
-      "costLicenseDecision": "approved",
-      "boundary": "Existing EA portal route and application services only; no new paid vendor dependency",
-      "evidence": ["module-registry-contract", "run3-business-wave-contract", "portal-build-smoke"]
-    },
-    {
-      "id": "applications",
-      "assemblyStatus": "certified",
-      "costLicenseDecision": "approved",
-      "boundary": "Existing EA portal route and application services only; no new paid vendor dependency",
-      "evidence": ["module-registry-contract", "run3-business-wave-contract", "portal-build-smoke"]
-    },
-    {
-      "id": "reports",
-      "assemblyStatus": "certified",
-      "costLicenseDecision": "approved",
-      "boundary": "Existing EA portal route and application services only; no new paid vendor dependency",
-      "evidence": ["module-registry-contract", "run3-business-wave-contract", "portal-build-smoke"]
-    },
-    {
-      "id": "member",
-      "assemblyStatus": "certified",
-      "costLicenseDecision": "approved",
-      "boundary": "EA-owned Member Experience route and existing tenant/member data only; no new vendor account or per-client license required",
-      "evidence": ["module-registry-contract", "run4-starter-package-contract", "portal-build-smoke"]
-    },
-    {
-      "id": "settings",
-      "assemblyStatus": "certified",
-      "costLicenseDecision": "approved",
-      "boundary": "EA-owned portal preferences and business-presence surfaces only; no new vendor account or per-client license required",
-      "evidence": ["module-registry-contract", "run4-starter-package-contract", "portal-build-smoke"]
-    },
-    {
-      "id": "events",
-      "assemblyStatus": "certified",
-      "costLicenseDecision": "approved",
-      "boundary": "EA Calendar & Event Hub route, shared scheduling, and EA registration ledger are certified. Pretix is an optional extension only and remains isolated from the assembly requirement; no Pretix account is required to provision the module.",
-      "evidence": ["module-registry-contract", "run4-starter-package-contract", "events-optional-provider-contract", "portal-build-smoke"]
-    },
-    {
-      "id": "billing",
-      "assemblyStatus": "certified",
-      "costLicenseDecision": "approved",
-      "boundary": "EA billing workspace, authorization boundary, and existing platform-managed Stripe adapter are certified. No client Stripe account or per-client software license is required for provisioning; payment-processing charges apply only when commerce is used.",
-      "evidence": ["module-registry-contract", "run4-starter-package-contract", "billing-platform-adapter-contract", "portal-build-smoke"]
-    }
+    {"id":"intake","assemblyStatus":"certified","costLicenseDecision":"approved","boundary":"Existing EA portal route and application services only; no new paid vendor dependency","evidence":["module-registry-contract","run3-business-wave-contract","portal-build-smoke"]},
+    {"id":"applications","assemblyStatus":"certified","costLicenseDecision":"approved","boundary":"Existing EA portal route and application services only; no new paid vendor dependency","evidence":["module-registry-contract","run3-business-wave-contract","portal-build-smoke"]},
+    {"id":"reports","assemblyStatus":"certified","costLicenseDecision":"approved","boundary":"Existing EA portal route and application services only; no new paid vendor dependency","evidence":["module-registry-contract","run3-business-wave-contract","portal-build-smoke"]},
+    {"id":"member","assemblyStatus":"certified","costLicenseDecision":"approved","boundary":"EA-owned Member Experience route and existing tenant/member data only; no new vendor account or per-client license required","evidence":["module-registry-contract","run4-starter-package-contract","portal-build-smoke"]},
+    {"id":"settings","assemblyStatus":"certified","costLicenseDecision":"approved","boundary":"EA-owned portal preferences and business-presence surfaces only; no new vendor account or per-client license required","evidence":["module-registry-contract","run4-starter-package-contract","portal-build-smoke"]},
+    {"id":"events","assemblyStatus":"certified","costLicenseDecision":"approved","boundary":"EA Calendar & Event Hub route, shared scheduling, and EA registration ledger are certified. Pretix is an optional extension only and remains isolated from the assembly requirement; no Pretix account is required to provision the module.","evidence":["module-registry-contract","run4-starter-package-contract","events-optional-provider-contract","portal-build-smoke"]},
+    {"id":"billing","assemblyStatus":"certified","costLicenseDecision":"approved","boundary":"EA billing workspace, authorization boundary, and existing platform-managed Stripe adapter are certified. No client Stripe account or per-client software license is required for provisioning; payment-processing charges apply only when commerce is used.","evidence":["module-registry-contract","run4-starter-package-contract","billing-platform-adapter-contract","portal-build-smoke"]},
+    {"id":"landing","assemblyStatus":"certified","costLicenseDecision":"approved","boundary":"EA-owned live-site and Experience Builder workspace surfaces using existing EA publish services; no new vendor account or per-client license required","evidence":["module-registry-contract","run4-canonical-entitlement-contract","portal-build-smoke"]},
+    {"id":"pulse","assemblyStatus":"certified","costLicenseDecision":"approved","boundary":"EA-owned Pulse operational-health and tenant activity surfaces using existing EA data services; no new vendor account or per-client license required","evidence":["module-registry-contract","run4-canonical-entitlement-contract","portal-build-smoke"]},
+    {"id":"ctp","assemblyStatus":"certified","costLicenseDecision":"approved","boundary":"EA-owned Consider the Possibilities workspace and existing CTP project-state services; no new vendor account or per-client license required","evidence":["module-registry-contract","run4-canonical-entitlement-contract","portal-build-smoke"]},
+    {"id":"messaging","assemblyStatus":"certified","costLicenseDecision":"approved","boundary":"EA-owned messaging surface backed by Update Hub and existing portal communication services. Novu is not required for this certified boundary and remains an optional future provider extension.","evidence":["module-registry-contract","run4-canonical-entitlement-contract","messaging-native-boundary","portal-build-smoke"]},
+    {"id":"documents","assemblyStatus":"certified","costLicenseDecision":"approved","boundary":"EA-owned Document Hub using existing tenant uploads, CTP deliverables, and Update Hub files. Documenso is not required for this certified boundary and remains isolated as an optional signing provider.","evidence":["module-registry-contract","run4-canonical-entitlement-contract","documents-native-boundary","portal-build-smoke"]},
+    {"id":"training","assemblyStatus":"certified","costLicenseDecision":"approved","boundary":"EA-owned Training Hub and existing published-training/course services; no new vendor account or per-client license required","evidence":["module-registry-contract","run4-canonical-entitlement-contract","portal-build-smoke"]},
+    {"id":"resources","assemblyStatus":"certified","costLicenseDecision":"approved","boundary":"EA-owned Resource Library using existing tenant resources and workspace links; no new vendor account or per-client license required","evidence":["module-registry-contract","run4-canonical-entitlement-contract","portal-build-smoke"]},
+    {"id":"ask","assemblyStatus":"certified","costLicenseDecision":"approved","boundary":"EA-owned Guide request surface using existing portal and Update Hub services; no new vendor account or per-client license required","evidence":["module-registry-contract","run4-canonical-entitlement-contract","portal-build-smoke"]},
+    {"id":"connect","assemblyStatus":"certified","costLicenseDecision":"approved","boundary":"EA-owned Connect relationship-capture workspace and existing EA routing services; no new vendor account or per-client software license required for provisioning","evidence":["module-registry-contract","run4-canonical-entitlement-contract","portal-build-smoke"]}
   ]
 }
