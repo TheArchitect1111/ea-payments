@@ -1,6 +1,84 @@
 {
-  "version": 2,
+  "version": 3,
   "clients": [
+    {
+      "id": "ea-platform",
+      "name": "Efficiency Architects Platform",
+      "publicUrls": [
+        "https://efficiencyarchitects.online/"
+      ],
+      "platformRoutes": [
+        "/portal/login",
+        "/amplifi"
+      ],
+      "protectedSourceFiles": [
+        "lib/canonical-project-registry.ts",
+        "ECOSYSTEM-MAP.md",
+        "SECURITY-MODEL.md",
+        "DEPLOYMENT-REGISTRY.md"
+      ],
+      "sourceContracts": [
+        {
+          "path": "lib/canonical-project-registry.ts",
+          "mustContain": [
+            "EA-PLATFORM",
+            "https://efficiencyarchitects.online",
+            "TheArchitect1111/ea-payments",
+            "ea-payments"
+          ]
+        },
+        {
+          "path": "SECURITY-MODEL.md",
+          "mustContain": [
+            "Missing or malformed roles resolve to no privilege",
+            "Privileged tenant operations require a persisted organization ID",
+            "Client-supplied tenant IDs must be ignored or checked against the authenticated session"
+          ]
+        },
+        {
+          "path": "DEPLOYMENT-REGISTRY.md",
+          "mustContain": [
+            "TheArchitect1111/ea-payments",
+            "Default branch",
+            "master",
+            "Vercel project",
+            "ea-payments"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "amplifi",
+      "name": "Amplifi by Efficiency Architects",
+      "publicUrls": [
+        "https://efficiencyarchitects.online/amplifi"
+      ],
+      "platformRoutes": [
+        "/amplifi",
+        "/amplifi/workspace"
+      ],
+      "protectedSourceFiles": [
+        "app/amplifi/page.tsx",
+        "lib/canonical-project-registry.ts"
+      ],
+      "sourceContracts": [
+        {
+          "path": "app/amplifi/page.tsx",
+          "mustContain": [
+            "Amplifi"
+          ]
+        },
+        {
+          "path": "lib/canonical-project-registry.ts",
+          "mustContain": [
+            "AMPLIFI",
+            "https://efficiencyarchitects.online/amplifi",
+            "app/amplifi",
+            "ea-payments"
+          ]
+        }
+      ]
+    },
     {
       "id": "amanda-catherine",
       "name": "Amanda Catherine",
