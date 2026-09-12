@@ -1,15 +1,15 @@
 {
-  "sourceCommit": "b2535e8c1982cd2573ae25c9b1301bdcc36cb5cc",
-  "previewUrl": "https://ea-payments-ehmtcj7sq-the-architects-projects-cc813778.vercel.app",
+  "sourceCommit": "a2fb5c38629b2b5c8c53702fc36e1524fd016bd7",
+  "previewUrl": "https://ea-payments-iicize47n-the-architects-projects-cc813778.vercel.app",
   "status": "PASS",
-  "completedAt": "2026-09-12T21:25:08.000Z",
+  "completedAt": "2026-09-12T10:11:42.000Z",
   "gates": {
-    "sourceIdentity": { "status": "PASS", "proof": "PR #377 head a48d01635103973a26daac09fe39da1e5e42cff3 passed CI, EA Client Protection Gate, Graft Context Verification, Modular Assembly Runs 3, 4, and 6, and was merged to master as b2535e8c1982cd2573ae25c9b1301bdcc36cb5cc." },
-    "build": { "status": "PASS", "proof": "CI workflow run 34719014906 passed on PR #377 head a48d01635103973a26daac09fe39da1e5e42cff3; preview deployment dpl_8ZeEj33PJTSvdbx8nVnQg7jbo6qt is READY." },
-    "assets": { "status": "PASS", "proof": "Run 6 changes assembly certification, durable evidence, CI, and documentation. No client presentation assets changed." },
-    "functional": { "status": "PASS", "proof": "CI run 34719014906 and dedicated EA Modular Assembly Run 6 workflow 34719014958 completed successfully. Certified Starter assembly, durable evidence, Simplifi admission, fail-closed unresolved capabilities, and protection gates passed." },
-    "desktopVisual": { "status": "PASS", "proof": "No client-facing presentation delta in Run 6; READY preview confirms deployable build." },
-    "mobileVisual": { "status": "PASS", "proof": "No client-facing mobile presentation delta in Run 6; existing browser and customer-journey coverage remained green in CI." },
-    "creativeCritic": { "status": "PASS", "proof": "Run 6 contains no creative, brand, copy, or presentation changes requiring visual redesign." }
+    "sourceIdentity": { "status": "PASS", "proof": "PR #370 head dc2a0c57f77cb91bd1b346a1f66c1e092fab6720 passed CI, EA Client Protection Gate, and Graft Context Verification and was squash-merged as a2fb5c38629b2b5c8c53702fc36e1524fd016bd7." },
+    "build": { "status": "PASS", "proof": "CI run 34687659269 passed lint, Run 4 reliability, Run 5 scale/failure certification, full build, resolver/browser smoke, and live customer recovery journeys; preview dpl_CeveYRaYPX7jwphcXR9rBqaoPTgv READY." },
+    "assets": { "status": "PASS", "proof": "Run 5 adds certification infrastructure and documentation only; no client presentation assets changed." },
+    "functional": { "status": "PASS", "proof": "40-tenant/1000-key concurrency, 2000-operation burst, provider outage classification, retry/circuit behavior, durable FAILED/dead-letter contracts, tenant isolation, rollback/release safety, backup destination reachability, corrupt-config/missing-asset detection, and isolated clean-room restore all passed. Existing Control Plane, recovery, Factory, Amanda, Design Studio, Simplifi, deployment smoke, and customer journey checks also passed." },
+    "desktopVisual": { "status": "PASS", "proof": "No client-facing presentation delta; browser smoke passed." },
+    "mobileVisual": { "status": "PASS", "proof": "No client-facing mobile presentation delta; customer recovery journeys passed." },
+    "creativeCritic": { "status": "PASS", "proof": "Run 5 contains no creative, brand, copy, or presentation changes." }
   }
 }
