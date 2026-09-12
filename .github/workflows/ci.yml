@@ -30,6 +30,8 @@ jobs:
         run: npm run lint
       - name: Verify EA System Registry contract
         run: node scripts/test-system-registry.mjs
+      - name: Verify EA Control Plane reconciliation contract
+        run: npx tsx scripts/test-control-plane.ts
       - name: Verify generalized production protection contracts
         run: node scripts/test-production-protection.mjs
       - name: Verify tenant isolation and authorization release contracts
