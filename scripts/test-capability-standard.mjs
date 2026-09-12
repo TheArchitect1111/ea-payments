@@ -59,27 +59,27 @@ const moduleIdsMatch = registry.match(/export const MODULE_IDS = \[([\s\S]*?)\] 
 const registryIds = moduleIdsMatch
   ? [...moduleIdsMatch[1].matchAll(/'([^']+)'/g)].map((match) => match[1])
   : [];
-const inventoryById = new Map(inventory.modules.map((module) => [module.id, module]));
+const inventoryById = new Map(inventory.modules.map((capabilityModule) => [capabilityModule.id, capabilityModule]));
 assert(registryIds.length > 0, 'could not parse module registry ids');
 assert(
   inventory.modules.length === registryIds.length,
   'inventory must classify every registered module exactly once',
 );
 assert(
-  new Set(inventory.modules.map((module) => module.id)).size === inventory.modules.length,
+  new Set(inventory.modules.map((capabilityModule) => capabilityModule.id)).size === inventory.modules.length,
   'inventory contains duplicate module ids',
 );
 for (const id of registryIds) {
   assert(inventoryById.has(id), `inventory missing registered module ${id}`);
 }
-for (const module of inventory.modules) {
-  assert(registryIds.includes(module.id), `inventory contains unknown module ${module.id}`);
+for (const capabilityModule of inventory.modules) {
+  assert(registryIds.includes(capabilityModule.id), `inventory contains unknown module ${capabilityModule.id}`);
   assert(
-    ['core', 'business', 'specialized'].includes(module.class),
-    `${module.id} has invalid class ${module.class}`,
+    ['core', 'business', 'specialized'].includes(capabilityModule.class),
+    `${capabilityModule.id} has invalid class ${capabilityModule.class}`,
   );
   for (const field of required) {
-    assert(Object.hasOwn(module, field), `${module.id} missing contract field ${field}`);
+    assert(Object.hasOwn(capabilityModule, field), `${capabilityModule.id} missing contract field ${field}`);
   }
 }
 
@@ -87,24 +87,29 @@ const targetClasses = Object.entries(standard.classes).flatMap(([className, valu
   value.target.map((id) => [id, className]),
 );
 for (const [id, expectedClass] of targetClasses) {
-  const module = inventoryById.get(id);
-  assert(module, `standard target ${id} missing from inventory`);
-  if (module) assert(module.class === expectedClass, `${id} must be classified ${expectedClass}`);
+  const capabilityModule = inventoryById.get(id);
+  assert(capabilityModule, `standard target ${id} missing from inventory`);
+  if (capabilityModule) {
+    assert(capabilityModule.class === expectedClass, `${id} must be classified ${expectedClass}`);
+  }
 }
 
 const certifiedCore = inventory.modules.filter(
-  (module) => module.class === 'core' && module.assemblyStatus === 'certified',
+  (capabilityModule) => capabilityModule.class === 'core' && capabilityModule.assemblyStatus === 'certified',
 );
 assert(
   certifiedCore.length === standard.classes.core.target.length,
   'every core target must be certified before universal-core expansion',
 );
 for (const id of standard.classes.core.target) {
-  const module = inventoryById.get(id);
-  assert(module?.assemblyStatus === 'certified', `${id} must be certified core`);
-  assert(module?.costLicense?.decision === 'approved', `${id} cost/license decision must be approved`);
+  const capabilityModule = inventoryById.get(id);
+  assert(capabilityModule?.assemblyStatus === 'certified', `${id} must be certified core`);
   assert(
-    module?.provisioning?.required === true,
+    capabilityModule?.costLicense?.decision === 'approved',
+    `${id} cost/license decision must be approved`,
+  );
+  assert(
+    capabilityModule?.provisioning?.required === true,
     `${id} must provision automatically with every tenant`,
   );
 }
@@ -120,11 +125,13 @@ for (const id of standard.classes.core.target) {
   );
 }
 
-const uncertified = inventory.modules.filter((module) => module.assemblyStatus !== 'certified');
-for (const module of uncertified) {
+const uncertified = inventory.modules.filter(
+  (capabilityModule) => capabilityModule.assemblyStatus !== 'certified',
+);
+for (const capabilityModule of uncertified) {
   assert(
-    module.costLicense?.decision !== 'approved' || module.assemblyStatus === 'certified',
-    `${module.id} cannot be silently approved before certification`,
+    capabilityModule.costLicense?.decision !== 'approved' || capabilityModule.assemblyStatus === 'certified',
+    `${capabilityModule.id} cannot be silently approved before certification`,
   );
 }
 
