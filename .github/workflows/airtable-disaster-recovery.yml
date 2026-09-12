@@ -2,6 +2,13 @@ name: EA Airtable Disaster Recovery
 
 on:
   workflow_dispatch:
+  push:
+    branches: [master]
+    paths:
+      - 'scripts/export-airtable-recovery.mjs'
+      - 'scripts/restore-airtable-recovery.py'
+      - '.github/workflows/airtable-disaster-recovery.yml'
+      - 'docs/governance/AIRTABLE-DISASTER-RECOVERY.md'
   schedule:
     - cron: '17 5 * * *'
 
@@ -68,7 +75,7 @@ jobs:
               raise SystemExit(1)
           PY
 
-      - name: Upload encrypted-at-rest GitHub recovery artifact
+      - name: Upload recovery artifact outside Airtable
         uses: actions/upload-artifact@v4
         with:
           name: ea-airtable-recovery-${{ github.run_id }}
