@@ -46,6 +46,10 @@ jobs:
         run: node scripts/test-capability-standard.mjs
       - name: Certify EA Modular Assembly Run 2
         run: npx tsx scripts/test-modular-assembly-run2.ts
+      - name: Verify EA Modular Assembly Run 3
+        run: npx tsx scripts/test-modular-assembly-run3.ts
+      - name: Certify EA Modular Assembly Run 4 Starter package
+        run: npx tsx scripts/test-modular-assembly-run4.ts
       - name: Verify EA System Registry contract
         run: node scripts/test-system-registry.mjs
       - name: Verify EA Control Plane reconciliation contract
