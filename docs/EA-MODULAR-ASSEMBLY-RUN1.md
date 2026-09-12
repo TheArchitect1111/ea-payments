@@ -1,6 +1,6 @@
 # EA Modular Assembly — Run 1
 
-Status: implementation complete pending CI/merge
+Status: implementation complete
 
 ## Objective
 
@@ -14,6 +14,8 @@ Classify the complete current EA module registry against the Run 0 capability st
 - Updated `CHASSIS_STANDARD_MODULE_IDS` so Amplifi is automatically included in every portal alongside Dashboard and Update Hub.
 - Left every non-core module fail-closed at `inventoried` status until its dependencies, integrations, provisioning, tests, rollback, and cost/license boundary are specifically certified.
 - Expanded `scripts/test-capability-standard.mjs` so CI rejects registry/inventory drift, missing contract fields, duplicate/unknown module ids, class mismatches, uncertified core targets, unapproved core cost/license boundaries, and certified core modules that are not enforced by the chassis.
+- Added lint diagnostics capture to CI so future lint failures produce a short-lived artifact instead of an opaque failure.
+- Added the Run 1 capability certification as an explicit CI step.
 
 ## Universal core after Run 1
 
