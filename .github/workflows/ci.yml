@@ -34,6 +34,8 @@ jobs:
         run: npx tsx scripts/test-control-plane.ts
       - name: Verify Run 4 durable reliability contracts
         run: npx tsx scripts/test-run4-reliability.ts
+      - name: Certify Run 5 scale and failure contracts
+        run: npx tsx scripts/test-run5-scale-certification.ts
       - name: Verify generalized production protection contracts
         run: node scripts/test-production-protection.mjs
       - name: Verify tenant isolation and authorization release contracts
