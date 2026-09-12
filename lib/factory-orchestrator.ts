@@ -49,16 +49,11 @@ export type OrchestratorStepResult = {
   capabilityId: string | null;
 };
 
-/**
- * Single orchestration step: discover at most one Capability from the registry.
- */
 export async function orchestrateOnce(projectId: string): Promise<OrchestratorStepResult> {
   bootstrapCapabilityRegistry();
   await ensureProjectContext(projectId);
   const context = await loadProjectContext(projectId);
-  if (!context) {
-    return { project: null, dispatched: false, worker: null, capabilityId: null };
-  }
+  if (!context) return { project: null, dispatched: false, worker: null, capabilityId: null };
 
   const status = context.pipelineStatus;
   console.info('[factory-orchestrator] inspect context', {
@@ -69,30 +64,20 @@ export async function orchestrateOnce(projectId: string): Promise<OrchestratorSt
   });
 
   if (status === 'CANCELLED' || status === 'FAILED') {
-    return {
-      project: await getProject(projectId),
-      dispatched: false,
-      worker: null,
-      capabilityId: null,
-    };
+    return { project: await getProject(projectId), dispatched: false, worker: null, capabilityId: null };
   }
 
-  if (status === 'UNDER_REVIEW') {
+  // UNDER_REVIEW is terminal only after the Run 0 notification receipt exists.
+  // Before that, the Notification capability must still be allowed to run.
+  if (status === 'UNDER_REVIEW' && context.outputs.some((item) => item.kind === 'notification')) {
     const project = await getProject(projectId);
-    if (project?.launchId) {
-      return { project, dispatched: false, worker: null, capabilityId: null };
-    }
+    return { project, dispatched: false, worker: null, capabilityId: null };
   }
 
   const capability = discoverNextFromRegistry(context);
   if (!capability) {
     console.info('[factory-orchestrator] no capability runnable', { projectId, status });
-    return {
-      project: await getProject(projectId),
-      dispatched: false,
-      worker: null,
-      capabilityId: null,
-    };
+    return { project: await getProject(projectId), dispatched: false, worker: null, capabilityId: null };
   }
 
   console.info('[factory-orchestrator] dispatch capability', {
@@ -111,9 +96,7 @@ export async function orchestrateOnce(projectId: string): Promise<OrchestratorSt
     durationMs,
     slow: durationMs > 90_000,
   });
-  if (result.project && result.ran) {
-    await emitStatusPulse(result.project);
-  }
+  if (result.project && result.ran) await emitStatusPulse(result.project);
 
   return {
     project: result.project,
@@ -125,10 +108,7 @@ export async function orchestrateOnce(projectId: string): Promise<OrchestratorSt
 
 /**
  * Run one orchestration step, then auto-chain the next in a fresh background job.
- *
- * Why one step: Vercel `after()` / request budgets often die mid-pipeline if we run
- * intake→research→discovery→… in a single pass. Chaining keeps Launch automatic
- * without asking a human to click Continue.
+ * One step per job protects Vercel request budgets while preserving full automation.
  */
 export async function runFactoryOrchestrator(projectId: string): Promise<FactoryProject | null> {
   let project = await getProject(projectId);
@@ -142,30 +122,17 @@ export async function runFactoryOrchestrator(projectId: string): Promise<Factory
 
   await ensureProjectContext(projectId);
   bootstrapCapabilityRegistry();
-
-  console.info('[factory-orchestrator] start', {
-    projectId,
-    status: project?.pipelineStatus,
-  });
+  console.info('[factory-orchestrator] start', { projectId, status: project?.pipelineStatus });
 
   const result = await orchestrateOnce(projectId);
   project = result.project;
+  console.info(result.dispatched ? '[factory-orchestrator] dispatched' : '[factory-orchestrator] idle', {
+    projectId,
+    capabilityId: result.capabilityId,
+    worker: result.worker,
+    status: project?.pipelineStatus,
+  });
 
-  if (result.dispatched) {
-    console.info('[factory-orchestrator] dispatched', {
-      projectId,
-      capabilityId: result.capabilityId,
-      worker: result.worker,
-      status: project?.pipelineStatus,
-    });
-  } else {
-    console.info('[factory-orchestrator] idle', {
-      projectId,
-      status: project?.pipelineStatus,
-    });
-  }
-
-  // Always chain while work remains — this is the automatic Factory conveyor.
   await ensureProjectContext(projectId);
   const leftover = await loadProjectContext(projectId);
   if (leftover && discoverNextFromRegistry(leftover)) {
@@ -176,8 +143,6 @@ export async function runFactoryOrchestrator(projectId: string): Promise<Factory
     const { scheduleFactoryGenerateJob } = await import('@/lib/factory-queue');
     scheduleFactoryGenerateJob(projectId);
   } else if (leftover) {
-    // After production reaches BUILDING with experience_concepts, run identity gate +
-    // concept previews once (idempotent). Never auto-publishes.
     const idleProject = await getProject(projectId);
     if (idleProject) {
       const {
@@ -189,18 +154,11 @@ export async function runFactoryOrchestrator(projectId: string): Promise<Factory
         try {
           const pack = await runPostBuildConceptPack(projectId);
           if (!pack.ok && pack.blocked) {
-            console.info('[factory-orchestrator] identity gate blocked concepts', {
-              projectId,
-              error: pack.error,
-            });
+            console.info('[factory-orchestrator] identity gate blocked concepts', { projectId, error: pack.error });
           } else if (!pack.ok) {
             console.error('[factory-orchestrator] concept pack failed', projectId, pack.error);
           } else {
-            console.info('[factory-orchestrator] concept pack', {
-              projectId,
-              skipped: pack.skipped,
-              reason: pack.reason,
-            });
+            console.info('[factory-orchestrator] concept pack', { projectId, skipped: pack.skipped, reason: pack.reason });
           }
         } catch (err) {
           console.error('[factory-orchestrator] concept pack threw', projectId, err);
@@ -208,7 +166,7 @@ export async function runFactoryOrchestrator(projectId: string): Promise<Factory
       }
     }
 
-    // No more automatic work — email once (done). Failures notify separately.
+    // Backward-compatible safety net. The Notification capability normally handles this first.
     try {
       const { notifyFactoryDone } = await import('@/lib/factory-notify');
       const notified = await notifyFactoryDone(projectId);
@@ -232,6 +190,8 @@ export const ORCHESTRATOR_DRAIN_STATUSES: FactoryPipelineStatus[] = [
   'DISCOVERING',
   'PLANNING',
   'BUILDING',
+  'QA',
+  'PUBLISHING',
   'GENERATING',
 ];
 
@@ -239,9 +199,7 @@ export async function failOrchestration(
   projectId: string,
   message: string,
 ): Promise<FactoryProject | null> {
-  const failed = await transitionFactoryProject(projectId, 'FAILED', 'generate', message, {
-    error: message,
-  });
+  const failed = await transitionFactoryProject(projectId, 'FAILED', 'generate', message, { error: message });
   try {
     const { notifyFactoryFailed } = await import('@/lib/factory-notify');
     await notifyFactoryFailed(projectId);
