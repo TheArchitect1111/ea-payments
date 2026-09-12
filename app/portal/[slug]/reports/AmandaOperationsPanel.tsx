@@ -5,18 +5,24 @@ import { listPretixEventsForPortal } from '@/lib/events/pretix-store';
 import { AMANDA_COURSES } from '@/lib/amanda-catherine/config';
 import { listAmandaCourseProgress } from '@/lib/amanda-catherine/progress-store';
 
+function settledArray<T>(result: PromiseSettledResult<T>): T extends unknown[] ? T : never[] {
+  return (result.status === 'fulfilled' && Array.isArray(result.value) ? result.value : []) as T extends unknown[] ? T : never[];
+}
+
 export default async function AmandaOperationsPanel({ slug }: { slug: string }) {
-  const [submissionResult, registrationResult, eventResult, progressResult] = await Promise.all([
+  const [submissionResult, registrationResult, eventResult, progressResult] = await Promise.allSettled([
     listPortalFormSubmissions(slug),
     listRegistrationsForPortal(slug),
     listPretixEventsForPortal(slug, { includeDrafts: true }),
     listAmandaCourseProgress(slug),
   ]);
 
-  const submissions = Array.isArray(submissionResult) ? submissionResult : [];
-  const registrations = Array.isArray(registrationResult) ? registrationResult : [];
-  const events = Array.isArray(eventResult) ? eventResult : [];
-  const courseProgress = Array.isArray(progressResult) ? progressResult : [];
+  const submissions = settledArray(submissionResult);
+  const registrations = settledArray(registrationResult);
+  const events = settledArray(eventResult);
+  const courseProgress = settledArray(progressResult);
+  const degradedSources = [submissionResult, registrationResult, eventResult, progressResult]
+    .filter((result) => result.status === 'rejected').length;
 
   const applications = submissions.filter((item) => item.kind === 'application');
   const intakes = submissions.filter((item) => item.kind === 'intake');
@@ -42,6 +48,11 @@ export default async function AmandaOperationsPanel({ slug }: { slug: string }) 
 
   return (
     <section style={{ marginBottom: 24 }}>
+      {degradedSources > 0 ? (
+        <p className="ep-module-card-note" role="status">
+          Some live operational data is temporarily unavailable. Available information is shown below and will refresh automatically when the source recovers.
+        </p>
+      ) : null}
       <div className="ep-metrics-grid">
         {metrics.map(([label, value]) => (
           <div key={label} className="ep-metric-card">
