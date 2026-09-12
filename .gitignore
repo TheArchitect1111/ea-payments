@@ -17,3 +17,6 @@ video-factory/renders/
 
 # Graft local regenerable code graph
 graft/
+
+# EA disaster-recovery exports contain production data. Never commit them.
+.recovery/
