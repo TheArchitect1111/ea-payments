@@ -54,6 +54,8 @@ jobs:
         run: npx tsx scripts/test-modular-assembly-run5.ts
       - name: Certify EA Modular Assembly Run 6 capability wave
         run: npx tsx scripts/test-modular-assembly-run6.ts
+      - name: Verify Factory Run 0 autonomous completion
+        run: node scripts/test-factory-run0-autonomous-completion.mjs
       - name: Verify EA System Registry contract
         run: node scripts/test-system-registry.mjs
       - name: Verify EA Control Plane reconciliation contract
