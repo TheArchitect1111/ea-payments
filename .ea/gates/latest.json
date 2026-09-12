@@ -1,36 +1,36 @@
 {
-  "sourceCommit": "0b6366b697c674f130f7088a9828f78bf4df6691",
-  "previewUrl": "https://ea-payments-mxtsotond-the-architects-projects-cc813778.vercel.app",
+  "sourceCommit": "5bbe0e6a633c0522d54e97c7a4ea8636e26364d7",
+  "previewUrl": "https://ea-payments-rekth7dhb-the-architects-projects-cc813778.vercel.app",
   "status": "PASS",
-  "completedAt": "2026-09-11T19:52:00.000Z",
+  "completedAt": "2026-09-12T08:59:55.000Z",
   "gates": {
     "sourceIdentity": {
       "status": "PASS",
-      "proof": "merged-source:0b6366b697c674f130f7088a9828f78bf4df6691; preview-source:770b6225551f3db78e796d4de82c1dfd1f80df22; git-compare:0-files-tree-equivalent"
+      "proof": "merged-source:5bbe0e6a633c0522d54e97c7a4ea8636e26364d7; preview-source:4ea558455649112d9aa6f12f4cb12b2c381e7ab1; tree:5eddaec9109960b4148333fd9c165c33330c830e; git-compare:0-files-tree-equivalent"
     },
     "build": {
       "status": "PASS",
-      "proof": "CI run 34641004725 success; Graft Context run 34641004630 success; EA Client Protection Gate run 34641004671 success; Vercel preview dpl_G4HF6v2mNTAg8t8EgAXDc65DwxEh READY"
+      "proof": "CI run 34684427923 success; Graft Context run 34684427938 success; EA Client Protection Gate run 34684427911 success; Vercel preview dpl_8yxE4epRxKw2i2GPazEVdBfgrgDR READY"
     },
     "assets": {
       "status": "PASS",
-      "proof": "No client presentation assets changed; existing live customer journey suite passed across EA, Amplifi, Amanda public, Amanda portal entry, and CPR"
+      "proof": "Run 1 changed no client presentation assets; generalized production protection and live customer recovery journeys passed."
     },
     "functional": {
       "status": "PASS",
-      "proof": "Run 3 self-healing certification passed: successful isolated repair; failed repair triggers known rollback and re-verification; failed rollback remains unhealthy; provider failures escalate; shared-platform mutation fails closed; disabled execution flag prevents mutation"
+      "proof": "EA System Registry contract passed; 25/25 Universal Manifest projection verified with stable Registry IDs and registry-v1 desired-state version; EA-only Pulse control-plane gating compiled and deploy smoke passed."
     },
     "desktopVisual": {
       "status": "PASS",
-      "proof": "No presentation-layer delta; full deploy smoke and live customer journeys passed"
+      "proof": "Presentation delta is confined to the authenticated internal EA Pulse route and reuses existing Pulse card/grid classes; final branch preview is READY; no public or client visual surface changed."
     },
     "mobileVisual": {
       "status": "PASS",
-      "proof": "No presentation-layer delta; existing full deploy smoke and client protection gates passed"
+      "proof": "Internal EA Pulse control-plane panel uses the existing responsive Pulse grid/list components; build and deploy smoke passed; no client-facing mobile surface changed."
     },
     "creativeCritic": {
       "status": "PASS",
-      "proof": "Run 3 is recovery certification infrastructure; no creative presentation delta"
+      "proof": "Run 1 introduces operational control-plane information architecture only; no client brand, asset, or creative presentation changes were made."
     }
   }
 }
