@@ -4,6 +4,7 @@
  */
 import { ensureOrganizationForPortal } from '@/lib/organizations';
 import { ensurePackageEntitlements } from '@/lib/modules/portal-modules';
+import { requireClientFactoryAssembly } from '@/lib/modules/client-factory-assembly';
 import { listOsCapabilitiesByLifecycle } from '@/lib/os-capability-taxonomy';
 import type { OsLifecycleTag } from '@/lib/os-lifecycle';
 
@@ -14,6 +15,9 @@ export type TenantFoundationInput = {
   clientRecordId?: string;
   packagePurchased: string;
   commerceOfferId?: string;
+  /** New automated Client Factory writes must opt into the certified Run 3 boundary. */
+  assemblyMode?: 'legacy' | 'certified';
+  requestedModuleIds?: readonly string[];
 };
 
 /** Light taxonomy hook — foundation sits at organize + communicate readiness. */
@@ -28,6 +32,15 @@ export async function ensureTenantFoundation(
   input: TenantFoundationInput,
 ): Promise<{ orgId: string }> {
   touchOsFoundationTaxonomy();
+
+  // This preflight intentionally runs before any organization or entitlement write.
+  // Existing clients remain on legacy behavior until their package capability set is certified.
+  if (input.assemblyMode === 'certified') {
+    requireClientFactoryAssembly({
+      packagePurchased: input.packagePurchased,
+      requestedModuleIds: input.requestedModuleIds,
+    });
+  }
 
   const { orgId } = await ensureOrganizationForPortal({
     portalSlug: input.portalSlug,
