@@ -15,61 +15,44 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
       - name: Secret scan (gitleaks)
         uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
-
       - name: Install dependencies
         run: npm ci
-
       - name: Lint
         run: npm run lint
-
       - name: Verify EA System Registry contract
         run: node scripts/test-system-registry.mjs
-
       - name: Verify generalized production protection contracts
         run: node scripts/test-production-protection.mjs
-
-      - name: Verify tenant isolation and authorization contracts
-        run: node scripts/test-tenant-safety.mjs
-
+      - name: Verify tenant isolation and authorization release contracts
+        run: node scripts/test-tenant-release-safety.mjs
       - name: Verify mandatory release guardrails
         run: node scripts/test-release-guardrails.mjs
-
       - name: Verify Recovery Orchestrator safety contract
         run: npx tsx scripts/test-recovery-orchestrator.ts
-
       - name: Certify Recovery Orchestrator self-healing loop
         run: npx tsx scripts/test-recovery-certification.ts
-
       - name: Verify Recovery Monitoring contract
         run: node scripts/test-recovery-monitoring-contract.mjs
-
       - name: Verify Client Factory fulfillment contract
         run: npx tsx scripts/test-factory-fulfillment.ts
-
       - name: Verify Amanda checkout and pricing contract
         run: npm run test:amanda-checkout
-
       - name: Verify Design Studio registry contract
         run: node scripts/test-design-studio-registry-contract.mjs
-
       - name: Verify Simplifi Orb and monitoring contracts
         run: npm run test:simplifi-hardening
-
       - name: Verify deploy (build + resolver + browser smoke)
         run: |
           npx playwright install --with-deps chromium
           npm run verify:deploy
-
       - name: Verify live customer recovery journeys
         run: node scripts/test-recovery-journeys.mjs
