@@ -1,15 +1,15 @@
 {
-  "sourceCommit": "b016b0f79db65b9e634c2e343bf99ae9c50aab48",
-  "previewUrl": "https://ea-payments-19bxqtln7-the-architects-projects-cc813778.vercel.app",
+  "sourceCommit": "c6c5285986ce40fa359459ac2929e5b83e53d674",
+  "previewUrl": "https://ea-payments-g398v40qm-the-architects-projects-cc813778.vercel.app",
   "status": "PASS",
-  "completedAt": "2026-09-12T21:30:00.000Z",
+  "completedAt": "2026-09-12T21:49:00.000Z",
   "gates": {
-    "sourceIdentity": { "status": "PASS", "proof": "Run 6 merged through PR #377 as b2535e8c1982cd2573ae25c9b1301bdcc36cb5cc. Airtable 429 hardening merged through PR #379 as b016b0f79db65b9e634c2e343bf99ae9c50aab48. EA Guard correctly reverted an unauthorized direct promotion attempt before this approved PR-based promotion." },
-    "build": { "status": "PASS", "proof": "PR #379 preview deployment dpl_E8YLEbMkiuQvqTT7wx7Uew47tdqC reached READY. CI run 34720034175 completed successfully, including build, resolver/browser smoke, and live customer recovery journeys." },
-    "assets": { "status": "PASS", "proof": "Run 3 remediation changes deployment gating metadata and Airtable retry behavior only. No client presentation assets changed." },
-    "functional": { "status": "PASS", "proof": "CI run 34720034175 passed capability standards, Modular Assembly Runs 2-6, system registry, Control Plane reconciliation, reliability/scale contracts, master guard contracts, tenant isolation, release guardrails, recovery orchestration/monitoring, Client Factory, Amanda checkout, Design Studio, Simplifi monitoring, deploy smoke, and live customer recovery journeys. Dedicated Run 6 workflow 34720034193 and Graft Context Verification 34720034172 also passed." },
-    "desktopVisual": { "status": "PASS", "proof": "No desktop presentation delta; preview deployment is READY and browser smoke passed." },
-    "mobileVisual": { "status": "PASS", "proof": "No mobile presentation delta; customer recovery journeys and deployment smoke passed." },
-    "creativeCritic": { "status": "PASS", "proof": "No creative, brand, copy, or presentation changes were introduced by this remediation." }
+    "sourceIdentity": { "status": "PASS", "proof": "Factory Run 0 was developed on feat/factory-run0-autonomous-completion-20260912, reviewed through PR #381, and squash-merged to authoritative master as c6c5285986ce40fa359459ac2929e5b83e53d674." },
+    "build": { "status": "PASS", "proof": "PR #381 preview deployment dpl_7xtR2T7SPN2ouVeTDQmzjfx4f3Nv reached READY. CI run 34720878725 passed the full deploy build, resolver checks, and browser smoke." },
+    "assets": { "status": "PASS", "proof": "Run 0 changes Factory orchestration/capabilities, review-gate semantics, tests, CI, and architecture documentation only. No client presentation assets were changed." },
+    "functional": { "status": "PASS", "proof": "CI run 34720878725 passed the new Factory Run 0 autonomous completion certification plus existing Factory fulfillment, capability standards, Modular Assembly Runs 2-6, Control Plane, security, tenant isolation, release guardrails, recovery, Amanda checkout, Design Studio, Simplifi, browser smoke, and live customer recovery journeys." },
+    "desktopVisual": { "status": "PASS", "proof": "No client-facing desktop presentation delta. Full browser smoke passed on PR #381." },
+    "mobileVisual": { "status": "PASS", "proof": "No client-facing mobile presentation delta. Existing responsive/browser and recovery checks remained green." },
+    "creativeCritic": { "status": "PASS", "proof": "Run 0 does not auto-approve subjective creative work. The experience-concept gate remains human-reviewed, and Run 0 performs no external production auto-publication." }
   }
 }
