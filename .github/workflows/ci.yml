@@ -39,6 +39,12 @@ jobs:
       - name: Verify generalized production protection contracts
         run: node scripts/test-production-protection.mjs
 
+      - name: Verify tenant isolation and authorization contracts
+        run: node scripts/test-tenant-safety.mjs
+
+      - name: Verify mandatory release guardrails
+        run: node scripts/test-release-guardrails.mjs
+
       - name: Verify Recovery Orchestrator safety contract
         run: npx tsx scripts/test-recovery-orchestrator.ts
 
@@ -60,7 +66,7 @@ jobs:
       - name: Verify Simplifi Orb and monitoring contracts
         run: npm run test:simplifi-hardening
 
-      - name: Verify deploy (build + resolver + smoke)
+      - name: Verify deploy (build + resolver + browser smoke)
         run: |
           npx playwright install --with-deps chromium
           npm run verify:deploy
