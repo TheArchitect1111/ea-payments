@@ -1,15 +1,15 @@
 {
-  "sourceCommit": "f67b57bdb9ec49e2a2a6273c30afe90f471900c6",
-  "previewUrl": "https://ea-payments-q5l64jcre-the-architects-projects-cc813778.vercel.app",
+  "sourceCommit": "acadde1e4bc1bb0e7c8cfe96ba3ece732b6f5ed4",
+  "previewUrl": "https://ea-payments-o1k71ebxr-the-architects-projects-cc813778.vercel.app",
   "status": "PASS",
-  "completedAt": "2026-09-12T09:39:28.000Z",
+  "completedAt": "2026-09-12T09:50:38.000Z",
   "gates": {
-    "sourceIdentity": { "status": "PASS", "proof": "Run 3 code was accepted at PR #367 head 64d71b615c9d80db59a32d2faccd38cb8d4d0fb7 and merge 63f77d1c801082039657471c2cc763a899e2a2a5. Subsequent master commits changed only the gate manifest; production parent f67b57bdb9ec49e2a2a6273c30afe90f471900c6 contains the accepted Run 3 code tree." },
-    "build": { "status": "PASS", "proof": "CI run 34686278506 completed successfully including lint, build, browser smoke, and recovery journeys; preview dpl_GkTNBFdkmAkmXuwoCzzBKamjCgAw READY." },
-    "assets": { "status": "PASS", "proof": "Run 3 adds control-plane reconciliation infrastructure only; no client presentation assets changed." },
-    "functional": { "status": "PASS", "proof": "Control-plane reconciliation contract plus existing registry, tenant, release, recovery, Factory, Amanda, Design Studio, Simplifi, deploy smoke, and live recovery checks passed." },
+    "sourceIdentity": { "status": "PASS", "proof": "PR #368 head 0af0c1577cd59765d6b11369e1da55ecf6d26f71 passed required checks and was merged as acadde1e4bc1bb0e7c8cfe96ba3ece732b6f5ed4." },
+    "build": { "status": "PASS", "proof": "CI run 34686751665 passed lint, Run 4 reliability certification, full build, browser smoke, and live recovery journeys; preview dpl_DovaybzuWuSdzRf5yuyduVwnqv83 READY." },
+    "assets": { "status": "PASS", "proof": "Run 4 changes execution and reliability infrastructure only; no client presentation assets changed." },
+    "functional": { "status": "PASS", "proof": "System Registry, Control Plane reconciliation, Run 4 reliability, production protection, tenant isolation, release guardrails, recovery, Factory fulfillment, Amanda checkout, Design Studio, Simplifi, browser smoke, and live recovery journeys all passed." },
     "desktopVisual": { "status": "PASS", "proof": "No client-facing presentation delta; browser smoke passed." },
-    "mobileVisual": { "status": "PASS", "proof": "No client-facing mobile presentation delta; customer journey checks passed." },
-    "creativeCritic": { "status": "PASS", "proof": "Run 3 contains no creative, brand, copy, or presentation changes." }
+    "mobileVisual": { "status": "PASS", "proof": "No client-facing mobile presentation delta; recovery journeys passed." },
+    "creativeCritic": { "status": "PASS", "proof": "Run 4 contains no creative, brand, copy, or presentation changes." }
   }
 }
