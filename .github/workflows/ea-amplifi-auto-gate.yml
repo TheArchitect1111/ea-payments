@@ -23,30 +23,39 @@ jobs:
           ref: ${{ github.event.deployment.sha }}
           fetch-depth: 0
 
-      - name: Require explicit Amplifi production candidate
+      - name: Detect explicit Amplifi production candidate
+        id: candidate
         shell: bash
         run: |
-          git log -1 --pretty=%B | grep -q '^\[EA-CANDIDATE\] Amplifi images ready for gated production$' || {
-            echo 'Not an Amplifi production candidate. Stop safely.'
-            exit 78
-          }
+          if git log -1 --pretty=%B | grep -q '^\[EA-CANDIDATE\] Amplifi images ready for gated production$'; then
+            echo 'candidate=true' >> "$GITHUB_OUTPUT"
+            echo 'Amplifi production candidate detected. Running strict gate.'
+          else
+            echo 'candidate=false' >> "$GITHUB_OUTPUT"
+            echo 'Not an Amplifi production candidate. No-op success.'
+          fi
 
       - name: Setup Node
+        if: steps.candidate.outputs.candidate == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: 24
           cache: npm
 
       - name: Install dependencies
+        if: steps.candidate.outputs.candidate == 'true'
         run: npm ci
 
       - name: Build gate
+        if: steps.candidate.outputs.candidate == 'true'
         run: npm run build
 
       - name: Install Chromium
+        if: steps.candidate.outputs.candidate == 'true'
         run: npx playwright install --with-deps chromium
 
       - name: Run exact-source visual gates
+        if: steps.candidate.outputs.candidate == 'true'
         env:
           EA_PREVIEW_URL: ${{ github.event.deployment_status.environment_url || github.event.deployment_status.target_url }}
           EA_GATE_PATH: /amplifi
@@ -57,7 +66,7 @@ jobs:
         run: node scripts/ea-preview-gate.mjs
 
       - name: Upload immutable proof
-        if: always()
+        if: always() && steps.candidate.outputs.candidate == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: ea-amplifi-gate-${{ github.event.deployment.sha }}
@@ -66,6 +75,7 @@ jobs:
           retention-days: 30
 
       - name: Verify master is ancestor of candidate
+        if: steps.candidate.outputs.candidate == 'true'
         shell: bash
         run: |
           git fetch origin master
@@ -75,6 +85,7 @@ jobs:
           }
 
       - name: Create manifest-only production promotion commit
+        if: steps.candidate.outputs.candidate == 'true'
         shell: bash
         run: |
           mkdir -p .ea/gates

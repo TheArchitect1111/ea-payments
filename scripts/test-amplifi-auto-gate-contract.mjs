@@ -1,0 +1,10 @@
+import fs from 'node:fs';
+const workflow = fs.readFileSync('.github/workflows/ea-amplifi-auto-gate.yml', 'utf8');
+const assert = (condition, message) => { if (!condition) throw new Error(message); };
+assert(workflow.includes('Detect explicit Amplifi production candidate'), 'candidate detection step missing');
+assert(workflow.includes("echo 'candidate=false' >> \"$GITHUB_OUTPUT\""), 'non-candidate success output missing');
+assert(workflow.includes("if: steps.candidate.outputs.candidate == 'true'"), 'candidate-only strict gate conditions missing');
+assert(!workflow.includes('exit 78'), 'non-candidate path must not fail with exit 78');
+assert(workflow.includes("if: always() && steps.candidate.outputs.candidate == 'true'"), 'proof upload must be candidate-only');
+assert(workflow.includes("^\\[EA-CANDIDATE\\] Amplifi images ready for gated production$"), 'explicit Amplifi candidate marker must remain strict');
+console.log('PASS Amplifi auto gate contract: unrelated deployments are neutral; explicit candidates remain strict');

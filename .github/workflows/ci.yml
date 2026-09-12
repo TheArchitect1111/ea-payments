@@ -66,6 +66,8 @@ jobs:
         run: node scripts/test-tenant-release-safety.mjs
       - name: Verify mandatory release guardrails
         run: node scripts/test-release-guardrails.mjs
+      - name: Verify Amplifi auto-gate no-op contract
+        run: node scripts/test-amplifi-auto-gate-contract.mjs
       - name: Verify Recovery Orchestrator safety contract
         run: npx tsx scripts/test-recovery-orchestrator.ts
       - name: Certify Recovery Orchestrator self-healing loop
