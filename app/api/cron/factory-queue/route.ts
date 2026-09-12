@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { drainFactoryQueue } from '@/lib/factory-queue';
+import { drainFactoryQueueDurably } from '@/lib/factory-durable-drain';
 import { factoryQueueHealth, listFactoryProjects } from '@/lib/factory-project-store';
 
 export const dynamic = 'force-dynamic';
@@ -12,18 +12,17 @@ function authorized(request: NextRequest): boolean {
   return header === `Bearer ${secret}`;
 }
 
-/** Vercel Cron — drain stuck Factory QUEUED projects. */
+/** Vercel Cron — durable drain for interrupted Factory work. */
 export async function GET(request: NextRequest) {
   if (!authorized(request)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  // Safety net every few minutes — picks up projects if a background chain was interrupted.
-  const result = await drainFactoryQueue(10);
+  const result = await drainFactoryQueueDurably(10);
   const health = factoryQueueHealth(await listFactoryProjects());
 
   return NextResponse.json({
-    ok: true,
+    ok: result.deadLettered === 0,
     ...result,
     health,
     at: new Date().toISOString(),
