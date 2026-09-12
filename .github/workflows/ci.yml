@@ -1,11 +1,9 @@
 name: CI
-
 on:
   pull_request:
     branches: [master]
   push:
     branches: [master]
-
 jobs:
   lint-build-smoke:
     runs-on: ubuntu-latest
@@ -13,17 +11,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+        with: { fetch-depth: 0 }
       - name: Secret scan (gitleaks)
         uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        env: { GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}" }
       - name: Setup Node
         uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
+        with: { node-version: 20, cache: npm }
       - name: Install dependencies
         run: npm ci
       - name: Lint
@@ -37,11 +31,7 @@ jobs:
       - name: Upload lint diagnostics
         if: failure() && steps.lint.outcome == 'failure'
         uses: actions/upload-artifact@v4
-        with:
-          name: lint-diagnostics
-          path: lint-output.txt
-          if-no-files-found: error
-          retention-days: 3
+        with: { name: lint-diagnostics, path: lint-output.txt, if-no-files-found: error, retention-days: 3 }
       - name: Verify EA Capability Standard and Run 1 inventory
         run: node scripts/test-capability-standard.mjs
       - name: Certify EA Modular Assembly Run 2
@@ -56,6 +46,8 @@ jobs:
         run: npx tsx scripts/test-modular-assembly-run6.ts
       - name: Verify Factory Run 0 autonomous completion
         run: node scripts/test-factory-run0-autonomous-completion.mjs
+      - name: Certify Factory Run 1 mass-production builders
+        run: node scripts/test-factory-run1-mass-builders.mjs
       - name: Verify EA System Registry contract
         run: node scripts/test-system-registry.mjs
       - name: Verify EA Control Plane reconciliation contract
