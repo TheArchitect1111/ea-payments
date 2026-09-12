@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "run": 3,
+  "certifications": [
+    {
+      "id": "intake",
+      "assemblyStatus": "certified",
+      "costLicenseDecision": "approved",
+      "boundary": "Existing EA portal route and application services only; no new paid vendor dependency",
+      "evidence": ["module-registry-contract", "run3-business-wave-contract", "portal-build-smoke"]
+    },
+    {
+      "id": "applications",
+      "assemblyStatus": "certified",
+      "costLicenseDecision": "approved",
+      "boundary": "Existing EA portal route and application services only; no new paid vendor dependency",
+      "evidence": ["module-registry-contract", "run3-business-wave-contract", "portal-build-smoke"]
+    },
+    {
+      "id": "reports",
+      "assemblyStatus": "certified",
+      "costLicenseDecision": "approved",
+      "boundary": "Existing EA portal route and application services only; no new paid vendor dependency",
+      "evidence": ["module-registry-contract", "run3-business-wave-contract", "portal-build-smoke"]
+    }
+  ]
+}
