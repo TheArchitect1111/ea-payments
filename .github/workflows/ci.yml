@@ -48,6 +48,8 @@ jobs:
         run: node scripts/test-factory-run0-autonomous-completion.mjs
       - name: Certify Factory Run 1 mass-production builders
         run: node scripts/test-factory-run1-mass-builders.mjs
+      - name: Certify Factory Run 2 torture, recovery, and tenant isolation
+        run: node scripts/test-factory-run2-torture-certification.mjs
       - name: Verify EA System Registry contract
         run: node scripts/test-system-registry.mjs
       - name: Verify EA Control Plane reconciliation contract
