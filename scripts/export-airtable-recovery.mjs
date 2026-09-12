@@ -2,12 +2,12 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import crypto from 'node:crypto';
 
-const token = process.env.AIRTABLE_ACCESS_TOKEN || process.env.AIRTABLE_TOKEN || process.env.AIRTABLE_API_KEY;
-const baseId = process.env.EA_AIRTABLE_BASE_ID || process.env.AIRTABLE_BASE_ID || 'appv0YoLIMY45fmDA';
+const token = process.env.AIRTABLE_ACCESS_TOKEN || process.env.AIRTABLE_TOKEN || process.env.AIRTABLE_API_KEY || process.env.AIRTABLE_PAT;
+const baseId = process.env.EA_AIRTABLE_BASE_ID || process.env.AIRTABLE_BASE_ID || process.env.AIRTABLE_PAYMENTS_BASE_ID || 'appv0YoLIMY45fmDA';
 const outDir = process.env.EA_RECOVERY_EXPORT_DIR || path.resolve('.recovery/airtable');
 
 if (!token) {
-  console.error('FAIL: Airtable credential missing. Set AIRTABLE_ACCESS_TOKEN (preferred), AIRTABLE_TOKEN, or AIRTABLE_API_KEY.');
+  console.error('FAIL: Airtable credential missing. Set AIRTABLE_ACCESS_TOKEN, AIRTABLE_TOKEN, AIRTABLE_API_KEY, or AIRTABLE_PAT.');
   process.exit(1);
 }
 
