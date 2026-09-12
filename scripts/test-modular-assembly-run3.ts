@@ -25,29 +25,38 @@ for (const id of wave) {
   assert.equal(definition.demoOnly, undefined, `${id} cannot be demo-only`);
 }
 
-const mixed = createAssemblyPlan(['intake', 'events']);
+// Run 3 established a fail-closed admission boundary. Later runs are allowed to
+// certify additional known modules, so this invariant uses a permanently unknown
+// capability rather than freezing a legitimate module in an uncertified state.
+const unknownCapability = '__run3-unknown-capability__';
+const mixed = createAssemblyPlan(['intake', unknownCapability]);
 assert.equal(mixed.blocked, true);
 assert.ok(mixed.admitted.includes('intake'));
 assert.deepEqual(mixed.rejected, [
-  { id: 'events', reason: 'not-certified', status: 'inventoried' },
+  { id: unknownCapability, reason: 'unknown-module' },
 ]);
 
-const starter = planClientFactoryAssembly({
-  packagePurchased: 'Website + Portal Starter',
+const clientFactoryPlan = planClientFactoryAssembly({
+  packagePurchased: 'Amplifi',
+  requestedModuleIds: [unknownCapability],
 });
-assert.equal(starter.blocked, true, 'package must fail closed while any entitlement is uncertified');
-assert.ok(starter.admitted.includes('intake'));
-assert.ok(starter.admitted.includes('applications'));
-assert.ok(starter.admitted.includes('reports'));
-assert.ok(starter.rejected.length > 0);
+assert.equal(clientFactoryPlan.blocked, true);
+assert.ok(clientFactoryPlan.admitted.includes('amplifi'));
+assert.deepEqual(clientFactoryPlan.rejected, [
+  { id: unknownCapability, reason: 'unknown-module' },
+]);
 assert.throws(
-  () => requireClientFactoryAssembly({ packagePurchased: 'Website + Portal Starter' }),
+  () =>
+    requireClientFactoryAssembly({
+      packagePurchased: 'Amplifi',
+      requestedModuleIds: [unknownCapability],
+    }),
   /EA assembly blocked:/,
 );
 
 console.log('EA Modular Assembly Run 3 OK');
-console.log(' - intake, applications, and reports are certified reusable business capabilities');
+console.log(' - intake, applications, and reports remain certified reusable business capabilities');
 console.log(' - certified business capabilities coexist with the universal chassis');
-console.log(' - uncertified modules still fail closed');
-console.log(' - Client Factory package planning is now routed through the Assembly Engine');
-console.log(' - incomplete package certification blocks before provisioning writes');
+console.log(' - unknown capabilities remain fail-closed');
+console.log(' - Client Factory package planning remains routed through the Assembly Engine');
+console.log(' - Run 3 invariants remain valid as later runs certify additional modules');
