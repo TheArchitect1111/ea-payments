@@ -1,0 +1,51 @@
+name: EA Modular Assembly Run 4
+
+on:
+  pull_request:
+    paths:
+      - 'config/capability-certifications.json'
+      - 'lib/modules/assembly.ts'
+      - 'lib/modules/client-factory-assembly.ts'
+      - 'lib/modules/registry.ts'
+      - 'scripts/test-modular-assembly-run4.ts'
+      - 'app/portal/[slug]/events/**'
+      - 'app/portal/[slug]/billing/**'
+      - 'app/portal/[slug]/member/**'
+      - 'app/portal/[slug]/settings/**'
+      - 'app/api/billing/**'
+      - '.github/workflows/ea-modular-assembly-run4.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'config/capability-certifications.json'
+      - 'lib/modules/assembly.ts'
+      - 'lib/modules/client-factory-assembly.ts'
+      - 'lib/modules/registry.ts'
+      - 'scripts/test-modular-assembly-run4.ts'
+      - 'app/portal/[slug]/events/**'
+      - 'app/portal/[slug]/billing/**'
+      - 'app/portal/[slug]/member/**'
+      - 'app/portal/[slug]/settings/**'
+      - 'app/api/billing/**'
+      - '.github/workflows/ea-modular-assembly-run4.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  certify-run4:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Verify Run 2 fail-closed Assembly Engine
+        run: npx tsx scripts/test-modular-assembly-run2.ts
+      - name: Verify Run 3 business wave and Client Factory gate
+        run: npx tsx scripts/test-modular-assembly-run3.ts
+      - name: Certify Run 4 Website + Portal Starter
+        run: npx tsx scripts/test-modular-assembly-run4.ts
