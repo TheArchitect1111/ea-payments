@@ -1,0 +1,80 @@
+name: EA Master Guard
+
+on:
+  push:
+    branches: [master]
+
+permissions:
+  contents: write
+  pull-requests: read
+
+concurrency:
+  group: ea-master-guard
+  cancel-in-progress: false
+
+jobs:
+  verify-master-push:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact pushed commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+
+      - name: Classify push
+        id: classify
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          SHA="$GITHUB_SHA"
+          REPO="$GITHUB_REPOSITORY"
+          MESSAGE="$(git log -1 --pretty=%B "$SHA")"
+          PARENT_COUNT="$(git cat-file -p "$SHA" | grep -c '^parent ' || true)"
+          CHANGED="$(git diff-tree --no-commit-id --name-only -r "$SHA")"
+
+          if [[ "$MESSAGE" == \[EA-GATED\]* ]]; then
+            test "$PARENT_COUNT" = "1" || { echo 'Invalid gated promotion: expected one parent.'; exit 20; }
+            test "$CHANGED" = ".ea/gates/latest.json" || { echo 'Invalid gated promotion: non-manifest files changed.'; exit 21; }
+            node scripts/verify-master-promotion.mjs
+            echo 'Authorized EA gated promotion.'
+            exit 0
+          fi
+
+          PR_COUNT="$(gh api -H 'Accept: application/vnd.github+json' "repos/$REPO/commits/$SHA/pulls" --jq '[.[] | select(.merged_at != null and .base.ref == "master")] | length')"
+          if [[ "$PR_COUNT" -gt 0 ]]; then
+            echo 'Authorized pull-request merge to master.'
+            exit 0
+          fi
+
+          echo 'Unauthorized direct push detected.'
+          echo "unauthorized=true" >> "$GITHUB_OUTPUT"
+
+      - name: Revert unauthorized direct push
+        if: steps.classify.outputs.unauthorized == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          SHA="$GITHUB_SHA"
+          git fetch origin master
+          CURRENT="$(git rev-parse origin/master)"
+          if [[ "$CURRENT" != "$SHA" ]]; then
+            echo "Master moved from $SHA to $CURRENT. Refusing an unsafe automatic revert."
+            exit 30
+          fi
+
+          git config user.name 'EA Master Guard'
+          git config user.email 'ea-master-guard@users.noreply.github.com'
+          PARENT_COUNT="$(git cat-file -p "$SHA" | grep -c '^parent ' || true)"
+          if [[ "$PARENT_COUNT" -gt 1 ]]; then
+            git revert -m 1 --no-edit "$SHA"
+          else
+            git revert --no-edit "$SHA"
+          fi
+          git commit --amend -m "[EA-GUARD-REVERT] Revert unauthorized master push $SHA"
+          git push origin HEAD:master
+          echo "Unauthorized master push $SHA was automatically reverted."
+          exit 1
