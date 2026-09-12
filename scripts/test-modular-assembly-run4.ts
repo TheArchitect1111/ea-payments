@@ -61,10 +61,10 @@ for (const id of run4Wave) {
   assert.ok(definition, `${id} must exist in the canonical module registry`);
   assert.ok(definition.pathSegment, `${id} must have a deterministic portal path`);
   const certification = certifications.certifications.find((item) => item.id === id);
-  assert.ok(certification, `${id} must have an explicit Run 4 certification record`);
+  assert.ok(certification, `${id} must retain its Run 4 certification record`);
   assert.equal(certification.assemblyStatus, 'certified');
   assert.equal(certification.costLicenseDecision, 'approved');
-  assert.ok(certification.boundary.length > 30, `${id} certification boundary must be explicit`);
+  assert.ok(certification.boundary.length > 30, `${id} certification boundary must remain explicit`);
 }
 
 const eventCertification = certifications.certifications.find((item) => item.id === 'events');
@@ -100,11 +100,10 @@ assert.match(billingRoute, /billing:manage/);
 
 assert.throws(() => requireAssemblyPlan(['calendar']), /calendar:not-certified/);
 assert.throws(() => requireAssemblyPlan(['people']), /people:not-certified/);
-assert.throws(() => requireAssemblyPlan(['simplifi']), /simplifi:not-certified/);
 
 console.log('EA Modular Assembly Run 4 OK');
-console.log(' - canonical Website + Portal Starter entitlement set is fully provisionable in certified mode');
-console.log(' - all thirteen Run 4 Starter capabilities have explicit certification boundaries');
+console.log(' - canonical Website + Portal Starter entitlement set remains fully provisionable in certified mode');
+console.log(' - all thirteen Run 4 Starter capabilities retain explicit certification boundaries');
 console.log(' - Pretix, Documenso, and Novu remain optional provider extensions, not assembly requirements');
 console.log(' - Billing fails safely when the existing platform Stripe adapter is unavailable');
-console.log(' - non-Starter unresolved capabilities remain fail-closed');
+console.log(' - unresolved Calendar and People capabilities remain fail-closed');

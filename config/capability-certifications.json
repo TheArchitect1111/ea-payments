@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "run": 4,
+  "run": 6,
   "certifications": [
     {"id":"intake","assemblyStatus":"certified","costLicenseDecision":"approved","boundary":"Existing EA portal route and application services only; no new paid vendor dependency","evidence":["module-registry-contract","run3-business-wave-contract","portal-build-smoke"]},
     {"id":"applications","assemblyStatus":"certified","costLicenseDecision":"approved","boundary":"Existing EA portal route and application services only; no new paid vendor dependency","evidence":["module-registry-contract","run3-business-wave-contract","portal-build-smoke"]},
@@ -17,6 +17,7 @@
     {"id":"training","assemblyStatus":"certified","costLicenseDecision":"approved","boundary":"EA-owned Training Hub and existing published-training/course services; no new vendor account or per-client license required","evidence":["module-registry-contract","run4-canonical-entitlement-contract","portal-build-smoke"]},
     {"id":"resources","assemblyStatus":"certified","costLicenseDecision":"approved","boundary":"EA-owned Resource Library using existing tenant resources and workspace links; no new vendor account or per-client license required","evidence":["module-registry-contract","run4-canonical-entitlement-contract","portal-build-smoke"]},
     {"id":"ask","assemblyStatus":"certified","costLicenseDecision":"approved","boundary":"EA-owned Guide request surface using existing portal and Update Hub services; no new vendor account or per-client license required","evidence":["module-registry-contract","run4-canonical-entitlement-contract","portal-build-smoke"]},
-    {"id":"connect","assemblyStatus":"certified","costLicenseDecision":"approved","boundary":"EA-owned Connect relationship-capture workspace and existing EA routing services; no new vendor account or per-client software license required for provisioning","evidence":["module-registry-contract","run4-canonical-entitlement-contract","portal-build-smoke"]}
+    {"id":"connect","assemblyStatus":"certified","costLicenseDecision":"approved","boundary":"EA-owned Connect relationship-capture workspace and existing EA routing services; no new vendor account or per-client software license required for provisioning","evidence":["module-registry-contract","run4-canonical-entitlement-contract","portal-build-smoke"]},
+    {"id":"simplifi","assemblyStatus":"certified","costLicenseDecision":"approved","boundary":"EA-owned Simplifi portal workspace, capture records, content-request visibility, and Magnifi linking using existing EA services. No new vendor account or per-client software license is required for provisioning.","evidence":["module-registry-contract","run6-simplifi-native-boundary","portal-build-smoke"]}
   ]
 }
