@@ -31,8 +31,8 @@ export const MODULE_IDS = [
 
 export type ModuleId = (typeof MODULE_IDS)[number];
 
-/** Modules that are part of the chassis itself and should exist in every portal. */
-export const CHASSIS_STANDARD_MODULE_IDS: ModuleId[] = ['dashboard', 'update-hub'];
+/** Certified chassis capabilities that must exist in every portal. */
+export const CHASSIS_STANDARD_MODULE_IDS: ModuleId[] = ['dashboard', 'amplifi', 'update-hub'];
 
 export type NavGroup = 'core' | 'growth' | 'operations' | 'platform';
 
