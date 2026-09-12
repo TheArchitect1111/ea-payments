@@ -1,0 +1,39 @@
+name: EA Modular Assembly Run 3
+
+on:
+  pull_request:
+    paths:
+      - 'config/capability-certifications.json'
+      - 'lib/modules/assembly.ts'
+      - 'lib/modules/client-factory-assembly.ts'
+      - 'lib/tenant-foundation.ts'
+      - 'scripts/test-modular-assembly-run3.ts'
+      - '.github/workflows/ea-modular-assembly-run3.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'config/capability-certifications.json'
+      - 'lib/modules/assembly.ts'
+      - 'lib/modules/client-factory-assembly.ts'
+      - 'lib/tenant-foundation.ts'
+      - 'scripts/test-modular-assembly-run3.ts'
+      - '.github/workflows/ea-modular-assembly-run3.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  certify-run3:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Verify Run 2 boundary remains intact
+        run: npx tsx scripts/test-modular-assembly-run2.ts
+      - name: Certify Run 3 business wave and Client Factory gate
+        run: npx tsx scripts/test-modular-assembly-run3.ts
