@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "run": 3,
+  "run": 4,
   "certifications": [
     {
       "id": "intake",
@@ -22,6 +22,34 @@
       "costLicenseDecision": "approved",
       "boundary": "Existing EA portal route and application services only; no new paid vendor dependency",
       "evidence": ["module-registry-contract", "run3-business-wave-contract", "portal-build-smoke"]
+    },
+    {
+      "id": "member",
+      "assemblyStatus": "certified",
+      "costLicenseDecision": "approved",
+      "boundary": "EA-owned Member Experience route and existing tenant/member data only; no new vendor account or per-client license required",
+      "evidence": ["module-registry-contract", "run4-starter-package-contract", "portal-build-smoke"]
+    },
+    {
+      "id": "settings",
+      "assemblyStatus": "certified",
+      "costLicenseDecision": "approved",
+      "boundary": "EA-owned portal preferences and business-presence surfaces only; no new vendor account or per-client license required",
+      "evidence": ["module-registry-contract", "run4-starter-package-contract", "portal-build-smoke"]
+    },
+    {
+      "id": "events",
+      "assemblyStatus": "certified",
+      "costLicenseDecision": "approved",
+      "boundary": "EA Calendar & Event Hub route, shared scheduling, and EA registration ledger are certified. Pretix is an optional extension only and remains isolated from the assembly requirement; no Pretix account is required to provision the module.",
+      "evidence": ["module-registry-contract", "run4-starter-package-contract", "events-optional-provider-contract", "portal-build-smoke"]
+    },
+    {
+      "id": "billing",
+      "assemblyStatus": "certified",
+      "costLicenseDecision": "approved",
+      "boundary": "EA billing workspace, authorization boundary, and existing platform-managed Stripe adapter are certified. No client Stripe account or per-client software license is required for provisioning; payment-processing charges apply only when commerce is used.",
+      "evidence": ["module-registry-contract", "run4-starter-package-contract", "billing-platform-adapter-contract", "portal-build-smoke"]
     }
   ]
 }
