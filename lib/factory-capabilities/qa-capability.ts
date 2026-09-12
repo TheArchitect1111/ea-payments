@@ -1,0 +1,118 @@
+import { qaCanRun as qaCanRunPure } from '@/lib/factory-capability-gates.mjs';
+import type { Capability, CapabilityExecutionResult } from '@/lib/factory-capability';
+import { appendArtifacts, type ArtifactDraft } from '@/lib/factory-artifact';
+import { listDeliverablesFromArtifacts } from '@/lib/factory-deliverable.mjs';
+import {
+  createReviewGate,
+  listReviewGatesFromArtifacts,
+  reviewGateToArtifactDraft,
+  summarizeReviewGates,
+} from '@/lib/factory-review-gate.mjs';
+import {
+  appendProjectContextOutput,
+  loadProjectContext,
+  type ProjectContext,
+} from '@/lib/factory-project-context';
+import { getProject } from '@/lib/factory-project';
+
+const SYSTEM_VERIFIABLE_GATES = new Set(['website-content', 'website-navigation']);
+
+export function qaCanRun(context: ProjectContext): boolean {
+  return qaCanRunPure(context);
+}
+
+export async function executeQa(context: ProjectContext): Promise<CapabilityExecutionResult> {
+  const projectId = context.projectId;
+  if (!qaCanRun(context)) {
+    return { ran: false, project: await getProject(projectId), context: await loadProjectContext(projectId), detail: 'skip' };
+  }
+
+  const artifacts = context.artifacts || [];
+  const artifactIds = new Set(artifacts.map((item) => item.id));
+  const deliverables = listDeliverablesFromArtifacts(artifacts as never[]);
+  const website = artifacts.find((item) => item.kind === 'website_site');
+  const concepts = artifacts.find((item) => item.kind === 'experience_concepts');
+  const conceptData = concepts?.data as Record<string, unknown> | undefined;
+  const recommendedConceptId = String(conceptData?.recommendedConceptId || '');
+  const conceptList = Array.isArray(conceptData?.concepts) ? conceptData?.concepts : [];
+
+  const blockers: string[] = [];
+  if (!deliverables.length) blockers.push('No deliverable artifact');
+  if (!website) blockers.push('No website_site artifact');
+  if (!concepts || !recommendedConceptId || !conceptList.length) blockers.push('No usable experience concept set');
+
+  const currentGates = listReviewGatesFromArtifacts(artifacts as never[]);
+  const revisions: ArtifactDraft[] = [];
+  const autoRemediatedGateIds: string[] = [];
+
+  for (const gate of currentGates) {
+    if (!gate.required || gate.status !== 'pending' || !SYSTEM_VERIFIABLE_GATES.has(gate.gateId)) continue;
+    const requiredSources = (gate.provenance?.sourceArtifactIds || []).filter((id: string) => id.startsWith('artifact-'));
+    const missingSources = requiredSources.filter((id: string) => !artifactIds.has(id));
+    if (missingSources.length) {
+      blockers.push(`${gate.gateId} missing source artifacts: ${missingSources.join(', ')}`);
+      continue;
+    }
+    const at = new Date().toISOString();
+    const passed = createReviewGate({
+      ...gate,
+      status: 'passed',
+      createdAt: at,
+      provenance: {
+        ...gate.provenance,
+        capabilityId: 'qa',
+        collectedAt: at,
+        notes: `QA auto-remediation: structural evidence verified for ${gate.gateId}`,
+      },
+    }, at);
+    revisions.push(reviewGateToArtifactDraft(passed) as ArtifactDraft);
+    autoRemediatedGateIds.push(gate.gateId);
+  }
+
+  if (revisions.length) await appendArtifacts(projectId, revisions);
+  const refreshed = (await loadProjectContext(projectId)) || context;
+  const resolvedGates = listReviewGatesFromArtifacts(refreshed.artifacts as never[]);
+  const gateSummary = summarizeReviewGates(resolvedGates);
+  const humanReviewGateIds = resolvedGates
+    .filter((gate) => gate.required && gate.status === 'pending' && !SYSTEM_VERIFIABLE_GATES.has(gate.gateId))
+    .map((gate) => gate.gateId);
+
+  const passed = blockers.length === 0 && gateSummary.requiredFailed === 0;
+  const output = await appendProjectContextOutput(projectId, {
+    kind: 'qa',
+    worker: 'qa',
+    payload: {
+      passed,
+      reviewReady: passed,
+      blockers,
+      autoRemediatedGateIds,
+      humanReviewGateIds,
+      deliverableIds: deliverables.map((item) => item.id),
+      recommendedConceptId,
+      checks: {
+        deliverablePresent: deliverables.length > 0,
+        websitePresent: Boolean(website),
+        conceptSetPresent: Boolean(concepts && recommendedConceptId && conceptList.length),
+        requiredFailedGates: gateSummary.requiredFailed,
+      },
+    },
+    pipelineStatus: passed ? 'QA' : 'FAILED',
+    detail: passed
+      ? `QA passed · auto=${autoRemediatedGateIds.length} · human=${humanReviewGateIds.length}`
+      : `QA blocked · ${blockers.join('; ')}`,
+  });
+
+  return {
+    ran: true,
+    project: output?.project ?? await getProject(projectId),
+    context: output?.context ?? await loadProjectContext(projectId),
+    detail: passed ? 'passed' : `blocked=${blockers.length}`,
+  };
+}
+
+export const qaCapability: Capability = {
+  id: 'qa',
+  dependencies: ['production'],
+  canRun: qaCanRun,
+  execute: executeQa,
+};
