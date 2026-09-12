@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+import { readFileSync } from 'node:fs';
 import certifications from '../config/capability-certifications.json';
 import { requireAssemblyPlan } from '../lib/modules/assembly';
 import {
@@ -50,17 +50,17 @@ const billingCertification = certifications.certifications.find((item) => item.i
 assert.match(billingCertification?.boundary ?? '', /platform-managed Stripe adapter/i);
 assert.match(billingCertification?.boundary ?? '', /No client Stripe account/i);
 
-const eventsPage = await readFile('app/portal/[slug]/events/page.tsx', 'utf8');
+const eventsPage = readFileSync('app/portal/[slug]/events/page.tsx', 'utf8');
 assert.match(eventsPage, /const hasPretix = ticketed\.length > 0/);
 assert.match(eventsPage, /hasPretix \? 'events' : 'calendar'/);
 
-const billingRoute = await readFile('app/api/billing/portal/route.ts', 'utf8');
+const billingRoute = readFileSync('app/api/billing/portal/route.ts', 'utf8');
 assert.match(billingRoute, /if \(!process\.env\.STRIPE_SECRET_KEY\)/);
 assert.match(billingRoute, /Billing is not configured/);
 assert.match(billingRoute, /billing:manage/);
 
-const unresolved = requireAssemblyPlan(['member', 'settings']);
-assert.equal(unresolved.blocked, false);
+const certifiedPair = requireAssemblyPlan(['member', 'settings']);
+assert.equal(certifiedPair.blocked, false);
 assert.throws(() => requireAssemblyPlan(['documents']), /documents:not-certified/);
 assert.throws(() => requireAssemblyPlan(['messages']), /messages:not-certified/);
 
