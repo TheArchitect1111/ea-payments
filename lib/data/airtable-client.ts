@@ -5,6 +5,7 @@
 
 const BASE_URL = 'https://api.airtable.com/v0';
 const AIRTABLE_RETRY_LIMIT = 3;
+const AIRTABLE_RATE_LIMIT_COOLDOWN_MS = 30_000;
 
 export const AIRTABLE_BASE_ID =
   process.env.AIRTABLE_PAYMENTS_BASE_ID?.trim() || 'appv0YoLIMY45fmDA';
@@ -31,6 +32,13 @@ export function airtableAuthHeaders(): Record<string, string> {
 
 function retryDelayMs(response: Response, attempt: number): number {
   const retryAfter = Number(response.headers.get('retry-after'));
+
+  if (response.status === 429) {
+    const serverDelay = Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter * 1000 : 0;
+    const jitter = Math.floor(Math.random() * 750);
+    return Math.max(AIRTABLE_RATE_LIMIT_COOLDOWN_MS, serverDelay) + jitter;
+  }
+
   if (Number.isFinite(retryAfter) && retryAfter > 0) return Math.min(retryAfter * 1000, 5000);
   return Math.min(250 * 2 ** attempt, 2000);
 }
