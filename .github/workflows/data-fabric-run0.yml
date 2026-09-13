@@ -1,0 +1,48 @@
+name: Data Fabric Run 0
+
+on:
+  pull_request:
+    paths:
+      - 'data-fabric/**'
+      - '.github/workflows/data-fabric-run0.yml'
+  push:
+    branches:
+      - 'foundation/ea-data-fabric-run0'
+    paths:
+      - 'data-fabric/**'
+      - '.github/workflows/data-fabric-run0.yml'
+
+jobs:
+  postgres-foundation:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: ea_fabric_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d ea_fabric_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      PGHOST: localhost
+      PGPORT: 5432
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: ea_fabric_test
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply foundation migration
+        run: psql -v ON_ERROR_STOP=1 -f data-fabric/migrations/0001_foundation.sql
+      - name: Verify health function
+        run: psql -v ON_ERROR_STOP=1 -c "SELECT * FROM fabric.health_check();"
+      - name: Verify tenant isolation
+        run: psql -v ON_ERROR_STOP=1 -f data-fabric/tests/tenant-isolation.sql
+      - name: Verify migration registry
+        run: |
+          test "$(psql -Atc "SELECT count(*) FROM fabric.schema_migrations WHERE version='0001_foundation';")" = "1"
