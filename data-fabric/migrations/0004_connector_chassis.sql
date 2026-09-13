@@ -85,13 +85,15 @@ CREATE TABLE IF NOT EXISTS fabric.approval_requests (
   requested_at timestamptz NOT NULL DEFAULT now(),
   decided_at timestamptz,
   UNIQUE (id, organization_id),
-  UNIQUE (organization_id, connector_run_id, status),
   FOREIGN KEY (connector_run_id, organization_id)
     REFERENCES fabric.connector_runs(id, organization_id) ON DELETE CASCADE,
   FOREIGN KEY (requested_by_identity_id) REFERENCES fabric.identities(id) ON DELETE SET NULL,
   FOREIGN KEY (approved_by_identity_id) REFERENCES fabric.identities(id) ON DELETE SET NULL
 );
 
+CREATE UNIQUE INDEX IF NOT EXISTS one_pending_connector_approval_idx
+  ON fabric.approval_requests (organization_id, connector_run_id)
+  WHERE status = 'pending';
 CREATE INDEX IF NOT EXISTS connector_definitions_org_type_idx
   ON fabric.connector_definitions (organization_id, connector_type, enabled);
 CREATE INDEX IF NOT EXISTS connector_runs_org_status_idx
@@ -120,7 +122,6 @@ BEGIN
   END LOOP;
 END $$;
 
--- Allowed state transitions are centralized so orchestration cannot silently jump gates.
 CREATE OR REPLACE FUNCTION fabric.connector_transition_allowed(from_status text, to_status text)
 RETURNS boolean
 LANGUAGE sql
@@ -143,10 +144,20 @@ CREATE OR REPLACE FUNCTION fabric.enforce_connector_run_transition()
 RETURNS trigger
 LANGUAGE plpgsql
 AS $$
+DECLARE requires_approval boolean;
 BEGIN
   IF OLD.status IS DISTINCT FROM NEW.status THEN
     IF NOT fabric.connector_transition_allowed(OLD.status, NEW.status) THEN
       RAISE EXCEPTION 'invalid connector run transition: % -> %', OLD.status, NEW.status;
+    END IF;
+
+    IF NEW.status = 'submitted' THEN
+      SELECT d.requires_human_approval INTO requires_approval
+      FROM fabric.connector_definitions d
+      WHERE d.id = NEW.connector_id AND d.organization_id = NEW.organization_id;
+      IF COALESCE(requires_approval, false) AND OLD.status <> 'approved' THEN
+        RAISE EXCEPTION 'human approval required before submission';
+      END IF;
     END IF;
 
     INSERT INTO fabric.connector_run_events(
@@ -170,7 +181,6 @@ CREATE TRIGGER connector_run_transition_guard
 BEFORE UPDATE OF status ON fabric.connector_runs
 FOR EACH ROW EXECUTE FUNCTION fabric.enforce_connector_run_transition();
 
--- Approval must match the connector policy and tenant context.
 CREATE OR REPLACE FUNCTION fabric.request_connector_approval(target_run_id uuid)
 RETURNS uuid
 LANGUAGE plpgsql
@@ -185,22 +195,43 @@ BEGIN
 
   SELECT * INTO connector_row FROM fabric.connector_definitions WHERE id = run_row.connector_id;
   IF connector_row.id IS NULL THEN RAISE EXCEPTION 'connector definition not found'; END IF;
-
-  IF NOT connector_row.requires_human_approval THEN
-    RAISE EXCEPTION 'connector does not require human approval';
-  END IF;
-
-  IF run_row.status <> 'validated' THEN
-    RAISE EXCEPTION 'connector run must be validated before approval request';
-  END IF;
+  IF NOT connector_row.requires_human_approval THEN RAISE EXCEPTION 'connector does not require human approval'; END IF;
+  IF run_row.status <> 'validated' THEN RAISE EXCEPTION 'connector run must be validated before approval request'; END IF;
 
   UPDATE fabric.connector_runs SET status = 'approval_required' WHERE id = target_run_id;
 
   approval_id := gen_random_uuid();
   INSERT INTO fabric.approval_requests(id, organization_id, connector_run_id, requested_by_identity_id)
   VALUES (approval_id, run_row.organization_id, run_row.id, fabric.current_identity_id());
-
   RETURN approval_id;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION fabric.decide_connector_approval(target_approval_id uuid, decision text, decision_reason text DEFAULT NULL)
+RETURNS void
+LANGUAGE plpgsql
+AS $$
+DECLARE approval_row fabric.approval_requests%ROWTYPE;
+BEGIN
+  IF decision NOT IN ('approved','denied') THEN RAISE EXCEPTION 'invalid approval decision'; END IF;
+  IF NOT fabric.has_permission('submission:approve') THEN RAISE EXCEPTION 'submission approval permission required'; END IF;
+
+  SELECT * INTO approval_row FROM fabric.approval_requests WHERE id = target_approval_id;
+  IF approval_row.id IS NULL THEN RAISE EXCEPTION 'approval request not found'; END IF;
+  IF approval_row.status <> 'pending' THEN RAISE EXCEPTION 'approval request already decided'; END IF;
+
+  UPDATE fabric.approval_requests
+  SET status = decision,
+      approved_by_identity_id = CASE WHEN decision = 'approved' THEN fabric.current_identity_id() ELSE NULL END,
+      reason = decision_reason,
+      decided_at = now()
+  WHERE id = target_approval_id;
+
+  IF decision = 'approved' THEN
+    UPDATE fabric.connector_runs SET status = 'approved' WHERE id = approval_row.connector_run_id;
+  ELSE
+    UPDATE fabric.connector_runs SET status = 'cancelled' WHERE id = approval_row.connector_run_id;
+  END IF;
 END;
 $$;
 
