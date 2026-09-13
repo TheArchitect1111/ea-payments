@@ -10,6 +10,7 @@ on:
       - 'foundation/ea-data-fabric-run0'
       - 'foundation/ea-data-fabric-run1'
       - 'foundation/ea-data-fabric-run2'
+      - 'foundation/ea-data-fabric-run4'
     paths:
       - 'data-fabric/**'
       - '.github/workflows/data-fabric-run0.yml'
@@ -45,6 +46,8 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f data-fabric/migrations/0002_canonical_domain.sql
       - name: Apply Run 2 security governance migration
         run: psql -v ON_ERROR_STOP=1 -f data-fabric/migrations/0003_security_governance.sql
+      - name: Apply Run 4 connector chassis migration
+        run: psql -v ON_ERROR_STOP=1 -f data-fabric/migrations/0004_connector_chassis.sql
       - name: Verify health function
         run: psql -v ON_ERROR_STOP=1 -c "SELECT * FROM fabric.health_check();"
       - name: Verify Run 0 tenant isolation
@@ -53,11 +56,18 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f data-fabric/tests/canonical-domain.sql
       - name: Verify Run 2 authorization and governance
         run: psql -v ON_ERROR_STOP=1 -f data-fabric/tests/security-governance.sql
+      - name: Verify Run 4 connector lifecycle, approvals, and isolation
+        run: psql -v ON_ERROR_STOP=1 -f data-fabric/tests/connector-chassis.sql
       - name: Verify OpenFGA model contract exists
         run: |
           test -s data-fabric/authz/openfga-model.fga
           grep -q "schema 1.1" data-fabric/authz/openfga-model.fga
           grep -q "define can_approve_submission" data-fabric/authz/openfga-model.fga
+      - name: Verify connector contract exists
+        run: |
+          test -s data-fabric/connectors/CONNECTOR-CONTRACT.md
+          grep -q "Temporal-compatible" data-fabric/connectors/CONNECTOR-CONTRACT.md
+          grep -q "Meltano/Singer-compatible" data-fabric/connectors/CONNECTOR-CONTRACT.md
       - name: Verify migration registry
         run: |
-          test "$(psql -Atc "SELECT count(*) FROM fabric.schema_migrations WHERE version IN ('0001_foundation','0002_canonical_domain','0003_security_governance');")" = "3"
+          test "$(psql -Atc "SELECT count(*) FROM fabric.schema_migrations WHERE version IN ('0001_foundation','0002_canonical_domain','0003_security_governance','0004_connector_chassis');")" = "4"
