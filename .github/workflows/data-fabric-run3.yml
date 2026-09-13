@@ -1,0 +1,49 @@
+name: Data Fabric Run 3
+
+on:
+  pull_request:
+    paths:
+      - 'data-fabric/migrations/0005_mapping_reporting.sql'
+      - 'data-fabric/tests/mapping-reporting.sql'
+      - '.github/workflows/data-fabric-run3.yml'
+  push:
+    branches:
+      - 'foundation/ea-data-fabric-run3'
+
+jobs:
+  mapping-reporting:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: ea_fabric_run3_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d ea_fabric_run3_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      PGHOST: localhost
+      PGPORT: 5432
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: ea_fabric_run3_test
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply Data Fabric migrations through logical Run 3
+        run: |
+          psql -v ON_ERROR_STOP=1 -f data-fabric/migrations/0001_foundation.sql
+          psql -v ON_ERROR_STOP=1 -f data-fabric/migrations/0002_canonical_domain.sql
+          psql -v ON_ERROR_STOP=1 -f data-fabric/migrations/0003_security_governance.sql
+          psql -v ON_ERROR_STOP=1 -f data-fabric/migrations/0004_connector_chassis.sql
+          psql -v ON_ERROR_STOP=1 -f data-fabric/migrations/0005_mapping_reporting.sql
+      - name: Verify mapping, validation, reporting, and tenant isolation
+        run: psql -v ON_ERROR_STOP=1 -f data-fabric/tests/mapping-reporting.sql
+      - name: Verify migration registry
+        run: |
+          test "$(psql -Atc "SELECT count(*) FROM fabric.schema_migrations WHERE version IN ('0001_foundation','0002_canonical_domain','0003_security_governance','0004_connector_chassis','0005_mapping_reporting');")" = "5"
