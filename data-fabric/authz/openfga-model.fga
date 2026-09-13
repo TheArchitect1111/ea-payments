@@ -1,0 +1,42 @@
+model
+  schema 1.1
+
+type user
+
+type organization
+  relations
+    define admin: [user]
+    define executive: [user]
+    define finance: [user]
+    define reporting_manager: [user]
+    define read_only: [user]
+    define member: admin or executive or finance or reporting_manager or read_only
+    define can_manage: admin
+    define can_read_pii: admin or executive or reporting_manager
+    define can_read_finance: admin or executive or finance or reporting_manager
+    define can_write_finance: admin or finance
+    define can_manage_reports: admin or reporting_manager
+    define can_approve_submission: admin or executive or reporting_manager
+    define can_read_audit: admin or executive or reporting_manager
+
+type program
+  relations
+    define organization: [organization]
+    define director: [user]
+    define case_manager: [user]
+    define can_read: director or case_manager or member from organization
+    define can_write: director or case_manager or admin from organization
+
+type client_record
+  relations
+    define organization: [organization]
+    define program: [program]
+    define can_read: can_read from program
+    define can_write: can_write from program
+
+type report
+  relations
+    define organization: [organization]
+    define can_read: member from organization
+    define can_manage: can_manage_reports from organization
+    define can_approve: can_approve_submission from organization
