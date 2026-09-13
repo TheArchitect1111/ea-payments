@@ -34,60 +34,37 @@ ON CONFLICT (id) DO NOTHING;
 
 DO $$
 BEGIN
-  IF NOT fabric.has_permission('organization:manage') THEN
-    RAISE EXCEPTION 'organization_admin must have organization:manage';
-  END IF;
-  IF NOT fabric.has_permission('finance:write') THEN
-    RAISE EXCEPTION 'organization_admin must have finance:write';
-  END IF;
+  IF NOT fabric.has_permission('organization:manage') THEN RAISE EXCEPTION 'organization_admin missing organization:manage'; END IF;
+  IF NOT fabric.has_permission('finance:write') THEN RAISE EXCEPTION 'organization_admin missing finance:write'; END IF;
 END $$;
 
 SET LOCAL app.current_identity_id = '20000000-0000-0000-0000-000000000002';
 DO $$
 BEGIN
-  IF NOT fabric.has_permission('pii:write') THEN
-    RAISE EXCEPTION 'case_manager must have pii:write';
-  END IF;
-  IF fabric.has_permission('finance:write') THEN
-    RAISE EXCEPTION 'case_manager must not have finance:write';
-  END IF;
-  IF NOT fabric.can_access_program('22000000-0000-0000-0000-000000000001') THEN
-    RAISE EXCEPTION 'case_manager must access assigned program';
-  END IF;
-  IF fabric.can_access_program('22000000-0000-0000-0000-000000000002') THEN
-    RAISE EXCEPTION 'case_manager must not access unassigned program';
-  END IF;
+  IF NOT fabric.has_permission('pii:write') THEN RAISE EXCEPTION 'case_manager missing pii:write'; END IF;
+  IF fabric.has_permission('finance:write') THEN RAISE EXCEPTION 'case_manager unexpectedly has finance:write'; END IF;
+  IF NOT fabric.can_access_program('22000000-0000-0000-0000-000000000001') THEN RAISE EXCEPTION 'case_manager cannot access assigned program'; END IF;
+  IF fabric.can_access_program('22000000-0000-0000-0000-000000000002') THEN RAISE EXCEPTION 'case_manager can access unassigned program'; END IF;
 END $$;
 
 SET LOCAL app.current_identity_id = '20000000-0000-0000-0000-000000000003';
 DO $$
 BEGIN
-  IF NOT fabric.has_permission('finance:write') THEN
-    RAISE EXCEPTION 'finance must have finance:write';
-  END IF;
-  IF fabric.has_permission('pii:write') THEN
-    RAISE EXCEPTION 'finance must not have pii:write';
-  END IF;
-  IF NOT fabric.can_access_program('22000000-0000-0000-0000-000000000002') THEN
-    RAISE EXCEPTION 'finance tenant-wide program visibility expected';
-  END IF;
+  IF NOT fabric.has_permission('finance:write') THEN RAISE EXCEPTION 'finance missing finance:write'; END IF;
+  IF fabric.has_permission('pii:write') THEN RAISE EXCEPTION 'finance unexpectedly has pii:write'; END IF;
+  IF NOT fabric.can_access_program('22000000-0000-0000-0000-000000000002') THEN RAISE EXCEPTION 'finance tenant-wide program visibility expected'; END IF;
 END $$;
 
 SET LOCAL app.current_identity_id = '20000000-0000-0000-0000-000000000004';
 DO $$
 BEGIN
-  IF fabric.has_permission('submission:approve') THEN
-    RAISE EXCEPTION 'suspended membership must have no permissions';
-  END IF;
+  IF fabric.has_permission('submission:approve') THEN RAISE EXCEPTION 'suspended membership has permissions'; END IF;
 END $$;
 
--- Missing identity fails closed.
 SET LOCAL app.current_identity_id = '';
 DO $$
 BEGIN
-  IF fabric.has_permission('program:read') THEN
-    RAISE EXCEPTION 'missing identity must fail closed';
-  END IF;
+  IF fabric.has_permission('program:read') THEN RAISE EXCEPTION 'missing identity did not fail closed'; END IF;
 END $$;
 
 -- Membership changes must create audit events.
@@ -107,21 +84,9 @@ BEGIN
   IF n < 1 THEN RAISE EXCEPTION 'membership update audit event missing'; END IF;
 END $$;
 
--- Even a privileged caller cannot mutate the audit history accidentally.
+-- A privileged caller still cannot modify audit history accidentally.
 DO $$
 BEGIN
-  BEGIN
-    UPDATE fabric.audit_events
-    SET event_type = 'tampered'
-    WHERE organization_id = '00000000-0000-0000-0000-0000000002a1'
-    LIMIT 1;
-    RAISE EXCEPTION 'audit mutation unexpectedly succeeded';
-  EXCEPTION
-    WHEN syntax_error THEN
-      -- PostgreSQL UPDATE has no LIMIT; run a valid targeted update below.
-      NULL;
-  END;
-
   BEGIN
     UPDATE fabric.audit_events
     SET event_type = 'tampered'
@@ -137,17 +102,12 @@ BEGIN
   END;
 END $$;
 
--- Wrong tenant context cannot resolve Org A's membership or program access.
 SET LOCAL app.current_organization_id = '00000000-0000-0000-0000-0000000002b2';
 SET LOCAL app.current_identity_id = '20000000-0000-0000-0000-000000000002';
 DO $$
 BEGIN
-  IF fabric.has_permission('pii:read') THEN
-    RAISE EXCEPTION 'cross-tenant permission leak detected';
-  END IF;
-  IF fabric.can_access_program('22000000-0000-0000-0000-000000000001') THEN
-    RAISE EXCEPTION 'cross-tenant program access leak detected';
-  END IF;
+  IF fabric.has_permission('pii:read') THEN RAISE EXCEPTION 'cross-tenant permission leak detected'; END IF;
+  IF fabric.can_access_program('22000000-0000-0000-0000-000000000001') THEN RAISE EXCEPTION 'cross-tenant program access leak detected'; END IF;
 END $$;
 
 ROLLBACK;
