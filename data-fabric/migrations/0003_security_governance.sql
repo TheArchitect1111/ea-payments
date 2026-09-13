@@ -51,37 +51,40 @@ INSERT INTO fabric.permission_definitions(permission, description, sensitivity) 
   ('audit:read', 'Read tenant audit events', 'sensitive')
 ON CONFLICT (permission) DO NOTHING;
 
--- Organization administrator: full tenant administration.
 INSERT INTO fabric.role_permissions(role, permission)
 SELECT 'organization_admin', permission FROM fabric.permission_definitions
 ON CONFLICT DO NOTHING;
 
--- Executive: broad read access and submission approval, but no routine PII/finance mutation.
 INSERT INTO fabric.role_permissions(role, permission) VALUES
  ('executive','pii:read'),('executive','program:read'),('executive','service:read'),
  ('executive','finance:read'),('executive','outcome:read'),('executive','evidence:read'),
  ('executive','report:read'),('executive','submission:approve'),('executive','audit:read'),
- -- Program director: program-scoped delivery management.
  ('program_director','pii:read'),('program_director','program:read'),('program_director','program:write'),
  ('program_director','service:read'),('program_director','service:write'),
  ('program_director','outcome:read'),('program_director','outcome:write'),
  ('program_director','evidence:read'),('program_director','evidence:write'),('program_director','report:read'),
- -- Case manager: program-scoped client/service work.
  ('case_manager','pii:read'),('case_manager','pii:write'),('case_manager','program:read'),
  ('case_manager','service:read'),('case_manager','service:write'),
  ('case_manager','outcome:read'),('case_manager','outcome:write'),
  ('case_manager','evidence:read'),('case_manager','evidence:write'),
- -- Finance: grant and expenditure work without routine PII mutation.
  ('finance','program:read'),('finance','service:read'),('finance','finance:read'),('finance','finance:write'),
  ('finance','report:read'),
- -- Reporting manager: broad read plus reporting configuration and approval.
  ('reporting_manager','pii:read'),('reporting_manager','program:read'),('reporting_manager','service:read'),
  ('reporting_manager','finance:read'),('reporting_manager','outcome:read'),('reporting_manager','evidence:read'),
  ('reporting_manager','report:read'),('reporting_manager','report:manage'),
  ('reporting_manager','submission:approve'),('reporting_manager','audit:read'),
- -- Read-only intentionally excludes raw PII and audit data.
  ('read_only','program:read'),('read_only','service:read'),('read_only','outcome:read'),('read_only','report:read')
 ON CONFLICT DO NOTHING;
+
+-- memberships needs a composite unique key before tenant-aware references can target it.
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'memberships_id_organization_key'
+  ) THEN
+    ALTER TABLE fabric.memberships ADD CONSTRAINT memberships_id_organization_key UNIQUE (id, organization_id);
+  END IF;
+END $$;
 
 CREATE TABLE IF NOT EXISTS fabric.program_access (
   id uuid PRIMARY KEY,
@@ -95,16 +98,6 @@ CREATE TABLE IF NOT EXISTS fabric.program_access (
   FOREIGN KEY (membership_id, organization_id) REFERENCES fabric.memberships(id, organization_id) ON DELETE CASCADE,
   FOREIGN KEY (program_id, organization_id) REFERENCES fabric.programs(id, organization_id) ON DELETE CASCADE
 );
-
--- memberships lacked a composite unique key in Run 0; add it for tenant-aware references.
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_constraint WHERE conname = 'memberships_id_organization_key'
-  ) THEN
-    ALTER TABLE fabric.memberships ADD CONSTRAINT memberships_id_organization_key UNIQUE (id, organization_id);
-  END IF;
-END $$;
 
 ALTER TABLE fabric.program_access ENABLE ROW LEVEL SECURITY;
 ALTER TABLE fabric.program_access FORCE ROW LEVEL SECURITY;
@@ -149,7 +142,6 @@ BEGIN
   r := fabric.current_membership_role();
   IF r IS NULL THEN RETURN false; END IF;
 
-  -- Tenant-wide roles can access all programs within the already-selected organization.
   IF r IN ('organization_admin','executive','finance','reporting_manager','read_only') THEN
     RETURN EXISTS (
       SELECT 1 FROM fabric.programs p
@@ -158,7 +150,6 @@ BEGIN
     );
   END IF;
 
-  -- Delivery roles require explicit program assignment.
   IF r IN ('program_director','case_manager') THEN
     RETURN EXISTS (
       SELECT 1
@@ -176,8 +167,6 @@ BEGIN
 END;
 $$;
 
--- Audit records are append-only. RLS already prevents tenant UPDATE/DELETE because no
--- policies exist; this trigger additionally blocks accidental privileged mutation.
 CREATE OR REPLACE FUNCTION fabric.prevent_audit_mutation()
 RETURNS trigger
 LANGUAGE plpgsql
@@ -192,7 +181,6 @@ CREATE TRIGGER audit_events_immutable
 BEFORE UPDATE OR DELETE ON fabric.audit_events
 FOR EACH ROW EXECUTE FUNCTION fabric.prevent_audit_mutation();
 
--- Record authorization-relevant membership changes in the existing audit stream.
 CREATE OR REPLACE FUNCTION fabric.audit_membership_change()
 RETURNS trigger
 LANGUAGE plpgsql
