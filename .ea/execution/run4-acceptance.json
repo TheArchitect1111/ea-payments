@@ -1,8 +1,8 @@
 {
-  "version": "2.1.0",
-  "status": "RUN_4_CERTIFIED_PENDING_MERGE",
+  "version": "3.0.0",
+  "status": "EA_STABLE_PRODUCTION_SYSTEM_V1_CERTIFIED",
   "certificationTarget": "EA_STABLE_PRODUCTION_SYSTEM_V1",
-  "purpose": "Certify the EA production system by proving representative faults are detected, unsafe promotion is blocked, deterministic repair/rollback/resume paths execute, re-testing occurs, and production verification remains authoritative.",
+  "purpose": "Final certification of the EA governed production system after controlled failure injection, branch CI, merge, Master Guard, master CI, deploy/browser smoke, and live recovery verification.",
   "failureScenarios": [
     "bad asset",
     "missing environment variable",
@@ -18,47 +18,43 @@
     "partial deployment",
     "portal login failure"
   ],
-  "requiredLoop": [
-    "detect",
-    "stop unsafe promotion",
-    "diagnose",
-    "repair rollback resume or block",
-    "re-test",
-    "verify safe state"
-  ],
-  "candidateEvidence": {
+  "certificationEvidence": {
     "pullRequest": 412,
-    "ciRun": 34907792326,
-    "ci": "PASS",
-    "executionPolicy": "PASS",
-    "clientProtection": "PASS",
-    "modularAssembly": "PASS",
-    "vercelPreview": "PASS",
+    "mergeCommit": "ddc27bdc3424bd32dc01d18be3541144378c8603",
+    "candidateCI": 34907792326,
+    "masterCI": 34908441905,
+    "masterGuard": 34908441919,
+    "candidateCIResult": "PASS",
+    "masterCIResult": "PASS",
+    "masterGuardResult": "PASS",
+    "run4Certification": "PASS",
     "deployBrowserSmoke": "PASS",
     "liveRecoveryJourneys": "PASS",
     "failureInjectionScenarios": 13,
-    "externalProductionTouched": false
+    "externalProductionTouchedByCertification": false
   },
   "invariants": [
-    "failure injection must not touch external production",
-    "no scenario may authorize production promotion during certification",
-    "unauthorized change must fail closed",
-    "bad feature flag must exercise kill-switch behavior",
-    "failed or partial deployment must exercise rollback behavior",
-    "worker or Temporal interruption must exercise durable resume behavior",
-    "repair paths must be re-tested before verification",
-    "COMPLETE remains evidence-backed rather than inferred"
+    "unsafe promotion fails closed",
+    "unauthorized change is blocked",
+    "bad feature flag exercises kill-switch behavior",
+    "failed or partial deployment exercises rollback behavior",
+    "worker or Temporal interruption exercises durable resume behavior",
+    "repair paths are re-tested before verification",
+    "COMPLETE is evidence-backed rather than inferred",
+    "certification failure injection does not touch external production"
   ],
-  "remainingCriteria": [
-    "PR is merged to master",
-    "Master Guard passes after merge",
-    "master CI passes",
-    "master contains final certification evidence"
-  ],
-  "nextSteps": [
-    "verify evidence commit CI",
-    "merge Run 4",
-    "verify master CI",
-    "set final status to EA_STABLE_PRODUCTION_SYSTEM_V1_CERTIFIED"
-  ]
+  "completionCriteria": {
+    "all13Scenarios": "PASS",
+    "mandatoryCIContract": "PASS",
+    "clientProtection": "PASS",
+    "executionPolicy": "PASS",
+    "modularAssembly": "PASS",
+    "mergedToMaster": "PASS",
+    "masterGuard": "PASS",
+    "masterCI": "PASS",
+    "deployBrowserSmoke": "PASS",
+    "liveRecoveryJourneys": "PASS",
+    "finalEvidenceOnMaster": "PASS"
+  },
+  "nextSteps": []
 }
