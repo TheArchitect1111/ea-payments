@@ -1,28 +1,58 @@
 {
-  "version":"1.0.0",
-  "status":"RUN_4_ACCEPTANCE_PENDING_CI",
-  "purpose":"Prove the EA Execution Controller fails closed under representative injected failures and preserves repair, re-gating, verification, and next-step contracts.",
-  "scenarios":[
-    "healthy authoritative evidence permits verification",
-    "functional failure prohibits pass and enters repair",
-    "asset QA failure prohibits pass and enters repair",
-    "desktop visual regression prohibits pass and enters repair",
-    "mobile visual regression prohibits pass and enters repair",
-    "creative critic rejection prohibits pass and enters repair",
-    "multiple simultaneous failures are all identified",
-    "repair cycles are bounded",
-    "failed repair is authoritatively re-gated",
-    "failed final verification cannot transition to COMPLETE",
-    "next steps survive through execution result"
+  "version": "2.0.0",
+  "status": "RUN_4_CERTIFICATION_CANDIDATE",
+  "certificationTarget": "EA_STABLE_PRODUCTION_SYSTEM_V1",
+  "purpose": "Certify the EA production system by proving representative faults are detected, unsafe promotion is blocked, deterministic repair/rollback/resume paths execute, re-testing occurs, and production verification remains authoritative.",
+  "failureScenarios": [
+    "bad asset",
+    "missing environment variable",
+    "broken API",
+    "failed deployment",
+    "duplicate image",
+    "visual drift",
+    "database timeout",
+    "worker restart",
+    "Temporal interruption",
+    "unauthorized change",
+    "bad feature flag",
+    "partial deployment",
+    "portal login failure"
   ],
-  "completionCriteria":[
-    "dedicated execution policy and contract tests pass",
+  "requiredLoop": [
+    "detect",
+    "stop unsafe promotion",
+    "diagnose",
+    "repair rollback resume or block",
+    "re-test",
+    "verify safe state"
+  ],
+  "invariants": [
+    "failure injection must not touch external production",
+    "no scenario may authorize production promotion during certification",
+    "unauthorized change must fail closed",
+    "bad feature flag must exercise kill-switch behavior",
+    "failed or partial deployment must exercise rollback behavior",
+    "worker or Temporal interruption must exercise durable resume behavior",
+    "repair paths must be re-tested before verification",
+    "COMPLETE remains evidence-backed rather than inferred"
+  ],
+  "completionCriteria": [
+    "all 13 certification scenarios pass",
+    "Run 4 certification test is mandatory in CI",
     "full EA CI passes",
-    "Graft verification passes",
-    "Client Protection passes",
-    "Modular Assembly passes",
+    "Client Protection Gate passes",
+    "Master Guard passes after merge",
+    "deployment and browser smoke verification passes",
+    "live customer recovery journeys pass",
     "PR is merged to master",
-    "master contains final acceptance evidence"
+    "master contains final certification evidence"
   ],
-  "nextSteps":["run all required CI","self-repair any failure","merge Run 4","verify master","certify EA Execution Controller integration complete"]
+  "nextSteps": [
+    "run candidate CI",
+    "self-repair any failure",
+    "record acceptance evidence",
+    "merge Run 4",
+    "verify master CI",
+    "certify EA STABLE PRODUCTION SYSTEM v1"
+  ]
 }
