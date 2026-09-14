@@ -1,12 +1,20 @@
 {
   "standard": "EA_STABLE_PRODUCTION_SYSTEM_V1",
-  "status": "CANDIDATE_CERTIFIED",
+  "status": "CERTIFIED",
   "pullRequest": 412,
-  "candidateCommit": "62b4c31e6c22bb344e35b75556b839b5abfdb3c8",
+  "mergeCommit": "ddc27bdc3424bd32dc01d18be3541144378c8603",
   "candidateCI": {
     "runId": 34907792326,
     "result": "success",
     "run4CertificationStep": "success",
+    "deployBrowserSmoke": "success",
+    "liveCustomerRecoveryJourneys": "success"
+  },
+  "masterVerification": {
+    "masterCI": 34908441905,
+    "masterCIResult": "success",
+    "masterGuard": 34908441919,
+    "masterGuardResult": "success",
     "deployBrowserSmoke": "success",
     "liveCustomerRecoveryJourneys": "success"
   },
@@ -42,7 +50,7 @@
     "killSwitchVerified": true
   },
   "notes": [
-    "EA Amplifi Auto Gate rejected the generic preview deployment because it was not explicitly marked as an Amplifi production candidate; this is expected fail-closed behavior and is not a Run 4 certification failure.",
-    "Final certification requires merge to master and successful post-merge master verification."
+    "EA Amplifi Auto Gate rejected generic preview deployments that were not explicitly marked as Amplifi production candidates. This was expected fail-closed behavior and did not invalidate Run 4.",
+    "Run 4 certification is complete."
   ]
 }
