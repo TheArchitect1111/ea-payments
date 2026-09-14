@@ -1,0 +1,30 @@
+{
+  "version": "1.0.0",
+  "run": "EA_STABILITY_RUN_2",
+  "status": "IMPLEMENTED_PENDING_CI",
+  "objective": "Protect approved client visuals and constrain autonomous engineering repairs to independently verified, policy-authorized scope.",
+  "implemented": [
+    "approved visual surface contract",
+    "immutable baseline reference requirement",
+    "multi-viewport visual evidence requirement",
+    "fail-closed missing visual evidence behavior",
+    "controlled autonomous repair decision policy",
+    "forbidden/out-of-scope path detection",
+    "OPA, functional, tenant-isolation, rollback and visual gates",
+    "first protected surface registration for Amanda Catherine public page",
+    "Run 2 executable contract tests"
+  ],
+  "authorityBoundary": {
+    "openhands": "engineering worker only; no merge/deploy/COMPLETE authority",
+    "visualWorker": "produces evidence only; cannot approve its own baseline",
+    "opa": "authorization authority",
+    "eaReleaseGate": "independent advancement authority after all evidence passes"
+  },
+  "firstProtectedSurface": {
+    "id": "amanda-catherine-public-v1",
+    "route": "/amanda-catherine",
+    "baselineRef": "9e375f7386f6787773fbbbca4515b676d3443c52",
+    "viewports": ["mobile-390", "desktop-1440"]
+  },
+  "next": "Run 3 adds unified observability, controlled release/kill-switch capability, and the Activepieces edge connector contract."
+}
