@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "contract": "EA_APPROVED_VISUAL_SURFACES",
+  "rules": [
+    "baselineRef must be immutable",
+    "candidate cannot approve or replace its own baseline",
+    "missing viewport evidence fails closed",
+    "protected surfaces require independent comparison before release"
+  ],
+  "surfaces": [
+    {
+      "id": "amanda-catherine-public-v1",
+      "clientId": "amanda-catherine",
+      "route": "/amanda-catherine",
+      "baselineRef": "9e375f7386f6787773fbbbca4515b676d3443c52",
+      "viewports": [
+        { "name": "mobile-390", "width": 390, "height": 844 },
+        { "name": "desktop-1440", "width": 1440, "height": 900 }
+      ],
+      "allowedChangeRegions": [],
+      "protectedRegions": ["full-page"],
+      "maxDiffPixelRatio": 0.001,
+      "status": "APPROVED"
+    }
+  ]
+}

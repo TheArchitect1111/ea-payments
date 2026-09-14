@@ -78,6 +78,8 @@ jobs:
         run: node scripts/test-recovery-monitoring-contract.mjs
       - name: Verify EA Stability Run 1 durable execution contracts
         run: npx tsx scripts/test-stability-run1.ts
+      - name: Verify EA Stability Run 2 protected autonomy contracts
+        run: npx tsx scripts/test-stability-run2.ts
       - name: Verify Client Factory fulfillment contract
         run: npx tsx scripts/test-factory-fulfillment.ts
       - name: Verify Amanda checkout and pricing contract
