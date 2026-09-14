@@ -1,0 +1,31 @@
+{
+  "version": "1.0.0",
+  "run": "EA_STABILITY_RUN_0",
+  "status": "IMPLEMENTED_PENDING_CI",
+  "objective": "Certify existing EA execution foundation and lock canonical client workspace plus risk-tiered approval contracts before durable orchestration integration.",
+  "existingFoundation": [
+    "EA Execution Controller",
+    "OPA fail-closed policy enforcement",
+    "ProjectContext append-only execution context",
+    "CapabilityRegistry registry-driven dispatch",
+    "EA Agent Framework dynamic specialist routing",
+    "provider/model failover",
+    "Recovery Orchestrator",
+    "tenant and client protection",
+    "Playwright functional verification",
+    "CI and production verification"
+  ],
+  "newContracts": [
+    ".ea/stability/client-workspace-contract.v1.json",
+    ".ea/stability/risk-approval-model.v1.json"
+  ],
+  "acceptance": [
+    "existing Run 4 execution acceptance scenarios remain mandatory",
+    "unknown risk fails closed to owner approval",
+    "cross-tenant mutation is blocked",
+    "production mutation requires approved intent and known rollback",
+    "protected asset changes require explicit authorization",
+    "completion requires authoritative verification evidence"
+  ],
+  "next": "Run 1 integrates durable Temporal execution and defines a sandboxed OpenHands engineering-worker adapter without granting production authority."
+}
