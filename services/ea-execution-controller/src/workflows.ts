@@ -3,14 +3,14 @@ import type * as activities from './activities.js';
 
 export type ExecutionState = 'INTAKE'|'CONTEXT_LOCK'|'MANIFEST'|'PLAN'|'EXECUTE'|'GATE'|'REPAIR'|'VERIFY'|'COMPLETE'|'BLOCKED'|'ROLLED_BACK';
 export type GateResult = { pass: boolean; repairable?: boolean; rollback?: boolean; evidence?: string[] };
-export type EAJob = { id:string; project:string; deliverable:string; approved:boolean; manifestRef:string; maxRepairCycles?:number };
-export type EAResult = { jobId:string; state:ExecutionState; repairCycles:number; evidence:string[]; blocker?:string };
+export type EAJob = { id:string; project:string; deliverable:string; approved:boolean; manifestRef:string; nextSteps:string[]; maxRepairCycles?:number };
+export type EAResult = { jobId:string; state:ExecutionState; repairCycles:number; evidence:string[]; nextSteps:string[]; blocker?:string };
 
 const a = proxyActivities<typeof activities>({ startToCloseTimeout: '10 minutes', retry: { initialInterval:'2 seconds', backoffCoefficient:2, maximumInterval:'1 minute', maximumAttempts:5 } });
 export const executionStatus = defineQuery<EAResult>('executionStatus');
 
 export async function eaExecutionWorkflow(job: EAJob): Promise<EAResult> {
-  let result: EAResult = { jobId:job.id, state:'INTAKE', repairCycles:0, evidence:[] };
+  const result: EAResult = { jobId:job.id, state:'INTAKE', repairCycles:0, evidence:[], nextSteps:job.nextSteps ?? [] };
   setHandler(executionStatus, () => result);
   if (!job.approved) return { ...result, state:'BLOCKED', blocker:'Action intent is not approved.' };
   result.state='CONTEXT_LOCK';
