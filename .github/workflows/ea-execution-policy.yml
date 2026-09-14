@@ -25,3 +25,6 @@ jobs:
       - name: Build execution controller
         working-directory: services/ea-execution-controller
         run: npm install && npm run build
+      - name: Test execution controller contract
+        working-directory: services/ea-execution-controller
+        run: npm test

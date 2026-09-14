@@ -2,7 +2,7 @@ import { proxyActivities, defineQuery, setHandler } from '@temporalio/workflow';
 import type * as activities from './activities.js';
 
 export type ExecutionState = 'INTAKE'|'CONTEXT_LOCK'|'MANIFEST'|'PLAN'|'EXECUTE'|'GATE'|'REPAIR'|'VERIFY'|'COMPLETE'|'BLOCKED'|'ROLLED_BACK';
-export type GateResult = { pass: boolean; repairable?: boolean; rollback?: boolean; evidence?: string[] };
+export type GateResult = { pass: boolean; repairable?: boolean; rollback?: boolean; evidence?: string[]; failedGates?: string[] };
 export type EAJob = { id:string; project:string; deliverable:string; approved:boolean; manifestRef:string; nextSteps:string[]; maxRepairCycles?:number };
 export type EAResult = { jobId:string; state:ExecutionState; repairCycles:number; evidence:string[]; nextSteps:string[]; blocker?:string };
 
@@ -20,6 +20,7 @@ export async function eaExecutionWorkflow(job: EAJob): Promise<EAResult> {
   result.state='PLAN';
   result.evidence.push(...await a.compilePlan(job));
   const maxRepairCycles = job.maxRepairCycles ?? 8;
+
   while (true) {
     result.state='EXECUTE';
     result.evidence.push(...await a.executeExistingEAStack(job));
@@ -38,12 +39,26 @@ export async function eaExecutionWorkflow(job: EAJob): Promise<EAResult> {
     result.repairCycles += 1;
     result.evidence.push(...await a.repair(job, gate));
   }
-  result.state='VERIFY';
-  const verified = await a.verify(job);
-  result.evidence.push(...(verified.evidence ?? []));
-  if (!verified.pass) {
-    return { ...result, state:'BLOCKED', blocker:'Final verification failed. COMPLETE is prohibited.' };
+
+  while (true) {
+    result.state='VERIFY';
+    const verified = await a.verify(job);
+    result.evidence.push(...(verified.evidence ?? []));
+    if (verified.pass) break;
+    if (!verified.repairable || result.repairCycles >= maxRepairCycles) {
+      return { ...result, state:'BLOCKED', blocker:'Final verification failed. COMPLETE is prohibited.' };
+    }
+    result.state='REPAIR';
+    result.repairCycles += 1;
+    result.evidence.push(...await a.repair(job, verified));
+    result.state='GATE';
+    const regated = await a.runExistingEAGates(job);
+    result.evidence.push(...(regated.evidence ?? []));
+    if (!regated.pass && (!regated.repairable || result.repairCycles >= maxRepairCycles)) {
+      return { ...result, state:'BLOCKED', blocker:'Repaired job failed authoritative re-gating.' };
+    }
   }
+
   result.state='COMPLETE';
   return result;
 }
