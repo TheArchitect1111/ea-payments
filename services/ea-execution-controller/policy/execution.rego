@@ -16,6 +16,7 @@ allow_complete if {
   input.execution.verified == true
   input.execution.unresolved_blocking_regressions == 0
   input.execution.required_evidence_complete == true
+  count(input.execution.next_steps) > 0
   input.verification.functional_passed == true
   not visual_required_or_failed
   not production_required_or_failed
@@ -36,6 +37,7 @@ deny contains "source of truth must be locked" if { input.context.source_of_trut
 deny contains "silent stack substitution is prohibited" if { input.execution.required_activity_substituted == true }
 deny contains "required activity was skipped" if { input.execution.required_activity_skipped == true }
 deny contains "unresolved required gate failure" if { input.execution.failed_required_gates > 0 }
+deny contains "next steps are required before COMPLETE" if { count(input.execution.next_steps) == 0 }
 deny contains "rollback path required for production change" if {
   input.verification.production_required == true
   input.execution.rollback_defined != true
