@@ -1,0 +1,30 @@
+{
+  "version": "1.0.0",
+  "status": "RUN_0_COMPLETE",
+  "principle": "orchestrate_existing_stack_do_not_replace",
+  "stages": [
+    {"state":"INTAKE","existing":["approved user intent","project/client source of truth"],"futureOwner":"EA controller"},
+    {"state":"CONTEXT_LOCK","existing":["Spec Kit constitution","Graft","project records","asset rules"],"futureOwner":"EA controller"},
+    {"state":"MANIFEST","existing":["Spec Kit acceptance criteria","protected invariants","rollback conditions"],"futureOwner":"EA controller"},
+    {"state":"PLAN","existing":["Spec Kit plan/tasks","Graft blast-radius context"],"futureOwner":"EA controller"},
+    {"state":"EXECUTE","existing":["EA engines","repository implementation","Visual Foundry where applicable"],"futureOwner":"Temporal workflow"},
+    {"state":"GATE","existing":["CI","build/tests","Playwright","Scrapling","EA Production Gate","creative/visual QA"],"futureOwner":"Temporal + OPA enforcement"},
+    {"state":"REPAIR","existing":["Spec Kit convergence rule","smallest-safe-change rule"],"futureOwner":"Temporal retry/repair workflow"},
+    {"state":"VERIFY","existing":["deployed route checks","functional checks","desktop/mobile visual checks","source-of-truth comparison"],"futureOwner":"EA controller"},
+    {"state":"COMPLETE","existing":["strict DONE vocabulary","no unresolved blocking regression"],"futureOwner":"EA controller"}
+  ],
+  "hardRules": [
+    "approval is semantic and does not require the word Go",
+    "questions and analysis do not mutate production",
+    "required activities cannot be silently skipped or substituted",
+    "failed required gates cannot advance to COMPLETE",
+    "safe failures loop through REPAIR without unnecessary user interruption",
+    "production changes require rollback criteria",
+    "visual fidelity is acceptance criteria for public sites and portals",
+    "final inspection is required when manifest requires it",
+    "existing EA gates remain authoritative evidence sources",
+    "Temporal and OPA are additive control-plane components, not replacements"
+  ],
+  "run1Ready": true,
+  "run2Ready": true
+}
