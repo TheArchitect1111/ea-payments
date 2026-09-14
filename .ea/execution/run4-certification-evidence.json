@@ -1,0 +1,48 @@
+{
+  "standard": "EA_STABLE_PRODUCTION_SYSTEM_V1",
+  "status": "CANDIDATE_CERTIFIED",
+  "pullRequest": 412,
+  "candidateCommit": "62b4c31e6c22bb344e35b75556b839b5abfdb3c8",
+  "candidateCI": {
+    "runId": 34907792326,
+    "result": "success",
+    "run4CertificationStep": "success",
+    "deployBrowserSmoke": "success",
+    "liveCustomerRecoveryJourneys": "success"
+  },
+  "requiredGates": {
+    "executionPolicy": "success",
+    "clientProtection": "success",
+    "modularAssembly": "success",
+    "vercelPreviewDeployment": "success"
+  },
+  "failureInjection": {
+    "scenarioCount": 13,
+    "scenarios": [
+      "bad-asset",
+      "missing-env",
+      "broken-api",
+      "failed-deploy",
+      "duplicate-image",
+      "visual-drift",
+      "db-timeout",
+      "worker-restart",
+      "temporal-interruption",
+      "unauthorized-change",
+      "bad-feature-flag",
+      "partial-deploy",
+      "portal-login-failure"
+    ],
+    "productionTouched": false,
+    "unsafePromotionAllowed": false,
+    "repairPathsVerified": true,
+    "rollbackPathsVerified": true,
+    "resumePathsVerified": true,
+    "unauthorizedChangeBlocked": true,
+    "killSwitchVerified": true
+  },
+  "notes": [
+    "EA Amplifi Auto Gate rejected the generic preview deployment because it was not explicitly marked as an Amplifi production candidate; this is expected fail-closed behavior and is not a Run 4 certification failure.",
+    "Final certification requires merge to master and successful post-merge master verification."
+  ]
+}
