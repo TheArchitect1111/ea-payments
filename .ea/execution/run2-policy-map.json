@@ -1,0 +1,23 @@
+{
+  "version":"1.0.0",
+  "status":"RUN_2_COMPLETE",
+  "engine":"OPA",
+  "deployment":"local-to-worker-and-ci",
+  "failClosed":true,
+  "enforcementPoints":["stage advancement","gate boundary","COMPLETE boundary","pull request CI"],
+  "protectedRules":[
+    "approved intent required",
+    "source of truth lock required",
+    "required activities cannot be skipped",
+    "required activities cannot be silently substituted",
+    "failed required gates block advancement",
+    "production work requires rollback definition",
+    "functional verification required",
+    "visual verification required when applicable",
+    "production verification required when applicable",
+    "unverified identity assets block completion",
+    "duplicate image sources block completion",
+    "unresolved blocking regressions block completion"
+  ],
+  "next":"Run 3 wires authoritative evidence and automatic repair implementations into the durable workflow."
+}
