@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "status": "ENFORCED_CONTRACT",
+  "observability": {
+    "standard": "OpenTelemetry",
+    "signals": ["traces", "metrics", "logs"],
+    "requiredAttributes": ["tenant.id", "project.id", "ea.stage", "ea.outcome", "ea.correlation_id"],
+    "deploymentAuthority": false
+  },
+  "featureManagement": {
+    "applicationApi": "OpenFeature",
+    "providerTarget": "Unleash",
+    "productionDefault": "OFF",
+    "modes": ["OFF", "INTERNAL", "CANARY", "FULL", "KILL_SWITCH"],
+    "requirements": ["approvalIdentity", "rollbackTarget", "tenantScope"]
+  },
+  "externalAutomation": {
+    "connector": "Activepieces",
+    "role": "EXTERNAL_CONNECTOR_LAYER",
+    "directProductionAuthority": false,
+    "requiredEnvelope": ["tenantId", "projectId", "correlationId", "idempotencyKey", "allowedCapabilities"]
+  },
+  "rule": "No observability, feature-management, or external-automation tool may bypass EA release, tenant-isolation, rollback, visual, or policy gates."
+}
