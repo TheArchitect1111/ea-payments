@@ -15,7 +15,8 @@ base_input := {
     "required_activity_substituted": false,
     "required_activity_skipped": false,
     "failed_required_gates": 0,
-    "rollback_defined": true
+    "rollback_defined": true,
+    "next_steps": ["Proceed to the next approved execution stage"]
   },
   "verification": {
     "functional_passed": true,
@@ -40,3 +41,5 @@ test_unverified_identity_asset_blocks if not allow_complete with input as object
 test_failed_gate_blocks if not allow_complete with input as object.union(base_input, {"execution": object.union(base_input.execution, {"failed_required_gates": 1})})
 
 test_skipped_activity_blocks if not allow_complete with input as object.union(base_input, {"execution": object.union(base_input.execution, {"required_activity_skipped": true})})
+
+test_missing_next_steps_blocks_complete if not allow_complete with input as object.union(base_input, {"execution": object.union(base_input.execution, {"next_steps": []})})
