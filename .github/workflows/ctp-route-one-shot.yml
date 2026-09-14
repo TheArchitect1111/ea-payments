@@ -2,29 +2,27 @@ name: CTP Route One Shot
 
 on:
   push:
-    branches:
-      - fix/ctp-api-fail-closed
+    branches: ["fix/ctp-api-fail-closed"]
 
 permissions:
   contents: write
 
 jobs:
   patch:
-    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: fix/ctp-api-fail-closed
-          fetch-depth: 0
-      - name: Patch CTP route fail-closed behavior
+          ref: "fix/ctp-api-fail-closed"
+      - name: Patch route
+        shell: bash
         run: |
-          python - <<'PY'
+          python3 <<'PY'
           from pathlib import Path
           p = Path('app/api/assessment/submit/route.ts')
           text = p.read_text()
 
-          old = """    if (!proposalResult.ok) {
+          old1 = """    if (!proposalResult.ok) {
       console.error('Proposal write failed:', proposalResult.error);
       return NextResponse.json({
         ok: true,
@@ -34,7 +32,7 @@ jobs:
       });
     }
 """
-          new = """    if (!proposalResult.ok) {
+          new1 = """    if (!proposalResult.ok) {
       console.error('Proposal write failed:', proposalResult.error);
       return NextResponse.json(
         {
@@ -48,13 +46,11 @@ jobs:
       );
     }
 """
-          if old not in text:
-              raise SystemExit('proposal false-success block not found')
-          text = text.replace(old, new, 1)
+          assert old1 in text, 'proposal block not found'
+          text = text.replace(old1, new1, 1)
 
-          old = """        if (ctpResult.submission) {
-"""
-          new = """        if (!ctpResult.ok || !ctpResult.submission) {
+          old2 = "        if (ctpResult.submission) {\n"
+          new2 = """        if (!ctpResult.ok || !ctpResult.submission) {
           console.error('[assessment/submit] CTP persistence failed:', ctpResult.error);
           return NextResponse.json(
             {
@@ -68,15 +64,14 @@ jobs:
 
         if (ctpResult.submission) {
 """
-          if old not in text:
-              raise SystemExit('ctp submission gate not found')
-          text = text.replace(old, new, 1)
+          assert old2 in text, 'CTP gate not found'
+          text = text.replace(old2, new2, 1)
 
-          old = """      } catch (err) {
+          old3 = """      } catch (err) {
         console.error('[assessment/submit] CTP submission failed:', err);
       }
 """
-          new = """      } catch (err) {
+          new3 = """      } catch (err) {
         console.error('[assessment/submit] CTP submission failed:', err);
         if (!ctpSubmissionId) {
           return NextResponse.json(
@@ -90,15 +85,11 @@ jobs:
         }
       }
 """
-          if old not in text:
-              raise SystemExit('ctp catch block not found')
-          text = text.replace(old, new, 1)
-
+          assert old3 in text, 'CTP catch block not found'
+          text = text.replace(old3, new3, 1)
           p.write_text(text)
           Path('.github/workflows/ctp-route-one-shot.yml').unlink()
           PY
-      - name: Commit surgical route repair
-        run: |
           git config user.name "EA CTP Repair"
           git config user.email "ea-ctp-repair@users.noreply.github.com"
           git add app/api/assessment/submit/route.ts .github/workflows/ctp-route-one-shot.yml
