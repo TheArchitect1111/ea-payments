@@ -1,0 +1,16 @@
+{
+  "version":"1.0.0",
+  "status":"RUN_3_IMPLEMENTED",
+  "authoritativeEvidence":[".ea/gates/latest.json"],
+  "behavior":[
+    "read existing EA gate evidence instead of manufacturing pass/fail",
+    "OPA evaluates authoritative evidence before advancement",
+    "failed named gates create deterministic repair routes",
+    "repair is followed by authoritative re-gating",
+    "failed final verification can re-enter repair",
+    "COMPLETE remains prohibited until verification passes",
+    "next steps remain mandatory"
+  ],
+  "repairBoundary":"Run 3 routes failures to existing subsystem repairers. Run 4 validates and hardens subsystem-specific adapters under injected failures.",
+  "nextSteps":["pass dedicated execution policy CI","pass full EA CI","merge Run 3","begin Run 4 shadow and failure-injection acceptance"]
+}
