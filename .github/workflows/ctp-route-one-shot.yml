@@ -1,0 +1,106 @@
+name: CTP Route One Shot
+
+on:
+  push:
+    branches:
+      - fix/ctp-api-fail-closed
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/ctp-api-fail-closed
+          fetch-depth: 0
+      - name: Patch CTP route fail-closed behavior
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('app/api/assessment/submit/route.ts')
+          text = p.read_text()
+
+          old = """    if (!proposalResult.ok) {
+      console.error('Proposal write failed:', proposalResult.error);
+      return NextResponse.json({
+        ok: true,
+        saved: false,
+        message:
+          'We received your assessment. Our team will follow up by email within 1–2 business days.',
+      });
+    }
+"""
+          new = """    if (!proposalResult.ok) {
+      console.error('Proposal write failed:', proposalResult.error);
+      return NextResponse.json(
+        {
+          ok: false,
+          saved: false,
+          error: isCtpFlow
+            ? 'Your CTP could not be safely saved. Please try again.'
+            : 'Your assessment could not be safely saved. Please try again.',
+        },
+        { status: 503 },
+      );
+    }
+"""
+          if old not in text:
+              raise SystemExit('proposal false-success block not found')
+          text = text.replace(old, new, 1)
+
+          old = """        if (ctpResult.submission) {
+"""
+          new = """        if (!ctpResult.ok || !ctpResult.submission) {
+          console.error('[assessment/submit] CTP persistence failed:', ctpResult.error);
+          return NextResponse.json(
+            {
+              ok: false,
+              saved: false,
+              error: 'Your CTP could not be verified as saved. Please try again.',
+            },
+            { status: 503 },
+          );
+        }
+
+        if (ctpResult.submission) {
+"""
+          if old not in text:
+              raise SystemExit('ctp submission gate not found')
+          text = text.replace(old, new, 1)
+
+          old = """      } catch (err) {
+        console.error('[assessment/submit] CTP submission failed:', err);
+      }
+"""
+          new = """      } catch (err) {
+        console.error('[assessment/submit] CTP submission failed:', err);
+        if (!ctpSubmissionId) {
+          return NextResponse.json(
+            {
+              ok: false,
+              saved: false,
+              error: 'Your CTP could not be completed safely. Please try again.',
+            },
+            { status: 500 },
+          );
+        }
+      }
+"""
+          if old not in text:
+              raise SystemExit('ctp catch block not found')
+          text = text.replace(old, new, 1)
+
+          p.write_text(text)
+          Path('.github/workflows/ctp-route-one-shot.yml').unlink()
+          PY
+      - name: Commit surgical route repair
+        run: |
+          git config user.name "EA CTP Repair"
+          git config user.email "ea-ctp-repair@users.noreply.github.com"
+          git add app/api/assessment/submit/route.ts .github/workflows/ctp-route-one-shot.yml
+          git commit -m "fix(ctp): fail closed at submission API boundary"
+          git push origin HEAD:fix/ctp-api-fail-closed
