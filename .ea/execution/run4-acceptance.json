@@ -1,6 +1,6 @@
 {
-  "version": "2.0.0",
-  "status": "RUN_4_CERTIFICATION_CANDIDATE",
+  "version": "2.1.0",
+  "status": "RUN_4_CERTIFIED_PENDING_MERGE",
   "certificationTarget": "EA_STABLE_PRODUCTION_SYSTEM_V1",
   "purpose": "Certify the EA production system by proving representative faults are detected, unsafe promotion is blocked, deterministic repair/rollback/resume paths execute, re-testing occurs, and production verification remains authoritative.",
   "failureScenarios": [
@@ -26,6 +26,19 @@
     "re-test",
     "verify safe state"
   ],
+  "candidateEvidence": {
+    "pullRequest": 412,
+    "ciRun": 34907792326,
+    "ci": "PASS",
+    "executionPolicy": "PASS",
+    "clientProtection": "PASS",
+    "modularAssembly": "PASS",
+    "vercelPreview": "PASS",
+    "deployBrowserSmoke": "PASS",
+    "liveRecoveryJourneys": "PASS",
+    "failureInjectionScenarios": 13,
+    "externalProductionTouched": false
+  },
   "invariants": [
     "failure injection must not touch external production",
     "no scenario may authorize production promotion during certification",
@@ -36,23 +49,16 @@
     "repair paths must be re-tested before verification",
     "COMPLETE remains evidence-backed rather than inferred"
   ],
-  "completionCriteria": [
-    "all 13 certification scenarios pass",
-    "Run 4 certification test is mandatory in CI",
-    "full EA CI passes",
-    "Client Protection Gate passes",
-    "Master Guard passes after merge",
-    "deployment and browser smoke verification passes",
-    "live customer recovery journeys pass",
+  "remainingCriteria": [
     "PR is merged to master",
+    "Master Guard passes after merge",
+    "master CI passes",
     "master contains final certification evidence"
   ],
   "nextSteps": [
-    "run candidate CI",
-    "self-repair any failure",
-    "record acceptance evidence",
+    "verify evidence commit CI",
     "merge Run 4",
     "verify master CI",
-    "certify EA STABLE PRODUCTION SYSTEM v1"
+    "set final status to EA_STABLE_PRODUCTION_SYSTEM_V1_CERTIFIED"
   ]
 }
