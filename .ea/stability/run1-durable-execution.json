@@ -1,0 +1,31 @@
+{
+  "version": "1.0.0",
+  "run": "EA_STABILITY_RUN_1",
+  "status": "IMPLEMENTED_PENDING_CI_AND_RUNTIME_BINDING",
+  "objective": "Add durable execution and autonomous engineering worker boundaries without transferring EA policy or production authority.",
+  "implemented": [
+    "TemporalExecutionBoundary contract",
+    "Temporal architectural invariants",
+    "OpenHandsEngineeringWorker contract",
+    "OpenHands SHADOW/PATCH_ONLY safety policy",
+    "OpenHands task safety assertions",
+    "Run 1 executable contract tests",
+    "CI enforcement for Run 1 contracts"
+  ],
+  "temporalRole": {
+    "owns": ["durable workflow state", "retries", "signals", "resume after worker/process failure"],
+    "doesNotOwn": ["OPA policy", "EA gate truth", "ProjectContext business truth", "CapabilityRegistry routing truth", "EA COMPLETE decision"]
+  },
+  "openhandsRole": {
+    "owns": ["scoped engineering investigation", "sandboxed code changes", "patch/test evidence"],
+    "prohibited": ["merge", "deploy", "direct master write", "production mutation", "EA COMPLETE decision"]
+  },
+  "runtimeBinding": {
+    "temporalSdk": "not yet installed in application runtime",
+    "temporalService": "not yet provisioned",
+    "openhandsAgentServer": "not yet provisioned",
+    "reason": "Run 1 first locks and tests the safety adapter contract. Runtime provisioning requires environment/dependency changes and must not bypass Run 0/CI gates."
+  },
+  "completionBoundary": "Code and CI contract implementation complete. Production runtime activation remains intentionally blocked until Run 0 and this branch pass repository gates.",
+  "next": "After CI acceptance, bind the Temporal adapter to a Temporal worker/service and OpenHands adapter to an isolated Agent Server in shadow mode; no production authority."
+}

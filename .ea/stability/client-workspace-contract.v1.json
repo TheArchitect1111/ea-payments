@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "contract": "EA_CLIENT_WORKSPACE",
+  "purpose": "Canonical machine-readable client truth for governed EA execution.",
+  "identity": {
+    "clientId": "required",
+    "clientName": "required",
+    "tenantScope": "required"
+  },
+  "canonicalDomains": [
+    "identity",
+    "approvedAssets",
+    "brand",
+    "approvalRules",
+    "systems",
+    "projects",
+    "builds",
+    "deployments",
+    "history",
+    "permissions"
+  ],
+  "rules": [
+    "execution reads canonical client context before mutation",
+    "approved assets are immutable unless change authorization explicitly permits replacement",
+    "brand and approval rules are hard execution constraints",
+    "project and deployment history is append-only evidence",
+    "cross-tenant reads and writes are prohibited",
+    "every production mutation references an approved intent and rollback target"
+  ],
+  "executionBoundary": {
+    "controller": "EA Execution Controller",
+    "policyEngine": "OPA",
+    "projectState": "ProjectContext",
+    "capabilityRouting": "CapabilityRegistry",
+    "verification": ["functional", "visual_when_applicable", "production_when_applicable"]
+  }
+}

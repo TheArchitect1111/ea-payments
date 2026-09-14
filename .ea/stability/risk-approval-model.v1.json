@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "contract": "EA_RISK_APPROVAL_MODEL",
+  "default": "OWNER_APPROVAL",
+  "tiers": [
+    {
+      "id": "SAFE_AUTO",
+      "authority": "automatic",
+      "requirements": ["known tenant", "authorized scope", "no protected-state mutation", "verification evidence"]
+    },
+    {
+      "id": "AUTO_VERIFY",
+      "authority": "automatic after gates",
+      "requirements": ["approved intent", "known rollback", "functional verification", "visual verification when applicable", "production verification when applicable"]
+    },
+    {
+      "id": "OWNER_APPROVAL",
+      "authority": "EA owner",
+      "requirements": ["explicit owner approval", "approved intent", "known rollback", "all applicable gates"]
+    },
+    {
+      "id": "CLIENT_APPROVAL",
+      "authority": "client plus EA policy",
+      "requirements": ["explicit client approval", "scope lock", "known rollback", "all applicable gates"]
+    },
+    {
+      "id": "BLOCKED",
+      "authority": "none",
+      "requirements": ["must not mutate production"]
+    }
+  ],
+  "failClosedRules": [
+    "unknown risk classification resolves to OWNER_APPROVAL",
+    "missing authorization blocks mutation",
+    "missing rollback blocks production mutation",
+    "failed required gate blocks advancement",
+    "cross-tenant mutation is BLOCKED",
+    "unverified protected asset mutation is BLOCKED"
+  ]
+}
