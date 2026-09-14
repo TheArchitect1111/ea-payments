@@ -103,10 +103,8 @@
         "entrepreneurialArtistPlaylistConfigured"
       ],
       "requiredOwnerMarkers": [
-        "Owner portal",
-        "Quick Actions",
-        "Ask Eva",
-        "Business Overview"
+        "Your Amanda Catherine workspace",
+        "ep-module-list"
       ],
       "protectedSourceFiles": [
         "clients/amanda-catherine/client.json",
@@ -174,12 +172,10 @@
         {
           "path": "app/portal/[slug]/member/AmandaMemberHome.tsx",
           "mustContain": [
-            "styles.shell",
-            "Owner portal",
-            "Quick Actions",
-            "Ask Eva",
-            "Business Overview",
-            "aesthetikine-studio-hero.jpg"
+            "Your Amanda Catherine workspace",
+            "AMANDA_ROLE_DASHBOARDS",
+            "resolveAmandaAudience",
+            "ep-module-list"
           ]
         },
         {
