@@ -1,15 +1,15 @@
 {
-  "sourceCommit": "e589cd5502c0f6b9452d70a62eadd470d2fe25df",
-  "previewUrl": "https://ea-payments-e1dqyxd1v-the-architects-projects-cc813778.vercel.app",
+  "sourceCommit": "a9f32a351ace73bec152c4584ade3d368ab35b9a",
+  "previewUrl": "https://ea-payments-git-fix-ctp--8d24cb-the-architects-projects-cc813778.vercel.app",
   "status": "PASS",
-  "completedAt": "2026-09-14T15:48:45.000Z",
+  "completedAt": "2026-09-14T18:58:30.000Z",
   "gates": {
-    "sourceIdentity": { "status": "PASS", "proof": "PR #396 merged the single-file Amanda portal restoration to master as e589cd5502c0f6b9452d70a62eadd470d2fe25df. The READY preview was built from PR head 312ab0ad0576876332e9607a67875dd2b3f69e36, whose Amanda portal file content is identical to the merged source." },
-    "build": { "status": "PASS", "proof": "Vercel preview dpl_BUu8yyWpVN5KxmqWApBP4FdjVwXZ reached READY. Build logs report successful compilation, page-data collection, and generation of all 136 static pages." },
-    "assets": { "status": "PASS", "proof": "The restored AmandaMemberHome presentation removes the later owner-dashboard Image usage entirely, eliminating the duplicated AesthetiKine hero image from the owner portal home while leaving public-site assets untouched." },
-    "functional": { "status": "PASS", "proof": "Current authentication, audience resolution, canonical routing, Update Hub, private deliveries, learning, billing, messaging, reports, events, intake, documents and resources remain wired. Only AmandaMemberHome presentation was restored; current member/page.tsx and backend routes were preserved." },
-    "desktopVisual": { "status": "PASS", "proof": "AmandaMemberHome was restored to the August 13 pre-issue component structure. The late custom owner-dashboard shell and its duplicate-image presentation were removed; the established portal card/list presentation is again authoritative." },
-    "mobileVisual": { "status": "PASS", "proof": "The restoration returns Amanda to the shared pre-issue PortalSubpage and ep-module responsive presentation instead of the later custom owner-dashboard shell. No public website or global portal CSS rollback was performed." },
-    "creativeCritic": { "status": "PASS", "proof": "Recovery is intentionally conservative: restore the last pre-issue Amanda portal presentation, retain later functional/security fixes, remove the identified duplicate-image shell, and avoid changes to AmandaCatherine.ca or other EA clients." }
+    "sourceIdentity": { "status": "PASS", "proof": "CTP storage verification merged through PR #397. Amanda's stale protection contract was corrected through PR #398 without changing portal presentation code. The API fail-closed boundary merged through PR #399 as a9f32a351ace73bec152c4584ade3d368ab35b9a." },
+    "build": { "status": "PASS", "proof": "PR #399 preview deployment dpl_9yNjzv8zq3xLyfVW7JusFMmcGpsq reached READY. CI run 34883352957 completed successfully through lint, build, deploy/browser smoke, and live customer recovery journeys." },
+    "assets": { "status": "PASS", "proof": "The CTP remediation changes persistence verification, submission failure semantics, and the Amanda protection manifest only. No client presentation assets were changed." },
+    "functional": { "status": "PASS", "proof": "CTP creation and updates now require verified Airtable persistence before success. The assessment API now returns failure when proposal or canonical CTP persistence cannot be verified. CI run 34883352957 passed all 35 functional, security, protection, deploy, and live recovery stages." },
+    "desktopVisual": { "status": "PASS", "proof": "No desktop presentation delta was introduced by the CTP repair. Browser smoke passed." },
+    "mobileVisual": { "status": "PASS", "proof": "No mobile presentation delta was introduced by the CTP repair. Existing responsive and live recovery checks remained green." },
+    "creativeCritic": { "status": "PASS", "proof": "No creative, brand, copy, or client presentation changes are part of this production promotion." }
   }
 }
