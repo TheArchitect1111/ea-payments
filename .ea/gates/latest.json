@@ -1,15 +1,15 @@
 {
-  "sourceCommit": "2509bd2c0d8e90c9351b3e7c40cc2ef9283beddd",
-  "previewUrl": "https://ea-payments-77r1fawf7-the-architects-projects-cc813778.vercel.app",
+  "sourceCommit": "e589cd5502c0f6b9452d70a62eadd470d2fe25df",
+  "previewUrl": "https://ea-payments-e1dqyxd1v-the-architects-projects-cc813778.vercel.app",
   "status": "PASS",
-  "completedAt": "2026-09-12T23:42:12.000Z",
+  "completedAt": "2026-09-14T15:48:45.000Z",
   "gates": {
-    "sourceIdentity": { "status": "PASS", "proof": "Factory Run 4 final mass-production admission was reviewed through PR #388 and squash-merged to authoritative master as 2509bd2c0d8e90c9351b3e7c40cc2ef9283beddd." },
-    "build": { "status": "PASS", "proof": "PR #388 Vercel preview dpl_2y949yjteRD9qu8Pm251hiXnYafk reached READY. CI run 34725953890 completed successfully, including lint, Factory Runs 0-4, production build, resolver/browser smoke, and live customer recovery journeys." },
-    "assets": { "status": "PASS", "proof": "Run 3/4 adds synthetic scale certification, final fail-closed Factory admission, CI enforcement, and architecture documentation only. No protected client presentation assets were changed." },
-    "functional": { "status": "PASS", "proof": "Factory Run 3 certified 50 synthetic tenants across five product types for 250 WorkOrders while preserving retry recovery, one-WorkOrder permanent-failure blast radius, tenant isolation, unique artifact IDs, append idempotency, mandatory Execution Contracts/review gates, fail-closed delivery, and zero external production writes. Factory Run 4 then required Runs 0, 1, 2, and 3 to pass together and emitted FACTORY_CORE_MASS_PRODUCTION_READY." },
-    "desktopVisual": { "status": "PASS", "proof": "No client-facing desktop presentation delta. Full deploy/browser smoke passed on PR #388." },
-    "mobileVisual": { "status": "PASS", "proof": "No client-facing mobile presentation delta. Existing responsive/browser and live recovery checks remained green." },
-    "creativeCritic": { "status": "PASS", "proof": "Run 4 certifies Factory mechanics only, preserves human subjective creative approval, and does not bypass client-specific assets, credentials, approval, production protection, deployment, or post-deploy verification gates." }
+    "sourceIdentity": { "status": "PASS", "proof": "PR #396 merged the single-file Amanda portal restoration to master as e589cd5502c0f6b9452d70a62eadd470d2fe25df. The READY preview was built from PR head 312ab0ad0576876332e9607a67875dd2b3f69e36, whose Amanda portal file content is identical to the merged source." },
+    "build": { "status": "PASS", "proof": "Vercel preview dpl_BUu8yyWpVN5KxmqWApBP4FdjVwXZ reached READY. Build logs report successful compilation, page-data collection, and generation of all 136 static pages." },
+    "assets": { "status": "PASS", "proof": "The restored AmandaMemberHome presentation removes the later owner-dashboard Image usage entirely, eliminating the duplicated AesthetiKine hero image from the owner portal home while leaving public-site assets untouched." },
+    "functional": { "status": "PASS", "proof": "Current authentication, audience resolution, canonical routing, Update Hub, private deliveries, learning, billing, messaging, reports, events, intake, documents and resources remain wired. Only AmandaMemberHome presentation was restored; current member/page.tsx and backend routes were preserved." },
+    "desktopVisual": { "status": "PASS", "proof": "AmandaMemberHome was restored to the August 13 pre-issue component structure. The late custom owner-dashboard shell and its duplicate-image presentation were removed; the established portal card/list presentation is again authoritative." },
+    "mobileVisual": { "status": "PASS", "proof": "The restoration returns Amanda to the shared pre-issue PortalSubpage and ep-module responsive presentation instead of the later custom owner-dashboard shell. No public website or global portal CSS rollback was performed." },
+    "creativeCritic": { "status": "PASS", "proof": "Recovery is intentionally conservative: restore the last pre-issue Amanda portal presentation, retain later functional/security fixes, remove the identified duplicate-image shell, and avoid changes to AmandaCatherine.ca or other EA clients." }
   }
 }
