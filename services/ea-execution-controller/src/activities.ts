@@ -9,7 +9,8 @@ export async function lockContext(job: EAJob): Promise<string[]> {
 }
 export async function validateManifest(job: EAJob): Promise<string[]> {
   if (!job.approved) throw new Error('unapproved job');
-  return ['manifest:validated'];
+  if (!job.nextSteps?.length) throw new Error('nextSteps are required');
+  return ['manifest:validated', 'next-steps:declared'];
 }
 export async function compilePlan(job: EAJob): Promise<string[]> { return [`plan:${job.deliverable}`]; }
 export async function executeExistingEAStack(job: EAJob): Promise<string[]> { return [`stack:delegated:${job.id}`]; }
@@ -28,6 +29,7 @@ function awaitingEvidenceInput(job: EAJob, targetState: string) {
       required_activity_skipped: false,
       failed_required_gates: 1,
       rollback_defined: true,
+      next_steps: job.nextSteps ?? [],
     },
     verification: { functional_passed: false, visual_required: true, visual_passed: false, production_required: true, production_passed: false },
     quality: { unverified_identity_asset: false, duplicate_image_source: false },
