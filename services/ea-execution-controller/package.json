@@ -1,10 +1,12 @@
 {
   "name": "@ea/execution-controller",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "scripts": {
     "worker": "tsx src/worker.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/worker.js",
     "test": "tsx test/workflow-contract.test.ts"
   },
   "dependencies": {
@@ -14,6 +16,7 @@
     "@temporalio/workflow": "^1.13.2"
   },
   "devDependencies": {
+    "@types/node": "^20",
     "tsx": "^4.23.1",
     "typescript": "^5"
   }
