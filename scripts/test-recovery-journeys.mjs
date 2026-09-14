@@ -81,9 +81,57 @@ for (const journey of journeys) {
   }
 }
 
+const smokePayloads = [
+  {
+    businessName: 'EA CTP Production Smoke 1',
+    contactName: 'EA Verification 1',
+    email: 'ea-ctp-smoke-1-20260914@example.com',
+    teamSizeLabel: 'Just me',
+    revenueRange: 'Under $100k',
+    currentSystems: '',
+    operationalChallenges: [],
+    growthGoals: 'Production persistence smoke test 1',
+    capacityConstraints: 'Test only',
+    discoveryVersion: 'prod-smoke-2026-09-14-1',
+    discoveryAnswers: { productionSmoke: true, run: 1 },
+  },
+  {
+    businessName: 'EA CTP Production Smoke 2',
+    contactName: 'EA Verification 2',
+    email: 'ea-ctp-smoke-2-20260914@example.com',
+    teamSizeLabel: 'Just me',
+    revenueRange: 'Under $100k',
+    currentSystems: '',
+    operationalChallenges: [],
+    growthGoals: 'Production persistence smoke test 2',
+    capacityConstraints: 'Test only',
+    discoveryVersion: 'prod-smoke-2026-09-14-2',
+    discoveryAnswers: { productionSmoke: true, run: 2 },
+  },
+];
+
+for (const [index, payload] of smokePayloads.entries()) {
+  try {
+    const response = await page.request.post('https://efficiencyarchitects.online/api/assessment/submit', {
+      data: payload,
+      headers: { 'Content-Type': 'application/json' },
+      timeout: 30_000,
+    });
+    const body = await response.json();
+    if (response.status() !== 200 || body?.ok !== true || body?.flow !== 'ctp' || body?.saved !== true) {
+      throw new Error(`HTTP ${response.status()} ${JSON.stringify(body)}`);
+    }
+    console.log(`[ctp-production-smoke] PASS ${index + 1} ${payload.email} ${JSON.stringify(body)}`);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    failures.push(`CTP production smoke ${index + 1}: ${message}`);
+    console.error(`[ctp-production-smoke] FAIL ${index + 1}: ${message}`);
+  }
+}
+
 await browser.close();
 if (failures.length) {
-  console.error(`Recovery journey monitor failed (${failures.length}/${journeys.length}):\n${failures.join('\n')}`);
+  console.error(`Recovery journey monitor failed (${failures.length} issue(s)):\n${failures.join('\n')}`);
   process.exit(1);
 }
-console.log(`Recovery journey monitor passed (${journeys.length}/${journeys.length}).`);
+console.log(`Recovery journey monitor passed (${journeys.length}/${journeys.length}) with 2/2 live CTP persistence smoke submissions.`);
