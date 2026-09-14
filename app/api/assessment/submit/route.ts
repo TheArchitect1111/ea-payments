@@ -289,12 +289,16 @@ export async function POST(req: NextRequest) {
 
     if (!proposalResult.ok) {
       console.error('Proposal write failed:', proposalResult.error);
-      return NextResponse.json({
-        ok: true,
-        saved: false,
-        message:
-          'We received your assessment. Our team will follow up by email within 1–2 business days.',
-      });
+      return NextResponse.json(
+        {
+          ok: false,
+          saved: false,
+          error: isCtpFlow
+            ? 'Your CTP could not be safely saved. Please try again.'
+            : 'Your assessment could not be safely saved. Please try again.',
+        },
+        { status: 503 },
+      );
     }
 
     if (!assessmentResult.ok) {
@@ -433,6 +437,18 @@ export async function POST(req: NextRequest) {
           portalRequired,
         });
 
+        if (!ctpResult.ok || !ctpResult.submission) {
+          console.error('[assessment/submit] CTP persistence failed:', ctpResult.error);
+          return NextResponse.json(
+            {
+              ok: false,
+              saved: false,
+              error: 'Your CTP could not be verified as saved. Please try again.',
+            },
+            { status: 503 },
+          );
+        }
+
         if (ctpResult.submission) {
           ctpSubmissionId = ctpResult.submission.id;
           await emitPulseEvent({
@@ -546,6 +562,16 @@ export async function POST(req: NextRequest) {
         }
       } catch (err) {
         console.error('[assessment/submit] CTP submission failed:', err);
+        if (!ctpSubmissionId) {
+          return NextResponse.json(
+            {
+              ok: false,
+              saved: false,
+              error: 'Your CTP could not be completed safely. Please try again.',
+            },
+            { status: 500 },
+          );
+        }
       }
     }
 
