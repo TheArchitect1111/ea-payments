@@ -1,0 +1,27 @@
+name: EA Execution Policy
+
+on:
+  pull_request:
+    paths:
+      - 'services/ea-execution-controller/**'
+      - '.ea/execution/**'
+      - '.github/workflows/ea-execution-policy.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  policy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install OPA
+        run: |
+          curl -L -o opa https://openpolicyagent.org/downloads/v1.8.0/opa_linux_amd64_static
+          chmod +x opa
+          sudo mv opa /usr/local/bin/opa
+      - name: Test policies
+        run: opa test services/ea-execution-controller/policy -v
+      - name: Build execution controller
+        working-directory: services/ea-execution-controller
+        run: npm install && npm run build
