@@ -301,6 +301,26 @@ function fromAirtableRecord(fields: Record<string, unknown>): CtpSubmission | nu
   };
 }
 
+async function verifyPersistedSubmission(expected: CtpSubmission): Promise<CtpSubmission> {
+  const formula = `{Submission ID}='${escapeAirtableString(expected.id)}'`;
+  const records = await airtableQuery(TABLE, { filterByFormula: formula, maxRecords: 1 });
+  const persisted = fromAirtableRecord(records[0]?.fields ?? {});
+
+  if (!persisted) {
+    throw new Error(`CTP persistence verification failed for ${expected.id}: record not found.`);
+  }
+
+  if (
+    persisted.id !== expected.id ||
+    persisted.email.trim().toLowerCase() !== expected.email.trim().toLowerCase() ||
+    persisted.updatedAt !== expected.updatedAt
+  ) {
+    throw new Error(`CTP persistence verification failed for ${expected.id}: stored record mismatch.`);
+  }
+
+  return persisted;
+}
+
 export async function createCtpSubmission(input: {
   businessName: string;
   contactName: string;
@@ -349,10 +369,9 @@ export async function createCtpSubmission(input: {
     updatedAt: now,
   };
 
-  memory.set(submission.id, submission);
-
   if (!airtableConfigured()) {
-    return { ok: true, submission };
+    console.error('[ctp-submissions] Airtable is not configured; refusing false success.');
+    return { ok: false, error: 'CTP storage is unavailable. Submission was not saved.' };
   }
 
   try {
@@ -363,10 +382,13 @@ export async function createCtpSubmission(input: {
       toAirtableFields(submission),
       true,
     );
-    return { ok: true, submission };
+    const persisted = await verifyPersistedSubmission(submission);
+    memory.set(persisted.id, persisted);
+    return { ok: true, submission: persisted };
   } catch (err) {
-    console.error('[ctp-submissions] Airtable save failed:', err);
-    return { ok: true, submission };
+    memory.delete(submission.id);
+    console.error('[ctp-submissions] Airtable save/verification failed:', err);
+    return { ok: false, error: 'CTP submission could not be verified as saved. Please retry.' };
   }
 }
 
@@ -413,19 +435,9 @@ export async function updateCtpSubmission(
     updatedAt: new Date().toISOString(),
   };
 
-  memory.set(submission.id, submission);
-
-  // Guide orchestration — adapts Progress from project state (non-blocking).
-  void import('@/lib/ctp-guide-orchestration')
-    .then(({ orchestrateGuideAfterSubmissionUpdate }) =>
-      orchestrateGuideAfterSubmissionUpdate(existing, submission),
-    )
-    .catch((err) => {
-      console.error('[ctp-submissions] guide orchestration failed:', err);
-    });
-
   if (!airtableConfigured()) {
-    return { ok: true, submission };
+    console.error('[ctp-submissions] Airtable is not configured; refusing false update success.');
+    return { ok: false, error: 'CTP storage is unavailable. Update was not saved.' };
   }
 
   try {
@@ -436,10 +448,22 @@ export async function updateCtpSubmission(
       toAirtableFields(submission),
       true,
     );
-    return { ok: true, submission };
+    const persisted = await verifyPersistedSubmission(submission);
+    memory.set(persisted.id, persisted);
+
+    // Guide orchestration runs only after canonical persistence is verified.
+    void import('@/lib/ctp-guide-orchestration')
+      .then(({ orchestrateGuideAfterSubmissionUpdate }) =>
+        orchestrateGuideAfterSubmissionUpdate(existing, persisted),
+      )
+      .catch((err) => {
+        console.error('[ctp-submissions] guide orchestration failed:', err);
+      });
+
+    return { ok: true, submission: persisted };
   } catch (err) {
-    console.error('[ctp-submissions] Airtable update failed:', err);
-    return { ok: true, submission };
+    console.error('[ctp-submissions] Airtable update/verification failed:', err);
+    return { ok: false, error: 'CTP update could not be verified as saved. Please retry.' };
   }
 }
 
