@@ -1,0 +1,20 @@
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+
+const path = '.ea/universal-factory/run3-automated-discovery-to-manifest.v1.json';
+const c = JSON.parse(fs.readFileSync(path, 'utf8'));
+assert.equal(c.program, 'EA_UNIVERSAL_FACTORY_V1');
+assert.equal(c.run, 3);
+assert.equal(c.status, 'ENFORCED_CONTRACT');
+for (const step of ['CAPTURE','IDENTIFY_UNKNOWNS','CLASSIFY_RISK','MATCH_ARCHETYPE','GENERATE_ARCHITECTURE','GENERATE_UNIVERSAL_MANIFEST','PRESENT_FOR_APPROVAL','LOCK_APPROVED_BASELINE']) assert(c.pipeline.includes(step), `missing pipeline step ${step}`);
+for (const section of ['identity','intent','usersAndRoles','systems','data','workflows','integrations','security','compliance','deployment','monitoring','recovery','archetype','capabilities','acceptance','approvals','evidence','provenance']) assert(c.universalManifest.requiredSections.includes(section), `missing manifest section ${section}`);
+assert.equal(c.discoveryRecord.provenanceRequired, true);
+assert.equal(c.approvalGate.executionForbiddenBeforeApproval, true);
+assert.equal(c.approvalGate.materialChangeRequiresReapproval, true);
+assert.equal(c.automationPolicy.mayNotInventClientApproval, true);
+assert.equal(c.automationPolicy.mayNotAutoWaiveRisk, true);
+assert(c.failClosedOn.includes('regulated-unknown'));
+assert(c.failClosedOn.includes('cross-tenant-evidence'));
+assert.equal(c.handoff.approvedManifestBecomes, 'RUN_4_ASSEMBLY_INPUT');
+assert.equal(c.handoff.reentryOfApprovedDiscoveryForbidden, true);
+console.log('EA Universal Factory Run 3 discovery-to-manifest contract certified.');
