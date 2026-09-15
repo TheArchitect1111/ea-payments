@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "1.0.0",
+  "program": "EA_UNIVERSAL_FACTORY_V1",
+  "run": 0,
+  "status": "ENFORCED_CONTRACT",
+  "purpose": "Define one governed production lifecycle for every current and future EA project class without replacing certified EA systems.",
+  "scope": {
+    "appliesTo": ["all-current-ea-projects", "all-future-ea-projects", "websites", "portals", "profiles", "courses", "events", "payments", "business-operating-systems", "impact-intelligence", "enterprise-interoperability", "regulated-projects"],
+    "migrationRule": "Existing working projects are registered and reconciled into the Universal Factory; they are not rebuilt merely to conform.",
+    "noveltyRule": "Unknown project classes enter architecture/discovery and may create a reusable capability only after independent verification and certification."
+  },
+  "canonicalLifecycle": ["DISCOVER", "CLASSIFY", "ARCHITECT", "MANIFEST", "PLAN", "ASSEMBLE", "CUSTOMIZE", "INTEGRATE", "VERIFY", "APPROVE", "DEPLOY", "OBSERVE", "RECOVER_OR_IMPROVE", "LEARN", "COMPLETE"],
+  "universalManifestRequiredDomains": ["identity", "intent", "tenant", "archetype", "capabilities", "data", "integrations", "experience", "security", "compliance", "infrastructure", "approvals", "verification", "deployment", "observability", "recovery", "learning"],
+  "systemOfRecord": {
+    "projectContext": "authoritative execution context",
+    "fileCabinet": "authoritative client/project evidence and approved assets",
+    "controlPlane": "authoritative identity, manifest, governance and acceptance resolver",
+    "capabilityRegistry": "authoritative reusable capability inventory",
+    "git": "authoritative versioned implementation and policy history"
+  },
+  "reusePolicy": {
+    "default": "REUSE_BEFORE_BUILD",
+    "sequence": ["find-existing-capability", "configure-existing-capability", "compose-existing-capabilities", "only-then-build-missing-capability", "verify", "certify", "register-for-reuse"],
+    "manualWorkCreatesFactoryDebt": true
+  },
+  "automationPolicy": {
+    "automate": "deterministic and safely reversible work",
+    "assist": "judgment-heavy work",
+    "approvalRequired": "consequential, destructive, financial, regulated, identity-sensitive, cross-tenant, shared-platform or ambiguous production actions",
+    "failClosedOn": ["unknown-tenant", "unknown-project", "missing-approved-intent", "missing-rollback", "failed-required-gate", "cross-tenant-request", "unverified-protected-asset", "ambiguous-production-target"]
+  },
+  "customizationPolicy": {
+    "standardize": ["security", "auth", "tenant-isolation", "deployment", "observability", "recovery", "policy", "evidence", "core-data-contracts"],
+    "customize": ["brand", "content", "information-architecture", "layout-composition", "visual-storytelling", "domain-workflows", "client-specific-integrations"],
+    "rule": "Mass production must not require cookie-cutter presentation or shared client identity."
+  },
+  "completionContract": {
+    "required": ["authorized-intent", "manifest-resolved", "required-capabilities-present", "tenant-isolation-pass", "functional-verification-pass", "visual-verification-when-applicable", "security-policy-pass", "deployment-verified-when-deployed", "observability-registered", "rollback-or-recovery-defined", "final-acceptance-pass"],
+    "forbiddenInference": ["commit-means-complete", "merge-means-complete", "deploy-means-complete", "http-200-means-complete", "worker-self-report-means-complete"],
+    "terminalStates": ["COMPLETE", "BLOCKED", "ROLLED_BACK"]
+  },
+  "learningContract": {
+    "onManualOrNovelSolution": ["classify-reusability", "extract-pattern", "test-independently", "certify-if-reusable", "register-capability-connector-workflow-policy-test-or-archetype"],
+    "rule": "A client-specific exception must never silently become a universal default."
+  },
+  "nonReplacementInvariants": ["do-not-replace-ea-control-plane", "do-not-replace-ea-factory", "do-not-replace-opa-governance", "do-not-replace-temporal-boundary", "do-not-replace-playwright-verification", "do-not-replace-recovery-controller", "do-not-create-second-file-cabinet"],
+  "nextRun": "RUN_1_UNIVERSAL_CONFIGURATION_ENGINE"
+}
