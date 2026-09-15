@@ -1,0 +1,18 @@
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+const c = JSON.parse(fs.readFileSync('.ea/universal-factory/run4-universal-automated-assembly-engine.v1.json','utf8'));
+assert.equal(c.program,'EA_UNIVERSAL_FACTORY_V1');
+assert.equal(c.run,4);
+assert.equal(c.entryGate.requiresRun3ApprovedManifest,true);
+for (const s of ['RESOLVE_GOLDEN_PATH','RESOLVE_CERTIFIED_CAPABILITIES','CALCULATE_DEPENDENCY_GRAPH','ALLOCATE_TENANT_SCOPED_PATHS','APPLY_CUSTOM_EXPERIENCE_BOUNDARY','GENERATE_TEST_PLAN','GENERATE_DEPLOYMENT_PLAN','GENERATE_RECOVERY_PLAN','VERIFY_ASSEMBLY','EMIT_CANDIDATE']) assert(c.assemblyLifecycle.includes(s),`missing ${s}`);
+for (const k of ['deterministicForSameApprovedManifest','registryFirst','certifiedCapabilitiesOnly','tenantScoped','idempotent','dependencyAware','versionPinned','customExperiencePreserved','existingInfrastructurePreserved']) assert.equal(c.assemblyRules[k],true,`${k} must be true`);
+assert.equal(c.assemblyRules.productionWritesDuringAssembly,false);
+assert.equal(c.driftProtection.existingProductionRouteRepointForbidden,true);
+assert.equal(c.driftProtection.existingProductionResourceDeletionForbidden,true);
+assert(c.failClosedOn.includes('cross-tenant-artifact'));
+assert(c.failClosedOn.includes('uncertified-required-capability'));
+assert(c.failClosedOn.includes('dependency-cycle'));
+assert.equal(c.handoff.productionReady,false);
+assert.equal(c.handoff.deploymentAuthorized,false);
+assert.equal(c.handoff.projectCandidateBecomes,'RUN_5_INFRASTRUCTURE_FACTORY_INPUT');
+console.log('EA Universal Factory Run 4 automated assembly contract certified.');
