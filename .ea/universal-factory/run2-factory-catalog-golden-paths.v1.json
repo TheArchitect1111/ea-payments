@@ -1,0 +1,28 @@
+{
+  "schemaVersion":"1.0.0",
+  "program":"EA_UNIVERSAL_FACTORY_V1",
+  "run":2,
+  "status":"ENFORCED_CONTRACT",
+  "component":"FACTORY_CATALOG_AND_GOLDEN_PATH_ENGINE",
+  "purpose":"Convert recurring EA project classes into governed, reusable production lines while preserving client-specific experience and blocking unsafe novelty from production.",
+  "catalogPolicy":{"registryFirst":true,"goldenPathIsSemanticNotVisual":true,"visualSamenessForbidden":true,"certifiedCapabilitiesOnly":true,"tenantScoped":true,"versioned":true,"rollbackRequired":true},
+  "goldenPathLifecycle":["DISCOVER","CLASSIFY","SELECT_ARCHETYPE","RESOLVE_CAPABILITIES","CONFIGURE","ASSEMBLE","TEST","PREVIEW","APPROVE","DEPLOY","VERIFY","MONITOR","RECOVER","LEARN"],
+  "productionLines":[
+    {"id":"experience-website","family":"EXPERIENCE_WEBSITE","readiness":"CERTIFIED_BASE","required":["website","approved-assets","responsive-ui","legal-baseline","analytics","monitoring","recovery"]},
+    {"id":"experience-portal","family":"EXPERIENCE_PORTAL","readiness":"CERTIFIED_BASE","required":["portal","auth","roles","member-home","monitoring","recovery"]},
+    {"id":"athlete-brand-os","family":"ATHLETE_BRAND_OS","readiness":"CERTIFIED_BASE","required":["website","portal","profiles","media","brand-story","nil-ready-structure","analytics"]},
+    {"id":"membership-learning-os","family":"MEMBERSHIP_LEARNING_OS","readiness":"CERTIFIED_BASE","required":["portal","auth","learning","entitlements","payments","notifications"]},
+    {"id":"event-camp-os","family":"EVENT_CAMP_OS","readiness":"CERTIFIED_BASE","required":["registration","payments","profiles","mobile-evaluation","notifications","reporting"]},
+    {"id":"service-business-os","family":"SERVICE_BUSINESS_OS","readiness":"CERTIFIED_BASE","required":["website","intake","portal","payments","workflows","eva","analytics"]},
+    {"id":"nonprofit-os","family":"NONPROFIT_OS","readiness":"CERTIFIED_BASE","required":["website","intake","portal","program-workflows","reporting","analytics"]},
+    {"id":"impact-intelligence-reporting-os","family":"IMPACT_INTELLIGENCE_REPORTING_OS","readiness":"PRODUCTION_LINE_CANDIDATE","required":["canonical-data-model","validation","mapping","outcome-tracking","report-generation","approval","audit-trail","dashboard","reconciliation"],"firstCertificationCase":"ESR"},
+    {"id":"business-operating-system","family":"BUSINESS_OPERATING_SYSTEM","readiness":"COMPOSABLE","required":["intake","portal","workflows","roles","notifications","analytics","eva"]},
+    {"id":"enterprise-interoperability-hub","family":"ENTERPRISE_INTEROPERABILITY_HUB","readiness":"DISCOVERY_GATED","required":["system-inventory","data-classification","identity-and-access","integration-boundaries","security","compliance","audit","observability","recovery"],"firstSyntheticCertificationCase":"PROJECT_HOSPITAL"}
+  ],
+  "selectionRules":{"exactKnownMatch":"CONFIGURE_GOLDEN_PATH","certifiedComposition":"COMPOSE_CAPABILITIES","missingCertifiedCapability":"BUILD_AND_CERTIFY_CAPABILITY","semanticNovelty":"ARCHITECT_NEW_ARCHETYPE","regulatedUnknown":"BLOCK_PRODUCTION_AND_DISCOVER"},
+  "goldenPathContract":{"mustDefine":["family","entryCriteria","requiredCapabilities","optionalCapabilities","configurationSchema","acceptanceTests","securityProfile","deploymentProfile","monitoringProfile","recoveryProfile","evidenceProfile"],"mustNotDefine":["fixed-client-copy","fixed-client-images","fixed-branding","fixed-layout","fixed-color-palette"]},
+  "learningLoop":{"manualStepReviewRequired":true,"repeatedManualStepBecomesCapabilityCandidate":true,"repeatedIntegrationBecomesConnectorCandidate":true,"repeatedSemanticPatternBecomesArchetypeCandidate":true,"certificationRequiredBeforeRegistryPromotion":true},
+  "failClosedOn":["unknown-tenant","unapproved-intent","uncertified-required-capability","golden-path-version-mismatch","missing-acceptance-tests","missing-monitoring","missing-recovery","cross-tenant-artifact","regulated-project-without-discovery","client-experience-overwritten-by-template-default"],
+  "outputs":["FactoryCatalogEntry","GoldenPathDefinition","CapabilityGapList","ExecutableAssemblyPlan"],
+  "nextRun":"RUN_3_AUTOMATED_DISCOVERY_TO_MANIFEST"
+}
