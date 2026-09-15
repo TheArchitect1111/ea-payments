@@ -84,6 +84,8 @@ jobs:
         run: node scripts/test-ea-stability-run3.mjs
       - name: Certify EA Stability Run 4 stable production system
         run: node scripts/test-ea-stability-run4.mjs
+      - name: Certify EA Universal Factory Run 0 contract
+        run: node scripts/test-universal-factory-run0.mjs
       - name: Verify Client Factory fulfillment contract
         run: npx tsx scripts/test-factory-fulfillment.ts
       - name: Verify Amanda checkout and pricing contract
