@@ -1,0 +1,18 @@
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+const c=JSON.parse(fs.readFileSync('.ea/universal-factory/run2-factory-catalog-golden-paths.v1.json','utf8'));
+assert.equal(c.program,'EA_UNIVERSAL_FACTORY_V1'); assert.equal(c.run,2);
+assert.equal(c.component,'FACTORY_CATALOG_AND_GOLDEN_PATH_ENGINE');
+assert.equal(c.catalogPolicy.registryFirst,true); assert.equal(c.catalogPolicy.goldenPathIsSemanticNotVisual,true); assert.equal(c.catalogPolicy.visualSamenessForbidden,true);
+assert.equal(c.productionLines.length,10);
+const byId=Object.fromEntries(c.productionLines.map(x=>[x.id,x]));
+for(const id of ['experience-website','experience-portal','athlete-brand-os','membership-learning-os','event-camp-os','service-business-os','nonprofit-os','impact-intelligence-reporting-os','business-operating-system','enterprise-interoperability-hub']) assert(byId[id]);
+assert.equal(byId['impact-intelligence-reporting-os'].firstCertificationCase,'ESR');
+assert.equal(byId['enterprise-interoperability-hub'].readiness,'DISCOVERY_GATED');
+assert.equal(byId['enterprise-interoperability-hub'].firstSyntheticCertificationCase,'PROJECT_HOSPITAL');
+for(const s of ['DISCOVER','CONFIGURE','ASSEMBLE','TEST','PREVIEW','APPROVE','DEPLOY','VERIFY','MONITOR','RECOVER','LEARN']) assert(c.goldenPathLifecycle.includes(s));
+for(const x of ['fixed-client-copy','fixed-client-images','fixed-branding','fixed-layout','fixed-color-palette']) assert(c.goldenPathContract.mustNotDefine.includes(x));
+assert.equal(c.learningLoop.repeatedManualStepBecomesCapabilityCandidate,true); assert.equal(c.learningLoop.repeatedIntegrationBecomesConnectorCandidate,true); assert.equal(c.learningLoop.certificationRequiredBeforeRegistryPromotion,true);
+for(const b of ['uncertified-required-capability','missing-acceptance-tests','missing-monitoring','missing-recovery','cross-tenant-artifact','regulated-project-without-discovery','client-experience-overwritten-by-template-default']) assert(c.failClosedOn.includes(b));
+assert.deepEqual(c.outputs,['FactoryCatalogEntry','GoldenPathDefinition','CapabilityGapList','ExecutableAssemblyPlan']);
+console.log(JSON.stringify({certification:'EA_UNIVERSAL_FACTORY_RUN_2_FACTORY_CATALOG_GOLDEN_PATHS',status:'PASS',productionLines:c.productionLines.length,nextRun:c.nextRun},null,2));
