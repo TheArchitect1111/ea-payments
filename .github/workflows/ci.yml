@@ -55,6 +55,8 @@ jobs:
       - run: node scripts/test-universal-factory-run9.mjs
       - name: Final certify EA Universal Factory V1
         run: node scripts/test-universal-factory-run10.mjs
+      - name: Verify Athlete Brand OS Run 0 contract
+        run: node scripts/test-athlete-brand-os-run0.mjs
       - run: npx tsx scripts/test-factory-fulfillment.ts
       - run: npm run test:amanda-checkout
       - run: node scripts/test-design-studio-registry-contract.mjs
