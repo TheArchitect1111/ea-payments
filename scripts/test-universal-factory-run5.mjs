@@ -1,0 +1,10 @@
+import fs from 'node:fs'; import assert from 'node:assert/strict';
+const c=JSON.parse(fs.readFileSync('.ea/universal-factory/run5-infrastructure-factory.v1.json','utf8'));
+assert.equal(c.run,5); assert.equal(c.iac.engine,'OpenTofu'); assert.equal(c.iac.planBeforeApply,true); assert.equal(c.iac.stateIsolation,'TENANT_AND_ENVIRONMENT');
+for(const k of ['discoverBeforeCreate','preserveExistingByDefault','deleteExistingForbidden','domainRepointForbiddenWithoutExplicitApproval']) assert.equal(c.existingResourcePolicy[k],true,k);
+assert.equal(c.productionPolicy.automaticProductionApply,false); assert.equal(c.productionPolicy.requiresExplicitProductionAuthorization,true); assert.equal(c.productionPolicy.requiresApprovedPlanHash,true); assert.equal(c.productionPolicy.applyMustMatchApprovedPlan,true);
+assert.equal(c.secretsPolicy.secretValuesInManifestForbidden,true); assert.equal(c.secretsPolicy.secretValuesInRepositoryForbidden,true); assert.equal(c.drift.silentReconciliationForbidden,true);
+for(const x of ['cross-tenant-state','plan-hash-mismatch','secret-in-source','domain-repoint-without-approval']) assert(c.failClosedOn.includes(x),x);
+assert.equal(c.handoff.nextRun,'RUN_6_CONNECTOR_FACTORY');
+const readme=fs.readFileSync('.ea/universal-factory/infrastructure/tofu/README.md','utf8'); assert(readme.includes('OpenTofu')); assert(readme.includes('Discover existing infrastructure')); assert(readme.includes('exact approved plan hash'));
+console.log('EA Universal Factory Run 5 infrastructure factory certified.');
