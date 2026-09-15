@@ -1,0 +1,21 @@
+{
+ "schemaVersion":"1.0.0","program":"EA_UNIVERSAL_FACTORY_V1","run":10,"status":"FINAL_CERTIFICATION_GATE","component":"UNIVERSAL_TORTURE_CERTIFICATION",
+ "targetCertification":"EA_UNIVERSAL_FACTORY_V1_CERTIFIED",
+ "purpose":"Prove the Universal Factory can safely classify, assemble, differentiate, provision, integrate, operate, recover, and learn across materially different project classes while failing closed on unsupported, ambiguous, cross-tenant, destructive, and regulated conditions.",
+ "prerequisites":{"runsRequired":[0,1,2,3,4,5,6,7,8,9],"allContractsPresent":true,"allCertificationTestsPresent":true},
+ "provingGrounds":[
+  {"id":"AMANDA","class":"existing-site-portal","mustProve":["approved-baseline-preservation","visual-drift-detection","safe-recovery","no-success-before-journey-verification"]},
+  {"id":"TARRIS","class":"athlete-brand-os","mustProve":["custom-experience-not-template","unique-asset-roles","NIL-capability-composition","identity-safety"]},
+  {"id":"CPR","class":"profiles-payments-workflows","mustProve":["tenant-scoped-profile-assembly","payment-capability","workflow-reuse","asset-repeat-detection"]},
+  {"id":"ESR","class":"impact-intelligence-reporting-os","mustProve":["canonical-data-pattern","report-mapping","connector-reuse","tenant-isolation","learning-promotion-boundary"]},
+  {"id":"PROJECT_HOSPITAL","class":"enterprise-interoperability-hub","mustProve":["enhanced-discovery-gate","synthetic-first","regulated-connector-domain-gate","no-phi-required-for-generic-certification","unsupported-vendor-blocks"]},
+  {"id":"GREENFIELD","class":"unknown-new-client","mustProve":["no-hidden-prior-context-required","discovery-to-manifest","archetype-selection-or-novelty-block","custom-experience","reproducible-infrastructure"]}
+ ],
+ "failureScenarios":["missing-client-approval","conflicting-discovery-evidence","uncertified-capability","dependency-cycle","cross-tenant-artifact","cross-tenant-credential","secret-in-source","destructive-infrastructure-plan","domain-repoint-without-approval","connector-write-without-idempotency","provider-failure","deployment-drift","asset-drift","visual-regression","worker-self-authorized-production","http-200-with-broken-user-journey","regulated-data-request-without-approval","repeated-manual-step-not-captured-as-factory-debt","unverified-learning-promotion","rollback-target-unverified"],
+ "scaleScenarios":{"knownArchetypeBatch":{"tenants":50,"productsPerTenant":5,"expectedWorkOrders":250,"mustProve":["unique-identities","tenant-isolation","idempotent-retry","permanent-failure-isolation"]},"mixedPortfolio":{"classes":["website","portal","athlete","event","nonprofit","reporting","business-os","enterprise-interoperability"],"mustProve":["correct-classification","no-universal-visual-template","capability-version-pinning","risk-appropriate-gating"]}},
+ "certificationRules":{"commitIsNotCompletion":true,"mergeIsNotCompletion":true,"deploymentIsNotCompletion":true,"http200IsNotCompletion":true,"allApplicableEvidenceRequired":true,"materialFailureBlocksCertification":true,"noWaiverByWorker":true,"noSilentFallback":true},
+ "evidenceRequired":["run-contract-presence","run-test-presence","tenant-isolation","functional","visual","security","integration","infrastructure","recovery","observability","learning","failure-injection","scale"],
+ "finalDecision":{"pass":"EA_UNIVERSAL_FACTORY_V1_CERTIFIED","fail":"EA_UNIVERSAL_FACTORY_V1_NOT_CERTIFIED","passRequiresAllMaterialScenarios":true,"knownExternalRuntimeDependenciesMustBeDeclared":true},
+ "externalRuntimeTruth":{"contractCertificationDoesNotProveRuntimeProvisioning":true,"examples":["Temporal-runtime","OpenHands-runtime","OpenTelemetry-collector","OpenFeature-provider","Activepieces-runtime","OpenFn-runtime","OpenTofu-state-backend","healthcare-vendor-access"]},
+ "acceptanceCriteria":["all runs 0-9 are present and certified by repository tests","all proving grounds have explicit required evidence","all listed failure scenarios fail closed or recover safely","scale envelope preserves tenant isolation and failure isolation","regulated scenarios remain discovery and approval gated","learning engine never promotes unverified work","final certification distinguishes repository certification from external runtime provisioning"]
+}
