@@ -19,6 +19,8 @@ jobs:
       - run: npm run lint
       - name: Enforce EA Stack First
         run: node scripts/test-stack-first-enforcement.mjs
+      - name: Verify Visual Foundry provider abstraction
+        run: node scripts/test-visual-foundry-provider-abstraction.mjs
       - run: node scripts/test-capability-standard.mjs
       - run: npx tsx scripts/test-modular-assembly-run2.ts
       - run: npx tsx scripts/test-modular-assembly-run3.ts
