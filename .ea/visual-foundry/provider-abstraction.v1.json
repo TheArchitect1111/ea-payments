@@ -1,0 +1,19 @@
+{
+  "schemaVersion":"1.0.0",
+  "id":"EA_VISUAL_FOUNDRY_PROVIDER_ABSTRACTION_V1",
+  "status":"ENFORCED",
+  "principle":"FOUNDRY_WORKFLOW_IS_PROVIDER_INDEPENDENT",
+  "executionModes":{
+    "FULL":{"default":true,"requiresGpuRuntime":true,"requiredStages":["SOURCE_VERIFY","IDENTITY_LOCK","SUBJECT_EXTRACTION","RELIGHT","DEPTH","ENHANCE","RIGHTS_GATE","LIKENESS_GATE","VISUAL_QA","STACK_RECEIPT"]},
+    "LITE":{"default":false,"requiresExplicitOwnerAuthorization":true,"mayNotClaimFullStack":true,"requiredStages":["SOURCE_VERIFY","IDENTITY_LOCK","SUBJECT_PRESERVING_EDIT","RIGHTS_GATE","LIKENESS_GATE","VISUAL_QA","STACK_RECEIPT"]}
+  },
+  "providers":[
+    {"id":"RUNPOD","class":"GPU_CLOUD","state":"UNCONFIGURED"},
+    {"id":"LOCAL_NVIDIA","class":"LOCAL_GPU","state":"UNCONFIGURED"},
+    {"id":"GENERIC_COMFYUI_API","class":"REMOTE_GPU","state":"UNCONFIGURED"}
+  ],
+  "fullStackComponents":["BiRefNet_or_SAM2","IC-Light","Depth_Anything_V2_Small","Real-ESRGAN","ComfyUI"],
+  "selection":{"rule":"FIRST_HEALTHY_AUTHORIZED_PROVIDER","silentFallback":false,"failClosed":true},
+  "acceptance":{"externalHealthRequestRequired":true,"tarrisMaster1IsFirstIdentityAcceptanceWorkload":true,"remainingTarrisMastersBlockedUntilMaster1Passes":true},
+  "receipt":{"required":true,"recordProvider":true,"recordMode":true,"recordActualComponents":true,"recordSubstitutions":true,"recordGateEvidence":true}
+}
