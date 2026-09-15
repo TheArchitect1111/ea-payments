@@ -9,96 +9,54 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 35
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with: { fetch-depth: 0 }
-      - name: Secret scan (gitleaks)
-        uses: gitleaks/gitleaks-action@v2
+      - uses: gitleaks/gitleaks-action@v2
         env: { GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}" }
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with: { node-version: 20, cache: npm }
-      - name: Install dependencies
-        run: npm ci
-      - name: Lint
-        run: npm run lint
-      - name: Verify EA Capability Standard and Run 1 inventory
-        run: node scripts/test-capability-standard.mjs
-      - name: Certify EA Modular Assembly Run 2
-        run: npx tsx scripts/test-modular-assembly-run2.ts
-      - name: Verify EA Modular Assembly Run 3
-        run: npx tsx scripts/test-modular-assembly-run3.ts
-      - name: Certify EA Modular Assembly Run 4 Starter package
-        run: npx tsx scripts/test-modular-assembly-run4.ts
-      - name: Verify EA Modular Assembly Run 5 durable evidence
-        run: npx tsx scripts/test-modular-assembly-run5.ts
-      - name: Certify EA Modular Assembly Run 6 capability wave
-        run: npx tsx scripts/test-modular-assembly-run6.ts
-      - name: Verify Factory Run 0 autonomous completion
-        run: node scripts/test-factory-run0-autonomous-completion.mjs
-      - name: Certify Factory Run 1 mass-production builders
-        run: node scripts/test-factory-run1-mass-builders.mjs
-      - name: Certify Factory Run 2 torture, recovery, and tenant isolation
-        run: node scripts/test-factory-run2-torture-certification.mjs
-      - name: Certify Factory Run 3 scale envelope
-        run: node scripts/test-factory-run3-scale-envelope.mjs
-      - name: Certify Factory Run 4 final mass-production acceptance
-        run: node scripts/test-factory-run4-final-acceptance.mjs
-      - name: Verify EA System Registry contract
-        run: node scripts/test-system-registry.mjs
-      - name: Verify EA Control Plane reconciliation contract
-        run: npx tsx scripts/test-control-plane.ts
-      - name: Verify Run 4 durable reliability contracts
-        run: npx tsx scripts/test-run4-reliability.ts
-      - name: Certify Run 5 scale and failure contracts
-        run: npx tsx scripts/test-run5-scale-certification.ts
-      - name: Verify compensating master guard contract
-        run: node scripts/test-master-guard-contract.mjs
-      - name: Verify generalized production protection contracts
-        run: node scripts/test-production-protection.mjs
-      - name: Verify tenant isolation and authorization release contracts
-        run: node scripts/test-tenant-release-safety.mjs
-      - name: Verify mandatory release guardrails
-        run: node scripts/test-release-guardrails.mjs
-      - name: Verify Recovery Orchestrator safety contract
-        run: npx tsx scripts/test-recovery-orchestrator.ts
-      - name: Certify Recovery Orchestrator self-healing loop
-        run: npx tsx scripts/test-recovery-certification.ts
-      - name: Verify Recovery Monitoring contract
-        run: node scripts/test-recovery-monitoring-contract.mjs
-      - name: Verify EA Stability Run 1 durable execution contracts
-        run: npx tsx scripts/test-stability-run1.ts
-      - name: Verify EA Stability Run 2 protected autonomy contracts
-        run: npx tsx scripts/test-stability-run2.ts
-      - name: Verify EA Stability Run 3 operational nervous system contract
-        run: node scripts/test-ea-stability-run3.mjs
-      - name: Certify EA Stability Run 4 stable production system
-        run: node scripts/test-ea-stability-run4.mjs
-      - name: Certify EA Universal Factory Run 0 contract
-        run: node scripts/test-universal-factory-run0.mjs
-      - name: Certify EA Universal Factory Run 1 configuration engine
-        run: node scripts/test-universal-factory-run1.mjs
-      - name: Certify EA Universal Factory Run 2 Golden Paths
-        run: node scripts/test-universal-factory-run2.mjs
-      - name: Certify EA Universal Factory Run 3 discovery to manifest
-        run: node scripts/test-universal-factory-run3.mjs
-      - name: Certify EA Universal Factory Run 4 automated assembly
-        run: node scripts/test-universal-factory-run4.mjs
-      - name: Certify EA Universal Factory Run 5 infrastructure factory
-        run: node scripts/test-universal-factory-run5.mjs
-      - name: Certify EA Universal Factory Run 6 connector factory
-        run: node scripts/test-universal-factory-run6.mjs
-      - name: Verify Client Factory fulfillment contract
-        run: npx tsx scripts/test-factory-fulfillment.ts
-      - name: Verify Amanda checkout and pricing contract
-        run: npm run test:amanda-checkout
-      - name: Verify Design Studio registry contract
-        run: node scripts/test-design-studio-registry-contract.mjs
-      - name: Verify Simplifi Orb and monitoring contracts
-        run: npm run test:simplifi-hardening
-      - name: Verify deploy (build + resolver + browser smoke)
-        run: |
+      - run: npm ci
+      - run: npm run lint
+      - run: node scripts/test-capability-standard.mjs
+      - run: npx tsx scripts/test-modular-assembly-run2.ts
+      - run: npx tsx scripts/test-modular-assembly-run3.ts
+      - run: npx tsx scripts/test-modular-assembly-run4.ts
+      - run: npx tsx scripts/test-modular-assembly-run5.ts
+      - run: npx tsx scripts/test-modular-assembly-run6.ts
+      - run: node scripts/test-factory-run0-autonomous-completion.mjs
+      - run: node scripts/test-factory-run1-mass-builders.mjs
+      - run: node scripts/test-factory-run2-torture-certification.mjs
+      - run: node scripts/test-factory-run3-scale-envelope.mjs
+      - run: node scripts/test-factory-run4-final-acceptance.mjs
+      - run: node scripts/test-system-registry.mjs
+      - run: npx tsx scripts/test-control-plane.ts
+      - run: npx tsx scripts/test-run4-reliability.ts
+      - run: npx tsx scripts/test-run5-scale-certification.ts
+      - run: node scripts/test-master-guard-contract.mjs
+      - run: node scripts/test-production-protection.mjs
+      - run: node scripts/test-tenant-release-safety.mjs
+      - run: node scripts/test-release-guardrails.mjs
+      - run: npx tsx scripts/test-recovery-orchestrator.ts
+      - run: npx tsx scripts/test-recovery-certification.ts
+      - run: node scripts/test-recovery-monitoring-contract.mjs
+      - run: npx tsx scripts/test-stability-run1.ts
+      - run: npx tsx scripts/test-stability-run2.ts
+      - run: node scripts/test-ea-stability-run3.mjs
+      - run: node scripts/test-ea-stability-run4.mjs
+      - run: node scripts/test-universal-factory-run0.mjs
+      - run: node scripts/test-universal-factory-run1.mjs
+      - run: node scripts/test-universal-factory-run2.mjs
+      - run: node scripts/test-universal-factory-run3.mjs
+      - run: node scripts/test-universal-factory-run4.mjs
+      - run: node scripts/test-universal-factory-run5.mjs
+      - run: node scripts/test-universal-factory-run6.mjs
+      - name: Certify EA Universal Factory Run 7 custom experience factory
+        run: node scripts/test-universal-factory-run7.mjs
+      - run: npx tsx scripts/test-factory-fulfillment.ts
+      - run: npm run test:amanda-checkout
+      - run: node scripts/test-design-studio-registry-contract.mjs
+      - run: npm run test:simplifi-hardening
+      - run: |
           npx playwright install --with-deps chromium
           npm run verify:deploy
-      - name: Verify live customer recovery journeys
-        run: node scripts/test-recovery-journeys.mjs
+      - run: node scripts/test-recovery-journeys.mjs
