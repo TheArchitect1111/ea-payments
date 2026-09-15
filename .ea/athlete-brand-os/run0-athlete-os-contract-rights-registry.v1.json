@@ -1,0 +1,100 @@
+{
+  "schemaVersion": "1.0.0",
+  "program": "EA_ATHLETE_BRAND_OPPORTUNITY_SYSTEM_V1",
+  "run": 0,
+  "status": "CONTRACT_DEFINED",
+  "component": "ATHLETE_OS_CONTRACT_RIGHTS_REGISTRY",
+  "purpose": "Define the reusable athlete brand, audience, opportunity, commerce, media and relationship operating contract while failing closed on rights, consent and consequential publishing decisions.",
+  "productPrinciple": "Build an athlete-owned audience and opportunity system, not merely a website, social scheduler, NIL dashboard or merchandise store.",
+  "experience": {
+    "athleteFacingName": "My Brand",
+    "internalCapability": "athlete-brand-os",
+    "primaryInterface": "Eva",
+    "intelligenceLayer": "Amplifi",
+    "domains": ["athlete", "brand", "community", "opportunity", "enterprise"],
+    "modules": ["my-brand", "my-shop", "club", "my-opportunities", "my-partners", "my-impact", "my-media", "my-content", "my-numbers"]
+  },
+  "responsibilityBoundaries": {
+    "Amplifi": ["discover", "research", "classify", "score", "explain", "recommend", "draft-content", "content-mix-guidance", "learn-from-approved-outcomes"],
+    "Eva": ["converse", "explain-recommendations", "collect-decisions", "surface-next-actions", "route-approvals"],
+    "AthleteOS": ["store-system-of-record", "execute-approved-actions", "manage-audience", "manage-opportunities", "manage-commerce", "manage-relationships", "record-evidence"],
+    "VisualFoundry": ["approved-asset-selection", "product-mockups", "social-visuals", "brand-creative"],
+    "UniversalFactory": ["assemble", "verify", "deploy", "observe", "recover", "promote-certified-reuse"]
+  },
+  "canonicalObjects": ["AthleteProfile", "BrandDNA", "Goal", "AudienceMember", "ConsentRecord", "Relationship", "Organization", "Opportunity", "OpportunityScore", "Partner", "Deal", "Deliverable", "MediaContact", "MediaOpportunity", "Appearance", "CommunityActivity", "ContentIdea", "ContentDraft", "ContentApproval", "PublishedContent", "Product", "ProductDesign", "RightsAsset", "RightsDecision", "Order", "Fulfillment", "ClubMembership", "MetricEvent", "Recommendation", "DecisionEvidence"],
+  "opportunityClasses": ["NIL_PAID", "BRAND_PARTNERSHIP", "AFFILIATE", "LICENSING", "MEDIA", "PODCAST", "SPEAKING", "APPEARANCE", "CAMP_CLINIC", "COMMUNITY", "BUSINESS", "NETWORKING", "EXPOSURE", "MERCHANDISE", "MEMBERSHIP", "FUTURE_ENTERPRISE"],
+  "rightsRegistry": {
+    "requiredFor": ["image", "video", "audio", "logo", "trademark", "uniform", "university-mark", "sponsor-mark", "music", "quote", "product-design", "social-content", "endorsement"],
+    "states": ["OWNED_OR_CLEARED", "CLEARANCE_REQUIRED", "BLOCKED", "EXPIRED", "UNKNOWN"],
+    "defaultState": "UNKNOWN",
+    "unknownFailsClosed": true,
+    "fields": ["assetId", "owner", "rightsBasis", "permittedUses", "prohibitedUses", "territory", "channels", "commercialUse", "effectiveAt", "expiresAt", "evidenceRef", "approvedBy", "decisionAt"],
+    "commercialPublicationRequires": ["OWNED_OR_CLEARED", "evidenceRef", "approvedBy"],
+    "thirdPartyMarksNeverInferred": true
+  },
+  "socialPolicy": {
+    "AmplifiMayPrepare": true,
+    "autonomousPublicPublishing": false,
+    "athleteOrAuthorizedHumanApprovalRequired": true,
+    "contentPillars": ["basketball", "journey", "personality", "community", "business-nil", "club", "partners", "merchandise"],
+    "mayRecommendNoPost": true,
+    "learnVoiceFrom": ["approved-posts", "athlete-edits", "explicit-preferences"],
+    "neverLearnFrom": ["rejected-drafts", "unverified-third-party-claims"]
+  },
+  "commercePolicy": {
+    "athleteSeesCuratedOptionsNotRawProviderCatalog": true,
+    "productStates": ["READY", "CLEARANCE_REQUIRED", "BLOCKED"],
+    "recommendationMustInclude": ["visual-mockup", "retail-price", "estimated-cost", "estimated-earnings", "fulfillment-status", "rights-status"],
+    "publishingRequiresAthleteApproval": true,
+    "duplicateFulfillmentForbidden": true
+  },
+  "audiencePolicy": {
+    "ownedAudienceGoal": true,
+    "consentRequiredForMarketing": true,
+    "unsubscribeHonored": true,
+    "purposeLimitation": true,
+    "crossAthleteAudienceLeakageForbidden": true,
+    "clubDefaultModel": "FREE_RELATIONSHIP_FIRST"
+  },
+  "opportunityPolicy": {
+    "scoreDimensions": ["brand-fit", "athlete-goals", "audience-fit", "relationship-value", "community-value", "exposure-value", "financial-value", "effort", "rights-risk", "reputation-risk", "timing"],
+    "paidIsNotAlwaysHighestPriority": true,
+    "recommendationRequiresExplanation": true,
+    "unverifiedOpportunityCannotBePresentedAsFact": true,
+    "materialCommitmentRequiresHumanApproval": true
+  },
+  "approvalGates": ["public-publishing", "commercial-product-publishing", "endorsement", "brand-outreach", "contractual-commitment", "pricing-change", "rights-clearance", "sensitive-topic-content", "university-mark-use", "paid-campaign-commitment"],
+  "dataIsolation": {
+    "tenantScoped": true,
+    "athleteScoped": true,
+    "credentialsTenantScoped": true,
+    "crossTenantReadsForbidden": true,
+    "crossAthleteWritesForbidden": true
+  },
+  "evidenceAndLearning": {
+    "recommendationsCarryProvenance": true,
+    "decisionsRecorded": true,
+    "outcomesMeasured": true,
+    "learningPromotionRequiresVerification": true,
+    "clientSpecificIdentityNeverPromotedAsReusableTemplate": true,
+    "reusablePatternsRouteToUniversalFactoryRun9": true
+  },
+  "tarrisProvingGround": {
+    "brand": "TB3",
+    "clubWorkingName": "TB3 Club",
+    "attachedCreativeConcept": "TB3 logo over athlete background artwork; university marks or official uniform elements remain CLEARANCE_REQUIRED until documented approval exists.",
+    "rules": ["TB3-owned identity is preferred default", "Alabama marks are never assumed cleared", "the athlete experience must remain custom and not become a generic athlete template"]
+  },
+  "acceptanceCriteria": [
+    "Amplifi and Eva responsibilities are distinct",
+    "athlete-facing experience does not expose infrastructure complexity",
+    "rights state defaults to UNKNOWN and fails closed",
+    "public social publishing requires authorized human approval",
+    "commerce recommendations are curated and rights-aware",
+    "audience marketing requires consent and opt-out support",
+    "opportunities include paid and non-paid strategic value",
+    "tenant and athlete isolation are mandatory",
+    "Tarris is a proving ground without becoming the reusable visual template",
+    "reusable verified patterns can promote into the Universal Factory learning engine"
+  ]
+}
