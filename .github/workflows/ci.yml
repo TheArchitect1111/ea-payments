@@ -52,8 +52,9 @@ jobs:
       - run: node scripts/test-universal-factory-run6.mjs
       - run: node scripts/test-universal-factory-run7.mjs
       - run: node scripts/test-universal-factory-run8.mjs
-      - name: Certify EA Universal Factory Run 9 learning and compounding engine
-        run: node scripts/test-universal-factory-run9.mjs
+      - run: node scripts/test-universal-factory-run9.mjs
+      - name: Final certify EA Universal Factory V1
+        run: node scripts/test-universal-factory-run10.mjs
       - run: npx tsx scripts/test-factory-fulfillment.ts
       - run: npm run test:amanda-checkout
       - run: node scripts/test-design-studio-registry-contract.mjs
