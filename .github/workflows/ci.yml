@@ -92,6 +92,8 @@ jobs:
         run: node scripts/test-universal-factory-run2.mjs
       - name: Certify EA Universal Factory Run 3 discovery to manifest
         run: node scripts/test-universal-factory-run3.mjs
+      - name: Certify EA Universal Factory Run 4 automated assembly
+        run: node scripts/test-universal-factory-run4.mjs
       - name: Verify Client Factory fulfillment contract
         run: npx tsx scripts/test-factory-fulfillment.ts
       - name: Verify Amanda checkout and pricing contract
