@@ -1,0 +1,72 @@
+{
+  "schemaVersion": "1.0.0",
+  "policyId": "EA_STACK_FIRST_ENFORCEMENT_V1",
+  "status": "ENFORCED",
+  "principle": "STACK_FIRST",
+  "default": true,
+  "ownerDirective": "Unless Robert explicitly states otherwise, every EA production task must use the full applicable registered EA stack.",
+  "rules": {
+    "directBypassProhibited": true,
+    "silentSubstitutionProhibited": true,
+    "explicitOwnerBypassRequired": true,
+    "failClosedWhenRequiredRuntimeUnavailable": true,
+    "completionRequiresStackReceipt": true,
+    "completionRequiresRequiredGates": true
+  },
+  "router": {
+    "entry": "REQUEST",
+    "flow": ["REQUEST", "STACK_ROUTER", "REQUIRED_PIPELINE", "GATES", "STACK_RECEIPT", "OUTPUT"],
+    "domains": {
+      "visual": "VISUAL_FOUNDRY",
+      "website_portal": "UNIVERSAL_FACTORY_EXPERIENCE_QA_DEPLOY_RECOVERY",
+      "integration": "CONNECTOR_FACTORY",
+      "athlete": "ATHLETE_BRAND_OS",
+      "data_reporting": "EA_DATA_FABRIC",
+      "intelligence": "AMPLIFI_EVA_REGISTERED_BOUNDARIES"
+    }
+  },
+  "visualFoundry": {
+    "identitySensitiveFlow": [
+      "APPROVED_SOURCE_VERIFICATION",
+      "IDENTITY_REFERENCE_LOCK",
+      "SUBJECT_PRESERVATION_OR_EXTRACTION",
+      "COMPOSITION",
+      "RELIGHTING",
+      "ENHANCEMENT",
+      "RIGHTS_IP_GATE",
+      "LIKENESS_QA",
+      "VISUAL_QA",
+      "STACK_RECEIPT",
+      "OUTPUT"
+    ],
+    "preferredRegisteredComponents": ["BiRefNet_or_SAM2", "IC-Light", "Depth_Anything_V2_Small", "Real-ESRGAN", "ComfyUI", "FFmpeg_or_Remotion"],
+    "identityFailureResult": "BLOCKED",
+    "unknownRightsResult": "BLOCKED_OR_CLEARANCE_REQUIRED",
+    "genericGenerationFallbackAllowed": false
+  },
+  "stackReceipt": {
+    "required": true,
+    "fields": [
+      "taskId",
+      "projectId",
+      "stackRoute",
+      "sourceAssets",
+      "componentsRequested",
+      "componentsActuallyExecuted",
+      "gates",
+      "substitutions",
+      "runtimeUnavailable",
+      "rightsStatus",
+      "identityStatus",
+      "verificationEvidence",
+      "finalStatus"
+    ],
+    "validFinalStatuses": ["VERIFIED", "BLOCKED", "CLEARANCE_REQUIRED"],
+    "noReceiptNoCompletion": true
+  },
+  "runtimeTruth": {
+    "contractIsNotRuntime": true,
+    "unprovenRuntimeMustNotBeClaimedLive": true,
+    "missingRequiredRuntimeMustNameBlockingComponent": true
+  }
+}
