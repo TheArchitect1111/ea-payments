@@ -17,6 +17,8 @@ jobs:
         with: { node-version: 20, cache: npm }
       - run: npm ci
       - run: npm run lint
+      - name: Enforce EA Stack First
+        run: node scripts/test-stack-first-enforcement.mjs
       - run: node scripts/test-capability-standard.mjs
       - run: npx tsx scripts/test-modular-assembly-run2.ts
       - run: npx tsx scripts/test-modular-assembly-run3.ts
