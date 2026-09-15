@@ -63,6 +63,8 @@ jobs:
         run: node scripts/test-athlete-brand-os-run2.mjs
       - name: Verify Athlete Brand OS Run 3 club and personal connection
         run: node scripts/test-athlete-brand-os-run3.mjs
+      - name: Verify Athlete Brand OS Run 4 Amplifi athlete intelligence
+        run: node scripts/test-athlete-brand-os-run4.mjs
       - run: npx tsx scripts/test-factory-fulfillment.ts
       - run: npm run test:amanda-checkout
       - run: node scripts/test-design-studio-registry-contract.mjs
