@@ -1,0 +1,16 @@
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+const root='.ea/athlete-brand-os';
+for(let i=0;i<=7;i++) assert.ok(fs.readdirSync(root).some(f=>f.startsWith(`run${i}-`)),`missing run ${i}`);
+const c=JSON.parse(fs.readFileSync(`${root}/run7-torture-certification.v1.json`,'utf8'));
+assert.equal(c.target,'EA_ATHLETE_BRAND_OS_V1_CERTIFIED');
+assert.equal(c.completion.noPartialCertification,true);
+assert.ok(c.scenarios.length>=28);
+assert.equal(c.scaleTest.workOrders,250);
+assert.equal(c.promotion.requiresAllScenariosPass,true);
+assert.equal(c.promotion.promoteReusableNotTarrisIdentity,true);
+assert.equal(c.runtimeTruth.repositoryCertificationDoesNotProveExternalProviderProvisioning,true);
+assert.equal(c.runtimeTruth.liveCredentialsForbiddenInRepository,true);
+const expected=['unlicensed-university-mark','cross-athlete-asset-leakage','duplicate-commerce-order','marketing-opt-out','fabricated-opportunity','content-edited-after-approval','unauthorized-public-publish','duplicate-social-publish','analytics-provider-outage','fake-nil-valuation-request','sensitive-trait-inference','eva-invented-metric','synthetic-athlete-impersonation'];
+for(const name of expected) assert.ok(c.scenarios.some(s=>s.name===name),`missing scenario ${name}`);
+console.log(c.completion.pass);
