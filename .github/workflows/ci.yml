@@ -67,6 +67,8 @@ jobs:
         run: node scripts/test-athlete-brand-os-run4.mjs
       - name: Verify Athlete Brand OS Run 5 content and distribution
         run: node scripts/test-athlete-brand-os-run5.mjs
+      - name: Verify Athlete Brand OS Run 6 intelligence analytics and Eva
+        run: node scripts/test-athlete-brand-os-run6.mjs
       - run: npx tsx scripts/test-factory-fulfillment.ts
       - run: npm run test:amanda-checkout
       - run: node scripts/test-design-studio-registry-contract.mjs
