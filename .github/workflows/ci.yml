@@ -69,6 +69,8 @@ jobs:
         run: node scripts/test-athlete-brand-os-run5.mjs
       - name: Verify Athlete Brand OS Run 6 intelligence analytics and Eva
         run: node scripts/test-athlete-brand-os-run6.mjs
+      - name: Final certify EA Athlete Brand OS V1
+        run: node scripts/test-athlete-brand-os-run7.mjs
       - run: npx tsx scripts/test-factory-fulfillment.ts
       - run: npm run test:amanda-checkout
       - run: node scripts/test-design-studio-registry-contract.mjs
