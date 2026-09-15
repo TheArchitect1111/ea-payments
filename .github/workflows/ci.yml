@@ -50,8 +50,9 @@ jobs:
       - run: node scripts/test-universal-factory-run4.mjs
       - run: node scripts/test-universal-factory-run5.mjs
       - run: node scripts/test-universal-factory-run6.mjs
-      - name: Certify EA Universal Factory Run 7 custom experience factory
-        run: node scripts/test-universal-factory-run7.mjs
+      - run: node scripts/test-universal-factory-run7.mjs
+      - name: Certify EA Universal Factory Run 8 autonomous operations
+        run: node scripts/test-universal-factory-run8.mjs
       - run: npx tsx scripts/test-factory-fulfillment.ts
       - run: npm run test:amanda-checkout
       - run: node scripts/test-design-studio-registry-contract.mjs
