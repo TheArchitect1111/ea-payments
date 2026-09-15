@@ -1,0 +1,84 @@
+{
+  "schemaVersion":"1.0.0",
+  "program":"EA_ATHLETE_BRAND_OPPORTUNITY_SYSTEM_V1",
+  "run":1,
+  "status":"FOUNDATION_DEFINED",
+  "component":"RELATIONSHIP_AUDIENCE_FOUNDATION",
+  "purpose":"Create the athlete-owned relationship and audience foundation used by Eva, Amplifi, TB3 Club, commerce, media, community and future opportunity intelligence.",
+  "prerequisites":["run0-athlete-os-contract-rights-registry"],
+  "principles":["OWN_THE_RELATIONSHIP_NOT_JUST_THE_FOLLOWER","CONSENT_BEFORE_MARKETING","ATHLETE_AND_TENANT_ISOLATION","EVA_IS_PRIMARY_INTERFACE","AMPLIFI_READS_CONTEXT_BUT_DOES_NOT_BYPASS_APPROVAL","NO_RAW_CRM_COMPLEXITY_FOR_ATHLETE"],
+  "canonicalEntities":{
+    "Person":["id","athleteId","name","email","mobile","relationshipTypes","source","consentState","preferences","lastInteractionAt","createdAt"],
+    "Organization":["id","athleteId","name","type","website","contacts","relationshipStrength","notes","createdAt"],
+    "Relationship":["id","athleteId","personOrOrgId","types","strength","status","introducedBy","lastInteractionAt","nextActionAt","evidenceRefs"],
+    "AudienceMember":["id","athleteId","personId","clubStatus","customerStatus","source","interests","sizePreferences","engagementState","consentIds"],
+    "ConsentRecord":["id","athleteId","personId","purpose","channel","status","capturedAt","source","evidenceRef","withdrawnAt"],
+    "Interaction":["id","athleteId","relationshipId","type","channel","occurredAt","summary","outcome","evidenceRefs"],
+    "Segment":["id","athleteId","name","rules","purpose","active"],
+    "RelationshipSignal":["id","athleteId","relationshipId","signalType","source","observedAt","confidence","recommendedAction"]
+  },
+  "relationshipTypes":["FAN","CLUB_MEMBER","CUSTOMER","BRAND","NIL_PARTNER","MEDIA","COACH","TEAM","COMMUNITY","CAMP","BUSINESS","MENTOR","ALUMNI","DONOR","SPONSOR","PROSPECTIVE_PARTNER","OTHER"],
+  "club":{
+    "workingName":"TB3 Club",
+    "defaultTier":"FREE",
+    "objectives":["owned-audience","direct-relationship","early-access","personal-connection","feedback","repeat-engagement"],
+    "memberBenefits":["early-drop-access","selected-behind-the-scenes-updates","community-and-camp-announcements","occasional-athlete-messages","giveaways-when-approved"],
+    "paidTierDeferred":true,
+    "membershipDoesNotImplyMarketingConsent":true
+  },
+  "consent":{
+    "states":["UNKNOWN","OPTED_IN","OPTED_OUT","SUPPRESSED"],
+    "default":"UNKNOWN",
+    "purposes":["TRANSACTIONAL","CLUB_UPDATES","MERCHANDISE","EVENTS_CAMPS","PARTNER_PROMOTIONS","SURVEYS_FEEDBACK"],
+    "channels":["EMAIL","SMS","PUSH","WHATSAPP"],
+    "marketingRequiresExplicitOptIn":true,
+    "transactionalSeparatedFromMarketing":true,
+    "withdrawalMustPropagate":true,
+    "suppressionOverridesCampaign":true
+  },
+  "evaExperience":{
+    "athleteDoesNotOperateCRM":true,
+    "examples":["Who joined TB3 Club this week?","Who should I follow up with?","Show me brands we have relationships with.","Who bought the last drop?","Who have I not spoken with recently?"],
+    "writeActionsRequirePolicyCheck":true
+  },
+  "amplifiContext":{
+    "mayUse":["relationship-type","relationship-strength","interaction-history","consented-audience-aggregates","engagement-signals","declared-interests"],
+    "mustNotUse":["cross-athlete-data","suppressed-contact-for-marketing","unknown-consent-as-opt-in"],
+    "outputs":["relationship-priority","audience-insight","follow-up-recommendation","content-audience-fit","opportunity-relationship-fit"]
+  },
+  "integrationStrategy":{
+    "crmPattern":"TWENTY_EVALUATION_ADAPTER",
+    "twentyRole":"optional relationship-system backend; athlete experience remains EA/Eva",
+    "providerAbstractionRequired":true,
+    "noVendorLockIn":true,
+    "eventContract":["audience.joined","audience.consent.changed","relationship.created","relationship.interaction.recorded","relationship.signal.detected","club.member.joined","commerce.customer.created"]
+  },
+  "isolation":{
+    "tenantScoped":true,
+    "athleteScoped":true,
+    "allEntityKeysCarryAthleteId":true,
+    "crossAthleteQueryDefaultDeny":true,
+    "crossTenantQueryDefaultDeny":true,
+    "exportRequiresAuthorization":true
+  },
+  "deduplication":{
+    "required":true,
+    "matchSignals":["verified-email","verified-mobile","provider-customer-id"],
+    "automaticMergeOnNameOnly":false,
+    "ambiguousMatch":"HUMAN_REVIEW"
+  },
+  "privacy":{
+    "dataMinimization":true,
+    "purposeLimitation":true,
+    "sensitiveInferenceForbidden":true,
+    "rawSecretsForbidden":true,
+    "auditConsentChanges":true
+  },
+  "tarrisProvingGround":{
+    "athlete":"Tarris Bouie",
+    "brand":"TB3",
+    "initialSegments":["TB3_CLUB","CUSTOMERS","CAMP_COMMUNITY","BRAND_RELATIONSHIPS","MEDIA_RELATIONSHIPS"],
+    "firstPartyGoal":"Convert appropriate public attention into consented direct relationships without making Tarris operate marketing software."
+  },
+  "acceptanceCriteria":["relationship and audience entities are athlete scoped","club membership and marketing consent are distinct","unknown consent cannot receive marketing","opt-out and suppression override campaigns","ambiguous identity matches do not auto-merge","Eva is the athlete-facing relationship interface","Amplifi can use permitted relationship context for recommendations","Twenty remains behind a provider abstraction","cross-athlete and cross-tenant access fail closed","event contracts support later Club, commerce, content and opportunity runs"]
+}
