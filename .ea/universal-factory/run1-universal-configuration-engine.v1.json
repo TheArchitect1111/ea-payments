@@ -1,0 +1,59 @@
+{
+  "schemaVersion": "1.0.0",
+  "program": "EA_UNIVERSAL_FACTORY_V1",
+  "run": 1,
+  "status": "ENFORCED_CONTRACT",
+  "component": "UNIVERSAL_CONFIGURATION_ENGINE",
+  "purpose": "Turn approved project intent into a deterministic, tenant-scoped, reusable build configuration for any EA project class.",
+  "inputs": ["projectContext", "approvedIntent", "clientWorkspace", "fileCabinetEvidence", "capabilityRegistry", "archetypeRegistry", "integrationRegistry", "policyEvidence"],
+  "resolutionOrder": ["identity", "tenant", "intent", "risk", "archetype", "capabilities", "data", "integrations", "experience", "security", "compliance", "infrastructure", "verification", "deployment", "observability", "recovery", "learning"],
+  "classification": {
+    "modes": ["KNOWN_ARCHETYPE", "COMPOSABLE", "NOVEL"],
+    "knownArchetype": "Resolve an approved Golden Path and configure it.",
+    "composable": "Compose certified capabilities without creating a new project chassis.",
+    "novel": "Enter architecture/discovery; production assembly is blocked until missing capabilities and acceptance criteria are defined and independently certified."
+  },
+  "archetypeFamilies": [
+    "EXPERIENCE_WEBSITE",
+    "EXPERIENCE_PORTAL",
+    "ATHLETE_BRAND_OS",
+    "MEMBERSHIP_LEARNING_OS",
+    "EVENT_CAMP_OS",
+    "SERVICE_BUSINESS_OS",
+    "NONPROFIT_OS",
+    "IMPACT_INTELLIGENCE_REPORTING_OS",
+    "BUSINESS_OPERATING_SYSTEM",
+    "ENTERPRISE_INTEROPERABILITY_HUB"
+  ],
+  "configurationLayers": {
+    "immutableCore": ["tenant-isolation", "authorization", "policy", "audit-evidence", "release-governance", "recovery-contract"],
+    "selectableCapabilities": ["website", "portal", "auth", "payments", "forms", "intake", "profiles", "learning", "reporting", "dashboards", "workflows", "notifications", "eva", "analytics", "integrations", "interoperability"],
+    "clientConfiguration": ["identity", "brand", "content", "approved-assets", "domain-workflows", "roles", "permissions", "data-mappings", "integration-bindings", "release-targets"],
+    "experienceCustomization": ["typography", "photography", "spacing", "layout", "component-composition", "motion", "visual-storytelling", "voice"]
+  },
+  "determinism": {
+    "required": true,
+    "sameApprovedInputsProduceSamePlan": true,
+    "configurationFingerprintRequired": true,
+    "idempotencyKeyRequired": true,
+    "appendOnlyEvidenceRequired": true
+  },
+  "reuse": {
+    "registryFirst": true,
+    "blankRepoDefault": false,
+    "manualCopyPasteDefault": false,
+    "newCapabilityRule": "Build only the missing capability, test independently, certify, then register for future assembly.",
+    "newArchetypeRule": "Create a Golden Path only when a recurring semantic project class cannot be expressed safely by existing archetypes plus certified capabilities."
+  },
+  "projectClassRules": {
+    "impactIntelligence": {"family": "IMPACT_INTELLIGENCE_REPORTING_OS", "productionLineEligible": true, "requires": ["canonical-data-model", "validation", "funding-source-mapping", "outcome-tracking", "report-generation", "approval", "audit-trail"]},
+    "enterpriseInteroperability": {"family": "ENTERPRISE_INTEROPERABILITY_HUB", "productionLineEligible": false, "requiresDiscoveryBeforeProduction": true, "requires": ["system-inventory", "data-classification", "api-and-protocol-inventory", "identity-and-access", "audit", "security", "compliance", "integration-boundaries", "failure-and-recovery-model"]}
+  },
+  "failClosedOn": ["missing-tenant", "missing-approved-intent", "unresolved-archetype", "uncertified-required-capability", "ambiguous-integration-target", "missing-data-classification", "missing-authorization", "missing-rollback-or-recovery", "cross-tenant-binding", "regulated-production-without-compliance-evidence"],
+  "output": {
+    "artifact": "UniversalBuildManifest",
+    "requiredFields": ["projectId", "tenantId", "intentId", "riskTier", "archetype", "capabilities", "configuration", "dataContracts", "integrations", "experience", "security", "compliance", "infrastructure", "tests", "approvals", "deployment", "observability", "recovery", "configurationFingerprint", "idempotencyKey"],
+    "allowedNextStates": ["PLAN", "ARCHITECT", "BLOCKED"]
+  },
+  "nextRun": "RUN_2_FACTORY_CATALOG_AND_GOLDEN_PATHS"
+}

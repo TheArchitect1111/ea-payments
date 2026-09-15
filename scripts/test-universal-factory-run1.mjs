@@ -1,0 +1,23 @@
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+
+const c = JSON.parse(fs.readFileSync('.ea/universal-factory/run1-universal-configuration-engine.v1.json','utf8'));
+assert.equal(c.program,'EA_UNIVERSAL_FACTORY_V1');
+assert.equal(c.run,1);
+assert.equal(c.component,'UNIVERSAL_CONFIGURATION_ENGINE');
+assert.deepEqual(c.classification.modes,['KNOWN_ARCHETYPE','COMPOSABLE','NOVEL']);
+for (const family of ['EXPERIENCE_WEBSITE','EXPERIENCE_PORTAL','ATHLETE_BRAND_OS','NONPROFIT_OS','IMPACT_INTELLIGENCE_REPORTING_OS','BUSINESS_OPERATING_SYSTEM','ENTERPRISE_INTEROPERABILITY_HUB']) assert(c.archetypeFamilies.includes(family));
+for (const core of ['tenant-isolation','authorization','policy','release-governance','recovery-contract']) assert(c.configurationLayers.immutableCore.includes(core));
+for (const custom of ['typography','photography','layout','component-composition','visual-storytelling','voice']) assert(c.configurationLayers.experienceCustomization.includes(custom));
+assert.equal(c.determinism.sameApprovedInputsProduceSamePlan,true);
+assert.equal(c.determinism.configurationFingerprintRequired,true);
+assert.equal(c.determinism.idempotencyKeyRequired,true);
+assert.equal(c.reuse.registryFirst,true);
+assert.equal(c.reuse.blankRepoDefault,false);
+assert.equal(c.projectClassRules.impactIntelligence.productionLineEligible,true);
+assert.equal(c.projectClassRules.enterpriseInteroperability.productionLineEligible,false);
+assert.equal(c.projectClassRules.enterpriseInteroperability.requiresDiscoveryBeforeProduction,true);
+for (const blocker of ['missing-tenant','missing-approved-intent','uncertified-required-capability','cross-tenant-binding','regulated-production-without-compliance-evidence']) assert(c.failClosedOn.includes(blocker));
+for (const field of ['projectId','tenantId','archetype','capabilities','configuration','integrations','security','tests','deployment','observability','recovery','configurationFingerprint','idempotencyKey']) assert(c.output.requiredFields.includes(field));
+assert.deepEqual(c.output.allowedNextStates,['PLAN','ARCHITECT','BLOCKED']);
+console.log(JSON.stringify({certification:'EA_UNIVERSAL_FACTORY_RUN_1_CONFIGURATION_ENGINE',status:'PASS',archetypeFamilies:c.archetypeFamilies.length,decision:'RUN_1_COMPLETE_PENDING_CI_AND_MERGE'},null,2));
