@@ -21,17 +21,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: Lint
-        id: lint
-        shell: bash
-        run: |
-          set +e
-          npm run lint 2>&1 | tee lint-output.txt
-          status=${PIPESTATUS[0]}
-          exit "$status"
-      - name: Upload lint diagnostics
-        if: failure() && steps.lint.outcome == 'failure'
-        uses: actions/upload-artifact@v4
-        with: { name: lint-diagnostics, path: lint-output.txt, if-no-files-found: error, retention-days: 3 }
+        run: npm run lint
       - name: Verify EA Capability Standard and Run 1 inventory
         run: node scripts/test-capability-standard.mjs
       - name: Certify EA Modular Assembly Run 2
@@ -96,6 +86,8 @@ jobs:
         run: node scripts/test-universal-factory-run4.mjs
       - name: Certify EA Universal Factory Run 5 infrastructure factory
         run: node scripts/test-universal-factory-run5.mjs
+      - name: Certify EA Universal Factory Run 6 connector factory
+        run: node scripts/test-universal-factory-run6.mjs
       - name: Verify Client Factory fulfillment contract
         run: npx tsx scripts/test-factory-fulfillment.ts
       - name: Verify Amanda checkout and pricing contract
