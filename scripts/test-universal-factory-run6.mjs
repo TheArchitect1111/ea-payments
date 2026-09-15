@@ -1,0 +1,11 @@
+import fs from 'node:fs'; import assert from 'node:assert/strict';
+const c=JSON.parse(fs.readFileSync('.ea/universal-factory/run6-connector-factory.v1.json','utf8'));
+assert.equal(c.run,6); assert.equal(c.engines.commodityAutomation,'Activepieces'); assert.equal(c.engines.governedPublicSectorHealthExchange,'OpenFn'); assert.equal(c.engines.durableOrchestrationBoundary,'Temporal');
+for(const x of ['REST_API','WEBHOOK','DATABASE','PAYMENT','FHIR','HL7_V2','MLLP']) assert(c.connectorClasses.includes(x),x);
+for(const x of ['SEARCH_CONNECTOR_REGISTRY','MATCH_CERTIFIED_CONNECTOR','IMPLEMENT_IN_ISOLATION','FAILURE_TEST','DOMAIN_CERTIFICATION_IF_REQUIRED','REGISTER','BIND_TO_TENANT']) assert(c.lifecycle.includes(x),x);
+assert.equal(c.reusePolicy.registryFirst,true); assert.equal(c.reusePolicy.duplicateConnectorImplementationForbidden,true); assert.equal(c.connectorContract.credentialsByReferenceOnly,true);
+assert.equal(c.healthcare.gateway,'OpenHIM'); assert.equal(c.healthcare.fhirEngine,'HAPI_FHIR'); assert.equal(c.healthcare.legacyAdapter,'Apache_Camel'); assert.equal(c.healthcare.certification,'Inferno'); assert.equal(c.healthcare.mirthAsFutureFoundation,false); assert.equal(c.healthcare.syntheticFirstBeforeClientData,true);
+assert.equal(c.failureBehavior.silentDataLossForbidden,true); assert.equal(c.security.crossTenantCredentialReuseForbidden,true);
+for(const x of ['uncertified-write-connector','cross-tenant-credential','missing-idempotency-for-write','regulated-connector-without-domain-certification']) assert(c.failClosedOn.includes(x),x);
+assert.equal(c.handoff.nextRun,'RUN_7_CUSTOM_EXPERIENCE_FACTORY');
+console.log('EA Universal Factory Run 6 connector factory certified.');
