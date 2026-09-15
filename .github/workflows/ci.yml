@@ -59,6 +59,8 @@ jobs:
         run: node scripts/test-athlete-brand-os-run0.mjs
       - name: Verify Athlete Brand OS Run 1 relationship foundation
         run: node scripts/test-athlete-brand-os-run1.mjs
+      - name: Verify Athlete Brand OS Run 2 shop and product advisor
+        run: node scripts/test-athlete-brand-os-run2.mjs
       - run: npx tsx scripts/test-factory-fulfillment.ts
       - run: npm run test:amanda-checkout
       - run: node scripts/test-design-studio-registry-contract.mjs
