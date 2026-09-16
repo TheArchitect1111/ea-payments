@@ -53,14 +53,31 @@ async function expectPolicyFailure(target: string) {
 }
 
 async function main() {
-  await expectPolicyFailure("not-a-url");
-  await expectPolicyFailure("file:///etc/passwd");
-  await expectPolicyFailure("http://localhost/admin");
-  await expectPolicyFailure("http://127.0.0.1/admin");
-  await expectPolicyFailure("http://10.0.0.1/admin");
-  await expectPolicyFailure("http://172.16.0.1/admin");
-  await expectPolicyFailure("http://192.168.1.1/admin");
-  await expectPolicyFailure("http://169.254.169.254/latest/meta-data/");
+  const blockedTargets = [
+    "not-a-url",
+    "file:///etc/passwd",
+    "http://localhost/admin",
+    "http://localhost.localdomain/admin",
+    "http://printer.local/admin",
+    "http://127.0.0.1/admin",
+    "http://10.0.0.1/admin",
+    "http://172.16.0.1/admin",
+    "http://172.31.255.255/admin",
+    "http://192.168.1.1/admin",
+    "http://169.254.169.254/latest/meta-data/",
+    "http://[::1]/admin",
+    "http://[::]/admin",
+    "http://[fc00::1]/admin",
+    "http://[fd12:3456:789a::1]/admin",
+    "http://[fe80::1]/admin",
+    "http://[::ffff:127.0.0.1]/admin",
+    "http://[::ffff:10.0.0.1]/admin",
+    "http://[::ffff:169.254.169.254]/latest/meta-data/",
+  ];
+
+  for (const target of blockedTargets) {
+    await expectPolicyFailure(target);
+  }
 
   {
     const adapter = new RecordingAdapter();
@@ -97,7 +114,7 @@ async function main() {
     );
   }
 
-  console.log("PASS intelligence gateway contract");
+  console.log("PASS intelligence gateway attack contract");
 }
 
 main().catch((error) => {
