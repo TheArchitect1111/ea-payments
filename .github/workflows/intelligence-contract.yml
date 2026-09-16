@@ -1,0 +1,39 @@
+name: Intelligence Contract
+
+on:
+  push:
+    branches:
+      - feature/ea-intelligence-service
+    paths:
+      - "lib/intelligence/**"
+      - "scripts/test-intelligence-gateway-contract.ts"
+      - ".github/workflows/intelligence-contract.yml"
+  pull_request:
+    paths:
+      - "lib/intelligence/**"
+      - "scripts/test-intelligence-gateway-contract.ts"
+      - ".github/workflows/intelligence-contract.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  intelligence-contract:
+    name: Intelligence Gateway Contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Intelligence Gateway contract
+        run: npx --no-install tsx scripts/test-intelligence-gateway-contract.ts
