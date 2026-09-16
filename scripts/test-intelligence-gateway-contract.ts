@@ -52,48 +52,55 @@ async function expectPolicyFailure(target: string) {
   assert.equal(adapter.calls.length, 0, "Rejected targets must never reach an adapter");
 }
 
-await expectPolicyFailure("not-a-url");
-await expectPolicyFailure("file:///etc/passwd");
-await expectPolicyFailure("http://localhost/admin");
-await expectPolicyFailure("http://127.0.0.1/admin");
-await expectPolicyFailure("http://10.0.0.1/admin");
-await expectPolicyFailure("http://172.16.0.1/admin");
-await expectPolicyFailure("http://192.168.1.1/admin");
-await expectPolicyFailure("http://169.254.169.254/latest/meta-data/");
+async function main() {
+  await expectPolicyFailure("not-a-url");
+  await expectPolicyFailure("file:///etc/passwd");
+  await expectPolicyFailure("http://localhost/admin");
+  await expectPolicyFailure("http://127.0.0.1/admin");
+  await expectPolicyFailure("http://10.0.0.1/admin");
+  await expectPolicyFailure("http://172.16.0.1/admin");
+  await expectPolicyFailure("http://192.168.1.1/admin");
+  await expectPolicyFailure("http://169.254.169.254/latest/meta-data/");
 
-{
-  const adapter = new RecordingAdapter();
-  const gateway = new IntelligenceGateway([adapter]);
-  const observations = await gateway.collect(baseRequest);
-  assert.equal(adapter.calls.length, 1);
-  assert.equal(adapter.calls[0].target, "https://example.com/research");
-  assert.equal(observations.length, 1);
-  assert.equal(observations[0].subjectId, baseRequest.subjectId);
-  assert.equal(observations[0].consumer, baseRequest.consumer);
-  assert.equal(observations[0].capability, baseRequest.capability);
-  assert.equal(observations[0].provider, adapter.id);
-  assert.deepEqual(observations[0].provenance, { source: "public", adapter: adapter.id });
+  {
+    const adapter = new RecordingAdapter();
+    const gateway = new IntelligenceGateway([adapter]);
+    const observations = await gateway.collect(baseRequest);
+    assert.equal(adapter.calls.length, 1);
+    assert.equal(adapter.calls[0].target, "https://example.com/research");
+    assert.equal(observations.length, 1);
+    assert.equal(observations[0].subjectId, baseRequest.subjectId);
+    assert.equal(observations[0].consumer, baseRequest.consumer);
+    assert.equal(observations[0].capability, baseRequest.capability);
+    assert.equal(observations[0].provider, adapter.id);
+    assert.deepEqual(observations[0].provenance, { source: "public", adapter: adapter.id });
+  }
+
+  {
+    const gateway = new IntelligenceGateway([]);
+    await assert.rejects(
+      () => gateway.collect(baseRequest),
+      (error: unknown) => error instanceof IntelligenceProviderError,
+    );
+  }
+
+  {
+    const adapter = new RecordingAdapter();
+    const gateway = new IntelligenceGateway([adapter]);
+    await assert.rejects(
+      () => gateway.collect({ ...baseRequest, subjectId: " " }),
+      (error: unknown) => error instanceof IntelligencePolicyError,
+    );
+    await assert.rejects(
+      () => gateway.collect({ ...baseRequest, purpose: " " }),
+      (error: unknown) => error instanceof IntelligencePolicyError,
+    );
+  }
+
+  console.log("PASS intelligence gateway contract");
 }
 
-{
-  const gateway = new IntelligenceGateway([]);
-  await assert.rejects(
-    () => gateway.collect(baseRequest),
-    (error: unknown) => error instanceof IntelligenceProviderError,
-  );
-}
-
-{
-  const adapter = new RecordingAdapter();
-  const gateway = new IntelligenceGateway([adapter]);
-  await assert.rejects(
-    () => gateway.collect({ ...baseRequest, subjectId: " " }),
-    (error: unknown) => error instanceof IntelligencePolicyError,
-  );
-  await assert.rejects(
-    () => gateway.collect({ ...baseRequest, purpose: " " }),
-    (error: unknown) => error instanceof IntelligencePolicyError,
-  );
-}
-
-console.log("PASS intelligence gateway contract");
+main().catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});
