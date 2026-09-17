@@ -1,0 +1,38 @@
+name: Amanda Recovery Evidence
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'app/**'
+      - 'lib/**'
+      - 'tests/amanda-recovery/**'
+      - 'playwright.amanda-recovery.config.ts'
+
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Run Amanda recovery evidence
+        run: npx playwright test --config=playwright.amanda-recovery.config.ts
+        env:
+          AMANDA_PUBLIC_URL: https://www.amandacatherine.ca
+          AMANDA_PORTAL_URL: https://ea-payments.vercel.app
+      - name: Upload Amanda evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: amanda-recovery-evidence
+          path: |
+            test-results/
+            playwright-report/amanda-recovery/
+          retention-days: 14
