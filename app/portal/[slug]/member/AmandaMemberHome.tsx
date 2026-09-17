@@ -4,7 +4,6 @@ import { AMANDA_ROLE_DASHBOARDS } from '@/lib/amanda-catherine/config';
 import { resolveAmandaAudience } from '@/lib/amanda-catherine/audience';
 
 const DESTINATIONS: Array<[string[], string]> = [
-  [['amplifi'], 'amplifi'],
   [['update-hub', 'website-update', 'site-update'], 'updates'],
   [['private-deliveries', 'media-delivery', 'recording', 'finished-work'], 'deliveries'],
   [['course', 'training', 'assessment', 'progress', 'certif'], 'learning'],
@@ -41,10 +40,7 @@ export default async function AmandaMemberHome({
   role?: PlatformRole;
 }) {
   const audience = await resolveAmandaAudience({ portalSlug: slug, email, role });
-  const baseItems = AMANDA_ROLE_DASHBOARDS[audience];
-  // Amplifi is a certified chassis-standard module. Surface it explicitly in
-  // Amanda's custom owner/admin shell, which intentionally bypasses PortalShell.
-  const items = audience === 'admin' ? ['amplifi', ...baseItems] : baseItems;
+  const items = AMANDA_ROLE_DASHBOARDS[audience];
   const audienceLabel = label(audience);
 
   return (
@@ -59,13 +55,9 @@ export default async function AmandaMemberHome({
         {items.map((item) => (
           <li key={item} className="ep-module-card">
             <Link href={hrefFor(slug, item)} className="ep-module-card-title">
-              {item === 'amplifi' ? 'Amplifi™' : label(item)}
+              {label(item)}
             </Link>
-            <p className="ep-module-card-note">
-              {item === 'amplifi'
-                ? 'Create and review approved content from your Amanda Catherine workspace. Nothing auto-publishes.'
-                : 'Open this part of your Amanda Catherine path.'}
-            </p>
+            <p className="ep-module-card-note">Open this part of your Amanda Catherine path.</p>
           </li>
         ))}
       </ul>
