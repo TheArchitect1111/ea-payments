@@ -1,0 +1,6 @@
+import type { ReactNode } from 'react';
+import '../../owner/owner.css';
+import Link from 'next/link';
+
+const nav=['Home','Appointments','Clients','Academy','LIFELINE','Documents','Marketing','Insights','Messages','Update Hub','Eva','Settings'];
+export default function AmandaReviewLayout({children}:{children:ReactNode}){return <div className="ac-owner-shell"><aside className="ac-sidebar"><div className="ac-brand"><span>AK</span><div><strong>AesthetiKine</strong><small>Studio Lab</small></div></div><div className="ac-nav-label">OWNER PORTAL · REVIEW</div><nav>{nav.map((label,i)=><a key={label} href={'#review-'+i}>{label}</a>)}</nav><div className="ac-sidebar-note"><span>VISUAL REVIEW</span><p>This renders the real Amanda portal styling with safe preview data. Production authentication remains unchanged.</p></div><div className="ac-owner-card"><div className="ac-avatar">AC</div><div><strong>Amanda Catherine</strong><small>Owner · Studio Director</small></div></div></aside><main className="ac-main">{children}</main></div>}
