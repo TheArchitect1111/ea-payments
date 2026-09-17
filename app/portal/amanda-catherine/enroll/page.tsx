@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { AMANDA_SELF_ENROLLMENT_COURSES } from '@/lib/amanda-catherine/config';
+import { AMANDA_CANONICAL_SELF_ENROLLMENT_COURSES } from '@/lib/amanda-catherine/canonical-courses';
 import AmandaEnrollmentForm from './AmandaEnrollmentForm';
 
 export const metadata = {
@@ -30,7 +30,7 @@ export default async function AmandaEnrollmentPage({
             Your checkout was cancelled. Nothing was charged; you can continue whenever you are ready.
           </div>
         ) : null}
-        <AmandaEnrollmentForm courses={AMANDA_SELF_ENROLLMENT_COURSES.map((course) => ({ ...course, delivery: [...course.delivery] }))} />
+        <AmandaEnrollmentForm courses={AMANDA_CANONICAL_SELF_ENROLLMENT_COURSES.map((course) => ({ ...course, delivery: [...course.delivery] }))} />
         <section className="mt-10 grid gap-4 rounded-3xl border border-[#d8c8b0] bg-white p-6 sm:grid-cols-2 sm:p-8" aria-labelledby="amanda-enrollment-resources">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.2em] text-[#8b5b32]">Course companion</p>
@@ -47,12 +47,7 @@ export default async function AmandaEnrollmentPage({
         </section>
         <div className="mt-10 border-t border-[#d8c8b0] pt-7 text-center">
           <p className="font-semibold">Already enrolled?</p>
-          <Link
-            className="mt-3 inline-flex min-h-12 items-center justify-center rounded-full border-2 border-[#102018] px-6 font-bold text-[#102018]"
-            href="/portal/login?next=%2Fportal%2Famanda-catherine%2Flearning"
-          >
-            Sign in to Courses & Learning
-          </Link>
+          <Link className="mt-3 inline-flex min-h-12 items-center justify-center rounded-full border-2 border-[#102018] px-6 font-bold text-[#102018]" href="/portal/login?next=%2Fportal%2Famanda-catherine%2Flearning">Sign in to Courses & Learning</Link>
         </div>
       </section>
     </main>
