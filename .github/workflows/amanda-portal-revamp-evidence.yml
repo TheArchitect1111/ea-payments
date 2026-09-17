@@ -1,0 +1,38 @@
+name: Amanda Portal Revamp Evidence
+on:
+  workflow_dispatch:
+  push:
+    branches: [revamp/amanda-portal-chassis]
+  pull_request:
+    paths:
+      - 'app/portal/amanda-catherine/owner/**'
+      - 'tests/amanda-recovery/amanda-portal-revamp.spec.ts'
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Run portal revamp evidence
+        env:
+          AMANDA_PORTAL_REVAMP_URL: ${{ vars.AMANDA_PORTAL_REVAMP_URL }}
+        run: |
+          if [ -z "$AMANDA_PORTAL_REVAMP_URL" ]; then
+            echo "AMANDA_PORTAL_REVAMP_URL is required. Evidence cannot silently run against production or localhost."
+            exit 1
+          fi
+          npx playwright test tests/amanda-recovery/amanda-portal-revamp.spec.ts --project="Desktop Chrome" --project="Pixel 7"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: amanda-portal-revamp-evidence
+          path: |
+            test-results/
+            playwright-report/
+          retention-days: 14
