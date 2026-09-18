@@ -46,7 +46,7 @@ export default function AmandaInquiryForm({ email }: { email: string }) {
   }
   return <section id="inquiries" className="ac-inquiry" aria-labelledby="ac-inquiry-title">
     <p className="ac-eyebrow">Your next conversation</p>
-    <h2 id="ac-inquiry-title">Book Amanda to Speak</h2>
+    <h2 id="ac-inquiry-title">{inquiryLabels[intent]}</h2>
     <p>Tell Amanda what you are planning. For advisory, interviews, partnerships or clinical mentorship, choose the conversation that fits.</p>
     <form onSubmit={submit} className="ac-form-grid">
       <label className="ac-form-wide">I’m interested in<select name="intent" value={intent} onChange={e => { setIntent(e.target.value as keyof typeof inquiryLabels); setStatus(''); }}>
