@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import type Stripe from 'stripe';
 import { getStripe } from '@/lib/stripe';
+import { isAmandaKitSession, recordAmandaKitOrder } from '@/lib/amanda-catherine/practitioner-kit-orders';
 import {
   fulfillAmandaCheckout,
   isAmandaCheckoutSession,
@@ -27,6 +28,11 @@ export async function POST(req: NextRequest) {
 
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object as Stripe.Checkout.Session;
+    if (isAmandaKitSession(session)) {
+      const result = await recordAmandaKitOrder(session);
+      if (!result.ok) return new Response(result.error, {status:409});
+      return Response.json({received:true});
+    }
     if (isAmandaCheckoutSession(session)) {
       const result = await fulfillAmandaCheckout(session, 'webhook');
       if (!result.ok) {

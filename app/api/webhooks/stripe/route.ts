@@ -37,6 +37,7 @@ import { provisionConnectAfterCheckout } from '@/lib/connect-provision-hook';
 import { publicPortalLoginUrl } from '@/lib/ctp-portal-host';
 import { CANONICAL_CTP_INTAKE_URL } from '@/lib/platform-urls';
 import { fulfillAmandaCheckout, isAmandaCheckoutSession } from '@/lib/amanda-catherine/payment-fulfillment';
+import { isAmandaKitSession, recordAmandaKitOrder } from '@/lib/amanda-catherine/practitioner-kit-orders';
 import { notifyAmandaOwnerOfEnrollment } from '@/lib/amanda-catherine/owner-payment-notification';
 
 export const dynamic = 'force-dynamic';
@@ -197,6 +198,12 @@ export async function POST(req: NextRequest) {
 
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promise<void> {
   const meta = session.metadata ?? {};
+
+  if (isAmandaKitSession(session)) {
+    const result = await recordAmandaKitOrder(session);
+    if (!result.ok) throw new Error(result.error);
+    return;
+  }
 
   if (isAmandaCheckoutSession(session)) {
     const result = await fulfillAmandaCheckout(session, 'webhook');
