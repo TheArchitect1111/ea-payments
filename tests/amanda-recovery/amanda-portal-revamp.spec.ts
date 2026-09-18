@@ -1,9 +1,20 @@
 import { test, expect } from '@playwright/test';
 
 const base = process.env.AMANDA_PORTAL_REVAMP_URL || process.env.PORTAL_BASE || 'http://127.0.0.1:3000';
+const shareToken = process.env.VERCEL_SHARE_TOKEN;
 const owner = '/portal/amanda-catherine/owner';
 
+async function enterPreview(page: any) {
+  if (!shareToken) return;
+  await page.goto(base + '/?_vercel_share=' + encodeURIComponent(shareToken), { waitUntil: 'domcontentloaded' });
+  await page.waitForTimeout(750);
+}
+
 test.describe('Amanda portal revamp evidence', () => {
+  test.beforeEach(async ({ page }) => {
+    await enterPreview(page);
+  });
+
   test('owner shell is Amanda-specific and coherent', async ({ page }) => {
     const response = await page.goto(base + owner);
     expect(response?.status() || 0).toBeLessThan(500);
