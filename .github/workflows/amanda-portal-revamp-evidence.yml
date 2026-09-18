@@ -8,6 +8,7 @@ on:
       - 'app/portal/amanda-catherine/owner/**'
       - 'app/review/amanda-portal/**'
       - 'tests/amanda-recovery/amanda-portal-revamp.spec.ts'
+      - 'playwright.amanda-portal.config.ts'
 jobs:
   evidence:
     runs-on: ubuntu-latest
@@ -23,7 +24,7 @@ jobs:
       - run: npm ci
       - run: npx playwright install --with-deps chromium
       - name: Run portal revamp evidence
-        run: npx playwright test tests/amanda-recovery/amanda-portal-revamp.spec.ts --project="Desktop Chrome" --project="Pixel 7"
+        run: npx playwright test tests/amanda-recovery/amanda-portal-revamp.spec.ts --config=playwright.amanda-portal.config.ts --project="Desktop Chrome" --project="Pixel 7"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
