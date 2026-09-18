@@ -36,11 +36,14 @@ export default async function AmandaEnrollmentPage({
           courses={AMANDA_SELF_ENROLLMENT_COURSES.map((course) => ({ ...course, delivery: [...course.delivery] }))}
         />
         <section className="mt-10 grid gap-4 rounded-3xl border border-[#d8c8b0] bg-white p-6 sm:grid-cols-2 sm:p-8" aria-labelledby="amanda-enrollment-resources">
-          <div>
+          <div className="flex items-start gap-4">
+            <img className="h-auto w-28 shrink-0 object-contain" src="/amanda-catherine/amanda-catherine-entrepreneurial-artist.webp" alt="The Entrepreneurial Artist by Amanda Catherine book cover"/>
+            <div className="min-w-0">
             <p className="text-xs font-black uppercase tracking-[0.2em] text-[#8b5b32]">Course companion</p>
             <h2 id="amanda-enrollment-resources" className="mt-2 font-serif text-2xl">The Entrepreneurial Artist</h2>
             <p className="mt-2 text-sm leading-6 text-[#5f5146]">Amanda Catherine’s book for turning God-given gifts into impact and income.</p>
             <a className="mt-4 inline-flex min-h-12 items-center justify-center rounded-full bg-[#641f31] px-5 font-bold text-white" href="https://www.amazon.ca/dp/B0F38N76H5" target="_blank" rel="noopener noreferrer">Buy the book on Amazon</a>
+            </div>
           </div>
           <div>
             <p className="text-xs font-black uppercase tracking-[0.2em] text-[#8b5b32]">Flexible financing</p>

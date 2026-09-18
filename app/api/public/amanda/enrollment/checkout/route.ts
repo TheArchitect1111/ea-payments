@@ -38,7 +38,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Choose a course and enter a valid name and email.' }, { status: 400 });
   }
 
-  const origin = canonicalPlatformOrigin();
+  // QA checkout must return to the same isolated preview, never production.
+  const origin = process.env.VERCEL_ENV === 'preview'
+    ? req.nextUrl.origin
+    : canonicalPlatformOrigin();
   const regularPriceCad = offer.compareAtPriceCad ?? offer.priceCad;
   const metadata = {
     portalSlug: 'amanda-catherine',

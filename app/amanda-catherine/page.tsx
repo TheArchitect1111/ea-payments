@@ -3,7 +3,7 @@ import { AMANDA_SELF_ENROLLMENT_COURSES } from '@/lib/amanda-catherine/config';
 import { CreateOffers, PractitionerEssentials, ClientProof, SocialLinks } from './ClientRequestedUpdates';
 
 export const dynamic = 'force-dynamic';
-const approvedImages={hero:'/amanda-catherine/amanda-catherine-founder.webp',about:'/amanda-catherine/amanda-catherine-faith.webp',restore:'/amanda-catherine/amanda-catherine-treatment.webp',learn:'/amanda-catherine/amanda-catherine-training.webp',create:'/amanda-catherine/amanda-catherine-entrepreneurial-artist.webp',impact:'/amanda-catherine/amanda-catherine-impact.webp'} as const;
+const approvedImages={hero:'/amanda-catherine/amanda-black-blouse.jpg',about:'/amanda-catherine/amanda-catherine-faith.webp',restore:'/amanda-catherine/studio-interior.jpg',learn:'/amanda-catherine/studio-treatment.jpg',create:'/amanda-catherine/amanda-catherine-entrepreneurial-artist.webp',impact:'/amanda-catherine/amanda-catherine-impact.webp'} as const;
 function Media({imageUrl,alt}:{imageUrl:string;alt:string}){return <img className="ac-media" src={imageUrl} alt={alt}/>}
 export default async function AmandaCatherinePublicPage(){
  const site=await getAmandaSiteContent(); const jane=site.contact.bookingUrl||'https://aesthetikine.janeapp.com/'; const email=site.contact.email||'Amanda@aesthetikine.com'; const phone=site.contact.phone||'226-581-2003';
