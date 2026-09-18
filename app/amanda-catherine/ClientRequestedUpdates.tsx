@@ -1,5 +1,6 @@
-import { AMANDA_OFFERS, ENTREPRENEURIAL_ARTIST_COURSE } from '@/lib/amanda-catherine/config';
+import { AMANDA_OFFERS } from '@/lib/amanda-catherine/config';
 import { AMANDA_PRACTITIONER_KIT } from '@/lib/amanda-catherine/practitioner-kit-catalog';
+import Image from 'next/image';
 import './client-updates.css';
 
 function Inquiry({email,subject,children}:{email:string;subject:string;children:React.ReactNode}) {
@@ -32,7 +33,7 @@ export function CreateOffers({email}:{email:string}) {
       <h4>Amanda Catherine’s Signature Talks</h4><ul><li>How to Use Your God-Given Gifts for Income &amp; Impact</li><li>How to Start a Business with What You Have</li><li>Monetize Your Gifts</li><li>Faith-Based Entrepreneur Leadership Talks</li><li>Wellness Topics for Female Health</li><li>Turning Setbacks into Strategy</li></ul>
       <h4>Audience outcomes</h4><ul><li>Identify overlooked gifts, experiences and expertise</li><li>Connect purpose to a clear audience and practical need</li><li>Turn a gift into an offer, service, program or platform</li><li>Generate income grounded in service and integrity</li><li>Move from overthinking into focused action</li></ul>
       <p>Previous speaking and media highlights include the Canadian Selah Music Awards. Amanda also serves as Director-at-Large with the Women’s Art Association of Canada.</p>
-      <div className="ac-update-links"><External href="https://www.instagram.com/reel/DaLkeD_T4Tu/">Watch Amanda’s speaking & media reel</External><External href="https://womensartofcanada.ca/about/">Women’s Art Association of Canada</External><External href={ENTREPRENEURIAL_ARTIST_COURSE.amazonBookUrl}>Read The Entrepreneurial Artist</External></div>
+      <div className="ac-update-links"><External href="https://www.instagram.com/reel/DaLkeD_T4Tu/">Watch Amanda’s speaking & media reel</External><External href="https://womensartofcanada.ca/about/">Women’s Art Association of Canada</External></div>
       <div className="ac-actions"><Inquiry email={email} subject="Book Amanda to Speak">Book Amanda to Speak</Inquiry></div>
     </article>
     <article className="ac-update-card" id="lifeline-live">
@@ -58,7 +59,7 @@ export function PractitionerEssentials() {
   return <section className="ac-section ac-alt" id="practitioner-essentials"><div className="ac-wrap ac-grid">
     <img className="ac-kit-art" src={AMANDA_PRACTITIONER_KIT.artwork} alt="Supplied BODY SCULPT Practitioner Starter Kit artwork, 7-piece Colombian Wood Therapy Collection, $499 CAD"/>
     <div><p className="ac-eyebrow">AesthetiKine · Practitioner essentials</p><h2>Tools for your practice.</h2><h3>{AMANDA_PRACTITIONER_KIT.name}</h3><p>{AMANDA_PRACTITIONER_KIT.description}</p><p><strong>${AMANDA_PRACTITIONER_KIT.priceCad} CAD</strong></p><a className="ac-btn ac-btn-fill" href="/amanda-catherine/private/practitioner-kit">Purchase your Practitioner Kit</a>
-    <div className="ac-products"><p className="ac-eyebrow">RIMAN Canada</p><h3>K-Beauty skincare</h3><img className="ac-riman-photo" src="/amanda-catherine/riman-products.jpg" alt="Amanda’s supplied RIMAN skincare products"/><p>Explore Amanda’s Canadian RIMAN storefront.</p><a className="ac-btn" href="https://mall.riman.com/amandacatherine/home?country=CA&lang=en-CA" target="_blank" rel="noopener noreferrer">Shop RIMAN Canada ↗</a><p>If RIMAN opens another market, choose Canada / English in its market selector, or <External href="https://riman.com/amandacatherine/en-CA/home">open the Canadian storefront directly</External>.</p></div></div>
+    <div className="ac-products"><p className="ac-eyebrow">RIMAN Canada</p><h3>K-Beauty skincare</h3><Image className="ac-riman-photo" src="/amanda-catherine/riman-products.jpg" width={502} height={346} alt="Amanda’s supplied RIMAN skincare products"/><p>Explore Amanda’s Canadian RIMAN storefront.</p><a className="ac-btn" href="https://mall.riman.com/amandacatherine/home?country=CA&lang=en-CA" target="_blank" rel="noopener noreferrer">Shop RIMAN Canada ↗</a><p>If RIMAN opens another market, choose Canada / English in its market selector, or <External href="https://riman.com/amandacatherine/en-CA/home">open the Canadian storefront directly</External>.</p></div></div>
   </div></section>;
 }
 
