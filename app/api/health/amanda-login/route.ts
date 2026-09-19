@@ -10,10 +10,14 @@ import { AMANDA_COURSE_RESOURCES } from '@/lib/amanda-catherine/course-resources
 
 export const dynamic = 'force-dynamic';
 
-async function authenticatedResponse(origin: string, path: string, token: string) {
+function internalCookies(token: string, previewJwt?: string) {
+  return `${EA_PORTAL_COOKIE}=${token}${previewJwt ? `; _vercel_jwt=${previewJwt}` : ''}`;
+}
+
+async function authenticatedResponse(origin: string, path: string, token: string, previewJwt?: string) {
   return fetch(`${origin}${path}`, {
     method: 'GET',
-    headers: { cookie: `${EA_PORTAL_COOKIE}=${token}` },
+    headers: { cookie: internalCookies(token, previewJwt) },
     redirect: 'manual',
     cache: 'no-store',
   });
@@ -43,6 +47,7 @@ const RECOVERED_VIDEO_CANDIDATES = [
 ] as const;
 
 export async function GET(req: NextRequest) {
+  const previewJwt = req.cookies.get('_vercel_jwt')?.value;
   const checks = {
     clientRecord: false,
     canonicalIdentity: false,
@@ -100,17 +105,17 @@ export async function GET(req: NextRequest) {
 
     if (token && checks.canonicalIdentity && checks.canonicalSlug) {
       const [ownerResponse, portalHomeResponse, memberResponse, ownerV2Response, advisoryResponse, speakingResponse, lifelineResponse, statusResponse] = await Promise.all([
-        authenticatedResponse(req.nextUrl.origin, AMANDA_OWNER_PATH, token),
-        authenticatedResponse(req.nextUrl.origin, `/portal/${AMANDA_PORTAL_SLUG}`, token),
-        authenticatedResponse(req.nextUrl.origin, `/portal/${AMANDA_PORTAL_SLUG}/member`, token),
-        authenticatedResponse(req.nextUrl.origin, `/portal/${AMANDA_PORTAL_SLUG}/owner`, token),
-        authenticatedResponse(req.nextUrl.origin, `/portal/${AMANDA_PORTAL_SLUG}/owner/advisory`, token),
-        authenticatedResponse(req.nextUrl.origin, `/portal/${AMANDA_PORTAL_SLUG}/owner/speaking`, token),
-        authenticatedResponse(req.nextUrl.origin, `/portal/${AMANDA_PORTAL_SLUG}/owner/lifeline`, token),
+        authenticatedResponse(req.nextUrl.origin, AMANDA_OWNER_PATH, token, previewJwt),
+        authenticatedResponse(req.nextUrl.origin, `/portal/${AMANDA_PORTAL_SLUG}`, token, previewJwt),
+        authenticatedResponse(req.nextUrl.origin, `/portal/${AMANDA_PORTAL_SLUG}/member`, token, previewJwt),
+        authenticatedResponse(req.nextUrl.origin, `/portal/${AMANDA_PORTAL_SLUG}/owner`, token, previewJwt),
+        authenticatedResponse(req.nextUrl.origin, `/portal/${AMANDA_PORTAL_SLUG}/owner/advisory`, token, previewJwt),
+        authenticatedResponse(req.nextUrl.origin, `/portal/${AMANDA_PORTAL_SLUG}/owner/speaking`, token, previewJwt),
+        authenticatedResponse(req.nextUrl.origin, `/portal/${AMANDA_PORTAL_SLUG}/owner/lifeline`, token, previewJwt),
         fetch(`${req.nextUrl.origin}/api/portal/forms/status`, {
           method: 'POST',
           headers: {
-            cookie: `${EA_PORTAL_COOKIE}=${token}`,
+            cookie: internalCookies(token, previewJwt),
             'content-type': 'application/json',
           },
           body: JSON.stringify({ submissionId: 'run4-health-nonexistent', status: 'reviewed' }),
