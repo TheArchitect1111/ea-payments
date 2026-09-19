@@ -15,3 +15,5 @@ Payment finding: current preview checkout returns 503 because STRIPE_SECRET_KEY 
 Verification: changed-file lint; existing checkout and learning-handoff checks; mocked route behavior including missing credentials and Stripe parameters; Vercel preview build; rendered page/image, booking action and enrollment resource inspection; compare protected JSX and owner Portal V2 against baseline. Real Stripe checkout requires an authorized preview credential and cannot be claimed verified without it.
 
 Rollback: discard this isolated branch and preview deployment. Never promote or change production aliases/settings. Continue corrective work if rendered scope, images or invariants fail.
+
+Production promotion: Robert authorized this exact approved preview for AmandaCatherine.ca on 2026-09-19. The production source baseline is merge commit `729c4f3b854a7716526c98ea219f95eae74cf5ea`; rollback branches preserve both the prior `ea-payments` source and the legacy `amanda-catherine` deployment source. This authorization supersedes the earlier preview-only deployment prohibition while preserving every design, copy, financing-location and frozen Portal V2 constraint.
