@@ -129,7 +129,7 @@ async function listFromAirtable(
   if (kind) {
     formula = `AND(${formula}, {Kind} = '${escapeAirtableString(kind)}')`;
   }
-  const rows = await platformQuery(PORTAL_FORM_SUBMISSIONS_TABLE, { filterByFormula: formula });
+  const rows = await platformQuery(PORTAL_FORM_SUBMISSIONS_TABLE, formula);
   return rows.map(mapRow).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }
 
@@ -210,7 +210,7 @@ export async function updatePortalFormSubmissionStatus(input: {
 
   if (platformStoreConfigured()) {
     const formula = `AND({Submission ID} = '${escapeAirtableString(input.submissionId)}', {Portal Slug} = '${escapeAirtableString(slug)}')`;
-    const rows = await platformQuery(PORTAL_FORM_SUBMISSIONS_TABLE, { filterByFormula: formula });
+    const rows = await platformQuery(PORTAL_FORM_SUBMISSIONS_TABLE, formula);
     const existing = rows[0] ? mapRow(rows[0]) : null;
     if (!existing) return null;
     const next = { ...existing, status: input.status, updatedAt };
