@@ -9,14 +9,17 @@ type Props = {
   kind: 'intake' | 'application';
   title: string;
   submitLabel: string;
+  initialFormId?: string;
+  program?: string;
 };
 
-export default function PortalFormClient({ slug, kind, title, submitLabel }: Props) {
+export default function PortalFormClient({ slug, kind, title, submitLabel, initialFormId = '', program = '' }: Props) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [notes, setNotes] = useState('');
-  const [formId, setFormId] = useState('');
+  const [formId, setFormId] = useState(initialFormId);
+  const [website, setWebsite] = useState('');
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [uploads, setUploads] = useState<Record<string, CtpAssetManifestEntry>>({});
   const [uploading, setUploading] = useState('');
@@ -70,9 +73,11 @@ export default function PortalFormClient({ slug, kind, title, submitLabel }: Pro
           payload: {
             formId: selectedForm?.id,
             audience: selectedForm?.audience,
+            ...(selectedForm?.id === 'partner-vendor-application' && program === 'lifeline' ? { program } : {}),
             answers,
             assetUploads: uploads,
             onboardingStatus: 'confirmation-pending',
+            website,
           },
         }),
       });
@@ -162,6 +167,10 @@ export default function PortalFormClient({ slug, kind, title, submitLabel }: Pro
           {uploads[assetType] ? <small>{uploads[assetType].fileName} uploaded</small> : null}
         </label>
       ))}
+      <label aria-hidden="true" style={{ position: 'absolute', left: '-10000px', width: 1, height: 1, overflow: 'hidden' }}>
+        <span>Website</span>
+        <input tabIndex={-1} autoComplete="off" value={website} onChange={(e) => setWebsite(e.target.value)} />
+      </label>
       <label className="ep-form-field">
         <span>Email</span>
         <input
