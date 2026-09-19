@@ -15,6 +15,8 @@ assert.ok(submit.includes('if (!uploads?.[upload])'));
 assert.ok(store.includes('if (input.requireDurable)'));
 assert.ok(store.includes("throw new Error('Durable application storage is unavailable.')"));
 assert.ok(store.includes("throw new Error('Portal form submission could not be saved to durable storage.')"));
+assert.equal((store.match(/platformQuery\(PORTAL_FORM_SUBMISSIONS_TABLE, formula\)/g) || []).length, 2);
+assert.ok(!store.includes('platformQuery(PORTAL_FORM_SUBMISSIONS_TABLE, { filterByFormula: formula })'));
 assert.ok(assets.includes('if (await persistCtpAssetToStudio(entry.id, organizationId))'));
 for (const check of ['authenticatedOwnerV2', 'ownerV2ApplicationQueues', 'authenticatedApplicationStatusApi']) {
   assert.ok(health.includes(check), `missing authenticated Run 4 health check: ${check}`);
