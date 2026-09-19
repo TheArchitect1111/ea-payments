@@ -91,6 +91,7 @@ const PUBLIC_PORTAL_AUTH_PATHS = new Set([
 
 const PUBLIC_PORTAL_EXPERIENCE_PATHS = new Set([
   '/portal/amanda-catherine/enroll',
+  '/portal/amanda-catherine/apply',
 ]);
 
 function isPublicPortalAuthPath(pathname: string): boolean {
