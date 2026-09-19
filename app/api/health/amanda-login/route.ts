@@ -52,6 +52,9 @@ export async function GET(req: NextRequest) {
     authenticatedOwnerRoute: false,
     authenticatedPortalHome: false,
     authenticatedMemberRoute: false,
+    authenticatedOwnerV2: false,
+    ownerV2ApplicationQueues: false,
+    authenticatedApplicationStatusApi: false,
     premiumOwnerDashboard: false,
     allMenuRoutes: false,
     allCourseResourceRoutes: false,
@@ -96,14 +99,35 @@ export async function GET(req: NextRequest) {
     checks.canonicalSlug = session?.slug === AMANDA_PORTAL_SLUG;
 
     if (token && checks.canonicalIdentity && checks.canonicalSlug) {
-      const [ownerResponse, portalHomeResponse, memberResponse] = await Promise.all([
+      const [ownerResponse, portalHomeResponse, memberResponse, ownerV2Response, advisoryResponse, speakingResponse, lifelineResponse, statusResponse] = await Promise.all([
         authenticatedResponse(req.nextUrl.origin, AMANDA_OWNER_PATH, token),
         authenticatedResponse(req.nextUrl.origin, `/portal/${AMANDA_PORTAL_SLUG}`, token),
         authenticatedResponse(req.nextUrl.origin, `/portal/${AMANDA_PORTAL_SLUG}/member`, token),
+        authenticatedResponse(req.nextUrl.origin, `/portal/${AMANDA_PORTAL_SLUG}/owner`, token),
+        authenticatedResponse(req.nextUrl.origin, `/portal/${AMANDA_PORTAL_SLUG}/owner/advisory`, token),
+        authenticatedResponse(req.nextUrl.origin, `/portal/${AMANDA_PORTAL_SLUG}/owner/speaking`, token),
+        authenticatedResponse(req.nextUrl.origin, `/portal/${AMANDA_PORTAL_SLUG}/owner/lifeline`, token),
+        fetch(`${req.nextUrl.origin}/api/portal/forms/status`, {
+          method: 'POST',
+          headers: {
+            cookie: `${EA_PORTAL_COOKIE}=${token}`,
+            'content-type': 'application/json',
+          },
+          body: JSON.stringify({ submissionId: 'run4-health-nonexistent', status: 'reviewed' }),
+          redirect: 'manual',
+          cache: 'no-store',
+        }),
       ]);
       checks.authenticatedOwnerRoute = ownerResponse.status === 200;
       checks.authenticatedPortalHome = portalHomeResponse.status === 200;
       checks.authenticatedMemberRoute = memberResponse.status === 200;
+      checks.authenticatedOwnerV2 = ownerV2Response.status === 200;
+      checks.authenticatedApplicationStatusApi = statusResponse.status === 404;
+
+      const queueResponses = [advisoryResponse, speakingResponse, lifelineResponse];
+      const queueBodies = await Promise.all(queueResponses.map((response) => response.text()));
+      checks.ownerV2ApplicationQueues = queueResponses.every((response) => response.status === 200)
+        && queueBodies.every((body) => body.includes('APPLICATION QUEUE'));
 
       if (portalHomeResponse.status === 200) {
         const body = await portalHomeResponse.text();
