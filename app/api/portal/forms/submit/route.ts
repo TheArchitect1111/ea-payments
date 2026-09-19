@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createPortalFormSubmission } from '@/lib/portal-forms/store';
 import type { PortalFormKind } from '@/lib/portal-forms/types';
-import { emitPulseEvent } from '@/lib/pulse-bus';
 import { notifyPortal } from '@/lib/portal-notify';
 import { syntheticOrgId } from '@/lib/platform-store';
 import { finalizeCtpAssetManifest, parseAssetUploads } from '@/lib/ctp-asset-store';
 import { AMANDA_PORTAL_FORMS } from '@/lib/amanda-catherine/config';
 import { checkRateLimit } from '@/lib/ai/rate-limit';
+import { amandaApplicationRoute } from '@/lib/amanda-catherine/application-routing';
 
 export const dynamic = 'force-dynamic';
 
@@ -109,7 +109,9 @@ export async function POST(req: NextRequest) {
     type: 'portal.form.submitted' as const,
     title: kind === 'application' ? 'Application submitted' : 'Intake submitted',
     detail: `${name} (${email})`,
-    href: `/portal/${slug}/${kind === 'application' ? 'applications' : 'intake'}`,
+    href: slug === 'amanda-catherine' && kind === 'application'
+      ? amandaApplicationRoute(payload?.formId, payload?.program).queueHref
+      : `/portal/${slug}/${kind === 'application' ? 'applications' : 'intake'}`,
     tenantId: syntheticOrgId(slug),
     objectId: submission.id,
     metadata: {
@@ -125,12 +127,14 @@ export async function POST(req: NextRequest) {
     },
   };
 
-  await emitPulseEvent(pulseEvent);
-  try {
-    await notifyPortal(pulseEvent);
-  } catch {
-    // notification channel is best-effort
-  }
+  await notifyPortal(pulseEvent);
 
-  return NextResponse.json({ ok: true, submission });
+  const route = slug === 'amanda-catherine' && kind === 'application'
+    ? amandaApplicationRoute(payload?.formId, payload?.program)
+    : null;
+  return NextResponse.json({
+    ok: true,
+    submission,
+    confirmation: route ? { title: route.confirmation, nextStep: route.reviewStep } : undefined,
+  });
 }
