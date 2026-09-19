@@ -39,6 +39,13 @@ function validateAmandaApplication(payload: Record<string, unknown> | undefined)
     const value = answers[field];
     if (typeof value !== 'string' || !value.trim() || value.length > 2_000) return `Complete ${field.replaceAll('-', ' ')}.`;
   }
+  const uploads = parseAssetUploads(payload.assetUploads);
+  if (uploads && Object.keys(uploads).some((key) => !form.uploads.includes(key as never))) {
+    return 'Application contains unsupported uploads.';
+  }
+  for (const upload of form.uploads) {
+    if (!uploads?.[upload]) return `Upload ${upload.replaceAll('-', ' ')}.`;
+  }
   return null;
 }
 
@@ -92,17 +99,30 @@ export async function POST(req: NextRequest) {
       stagedUploads,
       syntheticOrgId(slug),
     );
+    if (slug === 'amanda-catherine' && kind === 'application') {
+      const uploadError = validateAmandaApplication(payload);
+      if (uploadError) return NextResponse.json({ error: uploadError }, { status: 400 });
+    }
   }
 
-  const submission = await createPortalFormSubmission({
-    portalSlug: slug,
-    kind,
-    name,
-    email,
-    phone: body.phone,
-    notes: body.notes,
-    payload,
-  });
+  let submission;
+  try {
+    submission = await createPortalFormSubmission({
+      portalSlug: slug,
+      kind,
+      name,
+      email,
+      phone: body.phone,
+      notes: body.notes,
+      payload,
+      requireDurable: slug === 'amanda-catherine' && kind === 'application',
+    });
+  } catch {
+    return NextResponse.json(
+      { error: 'Application storage is temporarily unavailable. Please try again.' },
+      { status: 503 },
+    );
+  }
 
   const pulseEvent = {
     product: 'ea-platform' as const,
@@ -136,5 +156,6 @@ export async function POST(req: NextRequest) {
     ok: true,
     submission,
     confirmation: route ? { title: route.confirmation, nextStep: route.reviewStep } : undefined,
+    storage: route ? 'durable' : undefined,
   });
 }
