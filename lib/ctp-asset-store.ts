@@ -228,10 +228,9 @@ export async function finalizeCtpAssetManifest(
   const finalized: CtpAssetManifest = {};
   for (const [assetType, entry] of Object.entries(uploads)) {
     if (!entry?.id) continue;
-    await persistCtpAssetToStudio(entry.id, organizationId);
-    finalized[assetType] = entry;
+    if (await persistCtpAssetToStudio(entry.id, organizationId)) finalized[assetType] = entry;
   }
-  return finalized;
+  return Object.keys(finalized).length ? finalized : undefined;
 }
 
 export function parseAssetUploads(value: unknown): CtpAssetManifest | undefined {
