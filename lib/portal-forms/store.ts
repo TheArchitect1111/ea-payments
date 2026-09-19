@@ -116,7 +116,8 @@ async function upsertToAirtable(submission: PortalFormSubmission): Promise<Porta
     submission.id,
     submissionToFields(submission),
   );
-  return record ? mapRow(record) : submission;
+  if (!record) throw new Error('Portal form submission could not be saved to durable storage.');
+  return mapRow(record);
 }
 
 async function listFromAirtable(
@@ -140,6 +141,7 @@ export type CreatePortalFormSubmissionInput = {
   phone?: string;
   notes?: string;
   payload?: Record<string, unknown>;
+  requireDurable?: boolean;
 };
 
 export async function createPortalFormSubmission(
@@ -162,6 +164,10 @@ export async function createPortalFormSubmission(
 
   if (platformStoreConfigured()) {
     return upsertToAirtable(submission);
+  }
+
+  if (input.requireDurable) {
+    throw new Error('Durable application storage is unavailable.');
   }
 
   const rows = await readMemoryStore();
