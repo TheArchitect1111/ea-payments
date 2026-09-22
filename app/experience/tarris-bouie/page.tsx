@@ -1,20 +1,15 @@
 import Link from 'next/link';
-import '../../portal/tb3-run12b/tb3-run15.css';
+import './tb3-website.css';
 
-export default function TarrisBouieExperience(){
- return <main style={{minHeight:'100vh',background:'#050505',color:'#fff',fontFamily:'Arial, sans-serif'}}>
-  <section style={{maxWidth:1100,margin:'0 auto',padding:'64px 24px 24px',textAlign:'center'}}>
-   <p style={{fontSize:12,letterSpacing:'.32em',fontWeight:800,color:'#aaa'}}>PLAYER ONE • TARRIS BOUIE</p>
-   <h1 style={{fontSize:'clamp(64px,14vw,160px)',lineHeight:.82,margin:'24px 0 20px',fontWeight:950,fontStyle:'italic',letterSpacing:'-.09em'}}>TB3</h1>
-   <p style={{fontSize:'clamp(28px,5vw,58px)',fontWeight:900,letterSpacing:'-.04em',margin:'0 0 18px'}}>BUILT FOR MORE.</p>
-   <p style={{maxWidth:650,margin:'0 auto 34px',color:'#b8b8b8',fontSize:17,lineHeight:1.65}}>The official digital home for Tarris Bouie. Athlete. Story. Brand. Community. Future.</p>
-   <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap'}}>
-    <Link href="/portal/login?next=/portal/tarris-bouie" style={{background:'#fff',color:'#050505',padding:'15px 26px',borderRadius:999,textDecoration:'none',fontWeight:900,fontSize:12,letterSpacing:'.12em'}}>ENTER TB3 HQ</Link>
-    <Link href="/portal/tarris-bouie/store" style={{border:'1px solid #444',color:'#fff',padding:'15px 26px',borderRadius:999,textDecoration:'none',fontWeight:800,fontSize:12,letterSpacing:'.12em'}}>TB3 STORE</Link>
-   </div>
-  </section>
-  <section style={{maxWidth:1000,margin:'28px auto 0',padding:'0 20px 70px'}}>
-   <img src="/benchmarks/tb3-hq-approved-reference.jpg" alt="TB3 HQ" style={{display:'block',width:'100%',height:'auto',borderRadius:22,border:'1px solid #222',boxShadow:'0 28px 90px rgba(0,0,0,.65)'}}/>
-  </section>
- </main>;
-}
+const nav=['ATHLETE','STORY','BRAND','NIL','COMMUNITY'];
+const pillars=[['ATHLETE','Built on preparation, discipline and performance.'],['STORY','The journey behind the jersey and the work behind every opportunity.'],['BRAND','TB3 is an athlete brand built for impact beyond the game.'],['NIL','Partnerships aligned with performance, character and long-term value.'],['COMMUNITY','Connection, service and the people who make the journey possible.']];
+export default function TarrisBouieExperience(){return <main className="tb3-site">
+<header className="tb3-nav"><Link className="tb3-logo" href="#top">TB<span>3</span></Link><nav>{nav.map(x=><a key={x} href={`#${x.toLowerCase()}`}>{x}</a>)}</nav><Link className="tb3-hq-button" href="/portal/login?next=/portal/tarris-bouie">PLAYER ONE HQ</Link></header>
+<section id="top" className="tb3-hero"><div className="tb3-hero-copy"><p className="tb3-kicker">TARRIS BOUIE • TB3</p><h1>TARRIS<br/><em>BOUIE</em></h1><p className="tb3-deck">ATHLETE. STORY. BRAND. COMMUNITY. FUTURE.</p><div className="tb3-actions"><a href="#athlete">EXPLORE TB3</a><Link href="/portal/login?next=/portal/tarris-bouie">ENTER PLAYER ONE HQ</Link></div></div><div className="tb3-hero-graphic"><span>3</span><b>TB</b></div></section>
+<section className="tb3-statement"><p>PLAYER ONE</p><h2>BUILT FOR<br/><span>MORE.</span></h2><div>Performance is only the beginning. TB3 connects the athlete, the story, the brand and the future in one evolving platform.</div></section>
+<section className="tb3-pillars">{pillars.map(([title,body],i)=><article id={title.toLowerCase()} key={title} className="tb3-pillar"><div className="tb3-index">0{i+1}</div><div><p>TB3 / {title}</p><h2>{title}</h2><p className="tb3-copy">{body}</p></div></article>)}</section>
+<section className="tb3-media"><div><p className="tb3-kicker">MEDIA / HIGHLIGHTS</p><h2>THE WORK<br/>IN <span>MOTION.</span></h2><p>Highlights, features and moments from the TB3 journey.</p></div><div className="tb3-video"><span>▶</span><p>FEATURED VIDEO</p></div></section>
+<section className="tb3-future"><p className="tb3-kicker">ENTERPRISE / FUTURE</p><h2>THE GAME<br/>IS <span>ONE CHAPTER.</span></h2><p>TB3 is designed to grow with Tarris, from athlete identity and NIL partnerships to enterprise, community and opportunities beyond competition.</p></section>
+<section className="tb3-player-one"><div><p className="tb3-kicker">PRIVATE ATHLETE EXPERIENCE</p><h2>PLAYER ONE <span>HQ</span></h2><p>The command center for the journey: academics, training, NIL, opportunities, media, calendar, documents, community and Eva.</p></div><Link href="/portal/login?next=/portal/tarris-bouie">ENTER TB3 HQ →</Link></section>
+<section className="tb3-store"><p className="tb3-kicker">TB3 STORE</p><h2>WEAR THE<br/><span>STANDARD.</span></h2><Link href="/portal/tarris-bouie/store">EXPLORE TB3 STORE →</Link></section>
+<footer><div className="tb3-logo">TB<span>3</span></div><p>TARRIS BOUIE • PLAYER ONE</p></footer></main>}
