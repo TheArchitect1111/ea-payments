@@ -9,20 +9,24 @@ type Props = {
   kind: 'intake' | 'application';
   title: string;
   submitLabel: string;
+  initialFormId?: string;
+  program?: string;
 };
 
-export default function PortalFormClient({ slug, kind, title, submitLabel }: Props) {
+export default function PortalFormClient({ slug, kind, title, submitLabel, initialFormId = '', program = '' }: Props) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [notes, setNotes] = useState('');
-  const [formId, setFormId] = useState('');
+  const [formId, setFormId] = useState(initialFormId);
+  const [website, setWebsite] = useState('');
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [uploads, setUploads] = useState<Record<string, CtpAssetManifestEntry>>({});
   const [uploading, setUploading] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [done, setDone] = useState(false);
+  const [confirmation, setConfirmation] = useState<{ title: string; nextStep: string } | null>(null);
   const isAmanda = slug.toLowerCase().startsWith('amanda-catherine');
   const formOptions = useMemo(
     () => AMANDA_PORTAL_FORMS.filter((form) => form.kind === kind),
@@ -70,17 +74,20 @@ export default function PortalFormClient({ slug, kind, title, submitLabel }: Pro
           payload: {
             formId: selectedForm?.id,
             audience: selectedForm?.audience,
+            ...(selectedForm?.id === 'partner-vendor-application' && program === 'lifeline' ? { program } : {}),
             answers,
             assetUploads: uploads,
             onboardingStatus: 'confirmation-pending',
+            website,
           },
         }),
       });
-      const data = (await res.json()) as { ok?: boolean; error?: string };
+      const data = (await res.json()) as { ok?: boolean; error?: string; confirmation?: { title: string; nextStep: string } };
       if (!res.ok || !data.ok) {
         setError(data.error || 'Could not submit — try again.');
         return;
       }
+      setConfirmation(data.confirmation || null);
       setDone(true);
     } catch {
       setError('Network error — try again.');
@@ -92,10 +99,11 @@ export default function PortalFormClient({ slug, kind, title, submitLabel }: Pro
   if (done) {
     return (
       <div className="ep-module-card">
-        <p className="ep-module-card-title">{title} received</p>
+        <p className="ep-module-card-title">{confirmation?.title || `${title} received`}</p>
         <p className="ep-module-card-note">
-          Thank you — your team will follow up at {email || 'the email you provided'}.
+          Thank you. {confirmation?.nextStep || `Your team will follow up at ${email || 'the email you provided'}.`}
         </p>
+        <p className="ep-module-card-note">Follow-up will be sent to {email || 'the email you provided'}.</p>
       </div>
     );
   }
@@ -162,6 +170,10 @@ export default function PortalFormClient({ slug, kind, title, submitLabel }: Pro
           {uploads[assetType] ? <small>{uploads[assetType].fileName} uploaded</small> : null}
         </label>
       ))}
+      <label aria-hidden="true" style={{ position: 'absolute', left: '-10000px', width: 1, height: 1, overflow: 'hidden' }}>
+        <span>Website</span>
+        <input tabIndex={-1} autoComplete="off" value={website} onChange={(e) => setWebsite(e.target.value)} />
+      </label>
       <label className="ep-form-field">
         <span>Email</span>
         <input
