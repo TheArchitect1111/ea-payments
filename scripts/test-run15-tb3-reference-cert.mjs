@@ -8,12 +8,15 @@ const reference = readFileSync(new URL('../public/benchmarks/tb3-hq-approved-ref
 const digest = createHash('sha256').update(reference).digest('hex');
 
 assert.equal(digest, 'bf63b97db7841abfb7c6c638d87767957828bf34d171eb3e1add7207be0d5479', 'approved visual baseline changed');
-assert.match(page, /width="1463" height="1536"/, 'approved reference dimensions');
+assert.match(page, /width="1463"\s+height="1536"/, 'approved reference dimensions');
+assert.match(page, /tb3-reference-image/, 'approved reference must be the rendered visual layer');
+assert.doesNotMatch(page, /tb3-mobile/, 'alternate mobile reconstruction must not replace the approved reference');
+assert.doesNotMatch(css, /\.tb3-reference\{display:none\}/, 'approved reference must remain visible on mobile');
+assert.doesNotMatch(css, /\.tb3-mobile/, 'alternate mobile styling must not return');
 for (const region of ['home', 'journey', 'academics', 'training', 'nil-brand', 'opportunities', 'media', 'calendar', 'documents', 'community', 'messages', 'eva', 'settings', 'store']) {
-  assert.match(page, new RegExp(`['\"]${region}['\"]`), `missing ${region} module`);
+  assert.match(page, new RegExp(`['"]${region}['"]`), `missing ${region} module`);
 }
-assert.match(css, /@media\(max-width:899px\)/, 'mobile reconstruction breakpoint');
-assert.match(css, /\.tb3-reference\{display:none\}/, 'desktop reference hidden on mobile');
-assert.match(css, /\.tb3-mobile\{display:block/, 'functional mobile reconstruction enabled');
+assert.match(css, /\.tb3-reference-image\{display:block;width:100%;height:auto\}/, 'approved composition must scale proportionally');
+assert.match(css, /@media\(max-width:899px\)/, 'mobile hotspot sizing contract');
 assert.match(css, /\.tb3-hotspot:focus-visible/, 'keyboard focus treatment');
-console.log('PASS Run 15 TB3 approved-reference fidelity and responsive functionality contract');
+console.log('PASS Run 15 TB3 approved-reference fidelity across desktop and mobile');
