@@ -93,6 +93,10 @@ const PUBLIC_PORTAL_EXPERIENCE_PATHS = new Set([
   '/portal/amanda-catherine/enroll',
 ]);
 
+const PREVIEW_FACTORY_ACCEPTANCE_PATHS = new Set([
+  '/portal/tb3-run12b',
+]);
+
 function isPublicPortalAuthPath(pathname: string): boolean {
   return [...PUBLIC_PORTAL_AUTH_PATHS].some(
     (path) => pathname === path || pathname.startsWith(`${path}/`),
@@ -103,6 +107,10 @@ function isPublicPortalExperiencePath(pathname: string): boolean {
   return [...PUBLIC_PORTAL_EXPERIENCE_PATHS].some(
     (path) => pathname === path || pathname.startsWith(`${path}/`),
   );
+}
+
+function isPreviewFactoryAcceptancePath(pathname: string): boolean {
+  return process.env.VERCEL_ENV === 'preview' && PREVIEW_FACTORY_ACCEPTANCE_PATHS.has(pathname);
 }
 
 const PUBLIC_ADMIN_PATHS = new Set([
@@ -181,7 +189,11 @@ export async function middleware(request: NextRequest) {
 
 
   if (pathname.startsWith('/portal')) {
-    if (isPublicPortalAuthPath(pathname) || isPublicPortalExperiencePath(pathname)) {
+    if (
+      isPublicPortalAuthPath(pathname)
+      || isPublicPortalExperiencePath(pathname)
+      || isPreviewFactoryAcceptancePath(pathname)
+    ) {
       const requestHeaders = new Headers(request.headers);
       requestHeaders.set('x-pathname', pathname);
       return NextResponse.next({ request: { headers: requestHeaders } });
