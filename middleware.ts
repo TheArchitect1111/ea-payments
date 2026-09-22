@@ -111,7 +111,9 @@ function isPublicPortalExperiencePath(pathname: string): boolean {
 }
 
 function isPreviewFactoryAcceptancePath(pathname: string): boolean {
-  return process.env.VERCEL_ENV === 'preview' && [...PREVIEW_FACTORY_ACCEPTANCE_PATHS].some(\n    (path) => pathname === path || pathname.startsWith(\`\${path}/\`),\n  );
+  return process.env.VERCEL_ENV === 'preview' && [...PREVIEW_FACTORY_ACCEPTANCE_PATHS].some(
+    (path) => pathname === path || pathname.startsWith(`${path}/`),
+  );
 }
 
 const PUBLIC_ADMIN_PATHS = new Set([
