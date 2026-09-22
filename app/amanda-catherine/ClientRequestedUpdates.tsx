@@ -3,14 +3,11 @@ import { AMANDA_PRACTITIONER_KIT } from '@/lib/amanda-catherine/practitioner-kit
 import Image from 'next/image';
 import './client-updates.css';
 
-function Inquiry({email,subject,children}:{email:string;subject:string;children:React.ReactNode}) {
-  return <a className="ac-btn" href={`mailto:${email}?subject=${encodeURIComponent(subject)}`}>{children}</a>;
-}
 function External({href,children}:{href:string;children:React.ReactNode}) {
   return <a href={href} target="_blank" rel="noopener noreferrer">{children} ↗</a>;
 }
 
-export function CreateOffers({email}:{email:string}) {
+export function CreateOffers({email: _email}:{email:string}) {
   return <div className="ac-wrap ac-update-offers">
     <article className="ac-update-card" id="founder-advisory">
       <p className="ac-eyebrow">Direction · Positioning · Practical action</p><h3>Founder Advisory</h3>
@@ -22,7 +19,7 @@ export function CreateOffers({email}:{email:string}) {
       <h4>Established strategy packages</h4>
       {AMANDA_OFFERS.filter(offer=>offer.audience==='strategy-client').map(offer=><p key={offer.id}><strong>{offer.name}</strong> · ${offer.priceCad.toLocaleString()} CAD · {'durationMinutes' in offer ? `${offer.durationMinutes} minutes` : 'durationDays' in offer ? `${offer.durationDays} days` : ''}</p>)}
       <p>Ask Amanda which advisory pathway fits your goals and what your engagement will include.</p>
-      <Inquiry email={email} subject="Founder Advisory application">Apply for Founder Advisory</Inquiry>
+      <a className="ac-btn" href="/portal/amanda-catherine/apply?form=founder-advisory">Apply for Founder Advisory</a>
     </article>
     <article className="ac-update-card" id="speaking">
       <p className="ac-eyebrow">Keynotes · Panels · Workshops</p><h3>Speaking</h3>
@@ -34,7 +31,7 @@ export function CreateOffers({email}:{email:string}) {
       <h4>Audience outcomes</h4><ul><li>Identify overlooked gifts, experiences and expertise</li><li>Connect purpose to a clear audience and practical need</li><li>Turn a gift into an offer, service, program or platform</li><li>Generate income grounded in service and integrity</li><li>Move from overthinking into focused action</li></ul>
       <p>Previous speaking and media highlights include the Canadian Selah Music Awards. Amanda also serves as Director-at-Large with the Women’s Art Association of Canada.</p>
       <div className="ac-update-links"><External href="https://www.instagram.com/reel/DaLkeD_T4Tu/">Watch Amanda’s speaking & media reel</External><External href="https://womensartofcanada.ca/about/">Women’s Art Association of Canada</External></div>
-      <div className="ac-actions"><Inquiry email={email} subject="Book Amanda to Speak">Book Amanda to Speak</Inquiry></div>
+      <div className="ac-actions"><a className="ac-btn" href="/portal/amanda-catherine/apply?form=speaking-media">Book Amanda to Speak</a></div>
     </article>
     <article className="ac-update-card" id="lifeline-live">
       <p className="ac-eyebrow">Watch · Share your story · Partner</p><h3>LIFELINE LIVE</h3>
@@ -42,7 +39,7 @@ export function CreateOffers({email}:{email:string}) {
       <h4>Latest episodes</h4><p>Explore the newest conversations on Empower Art Collective’s YouTube channel, or begin with the episode Amanda selected.</p>
       <div className="ac-update-links"><External href="https://youtube.com/@empowerartcollective/videos">Watch the latest episodes</External><External href="https://youtu.be/CrMLhxbpjK0">Watch Amanda’s selected episode</External><External href="https://drive.google.com/file/d/1uDv2n2-2QUqNmb_KSyO8nKCSg51Q8Dcv/view">Guest application</External><External href="/amanda-catherine/lifeline-partnership-kit.pdf">Partnership & sponsorship kit</External></div>
       <h4>Participate</h4><p>Apply to share your story. For partnerships, sponsorships or an interview inquiry, tell Amanda about your work, audience and proposed collaboration.</p>
-      <div className="ac-actions"><Inquiry email={email} subject="LIFELINE media ministry interview booking">Book a LIFELINE interview</Inquiry><Inquiry email={email} subject="LIFELINE LIVE partnership or sponsorship">Explore a partnership</Inquiry></div>
+      <div className="ac-actions"><a className="ac-btn" href="/portal/amanda-catherine/apply?form=lifeline-media-guest">Book a LIFELINE interview</a><a className="ac-btn" href="/portal/amanda-catherine/apply?form=partner-vendor-application&amp;program=lifeline">Explore a partnership</a></div>
     </article>
     <article className="ac-update-card" id="empower-art">
       <p className="ac-eyebrow">Creativity · Access · Community</p><h3>Empower Art Collective</h3>
