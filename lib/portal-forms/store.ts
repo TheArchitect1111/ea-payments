@@ -116,7 +116,8 @@ async function upsertToAirtable(submission: PortalFormSubmission): Promise<Porta
     submission.id,
     submissionToFields(submission),
   );
-  return record ? mapRow(record) : submission;
+  if (!record) throw new Error('Portal form submission could not be saved to durable storage.');
+  return mapRow(record);
 }
 
 async function listFromAirtable(
@@ -128,7 +129,7 @@ async function listFromAirtable(
   if (kind) {
     formula = `AND(${formula}, {Kind} = '${escapeAirtableString(kind)}')`;
   }
-  const rows = await platformQuery(PORTAL_FORM_SUBMISSIONS_TABLE, { filterByFormula: formula });
+  const rows = await platformQuery(PORTAL_FORM_SUBMISSIONS_TABLE, formula);
   return rows.map(mapRow).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }
 
@@ -140,6 +141,7 @@ export type CreatePortalFormSubmissionInput = {
   phone?: string;
   notes?: string;
   payload?: Record<string, unknown>;
+  requireDurable?: boolean;
 };
 
 export async function createPortalFormSubmission(
@@ -162,6 +164,10 @@ export async function createPortalFormSubmission(
 
   if (platformStoreConfigured()) {
     return upsertToAirtable(submission);
+  }
+
+  if (input.requireDurable) {
+    throw new Error('Durable application storage is unavailable.');
   }
 
   const rows = await readMemoryStore();
@@ -204,7 +210,7 @@ export async function updatePortalFormSubmissionStatus(input: {
 
   if (platformStoreConfigured()) {
     const formula = `AND({Submission ID} = '${escapeAirtableString(input.submissionId)}', {Portal Slug} = '${escapeAirtableString(slug)}')`;
-    const rows = await platformQuery(PORTAL_FORM_SUBMISSIONS_TABLE, { filterByFormula: formula });
+    const rows = await platformQuery(PORTAL_FORM_SUBMISSIONS_TABLE, formula);
     const existing = rows[0] ? mapRow(rows[0]) : null;
     if (!existing) return null;
     const next = { ...existing, status: input.status, updatedAt };
