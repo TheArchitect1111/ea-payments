@@ -95,6 +95,7 @@ const PUBLIC_PORTAL_EXPERIENCE_PATHS = new Set([
 
 const PREVIEW_FACTORY_ACCEPTANCE_PATHS = new Set([
   '/portal/tb3-run12b',
+  '/portal/tarris-bouie',
 ]);
 
 function isPublicPortalAuthPath(pathname: string): boolean {
@@ -110,7 +111,7 @@ function isPublicPortalExperiencePath(pathname: string): boolean {
 }
 
 function isPreviewFactoryAcceptancePath(pathname: string): boolean {
-  return process.env.VERCEL_ENV === 'preview' && PREVIEW_FACTORY_ACCEPTANCE_PATHS.has(pathname);
+  return process.env.VERCEL_ENV === 'preview' && [...PREVIEW_FACTORY_ACCEPTANCE_PATHS].some(\n    (path) => pathname === path || pathname.startsWith(\`\${path}/\`),\n  );
 }
 
 const PUBLIC_ADMIN_PATHS = new Set([
