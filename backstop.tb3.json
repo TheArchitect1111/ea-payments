@@ -1,0 +1,38 @@
+{
+  "id": "ea_tb3_visual_compiler",
+  "viewports": [
+    {"label":"desktop-reference","width":1463,"height":1536},
+    {"label":"mobile","width":390,"height":844}
+  ],
+  "scenarios": [
+    {
+      "label":"TB3 Website Reconstruction",
+      "url":"http://127.0.0.1:3000/experience/tarris-bouie",
+      "selectors":["document"],
+      "misMatchThreshold":0.5,
+      "requireSameDimensions":true,
+      "delay":500
+    },
+    {
+      "label":"TB3 HQ Portal",
+      "url":"http://127.0.0.1:3000/portal/tarris-bouie",
+      "selectors":["document"],
+      "misMatchThreshold":0.5,
+      "requireSameDimensions":true,
+      "delay":500
+    }
+  ],
+  "paths": {
+    "bitmaps_reference":"backstop_data/tb3/bitmaps_reference",
+    "bitmaps_test":"backstop_data/tb3/bitmaps_test",
+    "engine_scripts":"backstop_data/engine_scripts",
+    "html_report":"backstop_data/tb3/html_report",
+    "ci_report":"backstop_data/tb3/ci_report"
+  },
+  "report":["browser","CI"],
+  "engine":"playwright",
+  "engineOptions":{"browser":"chromium"},
+  "asyncCaptureLimit":2,
+  "asyncCompareLimit":4,
+  "debug":false
+}
