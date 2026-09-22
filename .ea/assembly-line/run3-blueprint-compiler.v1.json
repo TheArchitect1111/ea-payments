@@ -1,0 +1,70 @@
+{
+  "schemaVersion": "1.0.0",
+  "program": "EA_ASSEMBLY_LINE_V1",
+  "run": 3,
+  "status": "ENFORCED_CONTRACT",
+  "component": "BLUEPRINT_COMPILER",
+  "purpose": "Compile client identity, brand, content, design reference and selected Lego modules into one deterministic assembly manifest that declares every surface, capability, dependency, route, permission, data binding, workflow, integration and acceptance contract required by the EA factory.",
+  "inputs": {
+    "required": ["tenantId", "projectId", "clientIdentity", "selectedProducts", "selectedModules"],
+    "optional": ["brandKit", "content", "assets", "designReference", "domainIntent", "integrationPreferences", "roleModel", "existingInfrastructure"],
+    "selectedProducts": ["website", "portal", "website+portal"]
+  },
+  "compileLifecycle": [
+    "VALIDATE_CLIENT_INPUT", "RESOLVE_SELECTED_MODULES", "EXPAND_MODULE_COMPOSITIONS", "DEDUPLICATE_SHARED_CAPABILITIES", "RESOLVE_CERTIFIED_CAPABILITY_VERSIONS", "CALCULATE_DEPENDENCIES", "GENERATE_NAVIGATION", "GENERATE_SURFACES", "GENERATE_ROUTES", "GENERATE_CTA_BINDINGS", "GENERATE_ROLE_PERMISSIONS", "GENERATE_DATA_BINDINGS", "GENERATE_WORKFLOWS", "GENERATE_INTEGRATIONS", "BIND_BRAND_AND_CONTENT", "BIND_DESIGN_REFERENCE", "GENERATE_ACCEPTANCE_CONTRACT", "VERIFY_MANIFEST", "EMIT_ASSEMBLY_MANIFEST"
+  ],
+  "moduleSelectionBehavior": {
+    "checkboxIsDeclarative": true,
+    "selectionAutomaticallyInstallsDependencies": true,
+    "sharedDependenciesInstalledOnce": true,
+    "navigationGeneratedFromSelection": true,
+    "websiteCTAForPortalModuleGeneratedWhenApplicable": true,
+    "permissionsGeneratedFromRoleModel": true,
+    "routesMustBeCanonical": true,
+    "manualPostAssemblyWiringForbidden": true
+  },
+  "examples": {
+    "eshop": {
+      "expandsTo": ["products", "checkout", "payments", "orders", "notifications"],
+      "creates": ["shop-navigation", "catalog-surface", "product-routes", "checkout-route", "order-history", "payment-binding", "receipt-notification"]
+    },
+    "events": {
+      "expandsTo": ["content", "forms", "calendar", "payments", "notifications"],
+      "creates": ["events-navigation", "event-list", "event-detail-route", "registration-flow", "ticket-or-registration-record", "calendar-binding", "payment-binding-when-paid", "confirmation-notification"]
+    },
+    "appointments": {
+      "expandsTo": ["booking", "calendar", "payments", "notifications"],
+      "creates": ["booking-navigation", "availability-surface", "booking-flow", "calendar-record", "payment-binding-when-paid", "confirmation-notification"]
+    },
+    "courses-lms": {
+      "expandsTo": ["identity-auth", "content", "files", "progress-tracking", "payments", "notifications"],
+      "creates": ["learning-navigation", "course-catalog", "course-detail", "enrollment-flow", "learner-access", "progress-record", "resource-access", "purchase-to-entitlement-binding-when-paid"]
+    }
+  },
+  "manifestOutputs": [
+    "ProductPlan", "ModuleSet", "ResolvedCapabilitySet", "DependencyGraph", "NavigationPlan", "SurfacePlan", "RouteMap", "CTABindingMap", "RolePermissionMap", "DataBindingMap", "WorkflowPlan", "IntegrationPlan", "BrandBinding", "ContentBinding", "DesignBinding", "AcceptanceContract"
+  ],
+  "determinism": {
+    "sameApprovedInputsYieldSameManifest": true,
+    "versionsPinned": true,
+    "implicitCapabilityUpgradeForbidden": true,
+    "implicitModuleSubstitutionForbidden": true
+  },
+  "failClosedOn": [
+    "unknown-module", "uncertified-required-capability", "dependency-cycle", "route-collision", "missing-required-permission", "unresolved-data-binding", "unresolved-cta-destination", "cross-tenant-binding", "missing-required-integration", "ambiguous-product-selection"
+  ],
+  "handoff": {
+    "output": "ApprovedAssemblyManifest",
+    "next": "RUN_4_ASSEMBLY_ENGINE",
+    "rule": "Run 4 may assemble only what Run 3 explicitly declares. No manual feature insertion or post-build wiring is permitted for standard modules."
+  },
+  "exitCriteria": [
+    "every selected module expands to explicit capabilities",
+    "shared capabilities are deduplicated",
+    "every visible menu item has a declared surface and canonical route",
+    "every applicable website CTA has a declared destination",
+    "every module has permissions data workflows integrations and acceptance requirements",
+    "manifest is deterministic and tenant-bound",
+    "assembly requires no manual wiring after compilation"
+  ]
+}
