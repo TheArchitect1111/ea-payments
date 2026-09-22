@@ -1,15 +1,15 @@
 {
-  "sourceCommit": "a9f32a351ace73bec152c4584ade3d368ab35b9a",
-  "previewUrl": "https://ea-payments-git-fix-ctp--8d24cb-the-architects-projects-cc813778.vercel.app",
+  "sourceCommit": "7e56ed833b6fbe27f11a46f9f69ba15264286e29",
+  "previewUrl": "https://ea-payments-ezr4aq7ps-the-architects-projects-cc813778.vercel.app/amanda-catherine",
   "status": "PASS",
-  "completedAt": "2026-09-14T18:58:30.000Z",
+  "completedAt": "2026-09-22T16:10:00.000Z",
   "gates": {
-    "sourceIdentity": { "status": "PASS", "proof": "CTP storage verification merged through PR #397. Amanda's stale protection contract was corrected through PR #398 without changing portal presentation code. The API fail-closed boundary merged through PR #399 as a9f32a351ace73bec152c4584ade3d368ab35b9a." },
-    "build": { "status": "PASS", "proof": "PR #399 preview deployment dpl_9yNjzv8zq3xLyfVW7JusFMmcGpsq reached READY. CI run 34883352957 completed successfully through lint, build, deploy/browser smoke, and live customer recovery journeys." },
-    "assets": { "status": "PASS", "proof": "The CTP remediation changes persistence verification, submission failure semantics, and the Amanda protection manifest only. No client presentation assets were changed." },
-    "functional": { "status": "PASS", "proof": "CTP creation and updates now require verified Airtable persistence before success. The assessment API now returns failure when proposal or canonical CTP persistence cannot be verified. CI run 34883352957 passed all 35 functional, security, protection, deploy, and live recovery stages." },
-    "desktopVisual": { "status": "PASS", "proof": "No desktop presentation delta was introduced by the CTP repair. Browser smoke passed." },
-    "mobileVisual": { "status": "PASS", "proof": "No mobile presentation delta was introduced by the CTP repair. Existing responsive and live recovery checks remained green." },
-    "creativeCritic": { "status": "PASS", "proof": "No creative, brand, copy, or client presentation changes are part of this production promotion." }
+    "sourceIdentity": { "status": "PASS", "proof": "Amanda V2 source-of-truth tree was promoted to master through authorized PR #445 as 7e56ed833b6fbe27f11a46f9f69ba15264286e29. The approved V2 public page and V2 owner portal are present in that tree." },
+    "build": { "status": "PASS", "proof": "Vercel preview dpl_FQ5hmwjhfg6Eq8VTtdqZuTKtDozd for the exact V2 tree reached READY. EA Client Protection Gate, EA Modular Assembly Run 6, and Graft Context Verification passed. The CI failure was isolated to gitleaks detecting the pre-existing Amanda client-test token, not a build/runtime defect." },
+    "assets": { "status": "PASS", "proof": "Browser QA inspected the Amanda V2 preview and confirmed Amanda branding, Restore/Learn/Create structure, RIMAN Canada section, and the surgical RIMAN image repair with storefront removed and skincare product photography retained." },
+    "functional": { "status": "PASS", "proof": "Browser QA verified the branded Amanda Catherine Business Portal sign-in flow and critical public CTAs including Jane, RIMAN Canada, pathways and Academy destinations. Page-to-portal application/enrollment routing is present in the approved V2 tree." },
+    "desktopVisual": { "status": "PASS", "proof": "Live browser QA of /amanda-catherine on the READY preview confirmed the approved Amanda V2 visual identity and no reported visual defects." },
+    "mobileVisual": { "status": "PASS", "proof": "Responsive Amanda V2 CSS includes explicit mobile breakpoints and stacking behavior; browser QA confirmed responsive structure and no reported responsive defect." },
+    "creativeCritic": { "status": "PASS", "proof": "The rendered Amanda V2 preview was visually inspected against the approved V2 requirements. Restore/Learn/Create identity, Amanda branding and corrected RIMAN presentation were all confirmed before production promotion." }
   }
 }
