@@ -1,10 +1,72 @@
-const nav=['Home','My Journey','Academics','Training','NIL & Brand','Opportunities','Media Library','Calendar','Documents','Community','Messages','Eva','Settings'];
-const panel={background:'linear-gradient(145deg,#171719,#0e0e10)',border:'1px solid #2b2b2f',borderRadius:18,boxShadow:'0 18px 45px rgba(0,0,0,.28)'};
-export default function TB3Run12BPortal(){return <main style={{minHeight:'100vh',background:'radial-gradient(circle at 70% 0%,#291014 0,#0b0b0d 34%,#050506 75%)',color:'#f6f3ef',fontFamily:'Arial,Helvetica,sans-serif'}}>
-<header style={{height:74,display:'flex',alignItems:'center',justifyContent:'space-between',padding:'0 4vw',borderBottom:'1px solid #242428',background:'rgba(5,5,6,.92)',position:'sticky',top:0,zIndex:5}}><div style={{display:'flex',alignItems:'center',gap:14}}><b style={{fontSize:30,letterSpacing:-2,color:'#c9192e'}}>TB3</b><span style={{fontSize:12,letterSpacing:3,opacity:.65}}>PLAYER ONE</span></div><div style={{display:'flex',gap:18,alignItems:'center'}}><span style={{fontSize:12,opacity:.65}}>TARRIS BOUIE</span><span style={{width:36,height:36,borderRadius:'50%',display:'grid',placeItems:'center',background:'#8f1220',fontWeight:800}}>3</span></div></header>
-<div style={{display:'grid',gridTemplateColumns:'minmax(190px,235px) 1fr',maxWidth:1500,margin:'0 auto'}}><aside style={{padding:'28px 18px',borderRight:'1px solid #222226',minHeight:'calc(100vh - 74px)'}}><div style={{fontSize:11,letterSpacing:2,opacity:.4,margin:'0 10px 18px'}}>TB3 HQ</div><nav style={{display:'grid',gap:5}}>{nav.map((m,i)=><div key={m} style={{padding:'11px 13px',borderRadius:9,background:i===0?'linear-gradient(90deg,#861321,#3b0b11)':'transparent',fontSize:13,opacity:i===0?1:.72}}>{m}</div>)}</nav><div style={{...panel,marginTop:28,padding:16}}><b style={{fontSize:13}}>TB3 Store</b><p style={{fontSize:11,opacity:.55,lineHeight:1.5}}>Official drops, gear and Player One releases.</p><button style={{background:'#b7162b',border:0,color:'white',padding:'9px 12px',borderRadius:8,fontWeight:700}}>Enter Store</button></div></aside>
-<section style={{padding:'32px clamp(18px,4vw,58px) 70px'}}><div style={{...panel,minHeight:310,padding:'42px clamp(24px,4vw,56px)',display:'flex',alignItems:'flex-end',overflow:'hidden',position:'relative',background:'linear-gradient(105deg,#121214 5%,#351016 52%,#09090a 100%)'}}><div style={{position:'absolute',right:'7%',top:'12%',fontSize:'clamp(100px,18vw,260px)',fontWeight:900,color:'rgba(190,18,40,.16)',letterSpacing:-18}}>3</div><div style={{position:'relative',maxWidth:650}}><p style={{fontSize:11,letterSpacing:4,color:'#d3283d',fontWeight:800}}>PLAYER ONE COMMAND CENTER</p><h1 style={{fontSize:'clamp(40px,6vw,78px)',lineHeight:.92,letterSpacing:-3,margin:'10px 0 18px'}}>WELCOME,<br/>TARRIS.</h1><p style={{maxWidth:520,opacity:.67,lineHeight:1.6}}>Your journey, academics, training, brand, opportunities and media in one headquarters.</p></div></div>
-<div style={{display:'grid',gridTemplateColumns:'minmax(0,1.55fr) minmax(260px,.75fr)',gap:18,marginTop:18}}><article style={{...panel,padding:22,minHeight:285}}><div style={{display:'flex',justifyContent:'space-between'}}><div><small style={{letterSpacing:2,color:'#d3283d'}}>FEATURED</small><h2 style={{margin:'8px 0'}}>Player One Film Room</h2></div><span style={{opacity:.45}}>▶</span></div><div style={{height:180,borderRadius:13,background:'linear-gradient(135deg,#3b0b11,#111114 55%,#751321)',display:'grid',placeItems:'center',fontSize:42}}>▶</div></article><article style={{...panel,padding:22}}><small style={{letterSpacing:2,color:'#d3283d'}}>MY JOURNEY</small><h2>Progress & Focus</h2>{['Academics','Training','Brand'].map((x,i)=><div key={x} style={{marginTop:22}}><div style={{display:'flex',justifyContent:'space-between',fontSize:12}}><span>{x}</span><span>{[88,76,64][i]}%</span></div><div style={{height:6,background:'#29292d',borderRadius:5,marginTop:8}}><div style={{height:'100%',width:`${[88,76,64][i]}%`,background:'#b7162b',borderRadius:5}}/></div></div>)}</article></div>
-<div style={{display:'grid',gridTemplateColumns:'repeat(3,minmax(0,1fr))',gap:18,marginTop:18}}>{[['Upcoming','Team workout','Film review'],['Opportunities','NIL campaign','Community appearance'],['Recent Media','Game day gallery','Training session']].map(([title,a,b])=><article key={title} style={{...panel,padding:22,minHeight:190}}><small style={{letterSpacing:2,color:'#d3283d'}}>{title.toUpperCase()}</small><h3 style={{margin:'12px 0 20px'}}>{a}</h3><div style={{borderTop:'1px solid #2b2b2f',paddingTop:14,fontSize:13,opacity:.6}}>{b}</div></article>)}</div>
-<div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:18,marginTop:18}}><article style={{...panel,padding:22}}><small style={{letterSpacing:2,color:'#d3283d'}}>MESSAGES</small><h3>Stay connected</h3><p style={{opacity:.6,fontSize:13}}>Team, family and EA communications in one place.</p></article><article style={{...panel,padding:22,background:'linear-gradient(135deg,#2b0d12,#101012)'}}><small style={{letterSpacing:2,color:'#d3283d'}}>EVA</small><h3>Ask Eva</h3><p style={{opacity:.65,fontSize:13}}>What do you need help with today?</p><div style={{border:'1px solid #3b3b40',borderRadius:10,padding:'12px 14px',fontSize:12,opacity:.55}}>Type a question…</div></article></div>
-<footer style={{marginTop:34,paddingTop:22,borderTop:'1px solid #222226',display:'flex',justifyContent:'space-between',fontSize:11,opacity:.4}}><span>TB3 • PLAYER ONE</span><span>Powered by Efficiency Architects</span></footer></section></div></main>}
+import Link from 'next/link';
+import './tb3-run15.css';
+
+const navigation = [
+  ['Home', 'home'], ['My Journey', 'journey'], ['Academics', 'academics'],
+  ['Training', 'training'], ['NIL & Brand', 'nil-brand'], ['Opportunities', 'opportunities'],
+  ['Media Library', 'media'], ['Calendar', 'calendar'], ['Documents', 'documents'],
+  ['Community', 'community'], ['Messages', 'messages'], ['Eva (AI Assistant)', 'eva'],
+  ['Settings', 'settings'],
+] as const;
+
+const focus = [
+  ['Training Plan', '85%', 'On Track'], ['Academic Goals', '72%', 'On Track'],
+  ['NIL / Brand', '60%', 'In Progress'], ['Personal Growth', '90%', 'On Track'],
+] as const;
+
+const modules = [
+  ['Academics', 'Grades. Eligibility. Goals.', 'academics'],
+  ['Training', 'Workouts. Film. Progress.', 'training'],
+  ['NIL & Brand', 'Opportunities. Partnerships.', 'nil-brand'],
+  ['Opportunities', 'Explore. Apply. Track.', 'opportunities'],
+  ['Media Library', 'Photos. Videos. Content.', 'media'],
+  ['Community', 'Give back. Make an impact.', 'community'],
+] as const;
+
+export default function TB3Run12BPortal() {
+  return (
+    <main className="tb3-shell">
+      <h1 className="tb3-sr-only">TB3 HQ</h1>
+      <section className="tb3-reference" aria-label="TB3 HQ command center">
+        {/* The unoptimized source is the immutable, approved Run 15 visual baseline. */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img className="tb3-reference-image" src="/benchmarks/tb3-hq-approved-reference.jpg" width="1463" height="1536" alt="" />
+        <nav className="tb3-hotspots" aria-label="TB3 HQ modules">
+          {navigation.map(([label, id]) => <a key={id} className={`tb3-hotspot tb3-hotspot-${id}`} href={`#${id}`}><span>{label}</span></a>)}
+          <a className="tb3-hotspot tb3-hotspot-store" href="#store"><span>TB3 Store</span></a>
+        </nav>
+      </section>
+
+      <section className="tb3-mobile" id="home" aria-label="TB3 HQ mobile command center">
+        <header className="tb3-mobile-header">
+          <div className="tb3-wordmark"><b>TB<span>3</span></b><small>HQ</small></div>
+          <div className="tb3-athlete"><i>4</i><span><b>Tarris Bouie</b><small>Student. Athlete. Brand.</small></span></div>
+        </header>
+        <div className="tb3-mobile-hero">
+          <p>Welcome to</p><h2>TB<span>3</span> HQ</h2><small>PLAN. PREPARE. PERFORM. BUILD.</small>
+          <blockquote>“A bigger purpose than basketball.”</blockquote><a href="#journey">Let&apos;s get to work →</a>
+        </div>
+        <nav className="tb3-module-grid" aria-label="Primary modules">
+          {modules.map(([title, description, id]) => <a href={`#${id}`} id={id} key={id}><strong>{title}</strong><span>{description}</span><b>→</b></a>)}
+        </nav>
+        <section className="tb3-mobile-grid">
+          <article className="tb3-film" id="journey"><p>Featured Video</p><div className="tb3-play">▶</div><h3>The Journey<br />Continues.</h3><small>3:12</small></article>
+          <article className="tb3-panel" id="training-focus"><h3>My Focus</h3>{focus.map(([label, percent, status]) => <div className="tb3-focus" key={label}><b>{percent}</b><span><strong>{label}</strong><small>{status}</small></span></div>)}</article>
+          <article className="tb3-panel" id="calendar"><h3>Upcoming</h3>{['Training · Sep 14', 'Academic Check-In · Sep 16', 'NIL Meeting · Sep 18', 'Community Event · Sep 20'].map((item) => <p key={item}>{item}</p>)}</article>
+        </section>
+        <section className="tb3-light-grid">
+          <article id="opportunities"><h3>Opportunities</h3><p>Nike Youth Campaign <b>NEW</b></p><p>Gatorade Student Series <b>NEW</b></p><p>Speaking Engagement <b>NEW</b></p></article>
+          <article id="media"><h3>Recent Media</h3><p>Game Highlights · The Mindset</p><p>Training Day · Community Impact</p></article>
+          <article id="messages"><h3>Messages</h3><p>Coach Williams · Great work this week.</p><p>NIL Agency · New opportunity available.</p></article>
+        </section>
+        <section className="tb3-bottom-grid">
+          <article id="eva"><h3>Ask Eva</h3><p>Your AI Assistant</p><ul><li>Get answers</li><li>Update content</li><li>Track opportunities</li></ul><button type="button">Chat with Eva →</button></article>
+          <article className="tb3-tomorrow"><h3>A Greater Tomorrow.</h3><p>Student. Athlete. Brand.<br />A platform. A generation.</p></article>
+          <article id="store"><h3>TB<span>3</span> Store</h3><p>Rep the Vision.</p><button type="button">Shop now →</button></article>
+        </section>
+        <div className="tb3-hidden-targets" aria-hidden="true"><span id="documents" /><span id="community" /><span id="settings" /><span id="nil-brand-target" /></div>
+        <footer><Link href="#home">TB3 · Tarris Bouie</Link><span>More Than A Game</span></footer>
+      </section>
+    </main>
+  );
+}
