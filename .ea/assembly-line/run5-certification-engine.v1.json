@@ -1,0 +1,18 @@
+{
+  "schemaVersion":"1.0.0","program":"EA_ASSEMBLY_LINE_V1","run":5,"status":"CERTIFICATION_CONTRACT","component":"AUTOMATED_RELEASE_CERTIFICATION_ENGINE","purpose":"Replace repetitive client-by-client manual QA with automated certification of an assembled tenant candidate against the manifest acceptance contract and previously certified capability contracts.",
+  "input":["AssembledWebsiteCandidate","AssembledPortalCandidate","AcceptanceProbeSet","AssemblyEvidence"],
+  "principle":"EA certifies the platform capabilities and automatically validates each provisioning event; humans do not manually retest certified functionality for every client.",
+  "certificationLayers":[
+    {"id":"L1_STATIC","checks":["manifest-schema","module-catalog-membership","capability-version-pins","dependency-integrity","tenant-isolation-plan","route-uniqueness","permission-completeness","binding-completeness"]},
+    {"id":"L2_COMPONENT","checks":["certified-capability-contracts","builder-contracts","module-composition-contracts"]},
+    {"id":"L3_INTEGRATION","checks":["navigation-to-route","cta-to-destination","checkout-to-payment","payment-to-order-or-entitlement","event-registration-to-record","booking-to-calendar","course-purchase-to-entitlement","form-to-workflow","workflow-to-notification","role-to-permission"]},
+    {"id":"L4_RUNTIME","checks":["website-routes-load","portal-routes-load","auth-boundaries","tenant-boundaries","data-write-read","webhook-or-event-processing","external-integration-health","retry-idempotency"]},
+    {"id":"L5_PROVISIONING","checks":["new-tenant-provision","brand-content-binding","selected-module-presence","unselected-module-absence","canonical-url-resolution","runtime-config-resolution"]},
+    {"id":"L6_RELEASE","checks":["all-required-probes-pass","no-critical-unresolved-bindings","rollback-plan-present","deployment-target-resolved","release-evidence-complete"]}
+  ],
+  "releaseDecision":{"CERTIFIED":"all required layers pass with runtime evidence","DENIED":"any required layer fails or lacks required runtime evidence","CONTRACT_ONLY":"static/contracts pass but real runtime execution was not demonstrated"},
+  "noFalseGreenRules":["contract-pass-is-not-runtime-pass","stub-is-not-certified-runtime","repository-presence-is-not-provisioning-proof","deployment-config-is-not-live-health-proof","manual-claim-is-not-evidence"],
+  "bankAccountStandard":{"goal":"Provision another client from certified components without manually retesting the platform","perClientAction":"automated provisioning validation only","humanQA":"exception-only","regressionStrategy":"test capability versions centrally, then pin certified versions in client manifests"},
+  "requiredEvidence":["manifest-hash","capability-version-set","assembly-id","tenant-id","probe-results","runtime-targets","timestamp","rollback-reference"],
+  "handoff":{"onCertified":"eligible-for-controlled-publish","onDenied":"return failing capability or binding to factory repair queue","onContractOnly":"do not describe assembly line as bank-account-level production ready"}
+}
