@@ -1,0 +1,26 @@
+{
+  "name":"EA Visual Compiler",
+  "version":1,
+  "costPolicy":"Open-source/self-hosted only. No new paid SaaS or account required.",
+  "pipeline":[
+    "ingest-approved-reference",
+    "decompose-layout-and-assets",
+    "reconstruct-real-components",
+    "render-fixed-viewports",
+    "pixel-diff-against-reference",
+    "localize-differences",
+    "targeted-correction-loop",
+    "bind-ea-lego-functionality",
+    "playwright-functional-test",
+    "integration-test",
+    "preview-certification"
+  ],
+  "certificates":{
+    "visual":"Reference comparison must pass configured visual threshold at every certified viewport.",
+    "functional":"Every visible interactive control must have a tested destination or behavior.",
+    "integration":"Website to authentication to portal and required data/module flows must pass end-to-end."
+  },
+  "certificationRule":"VISUAL + FUNCTIONAL + INTEGRATION are all required. A screenshot overlay or image hotspot implementation cannot satisfy FUNCTIONAL certification.",
+  "mobileRule":"Never invent an alternate mobile composition. Reconstruct responsive behavior from the approved reference set; where only one reference exists, preserve composition and require human approval for inferred responsive changes.",
+  "tools":{"browser":"Playwright","visualRegression":"BackstopJS","application":"Next.js/React + EA Lego chassis"}
+}
