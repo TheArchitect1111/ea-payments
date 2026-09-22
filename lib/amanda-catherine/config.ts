@@ -115,6 +115,22 @@ export const AMANDA_ROLE_DASHBOARDS: Record<
 
 export const AMANDA_PORTAL_FORMS = [
   {
+    id: 'founder-advisory',
+    kind: 'application',
+    audience: 'client',
+    title: 'Founder Advisory application',
+    fields: ['business-or-organization', 'current-stage', 'primary-challenge-or-decision', 'desired-outcome', 'preferred-engagement', 'timeline'],
+    uploads: [],
+  },
+  {
+    id: 'speaking-media',
+    kind: 'application',
+    audience: 'client',
+    title: 'Speaking and media inquiry',
+    fields: ['organization', 'event-or-media-format', 'proposed-date-and-location', 'audience-and-estimated-attendance', 'requested-topic', 'event-goals', 'budget-range'],
+    uploads: [],
+  },
+  {
     id: 'client-intake-consent',
     kind: 'intake',
     audience: 'client',

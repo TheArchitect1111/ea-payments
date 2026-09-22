@@ -1,15 +1,51 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createPortalFormSubmission } from '@/lib/portal-forms/store';
 import type { PortalFormKind } from '@/lib/portal-forms/types';
-import { emitPulseEvent } from '@/lib/pulse-bus';
 import { notifyPortal } from '@/lib/portal-notify';
 import { syntheticOrgId } from '@/lib/platform-store';
 import { finalizeCtpAssetManifest, parseAssetUploads } from '@/lib/ctp-asset-store';
+import { AMANDA_PORTAL_FORMS } from '@/lib/amanda-catherine/config';
+import { checkRateLimit } from '@/lib/ai/rate-limit';
+import { amandaApplicationRoute } from '@/lib/amanda-catherine/application-routing';
 
 export const dynamic = 'force-dynamic';
 
 function parseKind(raw: unknown): PortalFormKind | null {
   if (raw === 'intake' || raw === 'application') return raw;
+  return null;
+}
+
+function clientKey(req: NextRequest, slug: string) {
+  const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+    || req.headers.get('x-real-ip')
+    || 'unknown';
+  return `portal-form:${slug}:${ip}`;
+}
+
+function validateAmandaApplication(payload: Record<string, unknown> | undefined) {
+  if (!payload || typeof payload.formId !== 'string') return 'Choose an application form.';
+  if (typeof payload.website === 'string' && payload.website.trim()) return 'Submission rejected.';
+  const form = AMANDA_PORTAL_FORMS.find((item) => item.kind === 'application' && item.id === payload.formId);
+  if (!form) return 'Choose a valid Amanda Catherine application form.';
+  const allowedPayloadKeys = new Set(['formId', 'audience', 'answers', 'assetUploads', 'onboardingStatus', 'program', 'website']);
+  if (Object.keys(payload).some((key) => !allowedPayloadKeys.has(key))) return 'Application payload contains unsupported fields.';
+  if (payload.program !== undefined && !(form.id === 'partner-vendor-application' && payload.program === 'lifeline')) {
+    return 'Application program is not valid for the selected form.';
+  }
+  if (!payload.answers || typeof payload.answers !== 'object' || Array.isArray(payload.answers)) return 'Complete the required application fields.';
+  const answers = payload.answers as Record<string, unknown>;
+  if (Object.keys(answers).some((key) => !form.fields.includes(key as never))) return 'Application contains unsupported answers.';
+  for (const field of form.fields) {
+    const value = answers[field];
+    if (typeof value !== 'string' || !value.trim() || value.length > 2_000) return `Complete ${field.replaceAll('-', ' ')}.`;
+  }
+  const uploads = parseAssetUploads(payload.assetUploads);
+  if (uploads && Object.keys(uploads).some((key) => !form.uploads.includes(key as never))) {
+    return 'Application contains unsupported uploads.';
+  }
+  for (const upload of form.uploads) {
+    if (!uploads?.[upload]) return `Upload ${upload.replaceAll('-', ' ')}.`;
+  }
   return null;
 }
 
@@ -42,31 +78,60 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  if (name.length > 120 || email.length > 254 || (body.phone?.length || 0) > 40 || (body.notes?.length || 0) > 5_000) {
+    return NextResponse.json({ error: 'Submission fields exceed the allowed length.' }, { status: 400 });
+  }
+  if (!/^\S+@\S+\.\S+$/.test(email)) {
+    return NextResponse.json({ error: 'Enter a valid email address.' }, { status: 400 });
+  }
+  if (!checkRateLimit(clientKey(req, slug), 12, 60 * 60 * 1000).ok) {
+    return NextResponse.json({ error: 'Too many submissions. Please try again later.' }, { status: 429 });
+  }
+
   const payload = body.payload ? { ...body.payload } : undefined;
+  if (slug === 'amanda-catherine' && kind === 'application') {
+    const validationError = validateAmandaApplication(payload);
+    if (validationError) return NextResponse.json({ error: validationError }, { status: 400 });
+  }
   const stagedUploads = parseAssetUploads(payload?.assetUploads);
   if (payload && stagedUploads) {
     payload.assetUploads = await finalizeCtpAssetManifest(
       stagedUploads,
       syntheticOrgId(slug),
     );
+    if (slug === 'amanda-catherine' && kind === 'application') {
+      const uploadError = validateAmandaApplication(payload);
+      if (uploadError) return NextResponse.json({ error: uploadError }, { status: 400 });
+    }
   }
 
-  const submission = await createPortalFormSubmission({
-    portalSlug: slug,
-    kind,
-    name,
-    email,
-    phone: body.phone,
-    notes: body.notes,
-    payload,
-  });
+  let submission;
+  try {
+    submission = await createPortalFormSubmission({
+      portalSlug: slug,
+      kind,
+      name,
+      email,
+      phone: body.phone,
+      notes: body.notes,
+      payload,
+      requireDurable: slug === 'amanda-catherine' && kind === 'application',
+    });
+  } catch {
+    return NextResponse.json(
+      { error: 'Application storage is temporarily unavailable. Please try again.' },
+      { status: 503 },
+    );
+  }
 
   const pulseEvent = {
     product: 'ea-platform' as const,
     type: 'portal.form.submitted' as const,
     title: kind === 'application' ? 'Application submitted' : 'Intake submitted',
     detail: `${name} (${email})`,
-    href: `/portal/${slug}/${kind === 'application' ? 'applications' : 'intake'}`,
+    href: slug === 'amanda-catherine' && kind === 'application'
+      ? amandaApplicationRoute(payload?.formId, payload?.program).queueHref
+      : `/portal/${slug}/${kind === 'application' ? 'applications' : 'intake'}`,
     tenantId: syntheticOrgId(slug),
     objectId: submission.id,
     metadata: {
@@ -82,12 +147,15 @@ export async function POST(req: NextRequest) {
     },
   };
 
-  await emitPulseEvent(pulseEvent);
-  try {
-    await notifyPortal(pulseEvent);
-  } catch {
-    // notification channel is best-effort
-  }
+  await notifyPortal(pulseEvent);
 
-  return NextResponse.json({ ok: true, submission });
+  const route = slug === 'amanda-catherine' && kind === 'application'
+    ? amandaApplicationRoute(payload?.formId, payload?.program)
+    : null;
+  return NextResponse.json({
+    ok: true,
+    submission,
+    confirmation: route ? { title: route.confirmation, nextStep: route.reviewStep } : undefined,
+    storage: route ? 'durable' : undefined,
+  });
 }
