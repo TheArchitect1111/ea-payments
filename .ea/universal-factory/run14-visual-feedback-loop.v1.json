@@ -1,0 +1,19 @@
+{
+  "schemaVersion":"1.0.0",
+  "program":"EA_UNIVERSAL_FACTORY_V1",
+  "run":14,
+  "status":"ENFORCED_CONTRACT",
+  "component":"VISUAL_FEEDBACK_CORRECTION_LOOP",
+  "purpose":"Render a Run 13 reconstruction at the approved reference viewport, measure visual differences against the approved reference, localize mismatches, correct the implementation, and repeat until visual and structural acceptance thresholds are satisfied or the candidate fails closed.",
+  "entryGate":{"requiresRun13ReconstructionCandidate":true,"requiresApprovedReferenceImage":true,"requiresReferenceViewport":true,"requiresPlayableRoute":true},
+  "loop":["RENDER_CANDIDATE_AT_REFERENCE_VIEWPORT","CAPTURE_PLAYWRIGHT_SCREENSHOT","NORMALIZE_REFERENCE_AND_RENDER","COMPUTE_PIXEL_DIFF","COMPUTE_REGION_DIFF","COMPARE_LAYOUT_GEOMETRY","COMPARE_VISUAL_HIERARCHY","COMPARE_ASSET_ROLES","RANK_MISMATCHES","GENERATE_TARGETED_CORRECTIONS","APPLY_CORRECTIONS","RENDER_AGAIN","REPEAT_UNTIL_PASS_OR_MAX_ITERATIONS"],
+  "comparison":{"globalPixelDiff":true,"regionWeightedDiff":true,"layoutGeometryDiff":true,"missingRegionDetection":true,"unexpectedRegionDetection":true,"typographyHierarchyCheck":true,"spacingRhythmCheck":true,"imageRoleCheck":true,"navigationPlacementCheck":true,"brandExpressionCheck":true},
+  "regionWeights":{"hero-and-primary-identity":"critical","navigation":"critical","major-layout-regions":"critical","primary-imagery":"critical","functional-panels":"high","typography-hierarchy":"high","spacing-and-card-geometry":"high","decorative-detail":"normal"},
+  "correctionPolicy":{"automaticIteration":true,"correctHighestImpactMismatchFirst":true,"preserveWorkingFunctionality":true,"preserveTenantIsolation":true,"noGenericFallback":true,"noReferenceSubstitution":true,"noProductionMutation":true,"maxIterations":8},
+  "acceptance":{"mustPassAllCriticalRegions":true,"mustContainAllRequiredReferenceRegions":true,"mustPreserveReferenceHierarchy":true,"mustRemainResponsive":true,"mustRetainMappedLegoFunctionality":true,"genericDashboardCannotPass":true,"humanReadableEvidenceRequired":true},
+  "tb3Benchmark":{"reference":"TB3 HQ approved portal design","candidateRoute":"/portal/tb3-run12b","requiredCriticalRegions":["TB3-brand-header","athlete-hero","left-navigation","featured-video","progress-and-focus","upcoming","opportunities","recent-media","messages","eva","store","footer"],"knownBadPattern":"light generic module dashboard","knownBadPatternMustFail":true},
+  "failClosedOn":["critical-region-mismatch","missing-reference-region","generic-dashboard-fallback","reference-hierarchy-drift","approved-asset-role-drift","visual-loop-not-executed","visual-evidence-missing","max-iterations-exceeded-with-critical-failures"],
+  "artifacts":{"outputs":["ReferenceRenderPair","PixelDiffEvidence","RegionDiffEvidence","MismatchRanking","CorrectionLog","IterationHistory","FinalVisualRegressionEvidence","Run14Candidate"]},
+  "acceptanceCriteria":["render is compared directly to the approved reference rather than merely checking route existence","critical visual regions pass before candidate can advance","mismatches trigger targeted corrections and rerender","equivalent labels or functionality cannot compensate for visual mismatch","TB3 generic Run 12B dashboard is classified as failure","successful candidate preserves both approved appearance and mapped EA Lego functionality"],
+  "handoff":{"output":"VISUALLY_VERIFIED_RECONSTRUCTION_CANDIDATE","nextRun":"RUN_15_FACTORY_CERTIFICATION","productionReady":false}
+}
