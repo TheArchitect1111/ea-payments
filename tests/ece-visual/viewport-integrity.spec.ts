@@ -22,6 +22,11 @@ test.describe('ECE viewport integrity', () => {
       const response = await page.goto(previewPath, { waitUntil: 'networkidle' });
       expect(response?.ok() || response?.status() === 304).toBeTruthy();
 
+      if (previewPath === '/portal/tb3-run12b') {
+        await expect(page).toHaveURL(/\/portal\/tb3-run12b\/?$/);
+        await expect(page.getByRole('heading', { name: 'TB3 HQ', exact: true })).toBeVisible();
+      }
+
       const overflowX = await page.evaluate(() => {
         return document.documentElement.scrollWidth > document.documentElement.clientWidth + 1;
       });
