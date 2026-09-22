@@ -7,15 +7,8 @@ import '../ea-portal.css';
 
 export const dynamic = 'force-dynamic';
 
-export default async function ApplyPage({
-  params,
-  searchParams,
-}: {
-  params: Promise<{ slug: string }>;
-  searchParams: Promise<{ form?: string; program?: string }>;
-}) {
+export default async function ApplyPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const { form, program } = await searchParams;
   const client = await getClientByPortalSlug(slug);
   const orgName = client?.organization || client?.clientName || 'this organization';
 
@@ -39,8 +32,6 @@ export default async function ApplyPage({
           kind="application"
           title="Your application"
           submitLabel="Submit application"
-          initialFormId={form || ''}
-          program={program || ''}
         />
         {session?.slug === slug ? (
           <p style={{ marginTop: 24, fontSize: 14, opacity: 0.8 }}>

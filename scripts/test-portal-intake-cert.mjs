@@ -46,7 +46,7 @@ assert(store.includes('listPortalFormSubmissions'), 'form store must export list
 assert(store.includes('updatePortalFormSubmissionStatus'), 'form store must export status update');
 
 const submitRoute = readFileSync(join(root, 'app/api/portal/forms/submit/route.ts'), 'utf8');
-assert(submitRoute.includes('notifyPortal'), 'submit route must dispatch the canonical portal notification');
+assert(submitRoute.includes('emitPulseEvent'), 'submit route must emit Pulse');
 assert(submitRoute.includes('portal.form.submitted'), 'submit route must use portal.form.submitted');
 
 const cxNav = readFileSync(join(root, 'lib/ctp-client-nav.ts'), 'utf8');

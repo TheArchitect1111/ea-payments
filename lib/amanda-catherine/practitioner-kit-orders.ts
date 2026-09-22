@@ -1,24 +1,13 @@
 import type Stripe from 'stripe';
 import { createHash } from 'node:crypto';
-import { listStudioRecords, saveStudioRecord } from '@/lib/creative-studio/persistence';
+import { saveStudioRecord } from '@/lib/creative-studio/persistence';
 import { syntheticOrgId } from '@/lib/platform-store';
 import { AMANDA_PRACTITIONER_KIT } from './practitioner-kit-catalog';
-
-export type AmandaKitOrder = {
-  id:string; portalSlug:string; productId:string; stripeSessionId:string; paymentStatus:string;
-  amountPaidCad:number; email?:string|null; name?:string|null; phone?:string|null;
-  billingAddress?:Stripe.Address|null; fulfillmentStatus:string;
-};
 
 export function isAmandaKitSession(session: Stripe.Checkout.Session) {
   return session.metadata?.checkoutType === 'amanda-practitioner-kit'
     && session.metadata?.amandaKitId === AMANDA_PRACTITIONER_KIT.id
     && session.metadata?.portalSlug === 'amanda-catherine';
-}
-
-export async function listAmandaKitOrders() {
-  const rows = await listStudioRecords<AmandaKitOrder>('experience', syntheticOrgId('amanda-catherine'));
-  return rows.filter((row)=>row?.id?.startsWith('amanda-kit-order-') && row.portalSlug === 'amanda-catherine');
 }
 
 export async function recordAmandaKitOrder(session: Stripe.Checkout.Session) {

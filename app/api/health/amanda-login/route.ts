@@ -10,14 +10,10 @@ import { AMANDA_COURSE_RESOURCES } from '@/lib/amanda-catherine/course-resources
 
 export const dynamic = 'force-dynamic';
 
-function internalCookies(token: string, previewJwt?: string) {
-  return `${EA_PORTAL_COOKIE}=${token}${previewJwt ? `; _vercel_jwt=${previewJwt}` : ''}`;
-}
-
-async function authenticatedResponse(origin: string, path: string, token: string, previewJwt?: string) {
+async function authenticatedResponse(origin: string, path: string, token: string) {
   return fetch(`${origin}${path}`, {
     method: 'GET',
-    headers: { cookie: internalCookies(token, previewJwt) },
+    headers: { cookie: `${EA_PORTAL_COOKIE}=${token}` },
     redirect: 'manual',
     cache: 'no-store',
   });
@@ -47,7 +43,6 @@ const RECOVERED_VIDEO_CANDIDATES = [
 ] as const;
 
 export async function GET(req: NextRequest) {
-  const previewJwt = req.cookies.get('_vercel_jwt')?.value;
   const checks = {
     clientRecord: false,
     canonicalIdentity: false,
@@ -57,9 +52,6 @@ export async function GET(req: NextRequest) {
     authenticatedOwnerRoute: false,
     authenticatedPortalHome: false,
     authenticatedMemberRoute: false,
-    authenticatedOwnerV2: false,
-    ownerV2ApplicationQueues: false,
-    authenticatedApplicationStatusApi: false,
     premiumOwnerDashboard: false,
     allMenuRoutes: false,
     allCourseResourceRoutes: false,
@@ -104,35 +96,14 @@ export async function GET(req: NextRequest) {
     checks.canonicalSlug = session?.slug === AMANDA_PORTAL_SLUG;
 
     if (token && checks.canonicalIdentity && checks.canonicalSlug) {
-      const [ownerResponse, portalHomeResponse, memberResponse, ownerV2Response, advisoryResponse, speakingResponse, lifelineResponse, statusResponse] = await Promise.all([
-        authenticatedResponse(req.nextUrl.origin, AMANDA_OWNER_PATH, token, previewJwt),
-        authenticatedResponse(req.nextUrl.origin, `/portal/${AMANDA_PORTAL_SLUG}`, token, previewJwt),
-        authenticatedResponse(req.nextUrl.origin, `/portal/${AMANDA_PORTAL_SLUG}/member`, token, previewJwt),
-        authenticatedResponse(req.nextUrl.origin, `/portal/${AMANDA_PORTAL_SLUG}/owner`, token, previewJwt),
-        authenticatedResponse(req.nextUrl.origin, `/portal/${AMANDA_PORTAL_SLUG}/owner/advisory`, token, previewJwt),
-        authenticatedResponse(req.nextUrl.origin, `/portal/${AMANDA_PORTAL_SLUG}/owner/speaking`, token, previewJwt),
-        authenticatedResponse(req.nextUrl.origin, `/portal/${AMANDA_PORTAL_SLUG}/owner/lifeline`, token, previewJwt),
-        fetch(`${req.nextUrl.origin}/api/portal/forms/status`, {
-          method: 'POST',
-          headers: {
-            cookie: internalCookies(token, previewJwt),
-            'content-type': 'application/json',
-          },
-          body: JSON.stringify({ submissionId: 'run4-health-nonexistent', status: 'reviewed' }),
-          redirect: 'manual',
-          cache: 'no-store',
-        }),
+      const [ownerResponse, portalHomeResponse, memberResponse] = await Promise.all([
+        authenticatedResponse(req.nextUrl.origin, AMANDA_OWNER_PATH, token),
+        authenticatedResponse(req.nextUrl.origin, `/portal/${AMANDA_PORTAL_SLUG}`, token),
+        authenticatedResponse(req.nextUrl.origin, `/portal/${AMANDA_PORTAL_SLUG}/member`, token),
       ]);
       checks.authenticatedOwnerRoute = ownerResponse.status === 200;
       checks.authenticatedPortalHome = portalHomeResponse.status === 200;
       checks.authenticatedMemberRoute = memberResponse.status === 200;
-      checks.authenticatedOwnerV2 = ownerV2Response.status === 200;
-      checks.authenticatedApplicationStatusApi = statusResponse.status === 404;
-
-      const queueResponses = [advisoryResponse, speakingResponse, lifelineResponse];
-      const queueBodies = await Promise.all(queueResponses.map((response) => response.text()));
-      checks.ownerV2ApplicationQueues = queueResponses.every((response) => response.status === 200)
-        && queueBodies.every((body) => body.includes('APPLICATION QUEUE'));
 
       if (portalHomeResponse.status === 200) {
         const body = await portalHomeResponse.text();

@@ -12,8 +12,6 @@ import { resolveSimplifiAppHostRedirect } from '@/lib/simplifi-app-host';
 import { resolvePortalHostRewrite } from '@/lib/ctp-portal-host';
 
 const EA_ADMIN_COOKIE = 'ea_admin_session';
-const AMANDA_CLIENT_TEST_COOKIE = 'amanda_v2_client_test';
-const AMANDA_CLIENT_TEST_TOKEN = 'acv2-9f3c7a61-2d84-4fe8-b615-71eacb396204';
 
 type EdgeAdminSession = {
   role?: string;
@@ -93,7 +91,6 @@ const PUBLIC_PORTAL_AUTH_PATHS = new Set([
 
 const PUBLIC_PORTAL_EXPERIENCE_PATHS = new Set([
   '/portal/amanda-catherine/enroll',
-  '/portal/amanda-catherine/apply',
 ]);
 
 function isPublicPortalAuthPath(pathname: string): boolean {
@@ -129,34 +126,6 @@ export async function middleware(request: NextRequest) {
   const host = request.headers.get('host');
 
   const pathname = request.nextUrl.pathname;
-
-  // Isolated client-review access. This is active only on the dedicated preview
-  // branch and never weakens production authentication.
-  const isAmandaClientTestDeployment =
-    process.env.VERCEL_ENV === 'preview' &&
-    process.env.VERCEL_GIT_COMMIT_REF === 'client-test/amanda-v2-20260919';
-  const isAmandaOwnerPath = pathname.startsWith('/portal/amanda-catherine/owner');
-  if (isAmandaClientTestDeployment && isAmandaOwnerPath) {
-    const presentedToken = request.nextUrl.searchParams.get('client_test');
-    if (presentedToken === AMANDA_CLIENT_TEST_TOKEN) {
-      const target = request.nextUrl.clone();
-      target.searchParams.delete('client_test');
-      const response = NextResponse.redirect(target);
-      response.cookies.set(AMANDA_CLIENT_TEST_COOKIE, AMANDA_CLIENT_TEST_TOKEN, {
-        httpOnly: true,
-        sameSite: 'lax',
-        secure: true,
-        path: '/portal/amanda-catherine/owner',
-        maxAge: 60 * 60 * 24 * 14,
-      });
-      return response;
-    }
-    if (request.cookies.get(AMANDA_CLIENT_TEST_COOKIE)?.value === AMANDA_CLIENT_TEST_TOKEN) {
-      const requestHeaders = new Headers(request.headers);
-      requestHeaders.set('x-pathname', pathname);
-      return NextResponse.next({ request: { headers: requestHeaders } });
-    }
-  }
 
   // Canonical client aliases must resolve before portal authentication or host rewrites.
   // This prevents old or guessed slugs from rendering a different tenant shell.
