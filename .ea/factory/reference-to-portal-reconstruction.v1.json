@@ -1,0 +1,22 @@
+{
+  "name": "EA Reference-to-Portal Reconstruction Process",
+  "version": 1,
+  "visualSourceOfTruth": "approved reference image",
+  "sequence": [
+    "Accept an approved website or portal reference image.",
+    "Lock the reference image as the visual source of truth.",
+    "Measure layout, colors, typography, spacing, imagery, and component boundaries.",
+    "Reconstruct the design without visual substitutions.",
+    "Overlay or rebuild functional EA Lego modules.",
+    "Compare the rendered result with the approved reference.",
+    "Correct visual differences automatically.",
+    "Test desktop and mobile.",
+    "Deploy a Preview.",
+    "Require visual and functional verification before certification."
+  ],
+  "rules": {
+    "mobile": "The approved reference remains the visual source of truth on mobile. Never substitute an alternate mobile composition unless the approved reference explicitly defines one.",
+    "functionality": "Visual similarity alone cannot certify a portal. Every visible control must have a real route, drawer, modal, or workflow.",
+    "production": "Preview certification must complete before production promotion."
+  }
+}
