@@ -1,0 +1,20 @@
+{
+  "schemaVersion":"1.0.0",
+  "program":"EA_ASSEMBLY_LINE_V1",
+  "run":4,
+  "status":"ENFORCED_CONTRACT",
+  "component":"DETERMINISTIC_PAGE_PORTAL_ASSEMBLY_ENGINE",
+  "purpose":"Turn the approved Run 3 Assembly Manifest into a complete tenant-scoped website and/or portal candidate by dispatching only through the frozen EA Factory Core, registered builders and certified capability implementations.",
+  "input":"ApprovedAssemblyManifest",
+  "entryGates":["manifest-valid","tenant-bound","product-plan-resolved","capability-versions-pinned","dependency-graph-valid","routes-resolved","cta-bindings-resolved","permissions-resolved","data-bindings-resolved","acceptance-contract-present"],
+  "assemblyLifecycle":["VERIFY_MANIFEST","CREATE_PROJECT_CONTEXT","CREATE_WORK_ORDERS","RESOLVE_BUILDERS","INSTALL_SHARED_CAPABILITIES_ONCE","ASSEMBLE_WEBSITE_IF_SELECTED","ASSEMBLE_PORTAL_IF_SELECTED","MATERIALIZE_MODULE_SURFACES","MATERIALIZE_NAVIGATION","MATERIALIZE_CANONICAL_ROUTES","WIRE_CTA_BINDINGS","WIRE_ROLE_PERMISSIONS","WIRE_DATA_BINDINGS","WIRE_WORKFLOWS","WIRE_INTEGRATIONS","APPLY_BRAND_CONTENT_ASSETS","APPLY_DESIGN_BINDING","GENERATE_RUNTIME_CONFIGURATION","GENERATE_ACCEPTANCE_PROBES","VERIFY_NO_UNRESOLVED_BINDINGS","EMIT_ASSEMBLED_CANDIDATE"],
+  "factoryCoreRules":{"useFrozenLauncher":true,"useFrozenOrchestrator":true,"useCapabilityRegistry":true,"useBuilderRegistry":true,"useProjectContext":true,"useWorkOrders":true,"useArtifacts":true,"newParallelOrchestratorForbidden":true},
+  "productAssembly":{"website":{"builder":"website","requiredWhenSelected":true},"portal":{"builder":"portal","requiredWhenSelected":true},"website+portal":{"builders":["website","portal"],"sharedCapabilitiesDeduplicated":true,"crossSurfaceBindingsRequired":true}},
+  "moduleAssemblyRules":{"moduleMustExistInRun2Catalog":true,"moduleMustResolveToCapabilities":true,"allCapabilitiesMustBeCertified":true,"oneCapabilityImplementationPerPinnedVersion":true,"menuItemWithoutSurfaceForbidden":true,"surfaceWithoutRouteForbidden":true,"ctaWithoutDestinationForbidden":true,"manualPostAssemblyWiringForbidden":true},
+  "automaticWiring":["navigation-to-surface","surface-to-route","website-cta-to-destination","checkout-to-payment","payment-to-order-or-entitlement","event-registration-to-attendee-record","appointment-to-calendar-record","course-purchase-to-entitlement","form-to-workflow","workflow-to-notification","role-to-permission","module-to-data-binding","module-to-required-integration"],
+  "outputs":["AssembledWebsiteCandidate","AssembledPortalCandidate","ResolvedRuntimeConfig","CanonicalRouteMap","ResolvedCTAMap","ResolvedPermissionMap","ResolvedDataBindingMap","ResolvedWorkflowMap","ResolvedIntegrationMap","AcceptanceProbeSet","AssemblyEvidence"],
+  "candidateRules":{"productionReady":false,"deploymentAuthorized":false,"allDeclaredFeaturesMaterialized":true,"noUndeclaredStandardFeatures":true,"noUnresolvedStandardBindings":true,"sameManifestSameAssemblyPlan":true},
+  "failClosedOn":["builder-missing","capability-not-certified","version-mismatch","dependency-cycle","route-collision","unresolved-cta","unresolved-permission","unresolved-data-binding","unresolved-workflow","missing-integration","cross-tenant-binding","manual-standard-module-override","undeclared-production-mutation"],
+  "handoff":{"next":"RUN_5_CERTIFICATION_ENGINE","rule":"Run 5 proves the assembled candidate and issues or denies release certification. Run 4 cannot self-certify or publish."},
+  "exitCriteria":["website and portal selections dispatch through registered EA builders","selected modules materialize automatically","shared capabilities install once","navigation surfaces and routes agree","all CTA destinations are resolved","permissions data workflows and integrations are wired","no standard module requires manual post-build wiring","acceptance probes are generated from the manifest","candidate is ready for automated certification"]
+}
