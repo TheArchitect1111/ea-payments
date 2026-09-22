@@ -41,7 +41,7 @@ export default function TarrisBouiePortal() {
 
       <section className="tb3-hero">
         <div className="tb3-hero-copy"><small>WELCOME TO</small><h1><span>TB3</span> HQ</h1><p className="tb3-kicker">PLAN. PREPARE. PERFORM. BUILD.</p><blockquote>“A bigger purpose<br/>than basketball.”</blockquote><cite>— TARRIS BOUIE III</cite><Link href="/portal/tarris-bouie/journey">LET&apos;S GET TO WORK <b>→</b></Link></div>
-        <div className="tb3-athlete-art" aria-label="Tarris Bouie athlete artwork"><span className="tb3-number">4</span><span className="tb3-silhouette">TB</span></div>
+        <div className="tb3-athlete-art"><span className="tb3-number">4</span><img className="tb3-athlete-photo" src="/assets/tarris/2026-09-01/hero.avif" alt="Tarris Bouie"/></div>
         <div className="tb3-purpose"><b>DISCIPLINE</b><b>DETERMINATION</b><b>DEVELOPMENT</b><b>DESTINY</b><i>Different<br/>On Purpose.</i><span>SAME VISION<br/>BIGGER PURPOSE</span></div>
       </section>
 
@@ -50,7 +50,7 @@ export default function TarrisBouiePortal() {
       )}</nav>
 
       <section className="tb3-dashboard">
-        <Link className="tb3-card tb3-feature" href="/portal/tarris-bouie/journey"><span className="tb3-label">FEATURED VIDEO</span><div className="tb3-video-mark">▶</div><h2>THE<br/>JOURNEY<br/>CONTINUES.</h2><small>ALABAMA · 4</small></Link>
+        <Link className="tb3-card tb3-feature" href="/portal/tarris-bouie/journey"><img className="tb3-card-bg" src="/assets/tarris/2026-09-01/journey-action.avif" alt="Tarris Bouie game highlight"/><span className="tb3-label">FEATURED VIDEO</span><div className="tb3-video-mark">▶</div><h2>THE<br/>JOURNEY<br/>CONTINUES.</h2><small>ALABAMA · 4</small></Link>
 
         <article className="tb3-card tb3-focus"><header><span>MY FOCUS</span><Link href="/portal/tarris-bouie/journey">Edit →</Link></header>{[['85','Training Plan'],['74','Academic Goals'],['62','NIL / Brand'],['90','Personal Growth']].map(([n,t])=><div className="tb3-focus-row" key={t}><i style={{'--p':`${n}%`} as React.CSSProperties}>{n}%</i><p><b>{t}</b><small>On Track</small></p></div>)}</article>
 
@@ -58,12 +58,12 @@ export default function TarrisBouiePortal() {
 
         <article className="tb3-card tb3-opps"><header><span>OPPORTUNITIES</span><Link href="/portal/tarris-bouie/opportunities">View All →</Link></header>{[['NIKE','Nike Youth Campaign'],['G','Gatorade Student Series'],['◎','Speaking Engagement'],['♟','Camp Appearance']].map(([logo,t])=><Link href="/portal/tarris-bouie/opportunities" key={t}><strong>{logo}</strong><p><b>{t}</b><small>View opportunity</small></p><em>NEW</em></Link>)}</article>
 
-        <article className="tb3-card tb3-media"><header><span>RECENT MEDIA</span><Link href="/portal/tarris-bouie/media">View All →</Link></header><div>{media.map(([title,time],i)=><Link href="/portal/tarris-bouie/media" key={title}><span className={`tb3-thumb tone-${i}`}><b>▶</b></span><strong>{title}</strong><small>{time}</small></Link>)}</div></article>
+        <article className="tb3-card tb3-media"><header><span>RECENT MEDIA</span><Link href="/portal/tarris-bouie/media">View All →</Link></header><div>{media.map(([title,time],i)=><Link href="/portal/tarris-bouie/media" key={title}><span className={`tb3-thumb tone-${i}`}><img src={["/assets/tarris/2026-09-01/journey-action.avif","/assets/tarris/2026-09-01/film.avif","/assets/tarris/2026-09-01/close.avif","/assets/tarris/2026-09-01/community.avif"][i]} alt=""/><b>▶</b></span><strong>{title}</strong><small>{time}</small></Link>)}</div></article>
 
         <article className="tb3-card tb3-messages"><header><span>MESSAGES</span><Link href="/portal/tarris-bouie/messages">View All →</Link></header>{[['C','Coach Williams','Great work this week. Keep pushing.'],['N','NIL Agency','New opportunity available.'],['A','Academic Advisor','Your transcript has been updated.'],['M','Mentor','Proud of your progress. Keep going.']].map(([initial,name,msg])=><Link href="/portal/tarris-bouie/messages" key={name}><i>{initial}</i><p><b>{name}</b><small>{msg}</small></p></Link>)}</article>
 
-        <Link className="tb3-card tb3-eva" href="/portal/tarris-bouie/eva"><span className="tb3-eva-face">EVA</span><div><h3>ASK EVA</h3><p>Your AI Assistant</p><ul><li>Get answers</li><li>Update content</li><li>Track opportunities</li><li>Manage requests</li></ul><b>CHAT WITH EVA →</b></div></Link>
-        <Link className="tb3-card tb3-tomorrow" href="/portal/tarris-bouie/journey"><div><h3>A GREATER<br/>TOMORROW.</h3><p>STUDENT. ATHLETE. BRAND.<br/>A PLATFORM. A GENERATION.</p></div><strong>4</strong></Link>
+        <Link className="tb3-card tb3-eva" href="/portal/tarris-bouie/eva"><span className="tb3-eva-face"><img src="/assets/tarris/2026-09-01/journey-portrait.avif" alt="Eva assistant"/>EVA</span><div><h3>ASK EVA</h3><p>Your AI Assistant</p><ul><li>Get answers</li><li>Update content</li><li>Track opportunities</li><li>Manage requests</li></ul><b>CHAT WITH EVA →</b></div></Link>
+        <Link className="tb3-card tb3-tomorrow" href="/portal/tarris-bouie/journey"><img className="tb3-card-bg" src="/assets/tarris/2026-09-01/lifestyle.avif" alt="Tarris Bouie future"/><div><h3>A GREATER<br/>TOMORROW.</h3><p>STUDENT. ATHLETE. BRAND.<br/>A PLATFORM. A GENERATION.</p></div><strong>4</strong></Link>
         <Link className="tb3-card tb3-store" href="/portal/tarris-bouie/store"><div><b><span>TB3</span> STORE</b><p>Rep the Vision.</p></div><div className="tb3-merch"><i>TB3</i><i>TB3</i><i>4</i></div><strong>SHOP NOW →</strong></Link>
       </section>
 
