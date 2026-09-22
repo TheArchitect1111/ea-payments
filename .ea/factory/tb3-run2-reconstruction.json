@@ -1,0 +1,38 @@
+{
+  "project": "TB3",
+  "run": 2,
+  "mode": "reference-to-functional-reconstruction",
+  "reference": {
+    "canonicalName": "TB3-Approved-Website-Design.png",
+    "source": "/EA Factory Assets/TB3-Approved-Website-Design.png",
+    "contentHash": "40c0952c36d9a50639b86f8a28995b5b58b1f2251bf87ce16755c304c85e476b",
+    "rule": "The approved reference is the visual source of truth. It is a blueprint, not a background image or poster layer."
+  },
+  "target": {
+    "route": "/experience/tarris-bouie",
+    "framework": "Next.js/React",
+    "composition": ["TB3/Tarris hero", "Athlete", "Story", "Brand", "NIL", "Community", "Media/Highlights", "Enterprise/Future", "Player One HQ bridge", "TB3 Store"],
+    "portalDestination": "/portal/login?next=/portal/tarris-bouie"
+  },
+  "hardRules": [
+    "Do not redesign or substitute the approved composition.",
+    "Do not embed the full reference image as the website implementation.",
+    "Build real semantic HTML/CSS/React components.",
+    "Preserve approved imagery and identity assets wherever available.",
+    "Do not invent an alternate mobile composition.",
+    "Do not touch production during Run 2.",
+    "Do not certify visual success by human assertion alone."
+  ],
+  "visualLoop": {
+    "engine": "Playwright + BackstopJS",
+    "sequence": ["render", "capture", "compare", "localize-diff", "targeted-correction", "repeat"],
+    "acceptance": "Continue correction until configured visual threshold passes at certified desktop and mobile viewports."
+  },
+  "run2Exit": [
+    "real component reconstruction exists",
+    "reference comparison is executable",
+    "desktop and mobile are measured",
+    "visual differences are reported rather than guessed",
+    "no production promotion"
+  ]
+}
