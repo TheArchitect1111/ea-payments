@@ -1,0 +1,55 @@
+{
+  "schemaVersion": "1.0.0",
+  "program": "EA_ASSEMBLY_LINE_V1",
+  "run": 2,
+  "status": "CATALOG_BASELINE",
+  "purpose": "Define the reusable client-facing modules and shared underlying capabilities used to assemble EA websites and portals without rebuilding common systems per client.",
+  "principles": {
+    "menuItemsAreNotCapabilities": true,
+    "sharedCapabilitiesAreBuiltOnce": true,
+    "modulesComposeCapabilities": true,
+    "versionPinningRequired": true,
+    "certificationRequiredBeforeProductionUse": true,
+    "clientSpecificCodeIsExceptionNotDefault": true
+  },
+  "coreCapabilities": [
+    "identity-auth", "roles-permissions", "tenant-data", "navigation", "content", "forms", "files", "search", "notifications", "messaging", "calendar", "booking", "payments", "checkout", "orders", "subscriptions", "crm", "workflow", "analytics", "reporting", "eva", "audit-log", "integrations"
+  ],
+  "moduleCatalog": {
+    "core": ["dashboard", "profile", "settings", "eva", "notifications", "support"],
+    "sell": ["eshop", "products", "services", "checkout", "orders", "subscriptions", "donations", "gift-cards", "coupons"],
+    "events": ["events", "registration-ticketing", "check-in", "attendees", "vendors-sponsors", "event-calendar"],
+    "book": ["appointments", "calendar", "classes", "consultations", "reservations", "waitlist"],
+    "engage": ["crm-clients", "leads", "messages", "community", "memberships", "referrals", "reviews-testimonials", "loyalty-rewards"],
+    "deliver": ["projects", "tasks", "client-requests", "workflows", "documents", "contracts", "forms", "file-uploads"],
+    "teach": ["courses-lms", "lessons", "resources", "certifications", "assessments", "progress-tracking"],
+    "hire": ["jobs-careers", "applications", "staff-team", "onboarding", "staff-scheduling"],
+    "market": ["email-campaigns", "sms", "social-content", "blog-news", "media-library", "promotions", "lead-magnets"],
+    "measure": ["analytics-dashboard", "reports", "impact-outcomes", "surveys", "financial-overview"],
+    "specialized": ["fundraising", "grants", "volunteers", "athlete-nil", "opportunities", "training", "academics", "sponsorships"]
+  },
+  "compositions": {
+    "eshop": ["products", "checkout", "payments", "orders", "notifications"],
+    "events": ["content", "forms", "calendar", "payments", "notifications"],
+    "appointments": ["booking", "calendar", "payments", "notifications"],
+    "courses-lms": ["identity-auth", "content", "files", "progress-tracking", "payments", "notifications"],
+    "donations": ["forms", "payments", "crm", "notifications", "reporting"],
+    "memberships": ["identity-auth", "roles-permissions", "subscriptions", "payments", "content", "notifications"],
+    "contracts": ["documents", "forms", "files", "notifications", "audit-log"],
+    "crm-clients": ["tenant-data", "forms", "search", "messaging", "workflow", "analytics"]
+  },
+  "assemblyContract": {
+    "selectionInput": "client manifest checkbox/module selection",
+    "automaticOutputs": ["navigation-entry", "responsive-surface", "permissions", "data-bindings", "required-workflows", "required-integrations", "website-cta-binding-when-applicable", "acceptance-contract"],
+    "unsupportedSelection": "fail-closed-and-route-to-capability-certification",
+    "duplicateCapabilityImplementation": "forbidden-without-versioned-exception"
+  },
+  "certificationStates": ["DISCOVERED", "IMPLEMENTED", "CONTRACT_TESTED", "INTEGRATION_TESTED", "CERTIFIED", "DEPRECATED"],
+  "run2ExitCriteria": [
+    "master module catalog exists",
+    "shared capability catalog exists",
+    "common module compositions are explicit",
+    "new clients select modules instead of requesting duplicate implementations",
+    "production assembly may only consume CERTIFIED capability versions"
+  ]
+}
