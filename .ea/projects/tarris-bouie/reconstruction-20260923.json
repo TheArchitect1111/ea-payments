@@ -1,0 +1,53 @@
+{
+  "client": "tarris-bouie-iii",
+  "build": "tb3-reference-reconstruction-20260923",
+  "status": "BUILDING",
+  "sequence": ["website", "portal", "wiring", "certification"],
+  "source_lock": {
+    "website": {
+      "artifact": "tb3-reset-exact-image.html",
+      "embedded_reference_sha256": "dd5fc5488c3af67f78bd2bc45fe8f51482ec723f4b00508740f8b09003b94fbd",
+      "route": "/experience/tarris-bouie"
+    },
+    "portal": {
+      "artifact": "tb3-portal-clean-no-overlay.html",
+      "embedded_reference_sha256": "5d16818db909bd25f54dd05bc730fd0ee619c645a18209c24f1a92477c962791",
+      "route": "/portal/tarris-bouie"
+    }
+  },
+  "temporary_image_policy": {
+    "face_accuracy_final": false,
+    "replace_without_layout_rebuild": true,
+    "slots": [
+      "website.hero.primary",
+      "website.athlete.action",
+      "website.story.primary",
+      "website.brand.primary",
+      "website.media.primary",
+      "website.community.primary",
+      "portal.hero.primary",
+      "portal.media.primary"
+    ]
+  },
+  "website_cta_contract": {
+    "ENTER_TB3_HQ": "/portal/login?next=/portal/tarris-bouie",
+    "WATCH_STORY": "#media",
+    "MEDIA": "/portal/tarris-bouie/media",
+    "STORE": "/portal/tarris-bouie/store"
+  },
+  "portal_modules": [
+    "home", "journey", "academics", "training", "nil-brand", "opportunities",
+    "media", "calendar", "documents", "community", "messages", "eva", "settings", "store"
+  ],
+  "release_gates": {
+    "website_visual": "PENDING",
+    "website_responsive": "PENDING",
+    "website_functional": "PENDING",
+    "portal_visual": "PENDING",
+    "portal_responsive": "PENDING",
+    "portal_functional": "PENDING",
+    "website_portal_wiring": "PENDING",
+    "human_approval": "PENDING"
+  },
+  "production_policy": "DO_NOT_PROMOTE_UNTIL_ALL_GATES_PASS"
+}
