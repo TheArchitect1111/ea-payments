@@ -1,0 +1,35 @@
+{
+  "client": "amanda-catherine",
+  "status": "OFFICIAL_LOCKED",
+  "updated": "2026-09-23",
+  "source_of_truth": {
+    "page": {
+      "vercel_project_name": "amanda-catherine-4",
+      "vercel_project_id": "prj_x53IeeX3G9inkYUg87NJTHaXT9nw",
+      "role": "OFFICIAL_PAGE",
+      "allowed": true
+    },
+    "portal": {
+      "vercel_project_name": "amanda-portal-with-amanda-photo",
+      "vercel_project_id": "prj_eEOLeo7Mez3CBz9aHFfZigbsa31S",
+      "role": "OFFICIAL_PORTAL",
+      "allowed": true
+    }
+  },
+  "gate": {
+    "mode": "DENY_BY_DEFAULT",
+    "rule": "Amanda page or portal work may use only the two Vercel project IDs listed in source_of_truth. Any other Amanda project/deployment is retired and must fail source selection, reconstruction, wiring, QA, promotion, or deployment.",
+    "fallback_allowed": false,
+    "auto_discovery_allowed": false,
+    "legacy_allowed": false
+  },
+  "retired_project_names": [
+    "amanda-portal-real-final",
+    "amanda-portal-fixed-v2",
+    "amanda-portal-runnable-1",
+    "amanda-catherine-portal",
+    "amanda-catherine-preview",
+    "amanda-catherine-3",
+    "amanda-catherine"
+  ]
+}
