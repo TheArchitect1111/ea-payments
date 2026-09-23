@@ -1,13 +1,30 @@
 import Link from 'next/link';
 import { listPortalFormSubmissions } from '@/lib/portal-forms/store';
-import { amandaApplicationRoute } from '@/lib/amanda-catherine/application-routing';
-const actions=[['Appointments / Jane','appointments'],['AesthetiKine Academy','academy'],['Practitioner Starter Kit','practitioner-kit'],['LIFELINE','lifeline'],['Empower Art Collective','empower-art'],['Founder Advisory','advisory'],['Founder Clarity','clarity'],['Speaking & Media','speaking'],['The Entrepreneurial Artist','book'],['RIMAN Canada','riman'],['Reviews & Testimonials','reviews'],['Update Website','updates'],['Ask Eva','eva']] as const;
-export const metadata={title:'Amanda Catherine · Owner Portal V2'};
+
+export const metadata={title:'Amanda Catherine Portal'};
+const quick=[
+ ['◫','Book Appointment','/portal/amanda-catherine/owner/appointments'],
+ ['◍','Add New Client','/portal/amanda-catherine/owner/clients'],
+ ['▭','Create Program','/portal/amanda-catherine/owner/academy'],
+ ['⧉','View Orders','/portal/amanda-catherine/owner/insights'],
+ ['◫','Send Message','/portal/amanda-catherine/owner/eva'],
+ ['↗','Open Marketing Kit','/portal/amanda-catherine/owner/marketing']
+] as const;
+
 export default async function Page(){
-  const applications=(await listPortalFormSubmissions('amanda-catherine',{kind:'application'}))
-    .filter((item)=>['founder-advisory','speaking-media','lifeline-media-guest','partner-vendor-application'].includes(String(item.payload?.formId)))
-    .filter((item)=>item.payload?.formId!=='partner-vendor-application'||item.payload?.program==='lifeline');
-  const active=applications.filter((item)=>item.status==='submitted'||item.status==='reviewed');
-  const queueCounts=new Map<string,{label:string;href:string;count:number}>();
-  for(const item of active){const route=amandaApplicationRoute(item.payload?.formId,item.payload?.program);const current=queueCounts.get(route.queueHref);queueCounts.set(route.queueHref,{label:route.queueLabel,href:route.queueHref,count:(current?.count||0)+1});}
-  return <div className="ac-dashboard"><header className="ac-topbar"><div><small>AESTHETIKINE STUDIO LAB · OWNER PORTAL</small><h1>Welcome, Amanda.</h1><p>Your care, academy, founder work, media and creative business in one calm place.</p></div><div className="ac-status">Studio Lab · V2</div></header><section className="ac-hero"><div className="ac-hero-copy"><span className="ac-kicker">AESTHETIKINE STUDIO LAB</span><h2>Make space for the work that matters.</h2><p>The public experience and owner portal now share the same business map.</p></div><div className="ac-hero-art"><span>restore · learn · create</span></div></section><section><div className="ac-section-title"><div><span>APPLICATION ACTIVITY</span><h2>Requests needing attention</h2></div><p>{active.length} active</p></div>{active.length?<div className="ac-actions">{Array.from(queueCounts.values()).map((queue)=><Link href={queue.href} key={queue.href}>{queue.label}<b>{queue.count} active →</b></Link>)}</div>:<article className="ac-card"><span className="ac-eyebrow">ALL CAUGHT UP</span><h3>No active applications.</h3><p>New Founder Advisory, Speaking and LIFELINE requests will appear here automatically.</p></article>}</section><section><div className="ac-section-title"><div><span>OPERATE</span><h2>Quick Actions</h2></div><p>Public offerings mirrored inside the portal.</p></div><div className="ac-actions">{actions.map(([label,slug])=><Link href={`/portal/amanda-catherine/owner/${slug}`} key={slug}>{label}<b>↗</b></Link>)}</div></section><section className="ac-grid-two"><article className="ac-card"><span className="ac-eyebrow">RESTORE</span><h3>Appointments & Jane</h3><p>Clinical booking stays connected to Jane rather than creating a duplicate calendar.</p><Link href="/portal/amanda-catherine/owner/appointments">Manage pathway →</Link></article><article className="ac-card ac-studio"><span className="ac-eyebrow">LEARN + CREATE</span><h3>One operating map.</h3><p>Academy, Practitioner Starter Kit, LIFELINE, Empower Art Collective, Founder Advisory, Founder Clarity, Speaking, The Entrepreneurial Artist, RIMAN and Reviews now have explicit portal destinations.</p></article></section></div>}
+ const submissions=await listPortalFormSubmissions('amanda-catherine',{});
+ const applications=submissions.filter((x)=>x.kind==='application');
+ const active=applications.filter((x)=>x.status==='submitted'||x.status==='reviewed');
+ return <div className="approved-dashboard">
+  <section className="approved-hero"><img src="/amanda-catherine/amanda-catherine-founder.webp" alt="Amanda Catherine"/><div><h1>Welcome, Amanda</h1><p>Create Beauty. Change Lives. Build Legacy.</p><blockquote>“Wellness is not just a service, it’s a calling.”</blockquote></div></section>
+  <section><h2>Quick Actions</h2><div className="approved-quick">{quick.map(([icon,label,href])=><Link href={href} key={href}><span>{icon}</span><b>{label}</b></Link>)}</div></section>
+  <div className="approved-grid">
+   <section className="approved-card"><div className="approved-card-head"><h2>Business Overview</h2><span>Last 30 Days ▾</span></div><div className="approved-metrics"><div><b>{submissions.length}</b><small>Total Activity</small></div><div><b>{active.length}</b><small>New Requests</small></div><div><b>4</b><small>Academy Programs</small></div><div><b>Live</b><small>Page + Portal</small></div></div></section>
+   <section className="approved-card"><div className="approved-card-head"><h2>Recent Activity</h2><Link href="/portal/amanda-catherine/owner/clients">View All →</Link></div><p>{active.length?`${active.length} active application${active.length===1?'':'s'} need attention.`:'No active applications need attention.'}</p><p>Website enrollment is connected to secure checkout and learning access.</p></section>
+   <section className="approved-card"><div className="approved-card-head"><h2>Today&apos;s Appointments</h2><Link href="/portal/amanda-catherine/owner/appointments">View All →</Link></div><p>Appointments are managed through Amanda&apos;s Jane pathway.</p><Link className="approved-pill" href="/portal/amanda-catherine/owner/appointments">Open Appointments</Link></section>
+   <section className="approved-card"><div className="approved-card-head"><h2>Programs & Services</h2><Link href="/portal/amanda-catherine/owner/academy">Manage →</Link></div><div className="approved-programs"><Link href="/portal/amanda-catherine/owner/academy">AesthetiKine Academy</Link><Link href="/portal/amanda-catherine/owner/advisory">Founder Advisory</Link><Link href="/portal/amanda-catherine/owner/speaking">Speaking</Link><Link href="/portal/amanda-catherine/owner/lifeline">LIFELINE</Link></div></section>
+   <section className="approved-card approved-impact"><h2>❤ Your Impact</h2><div><b>{submissions.length}</b><small>Recorded interactions</small><b>4</b><small>Programs active</small><b>1</b><small>Connected portal</small></div><p>“When you pour into others, you create a ripple that never ends.”</p></section>
+   <section className="approved-card approved-riman"><h2>RIMAN</h2><p>Real Science. Real Beauty. Real You.</p><img src="/amanda-catherine/riman-products.jpg" alt="RIMAN products"/><Link className="approved-pill" href="/portal/amanda-catherine/owner/riman">Manage Products →</Link></section>
+  </div>
+ </div>;
+}
