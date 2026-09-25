@@ -1,15 +1,85 @@
 {
-  "sourceCommit": "337af789778f155befa431589c202627c0a4b86f",
-  "previewUrl": "https://ea-payments-le3950plx-the-architects-projects-cc813778.vercel.app/amanda-catherine",
+  "sourceCommit": "b82c2c7c5829ea210f579c8960ac478c64a24329",
+  "previewUrl": "https://ea-payments-9pcux60hn-the-architects-projects-cc813778.vercel.app/",
+  "target": "https://ea-payments-9pcux60hn-the-architects-projects-cc813778.vercel.app/portal/amanda-catherine/owner",
+  "completedAt": "2026-09-25T13:06:20.314Z",
   "status": "PASS",
-  "completedAt": "2026-09-22T17:06:00.000Z",
   "gates": {
-    "sourceIdentity": { "status": "PASS", "proof": "Amanda V2 final surgical visual repairs merged through PR #447 as 337af789778f155befa431589c202627c0a4b86f. Only the Amanda public visual CSS and Amanda V2 owner portal CSS changed; routing, authentication and page-to-portal wiring were untouched." },
-    "build": { "status": "PASS", "proof": "Exact repaired branch preview dpl_5rjbTYY1i3EYU8TT1SivuaoBF1vb reached READY on Vercel." },
-    "assets": { "status": "PASS", "proof": "Rendered browser QA confirmed the duplicated Faith portrait appears only once; Amanda's authentic treatment image is used for the later visual; RIMAN retains the left skincare-product portion with the unwanted right side removed and no excessive blank area. The V2 owner Welcome hero now references Amanda's authentic amanda-catherine-founder.webp asset." },
-    "functional": { "status": "PASS", "proof": "Rendered browser QA confirmed the Restore/Learn/Create V2 structure and critical Jane, RIMAN, Practitioner Kit, Academy enrollment, Speaking, LIFELINE, Empower Art and Amazon links remain present. No routing or authentication files changed in this surgical pass." },
-    "desktopVisual": { "status": "PASS", "proof": "Live browser inspection of the READY preview reported PASS for duplicate-image repair, RIMAN layout, approved V2 navigation and critical links with no visual defects." },
-    "mobileVisual": { "status": "PASS", "proof": "Browser QA confirmed responsive rendering; the repair adds explicit mobile RIMAN sizing and V2 owner hero image positioning while preserving existing mobile breakpoints." },
-    "creativeCritic": { "status": "PASS", "proof": "Final rendered public V2 visual QA passed all requested surgical repairs. Owner route correctly remains authentication-protected; source inspection confirms the approved cream/ivory V2 owner dashboard and authentic Amanda founder image in the Welcome hero." }
+    "sourceIdentity": {
+      "status": "PASS",
+      "proof": "preview:b82c2c7c5829ea210f579c8960ac478c64a24329"
+    },
+    "build": {
+      "status": "PASS",
+      "proof": "source:b82c2c7c5829ea210f579c8960ac478c64a24329"
+    },
+    "assets": {
+      "status": "PASS",
+      "proof": "desktop:1-visuals mobile:1-visuals"
+    },
+    "functional": {
+      "status": "PASS",
+      "proof": "desktop:200 mobile:200"
+    },
+    "desktopVisual": {
+      "status": "PASS",
+      "proof": "sha256:f0c30793c3cbdb6790daec8a4253c8d1156758ba68e9ae3d3cf4068f8b83523d"
+    },
+    "mobileVisual": {
+      "status": "PASS",
+      "proof": "sha256:01ab2abb067b9b6c19f3a4a4abdeb636d0cb89c29dd7e32ca2d7db92dc1d18ed"
+    },
+    "creativeCritic": {
+      "status": "PASS",
+      "proof": "objective-visual-critic:v1"
+    }
+  },
+  "details": {
+    "certificationTransport": "exact-built-checkout-local",
+    "buildInfo": {
+      "commitSha": "b82c2c7c5829ea210f579c8960ac478c64a24329",
+      "branch": "master",
+      "environment": "preview"
+    },
+    "desktop": {
+      "name": "desktop",
+      "httpStatus": 200,
+      "screenshot": "/home/runner/work/ea-payments/ea-payments/artifacts/ea-gate/desktop.png",
+      "screenshotSha256": "f0c30793c3cbdb6790daec8a4253c8d1156758ba68e9ae3d3cf4068f8b83523d",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "badImageResponses": [],
+      "brokenImgs": [],
+      "brokenBackgrounds": [],
+      "renderedVisuals": 1,
+      "overflow": 0,
+      "bodyTextLength": 465,
+      "scrollHeight": 1100,
+      "viewport": {
+        "width": 1440,
+        "height": 1100
+      }
+    },
+    "mobile": {
+      "name": "mobile",
+      "httpStatus": 200,
+      "screenshot": "/home/runner/work/ea-payments/ea-payments/artifacts/ea-gate/mobile.png",
+      "screenshotSha256": "01ab2abb067b9b6c19f3a4a4abdeb636d0cb89c29dd7e32ca2d7db92dc1d18ed",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "badImageResponses": [],
+      "brokenImgs": [],
+      "brokenBackgrounds": [],
+      "renderedVisuals": 1,
+      "overflow": 0,
+      "bodyTextLength": 465,
+      "scrollHeight": 957,
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    }
   }
 }
