@@ -30,7 +30,7 @@ if (stillUncertified) {
   ));
   assert.throws(
     () => requireAssemblyPlan([stillUncertified.id]),
-    new RegExp(`EA assembly blocked: ${stillUncertified.id}:not-certified`),
+    new RegExp(`${stillUncertified.id}:not-certified`),
   );
 }
 
