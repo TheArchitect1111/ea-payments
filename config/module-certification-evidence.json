@@ -1,7 +1,7 @@
 {
   "version": 2,
   "status": "certified-bin",
-  "policy": "Exact-version certificate authority. Evidence references are executable repository contracts; CI validates existence, coverage and assembly admission.",
+  "policy": "Fail-closed exact-version certificate authority. This ledger is the only step that may promote a module to reusable certified status after executable evidence validation.",
   "requiredEvidenceClasses": [
     "route-render",
     "responsive-ui",
