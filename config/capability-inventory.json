@@ -20,7 +20,7 @@
       "id": "dashboard",
       "name": "Dashboard",
       "class": "core",
-      "assemblyStatus": "review-required",
+      "assemblyStatus": "certified",
       "version": 1,
       "ui": {
         "surface": "portal-home",
@@ -125,7 +125,7 @@
       "id": "update-hub",
       "name": "Update Hub",
       "class": "core",
-      "assemblyStatus": "review-required",
+      "assemblyStatus": "certified",
       "version": 1,
       "ui": {
         "surface": "portal-module",
