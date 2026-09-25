@@ -58,6 +58,8 @@ jobs:
         run: npx tsx scripts/test-modular-assembly-run6.ts
       - name: Release boundary Run A
         run: node scripts/test-release-boundary-run-a.mjs
+      - name: Whole-system preflight
+        run: node scripts/certify-preflight.mjs repository
 
   platform-build:
     name: platform-build
