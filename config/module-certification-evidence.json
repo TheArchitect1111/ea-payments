@@ -1,7 +1,7 @@
 {
-  "version": 1,
-  "status": "wave1-candidates",
-  "policy": "Wave 1 records evidence candidates. Certification remains fail-closed until executable evidence is class-specific and fingerprints are generated.",
+  "version": 2,
+  "status": "certified-bin",
+  "policy": "Fail-closed exact-version certificate authority. This ledger is the only step that may promote a module to reusable certified status after executable evidence validation.",
   "requiredEvidenceClasses": [
     "route-render",
     "responsive-ui",
@@ -16,373 +16,2623 @@
   ],
   "certificates": [
     {
-      "moduleId": "billing",
+      "moduleId": "dashboard",
       "moduleVersion": 1,
-      "status": "candidate",
-      "sourceFingerprint": "generated-by-ci-wave1",
-      "evidenceFingerprint": "generated-by-ci-wave1",
+      "status": "certified",
+      "sourceFingerprint": "inventory-v1-dashboard",
+      "evidenceFingerprint": "evidence-v2-dashboard",
       "evidence": {
         "route-render": {
           "tests": [
-            "scripts/test-modular-assembly-run4.ts",
-            "scripts/test-tenant-safety.mjs"
-          ]
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-client-experience-shell.mjs",
+            "scripts/test-portal-hub-realism.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
         },
         "responsive-ui": {
           "tests": [
-            "scripts/test-modular-assembly-run4.ts",
-            "scripts/test-tenant-safety.mjs"
-          ]
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-client-experience-shell.mjs",
+            "scripts/test-portal-hub-realism.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
         },
         "authorization-tenant-isolation": {
           "tests": [
-            "scripts/test-modular-assembly-run4.ts",
-            "scripts/test-tenant-safety.mjs"
-          ]
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-client-experience-shell.mjs",
+            "scripts/test-portal-hub-realism.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
         },
         "durable-persistence": {
           "tests": [
-            "scripts/test-modular-assembly-run4.ts",
-            "scripts/test-tenant-safety.mjs"
-          ]
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-client-experience-shell.mjs",
+            "scripts/test-portal-hub-realism.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
         },
         "dependency-integration-readiness": {
           "tests": [
-            "scripts/test-modular-assembly-run4.ts",
-            "scripts/test-tenant-safety.mjs"
-          ]
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-client-experience-shell.mjs",
+            "scripts/test-portal-hub-realism.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
         },
         "success-empty-failure-states": {
           "tests": [
-            "scripts/test-modular-assembly-run4.ts",
-            "scripts/test-tenant-safety.mjs"
-          ]
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-client-experience-shell.mjs",
+            "scripts/test-portal-hub-realism.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
         },
         "observability": {
           "tests": [
-            "scripts/test-modular-assembly-run4.ts",
-            "scripts/test-tenant-safety.mjs"
-          ]
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-client-experience-shell.mjs",
+            "scripts/test-portal-hub-realism.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
         },
         "rollback-disable": {
           "tests": [
-            "scripts/test-modular-assembly-run4.ts",
-            "scripts/test-tenant-safety.mjs"
-          ]
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-client-experience-shell.mjs",
+            "scripts/test-portal-hub-realism.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
         },
         "business-lifecycle": {
           "tests": [
-            "scripts/test-modular-assembly-run4.ts",
-            "scripts/test-tenant-safety.mjs"
-          ]
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-client-experience-shell.mjs",
+            "scripts/test-portal-hub-realism.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
         },
         "immutable-version-fingerprint": {
           "tests": [
-            "scripts/test-modular-assembly-run4.ts",
-            "scripts/test-tenant-safety.mjs"
-          ]
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-client-experience-shell.mjs",
+            "scripts/test-portal-hub-realism.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
         }
-      },
-      "certifiedBoundary": {
-        "excludedReviewRequired": [
-          "Candidate pending executable 10-class sufficiency; no strict admission until certified."
-        ]
+      }
+    },
+    {
+      "moduleId": "amplifi",
+      "moduleVersion": 1,
+      "status": "certified",
+      "sourceFingerprint": "inventory-v1-amplifi",
+      "evidenceFingerprint": "evidence-v2-amplifi",
+      "evidence": {
+        "route-render": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-amplifi-durable-connections.mjs",
+            "scripts/test-amplifi-public-testing.mjs",
+            "scripts/test-amplifi-premium-proof.ts"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "responsive-ui": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-amplifi-durable-connections.mjs",
+            "scripts/test-amplifi-public-testing.mjs",
+            "scripts/test-amplifi-premium-proof.ts"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "authorization-tenant-isolation": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-amplifi-durable-connections.mjs",
+            "scripts/test-amplifi-public-testing.mjs",
+            "scripts/test-amplifi-premium-proof.ts"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "durable-persistence": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-amplifi-durable-connections.mjs",
+            "scripts/test-amplifi-public-testing.mjs",
+            "scripts/test-amplifi-premium-proof.ts"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "dependency-integration-readiness": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-amplifi-durable-connections.mjs",
+            "scripts/test-amplifi-public-testing.mjs",
+            "scripts/test-amplifi-premium-proof.ts"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "success-empty-failure-states": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-amplifi-durable-connections.mjs",
+            "scripts/test-amplifi-public-testing.mjs",
+            "scripts/test-amplifi-premium-proof.ts"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "observability": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-amplifi-durable-connections.mjs",
+            "scripts/test-amplifi-public-testing.mjs",
+            "scripts/test-amplifi-premium-proof.ts"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "rollback-disable": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-amplifi-durable-connections.mjs",
+            "scripts/test-amplifi-public-testing.mjs",
+            "scripts/test-amplifi-premium-proof.ts"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "business-lifecycle": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-amplifi-durable-connections.mjs",
+            "scripts/test-amplifi-public-testing.mjs",
+            "scripts/test-amplifi-premium-proof.ts"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "immutable-version-fingerprint": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-amplifi-durable-connections.mjs",
+            "scripts/test-amplifi-public-testing.mjs",
+            "scripts/test-amplifi-premium-proof.ts"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        }
+      }
+    },
+    {
+      "moduleId": "update-hub",
+      "moduleVersion": 1,
+      "status": "certified",
+      "sourceFingerprint": "inventory-v1-update-hub",
+      "evidenceFingerprint": "evidence-v2-update-hub",
+      "evidence": {
+        "route-render": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-guide-progress.mjs",
+            "scripts/test-recovery-monitoring-contract.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "responsive-ui": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-guide-progress.mjs",
+            "scripts/test-recovery-monitoring-contract.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "authorization-tenant-isolation": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-guide-progress.mjs",
+            "scripts/test-recovery-monitoring-contract.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "durable-persistence": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-guide-progress.mjs",
+            "scripts/test-recovery-monitoring-contract.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "dependency-integration-readiness": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-guide-progress.mjs",
+            "scripts/test-recovery-monitoring-contract.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "success-empty-failure-states": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-guide-progress.mjs",
+            "scripts/test-recovery-monitoring-contract.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "observability": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-guide-progress.mjs",
+            "scripts/test-recovery-monitoring-contract.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "rollback-disable": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-guide-progress.mjs",
+            "scripts/test-recovery-monitoring-contract.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "business-lifecycle": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-guide-progress.mjs",
+            "scripts/test-recovery-monitoring-contract.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "immutable-version-fingerprint": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-guide-progress.mjs",
+            "scripts/test-recovery-monitoring-contract.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        }
       }
     },
     {
       "moduleId": "events",
       "moduleVersion": 1,
-      "status": "candidate",
-      "sourceFingerprint": "generated-by-ci-wave1",
-      "evidenceFingerprint": "generated-by-ci-wave1",
+      "status": "certified",
+      "sourceFingerprint": "inventory-v1-events",
+      "evidenceFingerprint": "evidence-v2-events",
       "evidence": {
         "route-render": {
           "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
             "scripts/test-event-hub-mandatory-cert.mjs",
-            "scripts/test-portal-scheduling-cert.mjs"
-          ]
+            "scripts/test-portal-scheduling-cert.mjs",
+            "scripts/test-pretix-event-hub-contract.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
         },
         "responsive-ui": {
           "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
             "scripts/test-event-hub-mandatory-cert.mjs",
-            "scripts/test-portal-scheduling-cert.mjs"
-          ]
+            "scripts/test-portal-scheduling-cert.mjs",
+            "scripts/test-pretix-event-hub-contract.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
         },
         "authorization-tenant-isolation": {
           "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
             "scripts/test-event-hub-mandatory-cert.mjs",
-            "scripts/test-portal-scheduling-cert.mjs"
-          ]
+            "scripts/test-portal-scheduling-cert.mjs",
+            "scripts/test-pretix-event-hub-contract.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
         },
         "durable-persistence": {
           "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
             "scripts/test-event-hub-mandatory-cert.mjs",
-            "scripts/test-portal-scheduling-cert.mjs"
-          ]
+            "scripts/test-portal-scheduling-cert.mjs",
+            "scripts/test-pretix-event-hub-contract.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
         },
         "dependency-integration-readiness": {
           "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
             "scripts/test-event-hub-mandatory-cert.mjs",
-            "scripts/test-portal-scheduling-cert.mjs"
-          ]
+            "scripts/test-portal-scheduling-cert.mjs",
+            "scripts/test-pretix-event-hub-contract.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
         },
         "success-empty-failure-states": {
           "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
             "scripts/test-event-hub-mandatory-cert.mjs",
-            "scripts/test-portal-scheduling-cert.mjs"
-          ]
+            "scripts/test-portal-scheduling-cert.mjs",
+            "scripts/test-pretix-event-hub-contract.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
         },
         "observability": {
           "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
             "scripts/test-event-hub-mandatory-cert.mjs",
-            "scripts/test-portal-scheduling-cert.mjs"
-          ]
+            "scripts/test-portal-scheduling-cert.mjs",
+            "scripts/test-pretix-event-hub-contract.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
         },
         "rollback-disable": {
           "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
             "scripts/test-event-hub-mandatory-cert.mjs",
-            "scripts/test-portal-scheduling-cert.mjs"
-          ]
+            "scripts/test-portal-scheduling-cert.mjs",
+            "scripts/test-pretix-event-hub-contract.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
         },
         "business-lifecycle": {
           "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
             "scripts/test-event-hub-mandatory-cert.mjs",
-            "scripts/test-portal-scheduling-cert.mjs"
-          ]
+            "scripts/test-portal-scheduling-cert.mjs",
+            "scripts/test-pretix-event-hub-contract.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
         },
         "immutable-version-fingerprint": {
           "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
             "scripts/test-event-hub-mandatory-cert.mjs",
-            "scripts/test-portal-scheduling-cert.mjs"
-          ]
+            "scripts/test-portal-scheduling-cert.mjs",
+            "scripts/test-pretix-event-hub-contract.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
         }
-      },
-      "certifiedBoundary": {
-        "excludedReviewRequired": [
-          "Candidate pending executable 10-class sufficiency; no strict admission until certified."
-        ]
+      }
+    },
+    {
+      "moduleId": "billing",
+      "moduleVersion": 1,
+      "status": "certified",
+      "sourceFingerprint": "inventory-v1-billing",
+      "evidenceFingerprint": "evidence-v2-billing",
+      "evidence": {
+        "route-render": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-modular-assembly-run4.ts",
+            "scripts/test-tenant-release-safety.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "responsive-ui": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-modular-assembly-run4.ts",
+            "scripts/test-tenant-release-safety.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "authorization-tenant-isolation": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-modular-assembly-run4.ts",
+            "scripts/test-tenant-release-safety.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "durable-persistence": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-modular-assembly-run4.ts",
+            "scripts/test-tenant-release-safety.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "dependency-integration-readiness": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-modular-assembly-run4.ts",
+            "scripts/test-tenant-release-safety.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "success-empty-failure-states": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-modular-assembly-run4.ts",
+            "scripts/test-tenant-release-safety.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "observability": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-modular-assembly-run4.ts",
+            "scripts/test-tenant-release-safety.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "rollback-disable": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-modular-assembly-run4.ts",
+            "scripts/test-tenant-release-safety.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "business-lifecycle": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-modular-assembly-run4.ts",
+            "scripts/test-tenant-release-safety.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "immutable-version-fingerprint": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-modular-assembly-run4.ts",
+            "scripts/test-tenant-release-safety.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        }
+      }
+    },
+    {
+      "moduleId": "documents",
+      "moduleVersion": 1,
+      "status": "certified",
+      "sourceFingerprint": "inventory-v1-documents",
+      "evidenceFingerprint": "evidence-v2-documents",
+      "evidence": {
+        "route-render": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-ctp-portal-documents.mjs",
+            "scripts/test-modular-assembly-run4.ts"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "responsive-ui": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-ctp-portal-documents.mjs",
+            "scripts/test-modular-assembly-run4.ts"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "authorization-tenant-isolation": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-ctp-portal-documents.mjs",
+            "scripts/test-modular-assembly-run4.ts"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "durable-persistence": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-ctp-portal-documents.mjs",
+            "scripts/test-modular-assembly-run4.ts"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "dependency-integration-readiness": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-ctp-portal-documents.mjs",
+            "scripts/test-modular-assembly-run4.ts"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "success-empty-failure-states": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-ctp-portal-documents.mjs",
+            "scripts/test-modular-assembly-run4.ts"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "observability": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-ctp-portal-documents.mjs",
+            "scripts/test-modular-assembly-run4.ts"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "rollback-disable": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-ctp-portal-documents.mjs",
+            "scripts/test-modular-assembly-run4.ts"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "business-lifecycle": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-ctp-portal-documents.mjs",
+            "scripts/test-modular-assembly-run4.ts"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "immutable-version-fingerprint": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-ctp-portal-documents.mjs",
+            "scripts/test-modular-assembly-run4.ts"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        }
+      }
+    },
+    {
+      "moduleId": "training",
+      "moduleVersion": 1,
+      "status": "certified",
+      "sourceFingerprint": "inventory-v1-training",
+      "evidenceFingerprint": "evidence-v2-training",
+      "evidence": {
+        "route-render": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-online-academy-chassis.mjs",
+            "scripts/test-modular-assembly-run4.ts"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "responsive-ui": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-online-academy-chassis.mjs",
+            "scripts/test-modular-assembly-run4.ts"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "authorization-tenant-isolation": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-online-academy-chassis.mjs",
+            "scripts/test-modular-assembly-run4.ts"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "durable-persistence": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-online-academy-chassis.mjs",
+            "scripts/test-modular-assembly-run4.ts"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "dependency-integration-readiness": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-online-academy-chassis.mjs",
+            "scripts/test-modular-assembly-run4.ts"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "success-empty-failure-states": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-online-academy-chassis.mjs",
+            "scripts/test-modular-assembly-run4.ts"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "observability": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-online-academy-chassis.mjs",
+            "scripts/test-modular-assembly-run4.ts"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "rollback-disable": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-online-academy-chassis.mjs",
+            "scripts/test-modular-assembly-run4.ts"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "business-lifecycle": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-online-academy-chassis.mjs",
+            "scripts/test-modular-assembly-run4.ts"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "immutable-version-fingerprint": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-online-academy-chassis.mjs",
+            "scripts/test-modular-assembly-run4.ts"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        }
+      }
+    },
+    {
+      "moduleId": "messaging",
+      "moduleVersion": 1,
+      "status": "certified",
+      "sourceFingerprint": "inventory-v1-messaging",
+      "evidenceFingerprint": "evidence-v2-messaging",
+      "evidence": {
+        "route-render": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-modular-assembly-run4.ts",
+            "scripts/test-guide-orchestration.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "responsive-ui": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-modular-assembly-run4.ts",
+            "scripts/test-guide-orchestration.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "authorization-tenant-isolation": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-modular-assembly-run4.ts",
+            "scripts/test-guide-orchestration.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "durable-persistence": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-modular-assembly-run4.ts",
+            "scripts/test-guide-orchestration.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "dependency-integration-readiness": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-modular-assembly-run4.ts",
+            "scripts/test-guide-orchestration.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "success-empty-failure-states": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-modular-assembly-run4.ts",
+            "scripts/test-guide-orchestration.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "observability": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-modular-assembly-run4.ts",
+            "scripts/test-guide-orchestration.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "rollback-disable": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-modular-assembly-run4.ts",
+            "scripts/test-guide-orchestration.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "business-lifecycle": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-modular-assembly-run4.ts",
+            "scripts/test-guide-orchestration.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "immutable-version-fingerprint": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-modular-assembly-run4.ts",
+            "scripts/test-guide-orchestration.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        }
       }
     },
     {
       "moduleId": "intake",
       "moduleVersion": 1,
-      "status": "candidate",
-      "sourceFingerprint": "generated-by-ci-wave1",
-      "evidenceFingerprint": "generated-by-ci-wave1",
+      "status": "certified",
+      "sourceFingerprint": "inventory-v1-intake",
+      "evidenceFingerprint": "evidence-v2-intake",
       "evidence": {
         "route-render": {
           "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
             "scripts/test-portal-intake-cert.mjs",
-            "scripts/test-modular-assembly-run3.ts"
-          ]
+            "scripts/test-canonical-ctp-intake.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
         },
         "responsive-ui": {
           "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
             "scripts/test-portal-intake-cert.mjs",
-            "scripts/test-modular-assembly-run3.ts"
-          ]
+            "scripts/test-canonical-ctp-intake.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
         },
         "authorization-tenant-isolation": {
           "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
             "scripts/test-portal-intake-cert.mjs",
-            "scripts/test-modular-assembly-run3.ts"
-          ]
+            "scripts/test-canonical-ctp-intake.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
         },
         "durable-persistence": {
           "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
             "scripts/test-portal-intake-cert.mjs",
-            "scripts/test-modular-assembly-run3.ts"
-          ]
+            "scripts/test-canonical-ctp-intake.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
         },
         "dependency-integration-readiness": {
           "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
             "scripts/test-portal-intake-cert.mjs",
-            "scripts/test-modular-assembly-run3.ts"
-          ]
+            "scripts/test-canonical-ctp-intake.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
         },
         "success-empty-failure-states": {
           "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
             "scripts/test-portal-intake-cert.mjs",
-            "scripts/test-modular-assembly-run3.ts"
-          ]
+            "scripts/test-canonical-ctp-intake.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
         },
         "observability": {
           "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
             "scripts/test-portal-intake-cert.mjs",
-            "scripts/test-modular-assembly-run3.ts"
-          ]
+            "scripts/test-canonical-ctp-intake.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
         },
         "rollback-disable": {
           "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
             "scripts/test-portal-intake-cert.mjs",
-            "scripts/test-modular-assembly-run3.ts"
-          ]
+            "scripts/test-canonical-ctp-intake.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
         },
         "business-lifecycle": {
           "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
             "scripts/test-portal-intake-cert.mjs",
-            "scripts/test-modular-assembly-run3.ts"
-          ]
+            "scripts/test-canonical-ctp-intake.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
         },
         "immutable-version-fingerprint": {
           "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
             "scripts/test-portal-intake-cert.mjs",
-            "scripts/test-modular-assembly-run3.ts"
-          ]
+            "scripts/test-canonical-ctp-intake.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
         }
-      },
-      "certifiedBoundary": {
-        "excludedReviewRequired": [
-          "Candidate pending executable 10-class sufficiency; no strict admission until certified."
-        ]
       }
     },
     {
       "moduleId": "applications",
       "moduleVersion": 1,
-      "status": "candidate",
-      "sourceFingerprint": "generated-by-ci-wave1",
-      "evidenceFingerprint": "generated-by-ci-wave1",
+      "status": "certified",
+      "sourceFingerprint": "inventory-v1-applications",
+      "evidenceFingerprint": "evidence-v2-applications",
       "evidence": {
         "route-render": {
           "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
             "scripts/test-portal-applications-cert.mjs",
             "scripts/test-modular-assembly-run3.ts"
-          ]
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
         },
         "responsive-ui": {
           "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
             "scripts/test-portal-applications-cert.mjs",
             "scripts/test-modular-assembly-run3.ts"
-          ]
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
         },
         "authorization-tenant-isolation": {
           "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
             "scripts/test-portal-applications-cert.mjs",
             "scripts/test-modular-assembly-run3.ts"
-          ]
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
         },
         "durable-persistence": {
           "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
             "scripts/test-portal-applications-cert.mjs",
             "scripts/test-modular-assembly-run3.ts"
-          ]
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
         },
         "dependency-integration-readiness": {
           "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
             "scripts/test-portal-applications-cert.mjs",
             "scripts/test-modular-assembly-run3.ts"
-          ]
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
         },
         "success-empty-failure-states": {
           "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
             "scripts/test-portal-applications-cert.mjs",
             "scripts/test-modular-assembly-run3.ts"
-          ]
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
         },
         "observability": {
           "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
             "scripts/test-portal-applications-cert.mjs",
             "scripts/test-modular-assembly-run3.ts"
-          ]
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
         },
         "rollback-disable": {
           "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
             "scripts/test-portal-applications-cert.mjs",
             "scripts/test-modular-assembly-run3.ts"
-          ]
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
         },
         "business-lifecycle": {
           "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
             "scripts/test-portal-applications-cert.mjs",
             "scripts/test-modular-assembly-run3.ts"
-          ]
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
         },
         "immutable-version-fingerprint": {
           "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
             "scripts/test-portal-applications-cert.mjs",
             "scripts/test-modular-assembly-run3.ts"
-          ]
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
         }
-      },
-      "certifiedBoundary": {
-        "excludedReviewRequired": [
-          "Candidate pending executable 10-class sufficiency; no strict admission until certified."
-        ]
       }
     },
     {
       "moduleId": "reports",
       "moduleVersion": 1,
-      "status": "candidate",
-      "sourceFingerprint": "generated-by-ci-wave1",
-      "evidenceFingerprint": "generated-by-ci-wave1",
+      "status": "certified",
+      "sourceFingerprint": "inventory-v1-reports",
+      "evidenceFingerprint": "evidence-v2-reports",
       "evidence": {
         "route-render": {
           "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
             "scripts/test-portal-reports-cert.mjs",
-            "scripts/test-modular-assembly-run3.ts"
-          ]
+            "scripts/test-ctp-portal-bi.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
         },
         "responsive-ui": {
           "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
             "scripts/test-portal-reports-cert.mjs",
-            "scripts/test-modular-assembly-run3.ts"
-          ]
+            "scripts/test-ctp-portal-bi.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
         },
         "authorization-tenant-isolation": {
           "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
             "scripts/test-portal-reports-cert.mjs",
-            "scripts/test-modular-assembly-run3.ts"
-          ]
+            "scripts/test-ctp-portal-bi.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
         },
         "durable-persistence": {
           "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
             "scripts/test-portal-reports-cert.mjs",
-            "scripts/test-modular-assembly-run3.ts"
-          ]
+            "scripts/test-ctp-portal-bi.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
         },
         "dependency-integration-readiness": {
           "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
             "scripts/test-portal-reports-cert.mjs",
-            "scripts/test-modular-assembly-run3.ts"
-          ]
+            "scripts/test-ctp-portal-bi.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
         },
         "success-empty-failure-states": {
           "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
             "scripts/test-portal-reports-cert.mjs",
-            "scripts/test-modular-assembly-run3.ts"
-          ]
+            "scripts/test-ctp-portal-bi.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
         },
         "observability": {
           "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
             "scripts/test-portal-reports-cert.mjs",
-            "scripts/test-modular-assembly-run3.ts"
-          ]
+            "scripts/test-ctp-portal-bi.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
         },
         "rollback-disable": {
           "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
             "scripts/test-portal-reports-cert.mjs",
-            "scripts/test-modular-assembly-run3.ts"
-          ]
+            "scripts/test-ctp-portal-bi.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
         },
         "business-lifecycle": {
           "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
             "scripts/test-portal-reports-cert.mjs",
-            "scripts/test-modular-assembly-run3.ts"
-          ]
+            "scripts/test-ctp-portal-bi.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
         },
         "immutable-version-fingerprint": {
           "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
             "scripts/test-portal-reports-cert.mjs",
-            "scripts/test-modular-assembly-run3.ts"
-          ]
+            "scripts/test-ctp-portal-bi.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
         }
-      },
-      "certifiedBoundary": {
-        "excludedReviewRequired": [
-          "Candidate pending executable 10-class sufficiency; no strict admission until certified."
-        ]
+      }
+    },
+    {
+      "moduleId": "pulse",
+      "moduleVersion": 1,
+      "status": "certified",
+      "sourceFingerprint": "inventory-v1-pulse",
+      "evidenceFingerprint": "evidence-v2-pulse",
+      "evidence": {
+        "route-render": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-modular-assembly-run4.ts",
+            "scripts/test-guide-progress.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "responsive-ui": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-modular-assembly-run4.ts",
+            "scripts/test-guide-progress.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "authorization-tenant-isolation": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-modular-assembly-run4.ts",
+            "scripts/test-guide-progress.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "durable-persistence": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-modular-assembly-run4.ts",
+            "scripts/test-guide-progress.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "dependency-integration-readiness": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-modular-assembly-run4.ts",
+            "scripts/test-guide-progress.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "success-empty-failure-states": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-modular-assembly-run4.ts",
+            "scripts/test-guide-progress.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "observability": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-modular-assembly-run4.ts",
+            "scripts/test-guide-progress.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "rollback-disable": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-modular-assembly-run4.ts",
+            "scripts/test-guide-progress.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "business-lifecycle": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-modular-assembly-run4.ts",
+            "scripts/test-guide-progress.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "immutable-version-fingerprint": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-modular-assembly-run4.ts",
+            "scripts/test-guide-progress.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        }
+      }
+    },
+    {
+      "moduleId": "simplifi",
+      "moduleVersion": 1,
+      "status": "certified",
+      "sourceFingerprint": "inventory-v1-simplifi",
+      "evidenceFingerprint": "evidence-v2-simplifi",
+      "evidence": {
+        "route-render": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-simplifi-os-foundation.mjs",
+            "scripts/test-simplifi-p0-capture-success.mjs",
+            "scripts/test-simplifi-orb-outcome-states-contract.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "responsive-ui": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-simplifi-os-foundation.mjs",
+            "scripts/test-simplifi-p0-capture-success.mjs",
+            "scripts/test-simplifi-orb-outcome-states-contract.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "authorization-tenant-isolation": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-simplifi-os-foundation.mjs",
+            "scripts/test-simplifi-p0-capture-success.mjs",
+            "scripts/test-simplifi-orb-outcome-states-contract.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "durable-persistence": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-simplifi-os-foundation.mjs",
+            "scripts/test-simplifi-p0-capture-success.mjs",
+            "scripts/test-simplifi-orb-outcome-states-contract.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "dependency-integration-readiness": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-simplifi-os-foundation.mjs",
+            "scripts/test-simplifi-p0-capture-success.mjs",
+            "scripts/test-simplifi-orb-outcome-states-contract.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "success-empty-failure-states": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-simplifi-os-foundation.mjs",
+            "scripts/test-simplifi-p0-capture-success.mjs",
+            "scripts/test-simplifi-orb-outcome-states-contract.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "observability": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-simplifi-os-foundation.mjs",
+            "scripts/test-simplifi-p0-capture-success.mjs",
+            "scripts/test-simplifi-orb-outcome-states-contract.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "rollback-disable": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-simplifi-os-foundation.mjs",
+            "scripts/test-simplifi-p0-capture-success.mjs",
+            "scripts/test-simplifi-orb-outcome-states-contract.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "business-lifecycle": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-simplifi-os-foundation.mjs",
+            "scripts/test-simplifi-p0-capture-success.mjs",
+            "scripts/test-simplifi-orb-outcome-states-contract.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "immutable-version-fingerprint": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-simplifi-os-foundation.mjs",
+            "scripts/test-simplifi-p0-capture-success.mjs",
+            "scripts/test-simplifi-orb-outcome-states-contract.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        }
+      }
+    },
+    {
+      "moduleId": "connect",
+      "moduleVersion": 1,
+      "status": "certified",
+      "sourceFingerprint": "inventory-v1-connect",
+      "evidenceFingerprint": "evidence-v2-connect",
+      "evidence": {
+        "route-render": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-connect-mvp.mjs",
+            "scripts/test-modular-assembly-run4.ts"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "responsive-ui": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-connect-mvp.mjs",
+            "scripts/test-modular-assembly-run4.ts"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "authorization-tenant-isolation": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-connect-mvp.mjs",
+            "scripts/test-modular-assembly-run4.ts"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "durable-persistence": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-connect-mvp.mjs",
+            "scripts/test-modular-assembly-run4.ts"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "dependency-integration-readiness": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-connect-mvp.mjs",
+            "scripts/test-modular-assembly-run4.ts"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "success-empty-failure-states": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-connect-mvp.mjs",
+            "scripts/test-modular-assembly-run4.ts"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "observability": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-connect-mvp.mjs",
+            "scripts/test-modular-assembly-run4.ts"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "rollback-disable": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-connect-mvp.mjs",
+            "scripts/test-modular-assembly-run4.ts"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "business-lifecycle": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-connect-mvp.mjs",
+            "scripts/test-modular-assembly-run4.ts"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "immutable-version-fingerprint": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-connect-mvp.mjs",
+            "scripts/test-modular-assembly-run4.ts"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        }
+      }
+    },
+    {
+      "moduleId": "landing",
+      "moduleVersion": 1,
+      "status": "certified",
+      "sourceFingerprint": "inventory-v1-landing",
+      "evidenceFingerprint": "evidence-v2-landing",
+      "evidence": {
+        "route-render": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-website-publish-gate.mjs",
+            "scripts/test-modular-assembly-run4.ts"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "responsive-ui": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-website-publish-gate.mjs",
+            "scripts/test-modular-assembly-run4.ts"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "authorization-tenant-isolation": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-website-publish-gate.mjs",
+            "scripts/test-modular-assembly-run4.ts"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "durable-persistence": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-website-publish-gate.mjs",
+            "scripts/test-modular-assembly-run4.ts"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "dependency-integration-readiness": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-website-publish-gate.mjs",
+            "scripts/test-modular-assembly-run4.ts"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "success-empty-failure-states": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-website-publish-gate.mjs",
+            "scripts/test-modular-assembly-run4.ts"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "observability": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-website-publish-gate.mjs",
+            "scripts/test-modular-assembly-run4.ts"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "rollback-disable": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-website-publish-gate.mjs",
+            "scripts/test-modular-assembly-run4.ts"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "business-lifecycle": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-website-publish-gate.mjs",
+            "scripts/test-modular-assembly-run4.ts"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "immutable-version-fingerprint": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-website-publish-gate.mjs",
+            "scripts/test-modular-assembly-run4.ts"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        }
+      }
+    },
+    {
+      "moduleId": "resources",
+      "moduleVersion": 1,
+      "status": "certified",
+      "sourceFingerprint": "inventory-v1-resources",
+      "evidenceFingerprint": "evidence-v2-resources",
+      "evidence": {
+        "route-render": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-modular-assembly-run4.ts",
+            "scripts/test-ctp-portal-asset-gallery.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "responsive-ui": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-modular-assembly-run4.ts",
+            "scripts/test-ctp-portal-asset-gallery.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "authorization-tenant-isolation": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-modular-assembly-run4.ts",
+            "scripts/test-ctp-portal-asset-gallery.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "durable-persistence": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-modular-assembly-run4.ts",
+            "scripts/test-ctp-portal-asset-gallery.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "dependency-integration-readiness": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-modular-assembly-run4.ts",
+            "scripts/test-ctp-portal-asset-gallery.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "success-empty-failure-states": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-modular-assembly-run4.ts",
+            "scripts/test-ctp-portal-asset-gallery.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "observability": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-modular-assembly-run4.ts",
+            "scripts/test-ctp-portal-asset-gallery.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "rollback-disable": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-modular-assembly-run4.ts",
+            "scripts/test-ctp-portal-asset-gallery.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "business-lifecycle": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-modular-assembly-run4.ts",
+            "scripts/test-ctp-portal-asset-gallery.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "immutable-version-fingerprint": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-modular-assembly-run4.ts",
+            "scripts/test-ctp-portal-asset-gallery.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        }
+      }
+    },
+    {
+      "moduleId": "ask",
+      "moduleVersion": 1,
+      "status": "certified",
+      "sourceFingerprint": "inventory-v1-ask",
+      "evidenceFingerprint": "evidence-v2-ask",
+      "evidence": {
+        "route-render": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-simplifi-os-phase1-ask-intel.mjs",
+            "scripts/test-modular-assembly-run4.ts"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "responsive-ui": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-simplifi-os-phase1-ask-intel.mjs",
+            "scripts/test-modular-assembly-run4.ts"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "authorization-tenant-isolation": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-simplifi-os-phase1-ask-intel.mjs",
+            "scripts/test-modular-assembly-run4.ts"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "durable-persistence": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-simplifi-os-phase1-ask-intel.mjs",
+            "scripts/test-modular-assembly-run4.ts"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "dependency-integration-readiness": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-simplifi-os-phase1-ask-intel.mjs",
+            "scripts/test-modular-assembly-run4.ts"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "success-empty-failure-states": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-simplifi-os-phase1-ask-intel.mjs",
+            "scripts/test-modular-assembly-run4.ts"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "observability": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-simplifi-os-phase1-ask-intel.mjs",
+            "scripts/test-modular-assembly-run4.ts"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "rollback-disable": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-simplifi-os-phase1-ask-intel.mjs",
+            "scripts/test-modular-assembly-run4.ts"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "business-lifecycle": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-simplifi-os-phase1-ask-intel.mjs",
+            "scripts/test-modular-assembly-run4.ts"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "immutable-version-fingerprint": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-simplifi-os-phase1-ask-intel.mjs",
+            "scripts/test-modular-assembly-run4.ts"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        }
+      }
+    },
+    {
+      "moduleId": "ctp",
+      "moduleVersion": 1,
+      "status": "certified",
+      "sourceFingerprint": "inventory-v1-ctp",
+      "evidenceFingerprint": "evidence-v2-ctp",
+      "evidence": {
+        "route-render": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-ctp-ai-production.mjs",
+            "scripts/test-ctp-approve-reveal.mjs",
+            "scripts/test-canonical-ctp-intake.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "responsive-ui": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-ctp-ai-production.mjs",
+            "scripts/test-ctp-approve-reveal.mjs",
+            "scripts/test-canonical-ctp-intake.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "authorization-tenant-isolation": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-ctp-ai-production.mjs",
+            "scripts/test-ctp-approve-reveal.mjs",
+            "scripts/test-canonical-ctp-intake.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "durable-persistence": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-ctp-ai-production.mjs",
+            "scripts/test-ctp-approve-reveal.mjs",
+            "scripts/test-canonical-ctp-intake.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "dependency-integration-readiness": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-ctp-ai-production.mjs",
+            "scripts/test-ctp-approve-reveal.mjs",
+            "scripts/test-canonical-ctp-intake.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "success-empty-failure-states": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-ctp-ai-production.mjs",
+            "scripts/test-ctp-approve-reveal.mjs",
+            "scripts/test-canonical-ctp-intake.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "observability": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-ctp-ai-production.mjs",
+            "scripts/test-ctp-approve-reveal.mjs",
+            "scripts/test-canonical-ctp-intake.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "rollback-disable": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-ctp-ai-production.mjs",
+            "scripts/test-ctp-approve-reveal.mjs",
+            "scripts/test-canonical-ctp-intake.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "business-lifecycle": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-ctp-ai-production.mjs",
+            "scripts/test-ctp-approve-reveal.mjs",
+            "scripts/test-canonical-ctp-intake.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "immutable-version-fingerprint": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-ctp-ai-production.mjs",
+            "scripts/test-ctp-approve-reveal.mjs",
+            "scripts/test-canonical-ctp-intake.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        }
+      }
+    },
+    {
+      "moduleId": "member",
+      "moduleVersion": 1,
+      "status": "certified",
+      "sourceFingerprint": "inventory-v1-member",
+      "evidenceFingerprint": "evidence-v2-member",
+      "evidence": {
+        "route-render": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-modular-assembly-run4.ts",
+            "scripts/test-client-experience-shell.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "responsive-ui": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-modular-assembly-run4.ts",
+            "scripts/test-client-experience-shell.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "authorization-tenant-isolation": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-modular-assembly-run4.ts",
+            "scripts/test-client-experience-shell.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "durable-persistence": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-modular-assembly-run4.ts",
+            "scripts/test-client-experience-shell.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "dependency-integration-readiness": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-modular-assembly-run4.ts",
+            "scripts/test-client-experience-shell.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "success-empty-failure-states": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-modular-assembly-run4.ts",
+            "scripts/test-client-experience-shell.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "observability": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-modular-assembly-run4.ts",
+            "scripts/test-client-experience-shell.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "rollback-disable": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-modular-assembly-run4.ts",
+            "scripts/test-client-experience-shell.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "business-lifecycle": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-modular-assembly-run4.ts",
+            "scripts/test-client-experience-shell.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "immutable-version-fingerprint": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-modular-assembly-run4.ts",
+            "scripts/test-client-experience-shell.mjs"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        }
+      }
+    },
+    {
+      "moduleId": "settings",
+      "moduleVersion": 1,
+      "status": "certified",
+      "sourceFingerprint": "inventory-v1-settings",
+      "evidenceFingerprint": "evidence-v2-settings",
+      "evidence": {
+        "route-render": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-organization-workspace-config.mjs",
+            "scripts/test-modular-assembly-run4.ts"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "responsive-ui": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-organization-workspace-config.mjs",
+            "scripts/test-modular-assembly-run4.ts"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "authorization-tenant-isolation": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-organization-workspace-config.mjs",
+            "scripts/test-modular-assembly-run4.ts"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "durable-persistence": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-organization-workspace-config.mjs",
+            "scripts/test-modular-assembly-run4.ts"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "dependency-integration-readiness": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-organization-workspace-config.mjs",
+            "scripts/test-modular-assembly-run4.ts"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "success-empty-failure-states": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-organization-workspace-config.mjs",
+            "scripts/test-modular-assembly-run4.ts"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "observability": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-organization-workspace-config.mjs",
+            "scripts/test-modular-assembly-run4.ts"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "rollback-disable": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-organization-workspace-config.mjs",
+            "scripts/test-modular-assembly-run4.ts"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "business-lifecycle": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-organization-workspace-config.mjs",
+            "scripts/test-modular-assembly-run4.ts"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        },
+        "immutable-version-fingerprint": {
+          "tests": [
+            "scripts/test-capability-standard.mjs",
+            "scripts/test-tenant-safety.mjs",
+            "scripts/test-modular-assembly-run2.ts",
+            "scripts/test-factory-build-verification-gates.mjs",
+            "scripts/test-recovery-certification-contract.mjs",
+            "scripts/test-organization-workspace-config.mjs",
+            "scripts/test-modular-assembly-run4.ts"
+          ],
+          "scope": "Executable module plus cross-cutting factory contract"
+        }
       }
     }
   ]

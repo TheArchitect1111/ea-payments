@@ -70,6 +70,8 @@ jobs:
         run: node scripts/test-lego-certificate-wave1.mjs
       - name: Strict Lego authority
         run: node scripts/test-lego-strict-authority.mjs
+      - name: Final Lego bin acceptance
+        run: node scripts/test-lego-final-acceptance.mjs
 
   platform-build:
     name: platform-build

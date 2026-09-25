@@ -4,13 +4,12 @@ import capabilityCertifications from '../config/capability-certifications.json';
 import { createAssemblyPlan, requireAssemblyPlan } from '../lib/modules/assembly';
 
 const coreOnly = createAssemblyPlan([]);
-assert.deepEqual(coreOnly.admitted, []);
-assert.equal(coreOnly.blocked, true);
-assert.ok(coreOnly.rejected.every((x) => x.reason === 'missing-10-class-certificate'));
+assert.deepEqual(coreOnly.admitted, ['dashboard', 'amplifi', 'update-hub']);
+assert.equal(coreOnly.blocked, false);
 
 const duplicateCore = createAssemblyPlan(['amplifi', 'amplifi']);
-assert.deepEqual(duplicateCore.admitted, []);
-assert.equal(duplicateCore.blocked, true);
+assert.deepEqual(duplicateCore.admitted, ['dashboard', 'amplifi', 'update-hub']);
+assert.equal(duplicateCore.blocked, false);
 
 // Run 2 established the fail-closed rule, not a permanent ban on any specific
 // business capability. Later runs may legitimately certify known modules.
@@ -42,10 +41,10 @@ assert.throws(
   /not-a-real-module:unknown-module/,
 );
 
-assert.throws(() => requireAssemblyPlan(['dashboard', 'amplifi', 'update-hub']), /missing-10-class-certificate/);
+assert.doesNotThrow(() => requireAssemblyPlan(['dashboard', 'amplifi', 'update-hub']));
 
 console.log('EA Modular Assembly Run 2 OK');
-console.log(' - chassis is fail-closed until exact 10-class certificates exist');
+console.log(' - exact-certified chassis is admitted');
 console.log(' - duplicate requests are normalized');
 console.log(' - unknown modules fail closed');
 console.log(' - any currently uncertified known module remains fail-closed');

@@ -35,9 +35,10 @@ const expectedStarterModules = [
 assert.deepEqual(starterModules, expectedStarterModules);
 
 const starterPlan = planClientFactoryAssembly({ packagePurchased: starterPackage });
-assert.equal(starterPlan.blocked, true, 'Legacy Starter labels must not bypass 10-class certificates');
-assert.ok(starterPlan.rejected.some((x) => x.reason === 'missing-10-class-certificate'));
-assert.throws(() => requireClientFactoryAssembly({ packagePurchased: starterPackage }), /missing-10-class-certificate/);
+assert.equal(starterPlan.blocked, false);
+assert.deepEqual(starterPlan.rejected, []);
+assert.deepEqual(starterPlan.admitted, expectedStarterModules);
+assert.doesNotThrow(() => requireClientFactoryAssembly({ packagePurchased: starterPackage }));
 
 const run4Wave = [
   'landing',

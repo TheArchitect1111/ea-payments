@@ -10,7 +10,7 @@ assert.equal(simplifiCertification.assemblyStatus, 'certified');
 assert.equal(simplifiCertification.costLicenseDecision, 'approved');
 assert.match(simplifiCertification.boundary, /No new vendor account/i);
 
-const implementationWave = (() => { try { return requireAssemblyPlan([
+const implementationWave = requireAssemblyPlan([
   'simplifi',
   'amplifi',
   'connect',
@@ -18,8 +18,8 @@ const implementationWave = (() => { try { return requireAssemblyPlan([
   'events',
   'billing',
   'settings',
-]); } catch (error) { assert.match(String(error), /missing-10-class-certificate/); return null; } })();
-assert.equal(implementationWave, null);
+]);
+assert.equal(implementationWave.blocked,false);
 
 assert.throws(() => requireAssemblyPlan(['people']), /people:not-certified/);
 assert.throws(() => requireAssemblyPlan(['calendar']), /calendar:not-certified/);

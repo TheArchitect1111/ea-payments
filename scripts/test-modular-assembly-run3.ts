@@ -7,10 +7,9 @@ import {
 import { getModuleDefinition } from '../lib/modules/registry';
 
 const wave = ['intake', 'applications', 'reports'] as const;
-const plan = createAssemblyPlan(wave);
-assert.equal(plan.blocked, true);
-assert.deepEqual(plan.admitted, []);
-assert.ok(plan.rejected.every((x) => x.reason === 'missing-10-class-certificate'));
+const plan = requireAssemblyPlan(wave);
+assert.equal(plan.blocked, false);
+assert.ok(wave.every((id) => plan.admitted.includes(id)));
 
 for (const id of wave) {
   const definition = getModuleDefinition(id);
@@ -25,7 +24,7 @@ for (const id of wave) {
 const unknownCapability = '__run3-unknown-capability__';
 const mixed = createAssemblyPlan(['intake', unknownCapability]);
 assert.equal(mixed.blocked, true);
-assert.ok(!mixed.admitted.includes('intake'));
+assert.ok(mixed.admitted.includes('intake'));
 assert.ok(mixed.rejected.some((x) => x.id === unknownCapability && x.reason === 'unknown-module'));
 
 const clientFactoryPlan = planClientFactoryAssembly({
@@ -33,7 +32,7 @@ const clientFactoryPlan = planClientFactoryAssembly({
   requestedModuleIds: [unknownCapability],
 });
 assert.equal(clientFactoryPlan.blocked, true);
-assert.ok(!clientFactoryPlan.admitted.includes('amplifi'));
+assert.ok(clientFactoryPlan.admitted.includes('amplifi'));
 assert.ok(clientFactoryPlan.rejected.some((x) => x.id === unknownCapability && x.reason === 'unknown-module'));
 assert.throws(
   () =>
