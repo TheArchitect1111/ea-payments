@@ -35,10 +35,9 @@ const expectedStarterModules = [
 assert.deepEqual(starterModules, expectedStarterModules);
 
 const starterPlan = planClientFactoryAssembly({ packagePurchased: starterPackage });
-assert.equal(starterPlan.blocked, false, 'Website + Portal Starter must be fully assembly-ready');
-assert.deepEqual(starterPlan.rejected, []);
-assert.deepEqual(starterPlan.admitted, expectedStarterModules);
-assert.doesNotThrow(() => requireClientFactoryAssembly({ packagePurchased: starterPackage }));
+assert.equal(starterPlan.blocked, true, 'Legacy Starter labels must not bypass 10-class certificates');
+assert.ok(starterPlan.rejected.some((x) => x.reason === 'missing-10-class-certificate'));
+assert.throws(() => requireClientFactoryAssembly({ packagePurchased: starterPackage }), /missing-10-class-certificate/);
 
 const run4Wave = [
   'landing',
@@ -102,7 +101,7 @@ assert.throws(() => requireAssemblyPlan(['calendar']), /calendar:not-certified/)
 assert.throws(() => requireAssemblyPlan(['people']), /people:not-certified/);
 
 console.log('EA Modular Assembly Run 4 OK');
-console.log(' - canonical Website + Portal Starter entitlement set remains fully provisionable in certified mode');
+console.log(' - canonical Website + Portal Starter fails closed until exact 10-class certificates exist');
 console.log(' - all thirteen Run 4 Starter capabilities retain explicit certification boundaries');
 console.log(' - Pretix, Documenso, and Novu remain optional provider extensions, not assembly requirements');
 console.log(' - Billing fails safely when the existing platform Stripe adapter is unavailable');
