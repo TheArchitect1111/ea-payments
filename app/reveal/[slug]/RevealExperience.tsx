@@ -1,19 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Fraunces, Manrope } from 'next/font/google';
 import type { CtpRevealView } from '@/lib/ctp-reveal';
 import styles from './reveal.module.css';
 
-const display = Fraunces({
-  subsets: ['latin'],
-  weight: ['500', '700'],
-});
-
-const sans = Manrope({
-  subsets: ['latin'],
-  weight: ['500', '700', '800'],
-});
+const display = { className: 'font-serif' };
+const sans = { className: 'font-sans' };
 
 type Props = { view: CtpRevealView };
 
