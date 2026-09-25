@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "policy": "A Lego module is certified only when every required functional evidence class is present for the exact module version.",
+  "requiredEvidenceClasses": [
+    "route-render",
+    "responsive-ui",
+    "authorization-tenant-isolation",
+    "durable-persistence",
+    "dependency-integration-readiness",
+    "success-empty-failure-states",
+    "observability",
+    "rollback-disable",
+    "business-lifecycle",
+    "immutable-version-fingerprint"
+  ],
+  "rule": "Missing evidence fails closed. Client assembly may only consume modules satisfying this contract."
+}
