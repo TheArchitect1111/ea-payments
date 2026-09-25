@@ -8,6 +8,7 @@ import { emitPulseEvent } from '@/lib/pulse-bus';
 import { sendAdminNotification, sendPaymentConfirmationEmail } from '@/lib/email';
 import { provisionAmandaClientAccess } from '@/lib/amanda-catherine/client-access';
 import type { AmandaPortalAudience } from '@/lib/amanda-catherine/config';
+import { publishPlatformActivityEvent } from '@/lib/activity-events-store';
 
 export type AmandaPaymentRecord = {
   id: string; portalSlug: string; email: string; stripeSessionId: string;
@@ -86,6 +87,26 @@ export async function fulfillAmandaCheckout(session: Stripe.Checkout.Session, so
     return { ok: false as const, error: access.error || 'Student access could not be provisioned.', paymentRecorded: true as const };
   }
   if (!existing) {
+    await publishPlatformActivityEvent({
+      organizationId: 'amanda-catherine',
+      module: 'payments',
+      eventType: 'payment_fulfilled',
+      title: membership ? `Amanda membership activated · ${label}` : `Amanda payment fulfilled · ${label}`,
+      summary: `CAD ${record.amountPaidCad.toFixed(2)} · ${email}`,
+      priority: 90,
+      personId: email,
+      actionLabel: 'Open Amanda billing',
+      actionUrl: `/portal/${portalSlug}/billing`,
+      metadata: {
+        stripeSessionId: session.id,
+        transactionId,
+        offerId: offer?.id || '',
+        membershipId: membership?.id || '',
+        courseId: record.courseId || '',
+        source,
+        accessProvisioned: 'true',
+      },
+    });
     await emitPulseEvent({ product: 'ea-platform', type: membership ? 'subscription.started' : 'payment.received', title: membership ? `Amanda membership active — ${label}` : record.paymentOption === 'test' ? `Amanda private test payment — ${label}` : `Amanda payment received — ${label}`, detail: `CAD $${record.amountPaidCad.toFixed(2)} · ${email}`, priority: record.paymentOption === 'test' ? 'normal' : 'high', href: `/portal/${portalSlug}/billing`, tenantId: portalSlug, objectId: id, metadata: { stripeSessionId: session.id, email, source, offerId: offer?.id || '', membershipId: membership?.id || '', paymentOption: record.paymentOption || '', privateTestCheckout: record.paymentOption === 'test' ? 'true' : 'false' } });
   }
   return { ok: true as const, record, access };
