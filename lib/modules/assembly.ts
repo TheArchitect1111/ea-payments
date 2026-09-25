@@ -51,10 +51,10 @@ function effectiveAssemblyState(id: ModuleId): {
  */
 export function createAssemblyPlan(requestedIds: readonly string[]): AssemblyPlan {
   const requested = [...new Set(requestedIds)];
-  const admitted = new Set<ModuleId>(CHASSIS_STANDARD_MODULE_IDS);
+  const admitted = new Set<ModuleId>();
   const rejected: AssemblyRejection[] = [];
 
-  for (const id of requested) {
+  for (const id of [...new Set<string>([...CHASSIS_STANDARD_MODULE_IDS, ...requested])]) {
     if (!KNOWN_MODULE_IDS.has(id)) {
       rejected.push({ id, reason: 'unknown-module' });
       continue;
@@ -68,7 +68,7 @@ export function createAssemblyPlan(requestedIds: readonly string[]): AssemblyPla
     }
 
     const authority = certificationAuthority(moduleId);
-    if (process.env.EA_STRICT_LEGO_CERTIFICATION === '1' && !authority.reusable) {
+    if (!authority.reusable) {
       rejected.push({ id, reason: 'missing-10-class-certificate', status: state.status });
       continue;
     }
