@@ -19,6 +19,7 @@ for (const universal of [
   'test-modular-assembly-run6.ts',
   'npm run verify:deploy',
   'test-recovery-journeys.mjs',
+  'certify-preflight.mjs',
 ]) {
   assert(ci.includes(universal), `universal safety/assembly evidence missing: ${universal}`);
 }
