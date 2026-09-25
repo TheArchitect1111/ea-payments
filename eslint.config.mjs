@@ -7,7 +7,6 @@ const eslintConfig = defineConfig([
   ...nextTs,
   {
     rules: {
-      'react-hooks/set-state-in-effect': 'warn',
       '@next/next/no-html-link-for-pages': 'warn',
     },
   },
