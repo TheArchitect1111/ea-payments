@@ -64,6 +64,8 @@ jobs:
         run: node scripts/test-lego-certification-engine-run2.mjs
       - name: Lego certification contract
         run: node scripts/test-lego-certification-contract.mjs
+      - name: Lego factory lock Run 4
+        run: node scripts/test-lego-factory-lock-run4.mjs
 
   platform-build:
     name: platform-build
