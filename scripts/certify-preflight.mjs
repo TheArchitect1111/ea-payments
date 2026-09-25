@@ -1,4 +1,5 @@
 import { readFileSync, readdirSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
 
 const read = (p) => readFileSync(p, 'utf8');
 const json = (p) => JSON.parse(read(p));
@@ -7,6 +8,7 @@ const warnings = [];
 const pass = [];
 const fail = (m) => failures.push(m);
 const warn = (m) => warnings.push(m);
+const run = (label, command, args) => { try { execFileSync(command, args, { stdio: 'pipe', env: process.env }); pass.push(label); } catch (error) { const out = `${error.stdout || ''}${error.stderr || ''}`.trim().slice(-4000); fail(`${label}: ${out || error.message}`); } };
 
 const guardrails = json('config/release-guardrails.json');
 const protection = json('config/production-protection.json');
@@ -68,6 +70,13 @@ for (const workflow of amandaRecovery) {
   if (!body.startsWith('# QUARANTINED:') || /\n\s*push:/.test(body)) fail(`HISTORICAL_AUTOMATION_ACTIVE ${workflow}`);
 }
 if (amandaRecovery.length) pass.push(`${amandaRecovery.length} Amanda historical workflows are quarantined/manual-only`);
+
+if (process.argv.includes('--full')) {
+  run('dependency/import/build resolution', process.platform === 'win32' ? 'npm.cmd' : 'npm', ['run', 'build']);
+  for (const script of ['test-amanda-client-assembly-acceptance.mjs','test-amanda-page-portal-parity.mjs','test-amanda-learning-handoff.mjs','test-amanda-checkout-config.mjs','test-amanda-completion.mjs']) run(`Amanda contract ${script}`, 'node', [`scripts/${script}`]);
+  run('Amanda practitioner kit contract', process.platform === 'win32' ? 'npx.cmd' : 'npx', ['tsx','scripts/test-amanda-practitioner-kit.mts']);
+  run('recovery journeys', 'node', ['scripts/test-recovery-journeys.mjs']);
+}
 
 const report = {
   version: 1,
