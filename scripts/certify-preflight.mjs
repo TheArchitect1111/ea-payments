@@ -11,7 +11,7 @@ const warn = (m) => warnings.push(m);
 const guardrails = json('config/release-guardrails.json');
 const protection = json('config/production-protection.json');
 const inventory = json('config/capability-inventory.json');
-const certifications = json('config/capability-certifications.json');
+const certifications = json('config/capability-certifications.json'); // historical evidence ledger only
 const ci = read('.github/workflows/ci.yml');
 const registry = read('lib/modules/registry.ts');
 
@@ -33,8 +33,8 @@ pass.push('release guardrails mapped before CI execution');
 
 for (const [id, c] of cert) {
   const i = inv.get(id);
-  if (!i) fail(`certified module missing inventory record: ${id}`);
-  else if (i.assemblyStatus !== 'certified') warn(`CERTIFICATION_DRIFT ${id}: inventory=${i.assemblyStatus}, effective=certified`);
+  if (!i) fail(`historically certified module missing canonical inventory record: ${id}`);
+  else if (i.assemblyStatus !== 'certified') fail(`CERTIFICATION_DRIFT ${id}: canonical inventory=${i.assemblyStatus}, historical evidence=certified`);
 }
 pass.push('inventory/certification drift evaluated in one sweep');
 
@@ -43,7 +43,7 @@ if (preset) {
   const ids = [...preset[1].matchAll(/'([^']+)'/g)].map((m) => m[1]);
   for (const id of ids) {
     const i = inv.get(id);
-    const effectiveCertified = cert.has(id) || i?.assemblyStatus === 'certified';
+    const effectiveCertified = i?.assemblyStatus === 'certified';
     if (!effectiveCertified) fail(`DEFAULT_PRESET_UNCERTIFIED ${id}`);
   }
 }
@@ -63,7 +63,7 @@ pass.push('Amanda canonical/legacy boundary evaluated');
 
 const workflowNames = readdirSync('.github/workflows').filter((x) => x.endsWith('.yml') || x.endsWith('.yaml'));
 const amandaRecovery = workflowNames.filter((x) => x.startsWith('amanda-') && /recover|recovery|preflight/.test(x));
-if (amandaRecovery.length) warn(`HISTORICAL_AUTOMATION Amanda has ${amandaRecovery.length} recovery/preflight workflows: ${amandaRecovery.join(', ')}`);
+if (amandaRecovery.length) warn(`HISTORICAL_AUTOMATION Amanda has ${amandaRecovery.length} recovery/preflight workflows (non-canonical; quarantine/retirement tracked): ${amandaRecovery.join(', ')}`);
 
 const report = {
   version: 1,
