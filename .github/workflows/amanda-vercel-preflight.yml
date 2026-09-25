@@ -1,9 +1,6 @@
+# QUARANTINED: historical Amanda recovery/preflight utility. Manual dispatch only; not part of canonical release certification.
 name: Amanda Vercel preflight
 on:
-  push:
-    branches: [master]
-    paths:
-      - '.github/workflows/amanda-vercel-preflight.yml'
   workflow_dispatch:
 
 jobs:

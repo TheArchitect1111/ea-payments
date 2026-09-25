@@ -1,9 +1,6 @@
+# QUARANTINED: historical Amanda recovery/preflight utility. Manual dispatch only; not part of canonical release certification.
 name: Amanda secure official recovery
 on:
-  push:
-    branches: [master]
-    paths:
-      - '.github/workflows/amanda-secure-recovery.yml'
   workflow_dispatch:
 
 permissions:

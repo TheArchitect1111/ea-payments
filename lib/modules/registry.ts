@@ -329,7 +329,7 @@ export const TENANT_MODULE_PRESETS: Record<string, ModuleId[]> = {
     'ask',
     'billing',
     'settings',
-    'people',
+    // people remains available in the registry but is fail-closed until certified.
     'intake',
     'applications',
     'reports',

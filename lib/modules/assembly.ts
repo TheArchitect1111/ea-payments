@@ -1,5 +1,4 @@
 import capabilityInventory from '@/config/capability-inventory.json';
-import capabilityCertifications from '@/config/capability-certifications.json';
 import {
   CHASSIS_STANDARD_MODULE_IDS,
   MODULE_IDS,
@@ -13,12 +12,6 @@ type InventoryCapability = {
   class: 'core' | 'business' | 'specialized';
   assemblyStatus: AssemblyStatus;
   costLicense?: { decision?: string };
-};
-
-type CapabilityCertification = {
-  id: string;
-  assemblyStatus: 'certified';
-  costLicenseDecision: 'approved';
 };
 
 export type AssemblyRejection = {
@@ -37,26 +30,12 @@ export type AssemblyPlan = {
 const INVENTORY_BY_ID = new Map(
   (capabilityInventory.modules as InventoryCapability[]).map((capability) => [capability.id, capability]),
 );
-const CERTIFICATION_BY_ID = new Map(
-  (capabilityCertifications.certifications as CapabilityCertification[]).map((certification) => [
-    certification.id,
-    certification,
-  ]),
-);
 const KNOWN_MODULE_IDS = new Set<string>(MODULE_IDS);
 
 function effectiveAssemblyState(id: ModuleId): {
   status?: AssemblyStatus;
   costLicenseDecision?: string;
 } {
-  const certification = CERTIFICATION_BY_ID.get(id);
-  if (certification) {
-    return {
-      status: certification.assemblyStatus,
-      costLicenseDecision: certification.costLicenseDecision,
-    };
-  }
-
   const capability = INVENTORY_BY_ID.get(id);
   return {
     status: capability?.assemblyStatus,
