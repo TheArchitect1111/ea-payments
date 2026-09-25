@@ -68,5 +68,9 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 20, cache: npm }
       - run: npm ci
-      - name: Build production application
-        run: npm run build
+      - name: Build and customer-journey smoke
+        run: |
+          npx playwright install --with-deps chromium
+          npm run verify:deploy
+      - name: Recovery journeys
+        run: node scripts/test-recovery-journeys.mjs
