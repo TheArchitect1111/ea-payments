@@ -56,6 +56,8 @@ jobs:
         run: npx tsx scripts/test-modular-assembly-run5.ts
       - name: Assembly Run 6
         run: npx tsx scripts/test-modular-assembly-run6.ts
+      - name: Release boundary Run A
+        run: node scripts/test-release-boundary-run-a.mjs
 
   platform-build:
     name: platform-build
