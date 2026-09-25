@@ -60,6 +60,8 @@ jobs:
         run: node scripts/test-release-boundary-run-a.mjs
       - name: Whole-system preflight
         run: node scripts/certify-preflight.mjs repository
+      - name: Lego certification engine schema
+        run: node scripts/test-lego-certification-engine-run2.mjs
       - name: Lego certification contract
         run: node scripts/test-lego-certification-contract.mjs
 
