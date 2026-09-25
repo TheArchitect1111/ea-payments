@@ -66,6 +66,8 @@ jobs:
         run: node scripts/test-lego-certification-contract.mjs
       - name: Lego factory lock Run 4
         run: node scripts/test-lego-factory-lock-run4.mjs
+      - name: Lego evidence wave 1
+        run: node scripts/test-lego-certificate-wave1.mjs
 
   platform-build:
     name: platform-build
