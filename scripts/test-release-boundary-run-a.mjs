@@ -27,7 +27,6 @@ for (const unrelated of [
   'test-athlete-brand-os-run',
   'test:amanda-checkout',
   'test:simplifi-hardening',
-  'test-recovery-journeys.mjs',
   'test-universal-factory-run10.mjs',
   'npm run lint',
 ]) {
