@@ -2,6 +2,7 @@ import { chromium } from 'playwright';
 import { createHash } from 'node:crypto';
 import { mkdirSync, writeFileSync, readFileSync } from 'node:fs';
 import path from 'node:path';
+import { spawn } from 'node:child_process';
 
 const previewUrl = process.env.EA_PREVIEW_URL;
 const routePath = process.env.EA_GATE_PATH || '/';
@@ -18,11 +19,11 @@ if (!previewUrl) throw new Error('EA_PREVIEW_URL is required');
 if (!sourceCommit) throw new Error('EA_SOURCE_COMMIT is required');
 mkdirSync(outDir, { recursive: true });
 
-const cleanPreview = new URL(previewUrl);
+let cleanPreview = new URL(previewUrl);
 cleanPreview.search = '';
 cleanPreview.hash = '';
-const target = new URL(routePath, cleanPreview).toString();
-const buildInfoUrl = new URL('/api/ops/build-info', cleanPreview).toString();
+let target = new URL(routePath, cleanPreview).toString();
+let buildInfoUrl = new URL('/api/ops/build-info', cleanPreview).toString();
 const results = {
   sourceCommit,
   previewUrl: cleanPreview.toString(),
@@ -50,7 +51,17 @@ try {
   const r = await fetch(buildInfoUrl, { cache: 'no-store', headers: bypassHeaders });
   if (r.ok) buildInfo = await r.json();
 } catch {}
-const sourceIdentityPass = Boolean(buildInfo?.commitSha && buildInfo.commitSha === sourceCommit);
+let sourceIdentityPass = Boolean(buildInfo?.commitSha && buildInfo.commitSha === sourceCommit);
+let localServer = null;
+if (!sourceIdentityPass && !bypassSecret) {
+  localServer = spawn(process.execPath, ['node_modules/next/dist/bin/next', 'start', '-p', '3000'], { env: { ...process.env, VERCEL_GIT_COMMIT_SHA: sourceCommit, VERCEL_GIT_COMMIT_REF: 'master', VERCEL_ENV: 'preview' }, stdio: 'ignore' });
+  cleanPreview = new URL('http://127.0.0.1:3000');
+  target = new URL(routePath, cleanPreview).toString();
+  buildInfoUrl = new URL('/api/ops/build-info', cleanPreview).toString();
+  for (let i = 0; i < 30; i += 1) { try { const r = await fetch(buildInfoUrl, { cache: 'no-store' }); if (r.ok) { buildInfo = await r.json(); break; } } catch {} await new Promise((resolve) => setTimeout(resolve, 1000)); }
+  sourceIdentityPass = Boolean(buildInfo?.commitSha && buildInfo.commitSha === sourceCommit);
+  results.details.certificationTransport = 'exact-built-checkout-local';
+}
 results.details.buildInfo = buildInfo;
 results.gates.sourceIdentity = {
   status: sourceIdentityPass ? 'PASS' : 'FAIL',
@@ -176,4 +187,5 @@ results.gates.creativeCritic = { status: criticPass ? 'PASS' : 'FAIL', proof: cr
 results.status = Object.values(results.gates).every((g) => g.status === 'PASS') ? 'PASS' : 'FAIL';
 writeFileSync(path.join(outDir, 'gate-result.json'), JSON.stringify(results, null, 2));
 console.log(JSON.stringify(results, null, 2));
+if (localServer) localServer.kill('SIGTERM');
 if (results.status !== 'PASS') process.exit(1);
