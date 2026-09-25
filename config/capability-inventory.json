@@ -317,7 +317,7 @@
       "id": "documents",
       "name": "Document Hub",
       "class": "business",
-      "assemblyStatus": "review-required",
+      "assemblyStatus": "certified",
       "version": 1,
       "ui": {
         "surface": "portal-module"
@@ -367,7 +367,7 @@
       "id": "training",
       "name": "Training Hub",
       "class": "business",
-      "assemblyStatus": "review-required",
+      "assemblyStatus": "certified",
       "version": 1,
       "ui": {
         "surface": "portal-module"
@@ -413,7 +413,7 @@
       "id": "messaging",
       "name": "Messaging",
       "class": "business",
-      "assemblyStatus": "review-required",
+      "assemblyStatus": "certified",
       "version": 1,
       "ui": {
         "surface": "portal-module"
@@ -644,7 +644,7 @@
       "id": "pulse",
       "name": "Pulse",
       "class": "specialized",
-      "assemblyStatus": "review-required",
+      "assemblyStatus": "certified",
       "version": 1,
       "ui": {
         "surface": "portal-module"
@@ -871,7 +871,7 @@
       "id": "resources",
       "name": "Resource Library",
       "class": "specialized",
-      "assemblyStatus": "review-required",
+      "assemblyStatus": "certified",
       "version": 1,
       "ui": {
         "surface": "portal-module"
@@ -1009,7 +1009,7 @@
       "id": "member",
       "name": "Member Experience",
       "class": "specialized",
-      "assemblyStatus": "review-required",
+      "assemblyStatus": "certified",
       "version": 1,
       "ui": {
         "surface": "portal-module"
