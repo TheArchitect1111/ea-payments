@@ -7,6 +7,7 @@ import { finalizeCtpAssetManifest, parseAssetUploads } from '@/lib/ctp-asset-sto
 import { AMANDA_PORTAL_FORMS } from '@/lib/amanda-catherine/config';
 import { checkRateLimit } from '@/lib/ai/rate-limit';
 import { amandaApplicationRoute } from '@/lib/amanda-catherine/application-routing';
+import { publishPlatformActivityEvent } from '@/lib/activity-events-store';
 
 export const dynamic = 'force-dynamic';
 
@@ -148,6 +149,27 @@ export async function POST(req: NextRequest) {
   };
 
   await notifyPortal(pulseEvent);
+
+  if (slug === 'amanda-catherine' && kind === 'application') {
+    const destination = amandaApplicationRoute(payload?.formId, payload?.program);
+    await publishPlatformActivityEvent({
+      organizationId: 'amanda-catherine',
+      module: 'applications',
+      eventType: 'application_submitted',
+      title: `Amanda application submitted · ${destination.queueLabel}`,
+      summary: `${name} (${email})`,
+      priority: 70,
+      personId: email,
+      actionLabel: `Open ${destination.queueLabel} queue`,
+      actionUrl: destination.queueHref,
+      metadata: {
+        submissionId: submission.id,
+        formId: typeof payload?.formId === 'string' ? payload.formId : '',
+        program: typeof payload?.program === 'string' ? payload.program : '',
+        status: submission.status,
+      },
+    });
+  }
 
   const route = slug === 'amanda-catherine' && kind === 'application'
     ? amandaApplicationRoute(payload?.formId, payload?.program)
