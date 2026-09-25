@@ -49,6 +49,9 @@ const eslintConfig = defineConfig([
     "playwright-report/**",
     "mobile/metro.config.js",
     "video-factory/**",
+    // Legacy presentation package is independently maintained and is not part
+    // of the Next.js platform release surface.
+    "tools/ea-bolt-slides/**",
   ]),
 ]);
 
