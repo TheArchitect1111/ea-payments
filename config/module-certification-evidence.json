@@ -1,7 +1,389 @@
 {
   "version": 1,
-  "status": "run2-schema",
-  "policy": "Run 2 installs the fail-closed certificate schema. Run 3 populates module-specific proof and is the only step that may promote a certificate to certified.",
-  "requiredEvidenceClasses": ["route-render","responsive-ui","authorization-tenant-isolation","durable-persistence","dependency-integration-readiness","success-empty-failure-states","observability","rollback-disable","business-lifecycle","immutable-version-fingerprint"],
-  "certificates": []
+  "status": "wave1-candidates",
+  "policy": "Wave 1 records evidence candidates. Certification remains fail-closed until executable evidence is class-specific and fingerprints are generated.",
+  "requiredEvidenceClasses": [
+    "route-render",
+    "responsive-ui",
+    "authorization-tenant-isolation",
+    "durable-persistence",
+    "dependency-integration-readiness",
+    "success-empty-failure-states",
+    "observability",
+    "rollback-disable",
+    "business-lifecycle",
+    "immutable-version-fingerprint"
+  ],
+  "certificates": [
+    {
+      "moduleId": "billing",
+      "moduleVersion": 1,
+      "status": "candidate",
+      "sourceFingerprint": "generated-by-ci-wave1",
+      "evidenceFingerprint": "generated-by-ci-wave1",
+      "evidence": {
+        "route-render": {
+          "tests": [
+            "scripts/test-modular-assembly-run4.ts",
+            "scripts/test-tenant-safety.mjs"
+          ]
+        },
+        "responsive-ui": {
+          "tests": [
+            "scripts/test-modular-assembly-run4.ts",
+            "scripts/test-tenant-safety.mjs"
+          ]
+        },
+        "authorization-tenant-isolation": {
+          "tests": [
+            "scripts/test-modular-assembly-run4.ts",
+            "scripts/test-tenant-safety.mjs"
+          ]
+        },
+        "durable-persistence": {
+          "tests": [
+            "scripts/test-modular-assembly-run4.ts",
+            "scripts/test-tenant-safety.mjs"
+          ]
+        },
+        "dependency-integration-readiness": {
+          "tests": [
+            "scripts/test-modular-assembly-run4.ts",
+            "scripts/test-tenant-safety.mjs"
+          ]
+        },
+        "success-empty-failure-states": {
+          "tests": [
+            "scripts/test-modular-assembly-run4.ts",
+            "scripts/test-tenant-safety.mjs"
+          ]
+        },
+        "observability": {
+          "tests": [
+            "scripts/test-modular-assembly-run4.ts",
+            "scripts/test-tenant-safety.mjs"
+          ]
+        },
+        "rollback-disable": {
+          "tests": [
+            "scripts/test-modular-assembly-run4.ts",
+            "scripts/test-tenant-safety.mjs"
+          ]
+        },
+        "business-lifecycle": {
+          "tests": [
+            "scripts/test-modular-assembly-run4.ts",
+            "scripts/test-tenant-safety.mjs"
+          ]
+        },
+        "immutable-version-fingerprint": {
+          "tests": [
+            "scripts/test-modular-assembly-run4.ts",
+            "scripts/test-tenant-safety.mjs"
+          ]
+        }
+      },
+      "certifiedBoundary": {
+        "excludedReviewRequired": [
+          "Candidate pending executable 10-class sufficiency; no strict admission until certified."
+        ]
+      }
+    },
+    {
+      "moduleId": "events",
+      "moduleVersion": 1,
+      "status": "candidate",
+      "sourceFingerprint": "generated-by-ci-wave1",
+      "evidenceFingerprint": "generated-by-ci-wave1",
+      "evidence": {
+        "route-render": {
+          "tests": [
+            "scripts/test-event-hub-mandatory-cert.mjs",
+            "scripts/test-portal-scheduling-cert.mjs"
+          ]
+        },
+        "responsive-ui": {
+          "tests": [
+            "scripts/test-event-hub-mandatory-cert.mjs",
+            "scripts/test-portal-scheduling-cert.mjs"
+          ]
+        },
+        "authorization-tenant-isolation": {
+          "tests": [
+            "scripts/test-event-hub-mandatory-cert.mjs",
+            "scripts/test-portal-scheduling-cert.mjs"
+          ]
+        },
+        "durable-persistence": {
+          "tests": [
+            "scripts/test-event-hub-mandatory-cert.mjs",
+            "scripts/test-portal-scheduling-cert.mjs"
+          ]
+        },
+        "dependency-integration-readiness": {
+          "tests": [
+            "scripts/test-event-hub-mandatory-cert.mjs",
+            "scripts/test-portal-scheduling-cert.mjs"
+          ]
+        },
+        "success-empty-failure-states": {
+          "tests": [
+            "scripts/test-event-hub-mandatory-cert.mjs",
+            "scripts/test-portal-scheduling-cert.mjs"
+          ]
+        },
+        "observability": {
+          "tests": [
+            "scripts/test-event-hub-mandatory-cert.mjs",
+            "scripts/test-portal-scheduling-cert.mjs"
+          ]
+        },
+        "rollback-disable": {
+          "tests": [
+            "scripts/test-event-hub-mandatory-cert.mjs",
+            "scripts/test-portal-scheduling-cert.mjs"
+          ]
+        },
+        "business-lifecycle": {
+          "tests": [
+            "scripts/test-event-hub-mandatory-cert.mjs",
+            "scripts/test-portal-scheduling-cert.mjs"
+          ]
+        },
+        "immutable-version-fingerprint": {
+          "tests": [
+            "scripts/test-event-hub-mandatory-cert.mjs",
+            "scripts/test-portal-scheduling-cert.mjs"
+          ]
+        }
+      },
+      "certifiedBoundary": {
+        "excludedReviewRequired": [
+          "Candidate pending executable 10-class sufficiency; no strict admission until certified."
+        ]
+      }
+    },
+    {
+      "moduleId": "intake",
+      "moduleVersion": 1,
+      "status": "candidate",
+      "sourceFingerprint": "generated-by-ci-wave1",
+      "evidenceFingerprint": "generated-by-ci-wave1",
+      "evidence": {
+        "route-render": {
+          "tests": [
+            "scripts/test-portal-intake-cert.mjs",
+            "scripts/test-modular-assembly-run3.ts"
+          ]
+        },
+        "responsive-ui": {
+          "tests": [
+            "scripts/test-portal-intake-cert.mjs",
+            "scripts/test-modular-assembly-run3.ts"
+          ]
+        },
+        "authorization-tenant-isolation": {
+          "tests": [
+            "scripts/test-portal-intake-cert.mjs",
+            "scripts/test-modular-assembly-run3.ts"
+          ]
+        },
+        "durable-persistence": {
+          "tests": [
+            "scripts/test-portal-intake-cert.mjs",
+            "scripts/test-modular-assembly-run3.ts"
+          ]
+        },
+        "dependency-integration-readiness": {
+          "tests": [
+            "scripts/test-portal-intake-cert.mjs",
+            "scripts/test-modular-assembly-run3.ts"
+          ]
+        },
+        "success-empty-failure-states": {
+          "tests": [
+            "scripts/test-portal-intake-cert.mjs",
+            "scripts/test-modular-assembly-run3.ts"
+          ]
+        },
+        "observability": {
+          "tests": [
+            "scripts/test-portal-intake-cert.mjs",
+            "scripts/test-modular-assembly-run3.ts"
+          ]
+        },
+        "rollback-disable": {
+          "tests": [
+            "scripts/test-portal-intake-cert.mjs",
+            "scripts/test-modular-assembly-run3.ts"
+          ]
+        },
+        "business-lifecycle": {
+          "tests": [
+            "scripts/test-portal-intake-cert.mjs",
+            "scripts/test-modular-assembly-run3.ts"
+          ]
+        },
+        "immutable-version-fingerprint": {
+          "tests": [
+            "scripts/test-portal-intake-cert.mjs",
+            "scripts/test-modular-assembly-run3.ts"
+          ]
+        }
+      },
+      "certifiedBoundary": {
+        "excludedReviewRequired": [
+          "Candidate pending executable 10-class sufficiency; no strict admission until certified."
+        ]
+      }
+    },
+    {
+      "moduleId": "applications",
+      "moduleVersion": 1,
+      "status": "candidate",
+      "sourceFingerprint": "generated-by-ci-wave1",
+      "evidenceFingerprint": "generated-by-ci-wave1",
+      "evidence": {
+        "route-render": {
+          "tests": [
+            "scripts/test-portal-applications-cert.mjs",
+            "scripts/test-modular-assembly-run3.ts"
+          ]
+        },
+        "responsive-ui": {
+          "tests": [
+            "scripts/test-portal-applications-cert.mjs",
+            "scripts/test-modular-assembly-run3.ts"
+          ]
+        },
+        "authorization-tenant-isolation": {
+          "tests": [
+            "scripts/test-portal-applications-cert.mjs",
+            "scripts/test-modular-assembly-run3.ts"
+          ]
+        },
+        "durable-persistence": {
+          "tests": [
+            "scripts/test-portal-applications-cert.mjs",
+            "scripts/test-modular-assembly-run3.ts"
+          ]
+        },
+        "dependency-integration-readiness": {
+          "tests": [
+            "scripts/test-portal-applications-cert.mjs",
+            "scripts/test-modular-assembly-run3.ts"
+          ]
+        },
+        "success-empty-failure-states": {
+          "tests": [
+            "scripts/test-portal-applications-cert.mjs",
+            "scripts/test-modular-assembly-run3.ts"
+          ]
+        },
+        "observability": {
+          "tests": [
+            "scripts/test-portal-applications-cert.mjs",
+            "scripts/test-modular-assembly-run3.ts"
+          ]
+        },
+        "rollback-disable": {
+          "tests": [
+            "scripts/test-portal-applications-cert.mjs",
+            "scripts/test-modular-assembly-run3.ts"
+          ]
+        },
+        "business-lifecycle": {
+          "tests": [
+            "scripts/test-portal-applications-cert.mjs",
+            "scripts/test-modular-assembly-run3.ts"
+          ]
+        },
+        "immutable-version-fingerprint": {
+          "tests": [
+            "scripts/test-portal-applications-cert.mjs",
+            "scripts/test-modular-assembly-run3.ts"
+          ]
+        }
+      },
+      "certifiedBoundary": {
+        "excludedReviewRequired": [
+          "Candidate pending executable 10-class sufficiency; no strict admission until certified."
+        ]
+      }
+    },
+    {
+      "moduleId": "reports",
+      "moduleVersion": 1,
+      "status": "candidate",
+      "sourceFingerprint": "generated-by-ci-wave1",
+      "evidenceFingerprint": "generated-by-ci-wave1",
+      "evidence": {
+        "route-render": {
+          "tests": [
+            "scripts/test-portal-reports-cert.mjs",
+            "scripts/test-modular-assembly-run3.ts"
+          ]
+        },
+        "responsive-ui": {
+          "tests": [
+            "scripts/test-portal-reports-cert.mjs",
+            "scripts/test-modular-assembly-run3.ts"
+          ]
+        },
+        "authorization-tenant-isolation": {
+          "tests": [
+            "scripts/test-portal-reports-cert.mjs",
+            "scripts/test-modular-assembly-run3.ts"
+          ]
+        },
+        "durable-persistence": {
+          "tests": [
+            "scripts/test-portal-reports-cert.mjs",
+            "scripts/test-modular-assembly-run3.ts"
+          ]
+        },
+        "dependency-integration-readiness": {
+          "tests": [
+            "scripts/test-portal-reports-cert.mjs",
+            "scripts/test-modular-assembly-run3.ts"
+          ]
+        },
+        "success-empty-failure-states": {
+          "tests": [
+            "scripts/test-portal-reports-cert.mjs",
+            "scripts/test-modular-assembly-run3.ts"
+          ]
+        },
+        "observability": {
+          "tests": [
+            "scripts/test-portal-reports-cert.mjs",
+            "scripts/test-modular-assembly-run3.ts"
+          ]
+        },
+        "rollback-disable": {
+          "tests": [
+            "scripts/test-portal-reports-cert.mjs",
+            "scripts/test-modular-assembly-run3.ts"
+          ]
+        },
+        "business-lifecycle": {
+          "tests": [
+            "scripts/test-portal-reports-cert.mjs",
+            "scripts/test-modular-assembly-run3.ts"
+          ]
+        },
+        "immutable-version-fingerprint": {
+          "tests": [
+            "scripts/test-portal-reports-cert.mjs",
+            "scripts/test-modular-assembly-run3.ts"
+          ]
+        }
+      },
+      "certifiedBoundary": {
+        "excludedReviewRequired": [
+          "Candidate pending executable 10-class sufficiency; no strict admission until certified."
+        ]
+      }
+    }
+  ]
 }
