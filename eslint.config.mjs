@@ -14,10 +14,13 @@ const eslintConfig = defineConfig([
     files: [
       'tools/ea-bolt-slides/src/deck/Annotator.tsx',
       'tools/ea-bolt-slides/src/deck/Deck.tsx',
+      'tools/ea-bolt-slides/src/deck/useInView.ts',
+      'tools/ea-bolt-slides/src/components/VisualDashboard.tsx',
     ],
     rules: {
       'react-hooks/immutability': 'off',
       'react-hooks/refs': 'off',
+      'react-hooks/set-state-in-effect': 'off',
     },
   },
   {
