@@ -50,7 +50,7 @@ assert(!lib.includes('`/portal/${input.slug}`'), 'Reveal must not hardcode hub /
 assert(page.includes('RevealExperience'), 'Page must mount keynote experience');
 assert(page.includes('buildCtpRevealView'), 'Page must build reveal view model');
 assert(experience.includes('Continue'), 'Keynote must support staged continue');
-assert(experience.includes('Fraunces') || experience.includes('next/font'), 'Must use expressive display font');
+assert(experience.includes("font-serif") && experience.includes('display.className'), 'Must use expressive display font class without network-bound font dependency');
 assert(css.includes('ctpRevealShimmer'), 'Must include shimmer motion');
 assert(css.includes('ctpRevealItem'), 'Must include cascade motion');
 
