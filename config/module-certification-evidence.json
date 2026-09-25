@@ -1,0 +1,7 @@
+{
+  "version": 1,
+  "status": "run2-schema",
+  "policy": "Run 2 installs the fail-closed certificate schema. Run 3 populates module-specific proof and is the only step that may promote a certificate to certified.",
+  "requiredEvidenceClasses": ["route-render","responsive-ui","authorization-tenant-isolation","durable-persistence","dependency-integration-readiness","success-empty-failure-states","observability","rollback-disable","business-lifecycle","immutable-version-fingerprint"],
+  "certificates": []
+}
