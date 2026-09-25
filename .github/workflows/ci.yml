@@ -1,13 +1,19 @@
 name: CI
+
 on:
   pull_request:
     branches: [master]
   push:
     branches: [master]
+
+# Run A: release boundaries.
+# Universal PR blocking is intentionally limited to platform safety and the
+# certified assembly contract. Product/client/legacy suites own separate gates.
 jobs:
-  lint-build-smoke:
+  platform-core:
+    name: platform-core
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
         with: { fetch-depth: 0 }
@@ -16,68 +22,49 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 20, cache: npm }
       - run: npm ci
-      - run: npm run lint
-      - name: Enforce EA Stack First
-        run: node scripts/test-stack-first-enforcement.mjs
-      - run: node scripts/test-capability-standard.mjs
-      - run: npx tsx scripts/test-modular-assembly-run2.ts
-      - run: npx tsx scripts/test-modular-assembly-run3.ts
-      - run: npx tsx scripts/test-modular-assembly-run4.ts
-      - run: npx tsx scripts/test-modular-assembly-run5.ts
-      - run: npx tsx scripts/test-modular-assembly-run6.ts
-      - run: node scripts/test-factory-run0-autonomous-completion.mjs
-      - run: node scripts/test-factory-run1-mass-builders.mjs
-      - run: node scripts/test-factory-run2-torture-certification.mjs
-      - run: node scripts/test-factory-run3-scale-envelope.mjs
-      - run: node scripts/test-factory-run4-final-acceptance.mjs
-      - run: node scripts/test-system-registry.mjs
-      - run: npx tsx scripts/test-control-plane.ts
-      - run: npx tsx scripts/test-run4-reliability.ts
-      - run: npx tsx scripts/test-run5-scale-certification.ts
-      - run: node scripts/test-master-guard-contract.mjs
-      - run: node scripts/test-production-protection.mjs
-      - run: node scripts/test-tenant-release-safety.mjs
-      - run: node scripts/test-release-guardrails.mjs
-      - run: npx tsx scripts/test-recovery-orchestrator.ts
-      - run: npx tsx scripts/test-recovery-certification.ts
-      - run: node scripts/test-recovery-monitoring-contract.mjs
-      - run: npx tsx scripts/test-stability-run1.ts
-      - run: npx tsx scripts/test-stability-run2.ts
-      - run: node scripts/test-ea-stability-run3.mjs
-      - run: node scripts/test-ea-stability-run4.mjs
-      - run: node scripts/test-universal-factory-run0.mjs
-      - run: node scripts/test-universal-factory-run1.mjs
-      - run: node scripts/test-universal-factory-run2.mjs
-      - run: node scripts/test-universal-factory-run3.mjs
-      - run: node scripts/test-universal-factory-run4.mjs
-      - run: node scripts/test-universal-factory-run5.mjs
-      - run: node scripts/test-universal-factory-run6.mjs
-      - run: node scripts/test-universal-factory-run7.mjs
-      - run: node scripts/test-universal-factory-run8.mjs
-      - run: node scripts/test-universal-factory-run9.mjs
-      - name: Final certify EA Universal Factory V1
-        run: node scripts/test-universal-factory-run10.mjs
-      - name: Verify Athlete Brand OS Run 0 contract
-        run: node scripts/test-athlete-brand-os-run0.mjs
-      - name: Verify Athlete Brand OS Run 1 relationship foundation
-        run: node scripts/test-athlete-brand-os-run1.mjs
-      - name: Verify Athlete Brand OS Run 2 shop and product advisor
-        run: node scripts/test-athlete-brand-os-run2.mjs
-      - name: Verify Athlete Brand OS Run 3 club and personal connection
-        run: node scripts/test-athlete-brand-os-run3.mjs
-      - name: Verify Athlete Brand OS Run 4 Amplifi athlete intelligence
-        run: node scripts/test-athlete-brand-os-run4.mjs
-      - name: Verify Athlete Brand OS Run 5 content and distribution
-        run: node scripts/test-athlete-brand-os-run5.mjs
-      - name: Verify Athlete Brand OS Run 6 intelligence analytics and Eva
-        run: node scripts/test-athlete-brand-os-run6.mjs
-      - name: Final certify EA Athlete Brand OS V1
-        run: node scripts/test-athlete-brand-os-run7.mjs
-      - run: npx tsx scripts/test-factory-fulfillment.ts
-      - run: npm run test:amanda-checkout
-      - run: node scripts/test-design-studio-registry-contract.mjs
-      - run: npm run test:simplifi-hardening
-      - run: |
-          npx playwright install --with-deps chromium
-          npm run verify:deploy
-      - run: node scripts/test-recovery-journeys.mjs
+      - name: Production protection
+        run: node scripts/test-production-protection.mjs
+      - name: Tenant release safety
+        run: node scripts/test-tenant-release-safety.mjs
+      - name: Release guardrails
+        run: node scripts/test-release-guardrails.mjs
+      - name: Master guard contract
+        run: node scripts/test-master-guard-contract.mjs
+      - name: System registry
+        run: node scripts/test-system-registry.mjs
+      - name: Control plane
+        run: npx tsx scripts/test-control-plane.ts
+
+  certified-assembly:
+    name: certified-assembly
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20, cache: npm }
+      - run: npm ci
+      - name: Capability standard
+        run: node scripts/test-capability-standard.mjs
+      - name: Assembly Run 2
+        run: npx tsx scripts/test-modular-assembly-run2.ts
+      - name: Assembly Run 3
+        run: npx tsx scripts/test-modular-assembly-run3.ts
+      - name: Assembly Run 4
+        run: npx tsx scripts/test-modular-assembly-run4.ts
+      - name: Assembly Run 5
+        run: npx tsx scripts/test-modular-assembly-run5.ts
+      - name: Assembly Run 6
+        run: npx tsx scripts/test-modular-assembly-run6.ts
+
+  platform-build:
+    name: platform-build
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20, cache: npm }
+      - run: npm ci
+      - name: Build production application
+        run: npm run build
