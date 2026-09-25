@@ -8,10 +8,6 @@ const eslintConfig = defineConfig([
   {
     rules: {
       '@next/next/no-html-link-for-pages': 'warn',
-      // React Hooks 7 enabled this rule across legacy surfaces. Keep it visible
-      // as warning debt while preventing unrelated pre-existing violations from
-      // blocking scoped platform releases.
-      'react-hooks/set-state-in-effect': 'warn',
     },
   },
   {
