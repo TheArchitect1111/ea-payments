@@ -7,16 +7,10 @@ import {
 import { getModuleDefinition } from '../lib/modules/registry';
 
 const wave = ['intake', 'applications', 'reports'] as const;
-const plan = requireAssemblyPlan(wave);
-assert.equal(plan.blocked, false);
-assert.deepEqual(plan.admitted, [
-  'dashboard',
-  'amplifi',
-  'update-hub',
-  'intake',
-  'applications',
-  'reports',
-]);
+const plan = createAssemblyPlan(wave);
+assert.equal(plan.blocked, true);
+assert.deepEqual(plan.admitted, []);
+assert.ok(plan.rejected.every((x) => x.reason === 'missing-10-class-certificate'));
 
 for (const id of wave) {
   const definition = getModuleDefinition(id);
@@ -31,20 +25,16 @@ for (const id of wave) {
 const unknownCapability = '__run3-unknown-capability__';
 const mixed = createAssemblyPlan(['intake', unknownCapability]);
 assert.equal(mixed.blocked, true);
-assert.ok(mixed.admitted.includes('intake'));
-assert.deepEqual(mixed.rejected, [
-  { id: unknownCapability, reason: 'unknown-module' },
-]);
+assert.ok(!mixed.admitted.includes('intake'));
+assert.ok(mixed.rejected.some((x) => x.id === unknownCapability && x.reason === 'unknown-module'));
 
 const clientFactoryPlan = planClientFactoryAssembly({
   packagePurchased: 'Amplifi',
   requestedModuleIds: [unknownCapability],
 });
 assert.equal(clientFactoryPlan.blocked, true);
-assert.ok(clientFactoryPlan.admitted.includes('amplifi'));
-assert.deepEqual(clientFactoryPlan.rejected, [
-  { id: unknownCapability, reason: 'unknown-module' },
-]);
+assert.ok(!clientFactoryPlan.admitted.includes('amplifi'));
+assert.ok(clientFactoryPlan.rejected.some((x) => x.id === unknownCapability && x.reason === 'unknown-module'));
 assert.throws(
   () =>
     requireClientFactoryAssembly({
@@ -55,7 +45,7 @@ assert.throws(
 );
 
 console.log('EA Modular Assembly Run 3 OK');
-console.log(' - intake, applications, and reports remain certified reusable business capabilities');
+console.log(' - legacy certified labels cannot bypass the 10-class certificate authority');
 console.log(' - certified business capabilities coexist with the universal chassis');
 console.log(' - unknown capabilities remain fail-closed');
 console.log(' - Client Factory package planning remains routed through the Assembly Engine');
