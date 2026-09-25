@@ -2,10 +2,14 @@ name: EA Production Gate
 
 on:
   workflow_dispatch:
+  push:
+    branches: [master]
+    paths:
+      - '.ea/dispatch/production-gate.json'
     inputs:
       preview_url:
         description: Exact Vercel preview URL for the current master SHA
-        required: true
+        required: false
         type: string
       route_path:
         description: Route to visually and functionally verify
@@ -64,12 +68,19 @@ jobs:
       - name: Install Chromium for visual gates
         run: npx playwright install --with-deps chromium
 
+      - name: Resolve gate request
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            node -e "const f=require('./.ea/dispatch/production-gate.json'); for (const [k,v] of Object.entries({EA_PREVIEW_URL:f.preview_url,EA_GATE_PATH:f.route_path,EA_MIN_VISUALS:String(f.min_visuals||2)})) console.log(k+'='+v)" >> "$GITHUB_ENV"
+          else
+            echo "EA_PREVIEW_URL=${{ inputs.preview_url }}" >> "$GITHUB_ENV"
+            echo "EA_GATE_PATH=${{ inputs.route_path }}" >> "$GITHUB_ENV"
+            echo "EA_MIN_VISUALS=${{ inputs.min_visuals }}" >> "$GITHUB_ENV"
+          fi
       - name: Preview, asset, functional, desktop, mobile and critic gates
         env:
-          EA_PREVIEW_URL: ${{ inputs.preview_url }}
-          EA_GATE_PATH: ${{ inputs.route_path }}
           EA_SOURCE_COMMIT: ${{ github.sha }}
-          EA_MIN_VISUALS: ${{ inputs.min_visuals }}
           EA_GATE_OUTPUT: artifacts/ea-gate
           VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
         run: node scripts/ea-preview-gate.mjs
