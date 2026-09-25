@@ -4,7 +4,8 @@ const required=[
  'scripts/test-amanda-learning-handoff.mjs',
  'scripts/test-amanda-checkout-config.mjs',
  'scripts/test-amanda-completion.mjs',
- 'scripts/test-amanda-practitioner-kit.mts'
+ 'scripts/test-amanda-practitioner-kit.mts',
+ 'lib/amanda-catherine/readiness.ts'
 ];
 const failures=[];
 for(const p of required){try{readFileSync(p)}catch{failures.push(`missing:${p}`)}}
@@ -18,5 +19,9 @@ const fulfillment=readFileSync('lib/amanda-catherine/payment-fulfillment.ts','ut
 if(!fulfillment.includes('provisionAmandaClientAccess')) failures.push('payment-to-access-missing');
 const owner=readFileSync('app/portal/amanda-catherine/owner/OwnerApplicationQueue.tsx','utf8');
 if(!owner) failures.push('owner-visibility-missing');
+const readiness=readFileSync('lib/amanda-catherine/readiness.ts','utf8');
+for(const marker of ['STRIPE_SECRET_KEY','STRIPE_AMANDA_WEBHOOK_SECRET','AMANDA_JANE_BOOKING_URL','AMANDA_FINANCING_URL','NYLAS_API_KEY','nylasGrantId','nylasCalendarId']){
+ if(!readiness.includes(marker)) failures.push(`production-readiness-check-missing:${marker}`);
+}
 console.log(JSON.stringify({client:'amanda-catherine',contract:'public CTA -> checkout/application -> payment fulfillment -> entitlement -> learning -> owner visibility',failures},null,2));
 if(failures.length) process.exit(1);
