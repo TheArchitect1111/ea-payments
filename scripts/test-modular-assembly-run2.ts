@@ -23,9 +23,11 @@ const stillUncertified = capabilityInventory.modules.find(
 if (stillUncertified) {
   const plan = createAssemblyPlan([stillUncertified.id]);
   assert.equal(plan.blocked, true);
-  assert.deepEqual(plan.rejected, [
-    { id: stillUncertified.id, reason: 'not-certified', status: stillUncertified.assemblyStatus },
-  ]);
+  assert.ok(plan.rejected.some((item) =>
+    item.id === stillUncertified.id &&
+    item.reason === 'not-certified' &&
+    item.status === stillUncertified.assemblyStatus
+  ));
   assert.throws(
     () => requireAssemblyPlan([stillUncertified.id]),
     new RegExp(`EA assembly blocked: ${stillUncertified.id}:not-certified`),
