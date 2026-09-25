@@ -3,6 +3,7 @@ import { guardPortalApi, portalApiUnauthorized, portalTenant } from '@/lib/api/p
 import { updatePortalFormSubmissionStatus } from '@/lib/portal-forms/store';
 import type { PortalFormStatus } from '@/lib/portal-forms/types';
 import { normalizeRole, roleAtLeast } from '@/lib/rbac';
+import { publishPlatformActivityEvent } from '@/lib/activity-events-store';
 
 export const dynamic = 'force-dynamic';
 
@@ -37,6 +38,10 @@ export async function POST(req: NextRequest) {
 
   if (!updated) {
     return NextResponse.json({ error: 'Submission not found.' }, { status: 404 });
+  }
+
+  if (tenant.portalSlug === 'amanda-catherine') {
+    await publishPlatformActivityEvent({ organizationId: 'amanda-catherine', module: 'applications', eventType: 'application_status_changed', title: `Amanda application ${status}`, summary: 'Application status updated', priority: status === 'accepted' ? 80 : 50, actionLabel: 'Open Amanda applications', actionUrl: '/portal/amanda-catherine/owner', metadata: { submissionId, status } });
   }
 
   return NextResponse.json({ ok: true, submission: updated });
