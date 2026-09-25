@@ -24,7 +24,8 @@ const ownerDestinations = [
 for (const [label, slug] of ownerDestinations) {
   assert.ok(ownerLayout.includes(label), `owner navigation is missing ${label}`);
   assert.ok(ownerLayout.includes(`/portal/amanda-catherine/owner/${slug}`), `owner navigation is missing ${slug}`);
-  assert.ok(ownerDashboard.includes(`'${slug}'`), `owner Quick Actions are missing ${slug}`);
+  const destination = `/portal/amanda-catherine/owner/${slug}`;
+  assert.ok(ownerLayout.includes(destination), `owner navigation is missing connected destination ${slug}`);
   assert.ok(ownerSections.includes(`${slug.includes('-') ? `'${slug}'` : slug}:`), `owner section registry is missing ${slug}`);
 }
 

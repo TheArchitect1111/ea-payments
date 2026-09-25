@@ -1,0 +1,48 @@
+name: Amanda Client Assembly Acceptance
+on:
+  pull_request:
+    branches: [master]
+    paths:
+      - 'app/amanda-catherine/**'
+      - 'app/portal/amanda-catherine/**'
+      - 'app/api/public/amanda/**'
+      - 'lib/amanda-catherine/**'
+      - 'clients/amanda-catherine/**'
+      - 'scripts/test-amanda-**'
+      - 'config/capability-inventory.json'
+  workflow_dispatch:
+jobs:
+  acceptance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Amanda acceptance suite
+        shell: bash
+        run: |
+          set +e
+          failures=0
+          run_check() { echo "::group::$1"; shift; "$@" || failures=$((failures+1)); echo "::endgroup::"; }
+          run_check "Assembly lifecycle contract" node scripts/test-amanda-client-assembly-acceptance.mjs
+          run_check "Page to portal parity" node scripts/test-amanda-page-portal-parity.mjs
+          run_check "Enrollment to learning handoff" node scripts/test-amanda-learning-handoff.mjs
+          run_check "Checkout contract" node scripts/test-amanda-checkout-config.mjs
+          run_check "Completion contract" node scripts/test-amanda-completion.mjs
+          run_check "Practitioner kit safe Stripe contract" npx tsx scripts/test-amanda-practitioner-kit.mts
+          echo "Amanda acceptance failures: $failures"
+          test "$failures" -eq 0
+      - name: Acceptance complete
+        run: echo "Amanda client assembly acceptance complete"
+
+      # Individual contracts are intentionally executed by the collector above so every
+      # applicable failure is reported in one CI pass rather than fail-fast whack-a-mole.
+      - name: Legacy individual steps disabled
+        if: ${{ false }}
+        run: echo disabled
+      - name: Assembly lifecycle contract legacy
+        if: ${{ false }}
+        run: node scripts/test-amanda-client-assembly-acceptance.mjs
