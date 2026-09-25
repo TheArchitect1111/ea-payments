@@ -3,6 +3,7 @@ import type Stripe from 'stripe';
 import { AMANDA_SELF_ENROLLMENT_COURSES } from '@/lib/amanda-catherine/config';
 import { getStripe } from '@/lib/stripe';
 import { canonicalPlatformOrigin } from '@/lib/platform-urls';
+import { publishPlatformActivityEvent } from '@/lib/activity-events-store';
 
 export const dynamic = 'force-dynamic';
 
@@ -82,6 +83,23 @@ export async function POST(req: NextRequest) {
   try {
     const session = await getStripe().checkout.sessions.create(sessionParams);
     if (!session.url) throw new Error('Stripe did not return a checkout address.');
+    await publishPlatformActivityEvent({
+      organizationId: 'amanda-catherine',
+      module: 'enrollment',
+      eventType: 'checkout_created',
+      title: 'Amanda course checkout created',
+      summary: `${offer.title} checkout opened for ${email}`,
+      priority: 60,
+      personId: email,
+      actionLabel: 'Review Amanda enrollment',
+      actionUrl: '/portal/amanda-catherine/owner',
+      metadata: {
+        offerId: offer.offerId,
+        courseId: offer.courseId,
+        sessionId: session.id,
+        source: 'public-course-v1',
+      },
+    });
     return NextResponse.json({ ok: true, url: session.url });
   } catch (error) {
     console.error('[amanda-enrollment] checkout creation failed', error);
