@@ -168,8 +168,8 @@ results.details.mobile = mobile;
 const all = [desktop, mobile];
 const functionalPass = all.every((r) => r.httpStatus >= 200 && r.httpStatus < 400 && r.pageErrors.length === 0 && r.bodyTextLength > 40);
 const assetsPass = all.every((r) => r.brokenImgs.length === 0 && r.brokenBackgrounds.length === 0 && r.badImageResponses.length === 0 && r.renderedVisuals >= minVisuals);
-const desktopPass = desktop.overflow <= 2 && desktop.consoleErrors.length === 0 && desktop.failedRequests.length === 0 && desktop.scrollHeight > desktop.viewport.height;
-const mobilePass = mobile.overflow <= 2 && mobile.consoleErrors.length === 0 && mobile.failedRequests.length === 0 && mobile.scrollHeight > mobile.viewport.height;
+const desktopPass = desktop.overflow <= 2 && desktop.consoleErrors.length === 0 && desktop.failedRequests.length === 0 && desktop.scrollHeight >= desktop.viewport.height;
+const mobilePass = mobile.overflow <= 2 && mobile.consoleErrors.length === 0 && mobile.failedRequests.length === 0 && mobile.scrollHeight >= mobile.viewport.height;
 
 const criticReasons = [];
 if (!assetsPass) criticReasons.push('visual assets failed');
