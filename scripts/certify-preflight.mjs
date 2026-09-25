@@ -63,7 +63,11 @@ pass.push('Amanda canonical/legacy boundary evaluated');
 
 const workflowNames = readdirSync('.github/workflows').filter((x) => x.endsWith('.yml') || x.endsWith('.yaml'));
 const amandaRecovery = workflowNames.filter((x) => x.startsWith('amanda-') && /recover|recovery|preflight/.test(x));
-if (amandaRecovery.length) warn(`HISTORICAL_AUTOMATION Amanda has ${amandaRecovery.length} recovery/preflight workflows (non-canonical; quarantine/retirement tracked): ${amandaRecovery.join(', ')}`);
+for (const workflow of amandaRecovery) {
+  const body = read(`.github/workflows/${workflow}`);
+  if (!body.startsWith('# QUARANTINED:') || /\n\s*push:/.test(body)) fail(`HISTORICAL_AUTOMATION_ACTIVE ${workflow}`);
+}
+if (amandaRecovery.length) pass.push(`${amandaRecovery.length} Amanda historical workflows are quarantined/manual-only`);
 
 const report = {
   version: 1,
