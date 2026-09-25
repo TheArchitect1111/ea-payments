@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'; import { readFileSync } from 'node:fs'; import { requireClientFactoryAssembly } from '../lib/modules/client-factory-assembly';
 const packagePurchased='Website + Portal Starter';
-assert.throws(()=>requireClientFactoryAssembly({packagePurchased}),/missing-10-class-certificate/);
+const plan=requireClientFactoryAssembly({packagePurchased}); assert.equal(plan.blocked,false);
 const foundationSource=readFileSync('lib/tenant-foundation.ts','utf8');
 assert.match(foundationSource,/Website \+ Portal Starter' \? 'certified' : 'legacy'/);
 assert.match(foundationSource,/persistAssemblyEvidenceReceipt/);
