@@ -1,18 +1,10 @@
 'use client';
 
 import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
-import { Fraunces, Manrope } from 'next/font/google';
 import './brand-onboarding-paths.css';
 
-const display = Fraunces({
-  subsets: ['latin'],
-  weight: ['500', '600', '700'],
-});
-
-const sans = Manrope({
-  subsets: ['latin'],
-  weight: ['500', '600', '700', '800'],
-});
+const display = { className: 'font-serif' };
+const sans = { className: 'font-sans' };
 
 export type BrandOnboardingPath =
   | 'existing_brand'

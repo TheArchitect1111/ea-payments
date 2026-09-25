@@ -2,20 +2,12 @@
 
 import { useEffect, useState, type ReactNode } from 'react';
 import Link from 'next/link';
-import { Fraunces, Manrope } from 'next/font/google';
 import type { CtpOpportunityDashboardView } from '@/lib/ctp-opportunity-view';
 import BrandOnboardingPaths from './BrandOnboardingPaths';
 import './client-experience.css';
 
-const display = Fraunces({
-  subsets: ['latin'],
-  weight: ['500', '600', '700'],
-});
-
-const sans = Manrope({
-  subsets: ['latin'],
-  weight: ['500', '600', '700', '800'],
-});
+const display = { className: 'font-serif' };
+const sans = { className: 'font-sans' };
 
 const SCENE_COUNT = 7;
 
