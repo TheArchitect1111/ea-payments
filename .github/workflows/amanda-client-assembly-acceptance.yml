@@ -1,0 +1,35 @@
+name: Amanda Client Assembly Acceptance
+on:
+  pull_request:
+    branches: [master]
+    paths:
+      - 'app/amanda-catherine/**'
+      - 'app/portal/amanda-catherine/**'
+      - 'app/api/public/amanda/**'
+      - 'lib/amanda-catherine/**'
+      - 'clients/amanda-catherine/**'
+      - 'scripts/test-amanda-**'
+      - 'config/capability-inventory.json'
+  workflow_dispatch:
+jobs:
+  acceptance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Assembly lifecycle contract
+        run: node scripts/test-amanda-client-assembly-acceptance.mjs
+      - name: Page to portal parity
+        run: node scripts/test-amanda-page-portal-parity.mjs
+      - name: Enrollment to learning handoff
+        run: node scripts/test-amanda-learning-handoff.mjs
+      - name: Checkout contract
+        run: node scripts/test-amanda-checkout-config.mjs
+      - name: Completion contract
+        run: node scripts/test-amanda-completion.mjs
+      - name: Practitioner kit safe Stripe contract
+        run: npx tsx scripts/test-amanda-practitioner-kit.mts
