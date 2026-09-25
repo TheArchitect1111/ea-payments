@@ -68,6 +68,8 @@ jobs:
         run: node scripts/test-lego-factory-lock-run4.mjs
       - name: Lego evidence wave 1
         run: node scripts/test-lego-certificate-wave1.mjs
+      - name: Strict Lego authority
+        run: node scripts/test-lego-strict-authority.mjs
 
   platform-build:
     name: platform-build

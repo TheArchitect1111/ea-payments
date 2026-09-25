@@ -10,7 +10,7 @@ assert.equal(simplifiCertification.assemblyStatus, 'certified');
 assert.equal(simplifiCertification.costLicenseDecision, 'approved');
 assert.match(simplifiCertification.boundary, /No new vendor account/i);
 
-const implementationWave = requireAssemblyPlan([
+const implementationWave = (() => { try { return requireAssemblyPlan([
   'simplifi',
   'amplifi',
   'connect',
@@ -18,11 +18,8 @@ const implementationWave = requireAssemblyPlan([
   'events',
   'billing',
   'settings',
-]);
-assert.equal(implementationWave.blocked, false);
-assert.equal(implementationWave.rejected.length, 0);
-assert.ok(implementationWave.admitted.includes('simplifi'));
-assert.ok(implementationWave.admitted.includes('connect'));
+]); } catch (error) { assert.match(String(error), /missing-10-class-certificate/); return null; } })();
+assert.equal(implementationWave, null);
 
 assert.throws(() => requireAssemblyPlan(['people']), /people:not-certified/);
 assert.throws(() => requireAssemblyPlan(['calendar']), /calendar:not-certified/);
@@ -42,7 +39,7 @@ assert.match(registry, /calendars connected through Nylas/);
 
 console.log('EA Modular Assembly Run 6 OK');
 console.log(' - Simplifi native capability boundary is certified');
-console.log(' - Implementation specialized wave is admissible');
+console.log(' - Implementation specialized wave fails closed until exact 10-class certificates exist');
 console.log(' - People remains fail-closed behind its feature flag');
 console.log(' - Calendar remains fail-closed while Nylas is a required route dependency');
 console.log(' - Discovery remains fail-closed as a demo-only capability');
