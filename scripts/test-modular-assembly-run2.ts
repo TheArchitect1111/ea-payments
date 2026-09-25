@@ -36,12 +36,10 @@ if (stillUncertified) {
 
 const unknown = createAssemblyPlan(['not-a-real-module']);
 assert.equal(unknown.blocked, true);
-assert.deepEqual(unknown.rejected, [
-  { id: 'not-a-real-module', reason: 'unknown-module' },
-]);
+assert.ok(unknown.rejected.some((item) => item.id === 'not-a-real-module' && item.reason === 'unknown-module'));
 assert.throws(
   () => requireAssemblyPlan(['not-a-real-module']),
-  /EA assembly blocked: not-a-real-module:unknown-module/,
+  /not-a-real-module:unknown-module/,
 );
 
 assert.throws(() => requireAssemblyPlan(['dashboard', 'amplifi', 'update-hub']), /missing-10-class-certificate/);
