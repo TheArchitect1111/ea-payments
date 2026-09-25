@@ -1,0 +1,10 @@
+import assert from 'node:assert/strict'; import { readFileSync } from 'node:fs';
+const authority=readFileSync('lib/modules/certification-authority.ts','utf8');
+const assembly=readFileSync('lib/modules/assembly.ts','utf8');
+const ledger=JSON.parse(readFileSync('config/module-certification-evidence.json','utf8'));
+assert.match(authority,/certificate\?\.status==='certified'/);
+assert.match(authority,/missing-10-class-certificate/);
+assert.match(assembly,/certificationAuthority/);
+assert.match(assembly,/missing-10-class-certificate/);
+assert.ok(Array.isArray(ledger.certificates));
+console.log('EA Lego Factory Lock Run 4: PASS');
