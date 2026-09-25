@@ -2,9 +2,18 @@
   "version": 1,
   "standardVersion": 1,
   "policy": {
-    "certifiedCoreRequiredInEveryPortal": ["dashboard", "amplifi", "update-hub"],
+    "certifiedCoreRequiredInEveryPortal": [
+      "dashboard",
+      "amplifi",
+      "update-hub"
+    ],
     "nonCertifiedModulesFailClosed": true,
-    "assemblyStatuses": ["certified", "inventoried", "review-required"]
+    "assemblyStatuses": [
+      "certified",
+      "inventoried",
+      "review-required"
+    ],
+    "certificationSource": "This inventory is the canonical assembly certification truth. capability-certifications.json is historical evidence only."
   },
   "modules": [
     {
@@ -13,18 +22,50 @@
       "class": "core",
       "assemblyStatus": "certified",
       "version": 1,
-      "ui": {"surface": "portal-home", "implementation": "existing"},
-      "routes": ["/portal/{slug}"],
-      "navigation": {"required": true, "placement": "core"},
-      "data": {"authority": "existing EA platform sources", "newStoreRequired": false},
-      "permissions": {"minimumRole": "guest"},
-      "dependencies": ["EA capability registry", "EA module registry"],
+      "ui": {
+        "surface": "portal-home",
+        "implementation": "existing"
+      },
+      "routes": [
+        "/portal/{slug}"
+      ],
+      "navigation": {
+        "required": true,
+        "placement": "core"
+      },
+      "data": {
+        "authority": "existing EA platform sources",
+        "newStoreRequired": false
+      },
+      "permissions": {
+        "minimumRole": "guest"
+      },
+      "dependencies": [
+        "EA capability registry",
+        "EA module registry"
+      ],
       "integrations": [],
-      "provisioning": {"mode": "automatic-with-tenant", "required": true},
-      "healthCheck": {"type": "route-smoke", "path": "/portal/{slug}"},
-      "tests": ["module-registry-contract", "portal-smoke"],
-      "rollback": {"mode": "release-rollback", "removable": false},
-      "costLicense": {"decision": "approved", "mandatoryVendorFee": false, "boundary": "EA-owned application code"}
+      "provisioning": {
+        "mode": "automatic-with-tenant",
+        "required": true
+      },
+      "healthCheck": {
+        "type": "route-smoke",
+        "path": "/portal/{slug}"
+      },
+      "tests": [
+        "module-registry-contract",
+        "portal-smoke"
+      ],
+      "rollback": {
+        "mode": "release-rollback",
+        "removable": false
+      },
+      "costLicense": {
+        "decision": "approved",
+        "mandatoryVendorFee": false,
+        "boundary": "EA-owned application code"
+      }
     },
     {
       "id": "amplifi",
@@ -32,18 +73,53 @@
       "class": "core",
       "assemblyStatus": "certified",
       "version": 1,
-      "ui": {"surface": "portal-module", "implementation": "existing"},
-      "routes": ["/portal/{slug}/amplifi"],
-      "navigation": {"required": true, "placement": "growth", "pillNav": true},
-      "data": {"authority": "existing Amplifi application services", "newStoreRequired": false},
-      "permissions": {"minimumRole": "guest"},
-      "dependencies": ["EA capability registry", "EA module registry"],
-      "integrations": ["existing Amplifi providers only"],
-      "provisioning": {"mode": "automatic-with-tenant", "required": true},
-      "healthCheck": {"type": "route-smoke", "path": "/portal/{slug}/amplifi"},
-      "tests": ["module-registry-contract", "amplifi-route-smoke"],
-      "rollback": {"mode": "release-rollback", "removable": false},
-      "costLicense": {"decision": "approved", "mandatoryVendorFee": false, "boundary": "No new paid vendor account required by Run 1"}
+      "ui": {
+        "surface": "portal-module",
+        "implementation": "existing"
+      },
+      "routes": [
+        "/portal/{slug}/amplifi"
+      ],
+      "navigation": {
+        "required": true,
+        "placement": "growth",
+        "pillNav": true
+      },
+      "data": {
+        "authority": "existing Amplifi application services",
+        "newStoreRequired": false
+      },
+      "permissions": {
+        "minimumRole": "guest"
+      },
+      "dependencies": [
+        "EA capability registry",
+        "EA module registry"
+      ],
+      "integrations": [
+        "existing Amplifi providers only"
+      ],
+      "provisioning": {
+        "mode": "automatic-with-tenant",
+        "required": true
+      },
+      "healthCheck": {
+        "type": "route-smoke",
+        "path": "/portal/{slug}/amplifi"
+      },
+      "tests": [
+        "module-registry-contract",
+        "amplifi-route-smoke"
+      ],
+      "rollback": {
+        "mode": "release-rollback",
+        "removable": false
+      },
+      "costLicense": {
+        "decision": "approved",
+        "mandatoryVendorFee": false,
+        "boundary": "No new paid vendor account required by Run 1"
+      }
     },
     {
       "id": "update-hub",
@@ -51,38 +127,975 @@
       "class": "core",
       "assemblyStatus": "certified",
       "version": 1,
-      "ui": {"surface": "portal-module", "implementation": "existing"},
-      "routes": ["/portal/{slug}/updates"],
-      "navigation": {"required": true, "placement": "core", "pillNav": true},
-      "data": {"authority": "existing EA update/activity sources", "newStoreRequired": false},
-      "permissions": {"minimumRole": "guest"},
-      "dependencies": ["EA capability registry", "EA module registry"],
+      "ui": {
+        "surface": "portal-module",
+        "implementation": "existing"
+      },
+      "routes": [
+        "/portal/{slug}/updates"
+      ],
+      "navigation": {
+        "required": true,
+        "placement": "core",
+        "pillNav": true
+      },
+      "data": {
+        "authority": "existing EA update/activity sources",
+        "newStoreRequired": false
+      },
+      "permissions": {
+        "minimumRole": "guest"
+      },
+      "dependencies": [
+        "EA capability registry",
+        "EA module registry"
+      ],
       "integrations": [],
-      "provisioning": {"mode": "automatic-with-tenant", "required": true},
-      "healthCheck": {"type": "route-smoke", "path": "/portal/{slug}/updates"},
-      "tests": ["module-registry-contract", "updates-route-smoke"],
-      "rollback": {"mode": "release-rollback", "removable": false},
-      "costLicense": {"decision": "approved", "mandatoryVendorFee": false, "boundary": "EA-owned application code"}
+      "provisioning": {
+        "mode": "automatic-with-tenant",
+        "required": true
+      },
+      "healthCheck": {
+        "type": "route-smoke",
+        "path": "/portal/{slug}/updates"
+      },
+      "tests": [
+        "module-registry-contract",
+        "updates-route-smoke"
+      ],
+      "rollback": {
+        "mode": "release-rollback",
+        "removable": false
+      },
+      "costLicense": {
+        "decision": "approved",
+        "mandatoryVendorFee": false,
+        "boundary": "EA-owned application code"
+      }
     },
-    {"id":"events","name":"Calendar & Event Hub","class":"business","assemblyStatus":"inventoried","version":1,"ui":{"surface":"portal-module"},"routes":["/portal/{slug}/events"],"navigation":{"placement":"operations"},"data":{"status":"existing"},"permissions":{"minimumRole":"guest"},"dependencies":{"status":"review-required"},"integrations":{"status":"review-required","candidates":["pretix"]},"provisioning":{"status":"review-required"},"healthCheck":{"type":"route-smoke"},"tests":{"status":"existing-plus-review-required"},"rollback":{"mode":"module-disable-or-release-rollback"},"costLicense":{"decision":"review-required"}},
-    {"id":"calendar","name":"EA Shared Calendar","class":"business","assemblyStatus":"inventoried","version":1,"ui":{"surface":"portal-module"},"routes":["/portal/{slug}/calendar"],"navigation":{"placement":"operations"},"data":{"status":"existing"},"permissions":{"minimumRole":"guest"},"dependencies":{"status":"review-required"},"integrations":{"status":"review-required"},"provisioning":{"status":"review-required"},"healthCheck":{"type":"route-smoke"},"tests":{"status":"existing-plus-review-required"},"rollback":{"mode":"module-disable-or-release-rollback"},"costLicense":{"decision":"review-required"}},
-    {"id":"billing","name":"Billing","class":"business","assemblyStatus":"inventoried","version":1,"ui":{"surface":"portal-module"},"routes":["/portal/{slug}/billing"],"navigation":{"placement":"platform"},"data":{"status":"existing"},"permissions":{"minimumRole":"owner"},"dependencies":{"status":"review-required"},"integrations":{"status":"review-required"},"provisioning":{"status":"review-required"},"healthCheck":{"type":"route-smoke"},"tests":{"status":"existing-plus-review-required"},"rollback":{"mode":"module-disable-or-release-rollback"},"costLicense":{"decision":"review-required"}},
-    {"id":"documents","name":"Document Hub","class":"business","assemblyStatus":"inventoried","version":1,"ui":{"surface":"portal-module"},"routes":["/portal/{slug}/documents"],"navigation":{"placement":"operations"},"data":{"status":"existing"},"permissions":{"minimumRole":"guest"},"dependencies":{"status":"review-required"},"integrations":{"status":"review-required","candidates":["documenso"]},"provisioning":{"status":"review-required"},"healthCheck":{"type":"route-smoke"},"tests":{"status":"existing-plus-review-required"},"rollback":{"mode":"module-disable-or-release-rollback"},"costLicense":{"decision":"review-required"}},
-    {"id":"training","name":"Training Hub","class":"business","assemblyStatus":"inventoried","version":1,"ui":{"surface":"portal-module"},"routes":["/portal/{slug}/learning"],"navigation":{"placement":"operations"},"data":{"status":"existing"},"permissions":{"minimumRole":"guest"},"dependencies":{"status":"review-required"},"integrations":{"status":"review-required"},"provisioning":{"status":"review-required"},"healthCheck":{"type":"route-smoke"},"tests":{"status":"existing-plus-review-required"},"rollback":{"mode":"module-disable-or-release-rollback"},"costLicense":{"decision":"review-required"}},
-    {"id":"messaging","name":"Messaging","class":"business","assemblyStatus":"inventoried","version":1,"ui":{"surface":"portal-module"},"routes":["/portal/{slug}/messaging"],"navigation":{"placement":"operations"},"data":{"status":"existing"},"permissions":{"minimumRole":"guest"},"dependencies":{"status":"review-required"},"integrations":{"status":"review-required","candidates":["novu"]},"provisioning":{"status":"review-required"},"healthCheck":{"type":"route-smoke"},"tests":{"status":"existing-plus-review-required"},"rollback":{"mode":"module-disable-or-release-rollback"},"costLicense":{"decision":"review-required"}},
-    {"id":"people","name":"People","class":"business","assemblyStatus":"inventoried","version":1,"ui":{"surface":"portal-module"},"routes":["/portal/{slug}/people"],"navigation":{"placement":"operations"},"data":{"status":"existing"},"permissions":{"minimumRole":"staff"},"dependencies":{"status":"review-required"},"integrations":{"status":"review-required"},"provisioning":{"status":"review-required"},"healthCheck":{"type":"route-smoke"},"tests":{"status":"existing-plus-review-required"},"rollback":{"mode":"module-disable-or-release-rollback"},"costLicense":{"decision":"review-required"}},
-    {"id":"intake","name":"Intake","class":"business","assemblyStatus":"inventoried","version":1,"ui":{"surface":"portal-module"},"routes":["/portal/{slug}/intake"],"navigation":{"placement":"operations"},"data":{"status":"existing"},"permissions":{"minimumRole":"guest"},"dependencies":{"status":"review-required"},"integrations":{"status":"review-required"},"provisioning":{"status":"review-required"},"healthCheck":{"type":"route-smoke"},"tests":{"status":"existing-plus-review-required"},"rollback":{"mode":"module-disable-or-release-rollback"},"costLicense":{"decision":"review-required"}},
-    {"id":"applications","name":"Applications","class":"business","assemblyStatus":"inventoried","version":1,"ui":{"surface":"portal-module"},"routes":["/portal/{slug}/applications"],"navigation":{"placement":"operations"},"data":{"status":"existing"},"permissions":{"minimumRole":"guest"},"dependencies":{"status":"review-required"},"integrations":{"status":"review-required"},"provisioning":{"status":"review-required"},"healthCheck":{"type":"route-smoke"},"tests":{"status":"existing-plus-review-required"},"rollback":{"mode":"module-disable-or-release-rollback"},"costLicense":{"decision":"review-required"}},
-    {"id":"reports","name":"Reports","class":"business","assemblyStatus":"inventoried","version":1,"ui":{"surface":"portal-module"},"routes":["/portal/{slug}/reports"],"navigation":{"placement":"operations"},"data":{"status":"existing"},"permissions":{"minimumRole":"guest"},"dependencies":{"status":"review-required"},"integrations":{"status":"review-required"},"provisioning":{"status":"review-required"},"healthCheck":{"type":"route-smoke"},"tests":{"status":"existing-plus-review-required"},"rollback":{"mode":"module-disable-or-release-rollback"},"costLicense":{"decision":"review-required"}},
-    {"id":"pulse","name":"Pulse","class":"specialized","assemblyStatus":"inventoried","version":1,"ui":{"surface":"portal-module"},"routes":["/portal/{slug}/pulse"],"navigation":{"placement":"core"},"data":{"status":"existing"},"permissions":{"minimumRole":"guest"},"dependencies":{"status":"review-required"},"integrations":{"status":"review-required"},"provisioning":{"status":"review-required"},"healthCheck":{"type":"route-smoke"},"tests":{"status":"existing-plus-review-required"},"rollback":{"mode":"module-disable-or-release-rollback"},"costLicense":{"decision":"review-required"}},
-    {"id":"simplifi","name":"Simplifi","class":"specialized","assemblyStatus":"inventoried","version":1,"ui":{"surface":"portal-module"},"routes":["/portal/{slug}/simplifi"],"navigation":{"placement":"growth"},"data":{"status":"existing"},"permissions":{"minimumRole":"staff"},"dependencies":{"status":"review-required"},"integrations":{"status":"review-required"},"provisioning":{"status":"review-required"},"healthCheck":{"type":"route-smoke"},"tests":{"status":"existing-plus-review-required"},"rollback":{"mode":"module-disable-or-release-rollback"},"costLicense":{"decision":"review-required"}},
-    {"id":"connect","name":"EA Connect","class":"specialized","assemblyStatus":"inventoried","version":1,"ui":{"surface":"portal-module"},"routes":["/portal/{slug}/connect"],"navigation":{"placement":"growth"},"data":{"status":"existing"},"permissions":{"minimumRole":"staff"},"dependencies":{"status":"review-required"},"integrations":{"status":"review-required"},"provisioning":{"status":"review-required"},"healthCheck":{"type":"route-smoke"},"tests":{"status":"existing-plus-review-required"},"rollback":{"mode":"module-disable-or-release-rollback"},"costLicense":{"decision":"review-required"}},
-    {"id":"landing","name":"Landing Pages","class":"specialized","assemblyStatus":"inventoried","version":1,"ui":{"surface":"portal-module"},"routes":["/portal/{slug}/landing"],"navigation":{"placement":"growth"},"data":{"status":"existing"},"permissions":{"minimumRole":"owner"},"dependencies":{"status":"review-required"},"integrations":{"status":"review-required"},"provisioning":{"status":"review-required"},"healthCheck":{"type":"route-smoke"},"tests":{"status":"existing-plus-review-required"},"rollback":{"mode":"module-disable-or-release-rollback"},"costLicense":{"decision":"review-required"}},
-    {"id":"discovery","name":"Discovery","class":"specialized","assemblyStatus":"inventoried","version":1,"ui":{"surface":"assessment"},"routes":["/assessment"],"navigation":{"placement":"growth"},"data":{"status":"existing"},"permissions":{"minimumRole":"guest"},"dependencies":{"status":"review-required"},"integrations":{"status":"review-required"},"provisioning":{"status":"review-required"},"healthCheck":{"type":"route-smoke"},"tests":{"status":"existing-plus-review-required"},"rollback":{"mode":"module-disable-or-release-rollback"},"costLicense":{"decision":"review-required"}},
-    {"id":"resources","name":"Resource Library","class":"specialized","assemblyStatus":"inventoried","version":1,"ui":{"surface":"portal-module"},"routes":["/portal/{slug}/resources"],"navigation":{"placement":"operations"},"data":{"status":"existing"},"permissions":{"minimumRole":"guest"},"dependencies":{"status":"review-required"},"integrations":{"status":"review-required"},"provisioning":{"status":"review-required"},"healthCheck":{"type":"route-smoke"},"tests":{"status":"existing-plus-review-required"},"rollback":{"mode":"module-disable-or-release-rollback"},"costLicense":{"decision":"review-required"}},
-    {"id":"ask","name":"Guide","class":"specialized","assemblyStatus":"inventoried","version":1,"ui":{"surface":"portal-module"},"routes":["/portal/{slug}/ask"],"navigation":{"placement":"operations"},"data":{"status":"existing"},"permissions":{"minimumRole":"guest"},"dependencies":{"status":"review-required"},"integrations":{"status":"review-required"},"provisioning":{"status":"review-required"},"healthCheck":{"type":"route-smoke"},"tests":{"status":"existing-plus-review-required"},"rollback":{"mode":"module-disable-or-release-rollback"},"costLicense":{"decision":"review-required"}},
-    {"id":"ctp","name":"Consider the Possibilities","class":"specialized","assemblyStatus":"inventoried","version":1,"ui":{"surface":"portal-module"},"routes":["/portal/{slug}/ctp"],"navigation":{"placement":"operations"},"data":{"status":"existing"},"permissions":{"minimumRole":"guest"},"dependencies":{"status":"review-required"},"integrations":{"status":"review-required"},"provisioning":{"status":"review-required"},"healthCheck":{"type":"route-smoke"},"tests":{"status":"existing-plus-review-required"},"rollback":{"mode":"module-disable-or-release-rollback"},"costLicense":{"decision":"review-required"}},
-    {"id":"member","name":"Member Experience","class":"specialized","assemblyStatus":"inventoried","version":1,"ui":{"surface":"portal-module"},"routes":["/portal/{slug}/member"],"navigation":{"placement":"operations"},"data":{"status":"existing"},"permissions":{"minimumRole":"guest"},"dependencies":{"status":"review-required"},"integrations":{"status":"review-required"},"provisioning":{"status":"review-required"},"healthCheck":{"type":"route-smoke"},"tests":{"status":"existing-plus-review-required"},"rollback":{"mode":"module-disable-or-release-rollback"},"costLicense":{"decision":"review-required"}},
-    {"id":"settings","name":"Settings","class":"specialized","assemblyStatus":"inventoried","version":1,"ui":{"surface":"portal-module"},"routes":["/portal/{slug}/settings"],"navigation":{"placement":"platform"},"data":{"status":"existing"},"permissions":{"minimumRole":"guest"},"dependencies":{"status":"review-required"},"integrations":{"status":"review-required"},"provisioning":{"status":"review-required"},"healthCheck":{"type":"route-smoke"},"tests":{"status":"existing-plus-review-required"},"rollback":{"mode":"module-disable-or-release-rollback"},"costLicense":{"decision":"review-required"}}
+    {
+      "id": "events",
+      "name": "Calendar & Event Hub",
+      "class": "business",
+      "assemblyStatus": "certified",
+      "version": 1,
+      "ui": {
+        "surface": "portal-module"
+      },
+      "routes": [
+        "/portal/{slug}/events"
+      ],
+      "navigation": {
+        "placement": "operations"
+      },
+      "data": {
+        "status": "existing"
+      },
+      "permissions": {
+        "minimumRole": "guest"
+      },
+      "dependencies": {
+        "status": "review-required"
+      },
+      "integrations": {
+        "status": "review-required",
+        "candidates": [
+          "pretix"
+        ]
+      },
+      "provisioning": {
+        "status": "review-required"
+      },
+      "healthCheck": {
+        "type": "route-smoke"
+      },
+      "tests": [
+        "module-registry-contract",
+        "run4-starter-package-contract",
+        "events-optional-provider-contract",
+        "portal-build-smoke"
+      ],
+      "rollback": {
+        "mode": "module-disable-or-release-rollback"
+      },
+      "costLicense": {
+        "decision": "approved",
+        "boundary": "EA Calendar & Event Hub route, shared scheduling, and EA registration ledger are certified. Pretix is an optional extension only and remains isolated from the assembly requirement; no Pretix account is required to provision the module."
+      }
+    },
+    {
+      "id": "calendar",
+      "name": "EA Shared Calendar",
+      "class": "business",
+      "assemblyStatus": "inventoried",
+      "version": 1,
+      "ui": {
+        "surface": "portal-module"
+      },
+      "routes": [
+        "/portal/{slug}/calendar"
+      ],
+      "navigation": {
+        "placement": "operations"
+      },
+      "data": {
+        "status": "existing"
+      },
+      "permissions": {
+        "minimumRole": "guest"
+      },
+      "dependencies": {
+        "status": "review-required"
+      },
+      "integrations": {
+        "status": "review-required"
+      },
+      "provisioning": {
+        "status": "review-required"
+      },
+      "healthCheck": {
+        "type": "route-smoke"
+      },
+      "tests": {
+        "status": "existing-plus-review-required"
+      },
+      "rollback": {
+        "mode": "module-disable-or-release-rollback"
+      },
+      "costLicense": {
+        "decision": "review-required"
+      }
+    },
+    {
+      "id": "billing",
+      "name": "Billing",
+      "class": "business",
+      "assemblyStatus": "certified",
+      "version": 1,
+      "ui": {
+        "surface": "portal-module"
+      },
+      "routes": [
+        "/portal/{slug}/billing"
+      ],
+      "navigation": {
+        "placement": "platform"
+      },
+      "data": {
+        "status": "existing"
+      },
+      "permissions": {
+        "minimumRole": "owner"
+      },
+      "dependencies": {
+        "status": "review-required"
+      },
+      "integrations": {
+        "status": "review-required"
+      },
+      "provisioning": {
+        "status": "review-required"
+      },
+      "healthCheck": {
+        "type": "route-smoke"
+      },
+      "tests": [
+        "module-registry-contract",
+        "run4-starter-package-contract",
+        "billing-platform-adapter-contract",
+        "portal-build-smoke"
+      ],
+      "rollback": {
+        "mode": "module-disable-or-release-rollback"
+      },
+      "costLicense": {
+        "decision": "approved",
+        "boundary": "EA billing workspace, authorization boundary, and existing platform-managed Stripe adapter are certified. No client Stripe account or per-client software license is required for provisioning; payment-processing charges apply only when commerce is used."
+      }
+    },
+    {
+      "id": "documents",
+      "name": "Document Hub",
+      "class": "business",
+      "assemblyStatus": "certified",
+      "version": 1,
+      "ui": {
+        "surface": "portal-module"
+      },
+      "routes": [
+        "/portal/{slug}/documents"
+      ],
+      "navigation": {
+        "placement": "operations"
+      },
+      "data": {
+        "status": "existing"
+      },
+      "permissions": {
+        "minimumRole": "guest"
+      },
+      "dependencies": {
+        "status": "review-required"
+      },
+      "integrations": {
+        "status": "review-required",
+        "candidates": [
+          "documenso"
+        ]
+      },
+      "provisioning": {
+        "status": "review-required"
+      },
+      "healthCheck": {
+        "type": "route-smoke"
+      },
+      "tests": [
+        "module-registry-contract",
+        "run4-canonical-entitlement-contract",
+        "documents-native-boundary",
+        "portal-build-smoke"
+      ],
+      "rollback": {
+        "mode": "module-disable-or-release-rollback"
+      },
+      "costLicense": {
+        "decision": "approved",
+        "boundary": "EA-owned Document Hub using existing tenant uploads, CTP deliverables, and Update Hub files. Documenso is not required for this certified boundary and remains isolated as an optional signing provider."
+      }
+    },
+    {
+      "id": "training",
+      "name": "Training Hub",
+      "class": "business",
+      "assemblyStatus": "certified",
+      "version": 1,
+      "ui": {
+        "surface": "portal-module"
+      },
+      "routes": [
+        "/portal/{slug}/learning"
+      ],
+      "navigation": {
+        "placement": "operations"
+      },
+      "data": {
+        "status": "existing"
+      },
+      "permissions": {
+        "minimumRole": "guest"
+      },
+      "dependencies": {
+        "status": "review-required"
+      },
+      "integrations": {
+        "status": "review-required"
+      },
+      "provisioning": {
+        "status": "review-required"
+      },
+      "healthCheck": {
+        "type": "route-smoke"
+      },
+      "tests": [
+        "module-registry-contract",
+        "run4-canonical-entitlement-contract",
+        "portal-build-smoke"
+      ],
+      "rollback": {
+        "mode": "module-disable-or-release-rollback"
+      },
+      "costLicense": {
+        "decision": "approved",
+        "boundary": "EA-owned Training Hub and existing published-training/course services; no new vendor account or per-client license required"
+      }
+    },
+    {
+      "id": "messaging",
+      "name": "Messaging",
+      "class": "business",
+      "assemblyStatus": "certified",
+      "version": 1,
+      "ui": {
+        "surface": "portal-module"
+      },
+      "routes": [
+        "/portal/{slug}/messaging"
+      ],
+      "navigation": {
+        "placement": "operations"
+      },
+      "data": {
+        "status": "existing"
+      },
+      "permissions": {
+        "minimumRole": "guest"
+      },
+      "dependencies": {
+        "status": "review-required"
+      },
+      "integrations": {
+        "status": "review-required",
+        "candidates": [
+          "novu"
+        ]
+      },
+      "provisioning": {
+        "status": "review-required"
+      },
+      "healthCheck": {
+        "type": "route-smoke"
+      },
+      "tests": [
+        "module-registry-contract",
+        "run4-canonical-entitlement-contract",
+        "messaging-native-boundary",
+        "portal-build-smoke"
+      ],
+      "rollback": {
+        "mode": "module-disable-or-release-rollback"
+      },
+      "costLicense": {
+        "decision": "approved",
+        "boundary": "EA-owned messaging surface backed by Update Hub and existing portal communication services. Novu is not required for this certified boundary and remains an optional future provider extension."
+      }
+    },
+    {
+      "id": "people",
+      "name": "People",
+      "class": "business",
+      "assemblyStatus": "inventoried",
+      "version": 1,
+      "ui": {
+        "surface": "portal-module"
+      },
+      "routes": [
+        "/portal/{slug}/people"
+      ],
+      "navigation": {
+        "placement": "operations"
+      },
+      "data": {
+        "status": "existing"
+      },
+      "permissions": {
+        "minimumRole": "staff"
+      },
+      "dependencies": {
+        "status": "review-required"
+      },
+      "integrations": {
+        "status": "review-required"
+      },
+      "provisioning": {
+        "status": "review-required"
+      },
+      "healthCheck": {
+        "type": "route-smoke"
+      },
+      "tests": {
+        "status": "existing-plus-review-required"
+      },
+      "rollback": {
+        "mode": "module-disable-or-release-rollback"
+      },
+      "costLicense": {
+        "decision": "review-required"
+      }
+    },
+    {
+      "id": "intake",
+      "name": "Intake",
+      "class": "business",
+      "assemblyStatus": "certified",
+      "version": 1,
+      "ui": {
+        "surface": "portal-module"
+      },
+      "routes": [
+        "/portal/{slug}/intake"
+      ],
+      "navigation": {
+        "placement": "operations"
+      },
+      "data": {
+        "status": "existing"
+      },
+      "permissions": {
+        "minimumRole": "guest"
+      },
+      "dependencies": {
+        "status": "review-required"
+      },
+      "integrations": {
+        "status": "review-required"
+      },
+      "provisioning": {
+        "status": "review-required"
+      },
+      "healthCheck": {
+        "type": "route-smoke"
+      },
+      "tests": [
+        "module-registry-contract",
+        "run3-business-wave-contract",
+        "portal-build-smoke"
+      ],
+      "rollback": {
+        "mode": "module-disable-or-release-rollback"
+      },
+      "costLicense": {
+        "decision": "approved",
+        "boundary": "Existing EA portal route and application services only; no new paid vendor dependency"
+      }
+    },
+    {
+      "id": "applications",
+      "name": "Applications",
+      "class": "business",
+      "assemblyStatus": "certified",
+      "version": 1,
+      "ui": {
+        "surface": "portal-module"
+      },
+      "routes": [
+        "/portal/{slug}/applications"
+      ],
+      "navigation": {
+        "placement": "operations"
+      },
+      "data": {
+        "status": "existing"
+      },
+      "permissions": {
+        "minimumRole": "guest"
+      },
+      "dependencies": {
+        "status": "review-required"
+      },
+      "integrations": {
+        "status": "review-required"
+      },
+      "provisioning": {
+        "status": "review-required"
+      },
+      "healthCheck": {
+        "type": "route-smoke"
+      },
+      "tests": [
+        "module-registry-contract",
+        "run3-business-wave-contract",
+        "portal-build-smoke"
+      ],
+      "rollback": {
+        "mode": "module-disable-or-release-rollback"
+      },
+      "costLicense": {
+        "decision": "approved",
+        "boundary": "Existing EA portal route and application services only; no new paid vendor dependency"
+      }
+    },
+    {
+      "id": "reports",
+      "name": "Reports",
+      "class": "business",
+      "assemblyStatus": "certified",
+      "version": 1,
+      "ui": {
+        "surface": "portal-module"
+      },
+      "routes": [
+        "/portal/{slug}/reports"
+      ],
+      "navigation": {
+        "placement": "operations"
+      },
+      "data": {
+        "status": "existing"
+      },
+      "permissions": {
+        "minimumRole": "guest"
+      },
+      "dependencies": {
+        "status": "review-required"
+      },
+      "integrations": {
+        "status": "review-required"
+      },
+      "provisioning": {
+        "status": "review-required"
+      },
+      "healthCheck": {
+        "type": "route-smoke"
+      },
+      "tests": [
+        "module-registry-contract",
+        "run3-business-wave-contract",
+        "portal-build-smoke"
+      ],
+      "rollback": {
+        "mode": "module-disable-or-release-rollback"
+      },
+      "costLicense": {
+        "decision": "approved",
+        "boundary": "Existing EA portal route and application services only; no new paid vendor dependency"
+      }
+    },
+    {
+      "id": "pulse",
+      "name": "Pulse",
+      "class": "specialized",
+      "assemblyStatus": "certified",
+      "version": 1,
+      "ui": {
+        "surface": "portal-module"
+      },
+      "routes": [
+        "/portal/{slug}/pulse"
+      ],
+      "navigation": {
+        "placement": "core"
+      },
+      "data": {
+        "status": "existing"
+      },
+      "permissions": {
+        "minimumRole": "guest"
+      },
+      "dependencies": {
+        "status": "review-required"
+      },
+      "integrations": {
+        "status": "review-required"
+      },
+      "provisioning": {
+        "status": "review-required"
+      },
+      "healthCheck": {
+        "type": "route-smoke"
+      },
+      "tests": [
+        "module-registry-contract",
+        "run4-canonical-entitlement-contract",
+        "portal-build-smoke"
+      ],
+      "rollback": {
+        "mode": "module-disable-or-release-rollback"
+      },
+      "costLicense": {
+        "decision": "approved",
+        "boundary": "EA-owned Pulse operational-health and tenant activity surfaces using existing EA data services; no new vendor account or per-client license required"
+      }
+    },
+    {
+      "id": "simplifi",
+      "name": "Simplifi",
+      "class": "specialized",
+      "assemblyStatus": "certified",
+      "version": 1,
+      "ui": {
+        "surface": "portal-module"
+      },
+      "routes": [
+        "/portal/{slug}/simplifi"
+      ],
+      "navigation": {
+        "placement": "growth"
+      },
+      "data": {
+        "status": "existing"
+      },
+      "permissions": {
+        "minimumRole": "staff"
+      },
+      "dependencies": {
+        "status": "review-required"
+      },
+      "integrations": {
+        "status": "review-required"
+      },
+      "provisioning": {
+        "status": "review-required"
+      },
+      "healthCheck": {
+        "type": "route-smoke"
+      },
+      "tests": [
+        "module-registry-contract",
+        "run6-simplifi-native-boundary",
+        "portal-build-smoke"
+      ],
+      "rollback": {
+        "mode": "module-disable-or-release-rollback"
+      },
+      "costLicense": {
+        "decision": "approved",
+        "boundary": "EA-owned Simplifi portal workspace, capture records, content-request visibility, and Magnifi linking using existing EA services. No new vendor account or per-client software license is required for provisioning."
+      }
+    },
+    {
+      "id": "connect",
+      "name": "EA Connect",
+      "class": "specialized",
+      "assemblyStatus": "certified",
+      "version": 1,
+      "ui": {
+        "surface": "portal-module"
+      },
+      "routes": [
+        "/portal/{slug}/connect"
+      ],
+      "navigation": {
+        "placement": "growth"
+      },
+      "data": {
+        "status": "existing"
+      },
+      "permissions": {
+        "minimumRole": "staff"
+      },
+      "dependencies": {
+        "status": "review-required"
+      },
+      "integrations": {
+        "status": "review-required"
+      },
+      "provisioning": {
+        "status": "review-required"
+      },
+      "healthCheck": {
+        "type": "route-smoke"
+      },
+      "tests": [
+        "module-registry-contract",
+        "run4-canonical-entitlement-contract",
+        "portal-build-smoke"
+      ],
+      "rollback": {
+        "mode": "module-disable-or-release-rollback"
+      },
+      "costLicense": {
+        "decision": "approved",
+        "boundary": "EA-owned Connect relationship-capture workspace and existing EA routing services; no new vendor account or per-client software license required for provisioning"
+      }
+    },
+    {
+      "id": "landing",
+      "name": "Landing Pages",
+      "class": "specialized",
+      "assemblyStatus": "certified",
+      "version": 1,
+      "ui": {
+        "surface": "portal-module"
+      },
+      "routes": [
+        "/portal/{slug}/landing"
+      ],
+      "navigation": {
+        "placement": "growth"
+      },
+      "data": {
+        "status": "existing"
+      },
+      "permissions": {
+        "minimumRole": "owner"
+      },
+      "dependencies": {
+        "status": "review-required"
+      },
+      "integrations": {
+        "status": "review-required"
+      },
+      "provisioning": {
+        "status": "review-required"
+      },
+      "healthCheck": {
+        "type": "route-smoke"
+      },
+      "tests": [
+        "module-registry-contract",
+        "run4-canonical-entitlement-contract",
+        "portal-build-smoke"
+      ],
+      "rollback": {
+        "mode": "module-disable-or-release-rollback"
+      },
+      "costLicense": {
+        "decision": "approved",
+        "boundary": "EA-owned live-site and Experience Builder workspace surfaces using existing EA publish services; no new vendor account or per-client license required"
+      }
+    },
+    {
+      "id": "discovery",
+      "name": "Discovery",
+      "class": "specialized",
+      "assemblyStatus": "inventoried",
+      "version": 1,
+      "ui": {
+        "surface": "assessment"
+      },
+      "routes": [
+        "/assessment"
+      ],
+      "navigation": {
+        "placement": "growth"
+      },
+      "data": {
+        "status": "existing"
+      },
+      "permissions": {
+        "minimumRole": "guest"
+      },
+      "dependencies": {
+        "status": "review-required"
+      },
+      "integrations": {
+        "status": "review-required"
+      },
+      "provisioning": {
+        "status": "review-required"
+      },
+      "healthCheck": {
+        "type": "route-smoke"
+      },
+      "tests": {
+        "status": "existing-plus-review-required"
+      },
+      "rollback": {
+        "mode": "module-disable-or-release-rollback"
+      },
+      "costLicense": {
+        "decision": "review-required"
+      }
+    },
+    {
+      "id": "resources",
+      "name": "Resource Library",
+      "class": "specialized",
+      "assemblyStatus": "certified",
+      "version": 1,
+      "ui": {
+        "surface": "portal-module"
+      },
+      "routes": [
+        "/portal/{slug}/resources"
+      ],
+      "navigation": {
+        "placement": "operations"
+      },
+      "data": {
+        "status": "existing"
+      },
+      "permissions": {
+        "minimumRole": "guest"
+      },
+      "dependencies": {
+        "status": "review-required"
+      },
+      "integrations": {
+        "status": "review-required"
+      },
+      "provisioning": {
+        "status": "review-required"
+      },
+      "healthCheck": {
+        "type": "route-smoke"
+      },
+      "tests": [
+        "module-registry-contract",
+        "run4-canonical-entitlement-contract",
+        "portal-build-smoke"
+      ],
+      "rollback": {
+        "mode": "module-disable-or-release-rollback"
+      },
+      "costLicense": {
+        "decision": "approved",
+        "boundary": "EA-owned Resource Library using existing tenant resources and workspace links; no new vendor account or per-client license required"
+      }
+    },
+    {
+      "id": "ask",
+      "name": "Guide",
+      "class": "specialized",
+      "assemblyStatus": "certified",
+      "version": 1,
+      "ui": {
+        "surface": "portal-module"
+      },
+      "routes": [
+        "/portal/{slug}/ask"
+      ],
+      "navigation": {
+        "placement": "operations"
+      },
+      "data": {
+        "status": "existing"
+      },
+      "permissions": {
+        "minimumRole": "guest"
+      },
+      "dependencies": {
+        "status": "review-required"
+      },
+      "integrations": {
+        "status": "review-required"
+      },
+      "provisioning": {
+        "status": "review-required"
+      },
+      "healthCheck": {
+        "type": "route-smoke"
+      },
+      "tests": [
+        "module-registry-contract",
+        "run4-canonical-entitlement-contract",
+        "portal-build-smoke"
+      ],
+      "rollback": {
+        "mode": "module-disable-or-release-rollback"
+      },
+      "costLicense": {
+        "decision": "approved",
+        "boundary": "EA-owned Guide request surface using existing portal and Update Hub services; no new vendor account or per-client license required"
+      }
+    },
+    {
+      "id": "ctp",
+      "name": "Consider the Possibilities",
+      "class": "specialized",
+      "assemblyStatus": "certified",
+      "version": 1,
+      "ui": {
+        "surface": "portal-module"
+      },
+      "routes": [
+        "/portal/{slug}/ctp"
+      ],
+      "navigation": {
+        "placement": "operations"
+      },
+      "data": {
+        "status": "existing"
+      },
+      "permissions": {
+        "minimumRole": "guest"
+      },
+      "dependencies": {
+        "status": "review-required"
+      },
+      "integrations": {
+        "status": "review-required"
+      },
+      "provisioning": {
+        "status": "review-required"
+      },
+      "healthCheck": {
+        "type": "route-smoke"
+      },
+      "tests": [
+        "module-registry-contract",
+        "run4-canonical-entitlement-contract",
+        "portal-build-smoke"
+      ],
+      "rollback": {
+        "mode": "module-disable-or-release-rollback"
+      },
+      "costLicense": {
+        "decision": "approved",
+        "boundary": "EA-owned Consider the Possibilities workspace and existing CTP project-state services; no new vendor account or per-client license required"
+      }
+    },
+    {
+      "id": "member",
+      "name": "Member Experience",
+      "class": "specialized",
+      "assemblyStatus": "certified",
+      "version": 1,
+      "ui": {
+        "surface": "portal-module"
+      },
+      "routes": [
+        "/portal/{slug}/member"
+      ],
+      "navigation": {
+        "placement": "operations"
+      },
+      "data": {
+        "status": "existing"
+      },
+      "permissions": {
+        "minimumRole": "guest"
+      },
+      "dependencies": {
+        "status": "review-required"
+      },
+      "integrations": {
+        "status": "review-required"
+      },
+      "provisioning": {
+        "status": "review-required"
+      },
+      "healthCheck": {
+        "type": "route-smoke"
+      },
+      "tests": [
+        "module-registry-contract",
+        "run4-starter-package-contract",
+        "portal-build-smoke"
+      ],
+      "rollback": {
+        "mode": "module-disable-or-release-rollback"
+      },
+      "costLicense": {
+        "decision": "approved",
+        "boundary": "EA-owned Member Experience route and existing tenant/member data only; no new vendor account or per-client license required"
+      }
+    },
+    {
+      "id": "settings",
+      "name": "Settings",
+      "class": "specialized",
+      "assemblyStatus": "certified",
+      "version": 1,
+      "ui": {
+        "surface": "portal-module"
+      },
+      "routes": [
+        "/portal/{slug}/settings"
+      ],
+      "navigation": {
+        "placement": "platform"
+      },
+      "data": {
+        "status": "existing"
+      },
+      "permissions": {
+        "minimumRole": "guest"
+      },
+      "dependencies": {
+        "status": "review-required"
+      },
+      "integrations": {
+        "status": "review-required"
+      },
+      "provisioning": {
+        "status": "review-required"
+      },
+      "healthCheck": {
+        "type": "route-smoke"
+      },
+      "tests": [
+        "module-registry-contract",
+        "run4-starter-package-contract",
+        "portal-build-smoke"
+      ],
+      "rollback": {
+        "mode": "module-disable-or-release-rollback"
+      },
+      "costLicense": {
+        "decision": "approved",
+        "boundary": "EA-owned portal preferences and business-presence surfaces only; no new vendor account or per-client license required"
+      }
+    }
   ]
 }
