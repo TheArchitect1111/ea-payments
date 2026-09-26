@@ -1,8 +1,8 @@
 {
-  "preview_url": "https://ea-payments-9pcux60hn-the-architects-projects-cc813778.vercel.app",
-  "route_path": "/portal/amanda-catherine/owner",
+  "preview_url": "https://ea-payments-git-ea-gate-e0100c-the-architects-projects-cc813778.vercel.app",
+  "route_path": "/amplifi",
   "min_visuals": 1,
-  "requested_for": "Amanda final deterministic launch certification",
-  "requested_at": "2026-09-25T13:01:00Z",
-  "source_commit": "7969630a39efbdf3e5ef56bf1043347f1fdff3ab"
+  "requested_for": "EA Command Layer production certification",
+  "requested_at": "2026-09-26T11:13:00Z",
+  "source_commit": "d6911ca8ff81241373ca8f9caf501051c4823a87"
 }
