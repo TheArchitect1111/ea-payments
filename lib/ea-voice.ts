@@ -1,6 +1,3 @@
-import { routeIntent, type IntentRouteResult } from '@/lib/intent-router';
-import { voiceIntentFromRoute } from '@/lib/intent-voice';
-
 export type VoiceAction =
   | 'navigate'
   | 'analyze'
@@ -42,34 +39,12 @@ export function parseVoiceQuery(input: string): VoiceIntent {
     };
   }
 
-  const route = routeIntent(query);
-  return mapRouteToVoiceIntent(route, query);
-}
-
-function mapRouteToVoiceIntent(route: IntentRouteResult, query: string): VoiceIntent {
-  const intent = voiceIntentFromRoute(route, query);
-
-  if (
-    intent.action === 'navigate' &&
-    intent.href?.includes('/admin/knowledge-graph') &&
-    route.query
-  ) {
-    return { ...intent, action: 'search_graph' };
-  }
-
-  if (intent.action === 'navigate') return intent;
-  if (intent.action === 'audit' || intent.action === 'analyze') return intent;
-  if (intent.action === 'capture' || intent.action === 'tour' || intent.action === 'explain') {
-    return intent;
-  }
-
   return {
     action: 'unknown',
-    href: intent.href,
-    query: intent.query,
-    message: intent.message,
-    confidence: intent.confidence,
-    sources: intent.sources,
+    query,
+    message: 'Routing through the governed EA intent layer.',
+    confidence: 0,
+    sources: ['EA intent router'],
   };
 }
 
