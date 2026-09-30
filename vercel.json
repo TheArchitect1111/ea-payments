@@ -55,17 +55,5 @@
     { "path": "/api/cron/simplifi-intelligence", "schedule": "15 5 * * *" },
     { "path": "/api/cron/amplifi-publish", "schedule": "*/5 * * * *" },
     { "path": "/api/cron/amplifi-watch", "schedule": "0 8,14,20 * * *" }
-  ],
-  "rewrites": [
-    {
-      "source": "/",
-      "destination": "/tarris/future",
-      "has": [{ "type": "host", "value": "tb3.online" }]
-    },
-    {
-      "source": "/",
-      "destination": "/tarris/future",
-      "has": [{ "type": "host", "value": "www.tb3.online" }]
-    }
   ]
 }
