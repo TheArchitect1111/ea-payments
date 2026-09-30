@@ -1,5 +1,31 @@
 {
   "version": 2,
+  "rewrites": [
+    {
+      "source": "/",
+      "destination": "/tarris/future",
+      "has": [
+        {
+          "type": "host",
+          "value": "tb3.online"
+        }
+      ]
+    },
+    {
+      "source": "/",
+      "destination": "/tarris/future",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.tb3.online"
+        }
+      ]
+    },
+    {
+      "source": "/hq/:path*",
+      "destination": "/tarris/future/:path*"
+    }
+  ],
   "ignoreCommand": "node scripts/vercel-ignore-work-branches.mjs",
   "env": {
     "UNIVERSAL_PEOPLE": "1",
