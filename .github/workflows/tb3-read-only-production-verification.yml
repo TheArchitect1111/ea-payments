@@ -1,0 +1,56 @@
+name: TB3 Read-only Production Verification
+on:
+  pull_request:
+    branches: [master]
+    paths: ['.github/workflows/tb3-read-only-production-verification.yml']
+permissions:
+  contents: read
+jobs:
+  verify-live:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Verify certified live TB3 routes without submitting signatures or payments
+        shell: python
+        run: |
+          import urllib.request, json, time, html
+          from html.parser import HTMLParser
+          class Page(HTMLParser):
+              def __init__(self):
+                  super().__init__(); self.text=[]; self.links=[]
+              def handle_data(self, data): self.text.append(data)
+              def handle_starttag(self, tag, attrs):
+                  if tag == 'a': self.links.append(dict(attrs).get('href'))
+          expected='d27a72b4cfba5a099268bd48d12c87fb02fb438c'
+          origin='https://efficiencyarchitects.online'
+          for attempt in range(36):
+              try:
+                  with urllib.request.urlopen(origin+'/api/ops/build-info', timeout=10) as r:
+                      info=json.load(r)
+                  if info.get('commitSha') == expected: break
+              except Exception as e: info={'error':str(e)}
+              time.sleep(5)
+          else: raise Exception('Certified production identity unavailable: '+json.dumps(info))
+          print('PASS production identity '+expected)
+          failures=[]
+          checks=[
+              ('/','TB3 HQ','/tarris/future/agreement'),
+              ('/hq','TB3 HQ','/tarris/future/agreement'),
+              ('/hq/agreement','Client Services Agreement','/tarris/future/sign'),
+              ('/hq/sign','Electronic acceptance','/tarris/future/agreement'),
+              ('/tarris','MORE','/tarris/future')
+          ]
+          for host in ['tb3.online','www.tb3.online']:
+              for route, marker, link in checks:
+                  url='https://'+host+route
+                  try:
+                      with urllib.request.urlopen(url,timeout=20) as r:
+                          status=r.status; body=r.read().decode()
+                      page=Page(); page.feed(body)
+                      text=' '.join(page.text)
+                      assert status == 200 and marker in text and link in page.links, 'Missing expected page content or link'
+                      print('PASS '+url)
+                  except Exception as e:
+                      failures.append(url+': '+str(e)); print('FAIL '+failures[-1])
+          if failures: raise Exception('\n'.join(failures))
+          print('PASS: tb3.online and www.tb3.online live routes and full agreement/signing chain')
