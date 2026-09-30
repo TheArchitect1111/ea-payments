@@ -3,6 +3,7 @@ import { listPortalFormSubmissions } from '@/lib/portal-forms/store';
 import { listRegistrationsForPortal } from '@/lib/events/registration-ledger';
 import { listPretixEventsForPortal } from '@/lib/events/pretix-store';
 import { AMANDA_COURSES } from '@/lib/amanda-catherine/config';
+import { listAmandaPayments } from '@/lib/amanda-catherine/payment-fulfillment';
 import { listAmandaCourseProgress } from '@/lib/amanda-catherine/progress-store';
 
 function settledArray<T>(result: PromiseSettledResult<T>): T extends unknown[] ? T : never[] {
@@ -10,18 +11,20 @@ function settledArray<T>(result: PromiseSettledResult<T>): T extends unknown[] ?
 }
 
 export default async function AmandaOperationsPanel({ slug }: { slug: string }) {
-  const [submissionResult, registrationResult, eventResult, progressResult] = await Promise.allSettled([
+  const [submissionResult, registrationResult, eventResult, progressResult, paymentResult] = await Promise.allSettled([
     listPortalFormSubmissions(slug),
     listRegistrationsForPortal(slug),
     listPretixEventsForPortal(slug, { includeDrafts: true }),
     listAmandaCourseProgress(slug),
+    listAmandaPayments(slug),
   ]);
 
   const submissions = settledArray(submissionResult);
   const registrations = settledArray(registrationResult);
   const events = settledArray(eventResult);
   const courseProgress = settledArray(progressResult);
-  const degradedSources = [submissionResult, registrationResult, eventResult, progressResult]
+  const payments = settledArray(paymentResult);
+  const degradedSources = [submissionResult, registrationResult, eventResult, progressResult, paymentResult]
     .filter((result) => result.status === 'rejected').length;
 
   const applications = submissions.filter((item) => item.kind === 'application');
@@ -42,6 +45,9 @@ export default async function AmandaOperationsPanel({ slug }: { slug: string }) 
     ['Membership requests', membershipApplications],
     ['Media projects', mediaProjects],
     ['Volunteer applicants', volunteerApplications],
+    ['Verified purchases', payments.length],
+    ['Course purchases', payments.filter((item) => item.courseId).length],
+    ['Course sales (CAD)', payments.filter((item) => item.courseId).reduce((sum, item) => sum + item.amountPaidCad, 0)],
     ['Active course records', courseProgress.length],
     ['Certificates earned', courseProgress.filter((item) => item.certificateIssuedAt).length],
   ] as const;

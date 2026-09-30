@@ -27,7 +27,7 @@ const LEARNING_LINKS = [
   },
 ];
 
-export default async function LearningPage({ params }: { params: Promise<{ slug: string }> }) {
+export default async function LearningPage({ params, initialAmandaCourseId }: { params: Promise<{ slug: string }>; initialAmandaCourseId?: string }) {
   const { slug } = await params;
   const { client, session } = await requirePortalModule(slug, 'training');
   const publishedTraining = await listPublishedTrainingForTenant(slug);
@@ -50,7 +50,7 @@ export default async function LearningPage({ params }: { params: Promise<{ slug:
       title="Training & learning"
       lede="Guides, modules, and resources to support adoption — starting with the essentials below."
     >
-      {isAmanda && audience ? <AmandaLearningCenter audience={audience} assignedCourseIds={assignedCourseIds} isAdmin={canAdministerAmandaLearning} /> : null}
+      {isAmanda && audience ? <AmandaLearningCenter audience={audience} assignedCourseIds={assignedCourseIds} isAdmin={canAdministerAmandaLearning} initialCourseId={initialAmandaCourseId} /> : null}
       {publishedTraining.length ? (
         <section className="mb-8">
           <h2 className="ep-section-title">Assigned training</h2>

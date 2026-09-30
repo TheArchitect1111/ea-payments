@@ -37,7 +37,8 @@ export async function POST(req: NextRequest) {
       ok: true,
       email: result.record.email,
       courseId: result.record.courseId,
-      loginUrl: result.access.loginUrl,
+      loginUrl: `/portal/login?next=${encodeURIComponent(`/portal/amanda-catherine/learning?enrolled=${encodeURIComponent(result.record.courseId || '')}&welcome=1`)}`,
+      learningUrl: `/portal/amanda-catherine/learning?enrolled=${encodeURIComponent(result.record.courseId || '')}&welcome=1`,
       welcomeSent: result.access.welcomeSent,
     });
   } catch (error) {

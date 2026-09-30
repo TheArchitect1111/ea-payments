@@ -13,6 +13,7 @@ import { loadStudioRecord, saveStudioRecord } from '@/lib/creative-studio/persis
 import { syntheticOrgId } from '@/lib/platform-store';
 import { invitedAmandaLearner } from './invited-learners';
 import { z } from 'zod';
+import { linkAmandaWorkflowPerson } from './workflow-person';
 
 const AMANDA_PORTAL_SLUG = 'amanda-catherine';
 
@@ -33,6 +34,8 @@ const AmandaAccessProfileSchema = z.object({
   ]),
   courseIds: z.array(z.string().min(1)),
   updatedAt: z.string().min(1),
+  welcomeCourseIds: z.array(z.string()).optional(),
+  welcomeSentAt: z.string().optional(),
 });
 
 type AmandaAccessProfile = z.infer<typeof AmandaAccessProfileSchema>;
@@ -60,12 +63,6 @@ export async function hasAmandaLearningAccess(portalSlug: string, email: string)
   return (await getAmandaAssignedCourseIds(portalSlug, email)).length > 0;
 }
 
-function temporaryPassword() {
-  const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
-  const bytes = crypto.randomBytes(12);
-  return Array.from(bytes, (byte) => alphabet[byte % alphabet.length]).join('');
-}
-
 function displayName(name: string, email: string) {
   const trimmed = name.trim();
   if (trimmed) return trimmed;
@@ -79,26 +76,17 @@ function escapeHtml(value: string) {
 async function sendAmandaWelcome(input: {
   email: string;
   name: string;
-  tempPassword?: string;
   audience: AmandaPortalAudience;
 }) {
   const loginUrl = `${canonicalPlatformOrigin()}/portal/login?next=%2Fportal%2F${AMANDA_PORTAL_SLUG}%2Flearning`;
   const firstName = input.name.split(/\s+/)[0] || 'there';
   const safeFirstName = escapeHtml(firstName);
   const safeEmail = escapeHtml(input.email);
-  const safePassword = input.tempPassword ? escapeHtml(input.tempPassword) : '';
-  const credentialHtml = input.tempPassword
-    ? `<div style="padding:18px;background:#f7f1e8;border-left:4px solid #b9894d;margin:20px 0;">
-        <p style="margin:0 0 8px;"><strong>Email:</strong> ${safeEmail}</p>
-        <p style="margin:0;"><strong>Temporary password:</strong> ${safePassword}</p>
-      </div>`
-    : `<div style="padding:18px;background:#f7f1e8;border-left:4px solid #b9894d;margin:20px 0;">
-        <p style="margin:0 0 8px;"><strong>Email:</strong> ${safeEmail}</p>
-        <p style="margin:0;">Use the secure email code sent when you sign in. Your existing portal account remains unchanged.</p>
-      </div>`;
-  const text = input.tempPassword
-    ? `Your Amanda Catherine portal is ready. Sign in at ${loginUrl} with ${input.email} and temporary password ${input.tempPassword}.`
-    : `Your Amanda Catherine course access is ready. Sign in at ${loginUrl} with ${input.email} and use the secure code sent to your email.`;
+  const credentialHtml = `<div style="padding:18px;background:#f7f1e8;border-left:4px solid #b9894d;margin:20px 0;">
+    <p><strong>Email:</strong> ${safeEmail}</p>
+    <p>Sign in with this email and use the secure code sent to your inbox.</p>
+  </div>`;
+  const text = `Your Amanda Catherine course access is ready. Sign in at ${loginUrl} with ${input.email} and use the secure code sent to your email.`;
 
   return sendAuthEmail({
     to: input.email,
@@ -152,13 +140,11 @@ export async function provisionAmandaClientAccess(input: {
     created = true;
   }
 
-  let tempPassword = record.tempPassword || '';
-  const needsCredentials = !belongsToAnotherPortal && (!record.portalSlug || (!record.passwordChanged && !record.tempPassword));
-  if (needsCredentials) {
-    tempPassword = temporaryPassword();
-    const credentials = await setPortalCredentials(record.id, AMANDA_PORTAL_SLUG, tempPassword, email);
-    if (!credentials.ok) return { ok: false as const, error: credentials.error || 'Portal credentials could not be created.' };
-    created = true;
+  // Amanda uses email-code authentication. Bind new records without creating
+  // or storing a plaintext password; preserve any other portal identity.
+  if (!belongsToAnotherPortal && !record.portalSlug) {
+    const credentials = await setPortalCredentials(record.id, AMANDA_PORTAL_SLUG, '', email);
+    if (!credentials.ok) return { ok: false as const, error: credentials.error || 'Portal access could not be assigned.' };
   }
 
   const { orgId } = await ensureOrganizationForPortal({
@@ -176,42 +162,59 @@ export async function provisionAmandaClientAccess(input: {
   const priorCourseIds = existingProfile?.courseIds || [];
   const courseIds = [...new Set([...priorCourseIds, ...(input.courseIds || [])])];
   const accessChanged = !existingProfile || courseIds.some((courseId) => !priorCourseIds.includes(courseId));
+  const profile: AmandaAccessProfile = {
+    portalSlug: AMANDA_PORTAL_SLUG, email, name,
+    audience: existingProfile?.audience === 'admin' || existingProfile?.audience === 'staff' ? existingProfile.audience : input.audience,
+    courseIds, welcomeCourseIds: existingProfile?.welcomeCourseIds || [], welcomeSentAt: existingProfile?.welcomeSentAt,
+    updatedAt: new Date().toISOString(),
+  };
   const profileSave = await saveStudioRecord({
     recordType: 'experience',
     id: accessProfileId(AMANDA_PORTAL_SLUG, email),
     organizationId: syntheticOrgId(AMANDA_PORTAL_SLUG),
     title: `Amanda client access: ${email}`,
-    payload: {
-      portalSlug: AMANDA_PORTAL_SLUG,
-      email,
-      name,
-      audience: input.audience,
-      courseIds,
-      updatedAt: new Date().toISOString(),
-    } satisfies AmandaAccessProfile,
+    payload: profile,
   });
   if (!profileSave.ok) {
     return { ok: false as const, error: profileSave.error || 'Course assignment could not be saved.' };
   }
 
+  if ((process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV === 'preview') && !profileSave.persistedToAirtable) return { ok: false as const, error: 'Durable course assignment storage is unavailable.' };
+
+  let personId: string | null;
+  try {
+    personId = await linkAmandaWorkflowPerson({ email, name, clientRecordId: record.id,
+      reference: input.transactionId || accessProfileId(AMANDA_PORTAL_SLUG, email),
+      label: `Amanda course access: ${courseIds.join(', ')}`, student: courseIds.length > 0 });
+  } catch {
+    return { ok: false as const, error: 'Course access was assigned, but the People connection needs attention.', accessCreated: true };
+  }
+
   let welcomeSent = false;
-  if ((created || accessChanged) && (tempPassword || belongsToAnotherPortal)) {
+  if (!profile.welcomeSentAt || courseIds.some((courseId) => !profile.welcomeCourseIds?.includes(courseId))) {
     const welcome = await sendAmandaWelcome({
       email,
       name,
-      tempPassword: belongsToAnotherPortal ? undefined : tempPassword,
       audience: input.audience,
     });
     welcomeSent = welcome.ok;
     if (!welcome.ok) {
       return { ok: false as const, error: welcome.error || 'Access was created, but the welcome email could not be sent.', accessCreated: true };
     }
+    const welcomeSave = await saveStudioRecord({
+      recordType: 'experience', id: accessProfileId(AMANDA_PORTAL_SLUG, email),
+      organizationId: syntheticOrgId(AMANDA_PORTAL_SLUG), title: `Amanda client access: ${email}`,
+      payload: { ...profile, welcomeCourseIds: courseIds, welcomeSentAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+    });
+    if (!welcomeSave.ok || ((process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV === 'preview') && !welcomeSave.persistedToAirtable)) return { ok: false as const, error: 'Access was created, but welcome delivery could not be recorded.', accessCreated: true };
   }
 
   return {
     ok: true as const,
     created: created || accessChanged,
     welcomeSent,
+    personId,
+    clientRecordId: record.id,
     email,
     loginUrl: `${canonicalPlatformOrigin()}/portal/login?next=%2Fportal%2F${AMANDA_PORTAL_SLUG}%2Flearning`,
   };

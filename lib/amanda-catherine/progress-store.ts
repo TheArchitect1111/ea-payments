@@ -11,6 +11,8 @@ export type AmandaCourseProgress = {
   lessonReleaseAt: Record<string, string>;
   completedLessons: string[];
   assessmentScore?: number;
+  assessmentSubmission?: { notes: string; evidenceUrl?: string; submittedAt: string };
+  assessmentReview?: { reviewerEmail: string; reviewedAt: string; notes: string; practicalApproved: boolean };
   practicalRequirements: string[];
   certificateIssuedAt?: string;
   updatedAt: string;
@@ -106,18 +108,20 @@ export function certificateEligible(progress: AmandaCourseProgress) {
   return (
     course.lessons.every((lesson) => progress.completedLessons.includes(lesson)) &&
     (progress.assessmentScore ?? 0) >= course.passingScore &&
+    (Boolean(progress.certificateIssuedAt) || progress.assessmentReview?.practicalApproved === true) &&
     course.practicalRequirements.every((item) => progress.practicalRequirements.includes(item))
   );
 }
 
 async function persist(progress: AmandaCourseProgress) {
-  await saveStudioRecord({
+  const saved = await saveStudioRecord({
     recordType: 'experience',
     id: progressId(progress.portalSlug, progress.email, progress.courseId),
     organizationId: syntheticOrgId(progress.portalSlug),
     title: `Amanda course progress: ${progress.courseId}`,
     payload: progress,
   });
+  if (!saved.ok || ((process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV === 'preview') && !saved.persistedToAirtable)) throw new Error('Course progress could not be saved durably.');
   return progress;
 }
 
@@ -177,17 +181,34 @@ export async function updateAmandaCourseProgress(
   const practicalRequirements = (patch.practicalRequirements ?? current.practicalRequirements).filter((requirement) =>
     coursePracticalRequirements.includes(requirement),
   );
-  const completionRequirementsMet =
-    course.lessons.every((lesson) => completedLessons.includes(lesson)) &&
-    course.practicalRequirements.every((requirement) => practicalRequirements.includes(requirement));
-
   const next: AmandaCourseProgress = {
     ...current,
     completedLessons,
     practicalRequirements,
-    assessmentScore: completionRequirementsMet ? 100 : undefined,
+    // Learner checkboxes never manufacture an assessment grade.
+    assessmentScore: current.assessmentScore,
     updatedAt: new Date().toISOString(),
   };
-  if (certificateEligible(next) && !next.certificateIssuedAt) next.certificateIssuedAt = next.updatedAt;
+  return persist(next);
+}
+
+export async function submitAmandaAssessment(portalSlug: string, email: string, courseId: string, input: { notes: string; evidenceUrl?: string }) {
+  const current = await getAmandaCourseProgress(portalSlug, email, courseId);
+  return persist({ ...current, assessmentSubmission: { ...input, submittedAt: new Date().toISOString() },
+    // A resubmission needs a new review; retain certificates already issued.
+    assessmentReview: current.certificateIssuedAt ? current.assessmentReview : undefined,
+    assessmentScore: current.certificateIssuedAt ? current.assessmentScore : undefined,
+    updatedAt: new Date().toISOString() });
+}
+
+export async function reviewAmandaAssessment(portalSlug: string, email: string, courseId: string, input: {
+  score: number; practicalApproved: boolean; notes: string; reviewerEmail: string;
+}) {
+  const current = await getAmandaCourseProgress(portalSlug, email, courseId);
+  if (!current.assessmentSubmission) throw new Error('The learner has not submitted assessment evidence.');
+  const now = new Date().toISOString();
+  const next: AmandaCourseProgress = { ...current, assessmentScore: input.score,
+    assessmentReview: { reviewerEmail: input.reviewerEmail, reviewedAt: now, notes: input.notes, practicalApproved: input.practicalApproved }, updatedAt: now };
+  if (certificateEligible(next) && !next.certificateIssuedAt) next.certificateIssuedAt = now;
   return persist(next);
 }

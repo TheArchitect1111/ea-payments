@@ -10,9 +10,9 @@ export const metadata = {
 export default async function AmandaEnrollmentPage({
   searchParams,
 }: {
-  searchParams: Promise<{ payment?: string }>;
+  searchParams: Promise<{ payment?: string; course?: string }>;
 }) {
-  const { payment } = await searchParams;
+  const { payment, course } = await searchParams;
   return (
     <main className="min-h-screen bg-[#f7f1e8] text-[#17130f]">
       <section className="bg-[#102018] px-5 py-12 text-[#fffaf2] sm:py-16">
@@ -33,6 +33,7 @@ export default async function AmandaEnrollmentPage({
           </div>
         ) : null}
         <AmandaEnrollmentForm
+          initialCourseId={course}
           courses={AMANDA_SELF_ENROLLMENT_COURSES.map((course) => ({ ...course, delivery: [...course.delivery] }))}
         />
         <section className="mt-10 grid gap-4 rounded-3xl border border-[#d8c8b0] bg-white p-6 sm:grid-cols-2 sm:p-8" aria-labelledby="amanda-enrollment-resources">

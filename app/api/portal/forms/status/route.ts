@@ -3,6 +3,7 @@ import { guardPortalApi, portalApiUnauthorized, portalTenant } from '@/lib/api/p
 import { updatePortalFormSubmissionStatus } from '@/lib/portal-forms/store';
 import type { PortalFormStatus } from '@/lib/portal-forms/types';
 import { normalizeRole, roleAtLeast } from '@/lib/rbac';
+import { amandaStaffOrganization } from '@/lib/amanda-catherine/staff-access';
 import { publishPlatformActivityEvent } from '@/lib/activity-events-store';
 
 export const dynamic = 'force-dynamic';
@@ -15,6 +16,8 @@ export async function POST(req: NextRequest) {
   if (!roleAtLeast(normalizeRole(auth.session.role), 'staff')) {
     return NextResponse.json({ error: 'Staff access required.' }, { status: 403 });
   }
+
+  if (auth.session.slug === 'amanda-catherine' && !(await amandaStaffOrganization(auth.session))) return NextResponse.json({ error: 'Active Amanda staff membership required.' }, { status: 403 });
 
   let body: { submissionId?: string; status?: string };
   try {

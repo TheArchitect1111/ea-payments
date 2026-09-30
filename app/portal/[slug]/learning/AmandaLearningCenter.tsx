@@ -27,14 +27,16 @@ function embedUrl(value: string) {
   return value.match(/\.(mp4|webm)(\?.*)?$/i) ? value : '';
 }
 
-export default function AmandaLearningCenter({ audience, assignedCourseIds, isAdmin }: { audience: AmandaPortalAudience; assignedCourseIds: string[]; isAdmin: boolean }) {
+export default function AmandaLearningCenter({ audience, assignedCourseIds, isAdmin, initialCourseId }: { audience: AmandaPortalAudience; assignedCourseIds: string[]; isAdmin: boolean; initialCourseId?: string }) {
   const courses = useMemo(() => coursesForAccount(audience, assignedCourseIds, isAdmin), [audience, assignedCourseIds, isAdmin]);
-  const [courseId, setCourseId] = useState<string>(courses[0]?.id || '');
+  const [courseId, setCourseId] = useState<string>(courses.find((course) => course.id === initialCourseId)?.id || courses[0]?.id || '');
   const [progress, setProgress] = useState<AmandaCourseProgress | null>(null);
   const [content, setContent] = useState<AmandaCourseContent | null>(null);
   const [selected, setSelected] = useState(0);
   const [error, setError] = useState('');
   const [status, setStatus] = useState('');
+  const [assessmentNotes, setAssessmentNotes] = useState('');
+  const [assessmentEvidence, setAssessmentEvidence] = useState('');
   const [now, setNow] = useState(() => Date.now());
   const course = courses.find((item) => item.id === courseId) || courses[0];
 
@@ -110,6 +112,12 @@ export default function AmandaLearningCenter({ audience, assignedCourseIds, isAd
       <div><p className="ak-learning__eyebrow">Private course library</p><h3 id="course-materials-heading">Course materials</h3><p>Open or download the resources included with your certification program.</p></div>
       <div className="ak-learning__material-grid">{courseResources.map((resource) => <article key={resource.id} className="ak-learning__material-card"><span>{resource.fileType}</span><h4>{resource.title}</h4><p>{resource.description}</p><a className="ep-btn ep-btn-secondary" href={`/api/portal/amanda/resources/${resource.id}`} target="_blank" rel="noopener noreferrer">{resource.fileType === 'DOCX' ? 'Download resource' : 'Open resource'}</a></article>)}</div>
     </section> : null}
-    {!isAdmin ? <section className="ak-learning__requirements"><h3>Completion requirements</h3>{course.practicalRequirements.map((requirement) => <label key={requirement}><input type="checkbox" checked={progress.practicalRequirements.includes(requirement)} onChange={(e) => void saveProgress({ practicalRequirements: e.target.checked ? [...progress.practicalRequirements, requirement] : progress.practicalRequirements.filter((item) => item !== requirement) })} /><span>{requirement.replaceAll('-', ' ')}</span></label>)}<p>{progress.certificateIssuedAt ? `Certificate earned ${new Date(progress.certificateIssuedAt).toLocaleDateString()}.` : 'Your certificate unlocks after all lessons and completion requirements are finished.'}</p>{progress.certificateIssuedAt ? <a className="ep-btn" href={`/api/portal/amanda/certificate?courseId=${courseId}`}>Download certificate</a> : null}</section> : null}
+    {!isAdmin ? <section className="ak-learning__requirements"><h3>Completion requirements</h3>{course.practicalRequirements.map((requirement) => <label key={requirement}><input type="checkbox" checked={progress.practicalRequirements.includes(requirement)} onChange={(e) => void saveProgress({ practicalRequirements: e.target.checked ? [...progress.practicalRequirements, requirement] : progress.practicalRequirements.filter((item) => item !== requirement) })} /><span>{requirement.replaceAll('-', ' ')}</span></label>)}<p>{progress.certificateIssuedAt ? `Certificate earned ${new Date(progress.certificateIssuedAt).toLocaleDateString()}.` : 'Complete the lessons and submit your assessment for Amanda’s review. Certification requires a passing assessment and practical approval.'}</p>{!progress.certificateIssuedAt ? <form onSubmit={async (event) => {
+      event.preventDefault(); setError(''); setStatus('Submitting assessment…');
+      const response = await fetch('/api/portal/amanda/progress', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ courseId, assessmentSubmission: { notes: assessmentNotes, evidenceUrl: assessmentEvidence } }) });
+      const data = await response.json();
+      if (!response.ok) { setStatus(''); setError(data.error || 'Assessment could not be submitted.'); return; }
+      setProgress(data.progress); setStatus('Assessment submitted for review.');
+    }}><label><span>Assessment and practical demonstration notes</span><textarea required maxLength={5000} value={assessmentNotes} onChange={(event) => setAssessmentNotes(event.target.value)} /></label><label><span>Private demonstration or assessment link (optional)</span><input type="url" maxLength={2000} value={assessmentEvidence} onChange={(event) => setAssessmentEvidence(event.target.value)} /></label><button className="ep-btn" type="submit">Submit assessment for review</button><p>{progress.assessmentReview ? `Review recorded: ${progress.assessmentScore}% · ${progress.assessmentReview.notes}` : progress.assessmentSubmission ? 'Your assessment is awaiting review.' : ''}</p>{status ? <p role="status">{status}</p> : null}</form> : null}{progress.certificateIssuedAt ? <a className="ep-btn" href={`/api/portal/amanda/certificate?courseId=${courseId}`}>Download certificate</a> : null}</section> : null}
   </section>;
 }

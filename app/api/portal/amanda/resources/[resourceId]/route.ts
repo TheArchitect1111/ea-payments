@@ -44,6 +44,7 @@ export async function GET(
     const { presignedUrl } = await presignUrl(token, {
       pathname: resource.pathname,
       operation: 'get',
+      access: 'private',
       validUntil,
       useCache: true,
     });
