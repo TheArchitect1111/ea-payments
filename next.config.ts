@@ -77,7 +77,9 @@ const nextConfig: NextConfig = {
         .filter((rule) => rule.has?.some((condition) => condition.type === 'host'))
         .map((rule) => ({
           source: rule.source,
-          destination: rule.destination,
+          destination: rule.source === '/' && rule.has?.some((condition) =>
+            condition.type === 'host' && ['tb3.online', 'www.tb3.online'].includes(condition.value)
+          ) ? '/tarris' : rule.destination,
           has: rule.has as Array<{ type: 'host'; value: string }>,
         })),
       afterFiles: [],
