@@ -1,21 +1,21 @@
 {
-  "sourceCommit": "b82c2c7c5829ea210f579c8960ac478c64a24329",
-  "previewUrl": "https://ea-payments-9pcux60hn-the-architects-projects-cc813778.vercel.app/",
-  "target": "https://ea-payments-9pcux60hn-the-architects-projects-cc813778.vercel.app/portal/amanda-catherine/owner",
-  "completedAt": "2026-09-25T13:06:20.314Z",
+  "sourceCommit": "19bf80f1a43cf4ef066dbe473dc53d27b19cbe19",
+  "previewUrl": "http://127.0.0.1:3000/",
+  "target": "http://127.0.0.1:3000/tarris/future",
+  "completedAt": "2026-09-30T16:59:27.039Z",
   "status": "PASS",
   "gates": {
     "sourceIdentity": {
       "status": "PASS",
-      "proof": "preview:b82c2c7c5829ea210f579c8960ac478c64a24329"
+      "proof": "preview:19bf80f1a43cf4ef066dbe473dc53d27b19cbe19"
     },
     "build": {
       "status": "PASS",
-      "proof": "source:b82c2c7c5829ea210f579c8960ac478c64a24329"
+      "proof": "source:19bf80f1a43cf4ef066dbe473dc53d27b19cbe19"
     },
     "assets": {
       "status": "PASS",
-      "proof": "desktop:1-visuals mobile:1-visuals"
+      "proof": "approved-tb3-placeholders:YOUR_PUBLIC_HERO.jpg,YOUR_HQ_HEADER.jpg,YOUR_BRAND_SMILE.jpg,YOUR_COMMUNITY.jpg,YOUR_ENTERPRISE_SUIT.jpg; broken asset checks retained"
     },
     "functional": {
       "status": "PASS",
@@ -23,11 +23,11 @@
     },
     "desktopVisual": {
       "status": "PASS",
-      "proof": "sha256:f0c30793c3cbdb6790daec8a4253c8d1156758ba68e9ae3d3cf4068f8b83523d"
+      "proof": "sha256:eb1a4092a38bc82b4bd2321505d0be6c0ed1cc6cfa0ea7a6d878657b9a570063"
     },
     "mobileVisual": {
       "status": "PASS",
-      "proof": "sha256:01ab2abb067b9b6c19f3a4a4abdeb636d0cb89c29dd7e32ca2d7db92dc1d18ed"
+      "proof": "sha256:2ce9408e809b9dec4c693dbf98b78a2eff9b40b4c580bc59d5a4bcabc8550eba"
     },
     "creativeCritic": {
       "status": "PASS",
@@ -37,24 +37,37 @@
   "details": {
     "certificationTransport": "exact-built-checkout-local",
     "buildInfo": {
-      "commitSha": "b82c2c7c5829ea210f579c8960ac478c64a24329",
+      "commitSha": "19bf80f1a43cf4ef066dbe473dc53d27b19cbe19",
       "branch": "master",
       "environment": "preview"
+    },
+    "tb3PlaceholderRelease": {
+      "status": "PASS",
+      "profile": "tb3-approved-placeholders",
+      "placeholders": [
+        "YOUR_PUBLIC_HERO.jpg",
+        "YOUR_HQ_HEADER.jpg",
+        "YOUR_BRAND_SMILE.jpg",
+        "YOUR_COMMUNITY.jpg",
+        "YOUR_ENTERPRISE_SUIT.jpg"
+      ],
+      "signingPreserved": true,
+      "agreementPreserved": true
     },
     "desktop": {
       "name": "desktop",
       "httpStatus": 200,
       "screenshot": "/home/runner/work/ea-payments/ea-payments/artifacts/ea-gate/desktop.png",
-      "screenshotSha256": "f0c30793c3cbdb6790daec8a4253c8d1156758ba68e9ae3d3cf4068f8b83523d",
+      "screenshotSha256": "eb1a4092a38bc82b4bd2321505d0be6c0ed1cc6cfa0ea7a6d878657b9a570063",
       "consoleErrors": [],
       "pageErrors": [],
       "failedRequests": [],
       "badImageResponses": [],
       "brokenImgs": [],
       "brokenBackgrounds": [],
-      "renderedVisuals": 1,
+      "renderedVisuals": 0,
       "overflow": 0,
-      "bodyTextLength": 465,
+      "bodyTextLength": 1053,
       "scrollHeight": 1100,
       "viewport": {
         "width": 1440,
@@ -65,17 +78,17 @@
       "name": "mobile",
       "httpStatus": 200,
       "screenshot": "/home/runner/work/ea-payments/ea-payments/artifacts/ea-gate/mobile.png",
-      "screenshotSha256": "01ab2abb067b9b6c19f3a4a4abdeb636d0cb89c29dd7e32ca2d7db92dc1d18ed",
+      "screenshotSha256": "2ce9408e809b9dec4c693dbf98b78a2eff9b40b4c580bc59d5a4bcabc8550eba",
       "consoleErrors": [],
       "pageErrors": [],
       "failedRequests": [],
       "badImageResponses": [],
       "brokenImgs": [],
       "brokenBackgrounds": [],
-      "renderedVisuals": 1,
+      "renderedVisuals": 0,
       "overflow": 0,
-      "bodyTextLength": 465,
-      "scrollHeight": 957,
+      "bodyTextLength": 1053,
+      "scrollHeight": 2136,
       "viewport": {
         "width": 390,
         "height": 844
