@@ -70,6 +70,20 @@ const nextConfig: NextConfig = {
     // Avoid picking C:\Users\brick\package-lock.json when multiple lockfiles exist.
     root: path.join(__dirname),
   },
+  async rewrites() {
+    // TB3 host rules must run before the existing EA homepage is served.
+    return {
+      beforeFiles: vercelJson.rewrites
+        .filter((rule) => rule.has?.some((condition) => condition.type === 'host'))
+        .map((rule) => ({
+          source: rule.source,
+          destination: rule.destination,
+          has: rule.has as Array<{ type: 'host'; value: string }>,
+        })),
+      afterFiles: [],
+      fallback: [],
+    };
+  },
   async redirects() {
     return (vercelJson.redirects ?? []).map((rule) => ({
       source: rule.source,
