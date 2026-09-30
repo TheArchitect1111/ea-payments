@@ -17,7 +17,7 @@ jobs:
         with:
           ref: 15fbaeed7b77d38eaf0b4e60b908098f293b9394
       - name: Verify exact release source
-        run: test "$(git rev-parse HEAD)" = "15fbaeed7b77d38eaf0b4e60b908098f293b9394"
+        run: test "$(git -c safe.directory="$GITHUB_WORKSPACE" rev-parse HEAD)" = "15fbaeed7b77d38eaf0b4e60b908098f293b9394"
       - name: Install dependencies
         run: npm ci
       - name: Build approved release
