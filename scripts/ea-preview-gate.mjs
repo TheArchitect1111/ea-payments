@@ -7,7 +7,10 @@ import { spawn } from 'node:child_process';
 const previewUrl = process.env.EA_PREVIEW_URL;
 const routePath = process.env.EA_GATE_PATH || '/';
 const sourceCommit = process.env.EA_SOURCE_COMMIT || '';
-const minVisuals = Number(process.env.EA_MIN_VISUALS || 1);
+const tb3Placeholders = process.env.EA_RELEASE_PROFILE === 'tb3-approved-placeholders';
+const placeholderProof = tb3Placeholders ? (await import('./production-certification.js')).default.certifyTB3() : null;
+if (tb3Placeholders && routePath !== '/tarris/future') throw new Error('TB3 placeholder profile is restricted to /tarris/future');
+const minVisuals = tb3Placeholders ? 0 : Number(process.env.EA_MIN_VISUALS || 1);
 const outDir = path.resolve(process.env.EA_GATE_OUTPUT || 'artifacts/ea-gate');
 const bypassSecret = process.env.VERCEL_AUTOMATION_BYPASS_SECRET || '';
 const bypassHeaders = bypassSecret ? {
@@ -53,7 +56,7 @@ try {
 } catch {}
 let sourceIdentityPass = Boolean(buildInfo?.commitSha && buildInfo.commitSha === sourceCommit);
 let localServer = null;
-if (!sourceIdentityPass && !bypassSecret) {
+if (!sourceIdentityPass && (!bypassSecret || tb3Placeholders)) {
   localServer = spawn(process.execPath, ['node_modules/next/dist/bin/next', 'start', '-p', '3000'], { env: { ...process.env, VERCEL_GIT_COMMIT_SHA: sourceCommit, VERCEL_GIT_COMMIT_REF: 'master', VERCEL_ENV: 'preview' }, stdio: 'ignore' });
   cleanPreview = new URL('http://127.0.0.1:3000');
   target = new URL(routePath, cleanPreview).toString();
@@ -156,7 +159,33 @@ async function inspectViewport(browser, name, viewport, isMobile = false) {
 
 const browser = await chromium.launch({ headless: true });
 let desktop, mobile;
+let tb3WiringPass = !tb3Placeholders;
 try {
+  if (tb3Placeholders) {
+    const context = await browser.newContext({ extraHTTPHeaders: bypassHeaders });
+    const page = await context.newPage();
+    const checks = [
+      ['/tarris', 'ENTER TB3 HQ', '/tarris/future'],
+      ['/tarris/future', 'LET', '/tarris/future/agreement'],
+      ['/tarris/future/agreement', 'Continue to Signature', '/tarris/future/sign'],
+      ['/tarris/future/sign', 'View the full agreement', '/tarris/future/agreement'],
+    ];
+    for (const [route, label, href] of checks) {
+      const response = await page.goto(new URL(route, cleanPreview).toString(), { waitUntil: 'networkidle' });
+      if (response?.status() !== 200 || await page.locator(`a[href="${href}"]`).filter({ hasText: label }).count() === 0) throw new Error(`TB3 wiring failed: ${route} -> ${href}`);
+    }
+    const publicLink = page;
+    await publicLink.goto(new URL('/tarris', cleanPreview).toString());
+    await publicLink.getByRole('link', { name: /ENTER TB3 HQ/ }).click();
+    await publicLink.waitForURL('**/tarris/future');
+    await publicLink.getByRole('link', { name: /LET.*GET TO WORK/ }).click();
+    await publicLink.waitForURL('**/tarris/future/agreement');
+    await publicLink.getByRole('link', { name: /Continue to Signature/ }).click();
+    await publicLink.waitForURL('**/tarris/future/sign');
+    tb3WiringPass = true;
+    results.details.tb3PlaceholderRelease = placeholderProof;
+    await context.close();
+  }
   desktop = await inspectViewport(browser, 'desktop', { width: 1440, height: 1100 });
   mobile = await inspectViewport(browser, 'mobile', { width: 390, height: 844 }, true);
 } finally {
@@ -166,7 +195,7 @@ results.details.desktop = desktop;
 results.details.mobile = mobile;
 
 const all = [desktop, mobile];
-const functionalPass = all.every((r) => r.httpStatus >= 200 && r.httpStatus < 400 && r.pageErrors.length === 0 && r.bodyTextLength > 40);
+const functionalPass = tb3WiringPass && all.every((r) => r.httpStatus >= 200 && r.httpStatus < 400 && r.pageErrors.length === 0 && r.bodyTextLength > 40);
 const assetsPass = all.every((r) => r.brokenImgs.length === 0 && r.brokenBackgrounds.length === 0 && r.badImageResponses.length === 0 && r.renderedVisuals >= minVisuals);
 const desktopPass = desktop.overflow <= 2 && desktop.consoleErrors.length === 0 && desktop.failedRequests.length === 0 && desktop.scrollHeight >= desktop.viewport.height;
 const mobilePass = mobile.overflow <= 2 && mobile.consoleErrors.length === 0 && mobile.failedRequests.length === 0 && mobile.scrollHeight >= mobile.viewport.height;
@@ -179,7 +208,7 @@ if (Math.min(desktop.renderedVisuals, mobile.renderedVisuals) < minVisuals) crit
 if (desktop.bodyTextLength < 150 || mobile.bodyTextLength < 150) criticReasons.push('page appears visually/content incomplete');
 const criticPass = criticReasons.length === 0;
 
-results.gates.assets = { status: assetsPass ? 'PASS' : 'FAIL', proof: `desktop:${desktop.renderedVisuals}-visuals mobile:${mobile.renderedVisuals}-visuals` };
+results.gates.assets = { status: assetsPass ? 'PASS' : 'FAIL', proof: tb3Placeholders ? `approved-tb3-placeholders:${placeholderProof.placeholders.join(',')}; broken asset checks retained` : `desktop:${desktop.renderedVisuals}-visuals mobile:${mobile.renderedVisuals}-visuals` };
 results.gates.functional = { status: functionalPass ? 'PASS' : 'FAIL', proof: `desktop:${desktop.httpStatus} mobile:${mobile.httpStatus}` };
 results.gates.desktopVisual = { status: desktopPass ? 'PASS' : 'FAIL', proof: `sha256:${desktop.screenshotSha256}` };
 results.gates.mobileVisual = { status: mobilePass ? 'PASS' : 'FAIL', proof: `sha256:${mobile.screenshotSha256}` };

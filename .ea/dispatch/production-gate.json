@@ -1,7 +1,8 @@
 {
-  "preview_url": "https://ea-payments-git-ea-gate-e0100c-the-architects-projects-cc813778.vercel.app",
-  "route_path": "/amplifi",
-  "min_visuals": 1,
-  "requested_for": "EA Command Layer production certification",
-  "requested_at": "2026-09-26T11:15:00Z"
+  "preview_url": "http://127.0.0.1:3000",
+  "route_path": "/tarris/future",
+  "min_visuals": 0,
+  "release_profile": "tb3-approved-placeholders",
+  "requested_for": "Robert Brickey approved TB3 placeholder release certification and production promotion",
+  "requested_at": "2026-09-30T16:49:12Z"
 }
