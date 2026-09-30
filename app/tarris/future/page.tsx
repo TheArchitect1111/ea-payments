@@ -14,11 +14,11 @@ export default function TarrisFuturePage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white flex">
-      <aside className="fixed left-0 top-0 w-64 h-screen bg-[#111] border-r border-[#222] p-6">
+    <div className="min-h-screen bg-[#0a0a0a] text-white flex flex-col lg:flex-row">
+      <aside className="relative w-full lg:fixed lg:left-0 lg:top-0 lg:w-64 lg:h-screen bg-[#111] border-r border-[#222] p-6">
         <h2 className="font-black text-2xl mb-1 tracking-tight">TB3 HQ</h2>
         <p className="text-[10px] tracking-[0.3em] opacity-60 mb-8">MORE THAN A GAME</p>
-        <nav className="space-y-2 text-sm">
+        <nav className="grid grid-cols-2 gap-2 lg:block lg:space-y-2 text-sm">
           <Link href="/tarris/future" className="block bg-white text-black px-3 py-2 rounded font-bold">Home</Link>
           <a className="block opacity-70 px-3 py-2">My Journey</a>
           <a className="block opacity-70 px-3 py-2">Academics</a>
@@ -33,8 +33,8 @@ export default function TarrisFuturePage() {
         </div>
       </aside>
 
-      <main className="ml-64 flex-1 p-8 bg-[#0a0a0a]">
-        <div className="flex justify-between items-start mb-8 bg-[#111] rounded-2xl p-6 border border-[#222]">
+      <main className="min-w-0 ml-0 lg:ml-64 flex-1 p-4 sm:p-8 bg-[#0a0a0a]">
+        <div className="flex flex-col lg:flex-row gap-6 lg:gap-0 justify-between items-start mb-8 bg-[#111] rounded-2xl p-6 border border-[#222]">
           <div>
             <p className="text-xs tracking-widest opacity-60">WELCOME TO</p>
             <h1 className="text-6xl font-black mt-1">TB3 <span className="text-[#c41e3a]">HQ</span></h1>
@@ -45,18 +45,18 @@ export default function TarrisFuturePage() {
               LET&apos;S GET TO WORK →
             </Link>
           </div>
-          <div className="w-72 h-72 bg-[#1a1a1a] rounded-2xl flex items-center justify-center border border-dashed border-[#333] text-xs opacity-50 text-center p-4">
+          <div className="w-full sm:w-72 h-72 shrink-0 bg-[#1a1a1a] rounded-2xl flex items-center justify-center border border-dashed border-[#333] text-xs opacity-50 text-center p-4">
             HQ HEADER IMAGE<br/>Replace: {IMAGES.hqHeader}<br/>Mom-safe: polo/tee smile, no sweat/tank
           </div>
         </div>
 
-        <div className="grid grid-cols-6 gap-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
           {['ACADEMICS','TRAINING','NIL & BRAND','OPPORTUNITIES','MEDIA LIBRARY','COMMUNITY'].map(t=>(
             <div key={t} className="bg-[#1a1a1a] p-4 rounded-xl border border-[#222] text-xs font-bold">{t}<br/><span className="font-normal opacity-60 text-[11px]">Approved module</span></div>
           ))}
         </div>
 
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <div className="bg-[#1a1a1a] rounded-xl p-4 border border-[#222]">
             <p className="text-[10px] tracking-widest opacity-60">FEATURED VIDEO</p>
             <h3 className="font-black text-2xl mt-2 leading-tight">THE JOURNEY<br/>CONTINUES.</h3>
@@ -74,7 +74,7 @@ export default function TarrisFuturePage() {
           </div>
         </div>
 
-        <div className="mt-8 flex gap-4 text-[11px]">
+        <div className="mt-8 flex flex-wrap gap-4 text-[11px]">
           <Link href="/tarris/future/agreement" className="underline opacity-60 hover:opacity-100">View Agreement →</Link>
           <span className="opacity-20">|</span>
           <span className="opacity-30">WIRED: app/tarris/page.tsx → ENTER TB3 HQ → app/tarris/future/page.tsx → app/tarris/future/agreement/page.tsx</span>

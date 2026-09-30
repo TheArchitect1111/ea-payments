@@ -27,7 +27,7 @@ export default function TarrisPublicPage() {
             <span className="italic">A bigger purpose than basketball.</span>
           </p>
 
-          <div className="mt-10 flex gap-4">
+          <div className="mt-10 flex flex-col sm:flex-row gap-4">
             <Link href="/tarris/future" className="bg-white text-black px-8 py-4 rounded-full font-bold text-sm tracking-wide hover:bg-zinc-200 transition">
               ENTER TB3 HQ →
             </Link>
