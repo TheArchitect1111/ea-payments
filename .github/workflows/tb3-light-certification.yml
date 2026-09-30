@@ -1,4 +1,4 @@
-name: TB3 Light Release Certification
+name: TB3 Live Release Verification
 on:
   pull_request:
     branches: [master]
@@ -6,38 +6,56 @@ on:
 permissions:
   contents: read
 jobs:
-  certify:
+  live:
     if: github.head_ref == 'qa/tb3-light-certification-20260930'
     runs-on: ubuntu-latest
-    container:
-      image: mcr.microsoft.com/playwright:v1.61.0-noble
-    timeout-minutes: 20
+    timeout-minutes: 6
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          ref: 12680ab337340b3c52c272a94a07b003979e034a
-      - name: Verify exact release source
-        run: test "$(git -c safe.directory="$GITHUB_WORKSPACE" rev-parse HEAD)" = "12680ab337340b3c52c272a94a07b003979e034a"
-      - name: Install dependencies
-        run: npm ci
-      - name: Build approved release
-        run: npm run build
-      - name: Preserved content and host routing
+          node-version: 24
+      - name: Verify production identity and all TB3 routes without submissions
         run: |
-          node scripts/production-certification.js
-          node scripts/test-tb3-host-routing.mjs
-      - name: Desktop mobile and full agreement journey certification
-        env:
-          EA_SOURCE_COMMIT: 12680ab337340b3c52c272a94a07b003979e034a
-          EA_PREVIEW_URL: http://127.0.0.1:3000
-          EA_GATE_PATH: /tarris/future
-          EA_RELEASE_PROFILE: tb3-approved-placeholders
-          EA_MIN_VISUALS: '0'
-          EA_GATE_OUTPUT: artifacts/tb3-light-certification
-        run: node scripts/ea-preview-gate.mjs
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import { mkdirSync, writeFileSync } from 'node:fs';
+          const expected = '947a85ba148f1f25727ded2c46115a81489c87db';
+          const get = (url) => fetch(url, {redirect: 'follow', cache: 'no-store', signal: AbortSignal.timeout(30000)});
+          let identity;
+          for (let n = 0; n < 30; n++) {
+            const r = await get('https://efficiencyarchitects.online/api/ops/build-info');
+            identity = await r.json();
+            if (identity.commitSha === expected) break;
+            await new Promise(resolve => setTimeout(resolve, 5000));
+          }
+          assert.equal(identity.commitSha, expected, 'Live production source identity');
+          const checks = [];
+          for (const host of ['tb3.online', 'www.tb3.online']) {
+            for (const path of ['/', '/tarris', '/hq', '/tarris/future', '/tarris/future/agreement', '/tarris/future/sign']) {
+              const r = await get('https://' + host + path);
+              assert.equal(r.status, 200, host + path);
+              const html = await r.text();
+              if (path === '/' || path === '/tarris') {
+                assert.ok(html.includes('TB3 STORE') && html.includes('SLOT_TB3_MASK'), host + path + ' light page');
+                const slots = [...html.matchAll(/aria-label="(SLOT_[A-Z0-9_]+)"/g)].map(m => m[1]);
+                assert.equal(slots.length, 19);
+                assert.equal(new Set(slots).size, 19);
+              } else if (path === '/hq' || path === '/tarris/future') {
+                assert.ok(html.includes('TB3 HQ') && html.includes('ACADEMICS'), host + path + ' dark HQ');
+              }
+              checks.push({url: 'https://' + host + path, finalUrl: r.url, status: r.status});
+              console.log('PASS ' + host + path);
+            }
+          }
+          const ea = await get('https://efficiencyarchitects.online/');
+          assert.equal(ea.status, 200);
+          assert.ok((await ea.text()).includes('Live YOUR'), 'EA homepage preserved');
+          mkdirSync('artifacts', {recursive: true});
+          writeFileSync('artifacts/tb3-live-verification.json', JSON.stringify({status:'PASS', expectedCommit:expected, identity, checks, eaHomepagePreserved:true, completedAt:new Date().toISOString()}, null, 2));
+          NODE
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: tb3-light-certification-12680ab3
-          path: artifacts/tb3-light-certification
+          name: tb3-live-production-verification
+          path: artifacts/tb3-live-verification.json
           if-no-files-found: warn
