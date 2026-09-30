@@ -20,10 +20,11 @@ Status: source repairs prepared; production unchanged; certification blocked.
 - Scoped ESLint: no errors; existing image/effect warnings remain.
 - Full TypeScript reports no diagnostics in changed files; the repository-wide check fails in untouched files/services/dependencies.
 - Diff whitespace check passes.
+- Public preview routing responds 307 to the intended EA enroll/apply/learning paths and preserves course/form/program parameters; the Body Sculpt route was directly verified on deployment dpl_HNW8X2fyBNb26Y4k7jAeqeN7nMW4.
 
 ## Blocked / not proven
 - Existing tenant-safety source contract fails on the unchanged module resolver. Neither that test nor resolver was altered.
-- Full build result pending at initial commit; see PR updates for final build outcome.
+- Local full build fails in existing factory/admin client bundles. The Amanda learning client also imported server persistence through course-content; repaired by extracting the existing pure access helpers without changing access rules. Full build still requires a fresh preview check.
 - No test Stripe transactions executed; no transaction IDs or live webhook/entitlement proof. Four non-admin checkout/login/lesson launches remain mandatory.
 - Preview browser/mobile verification and actual owner membership/People/email service configuration remain unverified.
 - Current catalog maps Reset/Body Sculpt resources but no BBL/Wood Therapy resources. Recordings/lesson content cannot be fabricated.

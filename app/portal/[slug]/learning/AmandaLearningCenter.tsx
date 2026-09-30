@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { ENTREPRENEURIAL_ARTIST_COURSE, type AmandaPortalAudience } from '@/lib/amanda-catherine/config';
-import { coursesForAccount } from '@/lib/amanda-catherine/course-content';
+import { coursesForAccount } from '@/lib/amanda-catherine/course-access';
 import type { AmandaCourseContent, AmandaLessonContent } from '@/lib/amanda-catherine/course-content';
 import type { AmandaCourseProgress } from '@/lib/amanda-catherine/progress-store';
 import { resourcesForAmandaCourse } from '@/lib/amanda-catherine/course-resources';
