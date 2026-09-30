@@ -16,6 +16,7 @@ export type AmandaPaymentRecord = {
   paymentOption?: 'full' | 'deposit' | 'test'; amountPaidCad: number; currency: string;
   paymentStatus: string; stripeCustomerId?: string; stripeSubscriptionId?: string;
   subscriptionStatus?: string; customerConfirmationSentAt?: string; adminNotificationSentAt?: string;
+  personId?: string; clientRecordId?: string;
   recordedAt: string; updatedAt: string;
 };
 
@@ -30,7 +31,9 @@ export function isAmandaCheckoutSession(session: Stripe.Checkout.Session) {
   return Boolean(meta.portalSlug?.toLowerCase().startsWith('amanda-catherine') && (meta.amandaOfferId || meta.amandaMembershipId));
 }
 async function persistPaymentRecord(record: AmandaPaymentRecord, title: string) {
-  return saveStudioRecord({ recordType: 'experience', id: record.id, organizationId: syntheticOrgId(record.portalSlug), title, payload: record });
+  const saved = await saveStudioRecord({ recordType: 'experience', id: record.id, organizationId: syntheticOrgId(record.portalSlug), title, payload: record });
+  if ((process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV === 'preview') && !saved.persistedToAirtable) return { ...saved, ok: false, error: 'Durable payment storage is unavailable.' };
+  return saved;
 }
 
 export async function fulfillAmandaCheckout(session: Stripe.Checkout.Session, source: 'webhook' | 'return-verification') {
@@ -46,12 +49,13 @@ export async function fulfillAmandaCheckout(session: Stripe.Checkout.Session, so
   const id = recordId(session.id); const existing = await loadStudioRecord<AmandaPaymentRecord>('experience', id); const now = new Date().toISOString();
   let record: AmandaPaymentRecord = {
     id, portalSlug, email, stripeSessionId: session.id, kind: membership ? 'membership' : 'offer', offerId: offer?.id,
-    courseId: String(meta.amandaCourseId || ('courseId' in (offer || {}) ? (offer as { courseId?: string }).courseId || '' : '')) || undefined,
+    courseId: String('courseId' in (offer || {}) ? (offer as { courseId?: string }).courseId || '' : '') || undefined,
     membershipId: membership?.id,
     paymentOption: meta.paymentOption === 'deposit' || meta.paymentOption === 'full' || meta.paymentOption === 'test' ? meta.paymentOption : undefined,
     amountPaidCad: (session.amount_total ?? 0) / 100, currency: String(session.currency || 'cad').toUpperCase(), paymentStatus: session.payment_status,
     stripeCustomerId: stringId(session.customer), stripeSubscriptionId: stringId(session.subscription), subscriptionStatus: membership ? 'active' : undefined,
     customerConfirmationSentAt: existing?.customerConfirmationSentAt, adminNotificationSentAt: existing?.adminNotificationSentAt,
+    personId: existing?.personId, clientRecordId: existing?.clientRecordId,
     recordedAt: existing?.recordedAt ?? now, updatedAt: now,
   };
   const label = membership?.name ?? offer!.name;
@@ -86,16 +90,19 @@ export async function fulfillAmandaCheckout(session: Stripe.Checkout.Session, so
     await emitPulseEvent({ product: 'ea-platform', type: 'fulfillment.review_required', title: 'Amanda client access needs attention', detail: `${email} · ${access.error}`, priority: 'high', href: `/portal/${portalSlug}/deliveries`, tenantId: portalSlug, objectId: id });
     return { ok: false as const, error: access.error || 'Student access could not be provisioned.', paymentRecorded: true as const };
   }
+  record = { ...record, personId: access.personId || undefined, clientRecordId: access.clientRecordId };
+  const linkedSave = await persistPaymentRecord(record, title);
+  if (!linkedSave.ok) return { ok: false as const, error: 'Payment identity link could not be saved.', paymentRecorded: true as const };
   if (!existing) {
     await publishPlatformActivityEvent({ organizationId: 'amanda-catherine', module: 'payments', eventType: 'payment_fulfilled', title: membership ? `Amanda membership activated · ${label}` : `Amanda payment fulfilled · ${label}`, summary: `CAD ${record.amountPaidCad.toFixed(2)} payment fulfilled`, priority: 90, actionLabel: 'Open Amanda billing', actionUrl: `/portal/${portalSlug}/billing`, metadata: { stripeSessionId: session.id, transactionId, offerId: offer?.id || '', membershipId: membership?.id || '', courseId: record.courseId || '', source, accessProvisioned: 'true' } });
-    await emitPulseEvent({ product: 'ea-platform', type: membership ? 'subscription.started' : 'payment.received', title: membership ? `Amanda membership active — ${label}` : record.paymentOption === 'test' ? `Amanda private test payment — ${label}` : `Amanda payment received — ${label}`, detail: `CAD $${record.amountPaidCad.toFixed(2)} · ${email}`, priority: record.paymentOption === 'test' ? 'normal' : 'high', href: `/portal/${portalSlug}/billing`, tenantId: portalSlug, objectId: id, metadata: { stripeSessionId: session.id, email, source, offerId: offer?.id || '', membershipId: membership?.id || '', paymentOption: record.paymentOption || '', privateTestCheckout: record.paymentOption === 'test' ? 'true' : 'false' } });
+    await emitPulseEvent({ product: 'ea-platform', type: membership ? 'subscription.started' : 'payment.received', title: membership ? `Amanda membership active — ${label}` : record.paymentOption === 'test' ? `Amanda private test payment — ${label}` : `Amanda payment received — ${label}`, detail: `CAD $${record.amountPaidCad.toFixed(2)} · ${email}`, priority: record.paymentOption === 'test' ? 'medium' : 'high', href: `/portal/${portalSlug}/billing`, tenantId: portalSlug, objectId: id, metadata: { stripeSessionId: session.id, email, source, offerId: offer?.id || '', membershipId: membership?.id || '', paymentOption: record.paymentOption || '', privateTestCheckout: record.paymentOption === 'test' ? 'true' : 'false' } });
   }
   return { ok: true as const, record, access };
 }
 
-export async function listAmandaPayments(portalSlug: string, email: string) {
+export async function listAmandaPayments(portalSlug: string, email?: string) {
   const rows = await listStudioRecords<AmandaPaymentRecord>('experience', syntheticOrgId(portalSlug));
-  return rows.filter((row) => row?.id?.startsWith('amanda-payment-') && row.portalSlug === portalSlug && row.email === email.toLowerCase()).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+  return rows.filter((row) => row?.id?.startsWith('amanda-payment-') && row.portalSlug === portalSlug && (!email || row.email === email.toLowerCase())).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
 }
 
 export async function updateAmandaMembershipLifecycle(subscription: Stripe.Subscription) {

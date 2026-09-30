@@ -1,5 +1,7 @@
 'use client';
 
+import OwnerApplicationReply from './OwnerApplicationReply';
+import type { AmandaApplicationCommunication } from '@/lib/amanda-catherine/application-communication';
 import { useState } from 'react';
 import type { PortalFormStatus, PortalFormSubmission } from '@/lib/portal-forms/types';
 import { amandaApplicationHandoff } from '@/lib/amanda-catherine/application-routing';
@@ -10,7 +12,7 @@ function label(value: string) {
   return value.replaceAll('-', ' ').replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
-export default function OwnerApplicationQueue({ submissions: initial }: { submissions: PortalFormSubmission[] }) {
+export default function OwnerApplicationQueue({ submissions: initial, communications }: { submissions: PortalFormSubmission[]; communications: AmandaApplicationCommunication[] }) {
   const [submissions, setSubmissions] = useState(initial);
   const [busy, setBusy] = useState('');
   const [error, setError] = useState('');
@@ -45,7 +47,6 @@ export default function OwnerApplicationQueue({ submissions: initial }: { submis
     const uploads = submission.payload?.assetUploads && typeof submission.payload.assetUploads === 'object' ? submission.payload.assetUploads as Record<string, { fileName?: string; url?: string }> : {};
     const formId = submission.payload?.formId;
     const handoff = amandaApplicationHandoff(formId, submission.status, submission.payload?.program);
-    const subject = encodeURIComponent(`${label(String(formId || 'application'))} follow-up`);
-    return <article className="ac-card" key={submission.id}><div className="ac-queue-heading"><div><span className="ac-eyebrow">{label(String(formId || 'application'))}</span><h3>{submission.name}</h3></div><strong>{label(submission.status)}</strong></div><p><a href={`mailto:${submission.email}`}>{submission.email}</a>{submission.phone ? ` · ${submission.phone}` : ''}</p><p>Submitted {new Date(submission.createdAt).toLocaleString(undefined,{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'})}</p>{Object.entries(answers).map(([key,value])=><div className="ac-queue-answer" key={key}><b>{label(key)}</b><p>{String(value)}</p></div>)}{submission.notes&&<div className="ac-queue-answer"><b>Additional notes</b><p>{submission.notes}</p></div>}{Object.entries(uploads).length>0&&<div className="ac-queue-answer"><b>Attachments</b>{Object.entries(uploads).map(([key,file])=><p key={key}>{file.url?<a href={file.url} target="_blank" rel="noopener noreferrer">{file.fileName||label(key)} ↗</a>:file.fileName||label(key)}</p>)}</div>}<div className="ac-queue-handoff"><b>Next handoff</b><p>{handoff}</p><a href={`mailto:${submission.email}?subject=${subject}`}>Email applicant →</a></div><div className="ac-queue-status">{statuses.map((status)=><button type="button" key={status} disabled={busy===submission.id||submission.status===status} onClick={()=>updateStatus(submission.id,status)}>{label(status)}</button>)}</div></article>;
+    return <article className="ac-card" key={submission.id}><div className="ac-queue-heading"><div><span className="ac-eyebrow">{label(String(formId || 'application'))}</span><h3>{submission.name}</h3></div><strong>{label(submission.status)}</strong></div><p><a href={`mailto:${submission.email}`}>{submission.email}</a>{submission.phone ? ` · ${submission.phone}` : ''}</p><p>Submitted {new Date(submission.createdAt).toLocaleString(undefined,{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'})}</p>{Object.entries(answers).map(([key,value])=><div className="ac-queue-answer" key={key}><b>{label(key)}</b><p>{String(value)}</p></div>)}{submission.notes&&<div className="ac-queue-answer"><b>Additional notes</b><p>{submission.notes}</p></div>}{Object.entries(uploads).length>0&&<div className="ac-queue-answer"><b>Attachments</b>{Object.entries(uploads).map(([key,file])=><p key={key}>{file.url?<a href={file.url} target="_blank" rel="noopener noreferrer">{file.fileName||label(key)} ↗</a>:file.fileName||label(key)}</p>)}</div>}<div className="ac-queue-handoff"><b>Next handoff</b><p>{handoff}</p><OwnerApplicationReply submissionId={submission.id} initial={communications.filter((item) => item.submissionId === submission.id)} /></div><div className="ac-queue-status">{statuses.map((status)=><button type="button" key={status} disabled={busy===submission.id||submission.status===status} onClick={()=>updateStatus(submission.id,status)}>{label(status)}</button>)}</div></article>;
   })}</div></section>;
 }

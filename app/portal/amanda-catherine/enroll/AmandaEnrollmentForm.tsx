@@ -12,8 +12,8 @@ type Course = {
   delivery: string[];
 };
 
-export default function AmandaEnrollmentForm({ courses }: { courses: Course[] }) {
-  const [offerId, setOfferId] = useState(courses[0]?.offerId || '');
+export default function AmandaEnrollmentForm({ courses, initialCourseId }: { courses: Course[]; initialCourseId?: string }) {
+  const [offerId, setOfferId] = useState(courses.find((course) => course.courseId === initialCourseId || course.offerId === initialCourseId)?.offerId || courses[0]?.offerId || '');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');

@@ -26,11 +26,11 @@ export default function AmandaEnrollmentSuccess() {
       body: JSON.stringify({ sessionId }),
     })
       .then(async (response) => {
-        const data = (await response.json().catch(() => ({}))) as { error?: string; email?: string; loginUrl?: string; welcomeSent?: boolean };
-        if (!response.ok || !data.email || !data.loginUrl) throw new Error(data.error || 'Enrollment could not be verified.');
+        const data = (await response.json().catch(() => ({}))) as { error?: string; email?: string; loginUrl?: string; welcomeSent?: boolean; learningUrl?: string };
+        if (!response.ok || !data.email || !data.loginUrl || !data.learningUrl?.startsWith('/portal/amanda-catherine/learning?')) throw new Error(data.error || 'Enrollment could not be verified.');
         return data;
       })
-      .then((data) => { if (active) setState({ status: 'ready', email: data.email!, loginUrl: data.loginUrl!, welcomeSent: Boolean(data.welcomeSent) }); })
+      .then((data) => { if (active) { setState({ status: 'ready', email: data.email!, loginUrl: data.loginUrl!, welcomeSent: Boolean(data.welcomeSent) }); window.location.replace(data.learningUrl!); } })
       .catch((error) => { if (active) setState({ status: 'error', message: error instanceof Error ? error.message : 'Enrollment could not be verified.' }); });
     return () => { active = false; };
   }, [sessionId]);
@@ -47,7 +47,7 @@ export default function AmandaEnrollmentSuccess() {
           <>
             <h1 className="mt-5 font-serif text-5xl">You’re enrolled.</h1>
             <p className="mt-5 text-lg leading-8">Your course has been assigned to <strong>{state.email}</strong>.</p>
-            <p className="mt-3 leading-7">{state.welcomeSent ? 'Check your email for your temporary password and sign-in instructions.' : 'Your existing Amanda Catherine sign-in now includes this course.'}</p>
+            <p className="mt-3 leading-7">{state.welcomeSent ? 'Check your email for your course access and secure sign-in instructions.' : 'Sign in with your enrollment email and the secure code sent to your inbox.'}</p>
             <a href={state.loginUrl} className="mt-7 inline-flex min-h-14 items-center justify-center rounded-full bg-[#c39851] px-8 text-lg font-black">Open Courses & Learning</a>
           </>
         )}

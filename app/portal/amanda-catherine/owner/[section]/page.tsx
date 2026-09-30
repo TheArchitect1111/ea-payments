@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import { guardPortalApiCookie } from '@/lib/api/portal-route';
+import { amandaStaffOrganization } from '@/lib/amanda-catherine/staff-access';
 import { notFound } from 'next/navigation';
 import { ENTREPRENEURIAL_ARTIST_COURSE } from '@/lib/amanda-catherine/config';
 import { AMANDA_PRACTITIONER_KIT } from '@/lib/amanda-catherine/practitioner-kit-catalog';
@@ -6,7 +8,15 @@ import { listAmandaKitOrders } from '@/lib/amanda-catherine/practitioner-kit-ord
 import { DEFAULT_AMANDA_SITE_CONTENT } from '@/lib/amanda-catherine/site-content';
 import { listPortalFormSubmissions } from '@/lib/portal-forms/store';
 import type { PortalFormSubmission } from '@/lib/portal-forms/types';
+import { listAmandaApplicationCommunications, type AmandaApplicationCommunication } from '@/lib/amanda-catherine/application-communication';
+import OwnerPeople from '../OwnerPeople';
+import OwnerAssessmentReview from '../OwnerAssessmentReview';
 import OwnerApplicationQueue from '../OwnerApplicationQueue';
+import { AMANDA_COURSES } from '@/lib/amanda-catherine/config';
+import { getAmandaAssignedCourseIds } from '@/lib/amanda-catherine/client-access';
+import { listAmandaPayments } from '@/lib/amanda-catherine/payment-fulfillment';
+import { listAmandaCourseProgress } from '@/lib/amanda-catherine/progress-store';
+import AmandaOperationsPanel from '@/app/portal/[slug]/reports/AmandaOperationsPanel';
 
 const sections: Record<string, [string, string, string]> = {
   updates: ['Update Hub', 'GOVERNED CHANGES', 'Website and business change requests.'],
@@ -40,7 +50,7 @@ function Address({address}:{address?:{line1?:string|null;line2?:string|null;city
   return <p>{[address.line1,address.line2,address.city,address.state,address.postal_code,address.country].filter(Boolean).join(', ')}</p>;
 }
 
-function ConnectedSection({ section, submissions, kitOrders }: { section: string; submissions: PortalFormSubmission[]; kitOrders: Awaited<ReturnType<typeof listAmandaKitOrders>> }) {
+function ConnectedSection({ section, submissions, kitOrders, communications }: { communications: AmandaApplicationCommunication[]; section: string; submissions: PortalFormSubmission[]; kitOrders: Awaited<ReturnType<typeof listAmandaKitOrders>> }) {
   if (section === 'practitioner-kit') return <>
     <section className="ac-grid-two">
       <article className="ac-card"><span className="ac-eyebrow">PRODUCT</span><h3>{AMANDA_PRACTITIONER_KIT.name}</h3><p>{AMANDA_PRACTITIONER_KIT.description}</p><p><strong>${AMANDA_PRACTITIONER_KIT.priceCad} CAD</strong></p><Link href="/amanda-catherine/private/practitioner-kit">Open private checkout →</Link></article>
@@ -61,14 +71,38 @@ function ConnectedSection({ section, submissions, kitOrders }: { section: string
     <article className="ac-card"><span className="ac-eyebrow">SIX-WEEK PROGRAM</span><h3>{ENTREPRENEURIAL_ARTIST_COURSE.totalLessons} lessons</h3><p>One lesson releases each Monday at 9:00 AM Eastern through the approved companion playlist.</p><p><ExternalAction href={ENTREPRENEURIAL_ARTIST_COURSE.playlistUrl}>Open program playlist</ExternalAction></p><Link href="/portal/amanda-catherine/learning">Open student learning area →</Link></article>
   </section>;
 
-  if (section === 'advisory' || section === 'speaking' || section === 'lifeline') return <OwnerApplicationQueue submissions={submissions} />;
+  if (section === 'advisory' || section === 'speaking' || section === 'lifeline') return <OwnerApplicationQueue submissions={submissions} communications={communications} />;
   return null;
 }
 
 export default async function Page({ params }: { params: Promise<{ section: string }> }) {
   const { section } = await params;
+  if (['academy', 'clients', 'insights', 'advisory', 'speaking', 'lifeline'].includes(section)) {
+    const auth = await guardPortalApiCookie({ realm: 'portal', slug: 'amanda-catherine' });
+    if (!auth.ok || !(await amandaStaffOrganization(auth.session))) notFound();
+  }
   const item = sections[section];
   if (!item) notFound();
+  if (section === 'academy') {
+    const [payments, progress] = await Promise.all([
+      listAmandaPayments('amanda-catherine'), listAmandaCourseProgress('amanda-catherine'),
+    ]);
+    const enrollments = payments.filter((payment) => payment.courseId);
+    const emails = [...new Set(enrollments.map((payment) => payment.email))];
+    const assignments = new Map(await Promise.all(emails.map(async (email) => [email, await getAmandaAssignedCourseIds('amanda-catherine', email)] as const)));
+    return <div className="ac-dashboard"><header className="ac-topbar"><div><small>AESTHETIKINE ACADEMY</small><h1>Courses and enrollments</h1><p>Verified course purchases and recorded learning progress.</p></div></header>
+      <section className="ac-card"><h2>{enrollments.length} course purchases</h2><p><Link href="/portal/amanda-catherine/learning">Manage lessons and materials →</Link></p><p><Link href="/portal/amanda-catherine/owner/clients">Open People →</Link></p></section>
+      <section className="ac-actions">{enrollments.map((payment) => {
+        const course = AMANDA_COURSES.find((item) => item.id === payment.courseId);
+        const activity = progress.find((item) => item.email === payment.email && item.courseId === payment.courseId);
+        return <article className="ac-card" key={payment.id}><h3>{course?.title || payment.courseId}</h3><p>{payment.email}</p><p>CAD ${payment.amountPaidCad.toFixed(2)} · {payment.paymentStatus}</p><p>Course access: {assignments.get(payment.email)?.includes(payment.courseId!) ? 'Assigned' : 'Needs fulfillment review'}</p><p>Transaction: {payment.stripeSessionId}</p><p>Person: {payment.personId || 'People connection requires verification'}</p><p>{activity ? `${activity.completedLessons.length}/${course?.lessons.length || 0} lessons complete` : 'Course not opened yet'}</p><p>{activity?.certificateIssuedAt ? 'Certificate available' : 'Certification pending'}</p></article>;
+      })}</section><OwnerAssessmentReview progress={progress} /><Link href="/portal/amanda-catherine/owner">← Return to Dashboard</Link></div>;
+  }
+  if (section === 'clients') {
+    const [payments, applications, progress] = await Promise.all([listAmandaPayments('amanda-catherine'), listPortalFormSubmissions('amanda-catherine', { kind: 'application' }), listAmandaCourseProgress('amanda-catherine')]);
+    return <div className="ac-dashboard"><header className="ac-topbar"><h1>People and relationships</h1></header><OwnerPeople payments={payments} applications={applications} progress={progress} /></div>;
+  }
+  if (section === 'insights') return <div className="ac-dashboard"><header className="ac-topbar"><h1>Business Insights</h1></header><AmandaOperationsPanel slug="amanda-catherine" /></div>;
   const queueSections = new Set(['advisory', 'speaking', 'lifeline']);
   const allApplications = queueSections.has(section) ? await listPortalFormSubmissions('amanda-catherine', { kind: 'application' }) : [];
   const submissions = allApplications.filter((submission) => {
@@ -79,6 +113,7 @@ export default async function Page({ params }: { params: Promise<{ section: stri
     return false;
   });
   const kitOrders = section === 'practitioner-kit' ? await listAmandaKitOrders() : [];
-  const connected = ConnectedSection({ section, submissions, kitOrders });
+  const communications = queueSections.has(section) ? await listAmandaApplicationCommunications() : [];
+  const connected = ConnectedSection({ section, submissions, kitOrders, communications });
   return <div className="ac-dashboard"><header className="ac-topbar"><div><small>AMANDA CATHERINE · PORTAL V2</small><h1>{item[0]}</h1><p>{item[2]}</p></div><div className="ac-status">V2 · Connected</div></header>{connected || <section className="ac-card"><span className="ac-eyebrow">{item[1]}</span><h3>Portal destination established.</h3><p>This destination mirrors the approved public-page offering. External source links that Amanda has not supplied remain intentionally unwired rather than guessed.</p><Link href="/portal/amanda-catherine/owner">← Return to Dashboard</Link></section>}{connected && <section className="ac-card"><Link href="/portal/amanda-catherine/owner">← Return to Dashboard</Link></section>}</div>;
 }

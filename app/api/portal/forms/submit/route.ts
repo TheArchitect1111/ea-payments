@@ -8,6 +8,8 @@ import { AMANDA_PORTAL_FORMS } from '@/lib/amanda-catherine/config';
 import { checkRateLimit } from '@/lib/ai/rate-limit';
 import { amandaApplicationRoute } from '@/lib/amanda-catherine/application-routing';
 import { publishPlatformActivityEvent } from '@/lib/activity-events-store';
+import { acknowledgeAmandaApplication } from '@/lib/amanda-catherine/application-communication';
+import { linkAmandaWorkflowPerson } from '@/lib/amanda-catherine/workflow-person';
 
 export const dynamic = 'force-dynamic';
 
@@ -70,7 +72,7 @@ export async function POST(req: NextRequest) {
   const slug = body.slug?.trim().toLowerCase();
   const kind = parseKind(body.kind);
   const name = body.name?.trim();
-  const email = body.email?.trim();
+  const email = slug === 'amanda-catherine' ? body.email?.trim().toLowerCase() : body.email?.trim();
 
   if (!slug || !kind || !name || !email) {
     return NextResponse.json(
@@ -106,6 +108,17 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  if (slug === 'amanda-catherine' && kind === 'application' && payload) {
+    try {
+      const personId = await linkAmandaWorkflowPerson({ email, name,
+        reference: `amanda-application:${payload.formId}:${email}`,
+        label: amandaApplicationRoute(payload.formId, payload.program).queueLabel });
+      if (personId) payload.personId = personId;
+    } catch {
+      return NextResponse.json({ error: 'Application identity storage is temporarily unavailable. Please try again.' }, { status: 503 });
+    }
+  }
+
   let submission;
   try {
     submission = await createPortalFormSubmission({
@@ -123,6 +136,12 @@ export async function POST(req: NextRequest) {
       { error: 'Application storage is temporarily unavailable. Please try again.' },
       { status: 503 },
     );
+  }
+
+  let acknowledgmentStatus: 'sent' | 'pending' | 'failed' | undefined;
+  if (slug === 'amanda-catherine' && kind === 'application') {
+    try { acknowledgmentStatus = (await acknowledgeAmandaApplication(submission)).status; }
+    catch { acknowledgmentStatus = 'failed'; }
   }
 
   const pulseEvent = {
@@ -152,7 +171,7 @@ export async function POST(req: NextRequest) {
 
   if (slug === 'amanda-catherine' && kind === 'application') {
     const destination = amandaApplicationRoute(payload?.formId, payload?.program);
-    await publishPlatformActivityEvent({ organizationId: 'amanda-catherine', module: 'applications', eventType: 'application_submitted', title: `Amanda application submitted · ${destination.queueLabel}`, summary: 'New application received', priority: 70, actionLabel: `Open ${destination.queueLabel} queue`, actionUrl: destination.queueHref, metadata: { submissionId: submission.id, formId: typeof payload?.formId === 'string' ? payload.formId : '', program: typeof payload?.program === 'string' ? payload.program : '', status: submission.status } });
+    await publishPlatformActivityEvent({ organizationId: 'amanda-catherine', module: 'applications', eventType: 'application_submitted', title: `Amanda application submitted · ${destination.queueLabel}`, summary: 'New application received', priority: 70, actionLabel: `Open ${destination.queueLabel} queue`, actionUrl: destination.queueHref, metadata: { submissionId: submission.id, formId: typeof payload?.formId === 'string' ? payload.formId : '', program: typeof payload?.program === 'string' ? payload.program : '', status: submission.status, acknowledgmentStatus: acknowledgmentStatus || 'pending' } });
   }
 
   const route = slug === 'amanda-catherine' && kind === 'application'
@@ -163,5 +182,6 @@ export async function POST(req: NextRequest) {
     submission,
     confirmation: route ? { title: route.confirmation, nextStep: route.reviewStep } : undefined,
     storage: route ? 'durable' : undefined,
+    acknowledgmentStatus,
   });
 }
