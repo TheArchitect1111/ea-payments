@@ -3,6 +3,6 @@
   "route_path": "/tarris/future",
   "min_visuals": 0,
   "release_profile": "tb3-approved-placeholders",
-  "requested_for": "Robert Brickey approved TB3 placeholder release certification and production promotion",
-  "requested_at": "2026-09-30T16:56:00Z"
+  "requested_for": "Fix TB3 root host routing before EA filesystem homepage; preserve approved portals and other hosts",
+  "requested_at": "2026-09-30T18:00:00Z"
 }

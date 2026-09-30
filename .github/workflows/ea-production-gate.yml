@@ -65,6 +65,9 @@ jobs:
       - name: Build gate
         run: npm run build
 
+      - name: TB3 host routing regression gate
+        run: node scripts/test-tb3-host-routing.mjs
+
       - name: Install Chromium for visual gates
         run: npx playwright install --with-deps chromium
 
