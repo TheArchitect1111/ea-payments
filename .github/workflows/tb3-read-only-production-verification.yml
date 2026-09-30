@@ -10,6 +10,19 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
+      - name: Inspect DNS and HTTPS routing read-only
+        shell: bash
+        run: |
+          python - <<'PY'
+          import socket
+          for host in ['tb3.online','www.tb3.online','efficiencyarchitects.online','ea-payments-kz7uohjup-the-architects-projects-cc813778.vercel.app']:
+              try: print(host,sorted(set(x[4][0] for x in socket.getaddrinfo(host,443))))
+              except Exception as e: print(host,str(e))
+          PY
+          for host in tb3.online www.tb3.online; do
+            curl -Iv --connect-timeout 10 --max-time 15 "https://$host/" || true
+          done
+          curl -fsS --connect-timeout 10 --max-time 15 https://efficiencyarchitects.online/tarris/future | python -c 'import sys; s=sys.stdin.read(); print("Canonical production HQ markers:", "TB3 HQ" in s, "YOUR_HQ_HEADER.jpg" in s, "href=\"/tarris/future/agreement\"" in s)'
       - name: Verify certified live TB3 routes without submitting signatures or payments
         shell: python
         run: |
