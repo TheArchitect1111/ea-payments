@@ -1,0 +1,43 @@
+name: TB3 Light Release Certification
+on:
+  pull_request:
+    branches: [master]
+    paths: ['.github/workflows/tb3-light-certification.yml']
+permissions:
+  contents: read
+jobs:
+  certify:
+    if: github.head_ref == 'qa/tb3-light-certification-20260930'
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.61.0-noble
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 15fbaeed7b77d38eaf0b4e60b908098f293b9394
+      - name: Verify exact release source
+        run: test "$(git rev-parse HEAD)" = "15fbaeed7b77d38eaf0b4e60b908098f293b9394"
+      - name: Install dependencies
+        run: npm ci
+      - name: Build approved release
+        run: npm run build
+      - name: Preserved content and host routing
+        run: |
+          node scripts/production-certification.js
+          node scripts/test-tb3-host-routing.mjs
+      - name: Desktop mobile and full agreement journey certification
+        env:
+          EA_SOURCE_COMMIT: 15fbaeed7b77d38eaf0b4e60b908098f293b9394
+          EA_PREVIEW_URL: http://127.0.0.1:3000
+          EA_GATE_PATH: /tarris/future
+          EA_RELEASE_PROFILE: tb3-approved-placeholders
+          EA_MIN_VISUALS: '0'
+          EA_GATE_OUTPUT: artifacts/tb3-light-certification
+        run: node scripts/ea-preview-gate.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: tb3-light-certification-15fbaeed
+          path: artifacts/tb3-light-certification
+          if-no-files-found: warn
