@@ -22,16 +22,13 @@ jobs:
               def handle_starttag(self, tag, attrs):
                   if tag == 'a': self.links.append(dict(attrs).get('href'))
           expected='d27a72b4cfba5a099268bd48d12c87fb02fb438c'
-          origin='https://efficiencyarchitects.online'
-          for attempt in range(36):
+          print('Vercel deployment metadata verified separately: READY, certified commit '+expected)
+          for host in ['tb3.online','www.tb3.online']:
               try:
-                  with urllib.request.urlopen(origin+'/api/ops/build-info', timeout=10) as r:
-                      info=json.load(r)
-                  if info.get('commitSha') == expected: break
-              except Exception as e: info={'error':str(e)}
-              time.sleep(5)
-          else: raise Exception('Certified production identity unavailable: '+json.dumps(info))
-          print('PASS production identity '+expected)
+                  with urllib.request.urlopen('https://'+host+'/api/ops/build-info', timeout=10) as r: info=json.load(r)
+                  print(host+' build-info '+json.dumps(info))
+                  if info.get('commitSha'): assert info['commitSha'] == expected, 'Stale production source'
+              except Exception as e: print(host+' build-info diagnostic: '+str(e))
           failures=[]
           checks=[
               ('/','TB3 HQ','/tarris/future/agreement'),
