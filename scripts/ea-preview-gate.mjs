@@ -76,7 +76,7 @@ if (!sourceIdentityPass) {
   process.exit(1);
 }
 
-async function inspectViewport(browser, name, viewport, isMobile = false) {
+async function inspectViewport(browser, name, viewport, isMobile = false, pageTarget = target) {
   const context = await browser.newContext({ viewport, isMobile, deviceScaleFactor: 1, extraHTTPHeaders: bypassHeaders });
   const page = await context.newPage();
   const consoleErrors = [];
@@ -92,7 +92,7 @@ async function inspectViewport(browser, name, viewport, isMobile = false) {
     if (type === 'image' && !res.ok()) badImageResponses.push(`${res.status()} ${res.url()}`);
   });
 
-  const response = await page.goto(target, { waitUntil: 'networkidle', timeout: 60000 });
+  const response = await page.goto(pageTarget, { waitUntil: 'networkidle', timeout: 60000 });
   await page.waitForTimeout(1800);
 
   const dom = await page.evaluate(async () => {
@@ -130,6 +130,8 @@ async function inspectViewport(browser, name, viewport, isMobile = false) {
     }
     const root = document.documentElement;
     return {
+      placeholderSlots: [...document.querySelectorAll('[aria-label^="SLOT_"]')].filter(visible).map(el => el.getAttribute('aria-label')),
+      publicBackground: document.querySelector('#home') ? getComputedStyle(document.querySelector('#home')).backgroundColor : null,
       title: document.title,
       bodyTextLength: document.body.innerText.trim().length,
       scrollWidth: root.scrollWidth,
@@ -154,11 +156,12 @@ async function inspectViewport(browser, name, viewport, isMobile = false) {
     name, httpStatus: status, screenshot, screenshotSha256: sha256(screenshot), consoleErrors,
     pageErrors, failedRequests, badImageResponses, brokenImgs, brokenBackgrounds, renderedVisuals,
     overflow, bodyTextLength: dom.bodyTextLength, scrollHeight: dom.scrollHeight, viewport,
+    placeholderSlots: dom.placeholderSlots, publicBackground: dom.publicBackground,
   };
 }
 
 const browser = await chromium.launch({ headless: true });
-let desktop, mobile;
+let desktop, mobile, publicDesktop, publicMobile;
 let tb3WiringPass = !tb3Placeholders;
 try {
   if (tb3Placeholders) {
@@ -176,7 +179,7 @@ try {
     }
     const publicLink = page;
     await publicLink.goto(new URL('/tarris', cleanPreview).toString());
-    await publicLink.getByRole('link', { name: /ENTER TB3 HQ/ }).click();
+    await publicLink.getByRole('link', { name: /ENTER TB3 HQ/ }).first().click();
     await publicLink.waitForURL('**/tarris/future');
     await publicLink.getByRole('link', { name: /LET.*GET TO WORK/ }).click();
     await publicLink.waitForURL('**/tarris/future/agreement');
@@ -188,17 +191,27 @@ try {
   }
   desktop = await inspectViewport(browser, 'desktop', { width: 1440, height: 1100 });
   mobile = await inspectViewport(browser, 'mobile', { width: 390, height: 844 }, true);
+  if (tb3Placeholders) {
+    const publicTarget = new URL('/tarris', cleanPreview).toString();
+    publicDesktop = await inspectViewport(browser, 'public-desktop', { width: 1440, height: 1100 }, false, publicTarget);
+    publicMobile = await inspectViewport(browser, 'public-mobile', { width: 390, height: 844 }, true, publicTarget);
+    for (const view of [publicDesktop, publicMobile]) {
+      if (view.placeholderSlots.length !== 19 || new Set(view.placeholderSlots).size !== 19 || view.publicBackground !== 'rgb(247, 245, 242)') throw new Error('Public light placeholder layout failed: ' + view.name);
+    }
+  }
 } finally {
   await browser.close();
 }
 results.details.desktop = desktop;
 results.details.mobile = mobile;
 
-const all = [desktop, mobile];
+results.details.publicDesktop = publicDesktop;
+results.details.publicMobile = publicMobile;
+const all = [desktop, mobile, publicDesktop, publicMobile].filter(Boolean);
 const functionalPass = tb3WiringPass && all.every((r) => r.httpStatus >= 200 && r.httpStatus < 400 && r.pageErrors.length === 0 && r.bodyTextLength > 40);
 const assetsPass = all.every((r) => r.brokenImgs.length === 0 && r.brokenBackgrounds.length === 0 && r.badImageResponses.length === 0 && r.renderedVisuals >= minVisuals);
-const desktopPass = desktop.overflow <= 2 && desktop.consoleErrors.length === 0 && desktop.failedRequests.length === 0 && desktop.scrollHeight >= desktop.viewport.height;
-const mobilePass = mobile.overflow <= 2 && mobile.consoleErrors.length === 0 && mobile.failedRequests.length === 0 && mobile.scrollHeight >= mobile.viewport.height;
+const desktopPass = [desktop, publicDesktop].filter(Boolean).every(v => v.overflow <= 2 && v.consoleErrors.length === 0 && v.failedRequests.length === 0 && v.scrollHeight >= v.viewport.height);
+const mobilePass = [mobile, publicMobile].filter(Boolean).every(v => v.overflow <= 2 && v.consoleErrors.length === 0 && v.failedRequests.length === 0 && v.scrollHeight >= v.viewport.height);
 
 const criticReasons = [];
 if (!assetsPass) criticReasons.push('visual assets failed');

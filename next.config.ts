@@ -74,7 +74,7 @@ const nextConfig: NextConfig = {
     // TB3 host rules must run before the existing EA homepage is served.
     return {
       beforeFiles: vercelJson.rewrites
-        .filter((rule) => rule.has?.some((condition) => condition.type === 'host'))
+        .filter((rule) => rule.source === '/hq/:path*' || rule.has?.some((condition) => condition.type === 'host'))
         .map((rule) => ({
           source: rule.source,
           destination: rule.source === '/' && rule.has?.some((condition) =>
