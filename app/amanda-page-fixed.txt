@@ -1,0 +1,22 @@
+// amanda-page-fixed.txt - Patch for public page
+// Apply to: app/amanda-catherine/page.tsx in ea-payments
+
+// 1. Add inside existing <style> tag:
+.book-feature {
+  display: flex;
+  gap: 24px;
+  padding: 32px;
+  background: #fdf8f3;
+  border-radius: 24px;
+  align-items: center;
+}
+
+// 2. Find Jane image component and replace with:
+<img 
+  src={janeImage || "/images/jane-fallback.jpg"} 
+  alt="Jane"
+  onError={(e)=>{ e.currentTarget.src="/images/jane-fallback.jpg" }}
+  className="rounded-full w-32 h-32 object-cover"
+/>
+
+// 3. Keep existing layout, just add these two safety nets.
