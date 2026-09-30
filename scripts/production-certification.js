@@ -20,7 +20,7 @@ function certifyTB3() {
   link(agreement, '/tarris/future/sign');
   link(sign, '/tarris/future/agreement');
   for (const marker of ['TB3 HQ', 'MORE THAN A GAME', 'PLAN. PREPARE. PERFORM. BUILD.', 'DISCIPLINE', 'DETERMINATION', 'DEVELOPMENT', 'DESTINY', 'ACADEMICS', 'TRAINING', 'NIL & BRAND', 'OPPORTUNITIES', 'MEDIA LIBRARY', 'COMMUNITY', 'FEATURED VIDEO', 'MY FOCUS', 'UPCOMING']) assert.ok(hq.includes(marker), `HQ missing ${marker}`);
-  const allowed = ['YOUR_HQ_HEADER.jpg', 'YOUR_BRAND_SMILE.jpg', 'YOUR_COMMUNITY.jpg', 'YOUR_ENTERPRISE_SUIT.jpg', 'YOUR_PUBLIC_HERO.jpg'];
+  const allowed = ['YOUR_HQ_HEADER.jpg', 'YOUR_BRAND_SMILE.jpg', 'YOUR_COMMUNITY.jpg', 'YOUR_ENTERPRISE_SUIT.jpg'];
   const placeholders = [];
   for (const [name, content] of [['public', publicPage], ['hq', hq]]) {
     assert.ok(content.includes('NO IMAGES BUNDLED') && content.includes('Replace:'), `${name}: placeholder approval markers missing`);
@@ -31,9 +31,17 @@ function certifyTB3() {
     }
   }
   for (const filename of allowed) assert.ok(placeholders.includes(filename), `Missing approved placeholder ${filename}`);
+  for (const marker of ['#F7F5F2', '#A51C30', 'SLOT_TB3_MASK', 'SLOT_HERO_HOODIE', 'TB3 STORE', 'MORE THAN A GAME']) {
+    assert.ok(publicPage.includes(marker), `Public page missing ${marker}`);
+  }
   const config = JSON.parse(read('vercel.json'));
   assert.ok(Array.isArray(config.crons) && config.crons.length > 0, 'Existing crons missing');
-  for (const host of ['tb3.online', 'www.tb3.online']) assert.ok(config.rewrites?.some(r => r.source === '/' && r.destination === '/tarris/future' && r.has?.some(h => h.type === 'host' && h.value === host)), `Missing ${host} rewrite`);
+  const built = JSON.parse(read('.next/routes-manifest.json'));
+  for (const host of ['tb3.online', 'www.tb3.online']) {
+    assert.ok(built.rewrites.beforeFiles.some(r => r.source === '/' && r.destination === '/tarris' && r.has?.some(h => h.type === 'host' && h.value === host)), `Missing effective light homepage rewrite for ${host}`);
+    assert.ok(!built.rewrites.beforeFiles.some(r => r.source === '/' && r.destination === '/tarris/future' && r.has?.some(h => h.type === 'host' && h.value === host)), `Conflicting effective HQ homepage rule for ${host}`);
+  }
+  assert.ok(built.rewrites.beforeFiles.some(r => r.source === '/hq/:path*' && r.destination === '/tarris/future/:path*'), 'Missing effective HQ rewrite');
   assert.ok(config.rewrites.some(r => r.source === '/hq/:path*' && r.destination === '/tarris/future/:path*'), 'Missing HQ rewrite');
   assert.ok(!fs.existsSync('app/tarris/future/page.js'), 'Duplicate portal page.js');
   return { status: 'PASS', profile: 'tb3-approved-placeholders', placeholders, signingPreserved: true, agreementPreserved: true };
