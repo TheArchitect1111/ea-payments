@@ -1,17 +1,17 @@
 {
-  "sourceCommit": "19bf80f1a43cf4ef066dbe473dc53d27b19cbe19",
+  "sourceCommit": "d687bd2a100d5bf70ca40114d6d548da7496667f",
   "previewUrl": "http://127.0.0.1:3000/",
   "target": "http://127.0.0.1:3000/tarris/future",
-  "completedAt": "2026-09-30T16:59:27.039Z",
+  "completedAt": "2026-09-30T18:03:06.928Z",
   "status": "PASS",
   "gates": {
     "sourceIdentity": {
       "status": "PASS",
-      "proof": "preview:19bf80f1a43cf4ef066dbe473dc53d27b19cbe19"
+      "proof": "preview:d687bd2a100d5bf70ca40114d6d548da7496667f"
     },
     "build": {
       "status": "PASS",
-      "proof": "source:19bf80f1a43cf4ef066dbe473dc53d27b19cbe19"
+      "proof": "source:d687bd2a100d5bf70ca40114d6d548da7496667f"
     },
     "assets": {
       "status": "PASS",
@@ -37,7 +37,7 @@
   "details": {
     "certificationTransport": "exact-built-checkout-local",
     "buildInfo": {
-      "commitSha": "19bf80f1a43cf4ef066dbe473dc53d27b19cbe19",
+      "commitSha": "d687bd2a100d5bf70ca40114d6d548da7496667f",
       "branch": "master",
       "environment": "preview"
     },
