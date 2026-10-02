@@ -21,6 +21,13 @@ assert.equal(params?.line_items?.[0].price_data?.currency,'cad');
 assert.equal(params?.line_items?.[0].price_data?.unit_amount,49900);
 assert.ok(params?.success_url?.startsWith(origin));
 assert.ok(params?.cancel_url?.includes('payment=cancelled'));
+
+const publicSiteOrigin='https://amandacatherine.ca';
+const proxiedResponse=await POST(new Request('https://ea-payments.vercel.app/api/public/amanda/practitioner-kit/checkout',{method:'POST',headers:{origin:publicSiteOrigin,'x-forwarded-for':'test-checkout-proxy','content-type':'application/json'},body:JSON.stringify({kitFulfillment:'pickup'})}));
+assert.equal(proxiedResponse.status,200,'canonical Amanda browser origin must pass the Vercel rewrite proxy');
+assert.equal((await proxiedResponse.json()).url,'https://checkout.stripe.com/c/pay/cs_test_unit');
+assert.ok(params?.success_url?.startsWith(publicSiteOrigin));
+assert.ok(params?.cancel_url?.startsWith(publicSiteOrigin));
 assert.equal(params?.allow_promotion_codes,undefined);
 assert.equal(params?.automatic_tax,undefined);
 assert.equal((await POST(new Request(`${origin}/api/public/amanda/practitioner-kit/checkout`,{method:'POST',headers:{origin:'https://attacker.example'}}))).status,403);
