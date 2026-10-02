@@ -1,4 +1,4 @@
-// Locked to specs/amanda-lms-locked-v2/SOURCE_OF_TRUTH_v2.0.md.
+// Locked to specs/amanda-lms-locked-v2/SOURCE_OF_TRUTH_v2.1_FINAL.md.
 export const AMANDA_SUPPORT_WORDING = 'Includes 90 days of clinical integration support and business mentorship.';
 export const AMANDA_READY_COURSE_IDS: readonly string[] = [
   'aesthetikine-reset-training', 'body-sculpt-practitioner-certification',

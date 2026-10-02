@@ -1,6 +1,9 @@
 import CertificationQueue from '../CertificationQueue';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
+import { getCourseMenuRoute } from '@/lib/amanda-catherine/menu-routing';
+import { getAmandaAssignedCourseIds } from '@/lib/amanda-catherine/client-access';
+import { requirePortalModule } from '@/lib/modules/portal-modules';
 import { ENTREPRENEURIAL_ARTIST_COURSE } from '@/lib/amanda-catherine/config';
 import { AMANDA_PRACTITIONER_KIT } from '@/lib/amanda-catherine/practitioner-kit-catalog';
 import { listAmandaKitOrders } from '@/lib/amanda-catherine/practitioner-kit-orders';
@@ -41,8 +44,9 @@ function Address({address}:{address?:{line1?:string|null;line2?:string|null;city
   return <p>{[address.line1,address.line2,address.city,address.state,address.postal_code,address.country].filter(Boolean).join(', ')}</p>;
 }
 
-function ConnectedSection({ section, submissions, kitOrders }: { section: string; submissions: PortalFormSubmission[]; kitOrders: Awaited<ReturnType<typeof listAmandaKitOrders>> }) {
-  if (section === 'academy' || section === 'documents') return <CertificationQueue />;
+function ConnectedSection({ section, submissions, kitOrders, bookCourseRoute }: { bookCourseRoute: string; section: string; submissions: PortalFormSubmission[]; kitOrders: Awaited<ReturnType<typeof listAmandaKitOrders>> }) {
+  if (section === 'academy') return <><section className="ac-card"><Link href="/portal/amanda-catherine/learning">Manage course content</Link></section><CertificationQueue /></>;
+  if (section === 'documents') return <><section className="ac-card"><Link href="/portal/amanda-catherine/documents">Open document hub</Link></section><CertificationQueue /></>;
   if (section === 'practitioner-kit') return <>
     <section className="ac-grid-two">
       <article className="ac-card"><span className="ac-eyebrow">PRODUCT</span><h3>{AMANDA_PRACTITIONER_KIT.name}</h3><p>{AMANDA_PRACTITIONER_KIT.description}</p><p><strong>${AMANDA_PRACTITIONER_KIT.priceCad} CAD</strong></p><Link href="/amanda-catherine/private/practitioner-kit">Open private checkout →</Link></article>
@@ -60,7 +64,7 @@ function ConnectedSection({ section, submissions, kitOrders }: { section: string
 
   if (section === 'book') return <section className="ac-grid-two">
     <article className="ac-card"><span className="ac-eyebrow">BOOK</span><h3>{ENTREPRENEURIAL_ARTIST_COURSE.title}</h3><p>Use the approved Canadian Amazon listing for purchase and customer support.</p><ExternalAction href={ENTREPRENEURIAL_ARTIST_COURSE.amazonBookUrl}>Open Amazon listing</ExternalAction></article>
-    <article className="ac-card"><span className="ac-eyebrow">SIX-WEEK PROGRAM</span><h3>{ENTREPRENEURIAL_ARTIST_COURSE.totalLessons} lessons</h3><p>One lesson releases each Monday at 9:00 AM Eastern through the approved companion playlist.</p><p><ExternalAction href={ENTREPRENEURIAL_ARTIST_COURSE.playlistUrl}>Open program playlist</ExternalAction></p><Link href="/portal/amanda-catherine/learning">Open student learning area →</Link></article>
+    <article className="ac-card"><span className="ac-eyebrow">SIX-WEEK PROGRAM</span><h3>{ENTREPRENEURIAL_ARTIST_COURSE.totalLessons} lessons</h3><p>One lesson releases each Monday at 9:00 AM Eastern through the approved companion playlist.</p><p><ExternalAction href={ENTREPRENEURIAL_ARTIST_COURSE.playlistUrl}>Open program playlist</ExternalAction></p><Link href={bookCourseRoute}>Open student learning area →</Link></article>
   </section>;
 
   if (section === 'advisory' || section === 'speaking' || section === 'lifeline') return <OwnerApplicationQueue submissions={submissions} />;
@@ -91,7 +95,10 @@ export default async function Page({ params }: { params: Promise<{ section: stri
     return false;
   });
   const kitOrders = section === 'practitioner-kit' ? await listAmandaKitOrders() : [];
-  const connected = ConnectedSection({ section, submissions, kitOrders });
+  const bookSession = section === 'book' ? (await requirePortalModule('amanda-catherine', 'dashboard')).session : null;
+  const purchasedCourseIds = bookSession?.email ? await getAmandaAssignedCourseIds('amanda-catherine', bookSession.email) : [];
+  const bookCourseRoute = getCourseMenuRoute({ id: 'entrepreneurial-artist' }, { purchasedCourseIds });
+  const connected = ConnectedSection({ section, submissions, kitOrders, bookCourseRoute });
   if (!connected) notFound();
   return <div className="ac-dashboard"><header className="ac-topbar"><div><small>AMANDA CATHERINE · PORTAL V2</small><h1>{item[0]}</h1><p>{item[2]}</p></div><div className="ac-status">V2 · Connected</div></header>{connected}{connected && <section className="ac-card"><Link href="/portal/amanda-catherine/owner">← Return to Dashboard</Link></section>}</div>;
 }

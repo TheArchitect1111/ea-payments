@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { safePortalReturnPath } from '../lib/auth/portal-return-path';
+import { amandaMemberResources } from '../lib/amanda-catherine/member-resources';
 import { getCourseMenuRoute } from '../lib/amanda-catherine/menu-routing';
 import assert from 'node:assert/strict';
 import { AMANDA_COURSES } from '../lib/amanda-catherine/config';
@@ -36,3 +37,28 @@ for (const path of ['app/portal/login/page.tsx', 'app/api/portal/login/route.ts'
   assert.ok(readFileSync(path, 'utf8').includes('safePortalReturnPath'), `${path} must use the tested return policy`);
 }
 console.log('Owner placeholder removal and login policy integration checks passed.');
+
+// A stale purchase must never bypass a course that is no longer READY.
+const readyId = 'body-sculpt-practitioner-certification';
+assert.equal(getCourseMenuRoute({ id: readyId, status: 'WAITLIST' }, { purchasedCourseIds: [readyId] }), `/courses/${readyId}#waitlist`);
+assert.equal(getCourseMenuRoute({ id: 'unknown', status: 'READY' }, { purchasedCourseIds: ['unknown'] }), '/courses/unknown#waitlist');
+assert.equal(getCourseMenuRoute({ id: readyId, slug: 'approved-sales-slug', status: 'READY' }, { purchasedCourseIds: [] }), '/courses/approved-sales-slug');
+const memberMenu = readFileSync('app/portal/[slug]/member/AmandaMemberHome.tsx', 'utf8');
+assert.ok(memberMenu.includes('getCourseMenuRoute(course, { purchasedCourseIds })'));
+assert.ok(!memberMenu.includes("match?.[1] || 'member'"));
+assert.ok(memberMenu.includes('aria-disabled="true"'));
+assert.ok(memberMenu.includes("'courses-and-certifications'"));
+assert.ok(memberMenu.includes("'courses-progress-and-certifications'"));
+console.log('Non-READY stale purchase and explicit menu fallback regression checks passed.');
+
+
+assert.deepEqual(amandaMemberResources([]), []);
+assert.deepEqual(amandaMemberResources(['entrepreneurial-artist', 'unknown']), []);
+const protectedResources = amandaMemberResources(['body-sculpt-practitioner-certification']);
+assert.ok(protectedResources.length > 0);
+assert.ok(protectedResources.every(resource => resource.courseId === 'body-sculpt-practitioner-certification'));
+assert.deepEqual(amandaMemberResources(['body-sculpt-practitioner-certification', 'body-sculpt-practitioner-certification']), protectedResources);
+assert.ok(memberMenu.includes("'member-profile': 'profile'"));
+assert.ok(memberMenu.includes("'member-resources': 'resources'"));
+assert.ok(memberMenu.includes("'/amanda-catherine/private/practitioner-kit'"));
+console.log('Existing member profile/kit links and purchased READY resource selection tests passed.');

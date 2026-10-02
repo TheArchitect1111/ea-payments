@@ -1,87 +1,54 @@
-# Amanda LMS Locked v2.0 — menu-aware review
+# Amanda LMS locked v2.1 — review change summary
 
-Branch: fix/amanda-lms-locked-v2-20261002. Base implementation commit: 3ad51f0. Review only; no merge or production deployment.
+Same branch: `fix/amanda-lms-locked-v2-20261002`. Starting local commit `7a8bb50`. Remote starting review commit `257ca74d4241a04527d23624113616f227fdfcc9` has the exact tree of local `a2eeb9a`; the authorized review push includes the preceding local menu repair and this v2.1 update. Git chooses actual commit hashes; `7a8bb51` cannot be assigned as a requested identifier.
 
-Overall acceptance: NOT PASS. Scheduling URL and approved shipping prices absent. Authenticated browser tests and all owner function/role checks remain unverified. Repository-wide type checking and tenant-safety gate are blocked. Local HTTP login check did not complete because of local dev-server conflict; no redirect success claimed.
+Status: **IMPLEMENTED PARTIAL REPAIR / OVERALL HOLD**. Three of the 17 formerly unavailable labels now have existing real functions behind them. Fourteen remain absent; no unrelated destinations, fake data or broadened permissions are substituted. No master edits, merge or production promotion.
 
-Passed: runtime purchase/readiness matrix for every configured course; support-date boundaries; existing checkout configuration tests; safe return-path policy and integration checks; owner placeholder source removal; whitespace checks. Targeted lint: zero errors, two existing image warnings. No errors reported in changed application files by type checking.
-
-Owner routing uses existing functions. Clients -> intake review, Founder Clarity -> advisory queue, Settings -> existing preferences page, Eva -> website update assistant. These are not newly implemented CRM, scheduling, full settings or general assistant products. Scope-specific behavior must be confirmed before menu certification.
-
-Shipping recommendation: approved flat CAD rates per destination, supplied by Amanda. No amount selected. Free pickup remains $0. Shipping code expects AMANDA_KIT_SHIPPING_RATE_IDS_JSON. Scheduling expects AMANDA_MENTORSHIP_BOOKING_URL.
-
-## Menu-aware changes, file by file
+## v2.1 changes, file by file
 
 | File | Change |
 |---|---|
-| `app/amanda-catherine/page.tsx` | Course sales links use /courses/{id}; non-READY links use #waitlist. |
-| `lib/amanda-catherine/menu-routing.ts` | Single getCourseMenuRoute policy: READY + assigned purchase -> dedicated learning; READY without purchase -> sales; all non-READY -> waitlist. |
-| `app/courses/[courseSlug]/page.tsx` | Public per-course page. READY courses show existing checkout including kit choices; non-READY show only waitlist. |
-| `app/portal/amanda-catherine/learning/page.tsx` | Learner listing uses course readiness and durable assignments; administrator authoring retained. |
-| `app/portal/amanda-catherine/learning/[courseId]/page.tsx` | Server rechecks course assignment and readiness; redirects unauthorized course requests to sales/waitlist; renders only purchased course. |
-| `app/portal/[slug]/member/AmandaMemberHome.tsx` | Removes audience-based learner Courses/Progress/Certification links; adds purchase/readiness-aware course links. Training calendar points to calendar. |
-| `app/portal/amanda-catherine/owner/[section]/page.tsx` | Replaces placeholder destinations with existing guarded routes or approved external links; removes placeholder rendering. Founder Clarity shares existing advisory queue. |
-| `app/portal/amanda-catherine/owner/page.tsx` | View Orders -> kit orders; Send Message -> messaging; accurate Review Client Intake and Review Certifications labels. |
-| `app/portal/components/AmandaSiteUpdateHub.tsx` | Adds actual #eva target for existing website update assistant. |
-| `app/components/amanda/AmandaSupport.tsx` | Uses approved HTTPS booking URL when provided; button says Schedule Mentorship Call; exact support sentence and training-date countdown retained. |
-| `app/portal/amanda-catherine/support/page.tsx` | Reads AMANDA_MENTORSHIP_BOOKING_URL; no guessed default scheduling URL. |
-| `lib/auth/portal-return-path.ts` | Shared same-origin return-path sanitizer; rejects external, protocol-relative, backslash and control-character destinations. |
-| `app/portal/login/page.tsx` | Uses tested return-path policy. |
-| `app/api/portal/login/route.ts` | Sanitizes original next destination before password or 2FA handoff. |
-| `app/api/auth/verify-2fa/route.ts` | Applies return policy after portal 2FA verification. |
-| `scripts/test-amanda-lms-locked-v2.ts` | Tests all purchase/readiness states, support dates, login return policy and integration, and owner placeholder removal. |
-| `tests/smoke/amanda-menu-return.spec.ts` | Adds logged-out return-URL and approved purchased-learner login smoke tests. Not executed: browser runtime/account unavailable. |
+| `specs/amanda-lms-locked-v2/SOURCE_OF_TRUTH_v2.1_FINAL.md` | Verbatim extraction of the supplied final PDF; current authority supersedes prior shipping/scheduling values. |
+| `lib/amanda-catherine/kit-fulfillment.ts` | Removes paid-rate configuration/lookup/charge code. Both modes return zero shipping, shipment retains required normalized address. Includes the requested future-paid-shipping TODO. |
+| `lib/amanda-catherine/practitioner-kit-orders.ts` | Updates actual paid-order validation to accept only $0 shipping for both modes, retain shipment address checks and Stripe-total/tenant/payment checks. Preview validation test passes; production persistence unverified. |
+| `app/components/amanda/KitFulfillmentFields.tsx` | Ship to me - FREE; both options clearly show $0 CAD; address fields retained. |
+| `app/amanda-catherine/private/practitioner-kit/page.tsx` | Removes paid-shipping copy; retains standalone kit price and all approved assets. |
+| `lib/amanda-catherine/support-config.ts` | Reuses approved existing Jane destination and existing Gmail identity. Validates Jane HTTPS override, rejects credentials/lookalike/general URLs and falls back to existing approved Jane URL. |
+| `app/portal/amanda-catherine/support/page.tsx` | Uses Jane provider configuration and Gmail address for each assigned course or no-assignment support panel. Example URL and guessed scheduling behavior removed. |
+| `app/components/amanda/AmandaSupport.tsx` | Gmail-address email action and real Jane booking link; pending-example notice removed; exact support text, unique accessible IDs and training-date countdown retained. |
+| `app/portal/[slug]/member/AmandaMemberHome.tsx` | Member Profile -> real session-profile page; Member Resources and Protocols/Templates -> protected course-resource view; Product Ordering -> existing kit checkout. Other absent workflows remain visible/unavailable. |
+| `app/portal/amanda-catherine/profile/page.tsx` | Read-only member account view using existing exact-tenant module guard and session identity; missing email redirects to login preserving return URL. |
+| `lib/amanda-catherine/member-resources.ts` | Selects existing resource catalog only for deduplicated purchased READY course IDs. |
+| `app/portal/amanda-catherine/resources/page.tsx` | Displays selected protected resource links and existing private-delivery action, using signed-in email and durable assignments. Existing download API independently rechecks access. No clinical data or grants invented. |
+| `lib/amanda-catherine/lms-policy.ts` | Updates authority reference to v2.1; readiness and support clock behavior unchanged. |
+| `scripts/test-amanda-kit-shipping.ts` | Tests both $0 modes, retained addresses, missing/invalid address rejection, and stale or invalid paid config never charging shipment. No Stripe network calls. Also exercises the real order recorder in preview mode for standalone and tuition-included kits; unpaid, wrong total, other-tenant, nonzero shipping and missing-address fixtures reject. |
+| `scripts/test-amanda-support-render.tsx` | Tests actual support rendering, Jane host/override validation, Gmail-address email label, exact wording and training-date end date. |
+| `scripts/test-amanda-lms-locked-v2.ts` | Adds protected resource selection tests and profile/resource/kit menu integration checks; previous policy/login boundary tests retained. |
+| `specs/amanda-lms-locked-v2/spec.md` | Establishes v2.1 authority and free-shipping/provider acceptance; old temporary inputs explicitly superseded. |
+| `specs/amanda-lms-locked-v2/plan.md` | Updates shipping architecture and current verification blockers. |
+| `specs/amanda-lms-locked-v2/tasks.md` | Records approved inputs, supported function repairs, remaining missing implementations and review-only push authorization. |
+| `specs/amanda-lms-locked-v2/menu-wiring-audit.md` | Current complete label/function inventory, evidence and all remaining HOLD/UNVERIFIED rows. |
+| `specs/amanda-lms-locked-v2/diff-summary.md` | This current review evidence. |
 
-## Original locked v2 implementation inventory
+## Preceding local repair included in review push
 
-# Amanda LMS Locked v2.0 review
+Local `7a8bb50` supplies purchase/readiness-aware per-course groups for learner/staff/admin menus, explicit non-course mappings, removal of misleading generic member-dashboard fallbacks, existing authoring/document links beside certification review, book action readiness routing, unique support IDs and regression tests. Its temporary paid rates/example schedule have been removed by v2.1. Owner scope limitations remain unchanged and recorded in the audit.
 
-Status: implementation on review branch; not merged or deployed.
+## Observed verification
 
-Checks: locked policy runtime tests and existing checkout tests passed; lint zero errors (four warnings); diff whitespace check passed. Repository-wide type checking and tenant-safety gate remain blocked. Approved shipping rates are required in AMANDA_KIT_SHIPPING_RATE_IDS_JSON. No rates were invented. Browser/payment end-to-end and production verification remain pending.
+- PASS: `node --import tsx scripts/test-amanda-lms-locked-v2.ts`.
+- PASS: `node --import tsx scripts/test-amanda-kit-shipping.ts`.
+- PASS: `TSX_TSCONFIG_PATH=scripts/amanda-lms-test.tsconfig.json node --import tsx scripts/test-amanda-support-render.tsx`.
+- PASS: `npm run test:amanda-checkout`.
+- PASS: targeted `npm run lint -- [changed files]`, 0 errors and 1 existing image warning.
+- PASS: `git diff --check`.
+- PASS: new profile logged-out local HTTP 307 preserves `/portal/amanda-catherine/profile?view=account` in login `next`. This does not prove authenticated login or data rendering.
+- BLOCKED: repository-wide lint exits 2 for missing `react-hooks` plugin configuration.
+- FAIL: repository-wide type check exits 2 with 342 diagnostics; no diagnostics in changed files in inspected output.
+- FAIL: tenant-safety assertion at line 86, unchanged shared production entitlement function. Shared tenant code and test were not altered to manufacture a pass.
 
-| File | Change |
-|---|---|
-| `app/amanda-catherine/page.tsx` | Routing, learning, navigation or wording aligned with locked policy. |
-| `app/amanda-catherine/private/practitioner-kit/KitCheckout.tsx` | READY checkout guard and/or pickup versus configured shipping selection and fulfillment. |
-| `app/amanda-catherine/private/practitioner-kit/page.tsx` | READY checkout guard and/or pickup versus configured shipping selection and fulfillment. |
-| `app/api/portal/amanda/certificate/route.ts` | Evidence review, explicit administrator approval, and training-date support records. |
-| `app/api/portal/amanda/checkout/route.ts` | READY checkout guard and/or pickup versus configured shipping selection and fulfillment. |
-| `app/api/portal/amanda/progress/route.ts` | Evidence review, explicit administrator approval, and training-date support records. |
-| `app/api/portal/amanda/resources/[resourceId]/route.ts` | Routing, learning, navigation or wording aligned with locked policy. |
-| `app/api/public/amanda/enrollment/checkout/route.ts` | READY checkout guard and/or pickup versus configured shipping selection and fulfillment. |
-| `app/api/public/amanda/practitioner-kit/checkout/route.ts` | READY checkout guard and/or pickup versus configured shipping selection and fulfillment. |
-| `app/portal/[slug]/billing/AmandaPayments.tsx` | READY checkout guard and/or pickup versus configured shipping selection and fulfillment. |
-| `app/portal/[slug]/learning/AmandaLearningCenter.tsx` | Routing, learning, navigation or wording aligned with locked policy. |
-| `app/portal/[slug]/member/AmandaMemberHome.tsx` | Routing, learning, navigation or wording aligned with locked policy. |
-| `app/portal/amanda-catherine/enroll/AmandaEnrollmentForm.tsx` | READY checkout guard and/or pickup versus configured shipping selection and fulfillment. |
-| `app/portal/amanda-catherine/enroll/page.tsx` | Routing, learning, navigation or wording aligned with locked policy. |
-| `app/portal/amanda-catherine/owner/[section]/page.tsx` | Routing, learning, navigation or wording aligned with locked policy. |
-| `app/portal/amanda-catherine/page.tsx` | Routing, learning, navigation or wording aligned with locked policy. |
-| `lib/amanda-catherine/client-access.ts` | Assignment-based access and READY-only purchase fulfillment. |
-| `lib/amanda-catherine/config.ts` | Official names, separate certifications and compliant copy. |
-| `lib/amanda-catherine/course-content.ts` | Routing, learning, navigation or wording aligned with locked policy. |
-| `lib/amanda-catherine/payment-fulfillment.ts` | Assignment-based access and READY-only purchase fulfillment. |
-| `lib/amanda-catherine/practitioner-kit-orders.ts` | READY checkout guard and/or pickup versus configured shipping selection and fulfillment. |
-| `lib/amanda-catherine/progress-store.ts` | Evidence review, explicit administrator approval, and training-date support records. |
-| `lib/amanda-catherine/site-content.ts` | Official names, separate certifications and compliant copy. |
-| `middleware.ts` | Routing, learning, navigation or wording aligned with locked policy. |
-| `app/api/portal/amanda/certifications/route.ts` | Evidence review, explicit administrator approval, and training-date support records. |
-| `app/api/public/amanda/waitlist/route.ts` | Waitlist-only path without checkout or access provisioning. |
-| `app/components/amanda/AmandaSupport.tsx` | Routing, learning, navigation or wording aligned with locked policy. |
-| `app/components/amanda/CertificationEvidence.tsx` | Routing, learning, navigation or wording aligned with locked policy. |
-| `app/components/amanda/KitFulfillmentFields.tsx` | READY checkout guard and/or pickup versus configured shipping selection and fulfillment. |
-| `app/portal/amanda-catherine/owner/CertificationQueue.tsx` | Routing, learning, navigation or wording aligned with locked policy. |
-| `app/portal/amanda-catherine/support/page.tsx` | Exact support wording, READY policy and class-date support window. |
-| `app/portal/amanda-catherine/waitlist/WaitlistForm.tsx` | Waitlist-only path without checkout or access provisioning. |
-| `app/portal/amanda-catherine/waitlist/page.tsx` | Waitlist-only path without checkout or access provisioning. |
-| `lib/amanda-catherine/admin-access.ts` | Assignment-based access and READY-only purchase fulfillment. |
-| `lib/amanda-catherine/course-access.ts` | Assignment-based access and READY-only purchase fulfillment. |
-| `lib/amanda-catherine/kit-fulfillment.ts` | READY checkout guard and/or pickup versus configured shipping selection and fulfillment. |
-| `lib/amanda-catherine/lms-policy.ts` | Exact support wording, READY policy and class-date support window. |
-| `scripts/test-amanda-lms-locked-v2.ts` | Readiness, assignment access and support-date boundary tests. |
-| `specs/amanda-lms-locked-v2/DO_NOT_DO_LIST.md` | Locked source, constraints and review plan. |
-| `specs/amanda-lms-locked-v2/SOURCE_OF_TRUTH_v2.0.md` | Locked source, constraints and review plan. |
-| `specs/amanda-lms-locked-v2/plan.md` | Locked source, constraints and review plan. |
-| `specs/amanda-lms-locked-v2/spec.md` | Locked source, constraints and review plan. |
-| `specs/amanda-lms-locked-v2/tasks.md` | Locked source, constraints and review plan. |
+## Required next work
+
+Fourteen menu workflows remain missing; their exact labels and repository evidence are in the audit. Gmail-address email wiring does not certify a Gmail mailbox OAuth integration, which is absent from this repository. Approved QA access is still required for authenticated learner/admin, course download/unlock, payment/fulfillment, waitlist persistence, scheduled support, certification, mobile and complete menu tests.
+
+Overall audit remains HOLD until required functions and access rules are observed. Robert authorized pushing this branch for review only; no merge or production promotion.

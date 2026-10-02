@@ -27,8 +27,8 @@ export async function recordAmandaKitOrder(session: Stripe.Checkout.Session, inc
   const shippingCents = Number(meta.kitShippingCents);
   if ((!includedCourseId && !isAmandaKitSession(session)) || session.payment_status !== 'paid' || session.currency !== 'cad') return {ok:false,error:'A paid Practitioner Kit order could not be verified.'};
   if (choice !== 'pickup' && choice !== 'ship') return {ok:false,error:'Practitioner kit fulfillment selection is missing.'};
-  if (!Number.isSafeInteger(shippingCents) || shippingCents < 0 || (choice === 'pickup' && shippingCents !== 0) || (choice === 'ship' && shippingCents <= 0)) return {ok:false,error:'Practitioner kit shipping charge is invalid.'};
-  if ((session.shipping_cost?.amount_total || 0) !== shippingCents) return {ok:false,error:'The paid shipping charge does not match the fulfillment selection.'};
+  if (!Number.isSafeInteger(shippingCents) || shippingCents !== 0) return {ok:false,error:'Practitioner kit shipping charge is invalid.'};
+  if ((session.shipping_cost?.amount_total || 0) !== shippingCents) return {ok:false,error:'The shipping charge does not match the free fulfillment selection.'};
   let shippingAddress: Stripe.Address | null = null;
   try { shippingAddress = choice === 'ship' ? JSON.parse(meta.kitShippingAddress || '') : null; } catch { return {ok:false,error:'Shipping address is missing.'}; }
   if (choice === 'ship' && (!shippingAddress?.line1 || !shippingAddress.city || !shippingAddress.state || !shippingAddress.postal_code || !shippingAddress.country)) return {ok:false,error:'A complete shipping address is required.'};
