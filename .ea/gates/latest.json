@@ -1,17 +1,17 @@
 {
-  "sourceCommit": "59fea88f4e3e8746494e61768276e318788e789b",
-  "previewUrl": "https://ea-payments-53lgqy0th-the-architects-projects-cc813778.vercel.app/",
-  "target": "https://ea-payments-53lgqy0th-the-architects-projects-cc813778.vercel.app/amanda-catherine",
-  "completedAt": "2026-10-02T20:15:13.558Z",
+  "sourceCommit": "6ba09289a164971cf879f4ee46f3daa5b31c109c",
+  "previewUrl": "https://ea-payments-gdoqub7wx-the-architects-projects-cc813778.vercel.app/",
+  "target": "https://ea-payments-gdoqub7wx-the-architects-projects-cc813778.vercel.app/amanda-catherine",
+  "completedAt": "2026-10-02T20:28:45.085Z",
   "status": "PASS",
   "gates": {
     "sourceIdentity": {
       "status": "PASS",
-      "proof": "preview:59fea88f4e3e8746494e61768276e318788e789b"
+      "proof": "preview:6ba09289a164971cf879f4ee46f3daa5b31c109c"
     },
     "build": {
       "status": "PASS",
-      "proof": "source:59fea88f4e3e8746494e61768276e318788e789b"
+      "proof": "source:6ba09289a164971cf879f4ee46f3daa5b31c109c"
     },
     "assets": {
       "status": "PASS",
@@ -37,7 +37,7 @@
   "details": {
     "certificationTransport": "exact-built-checkout-local",
     "buildInfo": {
-      "commitSha": "59fea88f4e3e8746494e61768276e318788e789b",
+      "commitSha": "6ba09289a164971cf879f4ee46f3daa5b31c109c",
       "branch": "master",
       "environment": "preview"
     },
