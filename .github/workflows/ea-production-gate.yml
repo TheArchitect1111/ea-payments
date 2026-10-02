@@ -2,10 +2,6 @@ name: EA Production Gate
 
 on:
   workflow_dispatch:
-  push:
-    branches: [master]
-    paths:
-      - '.ea/dispatch/production-gate.json'
     inputs:
       preview_url:
         description: Exact Vercel preview URL for the current master SHA
@@ -14,13 +10,17 @@ on:
       route_path:
         description: Route to visually and functionally verify
         required: true
-        default: /amplifi
+        default: /amanda-catherine
         type: string
       min_visuals:
         description: Minimum number of visible image/background assets required
         required: true
         default: '2'
         type: string
+  push:
+    branches: [master]
+    paths:
+      - '.ea/dispatch/production-gate.json'
 
 permissions:
   contents: write
