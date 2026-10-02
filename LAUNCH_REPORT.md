@@ -8,6 +8,7 @@
 
 - Amanda launch work is merged to `master`. The final application fix is `6aa44354f6903bfda37496d1f75189ed0da6e17c`; production gate metadata is `2032ff1fd071cdcdc669eb80e8c586f69824cdb2`.
 - PRs #483–#489 delivered the launch repairs. Key fixes corrected the manually triggered gate inputs, production image loading/viewport checks, the practitioner kit test contract, and the health check’s canonical owner route and response body.
+- PR #490 merged this report, removed a stale TODO from Amanda’s approved free-shipping source of truth, and labeled the earlier review-only audit as historical.
 - Production deployment `dpl_Giv5Bdx8oKuXb7jFZhMHuiMLSyTS` is Vercel `READY`, targets `production`, and is aliased to `efficiencyarchitects.online`.
 - Gate run #15, for exact source commit `6aa44354f6903bfda37496d1f75189ed0da6e17c`, passed source identity, build, assets, desktop/mobile visuals, functional checks, and visual critic. Desktop and mobile had 11 loaded visuals, no broken images, failed requests, console/page errors, or overflow.
 - Production checks observed during the promotion: Amanda login health returned HTTP 200 with all checks true; final acceptance returned HTTP 200 with `tripleChecked: true`; public menu and both primary product images returned HTTP 200. I also opened the production host and confirmed the published menu, courses, kit, pricing, and Jane booking handoff are rendered there.
