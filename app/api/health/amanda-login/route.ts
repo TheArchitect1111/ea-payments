@@ -27,7 +27,7 @@ async function authenticatedResponse(origin: string, path: string, token: string
 function isExpectedOwnerRedirect(location: string | null, origin: string) {
   if (!location) return false;
   try {
-    return new URL(location, origin).pathname === AMANDA_OWNER_PATH;
+    return new URL(location, origin).pathname === `/portal/${AMANDA_PORTAL_SLUG}/owner`;
   } catch {
     return false;
   }
@@ -145,8 +145,8 @@ export async function GET(req: NextRequest) {
       checks.ownerV2ApplicationQueues = queueResponses.every((response) => response.status === 200)
         && queueBodies.every((body) => body.includes('APPLICATION QUEUE'));
 
-      if (ownerResponse.status === 200) {
-        const body = await ownerResponse.text();
+      if (ownerV2Response.status === 200) {
+        const body = await ownerV2Response.text();
         checks.premiumOwnerDashboard = hasAmandaPremiumOwnerDashboard(body);
       }
 
