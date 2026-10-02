@@ -1,17 +1,17 @@
 {
-  "sourceCommit": "6aa44354f6903bfda37496d1f75189ed0da6e17c",
+  "sourceCommit": "e65d1b66f452d25e758e196e4e7de44a96e77918",
   "previewUrl": "https://ea-payments-7enia5cz7-the-architects-projects-cc813778.vercel.app/",
   "target": "https://ea-payments-7enia5cz7-the-architects-projects-cc813778.vercel.app/amanda-catherine",
-  "completedAt": "2026-10-02T20:37:57.324Z",
+  "completedAt": "2026-10-02T23:08:30.813Z",
   "status": "PASS",
   "gates": {
     "sourceIdentity": {
       "status": "PASS",
-      "proof": "preview:6aa44354f6903bfda37496d1f75189ed0da6e17c"
+      "proof": "preview:e65d1b66f452d25e758e196e4e7de44a96e77918"
     },
     "build": {
       "status": "PASS",
-      "proof": "source:6aa44354f6903bfda37496d1f75189ed0da6e17c"
+      "proof": "source:e65d1b66f452d25e758e196e4e7de44a96e77918"
     },
     "assets": {
       "status": "PASS",
@@ -37,7 +37,7 @@
   "details": {
     "certificationTransport": "exact-built-checkout-local",
     "buildInfo": {
-      "commitSha": "6aa44354f6903bfda37496d1f75189ed0da6e17c",
+      "commitSha": "e65d1b66f452d25e758e196e4e7de44a96e77918",
       "branch": "master",
       "environment": "preview"
     },
