@@ -7,8 +7,10 @@ import { AMANDA_PRACTITIONER_KIT } from '@/lib/amanda-catherine/practitioner-kit
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
-  const origin = new URL(request.url).origin;
-  if (request.headers.get('origin') !== origin) return NextResponse.json({error:'Please open checkout from the private purchase page.'},{status:403});
+  const requestOrigin = new URL(request.url).origin;
+  const browserOrigin = request.headers.get('origin');
+  const origin = browserOrigin === requestOrigin || browserOrigin === 'https://amandacatherine.ca' ? browserOrigin : null;
+  if (!origin) return NextResponse.json({error:'Please open checkout from the private purchase page.'},{status:403});
   const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
   if (!checkRateLimit(`amanda-kit-checkout:${ip}`,6,60_000).ok) return NextResponse.json({error:'Please wait one minute before trying again.'},{status:429});
   if (!process.env.STRIPE_SECRET_KEY) return NextResponse.json({error:'Secure checkout is temporarily unavailable. Please try again later.'},{status:503});
