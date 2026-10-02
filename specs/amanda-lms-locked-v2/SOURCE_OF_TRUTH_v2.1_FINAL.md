@@ -25,8 +25,7 @@ leave free for now"
         If Ship selected: still capture shipping address for fulfillment, but amount =
    $0
       DO NOT implement paid shipping rates until Amanda approves otherwise
-      Flag in code: // TODO: Enable paid shipping when Amanda approves rates -
-   currently FREE per 20261002
+      Approved contract: keep pickup and ship-to-me free; capture the ship-to address and do not calculate or charge paid rates without new approval from Amanda.
 
 
 3. SUPPORT / MENTORSHIP - 3e + AMANDA
