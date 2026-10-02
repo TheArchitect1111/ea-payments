@@ -1,15 +1,17 @@
-# Amanda LMS locked v2.1 — review change summary
+# Amanda LMS locked v2.1 — historical review change summary (pre-promotion)
+
+This snapshot records review-time status and verification. It is superseded by the production deployment and current verification in [`LAUNCH_REPORT.md`](../../LAUNCH_REPORT.md).
 
 Same branch: `fix/amanda-lms-locked-v2-20261002`. Starting local commit `7a8bb50`. Remote starting review commit `257ca74d4241a04527d23624113616f227fdfcc9` has the exact tree of local `a2eeb9a`; the authorized review push includes the preceding local menu repair and this v2.1 update. Git chooses actual commit hashes; `7a8bb51` cannot be assigned as a requested identifier.
 
-Status: **IMPLEMENTED PARTIAL REPAIR / OVERALL HOLD**. Three of the 17 formerly unavailable labels now have existing real functions behind them. Fourteen remain absent; no unrelated destinations, fake data or broadened permissions are substituted. No master edits, merge or production promotion.
+Historical review status: **IMPLEMENTED PARTIAL REPAIR / OVERALL HOLD**. Three of the 17 formerly unavailable labels now have existing real functions behind them. Fourteen remain absent; no unrelated destinations, fake data or broadened permissions are substituted. This review-only restriction was the state at that time; the work was later merged and promoted as recorded in `LAUNCH_REPORT.md`.
 
 ## v2.1 changes, file by file
 
 | File | Change |
 |---|---|
 | `specs/amanda-lms-locked-v2/SOURCE_OF_TRUTH_v2.1_FINAL.md` | Verbatim extraction of the supplied final PDF; current authority supersedes prior shipping/scheduling values. |
-| `lib/amanda-catherine/kit-fulfillment.ts` | Removes paid-rate configuration/lookup/charge code. Both modes return zero shipping, shipment retains required normalized address. Includes the requested future-paid-shipping TODO. |
+| `lib/amanda-catherine/kit-fulfillment.ts` | Removes paid-rate configuration/lookup/charge code. Both modes return zero shipping, shipment retains required normalized address. Records the approved free-shipping contract; no paid rates or charges are implemented. |
 | `lib/amanda-catherine/practitioner-kit-orders.ts` | Updates actual paid-order validation to accept only $0 shipping for both modes, retain shipment address checks and Stripe-total/tenant/payment checks. Preview validation test passes; production persistence unverified. |
 | `app/components/amanda/KitFulfillmentFields.tsx` | Ship to me - FREE; both options clearly show $0 CAD; address fields retained. |
 | `app/amanda-catherine/private/practitioner-kit/page.tsx` | Removes paid-shipping copy; retains standalone kit price and all approved assets. |
@@ -51,7 +53,7 @@ Local `7a8bb50` supplies purchase/readiness-aware per-course groups for learner/
 
 Fourteen menu workflows remain missing; their exact labels and repository evidence are in the audit. Gmail-address email wiring does not certify a Gmail mailbox OAuth integration, which is absent from this repository. Approved QA access is still required for authenticated learner/admin, course download/unlock, payment/fulfillment, waitlist persistence, scheduled support, certification, mobile and complete menu tests.
 
-Overall audit remains HOLD until required functions and access rules are observed. Robert authorized pushing this branch for review only; no merge or production promotion.
+At review time this audit remained on HOLD and the branch was review-only. The later production promotion is documented in `LAUNCH_REPORT.md`; remaining operational boundaries are stated there.
 
 ## Waitlist follow-up on published review 959c728
 
@@ -72,7 +74,7 @@ Overall audit remains HOLD until required functions and access rules are observe
 | `scripts/test-amanda-waitlist.ts` | Mocked storage/Gmail success and failure, catalog and menu coverage, READY/unknown/origin rejection PASS. |
 | `specs/amanda-lms-locked-v2/menu-wiring-audit.md` | Row dispositions and concrete live QA plans; HOLD preserved, shared failing-check evidence retained. |
 
-External provision: created `amanda_waitlist` table `tblIgxYkeHnuvg6eK` in the verified existing Payments & Clients base. No student record or real email was created. No deployment or merge.
+Historical external provision: created `amanda_waitlist` table `tblIgxYkeHnuvg6eK` in the verified existing Payments & Clients base. No student record or real email was created during that review.
 
 ## Shared tenant assertion and environment documentation follow-up
 
