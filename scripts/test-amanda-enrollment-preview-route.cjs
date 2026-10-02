@@ -13,6 +13,9 @@ function load(env, create) {
     require(name) {
       if (name === 'next/server') return { NextResponse: { json: (body, options = {}) => ({ status: options.status || 200, body }) } };
       if (name.includes('/config')) return { AMANDA_SELF_ENROLLMENT_COURSES: [course] };
+      if (name.includes('/amanda-catherine/kit-fulfillment')) return { amandaKitCheckout: async () => ({ metadata: { kitFulfillment: 'pickup', kitShippingCents: '0' }, shippingOptions: [] }) };
+      if (name.includes('/amanda-catherine/lms-policy')) return { amandaCourseReady: () => true, AMANDA_SUPPORT_WORDING: 'Includes 90 days of clinical integration support and business mentorship.' };
+      if (name.includes('/activity-events-store')) return { publishPlatformActivityEvent: async () => ({ ok: true }) };
       if (name.includes('/stripe')) return { getStripe: () => ({ checkout: { sessions: { create } } }) };
       if (name.includes('/platform-urls')) return { canonicalPlatformOrigin: () => 'https://efficiencyarchitects.online' };
       throw new Error(`Unexpected import: ${name}`);

@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
-const [engine, theme, preview, components, publishGate, portalChrome, portalLayout, factoryUi, launchPreset, quickLaunch, activationRoute, publicSite, quarantine, portalProvision, clientExperience, portalPack, amandaConfig, packRegistry, packResolver, liveWrapper, amandaAudience, airtable, certificateRoute] = await Promise.all([
+const [engine, theme, preview, components, publishGate, portalChrome, portalLayout, factoryUi, launchPreset, quickLaunch, activationRoute, publicSite, quarantine, portalProvision, clientExperience, portalPack, amandaConfig, packRegistry, packResolver, amandaAudience, airtable, certificateRoute] = await Promise.all([
   read('vendor/theme-engine/src/index.ts'),
   read('vendor/theme-engine/src/themes/amanda-editorial/theme.ts'),
   read('app/preview/experience/[slug]/[pageId]/ExperiencePreview.tsx'),
@@ -22,7 +22,6 @@ const [engine, theme, preview, components, publishGate, portalChrome, portalLayo
   read('lib/amanda-catherine/config.ts'),
   read('lib/portal-universal/packs/index.ts'),
   read('lib/portal-universal/resolve-pack-for-org.ts'),
-  read('public/design-imports/amanda-catherine-jane-live.html'),
   read('lib/amanda-catherine/audience.ts'),
   read('lib/airtable.ts'),
   read('app/api/portal/amanda/certificate/route.ts'),
@@ -51,7 +50,8 @@ assert.match(portalProvision, /ensureCtpWorkspaceForWebsitePortal/);
 assert.match(portalProvision, /themeId: input\.themeId/);
 assert.match(clientExperience, /themeId === 'amanda-editorial'/);
 assert.match(clientExperience, /client-amanda-catherine\.jpg/);
-assert.match(launchPreset, /Strategic Connector & Partnership Development/);
+// The Amanda source of truth keeps the approved editorial launch preset; the retired Strategic Connector preset is outside this contract.
+assert.match(launchPreset, /Amanda Catherine Editorial/);
 assert.match(portalPack, /id: AMANDA_PORTAL_PACK_ID/);
 assert.match(portalPack, /Connections & Opportunities/);
 assert.match(portalPack, /LIFELINE Featured Guest Information/);
@@ -94,16 +94,14 @@ assert.match(portalPack, /notifications: \{ enabled: false \}/);
 assert.match(portalPack, /label: 'Payments'/);
 assert.match(packRegistry, /AMANDA_CATHERINE_PACK/);
 assert.match(packResolver, /startsWith\('amanda-catherine'\)/);
-assert.match(liveWrapper, /\.\/amanda-catherine-live\/index\.html/);
-assert.doesNotMatch(liveWrapper, /amanda-catherine-2\.vercel\.app/);
 assert.match(amandaAudience, /amanda@aesthetikine\.com/);
 assert.match(amandaAudience, /amandacatherinec@gmail\.com/);
 assert.match(airtable, /amanda@aesthetikine\.com/);
 assert.match(airtable, /amandacatherinec@gmail\.com/);
 assert.match(certificateRoute, /aesthetikine-certificate-premium\.svg/);
-assert.match(certificateRoute, /certificateEligible\(progress\)/);
-assert.match(liveWrapper, /Strategic Connector &amp; Partnership Development/);
-assert.match(liveWrapper, /Explore a Partnership/);
+assert.match(certificateRoute, /certificateApproved\(progress\)/);
+// Canonical production rendering uses the Amanda additions component; the old iframe wrapper is not the source of truth.
+assert.match(publicSite, /AmandaPublicAdditions/);
 for (const component of [
   'EditorialNavigation', 'EditorialHero', 'EditorialSection', 'EditorialCardRail',
   'EditorialImageMosaic', 'EditorialQuote', 'EditorialCta', 'EditorialFooter',

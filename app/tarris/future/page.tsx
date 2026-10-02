@@ -39,7 +39,7 @@ export default function TarrisFuturePage() {
             <p className="text-xs tracking-widest opacity-60">WELCOME TO</p>
             <h1 className="text-6xl font-black mt-1">TB3 <span className="text-[#c41e3a]">HQ</span></h1>
             <p className="text-xs tracking-[0.3em] opacity-60 mt-1">PLAN. PREPARE. PERFORM. BUILD.</p>
-            <p className="mt-6 text-lg italic opacity-80">"A bigger purpose than basketball."<br/><span className="text-xs not-italic opacity-60">— TARRIS BOUIE III</span></p>
+            <p className="mt-6 text-lg italic opacity-80">&quot;A bigger purpose than basketball.&quot;<br/><span className="text-xs not-italic opacity-60">— TARRIS BOUIE III</span></p>
             {/* WIRED FUNCTIONAL BUTTON - NOT JUST COMMENT */}
             <Link href="/tarris/future/agreement" className="mt-6 inline-block bg-white text-black px-6 py-3 rounded-full font-bold text-sm hover:bg-zinc-200 transition">
               LET&apos;S GET TO WORK →

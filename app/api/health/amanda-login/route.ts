@@ -7,6 +7,7 @@ import { AMANDA_OWNER_PATH, AMANDA_PORTAL_SLUG } from '@/lib/amanda-catherine/co
 import { AMANDA_COURSES, ENTREPRENEURIAL_ARTIST_COURSE } from '@/lib/amanda-catherine/config';
 import { getAmandaCourseContent } from '@/lib/amanda-catherine/course-content';
 import { AMANDA_COURSE_RESOURCES } from '@/lib/amanda-catherine/course-resources';
+import { hasAmandaPremiumOwnerDashboard, isAmandaCourseResourceResponse } from '@/lib/amanda-catherine/health-contract';
 
 export const dynamic = 'force-dynamic';
 
@@ -136,11 +137,7 @@ export async function GET(req: NextRequest) {
 
       if (portalHomeResponse.status === 200) {
         const body = await portalHomeResponse.text();
-        checks.premiumOwnerDashboard =
-          body.includes('Owner portal') &&
-          body.includes('Quick Actions') &&
-          body.includes('Ask Eva') &&
-          body.includes('Business Overview');
+        checks.premiumOwnerDashboard = hasAmandaPremiumOwnerDashboard(body);
       }
 
       const menuResults = await Promise.all(
@@ -163,7 +160,7 @@ export async function GET(req: NextRequest) {
         AMANDA_COURSE_RESOURCES.map(async (resource) => {
           const path = `/api/portal/amanda/resources/${resource.id}`;
           const response = await authenticatedResponse(req.nextUrl.origin, path, token);
-          return [resource.id, { path, status: response.status, ok: response.status === 200 }] as const;
+          return [resource.id, { path, status: response.status, ok: isAmandaCourseResourceResponse(response.status, response.headers.get('location')) }] as const;
         }),
       );
       for (const [key, result] of resourceResults) courseResourceRoutes[key] = result;

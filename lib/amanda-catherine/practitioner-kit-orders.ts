@@ -8,6 +8,7 @@ export type AmandaKitOrder = {
   id:string; portalSlug:string; productId:string; stripeSessionId:string; paymentStatus:string;
   amountPaidCad:number; email?:string|null; name?:string|null; phone?:string|null;
   billingAddress?:Stripe.Address|null; shippingAddress?:Stripe.Address|null; kitFulfillment?:'pickup'|'ship'; shippingChargeCad?:number; courseId?:string; fulfillmentStatus:string;
+  carrier?: string; trackingNumber?: string; trackingUrl?: string; fulfillmentUpdatedAt?: string;
 };
 
 export function isAmandaKitSession(session: Stripe.Checkout.Session) {
@@ -48,4 +49,27 @@ export async function recordAmandaKitOrder(session: Stripe.Checkout.Session, inc
   });
   if (!saved.ok || !saved.persistedToAirtable) return {ok:false,error:'Order recording needs attention. Your Stripe receipt remains valid.'};
   return {ok:true,preview:false};
+}
+
+export async function updateAmandaKitOrderTracking(input: { orderId: string; carrier: string; trackingNumber: string; trackingUrl: string }) {
+  const order = (await listAmandaKitOrders()).find((item) => item.id === input.orderId);
+  if (!order) return { ok: false as const, error: 'Practitioner Kit order not found.' };
+  if (order.kitFulfillment !== 'ship') return { ok: false as const, error: 'Tracking can only be recorded for shipped orders.' };
+  const updated: AmandaKitOrder = {
+    ...order,
+    carrier: input.carrier,
+    trackingNumber: input.trackingNumber,
+    trackingUrl: input.trackingUrl,
+    fulfillmentStatus: 'shipping-tracked',
+    fulfillmentUpdatedAt: new Date().toISOString(),
+  };
+  const saved = await saveStudioRecord({
+    recordType: 'experience',
+    id: order.id,
+    organizationId: syntheticOrgId('amanda-catherine'),
+    title: 'Amanda Practitioner Kit paid order',
+    payload: updated,
+  });
+  if (!saved.ok || !saved.persistedToAirtable) return { ok: false as const, error: 'Tracking could not be durably recorded.' };
+  return { ok: true as const, order: updated };
 }

@@ -6,6 +6,8 @@ import assert from 'node:assert/strict';
 import { AMANDA_COURSES } from '../lib/amanda-catherine/config';
 import { amandaCourseReady, amandaSupportWindow, AMANDA_SUPPORT_WORDING } from '../lib/amanda-catherine/lms-policy';
 import { coursesForAccount } from '../lib/amanda-catherine/course-access';
+import { hasAmandaPremiumOwnerDashboard, isAmandaCourseResourceResponse } from '../lib/amanda-catherine/health-contract';
+import { validateAmandaKitTrackingInput } from '../lib/amanda-catherine/kit-shipping';
 assert.equal(AMANDA_SUPPORT_WORDING, 'Includes 90 days of clinical integration support and business mentorship.');
 assert.equal(AMANDA_COURSES.filter(c => amandaCourseReady(c.id)).length, 4);
 assert.equal(amandaCourseReady('unknown'), false);
@@ -18,6 +20,21 @@ assert.equal(amandaSupportWindow('2026-10-02', new Date('2026-10-01T12:00Z'))?.s
 assert.equal(amandaSupportWindow('2026-10-02', new Date('2026-10-02T12:00Z'))?.daysRemaining, 90);
 assert.equal(amandaSupportWindow('2026-10-02', new Date('2026-12-31T12:00Z'))?.status, 'ended');
 console.log('Amanda locked v2 readiness, assignment access and support-clock tests passed.');
+assert.equal(hasAmandaPremiumOwnerDashboard('<h1>Welcome, Amanda</h1><h2>Quick Actions</h2><h2>Business Overview</h2>'), true);
+assert.equal(hasAmandaPremiumOwnerDashboard('Owner portal Ask Eva'), false);
+assert.equal(isAmandaCourseResourceResponse(200, null), true);
+assert.equal(isAmandaCourseResourceResponse(307, 'https://abc.blob.vercel-storage.com/private?token=signed'), true);
+assert.equal(isAmandaCourseResourceResponse(307, '/portal/login?next=%2Fresource'), false);
+assert.equal(isAmandaCourseResourceResponse(307, 'https://attacker.example/private?token=fake'), false);
+assert.equal(isAmandaCourseResourceResponse(307, 'http://abc.blob.vercel-storage.com/private'), false);
+console.log('Amanda production health contract checks passed.');
+assert.deepEqual(validateAmandaKitTrackingInput({ carrier: 'Canada Post', trackingNumber: '12345', trackingUrl: 'https://www.canadapost-postescanada.ca/track-reperage/en#/details/12345' }), { carrier: 'Canada Post', trackingNumber: '12345', trackingUrl: 'https://www.canadapost-postescanada.ca/track-reperage/en#/details/12345' });
+assert.equal(validateAmandaKitTrackingInput({ carrier: 'Carrier', trackingNumber: '12345', trackingUrl: 'http://carrier.example/track' }), null);
+assert.equal(validateAmandaKitTrackingInput({ carrier: 'Carrier', trackingNumber: '12345', trackingUrl: 'https://user:pass@carrier.example/track' }), null);
+const shippingRoute = readFileSync('app/api/portal/amanda/practitioner-kit/orders/[orderId]/route.ts', 'utf8');
+assert.ok(shippingRoute.includes('guardAmandaAdmin'));
+assert.ok(shippingRoute.includes('validateAmandaKitTrackingInput'));
+console.log('Amanda manual shipping fallback validation passed.');
 
 for (const course of AMANDA_COURSES) {
   const sales = `/courses/${course.id}`;

@@ -3,7 +3,7 @@ import type Stripe from 'stripe';
 export type AmandaKitSelection = { kitFulfillment?: 'pickup' | 'ship'; shippingAddress?: { line1: string; line2?: string; city: string; state: string; postal_code: string; country: string } };
 export async function amandaKitCheckout(selection: AmandaKitSelection): Promise<{ metadata: Record<string, string>; shippingOptions: Stripe.Checkout.SessionCreateParams.ShippingOption[] }> {
   if (selection.kitFulfillment !== 'pickup' && selection.kitFulfillment !== 'ship') throw new Error('Choose Free Pickup (Class / Shop) or Ship to me - FREE.');
-  // TODO: Enable paid shipping when Amanda approves rates - currently FREE per 20261002
+  // Launch workaround: shipping is free; Amanda completes carrier postage manually.
   if (selection.kitFulfillment === 'pickup') return { metadata: { kitFulfillment: 'pickup', kitShippingCents: '0' }, shippingOptions: [] };
   const address = selection.shippingAddress;
   if (!address || ['line1', 'city', 'state', 'postal_code', 'country'].some((key) => !String(address[key as keyof typeof address] || '').trim())) throw new Error('A complete shipping address is required.');
