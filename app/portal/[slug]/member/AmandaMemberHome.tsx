@@ -1,3 +1,4 @@
+import { AMANDA_WAITLIST_MENU_IDS } from '@/lib/amanda-catherine/waitlist-interests';
 import { getAmandaAssignedCourseIds } from '@/lib/amanda-catherine/client-access';
 import { getCourseMenuRoute } from '@/lib/amanda-catherine/menu-routing';
 import { amandaCourseReady } from '@/lib/amanda-catherine/lms-policy';
@@ -7,7 +8,7 @@ import { AMANDA_COURSES, AMANDA_ROLE_DASHBOARDS } from '@/lib/amanda-catherine/c
 import { resolveAmandaAudience } from '@/lib/amanda-catherine/audience';
 
 // Explicit routing prevents labels from silently falling back to the dashboard.
-// Missing domain workflows stay visible and unavailable until approved.
+// Approved NOT READY functions route to their public interest waitlists.
 const DESTINATIONS: Record<string, string> = {
   'private-deliveries': 'deliveries', 'media-delivery': 'deliveries',
   appointments: 'calendar', 'training-calendar': 'calendar', 'interview-schedule': 'calendar',
@@ -39,8 +40,10 @@ const COURSE_ITEMS = new Set([
 
 function hrefFor(slug: string, item: string) {
   if (item === 'product-ordering') return '/amanda-catherine/private/practitioner-kit';
+  if (AMANDA_WAITLIST_MENU_IDS.some(id => id === item)) return `/amanda-catherine/courses/${encodeURIComponent(item)}#waitlist`;
   const destination = DESTINATIONS[item];
-  return destination ? `/portal/${slug}/${destination}` : null;
+  if (!destination) throw new Error(`Unmapped Amanda menu item: ${item}`);
+  return `/portal/${slug}/${destination}`;
 }
 
 function label(value: string) {
@@ -89,11 +92,10 @@ export default async function AmandaMemberHome({
           </li>;
           const href = hrefFor(slug, item);
           return <li key={item} className="ep-module-card">
-            {href ? <Link href={href} className="ep-module-card-title">{item === 'amplifi' ? 'Amplifi™' : label(item)}</Link>
-              : <span className="ep-module-card-title" aria-disabled="true">{label(item)}</span>}
-            <p className="ep-module-card-note">{href
-              ? item === 'amplifi' ? 'Create and review approved content from your Amanda Catherine workspace. Nothing auto-publishes.' : 'Open this part of your Amanda Catherine path.'
-              : 'This function is not available yet. Contact Amanda through Support & Mentorship.'}</p>
+            <Link href={href} className="ep-module-card-title">{item === 'amplifi' ? 'Amplifi™' : label(item)}</Link>
+            <p className="ep-module-card-note">{AMANDA_WAITLIST_MENU_IDS.some(id => id === item)
+              ? 'Join the waitlist. Amanda will notify you when this function is READY.'
+              : item === 'amplifi' ? 'Create and review approved content from your Amanda Catherine workspace. Nothing auto-publishes.' : 'Open this part of your Amanda Catherine path.'}</p>
           </li>;
         })}
         {!items.some(item => COURSE_ITEMS.has(item)) ? <li className="ep-module-card">

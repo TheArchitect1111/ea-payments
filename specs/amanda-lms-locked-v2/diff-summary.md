@@ -52,3 +52,24 @@ Local `7a8bb50` supplies purchase/readiness-aware per-course groups for learner/
 Fourteen menu workflows remain missing; their exact labels and repository evidence are in the audit. Gmail-address email wiring does not certify a Gmail mailbox OAuth integration, which is absent from this repository. Approved QA access is still required for authenticated learner/admin, course download/unlock, payment/fulfillment, waitlist persistence, scheduled support, certification, mobile and complete menu tests.
 
 Overall audit remains HOLD until required functions and access rules are observed. Robert authorized pushing this branch for review only; no merge or production promotion.
+
+## Waitlist follow-up on published review 959c728
+
+| File | Change / observed evidence |
+|---|---|
+| `components/amanda/AmandaWaitlistForm.tsx` | Five labeled fields, auto-filled interest, exact confirmation only after save and notification success; busy and error feedback. |
+| `lib/amanda-catherine/waitlist-interests.ts` | Approved catalog NOT READY courses plus explicit 14 service interests authorized in latest instruction; rejects unknown/READY interests. |
+| `lib/amanda-catherine/waitlist.ts` | PDF snippet adaptation, dedicated Airtable persistence then Amanda notification; no invented admin route, checkout or entitlement. |
+| `lib/email/gmail.ts` | Actual server-only Gmail OAuth refresh and messages.send transport; no mailto fallback; runtime credentials unavailable, live send Unverified. |
+| `app/api/public/amanda/waitlist/route.ts` | Origin/rate/field validation, canonical interest lookup, durable-save requirement and separate notification failure handling. |
+| `app/amanda-catherine/courses/[courseSlug]/page.tsx` | Public anchored form for NOT READY courses/services, unknown 404, READY redirects to existing sales page. |
+| `lib/amanda-catherine/menu-routing.ts` | NOT READY routes canonical public waitlist; purchased READY learning and unpurchased READY sales retained. |
+| `app/portal/[slug]/member/AmandaMemberHome.tsx` | All 14 known unavailable functions now have explicitly registered waitlist routes. |
+| `app/portal/amanda-catherine/waitlist/WaitlistForm.tsx` | Existing entry point delegates to new full form; no divergent submission flow. |
+| `app/courses/[courseSlug]/page.tsx` | Existing sales waitlist shares new form; corrects stale shipping copy to FREE. |
+| `app/amanda-catherine/page.tsx` | Public NOT READY links use canonical path; stale shipping copy corrected to FREE. |
+| `scripts/test-amanda-lms-locked-v2.ts` | Existing routing expectations updated; policy suite PASS. |
+| `scripts/test-amanda-waitlist.ts` | Mocked storage/Gmail success and failure, catalog and menu coverage, READY/unknown/origin rejection PASS. |
+| `specs/amanda-lms-locked-v2/menu-wiring-audit.md` | Row dispositions and concrete live QA plans; HOLD preserved, shared failing-check evidence retained. |
+
+External provision: created `amanda_waitlist` table `tblIgxYkeHnuvg6eK` in the verified existing Payments & Clients base. No student record or real email was created. No deployment or merge.

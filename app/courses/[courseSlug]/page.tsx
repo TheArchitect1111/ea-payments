@@ -9,6 +9,6 @@ export default async function Page({ params }: { params: Promise<{ courseSlug: s
   if (!course) notFound();
   const offer = AMANDA_SELF_ENROLLMENT_COURSES.find(c => c.courseId === course.id);
   return <main className="min-h-screen bg-[#f7f1e8] px-5 py-12 text-[#17130f]"><section className="mx-auto max-w-3xl"><h1 className="font-serif text-4xl">{course.title}</h1>
-    {amandaCourseReady(course.id) && offer ? <><p>{AMANDA_SUPPORT_WORDING}</p><p>Practitioner kit included in tuition. Shipping is additional; pickup is free.</p><AmandaEnrollmentForm initialCourseId={course.id} courses={[{ ...offer, delivery: [...offer.delivery] }]} /></> : <section id="waitlist"><h2>Join Waitlist</h2><WaitlistForm courseId={course.id} /></section>}
+    {amandaCourseReady(course.id) && offer ? <><p>{AMANDA_SUPPORT_WORDING}</p><p>Practitioner kit included in tuition. Pickup and shipping are FREE.</p><AmandaEnrollmentForm initialCourseId={course.id} courses={[{ ...offer, delivery: [...offer.delivery] }]} /></> : <section id="waitlist"><h2>Join Waitlist</h2><WaitlistForm courseId={course.id} /></section>}
   </section></main>;
 }

@@ -21,8 +21,8 @@ console.log('Amanda locked v2 readiness, assignment access and support-clock tes
 
 for (const course of AMANDA_COURSES) {
   const sales = `/courses/${course.id}`;
-  assert.equal(getCourseMenuRoute(course, { purchasedCourseIds: [] }), amandaCourseReady(course.id) ? sales : `${sales}#waitlist`);
-  assert.equal(getCourseMenuRoute(course, { purchasedCourseIds: [course.id] }), amandaCourseReady(course.id) ? `/portal/amanda-catherine/learning/${course.id}` : `${sales}#waitlist`);
+  assert.equal(getCourseMenuRoute(course, { purchasedCourseIds: [] }), amandaCourseReady(course.id) ? sales : `/amanda-catherine/courses/${course.id}#waitlist`);
+  assert.equal(getCourseMenuRoute(course, { purchasedCourseIds: [course.id] }), amandaCourseReady(course.id) ? `/portal/amanda-catherine/learning/${course.id}` : `/amanda-catherine/courses/${course.id}#waitlist`);
 }
 const original = '/portal/amanda-catherine/learning/body-sculpt-practitioner-certification?view=progress';
 const login = new URL('/portal/login', 'https://portal.invalid');
@@ -40,13 +40,14 @@ console.log('Owner placeholder removal and login policy integration checks passe
 
 // A stale purchase must never bypass a course that is no longer READY.
 const readyId = 'body-sculpt-practitioner-certification';
-assert.equal(getCourseMenuRoute({ id: readyId, status: 'WAITLIST' }, { purchasedCourseIds: [readyId] }), `/courses/${readyId}#waitlist`);
-assert.equal(getCourseMenuRoute({ id: 'unknown', status: 'READY' }, { purchasedCourseIds: ['unknown'] }), '/courses/unknown#waitlist');
+assert.equal(getCourseMenuRoute({ id: readyId, status: 'WAITLIST' }, { purchasedCourseIds: [readyId] }), `/amanda-catherine/courses/${readyId}#waitlist`);
+assert.equal(getCourseMenuRoute({ id: 'unknown', status: 'READY' }, { purchasedCourseIds: ['unknown'] }), '/amanda-catherine/courses/unknown#waitlist');
 assert.equal(getCourseMenuRoute({ id: readyId, slug: 'approved-sales-slug', status: 'READY' }, { purchasedCourseIds: [] }), '/courses/approved-sales-slug');
 const memberMenu = readFileSync('app/portal/[slug]/member/AmandaMemberHome.tsx', 'utf8');
 assert.ok(memberMenu.includes('getCourseMenuRoute(course, { purchasedCourseIds })'));
 assert.ok(!memberMenu.includes("match?.[1] || 'member'"));
-assert.ok(memberMenu.includes('aria-disabled="true"'));
+assert.ok(memberMenu.includes('AMANDA_WAITLIST_MENU_IDS.some'));
+assert.ok(!memberMenu.includes('aria-disabled="true"'));
 assert.ok(memberMenu.includes("'courses-and-certifications'"));
 assert.ok(memberMenu.includes("'courses-progress-and-certifications'"));
 console.log('Non-READY stale purchase and explicit menu fallback regression checks passed.');
