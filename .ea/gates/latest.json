@@ -1,21 +1,21 @@
 {
-  "sourceCommit": "12680ab337340b3c52c272a94a07b003979e034a",
-  "previewUrl": "http://127.0.0.1:3000/",
-  "target": "http://127.0.0.1:3000/tarris/future",
-  "completedAt": "2026-09-30T21:33:28.971Z",
+  "sourceCommit": "59fea88f4e3e8746494e61768276e318788e789b",
+  "previewUrl": "https://ea-payments-53lgqy0th-the-architects-projects-cc813778.vercel.app/",
+  "target": "https://ea-payments-53lgqy0th-the-architects-projects-cc813778.vercel.app/amanda-catherine",
+  "completedAt": "2026-10-02T20:15:13.558Z",
   "status": "PASS",
   "gates": {
     "sourceIdentity": {
       "status": "PASS",
-      "proof": "preview:12680ab337340b3c52c272a94a07b003979e034a"
+      "proof": "preview:59fea88f4e3e8746494e61768276e318788e789b"
     },
     "build": {
       "status": "PASS",
-      "proof": "source:12680ab337340b3c52c272a94a07b003979e034a"
+      "proof": "source:59fea88f4e3e8746494e61768276e318788e789b"
     },
     "assets": {
       "status": "PASS",
-      "proof": "approved-tb3-placeholders:YOUR_HQ_HEADER.jpg,YOUR_BRAND_SMILE.jpg,YOUR_COMMUNITY.jpg,YOUR_ENTERPRISE_SUIT.jpg; broken asset checks retained"
+      "proof": "desktop:11-visuals mobile:11-visuals"
     },
     "functional": {
       "status": "PASS",
@@ -23,11 +23,11 @@
     },
     "desktopVisual": {
       "status": "PASS",
-      "proof": "sha256:18f4a1af41030f00a3a0f7bfdd44f6a82bf112334d5c1652c3c0495c3790076a"
+      "proof": "sha256:114d58f961fd973684a1112bb619ed00e7db0cf4a36d2552906fcdafcb6c4495"
     },
     "mobileVisual": {
       "status": "PASS",
-      "proof": "sha256:e49f4e1bcf7c031ce18139b6c3baf16e1b230d5caaa76c0c7e7595630f5339b8"
+      "proof": "sha256:56990f7be65a0aa3ac65eb154f392068c06592934fb25701b81b926849ad6903"
     },
     "creativeCritic": {
       "status": "PASS",
@@ -37,37 +37,25 @@
   "details": {
     "certificationTransport": "exact-built-checkout-local",
     "buildInfo": {
-      "commitSha": "12680ab337340b3c52c272a94a07b003979e034a",
+      "commitSha": "59fea88f4e3e8746494e61768276e318788e789b",
       "branch": "master",
       "environment": "preview"
-    },
-    "tb3PlaceholderRelease": {
-      "status": "PASS",
-      "profile": "tb3-approved-placeholders",
-      "placeholders": [
-        "YOUR_HQ_HEADER.jpg",
-        "YOUR_BRAND_SMILE.jpg",
-        "YOUR_COMMUNITY.jpg",
-        "YOUR_ENTERPRISE_SUIT.jpg"
-      ],
-      "signingPreserved": true,
-      "agreementPreserved": true
     },
     "desktop": {
       "name": "desktop",
       "httpStatus": 200,
-      "screenshot": "/__w/ea-payments/ea-payments/artifacts/tb3-light-certification/desktop.png",
-      "screenshotSha256": "18f4a1af41030f00a3a0f7bfdd44f6a82bf112334d5c1652c3c0495c3790076a",
+      "screenshot": "/home/runner/work/ea-payments/ea-payments/artifacts/ea-gate/desktop.png",
+      "screenshotSha256": "114d58f961fd973684a1112bb619ed00e7db0cf4a36d2552906fcdafcb6c4495",
       "consoleErrors": [],
       "pageErrors": [],
       "failedRequests": [],
       "badImageResponses": [],
       "brokenImgs": [],
       "brokenBackgrounds": [],
-      "renderedVisuals": 0,
+      "renderedVisuals": 11,
       "overflow": 0,
-      "bodyTextLength": 1053,
-      "scrollHeight": 1100,
+      "bodyTextLength": 9578,
+      "scrollHeight": 15256,
       "viewport": {
         "width": 1440,
         "height": 1100
@@ -78,110 +66,24 @@
     "mobile": {
       "name": "mobile",
       "httpStatus": 200,
-      "screenshot": "/__w/ea-payments/ea-payments/artifacts/tb3-light-certification/mobile.png",
-      "screenshotSha256": "e49f4e1bcf7c031ce18139b6c3baf16e1b230d5caaa76c0c7e7595630f5339b8",
+      "screenshot": "/home/runner/work/ea-payments/ea-payments/artifacts/ea-gate/mobile.png",
+      "screenshotSha256": "56990f7be65a0aa3ac65eb154f392068c06592934fb25701b81b926849ad6903",
       "consoleErrors": [],
       "pageErrors": [],
       "failedRequests": [],
       "badImageResponses": [],
       "brokenImgs": [],
       "brokenBackgrounds": [],
-      "renderedVisuals": 0,
+      "renderedVisuals": 11,
       "overflow": 0,
-      "bodyTextLength": 1053,
-      "scrollHeight": 2136,
+      "bodyTextLength": 9578,
+      "scrollHeight": 21756,
       "viewport": {
         "width": 390,
         "height": 844
       },
       "placeholderSlots": [],
       "publicBackground": null
-    },
-    "publicDesktop": {
-      "name": "public-desktop",
-      "httpStatus": 200,
-      "screenshot": "/__w/ea-payments/ea-payments/artifacts/tb3-light-certification/public-desktop.png",
-      "screenshotSha256": "dc68185fd84d86883f2703c8e2187878f57d92e85047177891f5258e2487889c",
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "badImageResponses": [],
-      "brokenImgs": [],
-      "brokenBackgrounds": [],
-      "renderedVisuals": 0,
-      "overflow": 0,
-      "bodyTextLength": 1548,
-      "scrollHeight": 2939,
-      "viewport": {
-        "width": 1440,
-        "height": 1100
-      },
-      "placeholderSlots": [
-        "SLOT_TB3_MASK",
-        "SLOT_HERO_HOODIE",
-        "SLOT_ATHLETE_IMG",
-        "SLOT_STORY_IMG",
-        "SLOT_BRAND_IMG",
-        "SLOT_NIL_IMG",
-        "SLOT_COMMUNITY_IMG",
-        "SLOT_MEDIA_FEATURE",
-        "SLOT_MEDIA_THUMB_1",
-        "SLOT_MEDIA_THUMB_2",
-        "SLOT_MEDIA_THUMB_3",
-        "SLOT_MEDIA_THUMB_4",
-        "SLOT_ENTERPRISE_IMG",
-        "SLOT_FUTURE_IMG",
-        "SLOT_MERCH_HOODIE_BLACK",
-        "SLOT_MERCH_TEE_WHITE",
-        "SLOT_MERCH_CAP",
-        "SLOT_MERCH_HOODIE_RED",
-        "SLOT_MERCH_TEE_BLACK"
-      ],
-      "publicBackground": "rgb(247, 245, 242)"
-    },
-    "publicMobile": {
-      "name": "public-mobile",
-      "httpStatus": 200,
-      "screenshot": "/__w/ea-payments/ea-payments/artifacts/tb3-light-certification/public-mobile.png",
-      "screenshotSha256": "ec2e0dfd30162bf801e26eb5fb4f066459dfc0de653bb18b5fb02b8a1acd8eb9",
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "badImageResponses": [],
-      "brokenImgs": [],
-      "brokenBackgrounds": [],
-      "renderedVisuals": 0,
-      "overflow": 0,
-      "bodyTextLength": 1548,
-      "scrollHeight": 6285,
-      "viewport": {
-        "width": 390,
-        "height": 844
-      },
-      "placeholderSlots": [
-        "SLOT_TB3_MASK",
-        "SLOT_HERO_HOODIE",
-        "SLOT_ATHLETE_IMG",
-        "SLOT_STORY_IMG",
-        "SLOT_BRAND_IMG",
-        "SLOT_NIL_IMG",
-        "SLOT_COMMUNITY_IMG",
-        "SLOT_MEDIA_FEATURE",
-        "SLOT_MEDIA_THUMB_1",
-        "SLOT_MEDIA_THUMB_2",
-        "SLOT_MEDIA_THUMB_3",
-        "SLOT_MEDIA_THUMB_4",
-        "SLOT_ENTERPRISE_IMG",
-        "SLOT_FUTURE_IMG",
-        "SLOT_MERCH_HOODIE_BLACK",
-        "SLOT_MERCH_TEE_WHITE",
-        "SLOT_MERCH_CAP",
-        "SLOT_MERCH_HOODIE_RED",
-        "SLOT_MERCH_TEE_BLACK"
-      ],
-      "publicBackground": "rgb(247, 245, 242)"
-    },
-    "certificationRun": "https://github.com/TheArchitect1111/ea-payments/actions/runs/36779996176",
-    "certificationArtifactId": 11127253599
+    }
   }
 }
