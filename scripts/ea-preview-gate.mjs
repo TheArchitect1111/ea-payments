@@ -94,6 +94,11 @@ async function inspectViewport(browser, name, viewport, isMobile = false, pageTa
 
   const response = await page.goto(pageTarget, { waitUntil: 'networkidle', timeout: 60000 });
   await page.waitForTimeout(1800);
+  await page.evaluate(async () => {
+    const lazyImages = [...document.images].filter((img) => img.loading === 'lazy');
+    for (const img of lazyImages) img.loading = 'eager';
+    await Promise.all([...document.images].map((img) => img.decode().catch(() => {})));
+  });
 
   const dom = await page.evaluate(async () => {
     const visible = (el) => {
