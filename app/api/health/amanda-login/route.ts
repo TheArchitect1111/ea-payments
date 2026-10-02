@@ -24,6 +24,15 @@ async function authenticatedResponse(origin: string, path: string, token: string
   });
 }
 
+function isExpectedOwnerRedirect(location: string | null, origin: string) {
+  if (!location) return false;
+  try {
+    return new URL(location, origin).pathname === AMANDA_OWNER_PATH;
+  } catch {
+    return false;
+  }
+}
+
 const OWNER_MENU_ROUTES = {
   dashboard: '',
   updateHub: 'updates',
@@ -125,7 +134,8 @@ export async function GET(req: NextRequest) {
         }),
       ]);
       checks.authenticatedOwnerRoute = ownerResponse.status === 200;
-      checks.authenticatedPortalHome = portalHomeResponse.status === 200;
+      checks.authenticatedPortalHome = portalHomeResponse.status === 200
+        || (portalHomeResponse.status === 307 && isExpectedOwnerRedirect(portalHomeResponse.headers.get('location'), req.nextUrl.origin));
       checks.authenticatedMemberRoute = memberResponse.status === 200;
       checks.authenticatedOwnerV2 = ownerV2Response.status === 200;
       checks.authenticatedApplicationStatusApi = statusResponse.status === 404;
@@ -135,8 +145,8 @@ export async function GET(req: NextRequest) {
       checks.ownerV2ApplicationQueues = queueResponses.every((response) => response.status === 200)
         && queueBodies.every((body) => body.includes('APPLICATION QUEUE'));
 
-      if (portalHomeResponse.status === 200) {
-        const body = await portalHomeResponse.text();
+      if (ownerResponse.status === 200) {
+        const body = await ownerResponse.text();
         checks.premiumOwnerDashboard = hasAmandaPremiumOwnerDashboard(body);
       }
 
@@ -154,7 +164,9 @@ export async function GET(req: NextRequest) {
       );
 
       for (const [key, result] of menuResults) menuRoutes[key] = result;
-      checks.allMenuRoutes = menuResults.every(([, result]) => result.ok && !result.redirect);
+      checks.allMenuRoutes = menuResults.every(([key, result]) => key === 'dashboard'
+        ? (result.ok && !result.redirect) || (result.status === 307 && isExpectedOwnerRedirect(result.redirect, req.nextUrl.origin))
+        : result.ok && !result.redirect);
 
       const resourceResults = await Promise.all(
         AMANDA_COURSE_RESOURCES.map(async (resource) => {
