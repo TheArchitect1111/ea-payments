@@ -1,3 +1,4 @@
+import { safePortalReturnPath } from '@/lib/auth/portal-return-path';
 import { NextRequest, NextResponse } from 'next/server';
 import { validatePortalLogin, getClientByPortalSlug, updateClientEngagementScore } from '@/lib/airtable';
 import { ensureDemoConnectTenant } from '@/lib/connect-provision';
@@ -35,7 +36,7 @@ export async function POST(req: NextRequest) {
 
   const email = (body.email ?? '').trim().toLowerCase();
   const password = (body.password ?? '').trim();
-  const nextPath = body.next;
+  const nextPath = safePortalReturnPath(body.next);
 
   if (!email || !password) {
     return NextResponse.json({ error: 'Email and password are required.' }, { status: 400 });

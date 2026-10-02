@@ -1,3 +1,4 @@
+import { amandaKitCheckout, type AmandaKitSelection } from '@/lib/amanda-catherine/kit-fulfillment';
 import { NextResponse } from 'next/server';
 import { getStripe } from '@/lib/stripe';
 import { checkRateLimit } from '@/lib/ai/rate-limit';
@@ -11,11 +12,14 @@ export async function POST(request: Request) {
   const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
   if (!checkRateLimit(`amanda-kit-checkout:${ip}`,6,60_000).ok) return NextResponse.json({error:'Please wait one minute before trying again.'},{status:429});
   if (!process.env.STRIPE_SECRET_KEY) return NextResponse.json({error:'Secure checkout is temporarily unavailable. Please try again later.'},{status:503});
-  const metadata = {portalSlug:'amanda-catherine',checkoutType:'amanda-practitioner-kit',amandaKitId:AMANDA_PRACTITIONER_KIT.id};
+  let kit;
+  try { kit = await amandaKitCheckout(await request.json().catch(() => ({})) as AmandaKitSelection); } catch(error) { return NextResponse.json({ error: error instanceof Error ? error.message : 'Kit selection is invalid.' }, { status: 409 }); }
+  const metadata = {...kit.metadata,portalSlug:'amanda-catherine',checkoutType:'amanda-practitioner-kit',amandaKitId:AMANDA_PRACTITIONER_KIT.id};
   try {
     const session = await getStripe().checkout.sessions.create({
       mode:'payment',payment_method_types:['card'],customer_creation:'always',
       billing_address_collection:'required',phone_number_collection:{enabled:true},
+      shipping_options:kit.shippingOptions,
       invoice_creation:{enabled:true},metadata,payment_intent_data:{metadata},
       line_items:[{quantity:1,price_data:{currency:'cad',unit_amount:AMANDA_PRACTITIONER_KIT.priceCad * 100,
         product_data:{name:AMANDA_PRACTITIONER_KIT.name,description:AMANDA_PRACTITIONER_KIT.description}}}],

@@ -1,3 +1,4 @@
+import { amandaCourseReady, amandaSupportWindow } from './lms-policy';
 import { createHash } from 'node:crypto';
 import { AMANDA_COURSES } from '@/lib/amanda-catherine/config';
 import { listStudioRecords, loadStudioRecord, saveStudioRecord } from '@/lib/creative-studio/persistence';
@@ -8,10 +9,15 @@ export type AmandaCourseProgress = {
   email: string;
   courseId: string;
   startedAt: string;
+  trainingDate?: string;
   lessonReleaseAt: Record<string, string>;
   completedLessons: string[];
   assessmentScore?: number;
   practicalRequirements: string[];
+  evidence?: { caseStudyUrl: string; quizEvidenceUrl: string; practicalEvidenceUrl: string; practicalMedia: boolean; clientConsent: boolean; submittedAt: string };
+  quizVerifiedAt?: string;
+  certificateApprovedBy?: string;
+  certificateApprovedEvidence?: string;
   certificateIssuedAt?: string;
   updatedAt: string;
 };
@@ -86,6 +92,7 @@ function firstMondayRelease(startedAt: string) {
 function buildReleaseSchedule(courseId: string, startedAt: string) {
   const course = AMANDA_COURSES.find((item) => item.id === courseId);
   if (!course) return {};
+  if (amandaCourseReady(courseId)) return Object.fromEntries(course.lessons.map((lesson) => [lesson, startedAt]));
   const firstRelease = firstMondayRelease(startedAt);
   return Object.fromEntries(
     course.lessons.map((lesson, index) => [
@@ -103,28 +110,35 @@ export function lessonIsReleased(progress: AmandaCourseProgress, lesson: string,
 export function certificateEligible(progress: AmandaCourseProgress) {
   const course = AMANDA_COURSES.find((item) => item.id === progress.courseId);
   if (!course) return false;
-  return (
-    course.lessons.every((lesson) => progress.completedLessons.includes(lesson)) &&
-    (progress.assessmentScore ?? 0) >= course.passingScore &&
-    course.practicalRequirements.every((item) => progress.practicalRequirements.includes(item))
-  );
+  return Boolean(amandaCourseReady(course.id) && progress.evidence?.caseStudyUrl && progress.evidence.quizEvidenceUrl && progress.evidence.practicalEvidenceUrl && (!progress.evidence.practicalMedia || progress.evidence.clientConsent) && progress.quizVerifiedAt && course.lessons.every((lesson) => progress.completedLessons.includes(lesson)));
+}
+
+export function certificationEvidenceVersion(progress: AmandaCourseProgress) {
+  return createHash('sha256').update(JSON.stringify([progress.evidence, [...progress.completedLessons].sort()])).digest('hex');
+}
+export function certificateApproved(progress: AmandaCourseProgress) {
+  return Boolean(certificateEligible(progress) && progress.certificateIssuedAt && progress.certificateApprovedBy && progress.certificateApprovedEvidence === certificationEvidenceVersion(progress));
 }
 
 async function persist(progress: AmandaCourseProgress) {
-  await saveStudioRecord({
+  const saved = await saveStudioRecord({
     recordType: 'experience',
     id: progressId(progress.portalSlug, progress.email, progress.courseId),
     organizationId: syntheticOrgId(progress.portalSlug),
     title: `Amanda course progress: ${progress.courseId}`,
     payload: progress,
   });
+  if (!saved.ok || (process.env.VERCEL_ENV === 'production' && !saved.persistedToAirtable)) throw new Error(saved.error || 'Course progress could not be saved durably.');
   return progress;
 }
 
 export async function getAmandaCourseProgress(portalSlug: string, email: string, courseId: string) {
   const saved = await loadStudioRecord<AmandaCourseProgress>('experience', progressId(portalSlug, email, courseId));
   if (saved) {
-    if (saved.startedAt && saved.lessonReleaseAt) return saved;
+    if (saved.startedAt && saved.lessonReleaseAt) {
+      if (amandaCourseReady(courseId)) return { ...saved, lessonReleaseAt: buildReleaseSchedule(courseId, saved.startedAt) };
+      return saved;
+    }
     const migrated: AmandaCourseProgress = {
       ...saved,
       startedAt: saved.updatedAt || new Date().toISOString(),
@@ -151,7 +165,7 @@ export async function listAmandaCourseProgress(portalSlug: string) {
     syntheticOrgId(portalSlug),
   );
   return records
-    .filter((record) => record.portalSlug === portalSlug && record.courseId && record.email)
+    .filter((record) => record.portalSlug === portalSlug && record.courseId && record.email && Array.isArray(record.completedLessons) && Array.isArray(record.practicalRequirements))
     .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
 }
 
@@ -159,7 +173,7 @@ export async function updateAmandaCourseProgress(
   portalSlug: string,
   email: string,
   courseId: string,
-  patch: Partial<Pick<AmandaCourseProgress, 'completedLessons' | 'practicalRequirements'>>,
+  patch: Partial<Pick<AmandaCourseProgress, 'completedLessons' | 'practicalRequirements' | 'evidence'>>,
 ) {
   const current = await getAmandaCourseProgress(portalSlug, email, courseId);
   const course = AMANDA_COURSES.find((item) => item.id === courseId);
@@ -177,17 +191,43 @@ export async function updateAmandaCourseProgress(
   const practicalRequirements = (patch.practicalRequirements ?? current.practicalRequirements).filter((requirement) =>
     coursePracticalRequirements.includes(requirement),
   );
-  const completionRequirementsMet =
-    course.lessons.every((lesson) => completedLessons.includes(lesson)) &&
-    course.practicalRequirements.every((requirement) => practicalRequirements.includes(requirement));
+  let evidence = current.evidence;
+  if (patch.evidence) {
+    const urls = ['caseStudyUrl', 'quizEvidenceUrl', 'practicalEvidenceUrl'] as const;
+    for (const key of urls) {
+      const value = patch.evidence[key];
+      if (typeof value !== 'string' || value.length > 2048 || new URL(value).protocol !== 'https:') throw new Error('Evidence links must use https.');
+    }
+    if (patch.evidence.practicalMedia !== false && patch.evidence.clientConsent !== true) throw new Error('Client consent is required for photos or video.');
+    evidence = { caseStudyUrl: patch.evidence.caseStudyUrl, quizEvidenceUrl: patch.evidence.quizEvidenceUrl, practicalEvidenceUrl: patch.evidence.practicalEvidenceUrl, practicalMedia: patch.evidence.practicalMedia !== false, clientConsent: patch.evidence.clientConsent === true, submittedAt: new Date().toISOString() };
+  }
 
   const next: AmandaCourseProgress = {
     ...current,
     completedLessons,
     practicalRequirements,
-    assessmentScore: completionRequirementsMet ? 100 : undefined,
+    evidence,
     updatedAt: new Date().toISOString(),
   };
-  if (certificateEligible(next) && !next.certificateIssuedAt) next.certificateIssuedAt = next.updatedAt;
+  if (certificationEvidenceVersion(next) !== certificationEvidenceVersion(current)) {
+    next.quizVerifiedAt = undefined; next.certificateIssuedAt = undefined;
+    next.certificateApprovedBy = undefined; next.certificateApprovedEvidence = undefined;
+  }
   return persist(next);
+}
+
+export async function setAmandaTrainingDate(portalSlug: string, email: string, courseId: string, trainingDate: string) {
+  if (!amandaCourseReady(courseId) || !amandaSupportWindow(trainingDate)) throw new Error('A valid class/training date and READY course are required.');
+  const current = await getAmandaCourseProgress(portalSlug, email, courseId);
+  return persist({ ...current, trainingDate, updatedAt: new Date().toISOString() });
+}
+
+export async function approveAmandaCertification(portalSlug: string, email: string, courseId: string, adminEmail: string, evidenceVersion: string, quizPassed: boolean) {
+  const current = await getAmandaCourseProgress(portalSlug, email, courseId);
+  if (!quizPassed || !evidenceVersion || evidenceVersion !== certificationEvidenceVersion(current)) throw new Error('Review the current evidence and verify the quiz result before approval.');
+  if (certificateApproved(current)) return current;
+  const now = new Date().toISOString();
+  const reviewed = { ...current, quizVerifiedAt: now };
+  if (!certificateEligible(reviewed)) throw new Error('Case study, quiz, practical evidence, consent and lesson completion are required.');
+  return persist({ ...reviewed, certificateIssuedAt: now, certificateApprovedBy: adminEmail, certificateApprovedEvidence: evidenceVersion, updatedAt: now });
 }

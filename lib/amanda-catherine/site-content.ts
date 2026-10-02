@@ -100,7 +100,7 @@ export const DEFAULT_AMANDA_SITE_CONTENT: AmandaSiteContent = {
   learn: {
     title: 'Clinical confidence, not trend chasing.',
     body:
-      'Education for health professionals, aestheticians, massage therapists, nurses, chiropractors, physiotherapists, kinesiologists, fitness professionals and entrepreneurs. Training pathways include Body Sculpt Certification™, Non-Surgical Tummy Tuck / BBL, Wood Therapy Certification, Reset Practitioner Training, Clinical Mentorship and Glow Pro IPL.',
+      'Education for health professionals, aestheticians, massage therapists, nurses, chiropractors, physiotherapists, kinesiologists, fitness professionals and entrepreneurs. Training pathways include Body Sculpt, Non-Surgical BBL: Glute Build & Sculpt Certification, Wood Therapy and Nervous System Reset. Non-Surgical Tummy Sculpt & Tighten and Clinical Fat Loss Injectables for Face & Body Contouring are separate certifications, with enrollment determined by readiness.',
     imageUrl: '/amanda-catherine/aesthetikine-certificate-premium.png',
   },
   create: {

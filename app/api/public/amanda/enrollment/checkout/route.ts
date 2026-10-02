@@ -1,3 +1,6 @@
+import { amandaKitCheckout, type AmandaKitSelection } from '@/lib/amanda-catherine/kit-fulfillment';
+import { AMANDA_SUPPORT_WORDING } from '@/lib/amanda-catherine/lms-policy';
+import { amandaCourseReady } from '@/lib/amanda-catherine/lms-policy';
 import { NextRequest, NextResponse } from 'next/server';
 import type Stripe from 'stripe';
 import { AMANDA_SELF_ENROLLMENT_COURSES } from '@/lib/amanda-catherine/config';
@@ -31,7 +34,7 @@ export async function POST(req: NextRequest) {
     offerId?: string;
     name?: string;
     email?: string;
-  };
+  } & AmandaKitSelection;
   const offer = AMANDA_SELF_ENROLLMENT_COURSES.find((item) => item.offerId === String(body.offerId || ''));
   const name = String(body.name || '').trim().slice(0, 120);
   const email = String(body.email || '').trim().toLowerCase().slice(0, 254);
@@ -39,12 +42,18 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Choose a course and enter a valid name and email.' }, { status: 400 });
   }
 
+  if (!amandaCourseReady(offer.courseId)) return NextResponse.json({ error: 'This course is waitlist only.' }, { status: 409 });
+
+  let kit;
+  try { kit = await amandaKitCheckout(body); } catch (error) { return NextResponse.json({ error: error instanceof Error ? error.message : 'Kit selection is invalid.' }, { status: 409 }); }
+
   // QA checkout must return to the same isolated preview, never production.
   const origin = process.env.VERCEL_ENV === 'preview'
     ? req.nextUrl.origin
     : canonicalPlatformOrigin();
   const regularPriceCad = offer.compareAtPriceCad ?? offer.priceCad;
   const metadata = {
+    ...kit.metadata,
     portalSlug: 'amanda-catherine',
     amandaOfferId: offer.offerId,
     amandaCourseId: offer.courseId,
@@ -58,6 +67,7 @@ export async function POST(req: NextRequest) {
   };
   const sessionParams: Stripe.Checkout.SessionCreateParams = {
     mode: 'payment',
+    shipping_options: kit.shippingOptions,
     payment_method_types: ['card'],
     allow_promotion_codes: true,
     customer_email: email,
@@ -69,7 +79,7 @@ export async function POST(req: NextRequest) {
         unit_amount: Math.round(offer.priceCad * 100),
         product_data: {
           name: offer.title,
-          description: `Amanda Catherine course enrollment · ${offer.delivery.join(' or ')}`,
+          description: `Practitioner kit included in tuition. ${AMANDA_SUPPORT_WORDING}`,
         },
       },
       quantity: 1,

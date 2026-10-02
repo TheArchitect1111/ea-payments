@@ -1,0 +1,12 @@
+# Tasks: Amanda LMS Locked v2.0
+- [x] Source, repository, constitution and isolated review branch.
+- [x] Entitlement/kit/support/names/certification implementation.
+- [x] Purchase/readiness-aware course menu and dedicated routes.
+- [x] Owner placeholder replacement using existing functions.
+- [x] Login return-flow policy tests and browser smoke tests authored.
+- [x] File-by-file diff and updated wiring audit.
+- [ ] Approved mentorship scheduling URL.
+- [ ] Approved shipping rate schedule.
+- [ ] Live student/admin, payment, mobile and complete menu certification.
+- [ ] Resolve repository-wide verification blockers.
+- [ ] Human merge approval; production verification after separately authorized deployment.

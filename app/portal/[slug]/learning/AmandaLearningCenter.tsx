@@ -1,8 +1,11 @@
 'use client';
 
+import CertificationEvidence from '@/app/components/amanda/CertificationEvidence';
+import Link from 'next/link';
+import { AMANDA_SUPPORT_WORDING } from '@/lib/amanda-catherine/lms-policy';
 import { useEffect, useMemo, useState } from 'react';
 import { ENTREPRENEURIAL_ARTIST_COURSE, type AmandaPortalAudience } from '@/lib/amanda-catherine/config';
-import { coursesForAccount } from '@/lib/amanda-catherine/course-content';
+import { coursesForAccount } from '@/lib/amanda-catherine/course-access';
 import type { AmandaCourseContent, AmandaLessonContent } from '@/lib/amanda-catherine/course-content';
 import type { AmandaCourseProgress } from '@/lib/amanda-catherine/progress-store';
 import { resourcesForAmandaCourse } from '@/lib/amanda-catherine/course-resources';
@@ -45,13 +48,16 @@ export default function AmandaLearningCenter({ audience, assignedCourseIds, isAd
 
   useEffect(() => {
     if (!courseId) return;
+    let active = true;
     void Promise.all([
       fetch(`/api/portal/amanda/progress?courseId=${encodeURIComponent(courseId)}`).then(async (res) => ({ ok: res.ok, data: await res.json() })),
       fetch(`/api/portal/amanda/course-content?courseId=${encodeURIComponent(courseId)}`).then(async (res) => ({ ok: res.ok, data: await res.json() })),
     ]).then(([p, c]) => {
+      if (!active) return;
       if (!p.ok || !c.ok) return setError(p.data.error || c.data.error || 'Unable to open this course.');
       setProgress(p.data.progress); setContent(c.data.content);
-    });
+    }).catch(() => { if (active) setError('Unable to open this course.'); });
+    return () => { active = false; };
   }, [courseId]);
 
   async function saveProgress(patch: Partial<AmandaCourseProgress>) {
@@ -76,8 +82,10 @@ export default function AmandaLearningCenter({ audience, assignedCourseIds, isAd
   }
 
   if (!course) return <section className="ak-learning-empty"><h2>No course assigned yet</h2><p>Amanda will assign your course when enrollment is confirmed.</p></section>;
+  if (error && (!progress || !content)) return <p role="alert">{error}</p>;
   if (!progress || !content) return <p className="ep-module-card-note">Loading your course…</p>;
-  const percent = Math.round((progress.completedLessons.length / course.lessons.length) * 100);
+  const percent = course.lessons.length ? Math.round((progress.completedLessons.length / course.lessons.length) * 100) : 0;
+  if (!content.lessons.length) return <section><h2>{course.title}</h2><p>Course content has not been provided.</p></section>;
   const lesson = content.lessons[selected];
   const releaseAt = progress.lessonReleaseAt?.[lesson.title];
   const released = isAdmin || Boolean(now && releaseAt && new Date(releaseAt).getTime() <= now);
@@ -87,7 +95,8 @@ export default function AmandaLearningCenter({ audience, assignedCourseIds, isAd
   const officialPlaylist = course.id === ENTREPRENEURIAL_ARTIST_COURSE.id ? embedUrl(ENTREPRENEURIAL_ARTIST_COURSE.playlistUrl) : '';
 
   return <section className="ak-learning">
-    <header className="ak-learning__header"><div><p className="ak-learning__eyebrow">My learning</p><h2>{course.title}</h2><p>Watch each lesson, complete the work, and track your path to certification.</p></div><label><span>Program</span><select value={courseId} onChange={(e) => { setError(''); setStatus(''); setSelected(0); setCourseId(e.target.value); }}>{courses.map((item) => <option key={item.id} value={item.id}>{item.title}</option>)}</select></label></header>
+    <p>{AMANDA_SUPPORT_WORDING}</p><Link href="/portal/amanda-catherine/support">Support &amp; mentorship</Link>
+    <header className="ak-learning__header"><div><p className="ak-learning__eyebrow">My learning</p><h2>{course.title}</h2><p>Watch each lesson, complete the work, and track your path to certification.</p></div><label><span>Program</span><select value={courseId} onChange={(e) => { setError(''); setStatus(''); setSelected(0); setProgress(null); setContent(null); setCourseId(e.target.value); }}>{courses.map((item) => <option key={item.id} value={item.id}>{item.title}</option>)}</select></label></header>
     <div className="ak-learning__progress"><strong>{percent}% complete</strong><div className="ak-learning__track"><span style={{ width: `${percent}%` }} /></div><small>{progress.completedLessons.length} of {course.lessons.length} lessons complete</small></div>
     {error ? <p className="ak-learning__error" role="alert">{error}</p> : null}
     {officialPlaylist ? <section className="ak-learning__materials" aria-labelledby="official-course-video-library"><div><p className="ak-learning__eyebrow">Official course videos</p><h3 id="official-course-video-library">The Entrepreneurial Artist video library</h3><p>The original six-part course playlist is restored here as the official video source.</p></div><div className="ak-learning__video"><iframe src={officialPlaylist} title="The Entrepreneurial Artist official course playlist" allow="accelerometer; autoplay; encrypted-media; picture-in-picture" allowFullScreen /></div></section> : null}
@@ -110,6 +119,6 @@ export default function AmandaLearningCenter({ audience, assignedCourseIds, isAd
       <div><p className="ak-learning__eyebrow">Private course library</p><h3 id="course-materials-heading">Course materials</h3><p>Open or download the resources included with your certification program.</p></div>
       <div className="ak-learning__material-grid">{courseResources.map((resource) => <article key={resource.id} className="ak-learning__material-card"><span>{resource.fileType}</span><h4>{resource.title}</h4><p>{resource.description}</p><a className="ep-btn ep-btn-secondary" href={`/api/portal/amanda/resources/${resource.id}`} target="_blank" rel="noopener noreferrer">{resource.fileType === 'DOCX' ? 'Download resource' : 'Open resource'}</a></article>)}</div>
     </section> : null}
-    {!isAdmin ? <section className="ak-learning__requirements"><h3>Completion requirements</h3>{course.practicalRequirements.map((requirement) => <label key={requirement}><input type="checkbox" checked={progress.practicalRequirements.includes(requirement)} onChange={(e) => void saveProgress({ practicalRequirements: e.target.checked ? [...progress.practicalRequirements, requirement] : progress.practicalRequirements.filter((item) => item !== requirement) })} /><span>{requirement.replaceAll('-', ' ')}</span></label>)}<p>{progress.certificateIssuedAt ? `Certificate earned ${new Date(progress.certificateIssuedAt).toLocaleDateString()}.` : 'Your certificate unlocks after all lessons and completion requirements are finished.'}</p>{progress.certificateIssuedAt ? <a className="ep-btn" href={`/api/portal/amanda/certificate?courseId=${courseId}`}>Download certificate</a> : null}</section> : null}
+    {!isAdmin ? <section className="ak-learning__requirements"><h3>Completion requirements</h3><p>Case study, quiz and practical demonstration/evidence. Photos or video require proper client consent.</p><CertificationEvidence onSubmit={async evidence => { await saveProgress({ evidence }); }} /><p>{progress.certificateApprovedBy && progress.certificateIssuedAt ? `Certificate approved ${new Date(progress.certificateIssuedAt).toLocaleDateString()}.` : 'Final certification requires Amanda’s approval in the portal.'}</p>{progress.certificateApprovedBy && progress.certificateIssuedAt ? <a className="ep-btn" href={`/api/portal/amanda/certificate?courseId=${courseId}`}>Download certificate</a> : null}</section> : null}
   </section>;
 }

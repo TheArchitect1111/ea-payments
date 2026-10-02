@@ -1,5 +1,8 @@
 'use client';
 
+import KitFulfillmentFields, { pickupSelection } from '@/app/components/amanda/KitFulfillmentFields';
+import type { AmandaKitSelection } from '@/lib/amanda-catherine/kit-fulfillment';
+import { AMANDA_SUPPORT_WORDING } from '@/lib/amanda-catherine/lms-policy';
 import { FormEvent, useState } from 'react';
 
 type Course = {
@@ -12,8 +15,9 @@ type Course = {
   delivery: string[];
 };
 
-export default function AmandaEnrollmentForm({ courses }: { courses: Course[] }) {
-  const [offerId, setOfferId] = useState(courses[0]?.offerId || '');
+export default function AmandaEnrollmentForm({ courses, initialCourseId }: { courses: Course[]; initialCourseId?: string }) {
+  const [kit, setKit] = useState<AmandaKitSelection>(pickupSelection);
+  const [offerId, setOfferId] = useState(courses.find(course => course.courseId === initialCourseId)?.offerId || courses[0]?.offerId || '');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
@@ -27,7 +31,7 @@ export default function AmandaEnrollmentForm({ courses }: { courses: Course[] })
       const response = await fetch('/api/public/amanda/enrollment/checkout', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ offerId, name, email }),
+        body: JSON.stringify({ offerId, name, email, ...kit }),
       });
       const data = (await response.json().catch(() => ({}))) as { url?: string; error?: string };
       if (!response.ok || !data.url) throw new Error(data.error || 'Secure checkout could not be opened.');
@@ -81,6 +85,8 @@ export default function AmandaEnrollmentForm({ courses }: { courses: Course[] })
         <input id="enrollment-name" name="name" autoComplete="name" required minLength={2} maxLength={120} value={name} onChange={(event) => setName(event.target.value)} className="mt-2 min-h-12 w-full rounded-xl border border-white/30 bg-white px-4 text-[#17130f]" />
         <label className="mt-5 block font-bold" htmlFor="enrollment-email">Email address</label>
         <input id="enrollment-email" name="email" type="email" inputMode="email" autoComplete="email" required maxLength={254} value={email} onChange={(event) => setEmail(event.target.value)} className="mt-2 min-h-12 w-full rounded-xl border border-white/30 bg-white px-4 text-[#17130f]" />
+        <p>{AMANDA_SUPPORT_WORDING}</p>
+        <KitFulfillmentFields value={kit} onChange={setKit} />
         {error ? <p role="alert" className="mt-4 rounded-xl bg-white p-3 font-semibold text-[#8b1229]">{error}</p> : null}
         <button type="submit" disabled={submitting || !offerId} className="mt-6 min-h-14 w-full rounded-full bg-[#c39851] px-5 text-lg font-black text-[#17130f] disabled:cursor-wait disabled:opacity-60">
           {submitting ? 'Opening secure checkout…' : 'Continue to secure checkout'}

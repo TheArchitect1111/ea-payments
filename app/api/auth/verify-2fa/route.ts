@@ -1,3 +1,4 @@
+import { safePortalReturnPath } from '@/lib/auth/portal-return-path';
 import { NextRequest, NextResponse } from 'next/server';
 import { verify2FACode } from '@/lib/ea-auth-2fa';
 import { makeAdminSessionCookie, signAdminSession } from '@/lib/ea-admin-auth';
@@ -109,7 +110,7 @@ export async function POST(req: NextRequest) {
 
       const clientForLanding = await getClientByPortalSlug(slug);
       const destination =
-        payload.data.next ||
+        safePortalReturnPath(payload.data.next) ||
         (await resolvePortalPostLoginPath(slug, clientForLanding));
       const res = NextResponse.json({ ok: true, slug, next: destination });
       res.cookies.set(makeSessionCookie(token));

@@ -46,6 +46,7 @@ export async function GET(
       operation: 'get',
       validUntil,
       useCache: true,
+      access: 'private',
     });
     return NextResponse.redirect(presignedUrl, 307);
   } catch (error) {
