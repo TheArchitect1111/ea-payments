@@ -12,7 +12,7 @@ stripe.checkout.sessions.create = (async (input: Stripe.Checkout.SessionCreatePa
 }) as typeof stripe.checkout.sessions.create;
 const { POST } = await import('../app/api/public/amanda/practitioner-kit/checkout/route');
 const origin='https://preview.example.com';
-const response=await POST(new Request(`${origin}/api/public/amanda/practitioner-kit/checkout`,{method:'POST',headers:{origin,'x-forwarded-for':'test-checkout'},body:JSON.stringify({priceCad:1,currency:'usd',portalSlug:'other-client'})}));
+const response=await POST(new Request(`${origin}/api/public/amanda/practitioner-kit/checkout`,{method:'POST',headers:{origin,'x-forwarded-for':'test-checkout','content-type':'application/json'},body:JSON.stringify({kitFulfillment:'pickup',priceCad:1,currency:'usd',portalSlug:'other-client'})}));
 assert.equal(response.status,200);
 assert.equal((await response.json()).url,'https://checkout.stripe.com/c/pay/cs_test_unit');
 assert.equal(params?.metadata?.amandaKitId,'body-sculpt-practitioner-starter-kit');
@@ -39,6 +39,6 @@ const page=readFileSync('app/amanda-catherine/page.tsx','utf8');
 for(const path of ['lib/amanda-catherine/config.ts','app/api/public/amanda/enrollment/checkout/route.ts','app/portal/amanda-catherine/enroll/page.tsx','app/portal/amanda-catherine/learning/page.tsx','app/portal/amanda-catherine/owner/page.tsx','app/portal/amanda-catherine/owner/layout.tsx','app/portal/amanda-catherine/owner/owner.css']) {
   assert.ok(readFileSync(path,'utf8').length>100, `Protected Amanda contract missing or empty: ${path}`);
 }
-assert.ok(!page.includes('encodeURIComponent(course.id)'));
-assert.ok(page.includes('encodeURIComponent(course.courseId)'));
+assert.ok(page.includes('`/courses/${encodeURIComponent(course.courseId)}`'));
+assert.ok(page.includes('`/amanda-catherine/courses/${encodeURIComponent(course.id)}#waitlist`'));
 console.log('Amanda kit: checkout amount/currency server-owned, CSRF rejected, paid-session validation passed, preview writes suppressed; Jane/imagery/portal/enrollment invariants preserved.');
