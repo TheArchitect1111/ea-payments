@@ -196,3 +196,9 @@ PASS requires approved implementations or requirements for the 14 missing workfl
 **Repository checks:** Resolve the existing shared lint/type/tenant-safety blockers in their authorized scope, then run full lint, type check and tenant suite. Overall remains HOLD until all required access and live functions are verified.
 
 Latest repository type-check re-run exited nonzero with 342 diagnostics; no diagnostics referenced this change’s waitlist, Gmail, menu or public-page files. Full type safety remains Unverified (Repository checks plan).
+
+## Shared tenant-safety follow-up and live routing inspection
+
+`npm run test:tenant-safety` now PASS after the assertion was aligned with the explicit registry chassis set. It verifies exactly dashboard/amplifi/update-hub and an empty input in the production-missing-entitlements branch; no entitlement-gated package defaults are accepted. ECOSYSTEM-MAP fail-closed policy remains distinct from registry chassis retention. No resolver, sender or waitlist logic changed. Full type/lint and live QA limitations remain.
+
+Live HTTP HEAD on Oct 2 returned 404 at `https://aesthetikine.com/amanda-catherine`, with Cloudflare server and WordPress wp-json header. This is external hosting evidence, not an observed EA redirect. GitHub comparison confirmed master is three commits behind bde8d0f (70 changed files). A master merge alone does not configure the external WordPress/Cloudflare host. No production merge/domain change performed in this inspection.

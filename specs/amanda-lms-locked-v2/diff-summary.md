@@ -73,3 +73,9 @@ Overall audit remains HOLD until required functions and access rules are observe
 | `specs/amanda-lms-locked-v2/menu-wiring-audit.md` | Row dispositions and concrete live QA plans; HOLD preserved, shared failing-check evidence retained. |
 
 External provision: created `amanda_waitlist` table `tblIgxYkeHnuvg6eK` in the verified existing Payments & Clients base. No student record or real email was created. No deployment or merge.
+
+## Shared tenant assertion and environment documentation follow-up
+
+- `scripts/test-tenant-safety.mjs`: asserts the exact three registry chassis modules and production empty-input branch; no package fallback or entitlement-gated modules. Correct policy/checkpoint comment. Tenant-safety command PASS.
+- `docs/VERCEL_ENV.md`: exact runtime names, reserved unused AMANDA_GMAIL_USER, durable-save versus verified-delivery distinction; no secrets or runtime changes.
+- `menu-wiring-audit.md`: latest passing tenant-safety evidence and externally hosted live 404 investigation; remaining verification HOLD retained.
