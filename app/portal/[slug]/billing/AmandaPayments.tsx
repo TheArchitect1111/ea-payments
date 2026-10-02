@@ -1,10 +1,14 @@
 'use client';
 
+import KitFulfillmentFields, { pickupSelection } from '@/app/components/amanda/KitFulfillmentFields';
+import type { AmandaKitSelection } from '@/lib/amanda-catherine/kit-fulfillment';
 import { useEffect, useState } from 'react';
+import { amandaCourseReady, AMANDA_SUPPORT_WORDING } from '@/lib/amanda-catherine/lms-policy';
 import { AMANDA_OFFERS } from '@/lib/amanda-catherine/config';
 import type { AmandaPaymentRecord } from '@/lib/amanda-catherine/payment-fulfillment';
 
 export default function AmandaPayments({ email }: { email: string }) {
+  const [kit, setKit] = useState<AmandaKitSelection>(pickupSelection);
   const [busy, setBusy] = useState('');
   const [error, setError] = useState('');
   const [verified, setVerified] = useState(false);
@@ -51,7 +55,7 @@ export default function AmandaPayments({ email }: { email: string }) {
       const res = await fetch('/api/portal/amanda/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ offerId, paymentOption }),
+        body: JSON.stringify({ offerId, paymentOption, ...kit }),
       });
       const data = await res.json() as { url?: string; error?: string };
       if (!res.ok || !data.url) {
@@ -96,8 +100,10 @@ export default function AmandaPayments({ email }: { email: string }) {
       ) : null}
       {verified ? <p className="ep-module-card-note">Payment verified with Stripe and recorded in your portal.</p> : null}
       {error ? <p className="ep-module-card-note" style={{ color: '#b42318' }}>{error}</p> : null}
+      <p>{AMANDA_SUPPORT_WORDING}</p>
+      <KitFulfillmentFields value={kit} onChange={setKit} />
       <ul className="ep-module-list">
-        {AMANDA_OFFERS.map((offer) => (
+        {AMANDA_OFFERS.filter(offer => !('courseId' in offer) || amandaCourseReady(offer.courseId)).map((offer) => (
           <li key={offer.id} className="ep-module-card">
             <p className="ep-module-card-title">{offer.name}</p>
             <p className="ep-module-card-note">CAD ${offer.priceCad.toLocaleString()}</p>

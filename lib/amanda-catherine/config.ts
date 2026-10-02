@@ -1,3 +1,4 @@
+import { amandaCourseReady, AMANDA_SUPPORT_WORDING } from './lms-policy';
 export const AMANDA_PORTAL_PACK_ID = 'amanda-catherine';
 
 export const AMANDA_PORTAL_AUDIENCES = [
@@ -232,7 +233,7 @@ export const AMANDA_OFFERS = [
   },
   {
     id: 'aesthetikine-reset-training',
-    name: 'AesthetiKine Nervous System Reset',
+    name: 'Nervous System Reset',
     priceCad: 997,
     audience: 'practitioner-trainee',
     courseId: 'aesthetikine-reset-training',
@@ -240,7 +241,7 @@ export const AMANDA_OFFERS = [
   },
   {
     id: 'body-sculpt-practitioner-certification',
-    name: 'Body Sculpt Practitioner Certification',
+    name: 'Body Sculpt',
     priceCad: 2497,
     compareAtPriceCad: 4997,
     saleLabel: 'Limited-time sale',
@@ -250,7 +251,7 @@ export const AMANDA_OFFERS = [
   },
   {
     id: 'non-surgical-bbl-training',
-    name: 'Non-Surgical BBL Lift - 1-Day Practitioner Training',
+    name: 'Non-Surgical BBL: Glute Build & Sculpt Certification',
     priceCad: 1497,
     audience: 'practitioner-trainee',
     courseId: 'non-surgical-bbl-training',
@@ -258,7 +259,7 @@ export const AMANDA_OFFERS = [
   },
   {
     id: 'wood-therapy-certification',
-    name: 'Wood Therapy Certification',
+    name: 'Wood Therapy',
     priceCad: 997,
     audience: 'practitioner-trainee',
     courseId: 'wood-therapy-certification',
@@ -266,7 +267,8 @@ export const AMANDA_OFFERS = [
   },
   {
     id: 'non-surgical-tummy-tuck-training',
-    name: 'Non-Surgical Tummy Tuck Sculpt with Fat Dissolving Injections',
+    courseId: 'non-surgical-tummy-tuck-training',
+    name: 'Non-Surgical Tummy Sculpt & Tighten',
     priceCad: 2497,
     audience: 'practitioner-trainee',
     delivery: ['in-person'],
@@ -339,7 +341,6 @@ export const AMANDA_COURSES = [
     title: 'The Entrepreneurial Artist',
     audience: 'student-trainee',
     certificateTitle: 'The Entrepreneurial Artist — Six-Week Program',
-    passingScore: 80,
     practicalRequirements: ['completed-reflection', 'impact-and-income-plan'],
     lessons: [
       'Recognize Your God-Given Gifts',
@@ -355,7 +356,6 @@ export const AMANDA_COURSES = [
     title: 'Firm Foundation',
     audience: 'member-community-participant',
     certificateTitle: 'Firm Foundation — Six-Week Mentorship Program',
-    passingScore: 80,
     practicalRequirements: ['completed-reflection', 'personal-action-plan'],
     lessons: [
       'Purpose and Foundation',
@@ -368,11 +368,10 @@ export const AMANDA_COURSES = [
   },
   {
     id: 'aesthetikine-reset-training',
-    title: 'AesthetiKine Nervous System Reset',
+    title: 'Nervous System Reset',
     audience: 'student-trainee',
-    certificateTitle: 'AesthetiKine Nervous System Reset — Certificate of Completion',
-    passingScore: 80,
-    practicalRequirements: ['practical-demonstration', 'course-assessment'],
+    certificateTitle: 'Nervous System Reset — Certificate of Completion',
+    practicalRequirements: ['case-study', 'quiz', 'practical-demonstration'],
     lessons: [
       'Nervous System Foundations',
       'Client-Centered Session Flow',
@@ -384,11 +383,10 @@ export const AMANDA_COURSES = [
   },
   {
     id: 'body-sculpt-practitioner-certification',
-    title: 'Body Sculpt Practitioner Certification',
+    title: 'Body Sculpt',
     audience: 'student-trainee',
-    certificateTitle: 'Body Sculpt Practitioner Certification — Certificate of Completion',
-    passingScore: 80,
-    practicalRequirements: ['practical-demonstration', 'course-assessment'],
+    certificateTitle: 'Body Sculpt — Certificate of Completion',
+    practicalRequirements: ['case-study', 'quiz', 'practical-demonstration'],
     lessons: [
       'Foundations and Safety',
       'Assessment and Treatment Planning',
@@ -400,27 +398,24 @@ export const AMANDA_COURSES = [
   },
   {
     id: 'non-surgical-bbl-training',
-    title: 'Non-Surgical Tummy Tuck / BBL Training',
+    title: 'Non-Surgical BBL: Glute Build & Sculpt Certification',
     audience: 'student-trainee',
-    certificateTitle: 'Non-Surgical Tummy Tuck / BBL Training — Certificate of Completion',
-    passingScore: 80,
-    practicalRequirements: ['practical-demonstration', 'course-assessment'],
+    certificateTitle: 'Non-Surgical BBL: Glute Build & Sculpt Certification — Certificate of Completion',
+    practicalRequirements: ['case-study', 'quiz', 'practical-demonstration'],
     lessons: [
       'Scope and Safety',
       'Client Assessment',
       'Treatment Planning',
-      'Non-Surgical Tummy Protocol',
-      'BBL Lift Protocol',
+      'Non-Surgical BBL: Glute Build & Sculpt Certification',
       'Practical Assessment',
     ],
   },
   {
     id: 'wood-therapy-certification',
-    title: 'Wood Therapy Certification',
+    title: 'Wood Therapy',
     audience: 'student-trainee',
-    certificateTitle: 'Wood Therapy Certification — Certificate of Completion',
-    passingScore: 80,
-    practicalRequirements: ['practical-demonstration', 'course-assessment'],
+    certificateTitle: 'Wood Therapy — Certificate of Completion',
+    practicalRequirements: ['case-study', 'quiz', 'practical-demonstration'],
     lessons: [
       'Foundations and Safety',
       'Tool Selection',
@@ -430,15 +425,32 @@ export const AMANDA_COURSES = [
       'Practical Assessment',
     ],
   },
+  {
+    id: 'non-surgical-tummy-tuck-training',
+    title: 'Non-Surgical Tummy Sculpt & Tighten',
+    audience: 'student-trainee',
+    certificateTitle: 'Non-Surgical Tummy Sculpt & Tighten',
+    practicalRequirements: ['case-study', 'quiz', 'practical-demonstration'],
+    lessons: [],
+  },
+  {
+    id: 'clinical-fat-loss-injectables',
+    title: 'Clinical Fat Loss Injectables for Face & Body Contouring',
+    audience: 'student-trainee',
+    certificateTitle: 'Clinical Fat Loss Injectables for Face & Body Contouring',
+    practicalRequirements: ['case-study', 'quiz', 'practical-demonstration'],
+    lessons: [],
+  },
 ] as const;
 
 export const AMANDA_SELF_ENROLLMENT_COURSES = AMANDA_OFFERS.filter(
-  (offer): offer is (typeof AMANDA_OFFERS)[number] & { courseId: string } => 'courseId' in offer,
+  (offer): offer is (typeof AMANDA_OFFERS)[number] & { courseId: string } => 'courseId' in offer && amandaCourseReady(offer.courseId),
 ).map((offer) => ({
   offerId: offer.id,
   courseId: offer.courseId,
   title: offer.name,
   priceCad: offer.priceCad,
+  supportWording: AMANDA_SUPPORT_WORDING,
   compareAtPriceCad: 'compareAtPriceCad' in offer ? offer.compareAtPriceCad : undefined,
   saleLabel: 'saleLabel' in offer ? offer.saleLabel : undefined,
   delivery: 'delivery' in offer ? offer.delivery : [],

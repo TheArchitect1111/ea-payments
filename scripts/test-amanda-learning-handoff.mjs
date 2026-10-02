@@ -16,7 +16,7 @@ assert.match(staticLearningRoute, /LearningPage/, 'Amanda static route must rend
 assert.match(moduleGate, /hasAmandaLearningAccess/, 'Training gate must honor learner-level course access');
 assert.match(moduleGate, /moduleId === 'training'/, 'Learner override must be scoped to training');
 assert.match(accessStore, /AmandaAccessProfileSchema\.safeParse/, 'Stored learner grants must be schema validated');
-assert.match(accessStore, /if \(!profileSave\.ok\)/, 'Fulfillment must fail closed when course assignment persistence fails');
+assert.match(accessStore, /!profileSave\.ok \|\| \(process\.env\.VERCEL_ENV === 'production' && !profileSave\.persistedToAirtable\)/, 'Production fulfillment must fail closed unless course assignment is durably persisted');
 assert.match(checkoutFulfillment, /provisionAmandaClientAccess/, 'Stripe fulfillment must provision course access');
 assert.match(checkoutFulfillment, /courseIds: record\.courseId \? \[record\.courseId\] : \[\]/, 'Purchased course must be assigned');
 assert.match(middleware, /login\.searchParams\.set\('next', `\$\{pathname\}\$\{request\.nextUrl\.search\}`\)/, 'Unauthenticated course links must preserve the post-login destination');

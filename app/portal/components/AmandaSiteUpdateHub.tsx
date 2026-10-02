@@ -251,7 +251,7 @@ export default function AmandaSiteUpdateHub({ slug, initialContent }: Props) {
 
       <div className="ak-editor-status" role="status">● {status}</div>
 
-      <div className="eva-card">
+      <div className="eva-card" id="eva">
         <div className="eva-heading">
           <div className="eva-orb">✦</div>
           <div><h2>Eva</h2><p>Your website update assistant</p></div>

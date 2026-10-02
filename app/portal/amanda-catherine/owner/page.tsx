@@ -4,10 +4,10 @@ import { listPortalFormSubmissions } from '@/lib/portal-forms/store';
 export const metadata={title:'Amanda Catherine Portal'};
 const quick=[
  ['◫','Book Appointment','/portal/amanda-catherine/owner/appointments'],
- ['◍','Add New Client','/portal/amanda-catherine/owner/clients'],
- ['▭','Create Program','/portal/amanda-catherine/owner/academy'],
- ['⧉','View Orders','/portal/amanda-catherine/owner/insights'],
- ['◫','Send Message','/portal/amanda-catherine/owner/eva'],
+ ['◍','Review Client Intake','/portal/amanda-catherine/owner/clients'],
+ ['▭','Review Certifications','/portal/amanda-catherine/owner/academy'],
+ ['⧉','View Orders','/portal/amanda-catherine/owner/practitioner-kit'],
+ ['◫','Send Message','/portal/amanda-catherine/messaging'],
  ['↗','Open Marketing Kit','/portal/amanda-catherine/owner/marketing']
 ] as const;
 

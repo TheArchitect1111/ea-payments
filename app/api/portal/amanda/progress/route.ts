@@ -33,6 +33,7 @@ export async function POST(req: NextRequest) {
     courseId?: string;
     completedLessons?: string[];
     practicalRequirements?: string[];
+    evidence?: import('@/lib/amanda-catherine/progress-store').AmandaCourseProgress['evidence'];
   };
   if (!body.courseId) return NextResponse.json({ error: 'courseId required.' }, { status: 400 });
   try {
@@ -42,6 +43,7 @@ export async function POST(req: NextRequest) {
     const progress = await updateAmandaCourseProgress(tenant.portalSlug, auth.session.email, body.courseId, {
       completedLessons: body.completedLessons,
       practicalRequirements: body.practicalRequirements,
+      evidence: body.evidence,
     });
     return NextResponse.json({ ok: true, progress });
   } catch (error) {

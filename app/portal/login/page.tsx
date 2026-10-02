@@ -1,3 +1,4 @@
+import { safePortalReturnPath } from '@/lib/auth/portal-return-path';
 import Image from 'next/image';
 import Link from 'next/link';
 import RealmLoginCard from '@/components/auth/RealmLoginCard';
@@ -9,13 +10,6 @@ const copy = getRealmLoginCopy('portal');
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
-/** Only honor same-origin relative next paths; otherwise let the auth exchange pick the client hub. */
-function safeNextPath(raw: string | null): string | undefined {
-  if (!raw || !raw.startsWith('/') || raw.startsWith('//')) return undefined;
-  // Never send portal-realm logins into the Simplifi product shell by default.
-  if (raw === '/simplifi/capture' || raw.startsWith('/simplifi/')) return undefined;
-  return raw;
-}
 
 function single(value: string | string[] | undefined): string | null {
   return Array.isArray(value) ? value[0] ?? null : value ?? null;
@@ -130,7 +124,7 @@ function DefaultLoginBrand() {
 
 export default async function PortalLoginPage({ searchParams }: { searchParams: SearchParams }) {
   const params = await searchParams;
-  const nextPath = safeNextPath(single(params.next));
+  const nextPath = safePortalReturnPath(single(params.next));
   const error = magicLinkErrorMessage('portal', single(params.error));
   const amanda = isAmandaPortal(nextPath);
   const amandaLearning = isAmandaLearningPortal(nextPath);

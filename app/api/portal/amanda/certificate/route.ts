@@ -3,7 +3,7 @@ import path from 'node:path';
 import { NextRequest, NextResponse } from 'next/server';
 import { guardPortalApi, portalApiUnauthorized, portalTenant } from '@/lib/api/portal-route';
 import { AMANDA_COURSES } from '@/lib/amanda-catherine/config';
-import { certificateEligible, getAmandaCourseProgress } from '@/lib/amanda-catherine/progress-store';
+import { certificateApproved, getAmandaCourseProgress } from '@/lib/amanda-catherine/progress-store';
 import { listPortalFormSubmissions } from '@/lib/portal-forms/store';
 import { resolveAmandaAudience } from '@/lib/amanda-catherine/audience';
 import { accountCanAccessCourse } from '@/lib/amanda-catherine/course-content';
@@ -61,7 +61,7 @@ export async function GET(req: NextRequest) {
   }
 
   const progress = await getAmandaCourseProgress(tenant.portalSlug, auth.session.email, courseId);
-  if (!certificateEligible(progress) || !progress.certificateIssuedAt) {
+  if (!certificateApproved(progress) || !progress.certificateIssuedAt) {
     return NextResponse.json({ error: 'Certificate requirements are not complete.' }, { status: 403 });
   }
 

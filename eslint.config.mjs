@@ -1,11 +1,13 @@
 import { defineConfig, globalIgnores } from "eslint/config";
 import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
+import reactHooks from "eslint-plugin-react-hooks";
 
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
   {
+    plugins: { 'react-hooks': reactHooks },
     rules: {
       'react-hooks/set-state-in-effect': 'warn',
       '@next/next/no-html-link-for-pages': 'warn',
@@ -35,6 +37,14 @@ const eslintConfig = defineConfig([
     files: ['app/api/portal/amplifi/create-campaign/route.ts'],
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
+    },
+  },
+  // These two audited utility scripts intentionally use CommonJS for Node and vm harness behavior.
+  {
+    files: ['scripts/production-certification.js', 'scripts/test-amanda-enrollment-preview-route.cjs'],
+    rules: {
+      '@typescript-eslint/no-require-imports': 'off',
+      '@next/next/no-assign-module-variable': 'off',
     },
   },
   // Override default ignores of eslint-config-next.

@@ -1,3 +1,6 @@
+import { amandaKitCheckout, type AmandaKitSelection } from '@/lib/amanda-catherine/kit-fulfillment';
+import { AMANDA_SUPPORT_WORDING } from '@/lib/amanda-catherine/lms-policy';
+import { amandaCourseReady } from '@/lib/amanda-catherine/lms-policy';
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { guardPortalApi, portalApiUnauthorized, portalTenant } from '@/lib/api/portal-route';
@@ -50,7 +53,7 @@ export async function POST(req: NextRequest) {
   if (!process.env.STRIPE_SECRET_KEY) {
     return NextResponse.json({ error: 'Secure payments are not configured yet.' }, { status: 503 });
   }
-  const body = await req.json() as { offerId?: string; membershipId?: string; paymentOption?: 'full' | 'deposit' | 'test' };
+  const body = await req.json() as { offerId?: string; membershipId?: string; paymentOption?: 'full' | 'deposit' | 'test' } & AmandaKitSelection;
   const membership = AMANDA_MEMBERSHIPS.find((item) => item.id === body.membershipId);
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
   const clientEmail = auth.session.email.trim().toLowerCase();
@@ -80,6 +83,8 @@ export async function POST(req: NextRequest) {
   const offer = AMANDA_OFFERS.find((item) => item.id === body.offerId);
   if (!offer) return NextResponse.json({ error: 'Offer not found.' }, { status: 404 });
 
+  if ('courseId' in offer && !amandaCourseReady(offer.courseId)) return NextResponse.json({ error: 'This course is waitlist only.' }, { status: 409 });
+
   const isTest = body.paymentOption === 'test';
   if (isTest && !(await canUseTestCheckout(auth.session.role, tenant.portalSlug, clientEmail))) {
     return NextResponse.json({ error: 'Private test checkout is restricted to Amanda administrators.' }, { status: 403 });
@@ -94,9 +99,14 @@ export async function POST(req: NextRequest) {
     amountCad = configured;
   }
 
+  let kit = { metadata: {} as Record<string, string>, shippingOptions: [] as Stripe.Checkout.SessionCreateParams.ShippingOption[] };
+  if ('courseId' in offer) {
+    try { kit = await amandaKitCheckout(body); } catch (error) { return NextResponse.json({ error: error instanceof Error ? error.message : 'Kit selection is invalid.' }, { status: 409 }); }
+  }
   const paymentLabel = isTest ? ' — PRIVATE $1 TEST' : body.paymentOption === 'deposit' ? ' — Deposit' : '';
   const sessionParams: Stripe.Checkout.SessionCreateParams = {
     mode: 'payment',
+    shipping_options: kit.shippingOptions,
     payment_method_types: ['card'],
     allow_promotion_codes: !isTest,
     customer_email: clientEmail,
@@ -111,12 +121,13 @@ export async function POST(req: NextRequest) {
             ? `Private Amanda Catherine workflow test. Normal price CAD $${offer.priceCad}.`
             : body.paymentOption === 'deposit'
               ? `Deposit toward CAD $${offer.priceCad}`
-              : undefined,
+              : 'courseId' in offer ? `Practitioner kit included in tuition. ${AMANDA_SUPPORT_WORDING}` : undefined,
         },
       },
       quantity: 1,
     }],
     metadata: {
+      ...kit.metadata,
       portalSlug: tenant.portalSlug,
       amandaOfferId: offer.id,
       clientEmail,

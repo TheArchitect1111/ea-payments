@@ -83,7 +83,16 @@ assert.match(portalSessionResolver, /!hasRequiredOrganization\(session\)/, 'Both
 
 const portalModules = read('lib/modules/portal-modules.ts');
 assert.match(portalModules, /NODE_ENV === 'production' && !isDemo/, 'Production entitlement fallback must be explicit');
-assert.match(portalModules, /return new Set<ModuleId>\(\)/, 'Missing production entitlements must return no modules');
+// ECOSYSTEM-MAP requires entitlement-gated access to fail closed. Separately,
+// registry.ts defines the standard chassis; retaining only that set grants no
+// additional entitlement-gated modules. Checkpoint d48f439 used package fallback
+// without this production branch; it is historical context, not this policy's source.
+const registrySource = read('lib/modules/registry.ts');
+const chassisDeclaration = registrySource.match(/CHASSIS_STANDARD_MODULE_IDS: ModuleId\[\] = \[([^\]]+)\]/);
+assert.ok(chassisDeclaration, 'Standard chassis declaration must be explicit');
+assert.deepEqual([...chassisDeclaration[1].matchAll(/'([^']+)'/g)].map(match => match[1]), ['dashboard', 'amplifi', 'update-hub'], 'Only the approved three standard chassis modules may be retained');
+assert.match(portalModules, /function withChassisStandardModules\(moduleIds: Iterable<ModuleId>\): Set<ModuleId>\s*\{\s*return new Set<ModuleId>\(\[\.\.\.CHASSIS_STANDARD_MODULE_IDS, \.\.\.moduleIds\]\);\s*\}/, 'Chassis helper must add only registered standard modules and its explicit input');
+assert.match(portalModules, /if \(process\.env\.NODE_ENV === 'production' && !isDemo\)\s*\{\s*return withChassisStandardModules\(\[\]\);\s*\}/, 'Missing production entitlements must retain only the standard chassis, with no package or entitlement-gated fallback');
 
 
 const experienceStore = read('lib/experience-builder/page-store.ts');

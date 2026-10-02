@@ -1,3 +1,4 @@
+import { amandaCourseReady } from './lms-policy';
 import crypto from 'node:crypto';
 import {
   createOrUpdateClientRecord,
@@ -50,7 +51,7 @@ export async function getAmandaAssignedAudience(portalSlug: string, email: strin
 export async function getAmandaAssignedCourseIds(portalSlug: string, email: string) {
   const stored = await loadStudioRecord<unknown>('experience', accessProfileId(portalSlug, email));
   const profile = AmandaAccessProfileSchema.safeParse(stored);
-  return profile.success ? profile.data.courseIds : [...(invitedAmandaLearner(email)?.courseIds || [])];
+  return (profile.success ? profile.data.courseIds : [...(invitedAmandaLearner(email)?.courseIds || [])]).filter(amandaCourseReady);
 }
 
 /** Paid or explicitly invited learners may open Amanda's training surface even
@@ -125,6 +126,7 @@ export async function provisionAmandaClientAccess(input: {
   transactionId?: string;
   courseIds?: string[];
 }) {
+  if ((input.courseIds || []).some((id) => !amandaCourseReady(id))) return { ok: false as const, error: 'This course is waitlist only.' };
   const email = input.email.trim().toLowerCase();
   if (!email || !email.includes('@')) return { ok: false as const, error: 'A valid client email is required.' };
   const name = displayName(input.name || '', email);
@@ -174,7 +176,7 @@ export async function provisionAmandaClientAccess(input: {
   const existingProfileResult = AmandaAccessProfileSchema.safeParse(existingStoredProfile);
   const existingProfile = existingProfileResult.success ? existingProfileResult.data : null;
   const priorCourseIds = existingProfile?.courseIds || [];
-  const courseIds = [...new Set([...priorCourseIds, ...(input.courseIds || [])])];
+  const courseIds = [...new Set([...priorCourseIds, ...(input.courseIds || [])])].filter(amandaCourseReady);
   const accessChanged = !existingProfile || courseIds.some((courseId) => !priorCourseIds.includes(courseId));
   const profileSave = await saveStudioRecord({
     recordType: 'experience',
@@ -190,7 +192,7 @@ export async function provisionAmandaClientAccess(input: {
       updatedAt: new Date().toISOString(),
     } satisfies AmandaAccessProfile,
   });
-  if (!profileSave.ok) {
+  if (!profileSave.ok || (process.env.VERCEL_ENV === 'production' && !profileSave.persistedToAirtable)) {
     return { ok: false as const, error: profileSave.error || 'Course assignment could not be saved.' };
   }
 
