@@ -29,7 +29,7 @@ for (const [label, slug] of ownerDestinations) {
   assert.ok(ownerSections.includes(`${slug.includes('-') ? `'${slug}'` : slug}:`), `owner section registry is missing ${slug}`);
 }
 
-assert.ok(publicPage.includes('/portal/amanda-catherine/enroll?course='), 'public course enrollment route is missing');
+assert.ok(publicPage.includes('href={`/courses/${encodeURIComponent(course.courseId)}`}'), 'public course enrollment route is missing');
 assert.ok(publicPage.includes('/portal/login?next=%2Fportal%2Famanda-catherine%2Flearning'), 'returning-student learning route is missing');
 assert.ok(publicPage.includes('/amanda-catherine/private/practitioner-kit'), 'public practitioner-kit route is missing');
 assert.ok(!publicPage.includes('/portal/amanda-catherine/owner'), 'public visitors must never be routed into the owner portal');
