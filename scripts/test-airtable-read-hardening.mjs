@@ -15,6 +15,11 @@ assert.equal(loads, 2, 'tenant keys must remain isolated');
 now = 60_000;
 await cache.get('experience:tenant-a', async () => ({ rows: [++loads] }));
 assert.equal(loads, 3, 'expired reads should refresh');
+await cache.get('experience:tenant-a:course', async () => ({ rows: [++loads] }));
+await cache.get('experience:tenant-b:course', async () => ({ rows: [++loads] }));
+cache.invalidatePrefix('experience:tenant-a:');
+await cache.get('experience:tenant-a:course', async () => ({ rows: [++loads] }));
+assert.equal(loads, 6, 'writes should invalidate only the selected tenant cache prefix');
 
 const concurrentCache = createTtlReadCache(60_000, () => now);
 let concurrentLoads = 0;
