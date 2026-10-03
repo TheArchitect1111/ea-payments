@@ -4,6 +4,7 @@
  */
 
 import { createAirtableRateLimitMonitor } from './airtable-rate-limit-monitor.mjs';
+import { createTtlReadCache } from './ttl-read-cache.mjs';
 
 const BASE_URL = 'https://api.airtable.com/v0';
 const AIRTABLE_RETRY_LIMIT = 3;
@@ -17,7 +18,6 @@ function invalidateAirtableReadCache(table: string): void {
   if (!AIRTABLE_CACHEABLE_READ_TABLES.has(table)) return;
   airtableReadCache.invalidatePrefix(`${BASE_URL}/${AIRTABLE_BASE_ID}/${encodeURIComponent(table)}?`);
 }
-
 
 const observeAirtableRateLimit = createAirtableRateLimitMonitor({
   threshold: 5,
