@@ -10,6 +10,11 @@ const TABLE = process.env.AIRTABLE_CREATIVE_STUDIO_TABLE ?? 'Creative Studio';
 const COMPRESSED_PREFIX = 'ea:gzip-base64:';
 const COMPRESS_THRESHOLD = 60_000;
 
+import { createTtlReadCache } from './ttl-read-cache.mjs';
+
+// 60-second tenant-scoped cache with request coalescing for repeated portal list reads.
+const studioListReadCache = createTtlReadCache(60_000);
+
 type MemoryRow = {
   payload: string;
   organizationId: string;
@@ -81,6 +86,7 @@ export async function saveStudioRecord(input: {
     title: input.title,
     updatedAt,
   });
+  studioListReadCache.invalidate(`${input.recordType}:${input.organizationId}`);
 
   if (!airtableConfigured()) {
     return { ok: true, persistedToAirtable: false, error: 'Airtable not configured' };
@@ -168,7 +174,7 @@ export async function loadStudioRecord<T>(
   }
 }
 
-export async function listStudioRecords<T>(
+async function loadStudioRecordsUncached<T>(
   recordType: 'campaign' | 'brand' | 'media' | 'experience',
   organizationId: string,
 ): Promise<T[]> {
@@ -219,6 +225,16 @@ export async function listStudioRecords<T>(
     console.error('[creative-studio] Airtable list failed:', err);
     return fromMemory;
   }
+}
+
+export async function listStudioRecords<T>(
+  recordType: 'campaign' | 'brand' | 'media' | 'experience',
+  organizationId: string,
+): Promise<T[]> {
+  // Key includes both record type and tenant organization to prevent cross-tenant reuse.
+  return studioListReadCache.get(`${recordType}:${organizationId}`, () =>
+    loadStudioRecordsUncached<T>(recordType, organizationId),
+  );
 }
 
 export async function listAllStudioRecords<T>(
