@@ -209,9 +209,10 @@ export function buildOpportunityPayload(input: {
 }
 
 export function embedOpportunityPayload(description: string, payload: OpportunityExperiencePayload): string {
-  const summary = description.trim();
+  const summary = description.split(OPP_JSON_MARKER, 1)[0].trim();
   const json = JSON.stringify(payload);
-  return `${summary}\n\n${OPP_JSON_MARKER}\n${json}`;
+  const embedded = `${OPP_JSON_MARKER}\n${json}`;
+  return summary ? `${summary}\n\n${embedded}` : embedded;
 }
 
 export function parseOpportunityPayload(capture: CaptureRecord): OpportunityExperiencePayload | null {
