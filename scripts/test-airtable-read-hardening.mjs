@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { createTtlReadCache } from '../lib/creative-studio/ttl-read-cache.mjs';
+import { createTtlReadCache } from '../lib/data/ttl-read-cache.mjs';
 import { createAirtableRateLimitMonitor } from '../lib/data/airtable-rate-limit-monitor.mjs';
 
 let now = 0;
@@ -50,6 +50,7 @@ observe429('https://api.airtable.com/v0/app/base/Client%20Records');
 assert.equal(warnings.length, 1, 'six 429s in a minute should warn');
 assert.equal(warnings[0].level, 'warn');
 assert.equal(warnings[0].count, 6);
+assert.equal(warnings[0].requestPath, 'base/Client%20Records');
 for (let i = 0; i < 3; i += 1) observe429('https://api.airtable.com/v0/app/base/Client%20Records');
 assert.equal(warnings.length, 1, 'warning should be deduplicated during the same minute');
 monitorNow += 60_001;
