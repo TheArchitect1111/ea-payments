@@ -7,6 +7,14 @@ const BASE_URL = 'https://api.airtable.com/v0';
 const AIRTABLE_RETRY_LIMIT = 3;
 const AIRTABLE_RATE_LIMIT_COOLDOWN_MS = 30_000;
 
+import { createAirtableRateLimitMonitor } from './airtable-rate-limit-monitor.mjs';
+
+const observeAirtableRateLimit = createAirtableRateLimitMonitor({
+  threshold: 5,
+  windowMs: 60_000,
+  warn: (event) => console.warn('[airtable-rate-limit-alert]', JSON.stringify(event)),
+});
+
 export const AIRTABLE_BASE_ID =
   process.env.AIRTABLE_PAYMENTS_BASE_ID?.trim() || 'appv0YoLIMY45fmDA';
 
@@ -48,6 +56,9 @@ async function airtableFetch(url: string, init: RequestInit): Promise<Response> 
   for (let attempt = 0; attempt < AIRTABLE_RETRY_LIMIT; attempt += 1) {
     const response = await fetch(url, init);
     lastResponse = response;
+    if (response.status === 429) {
+      observeAirtableRateLimit(url);
+    }
     if (response.status !== 429 && response.status < 500) return response;
     if (attempt === AIRTABLE_RETRY_LIMIT - 1) return response;
     await new Promise((resolve) => setTimeout(resolve, retryDelayMs(response, attempt)));
