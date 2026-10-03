@@ -3,11 +3,12 @@
  * New stores should use this module — not inline fetch + authHeaders.
  */
 
+import { createAirtableRateLimitMonitor } from './airtable-rate-limit-monitor.mjs';
+
 const BASE_URL = 'https://api.airtable.com/v0';
 const AIRTABLE_RETRY_LIMIT = 3;
 const AIRTABLE_RATE_LIMIT_COOLDOWN_MS = 30_000;
 
-import { createAirtableRateLimitMonitor } from './airtable-rate-limit-monitor.mjs';
 
 const observeAirtableRateLimit = createAirtableRateLimitMonitor({
   threshold: 5,
