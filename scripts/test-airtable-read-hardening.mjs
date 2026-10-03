@@ -1,6 +1,15 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { createTtlReadCache } from '../lib/data/ttl-read-cache.mjs';
 import { createAirtableRateLimitMonitor } from '../lib/data/airtable-rate-limit-monitor.mjs';
+
+
+const airtableClientSource = readFileSync(new URL('../lib/data/airtable-client.ts', import.meta.url), 'utf8');
+assert.match(airtableClientSource, /AIRTABLE_CACHEABLE_READ_TABLES = new Set\(\['Creative Studio', 'Organizations'\]\)/);
+assert.match(airtableClientSource, /return airtableReadCache\.get\(url\.toString\(\), executeQuery\)/);
+assert.match(airtableClientSource, /if \(!AIRTABLE_CACHEABLE_READ_TABLES\.has\(table\)\) return executeQuery\(\)/);
+assert.match(airtableClientSource, /if \(created\) invalidateAirtableReadCache\(table\)/);
+assert.match(airtableClientSource, /invalidateAirtableReadCache\(table\);\s+return updated/);
 
 let now = 0;
 const cache = createTtlReadCache(60_000, () => now);
