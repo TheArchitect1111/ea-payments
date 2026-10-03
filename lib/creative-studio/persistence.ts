@@ -1,4 +1,5 @@
 import { gunzipSync, gzipSync } from 'node:zlib';
+import { createTtlReadCache } from './ttl-read-cache.mjs';
 import {
   airtableConfigured,
   airtableQuery,
@@ -10,7 +11,6 @@ const TABLE = process.env.AIRTABLE_CREATIVE_STUDIO_TABLE ?? 'Creative Studio';
 const COMPRESSED_PREFIX = 'ea:gzip-base64:';
 const COMPRESS_THRESHOLD = 60_000;
 
-import { createTtlReadCache } from './ttl-read-cache.mjs';
 
 // 60-second tenant-scoped cache with request coalescing for repeated portal list reads.
 const studioListReadCache = createTtlReadCache(60_000);
