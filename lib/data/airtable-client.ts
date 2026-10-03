@@ -3,9 +3,27 @@
  * New stores should use this module — not inline fetch + authHeaders.
  */
 
+import { createAirtableRateLimitMonitor } from './airtable-rate-limit-monitor.mjs';
+import { createTtlReadCache } from './ttl-read-cache.mjs';
+
 const BASE_URL = 'https://api.airtable.com/v0';
 const AIRTABLE_RETRY_LIMIT = 3;
 const AIRTABLE_RATE_LIMIT_COOLDOWN_MS = 30_000;
+
+const AIRTABLE_READ_CACHE_TTL_MS = 60_000;
+const AIRTABLE_CACHEABLE_READ_TABLES = new Set(['Creative Studio', 'Organizations']);
+const airtableReadCache = createTtlReadCache(AIRTABLE_READ_CACHE_TTL_MS);
+
+function invalidateAirtableReadCache(table: string): void {
+  if (!AIRTABLE_CACHEABLE_READ_TABLES.has(table)) return;
+  airtableReadCache.invalidatePrefix(`${BASE_URL}/${AIRTABLE_BASE_ID}/${encodeURIComponent(table)}?`);
+}
+
+const observeAirtableRateLimit = createAirtableRateLimitMonitor({
+  threshold: 5,
+  windowMs: 60_000,
+  warn: (event) => console.warn('[airtable-rate-limit-alert]', JSON.stringify(event)),
+});
 
 export const AIRTABLE_BASE_ID =
   process.env.AIRTABLE_PAYMENTS_BASE_ID?.trim() || 'appv0YoLIMY45fmDA';
@@ -48,6 +66,9 @@ async function airtableFetch(url: string, init: RequestInit): Promise<Response> 
   for (let attempt = 0; attempt < AIRTABLE_RETRY_LIMIT; attempt += 1) {
     const response = await fetch(url, init);
     lastResponse = response;
+    if (response.status === 429) {
+      observeAirtableRateLimit(url);
+    }
     if (response.status !== 429 && response.status < 500) return response;
     if (attempt === AIRTABLE_RETRY_LIMIT - 1) return response;
     await new Promise((resolve) => setTimeout(resolve, retryDelayMs(response, attempt)));
@@ -82,21 +103,26 @@ export async function airtableQuery(
     url.searchParams.set('sort[0][direction]', options.sortDirection ?? 'desc');
   }
 
-  const res = await airtableFetch(url.toString(), {
-    headers: airtableAuthHeaders(),
-    cache: 'no-store',
-  });
+  const executeQuery = async (): Promise<AirtableRecord[]> => {
+    const res = await airtableFetch(url.toString(), {
+      headers: airtableAuthHeaders(),
+      cache: 'no-store',
+    });
 
-  if (!res.ok) {
-    const text = await res.text();
-    if (res.status === 404 || text.includes('INVALID_PERMISSIONS_OR_MODEL_NOT_FOUND')) {
-      return [];
+    if (!res.ok) {
+      const text = await res.text();
+      if (res.status === 404 || text.includes('INVALID_PERMISSIONS_OR_MODEL_NOT_FOUND')) {
+        return [];
+      }
+      throw new Error(`airtableQuery ${table} ${res.status}: ${text}`);
     }
-    throw new Error(`airtableQuery ${table} ${res.status}: ${text}`);
-  }
 
-  const data = (await res.json()) as { records?: AirtableRecord[] };
-  return data.records ?? [];
+    const data = (await res.json()) as { records?: AirtableRecord[] };
+    return data.records ?? [];
+  };
+
+  if (!AIRTABLE_CACHEABLE_READ_TABLES.has(table)) return executeQuery();
+  return airtableReadCache.get(url.toString(), executeQuery);
 }
 
 export async function airtableCreate(
@@ -116,7 +142,9 @@ export async function airtableCreate(
   }
 
   const data = (await res.json()) as { records?: AirtableRecord[] };
-  return data.records?.[0] ?? null;
+  const created = data.records?.[0] ?? null;
+  if (created) invalidateAirtableReadCache(table);
+  return created;
 }
 
 export async function airtableUpdate(
@@ -139,7 +167,9 @@ export async function airtableUpdate(
     return null;
   }
 
-  return res.json() as Promise<AirtableRecord>;
+  const updated = (await res.json()) as AirtableRecord;
+  invalidateAirtableReadCache(table);
+  return updated;
 }
 
 export async function airtableUpsertByField(

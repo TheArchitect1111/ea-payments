@@ -22,6 +22,8 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 20, cache: npm }
       - run: npm ci
+      - name: Airtable read hardening
+        run: npm run test:airtable-read-hardening
       - name: Production protection
         run: node scripts/test-production-protection.mjs
       - name: Tenant release safety
