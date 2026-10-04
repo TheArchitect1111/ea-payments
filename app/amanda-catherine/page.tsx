@@ -1,28 +1,83 @@
-import { getAmandaSiteContent } from '@/lib/amanda-catherine/site-content';
-import Image from 'next/image';
-import { AMANDA_SELF_ENROLLMENT_COURSES, ENTREPRENEURIAL_ARTIST_COURSE } from '@/lib/amanda-catherine/config';
-import { CreateOffers, PractitionerEssentials, ClientProof, SocialLinks } from './ClientRequestedUpdates';
+import { AMANDA_OFFERS, AMANDA_PORTAL_FORMS, AMANDA_PRACTITIONER } from '@/lib/amanda-catherine/config';
 
-export const dynamic = 'force-dynamic';
-const approvedImages={hero:'/amanda-catherine/amanda-black-blouse.jpg',about:'/amanda-catherine/amanda-catherine-faith.webp',restore:'/amanda-catherine/studio-interior.jpg',learn:'/amanda-catherine/studio-treatment.jpg',create:'/amanda-catherine/amanda-catherine-entrepreneurial-artist.webp',impact:'/amanda-catherine/amanda-catherine-impact.webp'} as const;
-function Media({imageUrl,alt}:{imageUrl:string;alt:string}){return <img className="ac-media" src={imageUrl} alt={alt}/>}
-export default async function AmandaCatherinePublicPage(){
- const site=await getAmandaSiteContent(); const jane=site.contact.bookingUrl||'https://aesthetikine.janeapp.com/'; const email=site.contact.email||'Amanda@aesthetikine.com'; const phone=site.contact.phone||'226-581-2003';
- return <div className="ac-site" id="top"><style dangerouslySetInnerHTML={{__html:`:root{--i:#17221c;--s:#556a5c;--c:#f4f0e8;--g:#b18b49;--l:#ded8cd;--m:#606a62}.ac-site{margin:-8px;background:#fff;color:var(--i);font-family:Inter,system-ui,sans-serif;line-height:1.55}.ac-wrap{width:min(1180px,calc(100% - 40px));margin:auto}.ac-nav{position:sticky;top:0;z-index:20;border-bottom:1px solid var(--l);background:rgba(255,255,255,.95);backdrop-filter:blur(16px)}.ac-nav-in{display:flex;align-items:center;justify-content:space-between;gap:20px;min-height:72px}.ac-brand{font:22px Georgia,serif;text-decoration:none;color:inherit}.ac-links{display:flex;gap:18px}.ac-links a,.ac-btn{text-decoration:none;color:inherit}.ac-links a{font-size:12px;font-weight:750}.ac-btn{display:inline-flex;align-items:center;justify-content:center;padding:12px 18px;border:1px solid var(--i);font-size:13px;font-weight:800}.ac-btn-fill{background:var(--i);color:#fff}.ac-hero{position:relative;min-height:720px;display:grid;align-items:end;overflow:hidden;background:var(--i);color:#fff}.ac-hero-media{position:absolute;inset:0}.ac-hero-media .ac-media{width:100%;height:100%;object-fit:cover;filter:saturate(.8) brightness(.56)}.ac-hero-media:after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(9,17,12,.86),rgba(9,17,12,.25) 62%,rgba(9,17,12,.3))}.ac-hero-copy{position:relative;z-index:2;padding:170px 0 86px;max-width:760px}.ac-eyebrow{margin:0 0 16px;color:var(--g);font-size:12px;font-weight:900;letter-spacing:.16em;text-transform:uppercase}.ac-hero h1,.ac-section h2{font-family:Georgia,serif;font-weight:500;line-height:1.02}.ac-hero h1{margin:0;font-size:clamp(54px,8vw,100px);letter-spacing:-.045em}.ac-hero p{max-width:680px;font-size:19px;color:rgba(255,255,255,.86)}.ac-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:30px}.ac-hero .ac-btn:not(.ac-btn-fill){border-color:#ffffff99;color:#fff}.ac-section{padding:100px 0}.ac-section h2{margin:0 0 22px;font-size:clamp(42px,6vw,72px);letter-spacing:-.035em}.ac-section p{color:var(--m);font-size:17px}.ac-intro{text-align:center;background:var(--c)}.ac-intro .ac-wrap{max-width:900px}.ac-grid{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center}.ac-media{display:block;width:100%;max-height:680px;object-fit:cover}.ac-copy{max-width:650px}.ac-facts{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:28px}.ac-fact{padding:20px;background:var(--c)}.ac-fact strong{display:block;font:28px Georgia,serif;color:var(--g)}.ac-path-grid,.ac-course-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:40px}.ac-path,.ac-course{padding:30px;background:var(--c)}.ac-path{min-height:260px;display:flex;flex-direction:column;justify-content:flex-end}.ac-path h3,.ac-course h3{font:34px Georgia,serif;margin:0 0 12px}.ac-course-price{font:28px Georgia,serif;color:var(--g);margin:12px 0}.ac-course-price del{font:14px Inter,sans-serif;color:var(--m);margin-left:8px}.ac-course .ac-btn{margin-top:14px}.ac-band{background:var(--s);color:#fff}.ac-band p{color:#ffffffd1}.ac-band .ac-eyebrow{color:#e1cfa8}.ac-alt{background:var(--c)}.ac-jane{background:#e5ddd0}.ac-jane-card{display:grid;grid-template-columns:1.15fr .85fr;gap:60px;align-items:center}.ac-jane-panel{background:#fff;padding:38px;border:1px solid #d4c9b8}.ac-jane-panel h3{font:36px Georgia,serif;margin:0 0 14px}.ac-jane-panel ul{padding-left:20px;color:var(--m)}.ac-contact{background:var(--i);color:#fff}.ac-contact p{color:#ffffffbf}.ac-contact-grid{display:grid;grid-template-columns:1.4fr .6fr;gap:60px}.ac-contact-list{display:grid;gap:14px}.ac-contact-list a{color:#fff}.ac-footer{padding:32px 0;background:#101713;color:#ffffffb3;font-size:13px}.ac-footer-in{display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap}.ac-note{max-width:760px}.ac-mobile-menu{display:none}@media(max-width:850px){.ac-nav-in{min-height:64px;flex-wrap:wrap;padding:10px 0}.ac-links{order:3;width:100%;overflow-x:auto;white-space:nowrap;border-top:1px solid var(--l);padding:9px 0 2px;scrollbar-width:none}.ac-links::-webkit-scrollbar{display:none}.ac-grid,.ac-contact-grid,.ac-jane-card{grid-template-columns:1fr}.ac-path-grid,.ac-course-grid{grid-template-columns:1fr}.ac-facts{grid-template-columns:1fr}.ac-section{padding:68px 0}.ac-hero{min-height:650px}.ac-hero-copy{padding:130px 0 60px}.ac-brand{font-size:19px}.ac-course,.ac-jane-panel{padding:24px}}`}}/>
- <nav className="ac-nav"><div className="ac-wrap ac-nav-in"><a href="#top" className="ac-brand">Amanda Catherine</a><div className="ac-links"><a href="#about">Meet Amanda</a><a href="#restore">Restore</a><a href="#jane">Jane</a><a href="#learn">Learn</a><a href="#academy">Courses</a><a href="#create">Create</a><a href="#contact">Contact</a></div><a className="ac-btn ac-btn-fill" href={jane} target="_blank" rel="noreferrer">Book</a></div></nav>
- <header className="ac-hero"><div className="ac-hero-media"><Media imageUrl={approvedImages.hero} alt="Amanda Catherine"/></div><div className="ac-wrap ac-hero-copy"><p className="ac-eyebrow">Restore yourself · Learn your craft · Create your legacy</p><h1>Return to alignment.<br/>Build what comes next.</h1><p>Helping people restore their health, practitioners elevate their skills, and founders build meaningful work through functional aesthetics, education, and creative leadership.</p><div className="ac-actions"><a className="ac-btn ac-btn-fill" href="#pathways">Choose your pathway</a><a className="ac-btn" href="#about">Meet Amanda</a></div></div></header>
- <section className="ac-section ac-intro"><div className="ac-wrap"><p className="ac-eyebrow">One integrated mission</p><h2>Health, craft and calling belong in the same conversation.</h2><p>Amanda Catherine’s work brings evidence-informed care, clinical education, entrepreneurship, media and community together through one clear progression: Restore. Learn. Create.</p></div></section>
- <section className="ac-section" id="about"><div className="ac-wrap ac-grid"><Media imageUrl={approvedImages.about} alt="Amanda Catherine"/><div className="ac-copy"><p className="ac-eyebrow">Meet Amanda</p><h2>Founder. Kinesiologist. Educator. Creative leader.</h2><p>Amanda Catherine is a Registered Kinesiologist, entrepreneur, media host and community leader. She serves as a Director on the Board of the Women’s Art Association of Canada, contributing to governance, strategic direction and the advancement of women in arts and culture. She also serves as a Director on the Hespeler Village Business Improvement Area Board, supporting local business growth, community partnerships and the continued revitalization of Hespeler Village. These leadership roles strengthen her work at the intersection of wellness, entrepreneurship, media, the arts and community development.</p><div className="ac-facts"><div className="ac-fact"><strong>20+ years</strong><span>Health, wellness and leadership</span></div><div className="ac-fact"><strong>200+ founders</strong><span>Supported through business and creative work</span></div></div></div></div></section>
- <section className="ac-section" id="pathways"><div className="ac-wrap"><p className="ac-eyebrow">Restore · Learn · Create</p><h2>Where are you beginning?</h2><div className="ac-path-grid"><article className="ac-path"><h3>Restore</h3><p>Personalized care centered on movement, recovery, regulation and whole-person wellness.</p></article><article className="ac-path"><h3>Learn</h3><p>Professional education designed to deepen clinical reasoning and practical skill.</p></article><article className="ac-path"><h3>Create</h3><p>Strategy, storytelling, media and community for meaningful work.</p></article></div></div></section>
- <section className="ac-section ac-band" id="restore"><div className="ac-wrap ac-grid"><div className="ac-copy"><p className="ac-eyebrow">Restore</p><h2>Care that begins with the whole person.</h2><p>Every new client begins with assessment. Recommendations are shaped around movement, posture, stress, recovery, lifestyle and personal goals.</p><a className="ac-btn" href="#jane">Meet Jane</a></div><Media imageUrl={approvedImages.restore} alt="AesthetiKine care"/></div></section>
- <section className="ac-section ac-jane" id="jane"><div className="ac-wrap ac-jane-card"><div><p className="ac-eyebrow">Appointments · Powered by Jane</p><h2>Your care starts here.</h2><p>Jane is Amanda’s dedicated appointment home for AesthetiKine. Explore available care, choose the appointment that fits, and manage your booking through one secure place.</p><a className="ac-btn ac-btn-fill" href={jane} target="_blank" rel="noreferrer">Open Jane & book</a></div><div className="ac-jane-panel"><Media imageUrl="/amanda-catherine/jane-payments.webp" alt="Jane Payments"/><h3>Plan your visit</h3><ul><li>View available appointments</li><li>Choose the service that fits your needs</li><li>Book and manage your appointment securely</li></ul><p>Already booked? Use Jane to review or manage your appointment.</p><a href={jane} target="_blank" rel="noreferrer">Manage in Jane →</a></div></div></section>
- <section className="ac-section ac-alt" id="learn"><div className="ac-wrap ac-grid"><Media imageUrl={approvedImages.learn} alt="Amanda Catherine training"/><div className="ac-copy"><p className="ac-eyebrow">Learn</p><h2>Clinical confidence, not trend chasing.</h2><p>Education for professionals who want stronger foundations, safer application, better assessment and a more confident connection between knowledge and practice.</p><a className="ac-btn" href="#academy">Explore courses</a></div></div></section>
- <PractitionerEssentials/>
- <section className="ac-section" id="academy"><div className="ac-wrap"><p className="ac-eyebrow">AesthetiKine Academy</p><h2>Professional training built for practice.</h2><p>Choose a program and continue through Amanda’s secure enrollment and learning experience.</p><div className="ac-course-grid">{AMANDA_SELF_ENROLLMENT_COURSES.map((course)=><article className="ac-course" key={course.offerId}><h3>{course.title}</h3><div className="ac-course-price">${course.priceCad.toLocaleString()} CAD{'compareAtPriceCad' in course&&course.compareAtPriceCad?<del>${course.compareAtPriceCad.toLocaleString()}</del>:null}</div><p>{course.delivery.join(' · ')}</p><a className="ac-btn ac-btn-fill" href={`/portal/amanda-catherine/enroll?course=${encodeURIComponent(course.courseId)}`}>Enroll</a></article>)}</div><div className="ac-actions"><a className="ac-btn" href="/portal/login?next=%2Fportal%2Famanda-catherine%2Flearning">Already enrolled? Sign in to learning</a></div></div></section>
- <section className="ac-section" id="create"><div className="ac-wrap ac-grid"><div className="ac-copy"><p className="ac-eyebrow">Create</p><h2>Build with purpose. Lead with impact.</h2><p>Amanda’s founder, leadership and creative strategy work supports entrepreneurs, artists, authors, ministries, nonprofits and organizations.</p></div><div className="ac-book-feature"><Image className="ac-media" src={approvedImages.create} alt="The Entrepreneurial Artist by Amanda Catherine" width={1122} height={1402}/><h3>The Entrepreneurial Artist</h3><p>Amanda Catherine’s book for turning God-given gifts into impact and income.</p><a className="ac-btn ac-btn-fill" href={ENTREPRENEURIAL_ARTIST_COURSE.amazonBookUrl} target="_blank" rel="noopener noreferrer">Buy the book on Amazon ↗</a></div></div><CreateOffers email={email}/></section>
- <section className="ac-section ac-alt"><div className="ac-wrap ac-grid"><Media imageUrl={approvedImages.impact} alt="Amanda Catherine speaking and media"/><div className="ac-copy"><p className="ac-eyebrow">Speaking · Media · Community</p><h2>Ideas made useful. Stories made visible.</h2><p>Amanda speaks and collaborates around entrepreneurship, wellness, faith, creativity and leadership.</p></div></div></section>
- <ClientProof/>
- <SocialLinks/>
- <section className="ac-section ac-contact" id="contact"><div className="ac-wrap ac-contact-grid"><div><p className="ac-eyebrow">Contact</p><h2>Choose the conversation that fits your next step.</h2></div><div className="ac-contact-list"><a href={`mailto:${email}`}>{email}</a><a href={`tel:${phone}`}>{phone}</a><a href={jane} target="_blank" rel="noreferrer">Jane appointments ↗</a></div></div></section>
- <footer className="ac-footer"><div className="ac-wrap ac-footer-in"><div><strong>Amanda Catherine</strong><div>Restore · Learn · Create</div></div><div className="ac-note">Medical information is educational and does not replace individualized diagnosis or treatment. Results vary. Certificates of Completion do not constitute professional licensure or medical certification.</div></div></footer>
- </div>}
+export default function AmandaPage(){
+  return (
+    <div style={{maxWidth:1080, margin:'0 auto', padding:'24px'}}>
+      <header style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
+        <a href="/amanda-catherine"><h1>AMANDA CATHERINE BODY SCULPT</h1></a>
+        <nav style={{display:'flex', gap:12}}>
+          <a href="/portal/amanda-catherine/apply?form=general-consultation">Apply</a>
+          <a href="/amanda-catherine/courses/body-sculpt-certification">Courses</a>
+          <a href="/amanda-catherine/private/practitioner-kit">Kit $499</a>
+        </nav>
+      </header>
+
+      <section style={{marginTop:48}}>
+        <h2>Practitioner Trainings - Certified Practitioner Audience</h2>
+        <p>Storage: Creative Studio + Portal Form Submissions + Client Records</p>
+        <div style={{display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(280px, 1fr))', gap:16, marginTop:16}}>
+          {AMANDA_OFFERS.filter((o:any)=>o.audience==='certified-practitioner').map((offer:any)=>(
+            <div key={offer.courseId} style={{border:'1px solid #ddd', padding:16}}>
+              <h3>{offer.name}</h3>
+              <p>{offer.priceCad} CAD</p>
+              <a href={`/portal/amanda-catherine/enroll?course=${offer.courseId}`} style={{display:'inline-block', padding:'10px 16px', background:'#17221c', color:'#fff', textDecoration:'none'}}>Enroll Now - Goes to Creative Studio</a>
+              <div style={{marginTop:8}}><a href={`/amanda-catherine/courses/${offer.courseId}`}>Waitlist - amanda_waitlist</a></div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section style={{marginTop:48}}>
+        <h2>Student / Trainee Courses</h2>
+        <p>Storage: Creative Studio + Portal Form Submissions + Client Records (training) + amanda_waitlist (waitlist)</p>
+        <div style={{display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(280px, 1fr))', gap:16, marginTop:16}}>
+          {AMANDA_OFFERS.filter((o:any)=>o.audience==='student-trainee').map((offer:any)=>(
+            <div key={offer.courseId} style={{border:'1px solid #ddd', padding:16}}>
+              <h3>{offer.name}</h3>
+              <p>{offer.priceCad} CAD</p>
+              <a href={`/portal/amanda-catherine/enroll?course=${offer.courseId}`} style={{display:'inline-block', padding:'10px 16px', background:'#17221c', color:'#fff', textDecoration:'none'}}>Enroll - Creative Studio</a>
+              <div style={{marginTop:8}}><a href={`/amanda-catherine/courses/${offer.courseId}`}>Join Waitlist - amanda_waitlist</a></div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section style={{marginTop:48}}>
+        <h2>Practitioner Application Forms - Portal Form Submissions</h2>
+        <div style={{display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(280px, 1fr))', gap:16, marginTop:16}}>
+          {AMANDA_PORTAL_FORMS.filter((f:any)=>f.audience==='certified-practitioner').map((form:any)=>(
+            <div key={form.id} style={{border:'1px solid #ddd', padding:16}}>
+              <h4>{form.title}</h4>
+              <p style={{fontSize:12, color:'#666'}}>{form.id}</p>
+              <a href={`/portal/amanda-catherine/apply?form=${form.id}`} style={{display:'inline-block', padding:'8px 12px', background:'#333', color:'#fff', textDecoration:'none'}}>Apply - Portal Form Submissions</a>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section style={{marginTop:48}}>
+        <h2>Student Application Forms</h2>
+        <div style={{display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(280px, 1fr))', gap:16, marginTop:16}}>
+          {AMANDA_PORTAL_FORMS.filter((f:any)=>f.audience==='student-trainee').map((form:any)=>(
+            <div key={form.id} style={{border:'1px solid #ddd', padding:16}}>
+              <h4>{form.title}</h4>
+              <p style={{fontSize:12, color:'#666'}}>{form.id}</p>
+              <a href={`/portal/amanda-catherine/apply?form=${form.id}`} style={{display:'inline-block', padding:'8px 12px', background:'#333', color:'#fff', textDecoration:'none'}}>Apply - Portal Form Submissions</a>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section style={{marginTop:48, padding:24, background:'#f5f5f0'}}>
+        <h2>BODY SCULPT Practitioner Kit - $499 CAD</h2>
+        <p>Creative Studio + Client Records</p>
+        <a href="/amanda-catherine/private/practitioner-kit" style={{display:'inline-block', padding:'12px 20px', background:'#17221c', color:'#fff', textDecoration:'none'}}>Buy Kit $499</a>
+      </section>
+
+      <section style={{marginTop:48}}>
+        <h3>Debug</h3>
+        <p><a href="/api/amanda-catherine/schema">Check /api/amanda-catherine/schema - verifies 4 tables exist</a></p>
+      </section>
+    </div>
+  );
+}
