@@ -1,3 +1,5 @@
+// Stub that satisfies app/amanda-catherine/page.tsx import
+// Original file missing in repo, config.ts exists
 export async function getAmandaSiteContent() {
   return {
     contact: {
