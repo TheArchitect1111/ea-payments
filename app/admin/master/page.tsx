@@ -1,4 +1,5 @@
 import { cookies } from 'next/headers';
+import Image from 'next/image';
 import { verifyAdminSession, EA_ADMIN_COOKIE } from '@/lib/ea-admin-auth';
 import {
   getProposalsWithAssessments,
@@ -237,6 +238,9 @@ export default async function MasterPortalPage() {
             <a href="/admin/proposals" className="text-xs font-semibold text-blue-200 hover:text-white transition">
               Proposals
             </a>
+            <a href="/admin/factory" className="text-xs font-semibold text-blue-200 hover:text-white transition">
+              EA Factory
+            </a>
             <a href="/admin/commissions" className="text-xs font-semibold text-blue-200 hover:text-white transition">
               Commissions
             </a>
@@ -250,7 +254,7 @@ export default async function MasterPortalPage() {
       <div className="bg-white border-b border-neutral-200 px-6 py-8">
         <div className="max-w-6xl mx-auto flex items-center justify-between flex-wrap gap-4">
           <div className="flex items-center gap-4">
-            <img src="/images/ea-logo-hd.png" alt="Efficiency Architects" style={{ height: '60px', width: 'auto' }} />
+            <Image src="/images/ea-logo-hd.png" alt="Efficiency Architects" width={120} height={60} style={{ height: '60px', width: 'auto' }} />
             <div>
               <h2 className="text-2xl font-extrabold" style={{ color: NAVY }}>
                 EA Master Control
@@ -265,6 +269,28 @@ export default async function MasterPortalPage() {
       </div>
 
       <main className="max-w-6xl mx-auto px-6 py-8 space-y-10">
+
+        {/* Section 1: Revenue Overview */}
+        <section>
+          <SectionHead title="EA Factory" />
+          <div className="bg-white border border-neutral-200 p-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h3 className="text-xl font-extrabold" style={{ color: NAVY }}>
+                Protocol-driven project intelligence
+              </h3>
+              <p className="text-sm text-neutral-500 mt-1">
+                Open Protocol Center, Repo Library, Project Generator, and Skin Factory from Pulse.
+              </p>
+            </div>
+            <a
+              href="/admin/factory"
+              className="px-5 py-3 text-center text-xs font-black uppercase tracking-[0.16em] text-white"
+              style={{ backgroundColor: NAVY }}
+            >
+              Launch EA Factory
+            </a>
+          </div>
+        </section>
 
         {/* Section 1: Revenue Overview */}
         <section>
