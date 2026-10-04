@@ -28,7 +28,8 @@ const portalModules = [
   ]},
 ];
 function PortalImage({ id, asset, alt, className = "" }: { id: string; asset: string; alt: string; className?: string }) {
-  return <img id={id} src={`/images/tb3-official/${asset}`} alt={alt} className={`h-full w-full object-cover object-center ${className}`} loading="lazy" />;
+  const objectPosition = asset.includes("HEADSHOT") ? "50% 15%" : asset.includes("BENCH_YELLOW_KOBE") ? "50% 30%" : asset.includes("BLAZER_CHAIR") ? "55% 20%" : "50% 50%";
+  return <img id={id} src={`/images/tb3-official/${asset}`} alt={alt} style={{ objectPosition }} className={`h-full w-full object-cover ${className}`} loading="lazy" />;
 }
 
 export default function TarrisFuturePage() {
@@ -50,6 +51,11 @@ export default function TarrisFuturePage() {
           <a className="block opacity-70 px-3 py-2">Opportunities</a>
           <a className="block opacity-70 px-3 py-2">Media Library</a>
           <a className="block opacity-70 px-3 py-2">Community</a>
+          <a className="block opacity-70 px-3 py-2">Calendar</a>
+          <a className="block opacity-70 px-3 py-2">Earnings</a>
+          <a className="block opacity-70 px-3 py-2">Analytics</a>
+          <a className="block opacity-70 px-3 py-2">Documents</a>
+          <a className="block opacity-70 px-3 py-2">EVA</a>
         </nav>
         <div className="mt-8 text-[10px] opacity-40 leading-relaxed">
           DISCIPLINE<br/>DETERMINATION<br/>DEVELOPMENT<br/>DESTINY
