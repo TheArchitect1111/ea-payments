@@ -1,52 +1,23 @@
-import { AMANDA_PORTAL_FORMS } from '@/lib/amanda-catherine/config';
-
-export default async function ApplyPage({ searchParams }: { searchParams: Promise<{ form?: string; program?: string }> }) {
-  const { form, program } = await searchParams;
-  const formDef: any = AMANDA_PORTAL_FORMS.find(f => f.id === form) || AMANDA_PORTAL_FORMS.find(f => f.id === 'partner-vendor-application');
-
+export default function ApplyPage({ searchParams }: { searchParams: { form?: string } }){
+  const formId = searchParams?.form || 'general-consultation';
+  const pretty = formId.replace(/-/g,' ').replace(/\b\w/g,(c:string)=>c.toUpperCase());
   return (
-    <div style={{ maxWidth: 720, margin: '40px auto', padding: 24, fontFamily: 'system-ui' }}>
-      <a href="/amanda-catherine">← Back</a>
-      <h1 style={{ marginTop: 16 }}>{formDef.title}</h1>
-      <p>Audience: {formDef.audience} | Kind: {formDef.kind} | Form: {formDef.id}</p>
-      <p style={{ fontSize: 13, color: '#666' }}>Storage: Portal Form Submissions + Client Records (if client access). Verify schema at /api/amanda-catherine/schema</p>
-
-      <form data-form="apply" data-formid={formDef.id} data-audience={formDef.audience} style={{ display: 'grid', gap: 12, marginTop: 24 }}>
-        <input name="name" placeholder="Full name" required style={{ padding: 12, border: '1px solid #ccc' }} />
-        <input name="email" type="email" placeholder="Email" required style={{ padding: 12, border: '1px solid #ccc' }} />
-        <input name="phone" placeholder="Phone" style={{ padding: 12, border: '1px solid #ccc' }} />
-        {formDef.fields.map((f: string) => (
-          <input key={f} name={f} placeholder={f.replace(/-/g, ' ')} style={{ padding: 12, border: '1px solid #ccc' }} />
-        ))}
-        <textarea name="message" placeholder="Tell Amanda about your work" style={{ padding: 12, border: '1px solid #ccc' }} />
-        <button type="submit" style={{ padding: 14, background: '#17221c', color: '#fff' }}>Submit Application</button>
+    <div style={{maxWidth:640, margin:'0 auto', padding:'24px', fontFamily:'system-ui', color:'#111', background:'#fff', minHeight:'100vh'}}>
+      <a href="/amanda-catherine" style={{color:'#17221c'}}>← Back to Amanda</a>
+      <h1 style={{marginTop:16, fontSize:28, color:'#111'}}>Apply: {pretty}</h1>
+      <p style={{color:'#333'}}>Submit your application — no account required. Saves to <b>Portal Form Submissions</b></p>
+      <p style={{fontSize:12, color:'#666'}}>Form ID: {formId}</p>
+      
+      <form action="/api/amanda-catherine/submit" method="POST" style={{marginTop:24, display:'grid', gap:12}}>
+        <input type="hidden" name="type" value="application" />
+        <input type="hidden" name="formId" value={formId} />
+        <label style={{color:'#111'}}>Name<input name="name" required style={{display:'block', width:'100%', padding:'10px', border:'1px solid #999', marginTop:4, color:'#111', background:'#fff'}} /></label>
+        <label style={{color:'#111'}}>Email<input name="email" type="email" required style={{display:'block', width:'100%', padding:'10px', border:'1px solid #999', marginTop:4, color:'#111', background:'#fff'}} /></label>
+        <label style={{color:'#111'}}>Phone<input name="phone" style={{display:'block', width:'100%', padding:'10px', border:'1px solid #999', marginTop:4, color:'#111', background:'#fff'}} /></label>
+        <label style={{color:'#111'}}>Organization (if applicable)<input name="organization" style={{display:'block', width:'100%', padding:'10px', border:'1px solid #999', marginTop:4, color:'#111', background:'#fff'}} /></label>
+        <label style={{color:'#111'}}>Message<textarea name="message" rows={5} style={{display:'block', width:'100%', padding:'10px', border:'1px solid #999', marginTop:4, color:'#111', background:'#fff'}}></textarea></label>
+        <button type="submit" style={{padding:'12px 20px', background:'#17221c', color:'#fff', border:'none', cursor:'pointer', fontSize:16}}>Submit Application - Goes to Portal Form Submissions</button>
       </form>
-      <div id="status"></div>
-      <script dangerouslySetInnerHTML={{ __html: `
-        const form = document.querySelector('form[data-form="apply"]');
-        form.addEventListener('submit', async (e) => {
-          e.preventDefault();
-          const fd = new FormData(form);
-          document.getElementById('status').textContent = 'Submitting...';
-          const res = await fetch('/api/amanda-catherine/submit', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              type: 'application',
-              audience: form.dataset.audience,
-              formId: form.dataset.formid,
-              source: 'apply-page',
-              program: '${program || ''}',
-              name: fd.get('name'),
-              email: fd.get('email'),
-              fields: Object.fromEntries(fd.entries())
-            })
-          });
-          const json = await res.json();
-          if (json.success) { alert('Application submitted! Tracked in portal.'); window.location.href = '/amanda-catherine#contact'; }
-          else { document.getElementById('status').textContent = JSON.stringify(json); }
-        });
-      `}} />
     </div>
   );
 }
