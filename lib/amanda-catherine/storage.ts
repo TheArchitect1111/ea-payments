@@ -1,93 +1,10 @@
-import { createRecord } from './airtable';
-
-// Maps to your 4 required tables
-export async function handleAmandaSubmit(payload: any){
-  const results: any = {};
-  const now = new Date().toISOString();
-  const common = {
-    'Name': payload.name || payload.fullName || '',
-    'Full Name': payload.name || payload.fullName || '',
-    'Email': payload.email || '',
-    'Phone': payload.phone || '',
-    'Source': 'amanda-catherine',
-    'Created': now,
-  };
-
-  if(payload.type === 'waitlist'){
-    // amanda_waitlist
-    results.waitlist = await createRecord('amanda_waitlist', {
-      ...common,
-      'Course': payload.courseId || payload.course || '',
-      'Course interested in': payload.courseId || payload.course || '',
-      'Message': payload.message || '',
-      'Status': 'Waitlisted',
-    });
-  }
-
-  if(payload.type === 'enroll'){
-    // 1. Creative Studio
-    results.creativeStudio = await createRecord('Creative Studio', {
-      ...common,
-      'Course ID': payload.courseId,
-      'Course': payload.courseId,
-      'Program': payload.courseId,
-      'Type': 'Enrollment',
-      'Amount CAD': payload.amount || '',
-      'Status': 'Enrolled',
-      'Notes': `Enrolled via /portal/amanda-catherine/enroll?course=${payload.courseId}`,
-    }).catch(e=>({error:e.message, table:'Creative Studio'}));
-
-    // 2. Client Records
-    results.clientRecord = await createRecord('Client Records', {
-      ...common,
-      'Course ID': payload.courseId,
-      'Course': payload.courseId,
-      'Program': payload.courseId,
-      'Type': 'Client - Amanda Catherine',
-      'Status': 'Active - Enrolled',
-      'Enrollment Date': now,
-    }).catch(e=>({error:e.message, table:'Client Records'}));
-
-    // 3. Portal Form Submissions (audit trail for portal)
-    results.portalSubmission = await createRecord('Portal Form Submissions', {
-      ...common,
-      'Form Type': 'Enrollment',
-      'Form ID': payload.courseId,
-      'Course': payload.courseId,
-      'Payload': JSON.stringify(payload),
-      'Status': 'Submitted',
-    }).catch(e=>({error:e.message, table:'Portal Form Submissions'}));
-  }
-
-  if(payload.type === 'application'){
-    results.application = await createRecord('Portal Form Submissions', {
-      ...common,
-      'Form Type': 'Application',
-      'Form ID': payload.formId || payload.form || '',
-      'Organization': payload.organization || '',
-      'Message': payload.message || payload.bio || '',
-      'Website': payload.website || '',
-      'Status': 'Application Received',
-      'Payload': JSON.stringify(payload),
-    });
-  }
-
-  if(payload.type === 'kit'){
-    results.kitStudio = await createRecord('Creative Studio', {
-      ...common,
-      'Course ID': 'practitioner-kit',
-      'Type': 'Kit Purchase',
-      'Amount CAD': 499,
-      'Status': 'Kit Purchased',
-    }).catch(e=>({error:e.message}));
-
-    results.kitClient = await createRecord('Client Records', {
-      ...common,
-      'Course ID': 'practitioner-kit',
-      'Type': 'Client - Kit',
-      'Status': 'Kit Active',
-    }).catch(e=>({error:e.message}));
-  }
-
-  return results;
+import { writeToTable } from './airtable'
+export async function handleAmandaSubmit(p:any){
+  const safe = (fn:Promise<any>) => fn.catch((e:any)=>console.error(e.message))
+  await Promise.all([
+    safe(writeToTable('Portal Form Submissions',{Email:p.email,Name:p.name,Phone:p.phone,Type:p.type,Course:p.courseId,FormId:p.formId,Created:new Date().toISOString()})),
+    (p.type==='enroll'||p.type==='kit') ? safe(writeToTable('Client Records',{Email:p.email,Name:p.name,Status:'Active Enrolled',Course:p.courseId})) : Promise.resolve(),
+    (p.type==='enroll'||p.type==='kit') ? safe(writeToTable('Creative Studio',{Email:p.email,Offer:p.courseId,Type:p.type})) : Promise.resolve(),
+    p.type==='waitlist' ? safe(writeToTable('amanda_waitlist',{Email:p.email,Name:p.name,Course:p.courseId})) : Promise.resolve(),
+  ])
 }
