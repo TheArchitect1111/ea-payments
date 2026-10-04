@@ -27,21 +27,71 @@ const pillarAssets: Record<string, ImageAsset[]> = {
     { id: "community-secondary", asset: "OFFICIAL_12_KIDS_ART.png", alt: "Young people working on art together", ratio: "aspect-[4/3]" },
   ],
 };
-const merch = ["HOODIE_BLACK", "TEE_WHITE", "CAP", "HOODIE_RED", "TEE_BLACK"];
-const merchAssets = [
-  "OFFICIAL_02_BENCH_YELLOW_KOBE.png",
-  "OFFICIAL_13_BLAZER_CHAIR.png",
-  "OFFICIAL_01_HEADSHOT_FRONT_BLACK_BG.png",
-  "OFFICIAL_08_HEADSHOT_RED_BG.png",
-  "OFFICIAL_10_CASUAL_LEAN.png",
+type MerchProduct = { id: string; name: string; kind: "hoodie" | "tee" | "cap" | "long-sleeve"; color: string; logoColor: string };
+const merchProducts: MerchProduct[] = [
+  { id: "MOCK_HOODIE_BLACK", name: "HOODIE · BLACK", kind: "hoodie", color: "#171717", logoColor: "#A51C30" },
+  { id: "MOCK_HOODIE_RED", name: "HOODIE · CRIMSON", kind: "hoodie", color: "#A51C30", logoColor: "#F7F5F2" },
+  { id: "MOCK_TEE_WHITE", name: "T-SHIRT · WHITE", kind: "tee", color: "#F7F5F2", logoColor: "#A51C30" },
+  { id: "MOCK_TEE_BLACK", name: "T-SHIRT · BLACK", kind: "tee", color: "#171717", logoColor: "#A51C30" },
+  { id: "MOCK_LONG_SLEEVE_BLACK", name: "LONG-SLEEVE T · BLACK", kind: "long-sleeve", color: "#171717", logoColor: "#A51C30" },
+  { id: "MOCK_CAP_BLACK", name: "CAP · BLACK", kind: "cap", color: "#171717", logoColor: "#A51C30" },
+  { id: "MOCK_CAP_RED", name: "CAP · CRIMSON", kind: "cap", color: "#A51C30", logoColor: "#F7F5F2" },
 ];
 const nav = ["HOME", "ATHLETE", "STORY", "BRAND", "NIL", "COMMUNITY", "MEDIA", "MERCH", "FUTURE"];
 
 type ImageAsset = { id: string; asset: string; alt: string; ratio?: string };
 function ImageSlot({ id, asset, alt, ratio = "aspect-[4/5]", hero = false }: ImageAsset & { hero?: boolean }) {
+  const objectPosition = asset.includes("HEADSHOT") ? "50% 15%" : id === "brand-primary" ? "55% 20%" : asset.includes("BENCH_YELLOW_KOBE") ? "50% 30%" : "50% 50%";
   return <div className={`relative w-full ${ratio} overflow-hidden ${hero ? "bg-[#0A0A0A]" : ""}`}>
-    <img id={id} src={`/images/tb3-official/${asset}`} alt={alt} className={`absolute inset-0 h-full w-full ${hero ? "object-contain" : "object-cover object-center"}`} loading={hero ? "eager" : "lazy"} />
+    <img id={id} src={`/images/tb3-official/${asset}`} alt={alt} style={{ objectPosition }} className={`absolute inset-0 h-full w-full ${hero ? "object-contain" : "object-cover"}`} loading={hero ? "eager" : "lazy"} />
   </div>;
+}
+function MerchMockup({ product }: { product: MerchProduct }) {
+  const dark = product.color === "#171717";
+  const seam = dark ? "#FFFFFF" : "#2A2927";
+  const cloth = product.color;
+  const gradientId = product.id.toLowerCase().replaceAll("_", "-") + "-cloth";
+  const logo = <text x="180" y={product.kind === "cap" ? "159" : "174"} textAnchor="middle" fill={product.logoColor} fontFamily="Arial, sans-serif" fontSize="38" fontWeight="900" letterSpacing="-4">TB3</text>;
+  return <svg id={product.id} viewBox="0 0 360 300" role="img" aria-label={`TB3 ${product.name.toLowerCase()} ghost-mannequin mockup`} className="h-full w-full">
+    <defs>
+      <linearGradient id={gradientId} x1="0" x2="1" y1="0" y2="1">
+        <stop offset="0%" stopColor={cloth} />
+        <stop offset="58%" stopColor={cloth} />
+        <stop offset="100%" stopColor={dark ? "#080808" : product.color === "#A51C30" ? "#741124" : "#D8D6D2"} />
+      </linearGradient>
+      <filter id="tb3-merch-shadow" x="-30%" y="-30%" width="160%" height="180%">
+        <feDropShadow dx="0" dy="8" stdDeviation="7" floodColor="#000000" floodOpacity=".16" />
+      </filter>
+    </defs>
+    <rect width="360" height="300" fill="#F1EEE9" />
+    <ellipse cx="180" cy="255" rx="88" ry="9" fill="#000000" opacity=".08" />
+    <g filter="url(#tb3-merch-shadow)">
+      {product.kind === "cap" ? <>
+        <path d="M91 157 C95 105 126 75 180 72 C234 75 265 105 269 157 L269 173 L91 173 Z" fill={`url(#${gradientId})`} />
+        <path d="M91 157 C129 146 231 146 269 157 C257 183 222 199 179 199 C138 199 104 183 91 157 Z" fill={cloth} />
+        <path d="M109 155 C143 142 216 142 250 155 M180 79 L180 132" fill="none" stroke={seam} strokeOpacity=".28" strokeWidth="2" />
+        {logo}
+      </> : <>
+        {product.kind === "hoodie" && <path d="M145 102 C139 61 154 41 180 41 C206 41 221 61 215 102 L198 120 L162 120 Z" fill={cloth} stroke={seam} strokeOpacity=".22" strokeWidth="2" />}
+        <path d={product.kind === "long-sleeve"
+          ? "M137 96 L101 105 L49 199 L80 216 L117 159 L114 241 L246 241 L243 159 L280 216 L311 199 L259 105 L223 96 L202 116 L158 116 Z"
+          : product.kind === "hoodie"
+            ? "M141 95 L105 107 L61 183 L91 201 L119 158 L116 241 L244 241 L241 158 L269 201 L299 183 L255 107 L219 95 L198 117 L162 117 Z"
+            : "M139 91 L103 103 L63 147 L88 168 L119 141 L116 241 L244 241 L241 141 L272 168 L297 147 L257 103 L221 91 L200 111 L160 111 Z"}
+          fill={`url(#${gradientId})`} stroke={seam} strokeOpacity=".2" strokeWidth="2" strokeLinejoin="round" />
+        <path d="M160 113 Q180 137 200 113 M126 232 L234 232" fill="none" stroke={seam} strokeOpacity=".28" strokeWidth="3" />
+        {product.kind === "hoodie" && <>
+          <path d="M139 191 Q180 179 221 191 L215 224 Q180 215 145 224 Z" fill="none" stroke={seam} strokeOpacity=".27" strokeWidth="2" />
+          <path d="M169 117 L169 139 M191 117 L191 139" stroke={seam} strokeOpacity=".42" strokeWidth="2" />
+        </>}
+        {product.kind === "long-sleeve" && <>
+          <path d="M57 186 L80 199 M280 199 L303 186 M118 227 L137 227 M223 227 L242 227" fill="none" stroke={seam} strokeOpacity=".32" strokeWidth="3" />
+        </>}
+        {logo}
+      </>}
+    </g>
+    <text x="180" y="280" textAnchor="middle" fill="#55514C" fontFamily="Arial, sans-serif" fontSize="8" fontWeight="700" letterSpacing="2">TB3 · DIFFERENT ON PURPOSE</text>
+  </svg>;
 }
 function Disabled({ children, className = "" }: { children: ReactNode; className?: string }) {
   return <button type="button" disabled className={`cursor-not-allowed opacity-60 ${className}`}>{children}</button>;
@@ -93,7 +143,7 @@ export default function TarrisPublicPage() {
         </section>
         <section id="merch" className="scroll-mt-5 py-10">
           <div className="mb-6 flex flex-wrap items-end justify-between gap-4"><div><p className="text-[9px] tracking-[0.25em] text-[#A51C30]">TB3 STORE</p><h2 className="mt-2 text-3xl font-black tracking-tight">WEAR THE VISION.</h2></div><Disabled className="border border-black px-5 py-3 text-[10px] font-bold tracking-widest">SHOP TB3 →</Disabled></div>
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">{merch.map((name, index) => <article key={name}><ImageSlot id={`public-merch-${index + 1}`} asset={merchAssets[index]} alt={`Approved TB3 brand image for ${name.replaceAll("_", " ").toLowerCase()}`} ratio="aspect-square" /><p className="mt-3 text-[9px] font-bold tracking-wider">TB3 {name.replaceAll("_", " ")}</p></article>)}</div>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">{merchProducts.map((product, index) => <article key={product.id} className="min-w-0"><div id={`public-merch-${index + 1}`} className="aspect-square overflow-hidden"><MerchMockup product={product} /></div><p className="mt-3 text-[9px] font-bold tracking-wider">{product.name}</p></article>)}</div>
         </section>
       </main>
       <footer className="border-t border-black/20"><div className="mx-auto flex max-w-[1440px] flex-wrap items-center justify-between gap-6 px-5 py-8 lg:px-10"><a href="#home" aria-label="TB3 home" className="text-4xl font-black tracking-[-0.1em] text-[#A51C30]">TB3</a><div className="flex flex-wrap gap-4 text-[9px] font-semibold tracking-wider"><a href="#home">HOME</a>{["ABOUT", "CONTACT", "PRIVACY", "TERMS"].map((label) => <Disabled key={label}>{label}</Disabled>)}</div><Disabled className="text-[9px] tracking-wider">SOCIAL</Disabled><span className="font-serif text-2xl italic text-[#A51C30]">Different On Purpose.</span></div></footer>
