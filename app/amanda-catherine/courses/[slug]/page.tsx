@@ -1,43 +1,22 @@
-export default async function WaitlistPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
+import { AMANDA_OFFERS } from '@/lib/amanda-catherine/config';
+export default function CoursePage({ params }: { params: { slug: string }}){
+  const slug = params.slug;
+  const offer = (AMANDA_OFFERS as any[]).find((o:any)=>o.courseId===slug);
   return (
-    <div style={{ maxWidth: 720, margin: '40px auto', padding: 24, fontFamily: 'system-ui' }}>
+    <div style={{maxWidth:640, margin:'0 auto', padding:'24px', fontFamily:'system-ui'}}>
       <a href="/amanda-catherine">← Back</a>
-      <h1 style={{ marginTop: 16, textTransform: 'capitalize' }}>{slug.replace(/-/g, ' ')}</h1>
-      <p>Join waitlist - Stored in amanda_waitlist + Portal Form Submissions</p>
-      <form data-course={slug} style={{ display: 'grid', gap: 12, marginTop: 24 }}>
-        <input name="name" placeholder="Full name" required style={{ padding: 12, border: '1px solid #ccc' }} />
-        <input name="email" type="email" placeholder="Email" required style={{ padding: 12, border: '1px solid #ccc' }} />
-        <input name="phone" placeholder="Phone" style={{ padding: 12, border: '1px solid #ccc' }} />
-        <textarea name="why" placeholder="Why interested?" style={{ padding: 12, border: '1px solid #ccc' }} />
-        <button type="submit" style={{ padding: 14, background: '#17221c', color: '#fff' }}>Join Waitlist</button>
+      <h1>{offer?.name || slug}</h1>
+      {!offer && <p style={{color:'orange'}}>This course is not READY - joining creates no payment</p>}
+      <form action="/api/amanda-catherine/submit" method="POST" style={{display:'grid', gap:12, marginTop:24}}>
+        <input type="hidden" name="type" value="waitlist" />
+        <input type="hidden" name="courseId" value={slug} />
+        <label>Name<input name="name" required style={{width:'100%', padding:10, border:'1px solid #999'}}/></label>
+        <label>Email<input name="email" type="email" required style={{width:'100%', padding:10, border:'1px solid #999'}}/></label>
+        <label>Phone<input name="phone" style={{width:'100%', padding:10, border:'1px solid #999'}}/></label>
+        <label>Course interested in<input name="Course interested in" defaultValue={offer?.name || slug} style={{width:'100%', padding:10, border:'1px solid #999'}}/></label>
+        <label>Message<textarea name="message" rows={3} style={{width:'100%', padding:10, border:'1px solid #999'}}/></label>
+        <button type="submit" style={{padding:'12px', background:'#17221c', color:'#fff', border:'none'}}>Join Waitlist - amanda_waitlist table</button>
       </form>
-      <div id="status"></div>
-      <script dangerouslySetInnerHTML={{ __html: `
-        const form = document.querySelector('form');
-        form.addEventListener('submit', async (e) => {
-          e.preventDefault();
-          const fd = new FormData(form);
-          document.getElementById('status').textContent = 'Adding...';
-          const res = await fetch('/api/amanda-catherine/submit', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              type: 'waitlist',
-              audience: 'student-trainee',
-              formId: 'waitlist',
-              courseId: form.dataset.course,
-              source: 'waitlist-page',
-              name: fd.get('name'),
-              email: fd.get('email'),
-              fields: Object.fromEntries(fd.entries())
-            })
-          });
-          const json = await res.json();
-          if (json.success) { alert('Added to waitlist!'); window.location.href = '/amanda-catherine'; }
-          else document.getElementById('status').textContent = JSON.stringify(json);
-        });
-      `}} />
     </div>
   );
 }
