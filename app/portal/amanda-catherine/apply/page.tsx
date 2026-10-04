@@ -1,7 +1,7 @@
 import { AMANDA_PORTAL_FORMS } from '@/lib/amanda-catherine/config';
 export default function ApplyPage({ searchParams }: { searchParams: { form?: string }}){
   const formId = searchParams?.form || 'general-consultation';
-  const formDef = (AMANDA_PORTAL_FORMS as any[]).find((f:any)=>f.id===formId);
+  const formDef = ([...AMANDA_PORTAL_FORMS]).find((f:any)=>f.id===formId);
   return (
     <div style={{maxWidth:640, margin:'0 auto', padding:'24px', fontFamily:'system-ui', color:'#111', background:'#fff', minHeight:'100vh'}}>
       <a href="/amanda-catherine">← Back</a>

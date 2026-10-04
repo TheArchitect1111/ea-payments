@@ -1,7 +1,7 @@
 import { AMANDA_OFFERS } from '@/lib/amanda-catherine/config';
 export default function CoursePage({ params }: { params: { slug: string }}){
   const slug = params.slug;
-  const offer = (AMANDA_OFFERS as any[]).find((o:any)=>o.courseId===slug);
+  const offer = ([...AMANDA_OFFERS]).find((o:any)=>o.courseId===slug);
   return (
     <div style={{maxWidth:640, margin:'0 auto', padding:'24px', fontFamily:'system-ui'}}>
       <a href="/amanda-catherine">← Back</a>

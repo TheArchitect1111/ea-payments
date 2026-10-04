@@ -1,7 +1,7 @@
 import { AMANDA_OFFERS } from '@/lib/amanda-catherine/config';
 export default function EnrollPage({ searchParams }: { searchParams: { course?: string }}){
   const courseId = searchParams?.course || '';
-  const offer = (AMANDA_OFFERS as any[]).find((o:any)=>o.courseId===courseId);
+  const offer = ([...AMANDA_OFFERS]).find((o:any)=>o.courseId===courseId);
   return (
     <div style={{maxWidth:640, margin:'0 auto', padding:'24px', fontFamily:'system-ui', color:'#111', background:'#fff', minHeight:'100vh'}}>
       <a href="/amanda-catherine">← Back</a>
