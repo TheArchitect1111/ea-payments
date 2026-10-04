@@ -1,23 +1,46 @@
-// app/tarris/future/page.tsx - TB3 HQ PORTAL - Production Ready - WIRED 100% - NO IMAGES BUNDLED
+// app/tarris/future/page.tsx - TB3 HQ PORTAL - approved official assets
 // WIRING: Public (app/tarris/page.tsx) -> ENTER TB3 HQ -> this file -> /tarris/future/agreement
 // This is what www.tb3.online/hq shows via rewrite /hq/:path* -> /tarris/future/:path*
 
 import React from "react";
 import Link from "next/link";
 
-export default function TarrisFuturePage() {
-  const IMAGES = {
-    hqHeader: "/images/tarris/YOUR_HQ_HEADER.jpg",
-    brandSmile: "/images/tarris/YOUR_BRAND_SMILE.jpg",
-    community: "/images/tarris/YOUR_COMMUNITY.jpg",
-    enterprise: "/images/tarris/YOUR_ENTERPRISE_SUIT.jpg",
-  };
+const portalModules = [
+  { title: "ACADEMICS", images: [
+    { id: "hq-academics-primary", asset: "OFFICIAL_09_LIBRARY_STUDYING.png", alt: "Tarris studying in the library" },
+    { id: "hq-academics-film", asset: "OFFICIAL_07_FILM_TABLET.png", alt: "Tarris reviewing game film" },
+  ]},
+  { title: "TRAINING", images: [
+    { id: "hq-training-primary", asset: "OFFICIAL_06_CABLE_MACHINE.png", alt: "Tarris training on a cable machine" },
+    { id: "hq-training-secondary", asset: "OFFICIAL_02_BENCH_YELLOW_KOBE.png", alt: "Tarris seated on the bench" },
+    { id: "hq-nutrition", asset: "OFFICIAL_11_KITCHEN_NUTRITION.png", alt: "Tarris preparing nutrition at home" },
+  ]},
+  { title: "NIL & BRAND", images: [
+    { id: "hq-nil-brand", asset: "OFFICIAL_13_BLAZER_CHAIR.png", alt: "Tarris in a blazer in a professional setting" },
+  ]},
+  { title: "OPPORTUNITIES", images: [
+    { id: "hq-opportunities-enterprise", asset: "OFFICIAL_15_PODIUM_SPEAKING.png", alt: "Tarris speaking at a podium" },
+  ]},
+  { title: "MEDIA LIBRARY", images: []},
+  { title: "COMMUNITY", images: [
+    { id: "hq-community-youth", asset: "OFFICIAL_14_YOUTH_HUDDLE.png", alt: "Tarris coaching a youth huddle" },
+    { id: "hq-community-education", asset: "OFFICIAL_12_KIDS_ART.png", alt: "Young people working on art together" },
+  ]},
+];
+function PortalImage({ id, asset, alt, className = "" }: { id: string; asset: string; alt: string; className?: string }) {
+  return <img id={id} src={`/images/tb3-official/${asset}`} alt={alt} className={`h-full w-full object-cover object-center ${className}`} loading="lazy" />;
+}
 
+export default function TarrisFuturePage() {
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white flex flex-col lg:flex-row">
       <aside className="relative w-full lg:fixed lg:left-0 lg:top-0 lg:w-64 lg:h-screen bg-[#111] border-r border-[#222] p-6">
         <h2 className="font-black text-2xl mb-1 tracking-tight">TB3 HQ</h2>
-        <p className="text-[10px] tracking-[0.3em] opacity-60 mb-8">MORE THAN A GAME</p>
+        <p className="text-[10px] tracking-[0.3em] opacity-60 mb-4">MORE THAN A GAME</p>
+        <div className="mb-8 flex items-center gap-3">
+          <img id="hq-profile-avatar" src="/images/tb3-official/OFFICIAL_01_HEADSHOT_FRONT_BLACK_BG.png" alt="Tarris Bouie profile" style={{ aspectRatio: "1 / 1" }} className="h-14 w-14 shrink-0 rounded-full object-cover object-center" loading="eager" />
+          <span className="text-sm font-semibold">Tarris Bouie</span>
+        </div>
         <nav className="grid grid-cols-2 gap-2 lg:block lg:space-y-2 text-sm">
           <Link href="/tarris/future" className="block bg-white text-black px-3 py-2 rounded font-bold">Home</Link>
           <a className="block opacity-70 px-3 py-2">My Journey</a>
@@ -45,14 +68,19 @@ export default function TarrisFuturePage() {
               LET&apos;S GET TO WORK →
             </Link>
           </div>
-          <div className="w-full sm:w-72 h-72 shrink-0 bg-[#1a1a1a] rounded-2xl flex items-center justify-center border border-dashed border-[#333] text-xs opacity-50 text-center p-4">
-            HQ HEADER IMAGE<br/>Replace: {IMAGES.hqHeader}<br/>Mom-safe: polo/tee smile, no sweat/tank
+          <div className="w-full sm:w-72 h-72 shrink-0 overflow-hidden rounded-2xl bg-[#0A0A0A]">
+            <img id="hq-hero" src="/images/tb3-official/OFFICIAL_00_HERO_TB3_MORE_THAN_A_GAME.png" alt="TB3: More Than a Game" className="h-full w-full object-contain" loading="eager" />
           </div>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
-          {['ACADEMICS','TRAINING','NIL & BRAND','OPPORTUNITIES','MEDIA LIBRARY','COMMUNITY'].map(t=>(
-            <div key={t} className="bg-[#1a1a1a] p-4 rounded-xl border border-[#222] text-xs font-bold">{t}<br/><span className="font-normal opacity-60 text-[11px]">Approved module</span></div>
+          {portalModules.map(({ title, images }) => (
+            <div key={title} className="bg-[#1a1a1a] p-4 rounded-xl border border-[#222] text-xs font-bold">
+              {images.length > 0 && <div className={`mb-3 grid gap-1 ${images.length > 1 ? "grid-cols-2" : "grid-cols-1"}`}>
+                {images.map(({ id, asset, alt }) => <div key={id} className="aspect-square overflow-hidden rounded-md"><PortalImage id={id} asset={asset} alt={alt} /></div>)}
+              </div>}
+              {title}<br/><span className="font-normal opacity-60 text-[11px]">Approved module</span>
+            </div>
           ))}
         </div>
 
@@ -60,8 +88,11 @@ export default function TarrisFuturePage() {
           <div className="bg-[#1a1a1a] rounded-xl p-4 border border-[#222]">
             <p className="text-[10px] tracking-widest opacity-60">FEATURED VIDEO</p>
             <h3 className="font-black text-2xl mt-2 leading-tight">THE JOURNEY<br/>CONTINUES.</h3>
-            <div className="mt-4 w-full h-48 bg-[#222] rounded-lg flex items-center justify-center border border-dashed border-[#444] text-xs opacity-50 text-center p-4">
-              BRAND SMILE IMAGE<br/>Replace: {IMAGES.brandSmile}<br/>Mom-safe: TB3 tee, arms crossed, warm smile
+            <div id="hq-media-library" className="mt-4 grid grid-cols-2 gap-2">
+              <div className="aspect-video overflow-hidden rounded-lg"><PortalImage id="hq-media-thumb-1" asset="OFFICIAL_01_HEADSHOT_FRONT_BLACK_BG.png" alt="Tarris headshot in Alabama gear" /></div>
+              <div className="aspect-video overflow-hidden rounded-lg"><PortalImage id="hq-media-thumb-2" asset="OFFICIAL_08_HEADSHOT_RED_BG.png" alt="Tarris headshot on red and black background" /></div>
+              <div className="aspect-video overflow-hidden rounded-lg"><PortalImage id="hq-media-thumb-3" asset="OFFICIAL_03_LOW_STANCE_ARENA.png" alt="Tarris in a low dribble stance on court" /></div>
+              <div className="aspect-video overflow-hidden rounded-lg"><PortalImage id="hq-media-thumb-4" asset="OFFICIAL_04_BALL_OVER_SHOULDER.png" alt="Tarris holding the ball over his shoulder" /></div>
             </div>
           </div>
           <div className="bg-[#1a1a1a] rounded-xl p-4 border border-[#222]">
