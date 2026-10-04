@@ -1,122 +1,268 @@
-// app/tarris/future/page.tsx - TB3 HQ PORTAL - approved official assets
-// WIRING: Public (app/tarris/page.tsx) -> ENTER TB3 HQ -> this file -> /tarris/future/agreement
-// This is what www.tb3.online/hq shows via rewrite /hq/:path* -> /tarris/future/:path*
+"use client";
 
-import React from "react";
-import Link from "next/link";
+import { useMemo, useState } from "react";
 
-const portalModules = [
-  { title: "ACADEMICS", images: [
-    { id: "hq-academics-primary", asset: "OFFICIAL_09_LIBRARY_STUDYING.png", alt: "Tarris studying in the library" },
-    { id: "hq-academics-film", asset: "OFFICIAL_07_FILM_TABLET.png", alt: "Tarris reviewing game film" },
-  ]},
-  { title: "TRAINING", images: [
-    { id: "hq-training-primary", asset: "OFFICIAL_06_CABLE_MACHINE.png", alt: "Tarris training on a cable machine" },
-    { id: "hq-training-secondary", asset: "OFFICIAL_02_BENCH_YELLOW_KOBE.png", alt: "Tarris seated on the bench" },
-    { id: "hq-nutrition", asset: "OFFICIAL_11_KITCHEN_NUTRITION.png", alt: "Tarris preparing nutrition at home" },
-  ]},
-  { title: "NIL & BRAND", images: [
-    { id: "hq-nil-brand", asset: "OFFICIAL_13_BLAZER_CHAIR.png", alt: "Tarris in a blazer in a professional setting" },
-  ]},
-  { title: "OPPORTUNITIES", images: [
-    { id: "hq-opportunities-enterprise", asset: "OFFICIAL_15_PODIUM_SPEAKING.png", alt: "Tarris speaking at a podium" },
-  ]},
-  { title: "MEDIA LIBRARY", images: []},
-  { title: "COMMUNITY", images: [
-    { id: "hq-community-youth", asset: "OFFICIAL_14_YOUTH_HUDDLE.png", alt: "Tarris coaching a youth huddle" },
-    { id: "hq-community-education", asset: "OFFICIAL_12_KIDS_ART.png", alt: "Young people working on art together" },
-  ]},
+const officialAssets = [
+  { filename: "OFFICIAL_00_HERO_TB3_MORE_THAN_A_GAME.png", category: "Brand" },
+  { filename: "OFFICIAL_01_HEADSHOT_FRONT_BLACK_BG.png", category: "Brand" },
+  { filename: "OFFICIAL_02_BENCH_YELLOW_KOBE.png", category: "Training" },
+  { filename: "OFFICIAL_03_LOW_STANCE_ARENA.png", category: "Athlete" },
+  { filename: "OFFICIAL_04_BALL_OVER_SHOULDER.png", category: "Athlete" },
+  { filename: "OFFICIAL_05_TUNNEL_BOUIE_4_BACK.png", category: "Future" },
+  { filename: "OFFICIAL_06_CABLE_MACHINE.png", category: "Training" },
+  { filename: "OFFICIAL_07_FILM_TABLET.png", category: "Academics" },
+  { filename: "OFFICIAL_08_HEADSHOT_RED_BG.png", category: "Brand" },
+  { filename: "OFFICIAL_09_LIBRARY_STUDYING.png", category: "Academics" },
+  { filename: "OFFICIAL_10_CASUAL_LEAN.png", category: "Brand" },
+  { filename: "OFFICIAL_11_KITCHEN_NUTRITION.png", category: "Training" },
+  { filename: "OFFICIAL_12_KIDS_ART.png", category: "Community" },
+  { filename: "OFFICIAL_13_BLAZER_CHAIR.png", category: "Brand" },
+  { filename: "OFFICIAL_14_YOUTH_HUDDLE.png", category: "Community" },
+  { filename: "OFFICIAL_15_PODIUM_SPEAKING.png", category: "Enterprise" },
 ];
-function PortalImage({ id, asset, alt, className = "" }: { id: string; asset: string; alt: string; className?: string }) {
-  const objectPosition = asset.includes("HEADSHOT") ? "50% 15%" : asset.includes("BENCH_YELLOW_KOBE") ? "50% 30%" : asset.includes("BLAZER_CHAIR") ? "55% 20%" : "50% 50%";
-  return <img id={id} src={`/images/tb3-official/${asset}`} alt={alt} style={{ objectPosition }} className={`h-full w-full object-cover ${className}`} loading="lazy" />;
+
+function PortalImage({
+  id,
+  asset,
+  alt,
+  position = "50% 50%",
+  className = "",
+  contain = false,
+  slotId,
+}: {
+  id: string;
+  asset: string;
+  alt: string;
+  position?: string;
+  className?: string;
+  contain?: boolean;
+  slotId?: string;
+}) {
+  return (
+    <img
+      id={id}
+      data-asset-slot={slotId}
+      src={`/images/tb3-official/${asset}`}
+      alt={alt}
+      style={{ objectPosition: position }}
+      className={`h-full w-full ${contain ? "object-contain" : "object-cover"} ${className}`}
+      loading={id === "hq-hero" ? "eager" : "lazy"}
+    />
+  );
+}
+
+function ActionButton({ children }: { children: string }) {
+  return (
+    <button
+      type="button"
+      disabled
+      className="cursor-not-allowed rounded border border-white/20 px-4 py-2 text-left text-xs font-semibold text-white/80 opacity-80"
+    >
+      {children}
+    </button>
+  );
 }
 
 export default function TarrisFuturePage() {
+  const [search, setSearch] = useState("");
+  const filteredAssets = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    if (!query) return officialAssets;
+    return officialAssets.filter(({ filename, category }) => `${filename} ${category}`.toLowerCase().includes(query));
+  }, [search]);
+
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white flex flex-col lg:flex-row">
-      <aside className="relative w-full lg:fixed lg:left-0 lg:top-0 lg:w-64 lg:h-screen bg-[#111] border-r border-[#222] p-6">
-        <h2 className="font-black text-2xl mb-1 tracking-tight">TB3 HQ</h2>
-        <p className="text-[10px] tracking-[0.3em] opacity-60 mb-4">MORE THAN A GAME</p>
-        <div className="mb-8 flex items-center gap-3">
-          <img id="hq-profile-avatar" src="/images/tb3-official/OFFICIAL_01_HEADSHOT_FRONT_BLACK_BG.png" alt="Tarris Bouie profile" style={{ aspectRatio: "1 / 1" }} className="h-14 w-14 shrink-0 rounded-full object-cover object-center" loading="eager" />
-          <span className="text-sm font-semibold">Tarris Bouie</span>
+    <div className="min-h-screen bg-[#0A0A0A] text-[#F7F5F2] lg:flex">
+      <aside className="border-b border-white/10 bg-[#111111] p-5 lg:fixed lg:inset-y-0 lg:left-0 lg:w-64 lg:overflow-y-auto lg:border-b-0 lg:border-r">
+        <div className="flex items-center justify-between gap-4">
+          <a href="#hq-home" aria-label="TB3 HQ Home" className="flex items-center gap-2">
+            <span className="text-3xl font-black leading-none tracking-[-0.1em] text-[#A51C30]">TB3</span>
+            <span className="border-l border-white/20 pl-2 text-xs font-black tracking-[0.18em]">HQ</span>
+          </a>
+          <PortalImage
+            id="hq-profile-avatar"
+            asset="OFFICIAL_01_HEADSHOT_FRONT_BLACK_BG.png"
+            alt="Tarris Bouie profile photo"
+            position="50% 15%"
+            className="h-12 w-12 rounded-full border border-white/20"
+          />
         </div>
-        <nav className="grid grid-cols-2 gap-2 lg:block lg:space-y-2 text-sm">
-          <Link href="/tarris/future" className="block bg-white text-black px-3 py-2 rounded font-bold">Home</Link>
-          <a className="block opacity-70 px-3 py-2">My Journey</a>
-          <a className="block opacity-70 px-3 py-2">Academics</a>
-          <a className="block opacity-70 px-3 py-2">Training</a>
-          <a className="block opacity-70 px-3 py-2">NIL & Brand</a>
-          <a className="block opacity-70 px-3 py-2">Opportunities</a>
-          <a className="block opacity-70 px-3 py-2">Media Library</a>
-          <a className="block opacity-70 px-3 py-2">Community</a>
-          <a className="block opacity-70 px-3 py-2">Calendar</a>
-          <a className="block opacity-70 px-3 py-2">Earnings</a>
-          <a className="block opacity-70 px-3 py-2">Analytics</a>
-          <a className="block opacity-70 px-3 py-2">Documents</a>
-          <a className="block opacity-70 px-3 py-2">EVA</a>
+        <p className="mt-3 text-[9px] tracking-[0.28em] text-white/50">TARRIS BOUIE</p>
+        <nav aria-label="TB3 HQ navigation" className="mt-6 grid grid-cols-2 gap-1 text-sm sm:grid-cols-4 lg:block lg:space-y-1">
+          <a href="#hq-home" className="rounded bg-white px-3 py-2 font-bold text-black">Home</a>
+          <a href="#hq-journey" className="block rounded px-3 py-2 text-white/70 hover:bg-white/10">My Journey</a>
+          <a href="#hq-academics" className="block rounded px-3 py-2 text-white/70 hover:bg-white/10">Academics</a>
+          <a href="#hq-training" className="block rounded px-3 py-2 text-white/70 hover:bg-white/10">Training</a>
+          <a href="#hq-nil-brand" className="block rounded px-3 py-2 text-white/70 hover:bg-white/10">NIL &amp; Brand</a>
+          <a href="#hq-opportunities" className="block rounded px-3 py-2 text-white/70 hover:bg-white/10">Opportunities</a>
+          <a href="#hq-media-library" className="block rounded px-3 py-2 text-white/70 hover:bg-white/10">Media Library</a>
+          <a href="#hq-community" className="block rounded px-3 py-2 text-white/70 hover:bg-white/10">Community</a>
         </nav>
-        <div className="mt-8 text-[10px] opacity-40 leading-relaxed">
-          DISCIPLINE<br/>DETERMINATION<br/>DEVELOPMENT<br/>DESTINY
+        <div className="mt-8 hidden text-[10px] leading-6 tracking-[0.16em] text-white/45 lg:block">
+          DISCIPLINE.<br />DETERMINATION.<br />DEVELOPMENT.<br />DESTINY.
         </div>
       </aside>
 
-      <main className="min-w-0 ml-0 lg:ml-64 flex-1 p-4 sm:p-8 bg-[#0a0a0a]">
-        <div className="flex flex-col lg:flex-row gap-6 lg:gap-0 justify-between items-start mb-8 bg-[#111] rounded-2xl p-6 border border-[#222]">
-          <div>
-            <p className="text-xs tracking-widest opacity-60">WELCOME TO</p>
-            <h1 className="text-6xl font-black mt-1">TB3 <span className="text-[#c41e3a]">HQ</span></h1>
-            <p className="text-xs tracking-[0.3em] opacity-60 mt-1">PLAN. PREPARE. PERFORM. BUILD.</p>
-            <p className="mt-6 text-lg italic opacity-80">&quot;A bigger purpose than basketball.&quot;<br/><span className="text-xs not-italic opacity-60">— TARRIS BOUIE III</span></p>
-            {/* WIRED FUNCTIONAL BUTTON - NOT JUST COMMENT */}
-            <Link href="/tarris/future/agreement" className="mt-6 inline-block bg-white text-black px-6 py-3 rounded-full font-bold text-sm hover:bg-zinc-200 transition">
-              LET&apos;S GET TO WORK →
-            </Link>
-          </div>
-          <div className="w-full sm:w-72 h-72 shrink-0 overflow-hidden rounded-2xl bg-[#0A0A0A]">
-            <img id="hq-hero" src="/images/tb3-official/OFFICIAL_00_HERO_TB3_MORE_THAN_A_GAME.png" alt="TB3: More Than a Game" className="h-full w-full object-contain" loading="eager" />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
-          {portalModules.map(({ title, images }) => (
-            <div key={title} className="bg-[#1a1a1a] p-4 rounded-xl border border-[#222] text-xs font-bold">
-              {images.length > 0 && <div className={`mb-3 grid gap-1 ${images.length > 1 ? "grid-cols-2" : "grid-cols-1"}`}>
-                {images.map(({ id, asset, alt }) => <div key={id} className="aspect-square overflow-hidden rounded-md"><PortalImage id={id} asset={asset} alt={alt} /></div>)}
-              </div>}
-              {title}<br/><span className="font-normal opacity-60 text-[11px]">Approved module</span>
+      <main className="min-w-0 flex-1 px-4 pb-28 pt-5 sm:px-8 lg:ml-64 lg:px-10">
+        <section id="hq-home" className="scroll-mt-6 rounded-2xl border border-white/10 bg-[#111111] p-5 sm:p-8">
+          <div className="flex flex-col justify-between gap-8 xl:flex-row xl:items-center">
+            <div className="max-w-2xl">
+              <p className="text-xs tracking-[0.25em] text-white/60">WELCOME TO</p>
+              <h1 className="mt-2 text-4xl font-black tracking-tight sm:text-6xl">TB3 <span className="text-[#C41E3A]">HQ</span></h1>
+              <p className="mt-3 text-xs tracking-[0.25em] text-white/60">PLAN. PREPARE. PERFORM. BUILD.</p>
+              <p className="mt-6 max-w-xl text-lg italic text-white/80">“A bigger purpose than basketball.”</p>
             </div>
-          ))}
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <div className="bg-[#1a1a1a] rounded-xl p-4 border border-[#222]">
-            <p className="text-[10px] tracking-widest opacity-60">FEATURED VIDEO</p>
-            <h3 className="font-black text-2xl mt-2 leading-tight">THE JOURNEY<br/>CONTINUES.</h3>
-            <div id="hq-media-library" className="mt-4 grid grid-cols-2 gap-2">
-              <div className="aspect-video overflow-hidden rounded-lg"><PortalImage id="hq-media-thumb-1" asset="OFFICIAL_01_HEADSHOT_FRONT_BLACK_BG.png" alt="Tarris headshot in Alabama gear" /></div>
-              <div className="aspect-video overflow-hidden rounded-lg"><PortalImage id="hq-media-thumb-2" asset="OFFICIAL_08_HEADSHOT_RED_BG.png" alt="Tarris headshot on red and black background" /></div>
-              <div className="aspect-video overflow-hidden rounded-lg"><PortalImage id="hq-media-thumb-3" asset="OFFICIAL_03_LOW_STANCE_ARENA.png" alt="Tarris in a low dribble stance on court" /></div>
-              <div className="aspect-video overflow-hidden rounded-lg"><PortalImage id="hq-media-thumb-4" asset="OFFICIAL_04_BALL_OVER_SHOULDER.png" alt="Tarris holding the ball over his shoulder" /></div>
+            <div className="aspect-video w-full max-w-lg overflow-hidden bg-[#0A0A0A]">
+              <PortalImage id="hq-hero" asset="OFFICIAL_00_HERO_TB3_MORE_THAN_A_GAME.png" alt="TB3 More Than a Game hero graphic" contain />
             </div>
           </div>
-          <div className="bg-[#1a1a1a] rounded-xl p-4 border border-[#222]">
-            <h3 className="font-bold">MY FOCUS</h3>
-            <div className="mt-4 space-y-3 text-xs"><div>85% Training Plan - On Track</div><div>72% Academic Goals - On Track</div><div>60% NIL / Brand - In Progress</div><div>90% Personal Growth - On Track</div></div>
-          </div>
-          <div className="bg-[#1a1a1a] rounded-xl p-4 border border-[#222]">
-            <h3 className="font-bold">UPCOMING</h3>
-            <div className="mt-4 space-y-3 text-xs opacity-70"><div>SEP 14 - Training</div><div>SEP 16 - Academic Check-In</div><div>SEP 18 - NIL Meeting</div><div>SEP 20 - Community Event</div></div>
-          </div>
-        </div>
+        </section>
 
-        <div className="mt-8 flex flex-wrap gap-4 text-[11px]">
-          <Link href="/tarris/future/agreement" className="underline opacity-60 hover:opacity-100">View Agreement →</Link>
-          <span className="opacity-20">|</span>
-          <span className="opacity-30">WIRED: app/tarris/page.tsx → ENTER TB3 HQ → app/tarris/future/page.tsx → app/tarris/future/agreement/page.tsx</span>
-        </div>
+        <section id="hq-journey" aria-labelledby="hq-journey-title" className="mt-6 scroll-mt-6 rounded-2xl border border-white/10 bg-[#111111] p-5 sm:p-7">
+          <p className="text-[10px] tracking-[0.24em] text-[#C41E3A]">MY JOURNEY</p>
+          <h2 id="hq-journey-title" className="mt-2 text-2xl font-black sm:text-3xl">THE JOURNEY CONTINUES.</h2>
+          <p className="mt-2 text-sm text-white/65">Charlotte. Spire. Alabama. Next. Every stop added something.</p>
+          <div className="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
+            <div className="aspect-[4/3] overflow-hidden rounded-lg bg-black"><PortalImage id="hq-journey-1" asset="OFFICIAL_01_HEADSHOT_FRONT_BLACK_BG.png" alt="Tarris headshot in Alabama gear" position="50% 15%" /></div>
+            <div className="aspect-[4/3] overflow-hidden rounded-lg bg-black"><PortalImage id="hq-journey-2" asset="OFFICIAL_08_HEADSHOT_RED_BG.png" alt="Tarris headshot on red and black background" position="50% 15%" /></div>
+            <div className="aspect-[4/3] overflow-hidden rounded-lg bg-black"><PortalImage id="hq-journey-3" asset="OFFICIAL_03_LOW_STANCE_ARENA.png" alt="Tarris in a low stance on court" /></div>
+            <div className="aspect-[4/3] overflow-hidden rounded-lg bg-black"><PortalImage id="hq-journey-4" asset="OFFICIAL_04_BALL_OVER_SHOULDER.png" alt="Tarris with a basketball over his shoulder" /></div>
+          </div>
+          <div className="mt-5 grid gap-3 text-xs sm:grid-cols-4">
+            <p className="rounded-lg bg-white/5 p-3"><strong>CHARLOTTE</strong><br /><span className="text-white/60">Foundation</span></p>
+            <p className="rounded-lg bg-white/5 p-3"><strong>SPIRE</strong><br /><span className="text-white/60">Development</span></p>
+            <p className="rounded-lg bg-white/5 p-3"><strong>ALABAMA</strong><br /><span className="text-white/60">Visibility</span></p>
+            <p className="rounded-lg bg-white/5 p-3"><strong>NEXT</strong><br /><span className="text-white/60">Possibility</span></p>
+          </div>
+        </section>
+
+        <section aria-labelledby="hq-focus-title" className="mt-6 rounded-2xl border border-white/10 bg-[#111111] p-5 sm:p-7">
+          <h2 id="hq-focus-title" className="text-xl font-black">MY FOCUS</h2>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <article className="rounded-lg border border-white/10 bg-white/[0.03] p-4"><h3 className="text-xs font-bold tracking-wider">ACADEMICS</h3><p className="mt-3 text-sm font-semibold text-[#D6B76A]">On Track</p><p className="mt-1 text-xs text-white/60">Study hall + Film</p></article>
+            <article className="rounded-lg border border-white/10 bg-white/[0.03] p-4"><h3 className="text-xs font-bold tracking-wider">TRAINING</h3><p className="mt-3 text-sm font-semibold text-[#D6B76A]">In Season</p><p className="mt-1 text-xs text-white/60">Strength + Recovery</p></article>
+            <article className="rounded-lg border border-white/10 bg-white/[0.03] p-4"><h3 className="text-xs font-bold tracking-wider">NIL PIPELINE</h3><p className="mt-3 text-sm font-semibold text-[#D6B76A]">3 Active Inquiries</p><a href="#hq-opportunities" className="mt-1 inline-block text-xs text-white/60 underline">View Opportunities</a></article>
+            <article className="rounded-lg border border-white/10 bg-white/[0.03] p-4"><h3 className="text-xs font-bold tracking-wider">COMMUNITY</h3><p className="mt-3 text-sm font-semibold text-[#D6B76A]">Next Clinic TBA</p><p className="mt-1 text-xs text-white/60">Impact beyond game</p></article>
+          </div>
+        </section>
+
+        <section id="hq-upcoming" aria-labelledby="hq-upcoming-title" className="mt-6 scroll-mt-6 rounded-2xl border border-white/10 bg-[#111111] p-5 sm:p-7">
+          <h2 id="hq-upcoming-title" className="text-xl font-black">UPCOMING</h2>
+          <div className="mt-4 rounded-lg border border-dashed border-white/20 p-5">
+            <p className="text-xs tracking-wider text-white/60">CALENDAR WIDGET PLACEHOLDER · CONNECT GOOGLE CALENDAR</p>
+            <p className="mt-3 text-sm">No events scheduled - Add appearance in Opportunities</p>
+          </div>
+        </section>
+
+        <section id="hq-academics" aria-labelledby="hq-academics-title" className="mt-6 scroll-mt-6 rounded-2xl border border-white/10 bg-[#111111] p-5 sm:p-7">
+          <p className="text-[10px] tracking-[0.22em] text-[#C41E3A]">STUDENT FIRST</p>
+          <h2 id="hq-academics-title" className="mt-2 text-2xl font-black">ACADEMICS</h2>
+          <p className="mt-1 text-sm text-white/65">Student. First. Athlete. Discipline in the classroom.</p>
+          <div className="mt-5 grid gap-4 md:grid-cols-2">
+            <div className="aspect-[4/3] overflow-hidden rounded-lg"><PortalImage id="hq-academics-primary" asset="OFFICIAL_09_LIBRARY_STUDYING.png" alt="Tarris studying in the library" position="50% 20%" /></div>
+            <div className="aspect-[4/3] overflow-hidden rounded-lg"><PortalImage id="hq-academics-film" asset="OFFICIAL_07_FILM_TABLET.png" alt="Tarris reviewing film on a tablet" /></div>
+          </div>
+          <p className="mt-4 max-w-3xl text-sm leading-6 text-white/70">Focus on academic excellence, eligibility, and development. Study hall tracking, tutor contacts, and degree progress live here.</p>
+          <div className="mt-4 flex flex-wrap gap-2"><ActionButton>View Transcripts</ActionButton><ActionButton>Tutor Contacts</ActionButton><ActionButton>Study Hall Log</ActionButton></div>
+        </section>
+
+        <section id="hq-training" aria-labelledby="hq-training-title" className="mt-6 scroll-mt-6 rounded-2xl border border-white/10 bg-[#111111] p-5 sm:p-7">
+          <p className="text-[10px] tracking-[0.22em] text-[#C41E3A]">PREPARE THE WORK</p>
+          <h2 id="hq-training-title" className="mt-2 text-2xl font-black">TRAINING</h2>
+          <p className="mt-1 text-sm text-white/65">Prepare The Work. Determination on the court.</p>
+          <div className="mt-5 grid gap-3 sm:grid-cols-3">
+            <div className="aspect-[4/3] overflow-hidden rounded-lg"><PortalImage id="hq-training-primary" asset="OFFICIAL_06_CABLE_MACHINE.png" alt="Tarris training on a cable machine" position="50% 30%" /></div>
+            <div className="aspect-[4/3] overflow-hidden rounded-lg"><PortalImage id="hq-training-secondary" asset="OFFICIAL_02_BENCH_YELLOW_KOBE.png" alt="Tarris seated on the training bench" position="50% 30%" /></div>
+            <div className="aspect-[4/3] overflow-hidden rounded-lg"><PortalImage id="hq-nutrition" asset="OFFICIAL_11_KITCHEN_NUTRITION.png" alt="Tarris preparing nutrition at home" /></div>
+          </div>
+          <p className="mt-4 max-w-3xl text-sm leading-6 text-white/70">Strength, conditioning, nutrition, recovery, and film. The work that builds the brand.</p>
+          <div className="mt-4 flex flex-wrap gap-2"><ActionButton>Weekly Plan</ActionButton><ActionButton>Nutrition Log</ActionButton><ActionButton>Film Notes - EVA</ActionButton></div>
+        </section>
+
+        <section id="hq-nil-brand" aria-labelledby="hq-nil-title" className="mt-6 scroll-mt-6 rounded-2xl border border-white/10 bg-[#111111] p-5 sm:p-7">
+          <p className="text-[10px] tracking-[0.22em] text-[#C41E3A]">SAME VISION · HIGHER PURPOSE</p>
+          <h2 id="hq-nil-title" className="mt-2 text-2xl font-black">NIL &amp; BRAND</h2>
+          <p className="mt-1 text-sm text-white/65">Meaningful Partnerships Around A Shared Vision.</p>
+          <div className="mt-5 grid gap-4 md:grid-cols-2">
+            <div className="aspect-[4/3] overflow-hidden rounded-lg"><PortalImage id="hq-nil-brand-image" slotId="hq-nil-brand" asset="OFFICIAL_13_BLAZER_CHAIR.png" alt="Tarris in a blazer in a professional setting" position="55% 20%" /></div>
+            <div className="aspect-[4/3] overflow-hidden rounded-lg"><PortalImage id="hq-nil-lifestyle" asset="OFFICIAL_10_CASUAL_LEAN.png" alt="Tarris in a casual outdoor portrait" /></div>
+          </div>
+          <p className="mt-4 max-w-3xl text-sm leading-6 text-white/70">Same vision. Higher purpose. Different on purpose. Brand guide, values, partnership criteria, and active brand deck.</p>
+          <div className="mt-4 flex flex-wrap gap-2"><ActionButton>Brand Deck PDF</ActionButton><ActionButton>Rate Card</ActionButton><ActionButton>Inquiry Pipeline</ActionButton></div>
+        </section>
+
+        <section id="hq-opportunities" aria-labelledby="hq-opportunities-title" className="mt-6 scroll-mt-6 rounded-2xl border border-white/10 bg-[#111111] p-5 sm:p-7">
+          <p className="text-[10px] tracking-[0.22em] text-[#C41E3A]">BUILD THE ENTERPRISE</p>
+          <h2 id="hq-opportunities-title" className="mt-2 text-2xl font-black">OPPORTUNITIES</h2>
+          <p className="mt-1 text-sm text-white/65">Build The Enterprise. Turn attention into durable opportunity.</p>
+          <div className="mt-5 aspect-[16/7] max-h-[420px] overflow-hidden rounded-lg"><PortalImage id="hq-opportunities-enterprise" asset="OFFICIAL_15_PODIUM_SPEAKING.png" alt="Tarris speaking at a podium" /></div>
+          <p className="mt-4 max-w-3xl text-sm leading-6 text-white/70">Appearances, speaking, partnerships, earnings, and future enterprise.</p>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <article className="rounded-lg bg-white/5 p-4"><h3 className="text-xs font-bold">Earnings Tracker</h3><p className="mt-2 text-xs text-white/55">Track opportunities and earnings here.</p></article>
+            <article className="rounded-lg bg-white/5 p-4"><h3 className="text-xs font-bold">Contracts Vault</h3><p className="mt-2 text-xs text-white/55">Organize partnership agreements here.</p></article>
+            <article className="rounded-lg bg-white/5 p-4"><h3 className="text-xs font-bold">Appearance Calendar</h3><p className="mt-2 text-xs text-white/55">Plan appearances and events here.</p></article>
+            <article className="rounded-lg bg-white/5 p-4"><h3 className="text-xs font-bold">Ask EVA</h3><p className="mt-2 text-xs text-white/55">What opportunities are inbound?</p></article>
+          </div>
+        </section>
+
+        <section id="hq-media-library" aria-labelledby="hq-media-title" className="mt-6 scroll-mt-6 rounded-2xl border border-white/10 bg-[#111111] p-5 sm:p-7">
+          <p className="text-[10px] tracking-[0.22em] text-[#C41E3A]">OFFICIAL TB3 FILES</p>
+          <h2 id="hq-media-title" className="mt-2 text-2xl font-black">MEDIA LIBRARY</h2>
+          <p className="mt-1 text-sm text-white/65">Approved Assets - 16 Official Images</p>
+          <label className="mt-5 block">
+            <span className="sr-only">Search media assets</span>
+            <input
+              type="search"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Search assets: Academics, Training, Brand, Community..."
+              className="w-full rounded-lg border border-white/15 bg-[#080808] px-4 py-3 text-sm text-white placeholder:text-white/40 focus:border-[#C41E3A] focus:outline-none"
+            />
+          </label>
+          <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {filteredAssets.map(({ filename, category }, index) => {
+              const assetPath = `/images/tb3-official/${filename}`;
+              const isHero = filename.startsWith("OFFICIAL_00_");
+              const isHeadshot = filename.includes("HEADSHOT");
+              return (
+                <article key={filename} className="overflow-hidden rounded-lg border border-white/10 bg-black">
+                  <div className={`aspect-square overflow-hidden ${isHero ? "bg-[#0A0A0A]" : "bg-[#1B1B1B]"}`}>
+                    <PortalImage id={`hq-library-thumb-${index + 1}`} asset={filename} alt={`${category} asset ${filename}`} contain={isHero} position={isHeadshot ? "50% 15%" : "50% 50%"} />
+                  </div>
+                  <div className="p-3">
+                    <p className="break-all text-[10px] font-semibold leading-4 text-white/85">{filename}</p>
+                    <p className="mt-1 text-[9px] uppercase tracking-wider text-white/45">{category}</p>
+                    <a href={assetPath} download={filename} className="mt-3 inline-flex rounded border border-white/20 px-3 py-1.5 text-[10px] font-bold hover:bg-white/10">Download</a>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+          {filteredAssets.length === 0 && <p className="mt-5 text-sm text-white/60">No matching official assets.</p>}
+        </section>
+
+        <section id="hq-community" aria-labelledby="hq-community-title" className="mt-6 scroll-mt-6 rounded-2xl border border-white/10 bg-[#111111] p-5 sm:p-7">
+          <p className="text-[10px] tracking-[0.22em] text-[#C41E3A]">IMPACT BEYOND THE GAME</p>
+          <h2 id="hq-community-title" className="mt-2 text-2xl font-black">COMMUNITY</h2>
+          <p className="mt-1 text-sm text-white/65">An Impact Beyond The Game.</p>
+          <div className="mt-5 grid gap-4 md:grid-cols-2">
+            <div className="aspect-[4/3] overflow-hidden rounded-lg"><PortalImage id="hq-community-youth" asset="OFFICIAL_14_YOUTH_HUDDLE.png" alt="Tarris coaching a youth huddle" /></div>
+            <div className="aspect-[4/3] overflow-hidden rounded-lg"><PortalImage id="hq-community-education" asset="OFFICIAL_12_KIDS_ART.png" alt="Young people working on art together" /></div>
+          </div>
+          <p className="mt-4 max-w-3xl text-sm leading-6 text-white/70">Youth clinics, mentorship, education initiatives, and community appearances.</p>
+          <div className="mt-4 flex flex-wrap gap-2"><ActionButton>Past Events</ActionButton><ActionButton>Upcoming Clinic</ActionButton><ActionButton>Impact Metrics</ActionButton></div>
+        </section>
+
+        <footer className="mt-8 border-t border-white/10 py-7">
+          <p className="text-[10px] font-bold tracking-[0.18em] text-white/70">DISCIPLINE. DETERMINATION. DEVELOPMENT. DESTINY.</p>
+          <p className="mt-2 text-[10px] tracking-[0.2em] text-[#C41E3A]">SAME VISION HIGHER PURPOSE</p>
+        </footer>
       </main>
+
+      <div role="note" aria-label="EVA assistant" className="fixed bottom-4 right-4 z-50 flex max-w-[calc(100vw-2rem)] items-center gap-3 rounded-full border border-[#C41E3A]/60 bg-[#111111] px-4 py-3 shadow-2xl">
+        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[#A51C30] text-xs font-black">EVA</span>
+        <span className="text-[11px] leading-4">Ask EVA about your brand, calendar, or opportunities</span>
+      </div>
     </div>
   );
 }
