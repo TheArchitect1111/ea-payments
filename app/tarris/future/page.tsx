@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { HqWorkspaceProvider, useHq, HqDialog, ModuleActions, ProactiveEva, HqFocus, Upcoming, OpportunitySummary, OpportunityPipeline, EarningsValue, CalendarModule, EvaPanel, EvaFab, EvaCommandBar } from "./hq-workspace";
+import { HqWorkspaceProvider, useHq, HqDialog, ModuleActions, ModuleTools, ProactiveEva, HqFocus, Upcoming, OpportunitySummary, OpportunityPipeline, EarningsValue, EarningsBreakdown, DocumentVault, OpportunityInbox, CalendarModule, EvaPanel, EvaFab, EvaCommandBar } from "./hq-workspace";
 
 type AssetCategory = "Athlete" | "Academics" | "Brand" | "Community" | "Future";
 type OfficialAsset = { filename: string; label: string; category: AssetCategory; alt: string };
@@ -194,7 +194,7 @@ function TarrisHqContent() {
             <div className="h-[400px] overflow-hidden rounded-2xl"><PortalImage id="academics-2" asset="OFFICIAL_07_FILM_TABLET.png" alt="Tarris reviewing film on a tablet" position="center" /></div>
           </div>
           <p className="mt-4 max-w-3xl text-sm leading-6 text-white/70">Focus on academic excellence, eligibility, and degree progress. Study hall tracking, tutor contacts, transcript vault live here.</p>
-          <div className="mt-4 flex flex-wrap gap-2"><ActionButton>Tutor Contacts</ActionButton><ActionButton>Transcript Vault</ActionButton><ActionButton>Eligibility Status: Not recorded</ActionButton></div>
+          <ModuleTools module="Academics" />
           <ModuleActions module="Academics" />
           <ProactiveEva module="Academics" />
         </section>
@@ -209,7 +209,7 @@ function TarrisHqContent() {
           </div>
           <div className="mt-4 mx-auto aspect-[4/5] w-[400px] max-w-full overflow-hidden rounded-2xl"><PortalImage id="training-3" asset="OFFICIAL_11_KITCHEN_NUTRITION.png" alt="Tarris preparing nutrition in the kitchen, full head and face visible" position="50% 15%" /></div>
           <p className="mt-4 max-w-3xl text-sm leading-6 text-white/70">Strength, conditioning, nutrition, recovery, film.</p>
-          <div className="mt-4 flex flex-wrap gap-2"><ActionButton>Weekly Plan</ActionButton><ActionButton>Nutrition Log</ActionButton><ActionButton>Film Notes - EVA</ActionButton><ActionButton>Recovery Log</ActionButton></div>
+          <ModuleTools module="Training" />
           <ModuleActions module="Training" />
           <ProactiveEva module="Training" />
         </section>
@@ -236,21 +236,14 @@ function TarrisHqContent() {
           <div className="mt-5 grid gap-4 lg:grid-cols-2">
             <article id="earnings-tracker" className="rounded-2xl border border-white/10 bg-[#1A1A1A] p-5">
               <div className="flex items-start justify-between"><div><p className="text-[10px] uppercase tracking-[0.2em] text-white/45">Earnings Tracker</p><EarningsValue /></div><span aria-hidden="true" className="text-xl text-[#C41E3A]">↗</span></div>
-              <div aria-label="Chart placeholder" className="mt-5 flex h-24 items-end gap-2 border-b border-white/10 px-1"><span className="h-5 flex-1 rounded-t bg-white/15"></span><span className="h-8 flex-1 rounded-t bg-white/15"></span><span className="h-6 flex-1 rounded-t bg-white/15"></span><span className="h-12 flex-1 rounded-t bg-white/15"></span><span className="h-10 flex-1 rounded-t bg-white/15"></span><span className="h-16 flex-1 rounded-t bg-white/15"></span><span className="h-9 flex-1 rounded-t bg-white/15"></span></div>
-              <button type="button" disabled className="mt-4 rounded border border-white/25 px-4 py-2 text-xs font-semibold text-white/80 opacity-80">View Breakdown</button>
+              <EarningsBreakdown />
             </article>
             <article id="contracts-vault" className="rounded-2xl border border-white/10 bg-[#1A1A1A] p-5">
               <p className="text-[10px] uppercase tracking-[0.2em] text-white/45">Contracts Vault</p>
-              <p className="mt-2 text-sm">No agreements uploaded.</p>
-              <ul className="mt-4 space-y-3 text-xs text-white/70">
-                <li className="flex items-center gap-3"><span aria-hidden="true" className="text-lg text-[#C41E3A]">▱</span>Partnership agreements</li>
-                <li className="flex items-center gap-3"><span aria-hidden="true" className="text-lg text-[#C41E3A]">▱</span>Appearance contracts</li>
-                <li className="flex items-center gap-3"><span aria-hidden="true" className="text-lg text-[#C41E3A]">▱</span>Brand documents</li>
-              </ul>
-              <button type="button" disabled className="mt-4 rounded border border-white/25 px-4 py-2 text-xs font-semibold text-white/80 opacity-80">Upload Agreement</button>
+              <DocumentVault />
             </article>
             <OpportunityPipeline />
-            <article id="opportunity-inbox" className="rounded-2xl bg-[#1A1A1A] p-5 lg:col-span-2"><h3 className="font-bold">OPPORTUNITY INBOX</h3><p className="mt-3 text-sm text-white/60">No partnership inquiries yet.</p></article>
+            <article id="opportunity-inbox" className="rounded-2xl bg-[#1A1A1A] p-5 lg:col-span-2"><h3 className="font-bold">OPPORTUNITY INBOX</h3><OpportunityInbox /></article>
           </div>
           <ProactiveEva module="Opportunity" />
         </section>
@@ -269,7 +262,7 @@ function TarrisHqContent() {
             <div className="h-[400px] overflow-hidden rounded-2xl"><PortalImage id="community-2" asset="OFFICIAL_12_KIDS_ART.png" alt="Children creating art together" position="center" /></div>
           </div>
           <p className="mt-4 max-w-3xl text-sm leading-6 text-white/70">Youth clinics, mentorship, education initiatives.</p>
-          <div className="mt-4 flex flex-wrap gap-2"><ActionButton>Past Events</ActionButton><ActionButton>Upcoming Clinic</ActionButton><ActionButton>Impact Metrics</ActionButton></div>
+          <ModuleTools module="Community" />
           <ModuleActions module="Community" />
           <ProactiveEva module="Community" />
         </section>
