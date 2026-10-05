@@ -1,0 +1,109 @@
+TB3 PUBLIC + HQ PORTAL — ASSET MANIFEST
+Snapshot target: v1.0_golden_master_2025_10_04
+
+COUNT NOTE
+The prompt says “15 filenames” but enumerates OFFICIAL_00 through OFFICIAL_15, which is 16 files. All 16 actual PNG assets in public/images/tb3-official are listed below.
+CPR image photo4141400134554580129.jpeg is excluded and not referenced by either page.
+
+OFFICIAL ASSETS + OBJECT POSITIONS
+- OFFICIAL_00_HERO_TB3_MORE_THAN_A_GAME.png
+  Public: center/contain, hero. Portal: center/contain, home hero. Vault: center/contain.
+- OFFICIAL_01_HEADSHOT_FRONT_BLACK_BG.png
+  Public: 50% 15%, cover. Portal Journey + profile avatar: 50% 15%, cover. Vault: 50% 15%, cover.
+- OFFICIAL_02_BENCH_YELLOW_KOBE.png
+  Public: 50% 30%, cover. Portal Training + Vault: 50% 30% in Training; center in Vault. Cover.
+- OFFICIAL_03_LOW_STANCE_ARENA.png
+  Public: 50% 35%, cover. Portal Journey + Vault: center, cover.
+- OFFICIAL_04_BALL_OVER_SHOULDER.png
+  Public: center top, cover. Portal Journey + Vault: center top in Journey; center in Vault. Cover.
+- OFFICIAL_05_TUNNEL_BOUIE_4_BACK.png
+  Public: 80% center, cover. Portal Future + Vault: 80% center in Future; center in Vault. Cover.
+- OFFICIAL_06_CABLE_MACHINE.png
+  Public: 50% 30%, cover. Portal Training + Vault: 50% 30% in Training; center in Vault. Cover.
+- OFFICIAL_07_FILM_TABLET.png
+  Public: center, cover. Portal Academics + Vault: center, cover.
+- OFFICIAL_08_HEADSHOT_RED_BG.png
+  Public: 50% 15%, cover. Portal Journey + Vault: 50% 15%, cover.
+- OFFICIAL_09_LIBRARY_STUDYING.png
+  Public: 50% 20%, cover. Portal Academics + Vault: center, cover.
+- OFFICIAL_10_CASUAL_LEAN.png
+  Public: center, cover. Portal NIL & Brand + Vault: center, cover.
+- OFFICIAL_11_KITCHEN_NUTRITION.png
+  Public: center, cover. Portal Training + Vault: center, cover.
+- OFFICIAL_12_KIDS_ART.png
+  Public: center, cover. Portal Community + Vault: center, cover.
+- OFFICIAL_13_BLAZER_CHAIR.png
+  Public: 55% 20%, cover. Portal NIL & Brand + Vault: 55% 20% in NIL & Brand; center in Vault. Cover.
+- OFFICIAL_14_YOUTH_HUDDLE.png
+  Public: center, cover. Portal Community + Vault: center, cover.
+- OFFICIAL_15_PODIUM_SPEAKING.png
+  Public: 50% 20%, cover. Portal Opportunities + Vault: 50% 20% in Opportunities; center in Vault. Cover.
+
+SINGLE-USE AUDIT (STORY PLACEMENTS ONLY; MEDIA VAULT IS A LIBRARY AND IS EXCLUDED)
+Public /tarris:
+- All 16 assets OFFICIAL_00–OFFICIAL_15 occur once each in the mapped public story/hero/media/enterprise placements.
+- No image is reused across the public page's mapped placements.
+
+Portal /tarris/future:
+- Home hero OFFICIAL_00: 1
+- My Journey OFFICIAL_01, 03, 04, 08: each 1
+- Academics OFFICIAL_07, 09: each 1
+- Training OFFICIAL_02, 06, 11: each 1
+- NIL & Brand OFFICIAL_10, 13: each 1
+- Opportunities OFFICIAL_15: 1
+- Community OFFICIAL_12, 14: each 1
+- Future OFFICIAL_05: 1 (separate Future section, not one of the six named storytelling modules)
+- Thus OFFICIAL_01–OFFICIAL_15 each appears in one portal narrative placement; OFFICIAL_00 is the Home hero. The 16-card Media Library intentionally shows a second library copy of every approved asset. The profile avatar also uses OFFICIAL_01.
+
+PUBLIC OBJECT-POSITION MAP
+- OFFICIAL_00_HERO_TB3_MORE_THAN_A_GAME.png: center/contain, hero
+- OFFICIAL_01_HEADSHOT_FRONT_BLACK_BG.png: 50% 15%, cover
+- OFFICIAL_02_BENCH_YELLOW_KOBE.png: 50% 30%, cover
+- OFFICIAL_03_LOW_STANCE_ARENA.png: 50% 35%, cover
+- OFFICIAL_04_BALL_OVER_SHOULDER.png: center top, cover
+- OFFICIAL_05_TUNNEL_BOUIE_4_BACK.png: 80% center, cover
+- OFFICIAL_06_CABLE_MACHINE.png: 50% 30%, cover
+- OFFICIAL_07_FILM_TABLET.png: center, cover
+- OFFICIAL_08_HEADSHOT_RED_BG.png: 50% 15%, cover
+- OFFICIAL_09_LIBRARY_STUDYING.png: 50% 20%, cover
+- OFFICIAL_10_CASUAL_LEAN.png: center, cover
+- OFFICIAL_11_KITCHEN_NUTRITION.png: center, cover
+- OFFICIAL_12_KIDS_ART.png: center, cover
+- OFFICIAL_13_BLAZER_CHAIR.png: 55% 20%, cover
+- OFFICIAL_14_YOUTH_HUDDLE.png: center, cover
+- OFFICIAL_15_PODIUM_SPEAKING.png: 50% 20%, cover
+
+PORTAL OBJECT-POSITION MAP
+- OFFICIAL_00_HERO_TB3_MORE_THAN_A_GAME.png: center/contain, home hero. Vault: center/contain.
+- OFFICIAL_01_HEADSHOT_FRONT_BLACK_BG.png: Journey + profile avatar: 50% 15%, cover. Vault: 50% 15%, cover.
+- OFFICIAL_02_BENCH_YELLOW_KOBE.png: Training + Vault: 50% 30% in Training; center in Vault. Cover.
+- OFFICIAL_03_LOW_STANCE_ARENA.png: Journey + Vault: center, cover.
+- OFFICIAL_04_BALL_OVER_SHOULDER.png: Journey + Vault: center top in Journey; center in Vault. Cover.
+- OFFICIAL_05_TUNNEL_BOUIE_4_BACK.png: Future + Vault: 80% center in Future; center in Vault. Cover.
+- OFFICIAL_06_CABLE_MACHINE.png: Training + Vault: 50% 30% in Training; center in Vault. Cover.
+- OFFICIAL_07_FILM_TABLET.png: Academics + Vault: center, cover.
+- OFFICIAL_08_HEADSHOT_RED_BG.png: Journey + Vault: 50% 15%, cover.
+- OFFICIAL_09_LIBRARY_STUDYING.png: Academics + Vault: center, cover.
+- OFFICIAL_10_CASUAL_LEAN.png: NIL & Brand + Vault: center, cover.
+- OFFICIAL_11_KITCHEN_NUTRITION.png: Training + Vault: center, cover.
+- OFFICIAL_12_KIDS_ART.png: Community + Vault: center, cover.
+- OFFICIAL_13_BLAZER_CHAIR.png: NIL & Brand + Vault: 55% 20% in NIL & Brand; center in Vault. Cover.
+- OFFICIAL_14_YOUTH_HUDDLE.png: Community + Vault: center, cover.
+- OFFICIAL_15_PODIUM_SPEAKING.png: Opportunities + Vault: 50% 20% in Opportunities; center in Vault. Cover.
+Additional Portal rules: Media Library headshots 50% 15%, tunnel 80% center, all remaining media cards center; hero uses contain on #0A0A0A.
+
+MERCH MOCK FILES ACTUALLY USED BY THE PUBLIC STORE
+- MOCK_TEE_SHORT_RED.jpg
+- MOCK_TEE_SHORT_WHITE.jpg
+- MOCK_TEE_LONG_RED.jpg
+- MOCK_TEE_LONG_WHITE.jpg
+- MOCK_HAT_WHITE.jpg
+- MOCK_HAT_RED.jpg (red state of the hat color switch)
+- MOCK_HOODIE_RED.jpg
+- MOCK_HOODIE_WHITE.jpg
+- MOCK_HOODIE_WHITE_LOGO_DETAIL_1.jpg
+
+The store has 8 product tiles. The two unused extra supplied mock files are MOCK_HOODIE_WHITE_LOGO_DETAIL_2.jpg and MOCK_SWEATSHIRT_WHITE_LOGO_DETAIL.jpg.
+
+SOURCE / SCOPE NOTES
+The two archived route files contain their page-specific helper components inline (ImageSlot, MerchProductCard, Disabled; PortalImage, ActionButton, FocusCard). They import only Next.js Link and React APIs; no external shared UI component source is needed for these pages.
