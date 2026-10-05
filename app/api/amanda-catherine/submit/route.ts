@@ -46,10 +46,18 @@ export async function POST(req: NextRequest) {
     url.searchParams.set('type', data.type || 'submission');
     if (data.courseId) url.searchParams.set('course', data.courseId);
     if (data.formId) url.searchParams.set('form', data.formId);
-    if (airtableResults?.error || airtableResults?.warning) {
+    const failedWrites = Array.isArray(airtableResults)
+      ? airtableResults.filter((result) => result?.success === false)
+      : [];
+    const writeFailure = failedWrites.length
+      ? failedWrites
+          .map((result) => `${result.table}: ${result.error || 'write failed'}`)
+          .join('; ')
+      : null;
+    if (writeFailure || airtableResults?.error || airtableResults?.warning) {
       url.searchParams.set(
         'debug',
-        (airtableResults.error || airtableResults.warning).slice(0, 200),
+        (writeFailure || airtableResults.error || airtableResults.warning).slice(0, 200),
       );
     }
 
