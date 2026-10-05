@@ -1,5 +1,6 @@
-export default function ThankYou({ searchParams }: { searchParams: { type?: string, course?: string }}){
+export default function ThankYou({ searchParams }: { searchParams: { type?: string, course?: string, debug?: string }}){
   const type = searchParams?.type || 'enroll';
+  const debug = searchParams?.debug;
   const isKit = type==='kit';
   const isWaitlist = type==='waitlist';
   
@@ -24,6 +25,13 @@ export default function ThankYou({ searchParams }: { searchParams: { type?: stri
               ? 'Thank you for your interest in becoming a certified practitioner. We honor your desire to elevate your work.'
               : 'We are so honored you chose to join us. You have just taken a powerful step toward elevating your practice, your results, and your impact. This method was created for practitioners like you — precise, intuitive, and devoted to excellence.'}
           </p>
+
+          {debug ? (
+            <div role="alert" style={{marginTop:24, padding:'16px 20px', background:'#fff3df', border:'1px solid #e5a33b', color:'#713f00', borderRadius:4}}>
+              <strong style={{display:'block', marginBottom:6, fontSize:13}}>Submission diagnostic</strong>
+              <span style={{fontSize:13, lineHeight:1.5, overflowWrap:'anywhere'}}>{debug}</span>
+            </div>
+          ) : null}
 
           <div style={{marginTop:40, background:'#fcfaf7', border:'1px solid #e8e2d9', padding:'28px'}}>
             <h3 style={{fontSize:12, letterSpacing:'0.15em', margin:'0 0 20px'}}>YOUR NEXT STEPS</h3>

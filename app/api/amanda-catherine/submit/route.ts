@@ -46,18 +46,27 @@ export async function POST(req: NextRequest) {
     url.searchParams.set('type', data.type || 'submission');
     if (data.courseId) url.searchParams.set('course', data.courseId);
     if (data.formId) url.searchParams.set('form', data.formId);
-    const failedWrites = Array.isArray(airtableResults)
-      ? airtableResults.filter((result) => result?.success === false)
+    const writeDiagnostics = Array.isArray(airtableResults)
+      ? airtableResults.flatMap((result) => {
+          if (result?.success === false) {
+            const initial = result.initialError
+              ? ` (initial Airtable error: ${result.initialError})`
+              : '';
+            return [`${result.table}: ${result.error || 'write failed'}${initial}`];
+          }
+          if (result?.initialError) {
+            return [
+              `${result.table}: recovered field mismatch (${result.fallback?.from} → ${result.fallback?.to}); Airtable error: ${result.initialError}`,
+            ];
+          }
+          return [];
+        })
       : [];
-    const writeFailure = failedWrites.length
-      ? failedWrites
-          .map((result) => `${result.table}: ${result.error || 'write failed'}`)
-          .join('; ')
-      : null;
-    if (writeFailure || airtableResults?.error || airtableResults?.warning) {
+    const writeDiagnostic = writeDiagnostics.join('; ');
+    if (writeDiagnostic || airtableResults?.error || airtableResults?.warning) {
       url.searchParams.set(
         'debug',
-        (writeFailure || airtableResults.error || airtableResults.warning).slice(0, 200),
+        (writeDiagnostic || airtableResults.error || airtableResults.warning).slice(0, 200),
       );
     }
 
