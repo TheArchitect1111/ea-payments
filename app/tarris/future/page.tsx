@@ -182,7 +182,7 @@ function TarrisHqContent() {
         <HqFocus />
         <Upcoming />
         <OpportunitySummary />
-        <section id="home-messages" className="mt-6 rounded-2xl border border-white/10 bg-[#111111] p-5 sm:p-7"><h2 className="text-xl font-black">MESSAGES / OPPORTUNITY INBOX</h2><p className="mt-3 text-sm text-white/60">No messages yet. Partnership inquiries from the public site will appear here once tracking is connected.</p><a href="#opportunity-inbox" className="mt-3 inline-block text-xs underline">View All →</a></section>
+        <section id="home-messages" className="mt-6 rounded-2xl border border-white/10 bg-[#111111] p-5 sm:p-7"><h2 className="text-xl font-black">MESSAGES / OPPORTUNITY INBOX</h2><OpportunityInbox /><a href="#opportunity-inbox" className="mt-3 inline-block text-xs underline">View All →</a></section>
         <section id="recent-media" className="mt-6 rounded-2xl border border-white/10 bg-[#111111] p-5 sm:p-7"><h2 className="text-xl font-black">RECENT MEDIA</h2><p className="mt-3 text-sm text-white/60">No videos uploaded.</p><a href="#media-library" className="mt-3 inline-block text-xs underline">Browse approved brand assets →</a></section>
 
         <section id="academics-module" aria-labelledby="academics-title" className="mt-6 scroll-mt-6 rounded-2xl border border-white/10 bg-[#111111] p-5 sm:p-7">
