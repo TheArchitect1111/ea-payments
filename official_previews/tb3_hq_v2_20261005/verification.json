@@ -1,0 +1,71 @@
+{
+  "status": "LOCAL_BROWSER_PASS_PREVIEW_BLOCKED",
+  "widths": [
+    1440,
+    375
+  ],
+  "routes": [
+    {
+      "url": "tb3.online/",
+      "status": 200
+    },
+    {
+      "url": "tb3.online/tarris",
+      "status": 200
+    },
+    {
+      "url": "tb3.online/hq",
+      "status": 404
+    },
+    {
+      "url": "tb3.online/tarris/future",
+      "status": 200
+    },
+    {
+      "url": "tb3.online/tarris/future/agreement",
+      "status": 200
+    },
+    {
+      "url": "tb3.online/tarris/future/sign",
+      "status": 200
+    },
+    {
+      "url": "www.tb3.online/",
+      "status": 200
+    },
+    {
+      "url": "www.tb3.online/tarris",
+      "status": 200
+    },
+    {
+      "url": "www.tb3.online/hq",
+      "status": 404
+    },
+    {
+      "url": "www.tb3.online/tarris/future",
+      "status": 200
+    },
+    {
+      "url": "www.tb3.online/tarris/future/agreement",
+      "status": 200
+    },
+    {
+      "url": "www.tb3.online/tarris/future/sign",
+      "status": 200
+    }
+  ],
+  "consoleErrors": [],
+  "checks": [
+    "nav order",
+    "16 vault assets",
+    "10 product mockups",
+    "no broken images",
+    "no horizontal overflow",
+    "search",
+    "filters",
+    "navigation",
+    "uncropped framing",
+    "data-only widgets",
+    "download"
+  ]
+}
