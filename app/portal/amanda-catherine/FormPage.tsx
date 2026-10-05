@@ -1,0 +1,7 @@
+import {registry,formDefinition} from '@/lib/amanda-catherine/registry';
+import AmandaForm from './AmandaForm';
+export default async function FormPage({kind,course='',context=''}:{kind:'apply'|'enroll'|'foundry';course?:string;context?:string}){
+ try{const r=await registry();const selected=r.courses.find(c=>c.key===course);const type=kind==='enroll'?(selected?.status==='READY'?'enroll':'waitlist'):'application';const formId=type==='application'?'amanda-apply':`amanda-${type}`;const f=formDefinition(r.forms,formId);
+ return <section className="amanda-card amanda-form"><p className="amanda-status">AMANDA CATHERINE</p><h1>{kind==='foundry'?'Foundry Application':type==='waitlist'?'Join the waitlist':f.title}</h1><p>{selected?.title || (kind==='enroll'?'Tell us which course interests you.':'Tell us about your next step.')}</p>{type==='waitlist' && <p>Enrollment is not yet open. Joining the waitlist does not create a purchase or course access.</p>}<AmandaForm fields={f.fields} label={f.label} type={type} formId={formId} courseId={course} context={context || kind}/>{kind==='foundry' && <p>Includes 90 days of clinical integration support and business mentorship.</p>}</section>;
+ }catch{ return <section className="amanda-card"><h1>We’re unable to load this form</h1><p role="alert">Please refresh in a moment.</p><a href="/portal/amanda-catherine/book">Contact Amanda through booking</a></section>; }
+}

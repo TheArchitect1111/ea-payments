@@ -1,146 +1,16 @@
-import { createRecord } from './airtable';
-
-type AirtableRecord = { id?: string; [key: string]: any };
-type FieldFallback = { from: string; to: string; error: string };
-type SafeCreateResult =
-  | { success: true; record: AirtableRecord; fallback: FieldFallback | null }
-  | {
-      success: false;
-      error: string;
-      initialError?: string;
-      fallback?: Omit<FieldFallback, 'error'>;
-    };
-
-type AmandaWriteResult = {
-  success: boolean;
-  error: string | null;
-  table: string;
-  recordId: string | null;
-  initialError?: string;
-  fallback?: Omit<FieldFallback, 'error'>;
-};
-
-function errorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : String(error);
-}
-
-const safeCreate = async (
-  tableName: string,
-  fields: Record<string, any>,
-): Promise<SafeCreateResult> => {
-  try {
-    return {
-      success: true,
-      record: await createRecord(tableName, fields),
-      fallback: null,
-    };
-  } catch (error: unknown) {
-    const initialError = errorMessage(error);
-    if (!initialError.includes('Unknown field name')) {
-      return { success: false, error: initialError };
-    }
-
-    const courseFieldError = /Unknown field name ["']?Course["']?/i.test(initialError);
-    const offerFieldError = /Unknown field name ["']?Offer["']?/i.test(initialError);
-    const from = courseFieldError ? 'Course' : offerFieldError ? 'Offer' : null;
-    const to = courseFieldError
-      ? 'Course interested in'
-      : offerFieldError
-        ? 'Course'
-        : null;
-
-    if (!from || !to || !(from in fields)) {
-      return { success: false, error: initialError };
-    }
-
-    const retryFields = { ...fields, [to]: fields[from] };
-    delete retryFields[from];
-
-    try {
-      return {
-        success: true,
-        record: await createRecord(tableName, retryFields),
-        fallback: { from, to, error: initialError },
-      };
-    } catch (retryError: unknown) {
-      return {
-        success: false,
-        error: errorMessage(retryError),
-        initialError,
-        fallback: { from, to },
-      };
-    }
-  }
-};
-
-async function writeRecord(
-  table: string,
-  fields: Record<string, any>,
-): Promise<AmandaWriteResult> {
-  const result = await safeCreate(table, fields);
-  if (!result.success) {
-    return {
-      success: false,
-      error: result.error,
-      table,
-      recordId: null,
-      ...(result.initialError ? { initialError: result.initialError } : {}),
-      ...(result.fallback ? { fallback: result.fallback } : {}),
-    };
-  }
-
-  return {
-    success: true,
-    error: null,
-    table,
-    recordId: result.record?.id ?? null,
-    ...(result.fallback
-      ? {
-          initialError: result.fallback.error,
-          fallback: { from: result.fallback.from, to: result.fallback.to },
-        }
-      : {}),
-  };
-}
-
-export async function handleAmandaSubmit(p: any): Promise<AmandaWriteResult[]> {
-  const writes: Promise<AmandaWriteResult>[] = [
-    writeRecord('Portal Form Submissions', {
-      Email: p.email,
-      Name: p.name,
-      Phone: p.phone,
-      Type: p.type,
-      Course: p.courseId,
-      FormId: p.formId,
-      Created: new Date().toISOString(),
-    }),
-  ];
-
-  if (p.type === 'enroll' || p.type === 'kit') {
-    writes.push(
-      writeRecord('Client Records', {
-        Email: p.email,
-        Name: p.name,
-        Status: 'Active Enrolled',
-        Course: p.courseId,
-      }),
-      writeRecord('Creative Studio', {
-        Email: p.email,
-        Offer: p.courseId,
-        Type: p.type,
-      }),
-    );
-  }
-
-  if (p.type === 'waitlist') {
-    writes.push(
-      writeRecord('amanda_waitlist', {
-        Email: p.email,
-        Name: p.name,
-        Course: p.courseId,
-      }),
-    );
-  }
-
-  return Promise.all(writes);
+import {registry,create} from './registry';
+export async function handleAmandaSubmit(p:Record<string,any>, r:Awaited<ReturnType<typeof registry>>){
+ const now=new Date().toISOString(),id=crypto.randomUUID();
+ const course=r.courses.find(c=>c.key===p.courseId);
+ const type=p.type==='enroll' && course?.status!=='READY'?'waitlist':p.type;
+ const results:Record<string,{success:boolean;id?:string;error?:string}>={};
+ async function write(key:string,table:string,values:Record<string,unknown>){try{const record=await create(table,values);results[key]={success:true,id:record.id};}catch(e){console.error('[Amanda submission]',key,e);results[key]={success:false,error:'Unable to save '+key};}}
+ await write('portal_submissions','Portal Form Submissions',{'Submission ID':id,'Portal Slug':'amanda-catherine',Kind:type,Status:'New',Name:p.name,Email:p.email,Phone:p.phone || '',Notes:p.message || '', 'Payload JSON':JSON.stringify({...p,type,organizationId:r.orgId}), 'Created At':now,'Updated At':now});
+ if(!results.portal_submissions.success)return {ok:false,type,...results};
+ if(type==='waitlist')await write('waitlist','amanda_waitlist',{student_name:p.name,student_email:p.email,student_phone:p.phone || '',course_slug:p.courseId,course_name:course?.title || p.courseId,student_message:p.message || '',portal_slug:'amanda-catherine',submitted_at:now});
+ if(type==='enroll'){
+ await write('creative_studio','Creative Studio',{'Record Key':`amanda-enrollment:${id}`,'Record Type':'Experience','Organization ID':r.orgId,Title:`Enrollment: ${course?.title}`,'Payload JSON':JSON.stringify({...p,organizationId:r.orgId,portalSlug:'amanda-catherine',kind:'enrollment',createdAt:now}),'Updated At':now});
+ await write('client_records','Client Records',{'Client Name':p.name,Email:p.email,Phone:p.phone || '',Organization:r.orgId,'Portal Slug':'amanda-catherine','Lifecycle Stage':'Active Enrolled'});
+ }
+ return {ok:Object.values(results).every(x=>x.success),type,...results};
 }
