@@ -1,6 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+
+import { HqWorkspaceProvider, useHq, HqDialog, ModuleActions, ProactiveEva, HqFocus, Upcoming, OpportunitySummary, OpportunityPipeline, EarningsValue, CalendarModule, EvaPanel, EvaFab, EvaCommandBar } from "./hq-workspace";
 
 type AssetCategory = "Athlete" | "Academics" | "Brand" | "Community" | "Future";
 type OfficialAsset = { filename: string; label: string; category: AssetCategory; alt: string };
@@ -12,7 +14,7 @@ const officialAssets: OfficialAsset[] = [
   { filename: "OFFICIAL_06_CABLE_MACHINE.png", label: "CABLE MACHINE", category: "Athlete", alt: "Tarris training on a cable machine" },
   { filename: "OFFICIAL_09_LIBRARY_STUDYING.png", label: "LIBRARY · STUDYING", category: "Academics", alt: "Tarris studying in a library" },
   { filename: "OFFICIAL_07_FILM_TABLET.png", label: "FILM TABLET", category: "Academics", alt: "Tarris reviewing game film on a tablet" },
-  { filename: "OFFICIAL_11_KITCHEN_NUTRITION.png", label: "KITCHEN · NUTRITION", category: "Athlete", alt: "Nutrition and wellness preparation" },
+  { filename: "OFFICIAL_11_KITCHEN_NUTRITION.png", label: "KITCHEN · NUTRITION", category: "Academics", alt: "Nutrition and wellness preparation" },
   { filename: "OFFICIAL_01_HEADSHOT_FRONT_BLACK_BG.png", label: "HEADSHOT · WHITE JERSEY", category: "Brand", alt: "Tarris headshot in a white Alabama jersey" },
   { filename: "OFFICIAL_08_HEADSHOT_RED_BG.png", label: "HEADSHOT · RED BACKGROUND", category: "Brand", alt: "Tarris headshot on a red and black background" },
   { filename: "OFFICIAL_13_BLAZER_CHAIR.png", label: "BLAZER · PROFESSIONAL", category: "Brand", alt: "Tarris in a blazer in a professional setting" },
@@ -21,7 +23,7 @@ const officialAssets: OfficialAsset[] = [
   { filename: "OFFICIAL_12_KIDS_ART.png", label: "KIDS · ART", category: "Community", alt: "Children creating art together" },
   { filename: "OFFICIAL_05_TUNNEL_BOUIE_4_BACK.png", label: "TUNNEL · BOUIE 4", category: "Future", alt: "Tarris in the tunnel with BOUIE and number 4 visible" },
   { filename: "OFFICIAL_15_PODIUM_SPEAKING.png", label: "PODIUM · SPEAKING", category: "Future", alt: "Tarris speaking at a podium" },
-  { filename: "OFFICIAL_00_HERO_TB3_MORE_THAN_A_GAME.png", label: "TB3 · MORE THAN A GAME", category: "Brand", alt: "TB3 More Than a Game hero graphic" },
+  { filename: "OFFICIAL_00_HERO_TB3_MORE_THAN_A_GAME.png", label: "TB3 · MORE THAN A GAME", category: "Future", alt: "TB3 More Than a Game hero graphic" },
 ];
 
 const filterOptions = ["All", "Athlete", "Academics", "Brand", "Community", "Future"] as const;
@@ -59,7 +61,7 @@ function WorkspaceIcon({ name }: { name: string }) {
     Training: "M3 8v8m3-10v12m12-12v12m3-10v8M6 12h12",
     "NIL & Brand": "M4 19V5m0 14h16M8 15l4-5 4 2 5-7",
     Opportunities: "M2 8l5-4 5 2 5-2 5 4-4 10-4 3-5-3-7-10m7 0 4-2 4 4-3 3-3-2m3 2 6 5",
-    "Media Library": "M3 4h18v16H3V4m6 4 7 4-7 4V8",
+    Calendar: "M3 5h18v16H3V5m0 5h18M7 2v6m10-6v6M7 14h3m4 0h3M7 17h3",
     Community: "M9 7a3 3 0 1 0 6 0a3 3 0 1 0-6 0m-5 14v-3a8 8 0 0 1 16 0v3M3 7v5m18-5v5",
   };
   return <svg aria-hidden="true" viewBox="0 0 24 24" className="h-7 w-7 text-[#C41E3A]" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d={paths[name]} /></svg>;
@@ -77,39 +79,24 @@ function ActionButton({ children }: { children: string }) {
   );
 }
 
-function FocusCard({
-  id,
-  title,
-  status,
-  detail,
-  href,
-}: {
-  id: string;
-  title: string;
-  status: string;
-  detail: string;
-  href: string;
-}) {
-  return (
-    <article id={id} className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
-      <h3 className="text-xs font-bold tracking-wider">{title}</h3>
-      <p className="mt-3 text-sm font-semibold text-[#C41E3A]">{status}</p>
-      <p className="mt-1 text-xs text-white/60">{detail}</p>
-      <a href={href} className="mt-3 inline-block text-xs font-semibold text-white/75 underline underline-offset-4">→ {title === "NIL PIPELINE" ? "Opportunities" : title[0] + title.slice(1).toLowerCase()}</a>
-    </article>
-  );
-}
+export default function TarrisFuturePage() { return <HqWorkspaceProvider><TarrisHqContent /></HqWorkspaceProvider>; }
 
-export default function TarrisFuturePage() {
+function TarrisHqContent() {
+  const {setAssetOpener,setModule}=useHq();
+  const [selectedAsset, setSelectedAsset]=useState<OfficialAsset|null>(null);
+  const [copyNotice, setCopyNotice]=useState("");
+  const rootRef=useRef<HTMLDivElement>(null);
   const [search, setSearch] = useState("");
   const [activeFilter, setActiveFilter] = useState<(typeof filterOptions)[number]>("All");
   const [copiedAsset, setCopiedAsset] = useState("");
 
+  useEffect(()=>{setAssetOpener(category=>setActiveFilter(filterOptions.includes(category as typeof filterOptions[number])?category as typeof filterOptions[number]:"All"));return()=>setAssetOpener(null);},[setAssetOpener]);
+  useEffect(()=>{const root=rootRef.current;if(!root)return;const names:Record<string,string>={"hq-home":"Home","my-journey-module":"My Journey","academics-module":"Academics","training-module":"Training","nil-brand-module":"NIL & Brand","opportunities-module":"Opportunities","community-module":"Community","calendar-module":"Calendar","media-library":"Media Library"};const observer=new IntersectionObserver(entries=>{const visible=entries.filter(e=>e.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio);if(visible[0])setModule(names[visible[0].target.id]);},{root,rootMargin:"-10% 0px -50% 0px",threshold:0});Object.keys(names).forEach(id=>{const node=document.getElementById(id);if(node)observer.observe(node);});return()=>observer.disconnect();},[setModule]);
   const filteredAssets = useMemo(() => {
     const query = search.trim().toLowerCase();
-    return officialAssets.filter(({ filename, label, category }) => {
+    return officialAssets.filter(({ label, category }) => {
       const categoryMatches = activeFilter === "All" || category === activeFilter;
-      const queryMatches = !query || (filename + " " + label + " " + category).toLowerCase().includes(query);
+      const queryMatches = !query || (label + " " + category).toLowerCase().includes(query);
       return categoryMatches && queryMatches;
     });
   }, [search, activeFilter]);
@@ -118,15 +105,15 @@ export default function TarrisFuturePage() {
     const link = window.location.origin + "/images/tb3-official/" + filename;
     try {
       await navigator.clipboard.writeText(link);
-      setCopiedAsset(filename);
+      setCopiedAsset(filename);setCopyNotice("Link copied");
       window.setTimeout(() => setCopiedAsset(""), 1600);
     } catch {
-      setCopiedAsset("");
+      setCopiedAsset("");setCopyNotice("Could not copy. Use Download HD or your browser’s copy-link action.");
     }
   }
 
   return (
-    <div className="h-[calc(100dvh-80px)] overflow-y-auto bg-[#0A0A0A] text-[#F7F5F2] lg:flex">
+    <div ref={rootRef} id="hq-scroll" className="h-[calc(100dvh-96px)] overflow-y-auto xl:h-dvh bg-[#0A0A0A] text-[#F7F5F2] lg:flex">
       <aside className="border-b border-white/10 bg-[#111111] p-5 lg:fixed lg:inset-y-0 lg:left-0 lg:w-64 lg:overflow-y-auto lg:border-b-0 lg:border-r">
         <div className="flex items-center justify-between gap-4">
           <a href="#hq-home" aria-label="TB3 HQ Home" className="flex items-center gap-2">
@@ -144,7 +131,8 @@ export default function TarrisFuturePage() {
           <a href="#nil-brand-module" className="block rounded px-3 py-2 text-white/70 hover:bg-white/10">NIL &amp; Brand</a>
           <a href="#opportunities-module" className="block rounded px-3 py-2 text-white/70 hover:bg-white/10">Opportunities</a>
           <a href="#community-module" className="block rounded px-3 py-2 text-white/70 hover:bg-white/10">Community</a>
-          <a href="#media-library-vault" className="block rounded px-3 py-2 text-white/70 hover:bg-white/10">Media Library</a>
+          <a href="#calendar-module" className="block rounded px-3 py-2 text-white/70 hover:bg-white/10">Calendar</a>
+          <a href="#media-library" className="block rounded px-3 py-2 text-white/70 hover:bg-white/10">Media Library</a>
         </nav>
         <details className="mt-4"><summary aria-label="Settings" title="Settings" className="grid h-10 w-10 cursor-pointer list-none place-items-center rounded-lg border border-white/15">⚙</summary><p className="mt-2 text-xs text-white/60">Account preferences will be available when HQ tracking is connected.</p></details>
         <div className="mt-8 hidden text-[10px] leading-6 tracking-[0.16em] text-white/45 lg:block">
@@ -152,7 +140,8 @@ export default function TarrisFuturePage() {
         </div>
       </aside>
 
-      <main className="min-w-0 flex-1 px-4 pb-28 pt-5 sm:px-8 lg:ml-64 lg:px-10">
+      <main className="min-w-0 flex-1 px-4 pb-28 pt-5 sm:px-8 lg:ml-64 lg:px-8 xl:mr-80">
+        <EvaCommandBar />
         <section id="hq-home" className="scroll-mt-6 rounded-2xl border border-white/10 bg-[#111111] p-5 sm:p-8">
           <div className="flex flex-col justify-between gap-8 xl:flex-row xl:items-center">
             <div className="max-w-2xl">
@@ -169,7 +158,7 @@ export default function TarrisFuturePage() {
         </section>
 
         <section aria-label="Your workspace" className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-3">
-          {[["Academics", "academics-module", "♧"], ["Training", "training-module", "↔"], ["NIL & Brand", "nil-brand-module", "↗"], ["Opportunities", "opportunities-module", "◇"], ["Media Library", "media-library-vault", "▷"], ["Community", "community-module", "◎"]].map(([label, target]) => <a key={target} href={"#" + target} className="rounded-2xl border border-white/10 bg-[#1A1A1A] p-5 transition hover:border-[#C41E3A]"><WorkspaceIcon name={label} /><h2 className="mt-4 text-xs font-bold uppercase tracking-wider">{label}</h2></a>)}
+          {[["Academics", "academics-module", "♧"], ["Training", "training-module", "↔"], ["NIL & Brand", "nil-brand-module", "↗"], ["Opportunities", "opportunities-module", "◇"], ["Community", "community-module", "◎"], ["Calendar", "calendar-module", "▦"]].map(([label, target]) => <a key={target} href={"#" + target} className="rounded-2xl border border-white/10 bg-[#1A1A1A] p-5 transition hover:border-[#C41E3A]"><WorkspaceIcon name={label} /><h2 className="mt-4 text-xs font-bold uppercase tracking-wider">{label}</h2></a>)}
         </section>
 
         <section id="my-journey-module" aria-labelledby="journey-title" className="mt-6 scroll-mt-6 rounded-2xl border border-white/10 bg-[#111111] p-5 sm:p-7">
@@ -190,28 +179,11 @@ export default function TarrisFuturePage() {
           </div>
         </section>
 
-        <section id="my-focus" aria-labelledby="focus-title" className="mt-6 rounded-2xl border border-white/10 bg-[#111111] p-5 sm:p-7">
-          <h2 id="focus-title" className="text-xl font-black">MY FOCUS</h2>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            <FocusCard id="focus-academics" title="ACADEMICS" status="No records yet" detail="Study hours and eligibility await tracking" href="#academics-module" />
-            <FocusCard id="focus-training" title="TRAINING" status="No records yet" detail="Workouts await tracking" href="#training-module" />
-            <FocusCard id="focus-nil" title="NIL PIPELINE" status="0 Recorded" detail="No partnership records yet" href="#opportunities-module" />
-            <FocusCard id="focus-growth" title="PERSONAL GROWTH" status="Different On Purpose" detail="Clinic hours and impact await tracking" href="#community-module" />
-          </div>
-        </section>
-
-        <section id="upcoming" aria-labelledby="upcoming-title" className="mt-6 scroll-mt-6 rounded-2xl border border-white/10 bg-[#111111] p-5 sm:p-7">
-          <h2 id="upcoming-title" className="text-xl font-black">UPCOMING</h2>
-          <div id="upcoming-calendar-real" className="mt-4 rounded-xl border border-dashed border-white/20 p-5">
-            <p className="text-xs tracking-wider text-white/60">CALENDAR PLACEHOLDER · CONNECT GOOGLE CALENDAR</p>
-            <p className="mt-3 text-sm">No events scheduled - Add appearance in Opportunities</p>
-            <a href="#opportunities-module" className="mt-4 inline-flex rounded bg-[#C41E3A] px-4 py-2 text-xs font-bold text-white">Add Appearance</a>
-          </div>
-        </section>
-
-        <section id="home-opportunities" className="mt-6 rounded-2xl border border-white/10 bg-[#111111] p-5 sm:p-7"><div className="flex justify-between"><h2 className="text-xl font-black">OPPORTUNITIES</h2><a href="#opportunity-pipeline" className="text-xs underline">View All →</a></div><div className="mt-4 grid gap-3 sm:grid-cols-3">{["Inbound", "In Discussion", "Contracted"].map(label => <article key={label} className="rounded-xl bg-[#1A1A1A] p-5"><h3 className="text-xs font-bold uppercase">{label}</h3><p className="mt-3 text-3xl font-black">0</p></article>)}</div><p className="mt-4 text-sm text-white/60">No opportunities yet. Public booking inquiries will appear here once tracking is connected.</p></section>
+        <HqFocus />
+        <Upcoming />
+        <OpportunitySummary />
         <section id="home-messages" className="mt-6 rounded-2xl border border-white/10 bg-[#111111] p-5 sm:p-7"><h2 className="text-xl font-black">MESSAGES / OPPORTUNITY INBOX</h2><p className="mt-3 text-sm text-white/60">No messages yet. Partnership inquiries from the public site will appear here once tracking is connected.</p><a href="#opportunity-inbox" className="mt-3 inline-block text-xs underline">View All →</a></section>
-        <section id="recent-media" className="mt-6 rounded-2xl border border-white/10 bg-[#111111] p-5 sm:p-7"><h2 className="text-xl font-black">RECENT MEDIA</h2><p className="mt-3 text-sm text-white/60">No videos uploaded.</p><a href="#media-library-vault" className="mt-3 inline-block text-xs underline">Browse approved brand assets →</a></section>
+        <section id="recent-media" className="mt-6 rounded-2xl border border-white/10 bg-[#111111] p-5 sm:p-7"><h2 className="text-xl font-black">RECENT MEDIA</h2><p className="mt-3 text-sm text-white/60">No videos uploaded.</p><a href="#media-library" className="mt-3 inline-block text-xs underline">Browse approved brand assets →</a></section>
 
         <section id="academics-module" aria-labelledby="academics-title" className="mt-6 scroll-mt-6 rounded-2xl border border-white/10 bg-[#111111] p-5 sm:p-7">
           <p className="text-[10px] tracking-[0.22em] text-[#C41E3A]">STUDENT FIRST</p>
@@ -222,7 +194,9 @@ export default function TarrisFuturePage() {
             <div className="h-[400px] overflow-hidden rounded-2xl"><PortalImage id="academics-2" asset="OFFICIAL_07_FILM_TABLET.png" alt="Tarris reviewing film on a tablet" position="center" /></div>
           </div>
           <p className="mt-4 max-w-3xl text-sm leading-6 text-white/70">Focus on academic excellence, eligibility, and degree progress. Study hall tracking, tutor contacts, transcript vault live here.</p>
-          <div className="mt-4 flex flex-wrap gap-2"><ActionButton>Study Hall Log</ActionButton><ActionButton>Tutor Contacts</ActionButton><ActionButton>Transcript Vault</ActionButton><ActionButton>Eligibility Status: Not recorded</ActionButton></div>
+          <div className="mt-4 flex flex-wrap gap-2"><ActionButton>Tutor Contacts</ActionButton><ActionButton>Transcript Vault</ActionButton><ActionButton>Eligibility Status: Not recorded</ActionButton></div>
+          <ModuleActions module="Academics" />
+          <ProactiveEva module="Academics" />
         </section>
 
         <section id="training-module" aria-labelledby="training-title" className="mt-6 scroll-mt-6 rounded-2xl border border-white/10 bg-[#111111] p-5 sm:p-7">
@@ -233,9 +207,11 @@ export default function TarrisFuturePage() {
             <div className="h-[400px] overflow-hidden rounded-2xl"><PortalImage id="training-1" contain asset="OFFICIAL_06_CABLE_MACHINE.png" alt="Tarris training on a cable machine" position="center" /></div>
             <div className="h-[400px] overflow-hidden rounded-2xl"><PortalImage id="training-2" contain asset="OFFICIAL_02_BENCH_YELLOW_KOBE.png" alt="Tarris seated on the bench with yellow shoes visible" position="50% 30%" /></div>
           </div>
-          <div className="mt-4 h-[300px] max-w-2xl overflow-hidden rounded-2xl"><PortalImage id="training-3" asset="OFFICIAL_11_KITCHEN_NUTRITION.png" alt="Nutrition and wellness preparation" position="center" /></div>
+          <div className="mt-4 mx-auto aspect-[4/5] w-[400px] max-w-full overflow-hidden rounded-2xl"><PortalImage id="training-3" asset="OFFICIAL_11_KITCHEN_NUTRITION.png" alt="Tarris preparing nutrition in the kitchen, full head and face visible" position="50% 15%" /></div>
           <p className="mt-4 max-w-3xl text-sm leading-6 text-white/70">Strength, conditioning, nutrition, recovery, film.</p>
           <div className="mt-4 flex flex-wrap gap-2"><ActionButton>Weekly Plan</ActionButton><ActionButton>Nutrition Log</ActionButton><ActionButton>Film Notes - EVA</ActionButton><ActionButton>Recovery Log</ActionButton></div>
+          <ModuleActions module="Training" />
+          <ProactiveEva module="Training" />
         </section>
 
         <section id="nil-brand-module" aria-labelledby="nil-brand-title" className="mt-6 scroll-mt-6 rounded-2xl border border-white/10 bg-[#111111] p-5 sm:p-7">
@@ -248,6 +224,7 @@ export default function TarrisFuturePage() {
           </div>
           <p className="mt-4 max-w-3xl text-sm leading-6 text-white/70">Same vision. Higher purpose. Different on purpose. Brand guide, values, partnership criteria.</p>
           <div className="mt-4 flex flex-wrap gap-2"><ActionButton>Brand Deck PDF</ActionButton><ActionButton>Rate Card</ActionButton><ActionButton>Partnership Criteria</ActionButton><ActionButton>Inquiry Pipeline</ActionButton></div>
+          <ModuleActions module="Brand" />
         </section>
 
         <section id="opportunities-module" aria-labelledby="opportunities-title" className="mt-6 scroll-mt-6 rounded-2xl border border-white/10 bg-[#111111] p-5 sm:p-7">
@@ -258,7 +235,7 @@ export default function TarrisFuturePage() {
           <p className="mt-4 max-w-3xl text-sm leading-6 text-white/70">Appearances, speaking, partnerships, earnings, and future enterprise.</p>
           <div className="mt-5 grid gap-4 lg:grid-cols-2">
             <article id="earnings-tracker" className="rounded-2xl border border-white/10 bg-[#1A1A1A] p-5">
-              <div className="flex items-start justify-between"><div><p className="text-[10px] uppercase tracking-[0.2em] text-white/45">Earnings Tracker</p><p className="mt-3 text-2xl font-black">$0 Tracked</p><p className="mt-1 text-xs text-white/60">0 Opportunities</p></div><span aria-hidden="true" className="text-xl text-[#C41E3A]">↗</span></div>
+              <div className="flex items-start justify-between"><div><p className="text-[10px] uppercase tracking-[0.2em] text-white/45">Earnings Tracker</p><EarningsValue /></div><span aria-hidden="true" className="text-xl text-[#C41E3A]">↗</span></div>
               <div aria-label="Chart placeholder" className="mt-5 flex h-24 items-end gap-2 border-b border-white/10 px-1"><span className="h-5 flex-1 rounded-t bg-white/15"></span><span className="h-8 flex-1 rounded-t bg-white/15"></span><span className="h-6 flex-1 rounded-t bg-white/15"></span><span className="h-12 flex-1 rounded-t bg-white/15"></span><span className="h-10 flex-1 rounded-t bg-white/15"></span><span className="h-16 flex-1 rounded-t bg-white/15"></span><span className="h-9 flex-1 rounded-t bg-white/15"></span></div>
               <button type="button" disabled className="mt-4 rounded border border-white/25 px-4 py-2 text-xs font-semibold text-white/80 opacity-80">View Breakdown</button>
             </article>
@@ -272,14 +249,10 @@ export default function TarrisFuturePage() {
               </ul>
               <button type="button" disabled className="mt-4 rounded border border-white/25 px-4 py-2 text-xs font-semibold text-white/80 opacity-80">Upload Agreement</button>
             </article>
-            <article id="appearance-calendar" className="rounded-2xl border border-white/10 bg-[#1A1A1A] p-5 lg:col-span-2">
-              <p className="text-[10px] uppercase tracking-[0.2em] text-white/45">Appearance Calendar</p>
-              <p className="mt-2 text-sm">No appearances recorded</p>
-              <div className="mt-4 grid min-h-24 place-items-center rounded-xl border border-dashed border-white/20 text-xs text-white/50">Calendar Placeholder - Connect Google Calendar</div>
-            </article>
-            <article id="opportunity-pipeline" className="rounded-2xl bg-[#1A1A1A] p-5 lg:col-span-2"><h3 className="font-bold">OPPORTUNITY PIPELINE</h3><div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">{["Inbound", "In Discussion", "Contracted", "Completed"].map(label => <div key={label} className="rounded-xl border border-white/10 p-4"><h4 className="text-xs font-bold">{label}</h4><p className="mt-4 text-xs text-white/50">No opportunities</p></div>)}</div></article>
+            <OpportunityPipeline />
             <article id="opportunity-inbox" className="rounded-2xl bg-[#1A1A1A] p-5 lg:col-span-2"><h3 className="font-bold">OPPORTUNITY INBOX</h3><p className="mt-3 text-sm text-white/60">No partnership inquiries yet.</p></article>
           </div>
+          <ProactiveEva module="Opportunity" />
         </section>
 
         <section id="future-module" aria-labelledby="future-title" className="mt-6 scroll-mt-6 overflow-hidden rounded-2xl border border-white/10 bg-[#111111]">
@@ -297,51 +270,18 @@ export default function TarrisFuturePage() {
           </div>
           <p className="mt-4 max-w-3xl text-sm leading-6 text-white/70">Youth clinics, mentorship, education initiatives.</p>
           <div className="mt-4 flex flex-wrap gap-2"><ActionButton>Past Events</ActionButton><ActionButton>Upcoming Clinic</ActionButton><ActionButton>Impact Metrics</ActionButton></div>
+          <ModuleActions module="Community" />
+          <ProactiveEva module="Community" />
         </section>
 
-        <section id="media-library-vault" aria-labelledby="vault-title" className="mt-6 scroll-mt-6 rounded-2xl border border-white/10 bg-[#111111] p-5 sm:p-7">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div><p className="text-[10px] tracking-[0.22em] text-[#C41E3A]">TB3 HQ · MEDIA</p><h2 id="vault-title" className="mt-2 text-2xl font-black">BRAND ASSETS</h2><p className="mt-2 max-w-3xl text-sm leading-6 text-white/65">Official high-resolution library. Approved images used on the public site. Download original-resolution brand assets.</p></div>
-            <details id="vault-tooltip" className="relative">
-              <summary aria-label="How this vault works" className="grid h-9 w-9 cursor-pointer list-none place-items-center rounded-full border border-white/30 text-sm font-bold">i</summary>
-              <div className="absolute right-0 z-20 mt-2 w-72 rounded-xl border border-white/15 bg-[#202020] p-4 text-xs leading-5 text-white/75 shadow-xl">This vault contains the approved brand assets. Download HD saves the original file. Copy Link provides a direct asset URL. Confirm usage rights before sharing with partners.</div>
-            </details>
-          </div>
-          <div className="mt-5 flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
-            <label className="block min-w-0 flex-1">
-              <span className="sr-only">Search assets</span>
-              <input id="asset-search" type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search TB3 HQ..." className="w-full rounded-xl border border-white/15 bg-[#080808] px-4 py-3 text-sm text-white placeholder:text-white/40 focus:border-[#C41E3A] focus:outline-none" />
-            </label>
-            <div id="asset-filter" aria-label="Filter assets" className="flex flex-wrap gap-2">
-              {filterOptions.map((category) => <button key={category} type="button" aria-pressed={activeFilter === category} onClick={() => setActiveFilter(category)} className={"rounded-full border px-3 py-2 text-[10px] font-bold uppercase tracking-wider transition " + (activeFilter === category ? "border-[#C41E3A] bg-[#C41E3A] text-white" : "border-white/15 bg-white/5 text-white/70 hover:bg-white/10")}>{category}</button>)}
-            </div>
-          </div>
-          <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            {filteredAssets.map(({ filename, label, category, alt }, index) => {
-              const assetPath = "/images/tb3-official/" + filename;
-              const isHero = filename.startsWith("OFFICIAL_00_");
-              const isHeadshot = filename.includes("HEADSHOT");
-              const position = isHeadshot ? "50% 15%" : filename.includes("TUNNEL") ? "80% center" : "center";
-              return (
-                <article key={filename} className="overflow-hidden rounded-xl border border-black/10 bg-[#F5F5F0] text-[#111111] shadow-[0_8px_30px_rgba(0,0,0,0.12)]">
-                  <div className="h-[280px] overflow-hidden bg-[#E5E5E0]">
-                    <PortalImage id={"vault-image-" + (index + 1)} asset={filename} alt={alt} position={position} contain={isHero || /TUNNEL|PODIUM|BENCH|CABLE/.test(filename)} className={isHero ? "bg-[#0A0A0A]" : ""} />
-                  </div>
-                  <div className="p-4">
-                    <h3 className="text-sm font-black uppercase tracking-wide">{label}</h3>
-                    <span className="mt-2 inline-flex rounded-full bg-[#E5E5E5] px-3 py-1 text-[10px] font-bold uppercase tracking-wider">{category}</span>
-                    <p className="mt-3 text-xs text-[#666666]">Usage: Approved for NIL, social, editorial</p>
-                    <div className="mt-4 flex items-center gap-2">
-                      <a href={assetPath} download={filename} className="inline-flex rounded-lg border border-black px-3 py-2 text-[10px] font-bold text-black hover:bg-black hover:text-white">Download HD</a>
-                      <button type="button" aria-label={"Copy link for " + label} onClick={() => copyAssetLink(filename)} className="grid h-9 w-9 place-items-center rounded-lg border border-black text-sm hover:bg-black hover:text-white" title={copiedAsset === filename ? "Link copied" : "Copy link"}>{copiedAsset === filename ? "✓" : "⧉"}</button>
-                    </div>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
-          {filteredAssets.length === 0 && <p className="mt-5 rounded-xl bg-white/5 p-4 text-sm text-white/60">No matching approved assets.</p>}
+        <CalendarModule />
+        <section id="media-library" aria-labelledby="vault-title" className="mt-6 scroll-mt-6 rounded-2xl border border-white/10 bg-[#111111] p-5 sm:p-7">
+          <div className="flex items-start justify-between gap-4"><div><p className="text-[10px] tracking-[0.22em] text-[#C41E3A]">TB3 HQ · MEDIA</p><h2 id="vault-title" className="mt-2 text-2xl font-black">BRAND ASSETS / Click to pull</h2><p className="mt-2 text-sm leading-6 text-white/65">Official high-resolution library. Click View Asset to load.</p></div><details id="vault-tooltip" className="relative"><summary aria-label="How vault works" className="grid h-9 w-9 cursor-pointer list-none place-items-center rounded-full border border-white/30 text-sm font-bold">i</summary><p className="absolute right-0 z-20 mt-2 w-64 rounded-xl border border-white/15 bg-[#202020] p-4 text-xs leading-5 text-white/75">Click View Asset to pull the original image. These are the approved assets used on the public site. Vault previews do not auto-load.</p></details></div>
+          <div className="mt-5 flex flex-col gap-3"><label><span className="sr-only">Search assets</span><input id="asset-search" type="search" value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search assets..." className="w-full rounded-xl border border-white/15 bg-[#080808] px-4 py-3 text-sm text-white" /></label><div id="asset-filter" aria-label="Filter assets" className="flex flex-wrap gap-2">{filterOptions.map(category=><button key={category} type="button" aria-pressed={activeFilter===category} onClick={()=>setActiveFilter(category)} className={"rounded-full border px-3 py-2 text-[10px] font-bold uppercase tracking-wider "+(activeFilter===category?"border-[#C41E3A] bg-[#C41E3A] text-white":"border-white/15 bg-white/5 text-white/70")}>{category} {category==="All"?officialAssets.length:officialAssets.filter(asset=>asset.category===category).length}</button>)}</div></div>
+          <div id="asset-grid" className="mt-5 grid gap-4 sm:grid-cols-2 2xl:grid-cols-4">{filteredAssets.map(asset=><article key={asset.filename} className="flex min-h-[220px] flex-col rounded-xl border border-[#E5E5E5] bg-[#F5F5F0] p-4 text-[#111]"><svg aria-hidden="true" viewBox="0 0 24 24" className="h-12 w-12 text-[#999]" fill="none" stroke="currentColor"><path d="M3 3h18v18H3V3m1 16 6-7 4 4 3-3 4 6M8 8h.01"/></svg><h3 className="mt-3 text-sm font-black uppercase">{asset.label}</h3><span className="mt-2 w-fit rounded-full bg-[#E5E5E5] px-3 py-1 text-[10px] font-bold uppercase">{asset.category}</span><p className="mt-3 text-xs text-[#666]">Click to view high-res</p><button type="button" onClick={()=>{setCopyNotice("");setSelectedAsset(asset);}} className="mt-4 w-fit rounded-lg bg-[#C41E3A] px-4 py-2 text-xs font-bold text-white" aria-label={"View Asset: "+asset.label}>View Asset →</button></article>)}</div>
+          {!filteredAssets.length&&<p className="mt-5 text-sm text-white/60">No matching approved assets.</p>}
         </section>
+        {selectedAsset&&<HqDialog id="asset-lightbox" title={selectedAsset.label} onClose={()=>setSelectedAsset(null)}><img id="asset-lightbox-image" src={"/images/tb3-official/"+selectedAsset.filename} alt={selectedAsset.alt} className="max-h-[65vh] w-full rounded-2xl object-contain"/><div className="mt-4 flex flex-wrap items-center gap-3"><span className="rounded-full bg-[#E5E5E5] px-3 py-1 text-[10px] font-bold uppercase">{selectedAsset.category}</span><p className="text-xs text-[#666]">Usage: Approved for NIL, social, editorial</p></div><div className="mt-4 flex gap-3"><a href={"/images/tb3-official/"+selectedAsset.filename} download={selectedAsset.filename} className="rounded-lg border border-black px-4 py-2 text-xs font-bold">Download HD</a><button type="button" onClick={()=>copyAssetLink(selectedAsset.filename)} className="rounded-lg border border-black px-4 py-2 text-xs font-bold">{copiedAsset===selectedAsset.filename?"Copied ✓":"Copy Link ⧉"}</button></div>{copyNotice&&<p role="status" className="mt-3 text-xs">{copyNotice}</p>}</HqDialog>}
 
         <section id="greater-tomorrow" className="mt-6 rounded-2xl border border-white/10 bg-[#111111] p-7"><p className="text-xs tracking-widest text-[#C41E3A]">A GREATER TOMORROW</p><h2 className="mt-3 text-3xl font-black">BUILD BEYOND THE GAME.</h2><a href="#future-module" className="mt-4 inline-block text-sm underline">Explore the next chapter →</a></section>
         <section id="tb3-store" className="mt-6 rounded-2xl bg-[#F5F5F0] p-5 text-[#111] sm:p-7"><p className="text-xs font-bold tracking-widest">TB3 STORE</p><h2 className="mt-2 text-3xl font-black">Rep the Vision.</h2><p className="mt-2 text-xs text-black/60">Product concepts. Store opening soon.</p><div className="mt-5 grid grid-cols-2 gap-4 xl:grid-cols-5">{[
@@ -354,10 +294,8 @@ export default function TarrisFuturePage() {
         </footer>
       </main>
 
-      <details id="eva-bubble" className="fixed bottom-0 left-0 right-0 z-[100] flex h-20 items-center justify-end border-t border-white/10 bg-[#0A0A0A] px-5 lg:fixed lg:bottom-0 lg:left-64 lg:right-0">
-        <summary aria-label="Open EVA assistant" className="grid h-12 w-12 cursor-pointer list-none place-items-center rounded-full border border-[#C41E3A] bg-[#C41E3A] text-[10px] font-black shadow-xl">EVA</summary>
-        <div className="absolute bottom-14 right-0 w-64 rounded-2xl border border-white/15 bg-[#171717] p-4 text-xs leading-5 text-white/80 shadow-2xl">ASK EVA · Your AI Assistant<br />Get answers · Update content · Track opportunities · Manage requests<p className="mt-2 text-white/50">Assistant connection is part of the next phase.</p></div>
-      </details>
+      <EvaPanel />
+      <EvaFab />
     </div>
   );
 }

@@ -1,0 +1,6 @@
+# TB3 HQ v2.1 local verification
+Build PASS; scoped TypeScript PASS; tenant-safety PASS; ESLint zero errors, three native-image warnings.
+Browser 1440/375 PASS: exact nine-item navigation; 16 CTA-only placeholder cards; no vault image before CTA; lightbox view/unload/keyboard close/download/copy feedback; filters/search/category routing; 15 unique storytelling images; full kitchen face; Month/Week/Day; activity save/delete/Upcoming; study hours/workout/community impact derivation; Contracted opportunity linked hold; reload persistence; no seeded dates/brands/metrics; no console errors; right 320px panel and reserved mobile 56px button at 20px margins.
+Run: scripts/test-tb3-hq-v21.mjs with available Playwright browser, optionally TB3_CHROMIUM_PATH / TB3_CHROMIUM_MODULE for serverless Chromium. Screenshots in official_previews/tb3_hq_v2_1_local_20261005.
+Preview limitations: browser-local activity persistence, shared account/Google Calendar/public booking sync in Phase 2. Existing /api/ai authentication preserved; unsigned preview supports commands, not verified live AI conversation. Named reference screenshots were not provided. 16 listed assets used, vault-only zero-request interpretation documented.
+No production promotion. Deployed preview verification pending.

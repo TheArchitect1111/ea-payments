@@ -1,0 +1,48 @@
+{
+  "url": "http://127.0.0.1:3231/tarris/future",
+  "results": [
+    {
+      "width": 1440,
+      "status": "PASS",
+      "navigation": 9,
+      "vaultPlaceholders": 16,
+      "vaultImagesBeforeCTA": 0,
+      "storytelling": 15,
+      "checks": [
+        "layout/no-overlap",
+        "source framing",
+        "asset search/filter/lightbox/unload/download/copy feedback",
+        "calendar month/week/day",
+        "activity upcoming/save/delete",
+        "study/training/community sync",
+        "opportunity contracted hold",
+        "reload persistence",
+        "empty initial state/no fake data",
+        "no console errors"
+      ]
+    },
+    {
+      "width": 375,
+      "status": "PASS",
+      "navigation": 9,
+      "vaultPlaceholders": 16,
+      "vaultImagesBeforeCTA": 0,
+      "storytelling": 15,
+      "checks": [
+        "layout/no-overlap",
+        "source framing",
+        "asset search/filter/lightbox/unload/download/copy feedback",
+        "calendar month/week/day",
+        "activity upcoming/save/delete",
+        "study/training/community sync",
+        "opportunity contracted hold",
+        "reload persistence",
+        "empty initial state/no fake data",
+        "no console errors"
+      ]
+    }
+  ],
+  "persistence": "browser-only preview",
+  "sharedBackend": "Phase 2",
+  "liveAi": "requires signed-in account"
+}
