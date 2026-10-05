@@ -3,6 +3,7 @@ import Stripe from 'stripe';
 import { getStripe } from '@/lib/stripe';
 import {
   createOrUpdateClientRecord,
+  getClientByEmail,
   getProposalByRecordId,
   updateProposal,
 } from '@/lib/airtable';
@@ -57,6 +58,12 @@ export async function POST(req: NextRequest) {
 
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promise<void> {
   const meta = session.metadata ?? {};
+
+  const amandaPackage = meta.packageName || '';
+  if (meta.portalSlug === 'amanda-catherine' || meta.instructor === 'amanda-catherine' || /amanda|catherine/i.test(amandaPackage)) {
+    await handleAmandaPayment(session);
+    return;
+  }
 
   // Phase E: proposal-based payment. Branch early; Phase A logic is not run.
   if (meta.proposalId && meta.airtableRecordId) {
@@ -360,4 +367,37 @@ async function handleProposalPayment(
   } catch (err) {
     console.error(`handleProposalPayment [${proposalId}]: sendWelcomeEmail threw:`, err);
   }
+}
+
+// Amanda-only payment confirmation; existing EA package handling stays unchanged.
+async function handleAmandaPayment(session: Stripe.Checkout.Session):Promise<void> {
+  if(session.payment_status!=='paid')return;
+  const meta=session.metadata || {},email=session.customer_details?.email || session.customer_email || '';
+  const clientName=meta.clientName || session.customer_details?.name || 'Student';
+  const packageName=meta.packageName || meta.courseName || 'Amanda Catherine enrollment';
+  if(!email)throw new Error('Amanda payment is missing a student email');
+  const existing=await getClientByEmail(email);
+  if(existing && existing.portalSlug!=='amanda-catherine' && !['amanda-catherine','org_amanda-catherine'].includes(existing.organization || ''))throw new Error('Amanda payment requires a tenant-specific client record');
+  const amountPaid=(session.amount_total || 0)/100;
+  const paymentDate=new Date(session.created*1000).toISOString().slice(0,10);
+  const stripeTransactionId=typeof session.payment_intent==='string'?session.payment_intent:session.payment_intent?.id || session.id;
+  const result=await createOrUpdateClientRecord({clientName,email,organization:'amanda-catherine',packagePurchased:packageName as AirtablePackage,amountPaid,paymentDate,stripeTransactionId,portalAccessStatus:'Pending',onboardingStatus:'Not Started'});
+  if(!result.ok || !result.recordId)throw new Error(result.error || 'Amanda paid record was not created');
+  const base=process.env.AIRTABLE_PAYMENTS_BASE_ID || process.env.AIRTABLE_BASE_ID;
+  const token=process.env.AIRTABLE_API_KEY;
+  if(!base || !token)throw new Error('Amanda payment tracking environment is missing');
+  const tracked=await fetch(`https://api.airtable.com/v0/${base}/Client%20Records/${result.recordId}`,{method:'PATCH',headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/json'},body:JSON.stringify({fields:{'Portal Slug':'amanda-catherine'},typecast:true})});
+  if(!tracked.ok)throw new Error('Amanda payment tenant tracking failed');
+  const portalLoginUrl=`${process.env.NEXT_PUBLIC_BASE_URL || 'https://amandacatherine.ca'}/portal/login`;
+  try {
+    const paymentIntent=await getStripe().paymentIntents.retrieve(stripeTransactionId,{expand:['latest_charge']});
+    const charge=paymentIntent.latest_charge;
+    const receiptUrl=charge && typeof charge!=='string'?charge.receipt_url:null;
+    if(!receiptUrl)throw new Error('Stripe payment receipt is not available');
+    const nextSteps=`Confirmed for ${packageName}. Portal: ${portalLoginUrl}. Zoom link sent 24h before.`;
+    // This existing helper renders tempCredentials; unsupported extra props would be discarded.
+    const sent=await sendWelcomeEmail({clientName,email,packageName,portalLoginUrl,platformName:'Amanda Catherine',tempCredentials:`Receipt: ${receiptUrl}. ${nextSteps}`});
+    if(!sent.ok)throw new Error(sent.error || 'Amanda confirmation email failed');
+    console.log('Amanda workflow: confirmation + receipt + next steps sent', {sessionId:session.id,recordId:result.recordId});
+  }catch(e){console.error('Amanda workflow fail',e);throw e;}
 }
