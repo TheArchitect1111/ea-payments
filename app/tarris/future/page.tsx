@@ -211,8 +211,8 @@ export default function TarrisFuturePage() {
           <h2 id="training-title" className="mt-2 text-2xl font-black">TRAINING</h2>
           <p className="mt-1 text-sm text-white/65">Prepare The Work. Determination on the court.</p>
           <div className="mt-5 grid gap-4 md:grid-cols-2">
-            <div className="h-[400px] overflow-hidden rounded-2xl"><PortalImage id="training-1" asset="OFFICIAL_06_CABLE_MACHINE.png" alt="Tarris training on a cable machine with yellow shoes visible" position="50% 30%" /></div>
-            <div className="h-[400px] overflow-hidden rounded-2xl"><PortalImage id="training-2" asset="OFFICIAL_02_BENCH_YELLOW_KOBE.png" alt="Tarris seated on the bench with yellow shoes visible" position="50% 30%" /></div>
+            <div className="h-[560px] overflow-hidden rounded-2xl"><PortalImage id="training-1" asset="OFFICIAL_06_CABLE_MACHINE.png" alt="Tarris training on a cable machine with yellow shoes visible" position="50% 30%" /></div>
+            <div className="h-[560px] overflow-hidden rounded-2xl"><PortalImage id="training-2" asset="OFFICIAL_02_BENCH_YELLOW_KOBE.png" alt="Tarris seated on the bench with yellow shoes visible" position="50% 30%" /></div>
           </div>
           <div className="mt-4 h-[300px] max-w-2xl overflow-hidden rounded-2xl"><PortalImage id="training-3" asset="OFFICIAL_11_KITCHEN_NUTRITION.png" alt="Nutrition and wellness preparation" position="center" /></div>
           <p className="mt-4 max-w-3xl text-sm leading-6 text-white/70">Strength, conditioning, nutrition, recovery, film.</p>
@@ -235,7 +235,7 @@ export default function TarrisFuturePage() {
           <p className="text-[10px] tracking-[0.22em] text-[#C41E3A]">BUILD THE ENTERPRISE</p>
           <h2 id="opportunities-title" className="mt-2 text-2xl font-black">OPPORTUNITIES</h2>
           <p className="mt-1 text-sm text-white/65">Build The Enterprise. Turn attention into durable opportunity.</p>
-          <div className="mt-5 h-[400px] overflow-hidden rounded-2xl"><PortalImage id="opportunities-hero" asset="OFFICIAL_15_PODIUM_SPEAKING.png" alt="Tarris speaking at a podium with the audience in view" position="50% 20%" /></div>
+          <div className="mx-auto mt-5 h-[560px] w-full max-w-[560px] overflow-hidden rounded-2xl"><PortalImage id="opportunities-hero" asset="OFFICIAL_15_PODIUM_SPEAKING.png" alt="Tarris speaking at a podium with the audience in view" position="50% 20%" /></div>
           <p className="mt-4 max-w-3xl text-sm leading-6 text-white/70">Appearances, speaking, partnerships, earnings, and future enterprise.</p>
           <div className="mt-5 grid gap-4 lg:grid-cols-2">
             <article id="earnings-tracker" className="rounded-2xl border border-white/10 bg-[#1A1A1A] p-5">
