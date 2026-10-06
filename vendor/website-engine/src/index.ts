@@ -25,3 +25,5 @@ export {
 } from './registry';
 
 export { assembleWebsitePage, landingChassisPageTemplate } from './assemble';
+
+export { EA_IMMERSIVE_SECTION_IDS, EA_IMMERSIVE_SECTIONS, eaImmersivePageTemplate } from './immersive';
