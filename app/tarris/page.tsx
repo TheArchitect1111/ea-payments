@@ -2,6 +2,7 @@
 // WIRED: TB3 / -> /tarris -> ENTER TB3 HQ -> /tarris/future.
 import Link from "next/link";
 import type { ReactNode } from "react";
+import TB3Intro from "./TB3Intro";
 
 const pillars = [
   ["ATHLETE", "Discipline in the classroom. Determination on the court.", "LEARN MORE"],
@@ -25,6 +26,7 @@ function HQLink({ dark = false }: { dark?: boolean }) {
 export default function TarrisPublicPage() {
   return (
     <div id="home" className="min-h-screen bg-[#F7F5F2] text-[#141414]">
+      <TB3Intro />
       <header className="border-b border-black/15">
         <div className="mx-auto flex max-w-[1440px] flex-wrap items-center justify-between gap-5 px-5 py-5 lg:px-10">
           <a href="#home" className="flex items-center gap-3"><span className="text-4xl font-black leading-none tracking-[-0.1em] text-[#A51C30]">TB3</span><span className="border-l border-black/20 pl-3"><span className="block text-xs font-black tracking-[0.15em]">TARRIS BOUIE</span><span className="block pt-1 text-[8px] tracking-[0.2em]">MORE THAN A GAME</span></span></a>
