@@ -1,10 +1,11 @@
 import {NextRequest,NextResponse} from 'next/server';
 import {handleAmandaSubmit} from '@/lib/amanda-catherine/storage';
 import {registry,formDefinition} from '@/lib/amanda-catherine/registry';
+import {isAllowedAmandaOrigin} from '@/lib/amanda-catherine/request-origin';
 export async function POST(req:NextRequest){
- try{const origin=req.headers.get('origin');if(origin && origin!==new URL(req.url).origin)return NextResponse.json({ok:false,error:'Invalid request origin'},{status:403});
+ try{if(!isAllowedAmandaOrigin(req))return NextResponse.json({ok:false,error:'Invalid request origin'},{status:403});
  const json=req.headers.get('content-type')?.includes('application/json');const p=json?await req.json():Object.fromEntries(await req.formData());
- if(!['application','enroll','waitlist'].includes(p.type) || typeof p.name!=='string' || !p.name.trim() || typeof p.email!=='string' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(p.email))return NextResponse.json({ok:false,error:'Enter a valid name and email.'},{status:400});
+ if(!['application','enroll','waitlist'].includes(p.type) || typeof p.name!=='string' || !p.name.trim() || typeof p.email!=='string' || !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(p.email))return NextResponse.json({ok:false,error:'Enter a valid name and email.'},{status:400});
  const r=await registry();const course=r.courses.find(c=>c.key===p.courseId);
  if(p.type==='enroll' && !course)return NextResponse.json({ok:false,error:'Choose a listed course.'},{status:400});
  const type=p.type==='enroll' && course?.status!=='READY'?'waitlist':p.type;
