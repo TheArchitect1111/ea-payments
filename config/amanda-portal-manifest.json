@@ -1,27 +1,18 @@
 {
-  "manifestName": "amanda-catherine-portal",
-  "desiredStateVersion": "1",
-  "organizationSlug": "amanda-catherine",
-  "repository": "TheArchitect1111/ea-payments",
-  "branch": "preview/amanda-cta-fix",
-  "portalPath": "/portal/amanda-catherine",
-  "productionUrl": "https://amandacatherine.ca",
-  "registryTables": [
-    "Organizations",
-    "Chassis Themes",
-    "Chassis Forms",
-    "Creative Studio"
-  ],
-  "formIds": [
-    "amanda-apply",
-    "amanda-enroll",
-    "amanda-waitlist"
-  ],
-  "readinessRule": "Only status READY permits enrollment; otherwise waitlist",
-  "certification": "Amanda Portal E2E + Square runtime registry change without redeploy",
-  "squareLinks": {
-    "source": "Creative Studio.Payload JSON.square_checkout_url",
-    "count": 8,
-    "driftProof": true
-  }
+  "manifestName":"amanda-catherine-portal",
+  "desiredStateVersion":"2",
+  "organizationSlug":"amanda-catherine",
+  "repository":"TheArchitect1111/ea-payments",
+  "branch":"preview/amanda-cta-fix",
+  "portalPath":"/portal/amanda-catherine",
+  "productionUrl":"https://amandacatherine.ca",
+  "registryTables":["Organizations","Chassis Themes","Chassis Forms","Creative Studio","Business Interested"],
+  "formIds":["amanda-apply","amanda-enroll","amanda-waitlist"],
+  "readinessRule":"Only status READY permits enrollment; otherwise waitlist",
+  "certification":"Amanda portal CTA click tracking, Hub, Calendar, and Eva are Airtable registry driven.",
+  "squareLinks":{"source":"Creative Studio.Payload JSON.square_checkout_url","count":8,"driftProof":true},
+  "ctasTracked":true,
+  "ctasTrackedCount":18,
+  "ctaNames":["Book a LIFELINE interview","Explore a partnership","Apply for Founder Advisory","Enroll — Advanced Body Sculpt","Enroll — Wood Therapy","Enroll — Non-Surgical BBL","Enroll — LIFELINE LIVE","Enroll — Body Sculpt Certification","Enroll — Strategy Call","Enroll — 90-Day Package","Enroll — Nervous System Reset","Enroll — Foundry Mentorship","Enroll — Clinical Fat Loss","Enroll — Starter Kit","Purchase your Practitioner Kit","Guest application","Partnership & sponsorship kit","Open Booking Calendar"],
+  "hub":true,"calendar":true,"eva":true,"driftProof":true
 }
