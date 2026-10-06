@@ -92,7 +92,9 @@ const PUBLIC_PORTAL_AUTH_PATHS = new Set([
 ]);
 
 const PUBLIC_PORTAL_EXPERIENCE_PATHS = new Set([
+  '/portal/amanda-catherine/classes',
   '/portal/amanda-catherine/enroll',
+  '/portal/amanda-catherine/hub',
   '/portal/amanda-catherine/waitlist',
   '/portal/amanda-catherine/apply',
 ]);

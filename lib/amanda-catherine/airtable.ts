@@ -1,9 +1,9 @@
 type AirtableRecord = { fields: Record<string, any> };
 
 function getEnv(){
-  const baseId = process.env.AIRTABLE_BASE_ID;
+  const baseId = process.env.AIRTABLE_BASE_ID || process.env.AIRTABLE_PAYMENTS_BASE_ID;
   const apiKey = process.env.AIRTABLE_API_KEY || process.env.AIRTABLE_TOKEN;
-  if(!baseId || !apiKey) throw new Error('Missing AIRTABLE_BASE_ID or AIRTABLE_API_KEY');
+  if(!baseId || !apiKey) throw new Error('Missing AIRTABLE_BASE_ID (or AIRTABLE_PAYMENTS_BASE_ID) or AIRTABLE_API_KEY');
   return { baseId, apiKey };
 }
 
