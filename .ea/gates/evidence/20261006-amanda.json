@@ -1,0 +1,9 @@
+{
+  "source": "84b007a302d39100e5f8f69d7741da592142e4aa",
+  "checks": {
+    "classes_public": true,
+    "schema_ok": true,
+    "env_present": true
+  },
+  "preview_deployment": "dpl_BXdgYSg7JvLxTFtbbpToSgcUCwm7"
+}
