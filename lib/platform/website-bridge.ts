@@ -6,6 +6,7 @@ import {
   createDefaultWebsiteRegistry,
   assembleWebsitePage,
   landingChassisPageTemplate,
+  eaImmersivePageTemplate,
   listLandingChassisSections,
   type WebsiteAssembly,
   type WebsitePageManifest,
@@ -61,6 +62,16 @@ export function assembleLandingTemplate(input: {
   themeId?: string;
 }): WebsiteAssembly {
   const page = landingChassisPageTemplate(input);
+  return assembleWebsitePage(page, getWebsiteSectionRegistry());
+}
+
+export function assembleImmersiveTemplate(input: {
+  id: string;
+  name: string;
+  organizationId?: string;
+  themeId?: string;
+}): WebsiteAssembly {
+  const page = eaImmersivePageTemplate(input);
   return assembleWebsitePage(page, getWebsiteSectionRegistry());
 }
 
