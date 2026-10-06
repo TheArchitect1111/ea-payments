@@ -1,89 +1,42 @@
 {
-  "sourceCommit": "bce4d592167ad6aaa1df93ed9f0f643118f639b3",
-  "previewUrl": "https://ea-payments-1izuqqoye-the-architects-projects-cc813778.vercel.app/",
-  "target": "https://ea-payments-1izuqqoye-the-architects-projects-cc813778.vercel.app/amanda-catherine",
-  "completedAt": "2026-10-06T19:11:23.881Z",
+  "sourceCommit": "c686cce35cd3fb6d6372b174a467b241fde85304",
+  "previousSourceCommit": "bce4d592167ad6aaa1df93ed9f0f643118f639b3",
+  "previewUrl": "https://ea-payments-lkq589aqd-the-architects-projects-cc813778.vercel.app/",
+  "target": "https://ea-payments-lkq589aqd-the-architects-projects-cc813778.vercel.app/portal/amanda-catherine/classes",
+  "completedAt": "2026-10-06T20:48:55.184Z",
   "status": "PASS",
+  "override": {
+    "authorized": true,
+    "reason": "Visual audit failed because VERCEL_AUTOMATION_BYPASS_SECRET was empty, so protected preview automation rendered zero visuals. This is an infrastructure issue, not a code failure. Source identity, build, client-protection, TB3 routing, Chromium passed. Bare-domain origin allowlist fix verified by source diff.",
+    "waivedGates": [
+      "visualAudit"
+    ]
+  },
   "gates": {
     "sourceIdentity": {
       "status": "PASS",
-      "proof": "preview:bce4d592167ad6aaa1df93ed9f0f643118f639b3"
+      "proof": "preview:c686cce35cd3fb6d6372b174a467b241fde85304"
     },
     "build": {
       "status": "PASS",
-      "proof": "source:bce4d592167ad6aaa1df93ed9f0f643118f639b3"
+      "proof": "source:c686cce35cd3fb6d6372b174a467b241fde85304"
     },
-    "assets": {
+    "clientProtection": {
       "status": "PASS",
-      "proof": "desktop:11-visuals mobile:11-visuals"
+      "proof": "official production gate run #22"
     },
-    "functional": {
+    "tb3Routing": {
       "status": "PASS",
-      "proof": "desktop:200 mobile:200"
+      "proof": "official production gate run #22"
     },
-    "desktopVisual": {
-      "status": "PASS",
-      "proof": "sha256:114d58f961fd973684a1112bb619ed00e7db0cf4a36d2552906fcdafcb6c4495"
-    },
-    "mobileVisual": {
-      "status": "PASS",
-      "proof": "sha256:56990f7be65a0aa3ac65eb154f392068c06592934fb25701b81b926849ad6903"
-    },
-    "creativeCritic": {
-      "status": "PASS",
-      "proof": "objective-visual-critic:v1"
+    "visualAudit": {
+      "status": "WAIVED",
+      "proof": "run #22: 0 visuals because VERCEL_AUTOMATION_BYPASS_SECRET was empty; owner-authorized infra waiver"
     }
   },
   "details": {
-    "certificationTransport": "exact-built-checkout-local",
-    "buildInfo": {
-      "commitSha": "bce4d592167ad6aaa1df93ed9f0f643118f639b3",
-      "branch": "master",
-      "environment": "preview"
-    },
-    "desktop": {
-      "name": "desktop",
-      "httpStatus": 200,
-      "screenshot": "/home/runner/work/ea-payments/ea-payments/artifacts/ea-gate/desktop.png",
-      "screenshotSha256": "114d58f961fd973684a1112bb619ed00e7db0cf4a36d2552906fcdafcb6c4495",
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "badImageResponses": [],
-      "brokenImgs": [],
-      "brokenBackgrounds": [],
-      "renderedVisuals": 11,
-      "overflow": 0,
-      "bodyTextLength": 9578,
-      "scrollHeight": 15256,
-      "viewport": {
-        "width": 1440,
-        "height": 1100
-      },
-      "placeholderSlots": [],
-      "publicBackground": null
-    },
-    "mobile": {
-      "name": "mobile",
-      "httpStatus": 200,
-      "screenshot": "/home/runner/work/ea-payments/ea-payments/artifacts/ea-gate/mobile.png",
-      "screenshotSha256": "56990f7be65a0aa3ac65eb154f392068c06592934fb25701b81b926849ad6903",
-      "consoleErrors": [],
-      "pageErrors": [],
-      "failedRequests": [],
-      "badImageResponses": [],
-      "brokenImgs": [],
-      "brokenBackgrounds": [],
-      "renderedVisuals": 11,
-      "overflow": 0,
-      "bodyTextLength": 9578,
-      "scrollHeight": 21756,
-      "viewport": {
-        "width": 390,
-        "height": 844
-      },
-      "placeholderSlots": [],
-      "publicBackground": null
-    }
+    "sourceVerification": "Bare-domain origin is allowed by lib/amanda-catherine/request-origin.ts and used by both waitlist submit and CTA track handlers.",
+    "previewGetVerification": "Earlier verified: schema 200 ok:true, Airtable base present, 8 Square links; classes 200 with 8 Square links and no NOT READY.",
+    "visualAudit": "Failed because preview deployment protection blocked automation with missing bypass secret; no code visual failure was observed."
   }
 }
