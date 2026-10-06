@@ -1,10 +1,4 @@
-import { notFound, redirect } from 'next/navigation';
-import { AMANDA_COURSES } from '@/lib/amanda-catherine/config';
-import { amandaCourseReady } from '@/lib/amanda-catherine/lms-policy';
-import WaitlistForm from './WaitlistForm';
-export default async function Page({ searchParams }: { searchParams: Promise<{ course?: string }> }) {
-  const { course: id } = await searchParams; const course = AMANDA_COURSES.find(item => item.id === id);
-  if (!course) notFound();
-  if (amandaCourseReady(course.id)) redirect(`/portal/amanda-catherine/enroll?course=${encodeURIComponent(course.id)}`);
-  return <main style={{ maxWidth: 720, margin: '60px auto', padding: 24 }}><h1>{course.title}</h1><p>Join Waitlist</p><WaitlistForm courseId={course.id} /></main>;
-}
+import FormPage from '../(engagement)/FormPage';
+export const dynamic='force-dynamic';
+export const metadata={title:'Amanda’s Premium Waitlist',description:'Join Amanda Catherine’s course waitlist.'};
+export default async function Page({searchParams}:{searchParams:Promise<{course?:string}>}){const q=await searchParams;return <main className="min-h-screen bg-[#f7f1e8] px-5 py-12 text-[#17130f]"><div className="mx-auto max-w-4xl"><FormPage kind="enroll" course={q.course||''} context="waitlist"/></div></main>;}
