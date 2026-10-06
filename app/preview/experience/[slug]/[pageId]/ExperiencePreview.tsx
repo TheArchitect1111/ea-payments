@@ -6,6 +6,7 @@ import { puckConfig } from '@/lib/experience-builder/puck-config';
 import type { Data } from '@measured/puck';
 import '@/lib/experience-builder/experience-builder.css';
 import '@/app/components/experience/themes/amanda-editorial/amanda-editorial.css';
+import '@/app/components/experience/themes/ea-immersive/ea-immersive.css';
 
 function rootBrand(data: Data): { primary?: string; accent?: string; themeId?: string } {
   const props = (data.root as { props?: Record<string, unknown> } | undefined)?.props;
@@ -18,6 +19,7 @@ function rootBrand(data: Data): { primary?: string; accent?: string; themeId?: s
 function themeClassName(themeId?: string): string | undefined {
   if (themeId === 'amanda-editorial') return 'amanda-editorial-theme';
   if (themeId === 'premium-care-editorial') return 'premium-care-editorial-theme';
+  if (themeId === 'ea-immersive') return 'ea-immersive-theme';
   return undefined;
 }
 
