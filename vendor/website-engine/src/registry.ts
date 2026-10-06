@@ -1,5 +1,6 @@
 import type { WebsiteSectionDefinition, WebsiteSectionKind } from './types';
 import { LANDING_CHASSIS_SECTIONS } from './landing-map';
+import { EA_IMMERSIVE_SECTIONS } from './immersive';
 import {
   EXPERIENCE_BUILDER_SEED_SECTIONS,
   adaptExperienceBlocks,
@@ -44,6 +45,7 @@ export function createDefaultWebsiteRegistry(
 ): WebsiteSectionRegistry {
   const registry = new WebsiteSectionRegistry();
   registry.registerMany(LANDING_CHASSIS_SECTIONS);
+  registry.registerMany(EA_IMMERSIVE_SECTIONS);
   registry.registerMany(
     experienceBlocks?.length
       ? adaptExperienceBlocks(experienceBlocks)
