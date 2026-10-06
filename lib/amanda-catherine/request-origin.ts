@@ -1,6 +1,6 @@
 import type { NextRequest } from 'next/server';
 
-const PUBLIC_AMANDA_ORIGINS = new Set(['https://amandacatherine.ca']);
+const PUBLIC_AMANDA_ORIGINS = new Set(['https://amandacatherine.ca', 'https://www.amandacatherine.ca']);
 
 export function isAllowedAmandaOrigin(request: NextRequest): boolean {
   const origin = request.headers.get('origin');
