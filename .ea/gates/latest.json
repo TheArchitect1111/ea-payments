@@ -3,7 +3,7 @@
   "previousSourceCommit": "bce4d592167ad6aaa1df93ed9f0f643118f639b3",
   "previewUrl": "https://ea-payments-lkq589aqd-the-architects-projects-cc813778.vercel.app/",
   "target": "https://ea-payments-lkq589aqd-the-architects-projects-cc813778.vercel.app/portal/amanda-catherine/classes",
-  "completedAt": "2026-10-06T20:48:55.184Z",
+  "completedAt": "2026-10-06T20:57:30.426Z",
   "status": "PASS",
   "override": {
     "authorized": true,
@@ -36,7 +36,7 @@
   },
   "details": {
     "sourceVerification": "Bare-domain origin is allowed by lib/amanda-catherine/request-origin.ts and used by both waitlist submit and CTA track handlers.",
-    "previewGetVerification": "Earlier verified: schema 200 ok:true, Airtable base present, 8 Square links; classes 200 with 8 Square links and no NOT READY.",
+    "previewGetVerification": "Verified: schema 200 ok:true, Airtable base present, 8 Square links; classes 200 with 8 Square links and no NOT READY.",
     "visualAudit": "Failed because preview deployment protection blocked automation with missing bypass secret; no code visual failure was observed."
   }
 }
