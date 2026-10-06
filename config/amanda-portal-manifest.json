@@ -1,6 +1,6 @@
 {
   "manifestName":"amanda-catherine-portal",
-  "desiredStateVersion":"2",
+  "desiredStateVersion":"3",
   "organizationSlug":"amanda-catherine",
   "repository":"TheArchitect1111/ea-payments",
   "branch":"preview/amanda-cta-fix",
@@ -12,7 +12,7 @@
   "certification":"Amanda portal CTA click tracking, Hub, Calendar, and Eva are Airtable registry driven.",
   "squareLinks":{"source":"Creative Studio.Payload JSON.square_checkout_url","count":8,"driftProof":true},
   "ctasTracked":true,
-  "ctasTrackedCount":18,
-  "ctaNames":["Book a LIFELINE interview","Explore a partnership","Apply for Founder Advisory","Enroll — Advanced Body Sculpt","Enroll — Wood Therapy","Enroll — Non-Surgical BBL","Enroll — LIFELINE LIVE","Enroll — Body Sculpt Certification","Enroll — Strategy Call","Enroll — 90-Day Package","Enroll — Nervous System Reset","Enroll — Foundry Mentorship","Enroll — Clinical Fat Loss","Enroll — Starter Kit","Purchase your Practitioner Kit","Guest application","Partnership & sponsorship kit","Open Booking Calendar"],
+  "ctasTrackedCount":19,
+  "ctaNames":["Book a LIFELINE interview","Explore a partnership","Apply for Founder Advisory","Enroll — Advanced Body Sculpt","Enroll — Wood Therapy","Enroll — Non-Surgical BBL","Enroll — LIFELINE LIVE","Enroll — Body Sculpt Certification","Enroll — Strategy Call","Enroll — 90-Day Package","Enroll — Nervous System Reset","Enroll — Foundry Mentorship","Enroll — Clinical Fat Loss","Enroll — Starter Kit","Enroll — The Entrepreneurial Artist","Purchase your Practitioner Kit","Guest application","Partnership & sponsorship kit","Open Booking Calendar"],
   "hub":true,"calendar":true,"eva":true,"driftProof":true
 }
