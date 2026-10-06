@@ -1,9 +1,0 @@
-{
-  "source": "7d537f585f58b72f217ab6db167456dfa5c72373",
-  "checks": {
-    "classes_public": true,
-    "schema_ok": true,
-    "env_present": true
-  },
-  "preview_deployment": "dpl_2ffVhCek5WHX7HryuJeAw8N9TpD1"
-}
