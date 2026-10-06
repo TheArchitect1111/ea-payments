@@ -109,7 +109,8 @@
     "test:admin-session-duration": "node scripts/test-admin-session-duration.mjs",
     "video:studio": "remotion studio video-factory/remotion/index.ts",
     "video:render": "node scripts/render-video-factory.mjs",
-    "test:video-factory": "npx --yes tsx scripts/test-video-factory-schema.ts"
+    "test:video-factory": "npx --yes tsx scripts/test-video-factory-schema.ts",
+    "test:ea-immersive-template": "node scripts/test-ea-immersive-template.mjs"
   },
   "dependencies": {
     "@clerk/nextjs": "^7.5.9",
