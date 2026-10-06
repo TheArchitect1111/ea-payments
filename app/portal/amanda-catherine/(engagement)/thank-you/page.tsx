@@ -1,0 +1,1 @@
+export default function Page(){return <section className="amanda-card"><h1>Your details have been received.</h1><p>Amanda’s team will review your request.</p><a className="amanda-button" href="/portal/amanda-catherine/classes">Return to classes</a></section>;}
