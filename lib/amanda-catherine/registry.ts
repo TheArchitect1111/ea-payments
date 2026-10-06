@@ -1,7 +1,7 @@
 import { cache } from 'react';
 export type Row = { id: string; fields: Record<string, any> };
 export type Field = {name:string; label:string; type:string; required?:boolean; options?:string[]};
-export type Course = {key:string; title:string; status:string; description:string; isTest:boolean};
+export type Course = {key:string; title:string; status:string; description:string; isTest:boolean; square_checkout_url:string|null};
 const slug = 'amanda-catherine';
 export async function airtable(path:string, init:RequestInit = {}) {
   const base=process.env.AIRTABLE_BASE_ID, token=process.env.AIRTABLE_API_KEY || process.env.AIRTABLE_TOKEN;
@@ -36,7 +36,7 @@ export const registry=cache(async()=>{
  rows('Creative Studio',`AND({Organization ID}='${orgId}',OR(LOWER({Record Type})='course',LOWER({Record Type})='service'))`)]);
  const theme=themes.find(t=>t.id===org.fields['Theme Id']) || themes[0];
  if(!theme)throw new Error('Amanda theme is missing');
- const courses:Course[]=items.map(item=>{const p=JSON.parse(item.fields['Payload JSON'] || '{}');return {key:p.slug || item.fields['Record Key'],title:item.fields.Title,status:String(p.status || 'NOT READY').toUpperCase(),description:p.description || '',isTest:p.isTest===true};});
+ const courses:Course[]=items.map(item=>{const p=JSON.parse(item.fields['Payload JSON'] || '{}');let square_checkout_url:string|null=null;try{const candidate=new URL(String(p.square_checkout_url || ''));if(candidate.protocol==='https:' && candidate.hostname==='checkout.square.site')square_checkout_url=candidate.toString();}catch{}return {key:p.slug || item.fields['Record Key'],title:item.fields.Title,status:String(p.status || 'NOT READY').toUpperCase(),description:p.description || '',isTest:p.isTest===true,square_checkout_url};});
  return {orgId,theme:theme.fields,forms,courses,bookingUrl:org.fields['Booking Url'] as string};
 });
 export function formDefinition(forms:Row[],id:string) {
