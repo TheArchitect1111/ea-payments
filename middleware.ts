@@ -97,6 +97,7 @@ const PUBLIC_PORTAL_EXPERIENCE_PATHS = new Set([
   '/portal/amanda-catherine/hub',
   '/portal/amanda-catherine/waitlist',
   '/portal/amanda-catherine/apply',
+  '/portal/amanda-catherine/api',
 ]);
 
 function isPublicPortalAuthPath(pathname: string): boolean {
