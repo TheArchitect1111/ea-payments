@@ -2,7 +2,9 @@ export type ThemeAppearance = 'light' | 'dark';
 export type ThemeDensity = 'compact' | 'comfortable' | 'spacious';
 
 import { amandaEditorialTheme } from './themes/amanda-editorial/theme';
+import { eaImmersiveTheme } from './themes/ea-immersive/theme';
 export * from './themes/amanda-editorial';
+export * from './themes/ea-immersive';
 
 /** Brand / workspace theme contract for multi-tenant shells. */
 export type WorkspaceTheme = {
@@ -79,6 +81,7 @@ export const defaultWorkspaceTheme: WorkspaceTheme = {
 export const WORKSPACE_THEMES: Record<string, WorkspaceTheme> = {
   [EA_DEFAULT_THEME_ID]: defaultWorkspaceTheme,
   [amandaEditorialTheme.id]: amandaEditorialTheme,
+  [eaImmersiveTheme.id]: eaImmersiveTheme,
   'cpr-theme': {
     id: 'cpr-theme',
     organizationId: 'cpr',
