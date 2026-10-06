@@ -316,3 +316,4 @@ export const config = {
     '/:slug',
     '/:slug/:path*',
   ],
+};
