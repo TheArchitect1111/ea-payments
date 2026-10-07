@@ -1,4 +1,5 @@
 import { createBlueprintRecord, blueprintUrl, publicBlueprint, saveBlueprintRecord } from '@/lib/blueprint-store';
+import { buildCtpV5Policy } from '@/lib/ctp-v5-policy';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -82,16 +83,24 @@ export async function POST(request: Request) {
     const raw = await request.text();
     if (raw.length > 1_500_000) return Response.json({ ok: false, error: 'Submission is too large.' }, { status: 413, headers: c.headers });
     const body = JSON.parse(raw || '{}');
-    const policy = body.policy;
-    if (!policy || policy.version !== 'ctp-v5' || !Array.isArray(policy.bricks) || !policy.bricks.includes('portal.shell')) {
-      return Response.json({ ok: false, error: 'Valid CTP V5 policy JSON is required.' }, { status: 400, headers: c.headers });
+    const intake = body.intake && typeof body.intake === 'object'
+      ? body.intake
+      : body.policy?.answers && typeof body.policy.answers === 'object'
+        ? body.policy.answers
+        : null;
+    if (!intake) {
+      return Response.json({ ok: false, error: 'CTP V5 intake answers are required.' }, { status: 400, headers: c.headers });
     }
+    intake.contactChoice = body.contactChoice ?? intake.contactChoice ?? '';
+    intake.contactValue = body.contactValue ?? intake.contactValue ?? '';
+    intake.portalAlias = body.portalAlias ?? intake.portalAlias ?? '';
+    const policy = buildCtpV5Policy(intake);
     const record = await createBlueprintRecord({
       policy,
       summary: body.summary,
-      contactChoice: body.contactChoice,
-      contactValue: body.contactValue,
-      alias: body.portalAlias,
+      contactChoice: intake.contactChoice,
+      contactValue: intake.contactValue,
+      alias: intake.portalAlias,
     });
     record.delivery = await deliver(record);
     await saveBlueprintRecord(record);
