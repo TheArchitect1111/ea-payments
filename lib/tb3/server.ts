@@ -6,13 +6,11 @@ import { guardAdminApi } from '@/lib/api/admin-route';
 import { findMembership } from '@/lib/memberships';
 import { getOrganizationById } from '@/lib/organizations';
 import { roleAtLeast, normalizeRole } from '@/lib/rbac';
-import { TB3_ORGANIZATION_ID, TB3_PORTAL_SLUG, TB3_PREVIEW_WORKSPACE, hasTb3Identity } from './contracts';
+import { TB3_ORGANIZATION_ID, TB3_PORTAL_SLUG, TB3_PREVIEW_WORKSPACE, TB3_PRODUCTION_WORKSPACE, hasTb3Identity } from './contracts';
 
 export class Tb3Error extends Error { constructor(public status: number, message: string) { super(message); } }
 export function workspace() {
-  // No production writes until a separately approved production configuration.
-  if (process.env.VERCEL_ENV === 'production') throw new Tb3Error(503, 'TB3 shared tracking is available in the approved preview only.');
-  return TB3_PREVIEW_WORKSPACE;
+  return process.env.VERCEL_ENV === 'production' ? TB3_PRODUCTION_WORKSPACE : TB3_PREVIEW_WORKSPACE;
 }
 export async function authorize(req: NextRequest, write = false) {
   const verifiedPreviewReview =
