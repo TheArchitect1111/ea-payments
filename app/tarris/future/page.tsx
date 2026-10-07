@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { HqWorkspaceProvider, useHq, HqDialog, ModuleActions, ModuleTools, ProactiveEva, HqFocus, Upcoming, OpportunitySummary, OpportunityPipeline, EarningsValue, EarningsBreakdown, DocumentVault, OpportunityInbox, CalendarModule, EvaPanel, EvaFab, EvaCommandBar } from "./hq-workspace";
+import { TarrisPortalNav } from "./portal-shell";
+import { OverviewAnalytics } from "./analytics-client";
 
 type AssetCategory = "Athlete" | "Academics" | "Brand" | "Community" | "Future";
 type OfficialAsset = { filename: string; label: string; category: AssetCategory; alt: string };
@@ -114,31 +116,7 @@ function TarrisHqContent() {
 
   return (
     <div ref={rootRef} id="hq-scroll" className="h-[calc(100dvh-96px)] overflow-y-auto xl:h-dvh bg-[#0A0A0A] text-[#F7F5F2] lg:flex">
-      <aside className="border-b border-white/10 bg-[#111111] p-5 lg:fixed lg:inset-y-0 lg:left-0 lg:w-64 lg:overflow-y-auto lg:border-b-0 lg:border-r">
-        <div className="flex items-center justify-between gap-4">
-          <a href="#hq-home" aria-label="TB3 HQ Home" className="flex items-center gap-2">
-            <span className="text-3xl font-black leading-none tracking-[-0.1em] text-[#A51C30]">TB3</span>
-            <span className="border-l border-white/20 pl-2 text-xs font-black tracking-[0.18em]">HQ</span>
-          </a>
-          <span aria-label="Tarris Bouie" className="grid h-12 w-12 place-items-center rounded-full border border-white/20 text-xs font-bold">TB III</span>
-        </div>
-        <p className="mt-3 text-[9px] tracking-[0.28em] text-white/50">TARRIS BOUIE</p>
-        <nav aria-label="TB3 HQ navigation" id="hq-nav" className="mt-6 grid grid-cols-2 gap-1 text-sm sm:grid-cols-4 lg:block lg:space-y-1">
-          <a href="#hq-home" className="rounded bg-white px-3 py-2 font-bold text-black">Home</a>
-          <a href="#my-journey-module" className="block rounded px-3 py-2 text-white/70 hover:bg-white/10">My Journey</a>
-          <a href="#academics-module" className="block rounded px-3 py-2 text-white/70 hover:bg-white/10">Academics</a>
-          <a href="#training-module" className="block rounded px-3 py-2 text-white/70 hover:bg-white/10">Training</a>
-          <a href="#nil-brand-module" className="block rounded px-3 py-2 text-white/70 hover:bg-white/10">NIL &amp; Brand</a>
-          <a href="#opportunities-module" className="block rounded px-3 py-2 text-white/70 hover:bg-white/10">Opportunities</a>
-          <a href="#community-module" className="block rounded px-3 py-2 text-white/70 hover:bg-white/10">Community</a>
-          <a href="#calendar-module" className="block rounded px-3 py-2 text-white/70 hover:bg-white/10">Calendar</a>
-          <a href="#media-library" className="block rounded px-3 py-2 text-white/70 hover:bg-white/10">Media Library</a>
-        </nav>
-        <details className="mt-4"><summary aria-label="Settings" title="Settings" className="grid h-10 w-10 cursor-pointer list-none place-items-center rounded-lg border border-white/15">⚙</summary><p className="mt-2 text-xs text-white/60">Account preferences will be available when HQ tracking is connected.</p></details>
-        <div className="mt-8 hidden text-[10px] leading-6 tracking-[0.16em] text-white/45 lg:block">
-          DISCIPLINE.<br />DETERMINATION.<br />DEVELOPMENT.<br />DESTINY.
-        </div>
-      </aside>
+      <TarrisPortalNav />
 
       <main className="min-w-0 flex-1 px-4 pb-28 pt-5 sm:px-8 lg:ml-64 lg:px-8 xl:mr-80">
         <EvaCommandBar />
@@ -156,6 +134,8 @@ function TarrisHqContent() {
             </div>
           </div>
         </section>
+
+        <OverviewAnalytics />
 
         <section aria-label="Your workspace" className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-3">
           {[["Academics", "academics-module", "♧"], ["Training", "training-module", "↔"], ["NIL & Brand", "nil-brand-module", "↗"], ["Opportunities", "opportunities-module", "◇"], ["Community", "community-module", "◎"], ["Calendar", "calendar-module", "▦"]].map(([label, target]) => <a key={target} href={"#" + target} className="rounded-2xl border border-white/10 bg-[#1A1A1A] p-5 transition hover:border-[#C41E3A]"><WorkspaceIcon name={label} /><h2 className="mt-4 text-xs font-bold uppercase tracking-wider">{label}</h2></a>)}

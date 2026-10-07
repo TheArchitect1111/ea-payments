@@ -2,6 +2,7 @@
 
 import { FormEvent, useState } from 'react';
 import Link from 'next/link';
+import { TENANT, PORTAL_BASE } from '../tenant-config';
 
 export default function TarrisFutureSigningPage() {
   const [legalName, setLegalName] = useState('');
@@ -15,7 +16,7 @@ export default function TarrisFutureSigningPage() {
     if (!consent || legalName.trim().length < 2) return;
     setLoading(true);
     try {
-      const response = await fetch('/api/tarris/sign', {
+      const response = await fetch(`/api/${TENANT}/sign`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ legalName: legalName.trim(), consent: true }),
@@ -49,7 +50,7 @@ export default function TarrisFutureSigningPage() {
             <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#d5ab3c]">Official agreement</p>
             <h2 className="mt-3 text-2xl font-semibold">Review before signing</h2>
             <p className="mt-3 max-w-2xl text-sm leading-7 text-white/60">This signing page is bound to the approved Tarris Bouie Client Services Agreement, including the $500 initial deposit and the 20% paid-referral commission provision.</p>
-            <Link href="/tarris/future/agreement" target="_blank" className="mt-5 inline-flex rounded-full border border-white/20 px-5 py-3 text-sm font-semibold hover:bg-white/5">View the full agreement</Link>
+            <Link href={`${PORTAL_BASE}/agreement`} target="_blank" className="mt-5 inline-flex rounded-full border border-white/20 px-5 py-3 text-sm font-semibold hover:bg-white/5">View the full agreement</Link>
           </div>
         </section>
 

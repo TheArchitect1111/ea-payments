@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { PORTAL_BASE } from "../tenant-config";
 
 const scope = [
   ['Custom Website', 'Responsive custom athlete website experience', 'Approved pages/sections, CTAs, storytelling, mobile optimization and launch', '$850'],
@@ -82,7 +83,7 @@ export default function TarrisAgreementPage() {
         <footer className="bg-[#0b0d10] px-7 py-8 text-white sm:px-12">
           <p className="text-sm font-semibold">Official agreement reference</p>
           <p className="mt-2 break-all font-mono text-[10px] leading-5 text-white/45">Tarris_Bouie_Client_Services_Agreement_OFFICIAL.pdf · SHA-256 390ed4546f66522f1ed84ccecd95bc037b24acd87eee7288913c9288027ac667</p>
-          <Link href="/tarris/future/sign" className="mt-6 inline-flex rounded-full bg-white px-6 py-3 text-sm font-bold text-[#0b0d10]">Continue to Signature →</Link>
+          <Link href={`${PORTAL_BASE}/sign`} className="mt-6 inline-flex rounded-full bg-white px-6 py-3 text-sm font-bold text-[#0b0d10]">Continue to Signature →</Link>
         </footer>
       </article>
     </main>
