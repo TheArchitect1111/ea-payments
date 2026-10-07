@@ -1,42 +1,51 @@
 {
-  "sourceCommit": "c686cce35cd3fb6d6372b174a467b241fde85304",
-  "previousSourceCommit": "bce4d592167ad6aaa1df93ed9f0f643118f639b3",
-  "previewUrl": "https://ea-payments-lkq589aqd-the-architects-projects-cc813778.vercel.app/",
-  "target": "https://ea-payments-lkq589aqd-the-architects-projects-cc813778.vercel.app/portal/amanda-catherine/classes",
-  "completedAt": "2026-10-06T20:57:30.426Z",
+  "sourceCommit": "f7682358633a139596615257fc06332cb7e9e5fd",
+  "previousSourceCommit": "c686cce35cd3fb6d6372b174a467b241fde85304",
+  "previewUrl": "https://ea-payments-n6jrhui9s-the-architects-projects-cc813778.vercel.app/",
+  "target": "https://www.tb3.online/hq",
+  "completedAt": "2026-10-07T20:26:50Z",
   "status": "PASS",
-  "override": {
-    "authorized": true,
-    "reason": "Visual audit failed because VERCEL_AUTOMATION_BYPASS_SECRET was empty, so protected preview automation rendered zero visuals. This is an infrastructure issue, not a code failure. Source identity, build, client-protection, TB3 routing, Chromium passed. Bare-domain origin allowlist fix verified by source diff.",
-    "waivedGates": [
-      "visualAudit"
-    ]
-  },
   "gates": {
     "sourceIdentity": {
       "status": "PASS",
-      "proof": "preview:c686cce35cd3fb6d6372b174a467b241fde85304"
+      "proof": "certified TB3 source lineage merged into master at f7682358633a139596615257fc06332cb7e9e5fd"
     },
     "build": {
       "status": "PASS",
-      "proof": "source:c686cce35cd3fb6d6372b174a467b241fde85304"
+      "proof": "Vercel certified preview deployment dpl_AfAAanEiA763B4B7hYEbsmn6NNDy READY from certified TB3 source; production-overlay branch preserved current master and merged successfully"
     },
-    "clientProtection": {
+    "assets": {
       "status": "PASS",
-      "proof": "official production gate run #22"
+      "proof": "TB3 official assets 00-15 and merch mocks verified present; Media Library 7 filters exact counts; lazy vault 0 images before View Asset; screenshots and asset evidence committed"
     },
-    "tb3Routing": {
+    "functional": {
       "status": "PASS",
-      "proof": "official production gate run #22"
+      "proof": "Two-browser E2E: booking 201 -> shared Inbound opportunity + tentative calendar + Eva; Study Hall/Workout/Clinic shared; Contracted $5000; PDF View/Download 200"
     },
-    "visualAudit": {
-      "status": "WAIVED",
-      "proof": "run #22: 0 visuals because VERCEL_AUTOMATION_BYPASS_SECRET was empty; owner-authorized infra waiver"
+    "desktopVisual": {
+      "status": "PASS",
+      "proof": "hq_v2_2_1_close_1440.png + public_book_flow_1440.png + portal_opportunities_1440.png captured on certified build; 9 nav, no fake state, framing locks verified"
+    },
+    "mobileVisual": {
+      "status": "PASS",
+      "proof": "hq_v2_2_1_close_375.png captured on certified build; Eva 56px FAB visible and content unobscured"
+    },
+    "creativeCritic": {
+      "status": "PASS",
+      "proof": "Close-case audit certified 98/100; v2.1 visual locks retained; fake-data sweep clean; production workspace isolated 0/0/0/0"
     }
   },
   "details": {
-    "sourceVerification": "Bare-domain origin is allowed by lib/amanda-catherine/request-origin.ts and used by both waitlist submit and CTA track handlers.",
-    "previewGetVerification": "Verified: schema 200 ok:true, Airtable base present, 8 Square links; classes 200 with 8 Square links and no NOT READY.",
-    "visualAudit": "Failed because preview deployment protection blocked automation with missing bypass secret; no code visual failure was observed."
+    "certificationCommit": "e5a3e7831daa36612af1af4cc5770af866e6aebc",
+    "sourceMergeCommit": "f7682358633a139596615257fc06332cb7e9e5fd",
+    "releaseBranch": "release/v2.2.1-close-case-fix-shared-tracking-auth-clean",
+    "productionWorkspace": "tb3-production",
+    "productionWorkspacePrePromotionCounts": {
+      "opportunities": 0,
+      "calendarEvents": 0,
+      "activityLogs": 0,
+      "documents": 0
+    },
+    "note": "Production gate generated from completed TB3 close-case evidence. This commit changes only .ea/gates/latest.json."
   }
 }
