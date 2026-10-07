@@ -187,5 +187,12 @@ export async function appendBlueprintVaultFile(clientId: string, file: Blueprint
 
 export function publicBlueprint(record: BlueprintRecord) {
   const { contact: _contact, ...safe } = record;
-  return safe;
+  const policy = { ...(safe.policy || {}) };
+  delete policy.answers;
+  const summary = {
+    subject: safe.summary?.subject,
+    link: safe.summary?.link,
+    greeting: safe.summary?.greeting,
+  };
+  return { ...safe, policy, summary };
 }
