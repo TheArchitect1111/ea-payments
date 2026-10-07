@@ -46,7 +46,7 @@ function Address({address}:{address?:{line1?:string|null;line2?:string|null;city
 }
 
 function ConnectedSection({ section, submissions, kitOrders, bookCourseRoute }: { bookCourseRoute: string; section: string; submissions: PortalFormSubmission[]; kitOrders: Awaited<ReturnType<typeof listAmandaKitOrders>> }) {
-  if (section === 'academy') return <><section className="ac-card"><Link href="/portal/amanda-catherine/learning">Manage course content</Link></section><CertificationQueue /></>;
+  if (section === 'academy') return <><section className="ac-card"><div className="ac-actions"><Link href="/portal/amanda-catherine/learning">Manage course content</Link><Link href="/portal/amanda-catherine/owner/learner-preview">Preview learner dashboard →</Link></div></section><CertificationQueue /></>;
   if (section === 'documents') return <><section className="ac-card"><Link href="/portal/amanda-catherine/documents">Open document hub</Link></section><CertificationQueue /></>;
   if (section === 'practitioner-kit') return <>
     <section className="ac-grid-two">
