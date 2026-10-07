@@ -26,8 +26,9 @@ const officialAssets: OfficialAsset[] = [
 ];
 
 const trainingAssets = new Set(["OFFICIAL_02_BENCH_YELLOW_KOBE.png", "OFFICIAL_06_CABLE_MACHINE.png", "OFFICIAL_07_FILM_TABLET.png"]);
+const futureAssets = new Set(["OFFICIAL_13_BLAZER_CHAIR.png"]);
 const filterOptions = ["All", "Athlete", "Academics", "Brand", "Community", "Future", "Training"] as const;
-const assetMatchesCategory = (filename: string, primary: AssetCategory, category: (typeof filterOptions)[number]) => category === "All" || primary === category || (category === "Training" && trainingAssets.has(filename));
+const assetMatchesCategory = (filename: string, primary: AssetCategory, category: (typeof filterOptions)[number]) => category === "All" || primary === category || (category === "Training" && trainingAssets.has(filename)) || (category === "Future" && futureAssets.has(filename));
 
 function PortalImage({
   id,
@@ -97,7 +98,7 @@ function TarrisHqContent() {
     const query = search.trim().toLowerCase();
     return officialAssets.filter(({ filename, label, category }) => {
       const categoryMatches = assetMatchesCategory(filename, category, activeFilter);
-      const queryMatches = !query || (label + " " + category + (trainingAssets.has(filename) ? " training" : "")).toLowerCase().includes(query);
+      const queryMatches = !query || (label + " " + category + (trainingAssets.has(filename) ? " training" : "") + (futureAssets.has(filename) ? " future" : "")).toLowerCase().includes(query);
       return categoryMatches && queryMatches;
     });
   }, [search, activeFilter]);
