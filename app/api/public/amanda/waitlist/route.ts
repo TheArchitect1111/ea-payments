@@ -3,6 +3,7 @@ import { findAmandaWaitlistInterest } from '@/lib/amanda-catherine/waitlist-inte
 import { saveAmandaWaitlist, notifyAmandaWaitlist } from '@/lib/amanda-catherine/waitlist';
 import { checkRateLimit } from '@/lib/ai/rate-limit';
 import { registry, create } from '@/lib/amanda-catherine/registry';
+import { sendAmandaWarmLetter } from '@/lib/email/amanda-warm-letter';
 export async function POST(req: NextRequest) {
   if (req.headers.get('origin') !== req.nextUrl.origin) return NextResponse.json({ error: 'Open the waitlist from Amanda’s website.' }, { status: 403 });
   const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
@@ -18,7 +19,7 @@ export async function POST(req: NextRequest) {
     const current = await registry();
     const courseRecord = current.courses.find(item => item.key === course.id);
     const timestamp = new Date().toISOString();
-    const payload = { event: 'waitlist_application', cta_name: 'Premium Waitlist Application', page: '/portal/amanda-catherine/waitlist', timestamp, portal_slug: 'amanda-catherine', course_name: course.title, course_key: course.id, price: courseRecord?.price ?? null, square_url_if_enroll: courseRecord?.square_checkout_url ?? null };
+    const payload = { event: 'waitlist_application', cta_name: 'Premium Waitlist Application', page: '/portal/amanda-catherine/waitlist', timestamp, portal_slug: 'amanda-catherine', source: 'amandacatherine.ca', course_name: course.title, course_key: course.id, price: courseRecord?.price ?? null, square_url_if_enroll: courseRecord?.square_checkout_url ?? null };
     await create('Business Interested', {
       Title: 'Premium Waitlist Application — ' + course.title + ' — ' + timestamp,
       'CTA Name': 'Premium Waitlist Application',
@@ -36,6 +37,17 @@ export async function POST(req: NextRequest) {
   } catch {
     return NextResponse.json({ error: 'Your waitlist was saved, but the Business Interested record could not be written. Please try again shortly.' }, { status: 503 });
   }
-  try { await notifyAmandaWaitlist(data); } catch { return NextResponse.json({ error: 'Your request was saved, but Amanda could not be notified. Please contact Amanda before submitting again.' }, { status: 503 }); }
+  console.log('[AMANDA_WORKFLOW] db_saved', { email, course: course.title, ctaType: 'waitlist', route: '/api/public/amanda/waitlist' });
+  try {
+    const sent = await sendAmandaWarmLetter({ to: email, name, course: course.title, ctaType: 'waitlist' });
+    console.log('[AMANDA_WORKFLOW] email_queued', { email, course: course.title, id: sent.id });
+  } catch (error) {
+    console.error('[AMANDA_WORKFLOW] email_failed', { email, course: course.title, ctaType: 'waitlist', error: error instanceof Error ? error.message : String(error) });
+  }
+  try {
+    await notifyAmandaWaitlist(data);
+  } catch (error) {
+    console.error('[AMANDA_WORKFLOW] admin_notification_failed', { email, course: course.title, error: error instanceof Error ? error.message : String(error) });
+  }
   return NextResponse.json({ ok: true });
 }
