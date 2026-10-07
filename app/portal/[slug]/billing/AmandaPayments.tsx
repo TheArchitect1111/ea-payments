@@ -12,6 +12,7 @@ export default function AmandaPayments({ email }: { email: string }) {
   const [busy, setBusy] = useState('');
   const [error, setError] = useState('');
   const [verified, setVerified] = useState(false);
+  const [verifiedPayment, setVerifiedPayment] = useState<AmandaPaymentRecord | null>(null);
   const [options, setOptions] = useState<{
     deposits: Record<string, number>;
     memberships: Array<{ id: string; name: string; available: boolean }>;
@@ -37,9 +38,9 @@ export default function AmandaPayments({ email }: { email: string }) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ sessionId }),
           });
-          const data = await res.json() as { ok?: boolean; error?: string };
+          const data = await res.json() as { ok?: boolean; error?: string; payment?: AmandaPaymentRecord };
           if (!res.ok || !data.ok) setError(data.error || 'Payment could not be verified.');
-          else setVerified(true);
+          else { setVerified(true); setVerifiedPayment(data.payment || null); }
         } catch {
           setError('Payment verification network error.');
         }
@@ -95,10 +96,10 @@ export default function AmandaPayments({ email }: { email: string }) {
       {options.testCheckoutAllowed ? (
         <div className="ep-module-card" style={{ marginBottom: 18, border: '1px solid #d9b76d' }}>
           <p className="ep-module-card-title">Private workflow testing</p>
-          <p className="ep-module-card-note">Administrator-only. Use the CAD $1 test button on any offer below to test checkout, receipt, portal access, and fulfillment without changing the public price.</p>
+          <p className="ep-module-card-note">Administrator-only. Use the CAD $1 test button on any READY course below to test checkout, receipt, course entitlement, portal access, and fulfillment without changing the public price. After payment, you return here automatically and can open the read-only learner preview.</p>
         </div>
       ) : null}
-      {verified ? <p className="ep-module-card-note">Payment verified with Stripe and recorded in your portal.</p> : null}
+      {verified ? <div className="ep-module-card" style={{ marginBottom: 18, border: '1px solid #8aa58f' }}><p className="ep-module-card-title">Payment verified with Stripe</p><p className="ep-module-card-note">The payment is recorded and course access has been provisioned.</p>{verifiedPayment?.courseId ? <a className="ep-btn" style={{ marginTop: 12 }} href={`/portal/amanda-catherine/owner/learner-preview?courseId=${encodeURIComponent(verifiedPayment.courseId)}`}>Preview the client learning dashboard</a> : null}</div> : null}
       {error ? <p className="ep-module-card-note" style={{ color: '#b42318' }}>{error}</p> : null}
       <p>{AMANDA_SUPPORT_WORDING}</p>
       <KitFulfillmentFields value={kit} onChange={setKit} />
