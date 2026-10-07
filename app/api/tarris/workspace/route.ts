@@ -1,0 +1,3 @@
+import type { NextRequest } from 'next/server';
+import { authorize, db, scope, handled, json } from '@/lib/tb3/server';
+export async function GET(req: NextRequest) {return handled(async()=>{await authorize(req);const queries=['tb3_activity_logs?'+scope()+'&order=created_at.desc','tb3_impact_metrics?'+scope(),'tb3_documents?'+scope()+'&order=created_at.desc','tb3_tutor_contacts?'+scope()+'&order=created_at.desc','tb3_academic_status?'+scope(),'tb3_notifications?'+scope()+'&order=created_at.desc'];const rows=await Promise.all(queries.map(query=>db(query)));return json({ok:true,logs:rows[0],impact:rows[1],documents:rows[2],contacts:rows[3],academic:rows[4],notifications:rows[5]});});}

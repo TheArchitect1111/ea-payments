@@ -1,0 +1,5 @@
+import type { NextRequest } from 'next/server';
+import { z } from 'zod';
+import { calendarSchema } from '@/lib/tb3/contracts';
+import { authorize, db, handled, json, body, scopedId, sameOrigin, scope, Tb3Error } from '@/lib/tb3/server';
+export async function PATCH(req:NextRequest,{params}:{params:Promise<{id:string}>}){return handled(async()=>{sameOrigin(req);await authorize(req,true);const id=z.string().uuid().parse((await params).id);const existing=await db<{linked_opportunity_id:string|null}[]>(`tb3_calendar_events?${scopedId(id)}`);if(!existing.length)throw new Tb3Error(404,'Event not found.');if(existing[0].linked_opportunity_id)throw new Tb3Error(409,'Update a booking hold through its opportunity.');const logs=await db<unknown[]>(`tb3_activity_logs?${scope()}&calendar_event_id=eq.${id}`);if(logs.length)throw new Tb3Error(409,'Logged activities are retained as recorded.');const event=calendarSchema.parse(await body(req));return json({ok:true,events:await db(`tb3_calendar_events?${scopedId(id)}`,{method:'PATCH',body:JSON.stringify({...event,updated_at:new Date().toISOString()})})});});}
