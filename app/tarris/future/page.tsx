@@ -3,7 +3,10 @@
 // This is what www.tb3.online/hq shows via rewrite /hq/:path* -> /tarris/future/:path*
 
 import React from "react";
-import Link from "next/link";\nimport BlueprintBrickPanel from "@/app/components/blueprint/BlueprintBrickPanel";\nimport EAAssistant from "@/app/components/ea-assistant/EAAssistant";\nimport { getBlueprintByAlias, publicBlueprint } from "@/lib/blueprint-store";
+import Link from "next/link";
+import BlueprintBrickPanel from "@/app/components/blueprint/BlueprintBrickPanel";
+import EAAssistant from "@/app/components/ea-assistant/EAAssistant";
+import { getBlueprintByAlias, publicBlueprint } from "@/lib/blueprint-store";
 
 export default async function TarrisFuturePage() {
   const IMAGES = {
@@ -11,7 +14,9 @@ export default async function TarrisFuturePage() {
     brandSmile: "/images/tarris/YOUR_BRAND_SMILE.jpg",
     community: "/images/tarris/YOUR_COMMUNITY.jpg",
     enterprise: "/images/tarris/YOUR_ENTERPRISE_SUIT.jpg",
-  };\n\n  const blueprint = await getBlueprintByAlias('tarris');
+  };
+
+  const blueprint = await getBlueprintByAlias('tarris');
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white flex flex-col lg:flex-row">
