@@ -10,8 +10,8 @@ Sculpt Certification"
 for Face & Body Contouring"
 5. NEVER auto-generate an entitlement / unlock online learning for a course that is
 NOT marked READY - must be waitlist only
-6. NEVER merge "Non-Surgical Tummy Sculpt & Tighten" with Fat Loss Injectables -
-they are separate certifications
+6. NEVER restore or display the retired "Non-Surgical Tummy Sculpt & Tighten"
+course unless Amanda explicitly approves it again
 7. NEVER say "lifetime support" or "ongoing mentorship" - only use exact wording:
 "Includes 90 days of clinical integration support and business mentorship."
 8. NEVER start 90-day clock at purchase date - it begins on class/training date
