@@ -1,6 +1,5 @@
 import { AMANDA_OFFERS } from '@/lib/amanda-catherine/config';
 import { AMANDA_PRACTITIONER_KIT } from '@/lib/amanda-catherine/practitioner-kit-catalog';
-import Image from 'next/image';
 import './client-updates.css';
 
 function External({href,children}:{href:string;children:React.ReactNode}) {
@@ -56,7 +55,7 @@ export function PractitionerEssentials() {
   return <section className="ac-section ac-alt" id="practitioner-essentials"><div className="ac-wrap ac-grid">
     <img className="ac-kit-art" src={AMANDA_PRACTITIONER_KIT.artwork} alt="Supplied BODY SCULPT Practitioner Starter Kit artwork, 7-piece Colombian Wood Therapy Collection, $499 CAD"/>
     <div><p className="ac-eyebrow">AesthetiKine · Practitioner essentials</p><h2>Tools for your practice.</h2><h3>{AMANDA_PRACTITIONER_KIT.name}</h3><p>{AMANDA_PRACTITIONER_KIT.description}</p><p><strong>${AMANDA_PRACTITIONER_KIT.priceCad} CAD</strong></p><a className="ac-btn ac-btn-fill" href="/amanda-catherine/private/practitioner-kit">Purchase your Practitioner Kit</a>
-    <div className="ac-products"><p className="ac-eyebrow">RIMAN Canada</p><h3>K-Beauty skincare</h3><Image unoptimized className="ac-riman-photo" src="/amanda-catherine/riman-products.jpg" width={502} height={346} alt="Amanda’s supplied RIMAN skincare products"/><p>Explore Amanda’s Canadian RIMAN storefront.</p><a className="ac-btn" href="https://riman.com/amandacatherine/en-CA/home" target="_blank" rel="noopener noreferrer">Shop RIMAN Canada ↗</a><p>If RIMAN opens another market, choose Canada / English in its market selector, or <External href="https://riman.com/amandacatherine/en-CA/home">open the Canadian storefront directly</External>.</p></div></div>
+    <div className="ac-products"><p className="ac-eyebrow">RIMAN Canada</p><h3>K-Beauty skincare</h3><img className="ac-riman-photo" src="https://www.buyincellderm.com/cdn/shop/files/ICDExpertExperienceKit.png?v=1772504566&width=2000" alt="RIMAN Incellderm ICD Expert Experience Kit with seven skincare products" loading="lazy"/><p>Explore Amanda’s Canadian RIMAN storefront.</p><a className="ac-btn" href="https://riman.com/amandacatherine/en-CA/home" target="_blank" rel="noopener noreferrer">Shop RIMAN Canada ↗</a><p>If RIMAN opens another market, choose Canada / English in its market selector, or <External href="https://riman.com/amandacatherine/en-CA/home">open the Canadian storefront directly</External>.</p></div></div>
   </div></section>;
 }
 
