@@ -8,7 +8,7 @@ import { requirePortalModule } from '@/lib/modules/portal-modules';
 import EAPortalHubCards from '@/app/portal/components/EAPortalHubCards';
 import PortalHomeExperience from '@/app/portal/components/PortalHomeExperience';
 import { PortalSubpage } from '@/app/portal/components/PortalSubpage';
-import AmandaMemberHome from '@/app/portal/[slug]/member/AmandaMemberHome';
+import AmandaMemberHome from '@/app/portal/[slug]/member/AmandaMemberHome';\nimport BlueprintBrickPanel from '@/app/components/blueprint/BlueprintBrickPanel';\nimport { getBlueprintByAlias, publicBlueprint } from '@/lib/blueprint-store';
 import {
   PortalPersonalityRail,
   orderDashboardSections,
@@ -41,7 +41,7 @@ export default async function PortalPage({
   // and redirecting it creates a browser prefetch/render loop.
   if (slug.toLowerCase().startsWith('amanda-catherine')) {
     const firstName = client.clientName?.split(' ')[0] || 'Amanda';
-    const isAdministrator = session.role === 'admin' || session.role === 'owner';
+    const isAdministrator = session.role === 'admin' || session.role === 'owner';\n    const blueprint = await getBlueprintByAlias(slug);
     return (
       <PortalSubpage
         slug={slug}
@@ -60,7 +60,7 @@ export default async function PortalPage({
           slug={slug}
           email={session.email || client.email}
           role={session.role}
-        />
+        />\n        {blueprint ? <BlueprintBrickPanel clientId={blueprint.clientId} initialRecord={publicBlueprint(blueprint)} /> : null}
       </PortalSubpage>
     );
   }
