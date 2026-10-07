@@ -4,6 +4,7 @@ export const TB3_PORTAL_SLUG = 'tarris';
 // Verified from the EA Organizations record, not a client-provided label.
 export const TB3_ORGANIZATION_ID = 'recxUohHc16hPk1T3';
 export const TB3_PREVIEW_WORKSPACE = 'tb3-preview-20261005';
+export const TB3_PRODUCTION_WORKSPACE = 'tb3-production';
 
 export const opportunityStages = ['Inbound', 'Discussion', 'Contracted', 'Completed'] as const;
 export const opportunityTypes = ['Speaking', 'Appearance', 'Camp/Clinic', 'Brand Partnership', 'Community', 'Other'] as const;
