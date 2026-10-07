@@ -1,0 +1,71 @@
+{
+  "375": {
+    "nav": [
+      "Home",
+      "My Journey",
+      "Academics",
+      "Training",
+      "NIL & Brand",
+      "Opportunities",
+      "Community",
+      "Calendar",
+      "Media Library"
+    ],
+    "pills": [
+      "All 15",
+      "Athlete 4",
+      "Academics 3",
+      "Brand 4",
+      "Community 2",
+      "Future 3",
+      "Training 3"
+    ],
+    "cards": 15,
+    "before": 0,
+    "trainCards": 3,
+    "noFake": true,
+    "earningsUnavailable": true,
+    "privateBanner": true,
+    "officialVisible": false,
+    "pngVisible": false,
+    "evaPanel": false,
+    "fabVisible": true
+  },
+  "1440": {
+    "nav": [
+      "Home",
+      "My Journey",
+      "Academics",
+      "Training",
+      "NIL & Brand",
+      "Opportunities",
+      "Community",
+      "Calendar",
+      "Media Library"
+    ],
+    "pills": [
+      "All 15",
+      "Athlete 4",
+      "Academics 3",
+      "Brand 4",
+      "Community 2",
+      "Future 3",
+      "Training 3"
+    ],
+    "cards": 15,
+    "before": 0,
+    "trainCards": 3,
+    "noFake": true,
+    "earningsUnavailable": true,
+    "privateBanner": true,
+    "officialVisible": false,
+    "pngVisible": false,
+    "evaPanel": true,
+    "fabVisible": false
+  },
+  "public": {
+    "status": 200,
+    "form": 1,
+    "sticky": "BOOK TARRIS / PARTNER WITH TB3"
+  }
+}
