@@ -1,0 +1,44 @@
+{
+  "booking": {
+    "status": 201,
+    "body": {
+      "ok": true,
+      "result": "8f8f2583-dc7b-41ae-93af-ef4d4b49133c"
+    }
+  },
+  "browserBList": {
+    "status": 200,
+    "body": {
+      "ok": true,
+      "opportunities": [
+        {
+          "id": "8f8f2583-dc7b-41ae-93af-ef4d4b49133c",
+          "workspace_key": "tb3-preview-20261005",
+          "tenant_id": "tarris-bouie-iii",
+          "request_id": "5f4ef026-1c6d-4c71-b4cb-a18bcf94f691",
+          "company_name": "Test Co",
+          "contact_name": "Test Company",
+          "contact_email": "test@testco.com",
+          "phone": "",
+          "type": "Brand Partnership",
+          "budget_range": "$5k-10k",
+          "date_requested": "2026-11-15",
+          "vision_answer": "Youth education aligns with Discipline Development",
+          "message": "Test booking for audit",
+          "status": "Inbound",
+          "earnings_amount": null,
+          "values_check": "Pass",
+          "created_from": "PublicBook",
+          "created_by": "public-booking",
+          "created_at": "2026-10-07T20:07:04.849739+00:00",
+          "updated_at": "2026-10-07T20:07:04.849739+00:00"
+        },
+        {
+          "id": "6f8f38c2-040c-4da7-9456-6d8eea52f5ff",
+          "workspace_key": "tb3-preview-20261005",
+          "tenant_id": "tarris-bouie-iii",
+          "request_id": "a9e522a9-606d-48e8-a2e4-03b92f1643c1",
+          "company_name": "Test Co",
+          "contact_name": "Test",
+          "contact_email": "test@test.com",
+ ¶»§q«^
