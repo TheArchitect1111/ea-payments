@@ -8,5 +8,5 @@ export default async function Page({ params }: { params: Promise<{ courseSlug: s
   if (AMANDA_COURSES.some(course => course.id === courseSlug) && amandaCourseReady(courseSlug)) redirect(`/courses/${encodeURIComponent(courseSlug)}`);
   const interest = findAmandaWaitlistInterest(courseSlug);
   if (!interest) notFound();
-  return <main className="min-h-screen bg-[#f7f1e8] px-5 py-12 text-[#17130f]"><section className="mx-auto max-w-3xl"><h1>{interest.title}</h1><section id="waitlist"><h2>Join Waitlist</h2><p>Enrollment isn't open yet. Join Amanda's priority waitlist and we'll let you know when the next opportunity becomes available.</p><AmandaWaitlistForm courseId={interest.id} courseName={interest.title} /></section></section></main>;
+  return <main className="min-h-screen bg-[#f7f1e8] px-5 py-12 text-[#17130f]"><section className="mx-auto max-w-3xl"><h1>{interest.title}</h1><section id="waitlist"><h2>Join Waitlist</h2><p>This course or service is not READY. Joining creates no payment or course access.</p><AmandaWaitlistForm courseId={interest.id} courseName={interest.title} /></section></section></main>;
 }
