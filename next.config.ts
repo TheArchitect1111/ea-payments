@@ -86,6 +86,13 @@ const nextConfig: NextConfig = {
       fallback: [],
     };
   },
+  async headers() {
+    const privateHeaders = [{ key: 'X-Robots-Tag', value: 'noindex, nofollow, noarchive, nosnippet' }];
+    return [
+      { source: '/tarris/future/:path*', headers: privateHeaders },
+      { source: '/hq/:path*', headers: privateHeaders },
+    ];
+  },
   async redirects() {
     return (vercelJson.redirects ?? []).map((rule) => ({
       source: rule.source,
