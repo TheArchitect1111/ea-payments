@@ -3,15 +3,15 @@
 // This is what www.tb3.online/hq shows via rewrite /hq/:path* -> /tarris/future/:path*
 
 import React from "react";
-import Link from "next/link";
+import Link from "next/link";\nimport BlueprintBrickPanel from "@/app/components/blueprint/BlueprintBrickPanel";\nimport EAAssistant from "@/app/components/ea-assistant/EAAssistant";\nimport { getBlueprintByAlias, publicBlueprint } from "@/lib/blueprint-store";
 
-export default function TarrisFuturePage() {
+export default async function TarrisFuturePage() {
   const IMAGES = {
     hqHeader: "/images/tarris/YOUR_HQ_HEADER.jpg",
     brandSmile: "/images/tarris/YOUR_BRAND_SMILE.jpg",
     community: "/images/tarris/YOUR_COMMUNITY.jpg",
     enterprise: "/images/tarris/YOUR_ENTERPRISE_SUIT.jpg",
-  };
+  };\n\n  const blueprint = await getBlueprintByAlias('tarris');
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white flex flex-col lg:flex-row">
@@ -79,7 +79,11 @@ export default function TarrisFuturePage() {
           <span className="opacity-20">|</span>
           <span className="opacity-30">WIRED: app/tarris/page.tsx → ENTER TB3 HQ → app/tarris/future/page.tsx → app/tarris/future/agreement/page.tsx</span>
         </div>
+        {blueprint ? (
+          <BlueprintBrickPanel clientId={blueprint.clientId} initialRecord={publicBlueprint(blueprint)} dark />
+        ) : null}
       </main>
+      <EAAssistant surface="portal" workspaceAiContext="TB3 HQ: academics, training, NIL and brand, opportunities, events, media, community, and the active operational blueprint." />
     </div>
   );
 }
