@@ -45,7 +45,14 @@ export async function db<T = unknown>(path: string, init: RequestInit = {}): Pro
   const unsigned = `${encoded({alg:'HS256',typ:'JWT'})}.${encoded({role:'people_app',iss:'supabase',iat:now-30,exp:now+300})}`;
   const token = `${unsigned}.${createHmac('sha256',secret).update(unsigned).digest('base64url')}`;
   const response = await fetch(`${url}/rest/v1/${path}`, {...init, cache:'no-store', headers:{...Object.fromEntries(new Headers(init.headers)),apikey:apiKey,Authorization:`Bearer ${token}`,'Content-Type':'application/json','Accept-Profile':'public','Content-Profile':'public',Prefer:'return=representation'}, signal:AbortSignal.timeout(15000)});
-  if (!response.ok) throw new Tb3Error(response.status === 409 ? 409 : 503, response.status === 409 ? 'A linked event already exists or the record changed. Refresh and try again.' : 'Shared tracking is temporarily unavailable. Nothing was confirmed saved.');
+  if (!response.ok) {
+    const failure = await response.json().catch(() => ({})) as { code?: string };
+    console.warn('TB3 shared tracking request rejected', { status: response.status, code: failure.code ?? 'unknown' });
+    if (response.status === 409) throw new Tb3Error(409, 'A linked event already exists or the record changed. Refresh and try again.');
+    if (response.status === 401 || response.status === 403) throw new Tb3Error(503, 'Shared tracking database role is not authorized.');
+    if (response.status === 404 || ['PGRST202','PGRST204','PGRST205'].includes(failure.code ?? '')) throw new Tb3Error(503, 'Shared tracking schema is not active.');
+    throw new Tb3Error(503, 'Shared tracking is temporarily unavailable. Nothing was confirmed saved.');
+  }
   return await response.json() as T;
 }
 export const scope = () => `workspace_key=eq.${encodeURIComponent(workspace())}`;
