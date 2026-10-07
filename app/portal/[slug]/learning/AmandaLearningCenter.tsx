@@ -30,8 +30,9 @@ function embedUrl(value: string) {
   return value.match(/\.(mp4|webm)(\?.*)?$/i) ? value : '';
 }
 
-export default function AmandaLearningCenter({ audience, assignedCourseIds, isAdmin }: { audience: AmandaPortalAudience; assignedCourseIds: string[]; isAdmin: boolean }) {
-  const courses = useMemo(() => coursesForAccount(audience, assignedCourseIds, isAdmin), [audience, assignedCourseIds, isAdmin]);
+export default function AmandaLearningCenter({ audience, assignedCourseIds, isAdmin, previewAsLearner = false }: { audience: AmandaPortalAudience; assignedCourseIds: string[]; isAdmin: boolean; previewAsLearner?: boolean }) {
+  const adminCourseAccess = isAdmin && !previewAsLearner;
+  const courses = useMemo(() => coursesForAccount(audience, assignedCourseIds, adminCourseAccess), [audience, assignedCourseIds, adminCourseAccess]);
   const [courseId, setCourseId] = useState<string>(courses[0]?.id || '');
   const [progress, setProgress] = useState<AmandaCourseProgress | null>(null);
   const [content, setContent] = useState<AmandaCourseContent | null>(null);
@@ -84,41 +85,44 @@ export default function AmandaLearningCenter({ audience, assignedCourseIds, isAd
   if (!course) return <section className="ak-learning-empty"><h2>No course assigned yet</h2><p>Amanda will assign your course when enrollment is confirmed.</p></section>;
   if (error && (!progress || !content)) return <p role="alert">{error}</p>;
   if (!progress || !content) return <p className="ep-module-card-note">Loading your course…</p>;
-  const percent = course.lessons.length ? Math.round((progress.completedLessons.length / course.lessons.length) * 100) : 0;
+  const completedLessons = previewAsLearner ? [] : progress.completedLessons;
+  const percent = course.lessons.length ? Math.round((completedLessons.length / course.lessons.length) * 100) : 0;
   if (!content.lessons.length) return <section><h2>{course.title}</h2><p>Course content has not been provided.</p></section>;
   const lesson = content.lessons[selected];
   const releaseAt = progress.lessonReleaseAt?.[lesson.title];
-  const released = isAdmin || Boolean(now && releaseAt && new Date(releaseAt).getTime() <= now);
+  const adminCanBypassRelease = isAdmin && !previewAsLearner;
+  const released = adminCanBypassRelease || Boolean(now && releaseAt && new Date(releaseAt).getTime() <= now);
   const player = embedUrl(lesson.videoUrl);
   const directVideo = /\.(mp4|webm)(\?.*)?$/i.test(player);
   const courseResources = resourcesForAmandaCourse(course.id);
   const officialPlaylist = course.id === ENTREPRENEURIAL_ARTIST_COURSE.id ? embedUrl(ENTREPRENEURIAL_ARTIST_COURSE.playlistUrl) : '';
 
   return <section className="ak-learning">
+    {previewAsLearner ? <div className="ep-module-card" style={{ marginBottom: 18, border: '1px solid #d9b76d' }}><strong>Admin preview · learner view</strong><p className="ep-module-card-note">Read-only. This shows the course layout, lessons and resources a newly enrolled client receives without changing learner progress.</p></div> : null}
     <p>{AMANDA_SUPPORT_WORDING}</p><Link href="/portal/amanda-catherine/support">Support &amp; mentorship</Link>
     <header className="ak-learning__header"><div><p className="ak-learning__eyebrow">My learning</p><h2>{course.title}</h2><p>Watch each lesson, complete the work, and track your path to certification.</p></div><label><span>Program</span><select value={courseId} onChange={(e) => { setError(''); setStatus(''); setSelected(0); setProgress(null); setContent(null); setCourseId(e.target.value); }}>{courses.map((item) => <option key={item.id} value={item.id}>{item.title}</option>)}</select></label></header>
-    <div className="ak-learning__progress"><strong>{percent}% complete</strong><div className="ak-learning__track"><span style={{ width: `${percent}%` }} /></div><small>{progress.completedLessons.length} of {course.lessons.length} lessons complete</small></div>
+    <div className="ak-learning__progress"><strong>{percent}% complete</strong><div className="ak-learning__track"><span style={{ width: `${percent}%` }} /></div><small>{completedLessons.length} of {course.lessons.length} lessons complete</small></div>
     {error ? <p className="ak-learning__error" role="alert">{error}</p> : null}
     {officialPlaylist ? <section className="ak-learning__materials" aria-labelledby="official-course-video-library"><div><p className="ak-learning__eyebrow">Official course videos</p><h3 id="official-course-video-library">The Entrepreneurial Artist video library</h3><p>The original six-part course playlist is restored here as the official video source.</p></div><div className="ak-learning__video"><iframe src={officialPlaylist} title="The Entrepreneurial Artist official course playlist" allow="accelerometer; autoplay; encrypted-media; picture-in-picture" allowFullScreen /></div></section> : null}
     <div className="ak-learning__workspace">
       <nav className="ak-learning__lessons" aria-label="Course lessons">{content.lessons.map((item, index) => {
         const release = progress.lessonReleaseAt?.[item.title];
-        const open = isAdmin || Boolean(now && release && new Date(release).getTime() <= now);
-        const complete = progress.completedLessons.includes(item.title);
+        const open = adminCanBypassRelease || Boolean(now && release && new Date(release).getTime() <= now);
+        const complete = completedLessons.includes(item.title);
         return <button key={item.title} type="button" className={selected === index ? 'is-active' : ''} onClick={() => setSelected(index)} disabled={!open}><span>{complete ? '✓' : open ? index + 1 : '🔒'}</span><span><strong>Week {index + 1}</strong><small>{item.title}</small></span></button>;
       })}</nav>
       <article className="ak-learning__lesson"><p className="ak-learning__eyebrow">Week {selected + 1}</p><h3>{lesson.title}</h3>
         {!released ? <div className="ak-learning__pending"><strong>Lesson not released</strong><p>{releaseAt ? `Available ${new Date(releaseAt).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short', timeZone: 'America/New_York' })} ET` : 'Release date pending.'}</p></div> : player ? <div className="ak-learning__video">{directVideo ? <video src={player} controls controlsList="nodownload" /> : <iframe src={player} title={lesson.title} allow="accelerometer; autoplay; encrypted-media; picture-in-picture" allowFullScreen />}</div> : <div className="ak-learning__pending"><strong>Video coming soon</strong><p>Amanda is preparing this lesson. Progress tracking is already active.</p></div>}
         {lesson.notes ? <div className="ak-learning__notes"><h4>Lesson notes</h4><p>{lesson.notes}</p></div> : null}
         {lesson.resourceUrl ? <a className="ep-btn ep-btn-secondary" href={lesson.resourceUrl} target="_blank" rel="noopener noreferrer">Open lesson resource</a> : null}
-        {released && !isAdmin ? <button className="ep-btn" type="button" onClick={() => void saveProgress({ completedLessons: progress.completedLessons.includes(lesson.title) ? progress.completedLessons.filter((item) => item !== lesson.title) : [...progress.completedLessons, lesson.title] })}>{progress.completedLessons.includes(lesson.title) ? 'Mark as incomplete' : 'Mark lesson complete'}</button> : null}
-        {isAdmin ? <div className="ak-learning__editor"><h4>Lesson setup</h4><label><span>Video link</span><input value={lesson.videoUrl} onChange={(e) => updateLesson({ videoUrl: e.target.value })} placeholder="YouTube, Vimeo, MP4 or WebM link" /></label><label><span>Lesson notes</span><textarea value={lesson.notes} onChange={(e) => updateLesson({ notes: e.target.value })} placeholder="Summary or directions" /></label><label><span>Resource link</span><input value={lesson.resourceUrl} onChange={(e) => updateLesson({ resourceUrl: e.target.value })} placeholder="Worksheet or supporting link" /></label><button className="ep-btn" type="button" onClick={() => void saveContent()}>Save course</button>{status ? <p>{status}</p> : null}</div> : null}
+        {released && !isAdmin && !previewAsLearner ? <button className="ep-btn" type="button" onClick={() => void saveProgress({ completedLessons: progress.completedLessons.includes(lesson.title) ? progress.completedLessons.filter((item) => item !== lesson.title) : [...progress.completedLessons, lesson.title] })}>{progress.completedLessons.includes(lesson.title) ? 'Mark as incomplete' : 'Mark lesson complete'}</button> : null}
+        {isAdmin && !previewAsLearner ? <div className="ak-learning__editor"><h4>Lesson setup</h4><label><span>Video link</span><input value={lesson.videoUrl} onChange={(e) => updateLesson({ videoUrl: e.target.value })} placeholder="YouTube, Vimeo, MP4 or WebM link" /></label><label><span>Lesson notes</span><textarea value={lesson.notes} onChange={(e) => updateLesson({ notes: e.target.value })} placeholder="Summary or directions" /></label><label><span>Resource link</span><input value={lesson.resourceUrl} onChange={(e) => updateLesson({ resourceUrl: e.target.value })} placeholder="Worksheet or supporting link" /></label><button className="ep-btn" type="button" onClick={() => void saveContent()}>Save course</button>{status ? <p>{status}</p> : null}</div> : null}
       </article>
     </div>
     {courseResources.length ? <section className="ak-learning__materials" aria-labelledby="course-materials-heading">
       <div><p className="ak-learning__eyebrow">Private course library</p><h3 id="course-materials-heading">Course materials</h3><p>Open or download the resources included with your certification program.</p></div>
       <div className="ak-learning__material-grid">{courseResources.map((resource) => <article key={resource.id} className="ak-learning__material-card"><span>{resource.fileType}</span><h4>{resource.title}</h4><p>{resource.description}</p><a className="ep-btn ep-btn-secondary" href={`/api/portal/amanda/resources/${resource.id}`} target="_blank" rel="noopener noreferrer">{resource.fileType === 'DOCX' ? 'Download resource' : 'Open resource'}</a></article>)}</div>
     </section> : null}
-    {!isAdmin ? <section className="ak-learning__requirements"><h3>Completion requirements</h3><p>Case study, quiz and practical demonstration/evidence. Photos or video require proper client consent.</p><CertificationEvidence onSubmit={async evidence => { await saveProgress({ evidence }); }} /><p>{progress.certificateApprovedBy && progress.certificateIssuedAt ? `Certificate approved ${new Date(progress.certificateIssuedAt).toLocaleDateString()}.` : 'Final certification requires Amanda’s approval in the portal.'}</p>{progress.certificateApprovedBy && progress.certificateIssuedAt ? <a className="ep-btn" href={`/api/portal/amanda/certificate?courseId=${courseId}`}>Download certificate</a> : null}</section> : null}
+    {!isAdmin || previewAsLearner ? <section className="ak-learning__requirements"><h3>Completion requirements</h3><p>Case study, quiz and practical demonstration/evidence. Photos or video require proper client consent.</p>{previewAsLearner ? <p className="ep-module-card-note">Evidence upload and completion controls are disabled in admin preview.</p> : <CertificationEvidence onSubmit={async evidence => { await saveProgress({ evidence }); }} />}<p>{previewAsLearner ? 'Final certification requires Amanda’s approval in the portal.' : progress.certificateApprovedBy && progress.certificateIssuedAt ? `Certificate approved ${new Date(progress.certificateIssuedAt).toLocaleDateString()}.` : 'Final certification requires Amanda’s approval in the portal.'}</p>{!previewAsLearner && progress.certificateApprovedBy && progress.certificateIssuedAt ? <a className="ep-btn" href={`/api/portal/amanda/certificate?courseId=${courseId}`}>Download certificate</a> : null}</section> : null}
   </section>;
 }

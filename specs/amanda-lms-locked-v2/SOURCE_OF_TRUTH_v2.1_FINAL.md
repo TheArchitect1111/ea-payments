@@ -52,12 +52,13 @@ days mentorship") with exact wording above.
    Delete all instances of old BBL names. Use only this.
 
 
-6. COURSE ARCHITECTURE - 6b
-   Non-Surgical Tummy Sculpt & Tighten REMAINS a separate certification. Do not
-merge.
-   New/Changed Course Name: Clinical Fat Loss Injectables for Face & Body
+6. COURSE ARCHITECTURE - OWNER UPDATE OCT 7, 2026
+   Non-Surgical Tummy Sculpt & Tighten is RETIRED and must be deleted from the
+public page, course catalog, waitlist, portal menus and future builds.
+   Current course name: Clinical Fat Loss Injectables for Face & Body
 Contouring
-   These are two distinct certifications.
+   This is the only current fat-loss/body-contouring waitlist course. Do not restore
+the retired Tummy Sculpt course without a new Amanda approval.
 
 
 7. CERTIFICATION REQUIREMENTS
@@ -112,9 +113,6 @@ ROUTING TABLE
   Wood Therapy                        READY       YES               Immediate
                                                                     Unlock
 
-  Non-Surgical Tummy Sculpt &         Separate    Per its own       Per readiness
-  Tighten                             Cert        readiness
-
-  Clinical Fat Loss Injectables for   Separate    Per its own       Per readiness
-  Face & Body Contouring              Cert        readiness
+  Clinical Fat Loss Injectables for   WAITLIST    NO                No entitlement
+  Face & Body Contouring
 
