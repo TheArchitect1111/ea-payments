@@ -8,5 +8,6 @@ export async function GET(req: NextRequest, context:{params:Promise<{id:string}>
   if(!doc || !doc.private_storage_path.startsWith(`tb3-contracts/${auth.workspace}/`))throw new Tb3Error(404,'Document not found.');
   const file=await get(doc.private_storage_path,{access:'private',useCache:false});if(!file||file.statusCode!==200)throw new Tb3Error(404,'Document unavailable.');
   const name=doc.display_name.replace(/[^a-zA-Z0-9._-]/g,'_');
-  return new Response(file.stream,{headers:{'Content-Type':'application/pdf','Content-Disposition':`attachment; filename="${name}"`,'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff'}});
+  const disposition=req.nextUrl.searchParams.get('view')==='1'?'inline':'attachment';
+  return new Response(file.stream,{headers:{'Content-Type':'application/pdf','Content-Disposition':`${disposition}; filename="${name}"`,'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff'}});
 });}

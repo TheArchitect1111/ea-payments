@@ -2,6 +2,7 @@ import { createHmac } from 'node:crypto';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { guardPortalApi } from '@/lib/api/portal-route';
+import { guardAdminApi } from '@/lib/api/admin-route';
 import { findMembership } from '@/lib/memberships';
 import { getOrganizationById } from '@/lib/organizations';
 import { roleAtLeast, normalizeRole } from '@/lib/rbac';
@@ -14,18 +15,28 @@ export function workspace() {
   return TB3_PREVIEW_WORKSPACE;
 }
 export async function authorize(req: NextRequest, write = false) {
-  const auth = await guardPortalApi(req, {slug: TB3_PORTAL_SLUG});
-  if (!auth.ok) throw new Tb3Error(auth.status, auth.error);
-  if (!hasTb3Identity(auth.session)) throw new Tb3Error(403, 'Tarris organization access required.');
-  const [member, org] = await Promise.all([findMembership(auth.session.email!, TB3_ORGANIZATION_ID), getOrganizationById(TB3_ORGANIZATION_ID)]);
-  const minimum = write ? 'staff' : 'viewer';
-  if (!org || org.status !== 'Active' || org.portalSlug !== TB3_PORTAL_SLUG || !member || member.status !== 'active'
-    || !roleAtLeast(normalizeRole(member.role), minimum) || !roleAtLeast(normalizeRole(auth.session.role), minimum)) throw new Tb3Error(403, 'Active Tarris membership required.');
-  return {actor: auth.session.email!, workspace: workspace()};
+  const portal = await guardPortalApi(req, {slug: TB3_PORTAL_SLUG});
+  if (portal.ok && hasTb3Identity(portal.session)) {
+    const [member, org] = await Promise.all([findMembership(portal.session.email!, TB3_ORGANIZATION_ID), getOrganizationById(TB3_ORGANIZATION_ID)]);
+    const minimum = write ? 'staff' : 'viewer';
+    if (org?.status === 'Active' && org.portalSlug === TB3_PORTAL_SLUG && member?.status === 'active'
+      && roleAtLeast(normalizeRole(member.role), minimum) && roleAtLeast(normalizeRole(portal.session.role), minimum)) {
+      return {actor: portal.session.email!, workspace: workspace()};
+    }
+  }
+
+  const admin = await guardAdminApi(req);
+  if (admin.ok && roleAtLeast(normalizeRole(admin.user.role), 'admin')) {
+    return {actor: admin.user.email, workspace: workspace()};
+  }
+
+  if (portal.ok) throw new Tb3Error(403, 'Active Tarris membership required.');
+  if (admin.ok) throw new Tb3Error(403, 'EA admin access required.');
+  throw new Tb3Error(portal.status === 401 && admin.status === 401 ? 401 : 403, 'Private TB3 HQ access required.');
 }
 export async function db<T = unknown>(path: string, init: RequestInit = {}): Promise<T> {
   workspace();
-  const url = process.env.TB3_SUPABASE_URL?.trim().replace(/\/$/, '');
+  const url = (process.env.TB3_SUPABASE_URL?.trim() || process.env.PEOPLE_SUPABASE_URL?.trim() || 'https://dwygvwnjjaennksddniu.supabase.co').replace(/\/$/, '');
   const apiKey = process.env.PEOPLE_SUPABASE_API_KEY?.trim();
   const secret = process.env.PEOPLE_SUPABASE_JWT_SECRET?.trim();
   if (!url || !apiKey || !secret) throw new Tb3Error(503, 'Shared tracking connection is not configured. Please contact the team.');

@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import { HqWorkspaceProvider, useHq, HqDialog, ModuleActions, ModuleTools, ProactiveEva, HqFocus, Upcoming, OpportunitySummary, OpportunityPipeline, EarningsValue, EarningsBreakdown, DocumentVault, OpportunityInbox, CalendarModule, EvaPanel, EvaFab, EvaCommandBar } from "./hq-workspace";
 
-type AssetCategory = "Athlete" | "Academics" | "Brand" | "Community" | "Future";
+type AssetCategory = "Athlete" | "Academics" | "Brand" | "Community" | "Future" | "Training";
 type OfficialAsset = { filename: string; label: string; category: AssetCategory; alt: string };
 
 const officialAssets: OfficialAsset[] = [
@@ -26,7 +26,9 @@ const officialAssets: OfficialAsset[] = [
   { filename: "OFFICIAL_00_HERO_TB3_MORE_THAN_A_GAME.png", label: "TB3 · MORE THAN A GAME", category: "Future", alt: "TB3 More Than a Game hero graphic" },
 ];
 
-const filterOptions = ["All", "Athlete", "Academics", "Brand", "Community", "Future"] as const;
+const trainingAssets = new Set(["OFFICIAL_02_BENCH_YELLOW_KOBE.png", "OFFICIAL_06_CABLE_MACHINE.png", "OFFICIAL_07_FILM_TABLET.png"]);
+const filterOptions = ["All", "Athlete", "Academics", "Brand", "Community", "Future", "Training"] as const;
+const assetMatchesCategory = (filename: string, primary: AssetCategory, category: (typeof filterOptions)[number]) => category === "All" || primary === category || (category === "Training" && trainingAssets.has(filename));
 
 function PortalImage({
   id,
@@ -94,9 +96,9 @@ function TarrisHqContent() {
   useEffect(()=>{const root=rootRef.current;if(!root)return;const names:Record<string,string>={"hq-home":"Home","my-journey-module":"My Journey","academics-module":"Academics","training-module":"Training","nil-brand-module":"NIL & Brand","opportunities-module":"Opportunities","community-module":"Community","calendar-module":"Calendar","media-library":"Media Library"};const observer=new IntersectionObserver(entries=>{const visible=entries.filter(e=>e.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio);if(visible[0])setModule(names[visible[0].target.id]);},{root,rootMargin:"-10% 0px -50% 0px",threshold:0});Object.keys(names).forEach(id=>{const node=document.getElementById(id);if(node)observer.observe(node);});return()=>observer.disconnect();},[setModule]);
   const filteredAssets = useMemo(() => {
     const query = search.trim().toLowerCase();
-    return officialAssets.filter(({ label, category }) => {
-      const categoryMatches = activeFilter === "All" || category === activeFilter;
-      const queryMatches = !query || (label + " " + category).toLowerCase().includes(query);
+    return officialAssets.filter(({ filename, label, category }) => {
+      const categoryMatches = assetMatchesCategory(filename, category, activeFilter);
+      const queryMatches = !query || (label + " " + category + (trainingAssets.has(filename) ? " training" : "")).toLowerCase().includes(query);
       return categoryMatches && queryMatches;
     });
   }, [search, activeFilter]);
@@ -270,7 +272,7 @@ function TarrisHqContent() {
         <CalendarModule />
         <section id="media-library" aria-labelledby="vault-title" className="mt-6 scroll-mt-6 rounded-2xl border border-white/10 bg-[#111111] p-5 sm:p-7">
           <div className="flex items-start justify-between gap-4"><div><p className="text-[10px] tracking-[0.22em] text-[#C41E3A]">TB3 HQ · MEDIA</p><h2 id="vault-title" className="mt-2 text-2xl font-black">BRAND ASSETS / Click to pull</h2><p className="mt-2 text-sm leading-6 text-white/65">Official high-resolution library. Click View Asset to load.</p></div><details id="vault-tooltip" className="relative"><summary aria-label="How vault works" className="grid h-9 w-9 cursor-pointer list-none place-items-center rounded-full border border-white/30 text-sm font-bold">i</summary><p className="absolute right-0 z-20 mt-2 w-64 rounded-xl border border-white/15 bg-[#202020] p-4 text-xs leading-5 text-white/75">Click View Asset to pull the original image. These are the approved assets used on the public site. Vault previews do not auto-load.</p></details></div>
-          <div className="mt-5 flex flex-col gap-3"><label><span className="sr-only">Search assets</span><input id="asset-search" type="search" value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search assets..." className="w-full rounded-xl border border-white/15 bg-[#080808] px-4 py-3 text-sm text-white" /></label><div id="asset-filter" aria-label="Filter assets" className="flex flex-wrap gap-2">{filterOptions.map(category=><button key={category} type="button" aria-pressed={activeFilter===category} onClick={()=>setActiveFilter(category)} className={"rounded-full border px-3 py-2 text-[10px] font-bold uppercase tracking-wider "+(activeFilter===category?"border-[#C41E3A] bg-[#C41E3A] text-white":"border-white/15 bg-white/5 text-white/70")}>{category} {category==="All"?officialAssets.length:officialAssets.filter(asset=>asset.category===category).length}</button>)}</div></div>
+          <div className="mt-5 flex flex-col gap-3"><label><span className="sr-only">Search assets</span><input id="asset-search" type="search" value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search assets..." className="w-full rounded-xl border border-white/15 bg-[#080808] px-4 py-3 text-sm text-white" /></label><div id="asset-filter" aria-label="Filter assets" className="flex flex-wrap gap-2">{filterOptions.map(category=><button key={category} type="button" aria-pressed={activeFilter===category} onClick={()=>setActiveFilter(category)} className={"rounded-full border px-3 py-2 text-[10px] font-bold uppercase tracking-wider "+(activeFilter===category?"border-[#C41E3A] bg-[#C41E3A] text-white":"border-white/15 bg-white/5 text-white/70")}>{category} {officialAssets.filter(asset=>assetMatchesCategory(asset.filename,asset.category,category)).length}</button>)}</div></div>
           <div id="asset-grid" className="mt-5 grid gap-4 sm:grid-cols-2 2xl:grid-cols-4">{filteredAssets.map(asset=><article key={asset.filename} className="flex min-h-[220px] flex-col rounded-xl border border-[#E5E5E5] bg-[#F5F5F0] p-4 text-[#111]"><svg aria-hidden="true" viewBox="0 0 24 24" className="h-12 w-12 text-[#999]" fill="none" stroke="currentColor"><path d="M3 3h18v18H3V3m1 16 6-7 4 4 3-3 4 6M8 8h.01"/></svg><h3 className="mt-3 text-sm font-black uppercase">{asset.label}</h3><span className="mt-2 w-fit rounded-full bg-[#E5E5E5] px-3 py-1 text-[10px] font-bold uppercase">{asset.category}</span><p className="mt-3 text-xs text-[#666]">Click to view high-res</p><button type="button" onClick={()=>{setCopyNotice("");setSelectedAsset(asset);}} className="mt-4 w-fit rounded-lg bg-[#C41E3A] px-4 py-2 text-xs font-bold text-white" aria-label={"View Asset: "+asset.label}>View Asset →</button></article>)}</div>
           {!filteredAssets.length&&<p className="mt-5 text-sm text-white/60">No matching approved assets.</p>}
         </section>
