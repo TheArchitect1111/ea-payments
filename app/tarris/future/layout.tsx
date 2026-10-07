@@ -35,7 +35,9 @@ async function hasApplicationAccess() {
 export default async function TarrisFutureLayout({ children }: { children: ReactNode }) {
   const cookieStore = await cookies();
   const verifiedPreviewShare =
-    process.env.VERCEL_ENV === 'preview' && Boolean(cookieStore.get('_vercel_jwt')?.value);
+    process.env.VERCEL_ENV === 'preview' &&
+    process.env.VERCEL_GIT_COMMIT_REF === 'codex/tb3-hq-remake-20261005' &&
+    Boolean(cookieStore.get('_vercel_jwt')?.value);
 
   if (!verifiedPreviewShare && !(await hasApplicationAccess())) {
     redirect('/tarris?hq=private');
