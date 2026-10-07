@@ -23,7 +23,6 @@ const officialAssets: OfficialAsset[] = [
   { filename: "OFFICIAL_12_KIDS_ART.png", label: "KIDS · ART", category: "Community", alt: "Children creating art together" },
   { filename: "OFFICIAL_05_TUNNEL_BOUIE_4_BACK.png", label: "TUNNEL · BOUIE 4", category: "Future", alt: "Tarris in the tunnel with BOUIE and number 4 visible" },
   { filename: "OFFICIAL_15_PODIUM_SPEAKING.png", label: "PODIUM · SPEAKING", category: "Future", alt: "Tarris speaking at a podium" },
-  { filename: "OFFICIAL_00_HERO_TB3_MORE_THAN_A_GAME.png", label: "TB3 · MORE THAN A GAME", category: "Future", alt: "TB3 More Than a Game hero graphic" },
 ];
 
 const trainingAssets = new Set(["OFFICIAL_02_BENCH_YELLOW_KOBE.png", "OFFICIAL_06_CABLE_MACHINE.png", "OFFICIAL_07_FILM_TABLET.png"]);
