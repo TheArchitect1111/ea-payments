@@ -265,15 +265,6 @@ export const AMANDA_OFFERS = [
     courseId: 'wood-therapy-certification',
     delivery: ['in-person'],
   },
-  {
-    id: 'non-surgical-tummy-tuck-training',
-    courseId: 'non-surgical-tummy-tuck-training',
-    name: 'Non-Surgical Tummy Sculpt & Tighten',
-    priceCad: 2497,
-    audience: 'practitioner-trainee',
-    delivery: ['in-person'],
-    requiresAuthorizedMedicalProfessionalForInjections: true,
-  },
 ] as const;
 
 export const AMANDA_MEMBERSHIPS = [
@@ -424,14 +415,6 @@ export const AMANDA_COURSES = [
       'Client Comfort and Aftercare',
       'Practical Assessment',
     ],
-  },
-  {
-    id: 'non-surgical-tummy-tuck-training',
-    title: 'Non-Surgical Tummy Sculpt & Tighten',
-    audience: 'student-trainee',
-    certificateTitle: 'Non-Surgical Tummy Sculpt & Tighten',
-    practicalRequirements: ['case-study', 'quiz', 'practical-demonstration'],
-    lessons: [],
   },
   {
     id: 'clinical-fat-loss-injectables',
