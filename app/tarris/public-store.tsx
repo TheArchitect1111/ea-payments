@@ -46,20 +46,23 @@ function setTilt(event: MouseEvent<HTMLElement>) {
 
 export function PublicTb3Store() {
   const { stats, loaded } = usePublicStats();
+  const [origin, setOrigin] = useState("");
+  useEffect(() => setOrigin(window.location.origin), []);
   return <>
     <section id="merch" aria-labelledby="store-title" className="scroll-mt-5 border-b border-black/20 py-10">
       <div className="mb-6 flex flex-wrap items-end justify-between gap-4"><div><p className="text-[9px] tracking-[0.25em] text-[#A51C30]">TB3 STORE</p><h2 id="store-title" className="mt-2 text-3xl font-black tracking-tight">WEAR THE VISION.</h2></div><p className="text-xs text-black/60">Drop 01 · Join the waitlist</p></div>
       <div className="grid grid-cols-2 gap-4 md:grid-cols-5 md:gap-6">
         {TB3_PRODUCTS.map((product) => {
           const count = stats.demand.find((item) => item.id === product.id)?.count || 0;
-          const qrTarget = `https://tb3fundamentals.com/tarris?product=${product.id}`;
-          const qr = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(qrTarget)}`;
+          const productPath = `/tarris?product=${encodeURIComponent(product.id)}`;
+          const qrTarget = origin ? new URL(productPath, origin).toString() : "";
+          const qr = qrTarget ? `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(qrTarget)}` : "";
           return <article key={product.id} onMouseMove={setTilt} onMouseLeave={(event) => { event.currentTarget.style.transform = ""; }} className="group relative flex min-w-0 flex-col gap-2 rounded-xl border border-black/10 bg-white p-2 transition-transform duration-300 hover:scale-[1.02] hover:shadow-[0_0_20px_rgba(165,0,20,0.3)]">
             <span className="absolute right-3 top-3 z-10 rounded bg-[#A51C30] px-2 py-1 text-[8px] font-bold uppercase tracking-wider text-white">Drop 01 — 100</span>
             <img src={product.image} alt={product.name} className="aspect-square w-full bg-[#f0f0f0] object-contain" loading="lazy" />
             <p className="text-[11px] font-bold uppercase tracking-widest">{product.name}</p>
             <EA_Form tenant="tarris" formType="merch-waitlist" productId={product.id} cta="Join Waitlist" placeholder="Email for Drop 01" />
-            <div className="flex items-center justify-between gap-2"><a href={qrTarget} className="text-[9px] font-semibold text-[#A51C30] underline underline-offset-2">Open product link</a><a href={qrTarget} aria-label={`Open ${product.name} waitlist link`}><img src={qr} alt={`QR code for ${product.name}`} width="48" height="48" loading="lazy" className="h-12 w-12 border border-black/10 bg-white p-1" /></a></div>
+            <div className="flex items-center justify-between gap-2"><a href={productPath} className="text-[9px] font-semibold text-[#A51C30] underline underline-offset-2">Open product link</a>{qrTarget ? <a href={productPath} aria-label={`Open ${product.name} waitlist link`}><img src={qr} alt={`QR code for ${product.name}`} width="48" height="48" loading="lazy" className="h-12 w-12 border border-black/10 bg-white p-1" /></a> : <span className="h-12 w-12" aria-hidden="true" />}</div>
             <p className="border-t border-black/10 pt-2 text-[9px] font-semibold text-black/60">{loaded ? count : "—"} want this — Drop 01</p>
           </article>;
         })}

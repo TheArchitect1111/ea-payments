@@ -71,6 +71,8 @@ export default async function AthletesShowcasePage() {
 
       <section><h2 className="text-2xl font-black sm:text-3xl">10 Minutes to Yours</h2><ol className="mt-5 space-y-3">{["Copy /app/tarris to /app/[your-name]", "Replace 10 merch PNGs + 16 photos + email", "Deploy — portal auto-creates for new tenant"].map((step, index) => <li key={step} className="flex items-start gap-4 rounded-xl border border-white/10 bg-[#141414] p-4"><span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[#A51C30] text-sm font-black">{index + 1}</span><span className="pt-1 text-sm leading-6">{step}</span></li>)}</ol><p className="mt-4 text-xs text-white/50">Onboarding guide: app/tarris/ONBOARDING.md</p></section>
 
+      <nav aria-label="TB3 demo links" className="flex flex-wrap gap-3"><a href="/tarris" className="rounded-lg border border-white/20 px-4 py-3 text-xs font-bold hover:bg-white/10">Open TB3 public page →</a><a href="/tarris/future" className="rounded-lg border border-white/20 px-4 py-3 text-xs font-bold hover:bg-white/10">Open TB3 family portal →</a></nav>
+
       <section className="rounded-3xl border border-[#C41E3A]/50 bg-gradient-to-r from-[#2b0b11] to-[#121212] p-6 sm:flex sm:items-center sm:justify-between sm:gap-8 sm:p-9"><div><p className="text-[10px] font-bold tracking-[0.22em] text-[#E2A8B2]">BUILD YOUR OWN</p><h2 className="mt-2 text-2xl font-black">Put your story in the center.</h2></div><a href="mailto:info@tb3fundamentals.com?subject=I%20want%20my%20Future%20Portal%20like%20TB3" className="mt-5 inline-flex rounded-lg bg-[#A51C30] px-5 py-4 text-center text-sm font-black text-white hover:bg-[#bd2037] sm:mt-0">Get Your Portal Like TB3 — info@tb3fundamentals.com</a></section>
     </div>
   </main>;

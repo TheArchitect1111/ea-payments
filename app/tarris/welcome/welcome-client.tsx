@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const wallpapers = [
   ["/images/tb3-official/OFFICIAL_00_HERO_TB3_MORE_THAN_A_GAME.png", "TB3 Wallpaper 1"],
@@ -11,7 +11,9 @@ export default function WelcomePage({ member: memberParam, code: codeParam }: { 
   const member = Math.max(1, Number.parseInt(memberParam || "1", 10) || 1);
   const code = codeParam || `TB3-IC-${String(member).padStart(3, "0")}`;
   const [copied, setCopied] = useState(false);
-  const shareText = `I'm #${member} in TB3 Inner Circle — https://tb3.online/tarris`;
+  const [publicUrl, setPublicUrl] = useState("/tarris");
+  useEffect(() => setPublicUrl(new URL("/tarris", window.location.origin).toString()), []);
+  const shareText = `I'm #${member} in TB3 Inner Circle — ${publicUrl}`;
   async function copyCode() {
     try { await navigator.clipboard.writeText(code); setCopied(true); window.setTimeout(() => setCopied(false), 1600); } catch { setCopied(false); }
   }
