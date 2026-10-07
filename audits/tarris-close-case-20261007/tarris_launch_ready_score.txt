@@ -1,0 +1,6 @@
+Score: 62/100
+v2.1: 36/40
+v2.2 Wiring: 20/40
+Clean/Auth/Build: 6/20
+Overall Status: BLOCKED
+Recommendation: DO NOT CLOSE CASE YET
