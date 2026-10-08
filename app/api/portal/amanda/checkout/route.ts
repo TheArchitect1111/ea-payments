@@ -86,6 +86,7 @@ export async function POST(req: NextRequest) {
   if ('courseId' in offer && !amandaCourseReady(offer.courseId)) return NextResponse.json({ error: 'This course is waitlist only.' }, { status: 409 });
 
   const isTest = body.paymentOption === 'test';
+  if (isTest && !('courseId' in offer)) return NextResponse.json({ error: 'Private test checkout is for READY courses only.' }, { status: 409 });
   if (isTest && !(await canUseTestCheckout(auth.session.role, tenant.portalSlug, clientEmail))) {
     return NextResponse.json({ error: 'Private test checkout is restricted to Amanda administrators.' }, { status: 403 });
   }
@@ -118,7 +119,7 @@ export async function POST(req: NextRequest) {
         product_data: {
           name: `${offer.name}${paymentLabel}`,
           description: isTest
-            ? `Private Amanda Catherine workflow test. Normal price CAD $${offer.priceCad}.`
+            ? `Private Amanda Catherine workflow test: access expires after 72 hours with no automatic rebill. Normal price CAD ${offer.priceCad}.`
             : body.paymentOption === 'deposit'
               ? `Deposit toward CAD $${offer.priceCad}`
               : 'courseId' in offer ? `Practitioner kit included in tuition. ${AMANDA_SUPPORT_WORDING}` : undefined,
