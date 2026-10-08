@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import BlueprintBrickPanel from '@/app/components/blueprint/BlueprintBrickPanel';
 import { getBlueprintRecord, publicBlueprint } from '@/lib/blueprint-store';
-import { canAccessBlueprint } from '@/lib/blueprint-access';
+import { canAccessBlueprint } from '@/lib/blueprint-ownership';
 import { requirePortalSession } from '@/lib/auth/resolve-portal-session';
 import { findMembership } from '@/lib/memberships';
 
