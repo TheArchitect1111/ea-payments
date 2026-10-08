@@ -14,6 +14,9 @@ export type BlueprintVaultFile = {
 export type BlueprintRecord = {
   schemaVersion: 1;
   clientId: string;
+  /** Trusted server-assigned tenant binding; absent means inaccessible until claimed. */
+  ownerOrgId?: string;
+  ownerPortalSlug?: string;
   alias?: string;
   policy: Record<string, any>;
   summary: Record<string, any>;
@@ -116,6 +119,7 @@ export async function createBlueprintRecord(input: {
   contactChoice?: string;
   contactValue?: string;
   alias?: string;
+  owner?: { orgId: string; portalSlug: string };
 }) {
   const clientId = makeClientId(input.policy);
   const url = blueprintUrl(clientId);
@@ -124,10 +128,12 @@ export async function createBlueprintRecord(input: {
     .replace(/https:\/\/cc\.efficiencyarchitects\.online\/blueprint\/preview/g, url)
     .replace(/https:\/\/cc\.efficiencyarchitects\.online\/blueprint\/[A-Za-z0-9._-]+/g, url);
   const now = new Date().toISOString();
-  const alias = input.alias ? safeBlueprintKey(input.alias) : undefined;
+  if (input.owner && (!input.owner.orgId || input.owner.orgId.startsWith('org_') || !input.owner.portalSlug)) throw new Error('Invalid blueprint owner.');
+  const alias = input.owner && input.alias === input.owner.portalSlug ? safeBlueprintKey(input.alias) : undefined;
   const record: BlueprintRecord = {
     schemaVersion: 1,
     clientId,
+    ...(input.owner ? { ownerOrgId: input.owner.orgId, ownerPortalSlug: input.owner.portalSlug } : {}),
     ...(alias ? { alias } : {}),
     policy: input.policy,
     summary: { ...incomingSummary, link: url, text },
@@ -140,7 +146,7 @@ export async function createBlueprintRecord(input: {
     updatedAt: now,
   };
   await writeJson(recordPath(clientId), record);
-  if (alias) await bindBlueprintAlias(alias, clientId);
+  if (alias && input.owner) await bindBlueprintAlias(alias, clientId, input.owner);
   return record;
 }
 
@@ -156,11 +162,32 @@ export async function saveBlueprintRecord(record: BlueprintRecord) {
   return record;
 }
 
-export async function bindBlueprintAlias(alias: string, clientId: string) {
+/** Server-owned immutable tenant pointer. Rebinding requires a separately reviewed migration. */
+export async function bindBlueprintAlias(
+  alias: string,
+  clientId: string,
+  owner: { orgId: string; portalSlug: string },
+) {
   const safeAlias = safeBlueprintKey(alias);
   const safeId = safeBlueprintKey(clientId);
-  if (!safeAlias || !safeId) throw new Error('Invalid blueprint alias.');
-  await writeJson(aliasPath(safeAlias), { alias: safeAlias, clientId: safeId, updatedAt: new Date().toISOString() });
+  if (!safeAlias || !safeId || safeAlias !== owner.portalSlug || !owner.orgId || owner.orgId.startsWith('org_')) {
+    throw new Error('Invalid or untrusted blueprint alias.');
+  }
+  const record = await getBlueprintRecord(safeId);
+  if (!record || record.ownerOrgId !== owner.orgId || record.ownerPortalSlug !== owner.portalSlug) {
+    throw new Error('Blueprint alias owner mismatch.');
+  }
+  const existing = await readJson<{ clientId?: string; ownerOrgId?: string }>(aliasPath(safeAlias));
+  if (existing) {
+    if (existing.clientId === safeId && existing.ownerOrgId === owner.orgId) return;
+    throw new Error('Blueprint alias is immutable; reassignment denied.');
+  }
+  // Provider rejects a competing create, even if another request races this read.
+  await put(aliasPath(safeAlias), Buffer.from(JSON.stringify({
+    alias: safeAlias, clientId: safeId, ownerOrgId: owner.orgId, updatedAt: new Date().toISOString(),
+  }), 'utf8'), {
+    access: 'private', contentType: 'application/json', addRandomSuffix: false, allowOverwrite: false,
+  });
 }
 
 export async function getBlueprintByAlias(alias: string) {
