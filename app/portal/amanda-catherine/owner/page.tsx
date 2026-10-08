@@ -6,6 +6,7 @@ const quick=[
  ['◫','Book Appointment','/portal/amanda-catherine/owner/appointments'],
  ['◍','Review Client Intake','/portal/amanda-catherine/owner/clients'],
  ['▭','Review Certifications','/portal/amanda-catherine/owner/academy'],
+ ['＄','Test course enrollment · CAD $1','/portal/amanda-catherine/billing?showTest=1'],
  ['⧉','View Orders','/portal/amanda-catherine/owner/practitioner-kit'],
  ['◫','Send Message','/portal/amanda-catherine/messaging'],
  ['↗','Open Marketing Kit','/portal/amanda-catherine/owner/marketing']

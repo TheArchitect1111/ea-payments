@@ -3,8 +3,9 @@ import { findAmandaWaitlistInterest } from '@/lib/amanda-catherine/waitlist-inte
 import { saveAmandaWaitlist, notifyAmandaWaitlist, updateAmandaWaitlistNotification } from '@/lib/amanda-catherine/waitlist';
 import { checkRateLimit } from '@/lib/ai/rate-limit';
 import { registry, create } from '@/lib/amanda-catherine/registry';
+import { isAllowedAmandaOrigin } from '@/lib/amanda-catherine/request-origin';
 export async function POST(req: NextRequest) {
-  if (req.headers.get('origin') !== req.nextUrl.origin) return NextResponse.json({ error: 'Open the waitlist from Amanda’s website.' }, { status: 403 });
+  if (!isAllowedAmandaOrigin(req)) return NextResponse.json({ error: 'Open the waitlist from Amanda’s website.' }, { status: 403 });
   const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
   if (!checkRateLimit(`amanda-waitlist:${ip}`, 6, 60000).ok) return NextResponse.json({ error: 'Please wait one minute.' }, { status: 429 });
   const body = await req.json().catch(() => ({}));
