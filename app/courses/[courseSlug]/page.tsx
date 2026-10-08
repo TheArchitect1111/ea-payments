@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import AmandaWarmLetter from '@/components/amanda/AmandaWarmLetter';
 import { AMANDA_COURSES, AMANDA_SELF_ENROLLMENT_COURSES } from '@/lib/amanda-catherine/config';
 import { amandaCourseReady, AMANDA_SUPPORT_WORDING } from '@/lib/amanda-catherine/lms-policy';
 import WaitlistForm from '@/app/portal/amanda-catherine/waitlist/WaitlistForm';
@@ -10,7 +11,7 @@ export default async function Page({ params }: { params: Promise<{ courseSlug: s
   if (!course) notFound();
   const offer = AMANDA_SELF_ENROLLMENT_COURSES.find(c => c.courseId === course.id);
   if (amandaCourseReady(course.id) && resourcesForAmandaCourse(course.id).length === 0) notFound();
-  return <main className="min-h-screen bg-[#f7f1e8] px-5 py-12 text-[#17130f]"><section className="mx-auto max-w-3xl"><h1 className="font-serif text-4xl">{course.title}</h1>
+  return <main className="min-h-screen bg-[#f7f1e8] px-5 py-12 text-[#17130f]"><section className="mx-auto max-w-3xl"><AmandaWarmLetter compact/><h1 className="font-serif text-4xl">{course.title}</h1>
     {course.id === 'clinical-fat-loss-injectables' ? <section id="waitlist"><h2>Join Waitlist</h2><WaitlistForm courseId={course.id} /></section> : amandaCourseReady(course.id) && offer ? <><p>{AMANDA_SUPPORT_WORDING}</p><p>Practitioner kit included in tuition. Pickup and shipping are FREE.</p><AmandaEnrollmentForm initialCourseId={course.id} courses={[{ ...offer, delivery: [...offer.delivery] }]} /></> : notFound()}
   </section></main>;
 }

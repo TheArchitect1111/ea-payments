@@ -26,9 +26,10 @@ test.describe('Amanda public production checks (no credentials and no payments)'
     await expect(kit).toBeVisible();
     await expect(kit).toHaveAttribute('src', /ICDExpertExperienceKit/);
     const publicCta = page.getByRole('link', { name: /Shop RIMAN Canada/i });
-    await expect(publicCta).toHaveAttribute('href', 'https://riman.com/amandacatherine/en-CA/home');
+    if (process.env.AMANDA_VERIFY_DEPLOYED === 'true') await expect(publicCta).toHaveAttribute('href', 'https://mall.riman.com/amandacatherine/home?country=CA&lang=en-CA');
+    else await expect(publicCta).toHaveAttribute('href', 'https://riman.com/amandacatherine/en-CA/home');
     const owner = readFileSync('app/portal/amanda-catherine/owner/[section]/page.tsx', 'utf8');
-    expect(owner).toContain("riman: 'https://riman.com/amandacatherine/en-CA/home'");
+    expect(owner).toContain("riman: 'https://mall.riman.com/amandacatherine/home?country=CA&lang=en-CA'");
   });
 
   test('Amanda-branded returning learner login renders', async ({ page }) => {
