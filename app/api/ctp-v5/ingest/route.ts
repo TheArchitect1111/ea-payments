@@ -1,5 +1,9 @@
 import { createBlueprintRecord, blueprintUrl, publicBlueprint, saveBlueprintRecord } from '@/lib/blueprint-store';
 import { buildCtpV5Policy } from '@/lib/ctp-v5-policy';
+import { requirePortalSessionFromRequest } from '@/lib/auth/resolve-portal-session';
+import { findMembership } from '@/lib/memberships';
+import { normalizeRole, roleAtLeast } from '@/lib/rbac';
+import type { NextRequest } from 'next/server';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -76,7 +80,7 @@ export async function OPTIONS(request: Request) {
   return new Response(null, { status: c.allowed ? 204 : 403, headers: c.headers });
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   const c = cors(request.headers.get('origin'));
   if (!c.allowed) return Response.json({ ok: false, error: 'Origin not allowed.' }, { status: 403, headers: c.headers });
   try {
@@ -93,14 +97,24 @@ export async function POST(request: Request) {
     }
     intake.contactChoice = body.contactChoice ?? intake.contactChoice ?? '';
     intake.contactValue = body.contactValue ?? intake.contactValue ?? '';
-    intake.portalAlias = body.portalAlias ?? intake.portalAlias ?? '';
+    // Portal alias is never accepted from untrusted CTP answers or request JSON.
+    delete intake.portalAlias;
+    const actor = await requirePortalSessionFromRequest(request);
+    const membership = actor?.email && actor.orgId
+      ? await findMembership(actor.email, actor.orgId) : null;
+    const canBind = Boolean(actor?.slug && actor.orgId && !actor.orgId.startsWith('org_') &&
+      membership?.status === 'active' && membership.organizationId === actor.orgId &&
+      membership.userEmail.toLowerCase() === actor.email?.toLowerCase() &&
+      roleAtLeast(normalizeRole(actor.role), 'admin') && roleAtLeast(normalizeRole(membership.role), 'admin'));
+    const owner = canBind && actor?.orgId && actor.slug
+      ? { orgId: actor.orgId, portalSlug: actor.slug } : undefined;
     const policy = buildCtpV5Policy(intake);
     const record = await createBlueprintRecord({
       policy,
       summary: body.summary,
       contactChoice: intake.contactChoice,
       contactValue: intake.contactValue,
-      alias: intake.portalAlias,
+      ...(owner ? { alias: owner.portalSlug, owner } : {}),
     });
     record.delivery = await deliver(record);
     await saveBlueprintRecord(record);
