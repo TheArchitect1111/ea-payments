@@ -65,14 +65,14 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     const blob = await put(path, bytes, { access: 'private', contentType: type, addRandomSuffix: true });
     const stored = await get(blob.pathname, { access: 'private', useCache: false });
     if (!stored || stored.statusCode !== 200) throw new Error('Storage verification failed.');
-    const record = await appendBlueprintVaultFile(clientId, {
+    const savedRecord = await appendBlueprintVaultFile(clientId, {
       name: file.name,
       type,
       size: file.size,
       blobPath: blob.pathname,
       uploadedAt: new Date().toISOString(),
     });
-    return Response.json({ ok: true, files: record.vaultFiles, record: publicBlueprint(record) }, { headers: c.headers });
+    return Response.json({ ok: true, files: savedRecord.vaultFiles, record: publicBlueprint(savedRecord) }, { headers: c.headers });
   } catch (error) {
     return Response.json({ ok: false, error: error instanceof Error ? error.message : 'Upload failed.' }, { status: 500, headers: c.headers });
   }
