@@ -18,6 +18,7 @@ export type AmandaPaymentRecord = {
   paymentOption?: 'full' | 'deposit' | 'test'; amountPaidCad: number; currency: string;
   paymentStatus: string; stripeCustomerId?: string; stripeSubscriptionId?: string;
   subscriptionStatus?: string; customerConfirmationSentAt?: string; adminNotificationSentAt?: string;
+  isTestAccess?: boolean; testPaidAt?: string | null; expiresAt?: string | null;
   recordedAt: string; updatedAt: string;
 };
 
@@ -54,6 +55,9 @@ export async function fulfillAmandaCheckout(session: Stripe.Checkout.Session, so
     if (!kit.ok) return { ok: false as const, error: kit.error || 'Kit fulfillment could not be recorded.' };
   }
   const id = recordId(session.id); const existing = await loadStudioRecord<AmandaPaymentRecord>('experience', id); const now = new Date().toISOString();
+  const isTestAccess = meta.paymentOption === 'test' && meta.privateTestCheckout === 'true' && Boolean(courseId);
+  const testPaidAt = isTestAccess ? new Date(session.created * 1000).toISOString() : null;
+  const expiresAt = isTestAccess ? new Date(session.created * 1000 + 72 * 60 * 60 * 1000).toISOString() : null;
   let record: AmandaPaymentRecord = {
     id, portalSlug, email, stripeSessionId: session.id, kind: membership ? 'membership' : 'offer', offerId: offer?.id,
     courseId,
@@ -62,6 +66,7 @@ export async function fulfillAmandaCheckout(session: Stripe.Checkout.Session, so
     amountPaidCad: (session.amount_total ?? 0) / 100, currency: String(session.currency || 'cad').toUpperCase(), paymentStatus: session.payment_status,
     stripeCustomerId: stringId(session.customer), stripeSubscriptionId: stringId(session.subscription), subscriptionStatus: membership ? 'active' : undefined,
     customerConfirmationSentAt: existing?.customerConfirmationSentAt, adminNotificationSentAt: existing?.adminNotificationSentAt,
+    isTestAccess, testPaidAt: existing?.testPaidAt ?? testPaidAt, expiresAt: existing?.expiresAt ?? expiresAt,
     recordedAt: existing?.recordedAt ?? now, updatedAt: now,
   };
   const label = membership?.name ?? offer!.name;
@@ -90,7 +95,7 @@ export async function fulfillAmandaCheckout(session: Stripe.Checkout.Session, so
   if (notificationStateChanged) { const notificationSave = await persistPaymentRecord(record, title); if (!notificationSave.ok) console.error('[amanda-payment] notification status persistence failed', notificationSave.error); }
 
   const audience: AmandaPortalAudience = membership ? 'member-community-participant' : offer?.id === 'lifeline-artist-business-launch' ? 'media-guest' : offer?.id.includes('training') || offer?.id.includes('certification') ? 'student-trainee' : 'client';
-  const access = await provisionAmandaClientAccess({ email, name: session.customer_details?.name || String(meta.clientName || ''), audience, amountPaidCad: record.amountPaidCad, transactionId, courseIds: record.courseId ? [record.courseId] : [] });
+  const access = await provisionAmandaClientAccess({ email, name: session.customer_details?.name || String(meta.clientName || ''), audience, amountPaidCad: record.amountPaidCad, transactionId, courseIds: record.courseId ? [record.courseId] : [], isTestAccess, testPaidAt: record.testPaidAt, expiresAt: record.expiresAt, stripeSessionId: session.id });
   if (!access.ok) {
     console.error('[amanda-payment] client portal access provisioning failed', access.error);
     await emitPulseEvent({ product: 'ea-platform', type: 'fulfillment.review_required', title: 'Amanda client access needs attention', detail: `${email} · ${access.error}`, priority: 'high', href: `/portal/${portalSlug}/deliveries`, tenantId: portalSlug, objectId: id });
