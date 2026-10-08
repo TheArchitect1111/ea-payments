@@ -80,7 +80,7 @@ export default async function Page({ params }: { params: Promise<{ section: stri
     clarity: '/portal/amanda-catherine/owner/advisory', marketing: '/portal/amanda-catherine/amplifi',
     insights: '/portal/amanda-catherine/reports', settings: '/portal/amanda-catherine/settings',
     eva: '/portal/amanda-catherine/updates#eva',
-    riman: 'https://mall.riman.com/amandacatherine/home?country=CA&lang=en-CA',
+    riman: 'https://riman.com/amandacatherine/en-CA/home',
     reviews: 'https://share.google/9Pw2JCYOXwcQeCDtY',
   };
   if (destinations[section]) redirect(destinations[section]);
