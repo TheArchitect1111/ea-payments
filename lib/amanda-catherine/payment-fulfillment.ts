@@ -1,4 +1,5 @@
 import { recordAmandaKitOrder } from './practitioner-kit-orders';
+import { amandaTrialFromStripeSession } from './test-access-rules';
 import { amandaCourseReady } from './lms-policy';
 import { createHash } from 'node:crypto';
 import type Stripe from 'stripe';
@@ -55,9 +56,10 @@ export async function fulfillAmandaCheckout(session: Stripe.Checkout.Session, so
     if (!kit.ok) return { ok: false as const, error: kit.error || 'Kit fulfillment could not be recorded.' };
   }
   const id = recordId(session.id); const existing = await loadStudioRecord<AmandaPaymentRecord>('experience', id); const now = new Date().toISOString();
-  const isTestAccess = meta.paymentOption === 'test' && meta.privateTestCheckout === 'true' && Boolean(courseId);
-  const testPaidAt = isTestAccess ? new Date(session.created * 1000).toISOString() : null;
-  const expiresAt = isTestAccess ? new Date(session.created * 1000 + 72 * 60 * 60 * 1000).toISOString() : null;
+  const trial = amandaTrialFromStripeSession(session, courseId);
+  const isTestAccess = Boolean(trial);
+  const testPaidAt = trial?.testPaidAt ?? null;
+  const expiresAt = trial?.expiresAt ?? null;
   let record: AmandaPaymentRecord = {
     id, portalSlug, email, stripeSessionId: session.id, kind: membership ? 'membership' : 'offer', offerId: offer?.id,
     courseId,

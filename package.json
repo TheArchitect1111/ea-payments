@@ -110,7 +110,9 @@
     "video:studio": "remotion studio video-factory/remotion/index.ts",
     "video:render": "node scripts/render-video-factory.mjs",
     "test:video-factory": "npx --yes tsx scripts/test-video-factory-schema.ts",
-    "test:ea-immersive-template": "node scripts/test-ea-immersive-template.mjs"
+    "test:ea-immersive-template": "node scripts/test-ea-immersive-template.mjs",
+    "test:amanda-dollar-e2e": "node --import tsx --test tests/amanda-dollar-test.test.ts",
+    "test:amanda-public": "playwright test --config=playwright.amanda.config.ts"
   },
   "dependencies": {
     "@clerk/nextjs": "^7.5.9",

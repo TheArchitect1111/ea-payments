@@ -14,6 +14,8 @@ import { loadStudioRecord, saveStudioRecord } from '@/lib/creative-studio/persis
 import { syntheticOrgId } from '@/lib/platform-store';
 import { invitedAmandaLearner } from './invited-learners';
 import { z } from 'zod';
+import { listStudioRecords } from '@/lib/creative-studio/persistence';
+import { amandaTrialExpired, resolveAmandaEntitlement, type AmandaCourseEntitlement } from './test-access-rules';
 
 const AMANDA_PORTAL_SLUG = 'amanda-catherine';
 
@@ -39,12 +41,13 @@ const AmandaAccessProfileSchema = z.object({
     testPaidAt: z.string().nullable(),
     expiresAt: z.string().nullable(),
     stripeSessionId: z.string().optional(),
+    status: z.enum(['active','expired']).optional(),
   })).optional(),
   updatedAt: z.string().min(1),
 });
 
 type AmandaAccessProfile = z.infer<typeof AmandaAccessProfileSchema>;
-type AmandaEntitlement = NonNullable<AmandaAccessProfile['entitlements']>[string];
+type AmandaEntitlement = AmandaCourseEntitlement;
 
 function accessProfileId(portalSlug: string, email: string) {
   return `amanda-access-${crypto.createHash('sha256').update(`${portalSlug}:${email.toLowerCase()}`).digest('hex').slice(0, 24)}`;
@@ -60,8 +63,7 @@ export async function getAmandaAssignedCourseIds(portalSlug: string, email: stri
   const stored = await loadStudioRecord<unknown>('experience', accessProfileId(portalSlug, email));
   const profile = AmandaAccessProfileSchema.safeParse(stored);
   return (profile.success ? profile.data.courseIds : [...(invitedAmandaLearner(email)?.courseIds || [])])
-    .filter((id) => amandaCourseReady(id) && (!profile.success || !profile.data.entitlements?.[id]?.expiresAt ||
-      Date.parse(profile.data.entitlements[id].expiresAt!) > Date.now()));
+    .filter((id) => amandaCourseReady(id) && (!profile.success || !amandaTrialExpired(profile.data.entitlements?.[id])));
 }
 
 /** Entitlement reads never write records and never restore expired test grants. */
@@ -70,7 +72,7 @@ export async function getAmandaCourseAccessDecision(portalSlug: string, email: s
   const parsed = AmandaAccessProfileSchema.safeParse(stored);
   const profile = parsed.success ? parsed.data : null;
   const grant = profile?.entitlements?.[courseId];
-  if (grant?.expiresAt && Date.parse(grant.expiresAt) <= Date.now()) {
+  if (amandaTrialExpired(grant)) {
     return { authorized: false as const, reason: 'TRIAL_EXPIRED' as const, expiresAt: grant.expiresAt, redirect: `/portal/amanda-catherine/expired?courseId=${encodeURIComponent(courseId)}` };
   }
   const assigned = profile ? profile.courseIds.includes(courseId) : Boolean(invitedAmandaLearner(email)?.courseIds?.includes(courseId));
@@ -208,15 +210,11 @@ export async function provisionAmandaClientAccess(input: {
   const entitlements: Record<string, AmandaEntitlement> = { ...(existingProfile?.entitlements || {}) };
   for (const id of input.courseIds || []) {
     const prior = entitlements[id];
-    if (input.isTestAccess) {
-      if (prior && !prior.isTestAccess && !prior.expiresAt) continue;
-      if (prior?.isTestAccess && prior.expiresAt) continue;
-      // Do not accidentally expire a grant created before explicit trial metadata existed.
-      if (priorCourseIds.includes(id) && !prior) continue;
-      entitlements[id] = { isTestAccess: true, testPaidAt: input.testPaidAt!, expiresAt: input.expiresAt!, stripeSessionId: input.stripeSessionId };
-    } else {
-      entitlements[id] = { isTestAccess: false, testPaidAt: null, expiresAt: null, stripeSessionId: input.stripeSessionId };
-    }
+    const purchase: AmandaEntitlement = input.isTestAccess
+      ? { isTestAccess: true, testPaidAt: input.testPaidAt!, expiresAt: input.expiresAt!, stripeSessionId: input.stripeSessionId, status: 'active' }
+      : { isTestAccess: false, testPaidAt: null, expiresAt: null, stripeSessionId: input.stripeSessionId, status: 'active' };
+    const resolved = resolveAmandaEntitlement(prior, purchase, Boolean(input.isTestAccess && priorCourseIds.includes(id) && !prior));
+    if (resolved) entitlements[id] = resolved;
   }
   const accessChanged = !existingProfile || courseIds.some((courseId) => !priorCourseIds.includes(courseId))
     || JSON.stringify(entitlements) !== JSON.stringify(existingProfile?.entitlements || {});
@@ -260,4 +258,48 @@ export async function provisionAmandaClientAccess(input: {
     email,
     loginUrl: `${canonicalPlatformOrigin()}/portal/login?next=%2Fportal%2F${AMANDA_PORTAL_SLUG}%2Flearning`,
   };
+}
+
+/** Hourly, idempotent maintenance. Authorization always enforces the expiry timestamp,
+ * so a delayed cron can never extend access. */
+export async function expireAmandaTestEntitlements(now = new Date()) {
+  const portalSlug = AMANDA_PORTAL_SLUG;
+  const orgId = syntheticOrgId(portalSlug);
+  const records = await listStudioRecords<unknown>('experience', orgId);
+  let scanned = 0;
+  let expired = 0;
+  const errors: string[] = [];
+  for (const row of records) {
+    const parsed = AmandaAccessProfileSchema.safeParse(row);
+    if (!parsed.success || parsed.data.portalSlug !== portalSlug) continue;
+    scanned += 1;
+    const email = parsed.data.email;
+    // Re-load before write so a recent full-price upgrade is never clobbered.
+    const fresh = AmandaAccessProfileSchema.safeParse(
+      await loadStudioRecord<unknown>('experience', accessProfileId(portalSlug, email)),
+    );
+    if (!fresh.success) continue;
+    const entitlements = { ...(fresh.data.entitlements ?? {}) };
+    let changed = false;
+    for (const [courseId, grant] of Object.entries(entitlements)) {
+      if (grant.isTestAccess && grant.status !== 'expired' &&
+          amandaTrialExpired(grant, now.getTime())) {
+        entitlements[courseId] = { ...grant, status: 'expired' };
+        changed = true;
+        expired += 1;
+      }
+    }
+    if (!changed) continue;
+    const saved = await saveStudioRecord({
+      recordType: 'experience',
+      id: accessProfileId(portalSlug, email),
+      organizationId: orgId,
+      title: `Amanda client access: ${email}`,
+      payload: { ...fresh.data, entitlements, updatedAt: now.toISOString() },
+    });
+    if (!saved.ok || (process.env.VERCEL_ENV === 'production' && !saved.persistedToAirtable)) {
+      errors.push(`Could not durably update an expired entitlement for ${email}`);
+    }
+  }
+  return { scanned, expired, errors, ok: errors.length === 0 };
 }
