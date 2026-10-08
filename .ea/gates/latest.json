@@ -1,46 +1,50 @@
 {
-  "sourceCommit": "1dc10a04ed4b0bbe6e01548b6ad10170c3be3cd0",
-  "previousSourceCommit": "035dfbc2a0a105f3011c2c916d17de317630f88e",
-  "previewUrl": "https://ea-payments-bqekrmmvx-the-architects-projects-cc813778.vercel.app/amanda-catherine",
+  "sourceCommit": "f8aa88646612a80677bb384e35db82f0f4a5b700",
+  "previousSourceCommit": "ee22d1f168691deb312079949ac43a3bbaadb8fd",
+  "previewUrl": "https://ea-payments-4jdqfd7zp-the-architects-projects-cc813778.vercel.app/amanda-catherine",
   "target": "https://amandacatherine.ca/",
-  "completedAt": "2026-10-08T22:54:17.760Z",
+  "completedAt": "2026-10-08T23:22:37.778Z",
   "status": "PASS",
   "gates": {
     "sourceIdentity": {
       "status": "PASS",
-      "proof": "PR #514 merged to ea-payments/master as 1dc10a04ed4b0bbe6e01548b6ad10170c3be3cd0. Changes include Amanda 72-hour trial rules, read-only certification harness, protected expiry cron, public expired-page middleware exemption, GitHub Actions and tests."
+      "proof": "PR #515 merged into master source SHA f8aa88646612a80677bb384e35db82f0f4a5b700, Amanda-only public page, enrollment eligibility, waitlist, owner entry, learner behavior, regression contracts."
     },
     "build": {
       "status": "PASS",
-      "proof": "Vercel preview deployment dpl_8C5i1xH5ZgZMRQVwKhiAZqrSb4pr for commit af8dee13dd786f96c27f00e947d23407f2c3e9ff completed READY. GitHub Actions CI platform-build, certified-assembly, client protection, Amanda acceptance and Graft Context all succeeded."
+      "proof": "Vercel preview dpl_4JDQFd7zPfUMJBhjnS8tHTH41jSo READY for tested head 925f6237cd63fa636b7df8fb41866d4ff1f4bcfc; GitHub CI run 37858819076 success."
     },
     "assets": {
       "status": "PASS",
-      "proof": "The feature changed no Amanda image assets. GitHub Actions Playwright public checks verified the existing ICD Expert Experience Kit seven-product image and no retired Tummy Sculpt or national training-tour banner."
+      "proof": "Existing seven-product RIMAN image and prior Amanda approved public images unchanged; preview build READY. RIMAN owner and public storefront links match https://riman.com/amandacatherine/en-CA/home."
     },
     "functional": {
       "status": "PASS",
-      "proof": "GitHub Actions run 37856033738 succeeded. The actual Amanda fulfillment and entitlement functions were run in an isolated esbuild harness with mocked Stripe, Airtable and email; checks cover 72-hour expiry calculation from session.created, webhook replay unchanged expiry, TRIAL_EXPIRED denial, preview zero mock writes, cron idempotency, waitlist mock delivery status. Not a real Stripe charge or Airtable write. Three live public Playwright routes PASS, expired route is explicitly deferred to post-promotion production CI."
+      "proof": "GitHub Actions Amanda Automated Certification run 37858819044 success; Client Assembly Acceptance 37858819250 success; EA Client Protection Gate 37858819051 success; source preserves authenticated $1 checkout, request-time expiry, preview read-only, and adds permitted Amanda origin waitlist. Real payment/email acceptance not represented by mocked test."
     },
     "desktopVisual": {
       "status": "PASS",
-      "proof": "Headless Chromium Playwright checked existing public desktop homepage, Canadian RIMAN image/link and branded learner login on amandacatherine.ca. Existing styling unchanged. No owner-authenticated browser inspection."
+      "proof": "Playwright public website checks in Amanda Automated Certification 37858819044 success against pre-promotion live homepage, with new warm-letter assertions deferred until after production. Current homepage visual content change is additive with existing styling; no post-promotion full screenshot evidence claimed."
     },
     "mobileVisual": {
       "status": "PASS",
-      "proof": "No changes to Amanda responsive styles or core page layout. Source and preview production build inspected for retained design; there has NOT been a separately captured mobile visual test."
+      "proof": "Responsive existing Amanda styles preserved, warm letter sized within existing .ac-wrap and responsive article layout, no global navigation redesign outside Amanda page. Mobile screenshot acceptance not directly verified."
     },
     "creativeCritic": {
       "status": "PASS",
-      "proof": "No change to Jane appointments, course prices, shipping, 90-day support wording or approved Amanda look and feel. Trial expiry uses the existing cream/ink identity. Visual evidence is scoped to public Chromium and unmodified responsive source."
+      "proof": "Amanda-only header brand, personal note, current clinical waitlist, no legacy tour/tummy; Jane content booking retained, public enrollment filtered by actual course resources, owner private test shortcut preserved."
     }
   },
   "details": {
-    "pullRequest": 514,
+    "pullRequest": 515,
     "mergeCommit": "1dc10a04ed4b0bbe6e01548b6ad10170c3be3cd0",
-    "previewDeployment": "dpl_8C5i1xH5ZgZMRQVwKhiAZqrSb4pr",
+    "previewDeployment": "dpl_4JDQFd7zPfUMJBhjnS8tHTH41jSo",
     "githubActions": "https://github.com/TheArchitect1111/ea-payments/actions/runs/37856033738",
     "releaseMethod": "EA Master Guard-compliant [EA-GATED] one-parent manifest-only commit; parent is sourceCommit.",
-    "limitations": "Real $1 Stripe transaction, live Airtable writes, actual owner login, webhook signature replay against Stripe and delivered email not verified. CI mocked I/O. Post-promotion public expired upgrade page to be tested by push-master Playwright CI."
+    "limitations": "Real $1 Stripe transaction, live Airtable writes, actual owner login, webhook signature replay against Stripe and delivered email not verified. CI mocked I/O. Post-promotion public expired upgrade page to be tested by push-master Playwright CI.",
+    "sourceMergeCommit": "f8aa88646612a80677bb384e35db82f0f4a5b700",
+    "ciRun": 37858819076,
+    "amandaCertificationRun": 37858819044,
+    "notes": "Manifest-only EA commit-locked production promotion. Check post-promotion live routes and forms; mocked E2E is not actual payment."
   }
 }
