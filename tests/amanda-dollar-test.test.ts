@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { build, type Plugin } from 'esbuild';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { readFileSync } from 'node:fs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 type TestDb = {
@@ -83,6 +84,14 @@ async function loadRealHandlers(): Promise<any> {
   const code = result.outputFiles[0].text;
   return import('data:text/javascript;base64,' + Buffer.from(code).toString('base64'));
 }
+
+test('Amanda upgrade route and middleware are deployed in the source artifact', () => {
+  const middleware = readFileSync(resolve(root, 'middleware.ts'), 'utf8');
+  const page = readFileSync(resolve(root, 'app/portal/amanda-catherine/expired/page.tsx'), 'utf8');
+  assert.match(middleware, /'\/portal\/amanda-catherine\/expired'/);
+  assert.match(page, /Your \$1 test access has expired/);
+  assert.match(page, /Upgrade to full course access/);
+});
 
 test('Amanda verified $1 fulfillment, replay, 72-hour denial, no-write preview, waitlist and hourly expiry', async () => {
   // This fixture is NOT a live Stripe charge or a write to the real Airtable base.
