@@ -1,4 +1,5 @@
 import { sendGmailEmail } from '@/lib/email/gmail';
+import { sendAuthEmail } from '@/lib/ea-auth-email';
 import { airtableConfigured, airtableCreate } from '@/lib/data/airtable-client';
 export type AmandaWaitlistData = { student_name: string; student_email: string; student_phone: string; course_name: string; course_slug: string; student_message?: string; course_url: string };
 // Adapted from the supplied Amanda Waitlist Email Templates PDF; no invented admin URL.
