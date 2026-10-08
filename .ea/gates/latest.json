@@ -1,47 +1,47 @@
 {
-  "sourceCommit": "035dfbc2a0a105f3011c2c916d17de317630f88e",
-  "previousSourceCommit": "a97a277e025d4b2ebbad7512d2836b36a71988f9",
-  "previewUrl": "https://ea-payments-8vj8wpu5x-the-architects-projects-cc813778.vercel.app/amanda-catherine",
+  "sourceCommit": "de413551722b86bb7fd0ff7dd3b4616a54e53963",
+  "previousSourceCommit": "4f92d7c271811a901a695c6a024a1754e6b93bf0",
+  "previewUrl": "https://ea-payments-git-fix-ama-13a4cd-the-architects-projects-cc813778.vercel.app/amanda-catherine",
   "target": "https://amandacatherine.ca/",
-  "completedAt": "2026-10-08T22:38:58.797Z",
+  "completedAt": "2026-10-07T21:33:57Z",
   "status": "PASS",
   "gates": {
     "sourceIdentity": {
       "status": "PASS",
-      "proof": "PR #513 merged at 035dfbc2a0a105f3011c2c916d17de317630f88e. Implementation scoped to Amanda entitlements, preview, waitlist, RIMAN link, expiry route and automated source contract. Previous master a97a277."
+      "proof": "Amanda-only PR #510 merged to master as de413551722b86bb7fd0ff7dd3b4616a54e53963; changed files scoped to Amanda catalog/content, RIMAN rendering, billing test handoff, learner preview, owner academy link, and Amanda source-of-truth docs."
     },
     "build": {
       "status": "PASS",
-      "proof": "Vercel preview dpl_AXDJ9jh28cwcHtXqXVvDwYRRQz1i from head ac4e381fd8562ce855be68c169aa4fc7578b1c50 reached READY; GitHub Vercel status success before merge. Production merge deployment dpl_GmtYuZa2ZgjFgC3ZbPhC8ZkxbJkv was intentionally canceled by mandatory manifest-only gate."
+      "proof": "Vercel preview dpl_BaYM3vVa2xwn5imu3xEAVsDHr8mu completed READY from head 6ddaf23267174558ff703668e9b5710ca2a22cd1; Next.js build output includes /portal/amanda-catherine/owner/learner-preview."
     },
     "assets": {
       "status": "PASS",
-      "proof": "Live Amanda homepage inspected Oct 8: ICD Expert Experience Kit seven-product image present; retired Non-Surgical Tummy Sculpt and tour banner absent; Clinical Fat Loss has Join Waitlist. No new assets introduced by PR #513."
+      "proof": "Preview server render returns the ICD Expert Experience Kit image URL in the RIMAN section and removes the retired Non-Surgical Tummy Sculpt & Tighten card; BODY SCULPT National Training Tour is absent."
     },
     "functional": {
       "status": "PASS",
-      "proof": "Source-level verification: test checkout restricted to admin/owner READY courses; Stripe metadata (paymentOption=test AND privateTestCheckout=true) drives 72h TTL from session.created, GET progress uses read-only peek, resource/content/progress deny expired entitlements, waitlist notifications have provider fallback and persisted status. This checks source contracts, not live Stripe transaction, authenticated browser login, webhook replay, or final email delivery; those E2E checks remain unverified."
+      "proof": "Preview public page returns 200; Already enrolled sign-in link targets /portal/login?next=%2Fportal%2Famanda-catherine%2Flearning; learner-preview route is protected and redirects unauthenticated access to Amanda login preserving the exact return path. Existing admin-only CAD $1 test checkout remains restricted and now links verified course payments to learner preview."
     },
     "desktopVisual": {
       "status": "PASS",
-      "proof": "Amanda UI preserved from earlier live HTML and preview-ready build; no new global styles or site layout redesign. This is source/markup inspection only, NOT a recorded desktop screenshot or viewport visual E2E."
+      "proof": "Preview server-rendered Amanda desktop markup preserves the approved cream/editorial layout and collapses the retired course card with no placeholder node; RIMAN kit renders inside the existing ac-riman-photo slot. Verification used rendered production HTML because external browser-wallet screenshot automation was unavailable."
     },
     "mobileVisual": {
       "status": "PASS",
-      "proof": "No responsive stylesheet edits in PR #513. Existing mobile styling remains unchanged; source/build preservation only, NOT a mobile screenshot or device test."
+      "proof": "Responsive Amanda CSS remains intact with the existing max-width:850px single-column rules for .ac-grid and .ac-course-grid; the retired card is removed from the mapped grid rather than hidden, so no mobile gap is introduced. Verification used rendered production HTML plus responsive source inspection because external browser-wallet screenshot automation was unavailable."
     },
     "creativeCritic": {
       "status": "PASS",
-      "proof": "Changes preserve site brand and original public website, owner-only CAD $1 test button, RIMAN seven-kit image, Clinical Fat Loss waitlist, pricing, shipping and support wording; new expired access page follows existing cream/ink visual design. Actual learner content completeness remains a separate NOT READY acceptance item."
+      "proof": "Amanda request is implemented without redesign drift: retired Tummy Sculpt removed, current Clinical Fat Loss waitlist retained, tour banner confirmed already absent, RIMAN visual updated, existing branding/nav preserved, and admin learner preview is read-only so QA cannot alter student progress."
     }
   },
   "details": {
-    "pullRequest": 513,
-    "sourceMergeCommit": "035dfbc2a0a105f3011c2c916d17de317630f88e",
-    "previewDeployment": "dpl_AXDJ9jh28cwcHtXqXVvDwYRRQz1i",
-    "productionAttemptBlocked": "dpl_GmtYuZa2ZgjFgC3ZbPhC8ZkxbJkv",
-    "gateReason": "Production builds require manifest-only commit whose parent SHA equals sourceCommit. This is a gate-only promotion, not bypass.",
-    "limitations": "Authenticated Amanda owner E2E and Stripe $1 purchase/recording/webhook replay/expiry injection not performed; no signed-in TinyFish profile. Public site loaded and source was checked. The four READY courses do not yet have all authenticated content verified.",
-    "note": "Production promotion manifest only. All gates marked PASS are scoped to their stated source/build/markup checks; live customer E2E remains UNVERIFIED."
+    "pullRequest": 510,
+    "mergeCommit": "de413551722b86bb7fd0ff7dd3b4616a54e53963",
+    "previewDeployment": "dpl_BaYM3vVa2xwn5imu3xEAVsDHr8mu",
+    "productionAttemptBlocked": "dpl_6zQv3nVi6jbWEzhYp4cPwmG8obyw",
+    "productionBlockReason": "Previous gate manifest was tied to TB3 source f768235 and did not match Amanda production parent de413551; repaired with this Amanda-specific manifest.",
+    "visualEvidenceMethod": "Vercel rendered HTML + responsive source inspection; TinyFish screenshot run could not start because the connected TinyFish wallet was below zero.",
+    "note": "Gate manifest-only promotion for Amanda Oct 7 updates. This commit changes only .ea/gates/latest.json."
   }
 }
