@@ -37,6 +37,20 @@ test.describe('Amanda public production checks (no credentials and no payments)'
     await expect(page.getByRole('heading', { name: /Amanda Catherine Courses & Learning/i })).toBeVisible();
   });
 
+  test('Clinical Fat Loss waitlist persists and confirms without a Gmail configuration error', async ({ request }) => {
+    test.skip(process.env.AMANDA_VERIFY_DEPLOYED !== 'true', 'Write-once QA is enabled only for EA-gated production promotion.');
+    const email = `amanda-qa-${process.env.GITHUB_RUN_ID || Date.now()}@example.invalid`;
+    const response = await request.post(base + '/api/public/amanda/waitlist', {
+      headers: { Origin: base, 'Content-Type': 'application/json' },
+      data: { courseId: 'clinical-fat-loss-injectables', name: 'Amanda Automated QA', email,
+        phone: '', message: 'Automated acceptance: no enrollment, no charge.' },
+    });
+    expect(response.status()).toBe(200);
+    const result = await response.json();
+    expect(result.ok).toBe(true);
+    expect(result.warning || '').toBe('');
+  });
+
   test('expired test learners see upgrade CTA without a login loop', async ({ page }) => {
     test.skip(process.env.AMANDA_VERIFY_DEPLOYED !== 'true', 'Run only after EA-GATED production promotion; PR preview is protected and not yet the live site.');
     await page.goto(base + '/portal/amanda-catherine/expired?courseId=aesthetikine-reset-training', { waitUntil: 'domcontentloaded' });
