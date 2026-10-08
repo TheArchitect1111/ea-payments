@@ -46,6 +46,8 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 20, cache: npm }
       - run: npm ci
+      - name: BRICKS blueprint tenant security (P0)
+        run: npx tsx scripts/test-bricks-blueprint-security.ts
       - name: Capability standard
         run: node scripts/test-capability-standard.mjs
       - name: Assembly Run 2
