@@ -2,7 +2,7 @@ import { issueSignedToken, presignUrl } from '@vercel/blob';
 import { type NextRequest, NextResponse } from 'next/server';
 import { guardPortalApi, portalApiUnauthorized, portalTenant } from '@/lib/api/portal-route';
 import { resolveAmandaAudience } from '@/lib/amanda-catherine/audience';
-import { getAmandaAssignedCourseIds } from '@/lib/amanda-catherine/client-access';
+import { getAmandaAssignedCourseIds, getAmandaCourseAccessDecision } from '@/lib/amanda-catherine/client-access';
 import { accountCanAccessCourse } from '@/lib/amanda-catherine/course-content';
 import { findAmandaCourseResource } from '@/lib/amanda-catherine/course-resources';
 import { roleAtLeast } from '@/lib/rbac';
@@ -31,6 +31,8 @@ export async function GET(
   const assignedCourseIds = await getAmandaAssignedCourseIds(tenant.portalSlug, auth.session.email);
   const isAdmin = Boolean(auth.session.role && roleAtLeast(auth.session.role, 'admin'));
   if (!accountCanAccessCourse(audience, assignedCourseIds, resource.courseId, isAdmin)) {
+    const access = await getAmandaCourseAccessDecision(tenant.portalSlug, auth.session.email, resource.courseId);
+    if (access.reason === 'TRIAL_EXPIRED') return NextResponse.json({ error: 'Your test access expired.', reason: 'TRIAL_EXPIRED', redirect: access.redirect }, { status: 403 });
     return NextResponse.json({ error: 'This course is not assigned to this account.' }, { status: 403 });
   }
 
