@@ -11,6 +11,8 @@ import { PortalSubpage } from '@/app/portal/components/PortalSubpage';
 import AmandaMemberHome from '@/app/portal/[slug]/member/AmandaMemberHome';
 import BlueprintBrickPanel from '@/app/components/blueprint/BlueprintBrickPanel';
 import { getBlueprintByAlias, publicBlueprint } from '@/lib/blueprint-store';
+import { canAccessBlueprint } from '@/lib/blueprint-access';
+import { findMembership } from '@/lib/memberships';
 import {
   PortalPersonalityRail,
   orderDashboardSections,
@@ -44,7 +46,11 @@ export default async function PortalPage({
   if (slug.toLowerCase().startsWith('amanda-catherine')) {
     const firstName = client.clientName?.split(' ')[0] || 'Amanda';
     const isAdministrator = session.role === 'admin' || session.role === 'owner';
-    const blueprint = await getBlueprintByAlias(slug);
+    const candidateBlueprint = await getBlueprintByAlias(slug);
+    const membership = candidateBlueprint && session.email && session.orgId
+      ? await findMembership(session.email, session.orgId) : null;
+    const blueprint = candidateBlueprint && canAccessBlueprint(session, candidateBlueprint, membership)
+      ? candidateBlueprint : null;
     return (
       <PortalSubpage
         slug={slug}
