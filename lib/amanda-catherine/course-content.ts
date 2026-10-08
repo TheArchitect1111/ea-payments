@@ -66,7 +66,7 @@ async function recoverLegacyCourseContent(courseId: string) {
   return null;
 }
 
-export async function getAmandaCourseContent(portalSlug: string, courseId: string) {
+export async function getAmandaCourseContent(portalSlug: string, courseId: string, readOnly = false) {
   const course = AMANDA_COURSES.find((item) => item.id === courseId);
   if (!course) throw new Error('Amanda course not found.');
   const id = contentId(portalSlug, courseId);
@@ -75,7 +75,7 @@ export async function getAmandaCourseContent(portalSlug: string, courseId: strin
 
   const backup = await loadStudioRecord<AmandaCourseContent>('experience', backupContentId(portalSlug, courseId));
   if (backup) {
-    await persistCourseRecord(portalSlug, courseId, course.title, backup, id, ' (recovered)');
+    if (!readOnly) await persistCourseRecord(portalSlug, courseId, course.title, backup, id, ' (recovered)');
     return backup;
   }
 
@@ -88,8 +88,10 @@ export async function getAmandaCourseContent(portalSlug: string, courseId: strin
         courseId,
         updatedAt: new Date().toISOString(),
       };
-      await persistCourseRecord(AMANDA_CANONICAL_PORTAL_SLUG, courseId, course.title, recovered, contentId(AMANDA_CANONICAL_PORTAL_SLUG, courseId), ' (legacy migrated)');
-      await persistCourseRecord(AMANDA_CANONICAL_PORTAL_SLUG, courseId, course.title, recovered, backupContentId(AMANDA_CANONICAL_PORTAL_SLUG, courseId), ' backup');
+      if (!readOnly) {
+        await persistCourseRecord(AMANDA_CANONICAL_PORTAL_SLUG, courseId, course.title, recovered, contentId(AMANDA_CANONICAL_PORTAL_SLUG, courseId), ' (legacy migrated)');
+        await persistCourseRecord(AMANDA_CANONICAL_PORTAL_SLUG, courseId, course.title, recovered, backupContentId(AMANDA_CANONICAL_PORTAL_SLUG, courseId), ' backup');
+      }
       return recovered;
     }
   }
