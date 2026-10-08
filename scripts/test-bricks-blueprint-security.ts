@@ -48,4 +48,7 @@ assert.doesNotMatch(intake, /alias:\s*intake\.portalAlias/);
 assert.match(read('lib/blueprint-store.ts'), /allowOverwrite:\s*false/);
 const blueprintPage = read('app/blueprint/[clientId]/page.tsx');
 assert.match(blueprintPage, /canAccessBlueprint\(session, record, membership\)/);
+const tarrisPage = read('app/tarris/future/page.tsx');
+assert.match(tarrisPage, /export const dynamic = 'force-dynamic'/);
+assert.match(tarrisPage, /canAccessBlueprint\(session, candidateBlueprint, membership\)/);
 console.log('Blueprint P0 security: 12 cross-tenant/RBAC policy cases PASS; route and alias guardrails PASS');
