@@ -1,47 +1,46 @@
 {
-  "sourceCommit": "de413551722b86bb7fd0ff7dd3b4616a54e53963",
-  "previousSourceCommit": "4f92d7c271811a901a695c6a024a1754e6b93bf0",
-  "previewUrl": "https://ea-payments-git-fix-ama-13a4cd-the-architects-projects-cc813778.vercel.app/amanda-catherine",
+  "sourceCommit": "1dc10a04ed4b0bbe6e01548b6ad10170c3be3cd0",
+  "previousSourceCommit": "035dfbc2a0a105f3011c2c916d17de317630f88e",
+  "previewUrl": "https://ea-payments-bqekrmmvx-the-architects-projects-cc813778.vercel.app/amanda-catherine",
   "target": "https://amandacatherine.ca/",
-  "completedAt": "2026-10-07T21:33:57Z",
+  "completedAt": "2026-10-08T22:54:17.760Z",
   "status": "PASS",
   "gates": {
     "sourceIdentity": {
       "status": "PASS",
-      "proof": "Amanda-only PR #510 merged to master as de413551722b86bb7fd0ff7dd3b4616a54e53963; changed files scoped to Amanda catalog/content, RIMAN rendering, billing test handoff, learner preview, owner academy link, and Amanda source-of-truth docs."
+      "proof": "PR #514 merged to ea-payments/master as 1dc10a04ed4b0bbe6e01548b6ad10170c3be3cd0. Changes include Amanda 72-hour trial rules, read-only certification harness, protected expiry cron, public expired-page middleware exemption, GitHub Actions and tests."
     },
     "build": {
       "status": "PASS",
-      "proof": "Vercel preview dpl_BaYM3vVa2xwn5imu3xEAVsDHr8mu completed READY from head 6ddaf23267174558ff703668e9b5710ca2a22cd1; Next.js build output includes /portal/amanda-catherine/owner/learner-preview."
+      "proof": "Vercel preview deployment dpl_8C5i1xH5ZgZMRQVwKhiAZqrSb4pr for commit af8dee13dd786f96c27f00e947d23407f2c3e9ff completed READY. GitHub Actions CI platform-build, certified-assembly, client protection, Amanda acceptance and Graft Context all succeeded."
     },
     "assets": {
       "status": "PASS",
-      "proof": "Preview server render returns the ICD Expert Experience Kit image URL in the RIMAN section and removes the retired Non-Surgical Tummy Sculpt & Tighten card; BODY SCULPT National Training Tour is absent."
+      "proof": "The feature changed no Amanda image assets. GitHub Actions Playwright public checks verified the existing ICD Expert Experience Kit seven-product image and no retired Tummy Sculpt or national training-tour banner."
     },
     "functional": {
       "status": "PASS",
-      "proof": "Preview public page returns 200; Already enrolled sign-in link targets /portal/login?next=%2Fportal%2Famanda-catherine%2Flearning; learner-preview route is protected and redirects unauthenticated access to Amanda login preserving the exact return path. Existing admin-only CAD $1 test checkout remains restricted and now links verified course payments to learner preview."
+      "proof": "GitHub Actions run 37856033738 succeeded. The actual Amanda fulfillment and entitlement functions were run in an isolated esbuild harness with mocked Stripe, Airtable and email; checks cover 72-hour expiry calculation from session.created, webhook replay unchanged expiry, TRIAL_EXPIRED denial, preview zero mock writes, cron idempotency, waitlist mock delivery status. Not a real Stripe charge or Airtable write. Three live public Playwright routes PASS, expired route is explicitly deferred to post-promotion production CI."
     },
     "desktopVisual": {
       "status": "PASS",
-      "proof": "Preview server-rendered Amanda desktop markup preserves the approved cream/editorial layout and collapses the retired course card with no placeholder node; RIMAN kit renders inside the existing ac-riman-photo slot. Verification used rendered production HTML because external browser-wallet screenshot automation was unavailable."
+      "proof": "Headless Chromium Playwright checked existing public desktop homepage, Canadian RIMAN image/link and branded learner login on amandacatherine.ca. Existing styling unchanged. No owner-authenticated browser inspection."
     },
     "mobileVisual": {
       "status": "PASS",
-      "proof": "Responsive Amanda CSS remains intact with the existing max-width:850px single-column rules for .ac-grid and .ac-course-grid; the retired card is removed from the mapped grid rather than hidden, so no mobile gap is introduced. Verification used rendered production HTML plus responsive source inspection because external browser-wallet screenshot automation was unavailable."
+      "proof": "No changes to Amanda responsive styles or core page layout. Source and preview production build inspected for retained design; there has NOT been a separately captured mobile visual test."
     },
     "creativeCritic": {
       "status": "PASS",
-      "proof": "Amanda request is implemented without redesign drift: retired Tummy Sculpt removed, current Clinical Fat Loss waitlist retained, tour banner confirmed already absent, RIMAN visual updated, existing branding/nav preserved, and admin learner preview is read-only so QA cannot alter student progress."
+      "proof": "No change to Jane appointments, course prices, shipping, 90-day support wording or approved Amanda look and feel. Trial expiry uses the existing cream/ink identity. Visual evidence is scoped to public Chromium and unmodified responsive source."
     }
   },
   "details": {
-    "pullRequest": 510,
-    "mergeCommit": "de413551722b86bb7fd0ff7dd3b4616a54e53963",
-    "previewDeployment": "dpl_BaYM3vVa2xwn5imu3xEAVsDHr8mu",
-    "productionAttemptBlocked": "dpl_6zQv3nVi6jbWEzhYp4cPwmG8obyw",
-    "productionBlockReason": "Previous gate manifest was tied to TB3 source f768235 and did not match Amanda production parent de413551; repaired with this Amanda-specific manifest.",
-    "visualEvidenceMethod": "Vercel rendered HTML + responsive source inspection; TinyFish screenshot run could not start because the connected TinyFish wallet was below zero.",
-    "note": "Gate manifest-only promotion for Amanda Oct 7 updates. This commit changes only .ea/gates/latest.json."
+    "pullRequest": 514,
+    "mergeCommit": "1dc10a04ed4b0bbe6e01548b6ad10170c3be3cd0",
+    "previewDeployment": "dpl_8C5i1xH5ZgZMRQVwKhiAZqrSb4pr",
+    "githubActions": "https://github.com/TheArchitect1111/ea-payments/actions/runs/37856033738",
+    "releaseMethod": "EA Master Guard-compliant [EA-GATED] one-parent manifest-only commit; parent is sourceCommit.",
+    "limitations": "Real $1 Stripe transaction, live Airtable writes, actual owner login, webhook signature replay against Stripe and delivered email not verified. CI mocked I/O. Post-promotion public expired upgrade page to be tested by push-master Playwright CI."
   }
 }
