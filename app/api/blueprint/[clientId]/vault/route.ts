@@ -1,5 +1,7 @@
 import { get, put } from '@vercel/blob';
 import { appendBlueprintVaultFile, getBlueprintRecord, publicBlueprint } from '@/lib/blueprint-store';
+import { authorizeBlueprintRequest } from '@/lib/blueprint-access';
+import type { NextRequest } from 'next/server';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -32,20 +34,25 @@ export async function OPTIONS(request: Request) {
   const c = cors(request.headers.get('origin'));
   return new Response(null, { status: c.allowed ? 204 : 403, headers: c.headers });
 }
-export async function GET(request: Request, { params }: { params: Promise<{ clientId: string }> }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ clientId: string }> }) {
   const c = cors(request.headers.get('origin'));
   if (!c.allowed) return Response.json({ ok: false }, { status: 403, headers: c.headers });
   const { clientId } = await params;
   const record = await getBlueprintRecord(clientId);
   if (!record) return Response.json({ ok: false, error: 'Blueprint not found.' }, { status: 404, headers: c.headers });
+  const auth = await authorizeBlueprintRequest(request, record);
+  if (!auth.ok) return Response.json({ ok: false, error: auth.error }, { status: auth.status, headers: c.headers });
   return Response.json({ ok: true, files: record.vaultFiles || [] }, { headers: c.headers });
 }
-export async function POST(request: Request, { params }: { params: Promise<{ clientId: string }> }) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ clientId: string }> }) {
   const c = cors(request.headers.get('origin'));
   if (!c.allowed) return Response.json({ ok: false }, { status: 403, headers: c.headers });
   try {
     const { clientId } = await params;
-    if (!(await getBlueprintRecord(clientId))) return Response.json({ ok: false, error: 'Blueprint not found.' }, { status: 404, headers: c.headers });
+    const record = await getBlueprintRecord(clientId);
+    if (!record) return Response.json({ ok: false, error: 'Blueprint not found.' }, { status: 404, headers: c.headers });
+    const auth = await authorizeBlueprintRequest(request, record);
+    if (!auth.ok) return Response.json({ ok: false, error: auth.error }, { status: auth.status, headers: c.headers });
     const form = await request.formData();
     const file = form.get('file');
     if (!(file instanceof File)) return Response.json({ ok: false, error: 'Choose a file.' }, { status: 400, headers: c.headers });
