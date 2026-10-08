@@ -1,0 +1,66 @@
+name: Amanda Automated Certification
+
+on:
+  pull_request:
+    paths:
+      - 'lib/amanda-catherine/**'
+      - 'app/api/portal/amanda/**'
+      - 'app/api/public/amanda/**'
+      - 'app/api/cron/expire-test-access/**'
+      - 'app/portal/amanda-catherine/**'
+      - 'app/portal/[slug]/learning/**'
+      - 'middleware.ts'
+      - 'vercel.json'
+      - 'tests/amanda-*'
+      - 'tests/fixtures/amanda-*'
+      - 'playwright.amanda.config.ts'
+      - '.github/workflows/amanda-e2e.yml'
+      - 'package.json'
+  push:
+    branches: [master, 'fix/amanda-*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  server-side-fulfillment:
+    name: Stripe and Airtable mocked integration
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Exercise actual fulfillment with isolated fake transports
+        run: npm run test:amanda-dollar-e2e
+      - name: Existing Amanda source contract
+        run: npm run test:amanda-learning-handoff
+
+  public-playwright:
+    name: Live public pages (not authenticated checkout)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npx playwright install --with-deps chromium
+      - name: Verify public Amanda production routes
+        run: npx playwright test --config=playwright.amanda.config.ts
+      - name: Save browser evidence when checks fail
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: amanda-playwright-evidence
+          path: |
+            playwright-amanda-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 14
