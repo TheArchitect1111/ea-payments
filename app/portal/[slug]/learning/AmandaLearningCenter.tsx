@@ -91,6 +91,20 @@ export default function AmandaLearningCenter({ audience, assignedCourseIds, isAd
   if (!course) return <section className="ak-learning-empty"><h2>No course assigned yet</h2><p>Amanda will assign your course when enrollment is confirmed.</p></section>;
   if (error && (!progress || !content)) return <p role="alert">{error}</p>;
   if (!progress || !content) return <p className="ep-module-card-note">Loading your course…</p>;
+  const courseResourcesForLearner = resourcesForAmandaCourse(course.id);
+  // Do not offer six empty video shells as if they were delivered lessons.
+  const hasRealLessonMaterials = content.lessons.some(item => Boolean(item.videoUrl || item.notes || item.resourceUrl));
+  if (!hasRealLessonMaterials && !adminCourseAccess) return <section className="ak-learning">
+    {previewAsLearner ? <p className="ep-module-card-note">Administrator preview · read-only</p> : null}
+    <h2>{course.title}</h2>
+    <p>{AMANDA_SUPPORT_WORDING}</p>
+    <p>Recorded lessons are not published yet. Available course reference materials are below.</p>
+    {courseResourcesForLearner.length ? <div className="ak-learning__material-grid">{courseResourcesForLearner.map(resource =>
+      <article className="ak-learning__material-card" key={resource.id}><span>{resource.fileType}</span><h3>{resource.title}</h3><p>{resource.description}</p>
+      <a className="ep-btn ep-btn-secondary" href={`/api/portal/amanda/resources/${resource.id}`} target="_blank" rel="noopener noreferrer">Open resource</a></article>)}</div>
+      : <p>This course has no published materials. Please contact Amanda for support.</p>}
+    <Link href="/portal/amanda-catherine/support">Support &amp; mentorship</Link>
+  </section>;
   const completedLessons = previewAsLearner ? [] : progress.completedLessons;
   const percent = course.lessons.length ? Math.round((completedLessons.length / course.lessons.length) * 100) : 0;
   if (!content.lessons.length) return <section><h2>{course.title}</h2><p>Course content has not been provided.</p></section>;
