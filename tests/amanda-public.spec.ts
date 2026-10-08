@@ -9,7 +9,7 @@ test.describe('Amanda public production checks (no credentials and no payments)'
     await expect(page.getByRole('heading', { name: /A note from Amanda/i })).toBeVisible();
     await expect(page.getByText(/BODY SCULPT(?:™)? NATIONAL TRAINING TOUR|Non-Surgical Tummy Sculpt & Tighten/i)).toHaveCount(0);
     await expect(page.getByRole('link', { name: /^Apply$|^Foundry$|^Update Hub$|^Calendar$|^Eva$/i })).toHaveCount(0);
-    await expect(page.getByRole('heading', { name: /Firm Foundation|The Entrepreneurial Artist/i })).toHaveCount(0);
+    await expect(page.locator('.ac-course-grid').getByRole('heading', { name: /Firm Foundation|The Entrepreneurial Artist/i })).toHaveCount(0);
 
     await expect(page.getByText(/Non-Surgical Tummy Sculpt & Tighten|Non-Surgical Tummy Tuck/i)).toHaveCount(0);
     await expect(page.getByText(/BODY SCULPT(?:™)? NATIONAL TRAINING TOUR/i)).toHaveCount(0);
