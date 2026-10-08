@@ -11,7 +11,7 @@ import { PortalSubpage } from '@/app/portal/components/PortalSubpage';
 import AmandaMemberHome from '@/app/portal/[slug]/member/AmandaMemberHome';
 import BlueprintBrickPanel from '@/app/components/blueprint/BlueprintBrickPanel';
 import { getBlueprintByAlias, publicBlueprint } from '@/lib/blueprint-store';
-import { canAccessBlueprint } from '@/lib/blueprint-access';
+import { canAccessBlueprint } from '@/lib/blueprint-ownership';
 import { findMembership } from '@/lib/memberships';
 import {
   PortalPersonalityRail,
