@@ -7,6 +7,11 @@ import Link from "next/link";
 import BlueprintBrickPanel from "@/app/components/blueprint/BlueprintBrickPanel";
 import EAAssistant from "@/app/components/ea-assistant/EAAssistant";
 import { getBlueprintByAlias, publicBlueprint } from "@/lib/blueprint-store";
+import { requirePortalSession } from '@/lib/auth/resolve-portal-session';
+import { findMembership } from '@/lib/memberships';
+import { canAccessBlueprint } from '@/lib/blueprint-ownership';
+
+export const dynamic = 'force-dynamic';
 
 export default async function TarrisFuturePage() {
   const IMAGES = {
@@ -16,7 +21,12 @@ export default async function TarrisFuturePage() {
     enterprise: "/images/tarris/YOUR_ENTERPRISE_SUIT.jpg",
   };
 
-  const blueprint = await getBlueprintByAlias('tarris');
+  const candidateBlueprint = await getBlueprintByAlias('tarris');
+  const session = await requirePortalSession();
+  const membership = candidateBlueprint && session?.email && session?.orgId
+    ? await findMembership(session.email, session.orgId) : null;
+  const blueprint = candidateBlueprint && canAccessBlueprint(session, candidateBlueprint, membership)
+    ? candidateBlueprint : null;
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white flex flex-col lg:flex-row">
