@@ -1,6 +1,9 @@
 import { notFound } from 'next/navigation';
 import BlueprintBrickPanel from '@/app/components/blueprint/BlueprintBrickPanel';
 import { getBlueprintRecord, publicBlueprint } from '@/lib/blueprint-store';
+import { canAccessBlueprint } from '@/lib/blueprint-access';
+import { requirePortalSession } from '@/lib/auth/resolve-portal-session';
+import { findMembership } from '@/lib/memberships';
 
 export const dynamic = 'force-dynamic';
 
@@ -8,6 +11,10 @@ export default async function BlueprintPage({ params }: { params: Promise<{ clie
   const { clientId } = await params;
   const record = await getBlueprintRecord(clientId);
   if (!record) notFound();
+  const session = await requirePortalSession();
+  if (!session?.email || !session.orgId) notFound();
+  const membership = await findMembership(session.email, session.orgId);
+  if (!canAccessBlueprint(session, record, membership)) notFound();
   return (
     <main style={{ maxWidth: 980, margin: '0 auto', padding: '34px 20px 70px', background: '#f6f0e6', minHeight: '100vh' }}>
       <p style={{ letterSpacing: '.14em', fontSize: 12, fontWeight: 800, color: '#596b5b' }}>EFFICIENCY ARCHITECTS</p>
