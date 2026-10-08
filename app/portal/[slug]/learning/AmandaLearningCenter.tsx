@@ -51,15 +51,21 @@ export default function AmandaLearningCenter({ audience, assignedCourseIds, isAd
     if (!courseId) return;
     let active = true;
     void Promise.all([
-      fetch(`/api/portal/amanda/progress?courseId=${encodeURIComponent(courseId)}`).then(async (res) => ({ ok: res.ok, data: await res.json() })),
-      fetch(`/api/portal/amanda/course-content?courseId=${encodeURIComponent(courseId)}`).then(async (res) => ({ ok: res.ok, data: await res.json() })),
+      fetch(`/api/portal/amanda/progress?courseId=${encodeURIComponent(courseId)}${previewAsLearner ? '&preview=true' : ''}`).then(async (res) => ({ ok: res.ok, data: await res.json() })),
+      fetch(`/api/portal/amanda/course-content?courseId=${encodeURIComponent(courseId)}${previewAsLearner ? '&preview=true' : ''}`).then(async (res) => ({ ok: res.ok, data: await res.json() })),
     ]).then(([p, c]) => {
       if (!active) return;
-      if (!p.ok || !c.ok) return setError(p.data.error || c.data.error || 'Unable to open this course.');
+      if (!p.ok || !c.ok) {
+        if (p.data.reason === 'TRIAL_EXPIRED' || c.data.reason === 'TRIAL_EXPIRED') {
+          window.location.assign(p.data.redirect || c.data.redirect || `/portal/amanda-catherine/expired?courseId=${encodeURIComponent(courseId)}`);
+          return;
+        }
+        return setError(p.data.error || c.data.error || 'Unable to open this course.');
+      }
       setProgress(p.data.progress); setContent(c.data.content);
     }).catch(() => { if (active) setError('Unable to open this course.'); });
     return () => { active = false; };
-  }, [courseId]);
+  }, [courseId, previewAsLearner]);
 
   async function saveProgress(patch: Partial<AmandaCourseProgress>) {
     const res = await fetch('/api/portal/amanda/progress', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ courseId, ...patch }) });

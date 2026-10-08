@@ -33,10 +33,18 @@ const AmandaAccessProfileSchema = z.object({
     'admin',
   ]),
   courseIds: z.array(z.string().min(1)),
+  // Older grants without entitlement metadata retain their original access.
+  entitlements: z.record(z.string(), z.object({
+    isTestAccess: z.boolean(),
+    testPaidAt: z.string().nullable(),
+    expiresAt: z.string().nullable(),
+    stripeSessionId: z.string().optional(),
+  })).optional(),
   updatedAt: z.string().min(1),
 });
 
 type AmandaAccessProfile = z.infer<typeof AmandaAccessProfileSchema>;
+type AmandaEntitlement = NonNullable<AmandaAccessProfile['entitlements']>[string];
 
 function accessProfileId(portalSlug: string, email: string) {
   return `amanda-access-${crypto.createHash('sha256').update(`${portalSlug}:${email.toLowerCase()}`).digest('hex').slice(0, 24)}`;
@@ -51,7 +59,22 @@ export async function getAmandaAssignedAudience(portalSlug: string, email: strin
 export async function getAmandaAssignedCourseIds(portalSlug: string, email: string) {
   const stored = await loadStudioRecord<unknown>('experience', accessProfileId(portalSlug, email));
   const profile = AmandaAccessProfileSchema.safeParse(stored);
-  return (profile.success ? profile.data.courseIds : [...(invitedAmandaLearner(email)?.courseIds || [])]).filter(amandaCourseReady);
+  return (profile.success ? profile.data.courseIds : [...(invitedAmandaLearner(email)?.courseIds || [])])
+    .filter((id) => amandaCourseReady(id) && (!profile.success || !profile.data.entitlements?.[id]?.expiresAt ||
+      Date.parse(profile.data.entitlements[id].expiresAt!) > Date.now()));
+}
+
+/** Entitlement reads never write records and never restore expired test grants. */
+export async function getAmandaCourseAccessDecision(portalSlug: string, email: string, courseId: string) {
+  const stored = await loadStudioRecord<unknown>('experience', accessProfileId(portalSlug, email));
+  const parsed = AmandaAccessProfileSchema.safeParse(stored);
+  const profile = parsed.success ? parsed.data : null;
+  const grant = profile?.entitlements?.[courseId];
+  if (grant?.expiresAt && Date.parse(grant.expiresAt) <= Date.now()) {
+    return { authorized: false as const, reason: 'TRIAL_EXPIRED' as const, expiresAt: grant.expiresAt, redirect: `/portal/amanda-catherine/expired?courseId=${encodeURIComponent(courseId)}` };
+  }
+  const assigned = profile ? profile.courseIds.includes(courseId) : Boolean(invitedAmandaLearner(email)?.courseIds?.includes(courseId));
+  return { authorized: assigned && amandaCourseReady(courseId), reason: assigned ? undefined : 'NOT_ASSIGNED', expiresAt: grant?.expiresAt ?? null };
 }
 
 /** Paid or explicitly invited learners may open Amanda's training surface even
@@ -125,8 +148,13 @@ export async function provisionAmandaClientAccess(input: {
   amountPaidCad?: number;
   transactionId?: string;
   courseIds?: string[];
+  isTestAccess?: boolean;
+  testPaidAt?: string | null;
+  expiresAt?: string | null;
+  stripeSessionId?: string;
 }) {
   if ((input.courseIds || []).some((id) => !amandaCourseReady(id))) return { ok: false as const, error: 'This course is waitlist only.' };
+  if (input.isTestAccess && (!input.testPaidAt || !input.expiresAt || !input.stripeSessionId)) return { ok: false as const, error: 'Verified test payment dates and Stripe session ID are required.' };
   const email = input.email.trim().toLowerCase();
   if (!email || !email.includes('@')) return { ok: false as const, error: 'A valid client email is required.' };
   const name = displayName(input.name || '', email);
@@ -177,7 +205,21 @@ export async function provisionAmandaClientAccess(input: {
   const existingProfile = existingProfileResult.success ? existingProfileResult.data : null;
   const priorCourseIds = existingProfile?.courseIds || [];
   const courseIds = [...new Set([...priorCourseIds, ...(input.courseIds || [])])].filter(amandaCourseReady);
-  const accessChanged = !existingProfile || courseIds.some((courseId) => !priorCourseIds.includes(courseId));
+  const entitlements: Record<string, AmandaEntitlement> = { ...(existingProfile?.entitlements || {}) };
+  for (const id of input.courseIds || []) {
+    const prior = entitlements[id];
+    if (input.isTestAccess) {
+      if (prior && !prior.isTestAccess && !prior.expiresAt) continue;
+      if (prior?.isTestAccess && prior.expiresAt) continue;
+      // Do not accidentally expire a grant created before explicit trial metadata existed.
+      if (priorCourseIds.includes(id) && !prior) continue;
+      entitlements[id] = { isTestAccess: true, testPaidAt: input.testPaidAt!, expiresAt: input.expiresAt!, stripeSessionId: input.stripeSessionId };
+    } else {
+      entitlements[id] = { isTestAccess: false, testPaidAt: null, expiresAt: null, stripeSessionId: input.stripeSessionId };
+    }
+  }
+  const accessChanged = !existingProfile || courseIds.some((courseId) => !priorCourseIds.includes(courseId))
+    || JSON.stringify(entitlements) !== JSON.stringify(existingProfile?.entitlements || {});
   const profileSave = await saveStudioRecord({
     recordType: 'experience',
     id: accessProfileId(AMANDA_PORTAL_SLUG, email),
@@ -189,6 +231,7 @@ export async function provisionAmandaClientAccess(input: {
       name,
       audience: input.audience,
       courseIds,
+      entitlements,
       updatedAt: new Date().toISOString(),
     } satisfies AmandaAccessProfile,
   });

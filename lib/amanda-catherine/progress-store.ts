@@ -132,6 +132,21 @@ async function persist(progress: AmandaCourseProgress) {
   return progress;
 }
 
+/** Pure read for GET/owner preview. Never creates or migrates an Airtable record. */
+export async function peekAmandaCourseProgress(portalSlug: string, email: string, courseId: string, synthetic = false): Promise<AmandaCourseProgress> {
+  const course = AMANDA_COURSES.find((item) => item.id === courseId);
+  if (!course) throw new Error('Amanda course not found.');
+  const saved = synthetic ? null : await loadStudioRecord<AmandaCourseProgress>('experience', progressId(portalSlug, email, courseId));
+  if (saved) {
+    const startedAt = saved.startedAt || saved.updatedAt || new Date().toISOString();
+    return { ...saved, startedAt, lessonReleaseAt: saved.lessonReleaseAt && !amandaCourseReady(courseId)
+      ? saved.lessonReleaseAt : buildReleaseSchedule(courseId, startedAt) };
+  }
+  const now = new Date().toISOString();
+  return { portalSlug, email, courseId, startedAt: now, lessonReleaseAt: buildReleaseSchedule(courseId, now),
+    completedLessons: [], practicalRequirements: [], updatedAt: now };
+}
+
 export async function getAmandaCourseProgress(portalSlug: string, email: string, courseId: string) {
   const saved = await loadStudioRecord<AmandaCourseProgress>('experience', progressId(portalSlug, email, courseId));
   if (saved) {

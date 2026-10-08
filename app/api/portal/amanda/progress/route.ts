@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { guardPortalApi, portalApiUnauthorized, portalTenant } from '@/lib/api/portal-route';
-import { getAmandaCourseProgress, updateAmandaCourseProgress } from '@/lib/amanda-catherine/progress-store';
+import { peekAmandaCourseProgress, updateAmandaCourseProgress } from '@/lib/amanda-catherine/progress-store';
 import { resolveAmandaAudience } from '@/lib/amanda-catherine/audience';
 import { accountCanAccessCourse } from '@/lib/amanda-catherine/course-content';
-import { getAmandaAssignedCourseIds } from '@/lib/amanda-catherine/client-access';
+import { getAmandaAssignedCourseIds, getAmandaCourseAccessDecision } from '@/lib/amanda-catherine/client-access';
 import { roleAtLeast } from '@/lib/rbac';
 
 export const dynamic = 'force-dynamic';
@@ -18,8 +18,15 @@ export async function GET(req: NextRequest) {
   }
   const audience = await resolveAmandaAudience({ portalSlug: tenant.portalSlug, email: auth.session.email, role: auth.session.role });
   const assignedCourseIds = await getAmandaAssignedCourseIds(tenant.portalSlug, auth.session.email);
-  if (!accountCanAccessCourse(audience, assignedCourseIds, courseId, Boolean(auth.session.role && roleAtLeast(auth.session.role, 'admin')))) return NextResponse.json({ error: 'This course is not assigned to this account.' }, { status: 403 });
-  return NextResponse.json({ ok: true, progress: await getAmandaCourseProgress(tenant.portalSlug, auth.session.email, courseId) });
+  const isAdmin = Boolean(auth.session.role && roleAtLeast(auth.session.role, 'admin'));
+  const preview = req.nextUrl.searchParams.get('preview') === 'true';
+  if (preview && !isAdmin) return NextResponse.json({ error: 'Administrator preview only.' }, { status: 403 });
+  if (!accountCanAccessCourse(audience, assignedCourseIds, courseId, isAdmin)) {
+    const access = await getAmandaCourseAccessDecision(tenant.portalSlug, auth.session.email, courseId);
+    if (access.reason === 'TRIAL_EXPIRED') return NextResponse.json({ error: 'Your test access expired.', reason: 'TRIAL_EXPIRED', redirect: access.redirect }, { status: 403 });
+    return NextResponse.json({ error: 'This course is not assigned to this account.' }, { status: 403 });
+  }
+  return NextResponse.json({ ok: true, progress: await peekAmandaCourseProgress(tenant.portalSlug, auth.session.email, courseId, preview) });
 }
 
 export async function POST(req: NextRequest) {
@@ -39,7 +46,11 @@ export async function POST(req: NextRequest) {
   try {
     const audience = await resolveAmandaAudience({ portalSlug: tenant.portalSlug, email: auth.session.email, role: auth.session.role });
     const assignedCourseIds = await getAmandaAssignedCourseIds(tenant.portalSlug, auth.session.email);
-    if (!accountCanAccessCourse(audience, assignedCourseIds, body.courseId, Boolean(auth.session.role && roleAtLeast(auth.session.role, 'admin')))) return NextResponse.json({ error: 'This course is not assigned to this account.' }, { status: 403 });
+    if (!accountCanAccessCourse(audience, assignedCourseIds, body.courseId, Boolean(auth.session.role && roleAtLeast(auth.session.role, 'admin')))) {
+      const access = await getAmandaCourseAccessDecision(tenant.portalSlug, auth.session.email, body.courseId);
+      if (access.reason === 'TRIAL_EXPIRED') return NextResponse.json({ error: 'Your test access expired.', reason: 'TRIAL_EXPIRED', redirect: access.redirect }, { status: 403 });
+      return NextResponse.json({ error: 'This course is not assigned to this account.' }, { status: 403 });
+    }
     const progress = await updateAmandaCourseProgress(tenant.portalSlug, auth.session.email, body.courseId, {
       completedLessons: body.completedLessons,
       practicalRequirements: body.practicalRequirements,
