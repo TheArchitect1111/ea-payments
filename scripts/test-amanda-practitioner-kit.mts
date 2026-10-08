@@ -47,5 +47,5 @@ for(const path of ['lib/amanda-catherine/config.ts','app/api/public/amanda/enrol
   assert.ok(readFileSync(path,'utf8').length>100, `Protected Amanda contract missing or empty: ${path}`);
 }
 assert.ok(page.includes('`/courses/${encodeURIComponent(course.courseId)}`'));
-assert.ok(page.includes('`/amanda-catherine/courses/${encodeURIComponent(course.id)}#waitlist`'));
+assert.ok(page.includes('`/courses/${encodeURIComponent(course.id)}#waitlist`'));
 console.log('Amanda kit: checkout amount/currency server-owned, CSRF rejected, paid-session validation passed, preview writes suppressed; Jane/imagery/portal/enrollment invariants preserved.');
