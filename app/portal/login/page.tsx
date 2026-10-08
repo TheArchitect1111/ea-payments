@@ -5,6 +5,7 @@ import RealmLoginCard from '@/components/auth/RealmLoginCard';
 import { getRealmLoginCopy, magicLinkErrorMessage } from '@/lib/auth/realm-login-copy';
 import amandaPhoto from '@/public/home/client-amanda-catherine.jpg';
 import './portal-login.css';
+import AmandaWarmLetter from '@/components/amanda/AmandaWarmLetter';
 
 const copy = getRealmLoginCopy('portal');
 
@@ -134,6 +135,7 @@ export default async function PortalLoginPage({ searchParams }: { searchParams: 
       <div className="pl-shell">
         {amandaLearning ? <AmandaLearningLoginBrand /> : amanda ? <AmandaLoginBrand /> : <DefaultLoginBrand />}
 
+        {amanda ? <AmandaWarmLetter compact/> : null}
         <RealmLoginCard realm="portal" next={nextPath} error={error} showTitle={false} />
 
         <footer className="pl-footer">
