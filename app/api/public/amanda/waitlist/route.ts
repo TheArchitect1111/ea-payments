@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { findAmandaWaitlistInterest } from '@/lib/amanda-catherine/waitlist-interests';
-import { saveAmandaWaitlist, notifyAmandaWaitlist } from '@/lib/amanda-catherine/waitlist';
+import { saveAmandaWaitlist, notifyAmandaWaitlist, updateAmandaWaitlistNotification } from '@/lib/amanda-catherine/waitlist';
 import { checkRateLimit } from '@/lib/ai/rate-limit';
 import { registry, create } from '@/lib/amanda-catherine/registry';
 export async function POST(req: NextRequest) {
@@ -13,7 +13,9 @@ export async function POST(req: NextRequest) {
   const name = String(body.name || '').trim().slice(0, 120);
   if (!course || !/^\S+@\S+\.\S+$/.test(email) || name.length < 2) return NextResponse.json({ error: 'A waitlist course, name and valid email are required.' }, { status: 400 });
   const data = { student_name: name, student_email: email, student_phone: String(body.phone || '').trim().slice(0, 40), student_message: String(body.message || '').trim().slice(0, 2000), course_name: course.title, course_slug: course.id, course_url: `${req.nextUrl.origin}/amanda-catherine/courses/${encodeURIComponent(course.id)}#waitlist` };
-  try { await saveAmandaWaitlist(data); } catch { return NextResponse.json({ error: 'The waitlist could not be saved. Please try again.' }, { status: 503 }); }
+  let waitlistRecordId: string;
+  try { waitlistRecordId = await saveAmandaWaitlist(data); }
+  catch { return NextResponse.json({ error: 'The waitlist could not be saved. Please try again.' }, { status: 503 }); }
   try {
     const current = await registry();
     const courseRecord = current.courses.find(item => item.key === course.id);
@@ -36,6 +38,13 @@ export async function POST(req: NextRequest) {
   } catch {
     return NextResponse.json({ error: 'Your waitlist was saved, but the Business Interested record could not be written. Please try again shortly.' }, { status: 503 });
   }
-  try { await notifyAmandaWaitlist(data); } catch { return NextResponse.json({ error: 'Your request was saved, but Amanda could not be notified. Please contact Amanda before submitting again.' }, { status: 503 }); }
+  try {
+    const provider = await notifyAmandaWaitlist(data);
+    await updateAmandaWaitlistNotification(waitlistRecordId, 'sent', provider);
+  } catch (error) {
+    console.error('[amanda-waitlist] owner notification failed', error instanceof Error ? error.message : 'Unknown delivery error');
+    try { await updateAmandaWaitlistNotification(waitlistRecordId, 'failed', 'none'); } catch (persistError) { console.error('[amanda-waitlist] notification status persistence failed', persistError); }
+    return NextResponse.json({ ok: true, warning: 'Your place on the waitlist is saved. Amanda notification requires follow-up.' });
+  }
   return NextResponse.json({ ok: true });
 }
