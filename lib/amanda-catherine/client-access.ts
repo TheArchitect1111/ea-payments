@@ -259,3 +259,47 @@ export async function provisionAmandaClientAccess(input: {
     loginUrl: `${canonicalPlatformOrigin()}/portal/login?next=%2Fportal%2F${AMANDA_PORTAL_SLUG}%2Flearning`,
   };
 }
+
+/** Hourly, idempotent maintenance. Authorization always enforces the expiry timestamp,
+ * so a delayed cron can never extend access. */
+export async function expireAmandaTestEntitlements(now = new Date()) {
+  const portalSlug = AMANDA_PORTAL_SLUG;
+  const orgId = syntheticOrgId(portalSlug);
+  const records = await listStudioRecords<unknown>('experience', orgId);
+  let scanned = 0;
+  let expired = 0;
+  const errors: string[] = [];
+  for (const row of records) {
+    const parsed = AmandaAccessProfileSchema.safeParse(row);
+    if (!parsed.success || parsed.data.portalSlug !== portalSlug) continue;
+    scanned += 1;
+    const email = parsed.data.email;
+    // Re-load before write so a recent full-price upgrade is never clobbered.
+    const fresh = AmandaAccessProfileSchema.safeParse(
+      await loadStudioRecord<unknown>('experience', accessProfileId(portalSlug, email)),
+    );
+    if (!fresh.success) continue;
+    const entitlements = { ...(fresh.data.entitlements ?? {}) };
+    let changed = false;
+    for (const [courseId, grant] of Object.entries(entitlements)) {
+      if (grant.isTestAccess && grant.status !== 'expired' &&
+          amandaTrialExpired(grant, now.getTime())) {
+        entitlements[courseId] = { ...grant, status: 'expired' };
+        changed = true;
+        expired += 1;
+      }
+    }
+    if (!changed) continue;
+    const saved = await saveStudioRecord({
+      recordType: 'experience',
+      id: accessProfileId(portalSlug, email),
+      organizationId: orgId,
+      title: `Amanda client access: ${email}`,
+      payload: { ...fresh.data, entitlements, updatedAt: now.toISOString() },
+    });
+    if (!saved.ok || (process.env.VERCEL_ENV === 'production' && !saved.persistedToAirtable)) {
+      errors.push(`Could not durably update an expired entitlement for ${email}`);
+    }
+  }
+  return { scanned, expired, errors, ok: errors.length === 0 };
+}
