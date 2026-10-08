@@ -7,6 +7,7 @@ on:
     paths:
       - 'scripts/export-airtable-recovery.mjs'
       - 'scripts/restore-airtable-recovery.py'
+      - 'scripts/verify-blob-disaster-recovery.mjs'
       - '.github/workflows/airtable-disaster-recovery.yml'
       - 'docs/governance/AIRTABLE-DISASTER-RECOVERY.md'
   schedule:
@@ -18,6 +19,12 @@ permissions:
 env:
   AIRTABLE_API_KEY: ${{ secrets.AIRTABLE_API_KEY }}
   AIRTABLE_PAT: ${{ secrets.AIRTABLE_PAT }}
+  AIRTABLE_TOKEN: ${{ secrets.AIRTABLE_TOKEN }}
+  AIRTABLE_ACCESS_TOKEN: ${{ secrets.AIRTABLE_ACCESS_TOKEN }}
+  BLOB_READ_WRITE_TOKEN: ${{ secrets.BLOB_READ_WRITE_TOKEN }}
+  EA_BLOB_DR_RESTORE_TOKEN: ${{ secrets.EA_BLOB_DR_RESTORE_TOKEN }}
+  EA_DR_BACKUP_KEY: ${{ secrets.EA_DR_BACKUP_KEY }}
+  EA_BLOB_DR_PREFIXES: ${{ vars.EA_BLOB_DR_PREFIXES }}
   AIRTABLE_PAYMENTS_BASE_ID: appv0YoLIMY45fmDA
   EA_RECOVERY_EXPORT_DIR: .recovery/airtable
 
@@ -37,16 +44,34 @@ jobs:
       - name: Verify recovery credential is available
         shell: bash
         run: |
-          if [ -z "${AIRTABLE_API_KEY}" ] && [ -z "${AIRTABLE_PAT}" ]; then
-            echo "BLOCKED: configure AIRTABLE_API_KEY or AIRTABLE_PAT as a GitHub Actions secret."
+          if [ -z "${AIRTABLE_API_KEY}" ] && [ -z "${AIRTABLE_PAT}" ] && [ -z "${AIRTABLE_TOKEN}" ] && [ -z "${AIRTABLE_ACCESS_TOKEN}" ]; then
+            echo "BLOCKED: configure AIRTABLE_API_KEY, AIRTABLE_PAT, AIRTABLE_TOKEN or AIRTABLE_ACCESS_TOKEN as a GitHub Actions secret."
             exit 1
           fi
+
+      - name: Verify Blob recovery isolation and encryption settings
+        shell: bash
+        run: |
+          if [ -z "${BLOB_READ_WRITE_TOKEN}" ] || [ -z "${EA_BLOB_DR_RESTORE_TOKEN}" ] || [ -z "${EA_DR_BACKUP_KEY}" ] || [ -z "${EA_BLOB_DR_PREFIXES}" ]; then
+            echo "BLOCKED: independent Blob source, restore token, encrypted backup key and namespace prefixes are required."
+            exit 1
+          fi
+          if [ "${BLOB_READ_WRITE_TOKEN}" = "${EA_BLOB_DR_RESTORE_TOKEN}" ]; then
+            echo "BLOCKED: disaster recovery must use an INDEPENDENT Blob store."
+            exit 1
+          fi
+
+      - name: Install Vercel Blob client from locked dependencies
+        run: npm ci --ignore-scripts --no-audit --no-fund
 
       - name: Export complete Airtable recovery package
         run: node scripts/export-airtable-recovery.mjs
 
       - name: Restore into provider-neutral SQLite
         run: python3 scripts/restore-airtable-recovery.py .recovery/airtable .recovery/ea-recovery.sqlite
+
+      - name: Export, encrypt, independently restore and verify private Blob store
+        run: node scripts/verify-blob-disaster-recovery.mjs
 
       - name: Write recovery proof summary
         shell: bash
@@ -57,8 +82,15 @@ jobs:
           manifest = json.loads((root/'manifest.json').read_text())
           db = sqlite3.connect('.recovery/ea-recovery.sqlite')
           integrity = db.execute('PRAGMA integrity_check').fetchone()[0]
+          blob_proof = json.loads(pathlib.Path('.recovery/blob/recovery-proof.json').read_text())
+          blob_pass = (blob_proof.get('status') == 'PASS' and
+                       blob_proof.get('independentProvider') is True and
+                       blob_proof.get('privateStore') is True and
+                       blob_proof.get('freshRead') is True and
+                       blob_proof.get('sourceObjectCount', 0) > 0 and
+                       blob_proof.get('sourceObjectCount') == blob_proof.get('restoreObjectCount'))
           proof = {
-            'status': 'PASS' if integrity == 'ok' else 'FAIL',
+            'status': 'PASS' if integrity == 'ok' and blob_pass else 'FAIL',
             'verifiedAt': datetime.datetime.now(datetime.timezone.utc).isoformat(),
             'format': manifest['format'],
             'baseId': manifest['baseId'],
@@ -66,6 +98,11 @@ jobs:
             'tableCount': manifest['tableCount'],
             'recordCount': manifest['recordCount'],
             'sqliteIntegrity': integrity,
+            'blobRecoveryStatus': blob_proof.get('status'),
+            'blobObjectCount': blob_proof.get('sourceObjectCount'),
+            'blobRestoreCount': blob_proof.get('restoreObjectCount'),
+            'blobArchiveEncrypted': True,
+            'independentBlobStore': blob_proof.get('independentProvider'),
             'manifestSha256': hashlib.sha256((root/'manifest.json').read_bytes()).hexdigest(),
             'sourceCommit': '${{ github.sha }}'
           }
@@ -82,6 +119,8 @@ jobs:
           path: |
             .recovery/airtable/
             .recovery/ea-recovery.sqlite
+            .recovery/blob/private-blobs.aes256gcm
+            .recovery/blob/recovery-proof.json
             .recovery/recovery-proof.json
           if-no-files-found: error
           retention-days: 30
