@@ -52,6 +52,22 @@ jobs:
           cache: npm
       - run: npm ci --ignore-scripts
       - run: npx playwright install --with-deps chromium
+      - name: Wait until new Amanda homepage is live before post-promotion checks
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' && startsWith(github.event.head_commit.message, '[EA-GATED]') }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 48); do
+            html="$(curl -fLsS --max-time 20 --retry 2 https://amandacatherine.ca/ || true)"
+            if [[ "$html" == *"One integrated mission"* ]] && [[ "$html" != *"A note from Amanda"* ]] && [[ "$html" == *"ICDExpertExperienceKit"* ]]; then
+              echo "Amanda official homepage release observed on live domain"
+              exit 0
+            fi
+            echo "Waiting for promoted Amanda page (check $attempt/48)"
+            sleep 10
+          done
+          echo "Expected Amanda homepage not live after release verification window" >&2
+          exit 1
       - name: Verify public Amanda production routes
         env:
           AMANDA_VERIFY_DEPLOYED: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' && startsWith(github.event.head_commit.message, '[EA-GATED]') }}
