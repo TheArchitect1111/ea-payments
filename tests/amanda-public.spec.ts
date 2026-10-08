@@ -33,6 +33,7 @@ test.describe('Amanda public production checks (no credentials and no payments)'
   });
 
   test('expired test learners see upgrade CTA without a login loop', async ({ page }) => {
+    test.skip(process.env.AMANDA_VERIFY_DEPLOYED !== 'true', 'Run only after EA-GATED production promotion; PR preview is protected and not yet the live site.');
     await page.goto(base + '/portal/amanda-catherine/expired?courseId=aesthetikine-reset-training', { waitUntil: 'domcontentloaded' });
     await expect(page.getByRole('heading', { name: /Your \$1 test access has expired/i })).toBeVisible();
     await expect(page.getByRole('link', { name: /Upgrade to full course access/i })).toBeVisible();
