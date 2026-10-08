@@ -53,6 +53,8 @@ jobs:
       - run: npm ci --ignore-scripts
       - run: npx playwright install --with-deps chromium
       - name: Verify public Amanda production routes
+        env:
+          AMANDA_VERIFY_DEPLOYED: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' && startsWith(github.event.head_commit.message, '[EA-GATED]') }}
         run: npx playwright test --config=playwright.amanda.config.ts
       - name: Save browser evidence when checks fail
         if: always()
