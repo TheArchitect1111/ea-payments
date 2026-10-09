@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-// TB3-only film manifest. Four distinct uploaded clips have been verified.
-// Do not publish as the requested five-film release until FILM 05 is supplied.
+// TB3-only verified collection: four distinct videos and one static scoreboard photograph.
 export type Tb3FilmAsset = {
   id: string;
   title: string;
@@ -11,16 +10,18 @@ export type Tb3FilmAsset = {
   poster: string;
   category: "Athlete";
   subcategory: "Film";
+  type: "video" | "photo";
 };
 export const tb3FilmAssets: Tb3FilmAsset[] = [
-  { id: "TB3-FILM-001", title: "FILM 01 - DUNK", filename: "VID_20261009_003250.mp4", poster: "/videos/tb3/VID_20261009_003250.jpg", category: "Athlete", subcategory: "Film" },
-  { id: "TB3-FILM-002", title: "FILM 02 - JUMBOTRON 18/8/3", filename: "VID_20261009_003245.mp4", poster: "/videos/tb3/scoreboard-proof.jpg", category: "Athlete", subcategory: "Film" },
-  { id: "TB3-FILM-003", title: "FILM 03 - DRIVE", filename: "VID_20261009_003231.mp4", poster: "/videos/tb3/VID_20261009_003231.jpg", category: "Athlete", subcategory: "Film" },
-  { id: "TB3-FILM-004", title: "FILM 04 - DEFENSE", filename: "VID_20261009_003236.mp4", poster: "/videos/tb3/VID_20261009_003236.jpg", category: "Athlete", subcategory: "Film" },
+  { id: "TB3-FILM-001", title: "FILM 01 - DUNK", filename: "TB3-FILM-001-DUNK-HD.mp4", poster: "/videos/tb3-film/TB3-FILM-001-poster.webp", category: "Athlete", subcategory: "Film", type: "video" },
+  { id: "TB3-FILM-002", title: "FILM 02 - JUMBOTRON 18/8/3", filename: "TB3-FILM-002-JUMBOTRON-18-8-3-HD.mp4", poster: "/videos/tb3-film/TB3-FILM-005-SCOREBOARD-PROOF.jpg", category: "Athlete", subcategory: "Film", type: "video" },
+  { id: "TB3-FILM-003", title: "FILM 03 - DRIVE", filename: "TB3-FILM-003-DRIVE-FINISH-HD.mp4", poster: "/videos/tb3-film/TB3-FILM-003-poster.webp", category: "Athlete", subcategory: "Film", type: "video" },
+  { id: "TB3-FILM-004", title: "FILM 04 - DEFENSE", filename: "TB3-FILM-004-DEFENSE-BATTLE-HD.mp4", poster: "/videos/tb3-film/TB3-FILM-004-poster.webp", category: "Athlete", subcategory: "Film", type: "video" },
+  { id: "TB3-FILM-005", title: "SCOREBOARD PROOF - 18/8/3/1", filename: "TB3-FILM-005-SCOREBOARD-PROOF.jpg", poster: "/videos/tb3-film/TB3-FILM-005-poster.webp", category: "Athlete", subcategory: "Film", type: "photo" },
 ];
 
 export function tb3FilmUrl(filename: string) {
-  return "/videos/tb3/" + filename;
+  return "/videos/tb3-film/" + filename;
 }
 
 export function Tb3FilmGrid() {
@@ -54,17 +55,15 @@ export function Tb3FilmGrid() {
           <article key={film.id} className="min-w-0 overflow-hidden border border-black/20">
             <button
               type="button"
-              aria-label={"Play " + film.title}
+              aria-label={(film.type === "photo" ? "View " : "Play ") + film.title}
               onClick={() => setSelected(film)}
-              onMouseEnter={(event) => onHoverStart(event.currentTarget)}
+              onMouseEnter={(event) => { if (film.type === "video") onHoverStart(event.currentTarget); }}
               onMouseLeave={(event) => onHoverEnd(event.currentTarget)}
               className="group relative block w-full overflow-hidden bg-[#141414] text-left"
             >
-              <video className="aspect-video w-full object-cover" src={tb3FilmUrl(film.filename)} poster={film.poster} muted loop playsInline preload="metadata" aria-hidden="true" />
+              {film.type === "video" ? <video className="aspect-video w-full object-cover" src={tb3FilmUrl(film.filename)} poster={film.poster} muted loop playsInline preload="metadata" aria-hidden="true" /> : <img className="aspect-video w-full object-cover" src={film.poster} alt={film.title} loading="lazy" />}
               <span className="pointer-events-none absolute inset-0 bg-black/35 transition group-hover:bg-black/20" />
-              <span className="pointer-events-none absolute inset-0 grid place-items-center">
-                <span className="grid h-14 w-14 place-items-center rounded-full bg-white text-xl text-[#A51C30] transition group-hover:scale-105" aria-hidden="true">▶</span>
-              </span>
+              {film.type === "video" && <span className="pointer-events-none absolute inset-0 grid place-items-center"><span className="grid h-14 w-14 place-items-center rounded-full bg-white text-xl text-[#A51C30] transition group-hover:scale-105" aria-hidden="true">▶</span></span>}
             </button>
             <p className="px-3 py-4 text-[10px] font-black uppercase tracking-widest">{film.title}</p>
           </article>
@@ -74,7 +73,7 @@ export function Tb3FilmGrid() {
         <div role="presentation" className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 p-3 sm:p-8" onClick={(event) => { if (event.target === event.currentTarget) setSelected(null); }}>
           <div role="dialog" aria-modal="true" aria-label={selected.title} className="relative w-full max-w-6xl">
             <button type="button" onClick={() => setSelected(null)} aria-label="Close film" className="absolute -top-11 right-0 grid h-10 w-10 place-items-center rounded-full border border-white/40 text-2xl text-white">×</button>
-            <video key={selected.id} src={tb3FilmUrl(selected.filename)} poster={selected.poster} controls autoPlay playsInline preload="metadata" className="max-h-[85dvh] w-full bg-black object-contain" />
+            {selected.type === "video" ? <video key={selected.id} src={tb3FilmUrl(selected.filename)} poster={selected.poster} controls autoPlay playsInline preload="metadata" className="max-h-[85dvh] w-full bg-black object-contain" /> : <img src={tb3FilmUrl(selected.filename)} alt={selected.title} className="max-h-[85dvh] w-full object-contain" />}
             <p className="mt-3 text-xs font-bold tracking-widest text-white">{selected.title}</p>
           </div>
         </div>
