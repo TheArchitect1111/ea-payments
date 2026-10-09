@@ -19,7 +19,10 @@ const LeadSchema = z.object({
 });
 
 function authorized(req: NextRequest) {
-  const expected = process.env.INGEST_API_KEY?.trim() || '';
+  const ingestKey = process.env.INGEST_API_KEY?.trim();
+  const trackingKey = process.env.TRACKING_PORTAL_API_KEY?.trim();
+  const expected = ingestKey || trackingKey || '';
+  console.info('[lead-ingest] authorization key source', ingestKey ? 'INGEST_API_KEY' : trackingKey ? 'TRACKING_PORTAL_API_KEY' : 'none');
   const received = req.headers.get('x-api-key') || '';
   if (!expected || !received) return false;
   const left = Buffer.from(expected);
