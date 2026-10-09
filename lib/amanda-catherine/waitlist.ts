@@ -4,9 +4,9 @@ import { airtableConfigured, airtableUpsertByField, airtableUpdate } from '@/lib
 export type AmandaWaitlistData = { student_name: string; student_email: string; student_phone: string; course_name: string; course_slug: string; student_message?: string; course_url: string };
 // Adapted from the supplied Amanda Waitlist Email Templates PDF; no invented admin URL.
 export async function notifyAmandaWaitlist(data: AmandaWaitlistData) {
-  const text = `New waitlist interest: ${data.course_name}\nName: ${data.student_name}\nEmail: ${data.student_email}\nPhone: ${data.student_phone}\nMessage: ${data.student_message || '(none)'}\nSource: ${data.course_url}\nStatus: WAITLIST ONLY. No payment or course entitlement.`;
+  const live = data.registration_type === 'live';\n  const text = `${live ? 'New live registration' : 'New waitlist interest'}: ${data.course_name}\nName: ${data.student_name}\nEmail: ${data.student_email}\nPhone: ${data.student_phone}\nMessage: ${data.student_message || '(none)'}\nSource: ${data.course_url}\nStatus: ${live ? 'LIVE REGISTRATION' : 'WAITLIST ONLY'}. No payment or course entitlement.`;
   if (process.env.AMANDA_GMAIL_CLIENT_ID && process.env.AMANDA_GMAIL_CLIENT_SECRET && process.env.AMANDA_GMAIL_REFRESH_TOKEN) {
-    await sendGmailEmail({ to: 'Amanda@aesthetikine.com', subject: `New Waitlist: ${data.course_name}`, text });
+    await sendGmailEmail({ to: 'Amanda@aesthetikine.com', subject: `${live ? 'New Live Registration' : 'New Waitlist'}: ${data.course_name}`, text });
     return 'gmail';
   }
   const fallback = await sendAuthEmail({

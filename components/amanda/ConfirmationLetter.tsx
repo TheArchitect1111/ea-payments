@@ -4,7 +4,7 @@ export type ConfirmationLetterData = {
   type: 'live' | 'waitlist';
   subject: string;
   body_html: string;
-  first_name?: string;
+  first_name: string;
 };
 
 function safeHtml(template: string, values: Record<string, string>) {

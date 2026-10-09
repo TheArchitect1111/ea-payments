@@ -38,7 +38,7 @@ export default function AmandaLettersEditor() {
   }
   return (
     <section className="grid gap-8">
-      <header><p className="text-xs font-bold uppercase tracking-[0.16em]">Amanda Catherine</p><h1 className="font-serif text-4xl">Confirmation letters</h1><p>Edit the message shown after a live registration or waitlist submission. Supported variables: {{first_name}}, {{class_name}}.</p></header>
+      <header><p className="text-xs font-bold uppercase tracking-[0.16em]">Amanda Catherine</p><h1 className="font-serif text-4xl">Confirmation letters</h1><p>Edit the message shown after a live registration or waitlist submission. Supported variables: {'{{first_name}}'}, {'{{class_name}}'}.</p></header>
       {letters.map((letter) => <article key={letter.type} className="grid gap-3 rounded-lg border bg-white p-5">
         <h2 className="font-serif text-2xl">{letter.type === 'live' ? 'Live registration' : 'Waitlist'}</h2>
         <label className="grid gap-1">Subject<input value={letter.subject} onChange={(event) => update(letter.type, 'subject', event.target.value)} /></label>
