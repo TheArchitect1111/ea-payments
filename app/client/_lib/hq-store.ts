@@ -129,7 +129,7 @@ export async function undoHqProject(id: string): Promise<HqProject | null> {
   const snapshot = await readBlobJson<HqProject & { savedAt?: string }>(recent[0].pathname);
   if (!snapshot) return null;
   const restored: HqProject = { ...snapshot, updatedAt: new Date().toISOString(), updatedBy: 'Robert' };
-  await writeBlobJson(contentPath(id), restored);
+  await saveHqProject(restored);
   return restored;
 }
 
