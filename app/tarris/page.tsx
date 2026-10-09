@@ -105,7 +105,20 @@ export default function TarrisPublicPage() {
             <p className="text-[9px] leading-5 tracking-[0.12em]">DISCIPLINE.<br />DETERMINATION.<br />DEVELOPMENT.<br />DESTINY.</p>
           </div>
           <div className="text-center">
-            <ImageSlot id="tb3-public-hero" asset="OFFICIAL_00_HERO_TB3_MORE_THAN_A_GAME.png" alt="TB3: More Than a Game" ratio="aspect-[16/9]" hero />
+            <div className="relative w-full aspect-[16/9] overflow-hidden bg-[#0A0A0A]">
+              <video
+                id="tb3-public-hero"
+                src="/videos/tb3-intro/tb3-billboard-intro.mp4"
+                poster="/images/tb3-official/OFFICIAL_00_HERO_TB3_MORE_THAN_A_GAME.png"
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload="metadata"
+                aria-label="Tarris Bouie Alabama number 4 billboard intro: More Than a Game"
+                className="absolute inset-0 h-full w-full object-cover"
+              />
+            </div>
             <p className="mt-5 text-[11px] font-semibold tracking-[0.45em]">TARRIS BOUIE</p>
             <h1 className="mt-3 text-[clamp(2.5rem,5.5vw,5.5rem)] font-black leading-[0.95] tracking-[-0.06em]">MORE THAN<br /><span className="text-[#A51C30]">A GAME.</span></h1>
             <div className="mt-6 flex flex-wrap justify-center gap-3"><Disabled className="border border-black px-5 py-3 text-[10px] font-bold tracking-[0.16em]">WATCH THE STORY</Disabled><HQLink /></div>
