@@ -86,7 +86,8 @@ async function inspectViewport(browser, name, viewport, isMobile = false, pageTa
 
   page.on('console', (msg) => { if (msg.type() === 'error') consoleErrors.push(msg.text()); });
   page.on('pageerror', (err) => pageErrors.push(String(err)));
-  page.on('requestfailed', (req) => failedRequests.push(`${req.method()} ${req.url()} :: ${req.failure()?.errorText || 'failed'}`));
+  const onRequestFailed = (req) => failedRequests.push(`${req.method()} ${req.url()} :: ${req.failure()?.errorText || 'failed'}`);
+  page.on('requestfailed', onRequestFailed);
   page.on('response', (res) => {
     const type = res.request().resourceType();
     if (type === 'image' && !res.ok()) badImageResponses.push(`${res.status()} ${res.url()}`);
@@ -150,6 +151,7 @@ async function inspectViewport(browser, name, viewport, isMobile = false, pageTa
 
   const screenshot = path.join(outDir, `${name}.png`);
   await page.screenshot({ path: screenshot, fullPage: true });
+  page.off('requestfailed', onRequestFailed);
   await context.close();
 
   const brokenImgs = dom.imgs.filter((img) => !img.complete || img.naturalWidth < 8 || img.naturalHeight < 8);
