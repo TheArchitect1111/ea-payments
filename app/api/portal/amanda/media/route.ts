@@ -51,6 +51,7 @@ export async function POST(request: NextRequest) {
     const media = await createAmandaMediaAsset({
       title,
       url: blob.url,
+      thumbnail: isImage ? blob.url : '',
       type: isVideo ? 'video' : 'image',
       sort_order: Number(form.get('sort_order') || 0),
       is_visible: form.get('is_visible') !== 'false',

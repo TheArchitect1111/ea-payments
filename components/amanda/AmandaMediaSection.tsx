@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 
-type MediaItem = { id: string; title: string; url: string; type: 'image' | 'video'; sort_order: number };
+type MediaItem = { id: string; title: string; url: string; thumbnail?: string; type: 'image' | 'video'; sort_order: number };
 
 export default function AmandaMediaSection() {
   const [media, setMedia] = useState<MediaItem[]>([]);
@@ -25,8 +25,8 @@ export default function AmandaMediaSection() {
           {media.map((item) => (
             <button key={item.id} type="button" className="ac-course text-left" onClick={() => setSelected(item)} aria-label={`Open ${item.title}`}>
               {item.type === 'video'
-                ? <video src={item.url} controls preload="metadata" className="w-full" aria-label={item.title} />
-                : <img src={item.url} alt={item.title} className="w-full object-cover" loading="lazy" />}
+                ? <video src={item.url} poster={item.thumbnail || undefined} controls preload="metadata" className="w-full" aria-label={item.title} />
+                : <img src={item.thumbnail || item.url} alt={item.title} className="w-full object-cover" loading="lazy" />}
               <strong className="mt-3 block">{item.title}</strong>
             </button>
           ))}
@@ -35,8 +35,8 @@ export default function AmandaMediaSection() {
           <div role="dialog" aria-modal="true" aria-label={selected.title} className="fixed inset-0 z-50 grid place-items-center bg-black/90 p-5" onClick={() => setSelected(null)}>
             <button type="button" className="absolute right-5 top-5 rounded bg-white px-4 py-2" onClick={() => setSelected(null)}>Close</button>
             {selected.type === 'video'
-              ? <video src={selected.url} controls autoPlay className="max-h-[85vh] max-w-full" onClick={(event) => event.stopPropagation()} />
-              : <img src={selected.url} alt={selected.title} className="max-h-[85vh] max-w-full object-contain" onClick={(event) => event.stopPropagation()} />}
+              ? <video src={selected.url} poster={selected.thumbnail || undefined} controls autoPlay className="max-h-[85vh] max-w-full" onClick={(event) => event.stopPropagation()} />
+              : <img src={selected.thumbnail || selected.url} alt={selected.title} className="max-h-[85vh] max-w-full object-contain" onClick={(event) => event.stopPropagation()} />}
           </div>
         )}
       </div>
