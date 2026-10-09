@@ -4,7 +4,7 @@
 import Link from "next/link";
 import BookingForm from "./book/booking-form";
 import { Tb3FilmGrid } from "./tb3-film";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 
 const pillars = [
   ["ATHLETE", "Discipline in the classroom. Determination on the court.", "LEARN MORE"],
@@ -87,7 +87,45 @@ function HQLink({ dark = false }: { dark?: boolean }) {
   return <Link href="/tarris/future" className={`inline-flex items-center justify-center px-5 py-3 text-[10px] font-bold tracking-[0.16em] transition hover:opacity-80 ${dark ? "bg-[#F7F5F2] text-black" : "bg-[#A51C30] text-white"}`}>ENTER TB3 HQ →</Link>;
 }
 export default function TarrisPublicPage() {
+  useEffect(() => {
+    const intro = document.getElementById("tarris-splash-intro");
+    if (!intro) return;
+    document.body.prepend(intro);
+    document.body.style.overflow = "hidden";
+    const btn = document.getElementById("enter-site-btn");
+    if (!btn) return;
+
+    const enterSite = () => {
+      intro.style.transition = "opacity 0.8s ease";
+      intro.style.opacity = "0";
+      window.setTimeout(() => {
+        intro.style.display = "none";
+        document.body.style.overflow = "";
+        document.getElementById("site")?.classList?.add("visible");
+      }, 800);
+    };
+    btn.addEventListener("click", enterSite);
+    const autoDismiss = window.setTimeout(() => {
+      if (intro.style.display !== "none") btn.click();
+    }, 6000);
+    return () => {
+      btn.removeEventListener("click", enterSite);
+      window.clearTimeout(autoDismiss);
+    };
+  }, []);
+
   return (
+    <>
+    <div id="tarris-splash-intro" style={{ position: "fixed", inset: 0, width: "100vw", height: "100vh", zIndex: 99999, background: "#000", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", margin: 0, padding: 0 }}>
+      <video id="tarris-intro-video" autoPlay muted loop controls={false} playsInline preload="auto" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}>
+        <source src="/videos/tb3-intro/tb3-billboard-intro.mp4" type="video/mp4" />
+      </video>
+      <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.18)", pointerEvents: "none" }} />
+      <div style={{ position: "absolute", bottom: "8%", left: "50%", transform: "translateX(-50%)", zIndex: 2, display: "flex", flexDirection: "column", alignItems: "center", gap: 14 }}>
+        <button id="enter-site-btn" type="button" style={{ border: "1.5px solid white", color: "white", background: "rgba(0,0,0,0.35)", backdropFilter: "blur(6px)", padding: "14px 36px", letterSpacing: "3px", fontSize: "13px", cursor: "pointer" }}>ENTER SITE</button>
+        <div style={{ color: "white", opacity: 0.7, fontSize: "10px", letterSpacing: "3px" }}>TARRIS BOUIE // MORE THAN A GAME</div>
+      </div>
+    </div>
     <div id="public-tarris" className="min-h-screen bg-[#F7F5F2] text-[#141414]">
       <header id="home" className="border-b border-black/15">
         <div className="mx-auto flex max-w-[1440px] flex-wrap items-center justify-between gap-5 px-5 py-5 lg:px-10">
@@ -98,31 +136,8 @@ export default function TarrisPublicPage() {
       </header>
       <a id="book-tarris-sticky" href="#book-tarris-form" className="fixed right-4 top-20 z-50 rounded-lg bg-[#C41E3A] px-4 py-3 text-xs font-bold text-white">BOOK TARRIS / PARTNER WITH TB3</a>
       <main className="mx-auto max-w-[1440px] px-5 lg:px-10">
-        <section aria-label="Tarris Bouie introduction" className="grid gap-8 border-b border-black/20 py-10 lg:grid-cols-[0.55fr_1.6fr] lg:gap-10 lg:py-14">
-          <div className="flex flex-col justify-between gap-8 lg:border-r lg:border-black/15 lg:pr-6">
-            <p className="text-[10px] font-semibold tracking-[0.25em] text-[#A51C30]">SAME VISION<br /><span className="text-black">HIGHER PURPOSE</span></p>
-            <p className="flex flex-wrap gap-x-4 gap-y-2 text-lg font-black leading-[1.25] tracking-tight lg:block lg:text-3xl">STUDENT<br className="hidden lg:block" /> ATHLETE<br className="hidden lg:block" /> BRAND<br className="hidden lg:block" /> IMPACT</p>
-            <p className="text-[9px] leading-5 tracking-[0.12em]">DISCIPLINE.<br />DETERMINATION.<br />DEVELOPMENT.<br />DESTINY.</p>
-          </div>
-          <div className="text-center">
-            <div className="relative w-full aspect-[16/9] overflow-hidden bg-[#0A0A0A]">
-              <video
-                id="tb3-public-hero"
-                src="/videos/tb3-intro/tb3-billboard-intro.mp4"
-                poster="/images/tb3-official/OFFICIAL_00_HERO_TB3_MORE_THAN_A_GAME.png"
-                autoPlay
-                muted
-                loop
-                playsInline
-                preload="metadata"
-                aria-label="Tarris Bouie Alabama number 4 billboard intro: More Than a Game"
-                className="absolute inset-0 h-full w-full object-cover"
-              />
-            </div>
-            <p className="mt-5 text-[11px] font-semibold tracking-[0.45em]">TARRIS BOUIE</p>
-            <h1 className="mt-3 text-[clamp(2.5rem,5.5vw,5.5rem)] font-black leading-[0.95] tracking-[-0.06em]">MORE THAN<br /><span className="text-[#A51C30]">A GAME.</span></h1>
-            <div className="mt-6 flex flex-wrap justify-center gap-3"><Disabled className="border border-black px-5 py-3 text-[10px] font-bold tracking-[0.16em]">WATCH THE STORY</Disabled><HQLink /></div>
-          </div>
+        <section id="original-hero" style={{ height: "92vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#070707" }}>
+          <img src="/images/tb3-official/OFFICIAL_00_HERO_TB3_MORE_THAN_A_GAME.png" alt="Tarris Bouie Logo" style={{ maxWidth: "560px", width: "82vw", height: "auto" }} />
         </section>
         <section aria-label="Five pillars" className="grid gap-6 border-b border-black/20 py-10 sm:grid-cols-2 lg:grid-cols-5">
           {pillars.map(([title, copy, action]) => <article key={title} id={title.toLowerCase()} className="flex scroll-mt-5 flex-col"><div className={`grid gap-2 ${title === "BRAND" || title === "ATHLETE" || title === "COMMUNITY" ? "grid-cols-2" : "grid-cols-1"}`}>{(pillarAssets[title] ?? []).map((asset) => <ImageSlot key={asset.id} {...asset} />)}</div><h2 className="mt-4 text-xl font-black tracking-tight">{title}</h2><p className="mt-2 flex-1 text-xs leading-6 text-black/65">{copy}</p><Disabled className="mt-4 self-start border-b border-[#A51C30] pb-2 text-[9px] font-bold tracking-widest text-[#A51C30]">{action} →</Disabled><a href="#book-tarris-form" className="mt-3 text-xs font-bold text-[#C41E3A]">Book Tarris for this →</a></article>)}
@@ -149,5 +164,6 @@ export default function TarrisPublicPage() {
       </main>
       <footer className="border-t border-black/20"><div className="mx-auto flex max-w-[1440px] flex-wrap items-center justify-between gap-6 px-5 py-8 lg:px-10"><a href="#home" aria-label="TB3 home" className="text-4xl font-black tracking-[-0.1em] text-[#A51C30]">TB3</a><div className="flex flex-wrap gap-4 text-[9px] font-semibold tracking-wider"><a href="#home">HOME</a>{["ABOUT", "CONTACT", "PRIVACY", "TERMS"].map((label) => <Disabled key={label}>{label}</Disabled>)}</div><Disabled className="text-[9px] tracking-wider">SOCIAL</Disabled><span className="font-serif text-2xl italic text-[#A51C30]">Different On Purpose.</span></div></footer>
     </div>
+    </>
   );
 }
