@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
     class_id: lead.class_id,
     registration_type: lead.registration_type,
     created_at: lead.created_at || new Date().toISOString(),
-    source_page: 'https://amandacatherine.ca',
+    source_page: 'amandacatherine.ca',
   });
   if (!saved) return NextResponse.json({ ok: false, error: 'Registration tracking is unavailable' }, { status: 503 });
   return NextResponse.json({ ok: true, id: saved.id, registration_type: lead.registration_type }, { headers: { 'Cache-Control': 'no-store' } });
