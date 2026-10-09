@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import AmandaWarmLetter from '@/components/amanda/AmandaWarmLetter';
 import AmandaWaitlistForm from '@/components/amanda/AmandaWaitlistForm';
+import AppHeaderNote from '@/components/amanda/AppHeaderNote';
 import { registry } from '@/lib/amanda-catherine/registry';
 
 export const dynamic = 'force-dynamic';
@@ -16,6 +17,7 @@ export default async function Page({ params }: { params: Promise<{ courseSlug: s
 
   return (
     <main className="min-h-screen bg-[#f7f1e8] px-5 py-12 text-[#17130f]">
+      <AppHeaderNote appName={course.title} />
       <section className="mx-auto max-w-3xl">
         <AmandaWarmLetter compact />
         <p className="mt-8 text-sm font-bold uppercase tracking-[0.18em] text-[#596b5b]">
