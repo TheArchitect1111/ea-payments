@@ -61,15 +61,15 @@ function certifyTB3() {
   assert.ok(built.rewrites.beforeFiles.some(r => r.source === '/hq/:path*' && r.destination === '/tarris/future/:path*'), 'Missing effective HQ rewrite');
   assert.ok(config.rewrites.some(r => r.source === '/hq/:path*' && r.destination === '/tarris/future/:path*'), 'Missing HQ rewrite');
   assert.ok(!fs.existsSync('app/tarris/future/page.js'), 'Duplicate portal page.js');
-  return { status: 'PASS', profile: 'tb3-approved-placeholders', placeholders, signingPreserved: true, agreementPreserved: true };
+  return { status: 'PASS', profile: 'tb3-film-release', videos, videoHashes, posters, officialImages: [...officialAssets], merchImages: [...merchAssets], signingPreserved: true, agreementPreserved: true };
 }
 
 module.exports = { certifyTB3 };
 if (require.main === module) {
   try {
     certifyTB3();
-    console.log('✅ CERTIFICATION PASS - Approved placeholder release accepted');
-    console.log('Routes: OK | Agreement: preserved | Signing: preserved/moved | Layout markers: OK | Images: approved placeholders');
+    console.log('✅ CERTIFICATION PASS - TB3 film release assets accepted');
+    console.log('Routes: OK | Agreement: preserved | Signing: preserved | Four distinct film videos and scoreboard proof assets verified');
     console.log('Production promotion also requires build and desktop/mobile browser gates.');
   } catch (error) {
     console.error(`CERTIFICATION FAIL: ${error.message}`);

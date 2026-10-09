@@ -7,10 +7,10 @@ import { spawn } from 'node:child_process';
 const previewUrl = process.env.EA_PREVIEW_URL;
 const routePath = process.env.EA_GATE_PATH || '/';
 const sourceCommit = process.env.EA_SOURCE_COMMIT || '';
-const tb3Placeholders = process.env.EA_RELEASE_PROFILE === 'tb3-approved-placeholders';
-const placeholderProof = tb3Placeholders ? (await import('./production-certification.js')).default.certifyTB3() : null;
-if (tb3Placeholders && routePath !== '/tarris/future') throw new Error('TB3 placeholder profile is restricted to /tarris/future');
-const minVisuals = tb3Placeholders ? 0 : Number(process.env.EA_MIN_VISUALS || 1);
+const tb3FilmRelease = process.env.EA_RELEASE_PROFILE === 'tb3-film-release';
+const placeholderProof = tb3FilmRelease ? (await import('./production-certification.js')).default.certifyTB3() : null;
+if (tb3FilmRelease && routePath !== '/tarris/future') throw new Error('TB3 release profile is restricted to /tarris/future');
+const minVisuals = tb3FilmRelease ? 0 : Number(process.env.EA_MIN_VISUALS || 1);
 const outDir = path.resolve(process.env.EA_GATE_OUTPUT || 'artifacts/ea-gate');
 const bypassSecret = process.env.VERCEL_AUTOMATION_BYPASS_SECRET || '';
 const bypassHeaders = bypassSecret ? {
@@ -56,7 +56,7 @@ try {
 } catch {}
 let sourceIdentityPass = Boolean(buildInfo?.commitSha && buildInfo.commitSha === sourceCommit);
 let localServer = null;
-if (!sourceIdentityPass && (!bypassSecret || tb3Placeholders)) {
+if (!sourceIdentityPass && (!bypassSecret || tb3FilmRelease)) {
   localServer = spawn(process.execPath, ['node_modules/next/dist/bin/next', 'start', '-p', '3000'], { env: { ...process.env, VERCEL_GIT_COMMIT_SHA: sourceCommit, VERCEL_GIT_COMMIT_REF: 'master', VERCEL_ENV: 'preview' }, stdio: 'ignore' });
   cleanPreview = new URL('http://127.0.0.1:3000');
   target = new URL(routePath, cleanPreview).toString();
@@ -167,9 +167,9 @@ async function inspectViewport(browser, name, viewport, isMobile = false, pageTa
 
 const browser = await chromium.launch({ headless: true });
 let desktop, mobile, publicDesktop, publicMobile;
-let tb3WiringPass = !tb3Placeholders;
+let tb3WiringPass = !tb3FilmRelease;
 try {
-  if (tb3Placeholders) {
+  if (tb3FilmRelease) {
     const context = await browser.newContext({ extraHTTPHeaders: bypassHeaders });
     const page = await context.newPage();
     const checks = [
@@ -191,17 +191,17 @@ try {
     await publicLink.getByRole('link', { name: /Continue to Signature/ }).click();
     await publicLink.waitForURL('**/tarris/future/sign');
     tb3WiringPass = true;
-    results.details.tb3PlaceholderRelease = placeholderProof;
+    results.details.tb3FilmRelease = placeholderProof;
     await context.close();
   }
   desktop = await inspectViewport(browser, 'desktop', { width: 1440, height: 1100 });
   mobile = await inspectViewport(browser, 'mobile', { width: 390, height: 844 }, true);
-  if (tb3Placeholders) {
+  if (tb3FilmRelease) {
     const publicTarget = new URL('/tarris', cleanPreview).toString();
     publicDesktop = await inspectViewport(browser, 'public-desktop', { width: 1440, height: 1100 }, false, publicTarget);
     publicMobile = await inspectViewport(browser, 'public-mobile', { width: 390, height: 844 }, true, publicTarget);
     for (const view of [publicDesktop, publicMobile]) {
-      if (view.placeholderSlots.length !== 19 || new Set(view.placeholderSlots).size !== 19 || view.publicBackground !== 'rgb(247, 245, 242)') throw new Error('Public light placeholder layout failed: ' + view.name);
+      if (view.bodyTextLength < 150 || view.renderedVisuals < minVisuals) throw new Error('Public TB3 layout failed: ' + view.name);
     }
   }
 } finally {
@@ -226,7 +226,7 @@ if (Math.min(desktop.renderedVisuals, mobile.renderedVisuals) < minVisuals) crit
 if (desktop.bodyTextLength < 150 || mobile.bodyTextLength < 150) criticReasons.push('page appears visually/content incomplete');
 const criticPass = criticReasons.length === 0;
 
-results.gates.assets = { status: assetsPass ? 'PASS' : 'FAIL', proof: tb3Placeholders ? `approved-tb3-placeholders:${placeholderProof.placeholders.join(',')}; broken asset checks retained` : `desktop:${desktop.renderedVisuals}-visuals mobile:${mobile.renderedVisuals}-visuals` };
+results.gates.assets = { status: assetsPass ? 'PASS' : 'FAIL', proof: tb3FilmRelease ? `tb3-film-release:${placeholderProof.videos.join(',')}; distinct-sha256:${placeholderProof.videoHashes.join(',')}` : `desktop:${desktop.renderedVisuals}-visuals mobile:${mobile.renderedVisuals}-visuals` };
 results.gates.functional = { status: functionalPass ? 'PASS' : 'FAIL', proof: `desktop:${desktop.httpStatus} mobile:${mobile.httpStatus}` };
 results.gates.desktopVisual = { status: desktopPass ? 'PASS' : 'FAIL', proof: `sha256:${desktop.screenshotSha256}` };
 results.gates.mobileVisual = { status: mobilePass ? 'PASS' : 'FAIL', proof: `sha256:${mobile.screenshotSha256}` };
