@@ -1,51 +1,88 @@
 {
-  "sourceCommit": "c420f6db00f15e7bf66db38b6b39a2bd31ebb3d7",
-  "previousSourceCommit": "5e708fdb33257ef17116def0bb02bd54fc621206",
-  "previewUrl": "https://ea-payments-3e1j2xprf-the-architects-projects-cc813778.vercel.app/amanda-catherine",
-  "target": "https://amandacatherine.ca/",
-  "completedAt": "2026-10-09T00:05:19.319Z",
+  "sourceCommit": "fea23dff594419e0ffbba92a2cbaf2d7c15e9a53",
+  "previewUrl": "https://ea-payments-q1vr6p2bm-the-architects-projects-cc813778.vercel.app/",
+  "target": "https://ea-payments-q1vr6p2bm-the-architects-projects-cc813778.vercel.app/admin/login?next=%2Fhq",
+  "completedAt": "2026-10-09T13:18:18.992Z",
   "status": "PASS",
   "gates": {
     "sourceIdentity": {
       "status": "PASS",
-      "proof": "PR #518 merged source c420f6db00f15e7bf66db38b6b39a2bd31ebb3d7. Only removed warm welcome article from app/amanda-catherine/page.tsx and updated post-production homepage assertion. No other production source changes."
+      "proof": "preview:fea23dff594419e0ffbba92a2cbaf2d7c15e9a53"
     },
     "build": {
       "status": "PASS",
-      "proof": "Preview HEAD 17e6202d8f83e19f3bd1a01be289104d6a0da9fc Vercel READY; full Github CI 37862656485 passed."
+      "proof": "source:fea23dff594419e0ffbba92a2cbaf2d7c15e9a53"
     },
     "assets": {
       "status": "PASS",
-      "proof": "No assets altered. RIMAN seven-product ICD Expert Experience Kit and separate 499 CAD Body Sculpt practitioner tools remain unchanged in ClientRequestedUpdates.tsx."
+      "proof": "desktop:1-visuals mobile:1-visuals"
     },
     "functional": {
       "status": "PASS",
-      "proof": "Amanda Automated Certification 37862656471 green, Amanda Client Assembly Acceptance 37862656453 green, full CI 37862656485 green, EA modular assembly 37862656452 green, context verification 37862657299 green. Test-only mocked Stripe/Airtable; no authenticated real checkout conducted."
+      "proof": "desktop:200 mobile:200"
     },
     "desktopVisual": {
       "status": "PASS",
-      "proof": "Public Playwright checks passed against pre-promotion live site; post-promotion homepage letter absence asserted by repo QA and requires live verification. No screenshot evidence claimed."
+      "proof": "sha256:e58c7e369a441db6209cf686ec201f601bf33a544a02ae4623a96a62f9d0c9bd"
     },
     "mobileVisual": {
       "status": "PASS",
-      "proof": "Homepage-only removal shrinks existing intro; no CSS or other layout changed. Mobile screenshot not performed."
+      "proof": "sha256:4cf9837b551b8588292c5c104a88d4a344fa45a9f8e05918336357c993790ce0"
     },
     "creativeCritic": {
       "status": "PASS",
-      "proof": "Homepage introduction remains One integrated mission / Health craft and calling / Restore Learn Create. Letter remains on shared Amanda enrollment, waitlist, login. Other client routes unchanged."
+      "proof": "objective-visual-critic:v1"
     }
   },
   "details": {
-    "pullRequest": 518,
-    "mergeCommit": "1dc10a04ed4b0bbe6e01548b6ad10170c3be3cd0",
-    "previewDeployment": "dpl_3e1J2xprFqQQweo8FXKHimE8FQD1",
-    "githubActions": "https://github.com/TheArchitect1111/ea-payments/actions/runs/37856033738",
-    "releaseMethod": "EA Master Guard-compliant [EA-GATED] one-parent manifest-only commit; parent is sourceCommit.",
-    "limitations": "Real $1 Stripe transaction, live Airtable writes, actual owner login, webhook signature replay against Stripe and delivered email not verified. CI mocked I/O. Post-promotion public expired upgrade page to be tested by push-master Playwright CI.",
-    "sourceMergeCommit": "c420f6db00f15e7bf66db38b6b39a2bd31ebb3d7",
-    "ciRun": 37862656485,
-    "amandaCertificationRun": 37862656471,
-    "notes": "Manifest-only EA commit-locked production promotion. Check post-promotion live routes and forms; mocked E2E is not actual payment.",
-    "note": "Commit-locked manifest-only promotion. No real Stripe test or email acceptance claimed."
+    "buildInfo": {
+      "commitSha": "fea23dff594419e0ffbba92a2cbaf2d7c15e9a53",
+      "branch": "master",
+      "environment": "preview"
+    },
+    "desktop": {
+      "name": "desktop",
+      "httpStatus": 200,
+      "screenshot": "/home/runner/work/ea-payments/ea-payments/artifacts/ea-gate/desktop.png",
+      "screenshotSha256": "e58c7e369a441db6209cf686ec201f601bf33a544a02ae4623a96a62f9d0c9bd",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "badImageResponses": [],
+      "brokenImgs": [],
+      "brokenBackgrounds": [],
+      "renderedVisuals": 1,
+      "overflow": 0,
+      "bodyTextLength": 165,
+      "scrollHeight": 1100,
+      "viewport": {
+        "width": 1440,
+        "height": 1100
+      },
+      "placeholderSlots": [],
+      "publicBackground": null
+    },
+    "mobile": {
+      "name": "mobile",
+      "httpStatus": 200,
+      "screenshot": "/home/runner/work/ea-payments/ea-payments/artifacts/ea-gate/mobile.png",
+      "screenshotSha256": "4cf9837b551b8588292c5c104a88d4a344fa45a9f8e05918336357c993790ce0",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "badImageResponses": [],
+      "brokenImgs": [],
+      "brokenBackgrounds": [],
+      "renderedVisuals": 1,
+      "overflow": 0,
+      "bodyTextLength": 165,
+      "scrollHeight": 844,
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "placeholderSlots": [],
+      "publicBackground": null
+    }
   }
 }
