@@ -3,6 +3,6 @@
   "route_path": "/tarris/future",
   "min_visuals": 0,
   "release_profile": "tb3-approved-placeholders",
-  "requested_for": "Run the EA production gate for the TB3 four-video vault and Update Hub release; verify public and HQ routes",
-  "requested_at": "2026-10-09T05:57:00Z"
+  "requested_for": "Fix TB3 root host routing before EA filesystem homepage; preserve approved portals and other hosts",
+  "requested_at": "2026-09-30T18:00:00Z"
 }
