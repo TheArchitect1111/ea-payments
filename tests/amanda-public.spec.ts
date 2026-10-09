@@ -6,7 +6,7 @@ test.describe('Amanda public production checks (no credentials and no payments)'
   test('homepage removes retired content and keeps Clinical Fat Loss waitlist-only', async ({ page }) => {
     await page.goto(base + '/', { waitUntil: 'domcontentloaded' });
     await expect(page.getByRole('heading', { name: /Clinical Fat Loss Injectables for Face & Body Contouring/i })).toBeVisible();
-    if (process.env.AMANDA_VERIFY_DEPLOYED === 'true') await expect(page.getByRole('heading', { name: /A note from Amanda/i })).toBeVisible();
+    if (process.env.AMANDA_VERIFY_DEPLOYED === 'true') await expect(page.getByRole('heading', { name: /A note from Amanda/i })).toHaveCount(0);
     await expect(page.getByText(/BODY SCULPT(?:™)? NATIONAL TRAINING TOUR|Non-Surgical Tummy Sculpt & Tighten/i)).toHaveCount(0);
     await expect(page.getByRole('link', { name: /^Apply$|^Foundry$|^Update Hub$|^Calendar$|^Eva$/i })).toHaveCount(0);
     if (process.env.AMANDA_VERIFY_DEPLOYED === 'true') await expect(page.locator('.ac-course-grid').getByRole('heading', { name: /Firm Foundation|The Entrepreneurial Artist/i })).toHaveCount(0);
@@ -27,7 +27,7 @@ test.describe('Amanda public production checks (no credentials and no payments)'
     await expect(kit).toHaveAttribute('src', /ICDExpertExperienceKit/);
     const publicCta = page.getByRole('link', { name: /Shop RIMAN Canada/i });
     if (process.env.AMANDA_VERIFY_DEPLOYED === 'true') await expect(publicCta).toHaveAttribute('href', 'https://mall.riman.com/amandacatherine/home?country=CA&lang=en-CA');
-    else await expect(publicCta).toHaveAttribute('href', 'https://riman.com/amandacatherine/en-CA/home');
+    else await expect(publicCta).toHaveAttribute('href', 'https://mall.riman.com/amandacatherine/home?country=CA&lang=en-CA');
     const owner = readFileSync('app/portal/amanda-catherine/owner/[section]/page.tsx', 'utf8');
     expect(owner).toContain("riman: 'https://mall.riman.com/amandacatherine/home?country=CA&lang=en-CA'");
   });
