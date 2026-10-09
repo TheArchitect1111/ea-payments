@@ -22,7 +22,7 @@ export async function saveAmandaWaitlist(data: AmandaWaitlistData) {
   // Stable key prevents duplicates for repeat submissions with the same course/email.
   const key = `${data.course_slug}:${data.student_email.toLowerCase()}`;
   const record = await airtableUpsertByField('amanda_waitlist', 'submission_key', key, {
-    ...data, portal_slug: 'amanda-catherine', submitted_at: new Date().toISOString(),
+    ...data, portal_slug: 'amanda-catherine', registration_type: data.registration_type, submitted_at: new Date().toISOString(),
     submission_key: key, notification_status: 'pending', notification_updated_at: new Date().toISOString(),
   });
   if (!record) throw new Error('Waitlist could not be saved');
