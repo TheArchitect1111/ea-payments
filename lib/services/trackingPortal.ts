@@ -12,22 +12,45 @@ export type TrackingLead = {
   source_page: 'amandacatherine.ca';
 };
 
+function registrationKey(data: TrackingLead) {
+  return `${data.email.toLowerCase()}:\${data.class_id}`;
+}
+
+async function saveTrackingLead(data: TrackingLead) {
+  const key = registrationKey(data);
+  const record = await airtableUpsertByField('portal_registrations', 'registration_key', key, {
+    registration_key: key,
+    ...data,
+  });
+  if (!record) throw new Error('Tracking portal registration could not be saved.');
+  return { ok: true, id: record.id };
+}
+
 export async function pushToTrackingPortal(data: TrackingLead) {
   const url = process.env.TRACKING_PORTAL_URL?.trim();
   const apiKey = process.env.TRACKING_PORTAL_API_KEY?.trim();
-  if (!url || !apiKey) throw new Error('Tracking portal connection is not configured.');
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey },
-    body: JSON.stringify(data),
-    cache: 'no-store',
-    signal: AbortSignal.timeout(10000),
-  });
-  const result = await response.json().catch(() => ({}));
-  if (!response.ok || !result.ok) throw new Error(result.error || `Tracking portal returned ${response.status}`);
-  const failureKey = `${data.email.toLowerCase()}:${data.class_id}`;
-  await airtableUpsertByField('tracking_sync_failures', 'failure_key', failureKey, {
-    failure_key: failureKey,
+  let result: { ok: boolean; id?: string };
+
+  if (url && apiKey) {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey },
+      body: JSON.stringify(data),
+      cache: 'no-store',
+      signal: AbortSignal.timeout(10000),
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok || !payload.ok) throw new Error(payload.error || `Tracking portal returned ${response.status}`);
+    result = payload;
+  } else {
+    // Both Amanda’s site and her EVA portal currently share the EA Airtable base.
+    // Persist directly to the portal table until an external ingest URL/key is configured.
+    result = await saveTrackingLead(data);
+  }
+
+  const key = registrationKey(data);
+  await airtableUpsertByField('tracking_sync_failures', 'failure_key', key, {
+    failure_key: key,
     payload_json: JSON.stringify(data),
     status: 'synced',
     attempts: 0,
@@ -39,10 +62,10 @@ export async function pushToTrackingPortal(data: TrackingLead) {
 }
 
 export async function enqueueTrackingPortalRetry(data: TrackingLead, error: unknown) {
-  const failureKey = `${data.email.toLowerCase()}:${data.class_id}`;
+  const key = registrationKey(data);
   const message = error instanceof Error ? error.message : 'Unknown tracking sync error';
-  const record = await airtableUpsertByField('tracking_sync_failures', 'failure_key', failureKey, {
-    failure_key: failureKey,
+  const record = await airtableUpsertByField('tracking_sync_failures', 'failure_key', key, {
+    failure_key: key,
     payload_json: JSON.stringify(data),
     status: 'pending',
     attempts: 0,
