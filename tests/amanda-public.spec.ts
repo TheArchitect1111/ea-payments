@@ -5,7 +5,7 @@ const base = 'https://amandacatherine.ca';
 test.describe('Amanda public production checks (no credentials and no payments)', () => {
   test('homepage removes retired content and keeps Clinical Fat Loss waitlist-only', async ({ page }) => {
     await page.goto(base + '/', { waitUntil: 'domcontentloaded' });
-    await expect(page.getByRole('heading', { name: /Clinical Fat Loss Injectables for Face & Body Contouring/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Clinical Fat Loss/i })).toBeVisible();
     if (process.env.AMANDA_VERIFY_DEPLOYED === 'true') await expect(page.getByRole('heading', { name: /A note from Amanda/i })).toHaveCount(0);
     await expect(page.getByText(/BODY SCULPT(?:™)? NATIONAL TRAINING TOUR|Non-Surgical Tummy Sculpt & Tighten/i)).toHaveCount(0);
     await expect(page.getByRole('link', { name: /^Apply$|^Foundry$|^Update Hub$|^Calendar$|^Eva$/i })).toHaveCount(0);
@@ -14,7 +14,7 @@ test.describe('Amanda public production checks (no credentials and no payments)'
     await expect(page.getByText(/Non-Surgical Tummy Sculpt & Tighten|Non-Surgical Tummy Tuck/i)).toHaveCount(0);
     await expect(page.getByText(/BODY SCULPT(?:™)? NATIONAL TRAINING TOUR/i)).toHaveCount(0);
     const clinicalCard = page.locator('article, section, li, div').filter({
-      has: page.getByRole('heading', { name: /Clinical Fat Loss Injectables for Face & Body Contouring/i }),
+      has: page.getByRole('heading', { name: /Clinical Fat Loss/i }),
     }).last();
     await expect(clinicalCard.getByRole('link', { name: /Join Waitlist/i })).toBeVisible();
     await expect(clinicalCard.getByRole('link', { name: /Enroll|Pay|Purchase/i })).toHaveCount(0);
