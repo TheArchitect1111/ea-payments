@@ -187,7 +187,13 @@ export async function saveHqProject(project: HqProject) {
   const shelves = project.shelves ?? SHELVES.map((shelf) => shelf.id);
   if (previous) {
     const stamp = new Date().toISOString().replace(/[:.]/g, '-');
-    await writeBlobJson(`${ROOT}/${project.id}/history/${stamp}.json`, { ...previous, savedAt: new Date().toISOString() });
+    const pathname = `${ROOT}/${project.id}/history/${stamp}.json`;
+    const savedAt = new Date().toISOString();
+    await writeBlobJson(pathname, { ...previous, savedAt });
+    const indexPath = `${ROOT}/${project.id}/history/index.json`;
+    const existing = await readBlobJson<Array<{ pathname: string; savedAt: string }>>(indexPath) ?? [];
+    const keep = existing.filter((entry) => Date.now() - new Date(entry.savedAt).getTime() <= 30 * 24 * 60 * 60 * 1000);
+    await writeBlobJson(indexPath, [...keep.filter((entry) => entry.pathname !== pathname), { pathname, savedAt }]);
   }
   await Promise.all([
     writeBlobJson(contentPath(project.id), { ...project, shelves }),
@@ -203,29 +209,17 @@ export async function undoHqProject(id: string): Promise<HqProject | null> {
   if (!isValidId(id)) return null;
   let history = [] as Array<{ pathname: string; uploadedAt: Date }>;
   if (process.env.BLOB_READ_WRITE_TOKEN) {
-    try { history = (await list({ prefix: `${ROOT}/${id}/history/`, limit: 1000 })).blobs; }
+    try { history = (await list({ prefix: `${ROOT}/${id}/history/`, limit: 1000 })).blobs.filter((blob) => /\/history\/\d{4}-/.test(blob.pathname)); }
     catch { localFallbackUsed = true; }
+  }
+  if (history.length === 0) {
+    const index = await readBlobJson<Array<{ pathname: string; savedAt: string }>>(`${ROOT}/${id}/history/index.json`) ?? [];
+    history = index.map((entry) => ({ pathname: entry.pathname, uploadedAt: new Date(entry.savedAt) }));
   }
   const recent = history
     .filter((blob) => Date.now() - new Date(blob.uploadedAt).getTime() <= 30 * 24 * 60 * 60 * 1000)
     .sort((a, b) => b.uploadedAt.getTime() - a.uploadedAt.getTime());
   let snapshot = recent[0] ? await readBlobJson<HqProject & { savedAt?: string }>(recent[0].pathname) : null;
-  if (!snapshot) {
-    for (const root of [resolve(process.cwd()), TMP_ROOT]) {
-      const folder = safeLocalPath(root, `${ROOT}/${id}/history`);
-      try {
-        const names = (await runtimeFs().readdir(folder)).filter((name) => name.endsWith('.json')).sort().reverse();
-        for (const name of names) {
-          const localHistoryPath = `${ROOT}/${id}/history/${name}`;
-          const file = await runtimeFs().stat(join(folder, name));
-          if (Date.now() - file.mtimeMs > 30 * 24 * 60 * 60 * 1000) continue;
-          snapshot = await readLocalJson<HqProject & { savedAt?: string }>(localHistoryPath);
-          if (snapshot) break;
-        }
-      } catch { /* The history may only exist in the other local root. */ }
-      if (snapshot) break;
-    }
-  }
   if (!snapshot) return null;
   const restored: HqProject = { ...snapshot, updatedAt: new Date().toISOString(), updatedBy: 'Robert' };
   await saveHqProject(restored);
