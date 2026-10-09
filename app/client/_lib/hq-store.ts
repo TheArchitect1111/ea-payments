@@ -1,5 +1,5 @@
 import { get, list, put } from '@vercel/blob';
-import { mkdir, readFile, readdir, stat, writeFile } from 'node:fs/promises';
+import type * as FileSystemPromises from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 
@@ -53,6 +53,13 @@ export type HqProject = {
 const ROOT = 'data/content';
 const PROJECTS_PATH = 'data/projects.json';
 const TMP_ROOT = join(tmpdir(), 'universal-phone-hq-data');
+type RuntimeFileSystem = typeof FileSystemPromises;
+function runtimeFs(): RuntimeFileSystem {
+  const getBuiltinModule = (process as NodeJS.Process & {
+    getBuiltinModule: (specifier: string) => RuntimeFileSystem;
+  }).getBuiltinModule;
+  return getBuiltinModule('node:fs/promises');
+}
 let localFallbackUsed = !process.env.BLOB_READ_WRITE_TOKEN;
 const SEEDED: HqProject[] = [
   { id: 'tb3', name: 'TB3', domain: 'tb3.online', livePath: 'https://tb3.online', shelves: SHELVES.map((shelf) => shelf.id), lockDesign: true, items: [], formDestinations: {}, updatedAt: '2026-10-09T00:00:00.000Z', updatedBy: 'Robert' },
@@ -84,7 +91,7 @@ function safeLocalMediaPath(root: string, kind: 'image' | 'video', id: string, f
 
 async function readLocalJson<T>(pathname: string): Promise<T | null> {
   for (const root of [TMP_ROOT, resolve(process.cwd())]) {
-    try { return JSON.parse(await readFile(safeLocalPath(root, pathname), 'utf8')) as T; }
+    try { return JSON.parse(await runtimeFs().readFile(safeLocalPath(root, pathname), 'utf8')) as T; }
     catch { /* Read the other safe local root. */ }
   }
   return null;
@@ -95,8 +102,8 @@ async function writeLocalJson(pathname: string, value: unknown) {
   for (const root of [resolve(process.cwd()), TMP_ROOT]) {
     const target = safeLocalPath(root, pathname);
     try {
-      await mkdir(dirname(target), { recursive: true });
-      await writeFile(target, serialized, 'utf8');
+      await runtimeFs().mkdir(dirname(target), { recursive: true });
+      await runtimeFs().writeFile(target, serialized, 'utf8');
       localFallbackUsed = true;
       return;
     } catch { /* Vercel's deployment filesystem is read-only; /tmp is the fallback. */ }
@@ -207,10 +214,10 @@ export async function undoHqProject(id: string): Promise<HqProject | null> {
     for (const root of [resolve(process.cwd()), TMP_ROOT]) {
       const folder = safeLocalPath(root, `${ROOT}/${id}/history`);
       try {
-        const names = (await readdir(folder)).filter((name) => name.endsWith('.json')).sort().reverse();
+        const names = (await runtimeFs().readdir(folder)).filter((name) => name.endsWith('.json')).sort().reverse();
         for (const name of names) {
           const localHistoryPath = `${ROOT}/${id}/history/${name}`;
-          const file = await stat(join(folder, name));
+          const file = await runtimeFs().stat(join(folder, name));
           if (Date.now() - file.mtimeMs > 30 * 24 * 60 * 60 * 1000) continue;
           snapshot = await readLocalJson<HqProject & { savedAt?: string }>(localHistoryPath);
           if (snapshot) break;
@@ -270,8 +277,8 @@ export async function savePublicMedia(id: string, file: File, kind: 'image' | 'v
   for (const root of [resolve(process.cwd()), TMP_ROOT]) {
     const target = safeLocalMediaPath(root, kind, id, storedName);
     try {
-      await mkdir(dirname(target), { recursive: true });
-      await writeFile(target, bytes);
+      await runtimeFs().mkdir(dirname(target), { recursive: true });
+      await runtimeFs().writeFile(target, bytes);
       localFallbackUsed = true;
       const base = root === TMP_ROOT ? `/client/api/media/local/${id}/${encodeURIComponent(storedName)}?kind=${kind}` : `/${localRelative}`;
       return { url: base, pathname, storage: 'local' as const };
@@ -282,7 +289,7 @@ export async function savePublicMedia(id: string, file: File, kind: 'image' | 'v
 
 export async function readLocalMedia(id: string, filename: string, kind: 'image' | 'video') {
   for (const root of [TMP_ROOT, resolve(process.cwd())]) {
-    try { return await readFile(safeLocalMediaPath(root, kind, id, filename)); }
+    try { return await runtimeFs().readFile(safeLocalMediaPath(root, kind, id, filename)); }
     catch { /* Try the other permitted local root. */ }
   }
   return null;
