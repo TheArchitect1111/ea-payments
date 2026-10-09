@@ -48,7 +48,7 @@ try {
       if (path.startsWith('/tarris/future') && response.status === 307) {
         assert.ok(response.location, host + path + ' missing private-route redirect');
         const target = new URL(response.location, 'https://' + host);
-        assert.equal(target.pathname.replace(/\\/$/, ''), '/tarris', host + path + ' private-route redirect target');
+        assert.equal(target.pathname.replace(/\/$/, ''), '/tarris', host + path + ' private-route redirect target');
         assert.equal(target.searchParams.get('hq'), 'private', host + path + ' private-route redirect reason');
         continue;
       }
