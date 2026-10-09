@@ -1,13 +1,27 @@
-import { notFound, redirect } from 'next/navigation';
-import AmandaWarmLetter from '@/components/amanda/AmandaWarmLetter';
+import { notFound } from 'next/navigation';
 import AmandaWaitlistForm from '@/components/amanda/AmandaWaitlistForm';
-import { findAmandaWaitlistInterest } from '@/lib/amanda-catherine/waitlist-interests';
-import { AMANDA_COURSES } from '@/lib/amanda-catherine/config';
-import { amandaCourseReady } from '@/lib/amanda-catherine/lms-policy';
+import { registry } from '@/lib/amanda-catherine/registry';
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export default async function Page({ params }: { params: Promise<{ courseSlug: string }> }) {
   const { courseSlug } = await params;
-  if (AMANDA_COURSES.some(course => course.id === courseSlug) && amandaCourseReady(courseSlug)) redirect(`/courses/${encodeURIComponent(courseSlug)}`);
-  const interest = findAmandaWaitlistInterest(courseSlug);
-  if (!interest) notFound();
-  return <main className="min-h-screen bg-[#f7f1e8] px-5 py-12 text-[#17130f]"><section className="mx-auto max-w-3xl"><AmandaWarmLetter compact/><h1>{interest.title}</h1><section id="waitlist"><h2>Join Waitlist</h2><p>Join Amanda's waitlist to hear when enrollment opens. No payment is required.</p><AmandaWaitlistForm courseId={interest.id} courseName={interest.title} /></section></section></main>;
+  const courseId = courseSlug === 'clinical-fat-loss-injectables' ? 'clinical-fat-loss' : courseSlug;
+  const course = (await registry()).courses.find((item) =>
+    item.key === courseId && !item.isTest && item.isActive && item.isVisible
+  );
+  if (!course) notFound();
+
+  return (
+    <main className="min-h-screen bg-[#f7f1e8] px-5 py-12 text-[#17130f]">
+      <section className="mx-auto max-w-3xl">
+        <h1 className="font-serif text-4xl">{course.title}</h1>
+        {course.description && <p className="mt-4">{course.description}</p>}
+        <section id="waitlist" className="mt-8">
+          <AmandaWaitlistForm courseId={course.key} courseName={course.title} status={course.status} />
+        </section>
+      </section>
+    </main>
+  );
 }
