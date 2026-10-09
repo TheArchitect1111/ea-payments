@@ -89,6 +89,11 @@ function HQLink({ dark = false }: { dark?: boolean }) {
 export default function TarrisPublicPage() {
   return (
     <div id="public-tarris" className="min-h-screen bg-[#F7F5F2] text-[#141414]">
+      <section id="tarris-intro-hero" className="relative m-0 h-[85vh] w-full overflow-hidden p-0 md:h-screen" style={{ position: "relative", width: "100%", overflow: "hidden", margin: 0, padding: 0 }}>
+        <video id="tarris-hero-video" autoPlay muted loop playsInline preload="auto" poster="" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center", display: "block" }}>
+          <source src="/videos/tb3-3d-billboard-intro.mp4" type="video/mp4" />
+        </video>
+      </section>
       <header id="home" className="border-b border-black/15">
         <div className="mx-auto flex max-w-[1440px] flex-wrap items-center justify-between gap-5 px-5 py-5 lg:px-10">
           <a href="#home" className="flex items-center gap-3"><span className="text-4xl font-black leading-none tracking-[-0.1em] text-[#A51C30]">TB3</span><span className="border-l border-black/20 pl-3"><span className="block text-xs font-black tracking-[0.15em]">TARRIS BOUIE</span><span className="block pt-1 text-[8px] tracking-[0.2em]">MORE THAN A GAME</span></span></a>
