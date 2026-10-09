@@ -1,7 +1,7 @@
 {
-  "preview_url": "https://ea-payments-git-codex-a-020b42-the-architects-projects-cc813778.vercel.app",
+  "preview_url": "https://ea-payments-git-master-the-architects-projects-cc813778.vercel.app",
   "route_path": "/amanda-catherine",
   "min_visuals": 2,
-  "requested_for": "Run the official EA production gate for Amanda class catalog and portal wiring",
-  "requested_at": "2026-10-09T15:31:47.030Z"
+  "requested_for": "Rerun Amanda production gate against exact-source Vercel preview runtime",
+  "requested_at": "2026-10-09T15:35:10.483Z"
 }
