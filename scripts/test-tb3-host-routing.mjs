@@ -44,7 +44,7 @@ try {
         const filmCards = [...html.matchAll(/aria-label="(?:Play|View) FILM ?\d|aria-label="(?:Play|View) SCOREBOARD PROOF/g)];
         assert.equal(filmCards.length, 5, host + path + ' TB3 film and scoreboard cards');
       } else if (path === '/hq' || path === '/tarris/future') {
-        for (const marker of ['TB3 HQ', 'LET&#x27;S GET TO WORK', 'ACADEMICS']) assert.ok(html.includes(marker), host + path + ' missing ' + marker);
+        for (const marker of ['TB3 HQ', 'LET’S GET TO WORK', 'ACADEMICS']) assert.ok(html.includes(marker), host + path + ' missing ' + marker);
       }
     }
   }
