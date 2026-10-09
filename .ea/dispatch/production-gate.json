@@ -1,8 +1,7 @@
 {
-  "preview_url": "http://127.0.0.1:3000",
-  "route_path": "/tarris/future",
-  "min_visuals": 0,
-  "release_profile": "tb3-approved-placeholders",
-  "requested_for": "Fix TB3 root host routing before EA filesystem homepage; preserve approved portals and other hosts",
-  "requested_at": "2026-09-30T18:00:00Z"
+  "preview_url": "https://ea-payments-git-master-the-architects-projects-cc813778.vercel.app",
+  "route_path": "/amanda-catherine",
+  "min_visuals": 2,
+  "requested_for": "Restore and verify the Amanda production class catalog and portal wiring from PR #530",
+  "requested_at": "2026-10-09T15:31:15.897Z"
 }
