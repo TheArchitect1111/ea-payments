@@ -20,18 +20,34 @@ function certifyTB3() {
   link(agreement, '/tarris/future/sign');
   link(sign, '/tarris/future/agreement');
   for (const marker of ['TB3 HQ', 'MORE THAN A GAME', 'PLAN. PREPARE. PERFORM. BUILD.', 'DISCIPLINE', 'DETERMINATION', 'DEVELOPMENT', 'DESTINY', 'ACADEMICS', 'TRAINING', 'NIL & BRAND', 'OPPORTUNITIES', 'MEDIA LIBRARY', 'COMMUNITY', 'FEATURED VIDEO', 'MY FOCUS', 'UPCOMING']) assert.ok(hq.includes(marker), `HQ missing ${marker}`);
-  const allowed = ['YOUR_HQ_HEADER.jpg', 'YOUR_BRAND_SMILE.jpg', 'YOUR_COMMUNITY.jpg', 'YOUR_ENTERPRISE_SUIT.jpg'];
-  const placeholders = [];
-  for (const [name, content] of [['public', publicPage], ['hq', hq]]) {
-    assert.ok(content.includes('NO IMAGES BUNDLED') && content.includes('Replace:'), `${name}: placeholder approval markers missing`);
-    assert.ok(!/<(?:img|Image)\b|backgroundImage\s*[:=]|url\(/.test(source(content)), `${name}: real image rendering requires separate asset certification`);
-    for (const match of content.matchAll(/\/images\/tarris\/([A-Za-z0-9_.-]+)/g)) {
-      assert.ok(allowed.includes(match[1]), `Unapproved placeholder ${match[1]}`);
-      placeholders.push(match[1]);
-    }
+  const filmSource = read('app/tarris/tb3-film.tsx');
+  for (const marker of ['TB3 MEDIA', 'TB3 FILM', '18 PTS 8 REB 3 AST', 'ALABAMA - 111-93', 'UPDATE HUB', 'v2.4 FILM VAULT LIVE']) {
+    assert.ok(publicPage.includes(marker) || hq.includes(marker), `TB3 release missing ${marker}`);
   }
-  for (const filename of allowed) assert.ok(placeholders.includes(filename), `Missing approved placeholder ${filename}`);
-  for (const marker of ['#F7F5F2', '#A51C30', 'SLOT_TB3_MASK', 'SLOT_HERO_HOODIE', 'TB3 STORE', 'MORE THAN A GAME']) {
+  const officialAssets = new Set();
+  for (const content of [publicPage, hq]) {
+    for (const match of content.matchAll(/OFFICIAL_[A-Za-z0-9_.-]+\\.png/g)) officialAssets.add(match[0]);
+  }
+  assert.ok(officialAssets.size >= 15, 'TB3 official image set incomplete');
+  for (const filename of officialAssets) assert.ok(fs.existsSync(path.join('public/images/tb3-official', filename)), `Missing TB3 official image ${filename}`);
+  const merchAssets = new Set();
+  for (const match of publicPage.matchAll(/(?:image|redImage): "([A-Za-z0-9_.-]+\\.(?:jpg|png|webp))"/g)) merchAssets.add(match[1]);
+  assert.ok(merchAssets.size >= 9, 'TB3 merch image set incomplete');
+  for (const filename of merchAssets) assert.ok(fs.existsSync(path.join('public/merch', filename)), `Missing TB3 merch image ${filename}`);
+  const videos = [...filmSource.matchAll(/filename: "(TB3-FILM-[A-Za-z0-9_-]+\\.mp4)"/g)].map((match) => match[1]);
+  assert.equal(videos.length, 4, 'TB3 release must contain four playable MP4s and one scoreboard photograph');
+  const videoHashes = videos.map((filename) => {
+    const videoPath = path.join('public/videos/tb3-film', filename);
+    assert.ok(fs.existsSync(videoPath), `Missing TB3 video ${filename}`);
+    return crypto.createHash('sha256').update(fs.readFileSync(videoPath)).digest('hex');
+  });
+  assert.equal(new Set(videoHashes).size, 4, 'TB3 video files must have four distinct hashes');
+  const posters = [...filmSource.matchAll(/poster: "(\\/videos\\/tb3-film\\/[^"]+)"/g)].map((match) => match[1].slice('/videos/tb3-film/'.length));
+  for (const filename of new Set([...posters, 'TB3-FILM-005-SCOREBOARD-PROOF.jpg', 'TB3-FILM-005-poster.webp'])) {
+    assert.ok(fs.existsSync(path.join('public/videos/tb3-film', filename)), `Missing TB3 film poster ${filename}`);
+  }
+  assert.ok(filmSource.includes('TB3-FILM-005-SCOREBOARD-PROOF.jpg'), 'Scoreboard proof photo missing');
+  for (const marker of ['#F7F5F2', '#A51C30', 'TB3 FILM', 'TB3 STORE', 'MORE THAN A GAME']) {
     assert.ok(publicPage.includes(marker), `Public page missing ${marker}`);
   }
   const config = JSON.parse(read('vercel.json'));
