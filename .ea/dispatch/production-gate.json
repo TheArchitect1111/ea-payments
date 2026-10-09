@@ -2,7 +2,7 @@
   "preview_url": "http://127.0.0.1:3000",
   "route_path": "/tarris/future",
   "min_visuals": 0,
-  "release_profile": "tb3-approved-placeholders",
-  "requested_for": "Fix TB3 root host routing before EA filesystem homepage; preserve approved portals and other hosts",
-  "requested_at": "2026-09-30T18:00:00Z"
+  "release_profile": "tb3-film-release",
+  "requested_for": "Verify TB3 four-video release, public film gallery, HQ and unaffected host routing",
+  "requested_at": "2026-10-09T06:10:00Z"
 }
