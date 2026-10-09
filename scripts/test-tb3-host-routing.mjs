@@ -8,7 +8,7 @@ function getPage(host, path) {
       let html = '';
       response.setEncoding('utf8');
       response.on('data', (chunk) => { html += chunk; });
-      response.on('end', () => resolve({ status: response.statusCode, html }));
+      response.on('end', () => resolve({ status: response.statusCode, location: response.headers.location, html }));
     });
     req.on('error', reject);
     req.setTimeout(15000, () => req.destroy(new Error('Request timeout')));
@@ -33,8 +33,19 @@ try {
     for (const path of ['/', '/tarris', '/hq', '/tarris/future', '/tarris/future/agreement', '/tarris/future/sign']) {
       console.log('Checking ' + host + path);
       const response = await getPage(host, path);
-      assert.equal(response.status, 200, host + path);
       const html = response.html;
+      if (path === '/hq' && response.status === 307) {
+        assert.ok(response.location, host + path + ' missing redirect location');
+        const target = new URL(response.location, 'https://' + host);
+        assert.equal(target.pathname.replace(/\/$/, ''), '/tarris/future', host + path + ' redirect target');
+        const redirected = await getPage(host, target.pathname + target.search);
+        assert.equal(redirected.status, 200, host + path + ' redirected HQ');
+        for (const marker of ['TB3 HQ', 'LET&#x27;S GET TO WORK', 'ACADEMICS']) {
+          assert.ok(redirected.html.includes(marker), host + path + ' redirected page missing ' + marker);
+        }
+        continue;
+      }
+      assert.equal(response.status, 200, host + path);
       if (path === '/' || path === '/tarris') {
         for (const marker of ['id="public-tarris"', 'MORE THAN', 'ENTER TB3 HQ']) {
           assert.ok(html.includes(marker), host + path + ' missing ' + marker);
@@ -49,7 +60,7 @@ try {
   const response = await getPage('efficiencyarchitects.online', '/');
   assert.equal(response.status, 200);
   assert.ok(response.html.includes('Live YOUR'));
-  console.log('PASS: TB3 root and HQ host rewrites, agreement and signing on both hosts; EA homepage preserved.');
+  console.log('PASS: TB3 root and HQ host routes, agreement and signing on both hosts; EA homepage preserved.');
 } catch (error) {
   console.error(output);
   throw error;
