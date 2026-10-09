@@ -16,7 +16,7 @@ export default async function Page({ params }: { params: Promise<{ courseSlug: s
 
   return (
     <main className="min-h-screen bg-[#f7f1e8] px-5 py-12 text-[#17130f]">
-      <AppHeaderNote appName={course.title} />
+      {['strategy-call', '90-day-package'].includes(course.key) && <AppHeaderNote appName={course.title} />}
       <section className="mx-auto max-w-3xl">
         <h1 className="font-serif text-4xl">{course.title}</h1>
         {course.description && <p className="mt-4">{course.description}</p>}
