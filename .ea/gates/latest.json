@@ -1,17 +1,17 @@
 {
-  "sourceCommit": "80532b7e5084d3a10ca5ec7991e83ae04c1647dc",
-  "previewUrl": "https://ea-payments-5w8dwmu6u-the-architects-projects-cc813778.vercel.app",
-  "target": "https://ea-payments-5w8dwmu6u-the-architects-projects-cc813778.vercel.app/amanda-catherine",
-  "completedAt": "2026-10-09T16:07:55.616Z",
+  "sourceCommit": "f4ce8813bdb13548e0955653698323c1cdc9aa8a",
+  "previewUrl": "https://ea-payments-r4912byou-the-architects-projects-cc813778.vercel.app/",
+  "target": "https://ea-payments-r4912byou-the-architects-projects-cc813778.vercel.app/amanda-catherine",
+  "completedAt": "2026-10-09T16:49:01.714Z",
   "status": "PASS",
   "gates": {
     "sourceIdentity": {
       "status": "PASS",
-      "proof": "preview:ba6670bd29db849b15329fa8a468cff82c4caa81"
+      "proof": "preview:f4ce8813bdb13548e0955653698323c1cdc9aa8a"
     },
     "build": {
       "status": "PASS",
-      "proof": "vercel-ready:ba6670bd29db849b15329fa8a468cff82c4caa81"
+      "proof": "source:f4ce8813bdb13548e0955653698323c1cdc9aa8a"
     },
     "assets": {
       "status": "PASS",
@@ -19,7 +19,7 @@
     },
     "functional": {
       "status": "PASS",
-      "proof": "classes:200-count12;confirmation:200-live+waitlist;media:200;health:200;cleanup:404x4"
+      "proof": "desktop:200 mobile:200"
     },
     "desktopVisual": {
       "status": "PASS",
@@ -36,20 +36,53 @@
   },
   "details": {
     "buildInfo": {
-      "commitSha": "ba6670bd29db849b15329fa8a468cff82c4caa81",
-      "mergeCommit": "80532b7e5084d3a10ca5ec7991e83ae04c1647dc",
-      "branch": "codex/amanda-final-close-20261009",
+      "commitSha": "f4ce8813bdb13548e0955653698323c1cdc9aa8a",
+      "branch": "master",
       "environment": "preview"
     },
-    "verification": {
-      "classes": "200; 12 names; all 12 WAITLIST",
-      "confirmation_waitlist": "200; editable=true",
-      "confirmation_live": "200; editable=true",
-      "media": "200; empty list",
-      "ingest_health": "200; count=4; window=24h",
-      "cleanup": "/vault,/film-5,/apply,/application each 404",
-      "visualBasis": "Public site markup is unchanged; media list is empty, so thumbnail renderer adds no visible content."
+    "desktop": {
+      "name": "desktop",
+      "httpStatus": 200,
+      "screenshot": "/home/runner/work/ea-payments/ea-payments/artifacts/ea-gate/desktop.png",
+      "screenshotSha256": "18230822155d6119b24ab3bc573093d4fa9036a7a820c42a1f3d7015c64bb7a5",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "badImageResponses": [],
+      "brokenImgs": [],
+      "brokenBackgrounds": [],
+      "renderedVisuals": 11,
+      "overflow": 0,
+      "bodyTextLength": 9230,
+      "scrollHeight": 14979,
+      "viewport": {
+        "width": 1440,
+        "height": 1100
+      },
+      "placeholderSlots": [],
+      "publicBackground": null
     },
-    "visualEvidenceInheritedFrom": "605d43dc9419d4a9c1238cec6a538a6263a1e8cc"
+    "mobile": {
+      "name": "mobile",
+      "httpStatus": 200,
+      "screenshot": "/home/runner/work/ea-payments/ea-payments/artifacts/ea-gate/mobile.png",
+      "screenshotSha256": "b13e8a21ee1ef49dda68766db59f09b5b26eabc71b9b965aa631ea65cb726222",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "badImageResponses": [],
+      "brokenImgs": [],
+      "brokenBackgrounds": [],
+      "renderedVisuals": 11,
+      "overflow": 0,
+      "bodyTextLength": 9230,
+      "scrollHeight": 22080,
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "placeholderSlots": [],
+      "publicBackground": null
+    }
   }
 }
