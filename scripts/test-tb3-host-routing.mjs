@@ -36,13 +36,10 @@ try {
       assert.equal(response.status, 200, host + path);
       const html = response.html;
       if (path === '/' || path === '/tarris') {
-        for (const marker of ['TB3 STORE', 'TB3 MEDIA', 'TB3 FILM', '18 PTS 8 REB 3 AST', 'ALABAMA - 111-93', 'FILM 01 - DUNK', 'FILM 04 - DEFENSE', 'SCOREBOARD PROOF - 18/8/3/1']) {
-          assert.ok(html.includes(marker), host + path + ' missing ' + marker);
-        }
-        assert.ok(html.includes('id="tb3-public-hero"'), host + path + ' missing public TB3 hero');
-        assert.ok(html.includes('id="tb3-film"'), host + path + ' missing TB3 film gallery');
-        const filmCards = [...html.matchAll(/aria-label="(?:Play|View) FILM ?\\d|aria-label="(?:Play|View) SCOREBOARD PROOF/g)];
-        assert.equal(filmCards.length, 5, host + path + ' TB3 film and scoreboard cards');
+        for (const marker of ['TB3 STORE', 'SLOT_TB3_MASK']) assert.ok(html.includes(marker), host + path + ' missing ' + marker);
+        const slots = [...html.matchAll(/aria-label="(SLOT_[A-Z0-9_]+)"/g)].map(m => m[1]);
+        const expected = ['SLOT_TB3_MASK', 'SLOT_HERO_HOODIE', ...['ATHLETE', 'STORY', 'BRAND', 'NIL', 'COMMUNITY'].map(p => 'SLOT_' + p + '_IMG'), 'SLOT_MEDIA_FEATURE', ...[1, 2, 3, 4].map(n => 'SLOT_MEDIA_THUMB_' + n), 'SLOT_ENTERPRISE_IMG', 'SLOT_FUTURE_IMG', ...['HOODIE_BLACK', 'TEE_WHITE', 'CAP', 'HOODIE_RED', 'TEE_BLACK'].map(m => 'SLOT_MERCH_' + m)];
+        assert.deepEqual(slots.sort(), expected.sort(), host + path + ' placeholder slots');
       } else if (path === '/hq' || path === '/tarris/future') {
         for (const marker of ['TB3 HQ', 'LET&#x27;S GET TO WORK', 'ACADEMICS']) assert.ok(html.includes(marker), host + path + ' missing ' + marker);
       }
@@ -51,7 +48,7 @@ try {
   const response = await getPage('efficiencyarchitects.online', '/');
   assert.equal(response.status, 200);
   assert.ok(response.html.includes('Live YOUR'));
-  console.log('PASS: TB3 public hero, film gallery, scoreboard, store, HQ, agreement and signing on both hosts; EA homepage preserved.');
+  console.log('PASS: TB3 light root, 19 placeholders, HQ, agreement and signing on both hosts; EA homepage preserved.');
 } catch (error) {
   console.error(output);
   throw error;
