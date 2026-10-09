@@ -1,51 +1,51 @@
 {
-  "sourceCommit": "746be516099de9ea943e9ba56d06f51cc8de5a4d",
-  "previousSourceCommit": "1502c721338b26a7627282c4114ad21fd661b585",
+  "sourceCommit": "c420f6db00f15e7bf66db38b6b39a2bd31ebb3d7",
+  "previousSourceCommit": "5e708fdb33257ef17116def0bb02bd54fc621206",
   "previewUrl": "https://ea-payments-3e1j2xprf-the-architects-projects-cc813778.vercel.app/amanda-catherine",
   "target": "https://amandacatherine.ca/",
-  "completedAt": "2026-10-08T23:41:58.618Z",
+  "completedAt": "2026-10-09T00:05:19.319Z",
   "status": "PASS",
   "gates": {
     "sourceIdentity": {
       "status": "PASS",
-      "proof": "PR #516 merge commit 746be516099de9ea943e9ba56d06f51cc8de5a4d. Only Amanda warm welcome on course, legacy waitlist, login, Canadian RIMAN links and matching test; existing public homepage, Stripe metadata and 72h entitlements preserved."
+      "proof": "PR #518 merged source c420f6db00f15e7bf66db38b6b39a2bd31ebb3d7. Only removed warm welcome article from app/amanda-catherine/page.tsx and updated post-production homepage assertion. No other production source changes."
     },
     "build": {
       "status": "PASS",
-      "proof": "Vercel preview dpl_3e1J2xprFqQQweo8FXKHimE8FQD1 READY at head d8ec9e71b62ca2e130d5d2f364abcfb073006d55; Github CI 37860611579 success."
+      "proof": "Preview HEAD 17e6202d8f83e19f3bd1a01be289104d6a0da9fc Vercel READY; full Github CI 37862656485 passed."
     },
     "assets": {
       "status": "PASS",
-      "proof": "Approved RIMAN ICDExpertExperienceKit seven-product photo unchanged; separate Body Sculpt Practitioner Starter Kit 499 CAD block remains in PractitionerEssentials. RIMAN public and owner store URL aligned to https://mall.riman.com/amandacatherine/home?country=CA&lang=en-CA."
+      "proof": "No assets altered. RIMAN seven-product ICD Expert Experience Kit and separate 499 CAD Body Sculpt practitioner tools remain unchanged in ClientRequestedUpdates.tsx."
     },
     "functional": {
       "status": "PASS",
-      "proof": "GitHub Amanda Automated Certification 37860611611, client acceptance 37860611596, EA Client Protection 37860611711, full CI 37860611579, modular assembly 37860611641, context 37860611556 all succeeded. Existing $1 option remains authenticated owner/admin-only, 72-hour trial from Stripe created, API TRIAL_EXPIRED, read-only preview and persisted waitlist contract. Actual live owner checkout and email delivery not run."
+      "proof": "Amanda Automated Certification 37862656471 green, Amanda Client Assembly Acceptance 37862656453 green, full CI 37862656485 green, EA modular assembly 37862656452 green, context verification 37862657299 green. Test-only mocked Stripe/Airtable; no authenticated real checkout conducted."
     },
     "desktopVisual": {
       "status": "PASS",
-      "proof": "Playwright live public prior-version homepage, RIMAN kit, brand login and awaitlisted page passed; newly added shared warm letter uses responsive inline styles. No new screenshot of authenticated end-to-end customer path."
+      "proof": "Public Playwright checks passed against pre-promotion live site; post-promotion homepage letter absence asserted by repo QA and requires live verification. No screenshot evidence claimed."
     },
     "mobileVisual": {
       "status": "PASS",
-      "proof": "Amanda public layout unchanged. Compact shared warm letter has fluid width and padding; no global styles overwritten. Mobile device screenshot acceptance not represented."
+      "proof": "Homepage-only removal shrinks existing intro; no CSS or other layout changed. Mobile screenshot not performed."
     },
     "creativeCritic": {
       "status": "PASS",
-      "proof": "Amanda personal welcome added to top of official course/waitlist/login; legacy NOT READY negative copy removed from legacy waitlist, RIMAN mall link standardized, 499 CAD Body Sculpt kit kept distinct."
+      "proof": "Homepage introduction remains One integrated mission / Health craft and calling / Restore Learn Create. Letter remains on shared Amanda enrollment, waitlist, login. Other client routes unchanged."
     }
   },
   "details": {
-    "pullRequest": 516,
+    "pullRequest": 518,
     "mergeCommit": "1dc10a04ed4b0bbe6e01548b6ad10170c3be3cd0",
     "previewDeployment": "dpl_3e1J2xprFqQQweo8FXKHimE8FQD1",
     "githubActions": "https://github.com/TheArchitect1111/ea-payments/actions/runs/37856033738",
     "releaseMethod": "EA Master Guard-compliant [EA-GATED] one-parent manifest-only commit; parent is sourceCommit.",
     "limitations": "Real $1 Stripe transaction, live Airtable writes, actual owner login, webhook signature replay against Stripe and delivered email not verified. CI mocked I/O. Post-promotion public expired upgrade page to be tested by push-master Playwright CI.",
-    "sourceMergeCommit": "746be516099de9ea943e9ba56d06f51cc8de5a4d",
-    "ciRun": 37860611579,
-    "amandaCertificationRun": 37860611611,
+    "sourceMergeCommit": "c420f6db00f15e7bf66db38b6b39a2bd31ebb3d7",
+    "ciRun": 37862656485,
+    "amandaCertificationRun": 37862656471,
     "notes": "Manifest-only EA commit-locked production promotion. Check post-promotion live routes and forms; mocked E2E is not actual payment.",
-    "note": "Commit-locked manifest-only production promotion; no falsified payment or email E2E evidence."
+    "note": "Commit-locked manifest-only promotion. No real Stripe test or email acceptance claimed."
   }
 }
