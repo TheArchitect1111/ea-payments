@@ -1,0 +1,4 @@
+[
+  { "id": "amanda-catherine", "name": "Amanda Catherine", "domain": "amandacatherine.ca", "route": "/portal/amanda-catherine", "features": ["letters", "test-payment"] },
+  { "id": "tb3", "name": "Tarris", "domain": "tb3.online", "route": "/tarris/future", "features": ["video-library"] }
+]

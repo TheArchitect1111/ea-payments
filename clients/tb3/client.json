@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "id": "tb3",
+  "name": "Tarris",
+  "status": "production",
+  "hqFeatures": ["video-library"],
+  "canonical": {
+    "sourceRepository": "TheArchitect1111/ea-payments",
+    "sourceBranch": "master",
+    "packagePath": "clients/tb3",
+    "publicSiteRoute": "/tarris",
+    "publicDomain": "https://tb3.online",
+    "portalRoute": "/tarris/future",
+    "applicationProject": "ea-payments"
+  }
+}
