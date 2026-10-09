@@ -3,6 +3,7 @@
 // WIRED: TB3 / -> /tarris -> ENTER TB3 HQ -> /tarris/future.
 import Link from "next/link";
 import BookingForm from "./book/booking-form";
+import { Tb3FilmGrid } from "./tb3-film";
 import { useState, type ReactNode } from "react";
 
 const pillars = [
@@ -119,6 +120,7 @@ export default function TarrisPublicPage() {
             <article><h3 className="mb-3 text-sm font-black tracking-widest">ACADEMICS PROOF</h3><ImageSlot id="academics-primary" asset="OFFICIAL_09_LIBRARY_STUDYING.png" alt="Tarris studying at a library table" ratio="aspect-[4/3]" /></article>
             <div className="grid grid-cols-2 gap-4"><ImageSlot id="film" asset="OFFICIAL_07_FILM_TABLET.png" alt="Game film on a tablet" ratio="aspect-[4/3]" /><ImageSlot id="nutrition" asset="OFFICIAL_11_KITCHEN_NUTRITION.png" alt="Nutrition and wellness preparation" ratio="aspect-[4/3]" /></div>
           </div>
+          <Tb3FilmGrid />
           <a href="#book-tarris-form" className="mt-4 inline-block text-xs font-bold text-[#C41E3A]">Book Tarris for this →</a>
         </section>
         <section id="future" aria-label="Enterprise and future" className="grid scroll-mt-5 gap-6 border-b border-black/20 py-10 md:grid-cols-3">

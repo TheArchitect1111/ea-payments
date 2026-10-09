@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { tb3FilmAssets, tb3FilmUrl } from "../tb3-film";
 
 import { HqWorkspaceProvider, useHq, HqDialog, ModuleActions, ModuleTools, ProactiveEva, HqFocus, Upcoming, OpportunitySummary, OpportunityPipeline, EarningsValue, EarningsBreakdown, DocumentVault, OpportunityInbox, CalendarModule, EvaPanel, EvaFab, EvaCommandBar } from "./hq-workspace";
 
 type AssetCategory = "Athlete" | "Academics" | "Brand" | "Community" | "Future" | "Training";
-type OfficialAsset = { filename: string; label: string; category: AssetCategory; alt: string };
+type OfficialAsset = { filename: string; label: string; category: AssetCategory; alt: string; id?: string; subcategory?: "Film"; mediaType?: "video" | "photo"; poster?: string };
 
 const officialAssets: OfficialAsset[] = [
   { filename: "OFFICIAL_03_LOW_STANCE_ARENA.png", label: "LOW STANCE · ARENA", category: "Athlete", alt: "Tarris in a low dribble stance on court" },
@@ -23,12 +24,13 @@ const officialAssets: OfficialAsset[] = [
   { filename: "OFFICIAL_12_KIDS_ART.png", label: "KIDS · ART", category: "Community", alt: "Children creating art together" },
   { filename: "OFFICIAL_05_TUNNEL_BOUIE_4_BACK.png", label: "TUNNEL · BOUIE 4", category: "Future", alt: "Tarris in the tunnel with BOUIE and number 4 visible" },
   { filename: "OFFICIAL_15_PODIUM_SPEAKING.png", label: "PODIUM · SPEAKING", category: "Future", alt: "Tarris speaking at a podium" },
+  ...tb3FilmAssets.map(film => ({ id: film.id, filename: film.filename, label: film.title, category: film.category, subcategory: film.subcategory, mediaType: film.type, poster: film.poster, alt: film.title })),
 ];
 
 const trainingAssets = new Set(["OFFICIAL_02_BENCH_YELLOW_KOBE.png", "OFFICIAL_06_CABLE_MACHINE.png", "OFFICIAL_07_FILM_TABLET.png"]);
 const futureAssets = new Set(["OFFICIAL_13_BLAZER_CHAIR.png"]);
-const filterOptions = ["All", "Athlete", "Academics", "Brand", "Community", "Future", "Training"] as const;
-const assetMatchesCategory = (filename: string, primary: AssetCategory, category: (typeof filterOptions)[number]) => category === "All" || primary === category || (category === "Training" && trainingAssets.has(filename)) || (category === "Future" && futureAssets.has(filename));
+const filterOptions = ["All", "Athlete", "Academics", "Brand", "Community", "Future", "Training", "Film"] as const;
+const assetMatchesCategory = (asset: OfficialAsset, category: (typeof filterOptions)[number]) => category === "All" || (category === "Film" && asset.subcategory === "Film") || asset.category === category || (category === "Training" && trainingAssets.has(asset.filename)) || (category === "Future" && futureAssets.has(asset.filename));
 
 function PortalImage({
   id,
@@ -87,6 +89,7 @@ function TarrisHqContent() {
   const {setAssetOpener,setModule}=useHq();
   const [selectedAsset, setSelectedAsset]=useState<OfficialAsset|null>(null);
   const [copyNotice, setCopyNotice]=useState("");
+  const [showUpdateHub, setShowUpdateHub]=useState(false);
   const rootRef=useRef<HTMLDivElement>(null);
   const [search, setSearch] = useState("");
   const [activeFilter, setActiveFilter] = useState<(typeof filterOptions)[number]>("All");
@@ -96,15 +99,16 @@ function TarrisHqContent() {
   useEffect(()=>{const root=rootRef.current;if(!root)return;const names:Record<string,string>={"hq-home":"Home","my-journey-module":"My Journey","academics-module":"Academics","training-module":"Training","nil-brand-module":"NIL & Brand","opportunities-module":"Opportunities","community-module":"Community","calendar-module":"Calendar","media-library":"Media Library"};const observer=new IntersectionObserver(entries=>{const visible=entries.filter(e=>e.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio);if(visible[0])setModule(names[visible[0].target.id]);},{root,rootMargin:"-10% 0px -50% 0px",threshold:0});Object.keys(names).forEach(id=>{const node=document.getElementById(id);if(node)observer.observe(node);});return()=>observer.disconnect();},[setModule]);
   const filteredAssets = useMemo(() => {
     const query = search.trim().toLowerCase();
-    return officialAssets.filter(({ filename, label, category }) => {
-      const categoryMatches = assetMatchesCategory(filename, category, activeFilter);
-      const queryMatches = !query || (label + " " + category + (trainingAssets.has(filename) ? " training" : "") + (futureAssets.has(filename) ? " future" : "")).toLowerCase().includes(query);
+    return officialAssets.filter(asset => {
+      const categoryMatches = assetMatchesCategory(asset, activeFilter);
+      const queryMatches = !query || (asset.label + " " + asset.category + " " + (asset.subcategory ?? "") + (trainingAssets.has(asset.filename) ? " training" : "") + (futureAssets.has(asset.filename) ? " future" : "")).toLowerCase().includes(query);
       return categoryMatches && queryMatches;
     });
   }, [search, activeFilter]);
 
-  async function copyAssetLink(filename: string) {
-    const link = window.location.origin + "/images/tb3-official/" + filename;
+  async function copyAssetLink(asset: OfficialAsset) {
+    const filename = asset.filename;
+    const link = window.location.origin + (asset.mediaType ? tb3FilmUrl(filename) : "/images/tb3-official/" + filename);
     try {
       await navigator.clipboard.writeText(link);
       setCopiedAsset(filename);setCopyNotice("Link copied");
@@ -135,6 +139,7 @@ function TarrisHqContent() {
           <a href="#community-module" className="block rounded px-3 py-2 text-white/70 hover:bg-white/10">Community</a>
           <a href="#calendar-module" className="block rounded px-3 py-2 text-white/70 hover:bg-white/10">Calendar</a>
           <a href="#media-library" className="block rounded px-3 py-2 text-white/70 hover:bg-white/10">Media Library</a>
+          <button type="button" onClick={()=>setShowUpdateHub(true)} className="block w-full rounded px-3 py-2 text-left text-white/70 hover:bg-white/10">Update Hub</button>
         </nav>
         <details className="mt-4"><summary aria-label="Settings" title="Settings" className="grid h-10 w-10 cursor-pointer list-none place-items-center rounded-lg border border-white/15">⚙</summary><p className="mt-2 text-xs text-white/60">Account preferences will be available when HQ tracking is connected.</p></details>
         <div className="mt-8 hidden text-[10px] leading-6 tracking-[0.16em] text-white/45 lg:block">
@@ -272,11 +277,12 @@ function TarrisHqContent() {
         <CalendarModule />
         <section id="media-library" aria-labelledby="vault-title" className="mt-6 scroll-mt-6 rounded-2xl border border-white/10 bg-[#111111] p-5 sm:p-7">
           <div className="flex items-start justify-between gap-4"><div><p className="text-[10px] tracking-[0.22em] text-[#C41E3A]">TB3 HQ · MEDIA</p><h2 id="vault-title" className="mt-2 text-2xl font-black">BRAND ASSETS / Click to pull</h2><p className="mt-2 text-sm leading-6 text-white/65">Official high-resolution library. Click View Asset to load.</p></div><details id="vault-tooltip" className="relative"><summary aria-label="How vault works" className="grid h-9 w-9 cursor-pointer list-none place-items-center rounded-full border border-white/30 text-sm font-bold">i</summary><p className="absolute right-0 z-20 mt-2 w-64 rounded-xl border border-white/15 bg-[#202020] p-4 text-xs leading-5 text-white/75">Click View Asset to pull the original image. These are the approved assets used on the public site. Vault previews do not auto-load.</p></details></div>
-          <div className="mt-5 flex flex-col gap-3"><label><span className="sr-only">Search assets</span><input id="asset-search" type="search" value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search assets..." className="w-full rounded-xl border border-white/15 bg-[#080808] px-4 py-3 text-sm text-white" /></label><div id="asset-filter" aria-label="Filter assets" className="flex flex-wrap gap-2">{filterOptions.map(category=><button key={category} type="button" aria-pressed={activeFilter===category} onClick={()=>setActiveFilter(category)} className={"rounded-full border px-3 py-2 text-[10px] font-bold uppercase tracking-wider "+(activeFilter===category?"border-[#C41E3A] bg-[#C41E3A] text-white":"border-white/15 bg-white/5 text-white/70")}>{category} {officialAssets.filter(asset=>assetMatchesCategory(asset.filename,asset.category,category)).length}</button>)}</div></div>
-          <div id="asset-grid" className="mt-5 grid gap-4 sm:grid-cols-2 2xl:grid-cols-4">{filteredAssets.map(asset=><article key={asset.filename} className="flex min-h-[220px] flex-col rounded-xl border border-[#E5E5E5] bg-[#F5F5F0] p-4 text-[#111]"><svg aria-hidden="true" viewBox="0 0 24 24" className="h-12 w-12 text-[#999]" fill="none" stroke="currentColor"><path d="M3 3h18v18H3V3m1 16 6-7 4 4 3-3 4 6M8 8h.01"/></svg><h3 className="mt-3 text-sm font-black uppercase">{asset.label}</h3><span className="mt-2 w-fit rounded-full bg-[#E5E5E5] px-3 py-1 text-[10px] font-bold uppercase">{asset.category}</span><p className="mt-3 text-xs text-[#666]">Click to view high-res</p><button type="button" onClick={()=>{setCopyNotice("");setSelectedAsset(asset);}} className="mt-4 w-fit rounded-lg bg-[#C41E3A] px-4 py-2 text-xs font-bold text-white" aria-label={"View Asset: "+asset.label}>View Asset →</button></article>)}</div>
+          <div className="mt-5 flex flex-col gap-3"><label><span className="sr-only">Search assets</span><input id="asset-search" type="search" value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search assets..." className="w-full rounded-xl border border-white/15 bg-[#080808] px-4 py-3 text-sm text-white" /></label><div id="asset-filter" aria-label="Filter assets" className="flex flex-wrap gap-2">{filterOptions.map(category=><button key={category} type="button" aria-pressed={activeFilter===category} onClick={()=>setActiveFilter(category)} className={"rounded-full border px-3 py-2 text-[10px] font-bold uppercase tracking-wider "+(activeFilter===category?"border-[#C41E3A] bg-[#C41E3A] text-white":"border-white/15 bg-white/5 text-white/70")}>{category} {officialAssets.filter(asset=>assetMatchesCategory(asset,category)).length}</button>)}</div></div>
+          <div id="asset-grid" className="mt-5 grid gap-4 sm:grid-cols-2 2xl:grid-cols-4">{filteredAssets.map(asset=><article key={asset.filename} className="flex min-h-[220px] flex-col rounded-xl border border-[#E5E5E5] bg-[#F5F5F0] p-4 text-[#111]">{asset.mediaType==="video"?<span aria-hidden="true" className="grid h-12 w-12 place-items-center rounded-full bg-[#C41E3A] text-2xl text-white">▶</span>:<svg aria-hidden="true" viewBox="0 0 24 24" className="h-12 w-12 text-[#999]" fill="none" stroke="currentColor"><path d="M3 3h18v18H3V3m1 16 6-7 4 4 3-3 4 6M8 8h.01"/></svg>}<h3 className="mt-3 text-sm font-black uppercase">{asset.label}</h3><span className="mt-2 w-fit rounded-full bg-[#E5E5E5] px-3 py-1 text-[10px] font-bold uppercase">{asset.subcategory ?? asset.category}</span><p className="mt-3 text-xs text-[#666]">{asset.mediaType==="video"?"Click to view film":asset.mediaType==="photo"?"Click to view scoreboard":"Click to view high-res"}</p><button type="button" onClick={()=>{setCopyNotice("");setSelectedAsset(asset);}} className="mt-4 w-fit rounded-lg bg-[#C41E3A] px-4 py-2 text-xs font-bold text-white" aria-label={"View Asset: "+asset.label}>View Asset →</button></article>)}</div>
           {!filteredAssets.length&&<p className="mt-5 text-sm text-white/60">No matching approved assets.</p>}
         </section>
-        {selectedAsset&&<HqDialog id="asset-lightbox" title={selectedAsset.label} onClose={()=>setSelectedAsset(null)}><img id="asset-lightbox-image" src={"/images/tb3-official/"+selectedAsset.filename} alt={selectedAsset.alt} className="max-h-[65vh] w-full rounded-2xl object-contain"/><div className="mt-4 flex flex-wrap items-center gap-3"><span className="rounded-full bg-[#E5E5E5] px-3 py-1 text-[10px] font-bold uppercase">{selectedAsset.category}</span><p className="text-xs text-[#666]">Usage: Approved for NIL, social, editorial</p></div><div className="mt-4 flex gap-3"><a href={"/images/tb3-official/"+selectedAsset.filename} download={selectedAsset.filename} className="rounded-lg border border-black px-4 py-2 text-xs font-bold">Download HD</a><button type="button" onClick={()=>copyAssetLink(selectedAsset.filename)} className="rounded-lg border border-black px-4 py-2 text-xs font-bold">{copiedAsset===selectedAsset.filename?"Copied ✓":"Copy Link ⧉"}</button></div>{copyNotice&&<p role="status" className="mt-3 text-xs">{copyNotice}</p>}</HqDialog>}
+        {showUpdateHub&&<HqDialog id="tb3-update-hub-dialog" title="UPDATE HUB" onClose={()=>setShowUpdateHub(false)}><p className="text-xs font-bold tracking-wider text-[#C41E3A]">LATEST · v2.4</p><h3 className="mt-2 text-xl font-black">FILM VAULT LIVE</h3><p className="mt-2 text-sm">Four HD game videos + scoreboard proof photo · 18 PTS / 8 REB / 3 AST · ALABAMA 111-93</p><h4 className="mt-6 text-xs font-black tracking-widest">CHANGELOG</h4><ul className="mt-3 space-y-3 text-sm"><li><strong>v2.4</strong> Film Vault · 4 videos + scoreboard proof photo (5 media assets)</li><li><strong>v2.3</strong> Media Vault speed</li><li><strong>v2.2</strong> Calendar + BOOK TARRIS wired</li><li><strong>v2.1</strong> Navigation + photo fixes</li></ul></HqDialog>}
+        {selectedAsset&&<HqDialog id="asset-lightbox" title={selectedAsset.label} onClose={()=>setSelectedAsset(null)}>{selectedAsset.mediaType==="video"?<video id="asset-lightbox-video" src={tb3FilmUrl(selectedAsset.filename)} poster={selectedAsset.poster} controls autoPlay playsInline preload="metadata" className="max-h-[65vh] w-full rounded-2xl bg-black object-contain"/>:<img id="asset-lightbox-image" src={selectedAsset.mediaType==="photo"?tb3FilmUrl(selectedAsset.filename):"/images/tb3-official/"+selectedAsset.filename} alt={selectedAsset.alt} className="max-h-[65vh] w-full rounded-2xl object-contain"/>}<div className="mt-4 flex flex-wrap items-center gap-3"><span className="rounded-full bg-[#E5E5E5] px-3 py-1 text-[10px] font-bold uppercase">{selectedAsset.category}</span><p className="text-xs text-[#666]">Usage: Approved for NIL, social, editorial</p></div><div className="mt-4 flex gap-3"><a href={selectedAsset.mediaType?tb3FilmUrl(selectedAsset.filename):"/images/tb3-official/"+selectedAsset.filename} download={selectedAsset.filename} className="rounded-lg border border-black px-4 py-2 text-xs font-bold">Download HD</a><button type="button" onClick={()=>copyAssetLink(selectedAsset)} className="rounded-lg border border-black px-4 py-2 text-xs font-bold">{copiedAsset===selectedAsset.filename?"Copied ✓":"Copy Link ⧉"}</button></div>{copyNotice&&<p role="status" className="mt-3 text-xs">{copyNotice}</p>}</HqDialog>}
 
         <section id="greater-tomorrow" className="mt-6 rounded-2xl border border-white/10 bg-[#111111] p-7"><p className="text-xs tracking-widest text-[#C41E3A]">A GREATER TOMORROW</p><h2 className="mt-3 text-3xl font-black">BUILD BEYOND THE GAME.</h2><a href="#future-module" className="mt-4 inline-block text-sm underline">Explore the next chapter →</a></section>
         <section id="tb3-store" className="mt-6 rounded-2xl bg-[#F5F5F0] p-5 text-[#111] sm:p-7"><p className="text-xs font-bold tracking-widest">TB3 STORE</p><h2 className="mt-2 text-3xl font-black">Rep the Vision.</h2><p className="mt-2 text-xs text-black/60">Product concepts. Store opening soon.</p><div className="mt-5 grid grid-cols-2 gap-4 xl:grid-cols-5">{[
