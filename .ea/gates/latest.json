@@ -1,21 +1,21 @@
 {
-  "sourceCommit": "f4ce8813bdb13548e0955653698323c1cdc9aa8a",
-  "previewUrl": "https://ea-payments-r4912byou-the-architects-projects-cc813778.vercel.app/",
-  "target": "https://ea-payments-r4912byou-the-architects-projects-cc813778.vercel.app/amanda-catherine",
-  "completedAt": "2026-10-09T16:49:01.714Z",
+  "sourceCommit": "dc453131c0339f43f1bebb7a75d889e5761bac7c",
+  "previewUrl": "https://ea-payments-c45v6hcig-the-architects-projects-cc813778.vercel.app/",
+  "target": "https://ea-payments-c45v6hcig-the-architects-projects-cc813778.vercel.app/tarris",
+  "completedAt": "2026-10-09T23:15:27.581Z",
   "status": "PASS",
   "gates": {
     "sourceIdentity": {
       "status": "PASS",
-      "proof": "preview:f4ce8813bdb13548e0955653698323c1cdc9aa8a"
+      "proof": "preview:dc453131c0339f43f1bebb7a75d889e5761bac7c"
     },
     "build": {
       "status": "PASS",
-      "proof": "source:f4ce8813bdb13548e0955653698323c1cdc9aa8a"
+      "proof": "source:dc453131c0339f43f1bebb7a75d889e5761bac7c"
     },
     "assets": {
       "status": "PASS",
-      "proof": "desktop:11-visuals mobile:11-visuals"
+      "proof": "desktop:24-visuals mobile:24-visuals"
     },
     "functional": {
       "status": "PASS",
@@ -23,11 +23,11 @@
     },
     "desktopVisual": {
       "status": "PASS",
-      "proof": "sha256:18230822155d6119b24ab3bc573093d4fa9036a7a820c42a1f3d7015c64bb7a5"
+      "proof": "sha256:f5555f55f315417281ee35de25a07a9549260814c15a267238c74ddccd1e4546"
     },
     "mobileVisual": {
       "status": "PASS",
-      "proof": "sha256:b13e8a21ee1ef49dda68766db59f09b5b26eabc71b9b965aa631ea65cb726222"
+      "proof": "sha256:c81c95c15a69d210e16d58681568d7370f11569b331c4e1eb40d1647128f3b01"
     },
     "creativeCritic": {
       "status": "PASS",
@@ -35,8 +35,9 @@
     }
   },
   "details": {
+    "certificationTransport": "exact-built-checkout-local",
     "buildInfo": {
-      "commitSha": "f4ce8813bdb13548e0955653698323c1cdc9aa8a",
+      "commitSha": "dc453131c0339f43f1bebb7a75d889e5761bac7c",
       "branch": "master",
       "environment": "preview"
     },
@@ -44,45 +45,45 @@
       "name": "desktop",
       "httpStatus": 200,
       "screenshot": "/home/runner/work/ea-payments/ea-payments/artifacts/ea-gate/desktop.png",
-      "screenshotSha256": "18230822155d6119b24ab3bc573093d4fa9036a7a820c42a1f3d7015c64bb7a5",
+      "screenshotSha256": "f5555f55f315417281ee35de25a07a9549260814c15a267238c74ddccd1e4546",
       "consoleErrors": [],
       "pageErrors": [],
       "failedRequests": [],
       "badImageResponses": [],
       "brokenImgs": [],
       "brokenBackgrounds": [],
-      "renderedVisuals": 11,
+      "renderedVisuals": 24,
       "overflow": 0,
-      "bodyTextLength": 9230,
-      "scrollHeight": 14979,
+      "bodyTextLength": 2056,
+      "scrollHeight": 5477,
       "viewport": {
         "width": 1440,
         "height": 1100
       },
       "placeholderSlots": [],
-      "publicBackground": null
+      "publicBackground": "rgba(0, 0, 0, 0)"
     },
     "mobile": {
       "name": "mobile",
       "httpStatus": 200,
       "screenshot": "/home/runner/work/ea-payments/ea-payments/artifacts/ea-gate/mobile.png",
-      "screenshotSha256": "b13e8a21ee1ef49dda68766db59f09b5b26eabc71b9b965aa631ea65cb726222",
+      "screenshotSha256": "c81c95c15a69d210e16d58681568d7370f11569b331c4e1eb40d1647128f3b01",
       "consoleErrors": [],
       "pageErrors": [],
       "failedRequests": [],
       "badImageResponses": [],
       "brokenImgs": [],
       "brokenBackgrounds": [],
-      "renderedVisuals": 11,
+      "renderedVisuals": 24,
       "overflow": 0,
-      "bodyTextLength": 9230,
-      "scrollHeight": 22080,
+      "bodyTextLength": 2056,
+      "scrollHeight": 8715,
       "viewport": {
         "width": 390,
         "height": 844
       },
       "placeholderSlots": [],
-      "publicBackground": null
+      "publicBackground": "rgba(0, 0, 0, 0)"
     }
   }
 }
