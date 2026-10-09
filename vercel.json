@@ -20,46 +20,6 @@
           "value": "www.tb3.online"
         }
       ]
-    },
-    {
-      "source": "/hq",
-      "destination": "/tarris/future",
-      "has": [
-        {
-          "type": "host",
-          "value": "tb3.online"
-        }
-      ]
-    },
-    {
-      "source": "/hq/:path*",
-      "destination": "/tarris/future/:path*",
-      "has": [
-        {
-          "type": "host",
-          "value": "tb3.online"
-        }
-      ]
-    },
-    {
-      "source": "/hq",
-      "destination": "/tarris/future",
-      "has": [
-        {
-          "type": "host",
-          "value": "www.tb3.online"
-        }
-      ]
-    },
-    {
-      "source": "/hq/:path*",
-      "destination": "/tarris/future/:path*",
-      "has": [
-        {
-          "type": "host",
-          "value": "www.tb3.online"
-        }
-      ]
     }
   ],
   "ignoreCommand": "node scripts/vercel-ignore-work-branches.mjs",
