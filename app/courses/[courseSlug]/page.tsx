@@ -23,7 +23,7 @@ export default async function Page({ params }: { params: Promise<{ courseSlug: s
         <p className="mt-8 text-sm font-bold uppercase tracking-[0.18em] text-[#596b5b]">
           {course.status === 'LIVE' ? 'Registration open' : 'Waitlist'}
         </p>
-        <h1 className="font-serif text-4xl">{course.title}</h1>
+        {!['strategy-call', '90-day-package'].includes(course.key) && <h1 className="font-serif text-4xl">{course.title}</h1>}
         {course.description && <p className="mt-4">{course.description}</p>}
         <section id="waitlist" className="mt-8">
           <AmandaWaitlistForm courseId={course.key} courseName={course.title} status={course.status} />
