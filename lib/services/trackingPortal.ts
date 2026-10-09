@@ -27,11 +27,12 @@ async function saveTrackingLead(data: TrackingLead) {
 }
 
 export async function pushToTrackingPortal(data: TrackingLead) {
-  const url = process.env.TRACKING_PORTAL_URL?.trim();
-  const apiKey = process.env.TRACKING_PORTAL_API_KEY?.trim();
+  const url = process.env.TRACKING_PORTAL_API_URL?.trim() || process.env.TRACKING_PORTAL_URL?.trim();
+  const apiKey = process.env.TRACKING_PORTAL_API_KEY?.trim() || process.env.INGEST_API_KEY?.trim();
   let result: { ok: boolean; id?: string };
 
   if (url && apiKey) {
+    console.info('[amanda-tracking] ingest host', new URL(url).host);
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey },
@@ -42,10 +43,12 @@ export async function pushToTrackingPortal(data: TrackingLead) {
     const payload = await response.json().catch(() => ({}));
     if (!response.ok || !payload.ok) throw new Error(payload.error || `Tracking portal returned ${response.status}`);
     result = payload;
+    console.info('[amanda-tracking] external sync complete', { registration_type: data.registration_type, class_id: data.class_id, recordId: result.id ?? null });
   } else {
     // Both Amanda’s site and her EVA portal currently share the EA Airtable base.
     // Persist directly to the portal table until an external ingest URL/key is configured.
     result = await saveTrackingLead(data);
+    console.info('[amanda-tracking] direct Airtable sync complete', { registration_type: data.registration_type, class_id: data.class_id, recordId: result.id ?? null });
   }
 
   const key = registrationKey(data);
