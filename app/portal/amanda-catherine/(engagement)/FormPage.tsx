@@ -4,7 +4,7 @@ import AmandaForm from './AmandaForm';
 
 export default async function FormPage({ kind, course = '', context = '' }: { kind: 'apply' | 'enroll' | 'foundry'; course?: string; context?: string }) {
   try {
-    const [r, hqTools] = await Promise.all([registry(), kind === 'enroll' ? getAmandaHqTools() : Promise.resolve({})]);
+    const [r, hqTools] = await Promise.all([registry(), getAmandaHqTools()]);
     const selected = r.courses.find((c) => c.key === course);
     if (kind === 'enroll' && selected?.status === 'READY' && selected.square_checkout_url) return <section className="amanda-card amanda-form"><p className="amanda-status">AMANDA CATHERINE</p><h1>{selected.title}</h1>{hqTools.registerLetter && <p className="amanda-hq-letter">{hqTools.registerLetter}</p>}<p>{selected.description || 'Continue to secure Square checkout.'}</p>{selected.price !== null && <p>{'$' + selected.price.toLocaleString('en-US')}</p>}<a className="amanda-button" href={selected.square_checkout_url} target="_blank" rel="noopener noreferrer" data-cta-name="Enroll" data-course-key={selected.key}>Enroll securely with Square</a></section>;
     if (kind === 'enroll' && selected?.status === 'READY') return <section className="amanda-card"><p className="amanda-status">AMANDA CATHERINE</p><h1>{selected.title}</h1>{hqTools.registerLetter && <p className="amanda-hq-letter">{hqTools.registerLetter}</p>}<p>Square checkout is not configured for this course yet. Please contact Amanda for current enrollment options.</p></section>;
