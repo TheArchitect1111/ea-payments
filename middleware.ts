@@ -135,6 +135,27 @@ export async function middleware(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname;
 
+  // Short Amanda app URLs resolve to their canonical portal pages only on Amanda's domain.
+  const normalizedHost = host?.split(':')[0].toLowerCase();
+  const amandaAliases: Record<string, string> = {
+    '/classes': '/portal/amanda-catherine/classes',
+    '/apply': '/portal/amanda-catherine/apply',
+    '/application': '/portal/amanda-catherine/apply',
+    '/book': '/portal/amanda-catherine/book',
+    '/foundry': '/portal/amanda-catherine/foundry',
+    '/update-hub': '/portal/amanda-catherine/hub',
+    '/calendar': '/portal/amanda-catherine/calendar',
+    '/eva': '/portal/amanda-catherine/eva',
+  };
+  if (
+    ['amandacatherine.ca', 'www.amandacatherine.ca'].includes(normalizedHost ?? '') &&
+    amandaAliases[pathname]
+  ) {
+    const target = request.nextUrl.clone();
+    target.pathname = amandaAliases[pathname];
+    return NextResponse.redirect(target);
+  }
+
   // Isolated client-review access. This is active only on the dedicated preview
   // branch and never weakens production authentication.
   const isAmandaClientTestDeployment =
