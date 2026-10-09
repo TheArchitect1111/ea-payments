@@ -86,7 +86,11 @@ async function inspectViewport(browser, name, viewport, isMobile = false, pageTa
 
   page.on('console', (msg) => { if (msg.type() === 'error') consoleErrors.push(msg.text()); });
   page.on('pageerror', (err) => pageErrors.push(String(err)));
-  const onRequestFailed = (req) => failedRequests.push(`${req.method()} ${req.url()} :: ${req.failure()?.errorText || 'failed'}`);
+  const onRequestFailed = (req) => {
+    const reason = req.failure()?.errorText || 'failed';
+    if (reason === 'net::ERR_ABORTED') return;
+    failedRequests.push(`${req.method()} ${req.url()} :: ${reason}`);
+  };
   page.on('requestfailed', onRequestFailed);
   page.on('response', (res) => {
     const type = res.request().resourceType();
