@@ -7,10 +7,10 @@ import { spawn } from 'node:child_process';
 const previewUrl = process.env.EA_PREVIEW_URL;
 const routePath = process.env.EA_GATE_PATH || '/';
 const sourceCommit = process.env.EA_SOURCE_COMMIT || '';
-const tb3FilmRelease = process.env.EA_RELEASE_PROFILE === 'tb3-film-release';
-const placeholderProof = tb3FilmRelease ? (await import('./production-certification.js')).default.certifyTB3() : null;
-if (tb3FilmRelease && routePath !== '/tarris/future') throw new Error('TB3 release profile is restricted to /tarris/future');
-const minVisuals = tb3FilmRelease ? 0 : Number(process.env.EA_MIN_VISUALS || 1);
+const tb3Placeholders = process.env.EA_RELEASE_PROFILE === 'tb3-approved-placeholders';
+const placeholderProof = tb3Placeholders ? (await import('./production-certification.js')).default.certifyTB3() : null;
+if (tb3Placeholders && routePath !== '/tarris/future') throw new Error('TB3 placeholder profile is restricted to /tarris/future');
+const minVisuals = tb3Placeholders ? 0 : Number(process.env.EA_MIN_VISUALS || 1);
 const outDir = path.resolve(process.env.EA_GATE_OUTPUT || 'artifacts/ea-gate');
 const bypassSecret = process.env.VERCEL_AUTOMATION_BYPASS_SECRET || '';
 const bypassHeaders = bypassSecret ? {
@@ -56,7 +56,7 @@ try {
 } catch {}
 let sourceIdentityPass = Boolean(buildInfo?.commitSha && buildInfo.commitSha === sourceCommit);
 let localServer = null;
-if (!sourceIdentityPass && (!bypassSecret || tb3FilmRelease)) {
+if (!sourceIdentityPass && (!bypassSecret || tb3Placeholders)) {
   localServer = spawn(process.execPath, ['node_modules/next/dist/bin/next', 'start', '-p', '3000'], { env: { ...process.env, VERCEL_GIT_COMMIT_SHA: sourceCommit, VERCEL_GIT_COMMIT_REF: 'master', VERCEL_ENV: 'preview' }, stdio: 'ignore' });
   cleanPreview = new URL('http://127.0.0.1:3000');
   target = new URL(routePath, cleanPreview).toString();
