@@ -91,7 +91,11 @@ export function Tb3FilmGrid() {
     <div id="tb3-film" className="mt-10 border-t border-black/20 pt-8">
       <p className="text-[9px] font-semibold tracking-[0.2em] text-[#A51C30]">TB3 FILM</p>
       <h3 className="mt-2 text-xl font-black tracking-tight sm:text-2xl">18 PTS 8 REB 3 AST <span className="text-[#A51C30]">| ALABAMA - 111-93</span></h3>
-      <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      <section aria-label="Final Lineup" className="mt-6">
+        <h4 className="text-sm font-black uppercase tracking-widest">Final Lineup</h4>
+        <p className="mt-2 text-sm font-bold">Drive · Defense · Putback</p>
+      </section>
+      <div className="mt-4 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {tb3HomepageFilmAssets.map((film) => (
           <article key={film.id} className="min-w-0 overflow-hidden border border-black/20">
             <button
@@ -110,6 +114,26 @@ export function Tb3FilmGrid() {
           </article>
         ))}
       </div>
+      <section aria-label="Archive Vault" className="mt-8 border-t border-black/20 pt-6">
+        <h4 className="text-sm font-black uppercase tracking-widest">Archive Vault</h4>
+        <p className="mt-2 text-sm font-bold">Dunk + Jumbotron</p>
+        <div className="mt-4 grid grid-cols-1 gap-5 sm:grid-cols-2">
+          {tb3FilmAssets.filter((film) => film.archived).map((film) => (
+            <article key={film.id} className="min-w-0 overflow-hidden border border-black/20">
+              <button
+                type="button"
+                aria-label={"Play " + film.title}
+                onClick={() => setSelected(film)}
+                className="group relative block w-full overflow-hidden bg-[#141414] text-left"
+              >
+                <video className="aspect-video w-full object-cover" src={film.mediaUrl} poster={film.poster} muted loop playsInline preload="none" aria-hidden="true" />
+                <span className="pointer-events-none absolute inset-0 grid place-items-center"><span className="grid h-14 w-14 place-items-center rounded-full bg-white text-xl text-[#A51C30]" aria-hidden="true">▶</span></span>
+              </button>
+              <p className="px-3 py-4 text-sm font-black">{film.id === "TB3-FILM-04" ? "Dunk" : "Jumbotron"}</p>
+            </article>
+          ))}
+        </div>
+      </section>
       {selected && (
         <div role="presentation" className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 p-3 sm:p-8" onClick={(event) => { if (event.target === event.currentTarget) setSelected(null); }}>
           <div role="dialog" aria-modal="true" aria-label={selected.title} className="relative w-full max-w-6xl">
