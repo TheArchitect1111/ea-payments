@@ -115,7 +115,7 @@ export default function TarrisPublicPage() {
   return (
     <>
     <div id="tarris-splash-intro" style={{ position: "fixed", inset: 0, width: "100vw", height: "100vh", zIndex: 99999, background: "#000", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", margin: 0, padding: 0 }}>
-      <video id="tarris-intro-video" autoPlay muted loop playsInline preload="auto" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}>
+      <video id="tarris-intro-video" autoPlay muted loop controls={false} playsInline preload="auto" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}>
         <source src="/videos/tb3-intro/tb3-billboard-intro.mp4" type="video/mp4" />
       </video>
       <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.18)", pointerEvents: "none" }} />
