@@ -5,6 +5,7 @@ export type AmandaMediaAsset = {
   id: string;
   title: string;
   url: string;
+  thumbnail: string;
   type: 'image' | 'video';
   sort_order: number;
   is_visible: boolean;
@@ -16,6 +17,7 @@ function toAsset(record: Row): AmandaMediaAsset {
     id: record.id,
     title: String(record.fields.title || ''),
     url: String(record.fields.url || ''),
+    thumbnail: String(record.fields.thumbnail || ''),
     type: record.fields.type === 'video' ? 'video' : 'image',
     sort_order: Number(record.fields.sort_order || 0),
     is_visible: record.fields.is_visible === true,
@@ -32,6 +34,7 @@ export async function createAmandaMediaAsset(input: Omit<AmandaMediaAsset, 'id' 
   const created = await create('media_assets', {
     title: input.title,
     url: input.url,
+    thumbnail: input.thumbnail || undefined,
     type: input.type,
     sort_order: input.sort_order,
     is_visible: input.is_visible,
