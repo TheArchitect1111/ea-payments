@@ -37,10 +37,10 @@ try {
       if (path === '/hq' && response.status === 307) {
         assert.ok(response.location, host + path + ' missing redirect location');
         const target = new URL(response.location, 'https://' + host);
-        assert.equal(target.pathname.replace(/\/$/, ''), '/tarris/future', host + path + ' redirect target');
+        assert.equal(target.pathname.replace(/\/$/, ''), '/tarris', host + path + ' redirect target');
         const redirected = await getPage(host, target.pathname + target.search);
-        assert.equal(redirected.status, 200, host + path + ' redirected HQ');
-        for (const marker of ['TB3 HQ', 'LET&#x27;S GET TO WORK', 'ACADEMICS']) {
+        assert.equal(redirected.status, 200, host + path + ' redirected page');
+        for (const marker of ['id="public-tarris"', 'MORE THAN', 'ENTER TB3 HQ']) {
           assert.ok(redirected.html.includes(marker), host + path + ' redirected page missing ' + marker);
         }
         continue;
