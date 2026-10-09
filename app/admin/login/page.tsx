@@ -11,29 +11,14 @@ export const metadata = {
 
 const copy = getRealmLoginCopy('admin');
 
-export default async function AdminLoginPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ next?: string; error?: string }>;
-}) {
+export default async function AdminLoginPage({ searchParams }: { searchParams: Promise<{ next?: string; error?: string }> }) {
   const params = await searchParams;
-  const nextPath = params.next?.startsWith('/admin') ? params.next : '/admin/master';
+  const nextPath = params.next === '/hq' || params.next?.startsWith('/admin') ? params.next : '/admin/master';
   const error = magicLinkErrorMessage('admin', params.error);
-
   return (
-    <div className="pl-page">
-      <div className="pl-shell">
-        <header className="pl-header">
-          <Image src="/ea-logo.png" alt="Efficiency Architects" width={200} height={200} className="pl-logo" priority />
-          <p className="pl-eyebrow">Master Portal</p>
-          <h1 className="pl-title">{copy.pageTitle}</h1>
-          <p className="pl-lede">{copy.pageSubtitle}</p>
-        </header>
-
-        <Suspense fallback={<div className="pl-card">Loading…</div>}>
-          <RealmLoginCard realm="admin" next={nextPath} error={error} showTitle={false} />
-        </Suspense>
-      </div>
-    </div>
+    <div className="pl-page"><div className="pl-shell">
+      <header className="pl-header"><Image src="/ea-logo.png" alt="Efficiency Architects" width={200} height={200} className="pl-logo" priority /><p className="pl-eyebrow">Master Portal</p><h1 className="pl-title">{copy.pageTitle}</h1><p className="pl-lede">{copy.pageSubtitle}</p></header>
+      <Suspense fallback={<div className="pl-card">Loading…</div>}><RealmLoginCard realm="admin" next={nextPath} error={error} showTitle={false} /></Suspense>
+    </div></div>
   );
 }
