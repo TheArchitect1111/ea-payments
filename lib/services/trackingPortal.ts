@@ -13,7 +13,7 @@ export type TrackingLead = {
 };
 
 function registrationKey(data: TrackingLead) {
-  return `${data.email.toLowerCase()}:\${data.class_id}`;
+  return `${data.email.toLowerCase()}:${data.class_id}`;
 }
 
 async function saveTrackingLead(data: TrackingLead) {
