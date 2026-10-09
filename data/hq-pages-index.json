@@ -1,0 +1,1082 @@
+[
+  {
+    "path": "/accessibility",
+    "label": "Accessibility"
+  },
+  {
+    "path": "/admin",
+    "label": "Admin"
+  },
+  {
+    "path": "/admin/academy",
+    "label": "Admin Academy"
+  },
+  {
+    "path": "/admin/blueprints",
+    "label": "Admin Blueprints"
+  },
+  {
+    "path": "/admin/capability-marketplace",
+    "label": "Admin Capability Marketplace"
+  },
+  {
+    "path": "/admin/client-registry",
+    "label": "Admin Client Registry"
+  },
+  {
+    "path": "/admin/commissions",
+    "label": "Admin Commissions"
+  },
+  {
+    "path": "/admin/connect",
+    "label": "Admin Connect"
+  },
+  {
+    "path": "/admin/connect/tenants",
+    "label": "Admin Connect Tenants"
+  },
+  {
+    "path": "/admin/content-requests",
+    "label": "Admin Content Requests"
+  },
+  {
+    "path": "/admin/creative-studio",
+    "label": "Admin Creative Studio"
+  },
+  {
+    "path": "/admin/creative-studio/brand",
+    "label": "Admin Creative Studio Brand"
+  },
+  {
+    "path": "/admin/creative-studio/campaigns/[id]",
+    "label": "Admin Creative Studio Campaigns Id"
+  },
+  {
+    "path": "/admin/creative-studio/media",
+    "label": "Admin Creative Studio Media"
+  },
+  {
+    "path": "/admin/ctp",
+    "label": "Admin Ctp"
+  },
+  {
+    "path": "/admin/dashboard",
+    "label": "Admin Dashboard"
+  },
+  {
+    "path": "/admin/delivery",
+    "label": "Admin Delivery"
+  },
+  {
+    "path": "/admin/device-preview",
+    "label": "Admin Device Preview"
+  },
+  {
+    "path": "/admin/digital-twin",
+    "label": "Admin Digital Twin"
+  },
+  {
+    "path": "/admin/ea-factory",
+    "label": "Admin Ea Factory"
+  },
+  {
+    "path": "/admin/ea-factory/ai-research-agent",
+    "label": "Admin Ea Factory Ai Research Agent"
+  },
+  {
+    "path": "/admin/ea-factory/approvals",
+    "label": "Admin Ea Factory Approvals"
+  },
+  {
+    "path": "/admin/ea-factory/chassis-deployment",
+    "label": "Admin Ea Factory Chassis Deployment"
+  },
+  {
+    "path": "/admin/ea-factory/codex-builder",
+    "label": "Admin Ea Factory Codex Builder"
+  },
+  {
+    "path": "/admin/ea-factory/concepts/[projectId]",
+    "label": "Admin Ea Factory Concepts ProjectId"
+  },
+  {
+    "path": "/admin/ea-factory/experience-acceptance",
+    "label": "Admin Ea Factory Experience Acceptance"
+  },
+  {
+    "path": "/admin/ea-factory/experience-director",
+    "label": "Admin Ea Factory Experience Director"
+  },
+  {
+    "path": "/admin/ea-factory/experience-director/calibration",
+    "label": "Admin Ea Factory Experience Director Calibration"
+  },
+  {
+    "path": "/admin/ea-factory/experience-director/validation",
+    "label": "Admin Ea Factory Experience Director Validation"
+  },
+  {
+    "path": "/admin/ea-factory/launch",
+    "label": "Admin Ea Factory Launch"
+  },
+  {
+    "path": "/admin/ea-factory/launches",
+    "label": "Admin Ea Factory Launches"
+  },
+  {
+    "path": "/admin/ea-factory/launches/[id]",
+    "label": "Admin Ea Factory Launches Id"
+  },
+  {
+    "path": "/admin/ea-factory/magnifi-integration",
+    "label": "Admin Ea Factory Magnifi Integration"
+  },
+  {
+    "path": "/admin/ea-factory/new-experience",
+    "label": "Admin Ea Factory New Experience"
+  },
+  {
+    "path": "/admin/ea-factory/project-generator",
+    "label": "Admin Ea Factory Project Generator"
+  },
+  {
+    "path": "/admin/ea-factory/projects",
+    "label": "Admin Ea Factory Projects"
+  },
+  {
+    "path": "/admin/ea-factory/protocol-center",
+    "label": "Admin Ea Factory Protocol Center"
+  },
+  {
+    "path": "/admin/ea-factory/protocols/[id]",
+    "label": "Admin Ea Factory Protocols Id"
+  },
+  {
+    "path": "/admin/ea-factory/quick-launch",
+    "label": "Admin Ea Factory Quick Launch"
+  },
+  {
+    "path": "/admin/ea-factory/repo-library",
+    "label": "Admin Ea Factory Repo Library"
+  },
+  {
+    "path": "/admin/ea-factory/repos/[id]",
+    "label": "Admin Ea Factory Repos Id"
+  },
+  {
+    "path": "/admin/ea-factory/simplifi-integration",
+    "label": "Admin Ea Factory Simplifi Integration"
+  },
+  {
+    "path": "/admin/ea-factory/skin-factory",
+    "label": "Admin Ea Factory Skin Factory"
+  },
+  {
+    "path": "/admin/ea-factory/skin-factory/briefs",
+    "label": "Admin Ea Factory Skin Factory Briefs"
+  },
+  {
+    "path": "/admin/ea-factory/skin-factory/briefs/[id]",
+    "label": "Admin Ea Factory Skin Factory Briefs Id"
+  },
+  {
+    "path": "/admin/ea-factory/skin-factory/briefs/[id]/export",
+    "label": "Admin Ea Factory Skin Factory Briefs Id Export"
+  },
+  {
+    "path": "/admin/ea-factory/skin-factory/new",
+    "label": "Admin Ea Factory Skin Factory New"
+  },
+  {
+    "path": "/admin/ea-factory/training-transformations",
+    "label": "Admin Ea Factory Training Transformations"
+  },
+  {
+    "path": "/admin/ea-guide",
+    "label": "Admin Ea Guide"
+  },
+  {
+    "path": "/admin/enhancements",
+    "label": "Admin Enhancements"
+  },
+  {
+    "path": "/admin/factory",
+    "label": "Admin Factory"
+  },
+  {
+    "path": "/admin/file-cabinet/share",
+    "label": "Admin File Cabinet Share"
+  },
+  {
+    "path": "/admin/forgot-password",
+    "label": "Admin Forgot Password"
+  },
+  {
+    "path": "/admin/foundation-library",
+    "label": "Admin Foundation Library"
+  },
+  {
+    "path": "/admin/knowledge-graph",
+    "label": "Admin Knowledge Graph"
+  },
+  {
+    "path": "/admin/legal",
+    "label": "Admin Legal"
+  },
+  {
+    "path": "/admin/login",
+    "label": "Admin Login"
+  },
+  {
+    "path": "/admin/master",
+    "label": "Admin Master"
+  },
+  {
+    "path": "/admin/operations",
+    "label": "Admin Operations"
+  },
+  {
+    "path": "/admin/opportunity-graph",
+    "label": "Admin Opportunity Graph"
+  },
+  {
+    "path": "/admin/partner-marketplace",
+    "label": "Admin Partner Marketplace"
+  },
+  {
+    "path": "/admin/proposals",
+    "label": "Admin Proposals"
+  },
+  {
+    "path": "/admin/protocol-center",
+    "label": "Admin Protocol Center"
+  },
+  {
+    "path": "/admin/quick-quote",
+    "label": "Admin Quick Quote"
+  },
+  {
+    "path": "/admin/register",
+    "label": "Admin Register"
+  },
+  {
+    "path": "/admin/reset-password",
+    "label": "Admin Reset Password"
+  },
+  {
+    "path": "/admin/resource-radar",
+    "label": "Admin Resource Radar"
+  },
+  {
+    "path": "/admin/show",
+    "label": "Admin Show"
+  },
+  {
+    "path": "/admin/sign-in",
+    "label": "Admin Sign In"
+  },
+  {
+    "path": "/admin/sign-in/complete",
+    "label": "Admin Sign In Complete"
+  },
+  {
+    "path": "/admin/simplifi",
+    "label": "Admin Simplifi"
+  },
+  {
+    "path": "/admin/simplifi-audit",
+    "label": "Admin Simplifi Audit"
+  },
+  {
+    "path": "/admin/video-test",
+    "label": "Admin Video Test"
+  },
+  {
+    "path": "/admin/workspace-preview",
+    "label": "Admin Workspace Preview"
+  },
+  {
+    "path": "/amanda-business",
+    "label": "Amanda Business"
+  },
+  {
+    "path": "/amanda-catherine",
+    "label": "Amanda Catherine"
+  },
+  {
+    "path": "/amanda-catherine/courses/[courseSlug]",
+    "label": "Amanda Catherine Courses CourseSlug"
+  },
+  {
+    "path": "/amanda-catherine/private/practitioner-kit",
+    "label": "Amanda Catherine Private Practitioner Kit"
+  },
+  {
+    "path": "/amanda-catherine/private/practitioner-kit/success",
+    "label": "Amanda Catherine Private Practitioner Kit Success"
+  },
+  {
+    "path": "/amplifi",
+    "label": "Amplifi"
+  },
+  {
+    "path": "/amplifi/acceptable-use",
+    "label": "Amplifi Acceptable Use"
+  },
+  {
+    "path": "/amplifi/create",
+    "label": "Amplifi Create"
+  },
+  {
+    "path": "/amplifi/customer-zero",
+    "label": "Amplifi Customer Zero"
+  },
+  {
+    "path": "/amplifi/idea-box",
+    "label": "Amplifi Idea Box"
+  },
+  {
+    "path": "/amplifi/install",
+    "label": "Amplifi Install"
+  },
+  {
+    "path": "/amplifi/onboarding",
+    "label": "Amplifi Onboarding"
+  },
+  {
+    "path": "/amplifi/one-brief-everywhere",
+    "label": "Amplifi One Brief Everywhere"
+  },
+  {
+    "path": "/amplifi/performance",
+    "label": "Amplifi Performance"
+  },
+  {
+    "path": "/amplifi/pricing",
+    "label": "Amplifi Pricing"
+  },
+  {
+    "path": "/amplifi/privacy",
+    "label": "Amplifi Privacy"
+  },
+  {
+    "path": "/amplifi/register",
+    "label": "Amplifi Register"
+  },
+  {
+    "path": "/amplifi/share",
+    "label": "Amplifi Share"
+  },
+  {
+    "path": "/amplifi/terms",
+    "label": "Amplifi Terms"
+  },
+  {
+    "path": "/amplifi/test",
+    "label": "Amplifi Test"
+  },
+  {
+    "path": "/amplifi/workspace",
+    "label": "Amplifi Workspace"
+  },
+  {
+    "path": "/assessment",
+    "label": "Assessment"
+  },
+  {
+    "path": "/assessment/thank-you",
+    "label": "Assessment Thank You"
+  },
+  {
+    "path": "/athletics-experience",
+    "label": "Athletics Experience"
+  },
+  {
+    "path": "/buy",
+    "label": "Buy"
+  },
+  {
+    "path": "/checkout",
+    "label": "Checkout"
+  },
+  {
+    "path": "/checkout/cancel",
+    "label": "Checkout Cancel"
+  },
+  {
+    "path": "/checkout/success",
+    "label": "Checkout Success"
+  },
+  {
+    "path": "/client/[id]",
+    "label": "Client Id"
+  },
+  {
+    "path": "/coaches-journey",
+    "label": "Coaches Journey"
+  },
+  {
+    "path": "/commitment/[proposalId]",
+    "label": "Commitment ProposalId"
+  },
+  {
+    "path": "/connect/[org]",
+    "label": "Connect Org"
+  },
+  {
+    "path": "/connect/[org]/go/[resourceId]",
+    "label": "Connect Org Go ResourceId"
+  },
+  {
+    "path": "/connect/[org]/guide",
+    "label": "Connect Org Guide"
+  },
+  {
+    "path": "/connect/[org]/journey",
+    "label": "Connect Org Journey"
+  },
+  {
+    "path": "/consider/[slug]",
+    "label": "Consider Slug"
+  },
+  {
+    "path": "/consider/joe-smith",
+    "label": "Consider Joe Smith"
+  },
+  {
+    "path": "/contact",
+    "label": "Contact"
+  },
+  {
+    "path": "/cookies",
+    "label": "Cookies"
+  },
+  {
+    "path": "/courses/[courseSlug]",
+    "label": "Courses CourseSlug"
+  },
+  {
+    "path": "/ctp-intake",
+    "label": "Ctp Intake"
+  },
+  {
+    "path": "/ctp-intake/thank-you",
+    "label": "Ctp Intake Thank You"
+  },
+  {
+    "path": "/disclaimer",
+    "label": "Disclaimer"
+  },
+  {
+    "path": "/discover",
+    "label": "Discover"
+  },
+  {
+    "path": "/discover/thank-you",
+    "label": "Discover Thank You"
+  },
+  {
+    "path": "/ea-athletics-experience",
+    "label": "Ea Athletics Experience"
+  },
+  {
+    "path": "/experience-lab",
+    "label": "Experience Lab"
+  },
+  {
+    "path": "/experience/templates",
+    "label": "Experience Templates"
+  },
+  {
+    "path": "/extension/connect",
+    "label": "Extension Connect"
+  },
+  {
+    "path": "/intakecenter",
+    "label": "Intakecenter"
+  },
+  {
+    "path": "/joe-smith",
+    "label": "Joe Smith"
+  },
+  {
+    "path": "/joe-smith/evaluation",
+    "label": "Joe Smith Evaluation"
+  },
+  {
+    "path": "/joe-smith/portal",
+    "label": "Joe Smith Portal"
+  },
+  {
+    "path": "/launch",
+    "label": "Launch"
+  },
+  {
+    "path": "/launch-verification",
+    "label": "Launch Verification"
+  },
+  {
+    "path": "/launch-verification/cancel",
+    "label": "Launch Verification Cancel"
+  },
+  {
+    "path": "/launch-verification/success",
+    "label": "Launch Verification Success"
+  },
+  {
+    "path": "/legal/account-deletion",
+    "label": "Legal Account Deletion"
+  },
+  {
+    "path": "/legal/ai-disclosure",
+    "label": "Legal Ai Disclosure"
+  },
+  {
+    "path": "/legal/cookies",
+    "label": "Legal Cookies"
+  },
+  {
+    "path": "/legal/eula",
+    "label": "Legal Eula"
+  },
+  {
+    "path": "/legal/msa",
+    "label": "Legal Msa"
+  },
+  {
+    "path": "/legal/privacy",
+    "label": "Legal Privacy"
+  },
+  {
+    "path": "/legal/sow",
+    "label": "Legal Sow"
+  },
+  {
+    "path": "/legal/support",
+    "label": "Legal Support"
+  },
+  {
+    "path": "/legal/terms",
+    "label": "Legal Terms"
+  },
+  {
+    "path": "/live-your-life",
+    "label": "Live Your Life"
+  },
+  {
+    "path": "/magnifi/[id]",
+    "label": "Magnifi Id"
+  },
+  {
+    "path": "/otis-nixon",
+    "label": "Otis Nixon"
+  },
+  {
+    "path": "/otis-nixon/portal",
+    "label": "Otis Nixon Portal"
+  },
+  {
+    "path": "/page.tsx",
+    "label": "Page.Tsx"
+  },
+  {
+    "path": "/partners/[slug]",
+    "label": "Partners Slug"
+  },
+  {
+    "path": "/partners/forgot-password",
+    "label": "Partners Forgot Password"
+  },
+  {
+    "path": "/partners/login",
+    "label": "Partners Login"
+  },
+  {
+    "path": "/partners/register",
+    "label": "Partners Register"
+  },
+  {
+    "path": "/partners/reset-password",
+    "label": "Partners Reset Password"
+  },
+  {
+    "path": "/pay/contract-test",
+    "label": "Pay Contract Test"
+  },
+  {
+    "path": "/pay/contract-test/success",
+    "label": "Pay Contract Test Success"
+  },
+  {
+    "path": "/pay/tarris-bouie",
+    "label": "Pay Tarris Bouie"
+  },
+  {
+    "path": "/pay/tarris-bouie/success",
+    "label": "Pay Tarris Bouie Success"
+  },
+  {
+    "path": "/pay/twin-city-kappas",
+    "label": "Pay Twin City Kappas"
+  },
+  {
+    "path": "/pay/twin-city-kappas/success",
+    "label": "Pay Twin City Kappas Success"
+  },
+  {
+    "path": "/portal/[slug]",
+    "label": "Portal Slug"
+  },
+  {
+    "path": "/portal/[slug]/amplifi",
+    "label": "Portal Slug Amplifi"
+  },
+  {
+    "path": "/portal/[slug]/applications",
+    "label": "Portal Slug Applications"
+  },
+  {
+    "path": "/portal/[slug]/apply",
+    "label": "Portal Slug Apply"
+  },
+  {
+    "path": "/portal/[slug]/ask",
+    "label": "Portal Slug Ask"
+  },
+  {
+    "path": "/portal/[slug]/billing",
+    "label": "Portal Slug Billing"
+  },
+  {
+    "path": "/portal/[slug]/calendar",
+    "label": "Portal Slug Calendar"
+  },
+  {
+    "path": "/portal/[slug]/connect",
+    "label": "Portal Slug Connect"
+  },
+  {
+    "path": "/portal/[slug]/crm",
+    "label": "Portal Slug Crm"
+  },
+  {
+    "path": "/portal/[slug]/ctp",
+    "label": "Portal Slug Ctp"
+  },
+  {
+    "path": "/portal/[slug]/ctp/bi",
+    "label": "Portal Slug Ctp Bi"
+  },
+  {
+    "path": "/portal/[slug]/ctp/documents",
+    "label": "Portal Slug Ctp Documents"
+  },
+  {
+    "path": "/portal/[slug]/ctp/messages",
+    "label": "Portal Slug Ctp Messages"
+  },
+  {
+    "path": "/portal/[slug]/ctp/opportunities/[opportunityId]",
+    "label": "Portal Slug Ctp Opportunities OpportunityId"
+  },
+  {
+    "path": "/portal/[slug]/ctp/progress",
+    "label": "Portal Slug Ctp Progress"
+  },
+  {
+    "path": "/portal/[slug]/ctp/recommendations",
+    "label": "Portal Slug Ctp Recommendations"
+  },
+  {
+    "path": "/portal/[slug]/ctp/review",
+    "label": "Portal Slug Ctp Review"
+  },
+  {
+    "path": "/portal/[slug]/ctp/review/confirmed",
+    "label": "Portal Slug Ctp Review Confirmed"
+  },
+  {
+    "path": "/portal/[slug]/ctp/schedule",
+    "label": "Portal Slug Ctp Schedule"
+  },
+  {
+    "path": "/portal/[slug]/ctp/support",
+    "label": "Portal Slug Ctp Support"
+  },
+  {
+    "path": "/portal/[slug]/deliveries",
+    "label": "Portal Slug Deliveries"
+  },
+  {
+    "path": "/portal/[slug]/documents",
+    "label": "Portal Slug Documents"
+  },
+  {
+    "path": "/portal/[slug]/events",
+    "label": "Portal Slug Events"
+  },
+  {
+    "path": "/portal/[slug]/experience-builder",
+    "label": "Portal Slug Experience Builder"
+  },
+  {
+    "path": "/portal/[slug]/experience-builder/[pageId]",
+    "label": "Portal Slug Experience Builder PageId"
+  },
+  {
+    "path": "/portal/[slug]/intake",
+    "label": "Portal Slug Intake"
+  },
+  {
+    "path": "/portal/[slug]/landing",
+    "label": "Portal Slug Landing"
+  },
+  {
+    "path": "/portal/[slug]/learning",
+    "label": "Portal Slug Learning"
+  },
+  {
+    "path": "/portal/[slug]/member",
+    "label": "Portal Slug Member"
+  },
+  {
+    "path": "/portal/[slug]/messaging",
+    "label": "Portal Slug Messaging"
+  },
+  {
+    "path": "/portal/[slug]/notifications",
+    "label": "Portal Slug Notifications"
+  },
+  {
+    "path": "/portal/[slug]/people",
+    "label": "Portal Slug People"
+  },
+  {
+    "path": "/portal/[slug]/pulse",
+    "label": "Portal Slug Pulse"
+  },
+  {
+    "path": "/portal/[slug]/reports",
+    "label": "Portal Slug Reports"
+  },
+  {
+    "path": "/portal/[slug]/resources",
+    "label": "Portal Slug Resources"
+  },
+  {
+    "path": "/portal/[slug]/settings",
+    "label": "Portal Slug Settings"
+  },
+  {
+    "path": "/portal/[slug]/simplifi",
+    "label": "Portal Slug Simplifi"
+  },
+  {
+    "path": "/portal/[slug]/updates",
+    "label": "Portal Slug Updates"
+  },
+  {
+    "path": "/portal/[slug]/updates/enhancement",
+    "label": "Portal Slug Updates Enhancement"
+  },
+  {
+    "path": "/portal/[slug]/updates/new",
+    "label": "Portal Slug Updates New"
+  },
+  {
+    "path": "/portal/amanda",
+    "label": "Portal Amanda"
+  },
+  {
+    "path": "/portal/amanda-catherine",
+    "label": "Portal Amanda Catherine"
+  },
+  {
+    "path": "/portal/amanda-catherine/apply",
+    "label": "Portal Amanda Catherine Apply"
+  },
+  {
+    "path": "/portal/amanda-catherine/book",
+    "label": "Portal Amanda Catherine Book"
+  },
+  {
+    "path": "/portal/amanda-catherine/calendar",
+    "label": "Portal Amanda Catherine Calendar"
+  },
+  {
+    "path": "/portal/amanda-catherine/classes",
+    "label": "Portal Amanda Catherine Classes"
+  },
+  {
+    "path": "/portal/amanda-catherine/enroll",
+    "label": "Portal Amanda Catherine Enroll"
+  },
+  {
+    "path": "/portal/amanda-catherine/enroll/success",
+    "label": "Portal Amanda Catherine Enroll Success"
+  },
+  {
+    "path": "/portal/amanda-catherine/eva",
+    "label": "Portal Amanda Catherine Eva"
+  },
+  {
+    "path": "/portal/amanda-catherine/expired",
+    "label": "Portal Amanda Catherine Expired"
+  },
+  {
+    "path": "/portal/amanda-catherine/foundry",
+    "label": "Portal Amanda Catherine Foundry"
+  },
+  {
+    "path": "/portal/amanda-catherine/hub",
+    "label": "Portal Amanda Catherine Hub"
+  },
+  {
+    "path": "/portal/amanda-catherine/learning",
+    "label": "Portal Amanda Catherine Learning"
+  },
+  {
+    "path": "/portal/amanda-catherine/learning/[courseId]",
+    "label": "Portal Amanda Catherine Learning CourseId"
+  },
+  {
+    "path": "/portal/amanda-catherine/owner",
+    "label": "Portal Amanda Catherine Owner"
+  },
+  {
+    "path": "/portal/amanda-catherine/owner/[section]",
+    "label": "Portal Amanda Catherine Owner Section"
+  },
+  {
+    "path": "/portal/amanda-catherine/owner/learner-preview",
+    "label": "Portal Amanda Catherine Owner Learner Preview"
+  },
+  {
+    "path": "/portal/amanda-catherine/profile",
+    "label": "Portal Amanda Catherine Profile"
+  },
+  {
+    "path": "/portal/amanda-catherine/resources",
+    "label": "Portal Amanda Catherine Resources"
+  },
+  {
+    "path": "/portal/amanda-catherine/support",
+    "label": "Portal Amanda Catherine Support"
+  },
+  {
+    "path": "/portal/amanda-catherine/thank-you",
+    "label": "Portal Amanda Catherine Thank You"
+  },
+  {
+    "path": "/portal/amanda-catherine/waitlist",
+    "label": "Portal Amanda Catherine Waitlist"
+  },
+  {
+    "path": "/portal/components/PortalSubpage.tsx",
+    "label": "Portal Components PortalSubpage.Tsx"
+  },
+  {
+    "path": "/portal/forgot-password",
+    "label": "Portal Forgot Password"
+  },
+  {
+    "path": "/portal/login",
+    "label": "Portal Login"
+  },
+  {
+    "path": "/portal/register",
+    "label": "Portal Register"
+  },
+  {
+    "path": "/portal/reset-password",
+    "label": "Portal Reset Password"
+  },
+  {
+    "path": "/portal/sign-in",
+    "label": "Portal Sign In"
+  },
+  {
+    "path": "/portal/sign-in/complete",
+    "label": "Portal Sign In Complete"
+  },
+  {
+    "path": "/possibilities",
+    "label": "Possibilities"
+  },
+  {
+    "path": "/preview/experience/[slug]/[pageId]",
+    "label": "Preview Experience Slug PageId"
+  },
+  {
+    "path": "/preview/factory/[projectId]/[conceptId]",
+    "label": "Preview Factory ProjectId ConceptId"
+  },
+  {
+    "path": "/preview/factory/[projectId]/[conceptId]/portal",
+    "label": "Preview Factory ProjectId ConceptId Portal"
+  },
+  {
+    "path": "/preview/home",
+    "label": "Preview Home"
+  },
+  {
+    "path": "/privacy",
+    "label": "Privacy"
+  },
+  {
+    "path": "/project-secured/[proposalId]",
+    "label": "Project Secured ProposalId"
+  },
+  {
+    "path": "/proposal/[proposalId]",
+    "label": "Proposal ProposalId"
+  },
+  {
+    "path": "/q/[proposalId]",
+    "label": "Q ProposalId"
+  },
+  {
+    "path": "/reveal/[slug]",
+    "label": "Reveal Slug"
+  },
+  {
+    "path": "/scorecard",
+    "label": "Scorecard"
+  },
+  {
+    "path": "/simplifi",
+    "label": "Simplifi"
+  },
+  {
+    "path": "/simplifi/ask",
+    "label": "Simplifi Ask"
+  },
+  {
+    "path": "/simplifi/calendar",
+    "label": "Simplifi Calendar"
+  },
+  {
+    "path": "/simplifi/capture",
+    "label": "Simplifi Capture"
+  },
+  {
+    "path": "/simplifi/environments",
+    "label": "Simplifi Environments"
+  },
+  {
+    "path": "/simplifi/follow-ups",
+    "label": "Simplifi Follow Ups"
+  },
+  {
+    "path": "/simplifi/forgot-password",
+    "label": "Simplifi Forgot Password"
+  },
+  {
+    "path": "/simplifi/guidance/[id]",
+    "label": "Simplifi Guidance Id"
+  },
+  {
+    "path": "/simplifi/inbox",
+    "label": "Simplifi Inbox"
+  },
+  {
+    "path": "/simplifi/login",
+    "label": "Simplifi Login"
+  },
+  {
+    "path": "/simplifi/opportunity/[id]",
+    "label": "Simplifi Opportunity Id"
+  },
+  {
+    "path": "/simplifi/orb",
+    "label": "Simplifi Orb"
+  },
+  {
+    "path": "/simplifi/register",
+    "label": "Simplifi Register"
+  },
+  {
+    "path": "/simplifi/reset-password",
+    "label": "Simplifi Reset Password"
+  },
+  {
+    "path": "/simplifi/settings",
+    "label": "Simplifi Settings"
+  },
+  {
+    "path": "/simplifi/workspace",
+    "label": "Simplifi Workspace"
+  },
+  {
+    "path": "/simplifiorb",
+    "label": "Simplifiorb"
+  },
+  {
+    "path": "/sites/[slug]",
+    "label": "Sites Slug"
+  },
+  {
+    "path": "/start",
+    "label": "Start"
+  },
+  {
+    "path": "/studio",
+    "label": "Studio"
+  },
+  {
+    "path": "/studio/create",
+    "label": "Studio Create"
+  },
+  {
+    "path": "/studio/create/seven-sports",
+    "label": "Studio Create Seven Sports"
+  },
+  {
+    "path": "/studio/websites",
+    "label": "Studio Websites"
+  },
+  {
+    "path": "/tarris",
+    "label": "Tarris"
+  },
+  {
+    "path": "/tarris/book",
+    "label": "Tarris Book"
+  },
+  {
+    "path": "/tarris/future",
+    "label": "Tarris Future"
+  },
+  {
+    "path": "/tarris/future/agreement",
+    "label": "Tarris Future Agreement"
+  },
+  {
+    "path": "/tarris/future/sign",
+    "label": "Tarris Future Sign"
+  },
+  {
+    "path": "/terms",
+    "label": "Terms"
+  },
+  {
+    "path": "/trust",
+    "label": "Trust"
+  },
+  {
+    "path": "/try",
+    "label": "Try"
+  },
+  {
+    "path": "/twin-city-kappas/golf",
+    "label": "Twin City Kappas Golf"
+  },
+  {
+    "path": "/twin-city-kappas/golf/flyer",
+    "label": "Twin City Kappas Golf Flyer"
+  },
+  {
+    "path": "/unsubscribe",
+    "label": "Unsubscribe"
+  }
+]
