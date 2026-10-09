@@ -88,10 +88,12 @@ function HQLink({ dark = false }: { dark?: boolean }) {
 }
 export default function TarrisPublicPage() {
   useEffect(() => {
+    const intro = document.getElementById("tarris-splash-intro");
+    if (!intro) return;
+    document.body.prepend(intro);
     document.body.style.overflow = "hidden";
     const btn = document.getElementById("enter-site-btn");
-    const intro = document.getElementById("tarris-splash-intro");
-    if (!btn || !intro) return;
+    if (!btn) return;
 
     const enterSite = () => {
       intro.style.transition = "opacity 0.8s ease";
