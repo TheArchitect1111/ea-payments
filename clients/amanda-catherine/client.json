@@ -3,6 +3,7 @@
   "id": "amanda-catherine",
   "name": "Amanda Catherine",
   "status": "production",
+  "hqFeatures": ["letters", "test-payment"],
   "canonical": {
     "sourceRepository": "TheArchitect1111/ea-payments",
     "sourceBranch": "master",
@@ -34,11 +35,7 @@
   },
   "legacy": {
     "invalidPortalRoutes": ["/portal/amanda"],
-    "retiredVercelProjects": [
-      "amanda-catherine-preview",
-      "amanda-catherine-3",
-      "amanda-catherine"
-    ],
+    "retiredVercelProjects": ["amanda-catherine-preview", "amanda-catherine-3", "amanda-catherine"],
     "rule": "Retired projects may retain historical Vercel URLs but must never own Amanda custom domains or be treated as canonical."
   }
 }
