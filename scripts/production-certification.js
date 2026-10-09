@@ -1,5 +1,6 @@
-// TB3 only: approved placeholder release. Build/browser gates run separately.
+// TB3 only: verified film release assets. Build/browser gates run separately.
 const fs = require('node:fs');
+const path = require('node:path');
 const crypto = require('node:crypto');
 const assert = require('node:assert/strict');
 
@@ -26,15 +27,15 @@ function certifyTB3() {
   }
   const officialAssets = new Set();
   for (const content of [publicPage, hq]) {
-    for (const match of content.matchAll(/OFFICIAL_[A-Za-z0-9_.-]+\\.png/g)) officialAssets.add(match[0]);
+    for (const match of content.matchAll(/OFFICIAL_[A-Za-z0-9_.-]+\.png/g)) officialAssets.add(match[0]);
   }
   assert.ok(officialAssets.size >= 15, 'TB3 official image set incomplete');
   for (const filename of officialAssets) assert.ok(fs.existsSync(path.join('public/images/tb3-official', filename)), `Missing TB3 official image ${filename}`);
   const merchAssets = new Set();
-  for (const match of publicPage.matchAll(/(?:image|redImage): "([A-Za-z0-9_.-]+\\.(?:jpg|png|webp))"/g)) merchAssets.add(match[1]);
+  for (const match of publicPage.matchAll(/(?:image|redImage): "([A-Za-z0-9_.-]+\.(?:jpg|png|webp))"/g)) merchAssets.add(match[1]);
   assert.ok(merchAssets.size >= 9, 'TB3 merch image set incomplete');
   for (const filename of merchAssets) assert.ok(fs.existsSync(path.join('public/merch', filename)), `Missing TB3 merch image ${filename}`);
-  const videos = [...filmSource.matchAll(/filename: "(TB3-FILM-[A-Za-z0-9_-]+\\.mp4)"/g)].map((match) => match[1]);
+  const videos = [...filmSource.matchAll(/filename: "(TB3-FILM-[A-Za-z0-9_-]+\.mp4)"/g)].map((match) => match[1]);
   assert.equal(videos.length, 4, 'TB3 release must contain four playable MP4s and one scoreboard photograph');
   const videoHashes = videos.map((filename) => {
     const videoPath = path.join('public/videos/tb3-film', filename);
@@ -42,7 +43,7 @@ function certifyTB3() {
     return crypto.createHash('sha256').update(fs.readFileSync(videoPath)).digest('hex');
   });
   assert.equal(new Set(videoHashes).size, 4, 'TB3 video files must have four distinct hashes');
-  const posters = [...filmSource.matchAll(/poster: "(\\/videos\\/tb3-film\\/[^"]+)"/g)].map((match) => match[1].slice('/videos/tb3-film/'.length));
+  const posters = [...filmSource.matchAll(/poster: "(\/videos\/tb3-film\/[^"]+)"/g)].map((match) => match[1].slice('/videos/tb3-film/'.length));
   for (const filename of new Set([...posters, 'TB3-FILM-005-SCOREBOARD-PROOF.jpg', 'TB3-FILM-005-poster.webp'])) {
     assert.ok(fs.existsSync(path.join('public/videos/tb3-film', filename)), `Missing TB3 film poster ${filename}`);
   }
