@@ -1,3 +1,4 @@
+import { portalContentDefault } from '@/lib/bricks/content-portal';
 import Link from 'next/link';
 import { requirePortalModule } from '@/lib/modules/portal-modules';
 import { listReportArtifacts } from '@/lib/portal-reports';
@@ -9,6 +10,9 @@ export const dynamic = 'force-dynamic';
 export default async function ReportsPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const { client, access } = await requirePortalModule(slug, 'reports');
+  // Read back tenant-specific durable defaults after module authorization.
+  const certifiedContent = await portalContentDefault(slug, 'reports');
+  void certifiedContent;
   const isAmanda = slug.toLowerCase().startsWith('amanda-catherine');
   const artifacts = listReportArtifacts(slug, client, access);
 
