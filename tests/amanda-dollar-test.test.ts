@@ -50,6 +50,12 @@ const mocks: Record<string, string> = {
   '@/lib/data/airtable-client': `
     const db = () => globalThis.__amandaE2E;
     export function airtableConfigured(){return true;}
+    export async function airtableQuery(table,options={}){
+      const match=String(options.filterByFormula||'').match(/'([^']+)'/);
+      return [...db().waitlist.entries()].filter(([key,fields])=>
+        key.startsWith(table+':') && (!match || fields.registration_key===match[1]))
+        .map(([id,fields])=>({id,fields}));
+    }
     export async function airtableUpsertByField(table,field,key,fields){
       const id=table+':'+key;const current=db().waitlist.get(id)||{};
       db().waitlist.set(id,{...current,...structuredClone(fields)});
@@ -87,6 +93,53 @@ async function loadRealHandlers(): Promise<any> {
   const code = result.outputFiles[0].text;
   return import('data:text/javascript;base64,' + Buffer.from(code).toString('base64'));
 }
+
+
+async function loadTrackingHandler(): Promise<any> {
+  const plugin: Plugin={name:'tracking-persistence-mocks',setup(ctx){
+    ctx.onResolve({filter:/.*/},(args)=>{
+      if(args.path==='@/lib/services/trackingPortal')return undefined;
+      return mocks[args.path]?{path:args.path,namespace:'amanda-test-transport'}:undefined;
+    });
+    ctx.onLoad({filter:/.*/,namespace:'amanda-test-transport'},args=>({contents:mocks[args.path],loader:'js'}));
+  }};
+  const buildResult=await build({entryPoints:[resolve(root,'lib/services/trackingPortal.ts')],
+    tsconfig:resolve(root,'tsconfig.json'),bundle:true,platform:'node',format:'esm',
+    target:'node22',write:false,logLevel:'silent',plugins:[plugin]});
+  return import('data:text/javascript;base64,'+Buffer.from(buildResult.outputFiles[0].text).toString('base64'));
+}
+
+test('Live signup and $1 test stay isolated; verified payment replay never creates a duplicate',async()=>{
+  db.records.clear();db.waitlist.clear();db.writes.length=0;
+  delete process.env.TRACKING_PORTAL_API_URL;delete process.env.TRACKING_PORTAL_URL;
+  const tracking=await loadTrackingHandler();
+  const lead={first_name:'Amanda',last_name:'Tracking',email:'tracking-qa@example.invalid',
+    phone:'',class_name:'Clinical Training',class_id:'ready-course',
+    registration_type:'live',created_at:new Date().toISOString(),source_page:'amandacatherine.ca',
+    registration_id:'reg-test-live-01',payment_status:'unpaid',is_test:false};
+  await tracking.pushToTrackingPortal(lead);
+  const before=[...db.waitlist.keys()].filter(k=>k.startsWith('portal_registrations:'));
+  assert.equal(before.length,1,'Live signup not recorded');
+  const paid={event_type:'payment_confirmed',registration_id:lead.registration_id,email:lead.email,
+    class_id:lead.class_id,payment_status:'paid',payment_reference:'square-reference-1',
+    payment_provider:'square',timestamp:new Date().toISOString(),is_test:false};
+  await tracking.storeTrackingPayment(paid);
+  await tracking.storeTrackingPayment(paid);
+  assert.equal([...db.waitlist.keys()].filter(k=>k.startsWith('portal_registrations:')).length,1,'Payment created duplicate live registration');
+  const metadata=[...db.records.values()].find(x=>x.payload?.payment_reference==='square-reference-1');
+  assert.ok(metadata,'Payment reference missing from existing lead metadata');
+  const testLead={...lead,email:'private-test@example.invalid',registration_id:'test-reg-isolated-01',is_test:true};
+  await tracking.pushToTrackingPortal(testLead);
+  await tracking.storeTrackingPayment({...paid,registration_id:testLead.registration_id,email:testLead.email,
+    payment_reference:'stripe-test-reference-1',payment_provider:'stripe',is_test:true});
+  const testReceipt=await tracking.getTestTrackingRegistration(testLead.registration_id);
+  assert.equal(testReceipt.is_test,true);
+  assert.equal(testReceipt.payment_status,'paid');
+  assert.equal([...db.waitlist.keys()].filter(k=>k.startsWith('portal_registrations:')).length,1,
+    'Test data polluted real registration table');
+  await assert.rejects(tracking.storeTrackingPayment({...paid,email:'no-registration@example.invalid'}),
+    /Matching live registration not found/);
+});
 
 test('Amanda upgrade route and middleware are deployed in the source artifact', () => {
   const middleware = readFileSync(resolve(root, 'middleware.ts'), 'utf8');
