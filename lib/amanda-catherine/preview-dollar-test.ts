@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto';
 import { airtableQuery } from '@/lib/data/airtable-client';
 import { loadStudioRecordFromAirtable, saveStudioRecord } from '@/lib/creative-studio/persistence';
 import { syntheticOrgId } from '@/lib/platform-store';
-import { getStripe } from '@/lib/stripe';
+import Stripe from 'stripe';
 import { getAmandaConfirmationLetter } from '@/lib/amanda-catherine/confirmation-letters';
 import { confirmTrackingPayment, pushToTrackingPortal, type TrackingLead } from '@/lib/services/trackingPortal';
 
@@ -10,14 +10,21 @@ const FIXTURE_EMAIL = 'amanda-preview-qa@example.invalid';
 const FIXTURE_CLASS = 'amanda-preview-dollar-test';
 const FIXTURE_TITLE = 'Amanda Preview $1 Workflow Test';
 
+function previewStripeTestKey() {
+  const primary = String(process.env.STRIPE_TEST_SECRET_KEY || '').trim();
+  if (primary) return primary.startsWith('sk_test_') ? primary : '';
+  const fallback = String(process.env.STRIPE_SECRET_KEY || '').trim();
+  return fallback.startsWith('sk_test_') ? fallback : '';
+}
+
 export function previewDollarTestGuard(host: string) {
   if (process.env.VERCEL_ENV !== 'preview' ||
       process.env.VERCEL_GIT_COMMIT_REF !== 'fix/amanda-tracking-wire' ||
       !/^[a-z0-9-]+\.vercel\.app$/.test(host)) {
     return { enabled: false, code: 404, reason: 'This endpoint is available only on the named Vercel preview branch.' };
   }
-  if (!String(process.env.STRIPE_SECRET_KEY || '').startsWith('sk_test_')) {
-    return { enabled: false, code: 503, reason: 'A Stripe TEST secret key is required. A live charge is prohibited.' };
+  if (!previewStripeTestKey()) {
+    return { enabled: false, code: 503, reason: 'STRIPE_TEST_SECRET_KEY is missing or is not a Stripe TEST key. A live charge is prohibited.' };
   }
   return { enabled: true, code: 200, reason: 'Stripe TEST mode ready. No real funds will move.' };
 }
@@ -61,6 +68,9 @@ export async function readPreviewDollarTest(registrationId: string) {
 
 export async function runPreviewDollarTest(registrationId: string) {
   // Fixed fake identity, never an actual customer or arbitrary user-supplied address.
+  const gate = previewDollarTestGuard(String(process.env.VERCEL_URL || ''));
+  if (!gate.enabled) throw new Error(gate.reason);
+  const stripe = new Stripe(previewStripeTestKey());
   const now = new Date().toISOString();
   const lead: TrackingLead = {
     event_type: 'signup', is_test: true,
@@ -79,7 +89,7 @@ export async function runPreviewDollarTest(registrationId: string) {
 
   // This is a REAL Stripe API call, but permitted exclusively with an sk_test_ key.
   // Never issue a real-money test charge or use a customer-supplied card.
-  const payment = await getStripe().paymentIntents.create({
+  const payment = await stripe.paymentIntents.create({
     amount: 100, currency: 'cad',
     payment_method_types: ['card'], payment_method: 'pm_card_visa',
     confirm: true,
