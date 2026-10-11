@@ -4,7 +4,7 @@ import { loadStudioRecordFromAirtable, saveStudioRecord } from '@/lib/creative-s
 import { syntheticOrgId } from '@/lib/platform-store';
 import Stripe from 'stripe';
 import { getAmandaConfirmationLetter } from '@/lib/amanda-catherine/confirmation-letters';
-import { pushToTrackingPortal, type TrackingLead } from '@/lib/services/trackingPortal';
+import { registerBrickEvent } from '@/lib/services/brickRegistrar';
 
 import { handleAmandaSubmit } from '@/lib/amanda-catherine/storage';
 
@@ -21,7 +21,7 @@ function previewStripeTestKey() {
 
 export function previewDollarTestGuard(host: string) {
   if (process.env.VERCEL_ENV !== 'preview' ||
-      process.env.VERCEL_GIT_COMMIT_REF !== 'fix/amanda-tracking-wire' ||
+      !['fix/amanda-tracking-wire','template/brick-chassis-v1'].includes(process.env.VERCEL_GIT_COMMIT_REF||'') ||
       !/^[a-z0-9-]+\.vercel\.app$/.test(host)) {
     return { enabled: false, code: 404, reason: 'This endpoint is available only on the named Vercel preview branch.' };
   }
@@ -74,17 +74,13 @@ export async function runPreviewDollarTest(registrationId: string) {
   if (!gate.enabled) throw new Error(gate.reason);
   const stripe = new Stripe(previewStripeTestKey());
   const now = new Date().toISOString();
-  const lead: TrackingLead = {
-    event_type: 'signup', is_test: true,
-    registration_id: registrationId,
-    first_name: 'Preview', last_name: 'Test', name: 'Preview Test',
-    email: FIXTURE_EMAIL, phone: '',
-    class_name: FIXTURE_TITLE, class_id: FIXTURE_CLASS,
-    registration_type: 'live', created_at: now, timestamp: now,
-    source_page: 'amandacatherine.ca', source: '/api/amanda-catherine/preview-dollar-test',
-    payment_status: 'unpaid', payment_reference: null,
-  };
-  await pushToTrackingPortal(lead);
+  const registered=await registerBrickEvent({
+    brick_type:'classes',brick_id:FIXTURE_CLASS,client_id:'amanda-catherine',
+    registration_id:registrationId,name:'Preview Test',email:FIXTURE_EMAIL,phone:'',
+    status:'preview_signup',payment_status:'unpaid',payment_reference:null,
+    timestamp:now,source:'/api/amanda-catherine/preview-dollar-test',is_test:true,
+  });
+  if(!registered.ok)throw new Error(registered.error||'Preview tracking registration failed');
   const signup = await readPreviewDollarTest(registrationId);
   if (!signup || signup.payment_status !== 'unpaid' || !signup.isolated_from_live)
     throw new Error('Isolated signup was not durably confirmed.');
