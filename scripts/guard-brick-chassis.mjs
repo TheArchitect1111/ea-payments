@@ -10,7 +10,9 @@ const root=process.cwd();
 const inputs=['app/api','app/tarris','lib/tb3','lib/amanda-catherine','lib/bricks','lib/services'];
 const exclude=new Set(['lib/services/trackingPortal.ts','lib/services/brickRegistrar.ts']);
 const exceptions=new Set([
-  // Explicitly reviewed legacy non-brick integrations; none currently allowed.
+  // The receiving transport endpoint must persist events sent BY the registrar.
+  // It is not a brick; routing it back into the registrar causes a recursion loop.
+  'app/api/v1/leads/ingest/route.ts',
 ]);
 function candidates(dir){
  let out=[];
