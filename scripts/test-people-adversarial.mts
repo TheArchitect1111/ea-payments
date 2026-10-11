@@ -57,6 +57,9 @@ function run(id: string, fn: () => void) {
   }
 }
 
+// One isolated fixture store across ESM/CJS module instances under Node 20.
+// Production People uses Postgres; this flag is only for the offline memory suite.
+process.env.PEOPLE_SHARED_MEMORY = '1';
 resetPeopleStoreForTests();
 setPeopleFlag(true);
 
@@ -511,8 +514,8 @@ run('ADV-13', () => {
   });
   assert.ok(person);
   const links = listProgramLinks(person!.id);
-  assert.ok(links.some((l) => l.kind === 'ctp_workspace' && l.externalRef === 'ctp_ws_13'));
-  assert.ok(links.some((l) => l.kind === 'ctp_opportunity' && l.externalRef === 'ctp_opp_13'));
+  assert.ok(links.some((l) => l.kind === 'ctp_workspace' && l.externalRef === 'ctp_ws_13'), 'migration must retain workspace link');
+  assert.ok(links.some((l) => l.kind === 'ctp_opportunity' && l.externalRef === 'ctp_opp_13'), 'migration must retain opportunity link');
 });
 
 // ADV-14 — migration retry
