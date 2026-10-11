@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server';
+import {trackTb3MerchSale} from '@/lib/tb3/brick-events';
 import { bonfireSignatureValid,ingestVerifiedBonfireOrder } from '@/lib/tb3/bonfire-ledger';
 export const runtime='nodejs';
 export async function GET(){return Response.json({error:'Not found'},{status:404});}
@@ -15,6 +16,7 @@ export async function POST(req:NextRequest){
   return Response.json({error:'Unauthorized'},{status:401});
  try{
   const result=await ingestVerifiedBonfireOrder(JSON.parse(body));
+  await trackTb3MerchSale(result.sale,true);
   return Response.json({ok:true,id:result.sale.id,replay:result.replay});
  }catch(e){
   console.error('[tb3 bonfire] verified ingestion failed',e);
