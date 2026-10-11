@@ -2,6 +2,7 @@ import { createHmac, timingSafeEqual } from 'node:crypto';
 import { z } from 'zod';
 import { brickHash, readBrickRecord, writeBrickRecord } from '@/lib/bricks/durable';
 import { TB3_ORGANIZATION_ID, TB3_PORTAL_SLUG } from '@/lib/tb3/contracts';
+import { recordVerifiedExternalCommerce } from '@/lib/bricks/commerce-family';
 import { loadTenantInstall } from '@/lib/modules/tenant-install';
 import { setModuleEnabled, listEntitlementsForOrg } from '@/lib/entitlements';
 
@@ -49,6 +50,11 @@ export async function ingestVerifiedBonfireOrder(input:unknown){
  }
  // External paid proof has already been authenticated at the ingress boundary.
  // Keep the canonical paid record and separate tracking receipt tenant-scoped.
+ const billing=await recordVerifiedExternalCommerce(tb3Tenant,{
+  externalOrderId:order.order_id,source:'bonfire',offerId:order.product_id,
+  title:order.product_name,amount:order.amount_cents,currency:order.currency,
+  email:order.customer.email,name:order.customer.name});
+ if(billing.replay)throw Error('Billing record exists without synchronized Bonfire receipt');
  await writeBrickRecord(tb3Tenant,id,row);
  await writeBrickRecord(tb3Tenant,trackingId(order.order_id),{...tb3Tenant,
   orderId:order.order_id,event:'merch_payment_confirmed',source:'bonfire',amount_cents:order.amount_cents});
