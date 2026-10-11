@@ -109,7 +109,7 @@ export async function POST(req: NextRequest) {
   }
 
   const captureKind = kind === 'application' ? 'applications' : 'intake';
-  const certifiedTenant = await resolveCaptureTenant(slug, captureKind);
+  const certifiedTenant = slug === 'amanda-catherine' ? null : await resolveCaptureTenant(slug, captureKind);
   const idempotencyId = certifiedTenant
     ? 'pfs_' + brickHash([slug,kind,email.toLowerCase(),name,payload ?? null])
     : undefined;
