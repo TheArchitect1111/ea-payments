@@ -1,3 +1,4 @@
+import FinalBrickPanel from '@/app/portal/components/FinalBrickPanel';
 import { getPortalCaptures } from '@/lib/capture-records';
 import { getClientSuccessProfile } from '@/lib/client-success';
 import { buildAmplifiPortalExperience } from '@/lib/amplifi-portal';
@@ -30,6 +31,7 @@ export default async function AmplifiPortalPage({ params }: { params: Promise<{ 
     <PortalShell slug={slug} active="amplifi" firstName={firstName}>
       <main className="ep-main ep-main-amplifi">
         <PortalModuleChromeStrip />
+        {!slug.startsWith('amanda-catherine') ? <FinalBrickPanel kind="amplifi" title="amplifi workspace" /> : null}
         <AmplifiPortalExperience experience={experience} slug={slug} loadError={loadError} />
       </main>
     </PortalShell>
