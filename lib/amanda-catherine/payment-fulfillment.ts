@@ -127,7 +127,7 @@ export async function fulfillAmandaCheckout(session: Stripe.Checkout.Session, so
   if (isTestAccess && courseId && !record.trackingLetterSentAt) {
     try {
       const letter=await getAmandaConfirmationLetter('live');
-      const firstName=String(meta.clientName || session.customer_details?.name || email).split(/\\s+/)[0];
+      const firstName=String(meta.clientName || session.customer_details?.name || email).split(/\s+/)[0];
       const safe=(value:string)=>value.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
       const html=letter.body_html.replace(/{{first_name}}/g,safe(firstName))
         .replace(/{{class_name}}/g,safe(label));
