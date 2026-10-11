@@ -1,3 +1,4 @@
+import FinalBrickPanel from '@/app/portal/components/FinalBrickPanel';
 import { redirect } from 'next/navigation';
 import { requirePortalModule } from '@/lib/modules/portal-modules';
 import { PortalShell } from '@/lib/chassis/PortalShell';
@@ -73,6 +74,7 @@ export default async function PortalCtpOpportunityDashboardPage({
       pageTitle="Your Journey"
       chrome={chrome}
     >
+      {!slug.startsWith('amanda-catherine') ? <FinalBrickPanel kind="ctp" title="ctp workspace" /> : null}
       <ClientExperience
         view={view}
         slug={slug}
