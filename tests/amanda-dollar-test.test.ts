@@ -17,7 +17,9 @@ const db: TestDb = { records: new Map(), clients: new Map(), waitlist: new Map()
 (globalThis as any).__amandaE2E = db;
 
 const mocks: Record<string, string> = {
-  '@/lib/services/trackingPortal': `export async function confirmTrackingPayment(event){ globalThis.__amandaE2E.trackingEvents.push(event); return {ok:true}; }`,
+  './registry': "export async function create(){throw new Error('Payment updates must not create signup rows');} export async function registry(){return {};}",
+  'stripe': "export default class Stripe {}",
+  '@/lib/services/trackingPortal': `export async function pushToTrackingPortal(event){globalThis.__amandaE2E.trackingEvents.push(event);return {ok:true};} export async function enqueueTrackingPortalRetry(){} export async function confirmTrackingPayment(event){ globalThis.__amandaE2E.trackingEvents.push(event); return {ok:true}; }`,
   '@/lib/amanda-catherine/confirmation-letters': `export async function getAmandaConfirmationLetter(){return {type:'live',subject:'Registered for {{class_name}}',body_html:'Hello {{first_name}}, {{class_name}}'};}`,
   './practitioner-kit-orders': "export async function recordAmandaKitOrder(){return {ok:true};}",
   '@/lib/amanda-catherine/config': `
@@ -27,6 +29,7 @@ const mocks: Record<string, string> = {
   `,
   '@/lib/creative-studio/persistence': `
     const db = () => globalThis.__amandaE2E;
+    export async function loadStudioRecordFromAirtable(type,id){return db().records.get(type+':'+id)?.payload ?? null;}
     export async function loadStudioRecord(type,id) {return db().records.get(type+':'+id)?.payload ?? null;}
     export async function saveStudioRecord(row) { db().records.set(row.recordType+':'+row.id,{payload:structuredClone(row.payload),organizationId:row.organizationId});db().writes.push({id:row.id,kind:'studio'});return {ok:true,persistedToAirtable:true};}
     export async function listStudioRecords(type,org) {return [...db().records.entries()].filter(([k,v])=>k.startsWith(type+':')&&v.organizationId===org).map(([,v])=>v.payload);}
@@ -245,4 +248,44 @@ test('Amanda verified $1 fulfillment, replay, 72-hour denial, no-write preview, 
   assert.equal(db.waitlist.get(waitlistId).notification_status,'sent');
   assert.equal(db.waitlist.size,1);
   console.log('ISOLATED FIXTURE AFTER: payment=1, entitlement profile=1, preview progress=0, waitlist=1, delivery=sent (mocked).');
+});
+
+test('Storage payment update calls tracking without creating another submission', async () => {
+  const app = await loadRealHandlers();
+  const writes = db.writes.length;
+  const before = db.trackingEvents.length;
+  const payment = { event_type:'payment_confirmed', registration_id:'storage-paid-01',
+    email:'storage-qa@example.invalid', class_id:'ready-course', payment_status:'paid',
+    payment_reference:'pi_test_storage', payment_provider:'stripe',
+    timestamp:new Date().toISOString(), is_test:true };
+  const result = await app.handleAmandaSubmit({}, undefined, payment);
+  assert.equal(result.ok,true);
+  assert.equal(result.type,'payment_update');
+  assert.equal(db.trackingEvents.length,before+1);
+  assert.deepEqual(db.trackingEvents.at(-1),payment);
+  assert.equal(db.writes.length,writes,'Payment update created a signup row');
+  await assert.rejects(app.handleAmandaSubmit({},undefined,{...payment,payment_reference:''}),
+    /Verified registration payment required/);
+});
+
+test('Preview guard uses the dedicated test key and rejects live keys and production', async () => {
+  const bundled = await build({entryPoints:[resolve(root,'lib/amanda-catherine/preview-dollar-test.ts')],
+    tsconfig:resolve(root,'tsconfig.json'),bundle:true,platform:'node',format:'esm',
+    target:'node22',write:false,logLevel:'silent',plugins:[plugin]});
+  const app = await import('data:text/javascript;base64,'+Buffer.from(bundled.outputFiles[0].text).toString('base64'));
+  const keys=['VERCEL_ENV','VERCEL_GIT_COMMIT_REF','STRIPE_TEST_SECRET_KEY','STRIPE_SECRET_KEY'];
+  const previous=Object.fromEntries(keys.map(k=>[k,process.env[k]]));
+  try {
+    process.env.VERCEL_ENV='preview';process.env.VERCEL_GIT_COMMIT_REF='fix/amanda-tracking-wire';
+    process.env.STRIPE_TEST_SECRET_KEY='sk_test_primary';process.env.STRIPE_SECRET_KEY='sk_live_blocked';
+    assert.equal(app.previewDollarTestGuard('qa.vercel.app').enabled,true);
+    delete process.env.STRIPE_TEST_SECRET_KEY;
+    assert.equal(app.previewDollarTestGuard('qa.vercel.app').code,503);
+    process.env.STRIPE_SECRET_KEY='sk_test_fallback';
+    assert.equal(app.previewDollarTestGuard('qa.vercel.app').enabled,true);
+    process.env.STRIPE_TEST_SECRET_KEY='sk_live_invalid_primary';
+    assert.equal(app.previewDollarTestGuard('qa.vercel.app').code,503);
+    process.env.STRIPE_TEST_SECRET_KEY='sk_test_primary';process.env.VERCEL_ENV='production';
+    assert.equal(app.previewDollarTestGuard('qa.vercel.app').code,404);
+  } finally { for(const key of keys) {if(previous[key]===undefined)delete process.env[key];else process.env[key]=previous[key];} }
 });
