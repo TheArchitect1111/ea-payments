@@ -3,3 +3,5 @@ export { getAmandaAssignedCourseIds, getAmandaCourseAccessDecision, expireAmanda
 export { peekAmandaCourseProgress } from '@/lib/amanda-catherine/progress-store';
 export { amandaTrialFromStripeSession, resolveAmandaEntitlement, amandaTrialExpired } from '@/lib/amanda-catherine/test-access-rules';
 export { saveAmandaWaitlist, notifyAmandaWaitlist, updateAmandaWaitlistNotification } from '@/lib/amanda-catherine/waitlist';
+
+export { handleAmandaSubmit } from '@/lib/amanda-catherine/storage';
