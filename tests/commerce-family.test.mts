@@ -3,9 +3,10 @@ import assert from 'node:assert/strict';
 import { build } from 'esbuild';
 import { writeFileSync, unlinkSync } from 'node:fs';
 
-const data={ rows:new Map<string,any>(), writes:new Map<string,number>(), allow:true };
+const data={ rows:new Map<string,any>(), writes:new Map<string,number>(), entitlements:new Map<string,any>(), allow:true };
 (globalThis as any).__commercePort=data;
 const mocks: Record<string,string> = {
+  '@/lib/entitlements': `export async function setModuleEnabled(org,module,enabled,source){const row={organizationId:org,moduleId:module,status:enabled?'active':'suspended',source};globalThis.__commercePort.entitlements.set(org+':'+module,row);return row;} export async function listEntitlementsForOrg(org){return [...globalThis.__commercePort.entitlements.values()].filter(x=>x.organizationId===org);}`,
   '@/lib/modules/tenant-install': `export async function loadTenantInstall(org){return {organizationId:org,portalSlug:'tenant-one',state:'installed',admitted:['billing','events','member']};}`,
   '@/lib/bricks/durable': `
     import {createHash} from 'node:crypto';
@@ -19,7 +20,7 @@ const file='tests/.commerce-family-bundle.mjs';writeFileSync(file,result.outputF
 const api=await import('../'+file);unlinkSync(file);
 const tenant={organizationId:'recTEST123',portalSlug:'tenant-one'};
 const config={offers:[{id:'event-1',title:'Launch Event',amount:100,currency:'usd'}],confirmationSubject:'Confirmed',confirmationHtml:'Hello {{name}} for {{offer}}'};
-const reset=()=>{data.rows.clear();data.writes.clear();data.allow=true};
+const reset=()=>{data.rows.clear();data.writes.clear();data.entitlements.clear();data.allow=true};
 for(const kind of ['billing','events'] as const){
  test(`${kind}: durable registration/payment/confirmation, tenant isolation, replay and tracking`,async()=>{
   reset();await api.installCommerce(tenant,kind,config);await api.installCommerce(tenant,kind,config);
@@ -47,9 +48,11 @@ test('member: durable grant, repeat, revoke, conflict, one confirmation each',as
  const a=await api.changeMemberGrant(tenant,request,confirm);
  const b=await api.changeMemberGrant(tenant,request,confirm);
  assert.equal(a.enabled,true);assert.deepEqual(a,b);assert.equal(emails,1);
+ assert.equal(data.entitlements.get(tenant.organizationId+':member')?.status,'active');
  await assert.rejects(api.changeMemberGrant(tenant,{...request,enabled:false},confirm),/Conflicting member replay/);
  const revoked=await api.changeMemberGrant(tenant,{...request,enabled:false,requestId:'revoke-123'},confirm);
  assert.equal(revoked.enabled,false);assert.equal(emails,2);
+ assert.equal(data.entitlements.get(tenant.organizationId+':member')?.status,'active');
 });
 test('fail-closed: durable storage and absent tenant entitlement reject',async()=>{
  reset();data.allow=false;
