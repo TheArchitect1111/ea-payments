@@ -27,7 +27,7 @@ jobs:
             if curl -fsS http://127.0.0.1:3102/api/ops/build-info >/dev/null; then break; fi
             sleep 1
           done
-          for route in /api/bricks/tenant-provision-test /api/calendar/tenant-provision-test /api/people/tenant-provision-test /api/assessment/tenant-provision-test; do
+          for route in /api/bricks/commerce-dollar-test /api/bricks/tenant-provision-test /api/calendar/tenant-provision-test /api/people/tenant-provision-test /api/assessment/tenant-provision-test; do
             for method in GET POST; do
               code=$(curl -s -o /dev/null -w '%{http_code}' -X "$method" "http://127.0.0.1:3102$route")
               test "$code" = "404" || { echo "FAIL $method $route: $code"; exit 1; }
