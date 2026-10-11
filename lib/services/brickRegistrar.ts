@@ -23,7 +23,7 @@
  * and cannot create live registrations or call remote ingest.
  */
 import { z } from 'zod';
-import { pushToTrackingPortal, confirmTrackingPayment, enqueueTrackingPortalRetry,
+import { pushToTrackingPortal, confirmTrackingPayment, enqueueTrackingPortalRetry, getTestTrackingRegistration,
   type TrackingLead, type TrackingPayment } from '@/lib/services/trackingPortal';
 
 const EventSchema=z.object({
@@ -87,4 +87,14 @@ export async function registerBrickEvent(event:BrickEvent, verifiedPayment?:Trac
    return {ok:true,deferred:true};
   }
  }catch(error){return {ok:false,error:error instanceof Error?error.message:'Brick registration failed'};}
+}
+
+/** Private replay adapter for previously persisted tracking failures.
+ * Only the registrar may talk to the tracking transport. */
+export async function retryRegisteredBrickEvent(lead:TrackingLead){
+ return pushToTrackingPortal(lead);
+}
+/** Authorized preview introspection only, never writes live tracking data. */
+export async function readTestBrickRegistration(id:string){
+ return getTestTrackingRegistration(id);
 }
