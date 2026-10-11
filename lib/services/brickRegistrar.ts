@@ -98,3 +98,5 @@ export async function retryRegisteredBrickEvent(lead:TrackingLead){
 export async function readTestBrickRegistration(id:string){
  return getTestTrackingRegistration(id);
 }
+
+export type {TrackingLead,TrackingPayment} from '@/lib/services/trackingPortal';
