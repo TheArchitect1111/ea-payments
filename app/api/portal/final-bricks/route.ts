@@ -3,6 +3,8 @@ import { z } from 'zod';
 import { guardPortalApi,portalApiUnauthorized,portalTenant } from '@/lib/api/portal-route';
 import { FinalKind,readFinal,listFinal,saveFinal,transitionFinal } from '@/lib/bricks/final-family';
 import { portalFinalDefault } from '@/lib/bricks/final-portal';
+import { listPublishedTrainingForTenant } from '@/lib/training-transformation-store';
+import { findPublishedSitePage } from '@/lib/provision-website-portal';
 async function context(req:NextRequest,kind:string){
  const a=await guardPortalApi(req,{realm:'portal'});if(!a.ok)return {error:portalApiUnauthorized(a)} as const;
  const k=FinalKind.safeParse(kind);if(!k.success)return {error:Response.json({error:'Invalid module'},{status:400})} as const;
@@ -30,6 +32,15 @@ export async function POST(req:NextRequest){
  if('error'in c)return c.error;
  const d=body.data;
  try{
+ if(c.kind==='training' && d.action==='create'){
+   const courses=await listPublishedTrainingForTenant(c.tenant.portalSlug);
+   if(!courses.some(course=>course.id===d.key))
+     return Response.json({error:'Course is not published for this tenant'},{status:409});
+ }
+ if(c.kind==='landing' && d.action==='transition' && d.state==='published'){
+   const page=await findPublishedSitePage(c.tenant.portalSlug);
+   if(!page)return Response.json({error:'Publish with Experience Builder before marking live'},{status:409});
+ }
  const row=d.action==='create'
    ?await saveFinal(c.tenant,c.kind,{key:d.key,title:d.title,body:d.body,
      visibility:d.visibility||'member',state:d.state||'submitted',channel:d.channel,source:d.source},c.role)
