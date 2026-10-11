@@ -67,3 +67,4 @@ export default function FinalBrickPanel({kind,title}:{kind:Kind;title:string}){
   </ul>
   {message?<p role="status" className="ep-module-card-note">{message}</p>:null}
  </section>;
+}
