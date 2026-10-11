@@ -104,7 +104,7 @@ export async function POST(req: NextRequest) {
   };
   const session = await getStripe().checkout.sessions.create(sessionParams);
   if ('courseId' in offer) {
-    const parts = (isTest ? testName : clientEmail).split(/\\s+/);
+    const parts = (isTest ? testName : clientEmail).split(/\s+/);
     try {
       await pushToTrackingPortal({
         registration_id:registrationId,first_name:parts[0] || clientEmail,last_name:parts.slice(1).join(' '),
