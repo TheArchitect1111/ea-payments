@@ -39,6 +39,8 @@ test('waitlist, calendar and payments use one public registrar entry point',asyn
  assert.deepEqual(state.live.map(x=>x.brick_type),['waitlist','calendar','payments']);
  assert.ok(state.live.every(x=>x.payment_status==='unpaid'));
  assert.ok(state.live.every(x=>x.email==='person@example.com'));
+ assert.equal(state.live.find(x=>x.brick_type==='calendar')?.client_id,'tarris');
+ assert.equal(state.live.find(x=>x.brick_type==='calendar')?.source_page,'tb3-booking');
 });
 test('test mode never enters production tracking',async()=>{
  const before=state.live.length;
