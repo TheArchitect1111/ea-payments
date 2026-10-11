@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { guardPortalApi, portalApiUnauthorized, portalTenant } from '@/lib/api/portal-route';
-import { getTestTrackingRegistration } from '@/lib/services/trackingPortal';
+import { readTestBrickRegistration } from '@/lib/services/brickRegistrar';
 import { normalizeRole, roleAtLeast } from '@/lib/rbac';
 export const dynamic='force-dynamic';
 export async function GET(req:NextRequest){
@@ -10,7 +10,7 @@ export async function GET(req:NextRequest){
   if(!tenant.portalSlug.startsWith('amanda-catherine')||!auth.session.email)
     return NextResponse.json({ok:false,error:'Amanda portal access required'},{status:403});
   const id=req.nextUrl.searchParams.get('registration_id')||'';
-  const row=await getTestTrackingRegistration(id);
+  const row=await readTestBrickRegistration(id);
   if(!row?.is_test)return NextResponse.json({ok:false,error:'Test registration not found'},{status:404});
   if(row.email!==auth.session.email.toLowerCase() &&
     !roleAtLeast(normalizeRole(auth.session.role),'admin'))
