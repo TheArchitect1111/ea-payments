@@ -72,7 +72,7 @@ export async function registerBrickEvent(event:BrickEvent, verifiedPayment?:Trac
    last_name:pieces.slice(1).join(' '),name:e.name,email:e.email,phone:e.phone,
    class_name:e.brick_id,class_id:e.brick_id,
    registration_type:e.brick_type==='waitlist'?'waitlist':'live',
-   created_at:e.timestamp,source_page:'amandacatherine.ca',
+   created_at:e.timestamp,source_page:e.client_id==='amanda-catherine'?'amandacatherine.ca':e.source,
    timestamp:e.timestamp,source:e.source,
    payment_status:'unpaid',payment_reference:null,is_test:e.is_test,event_type:'signup',
   };
