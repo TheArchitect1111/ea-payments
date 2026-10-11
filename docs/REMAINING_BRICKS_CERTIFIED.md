@@ -1,4 +1,4 @@
-| member | NO | Shared receipt + business adapter | YES (isolated) | YES, preview fixture + isolated lifecycle tests | CI pending | Business API implemented; manifest-driven config/live provider incomplete |
+| member | NO | Shared receipt + business adapter | YES (isolated) | YES, preview fixture + isolated lifecycle tests | YES (CI) | Business API implemented; manifest-driven config/live provider incomplete |
 
 **Branch:** `fix/remaining-bricks-certified` (not merged into master). **Production baseline:** `0b91edac` (certified source `bf5f5987`).
 
@@ -57,7 +57,7 @@ Requested `docs/BRICKS_AUDIT.md` does not exist on the inspected production ref.
 - `app/api/bricks/commerce-dollar-test/route.ts`: preview/test-only, authenticated fixture requiring `STRIPE_TEST_SECRET_KEY` beginning `sk_test_`; production GET/POST must return 404. **Synthetic $1 payment proof, not a Stripe charge.** No card or provider account is touched.
 - `tests/commerce-family.test.mts`: Billing/Events fixture payment and order replay, conflicting payment rejection, tenant separation, tracking, confirmation escaping; Member grant/replay/revoke and durable failure.
 - The new business adapter requires explicit `installCommerce` configuration after the tenant install journal is installed. The existing selected-module install receipt is automatic, but offer/payment adapter configuration is **not yet manifest-driven**. A real payment verifier must validate Stripe status, metadata, amount and currency before accepting a payment. Member grants are durable records but have not been synchronized to the production authorization provider. Concurrent exactly-once confirmation was not proven.
-- **Certification decision: NO for all three** until manifest-to-provider autowire, full tenant provisioning tests, Stripe test payment/provider readiness (Billing/Events), entitlement sync (Member), test-run CI and production 404 proof all pass.
+- [GitHub branch verification run 38136547999](https://github.com/TheArchitect1111/ea-payments/actions/runs/38136547999) **SUCCESS**: `npm test`, `npm run build`, production-mode GET/POST 404 probes (including commerce dollar test) passed. These validate simulated provider business logic, not live Stripe or provider entitlement updates.\n- **Certification decision: NO for all three** until manifest-to-provider autowire, full tenant provisioning tests, Stripe test payment/provider readiness (Billing/Events), entitlement sync (Member), test-run CI and production 404 proof all pass.
 
 ## Required acceptance before YES
 
