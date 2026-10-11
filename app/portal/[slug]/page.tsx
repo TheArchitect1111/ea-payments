@@ -1,3 +1,4 @@
+import { portalContentDefault } from '@/lib/bricks/content-portal';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getPortalCaptures } from '@/lib/capture-records';
@@ -35,6 +36,9 @@ export default async function PortalPage({
 }) {
   const { slug } = await params;
   const { client, session } = await requirePortalModule(slug, 'dashboard');
+  // Read back tenant-specific durable defaults after module authorization.
+  const certifiedContent = await portalContentDefault(slug, 'dashboard');
+  void certifiedContent;
 
   // Amanda's canonical portal home renders directly here. Do not redirect this
   // route to /member: Client Experience navigation points back to this route,
