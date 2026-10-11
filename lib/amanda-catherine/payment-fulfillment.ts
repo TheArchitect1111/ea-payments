@@ -1,5 +1,5 @@
 import { recordAmandaKitOrder } from './practitioner-kit-orders';
-import { confirmTrackingPayment } from '@/lib/services/trackingPortal';
+import { handleAmandaSubmit } from '@/lib/amanda-catherine/storage';
 import { getAmandaConfirmationLetter } from '@/lib/amanda-catherine/confirmation-letters';
 import { sendAuthEmail } from '@/lib/ea-auth-email';
 import { amandaTrialFromStripeSession } from './test-access-rules';
@@ -113,7 +113,7 @@ export async function fulfillAmandaCheckout(session: Stripe.Checkout.Session, so
   // Never create a second registration from payment fulfillment.
   if (courseId && meta.registrationId && session.payment_status === 'paid') {
     try {
-      await confirmTrackingPayment({
+      await handleAmandaSubmit({}, undefined, {
         event_type:'payment_confirmed', registration_id:meta.registrationId, email, class_id:courseId,
         payment_status:'paid', payment_reference:transactionId, payment_provider:'stripe',
         timestamp:now, is_test:isTestAccess,
