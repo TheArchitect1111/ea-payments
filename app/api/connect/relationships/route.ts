@@ -8,6 +8,7 @@ import {
   markSequenceStepSent,
   type CreateRelationshipInput,
 } from '@/lib/connect-store';
+import { bridgeCapturedRecord } from '@/lib/bricks/capture-entry-bridge';
 import { handoffConnectRelationship } from '@/lib/connect-pipeline';
 import { logConnectChannelDelivery } from '@/lib/connect-delivery-log';
 import { sendConnectSms, sendConnectWelcomeEmail, sendInternalNotification } from '@/lib/email';
@@ -63,6 +64,12 @@ export async function POST(request: NextRequest) {
     };
 
     const relationship = await createConnectRelationship(input);
+    // Certified tenants get a durable relationship/follow-up receipt in addition to
+    // the original Connect delivery pipeline; do not change public legacy contracts.
+    await bridgeCapturedRecord({slug:orgSlug,kind:'connect',
+      identity:relationship.id,requestId:relationship.id,email:relationship.email,
+      name:relationship.name,payload:{relationshipId:relationship.id,source:input.source,
+        campaignId:input.campaignId || null},route:true});
     const org = await getConnectOrg(orgSlug);
 
     const handoff = await handoffConnectRelationship(relationship, org);
