@@ -117,7 +117,7 @@
     "test:chassis-autowire": "node --import tsx --test tests/chassis-autowire.test.mts",
     "test:blockers-certified": "node --import tsx --test tests/blockers-certified.test.mts",
     "test:blockers-ui": "node scripts/test-blockers-ui.mjs",
-    "test:remaining-bricks": "node --import tsx --test tests/remaining-bricks-contract.test.mts"
+    "test:remaining-bricks": "node --import tsx --test tests/remaining-bricks-contract.test.mts && node --import tsx --test tests/remaining-bricks-replay.test.mts"
   },
   "dependencies": {
     "@clerk/nextjs": "^7.5.9",
