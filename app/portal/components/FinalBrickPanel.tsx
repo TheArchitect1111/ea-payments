@@ -52,8 +52,9 @@ export default function FinalBrickPanel({kind,title,courses=[]}:{kind:Kind;title
   <button type="button" className="ep-btn" disabled={working} onClick={()=>{
    const id=kind==='training'?key:key.trim().toLowerCase().replace(/[^a-z0-9-]/g,'-');
    if(!id||!body.trim()){setMessage('Enter a title and description');return;}
-   void request({action:'create',key:id,title:key,body,visibility:'member'});
-  }}>Submit / save</button>
+   void request({action:kind==='pulse'||kind==='amplifi'?'generate':'create',
+     key:id,title:key,body,sourceText:body,visibility:'member'});
+  }}>{kind==='pulse'||kind==='amplifi'?'Generate source-based draft':'Submit / save'}</button>
   <ul className="ep-module-list">
    {rows.filter(r=>r.key!=='welcome').map(r=>{
     const action=next(r);
