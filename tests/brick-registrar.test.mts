@@ -11,7 +11,8 @@ const mock:Record<string,string>={
   if(lead.is_test){s.test.push(lead);return {ok:true,id:'test-'+lead.registration_id};}
   s.live.push(lead);return {ok:true,id:'live-'+lead.registration_id};
  }
- export async function enqueueTrackingPortalRetry(lead,error){globalThis.__brickRegistrarFixture.test.push({queued:true,lead});return true;}\n export async function confirmTrackingPayment(payment){
+ export async function enqueueTrackingPortalRetry(lead,error){globalThis.__brickRegistrarFixture.test.push({queued:true,lead});return true;}
+ export async function confirmTrackingPayment(payment){
   const s=globalThis.__brickRegistrarFixture;
   s.paid.push(payment);s.confirmed++;return {ok:true,id:'paid-'+payment.registration_id};
  }`,
