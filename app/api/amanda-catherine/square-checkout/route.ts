@@ -15,7 +15,7 @@ export async function POST(req:NextRequest){
   const body=await req.json().catch(()=>({}));
   const email=String(body.email||'').trim().toLowerCase();
   const classId=String(body.class_id||body.courseId||'').trim();
-  if(!/^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$/.test(email) || !/^[a-zA-Z0-9_-]{2,120}$/.test(classId))
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) || !/^[a-zA-Z0-9_-]{2,120}$/.test(classId))
     return NextResponse.json({ok:false,error:'A prior valid registration is required'},{status:400});
   const key=email+':'+classId;
   const token=process.env.SQUARE_ACCESS_TOKEN?.trim();
