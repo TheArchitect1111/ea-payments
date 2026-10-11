@@ -9,7 +9,7 @@ const mock:Record<string,string>={
  '@/lib/api/portal-route':"export async function guardPortalApi(){const s=globalThis.__finalRoute;return {ok:true,session:{slug:s.slug,role:s.role}};}export function portalTenant(s){return {portalSlug:s.slug};}export function portalApiUnauthorized(){return Response.json({error:'No session'},{status:401});}",
  '@/lib/bricks/final-portal':"export async function portalFinalDefault(slug,kind){if(slug!=='tenant-test')return null;return {organizationId:'recTENANT01',portalSlug:slug,kind,key:'welcome'};}",
  '@/lib/bricks/final-family':`import {createHash} from 'node:crypto';
- export const FinalKind={safeParse:x=>({success:['pulse','amplifi','update-hub','messaging','training','landing','ask','settings','ctp'].includes(x),data:x})};
+ import {z} from 'zod'; export const FinalKind=z.enum(['pulse','amplifi','update-hub','messaging','training','landing','ask','settings','ctp']);
  const key=(t,k,id)=>t.organizationId+':'+k+':'+id;
  export async function saveFinal(t,k,input,role){if(role!=='staff'&&['pulse','amplifi','landing','settings','ctp'].includes(k))throw Error('Staff permission required');
  const s=globalThis.__finalRoute,x=key(t,k,input.key),prior=s.records.get(x);
