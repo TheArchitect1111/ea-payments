@@ -10,7 +10,7 @@ export async function handleAmandaSubmit(p:Record<string,any>, r:Awaited<ReturnT
  if(!results.portal_submissions.success)return {ok:false,type,...results};
  // Every portal application, enrollment and waitlist now enters the same tracking wire.
  // Public users cannot set test mode; the private $1 Stripe flow has a separate guarded entry point.
- const words=String(p.name).trim().split(/\\s+/);
+ const words=String(p.name).trim().split(/\s+/);
  const email=String(p.email).trim().toLowerCase();
  const courseId=String(p.courseId || 'application').trim();
  const lead:TrackingLead={
