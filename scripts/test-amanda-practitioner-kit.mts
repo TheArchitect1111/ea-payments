@@ -43,6 +43,9 @@ assert.equal((await POST(new Request(`${origin}/api/public/amanda/practitioner-k
 const paid={id:'cs_test_unit',metadata:params!.metadata,payment_status:'paid',amount_total:49900,currency:'cad'} as Stripe.Checkout.Session;
 assert.ok(isAmandaKitSession(paid));
 assert.deepEqual(await recordAmandaKitOrder(paid),{ok:true,preview:true});
+process.env.VERCEL_ENV='production';
+assert.deepEqual(await recordAmandaKitOrder({...paid,amount_total:100,metadata:{...paid.metadata,privateTestCheckout:'true',paymentOption:'test'}},'aesthetikine-reset-training'),{ok:true,preview:true},'Private $1 courses must not create physical kit orders');
+process.env.VERCEL_ENV='preview';
 assert.equal((await recordAmandaKitOrder({...paid,payment_status:'unpaid'})).ok,false);
 assert.equal((await recordAmandaKitOrder({...paid,currency:'usd'})).ok,false);
 assert.equal((await recordAmandaKitOrder({...paid,amount_total:100})).ok,false);
