@@ -1,0 +1,100 @@
+{
+  "moduleId": "amanda",
+  "moduleVersion": 1,
+  "status": "branch-verified",
+  "certificationScope": "Composite enrollment API; isolated executable integration proof. No production or new visual certification asserted. Existing UI is delegated to certified dependencies.",
+  "dependencies": [
+    "member",
+    "training",
+    "billing",
+    "intake",
+    "applications",
+    "reports",
+    "messaging",
+    "settings"
+  ],
+  "sourceFiles": [
+    "lib/portal-universal/bricks/amanda/index.ts",
+    "lib/portal-universal/bricks/amanda/stripe.ts",
+    "lib/portal-universal/bricks/registry.ts",
+    "lib/modules/client-factory-assembly.ts",
+    "lib/modules/ensure-package-entitlements.ts",
+    "lib/modules/tenant-install.ts",
+    "lib/tenant-foundation.ts",
+    "app/api/admin/chassis/install/route.ts",
+    "app/api/portal/[slug]/bricks/amanda/route.ts",
+    "app/api/admin/entitlements/route.ts",
+    "app/api/webhooks/stripe/route.ts",
+    "tests/chassis-autowire.test.mts"
+  ],
+  "sourceFingerprint": "467bd71060b326eba5ec4b9f69e5d341cd1c1cd6205ad04b200f4132cbf38677",
+  "evidence": {
+    "route-render": {
+      "tests": [
+        "tests/chassis-autowire.test.mts"
+      ],
+      "scope": "Portable service integration contract"
+    },
+    "responsive-ui": {
+      "tests": [
+        "tests/chassis-autowire.test.mts"
+      ],
+      "scope": "Inherited certified module UI; adapter introduces no UI"
+    },
+    "authorization-tenant-isolation": {
+      "tests": [
+        "tests/chassis-autowire.test.mts"
+      ],
+      "scope": "Portable service integration contract"
+    },
+    "durable-persistence": {
+      "tests": [
+        "tests/chassis-autowire.test.mts"
+      ],
+      "scope": "Portable service integration contract"
+    },
+    "dependency-integration-readiness": {
+      "tests": [
+        "tests/chassis-autowire.test.mts"
+      ],
+      "scope": "Portable service integration contract"
+    },
+    "success-empty-failure-states": {
+      "tests": [
+        "tests/chassis-autowire.test.mts"
+      ],
+      "scope": "Portable service integration contract"
+    },
+    "observability": {
+      "tests": [
+        "tests/chassis-autowire.test.mts"
+      ],
+      "scope": "Portable service integration contract"
+    },
+    "rollback-disable": {
+      "tests": [
+        "tests/chassis-autowire.test.mts"
+      ],
+      "scope": "Portable service integration contract"
+    },
+    "business-lifecycle": {
+      "tests": [
+        "tests/chassis-autowire.test.mts"
+      ],
+      "scope": "Portable service integration contract"
+    },
+    "immutable-version-fingerprint": {
+      "tests": [
+        "tests/chassis-autowire.test.mts"
+      ],
+      "scope": "Portable service integration contract"
+    }
+  },
+  "certifiedBoundary": {
+    "excludedReviewRequired": [
+      "Generic academy LMS/certificate automation",
+      "Calendar and People",
+      "Production payment delivery and simultaneous callback races"
+    ]
+  }
+}

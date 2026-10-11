@@ -7,6 +7,9 @@ import {
   syncPackageEntitlements,
 } from '@/lib/entitlements';
 import { resolveEntitlementPackageKey } from '@/lib/modules/entitlement-package-key';
+import { loadTenantInstall } from './tenant-install';
+import { requireAssemblyPlan } from './assembly';
+import type { ModuleId } from './registry';
 import { defaultModulesForPackage } from '@/lib/modules/registry';
 
 const DEMO_SLUGS = new Set(['demo-client', 'demo-website']);
@@ -21,13 +24,24 @@ export async function ensurePackageEntitlements(input: {
   packagePurchased: string;
   commerceOfferId?: string;
   slug: string;
+  admittedModuleIds?: readonly ModuleId[];
 }): Promise<void> {
-  if (input.orgId.startsWith('org_')) return;
+  if (input.orgId.startsWith('org_')) {
+    if (input.admittedModuleIds) throw new Error('Certified installation requires a persisted organization');
+    return;
+  }
 
   const packageKey = resolveEntitlementPackageKey(input);
-  const moduleIds = defaultModulesForPackage(packageKey, {
+  const installed = await loadTenantInstall(input.orgId);
+  if (installed && installed.portalSlug !== input.slug) throw new Error('Installation tenant mismatch');
+  const selected = input.admittedModuleIds ?? installed?.admitted;
+  const moduleIds = selected ? [...new Set(selected)] : defaultModulesForPackage(packageKey, {
     isDemo: isDemoPortalSlug(input.slug),
   });
+  if (selected) {
+    const checked = requireAssemblyPlan(moduleIds);
+    if (checked.admitted.length !== new Set(moduleIds).size) throw new Error('Selection omits required chassis modules');
+  }
   const desired = new Set(moduleIds);
   const existing = await listEntitlementsForOrg(input.orgId);
   const activePackage = new Set(
@@ -41,4 +55,10 @@ export async function ensurePackageEntitlements(input: {
   if (alreadyMatched) return;
 
   await syncPackageEntitlements(input.orgId, moduleIds);
+  if (selected) {
+    const actual = new Set((await listEntitlementsForOrg(input.orgId))
+      .filter(e => e.source === 'package' && (e.status === 'active' || e.status === 'trial')).map(e => e.moduleId));
+    if (actual.size !== desired.size || [...desired].some(id => !actual.has(id)))
+      throw new Error('Admitted entitlement read-back mismatch');
+  }
 }

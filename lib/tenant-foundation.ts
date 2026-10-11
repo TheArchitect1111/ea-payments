@@ -1,9 +1,13 @@
+import { loadStudioRecordFromAirtable } from '@/lib/creative-studio/persistence';
 /**
  * Shared org + package entitlements for every provision path.
  * Keeps CTP, phone show, and commerce fulfillment on one foundation.
  */
 import { ensureOrganizationForPortal } from '@/lib/organizations';
-import { ensurePackageEntitlements } from '@/lib/modules/portal-modules';
+import { ensurePackageEntitlements } from '@/lib/modules/ensure-package-entitlements';
+import { persistTenantInstall, type TenantInstall } from '@/lib/modules/tenant-install';
+import { installSelectedBricks, type BrickSelection } from '@/lib/portal-universal/bricks/registry';
+import { updateOrganizationWorkspaceConfig } from '@/lib/organizations';
 import { requireClientFactoryAssembly } from '@/lib/modules/client-factory-assembly';
 import {
   buildAssemblyEvidenceReceipt,
@@ -24,6 +28,9 @@ export type TenantFoundationInput = {
   /** Explicit override. Fully certified Starter provisioning defaults to certified mode. */
   assemblyMode?: 'legacy' | 'certified';
   requestedModuleIds?: readonly string[];
+  businessOptionIds?: readonly string[];
+  industryPackId?: string;
+  bricks?: readonly BrickSelection[];
 };
 
 export type TenantFoundationResult = {
@@ -40,6 +47,9 @@ function touchOsFoundationTaxonomy(): void {
 }
 
 function effectiveAssemblyMode(input: TenantFoundationInput): 'legacy' | 'certified' {
+  const explicitSelection = !!(input.requestedModuleIds || input.businessOptionIds || input.industryPackId || input.bricks);
+  if (explicitSelection && input.assemblyMode === 'legacy') throw new Error('Explicit selection requires certified installation');
+  if (explicitSelection) return 'certified';
   if (input.assemblyMode) return input.assemblyMode;
   return input.packagePurchased === 'Website + Portal Starter' ? 'certified' : 'legacy';
 }
@@ -53,7 +63,11 @@ export async function ensureTenantFoundation(
   const assemblyPlan = assemblyMode === 'certified'
     ? requireClientFactoryAssembly({
         packagePurchased: input.packagePurchased,
+        commerceOfferId: input.commerceOfferId,
         requestedModuleIds: input.requestedModuleIds,
+        businessOptionIds: input.businessOptionIds,
+        industryPackId: input.industryPackId,
+        bricks: input.bricks,
       })
     : null;
 
@@ -66,12 +80,19 @@ export async function ensureTenantFoundation(
     organizationName: input.organizationName ?? input.clientName,
   });
 
+  const installation: TenantInstall | undefined = assemblyPlan ? {
+    version: 1, organizationId: orgId, portalSlug: input.portalSlug,
+    requested: assemblyPlan.requested, admitted: assemblyPlan.admitted,
+    industryPackId: input.industryPackId, brickIds: (input.bricks ?? []).map(b => b.id), state: 'installing',
+  } : undefined;
+  if (installation) await persistTenantInstall(installation);
   try {
     await ensurePackageEntitlements({
       orgId,
       packagePurchased: input.packagePurchased,
       commerceOfferId: input.commerceOfferId,
       slug: input.portalSlug,
+      admittedModuleIds: assemblyPlan?.admitted,
     });
   } catch (err) {
     console.error('[tenant-foundation] ensurePackageEntitlements failed:', err);
@@ -80,6 +101,12 @@ export async function ensureTenantFoundation(
 
   if (!assemblyPlan) return { orgId };
 
+  await installSelectedBricks({ organizationId: orgId, portalSlug: input.portalSlug }, input.bricks);
+  if (input.industryPackId) {
+    const updated = await updateOrganizationWorkspaceConfig(orgId, { industryPackId: input.industryPackId });
+    const durable = await loadStudioRecordFromAirtable<{ industryPackId?: string }>('brand', `org-workspace-${orgId}`);
+    if (!updated || durable?.industryPackId !== input.industryPackId) throw new Error('Industry pack write failed');
+  }
   const assemblyEvidence = buildAssemblyEvidenceReceipt({
     portalSlug: input.portalSlug,
     organizationId: orgId,
@@ -89,5 +116,6 @@ export async function ensureTenantFoundation(
   });
   await persistAssemblyEvidenceReceipt(assemblyEvidence);
 
+  await persistTenantInstall({ ...installation!, state: 'installed' });
   return { orgId, assemblyEvidence };
 }

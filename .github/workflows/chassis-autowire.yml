@@ -1,0 +1,22 @@
+name: Chassis autowire branch verification
+on:
+  push:
+    branches: [fix/chassis-autowire]
+  pull_request:
+    branches: [master]
+permissions:
+  contents: read
+jobs:
+  chassis-autowire:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20, cache: npm }
+      - run: npm ci
+      - run: npm test
+      - run: node scripts/check-chassis-autowire-evidence.mjs
+      - run: npx tsx scripts/test-modular-assembly-run4.ts
+      - run: npx tsx scripts/test-modular-assembly-run6.ts
+      - run: npm run build
