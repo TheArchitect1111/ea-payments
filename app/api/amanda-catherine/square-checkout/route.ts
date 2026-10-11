@@ -44,7 +44,8 @@ export async function POST(req:NextRequest){
     const orderId=String(out.payment_link.order_id);
     const saved=await saveStudioRecord({recordType:'experience',id:'amanda-square-order-'+orderId,
       organizationId:syntheticOrgId('amanda-catherine'),title:'Amanda Square pending order',
-      payload:{email,class_id:classId,registration_id:id,order_id:orderId,expected_amount:amount,
+      payload:{email,name:[String(leads[0].fields.first_name||''),String(leads[0].fields.last_name||'')].filter(Boolean).join(' '),
+        class_name:course.title,class_id:classId,registration_id:id,order_id:orderId,expected_amount:amount,
         payment_status:'unpaid',is_test:false,created_at:new Date().toISOString()}});
     if(!saved.ok || !saved.persistedToAirtable)throw new Error(saved.error||'Square order correlation could not be saved');
     return NextResponse.json({ok:true,url:url.toString(),registration_id:id});
