@@ -1,17 +1,17 @@
 {
-  "sourceCommit": "66cbc97e4cc88c240a3f46a8fde610f96632363c",
+  "sourceCommit": "e7576401a8c58da3db0bd105f28de635307f13e0",
   "previewUrl": "https://ea-payments-git-master-the-architects-projects-cc813778.vercel.app/",
   "target": "https://ea-payments-git-master-the-architects-projects-cc813778.vercel.app/amanda-catherine",
-  "completedAt": "2026-10-11T18:58:49.601Z",
+  "completedAt": "2026-10-11T19:08:52.684Z",
   "status": "PASS",
   "gates": {
     "sourceIdentity": {
       "status": "PASS",
-      "proof": "preview:66cbc97e4cc88c240a3f46a8fde610f96632363c"
+      "proof": "preview:e7576401a8c58da3db0bd105f28de635307f13e0"
     },
     "build": {
       "status": "PASS",
-      "proof": "source:66cbc97e4cc88c240a3f46a8fde610f96632363c"
+      "proof": "source:e7576401a8c58da3db0bd105f28de635307f13e0"
     },
     "assets": {
       "status": "PASS",
@@ -37,7 +37,7 @@
   "details": {
     "certificationTransport": "exact-built-checkout-local",
     "buildInfo": {
-      "commitSha": "66cbc97e4cc88c240a3f46a8fde610f96632363c",
+      "commitSha": "e7576401a8c58da3db0bd105f28de635307f13e0",
       "branch": "master",
       "environment": "preview"
     },
@@ -66,12 +66,6 @@
         {
           "status": 200,
           "method": "GET",
-          "resourceType": "image",
-          "url": "http://127.0.0.1:3000/amanda-catherine/amanda-catherine-faith.webp"
-        },
-        {
-          "status": 200,
-          "method": "GET",
           "resourceType": "stylesheet",
           "url": "http://127.0.0.1:3000/_next/static/chunks/2hltbts7fh1jv.css"
         },
@@ -86,6 +80,12 @@
           "method": "GET",
           "resourceType": "stylesheet",
           "url": "http://127.0.0.1:3000/_next/static/chunks/0x0h4ktm3-e7l.css"
+        },
+        {
+          "status": 200,
+          "method": "GET",
+          "resourceType": "image",
+          "url": "http://127.0.0.1:3000/amanda-catherine/amanda-catherine-faith.webp"
         },
         {
           "status": 200,
@@ -139,19 +139,13 @@
           "status": 200,
           "method": "GET",
           "resourceType": "script",
-          "url": "http://127.0.0.1:3000/_next/static/chunks/0jy0gk7ijla1q.js"
-        },
-        {
-          "status": 200,
-          "method": "GET",
-          "resourceType": "script",
           "url": "http://127.0.0.1:3000/_next/static/chunks/1gdpaddb8g4_s.js"
         },
         {
           "status": 200,
           "method": "GET",
           "resourceType": "script",
-          "url": "http://127.0.0.1:3000/_next/static/chunks/0f0yocbeu0no-.js"
+          "url": "http://127.0.0.1:3000/_next/static/chunks/0jy0gk7ijla1q.js"
         },
         {
           "status": 200,
@@ -163,13 +157,13 @@
           "status": 200,
           "method": "GET",
           "resourceType": "script",
-          "url": "http://127.0.0.1:3000/_next/static/chunks/1l6ekrbzzn47p.js"
+          "url": "http://127.0.0.1:3000/_next/static/chunks/0f0yocbeu0no-.js"
         },
         {
           "status": 200,
           "method": "GET",
           "resourceType": "script",
-          "url": "http://127.0.0.1:3000/_next/static/chunks/turbopack-1xhadq9vl515a.js"
+          "url": "http://127.0.0.1:3000/_next/static/chunks/1l6ekrbzzn47p.js"
         },
         {
           "status": 200,
@@ -181,7 +175,7 @@
           "status": 200,
           "method": "GET",
           "resourceType": "script",
-          "url": "http://127.0.0.1:3000/_next/static/chunks/2-nfkpowurpdo.js"
+          "url": "http://127.0.0.1:3000/_next/static/chunks/turbopack-2xf6lypbhusv4.js"
         },
         {
           "status": 200,
@@ -193,7 +187,13 @@
           "status": 200,
           "method": "GET",
           "resourceType": "script",
-          "url": "http://127.0.0.1:3000/_next/static/chunks/1sesfxkv0wtaf.js"
+          "url": "http://127.0.0.1:3000/_next/static/chunks/2-nfkpowurpdo.js"
+        },
+        {
+          "status": 200,
+          "method": "GET",
+          "resourceType": "script",
+          "url": "http://127.0.0.1:3000/_next/static/chunks/3cxftiiak15i1.js"
         },
         {
           "status": 200,
@@ -271,13 +271,13 @@
           "status": 200,
           "method": "GET",
           "resourceType": "stylesheet",
-          "url": "http://127.0.0.1:3000/_next/static/chunks/0x0h4ktm3-e7l.css"
+          "url": "http://127.0.0.1:3000/_next/static/chunks/408fjgk5ymye-.css"
         },
         {
           "status": 200,
           "method": "GET",
           "resourceType": "stylesheet",
-          "url": "http://127.0.0.1:3000/_next/static/chunks/408fjgk5ymye-.css"
+          "url": "http://127.0.0.1:3000/_next/static/chunks/0x0h4ktm3-e7l.css"
         },
         {
           "status": 200,
@@ -337,6 +337,12 @@
           "status": 200,
           "method": "GET",
           "resourceType": "script",
+          "url": "http://127.0.0.1:3000/_next/static/chunks/0jy0gk7ijla1q.js"
+        },
+        {
+          "status": 200,
+          "method": "GET",
+          "resourceType": "script",
           "url": "http://127.0.0.1:3000/_next/static/chunks/1gdpaddb8g4_s.js"
         },
         {
@@ -349,19 +355,7 @@
           "status": 200,
           "method": "GET",
           "resourceType": "script",
-          "url": "http://127.0.0.1:3000/_next/static/chunks/0jy0gk7ijla1q.js"
-        },
-        {
-          "status": 200,
-          "method": "GET",
-          "resourceType": "script",
           "url": "http://127.0.0.1:3000/_next/static/chunks/0prwexttzb-d-.js"
-        },
-        {
-          "status": 200,
-          "method": "GET",
-          "resourceType": "script",
-          "url": "http://127.0.0.1:3000/_next/static/chunks/1l6ekrbzzn47p.js"
         },
         {
           "status": 200,
@@ -373,7 +367,13 @@
           "status": 200,
           "method": "GET",
           "resourceType": "script",
-          "url": "http://127.0.0.1:3000/_next/static/chunks/turbopack-1xhadq9vl515a.js"
+          "url": "http://127.0.0.1:3000/_next/static/chunks/1l6ekrbzzn47p.js"
+        },
+        {
+          "status": 200,
+          "method": "GET",
+          "resourceType": "script",
+          "url": "http://127.0.0.1:3000/_next/static/chunks/turbopack-2xf6lypbhusv4.js"
         },
         {
           "status": 200,
@@ -391,7 +391,7 @@
           "status": 200,
           "method": "GET",
           "resourceType": "script",
-          "url": "http://127.0.0.1:3000/_next/static/chunks/1sesfxkv0wtaf.js"
+          "url": "http://127.0.0.1:3000/_next/static/chunks/3cxftiiak15i1.js"
         },
         {
           "status": 200,
