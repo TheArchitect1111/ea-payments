@@ -1,6 +1,8 @@
 import { NextRequest } from 'next/server';
 import { authorize, Tb3Error } from '@/lib/tb3/server';
-import { importBonfireCsv, MAX_BONFIRE_CSV_BYTES } from '@/lib/tb3/bonfire-csv';
+import {trackTb3MerchSale} from '@/lib/tb3/brick-events';
+import {listTb3BonfireSales} from '@/lib/tb3/bonfire-ledger';
+import { parseBonfireCsv, importBonfireCsv, MAX_BONFIRE_CSV_BYTES } from '@/lib/tb3/bonfire-csv';
 export const runtime='nodejs';
 export async function GET(){return Response.json({error:'Not found'},{status:404});}
 export async function POST(request:NextRequest){
@@ -13,7 +15,16 @@ export async function POST(request:NextRequest){
   if(!/\.(csv|txt|md)$/i.test(file.name)||!['text/csv','application/csv','application/vnd.ms-excel','text/plain','text/markdown','application/octet-stream',''].includes(file.type))
    return Response.json({error:'Only CSV/plain-text seller export can be parsed; PDF and images belong in Documents, not payment ingestion'},{status:415});
   const csv=await file.text();
+  const rows=parseBonfireCsv(csv);
   const result=await importBonfireCsv(csv);
+  // Staff-attested seller exports create checkout activity, never a verified
+  // payment event or paid confirmation. Only signed provider proof may do that.
+  const saleIndex=await listTb3BonfireSales();
+  for(const {order} of rows){
+   const sale=saleIndex.find(x=>x.order_id===order.order_id);
+   if(!sale)throw new Error('Imported sale missing tenant ledger read-back');
+   await trackTb3MerchSale(sale,false);
+  }
   return Response.json({ok:true,...result,source:'Bonfire CSV',moneyMoved:false});
  }catch(e){
   if(e instanceof Tb3Error)return Response.json({error:'Not authorized'},{status:e.status});
