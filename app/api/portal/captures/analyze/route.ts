@@ -4,6 +4,7 @@ import { getClientByPortalSlug } from '@/lib/airtable';
 import { type CaptureInput } from '@/lib/capture-pipeline';
 import { portalCaptureSource } from '@/lib/capture-records';
 import { submitCapture, toCaptureApiResponse } from '@/lib/capture-submit';
+import { bridgeCapturedRecord } from '@/lib/bricks/capture-entry-bridge';
 import { sanitizeCaptureClientError } from '@/lib/capture-response';
 import { isModuleEnabled } from '@/lib/modules/portal-modules';
 import {
@@ -163,5 +164,18 @@ export async function POST(req: Request) {
     );
   }
 
+  // Preserve the existing Simplifi pipeline, then require a matching durable receipt
+  // for tenants using the certified chassis.
+  if (result.record?.id) {
+    try {
+      await bridgeCapturedRecord({slug:tenant.portalSlug,kind:'simplifi',
+        identity:result.record.id,requestId:result.record.id,email:session.email,
+        name:parsed.prospectName || result.record.title || 'Simplifi capture',
+        payload:{captureRecordId:result.record.id,sourceUrl:parsed.input.url || null},route:true});
+    } catch (error) {
+      console.error('[simplifi] canonical tenant capture failed', error);
+      return NextResponse.json({ok:false,error:'Capture tracking could not be saved.'},{status:503});
+    }
+  }
   return NextResponse.json(toCaptureApiResponse(result));
 }
