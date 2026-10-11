@@ -11,8 +11,9 @@ export default function TarrisFutureSigningPage() {
 
   async function submit(e: FormEvent) {
     e.preventDefault();
+    if (loading) return;
     setError('');
-    if (!consent || legalName.trim().length < 2) return;
+    if (!consent || legalName.trim().length < 2) { setError('Enter your full legal name and accept the agreement before signing.'); return; }
     setLoading(true);
     try {
       const response = await fetch('/api/tarris/sign', {
@@ -68,7 +69,7 @@ export default function TarrisFutureSigningPage() {
 
           <p className="mt-4 text-xs leading-5 text-neutral-500">Signing records the agreement version, date and time, network address, browser information, and signer identity in the Efficiency Architects audit trail.</p>
 
-          <button disabled={loading || !consent || legalName.trim().length < 2} className="mt-6 w-full rounded-full bg-[#0b0d10] px-6 py-4 text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-40">
+          <button aria-busy={loading} className="mt-6 w-full rounded-full bg-[#0b0d10] px-6 py-4 text-sm font-bold text-white">
             {loading ? 'Recording signature…' : 'Sign Agreement & Continue to $500 Deposit'}
           </button>
           {error ? <p className="mt-4 text-center text-sm font-semibold text-red-700" role="alert">{error}</p> : null}

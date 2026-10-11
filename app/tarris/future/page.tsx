@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { tb3FilmAssets, tb3FilmUrl } from "../tb3-film";
 
-import { HqWorkspaceProvider, useHq, HqDialog, ModuleActions, ModuleTools, ProactiveEva, HqFocus, Upcoming, OpportunitySummary, OpportunityPipeline, EarningsValue, EarningsBreakdown, DocumentVault, OpportunityInbox, CalendarModule, EvaPanel, EvaFab, EvaCommandBar } from "./hq-workspace";
+import { HqWorkspaceProvider, useHq, HqDialog, ModuleActions, ModuleTools, ProactiveEva, HqFocus, Upcoming, OpportunitySummary, OpportunityPipeline, EarningsValue, EarningsBreakdown, DocumentVault, OpportunityInbox, CalendarModule, EvaPanel, EvaFab, EvaCommandBar, BrandTools } from "./hq-workspace";
 
 type AssetCategory = "Athlete" | "Academics" | "Brand" | "Community" | "Future" | "Training";
 type OfficialAsset = { filename: string; label: string; category: AssetCategory; alt: string; id?: string; subcategory?: "Film"; mediaType?: "video" | "photo"; poster?: string };
@@ -71,17 +71,7 @@ function WorkspaceIcon({ name }: { name: string }) {
   return <svg aria-hidden="true" viewBox="0 0 24 24" className="h-7 w-7 text-[#C41E3A]" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d={paths[name]} /></svg>;
 }
 
-function ActionButton({ children }: { children: string }) {
-  return (
-    <button
-      type="button"
-      disabled
-      className="cursor-not-allowed rounded border border-white/20 px-4 py-2 text-left text-xs font-semibold text-white/80 opacity-80"
-    >
-      {children}
-    </button>
-  );
-}
+
 
 export default function TarrisFuturePage() { return <HqWorkspaceProvider><TarrisHqContent /></HqWorkspaceProvider>; }
 
@@ -230,7 +220,7 @@ function TarrisHqContent() {
             <div className="h-[400px] overflow-hidden rounded-2xl"><PortalImage id="nil-brand-2" asset="OFFICIAL_10_CASUAL_LEAN.png" alt="Tarris in a casual outdoor portrait" position="center" /></div>
           </div>
           <p className="mt-4 max-w-3xl text-sm leading-6 text-white/70">Same vision. Higher purpose. Different on purpose. Brand guide, values, partnership criteria.</p>
-          <div className="mt-4 flex flex-wrap gap-2"><ActionButton>Brand Deck PDF</ActionButton><ActionButton>Rate Card</ActionButton><ActionButton>Partnership Criteria</ActionButton><ActionButton>Inquiry Pipeline</ActionButton></div>
+          <BrandTools />
           <ModuleActions module="Brand" />
         </section>
 
@@ -287,7 +277,7 @@ function TarrisHqContent() {
         <section id="greater-tomorrow" className="mt-6 rounded-2xl border border-white/10 bg-[#111111] p-7"><p className="text-xs tracking-widest text-[#C41E3A]">A GREATER TOMORROW</p><h2 className="mt-3 text-3xl font-black">BUILD BEYOND THE GAME.</h2><a href="#future-module" className="mt-4 inline-block text-sm underline">Explore the next chapter →</a></section>
         <section id="tb3-store" className="mt-6 rounded-2xl bg-[#F5F5F0] p-5 text-[#111] sm:p-7"><p className="text-xs font-bold tracking-widest">TB3 STORE</p><h2 className="mt-2 text-3xl font-black">Rep the Vision.</h2><p className="mt-2 text-xs text-black/60">Product concepts. Store opening soon.</p><div className="mt-5 grid grid-cols-2 gap-4 xl:grid-cols-5">{[
           ["MOCK_TEE_SHORT_RED.jpg", "TEE · RED"], ["MOCK_TEE_SHORT_WHITE.jpg", "TEE · WHITE"], ["MOCK_TEE_LONG_RED.jpg", "LONG SLEEVE · RED"], ["MOCK_TEE_LONG_WHITE.jpg", "LONG SLEEVE · WHITE"], ["MOCK_HAT_RED.jpg", "CAP · RED"], ["MOCK_HAT_WHITE.jpg", "CAP · WHITE"], ["MOCK_HOODIE_RED.jpg", "HOODIE · RED"], ["MOCK_HOODIE_WHITE.jpg", "HOODIE · WHITE"], ["MOCK_HOODIE_WHITE_LOGO_DETAIL_1.jpg", "HOODIE · SIGNATURE"], ["MOCK_SWEATSHIRT_WHITE_LOGO_DETAIL.jpg", "SWEATSHIRT · SIGNATURE"]
-        ].map(([file, label]) => <article key={file}><div className="aspect-square rounded-2xl bg-white p-3"><img src={"/merch/" + file} alt={"TB3 " + label} loading="lazy" className="h-full w-full object-contain" /></div><h3 className="mt-3 text-xs font-bold">{label}</h3></article>)}</div><button disabled className="mt-5 rounded-lg border border-black px-5 py-3 text-xs font-bold">SHOP NOW · COMING SOON</button></section>
+        ].map(([file, label]) => <article key={file}><div className="aspect-square rounded-2xl bg-white p-3"><img src={"/merch/" + file} alt={"TB3 " + label} loading="lazy" className="h-full w-full object-contain" /></div><h3 className="mt-3 text-xs font-bold">{label}</h3></article>)}</div><a href="/tarris/book?type=merch" className="mt-5 inline-flex rounded-lg border border-black px-5 py-3 text-xs font-bold">SHOP TB3 · INQUIRE</a></section>
 
         <footer className="mt-8 border-t border-white/10 py-7">
           <p className="text-[10px] font-bold tracking-[0.18em] text-white/70">DISCIPLINE. DETERMINATION. DEVELOPMENT. DESTINY.</p>
