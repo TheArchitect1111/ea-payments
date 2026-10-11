@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import { z } from 'zod';
 import { guardPortalApi,portalApiUnauthorized,portalTenant } from '@/lib/api/portal-route';
-import { FinalKind,readFinal,listFinal,saveFinal,transitionFinal } from '@/lib/bricks/final-family';
+import { FinalKind,readFinal,listFinal,saveFinal,transitionFinal,generateFinal } from '@/lib/bricks/final-family';
 import { portalFinalDefault } from '@/lib/bricks/final-portal';
 import { listPublishedTrainingForTenant } from '@/lib/training-transformation-store';
 import { findPublishedSitePage } from '@/lib/provision-website-portal';
