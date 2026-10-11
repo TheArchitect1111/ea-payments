@@ -1,3 +1,4 @@
+import { portalContentDefault } from '@/lib/bricks/content-portal';
 import Link from 'next/link';
 import { requirePortalModule } from '@/lib/modules/portal-modules';
 import { PortalSubpage } from '@/app/portal/components/PortalSubpage';
@@ -19,6 +20,9 @@ const RESOURCES = [
 export default async function ResourcesPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   await requirePortalModule(slug, 'resources');
+  // Read back tenant-specific durable defaults after module authorization.
+  const certifiedContent = await portalContentDefault(slug, 'resources');
+  void certifiedContent;
 
   let siteHref: string | null = null;
   try {
