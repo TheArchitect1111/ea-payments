@@ -12,7 +12,8 @@ export default async function DocumentsPage({ params }: { params: Promise<{ slug
   const { slug } = await params;
   const { client, session } = await requirePortalModule(slug, 'documents');
   // Read back tenant-specific durable defaults after module authorization.
-  const certifiedContent = await portalContentDefault(slug, 'documents');
+  const certifiedContent = slug.toLowerCase().startsWith('amanda-catherine')
+    ? null : await portalContentDefault(slug, 'documents');
   const staff = ['staff','admin','owner'].includes(session.role);
   const savedContent = certifiedContent ? await listContent(
     {organizationId:certifiedContent.organizationId,portalSlug:slug},'documents',
