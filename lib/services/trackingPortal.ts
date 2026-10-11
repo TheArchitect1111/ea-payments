@@ -170,13 +170,18 @@ export async function storeBrickInteraction(event:BrickInteractionEvent) {
   if(!saved.ok||!saved.persistedToAirtable)throw new Error(saved.error||'Test click not saved');
   return {id};
  }
+ // Use Amanda's registry connection so writes and the Hub reader share one base.
+ const {registry,table,airtable}=await import('@/lib/amanda-catherine/registry');
  let course: {key:string;title:string;price:number|null;square_checkout_url:string|null}|undefined;
- if(event.course_key){const {registry}=await import('@/lib/amanda-catherine/registry');course=(await registry()).courses.find(item=>item.key===event.course_key);if(!course)throw new Error('Unknown Amanda course click');}
+ if(event.course_key){course=(await registry()).courses.find(item=>item.key===event.course_key);if(!course)throw new Error('Unknown Amanda course click');}
  const title=`${event.cta_name} — ${event.event_id}`;
- const row=await airtableUpsertByField('Business Interested','Title',title,{
-  Title:title,'CTA Name':event.cta_name,'Source Page':event.source,Timestamp:event.timestamp,
+ const values:Record<string,unknown>={Title:title,'CTA Name':event.cta_name,'Source Page':event.source,Timestamp:event.timestamp,
   Status:'CTA Clicked',Portal:'amanda-catherine','Portal Slug':'amanda-catherine',
-  Event:'cta_click','Payload JSON':JSON.stringify(event),...(course?{'Course Key':course.key,'Course Name':course.title,Price:course.price??undefined,'Square URL':course.square_checkout_url||undefined}:{})});
- if(!row)throw new Error('Amanda click could not be saved');
+  Event:'cta_click','Payload JSON':JSON.stringify(event),
+  ...(course?{'Course Key':course.key,'Course Name':course.title,Price:course.price??undefined,'Square URL':course.square_checkout_url||undefined}:{})};
+ const schema=await table('Business Interested');const fields:Record<string,unknown>={};
+ for(const [key,value] of Object.entries(values)){if(value===undefined)continue;const field=schema.fields.find(item=>item.name===key);if(!field)throw new Error('Amanda tracking schema drift: '+key);fields[field.id]=value;}
+ const result=await airtable('$base/'+schema.id,{method:'PATCH',body:JSON.stringify({performUpsert:{fieldsToMergeOn:['Title']},records:[{fields}],typecast:true})});
+ const row=result.records?.[0];if(!row?.id)throw new Error('Amanda click could not be saved');
  return {id:row.id};
 }

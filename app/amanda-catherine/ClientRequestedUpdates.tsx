@@ -1,9 +1,10 @@
+import {amandaCtaKey} from '@/lib/amanda-catherine/tracking';
 import { AMANDA_OFFERS } from '@/lib/amanda-catherine/config';
 import { AMANDA_PRACTITIONER_KIT } from '@/lib/amanda-catherine/practitioner-kit-catalog';
 import './client-updates.css';
 
 function External({href,children}:{href:string;children:React.ReactNode}) {
-  return <a data-cta-name="↗" data-cta-key="open" href={href} target="_blank" rel="noopener noreferrer">{children} ↗</a>;
+  return <a data-cta-name={typeof children==='string'?children:'Open resource'} data-cta-key={amandaCtaKey(typeof children==='string'?children:href)} href={href} target="_blank" rel="noopener noreferrer">{children} ↗</a>;
 }
 
 export function CreateOffers({email: _email}:{email:string}) {

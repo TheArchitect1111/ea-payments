@@ -115,16 +115,16 @@ export default function AmandaPayments({ email }: { email: string }) {
             <p className="ep-module-card-title">{offer.name}</p>
             <p className="ep-module-card-note">CAD ${offer.priceCad.toLocaleString()}</p>
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 14 }}>
-              <button data-cta-name="AmandaPayments-button-118" data-cta-key="amandapayments-button-118" className="ep-btn" disabled={Boolean(busy)} onClick={() => void checkout(offer.id, 'full')}>
+              <button data-cta-name={"Pay in full: "+offer.name} data-cta-key={"pay-full-"+offer.id} className="ep-btn" disabled={Boolean(busy)} onClick={() => void checkout(offer.id, 'full')}>
                 {busy === `${offer.id}:full` ? 'Opening…' : 'Pay in full'}
               </button>
               {options.deposits[offer.id] > 0 ? (
-                <button data-cta-name="AmandaPayments-button-121" data-cta-key="amandapayments-button-121" className="ep-btn ep-btn-secondary" disabled={Boolean(busy)} onClick={() => void checkout(offer.id, 'deposit')}>
+                <button data-cta-name={"Pay deposit: "+offer.name} data-cta-key={"pay-deposit-"+offer.id} className="ep-btn ep-btn-secondary" disabled={Boolean(busy)} onClick={() => void checkout(offer.id, 'deposit')}>
                   {busy === `${offer.id}:deposit` ? 'Opening…' : `Pay CAD $${options.deposits[offer.id].toLocaleString()} deposit`}
                 </button>
               ) : null}
               {options.testCheckoutAllowed && 'courseId' in offer ? (
-                <button data-cta-name="AmandaPayments-button-126" data-cta-key="amandapayments-button-126" className="ep-btn ep-btn-secondary" disabled={Boolean(busy) || testName.trim().length < 2} onClick={() => void checkout(offer.id, 'test')}>
+                <button data-cta-name={"Private test: "+offer.name} data-cta-key={"private-test-"+offer.id} className="ep-btn ep-btn-secondary" disabled={Boolean(busy) || testName.trim().length < 2} onClick={() => void checkout(offer.id, 'test')}>
                   {busy === `${offer.id}:test` ? 'Opening…' : 'CAD $1 — 3-day test, no auto-charge'}
                 </button>
               ) : null}
@@ -138,9 +138,9 @@ export default function AmandaPayments({ email }: { email: string }) {
           <p className="ep-module-card-note">Enrollment opens automatically for each membership after its Stripe price is configured.</p>
           {options.memberships.map((membership) => (
             <p key={membership.id} style={{ marginTop: 12 }}>
-              {membership.available ? <button data-cta-name="AmandaPayments-button-141" data-cta-key="amandapayments-button-141" className="ep-btn" disabled={Boolean(busy)} onClick={() => void membershipCheckout(membership.id)}>
+              {membership.available ? <button data-cta-name={"Join "+membership.name} data-cta-key={"join-"+membership.id} className="ep-btn" disabled={Boolean(busy)} onClick={() => void membershipCheckout(membership.id)}>
                 {busy === membership.id ? 'Opening…' : `Join ${membership.name}`}
-              </button> : <a data-cta-name="Set up" data-cta-key="set-up" className="ep-btn" href="/portal/amanda-catherine/billing/setup">Set up {membership.name}</a>}
+              </button> : <a data-cta-name={"Set up "+membership.name} data-cta-key={"setup-"+membership.id} className="ep-btn" href="/portal/amanda-catherine/billing/setup">Set up {membership.name}</a>}
             </p>
           ))}
         </div>
