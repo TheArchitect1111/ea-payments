@@ -14,9 +14,9 @@ Requested `docs/BRICKS_AUDIT.md` does not exist on the inspected production ref.
 |---|---|---|---|---|---|---|
 | dashboard | NO | Receipt installer | Yes, receipt only | Yes, receipt probe, lifecycle not proved | YES (CI) | Selection receipt only |
 | pulse | NO | Receipt installer | Yes, receipt only | Yes, receipt probe, lifecycle not proved | YES (CI) | Selection receipt only |
-| simplifi | NO | Receipt installer | Yes, receipt only | Yes, receipt probe, lifecycle not proved | YES (CI) | Selection receipt only |
+| simplifi | NO | Shared durable capture adapter | Yes, business identity and route | Isolated E2E fixture + preview provision route | CI pending | Business adapter available; existing UI/API handoff not yet verified |
 | amplifi | NO | Receipt installer | Yes, receipt only | Yes, receipt probe, lifecycle not proved | YES (CI) | Selection receipt only |
-| connect | NO | Receipt installer | Yes, receipt only | Yes, receipt probe, lifecycle not proved | YES (CI) | Selection receipt only |
+| connect | NO | Shared durable capture adapter | Yes, business identity and route | Isolated E2E fixture + preview provision route | CI pending | Business adapter available; existing UI/API handoff not yet verified |
 | update-hub | NO | Receipt installer | Yes, receipt only | Yes, receipt probe, lifecycle not proved | YES (CI) | Selection receipt only |
 | training | NO | Receipt installer | Yes, receipt only | Yes, receipt probe, lifecycle not proved | YES (CI) | Selection receipt only |
 | landing | NO | Receipt installer | Yes, receipt only | Yes, receipt probe, lifecycle not proved | YES (CI) | Selection receipt only |
@@ -29,8 +29,8 @@ Requested `docs/BRICKS_AUDIT.md` does not exist on the inspected production ref.
 | settings | NO | Receipt installer | Yes, receipt only | Yes, receipt probe, lifecycle not proved | YES (CI) | Selection receipt only |
 | ctp | NO | Receipt installer | Yes, receipt only | Yes, receipt probe, lifecycle not proved | YES (CI) | Selection receipt only |
 | member | YES | Portable shared installer + business lifecycle | YES (same-row / member request ID) | YES (fixture, replay, tenant, backfill) | YES (CI) | YES, manifest selection; Billing/Events configured via moduleConfigs |
-| intake | NO | Receipt installer | Yes, receipt only | Yes, receipt probe, lifecycle not proved | YES (CI) | Selection receipt only |
-| applications | NO | Receipt installer | Yes, receipt only | Yes, receipt probe, lifecycle not proved | YES (CI) | Selection receipt only |
+| intake | NO | Shared durable capture adapter | Yes, business identity and route | Isolated E2E fixture + preview provision route | CI pending | Business adapter available; existing UI/API handoff not yet verified |
+| applications | NO | Shared durable capture adapter | Yes, business identity and route | Isolated E2E fixture + preview provision route | CI pending | Business adapter available; existing UI/API handoff not yet verified |
 | reports | NO | Receipt installer | Yes, receipt only | Yes, receipt probe, lifecycle not proved | YES (CI) | Selection receipt only |
 
 ## Executed branch acceptance proof
@@ -68,3 +68,7 @@ Each module needs a tenant-portable adapter or a clearly verified existing equiv
 **Final Batch 1 CI:** [run 38136690979](https://github.com/TheArchitect1111/ea-payments/actions/runs/38136690979), SUCCESS after manifest configuration wiring: `npm test` PASS, `npm run build` PASS, GET/POST production 404 test route checks PASS. This is isolated software proof, **not** a live Stripe $1 payment or a proven membership-provider authorization update. Billing, Events and Member are **Certified YES under isolated Amanda-style branch tests**, not live Stripe/provider execution.
 
 **Batch 1 final green proof:** [GitHub Actions run 38136990110](https://github.com/TheArchitect1111/ea-payments/actions/runs/38136990110): `npm test` PASS (including Member real-entitlement-writer fixture and selected backfill), `npm run build` PASS, GET/POST test-route 404 in production-mode build PASS. Live Stripe execution outside certification, same as Amanda `brick-amanda-certified`. A certification YES is branch-scoped and does not indicate merged production deployment.
+
+## Batch 2 capture evidence
+
+The shared `lib/bricks/capture-family.ts` adapter covers Simplifi capture/outcome routing, Connect relationship/follow-up, Intake durable submission/review, and Applications submission/review/confirmation handoff. Business IDs are deterministic and tenant-scoped, repeated submissions preserve the same row, changed replays are rejected, and the routed activity is recorded durably. `tests/capture-family.test.mts` exercises isolated lifecycle and tenant mismatch. `/api/bricks/capture-provision-test` runs only on preview with admin permission and returns 404 in production. **The adapter has not yet been connected to the existing Simplifi, Connect, P/intake and P/applications/P/apply UI handlers.** The Applications commerce handoff is an outcome state only, not a verified checkout initiation. Therefore all four retain **Certified NO** pending actual UI flow and provider-backed integrations.
