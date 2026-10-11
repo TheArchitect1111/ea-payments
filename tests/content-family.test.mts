@@ -23,10 +23,13 @@ const tenant={organizationId:'recONE123',portalSlug:'tenant-content'};
 for(const kind of ['documents','resources','dashboard','reports'] as const){
  test(`${kind}: defaults, durable storage, ACL, replay, tenant partition, report completion`,async()=>{
   db.rows.clear();db.writes.clear();db.failId='';
+  console.error('content-stage',kind,'defaults',db.failId);
   const def=await api.contentDefaults(tenant,kind),again=await api.contentDefaults(tenant,kind);
+  console.error('content-stage',kind,'defaults-done');
   assert.equal(def.id,again.id);assert.equal(db.writes.get(def.id),1);
   const input={key:'artifact-1',title:'Private file',visibility:'staff',
    ...(['documents','resources'].includes(kind)?{source:'/portal/tenant-content/documents/artifact-1'}:{})};
+  console.error('content-stage',kind,'save',db.failId);
   const item=await api.saveContent(tenant,kind,input,'staff');
   await api.saveContent(tenant,kind,input,'staff');
   assert.equal(db.writes.get(item.id),1);
@@ -43,8 +46,10 @@ for(const kind of ['documents','resources','dashboard','reports'] as const){
     assert.deepEqual(completed,replay);
     await assert.rejects(api.finishReport(tenant,'artifact-1','/portal/other/reports/artifact-1','staff'),/mismatch/);
   }
+  console.error('content-stage',kind,'before-rejection');
   db.failId='content-'+createHash('sha256').update(JSON.stringify([tenant.organizationId,kind,'offline'])).digest('hex');
   const failedWrite=await api.saveContent(tenant,kind,{...input,key:'offline'},'staff').then(()=>null,(error:Error)=>error);
+  console.error('content-stage',kind,'after-rejection',failedWrite?.message);
   assert.match(failedWrite?.message ?? '',/durable/);
  });
 }
