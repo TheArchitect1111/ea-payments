@@ -20,7 +20,7 @@ const mocks:Record<string,string>={
  '@/lib/connect-delivery-log': "export async function logConnectChannelDelivery(){return true;}",
  '@/lib/email': "export async function sendConnectSms(){return {ok:true};}export async function sendConnectWelcomeEmail(){globalThis.__captureRoutesState.calls.push(['welcome']);return {ok:true};}export async function sendInternalNotification(){return {ok:true};}",
  '@/lib/admin-session-guard': "export async function requireAdminSessionFromRequest(){return {ok:true};}export function adminAuthJsonError(){return Response.json({error:'Admin required'},{status:401});}",
- '@/lib/bricks/durable': "export function brickHash(data){return require('node:crypto').createHash('sha256').update(JSON.stringify(data)).digest('hex');}",
+ '@/lib/bricks/durable': "import {createHash} from 'node:crypto';export function brickHash(data){return createHash('sha256').update(JSON.stringify(data)).digest('hex');}",
  '@/lib/portal-forms/store': "export async function createPortalFormSubmission(input){const s=globalThis.__captureRoutesState;const id=input.idempotencyId||('legacy-'+s.forms.size);const row=s.forms.get(id)||{id,portalSlug:input.portalSlug,kind:input.kind,name:input.name,email:input.email,payload:input.payload,status:'submitted'};s.forms.set(id,row);s.calls.push(['saveForm',input]);return row;}export async function updatePortalFormSubmissionStatus(input){const s=globalThis.__captureRoutesState;const row=s.forms.get(input.submissionId);if(!row||row.portalSlug!==input.portalSlug)return null;const next={...row,status:input.status};s.forms.set(row.id,next);return next;}",
  '@/lib/portal-notify': "export async function notifyPortal(){return true;}",
  '@/lib/platform-store': "export function syntheticOrgId(slug){return 'org_'+slug;}",
