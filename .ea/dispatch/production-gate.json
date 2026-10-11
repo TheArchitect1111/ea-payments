@@ -2,6 +2,6 @@
   "preview_url": "https://ea-payments-git-master-the-architects-projects-cc813778.vercel.app",
   "route_path": "/amanda-catherine",
   "min_visuals": 2,
-  "requested_for": "Certify source after PR #547; local Amanda optional media 503 resolved; guard-compliant release",
-  "requested_at": "2026-10-11T11:23:00Z"
+  "requested_for": "PR #549 merged; protected release through authorized gate-dispatch PR; certified 23-module chassis",
+  "requested_at": "2026-10-11T15:02:00Z"
 }
