@@ -14,9 +14,9 @@ Requested `docs/BRICKS_AUDIT.md` does not exist on the inspected production ref.
 |---|---|---|---|---|---|---|
 | dashboard | NO | Receipt installer | Yes, receipt only | Yes, receipt probe, lifecycle not proved | YES (CI) | Selection receipt only |
 | pulse | NO | Receipt installer | Yes, receipt only | Yes, receipt probe, lifecycle not proved | YES (CI) | Selection receipt only |
-| simplifi | NO | Shared durable capture adapter | Yes, business identity and route | Isolated E2E fixture + preview provision route | CI pending | Business adapter available; existing UI/API handoff not yet verified |
+| simplifi | NO | Shared durable capture adapter | Yes, business identity and route | Isolated E2E fixture + preview provision route | YES (CI) | Business adapter available; existing UI/API handoff not yet verified |
 | amplifi | NO | Receipt installer | Yes, receipt only | Yes, receipt probe, lifecycle not proved | YES (CI) | Selection receipt only |
-| connect | NO | Shared durable capture adapter | Yes, business identity and route | Isolated E2E fixture + preview provision route | CI pending | Business adapter available; existing UI/API handoff not yet verified |
+| connect | NO | Shared durable capture adapter | Yes, business identity and route | Isolated E2E fixture + preview provision route | YES (CI) | Business adapter available; existing UI/API handoff not yet verified |
 | update-hub | NO | Receipt installer | Yes, receipt only | Yes, receipt probe, lifecycle not proved | YES (CI) | Selection receipt only |
 | training | NO | Receipt installer | Yes, receipt only | Yes, receipt probe, lifecycle not proved | YES (CI) | Selection receipt only |
 | landing | NO | Receipt installer | Yes, receipt only | Yes, receipt probe, lifecycle not proved | YES (CI) | Selection receipt only |
@@ -29,8 +29,8 @@ Requested `docs/BRICKS_AUDIT.md` does not exist on the inspected production ref.
 | settings | NO | Receipt installer | Yes, receipt only | Yes, receipt probe, lifecycle not proved | YES (CI) | Selection receipt only |
 | ctp | NO | Receipt installer | Yes, receipt only | Yes, receipt probe, lifecycle not proved | YES (CI) | Selection receipt only |
 | member | YES | Portable shared installer + business lifecycle | YES (same-row / member request ID) | YES (fixture, replay, tenant, backfill) | YES (CI) | YES, manifest selection; Billing/Events configured via moduleConfigs |
-| intake | NO | Shared durable capture adapter | Yes, business identity and route | Isolated E2E fixture + preview provision route | CI pending | Business adapter available; existing UI/API handoff not yet verified |
-| applications | NO | Shared durable capture adapter | Yes, business identity and route | Isolated E2E fixture + preview provision route | CI pending | Business adapter available; existing UI/API handoff not yet verified |
+| intake | NO | Shared durable capture adapter | Yes, business identity and route | Isolated E2E fixture + preview provision route | YES (CI) | Business adapter available; existing UI/API handoff not yet verified |
+| applications | NO | Shared durable capture adapter | Yes, business identity and route | Isolated E2E fixture + preview provision route | YES (CI) | Business adapter available; existing UI/API handoff not yet verified |
 | reports | NO | Receipt installer | Yes, receipt only | Yes, receipt probe, lifecycle not proved | YES (CI) | Selection receipt only |
 
 ## Executed branch acceptance proof
@@ -72,3 +72,5 @@ Each module needs a tenant-portable adapter or a clearly verified existing equiv
 ## Batch 2 capture evidence
 
 The shared `lib/bricks/capture-family.ts` adapter covers Simplifi capture/outcome routing, Connect relationship/follow-up, Intake durable submission/review, and Applications submission/review/confirmation handoff. Business IDs are deterministic and tenant-scoped, repeated submissions preserve the same row, changed replays are rejected, and the routed activity is recorded durably. `tests/capture-family.test.mts` exercises isolated lifecycle and tenant mismatch. `/api/bricks/capture-provision-test` runs only on preview with admin permission and returns 404 in production. **The adapter has not yet been connected to the existing Simplifi, Connect, P/intake and P/applications/P/apply UI handlers.** The Applications commerce handoff is an outcome state only, not a verified checkout initiation. Therefore all four retain **Certified NO** pending actual UI flow and provider-backed integrations.
+
+**Batch 2 CI result:** [GitHub Actions run 38137336380](https://github.com/TheArchitect1111/ea-payments/actions/runs/38137336380) SUCCESS for latest code baseline: npm test PASS (all four executable replay/tenant/routing tests), npm run build PASS, GET/POST production 404 PASS for capture provisioning route and all prior guarded routes. The four capture families remain **Certified NO** until their existing customer-facing entry points (Simplifi capture, Connect relationships, P/intake, P/applications/P/apply) use the durable canonical adapter and provider-backed end-to-end workflows pass. No production merge performed.
