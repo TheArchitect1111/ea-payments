@@ -1,3 +1,4 @@
+import FinalBrickPanel from '@/app/portal/components/FinalBrickPanel';
 import Link from 'next/link';
 import { requirePortalModule } from '@/lib/modules/portal-modules';
 import { PortalSubpage } from '@/app/portal/components/PortalSubpage';
@@ -72,6 +73,7 @@ export default async function LandingHubPage({
           </p>
         </li>
       </ul>
+      {!slug.startsWith('amanda-catherine') ? <FinalBrickPanel kind="landing" title="landing workspace" /> : null}
     </PortalSubpage>
   );
 }
