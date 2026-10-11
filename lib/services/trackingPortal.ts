@@ -6,6 +6,7 @@ import { syntheticOrgId } from '@/lib/platform-store';
 /** Legacy public registration payload stays valid. New fields are optional for that caller. */
 export type TrackingLead = {
   first_name: string; last_name: string; name?: string; email: string; phone: string;
+  client_id?: string; brick_type?: string;
   class_name: string; class_id: string; registration_type: 'live' | 'waitlist';
   created_at: string; source_page: 'amandacatherine.ca';
   registration_id?: string; payment_status?: 'unpaid' | 'paid';
@@ -19,32 +20,33 @@ export type TrackingPayment = {
   timestamp: string; is_test?: boolean;
 };
 
-function registrationKey(email: string, course: string) {
-  return email.trim().toLowerCase() + ':' + course;
+function registrationKey(email: string, course: string, clientId='amanda-catherine') {
+  const original=email.trim().toLowerCase() + ':' + course;
+  return clientId==='amanda-catherine'?original:clientId+':'+original;
 }
-function testRecordId(registrationId: string) {
-  return 'amanda-tracking-test-' + createHash('sha256').update(registrationId).digest('hex').slice(0, 32);
+function testRecordId(registrationId: string, clientId='amanda-catherine') {
+  return 'amanda-tracking-test-' + createHash('sha256').update(clientId==='amanda-catherine'?registrationId:clientId+':'+registrationId).digest('hex').slice(0, 32);
 }
 function escapeFormula(value: string) { return value.replace(/\\/g, '\\\\').replace(/'/g, "\\'"); }
 function stableId(key: string) { return createHash('sha256').update(key).digest('hex').slice(0, 32); }
 function normalizeLead(input: TrackingLead): TrackingLead {
   const email = input.email.trim().toLowerCase();
-  return { ...input, email, name: input.name || [input.first_name,input.last_name].filter(Boolean).join(' '), registration_id: input.registration_id || stableId(registrationKey(email, input.class_id)),
+  return { ...input, email, name: input.name || [input.first_name,input.last_name].filter(Boolean).join(' '), registration_id: input.registration_id || stableId(registrationKey(email, input.class_id, input.client_id)),
     payment_status: input.payment_status || 'unpaid', payment_reference: input.payment_reference ?? null,
     timestamp: input.timestamp || input.created_at, source: input.source || input.source_page,
     event_type: 'signup', is_test: input.is_test === true };
 }
 async function saveTestLead(lead: TrackingLead) {
-  const id = testRecordId(lead.registration_id!);
+  const id = testRecordId(lead.registration_id!,lead.client_id);
   const saved = await saveStudioRecord({recordType:'experience',id,
-    organizationId:syntheticOrgId('amanda-catherine'),title:'[TEST] Amanda tracking signup',
+    organizationId:syntheticOrgId(lead.client_id||'amanda-catherine'),title:'[TEST] Brick tracking signup',
     payload:{...lead, is_test:true, record_kind:'amanda_tracking_test'}});
   if (!saved.ok || !saved.persistedToAirtable) throw new Error(saved.error || 'Test registration not saved');
   return {ok:true,id};
 }
 export async function saveTrackingLead(lead: TrackingLead) {
   if (lead.is_test) return saveTestLead(lead);
-  const key = registrationKey(lead.email, lead.class_id);
+  const key = registrationKey(lead.email, lead.class_id,lead.client_id);
   // Legacy fields remain the compatibility baseline for the existing Airtable schema.
   const current = await airtableQuery('portal_registrations',{
     filterByFormula:"{registration_key}='"+escapeFormula(key)+"'",maxRecords:1});
@@ -60,7 +62,7 @@ export async function saveTrackingLead(lead: TrackingLead) {
   const id = 'amanda-tracking-meta-' + stableId(key);
   const existing = await loadStudioRecord<TrackingLead>('experience',id);
   const saved = await saveStudioRecord({recordType:'experience',id,
-    organizationId:syntheticOrgId('amanda-catherine'),title:'Amanda tracking metadata',
+    organizationId:syntheticOrgId(lead.client_id||'amanda-catherine'),title:'Brick tracking metadata',
     payload:{...existing,...lead,registration_id:existing?.registration_id || lead.registration_id,
       payment_status:existing?.payment_status==='paid'?'paid':lead.payment_status,
       payment_reference:existing?.payment_status==='paid'?existing.payment_reference:lead.payment_reference}});
@@ -83,7 +85,7 @@ export async function pushToTrackingPortal(input: TrackingLead) {
   const remote = lead.is_test ? false : await postIngest(lead);
   const result = remote ? {ok:true} : await saveTrackingLead(lead);
   if (!lead.is_test) {
-    const key = registrationKey(lead.email,lead.class_id);
+    const key = registrationKey(lead.email,lead.class_id,lead.client_id);
     // The retry journal is best-effort; a journal failure must not replay an accepted signup.
     try { await airtableUpsertByField('tracking_sync_failures','failure_key',key,{
       failure_key:key,payload_json:JSON.stringify(lead),status:'synced',attempts:0,last_error:'',
