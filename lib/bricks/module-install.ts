@@ -6,8 +6,10 @@ import { getPeopleRepository } from '@/lib/people/adapter';
 import { isPeopleRuntimeAllowed, isUniversalPeoplePersistEnabled } from '@/lib/people/flags';
 import { brickHash, readBrickRecord, writeBrickRecord, type BrickTenant } from './durable';
 import type { ModuleId } from '@/lib/modules/registry';
+import { CommerceConfig, installCommerce } from './commerce-family';
 export const ModuleConfigsSchema = z.object({ calendar: CalendarConfig.optional(),
-  people: z.object({ provider: z.literal('postgres') }).strict().optional(), discovery: DiscoveryConfig.optional() }).strict();
+  people: z.object({ provider: z.literal('postgres') }).strict().optional(), discovery: DiscoveryConfig.optional(),
+  billing: CommerceConfig.optional(), events: CommerceConfig.optional() }).strict();
 export type ModuleConfigs = z.infer<typeof ModuleConfigsSchema>;
 export async function requireModuleProviders(ids: readonly ModuleId[], input: unknown = {}) {
   const config = ModuleConfigsSchema.parse(input);
@@ -36,6 +38,9 @@ export async function installAdmittedModules(tenant: BrickTenant, ids: readonly 
       continue;
     }
     await writeBrickRecord(tenant, receiptId, { ...tenant, moduleId: id, version: 1 });
+  }
+  for (const kind of ['billing', 'events'] as const) {
+    if (ids.includes(kind) && config[kind]) await installCommerce(tenant, kind, config[kind]);
   }
   if (ids.includes('calendar')) {
     const prior = await readBrickRecord<BrickTenant & {config: unknown}>(tenant, 'calendar-install-' + brickHash(tenant.organizationId));
