@@ -18,13 +18,13 @@ const configId = (tenant: BrickTenant, kind: string) => 'commerce-config-' + idF
 const enrollmentId = (id: string) => 'commerce-order-' + id;
 const escape = (s: string) => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 
-async function requireAdmitted(tenant: BrickTenant, kind: 'billing'|'events'|'member') {
+async function requireAdmitted(tenant: BrickTenant, kind: 'billing'|'events'|'member', allowInstalling = false) {
   const journal = await loadTenantInstall(tenant.organizationId);
-  if (!journal || journal.state !== 'installed' || journal.portalSlug !== tenant.portalSlug || !journal.admitted.includes(kind))
+  if (!journal || (journal.state !== 'installed' && !(allowInstalling && journal.state === 'installing')) || journal.portalSlug !== tenant.portalSlug || !journal.admitted.includes(kind))
     throw new Error('Certified tenant entitlement required: ' + kind);
 }
 export async function installCommerce(tenant: BrickTenant, kind: CommerceKind, input: unknown) {
-  await requireAdmitted(tenant,kind);
+  await requireAdmitted(tenant,kind,true);
   const config = CommerceConfig.parse(input);
   const old = await readBrickRecord<BrickTenant & {config:CommerceConfigType}>(tenant,configId(tenant,kind));
   if (old && JSON.stringify(old.config) !== JSON.stringify(config)) throw new Error('Commerce config conflict');
