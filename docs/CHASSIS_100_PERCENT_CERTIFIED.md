@@ -3,11 +3,11 @@
 ## Scope and evidence
 - Canonical registry: **23 modules**. Calendar, People and Discovery use dedicated installers; the remaining 20 are marked YES in [REMAINING_BRICKS_CERTIFIED.md](./REMAINING_BRICKS_CERTIFIED.md), under the **isolated Amanda-style branch acceptance boundary**.
 - Source branch: `fix/remaining-bricks-certified`. Base production before this release: `0b91edac`.
-- Final branch automated proof before PR: [run 38141077078](https://github.com/TheArchitect1111/ea-payments/actions/runs/38141077078): `npm test`, `npm run build`, and all guarded GET/POST production-mode 404 tests passed. Verify PR-head checks separately before merge.
-- **Production merge commit:** PENDING, record the GitHub merge SHA after successful PR checks.
-- **Certified manifest source commit:** PENDING, populated only by the `EA Production Gate` workflow following master promotion.
-- **Manifest-only promotion commit:** PENDING, must be produced by `.github/workflows/ea-production-gate.yml` after visual, functional, protection, routing, build and critic gates pass.
-- **Production Vercel deployment SHA / READY:** PENDING until Vercel and the production alias confirm the gate's resulting manifest commit.
+- Final PR-head branch automated proof: [run 38149105991](https://github.com/TheArchitect1111/ea-payments/actions/runs/38149105991), PASS (tests/build/404). Prior full branch proof: [run 38141077078](https://github.com/TheArchitect1111/ea-payments/actions/runs/38141077078): `npm test`, `npm run build`, and all guarded GET/POST production-mode 404 tests passed. Verify PR-head checks separately before merge.
+- **Production feature merge commit:** `3be1e07d5d40d634c1e357ac5f07333ba0d1ece8` ([PR #549](https://github.com/TheArchitect1111/ea-payments/pull/549)). This is the source merge, not the manifest-only promotion.
+- **Certified manifest source commit (authoritative):** The `sourceCommit` field in [`.ea/gates/latest.json`](../.ea/gates/latest.json). The gate automatically stamps the exact post-dispatch master source SHA on PASS.
+- **Manifest-only production commit (authoritative):** The GitHub history entry immediately following the certified source commit, with the sole changed file `.ea/gates/latest.json`, created by [EA Production Gate](../.github/workflows/ea-production-gate.yml). Verify its SHA against Vercel's deployment `githubCommitSha`.
+- **Production READY verifier:** [Vercel production](https://ea-payments.vercel.app). READY must be confirmed separately against the exact manifest-only commit; the prior READY deployment does not qualify.
 
 ## Certification boundary
 Branch evidence includes durable/tenant-scoped storage fixtures, replay/identity checks, customer-route handlers, production 404 checks and successful production compilation. It does **not** certify live Airtable, email/SMS, Stripe, social platform, LMS delivery, or full real tenant interactions. A branch-only YES must not be substituted for the independent production gate.
