@@ -5,7 +5,7 @@ import { syntheticOrgId } from '@/lib/platform-store';
 
 /** Legacy public registration payload stays valid. New fields are optional for that caller. */
 export type TrackingLead = {
-  first_name: string; last_name: string; email: string; phone: string;
+  first_name: string; last_name: string; name?: string; email: string; phone: string;
   class_name: string; class_id: string; registration_type: 'live' | 'waitlist';
   created_at: string; source_page: 'amandacatherine.ca';
   registration_id?: string; payment_status?: 'unpaid' | 'paid';
@@ -29,7 +29,7 @@ function escapeFormula(value: string) { return value.replace(/\\/g, '\\\\').repl
 function stableId(key: string) { return createHash('sha256').update(key).digest('hex').slice(0, 32); }
 function normalizeLead(input: TrackingLead): TrackingLead {
   const email = input.email.trim().toLowerCase();
-  return { ...input, email, registration_id: input.registration_id || stableId(registrationKey(email, input.class_id)),
+  return { ...input, email, name: input.name || [input.first_name,input.last_name].filter(Boolean).join(' '), registration_id: input.registration_id || stableId(registrationKey(email, input.class_id)),
     payment_status: input.payment_status || 'unpaid', payment_reference: input.payment_reference ?? null,
     timestamp: input.timestamp || input.created_at, source: input.source || input.source_page,
     event_type: 'signup', is_test: input.is_test === true };
