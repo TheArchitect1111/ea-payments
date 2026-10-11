@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
   // Existing P/intake and P/applications queues remain the review UI.
   // A certified tenant additionally persists routed canonical lifecycle status.
   const kind = updated.kind === 'application' ? 'applications' : 'intake';
-  const certified = await resolveCaptureTenant(tenant.portalSlug, kind);
+  const certified = tenant.portalSlug === 'amanda-catherine' ? null : await resolveCaptureTenant(tenant.portalSlug, kind);
   if (certified && (status === 'reviewed' || status === 'accepted')) {
     try {
       await progressCapture(certified, kind, updated.id, {
