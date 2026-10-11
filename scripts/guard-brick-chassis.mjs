@@ -29,13 +29,16 @@ export function violations(path,source){
  if(direct.test(source))results.push('direct trackingPortal call/import');
  // Detect registration/tracking-specific writes, not domain-owned business data.
  const forbidden=/(?:airtableUpsertByField|airtableCreate|airtableUpdate|saveStudioRecord|writeBrickRecord)\s*\((?:[^)]|\n){0,250}?(?:tracking[_ -]?registration|tracking[_ -]?portal|tracking[_ -]?payment)/gi;
- if(forbidden.test(source))results.push('direct Airtable tracking registration write');
+ const directTable=/(?:airtableUpsertByField|airtableCreate|airtableUpdate)\s*\(\s*['\"](?:portal_registrations|tracking_registrations|tracking_payments|tracking_portal)['\"]/i;
+ if(forbidden.test(source)||directTable.test(source))results.push('direct Airtable tracking registration write');
  return results.map(reason=>path+': '+reason);
 }
 if(process.argv.includes('--self-test')){
  const sample='import { pushToTrackingPortal } from "@/lib/services/trackingPortal"; pushToTrackingPortal(x)';
  const bad=violations('client/new-brick.ts',sample);
  if(bad.length===0)throw Error('Guard failed to reject direct tracking');
+ if(violations('client/new-brick.ts',"airtableUpsertByField('portal_registrations','registration_key',key,row)").length===0)
+  throw Error('Guard failed to reject direct Airtable registration');
  if(violations('client/new-brick.ts',"registerBrickEvent(value)").length)
   throw Error('Guard rejected canonical registrar');
  console.log('PASS: illegal direct tracking rejected; canonical registrar accepted');
