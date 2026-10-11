@@ -4,7 +4,7 @@ import { checkRateLimit } from '@/lib/ai/rate-limit';
 import { registry, create } from '@/lib/amanda-catherine/registry';
 import { isAllowedAmandaOrigin } from '@/lib/amanda-catherine/request-origin';
 import { getAmandaConfirmationLetter } from '@/lib/amanda-catherine/confirmation-letters';
-import { enqueueTrackingPortalRetry, pushToTrackingPortal, type TrackingLead } from '@/lib/services/trackingPortal';
+import { registerBrickEvent } from '@/lib/services/brickRegistrar';
 
 export const dynamic = 'force-dynamic';
 
@@ -55,22 +55,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Your details could not be saved. Please try again.' }, { status: 503 });
   }
 
-  const trackingLead: TrackingLead = {
-    ...person,
-    email,
-    phone: data.student_phone,
-    class_name: course.title,
-    class_id: course.key,
-    registration_type: registrationType,
-    created_at: timestamp,
-    source_page: 'amandacatherine.ca',
-  };
-  try {
-    await pushToTrackingPortal(trackingLead);
-  } catch (error) {
-    console.error('[amanda-registration] tracking sync deferred', error);
-    try { await enqueueTrackingPortalRetry(trackingLead, error); }
-    catch (queueError) { console.error('[amanda-registration] retry queue unavailable', queueError); }
+  const registered = await registerBrickEvent({
+    brick_type: registrationType === 'waitlist' ? 'waitlist' : 'classes',
+    brick_id: course.key,client_id:'amanda-catherine',registration_id:waitlistRecordId,
+    name,email,phone:data.student_phone,status:registrationType,
+    payment_status:'unpaid',payment_reference:null,timestamp,source:'amandacatherine.ca',
+    is_test:false,
+  });
+  if (!registered.ok) {
+    console.error('[amanda-registration] tracking not saved',registered.error);
+    return NextResponse.json({error:'Registration saved, but tracking could not be confirmed. Please contact support.'},{status:503});
   }
 
   try {
