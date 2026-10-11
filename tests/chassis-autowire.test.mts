@@ -6,7 +6,7 @@ import { readFileSync } from 'node:fs';
 import { NextRequest } from 'next/server.js';
 const root = process.cwd();
 import { db, mocks } from './fixtures/chassis-ports';
-const compiled = await build({ stdin: { contents: `export * from './lib/tenant-foundation'; export * from './lib/modules/ensure-package-entitlements';export * from './lib/modules/client-factory-assembly';export * from './lib/portal-universal/bricks/amanda';export { POST as brickPOST } from './app/api/portal/[slug]/bricks/amanda/route';export * from './lib/portal-universal/bricks/amanda/stripe';export { POST as entitlementsPOST } from './app/api/admin/entitlements/route';`, resolveDir: root },
+const compiled = await build({ stdin: { contents: `export * from './lib/tenant-foundation'; export * from './lib/modules/ensure-package-entitlements';export * from './lib/modules/client-factory-assembly';export * from './lib/portal-universal/bricks/amanda';export { changeMemberGrant } from './lib/bricks/commerce-family';export { POST as brickPOST } from './app/api/portal/[slug]/bricks/amanda/route';export * from './lib/portal-universal/bricks/amanda/stripe';export { POST as entitlementsPOST } from './app/api/admin/entitlements/route';`, resolveDir: root },
   bundle: true, write: false, platform: 'node', format: 'esm', packages: 'external', plugins: [{ name: 'ports', setup(b) {
     b.onResolve({ filter: /.*/ }, args => args.path in mocks ? { path: args.path, namespace: 'ports' } : undefined);
     b.onLoad({ filter: /.*/, namespace: 'ports' }, args => ({ contents: mocks[args.path], loader: 'js' }));
@@ -42,3 +42,20 @@ test('positive industry pack selection is persisted with admitted modules',async
 test('admin selector rejects uncertified and unknown selections before writes',async()=>{reset();for(const body of [{action:'set',moduleId:'missing'},{action:'set-business-option',businessOptionId:'missing'},{action:'bulk-enable',moduleIds:['connect','typo']}]){const result=await api.entitlementsPOST(request({organizationId:tenant.organizationId,...body}));assert.ok([400,409].includes(result.status));assert.equal(db.writes.length,0);}const response=await api.entitlementsPOST(request({organizationId:tenant.organizationId,action:'set-business-option',businessOptionId:'forms-intake-applications'}));assert.equal(response.status,200);const result=await response.json();assert.deepEqual(new Set(result.updated),new Set(['dashboard','amplifi','update-hub','intake','applications']));});
 
 test('selector changes remain installed across later backfill and disable is retained',async()=>{reset();await install();let response=await api.entitlementsPOST(request({organizationId:tenant.organizationId,action:'set',moduleId:'connect',enabled:true}));assert.equal(response.status,200);await api.ensurePackageEntitlements({orgId:tenant.organizationId,slug:tenant.portalSlug,packagePurchased:'Launch Verification'});assert.ok(db.entitlements.some(e=>e.moduleId==='connect'&&e.status==='active'));response=await api.entitlementsPOST(request({organizationId:tenant.organizationId,action:'set',moduleId:'connect',enabled:false}));assert.equal(response.status,200);await api.ensurePackageEntitlements({orgId:tenant.organizationId,slug:tenant.portalSlug,packagePurchased:'Launch Verification'});assert.ok(!db.entitlements.some(e=>e.moduleId==='connect'&&e.status==='active'));assert.equal((await api.entitlementsPOST(request({organizationId:tenant.organizationId,action:'set',moduleId:'dashboard',enabled:false}))).status,409);});
+
+test('Member grant reaches platform entitlement writer, readback and selected backfill',async()=>{
+ reset();await install();let letters=0;
+ const request={email:'member@example.com',memberId:'member-77',enabled:true,requestId:'request-1001'};
+ const granted=await api.changeMemberGrant(tenant,request,async()=>{letters++;});
+ assert.equal(granted.enabled,true);
+ assert.ok(db.entitlements.some(e=>e.organizationId===tenant.organizationId&&e.moduleId==='member'&&e.status==='active'));
+ await api.ensurePackageEntitlements({orgId:tenant.organizationId,slug:tenant.portalSlug,packagePurchased:'Launch Verification'});
+ assert.ok(db.entitlements.some(e=>e.moduleId==='member'&&e.status==='active'));
+ const again=await api.changeMemberGrant(tenant,request,async()=>{letters++;});
+ assert.deepEqual(again,granted);assert.equal(letters,1);
+ await assert.rejects(api.changeMemberGrant({...tenant,portalSlug:'other'},request,async()=>{}),/tenant|installation/i);
+ const revoked=await api.changeMemberGrant(tenant,{...request,enabled:false,requestId:'request-1002'},async()=>{letters++;});
+ assert.equal(revoked.enabled,false);assert.equal(letters,2);
+ // An individual revoke does not turn off the entire tenant's Member module.
+ assert.ok(db.entitlements.some(e=>e.moduleId==='member'&&e.status==='active'));
+});
