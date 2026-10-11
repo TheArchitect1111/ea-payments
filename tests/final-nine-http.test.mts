@@ -6,6 +6,9 @@ import {NextRequest} from 'next/server.js';
 const db={role:'staff',slug:'tenant-test',records:new Map<string,any>()};
 (globalThis as any).__finalRoute=db;
 const mock:Record<string,string>={
+ '@/lib/training-transformation-store':"export async function listPublishedTrainingForTenant(){return [{id:'request-1',title:'Certified Course',status:'published'}];}",
+ '@/lib/provision-website-portal':"export async function findPublishedSitePage(){return {id:'published-site',status:'published'};}",
+ '@/lib/bricks/durable':"import {createHash} from 'node:crypto';export const brickHash=x=>createHash('sha256').update(JSON.stringify(x)).digest('hex');",
  '@/lib/api/portal-route':"export async function guardPortalApi(){const s=globalThis.__finalRoute;return {ok:true,session:{slug:s.slug,role:s.role}};}export function portalTenant(s){return {portalSlug:s.slug};}export function portalApiUnauthorized(){return Response.json({error:'No session'},{status:401});}",
  '@/lib/bricks/final-portal':"export async function portalFinalDefault(slug,kind){if(slug!=='tenant-test')return null;return {organizationId:'recTENANT01',portalSlug:slug,kind,key:'welcome'};}",
  '@/lib/bricks/final-family':`import {createHash} from 'node:crypto';
