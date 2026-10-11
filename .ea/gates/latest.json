@@ -1,17 +1,17 @@
 {
-  "sourceCommit": "dd73e652b044c94d1dfaea41e1344365626e5cd8",
+  "sourceCommit": "ac6a628b69fd7c82d935f83ded29a95615f76afb",
   "previewUrl": "https://ea-payments-git-master-the-architects-projects-cc813778.vercel.app/",
   "target": "https://ea-payments-git-master-the-architects-projects-cc813778.vercel.app/amanda-catherine",
-  "completedAt": "2026-10-11T09:25:24.200Z",
+  "completedAt": "2026-10-11T10:14:34.740Z",
   "status": "PASS",
   "gates": {
     "sourceIdentity": {
       "status": "PASS",
-      "proof": "preview:dd73e652b044c94d1dfaea41e1344365626e5cd8"
+      "proof": "preview:ac6a628b69fd7c82d935f83ded29a95615f76afb"
     },
     "build": {
       "status": "PASS",
-      "proof": "source:dd73e652b044c94d1dfaea41e1344365626e5cd8"
+      "proof": "source:ac6a628b69fd7c82d935f83ded29a95615f76afb"
     },
     "assets": {
       "status": "PASS",
@@ -36,8 +36,8 @@
   },
   "details": {
     "buildInfo": {
-      "commitSha": "dd73e652b044c94d1dfaea41e1344365626e5cd8",
-      "branch": "master",
+      "commitSha": "ac6a628b69fd7c82d935f83ded29a95615f76afb",
+      "branch": "ac6a628b69fd7c82d935f83ded29a95615f76afb",
       "environment": "preview"
     },
     "desktop": {
