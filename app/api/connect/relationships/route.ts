@@ -8,7 +8,7 @@ import {
   markSequenceStepSent,
   type CreateRelationshipInput,
 } from '@/lib/connect-store';
-import { bridgeCapturedRecord } from '@/lib/bricks/capture-entry-bridge';
+import { resolveCaptureTenant, bridgeCapturedRecord } from '@/lib/bricks/capture-entry-bridge';
 import { handoffConnectRelationship } from '@/lib/connect-pipeline';
 import { logConnectChannelDelivery } from '@/lib/connect-delivery-log';
 import { sendConnectSms, sendConnectWelcomeEmail, sendInternalNotification } from '@/lib/email';
@@ -63,6 +63,25 @@ export async function POST(request: NextRequest) {
       campaignId: clean(body.campaignId),
     };
 
+    const certifiedTenant = await resolveCaptureTenant(orgSlug,'connect');
+    if (certifiedTenant) {
+      const previous = (await listConnectRelationships(orgSlug)).find(row =>
+        row.email.trim().toLowerCase() === email.trim().toLowerCase() &&
+        (row.campaignId || '') === (input.campaignId || '') &&
+        (row.event || '') === (input.event || ''));
+      if (previous) {
+        await bridgeCapturedRecord({slug:orgSlug,kind:'connect',
+          identity:previous.id,requestId:previous.id,email:previous.email,name:previous.name,
+          payload:{relationshipId:previous.id,source:previous.source,
+            campaignId:previous.campaignId || null},route:true});
+        const org = await getConnectOrg(orgSlug);
+        return NextResponse.json({relationship:previous,resources:org.resources,
+          redirectDestination:org.redirectDestination,nextSequence:org.sequence,
+          handoff:{simplifi:{captureId:previous.simplifiCaptureId},
+            amplifi:{shareUrl:previous.amplifiShareUrl}},
+          replay:true,delivery:{skipped:true},message:'Relationship already activated.'});
+      }
+    }
     const relationship = await createConnectRelationship(input);
     // Certified tenants get a durable relationship/follow-up receipt in addition to
     // the original Connect delivery pipeline; do not change public legacy contracts.
