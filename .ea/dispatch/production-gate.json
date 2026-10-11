@@ -2,6 +2,6 @@
   "preview_url": "https://ea-payments-git-master-the-architects-projects-cc813778.vercel.app",
   "route_path": "/amanda-catherine",
   "min_visuals": 2,
-  "requested_for": "Rerun Amanda production gate against exact-source Vercel preview runtime",
-  "requested_at": "2026-10-09T15:35:10.483Z"
+  "requested_for": "Certified Amanda tracking merge 6c84f909 via reviewed production gate",
+  "requested_at": "2026-10-11T09:18:53.924Z"
 }
