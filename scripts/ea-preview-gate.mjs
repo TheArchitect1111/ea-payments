@@ -83,6 +83,7 @@ async function inspectViewport(browser, name, viewport, isMobile = false, pageTa
   const pageErrors = [];
   const failedRequests = [];
   const badImageResponses = [];
+  const networkResponses = [];
 
   page.on('console', (msg) => { if (msg.type() === 'error') consoleErrors.push(msg.text()); });
   page.on('pageerror', (err) => pageErrors.push(String(err)));
@@ -94,6 +95,7 @@ async function inspectViewport(browser, name, viewport, isMobile = false, pageTa
   page.on('requestfailed', onRequestFailed);
   page.on('response', (res) => {
     const type = res.request().resourceType();
+    networkResponses.push({status: res.status(), method: res.request().method(), resourceType: type, url: res.url()});
     if (type === 'image' && !res.ok()) badImageResponses.push(`${res.status()} ${res.url()}`);
   });
 
@@ -165,7 +167,7 @@ async function inspectViewport(browser, name, viewport, isMobile = false, pageTa
   const status = response?.status() || 0;
   return {
     name, httpStatus: status, screenshot, screenshotSha256: sha256(screenshot), consoleErrors,
-    pageErrors, failedRequests, badImageResponses, brokenImgs, brokenBackgrounds, renderedVisuals,
+    pageErrors, failedRequests, badImageResponses, networkResponses, brokenImgs, brokenBackgrounds, renderedVisuals,
     overflow, bodyTextLength: dom.bodyTextLength, scrollHeight: dom.scrollHeight, viewport,
     placeholderSlots: dom.placeholderSlots, publicBackground: dom.publicBackground,
   };
