@@ -8,7 +8,7 @@ export type TrackingLead = {
   first_name: string; last_name: string; name?: string; email: string; phone: string;
   client_id?: string; brick_type?: string;
   class_name: string; class_id: string; registration_type: 'live' | 'waitlist';
-  created_at: string; source_page: 'amandacatherine.ca';
+  created_at: string; source_page: string;
   registration_id?: string; payment_status?: 'unpaid' | 'paid';
   payment_reference?: string | null; timestamp?: string; source?: string;
   is_test?: boolean; event_type?: 'signup';
@@ -20,9 +20,11 @@ export type TrackingPayment = {
   timestamp: string; is_test?: boolean; client_id?:string;
 };
 
-function registrationKey(email: string, course: string, clientId='amanda-catherine') {
+function registrationKey(email: string, course: string, clientId='amanda-catherine', registrationId?:string) {
   const original=email.trim().toLowerCase() + ':' + course;
-  return clientId==='amanda-catherine'?original:clientId+':'+original;
+  // Preserve Amanda's existing enrollment identity, but allow multiple bookings
+  // of one generic brick for the same customer without overwriting the first.
+  return clientId==='amanda-catherine'?original:clientId+':'+(registrationId || original);
 }
 function testRecordId(registrationId: string, clientId='amanda-catherine') {
   return 'amanda-tracking-test-' + createHash('sha256').update(clientId==='amanda-catherine'?registrationId:clientId+':'+registrationId).digest('hex').slice(0, 32);
@@ -31,7 +33,7 @@ function escapeFormula(value: string) { return value.replace(/\\/g, '\\\\').repl
 function stableId(key: string) { return createHash('sha256').update(key).digest('hex').slice(0, 32); }
 function normalizeLead(input: TrackingLead): TrackingLead {
   const email = input.email.trim().toLowerCase();
-  return { ...input, email, name: input.name || [input.first_name,input.last_name].filter(Boolean).join(' '), registration_id: input.registration_id || stableId(registrationKey(email, input.class_id, input.client_id)),
+  return { ...input, email, name: input.name || [input.first_name,input.last_name].filter(Boolean).join(' '), registration_id: input.registration_id || stableId(registrationKey(email, input.class_id, input.client_id, input.registration_id)),
     payment_status: input.payment_status || 'unpaid', payment_reference: input.payment_reference ?? null,
     timestamp: input.timestamp || input.created_at, source: input.source || input.source_page,
     event_type: 'signup', is_test: input.is_test === true };
@@ -46,7 +48,7 @@ async function saveTestLead(lead: TrackingLead) {
 }
 export async function saveTrackingLead(lead: TrackingLead) {
   if (lead.is_test) return saveTestLead(lead);
-  const key = registrationKey(lead.email, lead.class_id,lead.client_id);
+  const key = registrationKey(lead.email, lead.class_id,lead.client_id,lead.registration_id);
   // Legacy fields remain the compatibility baseline for the existing Airtable schema.
   const current = await airtableQuery('portal_registrations',{
     filterByFormula:"{registration_key}='"+escapeFormula(key)+"'",maxRecords:1});
@@ -85,7 +87,7 @@ export async function pushToTrackingPortal(input: TrackingLead) {
   const remote = lead.is_test ? false : await postIngest(lead);
   const result = remote ? {ok:true} : await saveTrackingLead(lead);
   if (!lead.is_test) {
-    const key = registrationKey(lead.email,lead.class_id,lead.client_id);
+    const key = registrationKey(lead.email,lead.class_id,lead.client_id,lead.registration_id);
     // The retry journal is best-effort; a journal failure must not replay an accepted signup.
     try { await airtableUpsertByField('tracking_sync_failures','failure_key',key,{
       failure_key:key,payload_json:JSON.stringify(lead),status:'synced',attempts:0,last_error:'',
@@ -111,7 +113,7 @@ export async function storeTrackingPayment(event: TrackingPayment) {
     if (!saved.ok || !saved.persistedToAirtable) throw new Error(saved.error || 'Test payment tracking failed');
     return {ok:true,id,alreadyPaid:lead.payment_status==='paid'};
   }
-  const key = registrationKey(event.email,event.class_id,event.client_id);
+  const key = registrationKey(event.email,event.class_id,event.client_id,event.registration_id);
   const rows = await airtableQuery('portal_registrations',{
     filterByFormula:"{registration_key}='" + escapeFormula(key) + "'",maxRecords:1});
   if (!rows[0]) throw new Error('Matching live registration not found; payment was not matched');
