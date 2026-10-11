@@ -125,7 +125,12 @@ test('Live signup and $1 test stay isolated; verified payment replay never creat
     payment_provider:'square',timestamp:new Date().toISOString(),is_test:false};
   await tracking.storeTrackingPayment(paid);
   await tracking.storeTrackingPayment(paid);
+  await tracking.pushToTrackingPortal(lead);
+  assert.equal(db.waitlist.get('portal_registrations:'+lead.email+':'+lead.class_id).payment_status,'paid','Signup replay must preserve payment');
   assert.equal([...db.waitlist.keys()].filter(k=>k.startsWith('portal_registrations:')).length,1,'Payment created duplicate live registration');
+  const realRecord=db.waitlist.get('portal_registrations:'+lead.email+':'+lead.class_id);
+  assert.equal(realRecord.payment_status,'paid','Original tracking lead must show paid');
+  assert.equal(realRecord.payment_reference,'square-reference-1','Original lead must store payment reference');
   const metadata=[...db.records.values()].find(x=>x.payload?.payment_reference==='square-reference-1');
   assert.ok(metadata,'Payment reference missing from existing lead metadata');
   const testLead={...lead,email:'private-test@example.invalid',registration_id:'test-reg-isolated-01',is_test:true};
