@@ -1,0 +1,32 @@
+name: Tag certified chassis autowire merge
+on:
+  push:
+    branches: [release/chassis-autowire-certified-tag]
+    paths: [.github/workflows/tag-chassis-autowire-certified.yml]
+permissions:
+  contents: write
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Verify release and push immutable tag
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin master --tags
+          git merge-base --is-ancestor 80f26be13a11ddccc77a2990b23e204e83830c71 58fd5cbc72b389bdde51662f58a649dd39a3ea7b
+          git merge-base --is-ancestor 58fd5cbc72b389bdde51662f58a649dd39a3ea7b origin/master
+          git show origin/master:.ea/gates/latest.json > /tmp/chassis-gate.json
+          node -e "const g=require('/tmp/chassis-gate.json');if(g.status!=='PASS'||g.sourceCommit!=='ac6a628b69fd7c82d935f83ded29a95615f76afb')throw new Error('Release gate mismatch')"
+          test "$(curl -s -o /dev/null -w '%{http_code}' https://ea-payments.vercel.app/amanda-catherine)" = 200
+          test "$(curl -s -o /dev/null -w '%{http_code}' https://ea-payments.vercel.app/api/amanda-catherine/preview-dollar-test)" = 404
+          test "$(curl -s -o /dev/null -w '%{http_code}' -X POST https://ea-payments.vercel.app/api/amanda-catherine/preview-dollar-test)" = 404
+          if git rev-parse --verify refs/tags/brick-chassis-autowire-certified >/dev/null 2>&1; then
+            test "$(git rev-parse refs/tags/brick-chassis-autowire-certified^{commit})" = 58fd5cbc72b389bdde51662f58a649dd39a3ea7b
+          else
+            git tag brick-chassis-autowire-certified 58fd5cbc72b389bdde51662f58a649dd39a3ea7b
+            git push origin refs/tags/brick-chassis-autowire-certified
+          fi
