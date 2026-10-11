@@ -2,6 +2,6 @@
   "preview_url": "https://ea-payments-git-master-the-architects-projects-cc813778.vercel.app",
   "route_path": "/amanda-catherine",
   "min_visuals": 2,
-  "requested_for": "TB3 Bonfire guarded integration PR #551; production ingestion disabled until provider webhook protocol verified; branch test/build/404 passed",
-  "requested_at": "2026-10-11T15:20:00Z"
+  "requested_for": "TB3 seller CSV import PR #553 merged; CI 38151584650 PASS; webhook remains fail closed and no live payout",
+  "requested_at": "2026-10-11T15:36:00Z"
 }
