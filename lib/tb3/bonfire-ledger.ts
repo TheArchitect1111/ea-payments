@@ -46,6 +46,9 @@ export async function ingestVerifiedBonfireOrder(input:unknown){
    payment_reference:order.order_id,payment_status:'paid',tracking:'Bonfire',source:'bonfire'};
  if(before){
   if(JSON.stringify(before)!==JSON.stringify(row))throw Error('Conflicting Bonfire order replay');
+  // A prior attempt may have persisted its payment but failed during entitlement
+  // write-back. Replay repairs that downstream step rather than silently ACKing it.
+  await ensureMemberEntitlement();
   return {sale:before,replay:true};
  }
  // External paid proof has already been authenticated at the ingress boundary.
@@ -60,11 +63,14 @@ export async function ingestVerifiedBonfireOrder(input:unknown){
   orderId:order.order_id,event:'merch_payment_confirmed',source:'bonfire',amount_cents:order.amount_cents});
  const old=await readBrickRecord<typeof tb3Tenant & {keys:string[]}>(tb3Tenant,indexId);
  if(!old?.keys.includes(id))await writeBrickRecord(tb3Tenant,indexId,{...tb3Tenant,keys:[...(old?.keys||[]),id]});
+ await ensureMemberEntitlement();
+ return {sale:row,replay:false};
+}
+async function ensureMemberEntitlement(){
  const entitled=await setModuleEnabled(TB3_ORGANIZATION_ID,'member',true,'manual');
  const readback=(await listEntitlementsForOrg(TB3_ORGANIZATION_ID)).find(x=>x.moduleId==='member');
  if(!entitled||entitled.status!=='active'||!readback||readback.status!=='active')
   throw Error('TB3 member entitlement was not durably confirmed');
- return {sale:row,replay:false};
 }
 export async function listTb3BonfireSales(){
  await requireTb3Installed();
