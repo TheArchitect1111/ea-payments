@@ -1,30 +1,13 @@
 import { notFound } from 'next/navigation';
-import { isUniversalPeopleEnabled } from '@/lib/people/flags';
-
-/**
- * Minimal staff People directory shell.
- * Flag OFF → hard 404 (INV-17).
- */
-export default async function PeoplePage({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
+import { isUniversalPeopleEnabled, isPeopleRuntimeAllowed } from '@/lib/people/flags';
+import { requirePortalModule } from '@/lib/modules/portal-modules';
+import { PortalSubpage } from '@/app/portal/components/PortalSubpage';
+import { roleAtLeast } from '@/lib/rbac';
+import PeopleDirectory from './PeopleDirectory';
+export default async function PeoplePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-
-  if (!isUniversalPeopleEnabled()) {
-    notFound();
-  }
-
-  return (
-    <main style={{ padding: 24, fontFamily: 'system-ui, sans-serif' }}>
-      <h1>People</h1>
-      <p>
-        Directory for portal <code>{slug}</code>.
-      </p>
-      <p>
-        Use <code>/api/portal/{slug}/people</code> for list/create when authenticated.
-      </p>
-    </main>
-  );
+  if (!isUniversalPeopleEnabled() || !isPeopleRuntimeAllowed()) notFound();
+  const { session } = await requirePortalModule(slug, 'people');
+  if (!session.role || !roleAtLeast(session.role, 'staff')) notFound();
+  return <PortalSubpage slug={slug} active="people" kicker="People" title="Your relationships" lede="Keep the people you work with in one place."><PeopleDirectory slug={slug} /></PortalSubpage>;
 }

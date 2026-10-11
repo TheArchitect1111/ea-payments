@@ -112,7 +112,7 @@ export async function ensurePersonForClientRecordAsync(
           ...(person.externalIds || []),
           { system: 'client-record', value: input.clientRecordId },
         ],
-      });
+      }, { expectedUpdatedAt: person.updatedAt });
     }
   }
 

@@ -1,3 +1,4 @@
+import { requireModuleProviders, installAdmittedModules, type ModuleConfigs } from '@/lib/bricks/module-install';
 import { loadStudioRecordFromAirtable } from '@/lib/creative-studio/persistence';
 /**
  * Shared org + package entitlements for every provision path.
@@ -31,6 +32,7 @@ export type TenantFoundationInput = {
   businessOptionIds?: readonly string[];
   industryPackId?: string;
   bricks?: readonly BrickSelection[];
+  moduleConfigs?: ModuleConfigs;
 };
 
 export type TenantFoundationResult = {
@@ -47,7 +49,7 @@ function touchOsFoundationTaxonomy(): void {
 }
 
 function effectiveAssemblyMode(input: TenantFoundationInput): 'legacy' | 'certified' {
-  const explicitSelection = !!(input.requestedModuleIds || input.businessOptionIds || input.industryPackId || input.bricks);
+  const explicitSelection = !!(input.requestedModuleIds || input.businessOptionIds || input.industryPackId || input.bricks || input.moduleConfigs);
   if (explicitSelection && input.assemblyMode === 'legacy') throw new Error('Explicit selection requires certified installation');
   if (explicitSelection) return 'certified';
   if (input.assemblyMode) return input.assemblyMode;
@@ -70,6 +72,8 @@ export async function ensureTenantFoundation(
         bricks: input.bricks,
       })
     : null;
+
+  if (assemblyPlan) await requireModuleProviders(assemblyPlan.admitted, input.moduleConfigs);
 
   // Certified preflight intentionally runs before any organization or entitlement write.
   // Packages that are not fully certified retain legacy behavior unless explicitly requested.
@@ -101,6 +105,7 @@ export async function ensureTenantFoundation(
 
   if (!assemblyPlan) return { orgId };
 
+  await installAdmittedModules({ organizationId: orgId, portalSlug: input.portalSlug }, assemblyPlan.admitted, input.moduleConfigs);
   await installSelectedBricks({ organizationId: orgId, portalSlug: input.portalSlug }, input.bricks);
   if (input.industryPackId) {
     const updated = await updateOrganizationWorkspaceConfig(orgId, { industryPackId: input.industryPackId });

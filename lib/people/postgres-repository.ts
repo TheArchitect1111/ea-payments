@@ -2,7 +2,7 @@
  * PostgresPeopleRepository — Phase 2C durable SoR via PostgREST + SECURITY DEFINER RPCs.
  * Airtable People SoR is quarantined and must not be used here (INV-33).
  */
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { peopleConflict, peopleUnavailable, peopleValidation } from '@/lib/people/errors';
 import { assertPeoplePostgresReady, peopleRest, peopleRpc } from '@/lib/people/postgres-client';
 import type {
@@ -229,7 +229,8 @@ class PostgresPeopleRepository implements PeopleRepository {
   async upsertDirectoryMembership(
     input: Omit<PersonDirectoryMembership, 'id'> & { id?: string },
   ): Promise<PersonDirectoryMembership> {
-    const id = input.id || newId('pmem');
+    const existing = await this.getDirectoryMembership(input.organizationId, input.personId);
+    const id = existing?.id || 'pmem_' + createHash('sha256').update(JSON.stringify([input.organizationId, input.personId])).digest('hex');
     const row = {
       membership_key: id,
       organization_id: input.organizationId,

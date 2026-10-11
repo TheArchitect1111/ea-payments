@@ -7,13 +7,13 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { assertPeopleAccess, personToExportRow, redactPersonForActor } from '../lib/people/acl.ts';
-import { ensurePersonForClientRecord } from '../lib/people/ensure-person.ts';
-import { isUniversalPeopleEnabled } from '../lib/people/flags.ts';
-import { validateImportRow } from '../lib/people/import-export.ts';
-import { migrateClientRecordToPerson } from '../lib/people/migrate-from-client.ts';
-import { mergePersons } from '../lib/people/merge.ts';
-import { ignoreBodyOrganizationId } from '../lib/people/resolve-tenant.ts';
+import { assertPeopleAccess, personToExportRow, redactPersonForActor } from '@/lib/people/acl';
+import { ensurePersonForClientRecord } from '@/lib/people/ensure-person';
+import { isUniversalPeopleEnabled } from '@/lib/people/flags';
+import { validateImportRow } from '@/lib/people/import-export';
+import { migrateClientRecordToPerson } from '@/lib/people/migrate-from-client';
+import { mergePersons } from '@/lib/people/merge';
+import { ignoreBodyOrganizationId } from '@/lib/people/resolve-tenant';
 import {
   appendPeopleAudit,
   createConsent,
@@ -31,8 +31,8 @@ import {
   updatePeopleAudit,
   updatePerson,
   upsertDirectoryMembership,
-} from '../lib/people/store.ts';
-import { buildClientExperienceNav } from '../lib/ctp-client-nav.ts';
+} from '@/lib/people/store';
+import { buildClientExperienceNav } from '@/lib/ctp-client-nav';
 
 type Row = { id: string; pass: boolean; detail: string };
 const rows: Row[] = [];
@@ -57,6 +57,9 @@ function run(id: string, fn: () => void) {
   }
 }
 
+// One isolated fixture store across ESM/CJS module instances under Node 20.
+// Production People uses Postgres; this flag is only for the offline memory suite.
+process.env.PEOPLE_SHARED_MEMORY = '1';
 resetPeopleStoreForTests();
 setPeopleFlag(true);
 
@@ -511,8 +514,8 @@ run('ADV-13', () => {
   });
   assert.ok(person);
   const links = listProgramLinks(person!.id);
-  assert.ok(links.some((l) => l.kind === 'ctp_workspace' && l.externalRef === 'ctp_ws_13'));
-  assert.ok(links.some((l) => l.kind === 'ctp_opportunity' && l.externalRef === 'ctp_opp_13'));
+  assert.ok(links.some((l) => l.kind === 'ctp_workspace' && l.externalRef === 'ctp_ws_13'), 'migration must retain workspace link');
+  assert.ok(links.some((l) => l.kind === 'ctp_opportunity' && l.externalRef === 'ctp_opp_13'), 'migration must retain opportunity link');
 });
 
 // ADV-14 — migration retry
@@ -658,17 +661,16 @@ run('ADV-20', () => {
 });
 
 // ADV-21 — flag OFF CX nav unchanged + fulfill hook no-op already in ADV-17
-run('ADV-21', () => {
+try {
   setPeopleFlag(false);
   delete process.env.UNIVERSAL_NAV_PACKS;
-  const nav = buildClientExperienceNav('demo-client');
+  const nav = await buildClientExperienceNav('demo-client');
   assert.equal(nav.length, 5);
-  assert.deepEqual(
-    nav.map((i) => i.id),
-    ['progress', 'documents', 'messages', 'support', 'journey'],
-  );
-  setPeopleFlag(true);
-});
+  assert.deepEqual(nav.map(i => i.id), ['progress', 'documents', 'messages', 'support', 'journey']);
+  record('ADV-21', true, 'ok');
+} catch (error) {
+  record('ADV-21', false, error instanceof Error ? error.message : String(error));
+} finally { setPeopleFlag(true); }
 
 // ADV-22 — data retained when flag OFF
 run('ADV-22', () => {

@@ -98,12 +98,12 @@ assert.match(billingRoute, /if \(!process\.env\.STRIPE_SECRET_KEY\)/);
 assert.match(billingRoute, /Billing is not configured/);
 assert.match(billingRoute, /billing:manage/);
 
-assert.throws(() => requireAssemblyPlan(['calendar']), /calendar:not-certified/);
-assert.throws(() => requireAssemblyPlan(['people']), /people:not-certified/);
+assert.ok(requireAssemblyPlan(['calendar']).admitted.includes('calendar'));
+assert.ok(requireAssemblyPlan(['people']).admitted.includes('people'));
 
 console.log('EA Modular Assembly Run 4 OK');
 console.log(' - canonical Website + Portal Starter fails closed until exact 10-class certificates exist');
 console.log(' - all thirteen Run 4 Starter capabilities retain explicit certification boundaries');
 console.log(' - Pretix, Documenso, and Novu remain optional provider extensions, not assembly requirements');
 console.log(' - Billing fails safely when the existing platform Stripe adapter is unavailable');
-console.log(' - unresolved Calendar and People capabilities remain fail-closed');
+console.log(' - Calendar and People have exact certificates; provider readiness still fails closed');

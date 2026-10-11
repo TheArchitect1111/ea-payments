@@ -2634,6 +2634,285 @@
           "scope": "Executable module plus cross-cutting factory contract"
         }
       }
+    },
+    {
+      "moduleId": "calendar",
+      "moduleVersion": 2,
+      "status": "certified",
+      "sourceFiles": [
+        "lib/chassis/PortalShell.tsx",
+        "app/portal/[slug]/ea-portal.css",
+        "lib/bricks/durable.ts",
+        "lib/bricks/access.ts",
+        "lib/bricks/module-install.ts",
+        "lib/bricks/provision-test.ts",
+        "lib/tenant-foundation.ts",
+        "app/api/admin/chassis/install/route.ts",
+        "app/api/admin/entitlements/route.ts",
+        "lib/calendar/storage.ts",
+        "lib/calendar/nylas.ts",
+        "app/api/portal/calendar/route.ts",
+        "app/api/portal/[slug]/calendar/events/route.ts",
+        "app/api/calendar/tenant-provision-test/route.ts",
+        "app/portal/[slug]/calendar/page.tsx",
+        "app/portal/[slug]/calendar/PortalCalendar.tsx"
+      ],
+      "sourceFingerprint": "0ee1cf1d56887015a18fb5f1e1c4c14fe92aa0603d657c7cc30aa6a86c79082c",
+      "evidenceFingerprint": "6771adeb2e9215db996a2fa645649556043a2bcd60e6d5f928b081dfd58db5c7",
+      "evidence": {
+        "route-render": {
+          "tests": [
+            "tests/blockers-certified.test.mts"
+          ],
+          "scope": "EA-owned tenant install and lifecycle; isolated provider/database ports. Live provider readiness is an installation gate, not inferred certification."
+        },
+        "responsive-ui": {
+          "tests": [
+            "scripts/test-blockers-ui.mjs"
+          ],
+          "scope": "EA-owned tenant install and lifecycle; isolated provider/database ports. Live provider readiness is an installation gate, not inferred certification."
+        },
+        "authorization-tenant-isolation": {
+          "tests": [
+            "tests/blockers-certified.test.mts"
+          ],
+          "scope": "EA-owned tenant install and lifecycle; isolated provider/database ports. Live provider readiness is an installation gate, not inferred certification."
+        },
+        "durable-persistence": {
+          "tests": [
+            "tests/blockers-certified.test.mts"
+          ],
+          "scope": "EA-owned tenant install and lifecycle; isolated provider/database ports. Live provider readiness is an installation gate, not inferred certification."
+        },
+        "dependency-integration-readiness": {
+          "tests": [
+            "tests/blockers-certified.test.mts"
+          ],
+          "scope": "EA-owned tenant install and lifecycle; isolated provider/database ports. Live provider readiness is an installation gate, not inferred certification."
+        },
+        "success-empty-failure-states": {
+          "tests": [
+            "tests/blockers-certified.test.mts"
+          ],
+          "scope": "EA-owned tenant install and lifecycle; isolated provider/database ports. Live provider readiness is an installation gate, not inferred certification."
+        },
+        "observability": {
+          "tests": [
+            "tests/blockers-certified.test.mts"
+          ],
+          "scope": "EA-owned tenant install and lifecycle; isolated provider/database ports. Live provider readiness is an installation gate, not inferred certification."
+        },
+        "rollback-disable": {
+          "tests": [
+            "tests/blockers-certified.test.mts"
+          ],
+          "scope": "EA-owned tenant install and lifecycle; isolated provider/database ports. Live provider readiness is an installation gate, not inferred certification."
+        },
+        "business-lifecycle": {
+          "tests": [
+            "tests/blockers-certified.test.mts"
+          ],
+          "scope": "EA-owned tenant install and lifecycle; isolated provider/database ports. Live provider readiness is an installation gate, not inferred certification."
+        },
+        "immutable-version-fingerprint": {
+          "tests": [
+            "scripts/certify-blockers.mjs"
+          ],
+          "scope": "EA-owned tenant install and lifecycle; isolated provider/database ports. Live provider readiness is an installation gate, not inferred certification."
+        }
+      },
+      "certifiedBoundary": {
+        "scope": "EA-owned implementation with isolated executable lifecycle and rendered UI proof. No production deployment, real email delivery, external OAuth account or live Postgres write is asserted.",
+        "runtimeReadinessRequired": true
+      }
+    },
+    {
+      "moduleId": "people",
+      "moduleVersion": 2,
+      "status": "certified",
+      "sourceFiles": [
+        "lib/chassis/PortalShell.tsx",
+        "app/portal/[slug]/ea-portal.css",
+        "lib/bricks/durable.ts",
+        "lib/bricks/access.ts",
+        "lib/bricks/module-install.ts",
+        "lib/bricks/provision-test.ts",
+        "lib/tenant-foundation.ts",
+        "app/api/admin/chassis/install/route.ts",
+        "app/api/admin/entitlements/route.ts",
+        "lib/people/errors.ts",
+        "lib/people/adapter.ts",
+        "lib/people/flags.ts",
+        "lib/people/postgres-client.ts",
+        "lib/people/postgres-repository.ts",
+        "lib/people/ensure-person.ts",
+        "lib/people/guard.ts",
+        "lib/people/resolve-tenant.ts",
+        "app/api/portal/[slug]/people/route.ts",
+        "app/api/people/tenant-provision-test/route.ts",
+        "app/portal/[slug]/people/page.tsx",
+        "app/portal/[slug]/people/PeopleDirectory.tsx"
+      ],
+      "sourceFingerprint": "c6bdd5667c5e54dbbf2740eee5171dda0f9a81ae9c91e3a8e82c9943f57c74be",
+      "evidenceFingerprint": "6771adeb2e9215db996a2fa645649556043a2bcd60e6d5f928b081dfd58db5c7",
+      "evidence": {
+        "route-render": {
+          "tests": [
+            "tests/blockers-certified.test.mts"
+          ],
+          "scope": "EA-owned tenant install and lifecycle; isolated provider/database ports. Live provider readiness is an installation gate, not inferred certification."
+        },
+        "responsive-ui": {
+          "tests": [
+            "scripts/test-blockers-ui.mjs"
+          ],
+          "scope": "EA-owned tenant install and lifecycle; isolated provider/database ports. Live provider readiness is an installation gate, not inferred certification."
+        },
+        "authorization-tenant-isolation": {
+          "tests": [
+            "tests/blockers-certified.test.mts"
+          ],
+          "scope": "EA-owned tenant install and lifecycle; isolated provider/database ports. Live provider readiness is an installation gate, not inferred certification."
+        },
+        "durable-persistence": {
+          "tests": [
+            "tests/blockers-certified.test.mts"
+          ],
+          "scope": "EA-owned tenant install and lifecycle; isolated provider/database ports. Live provider readiness is an installation gate, not inferred certification."
+        },
+        "dependency-integration-readiness": {
+          "tests": [
+            "tests/blockers-certified.test.mts"
+          ],
+          "scope": "EA-owned tenant install and lifecycle; isolated provider/database ports. Live provider readiness is an installation gate, not inferred certification."
+        },
+        "success-empty-failure-states": {
+          "tests": [
+            "tests/blockers-certified.test.mts"
+          ],
+          "scope": "EA-owned tenant install and lifecycle; isolated provider/database ports. Live provider readiness is an installation gate, not inferred certification."
+        },
+        "observability": {
+          "tests": [
+            "tests/blockers-certified.test.mts"
+          ],
+          "scope": "EA-owned tenant install and lifecycle; isolated provider/database ports. Live provider readiness is an installation gate, not inferred certification."
+        },
+        "rollback-disable": {
+          "tests": [
+            "tests/blockers-certified.test.mts"
+          ],
+          "scope": "EA-owned tenant install and lifecycle; isolated provider/database ports. Live provider readiness is an installation gate, not inferred certification."
+        },
+        "business-lifecycle": {
+          "tests": [
+            "tests/blockers-certified.test.mts"
+          ],
+          "scope": "EA-owned tenant install and lifecycle; isolated provider/database ports. Live provider readiness is an installation gate, not inferred certification."
+        },
+        "immutable-version-fingerprint": {
+          "tests": [
+            "scripts/certify-blockers.mjs"
+          ],
+          "scope": "EA-owned tenant install and lifecycle; isolated provider/database ports. Live provider readiness is an installation gate, not inferred certification."
+        }
+      },
+      "certifiedBoundary": {
+        "scope": "EA-owned implementation with isolated executable lifecycle and rendered UI proof. No production deployment, real email delivery, external OAuth account or live Postgres write is asserted.",
+        "runtimeReadinessRequired": true
+      }
+    },
+    {
+      "moduleId": "discovery",
+      "moduleVersion": 2,
+      "status": "certified",
+      "sourceFiles": [
+        "lib/chassis/PortalShell.tsx",
+        "app/portal/[slug]/ea-portal.css",
+        "lib/bricks/durable.ts",
+        "lib/bricks/access.ts",
+        "lib/bricks/module-install.ts",
+        "lib/bricks/provision-test.ts",
+        "lib/tenant-foundation.ts",
+        "app/api/admin/chassis/install/route.ts",
+        "app/api/admin/entitlements/route.ts",
+        "lib/discovery/storage.ts",
+        "lib/analysis-engine.ts",
+        "lib/modules/registry.ts",
+        "app/assessment/page.tsx",
+        "app/api/portal/[slug]/discovery/route.ts",
+        "app/api/assessment/tenant-provision-test/route.ts",
+        "app/portal/[slug]/discovery/page.tsx",
+        "app/portal/[slug]/discovery/DiscoveryForm.tsx"
+      ],
+      "sourceFingerprint": "b69e451334a15c4072c02af43603d31039d2b7b7bd2e1cac4d82fe76fd29ffee",
+      "evidenceFingerprint": "6771adeb2e9215db996a2fa645649556043a2bcd60e6d5f928b081dfd58db5c7",
+      "evidence": {
+        "route-render": {
+          "tests": [
+            "tests/blockers-certified.test.mts"
+          ],
+          "scope": "EA-owned tenant install and lifecycle; isolated provider/database ports. Live provider readiness is an installation gate, not inferred certification."
+        },
+        "responsive-ui": {
+          "tests": [
+            "scripts/test-blockers-ui.mjs"
+          ],
+          "scope": "EA-owned tenant install and lifecycle; isolated provider/database ports. Live provider readiness is an installation gate, not inferred certification."
+        },
+        "authorization-tenant-isolation": {
+          "tests": [
+            "tests/blockers-certified.test.mts"
+          ],
+          "scope": "EA-owned tenant install and lifecycle; isolated provider/database ports. Live provider readiness is an installation gate, not inferred certification."
+        },
+        "durable-persistence": {
+          "tests": [
+            "tests/blockers-certified.test.mts"
+          ],
+          "scope": "EA-owned tenant install and lifecycle; isolated provider/database ports. Live provider readiness is an installation gate, not inferred certification."
+        },
+        "dependency-integration-readiness": {
+          "tests": [
+            "tests/blockers-certified.test.mts"
+          ],
+          "scope": "EA-owned tenant install and lifecycle; isolated provider/database ports. Live provider readiness is an installation gate, not inferred certification."
+        },
+        "success-empty-failure-states": {
+          "tests": [
+            "tests/blockers-certified.test.mts"
+          ],
+          "scope": "EA-owned tenant install and lifecycle; isolated provider/database ports. Live provider readiness is an installation gate, not inferred certification."
+        },
+        "observability": {
+          "tests": [
+            "tests/blockers-certified.test.mts"
+          ],
+          "scope": "EA-owned tenant install and lifecycle; isolated provider/database ports. Live provider readiness is an installation gate, not inferred certification."
+        },
+        "rollback-disable": {
+          "tests": [
+            "tests/blockers-certified.test.mts"
+          ],
+          "scope": "EA-owned tenant install and lifecycle; isolated provider/database ports. Live provider readiness is an installation gate, not inferred certification."
+        },
+        "business-lifecycle": {
+          "tests": [
+            "tests/blockers-certified.test.mts"
+          ],
+          "scope": "EA-owned tenant install and lifecycle; isolated provider/database ports. Live provider readiness is an installation gate, not inferred certification."
+        },
+        "immutable-version-fingerprint": {
+          "tests": [
+            "scripts/certify-blockers.mjs"
+          ],
+          "scope": "EA-owned tenant install and lifecycle; isolated provider/database ports. Live provider readiness is an installation gate, not inferred certification."
+        }
+      },
+      "certifiedBoundary": {
+        "scope": "EA-owned implementation with isolated executable lifecycle and rendered UI proof. No production deployment, real email delivery, external OAuth account or live Postgres write is asserted.",
+        "runtimeReadinessRequired": true
+      }
     }
   ]
 }

@@ -1,3 +1,4 @@
+import { ModuleConfigsSchema } from '@/lib/bricks/module-install';
 import { AmandaInstallSchema } from '@/lib/portal-universal/bricks/amanda';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
@@ -13,7 +14,7 @@ const Manifest = z.object({
   portalSlug: z.string().regex(/^[a-z0-9-]{1,80}$/), clientName: z.string().trim().min(1).max(200),
   packagePurchased: z.string().trim().min(1), commerceOfferId: z.string().optional(),
   requestedModuleIds: z.array(z.string()).optional(), businessOptionIds: z.array(z.string()).optional(),
-  industryPackId: z.string().optional(),
+  industryPackId: z.string().optional(), moduleConfigs: ModuleConfigsSchema.optional(),
   bricks: z.array(z.object({ id: z.literal('amanda'), config: AmandaInstallSchema }).strict()).optional(),
 }).strict();
 export async function GET(req: NextRequest) {

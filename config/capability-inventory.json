@@ -227,10 +227,11 @@
       "id": "calendar",
       "name": "EA Shared Calendar",
       "class": "business",
-      "assemblyStatus": "inventoried",
-      "version": 1,
+      "assemblyStatus": "certified",
+      "version": 2,
       "ui": {
-        "surface": "portal-module"
+        "surface": "portal-module",
+        "implementation": "existing-plus-functional-lifecycle"
       },
       "routes": [
         "/portal/{slug}/calendar"
@@ -239,31 +240,41 @@
         "placement": "operations"
       },
       "data": {
-        "status": "existing"
+        "authority": "tenant-scoped Creative Studio durable records",
+        "newStoreRequired": false
       },
       "permissions": {
         "minimumRole": "guest"
       },
       "dependencies": {
-        "status": "review-required"
+        "status": "verified",
+        "boundary": "existing EA storage and tenant identity; providers checked before installation"
       },
       "integrations": {
-        "status": "review-required"
+        "status": "verified",
+        "provider": "internal; optional Nylas"
       },
       "provisioning": {
-        "status": "review-required"
+        "mode": "automatic-with-certified-selection",
+        "required": true,
+        "installer": "lib/bricks/module-install.ts"
       },
       "healthCheck": {
-        "type": "route-smoke"
+        "type": "tenant-provision-test",
+        "path": "/api/calendar/tenant-provision-test",
+        "productionStatus": 404
       },
       "tests": {
-        "status": "existing-plus-review-required"
+        "status": "executable",
+        "suite": "tests/blockers-certified.test.mts"
       },
       "rollback": {
         "mode": "module-disable-or-release-rollback"
       },
       "costLicense": {
-        "decision": "review-required"
+        "decision": "approved",
+        "mandatoryVendorFee": false,
+        "boundary": "EA-owned implementation over existing platform infrastructure; optional Nylas connection excluded from license approval"
       }
     },
     {
@@ -463,10 +474,11 @@
       "id": "people",
       "name": "People",
       "class": "business",
-      "assemblyStatus": "inventoried",
-      "version": 1,
+      "assemblyStatus": "certified",
+      "version": 2,
       "ui": {
-        "surface": "portal-module"
+        "surface": "portal-module",
+        "implementation": "existing-plus-functional-lifecycle"
       },
       "routes": [
         "/portal/{slug}/people"
@@ -475,31 +487,41 @@
         "placement": "operations"
       },
       "data": {
-        "status": "existing"
+        "authority": "existing people Postgres schema",
+        "newStoreRequired": false
       },
       "permissions": {
         "minimumRole": "staff"
       },
       "dependencies": {
-        "status": "review-required"
+        "status": "verified",
+        "boundary": "existing EA storage and tenant identity; providers checked before installation"
       },
       "integrations": {
-        "status": "review-required"
+        "status": "verified",
+        "provider": "Postgres people_app"
       },
       "provisioning": {
-        "status": "review-required"
+        "mode": "automatic-with-certified-selection",
+        "required": true,
+        "installer": "lib/bricks/module-install.ts"
       },
       "healthCheck": {
-        "type": "route-smoke"
+        "type": "tenant-provision-test",
+        "path": "/api/people/tenant-provision-test",
+        "productionStatus": 404
       },
       "tests": {
-        "status": "existing-plus-review-required"
+        "status": "executable",
+        "suite": "tests/blockers-certified.test.mts"
       },
       "rollback": {
         "mode": "module-disable-or-release-rollback"
       },
       "costLicense": {
-        "decision": "review-required"
+        "decision": "approved",
+        "mandatoryVendorFee": false,
+        "boundary": "EA-owned implementation over existing platform infrastructure; optional Nylas connection excluded from license approval"
       }
     },
     {
@@ -828,43 +850,55 @@
       "id": "discovery",
       "name": "Discovery",
       "class": "specialized",
-      "assemblyStatus": "inventoried",
-      "version": 1,
+      "assemblyStatus": "certified",
+      "version": 2,
       "ui": {
-        "surface": "assessment"
+        "surface": "assessment",
+        "implementation": "existing-plus-functional-lifecycle"
       },
       "routes": [
+        "/portal/{slug}/discovery",
         "/assessment"
       ],
       "navigation": {
         "placement": "growth"
       },
       "data": {
-        "status": "existing"
+        "authority": "tenant-scoped Creative Studio durable records",
+        "newStoreRequired": false
       },
       "permissions": {
         "minimumRole": "guest"
       },
       "dependencies": {
-        "status": "review-required"
+        "status": "verified",
+        "boundary": "existing EA storage and tenant identity; providers checked before installation"
       },
       "integrations": {
-        "status": "review-required"
+        "status": "verified",
+        "provider": "existing email adapter"
       },
       "provisioning": {
-        "status": "review-required"
+        "mode": "automatic-with-certified-selection",
+        "required": true,
+        "installer": "lib/bricks/module-install.ts"
       },
       "healthCheck": {
-        "type": "route-smoke"
+        "type": "tenant-provision-test",
+        "path": "/api/assessment/tenant-provision-test",
+        "productionStatus": 404
       },
       "tests": {
-        "status": "existing-plus-review-required"
+        "status": "executable",
+        "suite": "tests/blockers-certified.test.mts"
       },
       "rollback": {
         "mode": "module-disable-or-release-rollback"
       },
       "costLicense": {
-        "decision": "review-required"
+        "decision": "approved",
+        "mandatoryVendorFee": false,
+        "boundary": "EA-owned implementation over existing platform infrastructure; optional Nylas connection excluded from license approval"
       }
     },
     {
