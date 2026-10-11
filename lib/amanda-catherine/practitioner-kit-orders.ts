@@ -1,7 +1,8 @@
 import type Stripe from 'stripe';
 import { createHash } from 'node:crypto';
-import { listStudioRecords, saveStudioRecord } from '@/lib/creative-studio/persistence';
+import { listStudioRecords, loadStudioRecord, saveStudioRecord } from '@/lib/creative-studio/persistence';
 import { syntheticOrgId } from '@/lib/platform-store';
+import {recordAmandaVerifiedPayment} from './payments';
 import { AMANDA_PRACTITIONER_KIT } from './practitioner-kit-catalog';
 
 export type AmandaKitOrder = {
@@ -36,16 +37,18 @@ export async function recordAmandaKitOrder(session: Stripe.Checkout.Session, inc
   if (!includedCourseId && session.amount_total !== AMANDA_PRACTITIONER_KIT.priceCad * 100 + shippingCents) return {ok:false,error:'Practitioner kit payment total is invalid.'};
   if (process.env.VERCEL_ENV !== 'production') return {ok:true,preview:true};
   const id = `amanda-kit-order-${createHash('sha256').update(session.id).digest('hex').slice(0,24)}`;
+  const existing=await loadStudioRecord<AmandaKitOrder>('experience',id);
+  if(!includedCourseId){try{await recordAmandaVerifiedPayment(session,AMANDA_PRACTITIONER_KIT.id);}catch(error){console.error('[amanda-kit] verified tracking failed',error);return {ok:false,error:'Verified kit payment could not be tracked.'};}}
   const saved = await saveStudioRecord({
     recordType:'experience', id, organizationId:syntheticOrgId('amanda-catherine'),
     title: includedCourseId ? 'Amanda tuition-included Practitioner Kit' : 'Amanda Practitioner Kit paid order',
-    payload:{id,portalSlug:'amanda-catherine',productId:AMANDA_PRACTITIONER_KIT.id,
+    payload:{...existing,id,portalSlug:'amanda-catherine',productId:AMANDA_PRACTITIONER_KIT.id,
       stripeSessionId:session.id,paymentStatus:session.payment_status,amountPaidCad:(session.amount_total || 0) / 100,
       email:session.customer_details?.email || session.customer_email || meta.clientEmail,
       name:session.customer_details?.name || meta.clientName,phone:session.customer_details?.phone,
       billingAddress:session.customer_details?.address, shippingAddress, kitFulfillment:choice,
       shippingChargeCad:shippingCents / 100, courseId:includedCourseId,
-      fulfillmentStatus:choice === 'pickup' ? 'pickup-pending' : 'shipping-pending'},
+      fulfillmentStatus:existing?.fulfillmentStatus||(choice === 'pickup' ? 'pickup-pending' : 'shipping-pending')},
   });
   if (!saved.ok || !saved.persistedToAirtable) return {ok:false,error:'Order recording needs attention. Your Stripe receipt remains valid.'};
   return {ok:true,preview:false};

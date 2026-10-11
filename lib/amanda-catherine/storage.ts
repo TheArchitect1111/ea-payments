@@ -1,6 +1,7 @@
 import type { registry } from './registry';
 import { registerBrickEvent } from '@/lib/services/brickRegistrar';
 import type { TrackingPayment } from '@/lib/services/brickRegistrar';
+import {amandaApplicationIdentity} from './queues';
 export async function handleAmandaSubmit(p:Record<string,any>, r:Awaited<ReturnType<typeof registry>> | undefined, verifiedPayment?: TrackingPayment){
  // This third argument is supplied only by server-side verified payment handlers.
  // Never accept payment status or references from public submission fields.
@@ -19,13 +20,14 @@ export async function handleAmandaSubmit(p:Record<string,any>, r:Awaited<ReturnT
   return {ok:true,type:'payment_update',tracking:{success:true},...tracked};
  }
  if (!r) throw new Error('Amanda signup registry is required');
+ if(p.type==='application')p={...p,...amandaApplicationIdentity(p.formId,p.context,p.program)};
  const { create } = await import('./registry');
  const now=new Date().toISOString(),id=crypto.randomUUID();
  const course=r.courses.find(c=>c.key===p.courseId);
- const type=p.type==='enroll' && course?.status!=='READY'?'waitlist':p.type;
+ const type=p.type==='enroll' && !['READY','LIVE'].includes(course?.status||'')?'waitlist':p.type;
  const results:Record<string,{success:boolean;id?:string;error?:string}>={};
  async function write(key:string,table:string,values:Record<string,unknown>){try{const record=await create(table,values);results[key]={success:true,id:record.id};}catch(e){console.error('[Amanda submission]',key,e);results[key]={success:false,error:'Unable to save '+key};}}
- await write('portal_submissions','Portal Form Submissions',{'Submission ID':id,'Portal Slug':'amanda-catherine',Kind:type,Status:'New',Name:p.name,Email:p.email,Phone:p.phone || '',Notes:p.message || '', 'Payload JSON':JSON.stringify({...p,type,organizationId:r.orgId}), 'Created At':now,'Updated At':now});
+ await write('portal_submissions','Portal Form Submissions',{'Submission ID':id,'Portal Slug':'amanda-catherine',Kind:type,Status:'submitted',Name:p.name,Email:p.email,Phone:p.phone || '',Notes:p.message || '', 'Payload JSON':JSON.stringify({...p,type,organizationId:r.orgId}), 'Created At':now,'Updated At':now});
  if(!results.portal_submissions.success)return {ok:false,type,...results};
  // Every portal application, enrollment and waitlist now enters the same tracking wire.
  // Public users cannot set test mode; the private $1 Stripe flow has a separate guarded entry point.
@@ -39,6 +41,10 @@ export async function handleAmandaSubmit(p:Record<string,any>, r:Awaited<ReturnT
   source:String(p.sourcePage||'/portal/amanda-catherine/enroll'),is_test:false,
  });
  results.tracking=tracked.ok?{success:true}:{success:false,error:tracked.error||'Tracking unavailable'};
+ if(type==='application')await write('business_interested','Business Interested',{
+  Title:`Application — ${p.formId} — ${id}`,'CTA Name':String(p.formId),'Source Page':String(p.sourcePage||'/portal/amanda-catherine/apply'),
+  Timestamp:now,Portal:'amanda-catherine','Portal Slug':'amanda-catherine',Event:'application',Status:'submitted',
+  'Payload JSON':JSON.stringify({event:'application',form_id:p.formId,owner_queue:p.ownerQueue,program:p.program,submission_id:id,timestamp:now})});
 
  if(type==='waitlist'){
   await write('waitlist','amanda_waitlist',{student_name:p.name,student_email:p.email,student_phone:p.phone || '',course_slug:p.courseId,course_name:course?.title || p.courseId,student_message:p.message || '',portal_slug:'amanda-catherine',submitted_at:now});

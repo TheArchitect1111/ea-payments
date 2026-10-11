@@ -88,7 +88,7 @@ export default function AmandaEnrollmentForm({ courses, initialCourseId }: { cou
         <p>{AMANDA_SUPPORT_WORDING}</p>
         <KitFulfillmentFields value={kit} onChange={setKit} />
         {error ? <p role="alert" className="mt-4 rounded-xl bg-white p-3 font-semibold text-[#8b1229]">{error}</p> : null}
-        <button type="submit" disabled={submitting || !offerId} className="mt-6 min-h-14 w-full rounded-full bg-[#c39851] px-5 text-lg font-black text-[#17130f] disabled:cursor-wait disabled:opacity-60">
+        <button data-cta-name="AmandaEnrollmentForm-button-91" data-cta-key="amandaenrollmentform-button-91" type="submit" disabled={submitting || !offerId} className="mt-6 min-h-14 w-full rounded-full bg-[#c39851] px-5 text-lg font-black text-[#17130f] disabled:cursor-wait disabled:opacity-60">
           {submitting ? 'Opening secure checkout…' : 'Continue to secure checkout'}
         </button>
         <p className="mt-4 text-center text-xs leading-5 text-[#f1dfe3]">Payment is processed securely by Stripe. Promotion codes can be entered at checkout. Your course access is created after payment is confirmed.</p>

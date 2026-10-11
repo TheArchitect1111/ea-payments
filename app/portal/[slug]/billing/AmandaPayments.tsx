@@ -105,7 +105,7 @@ export default function AmandaPayments({ email }: { email: string }) {
             style={{display:'block',padding:12,width:'100%',border:'1px solid #777',borderRadius:8,marginTop:8}} />
         </div>
       ) : null}
-      {verified ? <div className="ep-module-card" style={{ marginBottom: 18, border: '1px solid #8aa58f' }}><p className="ep-module-card-title">Payment verified with Stripe</p><p className="ep-module-card-note">The payment is recorded and course access has been provisioned.</p>{verifiedPayment?.courseId ? <a className="ep-btn" style={{ marginTop: 12 }} href={`/portal/amanda-catherine/owner/learner-preview?courseId=${encodeURIComponent(verifiedPayment.courseId)}`}>Preview the client learning dashboard</a> : null}{verifiedPayment?.isTestAccess && verifiedPayment.trackingRegistrationId ? <a className="ep-btn ep-btn-secondary" style={{ marginTop: 12, marginLeft: 8 }} href={`/api/portal/amanda/tracking-test?registration_id=${encodeURIComponent(verifiedPayment.trackingRegistrationId)}`} target="_blank" rel="noopener noreferrer">Verify isolated tracking event</a> : null}</div> : null}
+      {verified ? <div className="ep-module-card" style={{ marginBottom: 18, border: '1px solid #8aa58f' }}><p className="ep-module-card-title">Payment verified with Stripe</p><p className="ep-module-card-note">The payment is recorded and course access has been provisioned.</p>{verifiedPayment?.courseId ? <a data-cta-name="Preview the client learning dashboard" data-cta-key="preview-the-client-learning-dashboard" className="ep-btn" style={{ marginTop: 12 }} href={`/portal/amanda-catherine/owner/learner-preview?courseId=${encodeURIComponent(verifiedPayment.courseId)}`}>Preview the client learning dashboard</a> : null}{verifiedPayment?.isTestAccess && verifiedPayment.trackingRegistrationId ? <a data-cta-name="Verify isolated tracking event" data-cta-key="verify-isolated-tracking-event" className="ep-btn ep-btn-secondary" style={{ marginTop: 12, marginLeft: 8 }} href={`/api/portal/amanda/tracking-test?registration_id=${encodeURIComponent(verifiedPayment.trackingRegistrationId)}`} target="_blank" rel="noopener noreferrer">Verify isolated tracking event</a> : null}</div> : null}
       {error ? <p className="ep-module-card-note" style={{ color: '#b42318' }}>{error}</p> : null}
       <p>{AMANDA_SUPPORT_WORDING}</p>
       <KitFulfillmentFields value={kit} onChange={setKit} />
@@ -115,16 +115,16 @@ export default function AmandaPayments({ email }: { email: string }) {
             <p className="ep-module-card-title">{offer.name}</p>
             <p className="ep-module-card-note">CAD ${offer.priceCad.toLocaleString()}</p>
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 14 }}>
-              <button className="ep-btn" disabled={Boolean(busy)} onClick={() => void checkout(offer.id, 'full')}>
+              <button data-cta-name={"Pay in full: "+offer.name} data-cta-key={"pay-full-"+offer.id} className="ep-btn" disabled={Boolean(busy)} onClick={() => void checkout(offer.id, 'full')}>
                 {busy === `${offer.id}:full` ? 'Opening…' : 'Pay in full'}
               </button>
               {options.deposits[offer.id] > 0 ? (
-                <button className="ep-btn ep-btn-secondary" disabled={Boolean(busy)} onClick={() => void checkout(offer.id, 'deposit')}>
+                <button data-cta-name={"Pay deposit: "+offer.name} data-cta-key={"pay-deposit-"+offer.id} className="ep-btn ep-btn-secondary" disabled={Boolean(busy)} onClick={() => void checkout(offer.id, 'deposit')}>
                   {busy === `${offer.id}:deposit` ? 'Opening…' : `Pay CAD $${options.deposits[offer.id].toLocaleString()} deposit`}
                 </button>
               ) : null}
               {options.testCheckoutAllowed && 'courseId' in offer ? (
-                <button className="ep-btn ep-btn-secondary" disabled={Boolean(busy) || testName.trim().length < 2} onClick={() => void checkout(offer.id, 'test')}>
+                <button data-cta-name={"Private test: "+offer.name} data-cta-key={"private-test-"+offer.id} className="ep-btn ep-btn-secondary" disabled={Boolean(busy) || testName.trim().length < 2} onClick={() => void checkout(offer.id, 'test')}>
                   {busy === `${offer.id}:test` ? 'Opening…' : 'CAD $1 — 3-day test, no auto-charge'}
                 </button>
               ) : null}
@@ -138,9 +138,9 @@ export default function AmandaPayments({ email }: { email: string }) {
           <p className="ep-module-card-note">Enrollment opens automatically for each membership after its Stripe price is configured.</p>
           {options.memberships.map((membership) => (
             <p key={membership.id} style={{ marginTop: 12 }}>
-              <button className="ep-btn" disabled={Boolean(busy) || !membership.available} onClick={() => void membershipCheckout(membership.id)}>
-                {busy === membership.id ? 'Opening…' : membership.available ? `Join ${membership.name}` : `${membership.name} — pricing to be confirmed`}
-              </button>
+              {membership.available ? <button data-cta-name={"Join "+membership.name} data-cta-key={"join-"+membership.id} className="ep-btn" disabled={Boolean(busy)} onClick={() => void membershipCheckout(membership.id)}>
+                {busy === membership.id ? 'Opening…' : `Join ${membership.name}`}
+              </button> : <a data-cta-name={"Set up "+membership.name} data-cta-key={"setup-"+membership.id} className="ep-btn" href="/portal/amanda-catherine/billing/setup">Set up {membership.name}</a>}
             </p>
           ))}
         </div>
@@ -165,12 +165,12 @@ export default function AmandaPayments({ email }: { email: string }) {
         </div>
       ) : null}
       {options.financingUrl ? (
-        <p style={{ marginTop: 18 }}><a className="ep-btn ep-btn-secondary" href={options.financingUrl} target="_blank" rel="noreferrer">View payment-plan options</a></p>
+        <p style={{ marginTop: 18 }}><a data-cta-name="View payment-plan options" data-cta-key="view-payment-plan-options" className="ep-btn ep-btn-secondary" href={options.financingUrl} target="_blank" rel="noreferrer">View payment-plan options</a></p>
       ) : (
         <div className="ep-module-card" style={{ marginTop: 18 }}>
           <p className="ep-module-card-title">Payment-plan options</p>
           <p className="ep-module-card-note">Financing details will be added after Amanda selects her preferred provider.</p>
-          <button className="ep-btn ep-btn-secondary" disabled style={{ marginTop: 12 }}>Provider not configured</button>
+          <a data-cta-name="Open billing setup" data-cta-key="open-billing-setup" className="ep-btn ep-btn-secondary" href="/portal/amanda-catherine/billing/setup" style={{ marginTop: 12 }}>Open billing setup</a>
         </div>
       )}
     </section>

@@ -1,3 +1,26 @@
-import {NextRequest,NextResponse} from 'next/server';import {create,registry} from '@/lib/amanda-catherine/registry';import {isAllowedAmandaOrigin} from '@/lib/amanda-catherine/request-origin';
+import {NextRequest,NextResponse} from 'next/server';
+import {registerAmandaClick} from '@/lib/amanda-catherine/brick-events';
+import {amandaCtaKey,isAmandaSource,isAmandaDestination} from '@/lib/amanda-catherine/tracking';
+import {isAllowedAmandaOrigin} from '@/lib/amanda-catherine/request-origin';
+import {checkRateLimit} from '@/lib/ai/rate-limit';
+import {z} from 'zod';
 export const dynamic='force-dynamic';export const revalidate=0;
-export async function POST(req:NextRequest){try{if(!isAllowedAmandaOrigin(req))return NextResponse.json({ok:false,error:'Invalid request origin'},{status:403});const b=await req.json();if(b?.event!=='cta_click'||b?.portal_slug!=='amanda-catherine')return NextResponse.json({ok:false,error:'Invalid tracking event'},{status:400});const name=String(b.cta_name||'').trim(),page=String(b.page||''),time=new Date(b.timestamp||Date.now());if(!name||name.length>120||!page.startsWith('/portal/amanda-catherine/')||!Number.isFinite(time.getTime()))return NextResponse.json({ok:false,error:'Invalid CTA details'},{status:400});const d=await registry(),cta=d.config.ctas.find(x=>x.name===name&&x.type!=='navigation'),isEnroll=name==='Enroll',calendarEvent=name===d.config.calendar?.eventCtaName&&page==='/portal/amanda-catherine/calendar';if(!cta&&!isEnroll&&!calendarEvent)return NextResponse.json({ok:false,error:'CTA is not in Amanda’s organization payload'},{status:400});let course=b.course_key?d.courses.find(x=>x.key===String(b.course_key)):undefined;if(cta?.type==='course'&&cta.courseKey)course=d.courses.find(x=>x.key===cta.courseKey);if((isEnroll||cta?.type==='course')&&!course)return NextResponse.json({ok:false,error:'Course is not in Amanda’s registry'},{status:400});const square=course?.square_checkout_url||'',destination=cta?.href||(cta?.type==='booking'?d.bookingUrl:'')||(course?square||('/portal/amanda-catherine/enroll?course='+encodeURIComponent(course.key)):String(b.destination||'')),event={event:'cta_click',cta_name:name,page,timestamp:time.toISOString(),portal_slug:'amanda-catherine',...(course?{course_name:course.title,course_key:course.key,price:course.price,square_url_if_enroll:square||null}:{}),destination};const saved=await create('Business Interested',{Title:name+' — '+time.toISOString(),'CTA Name':name,'Source Page':page,Timestamp:time.toISOString(),Status:'CTA Clicked',Portal:'amanda-catherine','Portal Slug':'amanda-catherine',Event:'cta_click','Course Name':course?.title,'Course Key':course?.key,Price:course?.price??undefined,'Square URL':square||undefined,'Payload JSON':JSON.stringify(event)});return NextResponse.json({ok:true,recordId:saved.id,event},{headers:{'Cache-Control':'no-store'}});}catch(e){console.error('[Amanda CTA tracking]',e);return NextResponse.json({ok:false,error:'CTA tracking is temporarily unavailable'},{status:503});}}
+const clickSchema=z.object({event:z.literal('cta_click'),portal_slug:z.literal('amanda-catherine'),
+ event_id:z.string().uuid(),visitor_id:z.string().uuid(),cta_key:z.string().max(100),cta_name:z.string().trim().min(1).max(200),
+ page:z.string().max(500),destination:z.string().max(2000),timestamp:z.string().datetime({offset:true}),course_key:z.string().max(128).optional()}).strict();
+export async function POST(req:NextRequest) {
+ try {
+  if(!isAllowedAmandaOrigin(req))return NextResponse.json({ok:false,error:'Invalid request origin'},{status:403});
+  const ip=req.headers.get('x-forwarded-for')?.split(',')[0]?.trim()||'unknown';
+  if(!checkRateLimit('amanda-click:'+ip,120,60000).ok)return NextResponse.json({ok:false,error:'Please wait a moment.'},{status:429});
+  const text=await req.text();if(text.length>5000)return NextResponse.json({ok:false,error:'Event too large'},{status:413});
+  const value=clickSchema.parse(JSON.parse(text));
+  if(!isAmandaSource(value.page)||!isAmandaDestination(value.destination)||value.cta_key!==amandaCtaKey(value.cta_key))return NextResponse.json({ok:false,error:'Invalid CTA details'},{status:400});
+  const {event,portal_slug,...click}=value;
+  const result=await registerAmandaClick(click,process.env.VERCEL_ENV==='preview');
+  return NextResponse.json({...result,event_id:value.event_id},{status:result.ok?200:503,headers:{'Cache-Control':'no-store'}});
+ }catch(error){
+  if(error instanceof z.ZodError||error instanceof SyntaxError)return NextResponse.json({ok:false,error:'Invalid tracking event'},{status:400});
+  console.error('[Amanda CTA tracking]',error);return NextResponse.json({ok:false,error:'CTA tracking is temporarily unavailable'},{status:503});
+ }
+}

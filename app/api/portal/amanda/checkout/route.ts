@@ -9,7 +9,7 @@ import { getStripe } from '@/lib/stripe';
 import { listAmandaPayments } from '@/lib/amanda-catherine/payment-fulfillment';
 import { roleAtLeast, normalizeRole } from '@/lib/rbac';
 import { getClientByPortalSlug } from '@/lib/airtable';
-import { registerBrickEvent } from '@/lib/services/brickRegistrar';
+import { registerAmandaCheckout } from '@/lib/amanda-catherine/payments';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
   const auth = await guardPortalApi(req);
   if (!auth.ok) return portalApiUnauthorized(auth);
   const tenant = portalTenant(auth.session);
-  if (!tenant.portalSlug.startsWith('amanda-catherine') || !auth.session.email) return NextResponse.json({ error: 'Amanda portal access required.' }, { status: 403 });
+  if (tenant.portalSlug !== 'amanda-catherine' || !auth.session.email) return NextResponse.json({ error: 'Amanda portal access required.' }, { status: 403 });
   const [allowedByRole, hqTools] = await Promise.all([
     canUseTestCheckout(auth.session.role, tenant.portalSlug, auth.session.email),
     getAmandaHqTools(),
@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
   const auth = await guardPortalApi(req);
   if (!auth.ok) return portalApiUnauthorized(auth);
   const tenant = portalTenant(auth.session);
-  if (!tenant.portalSlug.startsWith('amanda-catherine') || !auth.session.email) return NextResponse.json({ error: 'Amanda portal access required.' }, { status: 403 });
+  if (tenant.portalSlug !== 'amanda-catherine' || !auth.session.email) return NextResponse.json({ error: 'Amanda portal access required.' }, { status: 403 });
   if (!process.env.STRIPE_SECRET_KEY) return NextResponse.json({ error: 'Secure payments are not configured yet.' }, { status: 503 });
   const body = await req.json() as { offerId?: string; membershipId?: string; paymentOption?: 'full' | 'deposit' | 'test'; testName?: string } & AmandaKitSelection;
   const membership = AMANDA_MEMBERSHIPS.find((item) => item.id === body.membershipId);
@@ -53,7 +53,9 @@ export async function POST(req: NextRequest) {
   if (membership) {
     const priceId = process.env[membership.stripePriceEnvKey];
     if (!priceId) return NextResponse.json({ error: 'This membership is not available yet.' }, { status: 409 });
-    const metadata = { portalSlug: tenant.portalSlug, amandaMembershipId: membership.id, clientEmail };
+    const registrationId = crypto.randomUUID();
+    const metadata = { portalSlug: tenant.portalSlug, amandaMembershipId: membership.id, clientEmail, registrationId };
+    try { await registerAmandaCheckout({registrationId,brickId:membership.id,name:clientEmail,email:clientEmail,source:'/portal/amanda-catherine/billing',isTest:process.env.VERCEL_ENV==='preview'}); } catch {return NextResponse.json({error:'Signup tracking is unavailable.'},{status:503});}
     const session = await getStripe().checkout.sessions.create({
       mode: 'subscription', payment_method_types: ['card'], allow_promotion_codes: true, customer_email: clientEmail,
       line_items: [{ price: priceId, quantity: 1 }], metadata, subscription_data: { metadata },
@@ -102,21 +104,13 @@ export async function POST(req: NextRequest) {
     success_url: `${baseUrl}/portal/${tenant.portalSlug}/billing?payment=success&session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${baseUrl}/portal/${tenant.portalSlug}/billing?payment=cancelled`,
   };
-  const session = await getStripe().checkout.sessions.create(sessionParams);
-  if ('courseId' in offer) {
-    const parts = (isTest ? testName : clientEmail).split(/\s+/);
-    try {
-      const tracking=await registerBrickEvent({
-        brick_type:'checkout',brick_id:offer.courseId,client_id:'amanda-catherine',
-        registration_id:registrationId,name:isTest?testName:clientEmail,email:clientEmail,
-        phone:'',status:'checkout_started',payment_status:'unpaid',payment_reference:null,
-        timestamp:new Date().toISOString(),source:'/portal/amanda-catherine/billing',is_test:isTest,
-      });
-      if(!tracking.ok)throw new Error(tracking.error||'Checkout registration tracking failed');
-    } catch (error) {
-      console.error('[amanda-checkout] signup tracking failed',error);
-      return NextResponse.json({error:'Signup tracking is unavailable. No checkout was started.'},{status:503});
-    }
+  try {
+    await registerAmandaCheckout({registrationId,brickId:'courseId' in offer?offer.courseId:offer.id,
+      name:isTest?testName:clientEmail,email:clientEmail,source:'/portal/amanda-catherine/billing',isTest:isTest||process.env.VERCEL_ENV==='preview'});
+  } catch(error) {
+    console.error('[amanda-checkout] signup tracking failed',error);
+    return NextResponse.json({error:'Signup tracking is unavailable. No checkout was started.'},{status:503});
   }
+  const session = await getStripe().checkout.sessions.create(sessionParams);
   return NextResponse.json({ url: session.url, registrationId: isTest ? registrationId : undefined });
 }

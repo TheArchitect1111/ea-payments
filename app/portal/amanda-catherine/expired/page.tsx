@@ -14,10 +14,10 @@ export default async function AmandaTestExpired({ searchParams }: {
       <h1 className="mb-4 text-3xl font-semibold">Your $1 test access has expired</h1>
       <p className="mb-3">Your 3-day test access ended automatically. You have not been subscribed, and there is no automatic charge or renewal.</p>
       {course ? <p className="mb-5">Course: <strong>{course.title}</strong></p> : null}
-      <Link className="inline-block rounded-lg bg-[#17211c] px-5 py-3 text-white" href={course ? `/courses/${encodeURIComponent(course.id)}` : '/amanda-catherine'}>
+      <Link data-cta-name="Upgrade to full course access" data-cta-key="upgrade-to-full-course-access" className="inline-block rounded-lg bg-[#17211c] px-5 py-3 text-white" href={course ? `/courses/${encodeURIComponent(course.id)}` : '/amanda-catherine'}>
         Upgrade to full course access
       </Link>
-      <p className="mt-5"><Link href="/portal/amanda-catherine/learning">Return to Academy</Link></p>
+      <p className="mt-5"><Link data-cta-name="Return to Academy" data-cta-key="return-to-academy" href="/portal/amanda-catherine/learning">Return to Academy</Link></p>
     </section>
   </main>;
 }

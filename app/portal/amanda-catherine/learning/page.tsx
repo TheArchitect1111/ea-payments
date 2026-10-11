@@ -13,6 +13,6 @@ export default async function AmandaLearningPage() {
   const purchasedCourseIds = await getAmandaAssignedCourseIds('amanda-catherine', session.email || client.email);
   const admin = roleAtLeast(normalizeRole(session.role), 'admin');
   return <PortalSubpage slug="amanda-catherine" active="learning" kicker="AesthetiKine Academy" title={admin ? 'Manage learning' : 'Courses'} lede="Choose your next step.">
-    {admin ? <AmandaLearningCenter audience="admin" assignedCourseIds={[]} isAdmin /> : <ul className="ep-module-list">{AMANDA_COURSES.map(course => <li className="ep-module-card" key={course.id}><h2>{course.title}</h2><Link href={getCourseMenuRoute(course, { purchasedCourseIds })}>{!amandaCourseReady(course.id) ? 'Join Waitlist' : purchasedCourseIds.includes(course.id) ? 'My Courses' : 'View Course'}</Link></li>)}</ul>}
+    {admin ? <AmandaLearningCenter audience="admin" assignedCourseIds={[]} isAdmin /> : <ul className="ep-module-list">{AMANDA_COURSES.map(course => <li className="ep-module-card" key={course.id}><h2>{course.title}</h2><Link data-cta-name="getCourseMenuRoute(course, purchasedCourseIds )" data-cta-key="getcoursemenuroute-course-purchasedcourseids" href={getCourseMenuRoute(course, { purchasedCourseIds })}>{!amandaCourseReady(course.id) ? 'Join Waitlist' : purchasedCourseIds.includes(course.id) ? 'My Courses' : 'View Course'}</Link></li>)}</ul>}
   </PortalSubpage>;
 }

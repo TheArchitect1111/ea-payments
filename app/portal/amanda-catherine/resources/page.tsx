@@ -13,10 +13,10 @@ export default async function AmandaMemberResources() {
   const resources = amandaMemberResources(ids);
   return <PortalSubpage slug="amanda-catherine" active="resources" kicker="Your resources" title="Member Resources" lede="Materials for your purchased courses and private deliveries.">
     <ul className="ep-module-list">{resources.map(resource => <li key={resource.id} className="ep-module-card">
-      <Link className="ep-module-card-title" href={`/api/portal/amanda/resources/${encodeURIComponent(resource.id)}`}>{resource.title}</Link>
+      <Link data-cta-name="/api/portal/amanda/resources/$encodeURIComponent(resource.id)" data-cta-key="api-portal-amanda-resources-encodeuricomponent-resource-id" className="ep-module-card-title" href={`/api/portal/amanda/resources/${encodeURIComponent(resource.id)}`}>{resource.title}</Link>
       <p>{resource.description}</p>
     </li>)}</ul>
     {resources.length ? null : <p>No purchased READY course resources are assigned to your account.</p>}
-    <p><Link href="/portal/amanda-catherine/deliveries">Open your private deliveries</Link></p>
+    <p><Link data-cta-name="Open your private deliveries" data-cta-key="open-your-private-deliveries" href="/portal/amanda-catherine/deliveries">Open your private deliveries</Link></p>
   </PortalSubpage>;
 }

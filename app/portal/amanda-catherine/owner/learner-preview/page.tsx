@@ -29,7 +29,7 @@ export default async function AmandaLearnerPreviewPage({
         <span className="ac-eyebrow">PREVIEW A READY COURSE</span>
         <div className="ac-actions">
           {readyCourses.map((course) => (
-            <Link
+            <Link data-cta-name="/portal/amanda-catherine/owner/learner-preview?courseId=$encodeURIComponent(course.id)" data-cta-key="portal-amanda-catherine-owner-learner-preview-courseid-encodeuricomponent-course-id"
               key={course.id}
               className="approved-pill"
               href={`/portal/amanda-catherine/owner/learner-preview?courseId=${encodeURIComponent(course.id)}`}
@@ -56,7 +56,7 @@ export default async function AmandaLearnerPreviewPage({
       )}
 
       <section className="ac-card">
-        <Link href="/portal/amanda-catherine/owner/academy">← Return to AesthetiKine Academy</Link>
+        <Link data-cta-name="← Return to AesthetiKine Academy" data-cta-key="return-to-aesthetikine-academy" href="/portal/amanda-catherine/owner/academy">← Return to AesthetiKine Academy</Link>
       </section>
     </div>
   );

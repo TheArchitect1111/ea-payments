@@ -37,14 +37,14 @@ export default function KitOrderActions({ order }: { order: AmandaKitOrder }) {
 
   return <section className="ac-card" aria-label="Shipping actions">
     <p>Free shipping is the launch fallback. Use the packing sheet, purchase carrier postage manually, then save the real tracking details here.</p>
-    <button type="button" onClick={printPackingSheet}>Print packing sheet</button>
+    <button data-cta-name="Print packing sheet" data-cta-key="print-packing-sheet" type="button" onClick={printPackingSheet}>Print packing sheet</button>
     <form onSubmit={saveTracking} className="ac-kit-tracking-form">
       <label>Carrier<input required maxLength={80} value={carrier} onChange={(event) => setCarrier(event.target.value)} /></label>
       <label>Tracking number<input required maxLength={120} value={trackingNumber} onChange={(event) => setTrackingNumber(event.target.value)} /></label>
       <label>Tracking link<input required type="url" pattern="https://.*" maxLength={2000} value={trackingUrl} onChange={(event) => setTrackingUrl(event.target.value)} /></label>
-      <button type="submit" disabled={busy}>{busy ? 'Saving…' : 'Save tracking'}</button>
+      <button data-cta-name="KitOrderActions-button-45" data-cta-key="kitorderactions-button-45" type="submit" disabled={busy}>{busy ? 'Saving…' : 'Save tracking'}</button>
     </form>
-    {order.trackingNumber ? <p>Saved: {order.carrier} · <a href={order.trackingUrl} target="_blank" rel="noopener noreferrer">{order.trackingNumber} ↗</a></p> : null}
+    {order.trackingNumber ? <p>Saved: {order.carrier} · <a data-cta-name="↗" data-cta-key="open" href={order.trackingUrl} target="_blank" rel="noopener noreferrer">{order.trackingNumber} ↗</a></p> : null}
     <p role="status">{status}</p>
   </section>;
 }

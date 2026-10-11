@@ -129,9 +129,9 @@ test('Live signup and $1 test stay isolated; verified payment replay never creat
   await tracking.storeTrackingPayment(paid);
   await tracking.storeTrackingPayment(paid);
   await tracking.pushToTrackingPortal(lead);
-  assert.equal(db.waitlist.get('portal_registrations:'+lead.email+':'+lead.class_id).payment_status,'paid','Signup replay must preserve payment');
+  assert.equal(db.waitlist.get('portal_registrations:amanda-catherine:'+lead.registration_id).payment_status,'paid','Signup replay must preserve payment');
   assert.equal([...db.waitlist.keys()].filter(k=>k.startsWith('portal_registrations:')).length,1,'Payment created duplicate live registration');
-  const realRecord=db.waitlist.get('portal_registrations:'+lead.email+':'+lead.class_id);
+  const realRecord=db.waitlist.get('portal_registrations:amanda-catherine:'+lead.registration_id);
   assert.equal(realRecord.payment_status,'paid','Original tracking lead must show paid');
   assert.equal(realRecord.payment_reference,'square-reference-1','Original lead must store payment reference');
   const metadata=[...db.records.values()].find(x=>x.payload?.payment_reference==='square-reference-1');
@@ -147,6 +147,18 @@ test('Live signup and $1 test stay isolated; verified payment replay never creat
     'Test data polluted real registration table');
   await assert.rejects(tracking.storeTrackingPayment({...paid,email:'no-registration@example.invalid'}),
     /Matching live registration not found/);
+  const repeat={...lead,registration_id:'reg-repeat-purchase-02'};
+  await tracking.pushToTrackingPortal(repeat);
+  await tracking.storeTrackingPayment({...paid,registration_id:repeat.registration_id,payment_reference:'square-reference-2'});
+  assert.equal([...db.waitlist.keys()].filter(k=>k.startsWith('portal_registrations:')).length,2,'Repeat purchase needs a distinct signup');
+  assert.equal(db.waitlist.get('portal_registrations:amanda-catherine:'+lead.registration_id).payment_reference,'square-reference-1');
+  const legacy={...lead,registration_id:undefined,email:'legacy@example.invalid'};
+  await tracking.pushToTrackingPortal(legacy);
+  await tracking.storeTrackingPayment({...paid,registration_id:undefined,email:legacy.email,payment_reference:'legacy-reference'});
+  assert.equal(db.waitlist.get('portal_registrations:'+legacy.email+':'+legacy.class_id).payment_status,'paid','Legacy callers must retain their email/course key');
+  db.waitlist.set('portal_registrations:old-checkout@example.invalid:ready-course',{registration_key:'old-checkout@example.invalid:ready-course',email:'old-checkout@example.invalid',class_id:'ready-course',registration_id:'old-uuid-checkout'});
+  await tracking.storeTrackingPayment({...paid,registration_id:'old-uuid-checkout',email:'old-checkout@example.invalid',payment_reference:'old-checkout-paid'});
+  assert.equal(db.waitlist.get('portal_registrations:old-checkout@example.invalid:ready-course').payment_reference,'old-checkout-paid');
 });
 
 test('Amanda upgrade route and middleware are deployed in the source artifact', () => {

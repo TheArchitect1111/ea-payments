@@ -1,7 +1,7 @@
 {
   "preview_url": "https://ea-payments-git-master-the-architects-projects-cc813778.vercel.app",
-  "route_path": "/tarris",
+  "route_path": "/amanda-catherine",
   "min_visuals": 2,
-  "requested_for": "Promote PR #557 Tarris enabled controls from ee68f7031c08252104d72ddffcc901b0e4f75264; verify fresh source, build, desktop and mobile proof",
-  "requested_at": "2026-10-11T17:51:22.806478+00:00"
+  "requested_for": "Verify Amanda CTA wiring, pathways, queues, Stripe registration handoffs and billing setup; promote only after existing gates pass",
+  "requested_at": "2026-10-11T18:35:00Z"
 }

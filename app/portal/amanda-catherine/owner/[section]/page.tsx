@@ -1,3 +1,4 @@
+import {amandaCtaKey} from '@/lib/amanda-catherine/tracking';
 import CertificationQueue from '../CertificationQueue';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
@@ -12,6 +13,7 @@ import { DEFAULT_AMANDA_SITE_CONTENT } from '@/lib/amanda-catherine/site-content
 import { listPortalFormSubmissions } from '@/lib/portal-forms/store';
 import type { PortalFormSubmission } from '@/lib/portal-forms/types';
 import OwnerApplicationQueue from '../OwnerApplicationQueue';
+import {amandaApplicationIdentity} from '@/lib/amanda-catherine/queues';
 
 const sections: Record<string, [string, string, string]> = {
   updates: ['Update Hub', 'GOVERNED CHANGES', 'Website and business change requests.'],
@@ -37,7 +39,7 @@ const sections: Record<string, [string, string, string]> = {
 const email = DEFAULT_AMANDA_SITE_CONTENT.contact.email;
 
 function ExternalAction({ href, children }: { href: string; children: React.ReactNode }) {
-  return <a href={href} target="_blank" rel="noopener noreferrer">{children} ↗</a>;
+  return <a data-cta-name={typeof children==='string'?children:'Open resource'} data-cta-key={amandaCtaKey(typeof children==='string'?children:href)} href={href} target="_blank" rel="noopener noreferrer">{children} ↗</a>;
 }
 
 function Address({address}:{address?:{line1?:string|null;line2?:string|null;city?:string|null;state?:string|null;postal_code?:string|null;country?:string|null}|null}) {
@@ -46,11 +48,11 @@ function Address({address}:{address?:{line1?:string|null;line2?:string|null;city
 }
 
 function ConnectedSection({ section, submissions, kitOrders, bookCourseRoute }: { bookCourseRoute: string; section: string; submissions: PortalFormSubmission[]; kitOrders: Awaited<ReturnType<typeof listAmandaKitOrders>> }) {
-  if (section === 'academy') return <><section className="ac-card"><div className="ac-actions"><Link href="/portal/amanda-catherine/learning">Manage course content</Link><Link href="/portal/amanda-catherine/owner/learner-preview">Preview learner dashboard →</Link></div></section><CertificationQueue /></>;
-  if (section === 'documents') return <><section className="ac-card"><Link href="/portal/amanda-catherine/documents">Open document hub</Link></section><CertificationQueue /></>;
+  if (section === 'academy') return <><section className="ac-card"><div className="ac-actions"><Link data-cta-name="Manage course content" data-cta-key="manage-course-content" href="/portal/amanda-catherine/learning">Manage course content</Link><Link data-cta-name="Preview learner dashboard →" data-cta-key="preview-learner-dashboard" href="/portal/amanda-catherine/owner/learner-preview">Preview learner dashboard →</Link></div></section><CertificationQueue /></>;
+  if (section === 'documents') return <><section className="ac-card"><Link data-cta-name="Open document hub" data-cta-key="open-document-hub" href="/portal/amanda-catherine/documents">Open document hub</Link></section><CertificationQueue /></>;
   if (section === 'practitioner-kit') return <>
     <section className="ac-grid-two">
-      <article className="ac-card"><span className="ac-eyebrow">PRODUCT</span><h3>{AMANDA_PRACTITIONER_KIT.name}</h3><p>{AMANDA_PRACTITIONER_KIT.description}</p><p><strong>${AMANDA_PRACTITIONER_KIT.priceCad} CAD</strong></p><Link href="/amanda-catherine/private/practitioner-kit">Open private checkout →</Link></article>
+      <article className="ac-card"><span className="ac-eyebrow">PRODUCT</span><h3>{AMANDA_PRACTITIONER_KIT.name}</h3><p>{AMANDA_PRACTITIONER_KIT.description}</p><p><strong>${AMANDA_PRACTITIONER_KIT.priceCad} CAD</strong></p><Link data-cta-name="Open private checkout →" data-cta-key="open-private-checkout" href="/amanda-catherine/private/practitioner-kit">Open private checkout →</Link></article>
       <article className="ac-card"><span className="ac-eyebrow">FULFILLMENT</span><h3>{kitOrders.length} paid order{kitOrders.length===1?'':'s'}</h3><p>Stripe-verified orders requiring delivery arrangements appear below automatically.</p></article>
     </section>
     <section><div className="ac-section-title"><div><span>ORDER QUEUE</span><h2>Practitioner Kit fulfillment</h2></div><p>{kitOrders.length} total</p></div>
@@ -60,12 +62,12 @@ function ConnectedSection({ section, submissions, kitOrders, bookCourseRoute }: 
 
   if (section === 'empower-art') return <section className="ac-grid-two">
     <article className="ac-card"><span className="ac-eyebrow">PROGRAMS + EVENTS</span><h3>Collective operations</h3><p>Open the approved nonprofit site, current events and mission information.</p><p><ExternalAction href="https://www.empowerartcollective.com/">Open collective website</ExternalAction></p><p><ExternalAction href="https://empowerartcollective.com/events/">Review events</ExternalAction></p><ExternalAction href="https://empowerartcollective.com/about-us/">Review mission</ExternalAction></article>
-    <article className="ac-card"><span className="ac-eyebrow">COMMUNITY SUPPORT</span><h3>Volunteers and partnerships</h3><p>Review volunteer, support and partnership interest through the approved collective contact pathway.</p><p><ExternalAction href="https://empowerartcollective.com/contact-us/">Open contact pathway</ExternalAction></p><a href={`mailto:${email}?subject=${encodeURIComponent('Empower Art Collective partnership')}`}>Email Amanda about a partnership →</a></article>
+    <article className="ac-card"><span className="ac-eyebrow">COMMUNITY SUPPORT</span><h3>Volunteers and partnerships</h3><p>Review volunteer, support and partnership interest through the approved collective contact pathway.</p><p><ExternalAction href="https://empowerartcollective.com/contact-us/">Open contact pathway</ExternalAction></p><a data-cta-name="Email Amanda about a partnership →" data-cta-key="email-amanda-about-a-partnership" href={`mailto:${email}?subject=${encodeURIComponent('Empower Art Collective partnership')}`}>Email Amanda about a partnership →</a></article>
   </section>;
 
   if (section === 'book') return <section className="ac-grid-two">
     <article className="ac-card"><span className="ac-eyebrow">BOOK</span><h3>{ENTREPRENEURIAL_ARTIST_COURSE.title}</h3><p>Use the approved Canadian Amazon listing for purchase and customer support.</p><ExternalAction href={ENTREPRENEURIAL_ARTIST_COURSE.amazonBookUrl}>Open Amazon listing</ExternalAction></article>
-    <article className="ac-card"><span className="ac-eyebrow">SIX-WEEK PROGRAM</span><h3>{ENTREPRENEURIAL_ARTIST_COURSE.totalLessons} lessons</h3><p>One lesson releases each Monday at 9:00 AM Eastern through the approved companion playlist.</p><p><ExternalAction href={ENTREPRENEURIAL_ARTIST_COURSE.playlistUrl}>Open program playlist</ExternalAction></p><Link href={bookCourseRoute}>Open student learning area →</Link></article>
+    <article className="ac-card"><span className="ac-eyebrow">SIX-WEEK PROGRAM</span><h3>{ENTREPRENEURIAL_ARTIST_COURSE.totalLessons} lessons</h3><p>One lesson releases each Monday at 9:00 AM Eastern through the approved companion playlist.</p><p><ExternalAction href={ENTREPRENEURIAL_ARTIST_COURSE.playlistUrl}>Open program playlist</ExternalAction></p><Link data-cta-name="Open student learning area →" data-cta-key="open-student-learning-area" href={bookCourseRoute}>Open student learning area →</Link></article>
   </section>;
 
   if (section === 'advisory' || section === 'speaking' || section === 'lifeline') return <OwnerApplicationQueue submissions={submissions} />;
@@ -89,10 +91,12 @@ export default async function Page({ params }: { params: Promise<{ section: stri
   const queueSections = new Set(['advisory', 'speaking', 'lifeline']);
   const allApplications = queueSections.has(section) ? await listPortalFormSubmissions('amanda-catherine', { kind: 'application' }) : [];
   const submissions = allApplications.filter((submission) => {
-    const formId = submission.payload?.formId;
+    let identity;
+    try{identity=amandaApplicationIdentity(submission.payload?.formId,submission.payload?.context,submission.payload?.program);}catch{return false;}
+    const formId = identity.formId;
     if (section === 'advisory') return formId === 'founder-advisory';
     if (section === 'speaking') return formId === 'speaking-media';
-    if (section === 'lifeline') return formId === 'lifeline-media-guest' || (formId === 'partner-vendor-application' && submission.payload?.program === 'lifeline');
+    if (section === 'lifeline') return formId === 'lifeline-media-guest' || (formId === 'partner-vendor-application' && identity.program === 'lifeline');
     return false;
   });
   const kitOrders = section === 'practitioner-kit' ? await listAmandaKitOrders() : [];
@@ -101,5 +105,5 @@ export default async function Page({ params }: { params: Promise<{ section: stri
   const bookCourseRoute = getCourseMenuRoute({ id: 'entrepreneurial-artist' }, { purchasedCourseIds });
   const connected = ConnectedSection({ section, submissions, kitOrders, bookCourseRoute });
   if (!connected) notFound();
-  return <div className="ac-dashboard"><header className="ac-topbar"><div><small>AMANDA CATHERINE · PORTAL V2</small><h1>{item[0]}</h1><p>{item[2]}</p></div><div className="ac-status">V2 · Connected</div></header>{connected}{connected && <section className="ac-card"><Link href="/portal/amanda-catherine/owner">← Return to Dashboard</Link></section>}</div>;
+  return <div className="ac-dashboard"><header className="ac-topbar"><div><small>AMANDA CATHERINE · PORTAL V2</small><h1>{item[0]}</h1><p>{item[2]}</p></div><div className="ac-status">V2 · Connected</div></header>{connected}{connected && <section className="ac-card"><Link data-cta-name="← Return to Dashboard" data-cta-key="return-to-dashboard" href="/portal/amanda-catherine/owner">← Return to Dashboard</Link></section>}</div>;
 }

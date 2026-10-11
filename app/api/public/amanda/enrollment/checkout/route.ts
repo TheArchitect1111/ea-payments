@@ -7,6 +7,7 @@ import { AMANDA_SELF_ENROLLMENT_COURSES } from '@/lib/amanda-catherine/config';
 import { getStripe } from '@/lib/stripe';
 import { canonicalPlatformOrigin } from '@/lib/platform-urls';
 import { publishPlatformActivityEvent } from '@/lib/activity-events-store';
+import {registerAmandaCheckout} from '@/lib/amanda-catherine/payments';
 
 export const dynamic = 'force-dynamic';
 
@@ -52,6 +53,7 @@ export async function POST(req: NextRequest) {
     ? req.nextUrl.origin
     : canonicalPlatformOrigin();
   const regularPriceCad = offer.compareAtPriceCad ?? offer.priceCad;
+  const registrationId=crypto.randomUUID();
   const metadata = {
     ...kit.metadata,
     portalSlug: 'amanda-catherine',
@@ -59,6 +61,7 @@ export async function POST(req: NextRequest) {
     amandaCourseId: offer.courseId,
     clientEmail: email,
     clientName: name,
+    registrationId,
     enrollmentFlow: 'public-course-v1',
     paymentOption: 'full-or-promotion',
     currentPriceCad: String(offer.priceCad),
@@ -91,6 +94,8 @@ export async function POST(req: NextRequest) {
   };
 
   try {
+    await registerAmandaCheckout({registrationId,brickId:offer.courseId,name,email,
+      source:'/portal/amanda-catherine/enroll',isTest:process.env.VERCEL_ENV==='preview'});
     const session = await getStripe().checkout.sessions.create(sessionParams);
     if (!session.url) throw new Error('Stripe did not return a checkout address.');
     await publishPlatformActivityEvent({ organizationId: 'amanda-catherine', module: 'enrollment', eventType: 'checkout_created', title: 'Amanda course checkout created', summary: `${offer.title} checkout opened`, priority: 60, actionLabel: 'Review Amanda enrollment', actionUrl: '/portal/amanda-catherine/owner', metadata: { offerId: offer.offerId, courseId: offer.courseId, sessionId: session.id, source: 'public-course-v1' } });
