@@ -23,6 +23,7 @@ export type AmandaPaymentRecord = {
   paymentStatus: string; stripeCustomerId?: string; stripeSubscriptionId?: string;
   subscriptionStatus?: string; customerConfirmationSentAt?: string; adminNotificationSentAt?: string;
   isTestAccess?: boolean; testPaidAt?: string | null; expiresAt?: string | null; trackingLetterSentAt?: string;
+  trackingRegistrationId?: string;
   recordedAt: string; updatedAt: string;
 };
 
@@ -71,7 +72,8 @@ export async function fulfillAmandaCheckout(session: Stripe.Checkout.Session, so
     amountPaidCad: (session.amount_total ?? 0) / 100, currency: String(session.currency || 'cad').toUpperCase(), paymentStatus: session.payment_status,
     stripeCustomerId: stringId(session.customer), stripeSubscriptionId: stringId(session.subscription), subscriptionStatus: membership ? 'active' : undefined,
     customerConfirmationSentAt: existing?.customerConfirmationSentAt, adminNotificationSentAt: existing?.adminNotificationSentAt,
-    isTestAccess, testPaidAt: existing?.testPaidAt ?? testPaidAt, expiresAt: existing?.expiresAt ?? expiresAt,
+    isTestAccess, trackingRegistrationId:meta.registrationId || existing?.trackingRegistrationId,
+    testPaidAt: existing?.testPaidAt ?? testPaidAt, expiresAt: existing?.expiresAt ?? expiresAt,
     trackingLetterSentAt: existing?.trackingLetterSentAt,
     recordedAt: existing?.recordedAt ?? now, updatedAt: now,
   };
