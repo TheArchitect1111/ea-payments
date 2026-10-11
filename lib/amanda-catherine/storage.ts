@@ -1,5 +1,17 @@
-import {registry,create} from './registry';
-export async function handleAmandaSubmit(p:Record<string,any>, r:Awaited<ReturnType<typeof registry>>){
+import type { registry } from './registry';
+import { pushToTrackingPortal, confirmTrackingPayment, enqueueTrackingPortalRetry, type TrackingLead, type TrackingPayment } from '@/lib/services/trackingPortal';
+export async function handleAmandaSubmit(p:Record<string,any>, r:Awaited<ReturnType<typeof registry>> | undefined, verifiedPayment?: TrackingPayment){
+ // This third argument is supplied only by server-side verified payment handlers.
+ // Never accept payment status or references from public submission fields.
+ if (verifiedPayment) {
+  if (verifiedPayment.event_type !== 'payment_confirmed' ||
+      verifiedPayment.payment_status !== 'paid' || !verifiedPayment.registration_id ||
+      !verifiedPayment.payment_reference) throw new Error('Verified registration payment required');
+  const tracked = await confirmTrackingPayment(verifiedPayment);
+  return {ok:true,type:'payment_update',tracking:{success:true},...tracked};
+ }
+ if (!r) throw new Error('Amanda signup registry is required');
+ const { create } = await import('./registry');
  const now=new Date().toISOString(),id=crypto.randomUUID();
  const course=r.courses.find(c=>c.key===p.courseId);
  const type=p.type==='enroll' && course?.status!=='READY'?'waitlist':p.type;
@@ -7,6 +19,26 @@ export async function handleAmandaSubmit(p:Record<string,any>, r:Awaited<ReturnT
  async function write(key:string,table:string,values:Record<string,unknown>){try{const record=await create(table,values);results[key]={success:true,id:record.id};}catch(e){console.error('[Amanda submission]',key,e);results[key]={success:false,error:'Unable to save '+key};}}
  await write('portal_submissions','Portal Form Submissions',{'Submission ID':id,'Portal Slug':'amanda-catherine',Kind:type,Status:'New',Name:p.name,Email:p.email,Phone:p.phone || '',Notes:p.message || '', 'Payload JSON':JSON.stringify({...p,type,organizationId:r.orgId}), 'Created At':now,'Updated At':now});
  if(!results.portal_submissions.success)return {ok:false,type,...results};
+ // Every portal application, enrollment and waitlist now enters the same tracking wire.
+ // Public users cannot set test mode; the private $1 Stripe flow has a separate guarded entry point.
+ const words=String(p.name).trim().split(/\s+/);
+ const email=String(p.email).trim().toLowerCase();
+ const courseId=String(p.courseId || 'application').trim();
+ const lead:TrackingLead={
+  registration_id:id,first_name:words[0] || '',last_name:words.slice(1).join(' '),
+  email,phone:String(p.phone || ''),class_name:course?.title || (type==='application'?'Amanda Catherine application':courseId),
+  class_id:courseId,registration_type:type==='enroll'?'live':'waitlist',
+  created_at:now,source_page:'amandacatherine.ca',timestamp:now,
+  source:String(p.sourcePage || '/portal/amanda-catherine/enroll'),
+  payment_status:'unpaid',payment_reference:null,is_test:false,event_type:'signup',
+ };
+ try{await pushToTrackingPortal(lead);results.tracking={success:true};}
+ catch(error){
+  console.error('[Amanda submission] tracking sync deferred',error);
+  try{await enqueueTrackingPortalRetry(lead,error);results.tracking={success:true};}
+  catch(queueError){console.error('[Amanda submission] tracking retry unavailable',queueError);
+   results.tracking={success:false,error:'Registration was saved but tracking delivery could not be queued'};}
+ }
  if(type==='waitlist'){
   await write('waitlist','amanda_waitlist',{student_name:p.name,student_email:p.email,student_phone:p.phone || '',course_slug:p.courseId,course_name:course?.title || p.courseId,student_message:p.message || '',portal_slug:'amanda-catherine',submitted_at:now});
   const sourcePage=typeof p.sourcePage==='string'&&p.sourcePage.startsWith('/portal/amanda-catherine/')?p.sourcePage:'/portal/amanda-catherine/enroll';

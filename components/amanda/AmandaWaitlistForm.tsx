@@ -16,6 +16,8 @@ export default function AmandaWaitlistForm({
   const [statusMessage, setStatusMessage] = useState('');
   const [confirmation, setConfirmation] = useState<ConfirmationLetterData | null>(null);
   const [busy, setBusy] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState('');
+  const [paymentBusy, setPaymentBusy] = useState(false);
   const fieldClassName = 'w-full rounded-xl border border-black/20 bg-white px-4 py-3 text-black shadow-sm placeholder:text-black/40 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20';
 
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -41,6 +43,7 @@ export default function AmandaWaitlistForm({
         return;
       }
       setConfirmation(result.confirmation || null);
+      setRegisteredEmail(String(fields.get('email') || '').trim().toLowerCase());
     } catch {
       setStatusMessage('Your details could not be saved. Please try again.');
     } finally {
@@ -48,8 +51,28 @@ export default function AmandaWaitlistForm({
     }
   }
 
+  async function beginSquareCheckout() {
+    setPaymentBusy(true); setStatusMessage('');
+    try {
+      const response=await fetch('/api/amanda-catherine/square-checkout',{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({email:registeredEmail,class_id:courseId}),
+      });
+      const result=await response.json();
+      if(!response.ok||!result.url)throw new Error(result.error||'Square checkout unavailable');
+      window.location.assign(result.url);
+    }catch(error){setStatusMessage(error instanceof Error?error.message:'Square checkout unavailable');}
+    finally{setPaymentBusy(false);}
+  }
   if (confirmation) {
-    return <ConfirmationLetter letter={confirmation} firstName={confirmation.first_name} className={courseName} />;
+    return <div>
+      <ConfirmationLetter letter={confirmation} firstName={confirmation.first_name} className={courseName} />
+      {confirmation.type==='live' ? <button type="button" onClick={()=>void beginSquareCheckout()}
+        disabled={paymentBusy} className="mt-6 w-full rounded-xl bg-[#17211c] px-5 py-3 text-white">
+        {paymentBusy?'Opening secure payment…':'Continue to secure Square payment'}
+      </button> : null}
+      {statusMessage?<p role="alert" className="mt-3 text-red-800">{statusMessage}</p>:null}
+    </div>;
   }
 
   return (

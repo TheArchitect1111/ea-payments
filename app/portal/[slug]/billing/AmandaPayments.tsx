@@ -9,6 +9,7 @@ import type { AmandaPaymentRecord } from '@/lib/amanda-catherine/payment-fulfill
 
 export default function AmandaPayments({ email }: { email: string }) {
   const [kit, setKit] = useState<AmandaKitSelection>(pickupSelection);
+  const [testName, setTestName] = useState('');
   const [busy, setBusy] = useState('');
   const [error, setError] = useState('');
   const [verified, setVerified] = useState(false);
@@ -56,7 +57,7 @@ export default function AmandaPayments({ email }: { email: string }) {
       const res = await fetch('/api/portal/amanda/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ offerId, paymentOption, ...kit }),
+        body: JSON.stringify({ offerId, paymentOption, testName: paymentOption === 'test' ? testName : undefined, ...kit }),
       });
       const data = await res.json() as { url?: string; error?: string };
       if (!res.ok || !data.url) {
@@ -96,10 +97,15 @@ export default function AmandaPayments({ email }: { email: string }) {
       {options.testCheckoutAllowed ? (
         <div className="ep-module-card" style={{ marginBottom: 18, border: '1px solid #d9b76d' }}>
           <p className="ep-module-card-title">Private workflow testing</p>
-          <p className="ep-module-card-note">Owner/admin-only. CAD $1 grants 3 days of course access from Stripe checkout creation, expires automatically, and never renews or charges again. Use the CAD $1 test button on any READY course below to test checkout, receipt, course entitlement, portal access, and fulfillment without changing the public price. After payment, you return here automatically and can open the read-only learner preview.</p>
+          <p className="ep-module-card-note">Owner/admin-only. CAD $1 tests signup, Stripe payment, isolated tracking, confirmation email and 72-hour access. The charge is real and does not renew.</p>
+          <label htmlFor="amanda-tracking-test-name">Test signup name</label>
+          <input id="amanda-tracking-test-name" type="text" required minLength={2} maxLength={120}
+            value={testName} onChange={event=>setTestName(event.target.value)}
+            placeholder="Name for test registration"
+            style={{display:'block',padding:12,width:'100%',border:'1px solid #777',borderRadius:8,marginTop:8}} />
         </div>
       ) : null}
-      {verified ? <div className="ep-module-card" style={{ marginBottom: 18, border: '1px solid #8aa58f' }}><p className="ep-module-card-title">Payment verified with Stripe</p><p className="ep-module-card-note">The payment is recorded and course access has been provisioned.</p>{verifiedPayment?.courseId ? <a className="ep-btn" style={{ marginTop: 12 }} href={`/portal/amanda-catherine/owner/learner-preview?courseId=${encodeURIComponent(verifiedPayment.courseId)}`}>Preview the client learning dashboard</a> : null}</div> : null}
+      {verified ? <div className="ep-module-card" style={{ marginBottom: 18, border: '1px solid #8aa58f' }}><p className="ep-module-card-title">Payment verified with Stripe</p><p className="ep-module-card-note">The payment is recorded and course access has been provisioned.</p>{verifiedPayment?.courseId ? <a className="ep-btn" style={{ marginTop: 12 }} href={`/portal/amanda-catherine/owner/learner-preview?courseId=${encodeURIComponent(verifiedPayment.courseId)}`}>Preview the client learning dashboard</a> : null}{verifiedPayment?.isTestAccess && verifiedPayment.trackingRegistrationId ? <a className="ep-btn ep-btn-secondary" style={{ marginTop: 12, marginLeft: 8 }} href={`/api/portal/amanda/tracking-test?registration_id=${encodeURIComponent(verifiedPayment.trackingRegistrationId)}`} target="_blank" rel="noopener noreferrer">Verify isolated tracking event</a> : null}</div> : null}
       {error ? <p className="ep-module-card-note" style={{ color: '#b42318' }}>{error}</p> : null}
       <p>{AMANDA_SUPPORT_WORDING}</p>
       <KitFulfillmentFields value={kit} onChange={setKit} />
@@ -118,7 +124,7 @@ export default function AmandaPayments({ email }: { email: string }) {
                 </button>
               ) : null}
               {options.testCheckoutAllowed && 'courseId' in offer ? (
-                <button className="ep-btn ep-btn-secondary" disabled={Boolean(busy)} onClick={() => void checkout(offer.id, 'test')}>
+                <button className="ep-btn ep-btn-secondary" disabled={Boolean(busy) || testName.trim().length < 2} onClick={() => void checkout(offer.id, 'test')}>
                   {busy === `${offer.id}:test` ? 'Opening…' : 'CAD $1 — 3-day test, no auto-charge'}
                 </button>
               ) : null}
