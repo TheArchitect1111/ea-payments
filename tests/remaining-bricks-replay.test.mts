@@ -34,7 +34,7 @@ for(const id of ids){
     assert.deepEqual(await api.readBrickRecord(tenant,receiptId),first);
     assert.equal(store.size,1);
     const another={organizationId:'recTWO',portalSlug:'cert-two'};
-    assert.equal(await api.readBrickRecord(another,receiptId),null);
+    await assert.rejects(api.readBrickRecord(another,receiptId),/tenant mismatch/);
     await api.installAdmittedModules(another,[id]);
     assert.equal(store.size,2);
     (globalThis as any).__remainingBrickPort.durable=false;
