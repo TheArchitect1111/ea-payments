@@ -7,13 +7,13 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { assertPeopleAccess, personToExportRow, redactPersonForActor } from '../lib/people/acl.ts';
-import { ensurePersonForClientRecord } from '../lib/people/ensure-person.ts';
-import { isUniversalPeopleEnabled } from '../lib/people/flags.ts';
-import { validateImportRow } from '../lib/people/import-export.ts';
-import { migrateClientRecordToPerson } from '../lib/people/migrate-from-client.ts';
-import { mergePersons } from '../lib/people/merge.ts';
-import { ignoreBodyOrganizationId } from '../lib/people/resolve-tenant.ts';
+import { assertPeopleAccess, personToExportRow, redactPersonForActor } from '@/lib/people/acl';
+import { ensurePersonForClientRecord } from '@/lib/people/ensure-person';
+import { isUniversalPeopleEnabled } from '@/lib/people/flags';
+import { validateImportRow } from '@/lib/people/import-export';
+import { migrateClientRecordToPerson } from '@/lib/people/migrate-from-client';
+import { mergePersons } from '@/lib/people/merge';
+import { ignoreBodyOrganizationId } from '@/lib/people/resolve-tenant';
 import {
   appendPeopleAudit,
   createConsent,
@@ -31,8 +31,8 @@ import {
   updatePeopleAudit,
   updatePerson,
   upsertDirectoryMembership,
-} from '../lib/people/store.ts';
-import { buildClientExperienceNav } from '../lib/ctp-client-nav.ts';
+} from '@/lib/people/store';
+import { buildClientExperienceNav } from '@/lib/ctp-client-nav';
 
 type Row = { id: string; pass: boolean; detail: string };
 const rows: Row[] = [];
