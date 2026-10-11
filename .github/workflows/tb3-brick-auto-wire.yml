@@ -1,0 +1,33 @@
+name: TB3 brick auto-wire feature verification
+on:
+  push:
+    branches: [fix/tb3-brick-auto-wire]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - name: TB3 preview-only fixture hidden in production
+        run: |
+          VERCEL_ENV=production npx next start -p 3124 >/tmp/tb3-auto-wire.log 2>&1 &
+          PID=$!
+          trap 'kill "$PID"' EXIT
+          for i in $(seq 1 45); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:3124/api/tarris/brick-dollar-test || true)
+            test "$code" = "404" && break
+            sleep 1
+          done
+          for verb in GET POST; do
+            status=$(curl -s -o /dev/null -w '%{http_code}' -X "$verb" http://127.0.0.1:3124/api/tarris/brick-dollar-test)
+            test "$status" = "404" || { echo "Fixture exposed: $verb $status"; exit 1; }
+          done
