@@ -95,7 +95,8 @@ export default async function LearningPage({ params }: { params: Promise<{ slug:
           </p>
         </li>
       </ul>
-      {!slug.startsWith('amanda-catherine') ? <FinalBrickPanel kind="training" title="training workspace" /> : null}
+      {!slug.startsWith('amanda-catherine') ? <FinalBrickPanel kind="training" title="training workspace"
+        courses={publishedTraining.map(course=>({id:course.id,title:course.title}))} /> : null}
     </PortalSubpage>
   );
 }
