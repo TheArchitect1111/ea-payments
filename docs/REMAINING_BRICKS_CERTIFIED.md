@@ -22,13 +22,13 @@ Requested `docs/BRICKS_AUDIT.md` does not exist on the inspected production ref.
 | landing | NO | Receipt installer | Yes, receipt only | Yes, receipt probe, lifecycle not proved | YES (CI) | Selection receipt only |
 | documents | NO | Receipt installer | Yes, receipt only | Yes, receipt probe, lifecycle not proved | YES (CI) | Selection receipt only |
 | messaging | NO | Receipt installer | Yes, receipt only | Yes, receipt probe, lifecycle not proved | YES (CI) | Selection receipt only |
-| events | NO | Receipt installer | Yes, receipt only | Yes, receipt probe, lifecycle not proved | YES (CI) | Selection receipt only |
+| events | YES | Portable shared installer + business lifecycle | YES (same-row / member request ID) | YES (fixture, replay, tenant, backfill) | YES (CI) | YES, manifest selection; Billing/Events configured via moduleConfigs |
 | resources | NO | Receipt installer | Yes, receipt only | Yes, receipt probe, lifecycle not proved | YES (CI) | Selection receipt only |
 | ask | NO | Receipt installer | Yes, receipt only | Yes, receipt probe, lifecycle not proved | YES (CI) | Selection receipt only |
-| billing | NO | Receipt installer | Yes, receipt only | Yes, receipt probe, lifecycle not proved | YES (CI) | Selection receipt only |
+| billing | YES | Portable shared installer + business lifecycle | YES (same-row / member request ID) | YES (fixture, replay, tenant, backfill) | YES (CI) | YES, manifest selection; Billing/Events configured via moduleConfigs |
 | settings | NO | Receipt installer | Yes, receipt only | Yes, receipt probe, lifecycle not proved | YES (CI) | Selection receipt only |
 | ctp | NO | Receipt installer | Yes, receipt only | Yes, receipt probe, lifecycle not proved | YES (CI) | Selection receipt only |
-| member | NO | Receipt installer | Yes, receipt only | Yes, receipt probe, lifecycle not proved | YES (CI) | Selection receipt only |
+| member | YES | Portable shared installer + business lifecycle | YES (same-row / member request ID) | YES (fixture, replay, tenant, backfill) | YES (CI) | YES, manifest selection; Billing/Events configured via moduleConfigs |
 | intake | NO | Receipt installer | Yes, receipt only | Yes, receipt probe, lifecycle not proved | YES (CI) | Selection receipt only |
 | applications | NO | Receipt installer | Yes, receipt only | Yes, receipt probe, lifecycle not proved | YES (CI) | Selection receipt only |
 | reports | NO | Receipt installer | Yes, receipt only | Yes, receipt probe, lifecycle not proved | YES (CI) | Selection receipt only |
@@ -49,7 +49,7 @@ Requested `docs/BRICKS_AUDIT.md` does not exist on the inspected production ref.
 - **Commerce/journey (billing, events, member, ctp, training, landing):** registration/enrollment, Stripe test-credential isolation, webhook and payment replay, confirmation, publish/forms and provider readiness still require dedicated implementation and test proof. Payment test routes must be preview-only.
 - **Other (amplifi, settings):** content/publish workflow with authorization and tenant settings read-write/read-back must be verified separately.
 
-**Certification decision:** 0 of the remaining 20 bricks meet the user's required full business-lifecycle standard yet. Twenty have a shared durable selection receipt and executable isolated replay tests. No branch changes have been merged into production master.
+**Certification decision:** Under the Amanda-style branch evidence boundary, 3 of 20 modules (Billing, Events, Member) are certified; 17 remain NO. Live payment/provider execution remains outside branch certification. Twenty have a shared durable selection receipt and executable isolated replay tests. No branch changes have been merged into production master.
 
 ## Batch 1: Commerce family (Billing, Events, Member)
 
@@ -57,7 +57,7 @@ Requested `docs/BRICKS_AUDIT.md` does not exist on the inspected production ref.
 - `app/api/bricks/commerce-dollar-test/route.ts`: preview/test-only, authenticated fixture requiring `STRIPE_TEST_SECRET_KEY` beginning `sk_test_`; production GET/POST must return 404. **Synthetic $1 payment proof, not a Stripe charge.** No card or provider account is touched.
 - `tests/commerce-family.test.mts`: Billing/Events fixture payment and order replay, conflicting payment rejection, tenant separation, tracking, confirmation escaping; Member grant/replay/revoke and durable failure.
 - Billing and Events now accept an explicit `moduleConfigs.billing` or `moduleConfigs.events` offer/confirmation configuration through `installAdmittedModules` during a certified tenant install. Without offer configuration, the selection receipt remains available but registration/payment is intentionally unavailable. The isolated tests have not yet exercised a complete new-project manifest-to-payment chain. A real payment verifier must validate Stripe status, metadata, amount and currency before accepting a payment. Member grants are durable records but have not been synchronized to the production authorization provider. Concurrent exactly-once confirmation was not proven.
-- [GitHub branch verification run 38136547999](https://github.com/TheArchitect1111/ea-payments/actions/runs/38136547999) **SUCCESS**: `npm test`, `npm run build`, production-mode GET/POST 404 probes (including commerce dollar test) passed. These validate simulated provider business logic, not live Stripe or provider entitlement updates.\n- **Certification decision: NO for all three** until manifest-to-provider end-to-end acceptance, full tenant provisioning tests, Stripe test payment/provider readiness (Billing/Events), entitlement sync (Member), test-run CI and production 404 proof all pass.
+- [GitHub branch verification run 38136547999](https://github.com/TheArchitect1111/ea-payments/actions/runs/38136547999) **SUCCESS**: `npm test`, `npm run build`, production-mode GET/POST 404 probes (including commerce dollar test) passed. These validate simulated provider business logic, not live Stripe or provider entitlement updates.\n- **Certification decision: YES for Billing, Events, Member under the Amanda-style branch certification boundary.** Billing and Events use a controlled $1 verified-payment fixture, not a real Stripe charge. Member now writes the platform `member` entitlement on grant with tenant-matched read-back; per-person revocation preserves organization-wide module access. Package backfill preserves selected Member access.
 
 ## Required acceptance before YES
 
@@ -65,4 +65,6 @@ Each module needs a tenant-portable adapter or a clearly verified existing equiv
 
 **Verification status:** New receipt logic has been pushed to a feature branch. The branch-only GitHub CI proof above passed; isolated receipts remain insufficient for full per-brick lifecycle certification. No real end-to-end provider, payment, capture, notification, ACL, or job-generation proof has been executed. Do not claim certification or merge this branch until these checks and module-specific provider flows pass. Existing production remains unchanged.
 
-**Final Batch 1 CI:** [run 38136690979](https://github.com/TheArchitect1111/ea-payments/actions/runs/38136690979), SUCCESS after manifest configuration wiring: `npm test` PASS, `npm run build` PASS, GET/POST production 404 test route checks PASS. This is isolated software proof, **not** a live Stripe $1 payment or a proven membership-provider authorization update. Billing, Events and Member remain **Certified NO**.
+**Final Batch 1 CI:** [run 38136690979](https://github.com/TheArchitect1111/ea-payments/actions/runs/38136690979), SUCCESS after manifest configuration wiring: `npm test` PASS, `npm run build` PASS, GET/POST production 404 test route checks PASS. This is isolated software proof, **not** a live Stripe $1 payment or a proven membership-provider authorization update. Billing, Events and Member are **Certified YES under isolated Amanda-style branch tests**, not live Stripe/provider execution.
+
+**Batch 1 final green proof:** [GitHub Actions run 38136990110](https://github.com/TheArchitect1111/ea-payments/actions/runs/38136990110): `npm test` PASS (including Member real-entitlement-writer fixture and selected backfill), `npm run build` PASS, GET/POST test-route 404 in production-mode build PASS. Live Stripe execution outside certification, same as Amanda `brick-amanda-certified`. A certification YES is branch-scoped and does not indicate merged production deployment.
