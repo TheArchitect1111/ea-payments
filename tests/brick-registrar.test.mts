@@ -33,6 +33,8 @@ test('waitlist, calendar and payments use one public registrar entry point',asyn
  state.live.length=0;state.test.length=0;state.paid.length=0;
  for(const [index,brick_type] of ['waitlist','calendar','payments'].entries()){
   const result=await api.registerBrickEvent({...common,brick_type,brick_id:brick_type+'-brick',
+   client_id:brick_type==='calendar'?'tarris':'amanda-catherine',
+   source:brick_type==='calendar'?'tb3-booking':'portal',
    registration_id:'registration-0000'+(index+1)});
   assert.equal(result.ok,true);
  }
