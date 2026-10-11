@@ -142,6 +142,7 @@ export type CreatePortalFormSubmissionInput = {
   notes?: string;
   payload?: Record<string, unknown>;
   requireDurable?: boolean;
+  idempotencyId?: string;
 };
 
 export async function createPortalFormSubmission(
@@ -149,7 +150,7 @@ export async function createPortalFormSubmission(
 ): Promise<PortalFormSubmission> {
   const stamped = nowIso();
   const submission: PortalFormSubmission = {
-    id: newSubmissionId(),
+    id: input.idempotencyId || newSubmissionId(),
     portalSlug: normalizeSlug(input.portalSlug),
     kind: input.kind,
     status: 'submitted',
@@ -163,6 +164,11 @@ export async function createPortalFormSubmission(
   };
 
   if (platformStoreConfigured()) {
+    if (input.idempotencyId) {
+      const existing = await platformQuery(PORTAL_FORM_SUBMISSIONS_TABLE,
+        `AND({Submission ID} = '${escapeAirtableString(submission.id)}', {Portal Slug} = '${escapeAirtableString(submission.portalSlug)}')`, 1);
+      if (existing[0]) return mapRow(existing[0]); // Do not reset staff review on replay.
+    }
     return upsertToAirtable(submission);
   }
 
