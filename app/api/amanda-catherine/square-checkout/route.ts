@@ -46,7 +46,7 @@ export async function POST(req:NextRequest){
       organizationId:syntheticOrgId('amanda-catherine'),title:'Amanda Square pending order',
       payload:{email,class_id:classId,registration_id:id,order_id:orderId,expected_amount:amount,
         payment_status:'unpaid',is_test:false,created_at:new Date().toISOString()}});
-    if(!saved.ok)throw new Error(saved.error||'Square order correlation could not be saved');
+    if(!saved.ok || !saved.persistedToAirtable)throw new Error(saved.error||'Square order correlation could not be saved');
     return NextResponse.json({ok:true,url:url.toString(),registration_id:id});
   }catch(error){
     console.error('[Amanda Square checkout]',error);
