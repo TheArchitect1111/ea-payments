@@ -1,5 +1,6 @@
 import type { registry } from './registry';
-import { pushToTrackingPortal, confirmTrackingPayment, enqueueTrackingPortalRetry, type TrackingLead, type TrackingPayment } from '@/lib/services/trackingPortal';
+import { registerBrickEvent } from '@/lib/services/brickRegistrar';
+import type { TrackingPayment } from '@/lib/services/trackingPortal';
 export async function handleAmandaSubmit(p:Record<string,any>, r:Awaited<ReturnType<typeof registry>> | undefined, verifiedPayment?: TrackingPayment){
  // This third argument is supplied only by server-side verified payment handlers.
  // Never accept payment status or references from public submission fields.
@@ -7,7 +8,14 @@ export async function handleAmandaSubmit(p:Record<string,any>, r:Awaited<ReturnT
   if (verifiedPayment.event_type !== 'payment_confirmed' ||
       verifiedPayment.payment_status !== 'paid' || !verifiedPayment.registration_id ||
       !verifiedPayment.payment_reference) throw new Error('Verified registration payment required');
-  const tracked = await confirmTrackingPayment(verifiedPayment);
+  const tracked = await registerBrickEvent({
+   brick_type:'payments',brick_id:verifiedPayment.class_id,client_id:'amanda-catherine',
+   registration_id:verifiedPayment.registration_id,name:String(p.name||'Verified customer'),
+   email:verifiedPayment.email,phone:String(p.phone||''),status:'payment_confirmed',
+   payment_status:'paid',payment_reference:verifiedPayment.payment_reference,
+   timestamp:verifiedPayment.timestamp,source:'portal/amanda/payment',is_test:verifiedPayment.is_test===true,
+  },verifiedPayment);
+  if(!tracked.ok)throw new Error(tracked.error||'Payment tracking failed');
   return {ok:true,type:'payment_update',tracking:{success:true},...tracked};
  }
  if (!r) throw new Error('Amanda signup registry is required');
@@ -21,24 +29,17 @@ export async function handleAmandaSubmit(p:Record<string,any>, r:Awaited<ReturnT
  if(!results.portal_submissions.success)return {ok:false,type,...results};
  // Every portal application, enrollment and waitlist now enters the same tracking wire.
  // Public users cannot set test mode; the private $1 Stripe flow has a separate guarded entry point.
- const words=String(p.name).trim().split(/\s+/);
  const email=String(p.email).trim().toLowerCase();
  const courseId=String(p.courseId || 'application').trim();
- const lead:TrackingLead={
-  registration_id:id,first_name:words[0] || '',last_name:words.slice(1).join(' '),
-  email,phone:String(p.phone || ''),class_name:course?.title || (type==='application'?'Amanda Catherine application':courseId),
-  class_id:courseId,registration_type:type==='enroll'?'live':'waitlist',
-  created_at:now,source_page:'amandacatherine.ca',timestamp:now,
-  source:String(p.sourcePage || '/portal/amanda-catherine/enroll'),
-  payment_status:'unpaid',payment_reference:null,is_test:false,event_type:'signup',
- };
- try{await pushToTrackingPortal(lead);results.tracking={success:true};}
- catch(error){
-  console.error('[Amanda submission] tracking sync deferred',error);
-  try{await enqueueTrackingPortalRetry(lead,error);results.tracking={success:true};}
-  catch(queueError){console.error('[Amanda submission] tracking retry unavailable',queueError);
-   results.tracking={success:false,error:'Registration was saved but tracking delivery could not be queued'};}
- }
+ const tracked=await registerBrickEvent({
+  brick_type:type==='waitlist'?'waitlist':type==='enroll'?'classes':'applications',
+  brick_id:courseId,client_id:'amanda-catherine',registration_id:id,
+  name:String(p.name),email,phone:String(p.phone||''),status:type,
+  payment_status:'unpaid',payment_reference:null,timestamp:now,
+  source:String(p.sourcePage||'/portal/amanda-catherine/enroll'),is_test:false,
+ });
+ results.tracking=tracked.ok?{success:true}:{success:false,error:tracked.error||'Tracking unavailable'};
+
  if(type==='waitlist'){
   await write('waitlist','amanda_waitlist',{student_name:p.name,student_email:p.email,student_phone:p.phone || '',course_slug:p.courseId,course_name:course?.title || p.courseId,student_message:p.message || '',portal_slug:'amanda-catherine',submitted_at:now});
   const sourcePage=typeof p.sourcePage==='string'&&p.sourcePage.startsWith('/portal/amanda-catherine/')?p.sourcePage:'/portal/amanda-catherine/enroll';
