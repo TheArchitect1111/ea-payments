@@ -38,7 +38,6 @@ export default async function PortalPage({
   const { client, session } = await requirePortalModule(slug, 'dashboard');
   // Read back tenant-specific durable defaults after module authorization.
   const certifiedContent = await portalContentDefault(slug, 'dashboard');
-  void certifiedContent;
 
   // Amanda's canonical portal home renders directly here. Do not redirect this
   // route to /member: Client Experience navigation points back to this route,
@@ -103,6 +102,10 @@ export default async function PortalPage({
   const blocks = {
     todaysFocus: (
       <>
+        {certifiedContent && certifiedContent.title !== 'Your workspace' ?
+          <section className="ep-module-card" aria-label="Workspace title">
+            <p className="ep-module-card-title">{certifiedContent.title}</p>
+          </section> : null}
         <PortalPersonalityRail slug={slug} chrome={chrome} isEmpty={captures.length === 0} />
         <section className="ep-metrics-grid">
           <div className="ep-metric-card">
