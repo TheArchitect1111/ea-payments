@@ -1,3 +1,6 @@
+import { ensureTenantFoundation } from '@/lib/tenant-foundation';
+import { requireClientFactoryAssembly } from '@/lib/modules/client-factory-assembly';
+import type { BrickSelection } from '@/lib/portal-universal/bricks/registry';
 /**
  * Shared paid-client fulfillment: portal → org entitlements → Connect → optional site.
  * Used by Stripe fixed-package checkout and proposal payment (parity).
@@ -40,6 +43,9 @@ export type FulfillPaidClientInput = {
   connectIndustry?: string | null;
   /** Optional IndustryPack id — inferred from industry/name when omitted */
   industryPackId?: string;
+  requestedModuleIds?: readonly string[];
+  businessOptionIds?: readonly string[];
+  bricks?: readonly BrickSelection[];
 };
 
 export type FulfillPaidClientResult = {
@@ -76,7 +82,9 @@ export async function fulfillPaidClient(
   let magicLoginUrl: string | undefined;
   let orgId: string | undefined;
 
+  const hasSelection = !!(input.industryPackId || input.requestedModuleIds || input.businessOptionIds || input.bricks);
   try {
+    if (hasSelection) requireClientFactoryAssembly(input);
     const portalResult = await createPortalAccess(
       {
         clientName: input.clientName,
@@ -106,7 +114,9 @@ export async function fulfillPaidClient(
     }
 
     try {
-      const org = await ensureOrganizationForPortal({
+      const org = hasSelection ? await ensureTenantFoundation({
+        ...input, portalSlug, organizationName: input.organization, clientRecordId: input.airtableRecordId,
+      }) : await ensureOrganizationForPortal({
         portalSlug,
         name: input.clientName,
         clientRecordId: input.airtableRecordId,
@@ -129,11 +139,12 @@ export async function fulfillPaidClient(
             industryPackId: resolvedIndustryPackId,
           });
         } catch (packErr) {
+          if (hasSelection) throw packErr;
           console.error('fulfillPaidClient industryPackId persist failed (non-fatal):', packErr);
         }
       }
 
-      await ensurePackageEntitlements({
+      if (!hasSelection) await ensurePackageEntitlements({
         orgId,
         packagePurchased: input.packagePurchased,
         commerceOfferId: input.commerceOfferId,
@@ -237,6 +248,7 @@ export async function fulfillPaidClient(
         }
       }
     } catch (err) {
+      if (hasSelection) throw err;
       console.error('fulfillPaidClient entitlement/site sync failed:', err);
     }
 

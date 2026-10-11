@@ -61,7 +61,7 @@ export async function persistAssemblyEvidenceReceipt(
     payload: receipt,
     title: `Assembly Evidence — ${receipt.portalSlug}`,
   });
-  if (!result.ok) throw new Error(result.error || 'Could not persist EA assembly evidence.');
+  if (!result.ok || !result.persistedToAirtable) throw new Error(result.error || 'Could not persist EA assembly evidence.');
   return receipt;
 }
 

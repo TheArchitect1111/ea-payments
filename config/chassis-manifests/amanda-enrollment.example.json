@@ -1,0 +1,17 @@
+{
+  "portalSlug": "new-academy",
+  "clientName": "New Academy",
+  "packagePurchased": "Launch Verification",
+  "businessOptionIds": ["forms-intake-applications"],
+  "bricks": [
+    {
+      "id": "amanda",
+      "config": {
+        "brandName": "New Academy",
+        "confirmationSubject": "Your registration for {{class_name}} is confirmed",
+        "confirmationHtml": "<p>Hello {{first_name}}, your registration for {{class_name}} is confirmed.</p>",
+        "offers": [{"id": "intro-course", "title": "Introduction", "amount": 10000, "currency": "cad"}]
+      }
+    }
+  ]
+}
