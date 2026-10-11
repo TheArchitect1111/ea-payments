@@ -16,7 +16,7 @@ export type TrackingLead = {
 export type TrackingPayment = {
   event_type: 'payment_confirmed'; registration_id?: string;
   email: string; class_id: string; payment_status: 'paid';
-  payment_reference: string; payment_provider: 'square' | 'stripe';
+  payment_reference: string; payment_provider: 'square' | 'stripe' | 'bonfire';
   timestamp: string; is_test?: boolean; client_id?:string;
 };
 
@@ -84,7 +84,7 @@ async function postIngest(payload: TrackingLead | TrackingPayment) {
 export async function pushToTrackingPortal(input: TrackingLead) {
   const lead = normalizeLead(input);
   // Test events cannot enter the production portal_registrations table or a remote ingest.
-  const remote = lead.is_test ? false : await postIngest(lead);
+  const remote = lead.is_test || (lead.client_id && lead.client_id !== 'amanda-catherine') ? false : await postIngest(lead);
   const result = remote ? {ok:true} : await saveTrackingLead(lead);
   if (!lead.is_test) {
     const key = registrationKey(lead.email,lead.class_id,lead.client_id,lead.registration_id);
@@ -136,7 +136,7 @@ export async function storeTrackingPayment(event: TrackingPayment) {
 }
 export async function confirmTrackingPayment(event: TrackingPayment) {
   if (event.is_test) return storeTrackingPayment(event);
-  const remote = await postIngest(event);
+  const remote = event.client_id && event.client_id !== 'amanda-catherine' ? false : await postIngest(event);
   return remote ? {ok:true} : storeTrackingPayment(event);
 }
 export async function enqueueTrackingPortalRetry(data: TrackingLead,error:unknown) {
