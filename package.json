@@ -113,13 +113,14 @@
     "test:ea-immersive-template": "node scripts/test-ea-immersive-template.mjs",
     "test:amanda-dollar-e2e": "node --import tsx --test tests/amanda-dollar-test.test.ts",
     "test:amanda-public": "playwright test --config=playwright.amanda.config.ts",
-    "test": "npm run test:amanda-dollar-e2e && npm run test:chassis-autowire && npm run test:blockers-certified && npm run test:remaining-bricks && npm run test:commerce-family && npm run test:capture-family",
+    "test": "npm run test:amanda-dollar-e2e && npm run test:chassis-autowire && npm run test:blockers-certified && npm run test:remaining-bricks && npm run test:commerce-family && npm run test:capture-family && npm run test:capture-customer-routes",
     "test:chassis-autowire": "node --import tsx --test tests/chassis-autowire.test.mts",
     "test:blockers-certified": "node --import tsx --test tests/blockers-certified.test.mts",
     "test:blockers-ui": "node scripts/test-blockers-ui.mjs",
     "test:remaining-bricks": "node --import tsx --test tests/remaining-bricks-contract.test.mts && node --import tsx --test tests/remaining-bricks-replay.test.mts",
     "test:commerce-family": "node --import tsx --test tests/commerce-family.test.mts",
-    "test:capture-family": "node --import tsx --test tests/capture-family.test.mts"
+    "test:capture-family": "node --import tsx --test tests/capture-family.test.mts",
+    "test:capture-customer-routes": "node --import tsx --test tests/capture-customer-routes.test.mts"
   },
   "dependencies": {
     "@clerk/nextjs": "^7.5.9",
