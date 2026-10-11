@@ -79,7 +79,7 @@ The **EA Onboarding Webhook** Make scenario sends contracts via eSignatures.io u
 - Signer email → `clientEmail` from webhook payload
 - Template → MSA and/or SOW IDs
 
-See `docs/MAKE-EA-ONBOARDING-SCENARIO.md` for the payment → docs flow.
+New client source onboarding uses `docs/NEW_CLIENT_ONBOARDING.md`. eSignatures provider setup remains described above.
 
 ---
 
