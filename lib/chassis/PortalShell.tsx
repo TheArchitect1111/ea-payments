@@ -24,6 +24,8 @@ export type EAPortalTab =
   | 'documents'
   | 'events'
   | 'calendar'
+  | 'people'
+  | 'discovery'
   | 'resources'
   | 'messaging'
   | 'learning'

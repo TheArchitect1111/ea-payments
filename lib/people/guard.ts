@@ -1,3 +1,6 @@
+import { findMembership } from '@/lib/memberships';
+import { isModuleEnabled } from '@/lib/modules/portal-modules';
+import { PLATFORM_ROLES } from '@/lib/rbac';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import {
@@ -84,6 +87,13 @@ export async function guardPeopleApi(
     };
   }
 
+  if (auth.session.orgId !== tenant.organizationId || !auth.session.email || !auth.session.role ||
+      !PLATFORM_ROLES.includes(auth.session.role)) {
+    return { ok: false, response: NextResponse.json({ error: 'Portal access denied.' }, { status: 403 }) };
+  }
+  const membership = await findMembership(auth.session.email, tenant.organizationId);
+  if (membership?.status !== 'active' || !await isModuleEnabled({ orgId: tenant.organizationId, slug, moduleId: 'people', role: auth.session.role }))
+    return { ok: false, response: NextResponse.json({ error: 'People is unavailable.' }, { status: 403 }) };
   // Persist ON without Postgres configured → 503, never a memory/Airtable fallback (INV-19/33).
   let repository: PeopleRepository;
   try {
@@ -100,7 +110,7 @@ export async function guardPeopleApi(
     };
   }
 
-  const actorRole = normalizeRole(auth.session.role);
+  const actorRole = normalizeRole(membership.role);
   let actorPersonId: string | undefined;
   if (auth.session.email) {
     try {

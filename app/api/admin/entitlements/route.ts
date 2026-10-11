@@ -1,3 +1,4 @@
+import { requireModuleProviders, installAdmittedModules } from '@/lib/bricks/module-install';
 import { loadTenantInstall, persistTenantInstall } from '@/lib/modules/tenant-install';
 import { CHASSIS_STANDARD_MODULE_IDS } from '@/lib/modules/registry';
 import { createAssemblyPlan } from '@/lib/modules/assembly';
@@ -26,6 +27,14 @@ import {
 } from '@/lib/modules/business-options';
 
 export const dynamic = 'force-dynamic';
+async function prepareEnabledModules(organizationId: string, ids: readonly ModuleId[]) {
+  const affected = ids.filter(id => ['calendar', 'people', 'discovery'].includes(id));
+  if (!affected.length) return;
+  await requireModuleProviders(affected);
+  const install = await loadTenantInstall(organizationId);
+  if (!install || install.state !== 'installed') throw new Error('Install a certified chassis manifest before adding these modules');
+  await installAdmittedModules(install, affected);
+}
 async function retainInstalledSelection(organizationId: string, changed: readonly ModuleId[], enabled: boolean) {
   const install = await loadTenantInstall(organizationId);
   if (!install) return;
@@ -117,7 +126,7 @@ export async function GET(req: NextRequest) {
   });
 }
 
-export async function POST(req: NextRequest) {
+async function handlePOST(req: NextRequest) {
   const auth = await requireAdminActionFromRequest(req, 'admin:manage');
   if (!auth.ok) return adminAuthJsonError(auth);
 
@@ -176,6 +185,7 @@ export async function POST(req: NextRequest) {
     }
     if (body.enabled !== false) {
       const admitted = createAssemblyPlan([moduleId]).admitted;
+      await prepareEnabledModules(organizationId, admitted);
       const result = await setModulesEnabledBulk(organizationId, admitted, true, source);
       if (result.failed.length) return NextResponse.json({ ok: false, updated: result.ok, failed: result.failed }, { status: 503 });
       const actual = await listEntitlementsForOrg(organizationId);
@@ -203,6 +213,7 @@ export async function POST(req: NextRequest) {
     const enabled = body.enabled !== false;
     const plan = createAssemblyPlan([...option.moduleIds]);
     if (enabled && plan.blocked) return NextResponse.json({ error: 'Selection is not certified', rejected: plan.rejected }, { status: 409 });
+    if (enabled) await prepareEnabledModules(organizationId, plan.admitted);
     const result = await setModulesEnabledBulk(
       organizationId,
       enabled ? plan.admitted : [...option.moduleIds],
@@ -247,6 +258,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Standard chassis modules cannot be disabled' }, { status: 409 });
   const plan = createAssemblyPlan(targetIds);
   if (enabled && plan.blocked) return NextResponse.json({ error: 'Selection is not certified', rejected: plan.rejected }, { status: 409 });
+  if (enabled) await prepareEnabledModules(organizationId, plan.admitted);
   const result = await setModulesEnabledBulk(organizationId, enabled ? plan.admitted : targetIds, enabled, source);
   if (!result.failed.length) await retainInstalledSelection(organizationId, enabled ? plan.admitted : targetIds, enabled);
 
@@ -259,4 +271,9 @@ export async function POST(req: NextRequest) {
     updatedCount: result.ok.length,
     failedCount: result.failed.length,
   });
+}
+
+export async function POST(req: NextRequest) {
+  try { return await handlePOST(req); }
+  catch (error) { return NextResponse.json({ ok: false, error: error instanceof Error ? error.message : 'Selection installation failed' }, { status: 503 }); }
 }

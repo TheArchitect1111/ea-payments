@@ -1,3 +1,4 @@
+import { roleAtLeast } from '@/lib/rbac';
 import { PortalSubpage } from '@/app/portal/components/PortalSubpage';
 import { requirePortalModule } from '@/lib/modules/portal-modules';
 import PortalCalendar from './PortalCalendar';
@@ -6,7 +7,7 @@ export const dynamic = 'force-dynamic';
 
 export default async function SharedCalendarPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const { client } = await requirePortalModule(slug, 'calendar');
+  const { client, session } = await requirePortalModule(slug, 'calendar');
   const isAmanda = slug.toLowerCase().startsWith('amanda-catherine');
 
   return (
@@ -51,7 +52,7 @@ export default async function SharedCalendarPage({ params }: { params: Promise<{
           </div>
         </>
       ) : null}
-      <PortalCalendar slug={slug} />
+      <PortalCalendar slug={slug} canWrite={!!session.role && roleAtLeast(session.role, 'staff')} />
     </PortalSubpage>
   );
 }

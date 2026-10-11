@@ -1,0 +1,45 @@
+name: Blocked bricks certification
+on:
+  push:
+    branches: [fix/blockers-certified]
+  pull_request:
+    branches: [master]
+permissions:
+  contents: read
+jobs:
+  certify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20, cache: npm }
+      - run: npm ci
+      - run: npm test
+      - run: node --import tsx scripts/test-people-phase2c-offline.mts && node --import tsx scripts/test-people-adversarial.mts
+      - run: node scripts/certify-blockers.mjs
+      - run: node scripts/check-chassis-autowire-evidence.mjs
+      - run: node scripts/test-lego-certification-contract.mjs && node scripts/test-lego-final-acceptance.mjs
+      - run: npx tsx scripts/test-modular-assembly-run4.ts && npx tsx scripts/test-modular-assembly-run6.ts
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:blockers-ui
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: blockers-ui-${{ github.sha }}
+          path: artifacts/blockers-ui
+          if-no-files-found: warn
+      - run: npm run build
+      - name: Verify test routes disabled in production artifact
+        run: |
+          VERCEL_ENV=production npx next start -p 3101 > /tmp/blockers-prod-server.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID"' EXIT
+          for i in $(seq 1 30); do
+            if curl -s http://127.0.0.1:3101/api/ops/build-info >/dev/null; then break; fi
+            sleep 1
+          done
+          for module in calendar people assessment; do
+            test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:3101/api/$module/tenant-provision-test)" = 404
+            test "$(curl -s -o /dev/null -w '%{http_code}' -X POST http://127.0.0.1:3101/api/$module/tenant-provision-test)" = 404
+          done

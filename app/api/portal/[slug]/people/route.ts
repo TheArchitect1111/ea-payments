@@ -1,3 +1,4 @@
+import { requireSameOrigin } from '@/lib/bricks/access';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { roleAtLeast } from '@/lib/rbac';
@@ -69,6 +70,7 @@ export async function POST(req: NextRequest, ctx: Ctx) {
     return NextResponse.json({ ok: false, error: 'Forbidden' }, { status: 403 });
   }
 
+  try { requireSameOrigin(req); } catch { return NextResponse.json({ error: 'Same-origin request required' }, { status: 403 }); }
   const raw = (await req.json().catch(() => ({}))) as Record<string, unknown>;
   // INV-1 / ADV-1 — ignore body organizationId
   const body = ignoreBodyOrganizationId(raw);

@@ -141,7 +141,7 @@ const TECHNICAL_MODULE_REGISTRY: TechnicalModuleDefinition[] = [
     name: 'EA Shared Calendar™',
     tag: 'Calendar',
     title: 'Shared calendar',
-    description: 'Google, Microsoft, iCloud, and Exchange calendars connected through Nylas.',
+    description: 'A shared tenant calendar with optional Google, Microsoft, iCloud, and Exchange calendars connected through Nylas.',
     requiredRole: 'guest',
     pathSegment: 'calendar',
   },
@@ -190,7 +190,6 @@ const TECHNICAL_MODULE_REGISTRY: TechnicalModuleDefinition[] = [
     description: 'Capacity assessment and transformation scoping for your organization.',
     requiredRole: 'guest',
     pathSegment: 'discovery',
-    demoOnly: true,
   },
   {
     id: 'ctp',
@@ -309,7 +308,6 @@ export function getModuleDefinition(moduleId: ModuleId): ModuleDefinition | unde
 export function moduleHref(slug: string, module: ModuleDefinition): string {
   const base = `/portal/${slug}`;
   if (!module.pathSegment) return base;
-  if (module.demoOnly && module.id === 'discovery') return '/assessment';
   return `${base}/${module.pathSegment}`;
 }
 
@@ -329,7 +327,7 @@ export const TENANT_MODULE_PRESETS: Record<string, ModuleId[]> = {
     'ask',
     'billing',
     'settings',
-    // people remains available in the registry but is fail-closed until certified.
+    // People is explicitly selected and requires a ready Postgres runtime.
     'intake',
     'applications',
     'reports',

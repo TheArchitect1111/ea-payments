@@ -18,7 +18,7 @@ export type ResolvedPeopleTenant = {
  */
 function orgIdFromTestMap(slug: string): string | null {
   const raw = process.env.PEOPLE_TEST_ORG_MAP_JSON?.trim();
-  if (!raw) return null;
+  if (!raw || process.env.NODE_ENV === 'production' || ['production', 'preview'].includes(process.env.VERCEL_ENV || '')) return null;
   try {
     const map = JSON.parse(raw) as Record<string, string>;
     return map[slug.trim().toLowerCase()]?.trim() || null;
@@ -60,7 +60,7 @@ export async function resolvePeopleTenantFromSlug(
   }
 
   // Demo fallback for local certification without Airtable
-  if (process.env.NODE_ENV !== 'production' || process.env.PEOPLE_ALLOW_SLUG_ORG_FALLBACK === '1') {
+  if (process.env.NODE_ENV !== 'production' && !['production', 'preview'].includes(process.env.VERCEL_ENV || '')) {
     return {
       organizationId: `people_org_${slug}`,
       portalSlug: slug,

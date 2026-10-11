@@ -658,17 +658,16 @@ run('ADV-20', () => {
 });
 
 // ADV-21 — flag OFF CX nav unchanged + fulfill hook no-op already in ADV-17
-run('ADV-21', () => {
+try {
   setPeopleFlag(false);
   delete process.env.UNIVERSAL_NAV_PACKS;
-  const nav = buildClientExperienceNav('demo-client');
+  const nav = await buildClientExperienceNav('demo-client');
   assert.equal(nav.length, 5);
-  assert.deepEqual(
-    nav.map((i) => i.id),
-    ['progress', 'documents', 'messages', 'support', 'journey'],
-  );
-  setPeopleFlag(true);
-});
+  assert.deepEqual(nav.map(i => i.id), ['progress', 'documents', 'messages', 'support', 'journey']);
+  record('ADV-21', true, 'ok');
+} catch (error) {
+  record('ADV-21', false, error instanceof Error ? error.message : String(error));
+} finally { setPeopleFlag(true); }
 
 // ADV-22 — data retained when flag OFF
 run('ADV-22', () => {

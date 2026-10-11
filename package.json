@@ -113,8 +113,10 @@
     "test:ea-immersive-template": "node scripts/test-ea-immersive-template.mjs",
     "test:amanda-dollar-e2e": "node --import tsx --test tests/amanda-dollar-test.test.ts",
     "test:amanda-public": "playwright test --config=playwright.amanda.config.ts",
-    "test": "npm run test:amanda-dollar-e2e && npm run test:chassis-autowire",
-    "test:chassis-autowire": "node --import tsx --test tests/chassis-autowire.test.mts"
+    "test": "npm run test:amanda-dollar-e2e && npm run test:chassis-autowire && npm run test:blockers-certified",
+    "test:chassis-autowire": "node --import tsx --test tests/chassis-autowire.test.mts",
+    "test:blockers-certified": "node --import tsx --test tests/blockers-certified.test.mts",
+    "test:blockers-ui": "node scripts/test-blockers-ui.mjs"
   },
   "dependencies": {
     "@clerk/nextjs": "^7.5.9",
