@@ -1,4 +1,6 @@
 import { portalContentDefault } from '@/lib/bricks/content-portal';
+import { listContent } from '@/lib/bricks/content-family';
+import CertifiedReportGenerator from '@/app/portal/components/CertifiedReportGenerator';
 import Link from 'next/link';
 import { requirePortalModule } from '@/lib/modules/portal-modules';
 import { listReportArtifacts } from '@/lib/portal-reports';
@@ -9,10 +11,11 @@ export const dynamic = 'force-dynamic';
 
 export default async function ReportsPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const { client, access } = await requirePortalModule(slug, 'reports');
+  const { client, access, session } = await requirePortalModule(slug, 'reports');
   // Read back tenant-specific durable defaults after module authorization.
   const certifiedContent = await portalContentDefault(slug, 'reports');
-  void certifiedContent;
+  const staff=['staff','admin','owner'].includes(session.role);
+  const reports=certifiedContent?await listContent({organizationId:certifiedContent.organizationId,portalSlug:slug},'reports',staff?'staff':'member'):[];
   const isAmanda = slug.toLowerCase().startsWith('amanda-catherine');
   const artifacts = listReportArtifacts(slug, client, access);
 
@@ -25,6 +28,23 @@ export default async function ReportsPage({ params }: { params: Promise<{ slug: 
       lede={isAmanda ? 'Live intake, application, membership, media, volunteer, event, and follow-up signals.' : `Curated operational views for ${client.organization || client.clientName}.`}
     >
       {isAmanda ? <AmandaOperationsPanel slug={slug} /> : null}
+      {staff && certifiedContent && access.enabledModuleIds.has('documents') ?
+        <CertifiedReportGenerator sourceKind="documents" /> :
+        staff && certifiedContent && access.enabledModuleIds.has('resources') ?
+        <CertifiedReportGenerator sourceKind="resources" /> : null}
+      {reports.some(item=>item.state==='complete') ? (
+        <ul className="ep-module-list">
+          {reports.filter(item=>item.state==='complete').map(item=>(
+            <li className="ep-module-card" key={item.id}>
+              <Link className="ep-module-card-title"
+                href={`/api/portal/content/download?kind=reports&key=${encodeURIComponent(item.key)}`}>
+                {item.title}
+              </Link>
+              <p className="ep-module-card-note">Generated private report · {item.source||'tenant'} inventory</p>
+            </li>
+          ))}
+        </ul>
+      ):null}
       {artifacts.length === 0 ? (
         <p className="ep-module-card-note">No report surfaces are entitled for this portal yet.</p>
       ) : (
