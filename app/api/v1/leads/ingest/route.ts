@@ -9,7 +9,7 @@ export const revalidate=0;
 const SignupSchema=z.object({
   event_type:z.literal('signup').optional(),
   first_name:z.string().trim().min(1).max(80),last_name:z.string().trim().max(80).default(''),
-  email:z.string().trim().email().max(254),phone:z.string().trim().max(40).default(''),
+  name:z.string().trim().max(160).optional(),email:z.string().trim().email().max(254),phone:z.string().trim().max(40).default(''),
   class_name:z.string().trim().min(1).max(200),class_id:z.string().trim().min(1).max(120),
   registration_type:z.enum(['live','waitlist']),created_at:z.string().datetime().optional(),
   source_page:z.literal('amandacatherine.ca'),registration_id:z.string().max(120).optional(),
