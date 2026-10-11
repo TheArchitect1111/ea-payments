@@ -1,3 +1,4 @@
+import FinalBrickPanel from '@/app/portal/components/FinalBrickPanel';
 import Link from 'next/link';
 import { getClientSuccessProfile } from '@/lib/client-success';
 import { PortalShell, NAVY, GOLD } from '@/lib/chassis/PortalShell';
@@ -80,6 +81,7 @@ export default async function PulsePage({
     <PortalShell slug={slug} active="pulse" firstName={firstName}>
       <main className="ep-main">
         <PortalModuleChromeStrip />
+        {!slug.startsWith('amanda-catherine') ? <FinalBrickPanel kind="pulse" title="pulse workspace" /> : null}
         <div className="ep-welcome">
           <p className="ep-welcome-label">Pulse</p>
           <h1 className="ep-welcome-heading">Your Progress, {firstName}</h1>

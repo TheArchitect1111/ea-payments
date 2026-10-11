@@ -1,3 +1,4 @@
+import FinalBrickPanel from '@/app/portal/components/FinalBrickPanel';
 import Link from 'next/link';
 import { requirePortalModule } from '@/lib/modules/portal-modules';
 import { PortalSubpage } from '@/app/portal/components/PortalSubpage';
@@ -94,6 +95,8 @@ export default async function LearningPage({ params }: { params: Promise<{ slug:
           </p>
         </li>
       </ul>
+      {!slug.startsWith('amanda-catherine') ? <FinalBrickPanel kind="training" title="training workspace"
+        courses={publishedTraining.map(course=>({id:course.id,title:course.title}))} /> : null}
     </PortalSubpage>
   );
 }

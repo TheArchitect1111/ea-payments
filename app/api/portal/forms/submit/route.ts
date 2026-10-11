@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { brickHash } from '@/lib/bricks/durable';
+import { bridgeCapturedRecord, resolveCaptureTenant } from '@/lib/bricks/capture-entry-bridge';
 import { createPortalFormSubmission } from '@/lib/portal-forms/store';
 import type { PortalFormKind } from '@/lib/portal-forms/types';
 import { notifyPortal } from '@/lib/portal-notify';
@@ -106,6 +108,11 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  const captureKind = kind === 'application' ? 'applications' : 'intake';
+  const certifiedTenant = slug === 'amanda-catherine' ? null : await resolveCaptureTenant(slug, captureKind);
+  const idempotencyId = certifiedTenant
+    ? 'pfs_' + brickHash([slug,kind,email.toLowerCase(),name,payload ?? null])
+    : undefined;
   let submission;
   try {
     submission = await createPortalFormSubmission({
@@ -116,7 +123,8 @@ export async function POST(req: NextRequest) {
       phone: body.phone,
       notes: body.notes,
       payload,
-      requireDurable: slug === 'amanda-catherine' && kind === 'application',
+      requireDurable: Boolean(certifiedTenant) || (slug === 'amanda-catherine' && kind === 'application'),
+      idempotencyId,
     });
   } catch {
     return NextResponse.json(
@@ -125,6 +133,17 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // Write canonical tenant capture before acknowledging the existing public form.
+  // Staff review continues to use the same durable portal-forms ledger.
+  try {
+    if (certifiedTenant) await bridgeCapturedRecord({slug,kind:captureKind,
+      identity:submission.id,requestId:submission.id,email,name,
+      payload:{portalFormId:submission.id,formKind:kind,status:submission.status,
+        offerId:typeof payload?.offerId==='string'?payload.offerId:null}});
+  } catch(error) {
+    console.error('[portal-forms] canonical capture failed',error);
+    return NextResponse.json({error:'Durable capture storage is temporarily unavailable.'},{status:503});
+  }
   const pulseEvent = {
     product: 'ea-platform' as const,
     type: 'portal.form.submitted' as const,

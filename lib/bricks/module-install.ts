@@ -6,8 +6,10 @@ import { getPeopleRepository } from '@/lib/people/adapter';
 import { isPeopleRuntimeAllowed, isUniversalPeoplePersistEnabled } from '@/lib/people/flags';
 import { brickHash, readBrickRecord, writeBrickRecord, type BrickTenant } from './durable';
 import type { ModuleId } from '@/lib/modules/registry';
+import { CommerceConfig, installCommerce } from './commerce-family';
 export const ModuleConfigsSchema = z.object({ calendar: CalendarConfig.optional(),
-  people: z.object({ provider: z.literal('postgres') }).strict().optional(), discovery: DiscoveryConfig.optional() }).strict();
+  people: z.object({ provider: z.literal('postgres') }).strict().optional(), discovery: DiscoveryConfig.optional(),
+  billing: CommerceConfig.optional(), events: CommerceConfig.optional() }).strict();
 export type ModuleConfigs = z.infer<typeof ModuleConfigsSchema>;
 export async function requireModuleProviders(ids: readonly ModuleId[], input: unknown = {}) {
   const config = ModuleConfigsSchema.parse(input);
@@ -24,6 +26,22 @@ export async function requireModuleProviders(ids: readonly ModuleId[], input: un
 }
 export async function installAdmittedModules(tenant: BrickTenant, ids: readonly ModuleId[], input: unknown = {}) {
   const config = await requireModuleProviders(ids, input);
+  // Durable, tenant-scoped provision receipts for remaining chassis modules.
+  // A receipt proves selection and installation only, not external provider readiness.
+  const dedicated = new Set<ModuleId>(['calendar', 'people', 'discovery']);
+  for (const id of ids) {
+    if (dedicated.has(id)) continue;
+    const receiptId = 'module-install-' + id + '-' + brickHash(tenant.organizationId);
+    const existing = await readBrickRecord<BrickTenant & { moduleId: ModuleId; version: number }>(tenant, receiptId);
+    if (existing) {
+      if (existing.moduleId !== id || existing.version !== 1) throw new Error('Module install receipt mismatch: ' + id);
+      continue;
+    }
+    await writeBrickRecord(tenant, receiptId, { ...tenant, moduleId: id, version: 1 });
+  }
+  for (const kind of ['billing', 'events'] as const) {
+    if (ids.includes(kind) && config[kind]) await installCommerce(tenant, kind, config[kind]);
+  }
   if (ids.includes('calendar')) {
     const prior = await readBrickRecord<BrickTenant & {config: unknown}>(tenant, 'calendar-install-' + brickHash(tenant.organizationId));
     await installCalendar(tenant, config.calendar ?? prior?.config);

@@ -1,3 +1,4 @@
+import FinalBrickPanel from '@/app/portal/components/FinalBrickPanel';
 import { PortalSubpage } from '@/app/portal/components/PortalSubpage';
 import { requirePortalModule } from '@/lib/modules/portal-modules';
 import { BusinessPresencePanel } from './BusinessPresencePanel';
@@ -36,6 +37,7 @@ export default async function PortalSettingsPage({
         </p>
       </div>
       <BusinessPresencePanel />
+      {!slug.startsWith('amanda-catherine') ? <FinalBrickPanel kind="settings" title="settings workspace" /> : null}
     </PortalSubpage>
   );
 }

@@ -1,0 +1,35 @@
+name: Remaining bricks branch verification
+on:
+  push:
+    branches: [fix/remaining-bricks-certified]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Existing tests plus 20 receipt checks
+        run: npm test
+      - run: npm run build
+      - name: Production-mode provisioning routes must be unreachable
+        run: |
+          VERCEL_ENV=production npx next start -p 3102 > /tmp/remaining-bricks-prod.log 2>&1 &
+          PID=$!
+          trap 'kill "$PID"' EXIT
+          for i in $(seq 1 40); do
+            if curl -fsS http://127.0.0.1:3102/api/ops/build-info >/dev/null; then break; fi
+            sleep 1
+          done
+          for route in /api/bricks/final-provision-test /api/bricks/content-provision-test /api/bricks/capture-provision-test /api/bricks/commerce-dollar-test /api/bricks/tenant-provision-test /api/calendar/tenant-provision-test /api/people/tenant-provision-test /api/assessment/tenant-provision-test; do
+            for method in GET POST; do
+              code=$(curl -s -o /dev/null -w '%{http_code}' -X "$method" "http://127.0.0.1:3102$route")
+              test "$code" = "404" || { echo "FAIL $method $route: $code"; exit 1; }
+            done
+          done

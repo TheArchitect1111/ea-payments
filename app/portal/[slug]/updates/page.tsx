@@ -1,3 +1,4 @@
+import FinalBrickPanel from '@/app/portal/components/FinalBrickPanel';
 import { getContentRequestsForClient } from '@/lib/airtable';
 import { PortalShell, NAVY, GOLD } from '@/lib/chassis/PortalShell';
 import { PortalModuleChromeStrip } from '@/lib/chassis/PortalChromeContext';
@@ -27,6 +28,7 @@ export default async function UpdatesPage({ params }: { params: Promise<{ slug: 
       <PortalShell slug={slug} active="updates">
         <main className="ep-main">
           <PortalModuleChromeStrip />
+        {!slug.startsWith('amanda-catherine') ? <FinalBrickPanel kind="update-hub" title="update-hub workspace" /> : null}
           <AmandaSiteUpdateHub slug={slug} initialContent={content} />
         </main>
       </PortalShell>
