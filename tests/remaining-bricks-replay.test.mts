@@ -17,7 +17,7 @@ const mock: Record<string,string> = {
   '@/lib/portal-universal/bricks/amanda': 'export function assertBrickTenant(tenant){if(!tenant.organizationId||!tenant.portalSlug)throw Error("Invalid tenant");}',
 };
 (globalThis as any).__remainingBrickPort = {store, durable:true};
-const bundle = await build({stdin:{contents:"export {installAdmittedModules} from './lib/bricks/module-install'; export {readBrickRecord,brickHash} from './lib/bricks/durable';",resolveDir:process.cwd()},bundle:true,write:false,platform:'node',format:'esm',packages:'external',plugins:[{name:'isolate-ports',setup(b){b.onResolve({filter:/.*/},a=>Object.hasOwn(mock,a.path)?{path:a.path,namespace:'ports'}:undefined);b.onLoad({filter:/.*/,namespace:'ports'},a=>({contents:mock[a.path],loader:'js'}));}}]});
+const bundle = await build({stdin:{contents:"export {installAdmittedModules} from './lib/bricks/module-install'; export {readBrickRecord,brickHash} from './lib/bricks/durable';",resolveDir:process.cwd()},bundle:true,write:false,platform:'node',format:'esm',packages:'external',plugins:[{name:'isolate-ports',setup(b){b.onResolve({filter:/.*/},a=>Object.hasOwn(mock,a.path)?{path:a.path,namespace:'ports'}:undefined);b.onLoad({filter:/.*/,namespace:'ports'},a=>({contents:mock[a.path],loader:'js',resolveDir:process.cwd()}));}}]});
 const tmp='tests/.remaining-replay-bundle.mjs';writeFileSync(tmp,bundle.outputFiles[0].text);
 const api=await import('../'+tmp);unlinkSync(tmp);
 const ids=MODULE_IDS.filter(id=>!['calendar','people','discovery'].includes(id));
