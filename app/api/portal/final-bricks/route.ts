@@ -30,15 +30,22 @@ export async function GET(req:NextRequest){
  catch{return Response.json({error:'Unavailable'},{status:404});}
 }
 export async function POST(req:NextRequest){
- const body=z.object({kind:FinalKind,action:z.enum(['create','transition']),
+ const body=z.object({kind:FinalKind,action:z.enum(['create','transition','generate']),
  key:z.string(),title:z.string().optional(),body:z.string().optional(),
  visibility:z.enum(['staff','member']).optional(),state:z.enum(['draft','submitted','delivered','responded','published','enrolled','in_progress','completed','ready']).optional(),
- reply:z.string().optional(),progress:z.number().optional(),channel:z.string().optional(),source:z.string().optional()}).strict().safeParse(await req.json().catch(()=>null));
+ reply:z.string().optional(),progress:z.number().optional(),channel:z.string().optional(),source:z.string().optional(),sourceText:z.string().optional()}).strict().safeParse(await req.json().catch(()=>null));
  if(!body.success)return Response.json({error:'Invalid workflow'},{status:400});
  const c=await context(req,body.data.kind);
  if('error'in c)return c.error;
  const d=body.data;
  try{
+ if(d.action==='generate'){
+   if(c.role!=='staff'||(c.kind!=='pulse'&&c.kind!=='amplifi'))
+     return Response.json({error:'Generator unavailable'},{status:403});
+   const generated=await generateFinal(c.tenant,c.kind,{key:d.key,title:d.title||'Generated content',
+     sourceText:d.sourceText||d.body||''},'staff');
+   return Response.json({ok:true,record:generated,generation:'source-grounded-deterministic'});
+ }
  if(c.kind==='training' && d.action==='create'){
    const courses=await listPublishedTrainingForTenant(c.tenant.portalSlug);
    if(!courses.some(course=>course.id===d.key))
@@ -50,6 +57,8 @@ export async function POST(req:NextRequest){
  }
  const enrollmentKey=c.kind==='training' && c.role==='member'
    ?'course-'+brickHash([c.tenant.organizationId,c.email,d.key]).slice(0,40):d.key;
+ if(c.kind==='training' && c.role==='member' && !c.email)
+   return Response.json({error:'Authenticated student identity required'},{status:401});
  if(c.kind==='training' && c.role==='member' && d.action==='transition'){
    const mine=await readFinal(c.tenant,c.kind,d.key,'member');
    if(mine.source!==c.email)return Response.json({error:'Not your enrollment'},{status:403});
