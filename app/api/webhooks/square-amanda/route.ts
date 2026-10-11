@@ -2,7 +2,7 @@ import { createHmac, timingSafeEqual } from 'node:crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { loadStudioRecord, saveStudioRecord } from '@/lib/creative-studio/persistence';
 import { syntheticOrgId } from '@/lib/platform-store';
-import { confirmTrackingPayment } from '@/lib/services/trackingPortal';
+import { registerBrickEvent } from '@/lib/services/brickRegistrar';
 import { getAmandaConfirmationLetter } from '@/lib/amanda-catherine/confirmation-letters';
 import { sendAuthEmail } from '@/lib/ea-auth-email';
 
@@ -50,11 +50,18 @@ export async function POST(req:NextRequest){
       return NextResponse.json({ok:false,error:'Square payment amount differs from checkout'},{status:409});
     if(order.payment_reference && order.payment_reference!==paymentId)
       return NextResponse.json({ok:false,error:'Conflicting payment on registration'},{status:409});
-    await confirmTrackingPayment({
-      event_type:'payment_confirmed',registration_id:order.registration_id,email:order.email,
-      class_id:order.class_id,payment_status:'paid',payment_reference:paymentId,
-      payment_provider:'square',timestamp:String(payment.updated_at||new Date().toISOString()),is_test:false,
-    });
+    const verifiedPayment={
+      event_type:'payment_confirmed' as const,registration_id:order.registration_id,email:order.email,
+      class_id:order.class_id,payment_status:'paid' as const,payment_reference:paymentId,
+      payment_provider:'square' as const,timestamp:String(payment.updated_at||new Date().toISOString()),is_test:false,
+    };
+    const tracked=await registerBrickEvent({
+      brick_type:'payments',brick_id:order.class_id,client_id:'amanda-catherine',
+      registration_id:order.registration_id,name:order.name||order.email,email:order.email,
+      phone:'',status:'payment_confirmed',payment_status:'paid',payment_reference:paymentId,
+      timestamp:verifiedPayment.timestamp,source:'square-amanda-webhook',is_test:false,
+    },verifiedPayment);
+    if(!tracked.ok)throw new Error(tracked.error||'Verified Square tracking failed');
     let next:SquareOrder={...order,payment_status:'paid',payment_reference:paymentId};
     if(!order.confirmation_sent){
       const letter=await getAmandaConfirmationLetter('live');
