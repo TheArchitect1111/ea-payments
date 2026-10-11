@@ -70,7 +70,7 @@ export async function POST(req:NextRequest){
     const saved=await saveStudioRecord({recordType:'experience',id,
       organizationId:syntheticOrgId('amanda-catherine'),title:'Amanda Square verified payment',
       payload:next});
-    if(!saved.ok)throw new Error(saved.error||'Square confirmation state not saved');
+    if(!saved.ok || !saved.persistedToAirtable)throw new Error(saved.error||'Square confirmation state not saved');
     return NextResponse.json({ok:true,updated:true,payment_reference:paymentId});
   }catch(error){
     console.error('[Amanda Square webhook]',error);
