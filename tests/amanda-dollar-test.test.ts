@@ -152,6 +152,7 @@ test('Amanda upgrade route and middleware are deployed in the source artifact', 
 test('Amanda verified $1 fulfillment, replay, 72-hour denial, no-write preview, waitlist and hourly expiry', async () => {
   // This fixture is NOT a live Stripe charge or a write to the real Airtable base.
   console.log('PRODUCTION OBSERVED BASELINE (Oct 8, read-only): payments=4, access=1, progress=8, course-content=1');
+  db.records.clear();db.waitlist.clear();db.writes.length=0;db.trackingEvents.length=0;
   const app = await loadRealHandlers();
   assert.equal(db.records.size, 0);
   const created = Math.floor(Date.now()/1000);
