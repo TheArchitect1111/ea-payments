@@ -1,6 +1,17 @@
-import {registry,create} from './registry';
-import { pushToTrackingPortal, enqueueTrackingPortalRetry, type TrackingLead } from '@/lib/services/trackingPortal';
-export async function handleAmandaSubmit(p:Record<string,any>, r:Awaited<ReturnType<typeof registry>>){
+import type { registry } from './registry';
+import { pushToTrackingPortal, confirmTrackingPayment, enqueueTrackingPortalRetry, type TrackingLead, type TrackingPayment } from '@/lib/services/trackingPortal';
+export async function handleAmandaSubmit(p:Record<string,any>, r:Awaited<ReturnType<typeof registry>> | undefined, verifiedPayment?: TrackingPayment){
+ // This third argument is supplied only by server-side verified payment handlers.
+ // Never accept payment status or references from public submission fields.
+ if (verifiedPayment) {
+  if (verifiedPayment.event_type !== 'payment_confirmed' ||
+      verifiedPayment.payment_status !== 'paid' || !verifiedPayment.registration_id ||
+      !verifiedPayment.payment_reference) throw new Error('Verified registration payment required');
+  const tracked = await confirmTrackingPayment(verifiedPayment);
+  return {ok:true,type:'payment_update',tracking:{success:true},...tracked};
+ }
+ if (!r) throw new Error('Amanda signup registry is required');
+ const { create } = await import('./registry');
  const now=new Date().toISOString(),id=crypto.randomUUID();
  const course=r.courses.find(c=>c.key===p.courseId);
  const type=p.type==='enroll' && course?.status!=='READY'?'waitlist':p.type;
