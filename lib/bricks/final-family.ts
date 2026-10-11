@@ -21,7 +21,12 @@ export async function saveFinal(t:BrickTenant,k:FinalKind,input:unknown,role:Rol
  const id=idOf(t,k,v.key),prior=await readBrickRecord<FinalRecord>(t,id);
  if(prior){if(brickHash([prior.title,prior.body,prior.visibility,prior.channel,prior.source])!==
  brickHash([v.title,v.body,v.visibility,v.channel,v.source]))throw Error('Business identity conflict');return prior;}
- const row:FinalRecord={...t,...v,id,kind:k,version:1};
+ // Enforce server-owned initial workflow state, never trust a submitted "completed" or "published".
+ const initial:Record<FinalKind,FinalRecord['state']>={
+ pulse:'draft',amplifi:'draft','update-hub':'submitted',messaging:'submitted',
+ training:'enrolled',landing:'draft',ask:'submitted',settings:'ready',ctp:'ready'};
+ const row:FinalRecord={...t,...v,state:initial[k],reply:undefined,progress:k==='training'?0:undefined,
+   id,kind:k,version:1};
  await writeBrickRecord(t,id,row);
  const idx=idxOf(t,k),old=await readBrickRecord<BrickTenant&{keys:string[]}>(t,idx);
  if(!old?.keys.includes(v.key))await writeBrickRecord(t,idx,{...t,keys:[...(old?.keys||[]),v.key]});
@@ -45,6 +50,10 @@ export async function transitionFinal(t:BrickTenant,k:FinalKind,key:string,input
  if(role!=='staff'&&!(k==='training'&&['enrolled','in_progress','completed'].includes(action.state)))
  throw Error('Staff workflow permission required');
  if(k==='training'&&action.state==='completed'&&action.progress!==100)throw Error('Completion requires 100% progress');
+ if(k==='training'&&action.progress!==undefined&&action.progress<(old.progress||0))
+  throw Error('Training progress rollback denied');
+ if(['pulse','amplifi','landing'].includes(k)&&action.state==='published'&&old.body.trim().length===0)
+  throw Error('Cannot publish empty content');
  if(['update-hub','messaging','ask'].includes(k)&&action.state==='responded'&&!action.reply)throw Error('Advisor response required');
  if(['amplifi','landing'].includes(k)&&action.state==='published'&&role!=='staff')throw Error('Publication approval required');
  if(old.state===action.state&&old.reply===action.reply&&old.progress===action.progress)return old;
