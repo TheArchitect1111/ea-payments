@@ -8,7 +8,7 @@ import { AMANDA_PRACTITIONER_KIT } from './practitioner-kit-catalog';
 export type AmandaKitOrder = {
   id:string; portalSlug:string; productId:string; stripeSessionId:string; paymentStatus:string;
   amountPaidCad:number; email?:string|null; name?:string|null; phone?:string|null;
-  billingAddress?:Stripe.Address|null; shippingAddress?:Stripe.Address|null; kitFulfillment?:'pickup'|'ship'; shippingChargeCad?:number; courseId?:string; fulfillmentStatus:string;
+  billingAddress?:Stripe.Address|null; shippingAddress?:Stripe.Address|null; kitFulfillment?:'pickup'|'ship'; shippingChargeCad?:number; courseId?:string; fulfillmentStatus:string; isTestAccess?:boolean;
   carrier?: string; trackingNumber?: string; trackingUrl?: string; fulfillmentUpdatedAt?: string;
 };
 
@@ -20,7 +20,8 @@ export function isAmandaKitSession(session: Stripe.Checkout.Session) {
 
 export async function listAmandaKitOrders() {
   const rows = await listStudioRecords<AmandaKitOrder>('experience', syntheticOrgId('amanda-catherine'));
-  return rows.filter((row)=>row?.id?.startsWith('amanda-kit-order-') && row.portalSlug === 'amanda-catherine');
+  const testSessions=new Set(rows.filter(row=>row?.isTestAccess===true).map(row=>row.stripeSessionId));
+  return rows.filter((row)=>row?.id?.startsWith('amanda-kit-order-') && row.portalSlug === 'amanda-catherine'&&!testSessions.has(row.stripeSessionId));
 }
 
 export async function recordAmandaKitOrder(session: Stripe.Checkout.Session, includedCourseId?: string) {
@@ -35,6 +36,8 @@ export async function recordAmandaKitOrder(session: Stripe.Checkout.Session, inc
   try { shippingAddress = choice === 'ship' ? JSON.parse(meta.kitShippingAddress || '') : null; } catch { return {ok:false,error:'Shipping address is missing.'}; }
   if (choice === 'ship' && (!shippingAddress?.line1 || !shippingAddress.city || !shippingAddress.state || !shippingAddress.postal_code || !shippingAddress.country)) return {ok:false,error:'A complete shipping address is required.'};
   if (!includedCourseId && session.amount_total !== AMANDA_PRACTITIONER_KIT.priceCad * 100 + shippingCents) return {ok:false,error:'Practitioner kit payment total is invalid.'};
+  // The private $1 training test must never create a physical fulfillment order.
+  if(includedCourseId&&meta.privateTestCheckout==='true'&&meta.paymentOption==='test'&&session.amount_total===100)return {ok:true,preview:true};
   if (process.env.VERCEL_ENV !== 'production') return {ok:true,preview:true};
   const id = `amanda-kit-order-${createHash('sha256').update(session.id).digest('hex').slice(0,24)}`;
   const existing=await loadStudioRecord<AmandaKitOrder>('experience',id);

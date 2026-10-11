@@ -12,3 +12,10 @@ export function amandaApplicationIdentity(formId:unknown,context:unknown,program
  return {formId:id,ownerQueue:AMANDA_APPLICATION_QUEUES[id],
   ...(id==='partner-vendor-application'?{program:'lifeline'}:program==='lifeline'?{program:'lifeline'}:{})};
 }
+
+export function amandaApplicationsForQueue<T extends {payload?:Record<string,unknown>}>(applications:T[],queue:string):T[] {
+ return applications.filter(application=>{
+  try {return amandaApplicationIdentity(application.payload?.formId,application.payload?.context,application.payload?.program).ownerQueue===queue;}
+  catch {return false;}
+ });
+}

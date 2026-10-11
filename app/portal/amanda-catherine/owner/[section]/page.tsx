@@ -13,7 +13,7 @@ import { DEFAULT_AMANDA_SITE_CONTENT } from '@/lib/amanda-catherine/site-content
 import { listPortalFormSubmissions } from '@/lib/portal-forms/store';
 import type { PortalFormSubmission } from '@/lib/portal-forms/types';
 import OwnerApplicationQueue from '../OwnerApplicationQueue';
-import {amandaApplicationIdentity} from '@/lib/amanda-catherine/queues';
+import {amandaApplicationsForQueue} from '@/lib/amanda-catherine/queues';
 
 const sections: Record<string, [string, string, string]> = {
   updates: ['Update Hub', 'GOVERNED CHANGES', 'Website and business change requests.'],
@@ -90,15 +90,7 @@ export default async function Page({ params }: { params: Promise<{ section: stri
   if (!item) notFound();
   const queueSections = new Set(['advisory', 'speaking', 'lifeline']);
   const allApplications = queueSections.has(section) ? await listPortalFormSubmissions('amanda-catherine', { kind: 'application' }) : [];
-  const submissions = allApplications.filter((submission) => {
-    let identity;
-    try{identity=amandaApplicationIdentity(submission.payload?.formId,submission.payload?.context,submission.payload?.program);}catch{return false;}
-    const formId = identity.formId;
-    if (section === 'advisory') return formId === 'founder-advisory';
-    if (section === 'speaking') return formId === 'speaking-media';
-    if (section === 'lifeline') return formId === 'lifeline-media-guest' || (formId === 'partner-vendor-application' && identity.program === 'lifeline');
-    return false;
-  });
+  const submissions = amandaApplicationsForQueue(allApplications,section);
   const kitOrders = section === 'practitioner-kit' ? await listAmandaKitOrders() : [];
   const bookSession = section === 'book' ? (await requirePortalModule('amanda-catherine', 'dashboard')).session : null;
   const purchasedCourseIds = bookSession?.email ? await getAmandaAssignedCourseIds('amanda-catherine', bookSession.email) : [];

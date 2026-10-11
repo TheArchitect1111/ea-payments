@@ -1,3 +1,4 @@
+import {amandaCtaKey} from '@/lib/amanda-catherine/tracking';
 import Link from 'next/link';
 import { listPortalFormSubmissions } from '@/lib/portal-forms/store';
 
@@ -18,7 +19,7 @@ export default async function Page(){
  const active=applications.filter((x)=>x.status==='submitted'||x.status==='reviewed');
  return <div className="approved-dashboard">
   <section className="approved-hero"><img src="/amanda-catherine/amanda-catherine-founder.webp" alt="Amanda Catherine"/><div><h1>Welcome, Amanda</h1><p>Create Beauty. Change Lives. Build Legacy.</p><blockquote>“Wellness is not just a service, it’s a calling.”</blockquote></div></section>
-  <section><h2>Quick Actions</h2><div className="approved-quick">{quick.map(([icon,label,href])=><Link data-cta-name="href" data-cta-key="href" href={href} key={href}><span>{icon}</span><b>{label}</b></Link>)}</div></section>
+  <section><h2>Quick Actions</h2><div className="approved-quick">{quick.map(([icon,label,href])=><Link data-cta-name={label} data-cta-key={amandaCtaKey(label)} href={href} key={href}><span>{icon}</span><b>{label}</b></Link>)}</div></section>
   <div className="approved-grid">
    <section className="approved-card"><div className="approved-card-head"><h2>Business Overview</h2><span>Last 30 Days ▾</span></div><div className="approved-metrics"><div><b>{submissions.length}</b><small>Total Activity</small></div><div><b>{active.length}</b><small>New Requests</small></div><div><b>4</b><small>Academy Programs</small></div><div><b>Live</b><small>Page + Portal</small></div></div></section>
    <section className="approved-card"><div className="approved-card-head"><h2>Recent Activity</h2><Link data-cta-name="View All →" data-cta-key="view-all" href="/portal/amanda-catherine/owner/clients">View All →</Link></div><p>{active.length?`${active.length} active application${active.length===1?'':'s'} need attention.`:'No active applications need attention.'}</p><p>Website enrollment is connected to secure checkout and learning access.</p></section>

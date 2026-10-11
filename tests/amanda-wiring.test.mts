@@ -5,7 +5,7 @@ import {build} from 'esbuild';
 import {writeFileSync,unlinkSync,readFileSync,readdirSync} from 'node:fs';
 import ts from 'typescript';
 import {amandaCtaKey,amandaClickScope,isAmandaSource} from '../lib/amanda-catherine/tracking';
-import {amandaApplicationIdentity} from '../lib/amanda-catherine/queues';
+import {amandaApplicationIdentity,amandaApplicationsForQueue} from '../lib/amanda-catherine/queues';
 const state={clicks:[] as any[],leads:[] as any[],paid:[] as any[]};(globalThis as any).__amandaWiring=state;
 const fixture=await build({stdin:{contents:"export * from './app/api/amanda-catherine/track/route';export * from './lib/amanda-catherine/brick-events';export * from './lib/amanda-catherine/payments';",resolveDir:process.cwd()},bundle:true,platform:'node',format:'esm',packages:'external',write:false,
 plugins:[{name:'durable-sink-fixture',setup(b){b.onResolve({filter:/^@\/lib\/services\/trackingPortal$/},a=>({path:a.path,namespace:'fixture'}));b.onLoad({filter:/.*/,namespace:'fixture'},()=>({contents:`export async function storeBrickInteraction(e){const s=globalThis.__amandaWiring;if(!s.clicks.some(x=>x.event_id===e.event_id))s.clicks.push(e);return {id:e.event_id};}export async function pushToTrackingPortal(e){globalThis.__amandaWiring.leads.push(e);return {ok:true};}export async function confirmTrackingPayment(e){globalThis.__amandaWiring.paid.push(e);return {ok:true};}export async function getTestTrackingRegistration(){return null;}export async function enqueueTrackingPortalRetry(){return false;}`,loader:'js'}));}}]});
@@ -62,4 +62,9 @@ test('live click persistence uses Amanda registry, atomically upserts event iden
 test('portal enrollment metrics include canonical Enroll Now labels',()=>{
  const base={id:'click',title:'Enroll',sourcePage:'/',timestamp:new Date().toISOString(),courseName:'Course',courseKey:'course',price:null,squareUrl:'',payload:''};
  assert.equal(eventsToday([{...base,ctaName:'Enroll'},{...base,ctaName:'Enroll Now'},{...base,ctaName:'Join Waitlist'}],'UTC','Enroll').length,2);
+});
+
+test('every application identity appears in its owner queue, including legacy Foundry and general applications',()=>{
+ const applications=[{payload:{formId:'founder-advisory'}},{payload:{formId:'speaking-media'}},{payload:{formId:'partner-vendor-application'}},{payload:{formId:'amanda-apply',context:'foundry'}},{payload:{formId:'amanda-apply'}},{payload:{formId:'foreign-form'}}];
+ assert.equal(amandaApplicationsForQueue(applications,'advisory').length,1);assert.equal(amandaApplicationsForQueue(applications,'speaking').length,1);assert.equal(amandaApplicationsForQueue(applications,'lifeline').length,1);assert.equal(amandaApplicationsForQueue(applications,'clients').length,2);
 });
