@@ -19,7 +19,7 @@ const db: TestDb = { records: new Map(), clients: new Map(), waitlist: new Map()
 const mocks: Record<string, string> = {
   './registry': "export async function create(){throw new Error('Payment updates must not create signup rows');} export async function registry(){return {};}",
   'stripe': "export default class Stripe {}",
-  '@/lib/services/trackingPortal': `export async function pushToTrackingPortal(event){globalThis.__amandaE2E.trackingEvents.push(event);return {ok:true};} export async function enqueueTrackingPortalRetry(){} export async function confirmTrackingPayment(event){ globalThis.__amandaE2E.trackingEvents.push(event); return {ok:true}; }`,
+  '@/lib/services/trackingPortal': `export async function pushToTrackingPortal(event){globalThis.__amandaE2E.trackingEvents.push(event);return {ok:true};} export async function enqueueTrackingPortalRetry(){} export async function getTestTrackingRegistration(id){return globalThis.__amandaE2E.records.get('experience:'+id)?.payload??null;} export async function confirmTrackingPayment(event){ globalThis.__amandaE2E.trackingEvents.push(event); return {ok:true}; }`,
   '@/lib/amanda-catherine/confirmation-letters': `export async function getAmandaConfirmationLetter(){return {type:'live',subject:'Registered for {{class_name}}',body_html:'Hello {{first_name}}, {{class_name}}'};}`,
   './practitioner-kit-orders': "export async function recordAmandaKitOrder(){return {ok:true};}",
   '@/lib/amanda-catherine/config': `
