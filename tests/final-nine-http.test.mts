@@ -20,6 +20,7 @@ const mock:Record<string,string>={
  const row={...t,...input,kind:k,id:x};s.records.set(x,row);return row;}
  export async function listFinal(t,k,role){return [...globalThis.__finalRoute.records.values()].filter(x=>x.organizationId===t.organizationId&&x.kind===k&&(role==='staff'||x.visibility==='member'));}
  export async function readFinal(t,k,id,role){const row=globalThis.__finalRoute.records.get(key(t,k,id));if(!row||(row.visibility==='staff'&&role!=='staff'))throw Error('Access denied');return row;}
+ export async function generateFinal(t,k,input){return saveFinal(t,k,{key:input.key,title:input.title,body:'Generated: '+input.sourceText,visibility:'member',state:'draft'},'staff');}
  export async function transitionFinal(t,k,id,action,role){const row=await readFinal(t,k,id,role);if(role!=='staff'&&k!=='training')throw Error('Staff only');
  if(k==='training'&&action.state==='completed'&&action.progress!==100)throw Error('Completion needs 100%');
  const next={...row,...action};globalThis.__finalRoute.records.set(key(t,k,id),next);return next;}`
@@ -53,3 +54,15 @@ for(const kind of ['pulse','amplifi','update-hub','messaging','training','landin
   assert.equal(change.status,200);
  });
 }
+
+test('Pulse and Amplifi live generator produces one durable draft per replayed source',async()=>{
+ for(const kind of ['pulse','amplifi']){
+  db.records.clear();db.role='staff';db.slug='tenant-test';
+  const input={kind,action:'generate',key:'source-1',title:'Draft',
+    sourceText:'Verified input signals and confirmed organization facts'};
+  const first=await api.POST(post(input));assert.equal(first.status,200);
+  const second=await api.POST(post(input));assert.equal(second.status,200);
+  assert.equal(db.records.size,1);
+  assert.match((await first.json()).record.body,/Generated:/);
+ }
+});
