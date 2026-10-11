@@ -1,5 +1,6 @@
 import EAAssistant from '@/app/components/ea-assistant/EAAssistant';
 import { resolvePortalWorkspaceChrome } from '@/lib/platform/portal-workspace';
+import AmandaCtaTracker from '@/app/portal/amanda-catherine/(engagement)/AmandaCtaTracker';
 
 type Props = {
   children: React.ReactNode;
@@ -10,10 +11,11 @@ export default async function PortalRouteLayout({ children, params }: Props) {
   const { slug } = await params;
   const chrome = await resolvePortalWorkspaceChrome(slug);
 
-  return (
+  const content = (
     <>
       {children}
       <EAAssistant surface="portal" workspaceAiContext={chrome.aiContext || undefined} />
     </>
   );
+  return slug==='amanda-catherine'?<AmandaCtaTracker>{content}</AmandaCtaTracker>:content;
 }

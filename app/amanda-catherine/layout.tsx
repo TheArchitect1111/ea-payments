@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import './mobile-render-fix.css';
+import AmandaCtaTracker from '@/app/portal/amanda-catherine/(engagement)/AmandaCtaTracker';
 
 export const metadata: Metadata = {
   title: 'Amanda Catherine | Restore · Learn · Create',
@@ -9,5 +10,5 @@ export const metadata: Metadata = {
 };
 
 export default function AmandaCatherineLayout({ children }: { children: ReactNode }) {
-  return children;
+  return <AmandaCtaTracker>{children}</AmandaCtaTracker>;
 }

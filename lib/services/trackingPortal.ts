@@ -1,4 +1,5 @@
 import clientRegistry from '@/lib/clients/registry.json';
+import type {BrickInteractionEvent} from './brickRegistrar';
 import { createHash } from 'node:crypto';
 import { airtableQuery, airtableUpdate, airtableUpsertByField } from '@/lib/data/airtable-client';
 import { loadStudioRecord, saveStudioRecord } from '@/lib/creative-studio/persistence';
@@ -23,9 +24,8 @@ export type TrackingPayment = {
 
 function registrationKey(email: string, course: string, clientId='amanda-catherine', registrationId?:string) {
   const original=email.trim().toLowerCase() + ':' + course;
-  // Preserve Amanda's existing enrollment identity, but allow multiple bookings
-  // of one generic brick for the same customer without overwriting the first.
-  return clientId==='amanda-catherine'?original:clientId+':'+(registrationId || original);
+  // Explicit signup identity isolates repeat purchases; legacy callers keep their old key.
+  return registrationId?clientId+':'+registrationId:clientId==='amanda-catherine'?original:clientId+':'+original;
 }
 function testRecordId(registrationId: string, clientId='amanda-catherine') {
   return 'amanda-tracking-test-' + createHash('sha256').update(clientId==='amanda-catherine'?registrationId:clientId+':'+registrationId).digest('hex').slice(0, 32);
@@ -53,6 +53,7 @@ export async function saveTrackingLead(lead: TrackingLead) {
   // Legacy fields remain the compatibility baseline for the existing Airtable schema.
   const current = await airtableQuery('portal_registrations',{
     filterByFormula:"{registration_key}='"+escapeFormula(key)+"'",maxRecords:1});
+  if(current[0]&&(String(current[0].fields.email).toLowerCase()!==lead.email||current[0].fields.class_id!==lead.class_id))throw new Error('Conflicting signup identity');
   const existingPayment = String(current[0]?.fields?.payment_status || '');
   const fields = {registration_key:key,first_name:lead.first_name,last_name:lead.last_name,
     email:lead.email,phone:lead.phone,class_name:lead.class_name,class_id:lead.class_id,
@@ -117,7 +118,7 @@ export async function storeTrackingPayment(event: TrackingPayment) {
   const key = registrationKey(event.email,event.class_id,event.client_id,event.registration_id);
   const rows = await airtableQuery('portal_registrations',{
     filterByFormula:"{registration_key}='" + escapeFormula(key) + "'",maxRecords:1});
-  if (!rows[0]) throw new Error('Matching live registration not found; payment was not matched');
+  if (!rows[0]||String(rows[0].fields.email).toLowerCase()!==event.email.toLowerCase()||rows[0].fields.class_id!==event.class_id) throw new Error('Matching live registration not found; payment was not matched');
   const id = 'amanda-tracking-meta-' + stableId(key);
   const lead = await loadStudioRecord<TrackingLead & {payment_provider?:string}>('experience',id);
   if (lead?.payment_status === 'paid' && lead.payment_reference !== event.payment_reference) throw new Error('Conflicting payment reference');
@@ -157,4 +158,25 @@ export async function getTestTrackingRegistration(id:string) {
 export const clientTrackingPortals: Record<string,{name:string;slug:string;portalPath:string;eventAdapter:string}>=clientRegistry;
 export function getClientTrackingPortal(slug:string) {
  return Object.prototype.hasOwnProperty.call(clientTrackingPortals,slug)?clientTrackingPortals[slug]:null;
+}
+
+/** Canonical anonymous interaction sink, separate from contact registrations. */
+export async function storeBrickInteraction(event:BrickInteractionEvent) {
+ const id='amanda-click-'+event.event_id;
+ if(event.is_test) {
+  const saved=await saveStudioRecord({recordType:'experience',id,
+   organizationId:syntheticOrgId('amanda-catherine'),title:'[TEST] Amanda CTA',
+   payload:{...event,record_kind:'amanda_click_test'}});
+  if(!saved.ok||!saved.persistedToAirtable)throw new Error(saved.error||'Test click not saved');
+  return {id};
+ }
+ let course: {key:string;title:string;price:number|null;square_checkout_url:string|null}|undefined;
+ if(event.course_key){const {registry}=await import('@/lib/amanda-catherine/registry');course=(await registry()).courses.find(item=>item.key===event.course_key);if(!course)throw new Error('Unknown Amanda course click');}
+ const title=`${event.cta_name} — ${event.event_id}`;
+ const row=await airtableUpsertByField('Business Interested','Title',title,{
+  Title:title,'CTA Name':event.cta_name,'Source Page':event.source,Timestamp:event.timestamp,
+  Status:'CTA Clicked',Portal:'amanda-catherine','Portal Slug':'amanda-catherine',
+  Event:'cta_click','Payload JSON':JSON.stringify(event),...(course?{'Course Key':course.key,'Course Name':course.title,Price:course.price??undefined,'Square URL':course.square_checkout_url||undefined}:{})});
+ if(!row)throw new Error('Amanda click could not be saved');
+ return {id:row.id};
 }

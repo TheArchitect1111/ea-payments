@@ -55,7 +55,7 @@ function mapRow(row: { id: string; fields: Record<string, unknown> }): PortalFor
     id: String(row.fields['Submission ID'] || row.id),
     portalSlug: normalizeSlug(String(row.fields['Portal Slug'] || '')),
     kind: String(row.fields.Kind || 'intake') as PortalFormKind,
-    status: (String(row.fields.Status || 'submitted') as PortalFormStatus) || 'submitted',
+    status: (String(row.fields['Portal Slug']||'')==='amanda-catherine'&&String(row.fields.Status).toLowerCase()==='new'?'submitted':String(row.fields.Status||'submitted')) as PortalFormStatus,
     email: String(row.fields.Email || '').trim(),
     name: String(row.fields.Name || '').trim(),
     phone: row.fields.Phone ? String(row.fields.Phone) : undefined,

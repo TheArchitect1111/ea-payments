@@ -1,0 +1,49 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {build} from 'esbuild';
+import {writeFileSync,unlinkSync,readFileSync,readdirSync} from 'node:fs';
+import ts from 'typescript';
+import {amandaCtaKey,amandaClickScope,isAmandaSource} from '../lib/amanda-catherine/tracking';
+import {amandaApplicationIdentity} from '../lib/amanda-catherine/queues';
+const state={clicks:[] as any[],leads:[] as any[],paid:[] as any[]};(globalThis as any).__amandaWiring=state;
+const fixture=await build({stdin:{contents:"export * from './app/api/amanda-catherine/track/route';export * from './lib/amanda-catherine/brick-events';export * from './lib/amanda-catherine/payments';",resolveDir:process.cwd()},bundle:true,platform:'node',format:'esm',packages:'external',write:false,
+plugins:[{name:'durable-sink-fixture',setup(b){b.onResolve({filter:/^@\/lib\/services\/trackingPortal$/},a=>({path:a.path,namespace:'fixture'}));b.onLoad({filter:/.*/,namespace:'fixture'},()=>({contents:`export async function storeBrickInteraction(e){const s=globalThis.__amandaWiring;if(!s.clicks.some(x=>x.event_id===e.event_id))s.clicks.push(e);return {id:e.event_id};}export async function pushToTrackingPortal(e){globalThis.__amandaWiring.leads.push(e);return {ok:true};}export async function confirmTrackingPayment(e){globalThis.__amandaWiring.paid.push(e);return {ok:true};}export async function getTestTrackingRegistration(){return null;}export async function enqueueTrackingPortalRetry(){return false;}`,loader:'js'}));}}]});
+const file='tests/.amanda-wiring-fixture.mjs';writeFileSync(file,fixture.outputFiles[0].text);const api=await import('./.amanda-wiring-fixture.mjs');unlinkSync(file);
+const click={event:'cta_click',portal_slug:'amanda-catherine',event_id:crypto.randomUUID(),visitor_id:crypto.randomUUID(),cta_key:'explore-restore',cta_name:'Explore Restore',page:'/',destination:'https://amandacatherine.ca/amanda/restore',timestamp:new Date().toISOString()};
+function request(body:any,origin='https://amandacatherine.ca'){return new Request('https://ea-payments.vercel.app/api/amanda-catherine/track',{method:'POST',headers:{origin,'content-type':'application/json','x-forwarded-for':crypto.randomUUID()},body:JSON.stringify(body)});}
+test('homepage and Classes clicks validate, reach registrar, replay without duplicate and do not create leads',async()=>{
+ process.env.VERCEL_ENV='production';
+ for(const c of [click,{...click,event_id:crypto.randomUUID(),page:'/portal/amanda-catherine/classes',cta_key:'join-waitlist-nervous-system-reset',cta_name:'Join Waitlist',course_key:'nervous-system-reset'}]){
+ assert.equal((await api.POST(request(c))).status,200);assert.equal((await api.POST(request(c))).status,200);
+ }
+ assert.equal(state.clicks.length,2);assert.equal(state.leads.length,0);assert.equal(state.paid.length,0);
+ assert.equal(state.clicks[0].event,'amanda:homepage:explore-restore');assert.equal(state.clicks[1].event,'amanda:classes:join-waitlist-nervous-system-reset');
+ assert.equal((await api.POST(request({...click,page:'/portal/tarris/classes'}))).status,400);
+ assert.equal((await api.POST(request({...click,cta_key:'Enroll Now'}))).status,400);
+ assert.equal((await api.POST(request({...click,destination:'javascript:alert(1)'}))).status,400);
+ assert.equal((await api.POST(request(click,'https://attacker.example'))).status,403);
+ assert.equal((await api.POST(request({...click,email:'person@example.com'}))).status,400);
+});
+test('normalization never produces invalid long CTA keys and source scopes stay tenant bound',()=>{
+ for(const x of ['Enroll Now — Clinical Fat Loss','Ämanda!','a'.repeat(99)+' -- last'])assert.match(amandaCtaKey(x),/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
+ assert.equal(amandaClickScope('/amanda/restore'),'pathway');assert.equal(isAmandaSource('/amanda-imposter'),false);
+});
+test('named and legacy application identities resolve to the correct owner queue',()=>{
+ assert.deepEqual(amandaApplicationIdentity('amanda-apply','founder-advisory',''),{formId:'founder-advisory',ownerQueue:'advisory'});
+ assert.equal(amandaApplicationIdentity('speaking-media','','').ownerQueue,'speaking');
+ assert.deepEqual(amandaApplicationIdentity('partner-vendor-application','',''),{formId:'partner-vendor-application',ownerQueue:'lifeline',program:'lifeline'});
+ assert.throws(()=>amandaApplicationIdentity('other-tenant','',''));
+});
+test('Stripe payment keeps signup identity, rejects unpaid and other tenants, isolates preview',async()=>{
+ const id=crypto.randomUUID();await api.registerAmandaCheckout({registrationId:id,brickId:'kit',name:'Kit Customer',email:'kit@example.com',source:'/kit'});
+ const session={id:'cs_unit',payment_status:'paid',payment_intent:'pi_unit',metadata:{portalSlug:'amanda-catherine',registrationId:id,clientName:'Kit Customer',clientEmail:'kit@example.com'}};
+ await api.recordAmandaVerifiedPayment(session,'kit');assert.equal(state.paid.at(-1).registration_id,state.leads.at(-1).registration_id);
+ const before=state.paid.length;await assert.rejects(api.recordAmandaVerifiedPayment({...session,payment_status:'unpaid'},'kit'));await assert.rejects(api.recordAmandaVerifiedPayment({...session,metadata:{...session.metadata,portalSlug:'tarris'}},'kit'));assert.equal(state.paid.length,before);
+ process.env.VERCEL_ENV='preview';await api.recordAmandaVerifiedPayment(session,'kit');assert.equal(state.paid.at(-1).is_test,true);process.env.VERCEL_ENV='production';
+});
+test('every Amanda public/HQ source CTA has explicit identity; no permanently disabled billing control',()=>{
+ const files:string[]=[];function walk(p:string){for(const x of readdirSync(p,{withFileTypes:true})){const q=p+'/'+x.name;if(x.isDirectory())walk(q);else if(q.endsWith('.tsx'))files.push(q);}}
+ ['app/amanda-catherine','app/amanda','app/portal/amanda-catherine','app/components/amanda'].forEach(walk);
+ let total=0;for(const file of files){const source=ts.createSourceFile(file,readFileSync(file,'utf8'),ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX);function visit(n:ts.Node){if(ts.isJsxOpeningElement(n)||ts.isJsxSelfClosingElement(n)){if(['a','Link','button'].includes(n.tagName.getText(source))){total++;const attrs=n.attributes.properties.map(x=>(x as ts.JsxAttribute).name?.getText(source));assert.ok(attrs.includes('data-cta-name')&&attrs.includes('data-cta-key'),file+': missing CTA identity');}}ts.forEachChild(n,visit);}visit(source);}assert.ok(total>100);
+ const billing=readFileSync('app/portal/[slug]/billing/AmandaPayments.tsx','utf8');assert.ok(billing.includes('/portal/amanda-catherine/billing/setup'));assert.ok(!billing.includes('disabled style')&&!billing.includes('|| !membership.available'));
+});

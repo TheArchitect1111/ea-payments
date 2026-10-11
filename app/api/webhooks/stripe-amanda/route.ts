@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
     return new Response(`Webhook error: ${message}`, { status: 400 });
   }
 
-  if (event.type === 'checkout.session.completed') {
+  if (event.type === 'checkout.session.completed' || event.type === 'checkout.session.async_payment_succeeded') {
     const session = event.data.object as Stripe.Checkout.Session;
     if (isAmandaKitSession(session)) {
       const result = await recordAmandaKitOrder(session);

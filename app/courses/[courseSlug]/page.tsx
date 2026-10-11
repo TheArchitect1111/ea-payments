@@ -1,3 +1,4 @@
+import AmandaCtaTracker from '@/app/portal/amanda-catherine/(engagement)/AmandaCtaTracker';
 import { notFound } from 'next/navigation';
 import AmandaWarmLetter from '@/components/amanda/AmandaWarmLetter';
 import AmandaWaitlistForm from '@/components/amanda/AmandaWaitlistForm';
@@ -16,7 +17,7 @@ export default async function Page({ params }: { params: Promise<{ courseSlug: s
   if (!course) notFound();
 
   return (
-    <main className="min-h-screen bg-[#f7f1e8] px-5 py-12 text-[#17130f]">
+    <AmandaCtaTracker><main className="min-h-screen bg-[#f7f1e8] px-5 py-12 text-[#17130f]">
       {['strategy-call', '90-day-package'].includes(course.key) && <AppHeaderNote appName={course.title} />}
       <section className="mx-auto max-w-3xl">
         <AmandaWarmLetter compact />
@@ -29,6 +30,6 @@ export default async function Page({ params }: { params: Promise<{ courseSlug: s
           <AmandaWaitlistForm courseId={course.key} courseName={course.title} status={course.status} />
         </section>
       </section>
-    </main>
+    </main></AmandaCtaTracker>
   );
 }

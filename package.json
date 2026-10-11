@@ -113,7 +113,7 @@
     "test:ea-immersive-template": "node scripts/test-ea-immersive-template.mjs",
     "test:amanda-dollar-e2e": "node --import tsx --test tests/amanda-dollar-test.test.ts",
     "test:amanda-public": "playwright test --config=playwright.amanda.config.ts",
-    "test": "npm run test:amanda-dollar-e2e && npm run test:chassis-autowire && npm run test:blockers-certified && npm run test:remaining-bricks && npm run test:commerce-family && npm run test:capture-family && npm run test:capture-customer-routes && npm run test:content-family && npm run test:content-http && npm run test:final-nine && npm run test:final-nine-http && npm run test:tb3-bonfire && npm run test:brick-registrar && npm run test:tb3-brick-wire && npm run test:tb3-merch-registrar && npm run test:brick-chassis-guard && npm run test:client-factory",
+    "test": "npm run test:amanda-dollar-e2e && npm run test:chassis-autowire && npm run test:blockers-certified && npm run test:remaining-bricks && npm run test:commerce-family && npm run test:capture-family && npm run test:capture-customer-routes && npm run test:content-family && npm run test:content-http && npm run test:final-nine && npm run test:final-nine-http && npm run test:tb3-bonfire && npm run test:brick-registrar && npm run test:tb3-brick-wire && npm run test:tb3-merch-registrar && npm run test:brick-chassis-guard && npm run test:client-factory && npm run test:amanda-wiring",
     "test:chassis-autowire": "node --import tsx --test tests/chassis-autowire.test.mts",
     "test:blockers-certified": "node --import tsx --test tests/blockers-certified.test.mts",
     "test:blockers-ui": "node scripts/test-blockers-ui.mjs",
@@ -130,7 +130,8 @@
     "test:tb3-brick-wire": "node --import tsx --test tests/tb3-brick-auto-wire.test.mts",
     "test:tb3-merch-registrar": "node --import tsx --test tests/tb3-merch-registrar.test.mts",
     "test:brick-chassis-guard": "node scripts/guard-brick-chassis.mjs",
-    "test:client-factory": "node --import tsx --test tests/client-factory.test.mts"
+    "test:client-factory": "node --import tsx --test tests/client-factory.test.mts",
+    "test:amanda-wiring": "node --import tsx --test tests/amanda-wiring.test.mts"
   },
   "dependencies": {
     "@clerk/nextjs": "^7.5.9",

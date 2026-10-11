@@ -1,5 +1,5 @@
 import { recordAmandaKitOrder } from './practitioner-kit-orders';
-import { handleAmandaSubmit } from '@/lib/amanda-catherine/storage';
+import {recordAmandaVerifiedPayment} from './payments';
 import { getAmandaConfirmationLetter } from '@/lib/amanda-catherine/confirmation-letters';
 import { sendAuthEmail } from '@/lib/ea-auth-email';
 import { amandaTrialFromStripeSession } from './test-access-rules';
@@ -35,7 +35,7 @@ function paymentEmail(session: Stripe.Checkout.Session) {
 function stringId(value: string | { id?: string } | null | undefined) { return typeof value === 'string' ? value : value?.id || undefined; }
 export function isAmandaCheckoutSession(session: Stripe.Checkout.Session) {
   const meta = session.metadata ?? {};
-  return Boolean(meta.portalSlug?.toLowerCase().startsWith('amanda-catherine') && (meta.amandaOfferId || meta.amandaMembershipId));
+  return Boolean(meta.portalSlug?.toLowerCase()==='amanda-catherine' && (meta.amandaOfferId || meta.amandaMembershipId));
 }
 async function persistPaymentRecord(record: AmandaPaymentRecord, title: string) {
   return saveStudioRecord({ recordType: 'experience', id: record.id, organizationId: syntheticOrgId(record.portalSlug), title, payload: record });
@@ -45,7 +45,7 @@ export async function fulfillAmandaCheckout(session: Stripe.Checkout.Session, so
   const meta = session.metadata ?? {};
   const portalSlug = String(meta.portalSlug || '').trim().toLowerCase();
   const email = paymentEmail(session);
-  if (!portalSlug.startsWith('amanda-catherine') || !email) return { ok: false as const, error: 'Amanda payment identity is incomplete.' };
+  if (portalSlug!=='amanda-catherine' || !email) return { ok: false as const, error: 'Amanda payment identity is incomplete.' };
   const offer = AMANDA_OFFERS.find((item) => item.id === meta.amandaOfferId);
   const membership = AMANDA_MEMBERSHIPS.find((item) => item.id === meta.amandaMembershipId);
   if (!offer && !membership) return { ok: false as const, error: 'Amanda offer or membership was not recognized.' };
@@ -59,6 +59,9 @@ export async function fulfillAmandaCheckout(session: Stripe.Checkout.Session, so
     const kit = await recordAmandaKitOrder(session, courseId);
     if (!kit.ok) return { ok: false as const, error: kit.error || 'Kit fulfillment could not be recorded.' };
   }
+  const trackingBrickId=courseId||offer?.id||membership!.id;
+  let trackingRegistrationId=meta.registrationId;
+  if(session.payment_status==='paid'){try{trackingRegistrationId=(await recordAmandaVerifiedPayment(session,trackingBrickId,Boolean(amandaTrialFromStripeSession(session,courseId)))).registrationId;}catch(error){console.error('[amanda-payment] verified tracking failed',error);return {ok:false as const,error:'Verified payment could not be linked to its signup.'};}}
   const id = recordId(session.id); const existing = await loadStudioRecord<AmandaPaymentRecord>('experience', id); const now = new Date().toISOString();
   const trial = amandaTrialFromStripeSession(session, courseId);
   const isTestAccess = Boolean(trial);
@@ -72,7 +75,7 @@ export async function fulfillAmandaCheckout(session: Stripe.Checkout.Session, so
     amountPaidCad: (session.amount_total ?? 0) / 100, currency: String(session.currency || 'cad').toUpperCase(), paymentStatus: session.payment_status,
     stripeCustomerId: stringId(session.customer), stripeSubscriptionId: stringId(session.subscription), subscriptionStatus: membership ? 'active' : undefined,
     customerConfirmationSentAt: existing?.customerConfirmationSentAt, adminNotificationSentAt: existing?.adminNotificationSentAt,
-    isTestAccess, trackingRegistrationId:meta.registrationId || existing?.trackingRegistrationId,
+    isTestAccess, trackingRegistrationId:trackingRegistrationId || existing?.trackingRegistrationId,
     testPaidAt: existing?.testPaidAt ?? testPaidAt, expiresAt: existing?.expiresAt ?? expiresAt,
     trackingLetterSentAt: existing?.trackingLetterSentAt,
     recordedAt: existing?.recordedAt ?? now, updatedAt: now,
@@ -109,20 +112,6 @@ export async function fulfillAmandaCheckout(session: Stripe.Checkout.Session, so
     await emitPulseEvent({ product: 'ea-platform', type: 'fulfillment.review_required', title: 'Amanda client access needs attention', detail: `${email} · ${access.error}`, priority: 'high', href: `/portal/${portalSlug}/deliveries`, tenantId: portalSlug, objectId: id });
     return { ok: false as const, error: access.error || 'Student access could not be provisioned.', paymentRecorded: true as const };
   }
-  // Only Square's signed callback or Stripe's verified checkout can mark tracking paid.
-  // Never create a second registration from payment fulfillment.
-  if (courseId && meta.registrationId && session.payment_status === 'paid') {
-    try {
-      await handleAmandaSubmit({}, undefined, {
-        event_type:'payment_confirmed', registration_id:meta.registrationId, email, class_id:courseId,
-        payment_status:'paid', payment_reference:transactionId, payment_provider:'stripe',
-        timestamp:now, is_test:isTestAccess,
-      });
-    } catch(error) {
-      console.error('[amanda-payment] verified payment tracking sync failed',error);
-      return {ok:false as const,error:'Verified payment could not be linked to its signup.',paymentRecorded:true as const};
-    }
-  }
   // Amanda's approved confirmation letter is separate from Stripe's receipt.
   if (isTestAccess && courseId && !record.trackingLetterSentAt) {
     try {
@@ -155,7 +144,7 @@ export async function listAmandaPayments(portalSlug: string, email: string) {
 
 export async function updateAmandaMembershipLifecycle(subscription: Stripe.Subscription) {
   const meta = subscription.metadata ?? {}; const portalSlug = String(meta.portalSlug || '').trim().toLowerCase(); const membershipId = String(meta.amandaMembershipId || ''); const email = String(meta.clientEmail || '').trim().toLowerCase();
-  if (!portalSlug.startsWith('amanda-catherine') || !membershipId || !email) return false;
+  if (portalSlug!=='amanda-catherine' || !membershipId || !email) return false;
   const rows = await listAmandaPayments(portalSlug, email); const match = rows.find((row) => row.membershipId === membershipId && row.stripeSubscriptionId === subscription.id); if (!match) return false;
   const next: AmandaPaymentRecord = { ...match, subscriptionStatus: subscription.status, updatedAt: new Date().toISOString() };
   await saveStudioRecord({ recordType: 'experience', id: match.id, organizationId: syntheticOrgId(portalSlug), title: `Amanda membership payment: ${membershipId}`, payload: next });

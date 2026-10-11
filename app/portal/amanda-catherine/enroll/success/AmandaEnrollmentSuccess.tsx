@@ -48,10 +48,10 @@ export default function AmandaEnrollmentSuccess() {
             <h1 className="mt-5 font-serif text-5xl">You’re enrolled.</h1>
             <p className="mt-5 text-lg leading-8">Your course has been assigned to <strong>{state.email}</strong>.</p>
             <p className="mt-3 leading-7">{state.welcomeSent ? 'Check your email for your temporary password and sign-in instructions.' : 'Your existing Amanda Catherine sign-in now includes this course.'}</p>
-            <a href={state.loginUrl} className="mt-7 inline-flex min-h-14 items-center justify-center rounded-full bg-[#c39851] px-8 text-lg font-black">Open Courses & Learning</a>
+            <a data-cta-name="Open Courses & Learning" data-cta-key="open-courses-learning" href={state.loginUrl} className="mt-7 inline-flex min-h-14 items-center justify-center rounded-full bg-[#c39851] px-8 text-lg font-black">Open Courses & Learning</a>
           </>
         )}
-        <div className="mt-8"><Link className="font-bold underline" href="https://amandacatherine.ca">Return to AmandaCatherine.ca</Link></div>
+        <div className="mt-8"><Link data-cta-name="Return to AmandaCatherine.ca" data-cta-key="return-to-amandacatherine-ca" className="font-bold underline" href="https://amandacatherine.ca">Return to AmandaCatherine.ca</Link></div>
       </section>
     </main>
   );

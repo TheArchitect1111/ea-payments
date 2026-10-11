@@ -42,10 +42,27 @@ const EventSchema=z.object({
  is_test:z.boolean(),
 }).strict();
 export type BrickEvent=z.infer<typeof EventSchema>;
+const InteractionSchema=z.object({
+ event_type:z.literal('interaction'),client_id:z.literal('amanda-catherine'),
+ event_id:z.string().uuid(),visitor_id:z.string().uuid(),
+ event:z.string().regex(/^amanda:(homepage|classes|portal|pathway):[a-z0-9]+(?:-[a-z0-9]+)*$/),
+ cta_key:z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).max(100),
+ cta_name:z.string().trim().min(1).max(200),source:z.string().startsWith('/').max(500),
+ destination:z.string().min(1).max(2000),timestamp:z.string().datetime({offset:true}),
+ is_test:z.boolean(),course_key:z.string().max(128).optional(),
+}).strict();
+export type BrickInteractionEvent=z.infer<typeof InteractionSchema>;
 export type BrickRegistrationResult={ok:boolean;id?:string;error?:string;deferred?:boolean;alreadyPaid?:boolean};
 
-export async function registerBrickEvent(event:BrickEvent, verifiedPayment?:TrackingPayment):Promise<BrickRegistrationResult>{
+export async function registerBrickEvent(event:BrickEvent | BrickInteractionEvent, verifiedPayment?:TrackingPayment):Promise<BrickRegistrationResult>{
  try {
+  if('event_type' in event&&event.event_type==='interaction') {
+   if(verifiedPayment)return {ok:false,error:'Clicks cannot contain payment evidence'};
+   const click=InteractionSchema.parse(event);
+   if(click.event!==`amanda:${click.event.split(':')[1]}:${click.cta_key}`)return {ok:false,error:'Click name does not match canonical key'};
+   const transport=await import('@/lib/services/trackingPortal');
+   return {ok:true,...await transport.storeBrickInteraction(click)};
+  }
   const e=EventSchema.parse(event);
   if(e.payment_status==='paid'){
    if(!verifiedPayment||verifiedPayment.event_type!=='payment_confirmed'||
