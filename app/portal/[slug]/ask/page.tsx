@@ -1,3 +1,4 @@
+import FinalBrickPanel from '@/app/portal/components/FinalBrickPanel';
 import Link from 'next/link';
 import { NAVY, GOLD } from '@/lib/design-system';
 import { requirePortalModule } from '@/lib/modules/portal-modules';
@@ -29,6 +30,7 @@ export default async function AskAdvisorPage({ params }: { params: Promise<{ slu
           Open message form
         </Link>
       </div>
+      {!slug.startsWith('amanda-catherine') ? <FinalBrickPanel kind="ask" title="ask workspace" /> : null}
     </PortalSubpage>
   );
 }
