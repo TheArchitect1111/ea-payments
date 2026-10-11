@@ -6,7 +6,7 @@ export default async function FormPage({ kind, course = '', context = '' }: { ki
   try {
     const [r, hqTools] = await Promise.all([registry(), getAmandaHqTools()]);
     const selected = r.courses.find((c) => c.key === course);
-    if (kind === 'enroll' && selected?.status === 'READY' && selected.square_checkout_url) {
+    if (kind === 'enroll' && selected?.status === 'READY' && selected.price !== null) {
       const form=formDefinition(r.forms,'amanda-enroll');
       return <section className="amanda-card amanda-form"><p className="amanda-status">AMANDA CATHERINE</p><h1>{selected.title}</h1>
         {hqTools.registerLetter && <p className="amanda-hq-letter">{hqTools.registerLetter}</p>}
@@ -15,7 +15,7 @@ export default async function FormPage({ kind, course = '', context = '' }: { ki
           courseId={selected.key} context="enroll" />
       </section>;
     }
-    if (kind === 'enroll' && selected?.status === 'READY') return <section className="amanda-card"><p className="amanda-status">AMANDA CATHERINE</p><h1>{selected.title}</h1>{hqTools.registerLetter && <p className="amanda-hq-letter">{hqTools.registerLetter}</p>}<p>Square checkout is not configured for this course yet. Please contact Amanda for current enrollment options.</p></section>;
+    if (kind === 'enroll' && selected?.status === 'READY') return <section className="amanda-card"><p className="amanda-status">AMANDA CATHERINE</p><h1>{selected.title}</h1>{hqTools.registerLetter && <p className="amanda-hq-letter">{hqTools.registerLetter}</p>}<p>A checkout price has not been configured for this course. Please contact Amanda for current enrollment options.</p></section>;
 
     const type = kind === 'enroll' ? 'waitlist' : 'application';
     const formId = type === 'application' ? 'amanda-apply' : `amanda-${type}`;
