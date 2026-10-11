@@ -37,7 +37,8 @@ export default async function PortalPage({
   const { slug } = await params;
   const { client, session } = await requirePortalModule(slug, 'dashboard');
   // Read back tenant-specific durable defaults after module authorization.
-  const certifiedContent = await portalContentDefault(slug, 'dashboard');
+  const certifiedContent = slug.toLowerCase().startsWith('amanda-catherine')
+    ? null : await portalContentDefault(slug, 'dashboard');
 
   // Amanda's canonical portal home renders directly here. Do not redirect this
   // route to /member: Client Experience navigation points back to this route,
