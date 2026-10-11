@@ -10,31 +10,31 @@ Requested `docs/BRICKS_AUDIT.md` does not exist on the inspected production ref.
 
 `lib/bricks/module-install.ts` now persists durable tenant-scoped module-selection installation receipts for all non-dedicated selected modules. Existing records are replayed without rewriting, and a module/version mismatch fails closed. It uses the existing tenant validation and Airtable read-back persistence. The dedicated Calendar, People and Discovery installers remain unchanged. **This is shared receipt-level wiring, not proof of 100% functional autowire.** The receipt must not be interpreted as evidence of payment, signup, notifications, or other functional lifecycle readiness.
 
-| Brick | Certified YES/NO | Test | Autowires | Missing |
-|---|---|---|---|---|
-| dashboard | NO | Durable selection receipt (not executed in CI) | Receipt-level only | Dedicated lifecycle adapter, idempotency/provider integration tests; production 404 test-route proof |
-| pulse | NO | Durable selection receipt (not executed in CI) | Receipt-level only | Dedicated lifecycle adapter, idempotency/provider integration tests; production 404 test-route proof |
-| simplifi | NO | Durable selection receipt (not executed in CI) | Receipt-level only | Dedicated lifecycle adapter, idempotency/provider integration tests; production 404 test-route proof |
-| amplifi | NO | Durable selection receipt (not executed in CI) | Receipt-level only | Dedicated lifecycle adapter, idempotency/provider integration tests; production 404 test-route proof |
-| connect | NO | Durable selection receipt (not executed in CI) | Receipt-level only | Dedicated lifecycle adapter, idempotency/provider integration tests; production 404 test-route proof |
-| update-hub | NO | Durable selection receipt (not executed in CI) | Receipt-level only | Dedicated lifecycle adapter, idempotency/provider integration tests; production 404 test-route proof |
-| training | NO | Durable selection receipt (not executed in CI) | Receipt-level only | Dedicated lifecycle adapter, idempotency/provider integration tests; production 404 test-route proof |
-| landing | NO | Durable selection receipt (not executed in CI) | Receipt-level only | Dedicated lifecycle adapter, idempotency/provider integration tests; production 404 test-route proof |
-| documents | NO | Durable selection receipt (not executed in CI) | Receipt-level only | Dedicated lifecycle adapter, idempotency/provider integration tests; production 404 test-route proof |
-| messaging | NO | Durable selection receipt (not executed in CI) | Receipt-level only | Dedicated lifecycle adapter, idempotency/provider integration tests; production 404 test-route proof |
-| events | NO | Durable selection receipt (not executed in CI) | Receipt-level only | Dedicated lifecycle adapter, idempotency/provider integration tests; production 404 test-route proof |
-| resources | NO | Durable selection receipt (not executed in CI) | Receipt-level only | Dedicated lifecycle adapter, idempotency/provider integration tests; production 404 test-route proof |
-| ask | NO | Durable selection receipt (not executed in CI) | Receipt-level only | Dedicated lifecycle adapter, idempotency/provider integration tests; production 404 test-route proof |
-| billing | NO | Durable selection receipt (not executed in CI) | Receipt-level only | Dedicated lifecycle adapter, idempotency/provider integration tests; production 404 test-route proof |
-| settings | NO | Durable selection receipt (not executed in CI) | Receipt-level only | Dedicated lifecycle adapter, idempotency/provider integration tests; production 404 test-route proof |
-| ctp | NO | Durable selection receipt (not executed in CI) | Receipt-level only | Dedicated lifecycle adapter, idempotency/provider integration tests; production 404 test-route proof |
-| member | NO | Durable selection receipt (not executed in CI) | Receipt-level only | Dedicated lifecycle adapter, idempotency/provider integration tests; production 404 test-route proof |
-| intake | NO | Durable selection receipt (not executed in CI) | Receipt-level only | Dedicated lifecycle adapter, idempotency/provider integration tests; production 404 test-route proof |
-| applications | NO | Durable selection receipt (not executed in CI) | Receipt-level only | Dedicated lifecycle adapter, idempotency/provider integration tests; production 404 test-route proof |
-| reports | NO | Durable selection receipt (not executed in CI) | Receipt-level only | Dedicated lifecycle adapter, idempotency/provider integration tests; production 404 test-route proof |
+| Brick | Certified YES/NO | Has Installer | Has Replay Protection | Has Provisioning Test | 404 in Prod | Autowires |
+|---|---|---|---|---|---|---|
+| dashboard | NO | Receipt installer | Yes, receipt only | Yes, receipt probe, lifecycle not proved | CI pending | Selection receipt only |
+| pulse | NO | Receipt installer | Yes, receipt only | Yes, receipt probe, lifecycle not proved | CI pending | Selection receipt only |
+| simplifi | NO | Receipt installer | Yes, receipt only | Yes, receipt probe, lifecycle not proved | CI pending | Selection receipt only |
+| amplifi | NO | Receipt installer | Yes, receipt only | Yes, receipt probe, lifecycle not proved | CI pending | Selection receipt only |
+| connect | NO | Receipt installer | Yes, receipt only | Yes, receipt probe, lifecycle not proved | CI pending | Selection receipt only |
+| update-hub | NO | Receipt installer | Yes, receipt only | Yes, receipt probe, lifecycle not proved | CI pending | Selection receipt only |
+| training | NO | Receipt installer | Yes, receipt only | Yes, receipt probe, lifecycle not proved | CI pending | Selection receipt only |
+| landing | NO | Receipt installer | Yes, receipt only | Yes, receipt probe, lifecycle not proved | CI pending | Selection receipt only |
+| documents | NO | Receipt installer | Yes, receipt only | Yes, receipt probe, lifecycle not proved | CI pending | Selection receipt only |
+| messaging | NO | Receipt installer | Yes, receipt only | Yes, receipt probe, lifecycle not proved | CI pending | Selection receipt only |
+| events | NO | Receipt installer | Yes, receipt only | Yes, receipt probe, lifecycle not proved | CI pending | Selection receipt only |
+| resources | NO | Receipt installer | Yes, receipt only | Yes, receipt probe, lifecycle not proved | CI pending | Selection receipt only |
+| ask | NO | Receipt installer | Yes, receipt only | Yes, receipt probe, lifecycle not proved | CI pending | Selection receipt only |
+| billing | NO | Receipt installer | Yes, receipt only | Yes, receipt probe, lifecycle not proved | CI pending | Selection receipt only |
+| settings | NO | Receipt installer | Yes, receipt only | Yes, receipt probe, lifecycle not proved | CI pending | Selection receipt only |
+| ctp | NO | Receipt installer | Yes, receipt only | Yes, receipt probe, lifecycle not proved | CI pending | Selection receipt only |
+| member | NO | Receipt installer | Yes, receipt only | Yes, receipt probe, lifecycle not proved | CI pending | Selection receipt only |
+| intake | NO | Receipt installer | Yes, receipt only | Yes, receipt probe, lifecycle not proved | CI pending | Selection receipt only |
+| applications | NO | Receipt installer | Yes, receipt only | Yes, receipt probe, lifecycle not proved | CI pending | Selection receipt only |
+| reports | NO | Receipt installer | Yes, receipt only | Yes, receipt probe, lifecycle not proved | CI pending | Selection receipt only |
 
 ## Required acceptance before YES
 
 Each module needs a tenant-portable adapter or a clearly verified existing equivalent, durable business-record persistence, consistent-tenant readback, replay idempotency, functional write/list/update proof, tracking when applicable, and a Vercel-preview-only provisioning fixture returning GET/POST 404 in actual production. Payment modules require Stripe test-key isolation and same-row verified payment replay. Every new test must be executed; `npm test`, `npm run build`, and production-mode route probes must pass.
 
-**Verification status:** New receipt logic has been pushed to a feature branch. No local npm install, test, build, or production-mode HTTP test has been executed in this environment. Do not claim certification or merge this branch until these checks and module-specific provider flows pass. Existing production remains unchanged.
+**Verification status:** New receipt logic has been pushed to a feature branch. A branch-only GitHub CI workflow now runs npm test (including 20 structural contract checks), npm run build, and GET/POST production-mode 404 probes; its outcome must be inspected before claiming passes. No real end-to-end provider, payment, capture, notification, ACL, or job-generation proof has been executed. Do not claim certification or merge this branch until these checks and module-specific provider flows pass. Existing production remains unchanged.
