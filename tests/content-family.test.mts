@@ -2,14 +2,15 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { build } from 'esbuild';
 import { writeFileSync,unlinkSync } from 'node:fs';
-const db={rows:new Map<string,any>(),writes:new Map<string,number>(),durable:true};
+import { createHash } from 'node:crypto';
+const db={rows:new Map<string,any>(),writes:new Map<string,number>(),failId:''};
 (globalThis as any).__contentTest=db;
 const mocks:Record<string,string>={
  '@/lib/modules/tenant-install':"export async function loadTenantInstall(org){return {organizationId:org,portalSlug:'tenant-content',state:'installed',admitted:['documents','resources','dashboard','reports']};}",
  '@/lib/bricks/durable': `import {createHash} from 'node:crypto';
  export const brickHash=x=>createHash('sha256').update(JSON.stringify(x)).digest('hex');
  export async function readBrickRecord(t,id){const row=globalThis.__contentTest.rows.get(id);if(row&&(row.organizationId!==t.organizationId||row.portalSlug!==t.portalSlug))throw Error('Brick tenant mismatch');return row?structuredClone(row):null;}
- export async function writeBrickRecord(t,id,row){const d=globalThis.__contentTest;if(!d.durable)throw Error('Brick durable write failed');if(row.organizationId!==t.organizationId||row.portalSlug!==t.portalSlug)throw Error('Brick tenant mismatch');d.rows.set(id,structuredClone(row));d.writes.set(id,(d.writes.get(id)||0)+1);return row;}`,
+ export async function writeBrickRecord(t,id,row){const d=globalThis.__contentTest;if(d.failId===id)throw Error('Brick durable write failed');if(row.organizationId!==t.organizationId||row.portalSlug!==t.portalSlug)throw Error('Brick tenant mismatch');d.rows.set(id,structuredClone(row));d.writes.set(id,(d.writes.get(id)||0)+1);return row;}`,
 };
 const b=await build({stdin:{contents:"export * from './lib/bricks/content-family';",resolveDir:process.cwd()},
  bundle:true,write:false,platform:'node',format:'esm',packages:'external',plugins:[{name:'ports',setup(p){
@@ -21,7 +22,7 @@ const api=await import('../'+name);unlinkSync(name);
 const tenant={organizationId:'recONE123',portalSlug:'tenant-content'};
 for(const kind of ['documents','resources','dashboard','reports'] as const){
  test(`${kind}: defaults, durable storage, ACL, replay, tenant partition, report completion`,async()=>{
-  db.rows.clear();db.writes.clear();db.durable=true;
+  db.rows.clear();db.writes.clear();db.failId='';
   const def=await api.contentDefaults(tenant,kind),again=await api.contentDefaults(tenant,kind);
   assert.equal(def.id,again.id);assert.equal(db.writes.get(def.id),1);
   const input={key:'artifact-1',title:'Private file',visibility:'staff',
@@ -42,7 +43,7 @@ for(const kind of ['documents','resources','dashboard','reports'] as const){
     assert.deepEqual(completed,replay);
     await assert.rejects(api.finishReport(tenant,'artifact-1','/portal/other/reports/artifact-1','staff'),/mismatch/);
   }
-  db.durable=false;
+  db.failId='content-'+createHash('sha256').update(JSON.stringify([tenant.organizationId,kind,'offline'])).digest('hex');
   const failedWrite=await api.saveContent(tenant,kind,{...input,key:'offline'},'staff').then(()=>null,(error:Error)=>error);
   assert.match(failedWrite?.message ?? '',/durable/);
  });
