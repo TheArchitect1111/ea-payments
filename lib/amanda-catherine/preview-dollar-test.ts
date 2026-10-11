@@ -4,7 +4,9 @@ import { loadStudioRecordFromAirtable, saveStudioRecord } from '@/lib/creative-s
 import { syntheticOrgId } from '@/lib/platform-store';
 import Stripe from 'stripe';
 import { getAmandaConfirmationLetter } from '@/lib/amanda-catherine/confirmation-letters';
-import { confirmTrackingPayment, pushToTrackingPortal, type TrackingLead } from '@/lib/services/trackingPortal';
+import { pushToTrackingPortal, type TrackingLead } from '@/lib/services/trackingPortal';
+
+import { handleAmandaSubmit } from '@/lib/amanda-catherine/storage';
 
 const FIXTURE_EMAIL = 'amanda-preview-qa@example.invalid';
 const FIXTURE_CLASS = 'amanda-preview-dollar-test';
@@ -103,7 +105,7 @@ export async function runPreviewDollarTest(registrationId: string) {
       payment.currency !== 'cad' || payment.livemode !== false)
     throw new Error('Stripe test mode did not confirm the CAD $1 payment.');
 
-  await confirmTrackingPayment({
+  await handleAmandaSubmit({}, undefined, {
     event_type: 'payment_confirmed', is_test: true,
     registration_id: registrationId, email: FIXTURE_EMAIL, class_id: FIXTURE_CLASS,
     payment_status: 'paid', payment_reference: payment.id,
