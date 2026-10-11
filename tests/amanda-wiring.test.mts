@@ -1,3 +1,4 @@
+import {eventsToday} from '../lib/amanda-catherine/engagement';
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {build} from 'esbuild';
@@ -56,4 +57,9 @@ test('live click persistence uses Amanda registry, atomically upserts event iden
  await store.storeBrickInteraction(event);await store.storeBrickInteraction(event);
  assert.ok(writes.every(w=>w.path==='$base/amanda-business-table'));assert.deepEqual(writes[0].performUpsert,{fieldsToMergeOn:['Title']});assert.equal(writes[0].records[0].fields.Title,writes[1].records[0].fields.Title);assert.equal(writes[0].records[0].fields['Course Name'],'Nervous System Reset');
  await assert.rejects(store.storeBrickInteraction({...event,course_key:'foreign-course'}));assert.equal(writes.length,2);
+});
+
+test('portal enrollment metrics include canonical Enroll Now labels',()=>{
+ const base={id:'click',title:'Enroll',sourcePage:'/',timestamp:new Date().toISOString(),courseName:'Course',courseKey:'course',price:null,squareUrl:'',payload:''};
+ assert.equal(eventsToday([{...base,ctaName:'Enroll'},{...base,ctaName:'Enroll Now'},{...base,ctaName:'Join Waitlist'}],'UTC','Enroll').length,2);
 });
