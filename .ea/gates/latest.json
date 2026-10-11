@@ -1,21 +1,21 @@
 {
-  "sourceCommit": "0b8aaf09b9967e1d697c212e3ec9b22d25bff41b",
+  "sourceCommit": "198377aa0cd6175d6bd60d21a456ae0f9b68d9b2",
   "previewUrl": "https://ea-payments-git-master-the-architects-projects-cc813778.vercel.app/",
-  "target": "https://ea-payments-git-master-the-architects-projects-cc813778.vercel.app/amanda-catherine",
-  "completedAt": "2026-10-11T15:36:08.522Z",
+  "target": "https://ea-payments-git-master-the-architects-projects-cc813778.vercel.app/tarris",
+  "completedAt": "2026-10-11T17:56:09.146Z",
   "status": "PASS",
   "gates": {
     "sourceIdentity": {
       "status": "PASS",
-      "proof": "preview:0b8aaf09b9967e1d697c212e3ec9b22d25bff41b"
+      "proof": "preview:198377aa0cd6175d6bd60d21a456ae0f9b68d9b2"
     },
     "build": {
       "status": "PASS",
-      "proof": "source:0b8aaf09b9967e1d697c212e3ec9b22d25bff41b"
+      "proof": "source:198377aa0cd6175d6bd60d21a456ae0f9b68d9b2"
     },
     "assets": {
       "status": "PASS",
-      "proof": "desktop:11-visuals mobile:11-visuals"
+      "proof": "desktop:25-visuals mobile:25-visuals"
     },
     "functional": {
       "status": "PASS",
@@ -23,11 +23,11 @@
     },
     "desktopVisual": {
       "status": "PASS",
-      "proof": "sha256:491b1527afbe1b8f20797894f6424fd1066fe6fe835182c213fdd3e64b4fc474"
+      "proof": "sha256:9d6cfd774f603e6c63392ebe5d342bdf494011fa1f034a7d090f918ca3bd26f3"
     },
     "mobileVisual": {
       "status": "PASS",
-      "proof": "sha256:db152efa205d4e54b54f6f384be4f740fe12ee31b5b829ca7e43b0b161581a75"
+      "proof": "sha256:d3964e15fcbc9c4fe032a7863e9fb67e64cc03cf5ed15c58fd30a5f176725127"
     },
     "creativeCritic": {
       "status": "PASS",
@@ -37,7 +37,7 @@
   "details": {
     "certificationTransport": "exact-built-checkout-local",
     "buildInfo": {
-      "commitSha": "0b8aaf09b9967e1d697c212e3ec9b22d25bff41b",
+      "commitSha": "198377aa0cd6175d6bd60d21a456ae0f9b68d9b2",
       "branch": "master",
       "environment": "preview"
     },
@@ -45,7 +45,7 @@
       "name": "desktop",
       "httpStatus": 200,
       "screenshot": "/home/runner/work/ea-payments/ea-payments/artifacts/ea-gate/desktop.png",
-      "screenshotSha256": "491b1527afbe1b8f20797894f6424fd1066fe6fe835182c213fdd3e64b4fc474",
+      "screenshotSha256": "9d6cfd774f603e6c63392ebe5d342bdf494011fa1f034a7d090f918ca3bd26f3",
       "consoleErrors": [],
       "pageErrors": [],
       "failedRequests": [],
@@ -55,79 +55,43 @@
           "status": 200,
           "method": "GET",
           "resourceType": "document",
-          "url": "http://127.0.0.1:3000/amanda-catherine"
+          "url": "http://127.0.0.1:3000/tarris"
+        },
+        {
+          "status": 200,
+          "method": "GET",
+          "resourceType": "image",
+          "url": "http://127.0.0.1:3000/images/tb3-official/OFFICIAL_00_HERO_TB3_MORE_THAN_A_GAME.png"
+        },
+        {
+          "status": 200,
+          "method": "GET",
+          "resourceType": "image",
+          "url": "http://127.0.0.1:3000/videos/tb3-film/TB3-FILM-001-poster.webp"
+        },
+        {
+          "status": 200,
+          "method": "GET",
+          "resourceType": "image",
+          "url": "http://127.0.0.1:3000/videos/tb3-film/TB3-FILM-005-SCOREBOARD-PROOF.jpg"
         },
         {
           "status": 200,
           "method": "GET",
           "resourceType": "stylesheet",
-          "url": "http://127.0.0.1:3000/_next/static/chunks/2hltbts7fh1jv.css"
+          "url": "http://127.0.0.1:3000/_next/static/chunks/0x0h4ktm3-e7l.css"
         },
         {
           "status": 200,
           "method": "GET",
           "resourceType": "image",
-          "url": "http://127.0.0.1:3000/amanda-catherine/amanda-black-blouse.jpg"
-        },
-        {
-          "status": 200,
-          "method": "GET",
-          "resourceType": "stylesheet",
-          "url": "http://127.0.0.1:3000/_next/static/chunks/408fjgk5ymye-.css"
-        },
-        {
-          "status": 200,
-          "method": "GET",
-          "resourceType": "stylesheet",
-          "url": "http://127.0.0.1:3000/_next/static/chunks/2jkzit6dddyj_.css"
+          "url": "http://127.0.0.1:3000/videos/tb3-film/TB3-FILM-003-poster.webp"
         },
         {
           "status": 200,
           "method": "GET",
           "resourceType": "image",
-          "url": "http://127.0.0.1:3000/amanda-catherine/amanda-catherine-faith.webp"
-        },
-        {
-          "status": 200,
-          "method": "GET",
-          "resourceType": "image",
-          "url": "http://127.0.0.1:3000/amanda-catherine/studio-interior.jpg"
-        },
-        {
-          "status": 200,
-          "method": "GET",
-          "resourceType": "image",
-          "url": "http://127.0.0.1:3000/amanda-catherine/jane-payments.webp"
-        },
-        {
-          "status": 200,
-          "method": "GET",
-          "resourceType": "image",
-          "url": "http://127.0.0.1:3000/amanda-catherine/studio-treatment.jpg"
-        },
-        {
-          "status": 200,
-          "method": "GET",
-          "resourceType": "image",
-          "url": "http://127.0.0.1:3000/amanda-catherine/body-sculpt-practitioner-kit.jpg"
-        },
-        {
-          "status": 200,
-          "method": "GET",
-          "resourceType": "image",
-          "url": "http://127.0.0.1:3000/amanda-catherine/amanda-podium.jpg"
-        },
-        {
-          "status": 200,
-          "method": "GET",
-          "resourceType": "image",
-          "url": "http://127.0.0.1:3000/amanda-catherine/amanda-catherine-impact.webp"
-        },
-        {
-          "status": 200,
-          "method": "GET",
-          "resourceType": "image",
-          "url": "http://127.0.0.1:3000/amanda-catherine/studio-exterior.jpeg"
+          "url": "http://127.0.0.1:3000/videos/tb3-film/TB3-FILM-004-poster.webp"
         },
         {
           "status": 200,
@@ -139,25 +103,13 @@
           "status": 200,
           "method": "GET",
           "resourceType": "script",
-          "url": "http://127.0.0.1:3000/_next/static/chunks/0jy0gk7ijla1q.js"
-        },
-        {
-          "status": 200,
-          "method": "GET",
-          "resourceType": "script",
           "url": "http://127.0.0.1:3000/_next/static/chunks/1gdpaddb8g4_s.js"
         },
         {
           "status": 200,
           "method": "GET",
           "resourceType": "script",
-          "url": "http://127.0.0.1:3000/_next/static/chunks/turbopack-1jb0q40zg6mal.js"
-        },
-        {
-          "status": 200,
-          "method": "GET",
-          "resourceType": "script",
-          "url": "http://127.0.0.1:3000/_next/static/chunks/0prwexttzb-d-.js"
+          "url": "http://127.0.0.1:3000/_next/static/chunks/0jy0gk7ijla1q.js"
         },
         {
           "status": 200,
@@ -169,7 +121,13 @@
           "status": 200,
           "method": "GET",
           "resourceType": "script",
-          "url": "http://127.0.0.1:3000/_next/static/chunks/1l6ekrbzzn47p.js"
+          "url": "http://127.0.0.1:3000/_next/static/chunks/turbopack-2_8iy5v1gpgsr.js"
+        },
+        {
+          "status": 200,
+          "method": "GET",
+          "resourceType": "script",
+          "url": "http://127.0.0.1:3000/_next/static/chunks/0prwexttzb-d-.js"
         },
         {
           "status": 200,
@@ -181,13 +139,55 @@
           "status": 200,
           "method": "GET",
           "resourceType": "script",
-          "url": "http://127.0.0.1:3000/_next/static/chunks/43p3sfq-1v-k1.js"
+          "url": "http://127.0.0.1:3000/_next/static/chunks/1y0powzx3v595.js"
+        },
+        {
+          "status": 206,
+          "method": "GET",
+          "resourceType": "media",
+          "url": "http://127.0.0.1:3000/videos/tb3-intro/tb3-billboard-intro.mp4"
+        },
+        {
+          "status": 206,
+          "method": "GET",
+          "resourceType": "media",
+          "url": "http://127.0.0.1:3000/videos/tb3-film/TB3-FILM-001-DUNK-HD.mp4"
         },
         {
           "status": 200,
           "method": "GET",
           "resourceType": "script",
-          "url": "http://127.0.0.1:3000/_next/static/chunks/2718qxzrxb0s_.js"
+          "url": "http://127.0.0.1:3000/_next/static/chunks/1l6ekrbzzn47p.js"
+        },
+        {
+          "status": 206,
+          "method": "GET",
+          "resourceType": "media",
+          "url": "http://127.0.0.1:3000/videos/tb3-film/TB3-FILM-002-JUMBOTRON-18-8-3-HD.mp4"
+        },
+        {
+          "status": 206,
+          "method": "GET",
+          "resourceType": "media",
+          "url": "http://127.0.0.1:3000/videos/tb3-film/TB3-FILM-003-DRIVE-FINISH-HD.mp4"
+        },
+        {
+          "status": 200,
+          "method": "GET",
+          "resourceType": "script",
+          "url": "http://127.0.0.1:3000/_next/static/chunks/38yojjn618weo.js"
+        },
+        {
+          "status": 200,
+          "method": "GET",
+          "resourceType": "script",
+          "url": "http://127.0.0.1:3000/_next/static/chunks/16cs7t_gr-3cq.js"
+        },
+        {
+          "status": 206,
+          "method": "GET",
+          "resourceType": "media",
+          "url": "http://127.0.0.1:3000/videos/tb3-film/TB3-FILM-004-DEFENSE-BATTLE-HD.mp4"
         },
         {
           "status": 200,
@@ -199,45 +199,195 @@
           "status": 200,
           "method": "GET",
           "resourceType": "image",
-          "url": "http://127.0.0.1:3000/amanda-catherine/amanda-catherine-treatment.webp"
+          "url": "http://127.0.0.1:3000/images/tb3-official/OFFICIAL_03_LOW_STANCE_ARENA.png"
+        },
+        {
+          "status": 200,
+          "method": "GET",
+          "resourceType": "image",
+          "url": "http://127.0.0.1:3000/images/tb3-official/OFFICIAL_06_CABLE_MACHINE.png"
+        },
+        {
+          "status": 200,
+          "method": "GET",
+          "resourceType": "image",
+          "url": "http://127.0.0.1:3000/images/tb3-official/OFFICIAL_04_BALL_OVER_SHOULDER.png"
+        },
+        {
+          "status": 200,
+          "method": "GET",
+          "resourceType": "image",
+          "url": "http://127.0.0.1:3000/images/tb3-official/OFFICIAL_02_BENCH_YELLOW_KOBE.png"
+        },
+        {
+          "status": 200,
+          "method": "GET",
+          "resourceType": "image",
+          "url": "http://127.0.0.1:3000/images/tb3-official/OFFICIAL_05_TUNNEL_BOUIE_4_BACK.png"
+        },
+        {
+          "status": 200,
+          "method": "GET",
+          "resourceType": "image",
+          "url": "http://127.0.0.1:3000/images/tb3-official/OFFICIAL_13_BLAZER_CHAIR.png"
+        },
+        {
+          "status": 200,
+          "method": "GET",
+          "resourceType": "image",
+          "url": "http://127.0.0.1:3000/images/tb3-official/OFFICIAL_01_HEADSHOT_FRONT_BLACK_BG.png"
+        },
+        {
+          "status": 200,
+          "method": "GET",
+          "resourceType": "image",
+          "url": "http://127.0.0.1:3000/images/tb3-official/OFFICIAL_08_HEADSHOT_RED_BG.png"
+        },
+        {
+          "status": 200,
+          "method": "GET",
+          "resourceType": "image",
+          "url": "http://127.0.0.1:3000/images/tb3-official/OFFICIAL_10_CASUAL_LEAN.png"
+        },
+        {
+          "status": 200,
+          "method": "GET",
+          "resourceType": "image",
+          "url": "http://127.0.0.1:3000/images/tb3-official/OFFICIAL_14_YOUTH_HUDDLE.png"
+        },
+        {
+          "status": 200,
+          "method": "GET",
+          "resourceType": "image",
+          "url": "http://127.0.0.1:3000/images/tb3-official/OFFICIAL_12_KIDS_ART.png"
+        },
+        {
+          "status": 200,
+          "method": "GET",
+          "resourceType": "image",
+          "url": "http://127.0.0.1:3000/images/tb3-official/OFFICIAL_09_LIBRARY_STUDYING.png"
+        },
+        {
+          "status": 200,
+          "method": "GET",
+          "resourceType": "image",
+          "url": "http://127.0.0.1:3000/images/tb3-official/OFFICIAL_07_FILM_TABLET.png"
+        },
+        {
+          "status": 200,
+          "method": "GET",
+          "resourceType": "image",
+          "url": "http://127.0.0.1:3000/images/tb3-official/OFFICIAL_11_KITCHEN_NUTRITION.png"
+        },
+        {
+          "status": 200,
+          "method": "GET",
+          "resourceType": "image",
+          "url": "http://127.0.0.1:3000/videos/tb3-film/TB3-FILM-005-poster.webp"
+        },
+        {
+          "status": 200,
+          "method": "GET",
+          "resourceType": "image",
+          "url": "http://127.0.0.1:3000/images/tb3-official/OFFICIAL_15_PODIUM_SPEAKING.png"
+        },
+        {
+          "status": 200,
+          "method": "GET",
+          "resourceType": "image",
+          "url": "http://127.0.0.1:3000/merch/MOCK_TEE_SHORT_WHITE.jpg"
+        },
+        {
+          "status": 200,
+          "method": "GET",
+          "resourceType": "image",
+          "url": "http://127.0.0.1:3000/merch/MOCK_TEE_SHORT_RED.jpg"
+        },
+        {
+          "status": 200,
+          "method": "GET",
+          "resourceType": "image",
+          "url": "http://127.0.0.1:3000/merch/MOCK_TEE_LONG_RED.jpg"
+        },
+        {
+          "status": 200,
+          "method": "GET",
+          "resourceType": "image",
+          "url": "http://127.0.0.1:3000/merch/MOCK_TEE_LONG_WHITE.jpg"
+        },
+        {
+          "status": 200,
+          "method": "GET",
+          "resourceType": "font",
+          "url": "https://fonts.gstatic.com/s/barlow/v13/7cHqv4kjgoGqM7E3t-4s51os.woff2"
+        },
+        {
+          "status": 200,
+          "method": "GET",
+          "resourceType": "font",
+          "url": "https://fonts.gstatic.com/s/barlow/v13/7cHpv4kjgoGqM7E_DMs5.woff2"
+        },
+        {
+          "status": 200,
+          "method": "GET",
+          "resourceType": "font",
+          "url": "https://fonts.gstatic.com/s/barlow/v13/7cHqv4kjgoGqM7E30-8s51os.woff2"
         },
         {
           "status": 200,
           "method": "GET",
           "resourceType": "fetch",
-          "url": "http://127.0.0.1:3000/api/public/amanda/media"
+          "url": "http://127.0.0.1:3000/tarris/future?_rsc=pAoryoSpAnrey22z"
+        },
+        {
+          "status": 200,
+          "method": "GET",
+          "resourceType": "fetch",
+          "url": "http://127.0.0.1:3000/tarris/future?_rsc=OQtaPt7hDuylpNEp"
         },
         {
           "status": 200,
           "method": "GET",
           "resourceType": "image",
-          "url": "http://127.0.0.1:3000/amanda-catherine/amanda-catherine-entrepreneurial-artist.webp"
+          "url": "http://127.0.0.1:3000/merch/MOCK_HAT_WHITE.jpg"
         },
         {
           "status": 200,
           "method": "GET",
           "resourceType": "image",
-          "url": "https://www.buyincellderm.com/cdn/shop/files/ICDExpertExperienceKit.png?v=1772504566&width=2000"
+          "url": "http://127.0.0.1:3000/merch/MOCK_HOODIE_RED.jpg"
+        },
+        {
+          "status": 200,
+          "method": "GET",
+          "resourceType": "image",
+          "url": "http://127.0.0.1:3000/merch/MOCK_HOODIE_WHITE.jpg"
+        },
+        {
+          "status": 200,
+          "method": "GET",
+          "resourceType": "image",
+          "url": "http://127.0.0.1:3000/merch/MOCK_HOODIE_WHITE_LOGO_DETAIL_1.jpg"
         }
       ],
       "brokenImgs": [],
       "brokenBackgrounds": [],
-      "renderedVisuals": 11,
+      "renderedVisuals": 25,
       "overflow": 0,
-      "bodyTextLength": 8566,
-      "scrollHeight": 13940,
+      "bodyTextLength": 1928,
+      "scrollHeight": 5559,
       "viewport": {
         "width": 1440,
         "height": 1100
       },
       "placeholderSlots": [],
-      "publicBackground": null
+      "publicBackground": "rgba(0, 0, 0, 0)"
     },
     "mobile": {
       "name": "mobile",
       "httpStatus": 200,
       "screenshot": "/home/runner/work/ea-payments/ea-payments/artifacts/ea-gate/mobile.png",
-      "screenshotSha256": "db152efa205d4e54b54f6f384be4f740fe12ee31b5b829ca7e43b0b161581a75",
+      "screenshotSha256": "d3964e15fcbc9c4fe032a7863e9fb67e64cc03cf5ed15c58fd30a5f176725127",
       "consoleErrors": [],
       "pageErrors": [],
       "failedRequests": [],
@@ -247,79 +397,43 @@
           "status": 200,
           "method": "GET",
           "resourceType": "document",
-          "url": "http://127.0.0.1:3000/amanda-catherine"
+          "url": "http://127.0.0.1:3000/tarris"
         },
         {
           "status": 200,
           "method": "GET",
           "resourceType": "image",
-          "url": "http://127.0.0.1:3000/amanda-catherine/amanda-black-blouse.jpg"
-        },
-        {
-          "status": 200,
-          "method": "GET",
-          "resourceType": "image",
-          "url": "http://127.0.0.1:3000/amanda-catherine/amanda-catherine-faith.webp"
+          "url": "http://127.0.0.1:3000/images/tb3-official/OFFICIAL_00_HERO_TB3_MORE_THAN_A_GAME.png"
         },
         {
           "status": 200,
           "method": "GET",
           "resourceType": "stylesheet",
-          "url": "http://127.0.0.1:3000/_next/static/chunks/2jkzit6dddyj_.css"
-        },
-        {
-          "status": 200,
-          "method": "GET",
-          "resourceType": "stylesheet",
-          "url": "http://127.0.0.1:3000/_next/static/chunks/2hltbts7fh1jv.css"
-        },
-        {
-          "status": 200,
-          "method": "GET",
-          "resourceType": "stylesheet",
-          "url": "http://127.0.0.1:3000/_next/static/chunks/408fjgk5ymye-.css"
+          "url": "http://127.0.0.1:3000/_next/static/chunks/0x0h4ktm3-e7l.css"
         },
         {
           "status": 200,
           "method": "GET",
           "resourceType": "image",
-          "url": "http://127.0.0.1:3000/amanda-catherine/jane-payments.webp"
+          "url": "http://127.0.0.1:3000/videos/tb3-film/TB3-FILM-001-poster.webp"
         },
         {
           "status": 200,
           "method": "GET",
           "resourceType": "image",
-          "url": "http://127.0.0.1:3000/amanda-catherine/studio-treatment.jpg"
+          "url": "http://127.0.0.1:3000/videos/tb3-film/TB3-FILM-005-SCOREBOARD-PROOF.jpg"
         },
         {
           "status": 200,
           "method": "GET",
           "resourceType": "image",
-          "url": "http://127.0.0.1:3000/amanda-catherine/studio-interior.jpg"
+          "url": "http://127.0.0.1:3000/videos/tb3-film/TB3-FILM-003-poster.webp"
         },
         {
           "status": 200,
           "method": "GET",
           "resourceType": "image",
-          "url": "http://127.0.0.1:3000/amanda-catherine/body-sculpt-practitioner-kit.jpg"
-        },
-        {
-          "status": 200,
-          "method": "GET",
-          "resourceType": "image",
-          "url": "http://127.0.0.1:3000/amanda-catherine/amanda-catherine-impact.webp"
-        },
-        {
-          "status": 200,
-          "method": "GET",
-          "resourceType": "image",
-          "url": "http://127.0.0.1:3000/amanda-catherine/amanda-podium.jpg"
-        },
-        {
-          "status": 200,
-          "method": "GET",
-          "resourceType": "image",
-          "url": "http://127.0.0.1:3000/amanda-catherine/studio-exterior.jpeg"
+          "url": "http://127.0.0.1:3000/videos/tb3-film/TB3-FILM-004-poster.webp"
         },
         {
           "status": 200,
@@ -337,25 +451,13 @@
           "status": 200,
           "method": "GET",
           "resourceType": "script",
-          "url": "http://127.0.0.1:3000/_next/static/chunks/0f0yocbeu0no-.js"
-        },
-        {
-          "status": 200,
-          "method": "GET",
-          "resourceType": "script",
           "url": "http://127.0.0.1:3000/_next/static/chunks/0jy0gk7ijla1q.js"
         },
         {
           "status": 200,
           "method": "GET",
           "resourceType": "script",
-          "url": "http://127.0.0.1:3000/_next/static/chunks/turbopack-1jb0q40zg6mal.js"
-        },
-        {
-          "status": 200,
-          "method": "GET",
-          "resourceType": "script",
-          "url": "http://127.0.0.1:3000/_next/static/chunks/2-nfkpowurpdo.js"
+          "url": "http://127.0.0.1:3000/_next/static/chunks/0f0yocbeu0no-.js"
         },
         {
           "status": 200,
@@ -367,19 +469,67 @@
           "status": 200,
           "method": "GET",
           "resourceType": "script",
+          "url": "http://127.0.0.1:3000/_next/static/chunks/turbopack-2_8iy5v1gpgsr.js"
+        },
+        {
+          "status": 200,
+          "method": "GET",
+          "resourceType": "script",
+          "url": "http://127.0.0.1:3000/_next/static/chunks/1y0powzx3v595.js"
+        },
+        {
+          "status": 200,
+          "method": "GET",
+          "resourceType": "script",
+          "url": "http://127.0.0.1:3000/_next/static/chunks/2-nfkpowurpdo.js"
+        },
+        {
+          "status": 200,
+          "method": "GET",
+          "resourceType": "script",
           "url": "http://127.0.0.1:3000/_next/static/chunks/1l6ekrbzzn47p.js"
         },
         {
-          "status": 200,
+          "status": 206,
           "method": "GET",
-          "resourceType": "script",
-          "url": "http://127.0.0.1:3000/_next/static/chunks/43p3sfq-1v-k1.js"
+          "resourceType": "media",
+          "url": "http://127.0.0.1:3000/videos/tb3-intro/tb3-billboard-intro.mp4"
+        },
+        {
+          "status": 206,
+          "method": "GET",
+          "resourceType": "media",
+          "url": "http://127.0.0.1:3000/videos/tb3-film/TB3-FILM-001-DUNK-HD.mp4"
+        },
+        {
+          "status": 206,
+          "method": "GET",
+          "resourceType": "media",
+          "url": "http://127.0.0.1:3000/videos/tb3-film/TB3-FILM-002-JUMBOTRON-18-8-3-HD.mp4"
         },
         {
           "status": 200,
           "method": "GET",
           "resourceType": "script",
-          "url": "http://127.0.0.1:3000/_next/static/chunks/2718qxzrxb0s_.js"
+          "url": "http://127.0.0.1:3000/_next/static/chunks/38yojjn618weo.js"
+        },
+        {
+          "status": 200,
+          "method": "GET",
+          "resourceType": "script",
+          "url": "http://127.0.0.1:3000/_next/static/chunks/16cs7t_gr-3cq.js"
+        },
+        {
+          "status": 206,
+          "method": "GET",
+          "resourceType": "media",
+          "url": "http://127.0.0.1:3000/videos/tb3-film/TB3-FILM-003-DRIVE-FINISH-HD.mp4"
+        },
+        {
+          "status": 206,
+          "method": "GET",
+          "resourceType": "media",
+          "url": "http://127.0.0.1:3000/videos/tb3-film/TB3-FILM-004-DEFENSE-BATTLE-HD.mp4"
         },
         {
           "status": 200,
@@ -391,39 +541,189 @@
           "status": 200,
           "method": "GET",
           "resourceType": "image",
-          "url": "http://127.0.0.1:3000/amanda-catherine/amanda-catherine-treatment.webp"
+          "url": "http://127.0.0.1:3000/images/tb3-official/OFFICIAL_03_LOW_STANCE_ARENA.png"
+        },
+        {
+          "status": 200,
+          "method": "GET",
+          "resourceType": "image",
+          "url": "http://127.0.0.1:3000/images/tb3-official/OFFICIAL_04_BALL_OVER_SHOULDER.png"
+        },
+        {
+          "status": 200,
+          "method": "GET",
+          "resourceType": "image",
+          "url": "http://127.0.0.1:3000/images/tb3-official/OFFICIAL_06_CABLE_MACHINE.png"
+        },
+        {
+          "status": 200,
+          "method": "GET",
+          "resourceType": "image",
+          "url": "http://127.0.0.1:3000/images/tb3-official/OFFICIAL_02_BENCH_YELLOW_KOBE.png"
+        },
+        {
+          "status": 200,
+          "method": "GET",
+          "resourceType": "image",
+          "url": "http://127.0.0.1:3000/images/tb3-official/OFFICIAL_05_TUNNEL_BOUIE_4_BACK.png"
+        },
+        {
+          "status": 200,
+          "method": "GET",
+          "resourceType": "image",
+          "url": "http://127.0.0.1:3000/images/tb3-official/OFFICIAL_13_BLAZER_CHAIR.png"
+        },
+        {
+          "status": 200,
+          "method": "GET",
+          "resourceType": "image",
+          "url": "http://127.0.0.1:3000/images/tb3-official/OFFICIAL_01_HEADSHOT_FRONT_BLACK_BG.png"
+        },
+        {
+          "status": 200,
+          "method": "GET",
+          "resourceType": "image",
+          "url": "http://127.0.0.1:3000/images/tb3-official/OFFICIAL_08_HEADSHOT_RED_BG.png"
+        },
+        {
+          "status": 200,
+          "method": "GET",
+          "resourceType": "image",
+          "url": "http://127.0.0.1:3000/images/tb3-official/OFFICIAL_10_CASUAL_LEAN.png"
+        },
+        {
+          "status": 200,
+          "method": "GET",
+          "resourceType": "image",
+          "url": "http://127.0.0.1:3000/images/tb3-official/OFFICIAL_14_YOUTH_HUDDLE.png"
+        },
+        {
+          "status": 200,
+          "method": "GET",
+          "resourceType": "image",
+          "url": "http://127.0.0.1:3000/images/tb3-official/OFFICIAL_12_KIDS_ART.png"
+        },
+        {
+          "status": 200,
+          "method": "GET",
+          "resourceType": "image",
+          "url": "http://127.0.0.1:3000/images/tb3-official/OFFICIAL_09_LIBRARY_STUDYING.png"
+        },
+        {
+          "status": 200,
+          "method": "GET",
+          "resourceType": "image",
+          "url": "http://127.0.0.1:3000/images/tb3-official/OFFICIAL_07_FILM_TABLET.png"
+        },
+        {
+          "status": 200,
+          "method": "GET",
+          "resourceType": "image",
+          "url": "http://127.0.0.1:3000/images/tb3-official/OFFICIAL_11_KITCHEN_NUTRITION.png"
         },
         {
           "status": 200,
           "method": "GET",
           "resourceType": "fetch",
-          "url": "http://127.0.0.1:3000/api/public/amanda/media"
+          "url": "http://127.0.0.1:3000/tarris/future?_rsc=pAoryoSpAnrey22z"
+        },
+        {
+          "status": 200,
+          "method": "GET",
+          "resourceType": "font",
+          "url": "https://fonts.gstatic.com/s/barlow/v13/7cHpv4kjgoGqM7E_DMs5.woff2"
+        },
+        {
+          "status": 200,
+          "method": "GET",
+          "resourceType": "font",
+          "url": "https://fonts.gstatic.com/s/barlow/v13/7cHqv4kjgoGqM7E30-8s51os.woff2"
+        },
+        {
+          "status": 200,
+          "method": "GET",
+          "resourceType": "fetch",
+          "url": "http://127.0.0.1:3000/tarris/future?_rsc=OQtaPt7hDuylpNEp"
+        },
+        {
+          "status": 200,
+          "method": "GET",
+          "resourceType": "font",
+          "url": "https://fonts.gstatic.com/s/barlow/v13/7cHqv4kjgoGqM7E3t-4s51os.woff2"
         },
         {
           "status": 200,
           "method": "GET",
           "resourceType": "image",
-          "url": "http://127.0.0.1:3000/amanda-catherine/amanda-catherine-entrepreneurial-artist.webp"
+          "url": "http://127.0.0.1:3000/videos/tb3-film/TB3-FILM-005-poster.webp"
         },
         {
           "status": 200,
           "method": "GET",
           "resourceType": "image",
-          "url": "https://www.buyincellderm.com/cdn/shop/files/ICDExpertExperienceKit.png?v=1772504566&width=2000"
+          "url": "http://127.0.0.1:3000/images/tb3-official/OFFICIAL_15_PODIUM_SPEAKING.png"
+        },
+        {
+          "status": 200,
+          "method": "GET",
+          "resourceType": "image",
+          "url": "http://127.0.0.1:3000/merch/MOCK_TEE_SHORT_RED.jpg"
+        },
+        {
+          "status": 200,
+          "method": "GET",
+          "resourceType": "image",
+          "url": "http://127.0.0.1:3000/merch/MOCK_TEE_SHORT_WHITE.jpg"
+        },
+        {
+          "status": 200,
+          "method": "GET",
+          "resourceType": "image",
+          "url": "http://127.0.0.1:3000/merch/MOCK_TEE_LONG_RED.jpg"
+        },
+        {
+          "status": 200,
+          "method": "GET",
+          "resourceType": "image",
+          "url": "http://127.0.0.1:3000/merch/MOCK_TEE_LONG_WHITE.jpg"
+        },
+        {
+          "status": 200,
+          "method": "GET",
+          "resourceType": "image",
+          "url": "http://127.0.0.1:3000/merch/MOCK_HAT_WHITE.jpg"
+        },
+        {
+          "status": 200,
+          "method": "GET",
+          "resourceType": "image",
+          "url": "http://127.0.0.1:3000/merch/MOCK_HOODIE_RED.jpg"
+        },
+        {
+          "status": 200,
+          "method": "GET",
+          "resourceType": "image",
+          "url": "http://127.0.0.1:3000/merch/MOCK_HOODIE_WHITE.jpg"
+        },
+        {
+          "status": 200,
+          "method": "GET",
+          "resourceType": "image",
+          "url": "http://127.0.0.1:3000/merch/MOCK_HOODIE_WHITE_LOGO_DETAIL_1.jpg"
         }
       ],
       "brokenImgs": [],
       "brokenBackgrounds": [],
-      "renderedVisuals": 11,
+      "renderedVisuals": 25,
       "overflow": 0,
-      "bodyTextLength": 8566,
-      "scrollHeight": 19292,
+      "bodyTextLength": 1928,
+      "scrollHeight": 8796,
       "viewport": {
         "width": 390,
         "height": 844
       },
       "placeholderSlots": [],
-      "publicBackground": null
+      "publicBackground": "rgba(0, 0, 0, 0)"
     }
   }
 }
