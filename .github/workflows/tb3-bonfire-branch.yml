@@ -1,0 +1,43 @@
+name: TB3 Bonfire integration branch verification
+on:
+  push:
+    branches: [fix/tb3-bonfire-integration]
+  pull_request:
+    branches: [master]
+    paths:
+      - 'lib/tb3/bonfire-*'
+      - 'app/api/tb3/bonfire/**'
+      - 'app/api/bricks/tb3-bonfire-provision-test/**'
+      - 'tests/tb3-bonfire.test.mts'
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - name: Production mode test routes are unavailable
+        run: |
+          VERCEL_ENV=production npx next start -p 3123 >/tmp/bonfire-server.log 2>&1 &
+          PID=$!
+          trap 'kill "$PID"' EXIT
+          for i in $(seq 1 40); do
+            if curl -fsS http://127.0.0.1:3123/api/ops/build-info >/dev/null; then break; fi
+            sleep 1
+          done
+          for route in /api/bricks/tb3-bonfire-provision-test /api/bricks/commerce-dollar-test; do
+            for method in GET POST; do
+              code=$(curl -s -o /dev/null -w '%{http_code}' -X "$method" "http://127.0.0.1:3123$route")
+              test "$code" = "404" || { echo "FAIL $method $route: $code"; exit 1; }
+            done
+          done
+          code=$(curl -s -o /dev/null -w '%{http_code}' -X POST http://127.0.0.1:3123/api/tb3/bonfire/webhook)
+          test "$code" = "404" || { echo "Unsigned, unverified production Bonfire webhook must fail closed: $code"; exit 1; }
