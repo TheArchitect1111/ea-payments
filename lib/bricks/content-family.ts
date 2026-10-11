@@ -22,7 +22,7 @@ export async function saveContent(t:BrickTenant,k:ContentKind,input:unknown,role
  await admitted(t,k);if(role!=='staff')throw Error('Staff content permission required');
  const v=ContentInput.parse(input),id=rowId(t,k,v.key);const prior=await readBrickRecord<ContentRow>(t,id);
  if(prior){if(brickHash([prior.title,prior.visibility,prior.body,prior.source,prior.mediaType])!==
- brickHash([v.title,v.visibility,v.body,v.source,v.mediaType]))throw Error('Content identity conflict');return prior;}
+ brickHash([v.title,v.visibility,v.body,v.source,v.mediaType]))throw Error('Content identity conflict');await ensureContentIndex(t,k,v.key);return prior;}
  if((k==='documents'||k==='resources')&&v.source&&!v.source.startsWith('/portal/'+t.portalSlug+'/'))
    throw Error('Protected tenant delivery path required');
  const row:ContentRow={...t,...v,kind:k,id,version:1,state:k==='reports'?'queued':'ready'};
@@ -74,5 +74,6 @@ export async function contentDefaults(t:BrickTenant,k:ContentKind){
  dashboard:{key:'welcome',title:'Your workspace',visibility:'member' as const},
  reports:{key:'operational-report',title:'Operational report',visibility:'staff' as const}};
  const existing=await readBrickRecord<ContentRow>(t,rowId(t,k,defaults[k].key));
- return existing??saveContent(t,k,defaults[k],'staff');
+ if(existing){await ensureContentIndex(t,k,defaults[k].key);return existing;}
+ return saveContent(t,k,defaults[k],'staff');
 }
