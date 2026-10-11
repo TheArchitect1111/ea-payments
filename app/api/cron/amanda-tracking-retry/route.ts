@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { airtableQuery, airtableUpdate } from '@/lib/data/airtable-client';
-import { pushToTrackingPortal, type TrackingLead } from '@/lib/services/trackingPortal';
+import { retryRegisteredBrickEvent, type TrackingLead } from '@/lib/services/brickRegistrar';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 120;
@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
     let payload: TrackingLead;
     try {
       payload = JSON.parse(String(record.fields.payload_json || '')) as TrackingLead;
-      await pushToTrackingPortal(payload);
+      await retryRegisteredBrickEvent(payload);
       await airtableUpdate('tracking_sync_failures', record.id, {
         status: 'synced', last_error: '', updated_at: new Date().toISOString(),
       });
