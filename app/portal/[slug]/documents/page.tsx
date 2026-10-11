@@ -1,3 +1,4 @@
+import { portalContentDefault } from '@/lib/bricks/content-portal';
 import Link from 'next/link';
 import { requirePortalModule } from '@/lib/modules/portal-modules';
 import { listPortalDocuments } from '@/lib/portal-document-hub';
@@ -8,6 +9,9 @@ export const dynamic = 'force-dynamic';
 export default async function DocumentsPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const { client } = await requirePortalModule(slug, 'documents');
+  // Read back tenant-specific durable defaults after module authorization.
+  const certifiedContent = await portalContentDefault(slug, 'documents');
+  void certifiedContent;
   const documents = await listPortalDocuments(slug, client);
 
   return (
