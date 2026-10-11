@@ -43,6 +43,7 @@ for(const kind of ['documents','resources','dashboard','reports'] as const){
     await assert.rejects(api.finishReport(tenant,'artifact-1','/portal/other/reports/artifact-1','staff'),/mismatch/);
   }
   db.durable=false;
-  await assert.rejects(api.saveContent(tenant,kind,{...input,key:'offline'},'staff'),/durable/);
+  const failedWrite=await api.saveContent(tenant,kind,{...input,key:'offline'},'staff').then(()=>null,(error:Error)=>error);
+  assert.match(failedWrite?.message ?? '',/durable/);
  });
 }
