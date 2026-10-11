@@ -4,7 +4,7 @@ type Sale={order_id:string;product:string;amount_cents:number;customer:string;cu
  payment_reference:string;payment_status:string;tracking:string};
 export default function Tb3MerchSales({report=false}:{report?:boolean}){
  const [visible,setVisible]=useState(false),[sales,setSales]=useState<Sale[]>([]);
- const [error,setError]=useState(''),[loading,setLoading]=useState(false);
+ const [error,setError]=useState(''),[loading,setLoading]=useState(false),[result,setResult]=useState('');
  useEffect(()=>{if(!visible)return;let active=true;setLoading(true);
  fetch('/api/tb3/bonfire/sales',{cache:'no-store'}).then(async r=>{
   if(!r.ok)throw Error('Private merch sales unavailable');
@@ -22,7 +22,13 @@ export default function Tb3MerchSales({report=false}:{report?:boolean}){
   {visible?<div>
    {loading?<p>Loading private sales...</p>:null}
    {error?<p role="alert">{error}</p>:null}
-   {!loading&&!error?<><p>Recorded orders: {sales.length} · Gross recorded: {(total/100).toLocaleString('en-US',{style:'currency',currency:'USD'})}</p>
+   {!loading&&!error?<><form onSubmit={async e=>{e.preventDefault();setResult('Importing...');try{const form=new FormData(e.currentTarget);form.set('confirm','seller-attested-paid');const r=await fetch('/api/bricks/bonfire-csv-import',{method:'POST',body:form});const j=await r.json();if(!r.ok)throw Error(j.error||'Import failed');setResult(`Imported ${j.imported} orders; ${j.replayed} duplicates ignored`);const latest=await fetch('/api/tb3/bonfire/sales',{cache:'no-store'});if(latest.ok)setSales((await latest.json()).sales||[]);}catch(err){setResult(err instanceof Error?err.message:'Import failed');}}}>
+    <p>Import Bonfire seller order CSV (maximum 120 KB). This records sales only, not payouts.</p>
+    <input name="file" type="file" accept=".csv,text/csv,.txt,.md" required />
+    <label><input type="checkbox" required /> I confirm these rows represent paid orders from the seller export.</label>
+    <button type="submit" className="ep-pulse-cta">Import sales</button>
+    {result?<p role="status">{result}</p>:null}
+   </form><p>Recorded orders: {sales.length} · Gross recorded: {(total/100).toLocaleString('en-US',{style:'currency',currency:'USD'})}</p>
     {report?<a href="/api/tb3/bonfire/sales?format=csv" className="ep-pulse-cta">Download protected Bonfire report</a>:null}
     <table className="ep-data-table"><thead><tr>
       <th>Order</th><th>Product</th><th>Customer</th><th>Status</th><th>Tracking</th><th>Amount</th>
