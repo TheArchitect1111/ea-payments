@@ -17,7 +17,7 @@ export type TrackingPayment = {
   event_type: 'payment_confirmed'; registration_id?: string;
   email: string; class_id: string; payment_status: 'paid';
   payment_reference: string; payment_provider: 'square' | 'stripe';
-  timestamp: string; is_test?: boolean;
+  timestamp: string; is_test?: boolean; client_id?:string;
 };
 
 function registrationKey(email: string, course: string, clientId='amanda-catherine') {
@@ -98,20 +98,20 @@ export async function storeTrackingPayment(event: TrackingPayment) {
   if (event.payment_status !== 'paid' || !event.payment_reference) throw new Error('Verified payment required');
   if (event.is_test) {
     if (!event.registration_id) throw new Error('Test registration ID required');
-    const id = testRecordId(event.registration_id);
+    const id = testRecordId(event.registration_id,event.client_id);
     const lead = await loadStudioRecord<TrackingLead>('experience',id);
     if (!lead || !lead.is_test || lead.email !== event.email.toLowerCase() || lead.class_id !== event.class_id) {
       throw new Error('Matching test registration not found');
     }
     if (lead.payment_status === 'paid' && lead.payment_reference !== event.payment_reference) throw new Error('Conflicting test payment');
     const saved = await saveStudioRecord({recordType:'experience',id,
-      organizationId:syntheticOrgId('amanda-catherine'),title:'[TEST] Amanda tracking PAID',
+      organizationId:syntheticOrgId(event.client_id||'amanda-catherine'),title:'[TEST] Brick tracking PAID',
       payload:{...lead,payment_status:'paid',payment_reference:event.payment_reference,
         payment_provider:event.payment_provider,paid_at:event.timestamp,is_test:true}});
     if (!saved.ok || !saved.persistedToAirtable) throw new Error(saved.error || 'Test payment tracking failed');
     return {ok:true,id,alreadyPaid:lead.payment_status==='paid'};
   }
-  const key = registrationKey(event.email,event.class_id);
+  const key = registrationKey(event.email,event.class_id,event.client_id);
   const rows = await airtableQuery('portal_registrations',{
     filterByFormula:"{registration_key}='" + escapeFormula(key) + "'",maxRecords:1});
   if (!rows[0]) throw new Error('Matching live registration not found; payment was not matched');
@@ -125,7 +125,7 @@ export async function storeTrackingPayment(event: TrackingPayment) {
   });
   if (!updated) throw new Error('Existing tracking registration could not be marked paid');
   const saved = await saveStudioRecord({recordType:'experience',id,
-    organizationId:syntheticOrgId('amanda-catherine'),title:'Amanda tracking PAID',
+    organizationId:syntheticOrgId(event.client_id||'amanda-catherine'),title:'Brick tracking PAID',
     payload:{...lead,registration_id:lead?.registration_id || event.registration_id || stableId(key),
       email:event.email.toLowerCase(),class_id:event.class_id,payment_status:'paid',
       payment_reference:event.payment_reference,payment_provider:event.payment_provider,paid_at:event.timestamp,is_test:false}});
