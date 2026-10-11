@@ -89,10 +89,6 @@ export async function runPreviewDollarTest(registrationId: string) {
       source: 'fix/amanda-tracking-wire/preview-dollar-test',
     },
   }, { idempotencyKey: 'amanda-preview-' + registrationId });
-  if (payment.status !== 'succeeded' || payment.amount !== 100 || payment.currency !== 'cad' ||
-      !payment.livemode || false) {
-    // Keep mode verification separate: succeeded test payment has livemode === false.
-  }
   if (payment.status !== 'succeeded' || payment.amount !== 100 ||
       payment.currency !== 'cad' || payment.livemode !== false)
     throw new Error('Stripe test mode did not confirm the CAD $1 payment.');
