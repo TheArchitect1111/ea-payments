@@ -73,3 +73,15 @@ export async function finalDefaults(t:BrickTenant,k:FinalKind){
  landing:'Your landing page',ask:'Ask your advisor',settings:'Portal preferences',ctp:'Your journey'};
  return saveFinal(t,k,{key:'welcome',title:titles[k],body:'',visibility:'member',state:'ready'},'staff');
 }
+
+/** Source-grounded deterministic content generation. No invented provider output. */
+export async function generateFinal(t:BrickTenant,k:'pulse'|'amplifi',
+ input:{key:string;title:string;sourceText:string},role:Role){
+ if(role!=='staff')throw Error('Staff generation permission required');
+ const source=z.object({key:z.string().regex(/^[a-z0-9-]{1,80}$/),
+ title:z.string().trim().min(1),sourceText:z.string().trim().min(10).max(10000)}).strict().parse(input);
+ const body=k==='pulse'
+  ?'Operational Pulse\\n\\n'+source.sourceText+'\\n\\nReview the underlying signals before sharing.'
+  :'Amplifi content draft\\n\\n'+source.sourceText+'\\n\\nApproval required before publication.';
+ return saveFinal(t,k,{key:source.key,title:source.title,body,visibility:'member',state:'draft',source:brickHash(source.sourceText)},role);
+}
