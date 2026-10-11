@@ -9,7 +9,7 @@ import { getStripe } from '@/lib/stripe';
 import { listAmandaPayments } from '@/lib/amanda-catherine/payment-fulfillment';
 import { roleAtLeast, normalizeRole } from '@/lib/rbac';
 import { getClientByPortalSlug } from '@/lib/airtable';
-import { pushToTrackingPortal } from '@/lib/services/trackingPortal';
+import { registerBrickEvent } from '@/lib/services/brickRegistrar';
 
 export const dynamic = 'force-dynamic';
 
@@ -106,13 +106,13 @@ export async function POST(req: NextRequest) {
   if ('courseId' in offer) {
     const parts = (isTest ? testName : clientEmail).split(/\s+/);
     try {
-      await pushToTrackingPortal({
-        registration_id:registrationId,first_name:parts[0] || clientEmail,last_name:parts.slice(1).join(' '),
-        email:clientEmail,phone:'',class_name:offer.name,class_id:offer.courseId,
-        registration_type:'live',created_at:new Date().toISOString(),
-        source_page:'amandacatherine.ca',source:'/portal/amanda-catherine/billing',
-        payment_status:'unpaid',payment_reference:null,is_test:isTest,event_type:'signup',
+      const tracking=await registerBrickEvent({
+        brick_type:'checkout',brick_id:offer.courseId,client_id:'amanda-catherine',
+        registration_id:registrationId,name:isTest?testName:clientEmail,email:clientEmail,
+        phone:'',status:'checkout_started',payment_status:'unpaid',payment_reference:null,
+        timestamp:new Date().toISOString(),source:'/portal/amanda-catherine/billing',is_test:isTest,
       });
+      if(!tracking.ok)throw new Error(tracking.error||'Checkout registration tracking failed');
     } catch (error) {
       console.error('[amanda-checkout] signup tracking failed',error);
       return NextResponse.json({error:'Signup tracking is unavailable. No checkout was started.'},{status:503});
