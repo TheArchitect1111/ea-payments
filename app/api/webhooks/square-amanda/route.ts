@@ -7,7 +7,7 @@ import { getAmandaConfirmationLetter } from '@/lib/amanda-catherine/confirmation
 import { sendAuthEmail } from '@/lib/ea-auth-email';
 
 export const dynamic='force-dynamic';
-type SquareOrder={email:string;class_id:string;registration_id:string;order_id:string;
+type SquareOrder={email:string;name?:string;class_name?:string;class_id:string;registration_id:string;order_id:string;
   expected_amount:number;payment_status:string;payment_reference?:string;confirmation_sent?:boolean;
   is_test:false;created_at:string};
 function safe(value:string){return value.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
@@ -58,12 +58,12 @@ export async function POST(req:NextRequest){
     let next:SquareOrder={...order,payment_status:'paid',payment_reference:paymentId};
     if(!order.confirmation_sent){
       const letter=await getAmandaConfirmationLetter('live');
-      const firstName=order.email.split('@')[0];
+      const firstName=(order.name||order.email).split(' ')[0];
       const body=letter.body_html.replace(/{{first_name}}/g,safe(firstName))
-        .replace(/{{class_name}}/g,safe(order.class_id));
-      const sent=await sendAuthEmail({to:order.email,subject:letter.subject.replace(/{{class_name}}/g,order.class_id),
+        .replace(/{{class_name}}/g,safe(order.class_name||order.class_id));
+      const sent=await sendAuthEmail({to:order.email,subject:letter.subject.replace(/{{class_name}}/g,order.class_name||order.class_id),
         title:'Amanda Catherine registration confirmation',bodyHtml:body,
-        text:'Your registration for '+order.class_id+' is confirmed. Payment reference: '+paymentId});
+        text:'Your registration for '+(order.class_name||order.class_id)+' is confirmed. Payment reference: '+paymentId});
       if(!sent.ok)throw new Error(sent.error||'Amanda letter delivery failed');
       next={...next,confirmation_sent:true};
     }
