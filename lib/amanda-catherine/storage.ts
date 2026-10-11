@@ -1,6 +1,6 @@
 import type { registry } from './registry';
 import { registerBrickEvent } from '@/lib/services/brickRegistrar';
-import type { TrackingPayment } from '@/lib/services/trackingPortal';
+import type { TrackingPayment } from '@/lib/services/brickRegistrar';
 export async function handleAmandaSubmit(p:Record<string,any>, r:Awaited<ReturnType<typeof registry>> | undefined, verifiedPayment?: TrackingPayment){
  // This third argument is supplied only by server-side verified payment handlers.
  // Never accept payment status or references from public submission fields.
