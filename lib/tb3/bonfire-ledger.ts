@@ -20,7 +20,7 @@ export const BonfireOrder = z.object({
 export type BonfireOrder = z.infer<typeof BonfireOrder>;
 export type BonfireSale = typeof tb3Tenant & {id:string;order_id:string;offerId:string;
  product:string;amount_cents:number;currency:'usd';customer:string;customer_email:string;
- payment_reference:string;payment_status:'paid';tracking:'Bonfire'|'Bonfire CSV';source:'bonfire'|'bonfire-csv'};
+ payment_reference:string;payment_status:'paid';order_date?:string;tracking:'Bonfire'|'Bonfire CSV';source:'bonfire'|'bonfire-csv'};
 const receiptId=(orderId:string)=>'tb3-bonfire-'+brickHash([TB3_ORGANIZATION_ID,orderId]);
 const indexId='tb3-bonfire-index-'+brickHash(TB3_ORGANIZATION_ID);
 const trackingId=(orderId:string)=>'tb3-bonfire-track-'+brickHash([TB3_ORGANIZATION_ID,orderId]);
@@ -36,14 +36,14 @@ async function requireTb3Installed(){
   !record.admitted.includes('billing')||!record.admitted.includes('member'))
  throw Error('TB3 Billing and Member must be installed before merch ingestion');
 }
-export async function ingestVerifiedBonfireOrder(input:unknown,origin:'bonfire'|'bonfire-csv'='bonfire'){
+export async function ingestVerifiedBonfireOrder(input:unknown,origin:'bonfire'|'bonfire-csv'='bonfire',orderDate?:string){
  await requireTb3Installed();
  const order=BonfireOrder.parse(input), id=receiptId(order.order_id);
  const before=await readBrickRecord<BonfireSale>(tb3Tenant,id);
  const row:BonfireSale={...tb3Tenant,id,order_id:order.order_id,offerId:order.product_id,
    product:order.product_name,amount_cents:order.amount_cents,currency:order.currency,
    customer:order.customer.name,customer_email:order.customer.email,
-   payment_reference:order.order_id,payment_status:'paid',tracking:origin==='bonfire-csv'?'Bonfire CSV':'Bonfire',source:origin};
+   payment_reference:order.order_id,payment_status:'paid',...(orderDate?{order_date:orderDate}:{}),tracking:origin==='bonfire-csv'?'Bonfire CSV':'Bonfire',source:origin};
  if(before){
   if(JSON.stringify(before)!==JSON.stringify(row))throw Error('Conflicting Bonfire order replay');
   // A prior attempt may have persisted its payment but failed during entitlement
