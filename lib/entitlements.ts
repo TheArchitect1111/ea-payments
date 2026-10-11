@@ -142,14 +142,13 @@ export async function syncPackageEntitlements(
       ),
   );
 
+  // A deliberate manual suspend is an owner authorization decision.
+  // Package backfill must not silently reactivate it or overwrite its source.
+  const manualSuspensions = new Set(existing.filter(row =>
+    row.source === 'manual' && row.status === 'suspended').map(row => row.moduleId));
   await Promise.all(
-    moduleIds.map((moduleId) =>
-      upsertEntitlement({
-        organizationId,
-        moduleId,
-        status: 'active',
-        source: 'package',
-      }),
+    moduleIds.filter(moduleId => !manualSuspensions.has(moduleId)).map((moduleId) =>
+      upsertEntitlement({ organizationId, moduleId, status: 'active', source: 'package' }),
     ),
   );
 }
