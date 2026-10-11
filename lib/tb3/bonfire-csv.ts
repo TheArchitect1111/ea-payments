@@ -40,7 +40,7 @@ export async function importBonfireCsv(csv:string){
  const parsed=parseBonfireCsv(csv);
  let imported=0,replayed=0;
  for(const item of parsed){
-  const result=await ingestVerifiedBonfireOrder(item.order);
+  const result=await ingestVerifiedBonfireOrder(item.order,'bonfire-csv');
   if(result.replay)replayed++;else imported++;
  }
  return {imported,replayed,total:parsed.length};
