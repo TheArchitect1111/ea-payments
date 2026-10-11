@@ -15,11 +15,11 @@ test('inventory includes exactly 20 unspecialized canonical modules', () => {
 });
 for (const moduleId of remaining) {
   test(`module ${moduleId}: selected modules use durable, tenant-scoped replay receipts`, () => {
-    assert.match(installer, /for \\(const id of ids\\)/);
+    assert.ok(installer.includes('for (const id of ids)'));
     assert.match(installer, /readBrickRecord/);
     assert.match(installer, /writeBrickRecord/);
     assert.match(installer, /Module install receipt mismatch/);
-    assert.match(installer, /brickHash\\(tenant\\.organizationId\\)/);
+    assert.ok(installer.includes('brickHash(tenant.organizationId)'));
     assert.match(route, /ensureTenantFoundation/);
     assert.match(route, /receiptReplay/);
     assert.match(route, /lifecycleCertified: false/);
@@ -27,6 +27,6 @@ for (const moduleId of remaining) {
   });
 }
 test('production preview fixture is guarded before auth or tenant writes', () => {
-  assert.match(route, /if \\(!provisionTestsAllowed\\(\\)\\) return Response\\.json\\(\\{ error: 'Not found' \\}, \\{ status: 404 \\}\\)/);
-  assert.match(route, /export async function GET\\(\\)/);
+  assert.ok(route.includes("if (!provisionTestsAllowed()) return Response.json({ error: 'Not found' }, { status: 404 })"));
+  assert.ok(route.includes('export async function GET()'));
 });
