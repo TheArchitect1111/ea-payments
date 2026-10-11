@@ -1,0 +1,27 @@
+name: Brick auto-wire branch certification
+on:
+  push:
+    branches: [brick-auto-wire]
+  pull_request:
+    branches: [master]
+    paths:
+      - 'lib/services/brickRegistrar.ts'
+      - 'lib/services/trackingPortal.ts'
+      - 'app/api/public/amanda/waitlist/route.ts'
+      - 'lib/amanda-catherine/storage.ts'
+      - 'tests/brick-registrar.test.mts'
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
