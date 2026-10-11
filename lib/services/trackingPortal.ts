@@ -48,7 +48,9 @@ export async function saveTrackingLead(lead: TrackingLead) {
   // Legacy fields remain the compatibility baseline for the existing Airtable schema.
   const fields = {registration_key:key,first_name:lead.first_name,last_name:lead.last_name,
     email:lead.email,phone:lead.phone,class_name:lead.class_name,class_id:lead.class_id,
-    registration_type:lead.registration_type,created_at:lead.created_at,source_page:lead.source_page};
+    registration_type:lead.registration_type,created_at:lead.created_at,source_page:lead.source_page,
+    registration_id:lead.registration_id,payment_status:lead.payment_status,
+    payment_reference:lead.payment_reference || '',source:lead.source};
   const record = await airtableUpsertByField('portal_registrations','registration_key',key,fields);
   if (!record) throw new Error('Tracking portal registration could not be saved');
   // Extended payment metadata lives in a deterministic record, not in an unverified Airtable schema.
@@ -109,6 +111,12 @@ export async function storeTrackingPayment(event: TrackingPayment) {
   const id = 'amanda-tracking-meta-' + stableId(key);
   const lead = await loadStudioRecord<TrackingLead & {payment_provider?:string}>('experience',id);
   if (lead?.payment_status === 'paid' && lead.payment_reference !== event.payment_reference) throw new Error('Conflicting payment reference');
+  const updated = await airtableUpdate('portal_registrations',rows[0].id,{
+    payment_status:'paid',payment_reference:event.payment_reference,
+    payment_provider:event.payment_provider,paid_at:event.timestamp,
+    registration_id:lead?.registration_id || event.registration_id || stableId(key),
+  });
+  if (!updated) throw new Error('Existing tracking registration could not be marked paid');
   const saved = await saveStudioRecord({recordType:'experience',id,
     organizationId:syntheticOrgId('amanda-catherine'),title:'Amanda tracking PAID',
     payload:{...lead,registration_id:lead?.registration_id || event.registration_id || stableId(key),
