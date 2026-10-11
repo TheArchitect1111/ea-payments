@@ -23,7 +23,7 @@
  * and cannot create live registrations or call remote ingest.
  */
 import { z } from 'zod';
-import { pushToTrackingPortal, confirmTrackingPayment,
+import { pushToTrackingPortal, confirmTrackingPayment, enqueueTrackingPortalRetry,
   type TrackingLead, type TrackingPayment } from '@/lib/services/trackingPortal';
 
 const EventSchema=z.object({
@@ -76,7 +76,15 @@ export async function registerBrickEvent(event:BrickEvent, verifiedPayment?:Trac
    timestamp:e.timestamp,source:e.source,
    payment_status:'unpaid',payment_reference:null,is_test:e.is_test,event_type:'signup',
   };
-  const result=await pushToTrackingPortal(lead);
-  return {ok:true,...result};
+  try {
+   const result=await pushToTrackingPortal(lead);
+   return {ok:true,...result};
+  }catch(trackingError){
+   if(e.is_test)throw trackingError;
+   // Business save has already succeeded. Retain the exact registration in the
+   // retry queue rather than returning a misleading failure that duplicates a booking.
+   await enqueueTrackingPortalRetry(lead,trackingError);
+   return {ok:true,deferred:true};
+  }
  }catch(error){return {ok:false,error:error instanceof Error?error.message:'Brick registration failed'};}
 }
