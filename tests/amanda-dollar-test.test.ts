@@ -11,11 +11,14 @@ type TestDb = {
   clients: Map<string, any>;
   waitlist: Map<string, any>;
   writes: Array<{ id: string; kind: string }>;
+  trackingEvents: any[];
 };
-const db: TestDb = { records: new Map(), clients: new Map(), waitlist: new Map(), writes: [] };
+const db: TestDb = { records: new Map(), clients: new Map(), waitlist: new Map(), writes: [], trackingEvents: [] };
 (globalThis as any).__amandaE2E = db;
 
 const mocks: Record<string, string> = {
+  '@/lib/services/trackingPortal': `export async function confirmTrackingPayment(event){ globalThis.__amandaE2E.trackingEvents.push(event); return {ok:true}; }`,
+  '@/lib/amanda-catherine/confirmation-letters': `export async function getAmandaConfirmationLetter(){return {type:'live',subject:'Registered for {{class_name}}',body_html:'Hello {{first_name}}, {{class_name}}'};}`,
   './practitioner-kit-orders': "export async function recordAmandaKitOrder(){return {ok:true};}",
   '@/lib/amanda-catherine/config': `
     export const AMANDA_MEMBERSHIPS = [];
@@ -111,7 +114,7 @@ test('Amanda verified $1 fulfillment, replay, 72-hour denial, no-write preview, 
     metadata: {
       portalSlug: 'amanda-catherine', amandaOfferId: 'aesthetikine-reset-training',
       amandaCourseId: 'aesthetikine-reset-training',
-      clientEmail: email, paymentOption: 'test', privateTestCheckout: 'true',
+      clientEmail: email, paymentOption: 'test', privateTestCheckout: 'true', registrationId:'test-reg-001',clientName:'Amanda CI Test',
     },
   };
   const first = await app.fulfillAmandaCheckout(session as any, 'webhook');
@@ -119,6 +122,9 @@ test('Amanda verified $1 fulfillment, replay, 72-hour denial, no-write preview, 
   const paidAt = new Date(created*1000).toISOString();
   const expires = new Date((created+72*3600)*1000).toISOString();
   assert.equal(first.record.isTestAccess, true);
+  assert.equal(db.trackingEvents.length,1);
+  assert.deepEqual({is_test:db.trackingEvents[0].is_test,payment_status:db.trackingEvents[0].payment_status,registration_id:db.trackingEvents[0].registration_id},{is_test:true,payment_status:'paid',registration_id:'test-reg-001'});
+  assert.ok(first.record.trackingLetterSentAt,'test registration confirmation letter was not sent');
   assert.equal(first.record.testPaidAt, paidAt);
   assert.equal(first.record.expiresAt, expires);
 
@@ -138,6 +144,7 @@ test('Amanda verified $1 fulfillment, replay, 72-hour denial, no-write preview, 
   const replay = await app.fulfillAmandaCheckout(session as any,'webhook');
   assert.equal(replay.ok,true);
   assert.equal(payments().length,1,'webhook retry duplicated a payment');
+  assert.equal(db.trackingEvents.length,2,'verified replay should update the same tracking registration');
   assert.equal(profiles().length,1,'webhook retry duplicated access');
   assert.equal(profiles()[0][1].payload.entitlements[courseId].expiresAt,expires,'replay restarted the clock');
 
