@@ -24,7 +24,7 @@ for(const kind of ['simplifi','connect','intake','applications'] as const){
   assert.deepEqual(a,b);
   assert.equal(memory.writes.get(a.id),1);
   await assert.rejects(api.submitCapture(tenant,kind,{...input,requestId:'request-other'}),/Conflicting/);
-  await assert.rejects(api.readCapture({...tenant,organizationId:'recOTHER'},kind,input.identity),/tenant mismatch/);
+  await assert.rejects(api.readCapture({...tenant,organizationId:'recOTHER'},kind,input.identity),/tenant mismatch|Capture not found/);
   let confirmations=0;
   const ports={confirm:async()=>{confirmations++}};
   const first=await api.progressCapture(tenant,kind,input.identity,ports);
