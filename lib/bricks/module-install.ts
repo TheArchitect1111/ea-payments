@@ -24,6 +24,19 @@ export async function requireModuleProviders(ids: readonly ModuleId[], input: un
 }
 export async function installAdmittedModules(tenant: BrickTenant, ids: readonly ModuleId[], input: unknown = {}) {
   const config = await requireModuleProviders(ids, input);
+  // Durable, tenant-scoped provision receipts for remaining chassis modules.
+  // A receipt proves selection and installation only, not external provider readiness.
+  const dedicated = new Set<ModuleId>(['calendar', 'people', 'discovery']);
+  for (const id of ids) {
+    if (dedicated.has(id)) continue;
+    const receiptId = 'module-install-' + id + '-' + brickHash(tenant.organizationId);
+    const existing = await readBrickRecord<BrickTenant & { moduleId: ModuleId; version: number }>(tenant, receiptId);
+    if (existing) {
+      if (existing.moduleId !== id || existing.version !== 1) throw new Error('Module install receipt mismatch: ' + id);
+      continue;
+    }
+    await writeBrickRecord(tenant, receiptId, { ...tenant, moduleId: id, version: 1 });
+  }
   if (ids.includes('calendar')) {
     const prior = await readBrickRecord<BrickTenant & {config: unknown}>(tenant, 'calendar-install-' + brickHash(tenant.organizationId));
     await installCalendar(tenant, config.calendar ?? prior?.config);
