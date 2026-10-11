@@ -42,7 +42,7 @@ async function saveTestLead(lead: TrackingLead) {
   if (!saved.ok) throw new Error(saved.error || 'Test registration not saved');
   return {ok:true,id};
 }
-async function saveTrackingLead(lead: TrackingLead) {
+export async function saveTrackingLead(lead: TrackingLead) {
   if (lead.is_test) return saveTestLead(lead);
   const key = registrationKey(lead.email, lead.class_id);
   // Legacy fields remain the compatibility baseline for the existing Airtable schema.
