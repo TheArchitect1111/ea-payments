@@ -111,7 +111,7 @@ export async function fulfillAmandaCheckout(session: Stripe.Checkout.Session, so
   }
   // Only Square's signed callback or Stripe's verified checkout can mark tracking paid.
   // Never create a second registration from payment fulfillment.
-  if (courseId && meta.registrationId) {
+  if (courseId && meta.registrationId && session.payment_status === 'paid') {
     try {
       await confirmTrackingPayment({
         event_type:'payment_confirmed', registration_id:meta.registrationId, email, class_id:courseId,
