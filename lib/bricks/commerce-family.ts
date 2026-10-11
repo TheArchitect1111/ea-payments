@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { brickHash, readBrickRecord, writeBrickRecord, type BrickTenant } from '@/lib/bricks/durable';
 import { loadTenantInstall } from '@/lib/modules/tenant-install';
+import { setModuleEnabled, listEntitlementsForOrg } from '@/lib/entitlements';
 
 export const CommerceConfig = z.object({
   offers: z.array(z.object({ id: z.string().regex(/^[a-z0-9-]{1,80}$/),
@@ -93,6 +94,15 @@ export async function changeMemberGrant(tenant: BrickTenant, input:unknown, conf
     if(row.confirmationSent) return row;
   }
   const next={...tenant,...data,confirmationSent:false};
+  // The canonical Member entitlement is organization-wide, not a person-specific ACL.
+  // Never disable it on an individual member revoke.
+  if (data.enabled) {
+    const actual = await setModuleEnabled(tenant.organizationId, 'member', true, 'manual');
+    if (!actual || actual.organizationId !== tenant.organizationId || actual.moduleId !== 'member' || actual.status !== 'active')
+      throw new Error('Member platform entitlement write failed');
+    const stored = (await listEntitlementsForOrg(tenant.organizationId)).find(x => x.moduleId === 'member');
+    if (!stored || stored.status !== 'active') throw new Error('Member platform entitlement read-back failed');
+  }
   if(!row || row.requestId!==data.requestId) await writeBrickRecord(tenant,recordId,next);
   await confirm({to:data.email,subject:data.enabled?'Membership granted':'Membership revoked',
     html:data.enabled?'Your membership is active.':'Your membership has ended.'});
