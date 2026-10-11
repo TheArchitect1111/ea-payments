@@ -9,6 +9,7 @@ import { getStripe } from '@/lib/stripe';
 import { listAmandaPayments } from '@/lib/amanda-catherine/payment-fulfillment';
 import { roleAtLeast, normalizeRole } from '@/lib/rbac';
 import { getClientByPortalSlug } from '@/lib/airtable';
+import { pushToTrackingPortal } from '@/lib/services/trackingPortal';
 
 export const dynamic = 'force-dynamic';
 
@@ -44,7 +45,7 @@ export async function POST(req: NextRequest) {
   const tenant = portalTenant(auth.session);
   if (!tenant.portalSlug.startsWith('amanda-catherine') || !auth.session.email) return NextResponse.json({ error: 'Amanda portal access required.' }, { status: 403 });
   if (!process.env.STRIPE_SECRET_KEY) return NextResponse.json({ error: 'Secure payments are not configured yet.' }, { status: 503 });
-  const body = await req.json() as { offerId?: string; membershipId?: string; paymentOption?: 'full' | 'deposit' | 'test' } & AmandaKitSelection;
+  const body = await req.json() as { offerId?: string; membershipId?: string; paymentOption?: 'full' | 'deposit' | 'test'; testName?: string } & AmandaKitSelection;
   const membership = AMANDA_MEMBERSHIPS.find((item) => item.id === body.membershipId);
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
   const clientEmail = auth.session.email.trim().toLowerCase();
@@ -66,6 +67,9 @@ export async function POST(req: NextRequest) {
   if (!offer) return NextResponse.json({ error: 'Offer not found.' }, { status: 404 });
   if ('courseId' in offer && !amandaCourseReady(offer.courseId)) return NextResponse.json({ error: 'This course is waitlist only.' }, { status: 409 });
   const isTest = body.paymentOption === 'test';
+  const testName = String(body.testName || '').trim().slice(0, 120);
+  if (isTest && testName.length < 2) return NextResponse.json({error:'Enter a name for the private $1 signup test.'},{status:400});
+  const registrationId = crypto.randomUUID();
   if (isTest && !('courseId' in offer)) return NextResponse.json({ error: 'Private test checkout is for READY courses only.' }, { status: 409 });
   if (isTest && !(await getAmandaHqTools()).testPayment) return NextResponse.json({ error: 'The private $1 test is disabled in HQ.' }, { status: 403 });
   if (isTest && !(await canUseTestCheckout(auth.session.role, tenant.portalSlug, clientEmail))) return NextResponse.json({ error: 'Private test checkout is restricted to Amanda administrators.' }, { status: 403 });
@@ -93,10 +97,26 @@ export async function POST(req: NextRequest) {
     } }, quantity: 1 }],
     metadata: { ...kit.metadata, portalSlug: tenant.portalSlug, amandaOfferId: offer.id, clientEmail,
       paymentOption: isTest ? 'test' : body.paymentOption === 'deposit' ? 'deposit' : 'full',
-      fullPriceCad: String(offer.priceCad), amountPaidCad: String(amountCad), privateTestCheckout: isTest ? 'true' : 'false' },
+      fullPriceCad: String(offer.priceCad), amountPaidCad: String(amountCad), privateTestCheckout: isTest ? 'true' : 'false',
+      registrationId, clientName: isTest ? testName : clientEmail },
     success_url: `${baseUrl}/portal/${tenant.portalSlug}/billing?payment=success&session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${baseUrl}/portal/${tenant.portalSlug}/billing?payment=cancelled`,
   };
   const session = await getStripe().checkout.sessions.create(sessionParams);
-  return NextResponse.json({ url: session.url });
+  if ('courseId' in offer) {
+    const parts = (isTest ? testName : clientEmail).split(/\\s+/);
+    try {
+      await pushToTrackingPortal({
+        registration_id:registrationId,first_name:parts[0] || clientEmail,last_name:parts.slice(1).join(' '),
+        email:clientEmail,phone:'',class_name:offer.name,class_id:offer.courseId,
+        registration_type:'live',created_at:new Date().toISOString(),
+        source_page:'amandacatherine.ca',source:'/portal/amanda-catherine/billing',
+        payment_status:'unpaid',payment_reference:null,is_test:isTest,event_type:'signup',
+      });
+    } catch (error) {
+      console.error('[amanda-checkout] signup tracking failed',error);
+      return NextResponse.json({error:'Signup tracking is unavailable. No checkout was started.'},{status:503});
+    }
+  }
+  return NextResponse.json({ url: session.url, registrationId: isTest ? registrationId : undefined });
 }
