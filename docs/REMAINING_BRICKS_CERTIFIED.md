@@ -12,7 +12,7 @@ Requested `docs/BRICKS_AUDIT.md` does not exist on the inspected production ref.
 
 | Brick | Certified YES/NO | Has Installer | Has Replay Protection | Has Provisioning Test | 404 in Prod | Autowires |
 |---|---|---|---|---|---|---|
-| dashboard | NO | Receipt installer | Yes, receipt only | Yes, receipt probe, lifecycle not proved | YES (CI) | Selection receipt only |
+| dashboard | YES | Shared receipt + tenant defaults | YES, stored default record | YES, role-protected default read-back | YES (CI) | P/page.tsx tenant workspace title + authenticated content API |
 | pulse | NO | Receipt installer | Yes, receipt only | Yes, receipt probe, lifecycle not proved | YES (CI) | Selection receipt only |
 | simplifi | YES | Shared portable installer + live workflow adapter | YES (business identity / same-row replay) | YES (live HTTP handler + isolated tenant proof) | YES (CI) | YES, Live analyze POST → durable capture + Magnifi-review outcome |
 | amplifi | NO | Receipt installer | Yes, receipt only | Yes, receipt probe, lifecycle not proved | YES (CI) | Selection receipt only |
@@ -20,10 +20,10 @@ Requested `docs/BRICKS_AUDIT.md` does not exist on the inspected production ref.
 | update-hub | NO | Receipt installer | Yes, receipt only | Yes, receipt probe, lifecycle not proved | YES (CI) | Selection receipt only |
 | training | NO | Receipt installer | Yes, receipt only | Yes, receipt probe, lifecycle not proved | YES (CI) | Selection receipt only |
 | landing | NO | Receipt installer | Yes, receipt only | Yes, receipt probe, lifecycle not proved | YES (CI) | Selection receipt only |
-| documents | NO | Receipt installer | Yes, receipt only | Yes, receipt probe, lifecycle not proved | YES (CI) | Selection receipt only |
+| documents | YES | Shared receipt + private upload storage | YES, deterministic file identity | YES, upload/download HTTP + ACL + replay | YES (CI) | P/documents + non-Amanda P/deliveries, private tenant vault |
 | messaging | NO | Receipt installer | Yes, receipt only | Yes, receipt probe, lifecycle not proved | YES (CI) | Selection receipt only |
 | events | YES | Portable shared installer + business lifecycle | YES (same-row / member request ID) | YES (fixture, replay, tenant, backfill) | YES (CI) | YES, manifest selection; Billing/Events configured via moduleConfigs |
-| resources | NO | Receipt installer | Yes, receipt only | Yes, receipt probe, lifecycle not proved | YES (CI) | Selection receipt only |
+| resources | YES | Shared receipt + protected resources | YES, stable resource identity | YES, protected upload/read/list lifecycle | YES (CI) | P/resources managed tenant library and ACL delivery |
 | ask | NO | Receipt installer | Yes, receipt only | Yes, receipt probe, lifecycle not proved | YES (CI) | Selection receipt only |
 | billing | YES | Portable shared installer + business lifecycle | YES (same-row / member request ID) | YES (fixture, replay, tenant, backfill) | YES (CI) | YES, manifest selection; Billing/Events configured via moduleConfigs |
 | settings | NO | Receipt installer | Yes, receipt only | Yes, receipt probe, lifecycle not proved | YES (CI) | Selection receipt only |
@@ -31,7 +31,7 @@ Requested `docs/BRICKS_AUDIT.md` does not exist on the inspected production ref.
 | member | YES | Portable shared installer + business lifecycle | YES (same-row / member request ID) | YES (fixture, replay, tenant, backfill) | YES (CI) | YES, manifest selection; Billing/Events configured via moduleConfigs |
 | intake | YES | Shared portable installer + live workflow adapter | YES (business identity / same-row replay) | YES (live HTTP handler + isolated tenant proof) | YES (CI) | YES, P/intake shared form → stable durable ID + staff review route |
 | applications | YES | Shared portable installer + live workflow adapter | YES (business identity / same-row replay) | YES (live HTTP handler + isolated tenant proof) | YES (CI) | YES, P/apply + P/applications → durable review, confirmation, Billing register + verified Stripe handoff |
-| reports | NO | Receipt installer | Yes, receipt only | Yes, receipt probe, lifecycle not proved | YES (CI) | Selection receipt only |
+| reports | YES | Shared receipt + generation job state | YES, same-record generation replay | YES, source-backed artifact + tenant ACL | YES (CI) | P/reports generate/read protected tenant artifacts |
 
 ## Executed branch acceptance proof
 
@@ -45,11 +45,11 @@ Requested `docs/BRICKS_AUDIT.md` does not exist on the inspected production ref.
 
 - **Capture (simplifi, connect, intake, applications):** Certified YES against Amanda-style isolated tenant provider fixtures and exercised customer-facing POST handlers; live third-party provider delivery remains outside this branch evidence boundary.
 - **Requests (ask/Guide, messaging, update-hub):** request submission, delivery, conversation response and feed freshness/authorization must be wired and executed, not just installed.
-- **Content (dashboard, pulse, documents, resources, reports):** persisted tenant defaults, storage ACL, generated artifact/job state, and authorized read-back require domain integration tests.
+- **Content (dashboard, documents, resources, reports):** Certified YES via isolated tenant-storage and actual HTTP-handler fixture tests, including protected upload/download and source-backed Reports. **Pulse** remains NO and requires its own lifecycle.
 - **Commerce/journey (billing, events, member, ctp, training, landing):** registration/enrollment, Stripe test-credential isolation, webhook and payment replay, confirmation, publish/forms and provider readiness still require dedicated implementation and test proof. Payment test routes must be preview-only.
 - **Other (amplifi, settings):** content/publish workflow with authorization and tenant settings read-write/read-back must be verified separately.
 
-**Certification decision:** Under the Amanda-style branch evidence boundary, 7 of 20 modules (Billing, Events, Member, Simplifi, Connect, Intake, Applications) are certified; 13 remain NO. Live payment/provider execution remains outside branch certification. Twenty have a shared durable selection receipt and executable isolated replay tests. No branch changes have been merged into production master.
+**Certification decision:** Under the Amanda-style branch evidence boundary, 11 of 20 modules (Billing, Events, Member, Simplifi, Connect, Intake, Applications, Documents, Resources, Dashboard, Reports) are certified; 9 remain NO. Live payment/provider execution remains outside branch certification. Twenty have a shared durable selection receipt and executable isolated replay tests. No branch changes have been merged into production master.
 
 ## Batch 1: Commerce family (Billing, Events, Member)
 
@@ -63,7 +63,7 @@ Requested `docs/BRICKS_AUDIT.md` does not exist on the inspected production ref.
 
 Each module needs a tenant-portable adapter or a clearly verified existing equivalent, durable business-record persistence, consistent-tenant readback, replay idempotency, functional write/list/update proof, tracking when applicable, and a Vercel-preview-only provisioning fixture returning GET/POST 404 in actual production. Payment modules require Stripe test-key isolation and same-row verified payment replay. Every new test must be executed; `npm test`, `npm run build`, and production-mode route probes must pass.
 
-**Verification status:** New receipt logic has been pushed to a feature branch. The branch-only GitHub CI proof above passed; isolated receipts remain insufficient for full per-brick lifecycle certification. No real end-to-end provider, payment, capture, notification, ACL, or job-generation proof has been executed. Do not claim certification or merge this branch until these checks and module-specific provider flows pass. Existing production remains unchanged.
+**Verification status:** New receipt logic has been pushed to a feature branch. The branch-only GitHub CI proof above passed; isolated receipts remain insufficient for full per-brick lifecycle certification. No live external provider, payment, or notification delivery has been executed. Tenant ACL, upload/download, and report job behavior have been exercised through isolated branch fixtures. Do not claim certification or merge this branch until these checks and module-specific provider flows pass. Existing production remains unchanged.
 
 **Final Batch 1 CI:** [run 38136690979](https://github.com/TheArchitect1111/ea-payments/actions/runs/38136690979), SUCCESS after manifest configuration wiring: `npm test` PASS, `npm run build` PASS, GET/POST production 404 test route checks PASS. This is isolated software proof, **not** a live Stripe $1 payment or a proven membership-provider authorization update. Billing, Events and Member are **Certified YES under isolated Amanda-style branch tests**, not live Stripe/provider execution.
 
@@ -76,3 +76,16 @@ The shared `lib/bricks/capture-family.ts` adapter covers Simplifi capture/outcom
 **Batch 2 CI result:** [GitHub Actions run 38137336380](https://github.com/TheArchitect1111/ea-payments/actions/runs/38137336380) SUCCESS for latest code baseline: npm test PASS (all four executable replay/tenant/routing tests), npm run build PASS, GET/POST production 404 PASS for capture provisioning route and all prior guarded routes. That older run covered only isolated adapters. The subsequent verified integration run below exercised the actual customer-facing handlers and passed. No production merge performed.
 
 **Batch 2 final customer-facing proof:** [GitHub Actions run 38138039266](https://github.com/TheArchitect1111/ea-payments/actions/runs/38138039266) **SUCCESS**: `npm test` (including `tests/capture-family.test.mts` and `tests/capture-customer-routes.test.mts`) PASS, `npm run build` PASS, and production-mode GET/POST 404 on `/api/bricks/capture-provision-test` PASS. Tenant isolation, duplicate suppression, one Connect welcome on replay, P/intake review persistence, P/applications Billing order registration and Stripe-verification handoff were exercised with isolated service fixtures. Amanda form and review paths remain untouched by the generic bridge. **Simplifi, Connect, Intake, Applications: CERTIFIED YES under branch fixture standard.** No actual provider sends or Stripe payments executed. No master merge.
+
+## Batch 3: Content family (Documents, Resources, Dashboard, Reports)
+
+**Certified YES under Amanda-style isolated branch evidence**, using [GitHub Actions run 38139611804](https://github.com/TheArchitect1111/ea-payments/actions/runs/38139611804) (SUCCESS).
+
+- **Documents:** `P/documents` and non-Amanda `P/deliveries` show admitted tenant files and protected download links. Authenticated staff can upload PDFs, plain text, Markdown, PNG, or JPEG (maximum 120 KB). MIME and PDF/PNG/JPEG signatures are checked; bytes are saved in durable tenant-scoped content records and read back, never exposed by a public file URL. Member/staff ACL is enforced on the actual download route. Amanda's specialized Deliveries center is preserved unchanged.
+- **Resources:** `P/resources` exposes uploaded tenant resource records and protected downloads alongside existing curated links. Staff manage resources via the same authorized upload API; member visibility is explicit. Replays with matching business identity preserve the original record; changed payloads fail closed.
+- **Dashboard:** The existing `requirePortalModule` gate remains the first authorization step. The installed tenant-specific default is persisted and read back via `portalContentDefault`, with an authorized content API for tenant-customized display. Existing dashboard metrics, navigation and Amanda rendering are retained.
+- **Reports:** `P/reports` provides an authorized generation action. `generateReport` reads the tenant's admitted Documents/Resources index, writes a deterministic JSON operational snapshot, moves the report's existing job row from queued to complete, and serves the generated artifact only through protected download with staff ACL. Repeated generation is idempotent; a changed source requires a distinct job key.
+
+**Proof and safeguards:** `tests/content-family.test.mts` covers all four durable defaults, indexed read-back, tenant isolation, role ACL, replay/conflict, persistence failure and report generation. `tests/content-http-routes.test.mts` exercises the real Content upload/download/list/generation HTTP handlers with isolated durable-storage fixtures, including replay without extra writes, MIME denial, unauthorized member write denial and cross-tenant 404. `app/api/bricks/content-provision-test/route.ts` is an authenticated preview-only tenant provisioning fixture and explicitly verifies cross-tenant read rejection and the report artifact state. In the built production-mode server, **GET and POST of `/api/bricks/content-provision-test` both return 404**. The existing test routes' production 404 protections remain tested. `npm test` and `npm run build` PASS.
+
+**Certification boundary:** This is software/fixture certification of the existing tenant persistence adapter, not a live Airtable storage audit or a deployed production release. Large-file/object storage and external report data pipelines are not included. The 120 KB in-record upload policy is intentional until external blob storage and its own security tests are separately qualified. Production `master` remains unchanged; the branch must pass the normal protected gate before any future promotion.
