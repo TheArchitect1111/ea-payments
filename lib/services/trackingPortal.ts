@@ -140,7 +140,7 @@ export async function confirmTrackingPayment(event: TrackingPayment) {
   return remote ? {ok:true} : storeTrackingPayment(event);
 }
 export async function enqueueTrackingPortalRetry(data: TrackingLead,error:unknown) {
-  const key=registrationKey(data.email,data.class_id);
+  const key=registrationKey(data.email,data.class_id,data.client_id,data.registration_id);
   const message=error instanceof Error?error.message:'Unknown tracking sync error';
   const record=await airtableUpsertByField('tracking_sync_failures','failure_key',key,{
     failure_key:key,payload_json:JSON.stringify(data),status:'pending',attempts:0,last_error:message.slice(0,1000),
