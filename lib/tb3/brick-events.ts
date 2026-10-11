@@ -1,3 +1,4 @@
+import clientRegistry from '@/lib/clients/registry.json';
 /**
  * TB3 chassis adapter: every TB3 business intake or calendar event goes through
  * registerBrickEvent. This is the only TB3-to-tracking entry point.
@@ -37,4 +38,11 @@ export async function trackTb3MerchSale(sale:{order_id:string;offerId:string;cus
   payment_reference:sale.payment_reference,payment_provider:'bonfire',timestamp,is_test:false});
  if(!payment.ok)throw new Error('TB3 verified merchandise payment tracking failed');
  return {signup,payment};
+}
+
+/** Factory clients use the same payment verification and test isolation as TB3. */
+export const clientEventRegistry:Record<string,{name:string;slug:string;portalPath:string;eventAdapter:string}>=clientRegistry;
+export async function registerClientEvent(clientId:string,value:Omit<BrickEvent,'client_id'>,proof?:Parameters<typeof registerBrickEvent>[1]) {
+ if(!Object.prototype.hasOwnProperty.call(clientEventRegistry,clientId)) return {ok:false,error:'Client is not registered'};
+ return registerBrickEvent({...value,client_id:clientId},proof);
 }

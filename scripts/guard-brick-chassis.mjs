@@ -7,7 +7,7 @@
 import { readFileSync,readdirSync,statSync } from 'node:fs';
 import { join,relative } from 'node:path';
 const root=process.cwd();
-const inputs=['app/api','app/tarris','lib/tb3','lib/amanda-catherine','lib/bricks','lib/services'];
+const inputs=['app/api','app/tarris','lib/tb3','lib/amanda-catherine','lib/bricks','lib/services','lib/clients'];
 const exclude=new Set(['lib/services/trackingPortal.ts','lib/services/brickRegistrar.ts']);
 const exceptions=new Set([
   // The receiving transport endpoint must persist events sent BY the registrar.

@@ -1,3 +1,4 @@
+import clientRegistry from '@/lib/clients/registry.json';
 import { createHash } from 'node:crypto';
 import { airtableQuery, airtableUpdate, airtableUpsertByField } from '@/lib/data/airtable-client';
 import { loadStudioRecord, saveStudioRecord } from '@/lib/creative-studio/persistence';
@@ -150,4 +151,10 @@ export async function enqueueTrackingPortalRetry(data: TrackingLead,error:unknow
 export async function getTestTrackingRegistration(id:string) {
   if (!/^[a-zA-Z0-9_-]{8,120}$/.test(id)) return null;
   return loadStudioRecord<TrackingLead & {paid_at?:string}>('experience',testRecordId(id));
+}
+
+/** Factory-generated portal entries share one registry with client event adapters. */
+export const clientTrackingPortals: Record<string,{name:string;slug:string;portalPath:string;eventAdapter:string}>=clientRegistry;
+export function getClientTrackingPortal(slug:string) {
+ return Object.prototype.hasOwnProperty.call(clientTrackingPortals,slug)?clientTrackingPortals[slug]:null;
 }

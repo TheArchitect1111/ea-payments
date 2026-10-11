@@ -20,3 +20,16 @@ graft/
 
 # EA disaster-recovery exports contain production data. Never commit them.
 .recovery/
+
+# Client factory requires a clean source tree, excluding generated local artifacts.
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+next-env.d.ts
+.env*
+coverage/
+playwright-report/
+test-results/
+lib/clients/.factory-lock/
+lib/clients/.registry-*.tmp
