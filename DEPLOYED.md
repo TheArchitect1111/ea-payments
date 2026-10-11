@@ -1,7 +1,3 @@
-# Tarris release candidate
-
-Source revision: `ee68f7031c08252104d72ddffcc901b0e4f75264` (PR #557). Production promotion pending fresh certification and live verification. This candidate is not yet reported deployed.
-
 # Universal HQ Production Deployment
 
 - **Timestamp:** 2026-10-09 08:20 UTC
