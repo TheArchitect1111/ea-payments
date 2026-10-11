@@ -25,7 +25,8 @@ export type TrackingPayment = {
 function registrationKey(email: string, course: string, clientId='amanda-catherine', registrationId?:string) {
   const original=email.trim().toLowerCase() + ':' + course;
   // Explicit signup identity isolates repeat purchases; legacy callers keep their old key.
-  return registrationId?clientId+':'+registrationId:clientId==='amanda-catherine'?original:clientId+':'+original;
+  const legacyAmandaId=clientId==='amanda-catherine'&&registrationId===stableId(original);
+  return registrationId&&!legacyAmandaId?clientId+':'+registrationId:clientId==='amanda-catherine'?original:clientId+':'+original;
 }
 function testRecordId(registrationId: string, clientId='amanda-catherine') {
   return 'amanda-tracking-test-' + createHash('sha256').update(clientId==='amanda-catherine'?registrationId:clientId+':'+registrationId).digest('hex').slice(0, 32);
@@ -115,9 +116,14 @@ export async function storeTrackingPayment(event: TrackingPayment) {
     if (!saved.ok || !saved.persistedToAirtable) throw new Error(saved.error || 'Test payment tracking failed');
     return {ok:true,id,alreadyPaid:lead.payment_status==='paid'};
   }
-  const key = registrationKey(event.email,event.class_id,event.client_id,event.registration_id);
-  const rows = await airtableQuery('portal_registrations',{
+  let key = registrationKey(event.email,event.class_id,event.client_id,event.registration_id);
+  let rows = await airtableQuery('portal_registrations',{
     filterByFormula:"{registration_key}='" + escapeFormula(key) + "'",maxRecords:1});
+  if(!rows[0]&&event.registration_id&&(!event.client_id||event.client_id==='amanda-catherine')){
+    const legacyKey=event.email.trim().toLowerCase()+':'+event.class_id;
+    const legacy=await airtableQuery('portal_registrations',{filterByFormula:"{registration_key}='"+escapeFormula(legacyKey)+"'",maxRecords:1});
+    if(legacy[0]?.fields.registration_id===event.registration_id){key=legacyKey;rows=legacy;}
+  }
   if (!rows[0]||String(rows[0].fields.email).toLowerCase()!==event.email.toLowerCase()||rows[0].fields.class_id!==event.class_id) throw new Error('Matching live registration not found; payment was not matched');
   const id = 'amanda-tracking-meta-' + stableId(key);
   const lead = await loadStudioRecord<TrackingLead & {payment_provider?:string}>('experience',id);
