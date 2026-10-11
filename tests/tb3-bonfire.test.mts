@@ -2,6 +2,7 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {build} from 'esbuild';
 import {writeFileSync,unlinkSync} from 'node:fs';
+import {createHmac} from 'node:crypto';
 const state={rows:new Map<string,any>(),writes:new Map<string,number>(),entitlements:new Map<string,any>(),persist:true};
 (globalThis as any).__bonfireTest=state;
 const mocks:Record<string,string>={
@@ -24,7 +25,7 @@ const order=(order_id:string)=>({order_id,product_id:'tb3-tee',product_name:'TB3
 test('valid HMAC only, rejects malformed, wrong secret and unsigned input',()=>{
  const raw=JSON.stringify(order('order-1'));
  const secret='some-long-preview-secret';
- const sign=(await import('node:crypto')).createHmac('sha256',secret).update(raw).digest('hex');
+ const sign=createHmac('sha256',secret).update(raw).digest('hex');
  assert.equal(api.bonfireSignatureValid(raw,sign,secret),true);
  assert.equal(api.bonfireSignatureValid(raw,sign+'00',secret),false);
  assert.equal(api.bonfireSignatureValid(raw,sign,'wrong'),false);
@@ -55,5 +56,8 @@ test('TB3 $1: same-row canonical Billing paid order, tracking, Member entitlemen
  assert.equal((await api.listTb3BonfireSales()).length,2);
 });
 test('fail-closed storage and offer matching',async()=>{
- await assert.rejects(api.ingestVerifiedBonfireOrder(order('order-new-unknown-offer').product_id='bad'),/./);
+ await assert.rejects(api.ingestVerifiedBonfireOrder({...order('order-new-unknown-offer'),product_id:'unknown'}),/configured Billing offer/);
+ state.persist=false;
+ await assert.rejects(api.ingestVerifiedBonfireOrder(order('order-3')),/durable unavailable/);
+ state.persist=true;
 });
