@@ -39,7 +39,7 @@ async function saveTestLead(lead: TrackingLead) {
   const saved = await saveStudioRecord({recordType:'experience',id,
     organizationId:syntheticOrgId('amanda-catherine'),title:'[TEST] Amanda tracking signup',
     payload:{...lead, is_test:true, record_kind:'amanda_tracking_test'}});
-  if (!saved.ok) throw new Error(saved.error || 'Test registration not saved');
+  if (!saved.ok || !saved.persistedToAirtable) throw new Error(saved.error || 'Test registration not saved');
   return {ok:true,id};
 }
 export async function saveTrackingLead(lead: TrackingLead) {
@@ -57,7 +57,7 @@ export async function saveTrackingLead(lead: TrackingLead) {
   const saved = await saveStudioRecord({recordType:'experience',id,
     organizationId:syntheticOrgId('amanda-catherine'),title:'Amanda tracking metadata',
     payload:{...existing,...lead,registration_id:existing?.registration_id || lead.registration_id}});
-  if (!saved.ok) throw new Error(saved.error || 'Tracking metadata could not be saved');
+  if (!saved.ok || !saved.persistedToAirtable) throw new Error(saved.error || 'Tracking metadata could not be saved');
   return {ok:true,id:record.id};
 }
 async function postIngest(payload: TrackingLead | TrackingPayment) {
@@ -99,7 +99,7 @@ export async function storeTrackingPayment(event: TrackingPayment) {
       organizationId:syntheticOrgId('amanda-catherine'),title:'[TEST] Amanda tracking PAID',
       payload:{...lead,payment_status:'paid',payment_reference:event.payment_reference,
         payment_provider:event.payment_provider,paid_at:event.timestamp,is_test:true}});
-    if (!saved.ok) throw new Error(saved.error || 'Test payment tracking failed');
+    if (!saved.ok || !saved.persistedToAirtable) throw new Error(saved.error || 'Test payment tracking failed');
     return {ok:true,id,alreadyPaid:lead.payment_status==='paid'};
   }
   const key = registrationKey(event.email,event.class_id);
@@ -114,7 +114,7 @@ export async function storeTrackingPayment(event: TrackingPayment) {
     payload:{...lead,registration_id:lead?.registration_id || event.registration_id || stableId(key),
       email:event.email.toLowerCase(),class_id:event.class_id,payment_status:'paid',
       payment_reference:event.payment_reference,payment_provider:event.payment_provider,paid_at:event.timestamp,is_test:false}});
-  if (!saved.ok) throw new Error(saved.error || 'Verified payment metadata could not be saved');
+  if (!saved.ok || !saved.persistedToAirtable) throw new Error(saved.error || 'Verified payment metadata could not be saved');
   return {ok:true,id,alreadyPaid:lead?.payment_status==='paid'};
 }
 export async function confirmTrackingPayment(event: TrackingPayment) {
