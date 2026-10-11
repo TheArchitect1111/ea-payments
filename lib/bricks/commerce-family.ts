@@ -115,7 +115,7 @@ export async function changeMemberGrant(tenant: BrickTenant, input:unknown, conf
 /** Paid external commerce source: call only after the upstream event signature and paid status are verified.
  * Uses external order identity, not buyer email, so repeat purchases remain separate orders. */
 export async function recordVerifiedExternalCommerce(tenant:BrickTenant, input:{
-  externalOrderId:string;source:'bonfire';offerId:string;title:string;
+  externalOrderId:string;source:'bonfire'|'bonfire-csv';offerId:string;title:string;
   amount:number;currency:'usd';email:string;name:string;
 }){
  await requireAdmitted(tenant,'billing');

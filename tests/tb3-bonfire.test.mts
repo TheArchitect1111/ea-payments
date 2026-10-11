@@ -13,7 +13,7 @@ const mocks:Record<string,string>={
  export async function readBrickRecord(t,id){const r=globalThis.__bonfireTest.rows.get(id);if(r&&(r.organizationId!==t.organizationId||r.portalSlug!==t.portalSlug))throw Error('tenant mismatch');return r?structuredClone(r):null;}
  export async function writeBrickRecord(t,id,row){const s=globalThis.__bonfireTest;if(!s.persist)throw Error('durable unavailable');if(row.organizationId!==t.organizationId||row.portalSlug!==t.portalSlug)throw Error('tenant mismatch');s.rows.set(id,structuredClone(row));s.writes.set(id,(s.writes.get(id)||0)+1);return row;}`
 };
-const built=await build({stdin:{contents:"export * from './lib/tb3/bonfire-ledger';export {installCommerce} from './lib/bricks/commerce-family';",resolveDir:process.cwd()},
+const built=await build({stdin:{contents:"export * from './lib/tb3/bonfire-ledger';export * from './lib/tb3/bonfire-csv';export {installCommerce} from './lib/bricks/commerce-family';",resolveDir:process.cwd()},
  bundle:true,platform:'node',format:'esm',packages:'external',write:false,plugins:[{name:'mock-durable',setup(p){
  p.onResolve({filter:/.*/},a=>Object.hasOwn(mocks,a.path)?{path:a.path,namespace:'mock'}:undefined);
  p.onLoad({filter:/.*/,namespace:'mock'},a=>({contents:mocks[a.path],loader:'js',resolveDir:process.cwd()}));
@@ -60,4 +60,32 @@ test('fail-closed storage and offer matching',async()=>{
  state.persist=false;
  await assert.rejects(api.ingestVerifiedBonfireOrder(order('order-3')),/durable unavailable/);
  state.persist=true;
+});
+
+test('Bonfire seller CSV: 2 x $1 paid records, Member, Dashboard/Reports readback and duplicate reimport',async()=>{
+ state.rows.clear();state.writes.clear();state.entitlements.clear();state.persist=true;
+ await api.installCommerce(tenant,'billing',{offers:[{id:'tb3-tee',title:'TB3 T-Shirt',amount:100,currency:'usd'}],
+  confirmationSubject:'Merch sale',confirmationHtml:'Thank you'});
+ const csv='Order ID,Product ID,Product,Amount,Customer,Email,Date\n'+
+  'csv-order-1,tb3-tee,TB3 T-Shirt,1.00,Buyer One,one@example.com,2026-10-11\n'+
+  'csv-order-2,tb3-tee,TB3 T-Shirt,1.00,Buyer Two,two@example.com,2026-10-11\n';
+ const a=await api.importBonfireCsv(csv);assert.deepEqual(a,{imported:2,replayed:0,total:2});
+ const b=await api.importBonfireCsv(csv);assert.deepEqual(b,{imported:0,replayed:2,total:2});
+ const orders=[...state.rows.entries()].filter(([k,v])=>k.startsWith('commerce-order-')&&v.source==='bonfire-csv');
+ assert.equal(orders.length,2);
+ assert.ok(orders.every(([k,v])=>v.payment_status==='paid'&&v.payment_reference.startsWith('csv-order-')));
+ assert.ok(orders.every(([k,v])=>state.writes.get(k)===1));
+ const report=await api.tb3BonfireReport();
+ assert.equal(report.count,2);assert.equal(report.gross_cents,200);assert.equal(report.memberEnabled,true);
+ assert.ok(report.orders.every(x=>x.tracking==='Bonfire CSV'&&x.order_date==='2026-10-11'&&x.organizationId===tenant.organizationId));
+ assert.equal(state.entitlements.get(tenant.organizationId+':member')?.status,'active');
+ await assert.rejects(api.importBonfireCsv(csv.replace('csv-order-1,tb3-tee,TB3 T-Shirt,1.00','csv-order-1,tb3-tee,TB3 T-Shirt,2.00')),/conflict|matching/i);
+});
+test('seller CSV parser rejects malformed dates, unregistered amounts and quote escapes',()=>{
+ assert.throws(()=>api.parseBonfireCsv('Order ID,Product\n1,test'),/Missing required/);
+ const header='Order ID,Product ID,Product,Amount,Customer,Email,Date\n';
+ assert.throws(()=>api.parseBonfireCsv(header+'bad,tb3-tee,Tee,-1.00,Buyer,b@example.com,2026-10-11'),/Amount/);
+ assert.throws(()=>api.parseBonfireCsv(header+'bad,tb3-tee,Tee,1.00,Buyer,b@example.com,2026-99-11'),/Date/);
+ const quote=api.parseBonfireCsv(header+'quoted,tb3-tee,"TB3, Red Tee",1.00,Buyer,b@example.com,2026-10-11');
+ assert.equal(quote[0].order.product_name,'TB3, Red Tee');
 });

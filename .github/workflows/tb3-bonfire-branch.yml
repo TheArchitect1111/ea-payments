@@ -1,7 +1,7 @@
 name: TB3 Bonfire integration branch verification
 on:
   push:
-    branches: [fix/tb3-bonfire-integration]
+    branches: [fix/tb3-bonfire-csv]
   pull_request:
     branches: [master]
     paths:
@@ -33,7 +33,7 @@ jobs:
             if curl -fsS http://127.0.0.1:3123/api/ops/build-info >/dev/null; then break; fi
             sleep 1
           done
-          for route in /api/bricks/tb3-bonfire-provision-test /api/bricks/commerce-dollar-test; do
+          for route in /api/bricks/tb3-bonfire-csv-provision-test /api/bricks/tb3-bonfire-provision-test /api/bricks/commerce-dollar-test; do
             for method in GET POST; do
               code=$(curl -s -o /dev/null -w '%{http_code}' -X "$method" "http://127.0.0.1:3123$route")
               test "$code" = "404" || { echo "FAIL $method $route: $code"; exit 1; }
