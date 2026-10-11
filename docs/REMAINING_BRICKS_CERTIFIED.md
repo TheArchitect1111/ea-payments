@@ -1,4 +1,4 @@
-| member | NO | Shared receipt + business adapter | YES (isolated) | YES, preview fixture + isolated lifecycle tests | YES (CI) | Business API implemented; manifest-driven config/live provider incomplete |
+# Remaining chassis bricks: audit and certification status
 
 **Branch:** `fix/remaining-bricks-certified` (not merged into master). **Production baseline:** `0b91edac` (certified source `bf5f5987`).
 
