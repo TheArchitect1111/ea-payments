@@ -66,9 +66,9 @@ test('Bonfire seller CSV: 2 x $1 paid records, Member, Dashboard/Reports readbac
  state.rows.clear();state.writes.clear();state.entitlements.clear();state.persist=true;
  await api.installCommerce(tenant,'billing',{offers:[{id:'tb3-tee',title:'TB3 T-Shirt',amount:100,currency:'usd'}],
   confirmationSubject:'Merch sale',confirmationHtml:'Thank you'});
- const csv='Order ID,Product ID,Product,Amount,Customer,Email,Date\\n'+
-  'csv-order-1,tb3-tee,TB3 T-Shirt,1.00,Buyer One,one@example.com,2026-10-11\\n'+
-  'csv-order-2,tb3-tee,TB3 T-Shirt,1.00,Buyer Two,two@example.com,2026-10-11\\n';
+ const csv='Order ID,Product ID,Product,Amount,Customer,Email,Date\n'+
+  'csv-order-1,tb3-tee,TB3 T-Shirt,1.00,Buyer One,one@example.com,2026-10-11\n'+
+  'csv-order-2,tb3-tee,TB3 T-Shirt,1.00,Buyer Two,two@example.com,2026-10-11\n';
  const a=await api.importBonfireCsv(csv);assert.deepEqual(a,{imported:2,replayed:0,total:2});
  const b=await api.importBonfireCsv(csv);assert.deepEqual(b,{imported:0,replayed:2,total:2});
  const orders=[...state.rows.entries()].filter(([k,v])=>k.startsWith('commerce-order-')&&v.source==='bonfire-csv');
@@ -82,8 +82,8 @@ test('Bonfire seller CSV: 2 x $1 paid records, Member, Dashboard/Reports readbac
  await assert.rejects(api.importBonfireCsv(csv.replace('csv-order-1,tb3-tee,TB3 T-Shirt,1.00','csv-order-1,tb3-tee,TB3 T-Shirt,2.00')),/conflict|matching/i);
 });
 test('seller CSV parser rejects malformed dates, unregistered amounts and quote escapes',()=>{
- assert.throws(()=>api.parseBonfireCsv('Order ID,Product\\n1,test'),/Missing required/);
- const header='Order ID,Product ID,Product,Amount,Customer,Email,Date\\n';
+ assert.throws(()=>api.parseBonfireCsv('Order ID,Product\n1,test'),/Missing required/);
+ const header='Order ID,Product ID,Product,Amount,Customer,Email,Date\n';
  assert.throws(()=>api.parseBonfireCsv(header+'bad,tb3-tee,Tee,-1.00,Buyer,b@example.com,2026-10-11'),/Amount/);
  assert.throws(()=>api.parseBonfireCsv(header+'bad,tb3-tee,Tee,1.00,Buyer,b@example.com,2026-99-11'),/Date/);
  const quote=api.parseBonfireCsv(header+'quoted,tb3-tee,"TB3, Red Tee",1.00,Buyer,b@example.com,2026-10-11');
