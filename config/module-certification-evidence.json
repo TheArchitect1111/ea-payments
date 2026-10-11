@@ -2657,8 +2657,8 @@
         "app/portal/[slug]/calendar/page.tsx",
         "app/portal/[slug]/calendar/PortalCalendar.tsx"
       ],
-      "sourceFingerprint": "b8199154e8cc13f8f513819aec8ded93609e040bd088ee4612d2e52818b171fd",
-      "evidenceFingerprint": "7fe40d9dfbb89ef37fb5b9ea743946d59f4b615694436528a4d71aaff0d3c818",
+      "sourceFingerprint": "0ee1cf1d56887015a18fb5f1e1c4c14fe92aa0603d657c7cc30aa6a86c79082c",
+      "evidenceFingerprint": "a9cbb7da22775ce1222c02df60e37450dcaca22328fbb77fecf662cdf9d7bcb3",
       "evidence": {
         "route-render": {
           "tests": [
@@ -2740,6 +2740,7 @@
         "lib/tenant-foundation.ts",
         "app/api/admin/chassis/install/route.ts",
         "app/api/admin/entitlements/route.ts",
+        "lib/people/errors.ts",
         "lib/people/adapter.ts",
         "lib/people/flags.ts",
         "lib/people/postgres-client.ts",
@@ -2752,8 +2753,8 @@
         "app/portal/[slug]/people/page.tsx",
         "app/portal/[slug]/people/PeopleDirectory.tsx"
       ],
-      "sourceFingerprint": "43808fdd95acfb58c937b6355c196d1f70ab6d9ce078385c658a13540aff7554",
-      "evidenceFingerprint": "7fe40d9dfbb89ef37fb5b9ea743946d59f4b615694436528a4d71aaff0d3c818",
+      "sourceFingerprint": "c6bdd5667c5e54dbbf2740eee5171dda0f9a81ae9c91e3a8e82c9943f57c74be",
+      "evidenceFingerprint": "a9cbb7da22775ce1222c02df60e37450dcaca22328fbb77fecf662cdf9d7bcb3",
       "evidence": {
         "route-render": {
           "tests": [
@@ -2844,8 +2845,8 @@
         "app/portal/[slug]/discovery/page.tsx",
         "app/portal/[slug]/discovery/DiscoveryForm.tsx"
       ],
-      "sourceFingerprint": "44aabc31250d8b1ad0497e435692b739ebb6e252e3450720ecd4b4205a272bca",
-      "evidenceFingerprint": "7fe40d9dfbb89ef37fb5b9ea743946d59f4b615694436528a4d71aaff0d3c818",
+      "sourceFingerprint": "b69e451334a15c4072c02af43603d31039d2b7b7bd2e1cac4d82fe76fd29ffee",
+      "evidenceFingerprint": "a9cbb7da22775ce1222c02df60e37450dcaca22328fbb77fecf662cdf9d7bcb3",
       "evidence": {
         "route-render": {
           "tests": [

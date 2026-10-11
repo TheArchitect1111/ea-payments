@@ -45,7 +45,13 @@ export class PeoplePersistError extends Error {
 }
 
 export function isPeoplePersistError(value: unknown): value is PeoplePersistError {
-  return value instanceof PeoplePersistError;
+  if (value instanceof PeoplePersistError) return true;
+  // ESM/CJS loaders can instantiate the same server module twice. Preserve the
+  // typed fail-closed status across those boundaries; never accept plain JSON.
+  if (!(value instanceof Error) || value.name !== 'PeoplePersistError') return false;
+  const error = value as Error & { code?: unknown; httpStatus?: unknown; retryable?: unknown };
+  return typeof error.code === 'string' && Object.hasOwn(HTTP_STATUS, error.code) &&
+    error.httpStatus === HTTP_STATUS[error.code as PeoplePersistErrorCode] && typeof error.retryable === 'boolean';
 }
 
 export function peoplePersistHttpStatus(value: unknown): number {

@@ -15,7 +15,7 @@ const mocks = { ...baseMocks,
 const result = await build({ stdin: { contents: `
 export * from './lib/tenant-foundation';export * from './lib/bricks/module-install';export * from './lib/bricks/provision-test';
 export * from './lib/calendar/storage';export * from './lib/discovery/storage';export * from './lib/people/ensure-person';
-export * from './lib/people/adapter';export * from './lib/people/resolve-tenant';
+export * from './lib/people/adapter';export * from './lib/people/errors';export * from './lib/people/resolve-tenant';
 export {POST as calendarPOST} from './app/api/portal/[slug]/calendar/events/route';
 export {POST as discoveryPOST} from './app/api/portal/[slug]/discovery/route';
 export {GET as calendarGET} from './app/api/portal/calendar/route';
@@ -163,6 +163,11 @@ test('authorization-tenant-isolation: People guard rejects wrong org, inactive m
  assert.equal((await api.guardPeopleApi(req('/api/portal/cert-example/people'),tenant.portalSlug)).ok,true);
  for(const scenario of ['org','membership','disabled']){session();db.member=true;if(scenario==='org')db.session.orgId='recOTHER';if(scenario==='membership')db.member=false;if(scenario==='disabled')db.entitlements=[];
  const guarded=await api.guardPeopleApi(req('/api/portal/cert-example/people'),tenant.portalSlug);assert.equal(guarded.ok,false);assert.equal(guarded.response.status,403);}
+});
+test('success-empty-failure-states: People typed failures survive duplicate module loaders without trusting plain JSON',()=>{
+ const error=Object.assign(new Error('Unavailable'),{name:'PeoplePersistError',code:'unavailable',httpStatus:503,retryable:true});
+ assert.equal(api.isPeoplePersistError(error),true);assert.equal(api.isPeoplePersistError({...error}),false);
+ assert.equal(api.isPeoplePersistError(Object.assign(new Error('Invalid'),{name:'PeoplePersistError',code:'unavailable',httpStatus:200,retryable:true})),false);
 });
 test('immutable-version-fingerprint: all three module certificates have exact version and ten evidence classes',()=>{
  const inventory=JSON.parse(readFileSync('config/capability-inventory.json','utf8'));const ledger=JSON.parse(readFileSync('config/module-certification-evidence.json','utf8'));
