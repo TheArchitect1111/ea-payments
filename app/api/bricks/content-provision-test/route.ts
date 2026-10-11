@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { requireAdminActionFromRequest, adminAuthJsonError } from '@/lib/admin-session-guard';
 import { provisionTestsAllowed } from '@/lib/bricks/provision-test';
 import { ensureTenantFoundation } from '@/lib/tenant-foundation';
-import { ContentKind,contentDefaults,saveContent,readContent,finishReport } from '@/lib/bricks/content-family';
+import { ContentKind,contentDefaults,saveContent,readContent,generateReport } from '@/lib/bricks/content-family';
 export async function GET(){return Response.json({error:'Not found'},{status:404});}
 export async function POST(request:NextRequest){
  if(!provisionTestsAllowed())return Response.json({error:'Not found'},{status:404});
@@ -13,7 +13,7 @@ export async function POST(request:NextRequest){
   const {runId,kind}=z.object({runId:z.string().regex(/^[a-z0-9-]{8,40}$/),kind:ContentKind}).strict().parse(await request.json());
   const portalSlug='cert-'+kind+'-'+runId;
   const {orgId}=await ensureTenantFoundation({portalSlug,clientName:'Content certification',
-    packagePurchased:'Launch Verification',requestedModuleIds:[kind],assemblyMode:'certified'});
+    packagePurchased:'Launch Verification',requestedModuleIds:kind==='reports'?['reports','documents']:[kind],assemblyMode:'certified'});
   const tenant={organizationId:orgId,portalSlug};
   const initial=await contentDefaults(tenant,kind),repeat=await contentDefaults(tenant,kind);
   if(initial.id!==repeat.id)throw Error('Defaults replay mismatch');
@@ -26,7 +26,13 @@ export async function POST(request:NextRequest){
     if((e as Error).message!=='Content access denied')throw e;
   }
   const readback=await readContent(tenant,kind,'fixture','staff');
-  const job=kind==='reports'?await finishReport(tenant,'fixture','/portal/'+portalSlug+'/reports/fixture','staff'):null;
+  try{await readContent({...tenant,portalSlug:portalSlug+'-other'},kind,'fixture','staff');
+    throw Error('Cross-tenant read was accepted');}catch(e){
+    if((e as Error).message==='Cross-tenant read was accepted')throw e;
+  }
+  if(kind==='reports')await contentDefaults(tenant,'documents');
+  const job=kind==='reports'?await generateReport(tenant,'fixture','documents','staff'):null;
+  if(job && (job.state!=='complete'||!job.body))throw Error('Report generation did not persist an artifact');
   return Response.json({ok:true,testOnly:true,kind,readbackId:readback.id,reportState:job?.state||null,productionStatus:404});
  }catch(e){return Response.json({ok:false,error:e instanceof Error?e.message:'Failed'},{status:503});}
 }
