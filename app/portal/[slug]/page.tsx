@@ -1,5 +1,6 @@
 import { portalContentDefault } from '@/lib/bricks/content-portal';
 import Link from 'next/link';
+import Tb3MerchSales from '@/app/portal/components/Tb3MerchSales';
 import { redirect } from 'next/navigation';
 import { getPortalCaptures } from '@/lib/capture-records';
 import { getClientSuccessProfile } from '@/lib/client-success';
@@ -255,6 +256,7 @@ export default async function PortalPage({
     ),
     workspaceDock: (
       <>
+        {slug === 'tarris' ? <Tb3MerchSales /> : null}
         <EAPortalHubCards slug={slug} />
 
         <div className="ep-bento">
