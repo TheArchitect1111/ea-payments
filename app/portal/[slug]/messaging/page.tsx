@@ -1,3 +1,4 @@
+import FinalBrickPanel from '@/app/portal/components/FinalBrickPanel';
 import Link from 'next/link';
 import { requirePortalModule } from '@/lib/modules/portal-modules';
 import { listPortalMessagingThreads } from '@/lib/portal-messaging-hub';
@@ -73,6 +74,7 @@ export default async function MessagingPage({ params }: { params: Promise<{ slug
           </li>
         ))}
       </ul>
+      {!slug.startsWith('amanda-catherine') ? <FinalBrickPanel kind="messaging" title="messaging workspace" /> : null}
     </PortalSubpage>
   );
 }
