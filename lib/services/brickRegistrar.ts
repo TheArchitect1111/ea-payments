@@ -54,6 +54,8 @@ export async function registerBrickEvent(event:BrickEvent, verifiedPayment?:Trac
       verifiedPayment.registration_id!==e.registration_id||
       verifiedPayment.email.trim().toLowerCase()!==e.email||
       verifiedPayment.class_id!==e.brick_id||
+      (e.client_id!=='amanda-catherine'&&verifiedPayment.client_id!==e.client_id)||
+      e.status!=='payment_confirmed'||
       Boolean(verifiedPayment.is_test)!==e.is_test) {
     return {ok:false,error:'Verified server-side payment evidence required'};
    }
