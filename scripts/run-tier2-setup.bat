@@ -7,7 +7,7 @@ echo ============================================
 echo   Tier 2: ONBOARDING + ESIGN Make webhooks
 echo ============================================
 echo.
-echo Create two Make scenarios first (see docs\FULL-LAUNCH-MANUAL-SETUP.md):
+echo Create two Make scenarios first (see docs\MAKE-TIER2.md):
 echo   1. Onboarding — Custom webhook after Stripe payment
 echo   2. eSign — Custom webhook for signed docs
 echo.

@@ -1,12 +1,5 @@
 # EA Ecosystem Platform
 
-## LEGO Brick Chassis - OFFICIAL STANDARD - PR #556 MERGED
-Certified e451ff7, Factory one command: node scripts/new-client.mjs "Client Name"
-
-Guard: `scripts/guard-brick-chassis.mjs`. No manual wiring allowed. All client tracking events use `lib/services/brickRegistrar.ts`.
-
-Onboarding: [docs/NEW_CLIENT_ONBOARDING.md](docs/NEW_CLIENT_ONBOARDING.md).
-
 This repository is the current canonical foundation for the EA Ecosystem. Its observed repository and Vercel project name is `ea-payments`; its package name is `simplifi`; product surfaces use EA Platform, Simplifi, Amplifi, Magnifi, Pulse, Connect, and portal branding. These names are intentionally not being changed during stabilization.
 
 ## Current stabilization gate

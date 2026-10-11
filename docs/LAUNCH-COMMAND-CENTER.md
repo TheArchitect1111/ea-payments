@@ -68,5 +68,6 @@ Weighted sum of scored items (max 100). `controlled_paid_launch_ready` requires 
 - `docs/DEMO-LIBRARY.md`
 - `docs/FULL-LAUNCH-MANUAL-SETUP.md`
 - `docs/LAUNCH-CHANGELOG-KNOWN-LIMITATIONS.md`
-- `docs/NEW_CLIENT_ONBOARDING.md`
+- `docs/MAKE-TIER2.md`
+- `docs/MAKE-EA-ONBOARDING-SCENARIO.md`
 - `docs/LAUNCH-100.md`

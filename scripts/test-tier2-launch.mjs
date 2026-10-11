@@ -70,7 +70,7 @@ try {
   } else if (t2.ready) {
     console.log('\nWebhooks configured — run live checkout at', `${BASE}/checkout`);
   } else {
-    console.log('\nNext: docs/FULL-LAUNCH-MANUAL-SETUP.md → scripts/run-tier2-setup.bat');
+    console.log('\nNext: docs/MAKE-TIER2.md → scripts/run-tier2-setup.bat');
   }
 } catch (err) {
   console.log('Health check failed:', err.message);
