@@ -20,7 +20,7 @@ export const BonfireOrder = z.object({
 export type BonfireOrder = z.infer<typeof BonfireOrder>;
 export type BonfireSale = typeof tb3Tenant & {id:string;order_id:string;offerId:string;
  product:string;amount_cents:number;currency:'usd';customer:string;customer_email:string;
- payment_reference:string;payment_status:'paid';tracking:'Bonfire';source:'bonfire'};
+ payment_reference:string;payment_status:'paid';tracking:'Bonfire'|'Bonfire CSV';source:'bonfire'|'bonfire-csv'};
 const receiptId=(orderId:string)=>'tb3-bonfire-'+brickHash([TB3_ORGANIZATION_ID,orderId]);
 const indexId='tb3-bonfire-index-'+brickHash(TB3_ORGANIZATION_ID);
 const trackingId=(orderId:string)=>'tb3-bonfire-track-'+brickHash([TB3_ORGANIZATION_ID,orderId]);
@@ -36,14 +36,14 @@ async function requireTb3Installed(){
   !record.admitted.includes('billing')||!record.admitted.includes('member'))
  throw Error('TB3 Billing and Member must be installed before merch ingestion');
 }
-export async function ingestVerifiedBonfireOrder(input:unknown){
+export async function ingestVerifiedBonfireOrder(input:unknown,origin:'bonfire'|'bonfire-csv'='bonfire'){
  await requireTb3Installed();
  const order=BonfireOrder.parse(input), id=receiptId(order.order_id);
  const before=await readBrickRecord<BonfireSale>(tb3Tenant,id);
  const row:BonfireSale={...tb3Tenant,id,order_id:order.order_id,offerId:order.product_id,
    product:order.product_name,amount_cents:order.amount_cents,currency:order.currency,
    customer:order.customer.name,customer_email:order.customer.email,
-   payment_reference:order.order_id,payment_status:'paid',tracking:'Bonfire',source:'bonfire'};
+   payment_reference:order.order_id,payment_status:'paid',tracking:origin==='bonfire-csv'?'Bonfire CSV':'Bonfire',source:origin};
  if(before){
   if(JSON.stringify(before)!==JSON.stringify(row))throw Error('Conflicting Bonfire order replay');
   // A prior attempt may have persisted its payment but failed during entitlement
@@ -54,13 +54,13 @@ export async function ingestVerifiedBonfireOrder(input:unknown){
  // External paid proof has already been authenticated at the ingress boundary.
  // Keep the canonical paid record and separate tracking receipt tenant-scoped.
  const billing=await recordVerifiedExternalCommerce(tb3Tenant,{
-  externalOrderId:order.order_id,source:'bonfire',offerId:order.product_id,
+  externalOrderId:order.order_id,source:origin,offerId:order.product_id,
   title:order.product_name,amount:order.amount_cents,currency:order.currency,
   email:order.customer.email,name:order.customer.name});
  if(billing.replay)throw Error('Billing record exists without synchronized Bonfire receipt');
  await writeBrickRecord(tb3Tenant,id,row);
  await writeBrickRecord(tb3Tenant,trackingId(order.order_id),{...tb3Tenant,
-  orderId:order.order_id,event:'merch_payment_confirmed',source:'bonfire',amount_cents:order.amount_cents});
+  orderId:order.order_id,event:'merch_payment_confirmed',source:origin,amount_cents:order.amount_cents});
  const old=await readBrickRecord<typeof tb3Tenant & {keys:string[]}>(tb3Tenant,indexId);
  if(!old?.keys.includes(id))await writeBrickRecord(tb3Tenant,indexId,{...tb3Tenant,keys:[...(old?.keys||[]),id]});
  await ensureMemberEntitlement();
