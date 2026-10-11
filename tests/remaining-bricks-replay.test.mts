@@ -8,8 +8,8 @@ const store = new Map<string, unknown>();
 let durable = true;
 const mock: Record<string,string> = {
   '@/lib/calendar/nylas': 'export async function listPortalNylasEvents(){return [];}',
-  '@/lib/calendar/storage': 'export const CalendarConfig={optional:()=>undefined}; export async function installCalendar(){}',
-  '@/lib/discovery/storage': 'export async function installDiscovery(){}',
+  '@/lib/calendar/storage': "import {z} from 'zod'; export const CalendarConfig=z.object({}).passthrough(); export async function installCalendar(){}",
+  '@/lib/discovery/storage': "import {z} from 'zod'; export const DiscoveryConfig=z.object({}).passthrough(); export async function installDiscovery(){}",
   '@/lib/people/adapter': 'export function getPeopleRepository(){return {kind:"postgres", listPersonsByOrg:async()=>[]};}',
   '@/lib/people/flags': 'export function isPeopleRuntimeAllowed(){return true;} export function isUniversalPeoplePersistEnabled(){return true;}',
   '@/lib/creative-studio/persistence': `export async function loadStudioRecordFromAirtable(type,id){return structuredClone(globalThis.__remainingBrickPort.store.get(type+':'+id)||null);}
