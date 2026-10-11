@@ -46,11 +46,14 @@ export async function saveTrackingLead(lead: TrackingLead) {
   if (lead.is_test) return saveTestLead(lead);
   const key = registrationKey(lead.email, lead.class_id);
   // Legacy fields remain the compatibility baseline for the existing Airtable schema.
+  const current = await airtableQuery('portal_registrations',{
+    filterByFormula:"{registration_key}='"+escapeFormula(key)+"'",maxRecords:1});
+  const existingPayment = String(current[0]?.fields?.payment_status || '');
   const fields = {registration_key:key,first_name:lead.first_name,last_name:lead.last_name,
     email:lead.email,phone:lead.phone,class_name:lead.class_name,class_id:lead.class_id,
     registration_type:lead.registration_type,created_at:lead.created_at,source_page:lead.source_page,
-    registration_id:lead.registration_id,payment_status:lead.payment_status,
-    payment_reference:lead.payment_reference || '',source:lead.source};
+    registration_id:lead.registration_id,payment_status:existingPayment === 'paid' ? 'paid' : lead.payment_status,
+    payment_reference:existingPayment === 'paid' ? String(current[0]?.fields?.payment_reference || '') : (lead.payment_reference || ''),source:lead.source};
   const record = await airtableUpsertByField('portal_registrations','registration_key',key,fields);
   if (!record) throw new Error('Tracking portal registration could not be saved');
   // Extended payment metadata lives in a deterministic record, not in an unverified Airtable schema.
