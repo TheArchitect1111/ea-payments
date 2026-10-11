@@ -2,7 +2,7 @@
 import {useCallback,useEffect,useState} from 'react';
 type Kind='pulse'|'amplifi'|'update-hub'|'messaging'|'training'|'landing'|'ask'|'settings'|'ctp';
 type Row={key:string;title:string;body:string;state:string;reply?:string;progress?:number};
-export default function FinalBrickPanel({kind,title}:{kind:Kind;title:string}){
+export default function FinalBrickPanel({kind,title,courses=[]}:{kind:Kind;title:string;courses?:{id:string;title:string}[]}){
  const [key,setKey]=useState(''),[body,setBody]=useState(''),[reply,setReply]=useState('');
  const [rows,setRows]=useState<Row[]>([]),[message,setMessage]=useState('');
  const [working,setWorking]=useState(false);
@@ -40,10 +40,17 @@ export default function FinalBrickPanel({kind,title}:{kind:Kind;title:string}){
  return <section className="ep-module-card">
   <h2 className="ep-module-card-title">{title}</h2>
   <p className="ep-module-card-note">Your records, progress and replies stay within this portal.</p>
-  <label>Title<input value={key} onChange={e=>setKey(e.target.value)} maxLength={80}/></label>
+  {kind==='training'&&courses.length>0?
+   <label>Published course
+    <select value={key} onChange={e=>{setKey(e.target.value);setBody(courses.find(c=>c.id===e.target.value)?.title||'');}}>
+     <option value="">Choose a course</option>
+     {courses.map(c=><option key={c.id} value={c.id}>{c.title}</option>)}
+    </select>
+   </label>:
+   <label>Title<input value={key} onChange={e=>setKey(e.target.value)} maxLength={80}/></label>}
   <label>Details<textarea value={body} onChange={e=>setBody(e.target.value)} maxLength={25000}/></label>
   <button type="button" className="ep-btn" disabled={working} onClick={()=>{
-   const id=key.trim().toLowerCase().replace(/[^a-z0-9-]/g,'-');
+   const id=kind==='training'?key:key.trim().toLowerCase().replace(/[^a-z0-9-]/g,'-');
    if(!id||!body.trim()){setMessage('Enter a title and description');return;}
    void request({action:'create',key:id,title:key,body,visibility:'member'});
   }}>Submit / save</button>
