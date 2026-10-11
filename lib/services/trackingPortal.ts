@@ -61,7 +61,9 @@ export async function saveTrackingLead(lead: TrackingLead) {
   const existing = await loadStudioRecord<TrackingLead>('experience',id);
   const saved = await saveStudioRecord({recordType:'experience',id,
     organizationId:syntheticOrgId('amanda-catherine'),title:'Amanda tracking metadata',
-    payload:{...existing,...lead,registration_id:existing?.registration_id || lead.registration_id}});
+    payload:{...existing,...lead,registration_id:existing?.registration_id || lead.registration_id,
+      payment_status:existing?.payment_status==='paid'?'paid':lead.payment_status,
+      payment_reference:existing?.payment_status==='paid'?existing.payment_reference:lead.payment_reference}});
   if (!saved.ok || !saved.persistedToAirtable) throw new Error(saved.error || 'Tracking metadata could not be saved');
   return {ok:true,id:record.id};
 }
