@@ -33,11 +33,17 @@ for(const kind of ['documents','resources','dashboard','reports'] as const){
   assert.equal(db.writes.get(item.id),1);
   await assert.rejects(api.readContent(tenant,kind,'artifact-1','member'),/denied/);
   assert.equal((await api.readContent(tenant,kind,'artifact-1','staff')).id,item.id);
+  assert.ok((await api.listContent(tenant,kind,'staff')).some((row:any)=>row.id===item.id));
+  assert.ok(!(await api.listContent(tenant,kind,'member')).some((row:any)=>row.id===item.id));
   await assert.rejects(api.readContent({...tenant,organizationId:'recTWO456'},kind,'artifact-1','staff'),/not found|mismatch/i);
   await assert.rejects(api.saveContent(tenant,kind,{...input,title:'Tampered'},'staff'),/conflict/);
   await assert.rejects(api.saveContent(tenant,kind,{...input,key:'unauthorized'},'member'),/permission/);
   if(kind==='reports'){
     const artifact='/portal/tenant-content/reports/artifact-1';
+    await api.contentDefaults(tenant,'documents');
+    const generated=await api.generateReport(tenant,'artifact-1','documents','staff');
+    assert.equal(generated.artifact,artifact);
+    assert.equal(JSON.parse(generated.body).source,'documents');
     const completed=await api.finishReport(tenant,'artifact-1',artifact,'staff');
     assert.equal(completed.state,'complete');
     const replay=await api.finishReport(tenant,'artifact-1',artifact,'staff');
