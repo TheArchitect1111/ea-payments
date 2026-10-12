@@ -4,135 +4,135 @@
 export const CIGAR_EDITORIAL_IMAGES = {
   "intro": {
     "src": "https://images.pexels.com/photos/1637114/pexels-photo-1637114.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    "alt": "Premium cigars arranged in a wooden humidor"
+    "alt": "Cigar industry and business operations"
   },
   "C01": {
-    "src": "https://images.pexels.com/photos/26971409/pexels-photo-26971409.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    "alt": "Wooden cigar box and carefully presented cigars"
+    "src": "https://images.pexels.com/photos/14017014/pexels-photo-14017014.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    "alt": "Cigar industry and business operations"
   },
   "C02": {
-    "src": "https://images.pexels.com/photos/6713597/pexels-photo-6713597.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    "alt": "Close view of a premium hand-rolled cigar"
+    "src": "https://images.pexels.com/photos/6713596/pexels-photo-6713596.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    "alt": "Cigar industry and business operations"
   },
   "C03": {
-    "src": "https://images.pexels.com/photos/6169635/pexels-photo-6169635.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    "alt": "Warehouse computer tracking orders and reports"
+    "src": "https://images.pexels.com/photos/11725476/pexels-photo-11725476.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    "alt": "Cigar industry and business operations"
   },
   "C04": {
-    "src": "https://images.pexels.com/photos/7289732/pexels-photo-7289732.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    "alt": "Small business team packing orders"
+    "src": "https://images.pexels.com/photos/13542243/pexels-photo-13542243.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    "alt": "Cigar industry and business operations"
   },
   "C05": {
-    "src": "https://images.pexels.com/photos/6170102/pexels-photo-6170102.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    "alt": "Warehouse shipment records and checklist"
+    "src": "https://images.pexels.com/photos/15571674/pexels-photo-15571674.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    "alt": "Cigar industry and business operations"
   },
   "C06": {
-    "src": "https://images.pexels.com/photos/6169053/pexels-photo-6169053.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    "alt": "Business owner coordinating delivery and communication"
+    "src": "https://images.pexels.com/photos/34323703/pexels-photo-34323703.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    "alt": "Cigar industry and business operations"
   },
   "C07": {
-    "src": "https://images.pexels.com/photos/7289725/pexels-photo-7289725.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    "alt": "Small business shipping orders with a computer"
+    "src": "https://images.pexels.com/photos/33105619/pexels-photo-33105619.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    "alt": "Cigar industry and business operations"
   },
   "B01": {
-    "src": "https://images.pexels.com/photos/3975055/pexels-photo-3975055.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    "alt": "Handmade cigars on a cigar factory worktable"
+    "src": "https://images.pexels.com/photos/33105619/pexels-photo-33105619.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    "alt": "Cigar manufacturing, product and brand presentation"
   },
   "B02": {
     "src": "https://images.pexels.com/photos/11725476/pexels-photo-11725476.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    "alt": "Box of premium cigars ready for sale"
+    "alt": "Cigar manufacturing, product and brand presentation"
   },
   "B03": {
     "src": "https://images.pexels.com/photos/6713596/pexels-photo-6713596.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    "alt": "Cigar product packaging and branded bands"
+    "alt": "Cigar manufacturing, product and brand presentation"
   },
   "B04": {
-    "src": "https://images.pexels.com/photos/3975054/pexels-photo-3975054.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    "alt": "Worker inspecting tobacco inventory at the factory"
+    "src": "https://images.pexels.com/photos/14017014/pexels-photo-14017014.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    "alt": "Cigar manufacturing, product and brand presentation"
   },
   "B05": {
-    "src": "https://images.pexels.com/photos/34323703/pexels-photo-34323703.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    "alt": "Premium boxed cigars and product details"
+    "src": "https://images.pexels.com/photos/13542243/pexels-photo-13542243.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    "alt": "Cigar manufacturing, product and brand presentation"
   },
   "B06": {
-    "src": "https://images.pexels.com/photos/3975062/pexels-photo-3975062.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    "alt": "Cigar production sorting and quality work"
+    "src": "https://images.pexels.com/photos/34323703/pexels-photo-34323703.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    "alt": "Cigar manufacturing, product and brand presentation"
   },
   "B07": {
     "src": "https://images.pexels.com/photos/15571674/pexels-photo-15571674.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    "alt": "Finished cigar box and branded products"
+    "alt": "Cigar manufacturing, product and brand presentation"
   },
   "L01": {
-    "src": "https://images.pexels.com/photos/5472333/pexels-photo-5472333.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    "alt": "Elegant lounge seating and warm interior"
+    "src": "https://images.pexels.com/photos/21704941/pexels-photo-21704941.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    "alt": "Cigar store and lounge experience"
   },
   "L02": {
-    "src": "https://images.pexels.com/photos/1637114/pexels-photo-1637114.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    "alt": "Organized humidor with boxed cigars"
+    "src": "https://images.pexels.com/photos/25747046/pexels-photo-25747046.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    "alt": "Cigar store and lounge experience"
   },
   "L03": {
-    "src": "https://images.pexels.com/photos/33451538/pexels-photo-33451538.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    "alt": "Warm luxury lounge atmosphere"
+    "src": "https://images.pexels.com/photos/27127674/pexels-photo-27127674.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    "alt": "Cigar store and lounge experience"
   },
   "L04": {
-    "src": "https://images.pexels.com/photos/34365797/pexels-photo-34365797.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    "alt": "Leather lounge seating and conversation area"
+    "src": "https://images.pexels.com/photos/1637114/pexels-photo-1637114.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    "alt": "Cigar store and lounge experience"
   },
   "L05": {
-    "src": "https://images.pexels.com/photos/18988617/pexels-photo-18988617.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    "alt": "Hospitality seating and bar service area"
+    "src": "https://images.pexels.com/photos/21704941/pexels-photo-21704941.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    "alt": "Cigar store and lounge experience"
   },
   "L06": {
-    "src": "https://images.pexels.com/photos/6713597/pexels-photo-6713597.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    "alt": "Premium cigar product ready for retail"
+    "src": "https://images.pexels.com/photos/25747046/pexels-photo-25747046.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    "alt": "Cigar store and lounge experience"
   },
   "L07": {
-    "src": "https://images.pexels.com/photos/5490907/pexels-photo-5490907.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    "alt": "Refined lounge seating and hospitality space"
+    "src": "https://images.pexels.com/photos/6713596/pexels-photo-6713596.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    "alt": "Cigar store and lounge experience"
   },
   "D01": {
-    "src": "https://images.pexels.com/photos/5156696/pexels-photo-5156696.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    "alt": "Warehouse shelves stocked with boxes"
+    "src": "https://images.pexels.com/photos/6169643/pexels-photo-6169643.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    "alt": "Distribution operations, warehouse inventory or delivery"
   },
   "D02": {
-    "src": "https://images.pexels.com/photos/6170408/pexels-photo-6170408.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    "alt": "Staff member organizing warehouse products"
+    "src": "https://images.pexels.com/photos/6169049/pexels-photo-6169049.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    "alt": "Distribution operations, warehouse inventory or delivery"
   },
   "D03": {
-    "src": "https://images.pexels.com/photos/21838827/pexels-photo-21838827.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    "alt": "Boxes prepared for delivery in transport"
+    "src": "https://images.pexels.com/photos/6170102/pexels-photo-6170102.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    "alt": "Distribution operations, warehouse inventory or delivery"
   },
   "D04": {
-    "src": "https://images.pexels.com/photos/6169635/pexels-photo-6169635.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    "alt": "Distribution reports reviewed at a computer"
+    "src": "https://images.pexels.com/photos/12234106/pexels-photo-12234106.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    "alt": "Distribution operations, warehouse inventory or delivery"
   },
   "D05": {
-    "src": "https://images.pexels.com/photos/30824343/pexels-photo-30824343.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    "alt": "Inventory handling and package verification"
+    "src": "https://images.pexels.com/photos/6169167/pexels-photo-6169167.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    "alt": "Distribution operations, warehouse inventory or delivery"
   },
   "D06": {
-    "src": "https://images.pexels.com/photos/10834810/pexels-photo-10834810.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    "alt": "Large stock and warehouse inventory"
+    "src": "https://images.pexels.com/photos/31112250/pexels-photo-31112250.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    "alt": "Distribution operations, warehouse inventory or delivery"
   },
   "D07": {
-    "src": "https://images.pexels.com/photos/6169053/pexels-photo-6169053.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    "alt": "Logistics representative checking shipment communication"
+    "src": "https://images.pexels.com/photos/6699416/pexels-photo-6699416.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    "alt": "Distribution operations, warehouse inventory or delivery"
   },
   "upload": {
-    "src": "https://images.pexels.com/photos/6170102/pexels-photo-6170102.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    "alt": "Report and shipping checklist"
+    "src": "https://images.pexels.com/photos/1637114/pexels-photo-1637114.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    "alt": "Cigar industry and business operations"
   },
   "contact": {
-    "src": "https://images.pexels.com/photos/7289719/pexels-photo-7289719.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    "alt": "Business owner working with online orders"
+    "src": "https://images.pexels.com/photos/14017014/pexels-photo-14017014.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    "alt": "Cigar industry and business operations"
   },
   "review": {
     "src": "https://images.pexels.com/photos/6713596/pexels-photo-6713596.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    "alt": "Premium cigar product"
+    "alt": "Cigar industry and business operations"
   },
   "submitted": {
-    "src": "https://images.pexels.com/photos/26971409/pexels-photo-26971409.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    "alt": "Finished cigars presented in a wooden box"
+    "src": "https://images.pexels.com/photos/11725476/pexels-photo-11725476.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    "alt": "Cigar industry and business operations"
   }
 } as const;
 export type CigarImageKey = keyof typeof CIGAR_EDITORIAL_IMAGES;
