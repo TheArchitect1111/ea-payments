@@ -38,11 +38,29 @@ async function xlsx(bytes:Buffer):Promise<ExtractedSheet[]>{
  const sharedXml=await zip.file('xl/sharedStrings.xml')?.async('string')??'';
  const shared=[...sharedXml.matchAll(/<si\b[^>]*>([\s\S]*?)<\/si>/g)].map(m=>[...m[1].matchAll(/<t(?:\s[^>]*)?>([\s\S]*?)<\/t>/g)].map(a=>decode(a[1])).join('').slice(0,200));
  const workbook=await zip.file('xl/workbook.xml')?.async('string')??'';
- const names=[...workbook.matchAll(/<sheet\b[^>]*name="([^"]+)"/g)].map(m=>decode(m[1]));
- const paths=Object.keys(zip.files).filter(x=>/^xl\/worksheets\/sheet\d+\.xml$/.test(x)).sort((a,b)=>Number(a.match(/sheet(\d+)/)?.[1])-Number(b.match(/sheet(\d+)/)?.[1])).slice(0,20);
- if(!paths.length)throw new Error('No worksheets found.');
+ const relationships=await zip.file('xl/_rels/workbook.xml.rels')?.async('string')??'';
+ const relMap=new Map<string,string>();
+ for(const m of relationships.matchAll(/<Relationship\b([^>]*)\/?>(?:<\/Relationship>)?/g)){
+  const id=/\bId="([^"]+)"/.exec(m[1])?.[1];
+  const rawTarget=/\bTarget="([^"]+)"/.exec(m[1])?.[1];
+  if(!id||!rawTarget||!/worksheets\//.test(rawTarget))continue;
+  const p=rawTarget.startsWith('/xl/')?rawTarget.slice(1):rawTarget.startsWith('xl/')?rawTarget:'xl/'+rawTarget;
+  if(!p.startsWith('xl/worksheets/')||p.includes('..'))throw new Error('Invalid workbook worksheet path.');
+  relMap.set(id,p);
+ }
+ const entries=[...workbook.matchAll(/<sheet\b([^>]*)\/?>(?:<\/sheet>)?/g)].map(m=>({
+  name:decode(/\bname="([^"]+)"/.exec(m[1])?.[1]??'Unknown sheet'),
+  relation:/\br:id="([^"]+)"/.exec(m[1])?.[1]??'',
+  sheetId:/\bsheetId="([^"]+)"/.exec(m[1])?.[1]??'',
+ }));
+ const fallback=Object.keys(zip.files).filter(x=>/^xl\/worksheets\/sheet\d+\.xml$/.test(x)).sort((a,b)=>Number(a.match(/sheet(\d+)/)?.[1])-Number(b.match(/sheet(\d+)/)?.[1])).slice(0,20);
+ const selected=entries.length?entries.slice(0,20).map((entry,i)=>({
+  name:entry.name,
+  path:entry.relation && relMap.size ? relMap.get(entry.relation) : fallback.find(p=>p==='xl/worksheets/sheet'+entry.sheetId+'.xml')??fallback[i],
+ })) :fallback.map(p=>({name:p,path:p}));
+ if(!selected.length||selected.some(x=>!x.path||!zip.file(x.path)))throw new Error('Unable to safely resolve Excel worksheets.');
  const output:ExtractedSheet[]=[];
- for(let i=0;i<paths.length;i++){const raw=await zip.file(paths[i])?.async('string')??'';const rows:string[][]=[];
+ for(const item of selected){const raw=await zip.file(item.path!)?.async('string')??'';const rows:string[][]=[];
  for(const match of raw.matchAll(/<row\b[^>]*>([\s\S]*?)<\/row>/g)){const cells:string[]=[];
  for(const m of match[1].matchAll(/<c\b([^>]*?)(?:\/>|>([\s\S]*?)<\/c>)/g)){
  const ref=/\br="([A-Z]+)/.exec(m[1])?.[1]??'A';let col=0;for(const c of ref)col=col*26+c.charCodeAt(0)-64;
@@ -53,7 +71,7 @@ async function xlsx(bytes:Buffer):Promise<ExtractedSheet[]>{
  }
  if(cells.some(Boolean))rows.push(Array.from({length:Math.min(cells.length,40)},(_,n)=>cells[n]??''));
  if(rows.length>=2000)break;}
- output.push(sheet(names[i]??paths[i],rows));}
+ output.push(sheet(item.name,rows));}
  return output;
 }
 export async function extractCigarReport(fileName:string,bytes:Buffer):Promise<ReportExtract>{
