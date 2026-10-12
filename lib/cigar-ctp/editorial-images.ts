@@ -13,7 +13,7 @@
  * L07: 3322845 | Li Sun | asian_cigar | https://www.pexels.com/photo/3322845/
  * D04: 2890018 | Satoshi Hirayama | asian_woman_owner | https://www.pexels.com/photo/2890018/
  * D06: 15397179 | PeopleByOwen | women_staff | https://www.pexels.com/photo/15397179/
- * F01: 6759172 | AI25.Studio Studio | multiracial_group | https://www.pexels.com/photo/6759172/
+ * F01: 6759172 | Antoni Shkraba | multiracial_group | https://www.pexels.com/photo/6759172/
  * F02: 4473398 | Ketut Subiyanto | woman_owner | https://www.pexels.com/photo/4473398/
  * review: 10375888 | RDNE Stock project | black_owners | https://www.pexels.com/photo/10375888/
  * submitted: 10375818 | RDNE Stock project | black_woman_owner | https://www.pexels.com/photo/10375818/
