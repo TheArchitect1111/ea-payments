@@ -1,4 +1,5 @@
 import type {CigarAnswers,Finding} from './engine';
+import {ctpCalendlyUrl} from '@/lib/ctp-calendly';
 export type OptionalImpactInputs={hoursPerWeek?:number|null;laborCostPerHour?:number|null};
 export type CapacityImpact={
  status:'not-quantified'|'partial-time-estimate'|'labor-capacity-valued';
@@ -25,5 +26,5 @@ export function buildAssessmentEmailPreview(contact:{businessName:string;contact
   'You estimated approximately '+impact.annualHours.toLocaleString('en-US')+' hours per year in this activity.';
  const value=impact.annualLaborCapacityValue===null?'':' Using your optional labor rate, the associated annual capacity value is approximately $'+impact.annualLaborCapacityValue.toLocaleString('en-US',{maximumFractionDigits:2})+'. This is NOT a verified cash saving.';
  const notes=Object.values(answers).filter(a=>a.detail.trim()).length;
- return {subject:'Your EA Cigar Business Capacity Preview',body:'Hello '+first+',\n\nThank you for sharing how '+business+' operates. Here are the initial opportunities we identified from your answers:\n\n'+(primary||'We will discuss your priorities and identify where clearer information could help.')+'\n\nCapacity and financial impact:\n'+known+value+'\n'+impact.note+'\n\nWe noted '+notes+' question(s) with additional context. We will review them during Discovery instead of guessing missing numbers.\n\nSchedule your Capacity Review with Efficiency Architects using the booking link provided by your advisor, or reply to this message to continue the conversation.\n\nEfficiency Architects\n\nThis is an email preview. It has not been sent.'};
+ return {subject:'Your EA Cigar Business Capacity Preview',body:'Hello '+first+',\n\nThank you for sharing how '+business+' operates. Here are the initial opportunities we identified from your answers:\n\n'+(primary||'We will discuss your priorities and identify where clearer information could help.')+'\n\nCapacity and financial impact:\n'+known+value+'\n'+impact.note+'\n\nWe noted '+notes+' question(s) with additional context. We will review them during Discovery instead of guessing missing numbers.\n\nSchedule your Capacity Review with Efficiency Architects: '+ctpCalendlyUrl()+'\nOr reply to this email to continue the conversation.\n\nEfficiency Architects\n\nThis is an email preview. It has not been sent.'};
 }
