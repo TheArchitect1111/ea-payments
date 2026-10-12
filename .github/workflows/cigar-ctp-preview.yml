@@ -29,3 +29,43 @@ jobs:
         run: node --import tsx scripts/test-cigar-ctp-workflow.ts
       - name: TypeScript check
         run: npx tsc --project tsconfig.cigar-preview.json --noEmit
+
+  cigar-browser:
+    name: Cigar desktop and mobile browser verification
+    needs: cigar-preview
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - name: Install dependencies
+        run: npm ci
+      - name: Install Chromium for visual QA
+        run: npx playwright install --with-deps chromium
+      - name: Start isolated Cigar preview locally, no production intake
+        run: |
+          VERCEL_ENV=preview CIGAR_CTP_LIVE_SUBMISSIONS_ENABLED=false NEXT_TELEMETRY_DISABLED=1 npm run dev -- --hostname 127.0.0.1 -p 3200 > /tmp/cigar-preview-next.log 2>&1 &
+          for i in $(seq 1 100); do
+            if curl -fsS http://127.0.0.1:3200/discover/cigar > /dev/null; then
+              echo "Preview route is ready"
+              exit 0
+            fi
+            sleep 3
+          done
+          cat /tmp/cigar-preview-next.log
+          exit 1
+      - name: Verify 30 questions across desktop and mobile
+        run: node scripts/test-cigar-ctp-browser.mjs
+      - name: Keep screenshots for visual acceptance
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cigar-ctp-desktop-mobile
+          path: cigar-ctp-browser-screenshots/
+          if-no-files-found: ignore
+      - name: Print isolated preview server errors on failure
+        if: failure()
+        run: tail -120 /tmp/cigar-preview-next.log || true
