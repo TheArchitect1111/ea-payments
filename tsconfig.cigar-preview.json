@@ -6,7 +6,15 @@
   "include": [
     "next-env.d.ts",
     "app/discover/cigar/**/*.tsx",
-    "lib/cigar-ctp/**/*.ts"
+    "lib/cigar-ctp/**/*.ts",
+    "app/admin/cigar-ctp/page.tsx",
+    "app/api/admin/cigar-ctp/handoff/route.ts",
+    "app/api/cigar-ctp/submit/route.ts",
+    "app/api/cigar-ctp/calendly/webhook/route.ts",
+    "app/api/cron/cigar-ctp-reminders/route.ts"
   ],
-  "exclude": ["node_modules", "mobile"]
+  "exclude": [
+    "node_modules",
+    "mobile"
+  ]
 }
