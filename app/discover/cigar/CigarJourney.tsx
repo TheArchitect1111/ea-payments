@@ -9,7 +9,8 @@ import {
   visibleCigarQuestions,
   type CigarAnswers,
   type CigarQuestion,
-} from '@/lib/cigar-ctp/engine';
+ } from '@/lib/cigar-ctp/engine';
+import {buildAssessmentEmailPreview, calculateCapacityImpact} from '@/lib/cigar-ctp/impact';
 
 type PreviewReport = {fileName:string;format:string;sheets:{name:string;rows:number;category:string;preview:string[][]}[];findings:string[];caveat:string};
 
@@ -37,6 +38,8 @@ export default function CigarJourney() {
   const [report, setReport] = useState<PreviewReport | null>(null);
   const [reportStatus, setReportStatus] = useState('');
   const [reportLoading, setReportLoading] = useState(false);
+  const [optionalHours,setOptionalHours] = useState('');
+  const [optionalHourlyValue,setOptionalHourlyValue] = useState('');
   const [contactError, setContactError] = useState('');
   const questions = useMemo(() => visibleCigarQuestions(answers), [answers]);
   const role = primaryRole(answers);
@@ -47,6 +50,11 @@ export default function CigarJourney() {
   const reviewStep = questions.length + 2;
   const resultStep = questions.length + 3;
   const preview = useMemo(() => buildCigarPreview(answers), [answers]);
+  const impact = useMemo(()=>calculateCapacityImpact({
+    hoursPerWeek:optionalHours.trim()?Number(optionalHours):null,
+    laborCostPerHour:optionalHourlyValue.trim()?Number(optionalHourlyValue):null,
+  }),[optionalHours,optionalHourlyValue]);
+  const emailPreview=useMemo(()=>buildAssessmentEmailPreview(contact,answers,preview.findings,impact),[contact,answers,preview.findings,impact]);
   const heroImage = IMAGE_BY_ROLE[role];
   const progress = screen < 0 ? 0 : Math.min(100, Math.round(((screen + 1) / (questions.length + 3)) * 100));
 
@@ -122,7 +130,7 @@ export default function CigarJourney() {
     } finally { setReportLoading(false); }
   };
   const reset = () => {
-    setAnswers({}); setScreen(-1); setContact(EMPTY_CONTACT); setSelectedFile(''); setReport(null); setReportStatus(''); setContactError('');
+    setAnswers({}); setScreen(-1); setContact(EMPTY_CONTACT); setSelectedFile(''); setReport(null); setReportStatus(''); setOptionalHours(''); setOptionalHourlyValue(''); setContactError('');
     try { sessionStorage.removeItem(STORAGE_KEY); } catch { /* no-op */ }
   };
   const enterReview = () => {
@@ -243,7 +251,13 @@ export default function CigarJourney() {
                 {(['businessName', 'contactName', 'email'] as const).map(field => <label key={field} className="block font-semibold">{field === 'businessName' ? 'Business name' : field === 'contactName' ? 'Your name' : 'Email address'}<input value={contact[field]} type={field === 'email' ? 'email' : 'text'} autoComplete="off" onChange={e => setContact(c => ({ ...c, [field]: e.target.value.slice(0, 140) }))} className="mt-2 w-full rounded-lg border border-stone-300 bg-white p-3" /></label>)}
                 <label className="flex items-start gap-3 text-sm leading-6"><input type="checkbox" checked={contact.consent} onChange={e => setContact(c => ({ ...c, consent: e.target.checked }))} className="mt-1 h-5 w-5 accent-amber-700" /><span>I understand this is a non-submitting design preview. In the future live service, I would authorize EA to process these assessment answers and send the requested report.</span></label>
               </div>
-              {contactError && <p className="mt-4 text-sm font-semibold text-red-700" role="alert">{contactError}</p>}
+              <details className="mt-6 rounded-xl border border-stone-200 bg-white p-4">
+                <summary className="cursor-pointer font-semibold">Know any time or labor figures? (Entirely optional)</summary>
+                <p className="mt-3 text-sm text-stone-600">If you know roughly how much time you spend on one recurring reporting task, you can share it here. You may leave both blank. This never assumes cash savings.</p>
+                <label className="mt-3 block text-sm">Hours per week <input aria-label="Optional hours per week" type="number" min="0" max="168" step="0.5" value={optionalHours} onChange={e=>setOptionalHours(e.target.value)} className="mt-1 w-full rounded-lg border border-stone-300 p-2"/></label>
+                <label className="mt-3 block text-sm">Approximate hourly labor value in USD <input aria-label="Optional hourly labor value" type="number" min="0" max="1000" step="0.01" value={optionalHourlyValue} onChange={e=>setOptionalHourlyValue(e.target.value)} className="mt-1 w-full rounded-lg border border-stone-300 p-2"/></label>
+              </details>
+              {contactError && <p className="mt-4 text-sm font-semibold text-red-700" role="alert">{contactError}</p>
               <div className="mt-8 flex justify-between gap-3"><button type="button" onClick={() => setScreen(uploadStep)} className="rounded-full border border-stone-300 px-6 py-3">← Back</button><button type="button" onClick={enterReview} className="rounded-full px-6 py-3 font-bold text-white" style={{ background: INK }}>Review responses →</button></div>
             </div>
           )}
@@ -266,7 +280,15 @@ export default function CigarJourney() {
               <h1 className="mt-5 text-3xl font-bold">Your next opportunities are becoming clearer.</h1>
               <p className="mt-4 leading-7 text-stone-600">This is a demonstration based on the answers you selected. Nothing has been submitted, emailed or saved to EA's customer records.</p>
               <div className="mt-7 space-y-4">{preview.findings.length ? preview.findings.map((f, i) => <article key={f.title} className="rounded-xl border border-stone-200 bg-white p-5"><p className="text-xs font-bold uppercase" style={{ color: GOLD }}>Opportunity {i + 1}</p><h2 className="mt-2 text-lg font-bold">{f.title}</h2><p className="mt-2 text-sm leading-6 text-stone-600">{f.explanation}</p><p className="mt-3 text-xs text-stone-500">Potential capability: {f.proposedCapability}. {f.status === 'new-development' ? 'Requires development and verification.' : 'Requires integration review.'}</p></article>) : <p className="rounded-xl bg-stone-100 p-5">No specific operational issue identified yet. A conversation can clarify your priorities.</p>}</div>
-              <p className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-900">Financial impact: Not yet quantified. No fictional annual savings, unpaid balances or inventory values have been created.</p>
+              <div className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+                <p className="font-bold">Capacity and financial impact</p>
+                {impact.annualHours!==null&&<p className="mt-2">Estimated time in this process: {impact.annualHours.toLocaleString()} hours annually, based on your optional answer.</p>}
+                {impact.annualLaborCapacityValue!==null&&<p className="mt-2">Associated annual labor capacity value: ${impact.annualLaborCapacityValue.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}. This is not a cash-saving promise.</p>}
+                <p className="mt-2">{impact.note}</p>
+                <p className="mt-2">No fictional sales, profits, inventory balances, or double-counted revenue have been created.</p>
+              </div>
+              <details className="mt-5 rounded-xl border border-stone-200 bg-white p-4"><summary className="cursor-pointer font-bold">View your personalized email preview</summary><h2 className="mt-4 font-semibold">{emailPreview.subject}</h2><pre className="mt-3 whitespace-pre-wrap break-words font-sans text-sm leading-6 text-stone-700">{emailPreview.body}</pre><p className="mt-3 text-xs text-amber-900">Not sent. A secure, authorized mailer must be configured before launch.</p></details>
+              <details className="mt-4 rounded-xl border border-stone-200 bg-white p-4"><summary className="cursor-pointer font-bold">How limited vendor follow-ups would work</summary><p className="mt-3 text-sm text-stone-700">EA could acknowledge a received report or request an overdue scheduled report after the owner authorizes a specific recipient and reminder schedule. Invoice disputes, orders and payments require a human. Vendor mail sending is disabled in this preview.</p></details>
               {report && <div className="mt-5 rounded-xl border border-stone-200 p-4"><h2 className="font-bold">Your report analysis</h2><p className="mt-2 text-sm">We identified {report.sheets.length} report section(s). Figures require confirmation against source records.</p>{report.findings.map((x,i)=><p className="mt-2 text-sm" key={i}>• {x}</p>)}</div>}
               <p className="mt-5 text-sm leading-6 text-stone-600">The secure client record, actual assessment email, mailbox provisioning and Capacity Review booking integration require a separate, verified release. No vendor message has been sent.</p>
               <button type="button" onClick={reset} className="mt-7 rounded-full px-6 py-3 font-bold text-white" style={{ background: INK }}>Start a New Preview</button>
