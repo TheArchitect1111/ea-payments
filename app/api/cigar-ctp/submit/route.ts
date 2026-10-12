@@ -7,12 +7,19 @@ import {calculateCapacityImpact} from '@/lib/cigar-ctp/impact';
 import {buildCigarReportEmail} from '@/lib/cigar-ctp/report-email';
 import {cigarBookingUrl} from '@/lib/cigar-ctp/booking-link';
 import {sendEmail} from '@ea/portal-chassis/email';
+import {adminApiUnauthorized,guardAdminApi} from '@/lib/api/admin-route';
+import {isCigarProviderTestRequest,isCigarTestRecord} from '@/lib/cigar-ctp/provider-test';
 export const runtime='nodejs';
 export const dynamic='force-dynamic';
 const TABLE='Cigar CTP Lead Intake';
 const respond=(body:unknown,status=200)=>NextResponse.json(body,{status,headers:{'Cache-Control':'no-store'}});
 export async function POST(req:NextRequest){
- if(process.env.VERCEL_ENV==='preview')return respond({ok:false,error:'Real customer intake is unavailable on preview deployments. Use fictional QA test details.'},503);
+ const providerTest=isCigarProviderTestRequest(process.env.VERCEL_ENV,req.nextUrl.pathname);
+ if(process.env.VERCEL_ENV==='preview'&&!providerTest)return respond({ok:false,error:'Real customer intake is unavailable on preview deployments. Use fictional QA test details.'},503);
+ if(providerTest){
+  const auth=await guardAdminApi(req);
+  if(!auth.ok)return adminApiUnauthorized(auth);
+ }
  if(process.env.CIGAR_CTP_LIVE_SUBMISSIONS_ENABLED!=='true')return respond({ok:false,error:'Customer submissions are not activated. Preview testing remains available.'},503);
  const origin=req.headers.get('origin');
  if(!origin)return respond({ok:false,error:'Origin required.'},403);
@@ -27,6 +34,8 @@ export async function POST(req:NextRequest){
  const businessName=String(data.businessName??'').trim().slice(0,110);
  const contactName=String(data.contactName??'').trim().slice(0,110);
  const email=String(data.email??'').trim().toLowerCase();
+ if(providerTest&&(data.testOnly!==true||!isCigarTestRecord({businessName,contactName})))
+  return respond({ok:false,error:'Provider testing requires TEST business and contact names and testOnly confirmation.'},400);
  if(data.consent!==true||!businessName||!contactName||email.length>180||!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))return respond({ok:false,error:'Please supply business name, contact, valid email and consent.'},400);
  const rawAnswers=data.answers;
  if(!rawAnswers||typeof rawAnswers!=='object'||Array.isArray(rawAnswers)||Object.keys(rawAnswers).length>30)return respond({ok:false,error:'Invalid answers.'},400);
@@ -64,10 +73,10 @@ export async function POST(req:NextRequest){
  }
  const report=buildCigarReportEmail({businessName,contactName,answers,submissionId:id,hoursPerWeek:hours,laborCostPerHour:labor,reportFindings});
  try{
-  const delivery=await sendEmail({to:email,subject:report.subject,html:report.html,from:process.env.RESEND_FROM_EMAIL});
+  const delivery=await sendEmail({to:email,subject:(providerTest?'TEST | ':'')+report.subject,html:report.html,from:process.env.RESEND_FROM_EMAIL});
   const sentAt=new Date().toISOString();
   await airtableUpdate(TABLE,record.id,{'Email Status':'sent','Workflow Status':'emailed','Email Sent At':sentAt,'Resend Message ID':delivery.id,'Email Error':''});
-  return respond({ok:true,submissionId:id,emailStatus:'sent',emailMessageId:delivery.id,emailSentAt:sentAt,bookingUrl:cigarBookingUrl(id)});
+  return respond({ok:true,submissionId:id,recordId:record.id,emailStatus:'sent',emailMessageId:delivery.id,emailSentAt:sentAt,bookingUrl:cigarBookingUrl(id)});
  }catch(e){
   const reason=e instanceof Error?e.message:'Email provider error';
   await airtableUpdate(TABLE,record.id,{'Email Status':'failed','Email Error':reason.slice(0,240)});

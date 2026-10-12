@@ -3,6 +3,7 @@ import {airtableConfigured,airtableQuery,airtableUpdate,escapeAirtableString} fr
 import {verifyCigarCalendlySignature} from '@/lib/cigar-ctp/calendly-signature';
 import {cigarSubmissionIdFromTracking} from '@/lib/cigar-ctp/booking-link';
 import {sendEmail} from '@ea/portal-chassis/email';
+import {isCigarTestRecord} from '@/lib/cigar-ctp/provider-test';
 
 export const runtime='nodejs';
 export const dynamic='force-dynamic';
@@ -26,7 +27,8 @@ const safeTime=(v:unknown):string|null=>{
  * The Cigar CTP source ID and invitee email must BOTH match a persisted cigar lead.
  */
 export async function POST(req:NextRequest){
- if(process.env.VERCEL_ENV!=='production'||process.env.CIGAR_CTP_LIVE_SUBMISSIONS_ENABLED!=='true')
+ const providerTest=process.env.VERCEL_ENV==='preview';
+ if((process.env.VERCEL_ENV!=='production'&&!providerTest)||process.env.CIGAR_CTP_LIVE_SUBMISSIONS_ENABLED!=='true')
   return json({ok:false,error:'Cigar workflow is not activated.'},503);
  const secret=process.env.CIGAR_CALENDLY_WEBHOOK_SIGNING_KEY?.trim();
  if(!secret)return json({ok:false,error:'Booking signature verification unavailable.'},503);
@@ -45,6 +47,7 @@ export async function POST(req:NextRequest){
  const records=await airtableQuery(TABLE,{filterByFormula:`{Submission ID}='${escapeAirtableString(id)}'`,maxRecords:1});
  const record=records[0];
  if(!record||String(record.fields.Email??'').toLowerCase()!==email)return json({ok:true,ignored:'not a matched cigar lead'});
+ if(providerTest&&!isCigarTestRecord(record.fields))return json({ok:true,ignored:'Preview accepts TEST records only'});
  const oldUri=String(record.fields['Calendly Invitee URI']??'');
  if(body.event==='invitee.canceled'){
   if(oldUri!==payload.uri)return json({ok:true,ignored:'stale cancellation or reschedule'});

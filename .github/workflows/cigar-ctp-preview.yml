@@ -27,6 +27,8 @@ jobs:
         run: node scripts/test-cigar-ctp-preview.mjs
       - name: Test report analysis and vendor reply restrictions
         run: node --import tsx scripts/test-cigar-ctp-workflow.ts
+      - name: Verify provider QA preserves customer and admin boundaries
+        run: node --import tsx scripts/test-cigar-provider-test.mjs
       - name: TypeScript check
         run: npx tsc --project tsconfig.cigar-preview.json --noEmit
 
