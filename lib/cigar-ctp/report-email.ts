@@ -1,6 +1,7 @@
 import {buildCigarPreview, type CigarAnswers} from './engine';
 import {calculateCapacityImpact} from './impact';
 import {ctpCalendlyUrl} from '@/lib/ctp-calendly';
+import {cigarBookingUrl} from './booking-link';
 
 const logoUrl = 'https://app.efficiencyarchitects.online/ea-logo.png';
 const esc = (v:string):string => v.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]??c));
@@ -9,7 +10,7 @@ const roleNames:Record<string,string>={
  distributor:'Cigar Distributor / Wholesaler',other:'Cigar Industry Business',unsure:'Cigar Industry Business'
 };
 const usd=(n:number)=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(n);
-export type ReportEmailInput={businessName:string;contactName:string;answers:CigarAnswers;hoursPerWeek?:number|null;laborCostPerHour?:number|null;reportFindings?:string[]};
+export type ReportEmailInput={businessName:string;contactName:string;answers:CigarAnswers;submissionId?:string;hoursPerWeek?:number|null;laborCostPerHour?:number|null;reportFindings?:string[]};
 export type CigarReportEmail={subject:string;html:string;text:string;role:string;findingsCount:number;bookingUrl:string};
 
 export function buildCigarReportEmail(input:ReportEmailInput):CigarReportEmail{
@@ -18,7 +19,7 @@ export function buildCigarReportEmail(input:ReportEmailInput):CigarReportEmail{
  const business=input.businessName.trim().slice(0,110);
  const first=input.contactName.trim().split(/\s+/)[0].slice(0,70)||'there';
  const industry=roleNames[assessment.role]??roleNames.other;
- const bookingUrl=ctpCalendlyUrl();
+ const bookingUrl=input.submissionId?cigarBookingUrl(input.submissionId):ctpCalendlyUrl();
  const findings=assessment.findings.slice(0,3);
  const documentNotes=(input.reportFindings??[]).filter(x=>typeof x==='string').slice(0,4).map(x=>x.slice(0,400));
  const findingsPlain=findings.length?findings.map((f,i)=>String(i+1)+'. '+f.title+': '+f.explanation).join('\n\n'):'We will clarify your priorities together during your call.';
