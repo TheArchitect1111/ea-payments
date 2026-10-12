@@ -245,6 +245,10 @@
     {
       "path": "/api/cron/expire-test-access",
       "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/cron/cigar-ctp-reminders",
+      "schedule": "0 * * * *"
     }
   ]
 }
