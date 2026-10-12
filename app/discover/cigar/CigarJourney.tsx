@@ -191,11 +191,13 @@ export default function CigarJourney({live=false}:{live?:boolean}) {
 
       <div className="mx-auto grid max-w-6xl gap-7 px-4 py-7 sm:px-8 lg:grid-cols-[0.86fr_1.14fr] lg:gap-12 lg:py-12">
         <aside className="overflow-hidden rounded-3xl border border-black/10 bg-white shadow-lg lg:sticky lg:top-6 lg:self-start">
-          <div className="relative aspect-[16/10] w-full bg-stone-100 lg:aspect-[4/5]">
+          <div className="relative isolate aspect-[16/10] w-full overflow-hidden bg-[#211C18] lg:aspect-[4/5]">
+            <div aria-hidden="true" className="pointer-events-none absolute inset-[-8%] scale-110 bg-cover bg-center opacity-60 blur-xl"
+              style={{backgroundImage:`url("${currentImage.src}")`}} />
             <img key={imageKey} src={currentImage.src} alt={currentImage.alt}
               loading={screen <= 0 ? 'eager' : 'lazy'}
               onError={event => {if (!event.currentTarget.src.includes('/images/ctp-editorial/')) event.currentTarget.src='/images/ctp-editorial/10-clarity-blueprint-planning.png';}}
-              className="block h-full w-full bg-[#231D18] object-contain object-center" />
+              className="relative z-[1] block h-full w-full object-contain object-center" />
             <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/50" />
             <div className="pointer-events-none absolute inset-x-0 top-0 px-5 pt-5 sm:px-7 sm:pt-7">
               <p className="text-[10px] font-bold uppercase leading-5 tracking-[0.13em] text-white sm:text-xs sm:tracking-[0.18em]"
