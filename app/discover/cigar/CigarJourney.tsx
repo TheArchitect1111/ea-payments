@@ -12,6 +12,7 @@ import {
  } from '@/lib/cigar-ctp/engine';
 import {buildAssessmentEmailPreview, calculateCapacityImpact} from '@/lib/cigar-ctp/impact';
 import {ctpCalendlyUrl} from '@/lib/ctp-calendly';
+import {cigarStepImage} from '@/lib/cigar-ctp/editorial-images';
 
 type PreviewReport = {fileName:string;format:string;sheets:{name:string;rows:number;category:string;preview:string[][];reportedAmounts?:{label:string;amount:number}[]}[];findings:string[];caveat:string};
 
@@ -21,22 +22,6 @@ const STORAGE_KEY = 'ea-cigar-ctp-preview-v1.3';
 const CREAM = '#F6F0E6';
 const INK = '#1C211B';
 const GOLD = '#B48A49';
-// Curated free-to-use documentary photos (Pexels). Local EA editorial image is the fallback.
-const IMAGE_BY_ROLE: Record<string, string> = {
-  brand: 'https://images.pexels.com/photos/1637114/pexels-photo-1637114.jpeg?auto=compress&cs=tinysrgb&w=1400',
-  lounge: 'https://images.pexels.com/photos/7877479/pexels-photo-7877479.jpeg?auto=compress&cs=tinysrgb&w=1400',
-  distributor: 'https://images.pexels.com/photos/4481326/pexels-photo-4481326.jpeg?auto=compress&cs=tinysrgb&w=1400',
-  unsure: 'https://images.pexels.com/photos/1637114/pexels-photo-1637114.jpeg?auto=compress&cs=tinysrgb&w=1400',
-  other: '/images/ctp-editorial/10-clarity-blueprint-planning.png',
-};
-const ALT_BY_ROLE: Record<string,string>={
-  brand:'Premium cigars arranged in a humidor box.',
-  lounge:'Premium lounge interior with leather seating.',
-  distributor:'Organized distribution warehouse and stock.',
-  unsure:'Premium cigars arranged in a humidor box.',
-  other:'Calm architectural planning workspace.',
-};
-
 /** Preview flow only: intentionally does not submit PII, upload files or send email. */
 export default function CigarJourney() {
   const [answers, setAnswers] = useState<CigarAnswers>({});
@@ -66,7 +51,8 @@ export default function CigarJourney() {
     laborCostPerHour:optionalHourlyValue.trim()?Number(optionalHourlyValue):null,
   }),[optionalHours,optionalHourlyValue]);
   const emailPreview=useMemo(()=>buildAssessmentEmailPreview(contact,answers,preview.findings,impact),[contact,answers,preview.findings,impact]);
-  const heroImage = IMAGE_BY_ROLE[role];
+  const imageKey=screen<0?'intro':question?.id ?? (screen===uploadStep?'upload':screen===contactStep?'contact':screen===reviewStep?'review':'submitted');
+  const currentImage=cigarStepImage(imageKey);
   const progress = screen < 0 ? 0 : Math.min(100, Math.round(((screen + 1) / (questions.length + 3)) * 100));
 
   useEffect(() => {
@@ -194,13 +180,19 @@ export default function CigarJourney() {
 
       <div className="mx-auto grid max-w-6xl gap-7 px-4 py-7 sm:px-8 lg:grid-cols-[0.86fr_1.14fr] lg:gap-12 lg:py-12">
         <aside className="overflow-hidden rounded-3xl border border-black/10 bg-stone-800 shadow-xl lg:sticky lg:top-6 lg:h-[680px]">
-          <div className="relative h-[230px] lg:h-[540px]">
-            {/* Images intentionally reuse licensed/current EA CTP editorial assets for the first preview. */}
-            <img src={heroImage} alt={ALT_BY_ROLE[role]} onError={event => {if (!event.currentTarget.src.includes('/images/ctp-editorial/')) event.currentTarget.src='/images/ctp-editorial/10-clarity-blueprint-planning.png';}} className="h-full w-full object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent" />
+          <div className="relative h-[260px] lg:h-[540px]">
+            <img key={imageKey} src={currentImage.src} alt={currentImage.alt}
+              loading={screen<=0?"eager":"lazy"}
+              onError={event => {if (!event.currentTarget.src.includes('/images/ctp-editorial/')) event.currentTarget.src='/images/ctp-editorial/10-clarity-blueprint-planning.png';}}
+              className="h-full w-full object-cover transition-opacity duration-500" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
+            <div className="absolute left-6 top-6 rounded-full border border-white/40 bg-black/35 px-4 py-2 text-xs font-semibold text-white backdrop-blur-sm">
+              {question?.section ?? (screen===uploadStep?'Documents':screen===contactStep?'Your contact details':screen===reviewStep?'Review':'A business built on relationships')}
+            </div>
             <div className="absolute bottom-0 left-0 p-6 text-white sm:p-8">
               <p className="text-xs font-bold uppercase tracking-[0.3em]" style={{ color: '#F3D49C' }}>Clarity · Capacity · Confidence</p>
-              <p className="mt-3 max-w-sm text-2xl font-semibold leading-tight lg:text-3xl">Better information. Fewer unanswered questions. More room to grow.</p>
+              <p className="mt-3 max-w-sm text-2xl font-semibold leading-tight lg:text-3xl">A clearer picture at every step.</p>
+              <p className="mt-3 text-xs text-white/80">Photography matched to the current assessment topic</p>
             </div>
           </div>
           <div className="bg-[#171B17] px-6 py-5 text-xs leading-6 text-stone-300">About 5–8 minutes · No exact financial figures required · Based on your experience, not guesses.</div>
