@@ -1,11 +1,22 @@
 /** Report parsing for a staging-only cigar CTP. No persistent storage or ledger changes. */
 import JSZip from 'jszip';
-export type ExtractedSheet={name:string;rows:number;preview:string[][];category:string};
+export type ExtractedSheet={name:string;rows:number;preview:string[][];category:string;reportedAmounts?:{label:string;amount:number}[]};
 export type ReportExtract={fileName:string;format:string;sheets:ExtractedSheet[];findings:string[];caveat:string};
 function decode(s:string):string {return s.replace(/&#(\d+);/g,(_,n)=>String.fromCodePoint(Number(n))).replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&apos;/g,"'");}
 function text(s:string):string {return decode(s.replace(/<[^>]*>/g,' ').trim()).slice(0,200);}
 function type(name:string):string {const n=name.toLowerCase();return /free goods|promo|sample/.test(n)?'non-sale':/unpaid|outstanding/.test(n)?'unpaid':/paid/.test(n)?'paid':/fulfill|b2c|ship/.test(n)?'fulfillment':'other';}
-function sheet(name:string,rows:string[][]):ExtractedSheet{return {name,rows:rows.length,category:type(name),preview:rows.slice(0,8).map(row=>row.slice(0,12))};}
+function sheet(name:string,rows:string[][]):ExtractedSheet{
+ const reportedAmounts=/recap|summary/i.test(name)?
+ rows.slice(0,100).flatMap(row=>{
+  const label=(row[0]??'').trim().slice(0,120);
+  const raw=(row[1]??'').trim();
+  const normalized=raw.replace(/[$,\s]/g,'');
+  if(!label||!/^[-+]?\d+(?:\.\d+)?$/.test(normalized))return [];
+  const amount=Number(normalized);
+  return Number.isFinite(amount)?[{label,amount}]:[];
+ }).slice(0,30):undefined;
+ return {name,rows:rows.length,category:type(name),preview:rows.slice(0,8).map(row=>row.slice(0,12)),reportedAmounts};
+}
 function csv(input:string):string[][]{
  const output:string[][]=[];let row:string[]=[],v='',quoted=false;
  const value=input.replace(/^\uFEFF/,'').slice(0,1_000_000);
