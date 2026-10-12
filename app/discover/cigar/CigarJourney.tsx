@@ -21,12 +21,20 @@ const STORAGE_KEY = 'ea-cigar-ctp-preview-v1.3';
 const CREAM = '#F6F0E6';
 const INK = '#1C211B';
 const GOLD = '#B48A49';
+// Curated free-to-use documentary photos (Pexels). Local EA editorial image is the fallback.
 const IMAGE_BY_ROLE: Record<string, string> = {
-  brand: '/images/ctp-editorial/10-clarity-blueprint-planning.png',
-  lounge: '/images/ctp-editorial/05-calm-morning-owner.png',
-  distributor: '/images/ctp-editorial/06-capacity-team-collaboration.png',
-  unsure: '/images/ctp-editorial/01-possibility-beach-family.png',
-  other: '/images/ctp-editorial/01-possibility-beach-family.png',
+  brand: 'https://images.pexels.com/photos/1637114/pexels-photo-1637114.jpeg?auto=compress&cs=tinysrgb&w=1400',
+  lounge: 'https://images.pexels.com/photos/7877479/pexels-photo-7877479.jpeg?auto=compress&cs=tinysrgb&w=1400',
+  distributor: 'https://images.pexels.com/photos/4481326/pexels-photo-4481326.jpeg?auto=compress&cs=tinysrgb&w=1400',
+  unsure: 'https://images.pexels.com/photos/1637114/pexels-photo-1637114.jpeg?auto=compress&cs=tinysrgb&w=1400',
+  other: '/images/ctp-editorial/10-clarity-blueprint-planning.png',
+};
+const ALT_BY_ROLE: Record<string,string>={
+  brand:'Premium cigars arranged in a humidor box.',
+  lounge:'Premium lounge interior with leather seating.',
+  distributor:'Organized distribution warehouse and stock.',
+  unsure:'Premium cigars arranged in a humidor box.',
+  other:'Calm architectural planning workspace.',
 };
 
 /** Preview flow only: intentionally does not submit PII, upload files or send email. */
@@ -188,7 +196,7 @@ export default function CigarJourney() {
         <aside className="overflow-hidden rounded-3xl border border-black/10 bg-stone-800 shadow-xl lg:sticky lg:top-6 lg:h-[680px]">
           <div className="relative h-[230px] lg:h-[540px]">
             {/* Images intentionally reuse licensed/current EA CTP editorial assets for the first preview. */}
-            <img src={heroImage} alt="Editorial business leadership photograph" className="h-full w-full object-cover" />
+            <img src={heroImage} alt={ALT_BY_ROLE[role]} onError={event => {if (!event.currentTarget.src.includes('/images/ctp-editorial/')) event.currentTarget.src='/images/ctp-editorial/10-clarity-blueprint-planning.png';}} className="h-full w-full object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent" />
             <div className="absolute bottom-0 left-0 p-6 text-white sm:p-8">
               <p className="text-xs font-bold uppercase tracking-[0.3em]" style={{ color: '#F3D49C' }}>Clarity · Capacity · Confidence</p>
