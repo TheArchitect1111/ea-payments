@@ -59,3 +59,14 @@ Do not enable customer submissions until two Resend test emails and two real Cal
 - Calendly publicly shows the linked `30min` URL as `15 Minute Strategy Meeting`, 15 minutes. Two attributed TEST forms are prepared for October 13, 2026 at 09:00 and 09:30 America/New_York; neither was submitted because the final Schedule Event action explicitly accepts Calendly Participant Terms and awaits action-time confirmation.
 - No actual booking IDs exist yet. Cigar Calendly signing-key environment configuration is absent, so automatic signed booking write back is not verified.
 - `/ctp` and `/ctp/cigar` still return the same Contract Center shell. The path-specific redirect remains staged; no production activation or merge has occurred.
+
+## Confirmed TEST bookings and delivery, 2026-10-12 22:25 UTC
+
+- Owner confirmed receipt of both TEST evaluation emails and receipt of a Calendly appointment invitation in the conversation.
+- After owner accepted Calendly Participant Terms, both Schedule Event submissions succeeded and each Calendly page displayed `You are scheduled!`.
+- TEST brand actual invitee booking ID: `06d898b0-6038-417a-84a8-6783e381c0d6`. Calendly confirmation URL: `https://calendly.com/freedom-efficiencyarchitects/30min/invitees/06d898b0-6038-417a-84a8-6783e381c0d6`. Time: `2026-10-13T13:00:00Z` to `2026-10-13T13:15:00Z` (09:00 to 09:15 America/New_York). Matches TEST brand intake record `rectwRfaIFmHt2owC` via the submitted attributed booking link.
+- TEST lounge actual invitee booking ID: `3d3c8f6a-f974-452e-9e87-1dbc9b24d20a`. Calendly confirmation URL: `https://calendly.com/freedom-efficiencyarchitects/30min/invitees/3d3c8f6a-f974-452e-9e87-1dbc9b24d20a`. Time: `2026-10-13T13:30:00Z` to `2026-10-13T13:45:00Z` (09:30 to 09:45 America/New_York). Matches TEST lounge intake record `recsVY5YOMIlEg7NN` via the submitted attributed booking link.
+- Automatic write back FAILED: Airtable readback and the authenticated handoff dashboard still show both records as `emailed`, `Not booked`, and `Not confirmed`. No scheduled/completed status has been manually fabricated.
+- The missing Cigar signed Calendly connection remains the next blocker. Google sign-in for Calendly was selected by the owner in the secure authentication prompt, but automatic approval review rejected the next Google OAuth action because the Calendar access scope was not specifically authorized. The sign-in has not completed; no authorization bypass was attempted.
+- Meeting completion cannot be confirmed in production before an active scheduled meeting has ended. These real TEST meetings are on October 13. The existing completion guard remains intact.
+- Production activation, path-specific redirect promotion, and PR merge remain blocked until write back and handoff verification pass.
