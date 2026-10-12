@@ -85,6 +85,13 @@ export default function CigarJourney({live=false}:{live?:boolean}) {
     try { sessionStorage.setItem(STORAGE_KEY, JSON.stringify(answers)); } catch { /* Still usable without storage. */ }
   }, [answers, ready]);
 
+  // The next question starts at the top on mobile and desktop, regardless of where
+  // the previous answer or Continue button was positioned on the page.
+  useEffect(() => {
+    if (!ready) return;
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, [screen, ready]);
+
   const setChoice = (q: CigarQuestion, id: string) => {
     setAnswers(before => {
       const next = { ...before, [q.id]: updateCigarChoice(q, before[q.id], id) };
@@ -177,23 +184,14 @@ export default function CigarJourney({live=false}:{live?:boolean}) {
       </header>
 
       <div className="mx-auto grid max-w-6xl gap-7 px-4 py-7 sm:px-8 lg:grid-cols-[0.86fr_1.14fr] lg:gap-12 lg:py-12">
-        <aside className="overflow-hidden rounded-3xl border border-black/10 bg-stone-800 shadow-xl lg:sticky lg:top-6 lg:h-[680px]">
-          <div className="relative h-[260px] lg:h-[540px]">
+        <aside className="overflow-hidden rounded-3xl border border-black/10 bg-white shadow-lg lg:sticky lg:top-6 lg:self-start">
+          <div className="relative aspect-[16/10] w-full bg-stone-100 lg:aspect-[4/5]">
             <img key={imageKey} src={currentImage.src} alt={currentImage.alt}
-              loading={screen<=0?"eager":"lazy"}
+              loading={screen <= 0 ? 'eager' : 'lazy'}
               onError={event => {if (!event.currentTarget.src.includes('/images/ctp-editorial/')) event.currentTarget.src='/images/ctp-editorial/10-clarity-blueprint-planning.png';}}
-              className="h-full w-full object-cover transition-opacity duration-500" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
-            <div className="absolute left-6 top-6 rounded-full border border-white/40 bg-black/35 px-4 py-2 text-xs font-semibold text-white backdrop-blur-sm">
-              {question?.section ?? (screen===uploadStep?'Documents':screen===contactStep?'Your contact details':screen===reviewStep?'Review':'A business built on relationships')}
-            </div>
-            <div className="absolute bottom-0 left-0 p-6 text-white sm:p-8">
-              <p className="text-xs font-bold uppercase tracking-[0.3em]" style={{ color: '#F3D49C' }}>Clarity · Capacity · Confidence</p>
-              <p className="mt-3 max-w-sm text-2xl font-semibold leading-tight lg:text-3xl">A clearer picture at every step.</p>
-              <p className="mt-3 text-xs text-white/80">Photography matched to the current assessment topic</p>
-            </div>
+              className="block h-full w-full object-cover object-center" />
           </div>
-          <div className="bg-[#171B17] px-6 py-5 text-xs leading-6 text-stone-300">About 5–8 minutes · No exact financial figures required · Based on your experience, not guesses.</div>
+          <p className="px-6 py-4 text-sm font-medium text-stone-600">This assessment will take 5–8 minutes.</p>
         </aside>
 
         <section className="min-h-[540px] rounded-3xl border border-black/10 bg-white/85 px-6 py-8 shadow-xl sm:px-10 sm:py-11" aria-live="polite">
