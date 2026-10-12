@@ -5,6 +5,7 @@ import {checkRateLimit} from '@/lib/ai/rate-limit';
 import {CIGAR_QUESTIONS,visibleCigarQuestions,primaryRole,buildCigarPreview,type CigarAnswers} from '@/lib/cigar-ctp/engine';
 import {calculateCapacityImpact} from '@/lib/cigar-ctp/impact';
 import {buildCigarReportEmail} from '@/lib/cigar-ctp/report-email';
+import {cigarBookingUrl} from '@/lib/cigar-ctp/booking-link';
 import {sendEmail} from '@ea/portal-chassis/email';
 export const runtime='nodejs';
 export const dynamic='force-dynamic';
@@ -51,18 +52,18 @@ export async function POST(req:NextRequest){
  'Submission ID':id,'Business Name':businessName,'Contact Name':contactName,'Email':email,
  'Business Type':primaryRole(answers),'Answers JSON':JSON.stringify(answers),
  'Findings JSON':JSON.stringify(preview),'Capacity JSON':JSON.stringify(impact),
- 'Email Status':'pending','Submitted At':now,'Consent At':now
+ 'Email Status':'pending','Workflow Status':'submitted','Submitted At':now,'Consent At':now
  });
  if(!record)return respond({ok:false,error:'We could not save your assessment. Please retry.'},503);
  if(!process.env.RESEND_API_KEY||!process.env.RESEND_FROM_EMAIL){
   await airtableUpdate(TABLE,record.id,{'Email Status':'needs-configuration','Email Error':'Mail provider not configured'});
   return respond({ok:true,submissionId:id,emailStatus:'pending',message:'We received your assessment. Your email is being prepared.'});
  }
- const report=buildCigarReportEmail({businessName,contactName,answers,hoursPerWeek:hours,laborCostPerHour:labor});
+ const report=buildCigarReportEmail({businessName,contactName,answers,submissionId:id,hoursPerWeek:hours,laborCostPerHour:labor});
  try{
   await sendEmail({to:email,subject:report.subject,html:report.html,from:process.env.RESEND_FROM_EMAIL});
-  await airtableUpdate(TABLE,record.id,{'Email Status':'sent','Email Sent At':new Date().toISOString(),'Email Error':''});
-  return respond({ok:true,submissionId:id,emailStatus:'sent'});
+  await airtableUpdate(TABLE,record.id,{'Email Status':'sent','Workflow Status':'emailed','Email Sent At':new Date().toISOString(),'Email Error':''});
+  return respond({ok:true,submissionId:id,emailStatus:'sent',bookingUrl:cigarBookingUrl(id)});
  }catch(e){
   const reason=e instanceof Error?e.message:'Email provider error';
   await airtableUpdate(TABLE,record.id,{'Email Status':'failed','Email Error':reason.slice(0,240)});
