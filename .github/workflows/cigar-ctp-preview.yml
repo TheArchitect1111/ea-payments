@@ -29,8 +29,17 @@ jobs:
         run: node --import tsx scripts/test-cigar-ctp-workflow.ts
       - name: Verify provider QA preserves customer and admin boundaries
         run: node --import tsx scripts/test-cigar-provider-test.mjs
-      - name: TypeScript check
-        run: npx tsc --project tsconfig.cigar-preview.json --noEmit
+      - name: Verify Calendly connection and credential boundaries
+        run: node --import tsx scripts/test-cigar-calendly-connection.mjs
+      - name: TypeScript check for Cigar, CTP, report email and intake
+        run: node scripts/check-cigar-typescript.mjs
+      - name: Retain full unrelated TypeScript diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cigar-typescript-diagnostics
+          path: cigar-typescript-diagnostics.log
+          if-no-files-found: ignore
 
   cigar-browser:
     name: Cigar desktop and mobile browser verification

@@ -1,6 +1,6 @@
 import {NextRequest,NextResponse} from 'next/server';
 import {airtableConfigured,airtableQuery,airtableUpdate,escapeAirtableString} from '@/lib/data/airtable-client';
-import {verifyCigarCalendlySignature} from '@/lib/cigar-ctp/calendly-signature';
+import {verifyCigarCalendlySignature,cigarCalendlySigningKey} from '@/lib/cigar-ctp/calendly-signature';
 import {cigarSubmissionIdFromTracking} from '@/lib/cigar-ctp/booking-link';
 import {sendEmail} from '@ea/portal-chassis/email';
 import {isCigarTestRecord} from '@/lib/cigar-ctp/provider-test';
@@ -30,7 +30,7 @@ export async function POST(req:NextRequest){
  const providerTest=process.env.VERCEL_ENV==='preview';
  if((process.env.VERCEL_ENV!=='production'&&!providerTest)||process.env.CIGAR_CTP_LIVE_SUBMISSIONS_ENABLED!=='true')
   return json({ok:false,error:'Cigar workflow is not activated.'},503);
- const secret=process.env.CIGAR_CALENDLY_WEBHOOK_SIGNING_KEY?.trim();
+ const secret=cigarCalendlySigningKey();
  if(!secret)return json({ok:false,error:'Booking signature verification unavailable.'},503);
  const raw=await req.text();
  if(!verifyCigarCalendlySignature(raw,req.headers.get('calendly-webhook-signature'),secret))
