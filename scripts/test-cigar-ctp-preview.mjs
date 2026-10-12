@@ -1,0 +1,48 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import { createRequire } from 'node:module';
+
+const require = createRequire(import.meta.url);
+const ts = require('typescript');
+const root = process.cwd();
+const json = JSON.parse(fs.readFileSync(path.join(root, 'lib/cigar-ctp/questions.json'), 'utf8'));
+const source = fs.readFileSync(path.join(root, 'lib/cigar-ctp/engine.ts'), 'utf8');
+const compiled = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, esModuleInterop: true }, reportDiagnostics: true });
+assert.equal((compiled.diagnostics ?? []).length, 0, 'Engine TypeScript syntax must compile');
+const mod = { exports: {} };
+new Function('require', 'module', 'exports', compiled.outputText)(id => id === './questions.json' ? json : require(id), mod, mod.exports);
+const e = mod.exports;
+assert.equal(json.questions.length, 30, 'Approved three-path question bank');
+for (const [role, prefix] of [['brand', 'B'], ['lounge', 'L'], ['distributor', 'D']]) {
+  const answers = { C01: { selected: [role], detail: '' } };
+  const questions = e.visibleCigarQuestions(answers);
+  assert.equal(questions.filter(q => q.id.startsWith(prefix)).length, 7, `${role} must have seven targeted questions`);
+  assert.equal(questions.length, 16, `${role} includes seven shared and two closing questions`);
+  assert.equal(questions.filter(q => ['B', 'L', 'D'].some(p => q.id.startsWith(p)) && !q.id.startsWith(prefix)).length, 0, 'No unrelated roles');
+  assert.equal(e.primaryRole(answers), role);
+}
+assert.equal(e.visibleCigarQuestions({}).length, 9, 'Unclear role keeps guided core and close');
+assert.ok(json.questions.every(q => q.detailsPrompt && q.options.some(o => o.id === 'other') && q.options.some(o => o.id === 'unsure')), 'Every choice screen must offer Other, Unsure, and detail invitation');
+const q = e.CIGAR_QUESTIONS.find(q => q.id === 'C04');
+let answer = e.updateCigarChoice(q, undefined, 'data_entry');
+answer = e.updateCigarChoice(q, { ...answer, detail: 'About five hours every week, not verified.' }, 'other');
+assert.deepEqual(answer.selected, ['data_entry', 'other'], 'Other must coexist with preselected response');
+assert.match(answer.detail, /five hours/, 'Adding Other must not erase the detail');
+answer = e.updateCigarChoice(q, answer, 'unsure');
+assert.deepEqual(answer.selected, ['unsure'], 'Unsure must exclude contradictory selections');
+const unknown = e.buildCigarPreview({ C01: { selected: ['lounge'], detail: '' } });
+assert.equal(unknown.financialStatus, 'not-quantified');
+assert.equal(unknown.findings.length, 0);
+const reporting = e.buildCigarPreview({ C01: { selected: ['brand'], detail: '' }, B03: { selected: ['asked'], detail: 'Two weeks late' } });
+assert.ok(reporting.findings.some(f => /report/i.test(f.title)), 'Delayed brand statements must trigger report tracking');
+assert.equal(reporting.financialStatus, 'not-quantified', 'Narrative numbers must not mint financial estimates');
+const ui = fs.readFileSync(path.join(root, 'app/discover/cigar/CigarJourney.tsx'), 'utf8');
+const route = fs.readFileSync(path.join(root, 'app/discover/cigar/page.tsx'), 'utf8');
+assert.match(ui, /type="file"/);
+assert.match(ui, /No submissions or emails are sent/);
+assert.match(ui, /sessionStorage/);
+assert.match(ui, /No exact financial figures required/);
+assert.match(route, /VERCEL_ENV !== 'preview'/);
+assert.ok(!ui.includes('/api/assessment/submit'), 'Not wired to live intake on preview branch');
+console.log('PASS: 3 role paths, 30 question bank entries, Other/Unsure/detail, reporting signals, no fake financial totals, preview-only gate, local file selection, and zero live submissions');
