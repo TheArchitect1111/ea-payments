@@ -63,32 +63,32 @@ export const CIGAR_EDITORIAL_IMAGES = {
     "alt": "Cigar manufacturing, product and brand presentation"
   },
   "L01": {
-    "src": "https://images.pexels.com/photos/21704941/pexels-photo-21704941.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    "alt": "Cigar store and lounge experience"
+    "src": "https://images.pexels.com/photos/28697855/pexels-photo-28697855.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    "alt": "Elegant bar setting with premium cigars in a warm lounge"
   },
   "L02": {
-    "src": "https://images.pexels.com/photos/25747046/pexels-photo-25747046.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    "alt": "Cigar store and lounge experience"
+    "src": "https://images.pexels.com/photos/1637114/pexels-photo-1637114.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    "alt": "Neatly arranged cigars in a wooden humidor"
   },
   "L03": {
-    "src": "https://images.pexels.com/photos/27127674/pexels-photo-27127674.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    "alt": "Cigar store and lounge experience"
+    "src": "https://images.pexels.com/photos/25747046/pexels-photo-25747046.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    "alt": "Cigar shop interior and customer gathering"
   },
   "L04": {
-    "src": "https://images.pexels.com/photos/1637114/pexels-photo-1637114.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    "alt": "Cigar store and lounge experience"
+    "src": "https://images.pexels.com/photos/27127674/pexels-photo-27127674.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    "alt": "Leather lounge armchair and cigar reading area"
   },
   "L05": {
     "src": "https://images.pexels.com/photos/21704941/pexels-photo-21704941.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    "alt": "Cigar store and lounge experience"
+    "alt": "Cigar shop community seating"
   },
   "L06": {
-    "src": "https://images.pexels.com/photos/25747046/pexels-photo-25747046.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    "alt": "Cigar store and lounge experience"
+    "src": "https://images.pexels.com/photos/34323703/pexels-photo-34323703.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    "alt": "Premium retail cigar selection"
   },
   "L07": {
-    "src": "https://images.pexels.com/photos/6713596/pexels-photo-6713596.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    "alt": "Cigar store and lounge experience"
+    "src": "https://images.pexels.com/photos/28697855/pexels-photo-28697855.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    "alt": "Premium lounge bar ambiance"
   },
   "D01": {
     "src": "https://images.pexels.com/photos/6169643/pexels-photo-6169643.jpeg?auto=compress&cs=tinysrgb&w=1200",
