@@ -257,7 +257,7 @@ export default function CigarJourney() {
                 <label className="mt-3 block text-sm">Hours per week <input aria-label="Optional hours per week" type="number" min="0" max="168" step="0.5" value={optionalHours} onChange={e=>setOptionalHours(e.target.value)} className="mt-1 w-full rounded-lg border border-stone-300 p-2"/></label>
                 <label className="mt-3 block text-sm">Approximate hourly labor value in USD <input aria-label="Optional hourly labor value" type="number" min="0" max="1000" step="0.01" value={optionalHourlyValue} onChange={e=>setOptionalHourlyValue(e.target.value)} className="mt-1 w-full rounded-lg border border-stone-300 p-2"/></label>
               </details>
-              {contactError && <p className="mt-4 text-sm font-semibold text-red-700" role="alert">{contactError}</p>
+              {contactError && <p className="mt-4 text-sm font-semibold text-red-700" role="alert">{contactError}</p>}
               <div className="mt-8 flex justify-between gap-3"><button type="button" onClick={() => setScreen(uploadStep)} className="rounded-full border border-stone-300 px-6 py-3">← Back</button><button type="button" onClick={enterReview} className="rounded-full px-6 py-3 font-bold text-white" style={{ background: INK }}>Review responses →</button></div>
             </div>
           )}
