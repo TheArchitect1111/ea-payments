@@ -41,6 +41,10 @@ try {
         await expect(page.getByRole('heading', { name: question.question, exact: true })).toBeVisible();
         await expect(rationale).toHaveText(current.reason);
         await expect(title).toHaveText(current.title);
+        await expect.poll(async () => page.locator('aside img').evaluate(image => image.complete && image.naturalWidth > 0), {
+          timeout: 10000,
+          message: 'Photo must finish loading for ' + question.id + ' on ' + layout,
+        }).toBe(true);
         await expect(page.locator('aside')).toContainText('CLARITY · CAPACITY · CONFIDENCE');
         assert.notEqual(current.title, lastTitle, 'The image title must change when the question changes: ' + question.id);
         lastTitle = current.title;
