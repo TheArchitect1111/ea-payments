@@ -10,7 +10,7 @@ import {
   type CigarAnswers,
   type CigarQuestion,
  } from '@/lib/cigar-ctp/engine';
-import {buildAssessmentEmailPreview, calculateCapacityImpact} from '@/lib/cigar-ctp/impact';
+import {calculateCapacityImpact} from '@/lib/cigar-ctp/impact';
 import {ctpCalendlyUrl} from '@/lib/ctp-calendly';
 import {cigarStepImage} from '@/lib/cigar-ctp/editorial-images';
 
@@ -36,7 +36,6 @@ export default function CigarJourney() {
   const [optionalHourlyValue,setOptionalHourlyValue] = useState('');
   const [contactError, setContactError] = useState('');
   const [qaSaving,setQaSaving]=useState(false);
-  const [qaResult,setQaResult]=useState('');
   const [submitted,setSubmitted]=useState(false);
   const [deliveryStatus,setDeliveryStatus]=useState<'sent'|'pending'|'preview'>('pending');
   const [submissionId,setSubmissionId]=useState('');
@@ -53,7 +52,6 @@ export default function CigarJourney() {
     hoursPerWeek:optionalHours.trim()?Number(optionalHours):null,
     laborCostPerHour:optionalHourlyValue.trim()?Number(optionalHourlyValue):null,
   }),[optionalHours,optionalHourlyValue]);
-  const emailPreview=useMemo(()=>buildAssessmentEmailPreview(contact,answers,preview.findings,impact),[contact,answers,preview.findings,impact]);
   const imageKey=screen<0?'intro':question?.id ?? (screen===uploadStep?'upload':screen===contactStep?'contact':screen===reviewStep?'review':'submitted');
   const currentImage=cigarStepImage(imageKey);
   const progress = screen < 0 ? 0 : Math.min(100, Math.round(((screen + 1) / (questions.length + 3)) * 100));
@@ -130,34 +128,13 @@ export default function CigarJourney() {
     } finally { setReportLoading(false); }
   };
   const reset = () => {
-    setSubmitted(false);setDeliveryStatus('pending');setSubmissionId('');setAnswers({}); setScreen(-1); setContact(EMPTY_CONTACT); setSelectedFile(''); setReport(null); setReportStatus(''); setOptionalHours(''); setOptionalHourlyValue(''); setContactError(''); setQaResult('');
+    setSubmitted(false);setDeliveryStatus('pending');setSubmissionId('');setAnswers({}); setScreen(-1); setContact(EMPTY_CONTACT); setSelectedFile(''); setReport(null); setReportStatus(''); setOptionalHours(''); setOptionalHourlyValue(''); setContactError('');
     try { sessionStorage.removeItem(STORAGE_KEY); } catch { /* no-op */ }
-  };
-  const saveQaOnly=async()=>{
-    setQaResult('');
-    const business=contact.businessName.trim(),name=contact.contactName.trim(),email=contact.email.trim();
-    if(!/^(QA|Test)\b/i.test(business)||!/^(QA|Test)\b/i.test(name)||!/@[a-z0-9.-]+\.example$/i.test(email)){
-      setQaResult('QA mode requires fictional company and contact names starting with QA or Test, plus an email ending .example. No real customer details.');
-      return;
-    }
-    setQaSaving(true);
-    try{
-      const response=await fetch('/api/cigar-ctp/preview/submit',{
-       method:'POST',headers:{'Content-Type':'application/json'},cache:'no-store',
-       body:JSON.stringify({qaOnly:true,consent:contact.consent,businessName:business,contactName:name,email,answers,
-          hoursPerWeek:optionalHours.trim()?Number(optionalHours):null,
-          laborCostPerHour:optionalHourlyValue.trim()?Number(optionalHourlyValue):null}),
-      });
-      const result=await response.json();
-      if(!response.ok||!result.ok)throw new Error(result.error??'QA submission failed');
-      setQaResult('Staging-only QA record saved: '+result.qaSubmissionId+'. No assessment email or vendor message was sent.');
-    }catch(error){setQaResult(error instanceof Error?error.message:'Unable to save staging QA record.');}
-    finally{setQaSaving(false);}
   };
   const submitAssessment=async()=>{
     if(!contact.consent){setContactError('Please confirm consent before submitting.');return;}
     setQaSaving(true);setContactError('');
-    const fictional=/^(QA|Test)\\b/i.test(contact.businessName)&&/^(QA|Test)\\b/i.test(contact.contactName)&&/@[a-z0-9.-]+\\.example$/i.test(contact.email);
+    const fictional=/^(QA|Test)\b/i.test(contact.businessName)&&/^(QA|Test)\\b/i.test(contact.contactName)&&/@[a-z0-9.-]+\.example$/i.test(contact.email);
     try{
       const response=await fetch(fictional?'/api/cigar-ctp/preview/submit':'/api/cigar-ctp/submit',{
         method:'POST',headers:{'Content-Type':'application/json'},cache:'no-store',
