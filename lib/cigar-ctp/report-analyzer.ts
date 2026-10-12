@@ -21,7 +21,7 @@ async function xlsx(bytes:Buffer):Promise<ExtractedSheet[]>{
  if(bytes[0]!==0x50||bytes[1]!==0x4b)throw new Error('Not a valid XLSX file.');
  const zip=await JSZip.loadAsync(bytes,{checkCRC32:true});
  const all=Object.values(zip.files).filter(f=>!f.dir);
- const expanded=all.reduce((n,f)=>n+(f._data?.uncompressedSize??0),0);
+ const expanded=all.reduce((n,f)=>n+((f as unknown as {_data?:{uncompressedSize?:number}})._data?.uncompressedSize??0),0);
  if(all.length>400||expanded>20*1024*1024)throw new Error('Workbook is too large.');
  if(all.some(f=>/externalLinks|vbaProject|activeX|embeddings/i.test(f.name)))throw new Error('Upload a values-only spreadsheet without embedded content.');
  const sharedXml=await zip.file('xl/sharedStrings.xml')?.async('string')??'';
