@@ -20,6 +20,16 @@ assert.equal(xl.sheets[0].rows,2);
 assert.equal(xl.sheets[0].preview[1][1],'Sample Shop');
 assert.ok(xl.findings.some(x=>x.includes('Unpaid')));
 assert.equal(xl.caveat.includes('not verified'),false);
+const reordered=new JSZip();
+reordered.file('xl/workbook.xml','<workbook><sheets><sheet name="Unpaid Wholesale" sheetId="9" r:id="rIdA"/><sheet name="Paid Wholesale" sheetId="3" r:id="rIdB"/></sheets></workbook>');
+reordered.file('xl/_rels/workbook.xml.rels','<Relationships><Relationship Id="rIdA" Target="worksheets/sheet2.xml"/><Relationship Id="rIdB" Target="worksheets/sheet1.xml"/></Relationships>');
+reordered.file('xl/worksheets/sheet1.xml','<worksheet><sheetData><row r="1"><c r="A1"><v>111</v></c></row></sheetData></worksheet>');
+reordered.file('xl/worksheets/sheet2.xml','<worksheet><sheetData><row r="1"><c r="A1"><v>222</v></c></row></sheetData></worksheet>');
+const shuffled=await extractCigarReport('renamed.xlsx',await reordered.generateAsync({type:'nodebuffer'}));
+assert.equal(shuffled.sheets[0].name,'Unpaid Wholesale');
+assert.equal(shuffled.sheets[0].preview[0][0],'222','Sheet name must follow workbook relationship, not zip file number');
+assert.equal(shuffled.sheets[1].name,'Paid Wholesale');
+assert.equal(shuffled.sheets[1].preview[0][0],'111');
 await assert.rejects(extractCigarReport('fake.xlsx',Buffer.from('bad')),/XLSX/);
 await assert.rejects(extractCigarReport('bad.exe',Buffer.from('hello')),/XLSX, CSV or PDF/);
 
