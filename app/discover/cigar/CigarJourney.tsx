@@ -23,7 +23,7 @@ const CREAM = '#F6F0E6';
 const INK = '#1C211B';
 const GOLD = '#B48A49';
 /** Preview flow only: intentionally does not submit PII, upload files or send email. */
-export default function CigarJourney() {
+export default function CigarJourney({live=false}:{live?:boolean}) {
   const [answers, setAnswers] = useState<CigarAnswers>({});
   const [screen, setScreen] = useState(-1);
   const [ready, setReady] = useState(false);
@@ -134,7 +134,7 @@ export default function CigarJourney() {
   const submitAssessment=async()=>{
     if(!contact.consent){setContactError('Please confirm consent before submitting.');return;}
     setQaSaving(true);setContactError('');
-    const fictional=/^(QA|Test)\b/i.test(contact.businessName)&&/^(QA|Test)\\b/i.test(contact.contactName)&&/@[a-z0-9.-]+\.example$/i.test(contact.email);
+    const fictional=!live && /^(QA|Test)\b/i.test(contact.businessName)&&/^(QA|Test)\\b/i.test(contact.contactName)&&/@[a-z0-9.-]+\.example$/i.test(contact.email);
     try{
       const response=await fetch(fictional?'/api/cigar-ctp/preview/submit':'/api/cigar-ctp/submit',{
         method:'POST',headers:{'Content-Type':'application/json'},cache:'no-store',
@@ -167,8 +167,8 @@ export default function CigarJourney() {
             <div className="mt-1 text-sm font-semibold">Cigar Business Capacity &amp; Profitability</div>
           </div>
           <div className="text-right">
-            <div className="rounded-full border border-amber-600/40 px-3 py-1 text-xs font-bold">PREVIEW ONLY</div>
-            <div className="mt-2 text-xs text-stone-500">No customer submissions or emails are sent</div>
+            <div className="rounded-full border border-amber-600/40 px-3 py-1 text-xs font-bold">{live?"CAPACITY ASSESSMENT":"PREVIEW ONLY"}</div>
+            <div className="mt-2 text-xs text-stone-500">{live?"Personalized assessment reports by email":"No customer submissions or emails are sent"}</div>
           </div>
         </div>
         <div className="mx-auto mt-4 h-1 max-w-6xl overflow-hidden rounded-full bg-stone-200" role="progressbar" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100} aria-label="Assessment progress">
@@ -269,7 +269,7 @@ export default function CigarJourney() {
             <div>
               <div className="text-xs font-bold uppercase tracking-[0.2em]" style={{ color: GOLD }}>Your next step</div>
               <h1 className="mt-5 text-3xl font-bold">Where should your personalized preview go?</h1>
-              <p className="mt-4 text-stone-600">Enter where you would like your personalized report sent. We'll process your answers after you submit and follow up by email. In preview, use fictional QA details to test safely.</p>
+              <p className="mt-4 text-stone-600">Enter where you would like your personalized report sent. We'll process your answers after you submit and follow up by email. {live?"":"In preview, use fictional QA details to test safely."}</p>
               <div className="mt-7 space-y-4">
                 {(['businessName', 'contactName', 'email'] as const).map(field => <label key={field} className="block font-semibold">{field === 'businessName' ? 'Business name' : field === 'contactName' ? 'Your name' : 'Email address'}<input value={contact[field]} type={field === 'email' ? 'email' : 'text'} autoComplete="off" onChange={e => setContact(c => ({ ...c, [field]: e.target.value.slice(0, 140) }))} className="mt-2 w-full rounded-lg border border-stone-300 bg-white p-3" /></label>)}
                 <label className="flex items-start gap-3 text-sm leading-6"><input type="checkbox" checked={contact.consent} onChange={e => setContact(c => ({ ...c, consent: e.target.checked }))} className="mt-1 h-5 w-5 accent-amber-700" /><span>I authorize Efficiency Architects to save my assessment answers and email me my requested report and next steps.</span></label>
@@ -311,7 +311,7 @@ export default function CigarJourney() {
           )}
         </section>
       </div>
-      <footer className="border-t border-stone-300 px-5 py-5 text-center text-xs text-stone-500">EA Cigar Industry OS · Guided preview {CIGAR_PACK_VERSION} · No live email, stock or order actions</footer>
+      <footer className="border-t border-stone-300 px-5 py-5 text-center text-xs text-stone-500">EA Cigar Industry OS · Guided {live?'assessment':'preview'} {CIGAR_PACK_VERSION} · No live stock or vendor order actions</footer>
     </main>
   );
 }
