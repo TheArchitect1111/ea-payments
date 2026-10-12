@@ -3,6 +3,7 @@ import JSZip from 'jszip';
 import {extractCigarReport} from '../lib/cigar-ctp/report-analyzer';
 import {evaluateVendorAction} from '../lib/cigar-ctp/vendor-guard';
 
+async function main(){
 const csv=await extractCigarReport('orders.csv',Buffer.from('Invoice,Status,Amount\nA1,Paid,"1,200"\nA2,Unpaid,300\n'));
 assert.equal(csv.format,'csv');
 assert.equal(csv.sheets[0].rows,3);
@@ -32,3 +33,6 @@ assert.equal(evaluateVendorAction('reminder','Company','wrong@vendor.example',po
 assert.equal(evaluateVendorAction('reminder','Company','reports@vendor.example',{...policy,remindersSent:2}).status,'blocked');
 assert.equal(evaluateVendorAction('reminder','Company','reports@vendor.example',{...policy,paused:true}).status,'blocked');
 console.log('PASS: PDF/XLSX/CSV access rules, Excel row extraction, CSV quoting, no fabricated balances, no-send vendor policy and recipient/reminder restrictions');
+
+}
+main().catch(err=>{ console.error(err); process.exitCode=1; });
