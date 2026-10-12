@@ -12,7 +12,7 @@ import {
  } from '@/lib/cigar-ctp/engine';
 import {buildAssessmentEmailPreview, calculateCapacityImpact} from '@/lib/cigar-ctp/impact';
 
-type PreviewReport = {fileName:string;format:string;sheets:{name:string;rows:number;category:string;preview:string[][]}[];findings:string[];caveat:string};
+type PreviewReport = {fileName:string;format:string;sheets:{name:string;rows:number;category:string;preview:string[][];reportedAmounts?:{label:string;amount:number}[]}[];findings:string[];caveat:string};
 
 type Contact = { businessName: string; contactName: string; email: string; consent: boolean };
 const EMPTY_CONTACT: Contact = { businessName: '', contactName: '', email: '', consent: false };
@@ -234,6 +234,7 @@ export default function CigarJourney() {
               {report && <div className="mt-4 space-y-3 rounded-xl border border-stone-200 bg-white p-4">
                 <h2 className="font-bold">Report analysis · {report.sheets.length} section(s)</h2>
                 {report.sheets.map((s,i)=><div key={i} className="border-b pb-2"><p className="font-semibold">{s.name}</p><p className="text-sm text-stone-600">{s.rows} rows · {s.category}</p></div>)}
+                {report.sheets.filter(s=>s.reportedAmounts?.length).map((s,i)=><div key={i} className="rounded-lg bg-stone-50 p-3"><p className="mb-2 text-sm font-bold">Amounts stated in {s.name} (not yet reconciled)</p>{s.reportedAmounts?.slice(0,10).map((a,k)=><p key={k} className="flex justify-between gap-4 text-xs"><span>{a.label}</span><span className="font-semibold">{a.amount.toLocaleString("en-US",{style:"currency",currency:"USD"})}</span></p>)}</div>)}
                 {report.findings.map((f,i)=><p key={i} className="text-sm text-stone-700">• {f}</p>)}
                 <p className="text-xs text-amber-900">{report.caveat}</p>
               </div>}
