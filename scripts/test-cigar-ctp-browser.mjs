@@ -41,7 +41,7 @@ const checkPhoto = async (page, key, layout) => {
   }));
   assert.equal(current.fitting, 'contain', 'Full photograph must be visible without cropping: ' + key);
   assert.equal(current.position, '50% 50%', 'Photo must remain centered: ' + key);
-  assert.ok(actual.headingLayer > actual.frontLayer && actual.mottoLayer > actual.frontLayer, 'Text must be painted above every foreground image: ' + key);
+  assert.ok(actual.headingLayer > actual.frontLayer && actual.mottoLayer > actual.frontLayer, 'Text must be painted above every foreground image: ' + key + ', layers=' + JSON.stringify({front:actual.frontLayer,heading:actual.headingLayer,motto:actual.mottoLayer}));
   const shotKey = layout + '-' + key;
   if (!saved.has(shotKey)) {
     await page.locator('aside').screenshot({
