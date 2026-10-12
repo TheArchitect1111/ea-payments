@@ -10,7 +10,7 @@ fs.mkdirSync(screenshotDir, { recursive: true });
 const questions = JSON.parse(fs.readFileSync('lib/cigar-ctp/questions.json', 'utf8')).questions;
 const copySource = fs.readFileSync('lib/cigar-ctp/visual-copy.ts', 'utf8');
 const copy = {};
-for (const match of copySource.matchAll(/^  ([CBLDF]\\d{2}): \\{ title: '([^']+)', reason: '([^']+)' \\},?$/gm)) {
+for (const match of copySource.matchAll(/^  ([CBLDF]\d{2}): \{ title: '([^']+)', reason: '([^']+)' \},?$/gm)) {
   copy[match[1]] = { title: match[2], reason: match[3] };
 }
 assert.equal(Object.keys(copy).length, 30, 'Every assessment question requires an individual visual headline and rationale');
