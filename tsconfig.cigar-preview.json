@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "incremental": false
+  },
+  "include": [
+    "next-env.d.ts",
+    "app/discover/cigar/**/*.tsx",
+    "lib/cigar-ctp/**/*.ts"
+  ],
+  "exclude": ["node_modules", "mobile"]
+}
