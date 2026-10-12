@@ -26,4 +26,4 @@ jobs:
       - name: Verify all three CTP pathways and financial guardrails
         run: node scripts/test-cigar-ctp-preview.mjs
       - name: TypeScript check
-        run: npx tsc --noEmit
+        run: npx tsc --project tsconfig.cigar-preview.json --noEmit
