@@ -46,3 +46,16 @@ Do not enable customer submissions until two Resend test emails and two real Cal
 - `/ctp` preserved and verified after route promotion:
 - `/ctp/cigar` verified after route promotion:
 - Final live route screenshot:
+
+## Provider TEST evidence, 2026-10-12 22:17 UTC
+
+- Vercel Dashboard confirmed `CIGAR_CTP_LIVE_SUBMISSIONS_ENABLED` is assigned to Preview only. Production remains unset.
+- Preview source `f33aef243b6cb563851965495b4032a0ffc1e630` deployed READY at `https://ea-payments-8mu2r7sg6-the-architects-projects-cc813778.vercel.app`.
+- Authenticated EA admin ran two synthetic TEST assessments through the protected Preview provider-test flow. Both records are in `Cigar CTP Lead Intake`, table `tblPMCjQ2rXocwLZM`, base `appv0YoLIMY45fmDA`.
+- TEST brand: record `rectwRfaIFmHt2owC`, submission `CIGAR-bbe7d721-ff23-4b07-b1bc-2941f925ad6d`, actual Resend message ID `01a13230-b8ae-7998-8aed-d9c123e113f7`, sent at `2026-10-12T22:16:56.288Z`.
+- TEST lounge: record `recsVY5YOMIlEg7NN`, submission `CIGAR-9eb5c644-4380-4f2a-81bf-e35cca23b5f9`, actual Resend message ID `01a13230-e884-7d4b-92b9-c300484db4fa`, sent at `2026-10-12T22:17:08.532Z`.
+- Airtable readback confirmed both stored provider IDs, timestamps, TEST labels, roles, and `emailed` workflow states. Resend acceptance is verified; delivered/inbox receipt is NOT yet verified.
+- GitHub run `38313207208` passed question, report, provider-boundary, and desktop/mobile browser tests. Its TypeScript step failed on previously documented unrelated dependencies. No Cigar-file TypeScript diagnostics appeared in local scoped checks.
+- Calendly publicly shows the linked `30min` URL as `15 Minute Strategy Meeting`, 15 minutes. Two attributed TEST forms are prepared for October 13, 2026 at 09:00 and 09:30 America/New_York; neither was submitted because the final Schedule Event action explicitly accepts Calendly Participant Terms and awaits action-time confirmation.
+- No actual booking IDs exist yet. Cigar Calendly signing-key environment configuration is absent, so automatic signed booking write back is not verified.
+- `/ctp` and `/ctp/cigar` still return the same Contract Center shell. The path-specific redirect remains staged; no production activation or merge has occurred.
