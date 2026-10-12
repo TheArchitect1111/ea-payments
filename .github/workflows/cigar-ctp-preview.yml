@@ -1,0 +1,29 @@
+name: Cigar CTP Preview QA
+
+on:
+  push:
+    branches:
+      - feature/cigar-ctp-guided-preview-20261012
+  pull_request:
+    paths:
+      - 'lib/cigar-ctp/**'
+      - 'app/discover/cigar/**'
+      - 'scripts/test-cigar-ctp-preview.mjs'
+      - '.github/workflows/cigar-ctp-preview.yml'
+
+jobs:
+  cigar-preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - name: Install dependencies
+        run: npm ci
+      - name: Verify all three CTP pathways and financial guardrails
+        run: node scripts/test-cigar-ctp-preview.mjs
+      - name: TypeScript check
+        run: npx tsc --noEmit
