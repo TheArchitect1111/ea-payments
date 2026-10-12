@@ -44,6 +44,9 @@ export async function POST(req:NextRequest){
  const labor=data.laborCostPerHour==null?null:Number(data.laborCostPerHour);
  if((hours!==null&&(!Number.isFinite(hours)||hours<0||hours>168))||(labor!==null&&(!Number.isFinite(labor)||labor<0||labor>1000)))return respond({ok:false,error:'Invalid optional figures.'},400);
  if(!airtableConfigured())return respond({ok:false,error:'Intake storage unavailable. Please retry.'},503);
+ const rawReportFindings=data.reportFindings;
+ if(rawReportFindings!==undefined&&(!Array.isArray(rawReportFindings)||rawReportFindings.length>4||rawReportFindings.some(x=>typeof x!=='string'||x.length>400)))return respond({ok:false,error:'Invalid report observations.'},400);
+ const reportFindings=(Array.isArray(rawReportFindings)?rawReportFindings:[]) as string[];
  const preview=buildCigarPreview(answers);
  const impact=calculateCapacityImpact({hoursPerWeek:hours,laborCostPerHour:labor});
  const id='CIGAR-'+randomUUID();
@@ -51,7 +54,7 @@ export async function POST(req:NextRequest){
  const record=await airtableCreate(TABLE,{
  'Submission ID':id,'Business Name':businessName,'Contact Name':contactName,'Email':email,
  'Business Type':primaryRole(answers),'Answers JSON':JSON.stringify(answers),
- 'Findings JSON':JSON.stringify(preview),'Capacity JSON':JSON.stringify(impact),
+ 'Findings JSON':JSON.stringify(preview),'Capacity JSON':JSON.stringify(impact),'Report Notes JSON':JSON.stringify(reportFindings),
  'Email Status':'pending','Workflow Status':'submitted','Submitted At':now,'Consent At':now
  });
  if(!record)return respond({ok:false,error:'We could not save your assessment. Please retry.'},503);
@@ -59,11 +62,12 @@ export async function POST(req:NextRequest){
   await airtableUpdate(TABLE,record.id,{'Email Status':'needs-configuration','Email Error':'Mail provider not configured'});
   return respond({ok:true,submissionId:id,emailStatus:'pending',message:'We received your assessment. Your email is being prepared.'});
  }
- const report=buildCigarReportEmail({businessName,contactName,answers,submissionId:id,hoursPerWeek:hours,laborCostPerHour:labor});
+ const report=buildCigarReportEmail({businessName,contactName,answers,submissionId:id,hoursPerWeek:hours,laborCostPerHour:labor,reportFindings});
  try{
-  await sendEmail({to:email,subject:report.subject,html:report.html,from:process.env.RESEND_FROM_EMAIL});
-  await airtableUpdate(TABLE,record.id,{'Email Status':'sent','Workflow Status':'emailed','Email Sent At':new Date().toISOString(),'Email Error':''});
-  return respond({ok:true,submissionId:id,emailStatus:'sent',bookingUrl:cigarBookingUrl(id)});
+  const delivery=await sendEmail({to:email,subject:report.subject,html:report.html,from:process.env.RESEND_FROM_EMAIL});
+  const sentAt=new Date().toISOString();
+  await airtableUpdate(TABLE,record.id,{'Email Status':'sent','Workflow Status':'emailed','Email Sent At':sentAt,'Resend Message ID':delivery.id,'Email Error':''});
+  return respond({ok:true,submissionId:id,emailStatus:'sent',emailMessageId:delivery.id,emailSentAt:sentAt,bookingUrl:cigarBookingUrl(id)});
  }catch(e){
   const reason=e instanceof Error?e.message:'Email provider error';
   await airtableUpdate(TABLE,record.id,{'Email Status':'failed','Email Error':reason.slice(0,240)});
