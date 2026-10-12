@@ -12,6 +12,7 @@ import {
  } from '@/lib/cigar-ctp/engine';
 import {calculateCapacityImpact} from '@/lib/cigar-ctp/impact';
 import {ctpCalendlyUrl} from '@/lib/ctp-calendly';
+import {cigarBookingUrl} from '@/lib/cigar-ctp/booking-link';
 import {cigarStepImage} from '@/lib/cigar-ctp/editorial-images';
 import {CIGAR_INTRO_IMAGE_TITLE, CIGAR_QUESTION_VISUAL_COPY, CIGAR_STAGE_IMAGE_TITLES} from '@/lib/cigar-ctp/visual-copy';
 
@@ -322,7 +323,7 @@ export default function CigarJourney({live=false}:{live?:boolean}) {
               <h1 className="mt-4 text-4xl font-bold">Thank you!</h1>
               <p className="mt-5 max-w-lg text-lg leading-8">Your Cigar Business Capacity Assessment has been received.</p>
               {deliveryStatus==='preview'?<p className="mt-4 max-w-lg text-stone-600">Your fictional test assessment was saved successfully. This preview does not send emails. The complete personalized report is ready for the configured email workflow.</p>:<p className="mt-4 max-w-lg text-stone-600">We're preparing your personalized assessment report and recommended next steps. {deliveryStatus==='sent'?'Please check your email for your results and the link to book your Strategy Meeting.':'Please check your email shortly. If delivery takes longer than expected, our team has your assessment for follow-up.'}</p>}
-              <a href={ctpCalendlyUrl()} target="_blank" rel="noopener noreferrer" className="mt-8 inline-block rounded-full bg-[#1C211B] px-7 py-4 font-bold text-white">Book Your 15-Minute Strategy Meeting ↗</a>
+              <a href={live?cigarBookingUrl(submissionId):ctpCalendlyUrl()} target="_blank" rel="noopener noreferrer" className="mt-8 inline-block rounded-full bg-[#1C211B] px-7 py-4 font-bold text-white">Book Your 15-Minute Strategy Meeting ↗</a>
               <p className="mt-4 text-xs text-stone-500">Reference: {submissionId}</p>
               <button type="button" onClick={reset} className="mt-7 text-sm font-semibold underline">Start another assessment</button>
             </div>
