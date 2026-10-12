@@ -4,8 +4,26 @@ import {extractCigarReport} from '../lib/cigar-ctp/report-analyzer';
 import {evaluateVendorAction} from '../lib/cigar-ctp/vendor-guard';
 import {calculateCapacityImpact,buildAssessmentEmailPreview} from '../lib/cigar-ctp/impact';
 import {buildCigarReportEmail} from '../lib/cigar-ctp/report-email';
+import {cigarBookingUrl,cigarSubmissionIdFromTracking,CIGAR_CALENDLY_CAMPAIGN} from '../lib/cigar-ctp/booking-link';
+import {verifyCigarCalendlySignature} from '../lib/cigar-ctp/calendly-signature';
+import {createHmac} from 'node:crypto';
 
 async function main(){
+const id='CIGAR-123e4567-e89b-42d3-a456-426614174000';
+const booked=cigarBookingUrl(id);
+assert.ok(booked.includes('utm_source='+CIGAR_CALENDLY_CAMPAIGN));
+assert.ok(booked.includes('utm_content='+id));
+assert.equal(cigarSubmissionIdFromTracking({utm_source:CIGAR_CALENDLY_CAMPAIGN,utm_content:id}),id);
+assert.equal(cigarSubmissionIdFromTracking({utm_source:'other-service',utm_content:id}),null,'Unrelated Calendly booking must not update cigar records');
+const raw='{"event":"invitee.created","payload":{"tracking":{"utm_source":"ea-cigar-ctp"}}}';
+const secret='local-fictitious-unit-test-secret';
+const seconds=1730000000;
+const sig=createHmac('sha256',secret).update(seconds+'.'+raw).digest('hex');
+assert.equal(verifyCigarCalendlySignature(raw,'t='+seconds+',v1='+sig,secret,seconds*1000),true);
+assert.equal(verifyCigarCalendlySignature(raw+' ','t='+seconds+',v1='+sig,secret,seconds*1000),false,'Modified payload must be rejected');
+assert.equal(verifyCigarCalendlySignature(raw,'t='+seconds+',v1='+sig,secret,(seconds+181)*1000),false,'Replay beyond three minutes must be rejected');
+assert.equal(verifyCigarCalendlySignature(raw,null,secret,seconds*1000),false);
+
 const csv=await extractCigarReport('orders.csv',Buffer.from('Invoice,Status,Amount\nA1,Paid,"1,200"\nA2,Unpaid,300\n'));
 assert.equal(csv.format,'csv');
 assert.equal(csv.sheets[0].rows,3);
