@@ -33,6 +33,7 @@ jobs:
   cigar-browser:
     name: Cigar desktop and mobile browser verification
     needs: cigar-preview
+    if: always() && needs.cigar-preview.result != 'cancelled'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
