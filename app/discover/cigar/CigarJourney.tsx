@@ -138,7 +138,7 @@ export default function CigarJourney() {
   const saveQaOnly=async()=>{
     setQaResult('');
     const business=contact.businessName.trim(),name=contact.contactName.trim(),email=contact.email.trim();
-    if(!/^(QA|Test)\\b/i.test(business)||!/^(QA|Test)\\b/i.test(name)||!/@[a-z0-9.-]+\\.example$/i.test(email)){
+    if(!/^(QA|Test)\b/i.test(business)||!/^(QA|Test)\b/i.test(name)||!/@[a-z0-9.-]+\.example$/i.test(email)){
       setQaResult('QA mode requires fictional company and contact names starting with QA or Test, plus an email ending .example. No real customer details.');
       return;
     }
@@ -175,7 +175,7 @@ export default function CigarJourney() {
           </div>
           <div className="text-right">
             <div className="rounded-full border border-amber-600/40 px-3 py-1 text-xs font-bold">PREVIEW ONLY</div>
-            <div className="mt-2 text-xs text-stone-500">No submissions or emails are sent</div>
+            <div className="mt-2 text-xs text-stone-500">No customer submissions or emails are sent</div>
           </div>
         </div>
         <div className="mx-auto mt-4 h-1 max-w-6xl overflow-hidden rounded-full bg-stone-200" role="progressbar" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100} aria-label="Assessment progress">
