@@ -31,6 +31,7 @@ export default async function CalendlyConnectionPage({searchParams}:{searchParam
   {!config.tokenConfigured&&<p>Save CIGAR_CALENDLY_API_TOKEN as a Secret in this deployment’s Vercel environment, then redeploy. Never enter the token in chat.</p>}
   <form action={run}><input name="action" type="hidden" value="connect"/><button disabled={!config.tokenConfigured} className="rounded bg-[#17211c] px-6 py-3 text-white disabled:opacity-50">Connect booking updates</button></form>
   <form action={run} className="space-y-3"><input name="action" type="hidden" value="sync"/><label className="block">Cigar intake record IDs<input name="recordIds" className="block w-full rounded border p-3" placeholder="Record IDs separated by commas" required/></label><button disabled={!config.tokenConfigured||!config.liveEnabled} className="rounded bg-[#17211c] px-6 py-3 text-white disabled:opacity-50">Verify and sync bookings</button></form>
+  <form action={run}><input name="action" type="hidden" value="poll"/><button disabled={!config.tokenConfigured||!config.liveEnabled} className="rounded bg-[#17211c] px-6 py-3 text-white disabled:opacity-50">Run polling check</button><p>Checks the ten least recently checked Cigar records. Production runs this check every five minutes.</p></form>
   {result!==null&&<section aria-live="polite"><h2 className="text-xl font-semibold">Connection response</h2><pre className="overflow-auto whitespace-pre-wrap bg-stone-100 p-4">{JSON.stringify(result,null,2)}</pre></section>}
  </main>;
 }

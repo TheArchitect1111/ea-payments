@@ -64,7 +64,7 @@ export async function POST(req:NextRequest){
  'Submission ID':id,'Business Name':businessName,'Contact Name':contactName,'Email':email,
  'Business Type':primaryRole(answers),'Answers JSON':JSON.stringify(answers),
  'Findings JSON':JSON.stringify(preview),'Capacity JSON':JSON.stringify(impact),'Report Notes JSON':JSON.stringify(reportFindings),
- 'Email Status':'pending','Workflow Status':'submitted','Submitted At':now,'Consent At':now
+ 'Email Status':'pending','Workflow Status':'submitted','Submitted At':now,'Consent At':now,'Booking Checked At':now
  });
  if(!record)return respond({ok:false,error:'We could not save your assessment. Please retry.'},503);
  if(!process.env.RESEND_API_KEY||!process.env.RESEND_FROM_EMAIL){

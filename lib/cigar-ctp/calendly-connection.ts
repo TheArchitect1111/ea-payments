@@ -6,7 +6,7 @@ export const CIGAR_PRODUCTION_ORIGIN='https://app.efficiencyarchitects.online';
 export class CigarCalendlyConnectionError extends Error {}
 type User={uri:string;current_organization:string;scheduling_url:string};
 export type ScheduledEvent={uri:string;event_type:string;start_time:string;end_time:string;status:string};
-type Invitee={uri:string;email:string;tracking:unknown;status:string};
+type Invitee={uri:string;email:string;tracking:unknown;status:string;rescheduled?:boolean;event?:string};
 type Collection<T>={collection:T[];pagination?:{next_page_token?:string|null}};
 type Subscription={uri:string;callback_url:string;state:string;events:string[]};
 export type MatchedBooking={event:ScheduledEvent;invitee:Invitee};
@@ -88,4 +88,17 @@ export async function findCigarBooking(email:string,submissionId:string,fetcher:
  }
  if(matches.length>1)throw new CigarCalendlyConnectionError('More than one active Calendly booking matches this assessment. Review before updating.');
  return matches[0]??null;
+}
+
+/** Validate an existing booking through the same owning account and exact tracking. */
+export async function readCigarBooking(uri:string,email:string,submissionId:string,fetcher:typeof fetch=fetch):Promise<MatchedBooking>{
+ const match=/^https:\/\/api\.calendly\.com\/scheduled_events\/([^/?#]+)\/invitees\/([^/?#]+)$/.exec(uri);
+ if(!match)throw new CigarCalendlyConnectionError('Invalid stored Cigar booking URI.');
+ const user=await currentUser(fetcher);
+ const eventPath='/scheduled_events/'+encodeURIComponent(match[1]);
+ const {resource:event}=await request<{resource:ScheduledEvent&{event_memberships?:{user:string}[]}}>(eventPath,{},fetcher);
+ if(!event.event_memberships?.some(x=>x.user===user.uri))throw new CigarCalendlyConnectionError('Stored booking belongs to another scheduling account.');
+ const {resource:invitee}=await request<{resource:Invitee}>(eventPath+'/invitees/'+encodeURIComponent(match[2]),{},fetcher);
+ if(invitee.uri!==uri||event.uri!==uri.split('/invitees/')[0]||invitee.email.toLowerCase()!==email.toLowerCase()||cigarSubmissionIdFromTracking(invitee.tracking)!==submissionId||!['active','canceled'].includes(invitee.status))throw new CigarCalendlyConnectionError('Stored booking does not match this Cigar assessment.');
+ return {event,invitee};
 }

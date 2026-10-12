@@ -2,7 +2,7 @@ import {NextRequest,NextResponse} from 'next/server';
 import {airtableConfigured,airtableQuery,airtableUpdate,escapeAirtableString} from '@/lib/data/airtable-client';
 import {verifyCigarCalendlySignature,cigarCalendlySigningKey} from '@/lib/cigar-ctp/calendly-signature';
 import {cigarSubmissionIdFromTracking} from '@/lib/cigar-ctp/booking-link';
-import {sendEmail} from '@ea/portal-chassis/email';
+import {sendCigarConfirmation} from '@/lib/cigar-ctp/confirmation-mail';
 import {isCigarTestRecord} from '@/lib/cigar-ctp/provider-test';
 
 export const runtime='nodejs';
@@ -48,6 +48,7 @@ export async function POST(req:NextRequest){
  const record=records[0];
  if(!record||String(record.fields.Email??'').toLowerCase()!==email)return json({ok:true,ignored:'not a matched cigar lead'});
  if(providerTest&&!isCigarTestRecord(record.fields))return json({ok:true,ignored:'Preview accepts TEST records only'});
+ if(record.fields['Workflow Status']==='completed')return json({ok:true,unchanged:true,stage:'completed'});
  const oldUri=String(record.fields['Calendly Invitee URI']??'');
  if(body.event==='invitee.canceled'){
   if(oldUri!==payload.uri)return json({ok:true,ignored:'stale cancellation or reschedule'});
@@ -55,7 +56,7 @@ export async function POST(req:NextRequest){
   const saved=await airtableUpdate(TABLE,record.id,{
    'Workflow Status':status,'Booking Status':payload.rescheduled?'rescheduled':'canceled',
    'Meeting Scheduled At':null,'Meeting Ends At':null,'Calendly Invitee URI':'','Calendly Event URI':'',
-   'Meeting Confirmed At':null,'Reminder Sent At':null,
+   'Meeting Confirmed At':null,'Reminder Sent At':null,'Confirmation Message ID':'',
   });
   return saved?json({ok:true,changed:true,stage:status}):json({ok:false,error:'Unable to update booking.'},503);
  }
@@ -74,6 +75,7 @@ export async function POST(req:NextRequest){
   'Calendly Invitee URI':payload.uri,'Calendly Event URI':eventUri,
   'Meeting Scheduled At':start,'Meeting Ends At':end,
   'Meeting Confirmed At':sameBooking?record.fields['Meeting Confirmed At']??null:null,
+  'Confirmation Message ID':sameBooking?record.fields['Confirmation Message ID']??'':'',
   'Reminder Sent At':sameBooking?record.fields['Reminder Sent At']??null:null
  });
  if(!saved)return json({ok:false,error:'Unable to save Cigar booking.'},503);
@@ -83,11 +85,10 @@ export async function POST(req:NextRequest){
    const time=new Date(start).toLocaleString('en-US',{timeZone:'America/New_York',dateStyle:'full',timeStyle:'short'});
    const first=String(record.fields['Contact Name']??'there').trim().split(/\s+/)[0];
    const safe=(v:string)=>v.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]??c));
-   await sendEmail({to:email,from:process.env.RESEND_FROM_EMAIL,subject:'Your EA Cigar Strategy Meeting is confirmed',
+   const delivered=await sendCigarConfirmation(payload.uri,{to:email,from:process.env.RESEND_FROM_EMAIL,subject:'Your EA Cigar Strategy Meeting is confirmed',
     html:`<div style="max-width:600px;margin:auto;font-family:Arial,sans-serif;color:#17211c;padding:28px"><img src="https://app.efficiencyarchitects.online/ea-logo.png" alt="Efficiency Architects" width="110"/><h1>We're looking forward to meeting.</h1><p>Hello ${safe(first)},</p><p>Your Cigar Business Strategy Meeting is confirmed for <strong>${safe(time)} Eastern</strong>.</p><p>We'll review your assessment findings, answer questions and discuss opportunities. This meeting does not require a purchase.</p><p>Efficiency Architects</p></div>`});
-   await airtableUpdate(TABLE,record.id,{'Meeting Confirmed At':new Date().toISOString()});
-   confirmationSent=true;
-  }catch(error){console.error('[cigar-booking] confirmation delivery failed',error instanceof Error?error.message:'unknown');}
+   confirmationSent=Boolean(await airtableUpdate(TABLE,record.id,{'Meeting Confirmed At':new Date().toISOString(),'Confirmation Message ID':delivered.id}));
+  }catch(error){console.error('[cigar-booking] confirmation delivery failed','Provider send or confirmation persistence failed');}
  }
  return json({ok:true,stage:'scheduled',confirmationSent});
 }

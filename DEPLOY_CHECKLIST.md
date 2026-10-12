@@ -70,3 +70,19 @@ Do not enable customer submissions until two Resend test emails and two real Cal
 - The missing Cigar signed Calendly connection remains the next blocker. Google sign-in for Calendly was selected by the owner in the secure authentication prompt, but automatic approval review rejected the next Google OAuth action because the Calendar access scope was not specifically authorized. The sign-in has not completed; no authorization bypass was attempted.
 - Meeting completion cannot be confirmed in production before an active scheduled meeting has ended. These real TEST meetings are on October 13. The existing completion guard remains intact.
 - Production activation, path-specific redirect promotion, and PR merge remain blocked until write back and handoff verification pass.
+
+
+## Booking polling acceptance, October 12
+
+Owner saved the Preview Calendly token. The redeployed Preview verified both actual bookings and wrote `scheduled`, `active`, meeting start/end, and confirmation timestamps to Cigar CTP Lead Intake:
+
+- `rectwRfaIFmHt2owC`: event `9b0b2d7f-6f4d-4976-a7e5-8a142cd328c2`, invitee `06d898b0-6038-417a-84a8-6783e381c0d6`, October 13 13:00 to 13:15 UTC. Confirmation persisted October 12 22:55:24.004 UTC.
+- `recsVY5YOMIlEg7NN`: event `515c5d65-0020-42c8-8c36-b5c3cb5b0d46`, invitee `3d3c8f6a-f974-452e-9e87-1dbc9b24d20a`, October 13 13:30 to 13:45 UTC. Confirmation persisted October 12 22:55:22.526 UTC.
+
+Webhook subscription access returned 403. The authenticated read API worked. No subscription success is claimed. The Cigar-only polling fallback checks at most ten pending leads every five minutes in Production, sorted by last check time. The same worker is accessible to administrators on Preview, for TEST records only. Existing invitees are read directly so cancellations and reschedules are observed from provider data. Missing matches and API errors never imply cancellation. Completed records remain completed. The polling job requires CRON_SECRET; Production already has this secret configured.
+
+Added intake fields: Booking Checked At (`fldSNwFwnZ3c0JhNt`), Booking Sync Error (`fldVVPgNi4s5s9Nf0`), Confirmation Message ID (`fldaT5MPLnkEiQPmd`). Evaluation message IDs remain unchanged. Existing confirmation IDs were not captured and must not be invented. New confirmation sends persist the real returned message ID and use Resend's 24-hour idempotency key window. Confirmed bookings do not resend. If provider send succeeds but Airtable persistence remains unavailable beyond 24 hours, operator reconciliation is required before retrying to avoid a duplicate.
+
+Acceptance: offline polling tests must pass; deployed Preview polling must check both real TEST bookings without another confirmation; Airtable check timestamps and unchanged scheduled statuses must be read back. No meeting is auto-completed. Real completed handoff remains pending because both meetings are in the future. Production flag and Calendly token remain Preview-only until authorized release gates pass. No merge, Production activation, redirect promotion, or WORKFLOW LIVE is claimed by this source change.
+
+Rollback: remove the Cigar booking cron entry or unset the Cigar live flag. Preserve the general /ctp route and all other jobs. Do not remove or fabricate existing test evidence.

@@ -5,7 +5,7 @@ import {NextRequest} from 'next/server.js';
 const artifact='scripts/.cigar-calendly-connection-bundle.mjs';
 const ports={
  '@/lib/api/admin-route':`export async function guardAdminApi(){return {ok:false,status:401,error:'Admin authentication required.'}};export const adminApiUnauthorized=x=>Response.json({ok:false,error:x.error},{status:x.status});`,
- '@/lib/data/airtable-client':`export const airtableConfigured=()=>true;export const airtableQuery=()=>{throw Error('Unauthorized request must not read records')};`,
+ '@/lib/data/airtable-client':`export const airtableConfigured=()=>true;export const airtableUpdate=()=>{throw Error('Unauthorized request must not update records')};export const airtableQuery=()=>{throw Error('Unauthorized request must not read records')};`,
  '@/app/api/cigar-ctp/calendly/webhook/route':`export const POST=()=>{throw Error('Unauthorized request must not write a booking')};`,
 };
 const bundle=await build({stdin:{contents:"export * from './lib/cigar-ctp/calendly-connection';export * from './lib/cigar-ctp/calendly-signature';export {GET,POST} from './app/api/admin/cigar-ctp/calendly-connection/route';",resolveDir:process.cwd()},bundle:true,write:false,platform:'node',format:'esm',packages:'external',plugins:[{name:'boundary-ports',setup(p){
