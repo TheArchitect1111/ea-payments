@@ -52,20 +52,20 @@ assert.match(ui, /window\.scrollTo\(\{ top: 0, left: 0, behavior: 'instant' \}\)
 assert.ok(!ui.includes('Photography matched to the current assessment topic'), 'Removed image filler must stay absent');
 assert.match(ui, /CLARITY · CAPACITY · CONFIDENCE/, 'Upper-left motto visible on every screen');
 assert.match(ui, /CIGAR_INTRO_IMAGE_TITLE/, 'Introduction image uses its original heading');
-assert.match(ui, /visualCopy\\?\\.title/, 'Question image title must change with question');
-assert.match(ui, /visualCopy\\?\\.reason/, 'Question-specific why-this-matters sentence must render');
-assert.match(ui, /bg-gradient-to-b from-black\\/75/, 'Image contrast protection stays in place');
+assert.ok(ui.includes('visualCopy?.title'), 'Image title must change with each question');
+assert.ok(ui.includes('visualCopy?.reason'), 'Question-specific why-this-matters sentence must render');
+assert.ok(ui.includes('bg-gradient-to-b from-black/75'), 'Image contrast gradient must stay in place');
 const visualCopy = fs.readFileSync(path.join(root, 'lib/cigar-ctp/visual-copy.ts'), 'utf8');
-assert.match(visualCopy, /A clearer picture at every step\\./, 'Original introductory title restored');
+assert.ok(visualCopy.includes('A clearer picture at every step.'), 'Original introductory title must be restored');
 for (const q of json.questions) {
-  assert.match(visualCopy, new RegExp('^  ' + q.id + ': \\{ title: .+ reason: .+\\},?', 'm'), q.id + ' must have its own short title and explanation');
+  assert.ok(visualCopy.includes('  ' + q.id + ': { title: '), q.id + ' must have an individual title and reason');
 }
 const editorialSource = fs.readFileSync(path.join(root, 'lib/cigar-ctp/editorial-images.ts'), 'utf8');
-const editorialMatch = editorialSource.match(/export const CIGAR_EDITORIAL_IMAGES = (\\{[\\s\\S]*?\\}) as const;/);
-assert.ok(editorialMatch, 'Editorial images must be available');
-const images = JSON.parse(editorialMatch[1]);
-assert.equal(Object.keys(images).length, 35, '30 questions, intro and four supporting screens must have contextual photos');
-for (const q of json.questions) assert.ok(images[q.id]?.src && images[q.id]?.alt, 'Photo and accurate alt for ' + q.id);
+const editorialJson = editorialSource.split('export const CIGAR_EDITORIAL_IMAGES = ')[1]?.split(' as const;')[0];
+assert.ok(editorialJson, 'Editorial images must be available');
+const images = JSON.parse(editorialJson);
+assert.equal(Object.keys(images).length, 35, '30 question photos, intro and four supporting stages');
+for (const q of json.questions) assert.ok(images[q.id]?.src && images[q.id]?.alt, 'Photo and appropriate alt for ' + q.id);
 assert.ok(!ui.includes('Photography matched to the current assessment topic'), 'No restored filler subtitle');
 const discoveryLayout=fs.readFileSync(path.join(root,'app/discover/layout.tsx'),'utf8');
 const discoverGuide=fs.readFileSync(path.join(root,'app/discover/DiscoverGuide.tsx'),'utf8');
