@@ -41,6 +41,8 @@ export default function CigarJourney() {
   const [optionalHours,setOptionalHours] = useState('');
   const [optionalHourlyValue,setOptionalHourlyValue] = useState('');
   const [contactError, setContactError] = useState('');
+  const [qaSaving,setQaSaving]=useState(false);
+  const [qaResult,setQaResult]=useState('');
   const questions = useMemo(() => visibleCigarQuestions(answers), [answers]);
   const role = primaryRole(answers);
   const isQuestion = screen >= 0 && screen < questions.length;
@@ -130,8 +132,29 @@ export default function CigarJourney() {
     } finally { setReportLoading(false); }
   };
   const reset = () => {
-    setAnswers({}); setScreen(-1); setContact(EMPTY_CONTACT); setSelectedFile(''); setReport(null); setReportStatus(''); setOptionalHours(''); setOptionalHourlyValue(''); setContactError('');
+    setAnswers({}); setScreen(-1); setContact(EMPTY_CONTACT); setSelectedFile(''); setReport(null); setReportStatus(''); setOptionalHours(''); setOptionalHourlyValue(''); setContactError(''); setQaResult('');
     try { sessionStorage.removeItem(STORAGE_KEY); } catch { /* no-op */ }
+  };
+  const saveQaOnly=async()=>{
+    setQaResult('');
+    const business=contact.businessName.trim(),name=contact.contactName.trim(),email=contact.email.trim();
+    if(!/^(QA|Test)\\b/i.test(business)||!/^(QA|Test)\\b/i.test(name)||!/@[a-z0-9.-]+\\.example$/i.test(email)){
+      setQaResult('QA mode requires fictional company and contact names starting with QA or Test, plus an email ending .example. No real customer details.');
+      return;
+    }
+    setQaSaving(true);
+    try{
+      const response=await fetch('/api/cigar-ctp/preview/submit',{
+       method:'POST',headers:{'Content-Type':'application/json'},cache:'no-store',
+       body:JSON.stringify({qaOnly:true,consent:contact.consent,businessName:business,contactName:name,email,answers,
+          hoursPerWeek:optionalHours.trim()?Number(optionalHours):null,
+          laborCostPerHour:optionalHourlyValue.trim()?Number(optionalHourlyValue):null}),
+      });
+      const result=await response.json();
+      if(!response.ok||!result.ok)throw new Error(result.error??'QA submission failed');
+      setQaResult('Staging-only QA record saved: '+result.qaSubmissionId+'. No assessment email or vendor message was sent.');
+    }catch(error){setQaResult(error instanceof Error?error.message:'Unable to save staging QA record.');}
+    finally{setQaSaving(false);}
   };
   const enterReview = () => {
     const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email.trim());
@@ -247,7 +270,7 @@ export default function CigarJourney() {
             <div>
               <div className="text-xs font-bold uppercase tracking-[0.2em]" style={{ color: GOLD }}>Your next step</div>
               <h1 className="mt-5 text-3xl font-bold">Where should your personalized preview go?</h1>
-              <p className="mt-4 text-stone-600">For this design preview, your contact details stay in this browser tab. We do not send or save them.</p>
+              <p className="mt-4 text-stone-600">Your answers and contact details stay in this browser tab unless you intentionally choose the staging-only QA save on the results screen. That accepts fictional names and a .example email only. No mail is sent.</p>
               <div className="mt-7 space-y-4">
                 {(['businessName', 'contactName', 'email'] as const).map(field => <label key={field} className="block font-semibold">{field === 'businessName' ? 'Business name' : field === 'contactName' ? 'Your name' : 'Email address'}<input value={contact[field]} type={field === 'email' ? 'email' : 'text'} autoComplete="off" onChange={e => setContact(c => ({ ...c, [field]: e.target.value.slice(0, 140) }))} className="mt-2 w-full rounded-lg border border-stone-300 bg-white p-3" /></label>)}
                 <label className="flex items-start gap-3 text-sm leading-6"><input type="checkbox" checked={contact.consent} onChange={e => setContact(c => ({ ...c, consent: e.target.checked }))} className="mt-1 h-5 w-5 accent-amber-700" /><span>I understand this is a non-submitting design preview. In the future live service, I would authorize EA to process these assessment answers and send the requested report.</span></label>
@@ -279,7 +302,7 @@ export default function CigarJourney() {
             <div>
               <div className="text-xs font-bold uppercase tracking-[0.2em]" style={{ color: GOLD }}>Initial business opportunity preview</div>
               <h1 className="mt-5 text-3xl font-bold">Your next opportunities are becoming clearer.</h1>
-              <p className="mt-4 leading-7 text-stone-600">This is a demonstration based on the answers you selected. Nothing has been submitted, emailed or saved to EA's customer records.</p>
+              <p className="mt-4 leading-7 text-stone-600">This is a demonstration based on your selections. No customer intake records are created, and no email is sent. A separate optional QA save uses fictional test records only.</p>
               <div className="mt-7 space-y-4">{preview.findings.length ? preview.findings.map((f, i) => <article key={f.title} className="rounded-xl border border-stone-200 bg-white p-5"><p className="text-xs font-bold uppercase" style={{ color: GOLD }}>Opportunity {i + 1}</p><h2 className="mt-2 text-lg font-bold">{f.title}</h2><p className="mt-2 text-sm leading-6 text-stone-600">{f.explanation}</p><p className="mt-3 text-xs text-stone-500">Potential capability: {f.proposedCapability}. {f.status === 'new-development' ? 'Requires development and verification.' : 'Requires integration review.'}</p></article>) : <p className="rounded-xl bg-stone-100 p-5">No specific operational issue identified yet. A conversation can clarify your priorities.</p>}</div>
               <div className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
                 <p className="font-bold">Capacity and financial impact</p>
@@ -292,6 +315,12 @@ export default function CigarJourney() {
               <details className="mt-4 rounded-xl border border-stone-200 bg-white p-4"><summary className="cursor-pointer font-bold">How limited vendor follow-ups would work</summary><p className="mt-3 text-sm text-stone-700">EA could acknowledge a received report or request an overdue scheduled report after the owner authorizes a specific recipient and reminder schedule. Invoice disputes, orders and payments require a human. Vendor mail sending is disabled in this preview.</p></details>
               {report && <div className="mt-5 rounded-xl border border-stone-200 p-4"><h2 className="font-bold">Your report analysis</h2><p className="mt-2 text-sm">We identified {report.sheets.length} report section(s). Figures require confirmation against source records.</p>{report.findings.map((x,i)=><p className="mt-2 text-sm" key={i}>• {x}</p>)}</div>}
               <p className="mt-5 text-sm leading-6 text-stone-600">The secure client record, actual assessment email, mailbox provisioning and Capacity Review booking integration require a separate, verified release. No vendor message has been sent.</p>
+              <div className="mt-6 rounded-xl border border-stone-200 bg-stone-50 p-4">
+                <h2 className="font-bold">Staging QA only: save a fictional test assessment</h2>
+                <p className="mt-2 text-sm leading-6 text-stone-600">To test EA's Airtable handoff, use a business name starting with QA or Test, a contact name starting with QA or Test, and an email ending .example. This saves only a test record. It never sends the draft email or triggers real sales workflows.</p>
+                <button type="button" disabled={qaSaving} onClick={saveQaOnly} className="mt-3 rounded-full border border-stone-700 px-5 py-2 text-sm font-bold disabled:opacity-50">{qaSaving?'Saving QA record…':'Save Fictional QA Assessment'}</button>
+                {qaResult&&<p className="mt-3 break-words text-sm" role="status">{qaResult}</p>}
+              </div>
               <button type="button" onClick={reset} className="mt-7 rounded-full px-6 py-3 font-bold text-white" style={{ background: INK }}>Start a New Preview</button>
             </div>
           )}
