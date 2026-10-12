@@ -13,6 +13,7 @@ import {
 import {calculateCapacityImpact} from '@/lib/cigar-ctp/impact';
 import {ctpCalendlyUrl} from '@/lib/ctp-calendly';
 import {cigarStepImage} from '@/lib/cigar-ctp/editorial-images';
+import {CIGAR_INTRO_IMAGE_TITLE, CIGAR_QUESTION_VISUAL_COPY, CIGAR_STAGE_IMAGE_TITLES} from '@/lib/cigar-ctp/visual-copy';
 
 type PreviewReport = {fileName:string;format:string;sheets:{name:string;rows:number;category:string;preview:string[][];reportedAmounts?:{label:string;amount:number}[]}[];findings:string[];caveat:string};
 
@@ -54,6 +55,11 @@ export default function CigarJourney({live=false}:{live?:boolean}) {
   }),[optionalHours,optionalHourlyValue]);
   const imageKey=screen<0?'intro':question?.id ?? (screen===uploadStep?'upload':screen===contactStep?'contact':screen===reviewStep?'review':'submitted');
   const currentImage=cigarStepImage(imageKey);
+  const visualCopy = question ? CIGAR_QUESTION_VISUAL_COPY[question.id] : undefined;
+  const imageTitle = screen < 0
+    ? CIGAR_INTRO_IMAGE_TITLE
+    : question ? (visualCopy?.title ?? question.question)
+      : (CIGAR_STAGE_IMAGE_TITLES[imageKey] ?? CIGAR_INTRO_IMAGE_TITLE);
   const progress = screen < 0 ? 0 : Math.min(100, Math.round(((screen + 1) / (questions.length + 3)) * 100));
 
   useEffect(() => {
@@ -190,6 +196,17 @@ export default function CigarJourney({live=false}:{live?:boolean}) {
               loading={screen <= 0 ? 'eager' : 'lazy'}
               onError={event => {if (!event.currentTarget.src.includes('/images/ctp-editorial/')) event.currentTarget.src='/images/ctp-editorial/10-clarity-blueprint-planning.png';}}
               className="block h-full w-full object-cover object-center" />
+            <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/75 via-black/15 to-black/80" />
+            <div className="pointer-events-none absolute inset-x-0 top-0 px-5 pt-5 sm:px-7 sm:pt-7">
+              <p className="text-[10px] font-bold uppercase leading-5 tracking-[0.13em] text-white sm:text-xs sm:tracking-[0.18em]"
+                style={{textShadow:'0 2px 8px rgba(0,0,0,0.95)'}}>
+                CLARITY · CAPACITY · CONFIDENCE
+              </p>
+            </div>
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 px-5 pb-5 text-white sm:px-7 sm:pb-7">
+              <h2 className="max-w-[25ch] text-xl font-semibold leading-tight sm:text-2xl lg:text-3xl"
+                style={{textShadow:'0 2px 12px rgba(0,0,0,0.95)'}}>{imageTitle}</h2>
+            </div>
           </div>
           <p className="px-6 py-4 text-sm font-medium text-stone-600">This assessment will take 5–8 minutes.</p>
         </aside>
@@ -209,6 +226,7 @@ export default function CigarJourney({live=false}:{live?:boolean}) {
             <div>
               <div className="flex items-center justify-between gap-3 text-xs font-semibold uppercase tracking-[0.16em]" style={{ color: GOLD }}><span>{question.section}</span><span>Question {screen + 1} of {questions.length}</span></div>
               <h1 className="mt-5 text-2xl font-bold leading-tight sm:text-3xl">{question.question}</h1>
+              <p className="mt-3 text-sm leading-6 text-stone-600" data-testid="cigar-question-why">{visualCopy?.reason}</p>
               <p className="mt-4 leading-7 text-stone-600">{question.helper}</p>
               <fieldset className="mt-7 space-y-2">
                 <legend className="mb-3 text-sm font-semibold text-stone-600">{question.type === 'multi' ? 'Choose all that fit.' : 'Choose one answer.'}</legend>
