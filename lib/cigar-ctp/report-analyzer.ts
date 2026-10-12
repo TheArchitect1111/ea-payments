@@ -74,7 +74,7 @@ async function xlsx(bytes:Buffer):Promise<ExtractedSheet[]>{
  output.push(sheet(item.name,rows));}
  return output;
 }
-export async function extractCigarReport(fileName:string,bytes:Buffer):Promise<ReportExtract>{
+export async function extractCigarReport(fileName:string,bytes:Buffer,mode:'preview'|'live'='preview'):Promise<ReportExtract>{
  const name=fileName.slice(0,160);const ext=name.toLowerCase().split('.').pop();
  if(bytes.length===0||bytes.length>4*1024*1024)throw new Error('Choose a report under 4 MB.');
  if(!['xlsx','csv','pdf'].includes(ext??''))throw new Error('Please choose XLSX, CSV or PDF.');
@@ -93,5 +93,5 @@ export async function extractCigarReport(fileName:string,bytes:Buffer):Promise<R
  if(sheets.some(s=>s.category==='fulfillment'))findings.push('Fulfillment section found. Reconcile with online order IDs before calculating total sales.');
  if(sheets.some(s=>s.category==='paid'))findings.push('Paid invoice section found. Invoice values are not necessarily cash received or profit.');
  if(ext==='pdf'&&!sheets[0].rows)findings.push('No selectable text was found. Manual review or text-based PDF required.');
- return {fileName:name,format:ext??'',sheets,findings,caveat:'PREVIEW ONLY: Data has not been verified or saved. No inventory balances, cash receipts, losses, or ROI are inferred from this upload.'};
+ return {fileName:name,format:ext??'',sheets,findings,caveat:mode==='preview'?'PREVIEW ONLY: Data has not been verified or saved. No inventory balances, cash receipts, losses, or ROI are inferred from this upload.':'The file was examined temporarily, not stored. Observations are unverified and must not be treated as inventory balances, cash receipts, losses, or ROI.'};
 }
