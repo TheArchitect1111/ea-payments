@@ -22,7 +22,7 @@ const bad=await send('/api/cigar-ctp/preview/submit',JSON.stringify({
 assert.equal(bad.status,400,'Real customer data must be rejected');
 const fake=await send('/api/cigar-ctp/preview/submit',JSON.stringify({
  qaOnly:true,consent:true,businessName:'QA Synthetic Cigars',contactName:'QA Tester',
- email:'qa-synthetic@example.com',answers,hoursPerWeek:6,laborCostPerHour:40
+ email:'qa-synthetic@testing.example',answers,hoursPerWeek:6,laborCostPerHour:40
 }),{'Content-Type':'application/json'});
 assert.equal(fake.status,200,'Staging QA Airtable handoff failed ('+fake.status+'): '+JSON.stringify(fake.payload));
 assert.equal(fake.payload.ok,true);
