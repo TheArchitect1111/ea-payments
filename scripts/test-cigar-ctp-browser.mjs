@@ -34,10 +34,14 @@ const checkPhoto = async (page, key, layout) => {
   assert.equal(displayedPath, expectedPath, 'Must use distinct mapped photo rather than error fallback: ' + key);
   const current = await page.locator('aside img').evaluate(img => ({
     fitting: getComputedStyle(img).objectFit,
-    position: getComputedStyle(img).objectPosition
+    position: getComputedStyle(img).objectPosition,
+    frontLayer: Number(getComputedStyle(img).zIndex),
+    headingLayer: Number(getComputedStyle(img.parentElement.querySelector('h2').parentElement).zIndex),
+    mottoLayer: Number(getComputedStyle(Array.from(img.parentElement.querySelectorAll('p')).find(el => el.textContent?.includes('CLARITY · CAPACITY · CONFIDENCE')).parentElement).zIndex)
   }));
   assert.equal(current.fitting, 'contain', 'Full photograph must be visible without cropping: ' + key);
   assert.equal(current.position, '50% 50%', 'Photo must remain centered: ' + key);
+  assert.ok(actual.headingLayer > actual.frontLayer && actual.mottoLayer > actual.frontLayer, 'Text must be painted above every foreground image: ' + key);
   const shotKey = layout + '-' + key;
   if (!saved.has(shotKey)) {
     await page.locator('aside').screenshot({
