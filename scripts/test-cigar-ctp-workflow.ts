@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import JSZip from 'jszip';
 import {extractCigarReport} from '../lib/cigar-ctp/report-analyzer';
 import {evaluateVendorAction} from '../lib/cigar-ctp/vendor-guard';
+import {calculateCapacityImpact,buildAssessmentEmailPreview} from '../lib/cigar-ctp/impact';
 
 async function main(){
 const csv=await extractCigarReport('orders.csv',Buffer.from('Invoice,Status,Amount\nA1,Paid,"1,200"\nA2,Unpaid,300\n'));
@@ -21,6 +22,20 @@ assert.ok(xl.findings.some(x=>x.includes('Unpaid')));
 assert.equal(xl.caveat.includes('not verified'),false);
 await assert.rejects(extractCigarReport('fake.xlsx',Buffer.from('bad')),/XLSX/);
 await assert.rejects(extractCigarReport('bad.exe',Buffer.from('hello')),/XLSX, CSV or PDF/);
+
+const noNumbers=calculateCapacityImpact({});
+assert.equal(noNumbers.annualLaborCapacityValue,null);
+assert.equal(noNumbers.realizedCashSavings,null);
+const known=calculateCapacityImpact({hoursPerWeek:6,laborCostPerHour:40});
+assert.equal(known.annualHours,312);
+assert.equal(known.annualLaborCapacityValue,12480);
+assert.equal(known.realizedCashSavings,null);
+const note=buildAssessmentEmailPreview({businessName:'QA Sample',contactName:'Owner'}, {}, [], noNumbers);
+assert.ok(note.body.includes('Financial impact cannot yet be reliably quantified'));
+assert.ok(!note.body.includes('$30,000'));
+const knownNote=buildAssessmentEmailPreview({businessName:'QA Sample',contactName:'Owner'}, {}, [],known);
+assert.ok(knownNote.body.includes('12,480'));
+assert.ok(knownNote.body.includes('NOT a verified cash saving'));
 
 const policy={approved:true,recipientVerified:true,approvedEmail:'reports@vendor.example',reportDueAt:'2026-09-01',maxReminders:2,remindersSent:0,paused:false};
 const evaluated=evaluateVendorAction('request-report','QA Test Business','reports@vendor.example',policy,new Date('2026-10-12'));
