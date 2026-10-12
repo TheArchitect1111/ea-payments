@@ -40,7 +40,9 @@ assert.equal(reporting.financialStatus, 'not-quantified', 'Narrative numbers mus
 const ui = fs.readFileSync(path.join(root, 'app/discover/cigar/CigarJourney.tsx'), 'utf8');
 const route = fs.readFileSync(path.join(root, 'app/discover/cigar/page.tsx'), 'utf8');
 assert.match(ui, /type="file"/);
-assert.match(ui, /No submissions or emails are sent/);
+assert.match(ui, /No customer submissions or emails are sent/);
+assert.match(ui, /Save Fictional QA Assessment/);
+assert.match(ui, /\/api\/cigar-ctp\/preview\/submit/);
 assert.match(ui, /sessionStorage/);
 assert.match(ui, /No exact financial figures required/);
 assert.match(route, /VERCEL_ENV !== 'preview'/);
