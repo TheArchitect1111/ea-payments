@@ -11,6 +11,8 @@ import {
   type CigarQuestion,
 } from '@/lib/cigar-ctp/engine';
 
+type PreviewReport = {fileName:string;format:string;sheets:{name:string;rows:number;category:string;preview:string[][]}[];findings:string[];caveat:string};
+
 type Contact = { businessName: string; contactName: string; email: string; consent: boolean };
 const EMPTY_CONTACT: Contact = { businessName: '', contactName: '', email: '', consent: false };
 const STORAGE_KEY = 'ea-cigar-ctp-preview-v1.3';
@@ -32,6 +34,9 @@ export default function CigarJourney() {
   const [ready, setReady] = useState(false);
   const [contact, setContact] = useState<Contact>(EMPTY_CONTACT);
   const [selectedFile, setSelectedFile] = useState<string>('');
+  const [report, setReport] = useState<PreviewReport | null>(null);
+  const [reportStatus, setReportStatus] = useState('');
+  const [reportLoading, setReportLoading] = useState(false);
   const [contactError, setContactError] = useState('');
   const questions = useMemo(() => visibleCigarQuestions(answers), [answers]);
   const role = primaryRole(answers);
@@ -96,14 +101,28 @@ export default function CigarJourney() {
     if (!answers[question.id]?.selected?.length) return;
     setScreen(index => index + 1);
   };
-  const handleFile = (event: ChangeEvent<HTMLInputElement>) => {
+  const handleFile = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    // No document bytes leave the browser. This is a placeholder UI until secure upload is implemented.
-    setSelectedFile(file ? `${file.name} (selected locally only)` : '');
     event.target.value = '';
+    setSelectedFile(file?.name ?? '');
+    setReport(null);
+    setReportStatus('');
+    if (!file) return;
+    if (file.size > 4 * 1024 * 1024) { setReportStatus('Choose a file smaller than 4 MB.'); return; }
+    const data = new FormData(); data.set('report', file);
+    setReportLoading(true);
+    try {
+      const response = await fetch('/api/cigar-ctp/preview/report', {method:'POST',body:data,cache:'no-store'});
+      const result = await response.json();
+      if (!response.ok || !result.ok) throw new Error(result.error ?? 'Analysis could not finish.');
+      setReport(result.analysis as PreviewReport);
+      setReportStatus('Report examined in temporary staging. Data is not saved or verified.');
+    } catch (error) {
+      setReportStatus(error instanceof Error ? error.message : 'Could not read the report.');
+    } finally { setReportLoading(false); }
   };
   const reset = () => {
-    setAnswers({}); setScreen(-1); setContact(EMPTY_CONTACT); setSelectedFile(''); setContactError('');
+    setAnswers({}); setScreen(-1); setContact(EMPTY_CONTACT); setSelectedFile(''); setReport(null); setReportStatus(''); setContactError('');
     try { sessionStorage.removeItem(STORAGE_KEY); } catch { /* no-op */ }
   };
   const enterReview = () => {
@@ -201,8 +220,16 @@ export default function CigarJourney() {
               <p className="mt-5 leading-7 text-stone-600">Reports can help us understand sales, fees, overdue invoices and inventory movements. This step is optional, and you may provide files later during a secure Capacity Review.</p>
               <label htmlFor="preview-report" className="mt-7 block font-semibold">Choose an XLSX, CSV or PDF report (optional)</label>
               <input id="preview-report" type="file" accept=".xlsx,.csv,.pdf" onChange={handleFile} className="mt-3 block max-w-full text-sm" />
-              {selectedFile && <p className="mt-3 text-sm font-semibold">{selectedFile}</p>}
-              <p className="mt-4 text-sm text-amber-900">Preview safety: this file is not uploaded, stored, scanned or analyzed. Secure document ingestion will be a separate implementation.</p>
+              {selectedFile && <p className="mt-3 text-sm font-semibold">Selected: {selectedFile}</p>}
+              {reportLoading && <p className="mt-3 text-sm" role="status">Examining report, please wait…</p>}
+              {reportStatus && <p className="mt-3 text-sm text-amber-900" role="status">{reportStatus}</p>}
+              {report && <div className="mt-4 space-y-3 rounded-xl border border-stone-200 bg-white p-4">
+                <h2 className="font-bold">Report analysis · {report.sheets.length} section(s)</h2>
+                {report.sheets.map((s,i)=><div key={i} className="border-b pb-2"><p className="font-semibold">{s.name}</p><p className="text-sm text-stone-600">{s.rows} rows · {s.category}</p></div>)}
+                {report.findings.map((f,i)=><p key={i} className="text-sm text-stone-700">• {f}</p>)}
+                <p className="text-xs text-amber-900">{report.caveat}</p>
+              </div>}
+              <p className="mt-4 text-sm text-amber-900">Your report is processed temporarily. It is not stored or attached to your profile. Do not upload confidential customer details or unredacted financial statements during this preview.</p>
               <div className="mt-10 flex items-center justify-between gap-3"><button type="button" onClick={() => setScreen(index => index - 1)} className="rounded-full border border-stone-300 px-6 py-3">← Back</button><button type="button" onClick={() => setScreen(contactStep)} className="rounded-full px-7 py-3 font-bold text-white" style={{ background: INK }}>Continue →</button></div>
             </div>
           )}
@@ -240,7 +267,8 @@ export default function CigarJourney() {
               <p className="mt-4 leading-7 text-stone-600">This is a demonstration based on the answers you selected. Nothing has been submitted, emailed or saved to EA's customer records.</p>
               <div className="mt-7 space-y-4">{preview.findings.length ? preview.findings.map((f, i) => <article key={f.title} className="rounded-xl border border-stone-200 bg-white p-5"><p className="text-xs font-bold uppercase" style={{ color: GOLD }}>Opportunity {i + 1}</p><h2 className="mt-2 text-lg font-bold">{f.title}</h2><p className="mt-2 text-sm leading-6 text-stone-600">{f.explanation}</p><p className="mt-3 text-xs text-stone-500">Potential capability: {f.proposedCapability}. {f.status === 'new-development' ? 'Requires development and verification.' : 'Requires integration review.'}</p></article>) : <p className="rounded-xl bg-stone-100 p-5">No specific operational issue identified yet. A conversation can clarify your priorities.</p>}</div>
               <p className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-900">Financial impact: Not yet quantified. No fictional annual savings, unpaid balances or inventory values have been created.</p>
-              <p className="mt-5 text-sm leading-6 text-stone-600">Next step after this preview is approved: connect secure submissions, qualified calculations, a monitored reply address and an owner-approved Capacity Review booking link.</p>
+              {report && <div className="mt-5 rounded-xl border border-stone-200 p-4"><h2 className="font-bold">Your report analysis</h2><p className="mt-2 text-sm">We identified {report.sheets.length} report section(s). Figures require confirmation against source records.</p>{report.findings.map((x,i)=><p className="mt-2 text-sm" key={i}>• {x}</p>)}</div>}
+              <p className="mt-5 text-sm leading-6 text-stone-600">The secure client record, actual assessment email, mailbox provisioning and Capacity Review booking integration require a separate, verified release. No vendor message has been sent.</p>
               <button type="button" onClick={reset} className="mt-7 rounded-full px-6 py-3 font-bold text-white" style={{ background: INK }}>Start a New Preview</button>
             </div>
           )}
