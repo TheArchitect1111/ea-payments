@@ -132,11 +132,11 @@ export default function CigarJourney({live=false}:{live?:boolean}) {
     const data = new FormData(); data.set('report', file);
     setReportLoading(true);
     try {
-      const response = await fetch('/api/cigar-ctp/preview/report', {method:'POST',body:data,cache:'no-store'});
+      const response = await fetch(live?'/api/cigar-ctp/report':'/api/cigar-ctp/preview/report', {method:'POST',body:data,cache:'no-store'});
       const result = await response.json();
       if (!response.ok || !result.ok) throw new Error(result.error ?? 'Analysis could not finish.');
       setReport(result.analysis as PreviewReport);
-      setReportStatus('Report examined in temporary staging. Data is not saved or verified.');
+      setReportStatus(live?'Report reviewed temporarily. Observations are unverified and may inform your evaluation.':'Report examined in temporary staging. Data is not saved or verified.');
     } catch (error) {
       setReportStatus(error instanceof Error ? error.message : 'Could not read the report.');
     } finally { setReportLoading(false); }
@@ -153,7 +153,7 @@ export default function CigarJourney({live=false}:{live?:boolean}) {
       const response=await fetch(fictional?'/api/cigar-ctp/preview/submit':'/api/cigar-ctp/submit',{
         method:'POST',headers:{'Content-Type':'application/json'},cache:'no-store',
         body:JSON.stringify({qaOnly:fictional,consent:true,businessName:contact.businessName,contactName:contact.contactName,email:contact.email,answers,
-         hoursPerWeek:optionalHours.trim()?Number(optionalHours):null,laborCostPerHour:optionalHourlyValue.trim()?Number(optionalHourlyValue):null})
+         hoursPerWeek:optionalHours.trim()?Number(optionalHours):null,laborCostPerHour:optionalHourlyValue.trim()?Number(optionalHourlyValue):null,reportFindings:report?.findings??[]})
       });
       const json=await response.json();if(!response.ok||!json.ok)throw new Error(json.error??'Submission could not be completed.');
       setDeliveryStatus(fictional?'preview':json.emailStatus==='sent'?'sent':'pending');
