@@ -3,6 +3,8 @@
 ## Intended behavior
 Run the real assessment save and Resend send chain on the Cigar feature Preview without opening customer intake. The provider-test endpoint requires existing EA administrator authentication, the Preview live flag, TEST business/contact names, and explicit testOnly confirmation. Production returns 404 for this endpoint. Ordinary Preview submissions remain rejected.
 
+The internal Preview page `/admin/cigar-ctp/provider-test` requires EA administrator access. It generates fictional TEST answers for the selected path, submits through that same protected endpoint, shows the returned identifiers, and links to the attributed Calendly meeting. Verify identifiers against the intake table and provider evidence; a rendered page alone is not delivery proof.
+
 Signed Calendly Preview notifications may update only matched TEST records. Signature checks, attribution, email matching, cancellation handling, and production customer gates remain intact. Meeting completion still requires authorized staff and an ended active booking.
 
 ## Acceptance and rollback
