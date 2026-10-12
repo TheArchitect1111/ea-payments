@@ -134,7 +134,7 @@ export default function CigarJourney({live=false}:{live?:boolean}) {
   const submitAssessment=async()=>{
     if(!contact.consent){setContactError('Please confirm consent before submitting.');return;}
     setQaSaving(true);setContactError('');
-    const fictional=!live && /^(QA|Test)\b/i.test(contact.businessName)&&/^(QA|Test)\\b/i.test(contact.contactName)&&/@[a-z0-9.-]+\.example$/i.test(contact.email);
+    const fictional=!live && /^(QA|Test)\b/i.test(contact.businessName)&&/^(QA|Test)\b/i.test(contact.contactName)&&/@[a-z0-9.-]+\.example$/i.test(contact.email);
     try{
       const response=await fetch(fictional?'/api/cigar-ctp/preview/submit':'/api/cigar-ctp/submit',{
         method:'POST',headers:{'Content-Type':'application/json'},cache:'no-store',
@@ -268,7 +268,7 @@ export default function CigarJourney({live=false}:{live?:boolean}) {
           {screen === contactStep && (
             <div>
               <div className="text-xs font-bold uppercase tracking-[0.2em]" style={{ color: GOLD }}>Your next step</div>
-              <h1 className="mt-5 text-3xl font-bold">Where should your personalized preview go?</h1>
+              <h1 className="mt-5 text-3xl font-bold">Where should your personalized report go?</h1>
               <p className="mt-4 text-stone-600">Enter where you would like your personalized report sent. We'll process your answers after you submit and follow up by email. {live?"":"In preview, use fictional QA details to test safely."}</p>
               <div className="mt-7 space-y-4">
                 {(['businessName', 'contactName', 'email'] as const).map(field => <label key={field} className="block font-semibold">{field === 'businessName' ? 'Business name' : field === 'contactName' ? 'Your name' : 'Email address'}<input value={contact[field]} type={field === 'email' ? 'email' : 'text'} autoComplete="off" onChange={e => setContact(c => ({ ...c, [field]: e.target.value.slice(0, 140) }))} className="mt-2 w-full rounded-lg border border-stone-300 bg-white p-3" /></label>)}
