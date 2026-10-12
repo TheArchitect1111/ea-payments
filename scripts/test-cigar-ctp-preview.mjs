@@ -54,7 +54,8 @@ assert.match(ui, /CLARITY · CAPACITY · CONFIDENCE/, 'Upper-left motto visible 
 assert.match(ui, /CIGAR_INTRO_IMAGE_TITLE/, 'Introduction image uses its original heading');
 assert.ok(ui.includes('visualCopy?.title'), 'Image title must change with each question');
 assert.ok(ui.includes('visualCopy?.reason'), 'Question-specific why-this-matters sentence must render');
-assert.ok(ui.includes('bg-gradient-to-b from-black/75'), 'Image contrast gradient must stay in place');
+assert.ok(ui.includes('bg-gradient-to-b from-black/40 via-transparent to-black/50'), 'Subtle image gradient must preserve readable titles');
+assert.ok(ui.includes('object-contain object-center'), 'Complete heads, faces and bodies must remain visible');
 const visualCopy = fs.readFileSync(path.join(root, 'lib/cigar-ctp/visual-copy.ts'), 'utf8');
 assert.ok(visualCopy.includes('A clearer picture at every step.'), 'Original introductory title must be restored');
 for (const q of json.questions) {
@@ -65,6 +66,8 @@ const editorialJson = editorialSource.split('export const CIGAR_EDITORIAL_IMAGES
 assert.ok(editorialJson, 'Editorial images must be available');
 const images = JSON.parse(editorialJson);
 assert.equal(Object.keys(images).length, 35, '30 question photos, intro and four supporting stages');
+const photoIds = Object.values(images).map(image => new URL(image.src).pathname);
+assert.equal(new Set(photoIds).size, 35, 'Every CTP screen must have a distinct image file, not a repeated URL or crop');
 for (const q of json.questions) assert.ok(images[q.id]?.src && images[q.id]?.alt, 'Photo and appropriate alt for ' + q.id);
 assert.ok(!ui.includes('Photography matched to the current assessment topic'), 'No restored filler subtitle');
 const discoveryLayout=fs.readFileSync(path.join(root,'app/discover/layout.tsx'),'utf8');
