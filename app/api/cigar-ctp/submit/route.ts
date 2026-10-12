@@ -11,6 +11,7 @@ export const dynamic='force-dynamic';
 const TABLE='Cigar CTP Lead Intake';
 const respond=(body:unknown,status=200)=>NextResponse.json(body,{status,headers:{'Cache-Control':'no-store'}});
 export async function POST(req:NextRequest){
+ if(process.env.VERCEL_ENV==='preview')return respond({ok:false,error:'Real customer intake is unavailable on preview deployments. Use fictional QA test details.'},503);
  if(process.env.CIGAR_CTP_LIVE_SUBMISSIONS_ENABLED!=='true')return respond({ok:false,error:'Customer submissions are not activated. Preview testing remains available.'},503);
  const origin=req.headers.get('origin');
  if(!origin)return respond({ok:false,error:'Origin required.'},403);
