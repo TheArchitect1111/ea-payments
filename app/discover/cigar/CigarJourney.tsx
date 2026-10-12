@@ -197,15 +197,15 @@ export default function CigarJourney({live=false}:{live?:boolean}) {
             <img key={imageKey} src={currentImage.src} alt={currentImage.alt}
               loading={screen <= 0 ? 'eager' : 'lazy'}
               onError={event => {if (!event.currentTarget.src.includes('/images/ctp-editorial/')) event.currentTarget.src='/images/ctp-editorial/10-clarity-blueprint-planning.png';}}
-              className="relative z-[1] block h-full w-full object-contain object-center" />
-            <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-[2] bg-gradient-to-b from-black/40 via-transparent to-black/50" />
-            <div className="pointer-events-none absolute inset-x-0 top-0 z-[3] px-5 pt-5 sm:px-7 sm:pt-7">
+              className="relative z-[1] block h-full w-full object-contain object-center" style={{zIndex:1}} />
+            <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-[2] bg-gradient-to-b from-black/40 via-transparent to-black/50" style={{zIndex:2}} />
+            <div className="pointer-events-none absolute inset-x-0 top-0 z-[3] px-5 pt-5 sm:px-7 sm:pt-7" style={{zIndex:3}}>
               <p className="text-[10px] font-bold uppercase leading-5 tracking-[0.13em] text-white sm:text-xs sm:tracking-[0.18em]"
                 style={{textShadow:'0 2px 7px rgba(0,0,0,0.8)'}}>
                 CLARITY · CAPACITY · CONFIDENCE
               </p>
             </div>
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[3] px-5 pb-5 text-white sm:px-7 sm:pb-7">
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[3] px-5 pb-5 text-white sm:px-7 sm:pb-7" style={{zIndex:3}}>
               <h2 className="max-w-[25ch] text-xl font-semibold leading-tight sm:text-2xl lg:text-3xl"
                 style={{textShadow:'0 2px 10px rgba(0,0,0,0.8)'}}>{imageTitle}</h2>
             </div>
