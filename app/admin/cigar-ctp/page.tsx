@@ -2,7 +2,7 @@
 import {useEffect,useState} from 'react';
 type Finding={title:string;explanation:string};
 type Lead={
- recordId:string;submissionId:string;businessName:string;contactName:string;email:string;
+ isTest:boolean;recordId:string;submissionId:string;businessName:string;contactName:string;email:string;
  role:string;score:string;findings:Finding[];stage:string;emailStatus:string;bookingStatus:string;
  submittedAt:string;meetingAt:string;meetingEndsAt:string;meetingCompletedAt:string;
  meetingConfirmedAt:string;reminderSentAt:string;
@@ -25,7 +25,7 @@ export default function CigarCtpHandoff(){
   try{
    const r=await fetch('/api/admin/cigar-ctp/handoff',{
     method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({action:'complete',recordId:lead.recordId})
+    body:JSON.stringify({action:lead.isTest?'complete-test':'complete',recordId:lead.recordId})
    });
    const data=await r.json() as {ok:boolean;error?:string};
    if(!r.ok||!data.ok)throw new Error(data.error??'Could not confirm meeting completion.');
@@ -41,9 +41,9 @@ export default function CigarCtpHandoff(){
    {error&&<p role="alert" className="mt-5 rounded-lg bg-red-50 p-4 text-sm text-red-800">{error}</p>}
    {!ready?<p className="mt-7">Loading cigar submissions…</p>:null}
    {ready&&leads.length===0&&!error?<p className="mt-7">No cigar intake records yet.</p>:null}
-   <div className="mt-7 space-y-5">{leads.map(lead=><section key={lead.recordId} className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
+   <div className="mt-7 space-y-5">{leads.map(lead=><section key={lead.recordId} className="min-w-0 break-words rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
     <div className="flex flex-wrap items-start justify-between gap-3">
-     <div><h2 className="font-serif text-2xl">{lead.businessName}</h2><p className="mt-1 text-sm text-stone-600">{lead.contactName} · {lead.email}</p><p className="mt-1 text-xs text-stone-500">{lead.role} · {lead.submissionId}</p></div>
+     <div className="min-w-0"><h2 className="font-serif text-2xl">{lead.businessName}</h2><p className="mt-1 text-sm text-stone-600">{lead.contactName} · {lead.email}</p><p className="mt-1 text-xs text-stone-500">{lead.role} · {lead.submissionId}</p></div>
      <span className="rounded-full border border-[#b48a49] px-4 py-2 text-xs font-bold uppercase tracking-wide">{lead.stage}</span>
     </div>
     <div className="mt-5 grid gap-3 text-sm sm:grid-cols-3">
@@ -54,8 +54,10 @@ export default function CigarCtpHandoff(){
     {lead.findings.length>0&&<div className="mt-5 rounded-xl bg-[#faf7f0] p-4"><h3 className="text-sm font-bold">Evaluation summary</h3><ul className="mt-2 list-disc space-y-2 pl-5 text-sm leading-6">{lead.findings.map((x,i)=><li key={i}><strong>{x.title}</strong>: {x.explanation}</li>)}</ul></div>}
     <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
      <p className="text-xs text-stone-600">Meeting confirmed: {lead.meetingConfirmedAt?'Yes':'Not confirmed'} · Reminder sent: {lead.reminderSentAt?'Yes':'No'}</p>
-     {lead.stage==='scheduled'&&lead.bookingStatus==='active'&&Number.isFinite(new Date(lead.meetingEndsAt).getTime())&&new Date(lead.meetingEndsAt).getTime()<=Date.now()&&
-     <button type="button" disabled={busy} onClick={()=>void complete(lead)} className="rounded-full bg-[#17211c] px-5 py-3 text-sm font-bold text-white disabled:opacity-50">Confirm meeting completed</button>}
+     {lead.isTest&&lead.stage!=='completed'&&<button type="button" disabled={busy} onClick={()=>void complete(lead)} className="min-h-12 w-full rounded-full bg-[#17211c] px-5 py-3 text-base font-bold text-white disabled:opacity-50 sm:w-auto">Mark TEST completed</button>}
+     {lead.isTest&&lead.stage==='completed'&&<p role="status" className="text-sm font-semibold">TEST workflow completed</p>}
+     {!lead.isTest&&lead.stage==='scheduled'&&lead.bookingStatus==='active'&&Number.isFinite(new Date(lead.meetingEndsAt).getTime())&&new Date(lead.meetingEndsAt).getTime()<=Date.now()&&
+     <button type="button" disabled={busy} onClick={()=>void complete(lead)} className="min-h-12 w-full rounded-full bg-[#17211c] px-5 py-3 text-base font-bold text-white disabled:opacity-50 sm:w-auto">Confirm meeting completed</button>}
     </div>
    </section>)}</div>
   </div>

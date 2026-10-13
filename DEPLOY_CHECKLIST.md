@@ -86,3 +86,10 @@ Added intake fields: Booking Checked At (`fldSNwFwnZ3c0JhNt`), Booking Sync Erro
 Acceptance: offline polling tests must pass; deployed Preview polling must check both real TEST bookings without another confirmation; Airtable check timestamps and unchanged scheduled statuses must be read back. No meeting is auto-completed. Real completed handoff remains pending because both meetings are in the future. Production flag and Calendly token remain Preview-only until authorized release gates pass. No merge, Production activation, redirect promotion, or WORKFLOW LIVE is claimed by this source change.
 
 Rollback: remove the Cigar booking cron entry or unset the Cigar live flag. Preserve the general /ctp route and all other jobs. Do not remove or fabricate existing test evidence.
+
+
+## Owner-authorized TEST completion and phone handoff
+
+Owner explicitly requested both TEST records be marked completed before their future appointments. Airtable accepted Workflow Status = completed for rectwRfaIFmHt2owC and recsVY5YOMIlEg7NN. This is manual TEST workflow completion, not meeting attendance. Meeting Completed At was not fabricated. The admin page now has a 48px, full-width phone button for TEST completion, with completed feedback and wrapping for long record text. The API classifies TEST records from persisted names, requires administrator authentication, and refuses the TEST action for customer records. Real meeting completion retains the ended-meeting guard.
+
+Production environment listing returned 403 again. No Vercel CLI or VERCEL_TOKEN is available in the current workspace. Configuration and deployment must not be reported verified until actual Production evidence passes. PR base is master, the existing production branch, rather than a main branch.

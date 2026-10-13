@@ -1,4 +1,5 @@
 import {NextRequest,NextResponse} from 'next/server';
+import {isCigarTestRecord} from '@/lib/cigar-ctp/provider-test';
 import {adminApiUnauthorized,guardAdminApi} from '@/lib/api/admin-route';
 import {airtableConfigured,airtableQuery,airtableUpdate} from '@/lib/data/airtable-client';
 
@@ -13,7 +14,7 @@ function publicRecord(record:{id:string;fields:Record<string,unknown>}){
  try{const parsed=JSON.parse(String(f['Findings JSON']??'{}'));findings=Array.isArray(parsed.findings)?parsed.findings.slice(0,3).map((x:Finding)=>({title:String(x.title??''),explanation:String(x.explanation??'')})):[];}
  catch{findings=[];}
  return {
-  recordId:record.id,
+  recordId:record.id,isTest:isCigarTestRecord(f),
   submissionId:String(f['Submission ID']??''),businessName:String(f['Business Name']??''),
   contactName:String(f['Contact Name']??''),email:String(f.Email??''),
   role:String(f['Business Type']??''),
@@ -40,15 +41,21 @@ export async function POST(req:NextRequest){
  if(!airtableConfigured())return respond({ok:false,error:'Cigar CRM unavailable.'},503);
  let body:{recordId?:string;action?:string};
  try{body=(await req.json()) as typeof body;}catch{return respond({ok:false,error:'Invalid JSON.'},400);}
- if(body.action!=='complete'||!body.recordId||!/^rec[A-Za-z0-9]{14}$/.test(body.recordId))
+ if(!['complete','complete-test'].includes(body.action??'')||!body.recordId||!/^rec[A-Za-z0-9]{14}$/.test(body.recordId))
   return respond({ok:false,error:'Invalid completion request.'},400);
  // Airtable search by internal record ID is scoped ONLY to the dedicated Cigar CTP table.
  const leads=await airtableQuery(TABLE,{filterByFormula:`RECORD_ID()='${body.recordId}'`,maxRecords:1});
  const existing=leads[0];
  if(!existing)return respond({ok:false,error:'Cigar lead not found.'},404);
+ if(body.action==='complete-test'&&!isCigarTestRecord(existing.fields))return respond({ok:false,error:'Manual TEST completion is available only for TEST records.'},403);
  const status=String(existing.fields['Workflow Status']??'');
  const endTime=new Date(String(existing.fields['Meeting Ends At']??'')).getTime();
  if(status==='completed')return respond({ok:true,alreadyCompleted:true,lead:publicRecord(existing)});
+ if(body.action==='complete-test'){
+  // TEST workflow verification does not claim a future meeting was attended.
+  const saved=await airtableUpdate(TABLE,existing.id,{'Workflow Status':'completed'});
+  return saved?respond({ok:true,testCompletion:true,lead:publicRecord(saved)}):respond({ok:false,error:'Could not complete TEST workflow.'},503);
+ }
  if(status!=='scheduled'||existing.fields['Booking Status']!=='active'||!Number.isFinite(endTime)||endTime>Date.now())
   return respond({ok:false,error:'Only an ended, active scheduled meeting can be marked completed.'},409);
  const saved=await airtableUpdate(TABLE,existing.id,{'Workflow Status':'completed','Meeting Completed At':new Date().toISOString()});
