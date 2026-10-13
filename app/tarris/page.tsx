@@ -4,7 +4,7 @@
 import Link from "next/link";
 import BookingForm from "./book/booking-form";
 import { Tb3FilmGrid } from "./tb3-film";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 
 const pillars = [
   ["ATHLETE", "Discipline in the classroom. Determination on the court.", "LEARN MORE"],
@@ -34,16 +34,18 @@ const pillarAssets: Record<string, ImageAsset[]> = {
     { id: "community-secondary", asset: "OFFICIAL_12_KIDS_ART.png", alt: "Young people working on art together", ratio: "aspect-[4/3]" },
   ],
 };
-type MerchProduct = { id: string; image: string; label: string; price: string; redImage?: string };
+const bonfireStoreUrl = "https://www.bonfire.com/store/tb3-official-merch-shop/";
+type MerchProduct = { name: string; price: string | null; garment: "tee" | "long-sleeve" | "cap" | "hoodie" | "crewneck"; color: "red" | "white"; mark: "standard" | "tonal" | "premium" };
 const merchProducts: MerchProduct[] = [
-  { id: "merch-short-red", image: "MOCK_TEE_SHORT_RED.jpg", label: "TB3 TEE - RED", price: "$35" },
-  { id: "merch-short-white", image: "MOCK_TEE_SHORT_WHITE.jpg", label: "TB3 TEE - WHITE", price: "$35" },
-  { id: "merch-long-red", image: "MOCK_TEE_LONG_RED.jpg", label: "TB3 LONG SLEEVE - RED", price: "$45" },
-  { id: "merch-long-white", image: "MOCK_TEE_LONG_WHITE.jpg", label: "TB3 LONG SLEEVE - WHITE", price: "$45" },
-  { id: "merch-cap", image: "MOCK_HAT_WHITE.jpg", redImage: "MOCK_HAT_RED.jpg", label: "TB3 CAP - WHITE", price: "$30" },
-  { id: "merch-hoodie-red", image: "MOCK_HOODIE_RED.jpg", label: "TB3 HOODIE - RED", price: "$75" },
-  { id: "merch-hoodie-white", image: "MOCK_HOODIE_WHITE.jpg", label: "TB3 HOODIE - WHITE", price: "$75" },
-  { id: "merch-hoodie-premium", image: "MOCK_HOODIE_WHITE_LOGO_DETAIL_1.jpg", label: "TB3 HOODIE - PREMIUM LOGO", price: "$85" },
+  { name: "TB3 TEE - RED", price: "$35", garment: "tee", color: "red", mark: "standard" },
+  { name: "TB3 TEE - WHITE", price: "$35", garment: "tee", color: "white", mark: "standard" },
+  { name: "TB3 LONG SLEEVE - RED", price: "$45", garment: "long-sleeve", color: "red", mark: "standard" },
+  { name: "TB3 LONG SLEEVE - WHITE", price: "$45", garment: "long-sleeve", color: "white", mark: "standard" },
+  { name: "TB3 CAP - WHITE / RED", price: "$30", garment: "cap", color: "white", mark: "standard" },
+  { name: "TB3 HOODIE - WHITE", price: "$75", garment: "hoodie", color: "white", mark: "standard" },
+  { name: "TB3 HOODIE - RED tonal TB3", price: "$75", garment: "hoodie", color: "red", mark: "tonal" },
+  { name: "TB3 HOODIE - PREMIUM LOGO", price: "$85", garment: "hoodie", color: "white", mark: "premium" },
+  { name: "TB3 CREWNECK - RED", price: "$65", garment: "crewneck", color: "red", mark: "standard" },
 ];
 const nav = ["HOME", "ATHLETE", "STORY", "BRAND", "NIL", "COMMUNITY", "MEDIA", "MERCH", "FUTURE"];
 
@@ -64,20 +66,38 @@ function ImageSlot({ id, asset, alt, ratio = "aspect-[4/5]", hero = false }: Ima
     <img id={id} src={`/images/tb3-official/${asset}`} alt={alt} style={{ objectPosition }} className={`absolute inset-0 h-full w-full ${hero ? "object-contain" : "object-cover"}`} loading={hero ? "eager" : "lazy"} />
   </div>;
 }
-function MerchProductCard({ product, index }: { product: MerchProduct; index: number }) {
-  const [red, setRed] = useState(false);
-  const image = red && product.redImage ? product.redImage : product.image;
-  const label = red && product.redImage ? "TB3 CAP - RED" : product.label;
-  return <article className="min-w-0">
-    <div id={`merch-${index + 1}`} className="aspect-square overflow-hidden bg-[#E5E5E5] p-[10px]">
-      <img src={`/merch/${image}`} alt={label} className="h-full w-full object-contain" loading="lazy" />
+function MerchProductCard({ product }: { product: MerchProduct }) {
+  const isWhite = product.color === "white";
+  const garmentColor = isWhite ? "#F7F5F2" : "#A51C30";
+  const outlineColor = isWhite ? "#C8C2BA" : "#811527";
+  const logoColor = product.mark === "tonal" ? "#811527" : isWhite ? "#A51C30" : "#F7F5F2";
+  const logoOpacity = product.mark === "tonal" ? 0.78 : 1;
+  const shirtShape = product.garment === "hoodie"
+    ? "M60 39 72 30c2 12 8 19 18 19s16-7 18-19l12 9 24 20-13 19-13-9v68H62V69l-13 9-13-19 24-20Z"
+    : product.garment === "crewneck"
+      ? "M60 30 74 23c3 8 8 12 16 12s13-4 16-12l14 7 24 18-13 20-12-8v77H61V60l-12 8-13-20 24-18Z"
+      : product.garment === "long-sleeve"
+        ? "M61 28 74 21c3 8 8 12 16 12s13-4 16-12l14 7 38 33-13 18-27-23v83H62V56L35 79 22 61l39-33Z"
+        : product.garment === "cap"
+          ? "M36 94c3-30 24-49 54-49s51 19 54 49H36Zm1 4h106c-11 17-32 27-58 27-22 0-40-8-48-20-3-3-3-5 0-7Z"
+          : "M60 27 74 19c4 9 9 14 16 14s12-5 16-14l14 8 24 19-13 20-12-8v76H61V68l-12 8-13-20 24-19Z";
+  const isCap = product.garment === "cap";
+  return <article className="min-w-0 overflow-hidden rounded-sm border border-black/10 bg-white">
+    <div className="relative grid aspect-square place-items-center overflow-hidden bg-[#EAE7E2] p-5">
+      <svg role="img" aria-label={`${product.name} product preview`} viewBox="0 0 180 180" className="h-full w-full max-w-[250px]">
+        <title>{product.name} product preview</title>
+        <path d={shirtShape} fill={garmentColor} stroke={outlineColor} strokeWidth="2" strokeLinejoin="round" />
+        {isCap ? <path d="M42 93c17-13 45-20 75-15" fill="none" stroke={outlineColor} strokeWidth="2" /> : <path d={product.garment === "hoodie" ? "M74 39c2 11 7 17 16 17s14-6 16-17" : "M77 22c2 8 7 12 13 12s11-4 13-12"} fill="none" stroke={outlineColor} strokeWidth="2" />}
+        <text x="90" y={isCap ? "94" : "86"} fill={logoColor} fillOpacity={logoOpacity} fontSize={product.mark === "premium" ? "21" : "19"} fontWeight="900" textAnchor="middle" letterSpacing="-1">TB3</text>
+        {!isCap && <text x="90" y="99" fill={logoColor} fillOpacity={logoOpacity} fontSize="5.5" fontWeight="700" textAnchor="middle" letterSpacing="1.2">OFFICIAL</text>}
+      </svg>
+      <span className="absolute bottom-3 left-3 rounded-full border border-black/10 bg-white/80 px-3 py-1 text-[8px] font-bold tracking-[0.18em] text-black/60">PRODUCT PREVIEW</span>
     </div>
-    <p className="mt-3 text-[9px] font-bold tracking-wider">{product.label} <span className="font-normal">{product.price}</span></p>
-    {product.redImage && <div className="mt-2 flex items-center gap-2 text-[9px]">
-      <span className="text-black/60">COLOR</span>
-      <button type="button" onClick={() => setRed(false)} aria-pressed={!red} className={`border px-2 py-1 ${!red ? "border-black" : "border-black/20"}`}>WHITE</button>
-      <button type="button" onClick={() => setRed(true)} aria-pressed={red} className={`border px-2 py-1 ${red ? "border-black" : "border-black/20"}`}>RED</button>
-    </div>}
+    <div className="p-4 sm:p-5">
+      <h3 className="break-words text-sm font-bold tracking-wide">{product.name}</h3>
+      <p className="mt-1 text-xs text-black/55">{product.price ?? "See price at Bonfire"}</p>
+      <a href={bonfireStoreUrl} target="_blank" rel="noopener" className="mt-4 inline-flex min-h-11 w-full items-center justify-center bg-[#A51C30] px-4 py-3 text-[10px] font-bold tracking-[0.16em] text-white hover:bg-[#841627] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#A51C30]">SHOP NOW</a>
+    </div>
   </article>;
 }
 function ActionLink({ children, className = "", href = "/tarris/future" }: { children: ReactNode; className?: string; href?: string }) {
@@ -156,9 +176,18 @@ export default function TarrisPublicPage() {
           <article className="flex min-h-[300px] flex-col justify-center bg-[#EAE7E2] p-7"><p className="text-[9px] tracking-[0.3em] text-[#A51C30]">THE FUTURE</p><h2 className="mt-4 text-3xl font-black">PLAN. PREPARE.<br />PERFORM. BUILD.</h2><p className="mt-3 text-xs leading-6 text-black/65">The next chapter starts with the work you do today.</p><ActionLink href="/tarris/future" className="mt-4 self-start text-[9px] font-bold tracking-widest text-[#A51C30]">LEARN MORE →</ActionLink></article>
           <article className="flex flex-col justify-between bg-[#141414] p-7 text-white"><div><p className="text-[9px] tracking-[0.3em] text-white/60">THE NEXT CHAPTER</p><h2 className="mt-6 text-4xl font-black leading-none tracking-tight">PLAYER<br /><span className="text-[#A51C30]">ONE.</span></h2><p className="mt-5 text-xs leading-6 text-white/70">Same vision. Higher purpose.<br />Build what comes next.</p></div><div className="mt-8"><HQLink dark /></div></article>
         </section>
-        <section id="merch" className="scroll-mt-5 py-10">
-          <div className="mb-6 flex flex-wrap items-end justify-between gap-4"><div><p className="text-[9px] tracking-[0.25em] text-[#A51C30]">TB3 STORE</p><h2 className="mt-2 text-3xl font-black tracking-tight">WEAR THE VISION.</h2></div><ActionLink href="/tarris/book?type=merch" className="border border-black px-5 py-3 text-[10px] font-bold tracking-widest">SHOP TB3 →</ActionLink></div>
-          <div id="merch-store" className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">{merchProducts.map((product, index) => <MerchProductCard key={product.id} product={product} index={index} />)}</div>
+        <section id="merch" className="scroll-mt-5 border-b border-black/20 py-10 sm:py-14">
+          <div className="mb-7 flex flex-col items-start justify-between gap-5 sm:mb-9 sm:flex-row sm:items-end">
+            <div>
+              <p className="text-[9px] font-bold tracking-[0.25em] text-[#A51C30]">OFFICIAL MERCHANDISE</p>
+              <h2 className="mt-2 text-3xl font-black tracking-tight sm:text-4xl">TB3 OFFICIAL</h2>
+              <p className="mt-2 text-sm text-black/60">Official Merchandise</p>
+            </div>
+            <a href={bonfireStoreUrl} target="_blank" rel="noopener" className="inline-flex min-h-11 w-full items-center justify-center border border-black px-5 py-3 text-[10px] font-bold tracking-[0.16em] hover:bg-black hover:text-white sm:w-auto">SHOP ALL MERCH</a>
+          </div>
+          <div id="merch-store" className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {merchProducts.map((product) => <MerchProductCard key={product.name} product={product} />)}
+          </div>
         </section>
         <BookingForm/>
       </main>
