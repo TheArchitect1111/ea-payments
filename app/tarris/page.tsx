@@ -41,9 +41,9 @@ const merchProducts: MerchProduct[] = [
   { name: "TB3 TEE - WHITE", price: "$35", garment: "tee", color: "white", mark: "standard" },
   { name: "TB3 LONG SLEEVE - RED", price: "$45", garment: "long-sleeve", color: "red", mark: "standard" },
   { name: "TB3 LONG SLEEVE - WHITE", price: "$45", garment: "long-sleeve", color: "white", mark: "standard" },
-  { name: "TB3 CAP - WHITE / RED", price: null, garment: "cap", color: "white", mark: "standard" },
+  { name: "TB3 CAP - WHITE / RED", price: "$30", garment: "cap", color: "white", mark: "standard" },
   { name: "TB3 HOODIE - WHITE", price: "$75", garment: "hoodie", color: "white", mark: "standard" },
-  { name: "TB3 HOODIE - RED tonal TB3", price: null, garment: "hoodie", color: "red", mark: "tonal" },
+  { name: "TB3 HOODIE - RED tonal TB3", price: "$75", garment: "hoodie", color: "red", mark: "tonal" },
   { name: "TB3 HOODIE - PREMIUM LOGO", price: "$85", garment: "hoodie", color: "white", mark: "premium" },
   { name: "TB3 CREWNECK - RED", price: "$65", garment: "crewneck", color: "red", mark: "standard" },
 ];
