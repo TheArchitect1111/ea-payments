@@ -83,10 +83,14 @@ jobs:
             echo "EA_GATE_PATH=${{ inputs.route_path }}" >> "$GITHUB_ENV"
             echo "EA_MIN_VISUALS=${{ inputs.min_visuals }}" >> "$GITHUB_ENV"
           fi
-      - name: Preview, asset, functional, desktop, mobile and critic gates
+      - name: Run EA preview gate
         env:
-          EA_SOURCE_COMMIT: ${{ env.EA_REQUESTED_SOURCE_COMMIT || github.sha }}
+          EA_PREVIEW_URL: ${{ env.EA_PREVIEW_URL || inputs.preview_url || 'https://ea-payments-git-master-the-architects-projects-cc813778.vercel.app' }}
+          EA_SOURCE_COMMIT: ${{ github.sha }}
+          EA_GATE_PATH: ${{ env.EA_GATE_PATH || inputs.route_path || '/ctp/cigar' }}
           EA_GATE_OUTPUT: artifacts/ea-gate
+          VERCEL_ENV: preview
+          NODE_ENV: production
           VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
         run: node scripts/ea-preview-gate.mjs
 
