@@ -34,8 +34,19 @@ const pillarAssets: Record<string, ImageAsset[]> = {
     { id: "community-secondary", asset: "OFFICIAL_12_KIDS_ART.png", alt: "Young people working on art together", ratio: "aspect-[4/3]" },
   ],
 };
-const bonfireStoreUrl = "https://www.bonfire.com/store/tb3-official/";
-const merchProducts = ["TB3 Tee 1", "TB3 Tee 2", "TB3 Tee 3", "TB3 Tee 4"];
+const bonfireStoreUrl = "https://www.bonfire.com/store/tb3-official-merch-shop/";
+type MerchProduct = { name: string; price: string | null; garment: "tee" | "long-sleeve" | "cap" | "hoodie" | "crewneck"; color: "red" | "white"; mark: "standard" | "tonal" | "premium" };
+const merchProducts: MerchProduct[] = [
+  { name: "TB3 TEE - RED", price: "$35", garment: "tee", color: "red", mark: "standard" },
+  { name: "TB3 TEE - WHITE", price: "$35", garment: "tee", color: "white", mark: "standard" },
+  { name: "TB3 LONG SLEEVE - RED", price: "$45", garment: "long-sleeve", color: "red", mark: "standard" },
+  { name: "TB3 LONG SLEEVE - WHITE", price: "$45", garment: "long-sleeve", color: "white", mark: "standard" },
+  { name: "TB3 CAP - WHITE / RED", price: null, garment: "cap", color: "white", mark: "standard" },
+  { name: "TB3 HOODIE - WHITE", price: "$75", garment: "hoodie", color: "white", mark: "standard" },
+  { name: "TB3 HOODIE - RED tonal TB3", price: null, garment: "hoodie", color: "red", mark: "tonal" },
+  { name: "TB3 HOODIE - PREMIUM LOGO", price: "$85", garment: "hoodie", color: "white", mark: "premium" },
+  { name: "TB3 CREWNECK - RED", price: "$65", garment: "crewneck", color: "red", mark: "standard" },
+];
 const nav = ["HOME", "ATHLETE", "STORY", "BRAND", "NIL", "COMMUNITY", "MEDIA", "MERCH", "FUTURE"];
 
 type ImageAsset = { id: string; asset: string; alt: string; ratio?: string };
@@ -55,25 +66,37 @@ function ImageSlot({ id, asset, alt, ratio = "aspect-[4/5]", hero = false }: Ima
     <img id={id} src={`/images/tb3-official/${asset}`} alt={alt} style={{ objectPosition }} className={`absolute inset-0 h-full w-full ${hero ? "object-contain" : "object-cover"}`} loading={hero ? "eager" : "lazy"} />
   </div>;
 }
-function MerchProductCard({ name, index }: { name: string; index: number }) {
-  const shirtColors = ["#141414", "#A51C30", "#F7F5F2", "#343434"];
-  const shirtColor = shirtColors[index] ?? shirtColors[0];
-  const shirtOutline = index === 2 ? "#BEB9B2" : shirtColor;
+function MerchProductCard({ product }: { product: MerchProduct }) {
+  const isWhite = product.color === "white";
+  const garmentColor = isWhite ? "#F7F5F2" : "#A51C30";
+  const outlineColor = isWhite ? "#C8C2BA" : "#811527";
+  const logoColor = product.mark === "tonal" ? "#811527" : isWhite ? "#A51C30" : "#F7F5F2";
+  const logoOpacity = product.mark === "tonal" ? 0.78 : 1;
+  const shirtShape = product.garment === "hoodie"
+    ? "M60 39 72 30c2 12 8 19 18 19s16-7 18-19l12 9 24 20-13 19-13-9v68H62V69l-13 9-13-19 24-20Z"
+    : product.garment === "crewneck"
+      ? "M60 30 74 23c3 8 8 12 16 12s13-4 16-12l14 7 24 18-13 20-12-8v77H61V60l-12 8-13-20 24-18Z"
+      : product.garment === "long-sleeve"
+        ? "M61 28 74 21c3 8 8 12 16 12s13-4 16-12l14 7 38 33-13 18-27-23v83H62V56L35 79 22 61l39-33Z"
+        : product.garment === "cap"
+          ? "M36 94c3-30 24-49 54-49s51 19 54 49H36Zm1 4h106c-11 17-32 27-58 27-22 0-40-8-48-20-3-3-3-5 0-7Z"
+          : "M60 27 74 19c4 9 9 14 16 14s12-5 16-14l14 8 24 19-13 20-12-8v76H61V68l-12 8-13-20 24-19Z";
+  const isCap = product.garment === "cap";
   return <article className="min-w-0 overflow-hidden rounded-sm border border-black/10 bg-white">
     <div className="relative grid aspect-square place-items-center overflow-hidden bg-[#EAE7E2] p-5">
-      <svg role="img" aria-label={`${name} branded product placeholder`} viewBox="0 0 180 180" className="h-full w-full max-w-[250px]">
-        <title>{name} branded product placeholder</title>
-        <path d="M60 27 74 19c4 9 9 14 16 14s12-5 16-14l14 8 24 19-13 20-12-8v76H61V68l-12 8-13-20 24-19Z" fill={shirtColor} stroke={shirtOutline} strokeWidth="2" strokeLinejoin="round" />
-        <path d="M77 22c2 8 7 12 13 12s11-4 13-12" fill="none" stroke={index === 2 ? "#BEB9B2" : "#F7F5F2"} strokeWidth="2" />
-        <text x="90" y="87" fill={index === 2 ? "#A51C30" : "#F7F5F2"} fontSize="20" fontWeight="900" textAnchor="middle" letterSpacing="-1">TB3</text>
-        <text x="90" y="99" fill={index === 2 ? "#141414" : "#F7F5F2"} fontSize="5.5" fontWeight="700" textAnchor="middle" letterSpacing="1.2">OFFICIAL</text>
+      <svg role="img" aria-label={`${product.name} product preview`} viewBox="0 0 180 180" className="h-full w-full max-w-[250px]">
+        <title>{product.name} product preview</title>
+        <path d={shirtShape} fill={garmentColor} stroke={outlineColor} strokeWidth="2" strokeLinejoin="round" />
+        {isCap ? <path d="M42 93c17-13 45-20 75-15" fill="none" stroke={outlineColor} strokeWidth="2" /> : <path d={product.garment === "hoodie" ? "M74 39c2 11 7 17 16 17s14-6 16-17" : "M77 22c2 8 7 12 13 12s11-4 13-12"} fill="none" stroke={outlineColor} strokeWidth="2" />}
+        <text x="90" y={isCap ? "94" : "86"} fill={logoColor} fillOpacity={logoOpacity} fontSize={product.mark === "premium" ? "21" : "19"} fontWeight="900" textAnchor="middle" letterSpacing="-1">TB3</text>
+        {!isCap && <text x="90" y="99" fill={logoColor} fillOpacity={logoOpacity} fontSize="5.5" fontWeight="700" textAnchor="middle" letterSpacing="1.2">OFFICIAL</text>}
       </svg>
-      <span className="absolute bottom-3 left-3 rounded-full border border-black/10 bg-white/80 px-3 py-1 text-[8px] font-bold tracking-[0.18em] text-black/60">PLACEHOLDER</span>
+      <span className="absolute bottom-3 left-3 rounded-full border border-black/10 bg-white/80 px-3 py-1 text-[8px] font-bold tracking-[0.18em] text-black/60">PRODUCT PREVIEW</span>
     </div>
     <div className="p-4 sm:p-5">
-      <h3 className="text-sm font-bold tracking-wide">{name}</h3>
-      <p className="mt-1 text-xs text-black/55">Price shown at Bonfire</p>
-      <a href={bonfireStoreUrl} target="_blank" rel="noopener noreferrer" className="mt-4 inline-flex min-h-11 w-full items-center justify-center bg-[#A51C30] px-4 py-3 text-[10px] font-bold tracking-[0.16em] text-white transition hover:bg-[#841627] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#A51C30]">SHOP NOW</a>
+      <h3 className="break-words text-sm font-bold tracking-wide">{product.name}</h3>
+      <p className="mt-1 text-xs text-black/55">{product.price ?? "See price at Bonfire"}</p>
+      <a href={bonfireStoreUrl} target="_blank" rel="noopener" className="mt-4 inline-flex min-h-11 w-full items-center justify-center bg-[#A51C30] px-4 py-3 text-[10px] font-bold tracking-[0.16em] text-white hover:bg-[#841627] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#A51C30]">SHOP NOW</a>
     </div>
   </article>;
 }
@@ -160,10 +183,10 @@ export default function TarrisPublicPage() {
               <h2 className="mt-2 text-3xl font-black tracking-tight sm:text-4xl">TB3 OFFICIAL</h2>
               <p className="mt-2 text-sm text-black/60">Official Merchandise</p>
             </div>
-            <a href={bonfireStoreUrl} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 w-full items-center justify-center border border-black px-5 py-3 text-[10px] font-bold tracking-[0.16em] transition hover:bg-black hover:text-white sm:w-auto">SHOP ALL MERCH</a>
+            <a href={bonfireStoreUrl} target="_blank" rel="noopener" className="inline-flex min-h-11 w-full items-center justify-center border border-black px-5 py-3 text-[10px] font-bold tracking-[0.16em] hover:bg-black hover:text-white sm:w-auto">SHOP ALL MERCH</a>
           </div>
           <div id="merch-store" className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {merchProducts.map((name, index) => <MerchProductCard key={name} name={name} index={index} />)}
+            {merchProducts.map((product) => <MerchProductCard key={product.name} product={product} />)}
           </div>
         </section>
         <BookingForm/>
