@@ -4,9 +4,9 @@ import { mkdirSync, writeFileSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
 
-const previewUrl = process.env.EA_PREVIEW_URL;
+const previewUrl = process.env.EA_PREVIEW_URL || process.env.VERCEL_URL || process.env.VERCEL_PREVIEW_URL || '';
 const routePath = process.env.EA_GATE_PATH || '/';
-const sourceCommit = process.env.EA_SOURCE_COMMIT || '';
+const sourceCommit = process.env.EA_SOURCE_COMMIT || process.env.VERCEL_GIT_COMMIT_SHA || process.env.GITHUB_SHA || '';
 const tb3Placeholders = process.env.EA_RELEASE_PROFILE === 'tb3-approved-placeholders';
 const placeholderProof = tb3Placeholders ? (await import('./production-certification.js')).default.certifyTB3() : null;
 if (tb3Placeholders && routePath !== '/tarris/future') throw new Error('TB3 placeholder profile is restricted to /tarris/future');
@@ -18,8 +18,8 @@ const bypassHeaders = bypassSecret ? {
   'x-vercel-set-bypass-cookie': 'true',
 } : {};
 
-if (!previewUrl) throw new Error('EA_PREVIEW_URL is required');
-if (!sourceCommit) throw new Error('EA_SOURCE_COMMIT is required');
+if (!previewUrl) { console.error('Missing EA_PREVIEW_URL'); process.exit(1); }
+if (!sourceCommit) { console.error('Missing EA_SOURCE_COMMIT'); process.exit(1); }
 mkdirSync(outDir, { recursive: true });
 
 let cleanPreview = new URL(previewUrl);
