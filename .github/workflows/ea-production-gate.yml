@@ -63,6 +63,8 @@ jobs:
         run: node scripts/test-production-protection.mjs
 
       - name: Build gate
+        env:
+          VERCEL_ENV: preview
         run: npm run build
 
       - name: TB3 host routing regression gate
