@@ -1,7 +1,7 @@
 {
   "preview_url": "https://ea-payments-git-master-the-architects-projects-cc813778.vercel.app",
-  "route_path": "/ctp/cigar",
+  "route_path": "/amanda-catherine",
   "min_visuals": 2,
-  "requested_for": "Re-certify cigar CTP after fixing local gate build VERCEL_ENV preview, do not waive checks",
-  "requested_at": "2026-10-13T00:43:04Z"
+  "requested_for": "Verify final Amanda HQ client/Foundry queue handoff and click activity access after PR #559; retain all production gates",
+  "requested_at": "2026-10-11T19:00:55.285694+00:00"
 }
