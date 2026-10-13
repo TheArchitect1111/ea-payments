@@ -1,7 +1,7 @@
 {
   "preview_url": "https://ea-payments-git-master-the-architects-projects-cc813778.vercel.app",
-  "route_path": "/amanda-catherine",
+  "route_path": "/ctp/cigar",
   "min_visuals": 2,
-  "requested_for": "Verify final Amanda HQ client/Foundry queue handoff and click activity access after PR #559; retain all production gates",
-  "requested_at": "2026-10-11T19:00:55.285694+00:00"
+  "requested_for": "Certify merged Cigar CTP PR #561 through existing full EA Production Gate; retain all checks",
+  "requested_at": "2026-10-13T00:30:13Z"
 }
