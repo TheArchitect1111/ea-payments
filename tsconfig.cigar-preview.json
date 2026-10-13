@@ -1,0 +1,20 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "incremental": false
+  },
+  "include": [
+    "next-env.d.ts",
+    "app/discover/cigar/**/*.tsx",
+    "lib/cigar-ctp/**/*.ts",
+    "app/admin/cigar-ctp/**/*.tsx",
+    "app/api/admin/cigar-ctp/**/*.ts",
+    "app/api/cigar-ctp/submit/route.ts",
+    "app/api/cigar-ctp/calendly/webhook/route.ts",
+    "app/api/cron/cigar-ctp-reminders/route.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "mobile"
+  ]
+}

@@ -1,0 +1,23 @@
+name: Cigar CTP Staging End-to-End QA
+
+on:
+  push:
+    branches:
+      - feature/cigar-ctp-guided-preview-20261012
+    paths:
+      - '.github/workflows/cigar-ctp-staging-e2e.yml'
+      - 'scripts/test-cigar-ctp-staging-remote.mjs'
+
+jobs:
+  qa-staging-record:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      CIGAR_STAGING_BASE: https://ea-payments-1gnxg8bwm-the-architects-projects-cc813778.vercel.app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify no real customer records and save a synthetic QA assessment
+        run: node scripts/test-cigar-ctp-staging-remote.mjs
