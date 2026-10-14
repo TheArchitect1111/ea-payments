@@ -19,6 +19,7 @@ import { amandaTrialExpired, resolveAmandaEntitlement, type AmandaCourseEntitlem
 
 const AMANDA_PORTAL_SLUG = 'amanda-catherine';
 const AMANDA_OWNER_EMAILS = new Set(['amanda@aesthetikine.com', 'amandacatherinec@gmail.com']);
+export function isAmandaOwnerEmail(email: string) { return AMANDA_OWNER_EMAILS.has(email.trim().toLowerCase()); }
 
 const AmandaAccessProfileSchema = z.object({
   portalSlug: z.string().min(1),
@@ -168,7 +169,8 @@ export async function provisionAmandaClientAccess(input: {
 
   let created = false;
   if (!record) {
-    if (input.isTestAccess) return { ok: false as const, error: 'Private test access requires an existing Amanda owner portal record.' };
+    if (input.isTestAccess && !isAmandaOwnerEmail(email)) return { ok: false as const, error: 'Private test access requires an existing Amanda owner identity.' };
+    if (!input.isTestAccess) {
     const result = await createOrUpdateClientRecord({
       clientName: name,
       organization: 'Amanda Catherine',
@@ -186,10 +188,11 @@ export async function provisionAmandaClientAccess(input: {
     record = await getClientByEmail(email);
     if (!record) return { ok: false as const, error: 'Client access record could not be verified.' };
     created = true;
+    }
   }
 
-  let tempPassword = record.tempPassword || '';
-  const needsCredentials = !belongsToAnotherPortal && (!record.portalSlug || (!record.passwordChanged && !record.tempPassword));
+  let tempPassword = record?.tempPassword || '';
+  const needsCredentials = Boolean(record && !belongsToAnotherPortal && (!record.portalSlug || (!record.passwordChanged && !record.tempPassword)));
   if (input.isTestAccess && needsCredentials) return { ok: false as const, error: 'Owner portal credentials must already be active before a private test.' };
   if (needsCredentials) {
     tempPassword = temporaryPassword();
