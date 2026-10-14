@@ -12,3 +12,8 @@ export async function POST() {
     auth_granted: false,
   }, { headers: { 'Cache-Control': 'no-store' } });
 }
+
+// Read-only preview probe exercises the identical synthetic handler as POST.
+export async function GET() {
+  return POST();
+}
