@@ -1,15 +1,71 @@
-import { createHmac, timingSafeEqual } from 'node:crypto';
+import { createHash, createHmac, timingSafeEqual } from 'node:crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { loadStudioRecord, saveStudioRecord } from '@/lib/creative-studio/persistence';
 import { syntheticOrgId } from '@/lib/platform-store';
 import { registerBrickEvent } from '@/lib/services/brickRegistrar';
 import { getAmandaConfirmationLetter } from '@/lib/amanda-catherine/confirmation-letters';
+import { provisionAmandaClientAccess } from '@/lib/amanda-catherine/client-access';
 import { sendAuthEmail } from '@/lib/ea-auth-email';
+import { airtableCreate, airtableQuery, airtableUpdate, escapeAirtableString } from '@/lib/data/airtable-client';
 
 export const dynamic='force-dynamic';
-type SquareOrder={email:string;name?:string;class_name?:string;class_id:string;registration_id:string;order_id:string;
+type SquareOrder={email:string;name?:string;phone?:string;class_name?:string;class_id:string;registration_id:string;order_id:string;
   expected_amount:number;payment_status:string;payment_reference?:string;confirmation_sent?:boolean;
   is_test:false;created_at:string};
+const DIRECT_SQUARE_PRODUCTS: Array<{name:string;class_id:string;course_id?:string;expected_amount:number}> = [
+  {name:'Body Sculpt Certification',class_id:'body-sculpt-certification',course_id:'body-sculpt-practitioner-certification',expected_amount:249700},
+  {name:'Nervous System Reset Certification',class_id:'nervous-system-reset',course_id:'aesthetikine-reset-training',expected_amount:99700},
+  {name:'Wood Therapy Training & 7 Piece Set',class_id:'wood-therapy',course_id:'wood-therapy-certification',expected_amount:99700},
+  {name:'Glute Sculpt & Build Certification',class_id:'non-surgical-bbl',course_id:'non-surgical-bbl-training',expected_amount:149700},
+  {name:'Clinical Fat Loss Injectables: Face & Body Contouring Certification',class_id:'clinical-fat-loss',course_id:'clinical-fat-loss-injectables',expected_amount:149700},
+  {name:'Strategy Mentorship Call',class_id:'strategy-call',expected_amount:24900},
+];
+async function resolveDirectSquareOrder(orderId:string,payment:any):Promise<SquareOrder|null>{
+  const token=process.env.SQUARE_ACCESS_TOKEN?.trim()||'';
+  const response=await fetch('https://connect.squareup.com/v2/orders/'+encodeURIComponent(orderId),{
+    headers:{Authorization:'Bearer '+token,'Square-Version':'2026-09-16'},
+    signal:AbortSignal.timeout(10000),cache:'no-store'});
+  if(!response.ok)throw new Error('Square order verification failed: '+response.status);
+  const {order}=await response.json();
+  const items=Array.isArray(order?.line_items)?order.line_items:[];
+  if(items.length!==1)return null;
+  const item=items[0];
+  const product=DIRECT_SQUARE_PRODUCTS.find(entry=>entry.name===String(item?.name||''));
+  if(!product||item?.base_price_money?.currency!=='CAD'||Number(item?.base_price_money?.amount)!==product.expected_amount)return null;
+  const email=String(payment?.buyer_email_address||'').trim().toLowerCase();
+  if(!/^\S+@\S+\.\S+$/.test(email))return null;
+  let customer:any=null;
+  const customerId=String(payment?.customer_id||'');
+  if(customerId){
+    const customerResponse=await fetch('https://connect.squareup.com/v2/customers/'+encodeURIComponent(customerId),{
+      headers:{Authorization:'Bearer '+token,'Square-Version':'2026-09-16'},
+      signal:AbortSignal.timeout(10000),cache:'no-store'});
+    if(customerResponse.ok)customer=(await customerResponse.json()).customer;
+  }
+  const address=payment?.billing_address||{};
+  const customerName=[customer?.given_name||address?.first_name,customer?.family_name||address?.last_name].filter(Boolean).join(' ').trim();
+  const name=customerName||email;
+  const registrationId='square-direct-'+createHash('sha256').update(orderId).digest('hex').slice(0,32);
+  return {email,name,phone:String(customer?.phone_number||''),class_name:product.name,class_id:product.class_id,
+    registration_id:registrationId,order_id:orderId,expected_amount:product.expected_amount,
+    payment_status:'unpaid',is_test:false,created_at:new Date().toISOString()};
+}
+async function upsertAmandaClientRecord(order:SquareOrder, paidAt:string){
+  const formula=`AND({Email}='${escapeAirtableString(order.email)}',{Portal Slug}='amanda-catherine')`;
+  const current=await airtableQuery('Client Records',{filterByFormula:formula,maxRecords:1});
+  const fields={
+    'Client Name':order.name||order.email,
+    Organization:'AesthetiKine Studio Lab',
+    Email:order.email,
+    Phone:order.phone||'',
+    'Portal Slug':'amanda-catherine',
+    'Portal Access Status':'Active',
+    'Payment Received At':paidAt,
+    'Commerce Offer Id':'amanda-course-'+order.class_id,
+  };
+  const saved=current[0]?await airtableUpdate('Client Records',current[0].id,fields,true):await airtableCreate('Client Records',fields,true);
+  if(!saved)throw new Error('Amanda Client Records entry could not be saved');
+}
 function safe(value:string){return value.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function verified(raw:string,received:string,key:string,url:string){
   if(!key||!url||!received)return false;
@@ -43,11 +99,27 @@ export async function POST(req:NextRequest){
     const orderId=String(payment.order_id||'');
     if(!orderId)return NextResponse.json({ok:false,error:'Square payment has no correlated order'},{status:409});
     const id='amanda-square-order-'+orderId;
-    const order=await loadStudioRecord<SquareOrder>('experience',id);
+    let order=await loadStudioRecord<SquareOrder>('experience',id);
+    const isDirectSquareLink=!order;
+    if(isDirectSquareLink){
+      order=await resolveDirectSquareOrder(orderId,payment);
+      if(!order)return NextResponse.json({ok:false,error:'Square payment does not match a configured Amanda course product'},{status:409});
+      const saved=await saveStudioRecord({recordType:'experience',id,organizationId:syntheticOrgId('amanda-catherine'),
+        title:'Amanda Square direct-link order',payload:order});
+      if(!saved.ok||!saved.persistedToAirtable)throw new Error(saved.error||'Square order correlation could not be saved');
+    }
     if(!order||order.order_id!==orderId||order.is_test!==false)
       return NextResponse.json({ok:false,error:'Unknown Square registration order'},{status:409});
-    if(payment.amount_money?.currency!=='CAD'||Number(payment.amount_money?.amount)!==order.expected_amount)
+    if(payment.amount_money?.currency!=='CAD'||(!isDirectSquareLink&&Number(payment.amount_money?.amount)!==order.expected_amount)||
+       (isDirectSquareLink&&Number(payment.amount_money?.amount)<order.expected_amount))
       return NextResponse.json({ok:false,error:'Square payment amount differs from checkout'},{status:409});
+    if(isDirectSquareLink){
+      const signup=await registerBrickEvent({brick_type:'checkout',brick_id:order.class_id,client_id:'amanda-catherine',
+        registration_id:order.registration_id,name:order.name||order.email,email:order.email,phone:order.phone||'',
+        status:'checkout_started',payment_status:'unpaid',payment_reference:null,
+        timestamp:order.created_at,source:'square-payment-link',is_test:false});
+      if(!signup.ok)throw new Error(signup.error||'Square payment registration could not be created');
+    }
     if(order.payment_reference && order.payment_reference!==paymentId)
       return NextResponse.json({ok:false,error:'Conflicting payment on registration'},{status:409});
     const verifiedPayment={
@@ -62,6 +134,16 @@ export async function POST(req:NextRequest){
       timestamp:verifiedPayment.timestamp,source:'square-amanda-webhook',is_test:false,
     },verifiedPayment);
     if(!tracked.ok)throw new Error(tracked.error||'Verified Square tracking failed');
+    await upsertAmandaClientRecord(order,String(payment.updated_at||new Date().toISOString()));
+    const purchasedProduct=DIRECT_SQUARE_PRODUCTS.find(entry=>entry.class_id===order!.class_id);
+    if(purchasedProduct?.course_id){
+      const access=await provisionAmandaClientAccess({
+        email:order.email,name:order.name,audience:'student-trainee',
+        amountPaidCad:order.expected_amount/100,transactionId:paymentId,
+        courseIds:[purchasedProduct.course_id],
+      });
+      if(!access.ok)throw new Error(access.error||'Amanda course access could not be assigned');
+    }
     let next:SquareOrder={...order,payment_status:'paid',payment_reference:paymentId};
     if(!order.confirmation_sent){
       const letter=await getAmandaConfirmationLetter('live');

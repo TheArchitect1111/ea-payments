@@ -27,7 +27,7 @@
     "app/api/webhooks/stripe/route.ts",
     "tests/chassis-autowire.test.mts"
   ],
-  "sourceFingerprint": "b1004eb6dd57a578e114cb3f0baff2814957e06b318d281f1563f74570eec65f",
+  "sourceFingerprint": "78680a35e8b1307fbd0ca184c7a6e0f606067e5cde9e621673dce82e1b575a7c",
   "evidence": {
     "route-render": {
       "tests": [

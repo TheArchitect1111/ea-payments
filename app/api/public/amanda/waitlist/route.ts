@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { saveAmandaWaitlist, notifyAmandaWaitlist, updateAmandaWaitlistNotification } from '@/lib/amanda-catherine/waitlist';
+import { saveAmandaWaitlist, notifyAmandaWaitlist, sendAmandaWaitlistConfirmation, updateAmandaWaitlistNotification } from '@/lib/amanda-catherine/waitlist';
 import { checkRateLimit } from '@/lib/ai/rate-limit';
 import { registry, create } from '@/lib/amanda-catherine/registry';
 import { isAllowedAmandaOrigin } from '@/lib/amanda-catherine/request-origin';
@@ -86,6 +86,14 @@ export async function POST(req: NextRequest) {
     console.error('[amanda-registration] Business Interested write failed; HQ registration remains saved', error);
   }
 
+  let clientEmailSent = false;
+  try {
+    await sendAmandaWaitlistConfirmation(data);
+    clientEmailSent = true;
+  } catch (error) {
+    console.error('[amanda-registration] client confirmation failed', error instanceof Error ? error.message : 'Unknown delivery error');
+  }
+
   try {
     const provider = await notifyAmandaWaitlist(data);
     await updateAmandaWaitlistNotification(waitlistRecordId, 'sent', provider);
@@ -99,6 +107,7 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({
     ok: true,
     registration_type: registrationType,
+    client_email_sent: clientEmailSent,
     confirmation: { ...letter, first_name: person.first_name },
   }, { headers: { 'Cache-Control': 'no-store' } });
 }

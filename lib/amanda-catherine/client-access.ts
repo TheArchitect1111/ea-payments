@@ -18,6 +18,7 @@ import { listStudioRecords } from '@/lib/creative-studio/persistence';
 import { amandaTrialExpired, resolveAmandaEntitlement, type AmandaCourseEntitlement } from './test-access-rules';
 
 const AMANDA_PORTAL_SLUG = 'amanda-catherine';
+const AMANDA_OWNER_EMAILS = new Set(['amanda@aesthetikine.com', 'amandacatherinec@gmail.com']);
 
 const AmandaAccessProfileSchema = z.object({
   portalSlug: z.string().min(1),
@@ -54,6 +55,7 @@ function accessProfileId(portalSlug: string, email: string) {
 }
 
 export async function getAmandaAssignedAudience(portalSlug: string, email: string) {
+  if (portalSlug === AMANDA_PORTAL_SLUG && AMANDA_OWNER_EMAILS.has(email.trim().toLowerCase())) return 'admin';
   const stored = await loadStudioRecord<unknown>('experience', accessProfileId(portalSlug, email));
   const profile = AmandaAccessProfileSchema.safeParse(stored);
   return (profile.success ? profile.data.audience : null) || invitedAmandaLearner(email)?.audience || null;

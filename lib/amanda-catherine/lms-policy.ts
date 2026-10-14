@@ -3,6 +3,7 @@ export const AMANDA_SUPPORT_WORDING = 'Includes 90 days of clinical integration 
 export const AMANDA_READY_COURSE_IDS: readonly string[] = [
   'aesthetikine-reset-training', 'body-sculpt-practitioner-certification',
   'non-surgical-bbl-training', 'wood-therapy-certification',
+  'clinical-fat-loss-injectables',
 ];
 export function amandaCourseStatus(courseId: string): 'READY' | 'WAITLIST' {
   return AMANDA_READY_COURSE_IDS.includes(courseId) ? 'READY' : 'WAITLIST';

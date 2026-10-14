@@ -1,6 +1,6 @@
 'use client';
 
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 
 const ROUTE_NAMES: Record<string, string> = {
   apply: 'Application',
@@ -12,8 +12,19 @@ const ROUTE_NAMES: Record<string, string> = {
   enroll: 'Enrollment',
 };
 
+const APPLICATION_NAMES: Record<string, string> = {
+  'founder-advisory': 'Founder Advisory Application',
+  'speaking-media': 'Speaking Application',
+  'lifeline-media-guest': 'LIFELINE Guest Application',
+  'partner-vendor-application': 'Partnership Application',
+};
+
 const THANK_YOU_COPY: Record<string, string> = {
-  Application: 'Thank you for your interest in the Foundry Application. Tell us about your next step below.',
+  Application: 'Tell us about your next step below.',
+  'Founder Advisory Application': 'Share what you are building and where you would value Amanda’s guidance.',
+  'Speaking Application': 'Share your event details and speaking needs.',
+  'LIFELINE Guest Application': 'Tell Amanda about your story and proposed interview.',
+  'Partnership Application': 'Share your organization and partnership idea.',
   Book: 'Thank you for choosing to book with Amanda. Continue below.',
   'Foundry Mentorship': 'Thank you for your interest in Foundry Mentorship. Details are below.',
   'Update Hub': 'Thank you for visiting the Update Hub. Recent activity and next steps are below.',
@@ -29,12 +40,15 @@ export function getThankYouNote(appName: string): string {
 
 export default function AppHeaderNote({ appName }: { appName?: string }) {
   const pathname = usePathname() || '';
+  const searchParams = useSearchParams();
   const segments = pathname.split('/').filter(Boolean);
   const slug = segments.at(-1) ?? '';
+  const applicationName = slug === 'apply' ? APPLICATION_NAMES[searchParams.get('form') || ''] : undefined;
   if (!appName && ['classes', 'waitlist', 'enroll'].includes(slug)) return null;
 
   const resolvedName =
     appName ??
+    applicationName ??
     ROUTE_NAMES[slug] ??
     slug.replace(/[-_]+/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase()) ??
     'Amanda Catherine';

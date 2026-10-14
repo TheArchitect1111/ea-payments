@@ -21,7 +21,7 @@ export default async function Page({ params }: { params: Promise<{ courseSlug: s
         {!['strategy-call', '90-day-package'].includes(course.key) && <h1 className="font-serif text-4xl">{course.title}</h1>}
         {course.description && <p className="mt-4">{course.description}</p>}
         <section id="waitlist" className="mt-8">
-          <AmandaWaitlistForm courseId={course.key} courseName={course.title} status={course.status} />
+          <AmandaWaitlistForm courseId={course.key} courseName={course.title} status={course.status} squareCheckoutUrl={course.square_checkout_url} />
         </section>
       </section>
     </main>
