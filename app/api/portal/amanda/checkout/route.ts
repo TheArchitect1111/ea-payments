@@ -9,6 +9,7 @@ import { getStripe } from '@/lib/stripe';
 import { listAmandaPayments } from '@/lib/amanda-catherine/payment-fulfillment';
 import { roleAtLeast, normalizeRole } from '@/lib/rbac';
 import { getClientByEmail, getClientByPortalSlug } from '@/lib/airtable';
+import { isAmandaOwnerEmail } from '@/lib/amanda-catherine/client-access';
 import { registerAmandaCheckout } from '@/lib/amanda-catherine/payments';
 
 export const dynamic = 'force-dynamic';
@@ -79,7 +80,7 @@ export async function POST(req: NextRequest) {
   // Check before charging CAD $1 so access provisioning cannot discover a missing owner.
   if (isTest) {
     const existingOwner = await getClientByEmail(clientEmail);
-    if (!existingOwner || existingOwner.portalSlug !== tenant.portalSlug) {
+    if (!isAmandaOwnerEmail(clientEmail) && (!existingOwner || existingOwner.portalSlug !== tenant.portalSlug)) {
       return NextResponse.json({ error: 'Owner portal identity must already exist before a private test charge.' }, { status: 409 });
     }
   }
