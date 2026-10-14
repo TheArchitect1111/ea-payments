@@ -40,15 +40,15 @@ export default async function AmandaEnrollmentSuccess({
         <li>Start Module 1 and open the available workbooks, protocols, and course resources.</li>
         <li>Visit Support if you need assistance or community guidance.</li></ol>
       <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-        <Link className="ep-btn" href="/portal/amanda-catherine/learning">Access My Class Now</Link>
-        <Link className="ep-btn ep-btn-secondary" href="/portal/amanda-catherine/learning">View Materials</Link>
-        <Link className="ep-btn ep-btn-secondary" href={'/api/portal/amanda/receipt?provider=square&ref='+encodeURIComponent(reference)}>Download Receipt PDF</Link>
-        <Link className="ep-btn ep-btn-secondary" href="/portal/amanda-catherine/support">Get Support</Link>
+        <Link data-cta-name="Access My Class Now" data-cta-key="access-my-class-now" className="ep-btn" href="/portal/amanda-catherine/learning">Access My Class Now</Link>
+        <Link data-cta-name="View Materials" data-cta-key="view-materials" className="ep-btn ep-btn-secondary" href="/portal/amanda-catherine/learning">View Materials</Link>
+        <Link data-cta-name="Download Receipt PDF" data-cta-key="download-receipt-pdf" className="ep-btn ep-btn-secondary" href={'/api/portal/amanda/receipt?provider=square&ref='+encodeURIComponent(reference)}>Download Receipt PDF</Link>
+        <Link data-cta-name="Get Support" data-cta-key="get-support" className="ep-btn ep-btn-secondary" href="/portal/amanda-catherine/support">Get Support</Link>
       </div>
     </section> : <section className="ep-module-card">
       <h2>Enrollment information is not ready yet</h2>
       <p>For privacy, enrollment details appear here only after payment verification and sign-in with the purchaser's email.</p>
-      <Link href="/portal/amanda-catherine/learning">Open My Learning</Link>
+      <Link data-cta-name="Open My Learning" data-cta-key="open-my-learning" href="/portal/amanda-catherine/learning">Open My Learning</Link>
     </section>}
   </PortalSubpage>;
 }
