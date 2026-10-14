@@ -119,10 +119,10 @@ export default function AmandaPayments({ email }: { email: string }) {
         <h3>Your next steps</h3>
         <ol><li>Open Learning and select your enrolled class.</li><li>Start Module 1 and explore the available workbooks, protocols, and resources.</li><li>Visit Support if you need assistance.</li></ol>
         <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-          <a className="ep-btn" href="/portal/amanda-catherine/learning">Access My Class Now</a>
-          <a className="ep-btn ep-btn-secondary" href="/portal/amanda-catherine/learning">View Materials</a>
-          {verifiedPayment ? <a className="ep-btn ep-btn-secondary" href={`/api/portal/amanda/receipt?sessionId=${encodeURIComponent(verifiedPayment.stripeSessionId)}`} download>Download Receipt PDF</a> : null}
-          <a className="ep-btn ep-btn-secondary" href="/portal/amanda-catherine/support">Support &amp; Help</a>
+          <a data-cta-name="Access My Class Now" data-cta-key="access-my-class-now" className="ep-btn" href="/portal/amanda-catherine/learning">Access My Class Now</a>
+          <a data-cta-name="View Materials" data-cta-key="view-materials" className="ep-btn ep-btn-secondary" href="/portal/amanda-catherine/learning">View Materials</a>
+          {verifiedPayment ? <a data-cta-name="Download Receipt PDF" data-cta-key="download-receipt-pdf" className="ep-btn ep-btn-secondary" href={`/api/portal/amanda/receipt?sessionId=${encodeURIComponent(verifiedPayment.stripeSessionId)}`} download>Download Receipt PDF</a> : null}
+          <a data-cta-name="Support and Help" data-cta-key="support-and-help" className="ep-btn ep-btn-secondary" href="/portal/amanda-catherine/support">Support &amp; Help</a>
         </div>
         <p className="ep-module-card-title">Payment verified with Stripe</p><p className="ep-module-card-note">The payment is recorded and course access has been provisioned.</p>{verifiedPayment?.courseId ? <a data-cta-name="Preview the client learning dashboard" data-cta-key="preview-the-client-learning-dashboard" className="ep-btn" style={{ marginTop: 12 }} href={`/portal/amanda-catherine/owner/learner-preview?courseId=${encodeURIComponent(verifiedPayment.courseId)}`}>Preview the client learning dashboard</a> : null}{verifiedPayment?.isTestAccess && verifiedPayment.trackingRegistrationId ? <a data-cta-name="Verify isolated tracking event" data-cta-key="verify-isolated-tracking-event" className="ep-btn ep-btn-secondary" style={{ marginTop: 12, marginLeft: 8 }} href={`/api/portal/amanda/tracking-test?registration_id=${encodeURIComponent(verifiedPayment.trackingRegistrationId)}`} target="_blank" rel="noopener noreferrer">Verify isolated tracking event</a> : null}</div> : null}
       {error ? <p className="ep-module-card-note" style={{ color: '#b42318' }}>{error}</p> : null}
