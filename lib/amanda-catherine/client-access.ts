@@ -43,6 +43,7 @@ const AmandaAccessProfileSchema = z.object({
     expiresAt: z.string().nullable(),
     stripeSessionId: z.string().optional(),
     status: z.enum(['active','expired']).optional(),
+    expiryNotifiedAt: z.string().optional(),
   })).optional(),
   updatedAt: z.string().min(1),
 });
