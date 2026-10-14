@@ -237,6 +237,14 @@ export async function middleware(request: NextRequest) {
 
 
 
+  // The synthetic Amanda catalog contains only hard-coded public test constants.
+  // Never bypass a real dashboard request or any production environment.
+  if (process.env.VERCEL_ENV === 'preview' &&
+      pathname === '/portal/amanda-catherine/learning' &&
+      request.nextUrl.searchParams.get('mode') === 'preview-synthetic') {
+    return NextResponse.next();
+  }
+
   if (pathname.startsWith('/portal')) {
     if (isPublicPortalAuthPath(pathname) || isPublicPortalExperiencePath(pathname)) {
       const requestHeaders = new Headers(request.headers);
