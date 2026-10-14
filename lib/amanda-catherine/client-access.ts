@@ -281,31 +281,75 @@ export async function expireAmandaTestEntitlements(now = new Date()) {
     if (!parsed.success || parsed.data.portalSlug !== portalSlug) continue;
     scanned += 1;
     const email = parsed.data.email;
-    // Re-load before write so a recent full-price upgrade is never clobbered.
+    // Re-read before every write so a recent full-price upgrade wins.
     const fresh = AmandaAccessProfileSchema.safeParse(
       await loadStudioRecord<unknown>('experience', accessProfileId(portalSlug, email)),
     );
     if (!fresh.success) continue;
     const entitlements = { ...(fresh.data.entitlements ?? {}) };
+    const notifyCourses: string[] = [];
     let changed = false;
     for (const [courseId, grant] of Object.entries(entitlements)) {
-      if (grant.isTestAccess && grant.status !== 'expired' &&
-          amandaTrialExpired(grant, now.getTime())) {
+      if (!grant.isTestAccess || !amandaTrialExpired(grant, now.getTime())) continue;
+      if (grant.status !== 'expired') {
         entitlements[courseId] = { ...grant, status: 'expired' };
         changed = true;
         expired += 1;
       }
+      if (!grant.expiryNotifiedAt) notifyCourses.push(courseId);
     }
-    if (!changed) continue;
-    const saved = await saveStudioRecord({
-      recordType: 'experience',
-      id: accessProfileId(portalSlug, email),
-      organizationId: orgId,
-      title: `Amanda client access: ${email}`,
-      payload: { ...fresh.data, entitlements, updatedAt: now.toISOString() },
-    });
-    if (!saved.ok || (process.env.VERCEL_ENV === 'production' && !saved.persistedToAirtable)) {
-      errors.push(`Could not durably update an expired entitlement for ${email}`);
+    if (!changed && notifyCourses.length === 0) continue;
+    if (changed) {
+      const saved = await saveStudioRecord({
+        recordType: 'experience',
+        id: accessProfileId(portalSlug, email),
+        organizationId: orgId,
+        title: 'Amanda client access: ' + email,
+        payload: { ...fresh.data, entitlements, updatedAt: now.toISOString() },
+      });
+      if (!saved.ok || (process.env.VERCEL_ENV === 'production' && !saved.persistedToAirtable)) {
+        errors.push('Could not durably expire test entitlement for ' + email);
+        continue;
+      }
+    }
+    if (!notifyCourses.length) continue;
+    try {
+      const signInUrl = canonicalPlatformOrigin() + '/portal/login?next=%2Fportal%2Famanda-catherine%2Flearning';
+      const sent = await sendAuthEmail({
+        to: email,
+        subject: 'Your Amanda Catherine preview has ended — ready to enroll fully?',
+        title: 'Your 3-day preview has ended',
+        brandLabel: 'Amanda Catherine · AesthetiKine',
+        brandColor: '#596b5b',
+        bodyHtml: '<p>Your private three-day course preview has ended.</p>' +
+          '<p>Courses: ' + notifyCourses.map(escapeHtml).join(', ') + '</p>' +
+          '<p>Thank you for exploring AesthetiKine Academy. You may continue with a full enrollment whenever you are ready.</p>' +
+          '<p><a href="' + signInUrl + '">Sign in and explore your next steps</a></p>' +
+          '<p>Contact Amanda via your portal Support section if you need help.</p>',
+        text: 'Your private three-day preview has ended. Ready to fully enroll? Open ' + signInUrl,
+      });
+      if (!sent.ok) {
+        errors.push('Could not email expiry notice for ' + email);
+        continue;
+      }
+      for (const courseId of notifyCourses) {
+        const grant = entitlements[courseId];
+        if (grant?.isTestAccess && grant.status === 'expired') {
+          entitlements[courseId] = { ...grant, expiryNotifiedAt: now.toISOString() };
+        }
+      }
+      const noticeSaved = await saveStudioRecord({
+        recordType: 'experience',
+        id: accessProfileId(portalSlug, email),
+        organizationId: orgId,
+        title: 'Amanda client access: ' + email,
+        payload: { ...fresh.data, entitlements, updatedAt: now.toISOString() },
+      });
+      if (!noticeSaved.ok || (process.env.VERCEL_ENV === 'production' && !noticeSaved.persistedToAirtable)) {
+        errors.push('Could not save expiry notice state for ' + email);
+      }
+    } catch {
+      errors.push('Expiry notification error for ' + email);
     }
   }
   return { scanned, expired, errors, ok: errors.length === 0 };
