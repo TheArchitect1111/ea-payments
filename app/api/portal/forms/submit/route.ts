@@ -10,6 +10,7 @@ import { AMANDA_PORTAL_FORMS } from '@/lib/amanda-catherine/config';
 import { checkRateLimit } from '@/lib/ai/rate-limit';
 import { amandaApplicationRoute } from '@/lib/amanda-catherine/application-routing';
 import { publishPlatformActivityEvent } from '@/lib/activity-events-store';
+import { sendAuthEmail } from '@/lib/ea-auth-email';
 
 export const dynamic = 'force-dynamic';
 
@@ -169,8 +170,37 @@ export async function POST(req: NextRequest) {
 
   await notifyPortal(pulseEvent);
 
+  let amandaClientEmailSent = false;
+  let amandaOwnerLeadSent = false;
   if (slug === 'amanda-catherine' && kind === 'application') {
     const destination = amandaApplicationRoute(payload?.formId, payload?.program);
+    const esc = (value: string) => value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const firstName = name.trim().split(/\s+/)[0] || 'there';
+    const formName = typeof payload?.formId === 'string' ? payload.formId.replaceAll('-', ' ') : 'application';
+    const warmBody = `<p>Welcome to Amanda Catherine’s community.</p><p>Hi ${esc(firstName)},</p><p>Thank you for submitting your ${esc(formName)}. Amanda’s team will review your information and follow up by email with next steps.</p><p>Warmly,<br>Amanda Catherine</p>`;
+    const clientLetter = await sendAuthEmail({
+      to: email,
+      subject: 'Thank you for reaching out to Amanda Catherine',
+      title: 'Thank you for reaching out',
+      bodyHtml: warmBody,
+      text: `Hi ${firstName}, thank you for reaching out to Amanda Catherine. Amanda’s team will review your information and follow up by email with next steps. Warmly, Amanda Catherine.`,
+      brandLabel: 'Amanda Catherine · AesthetiKine',
+    });
+    amandaClientEmailSent = clientLetter.ok;
+    if (!clientLetter.ok) console.error('[portal-forms] Amanda client confirmation failed', clientLetter.error);
+
+    const ownerBody = `<p>New Amanda application received.</p><p><strong>Form:</strong> ${esc(destination.queueLabel)}</p><p><strong>Name:</strong> ${esc(name)}</p><p><strong>Email:</strong> ${esc(email)}</p><p><strong>Phone:</strong> ${esc(body.phone || '')}</p><p><strong>Notes:</strong> ${esc(body.notes || '')}</p><p>Open the Amanda application queue to review and follow up.</p>`;
+    const ownerLetter = await sendAuthEmail({
+      to: 'Amanda@aesthetikine.com',
+      subject: `New Amanda application: ${destination.queueLabel}`,
+      title: 'New application received',
+      bodyHtml: ownerBody,
+      text: `New Amanda application: ${destination.queueLabel}\nName: ${name}\nEmail: ${email}\nPhone: ${body.phone || ''}\nNotes: ${body.notes || ''}`,
+      brandLabel: 'Amanda Catherine · AesthetiKine',
+    });
+    amandaOwnerLeadSent = ownerLetter.ok;
+    if (!ownerLetter.ok) console.error('[portal-forms] Amanda owner lead notification failed', ownerLetter.error);
+
     await publishPlatformActivityEvent({ organizationId: 'amanda-catherine', module: 'applications', eventType: 'application_submitted', title: `Amanda application submitted · ${destination.queueLabel}`, summary: 'New application received', priority: 70, actionLabel: `Open ${destination.queueLabel} queue`, actionUrl: destination.queueHref, metadata: { submissionId: submission.id, formId: typeof payload?.formId === 'string' ? payload.formId : '', program: typeof payload?.program === 'string' ? payload.program : '', status: submission.status } });
   }
 
@@ -181,6 +211,7 @@ export async function POST(req: NextRequest) {
     ok: true,
     submission,
     confirmation: route ? { title: route.confirmation, nextStep: route.reviewStep } : undefined,
+    email_delivery: route ? { client: amandaClientEmailSent, owner: amandaOwnerLeadSent } : undefined,
     storage: route ? 'durable' : undefined,
   });
 }
