@@ -2,8 +2,11 @@ import { clickTest } from './clickTest';
 import type { Brick } from './BrickInterface';
 import { authAdapter } from './adapters/auth.adapter';
 import { lmsAdapter } from './adapters/lms.adapter';
-import { billingAdapter } from './adapters/billing.adapter';
-import { catalogAdapter } from './adapters/catalog.adapter';
+import { createBillingAdapter } from './adapters/billing.adapter';
+import { amandaPrices } from '../clients/amanda/offers';
+import { readFile } from 'node:fs/promises';
+import { createCatalogAdapter } from './adapters/catalog.adapter';
+import { auditLiveAmandaCatalog } from '../clients/amanda/catalog';
 import { menuAdapter } from './adapters/menu.adapter';
 import { checkoutAdapter } from './adapters/checkout.adapter';
 import { welcomeAdapter } from './adapters/welcome.adapter';
@@ -15,6 +18,14 @@ import { previewAdapter } from './adapters/preview.adapter';
 import { productionGateAdapter } from './adapters/production-gate.adapter';
 import { chassisCertAdapter } from './adapters/chassis-cert.adapter';
 
+const billingAdapter=createBillingAdapter({price:()=>amandaPrices.price('strategy-call'),health:async()=>{
+ const data=await readFile('app/api/webhooks/square-amanda/route.ts','utf8');
+ const expected=Math.round(amandaPrices.price('strategy-call').amountCad*100);
+ const match=data.match(/name:'Strategy Mentorship Call',class_id:'strategy-call',expected_amount:(\\d+)/);
+ const actual=match?Number(match[1]):null;
+ return {status:actual===expected?200:503,evidence:`Square strategy amount ${actual}; client contract ${expected}`};
+}});
+const catalogAdapter=createCatalogAdapter(auditLiveAmandaCatalog);
 export const registeredBricks: Brick[] = [authAdapter, lmsAdapter, billingAdapter, catalogAdapter, menuAdapter, checkoutAdapter, welcomeAdapter, emailAdapter, entitlementAdapter, janeAdapter, amazonAdapter, previewAdapter, productionGateAdapter, chassisCertAdapter];
 const result = await clickTest(registeredBricks, 'test', 'stripe-test');
 console.log(JSON.stringify(result,null,2));
