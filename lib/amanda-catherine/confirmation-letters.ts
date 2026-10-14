@@ -20,12 +20,29 @@ function toLetter(row: Row): AmandaConfirmationLetter {
   };
 }
 
+const PREVIEW_WARM_LETTERS: Record<AmandaConfirmationType, AmandaConfirmationLetter> = {
+  live: {
+    type: 'live',
+    subject: "You're registered for {{class_name}}",
+    body_html: '<p>Welcome to Amanda Catherine’s community.</p><p>Hi {{first_name}},</p><p>Thank you for registering for <strong>{{class_name}}</strong>. Your next step is to watch for a follow-up from Amanda’s team with the details for your program.</p><p>Warmly,<br>Amanda Catherine</p>',
+    editable: false,
+  },
+  waitlist: {
+    type: 'waitlist',
+    subject: "You're on the waitlist for {{class_name}}",
+    body_html: '<p>Welcome to Amanda Catherine’s community.</p><p>Hi {{first_name}},</p><p>Thank you for joining the waitlist for <strong>{{class_name}}</strong>. Amanda’s team will contact you when enrollment information is available. We look forward to sharing the next steps with you.</p><p>Warmly,<br>Amanda Catherine</p>',
+    editable: false,
+  },
+};
+
 export async function listAmandaConfirmationLetters() {
+  if (process.env.VERCEL_ENV === 'preview') return [PREVIEW_WARM_LETTERS.live, PREVIEW_WARM_LETTERS.waitlist];
   const records = await rows('confirmation_letters', "OR({type}='live',{type}='waitlist')");
   return records.map(toLetter);
 }
 
 export async function getAmandaConfirmationLetter(type: AmandaConfirmationType) {
+  if (process.env.VERCEL_ENV === 'preview') return PREVIEW_WARM_LETTERS[type];
   const records = await rows('confirmation_letters', `{type}='${type}'`);
   if (records[0]) return toLetter(records[0]);
   return type === 'live'
