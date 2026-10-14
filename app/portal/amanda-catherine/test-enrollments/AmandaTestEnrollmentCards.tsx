@@ -37,7 +37,7 @@ export default function AmandaTestEnrollmentCards({courses}:{courses:Course[]}) 
      <h2>{course.name}</h2>
      <p>Full price: CAD ${course.priceCad.toLocaleString('en-CA')}</p>
      <p>Private test: CAD $1.00 · access expires after 72 hours</p>
-     <button type="button" className="ep-btn" disabled={Boolean(busy)||testName.trim().length<2} onClick={()=>void checkout(course)}>
+     <button data-cta-name={"Private test "+course.name} data-cta-key={"private-test-"+course.id} type="button" className="ep-btn" disabled={Boolean(busy)||testName.trim().length<2} onClick={()=>void checkout(course)}>
        {busy===course.id?'Opening secure checkout…':'CAD $1 Test — No auto-charge'}
      </button>
    </article>)}
