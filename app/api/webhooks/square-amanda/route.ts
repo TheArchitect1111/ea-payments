@@ -17,7 +17,6 @@ const DIRECT_SQUARE_PRODUCTS=[
   {name:'Wood Therapy Training & 7 Piece Set',class_id:'wood-therapy',expected_amount:99700},
   {name:'Glute Sculpt & Build Certification',class_id:'non-surgical-bbl',expected_amount:149700},
   {name:'Clinical Fat Loss Injectables: Face & Body Contouring Certification',class_id:'clinical-fat-loss',expected_amount:149700},
-  {name:'Authentic Columbian 7 Piece Wood Therapy Kit',class_id:'starter-kit',expected_amount:49900},
   {name:'Strategy Mentorship Call',class_id:'strategy-call',expected_amount:24900},
 ] as const;
 async function resolveDirectSquareOrder(orderId:string,payment:any):Promise<SquareOrder|null>{
