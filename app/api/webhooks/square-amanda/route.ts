@@ -6,6 +6,7 @@ import { registerBrickEvent } from '@/lib/services/brickRegistrar';
 import { getAmandaConfirmationLetter } from '@/lib/amanda-catherine/confirmation-letters';
 import { provisionAmandaClientAccess } from '@/lib/amanda-catherine/client-access';
 import { sendAuthEmail } from '@/lib/ea-auth-email';
+import { sendAmandaPremiumReceiptEmail } from '@/lib/amanda-catherine/premium-receipt-email';
 import { airtableCreate, airtableQuery, airtableUpdate, escapeAirtableString } from '@/lib/data/airtable-client';
 
 export const dynamic='force-dynamic';
@@ -160,12 +161,19 @@ export async function POST(req:NextRequest){
         '<p><a href="'+learningUrl+'">Access learning</a></p>'+
         (receiptUrl?'<p><a href="'+safe(receiptUrl)+'">View Square receipt</a></p>':'')+
         '<p>Need help? Open Support in the Amanda Catherine portal.</p>';
-      const sent=await sendAuthEmail({
+      const sent=await sendAmandaPremiumReceiptEmail({
         to:order.email,subject:"You're in — Your "+(order.class_name||order.class_id)+" is Ready ✨",
-        title:'Amanda Catherine enrollment confirmed',
-        brandLabel:'Amanda Catherine · AesthetiKine',brandColor:'#596b5b',
-        bodyHtml:premiumHtml,
+        html:premiumHtml,
         text:'Thank you. Your '+(order.class_name||order.class_id)+' payment is confirmed, CAD '+amount+'. Reference: '+paymentId+'. Access learning: '+learningUrl,
+        idempotencyKey:'amanda-square-welcome-'+paymentId,
+        receipt:{
+          customer:order.name||order.email,
+          program:order.class_name||order.class_id,
+          amountCad:Number(payment.amount_money?.amount||order.expected_amount)/100,
+          provider:'Square',reference:paymentId,
+          paidAt:String(payment.updated_at||new Date().toISOString()),
+          isTest:false,
+        },
       });
       if(!sent.ok)throw new Error(sent.error||'Amanda letter delivery failed');
       next={...next,confirmation_sent:true};
