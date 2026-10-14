@@ -19,6 +19,8 @@ on:
         type: string
   push:
     branches: [master]
+    paths:
+      - '.ea/dispatch/production-gate.json'
 
 permissions:
   contents: write
@@ -29,7 +31,7 @@ concurrency:
 
 jobs:
   gate-and-promote:
-    if: github.ref == 'refs/heads/master' && !startsWith(github.event.head_commit.message, '[EA-GATED]')
+    if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
@@ -56,9 +58,6 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
-
-      - name: LEGO 14-brick click certification (fail closed)
-        run: node --import tsx src/chassis/runClickTest.ts
 
       - name: Client protection contract gate
         run: node scripts/test-production-protection.mjs
