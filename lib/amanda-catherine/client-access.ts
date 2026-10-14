@@ -167,6 +167,7 @@ export async function provisionAmandaClientAccess(input: {
 
   let created = false;
   if (!record) {
+    if (input.isTestAccess) return { ok: false as const, error: 'Private test access requires an existing Amanda owner portal record.' };
     const result = await createOrUpdateClientRecord({
       clientName: name,
       organization: 'Amanda Catherine',
@@ -188,6 +189,7 @@ export async function provisionAmandaClientAccess(input: {
 
   let tempPassword = record.tempPassword || '';
   const needsCredentials = !belongsToAnotherPortal && (!record.portalSlug || (!record.passwordChanged && !record.tempPassword));
+  if (input.isTestAccess && needsCredentials) return { ok: false as const, error: 'Owner portal credentials must already be active before a private test.' };
   if (needsCredentials) {
     tempPassword = temporaryPassword();
     const credentials = await setPortalCredentials(record.id, AMANDA_PORTAL_SLUG, tempPassword, email);
@@ -195,13 +197,15 @@ export async function provisionAmandaClientAccess(input: {
     created = true;
   }
 
-  const { orgId } = await ensureOrganizationForPortal({
-    portalSlug: AMANDA_PORTAL_SLUG,
-    name: 'Amanda Catherine',
-    organizationName: 'Amanda Catherine',
-  });
-  if (!orgId.startsWith('org_') && !(await findMembership(email, orgId))) {
-    await createMembership({ userEmail: email, organizationId: orgId, role: 'guest' });
+  if (!input.isTestAccess) {
+    const { orgId } = await ensureOrganizationForPortal({
+      portalSlug: AMANDA_PORTAL_SLUG,
+      name: 'Amanda Catherine',
+      organizationName: 'Amanda Catherine',
+    });
+    if (!orgId.startsWith('org_') && !(await findMembership(email, orgId))) {
+      await createMembership({ userEmail: email, organizationId: orgId, role: 'guest' });
+    }
   }
 
   const existingStoredProfile = await loadStudioRecord<unknown>('experience', accessProfileId(AMANDA_PORTAL_SLUG, email));
@@ -240,7 +244,7 @@ export async function provisionAmandaClientAccess(input: {
   }
 
   let welcomeSent = false;
-  if ((created || accessChanged) && (tempPassword || belongsToAnotherPortal)) {
+  if (!input.isTestAccess && (created || accessChanged) && (tempPassword || belongsToAnotherPortal)) {
     const welcome = await sendAmandaWelcome({
       email,
       name,
