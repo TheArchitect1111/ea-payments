@@ -36,8 +36,7 @@ export function CreateOffers({email: _email}:{email:string}) {
     <article className="ac-update-card" id="lifeline-live">
       <p className="ac-eyebrow">Watch · Share your story · Partner</p><h3>LIFELINE LIVE</h3>
       <p>Conversations with artists, entrepreneurs, authors, ministry leaders and community builders, connecting meaningful stories with creative opportunity.</p>
-      <h4>Latest episodes</h4><p>Explore the newest conversations on Empower Art Collective’s YouTube channel, or begin with the episode Amanda selected.</p>
-      <div className="ac-update-links"><External href="https://youtube.com/@empowerartcollective/videos">Watch the latest episodes</External><External href="https://youtu.be/CrMLhxbpjK0">Watch Amanda’s selected episode</External><External href="https://drive.google.com/file/d/1uDv2n2-2QUqNmb_KSyO8nKCSg51Q8Dcv/view">Guest application</External><External href="/amanda-catherine/lifeline-partnership-kit.pdf">Partnership & sponsorship kit</External></div>
+      <div className="ac-update-links"><External href="https://drive.google.com/file/d/1uDv2n2-2QUqNmb_KSyO8nKCSg51Q8Dcv/view">Guest application</External><External href="/amanda-catherine/lifeline-partnership-kit.pdf">Partnership & sponsorship kit</External></div>
       <h4>Participate</h4><p>Apply to share your story. For partnerships, sponsorships or an interview inquiry, tell Amanda about your work, audience and proposed collaboration.</p>
       <div className="ac-actions"><a data-cta-name="Book a LIFELINE interview" data-cta-key="book-a-lifeline-interview" className="ac-btn" href="/portal/amanda-catherine/apply?form=lifeline-media-guest">Book a LIFELINE interview</a><a data-cta-name="Explore a partnership" data-cta-key="explore-a-partnership" className="ac-btn" href="/portal/amanda-catherine/apply?form=partner-vendor-application&amp;program=lifeline">Explore a partnership</a></div>
     </article>
@@ -68,5 +67,5 @@ export function ClientProof() {
 }
 
 export function SocialLinks() {
-  return <div className="ac-wrap ac-update-social"><p className="ac-eyebrow">Stay connected</p><div className="ac-update-links"><External href="https://www.instagram.com/amandacatherinec/">Amanda Catherine Instagram</External><External href="https://www.instagram.com/aesthetikine/">AesthetiKine Instagram</External><External href="https://www.instagram.com/lifelinetour/">LIFELINE Instagram</External><External href="https://youtube.com/@empowerartcollective">Empower Art Collective YouTube</External></div></div>;
+  return <div className="ac-wrap ac-update-social"><p className="ac-eyebrow">Stay connected</p><div className="ac-update-links"><External href="https://www.instagram.com/amandacatherinec/">Amanda Catherine Instagram</External><External href="https://www.instagram.com/aesthetikine/">AesthetiKine Instagram</External><External href="https://www.instagram.com/lifelinetour/">LIFELINE Instagram</External></div></div>;
 }
