@@ -24,6 +24,7 @@ const required = ['sourceCommit', 'previewUrl', 'status', 'completedAt', 'gates'
 for (const key of required) {
   if (!manifest[key]) fail(`manifest missing ${key}`);
 }
+if (manifest.productionEligible === false || manifest.verificationType === 'CONTRACT ONLY') fail('staging contract evidence cannot promote production');
 if (manifest.status !== 'PASS') fail(`manifest status is ${manifest.status}`);
 
 const requiredGates = ['sourceIdentity','build','assets','functional','desktopVisual','mobileVisual','creativeCritic'];

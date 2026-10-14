@@ -11,3 +11,5 @@ export const clientConfig: ClientConfig = {
   }),
   janeUrl: tarrisJaneConfig.janeUrl,
 };
+
+export const tarrisConfig = clientConfig;

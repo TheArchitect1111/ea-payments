@@ -1,3 +1,4 @@
+import { createStagingAdapters } from './adapters/staging.adapter';
 import { clickTest } from './clickTest';
 import type { Brick, BrickHealth } from './BrickInterface';
 import type { CatalogSource } from './adapters/catalog.adapter';
@@ -23,7 +24,7 @@ export interface ClientConfig {
   janeUrl: string;
   janeApiKey?: string;
 }
-export async function runClickTest(clientConfig: ClientConfig) {
+export async function runClickTest(clientConfig: ClientConfig, mode: 'live' | 'contract' = 'live') {
   if (!clientConfig.id || !/^[a-z0-9-]+$/.test(clientConfig.id)) throw Error('Valid client ID required');
   const courseId = Object.keys(clientConfig.prices)[0];
   if (!courseId || !Number.isSafeInteger(clientConfig.prices[courseId]) ||
@@ -35,21 +36,36 @@ export async function runClickTest(clientConfig: ClientConfig) {
     createJaneAdapter(clientConfig), amazonAdapter, previewAdapter,
     productionGateAdapter, chassisCertAdapter,
   ];
-  const result = await clickTest(bricks, courseId, 'stripe-test');
-  return { ...result, clientId: clientConfig.id };
+  const checkedBricks = mode === 'contract' ? await createStagingAdapters(clientConfig, bricks) : bricks;
+  const result = await clickTest(checkedBricks, courseId, 'stripe-test');
+  return { ...result, clientId: clientConfig.id, verificationType: mode === 'contract' ? 'CONTRACT ONLY' : 'live', productionEligible: mode === 'live' && result.passed };
 }
 
 /** CLI: npx tsx src/chassis/runClickTest.ts --client=<client-id> */
-const clientArg = process.argv.find(arg => arg.startsWith('--client='));
-if (!clientArg) {
-  console.error('Client config required: --client=<client-id>');
-  process.exitCode = 1;
-} else {
+async function main() {
+  const clientArg = process.argv.find(arg => arg.startsWith('--client='));
+  if (!clientArg) {
+    console.error('Client config required: --client=<client-id>');
+    process.exitCode = 1;
+    return;
+  }
   const clientId = clientArg.slice('--client='.length);
   if (!/^[a-z0-9-]+$/.test(clientId)) throw Error('Invalid client identifier');
   const configModule = await import('../clients/' + clientId + '/chassis.config');
-  const result = await runClickTest(configModule.clientConfig as ClientConfig);
+  const modeArg = process.argv.find(arg => arg.startsWith('--mode='))?.slice('--mode='.length) || 'live';
+  if (modeArg !== 'live' && modeArg !== 'contract') throw Error('Mode must be live or contract');
+  const result = await runClickTest(configModule.clientConfig as ClientConfig, modeArg);
   console.log(JSON.stringify(result, null, 2));
-  if (result.passed) console.log('14/14 CLICK PASS: ' + clientId);
+  if (result.passed) console.log('14/14 CLICK PASS: ' + clientId + ' — ' + result.verificationType + (result.productionEligible ? '' : ' — NOT LIVE; production blocked'));
   else process.exitCode = 1;
+}
+
+const directlyExecuted = typeof require !== 'undefined' && typeof module !== 'undefined'
+  ? require.main === module
+  : /(?:^|[\\/])runClickTest\.(?:ts|js|mts|mjs)$/.test(process.argv[1] || '');
+if (directlyExecuted) {
+  main().catch(error => {
+    console.error('Runner error', error);
+    process.exitCode = 1;
+  });
 }
