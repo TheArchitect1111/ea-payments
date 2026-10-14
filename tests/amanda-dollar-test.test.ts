@@ -177,6 +177,12 @@ test('Amanda verified $1 fulfillment, replay, 72-hour denial, no-write preview, 
   assert.equal(db.records.size, 0);
   const created = Math.floor(Date.now()/1000);
   const email = 'qa-amanda-certification@example.invalid';
+  // An owner-only CAD $1 test starts with an existing authenticated portal identity.
+  // The test must never create or update an ordinary Client Records entry.
+  db.clients.clear();
+  db.clients.set(email, { id: 'rec-amanda-owner-test', email, portalSlug: 'amanda-catherine',
+    tempPassword: 'existing-test-only', passwordChanged: true });
+  const clientsBefore = structuredClone([...db.clients.entries()]);
   const session = {
     id: 'cs_test_amanda_ci_mock_0001',
     created,
@@ -193,6 +199,7 @@ test('Amanda verified $1 fulfillment, replay, 72-hour denial, no-write preview, 
   };
   const first = await app.fulfillAmandaCheckout(session as any, 'webhook');
   assert.equal(first.ok, true, JSON.stringify(first));
+  assert.deepEqual([...db.clients.entries()], clientsBefore, 'Private tests must not mutate ordinary client records');
   const paidAt = new Date(created*1000).toISOString();
   const expires = new Date((created+72*3600)*1000).toISOString();
   assert.equal(first.record.isTestAccess, true);
