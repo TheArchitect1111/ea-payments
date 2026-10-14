@@ -58,7 +58,25 @@ jobs:
         run: npm ci
 
       - name: LEGO 14-brick runtime click gate
-        run: node --import tsx src/chassis/runClickTest.ts
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/ea-gate
+          node --import tsx src/chassis/runClickTest.ts | tee artifacts/ea-gate/chassis-click.json
+          node - <<'NODE'
+          const fs = require('node:fs');
+          const p = JSON.parse(fs.readFileSync('artifacts/ea-gate/chassis-click.json', 'utf8'));
+          if (p.passed !== true || p.click !== '14/14' || !Array.isArray(p.results) || p.results.length !== 14 || p.results.some(r => r.click !== true || !r.evidence)) {
+            console.error('BLOCKED: real chassis click certification incomplete', p);
+            process.exit(1);
+          }
+          console.log('14/14 CLICK PASS verified from executable JSON results');
+          NODE
+          if grep -r -n -E 'aesthetikine|249' src/chassis --include='*.ts'; then
+            echo 'BLOCKED: client value leaked into chassis'
+            exit 1
+          fi
+          echo 'Generic chassis literal leak check PASS'
 
       - name: Client protection contract gate
         run: node scripts/test-production-protection.mjs
@@ -113,16 +131,44 @@ jobs:
             exit 1
           }
 
-      - name: Create manifest-only production promotion commit
+      - name: Create evidence-backed production manifest and promote
         shell: bash
         run: |
+          set -euo pipefail
           mkdir -p .ea/gates
-          cp artifacts/ea-gate/gate-result.json .ea/gates/latest.json
-          test "$(node -p "require('./.ea/gates/latest.json').status")" = "PASS"
+          node - <<'NODE'
+          const fs = require('node:fs');
+          const click = JSON.parse(fs.readFileSync('artifacts/ea-gate/chassis-click.json','utf8'));
+          const preview = JSON.parse(fs.readFileSync('artifacts/ea-gate/gate-result.json','utf8'));
+          const sha = process.env.GITHUB_SHA;
+          if (click.passed !== true || click.click !== '14/14' || click.results.length !== 14 || click.results.some(r => r.click !== true)) {
+            throw Error('Refusing manifest promotion: 14/14 bricks not verified');
+          }
+          if (preview.status !== 'PASS' || preview.sourceCommit !== sha) {
+            throw Error('Refusing manifest promotion: preview gate PASS and current-source identity required');
+          }
+          const record = {
+            ...preview,
+            sha,
+            sourceCommit: sha,
+            timestamp: new Date().toISOString(),
+            bricks: 14,
+            click: '14/14 PASS',
+            health: '14/14 200',
+            generic: true,
+            clientLeak: 0,
+            evidence: Object.fromEntries(click.results.map(({id,evidence}) => [id,evidence])),
+            verificationType: 'operational-click-test; provider delivery only where evidenced',
+            chassis: click
+          };
+          fs.writeFileSync('.ea/gates/latest.json',JSON.stringify(record,null,2)+'\n');
+          console.log(JSON.stringify({sha,click:record.click,preview:preview.status},null,2));
+          NODE
+          test "$(node -p "require('./.ea/gates/latest.json').sha")" = "$GITHUB_SHA"
           git config user.name "EA Production Gate"
           git config user.email "ea-production-gate@users.noreply.github.com"
           git add .ea/gates/latest.json
           git diff --cached --name-only | grep -qx '.ea/gates/latest.json'
           test "$(git diff --cached --name-only | wc -l | tr -d ' ')" = "1"
-          git commit -m "[EA-GATED] Promote verified ${GITHUB_SHA} to production"
+          git commit -m "[EA-GATED] Promote chassis proof for ${GITHUB_SHA}"
           git push origin HEAD:master
