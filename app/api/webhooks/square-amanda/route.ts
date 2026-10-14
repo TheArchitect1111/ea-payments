@@ -10,7 +10,7 @@ import { airtableCreate, airtableQuery, airtableUpdate, escapeAirtableString } f
 
 export const dynamic='force-dynamic';
 type SquareOrder={email:string;name?:string;phone?:string;class_name?:string;class_id:string;registration_id:string;order_id:string;
-  expected_amount:number;payment_status:string;payment_reference?:string;confirmation_sent?:boolean;owner_notification_sent?:boolean;
+  expected_amount:number;payment_status:string;payment_reference?:string;confirmation_sent?:boolean;
   is_test:false;created_at:string};
 const DIRECT_SQUARE_PRODUCTS: Array<{name:string;class_id:string;course_id?:string;expected_amount:number}> = [
   {name:'Body Sculpt Certification',class_id:'body-sculpt-certification',course_id:'body-sculpt-practitioner-certification',expected_amount:249700},
@@ -150,82 +150,7 @@ export async function POST(req:NextRequest){
       const firstName=(order.name||order.email).split(' ')[0];
       const body=letter.body_html.replace(/{{first_name}}/g,safe(firstName))
         .replace(/{{class_name}}/g,safe(order.class_name||order.class_id));
-      const learningUrl='https://amandacatherine.ca/portal/amanda-catherine/learning';
-      const receipts = typeof payment.receipt_url==='string' && /^https:\/\//.test(payment.receipt_url)
-        ? '<p><a href="'+safe(payment.receipt_url)+'">View your official Square receipt</a></p>' : '';
-      const premiumHtml=body+'<h3>Welcome — You\u0027re In! ✨</h3>'+
-        '<p><strong>Amount paid:</strong> CAD 
-        title:'Welcome to AesthetiKine Academy',bodyHtml:premiumHtml,
-        brandLabel:'Amanda Catherine · AesthetiKine',brandColor:'#596b5b',
-        text:'Your registration for '+(order.class_name||order.class_id)+' is confirmed. Payment reference: '+paymentId});
-      if(!sent.ok)throw new Error(sent.error||'Amanda letter delivery failed');
-      next={...next,confirmation_sent:true};
-    }
-    if(!order.owner_notification_sent){
-      const notice=await sendAuthEmail({
-        to:'amandacatherinec@gmail.com',
-        subject:'New paid enrollment — '+(order.class_name||order.class_id),
-        title:'AesthetiKine enrollment received',
-        brandLabel:'Amanda Catherine · AesthetiKine',brandColor:'#596b5b',
-        bodyHtml:'<p>A verified Square enrollment was completed for '+safe(order.class_name||order.class_id)+
-          '.</p><p>Client: '+safe(order.name||order.email)+' ('+safe(order.email)+
-          ')</p><p>Payment: CAD 
-      payload:next});
-    if(!saved.ok || !saved.persistedToAirtable)throw new Error(saved.error||'Square confirmation state not saved');
-    return NextResponse.json({ok:true,updated:true,payment_reference:paymentId});
-  }catch(error){
-    console.error('[Amanda Square webhook]',error);
-    // Return non-2xx so Square can retry a temporary storage or email failure.
-    return NextResponse.json({ok:false,error:'Square payment tracking deferred'},{status:503});
-  }
-}
-+(Number(payment.amount_money?.amount||order.expected_amount)/100).toFixed(2)+
-        '<br/><strong>Payment reference:</strong> '+safe(paymentId)+'</p>'+
-        '<ol><li>Sign in using your email code.</li><li>Go to Learning and choose '+safe(order.class_name||order.class_id)+'.</li>'+
-        '<li>Start Module 1 and open the available workbooks, protocols, and resources.</li></ol>'+
-        '<p><a href="'+learningUrl+'">Access your course</a></p>'+receipts+
-        '<p>For help, open Support inside the Amanda Catherine portal.</p>';
-      const sent=await sendAuthEmail({to:order.email,subject:"You're in — Your "+(order.class_name||order.class_id)+" is Ready ✨",
-        title:'Amanda Catherine registration confirmation',bodyHtml:body,
-        text:'Your registration for '+(order.class_name||order.class_id)+' is confirmed. Payment reference: '+paymentId});
-      if(!sent.ok)throw new Error(sent.error||'Amanda letter delivery failed');
-      next={...next,confirmation_sent:true};
-    }
-    const saved=await saveStudioRecord({recordType:'experience',id,
-      organizationId:syntheticOrgId('amanda-catherine'),title:'Amanda Square verified payment',
-      payload:next});
-    if(!saved.ok || !saved.persistedToAirtable)throw new Error(saved.error||'Square confirmation state not saved');
-    return NextResponse.json({ok:true,updated:true,payment_reference:paymentId});
-  }catch(error){
-    console.error('[Amanda Square webhook]',error);
-    // Return non-2xx so Square can retry a temporary storage or email failure.
-    return NextResponse.json({ok:false,error:'Square payment tracking deferred'},{status:503});
-  }
-}
-+(Number(payment.amount_money?.amount||order.expected_amount)/100).toFixed(2)+
-          '<br/>Square reference: '+safe(paymentId)+'</p><p>Review your Amanda owner portal for follow-up.</p>',
-      });
-      if(!notice.ok)throw new Error(notice.error||'Amanda owner lead notification failed');
-      next={...next,owner_notification_sent:true};
-    }
-    const saved=await saveStudioRecord({recordType:'experience',id,
-      organizationId:syntheticOrgId('amanda-catherine'),title:'Amanda Square verified payment',
-      payload:next});
-    if(!saved.ok || !saved.persistedToAirtable)throw new Error(saved.error||'Square confirmation state not saved');
-    return NextResponse.json({ok:true,updated:true,payment_reference:paymentId});
-  }catch(error){
-    console.error('[Amanda Square webhook]',error);
-    // Return non-2xx so Square can retry a temporary storage or email failure.
-    return NextResponse.json({ok:false,error:'Square payment tracking deferred'},{status:503});
-  }
-}
-+(Number(payment.amount_money?.amount||order.expected_amount)/100).toFixed(2)+
-        '<br/><strong>Payment reference:</strong> '+safe(paymentId)+'</p>'+
-        '<ol><li>Sign in using your email code.</li><li>Go to Learning and choose '+safe(order.class_name||order.class_id)+'.</li>'+
-        '<li>Start Module 1 and open the available workbooks, protocols, and resources.</li></ol>'+
-        '<p><a href="'+learningUrl+'">Access your course</a></p>'+receipts+
-        '<p>For help, open Support inside the Amanda Catherine portal.</p>';
-      const sent=await sendAuthEmail({to:order.email,subject:"You're in — Your "+(order.class_name||order.class_id)+" is Ready ✨",
+      const sent=await sendAuthEmail({to:order.email,subject:letter.subject.replace(/{{class_name}}/g,order.class_name||order.class_id),
         title:'Amanda Catherine registration confirmation',bodyHtml:body,
         text:'Your registration for '+(order.class_name||order.class_id)+' is confirmed. Payment reference: '+paymentId});
       if(!sent.ok)throw new Error(sent.error||'Amanda letter delivery failed');
