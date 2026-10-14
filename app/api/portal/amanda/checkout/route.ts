@@ -16,6 +16,7 @@ export const dynamic = 'force-dynamic';
 
 function depositEnvKey(offerId: string) { return `AMANDA_DEPOSIT_${offerId.replaceAll('-', '_').toUpperCase()}_CAD`; }
 async function canUseTestCheckout(role: string | undefined, portalSlug: string, sessionEmail: string) {
+  if (portalSlug === 'amanda-catherine' && isAmandaOwnerEmail(sessionEmail)) return true;
   if (roleAtLeast(normalizeRole(role), 'admin')) return true;
   const client = await getClientByPortalSlug(portalSlug);
   const ownerEmail = String(client?.email || '').trim().toLowerCase();
