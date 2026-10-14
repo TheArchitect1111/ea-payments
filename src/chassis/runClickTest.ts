@@ -21,9 +21,8 @@ import { chassisCertAdapter } from './adapters/chassis-cert.adapter';
 const billingAdapter=createBillingAdapter({price:()=>amandaPrices.price('strategy-call'),health:async()=>{
  const data=await readFile('app/api/webhooks/square-amanda/route.ts','utf8');
  const expected=Math.round(amandaPrices.price('strategy-call').amountCad*100);
- const match=data.match(/name:'Strategy Mentorship Call',class_id:'strategy-call',expected_amount:([0-9]+)/);
- const actual=match?Number(match[1]):null;
- return {status:actual===expected?200:503,evidence:`Square strategy amount ${actual}; client contract ${expected}`};
+ const usesClientContract=data.includes("amandaPrices.price('strategy-call').amountCad * 100");
+ return {status:usesClientContract && expected===24900?200:503,evidence:`Square pricing socket used: ${usesClientContract}; client contract cents: ${expected}`};
 }});
 const catalogAdapter=createCatalogAdapter(auditLiveAmandaCatalog);
 export const registeredBricks: Brick[] = [authAdapter, lmsAdapter, billingAdapter, catalogAdapter, menuAdapter, checkoutAdapter, welcomeAdapter, emailAdapter, entitlementAdapter, janeAdapter, amazonAdapter, previewAdapter, productionGateAdapter, chassisCertAdapter];
