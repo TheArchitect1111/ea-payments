@@ -7,10 +7,12 @@ export default function AmandaWaitlistForm({
   courseId,
   courseName,
   status = 'WAITLIST',
+  squareCheckoutUrl = null,
 }: {
   courseId: string;
   courseName: string;
   status?: string;
+  squareCheckoutUrl?: string | null;
 }) {
   const id = useId();
   const [statusMessage, setStatusMessage] = useState('');
@@ -130,13 +132,20 @@ export default function AmandaWaitlistForm({
           maxLength={2000}
         />
       </label>
-      <button
-        className="w-full rounded-xl bg-[#17211c] px-5 py-3 font-medium text-white shadow-sm transition hover:bg-[#27372d] focus:outline-none focus:ring-2 focus:ring-amber-500/40 disabled:cursor-wait disabled:opacity-60"
-        disabled={busy}
-        type="submit"
-      >
-        {busy ? 'Submitting…' : status.toUpperCase() === 'LIVE' ? 'Enroll Now' : 'Join Waitlist'}
-      </button>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <button
+          className="w-full rounded-xl bg-[#17211c] px-5 py-3 font-medium text-white shadow-sm transition hover:bg-[#27372d] focus:outline-none focus:ring-2 focus:ring-amber-500/40 disabled:cursor-wait disabled:opacity-60"
+          disabled={busy}
+          type="submit"
+        >
+          {busy ? 'Submitting…' : status.toUpperCase() === 'LIVE' ? 'Enroll Now' : 'Join Waitlist'}
+        </button>
+        {squareCheckoutUrl ? <a href={squareCheckoutUrl} target="_blank" rel="noopener noreferrer"
+          data-cta-name="Buy Now" data-cta-key={`buy-now-${courseId}`} data-course-key={courseId}
+          className="flex w-full items-center justify-center rounded-xl border border-[#17211c] bg-white px-5 py-3 font-medium text-[#17211c] shadow-sm transition hover:bg-[#f4f0e8] focus:outline-none focus:ring-2 focus:ring-amber-500/40">
+          Buy Now
+        </a> : null}
+      </div>
       <p className="min-h-5 text-sm text-[#7a3128]" role="status" aria-live="polite">{statusMessage}</p>
     </form>
   );
