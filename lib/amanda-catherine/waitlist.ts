@@ -1,5 +1,6 @@
 import { sendGmailEmail } from '@/lib/email/gmail';
 import { sendAuthEmail } from '@/lib/ea-auth-email';
+import { getAmandaConfirmationLetter } from './confirmation-letters';
 import { airtableConfigured, airtableUpsertByField, airtableUpdate } from '@/lib/data/airtable-client';
 
 export type AmandaWaitlistData = {
@@ -12,6 +13,29 @@ export type AmandaWaitlistData = {
   course_url: string;
   registration_type: 'live' | 'waitlist';
 };
+
+function safeEmailHtml(value: string) {
+  return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+export async function sendAmandaWaitlistConfirmation(data: AmandaWaitlistData) {
+  const letter = await getAmandaConfirmationLetter(data.registration_type);
+  const firstName = data.student_name.trim().split(/\s+/)[0] || 'there';
+  const bodyHtml = letter.body_html
+    .replace(/{{first_name}}/g, safeEmailHtml(firstName))
+    .replace(/{{class_name}}/g, safeEmailHtml(data.course_name));
+  const subject = letter.subject.replace(/{{class_name}}/g, data.course_name);
+  const sent = await sendAuthEmail({
+    to: data.student_email,
+    subject,
+    title: subject,
+    bodyHtml,
+    text: `Hi ${firstName}, thank you for your interest in ${data.course_name}. Amanda’s team will share the next steps with you. Warmly, Amanda Catherine.`,
+    brandLabel: 'Amanda Catherine · AesthetiKine',
+  });
+  if (!sent.ok) throw new Error(sent.error || 'Waitlist confirmation email failed');
+  return 'resend';
+}
 
 // Adapted from the supplied Amanda Waitlist Email Templates PDF; no invented admin URL.
 export async function notifyAmandaWaitlist(data: AmandaWaitlistData) {
