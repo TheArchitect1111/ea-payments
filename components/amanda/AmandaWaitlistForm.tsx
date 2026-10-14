@@ -2,6 +2,7 @@
 
 import { useId, useState, type FormEvent } from 'react';
 import ConfirmationLetter, { type ConfirmationLetterData } from './ConfirmationLetter';
+import AmandaWarmLetter from './AmandaWarmLetter';
 
 export default function AmandaWaitlistForm({
   courseId,
@@ -68,7 +69,7 @@ export default function AmandaWaitlistForm({
   }
   if (confirmation) {
     return <div>
-      <ConfirmationLetter letter={confirmation} firstName={confirmation.first_name} className={courseName} />
+      <ConfirmationLetter letter={confirmation} firstName={confirmation.first_name} className={courseName} includeWelcome />
       {confirmation.type==='live' ? <button type="button" onClick={()=>void beginSquareCheckout()}
         disabled={paymentBusy} className="mt-6 w-full rounded-xl bg-[#17211c] px-5 py-3 text-white">
         {paymentBusy?'Opening secure payment…':'Continue to secure Square payment'}
@@ -78,6 +79,8 @@ export default function AmandaWaitlistForm({
   }
 
   return (
+    <>
+    <AmandaWarmLetter compact />
     <form onSubmit={submit} aria-busy={busy} className="grid gap-4">
       <label className="grid gap-2 text-sm font-medium text-[#17211c]" htmlFor={`${id}-name`}>
         <span>Name</span>
@@ -148,5 +151,6 @@ export default function AmandaWaitlistForm({
       </div>
       <p className="min-h-5 text-sm text-[#7a3128]" role="status" aria-live="polite">{statusMessage}</p>
     </form>
+    </>
   );
 }
