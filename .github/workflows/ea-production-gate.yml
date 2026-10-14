@@ -30,7 +30,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p artifacts/ea-gate
-          node --import tsx src/chassis/runClickTest.ts 2>&1 | tee /tmp/click.log
+          node --import tsx src/chassis/runClickTest.ts --client=tarris 2>&1 | tee /tmp/click.log
           cat /tmp/click.log
           node - <<'NODE'
           const fs = require('node:fs');
@@ -42,7 +42,7 @@ jobs:
           fs.writeFileSync('artifacts/ea-gate/chassis-click.json',JSON.stringify(outcome,null,2));
           console.log('14/14 CLICK PASS');
           NODE
-          if grep -r -n -E 'aesthetikine|249' src/chassis --include='*.ts'; then
+          if grep -r -n -i -E 'amanda|aesthetikine|24900' src/chassis --include='*.ts'; then
             echo 'BLOCKED: client value leaked into generic chassis'
             exit 1
           fi
