@@ -1,17 +1,17 @@
 {
-  "sourceCommit": "73b2b5929794afddc92094e3b77f63b6e5f80fc5",
+  "sourceCommit": "6ad016b68b3840c051939aeb86c2d66894183b77",
   "previewUrl": "https://ea-payments-git-master-the-architects-projects-cc813778.vercel.app/",
   "target": "https://ea-payments-git-master-the-architects-projects-cc813778.vercel.app/amanda-catherine",
-  "completedAt": "2026-10-14T18:17:34.035Z",
+  "completedAt": "2026-10-14T19:50:24.273Z",
   "status": "PASS",
   "gates": {
     "sourceIdentity": {
       "status": "PASS",
-      "proof": "preview:73b2b5929794afddc92094e3b77f63b6e5f80fc5"
+      "proof": "preview:6ad016b68b3840c051939aeb86c2d66894183b77"
     },
     "build": {
       "status": "PASS",
-      "proof": "source:73b2b5929794afddc92094e3b77f63b6e5f80fc5"
+      "proof": "source:6ad016b68b3840c051939aeb86c2d66894183b77"
     },
     "assets": {
       "status": "PASS",
@@ -37,7 +37,7 @@
   "details": {
     "certificationTransport": "exact-built-checkout-local",
     "buildInfo": {
-      "commitSha": "73b2b5929794afddc92094e3b77f63b6e5f80fc5",
+      "commitSha": "6ad016b68b3840c051939aeb86c2d66894183b77",
       "branch": "master",
       "environment": "preview"
     },
@@ -78,8 +78,8 @@
         {
           "status": 200,
           "method": "GET",
-          "resourceType": "image",
-          "url": "http://127.0.0.1:3000/amanda-catherine/studio-interior.jpg"
+          "resourceType": "stylesheet",
+          "url": "http://127.0.0.1:3000/_next/static/chunks/408fjgk5ymye-.css"
         },
         {
           "status": 200,
@@ -91,13 +91,13 @@
           "status": 200,
           "method": "GET",
           "resourceType": "image",
-          "url": "http://127.0.0.1:3000/amanda-catherine/jane-payments.webp"
+          "url": "http://127.0.0.1:3000/amanda-catherine/studio-interior.jpg"
         },
         {
           "status": 200,
           "method": "GET",
-          "resourceType": "stylesheet",
-          "url": "http://127.0.0.1:3000/_next/static/chunks/408fjgk5ymye-.css"
+          "resourceType": "image",
+          "url": "http://127.0.0.1:3000/amanda-catherine/jane-payments.webp"
         },
         {
           "status": 200,
@@ -139,13 +139,25 @@
           "status": 200,
           "method": "GET",
           "resourceType": "script",
+          "url": "http://127.0.0.1:3000/_next/static/chunks/0jy0gk7ijla1q.js"
+        },
+        {
+          "status": 200,
+          "method": "GET",
+          "resourceType": "script",
           "url": "http://127.0.0.1:3000/_next/static/chunks/1gdpaddb8g4_s.js"
         },
         {
           "status": 200,
           "method": "GET",
           "resourceType": "script",
-          "url": "http://127.0.0.1:3000/_next/static/chunks/0jy0gk7ijla1q.js"
+          "url": "http://127.0.0.1:3000/_next/static/chunks/turbopack-38d6n8vbt9lql.js"
+        },
+        {
+          "status": 200,
+          "method": "GET",
+          "resourceType": "script",
+          "url": "http://127.0.0.1:3000/_next/static/chunks/24sqlcvu8e0xs.js"
         },
         {
           "status": 200,
@@ -163,19 +175,7 @@
           "status": 200,
           "method": "GET",
           "resourceType": "script",
-          "url": "http://127.0.0.1:3000/_next/static/chunks/turbopack-00mg6ovs_l2bo.js"
-        },
-        {
-          "status": 200,
-          "method": "GET",
-          "resourceType": "script",
-          "url": "http://127.0.0.1:3000/_next/static/chunks/0prwexttzb-d-.js"
-        },
-        {
-          "status": 200,
-          "method": "GET",
-          "resourceType": "script",
-          "url": "http://127.0.0.1:3000/_next/static/chunks/24sqlcvu8e0xs.js"
+          "url": "http://127.0.0.1:3000/_next/static/chunks/1l6ekrbzzn47p.js"
         },
         {
           "status": 200,
@@ -187,13 +187,13 @@
           "status": 200,
           "method": "GET",
           "resourceType": "script",
-          "url": "http://127.0.0.1:3000/_next/static/chunks/1l6ekrbzzn47p.js"
+          "url": "http://127.0.0.1:3000/_next/static/chunks/0prwexttzb-d-.js"
         },
         {
           "status": 200,
           "method": "GET",
           "resourceType": "script",
-          "url": "http://127.0.0.1:3000/_next/static/chunks/3ywe72oc6w117.js"
+          "url": "http://127.0.0.1:3000/_next/static/chunks/0fjvi8bfv29ek.js"
         },
         {
           "status": 200,
@@ -271,12 +271,6 @@
           "status": 200,
           "method": "GET",
           "resourceType": "stylesheet",
-          "url": "http://127.0.0.1:3000/_next/static/chunks/0mnxhjd7fpu65.css"
-        },
-        {
-          "status": 200,
-          "method": "GET",
-          "resourceType": "stylesheet",
           "url": "http://127.0.0.1:3000/_next/static/chunks/2hltbts7fh1jv.css"
         },
         {
@@ -290,6 +284,12 @@
           "method": "GET",
           "resourceType": "image",
           "url": "http://127.0.0.1:3000/amanda-catherine/studio-interior.jpg"
+        },
+        {
+          "status": 200,
+          "method": "GET",
+          "resourceType": "stylesheet",
+          "url": "http://127.0.0.1:3000/_next/static/chunks/0mnxhjd7fpu65.css"
         },
         {
           "status": 200,
@@ -331,13 +331,13 @@
           "status": 200,
           "method": "GET",
           "resourceType": "script",
-          "url": "http://127.0.0.1:3000/_next/static/chunks/3zm3ydnfgi4ln.js"
+          "url": "http://127.0.0.1:3000/_next/static/chunks/1gdpaddb8g4_s.js"
         },
         {
           "status": 200,
           "method": "GET",
           "resourceType": "script",
-          "url": "http://127.0.0.1:3000/_next/static/chunks/1gdpaddb8g4_s.js"
+          "url": "http://127.0.0.1:3000/_next/static/chunks/3zm3ydnfgi4ln.js"
         },
         {
           "status": 200,
@@ -355,7 +355,7 @@
           "status": 200,
           "method": "GET",
           "resourceType": "script",
-          "url": "http://127.0.0.1:3000/_next/static/chunks/24sqlcvu8e0xs.js"
+          "url": "http://127.0.0.1:3000/_next/static/chunks/turbopack-38d6n8vbt9lql.js"
         },
         {
           "status": 200,
@@ -367,13 +367,7 @@
           "status": 200,
           "method": "GET",
           "resourceType": "script",
-          "url": "http://127.0.0.1:3000/_next/static/chunks/1l6ekrbzzn47p.js"
-        },
-        {
-          "status": 200,
-          "method": "GET",
-          "resourceType": "script",
-          "url": "http://127.0.0.1:3000/_next/static/chunks/turbopack-00mg6ovs_l2bo.js"
+          "url": "http://127.0.0.1:3000/_next/static/chunks/24sqlcvu8e0xs.js"
         },
         {
           "status": 200,
@@ -385,13 +379,19 @@
           "status": 200,
           "method": "GET",
           "resourceType": "script",
+          "url": "http://127.0.0.1:3000/_next/static/chunks/1l6ekrbzzn47p.js"
+        },
+        {
+          "status": 200,
+          "method": "GET",
+          "resourceType": "script",
           "url": "http://127.0.0.1:3000/_next/static/chunks/43p3sfq-1v-k1.js"
         },
         {
           "status": 200,
           "method": "GET",
           "resourceType": "script",
-          "url": "http://127.0.0.1:3000/_next/static/chunks/3ywe72oc6w117.js"
+          "url": "http://127.0.0.1:3000/_next/static/chunks/0fjvi8bfv29ek.js"
         },
         {
           "status": 200,
