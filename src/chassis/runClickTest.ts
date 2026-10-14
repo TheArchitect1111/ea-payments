@@ -1,8 +1,21 @@
 import { clickTest } from './clickTest';
 import type { Brick } from './BrickInterface';
+import { authAdapter } from './adapters/auth.adapter';
+import { lmsAdapter } from './adapters/lms.adapter';
+import { billingAdapter } from './adapters/billing.adapter';
+import { catalogAdapter } from './adapters/catalog.adapter';
+import { menuAdapter } from './adapters/menu.adapter';
+import { checkoutAdapter } from './adapters/checkout.adapter';
+import { welcomeAdapter } from './adapters/welcome.adapter';
+import { emailAdapter } from './adapters/email.adapter';
+import { entitlementAdapter } from './adapters/entitlement.adapter';
+import { janeAdapter } from './adapters/jane.adapter';
+import { amazonAdapter } from './adapters/amazon.adapter';
+import { previewAdapter } from './adapters/preview.adapter';
+import { productionGateAdapter } from './adapters/production-gate.adapter';
+import { chassisCertAdapter } from './adapters/chassis-cert.adapter';
 
-/** The chassis must explicitly register adapters. An empty registry is NOT success. */
-const registeredBricks: Brick[] = [];
+export const registeredBricks: Brick[] = [authAdapter, lmsAdapter, billingAdapter, catalogAdapter, menuAdapter, checkoutAdapter, welcomeAdapter, emailAdapter, entitlementAdapter, janeAdapter, amazonAdapter, previewAdapter, productionGateAdapter, chassisCertAdapter];
 const result = await clickTest(registeredBricks, 'test', 'stripe-test');
-console.log(JSON.stringify({ ...result, evidence: 'Not certified until 14 real adapters are registered and exercised' }, null, 2));
-if (!result.passed) process.exitCode = 1;
+console.log(JSON.stringify(result,null,2));
+if(!result.passed) process.exitCode=1;
