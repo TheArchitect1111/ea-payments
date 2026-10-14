@@ -2753,7 +2753,7 @@
         "app/portal/[slug]/people/page.tsx",
         "app/portal/[slug]/people/PeopleDirectory.tsx"
       ],
-      "sourceFingerprint": "c6bdd5667c5e54dbbf2740eee5171dda0f9a81ae9c91e3a8e82c9943f57c74be",
+      "sourceFingerprint": "f293e0ff6c476502d1d19919c24362ef69a46261aae63e934df3b9ff5541f31e",
       "evidenceFingerprint": "6771adeb2e9215db996a2fa645649556043a2bcd60e6d5f928b081dfd58db5c7",
       "evidence": {
         "route-render": {
