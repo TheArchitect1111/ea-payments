@@ -97,13 +97,15 @@ jobs:
           NODE
           test "$(node -p "require('./.ea/gates/latest.json').sha")" = "$GITHUB_SHA"
           cat .ea/gates/latest.json
-      - name: Commit gated manifest
+      - name: Create manifest-only production promotion commit
         shell: bash
         run: |
           set -euo pipefail
           git config user.name "EA Production Gate"
           git config user.email "ea-production-gate@users.noreply.github.com"
           git add .ea/gates/latest.json
+          CHANGED=$(git diff --cached --name-only)
+          test -z "$CHANGED" || test "$CHANGED" = ".ea/gates/latest.json" || { echo "BLOCKED: promotion contains non-manifest changes"; exit 1; }
           git diff --cached --quiet && { echo 'Manifest unchanged'; exit 0; }
           git commit -m "[EA-GATED] LEGO certified source $GITHUB_SHA"
           git push origin HEAD:master
