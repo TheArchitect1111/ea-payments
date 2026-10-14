@@ -1,3 +1,4 @@
+import { amandaPrices } from '@/src/clients/amanda/offers';
 import { createHash, createHmac, timingSafeEqual } from 'node:crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { loadStudioRecord, saveStudioRecord } from '@/lib/creative-studio/persistence';
@@ -19,7 +20,7 @@ const DIRECT_SQUARE_PRODUCTS: Array<{name:string;class_id:string;course_id?:stri
   {name:'Wood Therapy Training & 7 Piece Set',class_id:'wood-therapy',course_id:'wood-therapy-certification',expected_amount:99700},
   {name:'Glute Sculpt & Build Certification',class_id:'non-surgical-bbl',course_id:'non-surgical-bbl-training',expected_amount:149700},
   {name:'Clinical Fat Loss Injectables: Face & Body Contouring Certification',class_id:'clinical-fat-loss',course_id:'clinical-fat-loss-injectables',expected_amount:149700},
-  {name:'Strategy Mentorship Call',class_id:'strategy-call',expected_amount:24900},
+  {name:'Strategy Mentorship Call',class_id:'strategy-call',expected_amount:Math.round(amandaPrices.price('strategy-call').amountCad * 100)},
 ];
 async function resolveDirectSquareOrder(orderId:string,payment:any):Promise<SquareOrder|null>{
   const token=process.env.SQUARE_ACCESS_TOKEN?.trim()||'';
