@@ -8,7 +8,7 @@ import { AMANDA_MEMBERSHIPS, AMANDA_OFFERS } from '@/lib/amanda-catherine/config
 import { getStripe } from '@/lib/stripe';
 import { listAmandaPayments } from '@/lib/amanda-catherine/payment-fulfillment';
 import { roleAtLeast, normalizeRole } from '@/lib/rbac';
-import { getClientByPortalSlug } from '@/lib/airtable';
+import { getClientByEmail, getClientByPortalSlug } from '@/lib/airtable';
 import { registerAmandaCheckout } from '@/lib/amanda-catherine/payments';
 
 export const dynamic = 'force-dynamic';
@@ -75,6 +75,14 @@ export async function POST(req: NextRequest) {
   if (isTest && !('courseId' in offer)) return NextResponse.json({ error: 'Private test checkout is for READY courses only.' }, { status: 409 });
   if (isTest && !(await getAmandaHqTools()).testPayment) return NextResponse.json({ error: 'The private $1 test is disabled in HQ.' }, { status: 403 });
   if (isTest && !(await canUseTestCheckout(auth.session.role, tenant.portalSlug, clientEmail))) return NextResponse.json({ error: 'Private test checkout is restricted to Amanda administrators.' }, { status: 403 });
+  // A private owner test must never create a real Client Records entry.
+  // Check before charging CAD $1 so access provisioning cannot discover a missing owner.
+  if (isTest) {
+    const existingOwner = await getClientByEmail(clientEmail);
+    if (!existingOwner || existingOwner.portalSlug !== tenant.portalSlug) {
+      return NextResponse.json({ error: 'Owner portal identity must already exist before a private test charge.' }, { status: 409 });
+    }
+  }
 
   let amountCad: number = isTest ? 1 : offer.priceCad;
   if (body.paymentOption === 'deposit') {
