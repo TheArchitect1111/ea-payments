@@ -21,7 +21,7 @@ export type AmandaPaymentRecord = {
   kind: 'offer' | 'membership'; offerId?: string; courseId?: string; membershipId?: string;
   paymentOption?: 'full' | 'deposit' | 'test'; amountPaidCad: number; currency: string;
   paymentStatus: string; stripeCustomerId?: string; stripeSubscriptionId?: string;
-  subscriptionStatus?: string; customerConfirmationSentAt?: string; adminNotificationSentAt?: string;
+  subscriptionStatus?: string; customerConfirmationSentAt?: string; adminNotificationSentAt?: string; premiumWelcomeSentAt?: string;
   isTestAccess?: boolean; testPaidAt?: string | null; expiresAt?: string | null; trackingLetterSentAt?: string;
   trackingRegistrationId?: string;
   recordedAt: string; updatedAt: string;
@@ -75,6 +75,7 @@ export async function fulfillAmandaCheckout(session: Stripe.Checkout.Session, so
     amountPaidCad: (session.amount_total ?? 0) / 100, currency: String(session.currency || 'cad').toUpperCase(), paymentStatus: session.payment_status,
     stripeCustomerId: stringId(session.customer), stripeSubscriptionId: stringId(session.subscription), subscriptionStatus: membership ? 'active' : undefined,
     customerConfirmationSentAt: existing?.customerConfirmationSentAt, adminNotificationSentAt: existing?.adminNotificationSentAt,
+    premiumWelcomeSentAt: existing?.premiumWelcomeSentAt,
     isTestAccess, trackingRegistrationId:trackingRegistrationId || existing?.trackingRegistrationId,
     testPaidAt: existing?.testPaidAt ?? testPaidAt, expiresAt: existing?.expiresAt ?? expiresAt,
     trackingLetterSentAt: existing?.trackingLetterSentAt,
@@ -111,6 +112,39 @@ export async function fulfillAmandaCheckout(session: Stripe.Checkout.Session, so
     console.error('[amanda-payment] client portal access provisioning failed', access.error);
     await emitPulseEvent({ product: 'ea-platform', type: 'fulfillment.review_required', title: 'Amanda client access needs attention', detail: `${email} · ${access.error}`, priority: 'high', href: `/portal/${portalSlug}/deliveries`, tenantId: portalSlug, objectId: id });
     return { ok: false as const, error: access.error || 'Student access could not be provisioned.', paymentRecorded: true as const };
+  }
+  // Send branded enrollment details after payment and learner access are confirmed.
+  // Only resend on a later webhook retry if the welcome did not complete.
+  if (courseId && !record.premiumWelcomeSentAt) {
+    const escapeHtml = (value: string) => value.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const learningUrl = canonicalPlatformOrigin() + '/portal/amanda-catherine/learning';
+    const expiryNote = isTestAccess && record.expiresAt
+      ? 'Your CAD $1 preview expires on ' + new Date(record.expiresAt).toLocaleString('en-CA') + '. No automatic renewal.'
+      : 'Your full-price access follows your course enrollment terms.';
+    const html = '<p>Thank you for enrolling in <strong>' + escapeHtml(label) + '</strong>.</p>' +
+      '<p><strong>CAD payment:</strong> ' + record.amountPaidCad.toFixed(2) +
+      '<br/><strong>Transaction:</strong> ' + escapeHtml(transactionId) + '</p>' +
+      '<ol><li>Sign in using your email code.</li><li>Choose your class under Learning.</li>' +
+      '<li>Start Module 1 and review the available workbooks, protocols, and resources.</li></ol>' +
+      '<p><a href="' + learningUrl + '">Open the learning portal</a></p><p>' + escapeHtml(expiryNote) + '</p>' +
+      '<p>Need help? Visit Support in your portal.</p>';
+    try {
+      const result = await sendAuthEmail({
+        to: email, subject: 'Your ' + label + (isTestAccess ? ' Preview' : '') + ' is Ready ✨',
+        title: 'Welcome to AesthetiKine Academy',
+        brandLabel: 'Amanda Catherine · AesthetiKine', brandColor: '#596b5b',
+        bodyHtml: html,
+        text: 'Welcome! ' + label + ', CAD ' + record.amountPaidCad.toFixed(2) +
+          '. Reference: ' + transactionId + '. Learning: ' + learningUrl + '. ' + expiryNote,
+      });
+      if (result.ok) {
+        record = { ...record, premiumWelcomeSentAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+        const persisted = await persistPaymentRecord(record, title);
+        if (!persisted.ok) console.error('[amanda-premium-welcome] delivery status persistence failed', persisted.error);
+      } else console.error('[amanda-premium-welcome] email failed', result.error);
+    } catch (error) {
+      console.error('[amanda-premium-welcome] email failed', error);
+    }
   }
   // Amanda's approved confirmation letter is separate from Stripe's receipt.
   if (isTestAccess && courseId && !record.trackingLetterSentAt) {
