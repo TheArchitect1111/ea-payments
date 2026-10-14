@@ -1,4 +1,4 @@
-import { createHmac, timingSafeEqual } from 'node:crypto';
+import { createHash, createHmac, timingSafeEqual } from 'node:crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { loadStudioRecord, saveStudioRecord } from '@/lib/creative-studio/persistence';
 import { syntheticOrgId } from '@/lib/platform-store';
@@ -6,7 +6,6 @@ import { registerBrickEvent } from '@/lib/services/brickRegistrar';
 import { getAmandaConfirmationLetter } from '@/lib/amanda-catherine/confirmation-letters';
 import { sendAuthEmail } from '@/lib/ea-auth-email';
 import { airtableCreate, airtableQuery, airtableUpdate, escapeAirtableString } from '@/lib/data/airtable-client';
-import { createHash } from 'node:crypto';
 
 export const dynamic='force-dynamic';
 type SquareOrder={email:string;name?:string;phone?:string;class_name?:string;class_id:string;registration_id:string;order_id:string;
