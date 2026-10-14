@@ -1,3 +1,4 @@
+import { amandaPrices } from '@/src/clients/amanda/offers';
 import { amandaCourseReady, AMANDA_SUPPORT_WORDING } from './lms-policy';
 export const AMANDA_PORTAL_PACK_ID = 'amanda-catherine';
 
@@ -220,7 +221,7 @@ export const AMANDA_OFFERS = [
   {
     id: 'strategy-call',
     name: 'Strategy Call',
-    priceCad: 250,
+    priceCad: amandaPrices.price('strategy-call').amountCad,
     audience: 'strategy-client',
     durationMinutes: 60,
   },
