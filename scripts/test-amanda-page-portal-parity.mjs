@@ -31,7 +31,9 @@ for (const [label, slug] of ownerDestinations) {
 
 assert.ok(publicPage.includes('href={`/courses/${encodeURIComponent(course.key)}#waitlist`}'), 'public course enrollment route is missing');
 assert.ok(publicPage.includes('/portal/login?next=%2Fportal%2Famanda-catherine%2Flearning'), 'returning-student learning route is missing');
-assert.ok(publicPage.includes('/amanda-catherine/private/practitioner-kit'), 'public practitioner-kit route is missing');
+assert.ok(publicPage.includes('href="/courses/starter-kit#waitlist"'), 'practitioner kit Request Info waitlist route is missing');
+assert.ok(publicPage.includes('Request Info'), 'practitioner kit inquiry CTA is missing');
+assert.ok(!publicPage.includes('/amanda-catherine/private/practitioner-kit'), 'public practitioner-kit checkout must not be linked');
 assert.ok(!publicPage.includes('/portal/amanda-catherine/owner'), 'public visitors must never be routed into the owner portal');
 
 console.log('Amanda page-to-portal parity: PASS');
