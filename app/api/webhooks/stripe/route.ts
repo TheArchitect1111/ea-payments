@@ -1,3 +1,4 @@
+import { TB3_OFFER, fulfillPaidAccess, revokeRefundedAccess } from '@/lib/tb3/paid-access';
 import { fulfillPortableAmandaSession } from '@/lib/portal-universal/bricks/amanda/stripe';
 import { NextRequest } from 'next/server';
 import Stripe from 'stripe';
@@ -170,6 +171,21 @@ export async function POST(req: NextRequest) {
     const msg = err instanceof Error ? err.message : 'Signature verification failed';
     console.error('Webhook signature error:', msg);
     return new Response(`Webhook error: ${msg}`, { status: 400 });
+  }
+
+  if ((event.type === 'checkout.session.completed' || event.type === 'checkout.session.async_payment_succeeded')
+    && (event.data.object as Stripe.Checkout.Session).metadata?.commerceOfferId === TB3_OFFER) {
+    const session = event.data.object as Stripe.Checkout.Session;
+    if (session.payment_status === 'paid') {
+      try { await fulfillPaidAccess(session.id, process.env.TB3_PUBLIC_ORIGIN || 'https://tb3.online'); }
+      catch { return new Response('TB3 fulfillment requires retry.', { status: 503 }); }
+    }
+    return Response.json({ received: true });
+  }
+  if (event.type === 'charge.refunded' && (event.data.object as Stripe.Charge).metadata?.clientId === 'tarris' && (event.data.object as Stripe.Charge).metadata?.commerceOfferId === TB3_OFFER) {
+    try { await revokeRefundedAccess(event.data.object as Stripe.Charge); }
+    catch { return new Response('TB3 refund tracking requires retry.', { status: 503 }); }
+    return Response.json({ received: true });
   }
 
   switch (event.type) {
