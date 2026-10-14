@@ -33,7 +33,7 @@ async function resolveDirectSquareOrder(orderId:string,payment:any):Promise<Squa
   const product=DIRECT_SQUARE_PRODUCTS.find(entry=>entry.name===String(item?.name||''));
   if(!product||item?.base_price_money?.currency!=='CAD'||Number(item?.base_price_money?.amount)!==product.expected_amount)return null;
   const email=String(payment?.buyer_email_address||'').trim().toLowerCase();
-  if(!/^\\S+@\\S+\\.\\S+$/.test(email))return null;
+  if(!/^\S+@\S+\.\S+$/.test(email))return null;
   let customer:any=null;
   const customerId=String(payment?.customer_id||'');
   if(customerId){
