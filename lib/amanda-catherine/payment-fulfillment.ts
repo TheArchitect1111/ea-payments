@@ -2,6 +2,7 @@ import { recordAmandaKitOrder } from './practitioner-kit-orders';
 import {recordAmandaVerifiedPayment} from './payments';
 import { getAmandaConfirmationLetter } from '@/lib/amanda-catherine/confirmation-letters';
 import { sendAuthEmail } from '@/lib/ea-auth-email';
+import { sendAmandaPremiumReceiptEmail } from './premium-receipt-email';
 import { amandaTrialFromStripeSession } from './test-access-rules';
 import { amandaCourseReady } from './lms-policy';
 import { createHash } from 'node:crypto';
@@ -129,13 +130,20 @@ export async function fulfillAmandaCheckout(session: Stripe.Checkout.Session, so
       '<p><a href="' + learningUrl + '">Open the learning portal</a></p><p>' + escapeHtml(expiryNote) + '</p>' +
       '<p>Need help? Visit Support in your portal.</p>';
     try {
-      const result = await sendAuthEmail({
-        to: email, subject: 'Your ' + label + (isTestAccess ? ' Preview' : '') + ' is Ready ✨',
-        title: 'Welcome to AesthetiKine Academy',
-        brandLabel: 'Amanda Catherine · AesthetiKine', brandColor: '#596b5b',
-        bodyHtml: html,
+      const result = await sendAmandaPremiumReceiptEmail({
+        to: email,
+        subject: "You're in — Your " + label + (isTestAccess ? ' Preview' : '') + ' is Ready ✨',
+        html,
         text: 'Welcome! ' + label + ', CAD ' + record.amountPaidCad.toFixed(2) +
           '. Reference: ' + transactionId + '. Learning: ' + learningUrl + '. ' + expiryNote,
+        idempotencyKey: 'amanda-stripe-welcome-' + session.id,
+        receipt: {
+          customer: String(session.customer_details?.name || meta.clientName || email),
+          program: label, amountCad: record.amountPaidCad,
+          provider: 'Stripe', reference: transactionId,
+          paidAt: record.recordedAt,
+          isTest: isTestAccess, expiresAt: record.expiresAt,
+        },
       });
       if (result.ok) {
         record = { ...record, premiumWelcomeSentAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
