@@ -83,6 +83,7 @@ export function escapeAirtableString(value: string): string {
 }
 
 export type AirtableQueryOptions = {
+  strict?: boolean;
   filterByFormula?: string;
   maxRecords?: number;
   sortField?: string;
@@ -111,7 +112,7 @@ export async function airtableQuery(
 
     if (!res.ok) {
       const text = await res.text();
-      if (res.status === 404 || text.includes('INVALID_PERMISSIONS_OR_MODEL_NOT_FOUND')) {
+      if (!options.strict && (res.status === 404 || text.includes('INVALID_PERMISSIONS_OR_MODEL_NOT_FOUND'))) {
         return [];
       }
       throw new Error(`airtableQuery ${table} ${res.status}: ${text}`);
@@ -189,4 +190,16 @@ export async function airtableUpsertByField(
     return airtableUpdate(table, recordId, fields, typecast);
   }
   return airtableCreate(table, fields, typecast);
+}
+
+/** Atomic merge prevents duplicate payment grants on concurrent webhook/return retries. */
+export async function airtableAtomicUpsert(table: string, mergeField: string, fields: Record<string, unknown>): Promise<AirtableRecord> {
+  const response = await airtableFetch(`${BASE_URL}/${AIRTABLE_BASE_ID}/${encodeURIComponent(table)}`, {
+    method: 'PATCH', headers: airtableAuthHeaders(),
+    body: JSON.stringify({ performUpsert: { fieldsToMergeOn: [mergeField] }, records: [{ fields }] }),
+  });
+  if (!response.ok) throw new Error('Airtable entitlement persistence failed: ' + response.status);
+  const data = await response.json() as { records?: AirtableRecord[] };
+  if (!data.records?.[0]) throw new Error('Airtable returned no saved record');
+  return data.records[0];
 }

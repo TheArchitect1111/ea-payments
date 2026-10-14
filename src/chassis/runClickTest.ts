@@ -1,14 +1,14 @@
 import { createStagingAdapters } from './adapters/staging.adapter';
 import { clickTest } from './clickTest';
-import type { Brick, BrickHealth } from './BrickInterface';
+import type { Brick, BrickHealth, CheckoutRequest, CheckoutResult, WelcomeRequest, WelcomeResult } from './BrickInterface';
 import type { CatalogSource } from './adapters/catalog.adapter';
 import { authAdapter } from './adapters/auth.adapter';
 import { lmsAdapter } from './adapters/lms.adapter';
 import { createBillingAdapter } from './adapters/billing.adapter';
 import { createCatalogAdapter } from './adapters/catalog.adapter';
 import { menuAdapter } from './adapters/menu.adapter';
-import { checkoutAdapter } from './adapters/checkout.adapter';
-import { welcomeAdapter } from './adapters/welcome.adapter';
+import { createCheckoutAdapter } from './adapters/checkout.adapter';
+import { createWelcomeAdapter } from './adapters/welcome.adapter';
 import { emailAdapter } from './adapters/email.adapter';
 import { entitlementAdapter } from './adapters/entitlement.adapter';
 import { createJaneAdapter } from './adapters/jane.adapter';
@@ -23,6 +23,11 @@ export interface ClientConfig {
   catalogSource: CatalogSource;
   janeUrl: string;
   janeApiKey?: string;
+  commerce?: {
+    health(): Promise<BrickHealth>;
+    checkout(opts: CheckoutRequest): Promise<CheckoutResult>;
+    welcome(payment: WelcomeRequest): Promise<WelcomeResult>;
+  };
 }
 export async function runClickTest(clientConfig: ClientConfig, mode: 'live' | 'contract' = 'live') {
   if (!clientConfig.id || !/^[a-z0-9-]+$/.test(clientConfig.id)) throw Error('Valid client ID required');
@@ -32,7 +37,7 @@ export async function runClickTest(clientConfig: ClientConfig, mode: 'live' | 'c
   const bricks: Brick[] = [
     authAdapter, lmsAdapter, createBillingAdapter(clientConfig.prices),
     createCatalogAdapter(clientConfig.catalogSource), menuAdapter,
-    checkoutAdapter, welcomeAdapter, emailAdapter, entitlementAdapter,
+    createCheckoutAdapter(clientConfig), createWelcomeAdapter(clientConfig), emailAdapter, entitlementAdapter,
     createJaneAdapter(clientConfig), amazonAdapter, previewAdapter,
     productionGateAdapter, chassisCertAdapter,
   ];
