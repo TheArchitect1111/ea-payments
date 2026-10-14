@@ -105,7 +105,24 @@ export default function AmandaPayments({ email }: { email: string }) {
             style={{display:'block',padding:12,width:'100%',border:'1px solid #777',borderRadius:8,marginTop:8}} />
         </div>
       ) : null}
-      {verified ? <div className="ep-module-card" style={{ marginBottom: 18, border: '1px solid #8aa58f' }}><p className="ep-module-card-title">Payment verified with Stripe</p><p className="ep-module-card-note">The payment is recorded and course access has been provisioned.</p>{verifiedPayment?.courseId ? <a data-cta-name="Preview the client learning dashboard" data-cta-key="preview-the-client-learning-dashboard" className="ep-btn" style={{ marginTop: 12 }} href={`/portal/amanda-catherine/owner/learner-preview?courseId=${encodeURIComponent(verifiedPayment.courseId)}`}>Preview the client learning dashboard</a> : null}{verifiedPayment?.isTestAccess && verifiedPayment.trackingRegistrationId ? <a data-cta-name="Verify isolated tracking event" data-cta-key="verify-isolated-tracking-event" className="ep-btn ep-btn-secondary" style={{ marginTop: 12, marginLeft: 8 }} href={`/api/portal/amanda/tracking-test?registration_id=${encodeURIComponent(verifiedPayment.trackingRegistrationId)}`} target="_blank" rel="noopener noreferrer">Verify isolated tracking event</a> : null}</div> : null}
+      {verified ? <div className="ep-module-card" role="status" style={{ marginBottom: 18, border: '1px solid #8aa58f' }}>
+        <h2>Welcome — You're In! ✨</h2>
+        <p><strong>Step 1 of 3 Complete — Access Granted</strong></p>
+        <p>Your verified enrollment is ready. Follow these steps to begin learning.</p>
+        {verifiedPayment ? <section aria-label="Payment receipt">
+          <h3>Receipt details</h3>
+          <p>Amount paid: CAD ${verifiedPayment.amountPaidCad.toFixed(2)}</p>
+          <p>Stripe reference: {verifiedPayment.stripeSessionId}</p>
+          <p>Paid on: {new Date(verifiedPayment.recordedAt).toLocaleDateString('en-CA')}</p>
+          {verifiedPayment.isTestAccess ? <><p>Private owner test · no automatic renewal.</p><p>Expires: {verifiedPayment.expiresAt ? new Date(verifiedPayment.expiresAt).toLocaleString('en-CA') : '72 hours after verified payment'}</p></> : <p>Full-price access, subject to program terms.</p>}
+        </section> : null}
+        <h3>Your next steps</h3>
+        <ol><li>Open Learning and select your enrolled class.</li><li>Start Module 1 and explore the available workbooks, protocols, and resources.</li><li>Visit Support if you need assistance.</li></ol>
+        <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
+          <a className="ep-btn" href="/portal/amanda-catherine/learning">Access My Class Now</a>
+          <a className="ep-btn ep-btn-secondary" href="/portal/amanda-catherine/support">Support &amp; materials help</a>
+        </div>
+        <p className="ep-module-card-title">Payment verified with Stripe</p><p className="ep-module-card-note">The payment is recorded and course access has been provisioned.</p>{verifiedPayment?.courseId ? <a data-cta-name="Preview the client learning dashboard" data-cta-key="preview-the-client-learning-dashboard" className="ep-btn" style={{ marginTop: 12 }} href={`/portal/amanda-catherine/owner/learner-preview?courseId=${encodeURIComponent(verifiedPayment.courseId)}`}>Preview the client learning dashboard</a> : null}{verifiedPayment?.isTestAccess && verifiedPayment.trackingRegistrationId ? <a data-cta-name="Verify isolated tracking event" data-cta-key="verify-isolated-tracking-event" className="ep-btn ep-btn-secondary" style={{ marginTop: 12, marginLeft: 8 }} href={`/api/portal/amanda/tracking-test?registration_id=${encodeURIComponent(verifiedPayment.trackingRegistrationId)}`} target="_blank" rel="noopener noreferrer">Verify isolated tracking event</a> : null}</div> : null}
       {error ? <p className="ep-module-card-note" style={{ color: '#b42318' }}>{error}</p> : null}
       <p>{AMANDA_SUPPORT_WORDING}</p>
       <KitFulfillmentFields value={kit} onChange={setKit} />
