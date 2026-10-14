@@ -194,7 +194,7 @@ export async function provisionAmandaClientAccess(input: {
   let tempPassword = record?.tempPassword || '';
   const needsCredentials = Boolean(record && !belongsToAnotherPortal && (!record.portalSlug || (!record.passwordChanged && !record.tempPassword)));
   if (input.isTestAccess && needsCredentials) return { ok: false as const, error: 'Owner portal credentials must already be active before a private test.' };
-  if (needsCredentials) {
+  if (needsCredentials && record) {
     tempPassword = temporaryPassword();
     const credentials = await setPortalCredentials(record.id, AMANDA_PORTAL_SLUG, tempPassword, email);
     if (!credentials.ok) return { ok: false as const, error: credentials.error || 'Portal credentials could not be created.' };
