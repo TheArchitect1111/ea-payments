@@ -3,6 +3,13 @@ import { useState } from 'react';
 import { pickupSelection } from '@/app/components/amanda/KitFulfillmentFields';
 
 type Course = { id: string; name: string; priceCad: number };
+const approvedStudioImage: Record<string, string> = {
+  'body-sculpt-practitioner-certification': '/amanda-catherine/studio-treatment.jpg',
+  'aesthetikine-reset-training': '/amanda-catherine/studio-interior.jpg',
+  'wood-therapy-certification': '/amanda-catherine/studio-treatment.jpg',
+  'non-surgical-bbl-training': '/amanda-catherine/studio-interior.jpg',
+  'clinical-fat-loss-injectables': '/amanda-catherine/studio-treatment.jpg',
+};
 export default function AmandaTestEnrollmentCards({courses}:{courses:Course[]}) {
  const [testName,setTestName]=useState('');
  const [busy,setBusy]=useState('');
@@ -24,6 +31,9 @@ export default function AmandaTestEnrollmentCards({courses}:{courses:Course[]}) 
   {error?<p role="alert">{error}</p>:null}
   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(230px,1fr))',gap:18}}>
    {courses.map(course=><article className="ep-module-card" key={course.id}>
+     <img src={approvedStudioImage[course.id] || '/amanda-catherine/studio-interior.jpg'}
+       alt="AesthetiKine Studio training environment" loading="lazy"
+       style={{width:'100%',height:160,objectFit:'cover',borderRadius:8,marginBottom:12}} />
      <h2>{course.name}</h2>
      <p>Full price: CAD ${course.priceCad.toLocaleString('en-CA')}</p>
      <p>Private test: CAD $1.00 · access expires after 72 hours</p>
