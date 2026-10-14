@@ -8,6 +8,7 @@ export type AmandaCourseEntitlement = {
   expiresAt: string | null;
   stripeSessionId?: string;
   status?: 'active' | 'expired';
+  expiryNotifiedAt?: string;
 };
 
 export function amandaTrialFromStripeSession(session: {

@@ -6,12 +6,13 @@ import { registerBrickEvent } from '@/lib/services/brickRegistrar';
 import { getAmandaConfirmationLetter } from '@/lib/amanda-catherine/confirmation-letters';
 import { provisionAmandaClientAccess } from '@/lib/amanda-catherine/client-access';
 import { sendAuthEmail } from '@/lib/ea-auth-email';
+import { sendAmandaPremiumReceiptEmail } from '@/lib/amanda-catherine/premium-receipt-email';
 import { airtableCreate, airtableQuery, airtableUpdate, escapeAirtableString } from '@/lib/data/airtable-client';
 
 export const dynamic='force-dynamic';
 type SquareOrder={email:string;name?:string;phone?:string;class_name?:string;class_id:string;registration_id:string;order_id:string;
-  expected_amount:number;payment_status:string;payment_reference?:string;confirmation_sent?:boolean;
-  is_test:false;created_at:string};
+  expected_amount:number;payment_status:string;payment_reference?:string;confirmation_sent?:boolean;owner_notification_sent?:boolean;
+  is_test:false;created_at:string;receipt_url?:string;paid_amount_cad?:number;paid_at?:string};
 const DIRECT_SQUARE_PRODUCTS: Array<{name:string;class_id:string;course_id?:string;expected_amount:number}> = [
   {name:'Body Sculpt Certification',class_id:'body-sculpt-certification',course_id:'body-sculpt-practitioner-certification',expected_amount:249700},
   {name:'Nervous System Reset Certification',class_id:'nervous-system-reset',course_id:'aesthetikine-reset-training',expected_amount:99700},
@@ -144,17 +145,54 @@ export async function POST(req:NextRequest){
       });
       if(!access.ok)throw new Error(access.error||'Amanda course access could not be assigned');
     }
-    let next:SquareOrder={...order,payment_status:'paid',payment_reference:paymentId};
+    let next:SquareOrder={...order,payment_status:'paid',payment_reference:paymentId,
+      receipt_url:typeof payment.receipt_url==='string' && payment.receipt_url.startsWith('https://') ? payment.receipt_url : undefined,
+      paid_amount_cad:Number(payment.amount_money?.amount||order.expected_amount)/100,
+      paid_at:String(payment.updated_at||new Date().toISOString())};
     if(!order.confirmation_sent){
       const letter=await getAmandaConfirmationLetter('live');
       const firstName=(order.name||order.email).split(' ')[0];
       const body=letter.body_html.replace(/{{first_name}}/g,safe(firstName))
         .replace(/{{class_name}}/g,safe(order.class_name||order.class_id));
-      const sent=await sendAuthEmail({to:order.email,subject:letter.subject.replace(/{{class_name}}/g,order.class_name||order.class_id),
-        title:'Amanda Catherine registration confirmation',bodyHtml:body,
-        text:'Your registration for '+(order.class_name||order.class_id)+' is confirmed. Payment reference: '+paymentId});
+      const learningUrl='https://amandacatherine.ca/portal/amanda-catherine/enrollment-success?provider=square&ref='+encodeURIComponent(paymentId);
+      const receiptUrl=typeof payment.receipt_url==='string' && payment.receipt_url.startsWith('https://') ? payment.receipt_url : '';
+      const amount=(Number(payment.amount_money?.amount || order.expected_amount)/100).toFixed(2);
+      const premiumHtml=body+'<h3>Welcome to AesthetiKine Academy</h3>'+
+        '<p>Paid CAD '+amount+'. Payment reference: '+safe(paymentId)+'</p>'+
+        '<ol><li>Sign in using your email code.</li><li>Open Learning and select '+safe(order.class_name||order.class_id)+'.</li>'+
+        '<li>Start Module 1 and find available workbooks, protocols, and resources in your course.</li></ol>'+
+        '<p><a href="'+learningUrl+'">Access learning</a></p>'+
+        (receiptUrl?'<p><a href="'+safe(receiptUrl)+'">View Square receipt</a></p>':'')+
+        '<p>Need help? Open Support in the Amanda Catherine portal.</p>';
+      const sent=await sendAmandaPremiumReceiptEmail({
+        to:order.email,subject:"You're in — Your "+(order.class_name||order.class_id)+" is Ready ✨",
+        html:premiumHtml,
+        text:'Thank you. Your '+(order.class_name||order.class_id)+' payment is confirmed, CAD '+amount+'. Reference: '+paymentId+'. Access learning: '+learningUrl,
+        idempotencyKey:'amanda-square-welcome-'+paymentId,
+        receipt:{
+          customer:order.name||order.email,
+          program:order.class_name||order.class_id,
+          amountCad:Number(payment.amount_money?.amount||order.expected_amount)/100,
+          provider:'Square',reference:paymentId,
+          paidAt:String(payment.updated_at||new Date().toISOString()),
+          isTest:false,
+        },
+      });
       if(!sent.ok)throw new Error(sent.error||'Amanda letter delivery failed');
       next={...next,confirmation_sent:true};
+    }
+    if(!order.owner_notification_sent){
+      const ownerEmail=await sendAuthEmail({
+        to:'amandacatherinec@gmail.com',
+        subject:'New paid enrollment — '+(order.class_name||order.class_id),
+        title:'AesthetiKine enrollment received',
+        brandLabel:'Amanda Catherine · AesthetiKine',brandColor:'#596b5b',
+        bodyHtml:'<p>A verified Square enrollment was completed for '+safe(order.class_name||order.class_id)+
+          '.</p><p>Client: '+safe(order.name||order.email)+' ('+safe(order.email)+
+          ')</p><p>Payment reference: '+safe(paymentId)+'</p><p>Review your Amanda owner portal for follow-up.</p>',
+      });
+      if(!ownerEmail.ok)throw new Error(ownerEmail.error||'Owner notification failed');
+      next={...next,owner_notification_sent:true};
     }
     const saved=await saveStudioRecord({recordType:'experience',id,
       organizationId:syntheticOrgId('amanda-catherine'),title:'Amanda Square verified payment',

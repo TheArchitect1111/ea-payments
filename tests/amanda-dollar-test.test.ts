@@ -177,6 +177,12 @@ test('Amanda verified $1 fulfillment, replay, 72-hour denial, no-write preview, 
   assert.equal(db.records.size, 0);
   const created = Math.floor(Date.now()/1000);
   const email = 'qa-amanda-certification@example.invalid';
+  // An owner-only CAD $1 test starts with an existing authenticated portal identity.
+  // The test must never create or update an ordinary Client Records entry.
+  db.clients.clear();
+  db.clients.set(email, { id: 'rec-amanda-owner-test', email, portalSlug: 'amanda-catherine',
+    tempPassword: 'existing-test-only', passwordChanged: true });
+  const clientsBefore = structuredClone([...db.clients.entries()]);
   const session = {
     id: 'cs_test_amanda_ci_mock_0001',
     created,
@@ -193,6 +199,7 @@ test('Amanda verified $1 fulfillment, replay, 72-hour denial, no-write preview, 
   };
   const first = await app.fulfillAmandaCheckout(session as any, 'webhook');
   assert.equal(first.ok, true, JSON.stringify(first));
+  assert.deepEqual([...db.clients.entries()], clientsBefore, 'Private tests must not mutate ordinary client records');
   const paidAt = new Date(created*1000).toISOString();
   const expires = new Date((created+72*3600)*1000).toISOString();
   assert.equal(first.record.isTestAccess, true);
@@ -300,4 +307,28 @@ test('Preview guard uses the dedicated test key and rejects live keys and produc
     process.env.STRIPE_TEST_SECRET_KEY='sk_test_primary';process.env.VERCEL_ENV='production';
     assert.equal(app.previewDollarTestGuard('qa.vercel.app').code,404);
   } finally { for(const key of keys) {if(previous[key]===undefined)delete process.env[key];else process.env[key]=previous[key];} }
+});
+
+
+test('Amanda alternate owner Gmail receives isolated $1 entitlement without a Client Records write', async () => {
+  db.records.clear(); db.clients.clear(); db.writes.length=0; db.trackingEvents.length=0;
+  const app = await loadRealHandlers();
+  const email='amandacatherinec@gmail.com';
+  const created=Math.floor(Date.now()/1000);
+  const session={
+    id:'cs_test_amanda_alt_owner_0001',created,amount_total:100,currency:'cad',
+    payment_status:'paid',customer_email:email,customer_details:{email,name:'Amanda Catherine'},
+    metadata:{
+      portalSlug:'amanda-catherine',amandaOfferId:'aesthetikine-reset-training',
+      amandaCourseId:'aesthetikine-reset-training',clientEmail:email,
+      paymentOption:'test',privateTestCheckout:'true',registrationId:'test-owner-alt-001',
+      clientName:'Amanda Catherine',
+    },
+  };
+  const result=await app.fulfillAmandaCheckout(session as any,'webhook');
+  assert.equal(result.ok,true,JSON.stringify(result));
+  assert.equal(db.clients.size,0,'Owner test must not create a normal customer record');
+  assert.deepEqual(await app.getAmandaAssignedCourseIds('amanda-catherine',email),['aesthetikine-reset-training']);
+  assert.equal(result.record.isTestAccess,true);
+  assert.ok(result.record.expiresAt,'Owner trial must expire after 72 hours');
 });
