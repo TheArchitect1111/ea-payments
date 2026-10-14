@@ -4,6 +4,7 @@ import { loadStudioRecord, saveStudioRecord } from '@/lib/creative-studio/persis
 import { syntheticOrgId } from '@/lib/platform-store';
 import { registerBrickEvent } from '@/lib/services/brickRegistrar';
 import { getAmandaConfirmationLetter } from '@/lib/amanda-catherine/confirmation-letters';
+import { provisionAmandaClientAccess } from '@/lib/amanda-catherine/client-access';
 import { sendAuthEmail } from '@/lib/ea-auth-email';
 import { airtableCreate, airtableQuery, airtableUpdate, escapeAirtableString } from '@/lib/data/airtable-client';
 
@@ -11,14 +12,14 @@ export const dynamic='force-dynamic';
 type SquareOrder={email:string;name?:string;phone?:string;class_name?:string;class_id:string;registration_id:string;order_id:string;
   expected_amount:number;payment_status:string;payment_reference?:string;confirmation_sent?:boolean;
   is_test:false;created_at:string};
-const DIRECT_SQUARE_PRODUCTS=[
-  {name:'Body Sculpt Certification',class_id:'body-sculpt-certification',expected_amount:249700},
-  {name:'Nervous System Reset Certification',class_id:'nervous-system-reset',expected_amount:99700},
-  {name:'Wood Therapy Training & 7 Piece Set',class_id:'wood-therapy',expected_amount:99700},
-  {name:'Glute Sculpt & Build Certification',class_id:'non-surgical-bbl',expected_amount:149700},
+const DIRECT_SQUARE_PRODUCTS: Array<{name:string;class_id:string;course_id?:string;expected_amount:number}> = [
+  {name:'Body Sculpt Certification',class_id:'body-sculpt-certification',course_id:'body-sculpt-practitioner-certification',expected_amount:249700},
+  {name:'Nervous System Reset Certification',class_id:'nervous-system-reset',course_id:'aesthetikine-reset-training',expected_amount:99700},
+  {name:'Wood Therapy Training & 7 Piece Set',class_id:'wood-therapy',course_id:'wood-therapy-certification',expected_amount:99700},
+  {name:'Glute Sculpt & Build Certification',class_id:'non-surgical-bbl',course_id:'non-surgical-bbl-training',expected_amount:149700},
   {name:'Clinical Fat Loss Injectables: Face & Body Contouring Certification',class_id:'clinical-fat-loss',expected_amount:149700},
   {name:'Strategy Mentorship Call',class_id:'strategy-call',expected_amount:24900},
-] as const;
+];
 async function resolveDirectSquareOrder(orderId:string,payment:any):Promise<SquareOrder|null>{
   const token=process.env.SQUARE_ACCESS_TOKEN?.trim()||'';
   const response=await fetch('https://connect.squareup.com/v2/orders/'+encodeURIComponent(orderId),{
@@ -49,7 +50,7 @@ async function resolveDirectSquareOrder(orderId:string,payment:any):Promise<Squa
     registration_id:registrationId,order_id:orderId,expected_amount:product.expected_amount,
     payment_status:'unpaid',is_test:false,created_at:new Date().toISOString()};
 }
-async function upsertAmandaClientRecord(order:SquareOrder){
+async function upsertAmandaClientRecord(order:SquareOrder, paidAt:string){
   const formula=`AND({Email}='${escapeAirtableString(order.email)}',{Portal Slug}='amanda-catherine')`;
   const current=await airtableQuery('Client Records',{filterByFormula:formula,maxRecords:1});
   const fields={
@@ -58,6 +59,8 @@ async function upsertAmandaClientRecord(order:SquareOrder){
     Email:order.email,
     Phone:order.phone||'',
     'Portal Slug':'amanda-catherine',
+    'Portal Access Status':'Active',
+    'Payment Received At':paidAt,
     'Commerce Offer Id':'amanda-course-'+order.class_id,
   };
   const saved=current[0]?await airtableUpdate('Client Records',current[0].id,fields,true):await airtableCreate('Client Records',fields,true);
@@ -131,7 +134,16 @@ export async function POST(req:NextRequest){
       timestamp:verifiedPayment.timestamp,source:'square-amanda-webhook',is_test:false,
     },verifiedPayment);
     if(!tracked.ok)throw new Error(tracked.error||'Verified Square tracking failed');
-    await upsertAmandaClientRecord(order);
+    await upsertAmandaClientRecord(order,String(payment.updated_at||new Date().toISOString()));
+    const purchasedProduct=DIRECT_SQUARE_PRODUCTS.find(entry=>entry.class_id===order!.class_id);
+    if(purchasedProduct?.course_id){
+      const access=await provisionAmandaClientAccess({
+        email:order.email,name:order.name,audience:'student-trainee',
+        amountPaidCad:order.expected_amount/100,transactionId:paymentId,
+        courseIds:[purchasedProduct.course_id],
+      });
+      if(!access.ok)throw new Error(access.error||'Amanda course access could not be assigned');
+    }
     let next:SquareOrder={...order,payment_status:'paid',payment_reference:paymentId};
     if(!order.confirmation_sent){
       const letter=await getAmandaConfirmationLetter('live');
