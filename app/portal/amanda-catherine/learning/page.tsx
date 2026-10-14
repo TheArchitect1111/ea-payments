@@ -23,7 +23,19 @@ const AMANDA_OWNER_CATALOG = [
   ['The Entrepreneurial Artist', 'WAITLIST'],
 ] as const;
 export const dynamic = 'force-dynamic';
-export default async function AmandaLearningPage() {
+export default async function AmandaLearningPage({ searchParams }: { searchParams: Promise<{ mode?: string }> }) {
+  const query = await searchParams;
+  if (process.env.VERCEL_ENV === 'preview' && query.mode === 'preview-synthetic') {
+    const readyCourses = AMANDA_COURSES.filter(course => amandaCourseReady(course.id));
+    return <main style={{ maxWidth: 920, margin: '32px auto', padding: 24 }}>
+      <h1>Preview Synthetic - Real dashboard requires auth</h1>
+      <p>Synthetic catalog only. No user session, payment, or customer information.</p>
+      <h2>12 catalog entries</h2>
+      <ul>{AMANDA_OWNER_CATALOG.map(([name,status]) => <li key={name}>{name} · {status}</li>)}</ul>
+      <h2>5 READY courses</h2>
+      <ul>{readyCourses.map(course => <li key={course.id}>{course.title} ({course.id})</li>)}</ul>
+    </main>;
+  }
   const { client, session } = await requirePortalModule('amanda-catherine', 'dashboard');
   const purchasedCourseIds = await getAmandaAssignedCourseIds('amanda-catherine', session.email || client.email);
   const admin = roleAtLeast(normalizeRole(session.role), 'admin') || await resolveAmandaAudience({ portalSlug: 'amanda-catherine', email: session.email || client.email, role: session.role }) === 'admin';
