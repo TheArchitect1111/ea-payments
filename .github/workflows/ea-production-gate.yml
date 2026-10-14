@@ -1,7 +1,7 @@
 name: EA Production Gate
 on:
   push:
-    branches: [master]
+    branches: [master, fix/client-agnostic-chassis-3ab5027]
   workflow_dispatch:
 
 permissions:
@@ -12,8 +12,37 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  staging-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Verify both client contracts, never live certification
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/ea-staging
+          for CLIENT in tarris amanda; do
+            node --import tsx src/chassis/runClickTest.ts --client="$CLIENT" --mode=contract | tee "artifacts/ea-staging/$CLIENT.log"
+            grep -q '14/14 CLICK PASS' "artifacts/ea-staging/$CLIENT.log"
+            grep -q 'CONTRACT ONLY' "artifacts/ea-staging/$CLIENT.log"
+            grep -q '"productionEligible": false' "artifacts/ea-staging/$CLIENT.log"
+          done
+          if grep -r -n -i -E 'amanda|aesthetikine|24900' src/chassis --include='*.ts'; then exit 1; fi
+          if grep -r -n 'aesthetikine' src/clients/tarris; then exit 1; fi
+          echo '0 client references in chassis; 0 foreign booking references in Tarris'
+      - name: Build
+        run: npm run build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ea-staging-contract-evidence
+          path: artifacts/ea-staging
   gate-and-promote:
-    if: github.ref == 'refs/heads/master' && !startsWith(github.event.head_commit.message, '[EA-GATED]')
+    if: github.ref == 'refs/heads/master' && startsWith(github.event.head_commit.message, '[EA-LIVE-CANDIDATE]')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -30,7 +59,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p artifacts/ea-gate
-          node --import tsx src/chassis/runClickTest.ts 2>&1 | tee /tmp/click.log
+          node --import tsx src/chassis/runClickTest.ts --client=tarris 2>&1 | tee /tmp/click.log
           cat /tmp/click.log
           node - <<'NODE'
           const fs = require('node:fs');
@@ -38,11 +67,12 @@ jobs:
           const match = text.match(/\{\s*"click"\s*:\s*"14\/14"[\s\S]*\}/);
           if (!match) throw Error('BLOCKED: missing 14/14 JSON');
           const outcome = JSON.parse(match[0]);
+          if (outcome.productionEligible !== true || outcome.verificationType !== 'live') throw Error('BLOCKED: contract evidence cannot promote production');
           if (outcome.passed !== true || outcome.results?.length !== 14 || outcome.results.some(r => r.click !== true || !r.evidence)) throw Error('BLOCKED: 14/14 not verified');
           fs.writeFileSync('artifacts/ea-gate/chassis-click.json',JSON.stringify(outcome,null,2));
           console.log('14/14 CLICK PASS');
           NODE
-          if grep -r -n -E 'aesthetikine|249' src/chassis --include='*.ts'; then
+          if grep -r -n -i -E 'amanda|aesthetikine|24900' src/chassis --include='*.ts'; then
             echo 'BLOCKED: client value leaked into generic chassis'
             exit 1
           fi
@@ -67,13 +97,15 @@ jobs:
           NODE
           test "$(node -p "require('./.ea/gates/latest.json').sha")" = "$GITHUB_SHA"
           cat .ea/gates/latest.json
-      - name: Commit gated manifest
+      - name: Create manifest-only production promotion commit
         shell: bash
         run: |
           set -euo pipefail
           git config user.name "EA Production Gate"
           git config user.email "ea-production-gate@users.noreply.github.com"
           git add .ea/gates/latest.json
+          CHANGED=$(git diff --cached --name-only)
+          test -z "$CHANGED" || test "$CHANGED" = ".ea/gates/latest.json" || { echo "BLOCKED: promotion contains non-manifest changes"; exit 1; }
           git diff --cached --quiet && { echo 'Manifest unchanged'; exit 0; }
           git commit -m "[EA-GATED] LEGO certified source $GITHUB_SHA"
           git push origin HEAD:master
