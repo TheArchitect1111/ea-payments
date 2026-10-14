@@ -24,10 +24,12 @@ export default function ConfirmationLetter({
   letter,
   firstName,
   className,
+  includeWelcome = false,
 }: {
   letter: ConfirmationLetterData;
   firstName: string;
   className: string;
+  includeWelcome?: boolean;
 }) {
   const html = safeHtml(letter.body_html, { first_name: firstName, class_name: className });
   return (
@@ -36,7 +38,11 @@ export default function ConfirmationLetter({
         {letter.type === 'live' ? 'Registration received' : 'Waitlist confirmed'}
       </p>
       <h2 className="mt-2 font-serif text-2xl">{letter.subject.replace('{{class_name}}', className)}</h2>
-      <div className="mt-4" dangerouslySetInnerHTML={{ __html: html }} />
+      {includeWelcome ? <>
+        <p className="mt-4 leading-7">Welcome. Whether you are here to restore your well-being, grow your clinical skills, or build something meaningful, I want you to feel supported in taking your next step. My work brings health, education and purpose together, with practical guidance and care for the person behind every goal.</p>
+        <p className="mt-3 leading-7">Explore the path that fits where you are today. I look forward to connecting with you.</p>
+      </> : null}
+      <div className="mt-4 leading-7" dangerouslySetInnerHTML={{ __html: html }} />
     </section>
   );
 }
