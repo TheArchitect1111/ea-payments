@@ -265,6 +265,14 @@ export const AMANDA_OFFERS = [
     courseId: 'wood-therapy-certification',
     delivery: ['in-person'],
   },
+  {
+    id: 'clinical-fat-loss-injectables',
+    name: 'Clinical Fat Loss',
+    priceCad: 1497,
+    audience: 'practitioner-trainee',
+    courseId: 'clinical-fat-loss-injectables',
+    delivery: ['in-person', 'virtual'],
+  },
 ] as const;
 
 export const AMANDA_MEMBERSHIPS = [
