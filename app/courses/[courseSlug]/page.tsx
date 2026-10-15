@@ -27,7 +27,7 @@ export default async function Page({ params }: { params: Promise<{ courseSlug: s
         </p>
         {!['strategy-call', '90-day-package'].includes(course.key) && <h1 className="font-serif text-4xl">{course.title}</h1>}
         <p className="mt-4">{amandaClassCardDescription(course.description, ctaStatus)}</p>
-        {course.price!==null && <p className="mt-4">{'
+        {course.price!==null && <p className="mt-4">{'$'+course.price.toLocaleString('en-US')+' CAD'}</p>}
         <section id="waitlist" className="mt-8">
           {ctaStatus === 'available'
             ? course.square_checkout_url ? <a href={course.square_checkout_url} target="_blank" rel="noopener noreferrer"
@@ -36,14 +36,6 @@ export default async function Page({ params }: { params: Promise<{ courseSlug: s
               : <p role="alert">Secure checkout is temporarily unavailable.</p>
             : <AmandaWaitlistForm courseId={course.key} courseName={course.title} status="WAITLIST"
                 squareCheckoutUrl={null} submitLabel={amandaClassButtonLabel(course.key)} />}
-        </section>
-      </section>
-    </main></AmandaCtaTracker>
-  );
-}
-+course.price.toLocaleString('en-US')+' CAD'}</p>}
-        <section id="waitlist" className="mt-8">
-          <AmandaWaitlistForm courseId={course.key} courseName={course.title} status={course.status} squareCheckoutUrl={course.square_checkout_url} />
         </section>
       </section>
     </main></AmandaCtaTracker>
