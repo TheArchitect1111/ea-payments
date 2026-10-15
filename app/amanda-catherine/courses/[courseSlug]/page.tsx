@@ -1,3 +1,4 @@
+import { amandaIsAvailableNow, amandaCtaDescription, amandaWaitlistLabel } from '@/lib/amanda-catherine/class-cta-policy';
 import { notFound } from 'next/navigation';
 import AmandaWaitlistForm from '@/components/amanda/AmandaWaitlistForm';
 import AppHeaderNote from '@/components/amanda/AppHeaderNote';
@@ -19,9 +20,10 @@ export default async function Page({ params }: { params: Promise<{ courseSlug: s
       {['strategy-call', '90-day-package'].includes(course.key) && <AppHeaderNote appName={course.title} />}
       <section className="mx-auto max-w-3xl">
         {!['strategy-call', '90-day-package'].includes(course.key) && <h1 className="font-serif text-4xl">{course.title}</h1>}
-        {course.description && <p className="mt-4">{course.description}</p>}
+        <p className="mt-4">{amandaCtaDescription(course,amandaIsAvailableNow(course))}</p>
+        {course.price !== null && <p className="mt-4">{course.price.toLocaleString('en-CA') + ' CAD'}</p>}
         <section id="waitlist" className="mt-8">
-          <AmandaWaitlistForm courseId={course.key} courseName={course.title} status={course.status} squareCheckoutUrl={course.square_checkout_url} />
+          {amandaIsAvailableNow(course) ? <a className="amanda-button" href={course.square_checkout_url!} target="_blank" rel="noopener noreferrer" data-cta-name="Buy Now" data-course-key={course.key} data-cta-key={'buy-now-' + course.key}>Buy Now</a> : <AmandaWaitlistForm courseId={course.key} courseName={course.title} status="WAITLIST" squareCheckoutUrl={null} buttonLabel={amandaWaitlistLabel(course.key)} />}
         </section>
       </section>
     </main>
