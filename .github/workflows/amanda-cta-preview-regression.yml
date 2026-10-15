@@ -1,0 +1,26 @@
+name: Amanda CTA Preview Regression
+on:
+  pull_request:
+    paths:
+      - 'app/portal/amanda-catherine/**'
+      - 'app/courses/**'
+      - 'app/amanda-catherine/courses/**'
+      - 'lib/amanda-catherine/**'
+      - 'components/amanda/**'
+      - 'scripts/test-amanda-cta-grid.mjs'
+      - '.github/workflows/amanda-cta-preview-regression.yml'
+  workflow_dispatch:
+jobs:
+  grid-cta:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Assert grid matches Airtable on PR preview
+        env:
+          AMANDA_CTA_PREVIEW_URL: ${{ secrets.AMANDA_CTA_PREVIEW_URL }}
+          AIRTABLE_API_KEY: ${{ secrets.AIRTABLE_API_KEY }}
+          AIRTABLE_BASE_ID: appv0YoLIMY45fmDA
+        run: node scripts/test-amanda-cta-grid.mjs
