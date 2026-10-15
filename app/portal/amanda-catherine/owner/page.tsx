@@ -1,3 +1,5 @@
+import { registry } from '@/lib/amanda-catherine/registry';
+import { airtableConfigured, airtableQuery } from '@/lib/data/airtable-client';
 import {amandaCtaKey} from '@/lib/amanda-catherine/tracking';
 import Link from 'next/link';
 import { listPortalFormSubmissions } from '@/lib/portal-forms/store';
@@ -13,11 +15,31 @@ const quick=[
  ['↗','Open Marketing Kit','/portal/amanda-catherine/owner/marketing']
 ] as const;
 
+async function testStudentSummary() {
+ if (!airtableConfigured()) return null;
+ try {
+  const courses=(await registry()).courses.filter(course=>!course.isTest);
+  const rows=await airtableQuery(process.env.AIRTABLE_CREATIVE_STUDIO_TABLE||'Creative Studio',{
+    filterByFormula:"AND({Record Type}='Experience',FIND('amanda-tracking-test-',{Record Key})>0)",maxRecords:100,
+  });
+  const tests=rows.flatMap(row=>{
+   try {
+    const x=JSON.parse(String(row.fields['Payload JSON']||'{}'));
+    return x.email==='test.student@amandacatherine.ca'&&x.name==='Test Student'&&x.is_test===true&&x.testTag==='TEST RUN'&&x.record_kind==='amanda_tracking_test'?[x]:[];
+   }catch{return [];}
+  });
+  if(!tests.length)return null;
+  const live=courses.filter(course=>tests.some(t=>t.class_id===course.key&&t.registration_type==='live')).length;
+  const waitlist=courses.filter(course=>tests.some(t=>t.class_id===course.key&&t.registration_type==='waitlist')).length;
+  const last=tests.map(t=>String(t.created_at||'')).sort().at(-1)||'Unknown';
+  return {live,waitlist,total:courses.length,last};
+ }catch(error){console.error('[Amanda test verification]',error);return null;}
+}
 export default async function Page(){
- const submissions=await listPortalFormSubmissions('amanda-catherine',{});
+ const [submissions,testSummary]=await Promise.all([listPortalFormSubmissions('amanda-catherine',{}),testStudentSummary()]);
  const applications=submissions.filter((x)=>x.kind==='application');
  const active=applications.filter((x)=>x.status==='submitted'||x.status==='reviewed');
- return <div className="approved-dashboard">
+ return <div className="approved-dashboard">{testSummary&&<div role="status" style={{padding:"8px 12px",border:"1px solid currentColor",fontSize:13}}><span style={{fontWeight:700}}>TEST</span> VERIFICATION: Test Student registered for {testSummary.live}/{testSummary.total} classes and {testSummary.waitlist}/{testSummary.total} waitlists. Last run: {testSummary.last}. Detailed report: npm run test:verify</div>}
   <section className="approved-hero"><img src="/amanda-catherine/amanda-catherine-founder.webp" alt="Amanda Catherine"/><div><h1>Welcome, Amanda</h1><p>Create Beauty. Change Lives. Build Legacy.</p><blockquote>“Wellness is not just a service, it’s a calling.”</blockquote></div></section>
   <section><h2>Quick Actions</h2><div className="approved-quick">{quick.map(([icon,label,href])=><Link data-cta-name={label} data-cta-key={amandaCtaKey(label)} href={href} key={href}><span>{icon}</span><b>{label}</b></Link>)}</div></section>
   <div className="approved-grid">
