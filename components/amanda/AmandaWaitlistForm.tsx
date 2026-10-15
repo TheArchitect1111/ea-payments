@@ -3,6 +3,7 @@
 import { useId, useState, type FormEvent } from 'react';
 import ConfirmationLetter, { type ConfirmationLetterData } from './ConfirmationLetter';
 import AmandaWarmLetter from './AmandaWarmLetter';
+import { amandaSingleCtaPolicy } from '@/lib/amanda-catherine/single-cta-policy';
 
 export default function AmandaWaitlistForm({
   courseId,
@@ -15,6 +16,7 @@ export default function AmandaWaitlistForm({
   status?: string;
   squareCheckoutUrl?: string | null;
 }) {
+  const policy = amandaSingleCtaPolicy(courseId, courseName);
   const id = useId();
   const [statusMessage, setStatusMessage] = useState('');
   const [confirmation, setConfirmation] = useState<ConfirmationLetterData | null>(null);
@@ -66,6 +68,14 @@ export default function AmandaWaitlistForm({
       window.location.assign(result.url);
     }catch(error){setStatusMessage(error instanceof Error?error.message:'Square checkout unavailable');}
     finally{setPaymentBusy(false);}
+  }
+  if (policy.isAvailable) {
+    return <section aria-label={`${courseName} enrollment`}>
+      <p>Explore this program with Amanda.</p>
+      {squareCheckoutUrl ? <a href={squareCheckoutUrl} target="_blank" rel="noopener noreferrer"
+        data-cta-name="Buy Now" data-cta-key={`buy-now-${courseId}`} data-course-key={courseId}
+        className="flex w-full items-center justify-center rounded-xl border border-[#17211c] bg-white px-5 py-3 font-medium text-[#17211c] shadow-sm transition hover:bg-[#f4f0e8] focus:outline-none focus:ring-2 focus:ring-amber-500/40">Buy Now</a> : <p role="alert">Enrollment link temporarily unavailable.</p>}
+    </section>;
   }
   if (confirmation) {
     return <div>
@@ -136,18 +146,11 @@ export default function AmandaWaitlistForm({
         />
       </label>
       <div className="grid gap-3 sm:grid-cols-2">
-        <button
+        <button data-cta-name={policy.label} data-cta-key={`join-waitlist-${courseId}`}
           className="w-full rounded-xl bg-[#17211c] px-5 py-3 font-medium text-white shadow-sm transition hover:bg-[#27372d] focus:outline-none focus:ring-2 focus:ring-amber-500/40 disabled:cursor-wait disabled:opacity-60"
-          disabled={busy}
-          type="submit"
-        >
-          {busy ? 'Submitting…' : status.toUpperCase() === 'LIVE' ? 'Enroll Now' : 'Join Waitlist'}
+          disabled={busy} type="submit">
+          {busy ? 'Submitting…' : policy.label}
         </button>
-        {squareCheckoutUrl ? <a href={squareCheckoutUrl} target="_blank" rel="noopener noreferrer"
-          data-cta-name="Buy Now" data-cta-key={`buy-now-${courseId}`} data-course-key={courseId}
-          className="flex w-full items-center justify-center rounded-xl border border-[#17211c] bg-white px-5 py-3 font-medium text-[#17211c] shadow-sm transition hover:bg-[#f4f0e8] focus:outline-none focus:ring-2 focus:ring-amber-500/40">
-          Buy Now
-        </a> : null}
       </div>
       <p className="min-h-5 text-sm text-[#7a3128]" role="status" aria-live="polite">{statusMessage}</p>
     </form>
