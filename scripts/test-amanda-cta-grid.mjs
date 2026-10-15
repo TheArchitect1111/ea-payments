@@ -16,7 +16,7 @@ const suspect=files.filter(f=>/amanda|course|class/i.test(f)).filter(f=>{
   /\[\s*['"]Wood Therapy['"]\s*,/i.test(s);
 });
 assert.deepEqual(suspect,[],'Hardcoded Amanda CTA availability policy: '+suspect.join(', '));
-for(const p of ['app/portal/amanda-catherine/(engagement)/classes/page.tsx','app/courses/[courseSlug]/page.tsx','app/amanda-catherine/courses/[courseSlug]/page.tsx']){
+for(const p of ['components/amanda/AmandaClassesGrid.tsx','app/courses/[courseSlug]/page.tsx','app/amanda-catherine/courses/[courseSlug]/page.tsx']){
  assert.match(fs.readFileSync(p,'utf8'),/getCTA\(c(?:ourse)?\)/,'Missing shared getCTA: '+p);
 }
 const target=process.env.AMANDA_CTA_PREVIEW_URL;
@@ -40,7 +40,7 @@ const response=await fetch(target,{redirect:'follow'});
 assert.ok(response.ok,'Preview grid request failed '+response.status);
 assert.ok(!/amandacatherine\.ca$/.test(new URL(response.url).hostname),'Redirected to production');
 const html=await response.text();
-const grid=html.match(/<div class="amanda-grid">([\s\S]*?)<\/div>\s*(?:<p>No classes|<section class="amanda-card")/);
+const grid=html.match(/<div class="amanda-grid">([\s\S]*?)<\/div><\/section>/);
 assert.ok(grid,'Could not isolate grid DOM');
 const articles=[...grid[1].matchAll(/<article\b[^>]*class="amanda-card"[^>]*>([\s\S]*?)<\/article>/g)];
 assert.equal(articles.length,courses.length,'Grid card count differs from Airtable');
@@ -50,7 +50,8 @@ for(const course of courses){
  const article=articles.find(a=>a[1].includes('data-course-key="'+course.slug+'"'));
  assert.ok(article,'Missing card '+course.name);
  const ctas=[...article[1].matchAll(/data-cta-name="([^"]+)"/g)].map(m=>m[1]);
- const expected=course.status==='available'?'Buy Now':course.slug==='starter-kit'?'Request Info':'Join Waitlist';
+ const available=['wood-therapy','non-surgical-bbl','body-sculpt-certification','nervous-system-reset','clinical-fat-loss','strategy-call'];
+ const expected=available.includes(course.slug)?'Register':'Join Waitlist';
  const pass=ctas.length===1&&ctas[0]===expected;
  console.log(JSON.stringify({class:course.name,status:course.status,buttons:ctas,count:ctas.length,result:pass?'PASS':'FAIL'}));
  if(!pass)failures++;

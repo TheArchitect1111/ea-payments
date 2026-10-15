@@ -32,8 +32,8 @@ export default async function Page({ params }: { params: Promise<{ courseSlug: s
           {available
             ? (course.square_checkout_url
               ? <a href={cta.action} target="_blank" rel="noopener noreferrer"
-                  data-cta-name={cta.label} data-cta-key={`buy-now-${course.key}`} data-course-key={course.key}
-                  className="inline-flex w-full items-center justify-center rounded-xl bg-[#17211c] px-5 py-3 font-medium text-white">Buy Now</a>
+                  data-cta-name={cta.label} data-cta-key={`register-${course.key}`} data-course-key={course.key}
+                  className="inline-flex w-full items-center justify-center rounded-xl bg-[#17211c] px-5 py-3 font-medium text-white">{cta.label}</a>
               : <p role="status">Checkout temporarily unavailable</p>)
             : <AmandaWaitlistForm courseId={course.key} courseName={course.title} status="WAITLIST" squareCheckoutUrl={null}
                 submitLabel={cta.label} />}
