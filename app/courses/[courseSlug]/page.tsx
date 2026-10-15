@@ -1,3 +1,4 @@
+import { getCTA, amandaClassCopy } from '@/lib/amanda-catherine/class-cta-policy';
 import AmandaCtaTracker from '@/app/portal/amanda-catherine/(engagement)/AmandaCtaTracker';
 import { notFound } from 'next/navigation';
 import AmandaWaitlistForm from '@/components/amanda/AmandaWaitlistForm';
@@ -14,18 +15,28 @@ export default async function Page({ params }: { params: Promise<{ courseSlug: s
     item.key === courseId && !item.isTest && item.isActive && item.isVisible
   );
   if (!course) notFound();
+  const cta = getCTA(course);
+  const available = cta.kind === 'checkout';
 
   return (
     <AmandaCtaTracker><main className="min-h-screen bg-[#f7f1e8] px-5 py-12 text-[#17130f]">
       {['strategy-call', '90-day-package'].includes(course.key) && <AppHeaderNote appName={course.title} />}
       <section className="mx-auto max-w-3xl">
         <p className="mt-8 text-sm font-bold uppercase tracking-[0.18em] text-[#596b5b]">
-          {course.status === 'LIVE' ? 'Registration open' : 'Waitlist'}
+          {available ? 'Registration open' : 'Waitlist'}
         </p>
         {!['strategy-call', '90-day-package'].includes(course.key) && <h1 className="font-serif text-4xl">{course.title}</h1>}
-        {course.description && <p className="mt-4">{course.description}</p>}
+        <p className="mt-4">{amandaClassCopy(course.description, available)}</p>
+        {course.price!==null && <p className="mt-4">{'$'+course.price.toLocaleString('en-US')} CAD</p>}
         <section id="waitlist" className="mt-8">
-          <AmandaWaitlistForm courseId={course.key} courseName={course.title} status={course.status} squareCheckoutUrl={course.square_checkout_url} />
+          {available
+            ? (course.square_checkout_url
+              ? <a href={cta.action} target="_blank" rel="noopener noreferrer"
+                  data-cta-name={cta.label} data-cta-key={`buy-now-${course.key}`} data-course-key={course.key}
+                  className="inline-flex w-full items-center justify-center rounded-xl bg-[#17211c] px-5 py-3 font-medium text-white">Buy Now</a>
+              : <p role="status">Checkout temporarily unavailable</p>)
+            : <AmandaWaitlistForm courseId={course.key} courseName={course.title} status="WAITLIST" squareCheckoutUrl={null}
+                submitLabel={cta.label} />}
         </section>
       </section>
     </main></AmandaCtaTracker>
