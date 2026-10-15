@@ -1,0 +1,110 @@
+[
+  {
+    "id": "test-wood-therapy-live",
+    "course": "wood-therapy",
+    "type": "live",
+    "name": "Test Student",
+    "email": "test.student@amandacatherine.ca",
+    "phone": "000-000-0000",
+    "created": "2026-10-15T20:58:28.615Z"
+  },
+  {
+    "id": "test-wood-therapy-waitlist",
+    "course": "wood-therapy",
+    "type": "waitlist",
+    "name": "Test Student",
+    "email": "test.student@amandacatherine.ca",
+    "phone": "000-000-0000",
+    "created": "2026-10-15T20:58:28.616Z"
+  },
+  {
+    "id": "test-non-surgical-bbl-live",
+    "course": "non-surgical-bbl",
+    "type": "live",
+    "name": "Test Student",
+    "email": "test.student@amandacatherine.ca",
+    "phone": "000-000-0000",
+    "created": "2026-10-15T20:58:28.616Z"
+  },
+  {
+    "id": "test-non-surgical-bbl-waitlist",
+    "course": "non-surgical-bbl",
+    "type": "waitlist",
+    "name": "Test Student",
+    "email": "test.student@amandacatherine.ca",
+    "phone": "000-000-0000",
+    "created": "2026-10-15T20:58:28.616Z"
+  },
+  {
+    "id": "test-body-sculpt-certification-live",
+    "course": "body-sculpt-certification",
+    "type": "live",
+    "name": "Test Student",
+    "email": "test.student@amandacatherine.ca",
+    "phone": "000-000-0000",
+    "created": "2026-10-15T20:58:28.616Z"
+  },
+  {
+    "id": "test-body-sculpt-certification-waitlist",
+    "course": "body-sculpt-certification",
+    "type": "waitlist",
+    "name": "Test Student",
+    "email": "test.student@amandacatherine.ca",
+    "phone": "000-000-0000",
+    "created": "2026-10-15T20:58:28.616Z"
+  },
+  {
+    "id": "test-nervous-system-reset-live",
+    "course": "nervous-system-reset",
+    "type": "live",
+    "name": "Test Student",
+    "email": "test.student@amandacatherine.ca",
+    "phone": "000-000-0000",
+    "created": "2026-10-15T20:58:28.616Z"
+  },
+  {
+    "id": "test-nervous-system-reset-waitlist",
+    "course": "nervous-system-reset",
+    "type": "waitlist",
+    "name": "Test Student",
+    "email": "test.student@amandacatherine.ca",
+    "phone": "000-000-0000",
+    "created": "2026-10-15T20:58:28.616Z"
+  },
+  {
+    "id": "test-clinical-fat-loss-live",
+    "course": "clinical-fat-loss",
+    "type": "live",
+    "name": "Test Student",
+    "email": "test.student@amandacatherine.ca",
+    "phone": "000-000-0000",
+    "created": "2026-10-15T20:58:28.616Z"
+  },
+  {
+    "id": "test-clinical-fat-loss-waitlist",
+    "course": "clinical-fat-loss",
+    "type": "waitlist",
+    "name": "Test Student",
+    "email": "test.student@amandacatherine.ca",
+    "phone": "000-000-0000",
+    "created": "2026-10-15T20:58:28.616Z"
+  },
+  {
+    "id": "test-strategy-call-live",
+    "course": "strategy-call",
+    "type": "live",
+    "name": "Test Student",
+    "email": "test.student@amandacatherine.ca",
+    "phone": "000-000-0000",
+    "created": "2026-10-15T20:58:28.616Z"
+  },
+  {
+    "id": "test-strategy-call-waitlist",
+    "course": "strategy-call",
+    "type": "waitlist",
+    "name": "Test Student",
+    "email": "test.student@amandacatherine.ca",
+    "phone": "000-000-0000",
+    "created": "2026-10-15T20:58:28.616Z"
+  }
+]
