@@ -2,7 +2,7 @@ import { getCTA, amandaClassCopy } from '@/lib/amanda-catherine/class-cta-policy
 import type { Course } from '@/lib/amanda-catherine/registry';
 
 export default function AmandaClassesGrid({courses}:{courses:Course[]}) {
-  return <section id="classes-grid" className="scroll-mt-24" style={{scrollMarginTop:'6rem'}} aria-label="Classes"><div className="amanda-grid">{courses.map(c=>{
+  return <section id="classes-grid" data-source-commit={process.env.VERCEL_GIT_COMMIT_SHA} className="scroll-mt-24" style={{scrollMarginTop:'6rem'}} aria-label="Classes"><div className="amanda-grid">{courses.map(c=>{
  const cta=getCTA(c);
  const available=cta.kind==='checkout';
  const label=cta.label;

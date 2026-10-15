@@ -20,7 +20,7 @@ let ready=false;
 for(let attempt=0;attempt<60;attempt++) {
   const response=await fetch(base+'/portal/amanda-catherine/classes');
   const html=await response.text();
-  if(response.ok&&html.includes('id="classes-grid"')&&html.includes('data-cta-name="Register"')){ready=true;break;}
+  if(response.ok&&html.includes('id="classes-grid"')&&html.includes('data-cta-name="Register"')&&(!process.env.EXPECTED_SHA||html.includes('data-source-commit="'+process.env.EXPECTED_SHA+'"'))){ready=true;break;}
   await new Promise(resolve=>setTimeout(resolve,10000));
 }
 assert.ok(ready,'New preview grid did not become available');
@@ -53,6 +53,8 @@ for(const [device,options] of [['desktop',{viewport:{width:1440,height:1000}}],[
   assert.equal(context.pages().length,1,'Classes opened another tab');
   const cards=await page.locator('#classes-grid article').evaluateAll(nodes=>nodes.map(node=>({text:node.textContent,buttons:[...node.querySelectorAll('a,button')].map(a=>({label:a.textContent,key:a.getAttribute('data-course-key'),href:a.getAttribute('href')}))})));
   assert.equal(cards.length,12);
+  assert.ok(await page.locator('#classes-grid h2').evaluateAll(nodes=>nodes.every(node=>getComputedStyle(node).fontSize==='26px')),'Class headings must retain the grid typography');
+  assert.ok(await page.locator('#classes-grid article').evaluateAll(nodes=>nodes.every(node=>node.getBoundingClientRect().right<=innerWidth+1)),'Class card overflow');
   for(const card of cards){assert.equal(card.buttons.length,1);assert.equal(card.buttons[0].label,available.has(card.buttons[0].key)?'Register':'Join Waitlist');}
   assert.equal(cards.filter(c=>c.buttons[0].label==='Register').length,6);
   assert.ok(!(await page.locator('body').innerText()).includes('Buy Now'));
