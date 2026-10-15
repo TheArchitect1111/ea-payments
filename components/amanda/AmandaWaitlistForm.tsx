@@ -9,11 +9,13 @@ export default function AmandaWaitlistForm({
   courseName,
   status = 'WAITLIST',
   squareCheckoutUrl = null,
+  buttonLabel,
 }: {
   courseId: string;
   courseName: string;
   status?: string;
   squareCheckoutUrl?: string | null;
+  buttonLabel?: string;
 }) {
   const id = useId();
   const [statusMessage, setStatusMessage] = useState('');
@@ -141,7 +143,7 @@ export default function AmandaWaitlistForm({
           disabled={busy}
           type="submit"
         >
-          {busy ? 'Submitting…' : status.toUpperCase() === 'LIVE' ? 'Enroll Now' : 'Join Waitlist'}
+          {busy ? 'Submitting…' : buttonLabel || (status.toUpperCase() === 'LIVE' ? 'Enroll Now' : 'Join Waitlist')}
         </button>
         {squareCheckoutUrl ? <a href={squareCheckoutUrl} target="_blank" rel="noopener noreferrer"
           data-cta-name="Buy Now" data-cta-key={`buy-now-${courseId}`} data-course-key={courseId}
