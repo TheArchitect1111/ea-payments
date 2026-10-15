@@ -1,7 +1,9 @@
 import { getCTA, amandaClassCopy } from '@/lib/amanda-catherine/class-cta-policy';
 import {amandaCtaKey} from '@/lib/amanda-catherine/tracking';
 import {registry} from '@/lib/amanda-catherine/registry';
-export const dynamic='force-dynamic';export const revalidate=0;
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+export const fetchCache = 'force-no-store';
 function hrefFor(c:{href?:string;type:string;courseKey?:string},_courses:Awaited<ReturnType<typeof registry>>['courses'],booking:string){if(c.type==='booking')return booking||'/portal/amanda-catherine/book';if(c.type==='course'&&c.courseKey){return '/portal/amanda-catherine/enroll?course='+encodeURIComponent(c.courseKey);}return c.href||'/portal/amanda-catherine/apply';}
 export default async function Classes(){let d:Awaited<ReturnType<typeof registry>>;try{d=await registry();}catch{return <section className="amanda-card"><h1>Classes</h1><p role="alert">Classes are temporarily unavailable. Please refresh shortly.</p></section>;}const courses=d.courses.filter(c=>!c.isTest),ctas=d.config.ctas.filter(c=>c.type!=='navigation'&&c.name!=='View Classes');return <><section className="amanda-card"><p className="amanda-status">LEARNING &amp; MENTORSHIP</p><h1>Classes</h1><p>Explore your next step with Amanda.</p></section><div className="amanda-grid">{courses.map(c=>{
  const cta=getCTA(c);
