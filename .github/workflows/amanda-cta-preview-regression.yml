@@ -10,6 +10,15 @@ on:
       - 'scripts/test-amanda-cta-grid.mjs'
       - '.github/workflows/amanda-cta-preview-regression.yml'
   workflow_dispatch:
+    inputs:
+      preview_url:
+        description: Immutable Vercel preview URL
+        required: true
+        type: string
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
 jobs:
   grid-cta:
     runs-on: ubuntu-latest
@@ -17,10 +26,19 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
-      - name: Assert grid matches Airtable on PR preview
+          node-version: '24'
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Verify same-page Classes navigation and 12 class CTAs on desktop/mobile
         env:
-          AMANDA_CTA_PREVIEW_URL: ${{ secrets.AMANDA_CTA_PREVIEW_URL }}
-          AIRTABLE_API_KEY: ${{ secrets.AIRTABLE_API_KEY }}
-          AIRTABLE_BASE_ID: appv0YoLIMY45fmDA
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha }}
+          AMANDA_CTA_PREVIEW_URL: ${{ inputs.preview_url }}
         run: node scripts/test-amanda-cta-grid.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: amanda-classes-desktop-mobile
+          path: artifacts/amanda-classes
