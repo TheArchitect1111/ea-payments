@@ -131,7 +131,10 @@
     "test:tb3-merch-registrar": "node --import tsx --test tests/tb3-merch-registrar.test.mts",
     "test:brick-chassis-guard": "node scripts/guard-brick-chassis.mjs",
     "test:client-factory": "node --import tsx --test tests/client-factory.test.mts",
-    "test:amanda-wiring": "node --import tsx --test tests/amanda-wiring.test.mts"
+    "test:amanda-wiring": "node --import tsx --test tests/amanda-wiring.test.mts",
+    "test:seed": "node --import tsx scripts/seed-test-student.ts",
+    "test:clean": "node --import tsx scripts/seed-test-student.ts --clean",
+    "test:verify": "node --import tsx scripts/verify-test-student.ts"
   },
   "dependencies": {
     "@clerk/nextjs": "^7.5.9",
