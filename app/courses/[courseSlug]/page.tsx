@@ -1,4 +1,4 @@
-import { isAmandaBuyNowClass, isAmandaStarterKitInquiry, amandaClassCopy } from '@/lib/amanda-catherine/class-cta-policy';
+import { getCTA, amandaClassCopy } from '@/lib/amanda-catherine/class-cta-policy';
 import AmandaCtaTracker from '@/app/portal/amanda-catherine/(engagement)/AmandaCtaTracker';
 import { notFound } from 'next/navigation';
 import AmandaWaitlistForm from '@/components/amanda/AmandaWaitlistForm';
@@ -15,8 +15,8 @@ export default async function Page({ params }: { params: Promise<{ courseSlug: s
     item.key === courseId && !item.isTest && item.isActive && item.isVisible
   );
   if (!course) notFound();
-  const available = isAmandaBuyNowClass(course.key);
-  const starterKit = isAmandaStarterKitInquiry(course.key);
+  const cta = getCTA(course);
+  const available = cta.kind === 'checkout';
 
   return (
     <AmandaCtaTracker><main className="min-h-screen bg-[#f7f1e8] px-5 py-12 text-[#17130f]">
@@ -31,12 +31,12 @@ export default async function Page({ params }: { params: Promise<{ courseSlug: s
         <section id="waitlist" className="mt-8">
           {available
             ? (course.square_checkout_url
-              ? <a href={course.square_checkout_url} target="_blank" rel="noopener noreferrer"
-                  data-cta-name="Buy Now" data-cta-key={`buy-now-${course.key}`} data-course-key={course.key}
+              ? <a href={cta.action} target="_blank" rel="noopener noreferrer"
+                  data-cta-name={cta.label} data-cta-key={`buy-now-${course.key}`} data-course-key={course.key}
                   className="inline-flex w-full items-center justify-center rounded-xl bg-[#17211c] px-5 py-3 font-medium text-white">Buy Now</a>
               : <p role="status">Checkout temporarily unavailable</p>)
             : <AmandaWaitlistForm courseId={course.key} courseName={course.title} status="WAITLIST" squareCheckoutUrl={null}
-                submitLabel={starterKit ? 'Request Info' : 'Join Waitlist'} />}
+                submitLabel={cta.label} />}
         </section>
       </section>
     </main></AmandaCtaTracker>
