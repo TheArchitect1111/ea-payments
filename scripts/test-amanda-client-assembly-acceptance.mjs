@@ -12,7 +12,7 @@ for(const p of required){try{readFileSync(p)}catch{failures.push(`missing:${p}`)
 const page=readFileSync('app/amanda-catherine/page.tsx','utf8');
 const updates=readFileSync('app/amanda-catherine/ClientRequestedUpdates.tsx','utf8');
 const source=page+'\n'+updates;
-for(const marker of ['href={`/courses/${encodeURIComponent(course.key)}#waitlist`}','/portal/login?next=%2Fportal%2Famanda-catherine%2Flearning','href="/courses/starter-kit#waitlist"']){
+for(const marker of ['<AmandaClassesGrid courses={courses}/>','/portal/login?next=%2Fportal%2Famanda-catherine%2Flearning','View Classes']){
  if(!source.includes(marker)) failures.push(`public-connection-missing:${marker}`);
 }
 const fulfillment=readFileSync('lib/amanda-catherine/payment-fulfillment.ts','utf8');

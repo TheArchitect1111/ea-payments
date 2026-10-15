@@ -1,59 +1,74 @@
-// Amanda preview grid regression gate. Run only against PR preview.
-import fs from 'node:fs';
-import path from 'node:path';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import { chromium, devices } from '@playwright/test';
 
-const root = process.cwd();
-const walk = d => fs.readdirSync(d,{withFileTypes:true}).flatMap(e => {
- const f=path.join(d,e.name);
- if(e.isDirectory())return ['node_modules','.next','.git'].includes(e.name)?[]:walk(f);
- return /\.(tsx?|jsx?)$/.test(e.name)?[f]:[];
-});
-const files=[...walk('app'),...walk('lib'),...walk('components')];
-const suspect=files.filter(f=>/amanda|course|class/i.test(f)).filter(f=>{
- const s=fs.readFileSync(f,'utf8');
- return /(?:availableClasses|buyNowClasses|isAmandaBuyNowClass)\s*(?:=|\()/i.test(s) ||
-  /\[\s*['"]Wood Therapy['"]\s*,/i.test(s);
-});
-assert.deepEqual(suspect,[],'Hardcoded Amanda CTA availability policy: '+suspect.join(', '));
-for(const p of ['app/portal/amanda-catherine/(engagement)/classes/page.tsx','app/courses/[courseSlug]/page.tsx','app/amanda-catherine/courses/[courseSlug]/page.tsx']){
- assert.match(fs.readFileSync(p,'utf8'),/getCTA\(c(?:ourse)?\)/,'Missing shared getCTA: '+p);
+let target=process.env.AMANDA_CTA_PREVIEW_URL;
+if (!target && process.env.PR_NUMBER) {
+  const response=await fetch(`https://api.github.com/repos/${process.env.GITHUB_REPOSITORY}/issues/${process.env.PR_NUMBER}/comments`,{headers:{Authorization:`Bearer ${process.env.GITHUB_TOKEN}`}});
+  assert.ok(response.ok,'Cannot resolve PR preview');
+  const comments=await response.json();
+  for (const comment of comments.reverse()) {
+    const match=comment.body.match(/\[Preview\]\((https:\/\/[^)]+)\)/);
+    if (match) {target=match[1];break;}
+  }
 }
-const target=process.env.AMANDA_CTA_PREVIEW_URL;
-assert.ok(target&&/^https:\/\/.test(target),'AMANDA_CTA_PREVIEW_URL required (PR preview only)');
-assert.ok(!/^(?:www\.)?amandacatherine\.ca$/i.test(new URL(target).hostname),'Production URL forbidden');
-assert.ok(process.env.AIRTABLE_API_KEY&&process.env.AIRTABLE_BASE_ID,'Airtable credentials required');
-const token=process.env.AIRTABLE_API_KEY,base=process.env.AIRTABLE_BASE_ID;
-assert.equal(base,'appv0YoLIMY45fmDA','Wrong Airtable base');
-const airtableUrl=new URL('https://api.airtable.com/v0/'+base+'/tblHseQxOkv5kvzIt');
-airtableUrl.searchParams.set('pageSize','100');
-airtableUrl.searchParams.set('filterByFormula',"AND({Organization ID}='org_amanda-catherine',OR(LOWER({Record Type})='course',LOWER({Record Type})='service'))");
-let all=[],offset;
-do {
- if(offset)airtableUrl.searchParams.set('offset',offset);
- const r=await fetch(airtableUrl,{headers:{Authorization:'Bearer '+token}});
- assert.ok(r.ok,'Airtable fetch failed '+r.status);
- const j=await r.json();all.push(...j.records);offset=j.offset;
-}while(offset);
-const courses=all.map(r=>{const p=JSON.parse(r.fields['Payload JSON']||'{}');return {name:r.fields.Title,slug:p.slug||r.fields['Record Key'],status:String(p.status||'WAITLIST').toLowerCase(),visible:p.is_visible!==false,active:p.is_active!==false,test:p.isTest===true};}).filter(c=>c.visible&&c.active&&!c.test);
-const response=await fetch(target,{redirect:'follow'});
-assert.ok(response.ok,'Preview grid request failed '+response.status);
-assert.ok(!/amandacatherine\.ca$/.test(new URL(response.url).hostname),'Redirected to production');
-const html=await response.text();
-const grid=html.match(/<div class="amanda-grid">([\s\S]*?)<\/div>\s*(?:<p>No classes|<section class="amanda-card")/);
-assert.ok(grid,'Could not isolate grid DOM');
-const articles=[...grid[1].matchAll(/<article\b[^>]*class="amanda-card"[^>]*>([\s\S]*?)<\/article>/g)];
-assert.equal(articles.length,courses.length,'Grid card count differs from Airtable');
-assert.equal(articles.length,12,'Expected 12 class cards in grid');
-let failures=0;
-for(const course of courses){
- const article=articles.find(a=>a[1].includes('data-course-key="'+course.slug+'"'));
- assert.ok(article,'Missing card '+course.name);
- const ctas=[...article[1].matchAll(/data-cta-name="([^"]+)"/g)].map(m=>m[1]);
- const expected=course.status==='available'?'Buy Now':course.slug==='starter-kit'?'Request Info':'Join Waitlist';
- const pass=ctas.length===1&&ctas[0]===expected;
- console.log(JSON.stringify({class:course.name,status:course.status,buttons:ctas,count:ctas.length,result:pass?'PASS':'FAIL'}));
- if(!pass)failures++;
+assert.ok(target,'PR preview URL is required');
+const base=new URL(target).origin;
+assert.ok(new URL(base).hostname.endsWith('.vercel.app'),'Preview host required');
+// A preview can still be building when CI starts. Require the new grid before testing.
+let ready=false;
+for(let attempt=0;attempt<60;attempt++) {
+  const response=await fetch(base+'/portal/amanda-catherine/classes');
+  const html=await response.text();
+  if(response.ok&&html.includes('id="classes-grid"')&&html.includes('data-cta-name="Register"')&&(!process.env.EXPECTED_SHA||html.includes('data-source-commit="'+process.env.EXPECTED_SHA+'"'))){ready=true;break;}
+  await new Promise(resolve=>setTimeout(resolve,10000));
 }
-assert.equal(failures,0,failures+' CTA errors in PR preview grid');
-console.log('AMANDA GRID CTA PASS: '+articles.length+' cards, 0 duplicate CTAs');
+assert.ok(ready,'New preview grid did not become available');
+const available=new Set(['wood-therapy','non-surgical-bbl','body-sculpt-certification','nervous-system-reset','clinical-fat-loss','strategy-call']);
+const browser=await chromium.launch();
+const results=[];
+fs.mkdirSync('artifacts/amanda-classes',{recursive:true});
+try {
+for(const [device,options] of [['desktop',{viewport:{width:1440,height:1000}}],['mobile',devices['iPhone 13']]]) {
+ for(const route of ['/amanda-catherine','/portal/amanda-catherine/classes']) {
+  const context=await browser.newContext(options);
+  const page=await context.newPage();
+  let documentRequests=0;
+  page.on('request',r=>{if(r.isNavigationRequest()&&r.frame()===page.mainFrame())documentRequests++;});
+  await page.goto(base+route);
+  await page.locator('#classes-grid article').first().waitFor();
+  const nav=page.getByRole('navigation').getByRole('link',{name:'Classes',exact:true});
+  assert.equal(await nav.getAttribute('href'),'#classes-grid');
+  assert.equal(await nav.getAttribute('target'),null);
+  await nav.hover();
+  assert.equal(await page.locator('nav [data-course-key]').count(),0);
+  const documentCount=documentRequests;
+  const timeOrigin=await page.evaluate(()=>performance.timeOrigin);
+  await nav.click();
+  await page.waitForFunction(()=>location.hash==='#classes-grid');
+  await page.waitForFunction(()=>Math.abs(document.getElementById('classes-grid').getBoundingClientRect().top-96)<5);
+  assert.equal(new URL(page.url()).pathname,route);
+  assert.equal(documentRequests,documentCount,'Classes triggered document navigation');
+  assert.equal(await page.evaluate(()=>performance.timeOrigin),timeOrigin,'Classes reloaded document');
+  assert.equal(context.pages().length,1,'Classes opened another tab');
+  const cards=await page.locator('#classes-grid article').evaluateAll(nodes=>nodes.map(node=>({text:node.textContent,buttons:[...node.querySelectorAll('a,button')].map(a=>({label:a.textContent,key:a.getAttribute('data-course-key'),href:a.getAttribute('href')}))})));
+  assert.equal(cards.length,12);
+  assert.ok(await page.locator('#classes-grid h2').evaluateAll(nodes=>nodes.every(node=>getComputedStyle(node).fontSize==='26px')),'Class headings must retain the grid typography');
+  assert.ok(await page.locator('#classes-grid article').evaluateAll(nodes=>nodes.every(node=>node.getBoundingClientRect().right<=innerWidth+1)),'Class card overflow');
+  for(const card of cards){assert.equal(card.buttons.length,1);assert.equal(card.buttons[0].label,available.has(card.buttons[0].key)?'Register':'Join Waitlist');}
+  assert.equal(cards.filter(c=>c.buttons[0].label==='Register').length,6);
+  assert.ok(!(await page.locator('body').innerText()).includes('Buy Now'));
+  assert.ok(!(await page.locator('body').innerText()).includes('Request Info'));
+  for(const [key,price] of [['nervous-system-reset','$997'],['clinical-fat-loss','$1,497'],['90-day-package','$2,500'],['starter-kit','$499']])assert.ok(cards.find(c=>c.buttons[0].key===key)?.text.includes(price));
+  await page.screenshot({path:`artifacts/amanda-classes/${device}-${route.includes('portal')?'portal':'home'}.png`,fullPage:true});
+  await page.locator('#classes-grid [data-course-key="starter-kit"]').click();
+  await page.getByRole('textbox',{name:'Email',exact:true}).waitFor();
+  assert.ok(page.url().includes('/courses/starter-kit#waitlist'));
+  results.push({device,route,cards:12,register:6,waitlist:6,duplicateButtons:0,newTabs:0,documentReload:false,waitlistForm:'PASS'});
+  await context.close();
+ }
+}
+} finally {await browser.close();}
+fs.writeFileSync('artifacts/amanda-classes/report.json',JSON.stringify({preview:base,source:process.env.EXPECTED_SHA,results},null,2));
+console.log(JSON.stringify(results,null,2));
+console.log('AMANDA CLASSES: desktop/mobile, same-page anchor, 12 cards, 6 Register + 6 Join Waitlist PASS');

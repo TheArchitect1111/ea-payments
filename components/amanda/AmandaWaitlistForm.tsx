@@ -143,12 +143,12 @@ export default function AmandaWaitlistForm({
           disabled={busy}
           type="submit"
         >
-          {busy ? 'Submitting…' : submitLabel || (status.toUpperCase() === 'LIVE' ? 'Enroll Now' : 'Join Waitlist')}
+          {busy ? 'Submitting…' : submitLabel || (status.toUpperCase() === 'LIVE' ? 'Register' : 'Join Waitlist')}
         </button>
         {squareCheckoutUrl ? <a href={squareCheckoutUrl} target="_blank" rel="noopener noreferrer"
-          data-cta-name="Buy Now" data-cta-key={`buy-now-${courseId}`} data-course-key={courseId}
+          data-cta-name="Register" data-cta-key={`register-${courseId}`} data-course-key={courseId}
           className="flex w-full items-center justify-center rounded-xl border border-[#17211c] bg-white px-5 py-3 font-medium text-[#17211c] shadow-sm transition hover:bg-[#f4f0e8] focus:outline-none focus:ring-2 focus:ring-amber-500/40">
-          Buy Now
+          Register
         </a> : null}
       </div>
       <p className="min-h-5 text-sm text-[#7a3128]" role="status" aria-live="polite">{statusMessage}</p>

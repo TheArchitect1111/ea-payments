@@ -11,3 +11,6 @@
 .amanda-app-note h1{margin:0 0 14px!important;color:var(--ink);font:400 clamp(38px,6vw,52px)/1.08 Georgia,serif!important;letter-spacing:-.035em}
 .amanda-app-note>p:last-child{max-width:680px;margin:0 auto!important;color:#4d5b52;font:17px/1.7 Arial,sans-serif}
 @media(max-width:640px){.amanda-portal{padding:18px 16px 48px}.amanda-nav{gap:12px;padding:16px;margin-bottom:24px}.amanda-nav__links{justify-content:flex-start;flex-wrap:nowrap;width:100%;overflow-x:auto;padding:4px 0 6px;scrollbar-width:none}.amanda-nav__links::-webkit-scrollbar{display:none}.amanda-nav__links a{flex:0 0 auto}.amanda-app-note{margin-bottom:22px;border-radius:18px}.amanda-app-note>p:last-child{font-size:16px}}
+
+.amanda-button--outline{background:transparent;color:var(--ink,#17211c)!important;border:1px solid var(--ink,#17211c)}
+.amanda-portal #classes-grid h2{font-size:26px;letter-spacing:normal;line-height:1.2;margin:0 0 12px}

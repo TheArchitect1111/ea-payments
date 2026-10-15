@@ -9,8 +9,11 @@ const classes = readFileSync('app/portal/amanda-catherine/(engagement)/classes/p
 assert.ok(page.includes("redirect('/courses/starter-kit#waitlist')"));
 assert.ok(checkout.includes('{ status: 410 }'));
 assert.ok(!checkout.includes('checkout.sessions.create'));
-assert.ok(homepage.includes('Request Info'));
-assert.ok(homepage.includes('href="/courses/starter-kit#waitlist"'));
-assert.ok(classes.includes("c.name==='Purchase your Practitioner Kit'"));
-assert.ok(classes.includes("'/courses/starter-kit#waitlist'"));
-console.log('Amanda practitioner kit: inquiry-only route and disabled Stripe checkout verified.');
+assert.ok(homepage.includes('View Classes'));
+assert.ok(homepage.includes('href="/portal/amanda-catherine/classes"'));
+assert.ok(classes.includes('<AmandaClassesGrid courses={courses}/>'));
+const policy=readFileSync('lib/amanda-catherine/class-cta-policy.ts','utf8');
+assert.ok(policy.includes("label:'Join Waitlist'"));
+assert.ok(!policy.includes('Request Info'));
+assert.ok(policy.includes("action:'/courses/'+encodeURIComponent(course.key)+'#waitlist'"));
+console.log('Amanda practitioner kit: shared waitlist route and disabled Stripe checkout verified.');
