@@ -1,4 +1,4 @@
-/** CTA decisions use Amanda Creative Studio status supplied by the Airtable registry. */
+/** Single CTA policy consumes the effective status supplied by Amanda's registry. */
 import type { Course } from './registry';
 
 export function getCTA(course: Pick<Course,'key'|'status'|'square_checkout_url'>) {
@@ -7,7 +7,7 @@ export function getCTA(course: Pick<Course,'key'|'status'|'square_checkout_url'>
     if(!course.square_checkout_url) throw new Error('Available Amanda class missing Square checkout: '+course.key);
     return {label:'Buy Now' as const, action:course.square_checkout_url, kind:'checkout' as const};
   }
-  return {label:course.key==='starter-kit'?'Request Info' as const:'Join Waitlist' as const,
+  return {label:status==='inquiry'?'Request Info' as const:'Join Waitlist' as const,
     action:'/courses/'+encodeURIComponent(course.key)+'#waitlist',kind:'waitlist' as const};
 }
 export function amandaClassCopy(description:string, available:boolean):string {
