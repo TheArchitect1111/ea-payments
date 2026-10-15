@@ -1,15 +1,15 @@
 {
-  "sourceCommit": "61533021776808d2f4a199275428fed643d9b583",
-  "sha": "61533021776808d2f4a199275428fed643d9b583",
-  "previewCommit": "c284a61a5920c339fe39a64c5283f124ba57e636",
-  "mergeCommit": "61533021776808d2f4a199275428fed643d9b583",
-  "previewUrl": "https://ea-payments-6facungsz-the-architects-projects-cc813778.vercel.app/portal/amanda-catherine/classes",
+  "sourceCommit": "865adab6401faa23f99e22114e4bd1d3eb909e6f",
+  "sha": "865adab6401faa23f99e22114e4bd1d3eb909e6f",
+  "previewCommit": "67be2953e64b113120af8b5effe9d76a213bf996",
+  "mergeCommit": "865adab6401faa23f99e22114e4bd1d3eb909e6f",
+  "previewUrl": "https://ea-payments-oyg6aagqd-the-architects-projects-cc813778.vercel.app/portal/amanda-catherine/classes",
   "client": "amanda-catherine",
-  "scope": "PR #572: owner-approved class status primary; override and log mismatched Airtable status",
+  "scope": "PR #573: remove duplicate public class catalog and route navigation/kit action to canonical grid",
   "productionEligible": true,
   "status": "PASS",
   "verificationType": "Primary status policy tests, preview build and four fresh desktop/mobile browser contexts",
-  "completedAt": "2026-10-15T13:00:28.868Z",
+  "completedAt": "2026-10-15T13:19:27.715Z",
   "verified": "12/12 PASS",
   "duplicateButtons": 0,
   "airtableBase": "appv0YoLIMY45fmDA",
@@ -119,35 +119,35 @@
       "result": "PASS"
     }
   ],
-  "qa": "registry.ts enforces six AVAILABLE / one INQUIRY / default WAITLIST statuses; logs Airtable disagreement. Grid/detail share getCTA(course), which maps effective status to a single button. Airtable still supplies content/prices/checkout URLs.",
+  "qa": "Canonical grid and effective status/CTA policies unchanged. Public/portal Classes are plain links to /portal/amanda-catherine/classes, prefetch disabled; duplicate homepage catalog and LIVE-based enrollment logic removed. Homepage practitioner kit links to View Classes.",
   "gates": {
     "sourceIdentity": {
       "status": "PASS",
-      "proof": "PR #572 merged c284a61a5920c339fe39a64c5283f124ba57e636 into 61533021776808d2f4a199275428fed643d9b583. Only registry status resolution and inquiry CTA condition changed."
+      "proof": "PR #573 merged exact head 67be2953e64b113120af8b5effe9d76a213bf996 into 865adab6401faa23f99e22114e4bd1d3eb909e6f; only public homepage, kit action and portal layout changed."
     },
     "build": {
       "status": "PASS",
-      "proof": "Vercel preview dpl_DKKFgpJG2WZ2Gn4mZd3H2qUcRJec READY at c284a61a5920c339fe39a64c5283f124ba57e636."
+      "proof": "Vercel preview dpl_8LU76z245aT2zFyvbZ5jJTPYY5u4 READY for 67be2953e64b113120af8b5effe9d76a213bf996."
     },
     "assets": {
       "status": "PASS",
-      "proof": "Local Chromium rendered the classes grid with loaded CSS and readable fonts at 1440x1000 and 390x844; grid contains text/cards, no image assets."
+      "proof": "Public homepage and canonical grid desktop/mobile screenshots reviewed; existing Amanda hero image present; layout, class prices and assets retained."
     },
     "functional": {
       "status": "PASS",
-      "proof": "Tests pass: all six available slugs resolve AVAILABLE even with Airtable WAITLIST/INQUIRY/missing status; Starter Kit resolves INQUIRY; other slugs WAITLIST; mismatches logged; missing checkout still rejected. Preview base/query routes at desktop/mobile all 12/12 single correct CTA and exact existing checkout/waitlist URLs."
+      "proof": "Fresh desktop/mobile contexts: hover public Classes -> no menus/popovers; click -> exact /portal/amanda-catherine/classes; portal Classes hover/click -> no menu. Homepage class enrollment CTA sources 0; navigation class CTA sources 0; canonical grid 12 cards/12 buttons, all expected labels PASS."
     },
     "desktopVisual": {
       "status": "PASS",
-      "proof": "New preview screenshots SHA256 b568529cc4bfc328a85de0240c0731f3c6f676de0f2a9bed6595bcf45f18c8a7 match previously visually reviewed correct desktop grid exactly; 1440x1000, no horizontal overflow."
+      "proof": "amanda-pr573-public-desktop.png and amanda-pr573-grid-desktop.png visually reviewed at 1440x1000; plain Classes link, no dropdown; correct 3-column main grid."
     },
     "mobileVisual": {
       "status": "PASS",
-      "proof": "New preview screenshots SHA256 02467ef9964f70df1fc3fa09a6181b4f3a601e5acc06662b9fa2eaab80463392 match previously visually reviewed correct phone grid exactly; 390x844, no horizontal overflow."
+      "proof": "amanda-pr573-public-mobile.png and amanda-pr573-grid-mobile.png visually reviewed at 390x844; direct Classes link, no popover; correct single-column main grid."
     },
     "creativeCritic": {
       "status": "PASS",
-      "proof": "All class buttons remain solid ink rgb(23,33,28), one per card. New desktop/mobile screenshot bytes match approved correct rendering, including Body Sculpt Certification $2497 Buy Now and Strategy Call $249 Buy Now."
+      "proof": "One canonical public class catalog remains; duplicate homepage card renderer removed, academy introduction retained with View Classes. All 12 grid cards render one correct CTA; no nav class cards."
     }
   },
   "limitations": [
