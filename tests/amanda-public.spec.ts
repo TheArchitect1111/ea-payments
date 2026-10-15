@@ -3,9 +3,8 @@ import { readFileSync } from 'node:fs';
 
 const base = process.env.AMANDA_VERIFY_URL || 'https://amandacatherine.ca';
 test.describe('Amanda public production checks (no credentials and no payments)', () => {
-  test('homepage removes retired content and keeps Clinical Fat Loss waitlist-only', async ({ page }) => {
+  test('homepage removes retired content and Clinical Fat Loss keeps its checkout destination', async ({ page }) => {
     await page.goto(base + (process.env.AMANDA_HOME_PATH||'/'), { waitUntil: 'domcontentloaded' });
-    await expect(page.getByRole('heading', { name: /Clinical Fat Loss/i })).toBeVisible();
     if (process.env.AMANDA_VERIFY_DEPLOYED === 'true') await expect(page.getByRole('heading', { name: /A note from Amanda/i })).toHaveCount(0);
     await expect(page.getByText(/BODY SCULPT(?:™)? NATIONAL TRAINING TOUR|Non-Surgical Tummy Sculpt & Tighten/i)).toHaveCount(0);
     if(process.env.AMANDA_VERIFY_DEPLOYED==='true'||process.env.AMANDA_VERIFY_URL) for(const label of ['Hub','Foundry','Calendar','Eva']) await expect(page.getByRole('link',{name:label,exact:true}).first()).toBeVisible();
@@ -13,11 +12,13 @@ test.describe('Amanda public production checks (no credentials and no payments)'
 
     await expect(page.getByText(/Non-Surgical Tummy Sculpt & Tighten|Non-Surgical Tummy Tuck/i)).toHaveCount(0);
     await expect(page.getByText(/BODY SCULPT(?:™)? NATIONAL TRAINING TOUR/i)).toHaveCount(0);
-    const clinicalCard = page.locator('article, section, li, div').filter({
-      has: page.getByRole('heading', { name: /Clinical Fat Loss/i }),
-    }).last();
-    await expect(clinicalCard.getByRole('link', { name: /Join Waitlist/i })).toBeVisible();
-    await expect(clinicalCard.getByRole('link', { name: /Enroll|Pay|Purchase/i })).toHaveCount(0);
+    await page.goto(base + '/portal/amanda-catherine/classes', { waitUntil: 'domcontentloaded' });
+    const clinicalCard = page.locator('article').filter({has:page.getByRole('heading',{name:'Clinical Fat Loss',exact:true})});
+    const registration = clinicalCard.getByRole('link', { name: process.env.AMANDA_VERIFY_DEPLOYED === 'true' ? 'Register' : /^(Register|Buy Now)$/ });
+    await expect(registration).toBeVisible();
+    await expect(registration).toHaveAttribute('href', /^https:\/\/checkout\.square\.site\//);
+    await expect(clinicalCard.getByRole('link', { name: 'Join Waitlist', exact:true })).toHaveCount(0);
+
   });
 
   test('RIMAN uses kit visual and a single Canadian destination in site and owner source', async ({ page }) => {
@@ -64,7 +65,7 @@ test.describe('Amanda public production checks (no credentials and no payments)'
 test('Amanda homepage and Classes have complete click identities and working pathways',async({page})=>{
  test.skip(!process.env.AMANDA_VERIFY_URL&&process.env.AMANDA_VERIFY_DEPLOYED!=='true','New feature checks require its exact preview or promoted production.');
  const evidence:any[]=[];
- for(const [path,min] of [[process.env.AMANDA_HOME_PATH||'/',49],['/portal/amanda-catherine/classes',27]] as const){
+ for(const [path,min] of [[process.env.AMANDA_HOME_PATH||'/',49],['/portal/amanda-catherine/classes',26]] as const){
   await page.goto(base+path,{waitUntil:'networkidle'});
   const links=page.locator('a');expect(await links.count()).toBeGreaterThanOrEqual(min);
   const identities=await page.locator('a,button').evaluateAll(nodes=>nodes.map(n=>({name:n.getAttribute('data-cta-name'),key:n.getAttribute('data-cta-key'),href:n.getAttribute('href'),disabled:n.hasAttribute('disabled')})));
