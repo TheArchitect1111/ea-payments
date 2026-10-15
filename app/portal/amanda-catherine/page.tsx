@@ -3,8 +3,14 @@ import { normalizeRole, roleAtLeast } from '@/lib/rbac';
 import { requirePortalModule } from '@/lib/modules/portal-modules';
 import { PortalSubpage } from '@/app/portal/components/PortalSubpage';
 import AmandaMemberHome from '@/app/portal/[slug]/member/AmandaMemberHome';
+import AmandaClassesGrid from '@/components/amanda/AmandaClassesGrid';
+import ClassesAnchor from '@/components/amanda/ClassesAnchor';
+import { registry } from '@/lib/amanda-catherine/registry';
+import './(engagement)/portal.css';
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+export const fetchCache = 'force-no-store';
 
 const SLUG = 'amanda-catherine';
 
@@ -12,14 +18,9 @@ export default async function AmandaCatherinePortalPage() {
   const { client, session } = await requirePortalModule(SLUG, 'dashboard');
   const firstName = client.clientName?.split(' ')[0] || 'Amanda';
   const isAdministrator = roleAtLeast(normalizeRole(session.role), 'admin');
-
-  // The owner dashboard already owns its complete branded shell, including
-  // navigation, header, hero, dashboard cards, footer and responsive mobile
-  // navigation. Wrapping it in the shared PortalShell creates a second shell
-  // around the approved Amanda experience and is the reason production did
-  // not visually match the approved design.
   if (isAdministrator) redirect('/portal/amanda-catherine/owner');
 
+  const classes = (await registry()).courses.filter(course => !course.isTest);
   return (
     <PortalSubpage
       slug={SLUG}
@@ -29,11 +30,21 @@ export default async function AmandaCatherinePortalPage() {
       lede="Your programs, appointments, files, payments, and next steps in one place."
       firstName={firstName}
     >
-      <AmandaMemberHome
-        slug={SLUG}
-        email={session.email || client.email}
-        role={session.role}
-      />
+      <div className="amanda-portal">
+        <nav className="amanda-nav" aria-label="Amanda classes navigation">
+          <div className="amanda-nav__links"><ClassesAnchor /></div>
+        </nav>
+        <AmandaMemberHome
+          slug={SLUG}
+          email={session.email || client.email}
+          role={session.role}
+        />
+        <section aria-label="Amanda classes" className="amanda-shell">
+          <h2>Classes</h2>
+          <p>Explore your next step with Amanda.</p>
+          <AmandaClassesGrid courses={classes} />
+        </section>
+      </div>
     </PortalSubpage>
   );
 }
