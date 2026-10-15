@@ -32,14 +32,14 @@ export default async function AmandaCatherinePortalPage() {
     >
       <div className="amanda-portal">
         <nav className="amanda-nav" aria-label="Amanda classes navigation">
-          <div className="amanda-nav__links"><ClassesAnchor target="classes" /></div>
+          <div className="amanda-nav__links"><ClassesAnchor /></div>
         </nav>
         <AmandaMemberHome
           slug={SLUG}
           email={session.email || client.email}
           role={session.role}
         />
-        <section id="classes" aria-label="Amanda classes" className="amanda-shell scroll-mt-24">
+        <section aria-label="Amanda classes" className="amanda-shell">
           <h2>Classes</h2>
           <p>Explore your next step with Amanda.</p>
           <AmandaClassesGrid courses={classes} />
