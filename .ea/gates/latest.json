@@ -1,157 +1,25 @@
 {
-  "sourceCommit": "c1a8904a51528dca84abac7895e769d80c561bf5",
-  "sha": "c1a8904a51528dca84abac7895e769d80c561bf5",
-  "previewCommit": "ecb87cd746b6b8b87e136cb0ee714441935c34a0",
-  "mergeCommit": "c1a8904a51528dca84abac7895e769d80c561bf5",
-  "previewUrl": "https://ea-payments-qm91wdfcm-the-architects-projects-cc813778.vercel.app/portal/amanda-catherine/classes",
-  "client": "amanda-catherine",
-  "scope": "PR #568 class CTA grid and detail consistency only",
-  "productionEligible": true,
-  "status": "PASS",
-  "verificationType": "Read-only preview DOM, Airtable readback, local Chromium desktop/mobile visual review",
-  "completedAt": "2026-10-15T12:27:13.497Z",
-  "verified": "12/12 PASS",
-  "duplicateButtons": 0,
-  "airtableBase": "appv0YoLIMY45fmDA",
-  "classes": [
-    {
-      "class": "Advanced Body Sculpt",
-      "slug": "advanced-body-sculpt",
-      "status": "WAITLIST",
-      "button": "Join Waitlist",
-      "count": 1,
-      "result": "PASS"
-    },
-    {
-      "class": "Wood Therapy",
-      "slug": "wood-therapy",
-      "status": "AVAILABLE",
-      "button": "Buy Now",
-      "count": 1,
-      "result": "PASS",
-      "priceCad": 997
-    },
-    {
-      "class": "Non-Surgical BBL",
-      "slug": "non-surgical-bbl",
-      "status": "AVAILABLE",
-      "button": "Buy Now",
-      "count": 1,
-      "result": "PASS",
-      "priceCad": 1497
-    },
-    {
-      "class": "LIFELINE LIVE",
-      "slug": "lifeline-live",
-      "status": "WAITLIST",
-      "button": "Join Waitlist",
-      "count": 1,
-      "result": "PASS"
-    },
-    {
-      "class": "Body Sculpt Certification",
-      "slug": "body-sculpt-certification",
-      "status": "AVAILABLE",
-      "button": "Buy Now",
-      "count": 1,
-      "result": "PASS",
-      "priceCad": 2497
-    },
-    {
-      "class": "Strategy Call",
-      "slug": "strategy-call",
-      "status": "AVAILABLE",
-      "button": "Buy Now",
-      "count": 1,
-      "result": "PASS",
-      "priceCad": 249
-    },
-    {
-      "class": "90-Day Package",
-      "slug": "90-day-package",
-      "status": "WAITLIST",
-      "button": "Join Waitlist",
-      "count": 1,
-      "result": "PASS",
-      "priceCad": 2500
-    },
-    {
-      "class": "Nervous System Reset",
-      "slug": "nervous-system-reset",
-      "status": "AVAILABLE",
-      "button": "Buy Now",
-      "count": 1,
-      "result": "PASS",
-      "priceCad": 997
-    },
-    {
-      "class": "Foundry Mentorship",
-      "slug": "foundry-mentorship",
-      "status": "WAITLIST",
-      "button": "Join Waitlist",
-      "count": 1,
-      "result": "PASS"
-    },
-    {
-      "class": "Clinical Fat Loss",
-      "slug": "clinical-fat-loss",
-      "status": "AVAILABLE",
-      "button": "Buy Now",
-      "count": 1,
-      "result": "PASS",
-      "priceCad": 1497
-    },
-    {
-      "class": "Starter Kit",
-      "slug": "starter-kit",
-      "status": "INQUIRY",
-      "button": "Request Info",
-      "count": 1,
-      "result": "PASS",
-      "priceCad": 499
-    },
-    {
-      "class": "The Entrepreneurial Artist",
-      "slug": "the-entrepreneurial-artist",
-      "status": "WAITLIST",
-      "button": "Join Waitlist",
-      "count": 1,
-      "result": "PASS"
-    }
-  ],
-  "qa": "Grid and detail routes use shared getCTA(), with registry status read from Creative Studio Payload JSON.status.",
-  "gates": {
-    "sourceIdentity": {
-      "status": "PASS",
-      "proof": "GitHub compare ecb87cd746b6b8b87e136cb0ee714441935c34a0 -> c1a8904a51528dca84abac7895e769d80c561bf5: files=[]; PR #568 merged with exact preview head."
-    },
-    "build": {
-      "status": "PASS",
-      "proof": "Vercel preview dpl_DrgrDt1rAEXzxsg1bdHbM8qNF84B READY at ecb87cd; merge contains zero file differences from preview."
-    },
-    "assets": {
-      "status": "PASS",
-      "proof": "Local Chromium rendered the classes grid with loaded CSS and readable fonts at 1440x1000 and 390x844; grid contains text/cards, no image assets."
-    },
-    "functional": {
-      "status": "PASS",
-      "proof": "2026-10-15 Airtable readback: 6 AVAILABLE, 5 WAITLIST, 1 INQUIRY; hydrated browser DOM: 12 matching class cards, one CTA each, six Square Buy Now links, five Join Waitlist links, one Starter Kit Request Info link. No checkout payment submitted."
-    },
-    "desktopVisual": {
-      "status": "PASS",
-      "proof": "Local Chromium screenshot amanda-preview-desktop.png reviewed at viewport 1440x1000: 3-column class grid, readable text and CTA labels, no horizontal overflow."
-    },
-    "mobileVisual": {
-      "status": "PASS",
-      "proof": "Local Chromium screenshot amanda-preview-mobile.png reviewed at viewport 390x844: single-column class grid, readable text and CTA labels, no horizontal overflow."
-    },
-    "creativeCritic": {
-      "status": "PASS",
-      "proof": "Scoped CTA review of both captured screenshots: all 12 class cards contain exactly one visible CTA; available cards have no waitlist copy; pricing and cream/ink editorial layout retained."
-    }
+  "sourceCommit": "f407125f8452328d5e87f2db61adc6b434d15045",
+  "sha": "f407125f8452328d5e87f2db61adc6b434d15045",
+  "client": "tarris",
+  "completedAt": "2026-10-14T21:51:52.722Z",
+  "status": "STAGING_CONTRACT_PASS",
+  "verificationType": "CONTRACT ONLY",
+  "productionEligible": false,
+  "generic": true,
+  "clientLeak": 0,
+  "bricks": 14,
+  "click": "14/14 CONTRACT ONLY PASS",
+  "chain": "cs_test_ -> /success -> /learn -> re_mock_ -> mock://receipt.pdf",
+  "build": "SUCCESS",
+  "clients": {
+    "tarris": "14/14 CONTRACT ONLY",
+    "amanda": "14/14 CONTRACT ONLY"
   },
   "limitations": [
-    "Existing GitHub CTA regression workflow is unhealthy: script syntax error and unset workflow credential/preview inputs. This manifest uses independently observed direct Airtable and browser evidence, not a claim that that workflow passed.",
-    "This certifies the Amanda class CTA change only, not the generic chassis or payment fulfillment."
+    "No real payment, email, PDF delivery, or entitlement grant verified",
+    "Booking placeholder requires a real provisioned client account",
+    "Catalog counts 12/5 are simulated fixtures",
+    "Portal browser verification pending"
   ]
 }
