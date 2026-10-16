@@ -79,7 +79,7 @@ export async function requireVerifiedProviderCheckout(checkoutId:string,organiza
   if(!row || row.organization_id!==organizationId || row.offer_id!==offerId)
     throw new Error('Payment is not correlated to a trusted checkout');
   return row as {checkout_id:string;organization_id:string;offer_id:string;
-    buyer_email:string;buyer_name:string;provider:string;amount_cad_cents:number};
+    buyer_email:string;buyer_name:string;provider:string;amount_cad_cents:number;fulfilled_payment_reference?:string|null};
 }
 export async function recordProviderCheckout(data:{
   checkoutId:string;organizationId:string;offerId:string;buyerEmail:string;buyerName:string;

@@ -32,7 +32,7 @@ export async function createSubportalBrick(input:{
         if(offer.provider==='stripe'){
           if(!process.env.STRIPE_SECRET_KEY)throw new Error('Stripe provider is not configured');
           const {getStripe}=await import('@/lib/stripe');
-          await getStripe().accounts.retrieve();
+          await getStripe().balance.retrieve();
         }
         if(offer.provider==='square'){
           if(!process.env.SQUARE_ACCESS_TOKEN ||
