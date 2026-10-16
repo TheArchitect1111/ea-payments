@@ -348,6 +348,7 @@ export const config = {
     '/reset-password',
     '/portal/:slug',
     '/portal/:slug/:path*',
+    '/api/subportal/:path*',
     '/simplifi',
     '/simplifi/:path*',
     '/admin/:path*',

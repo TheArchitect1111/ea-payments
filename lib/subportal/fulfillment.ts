@@ -103,7 +103,8 @@ export async function fulfillSubportalSquare(paymentId:string){
     payment.amount_money?.currency!=='CAD' || Number(payment.amount_money?.amount)!==expected ||
     Number(order.total_money?.amount)!==expected || lines[0].catalog_object_id!==offer.squareCatalogObjectId)
     throw new Error('Square amount, location, or catalog product mismatch');
-  const email=String(payment.buyer_email_address || checkout.buyer_email).trim().toLowerCase();
+  const providerEmail=String(payment.buyer_email_address||'').trim().toLowerCase();
+  const email=providerEmail || checkout.buyer_email;
   if(email!==checkout.buyer_email)throw new Error('Square buyer email does not match checkout');
   await processPaid({provider:'square',checkoutId,organizationId:manifest.organizationId,offerId:offer.id,
     paymentReference:payment.id,sessionId:checkoutId,email,amountCadCents:expected,

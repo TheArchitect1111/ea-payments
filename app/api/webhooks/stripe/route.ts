@@ -175,7 +175,13 @@ export async function POST(req: NextRequest) {
 
   switch (event.type) {
     case 'checkout.session.completed':
+      if ((event.data.object as Stripe.Checkout.Session).metadata?.subportalBrick === 'v1' &&
+        (event.data.object as Stripe.Checkout.Session).payment_status !== 'paid') break;
       await handleCheckoutCompleted(event.data.object as Stripe.Checkout.Session);
+      break;
+    case 'checkout.session.async_payment_succeeded':
+      if ((event.data.object as Stripe.Checkout.Session).metadata?.subportalBrick === 'v1')
+        await handleCheckoutCompleted(event.data.object as Stripe.Checkout.Session);
       break;
     case 'customer.subscription.created':
     case 'customer.subscription.updated':
