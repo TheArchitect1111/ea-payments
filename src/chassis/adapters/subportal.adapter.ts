@@ -1,7 +1,7 @@
 /** The four universal sockets. No client-specific imports, offers or slugs. */
 import type {Brick,CheckoutRequest,CheckoutResult,WelcomeRequest,WelcomeResult,BrickHealth} from '../BrickInterface';
 import {loadSubportalManifest,requireSubportalOffer} from '@/lib/subportal/manifest';
-import {subportalStoreHealth} from '@/lib/subportal/db';
+import {subportalStoreHealth,subportalDb} from '@/lib/subportal/db';
 import {createSubportalCheckout} from '@/lib/subportal/commerce';
 import {verifiedSubportalWelcome} from '@/lib/subportal/delivery';
 
@@ -30,7 +30,12 @@ export async function createSubportalBrick(input:{
         if(offer.provider==='square' && (!process.env.SQUARE_ACCESS_TOKEN ||
           !process.env.SQUARE_LOCATION_ID || !process.env.SQUARE_WEBHOOK_SIGNATURE_KEY))
           throw new Error('Square provider is not configured');
-        liveHealth=true;
+        const release=await subportalDb<{status:string;gate_results:Record<string,boolean>}>('subportal_certifications',{
+          query:{version:'eq.v1',select:'status,gate_results',limit:'1'},
+        });
+        const checks=release[0]?.gate_results;
+        liveHealth=release[0]?.status==='certified' &&
+          Boolean(checks && Object.keys(checks).length===20 && Object.values(checks).every(Boolean));
         return {status:200,evidence:'Live manifest, Supabase tables, identity and provider dependencies responsive'};
       }catch(e){return {status:503,evidence:e instanceof Error?e.message:'Subportal health check failed'};}
     },
@@ -47,6 +52,6 @@ export async function createSubportalBrick(input:{
     async welcome(payment:WelcomeRequest):Promise<WelcomeResult>{
       return verifiedSubportalWelcome(payment.sessionId);
     },
-    attach(){return liveHealth && process.env.SUBPORTAL_CERTIFIED_VERSION==='1';},
+    attach(){return liveHealth;},
   };
 }

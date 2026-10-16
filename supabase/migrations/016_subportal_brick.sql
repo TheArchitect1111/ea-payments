@@ -20,6 +20,8 @@ create table if not exists public.subportal_enrollments (
   student_id uuid not null references public.subportal_students(id) on delete restrict,
   offer_id text not null check (length(offer_id) between 1 and 80),
   program_title text not null,
+  student_name text not null,
+  student_email text not null,
   provider text not null check (provider in ('stripe','square')),
   payment_reference text not null,
   idempotency_key text not null unique,
@@ -53,6 +55,13 @@ create table if not exists public.subportal_checkout_orders (
   amount_cad_cents integer not null check(amount_cad_cents > 0),
   created_at timestamptz not null default now()
 );
+create table if not exists public.subportal_certifications (
+  version text primary key,
+  status text not null check(status in ('blocked','certified')),
+  gate_results jsonb not null check (jsonb_typeof(gate_results) = 'object'),
+  certified_at timestamptz,
+  verified_by text
+);
 create table if not exists public.subportal_deliveries (
   session_id text primary key,
   organization_id text not null,
@@ -73,10 +82,12 @@ alter table public.subportal_enrollments enable row level security;
 alter table public.subportal_progress enable row level security;
 alter table public.subportal_checkout_orders enable row level security;
 alter table public.subportal_deliveries enable row level security;
+alter table public.subportal_certifications enable row level security;
 
 revoke all on public.subportal_students,public.subportal_owner_access,
   public.subportal_enrollments,public.subportal_progress,
-  public.subportal_checkout_orders,public.subportal_deliveries from anon,authenticated;
+  public.subportal_checkout_orders,public.subportal_deliveries,
+  public.subportal_certifications from anon,authenticated;
 grant select on public.subportal_students to authenticated;
 grant select on public.subportal_owner_access to authenticated;
 grant select on public.subportal_enrollments to authenticated;
@@ -131,5 +142,6 @@ create policy subportal_progress_student_update on public.subportal_progress
 grant select,insert,update,delete on
   public.subportal_students,public.subportal_owner_access,
   public.subportal_enrollments,public.subportal_progress,
-  public.subportal_checkout_orders,public.subportal_deliveries to service_role;
+  public.subportal_checkout_orders,public.subportal_deliveries,
+  public.subportal_certifications to service_role;
 commit;

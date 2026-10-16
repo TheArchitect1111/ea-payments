@@ -3,6 +3,7 @@ import {notFound,redirect} from 'next/navigation';
 import {loadSubportalBySlug,requireSubportalOffer} from '@/lib/subportal/manifest';
 import {subportalViewer} from '@/lib/subportal/identity';
 import {subportalDb,type EnrollmentRow} from '@/lib/subportal/db';
+import StudentProgressAction from '../StudentProgressAction';
 export const dynamic='force-dynamic';
 type ProgressRow={enrollment_id:string;current_module:string|null;completed_modules:string[]};
 export default async function StudentPortal({params}:{
@@ -73,7 +74,9 @@ export default async function StudentPortal({params}:{
           <h4>Materials</h4>
           <ul style={{paddingLeft:18}}>{offer.modules.map(module=><li key={module.id} style={{marginBottom:9}}>
             <Link href={module.href}>{module.title}</Link>
-            {(seen.get(entry.id)?.completed_modules||[]).includes(module.id)?' ✓':''}
+            {!viewer.owner?<StudentProgressAction orgSlug={slug} enrollmentId={entry.id}
+              moduleId={module.id} completedModules={seen.get(entry.id)?.completed_modules||[]}
+              complete={(seen.get(entry.id)?.completed_modules||[]).includes(module.id)}/>:null}
           </li>)}</ul>
           <p style={{fontSize:14,color:'#555'}}>Next requirement: {next?.title||'All published modules completed'}</p>
         </section>)}

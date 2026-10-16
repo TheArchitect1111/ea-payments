@@ -44,6 +44,7 @@ export const subportalService={
       payload:{
         organization_id:input.organizationId, student_id:input.studentIdentity,
         offer_id:offer.id, provider:input.provider, payment_reference:input.paymentReference,
+        student_name:student[0].name, student_email:student[0].email,
         idempotency_key:input.idempotencyKey, program_title:offer.title,status:'active',
       },
     });
