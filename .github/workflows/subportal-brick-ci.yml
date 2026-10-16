@@ -26,6 +26,8 @@ jobs:
           node-version: '20'
           cache: npm
       - run: npm ci --ignore-scripts
+      - name: Reject client-specific Subportal code
+        run: node scripts/check-subportal-generic.mjs
       - name: Generic contract tests (not live payment proof)
         run: node --import tsx --test tests/subportal-brick-contract.test.mts
       - name: Subportal-owned TypeScript errors (all existing diagnostics reported)
