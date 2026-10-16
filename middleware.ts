@@ -254,6 +254,14 @@ export async function middleware(request: NextRequest, event: NextFetchEvent) {
       /^\/portal\/[a-z0-9-]+\/students(?:\/(?:[0-9a-f-]{36}|offers))?$/.test(pathname) ||
       pathname === '/api/subportal/progress' ||
       pathname === '/api/subportal/receipt') {
+    // Missing deployment configuration must fail closed with a clear service error,
+    // rather than throwing inside Clerk middleware and producing an opaque 500.
+    if (!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || !process.env.CLERK_SECRET_KEY) {
+      return NextResponse.json(
+        { error: 'Student authentication is not configured.' },
+        { status: 503, headers: { 'Cache-Control': 'no-store' } },
+      );
+    }
     return subportalClerk(request, event);
   }
 

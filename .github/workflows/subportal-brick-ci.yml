@@ -11,6 +11,8 @@ on:
       - 'app/api/webhooks/subportal/**'
       - 'src/chassis/adapters/subportal.adapter.ts'
       - 'tests/subportal-brick-contract.test.mts'
+      - 'tests/subportal-middleware.test.mts'
+      - 'middleware.ts'
       - '.github/workflows/subportal-brick-ci.yml'
 permissions:
   contents: read
@@ -30,5 +32,7 @@ jobs:
         run: node scripts/check-subportal-generic.mjs
       - name: Generic contract tests (not live payment proof)
         run: node --import tsx --test tests/subportal-brick-contract.test.mts
+      - name: Clerk middleware fail-closed and route regression checks
+        run: node --import tsx --test tests/subportal-middleware.test.mts
       - name: Subportal-owned TypeScript errors (all existing diagnostics reported)
         run: node scripts/check-subportal-types.mjs
