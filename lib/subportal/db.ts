@@ -7,7 +7,9 @@ export type EnrollmentRow = { id:string; organization_id:string; student_id:stri
   created_at:string; first_seen_at:string|null };
 export type DeliveryRow = { session_id:string; provider:string; student_id:string; enrollment_id:string;
   email_id:string|null; receipt_pdf_base64:string|null; success_page:string|null;
-  access_link:string|null; next_steps:string|null };
+  access_link:string|null; next_steps:string|null;
+  delivery_status?:'accepted'|'sent'|'delivered'|'bounced'|'complained'|'failed';
+  delivered_at?:string|null; delivery_event_id?:string|null };
 
 function supabaseUrl(){return (process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || '').replace(/\/$/,'');}
 function key(){return process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY || '';}
