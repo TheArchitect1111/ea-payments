@@ -27,6 +27,8 @@ export async function createSubportalBrick(input:{
           signal:AbortSignal.timeout(12000),
         });
         if(!verifyRes.ok)throw new Error('Resend account verification failed');
+        if(!process.env.RESEND_WEBHOOK_SIGNING_SECRET)
+          throw new Error('Signed Resend delivery proof webhook is not configured');
         if(!process.env.RESEND_API_KEY || !process.env.RESEND_FROM_EMAIL)
           throw new Error('Resend email is not configured');
         if(offer.provider==='stripe'){

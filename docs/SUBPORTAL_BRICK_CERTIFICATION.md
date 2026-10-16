@@ -29,7 +29,7 @@ Certification is fail closed: \`src/chassis/adapters/subportal.adapter.ts\` refu
 | 15 | Student RLS rejects cross-student/tenant reads and writes | PASS 5+ live policy checks | Live Supabase SQL role simulation, rollback |
 | 16 | Owner RLS isolates each organization | PASS 2 live policy checks | Live Supabase SQL role simulation, rollback |
 | 17 | Student progress saved and organization boundaries preserved | PASS 2 live policy checks | Live Supabase SQL update, rollback |
-| 18 | Real Resend email ID and provider delivery proof persisted | PENDING | Resend email ID, API status, delivery record |
+| 18 | Real Resend message ID and signed delivered webhook proof persisted | PENDING | Resend email ID, signed event ID, delivered_at, delivery_status |
 | 19 | Actual PDF receipt generated, stored, available only to entitled user | PASS PDF bytes unit; authenticated access pending | PDF checksum, provider-linked receipt and authorized GET |
 | 20 | Existing client routes, CTAs, auth, checkout unaffected | PENDING | Regression suite and preview/live comparisons |
 

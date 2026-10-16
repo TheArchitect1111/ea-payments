@@ -43,6 +43,7 @@ export async function deliverSubportalWelcome(input:{
   const rows=await subportalDb<DeliveryRow>('subportal_deliveries',{
     method:'POST',query:{on_conflict:'session_id'},prefer:'resolution=merge-duplicates,return=representation',
     payload:{session_id:input.sessionId,organization_id:input.organizationId,provider:input.provider,
+      delivery_status:'accepted',
       student_id:input.studentId,enrollment_id:input.enrollmentId,
       email_id:result.id,receipt_pdf_base64:pdf.toString('base64'),receipt_sha256:subportalPdfChecksum(pdf),
       success_page:path,access_link:path,next_steps:nextSteps},
