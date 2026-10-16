@@ -40,6 +40,12 @@ Certification is fail closed: \`src/chassis/adapters/subportal.adapter.ts\` refu
 **Schema:** supabase/migrations/20261016134137_subportal_brick_v1.sql
 **Unit tests:** tests/subportal-brick-contract.test.mts
 
+## Shared provider endpoints
+
+Each provider uses one platform-wide endpoint for every installed organization: Stripe `/api/webhooks/subportal/stripe`, Square `/api/webhooks/subportal/square`, and Resend `/api/webhooks/subportal/resend`. Provider identity is resolved from the verified event and installed manifest; no per-tenant webhook function is required. Stripe uses the endpoint-specific `SUBPORTAL_STRIPE_WEBHOOK_SECRET`. The legacy `/api/webhooks/stripe` source is kept byte-for-byte identical to the base branch because it is covered by the existing exact-source certification.
+
+The Preview deployment currently needs Clerk authentication configured before its student routes can run. A fail-closed middleware guard returns an uncached 503 when either Clerk key is absent; it never falls back to an EA HMAC token. This condition is deployment configuration, not a certification pass.
+
 ## Release blockers and non-drift rules
 
 1. Need real third-party Clerk JWT accepted by Supabase. This requires both Clerk Supabase integration and Supabase provider configuration. See https://supabase.com/docs/guides/auth/third-party/clerk

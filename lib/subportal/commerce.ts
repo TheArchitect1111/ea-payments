@@ -47,7 +47,8 @@ export async function createSubportalCheckout(input:{
     method:'POST',headers:{Authorization:'Bearer '+token,'Square-Version':'2026-09-16','Content-Type':'application/json'},
     body:JSON.stringify({idempotency_key:randomUUID(),order:{
       location_id:location,line_items:[{catalog_object_id:offer.squareCatalogObjectId,quantity:'1'}]},
-      checkout_options:{redirect_url:base+'/portal/login'},pre_populated_data:{buyer_email:buyer.email}}),
+      checkout_options:{redirect_url:base+'/portal/subportal-auth/success'},
+      pre_populated_data:{buyer_email:buyer.email}}),
     signal:AbortSignal.timeout(15000),
   });
   if(!res.ok)throw new Error('Square payment link failed: HTTP '+res.status);

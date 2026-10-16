@@ -1,5 +1,4 @@
 import { fulfillPortableAmandaSession } from '@/lib/portal-universal/bricks/amanda/stripe';
-import { fulfillSubportalStripe } from '@/lib/subportal/fulfillment';
 import { NextRequest } from 'next/server';
 import Stripe from 'stripe';
 import { getStripe } from '@/lib/stripe';
@@ -175,13 +174,7 @@ export async function POST(req: NextRequest) {
 
   switch (event.type) {
     case 'checkout.session.completed':
-      if ((event.data.object as Stripe.Checkout.Session).metadata?.subportalBrick === 'v1' &&
-        (event.data.object as Stripe.Checkout.Session).payment_status !== 'paid') break;
       await handleCheckoutCompleted(event.data.object as Stripe.Checkout.Session);
-      break;
-    case 'checkout.session.async_payment_succeeded':
-      if ((event.data.object as Stripe.Checkout.Session).metadata?.subportalBrick === 'v1')
-        await handleCheckoutCompleted(event.data.object as Stripe.Checkout.Session);
       break;
     case 'customer.subscription.created':
     case 'customer.subscription.updated':
@@ -207,7 +200,6 @@ export async function POST(req: NextRequest) {
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promise<void> {
   const meta = session.metadata ?? {};
 
-  if (await fulfillSubportalStripe(session)) return;
   if (await fulfillPortableAmandaSession(session)) return;
 
   if (isAmandaKitSession(session)) {

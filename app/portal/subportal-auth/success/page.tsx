@@ -6,9 +6,10 @@ import {loadSubportalManifest} from '@/lib/subportal/manifest';
 import {subportalViewer} from '@/lib/subportal/identity';
 export const dynamic='force-dynamic';
 export default async function SubportalSuccess({searchParams}:{
-  searchParams:Promise<{sessionId?:string}>;
+  searchParams:Promise<{sessionId?:string;orderId?:string}>;
 }){
-  const {sessionId=''}=await searchParams;
+  const {sessionId:stripeSessionId='',orderId=''}=await searchParams;
+  const sessionId=stripeSessionId||orderId;
   if(!/^[a-zA-Z0-9_-]{5,180}$/.test(sessionId))notFound();
   const session=await auth();
   if(!session.userId)redirect('/portal/subportal-auth?next='+encodeURIComponent('/portal/subportal-auth/success?sessionId='+sessionId));
