@@ -5,6 +5,7 @@ import {getStripe} from '@/lib/stripe';
 import {loadSubportalManifest,requireSubportalOffer} from './manifest';
 import {requireVerifiedProviderCheckout,resolveStudentIdentity,subportalService} from './service';
 import {deliverSubportalWelcome} from './delivery';
+import {subportalDb} from './db';
 
 type Paid={provider:'stripe'|'square';checkoutId:string;organizationId:string;offerId:string;
   paymentReference:string;sessionId:string;email:string;amountCadCents:number;
@@ -18,6 +19,20 @@ async function processPaid(input:Paid){
     throw new Error('Payment, identity or amount does not match the trusted checkout manifest');
   if(input.provider==='square' && input.catalogObjectId!==offer.squareCatalogObjectId)
     throw new Error('Square catalog object does not match the trusted offer ID');
+  if(checkout.fulfilled_payment_reference && checkout.fulfilled_payment_reference!==input.paymentReference)
+    throw new Error('Checkout already fulfilled by a different payment');
+  // Compare-and-set prevents two distinct payments from silently sharing a checkout.
+  if(!checkout.fulfilled_payment_reference){
+    const bound=await subportalDb('subportal_checkout_orders',{
+      method:'PATCH',query:{checkout_id:'eq.'+input.checkoutId,fulfilled_payment_reference:'is.null'},
+      payload:{fulfilled_payment_reference:input.paymentReference},
+    });
+    if(!bound.length){
+      const current=await requireVerifiedProviderCheckout(input.checkoutId,input.organizationId,input.offerId);
+      if(current.fulfilled_payment_reference!==input.paymentReference)
+        throw new Error('Payment reference binding conflict');
+    }
+  }
   const student=await resolveStudentIdentity({email:input.email,name:checkout.buyer_name});
   const created=await subportalService.create({
     organizationId:manifest.organizationId,studentIdentity:student.id,offerId:offer.id,
@@ -76,7 +91,6 @@ export async function fulfillSubportalSquare(paymentId:string){
   const lines=order?.line_items;
   if(!Array.isArray(lines)||lines.length!==1 || String(lines[0].quantity)!=='1' ||
     !lines[0].catalog_object_id)throw new Error('Square order is not a single trusted catalog item');
-  const {subportalDb}=await import('./db');
   const mapped=await subportalDb<any>('subportal_checkout_orders',{
     query:{checkout_id:'eq.'+checkoutId,select:'*',limit:'1'},
   });

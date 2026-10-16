@@ -11,18 +11,20 @@ const CreateSchema=z.object({
   studentIdentity:UUID, offerId:z.string().min(1), paymentReference:z.string().min(5).max(220),
   idempotencyKey:z.string().min(8).max(250), provider:z.enum(['stripe','square']),
 }).strict();
-const escapeValue=(s:string)=>'"'+s.replace(/\\/g,'\\\\').replace(/"/g,'\\"')+'"';
 
 export async function resolveStudentIdentity(input:{email:string;name:string}):Promise<StudentRow>{
   const email=Email.parse(input.email);
   const name=z.string().trim().min(1).max(200).parse(input.name);
   // A stable, immutable UUID; email is only a verified claim/recovery alias.
   const rows=await subportalDb<StudentRow>('subportal_students',{
-    method:'POST',query:{on_conflict:'email'},prefer:'resolution=merge-duplicates,return=representation',
+    method:'POST',query:{on_conflict:'email'},prefer:'resolution=ignore-duplicates,return=representation',
     payload:{id:randomUUID(),email,name},
   });
-  if(rows.length!==1)throw new Error('Student identity could not be persisted');
-  return rows[0];
+  const saved=rows[0] || (await subportalDb<StudentRow>('subportal_students',{
+    query:{email:'eq.'+email,select:'*',limit:'1'},
+  }))[0];
+  if(!saved)throw new Error('Student identity could not be persisted');
+  return saved;
 }
 
 export const subportalService={
@@ -41,12 +43,12 @@ export const subportalService={
       prefer:'resolution=ignore-duplicates,return=representation',
       payload:{
         organization_id:input.organizationId, student_id:input.studentIdentity,
-        offer_id:offer.id, payment_reference:input.paymentReference,
+        offer_id:offer.id, provider:input.provider, payment_reference:input.paymentReference,
         idempotency_key:input.idempotencyKey, program_title:offer.title,status:'active',
       },
     });
     const matches=rows.length?rows:await subportalDb<EnrollmentRow>('subportal_enrollments',{
-      query:{idempotency_key:'eq.'+encodeURIComponent(input.idempotencyKey),select:'*',limit:'1'},
+      query:{idempotency_key:'eq.'+input.idempotencyKey,select:'*',limit:'1'},
     });
     const enrollment=matches[0];
     if(!enrollment || enrollment.organization_id!==input.organizationId ||
@@ -70,7 +72,7 @@ export const subportalService={
 };
 export async function requireVerifiedProviderCheckout(checkoutId:string,organizationId:string,offerId:string){
   const rows=await subportalDb<any>('subportal_checkout_orders',{
-    query:{checkout_id:'eq.'+encodeURIComponent(checkoutId),select:'*',limit:'1'},
+    query:{checkout_id:'eq.'+checkoutId,select:'*',limit:'1'},
   });
   const row=rows[0];
   if(!row || row.organization_id!==organizationId || row.offer_id!==offerId)

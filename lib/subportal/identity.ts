@@ -41,8 +41,14 @@ export async function subportalViewer(manifest:Manifest){
   if(owner){
     await subportalDb('subportal_owner_access',{
       method:'POST',query:{on_conflict:'organization_id,auth_subject'},
-      prefer:'resolution=ignore-duplicates,return=representation',
-      payload:{organization_id:manifest.organizationId,auth_subject:session.userId},
+      prefer:'resolution=merge-duplicates,return=representation',
+      payload:{organization_id:manifest.organizationId,auth_subject:session.userId,expires_at:new Date(Date.now()+2*60*1000).toISOString()},
+    });
+  }else{
+    // A revoked owner cannot refresh a previous privileged binding.
+    await subportalDb('subportal_owner_access',{
+      method:'PATCH',query:{organization_id:'eq.'+manifest.organizationId,auth_subject:'eq.'+session.userId},
+      payload:{expires_at:new Date(0).toISOString()},
     });
   }
   return {email,authSubject:session.userId,token,studentId:student?.id || null,owner:Boolean(owner)};

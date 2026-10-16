@@ -1,4 +1,5 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, type NextFetchEvent } from 'next/server';
+import { clerkMiddleware } from '@clerk/nextjs/server';
 
 import type { NextRequest } from 'next/server';
 
@@ -129,7 +130,9 @@ function isPublicAdminPath(pathname: string): boolean {
 
 
 
-export async function middleware(request: NextRequest) {
+const subportalClerk = clerkMiddleware();
+
+export async function middleware(request: NextRequest, event: NextFetchEvent) {
 
   const host = request.headers.get('host');
 
@@ -243,6 +246,15 @@ export async function middleware(request: NextRequest) {
       pathname === '/portal/amanda-catherine/learning' &&
       request.nextUrl.searchParams.get('mode') === 'preview-synthetic') {
     return NextResponse.next();
+  }
+
+  // Isolate Clerk-backed student experiences from the legacy EA HMAC portal routes.
+  // A Clerk request context is mandatory for Supabase third-party JWT RLS.
+  if (pathname === '/portal/subportal-auth' ||
+      /^\/portal\/[a-z0-9-]+\/students\/[0-9a-f-]{36}$/.test(pathname) ||
+      pathname === '/api/subportal/progress' ||
+      pathname === '/api/subportal/receipt') {
+    return subportalClerk(request, event);
   }
 
   if (pathname.startsWith('/portal')) {

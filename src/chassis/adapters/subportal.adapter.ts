@@ -5,9 +5,11 @@ import {subportalStoreHealth} from '@/lib/subportal/db';
 import {createSubportalCheckout} from '@/lib/subportal/commerce';
 import {verifiedSubportalWelcome} from '@/lib/subportal/delivery';
 
-export function createSubportalBrick(input:{
+export async function createSubportalBrick(input:{
   organizationId:string;offerId:string;studentEmail:string;studentName:string;
-}):Brick{
+}):Promise<Brick>{
+  const installed=await loadSubportalManifest(input.organizationId);
+  const installedOffer=requireSubportalOffer(installed,input.offerId);
   let liveHealth=false;
   return {
     id:'subportal',
@@ -33,13 +35,9 @@ export function createSubportalBrick(input:{
       }catch(e){return {status:503,evidence:e instanceof Error?e.message:'Subportal health check failed'};}
     },
     price(){
-      // Config is resolved once from a verified install by the surrounding chassis;
-      // this synchronous socket cannot make a network call.
-      const price=Number(process.env.SUBPORTAL_BRICK_PRICE_CAD_CENTS);
-      const contract=process.env.SUBPORTAL_BRICK_PRICE_CONTRACT_ID || '';
-      if(!Number.isSafeInteger(price)||price<0||!contract)
-        throw new Error('Subportal price contract must be populated by the tenant resolver');
-      return {amountCad:price/100,contractId:contract};
+      // Resolved at adapter initialization from a durable tenant manifest.
+      return {amountCad:installedOffer.amountCadCents/100,
+        contractId:installed.organizationId+':'+installedOffer.id};
     },
     async checkout(opts:CheckoutRequest):Promise<CheckoutResult>{
       if(opts.courseId!==input.offerId)throw new Error('Offer mismatch');

@@ -1,4 +1,5 @@
 import { fulfillPortableAmandaSession } from '@/lib/portal-universal/bricks/amanda/stripe';
+import { fulfillSubportalStripe } from '@/lib/subportal/fulfillment';
 import { NextRequest } from 'next/server';
 import Stripe from 'stripe';
 import { getStripe } from '@/lib/stripe';
@@ -200,6 +201,7 @@ export async function POST(req: NextRequest) {
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promise<void> {
   const meta = session.metadata ?? {};
 
+  if (await fulfillSubportalStripe(session)) return;
   if (await fulfillPortableAmandaSession(session)) return;
 
   if (isAmandaKitSession(session)) {

@@ -22,7 +22,7 @@ export async function deliverSubportalWelcome(input:{
   if(!pdf.toString('ascii',0,8).startsWith('%PDF-'))throw new Error('Receipt PDF bytes invalid');
   const path='/portal/'+encodeURIComponent(input.manifest.orgSlug)+'/students/'+input.studentId;
   const origin=(process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || 'https://app.efficiencyarchitects.online').replace(/\/$/,'');
-  const loginUrl=origin+'/portal/sign-in?next='+encodeURIComponent(path);
+  const loginUrl=origin+'/portal/subportal-auth?next='+encodeURIComponent(path);
   const nextSteps='Sign in with your verified email, open your program, and select Continue Learning.';
   const esc=(s:string)=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   const html='<h1>Welcome to '+esc(input.manifest.brand.name)+'</h1><p>Hello '+esc(input.studentName)+

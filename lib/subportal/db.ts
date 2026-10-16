@@ -44,11 +44,7 @@ export async function subportalStoreHealth(){
   try{
     // Real database round trips, not file existence or synthetic returns.
     for(const table of ['subportal_students','subportal_enrollments','subportal_progress','subportal_deliveries','subportal_checkout_orders']){
-      await subportalDb(table,{query:{select:'id',limit:'0'}}).catch(async err=>{
-        if(table==='subportal_deliveries'||table==='subportal_checkout_orders')
-          return subportalDb(table,{query:{select:'*',limit:'0'}});
-        throw err;
-      });
+      await subportalDb(table,{query:{select:'*',limit:'0'}});
     }
     return {ok:true,evidence:'Live Supabase Subportal schema responds'};
   }catch(e){return {ok:false,evidence:e instanceof Error?e.message:'Subportal database unavailable'};}

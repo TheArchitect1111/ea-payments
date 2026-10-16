@@ -49,6 +49,7 @@ create table if not exists public.subportal_checkout_orders (
   provider text not null check (provider in ('stripe','square')),
   buyer_email text not null,
   buyer_name text not null,
+  fulfilled_payment_reference text,
   amount_cad_cents integer not null check(amount_cad_cents > 0),
   created_at timestamptz not null default now()
 );

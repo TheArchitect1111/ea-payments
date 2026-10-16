@@ -1,6 +1,7 @@
 /** Provider-neutral checkout. Offer identity and amounts come only from installed manifests. */
 import 'server-only';
 import {z} from 'zod';
+import {randomUUID} from 'node:crypto';
 import {getStripe} from '@/lib/stripe';
 import {loadSubportalManifest,requireSubportalOffer} from './manifest';
 import {recordProviderCheckout} from './service';
@@ -31,7 +32,7 @@ export async function createSubportalCheckout(input:{
       success_url:base+'/portal/login?subportal_session_id={CHECKOUT_SESSION_ID}',
       cancel_url:base+'/portal/'+encodeURIComponent(manifest.orgSlug),
       metadata:{subportalBrick:'v1',organizationId:manifest.organizationId,offerId:offer.id},
-    },{idempotencyKey:'subportal-checkout-'+crypto.randomUUID()});
+    },{idempotencyKey:'subportal-checkout-'+randomUUID()});
     if(!session.url)throw new Error('Provider did not return a Stripe checkout URL');
     await recordProviderCheckout({checkoutId:session.id,organizationId:manifest.organizationId,
       offerId:offer.id,buyerEmail:buyer.email,buyerName:buyer.name,
@@ -44,7 +45,7 @@ export async function createSubportalCheckout(input:{
     throw new Error('Square catalog mapping or credentials missing');
   const res=await fetch('https://connect.squareup.com/v2/online-checkout/payment-links',{
     method:'POST',headers:{Authorization:'Bearer '+token,'Square-Version':'2026-09-16','Content-Type':'application/json'},
-    body:JSON.stringify({idempotency_key:crypto.randomUUID(),order:{
+    body:JSON.stringify({idempotency_key:randomUUID(),order:{
       location_id:location,line_items:[{catalog_object_id:offer.squareCatalogObjectId,quantity:'1'}]},
       checkout_options:{redirect_url:base+'/portal/login'},pre_populated_data:{buyer_email:buyer.email}}),
     signal:AbortSignal.timeout(15000),
