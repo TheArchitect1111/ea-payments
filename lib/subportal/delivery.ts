@@ -39,7 +39,7 @@ export async function deliverSubportalWelcome(input:{
   });
   if(!res.ok)throw new Error('Resend rejected welcome: HTTP '+res.status);
   const result=await res.json() as {id?:string};
-  if(!result.id || !/^re_/.test(result.id))throw new Error('Email provider did not return a real message ID');
+  if(!result.id || !/^[a-zA-Z0-9_-]{12,128}$/.test(result.id))throw new Error('Email provider did not return a real message ID');
   const rows=await subportalDb<DeliveryRow>('subportal_deliveries',{
     method:'POST',query:{on_conflict:'session_id'},prefer:'resolution=merge-duplicates,return=representation',
     payload:{session_id:input.sessionId,organization_id:input.organizationId,provider:input.provider,

@@ -29,7 +29,7 @@ export async function createSubportalCheckout(input:{
       line_items:[{price_data:{
         currency:'cad',unit_amount:offer.amountCadCents,product_data:{name:offer.title},
       },quantity:1}],
-      success_url:base+'/portal/login?subportal_session_id={CHECKOUT_SESSION_ID}',
+      success_url:base+'/portal/subportal-auth/success?sessionId={CHECKOUT_SESSION_ID}',
       cancel_url:base+'/portal/'+encodeURIComponent(manifest.orgSlug),
       metadata:{subportalBrick:'v1',organizationId:manifest.organizationId,offerId:offer.id},
     },{idempotencyKey:'subportal-checkout-'+randomUUID()});

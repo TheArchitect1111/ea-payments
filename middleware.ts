@@ -250,7 +250,7 @@ export async function middleware(request: NextRequest, event: NextFetchEvent) {
 
   // Isolate Clerk-backed student experiences from the legacy EA HMAC portal routes.
   // A Clerk request context is mandatory for Supabase third-party JWT RLS.
-  if (pathname === '/portal/subportal-auth' ||
+  if (pathname.startsWith('/portal/subportal-auth') ||
       /^\/portal\/[a-z0-9-]+\/students(?:\/(?:[0-9a-f-]{36}|offers))?$/.test(pathname) ||
       pathname === '/api/subportal/progress' ||
       pathname === '/api/subportal/receipt') {
