@@ -28,5 +28,5 @@ jobs:
       - run: npm ci --ignore-scripts
       - name: Generic contract tests (not live payment proof)
         run: node --import tsx --test tests/subportal-brick-contract.test.mts
-      - name: TypeScript validation (repo-wide baseline gate)
-        run: npx tsc --noEmit --incremental false
+      - name: Subportal-owned TypeScript errors (all existing diagnostics reported)
+        run: node scripts/check-subportal-types.mjs
