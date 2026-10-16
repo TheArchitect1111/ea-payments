@@ -1,4 +1,5 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, type NextFetchEvent } from 'next/server';
+import { clerkMiddleware } from '@clerk/nextjs/server';
 
 import type { NextRequest } from 'next/server';
 
@@ -129,7 +130,9 @@ function isPublicAdminPath(pathname: string): boolean {
 
 
 
-export async function middleware(request: NextRequest) {
+const subportalClerk = clerkMiddleware();
+
+export async function middleware(request: NextRequest, event: NextFetchEvent) {
 
   const host = request.headers.get('host');
 
@@ -245,6 +248,23 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // Isolate Clerk-backed student experiences from the legacy EA HMAC portal routes.
+  // A Clerk request context is mandatory for Supabase third-party JWT RLS.
+  if (pathname.startsWith('/portal/subportal-auth') ||
+      /^\/portal\/[a-z0-9-]+\/students(?:\/(?:[0-9a-f-]{36}|offers))?$/.test(pathname) ||
+      pathname === '/api/subportal/progress' ||
+      pathname === '/api/subportal/receipt') {
+    // Missing deployment configuration must fail closed with a clear service error,
+    // rather than throwing inside Clerk middleware and producing an opaque 500.
+    if (!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || !process.env.CLERK_SECRET_KEY) {
+      return NextResponse.json(
+        { error: 'Student authentication is not configured.' },
+        { status: 503, headers: { 'Cache-Control': 'no-store' } },
+      );
+    }
+    return subportalClerk(request, event);
+  }
+
   if (pathname.startsWith('/portal')) {
     if (isPublicPortalAuthPath(pathname) || isPublicPortalExperiencePath(pathname)) {
       const requestHeaders = new Headers(request.headers);
@@ -336,6 +356,7 @@ export const config = {
     '/reset-password',
     '/portal/:slug',
     '/portal/:slug/:path*',
+    '/api/subportal/:path*',
     '/simplifi',
     '/simplifi/:path*',
     '/admin/:path*',

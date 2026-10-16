@@ -1,0 +1,38 @@
+name: Subportal Brick Contract
+on:
+  push:
+    branches: [feature/subportal-brick-20261016]
+  pull_request:
+    paths:
+      - 'lib/subportal/**'
+      - 'app/portal/**/students/**'
+      - 'app/portal/subportal-auth/**'
+      - 'app/api/subportal/**'
+      - 'app/api/webhooks/subportal/**'
+      - 'src/chassis/adapters/subportal.adapter.ts'
+      - 'tests/subportal-brick-contract.test.mts'
+      - 'tests/subportal-middleware.test.mts'
+      - 'middleware.ts'
+      - '.github/workflows/subportal-brick-ci.yml'
+permissions:
+  contents: read
+jobs:
+  contracts-and-types:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Reject client-specific Subportal code
+        run: node scripts/check-subportal-generic.mjs
+      - name: Generic contract tests (not live payment proof)
+        run: node --import tsx --test tests/subportal-brick-contract.test.mts
+      - name: Clerk middleware fail-closed and route regression checks
+        run: node --import tsx --test tests/subportal-middleware.test.mts
+      - name: Subportal-owned TypeScript errors (all existing diagnostics reported)
+        run: node scripts/check-subportal-types.mjs
