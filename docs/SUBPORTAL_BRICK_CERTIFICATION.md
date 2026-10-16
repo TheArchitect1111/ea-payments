@@ -60,3 +60,10 @@ The Preview deployment currently needs Clerk authentication configured before it
 Only a **signed, verified and paid** provider event reaches \`subportalService.create({organizationId, studentIdentity, offerId, paymentReference, idempotencyKey, provider})\`. The student UUID is immutable; an email can be linked to a Clerk principal only after verification. Idempotent enrollment keys and unique provider/payment references prevent duplicates. All tenants reuse a single shared student route and a single shared checkout/webhook implementation. Square offer catalog variation IDs come from the installed tenant manifest and must match the verified Square Order API response.
 
 **No new LMS scope:** programs, materials links, progress, support, next requirements and Eva first login only.
+
+## Continuation verification, October 16, 2026
+
+- Vercel Preview environment variable metadata read was retried against project `ea-payments` and team `the-architects-projects-cc813778`: **403 forbidden**, permission to list project environment variables denied. Values of `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` and `CLERK_SECRET_KEY` remain unconfirmed. No keys were added; there is no authorized proof of their absence or presence. The current execution environment has no Vercel CLI.
+- Connected Supabase project listing confirms `dwygvwnjjaennksddniu` is ACTIVE_HEALTHY, but the available connector does not expose the Authentication > Third-Party Auth toggle; **Clerk provider enabled status not verified**. Previously passing SQL role-simulation RLS checks do not establish real third-party JWT acceptance.
+- Therefore Preview Clerk sign-in, real signed Stripe/Square fulfillment, Resend delivered-webhook proof, and the 20/20 release check remain **BLOCKED/UNVERIFIED**. No live webhook or email delivery event was generated in this continuation.
+- Fail-closed release status is unchanged: **NOT CERTIFIED**; `.health()` remains 503 per the certification hold and `.attach()` must remain false. No customer-specific code, payment implementation, live deployment, or production branch was changed.
