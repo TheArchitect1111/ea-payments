@@ -9,6 +9,8 @@ const slug='amanda-catherine';
 export function getAvailabilityFromAirtable(value: unknown): 'AVAILABLE'|'INQUIRY'|'WAITLIST' {
  const status=String(value??'').trim().toUpperCase();
  if(status==='AVAILABLE'||status==='INQUIRY'||status==='WAITLIST')return status;
+ if(status==='NOT READY'||status==='NOT_READY'||status==='UNAVAILABLE')return 'WAITLIST';
+ if(status==='READY')return 'AVAILABLE';
  throw new Error('Invalid or missing Airtable availability status: '+status);
 }
 
