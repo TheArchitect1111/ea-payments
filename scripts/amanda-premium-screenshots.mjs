@@ -1,7 +1,7 @@
 import { chromium, devices } from 'playwright';
 import fs from 'node:fs/promises';
 const before = process.env.AMANDA_BEFORE_URL || 'https://ea-payments-vvhojegic-the-architects-projects-cc813778.vercel.app/amanda-catherine';
-const after = process.env.AMANDA_AFTER_URL || 'https://ea-payments-ni3e2ysoz-the-architects-projects-cc813778.vercel.app/amanda-catherine';
+const after = process.env.AMANDA_AFTER_URL || 'https://ea-payments-45x34h22r-the-architects-projects-cc813778.vercel.app/amanda-catherine';
 const targets = [{name:'desktop',width:1440,height:900},{name:'mobile',width:375,height:812}];
 const out='docs/baseline-screenshots';
 await fs.mkdir(out,{recursive:true});
