@@ -7,6 +7,7 @@ on:
       - '.github/workflows/amanda-premium-screenshots.yml'
       - 'scripts/amanda-premium-screenshots.mjs'
       - 'scripts/evaluate-visual-quality.mjs'
+      - 'scripts/evaluate-amanda-vision.ts'
 permissions:
   contents: write
 jobs:
@@ -28,6 +29,11 @@ jobs:
         run: node scripts/amanda-premium-screenshots.mjs
       - name: Inspect screenshot quality
         run: node scripts/evaluate-visual-quality.mjs
+      - name: AI visual quality assessment
+        continue-on-error: true
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: npx tsx scripts/evaluate-amanda-vision.ts
       - uses: actions/upload-artifact@v4
         if: always()
         with:
