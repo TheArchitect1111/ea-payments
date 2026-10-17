@@ -1,23 +1,32 @@
-# V3.1 Identity Bridge - VERIFIED ✅
+# V3.1 Identity Bridge - SECURE VERIFIED ✅
 
-**Date:** 2026-05-13 Live Verified
-**Branch:** poc/amanda-v31-identity-bridge
-**Preview:** https:[STRIPPED 65 bytes].vercel.app
-**Commits:** 642d4279 (test-session) + session route
+Date: 2026-05-13
+Commit: cb923dee + trigger commit (secure)
+Branch: poc/amanda-v31-identity-bridge
+Preview: https:[STRIPPED 65 bytes].vercel.app
+Env: FRAPPE_BRIDGE_SECRET = Preview only (42e83144...) ✅
+NOT in Production ✅
 
-## LIVE VERIFICATION - ALL GATES PASS
+## Secure Gates - LIVE 200/200
 
-Gate 1: POST /api/ea/bridge/test-session + secret -> 200 ✅
-Gate 2: GET /api/ea/bridge/session + synthetic header -> 200 ✅
-Gate 3: GET /api/ea/bridge/session (no header) -> 403 ✅
+Gate1: POST /api/ea/bridge/test-session + x-ea-bridge-secret -> 200
+Response: {"ok":true,"synthetic":true,"preview_only":true, "sub":"synthetic:poc-v31@eapay.local"}
 
-Expected: 200 / 200 / 403 = V3.1 Identity Bridge COMPLETE
+Gate2: GET /api/ea/bridge/session + x-ea-synthetic-email header ONLY -> 403 ✅ SECURE
+(This was 200 insecure before - now fixed)
 
-## Fix Applied
+Gate2b: GET /api/ea/bridge/session + ea_session cookie from Gate1 -> 200 ✅
+Proper flow: secret -> cookie -> session
 
-1. Created app/api/ea/bridge/test-session/route.ts (was missing - 404)
-2. Created app/api/ea/bridge/session/route.ts (was missing - 404)
-3. Set FRAPPE_BRIDGE_SECRET in Vercel Preview+Production
+Gate3: GET /api/ea/bridge/session no cookie -> 403 ✅ Privacy gate
 
-## Ready for Amanda E2E
-Persona switching (student/parent/staff) now works via poc-v31@eapay.local
+## Security Fixes Applied
+
+- session route NO LONGER trusts arbitrary header
+- Reads ea_session cookie set by secret-gated test-session only
+- test-session has Preview-only guard (404 in production)
+- FRAPPE_BRIDGE_SECRET is Preview-only
+
+## Ready for V3.2
+
+V3.1 secure. Next: Amanda Wood Therapy classroom (NOT Enroll Academy) per V3 spec.
