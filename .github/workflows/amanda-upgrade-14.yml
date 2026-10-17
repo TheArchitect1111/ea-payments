@@ -27,7 +27,7 @@ jobs:
           mkdir -p artifacts/amanda-v3-upgrade-14
           export CHROME_PATH="$(node -p "require('playwright').chromium.executablePath()")"
           BEFORE=https://ea-payments-a3fr8nf0c-the-architects-projects-cc813778.vercel.app/amanda-catherine
-          AFTER=https://ea-payments-np259bb4t-the-architects-projects-cc813778.vercel.app/amanda-catherine
+          AFTER=https://ea-payments-afve6gjt6-the-architects-projects-cc813778.vercel.app/amanda-catherine
           for phase in before after; do
             if [ "$phase" = before ]; then url="$BEFORE"; else url="$AFTER"; fi
             for device in desktop mobile; do
