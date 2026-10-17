@@ -15,7 +15,7 @@ const classes=await page.locator('#classes-grid .amanda-card').evaluateAll(cards
 if(response.status()!==200)failures.push(cfg.name+' HTTP '+response.status());
 if(!classes.length)failures.push(cfg.name+' no classes');
 if(new Set(classes.map(c=>c.courseKey)).size!==classes.length)failures.push(cfg.name+' duplicate class keys');
-for(const c of classes){if(!c.href)failures.push(cfg.name+' missing CTA href '+c.title);if(c.cta==='Join Waitlist'&&!/^\/courses\/.test(c.href||''))failures.push(cfg.name+' invalid waitlist '+c.title);if(c.cta==='Register'&&!/^https:\/\//.test(c.href||''))failures.push(cfg.name+' invalid checkout '+c.title);}
+for(const c of classes){if(!c.href)failures.push(cfg.name+' missing CTA href '+c.title);if(c.cta==='Join Waitlist'&&!(c.href||'').startsWith('/courses/'))failures.push(cfg.name+' invalid waitlist '+c.title);if(c.cta==='Register'&&!(c.href||'').startsWith('https://'))failures.push(cfg.name+' invalid checkout '+c.title);}
 const checkout=classes.find(c=>c.cta==='Register');
 if(checkout){const p=await browser.newPage();try{const response=await p.goto(checkout.href,{waitUntil:'domcontentloaded',timeout:40000});results.push({view:cfg.name,checkout:{courseKey:checkout.courseKey,origin:new URL(p.url()).origin,http:response?.status(),noPaymentSubmitted:true}})}catch(e){results.push({view:cfg.name,checkout:{courseKey:checkout.courseKey,error:String(e),noPaymentSubmitted:true}})}finally{await p.close();}} 
 const waitlist=classes.find(c=>c.cta==='Join Waitlist');
