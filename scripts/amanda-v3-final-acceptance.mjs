@@ -1,5 +1,5 @@
 import { chromium } from 'playwright';import fs from 'node:fs/promises';
-const BASE='https://amanda-catherine-4-ptzzjhwpa-the-architects-projects-cc813778.vercel.app';
+const BASE='https://amanda-catherine-4-qx1ohawcv-the-architects-projects-cc813778.vercel.app';
 const BEFORE='https://amanda-catherine-4-o9pm5vo35-the-architects-projects-cc813778.vercel.app';
 const dir='artifacts/amanda-v3-acceptance';await fs.mkdir(dir,{recursive:true});const browser=await chromium.launch();const tests=[],issues=[];
 const record=(name,passed,details)=>{tests.push({name,status:passed?'PASS':'FAIL',details});if(!passed)issues.push(name+': '+details)};
