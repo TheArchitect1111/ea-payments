@@ -4,6 +4,7 @@ import './mobile-render-fix.css';
 import './premium-foundation.css';
 import './premium-imagery.css';
 import './premium-pathways-nav.css';
+import './premium-classes-services-trust.css';
 import AmandaCtaTracker from '@/app/portal/amanda-catherine/(engagement)/AmandaCtaTracker';
 
 export const metadata: Metadata = {
