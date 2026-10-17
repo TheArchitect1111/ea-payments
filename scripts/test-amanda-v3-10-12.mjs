@@ -39,5 +39,5 @@ if(phase==='after'&&(!branded||loginResponse.status()!==200))failures.push('logi
 await login.close();}
 results.push({phase,viewport:viewport.name,homeStatus:response.status(),waitlistStatus:formResponse.status(),waitlistForm:formPresent});
 await page.close();
-}}finally{await browser.close();}
+}}}finally{await browser.close();}
 const report={passed:failures.length===0,failures,results,scope:'presentation only; no form submitted, no payment attempted, no authenticated sign-in'};await fs.writeFile(out+'/test-log.json',JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report));if(failures.length)process.exitCode=1;
