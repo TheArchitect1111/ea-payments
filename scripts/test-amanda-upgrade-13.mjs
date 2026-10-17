@@ -1,5 +1,5 @@
 import {chromium} from 'playwright';import fs from 'node:fs/promises';
-const base='https://ea-payments-emkkwpum1-the-architects-projects-cc813778.vercel.app';
+const base='https://ea-payments-a3fr8nf0c-the-architects-projects-cc813778.vercel.app';
 const dir='artifacts/amanda-v3-upgrade-13';await fs.mkdir(dir,{recursive:true});
 const browser=await chromium.launch();const results=[];
 try {for(const width of [375,768,1024,1440]){
