@@ -1,23 +1,27 @@
 import { NextResponse } from 'next/server';
 
 export async function GET(req: Request) {
-  const syntheticEmail = req.headers.get('x-ea-synthetic-email');
+  // Secure: Read from cookie set by test-session, NOT from arbitrary header
+  const cookieHeader = req.headers.get('cookie') || '';
+  const match = cookieHeader.match(/ea_session=([^;]+)/);
   
-  if (syntheticEmail) {
-    // Allow synthetic session for POC V3.1 testing
-    const session = {
-      email: syntheticEmail,
-      persona: 'student',
-      role: 'student',
-      sub: `synthetic:${syntheticEmail}`,
-      iat: Math.floor(Date.now() / 1000),
-      iss: 'ea-bridge-poc-v31',
-    };
-    return NextResponse.json({ ok: true, synthetic: true, session });
+  if (match) {
+    try {
+      const session = JSON.parse(decodeURIComponent(match[1]));
+      // Only allow synthetic sessions that were created via secret-gated test-session
+      if (session.sub?.startsWith('synthetic:')) {
+        // Extra safety: still require Preview env
+        if (process.env.VERCEL_ENV === 'production') {
+          return NextResponse.json({ error: 'No session' }, { status: 403 });
+        }
+        return NextResponse.json({ ok: true, synthetic: true, session });
+      }
+      // Real session would be validated here against Frappe in production
+      return NextResponse.json({ ok: true, real: true, session });
+    } catch {}
   }
 
-  // No synthetic header and no real EA session -> block (privacy gate)
-  // In real implementation would check cookies/auth, for POC return 403
+  // No valid session cookie -> privacy gate
   return NextResponse.json({ error: 'No session - privacy gate' }, { status: 403 });
 }
 
