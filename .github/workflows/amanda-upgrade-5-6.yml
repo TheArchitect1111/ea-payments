@@ -1,0 +1,30 @@
+name: Amanda V3 Pathways and Navigation Acceptance
+on:
+  workflow_dispatch:
+  push:
+    branches: ['premium/amanda-upgrade']
+    paths:
+      - 'scripts/test-amanda-upgrade-5-6.mjs'
+      - '.github/workflows/amanda-upgrade-5-6.yml'
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Verify pathways, desktop/mobile navigation and Classes same-page scroll
+        env:
+          AMANDA_TEST_BASE: https://ea-payments-899jah17k-the-architects-projects-cc813778.vercel.app
+        run: node scripts/test-amanda-upgrade-5-6.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: amanda-v3-pathways-nav-evidence
+          path: artifacts/amanda-upgrade-5-6/
