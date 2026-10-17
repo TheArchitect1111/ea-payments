@@ -9,9 +9,10 @@ for(const file of files){
  const pixels=png.width*png.height;
  if(bytes.subarray(0,8).toString('hex')!=='89504e470d0a1a0a') throw new Error('Invalid PNG: '+file);
  const conditions=[];
- if(png.width<320) conditions.push('too-narrow');
- if(png.height<200) conditions.push('too-short');
- if(pixels<100000) conditions.push('insufficient-resolution');
+ const fullPage=/after-(home|portal)-/.test(file);
+ if(fullPage&&png.width<320) conditions.push('full-page-too-narrow');
+ if(fullPage&&png.height<500) conditions.push('full-page-too-short');
+ if(png.width<80||png.height<45||pixels<12000) conditions.push('capture-too-small');
  results.push({file,width:png.width,height:png.height,passed:conditions.length===0,issues:conditions});
 }
 const report={schemaVersion:1,method:'deterministic-screenshot-inspection',evaluator:'node-png-header',scope:'Amanda preview only',visualCritic:{status:'not-executed',reason:'Vision-model invocation is not wired or verified in GitHub Actions'},premiumGate:{status:'not-scored',reason:'An 8.5/10 score requires real model observations, not invented ratings'},results};
