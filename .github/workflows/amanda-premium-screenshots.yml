@@ -30,7 +30,6 @@ jobs:
       - name: Inspect screenshot quality
         run: node scripts/evaluate-visual-quality.mjs
       - name: AI visual quality assessment
-        continue-on-error: true
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: npx tsx scripts/evaluate-amanda-vision.ts
