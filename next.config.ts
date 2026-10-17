@@ -7,6 +7,7 @@ import vercelJson from './vercel.json';
 const projectRoot = path.dirname(fileURLToPath(import.meta.url));
 
 const nextConfig: NextConfig = {
+  experimental: { authInterrupts: true },
   outputFileTracingRoot: projectRoot,
   /**
    * Prevent accidental serverless inclusion of mobile binaries, marketing
