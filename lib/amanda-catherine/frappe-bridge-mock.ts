@@ -23,7 +23,8 @@ export function verifyMock(token:string){
  let p:Payload;
  try {p=JSON.parse(Buffer.from(parts[1],'base64url').toString())}catch{return {email:null,courseAccess:false,reason:'format'}}
  const now=Math.floor(Date.now()/1000);
- if(p.iss!==issuer||p.aud!==audience||p.role!=='student'||p.courseId!=='wood-therapy-certification'||!mockAllowed(p.email)||!p.jti||!Number.isFinite(p.iat)||!Number.isFinite(p.exp)||p.iat>now+5||p.exp<=now||p.exp>p.iat+300)return {email:null,courseAccess:false,reason:'claims'};
+ if(p.iss!==issuer||p.aud!==audience||p.role!=='student'||p.courseId!=='wood-therapy-certification'||!mockAllowed(p.email)||!p.jti||!Number.isFinite(p.iat)||!Number.isFinite(p.exp)||p.iat>now+5||p.exp>p.iat+300)return {email:null,courseAccess:false,reason:'claims'};
+ if(p.exp<=now)return {email:null,courseAccess:false,reason:'expired'};
  for(const [id,exp] of used)if(exp<=now)used.delete(id);
  if(used.has(p.jti))return {email:null,courseAccess:false,reason:'replay'};
  used.set(p.jti,p.exp);return {email:p.email,courseAccess:true,reason:'ok'};
