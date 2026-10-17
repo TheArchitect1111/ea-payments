@@ -1,0 +1,18 @@
+import {chromium} from 'playwright';import fs from 'node:fs/promises';
+const base='https://ea-payments-emkkwpum1-the-architects-projects-cc813778.vercel.app';
+const dir='artifacts/amanda-v3-upgrade-13';await fs.mkdir(dir,{recursive:true});
+const browser=await chromium.launch();const results=[];
+try {for(const width of [375,768,1024,1440]){
+const page=await browser.newPage({viewport:{width,height:900}});
+const res=await page.goto(base+'/amanda-catherine',{waitUntil:'domcontentloaded',timeout:55000});
+await page.locator('#classes-grid .amanda-card').first().waitFor();
+await page.evaluate(async()=>{for(const img of document.images){if(img.loading==='lazy')img.loading='eager';}await Promise.all([...document.images].filter(i=>i.src.startsWith(location.origin)).map(i=>i.decode().catch(()=>null)));});
+await page.screenshot({path:`${dir}/homepage-${width}.png`,fullPage:true});
+await page.locator('#classes-grid').screenshot({path:`${dir}/classes-${width}.png`});
+const nav=page.locator('.ac-nav-more');await nav.locator('summary').click();await page.locator('.ac-nav').screenshot({path:`${dir}/nav-open-${width}.png`});
+const findings=await page.evaluate(()=>{const rect=e=>e.getBoundingClientRect(),bodyWidth=document.documentElement.scrollWidth, vw=innerWidth;let overflow=[...document.body.querySelectorAll('*')].filter(e=>{if(e.closest('.ac-links'))return false;const r=rect(e);return r.width>0&&(r.left < -4 || r.right>vw+4)}).slice(0,12).map(e=>({tag:e.tagName,cls:String(e.className).slice(0,60)}));const targets=[...document.querySelectorAll('.ac-nav a,.ac-nav summary,.ac-btn,.amanda-button,#classes-grid a')].filter(e=>getComputedStyle(e).display!=='none').map(e=>({text:e.textContent.trim().slice(0,35),width:rect(e).width,height:rect(e).height}));return {viewport:vw,documentWidth:bodyWidth,overflow,smallTargets:targets.filter(t=>t.height<44||t.width<44),heroTitleSize:parseFloat(getComputedStyle(document.querySelector('.ac-hero h1')).fontSize),cards:document.querySelectorAll('#classes-grid .amanda-card').length,brokenLocalImages:[...document.images].filter(i=>i.src.startsWith(location.origin)&&(!i.complete||!i.naturalWidth)).map(i=>i.src)};});
+const form=await browser.newPage({viewport:{width,height:900}});const fr=await form.goto(base+'/courses/advanced-body-sculpt#waitlist',{waitUntil:'domcontentloaded',timeout:55000});await form.locator('form').first().waitFor();await form.screenshot({path:`${dir}/waitlist-${width}.png`,fullPage:true});const formData=await form.evaluate(()=>({scrollWidth:document.documentElement.scrollWidth,viewport:innerWidth,inputs:[...document.querySelectorAll('form input,form button,form select,form textarea')].map(e=>({type:e.tagName,height:e.getBoundingClientRect().height,width:e.getBoundingClientRect().width}))}));await form.close();
+results.push({width,http:res.status(),formHTTP:fr.status(),...findings,form:formData});await page.close();
+}}finally{await browser.close();}
+const failures=results.flatMap(x=>[...(x.http!==200?[x.width+':home HTTP']:[]),...(x.formHTTP!==200?[x.width+':waitlist HTTP']:[]),...(x.documentWidth>x.width+4?[x.width+':document overflow']:[]),...(x.overflow.length?[x.width+':element overflow']:[]),...(x.form.scrollWidth>x.width+4?[x.width+':form overflow']:[]),...(x.brokenLocalImages.length?[x.width+':broken images']:[]),...(x.smallTargets.length?[x.width+':small targets '+JSON.stringify(x.smallTargets.slice(0,5))]:[])]);
+await fs.writeFile(dir+'/report.json',JSON.stringify({results,failures},null,2));console.log(JSON.stringify({failures,results:results.map(x=>({width:x.width,overflow:x.overflow.length,smallTargets:x.smallTargets,docWidth:x.documentWidth,formWidth:x.form.scrollWidth,cards:x.cards}))}));if(failures.length)process.exitCode=1;
