@@ -3,10 +3,11 @@ import { redirect } from 'next/navigation'
 
 async function getSession() {
   try {
-    const cookieStore = cookies()
+    const cookieStore = await cookies()
     const sessionCookie = cookieStore.get('ea_session')?.value
     if (!sessionCookie) return null
-    return { ok: true, session: { email: 'poc-v31@eapay.local', persona: 'student', sub: 'synthetic:poc-v31@eapay.local' } }
+    // If cookie exists, we are logged in (cookie was set by secret-gated test-session)
+    return { ok: true, session: { email: 'poc-v31@eapay.local', persona: 'student', sub: sessionCookie.slice(0,20) } }
   } catch {
     return null
   }
@@ -54,7 +55,8 @@ export default async function AmandaClassroom() {
             <div className="w-full bg-zinc-800 rounded-full h-2 mb-2">
               <div className="bg-white h-2 rounded-full" style={{width: '40%'}}></div>
             </div>
-            <p className="text-xs text-zinc-500">2 of 5 modules</p>
+            <p className="text-xs text-zinc-500">2 of 5 modules - 40%</p>
+            <p className="text-xs text-zinc-600 mt-2">Session: {String(session.session?.sub)}</p>
           </div>
         </div>
       </div>
