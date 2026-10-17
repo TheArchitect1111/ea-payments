@@ -1,0 +1,36 @@
+name: Amanda Premium V3 Screenshots
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  capture:
+    if: github.ref == 'refs/heads/premium/amanda-upgrade'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: premium/amanda-upgrade
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Capture before and after
+        run: node scripts/amanda-premium-screenshots.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: amanda-premium-v3-screenshots
+          path: docs/baseline-screenshots/
+      - name: Save screenshots to upgrade branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/baseline-screenshots/
+          if ! git diff --cached --quiet; then
+            git commit -m "docs(amanda): capture premium baseline visual comparison"
+            git push origin HEAD:premium/amanda-upgrade
+          fi
