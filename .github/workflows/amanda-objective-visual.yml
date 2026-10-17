@@ -1,0 +1,27 @@
+name: Amanda Objective Visual Acceptance
+on:
+  workflow_dispatch:
+  push:
+    branches: ['premium/amanda-upgrade']
+    paths:
+      - 'scripts/amanda-objective-visual-check.mjs'
+      - '.github/workflows/amanda-objective-visual.yml'
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: node scripts/amanda-objective-visual-check.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: amanda-objective-visual-audit
+          path: artifacts/visual-quality/objective-checks.json

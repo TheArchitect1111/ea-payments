@@ -1,0 +1,16 @@
+/* Amanda V3 U14 keyboard access and layout stability, no dependencies. */
+.ac-site .ac-skip-link {position:absolute;top:8px;left:12px;z-index:1000;background:#17211c;color:#fffdf8;padding:12px 18px;transform:translateY(-150%);}
+.ac-site .ac-skip-link:focus {transform:translateY(0);outline:3px solid #b48a49;}
+.ac-site .ac-hero-media .ac-media {aspect-ratio:auto;width:100%;height:100%;}
+.ac-site img {max-width:100%;}
+.ac-site :is(a,button,summary,input,select,textarea):focus-visible {outline:3px solid #b48a49;outline-offset:3px;}
+.ac-site .ac-nav-more[open] .ac-nav-more-menu {visibility:visible;}
+@media(prefers-reduced-motion:reduce){.ac-site .ac-skip-link{transition:none;}}
+
+/* Lighthouse-confirmed contrast repairs on the original Amanda page. */
+.ac-site .ac-fact strong { color:#644719; }
+.ac-site .ac-band .ac-eyebrow { color:#fffdf8; }
+.ac-site .ac-jane .ac-eyebrow { color:#3c5141; }
+.ac-site .ac-jane p { color:#354539; }
+.ac-site .ac-update-social .ac-eyebrow { color:#475b49; }
+.ac-site .ac-contact .ac-eyebrow { color:#fffdf8; }

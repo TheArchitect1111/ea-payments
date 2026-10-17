@@ -14,3 +14,12 @@
 
 .amanda-button--outline{background:transparent;color:var(--ink,#17211c)!important;border:1px solid var(--ink,#17211c)}
 .amanda-portal #classes-grid h2{font-size:26px;letter-spacing:normal;line-height:1.2;margin:0 0 12px}
+
+/* Amanda V3 entry, form and confirmation continuity; no handlers or form fields changed. */
+.amanda-portal .amanda-button { min-height:46px;border-radius:4px; }
+.amanda-portal .amanda-form :is(input,textarea,select) { min-height:46px;background:#fffdf8;border-color:#9ca89c;border-radius:4px; }
+.amanda-portal .amanda-form :is(input,textarea,select):focus-visible,.amanda-portal :is(a,button):focus-visible { outline:3px solid #b48a49;outline-offset:3px; }
+.amanda-portal :is(.amanda-alert,.amanda-waitlist-success) { border-left:4px solid #596b5b;background:#fffdf8;color:#17211c; }
+.amanda-portal .amanda-card { border-radius:8px; }
+@media(prefers-reduced-motion:no-preference){ .amanda-portal :is(.amanda-button,.amanda-nav a) { transition:background-color .18s ease,border-color .18s ease,box-shadow .18s ease,transform .18s ease; } .amanda-portal .amanda-button:hover { transform:translateY(-1px);box-shadow:0 8px 18px #17211c1c; } }
+@media(prefers-reduced-motion:reduce){ .amanda-portal * { scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important; } .amanda-portal .amanda-button:hover { transform:none; } }

@@ -1,0 +1,14 @@
+import {chromium} from 'playwright';import fs from 'node:fs/promises';
+const base=process.env.AMANDA_TEST_BASE||'https://ea-payments.vercel.app';
+const out='artifacts/amanda-upgrade-5-6';await fs.mkdir(out,{recursive:true});const browser=await chromium.launch();const results=[];
+try{for(const v of [{name:'desktop',width:1440,height:900},{name:'mobile',width:375,height:812}]){
+const page=await browser.newPage({viewport:{width:v.width,height:v.height}}),errs=[];
+page.on('pageerror',e=>errs.push(e.message));const resp=await page.goto(base+'/amanda-catherine',{waitUntil:'domcontentloaded',timeout:45000});await page.locator('#pathways .ac-path').first().waitFor();await page.screenshot({path:`${out}/pathways-${v.name}.png`,fullPage:false});await page.locator('#pathways').screenshot({path:`${out}/pathway-cards-${v.name}.png`});
+const cards=await page.locator('#pathways .ac-path').count();if(cards!==3)throw Error('Pathways count '+cards);
+for(const [label,id] of [['Restore','restore'],['Learn','learn'],['Create','create']]){await page.locator('.ac-nav .ac-links > a').filter({hasText:label}).first().click();await page.waitForTimeout(650);const state=await page.evaluate(id=>({hash:location.hash,top:document.getElementById(id)?.getBoundingClientRect().top}),id);if(state.hash!=='#'+id||state.top===undefined)throw Error(label+' navigation mismatch '+JSON.stringify(state));}
+const cls=page.locator('.ac-nav a[data-cta-key="classes"]');await cls.click();await page.waitForTimeout(900);const classes=await page.evaluate(()=>({hash:location.hash,grid:!!document.getElementById('classes-grid'),distance:document.getElementById('classes-grid')?.getBoundingClientRect().top}));await page.screenshot({path:`${out}/classes-anchor-${v.name}.png`,fullPage:false});if(!classes.grid||classes.hash!=='#classes-grid'||Math.abs(classes.distance)>160)throw Error('Classes anchor failed '+JSON.stringify(classes));
+const more=page.locator('.ac-nav-more');await more.locator('summary').click();if(!(await more.evaluate(e=>e.open)))throw Error('More did not open');for(const name of ['Hub','Foundry','Eva'])if(!(await more.locator('a',{hasText:name}).count()))throw Error('Missing More link '+name);
+const hrefs=await page.locator('.ac-nav a').evaluateAll(as=>as.map(a=>a.getAttribute('href')));if(hrefs.includes('/portal/amanda-catherine/classes'))throw Error('Deleted Classes route reintroduced');
+results.push({viewport:v.name,status:resp.status(),cards,classes,navLinks:hrefs,consoleErrors:errs});await page.close();}}
+finally{await browser.close();}
+await fs.writeFile(`${out}/test-log.json`,JSON.stringify(results,null,2)+'\n');console.log(JSON.stringify(results));

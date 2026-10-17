@@ -1,0 +1,30 @@
+name: Amanda V3 Classes Services Trust
+on:
+  workflow_dispatch:
+  push:
+    branches: ['premium/amanda-upgrade']
+    paths:
+      - 'scripts/test-amanda-v3-7-9.mjs'
+      - '.github/workflows/amanda-v3-7-9.yml'
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Verify class CTA targets, waitlist and screenshots without payment
+        env:
+          AMANDA_TEST_BASE: https://ea-payments-50qklyy5l-the-architects-projects-cc813778.vercel.app
+        run: node scripts/test-amanda-v3-7-9.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: amanda-v3-classes-supporting-trust
+          path: artifacts/amanda-v3-7-9/

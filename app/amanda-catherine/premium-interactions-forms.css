@@ -1,0 +1,18 @@
+/* Amanda premium V3 upgrades 10 & 11: presentation-only, no workflow changes. */
+@media(prefers-reduced-motion:no-preference){
+ .ac-site { scroll-behavior:smooth; }
+ .ac-site :is(.ac-btn,.amanda-button,.ac-nav a,.ac-nav summary,.ac-update-card a) { transition:background-color .18s ease,color .18s ease,border-color .18s ease,box-shadow .18s ease,transform .18s ease; }
+ .ac-site :is(.ac-btn,.amanda-button):hover { transform:translateY(-2px); box-shadow:0 8px 24px #17211c22; }
+ .ac-site :is(.ac-path,.amanda-card,.ac-update-card) { transition:border-color .2s ease,box-shadow .2s ease; }
+ .ac-site :is(.ac-path,.amanda-card,.ac-update-card):hover { border-color:#b48a49; box-shadow:0 12px 30px #17211c12; }
+}
+.ac-site :is(a,button,input,select,textarea,summary):focus-visible { outline:3px solid #b48a49; outline-offset:3px; }
+.ac-site :is(.amanda-form,.ac-contact) :is(input,textarea,select) { min-height:46px; border:1px solid #9ca89c; border-radius:4px; background:#fffdf8; color:#17211c; font:inherit; line-height:1.5; }
+.ac-site :is(.amanda-form,.ac-contact) label { color:#17211c; font-weight:600; }
+.ac-site :is(.amanda-form,.ac-contact) :is(input,textarea,select):focus { border-color:#596b5b; box-shadow:0 0 0 3px #596b5b22; }
+.ac-site :is(.amanda-alert,.amanda-waitlist-success) { background:#fffdf8; border:1px solid #ddd7cb; border-left:4px solid #596b5b; color:#17211c; }
+.ac-site :is(.amanda-button,.ac-btn) { cursor:pointer; }
+@media(prefers-reduced-motion:reduce){
+ .ac-site,.ac-site * { scroll-behavior:auto!important; animation-duration:.01ms!important; transition-duration:.01ms!important; }
+ .ac-site :is(.ac-btn,.amanda-button):hover { transform:none; }
+}

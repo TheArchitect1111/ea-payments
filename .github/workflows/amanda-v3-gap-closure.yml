@@ -1,0 +1,27 @@
+name: Amanda Gap Closure Read Only
+on:
+  workflow_dispatch:
+  push:
+    branches: ['premium/amanda-upgrade']
+    paths:
+      - 'scripts/amanda-v3-gap-closure.mjs'
+      - '.github/workflows/amanda-v3-gap-closure.yml'
+permissions:
+  contents: read
+jobs:
+  crawl:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: node scripts/amanda-v3-gap-closure.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: amanda-gap-closure-read-only
+          path: artifacts/amanda-gap-closure/

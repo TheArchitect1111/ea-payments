@@ -1,0 +1,126 @@
+/*
+ * Amanda Catherine Premium V3 | visual foundations
+ * Scope: public .ac-site only. No data, routes, interactions, hero, navigation,
+ * image selection, class state or checkout behavior are changed here.
+ * This stylesheet is loaded AFTER the existing inline styles, so intentionally
+ * use .ac-site-scoped selectors with appropriate specificity.
+ */
+.ac-site {
+  --premium-ink: #17211c;
+  --premium-sage: #596b5b;
+  --premium-cream: #f6f0e6;
+  --premium-paper: #fffdf8;
+  --premium-gold: #b48a49;
+  --premium-border: #ddd7cb;
+  --premium-muted: #667069;
+  --premium-font-display: Georgia, "Times New Roman", serif;
+  --premium-font-body: Arial, Helvetica, sans-serif;
+  --premium-space-1: 0.5rem;
+  --premium-space-2: 0.75rem;
+  --premium-space-3: 1rem;
+  --premium-space-4: 1.5rem;
+  --premium-space-5: 2rem;
+  --premium-space-6: 3rem;
+  --premium-space-7: 4rem;
+  --premium-space-8: 6rem;
+  --premium-reading-width: 68ch;
+  --premium-radius: 3px;
+  --premium-rule: 1px solid var(--premium-border);
+  color: var(--premium-ink);
+  font-family: var(--premium-font-body);
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Editorial rhythm: respect existing hero and navigation styling. */
+.ac-site .ac-section { padding-block: clamp(4rem, 7vw, 6rem); }
+.ac-site .ac-section h2 {
+  font-family: var(--premium-font-display);
+  font-size: clamp(2.5rem, 4.7vw, 4.5rem);
+  font-weight: 400;
+  line-height: 1.12;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+  margin-bottom: var(--premium-space-4);
+}
+.ac-site .ac-section h3 {
+  font-family: var(--premium-font-display);
+  font-size: clamp(1.65rem, 2.4vw, 2.15rem);
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+.ac-site .ac-section p {
+  line-height: 1.72;
+  max-width: var(--premium-reading-width);
+}
+.ac-site .ac-section p + p { margin-top: var(--premium-space-3); }
+.ac-site .ac-section .ac-eyebrow {
+  color: var(--premium-sage);
+  font-size: 0.73rem;
+  font-weight: 700;
+  line-height: 1.5;
+  letter-spacing: 0.14em;
+  margin-bottom: var(--premium-space-3);
+}
+.ac-site .ac-intro { background: var(--premium-cream); }
+.ac-site .ac-intro .ac-wrap > p { margin-inline: auto; }
+.ac-site .ac-alt, .ac-site .ac-fact,
+.ac-site .ac-path, .ac-site .ac-course { background: var(--premium-cream); }
+.ac-site .ac-copy { max-width: 42rem; }
+.ac-site .ac-grid { gap: clamp(2rem, 5vw, 4rem); }
+.ac-site .ac-path-grid, .ac-site .ac-course-grid {
+  gap: clamp(1rem, 2vw, 1.5rem);
+  margin-top: clamp(2rem, 4vw, 3rem);
+}
+.ac-site .ac-path, .ac-site .ac-course {
+  padding: clamp(1.5rem, 2.7vw, 2.5rem);
+  border: var(--premium-rule);
+  border-radius: var(--premium-radius);
+}
+.ac-site .ac-fact { border: var(--premium-rule); }
+.ac-site .ac-warm-letter {
+  background: var(--premium-paper);
+  border: var(--premium-rule);
+  padding: clamp(1.5rem, 4vw, 2.625rem);
+}
+.ac-site .ac-jane-panel {
+  background: var(--premium-paper);
+  border: var(--premium-rule);
+  padding: clamp(1.5rem, 4vw, 2.625rem);
+}
+.ac-site .ac-section .ac-btn {
+  min-height: 44px;
+  padding: 0.8rem 1.35rem;
+  font-family: var(--premium-font-body);
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: 0.015em;
+}
+.ac-site .ac-section :is(input, select, textarea) {
+  min-height: 44px;
+  border: var(--premium-rule);
+  border-radius: var(--premium-radius);
+  padding: 0.75rem 0.9rem;
+  font: inherit;
+  background: var(--premium-paper);
+  color: var(--premium-ink);
+}
+.ac-site .ac-section textarea { min-height: 7rem; }
+.ac-site .ac-section :is(input, select, textarea, button, a):focus-visible {
+  outline: 2px solid var(--premium-sage);
+  outline-offset: 3px;
+}
+@media (max-width: 850px) {
+  .ac-site .ac-section { padding-block: clamp(3.5rem, 8vw, 4.25rem); }
+  .ac-site .ac-section h2 { font-size: clamp(2.35rem, 9vw, 3.5rem); }
+  .ac-site .ac-section p { font-size: 1rem; line-height: 1.7; }
+  .ac-site .ac-grid { gap: 2rem; }
+  .ac-site .ac-path, .ac-site .ac-course { padding: 1.5rem; }
+}
+@media (max-width: 375px) {
+  .ac-site .ac-section h2 { font-size: 2.25rem; }
+  .ac-site .ac-section .ac-btn { width: 100%; }
+}

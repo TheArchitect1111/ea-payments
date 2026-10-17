@@ -7,6 +7,7 @@ export function getCTA(course: Pick<Course,'key'|'status'|'square_checkout_url'>
     if(!course.square_checkout_url) throw new Error('Available Amanda class missing Square checkout: '+course.key);
     return {label:'Register' as const, action:course.square_checkout_url, kind:'checkout' as const};
   }
+  if(status==='inquiry') return {label:'Request Info' as const, action:'/amanda-catherine#contact',kind:'inquiry' as const};
   return {label:'Join Waitlist' as const,
     action:'/courses/'+encodeURIComponent(course.key)+'#waitlist',kind:'waitlist' as const};
 }

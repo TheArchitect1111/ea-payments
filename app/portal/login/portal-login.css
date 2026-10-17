@@ -439,3 +439,25 @@
   line-height: 1.5;
   color: #4b5563;
 }
+
+/* Amanda V3 continuity only. Does not touch shared EA login or auth handlers. */
+.pl-page-amanda { background:radial-gradient(circle at 50% 0%,#e7e6dc 0%,#f6f0e6 48%,#fffdf8 100%); }
+.pl-page-amanda .pl-header-amanda,.pl-page-amanda .pl-header-amanda .pl-title { color:#17211c; }
+.pl-page-amanda .pl-header-amanda :is(.pl-lede,.pl-portal-line) { color:#596b5b; }
+.pl-page-amanda .pl-header-amanda .pl-eyebrow { color:#596b5b; }
+.pl-page-amanda .pl-amanda-photo { border-color:#fffdf8;box-shadow:0 14px 35px #17211c21; }
+.pl-page-amanda .pl-amanda-hero { background:linear-gradient(125deg,#17211c,#596b5b);border:1px solid #ddd7cb;border-radius:8px;box-shadow:0 10px 26px #17211c1a; }
+.pl-page-amanda .pl-amanda-hero-overlay p { border-radius:4px; background:#fffdf81c;border-color:#fffdf84a; }
+.pl-page-amanda .pl-card { background:#fffdf8;border:1px solid #ddd7cb;border-radius:8px;box-shadow:0 12px 34px #17211c12; }
+.pl-page-amanda .pl-btn { background:#17211c;color:#fffdf8;box-shadow:none;border-radius:4px;font-size:13px;letter-spacing:.05em; }
+.pl-page-amanda .pl-btn-secondary { background:#fffdf8;color:#17211c;border:1px solid #596b5b; }
+.pl-page-amanda .pl-input { min-height:46px;border:1px solid #9ca89c;border-radius:4px;background:#fffdf8;color:#17211c; }
+.pl-page-amanda .pl-input:focus-visible,.pl-page-amanda :is(a,button):focus-visible { outline:3px solid #b48a49;outline-offset:3px; }
+.pl-page-amanda .pl-label,.pl-page-amanda .pl-footer-text { color:#596b5b; }
+.pl-page-amanda .pl-tagline { color:#667069; }
+.pl-page-amanda .pl-link,.pl-page-amanda .pl-footer-link { color:#365542; }
+@media(prefers-reduced-motion:no-preference) {
+ .pl-page-amanda .pl-btn { transition:background-color .18s ease,box-shadow .18s ease,transform .18s ease; }
+ .pl-page-amanda .pl-btn:hover:not(:disabled) { background:#32453a;box-shadow:0 8px 18px #17211c22;transform:translateY(-1px); }
+}
+@media(prefers-reduced-motion:reduce){ .pl-page-amanda * { animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important; } .pl-page-amanda .pl-btn:hover { transform:none; } }
