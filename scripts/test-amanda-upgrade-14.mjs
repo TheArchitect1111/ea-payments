@@ -1,6 +1,6 @@
 import {chromium} from 'playwright';import fs from 'node:fs/promises';
 const before='https://ea-payments-a3fr8nf0c-the-architects-projects-cc813778.vercel.app/amanda-catherine';
-const after='https://ea-payments-np259bb4t-the-architects-projects-cc813778.vercel.app/amanda-catherine';
+const after='https://ea-payments-afve6gjt6-the-architects-projects-cc813778.vercel.app/amanda-catherine';
 const dir='artifacts/amanda-v3-upgrade-14';await fs.mkdir(dir,{recursive:true});
 const browser=await chromium.launch();const results=[];const failures=[];
 try{for(const width of [375,1440])for(const [phase,url] of [['before',before],['after',after]]){
