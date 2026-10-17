@@ -1,5 +1,5 @@
 import { chromium } from 'playwright';import fs from 'node:fs/promises';
-const base='https://amanda-catherine-4-qx1ohawcv-the-architects-projects-cc813778.vercel.app';
+const base='https://amanda-catherine-4-ofrgdpjwq-the-architects-projects-cc813778.vercel.app';
 const out='artifacts/amanda-gap-closure';await fs.mkdir(out,{recursive:true});const browser=await chromium.launch();const items=[],checks=[];
 try{
 const page=await browser.newPage({viewport:{width:1440,height:900}});await page.goto(base+'/',{waitUntil:'domcontentloaded',timeout:45000});
