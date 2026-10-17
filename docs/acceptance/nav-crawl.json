@@ -1,0 +1,35 @@
+{
+  "source": "GitHub Actions 39032849185, artifact 12101570116/nav-crawl.json",
+  "testedPreview": "https://amanda-catherine-4-qx1ohawcv-the-architects-projects-cc813778.vercel.app",
+  "uniqueLinks": 47,
+  "internalBroken": [
+    {
+      "label": "View Classes",
+      "href": "/portal/amanda-catherine/classes",
+      "http": 404
+    }
+  ],
+  "externalAutomatedRestrictions": [
+    {
+      "host": "mall.riman.com",
+      "http": 403
+    },
+    {
+      "host": "womensartofcanada.ca",
+      "http": 403
+    },
+    {
+      "host": "instagram.com",
+      "http": 429
+    }
+  ],
+  "otherUnverified": [
+    {
+      "href": "/amanda-catherine/lifeline-partnership-kit.pdf",
+      "result": "timeout-or-blocked"
+    }
+  ],
+  "janeHttp": 200,
+  "reportArtifact": "https://github.com/TheArchitect1111/ea-payments/actions/runs/39032849185/artifacts/12101570116",
+  "disposition": "BLOCKED: internal 404; external restrictions need manual validation; no design changed"
+}
