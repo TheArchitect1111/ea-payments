@@ -1,28 +1,27 @@
-# Amanda V3 read-only Airtable reconciliation
+# Amanda V3 Airtable-driven availability: reconciliation record
 
-**Status: BLOCKED pending authoritative Airtable row-level comparison.**
+## Implementation outcome
 
-Airtable is the configured live data source, using the `Organizations` and `Creative Studio` tables. The connected Airtable plugin's list of accessible bases does not expose that Creative Studio schema in the visible EA Payments & Clients base; therefore direct independent row-by-row reconciliation could not be completed using this connection. No Airtable records were changed.
+**Per-class hardcoded status override REMOVED.** In `lib/amanda-catherine/registry.ts` the `Creative Studio` course record's `Payload JSON.status` is passed directly through `getAvailabilityFromAirtable(p.status)`. Only status vocabulary translation is allowed: `AVAILABLE` or `READY` to **Register** (checkout), `WAITLIST` or `NOT READY` to **Join Waitlist**, and `INQUIRY` to **Request Info**. Invalid or missing statuses reject rather than guessing. No hardcoded class slugs or prices are used to determine availability.
 
-Crucial implementation finding: `lib/amanda-catherine/registry.ts` calls `getStatusFromHardcode(key,p.status)`, which **overrides Airtable availability** based on a fixed owner-approved list, logging when Airtable differs. Thus the live CTA state cannot honestly be certified as a direct mirror of Airtable status. `getCTA` maps effective `AVAILABLE` to `Register` and other statuses (including `INQUIRY`) to `Join Waitlist`. The existing grid does not expose a `Request Info` class state. Do not modify source data or policy without separate authorization.
+The public grid renders 12 Airtable-derived class records successfully with the following distribution: six Register, five Join Waitlist, one Request Info. Preview: https://amanda-catherine-4-ofrgdpjwq-the-architects-projects-cc813778.vercel.app .
 
-## Observed Preview cards (read only)
+| Airtable `Payload JSON.status` | Canonical status | UI CTA | Destination |
+|---|---|---|---|
+| AVAILABLE / READY | AVAILABLE | Register | Existing record's `square_checkout_url` |
+| NOT READY / WAITLIST | WAITLIST | Join Waitlist | Existing `/courses/[slug]#waitlist` |
+| INQUIRY | INQUIRY | Request Info | Amanda's existing `/amanda-catherine#contact` |
 
-| Class | Displayed CTA | Displayed price |
-|---|---|---|
-| Advanced Body Sculpt | Join Waitlist | not shown |
-| Wood Therapy | Register | CAD 997 |
-| Non-Surgical BBL | Register | CAD 1,497 |
-| LIFELINE LIVE | Join Waitlist | not shown |
-| Body Sculpt Certification | Register | CAD 2,497 |
-| Strategy Call | Register | CAD 249 |
-| 90-Day Package | Join Waitlist | CAD 2,500 |
-| Nervous System Reset | Register | CAD 997 |
-| Foundry Mentorship | Join Waitlist | not shown |
-| Clinical Fat Loss | Register | CAD 1,497 |
-| Starter Kit | Join Waitlist | CAD 499 |
-| The Entrepreneurial Artist | Join Waitlist | not shown |
+### Observed CTA mapping (12 rendered records)
 
-The table above is from the observed rendered grid, not verified raw Airtable rows. Evidence: https://github.com/TheArchitect1111/ea-payments/actions/runs/39032849185/artifacts/12101570116 .
+Register: Wood Therapy; Non-Surgical BBL; Body Sculpt Certification; Strategy Call; Nervous System Reset; Clinical Fat Loss.
 
-**Approval blocker:** Read the correct underlying base with authorized read-only access and reconcile raw `Payload JSON.status`, slug, price, and Square URL against each effective CTA. Resolve owner-policy-versus-Airtable precedence explicitly.
+Join Waitlist: Advanced Body Sculpt; LIFELINE LIVE; 90-Day Package; Foundry Mentorship; The Entrepreneurial Artist.
+
+Request Info: Starter Kit.
+
+Source code and live-rendered behavior establish a direct source-to-CTA mapping. **Independent raw Airtable row-level verification remains unavailable** because the connected Airtable account does not expose the app's `Creative Studio` source base. This is a limitation of evidence, not a return to hardcoded status. No Airtable records have been modified.
+
+**Reconciliation decision:** Source-to-CTA rule and actual Preview rendering PASS. Independent field-by-field cross-check DEFERRED/BLOCKED until read-only access to the correct Airtable base is supplied. Do not claim full independent reconciliation PASS based solely on rendering.
+
+Evidence: https://github.com/TheArchitect1111/ea-payments/actions/runs/39033783118 and https://github.com/TheArchitect1111/ea-payments/actions/runs/39033958937 .
