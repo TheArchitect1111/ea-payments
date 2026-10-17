@@ -1,5 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
+import { SecureGate } from './_components/SecureGate'
 
 type Module = {
   id: number
@@ -17,13 +18,14 @@ const modules: Module[] = [
   { id: 5, title: "Certification & Business", duration: "44 min", videoId: "placeholder-5", description: "Pricing, consent forms, certificate" },
 ]
 
-export default function AmandaClassroom() {
-  const [completed, setCompleted] = useState<number[]>(() => {
-    if (typeof window === 'undefined') return [1]
-    const saved = localStorage.getItem('amanda-wood-progress')
-    return saved ? JSON.parse(saved) : [1]
-  })
+function ClassroomInner() {
+  const [completed, setCompleted] = useState<number[]>([1])
   const [activeId, setActiveId] = useState(1)
+
+  useEffect(() => {
+    const saved = localStorage.getItem('amanda-wood-progress')
+    if (saved) setCompleted(JSON.parse(saved))
+  }, [])
 
   useEffect(() => {
     localStorage.setItem('amanda-wood-progress', JSON.stringify(completed))
@@ -37,9 +39,9 @@ export default function AmandaClassroom() {
     if (!completed.includes(activeId)) {
       const next = [...completed, activeId].sort((a,b) => a-b)
       setCompleted(next)
-      if (activeId < modules.length && isUnlocked(activeId + 1)) {
-        setActiveId(activeId + 1)
-      }
+      if (activeId < modules.length) setActiveId(activeId + 1)
+    } else if (activeId < modules.length) {
+      setActiveId(activeId + 1)
     }
   }
 
@@ -49,10 +51,10 @@ export default function AmandaClassroom() {
         <header className="mb-6 border-b border-zinc-800 pb-4 flex justify-between">
           <div>
             <h1 className="text-2xl font-bold">Amanda Wood Therapy Academy</h1>
-            <p className="text-zinc-500 text-sm">V3.2b - Secure + Progress</p>
+            <p className="text-zinc-500 text-sm">V3.2c - Secure + Progress + Stripe Ready</p>
           </div>
           <div className="text-right">
-            <div className="text-xs bg-zinc-900 border border-zinc-800 px-3 py-1 rounded-full">{progressPct}% Complete</div>
+            <div className="text-xs bg-green-950 text-green-400 border border-green-900 px-3 py-1 rounded-full">{progressPct}% • Secure</div>
             <div className="w-24 bg-zinc-800 rounded-full h-1 mt-2 ml-auto">
               <div className="bg-white h-1 rounded-full transition-all" style={{width: `${progressPct}%`}}></div>
             </div>
@@ -60,47 +62,48 @@ export default function AmandaClassroom() {
         </header>
 
         <div className="grid md:grid-cols-3 gap-6">
-          {/* Video Player */}
           <div className="md:col-span-2">
-            <div className="bg-black rounded-lg aspect-video border border-zinc-800 flex items-center justify-center relative">
+            <div className="bg-black rounded-lg aspect-video border border-zinc-800 flex items-center justify-center">
               <div className="text-center">
                 <div className="text-4xl mb-2">▶️</div>
                 <p className="text-sm font-medium">{activeModule.title}</p>
-                <p className="text-xs text-zinc-500 mt-1">Video: {activeModule.videoId}</p>
-                <p className="text- text-zinc-600 mt-2 max-w-xs">Replace videoId with Amanda's real Vimeo/YouTube link in modules array</p>
+                <p className="text-xs text-zinc-500 mt-1">{activeModule.videoId}</p>
               </div>
             </div>
             <div className="mt-4 bg-zinc-900 p-4 rounded-lg border border-zinc-800">
               <h2 className="font-semibold">{activeModule.title}</h2>
               <p className="text-sm text-zinc-400 mt-1">{activeModule.description} • {activeModule.duration}</p>
-              <button onClick={markComplete} className="mt-3 bg-white text-black text-sm px-4 py-2 rounded-full font-medium hover:bg-zinc-200">
+              <button onClick={markComplete} className="mt-3 bg-white text-black text-sm px-4 py-2 rounded-full font-medium">
                 {completed.includes(activeId) ? '✓ Completed - Next →' : 'Mark Complete & Unlock Next'}
               </button>
             </div>
           </div>
 
-          {/* Module List */}
           <div className="space-y-2">
             {modules.map(m => {
               const unlocked = isUnlocked(m.id)
               const done = completed.includes(m.id)
               return (
-                <div key={m.id} onClick={() => unlocked && setActiveId(m.id)} className={`p-3 rounded-lg border cursor-pointer transition ${activeId === m.id ? 'bg-white text-black border-white' : unlocked ? 'bg-zinc-900 border-zinc-800 hover:border-zinc-700' : 'bg-zinc-900 border-zinc-800 opacity-40 cursor-not-allowed'}`}>
-                  <div className="flex justify-between items-center">
+                <div key={m.id} onClick={() => unlocked && setActiveId(m.id)} className={`p-3 rounded-lg border cursor-pointer ${activeId === m.id ? 'bg-white text-black border-white' : unlocked ? 'bg-zinc-900 border-zinc-800' : 'bg-zinc-900 border-zinc-800 opacity-40'}`}>
+                  <div className="flex justify-between">
                     <span className="text-sm font-medium">{m.id}. {m.title}</span>
-                    <span className="text-">{done ? '✓' : unlocked ? '○' : '🔒'}</span>
+                    <span className="text-xs">{done ? '✓' : unlocked ? '○' : '🔒'}</span>
                   </div>
-                  <span className={`text- ${activeId === m.id ? 'text-zinc-600' : 'text-zinc-500'}`}>{m.duration} • {unlocked ? 'Unlocked' : 'Locked'}</span>
+                  <span className="text- opacity-60">{m.duration} • {unlocked ? 'Unlocked' : 'Locked'}</span>
                 </div>
               )
             })}
-            <div className="pt-4 text- text-zinc-600">
-              Progress saved in localStorage: amanda-wood-progress<br/>
-              Next: Stripe → auto ea_session cookie
-            </div>
           </div>
         </div>
       </div>
     </div>
+  )
+}
+
+export default function AmandaClassroom() {
+  return (
+    <SecureGate>
+      <ClassroomInner />
+    </SecureGate>
   )
 }
