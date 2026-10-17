@@ -14,6 +14,7 @@ try {
     const response=await page.goto(base.replace(/\/amanda-catherine$/,'')+(path || '/amanda-catherine'),{waitUntil:'domcontentloaded',timeout:45000});
     if(!response || response.status()>=400) throw new Error(`${version} ${viewport.name} ${section}: HTTP ${response?.status()}`);
     await page.evaluate(()=>document.fonts.ready);
+    if(section==='home') await page.locator('nav').first().waitFor({state:'visible',timeout:20000});
     await page.screenshot({path:`${out}/${version}-${section}-${viewport.name}.png`,fullPage:true,animations:'disabled'});
     if(section==='home'){
       for(const part of ['nav','classes-grid','footer']){
