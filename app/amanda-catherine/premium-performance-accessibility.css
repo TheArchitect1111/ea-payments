@@ -6,3 +6,11 @@
 .ac-site :is(a,button,summary,input,select,textarea):focus-visible {outline:3px solid #b48a49;outline-offset:3px;}
 .ac-site .ac-nav-more[open] .ac-nav-more-menu {visibility:visible;}
 @media(prefers-reduced-motion:reduce){.ac-site .ac-skip-link{transition:none;}}
+
+/* Lighthouse-confirmed contrast repairs on the original Amanda page. */
+.ac-site .ac-fact strong { color:#644719; }
+.ac-site .ac-band .ac-eyebrow { color:#fffdf8; }
+.ac-site .ac-jane .ac-eyebrow { color:#3c5141; }
+.ac-site .ac-jane p { color:#354539; }
+.ac-site .ac-update-social .ac-eyebrow { color:#475b49; }
+.ac-site .ac-contact .ac-eyebrow { color:#fffdf8; }
