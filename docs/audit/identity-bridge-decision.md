@@ -61,3 +61,27 @@ Five-test success matrix still **NOT RUN** against authenticated Preview:
 - premium branded classroom: route is a placeholder only; no claim of working Frappe learning functionality.
 
 **Decision remains HOLD / NO-GO for real SSO integration until shared replay storage and actual OIDC interoperability are proven.**
+
+
+## Final Sprint verification status, 2026-10-17
+
+**Decision: HOLD / NO-GO (5/5 not evidenced).** This overrides any suggestion that the mock is verified or real OIDC is working. Production Y/Z remain untouched.
+
+- Vercel Preview confirmed READY at `01e35341940511923a732386afa566e5c27a2d4b` before the latest test commits. Subsequent commits require fresh deployment checks.
+- Owner reported setting `FRAPPE_BRIDGE_SECRET` in Preview. Project env-list permissions returned 403, so the value and branch scope have not been independently inspected.
+- Token handling code updated: `f8ab4f8`, `a996851` (distinct 401 for signature, expiry and replay; process-local replay remains unfit for real SSO).
+- Classroom status code fix: `01e3534` uses Next.js forbidden interrupt and premium `forbidden.tsx`. Middleware Preview-only exemption `8cc2c4c` allows the classroom itself to emit 403 rather than redirect to login.
+- Scripts added: `scripts/test-bridge.js` and `tests/amanda-bridge.preview.spec.ts`.
+- Runner requires a genuinely authenticated **synthetic** EA session; creating a fake signed cookie without the existing EA authentication flow is not permitted as evidence. The current tool container cannot resolve the Vercel hostname, so HTTP assertions and Playwright screenshots have **not** been executed.
+
+| V3.1 mock acceptance check | Status | Evidence |
+|---|---|---|
+| Authorized synthetic classroom returns HTTP 200 | NOT RUN | Real allowlisted EA session unavailable |
+| Unauthenticated classroom returns premium HTTP 403 | NOT RUN | Code committed, runtime HTTP result unobserved |
+| Tampered signed JWT returns 401 | NOT RUN | Runner committed; live token unavailable |
+| Expired signed JWT returns 401 | NOT RUN | Runner committed; needs genuine signed token and expiration |
+| Desktop/mobile premium shell, no Frappe branding | NOT RUN | Screenshot files not yet captured |
+
+**Five verified screenshots: 0/5.** Screenshot filenames are reserved by Playwright but not fabricated. Do **not** change this decision to CONDITIONAL GO or proceed to V3.2 until live checks pass and screenshot evidence is committed.
+
+To execute: run `EA_PORTAL_SESSION_COOKIE=<valid synthetic session> BRIDGE_PREVIEW_URL=<ready Preview URL> node scripts/test-bridge.js` (set `WAIT_FOR_EXPIRY=1` to test expiry), then `EA_PORTAL_SESSION_COOKIE=<valid synthetic session> BRIDGE_PREVIEW_URL=<ready Preview URL> npx playwright test tests/amanda-bridge.preview.spec.ts`. Never publish the cookie or the bridge secret.
