@@ -245,6 +245,18 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // V3.1 Preview-only: allow classroom to render its own authenticated 403.
+  // No permission is granted here; the server page verifies the EA cookie and allowlist.
+  if (pathname === '/portal/amanda-catherine/classroom-test' &&
+      process.env.VERCEL_ENV === 'preview' &&
+      process.env.VERCEL_GIT_COMMIT_REF === 'poc/amanda-v31-identity-bridge' &&
+      !!process.env.FRAPPE_BRIDGE_SECRET &&
+      process.env.FRAPPE_BRIDGE_SECRET.length >= 32) {
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.set('x-pathname', pathname);
+    return NextResponse.next({ request: { headers: requestHeaders } });
+  }
+
   if (pathname.startsWith('/portal')) {
     if (isPublicPortalAuthPath(pathname) || isPublicPortalExperiencePath(pathname)) {
       const requestHeaders = new Headers(request.headers);
