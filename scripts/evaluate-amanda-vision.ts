@@ -1,5 +1,6 @@
 import fs from 'node:fs/promises';
 import { critiqueScreenshotWithConfiguredProvider } from '../lib/experience-creation/vision-critic-provider';
+async function main() {
 const root='docs/baseline-screenshots';
 const out='artifacts/visual-quality/vision-report.json';
 const names=['after-home-desktop.png','after-home-mobile.png','after-portal-desktop.png','after-portal-mobile.png'];
@@ -25,3 +26,6 @@ try {
 await fs.writeFile(out,JSON.stringify(report,null,2)+'\n');
 console.log(JSON.stringify({status:report.status,assessments:report.assessments.map(x=>({name:x.name,overall:x.overall,passed:x.passed})),error:report.error}));
 if(report.status!=='PASS') process.exitCode=1;
+
+}
+main().catch(error=>{console.error(error);process.exitCode=1;});
