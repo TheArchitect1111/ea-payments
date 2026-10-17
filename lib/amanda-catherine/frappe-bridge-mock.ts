@@ -6,7 +6,7 @@ const used=new Map<string,number>();
 const enabled=()=>process.env.VERCEL_ENV==='preview'&&!!process.env.FRAPPE_BRIDGE_SECRET&&process.env.FRAPPE_BRIDGE_SECRET.length>=32;
 const enc=(x:unknown)=>Buffer.from(JSON.stringify(x)).toString('base64url');
 const sig=(data:string)=>createHmac('sha256',process.env.FRAPPE_BRIDGE_SECRET!).update(data).digest('base64url');
-export function mockAllowed(email:string){return email.trim().toLowerCase()==='test@amandacatherine.ca';}
+export function mockAllowed(email:string){return ['test@amandacatherine.ca','brickmail1@gmail.com'].includes(email.trim().toLowerCase());}
 export function mockEnabled(){return enabled();}
 export function mintMock(email:string,courseId:string){
  if(!enabled()||!mockAllowed(email)||courseId!=='wood-therapy-certification')throw new Error('bridge denied');
