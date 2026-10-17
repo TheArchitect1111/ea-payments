@@ -1,6 +1,11 @@
 name: Amanda Premium V3 Screenshots
 on:
   workflow_dispatch:
+  push:
+    branches: ['premium/amanda-upgrade']
+    paths:
+      - '.github/workflows/amanda-premium-screenshots.yml'
+      - 'scripts/amanda-premium-screenshots.mjs'
 permissions:
   contents: write
 jobs:
