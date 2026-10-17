@@ -163,7 +163,9 @@
           "mustContain": [
             "if (isAdministrator)",
             "<AmandaMemberHome",
-            "complete branded shell"
+            "<PortalSubpage",
+            "<AmandaClassesGrid",
+            "<ClassesAnchor"
           ],
           "mustNotContain": [
             "<PortalShell"
