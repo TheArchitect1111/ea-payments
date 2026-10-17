@@ -1,0 +1,44 @@
+name: Amanda Upgrade 14 Lighthouse Accessibility
+on:
+  workflow_dispatch:
+  push:
+    branches: ['premium/amanda-upgrade']
+    paths:
+      - 'scripts/test-amanda-upgrade-14.mjs'
+      - '.github/workflows/amanda-upgrade-14.yml'
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 22
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Keyboard and console test
+        run: node scripts/test-amanda-upgrade-14.mjs
+      - name: Lighthouse desktop and mobile before after
+        shell: bash
+        run: |
+          mkdir -p artifacts/amanda-v3-upgrade-14
+          export CHROME_PATH="$(node -p "require('playwright').chromium.executablePath()")"
+          BEFORE=https://ea-payments-a3fr8nf0c-the-architects-projects-cc813778.vercel.app/amanda-catherine
+          AFTER=https://ea-payments-np259bb4t-the-architects-projects-cc813778.vercel.app/amanda-catherine
+          for phase in before after; do
+            if [ "$phase" = before ]; then url="$BEFORE"; else url="$AFTER"; fi
+            for device in desktop mobile; do
+              args=()
+              if [ "$device" = desktop ]; then args+=(--preset=desktop); fi
+              npx --yes lighthouse@12 "$url" --only-categories=performance,accessibility,best-practices,seo --chrome-flags="--headless --no-sandbox --disable-gpu" --output=json --output-path="artifacts/amanda-v3-upgrade-14/lighthouse-$phase-$device.json" "${args[@]}" --quiet
+            done
+          done
+          node -e 'const fs=require("fs"),p="artifacts/amanda-v3-upgrade-14/",d={};for(const phase of ["before","after"])for(const device of ["desktop","mobile"]){const x=JSON.parse(fs.readFileSync(p+"lighthouse-"+phase+"-"+device+".json"));d[phase+"-"+device]={scores:Object.fromEntries(Object.entries(x.categories).map(([k,v])=>[k,Math.round(v.score*100)])),cls:x.audits["cumulative-layout-shift"]?.numericValue,lcp:x.audits["largest-contentful-paint"]?.numericValue}}fs.writeFileSync(p+"lighthouse-summary.json",JSON.stringify(d,null,2));console.log(JSON.stringify(d))'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: amanda-upgrade-14-lighthouse-accessibility
+          path: artifacts/amanda-v3-upgrade-14/
