@@ -1,0 +1,28 @@
+/* Amanda V3 segments 7-9. Presentation only: no course data, CTA, commerce or intake changes. */
+.ac-site #academy .amanda-portal { margin-top: clamp(1.8rem,3vw,3rem); }
+.ac-site #academy .amanda-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,295px),1fr)); gap:clamp(1rem,2vw,1.5rem); align-items:stretch; }
+.ac-site #academy .amanda-card { display:flex; flex-direction:column; min-width:0; margin:0; padding:clamp(1.5rem,2.7vw,2.25rem); border:1px solid var(--premium-border); border-radius:8px; background:var(--premium-paper); box-shadow:0 12px 34px #17211c0a; }
+.ac-site #academy .amanda-card h2 { font-family:Georgia,serif; font-size:clamp(1.55rem,2.2vw,2rem); letter-spacing:-.025em; font-weight:400; line-height:1.2; margin:0 0 1.05rem; overflow-wrap:break-word; }
+.ac-site #academy .amanda-card p { font-size:1rem; line-height:1.65; color:var(--premium-muted); margin:0 0 1.1rem; }
+.ac-site #academy .amanda-card p:nth-of-type(2) { margin-top:auto; padding-top:.7rem; color:var(--premium-ink); font-weight:700; font-variant-numeric:tabular-nums; }
+.ac-site #academy .amanda-card .amanda-button { display:inline-flex; align-items:center; justify-content:center; min-height:46px; font-size:.875rem; line-height:1.3; border-radius:4px; padding:.8rem 1.15rem; text-align:center; }
+.ac-site #academy .amanda-card .amanda-button--outline { border:1px solid var(--premium-sage); background:transparent; color:var(--premium-ink)!important; }
+.ac-site #academy .amanda-card a:focus-visible { outline:3px solid var(--premium-gold); outline-offset:3px; }
+.ac-site .ac-update-offers { gap:clamp(1.1rem,2vw,1.5rem); }
+.ac-site .ac-update-card { background:var(--premium-paper); border-color:var(--premium-border); border-radius:6px; padding:clamp(1.4rem,2.5vw,2.25rem); box-shadow:0 8px 22px #17211c07; }
+.ac-site .ac-update-card h3 { font-size:clamp(1.7rem,2.8vw,2.2rem); font-weight:400; letter-spacing:-.025em; margin-bottom:1rem; }
+.ac-site .ac-update-card h4 { color:var(--premium-ink); margin-top:1.6rem; }
+.ac-site .ac-update-card p,.ac-site .ac-update-card li { color:var(--premium-muted); line-height:1.7; }
+.ac-site .ac-update-card ul { padding-left:1.3rem; }
+.ac-site .ac-update-card .ac-btn { margin-top:.7rem; min-height:45px; }
+.ac-site .ac-proof-grid .ac-update-card { border-top:3px solid var(--premium-sage); }
+.ac-site #client-proof .ac-update-card h3 { margin-bottom:.8rem; }
+.ac-site #client-proof .ac-update-card a { text-underline-offset:4px; }
+.ac-site .ac-speaking-photo { width:100%; max-height:340px; aspect-ratio:16/10; object-fit:cover; object-position:center 25%; }
+.ac-site .ac-studio-exterior { width:100%; max-height:320px; aspect-ratio:16/10; object-fit:cover; object-position:center; }
+@media(max-width:850px) {
+ .ac-site #academy .amanda-grid { grid-template-columns:1fr; }
+ .ac-site #academy .amanda-card { padding:1.5rem; }
+ .ac-site #academy .amanda-card .amanda-button { width:100%; }
+ .ac-site .ac-update-card { padding:1.5rem; }
+}
