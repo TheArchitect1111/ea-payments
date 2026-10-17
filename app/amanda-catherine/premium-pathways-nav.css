@@ -25,3 +25,10 @@
  .ac-site #pathways .ac-path .ac-btn { width:100%; }
  .ac-site :is(#restore,#learn,#create,#pathways,#classes-grid,#founder-advisory) { scroll-margin-top: 8.75rem; }
 }
+
+/* V3 U13: minimum 44px navigation activation areas at all breakpoints. */
+.ac-site .ac-nav .ac-brand {display:inline-flex;align-items:center;min-height:44px;padding-block:9px;}
+.ac-site .ac-nav .ac-links > a {display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;padding:10px 8px;box-sizing:border-box;}
+.ac-site .ac-nav .ac-nav-book {min-height:44px!important;}
+.ac-site .ac-nav .ac-nav-more summary {display:flex;align-items:center;min-height:44px;min-width:44px;box-sizing:border-box;padding:10px 9px;}
+.ac-site .ac-nav .ac-nav-more-menu a {display:flex;align-items:center;min-height:44px;box-sizing:border-box;}
