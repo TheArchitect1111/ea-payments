@@ -31,5 +31,5 @@ export default async function AmandaCatherinePublicPage(){
  <SocialLinks/>
  <MediaSection/>
  <section className="ac-section ac-contact" id="contact"><div className="ac-wrap ac-contact-grid"><div><p className="ac-eyebrow">Contact</p><h2>Choose the conversation that fits your next step.</h2></div><div className="ac-contact-list"><a data-cta-name="mailto:$email" data-cta-key="mailto-email" href={`mailto:${email}`}>{email}</a><a data-cta-name="tel:$phone" data-cta-key="tel-phone" href={`tel:${phone}`}>{phone}</a><a data-cta-name="Jane appointments ↗" data-cta-key="jane-appointments" href={jane} target="_blank" rel="noreferrer">Jane appointments ↗</a></div></div></section>
- <footer className="ac-footer"><div className="ac-wrap ac-footer-in"><div><strong>Amanda Catherine</strong><div>Restore · Learn · Create</div></div><div className="ac-note">Medical information is educational and does not replace individualized diagnosis or treatment. Results vary. Certificates of Completion do not constitute professional licensure or medical certification.</div></div></footer>
- </main></div>}
+ </main><footer className="ac-footer"><div className="ac-wrap ac-footer-in"><div><strong>Amanda Catherine</strong><div>Restore · Learn · Create</div></div><div className="ac-note">Medical information is educational and does not replace individualized diagnosis or treatment. Results vary. Certificates of Completion do not constitute professional licensure or medical certification.</div></div></footer>
+ </div>}
