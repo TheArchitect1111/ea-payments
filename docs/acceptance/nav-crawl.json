@@ -1,35 +1,23 @@
 {
-  "source": "GitHub Actions 39032849185, artifact 12101570116/nav-crawl.json",
-  "testedPreview": "https://amanda-catherine-4-qx1ohawcv-the-architects-projects-cc813778.vercel.app",
-  "uniqueLinks": 47,
-  "internalBroken": [
+  "audit": "2026-10-17 final fixed preview link crawl",
+  "preview": "https://amanda-catherine-4-ofrgdpjwq-the-architects-projects-cc813778.vercel.app",
+  "uniqueDestinations": 46,
+  "internal404Count": 0,
+  "navCrawl": "PASS: zero internal 404s",
+  "externalBlocked": [
     {
-      "label": "View Classes",
-      "href": "/portal/amanda-catherine/classes",
-      "http": 404
-    }
-  ],
-  "externalAutomatedRestrictions": [
-    {
-      "host": "mall.riman.com",
-      "http": 403
+      "label": "Shop RIMAN Canada",
+      "http": 403,
+      "url": "https://mall.riman.com/amandacatherine/home?country=CA&lang=en-CA"
     },
     {
-      "host": "womensartofcanada.ca",
-      "http": 403
-    },
-    {
-      "host": "instagram.com",
-      "http": 429
+      "label": "Women’s Art Association of Canada",
+      "http": 403,
+      "url": "https://womensartofcanada.ca/about/"
     }
   ],
-  "otherUnverified": [
-    {
-      "href": "/amanda-catherine/lifeline-partnership-kit.pdf",
-      "result": "timeout-or-blocked"
-    }
-  ],
-  "janeHttp": 200,
-  "reportArtifact": "https://github.com/TheArchitect1111/ea-payments/actions/runs/39032849185/artifacts/12101570116",
-  "disposition": "BLOCKED: internal 404; external restrictions need manual validation; no design changed"
+  "externalNote": "External 403 responses are bot/Cloudflare restrictions and are not evidence of broken internal routes.",
+  "fullLinkByLinkEvidence": "https://github.com/TheArchitect1111/ea-payments/actions/runs/39033958937/artifacts/12101223575",
+  "tests": "Read-only Playwright, no payments, no form posts.",
+  "deletedClassStandaloneLink": "absent from homepage; View Classes scrolls to #classes-grid"
 }
