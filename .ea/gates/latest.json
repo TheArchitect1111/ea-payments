@@ -1,16 +1,16 @@
 {
-  "sourceCommit": "865adab6401faa23f99e22114e4bd1d3eb909e6f",
-  "sha": "865adab6401faa23f99e22114e4bd1d3eb909e6f",
-  "previewCommit": "67be2953e64b113120af8b5effe9d76a213bf996",
-  "mergeCommit": "865adab6401faa23f99e22114e4bd1d3eb909e6f",
-  "previewUrl": "https://ea-payments-oyg6aagqd-the-architects-projects-cc813778.vercel.app/portal/amanda-catherine/classes",
+  "sourceCommit": "bdca18da4042943b649144764fa9c6062b2f7bb1",
+  "sha": "bdca18da4042943b649144764fa9c6062b2f7bb1",
+  "previewCommit": "c5d65b07522234e33f7a0dcf334e03ad3aa80cf8",
+  "mergeCommit": "bdca18da4042943b649144764fa9c6062b2f7bb1",
+  "previewUrl": "https://amanda-catherine-4-ofrgdpjwq-the-architects-projects-cc813778.vercel.app",
   "client": "amanda-catherine",
-  "scope": "PR #573: remove duplicate public class catalog and route navigation/kit action to canonical grid",
+  "scope": "Amanda Catherine Premium V3: PR #577, full public-site upgrade on protected preview",
   "productionEligible": true,
   "status": "PASS",
-  "verificationType": "Primary status policy tests, preview build and four fresh desktop/mobile browser contexts",
-  "completedAt": "2026-10-15T13:19:27.715Z",
-  "verified": "12/12 PASS",
+  "verificationType": "Preview-only Playwright public acceptance, Lighthouse, keyboard and visual evidence; owner-confirmed Airtable 6/5/1; no authenticated/payment execution",
+  "completedAt": "2026-10-17T12:59:40Z",
+  "verified": "Owner-confirmed 6/5/1; 19/19 public acceptance, 0 internal 404s, 100 desktop/mobile accessibility",
   "duplicateButtons": 0,
   "airtableBase": "appv0YoLIMY45fmDA",
   "classes": [
@@ -119,39 +119,42 @@
       "result": "PASS"
     }
   ],
-  "qa": "Canonical grid and effective status/CTA policies unchanged. Public/portal Classes are plain links to /portal/amanda-catherine/classes, prefetch disabled; duplicate homepage catalog and LIVE-based enrollment logic removed. Homepage practitioner kit links to View Classes.",
+  "qa": "Owner confirmed 6/5/1 Airtable status-to-CTA match. Nav Classes anchor and View Classes link verified; no standalone class page. No purchases, bookings or authenticated administration exercised.",
   "gates": {
     "sourceIdentity": {
       "status": "PASS",
-      "proof": "PR #573 merged exact head 67be2953e64b113120af8b5effe9d76a213bf996 into 865adab6401faa23f99e22114e4bd1d3eb909e6f; only public homepage, kit action and portal layout changed."
+      "proof": "V3 PR #577 merged into master at bdca18da4042943b649144764fa9c6062b2f7bb1; rollback tags retain upstream 377ca9f399832c0379383e2579ba61fe528e6766 and wrapper 652a776f320956137bc3c9181249824414c376bc."
     },
     "build": {
       "status": "PASS",
-      "proof": "Vercel preview dpl_8LU76z245aT2zFyvbZ5jJTPYY5u4 READY for 67be2953e64b113120af8b5effe9d76a213bf996."
+      "proof": "V3 upstream protected preview READY and wrapper https://amanda-catherine-4-ofrgdpjwq-the-architects-projects-cc813778.vercel.app READY; upstream merged production deployment was CANCELED by strict gate, not build failure."
     },
     "assets": {
       "status": "PASS",
-      "proof": "Public homepage and canonical grid desktop/mobile screenshots reviewed; existing Amanda hero image present; layout, class prices and assets retained."
+      "proof": "Four-width screenshot suite 375/768/1024/1440 at GitHub Actions run 39031245429; 16 view screenshots and zero overflow."
     },
     "functional": {
       "status": "PASS",
-      "proof": "Fresh desktop/mobile contexts: hover public Classes -> no menus/popovers; click -> exact /portal/amanda-catherine/classes; portal Classes hover/click -> no menu. Homepage class enrollment CTA sources 0; navigation class CTA sources 0; canonical grid 12 cards/12 buttons, all expected labels PASS."
+      "proof": "19/19 public Playwright checks run 39032528486; gap crawl run 39033958937: 46 destinations, zero internal 404; Square and Jane HTTP 200, no charges or bookings."
     },
     "desktopVisual": {
       "status": "PASS",
-      "proof": "amanda-pr573-public-desktop.png and amanda-pr573-grid-desktop.png visually reviewed at 1440x1000; plain Classes link, no dropdown; correct 3-column main grid."
+      "proof": "Desktop screenshots 1440, homepage/pathways/classes/services/trust at Actions 39032528486; Lighthouse desktop performance 98/accessibility 100 at run 39031788982."
     },
     "mobileVisual": {
       "status": "PASS",
-      "proof": "amanda-pr573-public-mobile.png and amanda-pr573-grid-mobile.png visually reviewed at 390x844; direct Classes link, no popover; correct single-column main grid."
+      "proof": "Mobile screenshots 375/768 plus responsive 1024 at Actions 39031245429; Lighthouse mobile performance 77/accessibility 100 at run 39031788982."
     },
     "creativeCritic": {
       "status": "PASS",
-      "proof": "One canonical public class catalog remains; duplicate homepage card renderer removed, academy introduction retained with View Classes. All 12 grid cards render one correct CTA; no nav class cards."
+      "proof": "Premium visual QA screenshots stored at run 39032528486; AI quality gate remained below 8.5 earlier, owner approval 2026-10-17 covered V3 release after objective acceptance."
     }
   },
   "limitations": [
-    "Existing GitHub CTA regression workflow is unhealthy: script syntax error and unset workflow credential/preview inputs. This manifest uses independently observed direct Airtable and browser evidence, not a claim that that workflow passed.",
-    "This certifies the Amanda class CTA change only, not the generic chassis or payment fulfillment."
+    "No real charges/payments or authenticated admin tests",
+    "Safe-form submission deferred to avoid production notifications",
+    "Independent raw Airtable read unavailable; owner confirmed six available, five waitlist and one inquiry",
+    "Shared-client smoke TB3 homepage HTTP 200, not exhaustive",
+    "AI visual scorer earlier below 8.5; objective QA and owner approval substituted, disclosed"
   ]
 }
