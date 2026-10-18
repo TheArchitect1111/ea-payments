@@ -1,4 +1,4 @@
-import { loadPortalKnowledge } from './manifest-loader';
+import { loadPortalKnowledgeLive } from './manifest-loader';
 import { canReadEntry, type GuideRole } from './roles';
 import { retrieveHelp } from './retriever';
 import { escalationFor } from './escalate';
@@ -19,7 +19,7 @@ function verifiedLink(origin: string, href: string | null): string | null {
   } catch { return null; }
 }
 export async function guideOneStep(request: GuideRequest, writer?: UnansweredWriter): Promise<GuideResponse> {
-  const data = loadPortalKnowledge(request.portalId);
+  const data = await loadPortalKnowledgeLive(request.portalId);
   const question = request.question.trim().slice(0, 500);
   const validStep = Number.isInteger(request.stepIndex) && (request.stepIndex ?? 0) >= 0;
   const continued = request.entryKey
