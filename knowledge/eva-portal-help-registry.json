@@ -5,6 +5,11 @@
       "manifestFile": "eva-amanda-manifest.json",
       "expectedEntries": 207,
       "origin": "https://amandacatherine.ca"
+    },
+    "tb3": {
+      "manifestFile": "eva-tb3-manifest.json",
+      "expectedEntries": 85,
+      "origin": "https://tb3.online"
     }
   }
 }
