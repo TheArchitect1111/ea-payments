@@ -240,11 +240,24 @@ export async function refreshPortalKnowledge(portalId: string, deps: WatchDepend
   const previousSnapshot: StoredSnapshot | null = previousText ? JSON.parse(previousText) as StoredSnapshot : null;
   if (previousSnapshot && previousSnapshot.portalId !== portalId) throw new Error('Snapshot cross-tenant mismatch');
   const baseline = previousSnapshot?.manifest ?? loadPortalKnowledge(portalId).manifest;
-  const readings=mode==='live'?await Promise.all((conf.liveSources||[]).map(async source=>{
+  // A 404 from an externally hosted public nav is not evidence that a menu
+  // was removed. Preserve its last verified entries rather than deleting them.
+  // Source config errors, non-404 failures and empty/invalid responses fail closed.
+  const warnings: Array<{group:string;source:string;reason:'HTTP_404';action:'retained-last-good'}> = [];
+  const readings=mode==='live'?(await Promise.all((conf.liveSources||[]).map(async source=>{
     checkLive(source,conf);
-    return {source,items:await (deps.readLiveSource||getLiveMenu)(source,conf)};
-  })):[];
-  if(mode==='live'&&!readings.length)throw Error('No live nav configured');
+    try {
+      return {source,items:await (deps.readLiveSource||getLiveMenu)(source,conf)};
+    } catch (error) {
+      if(source.kind==='html-nav' && error instanceof Error && /(?:HTTP\s*404|status\s*404)/i.test(error.message)){
+        warnings.push({group:source.group,source:source.path||'',reason:'HTTP_404',action:'retained-last-good'});
+        console.warn('[Eva Knowledge Watcher] Live navigation returned HTTP 404; retaining last good knowledge', {portalId,group:source.group});
+        return null;
+      }
+      throw error;
+    }
+  }))).filter((value):value is {source:LiveMenuSource;items:LiveMenuItem[]}=>value!==null):[];
+  if(mode==='live'&&!conf.liveSources?.length)throw Error('No live nav configured');
   const next=mode==='live'?mergeLive(baseline,readings):withUpdatedLabels(source!,baseline);
   const changedItems=mode==='live'?liveDiff(baseline,next,readings.map(r=>r.source.group)):[];
   const entryCount = numberOfEntries(next);
@@ -276,8 +289,10 @@ export async function refreshPortalKnowledge(portalId: string, deps: WatchDepend
   const logPath = prefix+'/refresh-logs/'+portalId+'/'+now.replace(/[:.]/g,'-')+'-'+randomUUID()+'.json';
   const event: RefreshEvent = {type:'eva.portal-help.refresh',portalId,at:now,changed,
     entryCount,lastRefreshTime,sourceHash,backupPath};
-  await store.write(logPath, JSON.stringify({...event,mode,changedItemsCount:changedItems.length,diff:changedItems}),false);
-  return {ok:true,portalId,mode,changed,changedItemsCount:changedItems.length,entryCount,lastRefreshTime,backupPath,logPath};
+  await store.write(logPath, JSON.stringify({...event,mode,changedItemsCount:changedItems.length,diff:changedItems,
+    warnings,partialLiveRefresh:warnings.length>0}),false);
+  return {ok:true,portalId,mode,changed,changedItemsCount:changedItems.length,entryCount,lastRefreshTime,backupPath,logPath,
+    warnings,partialLiveRefresh:warnings.length>0};
 }
 export async function refreshAllRegisteredPortals(deps:WatchDependencies = {}) {
   const parsed = JSON.parse(readFileSync(resolve(process.cwd(), 'knowledge/eva-portal-help-registry.json'),'utf8')) as {portals:Record<string,unknown>};
