@@ -1,160 +1,60 @@
 {
-  "sourceCommit": "b59c046de62cebae9d0cfc00052046b7e7df2db3",
-  "sha": "b59c046de62cebae9d0cfc00052046b7e7df2db3",
-  "previewCommit": "c5d65b07522234e33f7a0dcf334e03ad3aa80cf8",
-  "mergeCommit": "b59c046de62cebae9d0cfc00052046b7e7df2db3",
-  "previewUrl": "https://amanda-catherine-4-ofrgdpjwq-the-architects-projects-cc813778.vercel.app",
-  "client": "amanda-catherine",
-  "scope": "Amanda Catherine Premium V3: PR #577, full public-site upgrade on protected preview",
-  "productionEligible": true,
+  "type": "eva-scoped",
+  "verificationType": "eva-scoped",
   "status": "PASS",
-  "verificationType": "Preview-only Playwright public acceptance, Lighthouse, keyboard and visual evidence; owner-confirmed Airtable 6/5/1; no authenticated/payment execution",
-  "completedAt": "2026-10-17T12:59:40Z",
-  "verified": "Owner-confirmed 6/5/1; 19/19 public acceptance, 0 internal 404s, 100 desktop/mobile accessibility",
-  "duplicateButtons": 0,
-  "airtableBase": "appv0YoLIMY45fmDA",
-  "classes": [
-    {
-      "class": "Advanced Body Sculpt",
-      "slug": "advanced-body-sculpt",
-      "status": "WAITLIST",
-      "button": "Join Waitlist",
-      "count": 1,
-      "result": "PASS"
-    },
-    {
-      "class": "Wood Therapy",
-      "slug": "wood-therapy",
-      "status": "AVAILABLE",
-      "button": "Buy Now",
-      "count": 1,
-      "result": "PASS",
-      "priceCad": 997
-    },
-    {
-      "class": "Non-Surgical BBL",
-      "slug": "non-surgical-bbl",
-      "status": "AVAILABLE",
-      "button": "Buy Now",
-      "count": 1,
-      "result": "PASS",
-      "priceCad": 1497
-    },
-    {
-      "class": "LIFELINE LIVE",
-      "slug": "lifeline-live",
-      "status": "WAITLIST",
-      "button": "Join Waitlist",
-      "count": 1,
-      "result": "PASS"
-    },
-    {
-      "class": "Body Sculpt Certification",
-      "slug": "body-sculpt-certification",
-      "status": "AVAILABLE",
-      "button": "Buy Now",
-      "count": 1,
-      "result": "PASS",
-      "priceCad": 2497
-    },
-    {
-      "class": "Strategy Call",
-      "slug": "strategy-call",
-      "status": "AVAILABLE",
-      "button": "Buy Now",
-      "count": 1,
-      "result": "PASS",
-      "priceCad": 249
-    },
-    {
-      "class": "90-Day Package",
-      "slug": "90-day-package",
-      "status": "WAITLIST",
-      "button": "Join Waitlist",
-      "count": 1,
-      "result": "PASS",
-      "priceCad": 2500
-    },
-    {
-      "class": "Nervous System Reset",
-      "slug": "nervous-system-reset",
-      "status": "AVAILABLE",
-      "button": "Buy Now",
-      "count": 1,
-      "result": "PASS",
-      "priceCad": 997
-    },
-    {
-      "class": "Foundry Mentorship",
-      "slug": "foundry-mentorship",
-      "status": "WAITLIST",
-      "button": "Join Waitlist",
-      "count": 1,
-      "result": "PASS"
-    },
-    {
-      "class": "Clinical Fat Loss",
-      "slug": "clinical-fat-loss",
-      "status": "AVAILABLE",
-      "button": "Buy Now",
-      "count": 1,
-      "result": "PASS",
-      "priceCad": 1497
-    },
-    {
-      "class": "Starter Kit",
-      "slug": "starter-kit",
-      "status": "INQUIRY",
-      "button": "Request Info",
-      "count": 1,
-      "result": "PASS",
-      "priceCad": 499
-    },
-    {
-      "class": "The Entrepreneurial Artist",
-      "slug": "the-entrepreneurial-artist",
-      "status": "WAITLIST",
-      "button": "Join Waitlist",
-      "count": 1,
-      "result": "PASS"
-    }
-  ],
-  "qa": "Owner confirmed 6/5/1 Airtable status-to-CTA match. Nav Classes anchor and View Classes link verified; no standalone class page. No purchases, bookings or authenticated administration exercised.",
+  "productionEligible": true,
+  "sourceCommit": "cafa4e0ed84c2182d7a9697766ea432f22c5bc3e",
+  "previewCommit": "cafa4e0ed84c2182d7a9697766ea432f22c5bc3e",
+  "sourceBaselineCommit": "f140c5e33e0084c2062c1a3cf2ca0a4faea5ae21",
+  "previewUrl": "https://ea-payments-lf3oc3doe-the-architects-projects-cc813778.vercel.app",
+  "completedAt": "2026-10-18T07:54:25.005Z",
+  "scope": "Eva Portal Help Brick clean release: Amanda and TB3 tenant scoped help; 2 AM UTC cron; HTTP 404 retain-last-good fallback",
+  "deferredVerification": {
+    "privateBlobWrite": "Must verify after deployment; NOT verified in preview",
+    "authenticatedRefresh": "Must verify after deployment; NOT verified in preview",
+    "postDeployAction": "Log any failed refresh; do not roll back healthy Eva read path"
+  },
   "gates": {
     "sourceIdentity": {
       "status": "PASS",
-      "proof": "V3 PR #577 merged into master at bdca18da4042943b649144764fa9c6062b2f7bb1; rollback tags retain upstream 377ca9f399832c0379383e2579ba61fe528e6766 and wrapper 652a776f320956137bc3c9181249824414c376bc."
+      "proof": "GitHub compare baseline f140c5e3 to cafa4e0e: 20 scoped files, no unauthorized paths"
     },
     "build": {
       "status": "PASS",
-      "proof": "V3 upstream protected preview READY and wrapper https://amanda-catherine-4-ofrgdpjwq-the-architects-projects-cc813778.vercel.app READY; upstream merged production deployment was CANCELED by strict gate, not build failure."
-    },
-    "assets": {
-      "status": "PASS",
-      "proof": "Four-width screenshot suite 375/768/1024/1440 at GitHub Actions run 39031245429; 16 view screenshots and zero overflow."
+      "proof": "Vercel staging dpl_5moczqjUXAjTzGs4UrmaHGFoCfXw READY at exact source cafa4e0e"
     },
     "functional": {
       "status": "PASS",
-      "proof": "19/19 public Playwright checks run 39032528486; gap crawl run 39033958937: 46 destinations, zero internal 404; Square and Jane HTTP 200, no charges or bookings."
+      "proof": "Sandbox scripts/test-eva-portal-help.mts Amanda 10/10; scripts/test-eva-tb3-onboarding.mts TB3 10/10; cross-tenant isolation 2/2"
     },
-    "desktopVisual": {
+    "previewHealth": {
       "status": "PASS",
-      "proof": "Desktop screenshots 1440, homepage/pathways/classes/services/trust at Actions 39032528486; Lighthouse desktop performance 98/accessibility 100 at run 39031788982."
-    },
-    "mobileVisual": {
-      "status": "PASS",
-      "proof": "Mobile screenshots 375/768 plus responsive 1024 at Actions 39031245429; Lighthouse mobile performance 77/accessibility 100 at run 39031788982."
-    },
-    "creativeCritic": {
-      "status": "PASS",
-      "proof": "Premium visual QA screenshots stored at run 39032528486; AI quality gate remained below 8.5 earlier, owner approval 2026-10-17 covered V3 release after objective acceptance."
+      "proof": "HTTP 200 ok true Amanda 207 entries and TB3 85 entries on source deployment ea-payments-lf3oc3doe"
     }
   },
-  "limitations": [
-    "No real charges/payments or authenticated admin tests",
-    "Safe-form submission deferred to avoid production notifications",
-    "Independent raw Airtable read unavailable; owner confirmed six available, five waitlist and one inquiry",
-    "Shared-client smoke TB3 homepage HTTP 200, not exhaustive",
-    "AI visual scorer earlier below 8.5; objective QA and owner approval substituted, disclosed"
-  ]
+  "evidence": {
+    "tests": {
+      "amanda": "10/10",
+      "tb3": "10/10",
+      "isolation": "2/2"
+    },
+    "previewHealth": {
+      "amanda": {
+        "url": "https://ea-payments-lf3oc3doe-the-architects-projects-cc813778.vercel.app/api/portal/amanda-catherine/eva-help/health",
+        "status": 200,
+        "ok": true,
+        "entryCount": 207,
+        "checkedAt": "2026-10-18T07:54:25.009Z"
+      },
+      "tb3": {
+        "url": "https://ea-payments-lf3oc3doe-the-architects-projects-cc813778.vercel.app/api/portal/tb3/eva-help/health",
+        "status": 200,
+        "ok": true,
+        "entryCount": 85,
+        "checkedAt": "2026-10-18T07:54:25.010Z"
+      }
+    },
+    "buildDeployment": "dpl_5moczqjUXAjTzGs4UrmaHGFoCfXw",
+    "logs": "Private Blob post-deploy verification deferred by owner authorization"
+  }
 }
