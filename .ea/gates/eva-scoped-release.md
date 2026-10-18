@@ -14,6 +14,9 @@ A scoped release must prove that **every file changed since the last approved re
 - `app/api/portal/[slug]/eva-help/**` (including help, health and admin refresh, from the actual Next.js app directory; **not** `src/app/api/portal/[slug]/eva-help/**`)
 - `scripts/verify-production-gate.mjs` (only the narrowly authorized scoped release verifier update; full 14-brick validation remains intact)
 - `.ea/gates/eva-scoped-release.md` (release policy)
+- `vercel.json` **only** to append two fixed `0 2 * * *` cron entries for `amanda-catherine` and `tb3` at `/api/portal/{slug}/eva-help/refresh`, with all existing configuration unchanged.
+
+An HTTP 404 from a configured public live-menu source is not proof of navigation removal. The watcher must retain the last verified knowledge, preserve previous refresh time, and write a tenant-scoped **private-blob warning event** with `partialLiveRefresh:true`. The warning is a degraded source result, never reported as a successful live menu update. Other source failures still fail closed. Each cron uses an exact concrete URL and `CRON_SECRET` bearer authentication; POST continues requiring same-tenant admin or owner.
 
 The shared watcher itself is under `src/bricks/eva-portal-help/**`. No wildcard matches `src/bricks/**` broadly. UI integration, generic Next.js configuration, independent cron routes, GitHub workflows and cross-client modifications are **not** silently exempt: they require a separately reviewed source release or explicit additional authorization for those exact paths.
 
@@ -47,6 +50,6 @@ The scoped verifier is implemented in this release branch, but a PASS promotion 
 
 Both production health endpoints must be HTTP 200 `ok:true`; authenticated owner/admin `mode=live` refreshes for each tenant must yield persisted private-Blob diff logs and confirmed timestamps; verify `0 2 * * *` cron in Vercel. On failure, roll back to the prior healthy deployment and report the exact failing gate.
 
-## Unmet acceptance evidence on 2026-10-18
+## Release readiness requirements
 
-The configured TB3 live HTML source at `https://tb3.online/tarris` responded HTTP 404, and `/` and `/hq` also responded HTTP 404 when checked from the Vercel sandbox. Do not claim TB3 live refresh passed. Admin-authenticated real private-Blob read-back has not been verified. The clean baseline's `vercel.json` contains no Eva watcher cron schedule, and the cron route is outside the approved file scope. These failures prohibit any `eva-scoped` PASS manifest and production promotion until independently resolved.
+Configured 404 fallback is an accepted degraded-source behavior **only if** a real preview refresh invocation verifies private-blob warning write/readback and leaves the prior knowledge unchanged. Live authenticated preview and production refresh still require signed identity or CRON_SECRET. The 02:00 UTC cron is not active until the promoted production deployment is running. No unverified outcome may be marked PASS.
