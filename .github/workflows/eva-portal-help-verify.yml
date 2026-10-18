@@ -21,4 +21,4 @@ jobs:
           node-version: '22'
           cache: 'npm'
       - run: npm ci --ignore-scripts --no-audit --no-fund
-      - run: node --import tsx scripts/test-eva-portal-help.mts
+      - run: node --conditions=react-server --import tsx scripts/test-eva-portal-help.mts
