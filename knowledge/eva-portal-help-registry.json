@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "portals": {
+    "amanda-catherine": {
+      "manifestFile": "eva-amanda-manifest.json",
+      "expectedEntries": 207,
+      "origin": "https://amandacatherine.ca"
+    }
+  }
+}
