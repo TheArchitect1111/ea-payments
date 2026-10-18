@@ -1,0 +1,3351 @@
+{
+  "manifestVersion": "audit-1.0",
+  "kind": "Eva Portal Help Brick source-of-truth audit (no runtime ingestion)",
+  "auditDate": "2026-10-18",
+  "organization": "Amanda Catherine",
+  "portalSlug": "amanda-catherine",
+  "productionUrl": "https://amandacatherine.ca",
+  "repository": "TheArchitect1111/ea-payments",
+  "repositoryRevision": "7682df45bcd5785388b47e0810656407805042b7",
+  "branch": "audit/eva-amanda-help-20261018",
+  "readOnlyAudit": true,
+  "productionChanged": false,
+  "chatbotBuilt": false,
+  "verification": {
+    "publicHomepageObserved": true,
+    "publicHubObserved": true,
+    "publicWaitlistFormObserved": true,
+    "loginScreenObserved": true,
+    "authenticatedStudentVerified": false,
+    "authenticatedStaffVerified": false,
+    "authenticatedOwnerVerified": false,
+    "liveCoverage100Percent": false,
+    "comment": "Static routes and Airtable registry audited; production authenticated permutations not verifiable without credentials. Do not claim 100% live coverage.",
+    "checkedLinks": [
+      {
+        "url": "https://amandacatherine.ca/",
+        "outcome": "Public homepage and menus observed"
+      },
+      {
+        "url": "https://amandacatherine.ca/amanda/hub",
+        "outcome": "Redirects to /portal/amanda-catherine/hub; read-only hub visible"
+      },
+      {
+        "url": "https://amandacatherine.ca/amanda/eva",
+        "outcome": "Redirects to portal login for Eva"
+      },
+      {
+        "url": "https://amandacatherine.ca/courses/advanced-body-sculpt",
+        "outcome": "Public five-field course waitlist inspected without submitting"
+      },
+      {
+        "url": "https://amandacatherine.ca/portal/amanda-catherine/learning",
+        "outcome": "Redirects to portal login"
+      },
+      {
+        "url": "https://amandacatherine.ca/portal/amanda-catherine/owner",
+        "outcome": "Owner authenticated route not verified"
+      }
+    ]
+  },
+  "sources": [
+    {
+      "name": "Airtable Organizations",
+      "baseId": "appv0YoLIMY45fmDA",
+      "tableId": "tbl4I3oOnVCnVjegA",
+      "recordId": "rec4RdtA5S8XVIW0z",
+      "fields": [
+        "Portal Slug",
+        "Booking Url",
+        "Payload JSON"
+      ]
+    },
+    {
+      "name": "Airtable Creative Studio",
+      "baseId": "appv0YoLIMY45fmDA",
+      "tableId": "tblHseQxOkv5kvzIt",
+      "organizationId": "org_amanda-catherine",
+      "visiblePublicRecords": 12,
+      "excludedTestRecords": 1
+    },
+    {
+      "name": "Airtable Chassis Forms",
+      "baseId": "appv0YoLIMY45fmDA",
+      "tableId": "tbl7OquMBD1ZX3r3o",
+      "amandaFormIds": [
+        "amanda-waitlist",
+        "amanda-apply",
+        "amanda-enroll"
+      ]
+    },
+    {
+      "name": "Amanda owner nav",
+      "file": "app/portal/amanda-catherine/owner/layout.tsx"
+    },
+    {
+      "name": "Amanda role dashboards",
+      "file": "lib/amanda-catherine/config.ts"
+    },
+    {
+      "name": "Amanda tile destination mapping",
+      "file": "app/portal/[slug]/member/AmandaMemberHome.tsx"
+    },
+    {
+      "name": "chassis module registry",
+      "file": "lib/modules/registry.ts"
+    },
+    {
+      "name": "Entitlement/RBAC",
+      "file": "lib/modules/portal-modules.ts"
+    }
+  ],
+  "menus": {
+    "publicHomepageActions": [
+      {
+        "label": "Amanda Catherine",
+        "href": "#top",
+        "steps": [
+          "Open https://amandacatherine.ca/.",
+          "Click \"Amanda Catherine\" in the public page navigation or its relevant section.",
+          "The source-configured target is #top."
+        ],
+        "verification": "source-mapped, some live confirmed"
+      },
+      {
+        "label": "Skip to content",
+        "href": "#main-content",
+        "steps": [
+          "Open https://amandacatherine.ca/.",
+          "Click \"Skip to content\" in the public page navigation or its relevant section.",
+          "The source-configured target is #main-content."
+        ],
+        "verification": "source-mapped, some live confirmed"
+      },
+      {
+        "label": "Restore",
+        "href": "#restore",
+        "steps": [
+          "Open https://amandacatherine.ca/.",
+          "Click \"Restore\" in the public page navigation or its relevant section.",
+          "The source-configured target is #restore."
+        ],
+        "verification": "source-mapped, some live confirmed"
+      },
+      {
+        "label": "Learn",
+        "href": "#learn",
+        "steps": [
+          "Open https://amandacatherine.ca/.",
+          "Click \"Learn\" in the public page navigation or its relevant section.",
+          "The source-configured target is #learn."
+        ],
+        "verification": "source-mapped, some live confirmed"
+      },
+      {
+        "label": "Create",
+        "href": "#create",
+        "steps": [
+          "Open https://amandacatherine.ca/.",
+          "Click \"Create\" in the public page navigation or its relevant section.",
+          "The source-configured target is #create."
+        ],
+        "verification": "source-mapped, some live confirmed"
+      },
+      {
+        "label": "Classes",
+        "href": "#classes-grid",
+        "steps": [
+          "Open https://amandacatherine.ca/.",
+          "Click \"Classes\" in the public page navigation or its relevant section.",
+          "The source-configured target is #classes-grid."
+        ],
+        "verification": "source-mapped, some live confirmed"
+      },
+      {
+        "label": "Book a visit",
+        "href": "https://aesthetikine.janeapp.com/#/discipline/1/treatment/2",
+        "steps": [
+          "Open https://amandacatherine.ca/.",
+          "Click \"Book a visit\" in the public page navigation or its relevant section.",
+          "The source-configured target is https://aesthetikine.janeapp.com/#/discipline/1/treatment/2."
+        ],
+        "verification": "source-mapped, some live confirmed"
+      },
+      {
+        "label": "More",
+        "href": "opens nested navigation",
+        "steps": [
+          "Open https://amandacatherine.ca/.",
+          "Click \"More\" in the public page navigation or its relevant section.",
+          "The source-configured target is opens nested navigation."
+        ],
+        "verification": "source-mapped, some live confirmed"
+      },
+      {
+        "label": "Hub",
+        "href": "/amanda/hub",
+        "steps": [
+          "Open https://amandacatherine.ca/.",
+          "Click \"Hub\" in the public page navigation or its relevant section.",
+          "The source-configured target is /amanda/hub."
+        ],
+        "verification": "source-mapped, some live confirmed"
+      },
+      {
+        "label": "Foundry",
+        "href": "#founder-advisory",
+        "steps": [
+          "Open https://amandacatherine.ca/.",
+          "Click \"Foundry\" in the public page navigation or its relevant section.",
+          "The source-configured target is #founder-advisory."
+        ],
+        "verification": "source-mapped, some live confirmed"
+      },
+      {
+        "label": "Eva",
+        "href": "/amanda/eva",
+        "steps": [
+          "Open https://amandacatherine.ca/.",
+          "Click \"Eva\" in the public page navigation or its relevant section.",
+          "The source-configured target is /amanda/eva."
+        ],
+        "verification": "source-mapped, some live confirmed"
+      },
+      {
+        "label": "Choose your pathway",
+        "href": "#pathways",
+        "steps": [
+          "Open https://amandacatherine.ca/.",
+          "Click \"Choose your pathway\" in the public page navigation or its relevant section.",
+          "The source-configured target is #pathways."
+        ],
+        "verification": "source-mapped, some live confirmed"
+      },
+      {
+        "label": "Meet Amanda",
+        "href": "#about",
+        "steps": [
+          "Open https://amandacatherine.ca/.",
+          "Click \"Meet Amanda\" in the public page navigation or its relevant section.",
+          "The source-configured target is #about."
+        ],
+        "verification": "source-mapped, some live confirmed"
+      },
+      {
+        "label": "Explore Restore",
+        "href": null,
+        "steps": [
+          "Open https://amandacatherine.ca/.",
+          "Click \"Explore Restore\" in the public page navigation or its relevant section.",
+          "Follow the visible external or internal destination; exact resolved href must be authenticated/click-tested before Eva gives it as certain."
+        ],
+        "verification": "public label observed; final destination not independently verified"
+      },
+      {
+        "label": "Explore Learn",
+        "href": null,
+        "steps": [
+          "Open https://amandacatherine.ca/.",
+          "Click \"Explore Learn\" in the public page navigation or its relevant section.",
+          "Follow the visible external or internal destination; exact resolved href must be authenticated/click-tested before Eva gives it as certain."
+        ],
+        "verification": "public label observed; final destination not independently verified"
+      },
+      {
+        "label": "Explore Create",
+        "href": null,
+        "steps": [
+          "Open https://amandacatherine.ca/.",
+          "Click \"Explore Create\" in the public page navigation or its relevant section.",
+          "Follow the visible external or internal destination; exact resolved href must be authenticated/click-tested before Eva gives it as certain."
+        ],
+        "verification": "public label observed; final destination not independently verified"
+      },
+      {
+        "label": "Meet Jane",
+        "href": null,
+        "steps": [
+          "Open https://amandacatherine.ca/.",
+          "Click \"Meet Jane\" in the public page navigation or its relevant section.",
+          "Follow the visible external or internal destination; exact resolved href must be authenticated/click-tested before Eva gives it as certain."
+        ],
+        "verification": "public label observed; final destination not independently verified"
+      },
+      {
+        "label": "Open Jane & book",
+        "href": null,
+        "steps": [
+          "Open https://amandacatherine.ca/.",
+          "Click \"Open Jane & book\" in the public page navigation or its relevant section.",
+          "Follow the visible external or internal destination; exact resolved href must be authenticated/click-tested before Eva gives it as certain."
+        ],
+        "verification": "public label observed; final destination not independently verified"
+      },
+      {
+        "label": "Manage in Jane",
+        "href": null,
+        "steps": [
+          "Open https://amandacatherine.ca/.",
+          "Click \"Manage in Jane\" in the public page navigation or its relevant section.",
+          "Follow the visible external or internal destination; exact resolved href must be authenticated/click-tested before Eva gives it as certain."
+        ],
+        "verification": "public label observed; final destination not independently verified"
+      },
+      {
+        "label": "Explore courses",
+        "href": null,
+        "steps": [
+          "Open https://amandacatherine.ca/.",
+          "Click \"Explore courses\" in the public page navigation or its relevant section.",
+          "Follow the visible external or internal destination; exact resolved href must be authenticated/click-tested before Eva gives it as certain."
+        ],
+        "verification": "public label observed; final destination not independently verified"
+      },
+      {
+        "label": "View Classes",
+        "href": null,
+        "steps": [
+          "Open https://amandacatherine.ca/.",
+          "Click \"View Classes\" in the public page navigation or its relevant section.",
+          "Follow the visible external or internal destination; exact resolved href must be authenticated/click-tested before Eva gives it as certain."
+        ],
+        "verification": "public label observed; final destination not independently verified"
+      },
+      {
+        "label": "Shop RIMAN Canada",
+        "href": null,
+        "steps": [
+          "Open https://amandacatherine.ca/.",
+          "Click \"Shop RIMAN Canada\" in the public page navigation or its relevant section.",
+          "Follow the visible external or internal destination; exact resolved href must be authenticated/click-tested before Eva gives it as certain."
+        ],
+        "verification": "public label observed; final destination not independently verified"
+      },
+      {
+        "label": "Already enrolled? Sign in to learning",
+        "href": "/portal/login?next=/portal/amanda-catherine/learning",
+        "steps": [
+          "Open https://amandacatherine.ca/.",
+          "Click \"Already enrolled? Sign in to learning\" in the public page navigation or its relevant section.",
+          "The source-configured target is /portal/login?next=/portal/amanda-catherine/learning."
+        ],
+        "verification": "source-mapped, some live confirmed"
+      },
+      {
+        "label": "Apply for Founder Advisory",
+        "href": "/portal/amanda-catherine/apply?form=founder-advisory",
+        "steps": [
+          "Open https://amandacatherine.ca/.",
+          "Click \"Apply for Founder Advisory\" in the public page navigation or its relevant section.",
+          "The source-configured target is /portal/amanda-catherine/apply?form=founder-advisory."
+        ],
+        "verification": "source-mapped, some live confirmed"
+      },
+      {
+        "label": "Watch Amanda’s speaking & media reel",
+        "href": null,
+        "steps": [
+          "Open https://amandacatherine.ca/.",
+          "Click \"Watch Amanda’s speaking & media reel\" in the public page navigation or its relevant section.",
+          "Follow the visible external or internal destination; exact resolved href must be authenticated/click-tested before Eva gives it as certain."
+        ],
+        "verification": "public label observed; final destination not independently verified"
+      },
+      {
+        "label": "Women’s Art Association of Canada",
+        "href": null,
+        "steps": [
+          "Open https://amandacatherine.ca/.",
+          "Click \"Women’s Art Association of Canada\" in the public page navigation or its relevant section.",
+          "Follow the visible external or internal destination; exact resolved href must be authenticated/click-tested before Eva gives it as certain."
+        ],
+        "verification": "public label observed; final destination not independently verified"
+      },
+      {
+        "label": "Book Amanda to Speak",
+        "href": null,
+        "steps": [
+          "Open https://amandacatherine.ca/.",
+          "Click \"Book Amanda to Speak\" in the public page navigation or its relevant section.",
+          "Follow the visible external or internal destination; exact resolved href must be authenticated/click-tested before Eva gives it as certain."
+        ],
+        "verification": "public label observed; final destination not independently verified"
+      },
+      {
+        "label": "Guest application",
+        "href": "/portal/amanda-catherine/apply?form=lifeline-media-guest&entry=guest-application",
+        "steps": [
+          "Open https://amandacatherine.ca/.",
+          "Click \"Guest application\" in the public page navigation or its relevant section.",
+          "The source-configured target is /portal/amanda-catherine/apply?form=lifeline-media-guest&entry=guest-application."
+        ],
+        "verification": "source-mapped, some live confirmed"
+      },
+      {
+        "label": "Partnership & sponsorship kit",
+        "href": "/portal/amanda-catherine/apply?form=partner-vendor-application&program=lifeline&request=kit",
+        "steps": [
+          "Open https://amandacatherine.ca/.",
+          "Click \"Partnership & sponsorship kit\" in the public page navigation or its relevant section.",
+          "The source-configured target is /portal/amanda-catherine/apply?form=partner-vendor-application&program=lifeline&request=kit."
+        ],
+        "verification": "source-mapped, some live confirmed"
+      },
+      {
+        "label": "Book a LIFELINE interview",
+        "href": "/portal/amanda-catherine/apply?form=lifeline-media-guest",
+        "steps": [
+          "Open https://amandacatherine.ca/.",
+          "Click \"Book a LIFELINE interview\" in the public page navigation or its relevant section.",
+          "The source-configured target is /portal/amanda-catherine/apply?form=lifeline-media-guest."
+        ],
+        "verification": "source-mapped, some live confirmed"
+      },
+      {
+        "label": "Explore a partnership",
+        "href": "/portal/amanda-catherine/apply?form=partner-vendor-application&program=lifeline",
+        "steps": [
+          "Open https://amandacatherine.ca/.",
+          "Click \"Explore a partnership\" in the public page navigation or its relevant section.",
+          "The source-configured target is /portal/amanda-catherine/apply?form=partner-vendor-application&program=lifeline."
+        ],
+        "verification": "source-mapped, some live confirmed"
+      },
+      {
+        "label": "Explore Empower Art Collective",
+        "href": null,
+        "steps": [
+          "Open https://amandacatherine.ca/.",
+          "Click \"Explore Empower Art Collective\" in the public page navigation or its relevant section.",
+          "Follow the visible external or internal destination; exact resolved href must be authenticated/click-tested before Eva gives it as certain."
+        ],
+        "verification": "public label observed; final destination not independently verified"
+      },
+      {
+        "label": "Explore events",
+        "href": null,
+        "steps": [
+          "Open https://amandacatherine.ca/.",
+          "Click \"Explore events\" in the public page navigation or its relevant section.",
+          "Follow the visible external or internal destination; exact resolved href must be authenticated/click-tested before Eva gives it as certain."
+        ],
+        "verification": "public label observed; final destination not independently verified"
+      },
+      {
+        "label": "Watch the community video",
+        "href": null,
+        "steps": [
+          "Open https://amandacatherine.ca/.",
+          "Click \"Watch the community video\" in the public page navigation or its relevant section.",
+          "Follow the visible external or internal destination; exact resolved href must be authenticated/click-tested before Eva gives it as certain."
+        ],
+        "verification": "public label observed; final destination not independently verified"
+      },
+      {
+        "label": "Volunteer or offer support",
+        "href": null,
+        "steps": [
+          "Open https://amandacatherine.ca/.",
+          "Click \"Volunteer or offer support\" in the public page navigation or its relevant section.",
+          "Follow the visible external or internal destination; exact resolved href must be authenticated/click-tested before Eva gives it as certain."
+        ],
+        "verification": "public label observed; final destination not independently verified"
+      },
+      {
+        "label": "Mission & nonprofit information",
+        "href": null,
+        "steps": [
+          "Open https://amandacatherine.ca/.",
+          "Click \"Mission & nonprofit information\" in the public page navigation or its relevant section.",
+          "Follow the visible external or internal destination; exact resolved href must be authenticated/click-tested before Eva gives it as certain."
+        ],
+        "verification": "public label observed; final destination not independently verified"
+      },
+      {
+        "label": "Explore AesthetiKine’s client stories",
+        "href": null,
+        "steps": [
+          "Open https://amandacatherine.ca/.",
+          "Click \"Explore AesthetiKine’s client stories\" in the public page navigation or its relevant section.",
+          "Follow the visible external or internal destination; exact resolved href must be authenticated/click-tested before Eva gives it as certain."
+        ],
+        "verification": "public label observed; final destination not independently verified"
+      },
+      {
+        "label": "View AesthetiKine on Google",
+        "href": null,
+        "steps": [
+          "Open https://amandacatherine.ca/.",
+          "Click \"View AesthetiKine on Google\" in the public page navigation or its relevant section.",
+          "Follow the visible external or internal destination; exact resolved href must be authenticated/click-tested before Eva gives it as certain."
+        ],
+        "verification": "public label observed; final destination not independently verified"
+      },
+      {
+        "label": "View the WAAC board",
+        "href": null,
+        "steps": [
+          "Open https://amandacatherine.ca/.",
+          "Click \"View the WAAC board\" in the public page navigation or its relevant section.",
+          "Follow the visible external or internal destination; exact resolved href must be authenticated/click-tested before Eva gives it as certain."
+        ],
+        "verification": "public label observed; final destination not independently verified"
+      },
+      {
+        "label": "Amanda Catherine Instagram",
+        "href": null,
+        "steps": [
+          "Open https://amandacatherine.ca/.",
+          "Click \"Amanda Catherine Instagram\" in the public page navigation or its relevant section.",
+          "Follow the visible external or internal destination; exact resolved href must be authenticated/click-tested before Eva gives it as certain."
+        ],
+        "verification": "public label observed; final destination not independently verified"
+      },
+      {
+        "label": "AesthetiKine Instagram",
+        "href": null,
+        "steps": [
+          "Open https://amandacatherine.ca/.",
+          "Click \"AesthetiKine Instagram\" in the public page navigation or its relevant section.",
+          "Follow the visible external or internal destination; exact resolved href must be authenticated/click-tested before Eva gives it as certain."
+        ],
+        "verification": "public label observed; final destination not independently verified"
+      },
+      {
+        "label": "LIFELINE Instagram",
+        "href": null,
+        "steps": [
+          "Open https://amandacatherine.ca/.",
+          "Click \"LIFELINE Instagram\" in the public page navigation or its relevant section.",
+          "Follow the visible external or internal destination; exact resolved href must be authenticated/click-tested before Eva gives it as certain."
+        ],
+        "verification": "public label observed; final destination not independently verified"
+      },
+      {
+        "label": "Jane appointments",
+        "href": null,
+        "steps": [
+          "Open https://amandacatherine.ca/.",
+          "Click \"Jane appointments\" in the public page navigation or its relevant section.",
+          "Follow the visible external or internal destination; exact resolved href must be authenticated/click-tested before Eva gives it as certain."
+        ],
+        "verification": "public label observed; final destination not independently verified"
+      }
+    ],
+    "publicClasses": [
+      {
+        "slug": "advanced-body-sculpt",
+        "title": "Advanced Body Sculpt",
+        "status": "WAITLIST",
+        "priceCad": null,
+        "button": "Join Waitlist",
+        "href": "https://amandacatherine.ca/courses/advanced-body-sculpt#waitlist",
+        "steps": [
+          "Open https://amandacatherine.ca/ and scroll to the Classes section.",
+          "Find Advanced Body Sculpt and click Join Waitlist.",
+          "In the course page enter Name, Email, optional Phone, Class and Message and click Join Waitlist; submission not executed in audit."
+        ],
+        "source": "Airtable Creative Studio, organization org_amanda-catherine",
+        "liveObserved": true
+      },
+      {
+        "slug": "wood-therapy",
+        "title": "Wood Therapy",
+        "status": "AVAILABLE",
+        "priceCad": 997,
+        "button": "Register",
+        "href": "Square checkout configured in Creative Studio Payload JSON (external checkout.square.site)",
+        "steps": [
+          "Open https://amandacatherine.ca/ and scroll to the Classes section.",
+          "Find the Wood Therapy card and click Register.",
+          "Complete payment in the opened Square checkout; payment and access are not tested by this read-only audit."
+        ],
+        "source": "Airtable Creative Studio, organization org_amanda-catherine",
+        "liveObserved": true
+      },
+      {
+        "slug": "non-surgical-bbl",
+        "title": "Non-Surgical BBL",
+        "status": "AVAILABLE",
+        "priceCad": 1497,
+        "button": "Register",
+        "href": "Square checkout configured in Creative Studio Payload JSON (external checkout.square.site)",
+        "steps": [
+          "Open https://amandacatherine.ca/ and scroll to the Classes section.",
+          "Find the Non-Surgical BBL card and click Register.",
+          "Complete payment in the opened Square checkout; payment and access are not tested by this read-only audit."
+        ],
+        "source": "Airtable Creative Studio, organization org_amanda-catherine",
+        "liveObserved": true
+      },
+      {
+        "slug": "lifeline-live",
+        "title": "LIFELINE LIVE",
+        "status": "WAITLIST",
+        "priceCad": null,
+        "button": "Join Waitlist",
+        "href": "https://amandacatherine.ca/courses/lifeline-live#waitlist",
+        "steps": [
+          "Open https://amandacatherine.ca/ and scroll to the Classes section.",
+          "Find LIFELINE LIVE and click Join Waitlist.",
+          "In the course page enter Name, Email, optional Phone, Class and Message and click Join Waitlist; submission not executed in audit."
+        ],
+        "source": "Airtable Creative Studio, organization org_amanda-catherine",
+        "liveObserved": true
+      },
+      {
+        "slug": "body-sculpt-certification",
+        "title": "Body Sculpt Certification",
+        "status": "AVAILABLE",
+        "priceCad": 2497,
+        "button": "Register",
+        "href": "Square checkout configured in Creative Studio Payload JSON (external checkout.square.site)",
+        "steps": [
+          "Open https://amandacatherine.ca/ and scroll to the Classes section.",
+          "Find the Body Sculpt Certification card and click Register.",
+          "Complete payment in the opened Square checkout; payment and access are not tested by this read-only audit."
+        ],
+        "source": "Airtable Creative Studio, organization org_amanda-catherine",
+        "liveObserved": true
+      },
+      {
+        "slug": "strategy-call",
+        "title": "Strategy Call",
+        "status": "AVAILABLE",
+        "priceCad": 249,
+        "button": "Register",
+        "href": "Square checkout configured in Creative Studio Payload JSON (external checkout.square.site)",
+        "steps": [
+          "Open https://amandacatherine.ca/ and scroll to the Classes section.",
+          "Find the Strategy Call card and click Register.",
+          "Complete payment in the opened Square checkout; payment and access are not tested by this read-only audit."
+        ],
+        "source": "Airtable Creative Studio, organization org_amanda-catherine",
+        "liveObserved": true
+      },
+      {
+        "slug": "90-day-package",
+        "title": "90-Day Package",
+        "status": "WAITLIST",
+        "priceCad": 2500,
+        "button": "Join Waitlist",
+        "href": "https://amandacatherine.ca/courses/90-day-package#waitlist",
+        "steps": [
+          "Open https://amandacatherine.ca/ and scroll to the Classes section.",
+          "Find 90-Day Package and click Join Waitlist.",
+          "In the course page enter Name, Email, optional Phone, Class and Message and click Join Waitlist; submission not executed in audit."
+        ],
+        "source": "Airtable Creative Studio, organization org_amanda-catherine",
+        "liveObserved": true
+      },
+      {
+        "slug": "nervous-system-reset",
+        "title": "Nervous System Reset",
+        "status": "AVAILABLE",
+        "priceCad": 997,
+        "button": "Register",
+        "href": "Square checkout configured in Creative Studio Payload JSON (external checkout.square.site)",
+        "steps": [
+          "Open https://amandacatherine.ca/ and scroll to the Classes section.",
+          "Find the Nervous System Reset card and click Register.",
+          "Complete payment in the opened Square checkout; payment and access are not tested by this read-only audit."
+        ],
+        "source": "Airtable Creative Studio, organization org_amanda-catherine",
+        "liveObserved": true
+      },
+      {
+        "slug": "foundry-mentorship",
+        "title": "Foundry Mentorship",
+        "status": "WAITLIST",
+        "priceCad": null,
+        "button": "Join Waitlist",
+        "href": "https://amandacatherine.ca/courses/foundry-mentorship#waitlist",
+        "steps": [
+          "Open https://amandacatherine.ca/ and scroll to the Classes section.",
+          "Find Foundry Mentorship and click Join Waitlist.",
+          "In the course page enter Name, Email, optional Phone, Class and Message and click Join Waitlist; submission not executed in audit."
+        ],
+        "source": "Airtable Creative Studio, organization org_amanda-catherine",
+        "liveObserved": true
+      },
+      {
+        "slug": "clinical-fat-loss",
+        "title": "Clinical Fat Loss",
+        "status": "AVAILABLE",
+        "priceCad": 1497,
+        "button": "Register",
+        "href": "Square checkout configured in Creative Studio Payload JSON (external checkout.square.site)",
+        "steps": [
+          "Open https://amandacatherine.ca/ and scroll to the Classes section.",
+          "Find the Clinical Fat Loss card and click Register.",
+          "Complete payment in the opened Square checkout; payment and access are not tested by this read-only audit."
+        ],
+        "source": "Airtable Creative Studio, organization org_amanda-catherine",
+        "liveObserved": true
+      },
+      {
+        "slug": "starter-kit",
+        "title": "Starter Kit",
+        "status": "INQUIRY",
+        "priceCad": 499,
+        "button": "Request Info",
+        "href": "https://amandacatherine.ca/amanda-catherine#contact",
+        "steps": [
+          "Open https://amandacatherine.ca/ and scroll to the Classes section.",
+          "Find Starter Kit and click Request Info.",
+          "Use the contact form or contact details displayed."
+        ],
+        "source": "Airtable Creative Studio, organization org_amanda-catherine",
+        "liveObserved": true
+      },
+      {
+        "slug": "the-entrepreneurial-artist",
+        "title": "The Entrepreneurial Artist",
+        "status": "WAITLIST",
+        "priceCad": null,
+        "button": "Join Waitlist",
+        "href": "https://amandacatherine.ca/courses/the-entrepreneurial-artist#waitlist",
+        "steps": [
+          "Open https://amandacatherine.ca/ and scroll to the Classes section.",
+          "Find The Entrepreneurial Artist and click Join Waitlist.",
+          "In the course page enter Name, Email, optional Phone, Class and Message and click Join Waitlist; submission not executed in audit."
+        ],
+        "source": "Airtable Creative Studio, organization org_amanda-catherine",
+        "liveObserved": true
+      }
+    ],
+    "publicForms": [
+      {
+        "id": "amanda-waitlist",
+        "fields": [
+          "Name required",
+          "Email required",
+          "Phone optional",
+          "Course required",
+          "Message optional"
+        ],
+        "button": "Join the waitlist",
+        "steps": [
+          "Open the specific course page via Join Waitlist.",
+          "Enter Name, Email, optional Phone, choose course, optionally add Message.",
+          "Click Join the waitlist (not submitted during audit)."
+        ]
+      },
+      {
+        "id": "amanda-apply",
+        "fields": [
+          "Name required",
+          "Email required",
+          "Phone optional",
+          "Message optional"
+        ],
+        "button": "Submit Application",
+        "steps": [
+          "Click Apply or a program application CTA.",
+          "Enter Name and Email, optional Phone and Message.",
+          "Click Submit Application (not submitted during audit)."
+        ]
+      },
+      {
+        "id": "amanda-enroll",
+        "fields": [
+          "Name required",
+          "Email required",
+          "Phone optional",
+          "Course required",
+          "Message optional"
+        ],
+        "button": "Submit Enrollment",
+        "steps": [
+          "Open course registration flow.",
+          "Enter required fields and click Submit Enrollment; checkout behavior unverified."
+        ]
+      }
+    ],
+    "engagementNavigation": [
+      {
+        "label": "Classes",
+        "href": "#classes-grid",
+        "steps": [
+          "From an Amanda engagement page click \"Classes\" in top navigation.",
+          "Follow #classes-grid; for Classes scroll to the embedded classes grid."
+        ],
+        "component": "app/portal/amanda-catherine/(engagement)/layout.tsx",
+        "liveVerified": false
+      },
+      {
+        "label": "Apply",
+        "href": "/portal/amanda-catherine/apply",
+        "steps": [
+          "From an Amanda engagement page click \"Apply\" in top navigation.",
+          "Follow /portal/amanda-catherine/apply; for Classes scroll to the embedded classes grid."
+        ],
+        "component": "app/portal/amanda-catherine/(engagement)/layout.tsx",
+        "liveVerified": false
+      },
+      {
+        "label": "Book",
+        "href": "/portal/amanda-catherine/book",
+        "steps": [
+          "From an Amanda engagement page click \"Book\" in top navigation.",
+          "Follow /portal/amanda-catherine/book; for Classes scroll to the embedded classes grid."
+        ],
+        "component": "app/portal/amanda-catherine/(engagement)/layout.tsx",
+        "liveVerified": false
+      },
+      {
+        "label": "Foundry",
+        "href": "/portal/amanda-catherine/foundry",
+        "steps": [
+          "From an Amanda engagement page click \"Foundry\" in top navigation.",
+          "Follow /portal/amanda-catherine/foundry; for Classes scroll to the embedded classes grid."
+        ],
+        "component": "app/portal/amanda-catherine/(engagement)/layout.tsx",
+        "liveVerified": false
+      },
+      {
+        "label": "Update Hub",
+        "href": "/portal/amanda-catherine/hub",
+        "steps": [
+          "From an Amanda engagement page click \"Update Hub\" in top navigation.",
+          "Follow /portal/amanda-catherine/hub; for Classes scroll to the embedded classes grid."
+        ],
+        "component": "app/portal/amanda-catherine/(engagement)/layout.tsx",
+        "liveVerified": true
+      },
+      {
+        "label": "Calendar",
+        "href": "/portal/amanda-catherine/calendar",
+        "steps": [
+          "From an Amanda engagement page click \"Calendar\" in top navigation.",
+          "Follow /portal/amanda-catherine/calendar; for Classes scroll to the embedded classes grid."
+        ],
+        "component": "app/portal/amanda-catherine/(engagement)/layout.tsx",
+        "liveVerified": false
+      },
+      {
+        "label": "Eva",
+        "href": "/portal/amanda-catherine/eva",
+        "steps": [
+          "From an Amanda engagement page click \"Eva\" in top navigation.",
+          "Follow /portal/amanda-catherine/eva; for Classes scroll to the embedded classes grid."
+        ],
+        "component": "app/portal/amanda-catherine/(engagement)/layout.tsx",
+        "liveVerified": false
+      }
+    ],
+    "ownerSidebar": [
+      {
+        "label": "Dashboard",
+        "href": "/portal/amanda-catherine/owner",
+        "redirectsTo": null,
+        "description": "Review business overview, Quick Actions, activity, appointments and programs.",
+        "steps": [
+          "Sign in at https://amandacatherine.ca/portal/login as authorized owner or staff.",
+          "In the AesthetiKine owner left sidebar, click \"Dashboard\".",
+          "Review business overview, Quick Actions, activity, appointments and programs."
+        ],
+        "access": "staff+ enforced by owner layout",
+        "liveVerified": false,
+        "component": "app/portal/amanda-catherine/owner/layout.tsx"
+      },
+      {
+        "label": "Sales",
+        "href": "/portal/amanda-catherine/owner/sales",
+        "redirectsTo": null,
+        "description": "Read verified Stripe sales and practitioner kit orders.",
+        "steps": [
+          "Sign in at https://amandacatherine.ca/portal/login as authorized owner or staff.",
+          "In the AesthetiKine owner left sidebar, click \"Sales\".",
+          "Read verified Stripe sales and practitioner kit orders."
+        ],
+        "access": "staff+ enforced by owner layout",
+        "liveVerified": false,
+        "component": "app/portal/amanda-catherine/owner/layout.tsx"
+      },
+      {
+        "label": "Click Activity",
+        "href": "/portal/amanda-catherine/hub",
+        "redirectsTo": null,
+        "description": "Inspect today's Business Interested counts, course interest, and recent CTA click activity.",
+        "steps": [
+          "Sign in at https://amandacatherine.ca/portal/login as authorized owner or staff.",
+          "In the AesthetiKine owner left sidebar, click \"Click Activity\".",
+          "Inspect today's Business Interested counts, course interest, and recent CTA click activity."
+        ],
+        "access": "staff+ enforced by owner layout",
+        "liveVerified": false,
+        "component": "app/portal/amanda-catherine/owner/layout.tsx"
+      },
+      {
+        "label": "Payments",
+        "href": "/portal/amanda-catherine/billing",
+        "redirectsTo": null,
+        "description": "Open shared billing page for invoices and payment settings; exact authenticated controls unverified.",
+        "steps": [
+          "Sign in at https://amandacatherine.ca/portal/login as authorized owner or staff.",
+          "In the AesthetiKine owner left sidebar, click \"Payments\".",
+          "Open shared billing page for invoices and payment settings; exact authenticated controls unverified."
+        ],
+        "access": "staff+ enforced by owner layout",
+        "liveVerified": false,
+        "component": "app/portal/amanda-catherine/owner/layout.tsx"
+      },
+      {
+        "label": "$1 Test Enrollments",
+        "href": "/portal/amanda-catherine/test-enrollments",
+        "redirectsTo": null,
+        "description": "Review $1 test enrollment cards; visible only to an admin with enabled test-payment tool.",
+        "steps": [
+          "Sign in at https://amandacatherine.ca/portal/login as authorized owner or staff.",
+          "In the AesthetiKine owner left sidebar, click \"$1 Test Enrollments\".",
+          "Review $1 test enrollment cards; visible only to an admin with enabled test-payment tool."
+        ],
+        "access": "admin+ and testPayment feature enabled",
+        "liveVerified": false,
+        "component": "app/portal/amanda-catherine/owner/layout.tsx"
+      },
+      {
+        "label": "Update Hub",
+        "href": "/portal/amanda-catherine/owner/updates",
+        "redirectsTo": "/portal/amanda-catherine/updates",
+        "description": "Open shared Updates workspace for website and business requests.",
+        "steps": [
+          "Sign in at https://amandacatherine.ca/portal/login as authorized owner or staff.",
+          "In the AesthetiKine owner left sidebar, click \"Update Hub\".",
+          "Open shared Updates workspace for website and business requests."
+        ],
+        "access": "staff+ enforced by owner layout",
+        "liveVerified": false,
+        "component": "app/portal/amanda-catherine/owner/layout.tsx"
+      },
+      {
+        "label": "Appointments / Jane",
+        "href": "/portal/amanda-catherine/owner/appointments",
+        "redirectsTo": "/portal/amanda-catherine/calendar",
+        "description": "Open shared Calendar then use the Jane booking link for appointment management.",
+        "steps": [
+          "Sign in at https://amandacatherine.ca/portal/login as authorized owner or staff.",
+          "In the AesthetiKine owner left sidebar, click \"Appointments / Jane\".",
+          "Open shared Calendar then use the Jane booking link for appointment management."
+        ],
+        "access": "staff+ enforced by owner layout",
+        "liveVerified": false,
+        "component": "app/portal/amanda-catherine/owner/layout.tsx"
+      },
+      {
+        "label": "Clients",
+        "href": "/portal/amanda-catherine/owner/clients",
+        "redirectsTo": null,
+        "description": "Inspect applicant queues, supporting documents and submission status controls.",
+        "steps": [
+          "Sign in at https://amandacatherine.ca/portal/login as authorized owner or staff.",
+          "In the AesthetiKine owner left sidebar, click \"Clients\".",
+          "Inspect applicant queues, supporting documents and submission status controls."
+        ],
+        "access": "staff+ enforced by owner layout",
+        "liveVerified": false,
+        "component": "app/portal/amanda-catherine/owner/layout.tsx"
+      },
+      {
+        "label": "AesthetiKine Academy",
+        "href": "/portal/amanda-catherine/owner/academy",
+        "redirectsTo": null,
+        "description": "Use Manage course content, Preview learner dashboard, and the certification evidence review queue.",
+        "steps": [
+          "Sign in at https://amandacatherine.ca/portal/login as authorized owner or staff.",
+          "In the AesthetiKine owner left sidebar, click \"AesthetiKine Academy\".",
+          "Use Manage course content, Preview learner dashboard, and the certification evidence review queue."
+        ],
+        "access": "staff+ enforced by owner layout",
+        "liveVerified": false,
+        "component": "app/portal/amanda-catherine/owner/layout.tsx"
+      },
+      {
+        "label": "Practitioner Starter Kit",
+        "href": "/portal/amanda-catherine/owner/practitioner-kit",
+        "redirectsTo": null,
+        "description": "Inspect paid kit fulfillment orders, pickup/shipping details and order-specific actions.",
+        "steps": [
+          "Sign in at https://amandacatherine.ca/portal/login as authorized owner or staff.",
+          "In the AesthetiKine owner left sidebar, click \"Practitioner Starter Kit\".",
+          "Inspect paid kit fulfillment orders, pickup/shipping details and order-specific actions."
+        ],
+        "access": "staff+ enforced by owner layout",
+        "liveVerified": false,
+        "component": "app/portal/amanda-catherine/owner/layout.tsx"
+      },
+      {
+        "label": "LIFELINE",
+        "href": "/portal/amanda-catherine/owner/lifeline",
+        "redirectsTo": null,
+        "description": "Review LIFELINE guest applications; contact applicants and update statuses.",
+        "steps": [
+          "Sign in at https://amandacatherine.ca/portal/login as authorized owner or staff.",
+          "In the AesthetiKine owner left sidebar, click \"LIFELINE\".",
+          "Review LIFELINE guest applications; contact applicants and update statuses."
+        ],
+        "access": "staff+ enforced by owner layout",
+        "liveVerified": false,
+        "component": "app/portal/amanda-catherine/owner/layout.tsx"
+      },
+      {
+        "label": "Empower Art Collective",
+        "href": "/portal/amanda-catherine/owner/empower-art",
+        "redirectsTo": "/portal/amanda-catherine/events",
+        "description": "Redirects to shared Events, not the separate embedded Empower Art Collective panel.",
+        "steps": [
+          "Sign in at https://amandacatherine.ca/portal/login as authorized owner or staff.",
+          "In the AesthetiKine owner left sidebar, click \"Empower Art Collective\".",
+          "Redirects to shared Events, not the separate embedded Empower Art Collective panel."
+        ],
+        "access": "staff+ enforced by owner layout",
+        "liveVerified": false,
+        "component": "app/portal/amanda-catherine/owner/layout.tsx"
+      },
+      {
+        "label": "Founder Advisory",
+        "href": "/portal/amanda-catherine/owner/advisory",
+        "redirectsTo": null,
+        "description": "Review founder advisory applications, follow up by email, update status.",
+        "steps": [
+          "Sign in at https://amandacatherine.ca/portal/login as authorized owner or staff.",
+          "In the AesthetiKine owner left sidebar, click \"Founder Advisory\".",
+          "Review founder advisory applications, follow up by email, update status."
+        ],
+        "access": "staff+ enforced by owner layout",
+        "liveVerified": false,
+        "component": "app/portal/amanda-catherine/owner/layout.tsx"
+      },
+      {
+        "label": "Founder Clarity",
+        "href": "/portal/amanda-catherine/owner/clarity",
+        "redirectsTo": "/portal/amanda-catherine/owner/advisory",
+        "description": "Redirects to Founder Advisory. No dedicated clarity control documented.",
+        "steps": [
+          "Sign in at https://amandacatherine.ca/portal/login as authorized owner or staff.",
+          "In the AesthetiKine owner left sidebar, click \"Founder Clarity\".",
+          "Redirects to Founder Advisory. No dedicated clarity control documented."
+        ],
+        "access": "staff+ enforced by owner layout",
+        "liveVerified": false,
+        "component": "app/portal/amanda-catherine/owner/layout.tsx"
+      },
+      {
+        "label": "Speaking & Media",
+        "href": "/portal/amanda-catherine/owner/speaking",
+        "redirectsTo": null,
+        "description": "Review speaking/media applications, documents and statuses.",
+        "steps": [
+          "Sign in at https://amandacatherine.ca/portal/login as authorized owner or staff.",
+          "In the AesthetiKine owner left sidebar, click \"Speaking & Media\".",
+          "Review speaking/media applications, documents and statuses."
+        ],
+        "access": "staff+ enforced by owner layout",
+        "liveVerified": false,
+        "component": "app/portal/amanda-catherine/owner/layout.tsx"
+      },
+      {
+        "label": "The Entrepreneurial Artist",
+        "href": "/portal/amanda-catherine/owner/book",
+        "redirectsTo": null,
+        "description": "Open the Amazon listing, six-week playlist, or linked course learning area.",
+        "steps": [
+          "Sign in at https://amandacatherine.ca/portal/login as authorized owner or staff.",
+          "In the AesthetiKine owner left sidebar, click \"The Entrepreneurial Artist\".",
+          "Open the Amazon listing, six-week playlist, or linked course learning area."
+        ],
+        "access": "staff+ enforced by owner layout",
+        "liveVerified": false,
+        "component": "app/portal/amanda-catherine/owner/layout.tsx"
+      },
+      {
+        "label": "RIMAN Canada",
+        "href": "/portal/amanda-catherine/owner/riman",
+        "redirectsTo": "https://mall.riman.com/amandacatherine/home?country=CA&lang=en-CA",
+        "description": "Redirects to the RIMAN Canada external storefront.",
+        "steps": [
+          "Sign in at https://amandacatherine.ca/portal/login as authorized owner or staff.",
+          "In the AesthetiKine owner left sidebar, click \"RIMAN Canada\".",
+          "Redirects to the RIMAN Canada external storefront."
+        ],
+        "access": "staff+ enforced by owner layout",
+        "liveVerified": false,
+        "component": "app/portal/amanda-catherine/owner/layout.tsx"
+      },
+      {
+        "label": "Reviews & Testimonials",
+        "href": "/portal/amanda-catherine/owner/reviews",
+        "redirectsTo": "https://share.google/9Pw2JCYOXwcQeCDtY",
+        "description": "Redirects to Google reviews external profile.",
+        "steps": [
+          "Sign in at https://amandacatherine.ca/portal/login as authorized owner or staff.",
+          "In the AesthetiKine owner left sidebar, click \"Reviews & Testimonials\".",
+          "Redirects to Google reviews external profile."
+        ],
+        "access": "staff+ enforced by owner layout",
+        "liveVerified": false,
+        "component": "app/portal/amanda-catherine/owner/layout.tsx"
+      },
+      {
+        "label": "Documents & Certifications",
+        "href": "/portal/amanda-catherine/owner/documents",
+        "redirectsTo": null,
+        "description": "Open document hub and certification review queue.",
+        "steps": [
+          "Sign in at https://amandacatherine.ca/portal/login as authorized owner or staff.",
+          "In the AesthetiKine owner left sidebar, click \"Documents & Certifications\".",
+          "Open document hub and certification review queue."
+        ],
+        "access": "staff+ enforced by owner layout",
+        "liveVerified": false,
+        "component": "app/portal/amanda-catherine/owner/layout.tsx"
+      },
+      {
+        "label": "Marketing",
+        "href": "/portal/amanda-catherine/owner/marketing",
+        "redirectsTo": "/portal/amanda-catherine/amplifi",
+        "description": "Redirects to shared Amplifi content workspace.",
+        "steps": [
+          "Sign in at https://amandacatherine.ca/portal/login as authorized owner or staff.",
+          "In the AesthetiKine owner left sidebar, click \"Marketing\".",
+          "Redirects to shared Amplifi content workspace."
+        ],
+        "access": "staff+ enforced by owner layout",
+        "liveVerified": false,
+        "component": "app/portal/amanda-catherine/owner/layout.tsx"
+      },
+      {
+        "label": "Business Insights",
+        "href": "/portal/amanda-catherine/owner/insights",
+        "redirectsTo": "/portal/amanda-catherine/reports",
+        "description": "Redirects to shared Reports operations insights.",
+        "steps": [
+          "Sign in at https://amandacatherine.ca/portal/login as authorized owner or staff.",
+          "In the AesthetiKine owner left sidebar, click \"Business Insights\".",
+          "Redirects to shared Reports operations insights."
+        ],
+        "access": "staff+ enforced by owner layout",
+        "liveVerified": false,
+        "component": "app/portal/amanda-catherine/owner/layout.tsx"
+      },
+      {
+        "label": "Eva (AI Assistant)",
+        "href": "/portal/amanda-catherine/owner/eva",
+        "redirectsTo": "/portal/amanda-catherine/updates#eva",
+        "description": "Redirects to /updates#eva; no confirmed Eva anchor on that destination.",
+        "steps": [
+          "Sign in at https://amandacatherine.ca/portal/login as authorized owner or staff.",
+          "In the AesthetiKine owner left sidebar, click \"Eva (AI Assistant)\".",
+          "Redirects to /updates#eva; no confirmed Eva anchor on that destination."
+        ],
+        "access": "staff+ enforced by owner layout",
+        "liveVerified": false,
+        "component": "app/portal/amanda-catherine/owner/layout.tsx"
+      },
+      {
+        "label": "Settings",
+        "href": "/portal/amanda-catherine/owner/settings",
+        "redirectsTo": "/portal/amanda-catherine/settings",
+        "description": "Redirects to shared Settings; actual editable fields need authenticated verification.",
+        "steps": [
+          "Sign in at https://amandacatherine.ca/portal/login as authorized owner or staff.",
+          "In the AesthetiKine owner left sidebar, click \"Settings\".",
+          "Redirects to shared Settings; actual editable fields need authenticated verification."
+        ],
+        "access": "staff+ enforced by owner layout",
+        "liveVerified": false,
+        "component": "app/portal/amanda-catherine/owner/layout.tsx"
+      }
+    ],
+    "ownerQuickActions": [
+      {
+        "label": "Book Appointment",
+        "href": "/portal/amanda-catherine/owner/appointments",
+        "steps": [
+          "From the owner Dashboard click \"Book Appointment\".",
+          "Follow /portal/amanda-catherine/owner/appointments; privileged action must be explicitly authorized."
+        ]
+      },
+      {
+        "label": "Review Client Intake",
+        "href": "/portal/amanda-catherine/owner/clients",
+        "steps": [
+          "From the owner Dashboard click \"Review Client Intake\".",
+          "Follow /portal/amanda-catherine/owner/clients; privileged action must be explicitly authorized."
+        ]
+      },
+      {
+        "label": "Review Certifications",
+        "href": "/portal/amanda-catherine/owner/academy",
+        "steps": [
+          "From the owner Dashboard click \"Review Certifications\".",
+          "Follow /portal/amanda-catherine/owner/academy; privileged action must be explicitly authorized."
+        ]
+      },
+      {
+        "label": "Test course enrollment CAD $1",
+        "href": "/portal/amanda-catherine/billing?showTest=1",
+        "steps": [
+          "From the owner Dashboard click \"Test course enrollment CAD $1\".",
+          "Follow /portal/amanda-catherine/billing?showTest=1; privileged action must be explicitly authorized."
+        ]
+      },
+      {
+        "label": "View Orders",
+        "href": "/portal/amanda-catherine/owner/practitioner-kit",
+        "steps": [
+          "From the owner Dashboard click \"View Orders\".",
+          "Follow /portal/amanda-catherine/owner/practitioner-kit; privileged action must be explicitly authorized."
+        ]
+      },
+      {
+        "label": "Send Message",
+        "href": "/portal/amanda-catherine/messaging",
+        "steps": [
+          "From the owner Dashboard click \"Send Message\".",
+          "Follow /portal/amanda-catherine/messaging; privileged action must be explicitly authorized."
+        ]
+      },
+      {
+        "label": "Open Marketing Kit",
+        "href": "/portal/amanda-catherine/owner/marketing",
+        "steps": [
+          "From the owner Dashboard click \"Open Marketing Kit\".",
+          "Follow /portal/amanda-catherine/owner/marketing; privileged action must be explicitly authorized."
+        ]
+      }
+    ],
+    "audienceSpecificTiles": {
+      "client": [
+        {
+          "id": "private-deliveries",
+          "href": "/portal/amanda-catherine/deliveries",
+          "mapped": true,
+          "steps": [
+            "Sign in as a client user.",
+            "Open the private deliveries tile on the Amanda workspace.",
+            "Follow the mapped page or assigned course and its on-screen controls."
+          ],
+          "status": "configured, live role testing pending"
+        },
+        {
+          "id": "appointments",
+          "href": "/portal/amanda-catherine/calendar",
+          "mapped": true,
+          "steps": [
+            "Sign in as a client user.",
+            "Open the appointments tile on the Amanda workspace.",
+            "Follow the mapped page or assigned course and its on-screen controls."
+          ],
+          "status": "configured, live role testing pending"
+        },
+        {
+          "id": "forms-and-consents",
+          "href": "/portal/amanda-catherine/intake",
+          "mapped": true,
+          "steps": [
+            "Sign in as a client user.",
+            "Open the forms and consents tile on the Amanda workspace.",
+            "Follow the mapped page or assigned course and its on-screen controls."
+          ],
+          "status": "configured, live role testing pending"
+        },
+        {
+          "id": "preparation-and-aftercare",
+          "href": null,
+          "mapped": false,
+          "steps": [],
+          "status": "UNMAPPED: hrefFor throws during rendering; cannot supply working steps"
+        },
+        {
+          "id": "wellness-plan",
+          "href": null,
+          "mapped": false,
+          "steps": [],
+          "status": "UNMAPPED: hrefFor throws during rendering; cannot supply working steps"
+        },
+        {
+          "id": "packages-and-sessions",
+          "href": "/portal/amanda-catherine/billing",
+          "mapped": true,
+          "steps": [
+            "Sign in as a client user.",
+            "Open the packages and sessions tile on the Amanda workspace.",
+            "Follow the mapped page or assigned course and its on-screen controls."
+          ],
+          "status": "configured, live role testing pending"
+        },
+        {
+          "id": "payments-and-receipts",
+          "href": "/portal/amanda-catherine/billing",
+          "mapped": true,
+          "steps": [
+            "Sign in as a client user.",
+            "Open the payments and receipts tile on the Amanda workspace.",
+            "Follow the mapped page or assigned course and its on-screen controls."
+          ],
+          "status": "configured, live role testing pending"
+        },
+        {
+          "id": "messages",
+          "href": "/portal/amanda-catherine/messaging",
+          "mapped": true,
+          "steps": [
+            "Sign in as a client user.",
+            "Open the messages tile on the Amanda workspace.",
+            "Follow the mapped page or assigned course and its on-screen controls."
+          ],
+          "status": "configured, live role testing pending"
+        }
+      ],
+      "student-trainee": [
+        {
+          "id": "private-deliveries",
+          "href": "/portal/amanda-catherine/deliveries",
+          "mapped": true,
+          "steps": [
+            "Sign in as a student-trainee user.",
+            "Open the private deliveries tile on the Amanda workspace.",
+            "Follow the mapped page or assigned course and its on-screen controls."
+          ],
+          "status": "configured, live role testing pending"
+        },
+        {
+          "id": "courses",
+          "href": "course-specific: /portal/amanda-catherine/learning/[courseId]",
+          "mapped": true,
+          "steps": [
+            "Sign in as a student-trainee user.",
+            "Open the courses tile on the Amanda workspace.",
+            "Follow the mapped page or assigned course and its on-screen controls."
+          ],
+          "status": "configured, live role testing pending"
+        },
+        {
+          "id": "training-calendar",
+          "href": "/portal/amanda-catherine/calendar",
+          "mapped": true,
+          "steps": [
+            "Sign in as a student-trainee user.",
+            "Open the training calendar tile on the Amanda workspace.",
+            "Follow the mapped page or assigned course and its on-screen controls."
+          ],
+          "status": "configured, live role testing pending"
+        },
+        {
+          "id": "assignments-and-assessments",
+          "href": "course-specific: /portal/amanda-catherine/learning/[courseId]",
+          "mapped": true,
+          "steps": [
+            "Sign in as a student-trainee user.",
+            "Open the assignments and assessments tile on the Amanda workspace.",
+            "Follow the mapped page or assigned course and its on-screen controls."
+          ],
+          "status": "configured, live role testing pending"
+        },
+        {
+          "id": "document-upload",
+          "href": "/portal/amanda-catherine/ctp/documents",
+          "mapped": true,
+          "steps": [
+            "Sign in as a student-trainee user.",
+            "Open the document upload tile on the Amanda workspace.",
+            "Follow the mapped page or assigned course and its on-screen controls."
+          ],
+          "status": "configured, live role testing pending"
+        },
+        {
+          "id": "tuition-and-agreements",
+          "href": "/portal/amanda-catherine/billing",
+          "mapped": true,
+          "steps": [
+            "Sign in as a student-trainee user.",
+            "Open the tuition and agreements tile on the Amanda workspace.",
+            "Follow the mapped page or assigned course and its on-screen controls."
+          ],
+          "status": "configured, live role testing pending"
+        },
+        {
+          "id": "progress",
+          "href": "course-specific: /portal/amanda-catherine/learning/[courseId]",
+          "mapped": true,
+          "steps": [
+            "Sign in as a student-trainee user.",
+            "Open the progress tile on the Amanda workspace.",
+            "Follow the mapped page or assigned course and its on-screen controls."
+          ],
+          "status": "configured, live role testing pending"
+        },
+        {
+          "id": "certification",
+          "href": "course-specific: /portal/amanda-catherine/learning/[courseId]",
+          "mapped": true,
+          "steps": [
+            "Sign in as a student-trainee user.",
+            "Open the certification tile on the Amanda workspace.",
+            "Follow the mapped page or assigned course and its on-screen controls."
+          ],
+          "status": "configured, live role testing pending"
+        },
+        {
+          "id": "instructor-messages",
+          "href": "/portal/amanda-catherine/messaging",
+          "mapped": true,
+          "steps": [
+            "Sign in as a student-trainee user.",
+            "Open the instructor messages tile on the Amanda workspace.",
+            "Follow the mapped page or assigned course and its on-screen controls."
+          ],
+          "status": "configured, live role testing pending"
+        }
+      ],
+      "certified-practitioner": [
+        {
+          "id": "private-deliveries",
+          "href": "/portal/amanda-catherine/deliveries",
+          "mapped": true,
+          "steps": [
+            "Sign in as a certified-practitioner user.",
+            "Open the private deliveries tile on the Amanda workspace.",
+            "Follow the mapped page or assigned course and its on-screen controls."
+          ],
+          "status": "configured, live role testing pending"
+        },
+        {
+          "id": "protocols-and-templates",
+          "href": "/portal/amanda-catherine/resources",
+          "mapped": true,
+          "steps": [
+            "Sign in as a certified-practitioner user.",
+            "Open the protocols and templates tile on the Amanda workspace.",
+            "Follow the mapped page or assigned course and its on-screen controls."
+          ],
+          "status": "configured, live role testing pending"
+        },
+        {
+          "id": "advanced-training",
+          "href": "course-specific: /portal/amanda-catherine/learning/[courseId]",
+          "mapped": true,
+          "steps": [
+            "Sign in as a certified-practitioner user.",
+            "Open the advanced training tile on the Amanda workspace.",
+            "Follow the mapped page or assigned course and its on-screen controls."
+          ],
+          "status": "configured, live role testing pending"
+        },
+        {
+          "id": "mentorship",
+          "href": "/portal/amanda-catherine/support",
+          "mapped": true,
+          "steps": [
+            "Sign in as a certified-practitioner user.",
+            "Open the mentorship tile on the Amanda workspace.",
+            "Follow the mapped page or assigned course and its on-screen controls."
+          ],
+          "status": "configured, live role testing pending"
+        },
+        {
+          "id": "certificates",
+          "href": "course-specific: /portal/amanda-catherine/learning/[courseId]",
+          "mapped": true,
+          "steps": [
+            "Sign in as a certified-practitioner user.",
+            "Open the certificates tile on the Amanda workspace.",
+            "Follow the mapped page or assigned course and its on-screen controls."
+          ],
+          "status": "configured, live role testing pending"
+        },
+        {
+          "id": "practitioner-directory",
+          "href": null,
+          "mapped": false,
+          "steps": [],
+          "status": "UNMAPPED: hrefFor throws during rendering; cannot supply working steps"
+        },
+        {
+          "id": "referrals",
+          "href": null,
+          "mapped": false,
+          "steps": [],
+          "status": "UNMAPPED: hrefFor throws during rendering; cannot supply working steps"
+        },
+        {
+          "id": "professional-opportunities",
+          "href": null,
+          "mapped": false,
+          "steps": [],
+          "status": "UNMAPPED: hrefFor throws during rendering; cannot supply working steps"
+        },
+        {
+          "id": "product-ordering",
+          "href": "/amanda-catherine/private/practitioner-kit",
+          "mapped": true,
+          "steps": [
+            "Sign in as a certified-practitioner user.",
+            "Open the product ordering tile on the Amanda workspace.",
+            "Follow the mapped page or assigned course and its on-screen controls."
+          ],
+          "status": "configured, live role testing pending"
+        }
+      ],
+      "member-community-participant": [
+        {
+          "id": "private-deliveries",
+          "href": "/portal/amanda-catherine/deliveries",
+          "mapped": true,
+          "steps": [
+            "Sign in as a member-community-participant user.",
+            "Open the private deliveries tile on the Amanda workspace.",
+            "Follow the mapped page or assigned course and its on-screen controls."
+          ],
+          "status": "configured, live role testing pending"
+        },
+        {
+          "id": "member-profile",
+          "href": "/portal/amanda-catherine/profile",
+          "mapped": true,
+          "steps": [
+            "Sign in as a member-community-participant user.",
+            "Open the member profile tile on the Amanda workspace.",
+            "Follow the mapped page or assigned course and its on-screen controls."
+          ],
+          "status": "configured, live role testing pending"
+        },
+        {
+          "id": "member-resources",
+          "href": "/portal/amanda-catherine/resources",
+          "mapped": true,
+          "steps": [
+            "Sign in as a member-community-participant user.",
+            "Open the member resources tile on the Amanda workspace.",
+            "Follow the mapped page or assigned course and its on-screen controls."
+          ],
+          "status": "configured, live role testing pending"
+        },
+        {
+          "id": "events",
+          "href": "/portal/amanda-catherine/events?tab=events",
+          "mapped": true,
+          "steps": [
+            "Sign in as a member-community-participant user.",
+            "Open the events tile on the Amanda workspace.",
+            "Follow the mapped page or assigned course and its on-screen controls."
+          ],
+          "status": "configured, live role testing pending"
+        },
+        {
+          "id": "announcements",
+          "href": "/portal/amanda-catherine/messaging",
+          "mapped": true,
+          "steps": [
+            "Sign in as a member-community-participant user.",
+            "Open the announcements tile on the Amanda workspace.",
+            "Follow the mapped page or assigned course and its on-screen controls."
+          ],
+          "status": "configured, live role testing pending"
+        },
+        {
+          "id": "community-directory",
+          "href": null,
+          "mapped": false,
+          "steps": [],
+          "status": "UNMAPPED: hrefFor throws during rendering; cannot supply working steps"
+        },
+        {
+          "id": "groups-and-discussions",
+          "href": null,
+          "mapped": false,
+          "steps": [],
+          "status": "UNMAPPED: hrefFor throws during rendering; cannot supply working steps"
+        },
+        {
+          "id": "mentorship-and-collaboration",
+          "href": "/portal/amanda-catherine/support",
+          "mapped": true,
+          "steps": [
+            "Sign in as a member-community-participant user.",
+            "Open the mentorship and collaboration tile on the Amanda workspace.",
+            "Follow the mapped page or assigned course and its on-screen controls."
+          ],
+          "status": "configured, live role testing pending"
+        }
+      ],
+      "media-guest": [
+        {
+          "id": "private-deliveries",
+          "href": "/portal/amanda-catherine/deliveries",
+          "mapped": true,
+          "steps": [
+            "Sign in as a media-guest user.",
+            "Open the private deliveries tile on the Amanda workspace.",
+            "Follow the mapped page or assigned course and its on-screen controls."
+          ],
+          "status": "configured, live role testing pending"
+        },
+        {
+          "id": "media-application",
+          "href": "/portal/amanda-catherine/applications",
+          "mapped": true,
+          "steps": [
+            "Sign in as a media-guest user.",
+            "Open the media application tile on the Amanda workspace.",
+            "Follow the mapped page or assigned course and its on-screen controls."
+          ],
+          "status": "configured, live role testing pending"
+        },
+        {
+          "id": "package-and-payment",
+          "href": "/portal/amanda-catherine/billing",
+          "mapped": true,
+          "steps": [
+            "Sign in as a media-guest user.",
+            "Open the package and payment tile on the Amanda workspace.",
+            "Follow the mapped page or assigned course and its on-screen controls."
+          ],
+          "status": "configured, live role testing pending"
+        },
+        {
+          "id": "asset-upload",
+          "href": "/portal/amanda-catherine/ctp/documents",
+          "mapped": true,
+          "steps": [
+            "Sign in as a media-guest user.",
+            "Open the asset upload tile on the Amanda workspace.",
+            "Follow the mapped page or assigned course and its on-screen controls."
+          ],
+          "status": "configured, live role testing pending"
+        },
+        {
+          "id": "media-release",
+          "href": "/portal/amanda-catherine/documents",
+          "mapped": true,
+          "steps": [
+            "Sign in as a media-guest user.",
+            "Open the media release tile on the Amanda workspace.",
+            "Follow the mapped page or assigned course and its on-screen controls."
+          ],
+          "status": "configured, live role testing pending"
+        },
+        {
+          "id": "interview-schedule",
+          "href": "/portal/amanda-catherine/calendar",
+          "mapped": true,
+          "steps": [
+            "Sign in as a media-guest user.",
+            "Open the interview schedule tile on the Amanda workspace.",
+            "Follow the mapped page or assigned course and its on-screen controls."
+          ],
+          "status": "configured, live role testing pending"
+        },
+        {
+          "id": "production-status",
+          "href": null,
+          "mapped": false,
+          "steps": [],
+          "status": "UNMAPPED: hrefFor throws during rendering; cannot supply working steps"
+        },
+        {
+          "id": "media-delivery",
+          "href": "/portal/amanda-catherine/deliveries",
+          "mapped": true,
+          "steps": [
+            "Sign in as a media-guest user.",
+            "Open the media delivery tile on the Amanda workspace.",
+            "Follow the mapped page or assigned course and its on-screen controls."
+          ],
+          "status": "configured, live role testing pending"
+        },
+        {
+          "id": "launch-updates",
+          "href": "/portal/amanda-catherine/messaging",
+          "mapped": true,
+          "steps": [
+            "Sign in as a media-guest user.",
+            "Open the launch updates tile on the Amanda workspace.",
+            "Follow the mapped page or assigned course and its on-screen controls."
+          ],
+          "status": "configured, live role testing pending"
+        }
+      ],
+      "volunteer": [
+        {
+          "id": "private-deliveries",
+          "href": "/portal/amanda-catherine/deliveries",
+          "mapped": true,
+          "steps": [
+            "Sign in as a volunteer user.",
+            "Open the private deliveries tile on the Amanda workspace.",
+            "Follow the mapped page or assigned course and its on-screen controls."
+          ],
+          "status": "configured, live role testing pending"
+        },
+        {
+          "id": "volunteer-application",
+          "href": "/portal/amanda-catherine/applications",
+          "mapped": true,
+          "steps": [
+            "Sign in as a volunteer user.",
+            "Open the volunteer application tile on the Amanda workspace.",
+            "Follow the mapped page or assigned course and its on-screen controls."
+          ],
+          "status": "configured, live role testing pending"
+        },
+        {
+          "id": "onboarding-forms",
+          "href": "/portal/amanda-catherine/intake",
+          "mapped": true,
+          "steps": [
+            "Sign in as a volunteer user.",
+            "Open the onboarding forms tile on the Amanda workspace.",
+            "Follow the mapped page or assigned course and its on-screen controls."
+          ],
+          "status": "configured, live role testing pending"
+        },
+        {
+          "id": "schedule-and-assignments",
+          "href": null,
+          "mapped": false,
+          "steps": [],
+          "status": "UNMAPPED: hrefFor throws during rendering; cannot supply working steps"
+        },
+        {
+          "id": "policies-and-training",
+          "href": null,
+          "mapped": false,
+          "steps": [],
+          "status": "UNMAPPED: hrefFor throws during rendering; cannot supply working steps"
+        },
+        {
+          "id": "coordinator-messages",
+          "href": "/portal/amanda-catherine/messaging",
+          "mapped": true,
+          "steps": [
+            "Sign in as a volunteer user.",
+            "Open the coordinator messages tile on the Amanda workspace.",
+            "Follow the mapped page or assigned course and its on-screen controls."
+          ],
+          "status": "configured, live role testing pending"
+        },
+        {
+          "id": "participation-hours",
+          "href": null,
+          "mapped": false,
+          "steps": [],
+          "status": "UNMAPPED: hrefFor throws during rendering; cannot supply working steps"
+        }
+      ],
+      "vendor-partner": [
+        {
+          "id": "private-deliveries",
+          "href": "/portal/amanda-catherine/deliveries",
+          "mapped": true,
+          "steps": [
+            "Sign in as a vendor-partner user.",
+            "Open the private deliveries tile on the Amanda workspace.",
+            "Follow the mapped page or assigned course and its on-screen controls."
+          ],
+          "status": "configured, live role testing pending"
+        },
+        {
+          "id": "partner-application",
+          "href": "/portal/amanda-catherine/applications",
+          "mapped": true,
+          "steps": [
+            "Sign in as a vendor-partner user.",
+            "Open the partner application tile on the Amanda workspace.",
+            "Follow the mapped page or assigned course and its on-screen controls."
+          ],
+          "status": "configured, live role testing pending"
+        },
+        {
+          "id": "required-documents",
+          "href": "/portal/amanda-catherine/documents",
+          "mapped": true,
+          "steps": [
+            "Sign in as a vendor-partner user.",
+            "Open the required documents tile on the Amanda workspace.",
+            "Follow the mapped page or assigned course and its on-screen controls."
+          ],
+          "status": "configured, live role testing pending"
+        },
+        {
+          "id": "agreements",
+          "href": "/portal/amanda-catherine/documents",
+          "mapped": true,
+          "steps": [
+            "Sign in as a vendor-partner user.",
+            "Open the agreements tile on the Amanda workspace.",
+            "Follow the mapped page or assigned course and its on-screen controls."
+          ],
+          "status": "configured, live role testing pending"
+        },
+        {
+          "id": "event-registration",
+          "href": "/portal/amanda-catherine/events?tab=events",
+          "mapped": true,
+          "steps": [
+            "Sign in as a vendor-partner user.",
+            "Open the event registration tile on the Amanda workspace.",
+            "Follow the mapped page or assigned course and its on-screen controls."
+          ],
+          "status": "configured, live role testing pending"
+        },
+        {
+          "id": "invoices-and-payments",
+          "href": "/portal/amanda-catherine/billing",
+          "mapped": true,
+          "steps": [
+            "Sign in as a vendor-partner user.",
+            "Open the invoices and payments tile on the Amanda workspace.",
+            "Follow the mapped page or assigned course and its on-screen controls."
+          ],
+          "status": "configured, live role testing pending"
+        },
+        {
+          "id": "team-messages",
+          "href": "/portal/amanda-catherine/messaging",
+          "mapped": true,
+          "steps": [
+            "Sign in as a vendor-partner user.",
+            "Open the team messages tile on the Amanda workspace.",
+            "Follow the mapped page or assigned course and its on-screen controls."
+          ],
+          "status": "configured, live role testing pending"
+        }
+      ],
+      "staff": [
+        {
+          "id": "assigned-work",
+          "href": null,
+          "mapped": false,
+          "steps": [],
+          "status": "UNMAPPED: hrefFor throws during rendering; cannot supply working steps"
+        },
+        {
+          "id": "appointments",
+          "href": "/portal/amanda-catherine/calendar",
+          "mapped": true,
+          "steps": [
+            "Sign in as a staff user.",
+            "Open the appointments tile on the Amanda workspace.",
+            "Follow the mapped page or assigned course and its on-screen controls."
+          ],
+          "status": "configured, live role testing pending"
+        },
+        {
+          "id": "applications",
+          "href": "/portal/amanda-catherine/applications",
+          "mapped": true,
+          "steps": [
+            "Sign in as a staff user.",
+            "Open the applications tile on the Amanda workspace.",
+            "Follow the mapped page or assigned course and its on-screen controls."
+          ],
+          "status": "configured, live role testing pending"
+        },
+        {
+          "id": "courses-and-certifications",
+          "href": "course-specific: /portal/amanda-catherine/learning/[courseId]",
+          "mapped": true,
+          "steps": [
+            "Sign in as a staff user.",
+            "Open the courses and certifications tile on the Amanda workspace.",
+            "Follow the mapped page or assigned course and its on-screen controls."
+          ],
+          "status": "configured, live role testing pending"
+        },
+        {
+          "id": "memberships-and-events",
+          "href": "/portal/amanda-catherine/events?tab=events",
+          "mapped": true,
+          "steps": [
+            "Sign in as a staff user.",
+            "Open the memberships and events tile on the Amanda workspace.",
+            "Follow the mapped page or assigned course and its on-screen controls."
+          ],
+          "status": "configured, live role testing pending"
+        },
+        {
+          "id": "messages-and-announcements",
+          "href": "/portal/amanda-catherine/messaging",
+          "mapped": true,
+          "steps": [
+            "Sign in as a staff user.",
+            "Open the messages and announcements tile on the Amanda workspace.",
+            "Follow the mapped page or assigned course and its on-screen controls."
+          ],
+          "status": "configured, live role testing pending"
+        },
+        {
+          "id": "people-and-leads",
+          "href": "/portal/amanda-catherine/reports",
+          "mapped": true,
+          "steps": [
+            "Sign in as a staff user.",
+            "Open the people and leads tile on the Amanda workspace.",
+            "Follow the mapped page or assigned course and its on-screen controls."
+          ],
+          "status": "configured, live role testing pending"
+        },
+        {
+          "id": "reports",
+          "href": "/portal/amanda-catherine/reports",
+          "mapped": true,
+          "steps": [
+            "Sign in as a staff user.",
+            "Open the reports tile on the Amanda workspace.",
+            "Follow the mapped page or assigned course and its on-screen controls."
+          ],
+          "status": "configured, live role testing pending"
+        }
+      ],
+      "admin": [
+        {
+          "id": "executive-overview",
+          "href": "/portal/amanda-catherine/owner",
+          "mapped": true,
+          "steps": [
+            "Sign in as a admin user.",
+            "Open the executive overview tile on the Amanda workspace.",
+            "Follow the mapped page or assigned course and its on-screen controls."
+          ],
+          "status": "configured, live role testing pending"
+        },
+        {
+          "id": "users-and-permissions",
+          "href": null,
+          "mapped": false,
+          "steps": [],
+          "status": "UNMAPPED: hrefFor throws during rendering; cannot supply working steps"
+        },
+        {
+          "id": "crm-and-lead-stages",
+          "href": "/portal/amanda-catherine/reports",
+          "mapped": true,
+          "steps": [
+            "Sign in as a admin user.",
+            "Open the crm and lead stages tile on the Amanda workspace.",
+            "Follow the mapped page or assigned course and its on-screen controls."
+          ],
+          "status": "configured, live role testing pending"
+        },
+        {
+          "id": "appointments",
+          "href": "/portal/amanda-catherine/calendar",
+          "mapped": true,
+          "steps": [
+            "Sign in as a admin user.",
+            "Open the appointments tile on the Amanda workspace.",
+            "Follow the mapped page or assigned course and its on-screen controls."
+          ],
+          "status": "configured, live role testing pending"
+        },
+        {
+          "id": "applications-and-forms",
+          "href": "/portal/amanda-catherine/applications",
+          "mapped": true,
+          "steps": [
+            "Sign in as a admin user.",
+            "Open the applications and forms tile on the Amanda workspace.",
+            "Follow the mapped page or assigned course and its on-screen controls."
+          ],
+          "status": "configured, live role testing pending"
+        },
+        {
+          "id": "payments-and-balances",
+          "href": "/portal/amanda-catherine/billing",
+          "mapped": true,
+          "steps": [
+            "Sign in as a admin user.",
+            "Open the payments and balances tile on the Amanda workspace.",
+            "Follow the mapped page or assigned course and its on-screen controls."
+          ],
+          "status": "configured, live role testing pending"
+        },
+        {
+          "id": "courses-progress-and-certifications",
+          "href": "course-specific: /portal/amanda-catherine/learning/[courseId]",
+          "mapped": true,
+          "steps": [
+            "Sign in as a admin user.",
+            "Open the courses progress and certifications tile on the Amanda workspace.",
+            "Follow the mapped page or assigned course and its on-screen controls."
+          ],
+          "status": "configured, live role testing pending"
+        },
+        {
+          "id": "memberships-events-and-media",
+          "href": "/portal/amanda-catherine/events?tab=events",
+          "mapped": true,
+          "steps": [
+            "Sign in as a admin user.",
+            "Open the memberships events and media tile on the Amanda workspace.",
+            "Follow the mapped page or assigned course and its on-screen controls."
+          ],
+          "status": "configured, live role testing pending"
+        },
+        {
+          "id": "automations-and-communications",
+          "href": null,
+          "mapped": false,
+          "steps": [],
+          "status": "UNMAPPED: hrefFor throws during rendering; cannot supply working steps"
+        },
+        {
+          "id": "reports-and-follow-ups",
+          "href": "/portal/amanda-catherine/reports",
+          "mapped": true,
+          "steps": [
+            "Sign in as a admin user.",
+            "Open the reports and follow ups tile on the Amanda workspace.",
+            "Follow the mapped page or assigned course and its on-screen controls."
+          ],
+          "status": "configured, live role testing pending"
+        }
+      ]
+    },
+    "sharedChassisModules": [
+      {
+        "brickOrModule": "dashboard",
+        "href": "/portal/amanda-catherine",
+        "requiredRole": "guest",
+        "entitledCondition": "Module displayed only if entitled and role permitted; visibility not proven in production.",
+        "source": "lib/modules/registry.ts, lib/modules/portal-modules.ts, lib/experience-registry.ts"
+      },
+      {
+        "brickOrModule": "pulse",
+        "href": "/portal/amanda-catherine/pulse",
+        "requiredRole": "guest",
+        "entitledCondition": "Module displayed only if entitled and role permitted; visibility not proven in production.",
+        "source": "lib/modules/registry.ts, lib/modules/portal-modules.ts, lib/experience-registry.ts"
+      },
+      {
+        "brickOrModule": "simplifi",
+        "href": "/portal/amanda-catherine/simplifi",
+        "requiredRole": "staff",
+        "entitledCondition": "Module displayed only if entitled and role permitted; visibility not proven in production.",
+        "source": "lib/modules/registry.ts, lib/modules/portal-modules.ts, lib/experience-registry.ts"
+      },
+      {
+        "brickOrModule": "amplifi",
+        "href": "/portal/amanda-catherine/amplifi",
+        "requiredRole": "guest",
+        "entitledCondition": "Module displayed only if entitled and role permitted; visibility not proven in production.",
+        "source": "lib/modules/registry.ts, lib/modules/portal-modules.ts, lib/experience-registry.ts"
+      },
+      {
+        "brickOrModule": "connect",
+        "href": "/portal/amanda-catherine/connect",
+        "requiredRole": "staff",
+        "entitledCondition": "Module displayed only if entitled and role permitted; visibility not proven in production.",
+        "source": "lib/modules/registry.ts, lib/modules/portal-modules.ts, lib/experience-registry.ts"
+      },
+      {
+        "brickOrModule": "update-hub",
+        "href": "/portal/amanda-catherine/updates",
+        "requiredRole": "guest",
+        "entitledCondition": "Module displayed only if entitled and role permitted; visibility not proven in production.",
+        "source": "lib/modules/registry.ts, lib/modules/portal-modules.ts, lib/experience-registry.ts"
+      },
+      {
+        "brickOrModule": "training",
+        "href": "/portal/amanda-catherine/learning",
+        "requiredRole": "guest",
+        "entitledCondition": "Module displayed only if entitled and role permitted; visibility not proven in production.",
+        "source": "lib/modules/registry.ts, lib/modules/portal-modules.ts, lib/experience-registry.ts"
+      },
+      {
+        "brickOrModule": "landing",
+        "href": "/portal/amanda-catherine/landing",
+        "requiredRole": "owner",
+        "entitledCondition": "Module displayed only if entitled and role permitted; visibility not proven in production.",
+        "source": "lib/modules/registry.ts, lib/modules/portal-modules.ts, lib/experience-registry.ts"
+      },
+      {
+        "brickOrModule": "discovery",
+        "href": "/portal/amanda-catherine/discovery",
+        "requiredRole": "guest",
+        "entitledCondition": "Module displayed only if entitled and role permitted; visibility not proven in production.",
+        "source": "lib/modules/registry.ts, lib/modules/portal-modules.ts, lib/experience-registry.ts"
+      },
+      {
+        "brickOrModule": "documents",
+        "href": "/portal/amanda-catherine/documents",
+        "requiredRole": "guest",
+        "entitledCondition": "Module displayed only if entitled and role permitted; visibility not proven in production.",
+        "source": "lib/modules/registry.ts, lib/modules/portal-modules.ts, lib/experience-registry.ts"
+      },
+      {
+        "brickOrModule": "messaging",
+        "href": "/portal/amanda-catherine/messaging",
+        "requiredRole": "guest",
+        "entitledCondition": "Module displayed only if entitled and role permitted; visibility not proven in production.",
+        "source": "lib/modules/registry.ts, lib/modules/portal-modules.ts, lib/experience-registry.ts"
+      },
+      {
+        "brickOrModule": "calendar",
+        "href": "/portal/amanda-catherine/calendar",
+        "requiredRole": "guest",
+        "entitledCondition": "Module displayed only if entitled and role permitted; visibility not proven in production.",
+        "source": "lib/modules/registry.ts, lib/modules/portal-modules.ts, lib/experience-registry.ts"
+      },
+      {
+        "brickOrModule": "events",
+        "href": "/portal/amanda-catherine/events",
+        "requiredRole": "guest",
+        "entitledCondition": "Module displayed only if entitled and role permitted; visibility not proven in production.",
+        "source": "lib/modules/registry.ts, lib/modules/portal-modules.ts, lib/experience-registry.ts"
+      },
+      {
+        "brickOrModule": "resources",
+        "href": "/portal/amanda-catherine/resources",
+        "requiredRole": "guest",
+        "entitledCondition": "Module displayed only if entitled and role permitted; visibility not proven in production.",
+        "source": "lib/modules/registry.ts, lib/modules/portal-modules.ts, lib/experience-registry.ts"
+      },
+      {
+        "brickOrModule": "ask",
+        "href": "/portal/amanda-catherine/ask",
+        "requiredRole": "guest",
+        "entitledCondition": "Module displayed only if entitled and role permitted; visibility not proven in production.",
+        "source": "lib/modules/registry.ts, lib/modules/portal-modules.ts, lib/experience-registry.ts"
+      },
+      {
+        "brickOrModule": "billing",
+        "href": "/portal/amanda-catherine/billing",
+        "requiredRole": "owner",
+        "entitledCondition": "Module displayed only if entitled and role permitted; visibility not proven in production.",
+        "source": "lib/modules/registry.ts, lib/modules/portal-modules.ts, lib/experience-registry.ts"
+      },
+      {
+        "brickOrModule": "settings",
+        "href": "/portal/amanda-catherine/settings",
+        "requiredRole": "guest",
+        "entitledCondition": "Module displayed only if entitled and role permitted; visibility not proven in production.",
+        "source": "lib/modules/registry.ts, lib/modules/portal-modules.ts, lib/experience-registry.ts"
+      },
+      {
+        "brickOrModule": "ctp",
+        "href": "/portal/amanda-catherine/ctp",
+        "requiredRole": "guest",
+        "entitledCondition": "Module displayed only if entitled and role permitted; visibility not proven in production.",
+        "source": "lib/modules/registry.ts, lib/modules/portal-modules.ts, lib/experience-registry.ts"
+      },
+      {
+        "brickOrModule": "member",
+        "href": "/portal/amanda-catherine/member",
+        "requiredRole": "guest",
+        "entitledCondition": "Module displayed only if entitled and role permitted; visibility not proven in production.",
+        "source": "lib/modules/registry.ts, lib/modules/portal-modules.ts, lib/experience-registry.ts"
+      },
+      {
+        "brickOrModule": "people",
+        "href": "/portal/amanda-catherine/people",
+        "requiredRole": "staff",
+        "entitledCondition": "Module displayed only if entitled and role permitted; visibility not proven in production.",
+        "source": "lib/modules/registry.ts, lib/modules/portal-modules.ts, lib/experience-registry.ts"
+      },
+      {
+        "brickOrModule": "intake",
+        "href": "/portal/amanda-catherine/intake",
+        "requiredRole": "guest",
+        "entitledCondition": "Module displayed only if entitled and role permitted; visibility not proven in production.",
+        "source": "lib/modules/registry.ts, lib/modules/portal-modules.ts, lib/experience-registry.ts"
+      },
+      {
+        "brickOrModule": "applications",
+        "href": "/portal/amanda-catherine/applications",
+        "requiredRole": "guest",
+        "entitledCondition": "Module displayed only if entitled and role permitted; visibility not proven in production.",
+        "source": "lib/modules/registry.ts, lib/modules/portal-modules.ts, lib/experience-registry.ts"
+      },
+      {
+        "brickOrModule": "reports",
+        "href": "/portal/amanda-catherine/reports",
+        "requiredRole": "guest",
+        "entitledCondition": "Module displayed only if entitled and role permitted; visibility not proven in production.",
+        "source": "lib/modules/registry.ts, lib/modules/portal-modules.ts, lib/experience-registry.ts"
+      }
+    ]
+  },
+  "routes": {
+    "amandaAndSharedPages": [
+      {
+        "file": "app/amanda-catherine/courses/[courseSlug]/page.tsx",
+        "route": "/amanda-catherine/courses/:courseSlug",
+        "component": "app/amanda-catherine/courses/[courseSlug]/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/amanda-catherine/courses/[courseSlug]/page.tsx",
+        "category": "Amanda dedicated",
+        "liveVerified": false
+      },
+      {
+        "file": "app/amanda-catherine/page.tsx",
+        "route": "/amanda-catherine",
+        "component": "app/amanda-catherine/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/amanda-catherine/page.tsx",
+        "category": "Amanda dedicated",
+        "liveVerified": false
+      },
+      {
+        "file": "app/amanda-catherine/private/practitioner-kit/page.tsx",
+        "route": "/amanda-catherine/private/practitioner-kit",
+        "component": "app/amanda-catherine/private/practitioner-kit/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/amanda-catherine/private/practitioner-kit/page.tsx",
+        "category": "Amanda dedicated",
+        "liveVerified": false
+      },
+      {
+        "file": "app/amanda-catherine/private/practitioner-kit/success/page.tsx",
+        "route": "/amanda-catherine/private/practitioner-kit/success",
+        "component": "app/amanda-catherine/private/practitioner-kit/success/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/amanda-catherine/private/practitioner-kit/success/page.tsx",
+        "category": "Amanda dedicated",
+        "liveVerified": false
+      },
+      {
+        "file": "app/amanda/[section]/page.tsx",
+        "route": "/amanda/:section",
+        "component": "app/amanda/[section]/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/amanda/[section]/page.tsx",
+        "category": "Amanda dedicated",
+        "liveVerified": false
+      },
+      {
+        "file": "app/amanda/page.tsx",
+        "route": "/amanda",
+        "component": "app/amanda/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/amanda/page.tsx",
+        "category": "Amanda dedicated",
+        "liveVerified": false
+      },
+      {
+        "file": "app/courses/[courseSlug]/page.tsx",
+        "route": "/courses/:courseSlug",
+        "component": "app/courses/[courseSlug]/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/courses/[courseSlug]/page.tsx",
+        "category": "Amanda dedicated",
+        "liveVerified": false
+      },
+      {
+        "file": "app/portal/[slug]/amplifi/page.tsx",
+        "route": "/portal/amanda-catherine/amplifi",
+        "component": "app/portal/[slug]/amplifi/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/amplifi/page.tsx",
+        "category": "shared chassis, entitlement dependent",
+        "liveVerified": false
+      },
+      {
+        "file": "app/portal/[slug]/applications/page.tsx",
+        "route": "/portal/amanda-catherine/applications",
+        "component": "app/portal/[slug]/applications/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/applications/page.tsx",
+        "category": "shared chassis, entitlement dependent",
+        "liveVerified": false
+      },
+      {
+        "file": "app/portal/[slug]/apply/page.tsx",
+        "route": "/portal/amanda-catherine/apply",
+        "component": "app/portal/[slug]/apply/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/apply/page.tsx",
+        "category": "shared chassis, entitlement dependent",
+        "liveVerified": false
+      },
+      {
+        "file": "app/portal/[slug]/ask/page.tsx",
+        "route": "/portal/amanda-catherine/ask",
+        "component": "app/portal/[slug]/ask/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/ask/page.tsx",
+        "category": "shared chassis, entitlement dependent",
+        "liveVerified": false
+      },
+      {
+        "file": "app/portal/[slug]/billing/page.tsx",
+        "route": "/portal/amanda-catherine/billing",
+        "component": "app/portal/[slug]/billing/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/billing/page.tsx",
+        "category": "shared chassis, entitlement dependent",
+        "liveVerified": false
+      },
+      {
+        "file": "app/portal/[slug]/calendar/page.tsx",
+        "route": "/portal/amanda-catherine/calendar",
+        "component": "app/portal/[slug]/calendar/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/calendar/page.tsx",
+        "category": "shared chassis, entitlement dependent",
+        "liveVerified": false
+      },
+      {
+        "file": "app/portal/[slug]/connect/page.tsx",
+        "route": "/portal/amanda-catherine/connect",
+        "component": "app/portal/[slug]/connect/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/connect/page.tsx",
+        "category": "shared chassis, entitlement dependent",
+        "liveVerified": false
+      },
+      {
+        "file": "app/portal/[slug]/crm/page.tsx",
+        "route": "/portal/amanda-catherine/crm",
+        "component": "app/portal/[slug]/crm/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/crm/page.tsx",
+        "category": "shared chassis, entitlement dependent",
+        "liveVerified": false
+      },
+      {
+        "file": "app/portal/[slug]/ctp/bi/page.tsx",
+        "route": "/portal/amanda-catherine/ctp/bi",
+        "component": "app/portal/[slug]/ctp/bi/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/ctp/bi/page.tsx",
+        "category": "shared chassis, entitlement dependent",
+        "liveVerified": false
+      },
+      {
+        "file": "app/portal/[slug]/ctp/documents/page.tsx",
+        "route": "/portal/amanda-catherine/ctp/documents",
+        "component": "app/portal/[slug]/ctp/documents/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/ctp/documents/page.tsx",
+        "category": "shared chassis, entitlement dependent",
+        "liveVerified": false
+      },
+      {
+        "file": "app/portal/[slug]/ctp/messages/page.tsx",
+        "route": "/portal/amanda-catherine/ctp/messages",
+        "component": "app/portal/[slug]/ctp/messages/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/ctp/messages/page.tsx",
+        "category": "shared chassis, entitlement dependent",
+        "liveVerified": false
+      },
+      {
+        "file": "app/portal/[slug]/ctp/opportunities/[opportunityId]/page.tsx",
+        "route": "/portal/amanda-catherine/ctp/opportunities/[opportunityId]",
+        "component": "app/portal/[slug]/ctp/opportunities/[opportunityId]/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/ctp/opportunities/[opportunityId]/page.tsx",
+        "category": "shared chassis, entitlement dependent",
+        "liveVerified": false
+      },
+      {
+        "file": "app/portal/[slug]/ctp/page.tsx",
+        "route": "/portal/amanda-catherine/ctp",
+        "component": "app/portal/[slug]/ctp/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/ctp/page.tsx",
+        "category": "shared chassis, entitlement dependent",
+        "liveVerified": false
+      },
+      {
+        "file": "app/portal/[slug]/ctp/progress/page.tsx",
+        "route": "/portal/amanda-catherine/ctp/progress",
+        "component": "app/portal/[slug]/ctp/progress/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/ctp/progress/page.tsx",
+        "category": "shared chassis, entitlement dependent",
+        "liveVerified": false
+      },
+      {
+        "file": "app/portal/[slug]/ctp/recommendations/page.tsx",
+        "route": "/portal/amanda-catherine/ctp/recommendations",
+        "component": "app/portal/[slug]/ctp/recommendations/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/ctp/recommendations/page.tsx",
+        "category": "shared chassis, entitlement dependent",
+        "liveVerified": false
+      },
+      {
+        "file": "app/portal/[slug]/ctp/review/confirmed/page.tsx",
+        "route": "/portal/amanda-catherine/ctp/review/confirmed",
+        "component": "app/portal/[slug]/ctp/review/confirmed/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/ctp/review/confirmed/page.tsx",
+        "category": "shared chassis, entitlement dependent",
+        "liveVerified": false
+      },
+      {
+        "file": "app/portal/[slug]/ctp/review/page.tsx",
+        "route": "/portal/amanda-catherine/ctp/review",
+        "component": "app/portal/[slug]/ctp/review/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/ctp/review/page.tsx",
+        "category": "shared chassis, entitlement dependent",
+        "liveVerified": false
+      },
+      {
+        "file": "app/portal/[slug]/ctp/schedule/page.tsx",
+        "route": "/portal/amanda-catherine/ctp/schedule",
+        "component": "app/portal/[slug]/ctp/schedule/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/ctp/schedule/page.tsx",
+        "category": "shared chassis, entitlement dependent",
+        "liveVerified": false
+      },
+      {
+        "file": "app/portal/[slug]/ctp/support/page.tsx",
+        "route": "/portal/amanda-catherine/ctp/support",
+        "component": "app/portal/[slug]/ctp/support/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/ctp/support/page.tsx",
+        "category": "shared chassis, entitlement dependent",
+        "liveVerified": false
+      },
+      {
+        "file": "app/portal/[slug]/deliveries/page.tsx",
+        "route": "/portal/amanda-catherine/deliveries",
+        "component": "app/portal/[slug]/deliveries/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/deliveries/page.tsx",
+        "category": "shared chassis, entitlement dependent",
+        "liveVerified": false
+      },
+      {
+        "file": "app/portal/[slug]/discovery/page.tsx",
+        "route": "/portal/amanda-catherine/discovery",
+        "component": "app/portal/[slug]/discovery/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/discovery/page.tsx",
+        "category": "shared chassis, entitlement dependent",
+        "liveVerified": false
+      },
+      {
+        "file": "app/portal/[slug]/documents/page.tsx",
+        "route": "/portal/amanda-catherine/documents",
+        "component": "app/portal/[slug]/documents/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/documents/page.tsx",
+        "category": "shared chassis, entitlement dependent",
+        "liveVerified": false
+      },
+      {
+        "file": "app/portal/[slug]/events/page.tsx",
+        "route": "/portal/amanda-catherine/events",
+        "component": "app/portal/[slug]/events/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/events/page.tsx",
+        "category": "shared chassis, entitlement dependent",
+        "liveVerified": false
+      },
+      {
+        "file": "app/portal/[slug]/experience-builder/[pageId]/page.tsx",
+        "route": "/portal/amanda-catherine/experience-builder/[pageId]",
+        "component": "app/portal/[slug]/experience-builder/[pageId]/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/experience-builder/[pageId]/page.tsx",
+        "category": "shared chassis, entitlement dependent",
+        "liveVerified": false
+      },
+      {
+        "file": "app/portal/[slug]/experience-builder/page.tsx",
+        "route": "/portal/amanda-catherine/experience-builder",
+        "component": "app/portal/[slug]/experience-builder/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/experience-builder/page.tsx",
+        "category": "shared chassis, entitlement dependent",
+        "liveVerified": false
+      },
+      {
+        "file": "app/portal/[slug]/intake/page.tsx",
+        "route": "/portal/amanda-catherine/intake",
+        "component": "app/portal/[slug]/intake/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/intake/page.tsx",
+        "category": "shared chassis, entitlement dependent",
+        "liveVerified": false
+      },
+      {
+        "file": "app/portal/[slug]/landing/page.tsx",
+        "route": "/portal/amanda-catherine/landing",
+        "component": "app/portal/[slug]/landing/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/landing/page.tsx",
+        "category": "shared chassis, entitlement dependent",
+        "liveVerified": false
+      },
+      {
+        "file": "app/portal/[slug]/learning/page.tsx",
+        "route": "/portal/amanda-catherine/learning",
+        "component": "app/portal/[slug]/learning/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/learning/page.tsx",
+        "category": "shared chassis, entitlement dependent",
+        "liveVerified": false
+      },
+      {
+        "file": "app/portal/[slug]/member/page.tsx",
+        "route": "/portal/amanda-catherine/member",
+        "component": "app/portal/[slug]/member/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/member/page.tsx",
+        "category": "shared chassis, entitlement dependent",
+        "liveVerified": false
+      },
+      {
+        "file": "app/portal/[slug]/messaging/page.tsx",
+        "route": "/portal/amanda-catherine/messaging",
+        "component": "app/portal/[slug]/messaging/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/messaging/page.tsx",
+        "category": "shared chassis, entitlement dependent",
+        "liveVerified": false
+      },
+      {
+        "file": "app/portal/[slug]/notifications/page.tsx",
+        "route": "/portal/amanda-catherine/notifications",
+        "component": "app/portal/[slug]/notifications/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/notifications/page.tsx",
+        "category": "shared chassis, entitlement dependent",
+        "liveVerified": false
+      },
+      {
+        "file": "app/portal/[slug]/page.tsx",
+        "route": "/portal/amanda-catherine",
+        "component": "app/portal/[slug]/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/page.tsx",
+        "category": "shared chassis, entitlement dependent",
+        "liveVerified": false
+      },
+      {
+        "file": "app/portal/[slug]/people/page.tsx",
+        "route": "/portal/amanda-catherine/people",
+        "component": "app/portal/[slug]/people/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/people/page.tsx",
+        "category": "shared chassis, entitlement dependent",
+        "liveVerified": false
+      },
+      {
+        "file": "app/portal/[slug]/pulse/page.tsx",
+        "route": "/portal/amanda-catherine/pulse",
+        "component": "app/portal/[slug]/pulse/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/pulse/page.tsx",
+        "category": "shared chassis, entitlement dependent",
+        "liveVerified": false
+      },
+      {
+        "file": "app/portal/[slug]/reports/page.tsx",
+        "route": "/portal/amanda-catherine/reports",
+        "component": "app/portal/[slug]/reports/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/reports/page.tsx",
+        "category": "shared chassis, entitlement dependent",
+        "liveVerified": false
+      },
+      {
+        "file": "app/portal/[slug]/resources/page.tsx",
+        "route": "/portal/amanda-catherine/resources",
+        "component": "app/portal/[slug]/resources/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/resources/page.tsx",
+        "category": "shared chassis, entitlement dependent",
+        "liveVerified": false
+      },
+      {
+        "file": "app/portal/[slug]/settings/page.tsx",
+        "route": "/portal/amanda-catherine/settings",
+        "component": "app/portal/[slug]/settings/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/settings/page.tsx",
+        "category": "shared chassis, entitlement dependent",
+        "liveVerified": false
+      },
+      {
+        "file": "app/portal/[slug]/simplifi/page.tsx",
+        "route": "/portal/amanda-catherine/simplifi",
+        "component": "app/portal/[slug]/simplifi/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/simplifi/page.tsx",
+        "category": "shared chassis, entitlement dependent",
+        "liveVerified": false
+      },
+      {
+        "file": "app/portal/[slug]/updates/enhancement/page.tsx",
+        "route": "/portal/amanda-catherine/updates/enhancement",
+        "component": "app/portal/[slug]/updates/enhancement/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/updates/enhancement/page.tsx",
+        "category": "shared chassis, entitlement dependent",
+        "liveVerified": false
+      },
+      {
+        "file": "app/portal/[slug]/updates/new/page.tsx",
+        "route": "/portal/amanda-catherine/updates/new",
+        "component": "app/portal/[slug]/updates/new/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/updates/new/page.tsx",
+        "category": "shared chassis, entitlement dependent",
+        "liveVerified": false
+      },
+      {
+        "file": "app/portal/[slug]/updates/page.tsx",
+        "route": "/portal/amanda-catherine/updates",
+        "component": "app/portal/[slug]/updates/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/updates/page.tsx",
+        "category": "shared chassis, entitlement dependent",
+        "liveVerified": false
+      },
+      {
+        "file": "app/portal/amanda-catherine/(engagement)/apply/page.tsx",
+        "route": "/portal/amanda-catherine/apply",
+        "component": "app/portal/amanda-catherine/(engagement)/apply/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/amanda-catherine/(engagement)/apply/page.tsx",
+        "category": "Amanda engagement",
+        "liveVerified": false
+      },
+      {
+        "file": "app/portal/amanda-catherine/(engagement)/book/page.tsx",
+        "route": "/portal/amanda-catherine/book",
+        "component": "app/portal/amanda-catherine/(engagement)/book/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/amanda-catherine/(engagement)/book/page.tsx",
+        "category": "Amanda engagement",
+        "liveVerified": false
+      },
+      {
+        "file": "app/portal/amanda-catherine/(engagement)/calendar/page.tsx",
+        "route": "/portal/amanda-catherine/calendar",
+        "component": "app/portal/amanda-catherine/(engagement)/calendar/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/amanda-catherine/(engagement)/calendar/page.tsx",
+        "category": "Amanda engagement",
+        "liveVerified": false
+      },
+      {
+        "file": "app/portal/amanda-catherine/(engagement)/eva/page.tsx",
+        "route": "/portal/amanda-catherine/eva",
+        "component": "app/portal/amanda-catherine/(engagement)/eva/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/amanda-catherine/(engagement)/eva/page.tsx",
+        "category": "Amanda engagement",
+        "liveVerified": false
+      },
+      {
+        "file": "app/portal/amanda-catherine/(engagement)/foundry/page.tsx",
+        "route": "/portal/amanda-catherine/foundry",
+        "component": "app/portal/amanda-catherine/(engagement)/foundry/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/amanda-catherine/(engagement)/foundry/page.tsx",
+        "category": "Amanda engagement",
+        "liveVerified": false
+      },
+      {
+        "file": "app/portal/amanda-catherine/(engagement)/hub/page.tsx",
+        "route": "/portal/amanda-catherine/hub",
+        "component": "app/portal/amanda-catherine/(engagement)/hub/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/amanda-catherine/(engagement)/hub/page.tsx",
+        "category": "Amanda engagement",
+        "liveVerified": false
+      },
+      {
+        "file": "app/portal/amanda-catherine/(engagement)/thank-you/page.tsx",
+        "route": "/portal/amanda-catherine/thank-you",
+        "component": "app/portal/amanda-catherine/(engagement)/thank-you/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/amanda-catherine/(engagement)/thank-you/page.tsx",
+        "category": "Amanda engagement",
+        "liveVerified": false
+      },
+      {
+        "file": "app/portal/amanda-catherine/billing/setup/page.tsx",
+        "route": "/portal/amanda-catherine/billing/setup",
+        "component": "app/portal/amanda-catherine/billing/setup/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/amanda-catherine/billing/setup/page.tsx",
+        "category": "Amanda dedicated",
+        "liveVerified": false
+      },
+      {
+        "file": "app/portal/amanda-catherine/classroom-test/page.tsx",
+        "route": "/portal/amanda-catherine/classroom-test",
+        "component": "app/portal/amanda-catherine/classroom-test/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/amanda-catherine/classroom-test/page.tsx",
+        "category": "Amanda dedicated",
+        "liveVerified": false
+      },
+      {
+        "file": "app/portal/amanda-catherine/enroll/page.tsx",
+        "route": "/portal/amanda-catherine/enroll",
+        "component": "app/portal/amanda-catherine/enroll/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/amanda-catherine/enroll/page.tsx",
+        "category": "Amanda dedicated",
+        "liveVerified": false
+      },
+      {
+        "file": "app/portal/amanda-catherine/enroll/success/page.tsx",
+        "route": "/portal/amanda-catherine/enroll/success",
+        "component": "app/portal/amanda-catherine/enroll/success/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/amanda-catherine/enroll/success/page.tsx",
+        "category": "Amanda dedicated",
+        "liveVerified": false
+      },
+      {
+        "file": "app/portal/amanda-catherine/enrollment-success/page.tsx",
+        "route": "/portal/amanda-catherine/enrollment-success",
+        "component": "app/portal/amanda-catherine/enrollment-success/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/amanda-catherine/enrollment-success/page.tsx",
+        "category": "Amanda dedicated",
+        "liveVerified": false
+      },
+      {
+        "file": "app/portal/amanda-catherine/expired/page.tsx",
+        "route": "/portal/amanda-catherine/expired",
+        "component": "app/portal/amanda-catherine/expired/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/amanda-catherine/expired/page.tsx",
+        "category": "Amanda dedicated",
+        "liveVerified": false
+      },
+      {
+        "file": "app/portal/amanda-catherine/learning/[courseId]/page.tsx",
+        "route": "/portal/amanda-catherine/learning/:courseId",
+        "component": "app/portal/amanda-catherine/learning/[courseId]/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/amanda-catherine/learning/[courseId]/page.tsx",
+        "category": "Amanda dedicated",
+        "liveVerified": false
+      },
+      {
+        "file": "app/portal/amanda-catherine/learning/page.tsx",
+        "route": "/portal/amanda-catherine/learning",
+        "component": "app/portal/amanda-catherine/learning/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/amanda-catherine/learning/page.tsx",
+        "category": "Amanda dedicated",
+        "liveVerified": false
+      },
+      {
+        "file": "app/portal/amanda-catherine/owner/[section]/page.tsx",
+        "route": "/portal/amanda-catherine/owner/:section",
+        "component": "app/portal/amanda-catherine/owner/[section]/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/amanda-catherine/owner/[section]/page.tsx",
+        "category": "Amanda dedicated",
+        "liveVerified": false
+      },
+      {
+        "file": "app/portal/amanda-catherine/owner/clients/page.tsx",
+        "route": "/portal/amanda-catherine/owner/clients",
+        "component": "app/portal/amanda-catherine/owner/clients/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/amanda-catherine/owner/clients/page.tsx",
+        "category": "Amanda dedicated",
+        "liveVerified": false
+      },
+      {
+        "file": "app/portal/amanda-catherine/owner/learner-preview/page.tsx",
+        "route": "/portal/amanda-catherine/owner/learner-preview",
+        "component": "app/portal/amanda-catherine/owner/learner-preview/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/amanda-catherine/owner/learner-preview/page.tsx",
+        "category": "Amanda dedicated",
+        "liveVerified": false
+      },
+      {
+        "file": "app/portal/amanda-catherine/owner/page.tsx",
+        "route": "/portal/amanda-catherine/owner",
+        "component": "app/portal/amanda-catherine/owner/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/amanda-catherine/owner/page.tsx",
+        "category": "Amanda dedicated",
+        "liveVerified": false
+      },
+      {
+        "file": "app/portal/amanda-catherine/owner/sales/page.tsx",
+        "route": "/portal/amanda-catherine/owner/sales",
+        "component": "app/portal/amanda-catherine/owner/sales/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/amanda-catherine/owner/sales/page.tsx",
+        "category": "Amanda dedicated",
+        "liveVerified": false
+      },
+      {
+        "file": "app/portal/amanda-catherine/page.tsx",
+        "route": "/portal/amanda-catherine",
+        "component": "app/portal/amanda-catherine/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/amanda-catherine/page.tsx",
+        "category": "Amanda dedicated",
+        "liveVerified": false
+      },
+      {
+        "file": "app/portal/amanda-catherine/profile/page.tsx",
+        "route": "/portal/amanda-catherine/profile",
+        "component": "app/portal/amanda-catherine/profile/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/amanda-catherine/profile/page.tsx",
+        "category": "Amanda dedicated",
+        "liveVerified": false
+      },
+      {
+        "file": "app/portal/amanda-catherine/resources/page.tsx",
+        "route": "/portal/amanda-catherine/resources",
+        "component": "app/portal/amanda-catherine/resources/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/amanda-catherine/resources/page.tsx",
+        "category": "Amanda dedicated",
+        "liveVerified": false
+      },
+      {
+        "file": "app/portal/amanda-catherine/support/page.tsx",
+        "route": "/portal/amanda-catherine/support",
+        "component": "app/portal/amanda-catherine/support/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/amanda-catherine/support/page.tsx",
+        "category": "Amanda dedicated",
+        "liveVerified": false
+      },
+      {
+        "file": "app/portal/amanda-catherine/test-enrollments/page.tsx",
+        "route": "/portal/amanda-catherine/test-enrollments",
+        "component": "app/portal/amanda-catherine/test-enrollments/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/amanda-catherine/test-enrollments/page.tsx",
+        "category": "Amanda dedicated",
+        "liveVerified": false
+      },
+      {
+        "file": "app/portal/amanda-catherine/waitlist/page.tsx",
+        "route": "/portal/amanda-catherine/waitlist",
+        "component": "app/portal/amanda-catherine/waitlist/page.tsx",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/amanda-catherine/waitlist/page.tsx",
+        "category": "Amanda dedicated",
+        "liveVerified": false
+      }
+    ],
+    "amandaRelatedApi": [
+      {
+        "route": "/api/amanda-catherine/courses",
+        "file": "app/api/amanda-catherine/courses/route.ts",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/api/amanda-catherine/courses/route.ts"
+      },
+      {
+        "route": "/api/amanda-catherine/eva",
+        "file": "app/api/amanda-catherine/eva/route.ts",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/api/amanda-catherine/eva/route.ts"
+      },
+      {
+        "route": "/api/amanda-catherine/preview-dollar-test",
+        "file": "app/api/amanda-catherine/preview-dollar-test/route.ts",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/api/amanda-catherine/preview-dollar-test/route.ts"
+      },
+      {
+        "route": "/api/amanda-catherine/schema",
+        "file": "app/api/amanda-catherine/schema/route.ts",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/api/amanda-catherine/schema/route.ts"
+      },
+      {
+        "route": "/api/amanda-catherine/square-checkout",
+        "file": "app/api/amanda-catherine/square-checkout/route.ts",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/api/amanda-catherine/square-checkout/route.ts"
+      },
+      {
+        "route": "/api/amanda-catherine/submit",
+        "file": "app/api/amanda-catherine/submit/route.ts",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/api/amanda-catherine/submit/route.ts"
+      },
+      {
+        "route": "/api/amanda-catherine/track",
+        "file": "app/api/amanda-catherine/track/route.ts",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/api/amanda-catherine/track/route.ts"
+      },
+      {
+        "route": "/api/ea-guide/ask",
+        "file": "app/api/ea-guide/ask/route.ts",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/api/ea-guide/ask/route.ts"
+      },
+      {
+        "route": "/api/ea-guide/escalate",
+        "file": "app/api/ea-guide/escalate/route.ts",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/api/ea-guide/escalate/route.ts"
+      },
+      {
+        "route": "/api/ea-guide/progress",
+        "file": "app/api/ea-guide/progress/route.ts",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/api/ea-guide/progress/route.ts"
+      },
+      {
+        "route": "/api/portal/amanda/certificate",
+        "file": "app/api/portal/amanda/certificate/route.ts",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/api/portal/amanda/certificate/route.ts"
+      },
+      {
+        "route": "/api/portal/amanda/certifications",
+        "file": "app/api/portal/amanda/certifications/route.ts",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/api/portal/amanda/certifications/route.ts"
+      },
+      {
+        "route": "/api/portal/amanda/checkout",
+        "file": "app/api/portal/amanda/checkout/route.ts",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/api/portal/amanda/checkout/route.ts"
+      },
+      {
+        "route": "/api/portal/amanda/checkout/verify",
+        "file": "app/api/portal/amanda/checkout/verify/route.ts",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/api/portal/amanda/checkout/verify/route.ts"
+      },
+      {
+        "route": "/api/portal/amanda/course-content",
+        "file": "app/api/portal/amanda/course-content/route.ts",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/api/portal/amanda/course-content/route.ts"
+      },
+      {
+        "route": "/api/portal/amanda/deliveries/:id/open",
+        "file": "app/api/portal/amanda/deliveries/[id]/open/route.ts",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/api/portal/amanda/deliveries/[id]/open/route.ts"
+      },
+      {
+        "route": "/api/portal/amanda/deliveries",
+        "file": "app/api/portal/amanda/deliveries/route.ts",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/api/portal/amanda/deliveries/route.ts"
+      },
+      {
+        "route": "/api/portal/amanda/media",
+        "file": "app/api/portal/amanda/media/route.ts",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/api/portal/amanda/media/route.ts"
+      },
+      {
+        "route": "/api/portal/amanda/practitioner-kit/orders/:orderId",
+        "file": "app/api/portal/amanda/practitioner-kit/orders/[orderId]/route.ts",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/api/portal/amanda/practitioner-kit/orders/[orderId]/route.ts"
+      },
+      {
+        "route": "/api/portal/amanda/progress",
+        "file": "app/api/portal/amanda/progress/route.ts",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/api/portal/amanda/progress/route.ts"
+      },
+      {
+        "route": "/api/portal/amanda/receipt",
+        "file": "app/api/portal/amanda/receipt/route.ts",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/api/portal/amanda/receipt/route.ts"
+      },
+      {
+        "route": "/api/portal/amanda/resources/:resourceId",
+        "file": "app/api/portal/amanda/resources/[resourceId]/route.ts",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/api/portal/amanda/resources/[resourceId]/route.ts"
+      },
+      {
+        "route": "/api/portal/amanda/site-content",
+        "file": "app/api/portal/amanda/site-content/route.ts",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/api/portal/amanda/site-content/route.ts"
+      },
+      {
+        "route": "/api/portal/amanda/site-media",
+        "file": "app/api/portal/amanda/site-media/route.ts",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/api/portal/amanda/site-media/route.ts"
+      },
+      {
+        "route": "/api/portal/amanda/tracking-test",
+        "file": "app/api/portal/amanda/tracking-test/route.ts",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/api/portal/amanda/tracking-test/route.ts"
+      },
+      {
+        "route": "/api/portal/amanda/waitlist",
+        "file": "app/api/portal/amanda/waitlist/route.ts",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/api/portal/amanda/waitlist/route.ts"
+      },
+      {
+        "route": "/api/public/amanda/classes",
+        "file": "app/api/public/amanda/classes/route.ts",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/api/public/amanda/classes/route.ts"
+      },
+      {
+        "route": "/api/public/amanda/confirmation",
+        "file": "app/api/public/amanda/confirmation/route.ts",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/api/public/amanda/confirmation/route.ts"
+      },
+      {
+        "route": "/api/public/amanda/enrollment/checkout",
+        "file": "app/api/public/amanda/enrollment/checkout/route.ts",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/api/public/amanda/enrollment/checkout/route.ts"
+      },
+      {
+        "route": "/api/public/amanda/enrollment/verify",
+        "file": "app/api/public/amanda/enrollment/verify/route.ts",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/api/public/amanda/enrollment/verify/route.ts"
+      },
+      {
+        "route": "/api/public/amanda/media",
+        "file": "app/api/public/amanda/media/route.ts",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/api/public/amanda/media/route.ts"
+      },
+      {
+        "route": "/api/public/amanda/practitioner-kit/checkout",
+        "file": "app/api/public/amanda/practitioner-kit/checkout/route.ts",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/api/public/amanda/practitioner-kit/checkout/route.ts"
+      },
+      {
+        "route": "/api/public/amanda/waitlist",
+        "file": "app/api/public/amanda/waitlist/route.ts",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/api/public/amanda/waitlist/route.ts"
+      },
+      {
+        "route": "/api/webhooks/square-amanda",
+        "file": "app/api/webhooks/square-amanda/route.ts",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/api/webhooks/square-amanda/route.ts"
+      },
+      {
+        "route": "/api/webhooks/stripe-amanda",
+        "file": "app/api/webhooks/stripe-amanda/route.ts",
+        "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/api/webhooks/stripe-amanda/route.ts"
+      }
+    ],
+    "knownRouteAbsentInRepo": "/portal/amanda-catherine/classes",
+    "extraLiveWrappers": [
+      "/amanda/hub",
+      "/amanda/eva",
+      "/amanda-catherine"
+    ]
+  },
+  "eva": {
+    "dedicated": {
+      "page": "/portal/amanda-catherine/eva",
+      "uiComponent": "app/portal/amanda-catherine/(engagement)/eva/EvaChat.tsx",
+      "endpoint": "POST /api/amanda-catherine/eva",
+      "endpointFile": "app/api/amanda-catherine/eva/route.ts",
+      "mechanism": "Deterministic regex routing plus Airtable queries; no generated LLM answer or conversational memory",
+      "canAnswerToday": [
+        "how many tracked registrations/waitlists",
+        "today's enrollment and Business Interested CTA clicks",
+        "course title, Airtable price, current status, Square link presence",
+        "booking calendar URL",
+        "list currently configured programs"
+      ],
+      "sourcesAndTools": [
+        "lib/amanda-catherine/registry.ts: registry(),rows()",
+        "lib/amanda-catherine/engagement.ts: businessInterested(),eventsToday()"
+      ],
+      "storedPrompt": "You are Eva, assistant for Amanda Catherine's portal. Help track business interested, answer about courses: Nervous System Reset $997, Wood Therapy $997, Body Sculpt $2497, Non-Surgical BBL $1497, Starter Kit $499, Strategy Call $250, 90-Day $2500, Clinical Fat Loss. Enroll buttons go to Square.",
+      "storedPromptUsedAsInstructions": false,
+      "manifestUsed": false,
+      "authenticationLiveTested": false
+    },
+    "shared": {
+      "mount": "app/portal/[slug]/layout.tsx embeds EAAssistant surface=portal",
+      "uiComponent": "app/components/ea-assistant/EAAssistant.tsx",
+      "endpoint": "POST /api/ea-guide/ask",
+      "backendFile": "app/api/ea-guide/ask/route.ts",
+      "knowledgeFile": "lib/ea-guide-knowledge.ts",
+      "routingFile": "lib/eva-portal-guide.ts",
+      "mechanism": "General EA static FAQ fallback, pathname keyword module routing, optionally runOrchestrator with portal-help intent and up to three agents",
+      "promptContext": "helpMode:true; approvalBoundary prohibits claiming unverified actions; tenant slug/current route/current module passed",
+      "tools": [
+        "resolveSessionFromRequest(realm=portal)",
+        "answerGuideQuestion",
+        "buildEvaPortalGuideContext",
+        "resolveAIActor",
+        "runOrchestrator",
+        "/api/portal/captures live signals"
+      ],
+      "quickPrompts": [
+        "Ask about this page",
+        "Find something in my portal",
+        "What should I do next?",
+        "Help me complete this",
+        "Report a problem"
+      ],
+      "manifestUsed": false,
+      "ownerShellIntegration": "Owner shell does not mount this generic assistant directly; sidebar Eva redirects to /updates#eva."
+    }
+  },
+  "comparison": {
+    "liveMatchedToRepo": [
+      "Public main navigation and sections exist in app/amanda-catherine/page.tsx",
+      "12 visible Airtable courses use components/amanda/AmandaClassesGrid.tsx",
+      "Public Hub and Eva wrapper routes map to Amanda engagement pages",
+      "Owner sidebar and redirect map found in owner layout and dynamic owner section"
+    ],
+    "liveNotInRepoConfirmed": [],
+    "liveNotInRepoUncertain": [
+      "Protected live menus may differ from master, since deployed commit and role sessions were not confirmed."
+    ],
+    "repoNotVerifiedInLive": [
+      "All 23 owner sidebar entries",
+      "Entitlement-dependent shared chassis modules",
+      "Nine audience tile configurations",
+      "Classroom test and $1 test enrollment flows",
+      "Admin/owner configuration and certification actions"
+    ],
+    "definiteDrift": [
+      {
+        "from": "Organizations.Payload JSON.ctas View Classes",
+        "url": "/portal/amanda-catherine/classes",
+        "problem": "There is no app/portal/amanda-catherine/classes/page.tsx. Current site uses Classes anchor instead."
+      },
+      {
+        "from": "Owner Eva menu",
+        "url": "/portal/amanda-catherine/owner/eva",
+        "problem": "Redirects to /updates#eva, not Amanda dedicated /eva; anchor unverified."
+      },
+      {
+        "from": "Stored Eva prompt",
+        "problem": "Strategy Call listed as $250 while current Airtable visible price is $249."
+      },
+      {
+        "from": "FormPage registration",
+        "problem": "FormPage checks READY/LIVE while registry maps statuses to AVAILABLE/INQUIRY/WAITLIST, possible stale branch."
+      }
+    ]
+  },
+  "gaps": [
+    {
+      "id": "G1",
+      "severity": "blocking",
+      "topic": "Live authentication",
+      "details": "Private owner, staff and student session visibility and clicks not verified.",
+      "questions": [
+        "Which owner buttons actually render and complete expected flows?",
+        "Which student features appear for each entitlement?"
+      ]
+    },
+    {
+      "id": "G2",
+      "severity": "high",
+      "topic": "Unmapped persona tiles",
+      "details": "AmandaMemberHome.hrefFor throws when a tile ID is unmapped.",
+      "affected": [
+        {
+          "role": "client",
+          "id": "preparation-and-aftercare",
+          "issue": "Unmapped Amanda menu item; runtime tile rendering can throw."
+        },
+        {
+          "role": "client",
+          "id": "wellness-plan",
+          "issue": "Unmapped Amanda menu item; runtime tile rendering can throw."
+        },
+        {
+          "role": "certified-practitioner",
+          "id": "practitioner-directory",
+          "issue": "Unmapped Amanda menu item; runtime tile rendering can throw."
+        },
+        {
+          "role": "certified-practitioner",
+          "id": "referrals",
+          "issue": "Unmapped Amanda menu item; runtime tile rendering can throw."
+        },
+        {
+          "role": "certified-practitioner",
+          "id": "professional-opportunities",
+          "issue": "Unmapped Amanda menu item; runtime tile rendering can throw."
+        },
+        {
+          "role": "member-community-participant",
+          "id": "community-directory",
+          "issue": "Unmapped Amanda menu item; runtime tile rendering can throw."
+        },
+        {
+          "role": "member-community-participant",
+          "id": "groups-and-discussions",
+          "issue": "Unmapped Amanda menu item; runtime tile rendering can throw."
+        },
+        {
+          "role": "media-guest",
+          "id": "production-status",
+          "issue": "Unmapped Amanda menu item; runtime tile rendering can throw."
+        },
+        {
+          "role": "volunteer",
+          "id": "schedule-and-assignments",
+          "issue": "Unmapped Amanda menu item; runtime tile rendering can throw."
+        },
+        {
+          "role": "volunteer",
+          "id": "policies-and-training",
+          "issue": "Unmapped Amanda menu item; runtime tile rendering can throw."
+        },
+        {
+          "role": "volunteer",
+          "id": "participation-hours",
+          "issue": "Unmapped Amanda menu item; runtime tile rendering can throw."
+        },
+        {
+          "role": "staff",
+          "id": "assigned-work",
+          "issue": "Unmapped Amanda menu item; runtime tile rendering can throw."
+        },
+        {
+          "role": "admin",
+          "id": "users-and-permissions",
+          "issue": "Unmapped Amanda menu item; runtime tile rendering can throw."
+        },
+        {
+          "role": "admin",
+          "id": "automations-and-communications",
+          "issue": "Unmapped Amanda menu item; runtime tile rendering can throw."
+        }
+      ],
+      "questions": [
+        "How can I use my wellness plan?",
+        "Where is the practitioner directory?",
+        "How do I access users and permissions?"
+      ]
+    },
+    {
+      "id": "G3",
+      "severity": "high",
+      "topic": "Stale Classes link",
+      "details": "Airtable CTA references a removed /classes route.",
+      "questions": [
+        "Why does View Classes lead to a missing route?"
+      ]
+    },
+    {
+      "id": "G4",
+      "severity": "medium",
+      "topic": "Eva owner path",
+      "details": "Owner Eva redirects to /updates#eva rather than dedicated /eva; anchor unverified.",
+      "questions": [
+        "How do I open Eva from owner menu?"
+      ]
+    },
+    {
+      "id": "G5",
+      "severity": "high",
+      "topic": "Knowledge ingestion",
+      "details": "Neither existing Eva backend reads tenant-specific manifest for exact portal instructions.",
+      "questions": [
+        "Walk me through every menu option.",
+        "How do I change course content?"
+      ]
+    },
+    {
+      "id": "G6",
+      "severity": "medium",
+      "topic": "Stale configured prompt",
+      "details": "Stored prompt is not consumed and contains a Strategy Call price mismatch.",
+      "questions": [
+        "What is the accurate course price?",
+        "What prompt instructions does Eva actually follow?"
+      ]
+    },
+    {
+      "id": "G7",
+      "severity": "high",
+      "topic": "Course readiness",
+      "details": "Public Airtable course catalog differs from static LMS content IDs and published video/material completeness.",
+      "questions": [
+        "Which lessons and materials are live?",
+        "When will each waitlisted course open?"
+      ]
+    },
+    {
+      "id": "G8",
+      "severity": "medium",
+      "topic": "Square/Stripe fulfillment",
+      "details": "Public registration points to Square while other portal fulfillment references Stripe. Read-only audit performed no payment.",
+      "questions": [
+        "How does Square payment grant lesson access?",
+        "Where is my receipt?"
+      ]
+    },
+    {
+      "id": "G9",
+      "severity": "medium",
+      "topic": "External systems",
+      "details": "Jane, Square, RIMAN and Google actions were not completed in third-party systems.",
+      "questions": [
+        "How do I reschedule with Jane?",
+        "How do I request a payment refund?"
+      ]
+    },
+    {
+      "id": "G10",
+      "severity": "medium",
+      "topic": "Owner setting/workflows",
+      "details": "Precise live buttons for billing, messages, settings, uploads, progress and shipping need owner session.",
+      "questions": [
+        "How do I configure an integration?",
+        "How do I upload a lesson video?",
+        "How do I mark an order shipped?"
+      ]
+    },
+    {
+      "id": "G11",
+      "severity": "medium",
+      "topic": "Privacy and roles",
+      "details": "Owner shell admits staff+; generic Eva route uses portal auth but permission-scoped Amanda instructions not proven.",
+      "questions": [
+        "Which users can access owner data?",
+        "Can a student ask Eva about confidential owner data?"
+      ]
+    },
+    {
+      "id": "G12",
+      "severity": "medium",
+      "topic": "Live site versus repo",
+      "details": "Production deployment SHA has not been matched against master; public wrapper and dynamic links may differ.",
+      "questions": [
+        "Do all repo actions match the production deployment?"
+      ]
+    },
+    {
+      "id": "G13",
+      "severity": "medium",
+      "topic": "Hub visibility",
+      "details": "Public /amanda/hub showed click reporting without authentication. Policy review required.",
+      "questions": [
+        "Should anonymous visitors see click interest?"
+      ]
+    }
+  ],
+  "unansweredAreas": [
+    {
+      "id": "Q1",
+      "question": "How can I change a class price or availability?",
+      "status": "not reliably answerable today from dedicated Eva"
+    },
+    {
+      "id": "Q2",
+      "question": "How do I upload video lessons and student resources?",
+      "status": "not reliably answerable today from dedicated Eva"
+    },
+    {
+      "id": "Q3",
+      "question": "How do I assign or revoke course access?",
+      "status": "not reliably answerable today from dedicated Eva"
+    },
+    {
+      "id": "Q4",
+      "question": "How do I issue certificates after review?",
+      "status": "not reliably answerable today from dedicated Eva"
+    },
+    {
+      "id": "Q5",
+      "question": "Where do students find receipts after Square checkout?",
+      "status": "not reliably answerable today from dedicated Eva"
+    },
+    {
+      "id": "Q6",
+      "question": "How do I reply to a student inside the portal?",
+      "status": "not reliably answerable today from dedicated Eva"
+    },
+    {
+      "id": "Q7",
+      "question": "How do I edit Jane appointment schedules?",
+      "status": "not reliably answerable today from dedicated Eva"
+    },
+    {
+      "id": "Q8",
+      "question": "How do I manage roles or add staff?",
+      "status": "not reliably answerable today from dedicated Eva"
+    },
+    {
+      "id": "Q9",
+      "question": "Where is the owner Eva assistant reachable?",
+      "status": "not reliably answerable today from dedicated Eva"
+    },
+    {
+      "id": "Q10",
+      "question": "How do I see kit orders and update shipping status?",
+      "status": "not reliably answerable today from dedicated Eva"
+    },
+    {
+      "id": "Q11",
+      "question": "How are course waitlist leads notified when available?",
+      "status": "not reliably answerable today from dedicated Eva"
+    },
+    {
+      "id": "Q12",
+      "question": "How do I restore access after a failed login or expired $1 test?",
+      "status": "not reliably answerable today from dedicated Eva"
+    },
+    {
+      "id": "Q13",
+      "question": "How do I edit marketing and website content?",
+      "status": "not reliably answerable today from dedicated Eva"
+    },
+    {
+      "id": "Q14",
+      "question": "How do owner vs admin vs student permissions differ in production?",
+      "status": "not reliably answerable today from dedicated Eva"
+    },
+    {
+      "id": "Q15",
+      "question": "How do I locate missing role tiles?",
+      "status": "not reliably answerable today from dedicated Eva"
+    },
+    {
+      "id": "Q16",
+      "question": "What are actual live controls on Billing and Settings?",
+      "status": "not reliably answerable today from dedicated Eva"
+    },
+    {
+      "id": "Q17",
+      "question": "Does Square payment provision the same learner as Stripe payment?",
+      "status": "not reliably answerable today from dedicated Eva"
+    }
+  ],
+  "counts": {
+    "ownerSidebar": 23,
+    "engagementNav": 7,
+    "publicCourseCards": 12,
+    "publicStaticActionLabels": 43,
+    "audienceCount": 9,
+    "personaItems": 75,
+    "unmappedPersonaTileCount": 14,
+    "chassisModuleCount": 23,
+    "trackedPageRouteCount": 74,
+    "trackedApiRouteCount": 35
+  },
+  "exclusions": {
+    "noCodeChanges": true,
+    "noProductionDeployment": true,
+    "noChatbotOrNewArchitecture": true,
+    "noFormSubmission": true,
+    "noPayment": true,
+    "noAuthCredentialUsed": true,
+    "notCertified100PercentLive": true
+  }
+}
