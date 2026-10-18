@@ -6,10 +6,8 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export async function GET(request:NextRequest) {
-  // Vercel Cron executes only on production. Deliberately block it until
-  // production release is explicitly authorized by the owner.
-  if (process.env.VERCEL_ENV !== 'preview') {
-    return NextResponse.json({ok:false,error:'Preview-only scheduler is not activated'}, {status:403});
+  if (!['production','preview'].includes(process.env.VERCEL_ENV||'')) {
+    return NextResponse.json({ok:false,error:'Scheduler unavailable in this environment'}, {status:403});
   }
   const secret = process.env.CRON_SECRET;
   const presented = request.headers.get('authorization') || '';
