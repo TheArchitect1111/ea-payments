@@ -27,9 +27,9 @@ const liveCache = new Map<string, LoadedKnowledge>();
 
 /** Vercel preview releases are immutable: current knowledge is a private Blob snapshot. */
 export function previewKnowledgePrefix(): string | null {
-  if (process.env.VERCEL_ENV !== 'preview' && process.env.EVA_WATCHER_TEST_MODE !== '1') return null;
+  if (!['preview', 'production'].includes(process.env.VERCEL_ENV || '') && process.env.EVA_WATCHER_TEST_MODE !== '1') return null;
   const branch = process.env.VERCEL_GIT_COMMIT_REF || 'local-test';
-  return 'eva-portal-help/preview/' + branch.replace(/[^a-z0-9-]/gi, '-').slice(0, 100);
+  return 'eva-portal-help/' + (process.env.VERCEL_ENV === 'production' ? 'production' : 'preview') + '/' + (process.env.VERCEL_ENV === 'production' ? 'master' : branch.replace(/[^a-z0-9-]/gi, '-').slice(0, 100)) + (process.env.VERCEL_ENV === 'production' ? '' : '');
 }
 export function knowledgeSnapshotPath(portalId: string): string {
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(portalId)) throw new Error('Invalid portal id');
