@@ -1,0 +1,1624 @@
+{
+  "manifestId": "eva-tb3-help-audit-v1",
+  "schemaVersion": "1.0.0",
+  "audit": {
+    "date": "2026-10-18",
+    "scope": [
+      "https://tb3.online",
+      "TheArchitect1111/ea-payments"
+    ],
+    "mode": "source_audit_plus_unverified_live_http",
+    "productionCodeChanged": false,
+    "authenticatedLiveVerified": false,
+    "sourceRevision": "feature/eva-portal-help-brick-20261018",
+    "coverageClaim": "Audited available TB3 source navigation and controls; live authenticated pages, runtime items, fan account authorization and actual booking transaction unverified."
+  },
+  "sourceLinks": {
+    "site": "https://tb3.online",
+    "publicPage": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/page.tsx",
+    "hqPage": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/future/page.tsx",
+    "hqWorkspace": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/future/hq-workspace.tsx",
+    "bookingForm": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/book/booking-form.tsx"
+  },
+  "roles": [
+    {
+      "id": "fan",
+      "leastPrivileged": true,
+      "allowedMenuPrefixes": [
+        "publicNavigation",
+        "publicActions",
+        "publicMerch",
+        "publicBooking",
+        "fanCommunity"
+      ],
+      "description": "Public fan help only; no personal HQ data."
+    },
+    {
+      "id": "athlete",
+      "allowedMenuPrefixes": [
+        "publicNavigation",
+        "publicActions",
+        "publicMerch",
+        "publicBooking",
+        "fanCommunity",
+        "hqNavigation",
+        "hqTraining",
+        "hqNIL",
+        "hqOpportunities",
+        "hqMedia",
+        "hqCommunity",
+        "hqCalendar",
+        "hqEva"
+      ],
+      "description": "Athlete HQ and public controls, subject to actual portal sign-in."
+    },
+    {
+      "id": "admin",
+      "allowedMenuPrefixes": [
+        "*"
+      ],
+      "description": "Admin guide inventory; API authentication and RBAC continue to enforce access."
+    },
+    {
+      "id": "family",
+      "allowedMenuPrefixes": [
+        "publicNavigation",
+        "publicActions",
+        "publicMerch",
+        "publicBooking",
+        "fanCommunity"
+      ],
+      "description": "Family help limited to published public pages until verified family HQ access."
+    }
+  ],
+  "menus": {
+    "publicNavigation": [
+      {
+        "label": "HOME",
+        "href": "/tarris#home",
+        "description": "Public section HOME",
+        "location": "publicNavigation",
+        "roles": [
+          "fan",
+          "athlete",
+          "family",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/.",
+          "Find the control labeled \"HOME\" in the public navigation and select it."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/page.tsx"
+      },
+      {
+        "label": "ATHLETE",
+        "href": "/tarris#athlete",
+        "description": "Public section ATHLETE",
+        "location": "publicNavigation",
+        "roles": [
+          "fan",
+          "athlete",
+          "family",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/.",
+          "Find the control labeled \"ATHLETE\" in the public navigation and select it."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/page.tsx"
+      },
+      {
+        "label": "STORY",
+        "href": "/tarris#story",
+        "description": "Public section STORY",
+        "location": "publicNavigation",
+        "roles": [
+          "fan",
+          "athlete",
+          "family",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/.",
+          "Find the control labeled \"STORY\" in the public navigation and select it."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/page.tsx"
+      },
+      {
+        "label": "BRAND",
+        "href": "/tarris#brand",
+        "description": "Public section BRAND",
+        "location": "publicNavigation",
+        "roles": [
+          "fan",
+          "athlete",
+          "family",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/.",
+          "Find the control labeled \"BRAND\" in the public navigation and select it."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/page.tsx"
+      },
+      {
+        "label": "NIL",
+        "href": "/tarris#nil",
+        "description": "Public section NIL",
+        "location": "publicNavigation",
+        "roles": [
+          "fan",
+          "athlete",
+          "family",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/.",
+          "Find the control labeled \"NIL\" in the public navigation and select it."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/page.tsx"
+      },
+      {
+        "label": "COMMUNITY",
+        "href": "/tarris#community",
+        "description": "Public section COMMUNITY",
+        "location": "publicNavigation",
+        "roles": [
+          "fan",
+          "athlete",
+          "family",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/.",
+          "Find the control labeled \"COMMUNITY\" in the public navigation and select it."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/page.tsx"
+      },
+      {
+        "label": "MEDIA",
+        "href": "/tarris#media",
+        "description": "Public section MEDIA",
+        "location": "publicNavigation",
+        "roles": [
+          "fan",
+          "athlete",
+          "family",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/.",
+          "Find the control labeled \"MEDIA\" in the public navigation and select it."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/page.tsx"
+      },
+      {
+        "label": "MERCH",
+        "href": "/tarris#merch",
+        "description": "Public section MERCH",
+        "location": "publicNavigation",
+        "roles": [
+          "fan",
+          "athlete",
+          "family",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/.",
+          "Find the control labeled \"MERCH\" in the public navigation and select it."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/page.tsx"
+      },
+      {
+        "label": "FUTURE",
+        "href": "/tarris#future",
+        "description": "Public section FUTURE",
+        "location": "publicNavigation",
+        "roles": [
+          "fan",
+          "athlete",
+          "family",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/.",
+          "Find the control labeled \"FUTURE\" in the public navigation and select it."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/page.tsx"
+      }
+    ],
+    "publicActions": [
+      {
+        "label": "ENTER TB3 HQ",
+        "href": "/tarris/future",
+        "description": "Enter the TB3 HQ workspace",
+        "location": "publicActions",
+        "roles": [
+          "fan",
+          "athlete",
+          "family",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/hq.",
+          "Find the control labeled \"ENTER TB3 HQ\" in the TB3 public experience and select it."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/page.tsx"
+      },
+      {
+        "label": "NIL INQUIRIES",
+        "href": "/tarris/book",
+        "description": "Open NIL partnership inquiry",
+        "location": "publicActions",
+        "roles": [
+          "fan",
+          "athlete",
+          "family",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/tarris/book.",
+          "Find the control labeled \"NIL INQUIRIES\" in the TB3 public experience and select it."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/page.tsx"
+      },
+      {
+        "label": "BOOK TARRIS / PARTNER WITH TB3",
+        "href": "/tarris#book-tarris-form",
+        "description": "Open public opportunity booking form",
+        "location": "publicActions",
+        "roles": [
+          "fan",
+          "athlete",
+          "family",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/.",
+          "Find the control labeled \"BOOK TARRIS / PARTNER WITH TB3\" in the TB3 public experience and select it."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/page.tsx"
+      },
+      {
+        "label": "SHOP TB3",
+        "href": "/tarris/book?type=merch",
+        "description": "Send a merchandise inquiry; storefront checkout is not live",
+        "location": "publicActions",
+        "roles": [
+          "fan",
+          "athlete",
+          "family",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/tarris/book.",
+          "Find the control labeled \"SHOP TB3\" in the TB3 public experience and select it."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/page.tsx"
+      },
+      {
+        "label": "VIEW TB3 MEDIA",
+        "href": "/tarris#media",
+        "description": "View published TB3 media",
+        "location": "publicActions",
+        "roles": [
+          "fan",
+          "athlete",
+          "family",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/.",
+          "Find the control labeled \"VIEW TB3 MEDIA\" in the TB3 public experience and select it."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/page.tsx"
+      },
+      {
+        "label": "WATCH THE STORY",
+        "href": "/tarris/future",
+        "description": "Open story and HQ",
+        "location": "publicActions",
+        "roles": [
+          "fan",
+          "athlete",
+          "family",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/hq.",
+          "Find the control labeled \"WATCH THE STORY\" in the TB3 public experience and select it."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/page.tsx"
+      },
+      {
+        "label": "BOOK TARRIS / PARTNER WITH TB3 FORM",
+        "href": "/tarris/book",
+        "description": "Open standalone booking form",
+        "location": "publicActions",
+        "roles": [
+          "fan",
+          "athlete",
+          "family",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/tarris/book.",
+          "Find the control labeled \"BOOK TARRIS / PARTNER WITH TB3 FORM\" in the TB3 public experience and select it."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/book/booking-form.tsx"
+      },
+      {
+        "label": "PARTNERSHIP QUOTE REQUEST",
+        "href": "/tarris/book",
+        "description": "Request partnership or appearance pricing",
+        "location": "publicActions",
+        "roles": [
+          "fan",
+          "athlete",
+          "family",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/tarris/book.",
+          "Find the control labeled \"PARTNERSHIP QUOTE REQUEST\" in the TB3 public experience and select it."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/future/hq-workspace.tsx"
+      }
+    ],
+    "publicMerch": [
+      {
+        "label": "TB3 TEE - RED",
+        "href": "/tarris#merch-1",
+        "description": "Merch concept image only; inquiry used instead of checkout",
+        "location": "publicMerch",
+        "roles": [
+          "fan",
+          "athlete",
+          "family",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/.",
+          "Find the control labeled \"TB3 TEE - RED\" in the TB3 public experience and select it."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/page.tsx"
+      },
+      {
+        "label": "TB3 TEE - WHITE",
+        "href": "/tarris#merch-2",
+        "description": "Merch concept image only; inquiry used instead of checkout",
+        "location": "publicMerch",
+        "roles": [
+          "fan",
+          "athlete",
+          "family",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/.",
+          "Find the control labeled \"TB3 TEE - WHITE\" in the TB3 public experience and select it."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/page.tsx"
+      },
+      {
+        "label": "TB3 LONG SLEEVE - RED",
+        "href": "/tarris#merch-3",
+        "description": "Merch concept image only; inquiry used instead of checkout",
+        "location": "publicMerch",
+        "roles": [
+          "fan",
+          "athlete",
+          "family",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/.",
+          "Find the control labeled \"TB3 LONG SLEEVE - RED\" in the TB3 public experience and select it."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/page.tsx"
+      },
+      {
+        "label": "TB3 LONG SLEEVE - WHITE",
+        "href": "/tarris#merch-4",
+        "description": "Merch concept image only; inquiry used instead of checkout",
+        "location": "publicMerch",
+        "roles": [
+          "fan",
+          "athlete",
+          "family",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/.",
+          "Find the control labeled \"TB3 LONG SLEEVE - WHITE\" in the TB3 public experience and select it."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/page.tsx"
+      },
+      {
+        "label": "TB3 CAP - WHITE",
+        "href": "/tarris#merch-5",
+        "description": "Merch concept image only; inquiry used instead of checkout",
+        "location": "publicMerch",
+        "roles": [
+          "fan",
+          "athlete",
+          "family",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/.",
+          "Find the control labeled \"TB3 CAP - WHITE\" in the TB3 public experience and select it."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/page.tsx"
+      },
+      {
+        "label": "TB3 HOODIE - RED",
+        "href": "/tarris#merch-6",
+        "description": "Merch concept image only; inquiry used instead of checkout",
+        "location": "publicMerch",
+        "roles": [
+          "fan",
+          "athlete",
+          "family",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/.",
+          "Find the control labeled \"TB3 HOODIE - RED\" in the TB3 public experience and select it."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/page.tsx"
+      },
+      {
+        "label": "TB3 HOODIE - WHITE",
+        "href": "/tarris#merch-7",
+        "description": "Merch concept image only; inquiry used instead of checkout",
+        "location": "publicMerch",
+        "roles": [
+          "fan",
+          "athlete",
+          "family",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/.",
+          "Find the control labeled \"TB3 HOODIE - WHITE\" in the TB3 public experience and select it."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/page.tsx"
+      },
+      {
+        "label": "TB3 HOODIE - PREMIUM LOGO",
+        "href": "/tarris#merch-8",
+        "description": "Merch concept image only; inquiry used instead of checkout",
+        "location": "publicMerch",
+        "roles": [
+          "fan",
+          "athlete",
+          "family",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/.",
+          "Find the control labeled \"TB3 HOODIE - PREMIUM LOGO\" in the TB3 public experience and select it."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/page.tsx"
+      }
+    ],
+    "publicBooking": [
+      {
+        "label": "Name *",
+        "href": "/tarris/book",
+        "description": "Enter your contact name",
+        "location": "publicBooking",
+        "roles": [
+          "fan",
+          "athlete",
+          "family",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/tarris/book.",
+          "Find the form field or button labeled \"Name *\" and complete it as indicated."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/book/booking-form.tsx"
+      },
+      {
+        "label": "Company *",
+        "href": "/tarris/book",
+        "description": "Enter company or organization",
+        "location": "publicBooking",
+        "roles": [
+          "fan",
+          "athlete",
+          "family",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/tarris/book.",
+          "Find the form field or button labeled \"Company *\" and complete it as indicated."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/book/booking-form.tsx"
+      },
+      {
+        "label": "Email *",
+        "href": "/tarris/book",
+        "description": "Enter your contact email",
+        "location": "publicBooking",
+        "roles": [
+          "fan",
+          "athlete",
+          "family",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/tarris/book.",
+          "Find the form field or button labeled \"Email *\" and complete it as indicated."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/book/booking-form.tsx"
+      },
+      {
+        "label": "Phone",
+        "href": "/tarris/book",
+        "description": "Optional phone",
+        "location": "publicBooking",
+        "roles": [
+          "fan",
+          "athlete",
+          "family",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/tarris/book.",
+          "Find the form field or button labeled \"Phone\" and complete it as indicated."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/book/booking-form.tsx"
+      },
+      {
+        "label": "Type *",
+        "href": "/tarris/book",
+        "description": "Select type of booking or partnership inquiry",
+        "location": "publicBooking",
+        "roles": [
+          "fan",
+          "athlete",
+          "family",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/tarris/book.",
+          "Find the form field or button labeled \"Type *\" and complete it as indicated."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/book/booking-form.tsx"
+      },
+      {
+        "label": "Budget",
+        "href": "/tarris/book",
+        "description": "Select estimated budget range",
+        "location": "publicBooking",
+        "roles": [
+          "fan",
+          "athlete",
+          "family",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/tarris/book.",
+          "Find the form field or button labeled \"Budget\" and complete it as indicated."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/book/booking-form.tsx"
+      },
+      {
+        "label": "Date Requested",
+        "href": "/tarris/book",
+        "description": "Optional date",
+        "location": "publicBooking",
+        "roles": [
+          "fan",
+          "athlete",
+          "family",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/tarris/book.",
+          "Find the form field or button labeled \"Date Requested\" and complete it as indicated."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/book/booking-form.tsx"
+      },
+      {
+        "label": "Vision Alignment *",
+        "href": "/tarris/book",
+        "description": "Explain values alignment",
+        "location": "publicBooking",
+        "roles": [
+          "fan",
+          "athlete",
+          "family",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/tarris/book.",
+          "Find the form field or button labeled \"Vision Alignment *\" and complete it as indicated."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/book/booking-form.tsx"
+      },
+      {
+        "label": "Message",
+        "href": "/tarris/book",
+        "description": "Optional details",
+        "location": "publicBooking",
+        "roles": [
+          "fan",
+          "athlete",
+          "family",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/tarris/book.",
+          "Find the form field or button labeled \"Message\" and complete it as indicated."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/book/booking-form.tsx"
+      },
+      {
+        "label": "Submit Inquiry",
+        "href": "/tarris/book",
+        "description": "Submit public booking form; do not claim submission before API confirms",
+        "location": "publicBooking",
+        "roles": [
+          "fan",
+          "athlete",
+          "family",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/tarris/book.",
+          "Find the form field or button labeled \"Submit Inquiry\" and select it after all required fields are completed."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/book/booking-form.tsx"
+      }
+    ],
+    "hqNavigation": [
+      {
+        "label": "Home",
+        "href": "/tarris/future#hq-home",
+        "description": "TB3 HQ navigation section",
+        "location": "hqNavigation",
+        "roles": [
+          "athlete",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/hq.",
+          "Find the control labeled \"Home\" in TB3 HQ and select it."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/future/page.tsx"
+      },
+      {
+        "label": "My Journey",
+        "href": "/tarris/future#my-journey-module",
+        "description": "TB3 HQ navigation section",
+        "location": "hqNavigation",
+        "roles": [
+          "athlete",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/hq.",
+          "Find the control labeled \"My Journey\" in TB3 HQ and select it."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/future/page.tsx"
+      },
+      {
+        "label": "Academics",
+        "href": "/tarris/future#academics-module",
+        "description": "TB3 HQ navigation section",
+        "location": "hqNavigation",
+        "roles": [
+          "athlete",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/hq.",
+          "Find the control labeled \"Academics\" in TB3 HQ and select it."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/future/page.tsx"
+      },
+      {
+        "label": "Training",
+        "href": "/tarris/future#training-module",
+        "description": "TB3 HQ navigation section",
+        "location": "hqNavigation",
+        "roles": [
+          "athlete",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/hq.",
+          "Find the control labeled \"Training\" in TB3 HQ and select it."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/future/page.tsx"
+      },
+      {
+        "label": "NIL & Brand",
+        "href": "/tarris/future#nil-brand-module",
+        "description": "TB3 HQ navigation section",
+        "location": "hqNavigation",
+        "roles": [
+          "athlete",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/hq.",
+          "Find the control labeled \"NIL & Brand\" in TB3 HQ and select it."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/future/page.tsx"
+      },
+      {
+        "label": "Opportunities",
+        "href": "/tarris/future#opportunities-module",
+        "description": "TB3 HQ navigation section",
+        "location": "hqNavigation",
+        "roles": [
+          "athlete",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/hq.",
+          "Find the control labeled \"Opportunities\" in TB3 HQ and select it."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/future/page.tsx"
+      },
+      {
+        "label": "Community",
+        "href": "/tarris/future#community-module",
+        "description": "TB3 HQ navigation section",
+        "location": "hqNavigation",
+        "roles": [
+          "athlete",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/hq.",
+          "Find the control labeled \"Community\" in TB3 HQ and select it."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/future/page.tsx"
+      },
+      {
+        "label": "Calendar",
+        "href": "/tarris/future#calendar-module",
+        "description": "TB3 HQ navigation section",
+        "location": "hqNavigation",
+        "roles": [
+          "athlete",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/hq.",
+          "Find the control labeled \"Calendar\" in TB3 HQ and select it."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/future/page.tsx"
+      },
+      {
+        "label": "Media Library",
+        "href": "/tarris/future#media-library",
+        "description": "TB3 HQ navigation section",
+        "location": "hqNavigation",
+        "roles": [
+          "athlete",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/hq.",
+          "Find the control labeled \"Media Library\" in TB3 HQ and select it."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/future/page.tsx"
+      }
+    ],
+    "hqTraining": [
+      {
+        "label": "Training weekly plan",
+        "href": "/tarris/future#training-module",
+        "description": "In Training select Weekly Plan to see upcoming sessions",
+        "location": "hqTraining",
+        "roles": [
+          "athlete",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/tarris/future#training-module.",
+          "Use the \"weekly plan\" control in the workspace if available."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/future/hq-workspace.tsx"
+      },
+      {
+        "label": "Training workout log",
+        "href": "/tarris/future#training-module",
+        "description": "In Training use the Add Activity workflow to log workouts",
+        "location": "hqTraining",
+        "roles": [
+          "athlete",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/tarris/future#training-module.",
+          "Use the \"workout log\" control in the workspace if available."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/future/hq-workspace.tsx"
+      },
+      {
+        "label": "Training nutrition log",
+        "href": "/tarris/future#training-module",
+        "description": "In Training select Nutrition Log",
+        "location": "hqTraining",
+        "roles": [
+          "athlete",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/tarris/future#training-module.",
+          "Use the \"nutrition log\" control in the workspace if available."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/future/hq-workspace.tsx"
+      },
+      {
+        "label": "Training film notes",
+        "href": "/tarris/future#training-module",
+        "description": "In Training select Film Notes",
+        "location": "hqTraining",
+        "roles": [
+          "athlete",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/tarris/future#training-module.",
+          "Use the \"film notes\" control in the workspace if available."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/future/hq-workspace.tsx"
+      },
+      {
+        "label": "Training recovery log",
+        "href": "/tarris/future#training-module",
+        "description": "In Training select Recovery Log",
+        "location": "hqTraining",
+        "roles": [
+          "athlete",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/tarris/future#training-module.",
+          "Use the \"recovery log\" control in the workspace if available."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/future/hq-workspace.tsx"
+      },
+      {
+        "label": "Training calendar schedule",
+        "href": "/tarris/future#calendar-module",
+        "description": "In Calendar switch Month/Week/Day for activities",
+        "location": "hqTraining",
+        "roles": [
+          "athlete",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/tarris/future#calendar-module.",
+          "Use the \"calendar schedule\" control in the workspace if available."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/future/hq-workspace.tsx"
+      },
+      {
+        "label": "Training upcoming activities",
+        "href": "/tarris/future#upcoming",
+        "description": "From Upcoming use View All",
+        "location": "hqTraining",
+        "roles": [
+          "athlete",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/tarris/future#upcoming.",
+          "Use the \"upcoming activities\" control in the workspace if available."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/future/hq-workspace.tsx"
+      }
+    ],
+    "hqNIL": [
+      {
+        "label": "NIL partnership criteria",
+        "href": "/tarris/future#nil-criteria",
+        "description": "See brand values and partner criteria",
+        "location": "hqNIL",
+        "roles": [
+          "athlete",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/tarris/future#nil-criteria.",
+          "In the NIL & Brand section, select the \"NIL partnership criteria\" action or corresponding control."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/future/hq-workspace.tsx"
+      },
+      {
+        "label": "NIL brand deck PDF",
+        "href": "/tarris/future#nil-brand-module",
+        "description": "Select Brand Deck PDF to view approved brand assets",
+        "location": "hqNIL",
+        "roles": [
+          "athlete",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/tarris/future#nil-brand-module.",
+          "In the NIL & Brand section, select the \"NIL brand deck PDF\" action or corresponding control."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/future/hq-workspace.tsx"
+      },
+      {
+        "label": "NIL rate card",
+        "href": "/tarris/future#nil-brand-module",
+        "description": "Select Rate Card to see quoted engagement guidance",
+        "location": "hqNIL",
+        "roles": [
+          "athlete",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/tarris/future#nil-brand-module.",
+          "In the NIL & Brand section, select the \"NIL rate card\" action or corresponding control."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/future/hq-workspace.tsx"
+      },
+      {
+        "label": "NIL inquiry pipeline",
+        "href": "/tarris/future#opportunity-pipeline",
+        "description": "Review recorded partnership inquiries",
+        "location": "hqNIL",
+        "roles": [
+          "athlete",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/tarris/future#opportunity-pipeline.",
+          "In the NIL & Brand section, select the \"NIL inquiry pipeline\" action or corresponding control."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/future/hq-workspace.tsx"
+      },
+      {
+        "label": "NIL public partnership request",
+        "href": "/tarris/book",
+        "description": "Public NIL and partnership inquiry form",
+        "location": "hqNIL",
+        "roles": [
+          "athlete",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/tarris/book.",
+          "In the NIL & Brand section, select the \"NIL public partnership request\" action or corresponding control."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/future/hq-workspace.tsx"
+      }
+    ],
+    "hqOpportunities": [
+      {
+        "label": "Opportunity pipeline",
+        "href": "/tarris/future#opportunity-pipeline",
+        "description": "Review inbound to completed opportunity stages",
+        "location": "hqOpportunities",
+        "roles": [
+          "athlete",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/hq.",
+          "Find the control labeled \"Opportunity pipeline\" in TB3 HQ and select it."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/future/hq-workspace.tsx"
+      },
+      {
+        "label": "Opportunity inbox",
+        "href": "/tarris/future#opportunity-inbox",
+        "description": "Review inbound inquiries",
+        "location": "hqOpportunities",
+        "roles": [
+          "athlete",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/hq.",
+          "Find the control labeled \"Opportunity inbox\" in TB3 HQ and select it."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/future/hq-workspace.tsx"
+      },
+      {
+        "label": "Track Opportunity",
+        "href": "/tarris/future#opportunities-module",
+        "description": "Manually log an opportunity",
+        "location": "hqOpportunities",
+        "roles": [
+          "athlete",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/hq.",
+          "Find the control labeled \"Track Opportunity\" in TB3 HQ and select it."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/future/hq-workspace.tsx"
+      },
+      {
+        "label": "Opportunity earnings tracker",
+        "href": "/tarris/future#earnings-tracker",
+        "description": "Review earnings value and breakdown",
+        "location": "hqOpportunities",
+        "roles": [
+          "athlete",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/hq.",
+          "Find the control labeled \"Opportunity earnings tracker\" in TB3 HQ and select it."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/future/hq-workspace.tsx"
+      },
+      {
+        "label": "Opportunity contracts vault",
+        "href": "/tarris/future#contracts-vault",
+        "description": "View relevant contract PDFs",
+        "location": "hqOpportunities",
+        "roles": [
+          "athlete",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/hq.",
+          "Find the control labeled \"Opportunity contracts vault\" in TB3 HQ and select it."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/future/hq-workspace.tsx"
+      },
+      {
+        "label": "Opportunity upload contract",
+        "href": "/tarris/future#contracts-vault",
+        "description": "Upload a contract PDF",
+        "location": "hqOpportunities",
+        "roles": [
+          "athlete",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/hq.",
+          "Find the control labeled \"Opportunity upload contract\" in TB3 HQ and select it."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/future/hq-workspace.tsx"
+      },
+      {
+        "label": "Opportunity booking request",
+        "href": "/tarris/future#opportunity-inbox",
+        "description": "Booking inquiries enter opportunity inbox when saved",
+        "location": "hqOpportunities",
+        "roles": [
+          "athlete",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/hq.",
+          "Find the control labeled \"Opportunity booking request\" in TB3 HQ and select it."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/future/hq-workspace.tsx"
+      },
+      {
+        "label": "Opportunity add to calendar",
+        "href": "/tarris/future#calendar-module",
+        "description": "Record planned engagement on calendar",
+        "location": "hqOpportunities",
+        "roles": [
+          "athlete",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/hq.",
+          "Find the control labeled \"Opportunity add to calendar\" in TB3 HQ and select it."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/future/hq-workspace.tsx"
+      },
+      {
+        "label": "Opportunity status update",
+        "href": "/tarris/future#opportunity-pipeline",
+        "description": "Edit an inquiry stage",
+        "location": "hqOpportunities",
+        "roles": [
+          "athlete",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/hq.",
+          "Find the control labeled \"Opportunity status update\" in TB3 HQ and select it."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/future/hq-workspace.tsx"
+      }
+    ],
+    "hqMedia": [
+      {
+        "label": "Media Library filter Film",
+        "href": "/tarris/future#media-library",
+        "description": "Use Film filter to browse film assets",
+        "location": "hqMedia",
+        "roles": [
+          "athlete",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/hq.",
+          "Find the control labeled \"Media Library filter Film\" in TB3 HQ and select it."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/future/page.tsx"
+      },
+      {
+        "label": "Media Library search assets",
+        "href": "/tarris/future#media-library",
+        "description": "Enter text in Search assets",
+        "location": "hqMedia",
+        "roles": [
+          "athlete",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/hq.",
+          "Find the control labeled \"Media Library search assets\" in TB3 HQ and select it."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/future/page.tsx"
+      },
+      {
+        "label": "Media Library view asset",
+        "href": "/tarris/future#asset-grid",
+        "description": "Select View Asset to open media",
+        "location": "hqMedia",
+        "roles": [
+          "athlete",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/hq.",
+          "Find the control labeled \"Media Library view asset\" in TB3 HQ and select it."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/future/page.tsx"
+      },
+      {
+        "label": "Media Library download HD",
+        "href": "/tarris/future#media-library",
+        "description": "Use Download HD inside asset modal",
+        "location": "hqMedia",
+        "roles": [
+          "athlete",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/hq.",
+          "Find the control labeled \"Media Library download HD\" in TB3 HQ and select it."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/future/page.tsx"
+      },
+      {
+        "label": "Media Library copy link",
+        "href": "/tarris/future#media-library",
+        "description": "Use Copy Link inside asset modal",
+        "location": "hqMedia",
+        "roles": [
+          "athlete",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/hq.",
+          "Find the control labeled \"Media Library copy link\" in TB3 HQ and select it."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/future/page.tsx"
+      },
+      {
+        "label": "Media Library approved brand assets",
+        "href": "/tarris/future#media-library",
+        "description": "Brand asset gallery",
+        "location": "hqMedia",
+        "roles": [
+          "athlete",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/hq.",
+          "Find the control labeled \"Media Library approved brand assets\" in TB3 HQ and select it."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/future/page.tsx"
+      },
+      {
+        "label": "Media Library update hub",
+        "href": "/tarris/future#hq-home",
+        "description": "Update Hub reveals change log",
+        "location": "hqMedia",
+        "roles": [
+          "athlete",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/hq.",
+          "Find the control labeled \"Media Library update hub\" in TB3 HQ and select it."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/future/page.tsx"
+      }
+    ],
+    "hqCommunity": [
+      {
+        "label": "Community youth clinic",
+        "href": "/tarris/future#community-module",
+        "description": "Review community youth clinic work",
+        "location": "hqCommunity",
+        "roles": [
+          "athlete",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/hq.",
+          "Find the control labeled \"Community youth clinic\" in TB3 HQ and select it."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/future/hq-workspace.tsx"
+      },
+      {
+        "label": "Community impact metrics",
+        "href": "/tarris/future#community-module",
+        "description": "View Impact Metrics in Community tools",
+        "location": "hqCommunity",
+        "roles": [
+          "athlete",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/hq.",
+          "Find the control labeled \"Community impact metrics\" in TB3 HQ and select it."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/future/hq-workspace.tsx"
+      },
+      {
+        "label": "Community upcoming clinic",
+        "href": "/tarris/future#community-module",
+        "description": "View upcoming clinics",
+        "location": "hqCommunity",
+        "roles": [
+          "athlete",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/hq.",
+          "Find the control labeled \"Community upcoming clinic\" in TB3 HQ and select it."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/future/hq-workspace.tsx"
+      },
+      {
+        "label": "Community log activity",
+        "href": "/tarris/future#community-module",
+        "description": "Log an impact activity",
+        "location": "hqCommunity",
+        "roles": [
+          "athlete",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/hq.",
+          "Find the control labeled \"Community log activity\" in TB3 HQ and select it."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/future/hq-workspace.tsx"
+      }
+    ],
+    "hqCalendar": [
+      {
+        "label": "Calendar Month Week Day",
+        "href": "/tarris/future#calendar-views",
+        "description": "Switch calendar views",
+        "location": "hqCalendar",
+        "roles": [
+          "athlete",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/hq.",
+          "Find the control labeled \"Calendar Month Week Day\" in TB3 HQ and select it."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/future/hq-workspace.tsx"
+      },
+      {
+        "label": "Calendar next period",
+        "href": "/tarris/future#calendar-module",
+        "description": "Use next period arrow",
+        "location": "hqCalendar",
+        "roles": [
+          "athlete",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/hq.",
+          "Find the control labeled \"Calendar next period\" in TB3 HQ and select it."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/future/hq-workspace.tsx"
+      },
+      {
+        "label": "Calendar previous period",
+        "href": "/tarris/future#calendar-module",
+        "description": "Use previous period arrow",
+        "location": "hqCalendar",
+        "roles": [
+          "athlete",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/hq.",
+          "Find the control labeled \"Calendar previous period\" in TB3 HQ and select it."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/future/hq-workspace.tsx"
+      },
+      {
+        "label": "Calendar Today",
+        "href": "/tarris/future#calendar-module",
+        "description": "Jump to today",
+        "location": "hqCalendar",
+        "roles": [
+          "athlete",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/hq.",
+          "Find the control labeled \"Calendar Today\" in TB3 HQ and select it."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/future/hq-workspace.tsx"
+      },
+      {
+        "label": "Calendar add activity",
+        "href": "/tarris/future#calendar-module",
+        "description": "Select a day then add activity",
+        "location": "hqCalendar",
+        "roles": [
+          "athlete",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/hq.",
+          "Find the control labeled \"Calendar add activity\" in TB3 HQ and select it."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/future/hq-workspace.tsx"
+      }
+    ],
+    "hqEva": [
+      {
+        "label": "Eva HQ assistant",
+        "href": "/tarris/future#eva-panel",
+        "description": "Existing assistant uses /api/ai, not generic portal help API",
+        "location": "hqEva",
+        "roles": [
+          "athlete",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/hq.",
+          "Find the control labeled \"Eva HQ assistant\" in TB3 HQ and select it."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/future/hq-workspace.tsx"
+      },
+      {
+        "label": "Eva quick action",
+        "href": "/tarris/future#eva-command-bar",
+        "description": "Existing Eva supports quick action shortcuts",
+        "location": "hqEva",
+        "roles": [
+          "athlete",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/hq.",
+          "Find the control labeled \"Eva quick action\" in TB3 HQ and select it."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/future/hq-workspace.tsx"
+      }
+    ],
+    "fanCommunity": [
+      {
+        "label": "Fan community public page",
+        "href": "/tarris#community",
+        "description": "Public community story and youth impact. No verified private fan membership area.",
+        "location": "fanCommunity",
+        "roles": [
+          "fan",
+          "athlete",
+          "family",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/tarris#community.",
+          "Review the COMMUNITY section for public initiatives."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/page.tsx"
+      },
+      {
+        "label": "Fan booking for appearance",
+        "href": "/tarris/book",
+        "description": "Public appearance requests for community events",
+        "location": "fanCommunity",
+        "roles": [
+          "fan",
+          "athlete",
+          "family",
+          "admin"
+        ],
+        "steps": [
+          "Open https://tb3.online/tarris/book.",
+          "Find the control labeled \"Fan booking for appearance\" in this section and select it."
+        ],
+        "verification": "repo_source_audited_not_authenticated_live_verified",
+        "source": "https://github.com/TheArchitect1111/ea-payments/blob/feature/eva-portal-help-brick-20261018/app/tarris/book/booking-form.tsx"
+      }
+    ]
+  },
+  "features": {
+    "NIL": [
+      "Partnership criteria",
+      "Brand deck",
+      "Rate card",
+      "Inquiry pipeline"
+    ],
+    "training": [
+      "Weekly plan",
+      "Workout log",
+      "Nutrition log",
+      "Film notes",
+      "Recovery log",
+      "Calendar"
+    ],
+    "media": [
+      "Public media",
+      "HQ approved media gallery",
+      "Film filter",
+      "View, Download HD, Copy Link"
+    ],
+    "merchStore": "Products displayed as concepts. SHOP TB3 leads to merchandise inquiry, not confirmed checkout.",
+    "fanCommunity": "Public community content is verified in source; no private fan area proven.",
+    "bookingPipeline": "Public form POST /api/opportunities/create, subsequent HQ pipeline only after successful persistence.",
+    "opportunities": [
+      "Pipeline",
+      "Inbox",
+      "Earnings",
+      "Contracts Vault",
+      "Track Opportunity"
+    ],
+    "authCompatibility": "TB3 HQ EvaContent uses /api/ai and does not call /api/portal/tb3/eva-help. Generic endpoint requires EA_PORTAL_COOKIE HMAC session slug=tb3. HQ sign-in and role-specific cookie issuance have not been demonstrated."
+  },
+  "questionsEvaCannotReliablyAnswerToday": [
+    {
+      "question": "Where can I find Amanda Catherine's classes?",
+      "reason": "Cross-portal question; must not reveal Amanda inventory in TB3."
+    },
+    {
+      "question": "How do I access Amanda Catherine's learning portal?",
+      "reason": "Cross-portal knowledge request must be unanswered."
+    },
+    {
+      "question": "Can I buy TB3 merchandise right now?",
+      "reason": "Actual live checkout not verified; store is currently an inquiry flow."
+    },
+    {
+      "question": "What is my next training session time?",
+      "reason": "Account-specific calendar data not in knowledge manifest."
+    },
+    {
+      "question": "Can my family sign into TB3 HQ?",
+      "reason": "Family sign-in role and entitlements have not been verified."
+    }
+  ],
+  "stepByStepWorkflows": {
+    "nil-inquiry": [
+      "Open https://tb3.online/tarris/book.",
+      "Complete required partner identity and Vision Alignment fields.",
+      "Select Submit Inquiry. Wait for confirmed response."
+    ],
+    "training-weekly-plan": [
+      "Open https://tb3.online/tarris/future#training-module.",
+      "In Training select Weekly Plan."
+    ],
+    "media-download": [
+      "Open https://tb3.online/tarris/future#media-library.",
+      "Select View Asset for the desired media.",
+      "Select Download HD."
+    ],
+    "merch-inquiry": [
+      "Open https://tb3.online/tarris#merch.",
+      "Select SHOP TB3.",
+      "Complete the merchandise inquiry."
+    ],
+    "booking-pipeline": [
+      "Open https://tb3.online/tarris/book.",
+      "Submit all required details.",
+      "A saved inquiry appears in TB3 HQ Opportunities."
+    ]
+  },
+  "gaps": [
+    "Actual live site HTTP fetch not available via current remote reader.",
+    "TB3 HQ existing Eva chat not connected to help brick without code changes outside allowed scope.",
+    "EA_PORTAL_COOKIE session and signed-in athlete role compatibility unproven.",
+    "Fans and family HQ role access not established.",
+    "Live merchandise checkout not proven; inquiries only."
+  ]
+}

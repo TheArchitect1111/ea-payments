@@ -10,7 +10,8 @@ const quick=[
  ['＄','Test course enrollment · CAD $1','/portal/amanda-catherine/billing?showTest=1'],
  ['⧉','View Orders','/portal/amanda-catherine/owner/practitioner-kit'],
  ['◫','Send Message','/portal/amanda-catherine/messaging'],
- ['↗','Open Marketing Kit','/portal/amanda-catherine/owner/marketing']
+ ['↗','Open Marketing Kit','/portal/amanda-catherine/owner/marketing'],
+ ['?','Eva Portal Help','/portal/amanda-catherine/eva#portal-help']
 ] as const;
 
 export default async function Page(){

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { tb3FilmAssets, tb3FilmUrl } from "../tb3-film";
+import tb3HqNavigation from "@/knowledge/eva-menu-sources/tb3-hq.json";
 
 import { HqWorkspaceProvider, useHq, HqDialog, ModuleActions, ModuleTools, ProactiveEva, HqFocus, Upcoming, OpportunitySummary, OpportunityPipeline, EarningsValue, EarningsBreakdown, DocumentVault, OpportunityInbox, CalendarModule, EvaPanel, EvaFab, EvaCommandBar, BrandTools } from "./hq-workspace";
 
@@ -120,16 +121,7 @@ function TarrisHqContent() {
         </div>
         <p className="mt-3 text-[9px] tracking-[0.28em] text-white/50">TARRIS BOUIE</p>
         <nav aria-label="TB3 HQ navigation" id="hq-nav" className="mt-6 grid grid-cols-2 gap-1 text-sm sm:grid-cols-4 lg:block lg:space-y-1">
-          <a href="#hq-home" className="rounded bg-white px-3 py-2 font-bold text-black">Home</a>
-          <a href="#my-journey-module" className="block rounded px-3 py-2 text-white/70 hover:bg-white/10">My Journey</a>
-          <a href="#academics-module" className="block rounded px-3 py-2 text-white/70 hover:bg-white/10">Academics</a>
-          <a href="#training-module" className="block rounded px-3 py-2 text-white/70 hover:bg-white/10">Training</a>
-          <a href="#nil-brand-module" className="block rounded px-3 py-2 text-white/70 hover:bg-white/10">NIL &amp; Brand</a>
-          <a href="#opportunities-module" className="block rounded px-3 py-2 text-white/70 hover:bg-white/10">Opportunities</a>
-          <a href="#community-module" className="block rounded px-3 py-2 text-white/70 hover:bg-white/10">Community</a>
-          <a href="#calendar-module" className="block rounded px-3 py-2 text-white/70 hover:bg-white/10">Calendar</a>
-          <a href="#media-library" className="block rounded px-3 py-2 text-white/70 hover:bg-white/10">Media Library</a>
-          <button type="button" onClick={()=>setShowUpdateHub(true)} className="block w-full rounded px-3 py-2 text-left text-white/70 hover:bg-white/10">Update Hub</button>
+          {tb3HqNavigation.items.map(({label,href},index)=><a key={href} href={href.replace("/tarris/future","")} className={index===0?"rounded bg-white px-3 py-2 font-bold text-black":"block rounded px-3 py-2 text-white/70 hover:bg-white/10"}>{label}</a>)}
         </nav>
         <details className="mt-4"><summary aria-label="Settings" title="Settings" className="grid h-10 w-10 cursor-pointer list-none place-items-center rounded-lg border border-white/15">⚙</summary><p className="mt-2 text-xs text-white/60">Account preferences will be available when HQ tracking is connected.</p></details>
         <div className="mt-8 hidden text-[10px] leading-6 tracking-[0.16em] text-white/45 lg:block">

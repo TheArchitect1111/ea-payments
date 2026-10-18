@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation';
+import Link from 'next/link';
 import { normalizeRole, roleAtLeast } from '@/lib/rbac';
 import { requirePortalModule } from '@/lib/modules/portal-modules';
 import { PortalSubpage } from '@/app/portal/components/PortalSubpage';
@@ -32,7 +33,7 @@ export default async function AmandaCatherinePortalPage() {
     >
       <div className="amanda-portal">
         <nav className="amanda-nav" aria-label="Amanda classes navigation">
-          <div className="amanda-nav__links"><ClassesAnchor /></div>
+          <div className="amanda-nav__links"><ClassesAnchor /><Link href="/portal/amanda-catherine/eva#portal-help">Eva Portal Help</Link></div>
         </nav>
         <AmandaMemberHome
           slug={SLUG}

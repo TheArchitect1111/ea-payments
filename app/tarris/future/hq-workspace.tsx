@@ -134,11 +134,103 @@ export function CalendarModule(){const h=useHq();const [view,setView]=useState<"
   </section>;
 }
 
-function EvaContent({prefix}:{prefix:string}){const h=useHq();const [message,setMessage]=useState(""),[response,setResponse]=useState("I can help you log activity, plan your calendar and track opportunities."),[busy,setBusy]=useState(false);
-  const study=h.records.filter(r=>r.purpose==="study"&&r.logType==="Study Hall"&&r.completed),training=h.records.filter(r=>r.purpose==="training"&&r.logType==="Workout"&&r.completed),opps=h.records.filter(r=>r.purpose==="opportunity"&&r.stage!=="Completed");
-  async function send(e:FormEvent){e.preventDefault();if(busy)return;const query=message.trim();if(!query)return;setMessage("");const lower=query.toLowerCase();if(/study|tutor|academic/.test(lower)){h.openActivity({type:"Academics",purpose:"study"});setResponse("Your Study Hall Log is open. Save it to update Calendar and My Focus.");return;}if(/training log|workout|log training/.test(lower)){h.openActivity({type:"Training",purpose:"training"});setResponse("Your Training Log is open. Save it to update Calendar and My Focus.");return;}if(/opportunity|nil inquiry/.test(lower)){h.openActivity({type:"Opportunity",purpose:"opportunity"});setResponse("Enter an opportunity. Contracted opportunities create linked calendar holds.");return;}if(/calendar|event/.test(lower)){h.openActivity();setResponse("Add Activity is open. Your saved activity will appear in Calendar.");return;}if(/media|asset/.test(lower)){h.openAssets();setResponse("The approved asset vault is ready. Click View Asset to load an image.");return;}if(/focus|today/.test(lower)){setResponse(`${study.length} study sessions, ${training.length} completed workouts and ${opps.length} active opportunities recorded. ${h.upcoming.length?h.upcoming.map(r=>r.title+" · "+eventTime(r)).join("; "):"No upcoming activities scheduled."}`);return;}
-    setBusy(true);try{const res=await fetch("/api/ai",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({messages:[{role:"user",content:query}],system:"You are Eva, TB3 HQ's assistant. Do not invent athlete metrics, eligibility, contracts, events or completed actions. You cannot write HQ records; guide the user to Calendar, log or opportunity forms. No athlete records are supplied. Public booking uses the shared TB3 database. Do not claim a write has succeeded without a successful API response.",maxOutputTokens:400,metadata:{surface:"tb3-hq-preview"}})});const body=await res.json();setResponse(res.ok&&body.ok&&body.text?String(body.text):"Live AI chat requires a connected, signed-in account. Preview quick actions work now: log study hall, add a workout, track an opportunity or add a calendar event.");}catch{setResponse("Live chat is unavailable. You can still use the activity, calendar and opportunity quick actions.");}finally{setBusy(false);}}
-  return <div className="flex min-h-0 flex-1 flex-col"><p className="text-xs leading-6 opacity-70">You’re in {h.module}. {study.length} study sessions · {training.length} workouts recorded.</p><div className="mt-5 grid gap-2">{[["Log Study Hall","study"],["Add Calendar Event","calendar"],["Track Opportunity","opportunity"],["Update Media","media"]].map(([label,action])=><button key={action} type="button" onClick={()=>{if(action==="media")h.openAssets();else h.openActivity(action==="study"?{type:"Academics",purpose:"study"}:action==="opportunity"?{type:"Opportunity",purpose:"opportunity"}:{});}} className="rounded-lg border border-[#C41E3A]/60 px-3 py-3 text-left text-xs font-bold">{label} →</button>)}</div><div className="mt-6 border-t border-current/10 pt-5"><p className="text-[10px] font-bold tracking-widest opacity-50">YOUR WORKSPACE</p><p className="mt-3 text-xs leading-6">{opps.length} active opportunities recorded.</p><p className="text-xs leading-6">{h.upcoming.length} upcoming activities.</p><p className="mt-3 text-xs">{h.opportunities.filter(op=>op.status==="Inbound").length} inbound inquiries to review · {h.opportunities.filter(op=>op.values_check==="Fail").length} values checks flagged.</p>{(()=>{const notices=[...(h.details.notifications||[])].sort((a:any,b:any)=>String(b.created_at||"").localeCompare(String(a.created_at||"")));const notice=notices[0];const op=notice&&h.opportunities.find(item=>item.id===notice.opportunity_id);return op?<p data-testid="eva-new-inquiry" className="mt-3 rounded-lg bg-[#C41E3A]/10 p-3 text-xs">New inquiry from {op.company_name} - {op.type} - Values check: {op.values_check}</p>:null;})()}<p className="mt-3 text-xs">{h.opportunities.filter(op=>op.status==="Contracted"&&!h.documents.some(doc=>doc.opportunity_id===op.id)).length} contracted opportunities need an agreement.</p></div><p role="status" className="mt-5 whitespace-pre-wrap break-words rounded-xl bg-[#C41E3A]/10 p-4 text-xs leading-6">{response}</p><form onSubmit={send} className="mt-auto pt-6"><label htmlFor={prefix+"-eva-chat"} className="text-xs font-bold">Chat with Eva</label><div className="mt-2 flex gap-2"><input id={prefix+"-eva-chat"} maxLength={1200} value={message} onChange={e=>setMessage(e.target.value)} placeholder="Chat with Eva →" className="min-w-0 flex-1 rounded-lg border border-current/20 bg-transparent px-3 py-3 text-xs"/><button aria-busy={busy} type="submit" className="rounded-lg bg-[#C41E3A] px-3 py-3 text-xs font-bold text-white">{busy?"…":"Send"}</button></div></form></div>;
+type EvaHelpResult = {
+  ok: boolean;
+  status?: "guided" | "unanswered";
+  portalId?: string;
+  label?: string;
+  step?: string;
+  stepNumber?: number;
+  totalSteps?: number;
+  link?: string;
+  entryKey?: string;
+  nextStepIndex?: number | null;
+  logged?: boolean;
+  message?: string;
+  error?: string;
+};
+
+function EvaContent({prefix}:{prefix:string}){
+  const h=useHq();
+  const [message,setMessage]=useState("");
+  const [question,setQuestion]=useState("");
+  const [result,setResult]=useState<EvaHelpResult|null>(null);
+  const [notice,setNotice]=useState("Ask about TB3 navigation, NIL, training, community or merchandise.");
+  const [busy,setBusy]=useState(false);
+
+  async function requestHelp(query:string,entryKey?:string,stepIndex?:number){
+    setBusy(true);
+    try {
+      const response=await fetch("/api/portal/tb3/eva-help",{
+        method:"POST",
+        credentials:"same-origin",
+        headers:{"Content-Type":"application/json"},
+        cache:"no-store",
+        body:JSON.stringify({question:query,...(entryKey?{entryKey,stepIndex}: {})})
+      });
+      const data:EvaHelpResult=await response.json();
+      if (!response.ok) {
+        setResult(null);
+        setNotice(response.status===401
+          ?"Portal sign-in is required to use Eva's guided help."
+          :response.status===403
+          ?"This portal is not available in your account."
+          :data.error||"Eva could not retrieve verified guidance. Try again after signing in.");
+        return;
+      }
+      if (data.portalId!=="tb3") throw new Error("Portal mismatch. Guidance has been withheld.");
+      setResult(data);
+      setNotice(data.status==="unanswered"
+        ?data.message||"I cannot verify that instruction. It has been flagged for human review."
+        :"");
+    } catch {
+      setResult(null);
+      setNotice("Eva help is temporarily unavailable. Please try again.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function send(e:FormEvent){
+    e.preventDefault();
+    const query=message.trim();
+    if (!query||busy) return;
+    setMessage("");
+    setQuestion(query);
+    setResult(null);
+    await requestHelp(query);
+  }
+  async function nextStep(){
+    if(busy||!result?.entryKey||result.nextStepIndex==null||!question)return;
+    await requestHelp(question,result.entryKey,result.nextStepIndex);
+  }
+  return <div className="flex min-h-0 flex-1 flex-col">
+    <p className="text-xs leading-6 opacity-70">Verified help for this portal. Answers are shown one step at a time.</p>
+    <div className="mt-5 grid gap-2">
+      {[["Log Study Hall","study"],["Add Calendar Event","calendar"],["Track Opportunity","opportunity"],["Update Media","media"]].map(([label,action])=>
+        <button key={action} type="button" onClick={()=>{
+          if(action==="media")h.openAssets();
+          else h.openActivity(action==="study"?{type:"Academics",purpose:"study"}:action==="opportunity"?{type:"Opportunity",purpose:"opportunity"}:{});
+        }} className="rounded-lg border border-[#C41E3A]/60 px-3 py-3 text-left text-xs font-bold">{label} →</button>)}
+    </div>
+    <div aria-live="polite" data-testid="tb3-eva-help-result" className="mt-5 rounded-xl bg-[#C41E3A]/10 p-4 text-xs leading-6">
+      {question&&<p className="mb-3 font-bold">You asked: {question}</p>}
+      {notice&&<p role="status">{notice}</p>}
+      {result?.status==="guided"&&<div>
+        <p className="font-bold text-[#E2A8B2]">{result.label||"Your next step"}</p>
+        <p className="mt-2">Step {result.stepNumber} of {result.totalSteps}: {result.step}</p>
+        {result.link&&<a href={result.link} className="mt-3 inline-block underline underline-offset-4" rel="noopener noreferrer">Open this portal page →</a>}
+        {result.nextStepIndex!=null&&<button type="button" onClick={()=>{void nextStep();}} disabled={busy} className="mt-3 block rounded-lg border border-white/40 px-3 py-2 font-bold disabled:opacity-50">Next step →</button>}
+      </div>}
+    </div>
+    <form onSubmit={send} className="mt-auto pt-6">
+      <label htmlFor={prefix+"-eva-chat"} className="text-xs font-bold">Ask Eva</label>
+      <div className="mt-2 flex gap-2">
+        <input id={prefix+"-eva-chat"} maxLength={500} value={message} onChange={e=>setMessage(e.target.value)} placeholder="How do I find my training plan?" className="min-w-0 flex-1 rounded-lg border border-current/20 bg-transparent px-3 py-3 text-xs"/>
+        <button aria-busy={busy} disabled={busy} type="submit" className="rounded-lg bg-[#C41E3A] px-3 py-3 text-xs font-bold text-white disabled:opacity-50">{busy?"…":"Send"}</button>
+      </div>
+    </form>
+  </div>;
 }
 export function EvaPanel(){return <aside id="eva-panel" className="fixed bottom-0 right-0 top-0 z-[100] hidden w-80 flex-col overflow-y-auto border-l border-[#222] bg-[#0A0A0A] p-6 text-white xl:flex"><div className="mb-5 flex items-center justify-between"><h2 className="text-xl font-black">EVA</h2><span aria-hidden="true" className="h-2 w-2 rounded-full bg-[#C41E3A]"/></div><p className="mb-6 text-xs opacity-60">Your AI Assistant</p><EvaContent prefix="desktop"/></aside>}
 export function EvaFab(){const h=useHq();return <div className="fixed bottom-0 left-0 right-0 z-[100] flex h-24 items-center justify-end border-t border-white/10 bg-[#0A0A0A] px-5 xl:hidden"><button id="eva-fab" type="button" onClick={h.openEva} className="grid h-14 w-14 place-items-center rounded-full bg-[#C41E3A] text-xs font-black text-white shadow-xl" aria-label="Open Eva">EVA</button></div>}

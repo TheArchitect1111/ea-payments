@@ -1,0 +1,24 @@
+name: Eva portal help 10-question verification
+on:
+  push:
+    branches:
+      - feature/eva-portal-help-brick-20261018
+    paths:
+      - 'src/bricks/eva-portal-help/**'
+      - 'knowledge/**'
+      - 'scripts/test-eva-portal-help.mts'
+      - '.github/workflows/eva-portal-help-verify.yml'
+  workflow_dispatch:
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: node --conditions=react-server --import tsx scripts/test-eva-portal-help.mts

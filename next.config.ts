@@ -15,6 +15,9 @@ const nextConfig: NextConfig = {
    * helpers historically caused NFT to attach ~500MB to admin routes.
    */
   outputFileTracingIncludes: {
+    '/api/portal/*/eva-help': ['./knowledge/*.json'],
+    '/api/portal/*/eva-help/health': ['./knowledge/*.json'],
+    './app/api/portal/[slug]/eva-help/**': ['./knowledge/*.json'],
     '/app/api/admin/video-factory/publish/**': ['./public/video-factory/**'],
     './app/api/admin/video-factory/publish/**': ['./public/video-factory/**'],
   },
