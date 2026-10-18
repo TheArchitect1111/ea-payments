@@ -41,3 +41,30 @@ The Step 1 manifest documents 207 menu/control entries and 30 example unknown qu
 - Vercel preview for both API portals: `https://ea-payments-1qsm7yc1h-the-architects-projects-cc813778.vercel.app` (commit `7984328722e13d35f50aef8c465e6fda0a18e2be`). Health check: `/api/portal/amanda-catherine/eva-help/health` => HTTP 200, `portalId=amanda-catherine`, `entryCount=207`. `/api/portal/tb3/eva-help/health` => HTTP 200, `portalId=tb3`, `entryCount=85`. These responses validate manifest loading, not authenticated use.
 - TB3 HQ authentication and UI compatibility: **NOT VERIFIED / NOT WIRED**. Existing HQ Eva chat uses `/api/ai` and not `/api/portal/tb3/eva-help`. The generic help POST requires an `EA_PORTAL_COOKIE` signed session whose `slug` is `tb3`; actual issuance to TB3 athlete, fan, admin, family was not demonstrated. The existing `normalizeGuideRole(role)` signature lacks tenant context, so tenant-aware fallback occurs in `canReadEntry` based on the owning manifest. Under the strict no-other-shared-code-change rule, do not claim the existing HQ widget now calls this brick.
 - A 200 health response on both portals and passing offline isolation fixtures are **not evidence** that authenticated TB3 HQ end-to-end chat is connected.
+
+
+## Step 4 certification gate (2026-10-18)
+
+**Status: NOT CERTIFIED. Preview integration implemented; authenticated acceptance incomplete. Do not merge or deploy to production.**
+
+### TB3 HQ integration
+`app/tarris/future/hq-workspace.tsx` now routes the desktop/mobile Eva chat through authenticated `POST /api/portal/tb3/eva-help` with `credentials: same-origin`, no browser-supplied role, one-step response, direct link, and explicit Next step. Existing non-chat workspace quick-action buttons remain. The generic legacy `/api/ai` endpoint was not removed. A 401 asks users to sign in; a 403 does not fall back to legacy AI or disclose tenant data. Integration commit: `7d8b4b3f476d97fff70a5b51b448372661538782`.
+
+### Onboarding a new portal (target: under 30 minutes, not a service-time guarantee)
+1. Audit the real public and authenticated menu inventory, roles, links, controls, and entitlement boundaries. Record source and verification for each entry. Do not guess user-specific actions.
+2. Create `knowledge/eva-<portalId>-manifest.json` with `manifestId`, `schemaVersion`, an array of `roles`, and a `menus` map containing arrays of menu entries.
+3. Each role policy requires `id`, `allowedMenuPrefixes`; exactly one policy has `leastPrivileged:true`. Optional `aliases`, `allowedIdsByGroup`, `allowedHrefsByGroup`, `requiredAudienceByGroup`, `requiredAnyFieldsByGroup` narrow access. Unknown roles fall back only within the same manifest. Review the implications of wildcards.
+4. A menu entry needs a discoverable `label` (or `title`, `button`, `control`, `section`, `id`), `href` (or `ctaDestination`, `path`, `potentialHref`), and a nonempty `steps: string[]`; `location`, `audience`, `roles`, `verification`, `source`, and `behavior` document its provenance. Only vetted links should be used.
+5. Register `portalId` in `knowledge/eva-portal-help-registry.json` with `manifestFile`, exact `expectedEntries` and canonical HTTPS `origin`. Do not change the other tenants' content.
+6. Provide verified portal identity/session issuance, role mapping and access controls. The help API requires signed `ea_portal_session` with `session.slug === portalId`; do not let the browser choose identity or role.
+7. Connect the tenant's Eva surface to the existing endpoint and render `step`, `stepNumber`, `totalSteps`, `link`, `nextStepIndex`. Never switch to unscoped AI if an authorization check fails.
+8. Run offline regression, cross-portal leakage checks, then preview signed-in role walkthroughs including restricted controls and logged unknowns. Verify private Blob objects by their IDs/paths and contents before certifying. Refresh by updating only the tenant manifest, checking expected count, redeploying preview, and fetching `GET /api/portal/{portalId}/eva-help/health`.
+
+### Required certification evidence and known limits
+- Local sandbox regression on 2026-10-18: Amanda 10/10 PASS, TB3 10/10 PASS, isolation 2/2 PASS, both local health=200. Tests execute the manifest engine directly; they are not signed-in HTTP walkthroughs.
+- The preview health endpoints previously returned HTTP 200 for Amanda (207) and TB3 (85) and advertised `logging: private-blob`. That mode field proves configuration detection, not a successful Blob write.
+- **Authenticated preview walkthroughs: NOT PROVEN** for Amanda student/owner or TB3 athlete/fan. TB3 HQ layout itself requires an authenticated, active membership or admin session; its HMAC portal help API separately checks session slug. A fan without HQ membership cannot enter the current HQ shell.
+- **Role mapping gap:** `lib/rbac.ts` defines platform roles `owner`, `admin`, `manager`, `staff`, `viewer`, `guest`; it does not define manifest roles `student`, `athlete`, `fan`, or `family`. Merely falling back to the manifest's least-privileged role does not certify identity-specific elevated permissions. Do not manufacture preview tokens or upgrade guest roles.
+- **Private Blob event creation/read-back: NOT PROVEN** for two unknown questions on each authenticated tenant. The endpoint requires a signed cookie and actual storage write; logs and returned `logged` flags alone are insufficient to claim durable private storage.
+- A repository-wide `npx tsc --noEmit` returned nonzero with numerous unrelated project errors; the newly edited TB3 workspace and help modules were absent from the filtered error output. Full repository green status is NOT proven.
+- **Certification promotion rule:** mark Certified only after all four authenticated role walkthroughs, four private Blob reads, and full agreed regression/production gates pass in preview. No production promotion without explicit owner approval.
