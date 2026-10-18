@@ -68,3 +68,11 @@ The Step 1 manifest documents 207 menu/control entries and 30 example unknown qu
 - **Private Blob event creation/read-back: NOT PROVEN** for two unknown questions on each authenticated tenant. The endpoint requires a signed cookie and actual storage write; logs and returned `logged` flags alone are insufficient to claim durable private storage.
 - A repository-wide `npx tsc --noEmit` returned nonzero with numerous unrelated project errors; the newly edited TB3 workspace and help modules were absent from the filtered error output. Full repository green status is NOT proven.
 - **Certification promotion rule:** mark Certified only after all four authenticated role walkthroughs, four private Blob reads, and full agreed regression/production gates pass in preview. No production promotion without explicit owner approval.
+
+## Live-menu watcher, Step 6 (preview)
+
+The live menu source adapters are configured in `knowledge/eva-portal-help-registry.json`. The `app-config` adapter reads the same checked-in JSON navigation consumed by the Amanda owner and TB3 HQ components. The `html-nav` adapter extracts links from the configured accessible public navigation on the registered domain. Both sources provide section and allowed-role metadata. Do not put tenant URLs or selectors in shared watcher code.
+
+`POST /api/portal/{slug}/eva-help/refresh?mode=live` requires an authenticated same-tenant admin or owner. It compares current navigation with the previous tenant snapshot and returns `changedItemsCount` and `entryCount`. Each refresh appends a diff log; changed snapshots have private-blob backups. Preview snapshots are runtime state and do not overwrite committed knowledge JSON files.
+
+A 2026-10-18 sandbox run of `scripts/test-eva-live-menu-watcher.mts` passed Amanda add/remove, TB3 add/remove, refreshed guidance, role isolation, six simulated logs and six backups. Amanda 10/10, TB3 10/10 and isolation 2/2 also passed. Preview health returned 200 for Amanda 207 and TB3 85 before an authenticated live refresh. Actual private Blob writes and authenticated endpoint POST remain unverified. Vercel Cron is production-only, so the declared 02:00 UTC schedule is not executing on preview.
