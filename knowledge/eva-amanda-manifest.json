@@ -2177,7 +2177,9 @@
         "component": "app/amanda-catherine/courses/[courseSlug]/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/amanda-catherine/courses/[courseSlug]/page.tsx",
         "category": "Amanda dedicated",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "Amanda-specific route (custom component, not a separate certified brick)",
+        "componentSource": "app/amanda-catherine/courses/[courseSlug]/page.tsx"
       },
       {
         "file": "app/amanda-catherine/page.tsx",
@@ -2185,7 +2187,9 @@
         "component": "app/amanda-catherine/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/amanda-catherine/page.tsx",
         "category": "Amanda dedicated",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "Amanda-specific route (custom component, not a separate certified brick)",
+        "componentSource": "app/amanda-catherine/page.tsx"
       },
       {
         "file": "app/amanda-catherine/private/practitioner-kit/page.tsx",
@@ -2193,7 +2197,9 @@
         "component": "app/amanda-catherine/private/practitioner-kit/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/amanda-catherine/private/practitioner-kit/page.tsx",
         "category": "Amanda dedicated",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "Amanda-specific route (custom component, not a separate certified brick)",
+        "componentSource": "app/amanda-catherine/private/practitioner-kit/page.tsx"
       },
       {
         "file": "app/amanda-catherine/private/practitioner-kit/success/page.tsx",
@@ -2201,7 +2207,9 @@
         "component": "app/amanda-catherine/private/practitioner-kit/success/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/amanda-catherine/private/practitioner-kit/success/page.tsx",
         "category": "Amanda dedicated",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "Amanda-specific route (custom component, not a separate certified brick)",
+        "componentSource": "app/amanda-catherine/private/practitioner-kit/success/page.tsx"
       },
       {
         "file": "app/amanda/[section]/page.tsx",
@@ -2209,7 +2217,9 @@
         "component": "app/amanda/[section]/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/amanda/[section]/page.tsx",
         "category": "Amanda dedicated",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "Amanda-specific route (custom component, not a separate certified brick)",
+        "componentSource": "app/amanda/[section]/page.tsx"
       },
       {
         "file": "app/amanda/page.tsx",
@@ -2217,7 +2227,9 @@
         "component": "app/amanda/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/amanda/page.tsx",
         "category": "Amanda dedicated",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "Amanda-specific route (custom component, not a separate certified brick)",
+        "componentSource": "app/amanda/page.tsx"
       },
       {
         "file": "app/courses/[courseSlug]/page.tsx",
@@ -2225,7 +2237,9 @@
         "component": "app/courses/[courseSlug]/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/courses/[courseSlug]/page.tsx",
         "category": "Amanda dedicated",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "Amanda-specific route (custom component, not a separate certified brick)",
+        "componentSource": "app/courses/[courseSlug]/page.tsx"
       },
       {
         "file": "app/portal/[slug]/amplifi/page.tsx",
@@ -2233,7 +2247,9 @@
         "component": "app/portal/[slug]/amplifi/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/amplifi/page.tsx",
         "category": "shared chassis, entitlement dependent",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "amplifi",
+        "componentSource": "app/portal/[slug]/amplifi/page.tsx"
       },
       {
         "file": "app/portal/[slug]/applications/page.tsx",
@@ -2241,7 +2257,9 @@
         "component": "app/portal/[slug]/applications/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/applications/page.tsx",
         "category": "shared chassis, entitlement dependent",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "applications",
+        "componentSource": "app/portal/[slug]/applications/page.tsx"
       },
       {
         "file": "app/portal/[slug]/apply/page.tsx",
@@ -2249,7 +2267,9 @@
         "component": "app/portal/[slug]/apply/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/apply/page.tsx",
         "category": "shared chassis, entitlement dependent",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "Amanda engagement / form component",
+        "componentSource": "app/portal/[slug]/apply/page.tsx"
       },
       {
         "file": "app/portal/[slug]/ask/page.tsx",
@@ -2257,7 +2277,9 @@
         "component": "app/portal/[slug]/ask/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/ask/page.tsx",
         "category": "shared chassis, entitlement dependent",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "ask",
+        "componentSource": "app/portal/[slug]/ask/page.tsx"
       },
       {
         "file": "app/portal/[slug]/billing/page.tsx",
@@ -2265,7 +2287,9 @@
         "component": "app/portal/[slug]/billing/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/billing/page.tsx",
         "category": "shared chassis, entitlement dependent",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "billing",
+        "componentSource": "app/portal/[slug]/billing/page.tsx"
       },
       {
         "file": "app/portal/[slug]/calendar/page.tsx",
@@ -2273,7 +2297,9 @@
         "component": "app/portal/[slug]/calendar/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/calendar/page.tsx",
         "category": "shared chassis, entitlement dependent",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "calendar",
+        "componentSource": "app/portal/[slug]/calendar/page.tsx"
       },
       {
         "file": "app/portal/[slug]/connect/page.tsx",
@@ -2281,7 +2307,9 @@
         "component": "app/portal/[slug]/connect/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/connect/page.tsx",
         "category": "shared chassis, entitlement dependent",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "connect",
+        "componentSource": "app/portal/[slug]/connect/page.tsx"
       },
       {
         "file": "app/portal/[slug]/crm/page.tsx",
@@ -2289,7 +2317,9 @@
         "component": "app/portal/[slug]/crm/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/crm/page.tsx",
         "category": "shared chassis, entitlement dependent",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "Amanda-specific route (custom component, not a separate certified brick)",
+        "componentSource": "app/portal/[slug]/crm/page.tsx"
       },
       {
         "file": "app/portal/[slug]/ctp/bi/page.tsx",
@@ -2297,7 +2327,9 @@
         "component": "app/portal/[slug]/ctp/bi/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/ctp/bi/page.tsx",
         "category": "shared chassis, entitlement dependent",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "ctp",
+        "componentSource": "app/portal/[slug]/ctp/bi/page.tsx"
       },
       {
         "file": "app/portal/[slug]/ctp/documents/page.tsx",
@@ -2305,7 +2337,9 @@
         "component": "app/portal/[slug]/ctp/documents/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/ctp/documents/page.tsx",
         "category": "shared chassis, entitlement dependent",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "ctp",
+        "componentSource": "app/portal/[slug]/ctp/documents/page.tsx"
       },
       {
         "file": "app/portal/[slug]/ctp/messages/page.tsx",
@@ -2313,7 +2347,9 @@
         "component": "app/portal/[slug]/ctp/messages/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/ctp/messages/page.tsx",
         "category": "shared chassis, entitlement dependent",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "ctp",
+        "componentSource": "app/portal/[slug]/ctp/messages/page.tsx"
       },
       {
         "file": "app/portal/[slug]/ctp/opportunities/[opportunityId]/page.tsx",
@@ -2321,7 +2357,9 @@
         "component": "app/portal/[slug]/ctp/opportunities/[opportunityId]/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/ctp/opportunities/[opportunityId]/page.tsx",
         "category": "shared chassis, entitlement dependent",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "ctp",
+        "componentSource": "app/portal/[slug]/ctp/opportunities/[opportunityId]/page.tsx"
       },
       {
         "file": "app/portal/[slug]/ctp/page.tsx",
@@ -2329,7 +2367,9 @@
         "component": "app/portal/[slug]/ctp/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/ctp/page.tsx",
         "category": "shared chassis, entitlement dependent",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "ctp",
+        "componentSource": "app/portal/[slug]/ctp/page.tsx"
       },
       {
         "file": "app/portal/[slug]/ctp/progress/page.tsx",
@@ -2337,7 +2377,9 @@
         "component": "app/portal/[slug]/ctp/progress/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/ctp/progress/page.tsx",
         "category": "shared chassis, entitlement dependent",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "ctp",
+        "componentSource": "app/portal/[slug]/ctp/progress/page.tsx"
       },
       {
         "file": "app/portal/[slug]/ctp/recommendations/page.tsx",
@@ -2345,7 +2387,9 @@
         "component": "app/portal/[slug]/ctp/recommendations/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/ctp/recommendations/page.tsx",
         "category": "shared chassis, entitlement dependent",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "ctp",
+        "componentSource": "app/portal/[slug]/ctp/recommendations/page.tsx"
       },
       {
         "file": "app/portal/[slug]/ctp/review/confirmed/page.tsx",
@@ -2353,7 +2397,9 @@
         "component": "app/portal/[slug]/ctp/review/confirmed/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/ctp/review/confirmed/page.tsx",
         "category": "shared chassis, entitlement dependent",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "ctp",
+        "componentSource": "app/portal/[slug]/ctp/review/confirmed/page.tsx"
       },
       {
         "file": "app/portal/[slug]/ctp/review/page.tsx",
@@ -2361,7 +2407,9 @@
         "component": "app/portal/[slug]/ctp/review/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/ctp/review/page.tsx",
         "category": "shared chassis, entitlement dependent",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "ctp",
+        "componentSource": "app/portal/[slug]/ctp/review/page.tsx"
       },
       {
         "file": "app/portal/[slug]/ctp/schedule/page.tsx",
@@ -2369,7 +2417,9 @@
         "component": "app/portal/[slug]/ctp/schedule/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/ctp/schedule/page.tsx",
         "category": "shared chassis, entitlement dependent",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "ctp",
+        "componentSource": "app/portal/[slug]/ctp/schedule/page.tsx"
       },
       {
         "file": "app/portal/[slug]/ctp/support/page.tsx",
@@ -2377,7 +2427,9 @@
         "component": "app/portal/[slug]/ctp/support/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/ctp/support/page.tsx",
         "category": "shared chassis, entitlement dependent",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "ctp",
+        "componentSource": "app/portal/[slug]/ctp/support/page.tsx"
       },
       {
         "file": "app/portal/[slug]/deliveries/page.tsx",
@@ -2385,7 +2437,9 @@
         "component": "app/portal/[slug]/deliveries/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/deliveries/page.tsx",
         "category": "shared chassis, entitlement dependent",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "Amanda-specific route (custom component, not a separate certified brick)",
+        "componentSource": "app/portal/[slug]/deliveries/page.tsx"
       },
       {
         "file": "app/portal/[slug]/discovery/page.tsx",
@@ -2393,7 +2447,9 @@
         "component": "app/portal/[slug]/discovery/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/discovery/page.tsx",
         "category": "shared chassis, entitlement dependent",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "discovery",
+        "componentSource": "app/portal/[slug]/discovery/page.tsx"
       },
       {
         "file": "app/portal/[slug]/documents/page.tsx",
@@ -2401,7 +2457,9 @@
         "component": "app/portal/[slug]/documents/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/documents/page.tsx",
         "category": "shared chassis, entitlement dependent",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "documents",
+        "componentSource": "app/portal/[slug]/documents/page.tsx"
       },
       {
         "file": "app/portal/[slug]/events/page.tsx",
@@ -2409,7 +2467,9 @@
         "component": "app/portal/[slug]/events/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/events/page.tsx",
         "category": "shared chassis, entitlement dependent",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "events",
+        "componentSource": "app/portal/[slug]/events/page.tsx"
       },
       {
         "file": "app/portal/[slug]/experience-builder/[pageId]/page.tsx",
@@ -2417,7 +2477,9 @@
         "component": "app/portal/[slug]/experience-builder/[pageId]/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/experience-builder/[pageId]/page.tsx",
         "category": "shared chassis, entitlement dependent",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "Amanda-specific route (custom component, not a separate certified brick)",
+        "componentSource": "app/portal/[slug]/experience-builder/[pageId]/page.tsx"
       },
       {
         "file": "app/portal/[slug]/experience-builder/page.tsx",
@@ -2425,7 +2487,9 @@
         "component": "app/portal/[slug]/experience-builder/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/experience-builder/page.tsx",
         "category": "shared chassis, entitlement dependent",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "Amanda-specific route (custom component, not a separate certified brick)",
+        "componentSource": "app/portal/[slug]/experience-builder/page.tsx"
       },
       {
         "file": "app/portal/[slug]/intake/page.tsx",
@@ -2433,7 +2497,9 @@
         "component": "app/portal/[slug]/intake/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/intake/page.tsx",
         "category": "shared chassis, entitlement dependent",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "intake",
+        "componentSource": "app/portal/[slug]/intake/page.tsx"
       },
       {
         "file": "app/portal/[slug]/landing/page.tsx",
@@ -2441,7 +2507,9 @@
         "component": "app/portal/[slug]/landing/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/landing/page.tsx",
         "category": "shared chassis, entitlement dependent",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "landing",
+        "componentSource": "app/portal/[slug]/landing/page.tsx"
       },
       {
         "file": "app/portal/[slug]/learning/page.tsx",
@@ -2449,7 +2517,9 @@
         "component": "app/portal/[slug]/learning/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/learning/page.tsx",
         "category": "shared chassis, entitlement dependent",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "training",
+        "componentSource": "app/portal/[slug]/learning/page.tsx"
       },
       {
         "file": "app/portal/[slug]/member/page.tsx",
@@ -2457,7 +2527,9 @@
         "component": "app/portal/[slug]/member/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/member/page.tsx",
         "category": "shared chassis, entitlement dependent",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "member",
+        "componentSource": "app/portal/[slug]/member/page.tsx"
       },
       {
         "file": "app/portal/[slug]/messaging/page.tsx",
@@ -2465,7 +2537,9 @@
         "component": "app/portal/[slug]/messaging/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/messaging/page.tsx",
         "category": "shared chassis, entitlement dependent",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "messaging",
+        "componentSource": "app/portal/[slug]/messaging/page.tsx"
       },
       {
         "file": "app/portal/[slug]/notifications/page.tsx",
@@ -2473,7 +2547,9 @@
         "component": "app/portal/[slug]/notifications/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/notifications/page.tsx",
         "category": "shared chassis, entitlement dependent",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "Amanda-specific route (custom component, not a separate certified brick)",
+        "componentSource": "app/portal/[slug]/notifications/page.tsx"
       },
       {
         "file": "app/portal/[slug]/page.tsx",
@@ -2481,7 +2557,9 @@
         "component": "app/portal/[slug]/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/page.tsx",
         "category": "shared chassis, entitlement dependent",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "dashboard",
+        "componentSource": "app/portal/[slug]/page.tsx"
       },
       {
         "file": "app/portal/[slug]/people/page.tsx",
@@ -2489,7 +2567,9 @@
         "component": "app/portal/[slug]/people/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/people/page.tsx",
         "category": "shared chassis, entitlement dependent",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "people",
+        "componentSource": "app/portal/[slug]/people/page.tsx"
       },
       {
         "file": "app/portal/[slug]/pulse/page.tsx",
@@ -2497,7 +2577,9 @@
         "component": "app/portal/[slug]/pulse/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/pulse/page.tsx",
         "category": "shared chassis, entitlement dependent",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "pulse",
+        "componentSource": "app/portal/[slug]/pulse/page.tsx"
       },
       {
         "file": "app/portal/[slug]/reports/page.tsx",
@@ -2505,7 +2587,9 @@
         "component": "app/portal/[slug]/reports/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/reports/page.tsx",
         "category": "shared chassis, entitlement dependent",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "reports",
+        "componentSource": "app/portal/[slug]/reports/page.tsx"
       },
       {
         "file": "app/portal/[slug]/resources/page.tsx",
@@ -2513,7 +2597,9 @@
         "component": "app/portal/[slug]/resources/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/resources/page.tsx",
         "category": "shared chassis, entitlement dependent",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "resources",
+        "componentSource": "app/portal/[slug]/resources/page.tsx"
       },
       {
         "file": "app/portal/[slug]/settings/page.tsx",
@@ -2521,7 +2607,9 @@
         "component": "app/portal/[slug]/settings/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/settings/page.tsx",
         "category": "shared chassis, entitlement dependent",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "settings",
+        "componentSource": "app/portal/[slug]/settings/page.tsx"
       },
       {
         "file": "app/portal/[slug]/simplifi/page.tsx",
@@ -2529,7 +2617,9 @@
         "component": "app/portal/[slug]/simplifi/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/simplifi/page.tsx",
         "category": "shared chassis, entitlement dependent",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "simplifi",
+        "componentSource": "app/portal/[slug]/simplifi/page.tsx"
       },
       {
         "file": "app/portal/[slug]/updates/enhancement/page.tsx",
@@ -2537,7 +2627,9 @@
         "component": "app/portal/[slug]/updates/enhancement/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/updates/enhancement/page.tsx",
         "category": "shared chassis, entitlement dependent",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "update-hub",
+        "componentSource": "app/portal/[slug]/updates/enhancement/page.tsx"
       },
       {
         "file": "app/portal/[slug]/updates/new/page.tsx",
@@ -2545,7 +2637,9 @@
         "component": "app/portal/[slug]/updates/new/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/updates/new/page.tsx",
         "category": "shared chassis, entitlement dependent",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "update-hub",
+        "componentSource": "app/portal/[slug]/updates/new/page.tsx"
       },
       {
         "file": "app/portal/[slug]/updates/page.tsx",
@@ -2553,7 +2647,9 @@
         "component": "app/portal/[slug]/updates/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/[slug]/updates/page.tsx",
         "category": "shared chassis, entitlement dependent",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "update-hub",
+        "componentSource": "app/portal/[slug]/updates/page.tsx"
       },
       {
         "file": "app/portal/amanda-catherine/(engagement)/apply/page.tsx",
@@ -2561,7 +2657,9 @@
         "component": "app/portal/amanda-catherine/(engagement)/apply/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/amanda-catherine/(engagement)/apply/page.tsx",
         "category": "Amanda engagement",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "Amanda engagement / form component",
+        "componentSource": "app/portal/amanda-catherine/(engagement)/apply/page.tsx"
       },
       {
         "file": "app/portal/amanda-catherine/(engagement)/book/page.tsx",
@@ -2569,7 +2667,9 @@
         "component": "app/portal/amanda-catherine/(engagement)/book/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/amanda-catherine/(engagement)/book/page.tsx",
         "category": "Amanda engagement",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "Amanda engagement / form component",
+        "componentSource": "app/portal/amanda-catherine/(engagement)/book/page.tsx"
       },
       {
         "file": "app/portal/amanda-catherine/(engagement)/calendar/page.tsx",
@@ -2577,7 +2677,9 @@
         "component": "app/portal/amanda-catherine/(engagement)/calendar/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/amanda-catherine/(engagement)/calendar/page.tsx",
         "category": "Amanda engagement",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "calendar",
+        "componentSource": "app/portal/amanda-catherine/(engagement)/calendar/page.tsx"
       },
       {
         "file": "app/portal/amanda-catherine/(engagement)/eva/page.tsx",
@@ -2585,7 +2687,9 @@
         "component": "app/portal/amanda-catherine/(engagement)/eva/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/amanda-catherine/(engagement)/eva/page.tsx",
         "category": "Amanda engagement",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "Amanda engagement / form component",
+        "componentSource": "app/portal/amanda-catherine/(engagement)/eva/page.tsx"
       },
       {
         "file": "app/portal/amanda-catherine/(engagement)/foundry/page.tsx",
@@ -2593,7 +2697,9 @@
         "component": "app/portal/amanda-catherine/(engagement)/foundry/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/amanda-catherine/(engagement)/foundry/page.tsx",
         "category": "Amanda engagement",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "Amanda engagement / form component",
+        "componentSource": "app/portal/amanda-catherine/(engagement)/foundry/page.tsx"
       },
       {
         "file": "app/portal/amanda-catherine/(engagement)/hub/page.tsx",
@@ -2601,7 +2707,9 @@
         "component": "app/portal/amanda-catherine/(engagement)/hub/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/amanda-catherine/(engagement)/hub/page.tsx",
         "category": "Amanda engagement",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "Amanda engagement / form component",
+        "componentSource": "app/portal/amanda-catherine/(engagement)/hub/page.tsx"
       },
       {
         "file": "app/portal/amanda-catherine/(engagement)/thank-you/page.tsx",
@@ -2609,7 +2717,9 @@
         "component": "app/portal/amanda-catherine/(engagement)/thank-you/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/amanda-catherine/(engagement)/thank-you/page.tsx",
         "category": "Amanda engagement",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "Amanda engagement / form component",
+        "componentSource": "app/portal/amanda-catherine/(engagement)/thank-you/page.tsx"
       },
       {
         "file": "app/portal/amanda-catherine/billing/setup/page.tsx",
@@ -2617,7 +2727,9 @@
         "component": "app/portal/amanda-catherine/billing/setup/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/amanda-catherine/billing/setup/page.tsx",
         "category": "Amanda dedicated",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "billing",
+        "componentSource": "app/portal/amanda-catherine/billing/setup/page.tsx"
       },
       {
         "file": "app/portal/amanda-catherine/classroom-test/page.tsx",
@@ -2625,7 +2737,9 @@
         "component": "app/portal/amanda-catherine/classroom-test/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/amanda-catherine/classroom-test/page.tsx",
         "category": "Amanda dedicated",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "Amanda-specific route (custom component, not a separate certified brick)",
+        "componentSource": "app/portal/amanda-catherine/classroom-test/page.tsx"
       },
       {
         "file": "app/portal/amanda-catherine/enroll/page.tsx",
@@ -2633,7 +2747,9 @@
         "component": "app/portal/amanda-catherine/enroll/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/amanda-catherine/enroll/page.tsx",
         "category": "Amanda dedicated",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "Amanda engagement / form component",
+        "componentSource": "app/portal/amanda-catherine/enroll/page.tsx"
       },
       {
         "file": "app/portal/amanda-catherine/enroll/success/page.tsx",
@@ -2641,7 +2757,9 @@
         "component": "app/portal/amanda-catherine/enroll/success/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/amanda-catherine/enroll/success/page.tsx",
         "category": "Amanda dedicated",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "Amanda engagement / form component",
+        "componentSource": "app/portal/amanda-catherine/enroll/success/page.tsx"
       },
       {
         "file": "app/portal/amanda-catherine/enrollment-success/page.tsx",
@@ -2649,7 +2767,9 @@
         "component": "app/portal/amanda-catherine/enrollment-success/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/amanda-catherine/enrollment-success/page.tsx",
         "category": "Amanda dedicated",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "Amanda-specific route (custom component, not a separate certified brick)",
+        "componentSource": "app/portal/amanda-catherine/enrollment-success/page.tsx"
       },
       {
         "file": "app/portal/amanda-catherine/expired/page.tsx",
@@ -2657,7 +2777,9 @@
         "component": "app/portal/amanda-catherine/expired/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/amanda-catherine/expired/page.tsx",
         "category": "Amanda dedicated",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "Amanda-specific route (custom component, not a separate certified brick)",
+        "componentSource": "app/portal/amanda-catherine/expired/page.tsx"
       },
       {
         "file": "app/portal/amanda-catherine/learning/[courseId]/page.tsx",
@@ -2665,7 +2787,9 @@
         "component": "app/portal/amanda-catherine/learning/[courseId]/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/amanda-catherine/learning/[courseId]/page.tsx",
         "category": "Amanda dedicated",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "training",
+        "componentSource": "app/portal/amanda-catherine/learning/[courseId]/page.tsx"
       },
       {
         "file": "app/portal/amanda-catherine/learning/page.tsx",
@@ -2673,7 +2797,9 @@
         "component": "app/portal/amanda-catherine/learning/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/amanda-catherine/learning/page.tsx",
         "category": "Amanda dedicated",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "training",
+        "componentSource": "app/portal/amanda-catherine/learning/page.tsx"
       },
       {
         "file": "app/portal/amanda-catherine/owner/[section]/page.tsx",
@@ -2681,7 +2807,9 @@
         "component": "app/portal/amanda-catherine/owner/[section]/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/amanda-catherine/owner/[section]/page.tsx",
         "category": "Amanda dedicated",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "Amanda custom owner shell",
+        "componentSource": "app/portal/amanda-catherine/owner/[section]/page.tsx"
       },
       {
         "file": "app/portal/amanda-catherine/owner/clients/page.tsx",
@@ -2689,7 +2817,9 @@
         "component": "app/portal/amanda-catherine/owner/clients/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/amanda-catherine/owner/clients/page.tsx",
         "category": "Amanda dedicated",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "Amanda custom owner shell",
+        "componentSource": "app/portal/amanda-catherine/owner/clients/page.tsx"
       },
       {
         "file": "app/portal/amanda-catherine/owner/learner-preview/page.tsx",
@@ -2697,7 +2827,9 @@
         "component": "app/portal/amanda-catherine/owner/learner-preview/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/amanda-catherine/owner/learner-preview/page.tsx",
         "category": "Amanda dedicated",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "Amanda custom owner shell",
+        "componentSource": "app/portal/amanda-catherine/owner/learner-preview/page.tsx"
       },
       {
         "file": "app/portal/amanda-catherine/owner/page.tsx",
@@ -2705,7 +2837,9 @@
         "component": "app/portal/amanda-catherine/owner/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/amanda-catherine/owner/page.tsx",
         "category": "Amanda dedicated",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "Amanda custom owner shell",
+        "componentSource": "app/portal/amanda-catherine/owner/page.tsx"
       },
       {
         "file": "app/portal/amanda-catherine/owner/sales/page.tsx",
@@ -2713,7 +2847,9 @@
         "component": "app/portal/amanda-catherine/owner/sales/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/amanda-catherine/owner/sales/page.tsx",
         "category": "Amanda dedicated",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "Amanda custom owner shell",
+        "componentSource": "app/portal/amanda-catherine/owner/sales/page.tsx"
       },
       {
         "file": "app/portal/amanda-catherine/page.tsx",
@@ -2721,7 +2857,9 @@
         "component": "app/portal/amanda-catherine/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/amanda-catherine/page.tsx",
         "category": "Amanda dedicated",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "dashboard",
+        "componentSource": "app/portal/amanda-catherine/page.tsx"
       },
       {
         "file": "app/portal/amanda-catherine/profile/page.tsx",
@@ -2729,7 +2867,9 @@
         "component": "app/portal/amanda-catherine/profile/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/amanda-catherine/profile/page.tsx",
         "category": "Amanda dedicated",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "Amanda-specific route (custom component, not a separate certified brick)",
+        "componentSource": "app/portal/amanda-catherine/profile/page.tsx"
       },
       {
         "file": "app/portal/amanda-catherine/resources/page.tsx",
@@ -2737,7 +2877,9 @@
         "component": "app/portal/amanda-catherine/resources/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/amanda-catherine/resources/page.tsx",
         "category": "Amanda dedicated",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "resources",
+        "componentSource": "app/portal/amanda-catherine/resources/page.tsx"
       },
       {
         "file": "app/portal/amanda-catherine/support/page.tsx",
@@ -2745,7 +2887,9 @@
         "component": "app/portal/amanda-catherine/support/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/amanda-catherine/support/page.tsx",
         "category": "Amanda dedicated",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "Amanda-specific route (custom component, not a separate certified brick)",
+        "componentSource": "app/portal/amanda-catherine/support/page.tsx"
       },
       {
         "file": "app/portal/amanda-catherine/test-enrollments/page.tsx",
@@ -2753,7 +2897,9 @@
         "component": "app/portal/amanda-catherine/test-enrollments/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/amanda-catherine/test-enrollments/page.tsx",
         "category": "Amanda dedicated",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "Amanda gated test enrollment (not a production brick)",
+        "componentSource": "app/portal/amanda-catherine/test-enrollments/page.tsx"
       },
       {
         "file": "app/portal/amanda-catherine/waitlist/page.tsx",
@@ -2761,7 +2907,9 @@
         "component": "app/portal/amanda-catherine/waitlist/page.tsx",
         "repoUrl": "https://github.com/TheArchitect1111/ea-payments/blob/7682df45bcd5785388b47e0810656407805042b7/app/portal/amanda-catherine/waitlist/page.tsx",
         "category": "Amanda dedicated",
-        "liveVerified": false
+        "liveVerified": false,
+        "attachedBrickOrModule": "Amanda engagement / form component",
+        "componentSource": "app/portal/amanda-catherine/waitlist/page.tsx"
       }
     ],
     "amandaRelatedApi": [
@@ -3238,6 +3386,25 @@
       "questions": [
         "Should anonymous visitors see click interest?"
       ]
+    },
+    {
+      "id": "G14",
+      "severity": "medium",
+      "topic": "Classes anchor on engagement pages",
+      "details": "ClassesAnchor prevents default navigation, scrolls only to a classes grid on current page. On subpages that lack the grid, Classes can be a dead click.",
+      "questions": [
+        "Why doesn't Classes scroll anywhere from Apply or Calendar?"
+      ]
+    },
+    {
+      "id": "G15",
+      "severity": "medium",
+      "topic": "Settings and Messaging instructions",
+      "details": "Settings Branding/Notifications are explanatory, not self-service editor. Messaging routes Amanda contact via email and EA support through Update Hub; owner may not have an in-app Amanda message composer.",
+      "questions": [
+        "Where is the toggle for email reminders?",
+        "How do I send a direct in-app message to a student?"
+      ]
     }
   ],
   "unansweredAreas": [
@@ -3325,6 +3492,16 @@
       "id": "Q17",
       "question": "Does Square payment provision the same learner as Stripe payment?",
       "status": "not reliably answerable today from dedicated Eva"
+    },
+    {
+      "id": "Q18",
+      "question": "How do I edit notification preferences if self-service switches are not implemented?",
+      "status": "Not possible using current settings controls; must contact EA."
+    },
+    {
+      "id": "Q19",
+      "question": "Why does Classes not work on an engagement subpage without classes grid?",
+      "status": "Source shows scroll-only anchor with no cross-page fallback."
     }
   ],
   "counts": {
@@ -3347,5 +3524,205 @@
     "noPayment": true,
     "noAuthCredentialUsed": true,
     "notCertified100PercentLive": true
+  },
+  "auditAddendum": {
+    "verifiedFromRepository": [
+      "app/portal/[slug]/settings/page.tsx",
+      "app/portal/[slug]/settings/BusinessPresencePanel.tsx",
+      "app/portal/[slug]/messaging/page.tsx",
+      "app/portal/[slug]/billing/AmandaPayments.tsx",
+      "app/portal/[slug]/learning/AmandaLearningCenter.tsx",
+      "app/portal/amanda-catherine/test-enrollments/page.tsx",
+      "app/portal/amanda-catherine/test-enrollments/AmandaTestEnrollmentCards.tsx",
+      "app/portal/amanda-catherine/owner/KitOrderActions.tsx",
+      "app/components/amanda/AmandaSupport.tsx",
+      "components/amanda/ClassesAnchor.tsx"
+    ],
+    "controls": [
+      {
+        "surface": "owner Settings",
+        "role": "owner/admin or entitled",
+        "path": "/portal/amanda-catherine/settings",
+        "controls": [
+          "Branding: informational; EA team manages logo/colors/name",
+          "Notifications: informational; self-service toggles explicitly not yet available",
+          "Business Presence: View the guided setup checklist, Set up Apple Business outbound CTA"
+        ],
+        "steps": [
+          "Sign in and in owner sidebar select Settings.",
+          "Review Branding and Notifications information; to change these, contact Efficiency Architects.",
+          "Scroll to Business Presence; expand View the guided setup checklist to read available setup steps.",
+          "Select the outbound setup link only after independently verifying its destination."
+        ],
+        "limitation": "No editable notification switches in code; do not instruct Eva to click nonexistent toggles.",
+        "source": "app/portal/[slug]/settings/page.tsx"
+      },
+      {
+        "surface": "owner / student messaging",
+        "role": "portal users",
+        "path": "/portal/amanda-catherine/messaging",
+        "controls": [
+          "Email Amanda’s team",
+          "Contact Efficiency Architects support",
+          "View support activity & replies",
+          "Ask Efficiency Architects a quick question"
+        ],
+        "steps": [
+          "Open Messaging from the workspace.",
+          "For course, appointment, or certification questions select Email Amanda’s team, which opens a mailto email.",
+          "For portal and technical support select Contact Efficiency Architects support, which leads to an Update Hub content request.",
+          "To review previous support activity click View support activity & replies.",
+          "For brief general EA questions click Ask Efficiency Architects a quick question."
+        ],
+        "limitation": "Amanda's messaging page is link-based, not a verified full internal direct-message composer.",
+        "source": "app/portal/[slug]/messaging/page.tsx"
+      },
+      {
+        "surface": "student Learning",
+        "role": "student",
+        "path": "/portal/amanda-catherine/learning",
+        "controls": [
+          "Program dropdown",
+          "Course lesson / Week buttons",
+          "Open lesson resource",
+          "Mark lesson complete",
+          "Mark as incomplete",
+          "Open resource",
+          "Download resource",
+          "Case study / quiz / practical evidence submission",
+          "Download certificate",
+          "Support & mentorship"
+        ],
+        "steps": [
+          "Sign in using the enrollment email and open Learning.",
+          "Choose your assigned course with the Program dropdown.",
+          "Select a released Week lesson button. Locked lessons cannot be opened before release.",
+          "Open the video or Open lesson resource if provided.",
+          "After completing a released lesson, click Mark lesson complete; use Mark as incomplete to correct progress.",
+          "Use provided certification evidence controls to submit case study, quiz and practical work; obtain client consent for photos/video.",
+          "After Amanda approves certification, click Download certificate."
+        ],
+        "limitation": "Actual course assignment, content publication and authorized data were not tested live.",
+        "source": "app/portal/[slug]/learning/AmandaLearningCenter.tsx"
+      },
+      {
+        "surface": "owner Learning editor",
+        "role": "admin/owner",
+        "path": "/portal/amanda-catherine/learning",
+        "controls": [
+          "Program dropdown",
+          "Video link input",
+          "Lesson notes textarea",
+          "Resource link input",
+          "Save course",
+          "Preview learner dashboard"
+        ],
+        "steps": [
+          "In the owner sidebar click AesthetiKine Academy.",
+          "Click Manage course content.",
+          "Select a course from Program and select the lesson/week.",
+          "Enter the verified video URL under Video link, notes under Lesson notes, and a URL under Resource link.",
+          "Click Save course. Do not claim saved until the interface returns Course saved.",
+          "Use Preview learner dashboard to inspect a read-only learner experience."
+        ],
+        "limitation": "Do not assert actual upload or publishing without verified saved response; course editor supports links.",
+        "source": "app/portal/[slug]/learning/AmandaLearningCenter.tsx"
+      },
+      {
+        "surface": "owner Billing",
+        "role": "owner (module permission)",
+        "path": "/portal/amanda-catherine/billing",
+        "controls": [
+          "Pay in full",
+          "Pay deposit",
+          "Private test",
+          "Join membership",
+          "Set up membership",
+          "View payment-plan options",
+          "Open billing setup",
+          "Access My Class Now",
+          "View Materials",
+          "Download Receipt PDF",
+          "Support & Help"
+        ],
+        "steps": [
+          "Open Payments in the owner sidebar.",
+          "Select the appropriate offer, then choose Pay in full or Pay deposit if available; browser transfers to secure Stripe checkout.",
+          "If a payment is verified, choose Download Receipt PDF or Access My Class Now.",
+          "For $1 tests only, use the guarded private test control with a test name; these are real Stripe charges.",
+          "To inspect memberships use Join or Set up membership, depending on available offer."
+        ],
+        "limitation": "Stripe paid checkouts were not executed. Public AVAILABLE class cards use Square, a separate flow.",
+        "source": "app/portal/[slug]/billing/AmandaPayments.tsx"
+      },
+      {
+        "surface": "private $1 Test Enrollments",
+        "role": "admin with testPayment flag",
+        "path": "/portal/amanda-catherine/test-enrollments",
+        "controls": [
+          "Test name input",
+          "Private test [course] buttons"
+        ],
+        "steps": [
+          "Sign in as authorized admin.",
+          "In the owner sidebar select $1 Test Enrollments if visible.",
+          "Enter a synthetic test name of at least two characters.",
+          "Selecting a Private test course starts a real CAD $1 Stripe test enrollment, so this was not clicked during audit."
+        ],
+        "limitation": "Three-day trial is code stated; no real payment or account was created in this audit.",
+        "source": "app/portal/amanda-catherine/test-enrollments/page.tsx"
+      },
+      {
+        "surface": "owner Practitioner Kit shipping",
+        "role": "owner/admin/staff",
+        "path": "/portal/amanda-catherine/owner/practitioner-kit",
+        "controls": [
+          "Print packing sheet",
+          "Carrier input",
+          "Tracking number input",
+          "Tracking link input",
+          "Save tracking",
+          "Saved tracking external link"
+        ],
+        "steps": [
+          "Open Practitioner Starter Kit in the owner sidebar.",
+          "Find the ship-to-me order in the paid order queue.",
+          "Click Print packing sheet to print. Purchase carrier postage separately: the sheet is not a prepaid label.",
+          "Enter the actual Carrier, Tracking number, and HTTPS Tracking link.",
+          "Click Save tracking and confirm the saved status."
+        ],
+        "limitation": "Read-only inspection. No shipment was created or tracking record updated.",
+        "source": "app/portal/amanda-catherine/owner/KitOrderActions.tsx"
+      },
+      {
+        "surface": "Support & mentorship",
+        "role": "student",
+        "path": "/portal/amanda-catherine/support",
+        "controls": [
+          "Portal communication",
+          "Email Amanda via Gmail",
+          "Schedule Mentorship Call (when approved Jane URL exists)"
+        ],
+        "steps": [
+          "Open Support & mentorship from the member dashboard.",
+          "Select Portal communication for messaging links, Email Amanda via Gmail for email, or Schedule Mentorship Call when shown."
+        ],
+        "limitation": "The precise Jane scheduling steps depend on the external system.",
+        "source": "app/components/amanda/AmandaSupport.tsx"
+      },
+      {
+        "surface": "ClassesAnchor",
+        "role": "public and engagement users",
+        "path": "/portal/amanda-catherine#classes-grid",
+        "controls": [
+          "Classes"
+        ],
+        "steps": [
+          "On the Amanda public page or portal home containing a classes grid, click Classes to scroll to the grid."
+        ],
+        "limitation": "ClassesAnchor calls document.getElementById(target) on the CURRENT page and prevents default. When used on engagement pages without the classes-grid element, clicking Classes may do nothing.",
+        "source": "components/amanda/ClassesAnchor.tsx"
+      }
+    ]
   }
 }
