@@ -65,6 +65,7 @@ function validateEvaScopedRelease(manifest) {
     file.startsWith('src/bricks/eva-portal-help/') ||
     file === 'scripts/verify-production-gate.mjs' ||
     file === '.ea/gates/eva-scoped-release.md' ||
+    file === 'vercel.json' ||
     /^knowledge\/eva-[a-z0-9-]+-manifest\.json$/.test(file) ||
     file === 'knowledge/eva-portal-help-registry.json' ||
     file.startsWith('knowledge/eva-menu-sources/') ||
@@ -74,6 +75,24 @@ function validateEvaScopedRelease(manifest) {
     console.error('[EA Production Gate] MODE=EVA-SCOPED REJECT: ' +
       outside.length + ' non-Eva source files:\n' + outside.join('\n'));
     fail('eva-scoped source range contains excluded paths; full 14-brick certification required');
+  }
+  if (sourceChanged.includes('vercel.json')) {
+    // The sole authorized config delta is adding the two 02:00 UTC Eva
+    // entries. Reject edits to rewrites, other crons, env, build settings, etc.
+    const baselineConfig=JSON.parse(execGit(['show',approvedSource+':vercel.json']));
+    const releaseConfig=JSON.parse(readFileSync(path.join(ROOT,'vercel.json'),'utf8'));
+    const originalCrons=baselineConfig.crons || [];
+    const expected=[
+      {path:'/api/portal/amanda-catherine/eva-help/refresh',schedule:'0 2 * * *'},
+      {path:'/api/portal/tb3/eva-help/refresh',schedule:'0 2 * * *'}
+    ];
+    const actualCrons=releaseConfig.crons || [];
+    if(JSON.stringify(actualCrons)!==JSON.stringify([...originalCrons,...expected]))
+      fail('eva-scoped cron config changed beyond the two approved daily refresh jobs');
+    const before={...baselineConfig}; const after={...releaseConfig};
+    delete before.crons;delete after.crons;
+    if(JSON.stringify(before)!==JSON.stringify(after))
+      fail('eva-scoped Vercel configuration changed unrelated properties');
   }
   if (!sourceChanged.length) fail('eva-scoped source range is empty; no scoped release demonstrated');
   const checks = ['sourceIdentity','build','functional','previewHealth'];
