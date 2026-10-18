@@ -53,21 +53,66 @@
     "liveWrapperConfig": "https://github.com/TheArchitect1111/amanda-catherine/blob/e20a003e1117256562af6d26bcb78c3ee2692e92/vercel.json",
     "liveOriginDeployment": "https://vercel.com/the-architects-projects-cc813778/ea-payments/Bwz6wDjgFVzr5YVsxrYgvxhK5mK6"
   },
-  "roles": {
-    "anonymous": "Public page, application and class waitlist / checkout links",
-    "student": "Enrolled student with entitlement-scoped courses, resources, progress, documents, messages and support",
-    "admin": "Access to admin role menu and certification/learning management subject to module entitlements",
-    "owner": "Amanda owner / staff-gated shell with 23 defined navigation links and Quick Actions; conditional admin-only $1 controls",
-    "additionalAudiences": [
-      "client",
-      "certified-practitioner",
-      "member-community-participant",
-      "media-guest",
-      "volunteer",
-      "vendor-partner",
-      "staff"
-    ]
-  },
+  "roles": [
+    {
+      "id": "student",
+      "leastPrivileged": true,
+      "allowedMenuPrefixes": [
+        "publicCourseCatalog",
+        "studentLearningControls",
+        "roleDashboardNavigation",
+        "publicPrimary",
+        "publicCallToActions"
+      ],
+      "allowedIdsByGroup": {
+        "roleDashboardNavigation": [
+          "courses",
+          "advanced-training",
+          "assignments-and-assessments",
+          "progress",
+          "certification",
+          "certificates"
+        ]
+      },
+      "requiredAudienceByGroup": {
+        "roleDashboardNavigation": "student-trainee"
+      },
+      "allowedHrefsByGroup": {
+        "publicPrimary": [
+          "#learn",
+          "#classes-grid"
+        ],
+        "publicCallToActions": [
+          "#learn",
+          "#classes-grid"
+        ]
+      },
+      "description": "Enrolled student with entitlement-scoped courses, resources, progress, documents, messages and support"
+    },
+    {
+      "id": "admin",
+      "aliases": [
+        "staff"
+      ],
+      "allowedMenuPrefixes": [
+        "*"
+      ],
+      "requiredAnyFieldsByGroup": {
+        "ownerOperationalControls": [
+          "section",
+          "control"
+        ]
+      },
+      "description": "Access to admin role menu and certification/learning management subject to module entitlements"
+    },
+    {
+      "id": "owner",
+      "allowedMenuPrefixes": [
+        "*"
+      ],
+      "description": "Amanda owner / staff-gated shell with 23 defined navigation links and Quick Actions; conditional admin-only $1 controls"
+    }
+  ],
   "menus": {
     "publicPrimary": [
       {
@@ -5196,5 +5241,20 @@
     "Where do I review Founder Advisory or LIFELINE applications?": "ownerOperationalControls:2",
     "How do I mark a certificate approved?": "ownerOperationalControls:1",
     "How do I fulfill Practitioner Starter Kit orders?": "ownerOperationalControls:3"
+  },
+  "roleDescriptions": {
+    "anonymous": "Public page, application and class waitlist / checkout links",
+    "student": "Enrolled student with entitlement-scoped courses, resources, progress, documents, messages and support",
+    "admin": "Access to admin role menu and certification/learning management subject to module entitlements",
+    "owner": "Amanda owner / staff-gated shell with 23 defined navigation links and Quick Actions; conditional admin-only $1 controls",
+    "additionalAudiences": [
+      "client",
+      "certified-practitioner",
+      "member-community-participant",
+      "media-guest",
+      "volunteer",
+      "vendor-partner",
+      "staff"
+    ]
   }
 }
