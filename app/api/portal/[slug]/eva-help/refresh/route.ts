@@ -6,11 +6,11 @@ import { refreshPortalKnowledge } from '@/src/bricks/eva-portal-help/watcher';
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-/** Explicit owner/admin only, same portal session, and preview only. */
+/** Explicit owner/admin only, same tenant session, in supported deployment environments. */
 export async function POST(request: NextRequest, {params}:{params:Promise<{slug:string}>}) {
   const {slug} = await params;
-  if (process.env.VERCEL_ENV !== 'preview') {
-    return NextResponse.json({ok:false,error:'Knowledge refresh is preview-only'}, {status:403});
+  if (!['production','preview'].includes(process.env.VERCEL_ENV||'')) {
+    return NextResponse.json({ok:false,error:'Knowledge refresh unavailable in this environment'}, {status:403});
   }
   const origin = request.headers.get('origin');
   if (origin && origin !== request.nextUrl.origin) {
