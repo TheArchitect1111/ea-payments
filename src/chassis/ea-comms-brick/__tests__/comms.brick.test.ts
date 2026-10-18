@@ -3,7 +3,9 @@ import assert from 'node:assert/strict';
 import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
-import { createEACommsBrick } from '../index';
+import { createEACommsBrick, type EACommsBrick } from '../index';
+import { createCheckoutAdapter } from '../../adapters/checkout.adapter';
+import type { Brick, CheckoutResult } from '../../BrickInterface';
 import { TEMPLATE_REQUIREMENTS } from '../templates';
 import type { CommsAuditRow, CommsAuditTable } from '../sendTemplate';
 
@@ -54,6 +56,17 @@ const mockFetch: typeof fetch = async (request, init) => {
 };
 const brick = createEACommsBrick({ portalRoot, portalId: 'example-portal', auditTable: audit, fetchImpl: mockFetch });
 const contact = { email: 'RECIPIENT@example.com', verified: true as const };
+
+// Both variants must satisfy the chassis contract without ts-ignore or changed payment logic.
+const typedComms: EACommsBrick = brick;
+const typedPayment: Brick = createCheckoutAdapter();
+test('generic chassis socket typing preserves legacy payment adapter', async () => {
+  assert.equal(typedComms.price().currency, 'CAD');
+  assert.equal((await typedComms.checkout({ type: 'stripe-test', courseId: 'example' })).notApplicable, true);
+  const paid: CheckoutResult = await typedPayment.checkout({ type: 'stripe-test', courseId: 'example' });
+  assert.match(paid.sessionId, /^cs_test_/);
+  assert.ok(paid.entitlement.length > 0);
+});
 
 test('health: key and six complete templates return 200; missing key or config returns 503', async () => {
   delete process.env.RESEND_API_KEY;
