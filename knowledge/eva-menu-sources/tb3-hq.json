@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "group": "hqNavigation",
+  "roles": [
+    "athlete",
+    "admin"
+  ],
+  "items": [
+    {
+      "label": "Home",
+      "href": "/tarris/future#hq-home"
+    },
+    {
+      "label": "My Journey",
+      "href": "/tarris/future#my-journey-module"
+    },
+    {
+      "label": "Academics",
+      "href": "/tarris/future#academics-module"
+    },
+    {
+      "label": "Training",
+      "href": "/tarris/future#training-module"
+    },
+    {
+      "label": "NIL & Brand",
+      "href": "/tarris/future#nil-brand-module"
+    },
+    {
+      "label": "Opportunities",
+      "href": "/tarris/future#opportunities-module"
+    },
+    {
+      "label": "Community",
+      "href": "/tarris/future#community-module"
+    },
+    {
+      "label": "Calendar",
+      "href": "/tarris/future#calendar-module"
+    },
+    {
+      "label": "Media Library",
+      "href": "/tarris/future#media-library"
+    }
+  ]
+}
