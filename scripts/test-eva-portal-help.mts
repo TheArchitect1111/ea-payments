@@ -23,11 +23,15 @@ const questions = [
   [8, 'owner'], [10, 'owner'], [11, 'owner'], [12, 'owner'],
   [13, 'owner'], [17, 'owner'],
 ] as const; // 1-based indices from the Step 1 unanswered list.
+const expectedGuided = new Set([8, 10, 11, 12, 13]);
+let guidedCount = 0;
 const events: Array<{ portalId: string; question: string; role: string }> = [];
 for (const [index, role] of questions) {
   const question = manifest.questionsEvaCannotReliablyAnswerToday[index - 1].question as string;
   const result = await guideOneStep({ portalId, role, question }, async evt => { events.push(evt); });
+  assert.equal(result.ok, expectedGuided.has(index), 'Unexpected guidance disposition for audit question #' + index);
   if (result.ok) {
+    guidedCount++;
     assert.equal(result.status, 'guided');
     assert.match(result.link!, /^https:\/\//);
     assert.equal(result.stepNumber, 1);
@@ -45,9 +49,10 @@ for (const [index, role] of questions) {
     assert.ok(events.some(e => e.question === question && e.portalId === portalId));
   }
 }
-assert.equal(events.length, questions.filter(([i]) => i >= 1).length - questions.length + events.length); // all events accounted for by loop
+assert.equal(guidedCount, 5);
+assert.equal(events.length, 5);
 const privateAttempt = await guideOneStep({ portalId, role: 'student', question: 'Owner invoices', entryKey: 'ownerSidebar:3', stepIndex: 0 }, async evt => events.push(evt));
 assert.equal(privateAttempt.status, 'unanswered');
 assert.equal(privateAttempt.logged, true);
 assert.deepEqual(makeUnansweredEvent('amanda-catherine','student','help me test@example.com','not found').question, 'help me [email]');
-console.log(JSON.stringify({ status:'PASS', health:health(portalId), knowledge:knowledge(portalId), testQuestionCount:questions.length, loggedUnknownCount:events.length, studentOwnerEntryLeakCount:0 }, null, 2));
+console.log(JSON.stringify({ status:'PASS', health:health(portalId), knowledge:knowledge(portalId), testQuestionCount:questions.length, guidedCount, loggedUnknownCount:events.length, studentOwnerEntryLeakCount:0 }, null, 2));

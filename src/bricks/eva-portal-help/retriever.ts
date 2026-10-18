@@ -1,6 +1,7 @@
 import type { HelpEntry, LoadedKnowledge } from './manifest-loader';
 import { canReadEntry, type GuideRole } from './roles';
 
+type KnowledgeManifestWithRouting = LoadedKnowledge['manifest'] & { helpQuestionRouting?: Record<string, string> };
 const STOP = new Set(['how', 'do', 'i', 'we', 'a', 'an', 'the', 'and', 'or', 'to', 'my', 'our', 'is', 'are', 'can', 'where', 'what', 'why', 'from', 'with', 'on', 'in', 'of', 'for', 'it', 'me', 'get', 'does', 'this', 'that', 'please', 'today']);
 const FAMILIES = [
   ['video', 'lesson', 'classroom', 'recording'],
@@ -28,6 +29,15 @@ function tokens(e: HelpEntry): Set<string> {
 }
 export type Retrieval = { entry: HelpEntry; score: number } | null;
 export function retrieveHelp(data: LoadedKnowledge, question: string, role: GuideRole): Retrieval {
+  // Audited unanswered questions must be explicitly resolved in manifest data.
+  // A keyword-only guess cannot convert a known help gap into an instruction.
+  const audited = data.manifest.questionsEvaCannotReliablyAnswerToday?.some(item => item.question.trim().toLowerCase() === question.trim().toLowerCase());
+  if (audited) {
+    const routing = (data.manifest as KnowledgeManifestWithRouting).helpQuestionRouting || {};
+    const key = Object.entries(routing).find(([q]) => q.trim().toLowerCase() === question.trim().toLowerCase())?.[1];
+    const entry = key ? data.entries.find(item => item.key === key) : undefined;
+    return entry && canReadEntry(entry, role) && entry.href && entry.steps.length ? { entry, score: 100 } : null;
+  }
   const q = words(question);
   if (q.size === 0) return null;
   const candidates = data.entries.filter(entry => canReadEntry(entry, role) && entry.href && entry.steps.length > 0);
