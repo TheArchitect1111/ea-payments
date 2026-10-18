@@ -1,5 +1,5 @@
-import type { BrickHealth } from '../BrickInterface';
-import { loadCommsConfig, createAirtableCommsAuditTable, createCommsSender, type CommsAuditTable } from './sendTemplate';
+import type { Brick, BrickHealth, CheckoutNotApplicable, NonPaymentPriceContract } from '../BrickInterface';
+import { loadCommsConfig, createAirtableCommsAuditTable, createCommsSender, type CommsAuditTable, type CommsAuditRow, type CommsSendResult } from './sendTemplate';
 import type { VerifiedContact } from './config.schema';
 
 export type EACommsBrickOptions = {
@@ -9,8 +9,19 @@ export type EACommsBrickOptions = {
   fetchImpl?: typeof fetch;
 };
 
+/** Standalone, non-payment variant of the shared chassis contract. */
+export type EACommsBrick = Brick<
+  NonPaymentPriceContract,
+  CheckoutNotApplicable,
+  [templateId: string, to: VerifiedContact, data: Record<string, unknown>],
+  CommsSendResult
+> & {
+  sendTemplate(templateId: string, to: VerifiedContact, data: Record<string, unknown>): Promise<CommsSendResult>;
+  getAuditLog(): Promise<CommsAuditRow[]>;
+};
+
 /** Standalone non-payment socket contract. Does not claim a payment session or entitlement. */
-export function createEACommsBrick(options: EACommsBrickOptions) {
+export function createEACommsBrick(options: EACommsBrickOptions): EACommsBrick {
   const auditTable = options.auditTable || createAirtableCommsAuditTable(options.portalId, options.fetchImpl);
   const sender = createCommsSender({ portalRoot: options.portalRoot, auditTable, fetchImpl: options.fetchImpl });
   let healthy = false;
