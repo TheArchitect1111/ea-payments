@@ -154,7 +154,7 @@ export function createCommsSender(deps: SendDependencies) {
         method: 'POST',
         headers: { Authorization: 'Bearer ' + key, 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          from: config.fromAddress, reply_to: config.replyTo, to: [contact.email],
+          from: config.fromAddress, reply_to: config.replyTo, to: [row.to],
           subject: render(template.subject, data, false), html: render(template.html, data, true),
         }),
       });
