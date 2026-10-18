@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { EA_PORTAL_COOKIE, verifySession } from '@/lib/ea-portal-auth';
-import { loadPortalKnowledge } from '@/src/bricks/eva-portal-help/manifest-loader';
+import { loadPortalKnowledgeLive } from '@/src/bricks/eva-portal-help/manifest-loader';
 import { guideOneStep } from '@/src/bricks/eva-portal-help/guide';
 import { normalizeGuideRole } from '@/src/bricks/eva-portal-help/roles';
 export const dynamic = 'force-dynamic';
@@ -12,8 +12,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   const session = cookie ? await verifySession(cookie) : null;
   if (!session) return NextResponse.json({ ok: false, error: 'Portal sign-in required.' }, { status: 401 });
   if (session.slug !== slug) return NextResponse.json({ ok: false, error: 'This portal is not available in your account.' }, { status: 403 });
-  let data: ReturnType<typeof loadPortalKnowledge>;
-  try { data = loadPortalKnowledge(slug); }
+  let data: Awaited<ReturnType<typeof loadPortalKnowledgeLive>>;
+  try { data = await loadPortalKnowledgeLive(slug); }
   catch { return NextResponse.json({ ok: false, error: 'Portal help knowledge unavailable.' }, { status: 503 }); }
   const origin = request.headers.get('origin');
   if (origin && origin !== data.origin && origin !== new URL(request.url).origin) {
