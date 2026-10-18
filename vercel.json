@@ -253,6 +253,14 @@
     {
       "path": "/api/cron/cigar-ctp-bookings",
       "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/portal/amanda-catherine/eva-help/refresh",
+      "schedule": "0 2 * * *"
+    },
+    {
+      "path": "/api/portal/tb3/eva-help/refresh",
+      "schedule": "0 2 * * *"
     }
   ]
 }
