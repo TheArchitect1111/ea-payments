@@ -19,6 +19,6 @@ export async function GET(request:NextRequest) {
   if (lhs.length!==rhs.length || !timingSafeEqual(lhs,rhs)) {
     return NextResponse.json({ok:false,error:'Unauthorized'}, {status:401});
   }
-  const result=await refreshAllRegisteredPortals();
+  const result=await refreshAllRegisteredPortals({mode:'live'});
   return NextResponse.json(result, {status:result.ok?200:503,headers:{'Cache-Control':'no-store'}});
 }
