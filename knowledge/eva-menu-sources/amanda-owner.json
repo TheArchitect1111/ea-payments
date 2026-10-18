@@ -1,0 +1,102 @@
+{
+  "schemaVersion": 1,
+  "group": "ownerSidebar",
+  "roles": [
+    "admin",
+    "owner"
+  ],
+  "items": [
+    {
+      "label": "Dashboard",
+      "href": "/portal/amanda-catherine/owner"
+    },
+    {
+      "label": "Sales",
+      "href": "/portal/amanda-catherine/owner/sales"
+    },
+    {
+      "label": "Click Activity",
+      "href": "/portal/amanda-catherine/hub"
+    },
+    {
+      "label": "Payments",
+      "href": "/portal/amanda-catherine/billing"
+    },
+    {
+      "label": "$1 Test Enrollments",
+      "href": "/portal/amanda-catherine/test-enrollments"
+    },
+    {
+      "label": "Update Hub",
+      "href": "/portal/amanda-catherine/owner/updates"
+    },
+    {
+      "label": "Appointments / Jane",
+      "href": "/portal/amanda-catherine/owner/appointments"
+    },
+    {
+      "label": "Clients",
+      "href": "/portal/amanda-catherine/owner/clients"
+    },
+    {
+      "label": "AesthetiKine Academy",
+      "href": "/portal/amanda-catherine/owner/academy"
+    },
+    {
+      "label": "Practitioner Starter Kit",
+      "href": "/portal/amanda-catherine/owner/practitioner-kit"
+    },
+    {
+      "label": "LIFELINE",
+      "href": "/portal/amanda-catherine/owner/lifeline"
+    },
+    {
+      "label": "Empower Art Collective",
+      "href": "/portal/amanda-catherine/owner/empower-art"
+    },
+    {
+      "label": "Founder Advisory",
+      "href": "/portal/amanda-catherine/owner/advisory"
+    },
+    {
+      "label": "Founder Clarity",
+      "href": "/portal/amanda-catherine/owner/clarity"
+    },
+    {
+      "label": "Speaking & Media",
+      "href": "/portal/amanda-catherine/owner/speaking"
+    },
+    {
+      "label": "The Entrepreneurial Artist",
+      "href": "/portal/amanda-catherine/owner/book"
+    },
+    {
+      "label": "RIMAN Canada",
+      "href": "/portal/amanda-catherine/owner/riman"
+    },
+    {
+      "label": "Reviews & Testimonials",
+      "href": "/portal/amanda-catherine/owner/reviews"
+    },
+    {
+      "label": "Documents & Certifications",
+      "href": "/portal/amanda-catherine/owner/documents"
+    },
+    {
+      "label": "Marketing",
+      "href": "/portal/amanda-catherine/owner/marketing"
+    },
+    {
+      "label": "Business Insights",
+      "href": "/portal/amanda-catherine/owner/insights"
+    },
+    {
+      "label": "Eva (AI Assistant)",
+      "href": "/portal/amanda-catherine/eva#portal-help"
+    },
+    {
+      "label": "Settings",
+      "href": "/portal/amanda-catherine/owner/settings"
+    }
+  ]
+}
