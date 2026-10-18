@@ -1,0 +1,100 @@
+name: EA Comms one-time provider verification
+on:
+  push:
+    branches: [feature/ea-comms-brick-20261018]
+permissions:
+  contents: read
+jobs:
+  live-comms-cert:
+    if: github.event.head_commit.message == 'test(comms): one-time provider audit verification'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: One test send through real Comms sender; redact credentials
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          AIRTABLE_API_KEY: ${{ secrets.AIRTABLE_API_KEY }}
+          AIRTABLE_COMMS_BASE_ID: ${{ secrets.AIRTABLE_COMMS_BASE_ID }}
+          AIRTABLE_PAYMENTS_BASE_ID: ${{ secrets.AIRTABLE_PAYMENTS_BASE_ID }}
+          AIRTABLE_COMMS_AUDIT_TABLE: ${{ secrets.AIRTABLE_COMMS_AUDIT_TABLE }}
+        run: |
+          node --import tsx --input-type=module <<'NODE'
+          import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
+          import { tmpdir } from 'node:os';
+          import { join } from 'node:path';
+          import { createEACommsBrick } from './src/chassis/ea-comms-brick/index.ts';
+
+          const present = Boolean(process.env.RESEND_API_KEY?.trim());
+          const durableAudit = Boolean(process.env.AIRTABLE_API_KEY?.trim() &&
+            (process.env.AIRTABLE_COMMS_BASE_ID?.trim() || process.env.AIRTABLE_PAYMENTS_BASE_ID?.trim()) &&
+            process.env.AIRTABLE_COMMS_AUDIT_TABLE?.trim());
+          console.log('RESEND_API_KEY present:', present);
+          console.log('Comms Airtable audit configuration complete:', durableAudit);
+          if (!present) {
+            console.error('BLOCKED: RESEND_API_KEY unavailable to this GitHub Actions runner; no send attempted');
+            process.exitCode = 2;
+          } else {
+            const root = mkdtempSync(join(tmpdir(), 'ea-comms-live-'));
+            try {
+              mkdirSync(join(root, 'config'));
+              const template = { subject:'EA Comms certification {{eventDate}}', html:'<p>Test event: {{eventDate}}. {{eventLink}}</p>' };
+              const ids = [
+                'registration_confirmation','payment_receipt','event_reminder',
+                'waitlist_update','sponsor_or_guest_thankyou','support_reply_approved'
+              ];
+              writeFileSync(join(root, 'config', 'comms.templates.json'), JSON.stringify({
+                fromAddress: 'onboarding@resend.dev',
+                replyTo: 'onboarding@resend.dev',
+                provider: 'resend',
+                eventType: 'golf_tourney',
+                templates: Object.fromEntries(ids.map(id => [id, template]))
+              }));
+              const memoryRows = [];
+              const fallbackAudit = {
+                async insert(row) {
+                  const id = 'ephemeral-audit-' + (memoryRows.length + 1);
+                  memoryRows.push({ ...row, id });
+                  return id;
+                },
+                async update(id, changes) {
+                  const row = memoryRows.find(entry => entry.id === id);
+                  if (!row) throw new Error('Audit row missing');
+                  Object.assign(row, changes);
+                },
+                async list() { return memoryRows; }
+              };
+              const brick = createEACommsBrick({
+                portalRoot: root,
+                portalId: 'ea-comms-certification',
+                ...(durableAudit ? {} : { auditTable: fallbackAudit })
+              });
+              const health = await brick.health();
+              if (health.status !== 200) throw new Error('Comms health not 200');
+              const result = await brick.sendTemplate(
+                'registration_confirmation',
+                { email: 'delivered@resend.dev', verified: true },
+                { eventDate: '2026-10-18', eventLink: 'https://example.com' }
+              );
+              if (result.status !== 'sent') throw new Error('Resend did not return sent');
+              const rows = await brick.getAuditLog();
+              const row = rows.find(row => row.id === result.auditId);
+              if (!row || row.to !== 'delivered@resend.dev' ||
+                  row.templateId !== 'registration_confirmation' ||
+                  row.status !== 'sent' ||
+                  !Number.isFinite(Date.parse(row.timestamp))) throw new Error('Audit proof missing');
+              console.log(JSON.stringify({
+                eventType: 'golf_tourney', to: row.to, templateId: row.templateId,
+                timestamp: row.timestamp, status: row.status,
+                auditMode: durableAudit ? 'Airtable durable write and read-back' : 'ephemeral only; Airtable pending',
+                providerMessageId: result.providerMessageId
+              }));
+              if (!durableAudit) console.error('PENDING: no durable Airtable verification. Do not consider live audit certification complete.');
+            } finally { rmSync(root, { recursive:true, force:true }); }
+          }
+          NODE
