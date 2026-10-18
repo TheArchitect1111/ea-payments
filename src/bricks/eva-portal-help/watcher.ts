@@ -215,11 +215,11 @@ function withUpdatedLabels(next: KnowledgeManifest, previous: KnowledgeManifest)
   }
   return manifest;
 }
-/** Refreshes only the registered portal. Production writes are never permitted. */
+/** Refreshes only the registered portal in the active Vercel environment. */
 export async function refreshPortalKnowledge(portalId: string, deps: WatchDependencies = {}) {
   const conf = config(portalId);
   const prefix = previewKnowledgePrefix();
-  if (!prefix) throw new Error('Refresh is preview-only');
+  if (!prefix) throw new Error('Refresh requires a supported Vercel environment');
   const store = deps.store ?? privateStore;
   if (!deps.store && !process.env.BLOB_READ_WRITE_TOKEN) throw new Error('Private Blob credentials unavailable');
   const readSource = deps.readSource ?? defaultSource;
