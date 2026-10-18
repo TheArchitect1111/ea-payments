@@ -102,6 +102,7 @@ export default async function AmandaMemberHome({
           <h2 className="ep-module-card-title">Courses</h2>
           <ul>{AMANDA_COURSES.map(course => <li key={course.id}><Link href={getCourseMenuRoute(course, { purchasedCourseIds })}>{course.title} · {amandaCourseReady(course.id) ? purchasedCourseIds.includes(course.id) ? 'Open Course' : 'View Course' : 'Join Waitlist'}</Link></li>)}</ul>
         </li> : null}
+        {audience === 'student-trainee' ? <li className="ep-module-card"><Link href="/portal/amanda-catherine/eva#portal-help">Eva Portal Help</Link><p className="ep-module-card-note">Guided help for classes and learning.</p></li> : null}
         {audience === 'admin' ? <li className="ep-module-card"><Link href="/portal/amanda-catherine/owner/academy">Review certifications</Link></li> : null}
       </ul>
     </>
