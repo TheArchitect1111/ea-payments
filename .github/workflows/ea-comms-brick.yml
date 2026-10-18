@@ -1,0 +1,28 @@
+name: EA Comms Brick verification
+on:
+  push:
+    branches: [feature/ea-comms-brick-20261018]
+  pull_request:
+    paths:
+      - 'src/chassis/ea-comms-brick/**'
+      - 'package.json'
+      - '.github/workflows/ea-comms-brick.yml'
+permissions:
+  contents: read
+jobs:
+  comms-brick:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Four socket contracts, Resend mock, drafts, validation and audit
+        run: npm run test:comms-brick
+      - name: Generic code has no tenant or event wording
+        run: |
+          ! grep -Ein 'amanda|tarris|golf|gala' src/chassis/ea-comms-brick/index.ts src/chassis/ea-comms-brick/sendTemplate.ts src/chassis/ea-comms-brick/templates.ts
+      - run: npm run build
