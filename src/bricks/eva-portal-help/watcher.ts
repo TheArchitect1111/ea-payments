@@ -8,7 +8,9 @@ import {
   setLivePortalKnowledge, type KnowledgeManifest,
 } from './manifest-loader';
 
-type WatchConfig = {
+export type LiveMenuSource = {kind:'app-config'|'html-nav';group:string;file?:string;path?:string;ariaLabel?:string;hrefPrefix?:string;roles:string[]};
+export type LiveMenuItem = {label:string;href:string;section?:string;roles?:string[]};
+type WatchConfig = {liveSources?:LiveMenuSource[];
   manifestFile: string;
   sourceUrl: string;
   origin: string;
@@ -34,6 +36,8 @@ export type WatchDependencies = {
   store?: WatchStore;
   readSource?: (url: string) => Promise<string>;
   now?: () => string;
+  mode?: 'manifest' | 'live';
+  readLiveSource?: (source:LiveMenuSource, conf:WatchConfig)=>Promise<LiveMenuItem[]>;
 };
 const MAX_BYTES = 3_000_000;
 const digest = (value: unknown) =>
@@ -89,6 +93,107 @@ function numberOfEntries(manifest: KnowledgeManifest): number {
   if (count < 1 || count > 2000) throw new Error('Unsafe source inventory size');
   return count;
 }
+
+const safeFile=/^knowledge\/eva-menu-sources\/[a-z0-9-]+\.json$/;
+function checkLive(source:LiveMenuSource,conf:WatchConfig) {
+  if(!/^[a-zA-Z][a-zA-Z0-9]*$/.test(source.group)||!Array.isArray(source.roles)||!source.roles.length)
+    throw Error('Invalid nav group or roles');
+  if(source.kind==='app-config') {
+    if(!source.file||!safeFile.test(source.file))throw Error('Invalid app menu file');
+  } else if(source.kind==='html-nav') {
+    if(!source.path||!/^\/[a-z0-9/-]*$/.test(source.path)||!source.ariaLabel)throw Error('Invalid nav selector');
+    if(source.hrefPrefix&&!/^\/[a-z0-9/-]*$/.test(source.hrefPrefix))throw Error('Invalid nav link prefix');
+    if(new URL(conf.origin).protocol!=='https:')throw Error('Invalid origin');
+  } else throw Error('Unsupported source kind');
+}
+function unescapeHtml(text:string) {
+  return text.replace(/&(#x[0-9a-f]+|#[0-9]+|amp|quot|apos|lt|gt|nbsp);/gi,(_,e:string)=>{
+    const named:Record<string,string>={amp:'&',quot:'"',apos:"'",lt:'<',gt:'>',nbsp:' '};
+    if(e.startsWith('#')) {
+      const cp=e[1]==='x'?parseInt(e.slice(2),16):parseInt(e.slice(1),10);
+      return cp>31&&cp<=0x10ffff?String.fromCodePoint(cp):'';
+    }
+    return named[e.toLowerCase()]||'';
+  });
+}
+export function parseLiveNavigation(html:string,source:LiveMenuSource):LiveMenuItem[] {
+  if(!source.ariaLabel)throw Error('Missing source selector');
+  const nav=[...html.matchAll(/<nav\b([^>]*)>([\s\S]*?)<\/nav>/gi)].find(match=>{
+    const label=match[1].match(/\baria-label=["']([^"']+)["']/i)?.[1];
+    return label&&unescapeHtml(label)===source.ariaLabel;
+  });
+  if(!nav)throw Error('Live nav selector missing');
+  const items:LiveMenuItem[]=[];
+  for(const match of nav[2].matchAll(/<a\b([^>]*)>([\s\S]*?)<\/a>/gi)) {
+    const href=unescapeHtml(match[1].match(/\bhref=["']([^"']+)["']/i)?.[1]||'');
+    const label=unescapeHtml(match[2].replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim());
+    if(!href||!label||label.length>150)continue;
+    const resolved=href[0]==='#'?(source.hrefPrefix||'')+href:href;
+    if(!resolved.startsWith('/')&&!resolved.startsWith('#')&&!resolved.startsWith('https://'))continue;
+    items.push({label,href:resolved,section:source.group,roles:source.roles});
+  }
+  if(!items.length)throw Error('Live nav returned no items');
+  return items;
+}
+async function getLiveMenu(source:LiveMenuSource,conf:WatchConfig):Promise<LiveMenuItem[]>{
+  checkLive(source,conf);
+  if(source.kind==='app-config') {
+    const file=JSON.parse(readFileSync(resolve(process.cwd(),source.file!),'utf8')) as {group?:string;items?:LiveMenuItem[]};
+    if(file.group!==source.group||!Array.isArray(file.items))throw Error('App nav config invalid');
+    return file.items;
+  }
+  const url=new URL(source.path!,conf.origin);
+  if(url.origin!==new URL(conf.origin).origin)throw Error('Cross-site source');
+  const res=await fetch(url,{cache:'no-store',signal:AbortSignal.timeout(15000)});
+  if(!res.ok||!res.headers.get('content-type')?.includes('text/html'))throw Error('Live nav HTTP '+res.status);
+  if(new URL(res.url).hostname.replace(/^www\./,'')!==url.hostname.replace(/^www\./,''))throw Error('Cross-site redirect');
+  const html=await res.text();
+  if(html.length>MAX_BYTES)throw Error('Live page too large');
+  return parseLiveNavigation(html,source);
+}
+function mergeLive(baseline:KnowledgeManifest,readings:{source:LiveMenuSource;items:LiveMenuItem[]}[]):KnowledgeManifest{
+  const next=structuredClone(baseline);
+  for(const {source,items} of readings){
+    if(!Array.isArray(items)||!items.length||items.length>300)throw Error('Invalid live menu size');
+    const previous=Array.isArray(next.menus[source.group])?next.menus[source.group] as Record<string,unknown>[]:[];
+    const old=new Map(previous.map(item=>[String(item.href||''),item]));
+    const seen=new Set<string>();
+    next.menus[source.group]=items.map(item=>{
+      if(!item||!item.label||!item.href||seen.has(item.href))throw Error('Invalid or duplicate live menu');
+      if(!item.href.startsWith('/')&&!item.href.startsWith('#')&&!item.href.startsWith('https://'))throw Error('Unsafe href');
+      seen.add(item.href);
+      const before=old.get(item.href);
+      const roles=source.roles.filter(role=>(item.roles||source.roles).includes(role));
+      if(!roles.length)throw Error('No allowed role');
+      const previousSteps=Array.isArray(before?.steps)?before.steps.filter(x=>typeof x==='string') as string[]:[];
+      const prevLabel=typeof before?.label==='string'?before.label:'';
+      return {label:item.label,href:item.href,section:item.section||source.group,roles,
+        location:source.group,verification:'live-nav-source',source:source.kind,
+        steps:previousSteps.length?previousSteps.map(step=>prevLabel?step.split(prevLabel).join(item.label):step)
+          :["Open the "+source.group+" menu.","Select "+item.label+"."]};
+    });
+  }
+  return next;
+}
+function liveDiff(before:KnowledgeManifest,after:KnowledgeManifest,groups:string[]){
+  const diff:{group:string;operation:'added'|'removed'|'updated';label:string;href:string}[]=[];
+  for(const group of groups){
+    const a=Array.isArray(before.menus[group])?before.menus[group] as Record<string,unknown>[]:[];
+    const b=Array.isArray(after.menus[group])?after.menus[group] as Record<string,unknown>[]:[];
+    const left=new Map(a.map(x=>[String(x.href||''),x]));
+    const right=new Map(b.map(x=>[String(x.href||''),x]));
+    for(const [href,item] of right){
+      const old=left.get(href);
+      if(!old)diff.push({group,operation:'added',label:String(item.label),href});
+      else if(old.label!==item.label||JSON.stringify(old.roles)!==JSON.stringify(item.roles))
+        diff.push({group,operation:'updated',label:String(item.label),href});
+    }
+    for(const [href,item] of left)if(!right.has(href))
+      diff.push({group,operation:'removed',label:String(item.label),href});
+  }
+  return diff;
+}
+
 /** Preserve source instructions but replace obsolete control names when the label changes. */
 function withUpdatedLabels(next: KnowledgeManifest, previous: KnowledgeManifest): KnowledgeManifest {
   const manifest: KnowledgeManifest = structuredClone(next);
@@ -120,18 +225,28 @@ export async function refreshPortalKnowledge(portalId: string, deps: WatchDepend
   const readSource = deps.readSource ?? defaultSource;
   const now = deps.now?.() ?? new Date().toISOString();
   if (!Number.isFinite(Date.parse(now))) throw new Error('Invalid time');
-  const raw = await readSource(conf.sourceUrl);
+  const mode=deps.mode||'manifest';
+  if(mode!=='manifest'&&mode!=='live')throw Error('Invalid refresh mode');
+  const raw=mode==='manifest'?await readSource(conf.sourceUrl):'';
   if (raw.length > MAX_BYTES) throw new Error('Source registry too large');
-  const source = JSON.parse(raw) as KnowledgeManifest;
-  if (!source || typeof source.manifestId !== 'string' || typeof source.schemaVersion !== 'string' ||
-    !Array.isArray((source as KnowledgeManifest & {roles?:unknown}).roles)) throw new Error('Invalid source manifest');
-  numberOfEntries(source);
+  const source=mode==='manifest'?JSON.parse(raw) as KnowledgeManifest:null;
+  if(mode==='manifest'){
+    if(!source||typeof source.manifestId!=='string'||typeof source.schemaVersion!=='string'||
+      !Array.isArray((source as KnowledgeManifest & {roles?:unknown}).roles))throw Error('Invalid source manifest');
+    numberOfEntries(source);
+  }
   const currentPath = knowledgeSnapshotPath(portalId);
   const previousText = await store.read(currentPath);
   const previousSnapshot: StoredSnapshot | null = previousText ? JSON.parse(previousText) as StoredSnapshot : null;
   if (previousSnapshot && previousSnapshot.portalId !== portalId) throw new Error('Snapshot cross-tenant mismatch');
   const baseline = previousSnapshot?.manifest ?? loadPortalKnowledge(portalId).manifest;
-  const next = withUpdatedLabels(source, baseline);
+  const readings=mode==='live'?await Promise.all((conf.liveSources||[]).map(async source=>{
+    checkLive(source,conf);
+    return {source,items:await (deps.readLiveSource||getLiveMenu)(source,conf)};
+  })):[];
+  if(mode==='live'&&!readings.length)throw Error('No live nav configured');
+  const next=mode==='live'?mergeLive(baseline,readings):withUpdatedLabels(source!,baseline);
+  const changedItems=mode==='live'?liveDiff(baseline,next,readings.map(r=>r.source.group)):[];
   const entryCount = numberOfEntries(next);
   const sourceHash = digest({ menus: next.menus, roles: (next as KnowledgeManifest & {roles?:unknown}).roles,
     helpQuestionRouting: (next as KnowledgeManifest & {helpQuestionRouting?:unknown}).helpQuestionRouting });
@@ -161,8 +276,8 @@ export async function refreshPortalKnowledge(portalId: string, deps: WatchDepend
   const logPath = prefix+'/refresh-logs/'+portalId+'/'+now.replace(/[:.]/g,'-')+'-'+randomUUID()+'.json';
   const event: RefreshEvent = {type:'eva.portal-help.refresh',portalId,at:now,changed,
     entryCount,lastRefreshTime,sourceHash,backupPath};
-  await store.write(logPath, JSON.stringify(event), false);
-  return {ok:true,portalId,changed,entryCount,lastRefreshTime,backupPath,logPath};
+  await store.write(logPath, JSON.stringify({...event,mode,changedItemsCount:changedItems.length,diff:changedItems}),false);
+  return {ok:true,portalId,mode,changed,changedItemsCount:changedItems.length,entryCount,lastRefreshTime,backupPath,logPath};
 }
 export async function refreshAllRegisteredPortals(deps:WatchDependencies = {}) {
   const parsed = JSON.parse(readFileSync(resolve(process.cwd(), 'knowledge/eva-portal-help-registry.json'),'utf8')) as {portals:Record<string,unknown>};
