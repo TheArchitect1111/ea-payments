@@ -23,7 +23,7 @@ const questions = [
   [8, 'owner'], [10, 'owner'], [11, 'owner'], [12, 'owner'],
   [13, 'owner'], [17, 'owner'],
 ] as const; // 1-based indices from the Step 1 unanswered list.
-const expectedGuided = new Set([8, 10, 11, 12, 13]);
+const expectedGuided = new Set([10, 11, 12, 13]);
 let guidedCount = 0;
 const events: Array<{ portalId: string; question: string; role: string }> = [];
 for (const [index, role] of questions) {
@@ -49,8 +49,8 @@ for (const [index, role] of questions) {
     assert.ok(events.some(e => e.question === question && e.portalId === portalId));
   }
 }
-assert.equal(guidedCount, 5);
-assert.equal(events.length, 5);
+assert.equal(guidedCount, 4);
+assert.equal(events.length, 6);
 const privateAttempt = await guideOneStep({ portalId, role: 'student', question: 'Owner invoices', entryKey: 'ownerSidebar:3', stepIndex: 0 }, async evt => events.push(evt));
 assert.equal(privateAttempt.status, 'unanswered');
 assert.equal(privateAttempt.logged, true);

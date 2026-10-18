@@ -5192,7 +5192,6 @@
     "impact": "Do not conflate Vercel ea-payments latest production with Amanda-domain actual pinned preview origin. Newer master includes changes not available on the live domain."
   },
   "helpQuestionRouting": {
-    "How do I update a waitlist registration or see when a course opens?": "publicPrimary:5",
     "How do I change my owner settings, notifications, or permissions?": "ownerSidebar:22",
     "Where do I review Founder Advisory or LIFELINE applications?": "ownerOperationalControls:2",
     "How do I mark a certificate approved?": "ownerOperationalControls:1",
