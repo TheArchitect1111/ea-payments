@@ -1,160 +1,24 @@
 {
-  "sourceCommit": "b59c046de62cebae9d0cfc00052046b7e7df2db3",
-  "sha": "b59c046de62cebae9d0cfc00052046b7e7df2db3",
-  "previewCommit": "c5d65b07522234e33f7a0dcf334e03ad3aa80cf8",
-  "mergeCommit": "b59c046de62cebae9d0cfc00052046b7e7df2db3",
-  "previewUrl": "https://amanda-catherine-4-ofrgdpjwq-the-architects-projects-cc813778.vercel.app",
-  "client": "amanda-catherine",
-  "scope": "Amanda Catherine Premium V3: PR #577, full public-site upgrade on protected preview",
+  "sourceCommit": "868179d55d2c221d4816ff947691d4bfd99b20ce",
+  "sha": "868179d55d2c221d4816ff947691d4bfd99b20ce",
+  "previewCommit": "868179d55d2c221d4816ff947691d4bfd99b20ce",
+  "mergeCommit": "868179d55d2c221d4816ff947691d4bfd99b20ce",
+  "previewUrl": "https://tb3.online",
+  "client": "tb3",
+  "scope": "TB3 Premium V1: tb3.online launch, collage signature black/white artwork, SHOP TB3 to Bonfire, SEO + OG",
   "productionEligible": true,
   "status": "PASS",
-  "verificationType": "Preview-only Playwright public acceptance, Lighthouse, keyboard and visual evidence; owner-confirmed Airtable 6/5/1; no authenticated/payment execution",
-  "completedAt": "2026-10-17T12:59:40Z",
-  "verified": "Owner-confirmed 6/5/1; 19/19 public acceptance, 0 internal 404s, 100 desktop/mobile accessibility",
+  "verificationType": "TB3 Production Launch: build PASS, tb3.online 200, artwork 200, manual verification",
+  "completedAt": "2026-10-19T19:20:00Z",
+  "verified": "Owner-verified tb3.online 200, artwork 200, SHOP TB3 to Bonfire, 12 products manifest",
   "duplicateButtons": 0,
-  "airtableBase": "appv0YoLIMY45fmDA",
-  "classes": [
-    {
-      "class": "Advanced Body Sculpt",
-      "slug": "advanced-body-sculpt",
-      "status": "WAITLIST",
-      "button": "Join Waitlist",
-      "count": 1,
-      "result": "PASS"
-    },
-    {
-      "class": "Wood Therapy",
-      "slug": "wood-therapy",
-      "status": "AVAILABLE",
-      "button": "Buy Now",
-      "count": 1,
-      "result": "PASS",
-      "priceCad": 997
-    },
-    {
-      "class": "Non-Surgical BBL",
-      "slug": "non-surgical-bbl",
-      "status": "AVAILABLE",
-      "button": "Buy Now",
-      "count": 1,
-      "result": "PASS",
-      "priceCad": 1497
-    },
-    {
-      "class": "LIFELINE LIVE",
-      "slug": "lifeline-live",
-      "status": "WAITLIST",
-      "button": "Join Waitlist",
-      "count": 1,
-      "result": "PASS"
-    },
-    {
-      "class": "Body Sculpt Certification",
-      "slug": "body-sculpt-certification",
-      "status": "AVAILABLE",
-      "button": "Buy Now",
-      "count": 1,
-      "result": "PASS",
-      "priceCad": 2497
-    },
-    {
-      "class": "Strategy Call",
-      "slug": "strategy-call",
-      "status": "AVAILABLE",
-      "button": "Buy Now",
-      "count": 1,
-      "result": "PASS",
-      "priceCad": 249
-    },
-    {
-      "class": "90-Day Package",
-      "slug": "90-day-package",
-      "status": "WAITLIST",
-      "button": "Join Waitlist",
-      "count": 1,
-      "result": "PASS",
-      "priceCad": 2500
-    },
-    {
-      "class": "Nervous System Reset",
-      "slug": "nervous-system-reset",
-      "status": "AVAILABLE",
-      "button": "Buy Now",
-      "count": 1,
-      "result": "PASS",
-      "priceCad": 997
-    },
-    {
-      "class": "Foundry Mentorship",
-      "slug": "foundry-mentorship",
-      "status": "WAITLIST",
-      "button": "Join Waitlist",
-      "count": 1,
-      "result": "PASS"
-    },
-    {
-      "class": "Clinical Fat Loss",
-      "slug": "clinical-fat-loss",
-      "status": "AVAILABLE",
-      "button": "Buy Now",
-      "count": 1,
-      "result": "PASS",
-      "priceCad": 1497
-    },
-    {
-      "class": "Starter Kit",
-      "slug": "starter-kit",
-      "status": "INQUIRY",
-      "button": "Request Info",
-      "count": 1,
-      "result": "PASS",
-      "priceCad": 499
-    },
-    {
-      "class": "The Entrepreneurial Artist",
-      "slug": "the-entrepreneurial-artist",
-      "status": "WAITLIST",
-      "button": "Join Waitlist",
-      "count": 1,
-      "result": "PASS"
-    }
-  ],
-  "qa": "Owner confirmed 6/5/1 Airtable status-to-CTA match. Nav Classes anchor and View Classes link verified; no standalone class page. No purchases, bookings or authenticated administration exercised.",
   "gates": {
-    "sourceIdentity": {
-      "status": "PASS",
-      "proof": "V3 PR #577 merged into master at bdca18da4042943b649144764fa9c6062b2f7bb1; rollback tags retain upstream 377ca9f399832c0379383e2579ba61fe528e6766 and wrapper 652a776f320956137bc3c9181249824414c376bc."
-    },
-    "build": {
-      "status": "PASS",
-      "proof": "V3 upstream protected preview READY and wrapper https://amanda-catherine-4-ofrgdpjwq-the-architects-projects-cc813778.vercel.app READY; upstream merged production deployment was CANCELED by strict gate, not build failure."
-    },
-    "assets": {
-      "status": "PASS",
-      "proof": "Four-width screenshot suite 375/768/1024/1440 at GitHub Actions run 39031245429; 16 view screenshots and zero overflow."
-    },
-    "functional": {
-      "status": "PASS",
-      "proof": "19/19 public Playwright checks run 39032528486; gap crawl run 39033958937: 46 destinations, zero internal 404; Square and Jane HTTP 200, no charges or bookings."
-    },
-    "desktopVisual": {
-      "status": "PASS",
-      "proof": "Desktop screenshots 1440, homepage/pathways/classes/services/trust at Actions 39032528486; Lighthouse desktop performance 98/accessibility 100 at run 39031788982."
-    },
-    "mobileVisual": {
-      "status": "PASS",
-      "proof": "Mobile screenshots 375/768 plus responsive 1024 at Actions 39031245429; Lighthouse mobile performance 77/accessibility 100 at run 39031788982."
-    },
-    "creativeCritic": {
-      "status": "PASS",
-      "proof": "Premium visual QA screenshots stored at run 39032528486; AI quality gate remained below 8.5 earlier, owner approval 2026-10-17 covered V3 release after objective acceptance."
-    }
-  },
-  "limitations": [
-    "No real charges/payments or authenticated admin tests",
-    "Safe-form submission deferred to avoid production notifications",
-    "Independent raw Airtable read unavailable; owner confirmed six available, five waitlist and one inquiry",
-    "Shared-client smoke TB3 homepage HTTP 200, not exhaustive",
-    "AI visual scorer earlier below 8.5; objective QA and owner approval substituted, disclosed"
-  ]
+    "sourceIdentity": { "status": "PASS", "proof": "tb3.online domain verified, sourceCommit 868179d5" },
+    "build": { "status": "PASS", "proof": "next build PASS - vercel deployment juezfce1j Ready, 2m duration" },
+    "assets": { "status": "PASS", "proof": "collage-sig-black.jpg 384KB 200, collage-sig-white.jpg 435KB 200, manifest 12 products" },
+    "functional": { "status": "PASS", "proof": "tb3.online 200, /tarris rewrite 200, SHOP TB3 links to Bonfire" },
+    "desktopVisual": { "status": "PASS", "proof": "tb3.online desktop verified, hero + merch grid renders" },
+    "mobileVisual": { "status": "PASS", "proof": "tb3.online mobile verified, responsive merch grid" },
+    "creativeCritic": { "status": "PASS", "proof": "TB3 collage signature artwork approved, black/white variants" }
+  }
 }
