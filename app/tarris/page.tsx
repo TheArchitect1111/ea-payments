@@ -45,6 +45,10 @@ const merchProducts: MerchProduct[] = [
   { id: "merch-hoodie-red", image: "MOCK_HOODIE_RED.jpg", label: "TB3 HOODIE - RED", price: "$75" },
   { id: "merch-hoodie-white", image: "MOCK_HOODIE_WHITE.jpg", label: "TB3 HOODIE - WHITE", price: "$75" },
   { id: "merch-hoodie-premium", image: "MOCK_HOODIE_WHITE_LOGO_DETAIL_1.jpg", label: "TB3 HOODIE - PREMIUM LOGO", price: "$85" },
+  { id: "tb3-tee-plain-sig-01", image: "", label: "TB3 SIGNATURE TEE - BLACK - PLAIN", price: "$65" },
+  { id: "tb3-hoodie-plain-sig-02", image: "", label: "TB3 SIGNATURE HOODIE - BLACK - PLAIN", price: "$65" },
+  { id: "tb3-tee-collage-sig-03", image: "", label: "TB3 SIGNATURE TEE - BLACK - COLLAGE EDITION", price: "$65" },
+  { id: "tb3-hoodie-collage-sig-04", image: "", label: "TB3 SIGNATURE HOODIE - BLACK - COLLAGE EDITION", price: "$65" },
 ];
 const nav = ["HOME", "ATHLETE", "STORY", "BRAND", "NIL", "COMMUNITY", "MEDIA", "MERCH", "FUTURE"];
 
@@ -71,7 +75,7 @@ function MerchProductCard({ product, index }: { product: MerchProduct; index: nu
   const label = red && product.redImage ? "TB3 CAP - RED" : product.label;
   return <article className="min-w-0">
     <div id={`merch-${index + 1}`} className="aspect-square overflow-hidden bg-[#E5E5E5] p-[10px]">
-      <img src={`/merch/${image}`} alt={label} className="h-full w-full object-contain" loading="lazy" />
+      {image ? <img src={`/merch/${image}`} alt={label} className="h-full w-full object-contain" loading="lazy" /> : <div role="img" aria-label={`${label} artwork pending`} className="flex h-full w-full items-center justify-center bg-black px-4 text-center text-sm font-bold tracking-wider text-white">TB3 SIGNATURE COLLECTION</div>}
     </div>
     <p className="mt-3 text-[9px] font-bold tracking-wider">{product.label} <span className="font-normal">{product.price}</span></p>
     {product.redImage && <div className="mt-2 flex items-center gap-2 text-[9px]">
