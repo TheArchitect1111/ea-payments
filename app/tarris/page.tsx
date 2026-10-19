@@ -2,7 +2,7 @@
 // Public TB3 story and storefront. Official images are single-use on this surface.
 // WIRED: TB3 / -> /tarris -> ENTER TB3 HQ -> /tarris/future.
 import Link from "next/link";
-import { ChassisPreview } from "./chassis-preview";
+import { PaidAccessCta } from "./paid-access-cta";
 import BookingForm from "./book/booking-form";
 import { Tb3FilmGrid } from "./tb3-film";
 import { useEffect, useState, type ReactNode } from "react";
@@ -152,7 +152,7 @@ export default function TarrisPublicPage() {
           <Tb3FilmGrid />
           <a href="#book-tarris-form" className="mt-4 inline-block text-xs font-bold text-[#C41E3A]">Book Tarris for this →</a>
         </section>
-        <ChassisPreview />
+        <PaidAccessCta />
         <section id="future" aria-label="Enterprise and future" className="grid scroll-mt-5 gap-6 border-b border-black/20 py-10 md:grid-cols-3">
           <article><ImageSlot id="enterprise-only" asset="OFFICIAL_15_PODIUM_SPEAKING.png" alt="Tarris speaking at a podium" ratio="aspect-[4/3]" /><h2 className="mt-4 text-2xl font-black">ENTERPRISE</h2><p className="mt-2 text-xs leading-6 text-black/65">A vision that reaches beyond the court.</p><ActionLink className="mt-4 text-[9px] font-bold tracking-widest text-[#A51C30]">LEARN MORE →</ActionLink></article>
           <article className="flex min-h-[300px] flex-col justify-center bg-[#EAE7E2] p-7"><p className="text-[9px] tracking-[0.3em] text-[#A51C30]">THE FUTURE</p><h2 className="mt-4 text-3xl font-black">PLAN. PREPARE.<br />PERFORM. BUILD.</h2><p className="mt-3 text-xs leading-6 text-black/65">The next chapter starts with the work you do today.</p><ActionLink href="/tarris/future" className="mt-4 self-start text-[9px] font-bold tracking-widest text-[#A51C30]">LEARN MORE →</ActionLink></article>

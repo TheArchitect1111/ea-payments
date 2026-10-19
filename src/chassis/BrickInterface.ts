@@ -1,8 +1,8 @@
 /** Universal chassis contract. Integration proof must be established before attach(). */
 export type BrickHealth = { status: 200 | 503; evidence: string };
-export type CheckoutType = 'stripe-test' | 'square-full';
-export type CheckoutRequest = { type: CheckoutType; courseId: string };
-export type CheckoutResult = { sessionId: string; entitlement: string };
+export type CheckoutType = 'stripe-test' | 'stripe-live' | 'square-full';
+export type CheckoutRequest = { type: CheckoutType; courseId: string; email?: string; returnOrigin?: string };
+export type CheckoutResult = { sessionId: string; entitlement: string; url?: string };
 export type WelcomeRequest = { sessionId: string };
 export type WelcomeResult = { successPage: string; emailId: string; receiptPdf: string; nextSteps: string; accessLink: string };
 export interface Brick {

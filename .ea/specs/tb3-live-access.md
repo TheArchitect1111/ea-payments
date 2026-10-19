@@ -1,0 +1,7 @@
+# TB3 paid access and owner tracking
+
+Create a separate live TB3 access checkout; never alter the existing project-deposit checkout. Only a server-retrieved Stripe session with livemode=true, payment_status=paid, correct TB3 metadata, USD amount matching client configuration, and purchaser email can create an Airtable entitlement. Persist tb3:72h:live, session ID, purchaser email, paid timestamp, fixed expiry, token hash, receipt and activity. Payment retries must not extend access or create duplicate records. Payment success must not claim email delivery until a real provider message ID exists.
+
+Opaque session-derived access tokens are validated against the persisted entitlement and expiry, then exchanged for a secure HTTP-only cookie. Literal entitlement names, email strings, unpaid/test/wrong-product sessions and expired/revoked records cannot grant access. Owner tracking requires existing EA admin or active TB3 owner membership. Preserve HQ authentication, merchandise content, existing clients and production promotion controls. Do not upgrade the global 14-brick manifest without all live integration proof.
+
+Verify fake/unpaid/foreign payment rejection, idempotency, expiry enforcement, unauthenticated owner denial, real Airtable availability, build, hosted checkout and buyer completion followed by new ledger row and authorized portal. Roll back if tenancy or payment validation regress.
