@@ -57,43 +57,47 @@
     "image": "MOCK_HOODIE_WHITE_LOGO_DETAIL_1.jpg"
   },
   {
-    "id": "tb3-tee-plain-sig-01",
-    "name": "TB3 Signature Tee - Black - Plain",
-    "price": 65,
-    "color": "Black",
-    "front": "TB3 bold white center",
-    "bottom_side": "AB signature white left hem",
-    "status": "ready_to_publish",
-    "asset_status": "missing"
-  },
-  {
-    "id": "tb3-hoodie-plain-sig-02",
-    "name": "TB3 Signature Hoodie - Black - Plain",
-    "price": 65,
-    "color": "Black",
-    "front": "TB3 bold white center",
-    "bottom_side": "AB signature white left hem near pocket",
-    "status": "ready_to_publish",
-    "asset_status": "missing"
-  },
-  {
-    "id": "tb3-tee-collage-sig-03",
-    "name": "TB3 Signature Tee - Black - Collage Edition",
+    "id": "tb3-sig-collage-tee-black",
+    "name": "TB3 Collage Signature Tee - Black",
     "price": 65,
     "color": "Black",
     "front": "TB3 collage TARRIS BOUIE MORE THAN A GAME",
-    "bottom_side": "AB signature white left hem",
-    "status": "ready_to_publish",
-    "asset_status": "missing"
+    "bottom_side": "AB white signature left hem",
+    "image": "tb3/merch/collage-sig-final.jpg",
+    "asset_status": "pending_upload",
+    "status": "ready_to_publish"
   },
   {
-    "id": "tb3-hoodie-collage-sig-04",
-    "name": "TB3 Signature Hoodie - Black - Collage Edition",
+    "id": "tb3-sig-collage-hoodie-black",
+    "name": "TB3 Collage Signature Hoodie - Black",
     "price": 65,
     "color": "Black",
     "front": "TB3 collage TARRIS BOUIE MORE THAN A GAME",
-    "bottom_side": "AB signature white left hem near pocket",
-    "status": "ready_to_publish",
-    "asset_status": "missing"
+    "bottom_side": "AB white signature left hem",
+    "image": "tb3/merch/collage-sig-final.jpg",
+    "asset_status": "pending_upload",
+    "status": "ready_to_publish"
+  },
+  {
+    "id": "tb3-sig-collage-tee-white",
+    "name": "TB3 Collage Signature Tee - White",
+    "price": 65,
+    "color": "White",
+    "front": "TB3 collage TARRIS BOUIE MORE THAN A GAME",
+    "bottom_side": "AB black signature left hem",
+    "image": "tb3/merch/collage-sig-final.jpg",
+    "asset_status": "pending_upload",
+    "status": "ready_to_publish"
+  },
+  {
+    "id": "tb3-sig-collage-hoodie-white",
+    "name": "TB3 Collage Signature Hoodie - White",
+    "price": 65,
+    "color": "White",
+    "front": "TB3 collage TARRIS BOUIE MORE THAN A GAME",
+    "bottom_side": "AB black signature left hem",
+    "image": "tb3/merch/collage-sig-final.jpg",
+    "asset_status": "pending_upload",
+    "status": "ready_to_publish"
   }
 ]
