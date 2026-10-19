@@ -45,11 +45,6 @@ const merchProducts: MerchProduct[] = [
   { id: "merch-hoodie-red", image: "MOCK_HOODIE_RED.jpg", label: "TB3 HOODIE - RED", price: "$75" },
   { id: "merch-hoodie-white", image: "MOCK_HOODIE_WHITE.jpg", label: "TB3 HOODIE - WHITE", price: "$75" },
   { id: "merch-hoodie-premium", image: "MOCK_HOODIE_WHITE_LOGO_DETAIL_1.jpg", label: "TB3 HOODIE - PREMIUM LOGO", price: "$85" },
-  { id: "merch-hoodie-premium-2", image: "MOCK_HOODIE_WHITE_LOGO_DETAIL_2.jpg", label: "TB3 HOODIE - PREMIUM LOGO 2", price: "$85" },
-  { id: "merch-sweat-premium", image: "MOCK_SWEATSHIRT_WHITE_LOGO_DETAIL.jpg", label: "TB3 SWEATSHIRT - PREMIUM", price: "$75" },
-  { id: "merch-black-tee-65", image: "TB3_TEE_65.jpg", label: "BLACK TEE - SIGNATURE $65 SPECIAL", price: "$65" },
-  { id: "merch-black-hoodie-65", image: "TB3_HOODIE_65.jpg", label: "BLACK HOODIE - SIGNATURE $65 SPECIAL", price: "$65" },
-  { id: "merch-black-bundle-65", image: "TB3_BUNDLE_65.jpg", label: "BUNDLE - TEE + HOODIE - $65", price: "$65" },
 ];
 const nav = ["HOME", "ATHLETE", "STORY", "BRAND", "NIL", "COMMUNITY", "MEDIA", "MERCH", "FUTURE"];
 
