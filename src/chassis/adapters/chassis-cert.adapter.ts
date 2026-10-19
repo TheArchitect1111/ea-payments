@@ -20,3 +20,4 @@ export const chassis_certAdapter = {
 };
 
 export default chassis_certAdapter;
+export const createChassisCertAdapters = chassis_certAdapter;

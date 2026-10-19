@@ -20,3 +20,4 @@ export const intakeAdapter = {
 };
 
 export default intakeAdapter;
+export const createIntakeAdapters = intakeAdapter;

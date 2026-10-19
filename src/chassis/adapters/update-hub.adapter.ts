@@ -20,3 +20,4 @@ export const update_hubAdapter = {
 };
 
 export default update_hubAdapter;
+export const createUpdateHubAdapters = update_hubAdapter;

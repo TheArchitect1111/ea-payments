@@ -12,3 +12,7 @@ export const stagingAdapter = {
 };
 
 export default stagingAdapter;
+
+// BACKWARDS COMPAT - keep old exports so build doesn't break
+export const createStagingAdapters = stagingAdapter;
+export const stagingAdapters = stagingAdapter;
