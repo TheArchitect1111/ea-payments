@@ -7,9 +7,6 @@ import { CreateOffers, PractitionerEssentials, ClientProof, SocialLinks } from '
 import ClassesAnchor from '@/components/amanda/ClassesAnchor';
 import MediaSection from '@/components/amanda/AmandaMediaSection';
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
-export const fetchCache = 'force-no-store';
 const approvedImages={hero:'/amanda-catherine/amanda-black-blouse.jpg',about:'/amanda-catherine/amanda-catherine-faith.webp',restore:'/amanda-catherine/studio-interior.jpg',learn:'/amanda-catherine/studio-treatment.jpg',create:'/amanda-catherine/amanda-catherine-entrepreneurial-artist.webp',impact:'/amanda-catherine/amanda-catherine-impact.webp'} as const;
 function Media({imageUrl,alt}:{imageUrl:string;alt:string}){return <img className="ac-media" src={imageUrl} alt={alt} loading={imageUrl===approvedImages.hero?'eager':'lazy'} fetchPriority={imageUrl===approvedImages.hero?'high':undefined} decoding="async" width={1200} height={900} sizes="(max-width: 850px) 100vw, 50vw"/>}
 export default async function AmandaCatherinePublicPage(){
