@@ -15,7 +15,6 @@ export async function POST(req: NextRequest) { return handled(async () => {
     name:record.contact_name,email:record.contact_email,phone:record.phone,status:'submitted',
     source:manual?'tb3-hq-booking':'tb3-public-booking'});
   if(!tracked.ok)throw new Tb3Error(503,'Booking saved, tracking delivery unavailable.');
-  try { await db('tb3_notifications',{method:'POST',body:JSON.stringify([{workspace_key:workspace(),opportunity_id:result as unknown as string,type:'inbound',message:`New ${'${record.type}'} inquiry from ${'${record.company_name}'}`}])}); } catch { console.warn('TB3 notification insert failed'); }
   // Notification is a log only, no outbound email or contact details in logs.
   console.info('TB3 inquiry email notification queued as log only');
   return json({ok:true,result},201);
