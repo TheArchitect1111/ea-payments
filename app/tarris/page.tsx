@@ -75,7 +75,7 @@ function MerchProductCard({ product, index }: { product: MerchProduct; index: nu
   const label = red && product.redImage ? "TB3 CAP - RED" : product.label;
   return <article className="min-w-0">
     <div id={`merch-${index + 1}`} className="aspect-square overflow-hidden bg-[#E5E5E5] p-[10px]">
-      {image ? <img src={image.startsWith("tb3/merch/") ? `/${image}` : `/merch/${image}`} alt={label} className="h-full w-full object-contain" loading="lazy" /> : <div role="img" aria-label={`${label} artwork pending`} className="flex h-full w-full items-center justify-center bg-black px-4 text-center text-sm font-bold tracking-wider text-white">TB3 SIGNATURE COLLECTION</div>}
+      {image ? <img src={`/merch/${image}`} alt={label} className="h-full w-full object-contain" loading="lazy" /> : <div role="img" aria-label={`${label} artwork pending`} className="flex h-full w-full items-center justify-center bg-black px-4 text-center text-sm font-bold tracking-wider text-white">TB3 SIGNATURE COLLECTION</div>}
     </div>
     <p className="mt-3 text-[9px] font-bold tracking-wider">{product.label} <span className="font-normal">{product.price}</span></p>
     {product.redImage && <div className="mt-2 flex items-center gap-2 text-[9px]">
