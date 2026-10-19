@@ -1,15 +1,15 @@
-/** Single CTA policy consumes the effective status supplied by Amanda's registry. */
+/** Single CTA policy consumes authoritative Airtable status supplied by Amanda's registry. */
 import type { Course } from './registry';
 
 export function getCTA(course: Pick<Course,'key'|'status'|'square_checkout_url'>) {
-  const status=course.status.trim().toLowerCase();
-  if(status==='available') {
+  const status=course.status.trim().toUpperCase();
+  if(status==='AVAILABLE') {
     if(!course.square_checkout_url) throw new Error('Available Amanda class missing Square checkout: '+course.key);
     return {label:'Register' as const, action:course.square_checkout_url, kind:'checkout' as const};
   }
-  if(status==='inquiry') return {label:'Request Info' as const, action:'/amanda-catherine#contact',kind:'inquiry' as const};
-  return {label:'Join Waitlist' as const,
+  if(status==='WAITLIST'||status==='INQUIRY') return {label:'Join the waitlist' as const,
     action:'/courses/'+encodeURIComponent(course.key)+'#waitlist',kind:'waitlist' as const};
+  throw new Error('Unknown Amanda course status: '+course.key+' '+status);
 }
 export function amandaClassCopy(description:string, available:boolean):string {
   const text=description.trim();
