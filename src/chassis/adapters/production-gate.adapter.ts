@@ -20,4 +20,3 @@ export const production_gateAdapter = {
 };
 
 export default production_gateAdapter;
-export const createProductionGateAdapters = production_gateAdapter;

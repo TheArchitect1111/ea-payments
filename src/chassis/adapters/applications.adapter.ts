@@ -20,4 +20,3 @@ export const applicationsAdapter = {
 };
 
 export default applicationsAdapter;
-export const createApplicationsAdapters = applicationsAdapter;

@@ -20,4 +20,3 @@ export const reportsAdapter = {
 };
 
 export default reportsAdapter;
-export const createReportsAdapters = reportsAdapter;

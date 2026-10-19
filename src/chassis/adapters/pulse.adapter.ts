@@ -20,4 +20,3 @@ export const pulseAdapter = {
 };
 
 export default pulseAdapter;
-export const createPulseAdapters = pulseAdapter;
