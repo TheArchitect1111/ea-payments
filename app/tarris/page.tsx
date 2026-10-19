@@ -45,10 +45,10 @@ const merchProducts: MerchProduct[] = [
   { id: "merch-hoodie-red", image: "MOCK_HOODIE_RED.jpg", label: "TB3 HOODIE - RED", price: "$75" },
   { id: "merch-hoodie-white", image: "MOCK_HOODIE_WHITE.jpg", label: "TB3 HOODIE - WHITE", price: "$75" },
   { id: "merch-hoodie-premium", image: "MOCK_HOODIE_WHITE_LOGO_DETAIL_1.jpg", label: "TB3 HOODIE - PREMIUM LOGO", price: "$85" },
-  { id: "tb3-tee-plain-sig-01", image: "", label: "TB3 SIGNATURE TEE - BLACK - PLAIN", price: "$65" },
-  { id: "tb3-hoodie-plain-sig-02", image: "", label: "TB3 SIGNATURE HOODIE - BLACK - PLAIN", price: "$65" },
-  { id: "tb3-tee-collage-sig-03", image: "", label: "TB3 SIGNATURE TEE - BLACK - COLLAGE EDITION", price: "$65" },
-  { id: "tb3-hoodie-collage-sig-04", image: "", label: "TB3 SIGNATURE HOODIE - BLACK - COLLAGE EDITION", price: "$65" },
+  { id: "tb3-sig-collage-tee-black", image: "tb3/merch/collage-sig-black.jpg", label: "TB3 Collage Signature Tee - Black", price: "$65" },
+  { id: "tb3-sig-collage-hoodie-black", image: "tb3/merch/collage-sig-black.jpg", label: "TB3 Collage Signature Hoodie - Black", price: "$65" },
+  { id: "tb3-sig-collage-tee-white", image: "tb3/merch/collage-sig-white.jpg", label: "TB3 Collage Signature Tee - White", price: "$65" },
+  { id: "tb3-sig-collage-hoodie-white", image: "tb3/merch/collage-sig-white.jpg", label: "TB3 Collage Signature Hoodie - White", price: "$65" },
 ];
 const nav = ["HOME", "ATHLETE", "STORY", "BRAND", "NIL", "COMMUNITY", "MEDIA", "MERCH", "FUTURE"];
 
