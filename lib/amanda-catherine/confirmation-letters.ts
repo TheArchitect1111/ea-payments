@@ -23,14 +23,14 @@ function toLetter(row: Row): AmandaConfirmationLetter {
 const PREVIEW_WARM_LETTERS: Record<AmandaConfirmationType, AmandaConfirmationLetter> = {
   live: {
     type: 'live',
-    subject: "You're registered for {{class_name}}",
-    body_html: '<p>Welcome to Amanda Catherine’s community.</p><p>Hi {{first_name}},</p><p>Thank you for registering for <strong>{{class_name}}</strong>. Your next step is to watch for a follow-up from Amanda’s team with the details for your program.</p><p>Warmly,<br>Amanda Catherine</p>',
+    subject: "You're in! Welcome to {{class_name}} + Your First Micro-Win",
+    body_html: '<p>Hi {{first_name}},</p><p>You are registered for <strong>{{class_name}}</strong> at AesthetiKine Studio.</p><p><strong>Your first micro-win (watch now - 2 mins):</strong><br><a href="{{welcome_video_url}}">Welcome Video - Start Here</a></p><p><strong>What to bring / Where to park / What to wear:</strong><br><a href="{{what_to_bring_url}}">Download PDF + Parking Map</a></p><p><strong>Calendar Invite:</strong><br><a href="{{calendar_ics_url}}">Add to Calendar (.ics)</a></p><p><strong>Your Learning Portal:</strong><br><a href="https://aesthetikine.com/portal/amanda-catherine/learning">Portal - Learning</a></p><p>In 60 mins you will leave able to safely assess & map face & body contouring clients.</p><p>See you at AesthetiKine!<br>Warmly,<br>Amanda Catherine<br>226-581-2003</p><p><em>P.S. This training is NOT for non-licensed practitioners - safety filter applies.’s community.</p><p>Hi {{first_name}},</p><p>Hi {{first_name}},</p><p>You are registered for <strong>{{class_name}}</strong> at AesthetiKine Studio.</p><p><strong>Your first micro-win (watch now - 2 mins):</strong><br><a href="{{welcome_video_url}}">Welcome Video - Start Here</a></p><p><strong>What to bring / Where to park / What to wear:</strong><br><a href="{{what_to_bring_url}}">Download PDF + Parking Map</a></p><p><strong>Calendar Invite:</strong><br><a href="{{calendar_ics_url}}">Add to Calendar (.ics)</a></p><p><strong>Your Learning Portal:</strong><br><a href="https://aesthetikine.com/portal/amanda-catherine/learning">Portal - Learning</a></p><p>In 60 mins you will leave able to safely assess & map face & body contouring clients.</p><p>See you at AesthetiKine!<br>Warmly,<br>Amanda Catherine<br>226-581-2003</p><p><em>P.S. This training is NOT for non-licensed practitioners - safety filter applies.<p>Warmly,<br>Amanda Catherine</p>',
     editable: false,
   },
   waitlist: {
     type: 'waitlist',
     subject: "You're on the waitlist for {{class_name}}",
-    body_html: '<p>Welcome to Amanda Catherine’s community.</p><p>Hi {{first_name}},</p><p>Thank you for joining the waitlist for <strong>{{class_name}}</strong>. Amanda’s team will contact you when enrollment information is available. We look forward to sharing the next steps with you.</p><p>Warmly,<br>Amanda Catherine</p>',
+    body_html: '<p>Hi {{first_name}},</p><p>You are registered for <strong>{{class_name}}</strong> at AesthetiKine Studio.</p><p><strong>Your first micro-win (watch now - 2 mins):</strong><br><a href="{{welcome_video_url}}">Welcome Video - Start Here</a></p><p><strong>What to bring / Where to park / What to wear:</strong><br><a href="{{what_to_bring_url}}">Download PDF + Parking Map</a></p><p><strong>Calendar Invite:</strong><br><a href="{{calendar_ics_url}}">Add to Calendar (.ics)</a></p><p><strong>Your Learning Portal:</strong><br><a href="https://aesthetikine.com/portal/amanda-catherine/learning">Portal - Learning</a></p><p>In 60 mins you will leave able to safely assess & map face & body contouring clients.</p><p>See you at AesthetiKine!<br>Warmly,<br>Amanda Catherine<br>226-581-2003</p><p><em>P.S. This training is NOT for non-licensed practitioners - safety filter applies.’s community.</p><p>Hi {{first_name}},</p><p>Thank you for joining the waitlist for <strong>{{class_name}}</strong>. Amanda’s team will contact you when enrollment information is available. We look forward to sharing the next steps with you.</p><p>Warmly,<br>Amanda Catherine</p>',
     editable: false,
   },
 };
@@ -46,7 +46,7 @@ export async function getAmandaConfirmationLetter(type: AmandaConfirmationType) 
   const records = await rows('confirmation_letters', `{type}='${type}'`);
   if (records[0]) return toLetter(records[0]);
   return type === 'live'
-    ? { type, subject: "You're registered for {{class_name}}", body_html: '<p>Hi {{first_name}},</p><p>Your registration for <strong>{{class_name}}</strong> has been received. Amanda’s team will send next steps to this email address.</p><p>Warmly,<br>Amanda Catherine</p>', editable: true }
+    ? { type, subject: "You're in! Welcome to {{class_name}} + Your First Micro-Win", body_html: '<p>Hi {{first_name}},</p><p>Your registration for <strong>{{class_name}}</strong> has been received. Amanda’s team will send next steps to this email address.</p><p>Warmly,<br>Amanda Catherine</p>', editable: true }
     : { type, subject: "You're on the waitlist for {{class_name}}", body_html: '<p>Hi {{first_name}},</p><p>Thank you for joining the waitlist for <strong>{{class_name}}</strong>. Amanda’s team will contact you when enrollment information is available.</p><p>Warmly,<br>Amanda Catherine</p>', editable: true };
 }
 
