@@ -497,14 +497,7 @@ export const AMANDA_COURSES = [
       'Practical Assessment & Graduation: Your Practitioner Kit',
     ],
   },
-,
-  {id:'test-firm-foundation', title:'[TEST $1] Firm Foundation', courseId:'firm-foundation', status:'READY' as const},
-  {id:'test-entrepreneurial-artist', title:'[TEST $1] Entrepreneurial Artist', courseId:'entrepreneurial-artist', status:'READY' as const},
-  {id:'test-reset', title:'[TEST $1] Reset', courseId:'aesthetikine-reset-training', status:'READY' as const},
-  {id:'test-body-sculpt', title:'[TEST $1] Body Sculpt', courseId:'body-sculpt-practitioner-certification', status:'READY' as const},
-  {id:'test-bbl', title:'[TEST $1] BBL', courseId:'non-surgical-bbl-training', status:'READY' as const},
-  {id:'test-wood', title:'[TEST $1] Wood Therapy', courseId:'wood-therapy-certification', status:'READY' as const},
-  {id:'test-fat-loss', title:'[TEST $1] Fat Loss', courseId:'clinical-fat-loss-injectables', status:'READY' as const}] as const;
+] as const;
 
 export const AMANDA_SELF_ENROLLMENT_COURSES = AMANDA_OFFERS.filter(
   (offer): offer is (typeof AMANDA_OFFERS)[number] & { courseId: string } => 'courseId' in offer && amandaCourseReady(offer.courseId),
