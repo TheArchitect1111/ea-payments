@@ -122,3 +122,7 @@ export const AMANDA_COURSE_RESOURCES: readonly AmandaCourseResource[] = [
     fileType: 'PDF',
   },
 ] as const;
+
+export function resourcesForAmandaCourse(courseId: string) {
+  return AMANDA_COURSE_RESOURCES.filter(r => r.courseId === courseId);
+}
