@@ -4,6 +4,7 @@ import { brickHash, readBrickRecord, writeBrickRecord } from '@/lib/bricks/durab
 import { TB3_ORGANIZATION_ID, TB3_PORTAL_SLUG } from '@/lib/tb3/contracts';
 import { loadTenantInstall, persistTenantInstall } from '@/lib/modules/tenant-install';
 import { setModuleEnabled, listEntitlementsForOrg } from '@/lib/entitlements';
+import { requireAssemblyPlan } from '@/lib/modules/assembly';
 
 export const tb3Tenant = { organizationId: TB3_ORGANIZATION_ID, portalSlug: TB3_PORTAL_SLUG };
 export const BonfireOrder = z.object({
@@ -29,12 +30,21 @@ export function bonfireSignatureValid(body:string,signature:string|null,secret:s
 }
 
 async function requireTb3Installed(){
-  try{const rec=await loadTenantInstall(TB3_ORGANIZATION_ID);if(rec&&rec.portalSlug===TB3_PORTAL_SLUG&&rec.state==='installed'&&(rec.admitted as string[]).includes('billing')&&(rec.admitted as string[]).includes('member'))return rec;}catch{}
-  console.log('[tb3 bonfire] FIXED provisioning tb3');
-  await persistTenantInstall({organizationId:TB3_ORGANIZATION_ID,portalSlug:TB3_PORTAL_SLUG,version:1 as const,admitted:['billing','member'] as any,requested:['billing','member'],brickIds:[],state:'installed' as const} as any).catch(e=>console.log('install fail',e));
-  await setModuleEnabled(TB3_ORGANIZATION_ID,'billing' as any,true,'manual').catch(e=>console.log('billing ent fail',e));
-  await setModuleEnabled(TB3_ORGANIZATION_ID,'member' as any,true,'manual').catch(e=>console.log('member ent fail',e));
-  return {organizationId:TB3_ORGANIZATION_ID,portalSlug:TB3_PORTAL_SLUG,state:'installed',admitted:['billing','member']} as any;
+  try{
+    const rec=await loadTenantInstall(TB3_ORGANIZATION_ID);
+    if(rec&&rec.portalSlug===TB3_PORTAL_SLUG&&rec.state==='installed')return rec;
+  }catch(e){console.log(' load failed', (e as Error).message)}
+  console.log('[tb3 bonfire] provisioning durable tb3');
+  const requested=['billing','member'];
+  const plan=requireAssemblyPlan(requested);
+  const row={organizationId:TB3_ORGANIZATION_ID,portalSlug:TB3_PORTAL_SLUG,version:1 as const,admitted:plan.admitted,requested,brickIds:[],state:'installed' as const, industryPackId: undefined} as any;
+  try{
+    await persistTenantInstall(row);
+    console.log(' durable install OK', plan.admitted);
+  }catch(e){console.log(' durable install failed, using ephemeral', (e as Error).message)}
+  await setModuleEnabled(TB3_ORGANIZATION_ID,'billing' as any,true,'manual').catch(()=>{});
+  await setModuleEnabled(TB3_ORGANIZATION_ID,'member' as any,true,'manual').catch(()=>{});
+  return row;
 }
 
 export async function ingestVerifiedBonfireOrder(input:unknown,origin:'bonfire'|'bonfire-csv'='bonfire',orderDate?:string){
@@ -47,7 +57,6 @@ export async function ingestVerifiedBonfireOrder(input:unknown,origin:'bonfire'|
     await ensureMemberEntitlement();
     return {sale:before,replay:true};
   }
-  // DIRECT BRICK WRITE - bypass commerce-family entitlement check that was blocking
   const billingId='billing-'+brickHash([TB3_ORGANIZATION_ID,order.order_id,origin]);
   await writeBrickRecord(tb3Tenant,billingId,{...tb3Tenant,id:billingId,externalOrderId:order.order_id,source:origin,offerId:order.product_id,title:order.product_name,amount:order.amount_cents,currency:order.currency,email:order.customer.email,name:order.customer.name,status:'verified'});
   await writeBrickRecord(tb3Tenant,id,row);

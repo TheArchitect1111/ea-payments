@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createStagingAdapters } from '@/src/chassis/adapters/staging.adapter';
+import { stagingAdapter } from '@/src/chassis/adapters/staging.adapter';
 import { BRICK_IDS, type Brick } from '@/src/chassis/BrickInterface';
 import type { ClientConfig } from '@/src/chassis/runClickTest';
 
@@ -13,7 +13,7 @@ export async function GET(_request: Request, context: { params: Promise<{ client
   const config: ClientConfig = tarrisConfig;
   // Contract-only sockets; no network, payment provider, email or entitlement writes.
   const sockets = BRICK_IDS.map(id => ({ id, health: async () => ({ status: 503, evidence: 'Not provisioned' }) } as Brick));
-  const adapters = await createStagingAdapters(config, sockets);
+  const adapters = await stagingAdapter(config, sockets);
   const checkout = adapters.find(brick => brick.id === 'checkout')!;
   const health = await checkout.health();
   if (health.status !== 200) return NextResponse.json({ error: health.evidence }, { status: 422 });
