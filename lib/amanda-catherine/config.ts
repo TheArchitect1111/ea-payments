@@ -274,63 +274,6 @@ export const AMANDA_OFFERS = [
     courseId: 'clinical-fat-loss-injectables',
     delivery: ['in-person', 'virtual'],
   },
-,
-  {
-    id: 'test-firm-foundation',
-    name: '[TEST $1] Firm Foundation',
-    priceCad: 1,
-    audience: 'member-community-participant',
-    courseId: 'firm-foundation',
-    delivery: ['virtual'],
-  },
-  {
-    id: 'test-entrepreneurial-artist',
-    name: '[TEST $1] Entrepreneurial Artist',
-    priceCad: 1,
-    audience: 'student-trainee',
-    courseId: 'entrepreneurial-artist',
-    delivery: ['virtual'],
-  },
-  {
-    id: 'test-reset',
-    name: '[TEST $1] Nervous System Reset',
-    priceCad: 1,
-    audience: 'student-trainee',
-    courseId: 'aesthetikine-reset-training',
-    delivery: ['virtual'],
-  },
-  {
-    id: 'test-body-sculpt',
-    name: '[TEST $1] Body Sculpt',
-    priceCad: 1,
-    audience: 'student-trainee',
-    courseId: 'body-sculpt-practitioner-certification',
-    delivery: ['virtual'],
-  },
-  {
-    id: 'test-bbl',
-    name: '[TEST $1] Non-Surgical BBL',
-    priceCad: 1,
-    audience: 'student-trainee',
-    courseId: 'non-surgical-bbl-training',
-    delivery: ['virtual'],
-  },
-  {
-    id: 'test-wood',
-    name: '[TEST $1] Wood Therapy',
-    priceCad: 1,
-    audience: 'student-trainee',
-    courseId: 'wood-therapy-certification',
-    delivery: ['virtual'],
-  },
-  {
-    id: 'test-fat-loss',
-    name: '[TEST $1] Clinical Fat Loss',
-    priceCad: 1,
-    audience: 'student-trainee',
-    courseId: 'clinical-fat-loss-injectables',
-    delivery: ['virtual'],
-  }
 ] as const;
 
 export const AMANDA_MEMBERSHIPS = [
