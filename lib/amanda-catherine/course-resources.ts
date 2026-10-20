@@ -126,3 +126,11 @@ export const AMANDA_COURSE_RESOURCES: readonly AmandaCourseResource[] = [
 export function resourcesForAmandaCourse(courseId: string) {
   return AMANDA_COURSE_RESOURCES.filter(r => r.courseId === courseId);
 }
+
+export function findAmandaCourseResource(resourceId: string) {
+  return AMANDA_COURSE_RESOURCES.find(r => r.id === resourceId);
+}
+
+export function getAmandaCourseResourceById(resourceId: string) {
+  return AMANDA_COURSE_RESOURCES.find(r => r.id === resourceId);
+}
