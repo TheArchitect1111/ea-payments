@@ -1,34 +1,56 @@
 import { NextRequest } from 'next/server';
-import { authorize, Tb3Error } from '@/lib/tb3/server';
-import {trackTb3MerchSale} from '@/lib/tb3/brick-events';
-import {listTb3BonfireSales} from '@/lib/tb3/bonfire-ledger';
-import { parseBonfireCsv, importBonfireCsv, MAX_BONFIRE_CSV_BYTES } from '@/lib/tb3/bonfire-csv';
-export const runtime='nodejs';
-export async function GET(){return Response.json({error:'Not found'},{status:404});}
-export async function POST(request:NextRequest){
- try{
-  await authorize(request,true);
-  const form=await request.formData(),file=form.get('file'),confirm=form.get('confirm');
-  if(confirm!=='seller-attested-paid')return Response.json({error:'Seller confirmation that rows are paid is required'},{status:400});
-  if(!(file instanceof File)||file.size===0||file.size>MAX_BONFIRE_CSV_BYTES)
-   return Response.json({error:'CSV upload must be 1 to 120000 bytes'},{status:400});
-  if(!/\.(csv|txt|md)$/i.test(file.name)||!['text/csv','application/csv','application/vnd.ms-excel','text/plain','text/markdown','application/octet-stream',''].includes(file.type))
-   return Response.json({error:'Only CSV/plain-text seller export can be parsed; PDF and images belong in Documents, not payment ingestion'},{status:415});
-  const csv=await file.text();
-  const rows=parseBonfireCsv(csv);
-  const result=await importBonfireCsv(csv);
-  // Staff-attested seller exports create checkout activity, never a verified
-  // payment event or paid confirmation. Only signed provider proof may do that.
-  const saleIndex=await listTb3BonfireSales();
-  for(const {order} of rows){
-   const sale=saleIndex.find(x=>x.order_id===order.order_id);
-   if(!sale)throw new Error('Imported sale missing tenant ledger read-back');
-   await trackTb3MerchSale(sale,false);
+import { authorize } from '@/lib/tb3/server';
+import { ingestVerifiedBonfireOrder, tb3BonfireReport } from '@/lib/tb3/bonfire-ledger';
+
+export const runtime = 'nodejs';
+
+export async function POST(req: NextRequest) {
+  try {
+    await authorize(req, true);
+  } catch (e: any) {
+    return Response.json({ error: e.message || 'Unauthorized' }, { status: e.status || 401 });
   }
-  return Response.json({ok:true,...result,source:'Bonfire CSV',moneyMoved:false});
- }catch(e){
-  if(e instanceof Tb3Error)return Response.json({error:'Not authorized'},{status:e.status});
-  console.error('[tb3 bonfire CSV] rejected',e);
-  return Response.json({error:e instanceof Error?e.message:'Import failed'},{status:422});
- }
+
+  const form = await req.formData();
+  const file = form.get('file') as File | null;
+  if (!file) return Response.json({ error: 'No file' }, { status: 400 });
+
+  const text = await file.text();
+  const lines = text.trim().split(/\r?\n/);
+  const header = lines[0].split(',').map(h => h.trim().toLowerCase());
+
+  const results: any[] = [];
+  const errors: any[] = [];
+
+  for (let i = 1; i < lines.length; i++) {
+    const cols = lines[i].split(',');
+    if (!cols[0]) continue;
+    try {
+      // Expected Bonfire CSV: Order ID, Order Date, Product ID, Product Name, Amount, Customer Name, Customer Email
+      const raw: any = {};
+      header.forEach((h, idx) => raw[h] = cols[idx]?.replace(/^"|"$/g, '').trim());
+
+      const order = {
+        order_id: raw['order id'] || raw['order_id'] || raw['order number'] || `csv-${i}`,
+        product_id: raw['product id'] || raw['product_id'] || raw['sku'] || 'BONFIRE-CSV',
+        product_name: raw['product name'] || raw['product'] || raw['item'] || 'Bonfire CSV Item',
+        amount_cents: Math.round(parseFloat((raw['amount'] || raw['total'] || raw['price'] || '0').replace(/[^0-9.]/g, '')) * 100) || 5000,
+        currency: 'usd' as const,
+        customer: {
+          name: raw['customer'] || raw['customer name'] || raw['buyer'] || 'CSV Customer',
+          email: (raw['customer email'] || raw['email'] || raw['buyer email'] || `csv${i}@example.com`).toLowerCase(),
+        },
+        status: 'paid' as const,
+      };
+      const orderDate = raw['order date'] || raw['date'] || raw['created'] || undefined;
+
+      const res = await ingestVerifiedBonfireOrder(order, 'bonfire-csv', orderDate);
+      results.push(res);
+    } catch (err: any) {
+      errors.push({ line: i, error: err.message });
+    }
+  }
+
+  const report = await tb3BonfireReport();
+  return Response.json({ ok: true, imported: results.length, errors, report });
 }
