@@ -23,7 +23,27 @@ export default async function Page({ params }: { params: Promise<{ courseSlug: s
       <section className="mx-auto max-w-3xl">
         {!['strategy-call', '90-day-package'].includes(course.key) && <h1 className="font-serif text-4xl">{course.title}</h1>}
         <p className="mt-4">{amandaClassCopy(course.description, available)}</p>
-        {course.price!==null && <p className="mt-4">{'$'+course.price.toLocaleString('en-US')} CAD</p>}
+        {course.price!==null && <p className="mt-4 font-bold">{'$'+course.price.toLocaleString('en-US')} CAD</p>}
+        <div className="mt-6 rounded-xl bg-white p-5 border border-[#ded8cd]">
+          <p className="text-sm font-bold uppercase tracking-wide text-[#b18b49]">In 60 minutes you leave able to:</p>
+          <ul className="mt-3 list-disc pl-5 text- leading-6">
+            <li>Safely assess face & body contouring clients (who it is / is NOT for)</li>
+            <li>Map facial & body treatment zones</li>
+            <li>Counsel on aftercare + book follow-up</li>
+            <li>Use your Practitioner Kit</li>
+          </ul>
+          <p className="mt-4 text-sm"><span className="font-bold">Who this is NOT for:</span> Non-licensed practitioners, clients outside scope, anyone seeking medical diagnosis. Safety filter required.</p>
+          <p className="mt-3 text-sm italic">"Amanda taught me to map safely in one afternoon - my first client booked next day." — Past practitioner student</p>
+        </div>
+        <div className="mt-6 rounded-xl bg-[#17211c] text-white p-5">
+          <p className="text-sm font-bold">After payment you instantly get:</p>
+          <ul className="mt-2 list-disc pl-5 text-sm opacity-90">
+            <li>2-min Welcome Video (watch first = your micro-win)</li>
+            <li>What to Bring / Where to Park / What to Wear PDF</li>
+            <li>Calendar Invite (.ics) for AesthetiKine Studio</li>
+            <li>Access to Learning Portal with materials</li>
+          </ul>
+        </div>
         <section id="waitlist" className="mt-8">
           {available
             ? (course.square_checkout_url
