@@ -39,7 +39,7 @@ export default async function AmandaEnrollmentSuccess({
       <ol>
         <li><strong>Micro-win (2 mins):</strong> Watch Welcome Video - what to expect at AesthetiKine Studio</li>
         <li><strong>Logistics:</strong> Download What to Bring / Where to Park / What to Wear PDF + Add Calendar Invite (.ics)</li>
-        <li><strong>Deep work:</strong> Open Learning -> Clinical Fat Loss -> Module 1: Scope, Safety & Who This Is NOT For</li>
+        <li><strong>Deep work:</strong> Open Learning - Clinical Fat Loss - Module 1: Scope, Safety and Who This Is NOT For</li>
       </ol>
       <div style={{marginTop:16, padding:16, background:'#f7f1e8', borderRadius:12}}>
         <p style={{fontWeight:800, fontSize:14, textTransform:'uppercase', color:'#b18b49'}}>You instantly get:</p>
