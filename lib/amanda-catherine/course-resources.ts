@@ -96,12 +96,29 @@ export const AMANDA_COURSE_RESOURCES: readonly AmandaCourseResource[] = [
     pathname: 'Body Sculpt Video Demo.mov',
     fileType: 'VIDEO',
   },
+
+  {
+    id: 'clinical-fat-loss-welcome-video',
+    courseId: 'clinical-fat-loss-injectables',
+    title: 'Welcome Video - Start Here (2-min micro-win)',
+    description: 'Watch within 5 mins of enrollment - Your first win before Day 1',
+    pathname: 'AesthetiKine_Welcome_MicroWin.mp4',
+    fileType: 'VIDEO',
+  },
+  {
+    id: 'clinical-fat-loss-what-to-bring',
+    courseId: 'clinical-fat-loss-injectables',
+    title: 'What to Bring / Where to Park / What to Wear + Calendar Invite',
+    description: 'Includes address, parking map, dress code. Auto-sent after payment.',
+    pathname: 'AesthetiKine_What_To_Bring_Park_Wear.pdf',
+    fileType: 'PDF',
+  },
+  {
+    id: 'clinical-fat-loss-who-not-for',
+    courseId: 'clinical-fat-loss-injectables',
+    title: 'Who This Is NOT For - Safety Filter',
+    description: 'Scope checklist - ensures safe practitioner practice',
+    pathname: 'AesthetiKine_Who_This_Is_NOT_For.pdf',
+    fileType: 'PDF',
+  },
 ] as const;
-
-export function resourcesForAmandaCourse(courseId: string) {
-  return AMANDA_COURSE_RESOURCES.filter((resource) => resource.courseId === courseId);
-}
-
-export function findAmandaCourseResource(resourceId: string) {
-  return AMANDA_COURSE_RESOURCES.find((resource) => resource.id === resourceId);
-}
