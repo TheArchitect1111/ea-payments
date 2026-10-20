@@ -12,3 +12,6 @@ export const stagingAdapter = {
 };
 
 export default stagingAdapter;
+
+export const createStagingAdapters = stagingAdapter;
+export function createStagingAdapter() { return stagingAdapter; }
