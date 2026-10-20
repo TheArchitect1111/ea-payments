@@ -4,12 +4,8 @@ export const AMANDA_READY_COURSE_IDS: readonly string[] = [
   'aesthetikine-reset-training', 'body-sculpt-practitioner-certification',
   'non-surgical-bbl-training', 'wood-therapy-certification',
   'clinical-fat-loss-injectables',
-  'firm-foundation',
-  'entrepreneurial-artist',
 ];
 export function amandaCourseStatus(courseId: string): 'READY' | 'WAITLIST' {
-  // Allow all $1 test offers to be READY
-  if (courseId.startsWith('test-')) return 'READY';
   return AMANDA_READY_COURSE_IDS.includes(courseId) ? 'READY' : 'WAITLIST';
 }
 export function amandaCourseReady(courseId: string) { return amandaCourseStatus(courseId) === 'READY'; }
