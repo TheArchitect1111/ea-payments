@@ -431,7 +431,14 @@ export const AMANDA_COURSES = [
     audience: 'student-trainee',
     certificateTitle: 'Clinical Fat Loss Injectables for Face & Body Contouring',
     practicalRequirements: ['case-study', 'quiz', 'practical-demonstration'],
-    lessons: [],
+    lessons: [
+      'Welcome & What to Bring / Where to Park / What to Wear',
+      'Scope, Safety & Who This Is NOT For',
+      'Facial Anatomy & Contouring Assessment',
+      'Body Contouring Assessment & Treatment Mapping',
+      'Injection Protocol, Counseling & Aftercare',
+      'Practical Assessment & Graduation: Your Practitioner Kit',
+    ],
   },
 ] as const;
 
