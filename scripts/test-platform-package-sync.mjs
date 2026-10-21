@@ -38,7 +38,7 @@ function hashTree(dir) {
       const full = join(current, name);
       if (statSync(full).isDirectory()) walk(full);
       else {
-        hash.update(relative(dir, full).split('\\').join('/'));
+        hash.update(relative(dir, full).split('\\\\').join('/'));
         hash.update('\\0');
         hash.update(readFileSync(full));
         hash.update('\\0');
@@ -54,7 +54,8 @@ const consumerRoot = join(fixture, 'ea-payments');
 const sourceRoot = join(fixture, 'ea-operating-system');
 const sourcePackages = join(sourceRoot, 'packages');
 const vendorRoot = join(consumerRoot, 'vendor');
-const sourceCommit = () => execFileSync('git', ['-C', sourceRoot, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
+const sourceCommit = () =>
+  execFileSync('git', ['-C', sourceRoot, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
 
 try {
   mkdirSync(join(consumerRoot, 'scripts'), { recursive: true });
@@ -63,9 +64,12 @@ try {
   for (const name of packages) {
     const source = join(sourcePackages, name);
     mkdirSync(join(source, 'src'), { recursive: true });
-    writeFileSync(join(source, 'package.json'), JSON.stringify({ name: '@ea/' + name, version: '1.2.3' }, null, 2) + '\n');
-    writeFileSync(join(source, 'src/index.ts'), "export { value } from './value.js';\n");
-    writeFileSync(join(source, 'src/value.ts'), 'export const value = 1;\n');
+    writeFileSync(
+      join(source, 'package.json'),
+      JSON.stringify({ name: '@ea/' + name, version: '1.2.3' }, null, 2) + '\\n',
+    );
+    writeFileSync(join(source, 'src/index.ts'), "export { value } from './value.js';\\n");
+    writeFileSync(join(source, 'src/value.ts'), 'export const value = 1;\\n');
   }
 
   execFileSync('git', ['init', '-q', sourceRoot]);
@@ -74,7 +78,8 @@ try {
   execFileSync('git', ['-C', sourceRoot, 'add', '.']);
   execFileSync('git', ['-C', sourceRoot, 'commit', '-qm', 'fixture source']);
 
-  const firstRun = run(process.execPath, [join(consumerRoot, 'scripts/sync-platform-packages.mjs')]);
+  const syncPath = join(consumerRoot, 'scripts/sync-platform-packages.mjs');
+  const firstRun = run(process.execPath, [syncPath]);
   assert.equal(firstRun.status, 0, firstRun.stderr || firstRun.stdout);
   const metaPath = join(vendorRoot, '.platform-sync-meta.json');
   const metadata = JSON.parse(readFileSync(metaPath, 'utf8'));
@@ -87,35 +92,38 @@ try {
     const vendorPackage = join(vendorRoot, name);
     assert.equal(metadata.packageHashes[name], hashTree(vendorPackage));
     assert.equal(
-    writeFileSync(join(source, 'src/index.ts'), "export { value } from './value.js';\n");
-      "export { value } from './value';\n",
+      readFileSync(join(vendorPackage, 'src/index.ts'), 'utf8'),
+      "export { value } from './value';\\n",
     );
   }
 
   // Dirty source must be rejected before the previous vendor snapshot changes.
-    writeFileSync(join(source, 'src/value.ts'), 'export const value = 1;\n');
-    writeFileSync(join(source, 'src/value.ts'), 'export const value = 1;\n');
-  const dirtyRun = run(process.execPath, [join(consumerRoot, 'scripts/sync-platform-packages.mjs')]);
+  const stableVendor = readFileSync(join(vendorRoot, 'capability-registry/src/value.ts'), 'utf8');
+  writeFileSync(
+    join(sourcePackages, 'capability-registry/src/value.ts'),
+    'export const value = 2;\\n',
+  );
+  const dirtyRun = run(process.execPath, [syncPath]);
   assert.notEqual(dirtyRun.status, 0);
   assert.equal(
-    writeFileSync(join(source, 'src/value.ts'), 'export const value = 1;\n');
+    readFileSync(join(vendorRoot, 'capability-registry/src/value.ts'), 'utf8'),
     stableVendor,
   );
   assert.equal(JSON.parse(readFileSync(metaPath, 'utf8')).source.commit, metadata.source.commit);
 
-  // After an intentional commit, a missing package must still leave vendor intact.
+  // Once intentional source changes are committed, a missing package still leaves vendor intact.
   execFileSync('git', ['-C', sourceRoot, 'add', '.']);
   execFileSync('git', ['-C', sourceRoot, 'commit', '-qm', 'change source']);
   execFileSync('git', ['-C', sourceRoot, 'rm', '-rq', 'packages/workspace-engine']);
   execFileSync('git', ['-C', sourceRoot, 'commit', '-qm', 'remove package fixture']);
   const beforeMissingPackageRun = readFileSync(
-    writeFileSync(join(source, 'src/value.ts'), 'export const value = 1;\n');
+    join(vendorRoot, 'capability-registry/src/value.ts'),
     'utf8',
   );
-  const missingRun = run(process.execPath, [join(consumerRoot, 'scripts/sync-platform-packages.mjs')]);
+  const missingRun = run(process.execPath, [syncPath]);
   assert.notEqual(missingRun.status, 0);
   assert.equal(
-    writeFileSync(join(source, 'src/value.ts'), 'export const value = 1;\n');
+    readFileSync(join(vendorRoot, 'capability-registry/src/value.ts'), 'utf8'),
     beforeMissingPackageRun,
   );
   assert.equal(JSON.parse(readFileSync(metaPath, 'utf8')).source.commit, metadata.source.commit);
