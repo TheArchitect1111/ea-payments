@@ -163,11 +163,7 @@ export default function TarrisPublicPage() {
           <article className="flex flex-col justify-between bg-[#141414] p-7 text-white"><div><p className="text-[9px] tracking-[0.3em] text-white/60">THE NEXT CHAPTER</p><h2 className="mt-6 text-4xl font-black leading-none tracking-tight">PLAYER<br /><span className="text-[#A51C30]">ONE.</span></h2><p className="mt-5 text-xs leading-6 text-white/70">Same vision. Higher purpose.<br />Build what comes next.</p></div><div className="mt-8"><HQLink dark /></div></article>
         </section>
         <section id="merch" className="scroll-mt-5 py-10">
-<<<<<<< HEAD
           <div className="mb-6"><p className="text-[9px] tracking-[0.25em] text-[#A51C30]">TB3 STORE</p><h2 className="mt-2 text-3xl font-black tracking-tight">WEAR THE VISION.</h2></div>
-=======
-          <div className="mb-6 flex flex-wrap items-end justify-between gap-4"><div><p className="text-[9px] tracking-[0.25em] text-[#A51C30]">TB3 STORE</p><h2 className="mt-2 text-3xl font-black tracking-tight">WEAR THE VISION.</h2></div><ActionLink href="https://tarris-bouie-shop.fourthwall.com" className="border border-black px-5 py-3 text-[10px] font-bold tracking-widest">SHOP TB3 →</ActionLink></div>
->>>>>>> fa7ce4cc (fix: TB3 merch Bonfire -> Fourthwall tarris-bouie-shop.fourthwall.com)
           <div id="merch-store" className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">{merchProducts.map((product, index) => <MerchProductCard key={product.id} product={product} index={index} />)}</div>
         </section>
         <BookingForm/>
