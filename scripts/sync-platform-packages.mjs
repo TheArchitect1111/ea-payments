@@ -53,7 +53,8 @@ function git(...args) {
 
 const sourceRepo = git('-C', osPackages, 'rev-parse', '--show-toplevel');
 const sourceCommit = git('-C', sourceRepo, 'rev-parse', 'HEAD');
-const sourceRef = git('-C', sourceRepo, 'symbolic-ref', '--short', '-q', 'HEAD') || 'detached';
+let sourceRef = 'detached';
+try { sourceRef = git('-C', sourceRepo, 'symbolic-ref', '--short', '-q', 'HEAD'); } catch {}
 const dirty = Boolean(git('-C', sourceRepo, 'status', '--porcelain', '--untracked-files=all'));
 if (dirty && process.env.EA_ALLOW_DIRTY_PLATFORM_SOURCE !== '1') {
   throw new Error(
@@ -86,9 +87,9 @@ function treeHash(dir) {
   const hash = createHash('sha256');
   for (const file of walkFiles(dir)) {
     hash.update(relative(dir, file).split('\\').join('/'));
-    hash.update('\\0');
+    hash.update('\0');
     hash.update(readFileSync(file));
-    hash.update('\\0');
+    hash.update('\0');
   }
   return hash.digest('hex');
 }
