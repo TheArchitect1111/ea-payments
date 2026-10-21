@@ -31,7 +31,13 @@ export default async function TarrisPaymentSuccess({ searchParams }: { searchPar
           <div className="mt-1 text-5xl font-bold text-neutral-950">{paid ? '$500 Paid' : 'Check Required'}</div>
         </div>
         <p className="text-neutral-600 leading-7">{message}</p>
-        {paid ? <p className="mt-6 text-sm font-semibold text-neutral-900">Next: Efficiency Architects begins the contracted implementation.</p> : null}
+        {paid ? (
+          <div className="mt-8 space-y-3">
+            <p className="text-sm font-semibold text-neutral-900">Next: Efficiency Architects begins the contracted implementation.</p>
+            <a href="/tarris/future" className="inline-block w-full bg-black text-white px-8 py-3 text-center font-bold uppercase tracking-widest text-sm">Access HQ Workspace →</a>
+            <p className="text-xs text-neutral-500">Use portal login: tarrisb73@yahoo.com</p>
+          </div>
+        ) : null}
       </section>
     </main>
   );
