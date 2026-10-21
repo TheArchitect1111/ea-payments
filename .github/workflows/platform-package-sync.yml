@@ -1,0 +1,32 @@
+name: Platform package sync
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/sync-platform-packages.mjs'
+      - 'scripts/test-platform-package-sync.mjs'
+      - '.github/workflows/platform-package-sync.yml'
+  push:
+    branches:
+      - master
+    paths:
+      - 'scripts/sync-platform-packages.mjs'
+      - 'scripts/test-platform-package-sync.mjs'
+      - '.github/workflows/platform-package-sync.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  package-sync:
+    name: Test package sync provenance and failure safety
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Run sync integration test
+        run: node scripts/test-platform-package-sync.mjs

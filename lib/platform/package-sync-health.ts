@@ -7,8 +7,8 @@
  * function traces (see admin/capability-marketplace 530MB failure).
  */
 import { createHash } from 'node:crypto';
-import { existsSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
+import { join, relative, sep } from 'node:path';
 
 export const PLATFORM_VENDOR_PACKAGES = [
   'capability-registry',
@@ -36,6 +36,9 @@ export type PackageSyncRow = {
   versionMatch: boolean | null;
   /** Content fingerprint drift for a sentinel source file (null if OS unavailable). */
   contentMatch: boolean | null;
+  /** Full vendor tree matches the recorded sync hash; null for legacy metadata. */
+  snapshotMatch: boolean | null;
+  sourceCommit: string | null;
   detail: string;
   ok: boolean;
 };
@@ -122,6 +125,47 @@ function fingerprintNormalized(path: string): string | null {
   }
 }
 
+type PlatformSyncMetadata = {
+  source?: { commit?: string };
+  packageHashes?: Partial<Record<(typeof PLATFORM_VENDOR_PACKAGES)[number], string>>;
+};
+
+function readPlatformSyncMetadata(): PlatformSyncMetadata | null {
+  try {
+    const parsed = JSON.parse(
+      readFileSync(vendorJoin('', '.platform-sync-meta.json'), 'utf8'),
+    ) as PlatformSyncMetadata;
+    return parsed && typeof parsed === 'object' ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+function fingerprintTree(path: string): string | null {
+  if (!existsSync(path)) return null;
+  try {
+    const hash = createHash('sha256');
+    const files: string[] = [];
+    function walk(dir: string) {
+      for (const name of readdirSync(dir).sort()) {
+        const full = join(dir, name);
+        if (statSync(full).isDirectory()) walk(full);
+        else files.push(full);
+      }
+    }
+    walk(path);
+    for (const file of files) {
+      hash.update(relative(path, file).split(sep).join('/'));
+      hash.update('\0');
+      hash.update(readFileSync(file));
+      hash.update('\0');
+    }
+    return hash.digest('hex');
+  } catch {
+    return null;
+  }
+}
+
 /** Sentinel files used to detect vendor drift vs OS (platform packages). */
 const PLATFORM_SENTINELS: Partial<Record<(typeof PLATFORM_VENDOR_PACKAGES)[number], string>> = {
   'capability-registry': 'src/id-map.ts',
@@ -136,6 +180,7 @@ const PLATFORM_SENTINELS: Partial<Record<(typeof PLATFORM_VENDOR_PACKAGES)[numbe
 function rowForPlatform(
   name: (typeof PLATFORM_VENDOR_PACKAGES)[number],
   osPackagesRoot: string | null,
+  metadata: PlatformSyncMetadata | null,
 ): PackageSyncRow {
   const present =
     existsSync(vendorJoin(name, 'package.json')) && existsSync(vendorJoin(name, 'src'));
@@ -144,6 +189,13 @@ function rowForPlatform(
   let osVersion: string | null = null;
   let versionMatch: boolean | null = null;
   let contentMatch: boolean | null = null;
+  let snapshotMatch: boolean | null = null;
+  const sourceCommit = metadata?.source?.commit ?? null;
+  const expectedHash = metadata?.packageHashes?.[name];
+  if (expectedHash && present) {
+    const actualHash = fingerprintTree(vendorJoin(name));
+    if (actualHash) snapshotMatch = actualHash === expectedHash;
+  }
 
   if (osPackagesRoot) {
     const osPkgJson = join(osPackagesRoot, name, 'package.json');
@@ -158,7 +210,11 @@ function rowForPlatform(
     }
   }
 
-  const ok = present && versionMatch !== false && contentMatch !== false;
+  const ok =
+    present &&
+    versionMatch !== false &&
+    contentMatch !== false &&
+    snapshotMatch !== false;
 
   const parts: string[] = [];
   if (!present) parts.push('missing vendor copy');
@@ -173,6 +229,9 @@ function rowForPlatform(
   } else {
     parts.push('OS checkout not available (vendor-only check)');
   }
+  if (snapshotMatch === true) parts.push(`snapshot verified @ ${sourceCommit?.slice(0, 12) ?? 'unknown commit'}`);
+  else if (snapshotMatch === false) parts.push('snapshot differs from recorded sync');
+  else parts.push('sync provenance unavailable — run npm run sync-platform-packages');
 
   return {
     name,
@@ -183,6 +242,8 @@ function rowForPlatform(
     osVersion,
     versionMatch,
     contentMatch,
+    snapshotMatch,
+    sourceCommit,
     detail: parts.join(' · '),
     ok,
   };
@@ -227,6 +288,8 @@ function rowForChassis(
     osVersion,
     versionMatch,
     contentMatch: null,
+    snapshotMatch: null,
+    sourceCommit: null,
     detail: parts.join(' · '),
     ok,
   };
@@ -235,9 +298,10 @@ function rowForChassis(
 export function getPackageSyncHealth() {
   const osPackagesRoot = resolveOsPackagesRoot();
   const osRoot = resolveOsChassisRoot();
+  const metadata = readPlatformSyncMetadata();
 
   const platform = PLATFORM_VENDOR_PACKAGES.map((name) =>
-    rowForPlatform(name, osPackagesRoot),
+    rowForPlatform(name, osPackagesRoot, metadata),
   );
   const chassis = CHASSIS_VENDOR_PACKAGES.map((name) => rowForChassis(name, osRoot));
   const packages = [...platform, ...chassis];
@@ -245,8 +309,11 @@ export function getPackageSyncHealth() {
   const missing = packages.filter((p) => !p.present).map((p) => p.name);
   const drifted = packages
     .filter(
-      (p) => p.present && (p.versionMatch === false || p.contentMatch === false),
+      (p) => p.present && (p.versionMatch === false || p.contentMatch === false || p.snapshotMatch === false),
     )
+    .map((p) => p.name);
+  const unverified = platform
+    .filter((p) => p.present && p.snapshotMatch === null)
     .map((p) => p.name);
 
   const ok = packages.every((p) => p.ok);
@@ -258,11 +325,14 @@ export function getPackageSyncHealth() {
     presentCount: packages.filter((p) => p.present).length,
     missing,
     drifted,
+    unverified,
     packages,
     syncHint: drifted.length
       ? 'Run npm run sync-platform-packages (and sync-chassis / sync-premium if chassis drifted).'
       : missing.length
         ? 'Vendor copies missing — run npm run sync-platform-packages.'
-        : 'Vendor packages present.',
+        : unverified.length
+          ? 'Sync hashes are unavailable — run npm run sync-platform-packages to record verified provenance.'
+          : 'Vendor package snapshots verified.',
   };
 }
