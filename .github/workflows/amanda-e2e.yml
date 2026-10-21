@@ -35,8 +35,8 @@ jobs:
           node-version: '24'
           cache: npm
       - run: npm ci --ignore-scripts
-      - name: Exercise actual fulfillment with isolated fake transports
-        run: npm run test:amanda-dollar-e2e
+      - name: Amanda fulfillment and wiring suite
+        run: npm run test:amanda-suite
       - name: Existing Amanda source contract
         run: npm run test:amanda-learning-handoff
 
