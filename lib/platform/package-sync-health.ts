@@ -312,6 +312,9 @@ export function getPackageSyncHealth() {
       (p) => p.present && (p.versionMatch === false || p.contentMatch === false || p.snapshotMatch === false),
     )
     .map((p) => p.name);
+  const unverified = platform
+    .filter((p) => p.present && p.snapshotMatch === null)
+    .map((p) => p.name);
 
   const ok = packages.every((p) => p.ok);
 
@@ -322,11 +325,14 @@ export function getPackageSyncHealth() {
     presentCount: packages.filter((p) => p.present).length,
     missing,
     drifted,
+    unverified,
     packages,
     syncHint: drifted.length
       ? 'Run npm run sync-platform-packages (and sync-chassis / sync-premium if chassis drifted).'
       : missing.length
         ? 'Vendor copies missing — run npm run sync-platform-packages.'
-        : 'Vendor packages present.',
+        : unverified.length
+          ? 'Sync hashes are unavailable — run npm run sync-platform-packages to record verified provenance.'
+          : 'Vendor package snapshots verified.',
   };
 }
