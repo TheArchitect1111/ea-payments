@@ -7,13 +7,11 @@ const registrySource = readFileSync('lib/modules/registry.ts', 'utf8');
 const failures = [];
 const required = contract.requiredEvidenceClasses ?? [];
 
-const registryMatch = registrySource.match(/export const MODULE_IDS = \\[([\\s\\S]*?)\\] as const;/);
-if (!registryMatch) {
-  failures.push('registry:unable-to-read-MODULE_IDS');
-}
-const registryIds = registryMatch
-  ? [...registryMatch[1].matchAll(/'([^']+)'/g)].map((match) => match[1])
-  : [];
+const registryStart = registrySource.indexOf('export const MODULE_IDS = [');
+const registryEnd = registryStart < 0 ? -1 : registrySource.indexOf('] as const;', registryStart);
+if (registryStart < 0 || registryEnd < 0) failures.push('registry:unable-to-read-MODULE_IDS');
+const registryBody = registryStart >= 0 && registryEnd >= 0 ? registrySource.slice(registryStart, registryEnd) : '';
+const registryIds = [...registryBody.matchAll(/'([^']+)'/g)].map((match) => match[1]);
 const inventoryIds = inventory.modules.map((module) => module.id);
 const certifiedModules = inventory.modules.filter((module) => module.assemblyStatus === 'certified');
 const certifiedIds = certifiedModules.map((module) => module.id);
