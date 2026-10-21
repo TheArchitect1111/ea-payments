@@ -120,7 +120,7 @@ for (const path of [...uniqueTests].sort()) {
     const outputTail = output.trim().slice(-1800);
     console.error(`[evidence-test-failed] ${path} (exit=${result.status ?? 'null'}, code=${result.error?.code ?? 'none'})`);
     if (diagnostics) console.error(diagnostics);
-    else if (outputTail) console.error(outputTail);
+    if (outputTail) console.error('[evidence-test-output-tail]\n' + outputTail);
   }
 }
 
