@@ -1,38 +1,14 @@
 [
-  {
-    "id": "tb3-sig-collage-tee-black",
-    "name": "TB3 Collage Signature Tee - Black",
-    "price": 65,
-    "color": "Black",
-    "image": "/tb3/merch/collage-sig-black.jpg",
-    "fourthwall_id": "pending",
-    "status": "live"
-  },
-  {
-    "id": "tb3-sig-collage-hoodie-black",
-    "name": "TB3 Collage Signature Hoodie - Black",
-    "price": 75,
-    "color": "Black",
-    "image": "/tb3/merch/collage-sig-black.jpg",
-    "fourthwall_id": "pending",
-    "status": "live"
-  },
-  {
-    "id": "tb3-sig-collage-tee-white",
-    "name": "TB3 Collage Signature Tee - White",
-    "price": 65,
-    "color": "White",
-    "image": "/tb3/merch/collage-sig-white.jpg",
-    "fourthwall_id": "pending",
-    "status": "live"
-  },
-  {
-    "id": "tb3-sig-collage-hoodie-white",
-    "name": "TB3 Collage Signature Hoodie - White",
-    "price": 75,
-    "color": "White",
-    "image": "/tb3/merch/collage-sig-white.jpg",
-    "fourthwall_id": "pending",
-    "status": "live"
-  }
+  {"id":"merch-short-red","name":"TB3 TEE - RED","price":35,"color":"Red","image":"/tb3/merch/MOCK_TEE_SHORT_RED.jpg","status":"live"},
+  {"id":"merch-short-white","name":"TB3 TEE - WHITE","price":35,"color":"White","image":"/tb3/merch/MOCK_TEE_SHORT_WHITE.jpg","status":"live"},
+  {"id":"merch-long-red","name":"TB3 LONG SLEEVE - RED","price":45,"color":"Red","image":"/tb3/merch/MOCK_TEE_LONG_RED.jpg","status":"live"},
+  {"id":"merch-long-white","name":"TB3 LONG SLEEVE - WHITE","price":45,"color":"White","image":"/tb3/merch/MOCK_TEE_LONG_WHITE.jpg","status":"live"},
+  {"id":"merch-cap-white","name":"TB3 CAP - WHITE","price":30,"color":"White / Red","image":"/tb3/merch/MOCK_HAT_WHITE.jpg","status":"live"},
+  {"id":"merch-cap-red","name":"TB3 CAP - RED","price":30,"color":"Red / White","image":"/tb3/merch/MOCK_HAT_RED.jpg","status":"live"},
+  {"id":"merch-hoodie-red","name":"TB3 HOODIE - RED","price":75,"color":"Red","image":"/tb3/merch/MOCK_HOODIE_RED.jpg","status":"live"},
+  {"id":"merch-hoodie-white","name":"TB3 HOODIE - WHITE","price":75,"color":"White","image":"/tb3/merch/MOCK_HOODIE_WHITE.jpg","status":"live"},
+  {"id":"tb3-sig-collage-tee-black","name":"TB3 Collage Signature Tee - Black","price":65,"color":"Black","image":"/tb3/merch/collage-sig-black.jpg","status":"live"},
+  {"id":"tb3-sig-collage-hoodie-black","name":"TB3 Collage Signature Hoodie - Black","price":75,"color":"Black","image":"/tb3/merch/collage-sig-black.jpg","status":"live"},
+  {"id":"tb3-sig-collage-tee-white","name":"TB3 Collage Signature Tee - White","price":65,"color":"White","image":"/tb3/merch/collage-sig-white.jpg","status":"live"},
+  {"id":"tb3-sig-collage-hoodie-white","name":"TB3 Collage Signature Hoodie - White","price":75,"color":"White","image":"/tb3/merch/collage-sig-white.jpg","status":"live"}
 ]
