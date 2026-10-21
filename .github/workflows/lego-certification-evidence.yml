@@ -42,6 +42,8 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
+      - name: Install Chromium for browser evidence
+        run: npx playwright install --with-deps chromium
       - name: Run module tests and bind results to source
         run: node scripts/run-lego-certification-evidence.mjs
       - name: Upload evidence report
