@@ -1,14 +1,16 @@
 [
-  {"id":"merch-short-red","name":"TB3 TEE - RED","price":35,"color":"Red","image":"/tb3/merch/MOCK_TEE_SHORT_RED.jpg","status":"live"},
-  {"id":"merch-short-white","name":"TB3 TEE - WHITE","price":35,"color":"White","image":"/tb3/merch/MOCK_TEE_SHORT_WHITE.jpg","status":"live"},
-  {"id":"merch-long-red","name":"TB3 LONG SLEEVE - RED","price":45,"color":"Red","image":"/tb3/merch/MOCK_TEE_LONG_RED.jpg","status":"live"},
-  {"id":"merch-long-white","name":"TB3 LONG SLEEVE - WHITE","price":45,"color":"White","image":"/tb3/merch/MOCK_TEE_LONG_WHITE.jpg","status":"live"},
-  {"id":"merch-cap-white","name":"TB3 CAP - WHITE","price":30,"color":"White / Red","image":"/tb3/merch/MOCK_HAT_WHITE.jpg","status":"live"},
-  {"id":"merch-cap-red","name":"TB3 CAP - RED","price":30,"color":"Red / White","image":"/tb3/merch/MOCK_HAT_RED.jpg","status":"live"},
-  {"id":"merch-hoodie-red","name":"TB3 HOODIE - RED","price":75,"color":"Red","image":"/tb3/merch/MOCK_HOODIE_RED.jpg","status":"live"},
-  {"id":"merch-hoodie-white","name":"TB3 HOODIE - WHITE","price":75,"color":"White","image":"/tb3/merch/MOCK_HOODIE_WHITE.jpg","status":"live"},
-  {"id":"tb3-sig-collage-tee-black","name":"TB3 Collage Signature Tee - Black","price":65,"color":"Black","image":"/tb3/merch/collage-sig-black.jpg","status":"live"},
-  {"id":"tb3-sig-collage-hoodie-black","name":"TB3 Collage Signature Hoodie - Black","price":75,"color":"Black","image":"/tb3/merch/collage-sig-black.jpg","status":"live"},
-  {"id":"tb3-sig-collage-tee-white","name":"TB3 Collage Signature Tee - White","price":65,"color":"White","image":"/tb3/merch/collage-sig-white.jpg","status":"live"},
-  {"id":"tb3-sig-collage-hoodie-white","name":"TB3 Collage Signature Hoodie - White","price":75,"color":"White","image":"/tb3/merch/collage-sig-white.jpg","status":"live"}
+  {"id":"merch-short-red","name":"TB3 Official Tee | Red","price":35,"color":"Red","image":"/tb3/merch/MOCK_TEE_SHORT_RED.jpg","status":"live","fourthwall_url":"https://tarris-bouie-shop.fourthwall.com"},
+  {"id":"merch-short-white","name":"TB3 Official Tee | White","price":35,"color":"White","image":"/tb3/merch/MOCK_TEE_SHORT_WHITE.jpg","status":"live","fourthwall_url":"https://tarris-bouie-shop.fourthwall.com"},
+  {"id":"merch-long-red","name":"TB3 Official Long Sleeve | Red","price":45,"color":"Red","image":"/tb3/merch/MOCK_TEE_LONG_RED.jpg","status":"live","fourthwall_url":"https://tarris-bouie-shop.fourthwall.com"},
+  {"id":"merch-long-white","name":"TB3 Official Long Sleeve | White","price":45,"color":"White","image":"/tb3/merch/MOCK_TEE_LONG_WHITE.jpg","status":"live","fourthwall_url":"https://tarris-bouie-shop.fourthwall.com"},
+  {"id":"merch-cap-white","name":"TB3 Official Cap | White & Red","price":30,"color":"White / Red","image":"/tb3/merch/MOCK_HAT_WHITE.jpg","status":"live","fourthwall_url":"https://tarris-bouie-shop.fourthwall.com"},
+  {"id":"merch-cap-red","name":"TB3 Cap - Red","price":30,"color":"Red / White","image":"/tb3/merch/MOCK_HAT_RED.jpg","status":"live","fourthwall_url":"https://tarris-bouie-shop.fourthwall.com"},
+  {"id":"merch-hoodie-red","name":"TB3 Hoodie - Red","price":75,"color":"Red","image":"/tb3/merch/MOCK_HOODIE_RED.jpg","status":"live","fourthwall_url":"https://tarris-bouie-shop.fourthwall.com"},
+  {"id":"merch-hoodie-white","name":"TB3 Hoodie - White","price":75,"color":"White","image":"/tb3/merch/MOCK_HOODIE_WHITE.jpg","status":"live","fourthwall_url":"https://tarris-bouie-shop.fourthwall.com"},
+  {"id":"merch-hoodie-premium","name":"TB3 Signature Logo Hoodie | Premium Edition","price":85,"color":"White","image":"/tb3/merch/MOCK_HOODIE_WHITE_LOGO_DETAIL_1.jpg","status":"live","fourthwall_url":"https://tarris-bouie-shop.fourthwall.com"},
+  {"id":"merch-crewneck-red","name":"TB3 Official Crewneck | Red","price":65,"color":"Red","image":"/tb3/merch/MOCK_SWEATSHIRT_WHITE_LOGO_DETAIL.jpg","status":"live","fourthwall_url":"https://tarris-bouie-shop.fourthwall.com"},
+  {"id":"tb3-sig-collage-tee-black","name":"TB3 Collage Signature Tee - Black","price":65,"color":"Black","image":"/tb3/merch/collage-sig-black.jpg","status":"live","fourthwall_url":"https://tarris-bouie-shop.fourthwall.com"},
+  {"id":"tb3-sig-collage-hoodie-black","name":"TB3 Collage Signature Hoodie - Black","price":75,"color":"Black","image":"/tb3/merch/collage-sig-black.jpg","status":"live","fourthwall_url":"https://tarris-bouie-shop.fourthwall.com"},
+  {"id":"tb3-sig-collage-tee-white","name":"TB3 Collage Signature Tee - White","price":65,"color":"White","image":"/tb3/merch/collage-sig-white.jpg","status":"live","fourthwall_url":"https://tarris-bouie-shop.fourthwall.com"},
+  {"id":"tb3-sig-collage-hoodie-white","name":"TB3 Collage Signature Hoodie - White","price":75,"color":"White","image":"/tb3/merch/collage-sig-white.jpg","status":"live","fourthwall_url":"https://tarris-bouie-shop.fourthwall.com"}
 ]
