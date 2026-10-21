@@ -6,7 +6,7 @@ import {createHmac} from 'node:crypto';
 const state={rows:new Map<string,any>(),writes:new Map<string,number>(),entitlements:new Map<string,any>(),persist:true};
 (globalThis as any).__bonfireTest=state;
 const mocks:Record<string,string>={
- '@/lib/modules/tenant-install':"export async function loadTenantInstall(org){return {organizationId:org,portalSlug:'tarris',state:'installed',admitted:['billing','member','dashboard','reports']};}",
+ '@/lib/modules/tenant-install':"export async function loadTenantInstall(org){return {organizationId:org,portalSlug:'tarris',state:'installed',admitted:['billing','member','dashboard','reports']};} export async function persistTenantInstall(row){return row;}",
  '@/lib/entitlements':"export async function setModuleEnabled(org,kind){const s=globalThis.__bonfireTest,row={organizationId:org,moduleId:kind,status:'active'};s.entitlements.set(org+':'+kind,row);return row;}export async function listEntitlementsForOrg(org){return [...globalThis.__bonfireTest.entitlements.values()].filter(x=>x.organizationId===org);}",
  '@/lib/bricks/durable':`import {createHash} from 'node:crypto';
  export const brickHash=x=>createHash('sha256').update(JSON.stringify(x)).digest('hex');
