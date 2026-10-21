@@ -54,6 +54,19 @@ for (const module of certifiedModules) {
     for (const path of evidence.tests) {
       if (!existsSync(path)) failures.push(module.id + ':' + evidenceClass + ':missing-file:' + path);
     }
+    const mappedTests = certificate.evidenceClassTests?.[evidenceClass];
+    if (!Array.isArray(mappedTests) || !mappedTests.length) {
+      failures.push(module.id + ':' + evidenceClass + ':missing-explicit-test-mapping');
+    } else {
+      const evidenceTests = [...new Set(evidence.tests)].sort();
+      const classTests = [...new Set(mappedTests)].sort();
+      if (JSON.stringify(evidenceTests) !== JSON.stringify(classTests)) {
+        failures.push(module.id + ':' + evidenceClass + ':class-test-mapping-mismatch');
+      }
+      for (const path of classTests) {
+        if (!existsSync(path)) failures.push(module.id + ':' + evidenceClass + ':mapped-test-missing-file:' + path);
+      }
+    }
   }
   if (!certificate.sourceFingerprint || !certificate.evidenceFingerprint) {
     failures.push(module.id + ':missing-fingerprint');
