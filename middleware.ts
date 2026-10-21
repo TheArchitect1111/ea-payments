@@ -257,6 +257,13 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next({ request: { headers: requestHeaders } });
   }
 
+  // PUBLIC TB3 - bypass portal slug logic
+  if (pathname === '/tarris' || pathname.startsWith('/tarris/') || pathname.startsWith('/pay/tarris') || pathname.startsWith('/api/tarris')) {
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.set('x-pathname', pathname);
+    return NextResponse.next({ request: { headers: requestHeaders } });
+  }
+
   if (pathname.startsWith('/portal')) {
     if (isPublicPortalAuthPath(pathname) || isPublicPortalExperiencePath(pathname)) {
       const requestHeaders = new Headers(request.headers);
