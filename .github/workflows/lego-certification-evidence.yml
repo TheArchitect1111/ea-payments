@@ -1,0 +1,69 @@
+name: Lego certification evidence report
+
+on:
+  pull_request:
+    paths:
+      - 'app/**'
+      - 'lib/**'
+      - 'src/**'
+      - 'vendor/**'
+      - 'config/capability-inventory.json'
+      - 'config/module-certification-contract.json'
+      - 'config/module-certification-evidence.json'
+      - 'scripts/run-lego-certification-evidence.mjs'
+      - 'scripts/test-lego-certification-contract.mjs'
+      - '.github/workflows/lego-certification-evidence.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'app/**'
+      - 'lib/**'
+      - 'src/**'
+      - 'vendor/**'
+      - 'config/capability-inventory.json'
+      - 'config/module-certification-contract.json'
+      - 'config/module-certification-evidence.json'
+      - 'scripts/run-lego-certification-evidence.mjs'
+      - 'scripts/test-lego-certification-contract.mjs'
+      - '.github/workflows/lego-certification-evidence.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  evidence-report:
+    name: Diagnostic only — certification evidence report
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Install Chromium for browser evidence
+        run: npx playwright install --with-deps chromium
+      - name: Validate module certification contract
+        run: node scripts/test-lego-certification-contract.mjs
+      - name: Resolve implementation source commit
+        id: implementation-source
+        run: |
+          source_commit="$(git log -1 --format=%H -- app lib src vendor config/capability-inventory.json config/module-certification-contract.json)"
+          test -n "$source_commit"
+          echo "sha=$source_commit" >> "$GITHUB_OUTPUT"
+      - name: Run module tests and bind results to source
+        env:
+          GITHUB_SOURCE_COMMIT: ${{ steps.implementation-source.outputs.sha }}
+        run: node scripts/run-lego-certification-evidence.mjs
+      - name: Upload evidence report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lego-certification-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/lego-certification/latest.json
+          if-no-files-found: error
+          retention-days: 14
