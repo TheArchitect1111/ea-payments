@@ -37,6 +37,9 @@ jobs:
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -44,7 +47,15 @@ jobs:
       - run: npm ci
       - name: Install Chromium for browser evidence
         run: npx playwright install --with-deps chromium
+      - name: Resolve implementation source commit
+        id: implementation-source
+        run: |
+          source_commit="$(git log -1 --format=%H -- app lib src vendor config/capability-inventory.json config/module-certification-contract.json)"
+          test -n "$source_commit"
+          echo "sha=$source_commit" >> "$GITHUB_OUTPUT"
       - name: Run module tests and bind results to source
+        env:
+          GITHUB_SOURCE_COMMIT: ${{ steps.implementation-source.outputs.sha }}
         run: node scripts/run-lego-certification-evidence.mjs
       - name: Upload evidence report
         if: always()
