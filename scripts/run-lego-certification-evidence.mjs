@@ -112,6 +112,14 @@ for (const path of [...uniqueTests].sort()) {
     outputFingerprint: sha256(output),
     errorCode: result.error?.code ?? null,
   };
+  if (testResults[path].status !== 'passed') {
+    const diagnosticLines = output.split(/\r?\n/)
+      .filter((line) => /FAIL|AssertionError|Error:|not ok|missing|expected|cannot find|timeout/i.test(line))
+      .slice(-16);
+    const diagnostics = diagnosticLines.join('\n').slice(-2400);
+    console.error(`[evidence-test-failed] ${path} (exit=${result.status ?? 'null'}, code=${result.error?.code ?? 'none'})`);
+    if (diagnostics) console.error(diagnostics);
+  }
 }
 
 const allTestFilesPassed = Object.values(testResults).every((result) => result.status === 'passed');
