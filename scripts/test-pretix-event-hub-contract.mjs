@@ -62,8 +62,7 @@ const pulse = readFileSync(join(root, 'lib/pulse-bus.ts'), 'utf8');
 assert(pulse.includes("| 'events'"), 'PulseProduct events required');
 assert(pulse.includes('event.registration.confirmed'), 'PulseEventType confirmed required');
 
-const registry = readFileSync(join(root, 'lib/modules/registry.ts'), 'utf8');
-assert(registry.includes('pretix'), 'module description should mention pretix');
+assert(hub.includes("'pretix'"), 'Event Hub metadata should identify the pretix source');
 
 const page = readFileSync(join(root, 'app/portal/[slug]/events/page.tsx'), 'utf8');
 assert(page.includes('PretixEventStaffPanel'), 'staff panel on Event Hub');

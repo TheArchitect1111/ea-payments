@@ -47,7 +47,7 @@ assert(nav.includes("label: 'Journey'"), 'nav includes Journey as secondary');
   );
 }
 assert(!/label:\s*'(Pulse|Simplifi|Amplifi|Dashboard|Command Center|Mission Control)'/.test(nav), 'client nav has no Executive labels');
-assert(nav.includes("return 'progress'"), 'default active nav is Your Project');
+assert(/items\.some\(\(item\) => item\.id === 'progress'\)\s*\?\s*'progress'/.test(nav), 'default active nav prefers Your Project');
 
 assert(layout.includes("presentation === 'client'"), 'PortalLayout renders client presentation');
 assert(layout.includes('ClientExperienceNav'), 'PortalLayout mounts ClientExperienceNav');

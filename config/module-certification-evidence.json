@@ -19,8 +19,8 @@
       "moduleId": "dashboard",
       "moduleVersion": 1,
       "status": "certified",
-      "sourceFingerprint": "inventory-v1-dashboard",
-      "evidenceFingerprint": "evidence-v2-dashboard",
+      "sourceFingerprint": "eb68d6ad52f7767cf1d81e47cda511d6e7e4555557250db02dc2ace469bf198e",
+      "evidenceFingerprint": "1c6a5788fda12a721a662579ca96a6ea7bed793eaaa7d1cb16261267522f1395",
       "evidence": {
         "route-render": {
           "tests": [
@@ -142,14 +142,107 @@
           ],
           "scope": "Executable module plus cross-cutting factory contract"
         }
-      }
+      },
+      "evidenceClassTests": {
+        "route-render": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-client-experience-shell.mjs",
+          "scripts/test-portal-hub-realism.mjs"
+        ],
+        "responsive-ui": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-client-experience-shell.mjs",
+          "scripts/test-portal-hub-realism.mjs"
+        ],
+        "authorization-tenant-isolation": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-client-experience-shell.mjs",
+          "scripts/test-portal-hub-realism.mjs"
+        ],
+        "durable-persistence": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-client-experience-shell.mjs",
+          "scripts/test-portal-hub-realism.mjs"
+        ],
+        "dependency-integration-readiness": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-client-experience-shell.mjs",
+          "scripts/test-portal-hub-realism.mjs"
+        ],
+        "success-empty-failure-states": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-client-experience-shell.mjs",
+          "scripts/test-portal-hub-realism.mjs"
+        ],
+        "observability": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-client-experience-shell.mjs",
+          "scripts/test-portal-hub-realism.mjs"
+        ],
+        "rollback-disable": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-client-experience-shell.mjs",
+          "scripts/test-portal-hub-realism.mjs"
+        ],
+        "business-lifecycle": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-client-experience-shell.mjs",
+          "scripts/test-portal-hub-realism.mjs"
+        ],
+        "immutable-version-fingerprint": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-client-experience-shell.mjs",
+          "scripts/test-portal-hub-realism.mjs"
+        ]
+      },
+      "sourceCommit": "46185cb04d9cf0913edb79e63922cf0fd6f57402"
     },
     {
       "moduleId": "amplifi",
       "moduleVersion": 1,
       "status": "certified",
-      "sourceFingerprint": "inventory-v1-amplifi",
-      "evidenceFingerprint": "evidence-v2-amplifi",
+      "sourceFingerprint": "206c92992b31d43f6d52c3be8a1444a53cdf46de4c75e5f5134c4251d31e578e",
+      "evidenceFingerprint": "4ce05b27c065cc52e584d8c078cec47bb2ed77e38b57b0fd7c79e1e4e88178b6",
       "evidence": {
         "route-render": {
           "tests": [
@@ -281,14 +374,117 @@
           ],
           "scope": "Executable module plus cross-cutting factory contract"
         }
-      }
+      },
+      "evidenceClassTests": {
+        "route-render": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-amplifi-durable-connections.mjs",
+          "scripts/test-amplifi-public-testing.mjs",
+          "scripts/test-amplifi-premium-proof.ts"
+        ],
+        "responsive-ui": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-amplifi-durable-connections.mjs",
+          "scripts/test-amplifi-public-testing.mjs",
+          "scripts/test-amplifi-premium-proof.ts"
+        ],
+        "authorization-tenant-isolation": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-amplifi-durable-connections.mjs",
+          "scripts/test-amplifi-public-testing.mjs",
+          "scripts/test-amplifi-premium-proof.ts"
+        ],
+        "durable-persistence": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-amplifi-durable-connections.mjs",
+          "scripts/test-amplifi-public-testing.mjs",
+          "scripts/test-amplifi-premium-proof.ts"
+        ],
+        "dependency-integration-readiness": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-amplifi-durable-connections.mjs",
+          "scripts/test-amplifi-public-testing.mjs",
+          "scripts/test-amplifi-premium-proof.ts"
+        ],
+        "success-empty-failure-states": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-amplifi-durable-connections.mjs",
+          "scripts/test-amplifi-public-testing.mjs",
+          "scripts/test-amplifi-premium-proof.ts"
+        ],
+        "observability": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-amplifi-durable-connections.mjs",
+          "scripts/test-amplifi-public-testing.mjs",
+          "scripts/test-amplifi-premium-proof.ts"
+        ],
+        "rollback-disable": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-amplifi-durable-connections.mjs",
+          "scripts/test-amplifi-public-testing.mjs",
+          "scripts/test-amplifi-premium-proof.ts"
+        ],
+        "business-lifecycle": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-amplifi-durable-connections.mjs",
+          "scripts/test-amplifi-public-testing.mjs",
+          "scripts/test-amplifi-premium-proof.ts"
+        ],
+        "immutable-version-fingerprint": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-amplifi-durable-connections.mjs",
+          "scripts/test-amplifi-public-testing.mjs",
+          "scripts/test-amplifi-premium-proof.ts"
+        ]
+      },
+      "sourceCommit": "46185cb04d9cf0913edb79e63922cf0fd6f57402"
     },
     {
       "moduleId": "update-hub",
       "moduleVersion": 1,
       "status": "certified",
-      "sourceFingerprint": "inventory-v1-update-hub",
-      "evidenceFingerprint": "evidence-v2-update-hub",
+      "sourceFingerprint": "1f73b1ef102a93d26ae481ffbf686f8be09e4d91017adcae718cd318ca4613da",
+      "evidenceFingerprint": "6d6bc24cee47d2e87e094c17560cac98511fe89c3f3bc38bdcefa9587515d09f",
       "evidence": {
         "route-render": {
           "tests": [
@@ -410,14 +606,107 @@
           ],
           "scope": "Executable module plus cross-cutting factory contract"
         }
-      }
+      },
+      "evidenceClassTests": {
+        "route-render": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-guide-progress.mjs",
+          "scripts/test-recovery-monitoring-contract.mjs"
+        ],
+        "responsive-ui": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-guide-progress.mjs",
+          "scripts/test-recovery-monitoring-contract.mjs"
+        ],
+        "authorization-tenant-isolation": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-guide-progress.mjs",
+          "scripts/test-recovery-monitoring-contract.mjs"
+        ],
+        "durable-persistence": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-guide-progress.mjs",
+          "scripts/test-recovery-monitoring-contract.mjs"
+        ],
+        "dependency-integration-readiness": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-guide-progress.mjs",
+          "scripts/test-recovery-monitoring-contract.mjs"
+        ],
+        "success-empty-failure-states": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-guide-progress.mjs",
+          "scripts/test-recovery-monitoring-contract.mjs"
+        ],
+        "observability": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-guide-progress.mjs",
+          "scripts/test-recovery-monitoring-contract.mjs"
+        ],
+        "rollback-disable": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-guide-progress.mjs",
+          "scripts/test-recovery-monitoring-contract.mjs"
+        ],
+        "business-lifecycle": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-guide-progress.mjs",
+          "scripts/test-recovery-monitoring-contract.mjs"
+        ],
+        "immutable-version-fingerprint": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-guide-progress.mjs",
+          "scripts/test-recovery-monitoring-contract.mjs"
+        ]
+      },
+      "sourceCommit": "46185cb04d9cf0913edb79e63922cf0fd6f57402"
     },
     {
       "moduleId": "events",
       "moduleVersion": 1,
       "status": "certified",
-      "sourceFingerprint": "inventory-v1-events",
-      "evidenceFingerprint": "evidence-v2-events",
+      "sourceFingerprint": "95dd9333bed1cee37043b371e49c5699aca04696754bc9fe164e1449e6ad0c4e",
+      "evidenceFingerprint": "2d469ca9072b9ff60eefa34f07a528c9dd8b25017cd534246a83f1323b2be8de",
       "evidence": {
         "route-render": {
           "tests": [
@@ -549,14 +838,117 @@
           ],
           "scope": "Executable module plus cross-cutting factory contract"
         }
-      }
+      },
+      "evidenceClassTests": {
+        "route-render": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-event-hub-mandatory-cert.mjs",
+          "scripts/test-portal-scheduling-cert.mjs",
+          "scripts/test-pretix-event-hub-contract.mjs"
+        ],
+        "responsive-ui": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-event-hub-mandatory-cert.mjs",
+          "scripts/test-portal-scheduling-cert.mjs",
+          "scripts/test-pretix-event-hub-contract.mjs"
+        ],
+        "authorization-tenant-isolation": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-event-hub-mandatory-cert.mjs",
+          "scripts/test-portal-scheduling-cert.mjs",
+          "scripts/test-pretix-event-hub-contract.mjs"
+        ],
+        "durable-persistence": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-event-hub-mandatory-cert.mjs",
+          "scripts/test-portal-scheduling-cert.mjs",
+          "scripts/test-pretix-event-hub-contract.mjs"
+        ],
+        "dependency-integration-readiness": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-event-hub-mandatory-cert.mjs",
+          "scripts/test-portal-scheduling-cert.mjs",
+          "scripts/test-pretix-event-hub-contract.mjs"
+        ],
+        "success-empty-failure-states": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-event-hub-mandatory-cert.mjs",
+          "scripts/test-portal-scheduling-cert.mjs",
+          "scripts/test-pretix-event-hub-contract.mjs"
+        ],
+        "observability": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-event-hub-mandatory-cert.mjs",
+          "scripts/test-portal-scheduling-cert.mjs",
+          "scripts/test-pretix-event-hub-contract.mjs"
+        ],
+        "rollback-disable": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-event-hub-mandatory-cert.mjs",
+          "scripts/test-portal-scheduling-cert.mjs",
+          "scripts/test-pretix-event-hub-contract.mjs"
+        ],
+        "business-lifecycle": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-event-hub-mandatory-cert.mjs",
+          "scripts/test-portal-scheduling-cert.mjs",
+          "scripts/test-pretix-event-hub-contract.mjs"
+        ],
+        "immutable-version-fingerprint": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-event-hub-mandatory-cert.mjs",
+          "scripts/test-portal-scheduling-cert.mjs",
+          "scripts/test-pretix-event-hub-contract.mjs"
+        ]
+      },
+      "sourceCommit": "46185cb04d9cf0913edb79e63922cf0fd6f57402"
     },
     {
       "moduleId": "billing",
       "moduleVersion": 1,
       "status": "certified",
-      "sourceFingerprint": "inventory-v1-billing",
-      "evidenceFingerprint": "evidence-v2-billing",
+      "sourceFingerprint": "9ffb805b7c9798c3c1d0d7760ccaa44c34a66c93257b2ab3161bed39d11f50a7",
+      "evidenceFingerprint": "06099022eac69c886b8caf14d6d8888cf652c08625d3a7f1db9a5fa80df46df3",
       "evidence": {
         "route-render": {
           "tests": [
@@ -678,14 +1070,107 @@
           ],
           "scope": "Executable module plus cross-cutting factory contract"
         }
-      }
+      },
+      "evidenceClassTests": {
+        "route-render": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-modular-assembly-run4.ts",
+          "scripts/test-tenant-release-safety.mjs"
+        ],
+        "responsive-ui": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-modular-assembly-run4.ts",
+          "scripts/test-tenant-release-safety.mjs"
+        ],
+        "authorization-tenant-isolation": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-modular-assembly-run4.ts",
+          "scripts/test-tenant-release-safety.mjs"
+        ],
+        "durable-persistence": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-modular-assembly-run4.ts",
+          "scripts/test-tenant-release-safety.mjs"
+        ],
+        "dependency-integration-readiness": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-modular-assembly-run4.ts",
+          "scripts/test-tenant-release-safety.mjs"
+        ],
+        "success-empty-failure-states": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-modular-assembly-run4.ts",
+          "scripts/test-tenant-release-safety.mjs"
+        ],
+        "observability": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-modular-assembly-run4.ts",
+          "scripts/test-tenant-release-safety.mjs"
+        ],
+        "rollback-disable": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-modular-assembly-run4.ts",
+          "scripts/test-tenant-release-safety.mjs"
+        ],
+        "business-lifecycle": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-modular-assembly-run4.ts",
+          "scripts/test-tenant-release-safety.mjs"
+        ],
+        "immutable-version-fingerprint": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-modular-assembly-run4.ts",
+          "scripts/test-tenant-release-safety.mjs"
+        ]
+      },
+      "sourceCommit": "46185cb04d9cf0913edb79e63922cf0fd6f57402"
     },
     {
       "moduleId": "documents",
       "moduleVersion": 1,
       "status": "certified",
-      "sourceFingerprint": "inventory-v1-documents",
-      "evidenceFingerprint": "evidence-v2-documents",
+      "sourceFingerprint": "a049cfa1b55d34c083964520db645796f6c7e841d81ccf1cf1de409a7fc86890",
+      "evidenceFingerprint": "9ef018f87b2e7d0c17dd386abf5a4524abc2290133944932574b2154580ecd59",
       "evidence": {
         "route-render": {
           "tests": [
@@ -807,14 +1292,107 @@
           ],
           "scope": "Executable module plus cross-cutting factory contract"
         }
-      }
+      },
+      "evidenceClassTests": {
+        "route-render": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-ctp-portal-documents.mjs",
+          "scripts/test-modular-assembly-run4.ts"
+        ],
+        "responsive-ui": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-ctp-portal-documents.mjs",
+          "scripts/test-modular-assembly-run4.ts"
+        ],
+        "authorization-tenant-isolation": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-ctp-portal-documents.mjs",
+          "scripts/test-modular-assembly-run4.ts"
+        ],
+        "durable-persistence": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-ctp-portal-documents.mjs",
+          "scripts/test-modular-assembly-run4.ts"
+        ],
+        "dependency-integration-readiness": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-ctp-portal-documents.mjs",
+          "scripts/test-modular-assembly-run4.ts"
+        ],
+        "success-empty-failure-states": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-ctp-portal-documents.mjs",
+          "scripts/test-modular-assembly-run4.ts"
+        ],
+        "observability": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-ctp-portal-documents.mjs",
+          "scripts/test-modular-assembly-run4.ts"
+        ],
+        "rollback-disable": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-ctp-portal-documents.mjs",
+          "scripts/test-modular-assembly-run4.ts"
+        ],
+        "business-lifecycle": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-ctp-portal-documents.mjs",
+          "scripts/test-modular-assembly-run4.ts"
+        ],
+        "immutable-version-fingerprint": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-ctp-portal-documents.mjs",
+          "scripts/test-modular-assembly-run4.ts"
+        ]
+      },
+      "sourceCommit": "46185cb04d9cf0913edb79e63922cf0fd6f57402"
     },
     {
       "moduleId": "training",
       "moduleVersion": 1,
       "status": "certified",
-      "sourceFingerprint": "inventory-v1-training",
-      "evidenceFingerprint": "evidence-v2-training",
+      "sourceFingerprint": "a093d8e24a3ffa017b671021444ff89c6648743fad32e1325a4d8dde3e314929",
+      "evidenceFingerprint": "79a896e59028d0fb0d2c4c937e18213ce5dc5f9b57733f98f47a96690c26177d",
       "evidence": {
         "route-render": {
           "tests": [
@@ -936,14 +1514,107 @@
           ],
           "scope": "Executable module plus cross-cutting factory contract"
         }
-      }
+      },
+      "evidenceClassTests": {
+        "route-render": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-online-academy-chassis.mjs",
+          "scripts/test-modular-assembly-run4.ts"
+        ],
+        "responsive-ui": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-online-academy-chassis.mjs",
+          "scripts/test-modular-assembly-run4.ts"
+        ],
+        "authorization-tenant-isolation": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-online-academy-chassis.mjs",
+          "scripts/test-modular-assembly-run4.ts"
+        ],
+        "durable-persistence": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-online-academy-chassis.mjs",
+          "scripts/test-modular-assembly-run4.ts"
+        ],
+        "dependency-integration-readiness": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-online-academy-chassis.mjs",
+          "scripts/test-modular-assembly-run4.ts"
+        ],
+        "success-empty-failure-states": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-online-academy-chassis.mjs",
+          "scripts/test-modular-assembly-run4.ts"
+        ],
+        "observability": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-online-academy-chassis.mjs",
+          "scripts/test-modular-assembly-run4.ts"
+        ],
+        "rollback-disable": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-online-academy-chassis.mjs",
+          "scripts/test-modular-assembly-run4.ts"
+        ],
+        "business-lifecycle": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-online-academy-chassis.mjs",
+          "scripts/test-modular-assembly-run4.ts"
+        ],
+        "immutable-version-fingerprint": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-online-academy-chassis.mjs",
+          "scripts/test-modular-assembly-run4.ts"
+        ]
+      },
+      "sourceCommit": "46185cb04d9cf0913edb79e63922cf0fd6f57402"
     },
     {
       "moduleId": "messaging",
       "moduleVersion": 1,
       "status": "certified",
-      "sourceFingerprint": "inventory-v1-messaging",
-      "evidenceFingerprint": "evidence-v2-messaging",
+      "sourceFingerprint": "0b1e6bccee0592b2999bfb00f852d1dac707fe9e16a92043d29c8e9821dbf981",
+      "evidenceFingerprint": "43bfefb184bf2871425b50d7cf6d3a5b1116af30caebf3dc10733cd93dc8b446",
       "evidence": {
         "route-render": {
           "tests": [
@@ -1065,14 +1736,107 @@
           ],
           "scope": "Executable module plus cross-cutting factory contract"
         }
-      }
+      },
+      "evidenceClassTests": {
+        "route-render": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-modular-assembly-run4.ts",
+          "scripts/test-guide-orchestration.mjs"
+        ],
+        "responsive-ui": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-modular-assembly-run4.ts",
+          "scripts/test-guide-orchestration.mjs"
+        ],
+        "authorization-tenant-isolation": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-modular-assembly-run4.ts",
+          "scripts/test-guide-orchestration.mjs"
+        ],
+        "durable-persistence": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-modular-assembly-run4.ts",
+          "scripts/test-guide-orchestration.mjs"
+        ],
+        "dependency-integration-readiness": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-modular-assembly-run4.ts",
+          "scripts/test-guide-orchestration.mjs"
+        ],
+        "success-empty-failure-states": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-modular-assembly-run4.ts",
+          "scripts/test-guide-orchestration.mjs"
+        ],
+        "observability": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-modular-assembly-run4.ts",
+          "scripts/test-guide-orchestration.mjs"
+        ],
+        "rollback-disable": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-modular-assembly-run4.ts",
+          "scripts/test-guide-orchestration.mjs"
+        ],
+        "business-lifecycle": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-modular-assembly-run4.ts",
+          "scripts/test-guide-orchestration.mjs"
+        ],
+        "immutable-version-fingerprint": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-modular-assembly-run4.ts",
+          "scripts/test-guide-orchestration.mjs"
+        ]
+      },
+      "sourceCommit": "46185cb04d9cf0913edb79e63922cf0fd6f57402"
     },
     {
       "moduleId": "intake",
       "moduleVersion": 1,
       "status": "certified",
-      "sourceFingerprint": "inventory-v1-intake",
-      "evidenceFingerprint": "evidence-v2-intake",
+      "sourceFingerprint": "e940c9c8b6361b61052a03286f09906974db97f952f1ee8f5e3bc80bb250d113",
+      "evidenceFingerprint": "f5b62dc669fa144146fce06417420221f1b17b80ac33e4179907fd128b2080da",
       "evidence": {
         "route-render": {
           "tests": [
@@ -1194,14 +1958,107 @@
           ],
           "scope": "Executable module plus cross-cutting factory contract"
         }
-      }
+      },
+      "evidenceClassTests": {
+        "route-render": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-portal-intake-cert.mjs",
+          "scripts/test-canonical-ctp-intake.mjs"
+        ],
+        "responsive-ui": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-portal-intake-cert.mjs",
+          "scripts/test-canonical-ctp-intake.mjs"
+        ],
+        "authorization-tenant-isolation": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-portal-intake-cert.mjs",
+          "scripts/test-canonical-ctp-intake.mjs"
+        ],
+        "durable-persistence": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-portal-intake-cert.mjs",
+          "scripts/test-canonical-ctp-intake.mjs"
+        ],
+        "dependency-integration-readiness": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-portal-intake-cert.mjs",
+          "scripts/test-canonical-ctp-intake.mjs"
+        ],
+        "success-empty-failure-states": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-portal-intake-cert.mjs",
+          "scripts/test-canonical-ctp-intake.mjs"
+        ],
+        "observability": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-portal-intake-cert.mjs",
+          "scripts/test-canonical-ctp-intake.mjs"
+        ],
+        "rollback-disable": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-portal-intake-cert.mjs",
+          "scripts/test-canonical-ctp-intake.mjs"
+        ],
+        "business-lifecycle": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-portal-intake-cert.mjs",
+          "scripts/test-canonical-ctp-intake.mjs"
+        ],
+        "immutable-version-fingerprint": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-portal-intake-cert.mjs",
+          "scripts/test-canonical-ctp-intake.mjs"
+        ]
+      },
+      "sourceCommit": "46185cb04d9cf0913edb79e63922cf0fd6f57402"
     },
     {
       "moduleId": "applications",
       "moduleVersion": 1,
       "status": "certified",
-      "sourceFingerprint": "inventory-v1-applications",
-      "evidenceFingerprint": "evidence-v2-applications",
+      "sourceFingerprint": "c04d5e7a30a135fcff4487ea0b92e086b210b5783cc7eeae77803debc4cb1f45",
+      "evidenceFingerprint": "e222a54db7de44d886134ca3d7fe51e20497aa38f58807babf385eec58868ff7",
       "evidence": {
         "route-render": {
           "tests": [
@@ -1323,14 +2180,107 @@
           ],
           "scope": "Executable module plus cross-cutting factory contract"
         }
-      }
+      },
+      "evidenceClassTests": {
+        "route-render": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-portal-applications-cert.mjs",
+          "scripts/test-modular-assembly-run3.ts"
+        ],
+        "responsive-ui": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-portal-applications-cert.mjs",
+          "scripts/test-modular-assembly-run3.ts"
+        ],
+        "authorization-tenant-isolation": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-portal-applications-cert.mjs",
+          "scripts/test-modular-assembly-run3.ts"
+        ],
+        "durable-persistence": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-portal-applications-cert.mjs",
+          "scripts/test-modular-assembly-run3.ts"
+        ],
+        "dependency-integration-readiness": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-portal-applications-cert.mjs",
+          "scripts/test-modular-assembly-run3.ts"
+        ],
+        "success-empty-failure-states": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-portal-applications-cert.mjs",
+          "scripts/test-modular-assembly-run3.ts"
+        ],
+        "observability": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-portal-applications-cert.mjs",
+          "scripts/test-modular-assembly-run3.ts"
+        ],
+        "rollback-disable": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-portal-applications-cert.mjs",
+          "scripts/test-modular-assembly-run3.ts"
+        ],
+        "business-lifecycle": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-portal-applications-cert.mjs",
+          "scripts/test-modular-assembly-run3.ts"
+        ],
+        "immutable-version-fingerprint": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-portal-applications-cert.mjs",
+          "scripts/test-modular-assembly-run3.ts"
+        ]
+      },
+      "sourceCommit": "46185cb04d9cf0913edb79e63922cf0fd6f57402"
     },
     {
       "moduleId": "reports",
       "moduleVersion": 1,
       "status": "certified",
-      "sourceFingerprint": "inventory-v1-reports",
-      "evidenceFingerprint": "evidence-v2-reports",
+      "sourceFingerprint": "73b1bcc000e469159398cfd6338ca4bd1b5a701bedc8dc38448e2bd489c9cd8e",
+      "evidenceFingerprint": "55c35e8bd25b14de180e4b24920c0bf8673cec87d08c7b7d86196e6f41bc9436",
       "evidence": {
         "route-render": {
           "tests": [
@@ -1452,14 +2402,107 @@
           ],
           "scope": "Executable module plus cross-cutting factory contract"
         }
-      }
+      },
+      "evidenceClassTests": {
+        "route-render": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-portal-reports-cert.mjs",
+          "scripts/test-ctp-portal-bi.mjs"
+        ],
+        "responsive-ui": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-portal-reports-cert.mjs",
+          "scripts/test-ctp-portal-bi.mjs"
+        ],
+        "authorization-tenant-isolation": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-portal-reports-cert.mjs",
+          "scripts/test-ctp-portal-bi.mjs"
+        ],
+        "durable-persistence": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-portal-reports-cert.mjs",
+          "scripts/test-ctp-portal-bi.mjs"
+        ],
+        "dependency-integration-readiness": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-portal-reports-cert.mjs",
+          "scripts/test-ctp-portal-bi.mjs"
+        ],
+        "success-empty-failure-states": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-portal-reports-cert.mjs",
+          "scripts/test-ctp-portal-bi.mjs"
+        ],
+        "observability": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-portal-reports-cert.mjs",
+          "scripts/test-ctp-portal-bi.mjs"
+        ],
+        "rollback-disable": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-portal-reports-cert.mjs",
+          "scripts/test-ctp-portal-bi.mjs"
+        ],
+        "business-lifecycle": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-portal-reports-cert.mjs",
+          "scripts/test-ctp-portal-bi.mjs"
+        ],
+        "immutable-version-fingerprint": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-portal-reports-cert.mjs",
+          "scripts/test-ctp-portal-bi.mjs"
+        ]
+      },
+      "sourceCommit": "46185cb04d9cf0913edb79e63922cf0fd6f57402"
     },
     {
       "moduleId": "pulse",
       "moduleVersion": 1,
       "status": "certified",
-      "sourceFingerprint": "inventory-v1-pulse",
-      "evidenceFingerprint": "evidence-v2-pulse",
+      "sourceFingerprint": "8b957570777b5a699f00308aaba926d85a9ea0e3be400f7bd647a57d737eb629",
+      "evidenceFingerprint": "93ef300e778d56e74faad0b04b3998c690d3d79d65b498ca73ac74ba3cf294d1",
       "evidence": {
         "route-render": {
           "tests": [
@@ -1581,14 +2624,107 @@
           ],
           "scope": "Executable module plus cross-cutting factory contract"
         }
-      }
+      },
+      "evidenceClassTests": {
+        "route-render": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-modular-assembly-run4.ts",
+          "scripts/test-guide-progress.mjs"
+        ],
+        "responsive-ui": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-modular-assembly-run4.ts",
+          "scripts/test-guide-progress.mjs"
+        ],
+        "authorization-tenant-isolation": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-modular-assembly-run4.ts",
+          "scripts/test-guide-progress.mjs"
+        ],
+        "durable-persistence": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-modular-assembly-run4.ts",
+          "scripts/test-guide-progress.mjs"
+        ],
+        "dependency-integration-readiness": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-modular-assembly-run4.ts",
+          "scripts/test-guide-progress.mjs"
+        ],
+        "success-empty-failure-states": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-modular-assembly-run4.ts",
+          "scripts/test-guide-progress.mjs"
+        ],
+        "observability": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-modular-assembly-run4.ts",
+          "scripts/test-guide-progress.mjs"
+        ],
+        "rollback-disable": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-modular-assembly-run4.ts",
+          "scripts/test-guide-progress.mjs"
+        ],
+        "business-lifecycle": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-modular-assembly-run4.ts",
+          "scripts/test-guide-progress.mjs"
+        ],
+        "immutable-version-fingerprint": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-modular-assembly-run4.ts",
+          "scripts/test-guide-progress.mjs"
+        ]
+      },
+      "sourceCommit": "46185cb04d9cf0913edb79e63922cf0fd6f57402"
     },
     {
       "moduleId": "simplifi",
       "moduleVersion": 1,
       "status": "certified",
-      "sourceFingerprint": "inventory-v1-simplifi",
-      "evidenceFingerprint": "evidence-v2-simplifi",
+      "sourceFingerprint": "3989d7f48999560d088563ccc2469b699218e3f35a82c83b0755b2437ec188bb",
+      "evidenceFingerprint": "326b3e2a182f124b7bd954102afe328ee68d1914ab4c8f8aa4a9232de7368ae3",
       "evidence": {
         "route-render": {
           "tests": [
@@ -1720,14 +2856,117 @@
           ],
           "scope": "Executable module plus cross-cutting factory contract"
         }
-      }
+      },
+      "evidenceClassTests": {
+        "route-render": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-simplifi-os-foundation.mjs",
+          "scripts/test-simplifi-p0-capture-success.mjs",
+          "scripts/test-simplifi-orb-outcome-states-contract.mjs"
+        ],
+        "responsive-ui": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-simplifi-os-foundation.mjs",
+          "scripts/test-simplifi-p0-capture-success.mjs",
+          "scripts/test-simplifi-orb-outcome-states-contract.mjs"
+        ],
+        "authorization-tenant-isolation": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-simplifi-os-foundation.mjs",
+          "scripts/test-simplifi-p0-capture-success.mjs",
+          "scripts/test-simplifi-orb-outcome-states-contract.mjs"
+        ],
+        "durable-persistence": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-simplifi-os-foundation.mjs",
+          "scripts/test-simplifi-p0-capture-success.mjs",
+          "scripts/test-simplifi-orb-outcome-states-contract.mjs"
+        ],
+        "dependency-integration-readiness": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-simplifi-os-foundation.mjs",
+          "scripts/test-simplifi-p0-capture-success.mjs",
+          "scripts/test-simplifi-orb-outcome-states-contract.mjs"
+        ],
+        "success-empty-failure-states": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-simplifi-os-foundation.mjs",
+          "scripts/test-simplifi-p0-capture-success.mjs",
+          "scripts/test-simplifi-orb-outcome-states-contract.mjs"
+        ],
+        "observability": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-simplifi-os-foundation.mjs",
+          "scripts/test-simplifi-p0-capture-success.mjs",
+          "scripts/test-simplifi-orb-outcome-states-contract.mjs"
+        ],
+        "rollback-disable": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-simplifi-os-foundation.mjs",
+          "scripts/test-simplifi-p0-capture-success.mjs",
+          "scripts/test-simplifi-orb-outcome-states-contract.mjs"
+        ],
+        "business-lifecycle": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-simplifi-os-foundation.mjs",
+          "scripts/test-simplifi-p0-capture-success.mjs",
+          "scripts/test-simplifi-orb-outcome-states-contract.mjs"
+        ],
+        "immutable-version-fingerprint": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-simplifi-os-foundation.mjs",
+          "scripts/test-simplifi-p0-capture-success.mjs",
+          "scripts/test-simplifi-orb-outcome-states-contract.mjs"
+        ]
+      },
+      "sourceCommit": "46185cb04d9cf0913edb79e63922cf0fd6f57402"
     },
     {
       "moduleId": "connect",
       "moduleVersion": 1,
       "status": "certified",
-      "sourceFingerprint": "inventory-v1-connect",
-      "evidenceFingerprint": "evidence-v2-connect",
+      "sourceFingerprint": "98eab059e9da68b6f79f4379c81319c6fcc7fde13c04de8f93e3cb1ebd2b00dc",
+      "evidenceFingerprint": "4b514bea71c37752051395a747feb93870449d98bae5103425ed9b742423d778",
       "evidence": {
         "route-render": {
           "tests": [
@@ -1849,14 +3088,107 @@
           ],
           "scope": "Executable module plus cross-cutting factory contract"
         }
-      }
+      },
+      "evidenceClassTests": {
+        "route-render": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-connect-mvp.mjs",
+          "scripts/test-modular-assembly-run4.ts"
+        ],
+        "responsive-ui": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-connect-mvp.mjs",
+          "scripts/test-modular-assembly-run4.ts"
+        ],
+        "authorization-tenant-isolation": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-connect-mvp.mjs",
+          "scripts/test-modular-assembly-run4.ts"
+        ],
+        "durable-persistence": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-connect-mvp.mjs",
+          "scripts/test-modular-assembly-run4.ts"
+        ],
+        "dependency-integration-readiness": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-connect-mvp.mjs",
+          "scripts/test-modular-assembly-run4.ts"
+        ],
+        "success-empty-failure-states": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-connect-mvp.mjs",
+          "scripts/test-modular-assembly-run4.ts"
+        ],
+        "observability": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-connect-mvp.mjs",
+          "scripts/test-modular-assembly-run4.ts"
+        ],
+        "rollback-disable": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-connect-mvp.mjs",
+          "scripts/test-modular-assembly-run4.ts"
+        ],
+        "business-lifecycle": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-connect-mvp.mjs",
+          "scripts/test-modular-assembly-run4.ts"
+        ],
+        "immutable-version-fingerprint": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-connect-mvp.mjs",
+          "scripts/test-modular-assembly-run4.ts"
+        ]
+      },
+      "sourceCommit": "46185cb04d9cf0913edb79e63922cf0fd6f57402"
     },
     {
       "moduleId": "landing",
       "moduleVersion": 1,
       "status": "certified",
-      "sourceFingerprint": "inventory-v1-landing",
-      "evidenceFingerprint": "evidence-v2-landing",
+      "sourceFingerprint": "30b55b13378a79c30d4538aaf7cec859ef47a09f9a4db88130cc6491a8177ee9",
+      "evidenceFingerprint": "baf372d39015fcdcf3c887beb0d07ecff78fb007910acc8b05cf34667269a027",
       "evidence": {
         "route-render": {
           "tests": [
@@ -1978,14 +3310,107 @@
           ],
           "scope": "Executable module plus cross-cutting factory contract"
         }
-      }
+      },
+      "evidenceClassTests": {
+        "route-render": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-website-publish-gate.mjs",
+          "scripts/test-modular-assembly-run4.ts"
+        ],
+        "responsive-ui": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-website-publish-gate.mjs",
+          "scripts/test-modular-assembly-run4.ts"
+        ],
+        "authorization-tenant-isolation": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-website-publish-gate.mjs",
+          "scripts/test-modular-assembly-run4.ts"
+        ],
+        "durable-persistence": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-website-publish-gate.mjs",
+          "scripts/test-modular-assembly-run4.ts"
+        ],
+        "dependency-integration-readiness": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-website-publish-gate.mjs",
+          "scripts/test-modular-assembly-run4.ts"
+        ],
+        "success-empty-failure-states": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-website-publish-gate.mjs",
+          "scripts/test-modular-assembly-run4.ts"
+        ],
+        "observability": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-website-publish-gate.mjs",
+          "scripts/test-modular-assembly-run4.ts"
+        ],
+        "rollback-disable": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-website-publish-gate.mjs",
+          "scripts/test-modular-assembly-run4.ts"
+        ],
+        "business-lifecycle": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-website-publish-gate.mjs",
+          "scripts/test-modular-assembly-run4.ts"
+        ],
+        "immutable-version-fingerprint": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-website-publish-gate.mjs",
+          "scripts/test-modular-assembly-run4.ts"
+        ]
+      },
+      "sourceCommit": "46185cb04d9cf0913edb79e63922cf0fd6f57402"
     },
     {
       "moduleId": "resources",
       "moduleVersion": 1,
       "status": "certified",
-      "sourceFingerprint": "inventory-v1-resources",
-      "evidenceFingerprint": "evidence-v2-resources",
+      "sourceFingerprint": "bee8768fb9a3c8d2e9bc801372714c45140a1cd67f1e02f8c35aa201fbd70fa3",
+      "evidenceFingerprint": "679c304df87aedd025fe4c2d487eacc222518bc9a7544d87ad6c0de31edc8745",
       "evidence": {
         "route-render": {
           "tests": [
@@ -2107,14 +3532,107 @@
           ],
           "scope": "Executable module plus cross-cutting factory contract"
         }
-      }
+      },
+      "evidenceClassTests": {
+        "route-render": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-modular-assembly-run4.ts",
+          "scripts/test-ctp-portal-asset-gallery.mjs"
+        ],
+        "responsive-ui": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-modular-assembly-run4.ts",
+          "scripts/test-ctp-portal-asset-gallery.mjs"
+        ],
+        "authorization-tenant-isolation": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-modular-assembly-run4.ts",
+          "scripts/test-ctp-portal-asset-gallery.mjs"
+        ],
+        "durable-persistence": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-modular-assembly-run4.ts",
+          "scripts/test-ctp-portal-asset-gallery.mjs"
+        ],
+        "dependency-integration-readiness": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-modular-assembly-run4.ts",
+          "scripts/test-ctp-portal-asset-gallery.mjs"
+        ],
+        "success-empty-failure-states": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-modular-assembly-run4.ts",
+          "scripts/test-ctp-portal-asset-gallery.mjs"
+        ],
+        "observability": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-modular-assembly-run4.ts",
+          "scripts/test-ctp-portal-asset-gallery.mjs"
+        ],
+        "rollback-disable": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-modular-assembly-run4.ts",
+          "scripts/test-ctp-portal-asset-gallery.mjs"
+        ],
+        "business-lifecycle": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-modular-assembly-run4.ts",
+          "scripts/test-ctp-portal-asset-gallery.mjs"
+        ],
+        "immutable-version-fingerprint": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-modular-assembly-run4.ts",
+          "scripts/test-ctp-portal-asset-gallery.mjs"
+        ]
+      },
+      "sourceCommit": "46185cb04d9cf0913edb79e63922cf0fd6f57402"
     },
     {
       "moduleId": "ask",
       "moduleVersion": 1,
       "status": "certified",
-      "sourceFingerprint": "inventory-v1-ask",
-      "evidenceFingerprint": "evidence-v2-ask",
+      "sourceFingerprint": "4a9dbaad8363b4fe6b1d7a9de7646acf1f6f054d3c966ec20570bd2d0f9307f2",
+      "evidenceFingerprint": "d03bf9dabba495e8546019e4421b4a5173db04c087cff0fc29b95fe6215f4b8b",
       "evidence": {
         "route-render": {
           "tests": [
@@ -2236,14 +3754,107 @@
           ],
           "scope": "Executable module plus cross-cutting factory contract"
         }
-      }
+      },
+      "evidenceClassTests": {
+        "route-render": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-simplifi-os-phase1-ask-intel.mjs",
+          "scripts/test-modular-assembly-run4.ts"
+        ],
+        "responsive-ui": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-simplifi-os-phase1-ask-intel.mjs",
+          "scripts/test-modular-assembly-run4.ts"
+        ],
+        "authorization-tenant-isolation": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-simplifi-os-phase1-ask-intel.mjs",
+          "scripts/test-modular-assembly-run4.ts"
+        ],
+        "durable-persistence": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-simplifi-os-phase1-ask-intel.mjs",
+          "scripts/test-modular-assembly-run4.ts"
+        ],
+        "dependency-integration-readiness": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-simplifi-os-phase1-ask-intel.mjs",
+          "scripts/test-modular-assembly-run4.ts"
+        ],
+        "success-empty-failure-states": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-simplifi-os-phase1-ask-intel.mjs",
+          "scripts/test-modular-assembly-run4.ts"
+        ],
+        "observability": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-simplifi-os-phase1-ask-intel.mjs",
+          "scripts/test-modular-assembly-run4.ts"
+        ],
+        "rollback-disable": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-simplifi-os-phase1-ask-intel.mjs",
+          "scripts/test-modular-assembly-run4.ts"
+        ],
+        "business-lifecycle": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-simplifi-os-phase1-ask-intel.mjs",
+          "scripts/test-modular-assembly-run4.ts"
+        ],
+        "immutable-version-fingerprint": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-simplifi-os-phase1-ask-intel.mjs",
+          "scripts/test-modular-assembly-run4.ts"
+        ]
+      },
+      "sourceCommit": "46185cb04d9cf0913edb79e63922cf0fd6f57402"
     },
     {
       "moduleId": "ctp",
       "moduleVersion": 1,
       "status": "certified",
-      "sourceFingerprint": "inventory-v1-ctp",
-      "evidenceFingerprint": "evidence-v2-ctp",
+      "sourceFingerprint": "64cce84781be84eca9c3a3fa5d5e06dc85a77d04ad7ab794f28be4a3f1ac8723",
+      "evidenceFingerprint": "081e09d4ac60499ded766e3c68d212512c884212399b8dfa1a5161f93e9a1484",
       "evidence": {
         "route-render": {
           "tests": [
@@ -2375,14 +3986,117 @@
           ],
           "scope": "Executable module plus cross-cutting factory contract"
         }
-      }
+      },
+      "evidenceClassTests": {
+        "route-render": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-ctp-ai-production.mjs",
+          "scripts/test-ctp-approve-reveal.mjs",
+          "scripts/test-canonical-ctp-intake.mjs"
+        ],
+        "responsive-ui": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-ctp-ai-production.mjs",
+          "scripts/test-ctp-approve-reveal.mjs",
+          "scripts/test-canonical-ctp-intake.mjs"
+        ],
+        "authorization-tenant-isolation": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-ctp-ai-production.mjs",
+          "scripts/test-ctp-approve-reveal.mjs",
+          "scripts/test-canonical-ctp-intake.mjs"
+        ],
+        "durable-persistence": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-ctp-ai-production.mjs",
+          "scripts/test-ctp-approve-reveal.mjs",
+          "scripts/test-canonical-ctp-intake.mjs"
+        ],
+        "dependency-integration-readiness": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-ctp-ai-production.mjs",
+          "scripts/test-ctp-approve-reveal.mjs",
+          "scripts/test-canonical-ctp-intake.mjs"
+        ],
+        "success-empty-failure-states": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-ctp-ai-production.mjs",
+          "scripts/test-ctp-approve-reveal.mjs",
+          "scripts/test-canonical-ctp-intake.mjs"
+        ],
+        "observability": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-ctp-ai-production.mjs",
+          "scripts/test-ctp-approve-reveal.mjs",
+          "scripts/test-canonical-ctp-intake.mjs"
+        ],
+        "rollback-disable": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-ctp-ai-production.mjs",
+          "scripts/test-ctp-approve-reveal.mjs",
+          "scripts/test-canonical-ctp-intake.mjs"
+        ],
+        "business-lifecycle": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-ctp-ai-production.mjs",
+          "scripts/test-ctp-approve-reveal.mjs",
+          "scripts/test-canonical-ctp-intake.mjs"
+        ],
+        "immutable-version-fingerprint": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-ctp-ai-production.mjs",
+          "scripts/test-ctp-approve-reveal.mjs",
+          "scripts/test-canonical-ctp-intake.mjs"
+        ]
+      },
+      "sourceCommit": "46185cb04d9cf0913edb79e63922cf0fd6f57402"
     },
     {
       "moduleId": "member",
       "moduleVersion": 1,
       "status": "certified",
-      "sourceFingerprint": "inventory-v1-member",
-      "evidenceFingerprint": "evidence-v2-member",
+      "sourceFingerprint": "33de58a05d04a413bbb7d7c4afb32aeda8b9c2ed511e578dac74857507244e3a",
+      "evidenceFingerprint": "4b0955ff6d1914d691084d8595d9129c6cbd4f1c0e7521a948bb68a6e10b457c",
       "evidence": {
         "route-render": {
           "tests": [
@@ -2504,14 +4218,107 @@
           ],
           "scope": "Executable module plus cross-cutting factory contract"
         }
-      }
+      },
+      "evidenceClassTests": {
+        "route-render": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-modular-assembly-run4.ts",
+          "scripts/test-client-experience-shell.mjs"
+        ],
+        "responsive-ui": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-modular-assembly-run4.ts",
+          "scripts/test-client-experience-shell.mjs"
+        ],
+        "authorization-tenant-isolation": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-modular-assembly-run4.ts",
+          "scripts/test-client-experience-shell.mjs"
+        ],
+        "durable-persistence": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-modular-assembly-run4.ts",
+          "scripts/test-client-experience-shell.mjs"
+        ],
+        "dependency-integration-readiness": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-modular-assembly-run4.ts",
+          "scripts/test-client-experience-shell.mjs"
+        ],
+        "success-empty-failure-states": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-modular-assembly-run4.ts",
+          "scripts/test-client-experience-shell.mjs"
+        ],
+        "observability": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-modular-assembly-run4.ts",
+          "scripts/test-client-experience-shell.mjs"
+        ],
+        "rollback-disable": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-modular-assembly-run4.ts",
+          "scripts/test-client-experience-shell.mjs"
+        ],
+        "business-lifecycle": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-modular-assembly-run4.ts",
+          "scripts/test-client-experience-shell.mjs"
+        ],
+        "immutable-version-fingerprint": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-modular-assembly-run4.ts",
+          "scripts/test-client-experience-shell.mjs"
+        ]
+      },
+      "sourceCommit": "46185cb04d9cf0913edb79e63922cf0fd6f57402"
     },
     {
       "moduleId": "settings",
       "moduleVersion": 1,
       "status": "certified",
-      "sourceFingerprint": "inventory-v1-settings",
-      "evidenceFingerprint": "evidence-v2-settings",
+      "sourceFingerprint": "676b7b9195d80d0fbff35259810c969158540e12fa787607d37df31757358c29",
+      "evidenceFingerprint": "31521848afe81afca551ebfac5c43001212cd2eee9e2edea3ad13cc914c511f9",
       "evidence": {
         "route-render": {
           "tests": [
@@ -2633,7 +4440,100 @@
           ],
           "scope": "Executable module plus cross-cutting factory contract"
         }
-      }
+      },
+      "evidenceClassTests": {
+        "route-render": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-organization-workspace-config.mjs",
+          "scripts/test-modular-assembly-run4.ts"
+        ],
+        "responsive-ui": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-organization-workspace-config.mjs",
+          "scripts/test-modular-assembly-run4.ts"
+        ],
+        "authorization-tenant-isolation": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-organization-workspace-config.mjs",
+          "scripts/test-modular-assembly-run4.ts"
+        ],
+        "durable-persistence": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-organization-workspace-config.mjs",
+          "scripts/test-modular-assembly-run4.ts"
+        ],
+        "dependency-integration-readiness": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-organization-workspace-config.mjs",
+          "scripts/test-modular-assembly-run4.ts"
+        ],
+        "success-empty-failure-states": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-organization-workspace-config.mjs",
+          "scripts/test-modular-assembly-run4.ts"
+        ],
+        "observability": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-organization-workspace-config.mjs",
+          "scripts/test-modular-assembly-run4.ts"
+        ],
+        "rollback-disable": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-organization-workspace-config.mjs",
+          "scripts/test-modular-assembly-run4.ts"
+        ],
+        "business-lifecycle": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-organization-workspace-config.mjs",
+          "scripts/test-modular-assembly-run4.ts"
+        ],
+        "immutable-version-fingerprint": [
+          "scripts/test-capability-standard.mjs",
+          "scripts/test-tenant-safety.mjs",
+          "scripts/test-modular-assembly-run2.ts",
+          "scripts/test-factory-build-verification-gates.mjs",
+          "scripts/test-recovery-certification-contract.mjs",
+          "scripts/test-organization-workspace-config.mjs",
+          "scripts/test-modular-assembly-run4.ts"
+        ]
+      },
+      "sourceCommit": "46185cb04d9cf0913edb79e63922cf0fd6f57402"
     },
     {
       "moduleId": "calendar",
@@ -2724,7 +4624,40 @@
       "certifiedBoundary": {
         "scope": "EA-owned implementation with isolated executable lifecycle and rendered UI proof. No production deployment, real email delivery, external OAuth account or live Postgres write is asserted.",
         "runtimeReadinessRequired": true
-      }
+      },
+      "evidenceClassTests": {
+        "route-render": [
+          "tests/blockers-certified.test.mts"
+        ],
+        "responsive-ui": [
+          "scripts/test-blockers-ui.mjs"
+        ],
+        "authorization-tenant-isolation": [
+          "tests/blockers-certified.test.mts"
+        ],
+        "durable-persistence": [
+          "tests/blockers-certified.test.mts"
+        ],
+        "dependency-integration-readiness": [
+          "tests/blockers-certified.test.mts"
+        ],
+        "success-empty-failure-states": [
+          "tests/blockers-certified.test.mts"
+        ],
+        "observability": [
+          "tests/blockers-certified.test.mts"
+        ],
+        "rollback-disable": [
+          "tests/blockers-certified.test.mts"
+        ],
+        "business-lifecycle": [
+          "tests/blockers-certified.test.mts"
+        ],
+        "immutable-version-fingerprint": [
+          "scripts/certify-blockers.mjs"
+        ]
+      },
+      "sourceCommit": "46185cb04d9cf0913edb79e63922cf0fd6f57402"
     },
     {
       "moduleId": "people",
@@ -2820,7 +4753,40 @@
       "certifiedBoundary": {
         "scope": "EA-owned implementation with isolated executable lifecycle and rendered UI proof. No production deployment, real email delivery, external OAuth account or live Postgres write is asserted.",
         "runtimeReadinessRequired": true
-      }
+      },
+      "evidenceClassTests": {
+        "route-render": [
+          "tests/blockers-certified.test.mts"
+        ],
+        "responsive-ui": [
+          "scripts/test-blockers-ui.mjs"
+        ],
+        "authorization-tenant-isolation": [
+          "tests/blockers-certified.test.mts"
+        ],
+        "durable-persistence": [
+          "tests/blockers-certified.test.mts"
+        ],
+        "dependency-integration-readiness": [
+          "tests/blockers-certified.test.mts"
+        ],
+        "success-empty-failure-states": [
+          "tests/blockers-certified.test.mts"
+        ],
+        "observability": [
+          "tests/blockers-certified.test.mts"
+        ],
+        "rollback-disable": [
+          "tests/blockers-certified.test.mts"
+        ],
+        "business-lifecycle": [
+          "tests/blockers-certified.test.mts"
+        ],
+        "immutable-version-fingerprint": [
+          "scripts/certify-blockers.mjs"
+        ]
+      },
+      "sourceCommit": "46185cb04d9cf0913edb79e63922cf0fd6f57402"
     },
     {
       "moduleId": "discovery",
@@ -2912,7 +4878,40 @@
       "certifiedBoundary": {
         "scope": "EA-owned implementation with isolated executable lifecycle and rendered UI proof. No production deployment, real email delivery, external OAuth account or live Postgres write is asserted.",
         "runtimeReadinessRequired": true
-      }
+      },
+      "evidenceClassTests": {
+        "route-render": [
+          "tests/blockers-certified.test.mts"
+        ],
+        "responsive-ui": [
+          "scripts/test-blockers-ui.mjs"
+        ],
+        "authorization-tenant-isolation": [
+          "tests/blockers-certified.test.mts"
+        ],
+        "durable-persistence": [
+          "tests/blockers-certified.test.mts"
+        ],
+        "dependency-integration-readiness": [
+          "tests/blockers-certified.test.mts"
+        ],
+        "success-empty-failure-states": [
+          "tests/blockers-certified.test.mts"
+        ],
+        "observability": [
+          "tests/blockers-certified.test.mts"
+        ],
+        "rollback-disable": [
+          "tests/blockers-certified.test.mts"
+        ],
+        "business-lifecycle": [
+          "tests/blockers-certified.test.mts"
+        ],
+        "immutable-version-fingerprint": [
+          "scripts/certify-blockers.mjs"
+        ]
+      },
+      "sourceCommit": "46185cb04d9cf0913edb79e63922cf0fd6f57402"
     }
   ]
 }
