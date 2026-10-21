@@ -151,7 +151,7 @@ const TECHNICAL_MODULE_REGISTRY: TechnicalModuleDefinition[] = [
     tag: 'Calendar & Events',
     title: 'Calendar & shared scheduling',
     description:
-      'Shared scheduling, advisor bookings, events, ticketing, and registrations in one hub.',
+      'Shared scheduling, advisor bookings, events, and ticketing through Pretix for event registrations in one hub.',
     requiredRole: 'guest',
     pathSegment: 'events',
   },
