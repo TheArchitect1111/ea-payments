@@ -38,10 +38,10 @@ function hashTree(dir) {
       const full = join(current, name);
       if (statSync(full).isDirectory()) walk(full);
       else {
-        hash.update(relative(dir, full).split('\\\\').join('/'));
-        hash.update('\\0');
+        hash.update(relative(dir, full).split('\\').join('/'));
+        hash.update('\0');
         hash.update(readFileSync(full));
-        hash.update('\\0');
+        hash.update('\0');
       }
     }
   }
@@ -66,10 +66,10 @@ try {
     mkdirSync(join(source, 'src'), { recursive: true });
     writeFileSync(
       join(source, 'package.json'),
-      JSON.stringify({ name: '@ea/' + name, version: '1.2.3' }, null, 2) + '\\n',
+      JSON.stringify({ name: '@ea/' + name, version: '1.2.3' }, null, 2) + '\n',
     );
-    writeFileSync(join(source, 'src/index.ts'), "export { value } from './value.js';\\n");
-    writeFileSync(join(source, 'src/value.ts'), 'export const value = 1;\\n');
+    writeFileSync(join(source, 'src/index.ts'), "export { value } from './value.js';\n");
+    writeFileSync(join(source, 'src/value.ts'), 'export const value = 1;\n');
   }
 
   execFileSync('git', ['init', '-q', sourceRoot]);
@@ -93,7 +93,7 @@ try {
     assert.equal(metadata.packageHashes[name], hashTree(vendorPackage));
     assert.equal(
       readFileSync(join(vendorPackage, 'src/index.ts'), 'utf8'),
-      "export { value } from './value';\\n",
+      "export { value } from './value';\n",
     );
   }
 
@@ -101,7 +101,7 @@ try {
   const stableVendor = readFileSync(join(vendorRoot, 'capability-registry/src/value.ts'), 'utf8');
   writeFileSync(
     join(sourcePackages, 'capability-registry/src/value.ts'),
-    'export const value = 2;\\n',
+    'export const value = 2;\n',
   );
   const dirtyRun = run(process.execPath, [syncPath]);
   assert.notEqual(dirtyRun.status, 0);
