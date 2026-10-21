@@ -5,6 +5,8 @@ on:
     paths:
       - 'scripts/sync-platform-packages.mjs'
       - 'scripts/test-platform-package-sync.mjs'
+      - 'scripts/verify-platform-package-snapshot.mjs'
+      - 'vendor/**'
       - '.github/workflows/platform-package-sync.yml'
   push:
     branches:
@@ -12,6 +14,8 @@ on:
     paths:
       - 'scripts/sync-platform-packages.mjs'
       - 'scripts/test-platform-package-sync.mjs'
+      - 'scripts/verify-platform-package-snapshot.mjs'
+      - 'vendor/**'
       - '.github/workflows/platform-package-sync.yml'
 
 permissions:
@@ -30,3 +34,5 @@ jobs:
           node-version: 22
       - name: Run sync integration test
         run: node scripts/test-platform-package-sync.mjs
+      - name: Verify synced vendor snapshot and client isolation
+        run: node scripts/verify-platform-package-snapshot.mjs
