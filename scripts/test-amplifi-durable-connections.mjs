@@ -24,6 +24,7 @@ assert.match(callback, /instagram-missing/);
 assert.match(list, /loadAmplifiConnections\(auth\.session\.slug\)/);
 assert.match(list, /Legacy migration remains available only to established workspaces/);
 assert.match(list, /!auth\.session\.slug\.startsWith\('amplifi-trial-'\)/);
-assert.match(publish, /loadAmplifiConnections\(auth\.session\.slug\)/);
+assert.match(publish, /guardAmplifiCapability\(auth\.session, 'publishing'\)/);
+assert.match(publish, /publishThroughGateway\(\{ portalSlug:auth\.session\.slug/);
 
 console.log('Amplifi durable connection contract: PASS');
