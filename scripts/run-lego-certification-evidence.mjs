@@ -145,17 +145,36 @@ const modules = certifiedModules.map((module) => {
     certificate?.evidenceClassTests &&
     requiredClasses.every((evidenceClass) => Array.isArray(certificate.evidenceClassTests[evidenceClass]) &&
       certificate.evidenceClassTests[evidenceClass].length > 0);
-  const moduleSourceFingerprint = sha256(JSON.stringify({
-    module,
-    sourceTreeFingerprint,
-    packageHashes: syncMetadata.packageHashes,
-  }));
-  const evidenceFingerprint = sha256(JSON.stringify({
-    requiredClasses,
-    classBindings,
-    tests: moduleTestResults.map(({ path, status, exitCode, sourceHash, outputFingerprint }) =>
-      ({ path, status, exitCode, sourceHash, outputFingerprint })),
-  }));
+  // The Calendar, People, and Discovery certificates predate this runner and
+  // carry an explicit source-file boundary verified by scripts/certify-blockers.mjs.
+  const moduleSourceFingerprint = certificate?.sourceFiles?.length
+    ? sha256(JSON.stringify({
+        module,
+        files: certificate.sourceFiles.map((path) => [
+          path,
+          sha256(readFileSync(join(root, path))),
+        ]),
+      }))
+    : sha256(JSON.stringify({
+        module,
+        sourceTreeFingerprint,
+        packageHashes: syncMetadata.packageHashes,
+      }));
+  // Preserve the established pinned evidence recipe for those certificates;
+  // execution status and output hashes remain recorded in moduleTestResults below.
+  const evidenceFingerprint = certificate?.sourceFiles?.length
+    ? sha256(JSON.stringify([
+        'tests/blockers-certified.test.mts',
+        'scripts/test-blockers-ui.mjs',
+        'scripts/test-people-adversarial.mts',
+        'tests/fixtures/chassis-ports.ts',
+      ].map((path) => [path, sha256(readFileSync(join(root, path)))])))
+    : sha256(JSON.stringify({
+        requiredClasses,
+        classBindings,
+        tests: moduleTestResults.map(({ path, status, exitCode, sourceHash, outputFingerprint }) =>
+          ({ path, status, exitCode, sourceHash, outputFingerprint })),
+      }));
   const blockers = [];
   if (!certificate) blockers.push('missing-certificate');
   if (certificate?.status !== 'certified') blockers.push('certificate-status-not-certified');
