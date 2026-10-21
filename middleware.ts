@@ -135,6 +135,14 @@ export async function middleware(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname;
 
+  // TB3 public routes - bypass all portal auth (fixes 307)
+  if (pathname === '/tarris' || pathname.startsWith('/tarris/')) {
+    const h = new Headers(request.headers);
+    h.set('x-pathname', pathname);
+    return NextResponse.next({ request: { headers: h } });
+  }
+
+
   // Short Amanda app URLs resolve to their canonical portal pages only on Amanda's domain.
   const normalizedHost = host?.split(':')[0].toLowerCase();
   const amandaAliases: Record<string, string> = {
