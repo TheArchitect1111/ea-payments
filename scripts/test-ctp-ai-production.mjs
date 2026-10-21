@@ -74,7 +74,8 @@ assert(studio.includes('scheduleCtpProduction'), 'Studio bridge must schedule pr
 assert(portalStatus.includes('productionReady'), 'Timeline must honor production package');
 assert(actions.includes('run_production'), 'Executive desk must support run_production');
 assert(panel.includes('Run AI production'), 'Admin panel must expose run button');
-assert(progressPage.includes('AI production'), 'Progress must surface production package');
+assert(progressPage.includes('statusView.productionArtifacts'), 'Progress must surface production package');
+assert(!progressPage.includes('AI production'), 'Client progress should describe the work package in client language');
 
 if (failures.length) {
   console.error('CTP AI production checks FAILED:');
