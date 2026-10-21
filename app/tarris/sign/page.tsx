@@ -14,7 +14,7 @@ export default function Page() {
       const r = await fetch('/api/tarris/sign', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, consent: true, email: 'tarrisb73@yahoo.com', recordId: 'recd9zuiS7lDhBLAm' })
+        body: JSON.stringify({ legalName: name, consent: true, email: 'tarrisb73@yahoo.com', recordId: 'recd9zuiS7lDhBLAm' })
       });
       if (r.ok) location.href = '/pay/tarris-bouie';
       else {
