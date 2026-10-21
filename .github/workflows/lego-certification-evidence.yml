@@ -47,6 +47,8 @@ jobs:
       - run: npm ci
       - name: Install Chromium for browser evidence
         run: npx playwright install --with-deps chromium
+      - name: Validate module certification contract
+        run: node scripts/test-lego-certification-contract.mjs
       - name: Resolve implementation source commit
         id: implementation-source
         run: |
