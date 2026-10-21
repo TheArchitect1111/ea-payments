@@ -156,9 +156,9 @@ function fingerprintTree(path: string): string | null {
     walk(path);
     for (const file of files) {
       hash.update(relative(path, file).split(sep).join('/'));
-      hash.update('\\0');
+      hash.update('\0');
       hash.update(readFileSync(file));
-      hash.update('\\0');
+      hash.update('\0');
     }
     return hash.digest('hex');
   } catch {
