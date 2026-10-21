@@ -79,36 +79,6 @@ export default async function PortalCtpStatusPage({
             </p>
           ) : null}
           <p className="guide-progress-eta">{guide.confidenceMessage}</p>
-          <div
-            role="progressbar"
-            aria-label="Project completion"
-            aria-valuemin={0}
-            aria-valuemax={100}
-            aria-valuenow={statusView.percentComplete}
-            style={{ marginTop: '1rem' }}
-          >
-            <p className="guide-progress-eta" style={{ marginBottom: '0.4rem' }}>
-              <strong>{statusView.percentComplete}% complete</strong>
-            </p>
-            <div
-              style={{
-                height: 8,
-                borderRadius: 999,
-                background: 'rgba(255,255,255,0.12)',
-                overflow: 'hidden',
-              }}
-            >
-              <div
-                className="ctpPulse"
-                style={{
-                  width: `${statusView.percentComplete}%`,
-                  height: '100%',
-                  borderRadius: 999,
-                  background: 'linear-gradient(90deg, #d8ad3d, #f2d987)',
-                }}
-              />
-            </div>
-          </div>
           {typeof statusView.digitalScore === 'number' ||
           typeof statusView.socialScore === 'number' ||
           typeof statusView.gbpScore === 'number' ? (
@@ -224,19 +194,6 @@ export default async function PortalCtpStatusPage({
           </h2>
           <div className="guide-progress-panel">
             <p>{guide.behindTheScenes}</p>
-            {statusView.productionArtifacts?.length ? (
-              <>
-                <p>
-                  <strong>AI production:</strong>{' '}
-                  {statusView.productionHeadline || 'Your production package is ready.'}
-                </p>
-                <ul>
-                  {statusView.productionArtifacts.map((artifact) => (
-                    <li key={artifact.id}>{artifact.title}</li>
-                  ))}
-                </ul>
-              </>
-            ) : null}
           </div>
         </section>
 
