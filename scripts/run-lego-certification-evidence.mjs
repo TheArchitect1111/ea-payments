@@ -10,7 +10,7 @@ const contract = JSON.parse(readFileSync(join(root, 'config/module-certification
 const ledger = JSON.parse(readFileSync(join(root, 'config/module-certification-evidence.json'), 'utf8'));
 const registrySource = readFileSync(join(root, 'lib/modules/registry.ts'), 'utf8');
 const syncMetadata = JSON.parse(readFileSync(join(root, 'vendor/.platform-sync-meta.json'), 'utf8'));
-const registryMatch = registrySource.match(/export const MODULE_IDS = \\[([\\s\\S]*?)\\] as const;/);
+const registryMatch = registrySource.match(/export const MODULE_IDS = \[([\s\S]*?)\] as const;/);
 const registryIds = registryMatch ? [...registryMatch[1].matchAll(/'([^']+)'/g)].map((match) => match[1]) : [];
 const inventoryIds = inventory.modules.map((module) => module.id);
 const certifiedModules = inventory.modules.filter((module) => module.assemblyStatus === 'certified');
@@ -33,9 +33,9 @@ function hashRows(rows) {
   const hash = createHash('sha256');
   for (const row of [...rows].sort((a, b) => a.path.localeCompare(b.path))) {
     hash.update(row.path);
-    hash.update('\\0');
+    hash.update('\0');
     hash.update(row.hash);
-    hash.update('\\0');
+    hash.update('\0');
   }
   return hash.digest('hex');
 }
@@ -71,13 +71,13 @@ for (const id of setDifference(certifiedModules.map((module) => module.id), cert
 }
 
 const trackedPaths = execFileSync('git', ['ls-files', '-z'], { encoding: 'utf8' })
-  .split('\\0')
+  .split('\0')
   .filter(Boolean)
   .filter((path) =>
-    /^(app|lib|src|vendor)\\//.test(path) ||
+    /^(app|lib|src|vendor)\//.test(path) ||
     ['config/capability-inventory.json', 'config/module-certification-contract.json'].includes(path),
   )
-  .filter((path) => /\\.(?:c|m)?(?:js|jsx|ts|tsx|json|css)$/.test(path));
+  .filter((path) => /\.(?:c|m)?(?:js|jsx|ts|tsx|json|css)$/.test(path));
 const sourceRows = trackedPaths.map((path) => ({
   path: path.split(sep).join('/'),
   hash: sha256(readFileSync(join(root, path))),
@@ -91,7 +91,7 @@ for (const path of [...uniqueTests].sort()) {
     continue;
   }
   const sourceHash = sha256(readFileSync(join(root, path)));
-  const args = /\\.(?:ts|tsx|mts|cts)$/.test(path)
+  const args = /\.(?:ts|tsx|mts|cts)$/.test(path)
     ? ['--import', 'tsx', path]
     : [path];
   const startedAt = Date.now();
@@ -102,7 +102,7 @@ for (const path of [...uniqueTests].sort()) {
     maxBuffer: 2 * 1024 * 1024,
     env: process.env,
   });
-  const output = (result.stdout ?? '') + '\\n' + (result.stderr ?? '');
+  const output = (result.stdout ?? '') + '\n' + (result.stderr ?? '');
   testResults[path] = {
     status: result.error ? 'runner-error' : result.status === 0 ? 'passed' : 'failed',
     exitCode: result.status ?? null,
@@ -222,7 +222,7 @@ const report = {
 
 const outputPath = join(root, 'artifacts/lego-certification/latest.json');
 mkdirSync(dirname(outputPath), { recursive: true });
-writeFileSync(outputPath, JSON.stringify(report, null, 2) + '\\n');
+writeFileSync(outputPath, JSON.stringify(report, null, 2) + '\n');
 console.log(JSON.stringify({
   status: report.status,
   sourceCommit,
