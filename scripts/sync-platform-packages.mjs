@@ -78,14 +78,14 @@ function walkTsFiles(dir) {
 /** Turbopack fails on ./foo.js when only foo.ts exists; strip .js in relative imports. */
 function rewriteJsSpecifiers(filePath) {
   const before = readFileSync(filePath, 'utf8');
-  const after = before.replace(/(from\\s+['"])(\\.\\.?\\/[^'"]+)\\.js(['"])/g, '$1$2$3');
+  const after = before.replace(/(from\s+['"])(\.\.?\/[^'"]+)\.js(['"])/g, '$1$2$3');
   if (after !== before) writeFileSync(filePath, after);
 }
 
 function treeHash(dir) {
   const hash = createHash('sha256');
   for (const file of walkFiles(dir)) {
-    hash.update(relative(dir, file).split('\\\\').join('/'));
+    hash.update(relative(dir, file).split('\\').join('/'));
     hash.update('\\0');
     hash.update(readFileSync(file));
     hash.update('\\0');
@@ -116,7 +116,7 @@ try {
       cpSync(join(source, 'README.md'), join(staged, 'README.md'));
     }
     const pkg = JSON.parse(readFileSync(join(source, 'package.json'), 'utf8'));
-    writeFileSync(join(staged, 'package.json'), `${JSON.stringify(pkg, null, 2)}\\n`);
+    writeFileSync(join(staged, 'package.json'), `${JSON.stringify(pkg, null, 2)}\n`);
     for (const file of walkTsFiles(join(staged, 'src'))) rewriteJsSpecifiers(file);
     packageHashes[name] = treeHash(staged);
   }
@@ -152,7 +152,7 @@ try {
 
   const metaPath = join(vendorRoot, '.platform-sync-meta.json');
   const metaTemp = join(stagingRoot, '.platform-sync-meta.json');
-  writeFileSync(metaTemp, `${JSON.stringify(meta, null, 2)}\\n`);
+  writeFileSync(metaTemp, `${JSON.stringify(meta, null, 2)}\n`);
   renameSync(metaTemp, metaPath);
   rmSync(stagingRoot, { recursive: true, force: true });
 } catch (error) {
