@@ -5,8 +5,11 @@
  * 1. portal ModuleId     — ea-payments/lib/modules/registry.ts
  * 2. CapabilityId        — ea-payments/lib/experience-registry.ts
  * 3. workspace enableKey — next-steps-pro clientConfigs / moduleRegistry
+ * 4. technical BrickId — ea-payments/src/chassis/BrickInterface.ts
  *
  * Plus CPR hubModuleId — cpr tenant-presets / portal-hub-modules.
+ * BrickId is a separate implementation/service layer; rows below record only
+ * evidenced relationships and explicitly leave other bricks unmapped.
  *
  * Canonical platform id = CapabilityManifest.id (kebab-case, stable).
  */
@@ -141,13 +144,6 @@ export const CAPABILITY_ID_MAP: IdMapRow[] = [
     category: 'Workflow',
   },
   {
-    capabilityId: 'member-experience',
-    moduleId: 'member',
-    experienceCapabilityId: 'member-experience',
-    category: 'Workflow',
-    notes: 'OIB Member Experience → portal member home',
-  },
-  {
     capabilityId: 'landing-pages',
     moduleId: 'landing',
     experienceCapabilityId: 'landing-pages',
@@ -160,35 +156,6 @@ export const CAPABILITY_ID_MAP: IdMapRow[] = [
     enableKey: 'payments',
     category: 'Payments',
     notes: 'CPR payments (fee stages) and EA billing share this capability id after contract unify',
-  },
-  {
-    capabilityId: 'settings',
-    moduleId: 'settings',
-    experienceCapabilityId: 'settings',
-    enableKey: 'settings',
-    category: 'Platform',
-    notes: 'Portal branding and notification preferences',
-  },
-  {
-    capabilityId: 'client-intake',
-    moduleId: 'intake',
-    experienceCapabilityId: 'client-intake',
-    category: 'Workflow',
-    notes: 'Portal Ops — client end-user intake form ledger',
-  },
-  {
-    capabilityId: 'applications',
-    moduleId: 'applications',
-    experienceCapabilityId: 'applications',
-    category: 'Workflow',
-    notes: 'Portal Ops — application queue with shared form ledger',
-  },
-  {
-    capabilityId: 'operations-reports',
-    moduleId: 'reports',
-    experienceCapabilityId: 'operations-reports',
-    category: 'Analytics',
-    notes: 'Portal Ops — curated Pulse / CTP BI / Documents gallery',
   },
 
   // Workspace-only / vertical (no EA portal ModuleId yet)
@@ -249,9 +216,48 @@ export const CAPABILITY_ID_MAP: IdMapRow[] = [
   },
   {
     capabilityId: 'calendar',
+    moduleId: 'calendar',
+    experienceCapabilityId: 'shared-calendar',
     enableKey: 'calendar',
     hubModuleId: 'family-calendar',
     category: 'Calendar',
+    notes: 'EA portal calendar module and CPR family calendar share this row; events remains a separate module.',
+  },
+  {
+    capabilityId: 'member-experience',
+    moduleId: 'member',
+    experienceCapabilityId: 'member-experience',
+    category: 'Member Experience',
+  },
+  {
+    capabilityId: 'people-directory',
+    moduleId: 'people',
+    experienceCapabilityId: 'people-directory',
+    category: 'People',
+  },
+  {
+    capabilityId: 'settings',
+    moduleId: 'settings',
+    experienceCapabilityId: 'settings',
+    category: 'Settings',
+  },
+  {
+    capabilityId: 'client-intake',
+    moduleId: 'intake',
+    experienceCapabilityId: 'client-intake',
+    category: 'Intake',
+  },
+  {
+    capabilityId: 'applications',
+    moduleId: 'applications',
+    experienceCapabilityId: 'applications',
+    category: 'Applications',
+  },
+  {
+    capabilityId: 'operations-reports',
+    moduleId: 'reports',
+    experienceCapabilityId: 'operations-reports',
+    category: 'Reports',
   },
   {
     capabilityId: 'family-portal',
@@ -277,6 +283,57 @@ export const CAPABILITY_ID_MAP: IdMapRow[] = [
     category: 'Opportunities',
     notes: 'CPR hub module',
   },
+];
+
+/** Technical Brick IDs are not portal modules or customer capabilities. */
+export const TECHNICAL_BRICK_IDS = [
+  'auth',
+  'lms',
+  'billing',
+  'catalog',
+  'menu',
+  'checkout',
+  'welcome',
+  'email',
+  'entitlement',
+  'jane',
+  'amazon',
+  'preview',
+  'production-gate',
+  'chassis-cert',
+] as const;
+
+export type TechnicalBrickId = (typeof TECHNICAL_BRICK_IDS)[number];
+
+export type TechnicalBrickMapRow = {
+  brickId: TechnicalBrickId;
+  layer: 'platform' | 'domain-service' | 'provider-adapter' | 'delivery' | 'quality-gate';
+  relation: 'cross-cutting' | 'supports' | 'same-domain' | 'no-direct-feature-map';
+  moduleIds?: string[];
+  capabilityIds?: string[];
+  notes: string;
+};
+
+/**
+ * Technical-to-product crosswalk. Empty module/capability arrays are intentional:
+ * they prevent infrastructure and governance bricks from being mislabeled as
+ * customer-facing capabilities without source evidence.
+ */
+export const TECHNICAL_BRICK_MAP: TechnicalBrickMapRow[] = [
+  { brickId: 'auth', layer: 'platform', relation: 'cross-cutting', notes: 'Identity service; not a single portal capability.' },
+  { brickId: 'lms', layer: 'domain-service', relation: 'supports', moduleIds: ['training'], capabilityIds: ['learning'], notes: 'Training/LMS domain; runtime wiring still needs separate verification.' },
+  { brickId: 'billing', layer: 'provider-adapter', relation: 'same-domain', moduleIds: ['billing'], capabilityIds: ['billing'], notes: 'Stripe billing adapter and portal billing capability share the billing domain.' },
+  { brickId: 'catalog', layer: 'domain-service', relation: 'no-direct-feature-map', notes: 'Shared catalog service; no single portal module is evidenced.' },
+  { brickId: 'menu', layer: 'platform', relation: 'cross-cutting', notes: 'Navigation/menu concern; not a single customer capability.' },
+  { brickId: 'checkout', layer: 'provider-adapter', relation: 'supports', moduleIds: ['billing'], capabilityIds: ['billing'], notes: 'Stripe checkout supports the billing journey.' },
+  { brickId: 'welcome', layer: 'provider-adapter', relation: 'no-direct-feature-map', notes: 'Post-checkout welcome service; no owning portal module is established.' },
+  { brickId: 'email', layer: 'provider-adapter', relation: 'no-direct-feature-map', notes: 'Email delivery adapter; usage across product modules is not established by the registry.' },
+  { brickId: 'entitlement', layer: 'platform', relation: 'cross-cutting', notes: 'Access/entitlement concern spans modules rather than representing one capability.' },
+  { brickId: 'jane', layer: 'provider-adapter', relation: 'no-direct-feature-map', notes: 'Adapter provider is OpenAI in the current source; product/module ownership is unclear.' },
+  { brickId: 'amazon', layer: 'provider-adapter', relation: 'no-direct-feature-map', notes: 'Amazon provider adapter; no portal module mapping is established.' },
+  { brickId: 'preview', layer: 'delivery', relation: 'no-direct-feature-map', notes: 'Preview/storage concern; delivery tooling rather than a portal capability.' },
+  { brickId: 'production-gate', layer: 'quality-gate', relation: 'no-direct-feature-map', notes: 'Production audit/gating concern; not a portal capability.' },
+  { brickId: 'chassis-cert', layer: 'quality-gate', relation: 'no-direct-feature-map', notes: 'Chassis certification evidence concern; not a portal capability.' },
 ];
 
 const byCapabilityId = new Map(CAPABILITY_ID_MAP.map((r) => [r.capabilityId, r]));

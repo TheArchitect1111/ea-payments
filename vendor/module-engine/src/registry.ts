@@ -1,5 +1,6 @@
 import {
   CAPABILITY_CATALOG,
+  CRM_CAPABILITY_MANIFEST,
   getCapabilityManifest,
   type CapabilityManifest,
 } from '@ea/capability-registry';
@@ -12,7 +13,7 @@ import type { CapabilityContribution } from './types';
 export class CapabilityRegistry {
   private manifests = new Map<string, CapabilityManifest>();
 
-  constructor(seed: CapabilityManifest[] = CAPABILITY_CATALOG) {
+  constructor(seed: CapabilityManifest[] = [...CAPABILITY_CATALOG, CRM_CAPABILITY_MANIFEST]) {
     for (const manifest of seed) {
       this.register(manifest);
     }
@@ -30,6 +31,7 @@ export class CapabilityRegistry {
   }
 
   get(id: string): CapabilityManifest | undefined {
+    if (id === CRM_CAPABILITY_MANIFEST.id) return this.manifests.get(id) ?? CRM_CAPABILITY_MANIFEST;
     return this.manifests.get(id) ?? getCapabilityManifest(id);
   }
 

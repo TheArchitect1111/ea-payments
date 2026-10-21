@@ -10,7 +10,7 @@ const EA_PORTAL = {
   loginPath: '/portal/login',
 };
 
-/** Commercial Amplifi V1 plans. Smartchitecture add-ons are managed inside Amplifi billing. */
+/** Shared commercial Amplifi plans. Client or contract-specific offers stay in ea-payments. */
 export const AMPLIFI_COMMERCE_OFFERS: CommerceOffer[] = [
   {
     id: 'amplifi_social',
@@ -18,12 +18,12 @@ export const AMPLIFI_COMMERCE_OFFERS: CommerceOffer[] = [
     name: 'Amplifi Social',
     displayName: 'Amplifi Social',
     description:
-      'One brand, up to three social channels, AI-assisted social posts and graphics, content calendar, scheduling, approval controls, publishing, brand voice, and one active campaign.',
+      'One brand, up to three social channels, AI-assisted social posts and graphics, a content calendar, scheduling, approval controls, publishing, brand voice, and one active campaign.',
     interval: 'month',
     priceCents: 2900,
     stripePriceEnvKey: 'STRIPE_PRICE_AMPLIFI_SOCIAL',
     allowInlineStripePrice: true,
-    airtablePackageName: 'Implementation Package',
+    airtablePackageName: 'Amplifi',
     moduleIds: [...AMPLIFI_SOCIAL_MODULES],
     portalConfig: EA_PORTAL,
     fulfillmentType: 'amplifi',
@@ -42,7 +42,7 @@ export const AMPLIFI_COMMERCE_OFFERS: CommerceOffer[] = [
     priceCents: 5900,
     stripePriceEnvKey: 'STRIPE_PRICE_AMPLIFI_INTELLIGENCE',
     allowInlineStripePrice: true,
-    airtablePackageName: 'Implementation Package',
+    airtablePackageName: 'Amplifi',
     moduleIds: [...AMPLIFI_INTELLIGENCE_MODULES],
     portalConfig: EA_PORTAL,
     fulfillmentType: 'amplifi',
@@ -61,7 +61,7 @@ export const AMPLIFI_COMMERCE_OFFERS: CommerceOffer[] = [
     priceCents: 12900,
     stripePriceEnvKey: 'STRIPE_PRICE_AMPLIFI_COMPLETE',
     allowInlineStripePrice: true,
-    airtablePackageName: 'Implementation Package',
+    airtablePackageName: 'Amplifi',
     moduleIds: [...AMPLIFI_COMPLETE_MODULES],
     portalConfig: EA_PORTAL,
     fulfillmentType: 'amplifi',

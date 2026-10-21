@@ -57,7 +57,7 @@ export type CommerceOfferId =
   | 'platform_monthly'
   | 'platform_annual';
 
-/** Canonical commerce offer — single source for entitlements + checkout metadata. */
+/** Canonical commerce offer ? single source for entitlements + checkout metadata. */
 export type CommerceOffer = {
   id: CommerceOfferId;
   kind: CommerceOfferKind;

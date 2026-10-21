@@ -16,9 +16,11 @@ export type {
 
 export { CAPABILITY_STATUSES, CAPABILITY_CATEGORIES } from './types';
 
-export type { IdMapRow } from './id-map';
+export type { IdMapRow, TechnicalBrickId, TechnicalBrickMapRow } from './id-map';
 export {
   CAPABILITY_ID_MAP,
+  TECHNICAL_BRICK_IDS,
+  TECHNICAL_BRICK_MAP,
   getMapRowByCapabilityId,
   getMapRowByModuleId,
   getMapRowByEnableKey,
@@ -36,6 +38,8 @@ export {
   listCapabilityManifests,
   listCertifiedCapabilities,
 } from './catalog';
+
+export { CRM_CAPABILITY_MANIFEST } from './crm';
 
 export {
   CPR_HUB_MODULE_IDS,

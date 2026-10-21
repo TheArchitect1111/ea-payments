@@ -35,6 +35,13 @@ export const SIMPLIFI_SUBSCRIPTION_MODULES = ensureLaunchEditionModules([
   'billing',
 ]) as readonly string[];
 
+export const LAUNCH_VERIFICATION_MODULES = [
+  'dashboard',
+  'pulse',
+  'update-hub',
+  'ask',
+] as const;
+
 /** Lean commercial Amplifi workspace. */
 export const AMPLIFI_SOCIAL_MODULES = [
   'dashboard',
@@ -49,20 +56,10 @@ export const AMPLIFI_INTELLIGENCE_MODULES = [
   'reports',
 ] as const;
 
-/** Complete Amplifi keeps the same portal surface; Smartchitecture features are plan-gated inside Amplifi. */
+/** Complete Amplifi keeps the same portal surface; add-ons are plan-gated inside Amplifi. */
 export const AMPLIFI_COMPLETE_MODULES = [
-  'dashboard',
-  'amplifi',
-  'billing',
-  'settings',
+  ...AMPLIFI_SOCIAL_MODULES,
   'reports',
-] as const;
-
-export const LAUNCH_VERIFICATION_MODULES = [
-  'dashboard',
-  'pulse',
-  'update-hub',
-  'ask',
 ] as const;
 
 export const CAPACITY_MODULES = [
@@ -77,8 +74,6 @@ export const IMPLEMENTATION_MODULES = ensureLaunchEditionModules([
   'connect',
   'member',
 ]) as readonly string[];
-
-export const SIMPLIFI_ONE_TIME_MODULES = [...EA_CLIENT_MODULES] as const;
 
 /** Lean client portal modules for automated website + portal starter. */
 export const WEBSITE_PORTAL_MODULES = ensureLaunchEditionModules([
@@ -96,6 +91,8 @@ export const WEBSITE_PORTAL_MODULES = ensureLaunchEditionModules([
   'ask',
   'connect',
 ]) as readonly string[];
+
+export const SIMPLIFI_ONE_TIME_MODULES = [...EA_CLIENT_MODULES] as const;
 
 export const PLATFORM_MONTHLY_MODULES = ensureLaunchEditionModules([
   ...EA_CLIENT_MODULES,

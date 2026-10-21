@@ -3,8 +3,8 @@ export type ThemeDensity = 'compact' | 'comfortable' | 'spacious';
 
 import { amandaEditorialTheme } from './themes/amanda-editorial/theme';
 import { eaImmersiveTheme } from './themes/ea-immersive/theme';
-export * from './themes/amanda-editorial';
-export * from './themes/ea-immersive';
+export * from './themes/amanda-editorial/index';
+export * from './themes/ea-immersive/index';
 
 /** Brand / workspace theme contract for multi-tenant shells. */
 export type WorkspaceTheme = {
@@ -47,7 +47,7 @@ export const defaultWorkspaceTheme: WorkspaceTheme = {
   id: EA_DEFAULT_THEME_ID,
   organizationId: 'ea',
   name: 'Efficiency Architects',
-  logo: '/ea-logo.png',
+  logo: '/EA_Logo.png',
   logoAlt: 'Efficiency Architects',
   favicon: '/favicon.ico',
   heroImage: '',
