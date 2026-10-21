@@ -55,7 +55,7 @@ function setDifference(left, right) {
   return left.filter((value) => !rightSet.has(value)).sort();
 }
 
-const sourceCommit = process.env.GITHUB_SHA || execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
+const sourceCommit = process.env.GITHUB_SOURCE_COMMIT || process.env.GITHUB_SHA || execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
 if (!/^[a-f0-9]{40}$/i.test(sourceCommit)) failures.push('source-commit:invalid');
 
 if (!registryMatch) failures.push('registry:unable-to-read-MODULE_IDS');
