@@ -192,7 +192,7 @@ const report = {
     repository: process.env.GITHUB_REPOSITORY ?? 'TheArchitect1111/ea-payments',
     commit: sourceCommit,
     branch: process.env.GITHUB_REF_NAME ?? null,
-    dirty: execFileSync('git', ['status', '--porcelain'], { encoding: 'utf8' }).trim().length > 0,
+    dirty: execFileSync('git', ['status', '--porcelain', '--untracked-files=no'], { encoding: 'utf8' }).trim().length > 0,
     sourceTreeFingerprint,
     sourceFileCount: sourceRows.length,
   },
