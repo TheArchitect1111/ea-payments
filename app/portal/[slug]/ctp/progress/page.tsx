@@ -194,6 +194,16 @@ export default async function PortalCtpStatusPage({
           </h2>
           <div className="guide-progress-panel">
             <p>{guide.behindTheScenes}</p>
+            {statusView.productionArtifacts?.length ? (
+              <>
+                <p><strong>Work package updates:</strong> {statusView.productionHeadline || 'Your work package is ready.'}</p>
+                <ul>
+                  {statusView.productionArtifacts.map((artifact) => (
+                    <li key={artifact.id}>{artifact.title}</li>
+                  ))}
+                </ul>
+              </>
+            ) : null}
           </div>
         </section>
 
