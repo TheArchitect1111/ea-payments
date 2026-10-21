@@ -1,4 +1,75 @@
-import {existsSync,readFileSync} from 'node:fs';const contract=JSON.parse(readFileSync('config/module-certification-contract.json','utf8'));const inv=JSON.parse(readFileSync('config/capability-inventory.json','utf8'));const ledger=JSON.parse(readFileSync('config/module-certification-evidence.json','utf8'));const failures=[];const required=contract.requiredEvidenceClasses;const certs=new Map(ledger.certificates.map(x=>[x.moduleId,x]));
-for(const m of inv.modules.filter(x=>x.assemblyStatus==='certified')){const c=certs.get(m.id);if(!c){failures.push(m.id+':missing-certificate');continue;}if(c.status!=='certified')failures.push(m.id+':not-certified');if(c.moduleVersion!==m.version)failures.push(m.id+':version-mismatch');for(const cls of required){const e=c.evidence?.[cls];if(!e?.tests?.length)failures.push(m.id+':'+cls+':missing-evidence');else for(const p of e.tests)if(!existsSync(p))failures.push(m.id+':'+cls+':missing-file:'+p);}if(!c.sourceFingerprint||!c.evidenceFingerprint)failures.push(m.id+':missing-fingerprint');}
-for(const c of ledger.certificates)if(!inv.modules.some(m=>m.id===c.moduleId&&m.assemblyStatus==='certified'))failures.push(c.moduleId+':certificate-for-noncertified-module');
-console.log(JSON.stringify({certifiedModules:[...certs.keys()],count:certs.size,requiredEvidenceClasses:required,failures},null,2));if(failures.length)process.exit(1);
+import { existsSync, readFileSync } from 'node:fs';
+
+const contract = JSON.parse(readFileSync('config/module-certification-contract.json', 'utf8'));
+const inventory = JSON.parse(readFileSync('config/capability-inventory.json', 'utf8'));
+const ledger = JSON.parse(readFileSync('config/module-certification-evidence.json', 'utf8'));
+const registrySource = readFileSync('lib/modules/registry.ts', 'utf8');
+const failures = [];
+const required = contract.requiredEvidenceClasses ?? [];
+
+const registryMatch = registrySource.match(/export const MODULE_IDS = \\[([\\s\\S]*?)\\] as const;/);
+if (!registryMatch) {
+  failures.push('registry:unable-to-read-MODULE_IDS');
+}
+const registryIds = registryMatch
+  ? [...registryMatch[1].matchAll(/'([^']+)'/g)].map((match) => match[1])
+  : [];
+const inventoryIds = inventory.modules.map((module) => module.id);
+const certifiedModules = inventory.modules.filter((module) => module.assemblyStatus === 'certified');
+const certifiedIds = certifiedModules.map((module) => module.id);
+const certificates = ledger.certificates ?? [];
+const certificateIds = certificates.map((certificate) => certificate.moduleId);
+const certificatesById = new Map(certificates.map((certificate) => [certificate.moduleId, certificate]));
+
+function addDuplicates(label, values) {
+  const seen = new Set();
+  for (const value of values) {
+    if (seen.has(value)) failures.push(label + ':duplicate-id:' + value);
+    seen.add(value);
+  }
+}
+
+function compareIdSets(label, expected, actual) {
+  const expectedSet = new Set(expected);
+  const actualSet = new Set(actual);
+  for (const id of expectedSet) if (!actualSet.has(id)) failures.push(label + ':missing:' + id);
+  for (const id of actualSet) if (!expectedSet.has(id)) failures.push(label + ':unexpected:' + id);
+}
+
+addDuplicates('registry', registryIds);
+addDuplicates('inventory', inventoryIds);
+addDuplicates('certificates', certificateIds);
+compareIdSets('registry-vs-inventory', registryIds, inventoryIds);
+compareIdSets('certified-inventory-vs-ledger', certifiedIds, certificateIds);
+
+for (const module of certifiedModules) {
+  const certificate = certificatesById.get(module.id);
+  if (!certificate) continue;
+  if (certificate.status !== 'certified') failures.push(module.id + ':not-certified');
+  if (certificate.moduleVersion !== module.version) failures.push(module.id + ':version-mismatch');
+  for (const evidenceClass of required) {
+    const evidence = certificate.evidence?.[evidenceClass];
+    if (!evidence?.tests?.length) {
+      failures.push(module.id + ':' + evidenceClass + ':missing-evidence');
+      continue;
+    }
+    for (const path of evidence.tests) {
+      if (!existsSync(path)) failures.push(module.id + ':' + evidenceClass + ':missing-file:' + path);
+    }
+  }
+  if (!certificate.sourceFingerprint || !certificate.evidenceFingerprint) {
+    failures.push(module.id + ':missing-fingerprint');
+  }
+}
+
+console.log(JSON.stringify({
+  moduleIds: {
+    registry: registryIds.length,
+    inventory: inventoryIds.length,
+    certified: certifiedIds.length,
+    certificates: certificateIds.length,
+  },
+  requiredEvidenceClasses: required,
+  failures,
+}, null, 2));
+if (failures.length) process.exit(1);
