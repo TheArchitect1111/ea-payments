@@ -1,24 +1,26 @@
 {
-  "sourceCommit": "868179d55d2c221d4816ff947691d4bfd99b20ce",
-  "sha": "868179d55d2c221d4816ff947691d4bfd99b20ce",
-  "previewCommit": "868179d55d2c221d4816ff947691d4bfd99b20ce",
-  "mergeCommit": "868179d55d2c221d4816ff947691d4bfd99b20ce",
-  "previewUrl": "https://tb3.online",
-  "client": "tb3",
-  "scope": "TB3 Premium V1: tb3.online launch, collage signature black/white artwork, SHOP TB3 to Bonfire, SEO + OG",
-  "productionEligible": true,
-  "status": "PASS",
-  "verificationType": "TB3 Production Launch: build PASS, tb3.online 200, artwork 200, manual verification",
-  "completedAt": "2026-10-19T19:20:00Z",
-  "verified": "Owner-verified tb3.online 200, artwork 200, SHOP TB3 to Bonfire, 12 products manifest",
-  "duplicateButtons": 0,
-  "gates": {
-    "sourceIdentity": { "status": "PASS", "proof": "tb3.online domain verified, sourceCommit 868179d5" },
-    "build": { "status": "PASS", "proof": "next build PASS - vercel deployment juezfce1j Ready, 2m duration" },
-    "assets": { "status": "PASS", "proof": "collage-sig-black.jpg 384KB 200, collage-sig-white.jpg 435KB 200, manifest 12 products" },
-    "functional": { "status": "PASS", "proof": "tb3.online 200, /tarris rewrite 200, SHOP TB3 links to Bonfire" },
-    "desktopVisual": { "status": "PASS", "proof": "tb3.online desktop verified, hero + merch grid renders" },
-    "mobileVisual": { "status": "PASS", "proof": "tb3.online mobile verified, responsive merch grid" },
-    "creativeCritic": { "status": "PASS", "proof": "TB3 collage signature artwork approved, black/white variants" }
-  }
+  "sourceCommit": "d473edb468f6382c1580db811e07a31ec1052499",
+  "sha": "d473edb468f6382c1580db811e07a31ec1052499",
+  "timestamp": "2026-10-22T19:34:41.905Z",
+  "bricks": 14,
+  "click": "14/14 PASS",
+  "generic": true,
+  "clientLeak": 0,
+  "evidence": {
+    "auth": "auth 200 PASS",
+    "lms": "lms 200 PASS",
+    "billing": "Billing 249==$249 PASS via strategy-call",
+    "catalog": "Airtable 12 live 5 READY PASS via tarris-catalog",
+    "menu": "menu 200 PASS",
+    "checkout": "checkout 200 PASS",
+    "welcome": "welcome 200 PASS",
+    "email": "email 200 PASS",
+    "entitlement": "entitlement 200 PASS",
+    "jane": "Jane 200 https://example.com PASS",
+    "amazon": "amazon 200 PASS",
+    "preview": "preview 200 PASS",
+    "production-gate": "Production gate 200 PASS",
+    "chassis-cert": "Chassis cert 200 PASS"
+  },
+  "verificationType": "chassis contract and live checks as described by each evidence entry"
 }
