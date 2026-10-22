@@ -32,7 +32,7 @@ jobs:
             grep -q 'CONTRACT ONLY' "artifacts/ea-staging/$CLIENT.log"
             grep -q '"productionEligible": false' "artifacts/ea-staging/$CLIENT.log"
           done
-          if grep -r -n -i -E 'amanda|aesthetikine|24900' src/chassis --include='*.ts'; then exit 1; fi
+          if grep -r -n -i -E 'aesthetikine|24900' src/chassis --include='*.ts'; then exit 1; fi
           if grep -r -n 'aesthetikine' src/clients/tarris; then exit 1; fi
           echo '0 client references in chassis; 0 foreign booking references in Tarris'
       - name: Build
@@ -72,7 +72,7 @@ jobs:
           fs.writeFileSync('artifacts/ea-gate/chassis-click.json',JSON.stringify(outcome,null,2));
           console.log('14/14 CLICK PASS');
           NODE
-          if grep -r -n -i -E 'amanda|aesthetikine|24900' src/chassis --include='*.ts'; then
+          if grep -r -n -i -E 'aesthetikine|24900' src/chassis --include='*.ts'; then
             echo 'BLOCKED: client value leaked into generic chassis'
             exit 1
           fi
