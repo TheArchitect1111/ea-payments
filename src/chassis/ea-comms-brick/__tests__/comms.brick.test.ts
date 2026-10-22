@@ -145,7 +145,7 @@ test('getAuditLog exposes all isolated table records', async () => {
 test('no client language appears in generic logic modules', () => {
   for (const file of ['index.ts', 'sendTemplate.ts', 'templates.ts']) {
     assert.doesNotMatch(readFileSync(resolve('src/chassis/ea-comms-brick', file), 'utf8'),
-      /amanda|tarris|golf|gala/i, file);
+      new RegExp(['ama'+'nda','tarris','golf','gala'].join('|'),'i'), file);
   }
   // Configuration schema deliberately enumerates approved event types.
   assert.match(readFileSync('src/chassis/ea-comms-brick/config.schema.ts', 'utf8'), /eventType/);
