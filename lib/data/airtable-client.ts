@@ -106,7 +106,7 @@ export async function airtableQuery(
   const executeQuery = async (): Promise<AirtableRecord[]> => {
     const res = await airtableFetch(url.toString(), {
       headers: airtableAuthHeaders(),
-      next: { revalidate: 60 },
+      cache: 'no-store',
     });
 
     if (!res.ok) {
