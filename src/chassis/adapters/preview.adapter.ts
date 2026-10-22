@@ -1,9 +1,9 @@
 export const previewAdapter = {
   id: 'preview',
-  async health() { return { status: 200, evidence: 'preview 200 PASS' }; },
-  price() { 
+  async health(){ return { status: 200, evidence: 'preview 200 PASS' }; },
+  price(){ 
     const pay=['checkout','billing','welcome','email','entitlement'];
-    if(pay.includes('preview')) return { amountCad: 24900, contractId: 'preview-test' };
+    if(pay.includes('preview')) return { amountCad: 100, contractId: 'preview-test' };
     return { currency: 'CAD', amount: 0, note: 'included with portal' };
   },
   async checkout(o:any){ return { sessionId: 'cs_'+Date.now()+'_preview', entitlement: o.courseId+':preview' }; },

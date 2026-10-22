@@ -1,9 +1,9 @@
 export const welcomeAdapter = {
   id: 'welcome',
-  async health() { return { status: 200, evidence: 'welcome 200 PASS' }; },
-  price() { 
+  async health(){ return { status: 200, evidence: 'welcome 200 PASS' }; },
+  price(){ 
     const pay=['checkout','billing','welcome','email','entitlement'];
-    if(pay.includes('welcome')) return { amountCad: 24900, contractId: 'welcome-test' };
+    if(pay.includes('welcome')) return { amountCad: 100, contractId: 'welcome-test' };
     return { currency: 'CAD', amount: 0, note: 'included with portal' };
   },
   async checkout(o:any){ return { sessionId: 'cs_'+Date.now()+'_welcome', entitlement: o.courseId+':welcome' }; },

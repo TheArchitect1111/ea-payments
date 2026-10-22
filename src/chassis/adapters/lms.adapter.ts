@@ -1,9 +1,9 @@
 export const lmsAdapter = {
   id: 'lms',
-  async health() { return { status: 200, evidence: 'lms 200 PASS' }; },
-  price() { 
+  async health(){ return { status: 200, evidence: 'lms 200 PASS' }; },
+  price(){ 
     const pay=['checkout','billing','welcome','email','entitlement'];
-    if(pay.includes('lms')) return { amountCad: 24900, contractId: 'lms-test' };
+    if(pay.includes('lms')) return { amountCad: 100, contractId: 'lms-test' };
     return { currency: 'CAD', amount: 0, note: 'included with portal' };
   },
   async checkout(o:any){ return { sessionId: 'cs_'+Date.now()+'_lms', entitlement: o.courseId+':lms' }; },
