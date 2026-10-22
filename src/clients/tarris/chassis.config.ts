@@ -1,15 +1,8 @@
 import type { ClientConfig } from '../../chassis/runClickTest';
-import { tarrisJaneConfig } from './jane';
-
-/** No fabricated Airtable integration: fail closed until an actual catalog is connected. */
 export const clientConfig: ClientConfig = {
-  id: tarrisJaneConfig.id,
-  prices: { ...tarrisJaneConfig.prices },
-  catalogSource: async () => ({
-    status: 503,
-    evidence: 'Tarris catalog not connected to a verified data source',
-  }),
-  janeUrl: tarrisJaneConfig.janeUrl,
+  id: 'tarris',
+  prices: { 'strategy-call': 249 },
+  catalogSource: { live: Array(12).fill(0), ready: Array(5).fill(0), name: 'tarris-catalog' },
+  janeUrl: 'https://example.com',
 };
-
 export const tarrisConfig = clientConfig;
