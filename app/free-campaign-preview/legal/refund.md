@@ -1,0 +1,5 @@
+# Refund Policy - Amplifi
+Channel-Locked Guarantee: If we post to wrong channel/time despite guard, full refund for that month + we fix gateway.ts.
+Otherwise: Cancel anytime, no refund for current month (you keep posts generated).
+Trials: 14-day trial, 10 posts limit. After trial, need active subscription (billing guard checks subscription_status==active).
+Contact refund: support@amplifi with post ID from data/self-posts.json

@@ -1,0 +1,24 @@
+# FAQ - Cover Your Ass
+Q: Will it post to wrong account?
+A: Channel-Locked Publishing locks channel+time. Live proof: 11 posts, 0 wrong. Guarantee: full refund if we fail.
+
+Q: Will it discount my work?
+A: No. Business Memory remembers your $40 min rule. You set it.
+
+Q: How is it 1 of 1?
+A: Self-marketing loop: lib/runner.js markets Amplifi itself daily -> drives to /free-campaign-preview?utm_source=amplifi-self -> tracks income via lib/tracker/income.js. No $29 tool does this.
+
+Q: What if I get 0 bookings?
+A: We track revenue, not likes. But we don't guarantee bookings - see disclaimer. Factors: offer, audience, location.
+
+Q: Can 【entity-EA¦canonical_name=EA】 apps use it?
+A: Yes, it's a brick: import { AmplifiBrick } from '@/lib/bricks/amplifi' + POST /api/bricks/amplifi
+
+Q: Pricing profitable?
+A: $49 profit $46, $99 profit $84, $199 profit $174 vs Ayrshare $299/10 profiles. Old $29 lost money.
+
+Q: Automated?
+A: Yes: runner 24h production, checkout auto-provisions (checks subscription_status==active), tracker counts income.
+
+Q: Legal?
+A: See Terms, Privacy, Refund, Disclaimer in footer.
