@@ -1,16 +1,676 @@
 [
-  {"id":"merch-short-red","name":"TB3 Official Tee | Red","price":35,"color":"Red","image":"/tb3/merch/MOCK_TEE_SHORT_RED.jpg","status":"live","fourthwall_url":"https://tarris-bouie-shop.fourthwall.com"},
-  {"id":"merch-short-white","name":"TB3 Official Tee | White","price":35,"color":"White","image":"/tb3/merch/MOCK_TEE_SHORT_WHITE.jpg","status":"live","fourthwall_url":"https://tarris-bouie-shop.fourthwall.com"},
-  {"id":"merch-long-red","name":"TB3 Official Long Sleeve | Red","price":45,"color":"Red","image":"/tb3/merch/MOCK_TEE_LONG_RED.jpg","status":"live","fourthwall_url":"https://tarris-bouie-shop.fourthwall.com"},
-  {"id":"merch-long-white","name":"TB3 Official Long Sleeve | White","price":45,"color":"White","image":"/tb3/merch/MOCK_TEE_LONG_WHITE.jpg","status":"live","fourthwall_url":"https://tarris-bouie-shop.fourthwall.com"},
-  {"id":"merch-cap-white","name":"TB3 Official Cap | White & Red","price":30,"color":"White / Red","image":"/tb3/merch/MOCK_HAT_WHITE.jpg","status":"live","fourthwall_url":"https://tarris-bouie-shop.fourthwall.com"},
-  {"id":"merch-cap-red","name":"TB3 Cap - Red","price":30,"color":"Red / White","image":"/tb3/merch/MOCK_HAT_RED.jpg","status":"live","fourthwall_url":"https://tarris-bouie-shop.fourthwall.com"},
-  {"id":"merch-hoodie-red","name":"TB3 Hoodie - Red","price":75,"color":"Red","image":"/tb3/merch/MOCK_HOODIE_RED.jpg","status":"live","fourthwall_url":"https://tarris-bouie-shop.fourthwall.com"},
-  {"id":"merch-hoodie-white","name":"TB3 Hoodie - White","price":75,"color":"White","image":"/tb3/merch/MOCK_HOODIE_WHITE.jpg","status":"live","fourthwall_url":"https://tarris-bouie-shop.fourthwall.com"},
-  {"id":"merch-hoodie-premium","name":"TB3 Signature Logo Hoodie | Premium Edition","price":85,"color":"White","image":"/tb3/merch/MOCK_HOODIE_WHITE_LOGO_DETAIL_1.jpg","status":"live","fourthwall_url":"https://tarris-bouie-shop.fourthwall.com"},
-  {"id":"merch-crewneck-red","name":"TB3 Official Crewneck | Red","price":65,"color":"Red","image":"/tb3/merch/MOCK_SWEATSHIRT_WHITE_LOGO_DETAIL.jpg","status":"live","fourthwall_url":"https://tarris-bouie-shop.fourthwall.com"},
-  {"id":"tb3-sig-collage-tee-black","name":"TB3 Collage Signature Tee - Black","price":65,"color":"Black","image":"/tb3/merch/collage-sig-black.jpg","status":"live","fourthwall_url":"https://tarris-bouie-shop.fourthwall.com"},
-  {"id":"tb3-sig-collage-hoodie-black","name":"TB3 Collage Signature Hoodie - Black","price":75,"color":"Black","image":"/tb3/merch/collage-sig-black.jpg","status":"live","fourthwall_url":"https://tarris-bouie-shop.fourthwall.com"},
-  {"id":"tb3-sig-collage-tee-white","name":"TB3 Collage Signature Tee - White","price":65,"color":"White","image":"/tb3/merch/collage-sig-white.jpg","status":"live","fourthwall_url":"https://tarris-bouie-shop.fourthwall.com"},
-  {"id":"tb3-sig-collage-hoodie-white","name":"TB3 Collage Signature Hoodie - White","price":75,"color":"White","image":"/tb3/merch/collage-sig-white.jpg","status":"live","fourthwall_url":"https://tarris-bouie-shop.fourthwall.com"}
+  {
+    "id": "tb3-signature-tee-black",
+    "name": "TB3 Signature Tee - Black",
+    "price": 50,
+    "currency": "USD",
+    "color": "Black",
+    "image": "/tb3/merch/mockups/tb3-signature-tee-black.png",
+    "provider": "printful",
+    "printfulProductId": 485112609,
+    "status": "configured",
+    "variants": [
+      {
+        "id": 5593588451,
+        "catalogVariantId": 9527,
+        "size": "XS",
+        "price": 50
+      },
+      {
+        "id": 5593588452,
+        "catalogVariantId": 4016,
+        "size": "S",
+        "price": 50
+      },
+      {
+        "id": 5593588453,
+        "catalogVariantId": 4017,
+        "size": "M",
+        "price": 50
+      },
+      {
+        "id": 5593588454,
+        "catalogVariantId": 4018,
+        "size": "L",
+        "price": 50
+      },
+      {
+        "id": 5593588464,
+        "catalogVariantId": 4019,
+        "size": "XL",
+        "price": 50
+      },
+      {
+        "id": 5593588466,
+        "catalogVariantId": 4020,
+        "size": "2XL",
+        "price": 50
+      },
+      {
+        "id": 5593588474,
+        "catalogVariantId": 5295,
+        "size": "3XL",
+        "price": 50
+      }
+    ]
+  },
+  {
+    "id": "tb3-signature-tee-white",
+    "name": "TB3 Signature Tee - White",
+    "price": 50,
+    "currency": "USD",
+    "color": "White",
+    "image": "/tb3/merch/mockups/tb3-signature-tee-white.png",
+    "provider": "printful",
+    "printfulProductId": 485112613,
+    "status": "configured",
+    "variants": [
+      {
+        "id": 5593588484,
+        "catalogVariantId": 9526,
+        "size": "XS",
+        "price": 50
+      },
+      {
+        "id": 5593588485,
+        "catalogVariantId": 4011,
+        "size": "S",
+        "price": 50
+      },
+      {
+        "id": 5593588487,
+        "catalogVariantId": 4012,
+        "size": "M",
+        "price": 50
+      },
+      {
+        "id": 5593588489,
+        "catalogVariantId": 4013,
+        "size": "L",
+        "price": 50
+      },
+      {
+        "id": 5593588498,
+        "catalogVariantId": 4014,
+        "size": "XL",
+        "price": 50
+      },
+      {
+        "id": 5593588499,
+        "catalogVariantId": 4015,
+        "size": "2XL",
+        "price": 50
+      },
+      {
+        "id": 5593588500,
+        "catalogVariantId": 5294,
+        "size": "3XL",
+        "price": 50
+      }
+    ]
+  },
+  {
+    "id": "tb3-official-tee-black",
+    "name": "TB3 Official Tee - Black",
+    "price": 35,
+    "currency": "USD",
+    "color": "Black",
+    "image": "/tb3/merch/mockups/tb3-official-tee-black.png",
+    "provider": "printful",
+    "printfulProductId": 485112819,
+    "status": "configured",
+    "variants": [
+      {
+        "id": 5593590071,
+        "catalogVariantId": 9527,
+        "size": "XS",
+        "price": 35
+      },
+      {
+        "id": 5593590072,
+        "catalogVariantId": 4016,
+        "size": "S",
+        "price": 35
+      },
+      {
+        "id": 5593590073,
+        "catalogVariantId": 4017,
+        "size": "M",
+        "price": 35
+      },
+      {
+        "id": 5593590074,
+        "catalogVariantId": 4018,
+        "size": "L",
+        "price": 35
+      },
+      {
+        "id": 5593590076,
+        "catalogVariantId": 4019,
+        "size": "XL",
+        "price": 35
+      },
+      {
+        "id": 5593590077,
+        "catalogVariantId": 4020,
+        "size": "2XL",
+        "price": 35
+      },
+      {
+        "id": 5593590078,
+        "catalogVariantId": 5295,
+        "size": "3XL",
+        "price": 35
+      }
+    ]
+  },
+  {
+    "id": "tb3-official-tee-white",
+    "name": "TB3 Official Tee - White",
+    "price": 35,
+    "currency": "USD",
+    "color": "White",
+    "image": "/tb3/merch/mockups/tb3-official-tee-white.png",
+    "provider": "printful",
+    "printfulProductId": 485112820,
+    "status": "configured",
+    "variants": [
+      {
+        "id": 5593590082,
+        "catalogVariantId": 9526,
+        "size": "XS",
+        "price": 35
+      },
+      {
+        "id": 5593590083,
+        "catalogVariantId": 4011,
+        "size": "S",
+        "price": 35
+      },
+      {
+        "id": 5593590085,
+        "catalogVariantId": 4012,
+        "size": "M",
+        "price": 35
+      },
+      {
+        "id": 5593590086,
+        "catalogVariantId": 4013,
+        "size": "L",
+        "price": 35
+      },
+      {
+        "id": 5593590087,
+        "catalogVariantId": 4014,
+        "size": "XL",
+        "price": 35
+      },
+      {
+        "id": 5593590088,
+        "catalogVariantId": 4015,
+        "size": "2XL",
+        "price": 35
+      },
+      {
+        "id": 5593590089,
+        "catalogVariantId": 5294,
+        "size": "3XL",
+        "price": 35
+      }
+    ]
+  },
+  {
+    "id": "tb3-official-hoodie-black",
+    "name": "TB3 Official Hoodie - Black",
+    "price": 75,
+    "currency": "USD",
+    "color": "Black",
+    "image": "/tb3/merch/mockups/tb3-official-hoodie-black.png",
+    "provider": "printful",
+    "printfulProductId": 485112821,
+    "status": "configured",
+    "variants": [
+      {
+        "id": 5593590094,
+        "catalogVariantId": 5530,
+        "size": "S",
+        "price": 75
+      },
+      {
+        "id": 5593590095,
+        "catalogVariantId": 5531,
+        "size": "M",
+        "price": 75
+      },
+      {
+        "id": 5593590096,
+        "catalogVariantId": 5532,
+        "size": "L",
+        "price": 75
+      },
+      {
+        "id": 5593590097,
+        "catalogVariantId": 5533,
+        "size": "XL",
+        "price": 75
+      },
+      {
+        "id": 5593590098,
+        "catalogVariantId": 5534,
+        "size": "2XL",
+        "price": 75
+      },
+      {
+        "id": 5593590100,
+        "catalogVariantId": 5535,
+        "size": "3XL",
+        "price": 75
+      }
+    ]
+  },
+  {
+    "id": "tb3-official-hoodie-white",
+    "name": "TB3 Official Hoodie - White",
+    "price": 75,
+    "currency": "USD",
+    "color": "White",
+    "image": "/tb3/merch/mockups/tb3-official-hoodie-white.png",
+    "provider": "printful",
+    "printfulProductId": 485112824,
+    "status": "configured",
+    "variants": [
+      {
+        "id": 5593590126,
+        "catalogVariantId": 5522,
+        "size": "S",
+        "price": 75
+      },
+      {
+        "id": 5593590127,
+        "catalogVariantId": 5523,
+        "size": "M",
+        "price": 75
+      },
+      {
+        "id": 5593590128,
+        "catalogVariantId": 5524,
+        "size": "L",
+        "price": 75
+      },
+      {
+        "id": 5593590129,
+        "catalogVariantId": 5525,
+        "size": "XL",
+        "price": 75
+      },
+      {
+        "id": 5593590130,
+        "catalogVariantId": 5526,
+        "size": "2XL",
+        "price": 75
+      },
+      {
+        "id": 5593590140,
+        "catalogVariantId": 5527,
+        "size": "3XL",
+        "price": 75
+      }
+    ]
+  },
+  {
+    "id": "tb3-official-crewneck-black",
+    "name": "TB3 Official Crewneck - Black",
+    "price": 65,
+    "currency": "USD",
+    "color": "Black",
+    "image": "/tb3/merch/mockups/tb3-official-crewneck-black.png",
+    "provider": "printful",
+    "printfulProductId": 485112830,
+    "status": "configured",
+    "variants": [
+      {
+        "id": 5593590156,
+        "catalogVariantId": 5434,
+        "size": "S",
+        "price": 65
+      },
+      {
+        "id": 5593590159,
+        "catalogVariantId": 5435,
+        "size": "M",
+        "price": 65
+      },
+      {
+        "id": 5593590166,
+        "catalogVariantId": 5436,
+        "size": "L",
+        "price": 65
+      },
+      {
+        "id": 5593590168,
+        "catalogVariantId": 5437,
+        "size": "XL",
+        "price": 65
+      },
+      {
+        "id": 5593590169,
+        "catalogVariantId": 5438,
+        "size": "2XL",
+        "price": 65
+      },
+      {
+        "id": 5593590170,
+        "catalogVariantId": 5439,
+        "size": "3XL",
+        "price": 65
+      }
+    ]
+  },
+  {
+    "id": "tb3-signature-collage-hoodie-black",
+    "name": "TB3 Signature Collage Hoodie - Black",
+    "price": 65,
+    "currency": "USD",
+    "color": "Black",
+    "image": "/tb3/merch/mockups/tb3-signature-collage-hoodie-black.png",
+    "provider": "printful",
+    "printfulProductId": 485113045,
+    "status": "configured",
+    "variants": [
+      {
+        "id": 5593591698,
+        "catalogVariantId": 5530,
+        "size": "S",
+        "price": 65
+      },
+      {
+        "id": 5593591700,
+        "catalogVariantId": 5531,
+        "size": "M",
+        "price": 65
+      },
+      {
+        "id": 5593591701,
+        "catalogVariantId": 5532,
+        "size": "L",
+        "price": 65
+      },
+      {
+        "id": 5593591703,
+        "catalogVariantId": 5533,
+        "size": "XL",
+        "price": 65
+      },
+      {
+        "id": 5593591705,
+        "catalogVariantId": 5534,
+        "size": "2XL",
+        "price": 65
+      },
+      {
+        "id": 5593591709,
+        "catalogVariantId": 5535,
+        "size": "3XL",
+        "price": 65
+      }
+    ]
+  },
+  {
+    "id": "tb3-signature-collage-hoodie-white",
+    "name": "TB3 Signature Collage Hoodie - White",
+    "price": 65,
+    "currency": "USD",
+    "color": "White",
+    "image": "/tb3/merch/mockups/tb3-signature-collage-hoodie-white.png",
+    "provider": "printful",
+    "printfulProductId": 485113064,
+    "status": "configured",
+    "variants": [
+      {
+        "id": 5593591788,
+        "catalogVariantId": 5522,
+        "size": "S",
+        "price": 65
+      },
+      {
+        "id": 5593591795,
+        "catalogVariantId": 5523,
+        "size": "M",
+        "price": 65
+      },
+      {
+        "id": 5593591799,
+        "catalogVariantId": 5524,
+        "size": "L",
+        "price": 65
+      },
+      {
+        "id": 5593591805,
+        "catalogVariantId": 5525,
+        "size": "XL",
+        "price": 65
+      },
+      {
+        "id": 5593591811,
+        "catalogVariantId": 5526,
+        "size": "2XL",
+        "price": 65
+      },
+      {
+        "id": 5593591816,
+        "catalogVariantId": 5527,
+        "size": "3XL",
+        "price": 65
+      }
+    ]
+  },
+  {
+    "id": "tb3-official-long-sleeve-black",
+    "name": "TB3 Official Long Sleeve - Black",
+    "price": 45,
+    "currency": "USD",
+    "color": "Black",
+    "image": "/tb3/merch/mockups/tb3-official-long-sleeve-black.png",
+    "provider": "printful",
+    "printfulProductId": 485113494,
+    "status": "configured",
+    "variants": [
+      {
+        "id": 5593594968,
+        "catalogVariantId": 10093,
+        "size": "XS",
+        "price": 45
+      },
+      {
+        "id": 5593594969,
+        "catalogVariantId": 10094,
+        "size": "S",
+        "price": 45
+      },
+      {
+        "id": 5593594970,
+        "catalogVariantId": 10095,
+        "size": "M",
+        "price": 45
+      },
+      {
+        "id": 5593594971,
+        "catalogVariantId": 10096,
+        "size": "L",
+        "price": 45
+      },
+      {
+        "id": 5593594972,
+        "catalogVariantId": 10097,
+        "size": "XL",
+        "price": 45
+      },
+      {
+        "id": 5593594973,
+        "catalogVariantId": 10098,
+        "size": "2XL",
+        "price": 45
+      }
+    ]
+  },
+  {
+    "id": "tb3-official-long-sleeve-white",
+    "name": "TB3 Official Long Sleeve - White",
+    "price": 45,
+    "currency": "USD",
+    "color": "White",
+    "image": "/tb3/merch/mockups/tb3-official-long-sleeve-white.png",
+    "provider": "printful",
+    "printfulProductId": 485113498,
+    "status": "configured",
+    "variants": [
+      {
+        "id": 5593595001,
+        "catalogVariantId": 10141,
+        "size": "XS",
+        "price": 45
+      },
+      {
+        "id": 5593595002,
+        "catalogVariantId": 10142,
+        "size": "S",
+        "price": 45
+      },
+      {
+        "id": 5593595003,
+        "catalogVariantId": 10143,
+        "size": "M",
+        "price": 45
+      },
+      {
+        "id": 5593595004,
+        "catalogVariantId": 10144,
+        "size": "L",
+        "price": 45
+      },
+      {
+        "id": 5593595005,
+        "catalogVariantId": 10145,
+        "size": "XL",
+        "price": 45
+      },
+      {
+        "id": 5593595006,
+        "catalogVariantId": 10146,
+        "size": "2XL",
+        "price": 45
+      }
+    ]
+  },
+  {
+    "id": "tb3-official-crewneck-white",
+    "name": "TB3 Official Crewneck - White",
+    "price": 65,
+    "currency": "USD",
+    "color": "White",
+    "image": "/tb3/merch/mockups/tb3-official-crewneck-white.png",
+    "provider": "printful",
+    "printfulProductId": 485115208,
+    "status": "configured",
+    "variants": [
+      {
+        "id": 5593674946,
+        "catalogVariantId": 5426,
+        "size": "S",
+        "price": 65
+      },
+      {
+        "id": 5593674955,
+        "catalogVariantId": 5427,
+        "size": "M",
+        "price": 65
+      },
+      {
+        "id": 5593674956,
+        "catalogVariantId": 5428,
+        "size": "L",
+        "price": 65
+      },
+      {
+        "id": 5593674957,
+        "catalogVariantId": 5429,
+        "size": "XL",
+        "price": 65
+      },
+      {
+        "id": 5593674966,
+        "catalogVariantId": 5430,
+        "size": "2XL",
+        "price": 65
+      },
+      {
+        "id": 5593674967,
+        "catalogVariantId": 5431,
+        "size": "3XL",
+        "price": 65
+      }
+    ]
+  },
+  {
+    "id": "tb3-official-joggers-black",
+    "name": "TB3 Official Joggers - Black",
+    "price": 60,
+    "currency": "USD",
+    "color": "Black",
+    "image": "/tb3/merch/mockups/tb3-official-joggers-black.png",
+    "provider": "printful",
+    "printfulProductId": 485115486,
+    "status": "configured",
+    "variants": [
+      {
+        "id": 5593676311,
+        "catalogVariantId": 9927,
+        "size": "S",
+        "price": 60
+      },
+      {
+        "id": 5593676312,
+        "catalogVariantId": 9928,
+        "size": "M",
+        "price": 60
+      },
+      {
+        "id": 5593676313,
+        "catalogVariantId": 9929,
+        "size": "L",
+        "price": 60
+      },
+      {
+        "id": 5593676314,
+        "catalogVariantId": 9930,
+        "size": "XL",
+        "price": 60
+      },
+      {
+        "id": 5593676315,
+        "catalogVariantId": 9931,
+        "size": "2XL",
+        "price": 60
+      }
+    ]
+  },
+  {
+    "id": "tb3-official-duffel-black",
+    "name": "TB3 Official Duffel Bag - Black",
+    "price": 110,
+    "currency": "USD",
+    "color": "Black",
+    "image": "/tb3/merch/mockups/tb3-official-duffel-black.png",
+    "provider": "printful",
+    "printfulProductId": 485116492,
+    "status": "configured",
+    "variants": [
+      {
+        "id": 5593683591,
+        "catalogVariantId": 12021,
+        "size": "One size",
+        "price": 110
+      }
+    ]
+  }
 ]
