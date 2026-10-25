@@ -1,45 +1,106 @@
 'use client';
-import { useEffect,useState } from 'react';
-type Sale={order_id:string;product:string;amount_cents:number;customer:string;customer_email:string;
- payment_reference:string;payment_status:string;tracking:string};
-export default function Tb3MerchSales({report=false}:{report?:boolean}){
- const [visible,setVisible]=useState(false),[sales,setSales]=useState<Sale[]>([]);
- const [error,setError]=useState(''),[loading,setLoading]=useState(false),[result,setResult]=useState('');
- useEffect(()=>{if(!visible)return;let active=true;setLoading(true);
- fetch('/api/tb3/bonfire/sales',{cache:'no-store'}).then(async r=>{
-  if(!r.ok)throw Error('Private merch sales unavailable');
-  const result=await r.json();if(active)setSales(result.sales||[]);
- }).catch(e=>{if(active)setError(e.message);}).finally(()=>{if(active)setLoading(false);});
- return()=>{active=false};},[visible]);
- const total=sales.reduce((sum,item)=>sum+item.amount_cents,0);
- return <section className="ep-panel" aria-label="TB3 merchandise sales">
-  <div className="ep-panel-head">
-   <h2 className="ep-panel-title">TB3 merch sales</h2>
-   <button type="button" className="ep-pulse-cta" onClick={()=>setVisible(x=>!x)}>
-    {visible?'Close sales':'Merch sales tab'}
-   </button>
-  </div>
-  {visible?<div>
-   {loading?<p>Loading private sales...</p>:null}
-   {error?<p role="alert">{error}</p>:null}
-   {!loading&&!error?<><form onSubmit={async e=>{e.preventDefault();setResult('Importing...');try{const form=new FormData(e.currentTarget);form.set('confirm','seller-attested-paid');const r=await fetch('/api/bricks/bonfire-csv-import',{method:'POST',body:form});const j=await r.json();if(!r.ok)throw Error(j.error||'Import failed');setResult(`Imported ${j.imported} orders; ${j.replayed} duplicates ignored`);const latest=await fetch('/api/tb3/bonfire/sales',{cache:'no-store'});if(latest.ok)setSales((await latest.json()).sales||[]);}catch(err){setResult(err instanceof Error?err.message:'Import failed');}}}>
-    <p>Import Bonfire seller order CSV (maximum 120 KB). This records sales only, not payouts.</p>
-    <input name="file" type="file" accept=".csv,text/csv,.txt,.md" required />
-    <label><input type="checkbox" required /> I confirm these rows represent paid orders from the seller export.</label>
-    <button type="submit" className="ep-pulse-cta">Import sales</button>
-    {result?<p role="status">{result}</p>:null}
-   </form><p>Recorded orders: {sales.length} · Gross recorded: {(total/100).toLocaleString('en-US',{style:'currency',currency:'USD'})}</p>
-    {report?<a href="/api/tb3/bonfire/sales?format=csv" className="ep-pulse-cta">Download protected Bonfire report</a>:null}
-    <table className="ep-data-table"><thead><tr>
-      <th>Order</th><th>Product</th><th>Customer</th><th>Status</th><th>Tracking</th><th>Amount</th>
-     </tr></thead><tbody>
-     {sales.map(x=><tr key={x.order_id}>
-      <td>{x.payment_reference}</td><td>{x.product}</td>
-      <td>{x.customer} ({x.customer_email})</td><td>{x.payment_status}</td>
-      <td>{x.tracking}</td><td>{(x.amount_cents/100).toFixed(2)} USD</td>
-     </tr>)}</tbody></table>
-    {sales.length===0?<p>No authenticated Bonfire orders have been imported.</p>:null}
-   </>:null}
-  </div>:null}
- </section>;
+import { useEffect, useState } from 'react';
+
+type Order = {
+  id: number;
+  reference: string;
+  status: string;
+  products: { name: string; quantity: number }[];
+  retailTotal: string | number | null;
+  currency: string | null;
+  shipments: {
+    carrier: string;
+    trackingNumber: string;
+    trackingUrl: string | null;
+  }[];
+};
+
+export default function Tb3MerchSales({ report = false }: { report?: boolean }) {
+  const [visible, setVisible] = useState(false);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [offset, setOffset] = useState(0);
+  const [nextOffset, setNextOffset] = useState<number | null>(null);
+  const [refresh, setRefresh] = useState(0);
+
+  function prepareLoad() {
+    setLoading(true);
+    setError('');
+    setOrders([]);
+    setNextOffset(null);
+  }
+
+  useEffect(() => {
+    if (!visible) return;
+    const controller = new AbortController();
+    fetch('/api/tb3/printful/orders?offset=' + offset, {
+      cache: 'no-store', signal: controller.signal,
+    }).then(async response => {
+      if (!response.ok) throw Error('Private Printful orders are unavailable.');
+      const data = await response.json();
+      if (!controller.signal.aborted) {
+        setOrders(data.orders || []);
+        setNextOffset(data.nextOffset ?? null);
+      }
+    }).catch(error => {
+      if (!controller.signal.aborted)
+        setError(error instanceof Error ? error.message : 'Unable to load orders.');
+    }).finally(() => {
+      if (!controller.signal.aborted) setLoading(false);
+    });
+    return () => controller.abort();
+  }, [visible, offset, refresh]);
+
+  return <section className="ep-panel" aria-label="TB3 merchandise orders">
+    <div className="ep-panel-head">
+      <h2 className="ep-panel-title">TB3 Printful orders</h2>
+      <button type="button" className="ep-pulse-cta"
+        aria-expanded={visible} onClick={() => { if (!visible) prepareLoad(); setVisible(value => !value); }}>
+        {visible ? 'Close orders' : 'View merch orders'}
+      </button>
+    </div>
+    {visible && <div>
+      <button type="button" className="ep-pulse-cta" disabled={loading}
+        onClick={() => { prepareLoad(); setRefresh(value => value + 1); }}>Refresh orders</button>
+      <p>Fulfillment status and tracking from Printful. Retail totals do not confirm payment or payouts.</p>
+      {report && <p>Payment reconciliation will be available after checkout is connected.</p>}
+      {loading && <p role="status">Loading private orders...</p>}
+      {error && <p role="alert">{error}</p>}
+      {!loading && !error && <>
+        <p>Orders on this page: {orders.length}</p>
+        <div className="overflow-x-auto">
+          <table className="ep-data-table">
+            <thead><tr>
+              <th>Order</th><th>Products</th><th>Status</th>
+              <th>Tracking</th><th>Retail total</th>
+            </tr></thead>
+            <tbody>{orders.map(order => <tr key={order.id}>
+              <td>{order.reference}</td>
+              <td>{order.products.map((item, i) =>
+                <div key={i}>{item.name} × {item.quantity}</div>)}</td>
+              <td>{order.status}</td>
+              <td>{order.shipments.length ? order.shipments.map((shipment, i) =>
+                <div key={i}>{shipment.carrier}{' '}
+                  {shipment.trackingUrl
+                    ? <a href={shipment.trackingUrl} target="_blank"
+                        rel="noopener noreferrer">{shipment.trackingNumber || 'Track shipment'}</a>
+                    : shipment.trackingNumber || 'Tracking pending'}
+                </div>) : 'Not shipped'}</td>
+              <td>{order.retailTotal === null
+                ? 'Not provided'
+                : String(order.retailTotal) + ' ' + (order.currency || '')}</td>
+            </tr>)}</tbody>
+          </table>
+        </div>
+        {!orders.length && <p>No Printful orders found on this page.</p>}
+        <div className="flex gap-3">
+          {offset > 0 && <button type="button" className="ep-pulse-cta"
+            onClick={() => { prepareLoad(); setOffset(Math.max(0, offset - 100)); }}>Previous</button>}
+          {nextOffset !== null && <button type="button" className="ep-pulse-cta"
+            onClick={() => { prepareLoad(); setOffset(nextOffset); }}>Next</button>}
+        </div>
+      </>}
+    </div>}
+  </section>;
 }
