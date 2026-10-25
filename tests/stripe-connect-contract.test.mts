@@ -9,7 +9,7 @@ test('Stripe Connect adapter never uses EA service checkout keys',()=>{
  assert.doesNotMatch(code,/TB3_STRIPE_SECRET_KEY/);
 });
 test('tenant isolation, atomic mapping, official Stripe onboarding and return origin checks',()=>{
- for(const term of ['store.putIfAbsent','store.get(tenantId)','account.metadata?.ea_tenant_id !== tenantId','accountLinks.create','account_onboarding','url.origin !== process.env.EA_STRIPE_CONNECT_PORTAL_ORIGIN']){
+ for(const term of ['store.putIfAbsent','store.get(tenantId)','account.metadata?.ea_tenant_id !== tenantId','accountLinks.create','account_onboarding','url.origin !== trustedOrigin']){
   assert.ok(code.includes(term),term);
  }
 });
