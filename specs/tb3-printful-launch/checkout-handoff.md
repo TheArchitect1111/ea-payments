@@ -28,3 +28,10 @@ Status: **NOT LIVE; do not activate payment collection**.
 - All TB3 merch functionality fails closed until flags and TB3-owned credentials are present.
 - Existing local uncommitted assets and chassis guard changes are NOT incorporated in these remote commits.
 - This branch is not merged or production-certified.
+
+## Reusable payment-onboarding brick (October 25)
+- Added reusable tenant-isolated contract at `lib/bricks/merchant-onboarding/contract.ts`.
+- PayPal and Stripe are **processors**. Venmo is a potentially available method under PayPal; Cash App Pay and ACH under Stripe, subject to merchant eligibility and provider capabilities. Direct cash transfers and bank routing information are **not** treated as automatically verified checkout methods.
+- Added read-only selection/status UI `MerchantPaymentSetup.tsx`, visible to TB3 staff on their reports page. It does not collect banking data, claim the account is connected, or open an unauthorized provider onboarding URL.
+- A fully functional **Connect** flow still requires a verified provider partner/onboarding integration, secure credential/token storage, merchant-account capability verification, and a server-side webhook. Do not enable a button or infer payment readiness from a PayPal handle.
+- Existing Stripe-only TB3 merchandise checkout stays disabled pending supported processor connection.
