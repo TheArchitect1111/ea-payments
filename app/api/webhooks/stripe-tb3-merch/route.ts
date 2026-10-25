@@ -85,7 +85,7 @@ async function fulfill(session: Stripe.Checkout.Session) {
       if (!order) throw error;
     }
   }
-  if (order.external_id && order.external_id !== id)
+  if (order.external_id !== id)
     throw new Error('Printful order identity mismatch.');
   if (order.status !== 'draft') return; // already confirmed, never charge twice
 
