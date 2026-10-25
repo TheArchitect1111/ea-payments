@@ -69,6 +69,7 @@ async function fulfill(session: Stripe.Checkout.Session) {
         method: 'POST',
         body: JSON.stringify({
           external_id: id,
+          shipping: session.metadata.printful_shipping || 'STANDARD',
           recipient: {...rawRecipient, email: customer.email},
           items: lines.map(line => ({
             sync_variant_id: line.variantId,
