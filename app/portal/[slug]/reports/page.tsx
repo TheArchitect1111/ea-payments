@@ -3,6 +3,7 @@ import { listContent } from '@/lib/bricks/content-family';
 import CertifiedReportGenerator from '@/app/portal/components/CertifiedReportGenerator';
 import Link from 'next/link';
 import Tb3MerchSales from '@/app/portal/components/Tb3MerchSales';
+import { MerchantPaymentSetup } from '@/lib/bricks/merchant-onboarding/MerchantPaymentSetup';
 import { requirePortalModule } from '@/lib/modules/portal-modules';
 import { listReportArtifacts } from '@/lib/portal-reports';
 import { PortalSubpage } from '@/app/portal/components/PortalSubpage';
@@ -30,7 +31,10 @@ export default async function ReportsPage({ params }: { params: Promise<{ slug: 
       lede={isAmanda ? 'Live intake, application, membership, media, volunteer, event, and follow-up signals.' : `Curated operational views for ${client.organization || client.clientName}.`}
     >
       {isAmanda ? <AmandaOperationsPanel slug={slug} /> : null}
-      {slug === 'tarris' ? <Tb3MerchSales report /> : null}
+      {slug === 'tarris' ? <>
+        {staff ? <MerchantPaymentSetup tenantLabel="TB3" /> : null}
+        <Tb3MerchSales report />
+      </> : null}
       {staff && certifiedContent && access.enabledModuleIds.has('documents') ?
         <CertifiedReportGenerator sourceKind="documents" /> :
         staff && certifiedContent && access.enabledModuleIds.has('resources') ?
