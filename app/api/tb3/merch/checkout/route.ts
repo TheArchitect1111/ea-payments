@@ -12,8 +12,8 @@ export const dynamic = 'force-dynamic';
 const enabled = () => process.env.TB3_MERCH_CHECKOUT_ENABLED === 'true'
   && !!process.env.TB3_STRIPE_SECRET_KEY
   && !!process.env.TB3_STRIPE_WEBHOOK_SECRET
-  && !!process.env.TB3_MERCH_FULFILLMENT_LEDGER_READY
-  && process.env.TB3_MERCH_FULFILLMENT_LEDGER_READY === 'true';
+  && !!process.env.TB3_MERCH_DRAFT_FULFILLMENT_APPROVED
+  && process.env.TB3_MERCH_DRAFT_FULFILLMENT_APPROVED === 'true';
 
 const schema = z.object({
   cart: z.unknown(),
