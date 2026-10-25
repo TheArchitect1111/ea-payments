@@ -15,3 +15,9 @@ test('tenant mapping uses bound SQL parameters and conflict-safe insert',()=>{
  assert.ok(store.includes('VALUES ($1,$2)'));
  assert.ok(store.includes('ON CONFLICT (tenant_id) DO NOTHING'));
 });
+
+test('connection URL cannot override TLS certificate verification',()=>{
+ assert.ok(store.includes("url.searchParams.delete('sslmode')"));
+ assert.ok(store.includes("url.searchParams.delete('sslrootcert')"));
+ assert.ok(store.includes("rejectUnauthorized:true"));
+});
