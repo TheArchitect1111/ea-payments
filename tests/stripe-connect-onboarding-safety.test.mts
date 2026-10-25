@@ -10,7 +10,7 @@ test('merchant onboarding is owner/admin only and enforces same-tenant session',
     assert.ok(api.includes(text),text);
 });
 test('unconfigured merchant setup fails closed, not enabled by checkout key',()=>{
-  for(const text of ['EA_STRIPE_CONNECT_ONBOARDING_ENABLED','EA_STRIPE_CONNECT_SECRET_KEY','SUPABASE_SERVICE_ROLE_KEY'])
+  for(const text of ['EA_STRIPE_CONNECT_ONBOARDING_ENABLED','EA_STRIPE_CONNECT_SECRET_KEY','EA_MERCHANT_DB_SERVICE_KEY'])
     assert.ok(api.includes(text),text);
   assert.doesNotMatch(api,/TB3_STRIPE_SECRET_KEY/);
 });
@@ -22,4 +22,10 @@ test('registry has database uniqueness and inaccessible public roles',()=>{
 test('standard connected account creation and Stripe verification are server side',()=>{
   for(const text of ["type: 'standard'",'accountLinks.create','accounts.retrieve','charges_enabled','payouts_enabled'])
     assert.ok(adapter.includes(text),text);
+});
+
+test('merchant store never falls back to shared People or Simplifi databases',()=>{
+  assert.ok(store.includes('EA_MERCHANT_DB_URL'));
+  assert.ok(store.includes('EA_MERCHANT_DB_SERVICE_KEY'));
+  assert.doesNotMatch(store,/SUPABASE_URL|SUPABASE_SERVICE_ROLE_KEY|simplifi-os/);
 });
