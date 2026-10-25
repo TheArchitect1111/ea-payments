@@ -1,5 +1,5 @@
 'use client';
-import {useState} from 'react';
+import {useState, useEffect} from 'react';
 import {
   CUSTOMER_PAYMENT_METHODS, SUPPORTED_METHODS,
   type PaymentProvider, type MerchantConnectionStatus,
@@ -7,6 +7,7 @@ import {
 
 type Props = {
   tenantLabel: string;
+  tenantSlug?: string;
   initialProvider?: PaymentProvider;
   connectionStatus?: MerchantConnectionStatus;
   onBeginProviderSetup?: (provider: PaymentProvider) => void;
@@ -20,11 +21,43 @@ const labels = {
 };
 
 export function MerchantPaymentSetup({
-  tenantLabel, initialProvider = 'paypal', connectionStatus = 'not_connected',
+  tenantLabel, tenantSlug, initialProvider = 'paypal', connectionStatus = 'not_connected',
   onBeginProviderSetup,
 }: Props) {
   const [provider, setProvider] = useState<PaymentProvider>(initialProvider);
   const available = SUPPORTED_METHODS[provider];
+  const [status, setStatus] = useState<MerchantConnectionStatus>(connectionStatus);
+  const [working, setWorking] = useState(false);
+  const [error, setError] = useState('');
+  useEffect(() => {
+    if (!tenantSlug) return;
+    let active = true;
+    fetch('/api/portal/' + encodeURIComponent(tenantSlug) + '/payments/stripe',
+      {credentials:'same-origin',cache:'no-store'})
+      .then(async response => response.json())
+      .then(data => { if (active && typeof data.status === 'string') setStatus(data.status); })
+      .catch(() => { if (active) setStatus('setup_required'); });
+    return () => { active = false; };
+  }, [tenantSlug]);
+  async function begin() {
+    if (provider !== 'stripe' || !tenantSlug || working) return;
+    setWorking(true);
+    setError('');
+    try {
+      const response = await fetch('/api/portal/' + encodeURIComponent(tenantSlug) + '/payments/stripe',
+        {method:'POST',credentials:'same-origin'});
+      const payload = await response.json();
+      if (!response.ok || typeof payload.url !== 'string')
+        throw new Error('Secure onboarding is not yet available.');
+      const url = new URL(payload.url);
+      if (url.protocol !== 'https:' || (url.hostname !== 'connect.stripe.com' && url.hostname !== 'dashboard.stripe.com'))
+        throw new Error('Invalid payment provider destination.');
+      window.location.assign(url.toString());
+    } catch {
+      setError('Secure Stripe onboarding is not yet available. No changes were made.');
+      setWorking(false);
+    }
+  }
   return <section aria-label="Payment setup" className="rounded-xl border border-black/20 p-5">
     <h2 className="text-xl font-bold">Payment setup</h2>
     <p className="mt-2 text-sm">Connect a payment provider for {tenantLabel}. Your bank details
@@ -43,10 +76,13 @@ export function MerchantPaymentSetup({
     </ul>
     <p className="mt-2 text-xs">Availability depends on provider approval,
       country, account capabilities, and integration configuration.</p>
-    <p role="status" className="mt-4 text-sm">Connection status: {connectionStatus.replaceAll('_', ' ')}</p>
+    <p role="status" className="mt-4 text-sm">Connection status: {status.replaceAll('_', ' ')}</p>
+    {error ? <p role="alert" className="mt-2 text-sm">{error}</p> : null}
     {onBeginProviderSetup
       ? <button type="button" className="mt-4 min-h-11 rounded bg-black px-5 py-3 text-white"
           onClick={() => onBeginProviderSetup(provider)}>Begin secure provider setup</button>
+      : tenantSlug && provider === 'stripe' ?
+        <button type="button" disabled={working} className="mt-4 min-h-11 rounded bg-black px-5 py-3 text-white disabled:opacity-50" onClick={begin}>{working ? 'Opening Stripe…' : 'Connect Stripe securely'}</button>
       : <p className="mt-4 text-sm">Secure provider setup is not yet connected.
           No bank information is collected here and payments remain disabled.</p>}
   </section>;
