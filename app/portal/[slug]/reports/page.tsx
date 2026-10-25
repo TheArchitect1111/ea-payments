@@ -32,7 +32,7 @@ export default async function ReportsPage({ params }: { params: Promise<{ slug: 
     >
       {isAmanda ? <AmandaOperationsPanel slug={slug} /> : null}
       {slug === 'tarris' ? <>
-        {staff ? <MerchantPaymentSetup tenantLabel="TB3" /> : null}
+        {staff ? <MerchantPaymentSetup tenantLabel="TB3" tenantSlug={slug} /> : null}
         <Tb3MerchSales report />
       </> : null}
       {staff && certifiedContent && access.enabledModuleIds.has('documents') ?
